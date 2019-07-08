@@ -1,0 +1,546 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="RegistryProperties" xml:space="preserve">
+    <value>DECLARE @ProcessorNameString NVARCHAR(512)
+DECLARE @SystemManufacturer NVARCHAR(512)
+DECLARE @SystemProductName NVARCHAR(512)
+DECLARE @PVDriver NVARCHAR(512)
+IF EXISTS(SELECT * FROM fn_my_permissions ( 'sys.xp_instance_regread', 'OBJECT' ) WHERE permission_name='EXECUTE')
+BEGIN  
+	EXEC sys.xp_instance_regread N'HKEY_LOCAL_MACHINE', N'HARDWARE\DESCRIPTION\System\CentralProcessor\0', N'ProcessorNameString',@ProcessorNameString OUT;
+	EXEC sys.xp_instance_regread N'HKEY_LOCAL_MACHINE', N'SYSTEM\HardwareConfig\Current', N'SystemManufacturer',@SystemManufacturer OUT;
+	EXEC sys.xp_instance_regread N'HKEY_LOCAL_MACHINE', N'SYSTEM\HardwareConfig\Current', N'SystemProductName', @SystemProductName OUT;
+	EXEC sys.xp_instance_regread N'HKEY_LOCAL_MACHINE', N'SOFTWARE\Amazon\PVDriver',N'Version',@PVDriver OUT
+END
+DECLARE @ActivePowerPlan UNIQUEIDENTIFIER
+DECLARE @HighPerformance VARCHAR(36) = '8c5e7fda-e8bf-4a96-9a85-a6e23a8c635c'
+DECLARE @Balanced  VARCHAR(36) = '381b4222-f694-41f0-9685-ff5bb260df2e'
+DECLARE @PowerSaver  VARCHAR(36)='a1841308-3541-4fab-bc81-f71556f20b4a'
+DECLARE @output TABLE(
+	output NVARCHAR(MAX)
+)
+IF EXISTS(SELECT * FROM sys.configurations
+WHERE name = 'xp_cmdshell'
+AND value_in_use=1
+) AND EXISTS(SELECT * FROM fn_my_permissions ( 'xp_cmdshell', 'OBJECT' ) WHERE permission_name='EXECUTE')
+BEGIN
+	INSERT INTO @output
+	(
+		output
+	)
+	EXEC xp_cmdshell 'powercfg /list';
+	SELECT @ActivePowerPlan = CAST(MAX(CASE WHEN output LIKE  '%' + @HighPerformance + '%*%' THEN @HighPerformance WHEN output LIKE '%' + @Balanced + '%*%' THEN @Balanced WHEN output LIKE '%' + @PowerSaver + '%*%' THEN @PowerSaver ELSE NULL END) AS UNIQUEIDENTIFIER)
+	FROM @output
+
+END
+ELSE
+BEGIN
+	PRINT 'Enable xp_cmdshell to check power plan'
+END
+SELECT @ActivePowerPlan ActivePowerPlanGUID, CASE WHEN @ActivePowerPlan=@HighPerformance THEN 'High Performance' WHEN @ActivePowerPlan=@Balanced THEN 'Balanced' WHEN @ActivePowerPlan = @PowerSaver THEN 'Power Saver' ELSE NULL END AS ActivePowerPlan,
+	@ProcessorNameString as ProcessorNameString,@SystemManufacturer as SystemManufacturer,@SystemProductName as SystemProductName,@PVDriver as PVDriver</value>
+  </data>
+  <data name="SQLAgentJobSummary" xml:space="preserve">
+    <value>WITH T AS (
+SELECT j.job_id,j.name,
+MAX(CASE WHEN jh.step_id=0 AND jh.run_status &lt;&gt; 1 THEN dt.RunDateTime ELSE NULL END) LastFail,
+MAX(CASE WHEN jh.step_id=0 AND jh.run_status = 1 THEN dt.RunDateTime ELSE NULL END) LastSucceed,
+SUM(CASE WHEN jh.step_id=0 AND jh.run_status &lt;&gt; 1 AND dt.RunDateTime&gt;=DATEADD(hh,-24,GETDATE()) THEN 1 ELSE 0 END) FailCount24Hrs,
+SUM(CASE WHEN jh.step_id=0 AND jh.run_status = 1 AND dt.RunDateTime&gt;=DATEADD(hh,-24,GETDATE()) THEN 1 ELSE 0 END) SucceedCount24Hrs,
+SUM(CASE WHEN jh.step_id=0 AND jh.run_status &lt;&gt; 1 THEN 1 ELSE 0 END) FailCount7Days,
+SUM(CASE WHEN jh.step_id=0 AND jh.run_status = 1 THEN 1 ELSE 0 END) SucceedCount7Days,
+SUM(CASE WHEN jh.step_id&lt;&gt;0 AND jh.run_status &lt;&gt; 1 THEN 1 ELSE 0 END) AS JobStepFails7Days,
+SUM(CASE WHEN jh.step_id&lt;&gt;0 AND jh.run_status &lt;&gt; 1 AND dt.RunDateTime&gt;=DATEADD(hh,-24,GETDATE()) THEN 1 ELSE 0 END) AS JobStepFails24Hrs,
+j.enabled,
+MAX(CASE WHEN jh.step_id=0 THEN dt.RunDurationSec ELSE NULL END) AS MaxDurationSec,
+AVG(CASE WHEN jh.step_id=0 THEN dt.RunDurationSec ELSE NULL END) AS AvgDurationSec
+FROM msdb.dbo.sysjobs j
+JOIN msdb.dbo.sysjobhistory jh ON j.job_id = jh.job_id
+OUTER APPLY(SELECT msdb.dbo.agent_datetime(run_date, run_time) AS RunDateTime,
+((jh.run_duration/1000000)*86400) + (((jh.run_duration-((jh.run_duration/1000000)*1000000))/10000)*3600) + (((jh.run_duration-((jh.run_duration/10000)*10000))/100)*60) + (jh.run_duration-(jh.run_duration/100)*100) AS RunDurationSec) dt
+GROUP BY j.job_id,j.name,j.enabled
+)
+SELECT T.job_id,
+       T.name,
+  T.enabled,
+       T.LastFail,
+       T.LastSucceed,
+       T.FailCount24Hrs,
+       T.SucceedCount24Hrs,
+       T.FailCount7Days,
+       T.SucceedCount7Days,
+       T.JobStepFails7Days,
+       T.JobStepFails24Hrs,
+  T.MaxDurationSec,
+  T.AvgDurationSec,
+  CASE WHEN LastFail&gt;ISNULL(LastSucceed,0) THEN 1 ELSE 0 END AS IsLastFail
+FROM T</value>
+  </data>
+  <data name="SQLBackups" xml:space="preserve">
+    <value>select database_name,type, MAX(backup_start_date) LastBackup
+from msdb.dbo.backupset
+where server_name=@@SERVERNAME
+AND backup_finish_date&gt;=DATEADD(d,-10,GETUTCDATE())
+group by database_name, type</value>
+  </data>
+  <data name="SQLConfigurations" xml:space="preserve">
+    <value>select * from sys.configurations</value>
+  </data>
+  <data name="SQLDatabases" xml:space="preserve">
+    <value>SELECT name,
+       database_id,
+       source_database_id,
+       --owner_sid,
+	   CASE WHEN owner_sid=0x01 THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END AS IsOwnerSA,
+       create_date,
+       compatibility_level,
+       collation_name,
+       user_access,
+       --user_access_desc,
+       is_read_only,
+       is_auto_close_on,
+       is_auto_shrink_on,
+       state,
+       --state_desc,
+       is_in_standby,
+       is_cleanly_shutdown,
+       is_supplemental_logging_enabled,
+       snapshot_isolation_state,
+       --snapshot_isolation_state_desc,
+       is_read_committed_snapshot_on,
+       recovery_model,
+       --recovery_model_desc,
+       page_verify_option,
+       --page_verify_option_desc,
+       is_auto_create_stats_on,
+       is_auto_create_stats_incremental_on,
+       is_auto_update_stats_on,
+       is_auto_update_stats_async_on,
+       is_ansi_null_default_on,
+       is_ansi_nulls_on,
+       is_ansi_padding_on,
+       is_ansi_warnings_on,
+       is_arithabort_on,
+       is_concat_null_yields_null_on,
+       is_numeric_roundabort_on,
+       is_quoted_identifier_on,
+       is_recursive_triggers_on,
+       is_cursor_close_on_commit_on,
+       is_local_cursor_default,
+       is_fulltext_enabled,
+       is_trustworthy_on,
+       is_db_chaining_on,
+       is_parameterization_forced,
+       is_master_key_encrypted_by_server,
+       is_query_store_on,
+       is_published,
+       is_subscribed,
+       is_merge_published,
+       is_distributor,
+       is_sync_with_backup,
+       --service_broker_guid,
+       is_broker_enabled,
+       log_reuse_wait,
+       -- log_reuse_wait_desc,
+       is_date_correlation_on,
+       is_cdc_enabled,
+       is_encrypted,
+       is_honor_broker_priority_on,
+       replica_id,
+       group_database_id,
+       resource_pool_id,
+       default_language_lcid,
+       default_language_name,
+       default_fulltext_language_lcid,
+       default_fulltext_language_name,
+       is_nested_triggers_on,
+       is_transform_noise_words_on,
+       two_digit_year_cutoff,
+       containment,
+       --containment_desc,
+       target_recovery_time_in_seconds,
+       delayed_durability,
+       --delayed_durability_desc,
+       is_memory_optimized_elevate_to_snapshot_on,
+       is_federation_member,
+       is_remote_data_archive_enabled,
+       is_mixed_page_allocation_on 
+FROM sys.databases</value>
+  </data>
+  <data name="SQLDrives" xml:space="preserve">
+    <value>SELECT DISTINCT dovs.volume_mount_point AS Name,
+	dovs.total_bytes as Capacity,
+	dovs.available_bytes as FreeSpace,
+	dovs.logical_volume_name as Label
+FROM sys.master_files mf
+CROSS APPLY sys.dm_os_volume_stats(mf.database_id, mf.FILE_ID) dovs</value>
+  </data>
+  <data name="SQLFiles" xml:space="preserve">
+    <value>DECLARE @DBName SYSNAME
+DECLARE @SQL NVARCHAR(MAX)
+CREATE TABLE #FileList ( 
+database_id INT,
+file_id INT,
+data_space_id INT,
+name SYSNAME,
+filegroup_name SYSNAME,
+physical_name nvarchar(260),
+type TINYINT,
+size bigint,
+space_used bigint,
+max_size bigint,
+growth bigint,
+is_percent_growth bit,
+is_read_only bit
+)
+
+DECLARE DBs CURSOR FOR
+SELECT name
+FROM sys.databases
+WHERE state  = 0
+AND DATABASEPROPERTYEX(name, 'Updateability') = 'READ_WRITE'
+
+OPEN DBs
+FETCH NEXT FROM DBs INTO @DBName
+
+WHILE @@FETCH_STATUS = 0
+BEGIN
+
+PRINT @DBName
+SET @SQL =  N'USE ' + QUOTENAME(@DBName) + ';
+select 
+DB_ID() database_id,
+file_id,
+f.data_space_id,
+f.name,
+isnull(fg.name,''LOG'') as filegroup_name,
+f.physical_name,
+f.type,
+f.size,
+FILEPROPERTY(f.name,''spaceused'') as spaceused,
+f.max_size,
+f.growth,
+f.is_percent_growth,
+f.is_read_only
+from sys.database_files f
+LEFT JOIN sys.filegroups fg on f.data_space_id = fg.data_space_id
+where f.type_desc &lt;&gt; ''FULLTEXT'''
+
+INSERT INTO #FileList 
+EXEC  (	@SQL )
+
+FETCH NEXT FROM DBs INTO @DBName
+END
+CLOSE DBs
+DEALLOCATE DBs
+
+
+SELECT database_id,
+       file_id,
+       data_space_id,
+       name,
+       filegroup_name,
+       physical_name,
+       type,
+       size,
+       space_used,
+       max_size,
+       growth,
+       is_percent_growth,
+       is_read_only 
+FROM #FileList
+UNION ALL	
+SELECT database_id,
+file_id,
+data_space_id,
+name,
+NULL AS filegroup_name,
+physical_name,
+type,
+size,
+NULL AS SpaceUsed,
+max_size,
+growth,
+is_percent_growth,
+Is_Read_Only 
+FROM sys.master_files mf
+WHERE NOT EXISTS(SELECT 1 FROM #FileList fl WHERE fl.database_id = mf.database_id AND fl.file_id = mf.file_id)
+
+DROP TABLE #FileList</value>
+  </data>
+  <data name="SQLLogShipping" xml:space="preserve">
+    <value>WITH t
+AS (SELECT rsh.destination_database_name AS database_name,
+           rsh.restore_date,
+           bs.backup_start_date,
+           bmf.physical_device_name AS last_file,
+           ROW_NUMBER() OVER (PARTITION BY rsh.destination_database_name
+                              ORDER BY rsh.restore_date DESC
+                             ) rnum
+    FROM msdb.dbo.restorehistory rsh
+        INNER JOIN msdb.dbo.backupset bs ON rsh.backup_set_id = bs.backup_set_id
+        INNER JOIN msdb.dbo.restorefile rf ON rsh.restore_history_id = rf.restore_history_id
+        INNER JOIN msdb.dbo.backupmediafamily bmf ON bmf.media_set_id = bs.media_set_id
+        INNER JOIN sys.databases d ON rsh.destination_database_name = d.name
+    WHERE rsh.restore_type = 'L'
+    AND
+          (
+              d.state = 1
+        OR    d.is_in_standby = 1
+          ) -- restoring or standby
+)
+SELECT t.database_name,
+       t.restore_date,
+       t.backup_start_date,
+       t.last_file
+FROM t
+WHERE rnum = 1;</value>
+  </data>
+  <data name="SQLProperties" xml:space="preserve">
+    <value>SELECT CAST(SERVERPROPERTY('BuildClrVersion') as nvarchar(128)) as BuildClrVersion ,
+CAST(SERVERPROPERTY('Collation') as nvarchar(128)) as Collation ,
+CAST(SERVERPROPERTY('CollationID') as int) as CollationID ,
+CAST(SERVERPROPERTY('ComparisonStyle') as int) as ComparisonStyle ,
+CAST(SERVERPROPERTY('ComputerNamePhysicalNetBIOS') as nvarchar(128)) as ComputerNamePhysicalNetBIOS ,
+CAST(SERVERPROPERTY('Edition') as nvarchar(128)) as Edition ,
+CAST(SERVERPROPERTY('EditionID') as bigint) as EditionID ,
+CAST(SERVERPROPERTY('EngineEdition') as int) as EngineEdition ,
+CAST(SERVERPROPERTY('FileStreamConfiguredLevel') as tinyint) as FileStreamConfiguredLevel ,
+CAST(SERVERPROPERTY('FileStreamEffectiveLevel') as tinyint) as FileStreamEffectiveLevel ,
+CAST(SERVERPROPERTY('FileStreamShareName') as nvarchar(128)) as FileStreamShareName ,
+CAST(SERVERPROPERTY('HadrManagerStatus') as tinyint) as HadrManagerStatus ,
+CAST(SERVERPROPERTY('InstanceDefaultDataPath') as nvarchar(128)) as InstanceDefaultDataPath ,
+CAST(SERVERPROPERTY('InstanceDefaultLogPath') as nvarchar(128)) as InstanceDefaultLogPath ,
+CAST(SERVERPROPERTY('InstanceName') as nvarchar(128)) as InstanceName ,
+CAST(SERVERPROPERTY('IsAdvancedAnalyticsInstalled') as bit) as IsAdvancedAnalyticsInstalled ,
+CAST(SERVERPROPERTY('IsClustered') as int) as IsClustered ,
+CAST(SERVERPROPERTY('IsFullTextInstalled') as int) as IsFullTextInstalled ,
+CAST(SERVERPROPERTY('IsHadrEnabled') as int) as IsHadrEnabled ,
+CAST(SERVERPROPERTY('IsIntegratedSecurityOnly') as int) as IsIntegratedSecurityOnly ,
+CAST(SERVERPROPERTY('IsLocalDB') as int) as IsLocalDB ,
+CAST(SERVERPROPERTY('IsPolybaseInstalled') as int) as IsPolybaseInstalled ,
+CAST(SERVERPROPERTY('IsXTPSupported') as int) as IsXTPSupported ,
+CAST(SERVERPROPERTY('LCID') as int) as LCID ,
+CAST(SERVERPROPERTY('LicenseType') as nvarchar(128)) as LicenseType ,
+CAST(SERVERPROPERTY('MachineName') as nvarchar(128)) as MachineName ,
+CAST(SERVERPROPERTY('NumLicenses') as int) as NumLicenses ,
+CAST(SERVERPROPERTY('ProductBuild') as nvarchar(128)) as ProductBuild ,
+CAST(SERVERPROPERTY('ProductBuildType') as nvarchar(128)) as ProductBuildType ,
+CAST(SERVERPROPERTY('ProductLevel') as nvarchar(128)) as ProductLevel ,
+CAST(SERVERPROPERTY('ProductMajorVersion') as nvarchar(128)) as ProductMajorVersion ,
+CAST(SERVERPROPERTY('ProductUpdateLevel') as nvarchar(128)) as ProductUpdateLevel ,
+CAST(SERVERPROPERTY('ProductUpdateReference') as nvarchar(128)) as ProductUpdateReference ,
+CAST(SERVERPROPERTY('ProductVersion') as nvarchar(128)) as ProductVersion ,
+CAST(SERVERPROPERTY('ResourceLastUpdateDateTime') as datetime) as ResourceLastUpdateDateTime ,
+CAST(SERVERPROPERTY('ResourceVersion') as nvarchar(128)) as ResourceVersion ,
+CAST(SERVERPROPERTY('ServerName') as nvarchar(128)) as ServerName ,
+CAST(SERVERPROPERTY('SqlCharSet') as tinyint) as SqlCharSet ,
+CAST(SERVERPROPERTY('SqlCharSetName') as nvarchar(128)) as SqlCharSetName ,
+CAST(SERVERPROPERTY('SqlSortOrder') as tinyint) as SqlSortOrder ,
+CAST(SERVERPROPERTY('SqlSortOrderName') as nvarchar(128)) as SqlSortOrderName</value>
+  </data>
+  <data name="SQLPropertiesOLD" xml:space="preserve">
+    <value>WITH T AS (
+SELECT 'BuildClrVersion' as Property
+UNION ALL 
+SELECT 'Collation'
+UNION ALL 
+SELECT 'CollationID'
+UNION ALL 
+SELECT 'ComparisonStyle'
+UNION ALL 
+SELECT 'ComputerNamePhysicalNetBIOS'
+UNION ALL 
+SELECT 'Edition'
+UNION ALL 
+SELECT 'EditionID'
+UNION ALL 
+SELECT 'EngineEdition'
+UNION ALL 
+SELECT 'HadrManagerStatus'
+UNION ALL 
+SELECT 'InstanceDefaultDataPath'
+UNION ALL 
+SELECT 'InstanceDefaultLogPath'
+UNION ALL 
+SELECT 'InstanceName'
+UNION ALL 
+SELECT 'IsAdvancedAnalyticsInstalled'
+UNION ALL 
+SELECT 'IsClustered'
+UNION ALL 
+SELECT 'IsFullTextInstalled'
+UNION ALL 
+SELECT 'IsHadrEnabled'
+UNION ALL 
+SELECT 'IsIntegratedSecurityOnly'
+UNION ALL 
+SELECT 'IsLocalDB'
+UNION ALL 
+SELECT 'IsPolybaseInstalled'
+UNION ALL 
+SELECT 'IsXTPSupported'
+UNION ALL 
+SELECT 'LCID'
+UNION ALL 
+SELECT 'LicenseType'
+UNION ALL 
+SELECT 'MachineName'
+UNION ALL 
+SELECT 'NumLicenses'
+UNION ALL 
+SELECT 'ProductBuild'
+UNION ALL 
+SELECT 'ProductBuildType'
+UNION ALL 
+SELECT 'ProductLevel'
+UNION ALL 
+SELECT 'ProductMajorVersion'
+UNION ALL 
+SELECT 'ProductUpdateLevel'
+UNION ALL 
+SELECT 'ProductUpdateReference'
+UNION ALL 
+SELECT 'ProductVersion'
+UNION ALL 
+SELECT 'ResourceLastUpdateDateTime'
+UNION ALL 
+SELECT 'ResourceVersion'
+UNION ALL 
+SELECT 'ServerName'
+UNION ALL 
+SELECT 'SqlCharSet'
+UNION ALL 
+SELECT 'SqlCharSetName'
+UNION ALL 
+SELECT 'SqlSortOrder'
+UNION ALL 
+SELECT 'SqlSortOrderName'
+UNION ALL 
+SELECT 'FileStreamShareName'
+UNION ALL 
+SELECT 'FileStreamConfiguredLevel'
+UNION ALL 
+SELECT 'FileStreamEffectiveLevel'
+)
+SELECT Property,SERVERPROPERTY(Property) Value
+FROM T</value>
+  </data>
+</root>

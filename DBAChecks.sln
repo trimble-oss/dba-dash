@@ -1,0 +1,33 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.28010.2019
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DBAChecks", "DBAChecks\DBAChecks.csproj", "{176C91F1-D5F4-4695-B1ED-2C021249B88F}"
+EndProject
+Project("{00D1A9C2-B5F0-4AF3-8072-F6C62B433612}") = "DBAChecksDB", "DBAChecksDB\DBAChecksDB.sqlproj", "{DDE14068-5C6E-4E82-BF2F-7ED7681DBBC4}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{176C91F1-D5F4-4695-B1ED-2C021249B88F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{176C91F1-D5F4-4695-B1ED-2C021249B88F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{176C91F1-D5F4-4695-B1ED-2C021249B88F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{176C91F1-D5F4-4695-B1ED-2C021249B88F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DDE14068-5C6E-4E82-BF2F-7ED7681DBBC4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DDE14068-5C6E-4E82-BF2F-7ED7681DBBC4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DDE14068-5C6E-4E82-BF2F-7ED7681DBBC4}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{DDE14068-5C6E-4E82-BF2F-7ED7681DBBC4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DDE14068-5C6E-4E82-BF2F-7ED7681DBBC4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DDE14068-5C6E-4E82-BF2F-7ED7681DBBC4}.Release|Any CPU.Deploy.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {200F5F84-D72C-4088-8088-DF01E95D00D7}
+	EndGlobalSection
+EndGlobal

@@ -1,0 +1,51 @@
+﻿CREATE PROC [dbo].[AgentJobReport_Get](
+	@InstanceID INT=NULL,
+	@enabled TINYINT=1,
+	@FilterLevel TINYINT=2
+)
+AS
+SELECT J.Instance,
+       J.InstanceID,
+       J.job_id,
+       J.name,
+       J.LastFail,
+       J.TimeSinceLastFail,
+       J.TimeSinceLastFailureStatus,
+       J.LastSucceed,
+       J.TimeSinceLastSucceeded,
+       J.TimeSinceLastSucceededStatus,
+       J.TimeSinceLastSucceed,
+       J.FailCount24Hrs,
+       J.FailCount24HrsStatus,
+       J.SucceedCount24Hrs,
+       J.FailCount7Days,
+       J.FailCount7DaysStatus,
+       J.SucceedCount7Days,
+       J.JobStepFails7Days,
+       J.JobStepFail7DaysStatus,
+       J.JobStepFails24Hrs,
+       J.JobStepFail24HrsStatus,
+       J.enabled,
+       J.MaxDurationSec,
+       J.AvgDurationSec,
+       J.LastFailStatus,
+       J.IsLastFail,
+       J.TimeSinceLastFailureWarning,
+       J.TimeSinceLastFailureCritical,
+       J.TimeSinceLastSucceededWarning,
+       J.TimeSinceLastSucceededCritical,
+       J.FailCount24HrsWarning,
+       J.FailCount24HrsCritical,
+       J.FailCount7DaysCritical,
+       J.FailCount7DaysWarning,
+       J.JobStepFails24HrsWarning,
+       J.JobStepFails24HrsCritical,
+       J.JobStepFails7DaysWarning,
+       J.JobStepFails7DaysCritical,
+       J.LastFailIsCritical,
+       J.LastFailIsWarning,
+       J.ConfiguredLevel
+FROM dbo.AgentJobStatus J
+WHERE J.enabled=@enabled
+AND (J.TimeSinceLastFailureStatus<=@FilterLevel OR J.TimeSinceLastSucceededStatus<=@FilterLevel OR J.FailCount24HrsStatus<=@FilterLevel OR J.FailCount7DaysStatus<=@FilterLevel OR J.JobStepFail7DaysStatus<=@FilterLevel OR J.JobStepFail24HrsStatus<=@FilterLevel OR J.LastFailStatus<=@FilterLevel)
+ORDER BY J.IsLastFail DESC,J.FailCount24Hrs DESC,J.FailCount7Days DESC
