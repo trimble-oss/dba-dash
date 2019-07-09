@@ -101,5 +101,8 @@
     <Build Include="dbo\User Defined Types\ServerProperties.sql" />
     <Build Include="dbo\Tables\AgentJobThresholds.sql" />
     <Build Include="dbo\Views\AgentJobStatus.sql" />
+    <Build Include="dbo\Tables\DBFiles.sql" />
+    <Build Include="dbo\Stored Procedures\DBFiles_Upd.sql" />
+    <Build Include="dbo\User Defined Types\DBFiles.sql" />
   </ItemGroup>
 </Project>
