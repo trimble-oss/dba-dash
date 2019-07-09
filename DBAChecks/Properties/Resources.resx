@@ -201,7 +201,8 @@ AND backup_finish_date&gt;=DATEADD(d,-10,GETUTCDATE())
 group by database_name, type</value>
   </data>
   <data name="SQLConfigurations" xml:space="preserve">
-    <value>select * from sys.configurations</value>
+    <value>SELECT configuration_id,CAST(value as BIGINT) as value,CAST(value_in_use as BIGINT) as value_in_use
+FROM sys.configurations</value>
   </data>
   <data name="SQLDatabases" xml:space="preserve">
     <value>SELECT name,

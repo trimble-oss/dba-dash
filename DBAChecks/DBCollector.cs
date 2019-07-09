@@ -252,7 +252,7 @@ namespace DBAChecks
                     drives.Columns.Add("Capacity", typeof(Int64));
                     drives.Columns.Add("FreeSpace", typeof(Int64));
                     drives.Columns.Add("Label", typeof(string));
-                    string computerName = (string)Data.Tables["Properties"].Select("Property='ComputerNamePhysicalNetBIOS'")[0]["Value"];
+                    string computerName = (string)Data.Tables["Properties"].Rows[0]["ComputerNamePhysicalNetBIOS"];
 
                     ManagementPath path = new ManagementPath()
                     {

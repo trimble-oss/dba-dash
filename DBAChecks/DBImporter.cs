@@ -25,12 +25,31 @@ namespace DBAChecks
 
             instanceID= updateInstance(connectionString,rInstance);
             updateServerProperties(connectionString, instanceID, snapshotDate, Data);
+            updateSysConfig(connectionString, instanceID, snapshotDate, Data);
             updateDB(connectionString, instanceID, snapshotDate, Data);
             updateDrives(connectionString, instanceID, snapshotDate, Data);
             updateBackups(connectionString, instanceID, snapshotDate, Data);
             updateJobs(connectionString, instanceID, snapshotDate, Data);
             updateLogRestores(connectionString, instanceID, snapshotDate, Data);
             updateFiles(connectionString, instanceID, snapshotDate, Data);
+        }
+
+        private void updateSysConfig(string connectionString,Int32 instanceID, DateTime SnapshotDate, DataSet ds)
+        {
+            if (ds.Tables.Contains("Configuration") && ds.Tables["Configuration"].Rows.Count > 0)
+            {
+                var cn = new SqlConnection(connectionString);
+                using (cn)
+                {
+                    cn.Open();
+                    SqlCommand cmd = new SqlCommand("SysConfig_Upd", cn);
+                    cmd.Parameters.AddWithValue("Config", ds.Tables["Configuration"]);
+                    cmd.Parameters.AddWithValue("InstanceID", instanceID);
+                    cmd.Parameters.AddWithValue("SnapshotDate", SnapshotDate);
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.ExecuteNonQuery();
+                }
+            }
         }
 
         private void updateFiles(string connectionString,Int32 instanceID,DateTime SnapshotDate,DataSet ds)

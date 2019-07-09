@@ -105,7 +105,8 @@ namespace DBAChecks.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to select * from sys.configurations.
+        ///   Looks up a localized string similar to SELECT configuration_id,CAST(value as BIGINT) as value,CAST(value_in_use as BIGINT) as value_in_use
+        ///FROM sys.configurations.
         /// </summary>
         internal static string SQLConfigurations {
             get {
