@@ -65,10 +65,11 @@ namespace DBAChecks.Properties {
         ///DECLARE @SystemManufacturer NVARCHAR(512)
         ///DECLARE @SystemProductName NVARCHAR(512)
         ///DECLARE @PVDriver NVARCHAR(512)
+        ///DECLARE @IsAgentRunning BIT
+        ///DECLARE @InstantFileInitializationEnabled BIT
         ///IF EXISTS(SELECT * FROM fn_my_permissions ( &apos;sys.xp_instance_regread&apos;, &apos;OBJECT&apos; ) WHERE permission_name=&apos;EXECUTE&apos;)
         ///BEGIN  
-        ///	EXEC sys.xp_instance_regread N&apos;HKEY_LOCAL_MACHINE&apos;, N&apos;HARDWARE\DESCRIPTION\System\CentralProcessor\0&apos;, N&apos;ProcessorNameString&apos;,@ProcessorNameString OUT;
-        ///	EXEC sys.xp_instance_regread N&apos;HKEY_LOCAL_MACHINE&apos;, N&apos;SYSTEM\HardwareC [rest of string was truncated]&quot;;.
+        ///	EXEC sys.xp_instance_regread N&apos;HKEY_LOCAL_MACHINE&apos;, N&apos;HARDWARE\DESCRIPTION\System\CentralProcessor\0&apos;, N&apos;ProcessorNameString&apos;,@ProcessorNameString O [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string RegistryProperties {
             get {

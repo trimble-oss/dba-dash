@@ -122,6 +122,8 @@
 DECLARE @SystemManufacturer NVARCHAR(512)
 DECLARE @SystemProductName NVARCHAR(512)
 DECLARE @PVDriver NVARCHAR(512)
+DECLARE @IsAgentRunning BIT
+DECLARE @InstantFileInitializationEnabled BIT
 IF EXISTS(SELECT * FROM fn_my_permissions ( 'sys.xp_instance_regread', 'OBJECT' ) WHERE permission_name='EXECUTE')
 BEGIN  
 	EXEC sys.xp_instance_regread N'HKEY_LOCAL_MACHINE', N'HARDWARE\DESCRIPTION\System\CentralProcessor\0', N'ProcessorNameString',@ProcessorNameString OUT;
@@ -154,8 +156,17 @@ ELSE
 BEGIN
 	PRINT 'Enable xp_cmdshell to check power plan'
 END
+SELECT @IsAgentRunning = CASE WHEN status=4 THEN 1 ELSE 0 END
+FROM   sys.dm_server_services dss
+WHERE  dss.[servicename] LIKE N'SQL Server Agent (%'
+
+SELECT @InstantFileInitializationEnabled=CASE WHEN instant_file_initialization_enabled='Y' THEN 1 ELSE 0 END
+FROM   sys.dm_server_services dss
+WHERE  dss.[servicename] LIKE N'SQL Server (%';
+
 SELECT @ActivePowerPlan ActivePowerPlanGUID, CASE WHEN @ActivePowerPlan=@HighPerformance THEN 'High Performance' WHEN @ActivePowerPlan=@Balanced THEN 'Balanced' WHEN @ActivePowerPlan = @PowerSaver THEN 'Power Saver' ELSE NULL END AS ActivePowerPlan,
-	@ProcessorNameString as ProcessorNameString,@SystemManufacturer as SystemManufacturer,@SystemProductName as SystemProductName,@PVDriver as PVDriver</value>
+	@ProcessorNameString as ProcessorNameString,@SystemManufacturer as SystemManufacturer,@SystemProductName as SystemProductName,@PVDriver as PVDriver,@IsAgentRunning IsAgentRunning,
+	@InstantFileInitializationEnabled InstantFileInitializationEnabled</value>
   </data>
   <data name="SQLAgentJobSummary" xml:space="preserve">
     <value>WITH T AS (
