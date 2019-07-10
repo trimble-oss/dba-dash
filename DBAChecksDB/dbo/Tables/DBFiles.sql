@@ -4,7 +4,7 @@
     [file_id]           INT            NULL,
     [data_space_id]     INT            NULL,
     [name]              [sysname]      NOT NULL,
-    [filegroup_name]    [sysname]      NOT NULL,
+    [filegroup_name]    [sysname]      NULL,
     [physical_name]     NVARCHAR (260) NULL,
     [type]              TINYINT        NULL,
     [size]              BIGINT         NULL,
@@ -16,4 +16,6 @@
     [IsActive]          BIT            NULL,
     CONSTRAINT [PK_DBFiles] PRIMARY KEY CLUSTERED ([FileID] ASC)
 );
+
+
 

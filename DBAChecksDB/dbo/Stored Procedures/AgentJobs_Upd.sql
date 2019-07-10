@@ -1,4 +1,4 @@
-﻿CREATE PROC AgentJobs_Upd(@Jobs AgentJobs READONLY,@InstanceID INT,@SnapshotDate DATETIME)
+﻿CREATE PROC [dbo].[AgentJobs_Upd](@Jobs AgentJobs READONLY,@InstanceID INT,@SnapshotDate DATETIME)
 AS
 BEGIN TRAN
 DELETE AgentJobs WHERE InstanceID = @InstanceID
@@ -34,4 +34,8 @@ SELECT @InstanceID
            ,[AvgDurationSec]
            ,[IsLastFail]
 FROM @Jobs
+
+UPDATE dbo.SnapshotDates
+SET AgentJobsDate=@SnapshotDate
+WHERE InstanceID=@InstanceID
 COMMIT

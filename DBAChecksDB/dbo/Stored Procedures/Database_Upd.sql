@@ -223,3 +223,7 @@ VALUES( @InstanceID,
 )
 WHEN NOT MATCHED BY SOURCE THEN 
 UPDATE SET T.IsActive = 0;
+
+UPDATE dbo.SnapshotDates
+SET DatabasesDate=@SnapshotDate
+WHERE InstanceID=@InstanceID

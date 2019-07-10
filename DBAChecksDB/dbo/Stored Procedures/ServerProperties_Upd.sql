@@ -1,4 +1,4 @@
-﻿CREATE PROC ServerProperties_Upd(@Properties ServerProperties READONLY,@InstanceID INT,@SnapshotDate DATETIME)
+﻿CREATE PROC [dbo].[ServerProperties_Upd](@Properties ServerProperties READONLY,@InstanceID INT,@SnapshotDate DATETIME)
 AS
 UPDATE I
    SET [BuildClrVersion] = T.BuildClrVersion
@@ -45,3 +45,7 @@ UPDATE I
 FROM dbo.Instances I
 CROSS JOIN @Properties T
 WHERE I.InstanceID = @InstanceID
+
+UPDATE dbo.SnapshotDates
+SET ServerPropertiesDate=@SnapshotDate
+WHERE InstanceID=@InstanceID

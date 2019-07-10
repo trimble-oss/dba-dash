@@ -1,4 +1,5 @@
-﻿CREATE PROC DBFiles_Upd(
+﻿
+CREATE PROC [dbo].[DBFiles_Upd](
 	@Files DBFiles READONLY,
 	@InstanceID INT,
 	@SnapshotDate DATETIME
@@ -28,7 +29,7 @@ USING (SELECT D.DatabaseID
 	  FROM @Files F 
 	  JOIN dbo.Databases D ON F.database_id = D.database_id
 	  WHERE D.IsActive=1
-	  AND D.InstanceID = @InstanceID) as S ON S.file_id = T.file_id AND S.DatabaseID = T.DatabaseID
+	  AND D.InstanceID = @InstanceID) AS S ON S.file_id = T.file_id AND S.DatabaseID = T.DatabaseID
 WHEN MATCHED THEN 
  UPDATE 
  SET T.[data_space_id]=S.[data_space_id]
@@ -74,3 +75,16 @@ VALUES(DatabaseID
 	  ,1)
 WHEN NOT MATCHED BY SOURCE THEN
 UPDATE SET T.IsActive=0;
+
+INSERT INTO dbo.DBFileSnapshot(SnapshotDate,FileID,Size,space_used)
+SELECT @SnapshotDate,
+	  DBF.FileID,
+      F.[size],
+      F.[space_used]
+FROM @Files F 
+JOIN dbo.Databases D ON F.database_id = D.database_id AND D.InstanceID = @InstanceID
+JOIN dbo.DBFiles DBF ON F.file_id = DBF.file_id AND D.DatabaseID = DBF.DatabaseID
+
+UPDATE dbo.SnapshotDates
+SET DBFilesDate=@SnapshotDate
+WHERE InstanceID=@InstanceID

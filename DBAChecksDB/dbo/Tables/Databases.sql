@@ -49,7 +49,7 @@
     [is_broker_enabled]                          BIT              NOT NULL,
     [log_reuse_wait]                             TINYINT          NULL,
     [is_date_correlation_on]                     BIT              NOT NULL,
-    [is_cdc_enabled]                             BIT              NOT NULL,
+    [is_cdc_enabled]                             BIT              NULL,
     [is_encrypted]                               BIT              NULL,
     [is_honor_broker_priority_on]                BIT              NULL,
     [replica_id]                                 UNIQUEIDENTIFIER NULL,
@@ -73,6 +73,8 @@
     CONSTRAINT [PK_Databases] PRIMARY KEY CLUSTERED ([DatabaseID] ASC),
     CONSTRAINT [FK_Databases_Instances] FOREIGN KEY ([InstanceID]) REFERENCES [dbo].[Instances] ([InstanceID])
 );
+
+
 
 
 GO

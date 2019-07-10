@@ -116,25 +116,22 @@ namespace DBAChecks.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to SELECT name,
-        ///       database_id,
-        ///       source_database_id,
-        ///       --owner_sid,
-        ///	   CASE WHEN owner_sid=0x01 THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END AS IsOwnerSA,
-        ///       create_date,
-        ///       compatibility_level,
-        ///       collation_name,
-        ///       user_access,
-        ///       --user_access_desc,
-        ///       is_read_only,
-        ///       is_auto_close_on,
-        ///       is_auto_shrink_on,
-        ///       state,
-        ///       --state_desc,
-        ///       is_in_standby,
-        ///       is_cleanly_shutdown,
-        ///       is_supplemental_logging_enabled,
-        ///       snaps [rest of string was truncated]&quot;;.
+        ///   Looks up a localized string similar to CREATE TABLE #sysdb(
+        ///	[name] [sysname] NOT NULL,
+        ///	[database_id] [int] NOT NULL,
+        ///	[source_database_id] [int] NULL,
+        ///	[owner_sid] [varbinary](85) NULL,
+        ///	[create_date] [datetime] NOT NULL,
+        ///	[compatibility_level] [tinyint] NOT NULL,
+        ///	[collation_name] [sysname] NULL,
+        ///	[user_access] [tinyint] NULL,
+        ///	[is_read_only] [bit] NULL,
+        ///	[is_auto_close_on] [bit] NOT NULL,
+        ///	[is_auto_shrink_on] [bit] NULL,
+        ///	[state] [tinyint] NULL,
+        ///	[is_in_standby] [bit] NULL,
+        ///	[is_cleanly_shutdown] [bit] NULL,
+        ///	[is_supplemental_ [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string SQLDatabases {
             get {
@@ -143,12 +140,15 @@ namespace DBAChecks.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to SELECT DISTINCT dovs.volume_mount_point AS Name,
-        ///	dovs.total_bytes as Capacity,
-        ///	dovs.available_bytes as FreeSpace,
-        ///	dovs.logical_volume_name as Label
-        ///FROM sys.master_files mf
-        ///CROSS APPLY sys.dm_os_volume_stats(mf.database_id, mf.FILE_ID) dovs.
+        ///   Looks up a localized string similar to IF OBJECT_ID(&apos;sys.dm_os_volume_stats&apos;) IS NOT NULL
+        ///BEGIN
+        ///	SELECT DISTINCT dovs.volume_mount_point AS Name,
+        ///		dovs.total_bytes as Capacity,
+        ///		dovs.available_bytes as FreeSpace,
+        ///		dovs.logical_volume_name as Label
+        ///	FROM sys.master_files mf
+        ///	CROSS APPLY sys.dm_os_volume_stats(mf.database_id, mf.FILE_ID) dovs
+        ///END.
         /// </summary>
         internal static string SQLDrives {
             get {

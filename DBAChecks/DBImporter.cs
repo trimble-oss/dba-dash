@@ -25,7 +25,7 @@ namespace DBAChecks
 
             instanceID= updateInstance(connectionString,rInstance);
             updateServerProperties(connectionString, instanceID, snapshotDate, Data);
-            updateSysConfig(connectionString, instanceID, snapshotDate, Data);
+            //updateSysConfig(connectionString, instanceID, snapshotDate, Data);
             updateDB(connectionString, instanceID, snapshotDate, Data);
             updateDrives(connectionString, instanceID, snapshotDate, Data);
             updateBackups(connectionString, instanceID, snapshotDate, Data);

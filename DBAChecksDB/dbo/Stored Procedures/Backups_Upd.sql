@@ -12,4 +12,8 @@ UPDATE SET T.LastBackup = S.LastBackup
 WHEN NOT MATCHED BY TARGET THEN
 INSERT (DatabaseID,type,LastBackup)
 VALUES(DatabaseID,type,LastBackup);
+
+UPDATE dbo.SnapshotDates
+SET BackupsDate=@SnapshotDate
+WHERE InstanceID=@InstanceID
 	

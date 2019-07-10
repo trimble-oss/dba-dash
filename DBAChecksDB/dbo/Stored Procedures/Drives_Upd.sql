@@ -42,3 +42,6 @@ BEGIN
 	JOIN dbo.Drives D ON T.Name = D.Name AND D.InstanceID = @InstanceID
 
 END
+UPDATE dbo.SnapshotDates
+SET DrivesDate=@SnapshotDate
+WHERE InstanceID=@InstanceID
