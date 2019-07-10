@@ -22,7 +22,7 @@ FROM
 		   D.is_auto_update_stats_async_on AutoUpdateStatsAsync,
 		   D.is_date_correlation_on DateCorrelation,
 		   D.is_encrypted IsEncrypted,
-		   ~D.IsOwnerSA DBOwner
+		   CASE WHEN D.owner_sid = 0x01 THEN CAST(0 AS BIT) ELSE CAST(1 AS BIT) END AS DBOwner
     FROM dbo.Databases D
 	JOIN dbo.Instances I ON I.InstanceID = D.InstanceID
     WHERE D.IsActive = 1
@@ -46,8 +46,8 @@ FROM (
 		I.InstanceID,
 		D.Name + ' - ' + ISNULL(F.filegroup_name,F.data_space_id) AS Name,
 		MAX(CASE WHEN F.is_percent_growth=1 AND F.size>131072 THEN 1 ELSE 0 END) PercentGrowth,
-		CASE WHEN COUNT(DISTINCT growth)>1 OR COUNT(DISTINCT F.is_percent_growth)>1 THEN 1 ELSE 0 END AS UnevenGrowth,
-		MAX(CASE WHEN growth=128 AND F.size>131072 THEN 1 ELSE 0 END) AS SmallGrowth,
+		CASE WHEN COUNT(DISTINCT F.growth)>1 OR COUNT(DISTINCT F.is_percent_growth)>1 THEN 1 ELSE 0 END AS UnevenGrowth,
+		MAX(CASE WHEN F.growth=128 AND F.size>131072 THEN 1 ELSE 0 END) AS SmallGrowth,
 		MIN(CASE WHEN F.max_size NOT IN(268435456,-1) AND F.type IN(0,1) AND F.growth>0 THEN 1 ELSE 0 END) AS MaxSizeSet
 	FROM dbo.DBFiles F 
 	JOIN dbo.Databases D ON D.DatabaseID = F.DatabaseID

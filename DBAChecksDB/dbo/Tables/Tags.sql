@@ -1,0 +1,11 @@
+﻿CREATE TABLE [dbo].[Tags] (
+    [TagID] SMALLINT      IDENTITY (1, 1) NOT NULL,
+    [Tag]   NVARCHAR (50) NOT NULL,
+    CONSTRAINT [PK_Tags] PRIMARY KEY CLUSTERED ([TagID] ASC)
+);
+
+
+GO
+CREATE UNIQUE NONCLUSTERED INDEX [IX_Tags_Tag]
+    ON [dbo].[Tags]([Tag] ASC);
+

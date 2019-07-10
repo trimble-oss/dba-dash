@@ -1,9 +1,32 @@
-﻿CREATE PROC [dbo].[AgentJobReport_Get](
-	@InstanceID INT=NULL,
+﻿CREATE PROC [Report].[AgentJobs_Get](
+	@InstanceIDs VARCHAR(MAX) = NULL,
 	@enabled TINYINT=1,
 	@FilterLevel TINYINT=2
 )
 AS
+DECLARE @Instances TABLE(
+	InstanceID INT PRIMARY KEY
+)
+IF @InstanceIDs IS NULL
+BEGIN
+	INSERT INTO @Instances
+	(
+	    InstanceID
+	)
+	SELECT InstanceID 
+	FROM dbo.Instances 
+	WHERE IsActive=1
+END 
+ELSE 
+BEGIN
+	INSERT INTO @Instances
+	(
+		InstanceID
+	)
+	SELECT Item
+	FROM dbo.SplitStrings(@InstanceIDs,',')
+END
+
 SELECT J.Instance,
        J.InstanceID,
        J.job_id,
@@ -46,6 +69,7 @@ SELECT J.Instance,
        J.LastFailIsWarning,
        J.ConfiguredLevel
 FROM dbo.AgentJobStatus J
-WHERE J.enabled=@enabled
+WHERE EXISTS(SELECT 1 FROM @Instances I WHERE I.InstanceID = J.InstanceID)
+AND J.enabled=@enabled
 AND (J.TimeSinceLastFailureStatus<=@FilterLevel OR J.TimeSinceLastSucceededStatus<=@FilterLevel OR J.FailCount24HrsStatus<=@FilterLevel OR J.FailCount7DaysStatus<=@FilterLevel OR J.JobStepFail7DaysStatus<=@FilterLevel OR J.JobStepFail24HrsStatus<=@FilterLevel OR J.LastFailStatus<=@FilterLevel)
 ORDER BY J.IsLastFail DESC,J.FailCount24Hrs DESC,J.FailCount7Days DESC

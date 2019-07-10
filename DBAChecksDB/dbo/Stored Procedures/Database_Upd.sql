@@ -7,11 +7,11 @@ WITH T AS (
 	WHERE I.InstanceID = @InstanceID
 )
 MERGE T
-USING (SELECT * FROM @DB) as S ON S.database_id = T.database_id AND S.create_date = T.create_date
+USING (SELECT * FROM @DB) as S ON S.database_id = T.database_id AND (S.create_date = T.create_date OR S.name=T.name)
 WHEN MATCHED THEN 
 	UPDATE  SET [name] = S.Name
       ,[source_database_id] = S.source_database_id
-      ,[IsOwnerSA] = S.IsOwnerSA
+      ,[owner_sid] = S.owner_sid
       ,[create_date] = S.Create_date
       ,[compatibility_level] = S.[compatibility_level]
       ,[collation_name] = S.collation_name
@@ -83,7 +83,7 @@ INSERT (
 		name,
        database_id,
        source_database_id,
-	   IsOwnerSA,
+	   owner_sid,
        create_date,
        compatibility_level,
        collation_name,
@@ -154,7 +154,7 @@ VALUES( @InstanceID,
 		name,
        database_id,
        source_database_id,
-	   IsOwnerSA,
+	   owner_sid,
        create_date,
        compatibility_level,
        collation_name,

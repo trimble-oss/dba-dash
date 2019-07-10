@@ -31,3 +31,15 @@ BEGIN
 	SET	InstanceDate=@SnapshotDateUTC
 	WHERE InstanceID = @InstanceID
 END
+IF EXISTS(SELECT * FROM dbo.Tags WHERE TagID=-1)
+BEGIN
+	SET IDENTITY_INSERT dbo.Tags ON
+	INSERT INTO dbo.Tags(TagID,Tag)
+	VALUES(-1,'{All Instances}')
+	SET IDENTITY_INSERT dbo.Tags OFF
+END
+IF NOT EXISTS(SELECT 1 FROM dbo.InstanceTag WHERE InstanceID = @InstanceID AND TagID = -1)
+BEGIN
+	INSERT INTO dbo.IntanceTag(InstanceID,TagID)
+	VALUES(@InstanceID,-1)
+END

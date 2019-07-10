@@ -4,7 +4,7 @@
     [name]                                       [sysname]        NOT NULL,
     [database_id]                                INT              NOT NULL,
     [source_database_id]                         INT              NULL,
-    [IsOwnerSA]                                  BIT              NULL,
+	[owner_sid]									 VARBINARY(85)	  NULL,
     [create_date]                                DATETIME         NOT NULL,
     [compatibility_level]                        TINYINT          NOT NULL,
     [collation_name]                             [sysname]        NULL,

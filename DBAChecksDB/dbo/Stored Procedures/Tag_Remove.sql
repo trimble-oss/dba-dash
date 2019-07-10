@@ -1,0 +1,16 @@
+﻿CREATE PROC Tag_Remove(@InstanceID INT,@Tag NVARCHAR(50))
+AS
+DECLARE @TagID SMALLINT 
+SELECT @TagID = TagID
+FROM dbo.Tags
+WHERE Tag = @Tag
+IF @TagID IS NOT NULL
+BEGIN 
+	DELETE dbo.InstanceTag WHERE InstanceID =@InstanceID AND TagID = @TagID
+	
+	IF NOT EXISTS(SELECT 1 FROM dbo.InstanceTag WHERE TagID=@TagID)
+	BEGIN
+		DELETE dbo.Tags
+		WHERE TagID = @TagID
+	END
+END

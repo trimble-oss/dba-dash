@@ -64,6 +64,10 @@
     <Folder Include="dbo\Views\" />
     <Folder Include="dbo\Stored Procedures\" />
     <Folder Include="dbo\User Defined Types\" />
+    <Folder Include="dbo\Functions\" />
+    <Folder Include="Report\" />
+    <Folder Include="Report\Stored Procedures\" />
+    <Folder Include="Security\" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="dbo\Tables\LogRestoreThresholds.sql" />
@@ -80,12 +84,6 @@
     <Build Include="dbo\Views\BackupStatus.sql" />
     <Build Include="dbo\Views\LogShippingStatus.sql" />
     <Build Include="dbo\Views\DriveStatus.sql" />
-    <Build Include="dbo\Stored Procedures\DriveReport_Get.sql" />
-    <Build Include="dbo\Stored Procedures\LogshippingReport_Get.sql" />
-    <Build Include="dbo\Stored Procedures\AgentJobReport_Get.sql" />
-    <Build Include="dbo\Stored Procedures\DBAChecksReport.sql" />
-    <Build Include="dbo\Stored Procedures\BackupReport_Get.sql" />
-    <Build Include="dbo\Stored Procedures\DBAChecksSummary_Get.sql" />
     <Build Include="dbo\Stored Procedures\Instance_Upd.sql" />
     <Build Include="dbo\Stored Procedures\Database_Upd.sql" />
     <Build Include="dbo\Stored Procedures\Drives_Upd.sql" />
@@ -109,6 +107,22 @@
     <Build Include="dbo\Tables\DBFileSnapshot.sql" />
     <Build Include="dbo\Views\DBFileStatus.sql" />
     <Build Include="dbo\Views\ConfigurationCheck.sql" />
-    <Build Include="dbo\Stored Procedures\DBFilesReport_Get.sql" />
+    <Build Include="dbo\Tables\Tags.sql" />
+    <Build Include="dbo\Tables\InstanceTag.sql" />
+    <Build Include="dbo\Functions\SplitStrings.sql" />
+    <Build Include="dbo\Stored Procedures\Tag_Remove.sql" />
+    <Build Include="dbo\Stored Procedures\Tag_Add.sql" />
+    <Build Include="Report\Stored Procedures\TagMatching_Get.sql" />
+    <Build Include="Report\Stored Procedures\Tags_Get.sql" />
+    <Build Include="Report\Stored Procedures\Patching_Get.sql" />
+    <Build Include="Report\Stored Procedures\Instances_Get.sql" />
+    <Build Include="Report\Stored Procedures\DBAChecksAll.sql" />
+    <Build Include="Report\Stored Procedures\Summary_Get.sql" />
+    <Build Include="Report\Stored Procedures\DBFiles_Get.sql" />
+    <Build Include="Report\Stored Procedures\AgentJobs_Get.sql" />
+    <Build Include="Report\Stored Procedures\Backups_Get.sql" />
+    <Build Include="Report\Stored Procedures\Logshipping_Get.sql" />
+    <Build Include="Report\Stored Procedures\Drives_Get.sql" />
+    <Build Include="Security\Report.sql" />
   </ItemGroup>
 </Project>

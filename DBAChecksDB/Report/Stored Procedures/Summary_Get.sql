@@ -1,5 +1,28 @@
-﻿CREATE PROC [dbo].[DBAChecksSummary_Get]
+﻿CREATE PROC [Report].[Summary_Get](@InstanceIDs VARCHAR(MAX)=NULL)
 AS
+DECLARE @Instances TABLE(
+	InstanceID INT PRIMARY KEY
+)
+IF @InstanceIDs IS NULL
+BEGIN
+	INSERT INTO @Instances
+	(
+	    InstanceID
+	)
+	SELECT InstanceID 
+	FROM dbo.Instances 
+	WHERE IsActive=1
+END 
+ELSE 
+BEGIN
+	INSERT INTO @Instances
+	(
+		InstanceID
+	)
+	SELECT Item
+	FROM dbo.SplitStrings(@InstanceIDs,',')
+END;
+
 WITH LS AS (
 	SELECT InstanceID,MIN(Status) as LogShippingStatus
 	FROM LogShippingStatus
@@ -28,6 +51,7 @@ WITH LS AS (
 )
 SELECT I.InstanceID,
 	I.Instance,
+	STUFF((SELECT ',' + Tag FROM dbo.InstanceTag IT JOIN dbo.Tags T ON T.TagID = IT.TagID WHERE IT.InstanceID = I.InstanceID AND IT.TagID <> -1 ORDER BY T.Tag FOR XML PATH(''),TYPE).value('.','NVARCHAR(MAX)'),1,1,'') AS Tags,
 	LS.LogShippingStatus,
 	B.FullBackupStatus,
 	B.LogBackupStatus,
@@ -39,5 +63,5 @@ LEFT JOIN LS ON I.InstanceID = LS.InstanceID
 LEFT JOIN B ON I.InstanceID = B.InstanceID
 LEFT JOIN D ON I.InstanceID = D.InstanceID
 LEFT JOIN F ON I.InstanceID = F.InstanceID
-WHERE I.IsActive=1
-
+WHERE EXISTS(SELECT 1 FROM @Instances t WHERE I.InstanceID = t.InstanceID)
+AND I.IsActive=1

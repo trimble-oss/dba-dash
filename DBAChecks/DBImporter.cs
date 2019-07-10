@@ -187,11 +187,29 @@ namespace DBAChecks
                 using (cn)
                 {
                     cn.Open();
+                    var dtDB = ds.Tables["Databases"];
+                    if (dtDB.Columns["owner_sid"].DataType == typeof(string))
+                    {
+                        Int32 pos = dtDB.Columns["owner_sid"].Ordinal;
+                        dtDB.Columns["owner_sid"].ColumnName = "owner_sid_string";
+                        
+                        var newCol = dtDB.Columns.Add("owner_sid", typeof(byte[]));
+                       
+                        foreach(DataRow r in dtDB.Rows)
+                        {
+                            r["owner_sid"] = Convert.FromBase64String((string)r["owner_sid_string"]);
+                        }
+                        dtDB.Columns.Remove("owner_sid_string");
+                        newCol.SetOrdinal(pos);
+
+                    }
+
+
                     SqlCommand cmd = new SqlCommand("Database_Upd", cn);
                     cmd.Parameters.AddWithValue("DB", ds.Tables["Databases"]);
                     cmd.Parameters.AddWithValue("InstanceID", instanceID);
                     cmd.Parameters.AddWithValue("SnapshotDate", SnapshotDate);
-
+                    
                     cmd.CommandType = CommandType.StoredProcedure;
                     cmd.ExecuteNonQuery();
                 }
