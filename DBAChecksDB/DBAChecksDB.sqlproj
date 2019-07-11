@@ -80,7 +80,6 @@
     <Build Include="dbo\Tables\Backups.sql" />
     <Build Include="dbo\Tables\AgentJobs.sql" />
     <Build Include="dbo\Tables\LogRestores.sql" />
-    <Build Include="dbo\Tables\DBAChecksConfig.sql" />
     <Build Include="dbo\Tables\DriveThresholds.sql" />
     <Build Include="dbo\Views\BackupStatus.sql" />
     <Build Include="dbo\Views\LogShippingStatus.sql" />
@@ -128,5 +127,11 @@
     <Build Include="dbo\Tables\SysConfig.sql" />
     <Build Include="dbo\Stored Procedures\SysConfig_Upd.sql" />
     <Build Include="dbo\User Defined Types\SysConfig.sql" />
+    <Build Include="dbo\Tables\SysConfigOptions.sql" />
+    <Build Include="Report\Stored Procedures\SnapshotDates.sql" />
+    <Build Include="Report\Stored Procedures\Configuration.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <PostDeploy Include="Script.PostDeployment1.sql" />
   </ItemGroup>
 </Project>
