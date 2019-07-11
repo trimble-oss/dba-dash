@@ -25,6 +25,7 @@
     <TargetDatabaseSet>True</TargetDatabaseSet>
     <DefaultCollation>SQL_Latin1_General_CP1_CI_AS</DefaultCollation>
     <DefaultFilegroup>PRIMARY</DefaultFilegroup>
+    <PageVerify>CHECKSUM</PageVerify>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <OutputPath>bin\Release\</OutputPath>
@@ -124,5 +125,8 @@
     <Build Include="Report\Stored Procedures\Logshipping_Get.sql" />
     <Build Include="Report\Stored Procedures\Drives_Get.sql" />
     <Build Include="Security\Report.sql" />
+    <Build Include="dbo\Tables\SysConfig.sql" />
+    <Build Include="dbo\Stored Procedures\SysConfig_Upd.sql" />
+    <Build Include="dbo\User Defined Types\SysConfig.sql" />
   </ItemGroup>
 </Project>
