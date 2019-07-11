@@ -3,6 +3,7 @@
   <ConnectionProperties>
     <Extension>SQL</Extension>
     <ConnectString>Data Source=.;Initial Catalog=DBAChecksDB</ConnectString>
+    <IntegratedSecurity>true</IntegratedSecurity>
   </ConnectionProperties>
   <DataSourceID>df074985-af76-4575-87c8-4b34c6aef96d</DataSourceID>
 </RptDataSource>

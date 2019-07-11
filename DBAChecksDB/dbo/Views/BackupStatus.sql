@@ -1,4 +1,5 @@
 ﻿
+
 CREATE VIEW [dbo].[BackupStatus]
 AS
 WITH B AS(
@@ -35,9 +36,12 @@ SELECT I.InstanceID,
     cfg.[DiffBackupWarningThreshold],
     cfg.[DiffBackupCriticalThreshold],
     cfg.[ConsiderPartialBackups],
-    cfg.[ConsiderFGBackups]
+    cfg.[ConsiderFGBackups],
+	SSD.BackupsDate AS SnapshotDate,
+	DATEDIFF(mi,SSD.BackupsDate,GETUTCDATE()) AS SnapshotAge
 FROM dbo.Databases d 
 JOIN dbo.Instances I ON d.InstanceID = I.InstanceID
+JOIN dbo.SnapshotDates SSD ON SSD.InstanceID = I.InstanceID
 LEFT JOIN B ON d.DatabaseID = B.DatabaseID
 OUTER APPLY(SELECT TOP(1) T.* 
 			FROM dbo.BackupThresholds T 

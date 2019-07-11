@@ -45,7 +45,9 @@ SELECT InstanceID,
        DiffBackupWarningThreshold,
        DiffBackupCriticalThreshold,
        ConsiderPartialBackups,
-       ConsiderFGBackups 
+       ConsiderFGBackups,
+	   SnapshotDate,
+	   SnapshotAge
 FROM dbo.BackupStatus BS
 WHERE EXISTS(SELECT 1 FROM @Instances I WHERE I.InstanceID = BS.InstanceID)
 AND (FullBackupStatus<=@FilterLevel OR DiffBackupStatus<=@FilterLevel OR LogBackupStatus<= @FilterLevel)

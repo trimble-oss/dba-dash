@@ -38,11 +38,15 @@ SELECT InstanceID,
        is_db_read_only,
        is_in_standby,
        state,
+	   state_desc,
        FreeSpaceStatus,
        FreeSpaceWarningThreshold,
        FreeSpaceCriticalThreshold,
        FreeSpaceCheckType,
-	   ConfiguredLevel
+	   ConfiguredLevel,
+	   ExcludedReason,
+	   FileSnapshotDate,
+	   FileSnapshotAge
 FROM dbo.DBFileStatus F
 WHERE EXISTS(SELECT 1 FROM @Instances I WHERE I.InstanceID = F.InstanceID)
 AND (FreeSpaceStatus<=@FilterLevel OR @FilterLevel IS NULL)

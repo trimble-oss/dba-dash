@@ -1,16 +1,17 @@
 ﻿CREATE TABLE [dbo].[Drives] (
-    [DriveID]     INT            IDENTITY (1, 1) NOT NULL,
-    [InstanceID]  INT            NOT NULL,
-    [Name]        NVARCHAR (256) NOT NULL,
-    [Capacity]    BIGINT         NOT NULL,
-    [FreeSpace]   BIGINT         NOT NULL,
-    [UsedSpace]   AS             ([Capacity]-[FreeSpace]),
-    [Label]       NVARCHAR (256) NULL,
-    [UpdatedDate] DATETIME2 (2)  NOT NULL,
-    [IsActive]    BIT            NOT NULL,
+    [DriveID]    INT            IDENTITY (1, 1) NOT NULL,
+    [InstanceID] INT            NOT NULL,
+    [Name]       NVARCHAR (256) NOT NULL,
+    [Capacity]   BIGINT         NOT NULL,
+    [FreeSpace]  BIGINT         NOT NULL,
+    [UsedSpace]  AS             ([Capacity]-[FreeSpace]),
+    [Label]      NVARCHAR (256) NULL,
+    [IsActive]   BIT            NOT NULL,
     PRIMARY KEY CLUSTERED ([DriveID] ASC),
     CONSTRAINT [FK_Drives_SQLInstance] FOREIGN KEY ([InstanceID]) REFERENCES [dbo].[Instances] ([InstanceID])
 );
+
+
 
 
 GO

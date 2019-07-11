@@ -13,7 +13,6 @@ WHEN MATCHED THEN
 UPDATE SET T.Capacity=S.Capacity,
 T.FreeSpace = S.FreeSpace,
 T.Label = S.Label,
-T.UpdatedDate = @SnapshotDate,
 T.IsActive=1
 WHEN NOT MATCHED BY TARGET THEN 
 INSERT(InstanceID,
@@ -21,14 +20,12 @@ INSERT(InstanceID,
 	Capacity,
 	FreeSpace,
 	Label,
-	UpdatedDate,
 	IsActive)
 VALUES(@InstanceID,
 	Name,
 	Capacity,
 	FreeSpace,
 	Label,
-	@SnapshotDate,
 	1)
 WHEN NOT MATCHED BY SOURCE THEN 
 UPDATE SET T.UpdatedDate = @SnapshotDate,

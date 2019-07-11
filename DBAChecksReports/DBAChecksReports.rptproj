@@ -49,7 +49,19 @@
     <Reports>@(Report)</Reports>
   </PropertyGroup>
   <ItemGroup>
+    <DataSet Include="Instances.rsd" />
+    <DataSet Include="TagMatching.rsd" />
+    <DataSet Include="Tags.rsd" />
+  </ItemGroup>
+  <ItemGroup>
     <DataSource Include="DBAChecksDB.rds" />
+  </ItemGroup>
+  <ItemGroup>
+    <Report Include="Backups.rdl" />
+    <Report Include="Drives.rdl" />
+    <Report Include="Files.rdl" />
+    <Report Include="LogShipping.rdl" />
+    <Report Include="Summary.rdl" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Reporting Services\Microsoft.ReportingServices.MSBuilder.targets" />
 </Project>

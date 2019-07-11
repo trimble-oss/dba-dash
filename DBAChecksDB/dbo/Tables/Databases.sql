@@ -4,7 +4,7 @@
     [name]                                       [sysname]        NOT NULL,
     [database_id]                                INT              NOT NULL,
     [source_database_id]                         INT              NULL,
-	[owner_sid]									 VARBINARY(85)	  NULL,
+    [owner_sid]                                  VARBINARY (85)   NULL,
     [create_date]                                DATETIME         NOT NULL,
     [compatibility_level]                        TINYINT          NOT NULL,
     [collation_name]                             [sysname]        NULL,
@@ -70,9 +70,12 @@
     [is_remote_data_archive_enabled]             BIT              NULL,
     [is_mixed_page_allocation_on]                BIT              NULL,
     [IsActive]                                   BIT              NOT NULL,
+    [state_desc]                                 AS               (case when [STATE]=(0) then 'ONLINE' when [STATE]=(1) then 'RESTORING' when [STATE]=(2) then 'RECOVERING' when [STATE]=(3) then 'RECOVERY_PENDING' when [STATE]=(4) then 'SUSPECT' when [STATE]=(5) then 'EMERGENCY' when [STATE]=(6) then 'OFFLINE' when [STATE]=(7) then 'COPYING' when [STATE]=(10) then 'OFFLINE_SECONDARY' else CONVERT([nvarchar](60),[STATE]) end),
     CONSTRAINT [PK_Databases] PRIMARY KEY CLUSTERED ([DatabaseID] ASC),
     CONSTRAINT [FK_Databases_Instances] FOREIGN KEY ([InstanceID]) REFERENCES [dbo].[Instances] ([InstanceID])
 );
+
+
 
 
 

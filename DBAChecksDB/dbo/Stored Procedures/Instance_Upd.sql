@@ -7,8 +7,8 @@ WHERE ConnectionID = @ConnectionID
 IF @InstanceID IS NULL
 BEGIN
 	BEGIN TRAN
-	INSERT INTO dbo.Instances(Instance,ConnectionID,IsActive,SnapshotDate)
-	VALUES(@Instance,@ConnectionID,CAST(1 as BIT),@SnapshotDateUTC)
+	INSERT INTO dbo.Instances(Instance,ConnectionID,IsActive)
+	VALUES(@Instance,@ConnectionID,CAST(1 as BIT))
 	SELECT @InstanceID = SCOPE_IDENTITY();
 	INSERT INTO dbo.SnapshotDates(
 	    InstanceID,
@@ -31,7 +31,7 @@ BEGIN
 	SET	InstanceDate=@SnapshotDateUTC
 	WHERE InstanceID = @InstanceID
 END
-IF EXISTS(SELECT * FROM dbo.Tags WHERE TagID=-1)
+IF NOT EXISTS(SELECT * FROM dbo.Tags WHERE TagID=-1)
 BEGIN
 	SET IDENTITY_INSERT dbo.Tags ON
 	INSERT INTO dbo.Tags(TagID,Tag)

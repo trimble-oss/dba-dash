@@ -45,9 +45,10 @@
     [SqlCharSetName]               NVARCHAR (128) NULL,
     [SqlSortOrder]                 TINYINT        NULL,
     [SqlSortOrderName]             NVARCHAR (128) NULL,
-    [SnapshotDate]                 DATETIME       NULL,
     CONSTRAINT [PK_Instances] PRIMARY KEY CLUSTERED ([InstanceID] ASC)
 );
+
+
 
 
 
