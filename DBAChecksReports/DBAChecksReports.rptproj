@@ -60,7 +60,9 @@
     <Report Include="Backups.rdl" />
     <Report Include="Drives.rdl" />
     <Report Include="Files.rdl" />
+    <Report Include="Instance Configuration.rdl" />
     <Report Include="LogShipping.rdl" />
+    <Report Include="SnapshotDates.rdl" />
     <Report Include="Summary.rdl" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Reporting Services\Microsoft.ReportingServices.MSBuilder.targets" />

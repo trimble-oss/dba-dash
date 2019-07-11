@@ -596,7 +596,7 @@
                             <Paragraph>
                               <TextRuns>
                                 <TextRun>
-                                  <Value>=Fields!LogShippingStatus.Value</Value>
+                                  <Value />
                                   <Style>
                                     <FontFamily />
                                     <Color>#333333</Color>
@@ -628,14 +628,14 @@ Fields!LogShippingStatus.Value=4,"Green")</BackgroundColor>
                     </TablixCell>
                     <TablixCell>
                       <CellContents>
-                        <Textbox Name="FullBackupStatus">
+                        <Textbox Name="Textbox10">
                           <CanGrow>true</CanGrow>
                           <KeepTogether>true</KeepTogether>
                           <Paragraphs>
                             <Paragraph>
                               <TextRuns>
                                 <TextRun>
-                                  <Value>=Fields!FullBackupStatus.Value</Value>
+                                  <Value />
                                   <Style>
                                     <FontFamily />
                                     <Color>#333333</Color>
@@ -645,7 +645,7 @@ Fields!LogShippingStatus.Value=4,"Green")</BackgroundColor>
                               <Style />
                             </Paragraph>
                           </Paragraphs>
-                          <rd:DefaultName>FullBackupStatus</rd:DefaultName>
+                          <rd:DefaultName>Textbox10</rd:DefaultName>
                           <Style>
                             <Border>
                               <Color>LightGrey</Color>
@@ -656,7 +656,6 @@ Fields!LogShippingStatus.Value=4,"Green")</BackgroundColor>
                             <BackgroundColor>=SWITCH(Fields!FullBackupStatus.Value=1,"Red",
 Fields!FullBackupStatus.Value=2,"Yellow",
 Fields!FullBackupStatus.Value=4,"Green")</BackgroundColor>
-                            <FontFamily />
                             <PaddingLeft>2pt</PaddingLeft>
                             <PaddingRight>2pt</PaddingRight>
                             <PaddingTop>2pt</PaddingTop>
@@ -674,7 +673,7 @@ Fields!FullBackupStatus.Value=4,"Green")</BackgroundColor>
                             <Paragraph>
                               <TextRuns>
                                 <TextRun>
-                                  <Value>=Fields!LogBackupStatus.Value</Value>
+                                  <Value />
                                   <Style>
                                     <FontFamily />
                                     <Color>#333333</Color>
@@ -713,7 +712,7 @@ Fields!FullBackupStatus.Value=4,"Green")</BackgroundColor>
                             <Paragraph>
                               <TextRuns>
                                 <TextRun>
-                                  <Value>=Fields!DiffBackupStatus.Value</Value>
+                                  <Value />
                                   <Style>
                                     <FontFamily />
                                     <Color>#333333</Color>
@@ -752,7 +751,7 @@ Fields!DiffBackupStatus.Value=4,"Green")</BackgroundColor>
                             <Paragraph>
                               <TextRuns>
                                 <TextRun>
-                                  <Value>=Fields!DriveStatus.Value</Value>
+                                  <Value />
                                   <Style>
                                     <FontFamily />
                                     <Color>#333333</Color>
@@ -784,14 +783,14 @@ Fields!DriveStatus.Value=4,"Green")</BackgroundColor>
                     </TablixCell>
                     <TablixCell>
                       <CellContents>
-                        <Textbox Name="FileFreeSpaceStatus">
+                        <Textbox Name="Textbox11">
                           <CanGrow>true</CanGrow>
                           <KeepTogether>true</KeepTogether>
                           <Paragraphs>
                             <Paragraph>
                               <TextRuns>
                                 <TextRun>
-                                  <Value>=Fields!FileFreeSpaceStatus.Value</Value>
+                                  <Value />
                                   <Style>
                                     <FontFamily />
                                     <Color>#333333</Color>
@@ -801,7 +800,7 @@ Fields!DriveStatus.Value=4,"Green")</BackgroundColor>
                               <Style />
                             </Paragraph>
                           </Paragraphs>
-                          <rd:DefaultName>FileFreeSpaceStatus</rd:DefaultName>
+                          <rd:DefaultName>Textbox11</rd:DefaultName>
                           <Style>
                             <Border>
                               <Color>LightGrey</Color>
@@ -812,7 +811,6 @@ Fields!DriveStatus.Value=4,"Green")</BackgroundColor>
                             <BackgroundColor>=SWITCH(Fields!FileFreeSpaceStatus.Value=1,"Red",
 Fields!FileFreeSpaceStatus.Value=2,"Yellow",
 Fields!FileFreeSpaceStatus.Value=4,"Green")</BackgroundColor>
-                            <FontFamily />
                             <PaddingLeft>2pt</PaddingLeft>
                             <PaddingRight>2pt</PaddingRight>
                             <PaddingTop>2pt</PaddingTop>
@@ -877,7 +875,7 @@ Fields!FileFreeSpaceStatus.Value=4,"Green")</BackgroundColor>
                 <Value>=Parameters!TagMatching.Value</Value>
               </Parameter>
             </Parameters>
-            <Top>2.29042in</Top>
+            <Top>3.32861in</Top>
             <Height>0.72917in</Height>
             <Width>11.32292in</Width>
             <ZIndex>2</ZIndex>
@@ -889,7 +887,7 @@ Fields!FileFreeSpaceStatus.Value=4,"Green")</BackgroundColor>
           </Subreport>
           <Subreport Name="LogShipping">
             <ReportName>LogShipping</ReportName>
-            <Top>3.17583in</Top>
+            <Top>4.21403in</Top>
             <Height>0.66667in</Height>
             <Width>11.32292in</Width>
             <ZIndex>3</ZIndex>
@@ -906,7 +904,7 @@ Fields!FileFreeSpaceStatus.Value=4,"Green")</BackgroundColor>
                 <Value>=Parameters!InstanceIDs.Value</Value>
               </Parameter>
             </Parameters>
-            <Top>1.38417in</Top>
+            <Top>2.42236in</Top>
             <Height>0.78125in</Height>
             <Width>11.32292in</Width>
             <ZIndex>4</ZIndex>
@@ -918,7 +916,7 @@ Fields!FileFreeSpaceStatus.Value=4,"Green")</BackgroundColor>
           </Subreport>
           <Subreport Name="Files">
             <ReportName>Files</ReportName>
-            <Top>3.98833in</Top>
+            <Top>5.02653in</Top>
             <Height>0.84375in</Height>
             <Width>11.32292in</Width>
             <ZIndex>5</ZIndex>
@@ -928,8 +926,25 @@ Fields!FileFreeSpaceStatus.Value=4,"Green")</BackgroundColor>
               </Border>
             </Style>
           </Subreport>
+          <Subreport Name="SnapshotDates">
+            <ReportName>SnapshotDates</ReportName>
+            <Parameters>
+              <Parameter Name="InstanceIDs">
+                <Value>=Parameters!InstanceIDs.Value</Value>
+              </Parameter>
+            </Parameters>
+            <Top>1.4675in</Top>
+            <Height>0.88542in</Height>
+            <Width>11.32292in</Width>
+            <ZIndex>6</ZIndex>
+            <Style>
+              <Border>
+                <Style>None</Style>
+              </Border>
+            </Style>
+          </Subreport>
         </ReportItems>
-        <Height>8.95375in</Height>
+        <Height>6.28in</Height>
         <Style />
       </Body>
       <Width>11.32292in</Width>

@@ -25,7 +25,7 @@ namespace DBAChecks
 
             instanceID= updateInstance(connectionString,rInstance);
             updateServerProperties(connectionString, instanceID, snapshotDate, Data);
-            //updateSysConfig(connectionString, instanceID, snapshotDate, Data);
+            updateSysConfig(connectionString, instanceID, snapshotDate, Data);
             updateDB(connectionString, instanceID, snapshotDate, Data);
             updateDrives(connectionString, instanceID, snapshotDate, Data);
             updateBackups(connectionString, instanceID, snapshotDate, Data);
@@ -170,7 +170,7 @@ namespace DBAChecks
                 SqlCommand cmd = new SqlCommand("Instance_Upd", cn);
                 cmd.Parameters.AddWithValue("ConnectionID", (string)rInstance["ConnectionID"]);
                 cmd.Parameters.AddWithValue("Instance", (string)rInstance["Instance"]);
-                cmd.Parameters.AddWithValue("SnapshotDateUTC", (DateTime)rInstance["SnapshotDateUTC"]);
+                cmd.Parameters.AddWithValue("SnapshotDate", (DateTime)rInstance["SnapshotDateUTC"]);
                 var pInstanceID = cmd.Parameters.Add("InstanceID", SqlDbType.Int);
                 pInstanceID.Direction = ParameterDirection.Output;
                 cmd.CommandType = CommandType.StoredProcedure;

@@ -28,12 +28,11 @@ VALUES(@InstanceID,
 	Label,
 	1)
 WHEN NOT MATCHED BY SOURCE THEN 
-UPDATE SET T.UpdatedDate = @SnapshotDate,
-T.IsActive=0;
+UPDATE SET T.IsActive=0;
 
 IF NOT EXISTS(SELECT 1 FROM dbo.DriveSnapshot SS INNER JOIN dbo.Drives D ON D.DriveID = SS.DriveID WHERE D.InstanceID=@InstanceID AND SS.SnapshotDate = @SnapshotDate)
 BEGIN
-	INSERT INTO dbo.DriveSnapshot(DriveID,Capacity,FreeSpace,SnapshotDate)
+	INSERT INTO dbo.DriveSnapshot(DriveID,Capacity,FreeSpace, SnapshotDate)
 	SELECT D.DriveID,T.Capacity,T.FreeSpace,@SnapshotDate
 	FROM @Drives T
 	JOIN dbo.Drives D ON T.Name = D.Name AND D.InstanceID = @InstanceID

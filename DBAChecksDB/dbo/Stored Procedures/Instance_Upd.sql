@@ -1,4 +1,4 @@
-﻿CREATE PROC [dbo].[Instance_Upd](@ConnectionID SYSNAME,@Instance SYSNAME,@SnapshotDateUTC DATETIME,@InstanceID INT OUT)
+﻿CREATE PROC [dbo].[Instance_Upd](@ConnectionID SYSNAME,@Instance SYSNAME,@SnapshotDate DATETIME,@InstanceID INT OUT)
 AS
 SELECT @InstanceID = InstanceID
 FROM dbo.Instances 
@@ -15,7 +15,7 @@ BEGIN
 		InstanceDate
 	)
 	VALUES
-	(@InstanceID, @SnapshotDateUTC
+	(@InstanceID, @SnapshotDate
 	    )
 	COMMIT
 
@@ -23,12 +23,11 @@ END
 ELSE
 BEGIN
 	UPDATE dbo.Instances 
-	SET Instance = @Instance,
-	SnapshotDate=@SnapshotDateUTC
+	SET Instance = @Instance
 	WHERE InstanceID = @InstanceID
 
 	UPDATE dbo.SnapshotDates 
-	SET	InstanceDate=@SnapshotDateUTC
+	SET	InstanceDate=@SnapshotDate
 	WHERE InstanceID = @InstanceID
 END
 IF NOT EXISTS(SELECT * FROM dbo.Tags WHERE TagID=-1)
