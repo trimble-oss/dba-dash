@@ -505,6 +505,7 @@ AS (SELECT rsh.destination_database_name AS database_name,
         INNER JOIN msdb.dbo.backupmediafamily bmf ON bmf.media_set_id = bs.media_set_id
         INNER JOIN sys.databases d ON rsh.destination_database_name = d.name
     WHERE rsh.restore_type = 'L'
+	AND restore_date&gt;=DATEADD(d,-14,GETUTCDATE())
     AND
           (
               d.state = 1

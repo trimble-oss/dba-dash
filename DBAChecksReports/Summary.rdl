@@ -154,7 +154,7 @@
                   <Width>2.30208in</Width>
                 </TablixColumn>
                 <TablixColumn>
-                  <Width>1.69792in</Width>
+                  <Width>2.05625in</Width>
                 </TablixColumn>
                 <TablixColumn>
                   <Width>1in</Width>
@@ -537,10 +537,20 @@
                           <Style>
                             <Border>
                               <Color>LightGrey</Color>
+                              <Style>None</Style>
                             </Border>
+                            <TopBorder>
+                              <Style>Solid</Style>
+                            </TopBorder>
                             <BottomBorder>
                               <Style>Solid</Style>
                             </BottomBorder>
+                            <LeftBorder>
+                              <Style>Solid</Style>
+                            </LeftBorder>
+                            <RightBorder>
+                              <Style>Solid</Style>
+                            </RightBorder>
                             <FontFamily />
                             <PaddingLeft>2pt</PaddingLeft>
                             <PaddingRight>2pt</PaddingRight>
@@ -574,10 +584,20 @@
                           <Style>
                             <Border>
                               <Color>LightGrey</Color>
+                              <Style>None</Style>
                             </Border>
+                            <TopBorder>
+                              <Style>Solid</Style>
+                            </TopBorder>
                             <BottomBorder>
                               <Style>Solid</Style>
                             </BottomBorder>
+                            <LeftBorder>
+                              <Style>Solid</Style>
+                            </LeftBorder>
+                            <RightBorder>
+                              <Style>Solid</Style>
+                            </RightBorder>
                             <FontFamily />
                             <PaddingLeft>2pt</PaddingLeft>
                             <PaddingRight>2pt</PaddingRight>
@@ -610,10 +630,20 @@
                           <Style>
                             <Border>
                               <Color>LightGrey</Color>
+                              <Style>None</Style>
                             </Border>
+                            <TopBorder>
+                              <Style>Solid</Style>
+                            </TopBorder>
                             <BottomBorder>
                               <Style>Solid</Style>
                             </BottomBorder>
+                            <LeftBorder>
+                              <Style>Solid</Style>
+                            </LeftBorder>
+                            <RightBorder>
+                              <Style>Solid</Style>
+                            </RightBorder>
                             <BackgroundColor>=SWITCH(Fields!LogShippingStatus.Value=1,"Red",
 Fields!LogShippingStatus.Value=2,"Yellow",
 Fields!LogShippingStatus.Value=4,"Green")</BackgroundColor>
@@ -649,10 +679,20 @@ Fields!LogShippingStatus.Value=4,"Green")</BackgroundColor>
                           <Style>
                             <Border>
                               <Color>LightGrey</Color>
+                              <Style>None</Style>
                             </Border>
+                            <TopBorder>
+                              <Style>Solid</Style>
+                            </TopBorder>
                             <BottomBorder>
                               <Style>Solid</Style>
                             </BottomBorder>
+                            <LeftBorder>
+                              <Style>Solid</Style>
+                            </LeftBorder>
+                            <RightBorder>
+                              <Style>Solid</Style>
+                            </RightBorder>
                             <BackgroundColor>=SWITCH(Fields!FullBackupStatus.Value=1,"Red",
 Fields!FullBackupStatus.Value=2,"Yellow",
 Fields!FullBackupStatus.Value=4,"Green")</BackgroundColor>
@@ -687,13 +727,23 @@ Fields!FullBackupStatus.Value=4,"Green")</BackgroundColor>
                           <Style>
                             <Border>
                               <Color>LightGrey</Color>
+                              <Style>None</Style>
                             </Border>
+                            <TopBorder>
+                              <Style>Solid</Style>
+                            </TopBorder>
                             <BottomBorder>
                               <Style>Solid</Style>
                             </BottomBorder>
+                            <LeftBorder>
+                              <Style>Solid</Style>
+                            </LeftBorder>
+                            <RightBorder>
+                              <Style>Solid</Style>
+                            </RightBorder>
                             <BackgroundColor>=SWITCH(Fields!LogBackupStatus.Value=1,"Red",
-Fields!FullBackupStatus.Value=2,"Yellow",
-Fields!FullBackupStatus.Value=4,"Green")</BackgroundColor>
+Fields!LogBackupStatus.Value=2,"Yellow",
+Fields!LogBackupStatus.Value=4,"Green")</BackgroundColor>
                             <FontFamily />
                             <PaddingLeft>2pt</PaddingLeft>
                             <PaddingRight>2pt</PaddingRight>
@@ -726,10 +776,20 @@ Fields!FullBackupStatus.Value=4,"Green")</BackgroundColor>
                           <Style>
                             <Border>
                               <Color>LightGrey</Color>
+                              <Style>None</Style>
                             </Border>
+                            <TopBorder>
+                              <Style>Solid</Style>
+                            </TopBorder>
                             <BottomBorder>
                               <Style>Solid</Style>
                             </BottomBorder>
+                            <LeftBorder>
+                              <Style>Solid</Style>
+                            </LeftBorder>
+                            <RightBorder>
+                              <Style>Solid</Style>
+                            </RightBorder>
                             <BackgroundColor>=SWITCH(Fields!DiffBackupStatus.Value=1,"Red",
 Fields!DiffBackupStatus.Value=2,"Yellow",
 Fields!DiffBackupStatus.Value=4,"Green")</BackgroundColor>
@@ -765,10 +825,20 @@ Fields!DiffBackupStatus.Value=4,"Green")</BackgroundColor>
                           <Style>
                             <Border>
                               <Color>LightGrey</Color>
+                              <Style>None</Style>
                             </Border>
+                            <TopBorder>
+                              <Style>Solid</Style>
+                            </TopBorder>
                             <BottomBorder>
                               <Style>Solid</Style>
                             </BottomBorder>
+                            <LeftBorder>
+                              <Style>Solid</Style>
+                            </LeftBorder>
+                            <RightBorder>
+                              <Style>Solid</Style>
+                            </RightBorder>
                             <BackgroundColor>=SWITCH(Fields!DriveStatus.Value=1,"Red",
 Fields!DriveStatus.Value=2,"Yellow",
 Fields!DriveStatus.Value=4,"Green")</BackgroundColor>
@@ -804,10 +874,20 @@ Fields!DriveStatus.Value=4,"Green")</BackgroundColor>
                           <Style>
                             <Border>
                               <Color>LightGrey</Color>
+                              <Style>None</Style>
                             </Border>
+                            <TopBorder>
+                              <Style>Solid</Style>
+                            </TopBorder>
                             <BottomBorder>
                               <Style>Solid</Style>
                             </BottomBorder>
+                            <LeftBorder>
+                              <Style>Solid</Style>
+                            </LeftBorder>
+                            <RightBorder>
+                              <Style>Solid</Style>
+                            </RightBorder>
                             <BackgroundColor>=SWITCH(Fields!FileFreeSpaceStatus.Value=1,"Red",
 Fields!FileFreeSpaceStatus.Value=2,"Yellow",
 Fields!FileFreeSpaceStatus.Value=4,"Green")</BackgroundColor>
@@ -856,9 +936,14 @@ Fields!FileFreeSpaceStatus.Value=4,"Green")</BackgroundColor>
               </TablixMembers>
             </TablixRowHierarchy>
             <DataSetName>DataSet1</DataSetName>
+            <SortExpressions>
+              <SortExpression>
+                <Value>=Fields!Instance.Value</Value>
+              </SortExpression>
+            </SortExpressions>
             <Top>0.43in</Top>
             <Height>0.83625in</Height>
-            <Width>10in</Width>
+            <Width>10.35833in</Width>
             <ZIndex>1</ZIndex>
             <Style />
           </Tablix>
@@ -949,6 +1034,8 @@ Fields!FileFreeSpaceStatus.Value=4,"Green")</BackgroundColor>
       </Body>
       <Width>11.32292in</Width>
       <Page>
+        <InteractiveHeight>200in</InteractiveHeight>
+        <InteractiveWidth>8.5in</InteractiveWidth>
         <LeftMargin>1in</LeftMargin>
         <RightMargin>1in</RightMargin>
         <TopMargin>1in</TopMargin>

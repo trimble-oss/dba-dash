@@ -229,6 +229,9 @@
                       <CellContents>
                         <Textbox Name="textbox2">
                           <CanGrow>true</CanGrow>
+                          <UserSort>
+                            <SortExpression>=Fields!Instance.Value</SortExpression>
+                          </UserSort>
                           <KeepTogether>true</KeepTogether>
                           <Paragraphs>
                             <Paragraph>
@@ -268,6 +271,9 @@
                       <CellContents>
                         <Textbox Name="textbox3">
                           <CanGrow>true</CanGrow>
+                          <UserSort>
+                            <SortExpression>=Fields!Name.Value</SortExpression>
+                          </UserSort>
                           <KeepTogether>true</KeepTogether>
                           <Paragraphs>
                             <Paragraph>
@@ -307,6 +313,9 @@
                       <CellContents>
                         <Textbox Name="textbox4">
                           <CanGrow>true</CanGrow>
+                          <UserSort>
+                            <SortExpression>=Fields!Label.Value</SortExpression>
+                          </UserSort>
                           <KeepTogether>true</KeepTogether>
                           <Paragraphs>
                             <Paragraph>
@@ -346,6 +355,9 @@
                       <CellContents>
                         <Textbox Name="textbox5">
                           <CanGrow>true</CanGrow>
+                          <UserSort>
+                            <SortExpression>=Fields!TotalGB.Value</SortExpression>
+                          </UserSort>
                           <KeepTogether>true</KeepTogether>
                           <Paragraphs>
                             <Paragraph>
@@ -388,6 +400,9 @@
                       <CellContents>
                         <Textbox Name="textbox6">
                           <CanGrow>true</CanGrow>
+                          <UserSort>
+                            <SortExpression>=Fields!UsedGB.Value</SortExpression>
+                          </UserSort>
                           <KeepTogether>true</KeepTogether>
                           <Paragraphs>
                             <Paragraph>
@@ -430,6 +445,9 @@
                       <CellContents>
                         <Textbox Name="textbox7">
                           <CanGrow>true</CanGrow>
+                          <UserSort>
+                            <SortExpression>=Fields!FreeGB.Value</SortExpression>
+                          </UserSort>
                           <KeepTogether>true</KeepTogether>
                           <Paragraphs>
                             <Paragraph>
@@ -472,6 +490,9 @@
                       <CellContents>
                         <Textbox Name="textbox8">
                           <CanGrow>true</CanGrow>
+                          <UserSort>
+                            <SortExpression>=Fields!PctFreeSpace.Value</SortExpression>
+                          </UserSort>
                           <KeepTogether>true</KeepTogether>
                           <Paragraphs>
                             <Paragraph>
@@ -514,6 +535,9 @@
                       <CellContents>
                         <Textbox Name="textbox9">
                           <CanGrow>true</CanGrow>
+                          <UserSort>
+                            <SortExpression>=Fields!SnapshotAgeMins.Value</SortExpression>
+                          </UserSort>
                           <KeepTogether>true</KeepTogether>
                           <Paragraphs>
                             <Paragraph>
@@ -556,6 +580,9 @@
                       <CellContents>
                         <Textbox Name="textbox10">
                           <CanGrow>true</CanGrow>
+                          <UserSort>
+                            <SortExpression>=Fields!DriveWarningThreshold.Value</SortExpression>
+                          </UserSort>
                           <KeepTogether>true</KeepTogether>
                           <Paragraphs>
                             <Paragraph>
@@ -598,6 +625,9 @@
                       <CellContents>
                         <Textbox Name="textbox11">
                           <CanGrow>true</CanGrow>
+                          <UserSort>
+                            <SortExpression>=Fields!DriveCriticalThreshold.Value</SortExpression>
+                          </UserSort>
                           <KeepTogether>true</KeepTogether>
                           <Paragraphs>
                             <Paragraph>
@@ -640,6 +670,9 @@
                       <CellContents>
                         <Textbox Name="textbox12">
                           <CanGrow>true</CanGrow>
+                          <UserSort>
+                            <SortExpression>=Fields!DriveCheckType.Value</SortExpression>
+                          </UserSort>
                           <KeepTogether>true</KeepTogether>
                           <Paragraphs>
                             <Paragraph>
@@ -679,6 +712,9 @@
                       <CellContents>
                         <Textbox Name="textbox14">
                           <CanGrow>true</CanGrow>
+                          <UserSort>
+                            <SortExpression>=Fields!Status.Value</SortExpression>
+                          </UserSort>
                           <KeepTogether>true</KeepTogether>
                           <Paragraphs>
                             <Paragraph>
@@ -718,6 +754,9 @@
                       <CellContents>
                         <Textbox Name="textbox15">
                           <CanGrow>true</CanGrow>
+                          <UserSort>
+                            <SortExpression>=Fields!DriveCheckConfiguredLevel.Value</SortExpression>
+                          </UserSort>
                           <KeepTogether>true</KeepTogether>
                           <Paragraphs>
                             <Paragraph>
@@ -1280,7 +1319,7 @@ Fields!Status.Value=4,"Green")</BackgroundColor>
             <DataSetName>Drives</DataSetName>
             <Top>0.43in</Top>
             <Height>0.64in</Height>
-            <Width>15.32292in</Width>
+            <Width>15.32291in</Width>
             <ZIndex>1</ZIndex>
             <Style />
           </Tablix>
@@ -1310,7 +1349,6 @@ Fields!Status.Value=4,"Green")</BackgroundColor>
     </ReportParameter>
     <ReportParameter Name="TagIDs">
       <DataType>String</DataType>
-      <Nullable>true</Nullable>
       <DefaultValue>
         <Values>
           <Value>-1</Value>
@@ -1324,6 +1362,7 @@ Fields!Status.Value=4,"Green")</BackgroundColor>
           <LabelField>Tag</LabelField>
         </DataSetReference>
       </ValidValues>
+      <MultiValue>true</MultiValue>
     </ReportParameter>
     <ReportParameter Name="TagMatching">
       <DataType>String</DataType>

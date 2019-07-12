@@ -130,6 +130,15 @@
     <Build Include="dbo\Tables\SysConfigOptions.sql" />
     <Build Include="Report\Stored Procedures\SnapshotDates.sql" />
     <Build Include="Report\Stored Procedures\Configuration.sql" />
+    <Build Include="dbo\Stored Procedures\InstanceTags_Get.sql" />
+    <Build Include="dbo\Stored Procedures\Instances_Get.sql" />
+    <Build Include="dbo\Stored Procedures\DriveThresholds_Upd.sql" />
+    <Build Include="dbo\Stored Procedures\DriveThresholds_Get.sql" />
+    <Build Include="dbo\Stored Procedures\Drives_Get.sql" />
+    <Build Include="dbo\Stored Procedures\Databases_Get.sql" />
+    <Build Include="dbo\Stored Procedures\BackupThresholds_Upd.sql" />
+    <Build Include="dbo\Stored Procedures\BackupThresholds_Get.sql" />
+    <Build Include="Security\Reports.sql" />
   </ItemGroup>
   <ItemGroup>
     <PostDeploy Include="Script.PostDeployment1.sql" />

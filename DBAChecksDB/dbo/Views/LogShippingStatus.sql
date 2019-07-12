@@ -26,6 +26,8 @@ OUTER APPLY(SELECT DATEDIFF(mi,restore_date,GETUTCDATE()) as TimeSinceLast,
 					DATEDIFF(mi,backup_start_date,GETUTCDATE()) as TotalTimeBehind) l
 OUTER APPLY(SELECT CASE WHEN l.TimeSinceLast >cfg.TimeSinceLastCriticalThreshold THEN 1
 	WHEN l.LatencyOfLast> cfg.LatencyCriticalThreshold THEN 1
+	WHEN l.TimeSinceLast IS NULL AND cfg.TimeSinceLastCriticalThreshold IS NOT NULL THEN 1
+	WHEN l.LatencyOfLast IS NULL AND cfg.LatencyCriticalThreshold IS NOT NULL THEN 1
 	WHEN l.TimeSinceLast >cfg.TimeSinceLastWarningThreshold THEN 2
 	WHEN l.LatencyOfLast > cfg.LatencyWarningThreshold THEN 2
 	WHEN cfg.LatencyCriticalThreshold IS NULL AND cfg.TimeSinceLastCriticalThreshold IS NULL AND cfg.LatencyWarningThreshold IS NULL AND cfg.TimeSinceLastWarningThreshold IS NULL  THEN 3

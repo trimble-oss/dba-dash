@@ -39,6 +39,6 @@ BEGIN
 END
 IF NOT EXISTS(SELECT 1 FROM dbo.InstanceTag WHERE InstanceID = @InstanceID AND TagID = -1)
 BEGIN
-	INSERT INTO dbo.IntanceTag(InstanceID,TagID)
+	INSERT INTO dbo.InstanceTag(InstanceID,TagID)
 	VALUES(@InstanceID,-1)
 END
