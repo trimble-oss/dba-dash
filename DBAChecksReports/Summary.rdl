@@ -627,23 +627,28 @@
                             </Paragraph>
                           </Paragraphs>
                           <rd:DefaultName>LogShippingStatus</rd:DefaultName>
+                          <ActionInfo>
+                            <Actions>
+                              <Action>
+                                <Drillthrough>
+                                  <ReportName>LogShipping</ReportName>
+                                  <Parameters>
+                                    <Parameter Name="InstanceIDs">
+                                      <Value>=Fields!InstanceID.Value</Value>
+                                    </Parameter>
+                                    <Parameter Name="FilterLevel">
+                                      <Value>4</Value>
+                                    </Parameter>
+                                  </Parameters>
+                                </Drillthrough>
+                              </Action>
+                            </Actions>
+                          </ActionInfo>
                           <Style>
                             <Border>
                               <Color>LightGrey</Color>
-                              <Style>None</Style>
+                              <Style>Solid</Style>
                             </Border>
-                            <TopBorder>
-                              <Style>Solid</Style>
-                            </TopBorder>
-                            <BottomBorder>
-                              <Style>Solid</Style>
-                            </BottomBorder>
-                            <LeftBorder>
-                              <Style>Solid</Style>
-                            </LeftBorder>
-                            <RightBorder>
-                              <Style>Solid</Style>
-                            </RightBorder>
                             <BackgroundColor>=SWITCH(Fields!LogShippingStatus.Value=1,"Red",
 Fields!LogShippingStatus.Value=2,"Yellow",
 Fields!LogShippingStatus.Value=4,"Green")</BackgroundColor>
@@ -676,23 +681,28 @@ Fields!LogShippingStatus.Value=4,"Green")</BackgroundColor>
                             </Paragraph>
                           </Paragraphs>
                           <rd:DefaultName>Textbox10</rd:DefaultName>
+                          <ActionInfo>
+                            <Actions>
+                              <Action>
+                                <Drillthrough>
+                                  <ReportName>Backups</ReportName>
+                                  <Parameters>
+                                    <Parameter Name="InstanceIDs">
+                                      <Value>=Fields!InstanceID.Value</Value>
+                                    </Parameter>
+                                    <Parameter Name="FilterLevel">
+                                      <Value>4</Value>
+                                    </Parameter>
+                                  </Parameters>
+                                </Drillthrough>
+                              </Action>
+                            </Actions>
+                          </ActionInfo>
                           <Style>
                             <Border>
                               <Color>LightGrey</Color>
-                              <Style>None</Style>
+                              <Style>Solid</Style>
                             </Border>
-                            <TopBorder>
-                              <Style>Solid</Style>
-                            </TopBorder>
-                            <BottomBorder>
-                              <Style>Solid</Style>
-                            </BottomBorder>
-                            <LeftBorder>
-                              <Style>Solid</Style>
-                            </LeftBorder>
-                            <RightBorder>
-                              <Style>Solid</Style>
-                            </RightBorder>
                             <BackgroundColor>=SWITCH(Fields!FullBackupStatus.Value=1,"Red",
 Fields!FullBackupStatus.Value=2,"Yellow",
 Fields!FullBackupStatus.Value=4,"Green")</BackgroundColor>
@@ -724,23 +734,28 @@ Fields!FullBackupStatus.Value=4,"Green")</BackgroundColor>
                             </Paragraph>
                           </Paragraphs>
                           <rd:DefaultName>LogBackupStatus</rd:DefaultName>
+                          <ActionInfo>
+                            <Actions>
+                              <Action>
+                                <Drillthrough>
+                                  <ReportName>Backups</ReportName>
+                                  <Parameters>
+                                    <Parameter Name="InstanceIDs">
+                                      <Value>=Fields!InstanceID.Value</Value>
+                                    </Parameter>
+                                    <Parameter Name="FilterLevel">
+                                      <Value>4</Value>
+                                    </Parameter>
+                                  </Parameters>
+                                </Drillthrough>
+                              </Action>
+                            </Actions>
+                          </ActionInfo>
                           <Style>
                             <Border>
                               <Color>LightGrey</Color>
-                              <Style>None</Style>
+                              <Style>Solid</Style>
                             </Border>
-                            <TopBorder>
-                              <Style>Solid</Style>
-                            </TopBorder>
-                            <BottomBorder>
-                              <Style>Solid</Style>
-                            </BottomBorder>
-                            <LeftBorder>
-                              <Style>Solid</Style>
-                            </LeftBorder>
-                            <RightBorder>
-                              <Style>Solid</Style>
-                            </RightBorder>
                             <BackgroundColor>=SWITCH(Fields!LogBackupStatus.Value=1,"Red",
 Fields!LogBackupStatus.Value=2,"Yellow",
 Fields!LogBackupStatus.Value=4,"Green")</BackgroundColor>
@@ -773,23 +788,28 @@ Fields!LogBackupStatus.Value=4,"Green")</BackgroundColor>
                             </Paragraph>
                           </Paragraphs>
                           <rd:DefaultName>DiffBackupStatus</rd:DefaultName>
+                          <ActionInfo>
+                            <Actions>
+                              <Action>
+                                <Drillthrough>
+                                  <ReportName>Backups</ReportName>
+                                  <Parameters>
+                                    <Parameter Name="InstanceIDs">
+                                      <Value>=Fields!InstanceID.Value</Value>
+                                    </Parameter>
+                                    <Parameter Name="FilterLevel">
+                                      <Value>4</Value>
+                                    </Parameter>
+                                  </Parameters>
+                                </Drillthrough>
+                              </Action>
+                            </Actions>
+                          </ActionInfo>
                           <Style>
                             <Border>
                               <Color>LightGrey</Color>
-                              <Style>None</Style>
+                              <Style>Solid</Style>
                             </Border>
-                            <TopBorder>
-                              <Style>Solid</Style>
-                            </TopBorder>
-                            <BottomBorder>
-                              <Style>Solid</Style>
-                            </BottomBorder>
-                            <LeftBorder>
-                              <Style>Solid</Style>
-                            </LeftBorder>
-                            <RightBorder>
-                              <Style>Solid</Style>
-                            </RightBorder>
                             <BackgroundColor>=SWITCH(Fields!DiffBackupStatus.Value=1,"Red",
 Fields!DiffBackupStatus.Value=2,"Yellow",
 Fields!DiffBackupStatus.Value=4,"Green")</BackgroundColor>
@@ -822,23 +842,28 @@ Fields!DiffBackupStatus.Value=4,"Green")</BackgroundColor>
                             </Paragraph>
                           </Paragraphs>
                           <rd:DefaultName>DriveStatus</rd:DefaultName>
+                          <ActionInfo>
+                            <Actions>
+                              <Action>
+                                <Drillthrough>
+                                  <ReportName>Drives</ReportName>
+                                  <Parameters>
+                                    <Parameter Name="InstanceIDs">
+                                      <Value>=Fields!InstanceID.Value</Value>
+                                    </Parameter>
+                                    <Parameter Name="FilterLevel">
+                                      <Value>4</Value>
+                                    </Parameter>
+                                  </Parameters>
+                                </Drillthrough>
+                              </Action>
+                            </Actions>
+                          </ActionInfo>
                           <Style>
                             <Border>
                               <Color>LightGrey</Color>
-                              <Style>None</Style>
+                              <Style>Solid</Style>
                             </Border>
-                            <TopBorder>
-                              <Style>Solid</Style>
-                            </TopBorder>
-                            <BottomBorder>
-                              <Style>Solid</Style>
-                            </BottomBorder>
-                            <LeftBorder>
-                              <Style>Solid</Style>
-                            </LeftBorder>
-                            <RightBorder>
-                              <Style>Solid</Style>
-                            </RightBorder>
                             <BackgroundColor>=SWITCH(Fields!DriveStatus.Value=1,"Red",
 Fields!DriveStatus.Value=2,"Yellow",
 Fields!DriveStatus.Value=4,"Green")</BackgroundColor>
@@ -871,23 +896,28 @@ Fields!DriveStatus.Value=4,"Green")</BackgroundColor>
                             </Paragraph>
                           </Paragraphs>
                           <rd:DefaultName>Textbox11</rd:DefaultName>
+                          <ActionInfo>
+                            <Actions>
+                              <Action>
+                                <Drillthrough>
+                                  <ReportName>Files</ReportName>
+                                  <Parameters>
+                                    <Parameter Name="InstanceIDs">
+                                      <Value>=Fields!InstanceID.Value</Value>
+                                    </Parameter>
+                                    <Parameter Name="FilterLevel">
+                                      <Value>4</Value>
+                                    </Parameter>
+                                  </Parameters>
+                                </Drillthrough>
+                              </Action>
+                            </Actions>
+                          </ActionInfo>
                           <Style>
                             <Border>
                               <Color>LightGrey</Color>
-                              <Style>None</Style>
+                              <Style>Solid</Style>
                             </Border>
-                            <TopBorder>
-                              <Style>Solid</Style>
-                            </TopBorder>
-                            <BottomBorder>
-                              <Style>Solid</Style>
-                            </BottomBorder>
-                            <LeftBorder>
-                              <Style>Solid</Style>
-                            </LeftBorder>
-                            <RightBorder>
-                              <Style>Solid</Style>
-                            </RightBorder>
                             <BackgroundColor>=SWITCH(Fields!FileFreeSpaceStatus.Value=1,"Red",
 Fields!FileFreeSpaceStatus.Value=2,"Yellow",
 Fields!FileFreeSpaceStatus.Value=4,"Green")</BackgroundColor>

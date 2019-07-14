@@ -1,18 +1,27 @@
-﻿
-
-CREATE VIEW [dbo].[BackupStatus]
+﻿CREATE VIEW [dbo].[BackupStatus]
 AS
-WITH B AS(
-	SELECT DatabaseID,
+WITH hadr AS (
+	SELECT D.DatabaseId,partnr.DatabaseID BackupDatabaseID
+	FROM dbo.Databases D
+	JOIN dbo.DatabasesHADR hadr ON D.DatabaseID = hadr.DatabaseID
+	JOIN dbo.DatabasesHADR partnr ON hadr.group_database_id = partnr.group_database_id AND D.DatabaseID <> partnr.DatabaseID
+	UNION ALL
+	SELECT D.DatabaseID,D.DatabaseID
+	FROM dbo.Databases D
+),
+B AS(
+	SELECT hadr.DatabaseID,
 			MAX(CASE WHEN type='D' THEN LastBackup ELSE NULL END) AS LastFull,
 			MAX(CASE WHEN type='I' THEN LastBackup ELSE NULL END) AS LastDiff,
 			MAX(CASE WHEN type='L' THEN LastBackup ELSE NULL END) AS LastLog,
 			MAX(CASE WHEN type='F' THEN LastBackup ELSE NULL END) AS LastFG,
 			MAX(CASE WHEN type='G' THEN LastBackup ELSE NULL END) AS LastFGDiff,
 			MAX(CASE WHEN type='P' THEN LastBackup ELSE NULL END) AS LastPartial,
-			MAX(CASE WHEN type='P' THEN LastBackup ELSE NULL END) AS LastPartialDiff
-	FROM dbo.Backups
-	GROUP BY DatabaseID
+			MAX(CASE WHEN type='P' THEN LastBackup ELSE NULL END) AS LastPartialDiff,
+			MAX(CASE WHEN hadr.DatabaseID<>hadr.BackupDatabaseID THEN 1 ELSE 0 END) AS AGPartnerBackupsConsidered
+	FROM dbo.Backups B
+	JOIN hadr ON hadr.BackupDatabaseID = B.DatabaseID
+	GROUP BY hadr.DatabaseID
 )
 SELECT I.InstanceID,
 	d.DatabaseID,
@@ -38,8 +47,10 @@ SELECT I.InstanceID,
     cfg.[ConsiderPartialBackups],
     cfg.[ConsiderFGBackups],
 	SSD.BackupsDate AS SnapshotDate,
-	DATEDIFF(mi,SSD.BackupsDate,GETUTCDATE()) AS SnapshotAge
+	DATEDIFF(mi,SSD.BackupsDate,GETUTCDATE()) AS SnapshotAge,
+	CASE WHEN hadr.DatabaseID IS NULL THEN CAST(0 AS BIT) ELSE CAST(1 AS BIT) END AS IsHADRReplica
 FROM dbo.Databases d 
+LEFT JOIN dbo.DatabasesHADR hadr ON d.DatabaseID = hadr.DatabaseID
 JOIN dbo.Instances I ON d.InstanceID = I.InstanceID
 JOIN dbo.SnapshotDates SSD ON SSD.InstanceID = I.InstanceID
 LEFT JOIN B ON d.DatabaseID = B.DatabaseID

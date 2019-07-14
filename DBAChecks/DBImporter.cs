@@ -27,11 +27,30 @@ namespace DBAChecks
             updateServerProperties(connectionString, instanceID, snapshotDate, Data);
             updateSysConfig(connectionString, instanceID, snapshotDate, Data);
             updateDB(connectionString, instanceID, snapshotDate, Data);
+            updateDBHADR(connectionString, instanceID, snapshotDate, Data);
             updateDrives(connectionString, instanceID, snapshotDate, Data);
             updateBackups(connectionString, instanceID, snapshotDate, Data);
             updateJobs(connectionString, instanceID, snapshotDate, Data);
             updateLogRestores(connectionString, instanceID, snapshotDate, Data);
             updateFiles(connectionString, instanceID, snapshotDate, Data);
+        }
+
+        private void updateDBHADR(string connectionString, Int32 instanceID, DateTime SnapshotDate, DataSet ds)
+        {
+            if (ds.Tables.Contains("HADRDB") && ds.Tables["HADRDB"].Rows.Count > 0)
+            {
+                var cn = new SqlConnection(connectionString);
+                using (cn)
+                {
+                    cn.Open();
+                    SqlCommand cmd = new SqlCommand("DatabasesHADR_Upd", cn);
+                    cmd.Parameters.AddWithValue("DBs", ds.Tables["HADRDB"]);
+                    cmd.Parameters.AddWithValue("InstanceID", instanceID);
+                    cmd.Parameters.AddWithValue("SnapshotDate", SnapshotDate);
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.ExecuteNonQuery();
+                }
+            }
         }
 
         private void updateSysConfig(string connectionString,Int32 instanceID, DateTime SnapshotDate, DataSet ds)

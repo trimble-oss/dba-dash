@@ -236,7 +236,7 @@
                   <Width>1.23958in</Width>
                 </TablixColumn>
                 <TablixColumn>
-                  <Width>1.125in</Width>
+                  <Width>1.24167in</Width>
                 </TablixColumn>
                 <TablixColumn>
                   <Width>1.16667in</Width>
@@ -273,6 +273,9 @@
                 </TablixColumn>
                 <TablixColumn>
                   <Width>1.26042in</Width>
+                </TablixColumn>
+                <TablixColumn>
+                  <Width>1in</Width>
                 </TablixColumn>
                 <TablixColumn>
                   <Width>1in</Width>
@@ -1081,6 +1084,44 @@
                         </Textbox>
                       </CellContents>
                     </TablixCell>
+                    <TablixCell>
+                      <CellContents>
+                        <Textbox Name="Textbox3">
+                          <CanGrow>true</CanGrow>
+                          <KeepTogether>true</KeepTogether>
+                          <Paragraphs>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Value />
+                                  <Style>
+                                    <FontFamily />
+                                    <FontSize>11pt</FontSize>
+                                    <FontWeight>Bold</FontWeight>
+                                    <Color>White</Color>
+                                  </Style>
+                                </TextRun>
+                              </TextRuns>
+                              <Style />
+                            </Paragraph>
+                          </Paragraphs>
+                          <rd:DefaultName>Textbox3</rd:DefaultName>
+                          <Style>
+                            <Border>
+                              <Color>LightGrey</Color>
+                            </Border>
+                            <BottomBorder>
+                              <Style>Solid</Style>
+                            </BottomBorder>
+                            <BackgroundColor>#444444</BackgroundColor>
+                            <PaddingLeft>2pt</PaddingLeft>
+                            <PaddingRight>2pt</PaddingRight>
+                            <PaddingTop>2pt</PaddingTop>
+                            <PaddingBottom>2pt</PaddingBottom>
+                          </Style>
+                        </Textbox>
+                      </CellContents>
+                    </TablixCell>
                   </TablixCells>
                 </TablixRow>
                 <TablixRow>
@@ -1167,7 +1208,9 @@
                             <Paragraph>
                               <TextRuns>
                                 <TextRun>
-                                  <Value>=Fields!recovery_model.Value</Value>
+                                  <Value>=SWITCH(Fields!recovery_model.Value=1,"FULL",
+Fields!recovery_model.Value=2,"BULK LOGGED",
+Fields!recovery_model.Value=3,"SIMPLE")</Value>
                                   <Style>
                                     <FontFamily />
                                     <Color>#333333</Color>
@@ -1821,12 +1864,48 @@ Fields!LogBackupStatus.Value=4,"Green")</BackgroundColor>
                         </Textbox>
                       </CellContents>
                     </TablixCell>
+                    <TablixCell>
+                      <CellContents>
+                        <Textbox Name="Textbox15">
+                          <CanGrow>true</CanGrow>
+                          <KeepTogether>true</KeepTogether>
+                          <Paragraphs>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Value />
+                                  <Style>
+                                    <FontFamily />
+                                    <Color>#333333</Color>
+                                  </Style>
+                                </TextRun>
+                              </TextRuns>
+                              <Style />
+                            </Paragraph>
+                          </Paragraphs>
+                          <rd:DefaultName>Textbox15</rd:DefaultName>
+                          <Style>
+                            <Border>
+                              <Color>LightGrey</Color>
+                            </Border>
+                            <BottomBorder>
+                              <Style>Solid</Style>
+                            </BottomBorder>
+                            <PaddingLeft>2pt</PaddingLeft>
+                            <PaddingRight>2pt</PaddingRight>
+                            <PaddingTop>2pt</PaddingTop>
+                            <PaddingBottom>2pt</PaddingBottom>
+                          </Style>
+                        </Textbox>
+                      </CellContents>
+                    </TablixCell>
                   </TablixCells>
                 </TablixRow>
               </TablixRows>
             </TablixBody>
             <TablixColumnHierarchy>
               <TablixMembers>
+                <TablixMember />
                 <TablixMember />
                 <TablixMember />
                 <TablixMember />
@@ -1872,7 +1951,7 @@ Fields!LogBackupStatus.Value=4,"Green")</BackgroundColor>
             <DataSetName>Backups</DataSetName>
             <Top>0.43in</Top>
             <Height>0.79458in</Height>
-            <Width>23.67708in</Width>
+            <Width>24.79377in</Width>
             <ZIndex>1</ZIndex>
             <Style />
           </Tablix>
@@ -1880,7 +1959,7 @@ Fields!LogBackupStatus.Value=4,"Green")</BackgroundColor>
         <Height>1.22458in</Height>
         <Style />
       </Body>
-      <Width>23.67708in</Width>
+      <Width>24.79377in</Width>
       <Page>
         <LeftMargin>1in</LeftMargin>
         <RightMargin>1in</RightMargin>

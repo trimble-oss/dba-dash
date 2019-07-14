@@ -191,6 +191,26 @@ namespace DBAChecks.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to IF OBJECT_ID(&apos;sys.dm_hadr_database_replica_states&apos;) IS NOT NULL
+        ///BEGIN
+        ///    SELECT database_id,
+        ///           group_database_id,
+        ///           is_primary_replica,
+        ///           synchronization_state,
+        ///           synchronization_health,
+        ///           is_suspended,
+        ///           suspend_reason
+        ///    FROM sys.dm_hadr_database_replica_states
+        ///    WHERE is_local = 1;
+        ///END;.
+        /// </summary>
+        internal static string SQLHADRDB {
+            get {
+                return ResourceManager.GetString("SQLHADRDB", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to WITH t
         ///AS (SELECT rsh.destination_database_name AS database_name,
         ///           rsh.restore_date,

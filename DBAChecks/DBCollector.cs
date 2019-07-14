@@ -47,6 +47,8 @@ namespace DBAChecks
 
         }
 
+     
+
         public void GetInstance(string connectionID)
         {
              var dt = getDT("DBAChecks", "SELECT @@SERVERNAME as Instance,GETUTCDATE() As SnapshotDateUTC");
@@ -70,6 +72,7 @@ namespace DBAChecks
         {
             CollectProperies();
             CollectDatabases();
+            CollectHADRDB();
             CollectConfiguration();
             CollectDrives();
             CollectFiles();
@@ -77,6 +80,18 @@ namespace DBAChecks
             CollectAgentJobSummary();
             CollectLogShipping();
             CollectRegistryProperties();
+        }
+
+        public void CollectHADRDB()
+        {
+            try
+            {
+                addDT("HADRDB", DBAChecks.Properties.Resources.SQLHADRDB);
+            }
+            catch(Exception ex)
+            {
+                logError("HADRDB", ex.Message);
+            }
         }
 
         public void CollectFiles()

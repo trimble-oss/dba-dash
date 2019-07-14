@@ -490,6 +490,20 @@ WHERE NOT EXISTS(SELECT 1 FROM #FileList fl WHERE fl.database_id = mf.database_i
 
 DROP TABLE #FileList</value>
   </data>
+  <data name="SQLHADRDB" xml:space="preserve">
+    <value>IF OBJECT_ID('sys.dm_hadr_database_replica_states') IS NOT NULL
+BEGIN
+    SELECT database_id,
+           group_database_id,
+           is_primary_replica,
+           synchronization_state,
+           synchronization_health,
+           is_suspended,
+           suspend_reason
+    FROM sys.dm_hadr_database_replica_states
+    WHERE is_local = 1;
+END;</value>
+  </data>
   <data name="SQLLogShipping" xml:space="preserve">
     <value>WITH t
 AS (SELECT rsh.destination_database_name AS database_name,
