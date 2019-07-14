@@ -14,8 +14,8 @@ SELECT DatabaseID,restore_date,backup_start_date,last_file
 FROM @LogRestores L 
 JOIN dbo.Databases D ON d.name = L.database_name AND D.InstanceID= @InstanceID
 
-UPDATE dbo.Instances
-SET LogRestoreSnapshotDate = @SnapshotDate
+UPDATE dbo.SnapshotDates
+SET LogRestoresDate = @SnapshotDate
 WHERE InstanceID = @InstanceID
 
 COMMIT

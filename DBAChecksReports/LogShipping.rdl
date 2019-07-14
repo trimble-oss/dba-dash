@@ -30,6 +30,10 @@
           <DataField>InstanceID</DataField>
           <rd:TypeName>System.Int32</rd:TypeName>
         </Field>
+        <Field Name="DatabaseID">
+          <DataField>DatabaseID</DataField>
+          <rd:TypeName>System.Int32</rd:TypeName>
+        </Field>
         <Field Name="Instance">
           <DataField>Instance</DataField>
           <rd:TypeName>System.String</rd:TypeName>
@@ -62,8 +66,8 @@
           <DataField>SnapshotAge</DataField>
           <rd:TypeName>System.Int32</rd:TypeName>
         </Field>
-        <Field Name="LogRestoreSnapshotDate">
-          <DataField>LogRestoreSnapshotDate</DataField>
+        <Field Name="LogRestoresDate">
+          <DataField>LogRestoresDate</DataField>
           <rd:TypeName>System.DateTime</rd:TypeName>
         </Field>
         <Field Name="Status">
@@ -944,14 +948,14 @@
                     </TablixCell>
                     <TablixCell>
                       <CellContents>
-                        <Textbox Name="LogRestoreSnapshotDate">
+                        <Textbox Name="LogRestoresDate">
                           <CanGrow>true</CanGrow>
                           <KeepTogether>true</KeepTogether>
                           <Paragraphs>
                             <Paragraph>
                               <TextRuns>
                                 <TextRun>
-                                  <Value>=Fields!LogRestoreSnapshotDate.Value</Value>
+                                  <Value>=Fields!LogRestoresDate.Value</Value>
                                   <Style>
                                     <FontFamily />
                                     <Format>=Parameters!DateFormat.Value</Format>
@@ -962,7 +966,7 @@
                               <Style />
                             </Paragraph>
                           </Paragraphs>
-                          <rd:DefaultName>LogRestoreSnapshotDate</rd:DefaultName>
+                          <rd:DefaultName>LogRestoresDate</rd:DefaultName>
                           <Style>
                             <Border>
                               <Color>LightGrey</Color>
@@ -1093,7 +1097,7 @@
             <DataSetName>DataSet1</DataSetName>
             <Top>0.43in</Top>
             <Height>0.64in</Height>
-            <Width>13.58333in</Width>
+            <Width>13.58332in</Width>
             <ZIndex>1</ZIndex>
             <Style />
           </Tablix>

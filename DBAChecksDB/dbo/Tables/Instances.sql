@@ -3,7 +3,6 @@
     [Instance]                     [sysname]      NOT NULL,
     [ConnectionID]                 [sysname]      NOT NULL,
     [IsActive]                     BIT            NULL,
-    [LogRestoreSnapshotDate]       DATETIME2 (2)  NULL,
     [BuildClrVersion]              NVARCHAR (128) NULL,
     [Collation]                    NVARCHAR (128) NULL,
     [CollationID]                  INT            NULL,
@@ -47,6 +46,8 @@
     [SqlSortOrderName]             NVARCHAR (128) NULL,
     CONSTRAINT [PK_Instances] PRIMARY KEY CLUSTERED ([InstanceID] ASC)
 );
+
+
 
 
 

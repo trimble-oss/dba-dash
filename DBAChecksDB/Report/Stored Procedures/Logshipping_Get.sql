@@ -24,6 +24,7 @@ BEGIN
 END
 
 SELECT InstanceID,
+	   DatabaseID,
        Instance,
        name,
        restore_date,
@@ -32,7 +33,7 @@ SELECT InstanceID,
        LatencyOfLast,
        TotalTimeBehind,
        SnapshotAge,
-       LogRestoreSnapshotDate,
+       LogRestoresDate,
        Status,
        StatusDescription 
 FROM dbo.LogShippingStatus LSS
