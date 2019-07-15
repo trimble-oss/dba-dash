@@ -54,7 +54,9 @@ namespace DBAChecks
              var dt = getDT("DBAChecks", "SELECT @@SERVERNAME as Instance,GETUTCDATE() As SnapshotDateUTC");
             dt.Columns.Add("DBAChecksVersion", typeof(Int32));
             dt.Columns.Add("ConnectionID", typeof(string));
+            dt.Columns.Add("AgentHostName", typeof(string));
             dt.Rows[0]["DBAChecksVersion"] = 1;
+            dt.Rows[0]["AgentHostName"] = Environment.MachineName;
             if (connectionID == null)
             {
                 dt.Rows[0]["ConnectionID"] = dt.Rows[0]["Instance"];
