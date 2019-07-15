@@ -133,6 +133,9 @@
           <QueryParameter Name="@TagMatching">
             <Value>=Parameters!TagMatching.Value</Value>
           </QueryParameter>
+          <QueryParameter Name="@InstanceName">
+            <Value>=Parameters!InstanceName.Value</Value>
+          </QueryParameter>
         </QueryParameters>
       </SharedDataSet>
       <Fields>
@@ -1702,6 +1705,11 @@ IIF(Fields!InstanceSnapshotAge.Value&gt;Parameters!SnapshotAgeWarning.Value,"Yel
         </DataSetReference>
       </ValidValues>
     </ReportParameter>
+    <ReportParameter Name="InstanceName">
+      <DataType>String</DataType>
+      <Nullable>true</Nullable>
+      <Prompt>Instance Name</Prompt>
+    </ReportParameter>
     <ReportParameter Name="InstanceIDs">
       <DataType>String</DataType>
       <DefaultValue>
@@ -1754,6 +1762,11 @@ IIF(Fields!InstanceSnapshotAge.Value&gt;Parameters!SnapshotAgeWarning.Value,"Yel
         </CellDefinition>
         <CellDefinition>
           <ColumnIndex>1</ColumnIndex>
+          <RowIndex>1</RowIndex>
+          <ParameterName>InstanceName</ParameterName>
+        </CellDefinition>
+        <CellDefinition>
+          <ColumnIndex>2</ColumnIndex>
           <RowIndex>1</RowIndex>
           <ParameterName>InstanceIDs</ParameterName>
         </CellDefinition>

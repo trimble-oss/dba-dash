@@ -1,6 +1,7 @@
 ﻿
 
 
+
 CREATE VIEW [dbo].[LogShippingStatus] 
 AS
 SELECT I.InstanceID,
@@ -15,7 +16,8 @@ SELECT I.InstanceID,
 	DATEDIFF(mi,SSD.LogRestoresDate,GETUTCDATE()) AS SnapshotAge,
 	SSD.LogRestoresDate,
 	chk.Status,
-	CASE chk.Status WHEN 1 THEN 'Critical' WHEN 2 THEN 'Warning' WHEN 3 THEN 'N/A' WHEN 4 THEN 'OK' END AS StatusDescription
+	CASE chk.Status WHEN 1 THEN 'Critical' WHEN 2 THEN 'Warning' WHEN 3 THEN 'N/A' WHEN 4 THEN 'OK' END AS StatusDescription,
+	LR.last_file
 FROM dbo.Instances I 
 JOIN dbo.Databases D ON I.InstanceID = D.InstanceID
 JOIN dbo.SnapshotDates SSD ON SSD.InstanceID = I.InstanceID

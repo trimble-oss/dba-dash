@@ -1,4 +1,5 @@
-﻿CREATE PROC [Report].[Instances_Get](@TagIDs NVARCHAR(MAX)='-1',@TagMatching VARCHAR(50)='ALL')
+﻿
+CREATE PROC [Report].[Instances_Get](@TagIDs NVARCHAR(MAX)='-1',@TagMatching VARCHAR(50)='ALL',@InstanceName SYSNAME=NULL)
 AS
 DECLARE @TagCount INT
 DECLARE @tTags TABLE(
@@ -19,6 +20,7 @@ FROM dbo.Instances I
 LEFT JOIN dbo.InstanceTag IT ON IT.InstanceID = I.InstanceID
 			AND EXISTS(SELECT 1 FROM @tTags T WHERE T.TagID = IT.TagID)
 WHERE I.IsActive=1
+AND (I.Instance LIKE + '%' + @InstanceName + '%' OR @InstanceName IS NULL)
 GROUP BY I.InstanceID,I.Instance
 HAVING (COUNT(IT.InstanceID) = @TagCount AND @TagMatching='ALL')
 OR (COUNT(IT.InstanceID)>0 AND @TagMatching='ANY')

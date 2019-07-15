@@ -35,7 +35,8 @@ SELECT InstanceID,
        SnapshotAge,
        LogRestoresDate,
        Status,
-       StatusDescription 
+       StatusDescription,
+	   LSS.last_file
 FROM dbo.LogShippingStatus LSS
 WHERE EXISTS(SELECT 1 FROM @Instances I WHERE I.InstanceID = LSS.InstanceID)
 AND (Status<=@FilterLevel)

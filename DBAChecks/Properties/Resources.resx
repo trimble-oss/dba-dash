@@ -520,11 +520,6 @@ AS (SELECT rsh.destination_database_name AS database_name,
         INNER JOIN sys.databases d ON rsh.destination_database_name = d.name
     WHERE rsh.restore_type = 'L'
 	AND restore_date&gt;=DATEADD(d,-14,GETUTCDATE())
-    AND
-          (
-              d.state = 1
-        OR    d.is_in_standby = 1
-          ) -- restoring or standby
 )
 SELECT t.database_name,
        t.restore_date,

@@ -48,6 +48,13 @@ WITH LS AS (
 	FROM dbo.DBFileStatus
 	WHERE FreeSpaceStatus<>3
 	GROUP BY InstanceID
+),
+J AS (
+	SELECT InstanceID,MIN(JobStatus) AS JobStatus
+	FROM dbo.AgentJobStatus
+	WHERE JobStatus<>3
+	AND enabled=1
+	GROUP BY InstanceID
 )
 SELECT I.InstanceID,
 	I.Instance,
@@ -57,11 +64,13 @@ SELECT I.InstanceID,
 	B.LogBackupStatus,
 	B.DiffBackupStatus,
 	D.DriveStatus,
-	F.FileFreeSpaceStatus
+	F.FileFreeSpaceStatus,
+	J.JobStatus
 FROM dbo.Instances I 
 LEFT JOIN LS ON I.InstanceID = LS.InstanceID
 LEFT JOIN B ON I.InstanceID = B.InstanceID
 LEFT JOIN D ON I.InstanceID = D.InstanceID
 LEFT JOIN F ON I.InstanceID = F.InstanceID
+LEFT JOIN J ON I.InstanceID = J.InstanceID
 WHERE EXISTS(SELECT 1 FROM @Instances t WHERE I.InstanceID = t.InstanceID)
 AND I.IsActive=1

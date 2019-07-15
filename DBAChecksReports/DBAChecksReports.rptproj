@@ -4,15 +4,15 @@
     <FullPath>Debug</FullPath>
     <OutputPath>bin\Debug</OutputPath>
     <ErrorLevel>2</ErrorLevel>
-    <OverwriteDatasets>False</OverwriteDatasets>
+    <OverwriteDatasets>True</OverwriteDatasets>
     <OverwriteDataSources>False</OverwriteDataSources>
     <TargetServerVersion>SSRS2016</TargetServerVersion>
     <Platform>Win32</Platform>
-    <TargetReportFolder>DBAChecksReports</TargetReportFolder>
-    <TargetDatasetFolder>Datasets</TargetDatasetFolder>
-    <TargetDatasourceFolder>Data Sources</TargetDatasourceFolder>
-    <TargetReportPartFolder>Report Parts</TargetReportPartFolder>
-    <TargetServerURL>http://localhost/reportserver</TargetServerURL>
+    <TargetReportFolder>DBAChecks</TargetReportFolder>
+    <TargetDatasetFolder>DBAChecks/Datasets</TargetDatasetFolder>
+    <TargetDatasourceFolder>DBAChecks/Data Sources</TargetDatasourceFolder>
+    <TargetReportPartFolder>DBAChecks/Report Parts</TargetReportPartFolder>
+    <TargetServerURL />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'DebugLocal' ">
     <FullPath>DebugLocal</FullPath>
@@ -49,6 +49,7 @@
     <Reports>@(Report)</Reports>
   </PropertyGroup>
   <ItemGroup>
+    <DataSet Include="FilterLevel.rsd" />
     <DataSet Include="Instances.rsd" />
     <DataSet Include="TagMatching.rsd" />
     <DataSet Include="Tags.rsd" />
@@ -57,6 +58,7 @@
     <DataSource Include="DBAChecksDB.rds" />
   </ItemGroup>
   <ItemGroup>
+    <Report Include="AgentJobs.rdl" />
     <Report Include="Backups.rdl" />
     <Report Include="Drives.rdl" />
     <Report Include="Files.rdl" />

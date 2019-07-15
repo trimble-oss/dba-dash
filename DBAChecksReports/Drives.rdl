@@ -132,6 +132,9 @@
           <QueryParameter Name="@TagMatching">
             <Value>=Parameters!TagMatching.Value</Value>
           </QueryParameter>
+          <QueryParameter Name="@InstanceName">
+            <Value>=Parameters!InstanceName.Value</Value>
+          </QueryParameter>
         </QueryParameters>
       </SharedDataSet>
       <Fields>
@@ -141,6 +144,21 @@
         </Field>
         <Field Name="Instance">
           <DataField>Instance</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+      </Fields>
+    </DataSet>
+    <DataSet Name="FilterLevel">
+      <SharedDataSet>
+        <SharedDataSetReference>FilterLevel</SharedDataSetReference>
+      </SharedDataSet>
+      <Fields>
+        <Field Name="Value">
+          <DataField>Value</DataField>
+          <rd:TypeName>System.Int32</rd:TypeName>
+        </Field>
+        <Field Name="Label">
+          <DataField>Label</DataField>
           <rd:TypeName>System.String</rd:TypeName>
         </Field>
       </Fields>
@@ -1346,6 +1364,13 @@ Fields!Status.Value=4,"Green")</BackgroundColor>
         </Values>
       </DefaultValue>
       <Prompt>Filter Level</Prompt>
+      <ValidValues>
+        <DataSetReference>
+          <DataSetName>FilterLevel</DataSetName>
+          <ValueField>Value</ValueField>
+          <LabelField>Label</LabelField>
+        </DataSetReference>
+      </ValidValues>
     </ReportParameter>
     <ReportParameter Name="TagIDs">
       <DataType>String</DataType>
@@ -1380,6 +1405,11 @@ Fields!Status.Value=4,"Green")</BackgroundColor>
           <LabelField>Label</LabelField>
         </DataSetReference>
       </ValidValues>
+    </ReportParameter>
+    <ReportParameter Name="InstanceName">
+      <DataType>String</DataType>
+      <Nullable>true</Nullable>
+      <Prompt>InstanceName</Prompt>
     </ReportParameter>
     <ReportParameter Name="InstanceIDs">
       <DataType>String</DataType>
@@ -1424,6 +1454,11 @@ Fields!Status.Value=4,"Green")</BackgroundColor>
         <CellDefinition>
           <ColumnIndex>3</ColumnIndex>
           <RowIndex>0</RowIndex>
+          <ParameterName>InstanceName</ParameterName>
+        </CellDefinition>
+        <CellDefinition>
+          <ColumnIndex>0</ColumnIndex>
+          <RowIndex>1</RowIndex>
           <ParameterName>InstanceIDs</ParameterName>
         </CellDefinition>
       </CellDefinitions>
