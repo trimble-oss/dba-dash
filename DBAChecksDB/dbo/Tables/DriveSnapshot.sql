@@ -8,3 +8,11 @@
     CONSTRAINT [FK_DriveSnapshot_Drive] FOREIGN KEY ([DriveID]) REFERENCES [dbo].[Drives] ([DriveID])
 );
 
+
+
+
+GO
+CREATE UNIQUE NONCLUSTERED INDEX [IX_DriveSnapshot_DriveID_SnapshotDate]
+    ON [dbo].[DriveSnapshot]([DriveID] ASC, [SnapshotDate] ASC)
+    INCLUDE([Capacity], [FreeSpace], [UsedSpace]);
+

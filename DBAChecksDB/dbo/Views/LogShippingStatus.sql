@@ -1,8 +1,4 @@
-﻿
-
-
-
-CREATE VIEW [dbo].[LogShippingStatus] 
+﻿CREATE VIEW [dbo].[LogShippingStatus] 
 AS
 SELECT I.InstanceID,
 	D.DatabaseID,
@@ -17,7 +13,8 @@ SELECT I.InstanceID,
 	SSD.LogRestoresDate,
 	chk.Status,
 	CASE chk.Status WHEN 1 THEN 'Critical' WHEN 2 THEN 'Warning' WHEN 3 THEN 'N/A' WHEN 4 THEN 'OK' END AS StatusDescription,
-	LR.last_file
+	LR.last_file,
+	D.state_desc
 FROM dbo.Instances I 
 JOIN dbo.Databases D ON I.InstanceID = D.InstanceID
 JOIN dbo.SnapshotDates SSD ON SSD.InstanceID = I.InstanceID
@@ -39,6 +36,6 @@ OUTER APPLY(SELECT CASE WHEN l.TimeSinceLast >cfg.TimeSinceLastCriticalThreshold
 	WHEN l.LatencyOfLast > cfg.LatencyWarningThreshold THEN 2
 	WHEN cfg.LatencyCriticalThreshold IS NULL AND cfg.TimeSinceLastCriticalThreshold IS NULL AND cfg.LatencyWarningThreshold IS NULL AND cfg.TimeSinceLastWarningThreshold IS NULL  THEN 3
 	ELSE 4 END AS Status) chk
-WHERE (D.state=1 OR D.is_in_standby=1)
+WHERE (D.state IN(1,2) OR D.is_in_standby=1)
 AND D.IsActive=1
 AND I.IsActive=1
