@@ -835,6 +835,20 @@
                             </Paragraph>
                           </Paragraphs>
                           <rd:DefaultName>Instance</rd:DefaultName>
+                          <ActionInfo>
+                            <Actions>
+                              <Action>
+                                <Drillthrough>
+                                  <ReportName>DriveHistory</ReportName>
+                                  <Parameters>
+                                    <Parameter Name="InstanceID">
+                                      <Value>=Fields!InstanceID.Value</Value>
+                                    </Parameter>
+                                  </Parameters>
+                                </Drillthrough>
+                              </Action>
+                            </Actions>
+                          </ActionInfo>
                           <Style>
                             <Border>
                               <Color>LightGrey</Color>
@@ -871,6 +885,23 @@
                             </Paragraph>
                           </Paragraphs>
                           <rd:DefaultName>Name</rd:DefaultName>
+                          <ActionInfo>
+                            <Actions>
+                              <Action>
+                                <Drillthrough>
+                                  <ReportName>DriveHistory</ReportName>
+                                  <Parameters>
+                                    <Parameter Name="InstanceID">
+                                      <Value>=Fields!InstanceID.Value</Value>
+                                    </Parameter>
+                                    <Parameter Name="DriveID">
+                                      <Value>=Fields!DriveID.Value</Value>
+                                    </Parameter>
+                                  </Parameters>
+                                </Drillthrough>
+                              </Action>
+                            </Actions>
+                          </ActionInfo>
                           <Style>
                             <Border>
                               <Color>LightGrey</Color>

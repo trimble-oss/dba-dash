@@ -60,6 +60,7 @@
   <ItemGroup>
     <Report Include="AgentJobs.rdl" />
     <Report Include="Backups.rdl" />
+    <Report Include="DriveHistory.rdl" />
     <Report Include="Drives.rdl" />
     <Report Include="Files.rdl" />
     <Report Include="Instance Configuration.rdl" />
