@@ -13,6 +13,10 @@
     [enabled]           TINYINT          NOT NULL,
     [MaxDurationSec]    INT              NULL,
     [AvgDurationSec]    INT              NULL,
-    [IsLastFail]        BIT              NOT NULL
+    [IsLastFail]        BIT              NOT NULL,
+    CONSTRAINT [PK_AgentJobs] PRIMARY KEY CLUSTERED ([InstanceID] ASC, [job_id] ASC),
+    CONSTRAINT [FK_AgentJobs_Instance] FOREIGN KEY ([InstanceID]) REFERENCES [dbo].[Instances] ([InstanceID])
 );
+
+
 

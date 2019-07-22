@@ -144,6 +144,21 @@
     <Build Include="Report\Stored Procedures\Configuration_Get.sql" />
     <Build Include="dbo\Tables\SysConfigHistory.sql" />
     <Build Include="Report\Stored Procedures\ConfigurationHistory_Get.sql" />
+    <Build Include="Report\Stored Procedures\DriveUsedGrowth.sql" />
+    <Build Include="Report\Stored Procedures\DriveHistory_Get.sql" />
+    <Build Include="Report\Stored Procedures\DriveExpansion.sql" />
+    <Build Include="dbo\Tables\DBConfigOptions.sql" />
+    <Build Include="dbo\Tables\DBConfigHistory.sql" />
+    <Build Include="dbo\Tables\DBConfig.sql" />
+    <Build Include="dbo\Tables\Corruption.sql" />
+    <Build Include="dbo\Tables\CollectionErrorLog.sql" />
+    <Build Include="dbo\Stored Procedures\DBConfig_Upd.sql" />
+    <Build Include="dbo\Stored Procedures\Corruption_Upd.sql" />
+    <Build Include="dbo\Stored Procedures\CollectionErrorLog_Add.sql" />
+    <Build Include="dbo\User Defined Types\DBConfig.sql" />
+    <Build Include="dbo\User Defined Types\Corruption.sql" />
+    <Build Include="dbo\User Defined Types\CollectionError.sql" />
+    <Build Include="dbo\Stored Procedures\ServerExtraProperties_Upd.sql" />
   </ItemGroup>
   <ItemGroup>
     <PostDeploy Include="Script.PostDeployment1.sql" />

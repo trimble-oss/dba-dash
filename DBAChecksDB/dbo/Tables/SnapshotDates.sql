@@ -8,7 +8,10 @@
     [DBFilesDate]          DATETIME2 (2) NULL,
     [ServerPropertiesDate] DATETIME2 (2) NULL,
     [InstanceDate]         DATETIME2 (2) NULL,
+    [DBConfigDate]         DATETIME2 (2) NULL,
     CONSTRAINT [PK_SnapshotDates] PRIMARY KEY CLUSTERED ([InstanceID] ASC),
     CONSTRAINT [FK_SnapshotDates] FOREIGN KEY ([InstanceID]) REFERENCES [dbo].[Instances] ([InstanceID])
 );
+
+
 

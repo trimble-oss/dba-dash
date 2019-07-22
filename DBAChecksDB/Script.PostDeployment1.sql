@@ -87,6 +87,7 @@ VALUES
 ( 1584, N'backup checksum default', N'Enable checksum of backups by default', 1, 0, 0, 0, 1 ), 
 ( 1585, N'automatic soft-NUMA disabled', N'Automatic soft-NUMA is enabled by default', 0, 1, 0, 0, 1 ), 
 ( 1586, N'external scripts enabled', N'Allows execution of external scripts', 0, 0, 0, 0, 1 ), 
+( 1587, N'clr strict security', N'CLR strict security enabled in the server', 1, 1, null, 0, 1 ),
 ( 16384, N'Agent XPs', N'Enable or disable Agent XPs', 1, 1, 1, 0, 1 ), 
 ( 16386, N'Database Mail XPs', N'Enable or disable Database Mail XPs', 1, 1, N'0', 0, 1 ), 
 ( 16387, N'SMO and DMO XPs', N'Enable or disable SMO and DMO XPs', 1, 1, 1, 0, 1 ), 

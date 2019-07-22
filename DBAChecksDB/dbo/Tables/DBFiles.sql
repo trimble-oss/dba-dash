@@ -14,8 +14,11 @@
     [is_percent_growth] BIT            NULL,
     [is_read_only]      BIT            NULL,
     [IsActive]          BIT            NULL,
-    CONSTRAINT [PK_DBFiles] PRIMARY KEY CLUSTERED ([FileID] ASC)
+    CONSTRAINT [PK_DBFiles] PRIMARY KEY CLUSTERED ([FileID] ASC),
+    CONSTRAINT [FK_DBFiles_Databases] FOREIGN KEY ([DatabaseID]) REFERENCES [dbo].[Databases] ([DatabaseID])
 );
+
+
 
 
 

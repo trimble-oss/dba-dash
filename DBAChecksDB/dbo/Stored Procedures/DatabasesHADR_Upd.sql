@@ -1,4 +1,4 @@
-﻿CREATE PROC DatabasesHADR_Upd(@DBs DatabasesHADR READONLY,@InstanceID INT,@SnapshotDate DATETIME)
+﻿CREATE PROC [dbo].[DatabasesHADR_Upd](@DatabasesHADR DatabasesHADR READONLY,@InstanceID INT,@SnapshotDate DATETIME)
 AS
 SET XACT_ABORT ON;
 BEGIN TRAN;
@@ -28,7 +28,7 @@ SELECT d.DatabaseID,
        hadr.synchronization_health,
        hadr.is_suspended,
        hadr.suspend_reason
-FROM @DBs hadr
+FROM @DatabasesHADR hadr
     JOIN dbo.Databases d ON hadr.database_id = d.database_id
 WHERE d.InstanceID = @InstanceID;
 COMMIT;

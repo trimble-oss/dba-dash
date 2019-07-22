@@ -4,8 +4,13 @@
     [value]            SQL_VARIANT   NULL,
     [value_in_use]     SQL_VARIANT   NULL,
     [ValidFrom]        DATETIME2 (2) CONSTRAINT [DF_SysConfig_ValidFrom] DEFAULT (getutcdate()) NOT NULL,
-    CONSTRAINT [PK_SysConfig] PRIMARY KEY CLUSTERED ([InstanceID] ASC, [configuration_id] ASC)
+    CONSTRAINT [PK_SysConfig] PRIMARY KEY CLUSTERED ([InstanceID] ASC, [configuration_id] ASC),
+    CONSTRAINT [FK_SysConfig_Instances] FOREIGN KEY ([InstanceID]) REFERENCES [dbo].[Instances] ([InstanceID])
 );
+
+
+
+
 
 
 

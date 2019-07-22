@@ -117,7 +117,7 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="RegistryProperties" xml:space="preserve">
+  <data name="SQLExtraProperties" xml:space="preserve">
     <value>DECLARE @ProcessorNameString NVARCHAR(512)
 DECLARE @SystemManufacturer NVARCHAR(512)
 DECLARE @SystemProductName NVARCHAR(512)
@@ -386,6 +386,56 @@ FROM #sysdb
 DROP TABLE #sysdb
 DROP TABLE #sysdbcols</value>
   </data>
+  <data name="SQLDBConfig" xml:space="preserve">
+    <value>DECLARE @DBName SYSNAME
+DECLARE @SQL NVARCHAR(MAX)
+CREATE TABLE #DBConfig( 
+	database_id INT NOT NULL,
+	configuration_id INT NOT NULL,
+	name NVARCHAR(60) NOT NULL,
+	value NVARCHAR(128) NULL,
+	value_for_secondary NVARCHAR(128) NULL,
+	PRIMARY KEY (database_id,configuration_id)
+)
+
+IF OBJECT_ID('sys.database_scoped_configurations') IS NOT NULL
+BEGIN
+	DECLARE DBs CURSOR FAST_FORWARD READ_ONLY FOR
+	SELECT name
+	FROM sys.databases
+	WHERE state  = 0
+	AND DATABASEPROPERTYEX(name, 'Updateability') = 'READ_WRITE'
+
+	OPEN DBs
+	FETCH NEXT FROM DBs INTO @DBName
+
+	WHILE @@FETCH_STATUS = 0
+	BEGIN
+
+	SET @SQL =  N'USE ' + QUOTENAME(@DBName) + ';
+	SELECT DB_ID(),configuration_id,name,CAST(value as NVARCHAR(128)),CAST(value_for_secondary as NVARCHAR(128))
+	FROM sys.database_scoped_configurations'
+
+	INSERT INTO #DBConfig
+	EXEC  (	@SQL )
+
+	FETCH NEXT FROM DBs INTO @DBName
+	END
+	CLOSE DBs
+	DEALLOCATE DBs
+
+END
+
+
+SELECT database_id,
+       configuration_id,
+       name,
+       value,
+       value_for_secondary
+FROM #DBConfig
+
+DROP TABLE #DBConfig</value>
+  </data>
   <data name="SQLDrives" xml:space="preserve">
     <value>IF OBJECT_ID('sys.dm_os_volume_stats') IS NOT NULL
 BEGIN
@@ -571,91 +621,42 @@ CAST(SERVERPROPERTY('SqlCharSetName') as nvarchar(128)) as SqlCharSetName ,
 CAST(SERVERPROPERTY('SqlSortOrder') as tinyint) as SqlSortOrder ,
 CAST(SERVERPROPERTY('SqlSortOrderName') as nvarchar(128)) as SqlSortOrderName</value>
   </data>
-  <data name="SQLPropertiesOLD" xml:space="preserve">
-    <value>WITH T AS (
-SELECT 'BuildClrVersion' as Property
-UNION ALL 
-SELECT 'Collation'
-UNION ALL 
-SELECT 'CollationID'
-UNION ALL 
-SELECT 'ComparisonStyle'
-UNION ALL 
-SELECT 'ComputerNamePhysicalNetBIOS'
-UNION ALL 
-SELECT 'Edition'
-UNION ALL 
-SELECT 'EditionID'
-UNION ALL 
-SELECT 'EngineEdition'
-UNION ALL 
-SELECT 'HadrManagerStatus'
-UNION ALL 
-SELECT 'InstanceDefaultDataPath'
-UNION ALL 
-SELECT 'InstanceDefaultLogPath'
-UNION ALL 
-SELECT 'InstanceName'
-UNION ALL 
-SELECT 'IsAdvancedAnalyticsInstalled'
-UNION ALL 
-SELECT 'IsClustered'
-UNION ALL 
-SELECT 'IsFullTextInstalled'
-UNION ALL 
-SELECT 'IsHadrEnabled'
-UNION ALL 
-SELECT 'IsIntegratedSecurityOnly'
-UNION ALL 
-SELECT 'IsLocalDB'
-UNION ALL 
-SELECT 'IsPolybaseInstalled'
-UNION ALL 
-SELECT 'IsXTPSupported'
-UNION ALL 
-SELECT 'LCID'
-UNION ALL 
-SELECT 'LicenseType'
-UNION ALL 
-SELECT 'MachineName'
-UNION ALL 
-SELECT 'NumLicenses'
-UNION ALL 
-SELECT 'ProductBuild'
-UNION ALL 
-SELECT 'ProductBuildType'
-UNION ALL 
-SELECT 'ProductLevel'
-UNION ALL 
-SELECT 'ProductMajorVersion'
-UNION ALL 
-SELECT 'ProductUpdateLevel'
-UNION ALL 
-SELECT 'ProductUpdateReference'
-UNION ALL 
-SELECT 'ProductVersion'
-UNION ALL 
-SELECT 'ResourceLastUpdateDateTime'
-UNION ALL 
-SELECT 'ResourceVersion'
-UNION ALL 
-SELECT 'ServerName'
-UNION ALL 
-SELECT 'SqlCharSet'
-UNION ALL 
-SELECT 'SqlCharSetName'
-UNION ALL 
-SELECT 'SqlSortOrder'
-UNION ALL 
-SELECT 'SqlSortOrderName'
-UNION ALL 
-SELECT 'FileStreamShareName'
-UNION ALL 
-SELECT 'FileStreamConfiguredLevel'
-UNION ALL 
-SELECT 'FileStreamEffectiveLevel'
+  <data name="SQLCorruption" xml:space="preserve">
+    <value>DECLARE @Corruption TABLE(
+		SourceTable TINYINT,
+		database_id INT NOT NULL,
+		last_update_date DATETIME NOT NULL
 )
-SELECT Property,SERVERPROPERTY(Property) Value
-FROM T</value>
+IF OBJECT_ID('msdb.dbo.suspect_pages') IS NOT NULL
+BEGIN
+	INSERT INTO @Corruption(SourceTable,database_id,last_update_date)
+	SELECT CAST(1 AS TINYINT) AS SourceTable,
+		   database_id,
+		   MAX(last_update_date) last_update_date
+	FROM msdb.dbo.suspect_pages
+	GROUP BY database_id
+END
+IF OBJECT_ID('msdb.sys.dm_db_mirroring_auto_page_repair') IS NOT NULL
+BEGIN
+	INSERT INTO @Corruption(SourceTable,database_id,last_update_date)
+	SELECT CAST(2 AS TINYINT) AS SourceTable,
+		   database_id,
+		   MAX(modification_time)
+	FROM msdb.sys.dm_db_mirroring_auto_page_repair
+	GROUP BY database_id
+END
+IF OBJECT_ID('msdb.sys.dm_hadr_auto_page_repair') IS NOT NULL
+BEGIN
+	INSERT INTO @Corruption(SourceTable,database_id,last_update_date)
+	SELECT CAST(3 AS TINYINT) AS SourceTable,
+		   database_id,
+		   MAX(modification_time)
+	FROM msdb.sys.dm_hadr_auto_page_repair
+	GROUP BY database_id;
+END
+SELECT SourceTable,
+       database_id,
+       last_update_date
+FROM @Corruption</value>
   </data>
 </root>

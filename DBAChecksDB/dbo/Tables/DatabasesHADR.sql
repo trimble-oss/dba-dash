@@ -7,8 +7,11 @@
     [is_suspended]           BIT              NULL,
     [suspend_reason]         TINYINT          NULL,
     CONSTRAINT [PK_DatabasesHADR] PRIMARY KEY CLUSTERED ([DatabaseID] ASC),
-    CONSTRAINT [FK_DatabasesHADR] FOREIGN KEY ([DatabaseID]) REFERENCES [dbo].[Databases] ([DatabaseID])
+    CONSTRAINT [FK_DatabasesHADR] FOREIGN KEY ([DatabaseID]) REFERENCES [dbo].[Databases] ([DatabaseID]),
+    CONSTRAINT [FK_DatabasesHADR_Databases] FOREIGN KEY ([DatabaseID]) REFERENCES [dbo].[Databases] ([DatabaseID])
 );
+
+
 
 
 GO

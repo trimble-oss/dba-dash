@@ -17,7 +17,8 @@ namespace DBAChecks
 
         public DBCollector(string connectionString)
         {
-                     startup(connectionString, null);
+                  startup(connectionString, null);
+           
 
         }
 
@@ -35,8 +36,9 @@ namespace DBAChecks
             _connectionString = connectionString;
             Data = new DataSet("DBAChecks");
             dtErrors = new DataTable("Errors");
-            dtErrors.Columns.Add("ErrorMessage");
             dtErrors.Columns.Add("ErrorSource");
+            dtErrors.Columns.Add("ErrorMessage");
+           
             Data.Tables.Add(dtErrors);
             GetInstance(connectionID);
         }
@@ -81,18 +83,44 @@ namespace DBAChecks
             CollectBackups();
             CollectAgentJobSummary();
             CollectLogShipping();
-            CollectRegistryProperties();
+            CollectServerExtraProperties();
+            CollectDBConfig();
+            CollectCorruption();
+        }
+
+        public void CollectCorruption()
+        {
+            try
+            {
+                addDT("Corruption", DBAChecks.Properties.Resources.SQLCorruption);
+            }
+            catch (Exception ex)
+            {
+                logError("CollectCorruption", ex.Message);
+            }
+        }
+
+        public void CollectDBConfig()
+        {
+            try
+            {
+                addDT("DBConfig", DBAChecks.Properties.Resources.SQLDBConfig);
+            }
+            catch (Exception ex)
+            {
+                logError("DBConfig", ex.Message);
+            }
         }
 
         public void CollectHADRDB()
         {
             try
             {
-                addDT("HADRDB", DBAChecks.Properties.Resources.SQLHADRDB);
+                addDT("DatabasesHADR", DBAChecks.Properties.Resources.SQLHADRDB);
             }
             catch(Exception ex)
             {
-                logError("HADRDB", ex.Message);
+                logError("DatabasesHADR", ex.Message);
             }
         }
 
@@ -100,11 +128,11 @@ namespace DBAChecks
         {
             try
             {
-                addDT("Files", DBAChecks.Properties.Resources.SQLFiles);
+                addDT("DBFiles", DBAChecks.Properties.Resources.SQLFiles);
             }
             catch (Exception ex)
             {
-                logError("Collect Files", ex.Message);
+                logError("DBFiles", ex.Message);
             }
         }
 
@@ -112,23 +140,23 @@ namespace DBAChecks
         {
             try
             {
-                addDT("Properties", DBAChecks.Properties.Resources.SQLProperties);
+                addDT("ServerProperties", DBAChecks.Properties.Resources.SQLProperties);
             }
             catch(Exception ex)
             {
-                logError("Collect Properties", ex.Message);
+                logError("ServerProperties", ex.Message);
             }
         }
 
-        public void CollectRegistryProperties()
+        public void CollectServerExtraProperties()
         {
             try
             {
-                addDT("RegistryProperties", DBAChecks.Properties.Resources.RegistryProperties);
+                addDT("ServerExtraProperties", DBAChecks.Properties.Resources.SQLExtraProperties);
             }
             catch(Exception ex)
             {
-                logError("Collect Registry Properties", ex.Message);
+                logError("ServerExtraProperties", ex.Message);
             }
         }
 
@@ -147,14 +175,14 @@ namespace DBAChecks
         public void CollectConfiguration()
         {
             try { 
-                addDT("Configuration", DBAChecks.Properties.Resources.SQLConfigurations);
+                addDT("SysConfig", DBAChecks.Properties.Resources.SQLConfigurations);
             }
             catch(Exception ex)
             {
-                logError("Collect Configuration", ex.Message);
+                logError("SysConfig", ex.Message);
             }
  
-            //addDT(dt, DBAChecks.Properties.Resources.SQLProperties);
+ 
         }
 
         public void CollectAgentJobSummary()
@@ -269,7 +297,7 @@ namespace DBAChecks
                     drives.Columns.Add("Capacity", typeof(Int64));
                     drives.Columns.Add("FreeSpace", typeof(Int64));
                     drives.Columns.Add("Label", typeof(string));
-                    string computerName = (string)Data.Tables["Properties"].Rows[0]["ComputerNamePhysicalNetBIOS"];
+                    string computerName = (string)Data.Tables["ServerProperties"].Rows[0]["ComputerNamePhysicalNetBIOS"];
 
                     ManagementPath path = new ManagementPath()
                     {

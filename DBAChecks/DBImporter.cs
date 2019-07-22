@@ -22,29 +22,63 @@ namespace DBAChecks
             DateTime snapshotDate = (DateTime)rInstance["SnapshotDateUTC"];
             Int32 instanceID;
             string connectionID = (string)rInstance["ConnectionID"];
-
-            instanceID= updateInstance(connectionString,rInstance);
-            updateServerProperties(connectionString, instanceID, snapshotDate, Data);
-            updateSysConfig(connectionString, instanceID, snapshotDate, Data);
+         
+            instanceID = updateInstance(connectionString,rInstance);
+      
+        
             updateDB(connectionString, instanceID, snapshotDate, Data);
-            updateDBHADR(connectionString, instanceID, snapshotDate, Data);
-            updateDrives(connectionString, instanceID, snapshotDate, Data);
-            updateBackups(connectionString, instanceID, snapshotDate, Data);
-            updateJobs(connectionString, instanceID, snapshotDate, Data);
-            updateLogRestores(connectionString, instanceID, snapshotDate, Data);
-            updateFiles(connectionString, instanceID, snapshotDate, Data);
+            update(connectionString, instanceID, snapshotDate, Data,"Drives");
+            update(connectionString, instanceID, snapshotDate, Data, "ServerProperties");
+            update(connectionString, instanceID, snapshotDate, Data,"Backups");
+            update(connectionString, instanceID, snapshotDate, Data,"AgentJobs");
+            update(connectionString, instanceID, snapshotDate, Data,"LogRestores");
+            update(connectionString, instanceID, snapshotDate, Data,"DBFiles");
+            update(connectionString, instanceID, snapshotDate, Data,"DBConfig");
+            update(connectionString, instanceID, snapshotDate, Data, "Corruption");
+            update(connectionString, instanceID, snapshotDate, Data,"DatabasesHADR");
+            update(connectionString, instanceID, snapshotDate, Data, "SysConfig");
+            updateServerExtraProperties(connectionString, instanceID, snapshotDate, Data);
+            InsertErrors(connectionString, instanceID, snapshotDate, Data);
         }
 
-        private void updateDBHADR(string connectionString, Int32 instanceID, DateTime SnapshotDate, DataSet ds)
+        private void updateServerExtraProperties(string connectionString, Int32 instanceID, DateTime SnapshotDate, DataSet ds)
         {
-            if (ds.Tables.Contains("HADRDB") && ds.Tables["HADRDB"].Rows.Count > 0)
+            if (ds.Tables.Contains("ServerExtraProperties") && ds.Tables["ServerExtraProperties"].Rows.Count==1)
+            {
+                var r = ds.Tables["ServerExtraProperties"].Rows[0];
+                var cn = new SqlConnection(connectionString);
+                using (cn)
+                {
+                    cn.Open();
+                    SqlCommand cmd = new SqlCommand("ServerExtraProperties_Upd", cn);
+                    cmd.Parameters.AddWithValue("InstanceID", instanceID);
+                    cmd.Parameters.AddWithValue("SnapshotDate", SnapshotDate);
+                    cmd.Parameters.AddWithValue("ActivePowerPlanGUID", r["ActivePowerPlanGUID"]);
+                    cmd.Parameters.AddWithValue("ActivePowerPlan", r["ActivePowerPlan"]);
+                    cmd.Parameters.AddWithValue("ProcessorNameString", r["ProcessorNameString"]);
+                    cmd.Parameters.AddWithValue("SystemManufacturer", r["SystemManufacturer"]);
+                    cmd.Parameters.AddWithValue("SystemProductName", r["SystemProductName"]);
+                    cmd.Parameters.AddWithValue("IsAgentRunning", r["IsAgentRunning"]);
+                    cmd.Parameters.AddWithValue("InstantFileInitializationEnabled", r["InstantFileInitializationEnabled"]);
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.ExecuteNonQuery();
+                }
+            }
+        }
+
+            private void update(string connectionString, Int32 instanceID, DateTime SnapshotDate, DataSet ds,string TableName)
+        {
+            if (ds.Tables.Contains(TableName))
             {
                 var cn = new SqlConnection(connectionString);
                 using (cn)
                 {
                     cn.Open();
-                    SqlCommand cmd = new SqlCommand("DatabasesHADR_Upd", cn);
-                    cmd.Parameters.AddWithValue("DBs", ds.Tables["HADRDB"]);
+                    SqlCommand cmd = new SqlCommand(TableName + "_Upd", cn);
+                    if (ds.Tables[TableName].Rows.Count > 0)
+                    {
+                        cmd.Parameters.AddWithValue(TableName, ds.Tables[TableName]);
+                    }
                     cmd.Parameters.AddWithValue("InstanceID", instanceID);
                     cmd.Parameters.AddWithValue("SnapshotDate", SnapshotDate);
                     cmd.CommandType = CommandType.StoredProcedure;
@@ -53,131 +87,26 @@ namespace DBAChecks
             }
         }
 
-        private void updateSysConfig(string connectionString,Int32 instanceID, DateTime SnapshotDate, DataSet ds)
+
+            private void InsertErrors(string connectionString, Int32 instanceID, DateTime SnapshotDate, DataSet ds)
         {
-            if (ds.Tables.Contains("Configuration") && ds.Tables["Configuration"].Rows.Count > 0)
+            if (ds.Tables.Contains("Errors") && ds.Tables["Errors"].Rows.Count > 0)
             {
                 var cn = new SqlConnection(connectionString);
                 using (cn)
                 {
                     cn.Open();
-                    SqlCommand cmd = new SqlCommand("SysConfig_Upd", cn);
-                    cmd.Parameters.AddWithValue("Config", ds.Tables["Configuration"]);
+                    SqlCommand cmd = new SqlCommand("CollectionErrorLog_Add", cn);
+                    cmd.Parameters.AddWithValue("Errors", ds.Tables["Errors"]);
                     cmd.Parameters.AddWithValue("InstanceID", instanceID);
-                    cmd.Parameters.AddWithValue("SnapshotDate", SnapshotDate);
+                    cmd.Parameters.AddWithValue("ErrorDate", SnapshotDate);
                     cmd.CommandType = CommandType.StoredProcedure;
                     cmd.ExecuteNonQuery();
                 }
             }
         }
 
-        private void updateFiles(string connectionString,Int32 instanceID,DateTime SnapshotDate,DataSet ds)
-        {
-            if (ds.Tables.Contains("Properties") && ds.Tables["Properties"].Rows.Count > 0)
-            {
-                var cn = new SqlConnection(connectionString);
-                using (cn)
-                {
-                    cn.Open();
-                    SqlCommand cmd = new SqlCommand("DBFiles_Upd", cn);
-                    cmd.Parameters.AddWithValue("Files", ds.Tables["Files"]);
-                    cmd.Parameters.AddWithValue("InstanceID", instanceID);
-                    cmd.Parameters.AddWithValue("SnapshotDate", SnapshotDate);
-                    cmd.CommandType = CommandType.StoredProcedure;
-                    cmd.ExecuteNonQuery();
-                }
-            }
-        }
-
-        private void updateServerProperties(string connectionString,Int32 instanceID,DateTime SnapshotDate, DataSet ds)
-        {
-            if (ds.Tables.Contains("Properties") && ds.Tables["Properties"].Rows.Count > 0)
-            {
-                var cn = new SqlConnection(connectionString);
-                using (cn)
-                {
-                    cn.Open();
-                    SqlCommand cmd = new SqlCommand("ServerProperties_Upd", cn);
-                    cmd.Parameters.AddWithValue("Properties", ds.Tables["Properties"]);
-                    cmd.Parameters.AddWithValue("InstanceID", instanceID);
-                    cmd.Parameters.AddWithValue("SnapshotDate", SnapshotDate);
-                    cmd.CommandType = CommandType.StoredProcedure;
-                    cmd.ExecuteNonQuery();
-                }
-            }
-        }
-
-        private void updateDrives(string connectionString,Int32 instanceID,DateTime SnapshotDate, DataSet ds)
-        {
-            if (ds.Tables.Contains("Drives") && ds.Tables["Drives"].Rows.Count > 0)
-            {
-                var cn = new SqlConnection(connectionString);
-                using (cn)
-                {
-                    cn.Open();
-                    SqlCommand cmd = new SqlCommand("Drives_Upd", cn);
-                    cmd.Parameters.AddWithValue("Drives", ds.Tables["Drives"]);
-                    cmd.Parameters.AddWithValue("InstanceID", instanceID);
-                    cmd.Parameters.AddWithValue("SnapshotDate", SnapshotDate);
-                    cmd.CommandType = CommandType.StoredProcedure;
-                    cmd.ExecuteNonQuery();
-                }
-            }
-        }
-
-        private void updateBackups(string connectionString, Int32 instanceID, DateTime SnapshotDate, DataSet ds)
-        {
-            if (ds.Tables.Contains("Backups") && ds.Tables["Backups"].Rows.Count > 0)
-            {
-                var cn = new SqlConnection(connectionString);
-                using (cn)
-                {
-                    cn.Open();
-                    SqlCommand cmd = new SqlCommand("Backups_Upd", cn);
-                    cmd.Parameters.AddWithValue("Backups", ds.Tables["Backups"]);
-                    cmd.Parameters.AddWithValue("InstanceID", instanceID);
-                    cmd.Parameters.AddWithValue("SnapshotDate", SnapshotDate);
-                    cmd.CommandType = CommandType.StoredProcedure;
-                    cmd.ExecuteNonQuery();
-                }
-            }
-        }
-
-        private void updateJobs(string connectionString, Int32 instanceID, DateTime SnapshotDate, DataSet ds)
-        {
-            if (ds.Tables.Contains("AgentJobs") && ds.Tables["AgentJobs"].Rows.Count > 0)
-            {
-                var cn = new SqlConnection(connectionString);
-                using (cn)
-                {
-                    cn.Open();
-                    SqlCommand cmd = new SqlCommand("AgentJobs_Upd", cn);
-                    cmd.Parameters.AddWithValue("Jobs", ds.Tables["AgentJobs"]);
-                    cmd.Parameters.AddWithValue("InstanceID", instanceID);
-                    cmd.Parameters.AddWithValue("SnapshotDate", SnapshotDate);
-                    cmd.CommandType = CommandType.StoredProcedure;
-                    cmd.ExecuteNonQuery();
-                }
-            }
-        }
-
-        private void updateLogRestores(string connectionString, Int32 instanceID, DateTime SnapshotDate, DataSet ds)
-        {
-            if (ds.Tables.Contains("LogRestores") && ds.Tables["LogRestores"].Rows.Count > 0)
-            {
-                var cn = new SqlConnection(connectionString);
-                using (cn)
-                {
-                    cn.Open();
-                    SqlCommand cmd = new SqlCommand("LogRestores_Upd", cn);
-                    cmd.Parameters.AddWithValue("LogRestores", ds.Tables["LogRestores"]);
-                    cmd.Parameters.AddWithValue("InstanceID", instanceID);
-                    cmd.Parameters.AddWithValue("SnapshotDate", SnapshotDate);
-                    cmd.CommandType = CommandType.StoredProcedure;
-                    cmd.ExecuteNonQuery();
-                }
-            }
-        }
+                
 
         private Int32 updateInstance(string connectionString, DataRow rInstance)
         {
@@ -190,6 +119,8 @@ namespace DBAChecks
                 cmd.Parameters.AddWithValue("ConnectionID", (string)rInstance["ConnectionID"]);
                 cmd.Parameters.AddWithValue("Instance", (string)rInstance["Instance"]);
                 cmd.Parameters.AddWithValue("SnapshotDate", (DateTime)rInstance["SnapshotDateUTC"]);
+                cmd.Parameters.AddWithValue("AgentHostName", (string)rInstance["AgentHostName"]);
+
                 var pInstanceID = cmd.Parameters.Add("InstanceID", SqlDbType.Int);
                 pInstanceID.Direction = ParameterDirection.Output;
                 cmd.CommandType = CommandType.StoredProcedure;

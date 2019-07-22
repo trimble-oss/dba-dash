@@ -1,44 +1,48 @@
-﻿CREATE PROC [dbo].[Instance_Upd](@ConnectionID SYSNAME,@Instance SYSNAME,@SnapshotDate DATETIME,@InstanceID INT OUT)
+﻿CREATE PROC [dbo].[Instance_Upd](@ConnectionID SYSNAME,@Instance SYSNAME,@SnapshotDate DATETIME,@AgentHostName NVARCHAR(16),@InstanceID INT OUT)
 AS
 SELECT @InstanceID = InstanceID
 FROM dbo.Instances 
 WHERE ConnectionID = @ConnectionID
 
-IF @InstanceID IS NULL
+IF NOT EXISTS(SELECT 1 FROM dbo.SnapshotDates WHERE InstanceDate>=@SnapshotDate AND InstanceID = @InstanceID)
 BEGIN
-	BEGIN TRAN
-	INSERT INTO dbo.Instances(Instance,ConnectionID,IsActive)
-	VALUES(@Instance,@ConnectionID,CAST(1 as BIT))
-	SELECT @InstanceID = SCOPE_IDENTITY();
-	INSERT INTO dbo.SnapshotDates(
-	    InstanceID,
-		InstanceDate
-	)
-	VALUES
-	(@InstanceID, @SnapshotDate
-	    )
-	COMMIT
+	IF @InstanceID IS NULL
+	BEGIN
+		BEGIN TRAN
+		INSERT INTO dbo.Instances(Instance,ConnectionID,IsActive,AgentHostName)
+		VALUES(@Instance,@ConnectionID,CAST(1 as BIT),@AgentHostName)
+		SELECT @InstanceID = SCOPE_IDENTITY();
+		INSERT INTO dbo.SnapshotDates(
+			InstanceID,
+			InstanceDate
+		)
+		VALUES
+		(@InstanceID, @SnapshotDate
+			)
+		COMMIT
 
-END
-ELSE
-BEGIN
-	UPDATE dbo.Instances 
-	SET Instance = @Instance
-	WHERE InstanceID = @InstanceID
+	END
+	ELSE
+	BEGIN
+		UPDATE dbo.Instances 
+		SET Instance = @Instance,
+			AgentHostName=@AgentHostName
+		WHERE InstanceID = @InstanceID
 
-	UPDATE dbo.SnapshotDates 
-	SET	InstanceDate=@SnapshotDate
-	WHERE InstanceID = @InstanceID
-END
-IF NOT EXISTS(SELECT * FROM dbo.Tags WHERE TagID=-1)
-BEGIN
-	SET IDENTITY_INSERT dbo.Tags ON
-	INSERT INTO dbo.Tags(TagID,Tag)
-	VALUES(-1,'{All Instances}')
-	SET IDENTITY_INSERT dbo.Tags OFF
-END
-IF NOT EXISTS(SELECT 1 FROM dbo.InstanceTag WHERE InstanceID = @InstanceID AND TagID = -1)
-BEGIN
-	INSERT INTO dbo.InstanceTag(InstanceID,TagID)
-	VALUES(@InstanceID,-1)
+		UPDATE dbo.SnapshotDates 
+		SET	InstanceDate=@SnapshotDate
+		WHERE InstanceID = @InstanceID
+	END
+	IF NOT EXISTS(SELECT * FROM dbo.Tags WHERE TagID=-1)
+	BEGIN
+		SET IDENTITY_INSERT dbo.Tags ON
+		INSERT INTO dbo.Tags(TagID,Tag)
+		VALUES(-1,'{All Instances}')
+		SET IDENTITY_INSERT dbo.Tags OFF
+	END
+	IF NOT EXISTS(SELECT 1 FROM dbo.InstanceTag WHERE InstanceID = @InstanceID AND TagID = -1)
+	BEGIN
+		INSERT INTO dbo.InstanceTag(InstanceID,TagID)
+		VALUES(@InstanceID,-1)
+	END
 END

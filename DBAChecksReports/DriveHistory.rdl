@@ -279,7 +279,8 @@
                       <Length>0.5</Length>
                     </ChartMinorTickMarks>
                     <CrossAt>NaN</CrossAt>
-                    <Minimum>NaN</Minimum>
+                    <Scalar>true</Scalar>
+                    <Minimum>=DateTime.UtcNow.AddDays(-Parameters!HistoryDays.Value)</Minimum>
                     <Maximum>NaN</Maximum>
                     <ChartAxisScaleBreak>
                       <Style />
@@ -481,7 +482,7 @@
             </ChartLegends>
             <ChartTitles>
               <ChartTitle Name="Default">
-                <Caption>Drive History: Combined</Caption>
+                <Caption>Combined</Caption>
                 <Style>
                   <BackgroundGradientType>None</BackgroundGradientType>
                   <FontSize>14pt</FontSize>
@@ -663,6 +664,7 @@
                                       <Color>#5c5c5c</Color>
                                     </Style>
                                   </ChartAxisTitle>
+                                  <IntervalType>Days</IntervalType>
                                   <ChartMajorGridLines>
                                     <Enabled>False</Enabled>
                                     <Style>
@@ -696,7 +698,8 @@
                                     <Length>0.5</Length>
                                   </ChartMinorTickMarks>
                                   <CrossAt>NaN</CrossAt>
-                                  <Minimum>NaN</Minimum>
+                                  <Scalar>true</Scalar>
+                                  <Minimum>=DateTime.UtcNow.AddDays(-Parameters!HistoryDays.Value)</Minimum>
                                   <Maximum>NaN</Maximum>
                                   <ChartAxisScaleBreak>
                                     <Style />
@@ -898,7 +901,7 @@
                           </ChartLegends>
                           <ChartTitles>
                             <ChartTitle Name="Default">
-                              <Caption>="Drive History: " &amp; Fields!Name.Value &amp; " (" &amp; Fields!Label.Value &amp; ")"</Caption>
+                              <Caption>=Fields!Name.Value &amp; " (" &amp; Fields!Label.Value &amp; ")"</Caption>
                               <Style>
                                 <BackgroundGradientType>None</BackgroundGradientType>
                                 <FontSize>14pt</FontSize>
@@ -935,7 +938,6 @@
                             <BackgroundGradientType>None</BackgroundGradientType>
                           </Style>
                         </Chart>
-                        <rd:Selected>true</rd:Selected>
                       </CellContents>
                     </TablixCell>
                   </TablixCells>

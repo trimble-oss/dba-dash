@@ -56,21 +56,48 @@ J AS (
 	AND enabled=1
 	GROUP BY InstanceID
 )
+,ag AS (
+	SELECT D.InstanceID, MIN(hadr.synchronization_health) AS synchronization_health
+	FROM dbo.DatabasesHADR hadr
+	JOIN dbo.Databases D ON D.DatabaseID = hadr.DatabaseID
+	GROUP BY D.InstanceID
+),
+dc AS (
+	SELECT I.InstanceID,MAX(c.UpdateDate) AS DetectedCorruptionDate
+	FROM dbo.Instances I
+	JOIN dbo.Databases D ON D.InstanceID = I.InstanceID
+	JOIN dbo.Corruption c ON D.DatabaseID = c.DatabaseID
+	WHERE I.IsActive=1
+	AND D.IsActive=1
+	GROUP BY I.InstanceID
+),
+err AS ( 
+	SELECT InstanceID,COUNT(*) cnt,MAX(ErrorDate) AS LastError
+	FROM dbo.CollectionErrorLog
+	WHERE ErrorDate>=DATEADD(d,-7,GETUTCDATE())
+	GROUP BY InstanceID
+)
 SELECT I.InstanceID,
 	I.Instance,
-	STUFF((SELECT ',' + Tag FROM dbo.InstanceTag IT JOIN dbo.Tags T ON T.TagID = IT.TagID WHERE IT.InstanceID = I.InstanceID AND IT.TagID <> -1 ORDER BY T.Tag FOR XML PATH(''),TYPE).value('.','NVARCHAR(MAX)'),1,1,'') AS Tags,
-	LS.LogShippingStatus,
-	B.FullBackupStatus,
-	B.LogBackupStatus,
-	B.DiffBackupStatus,
-	D.DriveStatus,
-	F.FileFreeSpaceStatus,
-	J.JobStatus
+	STUFF((SELECT ',' + T.Tag FROM dbo.InstanceTag IT JOIN dbo.Tags T ON T.TagID = IT.TagID WHERE IT.InstanceID = I.InstanceID AND IT.TagID <> -1 ORDER BY T.Tag FOR XML PATH(''),TYPE).value('.','NVARCHAR(MAX)'),1,1,'') AS Tags,
+	ISNULL(LS.LogShippingStatus,3) AS LogShippingStatus,
+	ISNULL(B.FullBackupStatus,3) AS FullBackupStatus,
+	ISNULL(B.LogBackupStatus,3) AS LogBackupStatus,
+	ISNULL(B.DiffBackupStatus,3) AS DiffBackupStatus,
+	ISNULL(D.DriveStatus,3) AS DriveStatus,
+	ISNULL(F.FileFreeSpaceStatus,3) AS FileFreeSpaceStatus,
+	ISNULL(J.JobStatus,3) AS JobStatus,
+	CASE ag.synchronization_health WHEN 0 THEN 1 WHEN 1 THEN 2 WHEN 2 THEN 4 ELSE 3 END AS AGStatus,
+	dc.DetectedCorruptionDate,
+	CASE WHEN err.LastError > DATEADD(d,-1,GETUTCDATE()) THEN 1 WHEN err.cnt>0 THEN 2 ELSE 4 END AS CollectionErrorStatus
 FROM dbo.Instances I 
 LEFT JOIN LS ON I.InstanceID = LS.InstanceID
 LEFT JOIN B ON I.InstanceID = B.InstanceID
 LEFT JOIN D ON I.InstanceID = D.InstanceID
 LEFT JOIN F ON I.InstanceID = F.InstanceID
 LEFT JOIN J ON I.InstanceID = J.InstanceID
+LEFT JOIN ag ON I.InstanceID= ag.InstanceID
+LEFT JOIN dc ON I.InstanceID = dc.InstanceID
+LEFT JOIN err ON I.InstanceID = err.InstanceID
 WHERE EXISTS(SELECT 1 FROM @Instances t WHERE I.InstanceID = t.InstanceID)
 AND I.IsActive=1

@@ -61,23 +61,6 @@ namespace DBAChecks.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to DECLARE @ProcessorNameString NVARCHAR(512)
-        ///DECLARE @SystemManufacturer NVARCHAR(512)
-        ///DECLARE @SystemProductName NVARCHAR(512)
-        ///DECLARE @PVDriver NVARCHAR(512)
-        ///DECLARE @IsAgentRunning BIT
-        ///DECLARE @InstantFileInitializationEnabled BIT
-        ///IF EXISTS(SELECT * FROM fn_my_permissions ( &apos;sys.xp_instance_regread&apos;, &apos;OBJECT&apos; ) WHERE permission_name=&apos;EXECUTE&apos;)
-        ///BEGIN  
-        ///	EXEC sys.xp_instance_regread N&apos;HKEY_LOCAL_MACHINE&apos;, N&apos;HARDWARE\DESCRIPTION\System\CentralProcessor\0&apos;, N&apos;ProcessorNameString&apos;,@ProcessorNameString O [rest of string was truncated]&quot;;.
-        /// </summary>
-        internal static string RegistryProperties {
-            get {
-                return ResourceManager.GetString("RegistryProperties", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to WITH T AS (
         ///SELECT j.job_id,j.name,
         ///MAX(CASE WHEN jh.step_id=0 AND jh.run_status &lt;&gt; 1 THEN dt.RunDateTime ELSE NULL END) LastFail,
@@ -116,6 +99,31 @@ namespace DBAChecks.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to DECLARE @Corruption TABLE(
+        ///		SourceTable TINYINT,
+        ///		database_id INT NOT NULL,
+        ///		last_update_date DATETIME NOT NULL
+        ///)
+        ///IF OBJECT_ID(&apos;msdb.dbo.suspect_pages&apos;) IS NOT NULL
+        ///BEGIN
+        ///	INSERT INTO @Corruption(SourceTable,database_id,last_update_date)
+        ///	SELECT CAST(1 AS TINYINT) AS SourceTable,
+        ///		   database_id,
+        ///		   MAX(last_update_date) last_update_date
+        ///	FROM msdb.dbo.suspect_pages
+        ///	GROUP BY database_id
+        ///END
+        ///IF OBJECT_ID(&apos;msdb.sys.dm_db_mirroring_auto_page_repair&apos;) IS NOT NULL
+        ///BEGIN
+        ///	INSERT INTO @Corru [rest of string was truncated]&quot;;.
+        /// </summary>
+        internal static string SQLCorruption {
+            get {
+                return ResourceManager.GetString("SQLCorruption", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to CREATE TABLE #sysdb(
         ///	[name] [sysname] NOT NULL,
         ///	[database_id] [int] NOT NULL,
@@ -140,6 +148,32 @@ namespace DBAChecks.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to DECLARE @DBName SYSNAME
+        ///DECLARE @SQL NVARCHAR(MAX)
+        ///CREATE TABLE #DBConfig( 
+        ///	database_id INT NOT NULL,
+        ///	configuration_id INT NOT NULL,
+        ///	name NVARCHAR(60) NOT NULL,
+        ///	value NVARCHAR(128) NULL,
+        ///	value_for_secondary NVARCHAR(128) NULL,
+        ///	PRIMARY KEY (database_id,configuration_id)
+        ///)
+        ///
+        ///IF OBJECT_ID(&apos;sys.database_scoped_configurations&apos;) IS NOT NULL
+        ///BEGIN
+        ///	DECLARE DBs CURSOR FAST_FORWARD READ_ONLY FOR
+        ///	SELECT name
+        ///	FROM sys.databases
+        ///	WHERE state  = 0
+        ///	AND DATABASEPROPERTYEX(name, &apos;Updateability&apos;) =  [rest of string was truncated]&quot;;.
+        /// </summary>
+        internal static string SQLDBConfig {
+            get {
+                return ResourceManager.GetString("SQLDBConfig", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to IF OBJECT_ID(&apos;sys.dm_os_volume_stats&apos;) IS NOT NULL
         ///BEGIN
         ///	SELECT DISTINCT dovs.volume_mount_point AS Name,
@@ -153,6 +187,23 @@ namespace DBAChecks.Properties {
         internal static string SQLDrives {
             get {
                 return ResourceManager.GetString("SQLDrives", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to DECLARE @ProcessorNameString NVARCHAR(512)
+        ///DECLARE @SystemManufacturer NVARCHAR(512)
+        ///DECLARE @SystemProductName NVARCHAR(512)
+        ///DECLARE @PVDriver NVARCHAR(512)
+        ///DECLARE @IsAgentRunning BIT
+        ///DECLARE @InstantFileInitializationEnabled BIT
+        ///IF EXISTS(SELECT * FROM fn_my_permissions ( &apos;sys.xp_instance_regread&apos;, &apos;OBJECT&apos; ) WHERE permission_name=&apos;EXECUTE&apos;)
+        ///BEGIN  
+        ///	EXEC sys.xp_instance_regread N&apos;HKEY_LOCAL_MACHINE&apos;, N&apos;HARDWARE\DESCRIPTION\System\CentralProcessor\0&apos;, N&apos;ProcessorNameString&apos;,@ProcessorNameString O [rest of string was truncated]&quot;;.
+        /// </summary>
+        internal static string SQLExtraProperties {
+            get {
+                return ResourceManager.GetString("SQLExtraProperties", resourceCulture);
             }
         }
         
@@ -242,40 +293,6 @@ namespace DBAChecks.Properties {
         internal static string SQLProperties {
             get {
                 return ResourceManager.GetString("SQLProperties", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to WITH T AS (
-        ///SELECT &apos;BuildClrVersion&apos; as Property
-        ///UNION ALL 
-        ///SELECT &apos;Collation&apos;
-        ///UNION ALL 
-        ///SELECT &apos;CollationID&apos;
-        ///UNION ALL 
-        ///SELECT &apos;ComparisonStyle&apos;
-        ///UNION ALL 
-        ///SELECT &apos;ComputerNamePhysicalNetBIOS&apos;
-        ///UNION ALL 
-        ///SELECT &apos;Edition&apos;
-        ///UNION ALL 
-        ///SELECT &apos;EditionID&apos;
-        ///UNION ALL 
-        ///SELECT &apos;EngineEdition&apos;
-        ///UNION ALL 
-        ///SELECT &apos;HadrManagerStatus&apos;
-        ///UNION ALL 
-        ///SELECT &apos;InstanceDefaultDataPath&apos;
-        ///UNION ALL 
-        ///SELECT &apos;InstanceDefaultLogPath&apos;
-        ///UNION ALL 
-        ///SELECT &apos;InstanceName&apos;
-        ///UNION ALL 
-        ///SELECT &apos;IsAdvancedAnalyticsInst [rest of string was truncated]&quot;;.
-        /// </summary>
-        internal static string SQLPropertiesOLD {
-            get {
-                return ResourceManager.GetString("SQLPropertiesOLD", resourceCulture);
             }
         }
     }

@@ -1,4 +1,4 @@
-﻿CREATE PROC [dbo].[SysConfig_Upd](@Config SysConfig READONLY,@InstanceID INT,@SnapshotDate DATETIME)
+﻿CREATE PROC [dbo].[SysConfig_Upd](@SysConfig SysConfig READONLY,@InstanceID INT,@SnapshotDate DATETIME2(2))
 AS
 INSERT INTO dbo.SysConfig
 (
@@ -13,7 +13,7 @@ SELECT @InstanceID,
            value,
            value_in_use,
 		   @SnapshotDate ValidFrom 
-FROM @Config T
+FROM @SysConfig T
 WHERE NOT EXISTS(SELECT 1 FROM dbo.SysConfig SC WHERE T.configuration_id = SC.configuration_id AND SC.InstanceID = @InstanceID);
 
 WITH T AS(
@@ -29,7 +29,7 @@ MERGE T
 USING (SELECT configuration_id,
               value,
               value_in_use 
-		FROM @Config) S 
+		FROM @SysConfig) S 
 			ON S.configuration_id = T.configuration_id
 WHEN MATCHED AND NOT (
 				(S.value=T.value OR (S.value IS NULL AND T.value IS NULL))
