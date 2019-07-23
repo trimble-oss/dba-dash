@@ -102,7 +102,6 @@
     <Build Include="dbo\Tables\DBFiles.sql" />
     <Build Include="dbo\Stored Procedures\DBFiles_Upd.sql" />
     <Build Include="dbo\User Defined Types\DBFiles.sql" />
-    <Build Include="dbo\Tables\SnapshotDates.sql" />
     <Build Include="dbo\Tables\DBFileThresholds.sql" />
     <Build Include="dbo\Tables\DBFileSnapshot.sql" />
     <Build Include="dbo\Views\DBFileStatus.sql" />
@@ -164,6 +163,7 @@
     <Build Include="dbo\Stored Procedures\OSInfo_Upd.sql" />
     <Build Include="dbo\Stored Procedures\CollectionDates_Upd.sql" />
     <Build Include="dbo\User Defined Types\OSInfo.sql" />
+    <Build Include="dbo\Views\InstanceInfo.sql" />
   </ItemGroup>
   <ItemGroup>
     <PostDeploy Include="Script.PostDeployment1.sql" />

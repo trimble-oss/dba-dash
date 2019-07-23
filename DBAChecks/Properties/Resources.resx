@@ -710,4 +710,7 @@ PRINT @SQL
 
 EXEC sp_executesql @SQL</value>
   </data>
+  <data name="SQLTraceFlags" xml:space="preserve">
+    <value>DBCC TRACESTATUS(-1)</value>
+  </data>
 </root>

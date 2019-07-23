@@ -87,6 +87,19 @@ namespace DBAChecks
             CollectDBConfig();
             CollectCorruption();
             CollectOSInfo();
+            CollectTraceFlags();
+        }
+
+        public void CollectTraceFlags()
+        {
+            try
+            {
+                addDT("TraceFlags", DBAChecks.Properties.Resources.SQLTraceFlags);
+            }
+            catch (Exception ex)
+            {
+                logError("TraceFlags", ex.Message);
+            }
         }
 
         public void CollectOSInfo()

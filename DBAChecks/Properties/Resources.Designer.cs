@@ -321,5 +321,14 @@ namespace DBAChecks.Properties {
                 return ResourceManager.GetString("SQLProperties", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to DBCC TRACESTATUS(-1).
+        /// </summary>
+        internal static string SQLTraceFlags {
+            get {
+                return ResourceManager.GetString("SQLTraceFlags", resourceCulture);
+            }
+        }
     }
 }
