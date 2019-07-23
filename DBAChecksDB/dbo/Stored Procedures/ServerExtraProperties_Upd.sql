@@ -9,7 +9,8 @@
     @SystemProductName NVARCHAR(512),
     @IsAgentRunning BIT,
     @InstantFileInitializationEnabled BIT,
-	@OfflineSchedulers INT=NULL
+	@OfflineSchedulers INT=NULL,
+	@ResourceGovernorEnabled BIT=NULL
 )
 AS
 DECLARE @Ref VARCHAR(30)='ServerExtraProperties'
@@ -23,7 +24,8 @@ BEGIN
 		SystemProductName = @SystemProductName,
 		IsAgentRunning = @IsAgentRunning,
 		InstantFileInitializationEnabled = @InstantFileInitializationEnabled,
-		OfflineSchedulers=@OfflineSchedulers
+		OfflineSchedulers=@OfflineSchedulers,
+		ResourceGovernorEnabled=@ResourceGovernorEnabled
 	WHERE InstanceID = @InstanceID;
 
 	EXEC dbo.CollectionDates_Upd @InstanceID = @InstanceID,  

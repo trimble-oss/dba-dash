@@ -67,8 +67,11 @@
     [sqlserver_start_time]             DATETIME         NULL,
     [max_workers_count]                INT              NULL,
     [scheduler_count]                  INT              NULL,
+    [ResourceGovernorEnabled]          BIT              NULL,
     CONSTRAINT [PK_Instances] PRIMARY KEY CLUSTERED ([InstanceID] ASC)
 );
+
+
 
 
 

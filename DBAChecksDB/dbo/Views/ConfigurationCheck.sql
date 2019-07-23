@@ -1,4 +1,5 @@
 ﻿
+
 CREATE VIEW [dbo].[ConfigurationCheck]
 AS
 SELECT U.InstanceID,
@@ -59,6 +60,7 @@ FROM (
 	AND F.IsActive=1
 	AND D.is_in_standby=0
 	AND D.state=0
+	AND NOT EXISTS(SELECT 1 FROM dbo.DatabasesHADR hadr WHERE D.DatabaseID = hadr.DatabaseID AND hadr.is_primary_replica=0)
 	GROUP BY I.InstanceID,F.DatabaseID,F.data_space_id,F.filegroup_name,D.name,I.Instance
 ) T
 UNPIVOT(chkValue FOR chk IN(PercentGrowth,UnevenGrowth,SmallGrowth,MaxSizeSet)) U 
