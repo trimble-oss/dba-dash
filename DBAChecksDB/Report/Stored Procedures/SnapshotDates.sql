@@ -1,4 +1,5 @@
-﻿CREATE PROC Report.SnapshotDates(@InstanceIDs VARCHAR(MAX)=NULL)
+﻿
+CREATE PROC [Report].[SnapshotDates](@InstanceIDs VARCHAR(MAX)=NULL)
 AS
 DECLARE @Instances TABLE(
 	InstanceID INT PRIMARY KEY
@@ -23,23 +24,8 @@ BEGIN
 	FROM dbo.SplitStrings(@InstanceIDs,',')
 END
 
-SELECT I.Instance, SSD.AgentJobsDate,
-				  DATEDIFF(mi,SSD.AgentJobsDate,GETUTCDATE()) AgentJobSnapshotAge,
-                  SSD.BackupsDate,
-				  DATEDIFF(mi,SSD.BackupsDate,GETUTCDATE()) BackupsSnapshotAge,
-                  SSD.DatabasesDate,
-				  DATEDIFF(mi,SSD.DatabasesDate,GETUTCDATE()) DatabaseSnapshotAge,
-                  SSD.DrivesDate,
-				  DATEDIFF(mi,SSD.DrivesDate,GETUTCDATE()) DrivesSnapshotAge,
-                  SSD.LogRestoresDate,
-				  DATEDIFF(mi,SSD.LogRestoresDate,GETUTCDATE()) LogRestoresSnapshotAge,
-                  SSD.DBFilesDate,
-				  DATEDIFF(mi,SSD.DBFilesDate,GETUTCDATE()) DBFilesSnapshotAge,
-                  SSD.ServerPropertiesDate,
-				  DATEDIFF(mi,SSD.ServerPropertiesDate,GETUTCDATE()) ServerPropertiesSnapshotAge,
-                  SSD.InstanceDate,
-				  DATEDIFF(mi,SSD.DatabasesDate,GETUTCDATE()) InstanceSnapshotAge
+SELECT I.Instance,SSD.Reference,SSD.SnapshotDate,DATEDIFF(mi,SSD.SnapshotDate,GETUTCDATE()) AS SnapshotAge 
 FROM dbo.Instances I 
-JOIN dbo.SnapshotDates SSD ON SSD.InstanceID = I.InstanceID
+JOIN dbo.CollectionDates SSD ON SSD.InstanceID = I.InstanceID
 WHERE I.IsActive=1
 AND EXISTS(SELECT 1 FROM @Instances t WHERE I.InstanceID = t.InstanceID)

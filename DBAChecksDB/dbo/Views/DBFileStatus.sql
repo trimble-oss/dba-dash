@@ -1,4 +1,5 @@
 ﻿
+
 CREATE VIEW [dbo].[DBFileStatus]
 AS
 WITH agg AS (SELECT D.InstanceID,
@@ -62,10 +63,10 @@ SELECT agg.InstanceID,
        cfg.FreeSpaceCriticalThreshold,
        cfg.FreeSpaceCheckType,
 	   cfg.ConfiguredLevel,
-	   SSD.DBFilesDate AS FileSnapshotDate,
-	   DATEDIFF(mi,SSD.DBFilesDate,GETUTCDATE()) AS FileSnapshotAge
+	   SSD.SnapshotDate AS FileSnapshotDate,
+	   DATEDIFF(mi,SSD.SnapshotDate,GETUTCDATE()) AS FileSnapshotAge
 FROM agg
-LEFT JOIN dbo.SnapshotDates SSD ON agg.InstanceID = SSD.InstanceID
+LEFT JOIN dbo.CollectionDates SSD ON agg.InstanceID = SSD.InstanceID AND SSD.Reference='DBFiles'
 	OUTER APPLY(SELECT TOP(1) T.FreeSpaceWarningThreshold,
                     T.FreeSpaceCriticalThreshold,
                     T.FreeSpaceCheckType,

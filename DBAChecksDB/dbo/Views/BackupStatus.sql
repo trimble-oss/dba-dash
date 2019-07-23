@@ -1,4 +1,5 @@
-﻿CREATE VIEW [dbo].[BackupStatus]
+﻿
+CREATE VIEW [dbo].[BackupStatus]
 AS
 WITH hadr AS (
 	SELECT D.DatabaseId,partnr.DatabaseID BackupDatabaseID
@@ -46,13 +47,13 @@ SELECT I.InstanceID,
     cfg.[DiffBackupCriticalThreshold],
     cfg.[ConsiderPartialBackups],
     cfg.[ConsiderFGBackups],
-	SSD.BackupsDate AS SnapshotDate,
-	DATEDIFF(mi,SSD.BackupsDate,GETUTCDATE()) AS SnapshotAge,
+	SSD.SnapshotDate,
+	DATEDIFF(mi,SSD.SnapshotDate,GETUTCDATE()) AS SnapshotAge,
 	CASE WHEN hadr.DatabaseID IS NULL THEN CAST(0 AS BIT) ELSE CAST(1 AS BIT) END AS IsHADRReplica
 FROM dbo.Databases d 
 LEFT JOIN dbo.DatabasesHADR hadr ON d.DatabaseID = hadr.DatabaseID
 JOIN dbo.Instances I ON d.InstanceID = I.InstanceID
-JOIN dbo.SnapshotDates SSD ON SSD.InstanceID = I.InstanceID
+JOIN dbo.CollectionDates SSD ON SSD.InstanceID = I.InstanceID AND SSD.Reference='Backups'
 LEFT JOIN B ON d.DatabaseID = B.DatabaseID
 OUTER APPLY(SELECT TOP(1) T.* 
 			FROM dbo.BackupThresholds T 

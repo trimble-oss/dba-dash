@@ -1,4 +1,5 @@
 ﻿
+
 CREATE VIEW [dbo].[DriveStatus]
 AS
 SELECT I.InstanceID,
@@ -10,8 +11,8 @@ SELECT I.InstanceID,
 	UsedSpace/POWER(1024.0,3) UsedGB,
 	FreeSpace/POWER(1024.0,3) FreeGB,
 	FreeSpace/CAST(Capacity AS DECIMAL) AS PctFreeSpace,
-	DATEDIFF(mi,SSD.DrivesDate,GETUTCDATE()) AS SnapshotAgeMins,
-	SSD.DrivesDate AS SnapshotDate,
+	DATEDIFF(mi,SSD.SnapshotDate,GETUTCDATE()) AS SnapshotAgeMins,
+	SSD.SnapshotDate,
 	cfg.DriveWarningThreshold,
 	cfg.DriveCriticalThreshold,
 	cfg.DriveCheckType,
@@ -23,7 +24,7 @@ SELECT I.InstanceID,
 	ELSE 'Drive' END DriveCheckConfiguredLevel
 FROM dbo.Drives D
 INNER JOIN dbo.Instances I ON D.InstanceID = I.InstanceID
-INNER JOIN dbo.SnapshotDates SSD ON SSD.InstanceID = I.InstanceID
+INNER JOIN dbo.CollectionDates SSD ON SSD.InstanceID = I.InstanceID AND SSD.Reference='Drives'
 OUTER APPLY(SELECT TOP(1) T.* 
 			FROM dbo.DriveThresholds T 
 			WHERE (D.InstanceID = T.InstanceID OR T.InstanceID = -1)

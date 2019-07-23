@@ -1,7 +1,7 @@
 ﻿CREATE PROC [dbo].[AgentJobs_Upd](@AgentJobs AgentJobs READONLY,@InstanceID INT,@SnapshotDate DATETIME2(2))
 AS
-
-IF NOT EXISTS(SELECT 1 FROM dbo.SnapshotDates SSD WHERE SSD.AgentJobsDate>=@SnapshotDate AND SSD.InstanceID = @InstanceID)
+DECLARE @Ref VARCHAR(30)='AgentJobs'
+IF NOT EXISTS(SELECT 1 FROM dbo.CollectionDates WHERE SnapshotDate>=@SnapshotDate AND InstanceID = @InstanceID AND Reference=@Ref)
 BEGIN
 BEGIN TRAN
 	DELETE dbo.AgentJobs WHERE InstanceID = @InstanceID
@@ -38,8 +38,8 @@ BEGIN TRAN
 			   ,[IsLastFail]
 	FROM @AgentJobs
 
-	UPDATE dbo.SnapshotDates
-	SET AgentJobsDate=@SnapshotDate
-	WHERE InstanceID=@InstanceID
+	EXEC dbo.CollectionDates_Upd @InstanceID = @InstanceID,  
+	                             @Reference = @Ref,
+	                             @SnapshotDate = @SnapshotDate
 	COMMIT
 END

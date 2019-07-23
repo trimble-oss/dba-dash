@@ -1,6 +1,7 @@
 ﻿CREATE PROC [dbo].[Database_Upd](@DB SQLDB READONLY,@InstanceID INT,@SnapshotDate DATETIME2(2))
 AS
-IF NOT EXISTS(SELECT 1 FROM dbo.SnapshotDates WHERE DatabasesDate>=@SnapshotDate AND InstanceID=@InstanceID)
+DECLARE @Ref VARCHAR(30)='Database'
+IF NOT EXISTS(SELECT 1 FROM dbo.CollectionDates WHERE SnapshotDate>=@SnapshotDate AND InstanceID = @InstanceID AND Reference=@Ref)
 BEGIN
 	WITH T AS (
 		SELECT D.* 
@@ -226,7 +227,7 @@ BEGIN
 	WHEN NOT MATCHED BY SOURCE THEN 
 	UPDATE SET T.IsActive = 0;
 
-	UPDATE dbo.SnapshotDates
-	SET DatabasesDate=@SnapshotDate
-	WHERE InstanceID=@InstanceID
+	EXEC dbo.CollectionDates_Upd @InstanceID = @InstanceID,  
+									 @Reference = @Ref,
+									 @SnapshotDate = @SnapshotDate
 END

@@ -1,19 +1,21 @@
 ﻿
 CREATE PROC [dbo].[DBConfig_Upd](@DBConfig dbo.DBConfig READONLY,@InstanceID INT,@SnapshotDate DATETIME2(2))
 AS
-IF EXISTS(SELECT 1 
-			FROM @DBConfig t
-			WHERE NOT EXISTS(SELECT 1 FROM dbo.DBConfigOptions o WHERE t.configuration_id = o.configuration_id)
-)
+DECLARE @Ref VARCHAR(30)='DBConfig'
+IF NOT EXISTS(SELECT 1 FROM dbo.CollectionDates WHERE SnapshotDate>=@SnapshotDate AND InstanceID = @InstanceID AND Reference=@Ref)
 BEGIN
-	INSERT INTO dbo.DBConfigOptions(configuration_id,name)
-	SELECT configuration_id,MAX(name)
-	FROM @DBConfig t
-	WHERE NOT EXISTS(SELECT 1 FROM dbo.DBConfigOptions o WHERE t.configuration_id = o.configuration_id)
-	GROUP BY t.configuration_id
-END;
-IF NOT EXISTS(SELECT 1 FROM dbo.SnapshotDates WHERE InstanceID = @InstanceID AND DBConfigDate>=@SnapshotDate)
-BEGIN
+	IF EXISTS(SELECT 1 
+				FROM @DBConfig t
+				WHERE NOT EXISTS(SELECT 1 FROM dbo.DBConfigOptions o WHERE t.configuration_id = o.configuration_id)
+	)
+	BEGIN
+		INSERT INTO dbo.DBConfigOptions(configuration_id,name)
+		SELECT configuration_id,MAX(name)
+		FROM @DBConfig t
+		WHERE NOT EXISTS(SELECT 1 FROM dbo.DBConfigOptions o WHERE t.configuration_id = o.configuration_id)
+		GROUP BY t.configuration_id
+	END;
+
 	INSERT INTO dbo.DBConfig(DatabaseID,configuration_id,value,value_for_secondary,ValidFrom)
 	SELECT d.DatabaseID,t.configuration_id,t.value,t.value_for_secondary,@SnapshotDate
 	FROM @DBConfig t
@@ -54,4 +56,7 @@ BEGIN
 	DELETE
 	OUTPUT DELETED.DatabaseID,DELETED.configuration_id,DELETED.value,DELETED.value_for_secondary,INSERTED.value,INSERTED.value_for_secondary,DELETED.ValidFrom,@SnapshotDate INTO dbo.DBConfigHistory(DatabaseID,configuration_id,value,value_for_secondary,new_value,new_value_for_secondary,ValidFrom,ValidTo);
 
+	EXEC dbo.CollectionDates_Upd @InstanceID = @InstanceID,  
+										 @Reference = @Ref,
+										 @SnapshotDate = @SnapshotDate
 END

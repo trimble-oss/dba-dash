@@ -86,6 +86,19 @@ namespace DBAChecks
             CollectServerExtraProperties();
             CollectDBConfig();
             CollectCorruption();
+            CollectOSInfo();
+        }
+
+        public void CollectOSInfo()
+        {
+            try
+            {
+                addDT("OSInfo", DBAChecks.Properties.Resources.SQLOSInfo);
+            }
+            catch(Exception ex)
+            {
+                logError("OSInfo", ex.Message);
+            }
         }
 
         public void CollectCorruption()

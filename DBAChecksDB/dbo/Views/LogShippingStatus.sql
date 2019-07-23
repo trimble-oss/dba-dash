@@ -1,4 +1,5 @@
-﻿CREATE VIEW [dbo].[LogShippingStatus] 
+﻿
+CREATE VIEW [dbo].[LogShippingStatus] 
 AS
 SELECT I.InstanceID,
 	D.DatabaseID,
@@ -9,15 +10,15 @@ SELECT I.InstanceID,
 	l.TimeSinceLast,
 	l.LatencyOfLast,
 	l.TotalTimeBehind,
-	DATEDIFF(mi,SSD.LogRestoresDate,GETUTCDATE()) AS SnapshotAge,
-	SSD.LogRestoresDate,
+	DATEDIFF(mi,SSD.SnapshotDate,GETUTCDATE()) AS SnapshotAge,
+	SSD.SnapshotDate AS LogRestoresDate,
 	chk.Status,
 	CASE chk.Status WHEN 1 THEN 'Critical' WHEN 2 THEN 'Warning' WHEN 3 THEN 'N/A' WHEN 4 THEN 'OK' END AS StatusDescription,
 	LR.last_file,
 	D.state_desc
 FROM dbo.Instances I 
 JOIN dbo.Databases D ON I.InstanceID = D.InstanceID
-JOIN dbo.SnapshotDates SSD ON SSD.InstanceID = I.InstanceID
+JOIN dbo.CollectionDates SSD ON SSD.InstanceID = I.InstanceID AND SSD.Reference='LogRestores'
 LEFT JOIN dbo.LogRestores LR ON LR.DatabaseID = D.DatabaseID
 OUTER APPLY(SELECT TOP(1) T.* 
 			FROM dbo.LogRestoreThresholds T 

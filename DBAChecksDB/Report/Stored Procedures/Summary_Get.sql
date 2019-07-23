@@ -76,6 +76,11 @@ err AS (
 	FROM dbo.CollectionErrorLog
 	WHERE ErrorDate>=DATEADD(d,-7,GETUTCDATE())
 	GROUP BY InstanceID
+),
+SSD AS (
+	SELECT InstanceID,MIN(DATEDIFF(mi,SnapshotDate,GETUTCDATE())) AS SnapshotAgeMin,MAX(DATEDIFF(mi,SnapshotDate,GETUTCDATE())) AS SnapshotAgeMax
+	FROM dbo.CollectionDates
+	GROUP BY InstanceID
 )
 SELECT I.InstanceID,
 	I.Instance,
@@ -89,7 +94,9 @@ SELECT I.InstanceID,
 	ISNULL(J.JobStatus,3) AS JobStatus,
 	CASE ag.synchronization_health WHEN 0 THEN 1 WHEN 1 THEN 2 WHEN 2 THEN 4 ELSE 3 END AS AGStatus,
 	dc.DetectedCorruptionDate,
-	CASE WHEN err.LastError > DATEADD(d,-1,GETUTCDATE()) THEN 1 WHEN err.cnt>0 THEN 2 ELSE 4 END AS CollectionErrorStatus
+	CASE WHEN err.LastError > DATEADD(d,-1,GETUTCDATE()) THEN 1 WHEN err.cnt>0 THEN 2 ELSE 4 END AS CollectionErrorStatus,
+	SSD.SnapshotAgeMin,
+	SSD.SnapshotAgeMax
 FROM dbo.Instances I 
 LEFT JOIN LS ON I.InstanceID = LS.InstanceID
 LEFT JOIN B ON I.InstanceID = B.InstanceID
@@ -99,5 +106,6 @@ LEFT JOIN J ON I.InstanceID = J.InstanceID
 LEFT JOIN ag ON I.InstanceID= ag.InstanceID
 LEFT JOIN dc ON I.InstanceID = dc.InstanceID
 LEFT JOIN err ON I.InstanceID = err.InstanceID
+LEFT JOIN SSD ON I.InstanceID = SSD.InstanceID
 WHERE EXISTS(SELECT 1 FROM @Instances t WHERE I.InstanceID = t.InstanceID)
 AND I.IsActive=1

@@ -5,7 +5,8 @@ CREATE PROC [dbo].[DBFiles_Upd](
 	@SnapshotDate DATETIME2(2)
 )
 AS
-IF NOT EXISTS(SELECT 1 FROM dbo.SnapshotDates WHERE DBFilesDate>=@SnapshotDate AND InstanceID = @InstanceID)
+DECLARE @Ref VARCHAR(30)='DBFiles'
+IF NOT EXISTS(SELECT 1 FROM dbo.CollectionDates WHERE SnapshotDate>=@SnapshotDate AND InstanceID = @InstanceID AND Reference=@Ref)
 BEGIN
 	WITH T AS (
 		SELECT F.* 
@@ -90,8 +91,8 @@ BEGIN
 	AND D.IsActive=1
 
 
-	UPDATE dbo.SnapshotDates
-	SET DBFilesDate=@SnapshotDate
-	WHERE InstanceID=@InstanceID
+	EXEC dbo.CollectionDates_Upd @InstanceID = @InstanceID,  
+										 @Reference = @Ref,
+										 @SnapshotDate = @SnapshotDate
 
 END

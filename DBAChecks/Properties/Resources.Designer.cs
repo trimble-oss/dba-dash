@@ -194,12 +194,12 @@ namespace DBAChecks.Properties {
         ///   Looks up a localized string similar to DECLARE @ProcessorNameString NVARCHAR(512)
         ///DECLARE @SystemManufacturer NVARCHAR(512)
         ///DECLARE @SystemProductName NVARCHAR(512)
-        ///DECLARE @PVDriver NVARCHAR(512)
         ///DECLARE @IsAgentRunning BIT
         ///DECLARE @InstantFileInitializationEnabled BIT
         ///IF EXISTS(SELECT * FROM fn_my_permissions ( &apos;sys.xp_instance_regread&apos;, &apos;OBJECT&apos; ) WHERE permission_name=&apos;EXECUTE&apos;)
         ///BEGIN  
-        ///	EXEC sys.xp_instance_regread N&apos;HKEY_LOCAL_MACHINE&apos;, N&apos;HARDWARE\DESCRIPTION\System\CentralProcessor\0&apos;, N&apos;ProcessorNameString&apos;,@ProcessorNameString O [rest of string was truncated]&quot;;.
+        ///	EXEC sys.xp_instance_regread N&apos;HKEY_LOCAL_MACHINE&apos;, N&apos;HARDWARE\DESCRIPTION\System\CentralProcessor\0&apos;, N&apos;ProcessorNameString&apos;,@ProcessorNameString OUT;
+        ///	EXEC sys.xp_instance_regrea [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string SQLExtraProperties {
             get {
@@ -277,6 +277,32 @@ namespace DBAChecks.Properties {
         internal static string SQLLogShipping {
             get {
                 return ResourceManager.GetString("SQLLogShipping", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to DECLARE @SQL NVARCHAR(MAX);
+        ///
+        ///WITH cols AS (
+        ///	SELECT &apos;softnuma_configuration&apos; AS col,&apos;INT&apos; AS typ
+        ///	UNION ALL
+        ///	SELECT &apos;sql_memory_model&apos; AS col,&apos;INT&apos; AS typ
+        ///	UNION ALL
+        ///	SELECT &apos;socket_count&apos; AS col,&apos;INT&apos; AS typ
+        ///	UNION ALL
+        ///	SELECT &apos;cores_per_socket&apos; AS col,&apos;INT&apos; AS typ
+        ///	UNION ALL
+        ///	SELECT &apos;numa_node_count&apos; AS col,&apos;INT&apos; AS typ
+        ///	UNION ALL
+        ///	SELECT &apos;affinity_type&apos; AS col,&apos;INT&apos; AS typ
+        ///	UNION ALL
+        ///	SELECT &apos;sqlserver_start_time&apos; AS col,&apos;DATETIME&apos; AS typ
+        ///	UNION ALL
+        ///	SELECT &apos;os_priority_class&apos; AS col,&apos;IN [rest of string was truncated]&quot;;.
+        /// </summary>
+        internal static string SQLOSInfo {
+            get {
+                return ResourceManager.GetString("SQLOSInfo", resourceCulture);
             }
         }
         

@@ -1,4 +1,5 @@
-﻿CREATE VIEW ConfigurationCheck
+﻿
+CREATE VIEW [dbo].[ConfigurationCheck]
 AS
 SELECT U.InstanceID,
 	   U.Instance,
@@ -29,6 +30,7 @@ FROM
     AND   D.state = 0
 	AND D.is_in_standby=0
 	AND I.IsActive=1
+	AND NOT EXISTS(SELECT 1 FROM dbo.DatabasesHADR hadr WHERE D.DatabaseID = hadr.DatabaseID AND hadr.is_primary_replica=0)
 ) T
     UNPIVOT
     (
@@ -61,3 +63,7 @@ FROM (
 ) T
 UNPIVOT(chkValue FOR chk IN(PercentGrowth,UnevenGrowth,SmallGrowth,MaxSizeSet)) U 
 WHERE U.chkValue=1
+UNION ALL
+SELECT InstanceID,Instance,'Buffer Pool:' + FORMAT(PctMemoryAllocatedToBufferPool,'0.0%'),CASE WHEN PctMemoryAllocatedToBufferPool<0.85 THEN 'BufferPoolLow' ELSE 'BufferPoolHigh' END
+FROM dbo.InstanceInfo
+WHERE PctMemoryAllocatedToBufferPool>=0.91 OR (PctMemoryAllocatedToBufferPool<0.85 AND MemoryNotAllocatedToBufferPoolGB>4.5)

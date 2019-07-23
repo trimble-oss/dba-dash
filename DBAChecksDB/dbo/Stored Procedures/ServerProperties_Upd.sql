@@ -1,6 +1,7 @@
 ﻿CREATE PROC [dbo].[ServerProperties_Upd](@ServerProperties ServerProperties READONLY,@InstanceID INT,@SnapshotDate DATETIME2(2))
 AS
-IF NOT EXISTS(SELECT 1 FROM dbo.SnapshotDates WHERE ServerPropertiesDate>=@SnapshotDate AND InstanceID=@InstanceID)
+DECLARE @Ref VARCHAR(30)='ServerProperties'
+IF NOT EXISTS(SELECT 1 FROM dbo.CollectionDates WHERE SnapshotDate>=@SnapshotDate AND InstanceID = @InstanceID AND Reference=@Ref)
 BEGIN
 	UPDATE I
 	   SET [BuildClrVersion] = T.BuildClrVersion
@@ -48,8 +49,8 @@ BEGIN
 	CROSS JOIN @ServerProperties T
 	WHERE I.InstanceID = @InstanceID
 
-	UPDATE dbo.SnapshotDates
-	SET ServerPropertiesDate=@SnapshotDate
-	WHERE InstanceID=@InstanceID
+	EXEC dbo.CollectionDates_Upd @InstanceID = @InstanceID,  
+										 @Reference = @Ref,
+										 @SnapshotDate = @SnapshotDate
 
 END

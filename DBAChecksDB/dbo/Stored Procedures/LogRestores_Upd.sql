@@ -4,7 +4,8 @@
 	@SnapshotDate DATETIME
 )
 AS
-IF NOT EXISTS(SELECT 1 FROM dbo.SnapshotDates WHERE LogRestoresDate>=@SnapshotDate AND InstanceID=@InstanceID)
+DECLARE @Ref VARCHAR(30)='LogRestores'
+IF NOT EXISTS(SELECT 1 FROM dbo.CollectionDates WHERE SnapshotDate>=@SnapshotDate AND InstanceID = @InstanceID AND Reference=@Ref)
 BEGIN
 BEGIN TRAN
 	DELETE L 
@@ -17,9 +18,10 @@ BEGIN TRAN
 	JOIN dbo.Databases D ON d.name = L.database_name AND D.InstanceID= @InstanceID
 	WHERE D.IsActive=1
 
-	UPDATE dbo.SnapshotDates
-	SET LogRestoresDate = @SnapshotDate
-	WHERE InstanceID = @InstanceID
+
+	EXEC dbo.CollectionDates_Upd @InstanceID = @InstanceID,  
+										 @Reference = @Ref,
+										 @SnapshotDate = @SnapshotDate
 
 	COMMIT
 END

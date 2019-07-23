@@ -37,6 +37,7 @@ namespace DBAChecks
             update(connectionString, instanceID, snapshotDate, Data, "Corruption");
             update(connectionString, instanceID, snapshotDate, Data,"DatabasesHADR");
             update(connectionString, instanceID, snapshotDate, Data, "SysConfig");
+            update(connectionString, instanceID, snapshotDate, Data, "OSInfo");
             updateServerExtraProperties(connectionString, instanceID, snapshotDate, Data);
             InsertErrors(connectionString, instanceID, snapshotDate, Data);
         }
@@ -60,6 +61,7 @@ namespace DBAChecks
                     cmd.Parameters.AddWithValue("SystemProductName", r["SystemProductName"]);
                     cmd.Parameters.AddWithValue("IsAgentRunning", r["IsAgentRunning"]);
                     cmd.Parameters.AddWithValue("InstantFileInitializationEnabled", r["InstantFileInitializationEnabled"]);
+                    cmd.Parameters.AddWithValue("OfflineSchedulers", r["OfflineSchedulers"]);
                     cmd.CommandType = CommandType.StoredProcedure;
                     cmd.ExecuteNonQuery();
                 }

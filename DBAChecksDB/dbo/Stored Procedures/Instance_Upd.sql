@@ -4,7 +4,8 @@ SELECT @InstanceID = InstanceID
 FROM dbo.Instances 
 WHERE ConnectionID = @ConnectionID
 
-IF NOT EXISTS(SELECT 1 FROM dbo.SnapshotDates WHERE InstanceDate>=@SnapshotDate AND InstanceID = @InstanceID)
+DECLARE @Ref VARCHAR(30)='Instance'
+IF NOT EXISTS(SELECT 1 FROM dbo.CollectionDates WHERE SnapshotDate>=@SnapshotDate AND InstanceID = @InstanceID AND Reference=@Ref)
 BEGIN
 	IF @InstanceID IS NULL
 	BEGIN
@@ -12,13 +13,10 @@ BEGIN
 		INSERT INTO dbo.Instances(Instance,ConnectionID,IsActive,AgentHostName)
 		VALUES(@Instance,@ConnectionID,CAST(1 as BIT),@AgentHostName)
 		SELECT @InstanceID = SCOPE_IDENTITY();
-		INSERT INTO dbo.SnapshotDates(
-			InstanceID,
-			InstanceDate
-		)
-		VALUES
-		(@InstanceID, @SnapshotDate
-			)
+
+		EXEC dbo.CollectionDates_Upd @InstanceID = @InstanceID,  
+										 @Reference = @Ref,
+										 @SnapshotDate = @SnapshotDate
 		COMMIT
 
 	END
@@ -29,9 +27,9 @@ BEGIN
 			AgentHostName=@AgentHostName
 		WHERE InstanceID = @InstanceID
 
-		UPDATE dbo.SnapshotDates 
-		SET	InstanceDate=@SnapshotDate
-		WHERE InstanceID = @InstanceID
+		EXEC dbo.CollectionDates_Upd @InstanceID = @InstanceID,  
+										 @Reference = @Ref,
+										 @SnapshotDate = @SnapshotDate
 	END
 	IF NOT EXISTS(SELECT * FROM dbo.Tags WHERE TagID=-1)
 	BEGIN

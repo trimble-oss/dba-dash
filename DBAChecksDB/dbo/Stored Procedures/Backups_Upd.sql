@@ -4,7 +4,8 @@
 	@SnapshotDate DATETIME2(2)
 )
 AS
-IF NOT EXISTS(SELECT 1 FROM dbo.SnapshotDates WHERE BackupsDate >=@SnapshotDate AND InstanceID=@InstanceID)
+DECLARE @Ref VARCHAR(30)='Backups'
+IF NOT EXISTS(SELECT 1 FROM dbo.CollectionDates WHERE SnapshotDate>=@SnapshotDate AND InstanceID = @InstanceID AND Reference=@Ref)
 BEGIN
 	MERGE dbo.Backups as T
 	USING (SELECT B.LastBackup,B.type,d.DatabaseID FROM @Backups B JOIN dbo.Databases d ON d.name = B.database_name AND d.IsActive=1) as S
@@ -15,8 +16,8 @@ BEGIN
 	INSERT (DatabaseID,type,LastBackup)
 	VALUES(DatabaseID,type,LastBackup);
 
-	UPDATE dbo.SnapshotDates
-	SET BackupsDate=@SnapshotDate
-	WHERE InstanceID=@InstanceID
+	EXEC dbo.CollectionDates_Upd @InstanceID = @InstanceID,  
+	                             @Reference = @Ref,
+	                             @SnapshotDate = @SnapshotDate
 END
 	

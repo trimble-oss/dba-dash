@@ -1,4 +1,4 @@
-﻿CREATE PROC Report.DriveUsedGrowth(@Days INT=30,@InstanceIDs VARCHAR(MAX) = NULL)
+﻿CREATE PROC [Report].[DriveUsedGrowth](@Days INT=30,@InstanceIDs VARCHAR(MAX) = NULL)
 AS
 DECLARE @Instances TABLE(
 	InstanceID INT PRIMARY KEY
@@ -31,12 +31,12 @@ SELECT I.Instance,
        D.UsedSpace/POWER(1024.0,3) AS UsedGB,
        D.Label,
        D.IsActive,
-	   DATEDIFF(d,H.SnapshotDate,SSD.DrivesDate) Days,
+	   DATEDIFF(d,H.SnapshotDate,SSD.SnapshotDate) Days,
 	   (D.UsedSpace-H.UsedSpace)/POWER(1024.0,3) AS GrowthGB,
 	   ((D.UsedSpace-H.UsedSpace*1.0)/H.UsedSpace) PctGrowth
 FROM dbo.Drives D 
 JOIN dbo.Instances I ON I.InstanceID = D.InstanceID
-JOIN dbo.SnapshotDates SSD ON SSD.InstanceID = I.InstanceID
+JOIN dbo.CollectionDates SSD ON SSD.InstanceID = I.InstanceID AND SSD.Reference='Drives'
 CROSS APPLY(SELECT TOP(1) DSS.Capacity ,DSS.UsedSpace,DSS.SnapshotDate
 			FROM dbo.DriveSnapshot DSS 
 			WHERE DSS.DriveID = D.DriveID
