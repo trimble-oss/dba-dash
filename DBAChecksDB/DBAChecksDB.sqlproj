@@ -164,6 +164,9 @@
     <Build Include="dbo\Stored Procedures\CollectionDates_Upd.sql" />
     <Build Include="dbo\User Defined Types\OSInfo.sql" />
     <Build Include="dbo\Views\InstanceInfo.sql" />
+    <Build Include="dbo\Tables\TraceFlags.sql" />
+    <Build Include="dbo\Stored Procedures\TraceFlags_Upd.sql" />
+    <Build Include="dbo\User Defined Types\TraceFlags.sql" />
   </ItemGroup>
   <ItemGroup>
     <PostDeploy Include="Script.PostDeployment1.sql" />

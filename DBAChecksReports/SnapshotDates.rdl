@@ -31,6 +31,10 @@
           <DataField>Reference</DataField>
           <rd:TypeName>System.String</rd:TypeName>
         </Field>
+        <Field Name="AgentHostName">
+          <DataField>AgentHostName</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
         <Field Name="SnapshotDate">
           <DataField>SnapshotDate</DataField>
           <rd:TypeName>System.DateTime</rd:TypeName>
@@ -138,6 +142,10 @@
                     <CellContents>
                       <Textbox Name="Textbox5">
                         <CanGrow>true</CanGrow>
+                        <UserSort>
+                          <SortExpression>=Fields!Instance.Value</SortExpression>
+                          <SortExpressionScope>Instance</SortExpressionScope>
+                        </UserSort>
                         <KeepTogether>true</KeepTogether>
                         <Paragraphs>
                           <Paragraph>
@@ -155,6 +163,45 @@
                           </Paragraph>
                         </Paragraphs>
                         <rd:DefaultName>Textbox5</rd:DefaultName>
+                        <Style>
+                          <Border>
+                            <Color>LightGrey</Color>
+                            <Style>Solid</Style>
+                          </Border>
+                          <BackgroundColor>#444444</BackgroundColor>
+                          <PaddingLeft>2pt</PaddingLeft>
+                          <PaddingRight>2pt</PaddingRight>
+                          <PaddingTop>2pt</PaddingTop>
+                          <PaddingBottom>2pt</PaddingBottom>
+                        </Style>
+                      </Textbox>
+                    </CellContents>
+                  </TablixCornerCell>
+                  <TablixCornerCell>
+                    <CellContents>
+                      <Textbox Name="Textbox2">
+                        <CanGrow>true</CanGrow>
+                        <UserSort>
+                          <SortExpression>=Fields!AgentHostName.Value</SortExpression>
+                          <SortExpressionScope>Instance</SortExpressionScope>
+                        </UserSort>
+                        <KeepTogether>true</KeepTogether>
+                        <Paragraphs>
+                          <Paragraph>
+                            <TextRuns>
+                              <TextRun>
+                                <Value>Agent Host Name</Value>
+                                <Style>
+                                  <FontFamily>Arial</FontFamily>
+                                  <FontWeight>Bold</FontWeight>
+                                  <Color>White</Color>
+                                </Style>
+                              </TextRun>
+                            </TextRuns>
+                            <Style />
+                          </Paragraph>
+                        </Paragraphs>
+                        <rd:DefaultName>Textbox2</rd:DefaultName>
                         <Style>
                           <Border>
                             <Color>LightGrey</Color>
@@ -209,6 +256,7 @@ System.TimeZone.CurrentTimeZone.ToLocalTime(Min(Fields!SnapshotDate.Value)))</Va
                             </Border>
                             <BackgroundColor>=switch(Fields!SnapshotAge.Value&gt;Parameters!SnapshotAgeCritical.Value,"Red",
 Fields!SnapshotAge.Value&gt;Parameters!SnapshotAgeWarning.Value,"Yellow",
+ISNOTHING(Fields!SnapshotAge.Value),"LightGrey",
 Fields!SnapshotAge.Value&lt;=Parameters!SnapshotAgeWarning.Value,"Green",
 1=1,"LightGrey")</BackgroundColor>
                             <PaddingLeft>2pt</PaddingLeft>
@@ -316,7 +364,42 @@ Fields!SnapshotAge.Value&lt;=Parameters!SnapshotAgeWarning.Value,"Green",
                     </CellContents>
                   </TablixHeader>
                   <TablixMembers>
-                    <TablixMember />
+                    <TablixMember>
+                      <TablixHeader>
+                        <Size>1.29167in</Size>
+                        <CellContents>
+                          <Textbox Name="AgentHostName">
+                            <CanGrow>true</CanGrow>
+                            <KeepTogether>true</KeepTogether>
+                            <Paragraphs>
+                              <Paragraph>
+                                <TextRuns>
+                                  <TextRun>
+                                    <Value>=Fields!AgentHostName.Value</Value>
+                                    <Style />
+                                  </TextRun>
+                                </TextRuns>
+                                <Style />
+                              </Paragraph>
+                            </Paragraphs>
+                            <rd:DefaultName>AgentHostName</rd:DefaultName>
+                            <Style>
+                              <Border>
+                                <Color>LightGrey</Color>
+                                <Style>Solid</Style>
+                              </Border>
+                              <PaddingLeft>2pt</PaddingLeft>
+                              <PaddingRight>2pt</PaddingRight>
+                              <PaddingTop>2pt</PaddingTop>
+                              <PaddingBottom>2pt</PaddingBottom>
+                            </Style>
+                          </Textbox>
+                        </CellContents>
+                      </TablixHeader>
+                      <TablixMembers>
+                        <TablixMember />
+                      </TablixMembers>
+                    </TablixMember>
                   </TablixMembers>
                 </TablixMember>
               </TablixMembers>
@@ -324,7 +407,7 @@ Fields!SnapshotAge.Value&lt;=Parameters!SnapshotAgeWarning.Value,"Green",
             <DataSetName>SnapshotDates</DataSetName>
             <Top>0.68833in</Top>
             <Height>1.74167in</Height>
-            <Width>2.88334in</Width>
+            <Width>4.17501in</Width>
             <ZIndex>1</ZIndex>
             <Style>
               <Border>
