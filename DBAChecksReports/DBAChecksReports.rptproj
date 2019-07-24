@@ -60,6 +60,8 @@
   <ItemGroup>
     <Report Include="AgentJobs.rdl" />
     <Report Include="Backups.rdl" />
+    <Report Include="Database Growth.rdl" />
+    <Report Include="DBAChecks Error Log.rdl" />
     <Report Include="DriveHistory.rdl" />
     <Report Include="Drives.rdl" />
     <Report Include="Files.rdl" />
