@@ -63,6 +63,7 @@ namespace DBAChecks
                     cmd.Parameters.AddWithValue("IsAgentRunning", r["IsAgentRunning"]);
                     cmd.Parameters.AddWithValue("InstantFileInitializationEnabled", r["InstantFileInitializationEnabled"]);
                     cmd.Parameters.AddWithValue("OfflineSchedulers", r["OfflineSchedulers"]);
+                    cmd.Parameters.AddWithValue("ResourceGovernorEnabled", r["ResourceGovernorEnabled"]);
                     cmd.CommandType = CommandType.StoredProcedure;
                     cmd.ExecuteNonQuery();
                 }

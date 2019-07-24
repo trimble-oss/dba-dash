@@ -1275,6 +1275,20 @@ DateTime.UtcNow.Subtract(CDATE(Fields!DetectedCorruptionDate.Value)).TotalDays&l
                             </Paragraph>
                           </Paragraphs>
                           <rd:DefaultName>CollectionErrorStatus</rd:DefaultName>
+                          <ActionInfo>
+                            <Actions>
+                              <Action>
+                                <Drillthrough>
+                                  <ReportName>DBAChecks Error Log</ReportName>
+                                  <Parameters>
+                                    <Parameter Name="InstanceID">
+                                      <Value>=Fields!InstanceID.Value</Value>
+                                    </Parameter>
+                                  </Parameters>
+                                </Drillthrough>
+                              </Action>
+                            </Actions>
+                          </ActionInfo>
                           <Style>
                             <Border>
                               <Color>LightGrey</Color>

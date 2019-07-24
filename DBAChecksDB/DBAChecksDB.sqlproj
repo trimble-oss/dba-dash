@@ -167,6 +167,8 @@
     <Build Include="dbo\Tables\TraceFlags.sql" />
     <Build Include="dbo\Stored Procedures\TraceFlags_Upd.sql" />
     <Build Include="dbo\User Defined Types\TraceFlags.sql" />
+    <Build Include="Report\Stored Procedures\TraceFlags_Get.sql" />
+    <Build Include="Report\Stored Procedures\DBAChecksErrorLog.sql" />
   </ItemGroup>
   <ItemGroup>
     <PostDeploy Include="Script.PostDeployment1.sql" />

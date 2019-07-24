@@ -1,4 +1,5 @@
 ﻿
+
 CREATE PROC [dbo].[DBFiles_Upd](
 	@DBFiles DBFiles READONLY,
 	@InstanceID INT,
@@ -29,6 +30,7 @@ BEGIN
 		  ,F.[growth]
 		  ,F.[is_percent_growth]
 		  ,F.[is_read_only] 
+		  ,F.state
 		  FROM @DBFiles F 
 		  JOIN dbo.Databases D ON F.database_id = D.database_id
 		  WHERE D.IsActive=1
@@ -47,6 +49,7 @@ BEGIN
 		  ,T.[is_percent_growth]=S.[is_percent_growth]
 		  ,T.[is_read_only] =S.[is_read_only] 
 		  ,T.IsActive=1
+		  ,T.state = S.state
 	WHEN NOT MATCHED BY TARGET THEN
 	INSERT      (DatabaseID
 			   ,[file_id]
@@ -61,7 +64,8 @@ BEGIN
 			   ,[growth]
 			   ,[is_percent_growth]
 			   ,[is_read_only]
-			   ,IsActive)
+			   ,IsActive
+			   ,state)
 	VALUES(DatabaseID
 		  ,[file_id]
 		  ,[data_space_id]
@@ -75,7 +79,8 @@ BEGIN
 		  ,[growth]
 		  ,[is_percent_growth]
 		  ,[is_read_only]
-		  ,1)
+		  ,1
+		  ,state)
 	WHEN NOT MATCHED BY SOURCE THEN
 	UPDATE SET T.IsActive=0;
 

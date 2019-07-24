@@ -170,13 +170,21 @@ BEGIN
 	END
 END
 DECLARE @OfflineSchedulers INT
+DECLARE @ResourceGovernorEnabled BIT
 SELECT @OfflineSchedulers=COUNT(*)
 FROM sys.dm_os_schedulers
 WHERE is_online=0
+IF OBJECT_ID('sys.resource_governor_configuration') IS  NOT NULL
+BEGIN
+	SELECT  @ResourceGovernorEnabled = CASE WHEN EXISTS(SELECT * 
+										FROM sys.resource_governor_configuration
+										WHERE is_enabled=1)
+										THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END
+END
 
 SELECT @ActivePowerPlan ActivePowerPlanGUID, CASE WHEN @ActivePowerPlan=@HighPerformance THEN 'High Performance' WHEN @ActivePowerPlan=@Balanced THEN 'Balanced' WHEN @ActivePowerPlan = @PowerSaver THEN 'Power Saver' ELSE NULL END AS ActivePowerPlan,
 	@ProcessorNameString as ProcessorNameString,@SystemManufacturer as SystemManufacturer,@SystemProductName as SystemProductName,@IsAgentRunning IsAgentRunning,
-	@InstantFileInitializationEnabled InstantFileInitializationEnabled,@OfflineSchedulers OfflineSchedulers</value>
+	@InstantFileInitializationEnabled InstantFileInitializationEnabled,@OfflineSchedulers OfflineSchedulers, @ResourceGovernorEnabled AS  ResourceGovernorEnabled</value>
   </data>
   <data name="SQLAgentJobSummary" xml:space="preserve">
     <value>WITH T AS (
@@ -185,9 +193,9 @@ MAX(CASE WHEN jh.step_id=0 AND jh.run_status &lt;&gt; 1 THEN dt.RunDateTime ELSE
 MAX(CASE WHEN jh.step_id=0 AND jh.run_status = 1 THEN dt.RunDateTime ELSE NULL END) LastSucceed,
 SUM(CASE WHEN jh.step_id=0 AND jh.run_status &lt;&gt; 1 AND dt.RunDateTime&gt;=DATEADD(hh,-24,GETDATE()) THEN 1 ELSE 0 END) FailCount24Hrs,
 SUM(CASE WHEN jh.step_id=0 AND jh.run_status = 1 AND dt.RunDateTime&gt;=DATEADD(hh,-24,GETDATE()) THEN 1 ELSE 0 END) SucceedCount24Hrs,
-SUM(CASE WHEN jh.step_id=0 AND jh.run_status &lt;&gt; 1 THEN 1 ELSE 0 END) FailCount7Days,
-SUM(CASE WHEN jh.step_id=0 AND jh.run_status = 1 THEN 1 ELSE 0 END) SucceedCount7Days,
-SUM(CASE WHEN jh.step_id&lt;&gt;0 AND jh.run_status &lt;&gt; 1 THEN 1 ELSE 0 END) AS JobStepFails7Days,
+SUM(CASE WHEN jh.step_id=0 AND jh.run_status &lt;&gt; 1 AND dt.RunDateTime&gt;=DATEADD(d,-7,GETDATE()) THEN 1 ELSE 0 END) FailCount7Days,
+SUM(CASE WHEN jh.step_id=0 AND jh.run_status = 1 AND dt.RunDateTime&gt;=DATEADD(d,-7,GETDATE()) THEN 1 ELSE 0 END) SucceedCount7Days,
+SUM(CASE WHEN jh.step_id&lt;&gt;0 AND jh.run_status &lt;&gt; 1 AND dt.RunDateTime&gt;=DATEADD(d,-7,GETDATE()) THEN 1 ELSE 0 END) AS JobStepFails7Days,
 SUM(CASE WHEN jh.step_id&lt;&gt;0 AND jh.run_status &lt;&gt; 1 AND dt.RunDateTime&gt;=DATEADD(hh,-24,GETDATE()) THEN 1 ELSE 0 END) AS JobStepFails24Hrs,
 j.enabled,
 MAX(CASE WHEN jh.step_id=0 THEN dt.RunDurationSec ELSE NULL END) AS MaxDurationSec,
@@ -467,7 +475,8 @@ space_used bigint,
 max_size bigint,
 growth bigint,
 is_percent_growth bit,
-is_read_only bit
+is_read_only BIT,
+state TINYINT
 )
 
 DECLARE DBs CURSOR FOR
@@ -497,7 +506,8 @@ FILEPROPERTY(f.name,''spaceused'') as spaceused,
 f.max_size,
 f.growth,
 f.is_percent_growth,
-f.is_read_only
+f.is_read_only,
+f.state
 from sys.database_files f
 LEFT JOIN sys.filegroups fg on f.data_space_id = fg.data_space_id
 where f.type_desc &lt;&gt; ''FULLTEXT'''
@@ -523,7 +533,8 @@ SELECT database_id,
        max_size,
        growth,
        is_percent_growth,
-       is_read_only 
+       is_read_only,
+	   state
 FROM #FileList
 UNION ALL	
 SELECT database_id,
@@ -533,12 +544,13 @@ name,
 NULL AS filegroup_name,
 physical_name,
 type,
-size,
+CASE WHEN mf.state=3 THEN 0 ELSE size END,
 NULL AS SpaceUsed,
 max_size,
 growth,
 is_percent_growth,
-Is_Read_Only 
+Is_Read_Only,
+state
 FROM sys.master_files mf
 WHERE NOT EXISTS(SELECT 1 FROM #FileList fl WHERE fl.database_id = mf.database_id AND fl.file_id = mf.file_id)
 

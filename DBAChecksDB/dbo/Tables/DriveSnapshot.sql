@@ -4,9 +4,11 @@
     [Capacity]     BIGINT        NOT NULL,
     [FreeSpace]    BIGINT        NOT NULL,
     [UsedSpace]    AS            ([Capacity]-[FreeSpace]),
-    CONSTRAINT [PK_DriveSnapshot] PRIMARY KEY CLUSTERED ([SnapshotDate] ASC, [DriveID] ASC),
+    CONSTRAINT [PK_DriveSnapshot] PRIMARY KEY CLUSTERED ([SnapshotDate] ASC, [DriveID] ASC) WITH (DATA_COMPRESSION = PAGE),
     CONSTRAINT [FK_DriveSnapshot_Drive] FOREIGN KEY ([DriveID]) REFERENCES [dbo].[Drives] ([DriveID])
 );
+
+
 
 
 
@@ -14,5 +16,7 @@
 GO
 CREATE UNIQUE NONCLUSTERED INDEX [IX_DriveSnapshot_DriveID_SnapshotDate]
     ON [dbo].[DriveSnapshot]([DriveID] ASC, [SnapshotDate] ASC)
-    INCLUDE([Capacity], [FreeSpace], [UsedSpace]);
+    INCLUDE([Capacity], [FreeSpace], [UsedSpace]) WITH (DATA_COMPRESSION = PAGE);
+
+
 

@@ -38,6 +38,10 @@
 
 
 
+
+
+
+
 GO
 GRANT EXECUTE
     ON SCHEMA::[Report] TO [Reports];

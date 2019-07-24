@@ -1,4 +1,5 @@
-﻿CREATE PROC [Report].[Summary_Get](@InstanceIDs VARCHAR(MAX)=NULL)
+﻿
+CREATE PROC [Report].[Summary_Get](@InstanceIDs VARCHAR(MAX)=NULL)
 AS
 DECLARE @Instances TABLE(
 	InstanceID INT PRIMARY KEY
@@ -24,21 +25,21 @@ BEGIN
 END;
 
 WITH LS AS (
-	SELECT InstanceID,MIN(Status) as LogShippingStatus
+	SELECT InstanceID,MIN(Status) AS LogShippingStatus
 	FROM LogShippingStatus
 	WHERE Status<>3
 	GROUP BY InstanceID
 )
-, B as (
+, B AS (
 	SELECT InstanceID,
-			MIN(NULLIF(FullBackupStatus,3)) as FullBackupStatus,
-			MIN(NULLIF(LogBackupStatus,3)) as LogBackupStatus,
-			MIN(NULLIF(DiffBackupStatus,3)) as DiffBackupStatus
+			MIN(NULLIF(FullBackupStatus,3)) AS FullBackupStatus,
+			MIN(NULLIF(LogBackupStatus,3)) AS LogBackupStatus,
+			MIN(NULLIF(DiffBackupStatus,3)) AS DiffBackupStatus
 	FROM dbo.BackupStatus
 	GROUP BY InstanceID
 )
 , D AS (
-	SELECT InstanceID, MIN(Status) as DriveStatus
+	SELECT InstanceID, MIN(Status) AS DriveStatus
 	FROM dbo.DriveStatus
 	WHERE Status<>3
 	GROUP BY InstanceID
@@ -74,11 +75,14 @@ dc AS (
 err AS ( 
 	SELECT InstanceID,COUNT(*) cnt,MAX(ErrorDate) AS LastError
 	FROM dbo.CollectionErrorLog
-	WHERE ErrorDate>=DATEADD(d,-7,GETUTCDATE())
+	WHERE ErrorDate>=DATEADD(d,-3,GETUTCDATE())
 	GROUP BY InstanceID
 ),
 SSD AS (
-	SELECT InstanceID,MIN(DATEDIFF(mi,SnapshotDate,GETUTCDATE())) AS SnapshotAgeMin,MAX(DATEDIFF(mi,SnapshotDate,GETUTCDATE())) AS SnapshotAgeMax
+	SELECT InstanceID,
+		MIN(DATEDIFF(mi,SnapshotDate,GETUTCDATE())) AS SnapshotAgeMin,
+		MAX(DATEDIFF(mi,SnapshotDate,GETUTCDATE())) AS SnapshotAgeMax,
+		MIN(SnapshotDate) AS OldestSnapshot
 	FROM dbo.CollectionDates
 	GROUP BY InstanceID
 )
@@ -94,7 +98,7 @@ SELECT I.InstanceID,
 	ISNULL(J.JobStatus,3) AS JobStatus,
 	CASE ag.synchronization_health WHEN 0 THEN 1 WHEN 1 THEN 2 WHEN 2 THEN 4 ELSE 3 END AS AGStatus,
 	dc.DetectedCorruptionDate,
-	CASE WHEN err.LastError > DATEADD(d,-1,GETUTCDATE()) THEN 1 WHEN err.cnt>0 THEN 2 ELSE 4 END AS CollectionErrorStatus,
+	CASE WHEN err.LastError >= SSD.OldestSnapshot THEN 1 WHEN err.cnt>0 THEN 2 ELSE 4 END AS CollectionErrorStatus,
 	SSD.SnapshotAgeMin,
 	SSD.SnapshotAgeMax
 FROM dbo.Instances I 

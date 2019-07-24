@@ -11,7 +11,10 @@
     [max_size]          BIGINT         NULL,
     [growth]            BIGINT         NULL,
     [is_percent_growth] BIT            NULL,
-    [is_read_only]      BIT            NULL);
+    [is_read_only]      BIT            NULL,
+    [state]             TINYINT        NULL);
+
+
 
 
 

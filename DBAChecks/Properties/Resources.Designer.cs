@@ -223,7 +223,8 @@ namespace DBAChecks.Properties {
         ///max_size bigint,
         ///growth bigint,
         ///is_percent_growth bit,
-        ///is_read_only bit
+        ///is_read_only BIT,
+        ///state TINYINT
         ///)
         ///
         ///DECLARE DBs CURSOR FOR
@@ -233,7 +234,7 @@ namespace DBAChecks.Properties {
         ///AND DATABASEPROPERTYEX(name, &apos;Updateability&apos;) = &apos;READ_WRITE&apos;
         ///
         ///OPEN DBs
-        ///FETCH NEXT FROM DBs INTO @DBNam [rest of string was truncated]&quot;;.
+        ///FETCH NEXT FROM [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string SQLFiles {
             get {
