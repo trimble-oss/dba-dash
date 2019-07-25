@@ -16,6 +16,32 @@ namespace DBAChecks
 
         }
 
+        private void logError(string errorSource, string errorMessage,DataSet Data)
+        {
+            DataTable dtErrors;
+            if (Data.Tables.Contains("Errors"))
+            {
+                dtErrors = Data.Tables["Errors"];
+                if (dtErrors.Columns.Count == 0)
+                {
+                    dtErrors.Columns.Add("ErrorSource");
+                    dtErrors.Columns.Add("ErrorMessage");
+                }
+            }
+            else
+            {
+                dtErrors = new DataTable("ImportErrors");
+                dtErrors.Columns.Add("ErrorSource");
+                dtErrors.Columns.Add("ErrorMessage");
+            }
+
+            Console.WriteLine(errorSource + " : " + errorMessage);
+            var rError = dtErrors.NewRow();
+            rError["ErrorSource"] = errorSource;
+            rError["ErrorMessage"] = errorMessage;
+            dtErrors.Rows.Add(rError);
+        }
+
         public void Update(string connectionString, DataSet Data)
         {
             var rInstance = Data.Tables["DBAChecks"].Rows[0];
@@ -47,25 +73,32 @@ namespace DBAChecks
         {
             if (ds.Tables.Contains("ServerExtraProperties") && ds.Tables["ServerExtraProperties"].Rows.Count==1)
             {
-                var r = ds.Tables["ServerExtraProperties"].Rows[0];
-                var cn = new SqlConnection(connectionString);
-                using (cn)
+                try
                 {
-                    cn.Open();
-                    SqlCommand cmd = new SqlCommand("ServerExtraProperties_Upd", cn);
-                    cmd.Parameters.AddWithValue("InstanceID", instanceID);
-                    cmd.Parameters.AddWithValue("SnapshotDate", SnapshotDate);
-                    cmd.Parameters.AddWithValue("ActivePowerPlanGUID", r["ActivePowerPlanGUID"]);
-                    cmd.Parameters.AddWithValue("ActivePowerPlan", r["ActivePowerPlan"]);
-                    cmd.Parameters.AddWithValue("ProcessorNameString", r["ProcessorNameString"]);
-                    cmd.Parameters.AddWithValue("SystemManufacturer", r["SystemManufacturer"]);
-                    cmd.Parameters.AddWithValue("SystemProductName", r["SystemProductName"]);
-                    cmd.Parameters.AddWithValue("IsAgentRunning", r["IsAgentRunning"]);
-                    cmd.Parameters.AddWithValue("InstantFileInitializationEnabled", r["InstantFileInitializationEnabled"]);
-                    cmd.Parameters.AddWithValue("OfflineSchedulers", r["OfflineSchedulers"]);
-                    cmd.Parameters.AddWithValue("ResourceGovernorEnabled", r["ResourceGovernorEnabled"]);
-                    cmd.CommandType = CommandType.StoredProcedure;
-                    cmd.ExecuteNonQuery();
+                    var r = ds.Tables["ServerExtraProperties"].Rows[0];
+                    var cn = new SqlConnection(connectionString);
+                    using (cn)
+                    {
+                        cn.Open();
+                        SqlCommand cmd = new SqlCommand("ServerExtraProperties_Upd", cn);
+                        cmd.Parameters.AddWithValue("InstanceID", instanceID);
+                        cmd.Parameters.AddWithValue("SnapshotDate", SnapshotDate);
+                        cmd.Parameters.AddWithValue("ActivePowerPlanGUID", r["ActivePowerPlanGUID"]);
+                        cmd.Parameters.AddWithValue("ActivePowerPlan", r["ActivePowerPlan"]);
+                        cmd.Parameters.AddWithValue("ProcessorNameString", r["ProcessorNameString"]);
+                        cmd.Parameters.AddWithValue("SystemManufacturer", r["SystemManufacturer"]);
+                        cmd.Parameters.AddWithValue("SystemProductName", r["SystemProductName"]);
+                        cmd.Parameters.AddWithValue("IsAgentRunning", r["IsAgentRunning"]);
+                        cmd.Parameters.AddWithValue("InstantFileInitializationEnabled", r["InstantFileInitializationEnabled"]);
+                        cmd.Parameters.AddWithValue("OfflineSchedulers", r["OfflineSchedulers"]);
+                        cmd.Parameters.AddWithValue("ResourceGovernorEnabled", r["ResourceGovernorEnabled"]);
+                        cmd.CommandType = CommandType.StoredProcedure;
+                        cmd.ExecuteNonQuery();
+                    }
+                }
+                catch(Exception ex)
+                {
+                    logError("Import:ServerExtraProperties", ex.Message, ds);
                 }
             }
         }
@@ -74,19 +107,26 @@ namespace DBAChecks
         {
             if (ds.Tables.Contains(TableName))
             {
-                var cn = new SqlConnection(connectionString);
-                using (cn)
+                try
                 {
-                    cn.Open();
-                    SqlCommand cmd = new SqlCommand(TableName + "_Upd", cn);
-                    if (ds.Tables[TableName].Rows.Count > 0)
+                    var cn = new SqlConnection(connectionString);
+                    using (cn)
                     {
-                        cmd.Parameters.AddWithValue(TableName, ds.Tables[TableName]);
+                        cn.Open();
+                        SqlCommand cmd = new SqlCommand(TableName + "_Upd", cn);
+                        if (ds.Tables[TableName].Rows.Count > 0)
+                        {
+                            cmd.Parameters.AddWithValue(TableName, ds.Tables[TableName]);
+                        }
+                        cmd.Parameters.AddWithValue("InstanceID", instanceID);
+                        cmd.Parameters.AddWithValue("SnapshotDate", SnapshotDate);
+                        cmd.CommandType = CommandType.StoredProcedure;
+                        cmd.ExecuteNonQuery();
                     }
-                    cmd.Parameters.AddWithValue("InstanceID", instanceID);
-                    cmd.Parameters.AddWithValue("SnapshotDate", SnapshotDate);
-                    cmd.CommandType = CommandType.StoredProcedure;
-                    cmd.ExecuteNonQuery();
+                }
+                catch(Exception ex)
+                {
+                    logError("Import:" + TableName, ex.Message,ds );
                 }
             }
         }
@@ -137,35 +177,42 @@ namespace DBAChecks
         {
             if (ds.Tables.Contains("Databases") && ds.Tables["Databases"].Rows.Count > 0)
             {
-                var cn = new SqlConnection(connectionString);
-                using (cn)
+                try
                 {
-                    cn.Open();
-                    var dtDB = ds.Tables["Databases"];
-                    if (dtDB.Columns["owner_sid"].DataType == typeof(string))
+                    var cn = new SqlConnection(connectionString);
+                    using (cn)
                     {
-                        Int32 pos = dtDB.Columns["owner_sid"].Ordinal;
-                        dtDB.Columns["owner_sid"].ColumnName = "owner_sid_string";
-                        
-                        var newCol = dtDB.Columns.Add("owner_sid", typeof(byte[]));
-                       
-                        foreach(DataRow r in dtDB.Rows)
+                        cn.Open();
+                        var dtDB = ds.Tables["Databases"];
+                        if (dtDB.Columns["owner_sid"].DataType == typeof(string))
                         {
-                            r["owner_sid"] = Convert.FromBase64String((string)r["owner_sid_string"]);
+                            Int32 pos = dtDB.Columns["owner_sid"].Ordinal;
+                            dtDB.Columns["owner_sid"].ColumnName = "owner_sid_string";
+
+                            var newCol = dtDB.Columns.Add("owner_sid", typeof(byte[]));
+
+                            foreach (DataRow r in dtDB.Rows)
+                            {
+                                r["owner_sid"] = Convert.FromBase64String((string)r["owner_sid_string"]);
+                            }
+                            dtDB.Columns.Remove("owner_sid_string");
+                            newCol.SetOrdinal(pos);
+
                         }
-                        dtDB.Columns.Remove("owner_sid_string");
-                        newCol.SetOrdinal(pos);
 
+
+                        SqlCommand cmd = new SqlCommand("Database_Upd", cn);
+                        cmd.Parameters.AddWithValue("DB", ds.Tables["Databases"]);
+                        cmd.Parameters.AddWithValue("InstanceID", instanceID);
+                        cmd.Parameters.AddWithValue("SnapshotDate", SnapshotDate);
+
+                        cmd.CommandType = CommandType.StoredProcedure;
+                        cmd.ExecuteNonQuery();
                     }
-
-
-                    SqlCommand cmd = new SqlCommand("Database_Upd", cn);
-                    cmd.Parameters.AddWithValue("DB", ds.Tables["Databases"]);
-                    cmd.Parameters.AddWithValue("InstanceID", instanceID);
-                    cmd.Parameters.AddWithValue("SnapshotDate", SnapshotDate);
-                    
-                    cmd.CommandType = CommandType.StoredProcedure;
-                    cmd.ExecuteNonQuery();
+                }
+                catch(Exception ex)
+                {
+                    logError("Import:Database", ex.Message, ds);
                 }
             }
         }

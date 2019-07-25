@@ -1,5 +1,4 @@
-﻿
-CREATE PROC [Report].[Summary_Get](@InstanceIDs VARCHAR(MAX)=NULL)
+﻿CREATE PROC [Report].[Summary_Get](@InstanceIDs VARCHAR(MAX)=NULL)
 AS
 DECLARE @Instances TABLE(
 	InstanceID INT PRIMARY KEY
@@ -100,7 +99,12 @@ SELECT I.InstanceID,
 	dc.DetectedCorruptionDate,
 	CASE WHEN err.LastError >= SSD.OldestSnapshot THEN 1 WHEN err.cnt>0 THEN 2 ELSE 4 END AS CollectionErrorStatus,
 	SSD.SnapshotAgeMin,
-	SSD.SnapshotAgeMax
+	SSD.SnapshotAgeMax,
+	DATEADD(mi,I.UtcOffSet,I.sqlserver_start_time) AS sqlserver_start_time_utc,
+	I.UTCOffset,
+	DATEDIFF(mi,DATEADD(mi,I.UtcOffSet,I.sqlserver_start_time),OSInfoCD.SnapshotDate) AS sqlserver_uptime,
+	I.ms_ticks/60000 AS host_uptime,
+	DATEADD(s,-I.ms_ticks/1000,OSInfoCD.SnapshotDate) AS host_start_time_utc
 FROM dbo.Instances I 
 LEFT JOIN LS ON I.InstanceID = LS.InstanceID
 LEFT JOIN B ON I.InstanceID = B.InstanceID
@@ -111,5 +115,6 @@ LEFT JOIN ag ON I.InstanceID= ag.InstanceID
 LEFT JOIN dc ON I.InstanceID = dc.InstanceID
 LEFT JOIN err ON I.InstanceID = err.InstanceID
 LEFT JOIN SSD ON I.InstanceID = SSD.InstanceID
+LEFT JOIN dbo.CollectionDates OSInfoCD ON OSInfoCD.InstanceID = I.InstanceID AND OSInfoCD.Reference='OSInfo'
 WHERE EXISTS(SELECT 1 FROM @Instances t WHERE I.InstanceID = t.InstanceID)
 AND I.IsActive=1

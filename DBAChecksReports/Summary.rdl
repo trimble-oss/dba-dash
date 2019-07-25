@@ -83,6 +83,26 @@
           <DataField>SnapshotAgeMax</DataField>
           <rd:TypeName>System.Int32</rd:TypeName>
         </Field>
+        <Field Name="sqlserver_start_time_utc">
+          <DataField>sqlserver_start_time_utc</DataField>
+          <rd:TypeName>System.DateTime</rd:TypeName>
+        </Field>
+        <Field Name="UTCOffset">
+          <DataField>UTCOffset</DataField>
+          <rd:TypeName>System.Int32</rd:TypeName>
+        </Field>
+        <Field Name="sqlserver_uptime">
+          <DataField>sqlserver_uptime</DataField>
+          <rd:TypeName>System.Int32</rd:TypeName>
+        </Field>
+        <Field Name="host_uptime">
+          <DataField>host_uptime</DataField>
+          <rd:TypeName>System.Int64</rd:TypeName>
+        </Field>
+        <Field Name="host_start_time_utc">
+          <DataField>host_start_time_utc</DataField>
+          <rd:TypeName>System.DateTime</rd:TypeName>
+        </Field>
       </Fields>
     </DataSet>
     <DataSet Name="Instances">
@@ -213,6 +233,9 @@
                 <TablixColumn>
                   <Width>1in</Width>
                 </TablixColumn>
+                <TablixColumn>
+                  <Width>0.88333in</Width>
+                </TablixColumn>
               </TablixColumns>
               <TablixRows>
                 <TablixRow>
@@ -245,7 +268,8 @@
                           <rd:DefaultName>textbox2</rd:DefaultName>
                           <Style>
                             <Border>
-                              <Color>LightGrey</Color>
+                              <Color>Gainsboro</Color>
+                              <Style>None</Style>
                             </Border>
                             <BottomBorder>
                               <Style>Solid</Style>
@@ -290,7 +314,8 @@
                           <rd:DefaultName>textbox4</rd:DefaultName>
                           <Style>
                             <Border>
-                              <Color>LightGrey</Color>
+                              <Color>Gainsboro</Color>
+                              <Style>None</Style>
                             </Border>
                             <BottomBorder>
                               <Style>Solid</Style>
@@ -335,7 +360,8 @@
                           <rd:DefaultName>textbox5</rd:DefaultName>
                           <Style>
                             <Border>
-                              <Color>LightGrey</Color>
+                              <Color>Gainsboro</Color>
+                              <Style>None</Style>
                             </Border>
                             <BottomBorder>
                               <Style>Solid</Style>
@@ -380,7 +406,8 @@
                           <rd:DefaultName>textbox6</rd:DefaultName>
                           <Style>
                             <Border>
-                              <Color>LightGrey</Color>
+                              <Color>Gainsboro</Color>
+                              <Style>None</Style>
                             </Border>
                             <BottomBorder>
                               <Style>Solid</Style>
@@ -425,7 +452,8 @@
                           <rd:DefaultName>textbox7</rd:DefaultName>
                           <Style>
                             <Border>
-                              <Color>LightGrey</Color>
+                              <Color>Gainsboro</Color>
+                              <Style>None</Style>
                             </Border>
                             <BottomBorder>
                               <Style>Solid</Style>
@@ -470,7 +498,8 @@
                           <rd:DefaultName>textbox8</rd:DefaultName>
                           <Style>
                             <Border>
-                              <Color>LightGrey</Color>
+                              <Color>Gainsboro</Color>
+                              <Style>None</Style>
                             </Border>
                             <BottomBorder>
                               <Style>Solid</Style>
@@ -514,7 +543,8 @@
                           <rd:DefaultName>Textbox12</rd:DefaultName>
                           <Style>
                             <Border>
-                              <Color>LightGrey</Color>
+                              <Color>Gainsboro</Color>
+                              <Style>None</Style>
                             </Border>
                             <BottomBorder>
                               <Style>Solid</Style>
@@ -558,7 +588,8 @@
                           <rd:DefaultName>textbox9</rd:DefaultName>
                           <Style>
                             <Border>
-                              <Color>LightGrey</Color>
+                              <Color>Gainsboro</Color>
+                              <Style>None</Style>
                             </Border>
                             <BottomBorder>
                               <Style>Solid</Style>
@@ -602,7 +633,8 @@
                           <rd:DefaultName>Textbox13</rd:DefaultName>
                           <Style>
                             <Border>
-                              <Color>LightGrey</Color>
+                              <Color>Gainsboro</Color>
+                              <Style>None</Style>
                             </Border>
                             <BottomBorder>
                               <Style>Solid</Style>
@@ -645,7 +677,8 @@
                           <rd:DefaultName>Textbox16</rd:DefaultName>
                           <Style>
                             <Border>
-                              <Color>LightGrey</Color>
+                              <Color>Gainsboro</Color>
+                              <Style>None</Style>
                             </Border>
                             <BottomBorder>
                               <Style>Solid</Style>
@@ -688,7 +721,8 @@
                           <rd:DefaultName>Textbox18</rd:DefaultName>
                           <Style>
                             <Border>
-                              <Color>LightGrey</Color>
+                              <Color>Gainsboro</Color>
+                              <Style>None</Style>
                             </Border>
                             <BottomBorder>
                               <Style>Solid</Style>
@@ -740,7 +774,52 @@
                           </ActionInfo>
                           <Style>
                             <Border>
-                              <Color>LightGrey</Color>
+                              <Color>Gainsboro</Color>
+                              <Style>None</Style>
+                            </Border>
+                            <BottomBorder>
+                              <Style>Solid</Style>
+                            </BottomBorder>
+                            <BackgroundColor>#444444</BackgroundColor>
+                            <PaddingLeft>2pt</PaddingLeft>
+                            <PaddingRight>2pt</PaddingRight>
+                            <PaddingTop>2pt</PaddingTop>
+                            <PaddingBottom>2pt</PaddingBottom>
+                          </Style>
+                        </Textbox>
+                      </CellContents>
+                    </TablixCell>
+                    <TablixCell>
+                      <CellContents>
+                        <Textbox Name="Textbox3">
+                          <CanGrow>true</CanGrow>
+                          <UserSort>
+                            <SortExpression>=Fields!sqlserver_uptime.Value</SortExpression>
+                          </UserSort>
+                          <KeepTogether>true</KeepTogether>
+                          <Paragraphs>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Value>Instance uptime</Value>
+                                  <Style>
+                                    <FontFamily />
+                                    <FontSize>11pt</FontSize>
+                                    <FontWeight>Bold</FontWeight>
+                                    <Color>White</Color>
+                                  </Style>
+                                </TextRun>
+                              </TextRuns>
+                              <Style>
+                                <TextAlign>Right</TextAlign>
+                              </Style>
+                            </Paragraph>
+                          </Paragraphs>
+                          <rd:DefaultName>Textbox3</rd:DefaultName>
+                          <Style>
+                            <Border>
+                              <Color>Gainsboro</Color>
+                              <Style>None</Style>
                             </Border>
                             <BottomBorder>
                               <Style>Solid</Style>
@@ -771,7 +850,6 @@
                                   <Value>=Fields!Instance.Value</Value>
                                   <Style>
                                     <FontFamily />
-                                    <Color>#333333</Color>
                                   </Style>
                                 </TextRun>
                               </TextRuns>
@@ -782,7 +860,7 @@
                           <ToolTip>=Fields!Tags.Value.ToString().Replace(",",Environment.NewLine)</ToolTip>
                           <Style>
                             <Border>
-                              <Color>LightGrey</Color>
+                              <Color>Gainsboro</Color>
                               <Style>Solid</Style>
                             </Border>
                             <FontFamily />
@@ -806,7 +884,6 @@
                                   <Value />
                                   <Style>
                                     <FontFamily />
-                                    <Color>#333333</Color>
                                   </Style>
                                 </TextRun>
                               </TextRuns>
@@ -833,7 +910,7 @@
                           </ActionInfo>
                           <Style>
                             <Border>
-                              <Color>LightGrey</Color>
+                              <Color>Gainsboro</Color>
                               <Style>Solid</Style>
                             </Border>
                             <BackgroundColor>=SWITCH(Fields!LogShippingStatus.Value=1,"Red",
@@ -862,7 +939,6 @@ Fields!LogShippingStatus.Value=4,"Green",
                                   <Value />
                                   <Style>
                                     <FontFamily />
-                                    <Color>#333333</Color>
                                   </Style>
                                 </TextRun>
                               </TextRuns>
@@ -889,7 +965,7 @@ Fields!LogShippingStatus.Value=4,"Green",
                           </ActionInfo>
                           <Style>
                             <Border>
-                              <Color>LightGrey</Color>
+                              <Color>Gainsboro</Color>
                               <Style>Solid</Style>
                             </Border>
                             <BackgroundColor>=SWITCH(Fields!FullBackupStatus.Value=1,"Red",
@@ -916,7 +992,6 @@ Fields!FullBackupStatus.Value=4,"Green",
                                   <Value />
                                   <Style>
                                     <FontFamily />
-                                    <Color>#333333</Color>
                                   </Style>
                                 </TextRun>
                               </TextRuns>
@@ -943,7 +1018,7 @@ Fields!FullBackupStatus.Value=4,"Green",
                           </ActionInfo>
                           <Style>
                             <Border>
-                              <Color>LightGrey</Color>
+                              <Color>Gainsboro</Color>
                               <Style>Solid</Style>
                             </Border>
                             <BackgroundColor>=SWITCH(Fields!LogBackupStatus.Value=1,"Red",
@@ -971,7 +1046,6 @@ Fields!LogBackupStatus.Value=4,"Green",
                                   <Value />
                                   <Style>
                                     <FontFamily />
-                                    <Color>#333333</Color>
                                   </Style>
                                 </TextRun>
                               </TextRuns>
@@ -998,7 +1072,7 @@ Fields!LogBackupStatus.Value=4,"Green",
                           </ActionInfo>
                           <Style>
                             <Border>
-                              <Color>LightGrey</Color>
+                              <Color>Gainsboro</Color>
                               <Style>Solid</Style>
                             </Border>
                             <BackgroundColor>=SWITCH(Fields!DiffBackupStatus.Value=1,"Red",
@@ -1026,7 +1100,6 @@ Fields!DiffBackupStatus.Value=4,"Green",
                                   <Value />
                                   <Style>
                                     <FontFamily />
-                                    <Color>#333333</Color>
                                   </Style>
                                 </TextRun>
                               </TextRuns>
@@ -1053,7 +1126,7 @@ Fields!DiffBackupStatus.Value=4,"Green",
                           </ActionInfo>
                           <Style>
                             <Border>
-                              <Color>LightGrey</Color>
+                              <Color>Gainsboro</Color>
                               <Style>Solid</Style>
                             </Border>
                             <BackgroundColor>=SWITCH(Fields!DriveStatus.Value=1,"Red",
@@ -1081,7 +1154,6 @@ Fields!DriveStatus.Value=4,"Green",
                                   <Value />
                                   <Style>
                                     <FontFamily />
-                                    <Color>#333333</Color>
                                   </Style>
                                 </TextRun>
                               </TextRuns>
@@ -1108,7 +1180,7 @@ Fields!DriveStatus.Value=4,"Green",
                           </ActionInfo>
                           <Style>
                             <Border>
-                              <Color>LightGrey</Color>
+                              <Color>Gainsboro</Color>
                               <Style>Solid</Style>
                             </Border>
                             <BackgroundColor>=SWITCH(Fields!JobStatus.Value=1,"Red",
@@ -1135,7 +1207,6 @@ Fields!JobStatus.Value=4,"Green",
                                   <Value />
                                   <Style>
                                     <FontFamily />
-                                    <Color>#333333</Color>
                                   </Style>
                                 </TextRun>
                               </TextRuns>
@@ -1162,7 +1233,7 @@ Fields!JobStatus.Value=4,"Green",
                           </ActionInfo>
                           <Style>
                             <Border>
-                              <Color>LightGrey</Color>
+                              <Color>Gainsboro</Color>
                               <Style>Solid</Style>
                             </Border>
                             <BackgroundColor>=SWITCH(Fields!FileFreeSpaceStatus.Value=1,"Red",
@@ -1189,7 +1260,6 @@ Fields!FileFreeSpaceStatus.Value=4,"Green",
                                   <Value />
                                   <Style>
                                     <FontFamily />
-                                    <Color>#333333</Color>
                                   </Style>
                                 </TextRun>
                               </TextRuns>
@@ -1199,7 +1269,7 @@ Fields!FileFreeSpaceStatus.Value=4,"Green",
                           <rd:DefaultName>Textbox15</rd:DefaultName>
                           <Style>
                             <Border>
-                              <Color>LightGrey</Color>
+                              <Color>Gainsboro</Color>
                               <Style>Solid</Style>
                             </Border>
                             <BackgroundColor>=SWITCH(Fields!AGStatus.Value=1,"Red",
@@ -1227,7 +1297,6 @@ Fields!AGStatus.Value=4,"Green",
                                   <Style>
                                     <FontFamily />
                                     <Format>=Parameters!DateFormat.Value</Format>
-                                    <Color>#333333</Color>
                                   </Style>
                                 </TextRun>
                               </TextRuns>
@@ -1239,7 +1308,7 @@ Fields!AGStatus.Value=4,"Green",
 "Check these tables: sys.dm_hadr_auto_page_repair, sys.dm_db_mirroring_auto_page_repair, msdb.dbo.suspect_pages")</ToolTip>
                           <Style>
                             <Border>
-                              <Color>LightGrey</Color>
+                              <Color>Gainsboro</Color>
                               <Style>Solid</Style>
                             </Border>
                             <BackgroundColor>=SWITCH(IsNothing(Fields!DetectedCorruptionDate.Value),"Green",
@@ -1267,7 +1336,6 @@ DateTime.UtcNow.Subtract(CDATE(Fields!DetectedCorruptionDate.Value)).TotalDays&l
                                   <Value />
                                   <Style>
                                     <FontFamily />
-                                    <Color>#333333</Color>
                                   </Style>
                                 </TextRun>
                               </TextRuns>
@@ -1291,7 +1359,7 @@ DateTime.UtcNow.Subtract(CDATE(Fields!DetectedCorruptionDate.Value)).TotalDays&l
                           </ActionInfo>
                           <Style>
                             <Border>
-                              <Color>LightGrey</Color>
+                              <Color>Gainsboro</Color>
                               <Style>Solid</Style>
                             </Border>
                             <BackgroundColor>=SWITCH(Fields!CollectionErrorStatus.Value=1,"Red",
@@ -1320,7 +1388,6 @@ Fields!SnapshotAgeMax.Value,
 Fields!SnapshotAgeMin.Value &amp; " to " &amp; Fields!SnapshotAgeMax.Value)</Value>
                                   <Style>
                                     <FontFamily />
-                                    <Color>#333333</Color>
                                   </Style>
                                 </TextRun>
                               </TextRuns>
@@ -1350,7 +1417,7 @@ Fields!SnapshotAgeMin.Value &amp; " to " &amp; Fields!SnapshotAgeMax.Value)</Val
                           </ActionInfo>
                           <Style>
                             <Border>
-                              <Color>LightGrey</Color>
+                              <Color>Gainsboro</Color>
                               <Style>Solid</Style>
                             </Border>
                             <BackgroundColor>=switch(Fields!SnapshotAgeMax.Value&gt;Parameters!SnapshotAgeCritical.Value,"Red",
@@ -1365,12 +1432,52 @@ Fields!SnapshotAgeMax.Value&lt;=Parameters!SnapshotAgeWarning.Value,"Green",
                         </Textbox>
                       </CellContents>
                     </TablixCell>
+                    <TablixCell>
+                      <CellContents>
+                        <Textbox Name="sqlserver_uptime">
+                          <CanGrow>true</CanGrow>
+                          <KeepTogether>true</KeepTogether>
+                          <Paragraphs>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Value>=SWITCH(Fields!sqlserver_uptime.Value&lt;120,Fields!sqlserver_uptime.Value &amp; " Mins",
+Fields!sqlserver_uptime.Value&lt;1440,Format(Fields!sqlserver_uptime.Value/60,"0") &amp; " Hours",
+1=1,Format(Fields!sqlserver_uptime.Value/1440,"0") &amp; " Days")</Value>
+                                  <Style>
+                                    <FontFamily />
+                                  </Style>
+                                </TextRun>
+                              </TextRuns>
+                              <Style />
+                            </Paragraph>
+                          </Paragraphs>
+                          <rd:DefaultName>sqlserver_uptime</rd:DefaultName>
+                          <ToolTip>="Instance Start Time: " &amp; Format(System.TimeZone.CurrentTimeZone.ToLocalTime(Fields!sqlserver_start_time_utc.Value), Parameters!DateFormat.Value) &amp; Environment.NewLine &amp;
+"Host Start Time: " &amp; Format(System.TimeZone.CurrentTimeZone.ToLocalTime(Fields!host_start_time_utc.Value),Parameters!DateFormat.Value)</ToolTip>
+                          <Style>
+                            <Border>
+                              <Color>Gainsboro</Color>
+                              <Style>Solid</Style>
+                            </Border>
+                            <BackgroundColor>=SWITCH(Fields!sqlserver_uptime.Value&lt;720,"Red",
+Fields!sqlserver_uptime.Value&lt;2880,"Yellow",
+1=1,"Green")</BackgroundColor>
+                            <PaddingLeft>2pt</PaddingLeft>
+                            <PaddingRight>2pt</PaddingRight>
+                            <PaddingTop>2pt</PaddingTop>
+                            <PaddingBottom>2pt</PaddingBottom>
+                          </Style>
+                        </Textbox>
+                      </CellContents>
+                    </TablixCell>
                   </TablixCells>
                 </TablixRow>
               </TablixRows>
             </TablixBody>
             <TablixColumnHierarchy>
               <TablixMembers>
+                <TablixMember />
                 <TablixMember />
                 <TablixMember />
                 <TablixMember />
@@ -1413,7 +1520,7 @@ Fields!SnapshotAgeMax.Value&lt;=Parameters!SnapshotAgeWarning.Value,"Green",
             </SortExpressions>
             <Top>0.43in</Top>
             <Height>0.83625in</Height>
-            <Width>13.30208in</Width>
+            <Width>14.18541in</Width>
             <ZIndex>1</ZIndex>
             <Style />
           </Tablix>

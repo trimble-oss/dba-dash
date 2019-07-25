@@ -1,4 +1,5 @@
 ﻿
+
 CREATE PROC [dbo].[AgentJobs_Upd](@AgentJobs AgentJobs READONLY,@InstanceID INT,@SnapshotDate DATETIME2(2))
 AS
 DECLARE @Ref VARCHAR(30)='AgentJobs'
@@ -56,7 +57,7 @@ BEGIN TRAN;
 		   [IsLastFail],
 		   start_step_id,
 		   category_id,
-		   CONVERT(VARBINARY(85), owner_sid_string, 2),
+		   ISNULL(TRY_CONVERT(VARBINARY(85), owner_sid_string, 2),0x),
 		   notify_email_operator_id,
 		   notify_netsend_operator_id,
 		   notify_page_operator_id,

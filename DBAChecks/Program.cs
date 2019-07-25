@@ -98,82 +98,89 @@ namespace DBAChecks
                    Int32 i = 1;
                    foreach (string s in o.Source)
                    {
-                       Console.WriteLine(String.Format("Processing Source {0} of {1}", i, o.Source.Count()));
-                       if (s.StartsWith("s3://") || s.StartsWith("https://"))
+                       try
                        {
-                           Console.WriteLine("Import from S3");
-                           var uri = new Amazon.S3.Util.AmazonS3Uri(s);
-                           var s3Cli = getAWSClient(o.AWSProfile, uri);
-                           var resp = s3Cli.ListObjects(uri.Bucket, (uri.Key + "/DBAChecks_").Replace("//", "/"));
-                           foreach (var f in resp.S3Objects)
+                           Console.WriteLine(String.Format("Processing Source {0} of {1}", i, o.Source.Count()));
+                           if (s.StartsWith("s3://") || s.StartsWith("https://"))
                            {
-                               if (f.Key.EndsWith(".json"))
+                               Console.WriteLine("Import from S3");
+                               var uri = new Amazon.S3.Util.AmazonS3Uri(s);
+                               var s3Cli = getAWSClient(o.AWSProfile, uri);
+                               var resp = s3Cli.ListObjects(uri.Bucket, (uri.Key + "/DBAChecks_").Replace("//", "/"));
+                               foreach (var f in resp.S3Objects)
                                {
-                                   using (GetObjectResponse response = s3Cli.GetObject(f.BucketName, f.Key))
-                                   using (Stream responseStream = response.ResponseStream)
-                                   using (StreamReader reader = new StreamReader(responseStream))
+                                   if (f.Key.EndsWith(".json"))
                                    {
-                                       string json = reader.ReadToEnd();
-                                       DataSet ds = JsonConvert.DeserializeObject<DataSet>(json);
-                                       importer.Update(o.Destination, ds);
-                                       s3Cli.DeleteObject(f.BucketName, f.Key);
+                                       using (GetObjectResponse response = s3Cli.GetObject(f.BucketName, f.Key))
+                                       using (Stream responseStream = response.ResponseStream)
+                                       using (StreamReader reader = new StreamReader(responseStream))
+                                       {
+                                           string json = reader.ReadToEnd();
+                                           DataSet ds = JsonConvert.DeserializeObject<DataSet>(json);
+                                           importer.Update(o.Destination, ds);
+                                           s3Cli.DeleteObject(f.BucketName, f.Key);
+                                       }
+                                       Console.WriteLine("Imported:" + f.Key);
                                    }
-                                   Console.WriteLine("Imported:" + f.Key);
                                }
                            }
-                       }
-                       else if (System.IO.Directory.Exists(s))
-                       {
-                           Console.WriteLine("Import from Directory");
-                           foreach (var f in Directory.EnumerateFiles(s, "DBAChecks*.json", SearchOption.TopDirectoryOnly))
+                           else if (System.IO.Directory.Exists(s))
                            {
-                               string json = File.ReadAllText(f);
-                               DataSet ds = JsonConvert.DeserializeObject<DataSet>(json);
-                               importer.Update(o.Destination, ds);
-                               File.Delete(f);
-                               Console.WriteLine("Imported:" + f);
-                           }
-                       }
-                       else
-                       {
-                           Console.WriteLine("Collect from Instance:");
-                           var collector = new DBCollector(s, o.NoWMI);
-                           collector.CollectAll();
-                           var ds = collector.Data;
-                           if (o.Destination.StartsWith("s3://") || o.Destination.StartsWith("https://"))
-                           {
-                               Console.WriteLine("Upload to S3");
-                               var uri = new Amazon.S3.Util.AmazonS3Uri(o.Destination);
-                               var s3Cli = getAWSClient(o.AWSProfile, uri);
-                               var r = new Amazon.S3.Model.PutObjectRequest();
-                               string fileName = "DBAChecks_" + DateTime.UtcNow.ToString("yyyy-MM-dd HHmmss") + Guid.NewGuid().ToString() + ".json";
-                               string filePath = Path.Combine(o.Destination, fileName);
-                               string json = JsonConvert.SerializeObject(collector.Data, Formatting.None);
-                               r.ContentBody = json;
-                               r.BucketName = uri.Bucket;
-                               r.Key = (uri.Key + "/" + fileName).Replace("//", "/");
-
-                               s3Cli.PutObject(r);
-
-
-
-                           }
-                           else if (System.IO.Directory.Exists(o.Destination))
-                           {
-                               Console.WriteLine("Write to folder");
-                               string fileName = "DBAChecks_" + DateTime.UtcNow.ToString("yyyy-MM-dd HHmmss") + Guid.NewGuid().ToString() + ".json";
-                               string filePath = Path.Combine(o.Destination, fileName);
-                               string json = JsonConvert.SerializeObject(collector.Data, Formatting.None);
-                               File.WriteAllText(filePath, json);
+                               Console.WriteLine("Import from Directory");
+                               foreach (var f in Directory.EnumerateFiles(s, "DBAChecks*.json", SearchOption.TopDirectoryOnly))
+                               {
+                                   string json = File.ReadAllText(f);
+                                   DataSet ds = JsonConvert.DeserializeObject<DataSet>(json);
+                                   importer.Update(o.Destination, ds);
+                                   File.Delete(f);
+                                   Console.WriteLine("Imported:" + f);
+                               }
                            }
                            else
                            {
-                               Console.WriteLine("Update DBAChecks DB");
-                               importer.Update(o.Destination, collector.Data);
+                               Console.WriteLine("Collect from Instance:" + s);
+                               var collector = new DBCollector(s, o.NoWMI);
+                               collector.CollectAll();
+                               var ds = collector.Data;
+                               if (o.Destination.StartsWith("s3://") || o.Destination.StartsWith("https://"))
+                               {
+                                   Console.WriteLine("Upload to S3");
+                                   var uri = new Amazon.S3.Util.AmazonS3Uri(o.Destination);
+                                   var s3Cli = getAWSClient(o.AWSProfile, uri);
+                                   var r = new Amazon.S3.Model.PutObjectRequest();
+                                   string fileName = "DBAChecks_" + DateTime.UtcNow.ToString("yyyy-MM-dd HHmmss") + Guid.NewGuid().ToString() + ".json";
+                                   string filePath = Path.Combine(o.Destination, fileName);
+                                   string json = JsonConvert.SerializeObject(collector.Data, Formatting.None);
+                                   r.ContentBody = json;
+                                   r.BucketName = uri.Bucket;
+                                   r.Key = (uri.Key + "/" + fileName).Replace("//", "/");
 
+                                   s3Cli.PutObject(r);
+
+
+
+                               }
+                               else if (System.IO.Directory.Exists(o.Destination))
+                               {
+                                   Console.WriteLine("Write to folder");
+                                   string fileName = "DBAChecks_" + DateTime.UtcNow.ToString("yyyy-MM-dd HHmmss") + Guid.NewGuid().ToString() + ".json";
+                                   string filePath = Path.Combine(o.Destination, fileName);
+                                   string json = JsonConvert.SerializeObject(collector.Data, Formatting.None);
+                                   File.WriteAllText(filePath, json);
+                               }
+                               else
+                               {
+                                   Console.WriteLine("Update DBAChecks DB");
+                                   importer.Update(o.Destination, collector.Data);
+
+                               }
                            }
+                           i += 1;
                        }
-                       i += 1;
+                       catch(Exception ex)
+                       {
+                           Console.WriteLine(ex.Message);
+                       }
                    }
                    if (o.IntervalMins <= 0)
                    {
