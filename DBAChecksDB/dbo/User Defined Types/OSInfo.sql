@@ -12,5 +12,8 @@
     [socket_count]           INT      NULL,
     [softnuma_configuration] INT      NULL,
     [sql_memory_model]       INT      NULL,
-    [sqlserver_start_time]   DATETIME NULL);
+    [sqlserver_start_time]   DATETIME NULL,
+    [UTCOffset]              INT      NULL);
+
+
 

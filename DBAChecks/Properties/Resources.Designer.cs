@@ -61,13 +61,23 @@ namespace DBAChecks.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to WITH T AS (
-        ///SELECT j.job_id,j.name,
-        ///MAX(CASE WHEN jh.step_id=0 AND jh.run_status &lt;&gt; 1 THEN dt.RunDateTime ELSE NULL END) LastFail,
-        ///MAX(CASE WHEN jh.step_id=0 AND jh.run_status = 1 THEN dt.RunDateTime ELSE NULL END) LastSucceed,
-        ///SUM(CASE WHEN jh.step_id=0 AND jh.run_status &lt;&gt; 1 AND dt.RunDateTime&gt;=DATEADD(hh,-24,GETDATE()) THEN 1 ELSE 0 END) FailCount24Hrs,
-        ///SUM(CASE WHEN jh.step_id=0 AND jh.run_status = 1 AND dt.RunDateTime&gt;=DATEADD(hh,-24,GETDATE()) THEN 1 ELSE 0 END) SucceedCount24Hrs,
-        ///SUM(CASE WHEN  [rest of string was truncated]&quot;;.
+        ///   Looks up a localized string similar to WITH T
+        ///AS (SELECT j.job_id,
+        ///           j.name,
+        ///           MAX(   CASE
+        ///                      WHEN jh.step_id = 0
+        ///                      AND  jh.run_status &lt;&gt; 1 THEN
+        ///                          dt.RunDateTime
+        ///                      ELSE
+        ///                          NULL
+        ///                  END
+        ///              ) LastFail,
+        ///           MAX(   CASE
+        ///                      WHEN jh.step_id = 0
+        ///                      AND  jh.run_status = 1 THEN
+        ///                          dt.RunDateTime
+        ///                      ELSE
+        ///    [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string SQLAgentJobSummary {
             get {

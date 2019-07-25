@@ -68,8 +68,11 @@
     [max_workers_count]                INT              NULL,
     [scheduler_count]                  INT              NULL,
     [ResourceGovernorEnabled]          BIT              NULL,
+    [UTCOffset]                        INT              NULL,
     CONSTRAINT [PK_Instances] PRIMARY KEY CLUSTERED ([InstanceID] ASC)
 );
+
+
 
 
 

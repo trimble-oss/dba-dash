@@ -26,6 +26,10 @@ namespace DBAChecks
             public string Source{ get; set; }
             [Option('d', "destination", Required = true, HelpText = "Destination Connection string for DBAChecks DB")]
             public string Destination { get; set; }
+
+            [Option("nowmi", Required = false, Default = false, HelpText = "Don't use WMI to collect drive information")]
+            public bool NoWMI { get; set; }
+     
             [Option('p', "awsprofile", Required = false, HelpText = "AWS Profile")]
             public string AWSProfile { get; set; }
         }
@@ -121,7 +125,7 @@ namespace DBAChecks
                }
                else
                {
-                   var collector = new DBCollector(o.Source);
+                   var collector = new DBCollector(o.Source,o.NoWMI);
                    collector.CollectAll();
                    var ds = collector.Data;
                    if (o.Destination.StartsWith("s3://") || o.Destination.StartsWith("https://"))

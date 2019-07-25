@@ -14,12 +14,12 @@ namespace DBAChecks
         public DataSet Data;
         string _connectionString;
         private DataTable dtErrors;
+        private bool noWMI;
 
-        public DBCollector(string connectionString)
+        public DBCollector(string connectionString, bool noWMI)
         {
                   startup(connectionString, null);
-           
-
+                 this.noWMI = noWMI;
         }
 
         private void logError(string errorSource,string errorMessage)
@@ -303,14 +303,21 @@ namespace DBAChecks
 
         public void CollectDrives()
         {
-            try
+            if (noWMI)
             {
-                CollectDrivesWMI();
-            }
-            catch(Exception ex)
-            {
-                logError("Collect Drives","Error collecting drives via WMI.  Drive info will be collected from SQL, but might be incomplete");
                 CollectDrivesSQL();
+            }
+            else
+            {
+                try
+                {
+                    CollectDrivesWMI();
+                }
+                catch (Exception ex)
+                {
+                    logError("Collect Drives", "Error collecting drives via WMI.  Drive info will be collected from SQL, but might be incomplete.  Use --nowmi switch to collect through SQL as default.");
+                    CollectDrivesSQL();
+                }
             }
         }
 

@@ -1,4 +1,5 @@
-﻿CREATE PROC OSInfo_Upd(
+﻿
+CREATE PROC [dbo].[OSInfo_Upd](
 	@InstanceID INT,
 	@SnapshotDate DATETIME2(2),
 	@OSInfo OSInfo READONLY
@@ -21,7 +22,8 @@ BEGIN
 		I.sql_memory_model = t.sql_memory_model, 
 		I.sqlserver_start_time = t.sqlserver_start_time ,
 		I.max_workers_count = t.max_workers_count,
-		I.scheduler_count = t.scheduler_count
+		I.scheduler_count = t.scheduler_count,
+		I.UTCOffset = t.UTCOffset
 	FROM dbo.Instances I
 	CROSS JOIN @OSInfo t 
 	WHERE I.InstanceID = @InstanceID
