@@ -105,12 +105,20 @@ namespace DBAChecks
             }
             try
             {
+                addDT("FunctionStats", Properties.Resources.SQLFunctionPerformance);
+            }
+            catch (Exception ex)
+            {
+                logError("FunctionStats", ex.Message);
+            }
+            try
+            {
                 SqlParameter pTop = new SqlParameter("TOP", CPUCollectionPeriod);
                 addDT("CPU", Properties.Resources.SQLCPU, new SqlParameter[] { pTop });
             }
             catch (Exception ex)
             {
-                logError("ProcStats", ex.Message);
+                logError("CPU", ex.Message);
             }
         }
 

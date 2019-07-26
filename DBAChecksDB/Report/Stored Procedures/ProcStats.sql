@@ -1,6 +1,15 @@
 ﻿
 
-CREATE  PROC [Report].[ProcStats](@InstanceID INT,@DatabaseID INT=NULL,@Proc SYSNAME=NULL,@FromDate DATETIME=NULL,@ToDate DATETIME=NULL,@Measure VARCHAR(30)='TotalDuration',@DateAgg VARCHAR(20)='NONE')
+CREATE  PROC [Report].[ProcStats](
+	@InstanceID INT,
+	@DatabaseID INT=NULL,
+	@Proc SYSNAME=NULL,
+	@FromDate DATETIME=NULL,
+	@ToDate DATETIME=NULL,
+	@Measure VARCHAR(30)='TotalDuration',
+	@DateAgg VARCHAR(20)='NONE',
+	@IsFunction BIT=0
+)
 WITH EXECUTE AS OWNER
 AS
 IF @FromDate IS NULL
@@ -8,6 +17,7 @@ IF @FromDate IS NULL
 IF @ToDate IS NULL
 	SET @ToDate = GETUTCDATE()
 
+DECLARE @TypeString NVARCHAR(MAX) = CASE WHEN @IsFunction=1 THEN 'Function' ELSE 'Proc' END
 DECLARE @DateAggString NVARCHAR(MAX)
 DECLARE @MeasureString NVARCHAR(MAX) 
 SELECT @MeasureString = CASE WHEN @Measure IN('TotalCPU','AvgCPU','TotalDuration','AvgDuration','ExecutionCount','ExecutionsPerMin','AvgLogicalReads','AvgPhysicalReads','AvgWrites','TotalWrites','TotalLogicalReads','TotalPhysicalReads') THEN @Measure ELSE NULL END
@@ -18,7 +28,7 @@ SELECT @DateAggString = CASE @DateAgg WHEN 'NONE' THEN 'PS.SnapshotDate'
 DECLARE @SQL NVARCHAR(MAX)
 SET @SQL = N'
 WITH agg AS (
-SELECT P.ProcID,
+SELECT P.' + @TypeString + 'ID as ProcID,
 	   ' + @DateAggString + ' as SnapshotDate,
        D.name AS DatabaseName,
 	   D.DatabaseID,
@@ -35,8 +45,8 @@ SELECT P.ProcID,
 	   SUM(PS.total_physical_reads)/NULLIF(SUM(PS.execution_count),0) as AvgPhysicalReads,
 	   SUM(PS.total_logical_writes) as TotalWrites,
 	   SUM(PS.total_logical_writes)/NULLIF(SUM(PS.execution_count),0) as AvgWrites
-FROM dbo.ProcStats PS
-    JOIN dbo.Procs P ON PS.ProcID = P.ProcID
+FROM dbo.' + @TypeString + 'Stats PS
+    JOIN dbo.' + @TypeString + 's P ON PS.' + @TypeString + 'ID = P.' + @TypeString + 'ID
     JOIN dbo.Databases D ON D.DatabaseID = P.DatabaseID
 WHERE D.InstanceID=@InstanceID 
 AND D.IsActive=1
@@ -44,7 +54,7 @@ AND PS.SnapshotDate >= @FromDate
 AND PS.SnapshotDate< @ToDate
 ' + CASE WHEN @DatabaseID IS NULL THEN '' ELSE 'AND D.DatabaseID=@DatabaseID' END + '
 ' + CASE WHEN @Proc IS NULL THEN '' ELSE 'AND P.object_name=@Proc' END + '
-GROUP BY ' + @DateAggString + ',P.ProcID,D.Name,P.object_name,D.DatabaseID
+GROUP BY ' + @DateAggString + ',P.' + @TypeString + 'ID,D.Name,P.object_name,D.DatabaseID
 )
 , T AS (
 	SELECT agg.*,

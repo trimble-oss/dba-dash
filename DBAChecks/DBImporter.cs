@@ -16,7 +16,12 @@ namespace DBAChecks
 
         }
 
-        private void logError(string errorSource, string errorMessage,DataSet Data)
+        private void logError(string errorSource, string errorMessage, DataTable dt)
+        {
+            logError(errorSource, errorMessage, dt.DataSet);
+        }
+
+            private void logError(string errorSource, string errorMessage,DataSet Data)
         {
             DataTable dtErrors;
             if (Data.Tables.Contains("Errors"))
@@ -53,20 +58,29 @@ namespace DBAChecks
       
         
             updateDB(connectionString, instanceID, snapshotDate, Data);
-            update(connectionString, instanceID, snapshotDate, Data,"Drives");
-            update(connectionString, instanceID, snapshotDate, Data, "ServerProperties");
-            update(connectionString, instanceID, snapshotDate, Data,"Backups");
-            update(connectionString, instanceID, snapshotDate, Data,"AgentJobs");
-            update(connectionString, instanceID, snapshotDate, Data,"LogRestores");
-            update(connectionString, instanceID, snapshotDate, Data,"DBFiles");
-            update(connectionString, instanceID, snapshotDate, Data,"DBConfig");
-            update(connectionString, instanceID, snapshotDate, Data, "Corruption");
-            update(connectionString, instanceID, snapshotDate, Data,"DatabasesHADR");
-            update(connectionString, instanceID, snapshotDate, Data, "SysConfig");
-            update(connectionString, instanceID, snapshotDate, Data, "OSInfo");
-            update(connectionString, instanceID, snapshotDate, Data, "TraceFlags");
-            update(connectionString, instanceID, snapshotDate, Data, "ProcStats");
-            update(connectionString, instanceID, snapshotDate, Data, "CPU");
+            foreach(DataTable dt in Data.Tables)
+            {
+                string[] tables = { "Drives", "ServerProperties","Backups","AgentJobs","LogRestores","DBFiles","DBConfig","Corruption","DatabasesHADR","SysConfig","OSInfo","TraceFlags","ProcStats","FunctionStats","CPU" };
+                if (tables.Contains(dt.TableName))
+                {
+                    update(connectionString, instanceID, snapshotDate, dt);
+                }
+            }
+            //update(connectionString, instanceID, snapshotDate, Data,"Drives");
+            //update(connectionString, instanceID, snapshotDate, Data, "ServerProperties");
+            //update(connectionString, instanceID, snapshotDate, Data,"Backups");
+            //update(connectionString, instanceID, snapshotDate, Data,"AgentJobs");
+            //update(connectionString, instanceID, snapshotDate, Data,"LogRestores");
+            //update(connectionString, instanceID, snapshotDate, Data,"DBFiles");
+            //update(connectionString, instanceID, snapshotDate, Data,"DBConfig");
+            //update(connectionString, instanceID, snapshotDate, Data, "Corruption");
+            //update(connectionString, instanceID, snapshotDate, Data,"DatabasesHADR");
+            //update(connectionString, instanceID, snapshotDate, Data, "SysConfig");
+            //update(connectionString, instanceID, snapshotDate, Data, "OSInfo");
+            //update(connectionString, instanceID, snapshotDate, Data, "TraceFlags");
+            //update(connectionString, instanceID, snapshotDate, Data, "ProcStats");
+            //update(connectionString, instanceID, snapshotDate, Data, "FunctionStats");
+            //update(connectionString, instanceID, snapshotDate, Data, "CPU");
             updateServerExtraProperties(connectionString, instanceID, snapshotDate, Data);
             InsertErrors(connectionString, instanceID, snapshotDate, Data);
         }
@@ -105,7 +119,33 @@ namespace DBAChecks
             }
         }
 
-            private void update(string connectionString, Int32 instanceID, DateTime SnapshotDate, DataSet ds,string TableName)
+
+        private void update(string connectionString, Int32 instanceID, DateTime SnapshotDate, DataTable dt)
+        {
+            try
+            {
+                var cn = new SqlConnection(connectionString);
+                using (cn)
+                {
+                    cn.Open();
+                    SqlCommand cmd = new SqlCommand(dt.TableName + "_Upd", cn);
+                    if (dt.Rows.Count > 0)
+                    {
+                        cmd.Parameters.AddWithValue(dt.TableName, dt);
+                    }
+                    cmd.Parameters.AddWithValue("InstanceID", instanceID);
+                    cmd.Parameters.AddWithValue("SnapshotDate", SnapshotDate);
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.ExecuteNonQuery();
+                }
+            }
+            catch (Exception ex)
+            {
+                logError("Import:" + dt.TableName, ex.Message, dt);
+            }
+        }
+
+        private void update(string connectionString, Int32 instanceID, DateTime SnapshotDate, DataSet ds,string TableName)
         {
             if (ds.Tables.Contains(TableName))
             {

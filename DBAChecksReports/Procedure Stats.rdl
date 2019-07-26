@@ -35,6 +35,9 @@
           <QueryParameter Name="@DateAgg">
             <Value>=Parameters!DateAgg.Value</Value>
           </QueryParameter>
+          <QueryParameter Name="@IsFunction">
+            <Value>=Parameters!IsFunction.Value</Value>
+          </QueryParameter>
         </QueryParameters>
         <CommandType>StoredProcedure</CommandType>
         <CommandText>Report.ProcStats</CommandText>
@@ -172,6 +175,10 @@
           <QueryParameter Name="@DatabaseID">
             <Value>=Parameters!DatabaseID.Value</Value>
           </QueryParameter>
+          <QueryParameter Name="@IsFunction">
+            <Value>=Parameters!IsFunction.Value</Value>
+            <rd:UserDefined>true</rd:UserDefined>
+          </QueryParameter>
         </QueryParameters>
       </SharedDataSet>
       <Fields>
@@ -197,7 +204,7 @@
               <Paragraph>
                 <TextRuns>
                   <TextRun>
-                    <Value>Procedure Stats</Value>
+                    <Value>=Parameters!IsFunction.Label &amp; " Stats"</Value>
                     <Style>
                       <FontFamily>Segoe UI Light</FontFamily>
                       <FontSize>24pt</FontSize>
@@ -308,6 +315,9 @@ Environment.NewLine &amp; "Avg Writes: " &amp;  Format(Fields!AvgWrites.Value,"#
                                 </Parameter>
                                 <Parameter Name="Proc">
                                   <Value>=Parameters!Proc.Value</Value>
+                                </Parameter>
+                                <Parameter Name="IsFunction">
+                                  <Value>=Parameters!IsFunction.Value</Value>
                                 </Parameter>
                               </Parameters>
                             </Drillthrough>
@@ -690,6 +700,9 @@ Environment.NewLine &amp; "Avg Writes: " &amp;  Format(SUM(Fields!TotalWrites.Va
                                 </Parameter>
                                 <Parameter Name="ToDate">
                                   <Value>=Parameters!ToDate.Value</Value>
+                                </Parameter>
+                                <Parameter Name="IsFunction">
+                                  <Value>=Parameters!IsFunction.Value</Value>
                                 </Parameter>
                               </Parameters>
                             </Drillthrough>
@@ -1154,6 +1167,27 @@ Environment.NewLine &amp; "Avg Writes: " &amp;  Format(SUM(Fields!TotalWrites.Va
         </DataSetReference>
       </ValidValues>
     </ReportParameter>
+    <ReportParameter Name="IsFunction">
+      <DataType>Boolean</DataType>
+      <DefaultValue>
+        <Values>
+          <Value>false</Value>
+        </Values>
+      </DefaultValue>
+      <Prompt>Stats For:</Prompt>
+      <ValidValues>
+        <ParameterValues>
+          <ParameterValue>
+            <Value>true</Value>
+            <Label>Functions</Label>
+          </ParameterValue>
+          <ParameterValue>
+            <Value>false</Value>
+            <Label>Procedures</Label>
+          </ParameterValue>
+        </ParameterValues>
+      </ValidValues>
+    </ReportParameter>
     <ReportParameter Name="Proc">
       <DataType>String</DataType>
       <Nullable>true</Nullable>
@@ -1219,6 +1253,11 @@ Environment.NewLine &amp; "Avg Writes: " &amp;  Format(SUM(Fields!TotalWrites.Va
         </CellDefinition>
         <CellDefinition>
           <ColumnIndex>2</ColumnIndex>
+          <RowIndex>2</RowIndex>
+          <ParameterName>IsFunction</ParameterName>
+        </CellDefinition>
+        <CellDefinition>
+          <ColumnIndex>3</ColumnIndex>
           <RowIndex>2</RowIndex>
           <ParameterName>Proc</ParameterName>
         </CellDefinition>

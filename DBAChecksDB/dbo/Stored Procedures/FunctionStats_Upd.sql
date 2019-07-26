@@ -1,20 +1,21 @@
 ﻿
-CREATE PROC [dbo].[ProcStats_Upd](@ProcStats dbo.ProcStats READONLY,@InstanceID INT,@SnapshotDate DATETIME)
+
+CREATE PROC [dbo].[FunctionStats_Upd](@FunctionStats dbo.ProcStats READONLY,@InstanceID INT,@SnapshotDate DATETIME)
 AS
-INSERT INTO dbo.Procs
+INSERT INTO dbo.Functions
 (
     DatabaseID,
     object_name,
 	object_id
 )
 SELECT DISTINCT d.DatabaseID,t.object_name,t.object_id
-FROM @ProcStats t
+FROM @FunctionStats t
 JOIN dbo.Databases d ON t.database_id = d.database_id AND D.InstanceID=@InstanceID
 WHERE D.IsActive=1
-AND NOT EXISTS(SELECT 1 FROM dbo.Procs p WHERE p.DatabaseID = d.DatabaseID AND p.object_id = t.object_id AND p.object_name = t.object_name);
+AND NOT EXISTS(SELECT 1 FROM dbo.Functions p WHERE p.DatabaseID = d.DatabaseID AND p.object_id = t.object_id AND p.object_name = t.object_name);
 
 WITH t AS (
-	SELECT P.ProcID,
+	SELECT P.FunctionID,
 		   a.current_time_utc,
 		   DATEDIFF_BIG(mcs, MAX(MAX(b.current_time_utc)) OVER (), a.current_time_utc) diff,
 		   SUM(a.total_worker_time - ISNULL(b.total_worker_time, 0)) total_worker_time,
@@ -29,20 +30,20 @@ WITH t AS (
 			   ELSE
 				   0
 		   END) AS IsCompile
-	FROM @ProcStats a
-		LEFT JOIN Staging.ProcStats b ON  a.object_id = b.object_id
+	FROM @FunctionStats a
+		LEFT JOIN Staging.FunctionStats b ON  a.object_id = b.object_id
 							 AND a.database_id = b.database_id
 							 AND a.cached_time = b.cached_time
 							 AND b.InstanceID = @InstanceID
 							 AND a.current_time_utc > b.current_time_utc
 	JOIN dbo.Databases d ON a.database_id = d.database_id AND D.InstanceID=@InstanceID
-	JOIN dbo.Procs p ON a.OBJECT_NAME = p.OBJECT_NAME AND p.object_id = a.object_id AND p.DatabaseID = d.DatabaseID
+	JOIN dbo.Functions p ON a.OBJECT_NAME = p.OBJECT_NAME AND p.object_id = a.object_id AND p.DatabaseID = d.DatabaseID
 	WHERE D.IsActive=1
-	GROUP BY p.ProcID,a.current_time_utc
+	GROUP BY p.FunctionID,a.current_time_utc
 )
-INSERT INTO dbo.ProcStats
+INSERT INTO dbo.FunctionStats
 (
-    ProcID,
+    FunctionID,
     SnapshotDate,
     PeriodTime,
     total_worker_time,
@@ -53,7 +54,7 @@ INSERT INTO dbo.ProcStats
     execution_count,
     IsCompile
 )
-SELECT t.ProcID,
+SELECT t.FunctionID,
 	   t.current_time_utc,
 	   t.diff,
        t.total_worker_time,
@@ -66,8 +67,8 @@ SELECT t.ProcID,
 FROM T
 WHERE t.diff IS NOT NULL
 
-DELETE Staging.ProcStats WHERE InstanceID=@InstanceID
-INSERT INTO Staging.ProcStats(
+DELETE Staging.FunctionStats WHERE InstanceID=@InstanceID
+INSERT INTO Staging.FunctionStats(
 			InstanceID
 			,[object_id]
            ,[database_id]
@@ -92,4 +93,4 @@ SELECT @InstanceID
            ,[cached_time]
            ,[execution_count]
            ,[current_time_utc]
-FROM @ProcStats
+FROM @FunctionStats

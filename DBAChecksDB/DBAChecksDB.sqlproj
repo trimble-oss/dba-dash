@@ -184,6 +184,11 @@
     <Build Include="dbo\Tables\CPU.sql" />
     <Build Include="dbo\Stored Procedures\CPU_Upd.sql" />
     <Build Include="dbo\User Defined Types\CPU.sql" />
+    <Build Include="Report\Stored Procedures\CPU.sql" />
+    <Build Include="Staging\Tables\FunctionStats.sql" />
+    <Build Include="dbo\Tables\FunctionStats.sql" />
+    <Build Include="dbo\Tables\Functions.sql" />
+    <Build Include="dbo\Stored Procedures\FunctionStats_Upd.sql" />
   </ItemGroup>
   <ItemGroup>
     <PostDeploy Include="Script.PostDeployment1.sql" />

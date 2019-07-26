@@ -10,6 +10,12 @@
           <OmitFromQuery>false</OmitFromQuery>
           <rd:DbType>Int32</rd:DbType>
         </DataSetParameter>
+        <DataSetParameter Name="@IsFunction">
+          <ReadOnly>false</ReadOnly>
+          <Nullable>false</Nullable>
+          <OmitFromQuery>false</OmitFromQuery>
+          <rd:DbType>Boolean</rd:DbType>
+        </DataSetParameter>
       </DataSetParameters>
       <CommandType>StoredProcedure</CommandType>
       <CommandText>Report.Procs_Get</CommandText>
