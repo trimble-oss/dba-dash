@@ -123,7 +123,7 @@ DECLARE @SystemManufacturer NVARCHAR(512)
 DECLARE @SystemProductName NVARCHAR(512)
 DECLARE @IsAgentRunning BIT
 DECLARE @InstantFileInitializationEnabled BIT
-IF EXISTS(SELECT * FROM fn_my_permissions ( 'sys.xp_instance_regread', 'OBJECT' ) WHERE permission_name='EXECUTE')
+IF OBJECT_ID('sys.xp_instance_regread') IS NOT NULL AND EXISTS(SELECT * FROM fn_my_permissions ( 'sys.xp_instance_regread', 'OBJECT' ) WHERE permission_name='EXECUTE')
 BEGIN  
 	EXEC sys.xp_instance_regread N'HKEY_LOCAL_MACHINE', N'HARDWARE\DESCRIPTION\System\CentralProcessor\0', N'ProcessorNameString',@ProcessorNameString OUT;
 	EXEC sys.xp_instance_regread N'HKEY_LOCAL_MACHINE', N'SYSTEM\HardwareConfig\Current', N'SystemManufacturer',@SystemManufacturer OUT;

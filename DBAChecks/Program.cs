@@ -38,7 +38,7 @@ namespace DBAChecks
             [Option('i', "interval", Required = false, Default = -1, HelpText = "Interval (mins) to repeat tests.  Default = run once.")]
             public Int32 IntervalMins { get; set; }
 
-            [Option( "performanceonly", Required = false, Default =true, HelpText = "Collect performance data")]
+            [Option( "performanceonly", Required = false, Default =false, HelpText = "Collect performance data")]
             public bool PerformanceOnly { get; set; }
         }
 
