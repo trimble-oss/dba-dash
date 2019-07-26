@@ -15,6 +15,7 @@ namespace DBAChecks
         string _connectionString;
         private DataTable dtErrors;
         private bool noWMI;
+        public Int32 CPUCollectionPeriod=60;
 
         public DBCollector(string connectionString, bool noWMI)
         {
@@ -90,6 +91,8 @@ namespace DBAChecks
             CollectTraceFlags();
         }
 
+
+
         public void CollectPerformance()
         {
             try
@@ -97,6 +100,15 @@ namespace DBAChecks
                 addDT("ProcStats", Properties.Resources.SQLStoredProcPerformance);
             }
             catch(Exception ex)
+            {
+                logError("ProcStats", ex.Message);
+            }
+            try
+            {
+                SqlParameter pTop = new SqlParameter("TOP", CPUCollectionPeriod);
+                addDT("CPU", Properties.Resources.SQLCPU, new SqlParameter[] { pTop });
+            }
+            catch (Exception ex)
             {
                 logError("ProcStats", ex.Message);
             }
@@ -259,7 +271,9 @@ namespace DBAChecks
             }
         }
 
-        public DataTable getDT (string tableName, string SQL)
+ 
+
+            public DataTable getDT (string tableName, string SQL, SqlParameter[] param=null)
         {
             SqlConnection cn = new SqlConnection(_connectionString);
             using (cn)
@@ -267,6 +281,10 @@ namespace DBAChecks
                 cn.Open();
                 DataTable dt = new DataTable();
                 SqlDataAdapter da = new SqlDataAdapter(SQL, cn);
+                if (param != null)
+                {
+                    da.SelectCommand.Parameters.AddRange(param);
+                }
                 da.Fill(dt);
                 dt.TableName = tableName;
                 return dt;
@@ -275,12 +293,12 @@ namespace DBAChecks
             }
         }
 
-        public void addDT(string tableName,string sql)
+        public void addDT(string tableName,string sql,SqlParameter[] param=null)
         {
             if (!Data.Tables.Contains(tableName))
             {
                 
-                    Data.Tables.Add(getDT(tableName, sql));
+                    Data.Tables.Add(getDT(tableName, sql,param));
                                 
             }
         }

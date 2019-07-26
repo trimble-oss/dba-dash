@@ -147,7 +147,11 @@ namespace DBAChecks
                                var collector = new DBCollector(s, o.NoWMI);
                                if (o.PerformanceOnly)
                                {
+                                   if (o.IntervalMins > 0){
+                                       collector.CPUCollectionPeriod = (o.IntervalMins *2)+5;
+                                   }
                                    collector.CollectPerformance();
+                                   
                                }
                                else
                                {

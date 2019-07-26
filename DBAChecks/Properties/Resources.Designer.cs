@@ -134,6 +134,23 @@ namespace DBAChecks.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to DECLARE @ts_now bigint = (SELECT cpu_ticks/(cpu_ticks/ms_ticks) FROM sys.dm_os_sys_info WITH (NOLOCK)); 
+        /// 
+        ///SELECT TOP(@TOP) DATEADD(ms, -1 * (@ts_now - [timestamp]), GETUTCDATE()) AS [EventTime],
+        ///				SQLProcessUtilization AS [SQLProcessCPU], 
+        ///               SystemIdle AS [SystemIdleProcess] 
+        ///FROM (SELECT record.value(&apos;(./Record/@id)[1]&apos;, &apos;int&apos;) AS record_id, 
+        ///            record.value(&apos;(./Record/SchedulerMonitorEvent/SystemHealth/SystemIdle)[1]&apos;, &apos;int&apos;) 
+        ///            AS [SystemIdle], 
+        ///            reco [rest of string was truncated]&quot;;.
+        /// </summary>
+        internal static string SQLCPU {
+            get {
+                return ResourceManager.GetString("SQLCPU", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to CREATE TABLE #sysdb(
         ///	[name] [sysname] NOT NULL,
         ///	[database_id] [int] NOT NULL,
