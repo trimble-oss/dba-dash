@@ -630,7 +630,7 @@ Environment.NewLine &amp; "Avg Writes: " &amp;  Format(Fields!AvgWrites.Value,"#
                       <Value>=Sum(Fields!Measure.Value)</Value>
                     </SortExpression>
                   </SortExpressions>
-                  <Label>=Fields!DatabaseName.Value &amp; " - " &amp; Fields!object_name.Value</Label>
+                  <Label>=IIF(ISNOTHING(Parameters!DatabaseID.Value),Fields!DatabaseName.Value &amp; " - " &amp; Fields!object_name.Value,Fields!object_name.Value)</Label>
                 </ChartMember>
               </ChartMembers>
             </ChartCategoryHierarchy>
@@ -979,6 +979,9 @@ Environment.NewLine &amp; "Avg Writes: " &amp;  Format(SUM(Fields!TotalWrites.Va
             <Height>11.71667in</Height>
             <Width>23.80833in</Width>
             <ZIndex>2</ZIndex>
+            <Visibility>
+              <Hidden>=NOT(Parameters!Measure.Value.ToString().Contains("Total")) or NOT(ISNOTHING(Parameters!Proc.Value))</Hidden>
+            </Visibility>
             <Style>
               <Border>
                 <Color>LightGrey</Color>

@@ -333,19 +333,22 @@ namespace DBAChecks.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to SELECT object_id,
-        ///       database_id,
-        ///       OBJECT_NAME(object_id, database_id) object_name,
-        ///       total_worker_time,
-        ///       total_elapsed_time,
-        ///       total_logical_reads,
-        ///       total_logical_writes,
-        ///       total_physical_reads,
-        ///       cached_time,
-        ///       execution_count,
-        ///       GETUTCDATE() AS current_time_utc
-        ///FROM sys.dm_exec_procedure_stats
-        ///WHERE database_id &lt;&gt; 32767;.
+        ///   Looks up a localized string similar to IF OBJECT_ID(&apos;sys.dm_exec_procedure_stats&apos;) IS NOT NULL
+        ///BEGIN
+        ///	SELECT object_id,
+        ///		   database_id,
+        ///		   OBJECT_NAME(object_id, database_id) object_name,
+        ///		   total_worker_time,
+        ///		   total_elapsed_time,
+        ///		   total_logical_reads,
+        ///		   total_logical_writes,
+        ///		   total_physical_reads,
+        ///		   cached_time,
+        ///		   execution_count,
+        ///		   GETUTCDATE() AS current_time_utc
+        ///	FROM sys.dm_exec_procedure_stats
+        ///	WHERE database_id &lt;&gt; 32767;
+        ///END.
         /// </summary>
         internal static string SQLStoredProcPerformance {
             get {

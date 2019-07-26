@@ -1,7 +1,10 @@
-﻿CREATE  PROC Report.ProcStats(@InstanceID INT,@DatabaseID INT=NULL,@Proc SYSNAME=NULL,@FromDate DATETIME=NULL,@ToDate DATETIME=NULL,@Measure VARCHAR(30)='TotalDuration',@DateAgg VARCHAR(20)='NONE')
+﻿
+
+CREATE  PROC [Report].[ProcStats](@InstanceID INT,@DatabaseID INT=NULL,@Proc SYSNAME=NULL,@FromDate DATETIME=NULL,@ToDate DATETIME=NULL,@Measure VARCHAR(30)='TotalDuration',@DateAgg VARCHAR(20)='NONE')
+WITH EXECUTE AS OWNER
 AS
 IF @FromDate IS NULL
-	SET @FromDate = CONVERT(DATETIME,STUFF(CONVERT(VARCHAR,DATEADD(mi,-60,GETUTCDATE()),120),16,4,'0:00'),120) 
+	SET @FromDate = CONVERT(DATETIME,STUFF(CONVERT(VARCHAR,DATEADD(mi,-120,GETUTCDATE()),120),16,4,'0:00'),120) 
 IF @ToDate IS NULL
 	SET @ToDate = GETUTCDATE()
 
@@ -59,6 +62,6 @@ EXEC sp_executesql @SQL,N'@InstanceID INT,@DatabaseID INT,@FromDate DATETIME,@To
 END 
 ELSE
 BEGIN
-DECLARE  @results TABLE( [ProcID] int, [SnapshotDate] datetime, [DatabaseName] nvarchar(128),[DatabaseID] INT, [object_name] nvarchar(128), [TotalCPU] decimal(29,9), [AvgCPU] decimal(29,9), [ExecutionCount] bigint, [ExecutionsPerMin] decimal(38,9), [TotalDuration] decimal(29,9), [AvgDuration] decimal(29,9), [TotalLogicalReads] bigint, [AvgLogicalReads] bigint, [TotalPhysicalReads] bigint, [AvgPhysicalReads] bigint, [TotalWrites] bigint, [AvgWrites] bigint, [Measure] decimal(29,9), [ProcRank] bigint )
+DECLARE  @results TABLE( [ProcID] INT, [SnapshotDate] DATETIME, [DatabaseName] NVARCHAR(128),[DatabaseID] INT, [object_name] NVARCHAR(128), [TotalCPU] DECIMAL(29,9), [AvgCPU] DECIMAL(29,9), [ExecutionCount] BIGINT, [ExecutionsPerMin] DECIMAL(38,9), [TotalDuration] DECIMAL(29,9), [AvgDuration] DECIMAL(29,9), [TotalLogicalReads] BIGINT, [AvgLogicalReads] BIGINT, [TotalPhysicalReads] BIGINT, [AvgPhysicalReads] BIGINT, [TotalWrites] BIGINT, [AvgWrites] BIGINT, [Measure] DECIMAL(29,9), [ProcRank] BIGINT )
 SELECT * FROM @Results
 END
