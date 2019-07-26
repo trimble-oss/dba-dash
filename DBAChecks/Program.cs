@@ -8,6 +8,7 @@ using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Data.SqlClient;
 using System.IO;
 using System.Linq;
 using System.Management;
@@ -36,6 +37,9 @@ namespace DBAChecks
 
             [Option('i', "interval", Required = false, Default = -1, HelpText = "Interval (mins) to repeat tests.  Default = run once.")]
             public Int32 IntervalMins { get; set; }
+
+            [Option( "performanceonly", Required = false, Default =true, HelpText = "Collect performance data")]
+            public bool PerformanceOnly { get; set; }
         }
 
         private static AWSCredentials GetAWSCredentialsFromProfile(string profileName)
@@ -103,7 +107,7 @@ namespace DBAChecks
                            Console.WriteLine(String.Format("Processing Source {0} of {1}", i, o.Source.Count()));
                            if (s.StartsWith("s3://") || s.StartsWith("https://"))
                            {
-                               Console.WriteLine("Import from S3");
+                               Console.WriteLine("Import from S3: " + s);
                                var uri = new Amazon.S3.Util.AmazonS3Uri(s);
                                var s3Cli = getAWSClient(o.AWSProfile, uri);
                                var resp = s3Cli.ListObjects(uri.Bucket, (uri.Key + "/DBAChecks_").Replace("//", "/"));
@@ -126,7 +130,7 @@ namespace DBAChecks
                            }
                            else if (System.IO.Directory.Exists(s))
                            {
-                               Console.WriteLine("Import from Directory");
+                               Console.WriteLine("Import from Directory: " + s);
                                foreach (var f in Directory.EnumerateFiles(s, "DBAChecks*.json", SearchOption.TopDirectoryOnly))
                                {
                                    string json = File.ReadAllText(f);
@@ -138,9 +142,18 @@ namespace DBAChecks
                            }
                            else
                            {
-                               Console.WriteLine("Collect from Instance:" + s);
+                               SqlConnectionStringBuilder builder = new SqlConnectionStringBuilder(s);
+                               Console.WriteLine("Collect from Instance:" + builder.DataSource);
                                var collector = new DBCollector(s, o.NoWMI);
-                               collector.CollectAll();
+                               if (o.PerformanceOnly)
+                               {
+                                   collector.CollectPerformance();
+                               }
+                               else
+                               {
+                                   collector.CollectAll();
+                               }
+                           
                                var ds = collector.Data;
                                if (o.Destination.StartsWith("s3://") || o.Destination.StartsWith("https://"))
                                {

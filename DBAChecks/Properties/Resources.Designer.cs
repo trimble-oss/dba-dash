@@ -206,10 +206,9 @@ namespace DBAChecks.Properties {
         ///DECLARE @SystemProductName NVARCHAR(512)
         ///DECLARE @IsAgentRunning BIT
         ///DECLARE @InstantFileInitializationEnabled BIT
-        ///IF EXISTS(SELECT * FROM fn_my_permissions ( &apos;sys.xp_instance_regread&apos;, &apos;OBJECT&apos; ) WHERE permission_name=&apos;EXECUTE&apos;)
+        ///IF OBJECT_ID(&apos;sys.xp_instance_regread&apos;) IS NOT NULL AND EXISTS(SELECT * FROM fn_my_permissions ( &apos;sys.xp_instance_regread&apos;, &apos;OBJECT&apos; ) WHERE permission_name=&apos;EXECUTE&apos;)
         ///BEGIN  
-        ///	EXEC sys.xp_instance_regread N&apos;HKEY_LOCAL_MACHINE&apos;, N&apos;HARDWARE\DESCRIPTION\System\CentralProcessor\0&apos;, N&apos;ProcessorNameString&apos;,@ProcessorNameString OUT;
-        ///	EXEC sys.xp_instance_regrea [rest of string was truncated]&quot;;.
+        ///	EXEC sys.xp_instance_regread N&apos;HKEY_LOCAL_MACHINE&apos;, N&apos;HARDWARE\DESCRIPTION\System\CentralProcessor\0&apos;, N&apos;ProcessorNameString&apos;,@P [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string SQLExtraProperties {
             get {
@@ -330,6 +329,27 @@ namespace DBAChecks.Properties {
         internal static string SQLProperties {
             get {
                 return ResourceManager.GetString("SQLProperties", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to SELECT object_id,
+        ///       database_id,
+        ///       OBJECT_NAME(object_id, database_id) object_name,
+        ///       total_worker_time,
+        ///       total_elapsed_time,
+        ///       total_logical_reads,
+        ///       total_logical_writes,
+        ///       total_physical_reads,
+        ///       cached_time,
+        ///       execution_count,
+        ///       GETUTCDATE() AS current_time_utc
+        ///FROM sys.dm_exec_procedure_stats
+        ///WHERE database_id &lt;&gt; 32767;.
+        /// </summary>
+        internal static string SQLStoredProcPerformance {
+            get {
+                return ResourceManager.GetString("SQLStoredProcPerformance", resourceCulture);
             }
         }
         

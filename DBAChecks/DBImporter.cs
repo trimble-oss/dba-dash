@@ -65,6 +65,7 @@ namespace DBAChecks
             update(connectionString, instanceID, snapshotDate, Data, "SysConfig");
             update(connectionString, instanceID, snapshotDate, Data, "OSInfo");
             update(connectionString, instanceID, snapshotDate, Data, "TraceFlags");
+            update(connectionString, instanceID, snapshotDate, Data, "ProcStats");
             updateServerExtraProperties(connectionString, instanceID, snapshotDate, Data);
             InsertErrors(connectionString, instanceID, snapshotDate, Data);
         }

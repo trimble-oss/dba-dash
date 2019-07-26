@@ -49,8 +49,10 @@
     <Reports>@(Report)</Reports>
   </PropertyGroup>
   <ItemGroup>
+    <DataSet Include="Databases.rsd" />
     <DataSet Include="FilterLevel.rsd" />
     <DataSet Include="Instances.rsd" />
+    <DataSet Include="Procs.rsd" />
     <DataSet Include="TagMatching.rsd" />
     <DataSet Include="Tags.rsd" />
   </ItemGroup>
@@ -67,6 +69,7 @@
     <Report Include="Files.rdl" />
     <Report Include="Instance Configuration.rdl" />
     <Report Include="LogShipping.rdl" />
+    <Report Include="Procedure Stats.rdl" />
     <Report Include="SnapshotDates.rdl" />
     <Report Include="Summary.rdl" />
   </ItemGroup>

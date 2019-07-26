@@ -90,6 +90,18 @@ namespace DBAChecks
             CollectTraceFlags();
         }
 
+        public void CollectPerformance()
+        {
+            try
+            {
+                addDT("ProcStats", Properties.Resources.SQLStoredProcPerformance);
+            }
+            catch(Exception ex)
+            {
+                logError("ProcStats", ex.Message);
+            }
+        }
+
         public void CollectTraceFlags()
         {
             try
