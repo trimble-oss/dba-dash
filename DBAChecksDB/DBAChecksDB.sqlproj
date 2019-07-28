@@ -189,6 +189,8 @@
     <Build Include="dbo\Tables\FunctionStats.sql" />
     <Build Include="dbo\Tables\Functions.sql" />
     <Build Include="dbo\Stored Procedures\FunctionStats_Upd.sql" />
+    <Build Include="dbo\Stored Procedures\LogRestoreThresholds_Upd.sql" />
+    <Build Include="dbo\Stored Procedures\LogRestoreThresholds_Get.sql" />
   </ItemGroup>
   <ItemGroup>
     <PostDeploy Include="Script.PostDeployment1.sql" />
