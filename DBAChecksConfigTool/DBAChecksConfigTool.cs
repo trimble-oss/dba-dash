@@ -24,6 +24,7 @@ namespace DBAChecksConfigTool
             addInstances();
             GetDriveThresholds();
             GetBackupThresholds();
+            GetLRThresholds();
         }
         private void addInstances()
         {
@@ -52,7 +53,10 @@ namespace DBAChecksConfigTool
                 cboBackupInstance.DataSource = dtBackupinstances;
                 cboBackupInstance.DisplayMember = "Instance";
                 cboBackupInstance.ValueMember = "InstanceID";
-
+                var dtLRinstances = dtDriveInstances.Copy();
+                cboLRInstance.DataSource = dtBackupinstances;
+                cboLRInstance.DisplayMember = "Instance";
+                cboLRInstance.ValueMember = "InstanceID";
 
             }
             cboDrivesInstances.SelectedIndex=0;
@@ -192,8 +196,7 @@ namespace DBAChecksConfigTool
 
         private void GetBackupThresholds()
         {
-            Int32 DriveID = (Int32)cboDrives.SelectedValue;
-            Int32 InstanceID = (Int32)cboDrivesInstances.SelectedValue;
+
             SqlConnection cn = new SqlConnection(Properties.Settings.Default.ConnectionString);
             var cmd = new SqlCommand("dbo.BackupThresholds_Get", cn);
             cmd.CommandType = CommandType.StoredProcedure;
@@ -215,6 +218,30 @@ namespace DBAChecksConfigTool
                 dgvBackup.Columns["DiffBackupCriticalThreshold"].HeaderText = "Diff Critical Threshold";
                 dgvBackup.Columns["ConsiderPartialBackups"].HeaderText = "Use Partial";
                 dgvBackup.Columns["ConsiderFGBackups"].HeaderText = "Use Filegroup";
+            }
+        }
+
+        private void GetLRThresholds()
+        {
+
+            SqlConnection cn = new SqlConnection(Properties.Settings.Default.ConnectionString);
+            var cmd = new SqlCommand("dbo.LogRestoreThresholds_Get", cn);
+            cmd.CommandType = CommandType.StoredProcedure;
+
+            using (cn)
+            {
+                cn.Open();
+                var da = new SqlDataAdapter(cmd);
+                DataTable dt = new DataTable("LRThresholds");
+                da.Fill(dt);
+                dgvLR.DataSource = dt;
+                dgvLR.Columns["InstanceID"].Visible = false;
+                dgvLR.Columns["DatabaseID"].Visible = false;
+                dgvLR.Columns["LatencyWarningThreshold"].HeaderText = "Latency Warning Threshold";
+                dgvLR.Columns["LatencyCriticalThreshold"].HeaderText = "Latency Critical Threshold";
+                dgvLR.Columns["TimeSinceLastWarningThreshold"].HeaderText = "Time Since Last Warning Threshold";
+                dgvLR.Columns["TimeSinceLastCriticalThreshold"].HeaderText = "Time Since Last Critical Threshold";
+
             }
         }
 
@@ -245,8 +272,13 @@ namespace DBAChecksConfigTool
                 cboBackupDatabase.DataSource = dt;
                 cboBackupDatabase.DisplayMember = "Name";
                 cboBackupDatabase.ValueMember = "DatabaseID";
+                DataTable dtLRDB = dt.Copy();
+                cboLRDatabase.DataSource = dtLRDB;
+                cboLRDatabase.DisplayMember = "Name";
+                cboLRDatabase.ValueMember = "DatabaseID";
 
             }
+            cboLRDatabase.SelectedValue = -1;
             cboBackupDatabase.SelectedValue = -1;
         }
 
@@ -475,6 +507,14 @@ namespace DBAChecksConfigTool
         {
             var instanceID = cboBackupInstance.SelectedValue;
             var databaseID = cboBackupDatabase.SelectedValue;
+            if (databaseID == null)
+            {
+                databaseID = -1;
+            }
+            if (instanceID == null)
+            {
+                instanceID = -1;
+            }
             SqlConnection cn = new SqlConnection(Properties.Settings.Default.ConnectionString);
             var cmd = new SqlCommand("dbo.BackupThresholds_Upd", cn);
             cmd.CommandType = CommandType.StoredProcedure;
@@ -521,6 +561,102 @@ namespace DBAChecksConfigTool
                 
             GetBackupThresholds();
             
+        }
+
+        private void bttnLRAddUpdate_Click(object sender, EventArgs e)
+        {
+            var instanceID = cboLRInstance.SelectedValue;
+            var databaseID = cboLRDatabase.SelectedValue;
+            if (databaseID == null)
+            {
+                databaseID = -1;
+            }
+            if (instanceID == null)
+            {
+                instanceID = -1;
+            }
+            SqlConnection cn = new SqlConnection(Properties.Settings.Default.ConnectionString);
+            var cmd = new SqlCommand("dbo.LogRestoreThresholds_Upd", cn);
+            cmd.CommandType = CommandType.StoredProcedure;
+            cmd.Parameters.AddWithValue("InstanceID", instanceID);
+            cmd.Parameters.AddWithValue("DatabaseID", databaseID);
+            cmd.Parameters.AddWithValue("Inherit", chkLRInherit.Checked);
+            if (chkLRLatency.Checked)
+            {
+                cmd.Parameters.AddWithValue("LatencyWarning", numLRLatencyWarning.Value);
+                cmd.Parameters.AddWithValue("LatencyCritical", numLRLatencyCritical.Value);
+            }
+            else
+            {
+                cmd.Parameters.AddWithValue("LatencyWarning", DBNull.Value);
+                cmd.Parameters.AddWithValue("LatencyCritical", DBNull.Value);
+            }
+            if (chkLRTimeSinceLast.Checked)
+            {
+                cmd.Parameters.AddWithValue("TimeSinceLastWarning", numLRTimeSinceLastWarning.Value);
+                cmd.Parameters.AddWithValue("TimeSinceLastCritical", numLRTimeSinceLastCritical.Value);
+            }
+            else
+            {
+                cmd.Parameters.AddWithValue("TimeSinceLastWarning", DBNull.Value);
+                cmd.Parameters.AddWithValue("TimeSinceLastCritical", DBNull.Value);
+            }
+
+            using (cn)
+            {
+                cn.Open();
+                cmd.ExecuteNonQuery();
+            }
+            GetLRThresholds();
+    
+        }
+
+        private void dgvLR_CurrentCellChanged(object sender, EventArgs e)
+        {
+            if (dgvLR.CurrentCell != null)
+            {
+                var currentRow = dgvLR.CurrentCell.RowIndex;
+                chkLRInherit.Checked = false;
+                if (dgvLR.Rows[currentRow].Cells["LatencyCriticalThreshold"].Value != DBNull.Value && dgvLR.Rows[currentRow].Cells["LatencyWarningThreshold"].Value != DBNull.Value)
+                {
+                     numLRLatencyCritical.Value = (Int32)dgvLR.Rows[currentRow].Cells["LatencyCriticalThreshold"].Value;
+                    numLRLatencyWarning.Value = (Int32)dgvLR.Rows[currentRow].Cells["LatencyWarningThreshold"].Value;
+                    chkLRLatency.Checked = true;
+                }
+                else
+                {
+                    chkLRLatency.Checked = false;
+                }
+                if (dgvLR.Rows[currentRow].Cells["TimeSinceLastCriticalThreshold"].Value != DBNull.Value && dgvLR.Rows[currentRow].Cells["TimeSinceLastWarningThreshold"].Value != DBNull.Value)
+                {
+                    numLRTimeSinceLastCritical.Value = (Int32)dgvLR.Rows[currentRow].Cells["TimeSinceLastCriticalThreshold"].Value;
+                    numLRTimeSinceLastWarning.Value = (Int32)dgvLR.Rows[currentRow].Cells["TimeSinceLastWarningThreshold"].Value;
+                    chkLRTimeSinceLast.Checked = true;
+                }
+                else
+                {
+                    chkLRTimeSinceLast.Checked = false;
+                }
+           
+                var instanceID = (Int32)dgvLR.Rows[currentRow].Cells["InstanceID"].Value;
+                var databaseID = (Int32)dgvLR.Rows[currentRow].Cells["DatabaseID"].Value;
+
+                cboLRInstance.SelectedValue = instanceID;
+                cboLRDatabase.SelectedValue = databaseID;
+
+            }
+        }
+
+        private void chkLRLatency_CheckedChanged(object sender, EventArgs e)
+        {
+            numLRLatencyCritical.Enabled = chkLRLatency.Checked;
+            numLRLatencyWarning.Enabled = chkLRLatency.Checked;
+        }
+
+        private void chkLRTimeSinceLast_CheckedChanged(object sender, EventArgs e)
+        {
+            numLRTimeSinceLastWarning.Enabled = chkLRTimeSinceLast.Checked;
+            numLRTimeSinceLastCritical.Enabled = chkLRTimeSinceLast.Checked;
         }
     }
 }
