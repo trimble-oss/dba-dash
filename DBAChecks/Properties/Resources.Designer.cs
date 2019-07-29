@@ -273,7 +273,7 @@ namespace DBAChecks.Properties {
         ///BEGIN
         ///	SELECT object_id,
         ///		   database_id,
-        ///		   OBJECT_NAME(object_id, database_id) object_name,
+        ///		   ISNULL(OBJECT_NAME(object_id, database_id),&apos;&apos;) object_name,
         ///		   total_worker_time,
         ///		   total_elapsed_time,
         ///		   total_logical_reads,
@@ -378,7 +378,7 @@ namespace DBAChecks.Properties {
         ///BEGIN
         ///	SELECT object_id,
         ///		   database_id,
-        ///		   OBJECT_NAME(object_id, database_id) object_name,
+        ///		   ISNULL(OBJECT_NAME(object_id, database_id),&apos;&apos;) object_name,
         ///		   total_worker_time,
         ///		   total_elapsed_time,
         ///		   total_logical_reads,

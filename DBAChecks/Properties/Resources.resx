@@ -864,7 +864,7 @@ EXEC sp_executesql @SQL</value>
 BEGIN
 	SELECT object_id,
 		   database_id,
-		   OBJECT_NAME(object_id, database_id) object_name,
+		   ISNULL(OBJECT_NAME(object_id, database_id),'') object_name,
 		   total_worker_time,
 		   total_elapsed_time,
 		   total_logical_reads,
@@ -899,7 +899,7 @@ ORDER BY record_id DESC OPTION (RECOMPILE);</value>
 BEGIN
 	SELECT object_id,
 		   database_id,
-		   OBJECT_NAME(object_id, database_id) object_name,
+		   ISNULL(OBJECT_NAME(object_id, database_id),'') object_name,
 		   total_worker_time,
 		   total_elapsed_time,
 		   total_logical_reads,
