@@ -60,27 +60,13 @@ namespace DBAChecks
             updateDB(connectionString, instanceID, snapshotDate, Data);
             foreach(DataTable dt in Data.Tables)
             {
-                string[] tables = { "Drives", "ServerProperties","Backups","AgentJobs","LogRestores","DBFiles","DBConfig","Corruption","DatabasesHADR","SysConfig","OSInfo","TraceFlags","ProcStats","FunctionStats","CPU" };
+                string[] tables = { "Drives", "ServerProperties","Backups","AgentJobs","LogRestores","DBFiles","DBConfig","Corruption","DatabasesHADR","SysConfig","OSInfo","TraceFlags","ProcStats","FunctionStats","CPU","Drivers" };
                 if (tables.Contains(dt.TableName))
                 {
                     update(connectionString, instanceID, snapshotDate, dt);
                 }
             }
-            //update(connectionString, instanceID, snapshotDate, Data,"Drives");
-            //update(connectionString, instanceID, snapshotDate, Data, "ServerProperties");
-            //update(connectionString, instanceID, snapshotDate, Data,"Backups");
-            //update(connectionString, instanceID, snapshotDate, Data,"AgentJobs");
-            //update(connectionString, instanceID, snapshotDate, Data,"LogRestores");
-            //update(connectionString, instanceID, snapshotDate, Data,"DBFiles");
-            //update(connectionString, instanceID, snapshotDate, Data,"DBConfig");
-            //update(connectionString, instanceID, snapshotDate, Data, "Corruption");
-            //update(connectionString, instanceID, snapshotDate, Data,"DatabasesHADR");
-            //update(connectionString, instanceID, snapshotDate, Data, "SysConfig");
-            //update(connectionString, instanceID, snapshotDate, Data, "OSInfo");
-            //update(connectionString, instanceID, snapshotDate, Data, "TraceFlags");
-            //update(connectionString, instanceID, snapshotDate, Data, "ProcStats");
-            //update(connectionString, instanceID, snapshotDate, Data, "FunctionStats");
-            //update(connectionString, instanceID, snapshotDate, Data, "CPU");
+
             updateServerExtraProperties(connectionString, instanceID, snapshotDate, Data);
             InsertErrors(connectionString, instanceID, snapshotDate, Data);
         }

@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.Data.SqlClient;
 using System.Data;
 using System.Management;
+using Microsoft.Win32;
 
 namespace DBAChecks
 {
@@ -50,7 +51,8 @@ namespace DBAChecks
 
         }
 
-     
+
+
 
         public void GetInstance(string connectionID)
         {
@@ -89,6 +91,7 @@ namespace DBAChecks
             CollectCorruption();
             CollectOSInfo();
             CollectTraceFlags();
+            CollectDriversWMI();
         }
 
 
@@ -359,6 +362,131 @@ namespace DBAChecks
             }
         }
 
+        public void CollectDriversWMI()
+        {
+            try
+            {
+                if (!Data.Tables.Contains("Drivers"))
+                {
+                    DataTable dtDrivers = new DataTable("Drivers");
+                    string[] selectedProperties = new string[] { "ClassGuid", "DeviceClass", "DeviceID", "DeviceName", "DriverDate", "DriverProviderName", "DriverVersion", "FriendlyName", "HardWareID", "Manufacturer", "PDO" };
+                    foreach (string p in selectedProperties)
+                    {
+                        if (p == "DriverDate")
+                        {
+                            dtDrivers.Columns.Add(p, typeof(DateTime));
+                        }
+                        else if (p == "ClassGuid")
+                        {
+                            dtDrivers.Columns.Add(p, typeof(Guid));
+                        }
+                        else
+                        {
+                            dtDrivers.Columns.Add(p, typeof(string));
+                        }
+                    }
+
+                    string computerName = (string)Data.Tables["ServerProperties"].Rows[0]["ComputerNamePhysicalNetBIOS"];
+
+                    ManagementPath path = new ManagementPath()
+                    {
+                        NamespacePath = @"root\cimv2",
+                        Server = computerName
+                    };
+                    ManagementScope scope = new ManagementScope(path);
+
+                    SelectQuery query = new SelectQuery("Win32_PnPSignedDriver", "", selectedProperties);
+
+                    using (ManagementObjectSearcher searcher = new ManagementObjectSearcher(scope, query))
+                    using (ManagementObjectCollection results = searcher.Get())
+                    {
+                        foreach (ManagementObject mo in results)
+                        {
+                            if (mo != null)
+                            {
+                                var rDriver = dtDrivers.NewRow();
+                                foreach (string p in selectedProperties)
+                                {
+                                    if (mo.GetPropertyValue(p) != null)
+                                    {
+                                        if (p == "DriverDate" || p == "InstallDate")
+                                        {
+
+                                            try
+                                            {
+                                                rDriver[p] = ManagementDateTimeConverter.ToDateTime(mo.GetPropertyValue(p).ToString());
+                                            }
+                                            catch (Exception ex)
+                                            {
+                                                logError("Drivers", p + ": " + ex.Message);
+                                            }
+                                        }
+
+                                        else if (p == "ClassGuid")
+                                        {
+                                            try
+                                            {
+                                                rDriver[p] = Guid.Parse(mo.GetPropertyValue(p).ToString());
+                                            }
+                                            catch (Exception ex)
+                                            {
+                                                logError("Drivers", p + ": " + ex.Message);
+                                            }
+
+                                        }
+                                        else
+                                        {
+                                            try
+                                            {
+                                                string value = mo.GetPropertyValue(p).ToString();
+
+                                                rDriver[p] = value.Length<=200 ? value : value.Substring(0, 200);
+
+                                            }
+                                            catch (Exception ex)
+                                            {
+                                                logError("Drivers", p + ": " + ex.Message);
+                                            }
+                                        
+                                        }
+
+                                    }
+                                }
+                                dtDrivers.Rows.Add(rDriver);
+                            }
+                        }
+                    }
+                    try
+                    {
+                        var PVKey = RegistryKey.OpenRemoteBaseKey(RegistryHive.LocalMachine, computerName, RegistryView.Registry64).OpenSubKey("SOFTWARE\\Amazon\\PVDriver");
+                        if (PVKey != null)
+                        {
+                            var rDriver = dtDrivers.NewRow();
+                            rDriver["DeviceID"] = "HKEY_LOCAL_MACHINE\\SOFTWARE\\Amazon\\PVDriver";
+                            rDriver["Manufacturer"] = "Amazon Inc.";
+                            rDriver["DriverProviderName"] = "Amazon Inc.";
+                            rDriver["DeviceName"] = "AWS PV Driver";
+                            rDriver["DriverVersion"] = PVKey.GetValue("Version");
+                            dtDrivers.Rows.Add(rDriver);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        logError("AWSPVDriver", ex.Message);
+                    }
+                    Data.Tables.Add(dtDrivers);
+                }
+                
+            }
+            catch (Exception ex)
+            {
+                logError("Drivers (WMI)", ex.Message);
+                throw ex;
+            }
+        }
+    
+
+
         public void CollectDrivesWMI()
         {
             try {
@@ -399,6 +527,7 @@ namespace DBAChecks
                             }
                         }
                     }
+
                     Data.Tables.Add(drives);
 
                 }
