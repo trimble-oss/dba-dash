@@ -65,6 +65,7 @@
     <Report Include="Database Growth.rdl" />
     <Report Include="DBAChecks Error Log.rdl" />
     <Report Include="DriveHistory.rdl" />
+    <Report Include="Drivers.rdl" />
     <Report Include="Drives.rdl" />
     <Report Include="Files.rdl" />
     <Report Include="Instance Configuration.rdl" />

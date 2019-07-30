@@ -31,7 +31,8 @@ SELECT  @InstanceID,
     PDO,
 	@SnapshotDate
 FROM @Drivers t
-WHERE NOT EXISTS(SELECT 1 FROM dbo.Drivers D WHERE D.DeviceID = t.DeviceID AND D.InstanceID = @InstanceID);
+WHERE NOT EXISTS(SELECT 1 FROM dbo.Drivers D WHERE D.DeviceID = t.DeviceID AND D.InstanceID = @InstanceID)
+AND ClassGuid NOT IN ('4D36E96B-E325-11CE-BFC1-08002BE10318','4D36E96F-E325-11CE-BFC1-08002BE10318','1ED2BBF9-11F0-4084-B21F-AD83A8E6DCDC'); -- ignore KEYBOARD,MOUSE,PRINTQUEUE
 
 WITH S AS(
 	SELECT ClassGuid,
@@ -46,6 +47,7 @@ WITH S AS(
 		Manufacturer,
 		PDO
 	FROM @Drivers
+	WHERE ClassGuid NOT IN ('4D36E96B-E325-11CE-BFC1-08002BE10318','4D36E96F-E325-11CE-BFC1-08002BE10318','1ED2BBF9-11F0-4084-B21F-AD83A8E6DCDC') -- ignore KEYBOARD,MOUSE,PRINTQUEUE
 	EXCEPT 
 	SELECT ClassGuid,
 		DeviceClass,
@@ -134,3 +136,7 @@ OUTPUT DELETED.InstanceID,
 FROM dbo.Drivers D
 WHERE NOT EXISTS(SELECT 1 FROM @Drivers t WHERE d.DeviceID = t.DeviceID)
 AND D.InstanceID = @InstanceID
+
+EXEC dbo.CollectionDates_Upd @InstanceID = @InstanceID,
+                             @Reference = 'Drivers',
+                             @SnapshotDate = @SnapshotDate
