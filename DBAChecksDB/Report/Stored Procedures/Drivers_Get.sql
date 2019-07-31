@@ -1,4 +1,4 @@
-﻿CREATE PROC Report.Drivers_Get(@InstanceIDs VARCHAR(MAX)=NULL,@DriverSearch NVARCHAR(200))
+﻿CREATE PROC [Report].[Drivers_Get](@InstanceIDs VARCHAR(MAX)=NULL,@DriverSearch NVARCHAR(200))
 AS
 DECLARE @Instances TABLE(
 	InstanceID INT PRIMARY KEY
@@ -25,9 +25,13 @@ END;
 
 SELECT I.InstanceID,
        I.Instance,
+	   I.SystemManufacturer,
+	   I.SystemProductName,
        D.DeviceName,
        D.DriverProviderName,
        D.DriverVersion,
+	   MAX(D.ValidFrom) AS ValidFrom,
+	   CASE WHEN EXISTS(SELECT 1  FROM dbo.DriversHistory H WHERE I.InstanceID = H.InstanceID) THEN 1 ELSE 0 END AS HasDriverUpdates,
 	   CD.SnapshotDate
 FROM dbo.Instances I
     JOIN dbo.Drivers D ON D.InstanceID = I.InstanceID
@@ -41,4 +45,6 @@ GROUP BY I.InstanceID,
          D.DeviceName,
          D.DriverProviderName,
          D.DriverVersion,
-		 CD.SnapshotDate;
+		 CD.SnapshotDate,
+		 I.SystemManufacturer,
+	     I.SystemProductName;
