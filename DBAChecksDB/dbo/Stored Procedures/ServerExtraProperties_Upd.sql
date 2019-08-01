@@ -10,7 +10,13 @@
     @IsAgentRunning BIT,
     @InstantFileInitializationEnabled BIT,
 	@OfflineSchedulers INT=NULL,
-	@ResourceGovernorEnabled BIT=NULL
+	@ResourceGovernorEnabled BIT=NULL,
+	@WindowsRelease NVARCHAR(256)= NULL,
+	@WindowsSP NVARCHAR(256)= NULL,
+	@WindowsSKU NVARCHAR(256)= NULL,
+	@LastMemoryDump DATETIME=NULL,
+	@MemoryDumpCount INT= NULL,
+	@WindowsCaption NVARCHAR(256)= NULL
 )
 AS
 DECLARE @Ref VARCHAR(30)='ServerExtraProperties'
@@ -25,7 +31,13 @@ BEGIN
 		IsAgentRunning = @IsAgentRunning,
 		InstantFileInitializationEnabled = @InstantFileInitializationEnabled,
 		OfflineSchedulers=@OfflineSchedulers,
-		ResourceGovernorEnabled=@ResourceGovernorEnabled
+		ResourceGovernorEnabled=@ResourceGovernorEnabled,
+		WindowsRelease=@WindowsRelease,
+		WindowsSP=@WindowsSP,
+		WindowsSKU =@WindowsSKU,
+		LastMemoryDump =@LastMemoryDump,
+		MemoryDumpCount=@MemoryDumpCount,
+		WindowsCaption =@WindowsCaption
 	WHERE InstanceID = @InstanceID;
 
 	EXEC dbo.CollectionDates_Upd @InstanceID = @InstanceID,  

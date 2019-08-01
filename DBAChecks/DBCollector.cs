@@ -17,6 +17,7 @@ namespace DBAChecks
         private DataTable dtErrors;
         private bool noWMI;
         public Int32 CPUCollectionPeriod=60;
+        string computerName;
 
         public DBCollector(string connectionString, bool noWMI)
         {
@@ -77,7 +78,11 @@ namespace DBAChecks
 
         public void CollectAll()
         {
+   
             CollectProperies();
+            computerName = (string)Data.Tables["ServerProperties"].Rows[0]["ComputerNamePhysicalNetBIOS"];
+ 
+       
             CollectDatabases();
             CollectHADRDB();
             CollectConfiguration();
@@ -122,6 +127,14 @@ namespace DBAChecks
             catch (Exception ex)
             {
                 logError("CPU", ex.Message);
+            }
+            try
+            {
+                addDT("BlockingSnapshot", Properties.Resources.SQLBlockingSnapshot);
+            }
+            catch(Exception ex)
+            {
+                logError("BlockingSnapshot", ex.Message);
             }
         }
 
@@ -211,9 +224,25 @@ namespace DBAChecks
 
         public void CollectServerExtraProperties()
         {
+            
             try
             {
+                CollectComputerSystemWMI();
+                CollectOperatingSystemWMI() ;
                 addDT("ServerExtraProperties", DBAChecks.Properties.Resources.SQLExtraProperties);
+                Data.Tables["ServerExtraProperties"].Columns.Add("WindowsCaption");
+                if (manufacturer != "") { Data.Tables["ServerExtraProperties"].Rows[0]["SystemManufacturer"] = manufacturer; }
+                if (model != "") { Data.Tables["ServerExtraProperties"].Rows[0]["SystemProductName"] = model; }
+                if (WindowsVersion != "") { Data.Tables["ServerExtraProperties"].Rows[0]["WindowsRelease"] = WindowsVersion; }
+                if (WindowsSP != "") { Data.Tables["ServerExtraProperties"].Rows[0]["WindowsServicePackLevel"] = WindowsSP; }
+                if (Data.Tables["ServerExtraProperties"].Rows[0]["WindowsSKU"] == DBNull.Value) { Data.Tables["ServerExtraProperties"].Rows[0]["WindowsSKU"] = WindowsSKU; }
+                Data.Tables["ServerExtraProperties"].Rows[0]["WindowsCaption"] = WindowsCaption;
+                if (Data.Tables["ServerExtraProperties"].Rows[0]["ActivePowerPlanGUID"] == DBNull.Value)
+                {
+                    CollectPowerPlanWMI();
+                    Data.Tables["ServerExtraProperties"].Rows[0]["ActivePowerPlanGUID"] = activePowerPlanGUID;
+                    Data.Tables["ServerExtraProperties"].Rows[0]["ActivePowerPlan"] = activePowerPlan;
+                }
             }
             catch(Exception ex)
             {
@@ -362,126 +391,267 @@ namespace DBAChecks
             }
         }
 
-        public void CollectDriversWMI()
+        string activePowerPlan;
+        Guid activePowerPlanGUID;
+        string manufacturer;
+        string model;
+        string WindowsVersion;
+        string WindowsCaption;
+        Int32 WindowsSKU;
+        string WindowsSP;
+
+
+        #region "WMI"
+
+        public void CollectOperatingSystemWMI()
         {
-            try
+            if (!noWMI)
             {
-                if (!Data.Tables.Contains("Drivers"))
+                try
                 {
-                    DataTable dtDrivers = new DataTable("Drivers");
-                    string[] selectedProperties = new string[] { "ClassGuid", "DeviceClass", "DeviceID", "DeviceName", "DriverDate", "DriverProviderName", "DriverVersion", "FriendlyName", "HardWareID", "Manufacturer", "PDO" };
-                    foreach (string p in selectedProperties)
-                    {
-                        if (p == "DriverDate")
-                        {
-                            dtDrivers.Columns.Add(p, typeof(DateTime));
-                        }
-                        else if (p == "ClassGuid")
-                        {
-                            dtDrivers.Columns.Add(p, typeof(Guid));
-                        }
-                        else
-                        {
-                            dtDrivers.Columns.Add(p, typeof(string));
-                        }
-                    }
-
-                    string computerName = (string)Data.Tables["ServerProperties"].Rows[0]["ComputerNamePhysicalNetBIOS"];
-
                     ManagementPath path = new ManagementPath()
                     {
                         NamespacePath = @"root\cimv2",
                         Server = computerName
                     };
-                    ManagementScope scope = new ManagementScope(path);
+                    ManagementScope scopeCIMV2 = new ManagementScope(path);
 
-                    SelectQuery query = new SelectQuery("Win32_PnPSignedDriver", "", selectedProperties);
-
-                    using (ManagementObjectSearcher searcher = new ManagementObjectSearcher(scope, query))
+                    SelectQuery query = new SelectQuery("Win32_OperatingSystem", "", new string[] { "Version", "Caption", "OperatingSystemSKU", "ServicePackMajorVersion", "ServicePackMinorVersion" });
+                    using (ManagementObjectSearcher searcher = new ManagementObjectSearcher(scopeCIMV2, query))
                     using (ManagementObjectCollection results = searcher.Get())
                     {
-                        foreach (ManagementObject mo in results)
+                        if (results.Count == 1)
                         {
+                            var mo = results.OfType<ManagementObject>().FirstOrDefault();
                             if (mo != null)
                             {
-                                var rDriver = dtDrivers.NewRow();
-                                foreach (string p in selectedProperties)
-                                {
-                                    if (mo.GetPropertyValue(p) != null)
-                                    {
-                                        if (p == "DriverDate" || p == "InstallDate")
-                                        {
+                                WindowsVersion = getMOStringValue(mo, "Version", 256);
+                                WindowsCaption = getMOStringValue(mo, "Caption", 256);
+                                WindowsSKU = Int32.Parse(getMOStringValue(mo, "OperatingSystemSKU"));
+                                WindowsSP=  getMOStringValue(mo, "ServicePackMajorVersion",128) +  "." + getMOStringValue(mo, "ServicePackMinorVersion", 127);
 
-                                            try
-                                            {
-                                                rDriver[p] = ManagementDateTimeConverter.ToDateTime(mo.GetPropertyValue(p).ToString());
-                                            }
-                                            catch (Exception ex)
-                                            {
-                                                logError("Drivers", p + ": " + ex.Message);
-                                            }
-                                        }
+                           }
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    logError("Win32_OperatingSystem WMI", ex.Message);
+                }
+            }
+        }
 
-                                        else if (p == "ClassGuid")
-                                        {
-                                            try
-                                            {
-                                                rDriver[p] = Guid.Parse(mo.GetPropertyValue(p).ToString());
-                                            }
-                                            catch (Exception ex)
-                                            {
-                                                logError("Drivers", p + ": " + ex.Message);
-                                            }
+        public void CollectComputerSystemWMI()
+        {
+            if (!noWMI)
+            {
+                try
+                {
+                    ManagementPath path = new ManagementPath()
+                    {
+                        NamespacePath = @"root\cimv2",
+                        Server = computerName
+                    };
+                    ManagementScope scopeCIMV2 = new ManagementScope(path);
 
-                                        }
-                                        else
-                                        {
-                                            try
-                                            {
-                                                string value = mo.GetPropertyValue(p).ToString();
+                    SelectQuery query = new SelectQuery("Win32_ComputerSystem", "", new string[] { "Manufacturer", "Model" });
+                    using (ManagementObjectSearcher searcher = new ManagementObjectSearcher(scopeCIMV2, query))
+                    using (ManagementObjectCollection results = searcher.Get())
+                    {
+                        if (results.Count == 1)
+                        {
+                            var mo = results.OfType<ManagementObject>().FirstOrDefault();
+                            if (mo != null)
+                            {
+                                manufacturer = getMOStringValue(mo, "Manufacturer", 200);
+                                model = getMOStringValue(mo, "Model", 200);
 
-                                                rDriver[p] = value.Length<=200 ? value : value.Substring(0, 200);
-
-                                            }
-                                            catch (Exception ex)
-                                            {
-                                                logError("Drivers", p + ": " + ex.Message);
-                                            }
-                                        
-                                        }
-
-                                    }
-                                }
-                                dtDrivers.Rows.Add(rDriver);
                             }
                         }
                     }
-                    try
-                    {
-                        var PVKey = RegistryKey.OpenRemoteBaseKey(RegistryHive.LocalMachine, computerName, RegistryView.Registry64).OpenSubKey("SOFTWARE\\Amazon\\PVDriver");
-                        if (PVKey != null)
-                        {
-                            var rDriver = dtDrivers.NewRow();
-                            rDriver["DeviceID"] = "HKEY_LOCAL_MACHINE\\SOFTWARE\\Amazon\\PVDriver";
-                            rDriver["Manufacturer"] = "Amazon Inc.";
-                            rDriver["DriverProviderName"] = "Amazon Inc.";
-                            rDriver["DeviceName"] = "AWS PV Driver";
-                            rDriver["DriverVersion"] = PVKey.GetValue("Version");
-                            dtDrivers.Rows.Add(rDriver);
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        logError("AWSPVDriver", ex.Message);
-                    }
-                    Data.Tables.Add(dtDrivers);
                 }
-                
+                catch (Exception ex)
+                {
+                    logError("Win32_ComputerSystem WMI", ex.Message);
+                }
             }
-            catch (Exception ex)
+        }
+
+        private string getMOStringValue(ManagementObject mo, string propertyName, Int32 truncateLength = 0)
+    {
+        string value = "";
+        if (mo.GetPropertyValue(propertyName) != null)
+        {
+            value = mo.GetPropertyValue(propertyName).ToString();
+            if (truncateLength>0 && value.Length > truncateLength){
+                value = value.Substring(0, 200);
+            }
+        }
+        return value;
+    }
+
+        public void CollectPowerPlanWMI()
+        {
+            if (!noWMI)
             {
-                logError("Drivers (WMI)", ex.Message);
-                throw ex;
+                try
+                {
+                    ManagementPath pathPower = new ManagementPath()
+                    {
+                        NamespacePath = @"root\cimv2\power",
+                        Server = computerName
+                    };
+                    ManagementScope scopePower = new ManagementScope(pathPower);
+                    SelectQuery query = new SelectQuery("Win32_PowerPlan", "IsActive=1", new string[] { "InstanceID", "ElementName" });
+                    using (ManagementObjectSearcher searcher = new ManagementObjectSearcher(scopePower, query))
+                    using (ManagementObjectCollection results = searcher.Get())
+                    {
+
+                        var mo = results.OfType<ManagementObject>().FirstOrDefault();
+                        if (mo != null)
+                        {
+
+
+                            string instanceId = getMOStringValue(mo, "InstanceID");
+                            if (instanceId.Length > 0)
+                            {
+                                activePowerPlanGUID = Guid.Parse(instanceId.Substring(instanceId.Length - 38, 38));
+                            }
+                            activePowerPlan = getMOStringValue(mo, "ElementName");
+                        }
+
+                    }
+                }
+                catch (Exception ex)
+                {
+                    logError("Win32_PowerPlan WMI", ex.Message);
+                }
+            }
+        }
+
+        public void CollectDriversWMI()
+        {
+            if (!noWMI)
+            {
+                try
+                {
+                    if (!Data.Tables.Contains("Drivers"))
+                    {
+                        DataTable dtDrivers = new DataTable("Drivers");
+                        string[] selectedProperties = new string[] { "ClassGuid", "DeviceClass", "DeviceID", "DeviceName", "DriverDate", "DriverProviderName", "DriverVersion", "FriendlyName", "HardWareID", "Manufacturer", "PDO" };
+                        foreach (string p in selectedProperties)
+                        {
+                            if (p == "DriverDate")
+                            {
+                                dtDrivers.Columns.Add(p, typeof(DateTime));
+                            }
+                            else if (p == "ClassGuid")
+                            {
+                                dtDrivers.Columns.Add(p, typeof(Guid));
+                            }
+                            else
+                            {
+                                dtDrivers.Columns.Add(p, typeof(string));
+                            }
+                        }
+
+                        string computerName = (string)Data.Tables["ServerProperties"].Rows[0]["ComputerNamePhysicalNetBIOS"];
+
+                        ManagementPath path = new ManagementPath()
+                        {
+                            NamespacePath = @"root\cimv2",
+                            Server = computerName
+                        };
+                        ManagementScope scope = new ManagementScope(path);
+
+                        SelectQuery query = new SelectQuery("Win32_PnPSignedDriver", "", selectedProperties);
+
+                        using (ManagementObjectSearcher searcher = new ManagementObjectSearcher(scope, query))
+                        using (ManagementObjectCollection results = searcher.Get())
+                        {
+                            foreach (ManagementObject mo in results)
+                            {
+                                if (mo != null)
+                                {
+                                    var rDriver = dtDrivers.NewRow();
+                                    foreach (string p in selectedProperties)
+                                    {
+                                        if (mo.GetPropertyValue(p) != null)
+                                        {
+                                            if (p == "DriverDate" || p == "InstallDate")
+                                            {
+
+                                                try
+                                                {
+                                                    rDriver[p] = ManagementDateTimeConverter.ToDateTime(mo.GetPropertyValue(p).ToString());
+                                                }
+                                                catch (Exception ex)
+                                                {
+                                                    logError("Drivers", p + ": " + ex.Message);
+                                                }
+                                            }
+
+                                            else if (p == "ClassGuid")
+                                            {
+                                                try
+                                                {
+                                                    rDriver[p] = Guid.Parse(mo.GetPropertyValue(p).ToString());
+                                                }
+                                                catch (Exception ex)
+                                                {
+                                                    logError("Drivers", p + ": " + ex.Message);
+                                                }
+
+                                            }
+                                            else
+                                            {
+                                                try
+                                                {
+                                                    string value = mo.GetPropertyValue(p).ToString();
+
+                                                    rDriver[p] = value.Length <= 200 ? value : value.Substring(0, 200);
+
+                                                }
+                                                catch (Exception ex)
+                                                {
+                                                    logError("Drivers", p + ": " + ex.Message);
+                                                }
+
+                                            }
+
+                                        }
+                                    }
+                                    dtDrivers.Rows.Add(rDriver);
+                                }
+                            }
+                        }
+                        try
+                        {
+                            var PVKey = RegistryKey.OpenRemoteBaseKey(RegistryHive.LocalMachine, computerName, RegistryView.Registry64).OpenSubKey("SOFTWARE\\Amazon\\PVDriver");
+                            if (PVKey != null)
+                            {
+                                var rDriver = dtDrivers.NewRow();
+                                rDriver["DeviceID"] = "HKEY_LOCAL_MACHINE\\SOFTWARE\\Amazon\\PVDriver";
+                                rDriver["Manufacturer"] = "Amazon Inc.";
+                                rDriver["DriverProviderName"] = "Amazon Inc.";
+                                rDriver["DeviceName"] = "AWS PV Driver";
+                                rDriver["DriverVersion"] = PVKey.GetValue("Version");
+                                dtDrivers.Rows.Add(rDriver);
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            logError("AWSPVDriver", ex.Message);
+                        }
+                        Data.Tables.Add(dtDrivers);
+                    }
+
+                }
+                catch (Exception ex)
+                {
+                    logError("Drivers (WMI)", ex.Message);
+                    throw ex;
+                }
             }
         }
     
@@ -539,6 +709,7 @@ namespace DBAChecks
             }
          }
 
+        #endregion
 
     }
 }

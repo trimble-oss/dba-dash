@@ -197,6 +197,10 @@
     <Build Include="dbo\Tables\DriversHistory.sql" />
     <Build Include="Report\Stored Procedures\AWSDriver_Get.sql" />
     <Build Include="Report\Stored Procedures\Drivers_Get.sql" />
+    <Build Include="dbo\Tables\BlockingSnapshotSummary.sql" />
+    <Build Include="dbo\Tables\BlockingSnapshot.sql" />
+    <Build Include="dbo\Stored Procedures\BlockingSnapshot_Upd.sql" />
+    <Build Include="dbo\User Defined Types\BlockingSnapshot.sql" />
   </ItemGroup>
   <ItemGroup>
     <PostDeploy Include="Script.PostDeployment1.sql" />

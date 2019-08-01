@@ -181,10 +181,44 @@ BEGIN
 										WHERE is_enabled=1)
 										THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END
 END
-
-SELECT @ActivePowerPlan ActivePowerPlanGUID, CASE WHEN @ActivePowerPlan=@HighPerformance THEN 'High Performance' WHEN @ActivePowerPlan=@Balanced THEN 'Balanced' WHEN @ActivePowerPlan = @PowerSaver THEN 'Power Saver' ELSE NULL END AS ActivePowerPlan,
-	@ProcessorNameString as ProcessorNameString,@SystemManufacturer as SystemManufacturer,@SystemProductName as SystemProductName,@IsAgentRunning IsAgentRunning,
-	@InstantFileInitializationEnabled InstantFileInitializationEnabled,@OfflineSchedulers OfflineSchedulers, @ResourceGovernorEnabled AS  ResourceGovernorEnabled</value>
+DECLARE @WindowsRelease NVARCHAR(256)
+DECLARE @WindowsSP NVARCHAR(256)
+DECLARE @WindowsSKU INT
+IF OBJECT_ID('sys.dm_os_windows_info') IS NOT NULL
+BEGIN
+	SELECT @WindowsRelease=windows_release,@WindowsSP = windows_service_pack_level,@WindowsSKU = windows_sku
+	FROM sys.dm_os_windows_info
+END
+DECLARE @LastMemoryDump DATETIME
+DECLARE @DumpCount INT
+IF OBJECT_ID('sys.dm_server_memory_dumps') IS NOT NULL
+BEGIN
+	select @LastMemoryDump=MAX(creation_time),@DumpCount=COUNT(*) 
+	from sys.dm_server_memory_dumps
+END
+SELECT @ActivePowerPlan ActivePowerPlanGUID,
+       CASE
+           WHEN @ActivePowerPlan = @HighPerformance THEN
+               'High Performance'
+           WHEN @ActivePowerPlan = @Balanced THEN
+               'Balanced'
+           WHEN @ActivePowerPlan = @PowerSaver THEN
+               'Power Saver'
+           ELSE
+               NULL
+       END AS ActivePowerPlan,
+       @ProcessorNameString AS ProcessorNameString,
+       @SystemManufacturer AS SystemManufacturer,
+       @SystemProductName AS SystemProductName,
+       @IsAgentRunning IsAgentRunning,
+       @InstantFileInitializationEnabled InstantFileInitializationEnabled,
+       @OfflineSchedulers OfflineSchedulers,
+       @ResourceGovernorEnabled AS ResourceGovernorEnabled,
+       @WindowsRelease AS WindowsRelease,
+       @WindowsSP AS WindowsServicePackLevel,
+       @WindowsSKU AS WindowsSKU,
+       @LastMemoryDump LastMemoryDump,
+       @DumpCount AS MemoryDumpCount;</value>
   </data>
   <data name="SQLAgentJobSummary" xml:space="preserve">
     <value>WITH T
@@ -911,5 +945,39 @@ BEGIN
 	FROM sys.dm_exec_function_stats
 	WHERE database_id &lt;&gt; 32767;
 END</value>
+  </data>
+  <data name="SQLBlockingSnapshot" xml:space="preserve">
+    <value>DECLARE @MinWaitTimeMs INT = 1000
+DECLARE @UTCOffset INT 
+SELECT @UTCOffset= DATEDIFF(mi,GETDATE(),GETUTCDATE());
+WITH R AS (
+	SELECT GETUTCDATE() SnapshotDateUTC,
+		@UTCOffset AS UTCOffset,
+		S.session_id,
+		ISNULL(R.blocking_session_id,0) AS blocking_session_id,
+		ISNULL(RTXT.text,CTXT.text) AS Txt,
+		DATEADD(mi,@UTCOffset,ISNULL(R.start_time,S.last_request_start_time)) as start_time_utc,
+		R.command,
+		S.database_id,
+		DB_NAME(S.database_id) database_name,
+		S.host_name,
+		s.program_name,
+		R.wait_time,
+		S.login_name,
+		R.wait_resource,
+		R.Status
+	FROM sys.dm_exec_sessions s
+	INNER JOIN sys.dm_exec_connections c ON c.session_id= S.session_id
+	LEFT JOIN sys.dm_exec_requests as R ON S.session_id = R.session_id
+	OUTER APPLY sys.dm_exec_sql_text(R.sql_handle) AS Rtxt
+	OUTER APPLY sys.dm_exec_sql_text(C.most_recent_sql_handle) AS Ctxt
+	WHERE S.session_id&gt;0
+	AND S.is_user_process=1
+)
+SELECT *
+FROM R
+WHERE ( R.blocking_session_id &gt; 0  AND R.wait_time&gt; @MinWaitTimeMs
+OR EXISTS(SELECT * FROM R R2 WHERE R2.blocking_session_id = R.session_id AND R2.wait_time&gt;@MinWaitTimeMs)
+)</value>
   </data>
 </root>

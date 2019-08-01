@@ -69,8 +69,16 @@
     [scheduler_count]                  INT              NULL,
     [ResourceGovernorEnabled]          BIT              NULL,
     [UTCOffset]                        INT              NULL,
+    [WindowsRelease]                   NVARCHAR (256)   NULL,
+    [WindowsSP]                        NVARCHAR (256)   NULL,
+    [WindowsSKU]                       NVARCHAR (256)   NULL,
+    [LastMemoryDump]                   DATETIME         NULL,
+    [MemoryDumpCount]                  INT              NULL,
+    [WindowsCaption]                   NVARCHAR (256)   NULL,
     CONSTRAINT [PK_Instances] PRIMARY KEY CLUSTERED ([InstanceID] ASC)
 );
+
+
 
 
 

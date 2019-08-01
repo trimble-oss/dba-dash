@@ -104,7 +104,9 @@ SELECT I.InstanceID,
 	I.UTCOffset,
 	DATEDIFF(mi,DATEADD(mi,I.UtcOffSet,I.sqlserver_start_time),OSInfoCD.SnapshotDate) AS sqlserver_uptime,
 	I.ms_ticks/60000 AS host_uptime,
-	DATEADD(s,-I.ms_ticks/1000,OSInfoCD.SnapshotDate) AS host_start_time_utc
+	DATEADD(s,-I.ms_ticks/1000,OSInfoCD.SnapshotDate) AS host_start_time_utc,
+	I.MemoryDumpCount,
+	I.LastMemoryDump
 FROM dbo.Instances I 
 LEFT JOIN LS ON I.InstanceID = LS.InstanceID
 LEFT JOIN B ON I.InstanceID = B.InstanceID

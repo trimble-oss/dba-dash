@@ -35,9 +35,10 @@ namespace DBAChecks
             }
             else
             {
-                dtErrors = new DataTable("ImportErrors");
+                dtErrors = new DataTable("Errors");
                 dtErrors.Columns.Add("ErrorSource");
                 dtErrors.Columns.Add("ErrorMessage");
+                Data.Tables.Add(dtErrors);
             }
 
             Console.WriteLine(errorSource + " : " + errorMessage);
@@ -60,7 +61,7 @@ namespace DBAChecks
             updateDB(connectionString, instanceID, snapshotDate, Data);
             foreach(DataTable dt in Data.Tables)
             {
-                string[] tables = { "Drives", "ServerProperties","Backups","AgentJobs","LogRestores","DBFiles","DBConfig","Corruption","DatabasesHADR","SysConfig","OSInfo","TraceFlags","ProcStats","FunctionStats","CPU","Drivers" };
+                string[] tables = { "Drives", "ServerProperties","Backups","AgentJobs","LogRestores","DBFiles","DBConfig","Corruption","DatabasesHADR","SysConfig","OSInfo","TraceFlags","ProcStats","FunctionStats","CPU","Drivers","BlockingSnapshot" };
                 if (tables.Contains(dt.TableName))
                 {
                     update(connectionString, instanceID, snapshotDate, dt);
@@ -94,6 +95,12 @@ namespace DBAChecks
                         cmd.Parameters.AddWithValue("InstantFileInitializationEnabled", r["InstantFileInitializationEnabled"]);
                         cmd.Parameters.AddWithValue("OfflineSchedulers", r["OfflineSchedulers"]);
                         cmd.Parameters.AddWithValue("ResourceGovernorEnabled", r["ResourceGovernorEnabled"]);
+                        cmd.Parameters.AddWithValue("WindowsRelease", r["WindowsRelease"]);
+                        cmd.Parameters.AddWithValue("WindowsSP", r["WindowsServicePackLevel"]);
+                        cmd.Parameters.AddWithValue("WindowsSKU", r["WindowsSKU"]);
+                        cmd.Parameters.AddWithValue("LastMemoryDump", r["LastMemoryDump"]);
+                        cmd.Parameters.AddWithValue("MemoryDumpCount", r["MemoryDumpCount"]);
+                        cmd.Parameters.AddWithValue("WindowsCaption", r["WindowsCaption"]);
                         cmd.CommandType = CommandType.StoredProcedure;
                         cmd.ExecuteNonQuery();
                     }

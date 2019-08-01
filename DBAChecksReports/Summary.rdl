@@ -103,6 +103,14 @@
           <DataField>host_start_time_utc</DataField>
           <rd:TypeName>System.DateTime</rd:TypeName>
         </Field>
+        <Field Name="MemoryDumpCount">
+          <DataField>MemoryDumpCount</DataField>
+          <rd:TypeName>System.Int32</rd:TypeName>
+        </Field>
+        <Field Name="LastMemoryDump">
+          <DataField>LastMemoryDump</DataField>
+          <rd:TypeName>System.DateTime</rd:TypeName>
+        </Field>
       </Fields>
     </DataSet>
     <DataSet Name="Instances">
@@ -199,6 +207,9 @@
               <TablixColumns>
                 <TablixColumn>
                   <Width>2.30208in</Width>
+                </TablixColumn>
+                <TablixColumn>
+                  <Width>1in</Width>
                 </TablixColumn>
                 <TablixColumn>
                   <Width>1in</Width>
@@ -675,6 +686,50 @@
                             </Paragraph>
                           </Paragraphs>
                           <rd:DefaultName>Textbox16</rd:DefaultName>
+                          <Style>
+                            <Border>
+                              <Color>Gainsboro</Color>
+                              <Style>None</Style>
+                            </Border>
+                            <BottomBorder>
+                              <Style>Solid</Style>
+                            </BottomBorder>
+                            <BackgroundColor>#444444</BackgroundColor>
+                            <PaddingLeft>2pt</PaddingLeft>
+                            <PaddingRight>2pt</PaddingRight>
+                            <PaddingTop>2pt</PaddingTop>
+                            <PaddingBottom>2pt</PaddingBottom>
+                          </Style>
+                        </Textbox>
+                      </CellContents>
+                    </TablixCell>
+                    <TablixCell>
+                      <CellContents>
+                        <Textbox Name="Textbox19">
+                          <CanGrow>true</CanGrow>
+                          <UserSort>
+                            <SortExpression>=Fields!LastMemoryDump.Value</SortExpression>
+                          </UserSort>
+                          <KeepTogether>true</KeepTogether>
+                          <Paragraphs>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Value>Memory Dump</Value>
+                                  <Style>
+                                    <FontFamily />
+                                    <FontSize>11pt</FontSize>
+                                    <FontWeight>Bold</FontWeight>
+                                    <Color>White</Color>
+                                  </Style>
+                                </TextRun>
+                              </TextRuns>
+                              <Style>
+                                <TextAlign>Right</TextAlign>
+                              </Style>
+                            </Paragraph>
+                          </Paragraphs>
+                          <rd:DefaultName>Textbox19</rd:DefaultName>
                           <Style>
                             <Border>
                               <Color>Gainsboro</Color>
@@ -1326,6 +1381,52 @@ DateTime.UtcNow.Subtract(CDATE(Fields!DetectedCorruptionDate.Value)).TotalDays&l
                     </TablixCell>
                     <TablixCell>
                       <CellContents>
+                        <Textbox Name="LastMemoryDump">
+                          <CanGrow>true</CanGrow>
+                          <KeepTogether>true</KeepTogether>
+                          <Paragraphs>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Value>=SWITCH(isnothing(Fields!MemoryDumpCount.Value),"UNK",
+Fields!MemoryDumpCount.Value=0,"",
+DateTime.UtcNow.Subtract(CDATE(Fields!LastMemoryDump.Value)).TotalDays&lt;1,"Today",
+DateTime.UtcNow.Subtract(CDATE(Fields!LastMemoryDump.Value)).TotalDays&lt;2,"Yesterday",
+1=1,Format(DateTime.UtcNow.Subtract(CDATE(Fields!LastMemoryDump.Value)).TotalDays,"0") &amp; " Days ago"
+)</Value>
+                                  <Style>
+                                    <FontFamily />
+                                  </Style>
+                                </TextRun>
+                              </TextRuns>
+                              <Style />
+                            </Paragraph>
+                          </Paragraphs>
+                          <rd:DefaultName>LastMemoryDump</rd:DefaultName>
+                          <ToolTip>=SWITCH(isnothing(Fields!MemoryDumpCount.Value),"",
+1=1,"Total Memory dumps:" &amp; Fields!MemoryDumpCount.Value.ToString()
+)</ToolTip>
+                          <Style>
+                            <Border>
+                              <Color>Gainsboro</Color>
+                              <Style>Solid</Style>
+                            </Border>
+                            <BackgroundColor>=SWITCH(isnothing(Fields!MemoryDumpCount.Value),"LightGrey",
+Fields!MemoryDumpCount.Value=0,"Green",
+DateTime.UtcNow.Subtract(CDATE(Fields!LastMemoryDump.Value)).TotalDays&lt;2,"Red",
+DateTime.UtcNow.Subtract(CDATE(Fields!LastMemoryDump.Value)).TotalDays&lt;8,"Yellow",
+1=1,"Green"
+)</BackgroundColor>
+                            <PaddingLeft>2pt</PaddingLeft>
+                            <PaddingRight>2pt</PaddingRight>
+                            <PaddingTop>2pt</PaddingTop>
+                            <PaddingBottom>2pt</PaddingBottom>
+                          </Style>
+                        </Textbox>
+                      </CellContents>
+                    </TablixCell>
+                    <TablixCell>
+                      <CellContents>
                         <Textbox Name="CollectionErrorStatus">
                           <CanGrow>true</CanGrow>
                           <KeepTogether>true</KeepTogether>
@@ -1490,6 +1591,7 @@ Fields!sqlserver_uptime.Value&lt;2880,"Yellow",
                 <TablixMember />
                 <TablixMember />
                 <TablixMember />
+                <TablixMember />
               </TablixMembers>
             </TablixColumnHierarchy>
             <TablixRowHierarchy>
@@ -1520,7 +1622,7 @@ Fields!sqlserver_uptime.Value&lt;2880,"Yellow",
             </SortExpressions>
             <Top>0.43in</Top>
             <Height>0.83625in</Height>
-            <Width>14.18541in</Width>
+            <Width>15.18541in</Width>
             <ZIndex>1</ZIndex>
             <Style />
           </Tablix>

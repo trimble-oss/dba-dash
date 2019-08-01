@@ -46,12 +46,28 @@
           <DataField>SystemProductName</DataField>
           <rd:TypeName>System.String</rd:TypeName>
         </Field>
+        <Field Name="SQLVersion">
+          <DataField>SQLVersion</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+        <Field Name="ProductVersion">
+          <DataField>ProductVersion</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
         <Field Name="DriverProviderName">
           <DataField>DriverProviderName</DataField>
           <rd:TypeName>System.String</rd:TypeName>
         </Field>
+        <Field Name="ProductUpdateReference">
+          <DataField>ProductUpdateReference</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
         <Field Name="DriverVersion">
           <DataField>DriverVersion</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+        <Field Name="Windows">
+          <DataField>Windows</DataField>
           <rd:TypeName>System.String</rd:TypeName>
         </Field>
         <Field Name="ValidFrom">
@@ -280,6 +296,160 @@
                   </TablixCornerCell>
                   <TablixCornerCell>
                     <CellContents>
+                      <Textbox Name="Textbox5">
+                        <CanGrow>true</CanGrow>
+                        <UserSort>
+                          <SortExpression>=Fields!ProductVersion.Value</SortExpression>
+                          <SortExpressionScope>matrix1_Instance</SortExpressionScope>
+                        </UserSort>
+                        <KeepTogether>true</KeepTogether>
+                        <Paragraphs>
+                          <Paragraph>
+                            <TextRuns>
+                              <TextRun>
+                                <Value>SQLVersion</Value>
+                                <Style>
+                                  <FontFamily>Arial</FontFamily>
+                                  <FontWeight>Bold</FontWeight>
+                                  <Color>White</Color>
+                                </Style>
+                              </TextRun>
+                            </TextRuns>
+                            <Style />
+                          </Paragraph>
+                        </Paragraphs>
+                        <rd:DefaultName>Textbox5</rd:DefaultName>
+                        <Style>
+                          <Border>
+                            <Color>LightGrey</Color>
+                          </Border>
+                          <BackgroundColor>#444444</BackgroundColor>
+                          <PaddingLeft>2pt</PaddingLeft>
+                          <PaddingRight>2pt</PaddingRight>
+                          <PaddingTop>2pt</PaddingTop>
+                          <PaddingBottom>2pt</PaddingBottom>
+                        </Style>
+                      </Textbox>
+                      <RowSpan>2</RowSpan>
+                    </CellContents>
+                  </TablixCornerCell>
+                  <TablixCornerCell>
+                    <CellContents>
+                      <Textbox Name="Textbox17">
+                        <CanGrow>true</CanGrow>
+                        <UserSort>
+                          <SortExpression>=Fields!ProductUpdateReference.Value</SortExpression>
+                        </UserSort>
+                        <KeepTogether>true</KeepTogether>
+                        <Paragraphs>
+                          <Paragraph>
+                            <TextRuns>
+                              <TextRun>
+                                <Value>Product Update Reference</Value>
+                                <Style>
+                                  <FontFamily>Arial</FontFamily>
+                                  <FontWeight>Bold</FontWeight>
+                                  <Color>White</Color>
+                                </Style>
+                              </TextRun>
+                            </TextRuns>
+                            <Style />
+                          </Paragraph>
+                        </Paragraphs>
+                        <rd:DefaultName>Textbox17</rd:DefaultName>
+                        <Style>
+                          <Border>
+                            <Color>LightGrey</Color>
+                          </Border>
+                          <BackgroundColor>#444444</BackgroundColor>
+                          <PaddingLeft>2pt</PaddingLeft>
+                          <PaddingRight>2pt</PaddingRight>
+                          <PaddingTop>2pt</PaddingTop>
+                          <PaddingBottom>2pt</PaddingBottom>
+                        </Style>
+                      </Textbox>
+                      <RowSpan>2</RowSpan>
+                    </CellContents>
+                  </TablixCornerCell>
+                  <TablixCornerCell>
+                    <CellContents>
+                      <Textbox Name="Textbox14">
+                        <CanGrow>true</CanGrow>
+                        <UserSort>
+                          <SortExpression>=Fields!ProductVersion.Value</SortExpression>
+                        </UserSort>
+                        <KeepTogether>true</KeepTogether>
+                        <Paragraphs>
+                          <Paragraph>
+                            <TextRuns>
+                              <TextRun>
+                                <Value>Version</Value>
+                                <Style>
+                                  <FontFamily>Arial</FontFamily>
+                                  <FontWeight>Bold</FontWeight>
+                                  <Color>White</Color>
+                                </Style>
+                              </TextRun>
+                            </TextRuns>
+                            <Style />
+                          </Paragraph>
+                        </Paragraphs>
+                        <rd:DefaultName>Textbox14</rd:DefaultName>
+                        <Style>
+                          <Border>
+                            <Color>LightGrey</Color>
+                          </Border>
+                          <BackgroundColor>#444444</BackgroundColor>
+                          <PaddingLeft>2pt</PaddingLeft>
+                          <PaddingRight>2pt</PaddingRight>
+                          <PaddingTop>2pt</PaddingTop>
+                          <PaddingBottom>2pt</PaddingBottom>
+                        </Style>
+                      </Textbox>
+                      <RowSpan>2</RowSpan>
+                    </CellContents>
+                  </TablixCornerCell>
+                  <TablixCornerCell>
+                    <CellContents>
+                      <Textbox Name="Textbox9">
+                        <CanGrow>true</CanGrow>
+                        <UserSort>
+                          <SortExpression>=Fields!Windows.Value</SortExpression>
+                          <SortExpressionScope>matrix1_Instance</SortExpressionScope>
+                        </UserSort>
+                        <KeepTogether>true</KeepTogether>
+                        <Paragraphs>
+                          <Paragraph>
+                            <TextRuns>
+                              <TextRun>
+                                <Value>Windows</Value>
+                                <Style>
+                                  <FontFamily>Arial</FontFamily>
+                                  <FontWeight>Bold</FontWeight>
+                                  <Color>White</Color>
+                                </Style>
+                              </TextRun>
+                            </TextRuns>
+                            <Style />
+                          </Paragraph>
+                        </Paragraphs>
+                        <rd:DefaultName>Textbox9</rd:DefaultName>
+                        <Style>
+                          <Border>
+                            <Color>LightGrey</Color>
+                          </Border>
+                          <BackgroundColor>#444444</BackgroundColor>
+                          <PaddingLeft>2pt</PaddingLeft>
+                          <PaddingRight>2pt</PaddingRight>
+                          <PaddingTop>2pt</PaddingTop>
+                          <PaddingBottom>2pt</PaddingBottom>
+                        </Style>
+                      </Textbox>
+                      <RowSpan>2</RowSpan>
+                    </CellContents>
+                  </TablixCornerCell>
+                  <TablixCornerCell>
+                    <CellContents>
                       <Textbox Name="Textbox4">
                         <CanGrow>true</CanGrow>
                         <UserSort>
@@ -354,6 +524,10 @@
                   </TablixCornerCell>
                 </TablixCornerRow>
                 <TablixCornerRow>
+                  <TablixCornerCell />
+                  <TablixCornerCell />
+                  <TablixCornerCell />
+                  <TablixCornerCell />
                   <TablixCornerCell />
                   <TablixCornerCell />
                   <TablixCornerCell />
@@ -632,30 +806,18 @@
                           </TablixHeader>
                           <TablixMembers>
                             <TablixMember>
-                              <Group Name="matrix1_SnapshotDate">
-                                <GroupExpressions>
-                                  <GroupExpression>=Fields!SnapshotDate.Value</GroupExpression>
-                                </GroupExpressions>
-                              </Group>
-                              <SortExpressions>
-                                <SortExpression>
-                                  <Value>=Fields!SnapshotDate.Value</Value>
-                                </SortExpression>
-                              </SortExpressions>
                               <TablixHeader>
-                                <Size>1.27083in</Size>
+                                <Size>3.26042in</Size>
                                 <CellContents>
-                                  <Textbox Name="SnapshotDate">
+                                  <Textbox Name="SQLVersion">
                                     <CanGrow>true</CanGrow>
                                     <KeepTogether>true</KeepTogether>
                                     <Paragraphs>
                                       <Paragraph>
                                         <TextRuns>
                                           <TextRun>
-                                            <Value>=Fields!SnapshotDate.Value</Value>
-                                            <Style>
-                                              <Format>=Parameters!DateFormat.Value</Format>
-                                            </Style>
+                                            <Value>=Fields!SQLVersion.Value</Value>
+                                            <Style />
                                           </TextRun>
                                         </TextRuns>
                                         <Style>
@@ -663,7 +825,7 @@
                                         </Style>
                                       </Paragraph>
                                     </Paragraphs>
-                                    <rd:DefaultName>SnapshotDate</rd:DefaultName>
+                                    <rd:DefaultName>SQLVersion</rd:DefaultName>
                                     <Style>
                                       <Border>
                                         <Color>LightGrey</Color>
@@ -679,19 +841,17 @@
                               <TablixMembers>
                                 <TablixMember>
                                   <TablixHeader>
-                                    <Size>1.36458in</Size>
+                                    <Size>1.26042in</Size>
                                     <CellContents>
-                                      <Textbox Name="ValidFrom">
+                                      <Textbox Name="ProductUpdateReference">
                                         <CanGrow>true</CanGrow>
                                         <KeepTogether>true</KeepTogether>
                                         <Paragraphs>
                                           <Paragraph>
                                             <TextRuns>
                                               <TextRun>
-                                                <Value>=IIF( Fields!HasDriverUpdates.Value,Fields!ValidFrom.Value,"")</Value>
-                                                <Style>
-                                                  <Format>=Parameters!DateFormat.Value</Format>
-                                                </Style>
+                                                <Value>=Fields!ProductUpdateReference.Value</Value>
+                                                <Style />
                                               </TextRun>
                                             </TextRuns>
                                             <Style>
@@ -699,7 +859,7 @@
                                             </Style>
                                           </Paragraph>
                                         </Paragraphs>
-                                        <rd:DefaultName>ValidFrom</rd:DefaultName>
+                                        <rd:DefaultName>ProductUpdateReference</rd:DefaultName>
                                         <Style>
                                           <Border>
                                             <Color>LightGrey</Color>
@@ -712,10 +872,168 @@
                                       </Textbox>
                                     </CellContents>
                                   </TablixHeader>
+                                  <TablixMembers>
+                                    <TablixMember>
+                                      <TablixHeader>
+                                        <Size>1.23958in</Size>
+                                        <CellContents>
+                                          <Textbox Name="ProductVersion">
+                                            <CanGrow>true</CanGrow>
+                                            <KeepTogether>true</KeepTogether>
+                                            <Paragraphs>
+                                              <Paragraph>
+                                                <TextRuns>
+                                                  <TextRun>
+                                                    <Value>=Fields!ProductVersion.Value</Value>
+                                                    <Style />
+                                                  </TextRun>
+                                                </TextRuns>
+                                                <Style>
+                                                  <TextAlign>Right</TextAlign>
+                                                </Style>
+                                              </Paragraph>
+                                            </Paragraphs>
+                                            <rd:DefaultName>ProductVersion</rd:DefaultName>
+                                            <Style>
+                                              <Border>
+                                                <Color>LightGrey</Color>
+                                              </Border>
+                                              <PaddingLeft>2pt</PaddingLeft>
+                                              <PaddingRight>2pt</PaddingRight>
+                                              <PaddingTop>2pt</PaddingTop>
+                                              <PaddingBottom>2pt</PaddingBottom>
+                                            </Style>
+                                          </Textbox>
+                                        </CellContents>
+                                      </TablixHeader>
+                                      <TablixMembers>
+                                        <TablixMember>
+                                          <TablixHeader>
+                                            <Size>4.07292in</Size>
+                                            <CellContents>
+                                              <Textbox Name="Windows">
+                                                <CanGrow>true</CanGrow>
+                                                <KeepTogether>true</KeepTogether>
+                                                <Paragraphs>
+                                                  <Paragraph>
+                                                    <TextRuns>
+                                                      <TextRun>
+                                                        <Value>=Fields!Windows.Value</Value>
+                                                        <Style />
+                                                      </TextRun>
+                                                    </TextRuns>
+                                                    <Style>
+                                                      <TextAlign>Right</TextAlign>
+                                                    </Style>
+                                                  </Paragraph>
+                                                </Paragraphs>
+                                                <rd:DefaultName>Windows</rd:DefaultName>
+                                                <Style>
+                                                  <Border>
+                                                    <Color>LightGrey</Color>
+                                                  </Border>
+                                                  <PaddingLeft>2pt</PaddingLeft>
+                                                  <PaddingRight>2pt</PaddingRight>
+                                                  <PaddingTop>2pt</PaddingTop>
+                                                  <PaddingBottom>2pt</PaddingBottom>
+                                                </Style>
+                                              </Textbox>
+                                            </CellContents>
+                                          </TablixHeader>
+                                          <TablixMembers>
+                                            <TablixMember>
+                                              <Group Name="matrix1_SnapshotDate">
+                                                <GroupExpressions>
+                                                  <GroupExpression>=Fields!SnapshotDate.Value</GroupExpression>
+                                                </GroupExpressions>
+                                              </Group>
+                                              <SortExpressions>
+                                                <SortExpression>
+                                                  <Value>=Fields!SnapshotDate.Value</Value>
+                                                </SortExpression>
+                                              </SortExpressions>
+                                              <TablixHeader>
+                                                <Size>1.27083in</Size>
+                                                <CellContents>
+                                                  <Textbox Name="SnapshotDate">
+                                                    <CanGrow>true</CanGrow>
+                                                    <KeepTogether>true</KeepTogether>
+                                                    <Paragraphs>
+                                                      <Paragraph>
+                                                        <TextRuns>
+                                                          <TextRun>
+                                                            <Value>=Fields!SnapshotDate.Value</Value>
+                                                            <Style>
+                                                              <Format>=Parameters!DateFormat.Value</Format>
+                                                            </Style>
+                                                          </TextRun>
+                                                        </TextRuns>
+                                                        <Style>
+                                                          <TextAlign>Right</TextAlign>
+                                                        </Style>
+                                                      </Paragraph>
+                                                    </Paragraphs>
+                                                    <rd:DefaultName>SnapshotDate</rd:DefaultName>
+                                                    <Style>
+                                                      <Border>
+                                                        <Color>LightGrey</Color>
+                                                      </Border>
+                                                      <PaddingLeft>2pt</PaddingLeft>
+                                                      <PaddingRight>2pt</PaddingRight>
+                                                      <PaddingTop>2pt</PaddingTop>
+                                                      <PaddingBottom>2pt</PaddingBottom>
+                                                    </Style>
+                                                  </Textbox>
+                                                </CellContents>
+                                              </TablixHeader>
+                                              <TablixMembers>
+                                                <TablixMember>
+                                                  <TablixHeader>
+                                                    <Size>1.36458in</Size>
+                                                    <CellContents>
+                                                      <Textbox Name="ValidFrom">
+                                                        <CanGrow>true</CanGrow>
+                                                        <KeepTogether>true</KeepTogether>
+                                                        <Paragraphs>
+                                                          <Paragraph>
+                                                            <TextRuns>
+                                                              <TextRun>
+                                                                <Value>=IIF( Fields!HasDriverUpdates.Value,Fields!ValidFrom.Value,"")</Value>
+                                                                <Style>
+                                                                  <Format>=Parameters!DateFormat.Value</Format>
+                                                                </Style>
+                                                              </TextRun>
+                                                            </TextRuns>
+                                                            <Style>
+                                                              <TextAlign>Right</TextAlign>
+                                                            </Style>
+                                                          </Paragraph>
+                                                        </Paragraphs>
+                                                        <rd:DefaultName>ValidFrom</rd:DefaultName>
+                                                        <Style>
+                                                          <Border>
+                                                            <Color>LightGrey</Color>
+                                                          </Border>
+                                                          <PaddingLeft>2pt</PaddingLeft>
+                                                          <PaddingRight>2pt</PaddingRight>
+                                                          <PaddingTop>2pt</PaddingTop>
+                                                          <PaddingBottom>2pt</PaddingBottom>
+                                                        </Style>
+                                                      </Textbox>
+                                                    </CellContents>
+                                                  </TablixHeader>
+                                                </TablixMember>
+                                              </TablixMembers>
+                                              <DataElementOutput>Output</DataElementOutput>
+                                              <KeepTogether>true</KeepTogether>
+                                            </TablixMember>
+                                          </TablixMembers>
+                                        </TablixMember>
+                                      </TablixMembers>
+                                    </TablixMember>
+                                  </TablixMembers>
                                 </TablixMember>
                               </TablixMembers>
-                              <DataElementOutput>Output</DataElementOutput>
-                              <KeepTogether>true</KeepTogether>
                             </TablixMember>
                           </TablixMembers>
                         </TablixMember>
@@ -731,7 +1049,7 @@
             <DataSetName>Drivers</DataSetName>
             <Top>0.43in</Top>
             <Height>1.54667in</Height>
-            <Width>7.91667in</Width>
+            <Width>17.74999in</Width>
             <ZIndex>1</ZIndex>
             <Style />
           </Tablix>
@@ -739,7 +1057,7 @@
         <Height>1.97667in</Height>
         <Style />
       </Body>
-      <Width>7.91667in</Width>
+      <Width>17.74999in</Width>
       <Page>
         <LeftMargin>1in</LeftMargin>
         <RightMargin>1in</RightMargin>

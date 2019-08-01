@@ -99,6 +99,30 @@ namespace DBAChecks.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to DECLARE @MinWaitTimeMs INT = 1000
+        ///DECLARE @UTCOffset INT 
+        ///SELECT @UTCOffset= DATEDIFF(mi,GETDATE(),GETUTCDATE());
+        ///WITH R AS (
+        ///	SELECT GETUTCDATE() SnapshotDateUTC,
+        ///		@UTCOffset AS UTCOffset,
+        ///		S.session_id,
+        ///		ISNULL(R.blocking_session_id,0) AS blocking_session_id,
+        ///		ISNULL(RTXT.text,CTXT.text) AS Txt,
+        ///		DATEADD(mi,@UTCOffset,ISNULL(R.start_time,S.last_request_start_time)) as start_time_utc,
+        ///		R.command,
+        ///		S.database_id,
+        ///		DB_NAME(S.database_id) database_name,
+        ///		S.host_name,
+        ///		s.program_name,
+        /// [rest of string was truncated]&quot;;.
+        /// </summary>
+        internal static string SQLBlockingSnapshot {
+            get {
+                return ResourceManager.GetString("SQLBlockingSnapshot", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to SELECT configuration_id,CAST(value as BIGINT) as value,CAST(value_in_use as BIGINT) as value_in_use
         ///FROM sys.configurations.
         /// </summary>
