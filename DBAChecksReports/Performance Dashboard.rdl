@@ -128,6 +128,7 @@
               </Paragraph>
             </Paragraphs>
             <rd:DefaultName>textbox1</rd:DefaultName>
+            <Left>0.29634cm</Left>
             <Height>0.42in</Height>
             <Width>5in</Width>
             <Style>
@@ -854,17 +855,40 @@
               </TablixMembers>
             </TablixRowHierarchy>
             <DataSetName>CPU</DataSetName>
-            <Top>0.42in</Top>
-            <Height>1.57167in</Height>
+            <Top>2.51375in</Top>
+            <Height>1.57166in</Height>
             <Width>9.375in</Width>
             <ZIndex>1</ZIndex>
             <Style />
           </Tablix>
+          <Subreport Name="Subreport1">
+            <ReportName>Blocking</ReportName>
+            <Parameters>
+              <Parameter Name="ShowTable">
+                <Value>false</Value>
+              </Parameter>
+              <Parameter Name="FromDate">
+                <Value>=DateTime.UtcNow.AddMinutes(-Parameters!Mins.Value)</Value>
+              </Parameter>
+              <Parameter Name="InstanceIDs">
+                <Value>=Parameters!InstanceIDs.Value</Value>
+              </Parameter>
+            </Parameters>
+            <Top>0.55083in</Top>
+            <Height>1.84375in</Height>
+            <Width>13.58in</Width>
+            <ZIndex>2</ZIndex>
+            <Style>
+              <Border>
+                <Style>None</Style>
+              </Border>
+            </Style>
+          </Subreport>
         </ReportItems>
-        <Height>2.02167in</Height>
+        <Height>4.08541in</Height>
         <Style />
       </Body>
-      <Width>13.46333in</Width>
+      <Width>13.58in</Width>
       <Page>
         <InteractiveHeight>100in</InteractiveHeight>
         <InteractiveWidth>8.5in</InteractiveWidth>
@@ -942,7 +966,7 @@
           <ValueField>InstanceID</ValueField>
         </DataSetReference>
       </DefaultValue>
-      <Prompt>Instance IDs</Prompt>
+      <Prompt>Instances</Prompt>
       <ValidValues>
         <DataSetReference>
           <DataSetName>Instances</DataSetName>
