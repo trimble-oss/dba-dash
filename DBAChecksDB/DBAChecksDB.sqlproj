@@ -201,6 +201,14 @@
     <Build Include="dbo\Tables\BlockingSnapshot.sql" />
     <Build Include="dbo\Stored Procedures\BlockingSnapshot_Upd.sql" />
     <Build Include="dbo\User Defined Types\BlockingSnapshot.sql" />
+    <Build Include="dbo\Functions\BlockingSnapshotRecursiveStats.sql" />
+    <Build Include="Report\Stored Procedures\BlockingSummary.sql" />
+    <Build Include="Report\Stored Procedures\Blocking.sql" />
+    <Build Include="Staging\Tables\IOStats.sql" />
+    <Build Include="dbo\Tables\IOStats.sql" />
+    <Build Include="dbo\Stored Procedures\IOStats_Upd.sql" />
+    <Build Include="dbo\User Defined Types\IOStats.sql" />
+    <Build Include="Report\Stored Procedures\PerformanceDashboard.sql" />
   </ItemGroup>
   <ItemGroup>
     <PostDeploy Include="Script.PostDeployment1.sql" />

@@ -136,6 +136,14 @@ namespace DBAChecks
             {
                 logError("BlockingSnapshot", ex.Message);
             }
+            try
+            {
+                addDT("IOStats", Properties.Resources.SQLIOStats);
+            }
+            catch(Exception ex)
+            {
+                logError("IOStats", ex.Message);
+            }
         }
 
         public void CollectTraceFlags()

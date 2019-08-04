@@ -63,6 +63,7 @@
     <Report Include="AgentJobs.rdl" />
     <Report Include="Backups.rdl" />
     <Report Include="Blocking.rdl" />
+    <Report Include="CPUChart.rdl" />
     <Report Include="Database Growth.rdl" />
     <Report Include="DBAChecks Error Log.rdl" />
     <Report Include="DriveHistory.rdl" />
@@ -70,6 +71,7 @@
     <Report Include="Drives.rdl" />
     <Report Include="Files.rdl" />
     <Report Include="Instance Configuration.rdl" />
+    <Report Include="IO Performance.rdl" />
     <Report Include="LogShipping.rdl" />
     <Report Include="Performance Dashboard.rdl" />
     <Report Include="Procedure Stats.rdl" />

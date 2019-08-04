@@ -980,4 +980,19 @@ WHERE ( R.blocking_session_id &gt; 0  AND R.wait_time&gt; @MinWaitTimeMs
 OR EXISTS(SELECT * FROM R R2 WHERE R2.blocking_session_id = R.session_id AND R2.wait_time&gt;@MinWaitTimeMs)
 )</value>
   </data>
+  <data name="SQLIOStats" xml:space="preserve">
+    <value>SELECT GETUTCDATE() AS SnapshotDate,
+       [database_id],
+       [file_id],
+       [sample_ms],
+       [num_of_reads],
+       [num_of_bytes_read],
+       [io_stall_read_ms],
+       [num_of_writes],
+       [num_of_bytes_written],
+       [io_stall_write_ms],
+       [io_stall],
+       [size_on_disk_bytes]
+FROM sys.dm_io_virtual_file_stats(NULL, NULL) vfs;</value>
+  </data>
 </root>

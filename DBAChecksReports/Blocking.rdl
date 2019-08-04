@@ -625,7 +625,7 @@
             <Height>0.43in</Height>
             <Width>6.05208in</Width>
             <Visibility>
-              <Hidden>=NOT Parameters!ShowTable.Value</Hidden>
+              <Hidden>=NOT Parameters!ShowTable.Value OR Count(Fields!InstanceID.Value, "BlockingSummary")=0</Hidden>
             </Visibility>
             <Style />
           </Tablix>
@@ -1018,7 +1018,7 @@
             <Width>23.42583in</Width>
             <ZIndex>1</ZIndex>
             <Visibility>
-              <Hidden>=NOT ISNOTHING(Parameters!BlockingSnapshotID.Value)</Hidden>
+              <Hidden>=NOT ISNOTHING(Parameters!BlockingSnapshotID.Value) OR Count(Fields!InstanceID.Value, "BlockingSummary")=0</Hidden>
             </Visibility>
             <Style>
               <Border>
@@ -2302,8 +2302,43 @@
               </Border>
             </Style>
           </Tablix>
+          <Textbox Name="Textbox63">
+            <CanGrow>true</CanGrow>
+            <KeepTogether>true</KeepTogether>
+            <Paragraphs>
+              <Paragraph>
+                <TextRuns>
+                  <TextRun>
+                    <Value>No blocking snapshots for this time period</Value>
+                    <Style>
+                      <Color>#2b2a2a</Color>
+                    </Style>
+                  </TextRun>
+                </TextRuns>
+                <Style />
+              </Paragraph>
+            </Paragraphs>
+            <rd:DefaultName>Textbox63</rd:DefaultName>
+            <Top>4.47806in</Top>
+            <Height>0.30625in</Height>
+            <Width>17.20958in</Width>
+            <ZIndex>3</ZIndex>
+            <Visibility>
+              <Hidden>=Count(Fields!InstanceID.Value, "BlockingSummary")&gt;0</Hidden>
+            </Visibility>
+            <ToolTip>="There could still be blocking occuring on the selected instances but it hasn't been captured by the periodic snapshots that capture significant blocking occurrences"</ToolTip>
+            <Style>
+              <Border>
+                <Style>None</Style>
+              </Border>
+              <PaddingLeft>2pt</PaddingLeft>
+              <PaddingRight>2pt</PaddingRight>
+              <PaddingTop>2pt</PaddingTop>
+              <PaddingBottom>2pt</PaddingBottom>
+            </Style>
+          </Textbox>
         </ReportItems>
-        <Height>4.45028in</Height>
+        <Height>4.83569in</Height>
         <Style />
       </Body>
       <Width>23.42583in</Width>

@@ -10,44 +10,6 @@
     </DataSource>
   </DataSources>
   <DataSets>
-    <DataSet Name="CPU">
-      <Query>
-        <DataSourceName>DBAChecksDB</DataSourceName>
-        <QueryParameters>
-          <QueryParameter Name="@InstanceIDs">
-            <Value>=Parameters!InstanceIDs.Value</Value>
-          </QueryParameter>
-          <QueryParameter Name="@Mins">
-            <Value>=Parameters!Mins.Value</Value>
-          </QueryParameter>
-        </QueryParameters>
-        <CommandType>StoredProcedure</CommandType>
-        <CommandText>Report.CPU</CommandText>
-        <rd:UseGenericDesigner>true</rd:UseGenericDesigner>
-      </Query>
-      <Fields>
-        <Field Name="Instance">
-          <DataField>Instance</DataField>
-          <rd:TypeName>System.String</rd:TypeName>
-        </Field>
-        <Field Name="InstanceID">
-          <DataField>InstanceID</DataField>
-          <rd:TypeName>System.Int32</rd:TypeName>
-        </Field>
-        <Field Name="EventTime">
-          <DataField>EventTime</DataField>
-          <rd:TypeName>System.DateTime</rd:TypeName>
-        </Field>
-        <Field Name="SQLProcessCPU">
-          <DataField>SQLProcessCPU</DataField>
-          <rd:TypeName>System.Int32</rd:TypeName>
-        </Field>
-        <Field Name="SystemIdleCPU">
-          <DataField>SystemIdleCPU</DataField>
-          <rd:TypeName>System.Int32</rd:TypeName>
-        </Field>
-      </Fields>
-    </DataSet>
     <DataSet Name="TagMatching">
       <SharedDataSet>
         <SharedDataSetReference>TagMatching</SharedDataSetReference>
@@ -104,6 +66,87 @@
         </Field>
       </Fields>
     </DataSet>
+    <DataSet Name="InstancePerformance">
+      <Query>
+        <DataSourceName>DBAChecksDB</DataSourceName>
+        <QueryParameters>
+          <QueryParameter Name="@InstanceIDs">
+            <Value>=Parameters!InstanceIDs.Value</Value>
+          </QueryParameter>
+          <QueryParameter Name="@Mins">
+            <Value>=Parameters!Mins.Value</Value>
+          </QueryParameter>
+        </QueryParameters>
+        <CommandType>StoredProcedure</CommandType>
+        <CommandText>Report.PerformanceDashboard</CommandText>
+      </Query>
+      <Fields>
+        <Field Name="InstanceID">
+          <DataField>InstanceID</DataField>
+          <rd:TypeName>System.Int32</rd:TypeName>
+        </Field>
+        <Field Name="Instance">
+          <DataField>Instance</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+        <Field Name="ReadIOps">
+          <DataField>ReadIOPs</DataField>
+          <rd:TypeName>System.Decimal</rd:TypeName>
+        </Field>
+        <Field Name="WriteIOps">
+          <DataField>WriteIOPs</DataField>
+          <rd:TypeName>System.Decimal</rd:TypeName>
+        </Field>
+        <Field Name="ReadMBsec">
+          <DataField>ReadMBsec</DataField>
+          <rd:TypeName>System.Decimal</rd:TypeName>
+        </Field>
+        <Field Name="WriteMBsec">
+          <DataField>WriteMBsec</DataField>
+          <rd:TypeName>System.Decimal</rd:TypeName>
+        </Field>
+        <Field Name="ReadLatency">
+          <DataField>ReadLatency</DataField>
+          <rd:TypeName>System.Decimal</rd:TypeName>
+        </Field>
+        <Field Name="WriteLatency">
+          <DataField>WriteLatency</DataField>
+          <rd:TypeName>System.Decimal</rd:TypeName>
+        </Field>
+        <Field Name="Latency">
+          <DataField>Latency</DataField>
+          <rd:TypeName>System.Decimal</rd:TypeName>
+        </Field>
+        <Field Name="AvgCPU">
+          <DataField>AvgCPU</DataField>
+          <rd:TypeName>System.Int32</rd:TypeName>
+        </Field>
+        <Field Name="MaxReadIOPs">
+          <DataField>MaxReadIOPs</DataField>
+          <rd:TypeName>System.Decimal</rd:TypeName>
+        </Field>
+        <Field Name="MaxWriteIOPs">
+          <DataField>MaxWriteIOPs</DataField>
+          <rd:TypeName>System.Decimal</rd:TypeName>
+        </Field>
+        <Field Name="MaxIOPs">
+          <DataField>MaxIOPs</DataField>
+          <rd:TypeName>System.Decimal</rd:TypeName>
+        </Field>
+        <Field Name="MaxReadMBsec">
+          <DataField>MaxReadMBsec</DataField>
+          <rd:TypeName>System.Decimal</rd:TypeName>
+        </Field>
+        <Field Name="MaxWriteMBsec">
+          <DataField>MaxWriteMBsec</DataField>
+          <rd:TypeName>System.Decimal</rd:TypeName>
+        </Field>
+        <Field Name="MaxMBsec">
+          <DataField>MaxMBsec</DataField>
+          <rd:TypeName>System.Decimal</rd:TypeName>
+        </Field>
+      </Fields>
+    </DataSet>
   </DataSets>
   <ReportSections>
     <ReportSection>
@@ -138,30 +181,68 @@
               <PaddingBottom>2pt</PaddingBottom>
             </Style>
           </Textbox>
-          <Tablix Name="table1">
+          <Subreport Name="Subreport1">
+            <ReportName>Blocking</ReportName>
+            <Parameters>
+              <Parameter Name="ShowTable">
+                <Value>false</Value>
+              </Parameter>
+              <Parameter Name="FromDate">
+                <Value>=DateTime.UtcNow.AddMinutes(-Parameters!Mins.Value)</Value>
+              </Parameter>
+              <Parameter Name="InstanceIDs">
+                <Value>=Parameters!InstanceIDs.Value</Value>
+              </Parameter>
+            </Parameters>
+            <Top>0.55083in</Top>
+            <Height>1.84375in</Height>
+            <Width>13.58in</Width>
+            <ZIndex>1</ZIndex>
+            <Style>
+              <Border>
+                <Style>None</Style>
+              </Border>
+            </Style>
+          </Subreport>
+          <Tablix Name="Tablix1">
             <TablixBody>
               <TablixColumns>
                 <TablixColumn>
-                  <Width>3.075in</Width>
+                  <Width>2.14583in</Width>
                 </TablixColumn>
                 <TablixColumn>
-                  <Width>2.04167in</Width>
+                  <Width>4.1875in</Width>
                 </TablixColumn>
                 <TablixColumn>
-                  <Width>2.125in</Width>
+                  <Width>1in</Width>
                 </TablixColumn>
                 <TablixColumn>
-                  <Width>2.13333in</Width>
+                  <Width>1in</Width>
+                </TablixColumn>
+                <TablixColumn>
+                  <Width>1in</Width>
+                </TablixColumn>
+                <TablixColumn>
+                  <Width>1in</Width>
+                </TablixColumn>
+                <TablixColumn>
+                  <Width>1in</Width>
+                </TablixColumn>
+                <TablixColumn>
+                  <Width>1in</Width>
                 </TablixColumn>
               </TablixColumns>
               <TablixRows>
                 <TablixRow>
-                  <Height>0.45333in</Height>
+                  <Height>0.42708in</Height>
                   <TablixCells>
                     <TablixCell>
                       <CellContents>
-                        <Textbox Name="textbox2">
+                        <Textbox Name="Textbox8">
                           <CanGrow>true</CanGrow>
+                          <UserSort>
+                            <SortExpression>=Fields!Instance.Value</SortExpression>
+                          </UserSort>
                           <KeepTogether>true</KeepTogether>
                           <Paragraphs>
                             <Paragraph>
@@ -169,8 +250,7 @@
                                 <TextRun>
                                   <Value>Instance</Value>
                                   <Style>
-                                    <FontFamily />
-                                    <FontSize>11pt</FontSize>
+                                    <FontFamily>Arial</FontFamily>
                                     <FontWeight>Bold</FontWeight>
                                     <Color>White</Color>
                                   </Style>
@@ -179,16 +259,13 @@
                               <Style />
                             </Paragraph>
                           </Paragraphs>
-                          <rd:DefaultName>textbox2</rd:DefaultName>
+                          <rd:DefaultName>Textbox8</rd:DefaultName>
                           <Style>
                             <Border>
                               <Color>LightGrey</Color>
-                            </Border>
-                            <BottomBorder>
                               <Style>Solid</Style>
-                            </BottomBorder>
+                            </Border>
                             <BackgroundColor>#666666</BackgroundColor>
-                            <FontFamily />
                             <PaddingLeft>2pt</PaddingLeft>
                             <PaddingRight>2pt</PaddingRight>
                             <PaddingTop>2pt</PaddingTop>
@@ -199,8 +276,11 @@
                     </TablixCell>
                     <TablixCell>
                       <CellContents>
-                        <Textbox Name="Textbox3">
+                        <Textbox Name="Textbox12">
                           <CanGrow>true</CanGrow>
+                          <UserSort>
+                            <SortExpression>=Fields!AvgCPU.Value</SortExpression>
+                          </UserSort>
                           <KeepTogether>true</KeepTogether>
                           <Paragraphs>
                             <Paragraph>
@@ -208,8 +288,7 @@
                                 <TextRun>
                                   <Value>CPU</Value>
                                   <Style>
-                                    <FontFamily />
-                                    <FontSize>11pt</FontSize>
+                                    <FontFamily>Arial</FontFamily>
                                     <FontWeight>Bold</FontWeight>
                                     <Color>White</Color>
                                   </Style>
@@ -218,14 +297,12 @@
                               <Style />
                             </Paragraph>
                           </Paragraphs>
-                          <rd:DefaultName>Textbox3</rd:DefaultName>
+                          <rd:DefaultName>Textbox12</rd:DefaultName>
                           <Style>
                             <Border>
                               <Color>LightGrey</Color>
-                            </Border>
-                            <BottomBorder>
                               <Style>Solid</Style>
-                            </BottomBorder>
+                            </Border>
                             <BackgroundColor>#666666</BackgroundColor>
                             <PaddingLeft>2pt</PaddingLeft>
                             <PaddingRight>2pt</PaddingRight>
@@ -233,19 +310,244 @@
                             <PaddingBottom>2pt</PaddingBottom>
                           </Style>
                         </Textbox>
-                        <ColSpan>3</ColSpan>
                       </CellContents>
                     </TablixCell>
-                    <TablixCell />
-                    <TablixCell />
+                    <TablixCell>
+                      <CellContents>
+                        <Textbox Name="Textbox15">
+                          <CanGrow>true</CanGrow>
+                          <UserSort>
+                            <SortExpression>=Fields!ReadIOps.Value+Fields!WriteIOps.Value</SortExpression>
+                          </UserSort>
+                          <KeepTogether>true</KeepTogether>
+                          <Paragraphs>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Value>Avg IOPs</Value>
+                                  <Style>
+                                    <FontFamily>Arial</FontFamily>
+                                    <FontWeight>Bold</FontWeight>
+                                    <Color>White</Color>
+                                  </Style>
+                                </TextRun>
+                              </TextRuns>
+                              <Style />
+                            </Paragraph>
+                          </Paragraphs>
+                          <rd:DefaultName>Textbox15</rd:DefaultName>
+                          <Style>
+                            <Border>
+                              <Color>LightGrey</Color>
+                              <Style>Solid</Style>
+                            </Border>
+                            <BackgroundColor>#666666</BackgroundColor>
+                            <PaddingLeft>2pt</PaddingLeft>
+                            <PaddingRight>2pt</PaddingRight>
+                            <PaddingTop>2pt</PaddingTop>
+                            <PaddingBottom>2pt</PaddingBottom>
+                          </Style>
+                        </Textbox>
+                      </CellContents>
+                    </TablixCell>
+                    <TablixCell>
+                      <CellContents>
+                        <Textbox Name="Textbox18">
+                          <CanGrow>true</CanGrow>
+                          <UserSort>
+                            <SortExpression>=Fields!ReadMBsec.Value+Fields!WriteMBsec.Value</SortExpression>
+                          </UserSort>
+                          <KeepTogether>true</KeepTogether>
+                          <Paragraphs>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Value>Avg MB/sec</Value>
+                                  <Style>
+                                    <FontFamily>Arial</FontFamily>
+                                    <FontWeight>Bold</FontWeight>
+                                    <Color>White</Color>
+                                  </Style>
+                                </TextRun>
+                              </TextRuns>
+                              <Style />
+                            </Paragraph>
+                          </Paragraphs>
+                          <rd:DefaultName>Textbox18</rd:DefaultName>
+                          <Style>
+                            <Border>
+                              <Color>LightGrey</Color>
+                              <Style>Solid</Style>
+                            </Border>
+                            <BackgroundColor>#666666</BackgroundColor>
+                            <PaddingLeft>2pt</PaddingLeft>
+                            <PaddingRight>2pt</PaddingRight>
+                            <PaddingTop>2pt</PaddingTop>
+                            <PaddingBottom>2pt</PaddingBottom>
+                          </Style>
+                        </Textbox>
+                      </CellContents>
+                    </TablixCell>
+                    <TablixCell>
+                      <CellContents>
+                        <Textbox Name="Textbox24">
+                          <CanGrow>true</CanGrow>
+                          <UserSort>
+                            <SortExpression>=Fields!MaxIOPs.Value</SortExpression>
+                          </UserSort>
+                          <KeepTogether>true</KeepTogether>
+                          <Paragraphs>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Value>Max IOPs</Value>
+                                  <Style>
+                                    <FontFamily>Arial</FontFamily>
+                                    <FontWeight>Bold</FontWeight>
+                                    <Color>White</Color>
+                                  </Style>
+                                </TextRun>
+                              </TextRuns>
+                              <Style />
+                            </Paragraph>
+                          </Paragraphs>
+                          <rd:DefaultName>Textbox24</rd:DefaultName>
+                          <Style>
+                            <Border>
+                              <Color>LightGrey</Color>
+                              <Style>Solid</Style>
+                            </Border>
+                            <BackgroundColor>#666666</BackgroundColor>
+                            <PaddingLeft>2pt</PaddingLeft>
+                            <PaddingRight>2pt</PaddingRight>
+                            <PaddingTop>2pt</PaddingTop>
+                            <PaddingBottom>2pt</PaddingBottom>
+                          </Style>
+                        </Textbox>
+                      </CellContents>
+                    </TablixCell>
+                    <TablixCell>
+                      <CellContents>
+                        <Textbox Name="Textbox28">
+                          <CanGrow>true</CanGrow>
+                          <UserSort>
+                            <SortExpression>=Fields!MaxMBsec.Value</SortExpression>
+                          </UserSort>
+                          <KeepTogether>true</KeepTogether>
+                          <Paragraphs>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Value>Max MB/sec</Value>
+                                  <Style>
+                                    <FontFamily>Arial</FontFamily>
+                                    <FontWeight>Bold</FontWeight>
+                                    <Color>White</Color>
+                                  </Style>
+                                </TextRun>
+                              </TextRuns>
+                              <Style />
+                            </Paragraph>
+                          </Paragraphs>
+                          <rd:DefaultName>Textbox28</rd:DefaultName>
+                          <Style>
+                            <Border>
+                              <Color>LightGrey</Color>
+                              <Style>Solid</Style>
+                            </Border>
+                            <BackgroundColor>#666666</BackgroundColor>
+                            <PaddingLeft>2pt</PaddingLeft>
+                            <PaddingRight>2pt</PaddingRight>
+                            <PaddingTop>2pt</PaddingTop>
+                            <PaddingBottom>2pt</PaddingBottom>
+                          </Style>
+                        </Textbox>
+                      </CellContents>
+                    </TablixCell>
+                    <TablixCell>
+                      <CellContents>
+                        <Textbox Name="Textbox20">
+                          <CanGrow>true</CanGrow>
+                          <UserSort>
+                            <SortExpression>=Fields!ReadLatency.Value</SortExpression>
+                          </UserSort>
+                          <KeepTogether>true</KeepTogether>
+                          <Paragraphs>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Value>Read Latency (ms)</Value>
+                                  <Style>
+                                    <FontFamily>Arial</FontFamily>
+                                    <FontWeight>Bold</FontWeight>
+                                    <Color>White</Color>
+                                  </Style>
+                                </TextRun>
+                              </TextRuns>
+                              <Style />
+                            </Paragraph>
+                          </Paragraphs>
+                          <rd:DefaultName>Textbox20</rd:DefaultName>
+                          <Style>
+                            <Border>
+                              <Color>LightGrey</Color>
+                              <Style>Solid</Style>
+                            </Border>
+                            <BackgroundColor>#666666</BackgroundColor>
+                            <PaddingLeft>2pt</PaddingLeft>
+                            <PaddingRight>2pt</PaddingRight>
+                            <PaddingTop>2pt</PaddingTop>
+                            <PaddingBottom>2pt</PaddingBottom>
+                          </Style>
+                        </Textbox>
+                      </CellContents>
+                    </TablixCell>
+                    <TablixCell>
+                      <CellContents>
+                        <Textbox Name="Textbox22">
+                          <CanGrow>true</CanGrow>
+                          <UserSort>
+                            <SortExpression>=Fields!WriteLatency.Value</SortExpression>
+                          </UserSort>
+                          <KeepTogether>true</KeepTogether>
+                          <Paragraphs>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Value>Write Latency (ms)</Value>
+                                  <Style>
+                                    <FontFamily>Arial</FontFamily>
+                                    <FontWeight>Bold</FontWeight>
+                                    <Color>White</Color>
+                                  </Style>
+                                </TextRun>
+                              </TextRuns>
+                              <Style />
+                            </Paragraph>
+                          </Paragraphs>
+                          <rd:DefaultName>Textbox22</rd:DefaultName>
+                          <Style>
+                            <Border>
+                              <Color>LightGrey</Color>
+                              <Style>Solid</Style>
+                            </Border>
+                            <BackgroundColor>#666666</BackgroundColor>
+                            <PaddingLeft>2pt</PaddingLeft>
+                            <PaddingRight>2pt</PaddingRight>
+                            <PaddingTop>2pt</PaddingTop>
+                            <PaddingBottom>2pt</PaddingBottom>
+                          </Style>
+                        </Textbox>
+                      </CellContents>
+                    </TablixCell>
                   </TablixCells>
                 </TablixRow>
                 <TablixRow>
-                  <Height>0.86833in</Height>
+                  <Height>0.94792in</Height>
                   <TablixCells>
                     <TablixCell>
                       <CellContents>
-                        <Textbox Name="Instance">
+                        <Textbox Name="Instance1">
                           <CanGrow>true</CanGrow>
                           <KeepTogether>true</KeepTogether>
                           <Paragraphs>
@@ -253,487 +555,13 @@
                               <TextRuns>
                                 <TextRun>
                                   <Value>=Fields!Instance.Value</Value>
-                                  <Style>
-                                    <FontFamily />
-                                    <Color>#333333</Color>
-                                  </Style>
-                                </TextRun>
-                              </TextRuns>
-                              <Style />
-                            </Paragraph>
-                          </Paragraphs>
-                          <rd:DefaultName>Instance</rd:DefaultName>
-                          <ActionInfo>
-                            <Actions>
-                              <Action>
-                                <Drillthrough>
-                                  <ReportName>Procedure Stats</ReportName>
-                                  <Parameters>
-                                    <Parameter Name="InstanceID">
-                                      <Value>=Fields!InstanceID.Value</Value>
-                                    </Parameter>
-                                  </Parameters>
-                                </Drillthrough>
-                              </Action>
-                            </Actions>
-                          </ActionInfo>
-                          <Style>
-                            <Border>
-                              <Color>LightGrey</Color>
-                              <Style>None</Style>
-                            </Border>
-                            <FontFamily />
-                            <PaddingLeft>2pt</PaddingLeft>
-                            <PaddingRight>2pt</PaddingRight>
-                            <PaddingTop>2pt</PaddingTop>
-                            <PaddingBottom>2pt</PaddingBottom>
-                          </Style>
-                        </Textbox>
-                      </CellContents>
-                    </TablixCell>
-                    <TablixCell>
-                      <CellContents>
-                        <Chart Name="DataBar1">
-                          <ChartCategoryHierarchy>
-                            <ChartMembers>
-                              <ChartMember>
-                                <Group Name="DataBar1_CategoryGroup">
-                                  <GroupExpressions>
-                                    <GroupExpression>=Fields!EventTime.Value</GroupExpression>
-                                  </GroupExpressions>
-                                </Group>
-                                <SortExpressions>
-                                  <SortExpression>
-                                    <Value>=Fields!EventTime.Value</Value>
-                                  </SortExpression>
-                                </SortExpressions>
-                                <Label>=Fields!EventTime.Value</Label>
-                              </ChartMember>
-                            </ChartMembers>
-                          </ChartCategoryHierarchy>
-                          <ChartSeriesHierarchy>
-                            <ChartMembers>
-                              <ChartMember>
-                                <Label>SQLProcess CPU</Label>
-                              </ChartMember>
-                              <ChartMember>
-                                <Label>SQLProcess CPU</Label>
-                              </ChartMember>
-                            </ChartMembers>
-                          </ChartSeriesHierarchy>
-                          <ChartData>
-                            <ChartSeriesCollection>
-                              <ChartSeries Name="SQLProcessCPU">
-                                <ChartDataPoints>
-                                  <ChartDataPoint>
-                                    <ChartDataPointValues>
-                                      <Y>=Sum(Fields!SQLProcessCPU.Value)</Y>
-                                    </ChartDataPointValues>
-                                    <ChartDataLabel>
-                                      <Style />
-                                      <UseValueAsLabel>true</UseValueAsLabel>
-                                    </ChartDataLabel>
-                                    <Style>
-                                      <Color>CornflowerBlue</Color>
-                                    </Style>
-                                    <ChartMarker>
-                                      <Style />
-                                    </ChartMarker>
-                                    <DataElementOutput>Output</DataElementOutput>
-                                  </ChartDataPoint>
-                                </ChartDataPoints>
-                                <Type>Area</Type>
-                                <Subtype>Stacked</Subtype>
-                                <Style />
-                                <ChartEmptyPoints>
                                   <Style />
-                                  <ChartMarker>
-                                    <Style />
-                                  </ChartMarker>
-                                  <ChartDataLabel>
-                                    <Style />
-                                  </ChartDataLabel>
-                                </ChartEmptyPoints>
-                                <ValueAxisName>Primary</ValueAxisName>
-                                <CategoryAxisName>Primary</CategoryAxisName>
-                                <ChartSmartLabel>
-                                  <CalloutLineColor>Black</CalloutLineColor>
-                                  <MinMovingDistance>0pt</MinMovingDistance>
-                                </ChartSmartLabel>
-                              </ChartSeries>
-                              <ChartSeries Name="OtherCPU">
-                                <ChartDataPoints>
-                                  <ChartDataPoint>
-                                    <ChartDataPointValues>
-                                      <Y>=100-Fields!SystemIdleCPU.Value-Fields!SQLProcessCPU.Value</Y>
-                                    </ChartDataPointValues>
-                                    <ChartDataLabel>
-                                      <Style />
-                                    </ChartDataLabel>
-                                    <Style>
-                                      <Color>Orange</Color>
-                                    </Style>
-                                    <ChartMarker>
-                                      <Style />
-                                    </ChartMarker>
-                                    <DataElementOutput>Output</DataElementOutput>
-                                  </ChartDataPoint>
-                                </ChartDataPoints>
-                                <Type>Area</Type>
-                                <Subtype>Stacked</Subtype>
-                                <Style />
-                                <ChartEmptyPoints>
-                                  <Style />
-                                  <ChartMarker>
-                                    <Style />
-                                  </ChartMarker>
-                                  <ChartDataLabel>
-                                    <Style />
-                                  </ChartDataLabel>
-                                </ChartEmptyPoints>
-                                <ValueAxisName>Primary</ValueAxisName>
-                                <CategoryAxisName>Primary</CategoryAxisName>
-                                <ChartSmartLabel>
-                                  <CalloutLineColor>Black</CalloutLineColor>
-                                  <MinMovingDistance>0pt</MinMovingDistance>
-                                </ChartSmartLabel>
-                              </ChartSeries>
-                            </ChartSeriesCollection>
-                          </ChartData>
-                          <ChartAreas>
-                            <ChartArea Name="Default">
-                              <ChartCategoryAxes>
-                                <ChartAxis Name="Primary">
-                                  <Visible>False</Visible>
-                                  <Style>
-                                    <Border>
-                                      <Color>Gainsboro</Color>
-                                      <Style>None</Style>
-                                    </Border>
-                                    <FontSize>8pt</FontSize>
-                                    <Format>H:mm</Format>
-                                    <Color>#5c5c5c</Color>
-                                  </Style>
-                                  <ChartAxisTitle>
-                                    <Caption />
-                                    <Style>
-                                      <FontSize>9pt</FontSize>
-                                      <Color>#5c5c5c</Color>
-                                    </Style>
-                                  </ChartAxisTitle>
-                                  <Interval>1</Interval>
-                                  <IntervalType>Minutes</IntervalType>
-                                  <ChartMajorGridLines>
-                                    <Enabled>False</Enabled>
-                                    <Style>
-                                      <Border>
-                                        <Color>Gainsboro</Color>
-                                      </Border>
-                                    </Style>
-                                  </ChartMajorGridLines>
-                                  <ChartMinorGridLines>
-                                    <Style>
-                                      <Border>
-                                        <Color>Gainsboro</Color>
-                                        <Style>Dotted</Style>
-                                      </Border>
-                                    </Style>
-                                  </ChartMinorGridLines>
-                                  <ChartMajorTickMarks>
-                                    <Style>
-                                      <Border>
-                                        <Color>Gainsboro</Color>
-                                        <Style>None</Style>
-                                      </Border>
-                                    </Style>
-                                  </ChartMajorTickMarks>
-                                  <ChartMinorTickMarks>
-                                    <Style>
-                                      <Border>
-                                        <Color>Gainsboro</Color>
-                                      </Border>
-                                    </Style>
-                                    <Length>0.5</Length>
-                                  </ChartMinorTickMarks>
-                                  <CrossAt>NaN</CrossAt>
-                                  <Scalar>true</Scalar>
-                                  <Minimum>=DateTime.UtcNow.Subtract(Parameters!Mins.Value)</Minimum>
-                                  <Maximum>=DateTime.UtcNow</Maximum>
-                                  <ChartAxisScaleBreak>
-                                    <Style />
-                                  </ChartAxisScaleBreak>
-                                </ChartAxis>
-                                <ChartAxis Name="Secondary">
-                                  <Visible>False</Visible>
-                                  <Style>
-                                    <Border>
-                                      <Color>Gainsboro</Color>
-                                      <Style>None</Style>
-                                    </Border>
-                                    <FontSize>8pt</FontSize>
-                                    <Color>#5c5c5c</Color>
-                                  </Style>
-                                  <ChartAxisTitle>
-                                    <Caption />
-                                    <Style>
-                                      <FontSize>9pt</FontSize>
-                                      <Color>#5c5c5c</Color>
-                                    </Style>
-                                  </ChartAxisTitle>
-                                  <ChartMajorGridLines>
-                                    <Enabled>False</Enabled>
-                                    <Style>
-                                      <Border>
-                                        <Color>Gainsboro</Color>
-                                      </Border>
-                                    </Style>
-                                  </ChartMajorGridLines>
-                                  <ChartMinorGridLines>
-                                    <Style>
-                                      <Border>
-                                        <Color>Gainsboro</Color>
-                                        <Style>Dotted</Style>
-                                      </Border>
-                                    </Style>
-                                  </ChartMinorGridLines>
-                                  <ChartMajorTickMarks>
-                                    <Style>
-                                      <Border>
-                                        <Color>Gainsboro</Color>
-                                        <Style>None</Style>
-                                      </Border>
-                                    </Style>
-                                  </ChartMajorTickMarks>
-                                  <ChartMinorTickMarks>
-                                    <Style>
-                                      <Border>
-                                        <Color>Gainsboro</Color>
-                                      </Border>
-                                    </Style>
-                                    <Length>0.5</Length>
-                                  </ChartMinorTickMarks>
-                                  <CrossAt>NaN</CrossAt>
-                                  <Location>Opposite</Location>
-                                  <Minimum>NaN</Minimum>
-                                  <Maximum>NaN</Maximum>
-                                  <ChartAxisScaleBreak>
-                                    <Style />
-                                  </ChartAxisScaleBreak>
-                                </ChartAxis>
-                              </ChartCategoryAxes>
-                              <ChartValueAxes>
-                                <ChartAxis Name="Primary">
-                                  <Visible>False</Visible>
-                                  <Style>
-                                    <Border>
-                                      <Color>Gainsboro</Color>
-                                      <Style>None</Style>
-                                    </Border>
-                                    <FontSize>8pt</FontSize>
-                                    <Color>#5c5c5c</Color>
-                                  </Style>
-                                  <ChartAxisTitle>
-                                    <Caption />
-                                    <Style>
-                                      <FontSize>9pt</FontSize>
-                                      <Color>#5c5c5c</Color>
-                                    </Style>
-                                  </ChartAxisTitle>
-                                  <ChartMajorGridLines>
-                                    <Enabled>False</Enabled>
-                                    <Style>
-                                      <Border>
-                                        <Color>Gainsboro</Color>
-                                      </Border>
-                                    </Style>
-                                  </ChartMajorGridLines>
-                                  <ChartMinorGridLines>
-                                    <Style>
-                                      <Border>
-                                        <Color>Gainsboro</Color>
-                                        <Style>Dotted</Style>
-                                      </Border>
-                                    </Style>
-                                  </ChartMinorGridLines>
-                                  <ChartMajorTickMarks>
-                                    <Style>
-                                      <Border>
-                                        <Color>Gainsboro</Color>
-                                        <Style>None</Style>
-                                      </Border>
-                                    </Style>
-                                  </ChartMajorTickMarks>
-                                  <ChartMinorTickMarks>
-                                    <Style>
-                                      <Border>
-                                        <Color>Gainsboro</Color>
-                                      </Border>
-                                    </Style>
-                                    <Length>0.5</Length>
-                                  </ChartMinorTickMarks>
-                                  <CrossAt>NaN</CrossAt>
-                                  <Minimum>0</Minimum>
-                                  <Maximum>100</Maximum>
-                                  <ChartAxisScaleBreak>
-                                    <Style />
-                                  </ChartAxisScaleBreak>
-                                  <rd:SyncScope>table1</rd:SyncScope>
-                                </ChartAxis>
-                                <ChartAxis Name="Secondary">
-                                  <Visible>False</Visible>
-                                  <Style>
-                                    <Border>
-                                      <Color>Gainsboro</Color>
-                                      <Style>None</Style>
-                                    </Border>
-                                    <FontSize>8pt</FontSize>
-                                    <Color>#5c5c5c</Color>
-                                  </Style>
-                                  <ChartAxisTitle>
-                                    <Caption />
-                                    <Style>
-                                      <FontSize>9pt</FontSize>
-                                      <Color>#5c5c5c</Color>
-                                    </Style>
-                                  </ChartAxisTitle>
-                                  <ChartMajorGridLines>
-                                    <Style>
-                                      <Border>
-                                        <Color>Gainsboro</Color>
-                                      </Border>
-                                    </Style>
-                                  </ChartMajorGridLines>
-                                  <ChartMinorGridLines>
-                                    <Style>
-                                      <Border>
-                                        <Color>Gainsboro</Color>
-                                        <Style>Dotted</Style>
-                                      </Border>
-                                    </Style>
-                                  </ChartMinorGridLines>
-                                  <ChartMajorTickMarks>
-                                    <Style>
-                                      <Border>
-                                        <Color>Gainsboro</Color>
-                                        <Style>None</Style>
-                                      </Border>
-                                    </Style>
-                                  </ChartMajorTickMarks>
-                                  <ChartMinorTickMarks>
-                                    <Style>
-                                      <Border>
-                                        <Color>Gainsboro</Color>
-                                      </Border>
-                                    </Style>
-                                    <Length>0.5</Length>
-                                  </ChartMinorTickMarks>
-                                  <CrossAt>NaN</CrossAt>
-                                  <Location>Opposite</Location>
-                                  <Minimum>NaN</Minimum>
-                                  <Maximum>NaN</Maximum>
-                                  <ChartAxisScaleBreak>
-                                    <Style />
-                                  </ChartAxisScaleBreak>
-                                </ChartAxis>
-                              </ChartValueAxes>
-                              <Style>
-                                <BackgroundColor>WhiteSmoke</BackgroundColor>
-                                <BackgroundGradientType>LeftRight</BackgroundGradientType>
-                                <BackgroundGradientEndColor>LightGrey</BackgroundGradientEndColor>
-                                <BackgroundHatchType>None</BackgroundHatchType>
-                              </Style>
-                            </ChartArea>
-                          </ChartAreas>
-                          <Palette>BrightPastel</Palette>
-                          <ChartBorderSkin>
-                            <Style>
-                              <BackgroundColor>Gray</BackgroundColor>
-                              <BackgroundGradientType>None</BackgroundGradientType>
-                              <Color>White</Color>
-                            </Style>
-                          </ChartBorderSkin>
-                          <ChartNoDataMessage Name="NoDataMessage">
-                            <Caption>No Data Available</Caption>
-                            <Style>
-                              <BackgroundGradientType>None</BackgroundGradientType>
-                              <FontWeight>Bold</FontWeight>
-                              <TextAlign>General</TextAlign>
-                              <VerticalAlign>Top</VerticalAlign>
-                            </Style>
-                          </ChartNoDataMessage>
-                          <DataSetName>CPU</DataSetName>
-                          <Style>
-                            <Border>
-                              <Color>LightGrey</Color>
-                              <Style>Solid</Style>
-                            </Border>
-                            <BackgroundGradientType>None</BackgroundGradientType>
-                          </Style>
-                        </Chart>
-                        <ColSpan>3</ColSpan>
-                      </CellContents>
-                    </TablixCell>
-                    <TablixCell />
-                    <TablixCell />
-                  </TablixCells>
-                </TablixRow>
-                <TablixRow>
-                  <Height>0.25in</Height>
-                  <TablixCells>
-                    <TablixCell>
-                      <CellContents>
-                        <Textbox Name="Textbox9">
-                          <CanGrow>true</CanGrow>
-                          <KeepTogether>true</KeepTogether>
-                          <Paragraphs>
-                            <Paragraph>
-                              <TextRuns>
-                                <TextRun>
-                                  <Value />
-                                  <Style>
-                                    <FontFamily />
-                                    <Color>#333333</Color>
-                                  </Style>
                                 </TextRun>
                               </TextRuns>
                               <Style />
                             </Paragraph>
                           </Paragraphs>
-                          <rd:DefaultName>Textbox9</rd:DefaultName>
-                          <Style>
-                            <Border>
-                              <Color>LightGrey</Color>
-                            </Border>
-                            <BottomBorder>
-                              <Style>Solid</Style>
-                            </BottomBorder>
-                            <PaddingLeft>2pt</PaddingLeft>
-                            <PaddingRight>2pt</PaddingRight>
-                            <PaddingTop>2pt</PaddingTop>
-                            <PaddingBottom>2pt</PaddingBottom>
-                          </Style>
-                        </Textbox>
-                      </CellContents>
-                    </TablixCell>
-                    <TablixCell>
-                      <CellContents>
-                        <Textbox Name="Textbox11">
-                          <CanGrow>true</CanGrow>
-                          <KeepTogether>true</KeepTogether>
-                          <Paragraphs>
-                            <Paragraph>
-                              <TextRuns>
-                                <TextRun>
-                                  <Value>="AVG:" &amp; Format(AVG(100-Fields!SystemIdleCPU.Value),"0")</Value>
-                                  <Style>
-                                    <Color>#333333</Color>
-                                  </Style>
-                                </TextRun>
-                              </TextRuns>
-                              <Style />
-                            </Paragraph>
-                          </Paragraphs>
-                          <rd:DefaultName>Textbox11</rd:DefaultName>
+                          <rd:DefaultName>Instance1</rd:DefaultName>
                           <Style>
                             <Border>
                               <Color>LightGrey</Color>
@@ -749,24 +577,81 @@
                     </TablixCell>
                     <TablixCell>
                       <CellContents>
-                        <Textbox Name="Textbox17">
+                        <Subreport Name="Subreport2">
+                          <ReportName>CPUChart</ReportName>
+                          <Parameters>
+                            <Parameter Name="Mins">
+                              <Value>=Parameters!Mins.Value</Value>
+                            </Parameter>
+                            <Parameter Name="InstanceID">
+                              <Value>=Fields!InstanceID.Value</Value>
+                            </Parameter>
+                          </Parameters>
+                          <Style>
+                            <Border>
+                              <Color>LightGrey</Color>
+                              <Style>Solid</Style>
+                            </Border>
+                          </Style>
+                        </Subreport>
+                      </CellContents>
+                    </TablixCell>
+                    <TablixCell>
+                      <CellContents>
+                        <Textbox Name="ReadIOPs">
                           <CanGrow>true</CanGrow>
                           <KeepTogether>true</KeepTogether>
                           <Paragraphs>
                             <Paragraph>
                               <TextRuns>
                                 <TextRun>
-                                  <Value>="SQL Process: " &amp; Format(AVG(Fields!SQLProcessCPU.Value),"0")</Value>
+                                  <Value>=Fields!ReadIOps.Value+Fields!WriteIOps.Value</Value>
+                                  <Style>
+                                    <Format>#,0;(#,0)</Format>
+                                  </Style>
+                                </TextRun>
+                              </TextRuns>
+                              <Style />
+                            </Paragraph>
+                          </Paragraphs>
+                          <rd:DefaultName>ReadIOPs</rd:DefaultName>
+                          <ToolTip>="Read:" &amp; Format(Fields!ReadIOps.Value,"0") &amp; Environment.NewLine &amp;
+"Write:" &amp; Format(Fields!WriteIOps.Value,"0")</ToolTip>
+                          <Style>
+                            <Border>
+                              <Color>LightGrey</Color>
+                              <Style>Solid</Style>
+                            </Border>
+                            <PaddingLeft>2pt</PaddingLeft>
+                            <PaddingRight>2pt</PaddingRight>
+                            <PaddingTop>2pt</PaddingTop>
+                            <PaddingBottom>2pt</PaddingBottom>
+                          </Style>
+                        </Textbox>
+                      </CellContents>
+                    </TablixCell>
+                    <TablixCell>
+                      <CellContents>
+                        <Textbox Name="ReadMBsec">
+                          <CanGrow>true</CanGrow>
+                          <KeepTogether>true</KeepTogether>
+                          <Paragraphs>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Value>=Fields!ReadMBsec.Value+Fields!WriteMBsec.Value</Value>
                                   <Style>
                                     <FontFamily>Arial</FontFamily>
-                                    <Color>CornflowerBlue</Color>
+                                    <Format>#,0.0;(#,0.0)</Format>
                                   </Style>
                                 </TextRun>
                               </TextRuns>
                               <Style />
                             </Paragraph>
                           </Paragraphs>
-                          <rd:DefaultName>Textbox17</rd:DefaultName>
+                          <rd:DefaultName>ReadMBsec</rd:DefaultName>
+                          <ToolTip>="Read MB/sec:" &amp;  Format(Fields!ReadMBsec.Value,"0.0") &amp; Environment.NewLine &amp;
+"Write MB/sec:" &amp; Format(Fields!WriteMBsec.Value,"0.0")</ToolTip>
                           <Style>
                             <Border>
                               <Color>LightGrey</Color>
@@ -782,29 +667,140 @@
                     </TablixCell>
                     <TablixCell>
                       <CellContents>
-                        <Textbox Name="Textbox14">
+                        <Textbox Name="MaxIOPs">
                           <CanGrow>true</CanGrow>
                           <KeepTogether>true</KeepTogether>
                           <Paragraphs>
                             <Paragraph>
                               <TextRuns>
                                 <TextRun>
-                                  <Value>="Other:" &amp; Format(100-AVG(Fields!SystemIdleCPU.Value)-AVG(Fields!SQLProcessCPU.Value),"0")</Value>
+                                  <Value>=Fields!MaxIOPs.Value</Value>
                                   <Style>
                                     <FontFamily>Arial</FontFamily>
-                                    <Color>Orange</Color>
+                                    <Format>#,0</Format>
                                   </Style>
                                 </TextRun>
                               </TextRuns>
                               <Style />
                             </Paragraph>
                           </Paragraphs>
-                          <rd:DefaultName>Textbox14</rd:DefaultName>
+                          <rd:DefaultName>MaxIOPs</rd:DefaultName>
+                          <ToolTip>="Max Read IOPs: " &amp; format(Fields!MaxReadIOPs.Value,"0") &amp; Environment.NewLine &amp;
+ "Max Write IOPs: " &amp; format(Fields!MaxWriteIOPs.Value,"0")</ToolTip>
                           <Style>
                             <Border>
                               <Color>LightGrey</Color>
                               <Style>Solid</Style>
                             </Border>
+                            <PaddingLeft>2pt</PaddingLeft>
+                            <PaddingRight>2pt</PaddingRight>
+                            <PaddingTop>2pt</PaddingTop>
+                            <PaddingBottom>2pt</PaddingBottom>
+                          </Style>
+                        </Textbox>
+                      </CellContents>
+                    </TablixCell>
+                    <TablixCell>
+                      <CellContents>
+                        <Textbox Name="MaxMBsec">
+                          <CanGrow>true</CanGrow>
+                          <KeepTogether>true</KeepTogether>
+                          <Paragraphs>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Value>=Fields!MaxMBsec.Value</Value>
+                                  <Style>
+                                    <FontFamily>Arial</FontFamily>
+                                    <Format>#,0.0</Format>
+                                  </Style>
+                                </TextRun>
+                              </TextRuns>
+                              <Style />
+                            </Paragraph>
+                          </Paragraphs>
+                          <rd:DefaultName>MaxMBsec</rd:DefaultName>
+                          <ToolTip>="Max Read MB/sec: " &amp; format(Fields!MaxReadMBsec.Value,"0.0") &amp; Environment.NewLine &amp;
+"Max Write MB/sec: " &amp; format(Fields!MaxWriteMBsec.Value,"0.0")</ToolTip>
+                          <Style>
+                            <Border>
+                              <Color>LightGrey</Color>
+                              <Style>Solid</Style>
+                            </Border>
+                            <PaddingLeft>2pt</PaddingLeft>
+                            <PaddingRight>2pt</PaddingRight>
+                            <PaddingTop>2pt</PaddingTop>
+                            <PaddingBottom>2pt</PaddingBottom>
+                          </Style>
+                        </Textbox>
+                      </CellContents>
+                    </TablixCell>
+                    <TablixCell>
+                      <CellContents>
+                        <Textbox Name="ReadLatency">
+                          <CanGrow>true</CanGrow>
+                          <KeepTogether>true</KeepTogether>
+                          <Paragraphs>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Value>=Fields!ReadLatency.Value</Value>
+                                  <Style>
+                                    <FontFamily>Arial</FontFamily>
+                                    <Format>0</Format>
+                                  </Style>
+                                </TextRun>
+                              </TextRuns>
+                              <Style />
+                            </Paragraph>
+                          </Paragraphs>
+                          <rd:DefaultName>ReadLatency</rd:DefaultName>
+                          <Style>
+                            <Border>
+                              <Color>LightGrey</Color>
+                              <Style>Solid</Style>
+                            </Border>
+                            <BackgroundColor>=IIF(ISNOTHING(Fields!ReadLatency.Value),"LightGrey",
+IIF(Fields!ReadLatency.Value&lt;=10,"Green",
+IIF(Fields!ReadLatency.Value&lt;=50,"Yellow",
+"Red")))</BackgroundColor>
+                            <PaddingLeft>2pt</PaddingLeft>
+                            <PaddingRight>2pt</PaddingRight>
+                            <PaddingTop>2pt</PaddingTop>
+                            <PaddingBottom>2pt</PaddingBottom>
+                          </Style>
+                        </Textbox>
+                      </CellContents>
+                    </TablixCell>
+                    <TablixCell>
+                      <CellContents>
+                        <Textbox Name="WriteLatency">
+                          <CanGrow>true</CanGrow>
+                          <KeepTogether>true</KeepTogether>
+                          <Paragraphs>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Value>=Fields!WriteLatency.Value</Value>
+                                  <Style>
+                                    <FontFamily>Arial</FontFamily>
+                                    <Format>0</Format>
+                                  </Style>
+                                </TextRun>
+                              </TextRuns>
+                              <Style />
+                            </Paragraph>
+                          </Paragraphs>
+                          <rd:DefaultName>WriteLatency</rd:DefaultName>
+                          <Style>
+                            <Border>
+                              <Color>LightGrey</Color>
+                              <Style>Solid</Style>
+                            </Border>
+                            <BackgroundColor>=IIF(ISNOTHING(Fields!WriteLatency.Value),"LightGrey",
+IIF(Fields!WriteLatency.Value&lt;=10,"Green",
+IIF(Fields!WriteLatency.Value&lt;=50,"Yellow",
+"Red")))</BackgroundColor>
                             <PaddingLeft>2pt</PaddingLeft>
                             <PaddingRight>2pt</PaddingRight>
                             <PaddingTop>2pt</PaddingTop>
@@ -823,69 +819,42 @@
                 <TablixMember />
                 <TablixMember />
                 <TablixMember />
+                <TablixMember />
+                <TablixMember />
+                <TablixMember />
+                <TablixMember />
               </TablixMembers>
             </TablixColumnHierarchy>
             <TablixRowHierarchy>
               <TablixMembers>
                 <TablixMember>
                   <KeepWithGroup>After</KeepWithGroup>
-                  <RepeatOnNewPage>true</RepeatOnNewPage>
-                  <KeepTogether>true</KeepTogether>
                 </TablixMember>
                 <TablixMember>
-                  <Group Name="table1_Details_Group">
-                    <GroupExpressions>
-                      <GroupExpression>=Fields!Instance.Value</GroupExpression>
-                    </GroupExpressions>
-                    <DataElementName>Detail</DataElementName>
-                  </Group>
-                  <SortExpressions>
-                    <SortExpression>
-                      <Value>=Avg(Fields!SystemIdleCPU.Value)</Value>
-                    </SortExpression>
-                  </SortExpressions>
-                  <TablixMembers>
-                    <TablixMember />
-                    <TablixMember />
-                  </TablixMembers>
-                  <DataElementName>Detail_Collection</DataElementName>
-                  <DataElementOutput>Output</DataElementOutput>
-                  <KeepTogether>true</KeepTogether>
+                  <Group Name="Details" />
                 </TablixMember>
               </TablixMembers>
             </TablixRowHierarchy>
-            <DataSetName>CPU</DataSetName>
-            <Top>2.51375in</Top>
-            <Height>1.57166in</Height>
-            <Width>9.375in</Width>
-            <ZIndex>1</ZIndex>
-            <Style />
-          </Tablix>
-          <Subreport Name="Subreport1">
-            <ReportName>Blocking</ReportName>
-            <Parameters>
-              <Parameter Name="ShowTable">
-                <Value>false</Value>
-              </Parameter>
-              <Parameter Name="FromDate">
-                <Value>=DateTime.UtcNow.AddMinutes(-Parameters!Mins.Value)</Value>
-              </Parameter>
-              <Parameter Name="InstanceIDs">
-                <Value>=Parameters!InstanceIDs.Value</Value>
-              </Parameter>
-            </Parameters>
-            <Top>0.55083in</Top>
-            <Height>1.84375in</Height>
-            <Width>13.58in</Width>
+            <DataSetName>InstancePerformance</DataSetName>
+            <SortExpressions>
+              <SortExpression>
+                <Value>=Fields!AvgCPU.Value</Value>
+                <Direction>Descending</Direction>
+              </SortExpression>
+            </SortExpressions>
+            <Top>2.86333in</Top>
+            <Left>0.0925in</Left>
+            <Height>1.375in</Height>
+            <Width>12.33333in</Width>
             <ZIndex>2</ZIndex>
             <Style>
               <Border>
                 <Style>None</Style>
               </Border>
             </Style>
-          </Subreport>
+          </Tablix>
         </ReportItems>
-        <Height>4.08541in</Height>
+        <Height>4.23833in</Height>
         <Style />
       </Body>
       <Width>13.58in</Width>
@@ -979,7 +948,7 @@
   </ReportParameters>
   <ReportParametersLayout>
     <GridLayoutDefinition>
-      <NumberOfColumns>4</NumberOfColumns>
+      <NumberOfColumns>3</NumberOfColumns>
       <NumberOfRows>2</NumberOfRows>
       <CellDefinitions>
         <CellDefinition>
@@ -988,12 +957,12 @@
           <ParameterName>DateFormat</ParameterName>
         </CellDefinition>
         <CellDefinition>
-          <ColumnIndex>2</ColumnIndex>
+          <ColumnIndex>1</ColumnIndex>
           <RowIndex>0</RowIndex>
           <ParameterName>Mins</ParameterName>
         </CellDefinition>
         <CellDefinition>
-          <ColumnIndex>3</ColumnIndex>
+          <ColumnIndex>2</ColumnIndex>
           <RowIndex>0</RowIndex>
           <ParameterName>TagIDs</ParameterName>
         </CellDefinition>

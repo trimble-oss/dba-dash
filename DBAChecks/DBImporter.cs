@@ -61,7 +61,7 @@ namespace DBAChecks
             updateDB(connectionString, instanceID, snapshotDate, Data);
             foreach(DataTable dt in Data.Tables)
             {
-                string[] tables = { "Drives", "ServerProperties","Backups","AgentJobs","LogRestores","DBFiles","DBConfig","Corruption","DatabasesHADR","SysConfig","OSInfo","TraceFlags","ProcStats","FunctionStats","CPU","Drivers","BlockingSnapshot" };
+                string[] tables = { "Drives", "ServerProperties","Backups","AgentJobs","LogRestores","DBFiles","DBConfig","Corruption","DatabasesHADR","SysConfig","OSInfo","TraceFlags","ProcStats","FunctionStats","CPU","Drivers","BlockingSnapshot","IOStats" };
                 if (tables.Contains(dt.TableName))
                 {
                     update(connectionString, instanceID, snapshotDate, dt);
