@@ -1254,7 +1254,7 @@ IIF(Fields!IsDefault.Value,"Green","Yellow"))</BackgroundColor>
                             <Paragraph>
                               <TextRuns>
                                 <TextRun>
-                                  <Value>=Fields!ValidFrom.Value</Value>
+                                  <Value>=System.TimeZone.CurrentTimeZone.ToLocalTime(Fields!ValidFrom.Value)</Value>
                                   <Style>
                                     <FontFamily>Arial</FontFamily>
                                     <Format>=Parameters!DateFormat.Value</Format>
@@ -1287,7 +1287,7 @@ IIF(Fields!IsDefault.Value,"Green","Yellow"))</BackgroundColor>
                             <Paragraph>
                               <TextRuns>
                                 <TextRun>
-                                  <Value>=Fields!ValidTo.Value</Value>
+                                  <Value>=System.TimeZone.CurrentTimeZone.ToLocalTime(Fields!ValidTo.Value)</Value>
                                   <Style>
                                     <FontFamily>Arial</FontFamily>
                                     <Format>=Parameters!DateFormat.Value</Format>

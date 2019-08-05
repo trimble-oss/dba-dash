@@ -1264,7 +1264,7 @@ Fields!recovery_model.Value=3,"SIMPLE")</Value>
                             <Paragraph>
                               <TextRuns>
                                 <TextRun>
-                                  <Value>=Fields!LastFull.Value</Value>
+                                  <Value>=IIF(ISNOTHING(Fields!LastFull.Value),"", System.TimeZone.CurrentTimeZone.ToLocalTime(Fields!LastFull.Value))</Value>
                                   <Style>
                                     <FontFamily />
                                     <Format>=Parameters!DateFormat.Value</Format>
@@ -1304,7 +1304,7 @@ Fields!FullBackupStatus.Value=4,"Green")</BackgroundColor>
                             <Paragraph>
                               <TextRuns>
                                 <TextRun>
-                                  <Value>=Fields!LastDiff.Value</Value>
+                                  <Value>=IIF(ISNOTHING(Fields!LastDiff.Value),"", System.TimeZone.CurrentTimeZone.ToLocalTime(Fields!LastDiff.Value))</Value>
                                   <Style>
                                     <FontFamily />
                                     <Format>=Parameters!DateFormat.Value</Format>
@@ -1344,7 +1344,7 @@ Fields!DiffBackupStatus.Value=4,"Green")</BackgroundColor>
                             <Paragraph>
                               <TextRuns>
                                 <TextRun>
-                                  <Value>=Fields!LastLog.Value</Value>
+                                  <Value>=IIF(ISNOTHING(Fields!LastLog.Value),"", System.TimeZone.CurrentTimeZone.ToLocalTime(Fields!LastLog.Value))</Value>
                                   <Style>
                                     <FontFamily />
                                     <Format>=Parameters!DateFormat.Value</Format>
@@ -1384,7 +1384,7 @@ Fields!LogBackupStatus.Value=4,"Green")</BackgroundColor>
                             <Paragraph>
                               <TextRuns>
                                 <TextRun>
-                                  <Value>=Fields!LastFG.Value</Value>
+                                  <Value>=IIF(ISNOTHING(Fields!LastFG.Value),"", System.TimeZone.CurrentTimeZone.ToLocalTime(Fields!LastFG.Value))</Value>
                                   <Style>
                                     <FontFamily />
                                     <Format>=Parameters!DateFormat.Value</Format>
@@ -1421,7 +1421,7 @@ Fields!LogBackupStatus.Value=4,"Green")</BackgroundColor>
                             <Paragraph>
                               <TextRuns>
                                 <TextRun>
-                                  <Value>=Fields!LastFGDiff.Value</Value>
+                                  <Value>=IIF(ISNOTHING(Fields!LastFGDiff.Value),"", System.TimeZone.CurrentTimeZone.ToLocalTime(Fields!LastFGDiff.Value))</Value>
                                   <Style>
                                     <FontFamily />
                                     <Format>=Parameters!DateFormat.Value</Format>
@@ -1458,7 +1458,7 @@ Fields!LogBackupStatus.Value=4,"Green")</BackgroundColor>
                             <Paragraph>
                               <TextRuns>
                                 <TextRun>
-                                  <Value>=Fields!LastPartial.Value</Value>
+                                  <Value>=IIF(ISNOTHING(Fields!LastPartial.Value),"", System.TimeZone.CurrentTimeZone.ToLocalTime(Fields!LastPartial.Value))</Value>
                                   <Style>
                                     <FontFamily />
                                     <Format>=Parameters!DateFormat.Value</Format>
@@ -1495,7 +1495,7 @@ Fields!LogBackupStatus.Value=4,"Green")</BackgroundColor>
                             <Paragraph>
                               <TextRuns>
                                 <TextRun>
-                                  <Value>=Fields!LastPartialDiff.Value</Value>
+                                  <Value>=IIF(ISNOTHING(Fields!LastPartialDiff.Value),"", System.TimeZone.CurrentTimeZone.ToLocalTime(Fields!LastPartialDiff.Value))</Value>
                                   <Style>
                                     <FontFamily />
                                     <Format>=Parameters!DateFormat.Value</Format>
@@ -1820,7 +1820,7 @@ Fields!LogBackupStatus.Value=4,"Green")</BackgroundColor>
                             <Paragraph>
                               <TextRuns>
                                 <TextRun>
-                                  <Value>=Fields!SnapshotDate.Value</Value>
+                                  <Value>=IIF(ISNOTHING(Fields!SnapshotDate.Value),"", System.TimeZone.CurrentTimeZone.ToLocalTime(Fields!SnapshotDate.Value))</Value>
                                   <Style>
                                     <FontFamily />
                                     <Format>=Parameters!DateFormat.Value</Format>

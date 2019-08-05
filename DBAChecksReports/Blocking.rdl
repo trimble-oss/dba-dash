@@ -623,7 +623,7 @@
             <DataSetName>BlockingSummary</DataSetName>
             <Top>2.69792in</Top>
             <Height>0.43in</Height>
-            <Width>6.05208in</Width>
+            <Width>6.05209in</Width>
             <Visibility>
               <Hidden>=NOT Parameters!ShowTable.Value OR Count(Fields!InstanceID.Value, "BlockingSummary")=0</Hidden>
             </Visibility>
@@ -635,7 +635,7 @@
                 <ChartMember>
                   <Group Name="Chart1_CategoryGroup1">
                     <GroupExpressions>
-                      <GroupExpression>=Fields!SnapshotDateUTC.Value</GroupExpression>
+                      <GroupExpression>=System.TimeZone.CurrentTimeZone.ToLocalTime(Fields!SnapshotDateUTC.Value)</GroupExpression>
                     </GroupExpressions>
                   </Group>
                   <SortExpressions>
@@ -783,8 +783,12 @@
                     </ChartMinorTickMarks>
                     <CrossAt>NaN</CrossAt>
                     <Scalar>true</Scalar>
-                    <Minimum>=Parameters!FromDate.Value</Minimum>
-                    <Maximum>NaN</Maximum>
+                    <Minimum>=System.TimeZone.CurrentTimeZone.ToLocalTime(Parameters!FromDate.Value)</Minimum>
+                    <Maximum>=System.TimeZone.CurrentTimeZone.ToLocalTime(
+IIF(ISNOTHING(Parameters!ToDate.Value),
+DateTime.UtcNow,
+Parameters!ToDate.Value)
+)</Maximum>
                     <ChartAxisScaleBreak>
                       <Style />
                     </ChartAxisScaleBreak>

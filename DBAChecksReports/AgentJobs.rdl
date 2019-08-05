@@ -52,6 +52,10 @@
           <DataField>LastFail</DataField>
           <rd:TypeName>System.DateTime</rd:TypeName>
         </Field>
+        <Field Name="LastFailUTC">
+          <DataField>LastFailUTC</DataField>
+          <rd:TypeName>System.DateTime</rd:TypeName>
+        </Field>
         <Field Name="TimeSinceLastFail">
           <DataField>TimeSinceLastFail</DataField>
           <rd:TypeName>System.Int32</rd:TypeName>
@@ -71,6 +75,10 @@
         <Field Name="TimeSinceLastSucceededStatus">
           <DataField>TimeSinceLastSucceededStatus</DataField>
           <rd:TypeName>System.Int32</rd:TypeName>
+        </Field>
+        <Field Name="LastSucceedUTC">
+          <DataField>LastSucceedUTC</DataField>
+          <rd:TypeName>System.DateTime</rd:TypeName>
         </Field>
         <Field Name="TimeSinceLastSucceed">
           <DataField>TimeSinceLastSucceed</DataField>
@@ -1823,7 +1831,7 @@ Fields!JobStatus.Value=4,"Green")</BackgroundColor>
                             <Paragraph>
                               <TextRuns>
                                 <TextRun>
-                                  <Value>=Fields!LastFail.Value</Value>
+                                  <Value>=IIF(ISNOTHING(Fields!LastFailUTC.Value),"", Format(System.TimeZone.CurrentTimeZone.ToLocalTime(Fields!LastFailUTC.Value),Parameters!DateFormat.Value))</Value>
                                   <Style>
                                     <FontFamily />
                                     <Format>=Parameters!DateFormat.Value</Format>
@@ -1835,6 +1843,7 @@ Fields!JobStatus.Value=4,"Green")</BackgroundColor>
                             </Paragraph>
                           </Paragraphs>
                           <rd:DefaultName>LastFail</rd:DefaultName>
+                          <ToolTip>="Local time on server:" &amp; FORMAT(Fields!LastFail.Value,Parameters!DateFormat.Value)</ToolTip>
                           <Style>
                             <Border>
                               <Color>LightGrey</Color>
@@ -1899,7 +1908,7 @@ Fields!TimeSinceLastFailureStatus.Value=4,"Green")</BackgroundColor>
                             <Paragraph>
                               <TextRuns>
                                 <TextRun>
-                                  <Value>=Fields!LastSucceed.Value</Value>
+                                  <Value>=IIF(ISNOTHING(Fields!LastSucceedUTC.Value),"", Format(System.TimeZone.CurrentTimeZone.ToLocalTime(Fields!LastSucceedUTC.Value),Parameters!DateFormat.Value))</Value>
                                   <Style>
                                     <FontFamily />
                                     <Format>=Parameters!DateFormat.Value</Format>
@@ -1911,6 +1920,7 @@ Fields!TimeSinceLastFailureStatus.Value=4,"Green")</BackgroundColor>
                             </Paragraph>
                           </Paragraphs>
                           <rd:DefaultName>LastSucceed</rd:DefaultName>
+                          <ToolTip>="Local time on server: " &amp; format(Fields!LastSucceed.Value,Parameters!DateFormat.Value)</ToolTip>
                           <Style>
                             <Border>
                               <Color>LightGrey</Color>

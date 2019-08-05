@@ -1747,7 +1747,7 @@ Fields!FreeSpaceStatus.Value=4,"Green")</BackgroundColor>
                             <Paragraph>
                               <TextRuns>
                                 <TextRun>
-                                  <Value>=Fields!FileSnapshotDate.Value</Value>
+                                  <Value>=System.TimeZone.CurrentTimeZone.ToLocalTime(Fields!FileSnapshotDate.Value)</Value>
                                   <Style>
                                     <FontFamily />
                                     <Format>=Parameters!DateFormat.Value</Format>
@@ -1772,6 +1772,7 @@ Fields!FreeSpaceStatus.Value=4,"Green")</BackgroundColor>
                             <PaddingBottom>2pt</PaddingBottom>
                           </Style>
                         </Textbox>
+                        <rd:Selected>true</rd:Selected>
                       </CellContents>
                     </TablixCell>
                     <TablixCell>

@@ -962,7 +962,7 @@
                                                       <Paragraph>
                                                         <TextRuns>
                                                           <TextRun>
-                                                            <Value>=Fields!SnapshotDate.Value</Value>
+                                                            <Value>=System.TimeZone.CurrentTimeZone.ToLocalTime(Fields!SnapshotDate.Value)</Value>
                                                             <Style>
                                                               <Format>=Parameters!DateFormat.Value</Format>
                                                             </Style>
@@ -998,7 +998,7 @@
                                                           <Paragraph>
                                                             <TextRuns>
                                                               <TextRun>
-                                                                <Value>=IIF( Fields!HasDriverUpdates.Value,Fields!ValidFrom.Value,"")</Value>
+                                                                <Value>=IIF( Fields!HasDriverUpdates.Value,System.TimeZone.CurrentTimeZone.ToLocalTime(Fields!ValidFrom.Value),"")</Value>
                                                                 <Style>
                                                                   <Format>=Parameters!DateFormat.Value</Format>
                                                                 </Style>
@@ -1049,7 +1049,7 @@
             <DataSetName>Drivers</DataSetName>
             <Top>0.43in</Top>
             <Height>1.54667in</Height>
-            <Width>17.74999in</Width>
+            <Width>17.75in</Width>
             <ZIndex>1</ZIndex>
             <Style />
           </Tablix>
@@ -1057,7 +1057,7 @@
         <Height>1.97667in</Height>
         <Style />
       </Body>
-      <Width>17.74999in</Width>
+      <Width>17.75in</Width>
       <Page>
         <LeftMargin>1in</LeftMargin>
         <RightMargin>1in</RightMargin>

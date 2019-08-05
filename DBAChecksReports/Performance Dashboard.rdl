@@ -615,6 +615,32 @@
                             </Paragraph>
                           </Paragraphs>
                           <rd:DefaultName>ReadIOPs</rd:DefaultName>
+                          <ActionInfo>
+                            <Actions>
+                              <Action>
+                                <Drillthrough>
+                                  <ReportName>IO Performance</ReportName>
+                                  <Parameters>
+                                    <Parameter Name="InstanceIDs">
+                                      <Value>=Fields!InstanceID.Value</Value>
+                                    </Parameter>
+                                    <Parameter Name="FromDate">
+                                      <Value>=DateTime.UtcNow.AddMinutes(-Parameters!Mins.Value)</Value>
+                                    </Parameter>
+                                    <Parameter Name="ToDate">
+                                      <Value>=DateTime.UtcNow</Value>
+                                    </Parameter>
+                                    <Parameter Name="GroupByDB">
+                                      <Value>true</Value>
+                                    </Parameter>
+                                    <Parameter Name="DateFormat">
+                                      <Value>=Parameters!DateFormat.Value</Value>
+                                    </Parameter>
+                                  </Parameters>
+                                </Drillthrough>
+                              </Action>
+                            </Actions>
+                          </ActionInfo>
                           <ToolTip>="Read:" &amp; Format(Fields!ReadIOps.Value,"0") &amp; Environment.NewLine &amp;
 "Write:" &amp; Format(Fields!WriteIOps.Value,"0")</ToolTip>
                           <Style>
