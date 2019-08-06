@@ -99,22 +99,20 @@ namespace DBAChecks.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to DECLARE @MinWaitTimeMs INT = 1000
-        ///DECLARE @UTCOffset INT 
-        ///SELECT @UTCOffset= DATEDIFF(mi,GETDATE(),GETUTCDATE());
-        ///WITH R AS (
-        ///	SELECT GETUTCDATE() SnapshotDateUTC,
-        ///		@UTCOffset AS UTCOffset,
-        ///		S.session_id,
-        ///		ISNULL(R.blocking_session_id,0) AS blocking_session_id,
-        ///		ISNULL(RTXT.text,CTXT.text) AS Txt,
-        ///		DATEADD(mi,@UTCOffset,ISNULL(R.start_time,S.last_request_start_time)) as start_time_utc,
-        ///		R.command,
-        ///		S.database_id,
-        ///		DB_NAME(S.database_id) database_name,
-        ///		S.host_name,
-        ///		s.program_name,
-        /// [rest of string was truncated]&quot;;.
+        ///   Looks up a localized string similar to DECLARE @MinWaitTimeMs INT 
+        ///SET @MinWaitTimeMs= 1000
+        ///
+        ///DECLARE @DBIDTable NVARCHAR(MAX)
+        ///DECLARE @SQL NVARCHAR(MAX)
+        ///SELECT @DBIDTable= CASE WHEN COLUMNPROPERTY(OBJECT_ID(&apos;sys.dm_exec_sessions&apos;),&apos;database_id&apos;,&apos;ColumnId&apos;) IS NULL THEN &apos;R.&apos; ELSE &apos;S.&apos; END 
+        ///SET @SQL =N&apos;
+        ///	DECLARE @UTCOffset INT 
+        ///	SELECT @UTCOffset= DATEDIFF(mi,GETDATE(),GETUTCDATE());
+        ///	WITH R AS (
+        ///		SELECT GETUTCDATE() SnapshotDateUTC,
+        ///			@UTCOffset AS UTCOffset,
+        ///			S.session_id,
+        ///			ISNULL(R.blocking_session_id,0) AS blocking_session_i [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string SQLBlockingSnapshot {
             get {
@@ -158,7 +156,9 @@ namespace DBAChecks.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to DECLARE @ts_now bigint = (SELECT cpu_ticks/(cpu_ticks/ms_ticks) FROM sys.dm_os_sys_info WITH (NOLOCK)); 
+        ///   Looks up a localized string similar to DECLARE @ts_now bigint 
+        ///SELECT @ts_now= cpu_ticks/(cpu_ticks/ms_ticks) 
+        ///FROM sys.dm_os_sys_info; 
         /// 
         ///SELECT TOP(@TOP) DATEADD(ms, -1 * (@ts_now - [timestamp]), GETUTCDATE()) AS [EventTime],
         ///				SQLProcessUtilization AS [SQLProcessCPU], 
@@ -166,7 +166,7 @@ namespace DBAChecks.Properties {
         ///FROM (SELECT record.value(&apos;(./Record/@id)[1]&apos;, &apos;int&apos;) AS record_id, 
         ///            record.value(&apos;(./Record/SchedulerMonitorEvent/SystemHealth/SystemIdle)[1]&apos;, &apos;int&apos;) 
         ///            AS [SystemIdle], 
-        ///            reco [rest of string was truncated]&quot;;.
+        ///            record.va [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string SQLCPU {
             get {
@@ -199,24 +199,7 @@ namespace DBAChecks.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to DECLARE @DBName SYSNAME
-        ///DECLARE @SQL NVARCHAR(MAX)
-        ///CREATE TABLE #DBConfig( 
-        ///	database_id INT NOT NULL,
-        ///	configuration_id INT NOT NULL,
-        ///	name NVARCHAR(60) NOT NULL,
-        ///	value NVARCHAR(128) NULL,
-        ///	value_for_secondary NVARCHAR(128) NULL,
-        ///	PRIMARY KEY (database_id,configuration_id)
-        ///)
-        ///
-        ///IF OBJECT_ID(&apos;sys.database_scoped_configurations&apos;) IS NOT NULL
-        ///BEGIN
-        ///	DECLARE DBs CURSOR FAST_FORWARD READ_ONLY FOR
-        ///	SELECT name
-        ///	FROM sys.databases
-        ///	WHERE state  = 0
-        ///	AND DATABASEPROPERTYEX(name, &apos;Updateability&apos;) =  [rest of string was truncated]&quot;;.
+        ///   Looks up a localized string similar to .
         /// </summary>
         internal static string SQLDBConfig {
             get {

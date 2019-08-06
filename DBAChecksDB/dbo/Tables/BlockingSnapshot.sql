@@ -13,9 +13,12 @@
     [login_name]          NVARCHAR (128) NULL,
     [wait_resource]       NVARCHAR (256) NULL,
     [Status]              NVARCHAR (30)  NULL,
+    [wait_type]           NVARCHAR (60)  NULL,
     CONSTRAINT [PK_BlockingSnapshot] PRIMARY KEY CLUSTERED ([BlockingSnapshotID] ASC, [session_id] ASC),
     CONSTRAINT [FK_BlockingSnapshot_BlockingSnapshotSummary] FOREIGN KEY ([BlockingSnapshotID]) REFERENCES [dbo].[BlockingSnapshotSummary] ([BlockingSnapshotID])
 );
+
+
 
 
 

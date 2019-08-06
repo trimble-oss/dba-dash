@@ -1,4 +1,5 @@
 ﻿
+
 CREATE VIEW [dbo].[BackupStatus]
 AS
 WITH hadr AS (
@@ -12,17 +13,19 @@ WITH hadr AS (
 ),
 B AS(
 	SELECT hadr.DatabaseID,
-			MAX(CASE WHEN type='D' THEN LastBackup ELSE NULL END) AS LastFull,
-			MAX(CASE WHEN type='I' THEN LastBackup ELSE NULL END) AS LastDiff,
-			MAX(CASE WHEN type='L' THEN LastBackup ELSE NULL END) AS LastLog,
-			MAX(CASE WHEN type='F' THEN LastBackup ELSE NULL END) AS LastFG,
-			MAX(CASE WHEN type='G' THEN LastBackup ELSE NULL END) AS LastFGDiff,
-			MAX(CASE WHEN type='P' THEN LastBackup ELSE NULL END) AS LastPartial,
-			MAX(CASE WHEN type='P' THEN LastBackup ELSE NULL END) AS LastPartialDiff,
-			MAX(CASE WHEN hadr.DatabaseID<>hadr.BackupDatabaseID THEN 1 ELSE 0 END) AS AGPartnerBackupsConsidered
+			DATEADD(mi,I.UTCOffset,MAX(CASE WHEN B.type='D' THEN B.LastBackup ELSE NULL END)) AS LastFull,
+			DATEADD(mi,I.UTCOffset,MAX(CASE WHEN B.type='I' THEN B.LastBackup ELSE NULL END)) AS LastDiff,
+			DATEADD(mi,I.UTCOffset,MAX(CASE WHEN B.type='L' THEN B.LastBackup ELSE NULL END)) AS LastLog,
+			DATEADD(mi,I.UTCOffset,MAX(CASE WHEN B.type='F' THEN B.LastBackup ELSE NULL END)) AS LastFG,
+			DATEADD(mi,I.UTCOffset,MAX(CASE WHEN B.type='G' THEN B.LastBackup ELSE NULL END)) AS LastFGDiff,
+			DATEADD(mi,I.UTCOffset,MAX(CASE WHEN B.type='P' THEN B.LastBackup ELSE NULL END)) AS LastPartial,
+			DATEADD(mi,I.UTCOffset,MAX(CASE WHEN B.type='P' THEN B.LastBackup ELSE NULL END)) AS LastPartialDiff,
+			DATEADD(mi,I.UTCOffset,MAX(CASE WHEN hadr.DatabaseID<>hadr.BackupDatabaseID THEN 1 ELSE 0 END)) AS AGPartnerBackupsConsidered
 	FROM dbo.Backups B
 	JOIN hadr ON hadr.BackupDatabaseID = B.DatabaseID
-	GROUP BY hadr.DatabaseID
+	JOIN dbo.Databases D ON D.DatabaseID = B.DatabaseID
+	JOIN dbo.Instances I ON I.InstanceID = D.InstanceID
+	GROUP BY hadr.DatabaseID,I.UTCOffset
 )
 SELECT I.InstanceID,
 	d.DatabaseID,

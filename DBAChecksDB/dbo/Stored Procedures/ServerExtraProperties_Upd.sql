@@ -1,7 +1,7 @@
 ﻿CREATE PROC [dbo].[ServerExtraProperties_Upd]
 (
     @InstanceID INT,
-    @SnapshotDate DATETIME,
+    @SnapshotDate DATETIME2(2),
     @ActivePowerPlanGUID UNIQUEIDENTIFIER,
     @ActivePowerPlan VARCHAR(16),
     @ProcessorNameString NVARCHAR(512),
@@ -22,6 +22,34 @@ AS
 DECLARE @Ref VARCHAR(30)='ServerExtraProperties'
 IF NOT EXISTS(SELECT 1 FROM dbo.CollectionDates WHERE SnapshotDate>=@SnapshotDate AND InstanceID = @InstanceID AND Reference=@Ref)
 BEGIN
+	IF EXISTS(SELECT 1 
+			FROM dbo.Instances I
+			WHERE I.InstanceID = @InstanceID
+			AND (I.SystemProductName <> @SystemProductName
+				OR I.SystemManufacturer <> @SystemManufacturer
+				OR I.ProcessorNameString <> @ProcessorNameString
+				)
+			)
+	BEGIN
+		IF NOT EXISTS(SELECT 1 FROM dbo.HostUpgradeHistory WHERE InstanceID = @InstanceID AND ChangeDate = @SnapshotDate)
+		BEGIN
+			INSERT INTO dbo.HostUpgradeHistory(InstanceID,ChangeDate)
+			VALUES(@InstanceID,@SnapshotDate)
+		END
+		UPDATE HUH 
+			SET HUH.SystemManufacturerOld = I.SystemManufacturer,
+			HUH.SystemManufacturerNew = @SystemManufacturer,
+			HUH.SystemProductNameOld = I.SystemProductName,
+			HUH.SystemProductNameNew = @SystemProductName,
+			HUH.Processor_old = I.ProcessorNameString,
+			HUH.Processor_new = @ProcessorNameString
+		FROM dbo.HostUpgradeHistory HUH 
+		JOIN dbo.Instances I ON I.InstanceID = HUH.InstanceID
+		WHERE HUH.InstanceID = @InstanceID 
+		AND HUH.ChangeDate = @SnapshotDate
+		
+	END
+
 	UPDATE dbo.Instances
 	SET ActivePowerPlanGUID = @ActivePowerPlanGUID,
 		ActivePowerPlan = @ActivePowerPlan,

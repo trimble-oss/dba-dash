@@ -562,6 +562,23 @@
                             </Paragraph>
                           </Paragraphs>
                           <rd:DefaultName>Instance1</rd:DefaultName>
+                          <ActionInfo>
+                            <Actions>
+                              <Action>
+                                <Drillthrough>
+                                  <ReportName>Procedure Stats</ReportName>
+                                  <Parameters>
+                                    <Parameter Name="InstanceID">
+                                      <Value>=Fields!InstanceID.Value</Value>
+                                    </Parameter>
+                                    <Parameter Name="FromDateUser">
+                                      <Value>=DateTime.Now.AddMinutes(-Parameters!Mins.Value)</Value>
+                                    </Parameter>
+                                  </Parameters>
+                                </Drillthrough>
+                              </Action>
+                            </Actions>
+                          </ActionInfo>
                           <Style>
                             <Border>
                               <Color>LightGrey</Color>
@@ -624,11 +641,11 @@
                                     <Parameter Name="InstanceIDs">
                                       <Value>=Fields!InstanceID.Value</Value>
                                     </Parameter>
-                                    <Parameter Name="FromDate">
-                                      <Value>=DateTime.UtcNow.AddMinutes(-Parameters!Mins.Value)</Value>
+                                    <Parameter Name="FromDateUser">
+                                      <Value>=DateTime.Now.AddMinutes(-Parameters!Mins.Value)</Value>
                                     </Parameter>
-                                    <Parameter Name="ToDate">
-                                      <Value>=DateTime.UtcNow</Value>
+                                    <Parameter Name="ToDateUser">
+                                      <Value>=DateTime.Now</Value>
                                     </Parameter>
                                     <Parameter Name="GroupByDB">
                                       <Value>true</Value>

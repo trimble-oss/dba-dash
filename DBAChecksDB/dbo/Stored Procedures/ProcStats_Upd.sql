@@ -65,6 +65,7 @@ SELECT t.ProcID,
        t.IsCompile
 FROM T
 WHERE t.diff IS NOT NULL
+AND t.execution_count>0
 
 DELETE Staging.ProcStats WHERE InstanceID=@InstanceID
 INSERT INTO Staging.ProcStats(

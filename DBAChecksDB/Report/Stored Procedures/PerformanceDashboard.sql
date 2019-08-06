@@ -1,4 +1,4 @@
-﻿CREATE PROC Report.PerformanceDashboard(@InstanceIDs VARCHAR(MAX)=NULL,@Mins INT=60)
+﻿CREATE PROC [Report].[PerformanceDashboard](@InstanceIDs VARCHAR(MAX)=NULL,@Mins INT=60)
 AS
 DECLARE @Instances TABLE(
 	InstanceID INT PRIMARY KEY
@@ -54,7 +54,13 @@ SELECT a.InstanceID,
 		SUM(a.io_stall_read_ms)/(NULLIF(SUM(a.num_of_reads),0)*1.0) AS ReadLatency,
 		SUM(a.io_stall_write_ms)/(NULLIF(SUM(a.num_of_writes),0)*1.0) AS WriteLatency,
 		SUM(a.io_stall_read_ms+a.io_stall_write_ms)/(NULLIF(SUM(a.num_of_writes+a.num_of_reads),0)*1.0) AS Latency,
-		MAX(cpuAgg.AvgCPU) AS AvgCPU
+		MAX(cpuAgg.AvgCPU) AS AvgCPU,
+		MAX(a.num_of_reads/(a.sample_ms_diff/1000.0)) AS MaxReadIOPs,
+		MAX(a.num_of_writes/(a.sample_ms_diff/1000.0)) AS MaxWriteIOPs,
+		MAX((a.num_of_writes+a.num_of_reads)/(a.sample_ms_diff/1000.0)) AS MaxIOPs,
+		MAX(a.num_of_bytes_read/(a.sample_ms_diff/1000.0))/POWER(1024.0,2) AS MaxReadMBsec,
+		MAX(a.num_of_bytes_written/(a.sample_ms_diff/1000.0))/POWER(1024.0,2) AS MaxWriteMBsec,
+		MAX((a.num_of_bytes_written+a.num_of_bytes_read)/(a.sample_ms_diff/1000.0))/POWER(1024.0,2) AS MaxMBsec
 FROM instanceAgg a
 LEFT JOIN cpuAgg ON a.InstanceID = cpuAgg.InstanceID
 GROUP BY a.InstanceID,a.Instance

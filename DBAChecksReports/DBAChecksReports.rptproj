@@ -74,6 +74,7 @@
     <Report Include="IO Performance.rdl" />
     <Report Include="LogShipping.rdl" />
     <Report Include="Performance Dashboard.rdl" />
+    <Report Include="Procedure Insights.rdl" />
     <Report Include="Procedure Stats.rdl" />
     <Report Include="SnapshotDates.rdl" />
     <Report Include="Summary.rdl" />

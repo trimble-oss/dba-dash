@@ -3,6 +3,30 @@ AS
 DECLARE @Ref VARCHAR(30)='ServerProperties'
 IF NOT EXISTS(SELECT 1 FROM dbo.CollectionDates WHERE SnapshotDate>=@SnapshotDate AND InstanceID = @InstanceID AND Reference=@Ref)
 BEGIN
+	INSERT INTO dbo.SQLPatchingHistory
+	(
+	    InstanceID,
+	    ChangedDate,
+	    OldVersion,
+	    NewVersion,
+	    OldProductLevel,
+	    NewProductLevel,
+	    OldProductUpdateLevel,
+	    NewProductUpdateLevel
+	)
+	SELECT I.InstanceID,
+		   @SnapshotDate,
+		   I.ProductVersion,
+		   T.ProductVersion,
+		   I.ProductLevel,
+		   T.ProductLevel,
+		   I.ProductUpdateLevel,
+		   T.ProductUpdateLevel
+	FROM dbo.Instances I
+		CROSS JOIN @ServerProperties T
+	WHERE I.InstanceID = @InstanceID
+	AND   I.ProductVersion <> T.ProductVersion
+
 	UPDATE I
 	   SET [BuildClrVersion] = T.BuildClrVersion
 		  ,[Collation] = T.Collation

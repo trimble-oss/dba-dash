@@ -2,8 +2,7 @@
 <RptDataSource xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" Name="DBAChecksDB">
   <ConnectionProperties>
     <Extension>SQL</Extension>
-    <ConnectString>Data Source=.;Initial Catalog=DBAChecksDB</ConnectString>
-    <IntegratedSecurity>true</IntegratedSecurity>
+    <ConnectString>Data Source=10.99.1.125,1055;Initial Catalog=DBAChecksDB</ConnectString>
   </ConnectionProperties>
   <DataSourceID>df074985-af76-4575-87c8-4b34c6aef96d</DataSourceID>
 </RptDataSource>

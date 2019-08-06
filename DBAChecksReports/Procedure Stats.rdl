@@ -1044,15 +1044,76 @@ Environment.NewLine &amp; "Avg Writes: " &amp;  Format(SUM(Fields!TotalWrites.Va
       </DefaultValue>
       <Hidden>true</Hidden>
     </ReportParameter>
-    <ReportParameter Name="FromDate">
+    <ReportParameter Name="FromDateUser">
       <DataType>DateTime</DataType>
       <Nullable>true</Nullable>
       <Prompt>From Date</Prompt>
     </ReportParameter>
-    <ReportParameter Name="ToDate">
+    <ReportParameter Name="ToDateUser">
       <DataType>DateTime</DataType>
       <Nullable>true</Nullable>
       <Prompt>To Date</Prompt>
+    </ReportParameter>
+    <ReportParameter Name="InstanceID">
+      <DataType>Integer</DataType>
+      <Prompt>Instance </Prompt>
+      <ValidValues>
+        <DataSetReference>
+          <DataSetName>Instances</DataSetName>
+          <ValueField>InstanceID</ValueField>
+          <LabelField>Instance</LabelField>
+        </DataSetReference>
+      </ValidValues>
+    </ReportParameter>
+    <ReportParameter Name="FromDate">
+      <DataType>DateTime</DataType>
+      <Nullable>true</Nullable>
+      <DefaultValue>
+        <Values>
+          <Value>=IIF(ISNOTHING(Parameters!FromDateUser.Value),NOTHING,
+CDATE(Parameters!FromDateUser.Value).AddMinutes(IIF(ISNOTHING(Parameters!FromDateUser.Value),NOTHING,DateTime.Now.Date.Subtract(System.TimeZone.CurrentTimeZone.ToLocalTime(DateTime.UtcNow.Date)).TotalMinutes))
+)</Value>
+        </Values>
+      </DefaultValue>
+      <Prompt>From Date</Prompt>
+      <Hidden>true</Hidden>
+      <ValidValues>
+        <ParameterValues>
+          <ParameterValue>
+            <Value>=IIF(ISNOTHING(Parameters!FromDateUser.Value),NOTHING,
+CDATE(Parameters!FromDateUser.Value).AddMinutes(IIF(ISNOTHING(Parameters!FromDateUser.Value),NOTHING,DateTime.Now.Date.Subtract(System.TimeZone.CurrentTimeZone.ToLocalTime(DateTime.UtcNow.Date)).TotalMinutes))
+)</Value>
+            <Label>=IIF(ISNOTHING(Parameters!FromDateUser.Value),NOTHING,
+CDATE(Parameters!FromDateUser.Value).AddMinutes(IIF(ISNOTHING(Parameters!FromDateUser.Value),NOTHING,DateTime.Now.Date.Subtract(System.TimeZone.CurrentTimeZone.ToLocalTime(DateTime.UtcNow.Date)).TotalMinutes))
+)</Label>
+          </ParameterValue>
+        </ParameterValues>
+      </ValidValues>
+    </ReportParameter>
+    <ReportParameter Name="ToDate">
+      <DataType>DateTime</DataType>
+      <Nullable>true</Nullable>
+      <DefaultValue>
+        <Values>
+          <Value>=IIF(ISNOTHING(Parameters!ToDateUser.Value),NOTHING,
+CDATE(Parameters!ToDateUser.Value).AddMinutes(IIF(ISNOTHING(Parameters!ToDateUser.Value),NOTHING,DateTime.Now.Date.Subtract(System.TimeZone.CurrentTimeZone.ToLocalTime(DateTime.UtcNow.Date)).TotalMinutes))
+)</Value>
+        </Values>
+      </DefaultValue>
+      <Prompt>To Date</Prompt>
+      <Hidden>true</Hidden>
+      <ValidValues>
+        <ParameterValues>
+          <ParameterValue>
+            <Value>=IIF(ISNOTHING(Parameters!ToDateUser.Value),NOTHING,
+CDATE(Parameters!ToDateUser.Value).AddMinutes(IIF(ISNOTHING(Parameters!ToDateUser.Value),NOTHING,DateTime.Now.Date.Subtract(System.TimeZone.CurrentTimeZone.ToLocalTime(DateTime.UtcNow.Date)).TotalMinutes))
+)</Value>
+            <Label>=IIF(ISNOTHING(Parameters!ToDateUser.Value),NOTHING,
+CDATE(Parameters!ToDateUser.Value).AddMinutes(IIF(ISNOTHING(Parameters!ToDateUser.Value),NOTHING,DateTime.Now.Date.Subtract(System.TimeZone.CurrentTimeZone.ToLocalTime(DateTime.UtcNow.Date)).TotalMinutes))
+)</Label>
+          </ParameterValue>
+        </ParameterValues>
+      </ValidValues>
     </ReportParameter>
     <ReportParameter Name="DateAgg">
       <DataType>String</DataType>
@@ -1144,17 +1205,6 @@ Environment.NewLine &amp; "Avg Writes: " &amp;  Format(SUM(Fields!TotalWrites.Va
         </ParameterValues>
       </ValidValues>
     </ReportParameter>
-    <ReportParameter Name="InstanceID">
-      <DataType>Integer</DataType>
-      <Prompt>Instance </Prompt>
-      <ValidValues>
-        <DataSetReference>
-          <DataSetName>Instances</DataSetName>
-          <ValueField>InstanceID</ValueField>
-          <LabelField>Instance</LabelField>
-        </DataSetReference>
-      </ValidValues>
-    </ReportParameter>
     <ReportParameter Name="DatabaseID">
       <DataType>Integer</DataType>
       <Nullable>true</Nullable>
@@ -1233,46 +1283,56 @@ Environment.NewLine &amp; "Avg Writes: " &amp;  Format(SUM(Fields!TotalWrites.Va
         <CellDefinition>
           <ColumnIndex>0</ColumnIndex>
           <RowIndex>2</RowIndex>
-          <ParameterName>InstanceID</ParameterName>
+          <ParameterName>DateAgg</ParameterName>
         </CellDefinition>
         <CellDefinition>
           <ColumnIndex>1</ColumnIndex>
           <RowIndex>2</RowIndex>
-          <ParameterName>DatabaseID</ParameterName>
+          <ParameterName>Measure</ParameterName>
         </CellDefinition>
         <CellDefinition>
           <ColumnIndex>0</ColumnIndex>
           <RowIndex>1</RowIndex>
+          <ParameterName>FromDateUser</ParameterName>
+        </CellDefinition>
+        <CellDefinition>
+          <ColumnIndex>3</ColumnIndex>
+          <RowIndex>1</RowIndex>
           <ParameterName>FromDate</ParameterName>
         </CellDefinition>
         <CellDefinition>
-          <ColumnIndex>1</ColumnIndex>
+          <ColumnIndex>4</ColumnIndex>
           <RowIndex>1</RowIndex>
           <ParameterName>ToDate</ParameterName>
         </CellDefinition>
         <CellDefinition>
+          <ColumnIndex>1</ColumnIndex>
+          <RowIndex>1</RowIndex>
+          <ParameterName>ToDateUser</ParameterName>
+        </CellDefinition>
+        <CellDefinition>
+          <ColumnIndex>2</ColumnIndex>
+          <RowIndex>1</RowIndex>
+          <ParameterName>InstanceID</ParameterName>
+        </CellDefinition>
+        <CellDefinition>
+          <ColumnIndex>2</ColumnIndex>
+          <RowIndex>2</RowIndex>
+          <ParameterName>DatabaseID</ParameterName>
+        </CellDefinition>
+        <CellDefinition>
           <ColumnIndex>3</ColumnIndex>
-          <RowIndex>1</RowIndex>
-          <ParameterName>Measure</ParameterName>
-        </CellDefinition>
-        <CellDefinition>
-          <ColumnIndex>2</ColumnIndex>
-          <RowIndex>1</RowIndex>
-          <ParameterName>DateAgg</ParameterName>
-        </CellDefinition>
-        <CellDefinition>
-          <ColumnIndex>2</ColumnIndex>
           <RowIndex>2</RowIndex>
           <ParameterName>IsFunction</ParameterName>
         </CellDefinition>
         <CellDefinition>
-          <ColumnIndex>3</ColumnIndex>
-          <RowIndex>2</RowIndex>
+          <ColumnIndex>0</ColumnIndex>
+          <RowIndex>3</RowIndex>
           <ParameterName>Proc</ParameterName>
         </CellDefinition>
         <CellDefinition>
-          <ColumnIndex>4</ColumnIndex>
-          <RowIndex>2</RowIndex>
+          <ColumnIndex>1</ColumnIndex>
+          <RowIndex>3</RowIndex>
           <ParameterName>DateFormat</ParameterName>
         </CellDefinition>
       </CellDefinitions>

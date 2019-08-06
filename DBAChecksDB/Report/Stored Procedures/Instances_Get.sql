@@ -26,3 +26,4 @@ HAVING (COUNT(IT.InstanceID) = @TagCount AND @TagMatching='ALL')
 OR (COUNT(IT.InstanceID)>0 AND @TagMatching='ANY')
 OR (COUNT(IT.InstanceID)=0 AND @TagMatching='EXCLUDEANY')
 OR (COUNT(IT.InstanceID)<>@TagCount AND @TagMatching='EXCLUDEALL')
+ORDER BY I.Instance

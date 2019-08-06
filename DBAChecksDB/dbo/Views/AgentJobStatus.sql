@@ -1,6 +1,7 @@
 ﻿
 
 
+
 CREATE VIEW [dbo].[AgentJobStatus]
 AS
 SELECT I.Instance, 
@@ -8,9 +9,11 @@ SELECT I.Instance,
     J.job_id,
     J.name,
     J.LastFail,
+	DATEADD(mi,I.UTCOffset,J.LastFail) AS LastFailUTC,
 	DATEDIFF(mi,J.LastFail,GETUTCDATE()) AS TimeSinceLastFail,
 	st.TimeSinceLastFailureStatus,
     J.LastSucceed,
+	DATEADD(mi,I.UTCOffset,J.LastSucceed) AS LastSucceedUTC,
 	DATEDIFF(mi,J.LastSucceed,GETUTCDATE()) AS TimeSinceLastSucceeded,
 	st.TimeSinceLastSucceededStatus,
 	DATEDIFF(mi,J.LastSucceed,GETUTCDATE()) AS TimeSinceLastSucceed,

@@ -66,6 +66,7 @@ SELECT t.FunctionID,
        t.IsCompile
 FROM T
 WHERE t.diff IS NOT NULL
+AND t.execution_count>0
 
 DELETE Staging.FunctionStats WHERE InstanceID=@InstanceID
 INSERT INTO Staging.FunctionStats(

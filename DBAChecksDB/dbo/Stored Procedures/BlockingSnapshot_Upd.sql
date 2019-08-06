@@ -26,6 +26,7 @@ BEGIN;
 			   login_name,
 			   wait_resource,
 			   Status,
+			   wait_type,
 			   ROW_NUMBER() OVER(PARTITION BY t.session_id ORDER BY t.wait_time DESC) rnum
 		FROM @BlockingSnapshot t
 	)
@@ -42,7 +43,8 @@ BEGIN;
 		   wait_time,
 		   login_name,
 		   wait_resource,
-		   Status)
+		   Status,
+		   wait_type)
 	SELECT @SnapshotID,
 		   session_id,
 		   blocking_session_id,
@@ -56,7 +58,8 @@ BEGIN;
 		   wait_time,
 		   login_name,
 		   wait_resource,
-		   Status
+		   Status,
+		   wait_type
 	FROM T
 	WHERE rnum=1
 END

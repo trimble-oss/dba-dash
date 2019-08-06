@@ -115,7 +115,6 @@
     <Build Include="dbo\Stored Procedures\Tag_Add.sql" />
     <Build Include="Report\Stored Procedures\TagMatching_Get.sql" />
     <Build Include="Report\Stored Procedures\Tags_Get.sql" />
-    <Build Include="Report\Stored Procedures\Patching_Get.sql" />
     <Build Include="Report\Stored Procedures\Instances_Get.sql" />
     <Build Include="Report\Stored Procedures\DBAChecksAll.sql" />
     <Build Include="Report\Stored Procedures\Summary_Get.sql" />
@@ -209,6 +208,12 @@
     <Build Include="dbo\Stored Procedures\IOStats_Upd.sql" />
     <Build Include="dbo\User Defined Types\IOStats.sql" />
     <Build Include="Report\Stored Procedures\PerformanceDashboard.sql" />
+    <Build Include="dbo\Tables\SQLPatchingHistory.sql" />
+    <Build Include="dbo\Tables\HostUpgradeHistory.sql" />
+    <Build Include="Report\Stored Procedures\SQLPatching_Get.sql" />
+    <Build Include="Report\Stored Procedures\ProcedureInsights.sql" />
+    <Build Include="Report\Stored Procedures\IOPerformance.sql" />
+    <Build Include="Report\Stored Procedures\HostUpgrade.sql" />
   </ItemGroup>
   <ItemGroup>
     <PostDeploy Include="Script.PostDeployment1.sql" />

@@ -567,54 +567,7 @@ DROP TABLE #sysdb
 DROP TABLE #sysdbcols</value>
   </data>
   <data name="SQLDBConfig" xml:space="preserve">
-    <value>DECLARE @DBName SYSNAME
-DECLARE @SQL NVARCHAR(MAX)
-CREATE TABLE #DBConfig( 
-	database_id INT NOT NULL,
-	configuration_id INT NOT NULL,
-	name NVARCHAR(60) NOT NULL,
-	value NVARCHAR(128) NULL,
-	value_for_secondary NVARCHAR(128) NULL,
-	PRIMARY KEY (database_id,configuration_id)
-)
-
-IF OBJECT_ID('sys.database_scoped_configurations') IS NOT NULL
-BEGIN
-	DECLARE DBs CURSOR FAST_FORWARD READ_ONLY FOR
-	SELECT name
-	FROM sys.databases
-	WHERE state  = 0
-	AND DATABASEPROPERTYEX(name, 'Updateability') = 'READ_WRITE'
-
-	OPEN DBs
-	FETCH NEXT FROM DBs INTO @DBName
-
-	WHILE @@FETCH_STATUS = 0
-	BEGIN
-
-	SET @SQL =  N'USE ' + QUOTENAME(@DBName) + ';
-	SELECT DB_ID(),configuration_id,name,CAST(value as NVARCHAR(128)),CAST(value_for_secondary as NVARCHAR(128))
-	FROM sys.database_scoped_configurations'
-
-	INSERT INTO #DBConfig
-	EXEC  (	@SQL )
-
-	FETCH NEXT FROM DBs INTO @DBName
-	END
-	CLOSE DBs
-	DEALLOCATE DBs
-
-END
-
-
-SELECT database_id,
-       configuration_id,
-       name,
-       value,
-       value_for_secondary
-FROM #DBConfig
-
-DROP TABLE #DBConfig</value>
+    <value />
   </data>
   <data name="SQLDrives" xml:space="preserve">
     <value>IF OBJECT_ID('sys.dm_os_volume_stats') IS NOT NULL
@@ -912,7 +865,9 @@ BEGIN
 END</value>
   </data>
   <data name="SQLCPU" xml:space="preserve">
-    <value>DECLARE @ts_now bigint = (SELECT cpu_ticks/(cpu_ticks/ms_ticks) FROM sys.dm_os_sys_info WITH (NOLOCK)); 
+    <value>DECLARE @ts_now bigint 
+SELECT @ts_now= cpu_ticks/(cpu_ticks/ms_ticks) 
+FROM sys.dm_os_sys_info; 
  
 SELECT TOP(@TOP) DATEADD(ms, -1 * (@ts_now - [timestamp]), GETUTCDATE()) AS [EventTime],
 				SQLProcessUtilization AS [SQLProcessCPU], 
@@ -947,38 +902,47 @@ BEGIN
 END</value>
   </data>
   <data name="SQLBlockingSnapshot" xml:space="preserve">
-    <value>DECLARE @MinWaitTimeMs INT = 1000
-DECLARE @UTCOffset INT 
-SELECT @UTCOffset= DATEDIFF(mi,GETDATE(),GETUTCDATE());
-WITH R AS (
-	SELECT GETUTCDATE() SnapshotDateUTC,
-		@UTCOffset AS UTCOffset,
-		S.session_id,
-		ISNULL(R.blocking_session_id,0) AS blocking_session_id,
-		ISNULL(RTXT.text,CTXT.text) AS Txt,
-		DATEADD(mi,@UTCOffset,ISNULL(R.start_time,S.last_request_start_time)) as start_time_utc,
-		R.command,
-		S.database_id,
-		DB_NAME(S.database_id) database_name,
-		S.host_name,
-		s.program_name,
-		R.wait_time,
-		S.login_name,
-		R.wait_resource,
-		R.Status
-	FROM sys.dm_exec_sessions s
-	INNER JOIN sys.dm_exec_connections c ON c.session_id= S.session_id
-	LEFT JOIN sys.dm_exec_requests as R ON S.session_id = R.session_id
-	OUTER APPLY sys.dm_exec_sql_text(R.sql_handle) AS Rtxt
-	OUTER APPLY sys.dm_exec_sql_text(C.most_recent_sql_handle) AS Ctxt
-	WHERE S.session_id&gt;0
-	AND S.is_user_process=1
-)
-SELECT *
-FROM R
-WHERE ( R.blocking_session_id &gt; 0  AND R.wait_time&gt; @MinWaitTimeMs
-OR EXISTS(SELECT * FROM R R2 WHERE R2.blocking_session_id = R.session_id AND R2.wait_time&gt;@MinWaitTimeMs)
-)</value>
+    <value>DECLARE @MinWaitTimeMs INT 
+SET @MinWaitTimeMs= 1000
+
+DECLARE @DBIDTable NVARCHAR(MAX)
+DECLARE @SQL NVARCHAR(MAX)
+SELECT @DBIDTable= CASE WHEN COLUMNPROPERTY(OBJECT_ID('sys.dm_exec_sessions'),'database_id','ColumnId') IS NULL THEN 'R.' ELSE 'S.' END 
+SET @SQL =N'
+	DECLARE @UTCOffset INT 
+	SELECT @UTCOffset= DATEDIFF(mi,GETDATE(),GETUTCDATE());
+	WITH R AS (
+		SELECT GETUTCDATE() SnapshotDateUTC,
+			@UTCOffset AS UTCOffset,
+			S.session_id,
+			ISNULL(R.blocking_session_id,0) AS blocking_session_id,
+			ISNULL(RTXT.text,CTXT.text) AS Txt,
+			DATEADD(mi,@UTCOffset,ISNULL(R.start_time,S.last_request_start_time)) as start_time_utc,
+			R.command,
+			' + @DBIDTable + 'database_id,
+			DB_NAME(' + @DBIDTable + 'database_id) database_name,
+			S.host_name,
+			s.program_name,
+			R.wait_time,
+			S.login_name,
+			R.wait_resource,
+			R.Status,
+			wait_type
+		FROM sys.dm_exec_sessions s
+		INNER JOIN sys.dm_exec_connections c ON c.session_id= S.session_id
+		LEFT JOIN sys.dm_exec_requests as R ON S.session_id = R.session_id
+		OUTER APPLY sys.dm_exec_sql_text(R.sql_handle) AS Rtxt
+		OUTER APPLY sys.dm_exec_sql_text(C.most_recent_sql_handle) AS Ctxt
+		WHERE S.session_id&gt;0
+		AND S.is_user_process=1
+	)
+	SELECT *
+	FROM R
+	WHERE ( R.blocking_session_id &gt; 0  AND R.wait_time&gt; @MinWaitTimeMs
+	OR EXISTS(SELECT * FROM R R2 WHERE R2.blocking_session_id = R.session_id AND R2.wait_time&gt;@MinWaitTimeMs)
+	)'
+
+EXEC sp_executesql @SQL,N'@MinWaitTimeMs INT',@MinWaitTimeMs</value>
   </data>
   <data name="SQLIOStats" xml:space="preserve">
     <value>SELECT GETUTCDATE() AS SnapshotDate,
