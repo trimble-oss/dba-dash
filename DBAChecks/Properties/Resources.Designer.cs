@@ -433,5 +433,22 @@ namespace DBAChecks.Properties {
                 return ResourceManager.GetString("SQLTraceFlags", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to SELECT wait_type,
+        ///       waiting_tasks_count,
+        ///       wait_time_ms,
+        ///       signal_wait_time_ms
+        ///FROM sys.dm_os_wait_stats WITH (NOLOCK)
+        ///WHERE [wait_type] NOT IN ( N&apos;BROKER_EVENTHANDLER&apos;, N&apos;BROKER_RECEIVE_WAITFOR&apos;, N&apos;BROKER_TASK_STOP&apos;, N&apos;BROKER_TO_FLUSH&apos;,
+        ///                           N&apos;BROKER_TRANSMITTER&apos;, N&apos;CHECKPOINT_QUEUE&apos;, N&apos;CHKPT&apos;, N&apos;CLR_AUTO_EVENT&apos;,
+        ///                           N&apos;CLR_MANUAL_EVENT&apos;, N&apos;CLR_SEMAPHORE&apos;, N&apos;CXCONSUMER&apos;, N&apos;DBMIRROR_DBM_EVENT&apos;,
+        ///                           N&apos;DBMIRROR_EVENTS_QU [rest of string was truncated]&quot;;.
+        /// </summary>
+        internal static string SQLWaits {
+            get {
+                return ResourceManager.GetString("SQLWaits", resourceCulture);
+            }
+        }
     }
 }

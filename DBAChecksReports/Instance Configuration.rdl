@@ -201,6 +201,10 @@
           <DataField>TraceFlag</DataField>
           <rd:TypeName>System.Int16</rd:TypeName>
         </Field>
+        <Field Name="ValidFrom">
+          <DataField>ValidFrom</DataField>
+          <rd:TypeName>System.DateTime</rd:TypeName>
+        </Field>
       </Fields>
     </DataSet>
   </DataSets>
@@ -1589,7 +1593,7 @@ IIF(Fields!IsDefault.Value,"Green","Yellow"))</BackgroundColor>
             <TablixBody>
               <TablixColumns>
                 <TablixColumn>
-                  <Width>1in</Width>
+                  <Width>1.16667in</Width>
                 </TablixColumn>
               </TablixColumns>
               <TablixRows>
@@ -1605,8 +1609,11 @@ IIF(Fields!IsDefault.Value,"Green","Yellow"))</BackgroundColor>
                             <Paragraph>
                               <TextRuns>
                                 <TextRun>
-                                  <Value>=IIF(ISNOTHING(Fields!TraceFlag.Value),"N","Y")</Value>
-                                  <Style />
+                                  <Value>=IIF(ISNOTHING(Fields!TraceFlag.Value),"N","Y") &amp; " " &amp; 
+IIF(Fields!ValidFrom.Value="1900-01-01","",format(Fields!ValidFrom.Value,Parameters!DateFormat.Value))</Value>
+                                  <Style>
+                                    <FontWeight>=IIF(DATETIME.UtcNow.Subtract(Fields!ValidFrom.Value).TotalDays&lt;14,"Bold","Normal")</FontWeight>
+                                  </Style>
                                 </TextRun>
                               </TextRuns>
                               <Style />
@@ -1638,6 +1645,15 @@ IIF(Fields!IsDefault.Value,"Green","Yellow"))</BackgroundColor>
                     <GroupExpressions>
                       <GroupExpression>=Fields!TraceFlag.Value</GroupExpression>
                     </GroupExpressions>
+                    <Filters>
+                      <Filter>
+                        <FilterExpression>=Fields!TraceFlag.Value</FilterExpression>
+                        <Operator>NotEqual</Operator>
+                        <FilterValues>
+                          <FilterValue>=nothing</FilterValue>
+                        </FilterValues>
+                      </Filter>
+                    </Filters>
                   </Group>
                   <SortExpressions>
                     <SortExpression>
@@ -1740,7 +1756,7 @@ IIF(Fields!IsDefault.Value,"Green","Yellow"))</BackgroundColor>
             <DataSetName>TraceFlags</DataSetName>
             <Top>4.56333in</Top>
             <Height>0.5in</Height>
-            <Width>3.27167in</Width>
+            <Width>3.43834in</Width>
             <ZIndex>4</ZIndex>
             <Style>
               <Border>

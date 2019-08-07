@@ -80,7 +80,14 @@ namespace DBAChecks
         {
    
             CollectProperies();
-            computerName = (string)Data.Tables["ServerProperties"].Rows[0]["ComputerNamePhysicalNetBIOS"];
+            if (Data.Tables["ServerProperties"].Rows[0]["ComputerNamePhysicalNetBIOS"] == DBNull.Value)
+            {
+                noWMI = true;
+            }
+            else
+            {
+                computerName = (string)Data.Tables["ServerProperties"].Rows[0]["ComputerNamePhysicalNetBIOS"];
+            }
  
        
             CollectDatabases();
@@ -143,6 +150,14 @@ namespace DBAChecks
             catch(Exception ex)
             {
                 logError("IOStats", ex.Message);
+            }
+            try
+            {
+                addDT("Waits", Properties.Resources.SQLWaits);
+            }
+            catch(Exception ex)
+            {
+                logError("Waits", ex.Message);
             }
         }
 

@@ -1598,7 +1598,7 @@
                             <Paragraph>
                               <TextRuns>
                                 <TextRun>
-                                  <Value>=Fields!ChangedDate.Value</Value>
+                                  <Value>=System.TimeZone.CurrentTimeZone.ToLocalTime(Fields!ChangedDate.Value)</Value>
                                   <Style>
                                     <Format>=Parameters!DateFormat.Value</Format>
                                   </Style>
@@ -2055,7 +2055,6 @@
                             <PaddingBottom>2pt</PaddingBottom>
                           </Style>
                         </Textbox>
-                        <rd:Selected>true</rd:Selected>
                       </CellContents>
                     </TablixCell>
                     <TablixCell>
@@ -2137,7 +2136,7 @@
                             <Paragraph>
                               <TextRuns>
                                 <TextRun>
-                                  <Value>Memory Old</Value>
+                                  <Value>Memory Old GB</Value>
                                   <Style>
                                     <FontFamily>Arial</FontFamily>
                                     <FontWeight>Bold</FontWeight>
@@ -2172,7 +2171,7 @@
                             <Paragraph>
                               <TextRuns>
                                 <TextRun>
-                                  <Value>Memory New</Value>
+                                  <Value>Memory New GB</Value>
                                   <Style>
                                     <FontFamily>Arial</FontFamily>
                                     <FontWeight>Bold</FontWeight>
@@ -2592,7 +2591,7 @@
                             <Paragraph>
                               <TextRuns>
                                 <TextRun>
-                                  <Value>=Fields!ChangeDate.Value</Value>
+                                  <Value>=System.TimeZone.CurrentTimeZone.ToLocalTime(Fields!ChangeDate.Value)</Value>
                                   <Style>
                                     <FontFamily>Arial</FontFamily>
                                     <Format>=Parameters!DateFormat.Value</Format>
@@ -2614,6 +2613,7 @@
                             <PaddingBottom>2pt</PaddingBottom>
                           </Style>
                         </Textbox>
+                        <rd:Selected>true</rd:Selected>
                       </CellContents>
                     </TablixCell>
                     <TablixCell>
@@ -2752,7 +2752,7 @@
                                   <Value>=Fields!physical_memory_kb_old.Value/(1024*1024)</Value>
                                   <Style>
                                     <FontFamily>Arial</FontFamily>
-                                    <Format>0.0GB</Format>
+                                    <Format>#,0.0;-#,0.0;''</Format>
                                   </Style>
                                 </TextRun>
                               </TextRuns>
@@ -2785,7 +2785,7 @@
                                   <Value>=Fields!physical_memory_kb_new.Value/(1024*1024)</Value>
                                   <Style>
                                     <FontFamily>Arial</FontFamily>
-                                    <Format>0.0GB</Format>
+                                    <Format>#,0.0;-#,0.0;''</Format>
                                   </Style>
                                 </TextRun>
                               </TextRuns>
