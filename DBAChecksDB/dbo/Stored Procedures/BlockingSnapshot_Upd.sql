@@ -1,4 +1,4 @@
-﻿CREATE PROC [dbo].[BlockingSnapshot_Upd](@BlockingSnapshot dbo.BlockingSnapshot READONLY,@InstanceID INT,@SnapshotDate DATETIME)
+﻿CREATE PROC [dbo].[BlockingSnapshot_Upd](@BlockingSnapshot dbo.BlockingSnapshot READONLY,@InstanceID INT,@SnapshotDate DATETIME2(2))
 AS
 DECLARE @SnapshotID INT
 INSERT INTO dbo.BlockingSnapshotSummary(InstanceID,SnapshotDateUTC,BlockedSessionCount,BlockedWaitTime,UTCOffset)

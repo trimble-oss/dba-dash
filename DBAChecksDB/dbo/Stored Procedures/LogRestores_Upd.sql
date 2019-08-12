@@ -1,7 +1,7 @@
 ﻿CREATE PROC [dbo].[LogRestores_Upd] (
 	@LogRestores LogRestores READONLY,
 	@InstanceID INT,
-	@SnapshotDate DATETIME
+	@SnapshotDate DATETIME2(2)
 )
 AS
 DECLARE @Ref VARCHAR(30)='LogRestores'

@@ -1,5 +1,5 @@
 ﻿CREATE TYPE [dbo].[CPU] AS TABLE (
-    [EventTime]     DATETIME NOT NULL,
+    [EventTime]     DATETIME2(3) NOT NULL,
     [SQLProcessCPU] INT      NOT NULL,
     [SystemIdleCPU] INT      NOT NULL);
 

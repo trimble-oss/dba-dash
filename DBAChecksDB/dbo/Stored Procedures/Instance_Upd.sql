@@ -1,4 +1,4 @@
-﻿CREATE PROC [dbo].[Instance_Upd](@ConnectionID SYSNAME,@Instance SYSNAME,@SnapshotDate DATETIME,@AgentHostName NVARCHAR(16),@InstanceID INT OUT)
+﻿CREATE PROC [dbo].[Instance_Upd](@ConnectionID SYSNAME,@Instance SYSNAME,@SnapshotDate DATETIME2(2),@AgentHostName NVARCHAR(16),@InstanceID INT OUT)
 AS
 SELECT @InstanceID = InstanceID
 FROM dbo.Instances 

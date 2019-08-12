@@ -1,4 +1,4 @@
-﻿CREATE PROC [dbo].[DatabasesHADR_Upd](@DatabasesHADR DatabasesHADR READONLY,@InstanceID INT,@SnapshotDate DATETIME)
+﻿CREATE PROC [dbo].[DatabasesHADR_Upd](@DatabasesHADR DatabasesHADR READONLY,@InstanceID INT,@SnapshotDate DATETIME2(2))
 AS
 SET XACT_ABORT ON;
 DECLARE @Ref VARCHAR(30)='DatabaseHADR'

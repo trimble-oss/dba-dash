@@ -1,6 +1,6 @@
 ﻿
 
-CREATE PROC [dbo].[FunctionStats_Upd](@FunctionStats dbo.ProcStats READONLY,@InstanceID INT,@SnapshotDate DATETIME)
+CREATE PROC [dbo].[FunctionStats_Upd](@FunctionStats dbo.ProcStats READONLY,@InstanceID INT,@SnapshotDate DATETIME2(3))
 AS
 INSERT INTO dbo.Functions
 (
@@ -67,6 +67,7 @@ SELECT t.FunctionID,
 FROM T
 WHERE t.diff IS NOT NULL
 AND t.execution_count>0
+AND NOT EXISTS(SELECT 1 FROM dbo.FunctionStats FS WHERE FS.FunctionID = T.FunctionID AND FS.SnapshotDate = T.current_time_utc)
 
 DELETE Staging.FunctionStats WHERE InstanceID=@InstanceID
 INSERT INTO Staging.FunctionStats(

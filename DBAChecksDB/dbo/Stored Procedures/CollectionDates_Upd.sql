@@ -1,4 +1,4 @@
-﻿CREATE PROC CollectionDates_Upd(@InstanceID INT,@Reference VARCHAR(30),@SnapshotDate DATETIME)
+﻿CREATE PROC CollectionDates_Upd(@InstanceID INT,@Reference VARCHAR(30),@SnapshotDate DATETIME2(2))
 AS
 UPDATE dbo.CollectionDates
 SET SnapshotDate=@SnapshotDate 

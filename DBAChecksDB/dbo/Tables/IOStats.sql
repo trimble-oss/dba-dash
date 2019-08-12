@@ -13,7 +13,9 @@
     [io_stall_write_ms]    BIGINT        NOT NULL,
     [io_stall]             BIGINT        NOT NULL,
     [size_on_disk_bytes]   BIGINT        NOT NULL,
-    CONSTRAINT [PK_IOStats] PRIMARY KEY CLUSTERED ([InstanceID] ASC, [SnapshotDate] ASC, [database_id] ASC, [file_id] ASC),
+    CONSTRAINT [PK_IOStats] PRIMARY KEY CLUSTERED ([InstanceID] ASC, [SnapshotDate] ASC, [database_id] ASC, [file_id] ASC) WITH (DATA_COMPRESSION = PAGE),
     CONSTRAINT [FK_IOStats_FileID] FOREIGN KEY ([FileID]) REFERENCES [dbo].[DBFiles] ([FileID])
 );
+
+
 

@@ -3,7 +3,7 @@
     [session_id]          SMALLINT       NOT NULL,
     [blocking_session_id] SMALLINT       NOT NULL,
     [Txt]                 NVARCHAR (MAX) NULL,
-    [start_time_utc]      DATETIME       NULL,
+    [start_time_utc]      DATETIME2(3)       NULL,
     [command]             NVARCHAR (32)  NULL,
     [database_id]         SMALLINT       NULL,
     [database_name]       NVARCHAR (128) NULL,

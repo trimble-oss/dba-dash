@@ -102,3 +102,42 @@ VALUES
 ( 16397, N'allow polybase export', N'Allow INSERT into a Hadoop external table', 1, 0, 0, 0, 1 )
 
 END
+
+DECLARE @waits TABLE ( [WaitType] nvarchar(60) NOT NULL PRIMARY KEY, [IsCriticalWait] BIT NOT NULL )
+
+INSERT INTO @waits
+(
+    WaitType,
+    IsCriticalWait
+)
+VALUES
+( N'RESOURCE_SEMAPHORE', 1 ), 
+( N'THREADPOOL', 1 ), 
+( N'RESOURCE_SEMAPHORE_QUERY_COMPILE', 1 ), 
+( N'PREEMPTIVE_DEBUG', 1 ), 
+( N'IO_QUEUE_LIMIT', 1 ), 
+( N'IO_RETRY', 1 ), 
+( N'LOG_RATE_GOVERNOR', 1 ), 
+( N'POOL_LOG_RATE_GOVERNOR', 1 ), 
+( N'RESMGR_THROTTLED', 1 ), 
+( N'SE_REPL_CATCHUP_THROTTLE', 1 ), 
+( N'SE_REPL_COMMIT_ACK', 1 ), 
+( N'SE_REPL_COMMIT_TURN', 1 ), 
+( N'SE_REPL_ROLLBACK_ACK', 1 ), 
+( N'SE_REPL_SLOW_SECONDARY_THROTTLE', 1 )
+
+INSERT INTO dbo.WaitType
+(
+    WaitType,
+    IsCriticalWait
+)
+SELECT t.WaitType,
+       t.IsCriticalWait
+FROM @waits t
+WHERE NOT EXISTS(SELECT 1 FROM dbo.WaitType wt WHERE wt.WaitType = t.WaitType)
+
+UPDATE WT 
+	SET WT.IsCriticalWait = t.IsCriticalWait
+FROM dbo.WaitType wt 
+JOIN @waits t ON  t.WaitType = wt.WaitType
+WHERE WT.IsCriticalWait<>t.IsCriticalWait

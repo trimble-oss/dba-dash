@@ -1,6 +1,6 @@
 ﻿CREATE TABLE [dbo].[ProcStats] (
     [ProcID]               INT      NOT NULL,
-    [SnapshotDate]         DATETIME NOT NULL,
+    [SnapshotDate]         DATETIME2(3) NOT NULL,
     [PeriodTime]           BIGINT   NOT NULL,
     [total_worker_time]    BIGINT   NOT NULL,
     [total_elapsed_time]   BIGINT   NOT NULL,

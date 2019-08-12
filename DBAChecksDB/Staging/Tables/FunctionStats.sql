@@ -10,7 +10,7 @@
     [total_physical_reads] BIGINT         NOT NULL,
     [cached_time]          DATETIME       NOT NULL,
     [execution_count]      BIGINT         NOT NULL,
-    [current_time_utc]     DATETIME       NOT NULL,
+    [current_time_utc]     DATETIME2(3)       NOT NULL,
     CONSTRAINT [PK_Staging_FunctionStsts] PRIMARY KEY CLUSTERED ([InstanceID] ASC, [object_id] ASC, [database_id] ASC, [cached_time] ASC)
 );
 

@@ -1,4 +1,4 @@
-﻿CREATE PROC Waits_Upd(@Waits dbo.Waits READONLY,@InstanceID INT,@SnapshotDate DATETIME2(3))
+﻿CREATE PROC [dbo].[Waits_Upd](@Waits dbo.Waits READONLY,@InstanceID INT,@SnapshotDate DATETIME2(2))
 AS
 INSERT INTO dbo.WaitType(WaitType)
 SELECT wait_type 
@@ -23,7 +23,8 @@ WHERE W2.waiting_tasks_count>W1.waiting_tasks_count
 AND W2.wait_time_ms>=w1.wait_time_ms
 AND W2.signal_wait_time_ms>=W2.signal_wait_time_ms
 AND W1.SnapshotDate<@SnapshotDate
-AND DATEDIFF(mi,W1.SnapshotDate,@SnapshotDate)<2160;
+AND DATEDIFF(mi,W1.SnapshotDate,@SnapshotDate)<2160
+AND NOT EXISTS(SELECT 1 FROM dbo.Waits w WHERE w.InstanceID = @InstanceID AND w.SnapshotDate = @SnapshotDate);
 
 DELETE Staging.Waits WHERE InstanceID=@InstanceID;
 

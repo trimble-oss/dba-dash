@@ -1,7 +1,7 @@
 ﻿CREATE TABLE [dbo].[BlockingSnapshotSummary] (
     [BlockingSnapshotID]  INT      IDENTITY (1, 1) NOT NULL,
     [InstanceID]          INT      NOT NULL,
-    [SnapshotDateUTC]     DATETIME NOT NULL,
+    [SnapshotDateUTC]     DATETIME2(2) NOT NULL,
     [BlockedSessionCount] INT      NULL,
     [BlockedWaitTime]     BIGINT   NULL,
     [UTCOffset]           INT      NOT NULL,

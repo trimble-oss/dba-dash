@@ -9,5 +9,5 @@
     [total_physical_reads] BIGINT         NOT NULL,
     [cached_time]          DATETIME       NULL,
     [execution_count]      BIGINT         NOT NULL,
-    [current_time_utc]     DATETIME       NOT NULL);
+    [current_time_utc]     DATETIME2(3)       NOT NULL);
 

@@ -45,6 +45,7 @@ WITH instanceAgg AS (
 	WHERE EventTime >=DATEADD(mi,-@Mins,GETUTCDATE())
 	GROUP BY InstanceID
 )
+, i AS (
 SELECT a.InstanceID,
 		a.Instance,
 		SUM(a.num_of_reads)/(SUM(a.sample_ms_diff)/1000.0) AS ReadIOPs,
@@ -64,3 +65,34 @@ SELECT a.InstanceID,
 FROM instanceAgg a
 LEFT JOIN cpuAgg ON a.InstanceID = cpuAgg.InstanceID
 GROUP BY a.InstanceID,a.Instance
+)
+, wait AS (
+	SELECT W.InstanceID,WT.IsCriticalWait, WT.WaitType,SUM(W.wait_time_ms) TotalWaitMs,SUM(W.wait_time_ms)*1.0/ SUM(SUM(W.wait_time_ms)) OVER(PARTITION BY W.InstanceID) Pct
+	FROM dbo.Waits W 
+	JOIN dbo.WaitType WT ON WT.WaitTypeID = W.WaitTypeID
+	WHERE SnapshotDate>= DATEADD(mi,-@Mins,GETUTCDATE())
+	AND WT.WaitType <>'REDO_THREAD_PENDING_WORK'
+	GROUP BY WT.WaitType,W.InstanceID,WT.IsCriticalWait
+)
+SELECT i.InstanceID,
+       i.Instance,
+       i.ReadIOPs,
+       i.WriteIOPs,
+       i.ReadMBsec,
+       i.WriteMBsec,
+       i.ReadLatency,
+       i.WriteLatency,
+       i.Latency,
+       i.AvgCPU,
+       i.MaxReadIOPs,
+       i.MaxWriteIOPs,
+       i.MaxIOPs,
+       i.MaxReadMBsec,
+       i.MaxWriteMBsec,
+       i.MaxMBsec,
+       w.WaitType,
+       w.TotalWaitMs,
+       w.Pct,
+	   W.IsCriticalWait
+FROM i 
+LEFT JOIN wait w ON i.InstanceID = w.InstanceID AND (w.Pct>=0.01 OR w.IsCriticalWait=1)

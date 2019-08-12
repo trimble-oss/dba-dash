@@ -1,5 +1,5 @@
 ﻿CREATE TYPE [dbo].[BlockingSnapshot] AS TABLE (
-    [SnapshotDateUTC]     DATETIME       NOT NULL,
+    [SnapshotDateUTC]     DATETIME2(3)       NOT NULL,
     [UTCOffset]           INT            NOT NULL,
     [session_id]          SMALLINT       NOT NULL,
     [blocking_session_id] SMALLINT       NULL,
