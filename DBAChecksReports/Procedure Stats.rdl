@@ -261,6 +261,14 @@
                       <Value>=Fields!object_name.Value</Value>
                     </SortExpression>
                   </SortExpressions>
+                  <ChartMembers>
+                    <ChartMember>
+                      <Label>Measure</Label>
+                    </ChartMember>
+                    <ChartMember>
+                      <Label>Execution Count</Label>
+                    </ChartMember>
+                  </ChartMembers>
                   <Label>=Fields!object_name.Value</Label>
                 </ChartMember>
               </ChartMembers>
@@ -302,11 +310,11 @@ Environment.NewLine &amp; "Avg Writes: " &amp;  Format(Fields!AvgWrites.Value,"#
                                 <Parameter Name="DatabaseID">
                                   <Value>=Parameters!DatabaseID.Value</Value>
                                 </Parameter>
-                                <Parameter Name="FromDate">
-                                  <Value>=Fields!SnapshotDate.Value</Value>
+                                <Parameter Name="FromDateUser">
+                                  <Value>=System.TimeZone.CurrentTimeZone.ToLocalTime(Fields!SnapshotDate.Value)</Value>
                                 </Parameter>
-                                <Parameter Name="ToDate">
-                                  <Value>=CDATE(Fields!SnapshotDate.Value).AddMinutes(SWITCH(Parameters!DateAgg.Value="10MIN",10,Parameters!DateAgg.Value="60MIN",60,Parameters!DateAgg.Value="1DAY",1440,1=1,10))</Value>
+                                <Parameter Name="ToDateUser">
+                                  <Value>=CDATE(System.TimeZone.CurrentTimeZone.ToLocalTime(Fields!SnapshotDate.Value)).AddMinutes(SWITCH(Parameters!DateAgg.Value="10MIN",10,Parameters!DateAgg.Value="60MIN",60,Parameters!DateAgg.Value="1DAY",1440,1=1,10))</Value>
                                 </Parameter>
                                 <Parameter Name="DateAgg">
                                   <Value>=SWITCH(Parameters!DateAgg.Value="10MIN","NONE",Parameters!DateAgg.Value="60MIN","10MIN",Parameters!DateAgg.Value="1DAY","60MIN",1=1,"NONE")</Value>
@@ -344,6 +352,45 @@ Environment.NewLine &amp; "Avg Writes: " &amp;  Format(Fields!AvgWrites.Value,"#
                     </ChartDataLabel>
                   </ChartEmptyPoints>
                   <ValueAxisName>Primary</ValueAxisName>
+                  <CategoryAxisName>Primary</CategoryAxisName>
+                  <ChartSmartLabel>
+                    <CalloutLineColor>Black</CalloutLineColor>
+                    <MinMovingDistance>0pt</MinMovingDistance>
+                  </ChartSmartLabel>
+                </ChartSeries>
+                <ChartSeries Name="ExecutionCount">
+                  <Hidden>=ISNOTHING(Parameters!Proc.Value)</Hidden>
+                  <ChartDataPoints>
+                    <ChartDataPoint>
+                      <ChartDataPointValues>
+                        <Y>=Sum(Fields!ExecutionCount.Value)</Y>
+                      </ChartDataPointValues>
+                      <ChartDataLabel>
+                        <Style />
+                      </ChartDataLabel>
+                      <Style>
+                        <Border>
+                          <Width>2pt</Width>
+                        </Border>
+                      </Style>
+                      <ChartMarker>
+                        <Style />
+                      </ChartMarker>
+                      <DataElementOutput>Output</DataElementOutput>
+                    </ChartDataPoint>
+                  </ChartDataPoints>
+                  <Type>Line</Type>
+                  <Style />
+                  <ChartEmptyPoints>
+                    <Style />
+                    <ChartMarker>
+                      <Style />
+                    </ChartMarker>
+                    <ChartDataLabel>
+                      <Style />
+                    </ChartDataLabel>
+                  </ChartEmptyPoints>
+                  <ValueAxisName>Secondary</ValueAxisName>
                   <CategoryAxisName>Primary</CategoryAxisName>
                   <ChartSmartLabel>
                     <CalloutLineColor>Black</CalloutLineColor>
@@ -534,7 +581,7 @@ Environment.NewLine &amp; "Avg Writes: " &amp;  Format(Fields!AvgWrites.Value,"#
                       <Color>#5c5c5c</Color>
                     </Style>
                     <ChartAxisTitle>
-                      <Caption />
+                      <Caption>Execution Count</Caption>
                       <Style>
                         <FontSize>9pt</FontSize>
                         <Color>#5c5c5c</Color>
@@ -696,11 +743,11 @@ Environment.NewLine &amp; "Avg Writes: " &amp;  Format(SUM(Fields!TotalWrites.Va
                                 <Parameter Name="DateAgg">
                                   <Value>=Parameters!DateAgg.Value</Value>
                                 </Parameter>
-                                <Parameter Name="FromDate">
-                                  <Value>=Parameters!FromDate.Value</Value>
+                                <Parameter Name="FromDateUser">
+                                  <Value>=Parameters!FromDateUser.Value</Value>
                                 </Parameter>
-                                <Parameter Name="ToDate">
-                                  <Value>=Parameters!ToDate.Value</Value>
+                                <Parameter Name="ToDateUser">
+                                  <Value>=Parameters!ToDateUser.Value</Value>
                                 </Parameter>
                                 <Parameter Name="IsFunction">
                                   <Value>=Parameters!IsFunction.Value</Value>

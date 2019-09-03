@@ -41,6 +41,7 @@ WHERE A.sample_ms > b.sample_ms
 			AND A.num_of_reads>=B.num_of_reads
 			AND A.num_of_writes>=B.num_of_writes
 			AND A.num_of_bytes_written>= B.num_of_bytes_written
+			AND NOT (A.num_of_reads=B.num_of_reads AND A.num_of_writes=B.num_of_writes)
 AND NOT EXISTS(SELECT 1 FROM dbo.IOStats c WHERE c.InstanceID = @InstanceID AND a.SnapshotDate = c.SnapshotDate)
 
 DELETE Staging.IOStats

@@ -64,7 +64,7 @@ GROUP BY ' + @DateAggString + ',P.' + @TypeString + 'ID,D.Name,P.object_name,D.D
 )
 SELECT T.*
 FROM T
-WHERE ProcRank <100'
+WHERE ProcRank <=50'
 PRINT @SQL
 IF @SQL IS NOT NULL
 BEGIN

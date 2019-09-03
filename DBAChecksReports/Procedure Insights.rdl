@@ -749,9 +749,6 @@
                                     <Parameter Name="Top">
                                       <Value>=Parameters!Top.Value</Value>
                                     </Parameter>
-                                    <Parameter Name="UTCOffSet">
-                                      <Value>=Parameters!UTCOffSet.Value</Value>
-                                    </Parameter>
                                   </Parameters>
                                 </Drillthrough>
                               </Action>
@@ -762,9 +759,6 @@
                               <Color>LightGrey</Color>
                               <Style>Solid</Style>
                             </Border>
-                            <BottomBorder>
-                              <Style>Solid</Style>
-                            </BottomBorder>
                             <FontFamily />
                             <PaddingLeft>2pt</PaddingLeft>
                             <PaddingRight>2pt</PaddingRight>
@@ -772,6 +766,7 @@
                             <PaddingBottom>2pt</PaddingBottom>
                           </Style>
                         </Textbox>
+                        <rd:Selected>true</rd:Selected>
                       </CellContents>
                     </TablixCell>
                     <TablixCell>

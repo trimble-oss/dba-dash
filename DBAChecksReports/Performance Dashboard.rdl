@@ -802,7 +802,7 @@
                             <Paragraph>
                               <TextRuns>
                                 <TextRun>
-                                  <Value>=format(SUM(IIF(Fields!IsCriticalWait.Value=true,Fields!TotalWaitMs.Value,nothing))/1000,"#,0.0;(#,0.0)") &amp; "sec"</Value>
+                                  <Value>=format(SUM(IIF(Fields!IsCriticalWait.Value=true,Fields!TotalWaitMs.Value,0))/1000,"#,0.0;(#,0.0)") &amp; "sec"</Value>
                                   <Style />
                                 </TextRun>
                               </TextRuns>
@@ -1192,8 +1192,8 @@ format(SUM(Fields!Pct.Value),"0.0%")</ToolTip>
                             <Paragraph>
                               <TextRuns>
                                 <TextRun>
-                                  <Value>=format(SUM(IIF(Fields!WaitType.Value.ToString().StartsWith("LCK"),Fields!TotalWaitMs.Value,nothing))/1000,"#,0.0;(#,0.0)") &amp; "sec, " &amp;  Environment.NewLine &amp; 
-format(SUM(IIF(Fields!WaitType.Value.ToString().StartsWith("LCK"),Fields!Pct.Value,nothing)),"0.0%")</Value>
+                                  <Value>=format(SUM(IIF(Fields!WaitType.Value.ToString().StartsWith("LCK"),Fields!TotalWaitMs.Value,0))/1000,"#,0.0;(#,0.0)") &amp; "sec, " &amp;  Environment.NewLine &amp; 
+format(SUM(IIF(Fields!WaitType.Value.ToString().StartsWith("LCK"),Fields!Pct.Value,0)),"0.0%")</Value>
                                   <Style />
                                 </TextRun>
                               </TextRuns>
@@ -1224,8 +1224,8 @@ format(SUM(IIF(Fields!WaitType.Value.ToString().StartsWith("LCK"),Fields!Pct.Val
                             <Paragraph>
                               <TextRuns>
                                 <TextRun>
-                                  <Value>=format(SUM(IIF(Fields!WaitType.Value.ToString().StartsWith("PAGEIO") or Fields!WaitType.Value="WRITELOG",Fields!TotalWaitMs.Value,nothing))/1000,"#,0.0;(#,0.0)") &amp; "sec, " &amp; 
-Environment.NewLine &amp; format(SUM(IIF(Fields!WaitType.Value.ToString().StartsWith("PAGEIO") or Fields!WaitType.Value="WRITELOG",Fields!Pct.Value,nothing)),"0.0%")</Value>
+                                  <Value>=format(SUM(IIF(Fields!WaitType.Value.ToString().StartsWith("PAGEIO") or Fields!WaitType.Value="WRITELOG",Fields!TotalWaitMs.Value,0))/1000,"#,0.0;(#,0.0)") &amp; "sec, " &amp; 
+Environment.NewLine &amp; format(SUM(IIF(Fields!WaitType.Value.ToString().StartsWith("PAGEIO") or Fields!WaitType.Value="WRITELOG",Fields!Pct.Value,0)),"0.0%")</Value>
                                   <Style>
                                     <FontFamily>Arial</FontFamily>
                                   </Style>

@@ -1,5 +1,6 @@
 ﻿
 
+
 CREATE VIEW [dbo].[InstanceInfo]
 AS
 SELECT I.InstanceID,
@@ -31,6 +32,7 @@ SELECT I.InstanceID,
     I.hyperthread_ratio,
 	I.numa_node_count,
     I.softnuma_configuration,
+	CASE I.softnuma_configuration WHEN 0 THEN 'OFF' WHEN 1 THEN 'ON' WHEN 2 THEN 'MANUAL' ELSE NULL END AS softnuma_configuration_desc,
     I.ms_ticks,
 	I.ms_ticks/60000 host_up_time_mins,
 	DATEADD(s,-I.ms_ticks/1000,os.SnapshotDate) AS host_start_time,
@@ -54,6 +56,16 @@ SELECT I.InstanceID,
     I.EngineEdition,
 	I.ResourceLastUpdateDateTime,
     I.ResourceVersion,
+	CASE WHEN I.ProductVersion LIKE '9.%' THEN 'SQL 2005' 
+			WHEN I.ProductVersion LIKE '10.0%' THEN 'SQL 2008' 
+			WHEN I.ProductVersion LIKE '10.5%' THEN 'SQL 2008 R2'
+			WHEN I.ProductVersion LIKE '11.%' THEN 'SQL 2012'
+			WHEN I.ProductVersion LIKE '12.%' THEN 'SQL 2014'
+			WHEN I.ProductVersion LIKE '13.%' THEN 'SQL 2016'
+			WHEN I.ProductVersion LIKE '14.%' THEN 'SQL 2017'
+			WHEN I.ProductVersion LIKE '15.%' THEN 'SQL 2019'
+			ELSE I.ProductVersion END + ' ' + ISNULL(I.Edition + ' ','') + 
+						ISNULL(I.ProductLevel + ' ','') + ISNULL(I.ProductUpdateLevel,'') AS SQLVersion,
     I.Collation,
     I.CollationID,
     I.ComparisonStyle,
@@ -78,7 +90,12 @@ SELECT I.InstanceID,
     I.IsXTPSupported,
     I.IsAgentRunning,
     I.InstantFileInitializationEnabled,
-    I.AgentHostName
+    I.AgentHostName,
+	I.WindowsCaption,
+	I.WindowsRelease,
+	I.WindowsSKU,
+	I.IsActive,
+	DATEDIFF(mi,DATEADD(mi,I.UtcOffSet,I.sqlserver_start_time),os.SnapshotDate) AS sqlserver_uptime
 FROM dbo.Instances I
 JOIN dbo.SysConfig maxmem ON maxmem.InstanceID = I.InstanceID AND maxmem.configuration_id=1544 
 LEFT JOIN dbo.CollectionDates os ON os.InstanceID = I.InstanceID AND os.Reference='OSInfo'
