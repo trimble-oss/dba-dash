@@ -1,4 +1,4 @@
-﻿CREATE PROC Report.HostUpgrade(@InstanceIDs VARCHAR(MAX)=NULL)
+﻿CREATE PROC [Report].[HostUpgrade](@InstanceIDs VARCHAR(MAX)=NULL)
 AS
 DECLARE @Instances TABLE(
 	InstanceID INT PRIMARY KEY
@@ -42,4 +42,5 @@ SELECT I.Instance,
 	   HUH.physical_memory_kb_new
 FROM dbo.HostUpgradeHistory HUH
     JOIN dbo.Instances I ON HUH.InstanceID = I.InstanceID
+WHERE EXISTS(SELECT 1 FROM @Instances t WHERE t.InstanceID = HUH.InstanceID)
 ORDER BY HUH.ChangeDate DESC;

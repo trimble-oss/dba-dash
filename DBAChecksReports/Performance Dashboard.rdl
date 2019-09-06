@@ -746,13 +746,10 @@
                             <Actions>
                               <Action>
                                 <Drillthrough>
-                                  <ReportName>Procedure Stats</ReportName>
+                                  <ReportName>Server Performance</ReportName>
                                   <Parameters>
                                     <Parameter Name="InstanceID">
                                       <Value>=Fields!InstanceID.Value</Value>
-                                    </Parameter>
-                                    <Parameter Name="FromDateUser">
-                                      <Value>=DateTime.Now.AddMinutes(-Parameters!Mins.Value)</Value>
                                     </Parameter>
                                   </Parameters>
                                 </Drillthrough>
@@ -770,6 +767,7 @@
                             <PaddingBottom>2pt</PaddingBottom>
                           </Style>
                         </Textbox>
+                        <rd:Selected>true</rd:Selected>
                       </CellContents>
                     </TablixCell>
                     <TablixCell>

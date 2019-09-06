@@ -215,9 +215,32 @@
               </Paragraph>
             </Paragraphs>
             <rd:DefaultName>textbox1</rd:DefaultName>
+            <ActionInfo>
+              <Actions>
+                <Action>
+                  <Drillthrough>
+                    <ReportName>IO Performance</ReportName>
+                    <Parameters>
+                      <Parameter Name="InstanceIDs">
+                        <Value>=Parameters!InstanceIDs.Value</Value>
+                      </Parameter>
+                      <Parameter Name="TagIDs">
+                        <Value>=Parameters!TagIDs.Value</Value>
+                      </Parameter>
+                      <Parameter Name="InstanceName">
+                        <Value>=Parameters!InstanceName.Value</Value>
+                      </Parameter>
+                    </Parameters>
+                  </Drillthrough>
+                </Action>
+              </Actions>
+            </ActionInfo>
             <Height>0.43in</Height>
             <Width>18in</Width>
             <Style>
+              <Border>
+                <Style>None</Style>
+              </Border>
               <PaddingLeft>2pt</PaddingLeft>
               <PaddingRight>2pt</PaddingRight>
               <PaddingTop>2pt</PaddingTop>
@@ -1221,6 +1244,9 @@ Parameters!ToDate.Value))))</Value>
             <Height>5.89236in</Height>
             <Width>18in</Width>
             <ZIndex>2</ZIndex>
+            <Visibility>
+              <Hidden>=NOT Parameters!AvgThroughputChart.Value</Hidden>
+            </Visibility>
             <Style>
               <Border>
                 <Color>LightGrey</Color>
@@ -2704,6 +2730,9 @@ Parameters!ToDate.Value))))</Value>
             <Height>1.01917in</Height>
             <Width>19.12499in</Width>
             <ZIndex>3</ZIndex>
+            <Visibility>
+              <Hidden>=NOT Parameters!ShowTable.Value</Hidden>
+            </Visibility>
             <Style>
               <Border>
                 <Style>None</Style>
@@ -3047,6 +3076,9 @@ IIF(Avg(Fields!Latency.Value)&lt;50,"Yellow","Red"))</Color>
             <Height>5.84528in</Height>
             <Width>18in</Width>
             <ZIndex>4</ZIndex>
+            <Visibility>
+              <Hidden>=NOT Parameters!AvgLatencyChart.Value</Hidden>
+            </Visibility>
             <Style>
               <Border>
                 <Color>LightGrey</Color>
@@ -3279,11 +3311,40 @@ CDATE(Parameters!ToDateUser.Value).AddMinutes(IIF(ISNOTHING(Parameters!ToDateUse
       </DefaultValue>
       <Prompt>DateFormat</Prompt>
     </ReportParameter>
+    <ReportParameter Name="AvgThroughputChart">
+      <DataType>Boolean</DataType>
+      <DefaultValue>
+        <Values>
+          <Value>true</Value>
+        </Values>
+      </DefaultValue>
+      <Prompt>AvgThroughputChart</Prompt>
+      <Hidden>true</Hidden>
+    </ReportParameter>
+    <ReportParameter Name="AvgLatencyChart">
+      <DataType>Boolean</DataType>
+      <DefaultValue>
+        <Values>
+          <Value>true</Value>
+        </Values>
+      </DefaultValue>
+      <Prompt>AvgLatencyChart</Prompt>
+      <Hidden>true</Hidden>
+    </ReportParameter>
+    <ReportParameter Name="ShowTable">
+      <DataType>Boolean</DataType>
+      <DefaultValue>
+        <Values>
+          <Value>true</Value>
+        </Values>
+      </DefaultValue>
+      <Prompt>ShowTable</Prompt>
+    </ReportParameter>
   </ReportParameters>
   <ReportParametersLayout>
     <GridLayoutDefinition>
       <NumberOfColumns>4</NumberOfColumns>
-      <NumberOfRows>5</NumberOfRows>
+      <NumberOfRows>6</NumberOfRows>
       <CellDefinitions>
         <CellDefinition>
           <ColumnIndex>0</ColumnIndex>
@@ -3369,6 +3430,21 @@ CDATE(Parameters!ToDateUser.Value).AddMinutes(IIF(ISNOTHING(Parameters!ToDateUse
           <ColumnIndex>1</ColumnIndex>
           <RowIndex>4</RowIndex>
           <ParameterName>DateFormat</ParameterName>
+        </CellDefinition>
+        <CellDefinition>
+          <ColumnIndex>2</ColumnIndex>
+          <RowIndex>4</RowIndex>
+          <ParameterName>AvgThroughputChart</ParameterName>
+        </CellDefinition>
+        <CellDefinition>
+          <ColumnIndex>3</ColumnIndex>
+          <RowIndex>4</RowIndex>
+          <ParameterName>AvgLatencyChart</ParameterName>
+        </CellDefinition>
+        <CellDefinition>
+          <ColumnIndex>0</ColumnIndex>
+          <RowIndex>5</RowIndex>
+          <ParameterName>ShowTable</ParameterName>
         </CellDefinition>
       </CellDefinitions>
     </GridLayoutDefinition>

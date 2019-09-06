@@ -1298,7 +1298,7 @@ Parameters!Mins.Value&lt;=300,"10MIN",
 1=1,"60MIN")</Value>
               </Parameter>
             </Parameters>
-            <Top>7.29042in</Top>
+            <Top>10.27306in</Top>
             <Left>0.00003cm</Left>
             <Height>3.20833in</Height>
             <Width>23.45486in</Width>
@@ -1663,8 +1663,127 @@ Parameters!Mins.Value&lt;=300,"10MIN",
               <BackgroundGradientType>None</BackgroundGradientType>
             </Style>
           </Chart>
+          <Subreport Name="IOPerformance">
+            <ReportName>IO Performance</ReportName>
+            <Parameters>
+              <Parameter Name="InstanceIDs">
+                <Value>=Parameters!InstanceID.Value</Value>
+              </Parameter>
+              <Parameter Name="TagIDs">
+                <Value>-1</Value>
+              </Parameter>
+              <Parameter Name="TagMatching">
+                <Value>ALL</Value>
+              </Parameter>
+              <Parameter Name="FromDateUser">
+                <Value>=DateTime.Now.AddMinutes(-Parameters!Mins.Value)</Value>
+              </Parameter>
+              <Parameter Name="AvgThroughputChart">
+                <Value>false</Value>
+              </Parameter>
+              <Parameter Name="AvgLatencyChart">
+                <Value>false</Value>
+              </Parameter>
+              <Parameter Name="ShowTable">
+                <Value>false</Value>
+              </Parameter>
+            </Parameters>
+            <Top>7.2175in</Top>
+            <Left>0.00001in</Left>
+            <Height>3in</Height>
+            <Width>23.45486in</Width>
+            <ZIndex>5</ZIndex>
+            <Style>
+              <Border>
+                <Style>None</Style>
+              </Border>
+            </Style>
+          </Subreport>
+          <Subreport Name="Drives">
+            <ReportName>Drives</ReportName>
+            <Parameters>
+              <Parameter Name="InstanceIDs">
+                <Value>=Parameters!InstanceID.Value</Value>
+              </Parameter>
+              <Parameter Name="FilterLevel">
+                <Value>4</Value>
+              </Parameter>
+            </Parameters>
+            <Top>13.55083in</Top>
+            <Height>3in</Height>
+            <Width>23.45487in</Width>
+            <ZIndex>6</ZIndex>
+            <Style>
+              <Border>
+                <Style>None</Style>
+              </Border>
+            </Style>
+          </Subreport>
+          <Subreport Name="AgentJobs">
+            <ReportName>AgentJobs</ReportName>
+            <Parameters>
+              <Parameter Name="InstanceIDs">
+                <Value>=Parameters!InstanceID.Value</Value>
+              </Parameter>
+              <Parameter Name="FilterLevel">
+                <Value>4</Value>
+              </Parameter>
+            </Parameters>
+            <Top>16.62028in</Top>
+            <Height>3in</Height>
+            <Width>23.45487in</Width>
+            <ZIndex>7</ZIndex>
+            <Style>
+              <Border>
+                <Style>None</Style>
+              </Border>
+            </Style>
+          </Subreport>
+          <Subreport Name="Backups">
+            <ReportName>Backups</ReportName>
+            <Parameters>
+              <Parameter Name="InstanceIDs">
+                <Value>=Parameters!InstanceID.Value</Value>
+              </Parameter>
+              <Parameter Name="FilterLevel">
+                <Value>4</Value>
+              </Parameter>
+            </Parameters>
+            <Top>19.68972in</Top>
+            <Height>0.91319in</Height>
+            <Width>23.45487in</Width>
+            <ZIndex>8</ZIndex>
+            <Style>
+              <Border>
+                <Style>None</Style>
+              </Border>
+            </Style>
+          </Subreport>
+          <Subreport Name="Blocking">
+            <ReportName>Blocking</ReportName>
+            <Parameters>
+              <Parameter Name="InstanceIDs">
+                <Value>=Parameters!InstanceID.Value</Value>
+              </Parameter>
+              <Parameter Name="FromDate">
+                <Value>=DateTime.UtcNow.AddMinutes(-Parameters!Mins.Value)</Value>
+              </Parameter>
+              <Parameter Name="ShowTable">
+                <Value>false</Value>
+              </Parameter>
+            </Parameters>
+            <Left>11.86112in</Left>
+            <Height>1.89459in</Height>
+            <Width>11.59375in</Width>
+            <ZIndex>9</ZIndex>
+            <Style>
+              <Border>
+                <Style>None</Style>
+              </Border>
+            </Style>
+          </Subreport>
         </ReportItems>
-        <Height>10.49875in</Height>
+        <Height>25.905in</Height>
         <Style />
       </Body>
       <Width>23.45487in</Width>

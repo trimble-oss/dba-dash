@@ -283,6 +283,7 @@
                             <PaddingBottom>2pt</PaddingBottom>
                           </Style>
                         </Textbox>
+                        <rd:Selected>true</rd:Selected>
                       </CellContents>
                     </TablixCell>
                     <TablixCell>
@@ -1356,6 +1357,17 @@ Fields!Status.Value=4,"Green")</BackgroundColor>
                   <Group Name="table1_Details_Group">
                     <DataElementName>Detail</DataElementName>
                   </Group>
+                  <SortExpressions>
+                    <SortExpression>
+                      <Value>=Fields!Status.Value</Value>
+                    </SortExpression>
+                    <SortExpression>
+                      <Value>=Fields!Instance.Value</Value>
+                    </SortExpression>
+                    <SortExpression>
+                      <Value>=Fields!Name.Value</Value>
+                    </SortExpression>
+                  </SortExpressions>
                   <TablixMembers>
                     <TablixMember />
                   </TablixMembers>
@@ -1450,8 +1462,7 @@ Fields!Status.Value=4,"Green")</BackgroundColor>
           <ValueField>InstanceID</ValueField>
         </DataSetReference>
       </DefaultValue>
-      <Prompt>Instance IDs</Prompt>
-      <Hidden>true</Hidden>
+      <Prompt>Instance</Prompt>
       <ValidValues>
         <DataSetReference>
           <DataSetName>Instances</DataSetName>
