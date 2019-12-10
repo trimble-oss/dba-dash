@@ -161,6 +161,22 @@
           <DataField>IsCriticalWait</DataField>
           <rd:TypeName>System.Boolean</rd:TypeName>
         </Field>
+        <Field Name="LockWaitMs">
+          <DataField>LockWaitMs</DataField>
+          <rd:TypeName>System.Int64</rd:TypeName>
+        </Field>
+        <Field Name="LockWaitPct">
+          <DataField>LockWaitPct</DataField>
+          <rd:TypeName>System.Decimal</rd:TypeName>
+        </Field>
+        <Field Name="IOWaitMs">
+          <DataField>IOWaitMs</DataField>
+          <rd:TypeName>System.Int64</rd:TypeName>
+        </Field>
+        <Field Name="IOWaitPct">
+          <DataField>IOWaitPct</DataField>
+          <rd:TypeName>System.Decimal</rd:TypeName>
+        </Field>
       </Fields>
     </DataSet>
   </DataSets>
@@ -767,7 +783,6 @@
                             <PaddingBottom>2pt</PaddingBottom>
                           </Style>
                         </Textbox>
-                        <rd:Selected>true</rd:Selected>
                       </CellContents>
                     </TablixCell>
                     <TablixCell>
@@ -1190,8 +1205,11 @@ format(SUM(Fields!Pct.Value),"0.0%")</ToolTip>
                             <Paragraph>
                               <TextRuns>
                                 <TextRun>
-                                  <Value>=format(SUM(IIF(Fields!WaitType.Value.ToString().StartsWith("LCK"),Fields!TotalWaitMs.Value,0))/1000,"#,0.0;(#,0.0)") &amp; "sec, " &amp;  Environment.NewLine &amp; 
-format(SUM(IIF(Fields!WaitType.Value.ToString().StartsWith("LCK"),Fields!Pct.Value,0)),"0.0%")</Value>
+                                  <Value>=IIF(SUM(Fields!LockWaitMs.Value/1000) &lt; 86400, 
+    Format(DateAdd("s", SUM(Fields!LockWaitMs.Value/1000), "00:00:00"), "HH:mm:ss"), 
+    Floor(SUM(Fields!LockWaitMs.Value/1000) / 86400) &amp; " days, " &amp; Format(DateAdd("s", SUM(Fields!LockWaitMs.Value/1000), "00:00:00"), "HH:mm:ss"))
+	&amp; Environment.NewLine &amp; 
+format(SUM(Fields!LockWaitPct.Value),"0.0%")</Value>
                                   <Style />
                                 </TextRun>
                               </TextRuns>
@@ -1222,8 +1240,11 @@ format(SUM(IIF(Fields!WaitType.Value.ToString().StartsWith("LCK"),Fields!Pct.Val
                             <Paragraph>
                               <TextRuns>
                                 <TextRun>
-                                  <Value>=format(SUM(IIF(Fields!WaitType.Value.ToString().StartsWith("PAGEIO") or Fields!WaitType.Value="WRITELOG",Fields!TotalWaitMs.Value,0))/1000,"#,0.0;(#,0.0)") &amp; "sec, " &amp; 
-Environment.NewLine &amp; format(SUM(IIF(Fields!WaitType.Value.ToString().StartsWith("PAGEIO") or Fields!WaitType.Value="WRITELOG",Fields!Pct.Value,0)),"0.0%")</Value>
+                                  <Value>=IIF(SUM(Fields!IOWaitMs.Value/1000) &lt; 86400, 
+    Format(DateAdd("s", SUM(Fields!IOWaitMs.Value/1000), "00:00:00"), "HH:mm:ss"), 
+    Floor(SUM(Fields!IOWaitMs.Value/1000) / 86400) &amp; " days, " &amp; Format(DateAdd("s", SUM(Fields!IOWaitMs.Value/1000), "00:00:00"), "HH:mm:ss"))
+	&amp; Environment.NewLine &amp; 
+format(SUM(Fields!IOWaitPct.Value),"0.0%")</Value>
                                   <Style>
                                     <FontFamily>Arial</FontFamily>
                                   </Style>

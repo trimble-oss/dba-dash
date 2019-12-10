@@ -67,7 +67,11 @@ LEFT JOIN cpuAgg ON a.InstanceID = cpuAgg.InstanceID
 GROUP BY a.InstanceID,a.Instance
 )
 , wait AS (
-	SELECT W.InstanceID,WT.IsCriticalWait, WT.WaitType,SUM(W.wait_time_ms) TotalWaitMs,SUM(W.wait_time_ms)*1.0/ SUM(SUM(W.wait_time_ms)) OVER(PARTITION BY W.InstanceID) Pct
+	SELECT W.InstanceID,
+		WT.IsCriticalWait, 
+		WT.WaitType,
+		SUM(W.wait_time_ms) TotalWaitMs,
+		SUM(W.wait_time_ms)*1.0/ SUM(SUM(W.wait_time_ms)) OVER(PARTITION BY W.InstanceID) Pct
 	FROM dbo.Waits W 
 	JOIN dbo.WaitType WT ON WT.WaitTypeID = W.WaitTypeID
 	WHERE SnapshotDate>= DATEADD(mi,-@Mins,GETUTCDATE())
@@ -90,9 +94,13 @@ SELECT i.InstanceID,
        i.MaxReadMBsec,
        i.MaxWriteMBsec,
        i.MaxMBsec,
-       w.WaitType,
-       w.TotalWaitMs,
-       w.Pct,
-	   W.IsCriticalWait
+       ISNULL(w.WaitType,'') WaitType,
+       ISNULL(w.TotalWaitMs,0) TotalWaitMs,
+       ISNULL(w.Pct,0) Pct,
+	   ISNULL(W.IsCriticalWait,CAST(0 AS BIT)) IsCriticalWait,
+	   CASE WHEN w.WaitType LIKE 'LCK%' THEN w.TotalWaitMs ELSE 0 END AS LockWaitMs,
+	   CASE WHEN w.WaitType LIKE 'LCK%' THEN w.Pct ELSE 0 END AS LockWaitPct,
+	   CASE WHEN w.WaitType LIKE 'PAGEIO%' OR w.WaitType LIKE 'WRITELOG%' THEN w.TotalWaitMs ELSE 0 END AS IOWaitMs,
+	   CASE WHEN w.WaitType LIKE 'PAGEIO%' OR w.WaitType LIKE 'WRITELOG%' THEN w.Pct ELSE 0 END AS IOWaitPct
 FROM i 
 LEFT JOIN wait w ON i.InstanceID = w.InstanceID AND (w.Pct>=0.01 OR w.IsCriticalWait=1)

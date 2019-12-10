@@ -1,4 +1,5 @@
 ﻿
+
 CREATE VIEW [dbo].[LogShippingStatus] 
 AS
 SELECT I.InstanceID,
@@ -40,3 +41,4 @@ OUTER APPLY(SELECT CASE WHEN l.TimeSinceLast >cfg.TimeSinceLastCriticalThreshold
 WHERE (D.state IN(1,2) OR D.is_in_standby=1)
 AND D.IsActive=1
 AND I.IsActive=1
+AND D.create_date < DATEADD(d,-1,GETUTCDATE())

@@ -1131,7 +1131,7 @@
                                                           <Paragraph>
                                                             <TextRuns>
                                                               <TextRun>
-                                                                <Value>=IIF( Fields!HasDriverUpdates.Value,System.TimeZone.CurrentTimeZone.ToLocalTime(Fields!ValidFrom.Value),"")</Value>
+                                                                <Value>=MAX(IIF( Fields!HasDriverUpdates.Value,System.TimeZone.CurrentTimeZone.ToLocalTime(Fields!ValidFrom.Value),""))</Value>
                                                                 <Style>
                                                                   <Format>=Parameters!DateFormat.Value</Format>
                                                                 </Style>
@@ -1153,6 +1153,7 @@
                                                           <PaddingBottom>2pt</PaddingBottom>
                                                         </Style>
                                                       </Textbox>
+                                                      <rd:Selected>true</rd:Selected>
                                                     </CellContents>
                                                   </TablixHeader>
                                                 </TablixMember>
@@ -2613,7 +2614,6 @@
                             <PaddingBottom>2pt</PaddingBottom>
                           </Style>
                         </Textbox>
-                        <rd:Selected>true</rd:Selected>
                       </CellContents>
                     </TablixCell>
                     <TablixCell>

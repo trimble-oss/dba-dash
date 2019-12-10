@@ -44,10 +44,6 @@
         <rd:UseGenericDesigner>true</rd:UseGenericDesigner>
       </Query>
       <Fields>
-        <Field Name="ProcID">
-          <DataField>ProcID</DataField>
-          <rd:TypeName>System.Int32</rd:TypeName>
-        </Field>
         <Field Name="SnapshotDate">
           <DataField>SnapshotDate</DataField>
           <rd:TypeName>System.DateTime</rd:TypeName>
@@ -523,7 +519,7 @@ Environment.NewLine &amp; "Avg Writes: " &amp;  Format(Fields!AvgWrites.Value,"#
                         <Style>None</Style>
                       </Border>
                       <FontSize>8pt</FontSize>
-                      <Format>#,0;(#,0)</Format>
+                      <Format>#,0.0;(#,0.0)</Format>
                       <Color>#5c5c5c</Color>
                     </Style>
                     <ChartAxisTitle>

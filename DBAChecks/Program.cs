@@ -57,33 +57,35 @@ namespace DBAChecks
             AWSCredentials cred = null;
             if (profile == null)
             {
-                profile = "default";
+                cred = new InstanceProfileAWSCredentials();
             }
-            try
+            else
             {
-                cred = GetAWSCredentialsFromProfile(profile);
+                try
+                {
+                    cred = GetAWSCredentialsFromProfile(profile);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.Message);
+                    throw;
+                }
             }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.Message);
-                throw;
-            }
-
-        
-                Amazon.S3.AmazonS3Client cli = new AmazonS3Client(cred, RegionEndpoint.EUWest2);
+                    
+            Amazon.S3.AmazonS3Client cli = new AmazonS3Client(cred, RegionEndpoint.EUWest2);
 
                
-                RegionEndpoint AWSRegion;
-                if (uri.Region != null)
-                {
-                    AWSRegion = uri.Region;
-                }
-                else
-                {
-                    AWSRegion = RegionEndpoint.GetBySystemName(cli.GetBucketLocation(uri.Bucket).Location);
-                }
-                var s3Cli = new AmazonS3Client(cred, AWSRegion);
-                return s3Cli;
+            RegionEndpoint AWSRegion;
+            if (uri.Region != null)
+            {
+                AWSRegion = uri.Region;
+            }
+            else
+            {
+                AWSRegion = RegionEndpoint.GetBySystemName(cli.GetBucketLocation(uri.Bucket).Location);
+            }
+            var s3Cli = new AmazonS3Client(cred, AWSRegion);
+            return s3Cli;
          
         
         }

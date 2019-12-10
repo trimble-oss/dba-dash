@@ -28,8 +28,7 @@ SELECT @DateAggString = CASE @DateAgg WHEN 'NONE' THEN 'PS.SnapshotDate'
 DECLARE @SQL NVARCHAR(MAX)
 SET @SQL = N'
 WITH agg AS (
-SELECT P.' + @TypeString + 'ID as ProcID,
-	   ' + @DateAggString + ' as SnapshotDate,
+SELECT ' + @DateAggString + ' as SnapshotDate,
        D.name AS DatabaseName,
 	   D.DatabaseID,
        P.object_name,
@@ -54,7 +53,7 @@ AND PS.SnapshotDate >= @FromDate
 AND PS.SnapshotDate< @ToDate
 ' + CASE WHEN @DatabaseID IS NULL THEN '' ELSE 'AND D.DatabaseID=@DatabaseID' END + '
 ' + CASE WHEN @Proc IS NULL THEN '' ELSE 'AND P.object_name=@Proc' END + '
-GROUP BY ' + @DateAggString + ',P.' + @TypeString + 'ID,D.Name,P.object_name,D.DatabaseID
+GROUP BY ' + @DateAggString + ',D.Name,P.object_name,D.DatabaseID
 )
 , T AS (
 	SELECT agg.*,
@@ -72,6 +71,6 @@ EXEC sp_executesql @SQL,N'@InstanceID INT,@DatabaseID INT,@FromDate DATETIME,@To
 END 
 ELSE
 BEGIN
-DECLARE  @results TABLE( [ProcID] INT, [SnapshotDate] DATETIME, [DatabaseName] NVARCHAR(128),[DatabaseID] INT, [object_name] NVARCHAR(128), [TotalCPU] DECIMAL(29,9), [AvgCPU] DECIMAL(29,9), [ExecutionCount] BIGINT, [ExecutionsPerMin] DECIMAL(38,9), [TotalDuration] DECIMAL(29,9), [AvgDuration] DECIMAL(29,9), [TotalLogicalReads] BIGINT, [AvgLogicalReads] BIGINT, [TotalPhysicalReads] BIGINT, [AvgPhysicalReads] BIGINT, [TotalWrites] BIGINT, [AvgWrites] BIGINT, [Measure] DECIMAL(29,9), [ProcRank] BIGINT )
+DECLARE  @results TABLE( [SnapshotDate] DATETIME, [DatabaseName] NVARCHAR(128),[DatabaseID] INT, [object_name] NVARCHAR(128), [TotalCPU] DECIMAL(29,9), [AvgCPU] DECIMAL(29,9), [ExecutionCount] BIGINT, [ExecutionsPerMin] DECIMAL(38,9), [TotalDuration] DECIMAL(29,9), [AvgDuration] DECIMAL(29,9), [TotalLogicalReads] BIGINT, [AvgLogicalReads] BIGINT, [TotalPhysicalReads] BIGINT, [AvgPhysicalReads] BIGINT, [TotalWrites] BIGINT, [AvgWrites] BIGINT, [Measure] DECIMAL(29,9), [ProcRank] BIGINT )
 SELECT * FROM @Results
 END

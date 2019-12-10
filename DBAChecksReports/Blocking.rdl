@@ -2366,7 +2366,6 @@ Parameters!ToDate.Value)
       <DataType>Integer</DataType>
       <Nullable>true</Nullable>
       <Prompt>Blocking Snapshot ID</Prompt>
-      <Hidden>true</Hidden>
     </ReportParameter>
     <ReportParameter Name="FromDate">
       <DataType>DateTime</DataType>
