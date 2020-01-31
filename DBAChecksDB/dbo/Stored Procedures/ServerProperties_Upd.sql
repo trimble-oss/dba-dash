@@ -12,20 +12,25 @@ BEGIN
 	    OldProductLevel,
 	    NewProductLevel,
 	    OldProductUpdateLevel,
-	    NewProductUpdateLevel
+	    NewProductUpdateLevel,
+		OldEdition,
+		NewEdition
 	)
 	SELECT I.InstanceID,
 		   @SnapshotDate,
 		   I.ProductVersion,
-		   T.ProductVersion,
+		   NULLIF(T.ProductVersion,I.ProductVersion),
 		   I.ProductLevel,
-		   T.ProductLevel,
+		   NULLIF(T.ProductLevel,I.ProductLevel),
 		   I.ProductUpdateLevel,
-		   T.ProductUpdateLevel
+		   NULLIF(T.ProductUpdateLevel,I.ProductUpdateLevel),
+		   I.Edition,
+		   NULLIF(T.Edition,I.Edition)
 	FROM dbo.Instances I
 		CROSS JOIN @ServerProperties T
 	WHERE I.InstanceID = @InstanceID
-	AND   I.ProductVersion <> T.ProductVersion
+	AND   (I.ProductVersion <> T.ProductVersion
+			OR I.Edition<> T.Edition)
 
 	UPDATE I
 	   SET [BuildClrVersion] = T.BuildClrVersion

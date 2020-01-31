@@ -1,4 +1,4 @@
-﻿CREATE PROC Report.SQLPatching_Get(@InstanceIDs VARCHAR(MAX)=NULL)
+﻿CREATE PROC [Report].[SQLPatching_Get](@InstanceIDs VARCHAR(MAX)=NULL)
 AS
 DECLARE @Instances TABLE(
 	InstanceID INT PRIMARY KEY
@@ -22,7 +22,17 @@ BEGIN
 	SELECT Item
 	FROM dbo.SplitStrings(@InstanceIDs,',')
 END;
-SELECT I.Instance,P.ChangedDate,P.OldVersion,P.NewVersion,P.OldProductLevel,P.NewProductLevel,P.OldProductUpdateLevel,P.NewProductUpdateLevel 
+
+SELECT I.Instance,
+		P.ChangedDate,
+		P.OldVersion,
+		NULLIF(P.NewVersion,P.OldVersion) NewVersion,
+		P.OldProductLevel,
+		NULLIF(P.NewProductLevel,P.OldProductLevel) NewProductLevel,
+		P.OldProductUpdateLevel,
+		NULLIF(P.NewProductUpdateLevel,P.OldProductUpdateLevel) NewProductUpdateLevel,
+		P.OldEdition,
+		NULLIF(P.NewEdition,P.OldEdition) NewEdition
 FROM dbo.SQLPatchingHistory P
 JOIN dbo.Instances I ON I.InstanceID = P.InstanceID
 WHERE EXISTS(SELECT 1 FROM @Instances I WHERE I.InstanceID = P.InstanceID)

@@ -7,7 +7,11 @@
     [NewProductLevel]       NVARCHAR (128) NULL,
     [OldProductUpdateLevel] NVARCHAR (128) NULL,
     [NewProductUpdateLevel] NVARCHAR (128) NULL,
+    [OldEdition]            NVARCHAR (128) NULL,
+    [NewEdition]            NVARCHAR (128) NULL,
     CONSTRAINT [PK_SQLPatchingHistory] PRIMARY KEY CLUSTERED ([InstanceID] ASC, [ChangedDate] ASC),
     CONSTRAINT [FK_SQLVersionHistory_Instances] FOREIGN KEY ([InstanceID]) REFERENCES [dbo].[Instances] ([InstanceID])
 );
+
+
 

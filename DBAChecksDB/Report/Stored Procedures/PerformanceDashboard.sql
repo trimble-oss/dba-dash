@@ -103,4 +103,4 @@ SELECT i.InstanceID,
 	   CASE WHEN w.WaitType LIKE 'PAGEIO%' OR w.WaitType LIKE 'WRITELOG%' THEN w.TotalWaitMs ELSE 0 END AS IOWaitMs,
 	   CASE WHEN w.WaitType LIKE 'PAGEIO%' OR w.WaitType LIKE 'WRITELOG%' THEN w.Pct ELSE 0 END AS IOWaitPct
 FROM i 
-LEFT JOIN wait w ON i.InstanceID = w.InstanceID AND (w.Pct>=0.01 OR w.IsCriticalWait=1)
+LEFT JOIN wait w ON i.InstanceID = w.InstanceID AND (w.Pct>=0.01 OR w.IsCriticalWait=1 OR w.WaitType LIKE 'PAGEIO%' OR w.WaitType LIKE 'WRITELOG%')

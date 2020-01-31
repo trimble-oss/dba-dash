@@ -281,6 +281,7 @@
             <ChartData>
               <ChartSeriesCollection>
                 <ChartSeries Name="ReadMBsec">
+                  <Hidden>=Not Parameters!ReadMBsec.Value</Hidden>
                   <ChartDataPoints>
                     <ChartDataPoint>
                       <ChartDataPointValues>
@@ -377,6 +378,7 @@ Parameters!ToDate.Value))))</Value>
                   </ChartSmartLabel>
                 </ChartSeries>
                 <ChartSeries Name="WriteMBsec">
+                  <Hidden>=Not Parameters!WriteMBsec.Value</Hidden>
                   <ChartDataPoints>
                     <ChartDataPoint>
                       <ChartDataPointValues>
@@ -476,6 +478,7 @@ Parameters!ToDate.Value))))</Value>
                   </ChartSmartLabel>
                 </ChartSeries>
                 <ChartSeries Name="Latency">
+                  <Hidden>=Not Parameters!Latency.Value</Hidden>
                   <ChartDataPoints>
                     <ChartDataPoint>
                       <ChartDataPointValues>
@@ -3340,6 +3343,33 @@ CDATE(Parameters!ToDateUser.Value).AddMinutes(IIF(ISNOTHING(Parameters!ToDateUse
       </DefaultValue>
       <Prompt>ShowTable</Prompt>
     </ReportParameter>
+    <ReportParameter Name="Latency">
+      <DataType>Boolean</DataType>
+      <DefaultValue>
+        <Values>
+          <Value>true</Value>
+        </Values>
+      </DefaultValue>
+      <Prompt>Latency</Prompt>
+    </ReportParameter>
+    <ReportParameter Name="ReadMBsec">
+      <DataType>Boolean</DataType>
+      <DefaultValue>
+        <Values>
+          <Value>true</Value>
+        </Values>
+      </DefaultValue>
+      <Prompt>Read MB/sec</Prompt>
+    </ReportParameter>
+    <ReportParameter Name="WriteMBsec">
+      <DataType>Boolean</DataType>
+      <DefaultValue>
+        <Values>
+          <Value>true</Value>
+        </Values>
+      </DefaultValue>
+      <Prompt>Write MB/sec</Prompt>
+    </ReportParameter>
   </ReportParameters>
   <ReportParametersLayout>
     <GridLayoutDefinition>
@@ -3445,6 +3475,21 @@ CDATE(Parameters!ToDateUser.Value).AddMinutes(IIF(ISNOTHING(Parameters!ToDateUse
           <ColumnIndex>0</ColumnIndex>
           <RowIndex>5</RowIndex>
           <ParameterName>ShowTable</ParameterName>
+        </CellDefinition>
+        <CellDefinition>
+          <ColumnIndex>1</ColumnIndex>
+          <RowIndex>5</RowIndex>
+          <ParameterName>Latency</ParameterName>
+        </CellDefinition>
+        <CellDefinition>
+          <ColumnIndex>2</ColumnIndex>
+          <RowIndex>5</RowIndex>
+          <ParameterName>ReadMBsec</ParameterName>
+        </CellDefinition>
+        <CellDefinition>
+          <ColumnIndex>3</ColumnIndex>
+          <RowIndex>5</RowIndex>
+          <ParameterName>WriteMBsec</ParameterName>
         </CellDefinition>
       </CellDefinitions>
     </GridLayoutDefinition>
