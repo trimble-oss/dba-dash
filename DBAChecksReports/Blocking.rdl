@@ -621,7 +621,7 @@
               </TablixMembers>
             </TablixRowHierarchy>
             <DataSetName>BlockingSummary</DataSetName>
-            <Top>2.69792in</Top>
+            <Top>2.955in</Top>
             <Height>0.43in</Height>
             <Width>6.05209in</Width>
             <Visibility>
@@ -1018,6 +1018,7 @@ Parameters!ToDate.Value)
               </Style>
             </ChartNoDataMessage>
             <DataSetName>BlockingSummary</DataSetName>
+            <Top>0.65298cm</Top>
             <Height>2.69792in</Height>
             <Width>23.42583in</Width>
             <ZIndex>1</ZIndex>
@@ -2016,13 +2017,59 @@ Parameters!ToDate.Value)
                               <TextRuns>
                                 <TextRun>
                                   <Value>=LEFT(Fields!Txt.Value.ToString().TrimStart(),200)</Value>
-                                  <Style />
+                                  <Style>
+                                    <FontWeight>=IIF(Fields!Txt.Value=Parameters!Text.Value,"Bold","Normal")</FontWeight>
+                                  </Style>
                                 </TextRun>
                               </TextRuns>
                               <Style />
                             </Paragraph>
                           </Paragraphs>
                           <rd:DefaultName>Txt</rd:DefaultName>
+                          <ActionInfo>
+                            <Actions>
+                              <Action>
+                                <Drillthrough>
+                                  <ReportName>Blocking</ReportName>
+                                  <Parameters>
+                                    <Parameter Name="BlockingSnapshotID">
+                                      <Value>=Parameters!BlockingSnapshotID.Value</Value>
+                                    </Parameter>
+                                    <Parameter Name="FromDate">
+                                      <Value>=Parameters!FromDate.Value</Value>
+                                    </Parameter>
+                                    <Parameter Name="ToDate">
+                                      <Value>=Parameters!ToDate.Value</Value>
+                                    </Parameter>
+                                    <Parameter Name="ShowTable">
+                                      <Value>=Parameters!ShowTable.Value</Value>
+                                    </Parameter>
+                                    <Parameter Name="DateFormat">
+                                      <Value>=Parameters!DateFormat.Value</Value>
+                                    </Parameter>
+                                    <Parameter Name="TagIDs">
+                                      <Value>=Parameters!TagIDs.Value</Value>
+                                    </Parameter>
+                                    <Parameter Name="TagMatching">
+                                      <Value>=Parameters!TagMatching.Value</Value>
+                                    </Parameter>
+                                    <Parameter Name="InstanceName">
+                                      <Value>=Parameters!InstanceName.Value</Value>
+                                    </Parameter>
+                                    <Parameter Name="InstanceIDs">
+                                      <Value>=Parameters!InstanceIDs.Value</Value>
+                                    </Parameter>
+                                    <Parameter Name="Text">
+                                      <Value>=Fields!Txt.Value</Value>
+                                    </Parameter>
+                                    <Parameter Name="blocking_session_id">
+                                      <Value>0</Value>
+                                    </Parameter>
+                                  </Parameters>
+                                </Drillthrough>
+                              </Action>
+                            </Actions>
+                          </ActionInfo>
                           <ToolTip>=Fields!Txt.Value.ToString().TrimStart()</ToolTip>
                           <Style>
                             <Border>
@@ -2219,6 +2266,9 @@ Parameters!ToDate.Value)
                             <Parameter Name="ShowTable">
                               <Value>false</Value>
                             </Parameter>
+                            <Parameter Name="Text">
+                              <Value>=Parameters!Text.Value</Value>
+                            </Parameter>
                           </Parameters>
                           <Style>
                             <Border>
@@ -2292,8 +2342,7 @@ Parameters!ToDate.Value)
               </TablixMembers>
             </TablixRowHierarchy>
             <DataSetName>Blocking</DataSetName>
-            <Top>3.18986in</Top>
-            <Left>0.03125in</Left>
+            <Top>3.40055in</Top>
             <Height>1.26042in</Height>
             <Width>23.35417in</Width>
             <ZIndex>2</ZIndex>
@@ -2323,7 +2372,7 @@ Parameters!ToDate.Value)
               </Paragraph>
             </Paragraphs>
             <rd:DefaultName>Textbox63</rd:DefaultName>
-            <Top>4.47806in</Top>
+            <Top>4.68875in</Top>
             <Height>0.30625in</Height>
             <Width>17.20958in</Width>
             <ZIndex>3</ZIndex>
@@ -2341,11 +2390,42 @@ Parameters!ToDate.Value)
               <PaddingBottom>2pt</PaddingBottom>
             </Style>
           </Textbox>
+          <Textbox Name="Textbox1">
+            <CanGrow>true</CanGrow>
+            <KeepTogether>true</KeepTogether>
+            <Paragraphs>
+              <Paragraph>
+                <TextRuns>
+                  <TextRun>
+                    <Value>=Parameters!Text.Value</Value>
+                    <Style />
+                  </TextRun>
+                </TextRuns>
+                <Style />
+              </Paragraph>
+            </Paragraphs>
+            <rd:DefaultName>Textbox1</rd:DefaultName>
+            <Height>0.24319in</Height>
+            <Width>23.42583in</Width>
+            <ZIndex>4</ZIndex>
+            <Visibility>
+              <Hidden>=isnothing(Parameters!Text.Value) or (Parameters!blocking_session_id.Value&gt;0)</Hidden>
+            </Visibility>
+            <Style>
+              <Border>
+                <Style>None</Style>
+              </Border>
+              <PaddingLeft>2pt</PaddingLeft>
+              <PaddingRight>2pt</PaddingRight>
+              <PaddingTop>2pt</PaddingTop>
+              <PaddingBottom>2pt</PaddingBottom>
+            </Style>
+          </Textbox>
         </ReportItems>
-        <Height>4.83569in</Height>
+        <Height>4.995in</Height>
         <Style />
       </Body>
-      <Width>23.42583in</Width>
+      <Width>23.44668in</Width>
       <Page>
         <LeftMargin>1in</LeftMargin>
         <RightMargin>1in</RightMargin>
@@ -2456,11 +2536,17 @@ Parameters!ToDate.Value)
       </ValidValues>
       <MultiValue>true</MultiValue>
     </ReportParameter>
+    <ReportParameter Name="Text">
+      <DataType>String</DataType>
+      <Nullable>true</Nullable>
+      <Prompt>Text</Prompt>
+      <Hidden>true</Hidden>
+    </ReportParameter>
   </ReportParameters>
   <ReportParametersLayout>
     <GridLayoutDefinition>
       <NumberOfColumns>4</NumberOfColumns>
-      <NumberOfRows>3</NumberOfRows>
+      <NumberOfRows>4</NumberOfRows>
       <CellDefinitions>
         <CellDefinition>
           <ColumnIndex>2</ColumnIndex>
@@ -2511,6 +2597,11 @@ Parameters!ToDate.Value)
           <ColumnIndex>3</ColumnIndex>
           <RowIndex>2</RowIndex>
           <ParameterName>InstanceIDs</ParameterName>
+        </CellDefinition>
+        <CellDefinition>
+          <ColumnIndex>0</ColumnIndex>
+          <RowIndex>3</RowIndex>
+          <ParameterName>Text</ParameterName>
         </CellDefinition>
       </CellDefinitions>
     </GridLayoutDefinition>
