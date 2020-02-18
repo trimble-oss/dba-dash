@@ -10,7 +10,7 @@ using Microsoft.Win32;
 
 namespace DBAChecks
 {
-    class DBCollector
+   public  class DBCollector
     {
         public DataSet Data;
         string _connectionString;

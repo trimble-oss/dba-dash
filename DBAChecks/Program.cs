@@ -42,53 +42,7 @@ namespace DBAChecks
             public bool PerformanceOnly { get; set; }
         }
 
-        private static AWSCredentials GetAWSCredentialsFromProfile(string profileName)
-        {
-            var credentialProfileStoreChain = new CredentialProfileStoreChain();
-            AWSCredentials defaultCredentials;
-            if (credentialProfileStoreChain.TryGetAWSCredentials(profileName, out defaultCredentials))
-                return defaultCredentials;
-            else
-                throw new AmazonClientException("Unable to find profile in CredentialProfileStoreChain.");
-        }
 
-        private static Amazon.S3.AmazonS3Client getAWSClient(string profile, Amazon.S3.Util.AmazonS3Uri uri)
-        {
-            AWSCredentials cred = null;
-            if (profile == null)
-            {
-                cred = new InstanceProfileAWSCredentials();
-            }
-            else
-            {
-                try
-                {
-                    cred = GetAWSCredentialsFromProfile(profile);
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine(ex.Message);
-                    throw;
-                }
-            }
-                    
-            Amazon.S3.AmazonS3Client cli = new AmazonS3Client(cred, RegionEndpoint.EUWest2);
-
-               
-            RegionEndpoint AWSRegion;
-            if (uri.Region != null)
-            {
-                AWSRegion = uri.Region;
-            }
-            else
-            {
-                AWSRegion = RegionEndpoint.GetBySystemName(cli.GetBucketLocation(uri.Bucket).Location);
-            }
-            var s3Cli = new AmazonS3Client(cred, AWSRegion);
-            return s3Cli;
-         
-        
-        }
 
 
 
@@ -111,7 +65,7 @@ namespace DBAChecks
                            {
                                Console.WriteLine("Import from S3: " + s);
                                var uri = new Amazon.S3.Util.AmazonS3Uri(s);
-                               var s3Cli = getAWSClient(o.AWSProfile, uri);
+                               var s3Cli = AWSTools.GetAWSClient(o.AWSProfile, uri);
                                var resp = s3Cli.ListObjects(uri.Bucket, (uri.Key + "/DBAChecks_").Replace("//", "/"));
                                foreach (var f in resp.S3Objects)
                                {
@@ -165,7 +119,7 @@ namespace DBAChecks
                                {
                                    Console.WriteLine("Upload to S3");
                                    var uri = new Amazon.S3.Util.AmazonS3Uri(o.Destination);
-                                   var s3Cli = getAWSClient(o.AWSProfile, uri);
+                                   var s3Cli = AWSTools.GetAWSClient(o.AWSProfile, uri);
                                    var r = new Amazon.S3.Model.PutObjectRequest();
                                    string fileName = "DBAChecks_" + DateTime.UtcNow.ToString("yyyy-MM-dd HHmmss") + Guid.NewGuid().ToString() + ".json";
                                    string filePath = Path.Combine(o.Destination, fileName);

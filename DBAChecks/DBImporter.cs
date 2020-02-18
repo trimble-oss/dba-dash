@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace DBAChecks
 {
-    class DBImporter
+   public  class DBImporter
     {
  
         public DBImporter()
