@@ -1,14 +1,5 @@
-﻿using DBAChecks;
-using Quartz;
+﻿using Newtonsoft.Json;
 using System;
-using System.Collections.Generic;
-using System.Data.SqlClient;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Topshelf;
-using Topshelf.Quartz;
-using System.Text.Json;
 using System.Diagnostics;
 
 namespace DBAChecksService
@@ -18,13 +9,15 @@ namespace DBAChecksService
         static void Main(string[] args)
         {
             string jsonConfigPath = System.IO.Path.Combine(AppContext.BaseDirectory, "ServiceConfig.json");
-            if (!(System.IO.File.Exists(jsonConfigPath))){
-                EventLog.WriteEntry("DBAChecksService","ServiceConfig.json file is missing.  Please create." , EventLogEntryType.Error);
-            }
+            if (!(System.IO.File.Exists(jsonConfigPath)))
+            {
+                EventLog.WriteEntry("DBAChecksService", "ServiceConfig.json file is missing.  Please create.", EventLogEntryType.Error);
+                throw new Exception("ServiceConfig.json file is missing.Please create.");
+            }            
             string jsonConfig = System.IO.File.ReadAllText(jsonConfigPath);
-            var conf =  JsonSerializer.Deserialize<CollectionConfig[]>(jsonConfig);
+            var conf = JsonConvert.DeserializeObject<CollectionConfig[]>(jsonConfig);
             bool wasEncrypted = false;
-            foreach(var c in conf)
+            foreach (var c in conf)
             {
                 if (c.WasEncrypted())
                 {
@@ -34,12 +27,12 @@ namespace DBAChecksService
             if (wasEncrypted)
             {
                 Console.WriteLine("Saving ServiceConfig.json with encrypted password");
-                var options = new JsonSerializerOptions
+
+                string confString = JsonConvert.SerializeObject(conf, Formatting.Indented, new JsonSerializerSettings
                 {
-                    WriteIndented = true,
-                    IgnoreNullValues=true
-                };
-                string confString = JsonSerializer.Serialize(conf, options);
+                    NullValueHandling = NullValueHandling.Ignore,
+                    DefaultValueHandling = DefaultValueHandling.Ignore
+                });
                 System.IO.File.WriteAllText(jsonConfigPath, confString);
             }
 
@@ -51,7 +44,7 @@ namespace DBAChecksService
         {
             if (!EventLog.SourceExists("DBAChecksService"))
             {
-                   EventLog.CreateEventSource("DBAChecksService", "Application");
+                EventLog.CreateEventSource("DBAChecksService", "Application");
             }
         }
     }

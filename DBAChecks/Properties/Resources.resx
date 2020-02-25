@@ -117,7 +117,7 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="SQLExtraProperties" xml:space="preserve">
+  <data name="SQLServerExtraProperties" xml:space="preserve">
     <value>DECLARE @ProcessorNameString NVARCHAR(512)
 DECLARE @SystemManufacturer NVARCHAR(512)
 DECLARE @SystemProductName NVARCHAR(512)
@@ -220,7 +220,7 @@ SELECT @ActivePowerPlan ActivePowerPlanGUID,
        @LastMemoryDump LastMemoryDump,
        @DumpCount AS MemoryDumpCount;</value>
   </data>
-  <data name="SQLAgentJobSummary" xml:space="preserve">
+  <data name="SQLAgentJobs" xml:space="preserve">
     <value>WITH T
 AS (SELECT j.job_id,
            j.name,
@@ -397,7 +397,7 @@ where server_name=@@SERVERNAME
 AND backup_finish_date&gt;=DATEADD(d,-10,GETUTCDATE())
 group by database_name, type</value>
   </data>
-  <data name="SQLConfigurations" xml:space="preserve">
+  <data name="SQLSysConfig" xml:space="preserve">
     <value>SELECT configuration_id,CAST(value as BIGINT) as value,CAST(value_in_use as BIGINT) as value_in_use
 FROM sys.configurations</value>
   </data>
@@ -627,7 +627,7 @@ BEGIN
 	CROSS APPLY sys.dm_os_volume_stats(mf.database_id, mf.FILE_ID) dovs
 END</value>
   </data>
-  <data name="SQLFiles" xml:space="preserve">
+  <data name="SQLDBFiles" xml:space="preserve">
     <value>DECLARE @DBName SYSNAME
 DECLARE @SQL NVARCHAR(MAX)
 CREATE TABLE #FileList ( 
@@ -724,7 +724,7 @@ WHERE NOT EXISTS(SELECT 1 FROM #FileList fl WHERE fl.database_id = mf.database_i
 
 DROP TABLE #FileList</value>
   </data>
-  <data name="SQLHADRDB" xml:space="preserve">
+  <data name="SQLDatabasesHADR" xml:space="preserve">
     <value>IF OBJECT_ID('sys.dm_hadr_database_replica_states') IS NOT NULL
 BEGIN
     SELECT database_id,
@@ -738,7 +738,7 @@ BEGIN
     WHERE is_local = 1;
 END;</value>
   </data>
-  <data name="SQLLogShipping" xml:space="preserve">
+  <data name="SQLLogRestores" xml:space="preserve">
     <value>WITH t
 AS (SELECT rsh.destination_database_name AS database_name,
            rsh.restore_date,
@@ -762,7 +762,7 @@ SELECT t.database_name,
 FROM t
 WHERE rnum = 1;</value>
   </data>
-  <data name="SQLProperties" xml:space="preserve">
+  <data name="SQLServerProperties" xml:space="preserve">
     <value>SELECT CAST(SERVERPROPERTY('BuildClrVersion') as nvarchar(128)) as BuildClrVersion ,
 CAST(SERVERPROPERTY('Collation') as nvarchar(128)) as Collation ,
 CAST(SERVERPROPERTY('CollationID') as int) as CollationID ,
@@ -893,7 +893,7 @@ EXEC sp_executesql @SQL</value>
   <data name="SQLTraceFlags" xml:space="preserve">
     <value>DBCC TRACESTATUS(-1)</value>
   </data>
-  <data name="SQLStoredProcPerformance" xml:space="preserve">
+  <data name="SQLProcStats" xml:space="preserve">
     <value>IF OBJECT_ID('sys.dm_exec_procedure_stats') IS NOT NULL
 BEGIN
 	SELECT object_id,
@@ -930,7 +930,7 @@ FROM (SELECT record.value('(./Record/@id)[1]', 'int') AS record_id,
             AND record LIKE N'%&lt;SystemHealth&gt;%') AS x) AS y 
 ORDER BY record_id DESC OPTION (RECOMPILE);</value>
   </data>
-  <data name="SQLFunctionPerformance" xml:space="preserve">
+  <data name="SQLFunctionStats" xml:space="preserve">
     <value>IF OBJECT_ID('sys.dm_exec_function_stats') IS NOT NULL
 BEGIN
 	SELECT object_id,

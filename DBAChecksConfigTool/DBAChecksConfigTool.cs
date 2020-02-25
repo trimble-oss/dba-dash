@@ -1,12 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
 using System.Data;
 using System.Data.SqlClient;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace DBAChecksConfigTool
@@ -28,7 +22,7 @@ namespace DBAChecksConfigTool
         }
         private void addInstances()
         {
-        
+
             SqlConnection cn = new SqlConnection(Properties.Settings.Default.ConnectionString);
             var cmd = new SqlCommand("dbo.Instances_Get", cn);
             cmd.CommandType = CommandType.StoredProcedure;
@@ -38,7 +32,7 @@ namespace DBAChecksConfigTool
                 var da = new SqlDataAdapter(cmd);
                 var dt = new DataTable();
                 da.Fill(dt);
-       
+
                 cboInstances.DataSource = dt;
                 cboInstances.DisplayMember = "Instance";
                 cboInstances.ValueMember = "InstanceID";
@@ -59,25 +53,25 @@ namespace DBAChecksConfigTool
                 cboLRInstance.ValueMember = "InstanceID";
 
             }
-            cboDrivesInstances.SelectedIndex=0;
+            cboDrivesInstances.SelectedIndex = 0;
             cboInstances.SelectedIndex = 0;
-            
+
         }
 
 
 
         private void chkTags_SelectedIndexChanged(object sender, EventArgs e)
         {
-    
+
 
         }
 
         private void chkTags_ItemCheck(object sender, ItemCheckEventArgs e)
         {
-         
+
             string tag = chkTags.Items[e.Index].ToString();
-            
-            if (e.NewValue ==  CheckState.Unchecked)
+
+            if (e.NewValue == CheckState.Unchecked)
             {
                 RemoveTag(tag);
             }
@@ -247,7 +241,7 @@ namespace DBAChecksConfigTool
 
         private void cboDrivesInstances_SelectedIndexChanged(object sender, EventArgs e)
         {
-            refreshDrives();            
+            refreshDrives();
         }
 
         private void refreshDatabases()
@@ -311,7 +305,7 @@ namespace DBAChecksConfigTool
 
         private void dgvDriveThresholds_CellFormatting(object sender, DataGridViewCellFormattingEventArgs e)
         {
-           if (e.ColumnIndex == dgvDriveThresholds.Columns["DriveWarningThreshold"].Index || e.ColumnIndex == dgvDriveThresholds.Columns["DriveCriticalThreshold"].Index)
+            if (e.ColumnIndex == dgvDriveThresholds.Columns["DriveWarningThreshold"].Index || e.ColumnIndex == dgvDriveThresholds.Columns["DriveCriticalThreshold"].Index)
             {
                 if ((string)dgvDriveThresholds.Rows[e.RowIndex].Cells["DriveCheckType"].Value == "%")
                 {
@@ -354,7 +348,8 @@ namespace DBAChecksConfigTool
                 cmd.Parameters.AddWithValue("Critical", DBNull.Value);
                 cmd.Parameters.AddWithValue("DriveCheckType", '-');
             }
-            else if(optInherit.Checked){
+            else if (optInherit.Checked)
+            {
                 cmd.Parameters.AddWithValue("Warning", DBNull.Value);
                 cmd.Parameters.AddWithValue("Critical", DBNull.Value);
                 cmd.Parameters.AddWithValue("DriveCheckType", 'I');
@@ -381,20 +376,20 @@ namespace DBAChecksConfigTool
                 var currentRow = dgvDriveThresholds.CurrentCell.RowIndex;
                 decimal critical = 0;
                 decimal warning = 0;
-                
+
                 if (dgvDriveThresholds.Rows[currentRow].Cells["DriveCriticalThreshold"].Value != DBNull.Value)
                 {
-                     critical = (decimal)dgvDriveThresholds.Rows[currentRow].Cells["DriveCriticalThreshold"].Value;
+                    critical = (decimal)dgvDriveThresholds.Rows[currentRow].Cells["DriveCriticalThreshold"].Value;
                 }
                 if (dgvDriveThresholds.Rows[currentRow].Cells["DriveWarningThreshold"].Value != DBNull.Value)
                 {
-                     warning = (decimal)dgvDriveThresholds.Rows[currentRow].Cells["DriveWarningThreshold"].Value;
+                    warning = (decimal)dgvDriveThresholds.Rows[currentRow].Cells["DriveWarningThreshold"].Value;
                 }
                 var instanceID = (Int32)dgvDriveThresholds.Rows[currentRow].Cells["InstanceID"].Value;
                 var driveID = (Int32)dgvDriveThresholds.Rows[currentRow].Cells["DriveID"].Value;
-               
+
                 string type = dgvDriveThresholds.Rows[currentRow].Cells["DriveCheckType"].Value.ToString();
-           
+
                 cboDrivesInstances.SelectedValue = instanceID;
                 cboDrives.SelectedValue = driveID;
                 if (type == "%")
@@ -483,11 +478,11 @@ namespace DBAChecksConfigTool
 
                 var instanceID = (Int32)dgvBackup.Rows[currentRow].Cells["InstanceID"].Value;
                 var databaseID = (Int32)dgvBackup.Rows[currentRow].Cells["DatabaseID"].Value;
-                chkUseFG.Checked= (bool)dgvBackup.Rows[currentRow].Cells["ConsiderFGBackups"].Value;
+                chkUseFG.Checked = (bool)dgvBackup.Rows[currentRow].Cells["ConsiderFGBackups"].Value;
                 chkUsePartial.Checked = (bool)dgvBackup.Rows[currentRow].Cells["ConsiderPartialBackups"].Value;
                 cboBackupInstance.SelectedValue = instanceID;
                 cboBackupDatabase.SelectedValue = databaseID;
-          
+
             }
         }
 
@@ -531,7 +526,7 @@ namespace DBAChecksConfigTool
             else
             {
                 cmd.Parameters.AddWithValue("FullWarning", DBNull.Value);
-                cmd.Parameters.AddWithValue("FullCritical",DBNull.Value);
+                cmd.Parameters.AddWithValue("FullCritical", DBNull.Value);
             }
             if (chkDiff.Checked)
             {
@@ -558,9 +553,9 @@ namespace DBAChecksConfigTool
                 cn.Open();
                 cmd.ExecuteNonQuery();
             }
-                
+
             GetBackupThresholds();
-            
+
         }
 
         private void bttnLRAddUpdate_Click(object sender, EventArgs e)
@@ -608,7 +603,7 @@ namespace DBAChecksConfigTool
                 cmd.ExecuteNonQuery();
             }
             GetLRThresholds();
-    
+
         }
 
         private void dgvLR_CurrentCellChanged(object sender, EventArgs e)
@@ -619,7 +614,7 @@ namespace DBAChecksConfigTool
                 chkLRInherit.Checked = false;
                 if (dgvLR.Rows[currentRow].Cells["LatencyCriticalThreshold"].Value != DBNull.Value && dgvLR.Rows[currentRow].Cells["LatencyWarningThreshold"].Value != DBNull.Value)
                 {
-                     numLRLatencyCritical.Value = (Int32)dgvLR.Rows[currentRow].Cells["LatencyCriticalThreshold"].Value;
+                    numLRLatencyCritical.Value = (Int32)dgvLR.Rows[currentRow].Cells["LatencyCriticalThreshold"].Value;
                     numLRLatencyWarning.Value = (Int32)dgvLR.Rows[currentRow].Cells["LatencyWarningThreshold"].Value;
                     chkLRLatency.Checked = true;
                 }
@@ -637,7 +632,7 @@ namespace DBAChecksConfigTool
                 {
                     chkLRTimeSinceLast.Checked = false;
                 }
-           
+
                 var instanceID = (Int32)dgvLR.Rows[currentRow].Cells["InstanceID"].Value;
                 var databaseID = (Int32)dgvLR.Rows[currentRow].Cells["DatabaseID"].Value;
 

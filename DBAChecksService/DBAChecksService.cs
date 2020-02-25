@@ -3,13 +3,10 @@ using DBAChecks;
 using Newtonsoft.Json;
 using Quartz;
 using System;
-using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Topshelf;
 using Topshelf.Quartz;
 
@@ -33,19 +30,19 @@ namespace DBAChecksService
     {
         public void Execute(IJobExecutionContext context)
         {
-        
+
             JobDataMap dataMap = context.JobDetail.JobDataMap;
 
-            var cfg=  System.Text.Json.JsonSerializer.Deserialize<CollectionConfig>(dataMap.GetString("CFG"));
-            string type = dataMap.GetString("Type");
-                       
+            var cfg = JsonConvert.DeserializeObject<CollectionConfig>(dataMap.GetString("CFG"));
+            var types = JsonConvert.DeserializeObject<CollectionType[]>(dataMap.GetString("Type"));
+
             if (cfg.SourceConnectionType() == CollectionConfig.ConnectionType.Directory)
-            {            
+            {
                 string folder = cfg.GetSource();
                 Console.WriteLine("Import from folder:" + folder);
                 if (System.IO.Directory.Exists(folder))
-                { 
-                    foreach(string f in System.IO.Directory.GetFiles(folder, "DBAChecks_*.json"))
+                {
+                    foreach (string f in System.IO.Directory.GetFiles(folder, "DBAChecks_*.json"))
                     {
                         string json = System.IO.File.ReadAllText(f);
                         DataSet ds = JsonConvert.DeserializeObject<DataSet>(json);
@@ -53,11 +50,12 @@ namespace DBAChecksService
                         System.IO.File.Delete(f);
                     }
                 }
-                else { 
+                else
+                {
                     Console.WriteLine("Source directory doesn't exist: " + folder);
                 }
             }
-            else if (cfg.SourceConnectionType()== CollectionConfig.ConnectionType.AWSS3)
+            else if (cfg.SourceConnectionType() == CollectionConfig.ConnectionType.AWSS3)
             {
                 Console.WriteLine("Import from S3: " + cfg.Source);
                 var uri = new Amazon.S3.Util.AmazonS3Uri(cfg.Source);
@@ -73,26 +71,18 @@ namespace DBAChecksService
                         {
                             string json = reader.ReadToEnd();
                             DataSet ds = JsonConvert.DeserializeObject<DataSet>(json);
-                            writeDestination(cfg,ds);
+                            writeDestination(cfg, ds);
                             s3Cli.DeleteObject(f.BucketName, f.Key);
                         }
                         Console.WriteLine("Imported:" + f.Key);
                     }
-            
+
                 }
             }
-            else if (type == "General")
+            else
             {
                 SqlConnectionStringBuilder builder = new SqlConnectionStringBuilder(cfg.GetSource());
-                Console.WriteLine("Collect " + type + " from Instance:" + builder.DataSource);
-                var collector = new DBCollector(cfg.GetSource(), cfg.NoWMI);
-                collector.CollectAll();
-                writeDestination(cfg, collector.Data);
-            }
-            else if (type == "Performance")
-            {
-                SqlConnectionStringBuilder builder = new SqlConnectionStringBuilder(cfg.GetSource());
-                Console.WriteLine("Collect " + type + " from Instance:" + builder.DataSource);
+                Console.WriteLine("Collect " + string.Join(", ", types.Select(s => s.ToString()).ToArray()) + " from Instance:" + builder.DataSource);
                 var collector = new DBCollector(cfg.GetSource(), cfg.NoWMI);
                 if (context.PreviousFireTimeUtc.HasValue)
                 {
@@ -102,12 +92,12 @@ namespace DBAChecksService
                 {
                     collector.CPUCollectionPeriod = 30;
                 }
-                collector.CollectPerformance();
+                collector.Collect(types);
                 writeDestination(cfg, collector.Data);
             }
 
-           
-           
+
+
 
         }
 
@@ -129,7 +119,7 @@ namespace DBAChecksService
 
                 s3Cli.PutObject(r);
             }
-            else if (cfg.DestinationConnectionType()== CollectionConfig.ConnectionType.Directory)
+            else if (cfg.DestinationConnectionType() == CollectionConfig.ConnectionType.Directory)
             {
                 if (System.IO.Directory.Exists(destination))
                 {
@@ -170,61 +160,28 @@ namespace DBAChecksService
                     foreach (CollectionConfig cfg in configs)
                     {
 
-                        string cfgString = System.Text.Json.JsonSerializer.Serialize<CollectionConfig>(cfg);
-                        if (cfg.SourceConnectionType() == CollectionConfig.ConnectionType.AWSS3 || cfg.SourceConnectionType() == CollectionConfig.ConnectionType.Directory)
-                        {
-                            
-                            ScheduleJobServiceConfiguratorExtensions.ScheduleQuartzJob<DBAChecksService>(service, q =>
-                             q.WithJob(() =>
-                             JobBuilder.Create<DBAChecksJob>()
-                                  .UsingJobData("Type", "Import")
-                                  .UsingJobData("CFG",cfgString)
-                                 .Build())
+                        string cfgString = JsonConvert.SerializeObject(cfg);
 
-                               .AddTrigger(() => TriggerBuilder.Create()
-                                     .WithSimpleSchedule(b => b
-                                         .WithIntervalInSeconds(1)
-                                         .WithRepeatCount(0))
-                                     .Build())
-
-                             .AddTrigger(() => TriggerBuilder.Create()
-                                 .WithCronSchedule(cfg.ImportCollectionChron)
-                                 .Build()
-                                 ));
-                        }
-                        else
+                        foreach (var s in cfg.GetSchedule())
                         {
-                            ScheduleJobServiceConfiguratorExtensions.ScheduleQuartzJob<DBAChecksService>(service, q =>
-                             q.WithJob(() =>
-                             JobBuilder.Create<DBAChecksJob>()
-                                  .UsingJobData("Type", "General")
-                                  .UsingJobData("CFG", cfgString)
-                                 .Build())
-                               // Trigger general collection to occur when the service first starts
-                               .AddTrigger(() => TriggerBuilder.Create()
-                                     .WithSimpleSchedule(b => b
-                                         .WithIntervalInSeconds(1)
-                                         .WithRepeatCount(0))
-                                     .Build())
-                               // Add a second trigger for the defined schedule
-                             .AddTrigger(() => TriggerBuilder.Create()
-                                 .WithCronSchedule(cfg.GeneralCollectionChron)
-                                 .Build()
-                                 ));
-                            if (cfg.PerformanceCollectionChron.Length > 0)
-                            {
-                                ScheduleJobServiceConfiguratorExtensions.ScheduleQuartzJob<DBAChecksService>(service, q =>
-                               q.WithJob(() =>
+
+                            var x = ScheduleJobServiceConfiguratorExtensions.ScheduleQuartzJob<DBAChecksService>(service, q =>
+                              q.WithJob(() =>
                               JobBuilder.Create<DBAChecksJob>()
-                                   .UsingJobData("Type", "Performance")
+                                   .UsingJobData("Type", JsonConvert.SerializeObject(s.CollectionTypes))
                                    .UsingJobData("CFG", cfgString)
                                   .Build())
-
                               .AddTrigger(() => TriggerBuilder.Create()
-                                  .WithCronSchedule(cfg.PerformanceCollectionChron)
-                              .Build()));
-                            }
+                                      .WithSimpleSchedule(b => b
+                                          .WithIntervalInSeconds(1)
+                                          .WithRepeatCount(0))
+                                      .Build())
+                              .AddTrigger(() => TriggerBuilder.Create()
+                                  .WithCronSchedule(s.ChronSchedule)
+                                  .Build()
+                                  ));
                         }
+
 
 
                     }

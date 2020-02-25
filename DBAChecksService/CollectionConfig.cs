@@ -1,12 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.ComponentModel;
 using System.Data.SqlClient;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace DBAChecksService
 {
+
+
     public class CollectionConfig
     {
 
@@ -22,9 +21,28 @@ namespace DBAChecksService
         private string _destination;
         private bool wasEncryptionPerformed = false;
         private bool isEncrypted = false;
-        private string _generalCollectionChron = "0 0 * ? * *"; // Every 1hr
-        private string _performanceCollectionChron = "0 * * ? * *"; //Every 1min
-        private string _importCollectionChron = "0 * * ? * *"; //Every 1min
+
+        public CollectionConfigSchedule[] Schedules { get; set; }
+
+
+        public CollectionConfigSchedule[] GetSchedule()
+        {
+            if (Schedules == null)
+            {
+                if (SourceConnectionType() == ConnectionType.AWSS3 || SourceConnectionType() == ConnectionType.Directory)
+                {
+                    return CollectionConfigSchedule.DefaultImportSchedule();
+                }
+                else
+                {
+                    return CollectionConfigSchedule.DefaultSchedules();
+                }
+            }
+            else
+            {
+                return Schedules;
+            }
+        }
 
         public ConnectionType SourceConnectionType()
         {
@@ -37,14 +55,17 @@ namespace DBAChecksService
         }
 
         // Note if source is SQL connection string, password is encrypted.  Use GetSource() to return with real password
-        public string Source { 
-        get {
+        public string Source
+        {
+            get
+            {
                 return _source;
-            } 
-        set {
+            }
+            set
+            {
 
                 _source = getConnectionStringWithEncryptedPassword(value);
-            } 
+            }
         }
 
         // Note if destination is SQL connection string, password is encrypted.  Use GetDestination() to return with real password
@@ -83,46 +104,14 @@ namespace DBAChecksService
 
         public string AWSProfile { get; set; }
 
-   
+
 
         public string GenerateFileName()
         {
             return "DBAChecks_" + DateTime.UtcNow.ToString("yyyy-MM-dd HHmmss") + Guid.NewGuid().ToString() + ".json";
         }
 
-        public string ImportCollectionChron
-        {
-            get
-            {
-                return _importCollectionChron;
-            }
-            set
-            {
-                _importCollectionChron = value;
-            }
-        }
-        public string GeneralCollectionChron
-        {
-            get
-            {
-                return _generalCollectionChron;
-            }
-            set
-            {
-                _generalCollectionChron = value;
-            }
-        }
-        public string PerformanceCollectionChron
-        {
-            get
-            {
-                return _performanceCollectionChron;
-            }
-            set
-            {
-                _performanceCollectionChron = value;
-            }
-        }
+        [DefaultValue(false)]
         public bool NoWMI { get; set; }
 
         public CollectionConfig(string source, string destination)
@@ -137,7 +126,11 @@ namespace DBAChecksService
 
         private ConnectionType getConnectionType(string connectionString)
         {
-            if (connectionString.StartsWith("s3://") || connectionString.StartsWith("https://"))
+            if (connectionString == null)
+            {
+                return ConnectionType.SQL;
+            }
+            else if (connectionString.StartsWith("s3://") || connectionString.StartsWith("https://"))
             {
                 return ConnectionType.AWSS3;
             }
@@ -202,5 +195,5 @@ namespace DBAChecksService
 
     }
 
-  
+
 }

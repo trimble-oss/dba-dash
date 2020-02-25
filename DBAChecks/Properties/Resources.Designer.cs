@@ -19,7 +19,7 @@ namespace DBAChecks.Properties {
     // class via a tool like ResGen or Visual Studio.
     // To add or remove a member, edit your .ResX file then rerun ResGen
     // with the /str option, or rebuild your VS project.
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "15.0.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "16.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     internal class Resources {
@@ -79,9 +79,9 @@ namespace DBAChecks.Properties {
         ///                      ELSE
         ///    [rest of string was truncated]&quot;;.
         /// </summary>
-        internal static string SQLAgentJobSummary {
+        internal static string SQLAgentJobs {
             get {
-                return ResourceManager.GetString("SQLAgentJobSummary", resourceCulture);
+                return ResourceManager.GetString("SQLAgentJobs", resourceCulture);
             }
         }
         
@@ -117,16 +117,6 @@ namespace DBAChecks.Properties {
         internal static string SQLBlockingSnapshot {
             get {
                 return ResourceManager.GetString("SQLBlockingSnapshot", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to SELECT configuration_id,CAST(value as BIGINT) as value,CAST(value_in_use as BIGINT) as value_in_use
-        ///FROM sys.configurations.
-        /// </summary>
-        internal static string SQLConfigurations {
-            get {
-                return ResourceManager.GetString("SQLConfigurations", resourceCulture);
             }
         }
         
@@ -199,6 +189,26 @@ namespace DBAChecks.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to IF OBJECT_ID(&apos;sys.dm_hadr_database_replica_states&apos;) IS NOT NULL
+        ///BEGIN
+        ///    SELECT database_id,
+        ///           group_database_id,
+        ///           is_primary_replica,
+        ///           synchronization_state,
+        ///           synchronization_health,
+        ///           is_suspended,
+        ///           suspend_reason
+        ///    FROM sys.dm_hadr_database_replica_states
+        ///    WHERE is_local = 1;
+        ///END;.
+        /// </summary>
+        internal static string SQLDatabasesHADR {
+            get {
+                return ResourceManager.GetString("SQLDatabasesHADR", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to DECLARE @DBName SYSNAME
         ///DECLARE @SQL NVARCHAR(MAX)
         ///CREATE TABLE #DBConfig( 
@@ -221,39 +231,6 @@ namespace DBAChecks.Properties {
         internal static string SQLDBConfig {
             get {
                 return ResourceManager.GetString("SQLDBConfig", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to IF OBJECT_ID(&apos;sys.dm_os_volume_stats&apos;) IS NOT NULL
-        ///BEGIN
-        ///	SELECT DISTINCT dovs.volume_mount_point AS Name,
-        ///		dovs.total_bytes as Capacity,
-        ///		dovs.available_bytes as FreeSpace,
-        ///		dovs.logical_volume_name as Label
-        ///	FROM sys.master_files mf
-        ///	CROSS APPLY sys.dm_os_volume_stats(mf.database_id, mf.FILE_ID) dovs
-        ///END.
-        /// </summary>
-        internal static string SQLDrives {
-            get {
-                return ResourceManager.GetString("SQLDrives", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to DECLARE @ProcessorNameString NVARCHAR(512)
-        ///DECLARE @SystemManufacturer NVARCHAR(512)
-        ///DECLARE @SystemProductName NVARCHAR(512)
-        ///DECLARE @IsAgentRunning BIT
-        ///DECLARE @InstantFileInitializationEnabled BIT
-        ///IF OBJECT_ID(&apos;sys.xp_instance_regread&apos;) IS NOT NULL AND EXISTS(SELECT * FROM fn_my_permissions ( &apos;sys.xp_instance_regread&apos;, &apos;OBJECT&apos; ) WHERE permission_name=&apos;EXECUTE&apos;)
-        ///BEGIN  
-        ///	EXEC sys.xp_instance_regread N&apos;HKEY_LOCAL_MACHINE&apos;, N&apos;HARDWARE\DESCRIPTION\System\CentralProcessor\0&apos;, N&apos;ProcessorNameString&apos;,@P [rest of string was truncated]&quot;;.
-        /// </summary>
-        internal static string SQLExtraProperties {
-            get {
-                return ResourceManager.GetString("SQLExtraProperties", resourceCulture);
             }
         }
         
@@ -286,9 +263,26 @@ namespace DBAChecks.Properties {
         ///OPEN DBs
         ///FETCH NEXT FROM [rest of string was truncated]&quot;;.
         /// </summary>
-        internal static string SQLFiles {
+        internal static string SQLDBFiles {
             get {
-                return ResourceManager.GetString("SQLFiles", resourceCulture);
+                return ResourceManager.GetString("SQLDBFiles", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to IF OBJECT_ID(&apos;sys.dm_os_volume_stats&apos;) IS NOT NULL
+        ///BEGIN
+        ///	SELECT DISTINCT dovs.volume_mount_point AS Name,
+        ///		dovs.total_bytes as Capacity,
+        ///		dovs.available_bytes as FreeSpace,
+        ///		dovs.logical_volume_name as Label
+        ///	FROM sys.master_files mf
+        ///	CROSS APPLY sys.dm_os_volume_stats(mf.database_id, mf.FILE_ID) dovs
+        ///END.
+        /// </summary>
+        internal static string SQLDrives {
+            get {
+                return ResourceManager.GetString("SQLDrives", resourceCulture);
             }
         }
         
@@ -310,29 +304,9 @@ namespace DBAChecks.Properties {
         ///	WHERE database_id &lt;&gt; 32767;
         ///END.
         /// </summary>
-        internal static string SQLFunctionPerformance {
+        internal static string SQLFunctionStats {
             get {
-                return ResourceManager.GetString("SQLFunctionPerformance", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to IF OBJECT_ID(&apos;sys.dm_hadr_database_replica_states&apos;) IS NOT NULL
-        ///BEGIN
-        ///    SELECT database_id,
-        ///           group_database_id,
-        ///           is_primary_replica,
-        ///           synchronization_state,
-        ///           synchronization_health,
-        ///           is_suspended,
-        ///           suspend_reason
-        ///    FROM sys.dm_hadr_database_replica_states
-        ///    WHERE is_local = 1;
-        ///END;.
-        /// </summary>
-        internal static string SQLHADRDB {
-            get {
-                return ResourceManager.GetString("SQLHADRDB", resourceCulture);
+                return ResourceManager.GetString("SQLFunctionStats", resourceCulture);
             }
         }
         
@@ -370,9 +344,9 @@ namespace DBAChecks.Properties {
         ///        INNER JOIN msdb.dbo.backupset bs ON rsh.backup_set_id = bs.backup_set_id
         ///        INNER JOIN msdb.dbo.restoref [rest of string was truncated]&quot;;.
         /// </summary>
-        internal static string SQLLogShipping {
+        internal static string SQLLogRestores {
             get {
-                return ResourceManager.GetString("SQLLogShipping", resourceCulture);
+                return ResourceManager.GetString("SQLLogRestores", resourceCulture);
             }
         }
         
@@ -403,22 +377,6 @@ namespace DBAChecks.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to SELECT CAST(SERVERPROPERTY(&apos;BuildClrVersion&apos;) as nvarchar(128)) as BuildClrVersion ,
-        ///CAST(SERVERPROPERTY(&apos;Collation&apos;) as nvarchar(128)) as Collation ,
-        ///CAST(SERVERPROPERTY(&apos;CollationID&apos;) as int) as CollationID ,
-        ///CAST(SERVERPROPERTY(&apos;ComparisonStyle&apos;) as int) as ComparisonStyle ,
-        ///CAST(SERVERPROPERTY(&apos;ComputerNamePhysicalNetBIOS&apos;) as nvarchar(128)) as ComputerNamePhysicalNetBIOS ,
-        ///CAST(SERVERPROPERTY(&apos;Edition&apos;) as nvarchar(128)) as Edition ,
-        ///CAST(SERVERPROPERTY(&apos;EditionID&apos;) as bigint) as EditionID ,
-        ///CAS [rest of string was truncated]&quot;;.
-        /// </summary>
-        internal static string SQLProperties {
-            get {
-                return ResourceManager.GetString("SQLProperties", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to IF OBJECT_ID(&apos;sys.dm_exec_procedure_stats&apos;) IS NOT NULL
         ///BEGIN
         ///	SELECT object_id,
@@ -436,9 +394,51 @@ namespace DBAChecks.Properties {
         ///	WHERE database_id &lt;&gt; 32767;
         ///END.
         /// </summary>
-        internal static string SQLStoredProcPerformance {
+        internal static string SQLProcStats {
             get {
-                return ResourceManager.GetString("SQLStoredProcPerformance", resourceCulture);
+                return ResourceManager.GetString("SQLProcStats", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to DECLARE @ProcessorNameString NVARCHAR(512)
+        ///DECLARE @SystemManufacturer NVARCHAR(512)
+        ///DECLARE @SystemProductName NVARCHAR(512)
+        ///DECLARE @IsAgentRunning BIT
+        ///DECLARE @InstantFileInitializationEnabled BIT
+        ///IF OBJECT_ID(&apos;sys.xp_instance_regread&apos;) IS NOT NULL AND EXISTS(SELECT * FROM fn_my_permissions ( &apos;sys.xp_instance_regread&apos;, &apos;OBJECT&apos; ) WHERE permission_name=&apos;EXECUTE&apos;)
+        ///BEGIN  
+        ///	EXEC sys.xp_instance_regread N&apos;HKEY_LOCAL_MACHINE&apos;, N&apos;HARDWARE\DESCRIPTION\System\CentralProcessor\0&apos;, N&apos;ProcessorNameString&apos;,@P [rest of string was truncated]&quot;;.
+        /// </summary>
+        internal static string SQLServerExtraProperties {
+            get {
+                return ResourceManager.GetString("SQLServerExtraProperties", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to SELECT CAST(SERVERPROPERTY(&apos;BuildClrVersion&apos;) as nvarchar(128)) as BuildClrVersion ,
+        ///CAST(SERVERPROPERTY(&apos;Collation&apos;) as nvarchar(128)) as Collation ,
+        ///CAST(SERVERPROPERTY(&apos;CollationID&apos;) as int) as CollationID ,
+        ///CAST(SERVERPROPERTY(&apos;ComparisonStyle&apos;) as int) as ComparisonStyle ,
+        ///CAST(SERVERPROPERTY(&apos;ComputerNamePhysicalNetBIOS&apos;) as nvarchar(128)) as ComputerNamePhysicalNetBIOS ,
+        ///CAST(SERVERPROPERTY(&apos;Edition&apos;) as nvarchar(128)) as Edition ,
+        ///CAST(SERVERPROPERTY(&apos;EditionID&apos;) as bigint) as EditionID ,
+        ///CAS [rest of string was truncated]&quot;;.
+        /// </summary>
+        internal static string SQLServerProperties {
+            get {
+                return ResourceManager.GetString("SQLServerProperties", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to SELECT configuration_id,CAST(value as BIGINT) as value,CAST(value_in_use as BIGINT) as value_in_use
+        ///FROM sys.configurations.
+        /// </summary>
+        internal static string SQLSysConfig {
+            get {
+                return ResourceManager.GetString("SQLSysConfig", resourceCulture);
             }
         }
         

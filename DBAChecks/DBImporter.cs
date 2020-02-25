@@ -1,16 +1,13 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace DBAChecks
 {
-   public  class DBImporter
+    public class DBImporter
     {
- 
+
         public DBImporter()
         {
 
@@ -21,7 +18,7 @@ namespace DBAChecks
             logError(errorSource, errorMessage, dt.DataSet);
         }
 
-            private void logError(string errorSource, string errorMessage,DataSet Data)
+        private void logError(string errorSource, string errorMessage, DataSet Data)
         {
             DataTable dtErrors;
             if (Data.Tables.Contains("Errors"))
@@ -54,14 +51,14 @@ namespace DBAChecks
             DateTime snapshotDate = (DateTime)rInstance["SnapshotDateUTC"];
             Int32 instanceID;
             string connectionID = (string)rInstance["ConnectionID"];
-         
-            instanceID = updateInstance(connectionString,rInstance);
-      
-        
+
+            instanceID = updateInstance(connectionString, rInstance);
+
+
             updateDB(connectionString, instanceID, snapshotDate, Data);
-            foreach(DataTable dt in Data.Tables)
+            foreach (DataTable dt in Data.Tables)
             {
-                string[] tables = { "Drives", "ServerProperties","Backups","AgentJobs","LogRestores","DBFiles","DBConfig","Corruption","DatabasesHADR","SysConfig","OSInfo","TraceFlags","ProcStats","FunctionStats","CPU","Drivers","BlockingSnapshot","IOStats","Waits" };
+                string[] tables = { "Drives", "ServerProperties", "Backups", "AgentJobs", "LogRestores", "DBFiles", "DBConfig", "Corruption", "DatabasesHADR", "SysConfig", "OSInfo", "TraceFlags", "ProcStats", "FunctionStats", "CPU", "Drivers", "BlockingSnapshot", "IOStats", "Waits" };
                 if (tables.Contains(dt.TableName))
                 {
                     update(connectionString, instanceID, snapshotDate, dt);
@@ -74,7 +71,7 @@ namespace DBAChecks
 
         private void updateServerExtraProperties(string connectionString, Int32 instanceID, DateTime SnapshotDate, DataSet ds)
         {
-            if (ds.Tables.Contains("ServerExtraProperties") && ds.Tables["ServerExtraProperties"].Rows.Count==1)
+            if (ds.Tables.Contains("ServerExtraProperties") && ds.Tables["ServerExtraProperties"].Rows.Count == 1)
             {
                 try
                 {
@@ -105,7 +102,7 @@ namespace DBAChecks
                         cmd.ExecuteNonQuery();
                     }
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     logError("Import:ServerExtraProperties", ex.Message, ds);
                 }
@@ -138,7 +135,7 @@ namespace DBAChecks
             }
         }
 
-        private void update(string connectionString, Int32 instanceID, DateTime SnapshotDate, DataSet ds,string TableName)
+        private void update(string connectionString, Int32 instanceID, DateTime SnapshotDate, DataSet ds, string TableName)
         {
             if (ds.Tables.Contains(TableName))
             {
@@ -159,15 +156,15 @@ namespace DBAChecks
                         cmd.ExecuteNonQuery();
                     }
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
-                    logError("Import:" + TableName, ex.Message,ds );
+                    logError("Import:" + TableName, ex.Message, ds);
                 }
             }
         }
 
 
-            private void InsertErrors(string connectionString, Int32 instanceID, DateTime SnapshotDate, DataSet ds)
+        private void InsertErrors(string connectionString, Int32 instanceID, DateTime SnapshotDate, DataSet ds)
         {
             if (ds.Tables.Contains("Errors") && ds.Tables["Errors"].Rows.Count > 0)
             {
@@ -185,11 +182,11 @@ namespace DBAChecks
             }
         }
 
-                
+
 
         private Int32 updateInstance(string connectionString, DataRow rInstance)
         {
-            
+
             var cn = new SqlConnection(connectionString);
             using (cn)
             {
@@ -245,7 +242,7 @@ namespace DBAChecks
                         cmd.ExecuteNonQuery();
                     }
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     logError("Import:Database", ex.Message, ds);
                 }
