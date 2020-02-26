@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project ToolsVersion="Current" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
     <FullPath>Debug</FullPath>
     <OutputPath>bin\Debug</OutputPath>
@@ -12,7 +12,7 @@
     <TargetDatasetFolder>DBAChecks/Datasets</TargetDatasetFolder>
     <TargetDatasourceFolder>DBAChecks/Data Sources</TargetDatasourceFolder>
     <TargetReportPartFolder>DBAChecks/Report Parts</TargetReportPartFolder>
-    <TargetServerURL />
+    <TargetServerURL>http://ssrsserver/ReportServer</TargetServerURL>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'DebugLocal' ">
     <FullPath>DebugLocal</FullPath>
