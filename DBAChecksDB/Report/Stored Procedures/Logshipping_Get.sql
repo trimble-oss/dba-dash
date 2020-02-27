@@ -36,8 +36,9 @@ SELECT InstanceID,
        LogRestoresDate,
        Status,
        StatusDescription,
-	   LSS.last_file
+	   f.FileName AS last_file
 FROM dbo.LogShippingStatus LSS
+CROSS APPLY dbo.ParseFileName(LSS.last_file) f
 WHERE EXISTS(SELECT 1 FROM @Instances I WHERE I.InstanceID = LSS.InstanceID)
 AND (Status<=@FilterLevel)
 ORDER BY Status,TotalTimeBehind DESC

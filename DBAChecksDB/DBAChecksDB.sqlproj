@@ -222,6 +222,7 @@
     <Build Include="dbo\Tables\TraceFlagHistory.sql" />
     <Build Include="Report\Stored Procedures\Waits_Get.sql" />
     <Build Include="Report\Stored Procedures\InstanceInfo_Get.sql" />
+    <Build Include="dbo\Views\LogShippingStatusSummary.sql" />
   </ItemGroup>
   <ItemGroup>
     <PostDeploy Include="Script.PostDeployment1.sql" />
