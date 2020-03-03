@@ -223,6 +223,8 @@
     <Build Include="Report\Stored Procedures\Waits_Get.sql" />
     <Build Include="Report\Stored Procedures\InstanceInfo_Get.sql" />
     <Build Include="dbo\Views\LogShippingStatusSummary.sql" />
+    <Build Include="dbo\Functions\ParseFileName.sql" />
+    <Build Include="Report\Stored Procedures\LogShippingSummary_Get.sql" />
   </ItemGroup>
   <ItemGroup>
     <PostDeploy Include="Script.PostDeployment1.sql" />
