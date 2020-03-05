@@ -94,8 +94,6 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CollectionConfig.cs" />
-    <Compile Include="CollectionConfigSchedule.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="DBAChecksService.cs" />
@@ -108,6 +106,10 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\DBAChecksServiceConfig\DBAChecksServiceConfig.csproj">
+      <Project>{799e3ec5-e66d-4953-9182-38e7471770a0}</Project>
+      <Name>DBAChecksServiceConfig</Name>
+    </ProjectReference>
     <ProjectReference Include="..\DBAChecks\DBAChecks.csproj">
       <Project>{176c91f1-d5f4-4695-b1ed-2c021249b88f}</Project>
       <Name>DBAChecks</Name>

@@ -188,7 +188,7 @@ namespace DBAChecksService
                 });
 
                 //Setup Account that window service use to run.  
-                configure.RunAsPrompt();
+               // configure.RunAsPrompt();
                 //configure.RunAsLocalSystem();
                 configure.SetServiceName("DBAChecksService");
                 configure.SetDisplayName("DBAChecksService");

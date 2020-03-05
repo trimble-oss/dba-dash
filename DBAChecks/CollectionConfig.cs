@@ -13,7 +13,8 @@ namespace DBAChecksService
         {
             SQL,
             Directory,
-            AWSS3
+            AWSS3,
+            Invalid
         }
 
         private string myString = "g&hAs2&mVOLwE6DqO!I5";
@@ -44,6 +45,53 @@ namespace DBAChecksService
             }
         }
 
+        public bool Validate()
+        {
+            return ValidateDestination() && ValidateSource();
+        }
+
+        private bool validate(string connectionString, ConnectionType typ)
+        {
+            if (typ == ConnectionType.Directory)
+            {
+                if (System.IO.Directory.Exists(connectionString) == false)
+                {
+                    return false;
+                }
+            }
+            if (typ == ConnectionType.SQL)
+            {
+                if (validateSQLConnection(connectionString) == false)
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        public bool ValidateSource()
+        {
+            return validate(_source, SourceConnectionType());
+        }
+        public bool ValidateDestination()
+        {
+            return validate(_destination, DestinationConnectionType());
+        }
+
+         private bool validateSQLConnection(string connectionString)
+        {
+            SqlConnection cn = new SqlConnection(connectionString);
+            try
+            {
+                cn.Open();
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
         public ConnectionType SourceConnectionType()
         {
             return getConnectionType(_source);
@@ -54,6 +102,7 @@ namespace DBAChecksService
             return getConnectionType(_destination);
         }
 
+     
         // Note if source is SQL connection string, password is encrypted.  Use GetSource() to return with real password
         public string Source
         {
@@ -63,8 +112,7 @@ namespace DBAChecksService
             }
             set
             {
-
-                _source = getConnectionStringWithEncryptedPassword(value);
+                 _source = getConnectionStringWithEncryptedPassword(value);   
             }
         }
 
@@ -77,7 +125,7 @@ namespace DBAChecksService
             }
             set
             {
-                _destination = getConnectionStringWithEncryptedPassword(value);
+                   _destination = getConnectionStringWithEncryptedPassword(value);
             }
         }
 
@@ -126,9 +174,9 @@ namespace DBAChecksService
 
         private ConnectionType getConnectionType(string connectionString)
         {
-            if (connectionString == null)
+            if (connectionString == null || connectionString.Length<3)
             {
-                return ConnectionType.SQL;
+                return ConnectionType.Invalid;
             }
             else if (connectionString.StartsWith("s3://") || connectionString.StartsWith("https://"))
             {
@@ -140,7 +188,15 @@ namespace DBAChecksService
             }
             else
             {
-                return ConnectionType.SQL;
+                try
+                {
+                    SqlConnectionStringBuilder builder = new SqlConnectionStringBuilder(connectionString);
+                    return ConnectionType.SQL;
+                }
+                catch
+                {
+                    return ConnectionType.Invalid;
+                }              
             }
         }
 
