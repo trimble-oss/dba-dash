@@ -1,4 +1,4 @@
-﻿CREATE TABLE [dbo].[IOStats] (
+﻿CREATE TABLE [Switch].[IOStats] (
     [InstanceID]           INT           NOT NULL,
     [FileID]               INT           NULL,
     [database_id]          SMALLINT      NOT NULL,
@@ -13,11 +13,6 @@
     [io_stall_write_ms]    BIGINT        NOT NULL,
     [io_stall]             BIGINT        NOT NULL,
     [size_on_disk_bytes]   BIGINT        NOT NULL,
-    CONSTRAINT [PK_IOStats] PRIMARY KEY CLUSTERED ([InstanceID] ASC, [SnapshotDate] ASC, [database_id] ASC, [file_id] ASC) WITH (DATA_COMPRESSION = PAGE) ON [PS_IOStats] ([SnapshotDate]),
-    CONSTRAINT [FK_IOStats_FileID] FOREIGN KEY ([FileID]) REFERENCES [dbo].[DBFiles] ([FileID])
-) ON [PS_IOStats] ([SnapshotDate]);
-
-
-
-
+    CONSTRAINT [PK_IOStats] PRIMARY KEY CLUSTERED ([InstanceID] ASC, [SnapshotDate] ASC, [database_id] ASC, [file_id] ASC) WITH (DATA_COMPRESSION = PAGE)
+);
 

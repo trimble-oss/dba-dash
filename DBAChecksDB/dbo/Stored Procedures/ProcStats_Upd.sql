@@ -35,6 +35,7 @@ WITH t AS (
 							 AND a.cached_time = b.cached_time
 							 AND b.InstanceID = @InstanceID
 							 AND a.current_time_utc > b.current_time_utc
+							 AND a.total_elapsed_time>= b.total_elapsed_time
 	JOIN dbo.Databases d ON a.database_id = d.database_id AND D.InstanceID=@InstanceID
 	JOIN dbo.Procs p ON a.OBJECT_NAME = p.OBJECT_NAME AND p.object_id = a.object_id AND p.DatabaseID = d.DatabaseID
 	WHERE D.IsActive=1
@@ -42,6 +43,7 @@ WITH t AS (
 )
 INSERT INTO dbo.ProcStats
 (
+	InstanceID,
     ProcID,
     SnapshotDate,
     PeriodTime,
@@ -53,7 +55,8 @@ INSERT INTO dbo.ProcStats
     execution_count,
     IsCompile
 )
-SELECT t.ProcID,
+SELECT @InstanceID,
+		t.ProcID,
 	   t.current_time_utc,
 	   t.diff,
        t.total_worker_time,
@@ -66,7 +69,7 @@ SELECT t.ProcID,
 FROM T
 WHERE t.diff IS NOT NULL
 AND t.execution_count>0
-AND NOT EXISTS(SELECT 1 FROM dbo.ProcStats PS WHERE PS.ProcID = T.ProcID AND PS.SnapshotDate = T.current_time_utc)
+AND NOT EXISTS(SELECT 1 FROM dbo.ProcStats PS WHERE PS.ProcID = T.ProcID AND PS.InstanceID=@InstanceID AND PS.SnapshotDate = T.current_time_utc)
 
 DELETE Staging.ProcStats WHERE InstanceID=@InstanceID
 INSERT INTO Staging.ProcStats(
@@ -95,3 +98,44 @@ SELECT @InstanceID
            ,[execution_count]
            ,[current_time_utc]
 FROM @ProcStats
+
+DECLARE @MaxDate DATETIME 
+SELECT @MaxDate =MAX(SnapshotDate)
+FROM dbo.ProcStats_60MIN 
+WHERE InstanceID = @InstanceID
+
+
+BEGIN TRAN
+DELETE dbo.ProcStats_60MIN WHERE InstanceID=@InstanceID AND SnapshotDate=@MaxDate
+INSERT INTO dbo.ProcStats_60MIN
+(
+	InstanceID,
+    ProcID,
+    SnapshotDate,
+    PeriodTime,
+    total_worker_time,
+    total_elapsed_time,
+    total_logical_reads,
+    total_logical_writes,
+    total_physical_reads,
+    execution_count,
+    IsCompile
+)
+SELECT PS.InstanceID,
+	PS.ProcID,
+	CONVERT(DATETIME,SUBSTRING(CONVERT(VARCHAR,SnapshotDate,120),0,14) + ':00',120) AS SnapshotDate,
+	MAX(SUM(PeriodTime)) OVER(PARTITION BY PS.InstanceID,CONVERT(DATETIME,SUBSTRING(CONVERT(VARCHAR,SnapshotDate,120),0,14) + ':00',120)) PeriodTime,
+	SUM(total_worker_time) total_worker_time,
+	SUM(total_elapsed_time) total_elapsed_time,
+	SUM(total_logical_reads) total_logical_reads,
+	SUM(total_logical_writes) total_logical_writes,
+	SUM(total_physical_reads) total_physical_reads,
+	SUM(execution_count) execution_count,
+	CAST(MAX(CAST(IsCompile AS INT)) AS BIT) IsCompile
+FROM dbo.ProcStats PS
+WHERE PS.InstanceID = @InstanceID 
+AND PS.SnapshotDate >=@MaxDate
+GROUP BY PS.ProcID,PS.InstanceID,
+	CONVERT(DATETIME,SUBSTRING(CONVERT(VARCHAR,SnapshotDate,120),0,14) + ':00',120) 
+ OPTION(OPTIMIZE FOR(@MaxDate='9999-12-31'))
+COMMIT

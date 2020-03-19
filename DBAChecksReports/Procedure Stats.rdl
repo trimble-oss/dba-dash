@@ -38,6 +38,9 @@
           <QueryParameter Name="@IsFunction">
             <Value>=Parameters!IsFunction.Value</Value>
           </QueryParameter>
+          <QueryParameter Name="@UTCOffset">
+            <Value>=Parameters!UTCOffset.Value</Value>
+          </QueryParameter>
         </QueryParameters>
         <CommandType>StoredProcedure</CommandType>
         <CommandText>Report.ProcStats</CommandText>
@@ -227,7 +230,7 @@
                 <ChartMember>
                   <Group Name="Chart1_CategoryGroup1">
                     <GroupExpressions>
-                      <GroupExpression>=System.TimeZone.CurrentTimeZone.ToLocalTime(Fields!SnapshotDate.Value)</GroupExpression>
+                      <GroupExpression>=Fields!SnapshotDate.Value</GroupExpression>
                     </GroupExpressions>
                   </Group>
                   <SortExpressions>
@@ -235,7 +238,7 @@
                       <Value>=Fields!SnapshotDate.Value</Value>
                     </SortExpression>
                   </SortExpressions>
-                  <Label>=System.TimeZone.CurrentTimeZone.ToLocalTime(Fields!SnapshotDate.Value)</Label>
+                  <Label>=Fields!SnapshotDate.Value</Label>
                 </ChartMember>
               </ChartMembers>
             </ChartCategoryHierarchy>
@@ -1303,6 +1306,23 @@ CDATE(Parameters!ToDateUser.Value).AddMinutes(IIF(ISNOTHING(Parameters!ToDateUse
       </DefaultValue>
       <Prompt>DateFormat</Prompt>
     </ReportParameter>
+    <ReportParameter Name="UTCOffset">
+      <DataType>String</DataType>
+      <DefaultValue>
+        <Values>
+          <Value>=System.TimeZone.CurrentTimeZone.ToLocalTime(DateTime.UtcNow.Date).Subtract(DateTime.Now.Date).TotalMinutes</Value>
+        </Values>
+      </DefaultValue>
+      <Hidden>true</Hidden>
+      <ValidValues>
+        <ParameterValues>
+          <ParameterValue>
+            <Value>=System.TimeZone.CurrentTimeZone.ToLocalTime(DateTime.UtcNow.Date).Subtract(DateTime.Now.Date).TotalMinutes</Value>
+            <Label>=System.TimeZone.CurrentTimeZone.ToLocalTime(DateTime.UtcNow.Date).Subtract(DateTime.Now.Date).TotalMinutes</Label>
+          </ParameterValue>
+        </ParameterValues>
+      </ValidValues>
+    </ReportParameter>
   </ReportParameters>
   <ReportParametersLayout>
     <GridLayoutDefinition>
@@ -1378,6 +1398,11 @@ CDATE(Parameters!ToDateUser.Value).AddMinutes(IIF(ISNOTHING(Parameters!ToDateUse
           <ColumnIndex>1</ColumnIndex>
           <RowIndex>3</RowIndex>
           <ParameterName>DateFormat</ParameterName>
+        </CellDefinition>
+        <CellDefinition>
+          <ColumnIndex>2</ColumnIndex>
+          <RowIndex>3</RowIndex>
+          <ParameterName>UTCOffset</ParameterName>
         </CellDefinition>
       </CellDefinitions>
     </GridLayoutDefinition>

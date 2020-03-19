@@ -1,4 +1,4 @@
-﻿CREATE PROC Report.ProcedureInsights(@UTCOffset INT = 0, @Top INT=30,@InstanceID INT,@DatabaseID INT=NULL,@Type VARCHAR(50)='PROCEDURE')
+﻿CREATE PROC [Report].[ProcedureInsights](@UTCOffset INT = 0, @Top INT=30,@InstanceID INT,@DatabaseID INT=NULL,@Type VARCHAR(50)='PROCEDURE')
 WITH EXEC AS OWNER
 AS
 DECLARE @SQL NVARCHAR(MAX)=N'
@@ -12,11 +12,12 @@ SELECT CAST(DATEADD(mi, @UTCOffset, PS.SnapshotDate) AS DATE) DT,
        SUM(PS.total_elapsed_time) TotalDuration,
 	   SUM(PS.execution_count) ExecutionCount,
 	   SUM(SUM(PS.total_elapsed_time)) OVER(PARTITION BY ' + CASE @Type WHEN 'PROCEDURE' THEN 'P.ProcID' WHEN 'FUNCTION' THEN 'P.FunctionID' ELSE NULL END + ') TotalDurationAllDays
-FROM ' + CASE @Type WHEN 'PROCEDURE' THEN 'dbo.ProcStats' WHEN 'FUNCTION' THEN 'dbo.FunctionStats' ELSE NULL END + ' AS PS
+FROM ' + CASE @Type WHEN 'PROCEDURE' THEN 'dbo.ProcStats_60MIN' WHEN 'FUNCTION' THEN 'dbo.FunctionStats_60MIN' ELSE NULL END + ' AS PS
     ' + CASE @Type WHEN 'PROCEDURE' THEN 'JOIN dbo.Procs P ON P.ProcID = PS.ProcID' WHEN 'FUNCTION' THEN 'JOIN dbo.Functions P ON P.FunctionID = PS.FunctionID' ELSE NULL END + '
     JOIN dbo.Databases D ON D.DatabaseID = P.DatabaseID
     JOIN dbo.Instances I ON I.InstanceID = D.InstanceID
 WHERE I.InstanceID = @InstanceID
+AND PS.InstanceID = @InstanceID
 ' + CASE WHEN @DatabaseID IS NULL THEN '' ELSE 'AND D.DatabaseID= @DatabaseID' END + '
 AND PS.SnapshotDate>= DATEADD(d,-90,CAST(DATEADD(mi,-@UTCOffset,GETUTCDATE()) AS DATE))
 GROUP BY CAST(DATEADD(mi, @UTCOffset, PS.SnapshotDate) AS DATE),

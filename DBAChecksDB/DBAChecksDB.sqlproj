@@ -26,6 +26,10 @@
     <DefaultCollation>SQL_Latin1_General_CP1_CI_AS</DefaultCollation>
     <DefaultFilegroup>PRIMARY</DefaultFilegroup>
     <PageVerify>CHECKSUM</PageVerify>
+    <QueryStoreDesiredState>ReadWrite</QueryStoreDesiredState>
+    <QueryStoreStaleQueryThreshold>15</QueryStoreStaleQueryThreshold>
+    <QueryStoreMaxStorageSize>512</QueryStoreMaxStorageSize>
+    <QueryStoreMaxPlansPerQuery>50</QueryStoreMaxPlansPerQuery>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <OutputPath>bin\Release\</OutputPath>
@@ -71,6 +75,9 @@
     <Folder Include="Security\" />
     <Folder Include="Staging\" />
     <Folder Include="Staging\Tables\" />
+    <Folder Include="Switch\" />
+    <Folder Include="Switch\Tables\" />
+    <Folder Include="Storage\" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="dbo\Tables\LogRestoreThresholds.sql" />
@@ -225,8 +232,49 @@
     <Build Include="dbo\Views\LogShippingStatusSummary.sql" />
     <Build Include="dbo\Functions\ParseFileName.sql" />
     <Build Include="Report\Stored Procedures\LogShippingSummary_Get.sql" />
+    <Build Include="dbo\Tables\Waits_60MIN.sql" />
+    <Build Include="dbo\Tables\ProcStats_60MIN.sql" />
+    <Build Include="dbo\Tables\FunctionStats_60MIN.sql" />
+    <Build Include="Switch\Tables\ProcStats.sql" />
+    <Build Include="Switch\Tables\FunctionStats.sql" />
+    <Build Include="dbo\Views\NonDefaultDBConfig.sql" />
+    <Build Include="dbo\Functions\PartitionBoundaryHelper.sql" />
+    <Build Include="dbo\Stored Procedures\ProcStats_Cleanup.sql" />
+    <Build Include="dbo\Stored Procedures\PartitionTable_Cleanup.sql" />
+    <Build Include="dbo\Stored Procedures\Partitions_Add.sql" />
+    <Build Include="dbo\Stored Procedures\DailyPartitions_Add.sql" />
+    <Build Include="Storage\PF_ProcStats.sql" />
+    <Build Include="Storage\PF_FunctionStats.sql" />
+    <Build Include="Storage\PS_ProcStats.sql" />
+    <Build Include="Storage\PS_FunctionStats.sql" />
+    <Build Include="Security\Switch.sql" />
+    <Build Include="Switch\Tables\Waits.sql" />
+    <Build Include="Switch\Tables\IOStats.sql" />
+    <Build Include="Switch\Tables\CPU.sql" />
+    <Build Include="Switch\Tables\BlockingSnapshot.sql" />
+    <Build Include="dbo\Tables\DataRetention.sql" />
+    <Build Include="Storage\PF_Waits.sql" />
+    <Build Include="Storage\PF_IOStats.sql" />
+    <Build Include="Storage\PF_CPU.sql" />
+    <Build Include="Storage\PF_BlockingSnapshot.sql" />
+    <Build Include="Storage\PS_Waits.sql" />
+    <Build Include="Storage\PS_IOStats.sql" />
+    <Build Include="Storage\PS_CPU.sql" />
+    <Build Include="Storage\PS_BlockingSnapshot.sql" />
+    <Build Include="dbo\Stored Procedures\PurgeData.sql" />
   </ItemGroup>
   <ItemGroup>
     <PostDeploy Include="Script.PostDeployment1.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <ArtifactReference Include="$(DacPacRootPath)\Extensions\Microsoft\SQLDB\Extensions\SqlServer\130\SqlSchemas\master.dacpac">
+      <HintPath>$(DacPacRootPath)\Extensions\Microsoft\SQLDB\Extensions\SqlServer\130\SqlSchemas\master.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+      <DatabaseVariableLiteralValue>master</DatabaseVariableLiteralValue>
+    </ArtifactReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="DBAChecksDB.publish.xml" />
+    <None Include="Schema_Compare.scmp" />
   </ItemGroup>
 </Project>

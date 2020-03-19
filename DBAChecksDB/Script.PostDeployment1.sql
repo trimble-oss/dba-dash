@@ -141,3 +141,22 @@ UPDATE WT
 FROM dbo.WaitType wt 
 JOIN @waits t ON  t.WaitType = wt.WaitType
 WHERE WT.IsCriticalWait<>t.IsCriticalWait
+GO
+EXEC dbo.Partitions_Add
+GO
+
+INSERT INTO dbo.DataRetention
+(
+    TableName,
+    RetentionDays
+)
+SELECT t.TableName,t.RetentionDays
+FROM (VALUES('ProcStats',180),
+				('FunctionStats',180),
+				('Waits',180),
+				('IOStats',365),
+				('CPU',365),
+				('BlockingSnapshot',120)
+				) AS t(TableName,RetentionDays)
+WHERE NOT EXISTS(SELECT 1 FROM dbo.DataRetention DR WHERE DR.TableName = T.TableName)
+

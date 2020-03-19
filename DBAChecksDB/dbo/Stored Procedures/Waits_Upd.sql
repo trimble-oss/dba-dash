@@ -45,6 +45,44 @@ SELECT @InstanceID,
        signal_wait_time_ms
 FROM @Waits;
 
+/* Update 60min aggregation */
+BEGIN TRAN
+DECLARE @MaxDate DATETIME
+SELECT @MaxDate = ISNULL(MAX(SnapshotDate),'19000101') 
+FROM dbo.Waits_60MIN 
+WHERE InstanceID = @InstanceID
+
+DELETE dbo.Waits_60MIN
+WHERE InstanceID=@InstanceID
+AND SnapshotDate=@MaxDate
+
+INSERT INTO dbo.Waits_60MIN
+(
+    InstanceID,
+    SnapshotDate,
+    WaitTypeID,
+    waiting_tasks_count,
+    wait_time_ms,
+    signal_wait_time_ms,
+    sample_ms_diff
+)
+SELECT InstanceID,
+	CONVERT(DATETIME,SUBSTRING(CONVERT(VARCHAR,SnapshotDate,120),0,14) + ':00',120) AS SnapshotDate,
+	WaitTypeID,
+	SUM(waiting_tasks_count) waiting_tasks_count,
+	SUM(wait_time_ms) wait_time_ms,
+	SUM(signal_wait_time_ms) signal_wait_ms,
+	MAX(SUM(sample_ms_diff)) OVER(PARTITION BY InstanceID,CONVERT(DATETIME,SUBSTRING(CONVERT(VARCHAR,SnapshotDate,120),0,14) + ':00',120)) sample_ms_diff
+FROM dbo.Waits w
+WHERE w.InstanceID=@InstanceID
+AND SnapshotDate >= @MaxDate
+GROUP BY InstanceID,
+	CONVERT(DATETIME,SUBSTRING(CONVERT(VARCHAR,SnapshotDate,120),0,14) + ':00',120),
+	WaitTypeID
+ OPTION(OPTIMIZE FOR(@MaxDate='9999-12-31'))
+COMMIT
+/* **************** */
+
 EXEC dbo.CollectionDates_Upd @InstanceID = @InstanceID,
                              @Reference = 'Waits', 
                              @SnapshotDate = @SnapshotDate

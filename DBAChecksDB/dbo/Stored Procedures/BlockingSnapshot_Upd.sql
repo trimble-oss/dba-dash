@@ -2,10 +2,10 @@
 AS
 DECLARE @SnapshotID INT
 INSERT INTO dbo.BlockingSnapshotSummary(InstanceID,SnapshotDateUTC,BlockedSessionCount,BlockedWaitTime,UTCOffset)
-SELECT @InstanceID,MAX(SnapshotDateUTC), COUNT(*),SUM(wait_time),MAX(T.UTCOffset)
+SELECT @InstanceID,@SnapshotDate, COUNT(*),SUM(wait_time),MAX(T.UTCOffset)
 FROM @BlockingSnapshot T
 WHERE blocking_session_id>0
-AND NOT EXISTS(SELECT 1 FROM dbo.BlockingSnapshotSummary SS WHERE SS.InstanceID=@InstanceID AND SS.SnapshotDateUTC = T.SnapshotDateUTC)
+AND NOT EXISTS(SELECT 1 FROM dbo.BlockingSnapshotSummary SS WHERE SS.InstanceID=@InstanceID AND SS.SnapshotDateUTC = @SnapshotDate)
 HAVING(COUNT(*)>0)
 
 SET @SnapshotID = SCOPE_IDENTITY();
@@ -31,6 +31,7 @@ BEGIN;
 		FROM @BlockingSnapshot t
 	)
 	INSERT INTO dbo.BlockingSnapshot(BlockingSnapshotID,
+		   SnapshotDateUTC,
 		   session_id,
 		   blocking_session_id,
 		   Txt,
@@ -46,6 +47,7 @@ BEGIN;
 		   Status,
 		   wait_type)
 	SELECT @SnapshotID,
+		   @SnapshotDate,
 		   session_id,
 		   blocking_session_id,
 		   Txt,

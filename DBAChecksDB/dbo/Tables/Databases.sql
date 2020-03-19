@@ -80,12 +80,20 @@
 
 
 
+
+
 GO
 CREATE UNIQUE NONCLUSTERED INDEX [IX_Databases_InstanceID_database_id_create_date]
-    ON [dbo].[Databases]([InstanceID] ASC, [database_id] ASC, [create_date] ASC);
+    ON [dbo].[Databases]([InstanceID] ASC, [database_id] ASC, [create_date] ASC)
+    INCLUDE([IsActive]);
+
+
 
 
 GO
 CREATE UNIQUE NONCLUSTERED INDEX [FIX_Databases_InstanceID_name]
-    ON [dbo].[Databases]([InstanceID] ASC, [name] ASC) WHERE ([IsActive]=(1));
+    ON [dbo].[Databases]([InstanceID] ASC, [name] ASC)
+    INCLUDE([database_id]) WHERE ([IsActive]=(1));
+
+
 
