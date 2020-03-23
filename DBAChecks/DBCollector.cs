@@ -34,7 +34,9 @@ namespace DBAChecks
         Backups,
         LogRestores,
         ServerProperties,
-        ServerExtraProperties
+        ServerExtraProperties,
+        OSLoadedModules,
+        DBTuningOptions
     }
 
     public class DBCollector
@@ -153,7 +155,7 @@ namespace DBAChecks
                 // Already collected
                 return;
             }
-            else if (IsAzure && (new CollectionType[] { CollectionType.OSInfo, CollectionType.Backups, CollectionType.AgentJobs, CollectionType.DBFiles, CollectionType.LogRestores,CollectionType.Corruption}).Contains(collectionType))
+            else if (IsAzure && (new CollectionType[] { CollectionType.OSInfo, CollectionType.Backups, CollectionType.AgentJobs, CollectionType.DBFiles, CollectionType.LogRestores,CollectionType.Corruption, CollectionType.OSLoadedModules}).Contains(collectionType))
             {
                 return;
             }
@@ -178,6 +180,8 @@ namespace DBAChecks
                 Collect(CollectionType.OSInfo);
                 Collect(CollectionType.TraceFlags);
                 Collect(CollectionType.DriversWMI);
+                Collect(CollectionType.OSLoadedModules);
+                Collect(CollectionType.DBTuningOptions);
             }
             else if (collectionType == CollectionType.Performance)
             {

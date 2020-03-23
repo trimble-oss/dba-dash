@@ -270,6 +270,32 @@ namespace DBAChecks.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to DECLARE @DBName SYSNAME
+        ///DECLARE @SQL NVARCHAR(MAX)
+        ///CREATE TABLE #autotune( 
+        ///	database_id INT NOT NULL,
+        ///	[name] nvarchar(128), 
+        ///	[desired_state_desc] nvarchar(60), 
+        ///	[actual_state_desc] nvarchar(60), 
+        ///	[reason_desc] nvarchar(60) 
+        ///	PRIMARY KEY (database_id,name)
+        ///)
+        ///
+        ///IF OBJECT_ID(&apos;sys.database_automatic_tuning_options&apos;) IS NOT NULL
+        ///BEGIN
+        ///	DECLARE DBs CURSOR FAST_FORWARD READ_ONLY LOCAL FOR
+        ///	SELECT name
+        ///	FROM sys.databases
+        ///	WHERE state  = 0
+        ///	AND DATABASEPROPERTYEX(name, &apos;Updateability&apos;) = &apos;READ_ [rest of string was truncated]&quot;;.
+        /// </summary>
+        internal static string SQLDBTuningOptions {
+            get {
+                return ResourceManager.GetString("SQLDBTuningOptions", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to IF OBJECT_ID(&apos;sys.dm_os_volume_stats&apos;) IS NOT NULL
         ///BEGIN
         ///	SELECT DISTINCT dovs.volume_mount_point AS Name,
@@ -373,6 +399,27 @@ namespace DBAChecks.Properties {
         internal static string SQLOSInfo {
             get {
                 return ResourceManager.GetString("SQLOSInfo", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to SELECT CONVERT(CHAR(16), base_address, 2) base_address_string,
+        ///       file_version,
+        ///       product_version,
+        ///       debug,
+        ///       patched,
+        ///       prerelease,
+        ///       private_build,
+        ///       special_build,
+        ///       language,
+        ///       company,
+        ///       description,
+        ///       name
+        ///FROM sys.dm_os_loaded_modules.
+        /// </summary>
+        internal static string SQLOSLoadedModules {
+            get {
+                return ResourceManager.GetString("SQLOSLoadedModules", resourceCulture);
             }
         }
         

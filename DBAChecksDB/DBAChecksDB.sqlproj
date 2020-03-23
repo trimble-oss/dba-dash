@@ -262,6 +262,13 @@
     <Build Include="Storage\PS_CPU.sql" />
     <Build Include="Storage\PS_BlockingSnapshot.sql" />
     <Build Include="dbo\Stored Procedures\PurgeData.sql" />
+    <Build Include="dbo\Tables\OSLoadedModules.sql" />
+    <Build Include="dbo\Tables\DBTuningOptionsHistory.sql" />
+    <Build Include="dbo\Tables\DBTuningOptions.sql" />
+    <Build Include="dbo\Stored Procedures\OSLoadedModules_Upd.sql" />
+    <Build Include="dbo\Stored Procedures\DBTuningOptions_Upd.sql" />
+    <Build Include="dbo\User Defined Types\OSLoadedModules.sql" />
+    <Build Include="dbo\User Defined Types\DBTuningOptions.sql" />
   </ItemGroup>
   <ItemGroup>
     <PostDeploy Include="Script.PostDeployment1.sql" />

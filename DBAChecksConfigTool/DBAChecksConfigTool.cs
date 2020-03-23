@@ -53,8 +53,14 @@ namespace DBAChecksConfigTool
                 cboLRInstance.ValueMember = "InstanceID";
 
             }
-            cboDrivesInstances.SelectedIndex = 0;
-            cboInstances.SelectedIndex = 0;
+            if (cboDrivesInstances.Items.Count > 0)
+            {
+                cboDrivesInstances.SelectedIndex = 0;
+            }
+            if (cboInstances.Items.Count > 0)
+            {
+                cboInstances.SelectedIndex = 0;
+            }
 
         }
 
