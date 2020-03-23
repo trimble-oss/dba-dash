@@ -160,3 +160,46 @@ FROM (VALUES('ProcStats',180),
 				) AS t(TableName,RetentionDays)
 WHERE NOT EXISTS(SELECT 1 FROM dbo.DataRetention DR WHERE DR.TableName = T.TableName)
 
+INSERT INTO dbo.OSLoadedModulesStatus
+(
+    NAME,
+    Company,
+    Description,
+    STATUS
+)
+SELECT * FROM  (
+VALUES
+( N'%', N'%', N'XTP Native DLL', 4 ), 
+( N'%', N'Microsoft Corporation', N'%', 4 ), 
+( N'%', N'Корпорация Майкрософт', N'%', 4 ), 
+( N'%\ENTAPI.DLL', N'%', N'%', 1 ), 
+( N'%\HcApi.dll', N'%', N'%', 1 ), 
+( N'%\HcSQL.dll', N'%', N'%', 1 ), 
+( N'%\HcThe.dll', N'%', N'%', 1 ), 
+( N'%\HIPI.DLL', N'%', N'%', 1 ), 
+( N'%\PIOLEDB.DLL', N'%', N'%', 1 ), 
+( N'%\PISDK.DLL', N'%', N'%', 1 ), 
+( N'%\SOPHOS_DETOURED.DLL', N'%', N'%', 1 ), 
+( N'%\SOPHOS_DETOURED_x64.DLL', N'%', N'%', 1 ), 
+( N'%\SOPHOS~%.dll', N'%', N'%', 1 ), 
+( N'%\SWI_IFSLSP_64.dll', N'%', N'%', 1 ), 
+( N'%IisRTL.DLL', N'%', N'%', 4 ), 
+( N'%iisutil.dll', N'%', N'%', 4 ), 
+( N'%instapi.dll', N'%', N'%', 4 ), 
+( N'%MSDART.DLL', N'%', N'%', 4 ), 
+( N'%msxml3.dll', N'%', N'%', 4 ), 
+( N'%msxmlsql.dll', N'%', N'%', 4 ), 
+( N'%ODBC32.dll', N'%', N'%', 4 ), 
+( N'%oledb32.dll', N'%', N'%', 4 ), 
+( N'%OLEDB32R.DLL', N'%', N'%', 4 ), 
+( N'%ScriptControl64%.dll', N'%', N'%', 4 ), 
+( N'%UMPDC.dll', N'%', N'%', 4 ), 
+( N'%umppc%.dll', N'%', N'%', 4 ), 
+( N'%w3ctrs.dll', N'%', N'%', 4 ), 
+( N'%XmlLite.dll', N'%', N'%', 4 ), 
+( N'%xpsqlbot.dll', N'%', N'%', 4 )
+) t(name,company,description,status)
+WHERE NOT EXISTS(SELECT 1 FROM dbo.OSLoadedModulesStatus s
+			WHERE s.NAME = t.name 
+			AND s.Company = t.company
+			AND s.Description = t.description)
