@@ -33,7 +33,10 @@ namespace DBAChecksServiceConfig
             CollectionConfig cfg = new CollectionConfig(cboSource.Text, cboDestination.Text);
             if (pnlAWS.Visible)
             {
-                cfg.AWSProfile = txtAWSProfile.Text;
+                if (txtAWSProfile.Text != "") { cfg.AWSProfile = txtAWSProfile.Text; }
+                if(txtAccessKey.Text!="") { cfg.AccessKey = txtAccessKey.Text; }
+                if (txtSecretKey.Text != "") { cfg.SecretKey = txtSecretKey.Text; }
+
             }
             cfg.NoWMI = chkNoWMI.Checked;
             if (chkCustomizeSchedule.Checked)
@@ -251,14 +254,15 @@ namespace DBAChecksServiceConfig
             if (svcCtrl.Status == ServiceControllerStatus.Stopped)
             {
                 try { 
-                svcCtrl.Start();
+                    svcCtrl.Start();
+                    System.Threading.Thread.Sleep(500);
                 }
                 catch (Exception ex)
                 {
                     MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
-        
+            
             refreshServiceStatus();
         }
 
@@ -270,6 +274,7 @@ namespace DBAChecksServiceConfig
                 try
                 {
                     svcCtrl.Stop();
+                    System.Threading.Thread.Sleep(500);
                 }
                 catch(Exception ex)
                 {
@@ -315,6 +320,7 @@ namespace DBAChecksServiceConfig
             p.StartInfo = psi;
             p.Start();
             p.WaitForExit();
+            System.Threading.Thread.Sleep(500);
             refreshServiceStatus();
         }
 
@@ -327,12 +333,29 @@ namespace DBAChecksServiceConfig
             p.StartInfo = psi;
             p.Start();
             p.WaitForExit();
+            System.Threading.Thread.Sleep(500);
             refreshServiceStatus();
         }
 
         private void bttnCancel_Click(object sender, EventArgs e)
         {
             this.Close();
+        }
+
+        private void txtAWSProfile_TextChanged(object sender, EventArgs e)
+        {
+            txtAccessKey.Enabled = (txtAWSProfile.Text.Length == 0);
+            txtSecretKey.Enabled = txtAccessKey.Enabled;
+        }
+
+        private void txtAccessKey_TextChanged(object sender, EventArgs e)
+        {
+            txtAWSProfile.Enabled = (txtAccessKey.Text.Length == 0 && txtSecretKey.Text.Length == 0);
+        }
+
+        private void txtSecretKey_TextChanged(object sender, EventArgs e)
+        {
+            txtAWSProfile.Enabled = (txtAccessKey.Text.Length == 0 && txtSecretKey.Text.Length == 0);
         }
     }
 }

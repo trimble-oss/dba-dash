@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.ComponentModel;
 using System.Data.SqlClient;
 
@@ -22,7 +23,7 @@ namespace DBAChecksService
         private string _destination;
         private bool wasEncryptionPerformed = false;
         private bool isEncrypted = false;
-
+        private string _secretKey;
         public CollectionConfigSchedule[] Schedules { get; set; }
 
 
@@ -78,7 +79,7 @@ namespace DBAChecksService
             return validate(_destination, DestinationConnectionType());
         }
 
-         private bool validateSQLConnection(string connectionString)
+        private bool validateSQLConnection(string connectionString)
         {
             SqlConnection cn = new SqlConnection(connectionString);
             try
@@ -102,7 +103,7 @@ namespace DBAChecksService
             return getConnectionType(_destination);
         }
 
-     
+
         // Note if source is SQL connection string, password is encrypted.  Use GetSource() to return with real password
         public string Source
         {
@@ -112,7 +113,7 @@ namespace DBAChecksService
             }
             set
             {
-                 _source = getConnectionStringWithEncryptedPassword(value);   
+                _source = getConnectionStringWithEncryptedPassword(value);
             }
         }
 
@@ -125,7 +126,7 @@ namespace DBAChecksService
             }
             set
             {
-                   _destination = getConnectionStringWithEncryptedPassword(value);
+                _destination = getConnectionStringWithEncryptedPassword(value);
             }
         }
 
@@ -152,7 +153,41 @@ namespace DBAChecksService
 
         public string AWSProfile { get; set; }
 
+        public string AccessKey { get; set; }
+        public string SecretKey
+        {
+            get
+            {
+                return _secretKey;
+            }
+            set
+            {
+                if (value == null || value.StartsWith("¬=!"))
+                {
+                    _secretKey = value;
+                }
+                else
+                {
+                    _secretKey = "¬=!" + EncryptText.EncryptString(value, myString);
+                    wasEncryptionPerformed = true;
+                }
+            }
+        }
 
+       
+        public string  GetSecretKey()
+        {
+
+            if (_secretKey != null && _secretKey.StartsWith("¬=!"))
+            {
+                return EncryptText.DecryptString(_secretKey.Substring(3), myString);
+            }
+            else
+            {
+                return _secretKey;
+            }
+    
+        }
 
         public string GenerateFileName()
         {

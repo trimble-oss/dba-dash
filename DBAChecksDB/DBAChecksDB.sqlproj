@@ -269,6 +269,9 @@
     <Build Include="dbo\Stored Procedures\DBTuningOptions_Upd.sql" />
     <Build Include="dbo\User Defined Types\OSLoadedModules.sql" />
     <Build Include="dbo\User Defined Types\DBTuningOptions.sql" />
+    <Build Include="dbo\Tables\OSLoadedModulesStatus.sql" />
+    <Build Include="Report\Stored Procedures\OSLoadedModules_Get.sql" />
+    <Build Include="dbo\Stored Procedures\OSLoadedModulesStatus_Upd.sql" />
   </ItemGroup>
   <ItemGroup>
     <PostDeploy Include="Script.PostDeployment1.sql" />

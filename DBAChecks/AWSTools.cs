@@ -18,14 +18,14 @@ namespace DBAChecks
                 throw new AmazonClientException("Unable to find profile in CredentialProfileStoreChain.");
         }
 
-        public static Amazon.S3.AmazonS3Client GetAWSClient(string profile, Amazon.S3.Util.AmazonS3Uri uri)
+        public static Amazon.S3.AmazonS3Client GetAWSClient(string profile, string accessKey, string secretKey, Amazon.S3.Util.AmazonS3Uri uri)
         {
             AWSCredentials cred = null;
-            if (profile == null)
+            if (accessKey != null && secretKey !=null && accessKey.Length>0 && secretKey.Length>0)
             {
-                cred = new InstanceProfileAWSCredentials();
+                cred = new BasicAWSCredentials(accessKey, secretKey);
             }
-            else
+            else if (profile != null & profile.Length>0)
             {
                 try
                 {
@@ -35,7 +35,11 @@ namespace DBAChecks
                 {
                     Console.WriteLine(ex.Message);
                     throw;
-                }
+                }      
+            }
+            else
+            {
+                cred = new InstanceProfileAWSCredentials();
             }
 
             Amazon.S3.AmazonS3Client cli = new AmazonS3Client(cred, RegionEndpoint.EUWest2);

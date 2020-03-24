@@ -59,7 +59,7 @@ namespace DBAChecksService
             {
                 Console.WriteLine("Import from S3: " + cfg.Source);
                 var uri = new Amazon.S3.Util.AmazonS3Uri(cfg.Source);
-                var s3Cli = AWSTools.GetAWSClient(cfg.AWSProfile, uri);
+                var s3Cli = AWSTools.GetAWSClient(cfg.AWSProfile,cfg.AccessKey,cfg.GetSecretKey(), uri);
                 var resp = s3Cli.ListObjects(uri.Bucket, (uri.Key + "/DBAChecks_").Replace("//", "/"));
                 foreach (var f in resp.S3Objects)
                 {
@@ -108,7 +108,7 @@ namespace DBAChecksService
             {
                 Console.WriteLine("Upload to S3");
                 var uri = new Amazon.S3.Util.AmazonS3Uri(destination);
-                var s3Cli = AWSTools.GetAWSClient(cfg.AWSProfile, uri);
+                var s3Cli = AWSTools.GetAWSClient(cfg.AWSProfile,cfg.AccessKey,cfg.GetSecretKey(), uri);
                 var r = new Amazon.S3.Model.PutObjectRequest();
                 string fileName = cfg.GenerateFileName();
                 string filePath = Path.Combine(destination, fileName);
