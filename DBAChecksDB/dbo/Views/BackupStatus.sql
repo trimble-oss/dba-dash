@@ -1,5 +1,6 @@
 ﻿
 
+
 CREATE VIEW [dbo].[BackupStatus]
 AS
 WITH hadr AS (
@@ -74,12 +75,12 @@ OUTER APPLY(SELECT CASE WHEN ISNULL(f.FullBackupAge,cfg.FullBackupCriticalThresh
 	WHEN f.FullBackupAge>=cfg.FullBackupWarningThreshold THEN 2
 	WHEN cfg.FullBackupWarningThreshold IS NULL AND cfg.FullBackupCriticalThreshold IS NULL THEN 3
 	ELSE 4 END AS FullBackupStatus,
-	CASE WHEN d.name='master' THEN 4
+	CASE WHEN d.name='master' THEN 3
 	WHEN ISNULL(f.DiffBackupAge,cfg.DiffBackupCriticalThreshold) >= cfg.DiffBackupCriticalThreshold THEN 1
 	WHEN f.DiffBackupAge>=cfg.DiffBackupWarningThreshold THEN 2
 	WHEN cfg.DiffBackupWarningThreshold IS NULL AND cfg.DiffBackupCriticalThreshold IS NULL THEN 3
 	ELSE 4 END AS DiffBackupStatus,
-	CASE WHEN d.recovery_model=3 THEN 4
+	CASE WHEN d.recovery_model=3 THEN 3
 	WHEN ISNULL(f.LogBackupAge,cfg.LogBackupCriticalThreshold) >= cfg.LogBackupCriticalThreshold THEN 1
 	WHEN f.LogBackupAge>=cfg.LogBackupWarningThreshold THEN 2
 	WHEN cfg.LogBackupWarningThreshold IS NULL AND cfg.LogBackupCriticalThreshold IS NULL THEN 3
