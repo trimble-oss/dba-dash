@@ -161,11 +161,15 @@ namespace DBAChecksConfigTool
             {
                 lblDriveCritical.Text = "%";
                 lblDriveWarning.Text = "%";
+                numDriveCritical.Maximum = 100;
+                numDriveWarning.Maximum = 100;
             }
             else
             {
                 lblDriveWarning.Text = "GB";
                 lblDriveCritical.Text = "GB";
+                numDriveCritical.Maximum = Int32.MaxValue;
+                numDriveWarning.Maximum = Int32.MaxValue;
             }
 
 

@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(DBAChecksConfigTool));
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabPage1 = new System.Windows.Forms.TabPage();
             this.label2 = new System.Windows.Forms.Label();
@@ -83,12 +84,7 @@
             this.label12 = new System.Windows.Forms.Label();
             this.cboBackupInstance = new System.Windows.Forms.ComboBox();
             this.tabPage4 = new System.Windows.Forms.TabPage();
-            this.label17 = new System.Windows.Forms.Label();
-            this.cboLRDatabase = new System.Windows.Forms.ComboBox();
-            this.label18 = new System.Windows.Forms.Label();
-            this.cboLRInstance = new System.Windows.Forms.ComboBox();
-            this.dgvLR = new System.Windows.Forms.DataGridView();
-            this.chkLRInherit = new System.Windows.Forms.CheckBox();
+            this.bttnLRAddUpdate = new System.Windows.Forms.Button();
             this.panel1 = new System.Windows.Forms.Panel();
             this.label21 = new System.Windows.Forms.Label();
             this.label22 = new System.Windows.Forms.Label();
@@ -102,7 +98,12 @@
             this.label26 = new System.Windows.Forms.Label();
             this.numLRLatencyWarning = new System.Windows.Forms.NumericUpDown();
             this.numLRLatencyCritical = new System.Windows.Forms.NumericUpDown();
-            this.bttnLRAddUpdate = new System.Windows.Forms.Button();
+            this.chkLRInherit = new System.Windows.Forms.CheckBox();
+            this.dgvLR = new System.Windows.Forms.DataGridView();
+            this.label17 = new System.Windows.Forms.Label();
+            this.cboLRDatabase = new System.Windows.Forms.ComboBox();
+            this.label18 = new System.Windows.Forms.Label();
+            this.cboLRInstance = new System.Windows.Forms.ComboBox();
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
             this.tabPage2.SuspendLayout();
@@ -120,12 +121,12 @@
             ((System.ComponentModel.ISupportInitialize)(this.numFullCritical)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.dgvBackup)).BeginInit();
             this.tabPage4.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.dgvLR)).BeginInit();
             this.panel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.numLRTimeSinceLastWarning)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.numLRTimeSinceLastCritical)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.numLRLatencyWarning)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.numLRLatencyCritical)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.dgvLR)).BeginInit();
             this.SuspendLayout();
             // 
             // tabControl1
@@ -167,7 +168,7 @@
             this.label2.Location = new System.Drawing.Point(27, 76);
             this.label2.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(33, 17);
+            this.label2.Size = new System.Drawing.Size(28, 15);
             this.label2.TabIndex = 5;
             this.label2.Text = "Tag";
             // 
@@ -187,7 +188,7 @@
             this.txtTag.Location = new System.Drawing.Point(103, 73);
             this.txtTag.Margin = new System.Windows.Forms.Padding(4);
             this.txtTag.Name = "txtTag";
-            this.txtTag.Size = new System.Drawing.Size(363, 22);
+            this.txtTag.Size = new System.Drawing.Size(363, 20);
             this.txtTag.TabIndex = 3;
             // 
             // label1
@@ -196,7 +197,7 @@
             this.label1.Location = new System.Drawing.Point(27, 31);
             this.label1.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(65, 17);
+            this.label1.Size = new System.Drawing.Size(56, 15);
             this.label1.TabIndex = 2;
             this.label1.Text = "Instance:";
             // 
@@ -254,7 +255,7 @@
             this.optInherit.Location = new System.Drawing.Point(388, 114);
             this.optInherit.Margin = new System.Windows.Forms.Padding(4);
             this.optInherit.Name = "optInherit";
-            this.optInherit.Size = new System.Drawing.Size(68, 21);
+            this.optInherit.Size = new System.Drawing.Size(62, 19);
             this.optInherit.TabIndex = 27;
             this.optInherit.Text = "Inherit";
             this.optInherit.UseVisualStyleBackColor = true;
@@ -280,7 +281,7 @@
             this.label6.Location = new System.Drawing.Point(4, 52);
             this.label6.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label6.Name = "label6";
-            this.label6.Size = new System.Drawing.Size(54, 17);
+            this.label6.Size = new System.Drawing.Size(47, 15);
             this.label6.TabIndex = 20;
             this.label6.Text = "Critical:";
             // 
@@ -290,7 +291,7 @@
             this.lblDriveCritical.Location = new System.Drawing.Point(244, 50);
             this.lblDriveCritical.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.lblDriveCritical.Name = "lblDriveCritical";
-            this.lblDriveCritical.Size = new System.Drawing.Size(20, 17);
+            this.lblDriveCritical.Size = new System.Drawing.Size(18, 15);
             this.lblDriveCritical.TabIndex = 25;
             this.lblDriveCritical.Text = "%";
             // 
@@ -300,7 +301,7 @@
             this.label5.Location = new System.Drawing.Point(4, 16);
             this.label5.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(65, 17);
+            this.label5.Size = new System.Drawing.Size(56, 15);
             this.label5.TabIndex = 19;
             this.label5.Text = "Warning:";
             // 
@@ -310,7 +311,7 @@
             this.lblDriveWarning.Location = new System.Drawing.Point(244, 18);
             this.lblDriveWarning.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.lblDriveWarning.Name = "lblDriveWarning";
-            this.lblDriveWarning.Size = new System.Drawing.Size(20, 17);
+            this.lblDriveWarning.Size = new System.Drawing.Size(18, 15);
             this.lblDriveWarning.TabIndex = 24;
             this.lblDriveWarning.Text = "%";
             // 
@@ -320,7 +321,7 @@
             this.numDriveWarning.Location = new System.Drawing.Point(76, 16);
             this.numDriveWarning.Margin = new System.Windows.Forms.Padding(4);
             this.numDriveWarning.Name = "numDriveWarning";
-            this.numDriveWarning.Size = new System.Drawing.Size(160, 22);
+            this.numDriveWarning.Size = new System.Drawing.Size(160, 20);
             this.numDriveWarning.TabIndex = 22;
             this.numDriveWarning.Value = new decimal(new int[] {
             20,
@@ -334,7 +335,7 @@
             this.numDriveCritical.Location = new System.Drawing.Point(76, 48);
             this.numDriveCritical.Margin = new System.Windows.Forms.Padding(4);
             this.numDriveCritical.Name = "numDriveCritical";
-            this.numDriveCritical.Size = new System.Drawing.Size(160, 22);
+            this.numDriveCritical.Size = new System.Drawing.Size(160, 20);
             this.numDriveCritical.TabIndex = 23;
             this.numDriveCritical.Value = new decimal(new int[] {
             10,
@@ -365,6 +366,7 @@
             this.dgvDriveThresholds.Margin = new System.Windows.Forms.Padding(4);
             this.dgvDriveThresholds.Name = "dgvDriveThresholds";
             this.dgvDriveThresholds.ReadOnly = true;
+            this.dgvDriveThresholds.RowHeadersWidth = 51;
             this.dgvDriveThresholds.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
             this.dgvDriveThresholds.Size = new System.Drawing.Size(1171, 378);
             this.dgvDriveThresholds.TabIndex = 16;
@@ -378,7 +380,7 @@
             this.OptDisabled.Location = new System.Drawing.Point(272, 114);
             this.OptDisabled.Margin = new System.Windows.Forms.Padding(4);
             this.OptDisabled.Name = "OptDisabled";
-            this.OptDisabled.Size = new System.Drawing.Size(84, 21);
+            this.OptDisabled.Size = new System.Drawing.Size(77, 19);
             this.OptDisabled.TabIndex = 14;
             this.OptDisabled.Text = "Disabled";
             this.OptDisabled.UseVisualStyleBackColor = true;
@@ -390,7 +392,7 @@
             this.optGB.Location = new System.Drawing.Point(201, 114);
             this.optGB.Margin = new System.Windows.Forms.Padding(4);
             this.optGB.Name = "optGB";
-            this.optGB.Size = new System.Drawing.Size(49, 21);
+            this.optGB.Size = new System.Drawing.Size(45, 19);
             this.optGB.TabIndex = 12;
             this.optGB.Text = "GB";
             this.optGB.UseVisualStyleBackColor = true;
@@ -402,7 +404,7 @@
             this.optPercent.Location = new System.Drawing.Point(96, 114);
             this.optPercent.Margin = new System.Windows.Forms.Padding(4);
             this.optPercent.Name = "optPercent";
-            this.optPercent.Size = new System.Drawing.Size(94, 21);
+            this.optPercent.Size = new System.Drawing.Size(84, 19);
             this.optPercent.TabIndex = 11;
             this.optPercent.TabStop = true;
             this.optPercent.Text = "Percent %";
@@ -415,7 +417,7 @@
             this.label4.Location = new System.Drawing.Point(20, 73);
             this.label4.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(45, 17);
+            this.label4.Size = new System.Drawing.Size(38, 15);
             this.label4.TabIndex = 6;
             this.label4.Text = "Drive:";
             // 
@@ -437,7 +439,7 @@
             this.label3.Location = new System.Drawing.Point(20, 39);
             this.label3.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(65, 17);
+            this.label3.Size = new System.Drawing.Size(56, 15);
             this.label3.TabIndex = 4;
             this.label3.Text = "Instance:";
             // 
@@ -479,7 +481,7 @@
             this.chkUseFG.AutoSize = true;
             this.chkUseFG.Location = new System.Drawing.Point(360, 94);
             this.chkUseFG.Name = "chkUseFG";
-            this.chkUseFG.Size = new System.Drawing.Size(176, 21);
+            this.chkUseFG.Size = new System.Drawing.Size(156, 19);
             this.chkUseFG.TabIndex = 40;
             this.chkUseFG.Text = "Use Filegroup Backups";
             this.chkUseFG.UseVisualStyleBackColor = true;
@@ -489,7 +491,7 @@
             this.chkUsePartial.AutoSize = true;
             this.chkUsePartial.Location = new System.Drawing.Point(191, 94);
             this.chkUsePartial.Name = "chkUsePartial";
-            this.chkUsePartial.Size = new System.Drawing.Size(157, 21);
+            this.chkUsePartial.Size = new System.Drawing.Size(139, 19);
             this.chkUsePartial.TabIndex = 39;
             this.chkUsePartial.Text = "Use Partial Backups";
             this.chkUsePartial.UseVisualStyleBackColor = true;
@@ -499,7 +501,7 @@
             this.chkBackupInherit.AutoSize = true;
             this.chkBackupInherit.Location = new System.Drawing.Point(106, 94);
             this.chkBackupInherit.Name = "chkBackupInherit";
-            this.chkBackupInherit.Size = new System.Drawing.Size(69, 21);
+            this.chkBackupInherit.Size = new System.Drawing.Size(63, 19);
             this.chkBackupInherit.TabIndex = 38;
             this.chkBackupInherit.Text = "Inherit";
             this.chkBackupInherit.UseVisualStyleBackColor = true;
@@ -535,7 +537,7 @@
             this.label15.AutoSize = true;
             this.label15.Location = new System.Drawing.Point(229, 101);
             this.label15.Name = "label15";
-            this.label15.Size = new System.Drawing.Size(37, 17);
+            this.label15.Size = new System.Drawing.Size(34, 15);
             this.label15.TabIndex = 53;
             this.label15.Text = "mins";
             // 
@@ -544,7 +546,7 @@
             this.label16.AutoSize = true;
             this.label16.Location = new System.Drawing.Point(404, 101);
             this.label16.Name = "label16";
-            this.label16.Size = new System.Drawing.Size(37, 17);
+            this.label16.Size = new System.Drawing.Size(34, 15);
             this.label16.TabIndex = 52;
             this.label16.Text = "mins";
             // 
@@ -558,7 +560,7 @@
             0,
             0});
             this.numLogWarning.Name = "numLogWarning";
-            this.numLogWarning.Size = new System.Drawing.Size(100, 22);
+            this.numLogWarning.Size = new System.Drawing.Size(100, 20);
             this.numLogWarning.TabIndex = 50;
             this.numLogWarning.Value = new decimal(new int[] {
             720,
@@ -576,7 +578,7 @@
             0,
             0});
             this.numLogCritical.Name = "numLogCritical";
-            this.numLogCritical.Size = new System.Drawing.Size(100, 22);
+            this.numLogCritical.Size = new System.Drawing.Size(100, 20);
             this.numLogCritical.TabIndex = 51;
             this.numLogCritical.Value = new decimal(new int[] {
             1440,
@@ -589,7 +591,7 @@
             this.label13.AutoSize = true;
             this.label13.Location = new System.Drawing.Point(229, 71);
             this.label13.Name = "label13";
-            this.label13.Size = new System.Drawing.Size(37, 17);
+            this.label13.Size = new System.Drawing.Size(34, 15);
             this.label13.TabIndex = 49;
             this.label13.Text = "mins";
             // 
@@ -598,7 +600,7 @@
             this.label14.AutoSize = true;
             this.label14.Location = new System.Drawing.Point(404, 71);
             this.label14.Name = "label14";
-            this.label14.Size = new System.Drawing.Size(37, 17);
+            this.label14.Size = new System.Drawing.Size(34, 15);
             this.label14.TabIndex = 48;
             this.label14.Text = "mins";
             // 
@@ -613,7 +615,7 @@
             0,
             0});
             this.numDiffWarning.Name = "numDiffWarning";
-            this.numDiffWarning.Size = new System.Drawing.Size(100, 22);
+            this.numDiffWarning.Size = new System.Drawing.Size(100, 20);
             this.numDiffWarning.TabIndex = 46;
             this.numDiffWarning.Value = new decimal(new int[] {
             1440,
@@ -632,7 +634,7 @@
             0,
             0});
             this.numDiffCritical.Name = "numDiffCritical";
-            this.numDiffCritical.Size = new System.Drawing.Size(100, 22);
+            this.numDiffCritical.Size = new System.Drawing.Size(100, 20);
             this.numDiffCritical.TabIndex = 47;
             this.numDiffCritical.Value = new decimal(new int[] {
             2880,
@@ -645,7 +647,7 @@
             this.label10.AutoSize = true;
             this.label10.Location = new System.Drawing.Point(229, 41);
             this.label10.Name = "label10";
-            this.label10.Size = new System.Drawing.Size(37, 17);
+            this.label10.Size = new System.Drawing.Size(34, 15);
             this.label10.TabIndex = 45;
             this.label10.Text = "mins";
             // 
@@ -654,7 +656,7 @@
             this.label8.AutoSize = true;
             this.label8.Location = new System.Drawing.Point(404, 41);
             this.label8.Name = "label8";
-            this.label8.Size = new System.Drawing.Size(37, 17);
+            this.label8.Size = new System.Drawing.Size(34, 15);
             this.label8.TabIndex = 44;
             this.label8.Text = "mins";
             // 
@@ -665,7 +667,7 @@
             this.chkLog.CheckState = System.Windows.Forms.CheckState.Checked;
             this.chkLog.Location = new System.Drawing.Point(14, 101);
             this.chkLog.Name = "chkLog";
-            this.chkLog.Size = new System.Drawing.Size(54, 21);
+            this.chkLog.Size = new System.Drawing.Size(50, 19);
             this.chkLog.TabIndex = 43;
             this.chkLog.Text = "Log";
             this.chkLog.UseVisualStyleBackColor = true;
@@ -676,7 +678,7 @@
             this.chkDiff.AutoSize = true;
             this.chkDiff.Location = new System.Drawing.Point(13, 71);
             this.chkDiff.Name = "chkDiff";
-            this.chkDiff.Size = new System.Drawing.Size(51, 21);
+            this.chkDiff.Size = new System.Drawing.Size(47, 19);
             this.chkDiff.TabIndex = 42;
             this.chkDiff.Text = "Diff";
             this.chkDiff.UseVisualStyleBackColor = true;
@@ -689,7 +691,7 @@
             this.chkFull.CheckState = System.Windows.Forms.CheckState.Checked;
             this.chkFull.Location = new System.Drawing.Point(13, 41);
             this.chkFull.Name = "chkFull";
-            this.chkFull.Size = new System.Drawing.Size(52, 21);
+            this.chkFull.Size = new System.Drawing.Size(49, 19);
             this.chkFull.TabIndex = 41;
             this.chkFull.Text = "Full";
             this.chkFull.UseVisualStyleBackColor = true;
@@ -701,7 +703,7 @@
             this.label7.Location = new System.Drawing.Point(295, 9);
             this.label7.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label7.Name = "label7";
-            this.label7.Size = new System.Drawing.Size(54, 17);
+            this.label7.Size = new System.Drawing.Size(47, 15);
             this.label7.TabIndex = 20;
             this.label7.Text = "Critical:";
             // 
@@ -711,7 +713,7 @@
             this.label9.Location = new System.Drawing.Point(119, 10);
             this.label9.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label9.Name = "label9";
-            this.label9.Size = new System.Drawing.Size(65, 17);
+            this.label9.Size = new System.Drawing.Size(56, 15);
             this.label9.TabIndex = 19;
             this.label9.Text = "Warning:";
             // 
@@ -725,7 +727,7 @@
             0,
             0});
             this.numFullWarning.Name = "numFullWarning";
-            this.numFullWarning.Size = new System.Drawing.Size(100, 22);
+            this.numFullWarning.Size = new System.Drawing.Size(100, 20);
             this.numFullWarning.TabIndex = 22;
             this.numFullWarning.Value = new decimal(new int[] {
             10080,
@@ -743,7 +745,7 @@
             0,
             0});
             this.numFullCritical.Name = "numFullCritical";
-            this.numFullCritical.Size = new System.Drawing.Size(100, 22);
+            this.numFullCritical.Size = new System.Drawing.Size(100, 20);
             this.numFullCritical.TabIndex = 23;
             this.numFullCritical.Value = new decimal(new int[] {
             14400,
@@ -774,6 +776,7 @@
             this.dgvBackup.Margin = new System.Windows.Forms.Padding(4);
             this.dgvBackup.Name = "dgvBackup";
             this.dgvBackup.ReadOnly = true;
+            this.dgvBackup.RowHeadersWidth = 51;
             this.dgvBackup.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
             this.dgvBackup.Size = new System.Drawing.Size(1173, 373);
             this.dgvBackup.TabIndex = 35;
@@ -785,7 +788,7 @@
             this.label11.Location = new System.Drawing.Point(30, 64);
             this.label11.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label11.Name = "label11";
-            this.label11.Size = new System.Drawing.Size(73, 17);
+            this.label11.Size = new System.Drawing.Size(63, 15);
             this.label11.TabIndex = 31;
             this.label11.Text = "Database:";
             // 
@@ -807,7 +810,7 @@
             this.label12.Location = new System.Drawing.Point(30, 30);
             this.label12.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label12.Name = "label12";
-            this.label12.Size = new System.Drawing.Size(65, 17);
+            this.label12.Size = new System.Drawing.Size(56, 15);
             this.label12.TabIndex = 29;
             this.label12.Text = "Instance:";
             // 
@@ -842,76 +845,16 @@
             this.tabPage4.Text = "Log Restores";
             this.tabPage4.UseVisualStyleBackColor = true;
             // 
-            // label17
+            // bttnLRAddUpdate
             // 
-            this.label17.AutoSize = true;
-            this.label17.Location = new System.Drawing.Point(23, 76);
-            this.label17.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
-            this.label17.Name = "label17";
-            this.label17.Size = new System.Drawing.Size(73, 17);
-            this.label17.TabIndex = 35;
-            this.label17.Text = "Database:";
-            // 
-            // cboLRDatabase
-            // 
-            this.cboLRDatabase.DisplayMember = "Instance";
-            this.cboLRDatabase.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.cboLRDatabase.FormattingEnabled = true;
-            this.cboLRDatabase.Location = new System.Drawing.Point(99, 72);
-            this.cboLRDatabase.Margin = new System.Windows.Forms.Padding(4);
-            this.cboLRDatabase.Name = "cboLRDatabase";
-            this.cboLRDatabase.Size = new System.Drawing.Size(363, 24);
-            this.cboLRDatabase.TabIndex = 34;
-            this.cboLRDatabase.ValueMember = "InstanceID";
-            // 
-            // label18
-            // 
-            this.label18.AutoSize = true;
-            this.label18.Location = new System.Drawing.Point(23, 42);
-            this.label18.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
-            this.label18.Name = "label18";
-            this.label18.Size = new System.Drawing.Size(65, 17);
-            this.label18.TabIndex = 33;
-            this.label18.Text = "Instance:";
-            // 
-            // cboLRInstance
-            // 
-            this.cboLRInstance.DisplayMember = "Instance";
-            this.cboLRInstance.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.cboLRInstance.FormattingEnabled = true;
-            this.cboLRInstance.Location = new System.Drawing.Point(99, 39);
-            this.cboLRInstance.Margin = new System.Windows.Forms.Padding(4);
-            this.cboLRInstance.Name = "cboLRInstance";
-            this.cboLRInstance.Size = new System.Drawing.Size(363, 24);
-            this.cboLRInstance.TabIndex = 32;
-            this.cboLRInstance.ValueMember = "InstanceID";
-            // 
-            // dgvLR
-            // 
-            this.dgvLR.AllowUserToAddRows = false;
-            this.dgvLR.AllowUserToDeleteRows = false;
-            this.dgvLR.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.dgvLR.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.dgvLR.Location = new System.Drawing.Point(4, 274);
-            this.dgvLR.Margin = new System.Windows.Forms.Padding(4);
-            this.dgvLR.Name = "dgvLR";
-            this.dgvLR.ReadOnly = true;
-            this.dgvLR.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-            this.dgvLR.Size = new System.Drawing.Size(1173, 373);
-            this.dgvLR.TabIndex = 36;
-            this.dgvLR.CurrentCellChanged += new System.EventHandler(this.dgvLR_CurrentCellChanged);
-            // 
-            // chkLRInherit
-            // 
-            this.chkLRInherit.AutoSize = true;
-            this.chkLRInherit.Location = new System.Drawing.Point(99, 112);
-            this.chkLRInherit.Name = "chkLRInherit";
-            this.chkLRInherit.Size = new System.Drawing.Size(69, 21);
-            this.chkLRInherit.TabIndex = 37;
-            this.chkLRInherit.Text = "Inherit";
-            this.chkLRInherit.UseVisualStyleBackColor = true;
+            this.bttnLRAddUpdate.Location = new System.Drawing.Point(669, 206);
+            this.bttnLRAddUpdate.Margin = new System.Windows.Forms.Padding(4);
+            this.bttnLRAddUpdate.Name = "bttnLRAddUpdate";
+            this.bttnLRAddUpdate.Size = new System.Drawing.Size(144, 28);
+            this.bttnLRAddUpdate.TabIndex = 39;
+            this.bttnLRAddUpdate.Text = "Add/Update";
+            this.bttnLRAddUpdate.UseVisualStyleBackColor = true;
+            this.bttnLRAddUpdate.Click += new System.EventHandler(this.bttnLRAddUpdate_Click);
             // 
             // panel1
             // 
@@ -938,7 +881,7 @@
             this.label21.AutoSize = true;
             this.label21.Location = new System.Drawing.Point(288, 71);
             this.label21.Name = "label21";
-            this.label21.Size = new System.Drawing.Size(37, 17);
+            this.label21.Size = new System.Drawing.Size(34, 15);
             this.label21.TabIndex = 49;
             this.label21.Text = "mins";
             // 
@@ -947,7 +890,7 @@
             this.label22.AutoSize = true;
             this.label22.Location = new System.Drawing.Point(463, 71);
             this.label22.Name = "label22";
-            this.label22.Size = new System.Drawing.Size(37, 17);
+            this.label22.Size = new System.Drawing.Size(34, 15);
             this.label22.TabIndex = 48;
             this.label22.Text = "mins";
             // 
@@ -961,7 +904,7 @@
             0,
             0});
             this.numLRTimeSinceLastWarning.Name = "numLRTimeSinceLastWarning";
-            this.numLRTimeSinceLastWarning.Size = new System.Drawing.Size(100, 22);
+            this.numLRTimeSinceLastWarning.Size = new System.Drawing.Size(100, 20);
             this.numLRTimeSinceLastWarning.TabIndex = 46;
             this.numLRTimeSinceLastWarning.Value = new decimal(new int[] {
             1440,
@@ -979,7 +922,7 @@
             0,
             0});
             this.numLRTimeSinceLastCritical.Name = "numLRTimeSinceLastCritical";
-            this.numLRTimeSinceLastCritical.Size = new System.Drawing.Size(100, 22);
+            this.numLRTimeSinceLastCritical.Size = new System.Drawing.Size(100, 20);
             this.numLRTimeSinceLastCritical.TabIndex = 47;
             this.numLRTimeSinceLastCritical.Value = new decimal(new int[] {
             2880,
@@ -992,7 +935,7 @@
             this.label23.AutoSize = true;
             this.label23.Location = new System.Drawing.Point(288, 41);
             this.label23.Name = "label23";
-            this.label23.Size = new System.Drawing.Size(37, 17);
+            this.label23.Size = new System.Drawing.Size(34, 15);
             this.label23.TabIndex = 45;
             this.label23.Text = "mins";
             // 
@@ -1001,7 +944,7 @@
             this.label24.AutoSize = true;
             this.label24.Location = new System.Drawing.Point(463, 41);
             this.label24.Name = "label24";
-            this.label24.Size = new System.Drawing.Size(37, 17);
+            this.label24.Size = new System.Drawing.Size(34, 15);
             this.label24.TabIndex = 44;
             this.label24.Text = "mins";
             // 
@@ -1012,7 +955,7 @@
             this.chkLRTimeSinceLast.CheckState = System.Windows.Forms.CheckState.Checked;
             this.chkLRTimeSinceLast.Location = new System.Drawing.Point(13, 71);
             this.chkLRTimeSinceLast.Name = "chkLRTimeSinceLast";
-            this.chkLRTimeSinceLast.Size = new System.Drawing.Size(131, 21);
+            this.chkLRTimeSinceLast.Size = new System.Drawing.Size(117, 19);
             this.chkLRTimeSinceLast.TabIndex = 42;
             this.chkLRTimeSinceLast.Text = "Time Since Last";
             this.chkLRTimeSinceLast.UseVisualStyleBackColor = true;
@@ -1025,7 +968,7 @@
             this.chkLRLatency.CheckState = System.Windows.Forms.CheckState.Checked;
             this.chkLRLatency.Location = new System.Drawing.Point(13, 41);
             this.chkLRLatency.Name = "chkLRLatency";
-            this.chkLRLatency.Size = new System.Drawing.Size(80, 21);
+            this.chkLRLatency.Size = new System.Drawing.Size(71, 19);
             this.chkLRLatency.TabIndex = 41;
             this.chkLRLatency.Text = "Latency";
             this.chkLRLatency.UseVisualStyleBackColor = true;
@@ -1037,7 +980,7 @@
             this.label25.Location = new System.Drawing.Point(354, 9);
             this.label25.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label25.Name = "label25";
-            this.label25.Size = new System.Drawing.Size(54, 17);
+            this.label25.Size = new System.Drawing.Size(47, 15);
             this.label25.TabIndex = 20;
             this.label25.Text = "Critical:";
             // 
@@ -1047,7 +990,7 @@
             this.label26.Location = new System.Drawing.Point(178, 10);
             this.label26.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label26.Name = "label26";
-            this.label26.Size = new System.Drawing.Size(65, 17);
+            this.label26.Size = new System.Drawing.Size(56, 15);
             this.label26.TabIndex = 19;
             this.label26.Text = "Warning:";
             // 
@@ -1061,7 +1004,7 @@
             0,
             0});
             this.numLRLatencyWarning.Name = "numLRLatencyWarning";
-            this.numLRLatencyWarning.Size = new System.Drawing.Size(100, 22);
+            this.numLRLatencyWarning.Size = new System.Drawing.Size(100, 20);
             this.numLRLatencyWarning.TabIndex = 22;
             this.numLRLatencyWarning.Value = new decimal(new int[] {
             1440,
@@ -1079,7 +1022,7 @@
             0,
             0});
             this.numLRLatencyCritical.Name = "numLRLatencyCritical";
-            this.numLRLatencyCritical.Size = new System.Drawing.Size(100, 22);
+            this.numLRLatencyCritical.Size = new System.Drawing.Size(100, 20);
             this.numLRLatencyCritical.TabIndex = 23;
             this.numLRLatencyCritical.Value = new decimal(new int[] {
             2880,
@@ -1087,16 +1030,77 @@
             0,
             0});
             // 
-            // bttnLRAddUpdate
+            // chkLRInherit
             // 
-            this.bttnLRAddUpdate.Location = new System.Drawing.Point(669, 206);
-            this.bttnLRAddUpdate.Margin = new System.Windows.Forms.Padding(4);
-            this.bttnLRAddUpdate.Name = "bttnLRAddUpdate";
-            this.bttnLRAddUpdate.Size = new System.Drawing.Size(144, 28);
-            this.bttnLRAddUpdate.TabIndex = 39;
-            this.bttnLRAddUpdate.Text = "Add/Update";
-            this.bttnLRAddUpdate.UseVisualStyleBackColor = true;
-            this.bttnLRAddUpdate.Click += new System.EventHandler(this.bttnLRAddUpdate_Click);
+            this.chkLRInherit.AutoSize = true;
+            this.chkLRInherit.Location = new System.Drawing.Point(99, 112);
+            this.chkLRInherit.Name = "chkLRInherit";
+            this.chkLRInherit.Size = new System.Drawing.Size(63, 19);
+            this.chkLRInherit.TabIndex = 37;
+            this.chkLRInherit.Text = "Inherit";
+            this.chkLRInherit.UseVisualStyleBackColor = true;
+            // 
+            // dgvLR
+            // 
+            this.dgvLR.AllowUserToAddRows = false;
+            this.dgvLR.AllowUserToDeleteRows = false;
+            this.dgvLR.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.dgvLR.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.dgvLR.Location = new System.Drawing.Point(4, 274);
+            this.dgvLR.Margin = new System.Windows.Forms.Padding(4);
+            this.dgvLR.Name = "dgvLR";
+            this.dgvLR.ReadOnly = true;
+            this.dgvLR.RowHeadersWidth = 51;
+            this.dgvLR.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
+            this.dgvLR.Size = new System.Drawing.Size(1173, 373);
+            this.dgvLR.TabIndex = 36;
+            this.dgvLR.CurrentCellChanged += new System.EventHandler(this.dgvLR_CurrentCellChanged);
+            // 
+            // label17
+            // 
+            this.label17.AutoSize = true;
+            this.label17.Location = new System.Drawing.Point(23, 76);
+            this.label17.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label17.Name = "label17";
+            this.label17.Size = new System.Drawing.Size(63, 15);
+            this.label17.TabIndex = 35;
+            this.label17.Text = "Database:";
+            // 
+            // cboLRDatabase
+            // 
+            this.cboLRDatabase.DisplayMember = "Instance";
+            this.cboLRDatabase.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cboLRDatabase.FormattingEnabled = true;
+            this.cboLRDatabase.Location = new System.Drawing.Point(99, 72);
+            this.cboLRDatabase.Margin = new System.Windows.Forms.Padding(4);
+            this.cboLRDatabase.Name = "cboLRDatabase";
+            this.cboLRDatabase.Size = new System.Drawing.Size(363, 24);
+            this.cboLRDatabase.TabIndex = 34;
+            this.cboLRDatabase.ValueMember = "InstanceID";
+            // 
+            // label18
+            // 
+            this.label18.AutoSize = true;
+            this.label18.Location = new System.Drawing.Point(23, 42);
+            this.label18.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label18.Name = "label18";
+            this.label18.Size = new System.Drawing.Size(56, 15);
+            this.label18.TabIndex = 33;
+            this.label18.Text = "Instance:";
+            // 
+            // cboLRInstance
+            // 
+            this.cboLRInstance.DisplayMember = "Instance";
+            this.cboLRInstance.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cboLRInstance.FormattingEnabled = true;
+            this.cboLRInstance.Location = new System.Drawing.Point(99, 39);
+            this.cboLRInstance.Margin = new System.Windows.Forms.Padding(4);
+            this.cboLRInstance.Name = "cboLRInstance";
+            this.cboLRInstance.Size = new System.Drawing.Size(363, 24);
+            this.cboLRInstance.TabIndex = 32;
+            this.cboLRInstance.ValueMember = "InstanceID";
             // 
             // DBAChecksConfigTool
             // 
@@ -1104,6 +1108,7 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1224, 737);
             this.Controls.Add(this.tabControl1);
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Margin = new System.Windows.Forms.Padding(4);
             this.Name = "DBAChecksConfigTool";
             this.Text = "DBAChecks Config Tool";
@@ -1131,13 +1136,13 @@
             ((System.ComponentModel.ISupportInitialize)(this.dgvBackup)).EndInit();
             this.tabPage4.ResumeLayout(false);
             this.tabPage4.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.dgvLR)).EndInit();
             this.panel1.ResumeLayout(false);
             this.panel1.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.numLRTimeSinceLastWarning)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.numLRTimeSinceLastCritical)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.numLRLatencyWarning)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.numLRLatencyCritical)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.dgvLR)).EndInit();
             this.ResumeLayout(false);
 
         }
