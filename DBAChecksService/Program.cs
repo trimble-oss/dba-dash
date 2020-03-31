@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using DBAChecks;
+using Newtonsoft.Json;
 using System;
 using System.Diagnostics;
 
@@ -15,24 +16,28 @@ namespace DBAChecksService
                 throw new Exception("ServiceConfig.json file is missing.Please create.");
             }            
             string jsonConfig = System.IO.File.ReadAllText(jsonConfigPath);
-            var conf = JsonConvert.DeserializeObject<CollectionConfig[]>(jsonConfig);
+            var conf = CollectionConfig.Deserialize(jsonConfig);
             bool wasEncrypted = false;
-            foreach (var c in conf)
+
+            if (conf.DestinationConnection.WasEncrypted)
             {
-                if (c.WasEncrypted())
+                wasEncrypted = true;
+            }
+            else
+            {
+                foreach (var c in conf.SourceConnections)
                 {
-                    wasEncrypted = true;
+                    if (c.SourceConnection.WasEncrypted)
+                    {
+                        wasEncrypted = true;
+                    }
                 }
             }
             if (wasEncrypted)
             {
                 Console.WriteLine("Saving ServiceConfig.json with encrypted password");
 
-                string confString = JsonConvert.SerializeObject(conf, Formatting.Indented, new JsonSerializerSettings
-                {
-                    NullValueHandling = NullValueHandling.Ignore,
-                    DefaultValueHandling = DefaultValueHandling.Ignore
-                });
+                string confString = conf.Serialize();
                 System.IO.File.WriteAllText(jsonConfigPath, confString);
             }
 

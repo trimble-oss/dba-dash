@@ -14,6 +14,8 @@ using System.Data.SqlClient;
 using System.ServiceProcess;
 using System.Diagnostics;
 using DBAChecks;
+using static DBAChecks.DBAChecksConnection;
+
 namespace DBAChecksServiceConfig
 {
     public partial class ServiceConfig : Form
@@ -24,55 +26,52 @@ namespace DBAChecksServiceConfig
         }
 
         string originalJson="";
-        List<CollectionConfig>collectionConfigs = new List<CollectionConfig>();
+        CollectionConfig collectionConfig = new CollectionConfig();
         string jsonPath = System.IO.Path.Combine(Application.StartupPath, "ServiceConfig.json");
         ServiceController svcCtrl;
 
         private void bttnAdd_Click(object sender, EventArgs e)
         {
-            CollectionConfig cfg = new CollectionConfig(cboSource.Text, cboDestination.Text);
-            if (pnlAWS.Visible)
-            {
-                if (txtAWSProfile.Text != "") { cfg.AWSProfile = txtAWSProfile.Text; }
-                if(txtAccessKey.Text!="") { cfg.AccessKey = txtAccessKey.Text; }
-                if (txtSecretKey.Text != "") { cfg.SecretKey = txtSecretKey.Text; }
-
-            }
-            cfg.NoWMI = chkNoWMI.Checked;
+            DBAChecksSource src = new DBAChecksSource(cboSource.Text);
+              src.NoWMI = chkNoWMI.Checked;
             if (chkCustomizeSchedule.Checked)
             {
-                cfg.Schedules = cfg.GetSchedule();
+                src.Schedules = src.GetSchedule();
             }
-            bool validated = validateSource() && validateDestination();
+            bool validated = validateSource();
 
             if (validated)
             {
-                if (cfg.Validate() == false)
-                {
-                    if (MessageBox.Show("Error connecting to data source/destination.  Are you sure you want to add this to the configuration?","Error", MessageBoxButtons.YesNo, MessageBoxIcon.Exclamation) == DialogResult.No)
-                    {
-                        return;
-                    }
-                }
-                if (!(cfg.SourceConnectionType() == CollectionConfig.ConnectionType.SQL || cfg.DestinationConnectionType() == CollectionConfig.ConnectionType.SQL))
+                if (!(src.SourceConnection.Type == ConnectionType.SQL || collectionConfig.DestinationConnection.Type == ConnectionType.SQL))
                 {
                     MessageBox.Show("Error: Invalid source and destination connection combination.  One of these should be a SQL connection string", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     return;
                 }
-                if (collectionConfigs == null)
+
+                if (collectionConfig == null)
                 {
-                    collectionConfigs = new List<CollectionConfig>();
+                    collectionConfig = new CollectionConfig();
                 }
-                foreach (var _cfg in collectionConfigs)
+                foreach (var s in collectionConfig.SourceConnections)
                 {
-                    if (cfg.Source == _cfg.Source && cfg.Destination == _cfg.Destination)
+                    if (src.ConnectionString == s.ConnectionString)
                     {
                         MessageBox.Show("Error: Item already exists", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                         return;
                     }
 
                 }
-                collectionConfigs.Add(cfg);
+                System.Windows.Forms.Cursor.Current = System.Windows.Forms.Cursors.WaitCursor;
+                validated = src.SourceConnection.Validate();
+                System.Windows.Forms.Cursor.Current = System.Windows.Forms.Cursors.Default;
+                if (validated == false)
+                {
+                    if (MessageBox.Show("Error connecting to data source.  Are you sure you want to add this to the configuration?", "Error", MessageBoxButtons.YesNo, MessageBoxIcon.Exclamation) == DialogResult.No)
+                    {
+                        return;
+                    }
+                }
+                collectionConfig.SourceConnections.Add(src);
                 txtJson.Text = jsonConfig();
                 populateDropDowns();
             }
@@ -81,7 +80,7 @@ namespace DBAChecksServiceConfig
 
         private string jsonConfig()
         {
-            return JsonConvert.SerializeObject(collectionConfigs, Formatting.Indented, new JsonSerializerSettings
+            return JsonConvert.SerializeObject(collectionConfig, Formatting.Indented, new JsonSerializerSettings
             {
                 NullValueHandling = NullValueHandling.Ignore,
                 DefaultValueHandling = DefaultValueHandling.Ignore
@@ -90,32 +89,25 @@ namespace DBAChecksServiceConfig
 
         private void populateDropDowns()
         {
-            foreach (var _cfg in collectionConfigs)
+            foreach (var _cfg in collectionConfig.SourceConnections)
             {
-               if (!(cboSource.Items.Contains(_cfg.Source)))
+               if (!(cboSource.Items.Contains(_cfg.ConnectionString)))
                 {
-                    cboSource.Items.Add(_cfg.Source);
+                    cboSource.Items.Add(_cfg.ConnectionString);
                 }
-               if (!(cboDestination.Items.Contains(_cfg.Destination)))
-                {
-                    cboDestination.Items.Add(_cfg.Destination);
-                }
-
-
-            }
+              }
         }
 
         private bool validateSource()
         {
             errorProvider1.SetError(cboSource, null);
-            CollectionConfig cfg = new CollectionConfig(cboSource.Text, cboDestination.Text);
-            pnlAWS.Visible = (cfg.SourceConnectionType() == CollectionConfig.ConnectionType.AWSS3 || cfg.DestinationConnectionType() == CollectionConfig.ConnectionType.AWSS3);
+            DBAChecksConnection source = new DBAChecksConnection(cboSource.Text);
             if (cboSource.Text == "")
             {
                 return false;
             }
             
-            if (cfg.SourceConnectionType() == DBAChecksService.CollectionConfig.ConnectionType.Invalid)
+            if (source.Type == ConnectionType.Invalid)
             {
                 errorProvider1.SetError(cboSource, "Invalid connection string, directory or S3 path");    
                 return false;
@@ -128,17 +120,17 @@ namespace DBAChecksServiceConfig
 
         private bool validateDestination()
         {
-            errorProvider1.SetError(cboDestination, null);
-            CollectionConfig cfg = new CollectionConfig(cboSource.Text, cboDestination.Text);
-            pnlAWS.Visible = (cfg.SourceConnectionType() == CollectionConfig.ConnectionType.AWSS3 || cfg.DestinationConnectionType() == CollectionConfig.ConnectionType.AWSS3);
-            if (cboDestination.Text == "")
+            errorProvider1.SetError(txtDestination, null);
+            DBAChecksConnection dest = new DBAChecksConnection(txtDestination.Text);
+
+            if (txtDestination.Text == "")
             {
                 return false;
             }
             
-            if (cfg.DestinationConnectionType() == DBAChecksService.CollectionConfig.ConnectionType.Invalid)
+            if (dest.Type == ConnectionType.Invalid)
             {
-                errorProvider1.SetError(cboDestination, "Invalid connection string, directory or S3 path");
+                errorProvider1.SetError(txtDestination, "Invalid connection string, directory or S3 path");
                 return false;
             }
             else
@@ -147,15 +139,8 @@ namespace DBAChecksServiceConfig
             }
         }
 
-        private void cboSource_Validating(object sender, CancelEventArgs e)
-        {
-            bttnAdd.Enabled = validateSource() && validateDestination() ;
-        }
 
-        private void cboDestination_Validating(object sender, CancelEventArgs e)
-        {
-            bttnAdd.Enabled = validateSource() && validateDestination();
-        }
+
 
         private void bttnSave_Click(object sender, EventArgs e)
         {
@@ -179,12 +164,7 @@ namespace DBAChecksServiceConfig
                 {
                      originalJson=  System.IO.File.ReadAllText(jsonPath);
                      txtJson.Text = originalJson;
-                     collectionConfigs = JsonConvert.DeserializeObject<List<CollectionConfig>>(originalJson);
-                    populateDropDowns();
-                    if (cboDestination.Items.Count == 1)
-                    {
-                        cboDestination.SelectedIndex = 0;
-                    }
+                    setFromJson(originalJson);
                 }
                 catch 
                 {
@@ -192,6 +172,18 @@ namespace DBAChecksServiceConfig
                 }
             }
             refreshServiceStatus();
+        }
+
+        private void setFromJson(string json)
+        {
+            collectionConfig = CollectionConfig.Deserialize(json);
+            populateDropDowns();
+            txtDestination.Text = collectionConfig.DestinationConnection.EncryptedConnectionString;
+            txtAWSProfile.Text = collectionConfig.AWSProfile;
+            txtAccessKey.Text = collectionConfig.AccessKey;
+            txtSecretKey.Text = collectionConfig.SecretKey;
+            chkCustomizeMaintenanceChron.Checked = (collectionConfig.MaintenanceScheduleChron != null);
+           
         }
 
         private void refreshServiceStatus()
@@ -223,13 +215,12 @@ namespace DBAChecksServiceConfig
             errorProvider1.SetError(txtJson, null);
             if (txtJson.Text.Trim() == "")
             {
-                collectionConfigs = new List<CollectionConfig>();
+                collectionConfig = new CollectionConfig();
                 return;
             }
             try
             {
-                collectionConfigs = JsonConvert.DeserializeObject<List<CollectionConfig>>(txtJson.Text);
-                populateDropDowns();
+                setFromJson(txtJson.Text);
             }
             catch(Exception ex)
             {
@@ -346,16 +337,89 @@ namespace DBAChecksServiceConfig
         {
             txtAccessKey.Enabled = (txtAWSProfile.Text.Length == 0);
             txtSecretKey.Enabled = txtAccessKey.Enabled;
+
         }
 
         private void txtAccessKey_TextChanged(object sender, EventArgs e)
         {
             txtAWSProfile.Enabled = (txtAccessKey.Text.Length == 0 && txtSecretKey.Text.Length == 0);
+           
         }
 
         private void txtSecretKey_TextChanged(object sender, EventArgs e)
         {
             txtAWSProfile.Enabled = (txtAccessKey.Text.Length == 0 && txtSecretKey.Text.Length == 0);
+           
+        }
+
+        private void cboDestination_SelectedIndexChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void txtDestination_TextChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void txtDestination_Validated(object sender, EventArgs e)
+        {
+            validateDestination();
+            collectionConfig.Destination = txtDestination.Text;
+            txtJson.Text = collectionConfig.Serialize();
+        }
+
+        private void bttnRemove_Click(object sender, EventArgs e)
+        {
+           DBAChecksSource src=null;
+           foreach(var c in collectionConfig.SourceConnections)
+            {
+                if (c.SourceConnection.ConnectionString == cboSource.Text)
+                {
+                    src = c;
+                }
+            }
+            if (src != null)
+            {
+                collectionConfig.SourceConnections.Remove(src);
+                MessageBox.Show("Connection removed", "Remove", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            else
+            {
+                MessageBox.Show("Connection not found", "Remove", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+            }
+            txtJson.Text = collectionConfig.Serialize();
+        }
+
+        private void txtAccessKey_Validating(object sender, CancelEventArgs e)
+        {
+            collectionConfig.AccessKey = (txtAccessKey.Text == "" ? null : txtAccessKey.Text);
+            txtJson.Text = collectionConfig.Serialize();
+        }
+
+        private void txtSecretKey_Validating(object sender, CancelEventArgs e)
+        {
+            collectionConfig.SecretKey = (txtSecretKey.Text=="" ? null : txtSecretKey.Text);
+            txtJson.Text = collectionConfig.Serialize();
+        }
+
+        private void txtAWSProfile_Validating(object sender, CancelEventArgs e)
+        {
+            collectionConfig.AWSProfile = (txtAWSProfile.Text=="" ? null : txtAWSProfile.Text);
+            txtJson.Text = collectionConfig.Serialize();
+        }
+
+        private void chkCustomizeMaintenanceChron_CheckedChanged(object sender, EventArgs e)
+        {
+            if (chkCustomizeMaintenanceChron.Checked)
+            {
+                collectionConfig.MaintenanceScheduleChron = collectionConfig.GetMaintenanceChron();
+            }
+            else
+            {
+                collectionConfig.MaintenanceScheduleChron = null;
+            }
+            txtJson.Text = collectionConfig.Serialize();
         }
     }
 }

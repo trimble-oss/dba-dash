@@ -59,6 +59,8 @@
     <Compile Include="AWSTools.cs" />
     <Compile Include="CollectionConfig.cs" />
     <Compile Include="CollectionConfigSchedule.cs" />
+    <Compile Include="DBAChecksConnection.cs" />
+    <Compile Include="DBAChecksSource.cs" />
     <Compile Include="DBCollector.cs" />
     <Compile Include="DBImporter.cs" />
     <Compile Include="Encrypt.cs" />

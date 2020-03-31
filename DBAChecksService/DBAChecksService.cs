@@ -9,6 +9,7 @@ using System.IO;
 using System.Linq;
 using Topshelf;
 using Topshelf.Quartz;
+using static DBAChecks.DBAChecksConnection;
 
 namespace DBAChecksService
 {
@@ -25,18 +26,70 @@ namespace DBAChecksService
 
     }
 
+    public class MaintenanceJob: IJob
+    {
+        public void Execute(IJobExecutionContext context)
+        {
+            JobDataMap dataMap = context.JobDetail.JobDataMap;
+            string connectionString = dataMap.GetString("ConnectionString");
+            AddPartitions(connectionString);
+            PurgeData(connectionString);
+        }
+
+        public static void AddPartitions(string connectionString)
+        {
+            var cn = new SqlConnection(connectionString);
+            using (cn)
+            {
+                cn.Open();
+                SqlCommand cmd = new SqlCommand("Partitions_Add", cn);
+                Console.WriteLine("Maintenance: Creating partitions");
+                cmd.ExecuteNonQuery();             
+            }
+        }
+        public static void PurgeData(string connectionString)
+        {
+            var cn = new SqlConnection(connectionString);
+            using (cn)
+            {
+                cn.Open();
+                Console.WriteLine("Maintenance: PurgeData");
+                SqlCommand cmd = new SqlCommand("PurgeData", cn);
+                cmd.ExecuteNonQuery();
+            }
+        }
+    }
+    
 
     public class DBAChecksJob : IJob
     {
+
+        string AccessKey;
+        string SecretKey;
+        string AWSProfile;
+        string source;
+        string destination;
+        ConnectionType sourceType;
+        ConnectionType destinationType;
+         
+
         public void Execute(IJobExecutionContext context)
         {
 
             JobDataMap dataMap = context.JobDetail.JobDataMap;
 
-            var cfg = JsonConvert.DeserializeObject<CollectionConfig>(dataMap.GetString("CFG"));
+            var cfg = JsonConvert.DeserializeObject<DBAChecksSource>(dataMap.GetString("CFG"));
             var types = JsonConvert.DeserializeObject<CollectionType[]>(dataMap.GetString("Type"));
+             AccessKey = dataMap.GetString("AccessKey");
+             SecretKey = dataMap.GetString("SecretKey");
+            AWSProfile = dataMap.GetString("AWSProfile");
+            source = dataMap.GetString("Source");
+            destination = dataMap.GetString("Destination");
+            sourceType = JsonConvert.DeserializeObject<ConnectionType>(dataMap.GetString("SourceType"));
+            destinationType = JsonConvert.DeserializeObject<ConnectionType>(dataMap.GetString("DestinationType"));
+                   
 
-            if (cfg.SourceConnectionType() == CollectionConfig.ConnectionType.Directory)
+            if (cfg.SourceConnection.Type == ConnectionType.Directory)
             {
                 string folder = cfg.GetSource();
                 Console.WriteLine("Import from folder:" + folder);
@@ -55,11 +108,11 @@ namespace DBAChecksService
                     Console.WriteLine("Source directory doesn't exist: " + folder);
                 }
             }
-            else if (cfg.SourceConnectionType() == CollectionConfig.ConnectionType.AWSS3)
+            else if (cfg.SourceConnection.Type == ConnectionType.AWSS3)
             {
-                Console.WriteLine("Import from S3: " + cfg.Source);
-                var uri = new Amazon.S3.Util.AmazonS3Uri(cfg.Source);
-                var s3Cli = AWSTools.GetAWSClient(cfg.AWSProfile,cfg.AccessKey,cfg.GetSecretKey(), uri);
+                Console.WriteLine("Import from S3: " + cfg.ConnectionString);
+                var uri = new Amazon.S3.Util.AmazonS3Uri(cfg.ConnectionString);
+                var s3Cli = AWSTools.GetAWSClient(AWSProfile,AccessKey,SecretKey, uri);
                 var resp = s3Cli.ListObjects(uri.Bucket, (uri.Key + "/DBAChecks_").Replace("//", "/"));
                 foreach (var f in resp.S3Objects)
                 {
@@ -101,14 +154,14 @@ namespace DBAChecksService
 
         }
 
-        private void writeDestination(CollectionConfig cfg, DataSet ds)
+        private void writeDestination(DBAChecksSource cfg, DataSet ds)
         {
-            string destination = cfg.GetDestination();
-            if (cfg.DestinationConnectionType() == CollectionConfig.ConnectionType.AWSS3)
+      
+            if (destinationType == ConnectionType.AWSS3)
             {
                 Console.WriteLine("Upload to S3");
                 var uri = new Amazon.S3.Util.AmazonS3Uri(destination);
-                var s3Cli = AWSTools.GetAWSClient(cfg.AWSProfile,cfg.AccessKey,cfg.GetSecretKey(), uri);
+                var s3Cli = AWSTools.GetAWSClient(AWSProfile,AccessKey,SecretKey, uri);
                 var r = new Amazon.S3.Model.PutObjectRequest();
                 string fileName = cfg.GenerateFileName();
                 string filePath = Path.Combine(destination, fileName);
@@ -119,7 +172,7 @@ namespace DBAChecksService
 
                 s3Cli.PutObject(r);
             }
-            else if (cfg.DestinationConnectionType() == CollectionConfig.ConnectionType.Directory)
+            else if (destinationType == ConnectionType.Directory)
             {
                 if (System.IO.Directory.Exists(destination))
                 {
@@ -138,7 +191,7 @@ namespace DBAChecksService
             {
                 var importer = new DBImporter();
                 Console.WriteLine("Update DBAChecks DB");
-                importer.Update(cfg.GetDestination(), ds);
+                importer.Update(destination, ds);
 
             }
         }
@@ -147,7 +200,7 @@ namespace DBAChecksService
 
     internal static class ConfigureService
     {
-        internal static void Configure(CollectionConfig[] configs)
+        internal static void Configure(CollectionConfig config)
         {
             HostFactory.Run(configure =>
             {
@@ -157,7 +210,22 @@ namespace DBAChecksService
                     service.ConstructUsing(s => new DBAChecksService());
                     ServiceConfiguratorExtensions.WhenStarted<DBAChecksService>(service, s => s.Start());
                     ServiceConfiguratorExtensions.WhenStopped<DBAChecksService>(service, s => s.Stop());
-                    foreach (CollectionConfig cfg in configs)
+                    if (config.DestinationConnection.Type == ConnectionType.SQL)
+                    {
+                        string maintenanceChron = config.GetMaintenanceChron();
+                        var x = ScheduleJobServiceConfiguratorExtensions.ScheduleQuartzJob<DBAChecksService>(service, q =>
+                     q.WithJob(() =>
+                     JobBuilder.Create<MaintenanceJob>()
+                          .UsingJobData("ConnectionString", config.DestinationConnection.ConnectionString)
+                          .Build())
+                          .AddTrigger(() => TriggerBuilder.Create()
+                              .WithCronSchedule(maintenanceChron)
+                              .Build()
+                              )); ; ;
+                        MaintenanceJob.AddPartitions(config.DestinationConnection.ConnectionString);
+
+                    }
+                    foreach (DBAChecksSource cfg in config.SourceConnections)
                     {
 
                         string cfgString = JsonConvert.SerializeObject(cfg);
@@ -170,6 +238,13 @@ namespace DBAChecksService
                               JobBuilder.Create<DBAChecksJob>()
                                    .UsingJobData("Type", JsonConvert.SerializeObject(s.CollectionTypes))
                                    .UsingJobData("CFG", cfgString)
+                                   .UsingJobData("AccessKey", config.AccessKey)
+                                   .UsingJobData("SecretKey", config.GetSecretKey())
+                                   .UsingJobData("AWSProfile", config.AWSProfile)
+                                   .UsingJobData("Source", cfg.SourceConnection.ConnectionString)
+                                   .UsingJobData("Destination", config.DestinationConnection.ConnectionString)
+                                   .UsingJobData("SourceType", JsonConvert.SerializeObject(cfg.SourceConnection.Type))
+                                   .UsingJobData("DestinationType", JsonConvert.SerializeObject(config.DestinationConnection.Type))
                                   .Build())
                               .AddTrigger(() => TriggerBuilder.Create()
                                       .WithSimpleSchedule(b => b
@@ -179,10 +254,10 @@ namespace DBAChecksService
                               .AddTrigger(() => TriggerBuilder.Create()
                                   .WithCronSchedule(s.ChronSchedule)
                                   .Build()
-                                  ));
+                                  )); ; ;
                         }
 
-
+             
 
                     }
                 });
