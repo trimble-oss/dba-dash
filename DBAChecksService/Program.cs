@@ -17,23 +17,7 @@ namespace DBAChecksService
             }            
             string jsonConfig = System.IO.File.ReadAllText(jsonConfigPath);
             var conf = CollectionConfig.Deserialize(jsonConfig);
-            bool wasEncrypted = false;
-
-            if (conf.DestinationConnection.WasEncrypted)
-            {
-                wasEncrypted = true;
-            }
-            else
-            {
-                foreach (var c in conf.SourceConnections)
-                {
-                    if (c.SourceConnection.WasEncrypted)
-                    {
-                        wasEncrypted = true;
-                    }
-                }
-            }
-            if (wasEncrypted)
+            if (conf.WasEncrypted())
             {
                 Console.WriteLine("Saving ServiceConfig.json with encrypted password");
 

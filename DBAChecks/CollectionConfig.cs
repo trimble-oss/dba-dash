@@ -111,5 +111,28 @@ namespace DBAChecks
                 DestinationConnection = new DBAChecksConnection(value);
             }
         }
+
+        public bool WasEncrypted()
+        {
+            if (wasEncryptionPerformed)
+            {
+                return wasEncryptionPerformed;
+            }
+            if (DestinationConnection.WasEncrypted)
+            {
+                wasEncryptionPerformed = true;
+            }
+            else
+            {
+                foreach (var c in SourceConnections)
+                {
+                    if (c.SourceConnection.WasEncrypted)
+                    {
+                        wasEncryptionPerformed= true;
+                    }
+                }
+            }
+            return wasEncryptionPerformed;
+        }
     }
 }
