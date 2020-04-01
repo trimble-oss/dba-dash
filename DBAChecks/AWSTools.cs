@@ -25,7 +25,7 @@ namespace DBAChecks
             {
                 cred = new BasicAWSCredentials(accessKey, secretKey);
             }
-            else if (profile != null & profile.Length>0)
+            else if (profile != null && profile.Length>0)
             {
                 try
                 {

@@ -146,7 +146,14 @@ namespace DBAChecksService
                     collector.CPUCollectionPeriod = 30;
                 }
                 collector.Collect(types);
-                writeDestination(cfg, collector.Data);
+                try
+                {
+                    writeDestination(cfg, collector.Data);
+                }
+                catch(Exception ex)
+                {
+                    Console.WriteLine("Error writing to destination:" + ex.ToString());
+                }
             }
 
 
