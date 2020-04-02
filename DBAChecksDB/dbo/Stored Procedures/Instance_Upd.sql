@@ -1,4 +1,11 @@
-﻿CREATE PROC [dbo].[Instance_Upd](@ConnectionID SYSNAME,@Instance SYSNAME,@SnapshotDate DATETIME2(2),@AgentHostName NVARCHAR(16),@InstanceID INT OUT)
+﻿CREATE PROC [dbo].[Instance_Upd](
+	@ConnectionID SYSNAME,
+	@Instance SYSNAME,
+	@SnapshotDate DATETIME2(2),
+	@AgentHostName NVARCHAR(16),
+	@AgentVersion VARCHAR(30)=NULL,
+	@InstanceID INT OUT
+)
 AS
 SELECT @InstanceID = InstanceID
 FROM dbo.Instances 
@@ -10,8 +17,8 @@ BEGIN
 	IF @InstanceID IS NULL
 	BEGIN
 		BEGIN TRAN
-		INSERT INTO dbo.Instances(Instance,ConnectionID,IsActive,AgentHostName)
-		VALUES(@Instance,@ConnectionID,CAST(1 as BIT),@AgentHostName)
+		INSERT INTO dbo.Instances(Instance,ConnectionID,IsActive,AgentHostName,AgentVersion)
+		VALUES(@Instance,@ConnectionID,CAST(1 as BIT),@AgentHostName,@AgentVersion)
 		SELECT @InstanceID = SCOPE_IDENTITY();
 
 		EXEC dbo.CollectionDates_Upd @InstanceID = @InstanceID,  
@@ -24,7 +31,8 @@ BEGIN
 	BEGIN
 		UPDATE dbo.Instances 
 		SET Instance = @Instance,
-			AgentHostName=@AgentHostName
+			AgentHostName=@AgentHostName,
+			AgentVersion=@AgentVersion
 		WHERE InstanceID = @InstanceID
 
 		EXEC dbo.CollectionDates_Upd @InstanceID = @InstanceID,  

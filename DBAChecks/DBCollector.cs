@@ -6,6 +6,7 @@ using System.Data;
 using System.Data.SqlClient;
 using System.Linq;
 using System.Management;
+using System.Reflection;
 
 namespace DBAChecks
 {
@@ -102,11 +103,12 @@ namespace DBAChecks
         public void GetInstance(string connectionID)
         {
             var dt = getDT("DBAChecks", "SELECT @@SERVERNAME as Instance,GETUTCDATE() As SnapshotDateUTC,CAST(SERVERPROPERTY('EditionID') as bigint) as EditionID,ISNULL(CAST(SERVERPROPERTY('ComputerNamePhysicalNetBIOS') as nvarchar(128)),'') as ComputerNamePhysicalNetBIOS,DB_NAME() as DBName");
-            dt.Columns.Add("DBAChecksVersion", typeof(Int32));
+            dt.Columns.Add("AgentVersion", typeof(string));
             dt.Columns.Add("ConnectionID", typeof(string));
             dt.Columns.Add("AgentHostName", typeof(string));
-            dt.Rows[0]["DBAChecksVersion"] = 1;
+            dt.Rows[0]["AgentVersion"] = Assembly.GetEntryAssembly().GetName().Version;
             dt.Rows[0]["AgentHostName"] = Environment.MachineName;
+       
             editionId = (Int64)dt.Rows[0]["EditionId"];
             computerName = (string)dt.Rows[0]["ComputerNamePhysicalNetBIOS"];
             string dbName = (string)dt.Rows[0]["DBName"];

@@ -75,8 +75,11 @@
     [LastMemoryDump]                   DATETIME         NULL,
     [MemoryDumpCount]                  INT              NULL,
     [WindowsCaption]                   NVARCHAR (256)   NULL,
+    [AgentVersion]                     VARCHAR (30)     NULL,
     CONSTRAINT [PK_Instances] PRIMARY KEY CLUSTERED ([InstanceID] ASC)
 );
+
+
 
 
 

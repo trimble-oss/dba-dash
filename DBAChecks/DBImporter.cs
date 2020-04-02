@@ -195,9 +195,13 @@ namespace DBAChecks
                 cmd.Parameters.AddWithValue("ConnectionID", (string)rInstance["ConnectionID"]);
                 cmd.Parameters.AddWithValue("Instance", (string)rInstance["Instance"]);
                 cmd.Parameters.AddWithValue("SnapshotDate", (DateTime)rInstance["SnapshotDateUTC"]);
+           
                 cmd.Parameters.AddWithValue("AgentHostName", (string)rInstance["AgentHostName"]);
-
-                var pInstanceID = cmd.Parameters.Add("InstanceID", SqlDbType.Int);
+                if (rInstance.Table.Columns.Contains("AgentVersion"))
+                {
+                    cmd.Parameters.AddWithValue("AgentVersion", (string)rInstance["AgentVersion"]);
+                }
+                 var pInstanceID = cmd.Parameters.Add("InstanceID", SqlDbType.Int);
                 pInstanceID.Direction = ParameterDirection.Output;
                 cmd.CommandType = CommandType.StoredProcedure;
                 cmd.ExecuteNonQuery();

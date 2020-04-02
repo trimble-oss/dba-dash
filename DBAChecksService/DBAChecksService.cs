@@ -87,75 +87,80 @@ namespace DBAChecksService
             destination = dataMap.GetString("Destination");
             sourceType = JsonConvert.DeserializeObject<ConnectionType>(dataMap.GetString("SourceType"));
             destinationType = JsonConvert.DeserializeObject<ConnectionType>(dataMap.GetString("DestinationType"));
-                   
 
-            if (cfg.SourceConnection.Type == ConnectionType.Directory)
+            try
             {
-                string folder = cfg.GetSource();
-                Console.WriteLine("Import from folder:" + folder);
-                if (System.IO.Directory.Exists(folder))
+                if (cfg.SourceConnection.Type == ConnectionType.Directory)
                 {
-                    foreach (string f in System.IO.Directory.GetFiles(folder, "DBAChecks_*.json"))
+                    string folder = cfg.GetSource();
+                    Console.WriteLine("Import from folder:" + folder);
+                    if (System.IO.Directory.Exists(folder))
                     {
-                        string json = System.IO.File.ReadAllText(f);
-                        DataSet ds = JsonConvert.DeserializeObject<DataSet>(json);
-                        writeDestination(cfg, ds);
-                        System.IO.File.Delete(f);
-                    }
-                }
-                else
-                {
-                    Console.WriteLine("Source directory doesn't exist: " + folder);
-                }
-            }
-            else if (cfg.SourceConnection.Type == ConnectionType.AWSS3)
-            {
-                Console.WriteLine("Import from S3: " + cfg.ConnectionString);
-                var uri = new Amazon.S3.Util.AmazonS3Uri(cfg.ConnectionString);
-                var s3Cli = AWSTools.GetAWSClient(AWSProfile,AccessKey,SecretKey, uri);
-                var resp = s3Cli.ListObjects(uri.Bucket, (uri.Key + "/DBAChecks_").Replace("//", "/"));
-                foreach (var f in resp.S3Objects)
-                {
-                    if (f.Key.EndsWith(".json"))
-                    {
-                        using (GetObjectResponse response = s3Cli.GetObject(f.BucketName, f.Key))
-                        using (Stream responseStream = response.ResponseStream)
-                        using (StreamReader reader = new StreamReader(responseStream))
+                        foreach (string f in System.IO.Directory.GetFiles(folder, "DBAChecks_*.json"))
                         {
-                            string json = reader.ReadToEnd();
+                            string json = System.IO.File.ReadAllText(f);
                             DataSet ds = JsonConvert.DeserializeObject<DataSet>(json);
                             writeDestination(cfg, ds);
-                            s3Cli.DeleteObject(f.BucketName, f.Key);
+                            System.IO.File.Delete(f);
                         }
-                        Console.WriteLine("Imported:" + f.Key);
                     }
-
+                    else
+                    {
+                        Console.WriteLine("Source directory doesn't exist: " + folder);
+                    }
                 }
-            }
-            else
-            {
-                SqlConnectionStringBuilder builder = new SqlConnectionStringBuilder(cfg.GetSource());
-                Console.WriteLine("Collect " + string.Join(", ", types.Select(s => s.ToString()).ToArray()) + " from Instance:" + builder.DataSource);
-                var collector = new DBCollector(cfg.GetSource(), cfg.NoWMI);
-                if (context.PreviousFireTimeUtc.HasValue)
+                else if (cfg.SourceConnection.Type == ConnectionType.AWSS3)
                 {
-                    collector.CPUCollectionPeriod = (Int32)DateTime.UtcNow.Subtract(context.PreviousFireTimeUtc.Value.UtcDateTime).TotalMinutes + 5;
+                    Console.WriteLine("Import from S3: " + cfg.ConnectionString);
+                    var uri = new Amazon.S3.Util.AmazonS3Uri(cfg.ConnectionString);
+                    var s3Cli = AWSTools.GetAWSClient(AWSProfile, AccessKey, SecretKey, uri);
+                    var resp = s3Cli.ListObjects(uri.Bucket, (uri.Key + "/DBAChecks_").Replace("//", "/"));
+                    foreach (var f in resp.S3Objects)
+                    {
+                        if (f.Key.EndsWith(".json"))
+                        {
+                            using (GetObjectResponse response = s3Cli.GetObject(f.BucketName, f.Key))
+                            using (Stream responseStream = response.ResponseStream)
+                            using (StreamReader reader = new StreamReader(responseStream))
+                            {
+                                string json = reader.ReadToEnd();
+                                DataSet ds = JsonConvert.DeserializeObject<DataSet>(json);
+                                writeDestination(cfg, ds);
+                                s3Cli.DeleteObject(f.BucketName, f.Key);
+                            }
+                            Console.WriteLine("Imported:" + f.Key);
+                        }
+
+                    }
                 }
                 else
                 {
-                    collector.CPUCollectionPeriod = 30;
-                }
-                collector.Collect(types);
-                try
-                {
-                    writeDestination(cfg, collector.Data);
-                }
-                catch(Exception ex)
-                {
-                    Console.WriteLine("Error writing to destination:" + ex.ToString());
+                    SqlConnectionStringBuilder builder = new SqlConnectionStringBuilder(cfg.GetSource());
+                    Console.WriteLine("Collect " + string.Join(", ", types.Select(s => s.ToString()).ToArray()) + " from Instance:" + builder.DataSource);
+                    var collector = new DBCollector(cfg.GetSource(), cfg.NoWMI);
+                    if (context.PreviousFireTimeUtc.HasValue)
+                    {
+                        collector.CPUCollectionPeriod = (Int32)DateTime.UtcNow.Subtract(context.PreviousFireTimeUtc.Value.UtcDateTime).TotalMinutes + 5;
+                    }
+                    else
+                    {
+                        collector.CPUCollectionPeriod = 30;
+                    }
+                    collector.Collect(types);
+                    try
+                    {
+                        writeDestination(cfg, collector.Data);
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine("Error writing to destination:" + ex.ToString());
+                    }
                 }
             }
-
+            catch(Exception ex)
+            {
+                Console.WriteLine(ex.ToString());               
+            }
 
 
 
