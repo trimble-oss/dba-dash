@@ -27,6 +27,10 @@
           <DataField>Instance</DataField>
           <rd:TypeName>System.String</rd:TypeName>
         </Field>
+        <Field Name="ConnectionID">
+          <DataField>ConnectionID</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
         <Field Name="configuration_id">
           <DataField>configuration_id</DataField>
           <rd:TypeName>System.Int32</rd:TypeName>
@@ -79,9 +83,9 @@
         </Field>
       </Fields>
     </DataSet>
-    <DataSet Name="Instances">
+    <DataSet Name="Connections">
       <SharedDataSet>
-        <SharedDataSetReference>Instances</SharedDataSetReference>
+        <SharedDataSetReference>Connections</SharedDataSetReference>
         <QueryParameters>
           <QueryParameter Name="@TagIDs">
             <Value>=Parameters!TagIDs.Value</Value>
@@ -99,8 +103,8 @@
           <DataField>InstanceID</DataField>
           <rd:TypeName>System.Int32</rd:TypeName>
         </Field>
-        <Field Name="Instance">
-          <DataField>Instance</DataField>
+        <Field Name="ConnectionID">
+          <DataField>ConnectionID</DataField>
           <rd:TypeName>System.String</rd:TypeName>
         </Field>
       </Fields>
@@ -125,6 +129,10 @@
       <Fields>
         <Field Name="Instance">
           <DataField>Instance</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+        <Field Name="ConnectionID">
+          <DataField>ConnectionID</DataField>
           <rd:TypeName>System.String</rd:TypeName>
         </Field>
         <Field Name="name">
@@ -195,6 +203,10 @@
       <Fields>
         <Field Name="Instance">
           <DataField>Instance</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+        <Field Name="ConnectionID">
+          <DataField>ConnectionID</DataField>
           <rd:TypeName>System.String</rd:TypeName>
         </Field>
         <Field Name="TraceFlag">
@@ -294,7 +306,7 @@
                           <Paragraph>
                             <TextRuns>
                               <TextRun>
-                                <Value />
+                                <Value>Connection ID</Value>
                                 <Style>
                                   <Color>White</Color>
                                 </Style>
@@ -431,7 +443,7 @@ IIF(Fields!IsDefault.Value,"Green","Yellow"))</BackgroundColor>
                 <TablixMember>
                   <Group Name="matrix1_Instance">
                     <GroupExpressions>
-                      <GroupExpression>=Fields!Instance.Value</GroupExpression>
+                      <GroupExpression>=Fields!ConnectionID.Value</GroupExpression>
                     </GroupExpressions>
                   </Group>
                   <SortExpressions>
@@ -442,14 +454,14 @@ IIF(Fields!IsDefault.Value,"Green","Yellow"))</BackgroundColor>
                   <TablixHeader>
                     <Size>1.52083in</Size>
                     <CellContents>
-                      <Textbox Name="Instance">
+                      <Textbox Name="ConnectionID">
                         <CanGrow>true</CanGrow>
                         <KeepTogether>true</KeepTogether>
                         <Paragraphs>
                           <Paragraph>
                             <TextRuns>
                               <TextRun>
-                                <Value>=Fields!Instance.Value</Value>
+                                <Value>=Fields!ConnectionID.Value</Value>
                                 <Style />
                               </TextRun>
                             </TextRuns>
@@ -458,7 +470,7 @@ IIF(Fields!IsDefault.Value,"Green","Yellow"))</BackgroundColor>
                             </Style>
                           </Paragraph>
                         </Paragraphs>
-                        <rd:DefaultName>Instance</rd:DefaultName>
+                        <rd:DefaultName>ConnectionID</rd:DefaultName>
                         <Style>
                           <Border>
                             <Color>LightGrey</Color>
@@ -1074,21 +1086,21 @@ IIF(Fields!IsDefault.Value,"Green","Yellow"))</BackgroundColor>
                   <TablixCells>
                     <TablixCell>
                       <CellContents>
-                        <Textbox Name="Instance1">
+                        <Textbox Name="ConnectionID1">
                           <CanGrow>true</CanGrow>
                           <KeepTogether>true</KeepTogether>
                           <Paragraphs>
                             <Paragraph>
                               <TextRuns>
                                 <TextRun>
-                                  <Value>=Fields!Instance.Value</Value>
+                                  <Value>=Fields!ConnectionID.Value</Value>
                                   <Style />
                                 </TextRun>
                               </TextRuns>
                               <Style />
                             </Paragraph>
                           </Paragraphs>
-                          <rd:DefaultName>Instance1</rd:DefaultName>
+                          <rd:DefaultName>ConnectionID1</rd:DefaultName>
                           <Style>
                             <Border>
                               <Color>LightGrey</Color>
@@ -1752,7 +1764,7 @@ IIF(Fields!ValidFrom.Value="1900-01-01","",format(Fields!ValidFrom.Value,Paramet
                 <TablixMember>
                   <Group Name="Instance">
                     <GroupExpressions>
-                      <GroupExpression>=Fields!Instance.Value</GroupExpression>
+                      <GroupExpression>=Fields!ConnectionID.Value</GroupExpression>
                     </GroupExpressions>
                   </Group>
                   <SortExpressions>
@@ -1763,21 +1775,21 @@ IIF(Fields!ValidFrom.Value="1900-01-01","",format(Fields!ValidFrom.Value,Paramet
                   <TablixHeader>
                     <Size>2.27167in</Size>
                     <CellContents>
-                      <Textbox Name="Instance2">
+                      <Textbox Name="ConnectionID2">
                         <CanGrow>true</CanGrow>
                         <KeepTogether>true</KeepTogether>
                         <Paragraphs>
                           <Paragraph>
                             <TextRuns>
                               <TextRun>
-                                <Value>=Fields!Instance.Value</Value>
+                                <Value>=Fields!ConnectionID.Value</Value>
                                 <Style />
                               </TextRun>
                             </TextRuns>
                             <Style />
                           </Paragraph>
                         </Paragraphs>
-                        <rd:DefaultName>Instance2</rd:DefaultName>
+                        <rd:DefaultName>ConnectionID2</rd:DefaultName>
                         <Style>
                           <Border>
                             <Color>LightGrey</Color>
@@ -2391,7 +2403,7 @@ IIF(MIN(Fields!Status.Value, "OSLoadedModules")=1,
           <Value>-1</Value>
         </Values>
       </DefaultValue>
-      <Prompt>Tag IDs</Prompt>
+      <Prompt>Tags</Prompt>
       <ValidValues>
         <DataSetReference>
           <DataSetName>Tags</DataSetName>
@@ -2427,17 +2439,17 @@ IIF(MIN(Fields!Status.Value, "OSLoadedModules")=1,
       <DataType>String</DataType>
       <DefaultValue>
         <DataSetReference>
-          <DataSetName>Instances</DataSetName>
+          <DataSetName>Connections</DataSetName>
           <ValueField>InstanceID</ValueField>
         </DataSetReference>
       </DefaultValue>
-      <Prompt>Instance IDs</Prompt>
+      <Prompt>Instances</Prompt>
       <Hidden>true</Hidden>
       <ValidValues>
         <DataSetReference>
-          <DataSetName>Instances</DataSetName>
+          <DataSetName>Connections</DataSetName>
           <ValueField>InstanceID</ValueField>
-          <LabelField>Instance</LabelField>
+          <LabelField>ConnectionID</LabelField>
         </DataSetReference>
       </ValidValues>
       <MultiValue>true</MultiValue>

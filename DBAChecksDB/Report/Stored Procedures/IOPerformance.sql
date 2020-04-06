@@ -42,6 +42,7 @@ END;
 WITH instanceAgg AS (
 	SELECT I.InstanceID,
 			I.Instance,
+			I.ConnectionID,
 			CASE WHEN @GroupByDB=1 THEN D.name ELSE NULL END AS DBName,
 			CASE WHEN @GroupByFileGroup=1 THEN F.filegroup_name ELSE NULL END AS FileGroup,
 			CASE WHEN @GroupByFile=1 THEN F.name ELSE NULL END AS FileName,
@@ -67,6 +68,7 @@ WITH instanceAgg AS (
 		AND EXISTS(SELECT 1 FROM @Instances t WHERE I.InstanceID = t.InstanceID)
 	GROUP BY I.InstanceID,
 			I.Instance,
+			I.ConnectionID,
 			IOS.SnapshotDate,
 			CASE WHEN @GroupByDB=1 THEN D.name ELSE NULL END,
 			CASE WHEN @GroupByFileGroup=1 THEN F.filegroup_name ELSE NULL END,
@@ -75,6 +77,7 @@ WITH instanceAgg AS (
 )
 SELECT a.InstanceID,
 		a.Instance,
+		a.ConnectionID,
 		a.DBName,
 		a.FileGroup,
 		a.FileName,
@@ -98,7 +101,7 @@ SELECT a.InstanceID,
 		MAX(a.num_of_bytes_written/(a.sample_ms_diff/1000.0))/POWER(1024.0,2) AS MaxWriteMBsec,
 		MAX((a.num_of_bytes_written+a.num_of_bytes_read)/(a.sample_ms_diff/1000.0))/POWER(1024.0,2) AS MaxMBsec
 FROM instanceAgg a
-GROUP BY a.InstanceID,a.Instance,a.DBName,a.FileGroup,a.FileName,a.Drive,
+GROUP BY a.InstanceID,a.Instance,a.ConnectionID,a.DBName,a.FileGroup,a.FileName,a.Drive,
 			CASE WHEN @TimeGroup=0 THEN NULL	
 			WHEN @TimeGroup=1 THEN CONVERT(DATETIME,LEFT(CONVERT(VARCHAR,a.SnapshotDate,120),16),120)
 			WHEN @TimeGroup=2 THEN CONVERT(DATETIME,LEFT(CONVERT(VARCHAR,a.SnapshotDate,120),15) + '0',120)

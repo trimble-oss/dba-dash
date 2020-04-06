@@ -489,8 +489,11 @@ FROM (
 	) T
 FOR XML PATH(''),TYPE).value('.','NVARCHAR(MAX)'),1,1,'')
 
+DECLARE @EditionID BIGINT = CAST(SERVERPROPERTY('EditionID') as bigint) 
+
 SELECT @SQL = 'INSERT INTO #sysdb(' + @cols + ')
-		SELECT ' + @cols + ' FROM sys.databases'
+		SELECT ' + @cols + ' FROM sys.databases 
+		' + CASE WHEN @EditionID = 1674378470 THEN ' WHERE name = DB_NAME()' ELSE '' END -- current DB only for azure
 
 EXEC sp_executesql @SQL
 
@@ -688,8 +691,9 @@ END
 CLOSE DBs
 DEALLOCATE DBs
 
-
-SELECT database_id,
+IF OBJECT_ID('sys.master_files') IS NULL
+BEGIN
+	SELECT database_id,
        file_id,
        data_space_id,
        name,
@@ -703,25 +707,43 @@ SELECT database_id,
        is_percent_growth,
        is_read_only,
 	   state
-FROM #FileList
-UNION ALL	
-SELECT database_id,
-file_id,
-data_space_id,
-name,
-NULL AS filegroup_name,
-physical_name,
-type,
-CASE WHEN mf.state=3 THEN 0 ELSE size END,
-NULL AS SpaceUsed,
-max_size,
-growth,
-is_percent_growth,
-Is_Read_Only,
-state
-FROM sys.master_files mf
-WHERE NOT EXISTS(SELECT 1 FROM #FileList fl WHERE fl.database_id = mf.database_id AND fl.file_id = mf.file_id)
-
+	FROM #FileList
+END
+ELSE
+BEGIN
+	SELECT database_id,
+		   file_id,
+		   data_space_id,
+		   name,
+		   filegroup_name,
+		   physical_name,
+		   type,
+		   size,
+		   space_used,
+		   max_size,
+		   growth,
+		   is_percent_growth,
+		   is_read_only,
+		   state
+	FROM #FileList
+	UNION ALL	
+	SELECT database_id,
+			file_id,
+			data_space_id,
+			name,
+			NULL AS filegroup_name,
+			physical_name,
+			type,
+			CASE WHEN mf.state=3 THEN 0 ELSE size END,
+			NULL AS SpaceUsed,
+			max_size,
+			growth,
+			is_percent_growth,
+			Is_Read_Only,
+			state
+	FROM sys.master_files mf
+	WHERE NOT EXISTS(SELECT 1 FROM #FileList fl WHERE fl.database_id = mf.database_id AND fl.file_id = mf.file_id)
+END
 DROP TABLE #FileList</value>
   </data>
   <data name="SQLDatabasesHADR" xml:space="preserve">
@@ -912,23 +934,33 @@ BEGIN
 END</value>
   </data>
   <data name="SQLCPU" xml:space="preserve">
-    <value>DECLARE @ts_now bigint 
-SELECT @ts_now= cpu_ticks/(cpu_ticks/ms_ticks) 
-FROM sys.dm_os_sys_info; 
+    <value>IF OBJECT_ID('sys.dm_db_resource_stats') IS NOT NULL
+BEGIN
+	SELECT TOP(@TOP) end_time AS EventTime,
+		CAST(avg_cpu_percent AS INT),
+		100-CAST(avg_cpu_percent AS INT) AS SystemIdle
+	FROM sys.dm_db_resource_stats
+END
+ELSE
+BEGIN
+	DECLARE @ts_now bigint 
+	SELECT @ts_now= cpu_ticks/(cpu_ticks/ms_ticks) 
+	FROM sys.dm_os_sys_info; 
  
-SELECT TOP(@TOP) DATEADD(ms, -1 * (@ts_now - [timestamp]), GETUTCDATE()) AS [EventTime],
-				SQLProcessUtilization AS [SQLProcessCPU], 
-               SystemIdle AS [SystemIdleProcess] 
-FROM (SELECT record.value('(./Record/@id)[1]', 'int') AS record_id, 
-            record.value('(./Record/SchedulerMonitorEvent/SystemHealth/SystemIdle)[1]', 'int') 
-            AS [SystemIdle], 
-            record.value('(./Record/SchedulerMonitorEvent/SystemHealth/ProcessUtilization)[1]', 'int') 
-            AS [SQLProcessUtilization], [timestamp] 
-      FROM (SELECT [timestamp], CONVERT(xml, record) AS [record] 
-            FROM sys.dm_os_ring_buffers WITH (NOLOCK)
-            WHERE ring_buffer_type = N'RING_BUFFER_SCHEDULER_MONITOR' 
-            AND record LIKE N'%&lt;SystemHealth&gt;%') AS x) AS y 
-ORDER BY record_id DESC OPTION (RECOMPILE);</value>
+	SELECT TOP(@TOP) DATEADD(ms, -1 * (@ts_now - [timestamp]), GETUTCDATE()) AS [EventTime],
+					SQLProcessUtilization AS [SQLProcessCPU], 
+				   SystemIdle AS [SystemIdleProcess] 
+	FROM (SELECT record.value('(./Record/@id)[1]', 'int') AS record_id, 
+				record.value('(./Record/SchedulerMonitorEvent/SystemHealth/SystemIdle)[1]', 'int') 
+				AS [SystemIdle], 
+				record.value('(./Record/SchedulerMonitorEvent/SystemHealth/ProcessUtilization)[1]', 'int') 
+				AS [SQLProcessUtilization], [timestamp] 
+		  FROM (SELECT [timestamp], CONVERT(xml, record) AS [record] 
+				FROM sys.dm_os_ring_buffers WITH (NOLOCK)
+				WHERE ring_buffer_type = N'RING_BUFFER_SCHEDULER_MONITOR' 
+				AND record LIKE N'%&lt;SystemHealth&gt;%') AS x) AS y 
+	ORDER BY record_id DESC OPTION (RECOMPILE);
+END</value>
   </data>
   <data name="SQLFunctionStats" xml:space="preserve">
     <value>IF OBJECT_ID('sys.dm_exec_function_stats') IS NOT NULL

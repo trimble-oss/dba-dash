@@ -52,14 +52,10 @@ namespace DBAChecksServiceConfig
                 {
                     collectionConfig = new CollectionConfig();
                 }
-                foreach (var s in collectionConfig.SourceConnections)
-                {
-                    if (src.ConnectionString == s.ConnectionString)
-                    {
+                if(ConnectionExists(src.SourceConnection)) { 
                         MessageBox.Show("Error: Item already exists", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                         return;
-                    }
-
+                    
                 }
                 System.Windows.Forms.Cursor.Current = System.Windows.Forms.Cursors.WaitCursor;
                 validated = src.SourceConnection.Validate();
@@ -71,11 +67,62 @@ namespace DBAChecksServiceConfig
                         return;
                     }
                 }
+                else if (src.SourceConnection.IsAzureDB() && (src.SourceConnection.InitialCatalog()=="" || src.SourceConnection.InitialCatalog()=="master"))
+                {
+                    if(MessageBox.Show("Add all azure databases as connections?", "Add Connections", MessageBoxButtons.YesNo, MessageBoxIcon.Question)== DialogResult.Yes){
+                        SqlConnection cn = new SqlConnection(src.SourceConnection.ConnectionString);
+                        using (cn)
+                        {
+                            cn.Open();
+                            SqlCommand cmd = new SqlCommand("SELECT name from sys.databases", cn);
+                             var  rdr = cmd.ExecuteReader();
+                            var builder = new SqlConnectionStringBuilder(src.SourceConnection.ConnectionString);
+                            while (rdr.Read())
+                            {
+                                builder.InitialCatalog = rdr.GetString(0);
+                                DBAChecksSource dbCn  = new DBAChecksSource(builder.ConnectionString);
+                                if (ConnectionExists(dbCn.SourceConnection) == false)
+                                {
+                                    collectionConfig.SourceConnections.Add(dbCn);
+                                }
+                            }
+                            
+                        }
+                    }
+                }
+
                 collectionConfig.SourceConnections.Add(src);
                 txtJson.Text = jsonConfig();
                 populateDropDowns();
             }
            // JsonConvert.DeserializeObject<CollectionConfig[]>(jsonConfig);
+        }
+
+        private bool ConnectionExists(DBAChecksConnection newConnection)
+        {
+            if (collectionConfig == null)
+            {
+                return false;
+            }
+            foreach (var s in collectionConfig.SourceConnections)
+            {
+                if (s.SourceConnection.Type == newConnection.Type)
+                {
+                    if (s.SourceConnection.Type== ConnectionType.SQL && newConnection.DataSource() == s.SourceConnection.DataSource() && (s.SourceConnection.InitialCatalog() == newConnection.InitialCatalog()))
+                    {
+                        return true;
+                    }
+                    else if (s.SourceConnection.ConnectionString == newConnection.ConnectionString)
+                    {
+                        return true;
+                    }
+                }
+                else
+                {
+                    return false;
+                }
+            }
+            return false;
         }
 
         private string jsonConfig()

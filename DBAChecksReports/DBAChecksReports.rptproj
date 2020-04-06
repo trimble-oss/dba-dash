@@ -49,6 +49,7 @@
     <Reports>@(Report)</Reports>
   </PropertyGroup>
   <ItemGroup>
+    <DataSet Include="Connections.rsd" />
     <DataSet Include="Databases.rsd" />
     <DataSet Include="FilterLevel.rsd" />
     <DataSet Include="Instances.rsd" />

@@ -154,9 +154,9 @@
         </Field>
       </Fields>
     </DataSet>
-    <DataSet Name="Instances">
+    <DataSet Name="Connections">
       <SharedDataSet>
-        <SharedDataSetReference>Instances</SharedDataSetReference>
+        <SharedDataSetReference>Connections</SharedDataSetReference>
         <QueryParameters>
           <QueryParameter Name="@TagIDs">
             <Value>=Parameters!TagIDs.Value</Value>
@@ -174,8 +174,8 @@
           <DataField>InstanceID</DataField>
           <rd:TypeName>System.Int32</rd:TypeName>
         </Field>
-        <Field Name="Instance">
-          <DataField>Instance</DataField>
+        <Field Name="ConnectionID">
+          <DataField>ConnectionID</DataField>
           <rd:TypeName>System.String</rd:TypeName>
         </Field>
       </Fields>
@@ -1829,17 +1829,12 @@ Parameters!Mins.Value&lt;=300,"10MIN",
     </ReportParameter>
     <ReportParameter Name="InstanceID">
       <DataType>Integer</DataType>
-      <DefaultValue>
-        <Values>
-          <Value>2</Value>
-        </Values>
-      </DefaultValue>
       <Prompt>Instance</Prompt>
       <ValidValues>
         <DataSetReference>
-          <DataSetName>Instances</DataSetName>
+          <DataSetName>Connections</DataSetName>
           <ValueField>InstanceID</ValueField>
-          <LabelField>Instance</LabelField>
+          <LabelField>ConnectionID</LabelField>
         </DataSetReference>
       </ValidValues>
     </ReportParameter>

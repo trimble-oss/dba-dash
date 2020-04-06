@@ -1,10 +1,8 @@
-﻿
-
-
-CREATE VIEW [dbo].[InstanceInfo]
+﻿CREATE VIEW [dbo].[InstanceInfo]
 AS
 SELECT I.InstanceID,
 	I.Instance,
+	I.ConnectionID,
     I.MachineName,
 	I.ComputerNamePhysicalNetBIOS,
 	I.ServerName,

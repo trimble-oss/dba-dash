@@ -1,10 +1,12 @@
 ﻿
 
+
 CREATE VIEW [dbo].[DriveStatus]
 AS
 SELECT I.InstanceID,
 	D.DriveID,
 	I.Instance,
+	I.ConnectionID,
 	D.Name,
 	D.Label,
 	Capacity/POWER(1024.0,3) TotalGB,

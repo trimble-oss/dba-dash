@@ -23,7 +23,12 @@ BEGIN
 	FROM dbo.SplitStrings(@InstanceIDs,',')
 END
 
-SELECT I.Instance,SSD.Reference,I.AgentHostName,SSD.SnapshotDate,DATEDIFF(mi,SSD.SnapshotDate,GETUTCDATE()) AS SnapshotAge 
+SELECT I.Instance,
+	i.ConnectionID,
+	SSD.Reference,
+	I.AgentHostName,
+	SSD.SnapshotDate,
+	DATEDIFF(mi,SSD.SnapshotDate,GETUTCDATE()) AS SnapshotAge 
 FROM dbo.Instances I 
 JOIN dbo.CollectionDates SSD ON SSD.InstanceID = I.InstanceID
 WHERE I.IsActive=1

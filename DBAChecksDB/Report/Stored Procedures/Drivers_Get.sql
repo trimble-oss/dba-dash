@@ -25,6 +25,7 @@ END;
 
 SELECT I.InstanceID,
        I.Instance,
+	   I.ConnectionID,
 	   I.SystemManufacturer,
 	   I.SystemProductName,
 	   I.SQLVersion,
@@ -46,6 +47,7 @@ AND EXISTS(SELECT 1 FROM @Instances t WHERE I.InstanceID = t.InstanceID)
 AND (D.DeviceName LIKE '%' + @DriverSearch + '%' OR D.DriverProviderName LIKE '%' + @DriverSearch + '%'  OR D.DriverVersion LIKE '%' + @DriverSearch + '%'  OR @DriverSearch IS NULL)
 GROUP BY I.InstanceID,
          I.Instance,
+		 I.ConnectionID,
          D.DeviceName,
          D.DriverProviderName,
          D.DriverVersion,

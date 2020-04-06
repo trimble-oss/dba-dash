@@ -14,8 +14,8 @@
       <Query>
         <DataSourceName>DBAChecksDB</DataSourceName>
         <QueryParameters>
-          <QueryParameter Name="@InstanceID">
-            <Value>=Parameters!InstanceID.Value</Value>
+          <QueryParameter Name="@Instance">
+            <Value>=Parameters!Instance.Value</Value>
           </QueryParameter>
           <QueryParameter Name="@DatabaseID">
             <Value>=Parameters!DatabaseID.Value</Value>
@@ -137,10 +137,6 @@
         </QueryParameters>
       </SharedDataSet>
       <Fields>
-        <Field Name="InstanceID">
-          <DataField>InstanceID</DataField>
-          <rd:TypeName>System.Int32</rd:TypeName>
-        </Field>
         <Field Name="Instance">
           <DataField>Instance</DataField>
           <rd:TypeName>System.String</rd:TypeName>
@@ -151,8 +147,8 @@
       <SharedDataSet>
         <SharedDataSetReference>Databases</SharedDataSetReference>
         <QueryParameters>
-          <QueryParameter Name="@InstanceID">
-            <Value>=Parameters!InstanceID.Value</Value>
+          <QueryParameter Name="@Instance">
+            <Value>=Parameters!Instance.Value</Value>
           </QueryParameter>
         </QueryParameters>
       </SharedDataSet>
@@ -303,8 +299,8 @@ Environment.NewLine &amp; "Avg Writes: " &amp;  Format(Fields!AvgWrites.Value,"#
                             <Drillthrough>
                               <ReportName>Procedure Stats</ReportName>
                               <Parameters>
-                                <Parameter Name="InstanceID">
-                                  <Value>=Parameters!InstanceID.Value</Value>
+                                <Parameter Name="Instance">
+                                  <Value>=Parameters!Instance.Value</Value>
                                 </Parameter>
                                 <Parameter Name="DatabaseID">
                                   <Value>=Parameters!DatabaseID.Value</Value>
@@ -730,8 +726,8 @@ Environment.NewLine &amp; "Avg Writes: " &amp;  Format(SUM(Fields!TotalWrites.Va
                                 <Parameter Name="DatabaseID">
                                   <Value>=Fields!DatabaseID.Value</Value>
                                 </Parameter>
-                                <Parameter Name="InstanceID">
-                                  <Value>=Parameters!InstanceID.Value</Value>
+                                <Parameter Name="Instance">
+                                  <Value>=Parameters!Instance.Value</Value>
                                 </Parameter>
                                 <Parameter Name="Proc">
                                   <Value>=Fields!object_name.Value</Value>
@@ -1101,13 +1097,13 @@ Environment.NewLine &amp; "Avg Writes: " &amp;  Format(SUM(Fields!TotalWrites.Va
       <Nullable>true</Nullable>
       <Prompt>To Date</Prompt>
     </ReportParameter>
-    <ReportParameter Name="InstanceID">
-      <DataType>Integer</DataType>
+    <ReportParameter Name="Instance">
+      <DataType>String</DataType>
       <Prompt>Instance </Prompt>
       <ValidValues>
         <DataSetReference>
           <DataSetName>Instances</DataSetName>
-          <ValueField>InstanceID</ValueField>
+          <ValueField>Instance</ValueField>
           <LabelField>Instance</LabelField>
         </DataSetReference>
       </ValidValues>
@@ -1377,7 +1373,7 @@ CDATE(Parameters!ToDateUser.Value).AddMinutes(IIF(ISNOTHING(Parameters!ToDateUse
         <CellDefinition>
           <ColumnIndex>2</ColumnIndex>
           <RowIndex>1</RowIndex>
-          <ParameterName>InstanceID</ParameterName>
+          <ParameterName>Instance</ParameterName>
         </CellDefinition>
         <CellDefinition>
           <ColumnIndex>2</ColumnIndex>

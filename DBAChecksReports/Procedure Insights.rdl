@@ -17,11 +17,11 @@
           <QueryParameter Name="@UTCOffset">
             <Value>=Parameters!UTCOffSet.Value</Value>
           </QueryParameter>
-          <QueryParameter Name="@InstanceID">
-            <Value>=Parameters!InstanceID.Value</Value>
-          </QueryParameter>
           <QueryParameter Name="@Top">
             <Value>=Parameters!Top.Value</Value>
+          </QueryParameter>
+          <QueryParameter Name="@Instance">
+            <Value>=Parameters!Instance.Value</Value>
           </QueryParameter>
           <QueryParameter Name="@DatabaseID">
             <Value>=Parameters!DatabaseID.Value</Value>
@@ -93,10 +93,6 @@
         </QueryParameters>
       </SharedDataSet>
       <Fields>
-        <Field Name="InstanceID">
-          <DataField>InstanceID</DataField>
-          <rd:TypeName>System.Int32</rd:TypeName>
-        </Field>
         <Field Name="Instance">
           <DataField>Instance</DataField>
           <rd:TypeName>System.String</rd:TypeName>
@@ -107,8 +103,8 @@
       <SharedDataSet>
         <SharedDataSetReference>Databases</SharedDataSetReference>
         <QueryParameters>
-          <QueryParameter Name="@InstanceID">
-            <Value>=Parameters!InstanceID.Value</Value>
+          <QueryParameter Name="@Instance">
+            <Value>=Parameters!Instance.Value</Value>
           </QueryParameter>
         </QueryParameters>
       </SharedDataSet>
@@ -786,8 +782,8 @@
                                     <Parameter Name="DatabaseID">
                                       <Value>=Fields!DatabaseID.Value</Value>
                                     </Parameter>
-                                    <Parameter Name="InstanceID">
-                                      <Value>=Parameters!InstanceID.Value</Value>
+                                    <Parameter Name="Instance">
+                                      <Value>=Parameters!Instance.Value</Value>
                                     </Parameter>
                                     <Parameter Name="Top">
                                       <Value>=Parameters!Top.Value</Value>
@@ -2768,18 +2764,13 @@ Sum(IIF(Fields!DT.Value&gt;=DateTime.Now.Date.AddDays(-60) and Fields!DT.Value&l
       <Prompt>Instance Name</Prompt>
       <Hidden>true</Hidden>
     </ReportParameter>
-    <ReportParameter Name="InstanceID">
+    <ReportParameter Name="Instance">
       <DataType>String</DataType>
-      <DefaultValue>
-        <Values>
-          <Value>2</Value>
-        </Values>
-      </DefaultValue>
       <Prompt>Instance</Prompt>
       <ValidValues>
         <DataSetReference>
           <DataSetName>Instances</DataSetName>
-          <ValueField>InstanceID</ValueField>
+          <ValueField>Instance</ValueField>
           <LabelField>Instance</LabelField>
         </DataSetReference>
       </ValidValues>
@@ -2865,7 +2856,7 @@ Sum(IIF(Fields!DT.Value&gt;=DateTime.Now.Date.AddDays(-60) and Fields!DT.Value&l
         <CellDefinition>
           <ColumnIndex>0</ColumnIndex>
           <RowIndex>1</RowIndex>
-          <ParameterName>InstanceID</ParameterName>
+          <ParameterName>Instance</ParameterName>
         </CellDefinition>
         <CellDefinition>
           <ColumnIndex>3</ColumnIndex>

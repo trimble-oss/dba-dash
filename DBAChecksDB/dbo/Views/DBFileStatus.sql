@@ -1,11 +1,13 @@
 ﻿
 
+
 CREATE VIEW [dbo].[DBFileStatus]
 AS
 WITH agg AS (SELECT D.InstanceID,
        F.DatabaseID,
        F.data_space_id,
        I.Instance,
+	   I.ConnectionID,
        D.name,
        F.filegroup_name,
 	   SUM(F.size)/128.0 AS SizeMB,
@@ -25,6 +27,7 @@ FROM dbo.DBFiles F
 	AND I.IsActive=1
 GROUP BY D.InstanceID,
          I.Instance,
+		 I.ConnectionID,
          F.DatabaseID,
          F.data_space_id,
          D.name,
@@ -39,6 +42,7 @@ SELECT agg.InstanceID,
        agg.DatabaseID,
        agg.data_space_id,
        agg.Instance,
+	   agg.ConnectionID,
        agg.name,
        agg.filegroup_name,
        agg.SizeMB,

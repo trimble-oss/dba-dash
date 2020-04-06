@@ -28,10 +28,6 @@
       <CommandText>Report.Instances_Get</CommandText>
     </Query>
     <Fields>
-      <Field Name="InstanceID">
-        <DataField>InstanceID</DataField>
-        <rd:TypeName>System.Int32</rd:TypeName>
-      </Field>
       <Field Name="Instance">
         <DataField>Instance</DataField>
         <rd:TypeName>System.String</rd:TypeName>

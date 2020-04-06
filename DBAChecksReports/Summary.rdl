@@ -113,9 +113,9 @@
         </Field>
       </Fields>
     </DataSet>
-    <DataSet Name="Instances">
+    <DataSet Name="Connections">
       <SharedDataSet>
-        <SharedDataSetReference>Instances</SharedDataSetReference>
+        <SharedDataSetReference>Connections</SharedDataSetReference>
         <QueryParameters>
           <QueryParameter Name="@TagIDs">
             <Value>=Parameters!TagIDs.Value</Value>
@@ -133,8 +133,8 @@
           <DataField>InstanceID</DataField>
           <rd:TypeName>System.Int32</rd:TypeName>
         </Field>
-        <Field Name="Instance">
-          <DataField>Instance</DataField>
+        <Field Name="ConnectionID">
+          <DataField>ConnectionID</DataField>
           <rd:TypeName>System.String</rd:TypeName>
         </Field>
       </Fields>
@@ -1750,7 +1750,7 @@ Fields!sqlserver_uptime.Value&lt;2880,"Yellow",
           <Value>-1</Value>
         </Values>
       </DefaultValue>
-      <Prompt>Tag IDs</Prompt>
+      <Prompt>Tags</Prompt>
       <ValidValues>
         <DataSetReference>
           <DataSetName>Tags</DataSetName>
@@ -1785,16 +1785,16 @@ Fields!sqlserver_uptime.Value&lt;2880,"Yellow",
       <DataType>String</DataType>
       <DefaultValue>
         <DataSetReference>
-          <DataSetName>Instances</DataSetName>
+          <DataSetName>Connections</DataSetName>
           <ValueField>InstanceID</ValueField>
         </DataSetReference>
       </DefaultValue>
       <Hidden>true</Hidden>
       <ValidValues>
         <DataSetReference>
-          <DataSetName>Instances</DataSetName>
+          <DataSetName>Connections</DataSetName>
           <ValueField>InstanceID</ValueField>
-          <LabelField>Instance</LabelField>
+          <LabelField>ConnectionID</LabelField>
         </DataSetReference>
       </ValidValues>
       <MultiValue>true</MultiValue>

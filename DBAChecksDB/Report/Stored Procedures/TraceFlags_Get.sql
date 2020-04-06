@@ -23,7 +23,10 @@ BEGIN
 	FROM dbo.SplitStrings(@InstanceIDs,',')
 END
 
-SELECT I.Instance, tf.TraceFlag,tf.ValidFrom
+SELECT I.Instance, 
+		I.ConnectionID,
+		tf.TraceFlag,
+		tf.ValidFrom
 FROM dbo.Instances I 
 LEFT JOIN dbo.TraceFlags tf ON tf.InstanceID=I.InstanceID
 WHERE EXISTS(SELECT 1 FROM @Instances t WHERE I.InstanceID = t.InstanceID)

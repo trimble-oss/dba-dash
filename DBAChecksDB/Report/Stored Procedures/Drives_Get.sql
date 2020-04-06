@@ -26,6 +26,7 @@ END
 SELECT DS.InstanceID,
        DS.DriveID,
        DS.Instance,
+	   DS.ConnectionID,
        DS.Name,
        DS.Label,
        DS.TotalGB,

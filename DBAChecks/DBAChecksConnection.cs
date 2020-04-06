@@ -105,6 +105,37 @@ namespace DBAChecks
             return true;
         }
 
+        public bool IsAzureDB()
+        {
+            if(connectionType== ConnectionType.SQL)
+            {
+                SqlConnection cn = new SqlConnection(connectionString);
+                try
+                {
+                    cn.Open();
+                    SqlCommand cmd = new SqlCommand("SELECT CAST(SERVERPROPERTY('EditionID') AS BIGINT)", cn);
+                    Int64 editionID = (Int64)cmd.ExecuteScalar();
+                    if (editionID== 1674378470)
+                    {
+                        return true;
+                    }
+                    else
+                    {
+                        return false;
+                    }
+                }
+                catch(Exception ex)
+                {
+                    Console.WriteLine(ex.Message);
+                    return false;
+                }
+            }
+            else
+            {
+                return false;
+            }
+        }
+
 
         private bool validateSQLConnection(string connectionString)
         {
@@ -125,6 +156,32 @@ namespace DBAChecks
             get
             {
                 return connectionType;
+            }
+        }
+
+        public string InitialCatalog()
+        {
+            if (connectionType == ConnectionType.SQL)
+            {
+                SqlConnectionStringBuilder builder = new SqlConnectionStringBuilder(connectionString);
+                return builder.InitialCatalog;
+            }
+            else
+            {
+                return "";
+            }
+        }
+
+        public string DataSource()
+        {
+            if (connectionType == ConnectionType.SQL)
+            {
+                SqlConnectionStringBuilder builder = new SqlConnectionStringBuilder(connectionString);
+                return builder.DataSource;
+            }
+            else
+            {
+                return "";
             }
         }
 

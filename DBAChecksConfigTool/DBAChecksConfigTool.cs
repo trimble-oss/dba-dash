@@ -34,7 +34,7 @@ namespace DBAChecksConfigTool
                 da.Fill(dt);
 
                 cboInstances.DataSource = dt;
-                cboInstances.DisplayMember = "Instance";
+                cboInstances.DisplayMember = "ConnectionID";
                 cboInstances.ValueMember = "InstanceID";
                 var dtDriveInstances = dt.Copy();
                 var r = dtDriveInstances.Rows.Add();

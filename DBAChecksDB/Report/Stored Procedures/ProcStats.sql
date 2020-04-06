@@ -1,5 +1,5 @@
 ﻿CREATE  PROC [Report].[ProcStats](
-	@InstanceID INT,
+	@Instance SYSNAME=NULL,
 	@DatabaseID INT=NULL,
 	@Proc SYSNAME=NULL,
 	@FromDate DATETIME=NULL,
@@ -49,8 +49,8 @@ SELECT ' + @DateAggString + ' as SnapshotDate,
 FROM dbo.' + @TypeString + 'Stats' + CASE WHEN @DateAgg IN('60MIN','1DAY') THEN '_60MIN' ELSE '' END + ' PS
     JOIN dbo.' + @TypeString + 's P ON PS.' + @TypeString + 'ID = P.' + @TypeString + 'ID
     JOIN dbo.Databases D ON D.DatabaseID = P.DatabaseID
-WHERE D.InstanceID=@InstanceID 
-AND PS.InstanceID = @InstanceID
+	JOIN dbo.Instances I ON D.InstanceID = I.InstanceID AND PS.InstanceID = I.InstanceID
+WHERE I.Instance=@Instance 
 AND D.IsActive=1
 AND PS.SnapshotDate >= @FromDate 
 AND PS.SnapshotDate< @ToDate
@@ -70,7 +70,7 @@ WHERE ProcRank <=50'
 PRINT @SQL
 IF @SQL IS NOT NULL
 BEGIN
-EXEC sp_executesql @SQL,N'@InstanceID INT,@DatabaseID INT,@FromDate DATETIME,@ToDate DATETIME,@Proc SYSNAME,@UTCOffset INT',@InstanceID,@DatabaseID,@FromDate,@ToDate,@Proc,@UTCOffset
+EXEC sp_executesql @SQL,N'@Instance SYSNAME,@DatabaseID INT,@FromDate DATETIME,@ToDate DATETIME,@Proc SYSNAME,@UTCOffset INT',@Instance,@DatabaseID,@FromDate,@ToDate,@Proc,@UTCOffset
 END 
 ELSE
 BEGIN

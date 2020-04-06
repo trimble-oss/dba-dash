@@ -34,6 +34,10 @@
           <DataField>Instance</DataField>
           <rd:TypeName>System.String</rd:TypeName>
         </Field>
+        <Field Name="ConnectionID">
+          <DataField>ConnectionID</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
         <Field Name="SystemManufacturer">
           <DataField>SystemManufacturer</DataField>
           <rd:TypeName>System.String</rd:TypeName>
@@ -84,9 +88,9 @@
         </Field>
       </Fields>
     </DataSet>
-    <DataSet Name="Instances">
+    <DataSet Name="Connections">
       <SharedDataSet>
-        <SharedDataSetReference>Instances</SharedDataSetReference>
+        <SharedDataSetReference>Connections</SharedDataSetReference>
         <QueryParameters>
           <QueryParameter Name="@TagIDs">
             <Value>=Parameters!TagIDs.Value</Value>
@@ -104,8 +108,8 @@
           <DataField>InstanceID</DataField>
           <rd:TypeName>System.Int32</rd:TypeName>
         </Field>
-        <Field Name="Instance">
-          <DataField>Instance</DataField>
+        <Field Name="ConnectionID">
+          <DataField>ConnectionID</DataField>
           <rd:TypeName>System.String</rd:TypeName>
         </Field>
       </Fields>
@@ -837,7 +841,7 @@
                 <TablixMember>
                   <Group Name="matrix1_Instance">
                     <GroupExpressions>
-                      <GroupExpression>=Fields!Instance.Value</GroupExpression>
+                      <GroupExpression>=Fields!ConnectionID.Value</GroupExpression>
                     </GroupExpressions>
                   </Group>
                   <SortExpressions>
@@ -848,14 +852,14 @@
                   <TablixHeader>
                     <Size>1.76042in</Size>
                     <CellContents>
-                      <Textbox Name="Instance">
+                      <Textbox Name="ConnectionID">
                         <CanGrow>true</CanGrow>
                         <KeepTogether>true</KeepTogether>
                         <Paragraphs>
                           <Paragraph>
                             <TextRuns>
                               <TextRun>
-                                <Value>=Fields!Instance.Value</Value>
+                                <Value>=Fields!ConnectionID.Value</Value>
                                 <Style />
                               </TextRun>
                             </TextRuns>
@@ -864,7 +868,7 @@
                             </Style>
                           </Paragraph>
                         </Paragraphs>
-                        <rd:DefaultName>Instance</rd:DefaultName>
+                        <rd:DefaultName>ConnectionID</rd:DefaultName>
                         <Style>
                           <Border>
                             <Color>LightGrey</Color>
@@ -1995,7 +1999,7 @@
             <Top>2.61653in</Top>
             <Left>0.01042in</Left>
             <Height>0.85417in</Height>
-            <Width>15.38542in</Width>
+            <Width>15.38541in</Width>
             <ZIndex>3</ZIndex>
             <Style>
               <Border>
@@ -3424,16 +3428,16 @@
       <DataType>String</DataType>
       <DefaultValue>
         <DataSetReference>
-          <DataSetName>Instances</DataSetName>
+          <DataSetName>Connections</DataSetName>
           <ValueField>InstanceID</ValueField>
         </DataSetReference>
       </DefaultValue>
-      <Prompt>Instance IDs</Prompt>
+      <Prompt>Instances</Prompt>
       <ValidValues>
         <DataSetReference>
-          <DataSetName>Instances</DataSetName>
+          <DataSetName>Connections</DataSetName>
           <ValueField>InstanceID</ValueField>
-          <LabelField>Instance</LabelField>
+          <LabelField>ConnectionID</LabelField>
         </DataSetReference>
       </ValidValues>
       <MultiValue>true</MultiValue>

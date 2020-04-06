@@ -40,6 +40,7 @@ namespace DBAChecks
         DBTuningOptions
     }
 
+
     public class DBCollector
     {
         public DataSet Data;
@@ -49,6 +50,8 @@ namespace DBAChecks
         public Int32 CPUCollectionPeriod = 60;
         string computerName;
         Int64 editionId;
+        CollectionType[] azureCollectionTypes = new CollectionType[] {CollectionType.CPU, CollectionType.DBFiles, CollectionType.General, CollectionType.Performance, CollectionType.Databases, CollectionType.DBConfig, CollectionType.TraceFlags, CollectionType.ProcStats, CollectionType.FunctionStats, CollectionType.BlockingSnapshot, CollectionType.IOStats, CollectionType.Waits, CollectionType.ServerProperties, CollectionType.DBTuningOptions ,CollectionType.SysConfig};
+
 
         public bool IsAzure
         {
@@ -66,10 +69,11 @@ namespace DBAChecks
         }
 
 
+
         public DBCollector(string connectionString, bool noWMI)
         {
-            startup(connectionString, null);
             this.noWMI = noWMI;
+            startup(connectionString, null);       
         }
 
         private void logError(string errorSource, string errorMessage)
@@ -111,6 +115,7 @@ namespace DBAChecks
        
             editionId = (Int64)dt.Rows[0]["EditionId"];
             computerName = (string)dt.Rows[0]["ComputerNamePhysicalNetBIOS"];
+ 
             string dbName = (string)dt.Rows[0]["DBName"];
             string instanceName = (string)dt.Rows[0]["Instance"];
             if (computerName.Length == 0)
@@ -121,7 +126,9 @@ namespace DBAChecks
             {
                 if (IsAzure)
                 {
-                    dt.Rows[0]["ConnectionID"] = instanceName + "|" + dbName; 
+                    dt.Rows[0]["ConnectionID"] = instanceName + "|" + dbName;
+                    noWMI = true;
+                   // dt.Rows[0]["Instance"] = instanceName + "|" + dbName;
                 }
                 else
                 {
@@ -157,11 +164,7 @@ namespace DBAChecks
                 // Already collected
                 return;
             }
-            else if (IsAzure && (new CollectionType[] { CollectionType.OSInfo, CollectionType.Backups, CollectionType.AgentJobs, CollectionType.DBFiles, CollectionType.LogRestores,CollectionType.Corruption, CollectionType.OSLoadedModules}).Contains(collectionType))
-            {
-                return;
-            }
-            else if (collectionType== CollectionType.CPU && IsAzure)
+            else if (IsAzure && (!azureCollectionTypes.Contains(collectionType)))
             {
                 return;
             }

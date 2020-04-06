@@ -100,7 +100,7 @@ SELECT @InstanceID
 FROM @ProcStats
 
 DECLARE @MaxDate DATETIME 
-SELECT @MaxDate =MAX(SnapshotDate)
+SELECT @MaxDate = ISNULL(MAX(SnapshotDate),'19000101')
 FROM dbo.ProcStats_60MIN 
 WHERE InstanceID = @InstanceID
 

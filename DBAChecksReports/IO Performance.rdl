@@ -61,6 +61,10 @@
           <DataField>Instance</DataField>
           <rd:TypeName>System.String</rd:TypeName>
         </Field>
+        <Field Name="ConnectionID">
+          <DataField>ConnectionID</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
         <Field Name="DBName">
           <DataField>DBName</DataField>
           <rd:TypeName>System.String</rd:TypeName>
@@ -135,9 +139,9 @@
         </Field>
       </Fields>
     </DataSet>
-    <DataSet Name="Instances">
+    <DataSet Name="Connections">
       <SharedDataSet>
-        <SharedDataSetReference>Instances</SharedDataSetReference>
+        <SharedDataSetReference>Connections</SharedDataSetReference>
         <QueryParameters>
           <QueryParameter Name="@TagIDs">
             <Value>=Parameters!TagIDs.Value</Value>
@@ -155,8 +159,8 @@
           <DataField>InstanceID</DataField>
           <rd:TypeName>System.Int32</rd:TypeName>
         </Field>
-        <Field Name="Instance">
-          <DataField>Instance</DataField>
+        <Field Name="ConnectionID">
+          <DataField>ConnectionID</DataField>
           <rd:TypeName>System.String</rd:TypeName>
         </Field>
       </Fields>
@@ -809,7 +813,7 @@ Parameters!ToDate.Value))))</Value>
                 <ChartMember>
                   <Group Name="Chart2_CategoryGroup">
                     <GroupExpressions>
-                      <GroupExpression>=Fields!Instance.Value</GroupExpression>
+                      <GroupExpression>=Fields!ConnectionID.Value</GroupExpression>
                       <GroupExpression>=Fields!DBName.Value</GroupExpression>
                       <GroupExpression>=Fields!FileGroup.Value</GroupExpression>
                       <GroupExpression>=Fields!FileName.Value</GroupExpression>
@@ -821,7 +825,7 @@ Parameters!ToDate.Value))))</Value>
                       <Value>=SUM(Fields!ReadMBsec.Value+Fields!WriteMBsec.Value)</Value>
                     </SortExpression>
                   </SortExpressions>
-                  <Label>=Fields!Instance.Value &amp; " - " &amp; Fields!DBName.Value &amp; " " &amp;  Fields!FileGroup.Value &amp; " " &amp; Fields!Drive.Value</Label>
+                  <Label>=Fields!ConnectionID.Value &amp; " - " &amp; Fields!DBName.Value &amp; " " &amp;  Fields!FileGroup.Value &amp; " " &amp; Fields!Drive.Value</Label>
                 </ChartMember>
               </ChartMembers>
             </ChartCategoryHierarchy>
@@ -1263,7 +1267,7 @@ Parameters!ToDate.Value))))</Value>
             <TablixBody>
               <TablixColumns>
                 <TablixColumn>
-                  <Width>1.70833in</Width>
+                  <Width>2.55833in</Width>
                 </TablixColumn>
                 <TablixColumn>
                   <Width>1.75in</Width>
@@ -1983,21 +1987,21 @@ Parameters!ToDate.Value))))</Value>
                   <TablixCells>
                     <TablixCell>
                       <CellContents>
-                        <Textbox Name="Instance">
+                        <Textbox Name="ConnectionID">
                           <CanGrow>true</CanGrow>
                           <KeepTogether>true</KeepTogether>
                           <Paragraphs>
                             <Paragraph>
                               <TextRuns>
                                 <TextRun>
-                                  <Value>=Fields!Instance.Value</Value>
+                                  <Value>=Fields!ConnectionID.Value</Value>
                                   <Style />
                                 </TextRun>
                               </TextRuns>
                               <Style />
                             </Paragraph>
                           </Paragraphs>
-                          <rd:DefaultName>Instance</rd:DefaultName>
+                          <rd:DefaultName>ConnectionID</rd:DefaultName>
                           <ActionInfo>
                             <Actions>
                               <Action>
@@ -2731,7 +2735,7 @@ Parameters!ToDate.Value))))</Value>
             <DataSetName>DataSet1</DataSetName>
             <Top>16.31972in</Top>
             <Height>1.01917in</Height>
-            <Width>19.12499in</Width>
+            <Width>19.97499in</Width>
             <ZIndex>3</ZIndex>
             <Visibility>
               <Hidden>=NOT Parameters!ShowTable.Value</Hidden>
@@ -2748,7 +2752,7 @@ Parameters!ToDate.Value))))</Value>
                 <ChartMember>
                   <Group Name="Chart2_CategoryGroup2">
                     <GroupExpressions>
-                      <GroupExpression>=Fields!Instance.Value</GroupExpression>
+                      <GroupExpression>=Fields!ConnectionID.Value</GroupExpression>
                       <GroupExpression>=Fields!DBName.Value</GroupExpression>
                       <GroupExpression>=Fields!FileGroup.Value</GroupExpression>
                       <GroupExpression>=Fields!FileName.Value</GroupExpression>
@@ -2760,7 +2764,7 @@ Parameters!ToDate.Value))))</Value>
                       <Value>=Avg(Fields!Latency.Value)</Value>
                     </SortExpression>
                   </SortExpressions>
-                  <Label>=Fields!Instance.Value &amp; " - " &amp; Fields!DBName.Value &amp; " " &amp; Fields!FileGroup.Value &amp; " " &amp; Fields!Drive.Value</Label>
+                  <Label>=Fields!ConnectionID.Value &amp; " - " &amp; Fields!DBName.Value &amp; " " &amp; Fields!FileGroup.Value &amp; " " &amp; Fields!Drive.Value</Label>
                 </ChartMember>
               </ChartMembers>
             </ChartCategoryHierarchy>
@@ -3151,16 +3155,16 @@ IIF(Avg(Fields!Latency.Value)&lt;50,"Yellow","Red"))</Color>
       <DataType>String</DataType>
       <DefaultValue>
         <DataSetReference>
-          <DataSetName>Instances</DataSetName>
+          <DataSetName>Connections</DataSetName>
           <ValueField>InstanceID</ValueField>
         </DataSetReference>
       </DefaultValue>
       <Prompt>Instances</Prompt>
       <ValidValues>
         <DataSetReference>
-          <DataSetName>Instances</DataSetName>
+          <DataSetName>Connections</DataSetName>
           <ValueField>InstanceID</ValueField>
-          <LabelField>Instance</LabelField>
+          <LabelField>ConnectionID</LabelField>
         </DataSetReference>
       </ValidValues>
       <MultiValue>true</MultiValue>

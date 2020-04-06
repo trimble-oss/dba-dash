@@ -140,32 +140,6 @@
         </Field>
       </Fields>
     </DataSet>
-    <DataSet Name="Instances">
-      <SharedDataSet>
-        <SharedDataSetReference>Instances</SharedDataSetReference>
-        <QueryParameters>
-          <QueryParameter Name="@TagIDs">
-            <Value>=Parameters!TagIDs.Value</Value>
-          </QueryParameter>
-          <QueryParameter Name="@TagMatching">
-            <Value>=Parameters!TagMatching.Value</Value>
-          </QueryParameter>
-          <QueryParameter Name="@InstanceName">
-            <Value>=Parameters!InstanceName.Value</Value>
-          </QueryParameter>
-        </QueryParameters>
-      </SharedDataSet>
-      <Fields>
-        <Field Name="InstanceID">
-          <DataField>InstanceID</DataField>
-          <rd:TypeName>System.Int32</rd:TypeName>
-        </Field>
-        <Field Name="Instance">
-          <DataField>Instance</DataField>
-          <rd:TypeName>System.String</rd:TypeName>
-        </Field>
-      </Fields>
-    </DataSet>
     <DataSet Name="TagMatching">
       <SharedDataSet>
         <SharedDataSetReference>TagMatching</SharedDataSetReference>
@@ -192,6 +166,32 @@
         </Field>
         <Field Name="Tag">
           <DataField>Tag</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+      </Fields>
+    </DataSet>
+    <DataSet Name="Connections">
+      <SharedDataSet>
+        <SharedDataSetReference>Connections</SharedDataSetReference>
+        <QueryParameters>
+          <QueryParameter Name="@TagIDs">
+            <Value>=Parameters!TagIDs.Value</Value>
+          </QueryParameter>
+          <QueryParameter Name="@TagMatching">
+            <Value>=Parameters!TagMatching.Value</Value>
+          </QueryParameter>
+          <QueryParameter Name="@InstanceName">
+            <Value>=Parameters!InstanceName.Value</Value>
+          </QueryParameter>
+        </QueryParameters>
+      </SharedDataSet>
+      <Fields>
+        <Field Name="InstanceID">
+          <DataField>InstanceID</DataField>
+          <rd:TypeName>System.Int32</rd:TypeName>
+        </Field>
+        <Field Name="ConnectionID">
+          <DataField>ConnectionID</DataField>
           <rd:TypeName>System.String</rd:TypeName>
         </Field>
       </Fields>
@@ -2519,19 +2519,19 @@ Parameters!ToDate.Value)
       <Prompt>Instance Name</Prompt>
     </ReportParameter>
     <ReportParameter Name="InstanceIDs">
-      <DataType>String</DataType>
+      <DataType>Integer</DataType>
       <DefaultValue>
         <DataSetReference>
-          <DataSetName>Instances</DataSetName>
+          <DataSetName>Connections</DataSetName>
           <ValueField>InstanceID</ValueField>
         </DataSetReference>
       </DefaultValue>
       <Prompt>Instances</Prompt>
       <ValidValues>
         <DataSetReference>
-          <DataSetName>Instances</DataSetName>
+          <DataSetName>Connections</DataSetName>
           <ValueField>InstanceID</ValueField>
-          <LabelField>Instance</LabelField>
+          <LabelField>ConnectionID</LabelField>
         </DataSetReference>
       </ValidValues>
       <MultiValue>true</MultiValue>

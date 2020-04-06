@@ -24,7 +24,7 @@ BEGIN
 END;
 
 WITH instanceAgg AS (
-	SELECT I.InstanceID,I.Instance,IOS.SnapshotDate,
+	SELECT I.InstanceID,I.Instance,I.ConnectionID,IOS.SnapshotDate,
 			SUM(IOS.num_of_reads) AS num_of_reads,
 			SUM(IOS.num_of_writes) AS num_of_writes,
 			SUM(IOS.num_of_bytes_read) num_of_bytes_read,
@@ -37,7 +37,7 @@ WITH instanceAgg AS (
 						AND IOS.SnapshotDate>=DATEADD(mi,-@Mins,GETUTCDATE())
 	WHERE I.IsActive=1
 	AND EXISTS(SELECT 1 FROM @Instances t WHERE I.InstanceID = t.InstanceID)
-	GROUP BY I.InstanceID,I.Instance,IOS.SnapshotDate
+	GROUP BY I.InstanceID,I.Instance,I.ConnectionID,IOS.SnapshotDate
 )
 , cpuAgg AS (
 	SELECT InstanceID,AVG(100-SystemIdleCPU) AvgCPU
@@ -47,6 +47,7 @@ WITH instanceAgg AS (
 )
 , i AS (
 SELECT a.InstanceID,
+		a.ConnectionID,
 		a.Instance,
 		SUM(a.num_of_reads)/(SUM(a.sample_ms_diff)/1000.0) AS ReadIOPs,
 		SUM(a.num_of_writes)/(SUM(a.sample_ms_diff)/1000.0) AS WriteIOPs,
@@ -64,7 +65,7 @@ SELECT a.InstanceID,
 		MAX((a.num_of_bytes_written+a.num_of_bytes_read)/(a.sample_ms_diff/1000.0))/POWER(1024.0,2) AS MaxMBsec
 FROM instanceAgg a
 LEFT JOIN cpuAgg ON a.InstanceID = cpuAgg.InstanceID
-GROUP BY a.InstanceID,a.Instance
+GROUP BY a.InstanceID,a.Instance,a.ConnectionID
 )
 , wait AS (
 	SELECT W.InstanceID,
@@ -74,11 +75,12 @@ GROUP BY a.InstanceID,a.Instance
 		SUM(W.wait_time_ms)*1.0/ SUM(SUM(W.wait_time_ms)) OVER(PARTITION BY W.InstanceID) Pct
 	FROM dbo.Waits W 
 	JOIN dbo.WaitType WT ON WT.WaitTypeID = W.WaitTypeID
-	WHERE SnapshotDate>= DATEADD(mi,-@Mins,GETUTCDATE())
+	WHERE W.SnapshotDate>= DATEADD(mi,-@Mins,GETUTCDATE())
 	AND WT.WaitType <>'REDO_THREAD_PENDING_WORK'
 	GROUP BY WT.WaitType,W.InstanceID,WT.IsCriticalWait
 )
 SELECT i.InstanceID,
+		i.ConnectionID,
        i.Instance,
        i.ReadIOPs,
        i.WriteIOPs,

@@ -23,6 +23,7 @@ BEGIN
 	FROM dbo.SplitStrings(@InstanceIDs,',')
 END
 SELECT I.Instance,
+	   I.ConnectionID,
        o.name,
        o.description,
        h.value,

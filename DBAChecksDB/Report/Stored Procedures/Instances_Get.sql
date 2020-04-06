@@ -15,15 +15,19 @@ WHERE EXISTS(SELECT 1 FROM dbo.SplitStrings(@TagIDs,',') SS WHERE CAST(SS.Item A
 
 SET @TagCount=@@ROWCOUNT;
 
-SELECT I.InstanceID,I.Instance
-FROM dbo.Instances I
-LEFT JOIN dbo.InstanceTag IT ON IT.InstanceID = I.InstanceID
-			AND EXISTS(SELECT 1 FROM @tTags T WHERE T.TagID = IT.TagID)
-WHERE I.IsActive=1
-AND (I.Instance LIKE + '%' + @InstanceName + '%' OR @InstanceName IS NULL)
-GROUP BY I.InstanceID,I.Instance
-HAVING (COUNT(IT.InstanceID) = @TagCount AND @TagMatching='ALL')
-OR (COUNT(IT.InstanceID)>0 AND @TagMatching='ANY')
-OR (COUNT(IT.InstanceID)=0 AND @TagMatching='EXCLUDEANY')
-OR (COUNT(IT.InstanceID)<>@TagCount AND @TagMatching='EXCLUDEALL')
-ORDER BY I.Instance
+WITH T AS (
+	SELECT I.InstanceID,I.Instance
+	FROM dbo.Instances I
+	LEFT JOIN dbo.InstanceTag IT ON IT.InstanceID = I.InstanceID
+				AND EXISTS(SELECT 1 FROM @tTags T WHERE T.TagID = IT.TagID)
+	WHERE I.IsActive=1
+	AND (I.Instance LIKE + '%' + @InstanceName + '%' OR @InstanceName IS NULL)
+	GROUP BY I.InstanceID,I.Instance
+	HAVING (COUNT(IT.InstanceID) = @TagCount AND @TagMatching='ALL')
+	OR (COUNT(IT.InstanceID)>0 AND @TagMatching='ANY')
+	OR (COUNT(IT.InstanceID)=0 AND @TagMatching='EXCLUDEANY')
+	OR (COUNT(IT.InstanceID)<>@TagCount AND @TagMatching='EXCLUDEALL')
+)
+SELECT DISTINCT Instance 
+FROM T
+ORDER BY T.Instance;

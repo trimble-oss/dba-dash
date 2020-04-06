@@ -42,6 +42,10 @@
           <DataField>Instance</DataField>
           <rd:TypeName>System.String</rd:TypeName>
         </Field>
+        <Field Name="ConnectionID">
+          <DataField>ConnectionID</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
         <Field Name="name">
           <DataField>name</DataField>
           <rd:TypeName>System.String</rd:TypeName>
@@ -154,9 +158,9 @@
         </Field>
       </Fields>
     </DataSet>
-    <DataSet Name="Instances">
+    <DataSet Name="Connections">
       <SharedDataSet>
-        <SharedDataSetReference>Instances</SharedDataSetReference>
+        <SharedDataSetReference>Connections</SharedDataSetReference>
         <QueryParameters>
           <QueryParameter Name="@TagIDs">
             <Value>=Parameters!TagIDs.Value</Value>
@@ -174,8 +178,8 @@
           <DataField>InstanceID</DataField>
           <rd:TypeName>System.Int32</rd:TypeName>
         </Field>
-        <Field Name="Instance">
-          <DataField>Instance</DataField>
+        <Field Name="ConnectionID">
+          <DataField>ConnectionID</DataField>
           <rd:TypeName>System.String</rd:TypeName>
         </Field>
       </Fields>
@@ -1119,14 +1123,14 @@
                   <TablixCells>
                     <TablixCell>
                       <CellContents>
-                        <Textbox Name="Instance">
+                        <Textbox Name="ConnectionID">
                           <CanGrow>true</CanGrow>
                           <KeepTogether>true</KeepTogether>
                           <Paragraphs>
                             <Paragraph>
                               <TextRuns>
                                 <TextRun>
-                                  <Value>=Fields!Instance.Value</Value>
+                                  <Value>=Fields!ConnectionID.Value</Value>
                                   <Style>
                                     <FontFamily />
                                     <Color>#333333</Color>
@@ -1136,7 +1140,7 @@
                               <Style />
                             </Paragraph>
                           </Paragraphs>
-                          <rd:DefaultName>Instance</rd:DefaultName>
+                          <rd:DefaultName>ConnectionID</rd:DefaultName>
                           <Style>
                             <Border>
                               <Color>LightGrey</Color>
@@ -1772,7 +1776,6 @@ Fields!FreeSpaceStatus.Value=4,"Green")</BackgroundColor>
                             <PaddingBottom>2pt</PaddingBottom>
                           </Style>
                         </Textbox>
-                        <rd:Selected>true</rd:Selected>
                       </CellContents>
                     </TablixCell>
                     <TablixCell>
@@ -1902,7 +1905,7 @@ Fields!FreeSpaceStatus.Value=4,"Green")</BackgroundColor>
           <Value>-1</Value>
         </Values>
       </DefaultValue>
-      <Prompt>Tag IDs</Prompt>
+      <Prompt>Tags</Prompt>
       <ValidValues>
         <DataSetReference>
           <DataSetName>Tags</DataSetName>
@@ -1938,7 +1941,7 @@ Fields!FreeSpaceStatus.Value=4,"Green")</BackgroundColor>
       <DataType>String</DataType>
       <DefaultValue>
         <DataSetReference>
-          <DataSetName>Instances</DataSetName>
+          <DataSetName>Connections</DataSetName>
           <ValueField>InstanceID</ValueField>
         </DataSetReference>
       </DefaultValue>
@@ -1946,9 +1949,9 @@ Fields!FreeSpaceStatus.Value=4,"Green")</BackgroundColor>
       <Hidden>true</Hidden>
       <ValidValues>
         <DataSetReference>
-          <DataSetName>Instances</DataSetName>
+          <DataSetName>Connections</DataSetName>
           <ValueField>InstanceID</ValueField>
-          <LabelField>Instance</LabelField>
+          <LabelField>ConnectionID</LabelField>
         </DataSetReference>
       </ValidValues>
       <MultiValue>true</MultiValue>

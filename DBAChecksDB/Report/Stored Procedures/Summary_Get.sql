@@ -120,3 +120,4 @@ LEFT JOIN SSD ON I.InstanceID = SSD.InstanceID
 LEFT JOIN dbo.CollectionDates OSInfoCD ON OSInfoCD.InstanceID = I.InstanceID AND OSInfoCD.Reference='OSInfo'
 WHERE EXISTS(SELECT 1 FROM @Instances t WHERE I.InstanceID = t.InstanceID)
 AND I.IsActive=1
+AND I.EditionID<>1674378470 -- exclude azure 

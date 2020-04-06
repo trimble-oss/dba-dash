@@ -203,3 +203,50 @@ WHERE NOT EXISTS(SELECT 1 FROM dbo.OSLoadedModulesStatus s
 			WHERE s.NAME = t.name 
 			AND s.Company = t.company
 			AND s.Description = t.description)
+
+IF NOT EXISTS(SELECT 1 FROM dbo.DriveThresholds)
+BEGIN 
+	INSERT INTO dbo.DriveThresholds
+	(
+		InstanceID,
+		DriveID,
+		DriveWarningThreshold,
+		DriveCriticalThreshold,
+		DriveCheckType
+	)
+	VALUES
+	( -1, -1, 0.200, 0.100, '%' )
+END
+
+IF NOT EXISTS(SELECT 1 FROM dbo.LogRestoreThresholds)
+BEGIN
+	INSERT INTO dbo.LogRestoreThresholds
+	(
+		InstanceID,
+		DatabaseID,
+		LatencyWarningThreshold,
+		LatencyCriticalThreshold,
+		TimeSinceLastWarningThreshold,
+		TimeSinceLastCriticalThreshold
+	)
+	VALUES
+	( -1, -1, 1440, 2880, 1440, 2880 )
+END
+IF NOT EXISTS(SELECT 1 FROM dbo.BackupThresholds)
+BEGIN
+	INSERT INTO dbo.BackupThresholds
+	(
+		InstanceID,
+		DatabaseID,
+		LogBackupWarningThreshold,
+		LogBackupCriticalThreshold,
+		FullBackupWarningThreshold,
+		FullBackupCriticalThreshold,
+		DiffBackupWarningThreshold,
+		DiffBackupCriticalThreshold,
+		ConsiderPartialBackups,
+		ConsiderFGBackups
+	)
+	VALUES
+	( -1, -1, 720, 1440, 10080, 14400, NULL, NULL, 0, 0 )
+END
