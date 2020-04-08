@@ -273,6 +273,11 @@
     <Build Include="Report\Stored Procedures\OSLoadedModules_Get.sql" />
     <Build Include="dbo\Stored Procedures\OSLoadedModulesStatus_Upd.sql" />
     <Build Include="Report\Stored Procedures\Connections_Get.sql" />
+    <Build Include="dbo\Tables\AzureDBResourceStats.sql" />
+    <Build Include="dbo\Stored Procedures\AzureDBResourceStats_Upd.sql" />
+    <Build Include="dbo\User Defined Types\AzureDBResourceStats.sql" />
+    <Build Include="Storage\PF_AzureDBResourceStats.sql" />
+    <Build Include="Storage\PS_AzureDBResourceStats.sql" />
   </ItemGroup>
   <ItemGroup>
     <PostDeploy Include="Script.PostDeployment1.sql" />

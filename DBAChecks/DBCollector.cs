@@ -37,7 +37,8 @@ namespace DBAChecks
         ServerProperties,
         ServerExtraProperties,
         OSLoadedModules,
-        DBTuningOptions
+        DBTuningOptions,
+        AzureDBResourceStats
     }
 
 
@@ -47,10 +48,10 @@ namespace DBAChecks
         string _connectionString;
         private DataTable dtErrors;
         private bool noWMI;
-        public Int32 CPUCollectionPeriod = 60;
+        public Int32 PerformanceCollectionPeriodMins = 60;
         string computerName;
         Int64 editionId;
-        CollectionType[] azureCollectionTypes = new CollectionType[] {CollectionType.CPU, CollectionType.DBFiles, CollectionType.General, CollectionType.Performance, CollectionType.Databases, CollectionType.DBConfig, CollectionType.TraceFlags, CollectionType.ProcStats, CollectionType.FunctionStats, CollectionType.BlockingSnapshot, CollectionType.IOStats, CollectionType.Waits, CollectionType.ServerProperties, CollectionType.DBTuningOptions ,CollectionType.SysConfig};
+        CollectionType[] azureCollectionTypes = new CollectionType[] {CollectionType.AzureDBResourceStats,CollectionType.CPU, CollectionType.DBFiles, CollectionType.General, CollectionType.Performance, CollectionType.Databases, CollectionType.DBConfig, CollectionType.TraceFlags, CollectionType.ProcStats, CollectionType.FunctionStats, CollectionType.BlockingSnapshot, CollectionType.IOStats, CollectionType.Waits, CollectionType.ServerProperties, CollectionType.DBTuningOptions ,CollectionType.SysConfig};
 
 
         public bool IsAzure
@@ -196,6 +197,7 @@ namespace DBAChecks
                 Collect(CollectionType.BlockingSnapshot);
                 Collect(CollectionType.IOStats);
                 Collect(CollectionType.Waits);
+                Collect(CollectionType.AzureDBResourceStats);
             }
             else if (collectionType == CollectionType.Drives)
             {
@@ -211,18 +213,40 @@ namespace DBAChecks
             }
             else if (collectionType == CollectionType.CPU)
             {
-                SqlParameter pTop = new SqlParameter("TOP", CPUCollectionPeriod);
-                addDT("CPU", Properties.Resources.SQLCPU, new SqlParameter[] { pTop });
+                SqlParameter pTop = new SqlParameter("TOP", PerformanceCollectionPeriodMins);
+                try
+                {
+                    addDT(enumToString(collectionType), Properties.Resources.SQLCPU, new SqlParameter[] { pTop });
+                }
+                catch(Exception ex)
+                {
+                    logError(collectionTypeString, ex.Message);
+                }
+            }
+            else if(collectionType==CollectionType.AzureDBResourceStats)
+            {
+                if (IsAzure)
+                {
+                    SqlParameter pDate = new SqlParameter("Date", DateTime.UtcNow.AddMinutes(-PerformanceCollectionPeriodMins));
+                    try
+                    {
+                        addDT(collectionTypeString, Properties.Resources.SQLAzureDBResourceStats, new SqlParameter[] { pDate });
+                    }
+                    catch(Exception ex)
+                    {
+                        logError(collectionTypeString, ex.Message);
+                    }
+                }
             }
             else
             {
                 try
                 {
-                    addDT(enumToString(collectionType), Properties.Resources.ResourceManager.GetString("SQL" + enumToString(collectionType), Properties.Resources.Culture));               
+                    addDT(collectionTypeString, Properties.Resources.ResourceManager.GetString("SQL" + collectionTypeString, Properties.Resources.Culture));               
                 }
                 catch (Exception ex)
                 {
-                    logError(enumToString(collectionType), ex.Message);
+                    logError(collectionTypeString, ex.Message);
                 }
 
             }

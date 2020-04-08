@@ -140,11 +140,11 @@ namespace DBAChecksService
                     var collector = new DBCollector(cfg.GetSource(), cfg.NoWMI);
                     if (context.PreviousFireTimeUtc.HasValue)
                     {
-                        collector.CPUCollectionPeriod = (Int32)DateTime.UtcNow.Subtract(context.PreviousFireTimeUtc.Value.UtcDateTime).TotalMinutes + 5;
+                        collector.PerformanceCollectionPeriodMins = (Int32)DateTime.UtcNow.Subtract(context.PreviousFireTimeUtc.Value.UtcDateTime).TotalMinutes + 5;
                     }
                     else
                     {
-                        collector.CPUCollectionPeriod = 30;
+                        collector.PerformanceCollectionPeriodMins = 30;
                     }
                     collector.Collect(types);
                     try
