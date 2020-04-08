@@ -38,7 +38,8 @@ namespace DBAChecks
         ServerExtraProperties,
         OSLoadedModules,
         DBTuningOptions,
-        AzureDBResourceStats
+        AzureDBResourceStats,
+        AzureDBServiceObjectives
     }
 
 
@@ -51,7 +52,7 @@ namespace DBAChecks
         public Int32 PerformanceCollectionPeriodMins = 60;
         string computerName;
         Int64 editionId;
-        CollectionType[] azureCollectionTypes = new CollectionType[] {CollectionType.AzureDBResourceStats,CollectionType.CPU, CollectionType.DBFiles, CollectionType.General, CollectionType.Performance, CollectionType.Databases, CollectionType.DBConfig, CollectionType.TraceFlags, CollectionType.ProcStats, CollectionType.FunctionStats, CollectionType.BlockingSnapshot, CollectionType.IOStats, CollectionType.Waits, CollectionType.ServerProperties, CollectionType.DBTuningOptions ,CollectionType.SysConfig};
+        CollectionType[] azureCollectionTypes = new CollectionType[] {CollectionType.AzureDBServiceObjectives,CollectionType.AzureDBResourceStats,CollectionType.CPU, CollectionType.DBFiles, CollectionType.General, CollectionType.Performance, CollectionType.Databases, CollectionType.DBConfig, CollectionType.TraceFlags, CollectionType.ProcStats, CollectionType.FunctionStats, CollectionType.BlockingSnapshot, CollectionType.IOStats, CollectionType.Waits, CollectionType.ServerProperties, CollectionType.DBTuningOptions ,CollectionType.SysConfig};
 
 
         public bool IsAzure
@@ -188,6 +189,7 @@ namespace DBAChecks
                 Collect(CollectionType.DriversWMI);
                 Collect(CollectionType.OSLoadedModules);
                 Collect(CollectionType.DBTuningOptions);
+                Collect(CollectionType.AzureDBServiceObjectives);
             }
             else if (collectionType == CollectionType.Performance)
             {
@@ -223,14 +225,14 @@ namespace DBAChecks
                     logError(collectionTypeString, ex.Message);
                 }
             }
-            else if(collectionType==CollectionType.AzureDBResourceStats)
+            else if(collectionType==CollectionType.AzureDBResourceStats || collectionType == CollectionType.AzureDBServiceObjectives)
             {
                 if (IsAzure)
                 {
                     SqlParameter pDate = new SqlParameter("Date", DateTime.UtcNow.AddMinutes(-PerformanceCollectionPeriodMins));
                     try
                     {
-                        addDT(collectionTypeString, Properties.Resources.SQLAzureDBResourceStats, new SqlParameter[] { pDate });
+                        addDT(collectionTypeString, Properties.Resources.ResourceManager.GetString("SQL" + collectionTypeString, Properties.Resources.Culture), new SqlParameter[] { pDate });
                     }
                     catch(Exception ex)
                     {

@@ -109,6 +109,19 @@ namespace DBAChecks.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to SELECT edition,
+        ///       service_objective,
+        ///       elastic_pool_name 
+        ///FROM sys.database_service_objectives
+        ///WHERE database_id = DB_ID().
+        /// </summary>
+        internal static string SQLAzureDBServiceObjectives {
+            get {
+                return ResourceManager.GetString("SQLAzureDBServiceObjectives", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to select database_name,type, MAX(backup_start_date) LastBackup
         ///from msdb.dbo.backupset
         ///where server_name=@@SERVERNAME
