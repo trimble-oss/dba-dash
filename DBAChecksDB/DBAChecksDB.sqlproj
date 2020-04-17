@@ -278,6 +278,15 @@
     <Build Include="dbo\User Defined Types\AzureDBResourceStats.sql" />
     <Build Include="Storage\PF_AzureDBResourceStats.sql" />
     <Build Include="Storage\PS_AzureDBResourceStats.sql" />
+    <Build Include="dbo\Tables\AzureDBServiceObjectivesHistory.sql" />
+    <Build Include="dbo\Tables\AzureDBServiceObjectives.sql" />
+    <Build Include="dbo\Stored Procedures\AzureDBServiceObjectives_Upd.sql" />
+    <Build Include="dbo\User Defined Types\AzureDBServiceObjectives.sql" />
+    <Build Include="dbo\Tables\AzureDBElasticPoolResourceStats.sql" />
+    <Build Include="dbo\Stored Procedures\AzureDBElasticPoolResourceStats_Upd.sql" />
+    <Build Include="dbo\User Defined Types\AzureDBElasticPoolResourceStats.sql" />
+    <Build Include="Storage\PF_AzureDBElasticPoolResourceStats.sql" />
+    <Build Include="Storage\PS_AzureDBElasticPoolResourceStats.sql" />
   </ItemGroup>
   <ItemGroup>
     <PostDeploy Include="Script.PostDeployment1.sql" />

@@ -1,0 +1,4 @@
+﻿CREATE PARTITION FUNCTION [PF_AzureDBElasticPoolResourceStats](DATETIME2 (7))
+    AS RANGE RIGHT
+    FOR VALUES ();
+

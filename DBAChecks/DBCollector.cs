@@ -39,7 +39,8 @@ namespace DBAChecks
         OSLoadedModules,
         DBTuningOptions,
         AzureDBResourceStats,
-        AzureDBServiceObjectives
+        AzureDBServiceObjectives,
+        AzureDBElasticPoolResourceStats
     }
 
 
@@ -52,25 +53,12 @@ namespace DBAChecks
         public Int32 PerformanceCollectionPeriodMins = 60;
         string computerName;
         Int64 editionId;
-        CollectionType[] azureCollectionTypes = new CollectionType[] {CollectionType.AzureDBServiceObjectives,CollectionType.AzureDBResourceStats,CollectionType.CPU, CollectionType.DBFiles, CollectionType.General, CollectionType.Performance, CollectionType.Databases, CollectionType.DBConfig, CollectionType.TraceFlags, CollectionType.ProcStats, CollectionType.FunctionStats, CollectionType.BlockingSnapshot, CollectionType.IOStats, CollectionType.Waits, CollectionType.ServerProperties, CollectionType.DBTuningOptions ,CollectionType.SysConfig};
+        CollectionType[] azureCollectionTypes = new CollectionType[] {CollectionType.AzureDBElasticPoolResourceStats,CollectionType.AzureDBServiceObjectives,CollectionType.AzureDBResourceStats,CollectionType.CPU, CollectionType.DBFiles, CollectionType.General, CollectionType.Performance, CollectionType.Databases, CollectionType.DBConfig, CollectionType.TraceFlags, CollectionType.ProcStats, CollectionType.FunctionStats, CollectionType.BlockingSnapshot, CollectionType.IOStats, CollectionType.Waits, CollectionType.ServerProperties, CollectionType.DBTuningOptions ,CollectionType.SysConfig};
 
 
-        public bool IsAzure
-        {
-            get
-            {
-                if (editionId == 1674378470)
-                {
-                    return true;
-                }
-                else
-                {
-                    return false;
-                }
-            }
-        }
-
-
+        private bool IsAzure = false;
+        private bool isAzureMasterDB = false;
+ 
 
         public DBCollector(string connectionString, bool noWMI)
         {
@@ -117,9 +105,17 @@ namespace DBAChecks
        
             editionId = (Int64)dt.Rows[0]["EditionId"];
             computerName = (string)dt.Rows[0]["ComputerNamePhysicalNetBIOS"];
- 
             string dbName = (string)dt.Rows[0]["DBName"];
             string instanceName = (string)dt.Rows[0]["Instance"];
+            if ( editionId == 1674378470)
+            {
+                IsAzure = true;
+                if (dbName == "master")
+                {
+                    isAzureMasterDB = true;
+                }
+            }
+
             if (computerName.Length == 0)
             {
                 noWMI = true;
@@ -189,7 +185,7 @@ namespace DBAChecks
                 Collect(CollectionType.DriversWMI);
                 Collect(CollectionType.OSLoadedModules);
                 Collect(CollectionType.DBTuningOptions);
-                Collect(CollectionType.AzureDBServiceObjectives);
+                Collect(CollectionType.AzureDBServiceObjectives);     
             }
             else if (collectionType == CollectionType.Performance)
             {
@@ -200,6 +196,7 @@ namespace DBAChecks
                 Collect(CollectionType.IOStats);
                 Collect(CollectionType.Waits);
                 Collect(CollectionType.AzureDBResourceStats);
+                Collect(CollectionType.AzureDBElasticPoolResourceStats);
             }
             else if (collectionType == CollectionType.Drives)
             {
@@ -235,6 +232,21 @@ namespace DBAChecks
                         addDT(collectionTypeString, Properties.Resources.ResourceManager.GetString("SQL" + collectionTypeString, Properties.Resources.Culture), new SqlParameter[] { pDate });
                     }
                     catch(Exception ex)
+                    {
+                        logError(collectionTypeString, ex.Message);
+                    }
+                }
+            }
+            else if (collectionType == CollectionType.AzureDBElasticPoolResourceStats)
+            {
+                if (IsAzure && isAzureMasterDB)
+                {
+                    SqlParameter pDate = new SqlParameter("Date", DateTime.UtcNow.AddMinutes(-PerformanceCollectionPeriodMins));
+                    try
+                    {
+                        addDT(collectionTypeString, Properties.Resources.ResourceManager.GetString("SQL" + collectionTypeString, Properties.Resources.Culture), new SqlParameter[] { pDate });
+                    }
+                    catch (Exception ex)
                     {
                         logError(collectionTypeString, ex.Message);
                     }
