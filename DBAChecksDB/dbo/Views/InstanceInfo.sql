@@ -1,4 +1,9 @@
-﻿CREATE VIEW [dbo].[InstanceInfo]
+﻿
+
+
+
+
+CREATE VIEW [dbo].[InstanceInfo]
 AS
 SELECT I.InstanceID,
 	I.Instance,
@@ -54,7 +59,8 @@ SELECT I.InstanceID,
     I.EngineEdition,
 	I.ResourceLastUpdateDateTime,
     I.ResourceVersion,
-	CASE WHEN I.ProductVersion LIKE '9.%' THEN 'SQL 2005' 
+	CASE WHEN I.EditionID = 1674378470 THEN I.ProductVersion
+			WHEN I.ProductVersion LIKE '9.%' THEN 'SQL 2005' 
 			WHEN I.ProductVersion LIKE '10.0%' THEN 'SQL 2008' 
 			WHEN I.ProductVersion LIKE '10.5%' THEN 'SQL 2008 R2'
 			WHEN I.ProductVersion LIKE '11.%' THEN 'SQL 2012'

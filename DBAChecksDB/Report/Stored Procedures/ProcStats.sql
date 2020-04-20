@@ -7,7 +7,8 @@
 	@Measure VARCHAR(30)='TotalDuration',
 	@DateAgg VARCHAR(20)='NONE',
 	@IsFunction BIT=0,
-	@UTCOffset INT=0
+	@UTCOffset INT=0,
+	@InstanceID INT=NULL
 )
 WITH EXECUTE AS OWNER
 AS
@@ -50,8 +51,9 @@ FROM dbo.' + @TypeString + 'Stats' + CASE WHEN @DateAgg IN('60MIN','1DAY') THEN 
     JOIN dbo.' + @TypeString + 's P ON PS.' + @TypeString + 'ID = P.' + @TypeString + 'ID
     JOIN dbo.Databases D ON D.DatabaseID = P.DatabaseID
 	JOIN dbo.Instances I ON D.InstanceID = I.InstanceID AND PS.InstanceID = I.InstanceID
-WHERE I.Instance=@Instance 
-AND D.IsActive=1
+WHERE D.IsActive=1
+' + CASE WHEN @Instance IS NOT NULL THEN 'AND I.Instance = @Instance' ELSE '' END + '
+' + CASE WHEN @InstanceID IS NOT NULL THEN 'AND I.InstanceID = @InstanceID' ELSE '' END + '
 AND PS.SnapshotDate >= @FromDate 
 AND PS.SnapshotDate< @ToDate
 ' + CASE WHEN @DatabaseID IS NULL THEN '' ELSE 'AND D.DatabaseID=@DatabaseID' END + '
@@ -70,7 +72,8 @@ WHERE ProcRank <=50'
 PRINT @SQL
 IF @SQL IS NOT NULL
 BEGIN
-EXEC sp_executesql @SQL,N'@Instance SYSNAME,@DatabaseID INT,@FromDate DATETIME,@ToDate DATETIME,@Proc SYSNAME,@UTCOffset INT',@Instance,@DatabaseID,@FromDate,@ToDate,@Proc,@UTCOffset
+EXEC sp_executesql @SQL,N'@Instance SYSNAME,@DatabaseID INT,@FromDate DATETIME,@ToDate DATETIME,@Proc SYSNAME,@UTCOffset INT,@InstanceID INT',
+	@Instance,@DatabaseID,@FromDate,@ToDate,@Proc,@UTCOffset,@InstanceID
 END 
 ELSE
 BEGIN

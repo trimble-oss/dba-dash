@@ -41,6 +41,9 @@
           <QueryParameter Name="@UTCOffset">
             <Value>=Parameters!UTCOffset.Value</Value>
           </QueryParameter>
+          <QueryParameter Name="@InstanceID">
+            <Value>=Parameters!InstanceID.Value</Value>
+          </QueryParameter>
         </QueryParameters>
         <CommandType>StoredProcedure</CommandType>
         <CommandText>Report.ProcStats</CommandText>
@@ -1319,6 +1322,12 @@ CDATE(Parameters!ToDateUser.Value).AddMinutes(IIF(ISNOTHING(Parameters!ToDateUse
         </ParameterValues>
       </ValidValues>
     </ReportParameter>
+    <ReportParameter Name="InstanceID">
+      <DataType>String</DataType>
+      <Nullable>true</Nullable>
+      <Prompt>InstanceID</Prompt>
+      <Hidden>true</Hidden>
+    </ReportParameter>
   </ReportParameters>
   <ReportParametersLayout>
     <GridLayoutDefinition>
@@ -1399,6 +1408,11 @@ CDATE(Parameters!ToDateUser.Value).AddMinutes(IIF(ISNOTHING(Parameters!ToDateUse
           <ColumnIndex>2</ColumnIndex>
           <RowIndex>3</RowIndex>
           <ParameterName>UTCOffset</ParameterName>
+        </CellDefinition>
+        <CellDefinition>
+          <ColumnIndex>3</ColumnIndex>
+          <RowIndex>3</RowIndex>
+          <ParameterName>InstanceID</ParameterName>
         </CellDefinition>
       </CellDefinitions>
     </GridLayoutDefinition>

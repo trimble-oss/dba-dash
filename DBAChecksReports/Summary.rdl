@@ -193,6 +193,7 @@
               </Paragraph>
             </Paragraphs>
             <rd:DefaultName>textbox1</rd:DefaultName>
+            <Left>0.05293cm</Left>
             <Height>0.43in</Height>
             <Width>8in</Width>
             <Style>
@@ -1621,6 +1622,7 @@ Fields!sqlserver_uptime.Value&lt;2880,"Yellow",
               </SortExpression>
             </SortExpressions>
             <Top>0.43in</Top>
+            <Left>0.05293cm</Left>
             <Height>0.83625in</Height>
             <Width>15.18541in</Width>
             <ZIndex>1</ZIndex>
@@ -1639,7 +1641,7 @@ Fields!sqlserver_uptime.Value&lt;2880,"Yellow",
                 <Value>=Parameters!TagMatching.Value</Value>
               </Parameter>
             </Parameters>
-            <Top>2.24194in</Top>
+            <Top>2.15861in</Top>
             <Height>0.72917in</Height>
             <Width>11.32292in</Width>
             <ZIndex>2</ZIndex>
@@ -1659,7 +1661,8 @@ Fields!sqlserver_uptime.Value&lt;2880,"Yellow",
                 <Value>=Parameters!InstanceIDs.Value</Value>
               </Parameter>
             </Parameters>
-            <Top>3.12736in</Top>
+            <Top>2.92944in</Top>
+            <Left>0.05293cm</Left>
             <Height>0.66667in</Height>
             <Width>11.32292in</Width>
             <ZIndex>3</ZIndex>
@@ -1677,6 +1680,7 @@ Fields!sqlserver_uptime.Value&lt;2880,"Yellow",
               </Parameter>
             </Parameters>
             <Top>1.33569in</Top>
+            <Left>0.05293cm</Left>
             <Height>0.78125in</Height>
             <Width>11.32292in</Width>
             <ZIndex>4</ZIndex>
@@ -1696,7 +1700,7 @@ Fields!sqlserver_uptime.Value&lt;2880,"Yellow",
                 <Value>2</Value>
               </Parameter>
             </Parameters>
-            <Top>4.79403in</Top>
+            <Top>4.49612in</Top>
             <Height>0.84375in</Height>
             <Width>11.32292in</Width>
             <ZIndex>5</ZIndex>
@@ -1716,7 +1720,7 @@ Fields!sqlserver_uptime.Value&lt;2880,"Yellow",
                 <Value>2</Value>
               </Parameter>
             </Parameters>
-            <Top>3.86347in</Top>
+            <Top>3.63778in</Top>
             <Height>0.81667in</Height>
             <Width>11.32292in</Width>
             <ZIndex>6</ZIndex>
@@ -1726,11 +1730,37 @@ Fields!sqlserver_uptime.Value&lt;2880,"Yellow",
               </Border>
             </Style>
           </Subreport>
+          <Subreport Name="MaxFileSize">
+            <ReportName>DBMaxSize</ReportName>
+            <Parameters>
+              <Parameter Name="FilterLevel">
+                <Value>Warning</Value>
+              </Parameter>
+              <Parameter Name="TagMatching">
+                <Value>=Parameters!TagMatching.Value</Value>
+              </Parameter>
+              <Parameter Name="TagIDs">
+                <Value>=Parameters!TagIDs.Value</Value>
+              </Parameter>
+              <Parameter Name="InstanceIDs">
+                <Value>=Parameters!InstanceIDs.Value</Value>
+              </Parameter>
+            </Parameters>
+            <Top>5.38153in</Top>
+            <Height>0.89167in</Height>
+            <Width>11.32292in</Width>
+            <ZIndex>7</ZIndex>
+            <Style>
+              <Border>
+                <Style>None</Style>
+              </Border>
+            </Style>
+          </Subreport>
         </ReportItems>
-        <Height>6.72445in</Height>
+        <Height>6.2732in</Height>
         <Style />
       </Body>
-      <Width>15.35833in</Width>
+      <Width>15.20625in</Width>
       <Page>
         <InteractiveHeight>200in</InteractiveHeight>
         <InteractiveWidth>8.5in</InteractiveWidth>

@@ -1,7 +1,8 @@
 ﻿CREATE PROC [Report].[InstanceInfo_Get](@InstanceID INT)
 AS
-SELECT InstanceID,
+SELECT I.InstanceID,
 	I.Instance,
+	I.EditionID,
 	I.SQLVersion,
 	I.ProcessorNameString,
 	I.ActivePowerPlan,

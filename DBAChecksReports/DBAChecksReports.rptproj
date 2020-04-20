@@ -62,11 +62,14 @@
   </ItemGroup>
   <ItemGroup>
     <Report Include="AgentJobs.rdl" />
+    <Report Include="AzureDB Resource Summary.rdl" />
+    <Report Include="AzureDB Resource Usage.rdl" />
     <Report Include="Backups.rdl" />
     <Report Include="Blocking.rdl" />
     <Report Include="CPUChart.rdl" />
     <Report Include="Database Growth.rdl" />
     <Report Include="DBAChecks Error Log.rdl" />
+    <Report Include="DBMaxSize.rdl" />
     <Report Include="DriveHistory.rdl" />
     <Report Include="Drivers and Patching.rdl" />
     <Report Include="Drives.rdl" />

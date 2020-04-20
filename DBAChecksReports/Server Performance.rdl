@@ -60,6 +60,10 @@
           <DataField>Instance</DataField>
           <rd:TypeName>System.String</rd:TypeName>
         </Field>
+        <Field Name="EditionID">
+          <DataField>EditionID</DataField>
+          <rd:TypeName>System.Int64</rd:TypeName>
+        </Field>
         <Field Name="SQLVersion">
           <DataField>SQLVersion</DataField>
           <rd:TypeName>System.String</rd:TypeName>
@@ -177,6 +181,10 @@
         <Field Name="ConnectionID">
           <DataField>ConnectionID</DataField>
           <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+        <Field Name="EditionID">
+          <DataField>EditionID</DataField>
+          <rd:TypeName>System.Int64</rd:TypeName>
         </Field>
       </Fields>
     </DataSet>
@@ -1297,6 +1305,9 @@ format(Fields!TempDBFileSizeMB.Value,"#,0;(#,0)") &amp; "MB files evenly sized, 
 Parameters!Mins.Value&lt;=300,"10MIN",
 1=1,"60MIN")</Value>
               </Parameter>
+              <Parameter Name="Instance">
+                <Value>=First(Fields!Instance.Value, "InstanceInfo")</Value>
+              </Parameter>
             </Parameters>
             <Top>10.27306in</Top>
             <Left>0.00003cm</Left>
@@ -1713,6 +1724,9 @@ Parameters!Mins.Value&lt;=300,"10MIN",
             <Height>3in</Height>
             <Width>23.45487in</Width>
             <ZIndex>6</ZIndex>
+            <Visibility>
+              <Hidden>=First(Fields!EditionID.Value, "InstanceInfo")=1674378470</Hidden>
+            </Visibility>
             <Style>
               <Border>
                 <Style>None</Style>
@@ -1733,6 +1747,9 @@ Parameters!Mins.Value&lt;=300,"10MIN",
             <Height>3in</Height>
             <Width>23.45487in</Width>
             <ZIndex>7</ZIndex>
+            <Visibility>
+              <Hidden>=First(Fields!EditionID.Value, "InstanceInfo")=1674378470</Hidden>
+            </Visibility>
             <Style>
               <Border>
                 <Style>None</Style>
@@ -1753,6 +1770,9 @@ Parameters!Mins.Value&lt;=300,"10MIN",
             <Height>0.91319in</Height>
             <Width>23.45487in</Width>
             <ZIndex>8</ZIndex>
+            <Visibility>
+              <Hidden>=First(Fields!EditionID.Value, "InstanceInfo")=1674378470</Hidden>
+            </Visibility>
             <Style>
               <Border>
                 <Style>None</Style>
@@ -1782,8 +1802,35 @@ Parameters!Mins.Value&lt;=300,"10MIN",
               </Border>
             </Style>
           </Subreport>
+          <Subreport Name="AzureDBResourceUsage">
+            <ReportName>AzureDB Resource Usage</ReportName>
+            <Parameters>
+              <Parameter Name="FromDateUser">
+                <Value>=DateTime.Now.AddMinutes(-Parameters!Mins.Value)</Value>
+              </Parameter>
+              <Parameter Name="ToDateUser">
+                <Value>=DateTime.Now</Value>
+              </Parameter>
+              <Parameter Name="InstanceIDs">
+                <Value>=Parameters!InstanceID.Value</Value>
+              </Parameter>
+            </Parameters>
+            <Top>20.64458in</Top>
+            <Left>0.00001in</Left>
+            <Height>1.21666in</Height>
+            <Width>23.45486in</Width>
+            <ZIndex>10</ZIndex>
+            <Visibility>
+              <Hidden>=First(Fields!EditionID.Value, "InstanceInfo")&lt;&gt;1674378470</Hidden>
+            </Visibility>
+            <Style>
+              <Border>
+                <Style>None</Style>
+              </Border>
+            </Style>
+          </Subreport>
         </ReportItems>
-        <Height>20.60292in</Height>
+        <Height>22.73625in</Height>
         <Style />
       </Body>
       <Width>23.45487in</Width>

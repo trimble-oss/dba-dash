@@ -32,6 +32,10 @@
         <DataField>Instance</DataField>
         <rd:TypeName>System.String</rd:TypeName>
       </Field>
+      <Field Name="EditionID">
+        <DataField>EditionID</DataField>
+        <rd:TypeName>System.Int64</rd:TypeName>
+      </Field>
     </Fields>
   </DataSet>
 </SharedDataSet>

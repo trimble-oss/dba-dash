@@ -16,18 +16,18 @@ WHERE EXISTS(SELECT 1 FROM dbo.SplitStrings(@TagIDs,',') SS WHERE CAST(SS.Item A
 SET @TagCount=@@ROWCOUNT;
 
 WITH T AS (
-	SELECT I.InstanceID,I.Instance
+	SELECT I.InstanceID,I.Instance,I.EditionID
 	FROM dbo.Instances I
 	LEFT JOIN dbo.InstanceTag IT ON IT.InstanceID = I.InstanceID
 				AND EXISTS(SELECT 1 FROM @tTags T WHERE T.TagID = IT.TagID)
 	WHERE I.IsActive=1
 	AND (I.Instance LIKE + '%' + @InstanceName + '%' OR @InstanceName IS NULL)
-	GROUP BY I.InstanceID,I.Instance
+	GROUP BY I.InstanceID,I.Instance,I.EditionID
 	HAVING (COUNT(IT.InstanceID) = @TagCount AND @TagMatching='ALL')
 	OR (COUNT(IT.InstanceID)>0 AND @TagMatching='ANY')
 	OR (COUNT(IT.InstanceID)=0 AND @TagMatching='EXCLUDEANY')
 	OR (COUNT(IT.InstanceID)<>@TagCount AND @TagMatching='EXCLUDEALL')
 )
-SELECT DISTINCT Instance 
+SELECT DISTINCT Instance,T.EditionID 
 FROM T
 ORDER BY T.Instance;
