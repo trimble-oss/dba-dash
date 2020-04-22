@@ -288,6 +288,10 @@
     <Build Include="Storage\PF_AzureDBElasticPoolResourceStats.sql" />
     <Build Include="Storage\PS_AzureDBElasticPoolResourceStats.sql" />
     <Build Include="Report\Stored Procedures\DBMaxSize.sql" />
+    <Build Include="Report\Stored Procedures\AzureDBUtilization.sql" />
+    <Build Include="Report\Stored Procedures\AzureDBResourceUsage.sql" />
+    <Build Include="Report\Stored Procedures\AzureDBPoolUtilization.sql" />
+    <Build Include="Report\Stored Procedures\AzureDBResourcePoolUsage.sql" />
   </ItemGroup>
   <ItemGroup>
     <PostDeploy Include="Script.PostDeployment1.sql" />
