@@ -283,7 +283,7 @@
                         <Style />
                       </ChartDataLabel>
                       <ToolTip>=Fields!DatabaseName.Value &amp; " - " &amp; Fields!object_name.Value &amp; ": " &amp; 
-Environment.NewLine &amp; "Time:" &amp; format(System.TimeZone.CurrentTimeZone.ToLocalTime(Fields!SnapshotDate.Value),Parameters!DateFormat.Value) &amp;
+Environment.NewLine &amp; "Time:" &amp; format(Fields!SnapshotDate.Value,Parameters!DateFormat.Value) &amp;
 Environment.NewLine &amp; "Avg CPU (sec): " &amp;  Format(Fields!AvgCPU.Value,"#,##0.###") &amp;
 Environment.NewLine &amp; "Total CPU (sec): " &amp;  Format(Fields!TotalCPU.Value,"#,##0.###") &amp;
 Environment.NewLine &amp; "Avg Duration (sec): " &amp;  Format(Fields!AvgDuration.Value,"#,##0.###") &amp;
