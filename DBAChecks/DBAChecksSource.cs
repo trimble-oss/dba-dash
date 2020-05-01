@@ -12,7 +12,7 @@ namespace DBAChecks
 {
     public class DBAChecksSource
     {
-
+        private Int32 slowQueryThresholdMs=-1;
 
         public CollectionConfigSchedule[] Schedules { get; set; }
 
@@ -73,6 +73,12 @@ namespace DBAChecks
 
         [DefaultValue(false)]
         public bool NoWMI { get; set; }
+
+        [DefaultValue(-1)]
+        public Int32 SlowQueryThresholdMs { 
+            get { return slowQueryThresholdMs; }
+            set { slowQueryThresholdMs = value; }
+        }
 
         public DBAChecksSource(string source)
         {

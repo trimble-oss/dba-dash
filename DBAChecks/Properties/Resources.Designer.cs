@@ -511,6 +511,50 @@ namespace DBAChecks.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to IF EXISTS(SELECT 1 
+        ///			FROM sys.server_event_sessions
+        ///			WHERE name = &apos;DBAChecks_1&apos;
+        ///			)
+        ///BEGIN
+        ///	DROP EVENT SESSION DBAChecks_1 ON SERVER;
+        ///END
+        ///IF EXISTS(SELECT 1 
+        ///			FROM sys.server_event_sessions
+        ///			WHERE name = &apos;DBAChecks_2&apos;
+        ///			)
+        ///BEGIN
+        ///	DROP EVENT SESSION DBAChecks_2 ON SERVER;
+        ///END.
+        /// </summary>
+        internal static string SQLRemoveEventSessions {
+            get {
+                return ResourceManager.GetString("SQLRemoveEventSessions", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to IF EXISTS(SELECT 1 
+        ///			FROM sys.database_event_sessions
+        ///			WHERE name = &apos;DBAChecks_1&apos;
+        ///			)
+        ///BEGIN
+        ///	DROP EVENT SESSION DBAChecks_1 ON DATABASE;
+        ///END
+        ///IF EXISTS(SELECT 1 
+        ///			FROM sys.database_event_sessions
+        ///			WHERE name = &apos;DBAChecks_2&apos;
+        ///			)
+        ///BEGIN
+        ///	DROP EVENT SESSION DBAChecks_2 ON DATABASE;
+        ///END.
+        /// </summary>
+        internal static string SQLRemoveEventSessionsAzure {
+            get {
+                return ResourceManager.GetString("SQLRemoveEventSessionsAzure", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to DECLARE @ProcessorNameString NVARCHAR(512)
         ///DECLARE @SystemManufacturer NVARCHAR(512)
         ///DECLARE @SystemProductName NVARCHAR(512)
@@ -539,6 +583,38 @@ namespace DBAChecks.Properties {
         internal static string SQLServerProperties {
             get {
                 return ResourceManager.GetString("SQLServerProperties", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to /* Setup - create event sessions if they don&apos;t exist */
+        ///DECLARE @SQL NVARCHAR(MAX)
+        ///DECLARE @EventSessionTemplate NVARCHAR(MAX) = N&apos;CREATE EVENT SESSION [{EventSessionName}] ON SERVER 
+        ///	ADD EVENT sqlserver.rpc_completed(
+        ///		ACTION(sqlserver.client_app_name,sqlserver.client_hostname,sqlserver.database_id,sqlserver.username)
+        ///		WHERE ([duration]&gt;(&apos; + CAST(@SlowQueryThreshold AS NVARCHAR(MAX)) + &apos;) AND ([sqlserver].[client_app_name]&lt;&gt;N&apos;&apos;DBAChecksXE&apos;&apos;))),
+        ///	ADD EVENT sqlserver.sql_batch_completed(
+        ///		ACTION(s [rest of string was truncated]&quot;;.
+        /// </summary>
+        internal static string SQLSlowQueries {
+            get {
+                return ResourceManager.GetString("SQLSlowQueries", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to /* Setup - create event sessions if they don&apos;t exist */
+        ///DECLARE @SQL NVARCHAR(MAX)
+        ///DECLARE @EventSessionTemplate NVARCHAR(MAX) = N&apos;CREATE EVENT SESSION [{EventSessionName}] ON DATABASE 
+        ///	ADD EVENT sqlserver.rpc_completed(
+        ///		ACTION(sqlserver.client_app_name,sqlserver.client_hostname,sqlserver.database_id,sqlserver.username)
+        ///		WHERE ([duration]&gt;(&apos; + CAST(@SlowQueryThreshold AS NVARCHAR(MAX)) + &apos;) AND ([sqlserver].[client_app_name]&lt;&gt;N&apos;&apos;DBAChecksXE&apos;&apos;))),
+        ///	ADD EVENT sqlserver.sql_batch_completed(
+        ///		ACTION [rest of string was truncated]&quot;;.
+        /// </summary>
+        internal static string SQLSlowQueriesAzure {
+            get {
+                return ResourceManager.GetString("SQLSlowQueriesAzure", resourceCulture);
             }
         }
         

@@ -1,0 +1,4 @@
+﻿CREATE PARTITION SCHEME [PS_SlowQueries]
+    AS PARTITION [PF_SlowQueries]
+    ALL TO ([PRIMARY]);
+

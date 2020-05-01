@@ -40,7 +40,8 @@ namespace DBAChecks
         DBTuningOptions,
         AzureDBResourceStats,
         AzureDBServiceObjectives,
-        AzureDBElasticPoolResourceStats
+        AzureDBElasticPoolResourceStats,
+        SlowQueries
     }
 
 
@@ -53,8 +54,8 @@ namespace DBAChecks
         public Int32 PerformanceCollectionPeriodMins = 60;
         string computerName;
         Int64 editionId;
-        CollectionType[] azureCollectionTypes = new CollectionType[] {CollectionType.AzureDBElasticPoolResourceStats,CollectionType.AzureDBServiceObjectives,CollectionType.AzureDBResourceStats,CollectionType.CPU, CollectionType.DBFiles, CollectionType.General, CollectionType.Performance, CollectionType.Databases, CollectionType.DBConfig, CollectionType.TraceFlags, CollectionType.ProcStats, CollectionType.FunctionStats, CollectionType.BlockingSnapshot, CollectionType.IOStats, CollectionType.Waits, CollectionType.ServerProperties, CollectionType.DBTuningOptions ,CollectionType.SysConfig};
-
+        CollectionType[] azureCollectionTypes = new CollectionType[] {CollectionType.SlowQueries,CollectionType.AzureDBElasticPoolResourceStats,CollectionType.AzureDBServiceObjectives,CollectionType.AzureDBResourceStats,CollectionType.CPU, CollectionType.DBFiles, CollectionType.General, CollectionType.Performance, CollectionType.Databases, CollectionType.DBConfig, CollectionType.TraceFlags, CollectionType.ProcStats, CollectionType.FunctionStats, CollectionType.BlockingSnapshot, CollectionType.IOStats, CollectionType.Waits, CollectionType.ServerProperties, CollectionType.DBTuningOptions ,CollectionType.SysConfig};
+        public Int64 SlowQueryThresholdMs=-1;
 
         private bool IsAzure = false;
         private bool isAzureMasterDB = false;
@@ -92,6 +93,26 @@ namespace DBAChecks
         {
             startup(connectionString, connectionID);
 
+        }
+
+        public void RemoveEventSessions()
+        {
+            string removeSQL;
+            if (IsAzure)
+            {
+                removeSQL = Properties.Resources.SQLRemoveEventSessionsAzure;
+            }
+            else
+            {
+                removeSQL = Properties.Resources.SQLRemoveEventSessions;
+            }
+            SqlConnection cn = new SqlConnection(_connectionString);
+            using (cn)
+            {
+                cn.Open();
+                var cmd = new SqlCommand(removeSQL, cn);
+                cmd.ExecuteScalar();
+            }
         }
 
         public void GetInstance(string connectionID)
@@ -197,6 +218,7 @@ namespace DBAChecks
                 Collect(CollectionType.Waits);
                 Collect(CollectionType.AzureDBResourceStats);
                 Collect(CollectionType.AzureDBElasticPoolResourceStats);
+                Collect(CollectionType.SlowQueries);
             }
             else if (collectionType == CollectionType.Drives)
             {
@@ -252,6 +274,17 @@ namespace DBAChecks
                     }
                 }
             }
+            else if (collectionType == CollectionType.SlowQueries && SlowQueryThresholdMs>0)
+            {
+                try
+                {
+                    collectSlowQueries();
+                }
+                catch(Exception ex)
+                {
+                    logError(collectionTypeString, ex.Message);
+                }
+            }
             else
             {
                 try
@@ -266,6 +299,36 @@ namespace DBAChecks
             }
         }
 
+
+        private void collectSlowQueries()
+        {
+            SqlConnectionStringBuilder builder = new SqlConnectionStringBuilder(_connectionString);
+            builder.ApplicationName = "DBAChecksXE";
+            SqlConnection cn = new SqlConnection(builder.ConnectionString);
+            string slowQueriesSQL;
+            if (IsAzure)
+            {
+                slowQueriesSQL = Properties.Resources.SQLSlowQueriesAzure;
+            }
+            else
+            {
+                slowQueriesSQL = Properties.Resources.SQLSlowQueries;
+            }
+            using (cn)
+            {
+                cn.Open();
+                SqlCommand cmd = new SqlCommand(slowQueriesSQL, cn);
+
+                cmd.Parameters.AddWithValue("SlowQueryThreshold", SlowQueryThresholdMs*1000);
+                string ringBuffer = (string)cmd.ExecuteScalar();
+                if (ringBuffer.Length > 0)
+                {
+                    var dt = XETools.XEStrToDT(ringBuffer);
+                    dt.TableName = "SlowQueries";
+                   addDT(dt);
+                }
+            }
+        }
 
 
         private void collectServerExtraProperties()
@@ -333,6 +396,13 @@ namespace DBAChecks
             }
         }
 
+        private void addDT(DataTable dt)
+        {
+            if (!Data.Tables.Contains(dt.TableName))
+            {
+                Data.Tables.Add(dt);
+            }
+        }
         public void addDT(DataTable dt, string sql)
         {
             if (!Data.Tables.Contains(dt.TableName))

@@ -15,13 +15,42 @@ namespace DBAChecksService
 {
     class DBAChecksService
     {
-        public void Start()
+        public void Start(CollectionConfig config)
         {
-
+            removeEventSessions(config);
         }
-        public void Stop()
-        {
 
+        private void removeEventSessions(CollectionConfig config)
+        {
+            foreach (DBAChecksSource cfg in config.SourceConnections)
+            {
+
+                string cfgString = JsonConvert.SerializeObject(cfg);
+                if (cfg.SourceConnection.Type == ConnectionType.SQL)
+                {
+                    var collector = new DBCollector(cfg.GetSource(), cfg.NoWMI);
+                    try
+                    {
+                        Console.WriteLine("Remove DBAChecks event sessions: " + cfg.SourceConnection.DataSource());
+                        collector.RemoveEventSessions();
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine("Error removing event sessions" + ex.Message);
+                    }
+                }
+            }
+        }
+
+
+        public void Stop(CollectionConfig config)
+        {
+            removeEventSessions(config);
+        }
+
+        public void Shutdown(CollectionConfig config)
+        {
+            removeEventSessions(config);
         }
 
     }
@@ -146,6 +175,7 @@ namespace DBAChecksService
                     {
                         collector.PerformanceCollectionPeriodMins = 30;
                     }
+                    collector.SlowQueryThresholdMs = cfg.SlowQueryThresholdMs;
                     collector.Collect(types);
                     try
                     {
@@ -220,8 +250,9 @@ namespace DBAChecksService
                 configure.Service<DBAChecksService>(service =>
                 {
                     service.ConstructUsing(s => new DBAChecksService());
-                    ServiceConfiguratorExtensions.WhenStarted<DBAChecksService>(service, s => s.Start());
-                    ServiceConfiguratorExtensions.WhenStopped<DBAChecksService>(service, s => s.Stop());
+                    ServiceConfiguratorExtensions.WhenStarted<DBAChecksService>(service, s => s.Start(config));
+                    ServiceConfiguratorExtensions.WhenStopped<DBAChecksService>(service, s => s.Stop(config));
+                    ServiceConfiguratorExtensions.WhenShutdown<DBAChecksService>(service, s => s.Shutdown(config));
                     if (config.DestinationConnection.Type == ConnectionType.SQL)
                     {
                         string maintenanceChron = config.GetMaintenanceChron();
@@ -267,13 +298,10 @@ namespace DBAChecksService
                                   .WithCronSchedule(s.ChronSchedule)
                                   .Build()
                                   )); ; ;
-                        }
-
-             
-
+                        }                
                     }
                 });
-
+       
                 //Setup Account that window service use to run.  
                // configure.RunAsPrompt();
                 //configure.RunAsLocalSystem();

@@ -248,15 +248,15 @@ namespace DBAChecks
             if (getConnectionType(connectionString) == ConnectionType.SQL)
             {
                 SqlConnectionStringBuilder builder = new SqlConnectionStringBuilder(connectionString);
+                if (builder.ApplicationName == ".Net SqlClient Data Provider")
+                {
+                    builder.ApplicationName = "DBAChecks";
+                }
                 if (builder.Password.StartsWith("¬=!"))
                 {
                     builder.Password = EncryptText.DecryptString(builder.Password.Substring(3), myString);
-                    return builder.ConnectionString;
-                }
-                else
-                {
-                    return connectionString;
-                }
+                }               
+                return builder.ConnectionString;
             }
             else
             {

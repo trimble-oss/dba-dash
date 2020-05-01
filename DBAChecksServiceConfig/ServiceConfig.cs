@@ -34,6 +34,10 @@ namespace DBAChecksServiceConfig
         {
             DBAChecksSource src = new DBAChecksSource(cboSource.Text);
               src.NoWMI = chkNoWMI.Checked;
+            if (chkSlowQueryThreshold.Checked)
+            {
+                src.SlowQueryThresholdMs = (Int32)numSlowQueryThreshold.Value;
+            }
             if (chkCustomizeSchedule.Checked)
             {
                 src.Schedules = src.GetSchedule();
@@ -51,11 +55,6 @@ namespace DBAChecksServiceConfig
                 if (collectionConfig == null)
                 {
                     collectionConfig = new CollectionConfig();
-                }
-                if(ConnectionExists(src.SourceConnection)) { 
-                        MessageBox.Show("Error: Item already exists", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                        return;
-                    
                 }
                 System.Windows.Forms.Cursor.Current = System.Windows.Forms.Cursors.WaitCursor;
                 validated = src.SourceConnection.Validate();
@@ -90,7 +89,21 @@ namespace DBAChecksServiceConfig
                         }
                     }
                 }
+ 
+                    var existingConnection = getConnection(cboSource.Text);
+                if (existingConnection != null)
+                {
+                    if (MessageBox.Show("Update existing connection?", "Update", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+                    {
+                        collectionConfig.SourceConnections.Remove(existingConnection);
+                    }
+                    else
+                    {
+                        return;
+                    }
 
+               }
+                
                 collectionConfig.SourceConnections.Add(src);
                 txtJson.Text = jsonConfig();
                 populateDropDowns();
@@ -100,29 +113,14 @@ namespace DBAChecksServiceConfig
 
         private bool ConnectionExists(DBAChecksConnection newConnection)
         {
-            if (collectionConfig == null)
+            if (getConnection(newConnection.ConnectionString) != null)
+            {
+                return true;
+            }
+            else
             {
                 return false;
             }
-            foreach (var s in collectionConfig.SourceConnections)
-            {
-                if (s.SourceConnection.Type == newConnection.Type)
-                {
-                    if (s.SourceConnection.Type== ConnectionType.SQL && newConnection.DataSource() == s.SourceConnection.DataSource() && (s.SourceConnection.InitialCatalog() == newConnection.InitialCatalog()))
-                    {
-                        return true;
-                    }
-                    else if (s.SourceConnection.ConnectionString == newConnection.ConnectionString)
-                    {
-                        return true;
-                    }
-                }
-                else
-                {
-                    return false;
-                }
-            }
-            return false;
         }
 
         private string jsonConfig()
@@ -416,16 +414,37 @@ namespace DBAChecksServiceConfig
             txtJson.Text = collectionConfig.Serialize();
         }
 
+
+        private DBAChecksSource getConnection(string connectionString)
+        {
+            if (collectionConfig == null)
+            {
+                return null;
+            }
+            var findConnection = new DBAChecksConnection(connectionString);
+            foreach (var s in collectionConfig.SourceConnections)
+            {
+
+                if (s.SourceConnection.Type == findConnection.Type)
+                {
+                    if (s.SourceConnection.Type == ConnectionType.SQL && s.SourceConnection.DataSource() == findConnection.DataSource() && (s.SourceConnection.InitialCatalog() == findConnection.InitialCatalog()))
+                    {
+                        return s;
+                    }
+                    else if (s.SourceConnection.ConnectionString == findConnection.ConnectionString)
+                    {
+                        return s;
+                    }
+                }
+            }
+            return null;
+        }
+
         private void bttnRemove_Click(object sender, EventArgs e)
         {
            DBAChecksSource src=null;
-           foreach(var c in collectionConfig.SourceConnections)
-            {
-                if (c.SourceConnection.ConnectionString == cboSource.Text)
-                {
-                    src = c;
-                }
-            }
+
+            src = getConnection(cboSource.Text);
             if (src != null)
             {
                 collectionConfig.SourceConnections.Remove(src);
@@ -467,6 +486,22 @@ namespace DBAChecksServiceConfig
                 collectionConfig.MaintenanceScheduleChron = null;
             }
             txtJson.Text = collectionConfig.Serialize();
+        }
+
+        private void chkSlowQueryThreshold_CheckedChanged(object sender, EventArgs e)
+        {
+            numSlowQueryThreshold.Enabled = chkSlowQueryThreshold.Checked;
+            if (chkSlowQueryThreshold.Checked)
+            {
+                numSlowQueryThreshold.Value = 1000;
+                lblSlow.Text = "Extended events trace to capture slow rpc and batch completed events IS enabled";
+            }
+            else
+            {
+                numSlowQueryThreshold.Value = -1;      
+                lblSlow.Text = "Extended events trace to capture slow rpc and batch completed events is NOT enabled";
+            }
+
         }
     }
 }
