@@ -1378,4 +1378,48 @@ BEGIN
 	DROP EVENT SESSION DBAChecks_2 ON DATABASE;
 END</value>
   </data>
+  <data name="SQLStopEventSessions" xml:space="preserve">
+    <value>IF EXISTS(
+	SELECT * 
+	FROM sys.dm_xe_sessions
+	WHERE name = 'DBAChecks_1'
+	)
+BEGIN
+	ALTER EVENT SESSION DBAChecks_1
+	ON SERVER
+	State = STOP
+END
+IF EXISTS(
+	SELECT * 
+	FROM sys.dm_xe_sessions
+	WHERE name = 'DBAChecks_2'
+	)
+BEGIN
+	ALTER EVENT SESSION DBAChecks_2
+	ON SERVER
+	State = STOP
+END</value>
+  </data>
+  <data name="SQLStopEventSessionsAzure" xml:space="preserve">
+    <value>IF EXISTS(
+	SELECT * 
+	FROM sys.dm_xe_database_sessions
+	WHERE name = 'DBAChecks_1'
+	)
+BEGIN
+	ALTER EVENT SESSION DBAChecks_1
+	ON DATABASE
+	State = STOP
+END
+IF EXISTS(
+	SELECT * 
+	FROM sys.dm_xe_database_sessions
+	WHERE name = 'DBAChecks_2'
+	)
+BEGIN
+	ALTER EVENT SESSION DBAChecks_2
+	ON DATABASE
+	State = STOP
+END</value>
+  </data>
 </root>

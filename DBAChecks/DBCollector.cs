@@ -59,6 +59,8 @@ namespace DBAChecks
 
         private bool IsAzure = false;
         private bool isAzureMasterDB = false;
+        private string instanceName;
+        string dbName;
  
 
         public DBCollector(string connectionString, bool noWMI)
@@ -69,7 +71,7 @@ namespace DBAChecks
 
         private void logError(string errorSource, string errorMessage)
         {
-            Console.WriteLine(errorSource + " : " + errorMessage);
+            Console.WriteLine("Error: " + instanceName + "|" +  dbName + " " +  errorSource + " : " + errorMessage);
             var rError = dtErrors.NewRow();
             rError["ErrorSource"] = errorSource;
             rError["ErrorMessage"] = errorMessage;
@@ -115,6 +117,26 @@ namespace DBAChecks
             }
         }
 
+        public void StopEventSessions()
+        {
+            string removeSQL;
+            if (IsAzure)
+            {
+                removeSQL = Properties.Resources.SQLStopEventSessionsAzure;
+            }
+            else
+            {
+                removeSQL = Properties.Resources.SQLStopEventSessions;
+            }
+            SqlConnection cn = new SqlConnection(_connectionString);
+            using (cn)
+            {
+                cn.Open();
+                var cmd = new SqlCommand(removeSQL, cn);
+                cmd.ExecuteScalar();
+            }
+        }
+
         public void GetInstance(string connectionID)
         {
             var dt = getDT("DBAChecks", "SELECT @@SERVERNAME as Instance,GETUTCDATE() As SnapshotDateUTC,CAST(SERVERPROPERTY('EditionID') as bigint) as EditionID,ISNULL(CAST(SERVERPROPERTY('ComputerNamePhysicalNetBIOS') as nvarchar(128)),'') as ComputerNamePhysicalNetBIOS,DB_NAME() as DBName");
@@ -126,8 +148,8 @@ namespace DBAChecks
        
             editionId = (Int64)dt.Rows[0]["EditionId"];
             computerName = (string)dt.Rows[0]["ComputerNamePhysicalNetBIOS"];
-            string dbName = (string)dt.Rows[0]["DBName"];
-            string instanceName = (string)dt.Rows[0]["Instance"];
+            dbName = (string)dt.Rows[0]["DBName"];
+            instanceName = (string)dt.Rows[0]["Instance"];
             if ( editionId == 1674378470)
             {
                 IsAzure = true;
@@ -274,15 +296,18 @@ namespace DBAChecks
                     }
                 }
             }
-            else if (collectionType == CollectionType.SlowQueries && SlowQueryThresholdMs>0)
+            else if (collectionType == CollectionType.SlowQueries)
             {
-                try
+                if (SlowQueryThresholdMs > 0)
                 {
-                    collectSlowQueries();
-                }
-                catch(Exception ex)
-                {
-                    logError(collectionTypeString, ex.Message);
+                    try
+                    {
+                        collectSlowQueries();
+                    }
+                    catch (Exception ex)
+                    {
+                        logError(collectionTypeString, ex.Message);
+                    }
                 }
             }
             else
@@ -302,6 +327,7 @@ namespace DBAChecks
 
         private void collectSlowQueries()
         {
+          
             SqlConnectionStringBuilder builder = new SqlConnectionStringBuilder(_connectionString);
             builder.ApplicationName = "DBAChecksXE";
             SqlConnection cn = new SqlConnection(builder.ConnectionString);
@@ -320,12 +346,19 @@ namespace DBAChecks
                 SqlCommand cmd = new SqlCommand(slowQueriesSQL, cn);
 
                 cmd.Parameters.AddWithValue("SlowQueryThreshold", SlowQueryThresholdMs*1000);
-                string ringBuffer = (string)cmd.ExecuteScalar();
+                var result = cmd.ExecuteScalar();
+                if (result == DBNull.Value)
+                {
+                    logError("SlowQueries","Result IS NULL");
+                    return;
+                }
+                string ringBuffer = (string)result;
                 if (ringBuffer.Length > 0)
                 {
                     var dt = XETools.XEStrToDT(ringBuffer);
                     dt.TableName = "SlowQueries";
-                   addDT(dt);
+                    addDT(dt);
+                    
                 }
             }
         }

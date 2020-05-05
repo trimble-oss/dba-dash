@@ -81,6 +81,7 @@
     <Report Include="Procedure Insights.rdl" />
     <Report Include="Procedure Stats.rdl" />
     <Report Include="Server Performance.rdl" />
+    <Report Include="SlowQueries.rdl" />
     <Report Include="SnapshotDates.rdl" />
     <Report Include="Summary.rdl" />
     <Report Include="WaitChart.rdl" />

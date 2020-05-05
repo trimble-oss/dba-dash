@@ -619,6 +619,62 @@ namespace DBAChecks.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to IF EXISTS(
+        ///	SELECT * 
+        ///	FROM sys.dm_xe_sessions
+        ///	WHERE name = &apos;DBAChecks_1&apos;
+        ///	)
+        ///BEGIN
+        ///	ALTER EVENT SESSION DBAChecks_1
+        ///	ON SERVER
+        ///	State = STOP
+        ///END
+        ///IF EXISTS(
+        ///	SELECT * 
+        ///	FROM sys.dm_xe_sessions
+        ///	WHERE name = &apos;DBAChecks_2&apos;
+        ///	)
+        ///BEGIN
+        ///	ALTER EVENT SESSION DBAChecks_2
+        ///	ON SERVER
+        ///	State = STOP
+        ///END.
+        /// </summary>
+        internal static string SQLStopEventSessions {
+            get {
+                return ResourceManager.GetString("SQLStopEventSessions", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to IF EXISTS(
+        ///	SELECT * 
+        ///	FROM sys.dm_xe_database_sessions
+        ///	WHERE name = &apos;DBAChecks_1&apos;
+        ///	)
+        ///BEGIN
+        ///	ALTER EVENT SESSION DBAChecks_1
+        ///	ON DATABASE
+        ///	State = STOP
+        ///END
+        ///IF EXISTS(
+        ///	SELECT * 
+        ///	FROM sys.dm_xe_database_sessions
+        ///	WHERE name = &apos;DBAChecks_2&apos;
+        ///	)
+        ///BEGIN
+        ///	ALTER EVENT SESSION DBAChecks_2
+        ///	ON DATABASE
+        ///	State = STOP
+        ///END.
+        /// </summary>
+        internal static string SQLStopEventSessionsAzure {
+            get {
+                return ResourceManager.GetString("SQLStopEventSessionsAzure", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to SELECT configuration_id,CAST(value as BIGINT) as value,CAST(value_in_use as BIGINT) as value_in_use
         ///FROM sys.configurations.
         /// </summary>

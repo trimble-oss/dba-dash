@@ -1,0 +1,9 @@
+﻿CREATE TYPE [dbo].[IDs] AS TABLE (
+    [ID] INT NOT NULL,
+    PRIMARY KEY CLUSTERED ([ID] ASC));
+
+
+GO
+GRANT EXECUTE
+    ON TYPE::[dbo].[IDs] TO [Reports];
+

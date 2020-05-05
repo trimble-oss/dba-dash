@@ -291,8 +291,8 @@ namespace DBAChecksService
                                   .Build())
                               .AddTrigger(() => TriggerBuilder.Create()
                                       .WithSimpleSchedule(b => b
-                                          .WithIntervalInSeconds(1)
-                                          .WithRepeatCount(0))
+                                          .WithIntervalInSeconds(1)                                        
+                                          .WithRepeatCount(0)).StartAt(DateTime.Now.AddSeconds(5))
                                       .Build())
                               .AddTrigger(() => TriggerBuilder.Create()
                                   .WithCronSchedule(s.ChronSchedule)

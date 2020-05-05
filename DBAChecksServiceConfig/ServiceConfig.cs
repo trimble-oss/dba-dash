@@ -42,6 +42,7 @@ namespace DBAChecksServiceConfig
             {
                 src.Schedules = src.GetSchedule();
             }
+            src.PersistXESessions = chkPersistXESession.Checked;
             bool validated = validateSource();
 
             if (validated)

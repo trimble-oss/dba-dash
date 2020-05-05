@@ -79,6 +79,8 @@ namespace DBAChecks
             get { return slowQueryThresholdMs; }
             set { slowQueryThresholdMs = value; }
         }
+        [DefaultValue(false)]
+        public bool PersistXESessions { get; set; }
 
         public DBAChecksSource(string source)
         {
