@@ -29,15 +29,31 @@ namespace DBAChecksService
                 if (cfg.SourceConnection.Type == ConnectionType.SQL)
                 {
                     var collector = new DBCollector(cfg.GetSource(), cfg.NoWMI);
-                    try
+                    if (cfg.PersistXESessions)
                     {
-                        Console.WriteLine("Remove DBAChecks event sessions: " + cfg.SourceConnection.DataSource());
-                        collector.RemoveEventSessions();
+                        try
+                        {
+                            Console.WriteLine("Stop DBAChecks event sessions: " + cfg.SourceConnection.DataSource());
+                            collector.StopEventSessions();
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine("Error stopping event sessions" + ex.Message);
+                        }
                     }
-                    catch (Exception ex)
+                    else
                     {
-                        Console.WriteLine("Error removing event sessions" + ex.Message);
+                        try
+                        {
+                            Console.WriteLine("Remove DBAChecks event sessions: " + cfg.SourceConnection.DataSource());
+                            collector.RemoveEventSessions();
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine("Error removing event sessions" + ex.Message);
+                        }
                     }
+
                 }
             }
         }
