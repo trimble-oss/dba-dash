@@ -91,9 +91,13 @@ namespace DBAChecksServiceConfig
                     }
                 }
  
-                    var existingConnection = getConnection(cboSource.Text);
+                var existingConnection = getConnection(cboSource.Text);
                 if (existingConnection != null)
                 {
+                    if (chkCustomizeSchedule.Checked && existingConnection.Schedules!=null)
+                    {
+                        src.Schedules = existingConnection.Schedules;
+                    }
                     if (MessageBox.Show("Update existing connection?", "Update", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
                     {
                         collectionConfig.SourceConnections.Remove(existingConnection);
@@ -503,6 +507,30 @@ namespace DBAChecksServiceConfig
                 lblSlow.Text = "Extended events trace to capture slow rpc and batch completed events is NOT enabled";
             }
 
+        }
+
+        private void cboSource_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            DBAChecksSource src = null;
+
+            src = getConnection(cboSource.Text);
+            if (src != null)
+            {
+                chkNoWMI.Checked = src.NoWMI;
+                chkPersistXESession.Checked = src.PersistXESessions;
+                chkSlowQueryThreshold.Checked = (src.SlowQueryThresholdMs != -1);
+                if (chkSlowQueryThreshold.Checked)
+                {
+                    numSlowQueryThreshold.Value = src.SlowQueryThresholdMs;
+                }
+                else
+                {
+                    numSlowQueryThreshold.Value = 0;
+                }
+       
+               chkCustomizeSchedule.Checked = src.Schedules != null;
+                
+            }
         }
     }
 }

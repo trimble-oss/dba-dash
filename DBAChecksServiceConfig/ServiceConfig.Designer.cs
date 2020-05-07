@@ -60,13 +60,13 @@
             this.label7 = new System.Windows.Forms.Label();
             this.txtDestination = new System.Windows.Forms.TextBox();
             this.tabPage1 = new System.Windows.Forms.TabPage();
+            this.chkPersistXESession = new System.Windows.Forms.CheckBox();
             this.lblSlow = new System.Windows.Forms.Label();
             this.chkSlowQueryThreshold = new System.Windows.Forms.CheckBox();
             this.numSlowQueryThreshold = new System.Windows.Forms.NumericUpDown();
             this.bttnRemove = new System.Windows.Forms.Button();
             this.tabPage2 = new System.Windows.Forms.TabPage();
             this.tabPage4 = new System.Windows.Forms.TabPage();
-            this.chkPersistXESession = new System.Windows.Forms.CheckBox();
             ((System.ComponentModel.ISupportInitialize)(this.errorProvider1)).BeginInit();
             this.tabControl1.SuspendLayout();
             this.tabPage3.SuspendLayout();
@@ -85,6 +85,7 @@
             this.cboSource.Name = "cboSource";
             this.cboSource.Size = new System.Drawing.Size(718, 24);
             this.cboSource.TabIndex = 0;
+            this.cboSource.SelectedIndexChanged += new System.EventHandler(this.cboSource_SelectedIndexChanged);
             // 
             // label1
             // 
@@ -399,6 +400,16 @@
             this.tabPage1.Text = "Source";
             this.tabPage1.UseVisualStyleBackColor = true;
             // 
+            // chkPersistXESession
+            // 
+            this.chkPersistXESession.AutoSize = true;
+            this.chkPersistXESession.Location = new System.Drawing.Point(9, 136);
+            this.chkPersistXESession.Name = "chkPersistXESession";
+            this.chkPersistXESession.Size = new System.Drawing.Size(372, 21);
+            this.chkPersistXESession.TabIndex = 15;
+            this.chkPersistXESession.Text = "Persist XE sessions (to allow for manual configuration)";
+            this.chkPersistXESession.UseVisualStyleBackColor = true;
+            // 
             // lblSlow
             // 
             this.lblSlow.AutoSize = true;
@@ -492,16 +503,6 @@
             this.tabPage4.TabIndex = 3;
             this.tabPage4.Text = "Service";
             this.tabPage4.UseVisualStyleBackColor = true;
-            // 
-            // chkPersistXESession
-            // 
-            this.chkPersistXESession.AutoSize = true;
-            this.chkPersistXESession.Location = new System.Drawing.Point(9, 136);
-            this.chkPersistXESession.Name = "chkPersistXESession";
-            this.chkPersistXESession.Size = new System.Drawing.Size(372, 21);
-            this.chkPersistXESession.TabIndex = 15;
-            this.chkPersistXESession.Text = "Persist XE sessions (to allow for manual configuration)";
-            this.chkPersistXESession.UseVisualStyleBackColor = true;
             // 
             // ServiceConfig
             // 
