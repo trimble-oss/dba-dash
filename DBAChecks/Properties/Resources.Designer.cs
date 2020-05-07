@@ -592,9 +592,8 @@ namespace DBAChecks.Properties {
         ///DECLARE @EventSessionTemplate NVARCHAR(MAX) = N&apos;CREATE EVENT SESSION [{EventSessionName}] ON SERVER 
         ///	ADD EVENT sqlserver.rpc_completed(
         ///		ACTION(sqlserver.client_app_name,sqlserver.client_hostname,sqlserver.database_id,sqlserver.username)
-        ///		WHERE ([duration]&gt;(&apos; + CAST(@SlowQueryThreshold AS NVARCHAR(MAX)) + &apos;) AND ([sqlserver].[client_app_name]&lt;&gt;N&apos;&apos;DBAChecksXE&apos;&apos;))),
-        ///	ADD EVENT sqlserver.sql_batch_completed(
-        ///		ACTION(s [rest of string was truncated]&quot;;.
+        ///		WHERE ([duration]&gt;(&apos; + CAST(@SlowQueryThreshold AS NVARCHAR(MAX)) + &apos;) AND ([sqlserver].[client_app_name]&lt;&gt;N&apos;&apos;DBAChecksXE&apos;&apos; AND [object_name]&lt;&gt;N&apos;&apos;sp_readrequest&apos;&apos;))),
+        ///	ADD EVENT sql [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string SQLSlowQueries {
             get {

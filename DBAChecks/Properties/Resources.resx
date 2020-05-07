@@ -1190,7 +1190,7 @@ DECLARE @SQL NVARCHAR(MAX)
 DECLARE @EventSessionTemplate NVARCHAR(MAX) = N'CREATE EVENT SESSION [{EventSessionName}] ON SERVER 
 	ADD EVENT sqlserver.rpc_completed(
 		ACTION(sqlserver.client_app_name,sqlserver.client_hostname,sqlserver.database_id,sqlserver.username)
-		WHERE ([duration]&gt;(' + CAST(@SlowQueryThreshold AS NVARCHAR(MAX)) + ') AND ([sqlserver].[client_app_name]&lt;&gt;N''DBAChecksXE''))),
+		WHERE ([duration]&gt;(' + CAST(@SlowQueryThreshold AS NVARCHAR(MAX)) + ') AND ([sqlserver].[client_app_name]&lt;&gt;N''DBAChecksXE'' AND [object_name]&lt;&gt;N''sp_readrequest''))),
 	ADD EVENT sqlserver.sql_batch_completed(
 		ACTION(sqlserver.client_app_name,sqlserver.client_hostname,sqlserver.database_id,sqlserver.username)
 		WHERE ([duration]&gt;(' + CAST(@SlowQueryThreshold AS NVARCHAR(MAX)) + ') AND ([sqlserver].[client_app_name]&lt;&gt;N''DBAChecksXE'')))
