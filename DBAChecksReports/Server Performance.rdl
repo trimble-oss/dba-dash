@@ -222,6 +222,14 @@
           <DataField>WaitMs</DataField>
           <rd:TypeName>System.Int64</rd:TypeName>
         </Field>
+        <Field Name="WaitCount">
+          <DataField>WaitCount</DataField>
+          <rd:TypeName>System.Int64</rd:TypeName>
+        </Field>
+        <Field Name="SignalWaitMs">
+          <DataField>SignalWaitMs</DataField>
+          <rd:TypeName>System.Int64</rd:TypeName>
+        </Field>
       </Fields>
     </DataSet>
   </DataSets>
@@ -1367,8 +1375,13 @@ Parameters!Mins.Value&lt;=300,"10MIN",
                       <ChartDataLabel>
                         <Style />
                       </ChartDataLabel>
-                      <ToolTip>=Fields!WaitType.Value &amp; " " &amp; format(System.TimeZone.CurrentTimeZone.ToLocalTime(Fields!Time.Value),Parameters!DateFormat.Value) 
-&amp; ": " &amp; format(Fields!WaitMs.Value/1000,"0.0") &amp; " seconds"</ToolTip>
+                      <ToolTip>=Fields!WaitType.Value &amp; " " &amp; format(System.TimeZone.CurrentTimeZone.ToLocalTime(Fields!Time.Value),Parameters!DateFormat.Value) &amp; Environment.NewLine &amp;
+"Wait Time (seconds) :  " &amp; format(Fields!WaitMs.Value/1000,"0.0") &amp; Environment.NewLine &amp;
+"Signal wait (seconds) :  " &amp; format(Fields!SignalWaitMs.Value/1000,"0.0") &amp; Environment.NewLine &amp;
+"Wait Count :  " &amp; Fields!WaitCount.Value &amp; Environment.NewLine &amp;
+"Avg Wait (ms) :  " &amp; Format(Fields!WaitMs.Value/Fields!WaitCount.Value,"0") &amp; Environment.NewLine &amp;
+"Avg signal wait (ms) :  " &amp; Format(Fields!SignalWaitMs.Value/Fields!WaitCount.Value,"0") &amp; Environment.NewLine &amp;
+"Percent Signal wait:  " &amp; Format(Fields!SignalWaitMs.Value/Fields!WaitMs.Value,"P")</ToolTip>
                       <Style />
                       <ChartMarker>
                         <Style />
