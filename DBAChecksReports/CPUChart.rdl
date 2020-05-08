@@ -116,6 +116,7 @@
                   </ChartSmartLabel>
                 </ChartSeries>
                 <ChartSeries Name="Other">
+                  <Hidden>=IIF(Min(Fields!SQLProcessCPU.Value+Fields!SystemIdleCPU.Value, "DataSet1")=100,true,false)</Hidden>
                   <ChartDataPoints>
                     <ChartDataPoint>
                       <ChartDataPointValues>

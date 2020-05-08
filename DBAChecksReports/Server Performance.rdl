@@ -305,6 +305,7 @@
                   </ChartSmartLabel>
                 </ChartSeries>
                 <ChartSeries Name="Series">
+                  <Hidden>=IIF(Min(Fields!SQLProcessCPU.Value+Fields!SystemIdleCPU.Value, "CPU")=100,true,false)</Hidden>
                   <ChartDataPoints>
                     <ChartDataPoint>
                       <ChartDataPointValues>
@@ -604,7 +605,7 @@
                 <Caption>CPU</Caption>
                 <Style>
                   <BackgroundGradientType>None</BackgroundGradientType>
-                  <FontSize>14pt</FontSize>
+                  <FontSize>9pt</FontSize>
                   <FontWeight>Bold</FontWeight>
                   <TextAlign>Left</TextAlign>
                   <VerticalAlign>Top</VerticalAlign>
@@ -648,7 +649,7 @@
               <Paragraph>
                 <TextRuns>
                   <TextRun>
-                    <Value>=First(Fields!Instance.Value, "InstanceInfo")</Value>
+                    <Value>=Parameters!InstanceID.Label</Value>
                     <Style>
                       <FontFamily>Arial</FontFamily>
                       <FontSize>25pt</FontSize>
@@ -1648,11 +1649,24 @@ Parameters!Mins.Value&lt;=300,"10MIN",
                 <Caption>Waits</Caption>
                 <Style>
                   <BackgroundGradientType>None</BackgroundGradientType>
-                  <FontSize>14pt</FontSize>
+                  <FontSize>9pt</FontSize>
                   <FontWeight>Bold</FontWeight>
                   <TextAlign>General</TextAlign>
                   <VerticalAlign>Top</VerticalAlign>
                 </Style>
+              </ChartTitle>
+              <ChartTitle Name="Title2">
+                <Caption>="Critial Wait: " &amp; Format(Sum(IIF(Fields!IsCriticalWait.Value=true,Fields!WaitMs.Value,0), "Waits")/1000,"0.0") &amp; " seconds"</Caption>
+                <Hidden>=IIF(Sum(IIF(Fields!IsCriticalWait.Value=true,Fields!WaitMs.Value,0))&gt;1000,false,true)</Hidden>
+                <Style>
+                  <BackgroundGradientType>None</BackgroundGradientType>
+                  <FontSize>9pt</FontSize>
+                  <FontWeight>Bold</FontWeight>
+                  <TextAlign>General</TextAlign>
+                  <VerticalAlign>Top</VerticalAlign>
+                  <Color>Red</Color>
+                </Style>
+                <Position>BottomCenter</Position>
               </ChartTitle>
             </ChartTitles>
             <Palette>Pacific</Palette>
@@ -1673,10 +1687,10 @@ Parameters!Mins.Value&lt;=300,"10MIN",
               </Style>
             </ChartNoDataMessage>
             <DataSetName>Waits</DataSetName>
-            <Top>2.36681in</Top>
-            <Left>11.86112in</Left>
-            <Height>4.78125in</Height>
-            <Width>11.59375in</Width>
+            <Top>3.91126in</Top>
+            <Left>11.86113in</Left>
+            <Height>3.22292in</Height>
+            <Width>11.55207in</Width>
             <ZIndex>4</ZIndex>
             <Style>
               <Border>
@@ -1712,7 +1726,7 @@ Parameters!Mins.Value&lt;=300,"10MIN",
                 <Value>false</Value>
               </Parameter>
             </Parameters>
-            <Top>7.2175in</Top>
+            <Top>7.20362in</Top>
             <Left>0.00001in</Left>
             <Height>3in</Height>
             <Width>23.45486in</Width>
@@ -1733,7 +1747,8 @@ Parameters!Mins.Value&lt;=300,"10MIN",
                 <Value>4</Value>
               </Parameter>
             </Parameters>
-            <Top>13.55083in</Top>
+            <Top>15.24181in</Top>
+            <Left>0.00003cm</Left>
             <Height>3in</Height>
             <Width>23.45487in</Width>
             <ZIndex>6</ZIndex>
@@ -1756,7 +1771,8 @@ Parameters!Mins.Value&lt;=300,"10MIN",
                 <Value>4</Value>
               </Parameter>
             </Parameters>
-            <Top>16.62028in</Top>
+            <Top>18.28348in</Top>
+            <Left>0.00003cm</Left>
             <Height>3in</Height>
             <Width>23.45487in</Width>
             <ZIndex>7</ZIndex>
@@ -1779,7 +1795,7 @@ Parameters!Mins.Value&lt;=300,"10MIN",
                 <Value>4</Value>
               </Parameter>
             </Parameters>
-            <Top>19.68972in</Top>
+            <Top>21.35292in</Top>
             <Height>0.91319in</Height>
             <Width>23.45487in</Width>
             <ZIndex>8</ZIndex>
@@ -1805,9 +1821,9 @@ Parameters!Mins.Value&lt;=300,"10MIN",
                 <Value>false</Value>
               </Parameter>
             </Parameters>
-            <Left>11.86112in</Left>
-            <Height>1.89459in</Height>
-            <Width>11.59375in</Width>
+            <Left>11.86113in</Left>
+            <Height>2.1807in</Height>
+            <Width>11.59377in</Width>
             <ZIndex>9</ZIndex>
             <Style>
               <Border>
@@ -1828,8 +1844,8 @@ Parameters!Mins.Value&lt;=300,"10MIN",
                 <Value>=Parameters!InstanceID.Value</Value>
               </Parameter>
             </Parameters>
-            <Top>20.64458in</Top>
-            <Left>0.00001in</Left>
+            <Top>22.33556in</Top>
+            <Left>0.00002in</Left>
             <Height>1.21666in</Height>
             <Width>23.45486in</Width>
             <ZIndex>10</ZIndex>
@@ -1842,11 +1858,380 @@ Parameters!Mins.Value&lt;=300,"10MIN",
               </Border>
             </Style>
           </Subreport>
+          <Subreport Name="SlowQueries">
+            <ReportName>SlowQueries</ReportName>
+            <Parameters>
+              <Parameter Name="FromDateUser">
+                <Value>=DateTime.Now.AddMinutes(-Parameters!Mins.Value)</Value>
+              </Parameter>
+              <Parameter Name="InstanceIDs">
+                <Value>=Parameters!InstanceID.Value</Value>
+              </Parameter>
+            </Parameters>
+            <Top>13.53695in</Top>
+            <Left>0.00002in</Left>
+            <Height>1.575in</Height>
+            <Width>23.45485in</Width>
+            <ZIndex>11</ZIndex>
+            <Style>
+              <Border>
+                <Style>None</Style>
+              </Border>
+            </Style>
+          </Subreport>
+          <Chart Name="Chart3">
+            <ChartCategoryHierarchy>
+              <ChartMembers>
+                <ChartMember>
+                  <Group Name="Chart3_CategoryGroup">
+                    <GroupExpressions>
+                      <GroupExpression>=Fields!Time.Value</GroupExpression>
+                    </GroupExpressions>
+                  </Group>
+                  <SortExpressions>
+                    <SortExpression>
+                      <Value>=Fields!Time.Value</Value>
+                    </SortExpression>
+                  </SortExpressions>
+                  <Label>=Fields!Time.Value</Label>
+                </ChartMember>
+              </ChartMembers>
+            </ChartCategoryHierarchy>
+            <ChartSeriesHierarchy>
+              <ChartMembers>
+                <ChartMember>
+                  <Label>Wait Ms</Label>
+                </ChartMember>
+              </ChartMembers>
+            </ChartSeriesHierarchy>
+            <ChartData>
+              <ChartSeriesCollection>
+                <ChartSeries Name="SignalWaitMs">
+                  <ChartDataPoints>
+                    <ChartDataPoint>
+                      <ChartDataPointValues>
+                        <Y>=Sum(Fields!SignalWaitMs.Value)/SUM(Fields!WaitMs.Value)</Y>
+                      </ChartDataPointValues>
+                      <ChartDataLabel>
+                        <Style />
+                      </ChartDataLabel>
+                      <Style>
+                        <Border>
+                          <Width>1.5pt</Width>
+                        </Border>
+                        <Color>=IIF(Sum(Fields!SignalWaitMs.Value, "Waits")/Sum(Fields!WaitMs.Value, "Waits")&gt;0.3,"Red", "SteelBlue")</Color>
+                      </Style>
+                      <ChartMarker>
+                        <Type>Auto</Type>
+                        <Style />
+                      </ChartMarker>
+                      <DataElementOutput>Output</DataElementOutput>
+                    </ChartDataPoint>
+                  </ChartDataPoints>
+                  <Type>Line</Type>
+                  <Style />
+                  <ChartEmptyPoints>
+                    <Style />
+                    <ChartMarker>
+                      <Style />
+                    </ChartMarker>
+                    <ChartDataLabel>
+                      <Style />
+                    </ChartDataLabel>
+                  </ChartEmptyPoints>
+                  <ValueAxisName>Primary</ValueAxisName>
+                  <CategoryAxisName>Primary</CategoryAxisName>
+                  <ChartSmartLabel>
+                    <CalloutLineColor>Black</CalloutLineColor>
+                    <MinMovingDistance>0pt</MinMovingDistance>
+                  </ChartSmartLabel>
+                </ChartSeries>
+              </ChartSeriesCollection>
+            </ChartData>
+            <ChartAreas>
+              <ChartArea Name="Default">
+                <ChartCategoryAxes>
+                  <ChartAxis Name="Primary">
+                    <Style>
+                      <Border>
+                        <Color>Gainsboro</Color>
+                        <Style>None</Style>
+                      </Border>
+                      <FontSize>8pt</FontSize>
+                      <Format>=Parameters!DateFormat.Value</Format>
+                      <Color>#5c5c5c</Color>
+                    </Style>
+                    <ChartAxisTitle>
+                      <Caption />
+                      <Style>
+                        <FontSize>9pt</FontSize>
+                        <Color>#5c5c5c</Color>
+                      </Style>
+                    </ChartAxisTitle>
+                    <ChartMajorGridLines>
+                      <Enabled>False</Enabled>
+                      <Style>
+                        <Border>
+                          <Color>Gainsboro</Color>
+                        </Border>
+                      </Style>
+                    </ChartMajorGridLines>
+                    <ChartMinorGridLines>
+                      <Style>
+                        <Border>
+                          <Color>Gainsboro</Color>
+                          <Style>Dotted</Style>
+                        </Border>
+                      </Style>
+                    </ChartMinorGridLines>
+                    <ChartMajorTickMarks>
+                      <Style>
+                        <Border>
+                          <Color>Gainsboro</Color>
+                          <Style>None</Style>
+                        </Border>
+                      </Style>
+                    </ChartMajorTickMarks>
+                    <ChartMinorTickMarks>
+                      <Style>
+                        <Border>
+                          <Color>Gainsboro</Color>
+                        </Border>
+                      </Style>
+                      <Length>0.5</Length>
+                    </ChartMinorTickMarks>
+                    <CrossAt>NaN</CrossAt>
+                    <Minimum>NaN</Minimum>
+                    <Maximum>NaN</Maximum>
+                    <ChartAxisScaleBreak>
+                      <Style />
+                    </ChartAxisScaleBreak>
+                  </ChartAxis>
+                  <ChartAxis Name="Secondary">
+                    <Style>
+                      <Border>
+                        <Color>Gainsboro</Color>
+                        <Style>None</Style>
+                      </Border>
+                      <FontSize>8pt</FontSize>
+                      <Color>#5c5c5c</Color>
+                    </Style>
+                    <ChartAxisTitle>
+                      <Caption />
+                      <Style>
+                        <FontSize>9pt</FontSize>
+                        <Color>#5c5c5c</Color>
+                      </Style>
+                    </ChartAxisTitle>
+                    <ChartMajorGridLines>
+                      <Enabled>False</Enabled>
+                      <Style>
+                        <Border>
+                          <Color>Gainsboro</Color>
+                        </Border>
+                      </Style>
+                    </ChartMajorGridLines>
+                    <ChartMinorGridLines>
+                      <Style>
+                        <Border>
+                          <Color>Gainsboro</Color>
+                          <Style>Dotted</Style>
+                        </Border>
+                      </Style>
+                    </ChartMinorGridLines>
+                    <ChartMajorTickMarks>
+                      <Style>
+                        <Border>
+                          <Color>Gainsboro</Color>
+                          <Style>None</Style>
+                        </Border>
+                      </Style>
+                    </ChartMajorTickMarks>
+                    <ChartMinorTickMarks>
+                      <Style>
+                        <Border>
+                          <Color>Gainsboro</Color>
+                        </Border>
+                      </Style>
+                      <Length>0.5</Length>
+                    </ChartMinorTickMarks>
+                    <CrossAt>NaN</CrossAt>
+                    <Location>Opposite</Location>
+                    <Minimum>NaN</Minimum>
+                    <Maximum>NaN</Maximum>
+                    <ChartAxisScaleBreak>
+                      <Style />
+                    </ChartAxisScaleBreak>
+                  </ChartAxis>
+                </ChartCategoryAxes>
+                <ChartValueAxes>
+                  <ChartAxis Name="Primary">
+                    <Style>
+                      <Border>
+                        <Color>Gainsboro</Color>
+                        <Style>None</Style>
+                      </Border>
+                      <FontSize>8pt</FontSize>
+                      <Format>0%</Format>
+                      <Color>#5c5c5c</Color>
+                    </Style>
+                    <ChartAxisTitle>
+                      <Caption />
+                      <Style>
+                        <FontSize>9pt</FontSize>
+                        <Color>#5c5c5c</Color>
+                      </Style>
+                    </ChartAxisTitle>
+                    <ChartMajorGridLines>
+                      <Style>
+                        <Border>
+                          <Color>Gainsboro</Color>
+                        </Border>
+                      </Style>
+                    </ChartMajorGridLines>
+                    <ChartMinorGridLines>
+                      <Style>
+                        <Border>
+                          <Color>Gainsboro</Color>
+                          <Style>Dotted</Style>
+                        </Border>
+                      </Style>
+                    </ChartMinorGridLines>
+                    <ChartMajorTickMarks>
+                      <Style>
+                        <Border>
+                          <Color>Gainsboro</Color>
+                          <Style>None</Style>
+                        </Border>
+                      </Style>
+                    </ChartMajorTickMarks>
+                    <ChartMinorTickMarks>
+                      <Style>
+                        <Border>
+                          <Color>Gainsboro</Color>
+                        </Border>
+                      </Style>
+                      <Length>0.5</Length>
+                    </ChartMinorTickMarks>
+                    <CrossAt>NaN</CrossAt>
+                    <Minimum>0</Minimum>
+                    <Maximum>1</Maximum>
+                    <ChartAxisScaleBreak>
+                      <Style />
+                    </ChartAxisScaleBreak>
+                  </ChartAxis>
+                  <ChartAxis Name="Secondary">
+                    <Style>
+                      <Border>
+                        <Color>Gainsboro</Color>
+                        <Style>None</Style>
+                      </Border>
+                      <FontSize>8pt</FontSize>
+                      <Color>#5c5c5c</Color>
+                    </Style>
+                    <ChartAxisTitle>
+                      <Caption />
+                      <Style>
+                        <FontSize>9pt</FontSize>
+                        <Color>#5c5c5c</Color>
+                      </Style>
+                    </ChartAxisTitle>
+                    <ChartMajorGridLines>
+                      <Style>
+                        <Border>
+                          <Color>Gainsboro</Color>
+                        </Border>
+                      </Style>
+                    </ChartMajorGridLines>
+                    <ChartMinorGridLines>
+                      <Style>
+                        <Border>
+                          <Color>Gainsboro</Color>
+                          <Style>Dotted</Style>
+                        </Border>
+                      </Style>
+                    </ChartMinorGridLines>
+                    <ChartMajorTickMarks>
+                      <Style>
+                        <Border>
+                          <Color>Gainsboro</Color>
+                          <Style>None</Style>
+                        </Border>
+                      </Style>
+                    </ChartMajorTickMarks>
+                    <ChartMinorTickMarks>
+                      <Style>
+                        <Border>
+                          <Color>Gainsboro</Color>
+                        </Border>
+                      </Style>
+                      <Length>0.5</Length>
+                    </ChartMinorTickMarks>
+                    <CrossAt>NaN</CrossAt>
+                    <Location>Opposite</Location>
+                    <Minimum>NaN</Minimum>
+                    <Maximum>NaN</Maximum>
+                    <ChartAxisScaleBreak>
+                      <Style />
+                    </ChartAxisScaleBreak>
+                  </ChartAxis>
+                </ChartValueAxes>
+                <Style>
+                  <BackgroundColor>#00ffffff</BackgroundColor>
+                  <BackgroundGradientType>None</BackgroundGradientType>
+                </Style>
+              </ChartArea>
+            </ChartAreas>
+            <ChartTitles>
+              <ChartTitle Name="Default">
+                <Caption>Signal Waits</Caption>
+                <Style>
+                  <BackgroundGradientType>None</BackgroundGradientType>
+                  <FontSize>9pt</FontSize>
+                  <FontWeight>Bold</FontWeight>
+                  <TextAlign>Left</TextAlign>
+                  <VerticalAlign>Top</VerticalAlign>
+                  <Color>=IIF(Sum(Fields!SignalWaitMs.Value, "Waits")/Sum(Fields!WaitMs.Value, "Waits")&gt;0.3,"Red", "Black")</Color>
+                </Style>
+              </ChartTitle>
+            </ChartTitles>
+            <Palette>Pacific</Palette>
+            <ChartBorderSkin>
+              <Style>
+                <BackgroundColor>Gray</BackgroundColor>
+                <BackgroundGradientType>None</BackgroundGradientType>
+                <Color>White</Color>
+              </Style>
+            </ChartBorderSkin>
+            <ChartNoDataMessage Name="NoDataMessage">
+              <Caption>No Data Available</Caption>
+              <Style>
+                <BackgroundGradientType>None</BackgroundGradientType>
+                <FontWeight>Bold</FontWeight>
+                <TextAlign>General</TextAlign>
+                <VerticalAlign>Top</VerticalAlign>
+              </Style>
+            </ChartNoDataMessage>
+            <DataSetName>Waits</DataSetName>
+            <Top>2.23626in</Top>
+            <Left>11.86113in</Left>
+            <Height>1.60556in</Height>
+            <Width>11.57988in</Width>
+            <ZIndex>12</ZIndex>
+            <Style>
+              <Border>
+                <Color>LightGrey</Color>
+                <Style>None</Style>
+              </Border>
+              <BackgroundColor>White</BackgroundColor>
+              <BackgroundGradientType>None</BackgroundGradientType>
+            </Style>
+          </Chart>
         </ReportItems>
-        <Height>22.73625in</Height>
+        <Height>25.28in</Height>
         <Style />
       </Body>
-      <Width>23.45487in</Width>
+      <Width>23.45489in</Width>
       <Page>
         <InteractiveHeight>200in</InteractiveHeight>
         <InteractiveWidth>8.5in</InteractiveWidth>
@@ -1889,6 +2274,11 @@ Parameters!Mins.Value&lt;=300,"10MIN",
     </ReportParameter>
     <ReportParameter Name="InstanceID">
       <DataType>Integer</DataType>
+      <DefaultValue>
+        <Values>
+          <Value>1</Value>
+        </Values>
+      </DefaultValue>
       <Prompt>Instance</Prompt>
       <ValidValues>
         <DataSetReference>

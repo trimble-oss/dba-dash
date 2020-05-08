@@ -50,6 +50,9 @@
           <QueryParameter Name="@DatabaseName">
             <Value>=Parameters!DatabaseName.Value</Value>
           </QueryParameter>
+          <QueryParameter Name="@Top">
+            <Value>=Parameters!Top.Value</Value>
+          </QueryParameter>
         </QueryParameters>
         <CommandType>StoredProcedure</CommandType>
         <CommandText>Report.SlowQueriesSummary</CommandText>
@@ -161,6 +164,9 @@
           </QueryParameter>
           <QueryParameter Name="@DatabaseName">
             <Value>=Parameters!DatabaseName.Value</Value>
+          </QueryParameter>
+          <QueryParameter Name="@Top">
+            <Value>=Parameters!Top.Value</Value>
           </QueryParameter>
         </QueryParameters>
         <CommandType>StoredProcedure</CommandType>
@@ -452,6 +458,9 @@
           <QueryParameter Name="@DatabaseName">
             <Value>=Parameters!DatabaseName.Value</Value>
           </QueryParameter>
+          <QueryParameter Name="@Top">
+            <Value>=Parameters!Top.Value</Value>
+          </QueryParameter>
         </QueryParameters>
         <CommandType>StoredProcedure</CommandType>
         <CommandText>Report.SlowQueriesSummary</CommandText>
@@ -549,7 +558,13 @@
             <rd:DefaultName>textbox1</rd:DefaultName>
             <Height>0.39778in</Height>
             <Width>16in</Width>
+            <Visibility>
+              <Hidden>=IIF(Count(Fields!InstanceID.Value, "Detail")=0,true,false)</Hidden>
+            </Visibility>
             <Style>
+              <Border>
+                <Style>None</Style>
+              </Border>
               <PaddingLeft>2pt</PaddingLeft>
               <PaddingRight>2pt</PaddingRight>
               <PaddingTop>2pt</PaddingTop>
@@ -5712,6 +5727,9 @@
             <Height>1.455in</Height>
             <Width>15.88334in</Width>
             <ZIndex>1</ZIndex>
+            <Visibility>
+              <Hidden>=IIF(Sum(Fields!Total.Value, "ByConnection")=0,true,false)</Hidden>
+            </Visibility>
             <Style />
           </Tablix>
           <Tablix Name="Tablix1">
@@ -6896,6 +6914,9 @@
             <Height>0.86667in</Height>
             <Width>18.47835in</Width>
             <ZIndex>2</ZIndex>
+            <Visibility>
+              <Hidden>=IIF(Count(Fields!InstanceID.Value, "Detail")=0,true,false)</Hidden>
+            </Visibility>
             <Style>
               <Border>
                 <Style>None</Style>
@@ -12059,7 +12080,8 @@
             <Width>15.88334in</Width>
             <ZIndex>3</ZIndex>
             <Visibility>
-              <Hidden>=IIF(Parameters!ClientAppName.Value=nothing,false,true)</Hidden>
+              <Hidden>=IIF(Sum(Fields!Total.Value, "ByApp")=0,true,
+IIF(Parameters!ClientAppName.Value=nothing,false,true))</Hidden>
             </Visibility>
             <Style />
           </Tablix>
@@ -17214,7 +17236,8 @@
             <Width>15.88334in</Width>
             <ZIndex>4</ZIndex>
             <Visibility>
-              <Hidden>=IIF(Parameters!DatabaseName.Value=nothing,false,true)</Hidden>
+              <Hidden>=IIF(Sum(Fields!Total.Value, "ByDatabase")=0,true,
+IIF(Parameters!DatabaseName.Value=nothing,false,true))</Hidden>
             </Visibility>
             <Style />
           </Tablix>
@@ -17389,7 +17412,7 @@ CDATE(Parameters!ToDateUser.Value).AddMinutes(IIF(ISNOTHING(Parameters!ToDateUse
       <DataType>Integer</DataType>
       <DefaultValue>
         <Values>
-          <Value>10</Value>
+          <Value>20</Value>
         </Values>
       </DefaultValue>
       <Prompt>Top</Prompt>
