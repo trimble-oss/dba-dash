@@ -8,9 +8,40 @@ using System.Xml.Linq;
 
 namespace DBAChecks
 {
+
+    class RingBufferTargetAttributes
+    {
+        public Int32 Truncated;
+        public Int32 ProcessingTime;
+        public Int32 TotalEventsProcessed;
+        public Int32 EventCount;
+        public Int32 DroppedCount;
+        public Int32 MemoryUsed;
+
+        public DataTable GetTable()
+        {
+            DataTable dt = new DataTable();
+            dt.Columns.Add("Truncated", typeof (Int32));
+            dt.Columns.Add("ProcessingTime", typeof(Int32));
+            dt.Columns.Add("TotalEventsProcessed", typeof(Int32));
+            dt.Columns.Add("EventCount", typeof(Int32));
+            dt.Columns.Add("DroppedCount", typeof(Int32));
+            dt.Columns.Add("MemoryUsed", typeof(Int32));
+            var r = dt.NewRow();
+            r["Truncated"] = Truncated;
+            r["ProcessingTime"] = ProcessingTime;
+            r["TotalEventsProcessed"] = TotalEventsProcessed;
+            r["EventCount"] = EventCount;
+            r["DroppedCount"] = DroppedCount;
+            r["MemoryUsed"] = MemoryUsed;
+            dt.Rows.Add(r);
+            return dt;
+        }
+    }
+
     class XETools
     {
-       public static DataTable XEStrToDT(string xe)
+       public static DataTable XEStrToDT(string xe, out RingBufferTargetAttributes ringBufferAtt)
         {
             var dtm = DateTime.Now;
             DataTable dt = new DataTable("XEL");
@@ -30,7 +61,16 @@ namespace DBAChecks
             dt.Columns.Add("client_app_name", typeof(string));
             dt.Columns.Add("result", typeof(string));
             string name;
-            foreach (XElement evt in XElement.Parse(xe).Elements("event"))
+            var el = XElement.Parse(xe);
+            ringBufferAtt = new RingBufferTargetAttributes();
+            ringBufferAtt.Truncated = Int32.Parse(el.Attribute("truncated").Value);
+            ringBufferAtt.DroppedCount = Int32.Parse(el.Attribute("droppedCount").Value);
+            ringBufferAtt.ProcessingTime = Int32.Parse(el.Attribute("processingTime").Value);
+            ringBufferAtt.EventCount = Int32.Parse(el.Attribute("eventCount").Value);
+            ringBufferAtt.MemoryUsed = Int32.Parse(el.Attribute("memoryUsed").Value);
+            ringBufferAtt.TotalEventsProcessed= Int32.Parse(el.Attribute("totalEventsProcessed").Value);
+    
+            foreach (XElement evt in el.Elements("event"))
             {
                 var r = dt.Rows.Add();
                 r["event_type"] = evt.Attribute("name").Value;

@@ -355,9 +355,13 @@ namespace DBAChecks
                 string ringBuffer = (string)result;
                 if (ringBuffer.Length > 0)
                 {
-                    var dt = XETools.XEStrToDT(ringBuffer);
+                    RingBufferTargetAttributes ringBufferAtt;
+                    var dt = XETools.XEStrToDT(ringBuffer,out ringBufferAtt);
                     dt.TableName = "SlowQueries";
                     addDT(dt);
+                    var dtAtt = ringBufferAtt.GetTable();
+                    dtAtt.TableName = "SlowQueriesStats";
+                    addDT(dtAtt);
                     
                 }
             }
