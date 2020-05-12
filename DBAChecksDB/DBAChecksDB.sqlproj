@@ -297,6 +297,9 @@
     <Build Include="dbo\User Defined Types\SlowQueries.sql" />
     <Build Include="Storage\PF_SlowQueries.sql" />
     <Build Include="Storage\PS_SlowQueries.sql" />
+    <Build Include="dbo\Tables\SlowQueriesStats.sql" />
+    <Build Include="dbo\User Defined Types\SlowQueriesStats.sql" />
+    <Build Include="dbo\Stored Procedures\SlowQueriesStats_Upd.sql" />
   </ItemGroup>
   <ItemGroup>
     <PostDeploy Include="Script.PostDeployment1.sql" />
