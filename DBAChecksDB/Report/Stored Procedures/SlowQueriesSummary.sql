@@ -10,7 +10,8 @@
 	@DurationToSec BIGINT=NULL,
 	@GroupBy VARCHAR(50)='ConnectionID',
 	@Text NVARCHAR(MAX)=NULL,
-	@DatabaseName SYSNAME=NULL
+	@DatabaseName SYSNAME=NULL,
+	@Top INT=20
 )
 AS
 DECLARE @DurationFromUS BIGINT 
@@ -40,7 +41,7 @@ DECLARE @GroupSQL NVARCHAR(MAX) = CASE @GroupBy WHEN 'ConnectionID' THEN 'I.Conn
 
 DECLARE @SQL NVARCHAR(MAX)
 SET @SQL = 
-N'SELECT ' + @GroupSQL + ' as Grp,
+N'SELECT TOP(@Top) ' + @GroupSQL + ' as Grp,
 		SUM(CASE WHEN Duration<5000000 THEN 1 ELSE 0 END) AS [1-5 seconds], 
 		SUM(CASE WHEN Duration>=5000000 AND Duration < 10000000 THEN 1 ELSE 0 END) AS [5-10 seconds], 
 		SUM(CASE WHEN Duration>=10000000 AND Duration < 20000000 THEN 1 ELSE 0 END) AS [10-20 seconds], 
@@ -70,11 +71,12 @@ AND timestamp< @ToDate
 ' + CASE WHEN @DurationToUS IS NULL THEN '' ELSE 'AND SQ.Duration < @DurationTo' END + '
 ' + CASE WHEN @Text IS NULL THEN '' ELSE 'AND SQ.Text LIKE ''%'' + @Text + ''%''' END + '
 ' + CASE WHEN @DatabaseName IS NULL THEN '' ELSE 'AND D.name = @DatabaseName' END + '
-GROUP BY ' + @GroupSQL 
+GROUP BY ' + @GroupSQL +'
+ORDER BY SUM(Duration) DESC'
 
 EXEC sp_executesql @sql,N'@Instances IDs READONLY,@ObjectName SYSNAME,@ClientHostName SYSNAME,
 						@ConnectionID SYSNAME,@ClientAppName SYSNAME,@DurationFrom BIGINT,
 						@DurationTo BIGINT,@Text NVARCHAR(MAX),@DatabaseName SYSNAME,
-						@FromDate DATETIME2(3),@ToDate DATETIME2(3)',
+						@FromDate DATETIME2(3),@ToDate DATETIME2(3),@Top INT',
 						@Instances,@ObjectName,@ClientHostName,@ConnectionID,@ClientAppName,
-						@DurationFromUS,@DurationToUS,@Text,@DatabaseName,@FromDate,@ToDate
+						@DurationFromUS,@DurationToUS,@Text,@DatabaseName,@FromDate,@ToDate,@Top

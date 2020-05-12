@@ -1,4 +1,4 @@
-﻿CREATE PROC Report.Waits_Get(@InstanceID INT,@Mins INT,@TimeGroup TINYINT)
+﻿CREATE PROC [Report].[Waits_Get](@InstanceID INT,@Mins INT=60,@TimeGroup TINYINT=1)
 AS
 SELECT CASE WHEN @TimeGroup=0 THEN NULL	
 			WHEN @TimeGroup=1 THEN CONVERT(DATETIME,LEFT(CONVERT(VARCHAR,W.SnapshotDate,120),16),120)
@@ -7,7 +7,9 @@ SELECT CASE WHEN @TimeGroup=0 THEN NULL
 			ELSE NULL END AS Time,
 			WT.IsCriticalWait, 
 			WT.WaitType,
-			SUM(W.wait_time_ms) WaitMs
+			SUM(W.wait_time_ms) WaitMs,
+			SUM(W.waiting_tasks_count) WaitCount,
+			SUM(W.signal_wait_time_ms) AS SignalWaitMs
 FROM dbo.Waits W 
 JOIN dbo.WaitType WT ON WT.WaitTypeID = W.WaitTypeID
 WHERE W.SnapshotDate>= DATEADD(mi,-@Mins,GETUTCDATE())
