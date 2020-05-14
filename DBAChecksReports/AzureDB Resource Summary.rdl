@@ -1221,7 +1221,7 @@
                             <Actions>
                               <Action>
                                 <Drillthrough>
-                                  <ReportName>AzureDB Resource Utilization</ReportName>
+                                  <ReportName>AzureDB Resource Summary</ReportName>
                                   <Parameters>
                                     <Parameter Name="FromDate">
                                       <Value>=Parameters!FromDate.Value</Value>
@@ -1231,6 +1231,12 @@
                                     </Parameter>
                                     <Parameter Name="Instance">
                                       <Value>=Fields!Instance.Value</Value>
+                                    </Parameter>
+                                    <Parameter Name="TagIDs">
+                                      <Value>=Parameters!TagIDs.Value</Value>
+                                    </Parameter>
+                                    <Parameter Name="TagMatching">
+                                      <Value>=Parameters!TagMatching.Value</Value>
                                     </Parameter>
                                     <Parameter Name="DatabaseName">
                                       <Value>=Parameters!DatabaseName.Value</Value>
@@ -1280,19 +1286,16 @@
                             <Actions>
                               <Action>
                                 <Drillthrough>
-                                  <ReportName>AzureDB Resource Utilization</ReportName>
+                                  <ReportName>AzureDB Resource Usage</ReportName>
                                   <Parameters>
-                                    <Parameter Name="ToDate">
+                                    <Parameter Name="ToDateUser">
                                       <Value>=Parameters!ToDate.Value</Value>
                                     </Parameter>
-                                    <Parameter Name="FromDate">
+                                    <Parameter Name="FromDateUser">
                                       <Value>=Parameters!FromDate.Value</Value>
                                     </Parameter>
-                                    <Parameter Name="DatabaseName">
-                                      <Value>=Fields!DB.Value</Value>
-                                    </Parameter>
-                                    <Parameter Name="Instance">
-                                      <Value>=Parameters!Instance.Value</Value>
+                                    <Parameter Name="InstanceIDs">
+                                      <Value>=Fields!InstanceID.Value</Value>
                                     </Parameter>
                                   </Parameters>
                                 </Drillthrough>
