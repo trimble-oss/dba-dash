@@ -1422,4 +1422,60 @@ BEGIN
 	State = STOP
 END</value>
   </data>
+  <data name="SQLLastGoodCheckDB" xml:space="preserve">
+    <value>DECLARE @SQL NVARCHAR(MAX)
+DECLARE @DBName SYSNAME
+DECLARE @DBID INT
+IF DATABASEPROPERTYEX(DB_NAME(),'LastGoodCheckDbTime') IS NULL
+BEGIN
+	DECLARE DBs CURSOR FAST_FORWARD READ_ONLY FOR
+	SELECT name,database_id
+	FROM sys.databases
+	WHERE state  = 0
+	AND DATABASEPROPERTYEX(name, 'Updateability') = 'READ_WRITE'
+
+	DECLARE @dbinfo TABLE
+			( ParentObject VARCHAR(255) ,
+			  Object VARCHAR(255) ,
+			  Field VARCHAR(255) ,
+			  Value VARCHAR(255) 
+			);
+	DECLARE @LastGoodDBCC TABLE(
+		database_id INT PRIMARY KEY,
+		LastGoodCheckDbTime DATETIME2(3)
+	)
+
+	OPEN DBs
+
+
+	WHILE 1=1
+	BEGIN
+		FETCH NEXT FROM DBs INTO @DBName,@DBID
+		IF @@FETCH_STATUS&lt;&gt;0
+			BREAK
+		SET @SQL =  N'USE ' + QUOTENAME(@DBName) + ';
+		DBCC DBInfo() With TableResults, NO_INFOMSGS'
+
+		INSERT INTO @dbinfo(ParentObject,Object,Field,Value)
+		EXEC  (	@SQL )
+
+		INSERT INTO @LastGoodDBCC(database_id,LastGoodCheckDbTime)
+		SELECT @DBID, CAST(Value as DATETIME2(3))
+		FROM @dbinfo
+		WHERE Field = 'dbi_dbccLastKnownGood'
+
+		DELETE @dbinfo
+	END
+	CLOSE DBs
+	DEALLOCATE DBs
+	SELECT database_id,LastGoodCheckDbTime
+	FROM @LastGoodDBCC
+
+END
+ELSE
+BEGIN
+	SELECT database_id,CAST(DATABASEPROPERTYEX(name,'LastGoodCheckDbTime') as DATETIME2(3)) as LastGoodCheckDbTime
+	FROM sys.databases
+END</value>
+  </data>
 </root>

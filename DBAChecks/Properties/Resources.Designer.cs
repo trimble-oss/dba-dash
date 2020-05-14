@@ -421,6 +421,33 @@ namespace DBAChecks.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to DECLARE @SQL NVARCHAR(MAX)
+        ///DECLARE @DBName SYSNAME
+        ///DECLARE @DBID INT
+        ///IF DATABASEPROPERTYEX(DB_NAME(),&apos;LastGoodCheckDbTime&apos;) IS NULL
+        ///BEGIN
+        ///	DECLARE DBs CURSOR FAST_FORWARD READ_ONLY FOR
+        ///	SELECT name,database_id
+        ///	FROM sys.databases
+        ///	WHERE state  = 0
+        ///	AND DATABASEPROPERTYEX(name, &apos;Updateability&apos;) = &apos;READ_WRITE&apos;
+        ///
+        ///	DECLARE @dbinfo TABLE
+        ///			( ParentObject VARCHAR(255) ,
+        ///			  Object VARCHAR(255) ,
+        ///			  Field VARCHAR(255) ,
+        ///			  Value VARCHAR(255) 
+        ///			);
+        ///	DECLARE @LastGoodDBCC TABLE(
+        ///		database_id [rest of string was truncated]&quot;;.
+        /// </summary>
+        internal static string SQLLastGoodCheckDB {
+            get {
+                return ResourceManager.GetString("SQLLastGoodCheckDB", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to WITH t
         ///AS (SELECT rsh.destination_database_name AS database_name,
         ///           rsh.restore_date,

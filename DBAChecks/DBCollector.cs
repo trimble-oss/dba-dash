@@ -41,7 +41,8 @@ namespace DBAChecks
         AzureDBResourceStats,
         AzureDBServiceObjectives,
         AzureDBElasticPoolResourceStats,
-        SlowQueries
+        SlowQueries,
+        LastGoodCheckDB
     }
 
 
@@ -228,7 +229,8 @@ namespace DBAChecks
                 Collect(CollectionType.DriversWMI);
                 Collect(CollectionType.OSLoadedModules);
                 Collect(CollectionType.DBTuningOptions);
-                Collect(CollectionType.AzureDBServiceObjectives);     
+                Collect(CollectionType.AzureDBServiceObjectives);
+                Collect(CollectionType.LastGoodCheckDB);
             }
             else if (collectionType == CollectionType.Performance)
             {
