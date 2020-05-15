@@ -84,6 +84,18 @@ SSD AS (
 		MIN(SnapshotDate) AS OldestSnapshot
 	FROM dbo.CollectionDates
 	GROUP BY InstanceID
+),
+dbc AS (
+	SELECT InstanceID,
+		MIN(CASE WHEN Status = 3 THEN NULL ELSE Status END) AS LastGoodCheckDBStatus,
+		SUM(CASE WHEN Status=1 THEN 1 ELSE 0 END) AS LastGoodCheckDBCriticalCount,
+		SUM(CASE WHEN Status=2 THEN 1 ELSE 0 END) AS LastGoodCheckDBWarningCount,
+		SUM(CASE WHEN Status=4 THEN 1 ELSE 0 END) AS LastGoodCheckDBHealthyCount,
+		SUM(CASE WHEN Status=3 OR Status IS NULL THEN 1 ELSE 0 END) AS LastGoodCheckDBNACount,
+		MIN(CASE WHEN Status <> 3 THEN LastGoodCheckDbTime ELSE NULL END) AS OldestLastGoodCheckDBTime,
+		DATEDIFF(d,NULLIF(MIN(CASE WHEN Status <> 3 THEN LastGoodCheckDbTime ELSE NULL END),'1900-01-01'),GETUTCDATE()) AS DaysSinceLastGoodCheckDB
+	FROM dbo.LastGoodCheckDB
+	GROUP BY InstanceID
 )
 SELECT I.InstanceID,
 	I.Instance,
@@ -106,7 +118,14 @@ SELECT I.InstanceID,
 	I.ms_ticks/60000 AS host_uptime,
 	DATEADD(s,-I.ms_ticks/1000,OSInfoCD.SnapshotDate) AS host_start_time_utc,
 	I.MemoryDumpCount,
-	I.LastMemoryDump
+	I.LastMemoryDump,
+    dbc.LastGoodCheckDBStatus,
+    dbc.LastGoodCheckDBCriticalCount,
+    dbc.LastGoodCheckDBWarningCount,
+    dbc.LastGoodCheckDBHealthyCount,
+    dbc.LastGoodCheckDBNACount,
+	dbc.OldestLastGoodCheckDBTime,
+	dbc.DaysSinceLastGoodCheckDB
 FROM dbo.Instances I 
 LEFT JOIN LS ON I.InstanceID = LS.InstanceID
 LEFT JOIN B ON I.InstanceID = B.InstanceID
@@ -117,6 +136,7 @@ LEFT JOIN ag ON I.InstanceID= ag.InstanceID
 LEFT JOIN dc ON I.InstanceID = dc.InstanceID
 LEFT JOIN err ON I.InstanceID = err.InstanceID
 LEFT JOIN SSD ON I.InstanceID = SSD.InstanceID
+LEFT JOIN dbc ON I.InstanceID = dbc.InstanceID
 LEFT JOIN dbo.CollectionDates OSInfoCD ON OSInfoCD.InstanceID = I.InstanceID AND OSInfoCD.Reference='OSInfo'
 WHERE EXISTS(SELECT 1 FROM @Instances t WHERE I.InstanceID = t.InstanceID)
 AND I.IsActive=1

@@ -111,6 +111,34 @@
           <DataField>LastMemoryDump</DataField>
           <rd:TypeName>System.DateTime</rd:TypeName>
         </Field>
+        <Field Name="LastGoodCheckDBStatus">
+          <DataField>LastGoodCheckDBStatus</DataField>
+          <rd:TypeName>System.Int32</rd:TypeName>
+        </Field>
+        <Field Name="LastGoodCheckDBCriticalCount">
+          <DataField>LastGoodCheckDBCriticalCount</DataField>
+          <rd:TypeName>System.Int32</rd:TypeName>
+        </Field>
+        <Field Name="LastGoodCheckDBWarningCount">
+          <DataField>LastGoodCheckDBWarningCount</DataField>
+          <rd:TypeName>System.Int32</rd:TypeName>
+        </Field>
+        <Field Name="LastGoodCheckDBHealthyCount">
+          <DataField>LastGoodCheckDBHealthyCount</DataField>
+          <rd:TypeName>System.Int32</rd:TypeName>
+        </Field>
+        <Field Name="LastGoodCheckDBNACount">
+          <DataField>LastGoodCheckDBNACount</DataField>
+          <rd:TypeName>System.Int32</rd:TypeName>
+        </Field>
+        <Field Name="OldestLastGoodCheckDBTime">
+          <DataField>OldestLastGoodCheckDBTime</DataField>
+          <rd:TypeName>System.DateTime</rd:TypeName>
+        </Field>
+        <Field Name="DaysSinceLastGoodCheckDB">
+          <DataField>DaysSinceLastGoodCheckDB</DataField>
+          <rd:TypeName>System.Int32</rd:TypeName>
+        </Field>
       </Fields>
     </DataSet>
     <DataSet Name="Connections">
@@ -208,6 +236,9 @@
               <TablixColumns>
                 <TablixColumn>
                   <Width>2.30208in</Width>
+                </TablixColumn>
+                <TablixColumn>
+                  <Width>1in</Width>
                 </TablixColumn>
                 <TablixColumn>
                   <Width>1in</Width>
@@ -687,6 +718,47 @@
                             </Paragraph>
                           </Paragraphs>
                           <rd:DefaultName>Textbox16</rd:DefaultName>
+                          <Style>
+                            <Border>
+                              <Color>Gainsboro</Color>
+                              <Style>None</Style>
+                            </Border>
+                            <BottomBorder>
+                              <Style>Solid</Style>
+                            </BottomBorder>
+                            <BackgroundColor>#444444</BackgroundColor>
+                            <PaddingLeft>2pt</PaddingLeft>
+                            <PaddingRight>2pt</PaddingRight>
+                            <PaddingTop>2pt</PaddingTop>
+                            <PaddingBottom>2pt</PaddingBottom>
+                          </Style>
+                        </Textbox>
+                      </CellContents>
+                    </TablixCell>
+                    <TablixCell>
+                      <CellContents>
+                        <Textbox Name="Textbox20">
+                          <CanGrow>true</CanGrow>
+                          <KeepTogether>true</KeepTogether>
+                          <Paragraphs>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Value>Last Good CheckDB</Value>
+                                  <Style>
+                                    <FontFamily />
+                                    <FontSize>11pt</FontSize>
+                                    <FontWeight>Bold</FontWeight>
+                                    <Color>White</Color>
+                                  </Style>
+                                </TextRun>
+                              </TextRuns>
+                              <Style>
+                                <TextAlign>Right</TextAlign>
+                              </Style>
+                            </Paragraph>
+                          </Paragraphs>
+                          <rd:DefaultName>Textbox20</rd:DefaultName>
                           <Style>
                             <Border>
                               <Color>Gainsboro</Color>
@@ -1382,6 +1454,66 @@ DateTime.UtcNow.Subtract(CDATE(Fields!DetectedCorruptionDate.Value)).TotalDays&l
                     </TablixCell>
                     <TablixCell>
                       <CellContents>
+                        <Textbox Name="Textbox21">
+                          <CanGrow>true</CanGrow>
+                          <KeepTogether>true</KeepTogether>
+                          <Paragraphs>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Value>=IIF(isnothing(Fields!OldestLastGoodCheckDBTime.Value),"", 
+IIF(Fields!OldestLastGoodCheckDBTime.Value=Datetime.Parse("1900-01-01"),"Never",
+Fields!DaysSinceLastGoodCheckDB.Value &amp; " Days"))</Value>
+                                  <Style>
+                                    <FontFamily />
+                                  </Style>
+                                </TextRun>
+                              </TextRuns>
+                              <Style />
+                            </Paragraph>
+                          </Paragraphs>
+                          <rd:DefaultName>Textbox21</rd:DefaultName>
+                          <ActionInfo>
+                            <Actions>
+                              <Action>
+                                <Drillthrough>
+                                  <ReportName>Last Good CheckDB</ReportName>
+                                  <Parameters>
+                                    <Parameter Name="InstanceIDs">
+                                      <Value>=Fields!InstanceID.Value</Value>
+                                    </Parameter>
+                                    <Parameter Name="FilterLevel">
+                                      <Value>4</Value>
+                                    </Parameter>
+                                  </Parameters>
+                                </Drillthrough>
+                              </Action>
+                            </Actions>
+                          </ActionInfo>
+                          <ToolTip>="Critical:" &amp; Fields!LastGoodCheckDBCriticalCount.Value &amp; Environment.NewLine &amp; 
+"Warning:" &amp; Fields!LastGoodCheckDBWarningCount.Value &amp; Environment.NewLine &amp;
+"Healthy:" &amp; Fields!LastGoodCheckDBHealthyCount.Value &amp; Environment.NewLine &amp;
+"N/A:" &amp; Fields!LastGoodCheckDBNACount.Value &amp; Environment.NewLine &amp;
+"Last Good CheckDB Date:" &amp; Format(Fields!OldestLastGoodCheckDBTime.Value,Parameters!DateFormat.Value)</ToolTip>
+                          <Style>
+                            <Border>
+                              <Color>Gainsboro</Color>
+                              <Style>Solid</Style>
+                            </Border>
+                            <BackgroundColor>=SWITCH(Fields!LastGoodCheckDBStatus.Value=1,"Red",
+Fields!LastGoodCheckDBStatus.Value=2,"Yellow",
+Fields!LastGoodCheckDBStatus.Value=4,"Green",
+1=1,"LightGray")</BackgroundColor>
+                            <PaddingLeft>2pt</PaddingLeft>
+                            <PaddingRight>2pt</PaddingRight>
+                            <PaddingTop>2pt</PaddingTop>
+                            <PaddingBottom>2pt</PaddingBottom>
+                          </Style>
+                        </Textbox>
+                      </CellContents>
+                    </TablixCell>
+                    <TablixCell>
+                      <CellContents>
                         <Textbox Name="LastMemoryDump">
                           <CanGrow>true</CanGrow>
                           <KeepTogether>true</KeepTogether>
@@ -1593,6 +1725,7 @@ Fields!sqlserver_uptime.Value&lt;2880,"Yellow",
                 <TablixMember />
                 <TablixMember />
                 <TablixMember />
+                <TablixMember />
               </TablixMembers>
             </TablixColumnHierarchy>
             <TablixRowHierarchy>
@@ -1624,7 +1757,7 @@ Fields!sqlserver_uptime.Value&lt;2880,"Yellow",
             <Top>0.43in</Top>
             <Left>0.05293cm</Left>
             <Height>0.83625in</Height>
-            <Width>15.18541in</Width>
+            <Width>16.18541in</Width>
             <ZIndex>1</ZIndex>
             <Style />
           </Tablix>
@@ -1760,7 +1893,7 @@ Fields!sqlserver_uptime.Value&lt;2880,"Yellow",
         <Height>6.2732in</Height>
         <Style />
       </Body>
-      <Width>15.20625in</Width>
+      <Width>16.20625in</Width>
       <Page>
         <InteractiveHeight>200in</InteractiveHeight>
         <InteractiveWidth>8.5in</InteractiveWidth>
@@ -1819,7 +1952,7 @@ Fields!sqlserver_uptime.Value&lt;2880,"Yellow",
           <ValueField>InstanceID</ValueField>
         </DataSetReference>
       </DefaultValue>
-      <Hidden>true</Hidden>
+      <Prompt>Instances</Prompt>
       <ValidValues>
         <DataSetReference>
           <DataSetName>Connections</DataSetName>

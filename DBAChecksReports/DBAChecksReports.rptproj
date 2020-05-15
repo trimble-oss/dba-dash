@@ -76,6 +76,7 @@
     <Report Include="Files.rdl" />
     <Report Include="Instance Configuration.rdl" />
     <Report Include="IO Performance.rdl" />
+    <Report Include="Last Good CheckDB.rdl" />
     <Report Include="LogShipping.rdl" />
     <Report Include="Performance Dashboard.rdl" />
     <Report Include="Procedure Insights.rdl" />
