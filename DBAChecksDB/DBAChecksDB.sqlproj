@@ -308,6 +308,9 @@
     <Build Include="dbo\Tables\LastGoodCheckDBThresholds.sql" />
     <Build Include="dbo\Views\LastGoodCheckDB.sql" />
     <Build Include="Report\Stored Procedures\LastGoodCheckDB_Get.sql" />
+    <Build Include="dbo\Tables\Alerts.sql" />
+    <Build Include="dbo\Stored Procedures\Alerts_Upd.sql" />
+    <Build Include="dbo\User Defined Types\Alerts.sql" />
   </ItemGroup>
   <ItemGroup>
     <PostDeploy Include="Script.PostDeployment1.sql" />

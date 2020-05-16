@@ -86,6 +86,31 @@ namespace DBAChecks.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to SELECT id,
+        ///	name,
+        ///	message_id,
+        ///	severity,
+        ///	enabled,
+        ///	delay_between_responses,
+        ///	msdb.dbo.AGENT_DATETIME(NULLIF(last_occurrence_date,0),last_occurrence_time) last_occurrence,
+        ///	msdb.dbo.AGENT_DATETIME(NULLIF(last_response_date,0),last_response_time) last_response,
+        ///	notification_message,
+        ///	include_event_description,
+        ///	database_name,
+        ///	event_description_keyword,
+        ///	occurrence_count,
+        ///	msdb.dbo.AGENT_DATETIME(NULLIF(count_reset_date,0),count_reset_time) as count_reset,
+        ///	job_id,
+        ///	has_notification,
+        ///	categ [rest of string was truncated]&quot;;.
+        /// </summary>
+        internal static string SQLAlerts {
+            get {
+                return ResourceManager.GetString("SQLAlerts", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to SELECT start_time,
         ///       end_time,
         ///       elastic_pool_name,
