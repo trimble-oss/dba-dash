@@ -63,7 +63,20 @@ namespace DBAChecks
         private bool isAzureMasterDB = false;
         private string instanceName;
         string dbName;
+        string productVersion;
  
+
+        public bool IsXESupported()
+        {
+            if (productVersion.StartsWith("8.") || productVersion.StartsWith("9."))
+            {
+                return false;
+            }
+            else
+            {
+                return true;
+            }
+        }
 
         public DBCollector(string connectionString, bool noWMI)
         {
@@ -101,47 +114,53 @@ namespace DBAChecks
 
         public void RemoveEventSessions()
         {
-            string removeSQL;
-            if (IsAzure)
+            if (IsXESupported())
             {
-                removeSQL = Properties.Resources.SQLRemoveEventSessionsAzure;
-            }
-            else
-            {
-                removeSQL = Properties.Resources.SQLRemoveEventSessions;
-            }
-            SqlConnection cn = new SqlConnection(_connectionString);
-            using (cn)
-            {
-                cn.Open();
-                var cmd = new SqlCommand(removeSQL, cn);
-                cmd.ExecuteScalar();
+                string removeSQL;
+                if (IsAzure)
+                {
+                    removeSQL = Properties.Resources.SQLRemoveEventSessionsAzure;
+                }
+                else
+                {
+                    removeSQL = Properties.Resources.SQLRemoveEventSessions;
+                }
+                SqlConnection cn = new SqlConnection(_connectionString);
+                using (cn)
+                {
+                    cn.Open();
+                    var cmd = new SqlCommand(removeSQL, cn);
+                    cmd.ExecuteScalar();
+                }
             }
         }
 
         public void StopEventSessions()
         {
-            string removeSQL;
-            if (IsAzure)
+            if (IsXESupported())
             {
-                removeSQL = Properties.Resources.SQLStopEventSessionsAzure;
-            }
-            else
-            {
-                removeSQL = Properties.Resources.SQLStopEventSessions;
-            }
-            SqlConnection cn = new SqlConnection(_connectionString);
-            using (cn)
-            {
-                cn.Open();
-                var cmd = new SqlCommand(removeSQL, cn);
-                cmd.ExecuteScalar();
+                string removeSQL;
+                if (IsAzure)
+                {
+                    removeSQL = Properties.Resources.SQLStopEventSessionsAzure;
+                }
+                else
+                {
+                    removeSQL = Properties.Resources.SQLStopEventSessions;
+                }
+                SqlConnection cn = new SqlConnection(_connectionString);
+                using (cn)
+                {
+                    cn.Open();
+                    var cmd = new SqlCommand(removeSQL, cn);
+                    cmd.ExecuteScalar();
+                }
             }
         }
 
         public void GetInstance(string connectionID)
         {
-            var dt = getDT("DBAChecks", "SELECT @@SERVERNAME as Instance,GETUTCDATE() As SnapshotDateUTC,CAST(SERVERPROPERTY('EditionID') as bigint) as EditionID,ISNULL(CAST(SERVERPROPERTY('ComputerNamePhysicalNetBIOS') as nvarchar(128)),'') as ComputerNamePhysicalNetBIOS,DB_NAME() as DBName");
+            var dt = getDT("DBAChecks", "SELECT @@SERVERNAME as Instance,GETUTCDATE() As SnapshotDateUTC,CAST(SERVERPROPERTY('EditionID') as bigint) as EditionID,ISNULL(CAST(SERVERPROPERTY('ComputerNamePhysicalNetBIOS') as nvarchar(128)),'') as ComputerNamePhysicalNetBIOS,DB_NAME() as DBName,SERVERPROPERTY ('productversion') as ProductVersion");
             dt.Columns.Add("AgentVersion", typeof(string));
             dt.Columns.Add("ConnectionID", typeof(string));
             dt.Columns.Add("AgentHostName", typeof(string));
@@ -152,6 +171,7 @@ namespace DBAChecks
             computerName = (string)dt.Rows[0]["ComputerNamePhysicalNetBIOS"];
             dbName = (string)dt.Rows[0]["DBName"];
             instanceName = (string)dt.Rows[0]["Instance"];
+            productVersion = (string)dt.Rows[0]["ProductVersion"];
             if ( editionId == 1674378470)
             {
                 IsAzure = true;
@@ -331,42 +351,45 @@ namespace DBAChecks
 
         private void collectSlowQueries()
         {
-          
-            SqlConnectionStringBuilder builder = new SqlConnectionStringBuilder(_connectionString);
-            builder.ApplicationName = "DBAChecksXE";
-            SqlConnection cn = new SqlConnection(builder.ConnectionString);
-            string slowQueriesSQL;
-            if (IsAzure)
-            {
-                slowQueriesSQL = Properties.Resources.SQLSlowQueriesAzure;
-            }
-            else
-            {
-                slowQueriesSQL = Properties.Resources.SQLSlowQueries;
-            }
-            using (cn)
-            {
-                cn.Open();
-                SqlCommand cmd = new SqlCommand(slowQueriesSQL, cn);
 
-                cmd.Parameters.AddWithValue("SlowQueryThreshold", SlowQueryThresholdMs*1000);
-                var result = cmd.ExecuteScalar();
-                if (result == DBNull.Value)
+            if (IsXESupported())
+            {
+                SqlConnectionStringBuilder builder = new SqlConnectionStringBuilder(_connectionString);
+                builder.ApplicationName = "DBAChecksXE";
+                SqlConnection cn = new SqlConnection(builder.ConnectionString);
+                string slowQueriesSQL;
+                if (IsAzure)
                 {
-                    logError("SlowQueries","Result IS NULL");
-                    return;
+                    slowQueriesSQL = Properties.Resources.SQLSlowQueriesAzure;
                 }
-                string ringBuffer = (string)result;
-                if (ringBuffer.Length > 0)
+                else
                 {
-                    RingBufferTargetAttributes ringBufferAtt;
-                    var dt = XETools.XEStrToDT(ringBuffer,out ringBufferAtt);
-                    dt.TableName = "SlowQueries";
-                    addDT(dt);
-                    var dtAtt = ringBufferAtt.GetTable();
-                    dtAtt.TableName = "SlowQueriesStats";
-                    addDT(dtAtt);
-                    
+                    slowQueriesSQL = Properties.Resources.SQLSlowQueries;
+                }
+                using (cn)
+                {
+                    cn.Open();
+                    SqlCommand cmd = new SqlCommand(slowQueriesSQL, cn);
+
+                    cmd.Parameters.AddWithValue("SlowQueryThreshold", SlowQueryThresholdMs * 1000);
+                    var result = cmd.ExecuteScalar();
+                    if (result == DBNull.Value)
+                    {
+                        logError("SlowQueries", "Result IS NULL");
+                        return;
+                    }
+                    string ringBuffer = (string)result;
+                    if (ringBuffer.Length > 0)
+                    {
+                        RingBufferTargetAttributes ringBufferAtt;
+                        var dt = XETools.XEStrToDT(ringBuffer, out ringBufferAtt);
+                        dt.TableName = "SlowQueries";
+                        addDT(dt);
+                        var dtAtt = ringBufferAtt.GetTable();
+                        dtAtt.TableName = "SlowQueriesStats";
+                        addDT(dtAtt);
+
+                    }
                 }
             }
         }

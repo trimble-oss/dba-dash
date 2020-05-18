@@ -489,7 +489,8 @@ FROM (
 	) T
 FOR XML PATH(''),TYPE).value('.','NVARCHAR(MAX)'),1,1,'')
 
-DECLARE @EditionID BIGINT = CAST(SERVERPROPERTY('EditionID') as bigint) 
+DECLARE @EditionID BIGINT
+SELECT @EditionID = CAST(SERVERPROPERTY('EditionID') as bigint) 
 
 SELECT @SQL = 'INSERT INTO #sysdb(' + @cols + ')
 		SELECT ' + @cols + ' FROM sys.databases 
@@ -1442,7 +1443,7 @@ BEGIN
 			);
 	DECLARE @LastGoodDBCC TABLE(
 		database_id INT PRIMARY KEY,
-		LastGoodCheckDbTime DATETIME2(3)
+		LastGoodCheckDbTime DATETIME
 	)
 
 	OPEN DBs
@@ -1460,7 +1461,7 @@ BEGIN
 		EXEC  (	@SQL )
 
 		INSERT INTO @LastGoodDBCC(database_id,LastGoodCheckDbTime)
-		SELECT @DBID, CAST(Value as DATETIME2(3))
+		SELECT @DBID, CAST(Value as DATETIME)
 		FROM @dbinfo
 		WHERE Field = 'dbi_dbccLastKnownGood'
 
@@ -1474,7 +1475,7 @@ BEGIN
 END
 ELSE
 BEGIN
-	SELECT database_id,CAST(DATABASEPROPERTYEX(name,'LastGoodCheckDbTime') as DATETIME2(3)) as LastGoodCheckDbTime
+	SELECT database_id,CAST(DATABASEPROPERTYEX(name,'LastGoodCheckDbTime') as DATETIME) as LastGoodCheckDbTime
 	FROM sys.databases
 END</value>
   </data>
