@@ -311,6 +311,9 @@
     <Build Include="dbo\Tables\Alerts.sql" />
     <Build Include="dbo\Stored Procedures\Alerts_Upd.sql" />
     <Build Include="dbo\User Defined Types\Alerts.sql" />
+    <Build Include="dbo\Views\SysAlerts.sql" />
+    <Build Include="Report\Stored Procedures\Alerts_Get.sql" />
+    <Build Include="Report\Stored Procedures\AlertsConfig_Get.sql" />
   </ItemGroup>
   <ItemGroup>
     <PostDeploy Include="Script.PostDeployment1.sql" />

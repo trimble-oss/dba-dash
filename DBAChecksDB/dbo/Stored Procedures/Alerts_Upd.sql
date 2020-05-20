@@ -1,4 +1,5 @@
-﻿CREATE PROC [dbo].[Alerts_Upd](@Alerts dbo.Alerts READONLY,@InstanceID INT,@SnapshotDate DATETIME2(3))
+﻿
+CREATE PROC [dbo].[Alerts_Upd](@Alerts dbo.Alerts READONLY,@InstanceID INT,@SnapshotDate DATETIME2(3))
 AS
 SET XACT_ABORT ON
 DECLARE @Ref VARCHAR(30)='Alerts'
@@ -26,7 +27,8 @@ BEGIN
 		count_reset,
 		job_id,
 		has_notification,
-		category_id
+		category_id,
+		performance_condition
 	)
 	SELECT @InstanceID,
 			id,
@@ -45,7 +47,8 @@ BEGIN
 			count_reset,
 			job_id,
 			has_notification,
-			category_id
+			category_id,
+			performance_condition
 	FROM @Alerts
 
 	EXEC dbo.CollectionDates_Upd @InstanceID = @InstanceID,  

@@ -325,7 +325,7 @@ AS (SELECT j.job_id,
 		   j.delete_level,
 		   j.version_number
     FROM msdb.dbo.sysjobs j
-        JOIN msdb.dbo.sysjobhistory jh ON j.job_id = jh.job_id
+        LEFT JOIN msdb.dbo.sysjobhistory jh ON j.job_id = jh.job_id
         OUTER APPLY
     (
         SELECT msdb.dbo.agent_datetime(run_date, run_time) AS RunDateTime,
@@ -1496,7 +1496,8 @@ END</value>
 	msdb.dbo.AGENT_DATETIME(NULLIF(count_reset_date,0),count_reset_time) as count_reset,
 	job_id,
 	has_notification,
-	category_id
+	category_id,
+	performance_condition
 FROM msdb..sysalerts</value>
   </data>
 </root>

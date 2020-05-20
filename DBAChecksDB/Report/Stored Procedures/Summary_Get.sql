@@ -96,6 +96,14 @@ dbc AS (
 		DATEDIFF(d,NULLIF(MIN(CASE WHEN Status <> 3 THEN LastGoodCheckDbTime ELSE NULL END),'1900-01-01'),GETUTCDATE()) AS DaysSinceLastGoodCheckDB
 	FROM dbo.LastGoodCheckDB
 	GROUP BY InstanceID
+),
+a AS(
+	SELECT InstanceID,
+		MAX(last_occurrence_utc) AS LastAlert,
+		SUM(occurrence_count) AS TotalAlerts,
+		MAX(CASE WHEN IsCriticalAlert=1 THEN last_occurrence_utc ELSE null END) AS LastCritical
+	FROM dbo.sysalerts
+	GROUP BY InstanceID
 )
 SELECT I.InstanceID,
 	I.Instance,
@@ -125,7 +133,11 @@ SELECT I.InstanceID,
     dbc.LastGoodCheckDBHealthyCount,
     dbc.LastGoodCheckDBNACount,
 	dbc.OldestLastGoodCheckDBTime,
-	dbc.DaysSinceLastGoodCheckDB
+	dbc.DaysSinceLastGoodCheckDB,
+	a.LastAlert,
+	a.LastCritical,
+	a.TotalAlerts,
+	AlertCD.SnapshotDate AS AlertSnapshotDate
 FROM dbo.Instances I 
 LEFT JOIN LS ON I.InstanceID = LS.InstanceID
 LEFT JOIN B ON I.InstanceID = B.InstanceID
@@ -137,7 +149,9 @@ LEFT JOIN dc ON I.InstanceID = dc.InstanceID
 LEFT JOIN err ON I.InstanceID = err.InstanceID
 LEFT JOIN SSD ON I.InstanceID = SSD.InstanceID
 LEFT JOIN dbc ON I.InstanceID = dbc.InstanceID
+LEFT JOIN a ON I.InstanceID = a.InstanceID 
 LEFT JOIN dbo.CollectionDates OSInfoCD ON OSInfoCD.InstanceID = I.InstanceID AND OSInfoCD.Reference='OSInfo'
+LEFT JOIN dbo.CollectionDates AlertCD ON AlertCD.InstanceID = I.InstanceID AND AlertCD.Reference='Alerts'
 WHERE EXISTS(SELECT 1 FROM @Instances t WHERE I.InstanceID = t.InstanceID)
 AND I.IsActive=1
 AND I.EditionID<>1674378470 -- exclude azure 

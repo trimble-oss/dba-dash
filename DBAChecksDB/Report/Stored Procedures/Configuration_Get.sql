@@ -34,3 +34,5 @@ FROM dbo.SysConfig SC
 JOIN dbo.Instances I ON SC.InstanceID=I.InstanceID
 JOIN dbo.SysConfigOptions SCO ON SC.configuration_id = SCO.configuration_id
 WHERE EXISTS(SELECT 1 FROM @Instances t WHERE I.InstanceID = t.InstanceID)
+AND I.EditionID<> 1674378470 --exclude azure
+AND I.IsActive=1

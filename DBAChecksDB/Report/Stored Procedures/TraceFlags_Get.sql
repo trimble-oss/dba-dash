@@ -30,3 +30,5 @@ SELECT I.Instance,
 FROM dbo.Instances I 
 LEFT JOIN dbo.TraceFlags tf ON tf.InstanceID=I.InstanceID
 WHERE EXISTS(SELECT 1 FROM @Instances t WHERE I.InstanceID = t.InstanceID)
+AND I.EditionID<> 1674378470 --exclude azure
+AND I.IsActive=1

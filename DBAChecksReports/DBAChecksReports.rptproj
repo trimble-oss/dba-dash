@@ -62,6 +62,7 @@
   </ItemGroup>
   <ItemGroup>
     <Report Include="AgentJobs.rdl" />
+    <Report Include="Alerts.rdl" />
     <Report Include="AzureDB Resource Summary.rdl" />
     <Report Include="AzureDB Resource Usage.rdl" />
     <Report Include="Backups.rdl" />

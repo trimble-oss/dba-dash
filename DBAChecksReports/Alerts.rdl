@@ -6,20 +6,29 @@
     <DataSource Name="DBAChecksDB">
       <DataSourceReference>DBAChecksDB</DataSourceReference>
       <rd:SecurityType>None</rd:SecurityType>
-      <rd:DataSourceID>3147118e-122a-4602-bfc3-ae51dc692f6f</rd:DataSourceID>
+      <rd:DataSourceID>124d5848-c4bb-40db-b824-c567f6840ca1</rd:DataSourceID>
     </DataSource>
   </DataSources>
   <DataSets>
-    <DataSet Name="Summary">
+    <DataSet Name="Alerts">
       <Query>
         <DataSourceName>DBAChecksDB</DataSourceName>
         <QueryParameters>
           <QueryParameter Name="@InstanceIDs">
             <Value>=Parameters!InstanceIDs.Value</Value>
           </QueryParameter>
+          <QueryParameter Name="@LastOccurrenceFrom">
+            <Value>=Parameters!LastOccurrenceFrom.Value</Value>
+          </QueryParameter>
+          <QueryParameter Name="@LastOccurrenceTo">
+            <Value>=Parameters!LastOccurrenceTo.Value</Value>
+          </QueryParameter>
+          <QueryParameter Name="@IsCritical">
+            <Value>=Parameters!IsCritical.Value</Value>
+          </QueryParameter>
         </QueryParameters>
         <CommandType>StoredProcedure</CommandType>
-        <CommandText>Report.Summary_Get</CommandText>
+        <CommandText>Report.Alerts_Get</CommandText>
         <rd:UseGenericDesigner>true</rd:UseGenericDesigner>
       </Query>
       <Fields>
@@ -31,133 +40,109 @@
           <DataField>Instance</DataField>
           <rd:TypeName>System.String</rd:TypeName>
         </Field>
-        <Field Name="Tags">
-          <DataField>Tags</DataField>
+        <Field Name="ConnectionID">
+          <DataField>ConnectionID</DataField>
           <rd:TypeName>System.String</rd:TypeName>
         </Field>
-        <Field Name="LogShippingStatus">
-          <DataField>LogShippingStatus</DataField>
+        <Field Name="id">
+          <DataField>id</DataField>
           <rd:TypeName>System.Int32</rd:TypeName>
         </Field>
-        <Field Name="FullBackupStatus">
-          <DataField>FullBackupStatus</DataField>
+        <Field Name="name">
+          <DataField>name</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+        <Field Name="message_id">
+          <DataField>message_id</DataField>
           <rd:TypeName>System.Int32</rd:TypeName>
         </Field>
-        <Field Name="LogBackupStatus">
-          <DataField>LogBackupStatus</DataField>
+        <Field Name="severity">
+          <DataField>severity</DataField>
           <rd:TypeName>System.Int32</rd:TypeName>
         </Field>
-        <Field Name="DiffBackupStatus">
-          <DataField>DiffBackupStatus</DataField>
+        <Field Name="enabled">
+          <DataField>enabled</DataField>
+          <rd:TypeName>System.Byte</rd:TypeName>
+        </Field>
+        <Field Name="delay_between_responses">
+          <DataField>delay_between_responses</DataField>
           <rd:TypeName>System.Int32</rd:TypeName>
         </Field>
-        <Field Name="DriveStatus">
-          <DataField>DriveStatus</DataField>
-          <rd:TypeName>System.Int32</rd:TypeName>
-        </Field>
-        <Field Name="FileFreeSpaceStatus">
-          <DataField>FileFreeSpaceStatus</DataField>
-          <rd:TypeName>System.Int32</rd:TypeName>
-        </Field>
-        <Field Name="JobStatus">
-          <DataField>JobStatus</DataField>
-          <rd:TypeName>System.Int32</rd:TypeName>
-        </Field>
-        <Field Name="AGStatus">
-          <DataField>AGStatus</DataField>
-          <rd:TypeName>System.Int32</rd:TypeName>
-        </Field>
-        <Field Name="DetectedCorruptionDate">
-          <DataField>DetectedCorruptionDate</DataField>
+        <Field Name="last_occurrence">
+          <DataField>last_occurrence</DataField>
           <rd:TypeName>System.DateTime</rd:TypeName>
         </Field>
-        <Field Name="CollectionErrorStatus">
-          <DataField>CollectionErrorStatus</DataField>
-          <rd:TypeName>System.Int32</rd:TypeName>
-        </Field>
-        <Field Name="SnapshotAgeMin">
-          <DataField>SnapshotAgeMin</DataField>
-          <rd:TypeName>System.Int32</rd:TypeName>
-        </Field>
-        <Field Name="SnapshotAgeMax">
-          <DataField>SnapshotAgeMax</DataField>
-          <rd:TypeName>System.Int32</rd:TypeName>
-        </Field>
-        <Field Name="sqlserver_start_time_utc">
-          <DataField>sqlserver_start_time_utc</DataField>
+        <Field Name="last_occurrence_utc">
+          <DataField>last_occurrence_utc</DataField>
           <rd:TypeName>System.DateTime</rd:TypeName>
+        </Field>
+        <Field Name="last_response">
+          <DataField>last_response</DataField>
+          <rd:TypeName>System.DateTime</rd:TypeName>
+        </Field>
+        <Field Name="last_response_utc">
+          <DataField>last_response_utc</DataField>
+          <rd:TypeName>System.DateTime</rd:TypeName>
+        </Field>
+        <Field Name="notification_message">
+          <DataField>notification_message</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+        <Field Name="include_event_description">
+          <DataField>include_event_description</DataField>
+          <rd:TypeName>System.Byte</rd:TypeName>
+        </Field>
+        <Field Name="database_name">
+          <DataField>database_name</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+        <Field Name="event_description_keyword">
+          <DataField>event_description_keyword</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+        <Field Name="occurrence_count">
+          <DataField>occurrence_count</DataField>
+          <rd:TypeName>System.Int32</rd:TypeName>
+        </Field>
+        <Field Name="count_reset">
+          <DataField>count_reset</DataField>
+          <rd:TypeName>System.DateTime</rd:TypeName>
+        </Field>
+        <Field Name="count_reset_utc">
+          <DataField>count_reset_utc</DataField>
+          <rd:TypeName>System.DateTime</rd:TypeName>
+        </Field>
+        <Field Name="job_id">
+          <DataField>job_id</DataField>
+          <rd:TypeName>System.Guid</rd:TypeName>
+        </Field>
+        <Field Name="JobName">
+          <DataField>JobName</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+        <Field Name="has_notification">
+          <DataField>has_notification</DataField>
+          <rd:TypeName>System.Int32</rd:TypeName>
+        </Field>
+        <Field Name="category_id">
+          <DataField>category_id</DataField>
+          <rd:TypeName>System.Int32</rd:TypeName>
+        </Field>
+        <Field Name="performance_condition">
+          <DataField>performance_condition</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+        <Field Name="IsCriticalAlert">
+          <DataField>IsCriticalAlert</DataField>
+          <rd:TypeName>System.Boolean</rd:TypeName>
         </Field>
         <Field Name="UTCOffset">
           <DataField>UTCOffset</DataField>
           <rd:TypeName>System.Int32</rd:TypeName>
         </Field>
-        <Field Name="sqlserver_uptime">
-          <DataField>sqlserver_uptime</DataField>
-          <rd:TypeName>System.Int32</rd:TypeName>
-        </Field>
-        <Field Name="host_uptime">
-          <DataField>host_uptime</DataField>
-          <rd:TypeName>System.Int64</rd:TypeName>
-        </Field>
-        <Field Name="host_start_time_utc">
-          <DataField>host_start_time_utc</DataField>
-          <rd:TypeName>System.DateTime</rd:TypeName>
-        </Field>
-        <Field Name="MemoryDumpCount">
-          <DataField>MemoryDumpCount</DataField>
-          <rd:TypeName>System.Int32</rd:TypeName>
-        </Field>
-        <Field Name="LastMemoryDump">
-          <DataField>LastMemoryDump</DataField>
-          <rd:TypeName>System.DateTime</rd:TypeName>
-        </Field>
-        <Field Name="LastGoodCheckDBStatus">
-          <DataField>LastGoodCheckDBStatus</DataField>
-          <rd:TypeName>System.Int32</rd:TypeName>
-        </Field>
-        <Field Name="LastGoodCheckDBCriticalCount">
-          <DataField>LastGoodCheckDBCriticalCount</DataField>
-          <rd:TypeName>System.Int32</rd:TypeName>
-        </Field>
-        <Field Name="LastGoodCheckDBWarningCount">
-          <DataField>LastGoodCheckDBWarningCount</DataField>
-          <rd:TypeName>System.Int32</rd:TypeName>
-        </Field>
-        <Field Name="LastGoodCheckDBHealthyCount">
-          <DataField>LastGoodCheckDBHealthyCount</DataField>
-          <rd:TypeName>System.Int32</rd:TypeName>
-        </Field>
-        <Field Name="LastGoodCheckDBNACount">
-          <DataField>LastGoodCheckDBNACount</DataField>
-          <rd:TypeName>System.Int32</rd:TypeName>
-        </Field>
-        <Field Name="OldestLastGoodCheckDBTime">
-          <DataField>OldestLastGoodCheckDBTime</DataField>
-          <rd:TypeName>System.DateTime</rd:TypeName>
-        </Field>
-        <Field Name="DaysSinceLastGoodCheckDB">
-          <DataField>DaysSinceLastGoodCheckDB</DataField>
-          <rd:TypeName>System.Int32</rd:TypeName>
-        </Field>
-        <Field Name="LastAlert">
-          <DataField>LastAlert</DataField>
-          <rd:TypeName>System.DateTime</rd:TypeName>
-        </Field>
-        <Field Name="LastCritical">
-          <DataField>LastCritical</DataField>
-          <rd:TypeName>System.DateTime</rd:TypeName>
-        </Field>
-        <Field Name="TotalAlerts">
-          <DataField>TotalAlerts</DataField>
-          <rd:TypeName>System.Int32</rd:TypeName>
-        </Field>
-        <Field Name="AlertSnapshotDate">
-          <DataField>AlertSnapshotDate</DataField>
-          <rd:TypeName>System.DateTime</rd:TypeName>
-        </Field>
       </Fields>
     </DataSet>
-    <DataSet Name="Connections">
+    <DataSet Name="Instances">
       <SharedDataSet>
         <SharedDataSetReference>Connections</SharedDataSetReference>
         <QueryParameters>
@@ -181,20 +166,9 @@
           <DataField>ConnectionID</DataField>
           <rd:TypeName>System.String</rd:TypeName>
         </Field>
-      </Fields>
-    </DataSet>
-    <DataSet Name="Tags">
-      <SharedDataSet>
-        <SharedDataSetReference>Tags</SharedDataSetReference>
-      </SharedDataSet>
-      <Fields>
-        <Field Name="TagID">
-          <DataField>TagID</DataField>
-          <rd:TypeName>System.Int16</rd:TypeName>
-        </Field>
-        <Field Name="Tag">
-          <DataField>Tag</DataField>
-          <rd:TypeName>System.String</rd:TypeName>
+        <Field Name="EditionID">
+          <DataField>EditionID</DataField>
+          <rd:TypeName>System.Int64</rd:TypeName>
         </Field>
       </Fields>
     </DataSet>
@@ -213,6 +187,21 @@
         </Field>
       </Fields>
     </DataSet>
+    <DataSet Name="Tags">
+      <SharedDataSet>
+        <SharedDataSetReference>Tags</SharedDataSetReference>
+      </SharedDataSet>
+      <Fields>
+        <Field Name="TagID">
+          <DataField>TagID</DataField>
+          <rd:TypeName>System.Int16</rd:TypeName>
+        </Field>
+        <Field Name="Tag">
+          <DataField>Tag</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+      </Fields>
+    </DataSet>
   </DataSets>
   <ReportSections>
     <ReportSection>
@@ -225,7 +214,7 @@
               <Paragraph>
                 <TextRuns>
                   <TextRun>
-                    <Value>Summary</Value>
+                    <Value>Alerts</Value>
                     <Style>
                       <FontFamily>Segoe UI Light</FontFamily>
                       <FontSize>24pt</FontSize>
@@ -237,9 +226,8 @@
               </Paragraph>
             </Paragraphs>
             <rd:DefaultName>textbox1</rd:DefaultName>
-            <Left>0.05293cm</Left>
-            <Height>0.43in</Height>
-            <Width>8in</Width>
+            <Height>0.42in</Height>
+            <Width>21.31667in</Width>
             <Style>
               <PaddingLeft>2pt</PaddingLeft>
               <PaddingRight>2pt</PaddingRight>
@@ -251,7 +239,31 @@
             <TablixBody>
               <TablixColumns>
                 <TablixColumn>
-                  <Width>2.30208in</Width>
+                  <Width>2.38333in</Width>
+                </TablixColumn>
+                <TablixColumn>
+                  <Width>2.325in</Width>
+                </TablixColumn>
+                <TablixColumn>
+                  <Width>0.775in</Width>
+                </TablixColumn>
+                <TablixColumn>
+                  <Width>0.7in</Width>
+                </TablixColumn>
+                <TablixColumn>
+                  <Width>0.69167in</Width>
+                </TablixColumn>
+                <TablixColumn>
+                  <Width>0.74167in</Width>
+                </TablixColumn>
+                <TablixColumn>
+                  <Width>1.31666in</Width>
+                </TablixColumn>
+                <TablixColumn>
+                  <Width>1in</Width>
+                </TablixColumn>
+                <TablixColumn>
+                  <Width>1.48333in</Width>
                 </TablixColumn>
                 <TablixColumn>
                   <Width>1in</Width>
@@ -272,7 +284,13 @@
                   <Width>1in</Width>
                 </TablixColumn>
                 <TablixColumn>
-                  <Width>1in</Width>
+                  <Width>1.5in</Width>
+                </TablixColumn>
+                <TablixColumn>
+                  <Width>1.59167in</Width>
+                </TablixColumn>
+                <TablixColumn>
+                  <Width>0.93333in</Width>
                 </TablixColumn>
                 <TablixColumn>
                   <Width>1in</Width>
@@ -281,31 +299,16 @@
                   <Width>1in</Width>
                 </TablixColumn>
                 <TablixColumn>
-                  <Width>1in</Width>
-                </TablixColumn>
-                <TablixColumn>
-                  <Width>0.66667in</Width>
-                </TablixColumn>
-                <TablixColumn>
-                  <Width>1in</Width>
-                </TablixColumn>
-                <TablixColumn>
-                  <Width>1in</Width>
-                </TablixColumn>
-                <TablixColumn>
-                  <Width>1in</Width>
-                </TablixColumn>
-                <TablixColumn>
-                  <Width>0.88333in</Width>
+                  <Width>0.675in</Width>
                 </TablixColumn>
               </TablixColumns>
               <TablixRows>
                 <TablixRow>
-                  <Height>0.62625in</Height>
+                  <Height>0.64in</Height>
                   <TablixCells>
                     <TablixCell>
                       <CellContents>
-                        <Textbox Name="textbox2">
+                        <Textbox Name="textbox3">
                           <CanGrow>true</CanGrow>
                           <UserSort>
                             <SortExpression>=Fields!Instance.Value</SortExpression>
@@ -327,108 +330,15 @@
                               <Style />
                             </Paragraph>
                           </Paragraphs>
-                          <rd:DefaultName>textbox2</rd:DefaultName>
+                          <rd:DefaultName>textbox3</rd:DefaultName>
                           <Style>
                             <Border>
-                              <Color>Gainsboro</Color>
-                              <Style>None</Style>
+                              <Color>LightGrey</Color>
                             </Border>
                             <BottomBorder>
                               <Style>Solid</Style>
                             </BottomBorder>
-                            <BackgroundColor>#444444</BackgroundColor>
-                            <FontFamily />
-                            <PaddingLeft>2pt</PaddingLeft>
-                            <PaddingRight>2pt</PaddingRight>
-                            <PaddingTop>2pt</PaddingTop>
-                            <PaddingBottom>2pt</PaddingBottom>
-                          </Style>
-                        </Textbox>
-                      </CellContents>
-                    </TablixCell>
-                    <TablixCell>
-                      <CellContents>
-                        <Textbox Name="textbox4">
-                          <CanGrow>true</CanGrow>
-                          <UserSort>
-                            <SortExpression>=Fields!LogShippingStatus.Value</SortExpression>
-                          </UserSort>
-                          <KeepTogether>true</KeepTogether>
-                          <Paragraphs>
-                            <Paragraph>
-                              <TextRuns>
-                                <TextRun>
-                                  <Value>Log Shipping Status</Value>
-                                  <Style>
-                                    <FontFamily />
-                                    <FontSize>11pt</FontSize>
-                                    <FontWeight>Bold</FontWeight>
-                                    <Color>White</Color>
-                                  </Style>
-                                </TextRun>
-                              </TextRuns>
-                              <Style>
-                                <FontFamily />
-                                <TextAlign>Right</TextAlign>
-                              </Style>
-                            </Paragraph>
-                          </Paragraphs>
-                          <rd:DefaultName>textbox4</rd:DefaultName>
-                          <Style>
-                            <Border>
-                              <Color>Gainsboro</Color>
-                              <Style>None</Style>
-                            </Border>
-                            <BottomBorder>
-                              <Style>Solid</Style>
-                            </BottomBorder>
-                            <BackgroundColor>#444444</BackgroundColor>
-                            <FontFamily />
-                            <PaddingLeft>2pt</PaddingLeft>
-                            <PaddingRight>2pt</PaddingRight>
-                            <PaddingTop>2pt</PaddingTop>
-                            <PaddingBottom>2pt</PaddingBottom>
-                          </Style>
-                        </Textbox>
-                      </CellContents>
-                    </TablixCell>
-                    <TablixCell>
-                      <CellContents>
-                        <Textbox Name="textbox5">
-                          <CanGrow>true</CanGrow>
-                          <UserSort>
-                            <SortExpression>=Fields!FullBackupStatus.Value</SortExpression>
-                          </UserSort>
-                          <KeepTogether>true</KeepTogether>
-                          <Paragraphs>
-                            <Paragraph>
-                              <TextRuns>
-                                <TextRun>
-                                  <Value>Full Backup Status</Value>
-                                  <Style>
-                                    <FontFamily />
-                                    <FontSize>11pt</FontSize>
-                                    <FontWeight>Bold</FontWeight>
-                                    <Color>White</Color>
-                                  </Style>
-                                </TextRun>
-                              </TextRuns>
-                              <Style>
-                                <FontFamily />
-                                <TextAlign>Right</TextAlign>
-                              </Style>
-                            </Paragraph>
-                          </Paragraphs>
-                          <rd:DefaultName>textbox5</rd:DefaultName>
-                          <Style>
-                            <Border>
-                              <Color>Gainsboro</Color>
-                              <Style>None</Style>
-                            </Border>
-                            <BottomBorder>
-                              <Style>Solid</Style>
-                            </BottomBorder>
-                            <BackgroundColor>#444444</BackgroundColor>
+                            <BackgroundColor>#3a3a3a</BackgroundColor>
                             <FontFamily />
                             <PaddingLeft>2pt</PaddingLeft>
                             <PaddingRight>2pt</PaddingRight>
@@ -443,14 +353,14 @@
                         <Textbox Name="textbox6">
                           <CanGrow>true</CanGrow>
                           <UserSort>
-                            <SortExpression>=Fields!LogBackupStatus.Value</SortExpression>
+                            <SortExpression>=Fields!name.Value</SortExpression>
                           </UserSort>
                           <KeepTogether>true</KeepTogether>
                           <Paragraphs>
                             <Paragraph>
                               <TextRuns>
                                 <TextRun>
-                                  <Value>Log Backup Status</Value>
+                                  <Value>name</Value>
                                   <Style>
                                     <FontFamily />
                                     <FontSize>11pt</FontSize>
@@ -459,22 +369,18 @@
                                   </Style>
                                 </TextRun>
                               </TextRuns>
-                              <Style>
-                                <FontFamily />
-                                <TextAlign>Right</TextAlign>
-                              </Style>
+                              <Style />
                             </Paragraph>
                           </Paragraphs>
                           <rd:DefaultName>textbox6</rd:DefaultName>
                           <Style>
                             <Border>
-                              <Color>Gainsboro</Color>
-                              <Style>None</Style>
+                              <Color>LightGrey</Color>
                             </Border>
                             <BottomBorder>
                               <Style>Solid</Style>
                             </BottomBorder>
-                            <BackgroundColor>#444444</BackgroundColor>
+                            <BackgroundColor>#3a3a3a</BackgroundColor>
                             <FontFamily />
                             <PaddingLeft>2pt</PaddingLeft>
                             <PaddingRight>2pt</PaddingRight>
@@ -489,14 +395,14 @@
                         <Textbox Name="textbox7">
                           <CanGrow>true</CanGrow>
                           <UserSort>
-                            <SortExpression>=Fields!DiffBackupStatus.Value</SortExpression>
+                            <SortExpression>=Fields!message_id.Value</SortExpression>
                           </UserSort>
                           <KeepTogether>true</KeepTogether>
                           <Paragraphs>
                             <Paragraph>
                               <TextRuns>
                                 <TextRun>
-                                  <Value>Diff Backup Status</Value>
+                                  <Value>message id</Value>
                                   <Style>
                                     <FontFamily />
                                     <FontSize>11pt</FontSize>
@@ -514,13 +420,12 @@
                           <rd:DefaultName>textbox7</rd:DefaultName>
                           <Style>
                             <Border>
-                              <Color>Gainsboro</Color>
-                              <Style>None</Style>
+                              <Color>LightGrey</Color>
                             </Border>
                             <BottomBorder>
                               <Style>Solid</Style>
                             </BottomBorder>
-                            <BackgroundColor>#444444</BackgroundColor>
+                            <BackgroundColor>#3a3a3a</BackgroundColor>
                             <FontFamily />
                             <PaddingLeft>2pt</PaddingLeft>
                             <PaddingRight>2pt</PaddingRight>
@@ -535,14 +440,14 @@
                         <Textbox Name="textbox8">
                           <CanGrow>true</CanGrow>
                           <UserSort>
-                            <SortExpression>=Fields!DriveStatus.Value</SortExpression>
+                            <SortExpression>=Fields!severity.Value</SortExpression>
                           </UserSort>
                           <KeepTogether>true</KeepTogether>
                           <Paragraphs>
                             <Paragraph>
                               <TextRuns>
                                 <TextRun>
-                                  <Value>Drive Status</Value>
+                                  <Value>severity</Value>
                                   <Style>
                                     <FontFamily />
                                     <FontSize>11pt</FontSize>
@@ -560,58 +465,13 @@
                           <rd:DefaultName>textbox8</rd:DefaultName>
                           <Style>
                             <Border>
-                              <Color>Gainsboro</Color>
-                              <Style>None</Style>
+                              <Color>LightGrey</Color>
                             </Border>
                             <BottomBorder>
                               <Style>Solid</Style>
                             </BottomBorder>
-                            <BackgroundColor>#444444</BackgroundColor>
+                            <BackgroundColor>#3a3a3a</BackgroundColor>
                             <FontFamily />
-                            <PaddingLeft>2pt</PaddingLeft>
-                            <PaddingRight>2pt</PaddingRight>
-                            <PaddingTop>2pt</PaddingTop>
-                            <PaddingBottom>2pt</PaddingBottom>
-                          </Style>
-                        </Textbox>
-                      </CellContents>
-                    </TablixCell>
-                    <TablixCell>
-                      <CellContents>
-                        <Textbox Name="Textbox12">
-                          <CanGrow>true</CanGrow>
-                          <UserSort>
-                            <SortExpression>=Fields!JobStatus.Value</SortExpression>
-                          </UserSort>
-                          <KeepTogether>true</KeepTogether>
-                          <Paragraphs>
-                            <Paragraph>
-                              <TextRuns>
-                                <TextRun>
-                                  <Value>Job Status</Value>
-                                  <Style>
-                                    <FontFamily />
-                                    <FontSize>11pt</FontSize>
-                                    <FontWeight>Bold</FontWeight>
-                                    <Color>White</Color>
-                                  </Style>
-                                </TextRun>
-                              </TextRuns>
-                              <Style>
-                                <TextAlign>Right</TextAlign>
-                              </Style>
-                            </Paragraph>
-                          </Paragraphs>
-                          <rd:DefaultName>Textbox12</rd:DefaultName>
-                          <Style>
-                            <Border>
-                              <Color>Gainsboro</Color>
-                              <Style>None</Style>
-                            </Border>
-                            <BottomBorder>
-                              <Style>Solid</Style>
-                            </BottomBorder>
-                            <BackgroundColor>#444444</BackgroundColor>
                             <PaddingLeft>2pt</PaddingLeft>
                             <PaddingRight>2pt</PaddingRight>
                             <PaddingTop>2pt</PaddingTop>
@@ -625,14 +485,14 @@
                         <Textbox Name="textbox9">
                           <CanGrow>true</CanGrow>
                           <UserSort>
-                            <SortExpression>=Fields!FileFreeSpaceStatus.Value</SortExpression>
+                            <SortExpression>=Fields!enabled.Value</SortExpression>
                           </UserSort>
                           <KeepTogether>true</KeepTogether>
                           <Paragraphs>
                             <Paragraph>
                               <TextRuns>
                                 <TextRun>
-                                  <Value>File Free Space Status</Value>
+                                  <Value>enabled</Value>
                                   <Style>
                                     <FontFamily />
                                     <FontSize>11pt</FontSize>
@@ -650,13 +510,12 @@
                           <rd:DefaultName>textbox9</rd:DefaultName>
                           <Style>
                             <Border>
-                              <Color>Gainsboro</Color>
-                              <Style>None</Style>
+                              <Color>LightGrey</Color>
                             </Border>
                             <BottomBorder>
                               <Style>Solid</Style>
                             </BottomBorder>
-                            <BackgroundColor>#444444</BackgroundColor>
+                            <BackgroundColor>#3a3a3a</BackgroundColor>
                             <FontFamily />
                             <PaddingLeft>2pt</PaddingLeft>
                             <PaddingRight>2pt</PaddingRight>
@@ -668,17 +527,59 @@
                     </TablixCell>
                     <TablixCell>
                       <CellContents>
-                        <Textbox Name="Textbox13">
+                        <Textbox Name="textbox10">
+                          <CanGrow>true</CanGrow>
+                          <KeepTogether>true</KeepTogether>
+                          <Paragraphs>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Value>delay between responses</Value>
+                                  <Style>
+                                    <FontFamily />
+                                    <FontSize>11pt</FontSize>
+                                    <FontWeight>Bold</FontWeight>
+                                    <Color>White</Color>
+                                  </Style>
+                                </TextRun>
+                              </TextRuns>
+                              <Style>
+                                <FontFamily />
+                                <TextAlign>Right</TextAlign>
+                              </Style>
+                            </Paragraph>
+                          </Paragraphs>
+                          <rd:DefaultName>textbox10</rd:DefaultName>
+                          <Style>
+                            <Border>
+                              <Color>LightGrey</Color>
+                            </Border>
+                            <BottomBorder>
+                              <Style>Solid</Style>
+                            </BottomBorder>
+                            <BackgroundColor>#3a3a3a</BackgroundColor>
+                            <FontFamily />
+                            <PaddingLeft>2pt</PaddingLeft>
+                            <PaddingRight>2pt</PaddingRight>
+                            <PaddingTop>2pt</PaddingTop>
+                            <PaddingBottom>2pt</PaddingBottom>
+                          </Style>
+                        </Textbox>
+                      </CellContents>
+                    </TablixCell>
+                    <TablixCell>
+                      <CellContents>
+                        <Textbox Name="textbox12">
                           <CanGrow>true</CanGrow>
                           <UserSort>
-                            <SortExpression>=Fields!AGStatus.Value</SortExpression>
+                            <SortExpression>=Fields!last_occurrence.Value</SortExpression>
                           </UserSort>
                           <KeepTogether>true</KeepTogether>
                           <Paragraphs>
                             <Paragraph>
                               <TextRuns>
                                 <TextRun>
-                                  <Value>Always On Availability Groups</Value>
+                                  <Value>last occurrence</Value>
                                   <Style>
                                     <FontFamily />
                                     <FontSize>11pt</FontSize>
@@ -687,42 +588,42 @@
                                   </Style>
                                 </TextRun>
                               </TextRuns>
-                              <Style>
-                                <TextAlign>Right</TextAlign>
-                              </Style>
+                              <Style />
                             </Paragraph>
                           </Paragraphs>
-                          <rd:DefaultName>Textbox13</rd:DefaultName>
+                          <rd:DefaultName>textbox12</rd:DefaultName>
                           <Style>
                             <Border>
-                              <Color>Gainsboro</Color>
-                              <Style>None</Style>
+                              <Color>LightGrey</Color>
                             </Border>
                             <BottomBorder>
                               <Style>Solid</Style>
                             </BottomBorder>
-                            <BackgroundColor>#444444</BackgroundColor>
+                            <BackgroundColor>#3a3a3a</BackgroundColor>
+                            <FontFamily />
                             <PaddingLeft>2pt</PaddingLeft>
                             <PaddingRight>2pt</PaddingRight>
                             <PaddingTop>2pt</PaddingTop>
                             <PaddingBottom>2pt</PaddingBottom>
                           </Style>
                         </Textbox>
+                        <ColSpan>2</ColSpan>
                       </CellContents>
                     </TablixCell>
+                    <TablixCell />
                     <TablixCell>
                       <CellContents>
-                        <Textbox Name="Textbox16">
+                        <Textbox Name="textbox14">
                           <CanGrow>true</CanGrow>
                           <UserSort>
-                            <SortExpression>=Fields!DetectedCorruptionDate.Value</SortExpression>
+                            <SortExpression>=Fields!last_response.Value</SortExpression>
                           </UserSort>
                           <KeepTogether>true</KeepTogether>
                           <Paragraphs>
                             <Paragraph>
                               <TextRuns>
                                 <TextRun>
-                                  <Value>DB Corruption</Value>
+                                  <Value>last response</Value>
                                   <Style>
                                     <FontFamily />
                                     <FontSize>11pt</FontSize>
@@ -731,39 +632,39 @@
                                   </Style>
                                 </TextRun>
                               </TextRuns>
-                              <Style>
-                                <TextAlign>Right</TextAlign>
-                              </Style>
+                              <Style />
                             </Paragraph>
                           </Paragraphs>
-                          <rd:DefaultName>Textbox16</rd:DefaultName>
+                          <rd:DefaultName>textbox14</rd:DefaultName>
                           <Style>
                             <Border>
-                              <Color>Gainsboro</Color>
-                              <Style>None</Style>
+                              <Color>LightGrey</Color>
                             </Border>
                             <BottomBorder>
                               <Style>Solid</Style>
                             </BottomBorder>
-                            <BackgroundColor>#444444</BackgroundColor>
+                            <BackgroundColor>#3a3a3a</BackgroundColor>
+                            <FontFamily />
                             <PaddingLeft>2pt</PaddingLeft>
                             <PaddingRight>2pt</PaddingRight>
                             <PaddingTop>2pt</PaddingTop>
                             <PaddingBottom>2pt</PaddingBottom>
                           </Style>
                         </Textbox>
+                        <ColSpan>2</ColSpan>
                       </CellContents>
                     </TablixCell>
+                    <TablixCell />
                     <TablixCell>
                       <CellContents>
-                        <Textbox Name="Textbox20">
+                        <Textbox Name="textbox15">
                           <CanGrow>true</CanGrow>
                           <KeepTogether>true</KeepTogether>
                           <Paragraphs>
                             <Paragraph>
                               <TextRuns>
                                 <TextRun>
-                                  <Value>Last Good CheckDB</Value>
+                                  <Value>notification message</Value>
                                   <Style>
                                     <FontFamily />
                                     <FontSize>11pt</FontSize>
@@ -772,21 +673,19 @@
                                   </Style>
                                 </TextRun>
                               </TextRuns>
-                              <Style>
-                                <TextAlign>Right</TextAlign>
-                              </Style>
+                              <Style />
                             </Paragraph>
                           </Paragraphs>
-                          <rd:DefaultName>Textbox20</rd:DefaultName>
+                          <rd:DefaultName>textbox15</rd:DefaultName>
                           <Style>
                             <Border>
-                              <Color>Gainsboro</Color>
-                              <Style>None</Style>
+                              <Color>LightGrey</Color>
                             </Border>
                             <BottomBorder>
                               <Style>Solid</Style>
                             </BottomBorder>
-                            <BackgroundColor>#444444</BackgroundColor>
+                            <BackgroundColor>#3a3a3a</BackgroundColor>
+                            <FontFamily />
                             <PaddingLeft>2pt</PaddingLeft>
                             <PaddingRight>2pt</PaddingRight>
                             <PaddingTop>2pt</PaddingTop>
@@ -797,14 +696,14 @@
                     </TablixCell>
                     <TablixCell>
                       <CellContents>
-                        <Textbox Name="Textbox22">
+                        <Textbox Name="textbox16">
                           <CanGrow>true</CanGrow>
                           <KeepTogether>true</KeepTogether>
                           <Paragraphs>
                             <Paragraph>
                               <TextRuns>
                                 <TextRun>
-                                  <Value>Alerts</Value>
+                                  <Value>include event description</Value>
                                   <Style>
                                     <FontFamily />
                                     <FontSize>11pt</FontSize>
@@ -814,20 +713,21 @@
                                 </TextRun>
                               </TextRuns>
                               <Style>
+                                <FontFamily />
                                 <TextAlign>Right</TextAlign>
                               </Style>
                             </Paragraph>
                           </Paragraphs>
-                          <rd:DefaultName>Textbox22</rd:DefaultName>
+                          <rd:DefaultName>textbox16</rd:DefaultName>
                           <Style>
                             <Border>
-                              <Color>Gainsboro</Color>
-                              <Style>None</Style>
+                              <Color>LightGrey</Color>
                             </Border>
                             <BottomBorder>
                               <Style>Solid</Style>
                             </BottomBorder>
-                            <BackgroundColor>#444444</BackgroundColor>
+                            <BackgroundColor>#3a3a3a</BackgroundColor>
+                            <FontFamily />
                             <PaddingLeft>2pt</PaddingLeft>
                             <PaddingRight>2pt</PaddingRight>
                             <PaddingTop>2pt</PaddingTop>
@@ -838,17 +738,95 @@
                     </TablixCell>
                     <TablixCell>
                       <CellContents>
-                        <Textbox Name="Textbox19">
+                        <Textbox Name="textbox17">
+                          <CanGrow>true</CanGrow>
+                          <KeepTogether>true</KeepTogether>
+                          <Paragraphs>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Value>database name</Value>
+                                  <Style>
+                                    <FontFamily />
+                                    <FontSize>11pt</FontSize>
+                                    <FontWeight>Bold</FontWeight>
+                                    <Color>White</Color>
+                                  </Style>
+                                </TextRun>
+                              </TextRuns>
+                              <Style />
+                            </Paragraph>
+                          </Paragraphs>
+                          <rd:DefaultName>textbox17</rd:DefaultName>
+                          <Style>
+                            <Border>
+                              <Color>LightGrey</Color>
+                            </Border>
+                            <BottomBorder>
+                              <Style>Solid</Style>
+                            </BottomBorder>
+                            <BackgroundColor>#3a3a3a</BackgroundColor>
+                            <FontFamily />
+                            <PaddingLeft>2pt</PaddingLeft>
+                            <PaddingRight>2pt</PaddingRight>
+                            <PaddingTop>2pt</PaddingTop>
+                            <PaddingBottom>2pt</PaddingBottom>
+                          </Style>
+                        </Textbox>
+                      </CellContents>
+                    </TablixCell>
+                    <TablixCell>
+                      <CellContents>
+                        <Textbox Name="textbox18">
+                          <CanGrow>true</CanGrow>
+                          <KeepTogether>true</KeepTogether>
+                          <Paragraphs>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Value>event description keyword</Value>
+                                  <Style>
+                                    <FontFamily />
+                                    <FontSize>11pt</FontSize>
+                                    <FontWeight>Bold</FontWeight>
+                                    <Color>White</Color>
+                                  </Style>
+                                </TextRun>
+                              </TextRuns>
+                              <Style />
+                            </Paragraph>
+                          </Paragraphs>
+                          <rd:DefaultName>textbox18</rd:DefaultName>
+                          <Style>
+                            <Border>
+                              <Color>LightGrey</Color>
+                            </Border>
+                            <BottomBorder>
+                              <Style>Solid</Style>
+                            </BottomBorder>
+                            <BackgroundColor>#3a3a3a</BackgroundColor>
+                            <FontFamily />
+                            <PaddingLeft>2pt</PaddingLeft>
+                            <PaddingRight>2pt</PaddingRight>
+                            <PaddingTop>2pt</PaddingTop>
+                            <PaddingBottom>2pt</PaddingBottom>
+                          </Style>
+                        </Textbox>
+                      </CellContents>
+                    </TablixCell>
+                    <TablixCell>
+                      <CellContents>
+                        <Textbox Name="textbox19">
                           <CanGrow>true</CanGrow>
                           <UserSort>
-                            <SortExpression>=Fields!LastMemoryDump.Value</SortExpression>
+                            <SortExpression>=Fields!occurrence_count.Value</SortExpression>
                           </UserSort>
                           <KeepTogether>true</KeepTogether>
                           <Paragraphs>
                             <Paragraph>
                               <TextRuns>
                                 <TextRun>
-                                  <Value>Memory Dump</Value>
+                                  <Value>occurrence count</Value>
                                   <Style>
                                     <FontFamily />
                                     <FontSize>11pt</FontSize>
@@ -858,20 +836,21 @@
                                 </TextRun>
                               </TextRuns>
                               <Style>
+                                <FontFamily />
                                 <TextAlign>Right</TextAlign>
                               </Style>
                             </Paragraph>
                           </Paragraphs>
-                          <rd:DefaultName>Textbox19</rd:DefaultName>
+                          <rd:DefaultName>textbox19</rd:DefaultName>
                           <Style>
                             <Border>
-                              <Color>Gainsboro</Color>
-                              <Style>None</Style>
+                              <Color>LightGrey</Color>
                             </Border>
                             <BottomBorder>
                               <Style>Solid</Style>
                             </BottomBorder>
-                            <BackgroundColor>#444444</BackgroundColor>
+                            <BackgroundColor>#3a3a3a</BackgroundColor>
+                            <FontFamily />
                             <PaddingLeft>2pt</PaddingLeft>
                             <PaddingRight>2pt</PaddingRight>
                             <PaddingTop>2pt</PaddingTop>
@@ -882,17 +861,17 @@
                     </TablixCell>
                     <TablixCell>
                       <CellContents>
-                        <Textbox Name="Textbox18">
+                        <Textbox Name="textbox21">
                           <CanGrow>true</CanGrow>
                           <UserSort>
-                            <SortExpression>=Fields!CollectionErrorStatus.Value</SortExpression>
+                            <SortExpression>=Fields!count_reset.Value</SortExpression>
                           </UserSort>
                           <KeepTogether>true</KeepTogether>
                           <Paragraphs>
                             <Paragraph>
                               <TextRuns>
                                 <TextRun>
-                                  <Value>Collection Error Status</Value>
+                                  <Value>count reset</Value>
                                   <Style>
                                     <FontFamily />
                                     <FontSize>11pt</FontSize>
@@ -901,21 +880,19 @@
                                   </Style>
                                 </TextRun>
                               </TextRuns>
-                              <Style>
-                                <TextAlign>Right</TextAlign>
-                              </Style>
+                              <Style />
                             </Paragraph>
                           </Paragraphs>
-                          <rd:DefaultName>Textbox18</rd:DefaultName>
+                          <rd:DefaultName>textbox21</rd:DefaultName>
                           <Style>
                             <Border>
-                              <Color>Gainsboro</Color>
-                              <Style>None</Style>
+                              <Color>LightGrey</Color>
                             </Border>
                             <BottomBorder>
                               <Style>Solid</Style>
                             </BottomBorder>
-                            <BackgroundColor>#444444</BackgroundColor>
+                            <BackgroundColor>#3a3a3a</BackgroundColor>
+                            <FontFamily />
                             <PaddingLeft>2pt</PaddingLeft>
                             <PaddingRight>2pt</PaddingRight>
                             <PaddingTop>2pt</PaddingTop>
@@ -926,17 +903,14 @@
                     </TablixCell>
                     <TablixCell>
                       <CellContents>
-                        <Textbox Name="Textbox17">
+                        <Textbox Name="textbox23">
                           <CanGrow>true</CanGrow>
-                          <UserSort>
-                            <SortExpression>=Fields!SnapshotAgeMax.Value</SortExpression>
-                          </UserSort>
                           <KeepTogether>true</KeepTogether>
                           <Paragraphs>
                             <Paragraph>
                               <TextRuns>
                                 <TextRun>
-                                  <Value>Snapshot Age (min)</Value>
+                                  <Value>Job Name</Value>
                                   <Style>
                                     <FontFamily />
                                     <FontSize>11pt</FontSize>
@@ -945,30 +919,19 @@
                                   </Style>
                                 </TextRun>
                               </TextRuns>
-                              <Style>
-                                <TextAlign>Right</TextAlign>
-                              </Style>
+                              <Style />
                             </Paragraph>
                           </Paragraphs>
-                          <rd:DefaultName>Textbox17</rd:DefaultName>
-                          <ActionInfo>
-                            <Actions>
-                              <Action>
-                                <Drillthrough>
-                                  <ReportName>SnapshotDates</ReportName>
-                                </Drillthrough>
-                              </Action>
-                            </Actions>
-                          </ActionInfo>
+                          <rd:DefaultName>textbox23</rd:DefaultName>
                           <Style>
                             <Border>
-                              <Color>Gainsboro</Color>
-                              <Style>None</Style>
+                              <Color>LightGrey</Color>
                             </Border>
                             <BottomBorder>
                               <Style>Solid</Style>
                             </BottomBorder>
-                            <BackgroundColor>#444444</BackgroundColor>
+                            <BackgroundColor>#3a3a3a</BackgroundColor>
+                            <FontFamily />
                             <PaddingLeft>2pt</PaddingLeft>
                             <PaddingRight>2pt</PaddingRight>
                             <PaddingTop>2pt</PaddingTop>
@@ -979,17 +942,14 @@
                     </TablixCell>
                     <TablixCell>
                       <CellContents>
-                        <Textbox Name="Textbox3">
+                        <Textbox Name="textbox24">
                           <CanGrow>true</CanGrow>
-                          <UserSort>
-                            <SortExpression>=Fields!sqlserver_uptime.Value</SortExpression>
-                          </UserSort>
                           <KeepTogether>true</KeepTogether>
                           <Paragraphs>
                             <Paragraph>
                               <TextRuns>
                                 <TextRun>
-                                  <Value>Instance uptime</Value>
+                                  <Value>has notification</Value>
                                   <Style>
                                     <FontFamily />
                                     <FontSize>11pt</FontSize>
@@ -999,20 +959,141 @@
                                 </TextRun>
                               </TextRuns>
                               <Style>
+                                <FontFamily />
                                 <TextAlign>Right</TextAlign>
                               </Style>
                             </Paragraph>
                           </Paragraphs>
-                          <rd:DefaultName>Textbox3</rd:DefaultName>
+                          <rd:DefaultName>textbox24</rd:DefaultName>
                           <Style>
                             <Border>
-                              <Color>Gainsboro</Color>
-                              <Style>None</Style>
+                              <Color>LightGrey</Color>
                             </Border>
                             <BottomBorder>
                               <Style>Solid</Style>
                             </BottomBorder>
-                            <BackgroundColor>#444444</BackgroundColor>
+                            <BackgroundColor>#3a3a3a</BackgroundColor>
+                            <FontFamily />
+                            <PaddingLeft>2pt</PaddingLeft>
+                            <PaddingRight>2pt</PaddingRight>
+                            <PaddingTop>2pt</PaddingTop>
+                            <PaddingBottom>2pt</PaddingBottom>
+                          </Style>
+                        </Textbox>
+                      </CellContents>
+                    </TablixCell>
+                    <TablixCell>
+                      <CellContents>
+                        <Textbox Name="textbox25">
+                          <CanGrow>true</CanGrow>
+                          <KeepTogether>true</KeepTogether>
+                          <Paragraphs>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Value>category id</Value>
+                                  <Style>
+                                    <FontFamily />
+                                    <FontSize>11pt</FontSize>
+                                    <FontWeight>Bold</FontWeight>
+                                    <Color>White</Color>
+                                  </Style>
+                                </TextRun>
+                              </TextRuns>
+                              <Style>
+                                <FontFamily />
+                                <TextAlign>Right</TextAlign>
+                              </Style>
+                            </Paragraph>
+                          </Paragraphs>
+                          <rd:DefaultName>textbox25</rd:DefaultName>
+                          <Style>
+                            <Border>
+                              <Color>LightGrey</Color>
+                            </Border>
+                            <BottomBorder>
+                              <Style>Solid</Style>
+                            </BottomBorder>
+                            <BackgroundColor>#3a3a3a</BackgroundColor>
+                            <FontFamily />
+                            <PaddingLeft>2pt</PaddingLeft>
+                            <PaddingRight>2pt</PaddingRight>
+                            <PaddingTop>2pt</PaddingTop>
+                            <PaddingBottom>2pt</PaddingBottom>
+                          </Style>
+                        </Textbox>
+                      </CellContents>
+                    </TablixCell>
+                    <TablixCell>
+                      <CellContents>
+                        <Textbox Name="textbox26">
+                          <CanGrow>true</CanGrow>
+                          <KeepTogether>true</KeepTogether>
+                          <Paragraphs>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Value>performance condition</Value>
+                                  <Style>
+                                    <FontFamily />
+                                    <FontSize>11pt</FontSize>
+                                    <FontWeight>Bold</FontWeight>
+                                    <Color>White</Color>
+                                  </Style>
+                                </TextRun>
+                              </TextRuns>
+                              <Style />
+                            </Paragraph>
+                          </Paragraphs>
+                          <rd:DefaultName>textbox26</rd:DefaultName>
+                          <Style>
+                            <Border>
+                              <Color>LightGrey</Color>
+                            </Border>
+                            <BottomBorder>
+                              <Style>Solid</Style>
+                            </BottomBorder>
+                            <BackgroundColor>#3a3a3a</BackgroundColor>
+                            <FontFamily />
+                            <PaddingLeft>2pt</PaddingLeft>
+                            <PaddingRight>2pt</PaddingRight>
+                            <PaddingTop>2pt</PaddingTop>
+                            <PaddingBottom>2pt</PaddingBottom>
+                          </Style>
+                        </Textbox>
+                      </CellContents>
+                    </TablixCell>
+                    <TablixCell>
+                      <CellContents>
+                        <Textbox Name="textbox27">
+                          <CanGrow>true</CanGrow>
+                          <KeepTogether>true</KeepTogether>
+                          <Paragraphs>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Value>Is Critical Alert</Value>
+                                  <Style>
+                                    <FontFamily />
+                                    <FontSize>11pt</FontSize>
+                                    <FontWeight>Bold</FontWeight>
+                                    <Color>White</Color>
+                                  </Style>
+                                </TextRun>
+                              </TextRuns>
+                              <Style />
+                            </Paragraph>
+                          </Paragraphs>
+                          <rd:DefaultName>textbox27</rd:DefaultName>
+                          <Style>
+                            <Border>
+                              <Color>LightGrey</Color>
+                            </Border>
+                            <BottomBorder>
+                              <Style>Solid</Style>
+                            </BottomBorder>
+                            <BackgroundColor>#3a3a3a</BackgroundColor>
+                            <FontFamily />
                             <PaddingLeft>2pt</PaddingLeft>
                             <PaddingRight>2pt</PaddingRight>
                             <PaddingTop>2pt</PaddingTop>
@@ -1038,6 +1119,7 @@
                                   <Value>=Fields!Instance.Value</Value>
                                   <Style>
                                     <FontFamily />
+                                    <Color>#333333</Color>
                                   </Style>
                                 </TextRun>
                               </TextRuns>
@@ -1045,12 +1127,13 @@
                             </Paragraph>
                           </Paragraphs>
                           <rd:DefaultName>Instance</rd:DefaultName>
-                          <ToolTip>=Fields!Tags.Value.ToString().Replace(",",Environment.NewLine)</ToolTip>
                           <Style>
                             <Border>
-                              <Color>Gainsboro</Color>
-                              <Style>Solid</Style>
+                              <Color>LightGrey</Color>
                             </Border>
+                            <BottomBorder>
+                              <Style>Solid</Style>
+                            </BottomBorder>
                             <FontFamily />
                             <PaddingLeft>2pt</PaddingLeft>
                             <PaddingRight>2pt</PaddingRight>
@@ -1062,50 +1145,31 @@
                     </TablixCell>
                     <TablixCell>
                       <CellContents>
-                        <Textbox Name="LogShippingStatus">
+                        <Textbox Name="name">
                           <CanGrow>true</CanGrow>
                           <KeepTogether>true</KeepTogether>
                           <Paragraphs>
                             <Paragraph>
                               <TextRuns>
                                 <TextRun>
-                                  <Value />
+                                  <Value>=Fields!name.Value</Value>
                                   <Style>
                                     <FontFamily />
+                                    <Color>#333333</Color>
                                   </Style>
                                 </TextRun>
                               </TextRuns>
                               <Style />
                             </Paragraph>
                           </Paragraphs>
-                          <rd:DefaultName>LogShippingStatus</rd:DefaultName>
-                          <ActionInfo>
-                            <Actions>
-                              <Action>
-                                <Drillthrough>
-                                  <ReportName>LogShipping</ReportName>
-                                  <Parameters>
-                                    <Parameter Name="InstanceIDs">
-                                      <Value>=Fields!InstanceID.Value</Value>
-                                    </Parameter>
-                                    <Parameter Name="FilterLevel">
-                                      <Value>4</Value>
-                                    </Parameter>
-                                  </Parameters>
-                                </Drillthrough>
-                              </Action>
-                            </Actions>
-                          </ActionInfo>
+                          <rd:DefaultName>name</rd:DefaultName>
                           <Style>
                             <Border>
-                              <Color>Gainsboro</Color>
-                              <Style>Solid</Style>
+                              <Color>LightGrey</Color>
                             </Border>
-                            <BackgroundColor>=SWITCH(Fields!LogShippingStatus.Value=1,"Red",
-Fields!LogShippingStatus.Value=2,"Yellow",
-Fields!LogShippingStatus.Value=3,"LightGrey",
-Fields!LogShippingStatus.Value=4,"Green",
-1=1,"LightGrey")</BackgroundColor>
+                            <BottomBorder>
+                              <Style>Solid</Style>
+                            </BottomBorder>
                             <FontFamily />
                             <PaddingLeft>2pt</PaddingLeft>
                             <PaddingRight>2pt</PaddingRight>
@@ -1117,102 +1181,31 @@ Fields!LogShippingStatus.Value=4,"Green",
                     </TablixCell>
                     <TablixCell>
                       <CellContents>
-                        <Textbox Name="Textbox10">
+                        <Textbox Name="message_id">
                           <CanGrow>true</CanGrow>
                           <KeepTogether>true</KeepTogether>
                           <Paragraphs>
                             <Paragraph>
                               <TextRuns>
                                 <TextRun>
-                                  <Value />
+                                  <Value>=Fields!message_id.Value</Value>
                                   <Style>
                                     <FontFamily />
+                                    <Color>#333333</Color>
                                   </Style>
                                 </TextRun>
                               </TextRuns>
                               <Style />
                             </Paragraph>
                           </Paragraphs>
-                          <rd:DefaultName>Textbox10</rd:DefaultName>
-                          <ActionInfo>
-                            <Actions>
-                              <Action>
-                                <Drillthrough>
-                                  <ReportName>Backups</ReportName>
-                                  <Parameters>
-                                    <Parameter Name="InstanceIDs">
-                                      <Value>=Fields!InstanceID.Value</Value>
-                                    </Parameter>
-                                    <Parameter Name="FilterLevel">
-                                      <Value>4</Value>
-                                    </Parameter>
-                                  </Parameters>
-                                </Drillthrough>
-                              </Action>
-                            </Actions>
-                          </ActionInfo>
+                          <rd:DefaultName>message_id</rd:DefaultName>
                           <Style>
                             <Border>
-                              <Color>Gainsboro</Color>
-                              <Style>Solid</Style>
+                              <Color>LightGrey</Color>
                             </Border>
-                            <BackgroundColor>=SWITCH(Fields!FullBackupStatus.Value=1,"Red",
-Fields!FullBackupStatus.Value=2,"Yellow",
-Fields!FullBackupStatus.Value=4,"Green",
-1=1,"LightGrey")</BackgroundColor>
-                            <PaddingLeft>2pt</PaddingLeft>
-                            <PaddingRight>2pt</PaddingRight>
-                            <PaddingTop>2pt</PaddingTop>
-                            <PaddingBottom>2pt</PaddingBottom>
-                          </Style>
-                        </Textbox>
-                      </CellContents>
-                    </TablixCell>
-                    <TablixCell>
-                      <CellContents>
-                        <Textbox Name="LogBackupStatus">
-                          <CanGrow>true</CanGrow>
-                          <KeepTogether>true</KeepTogether>
-                          <Paragraphs>
-                            <Paragraph>
-                              <TextRuns>
-                                <TextRun>
-                                  <Value />
-                                  <Style>
-                                    <FontFamily />
-                                  </Style>
-                                </TextRun>
-                              </TextRuns>
-                              <Style />
-                            </Paragraph>
-                          </Paragraphs>
-                          <rd:DefaultName>LogBackupStatus</rd:DefaultName>
-                          <ActionInfo>
-                            <Actions>
-                              <Action>
-                                <Drillthrough>
-                                  <ReportName>Backups</ReportName>
-                                  <Parameters>
-                                    <Parameter Name="InstanceIDs">
-                                      <Value>=Fields!InstanceID.Value</Value>
-                                    </Parameter>
-                                    <Parameter Name="FilterLevel">
-                                      <Value>4</Value>
-                                    </Parameter>
-                                  </Parameters>
-                                </Drillthrough>
-                              </Action>
-                            </Actions>
-                          </ActionInfo>
-                          <Style>
-                            <Border>
-                              <Color>Gainsboro</Color>
+                            <BottomBorder>
                               <Style>Solid</Style>
-                            </Border>
-                            <BackgroundColor>=SWITCH(Fields!LogBackupStatus.Value=1,"Red",
-Fields!LogBackupStatus.Value=2,"Yellow",
-Fields!LogBackupStatus.Value=4,"Green",
-1=1,"LightGrey")</BackgroundColor>
+                            </BottomBorder>
                             <FontFamily />
                             <PaddingLeft>2pt</PaddingLeft>
                             <PaddingRight>2pt</PaddingRight>
@@ -1224,49 +1217,31 @@ Fields!LogBackupStatus.Value=4,"Green",
                     </TablixCell>
                     <TablixCell>
                       <CellContents>
-                        <Textbox Name="DiffBackupStatus">
+                        <Textbox Name="severity">
                           <CanGrow>true</CanGrow>
                           <KeepTogether>true</KeepTogether>
                           <Paragraphs>
                             <Paragraph>
                               <TextRuns>
                                 <TextRun>
-                                  <Value />
+                                  <Value>=Fields!severity.Value</Value>
                                   <Style>
                                     <FontFamily />
+                                    <Color>#333333</Color>
                                   </Style>
                                 </TextRun>
                               </TextRuns>
                               <Style />
                             </Paragraph>
                           </Paragraphs>
-                          <rd:DefaultName>DiffBackupStatus</rd:DefaultName>
-                          <ActionInfo>
-                            <Actions>
-                              <Action>
-                                <Drillthrough>
-                                  <ReportName>Backups</ReportName>
-                                  <Parameters>
-                                    <Parameter Name="InstanceIDs">
-                                      <Value>=Fields!InstanceID.Value</Value>
-                                    </Parameter>
-                                    <Parameter Name="FilterLevel">
-                                      <Value>4</Value>
-                                    </Parameter>
-                                  </Parameters>
-                                </Drillthrough>
-                              </Action>
-                            </Actions>
-                          </ActionInfo>
+                          <rd:DefaultName>severity</rd:DefaultName>
                           <Style>
                             <Border>
-                              <Color>Gainsboro</Color>
-                              <Style>Solid</Style>
+                              <Color>LightGrey</Color>
                             </Border>
-                            <BackgroundColor>=SWITCH(Fields!DiffBackupStatus.Value=1,"Red",
-Fields!DiffBackupStatus.Value=2,"Yellow",
-Fields!DiffBackupStatus.Value=4,"Green",
-1=1,"LightGrey")</BackgroundColor>
+                            <BottomBorder>
+                              <Style>Solid</Style>
+                            </BottomBorder>
                             <FontFamily />
                             <PaddingLeft>2pt</PaddingLeft>
                             <PaddingRight>2pt</PaddingRight>
@@ -1278,49 +1253,31 @@ Fields!DiffBackupStatus.Value=4,"Green",
                     </TablixCell>
                     <TablixCell>
                       <CellContents>
-                        <Textbox Name="DriveStatus">
+                        <Textbox Name="enabled">
                           <CanGrow>true</CanGrow>
                           <KeepTogether>true</KeepTogether>
                           <Paragraphs>
                             <Paragraph>
                               <TextRuns>
                                 <TextRun>
-                                  <Value />
+                                  <Value>=IIF(Fields!enabled.Value,"Y","N")</Value>
                                   <Style>
                                     <FontFamily />
+                                    <Color>#333333</Color>
                                   </Style>
                                 </TextRun>
                               </TextRuns>
                               <Style />
                             </Paragraph>
                           </Paragraphs>
-                          <rd:DefaultName>DriveStatus</rd:DefaultName>
-                          <ActionInfo>
-                            <Actions>
-                              <Action>
-                                <Drillthrough>
-                                  <ReportName>Drives</ReportName>
-                                  <Parameters>
-                                    <Parameter Name="InstanceIDs">
-                                      <Value>=Fields!InstanceID.Value</Value>
-                                    </Parameter>
-                                    <Parameter Name="FilterLevel">
-                                      <Value>4</Value>
-                                    </Parameter>
-                                  </Parameters>
-                                </Drillthrough>
-                              </Action>
-                            </Actions>
-                          </ActionInfo>
+                          <rd:DefaultName>enabled</rd:DefaultName>
                           <Style>
                             <Border>
-                              <Color>Gainsboro</Color>
-                              <Style>Solid</Style>
+                              <Color>LightGrey</Color>
                             </Border>
-                            <BackgroundColor>=SWITCH(Fields!DriveStatus.Value=1,"Red",
-Fields!DriveStatus.Value=2,"Yellow",
-Fields!DriveStatus.Value=4,"Green",
-1=1,"LightGrey")</BackgroundColor>
+                            <BottomBorder>
+                              <Style>Solid</Style>
+                            </BottomBorder>
                             <FontFamily />
                             <PaddingLeft>2pt</PaddingLeft>
                             <PaddingRight>2pt</PaddingRight>
@@ -1332,49 +1289,153 @@ Fields!DriveStatus.Value=4,"Green",
                     </TablixCell>
                     <TablixCell>
                       <CellContents>
-                        <Textbox Name="Textbox14">
+                        <Textbox Name="delay_between_responses">
                           <CanGrow>true</CanGrow>
                           <KeepTogether>true</KeepTogether>
                           <Paragraphs>
                             <Paragraph>
                               <TextRuns>
                                 <TextRun>
-                                  <Value />
+                                  <Value>=Fields!delay_between_responses.Value</Value>
                                   <Style>
                                     <FontFamily />
+                                    <Color>#333333</Color>
                                   </Style>
                                 </TextRun>
                               </TextRuns>
                               <Style />
                             </Paragraph>
                           </Paragraphs>
-                          <rd:DefaultName>Textbox14</rd:DefaultName>
-                          <ActionInfo>
-                            <Actions>
-                              <Action>
-                                <Drillthrough>
-                                  <ReportName>AgentJobs</ReportName>
-                                  <Parameters>
-                                    <Parameter Name="InstanceIDs">
-                                      <Value>=Fields!InstanceID.Value</Value>
-                                    </Parameter>
-                                    <Parameter Name="FilterLevel">
-                                      <Value>4</Value>
-                                    </Parameter>
-                                  </Parameters>
-                                </Drillthrough>
-                              </Action>
-                            </Actions>
-                          </ActionInfo>
+                          <rd:DefaultName>delay_between_responses</rd:DefaultName>
                           <Style>
                             <Border>
-                              <Color>Gainsboro</Color>
-                              <Style>Solid</Style>
+                              <Color>LightGrey</Color>
                             </Border>
-                            <BackgroundColor>=SWITCH(Fields!JobStatus.Value=1,"Red",
-Fields!JobStatus.Value=2,"Yellow",
-Fields!JobStatus.Value=4,"Green",
-1=1,"LightGrey")</BackgroundColor>
+                            <BottomBorder>
+                              <Style>Solid</Style>
+                            </BottomBorder>
+                            <FontFamily />
+                            <PaddingLeft>2pt</PaddingLeft>
+                            <PaddingRight>2pt</PaddingRight>
+                            <PaddingTop>2pt</PaddingTop>
+                            <PaddingBottom>2pt</PaddingBottom>
+                          </Style>
+                        </Textbox>
+                      </CellContents>
+                    </TablixCell>
+                    <TablixCell>
+                      <CellContents>
+                        <Textbox Name="last_occurrence_utc">
+                          <CanGrow>true</CanGrow>
+                          <KeepTogether>true</KeepTogether>
+                          <Paragraphs>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Value>=IIF(isnothing(Fields!last_occurrence_utc.Value),"",
+System.TimeZone.CurrentTimeZone.ToLocalTime(Fields!last_occurrence_utc.Value))</Value>
+                                  <Style>
+                                    <FontFamily />
+                                    <Format>=Parameters!DateFormat.Value</Format>
+                                    <Color>#333333</Color>
+                                  </Style>
+                                </TextRun>
+                              </TextRuns>
+                              <Style />
+                            </Paragraph>
+                          </Paragraphs>
+                          <rd:DefaultName>last_occurrence_utc</rd:DefaultName>
+                          <ToolTip>="Local Time (Server): " + format(Fields!last_occurrence.Value,Parameters!DateFormat.Value) + Environment.NewLine + 
+"UTC: " + format(Fields!last_occurrence_utc.Value,Parameters!DateFormat.Value)</ToolTip>
+                          <Style>
+                            <Border>
+                              <Color>LightGrey</Color>
+                            </Border>
+                            <BottomBorder>
+                              <Style>Solid</Style>
+                            </BottomBorder>
+                            <FontFamily />
+                            <PaddingLeft>2pt</PaddingLeft>
+                            <PaddingRight>2pt</PaddingRight>
+                            <PaddingTop>2pt</PaddingTop>
+                            <PaddingBottom>2pt</PaddingBottom>
+                          </Style>
+                        </Textbox>
+                      </CellContents>
+                    </TablixCell>
+                    <TablixCell>
+                      <CellContents>
+                        <Textbox Name="Textbox4">
+                          <CanGrow>true</CanGrow>
+                          <KeepTogether>true</KeepTogether>
+                          <Paragraphs>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Value>=switch(isnothing(Fields!last_occurrence_utc.Value),"",
+DateTime.UtcNow.Subtract(iif(isnothing(Fields!last_occurrence_utc.Value),"1900-01-01",Fields!last_occurrence_utc.Value)).TotalMinutes&lt;120, " (" + format(DateTime.UtcNow.Subtract(iif(isnothing(Fields!last_occurrence_utc.Value),"1900-01-01",Fields!last_occurrence_utc.Value)).TotalMinutes,"#") + " mins)",
+DateTime.UtcNow.Subtract(iif(isnothing(Fields!last_occurrence_utc.Value),"1900-01-01",Fields!last_occurrence_utc.Value)).TotalHours&lt;48," (" + format(DateTime.UtcNow.Subtract(iif(isnothing(Fields!last_occurrence_utc.Value),"1900-01-01",Fields!last_occurrence_utc.Value)).TotalHours,"#") + " hrs)",
+1=1," (" + format(DateTime.UtcNow.Subtract(iif(isnothing(Fields!last_occurrence_utc.Value),"1900-01-01",Fields!last_occurrence_utc.Value)).TotalDays,"#") + " days)"
+)</Value>
+                                  <Style>
+                                    <FontFamily />
+                                    <Color>#333333</Color>
+                                  </Style>
+                                </TextRun>
+                              </TextRuns>
+                              <Style />
+                            </Paragraph>
+                          </Paragraphs>
+                          <rd:DefaultName>Textbox4</rd:DefaultName>
+                          <Style>
+                            <Border>
+                              <Color>LightGrey</Color>
+                            </Border>
+                            <BottomBorder>
+                              <Style>Solid</Style>
+                            </BottomBorder>
+                            <PaddingLeft>2pt</PaddingLeft>
+                            <PaddingRight>2pt</PaddingRight>
+                            <PaddingTop>2pt</PaddingTop>
+                            <PaddingBottom>2pt</PaddingBottom>
+                          </Style>
+                        </Textbox>
+                      </CellContents>
+                    </TablixCell>
+                    <TablixCell>
+                      <CellContents>
+                        <Textbox Name="last_response_utc">
+                          <CanGrow>true</CanGrow>
+                          <KeepTogether>true</KeepTogether>
+                          <Paragraphs>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Value>=iif(isnothing(Fields!last_response_utc.Value),"",
+System.TimeZone.CurrentTimeZone.ToLocalTime(Fields!last_response_utc.Value)
+)</Value>
+                                  <Style>
+                                    <FontFamily />
+                                    <Format>=Parameters!DateFormat.Value</Format>
+                                    <Color>#333333</Color>
+                                  </Style>
+                                </TextRun>
+                              </TextRuns>
+                              <Style />
+                            </Paragraph>
+                          </Paragraphs>
+                          <rd:DefaultName>last_response_utc</rd:DefaultName>
+                          <ToolTip>="Local Time (Server):" 
++ format(Fields!last_response.Value,Parameters!DateFormat.Value) &amp; Environment.NewLine
++ "UTC:" &amp; format(Fields!last_response_utc.Value,Parameters!DateFormat.Value)</ToolTip>
+                          <Style>
+                            <Border>
+                              <Color>LightGrey</Color>
+                            </Border>
+                            <BottomBorder>
+                              <Style>Solid</Style>
+                            </BottomBorder>
+                            <FontFamily />
                             <PaddingLeft>2pt</PaddingLeft>
                             <PaddingRight>2pt</PaddingRight>
                             <PaddingTop>2pt</PaddingTop>
@@ -1392,9 +1453,14 @@ Fields!JobStatus.Value=4,"Green",
                             <Paragraph>
                               <TextRuns>
                                 <TextRun>
-                                  <Value />
+                                  <Value>=switch(isnothing(Fields!last_response_utc.Value),"",
+DateTime.UtcNow.Subtract(iif(isnothing(Fields!last_response_utc.Value),"1900-01-01",Fields!last_response_utc.Value)).TotalMinutes&lt;120, " (" + format(DateTime.UtcNow.Subtract(iif(isnothing(Fields!last_response_utc.Value),"1900-01-01",Fields!last_response_utc.Value)).TotalMinutes,"#") + " mins)",
+DateTime.UtcNow.Subtract(iif(isnothing(Fields!last_response_utc.Value),"1900-01-01",Fields!last_response_utc.Value)).TotalHours&lt;48," (" + format(DateTime.UtcNow.Subtract(iif(isnothing(Fields!last_response_utc.Value),"1900-01-01",Fields!last_response_utc.Value)).TotalHours,"#") + " hrs)",
+1=1," (" + format(DateTime.UtcNow.Subtract(iif(isnothing(Fields!last_response_utc.Value),"1900-01-01",Fields!last_response_utc.Value)).TotalDays,"#") + " days)"
+)</Value>
                                   <Style>
                                     <FontFamily />
+                                    <Color>#333333</Color>
                                   </Style>
                                 </TextRun>
                               </TextRuns>
@@ -1402,32 +1468,13 @@ Fields!JobStatus.Value=4,"Green",
                             </Paragraph>
                           </Paragraphs>
                           <rd:DefaultName>Textbox11</rd:DefaultName>
-                          <ActionInfo>
-                            <Actions>
-                              <Action>
-                                <Drillthrough>
-                                  <ReportName>Files</ReportName>
-                                  <Parameters>
-                                    <Parameter Name="InstanceIDs">
-                                      <Value>=Fields!InstanceID.Value</Value>
-                                    </Parameter>
-                                    <Parameter Name="FilterLevel">
-                                      <Value>4</Value>
-                                    </Parameter>
-                                  </Parameters>
-                                </Drillthrough>
-                              </Action>
-                            </Actions>
-                          </ActionInfo>
                           <Style>
                             <Border>
-                              <Color>Gainsboro</Color>
-                              <Style>Solid</Style>
+                              <Color>LightGrey</Color>
                             </Border>
-                            <BackgroundColor>=SWITCH(Fields!FileFreeSpaceStatus.Value=1,"Red",
-Fields!FileFreeSpaceStatus.Value=2,"Yellow",
-Fields!FileFreeSpaceStatus.Value=4,"Green",
-1=1,"LightGrey")</BackgroundColor>
+                            <BottomBorder>
+                              <Style>Solid</Style>
+                            </BottomBorder>
                             <PaddingLeft>2pt</PaddingLeft>
                             <PaddingRight>2pt</PaddingRight>
                             <PaddingTop>2pt</PaddingTop>
@@ -1438,32 +1485,32 @@ Fields!FileFreeSpaceStatus.Value=4,"Green",
                     </TablixCell>
                     <TablixCell>
                       <CellContents>
-                        <Textbox Name="Textbox15">
+                        <Textbox Name="notification_message">
                           <CanGrow>true</CanGrow>
                           <KeepTogether>true</KeepTogether>
                           <Paragraphs>
                             <Paragraph>
                               <TextRuns>
                                 <TextRun>
-                                  <Value />
+                                  <Value>=Fields!notification_message.Value</Value>
                                   <Style>
                                     <FontFamily />
+                                    <Color>#333333</Color>
                                   </Style>
                                 </TextRun>
                               </TextRuns>
                               <Style />
                             </Paragraph>
                           </Paragraphs>
-                          <rd:DefaultName>Textbox15</rd:DefaultName>
+                          <rd:DefaultName>notification_message</rd:DefaultName>
                           <Style>
                             <Border>
-                              <Color>Gainsboro</Color>
-                              <Style>Solid</Style>
+                              <Color>LightGrey</Color>
                             </Border>
-                            <BackgroundColor>=SWITCH(Fields!AGStatus.Value=1,"Red",
-Fields!AGStatus.Value=2,"Yellow",
-Fields!AGStatus.Value=4,"Green",
-1=1,"LightGrey")</BackgroundColor>
+                            <BottomBorder>
+                              <Style>Solid</Style>
+                            </BottomBorder>
+                            <FontFamily />
                             <PaddingLeft>2pt</PaddingLeft>
                             <PaddingRight>2pt</PaddingRight>
                             <PaddingTop>2pt</PaddingTop>
@@ -1474,36 +1521,32 @@ Fields!AGStatus.Value=4,"Green",
                     </TablixCell>
                     <TablixCell>
                       <CellContents>
-                        <Textbox Name="DetectedCorruptionDate">
+                        <Textbox Name="include_event_description">
                           <CanGrow>true</CanGrow>
                           <KeepTogether>true</KeepTogether>
                           <Paragraphs>
                             <Paragraph>
                               <TextRuns>
                                 <TextRun>
-                                  <Value>=Fields!DetectedCorruptionDate.Value</Value>
+                                  <Value>=Fields!include_event_description.Value</Value>
                                   <Style>
                                     <FontFamily />
-                                    <Format>=Parameters!DateFormat.Value</Format>
+                                    <Color>#333333</Color>
                                   </Style>
                                 </TextRun>
                               </TextRuns>
                               <Style />
                             </Paragraph>
                           </Paragraphs>
-                          <rd:DefaultName>DetectedCorruptionDate</rd:DefaultName>
-                          <ToolTip>=IIF(ISNOTHING(Fields!DetectedCorruptionDate.Value),"",
-"Check these tables: sys.dm_hadr_auto_page_repair, sys.dm_db_mirroring_auto_page_repair, msdb.dbo.suspect_pages")</ToolTip>
+                          <rd:DefaultName>include_event_description</rd:DefaultName>
                           <Style>
                             <Border>
-                              <Color>Gainsboro</Color>
-                              <Style>Solid</Style>
+                              <Color>LightGrey</Color>
                             </Border>
-                            <BackgroundColor>=SWITCH(IsNothing(Fields!DetectedCorruptionDate.Value),"Green",
-DateTime.UtcNow.Subtract(CDATE(Fields!DetectedCorruptionDate.Value)).TotalDays&lt;14,"Red",
-DateTime.UtcNow.Subtract(CDATE(Fields!DetectedCorruptionDate.Value)).TotalDays&lt;30,"Yellow",
-1=1,"LightGrey"
-)</BackgroundColor>
+                            <BottomBorder>
+                              <Style>Solid</Style>
+                            </BottomBorder>
+                            <FontFamily />
                             <PaddingLeft>2pt</PaddingLeft>
                             <PaddingRight>2pt</PaddingRight>
                             <PaddingTop>2pt</PaddingTop>
@@ -1514,56 +1557,32 @@ DateTime.UtcNow.Subtract(CDATE(Fields!DetectedCorruptionDate.Value)).TotalDays&l
                     </TablixCell>
                     <TablixCell>
                       <CellContents>
-                        <Textbox Name="Textbox21">
+                        <Textbox Name="database_name">
                           <CanGrow>true</CanGrow>
                           <KeepTogether>true</KeepTogether>
                           <Paragraphs>
                             <Paragraph>
                               <TextRuns>
                                 <TextRun>
-                                  <Value>=IIF(isnothing(Fields!OldestLastGoodCheckDBTime.Value),"", 
-IIF(Fields!OldestLastGoodCheckDBTime.Value=Datetime.Parse("1900-01-01"),"Never",
-Fields!DaysSinceLastGoodCheckDB.Value &amp; " Days"))</Value>
+                                  <Value>=Fields!database_name.Value</Value>
                                   <Style>
                                     <FontFamily />
+                                    <Color>#333333</Color>
                                   </Style>
                                 </TextRun>
                               </TextRuns>
                               <Style />
                             </Paragraph>
                           </Paragraphs>
-                          <rd:DefaultName>Textbox21</rd:DefaultName>
-                          <ActionInfo>
-                            <Actions>
-                              <Action>
-                                <Drillthrough>
-                                  <ReportName>Last Good CheckDB</ReportName>
-                                  <Parameters>
-                                    <Parameter Name="InstanceIDs">
-                                      <Value>=Fields!InstanceID.Value</Value>
-                                    </Parameter>
-                                    <Parameter Name="FilterLevel">
-                                      <Value>4</Value>
-                                    </Parameter>
-                                  </Parameters>
-                                </Drillthrough>
-                              </Action>
-                            </Actions>
-                          </ActionInfo>
-                          <ToolTip>="Critical:" &amp; Fields!LastGoodCheckDBCriticalCount.Value &amp; Environment.NewLine &amp; 
-"Warning:" &amp; Fields!LastGoodCheckDBWarningCount.Value &amp; Environment.NewLine &amp;
-"Healthy:" &amp; Fields!LastGoodCheckDBHealthyCount.Value &amp; Environment.NewLine &amp;
-"N/A:" &amp; Fields!LastGoodCheckDBNACount.Value &amp; Environment.NewLine &amp;
-"Last Good CheckDB Date:" &amp; Format(Fields!OldestLastGoodCheckDBTime.Value,Parameters!DateFormat.Value)</ToolTip>
+                          <rd:DefaultName>database_name</rd:DefaultName>
                           <Style>
                             <Border>
-                              <Color>Gainsboro</Color>
-                              <Style>Solid</Style>
+                              <Color>LightGrey</Color>
                             </Border>
-                            <BackgroundColor>=SWITCH(Fields!LastGoodCheckDBStatus.Value=1,"Red",
-Fields!LastGoodCheckDBStatus.Value=2,"Yellow",
-Fields!LastGoodCheckDBStatus.Value=4,"Green",
-1=1,"LightGray")</BackgroundColor>
+                            <BottomBorder>
+                              <Style>Solid</Style>
+                            </BottomBorder>
+                            <FontFamily />
                             <PaddingLeft>2pt</PaddingLeft>
                             <PaddingRight>2pt</PaddingRight>
                             <PaddingTop>2pt</PaddingTop>
@@ -1574,105 +1593,109 @@ Fields!LastGoodCheckDBStatus.Value=4,"Green",
                     </TablixCell>
                     <TablixCell>
                       <CellContents>
-                        <Textbox Name="Textbox23">
+                        <Textbox Name="event_description_keyword">
                           <CanGrow>true</CanGrow>
                           <KeepTogether>true</KeepTogether>
                           <Paragraphs>
                             <Paragraph>
                               <TextRuns>
                                 <TextRun>
-                                  <Value>=switch(isnothing(Fields!LastAlert.Value),"",
-DateTime.UtcNow.Subtract(iif(isnothing(Fields!LastAlert.Value),"1900-01-01",Fields!LastAlert.Value)).TotalMinutes&lt;120,format(DateTime.UtcNow.Subtract(iif(isnothing(Fields!LastAlert.Value),"1900-01-01",Fields!LastAlert.Value)).TotalMinutes,"#") + " mins",
-DateTime.UtcNow.Subtract(iif(isnothing(Fields!LastAlert.Value),"1900-01-01",Fields!LastAlert.Value)).TotalHours&lt;48,format(DateTime.UtcNow.Subtract(iif(isnothing(Fields!LastAlert.Value),"1900-01-01",Fields!LastAlert.Value)).TotalHours,"#") + " hrs",
-1=1,format(DateTime.UtcNow.Subtract(iif(isnothing(Fields!LastAlert.Value),"1900-01-01",Fields!LastAlert.Value)).TotalDays,"#") + " days"
+                                  <Value>=Fields!event_description_keyword.Value</Value>
+                                  <Style>
+                                    <FontFamily />
+                                    <Color>#333333</Color>
+                                  </Style>
+                                </TextRun>
+                              </TextRuns>
+                              <Style />
+                            </Paragraph>
+                          </Paragraphs>
+                          <rd:DefaultName>event_description_keyword</rd:DefaultName>
+                          <Style>
+                            <Border>
+                              <Color>LightGrey</Color>
+                            </Border>
+                            <BottomBorder>
+                              <Style>Solid</Style>
+                            </BottomBorder>
+                            <FontFamily />
+                            <PaddingLeft>2pt</PaddingLeft>
+                            <PaddingRight>2pt</PaddingRight>
+                            <PaddingTop>2pt</PaddingTop>
+                            <PaddingBottom>2pt</PaddingBottom>
+                          </Style>
+                        </Textbox>
+                      </CellContents>
+                    </TablixCell>
+                    <TablixCell>
+                      <CellContents>
+                        <Textbox Name="occurrence_count">
+                          <CanGrow>true</CanGrow>
+                          <KeepTogether>true</KeepTogether>
+                          <Paragraphs>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Value>=Fields!occurrence_count.Value</Value>
+                                  <Style>
+                                    <FontFamily />
+                                    <Color>#333333</Color>
+                                  </Style>
+                                </TextRun>
+                              </TextRuns>
+                              <Style />
+                            </Paragraph>
+                          </Paragraphs>
+                          <rd:DefaultName>occurrence_count</rd:DefaultName>
+                          <Style>
+                            <Border>
+                              <Color>LightGrey</Color>
+                            </Border>
+                            <BottomBorder>
+                              <Style>Solid</Style>
+                            </BottomBorder>
+                            <FontFamily />
+                            <PaddingLeft>2pt</PaddingLeft>
+                            <PaddingRight>2pt</PaddingRight>
+                            <PaddingTop>2pt</PaddingTop>
+                            <PaddingBottom>2pt</PaddingBottom>
+                          </Style>
+                        </Textbox>
+                      </CellContents>
+                    </TablixCell>
+                    <TablixCell>
+                      <CellContents>
+                        <Textbox Name="count_reset_utc">
+                          <CanGrow>true</CanGrow>
+                          <KeepTogether>true</KeepTogether>
+                          <Paragraphs>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Value>=iif(isnothing(Fields!count_reset_utc.Value),"",
+System.TimeZone.CurrentTimeZone.ToLocalTime(Fields!count_reset_utc.Value)
 )</Value>
                                   <Style>
                                     <FontFamily />
                                     <Format>=Parameters!DateFormat.Value</Format>
+                                    <Color>#333333</Color>
                                   </Style>
                                 </TextRun>
                               </TextRuns>
                               <Style />
                             </Paragraph>
                           </Paragraphs>
-                          <rd:DefaultName>Textbox23</rd:DefaultName>
-                          <ActionInfo>
-                            <Actions>
-                              <Action>
-                                <Drillthrough>
-                                  <ReportName>Alerts</ReportName>
-                                  <Parameters>
-                                    <Parameter Name="InstanceIDs">
-                                      <Value>=Fields!InstanceID.Value</Value>
-                                    </Parameter>
-                                  </Parameters>
-                                </Drillthrough>
-                              </Action>
-                            </Actions>
-                          </ActionInfo>
-                          <ToolTip>="Last Alert: " + IIF(isnothing(Fields!LastAlert.Value),"Never",
-System.TimeZone.CurrentTimeZone.ToLocalTime(Fields!LastAlert.Value)) + Environment.NewLine +
-"Last Critical Alert:" + IIF(isnothing(Fields!LastCritical.Value),"Never", System.TimeZone.CurrentTimeZone.ToLocalTime(Fields!LastCritical.Value))</ToolTip>
+                          <rd:DefaultName>count_reset_utc</rd:DefaultName>
+                          <ToolTip>="Local Time (Server): " &amp; format(Fields!count_reset.Value,Parameters!DateFormat.Value) &amp; Environment.NewLine &amp; 
+"UTC:" &amp; format(Fields!last_occurrence_utc.Value,Parameters!DateFormat.Value)</ToolTip>
                           <Style>
                             <Border>
-                              <Color>Gainsboro</Color>
-                              <Style>Solid</Style>
+                              <Color>LightGrey</Color>
                             </Border>
-                            <BackgroundColor>=SWITCH(
-isnothing(Fields!AlertSnapshotDate.Value),"LightGray",
-DateTime.UtcNow.Subtract(IIF(isnothing(Fields!LastCritical.Value),"1900-01-01",Fields!LastCritical.Value)).TotalHours&lt;168
-,"Red",
-DateTime.UtcNow.Subtract(iif(isnothing(Fields!LastAlert.Value),"1900-01-01",Fields!LastAlert.Value)).TotalHours&lt;72,"Yellow",
-DateTime.UtcNow.Subtract(iif(isnothing(Fields!AlertSnapshotDate.Value),"1900-01-01",Fields!AlertSnapshotDate.Value)).TotalHours&gt;24,"LightGray",
-DateTime.UtcNow.Subtract(iif(isnothing(Fields!LastAlert.Value),"1900-01-01",Fields!LastAlert.Value)).TotalHours&gt;=72,"Green",
-1=1,"LightGray")</BackgroundColor>
-                            <PaddingLeft>2pt</PaddingLeft>
-                            <PaddingRight>2pt</PaddingRight>
-                            <PaddingTop>2pt</PaddingTop>
-                            <PaddingBottom>2pt</PaddingBottom>
-                          </Style>
-                        </Textbox>
-                        <rd:Selected>true</rd:Selected>
-                      </CellContents>
-                    </TablixCell>
-                    <TablixCell>
-                      <CellContents>
-                        <Textbox Name="LastMemoryDump">
-                          <CanGrow>true</CanGrow>
-                          <KeepTogether>true</KeepTogether>
-                          <Paragraphs>
-                            <Paragraph>
-                              <TextRuns>
-                                <TextRun>
-                                  <Value>=SWITCH(isnothing(Fields!MemoryDumpCount.Value),"UNK",
-Fields!MemoryDumpCount.Value=0,"",
-DateTime.UtcNow.Subtract(CDATE(Fields!LastMemoryDump.Value)).TotalDays&lt;1,"Today",
-DateTime.UtcNow.Subtract(CDATE(Fields!LastMemoryDump.Value)).TotalDays&lt;2,"Yesterday",
-1=1,Format(DateTime.UtcNow.Subtract(CDATE(Fields!LastMemoryDump.Value)).TotalDays,"0") &amp; " Days ago"
-)</Value>
-                                  <Style>
-                                    <FontFamily />
-                                  </Style>
-                                </TextRun>
-                              </TextRuns>
-                              <Style />
-                            </Paragraph>
-                          </Paragraphs>
-                          <rd:DefaultName>LastMemoryDump</rd:DefaultName>
-                          <ToolTip>=SWITCH(isnothing(Fields!MemoryDumpCount.Value),"",
-1=1,"Total Memory dumps:" &amp; Fields!MemoryDumpCount.Value.ToString()
-)</ToolTip>
-                          <Style>
-                            <Border>
-                              <Color>Gainsboro</Color>
+                            <BottomBorder>
                               <Style>Solid</Style>
-                            </Border>
-                            <BackgroundColor>=SWITCH(isnothing(Fields!MemoryDumpCount.Value),"LightGrey",
-Fields!MemoryDumpCount.Value=0,"Green",
-DateTime.UtcNow.Subtract(CDATE(Fields!LastMemoryDump.Value)).TotalDays&lt;2,"Red",
-DateTime.UtcNow.Subtract(CDATE(Fields!LastMemoryDump.Value)).TotalDays&lt;8,"Yellow",
-1=1,"Green"
-)</BackgroundColor>
+                            </BottomBorder>
+                            <FontFamily />
                             <PaddingLeft>2pt</PaddingLeft>
                             <PaddingRight>2pt</PaddingRight>
                             <PaddingTop>2pt</PaddingTop>
@@ -1683,46 +1706,32 @@ DateTime.UtcNow.Subtract(CDATE(Fields!LastMemoryDump.Value)).TotalDays&lt;8,"Yel
                     </TablixCell>
                     <TablixCell>
                       <CellContents>
-                        <Textbox Name="CollectionErrorStatus">
+                        <Textbox Name="JobName">
                           <CanGrow>true</CanGrow>
                           <KeepTogether>true</KeepTogether>
                           <Paragraphs>
                             <Paragraph>
                               <TextRuns>
                                 <TextRun>
-                                  <Value />
+                                  <Value>=iif(isnothing(Fields!JobName.Value),Fields!job_id.Value,Fields!JobName.Value)</Value>
                                   <Style>
                                     <FontFamily />
+                                    <Color>#333333</Color>
                                   </Style>
                                 </TextRun>
                               </TextRuns>
                               <Style />
                             </Paragraph>
                           </Paragraphs>
-                          <rd:DefaultName>CollectionErrorStatus</rd:DefaultName>
-                          <ActionInfo>
-                            <Actions>
-                              <Action>
-                                <Drillthrough>
-                                  <ReportName>DBAChecks Error Log</ReportName>
-                                  <Parameters>
-                                    <Parameter Name="InstanceID">
-                                      <Value>=Fields!InstanceID.Value</Value>
-                                    </Parameter>
-                                  </Parameters>
-                                </Drillthrough>
-                              </Action>
-                            </Actions>
-                          </ActionInfo>
+                          <rd:DefaultName>JobName</rd:DefaultName>
                           <Style>
                             <Border>
-                              <Color>Gainsboro</Color>
-                              <Style>Solid</Style>
+                              <Color>LightGrey</Color>
                             </Border>
-                            <BackgroundColor>=SWITCH(Fields!CollectionErrorStatus.Value=1,"Red",
-Fields!CollectionErrorStatus.Value=2,"Yellow",
-Fields!CollectionErrorStatus.Value=4,"Green",
-1=1,"LightGrey")</BackgroundColor>
+                            <BottomBorder>
+                              <Style>Solid</Style>
+                            </BottomBorder>
+                            <FontFamily />
                             <PaddingLeft>2pt</PaddingLeft>
                             <PaddingRight>2pt</PaddingRight>
                             <PaddingTop>2pt</PaddingTop>
@@ -1733,54 +1742,32 @@ Fields!CollectionErrorStatus.Value=4,"Green",
                     </TablixCell>
                     <TablixCell>
                       <CellContents>
-                        <Textbox Name="SnapshotAgeMin">
+                        <Textbox Name="has_notification">
                           <CanGrow>true</CanGrow>
                           <KeepTogether>true</KeepTogether>
                           <Paragraphs>
                             <Paragraph>
                               <TextRuns>
                                 <TextRun>
-                                  <Value>=IIF(Fields!SnapshotAgeMin.Value=Fields!SnapshotAgeMax.Value,
-Fields!SnapshotAgeMax.Value,
-Fields!SnapshotAgeMin.Value &amp; " to " &amp; Fields!SnapshotAgeMax.Value)</Value>
+                                  <Value>=IIF(Fields!has_notification.Value,"Y","N")</Value>
                                   <Style>
                                     <FontFamily />
+                                    <Color>#333333</Color>
                                   </Style>
                                 </TextRun>
                               </TextRuns>
                               <Style />
                             </Paragraph>
                           </Paragraphs>
-                          <rd:DefaultName>SnapshotAgeMin</rd:DefaultName>
-                          <ActionInfo>
-                            <Actions>
-                              <Action>
-                                <Drillthrough>
-                                  <ReportName>SnapshotDates</ReportName>
-                                  <Parameters>
-                                    <Parameter Name="InstanceIDs">
-                                      <Value>=Fields!InstanceID.Value</Value>
-                                    </Parameter>
-                                    <Parameter Name="TagIDs">
-                                      <Value>=Parameters!TagIDs.Value</Value>
-                                    </Parameter>
-                                    <Parameter Name="TagMatching">
-                                      <Value>=Parameters!TagMatching.Value</Value>
-                                    </Parameter>
-                                  </Parameters>
-                                </Drillthrough>
-                              </Action>
-                            </Actions>
-                          </ActionInfo>
+                          <rd:DefaultName>has_notification</rd:DefaultName>
                           <Style>
                             <Border>
-                              <Color>Gainsboro</Color>
-                              <Style>Solid</Style>
+                              <Color>LightGrey</Color>
                             </Border>
-                            <BackgroundColor>=switch(Fields!SnapshotAgeMax.Value&gt;Parameters!SnapshotAgeCritical.Value,"Red",
-Fields!SnapshotAgeMax.Value&gt;Parameters!SnapshotAgeWarning.Value,"Yellow",
-Fields!SnapshotAgeMax.Value&lt;=Parameters!SnapshotAgeWarning.Value,"Green",
-1=1,"LightGrey")</BackgroundColor>
+                            <BottomBorder>
+                              <Style>Solid</Style>
+                            </BottomBorder>
+                            <FontFamily />
                             <PaddingLeft>2pt</PaddingLeft>
                             <PaddingRight>2pt</PaddingRight>
                             <PaddingTop>2pt</PaddingTop>
@@ -1791,35 +1778,104 @@ Fields!SnapshotAgeMax.Value&lt;=Parameters!SnapshotAgeWarning.Value,"Green",
                     </TablixCell>
                     <TablixCell>
                       <CellContents>
-                        <Textbox Name="sqlserver_uptime">
+                        <Textbox Name="category_id">
                           <CanGrow>true</CanGrow>
                           <KeepTogether>true</KeepTogether>
                           <Paragraphs>
                             <Paragraph>
                               <TextRuns>
                                 <TextRun>
-                                  <Value>=SWITCH(Fields!sqlserver_uptime.Value&lt;120,Fields!sqlserver_uptime.Value &amp; " Mins",
-Fields!sqlserver_uptime.Value&lt;1440,Format(Fields!sqlserver_uptime.Value/60,"0") &amp; " Hours",
-1=1,Format(Fields!sqlserver_uptime.Value/1440,"0") &amp; " Days")</Value>
+                                  <Value>=Fields!category_id.Value</Value>
                                   <Style>
                                     <FontFamily />
+                                    <Color>#333333</Color>
                                   </Style>
                                 </TextRun>
                               </TextRuns>
                               <Style />
                             </Paragraph>
                           </Paragraphs>
-                          <rd:DefaultName>sqlserver_uptime</rd:DefaultName>
-                          <ToolTip>="Instance Start Time: " &amp; Format(System.TimeZone.CurrentTimeZone.ToLocalTime(Fields!sqlserver_start_time_utc.Value), Parameters!DateFormat.Value) &amp; Environment.NewLine &amp;
-"Host Start Time: " &amp; Format(System.TimeZone.CurrentTimeZone.ToLocalTime(Fields!host_start_time_utc.Value),Parameters!DateFormat.Value)</ToolTip>
+                          <rd:DefaultName>category_id</rd:DefaultName>
                           <Style>
                             <Border>
-                              <Color>Gainsboro</Color>
-                              <Style>Solid</Style>
+                              <Color>LightGrey</Color>
                             </Border>
-                            <BackgroundColor>=SWITCH(Fields!sqlserver_uptime.Value&lt;720,"Red",
-Fields!sqlserver_uptime.Value&lt;2880,"Yellow",
-1=1,"Green")</BackgroundColor>
+                            <BottomBorder>
+                              <Style>Solid</Style>
+                            </BottomBorder>
+                            <FontFamily />
+                            <PaddingLeft>2pt</PaddingLeft>
+                            <PaddingRight>2pt</PaddingRight>
+                            <PaddingTop>2pt</PaddingTop>
+                            <PaddingBottom>2pt</PaddingBottom>
+                          </Style>
+                        </Textbox>
+                      </CellContents>
+                    </TablixCell>
+                    <TablixCell>
+                      <CellContents>
+                        <Textbox Name="performance_condition">
+                          <CanGrow>true</CanGrow>
+                          <KeepTogether>true</KeepTogether>
+                          <Paragraphs>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Value>=Fields!performance_condition.Value</Value>
+                                  <Style>
+                                    <FontFamily />
+                                    <Color>#333333</Color>
+                                  </Style>
+                                </TextRun>
+                              </TextRuns>
+                              <Style />
+                            </Paragraph>
+                          </Paragraphs>
+                          <rd:DefaultName>performance_condition</rd:DefaultName>
+                          <Style>
+                            <Border>
+                              <Color>LightGrey</Color>
+                            </Border>
+                            <BottomBorder>
+                              <Style>Solid</Style>
+                            </BottomBorder>
+                            <FontFamily />
+                            <PaddingLeft>2pt</PaddingLeft>
+                            <PaddingRight>2pt</PaddingRight>
+                            <PaddingTop>2pt</PaddingTop>
+                            <PaddingBottom>2pt</PaddingBottom>
+                          </Style>
+                        </Textbox>
+                      </CellContents>
+                    </TablixCell>
+                    <TablixCell>
+                      <CellContents>
+                        <Textbox Name="IsCriticalAlert">
+                          <CanGrow>true</CanGrow>
+                          <KeepTogether>true</KeepTogether>
+                          <Paragraphs>
+                            <Paragraph>
+                              <TextRuns>
+                                <TextRun>
+                                  <Value>=IIF(Fields!IsCriticalAlert.Value,"Y","N")</Value>
+                                  <Style>
+                                    <FontFamily />
+                                    <Color>#333333</Color>
+                                  </Style>
+                                </TextRun>
+                              </TextRuns>
+                              <Style />
+                            </Paragraph>
+                          </Paragraphs>
+                          <rd:DefaultName>IsCriticalAlert</rd:DefaultName>
+                          <Style>
+                            <Border>
+                              <Color>LightGrey</Color>
+                            </Border>
+                            <BottomBorder>
+                              <Style>Solid</Style>
+                            </BottomBorder>
+                            <FontFamily />
                             <PaddingLeft>2pt</PaddingLeft>
                             <PaddingRight>2pt</PaddingRight>
                             <PaddingTop>2pt</PaddingTop>
@@ -1834,6 +1890,11 @@ Fields!sqlserver_uptime.Value&lt;2880,"Yellow",
             </TablixBody>
             <TablixColumnHierarchy>
               <TablixMembers>
+                <TablixMember />
+                <TablixMember />
+                <TablixMember />
+                <TablixMember />
+                <TablixMember />
                 <TablixMember />
                 <TablixMember />
                 <TablixMember />
@@ -1872,155 +1933,25 @@ Fields!sqlserver_uptime.Value&lt;2880,"Yellow",
                 </TablixMember>
               </TablixMembers>
             </TablixRowHierarchy>
-            <DataSetName>Summary</DataSetName>
+            <DataSetName>Alerts</DataSetName>
             <SortExpressions>
               <SortExpression>
-                <Value>=Fields!Instance.Value</Value>
+                <Value>=Fields!last_occurrence.Value</Value>
+                <Direction>Descending</Direction>
               </SortExpression>
             </SortExpressions>
-            <Top>0.43in</Top>
-            <Left>0.05293cm</Left>
-            <Height>0.83625in</Height>
-            <Width>16.85208in</Width>
+            <Top>0.42in</Top>
+            <Height>0.85in</Height>
+            <Width>24.11667in</Width>
             <ZIndex>1</ZIndex>
             <Style />
           </Tablix>
-          <Subreport Name="Backups">
-            <ReportName>Backups</ReportName>
-            <Parameters>
-              <Parameter Name="InstanceIDs">
-                <Value>=Parameters!InstanceIDs.Value</Value>
-              </Parameter>
-              <Parameter Name="TagIDs">
-                <Value>=Parameters!TagIDs.Value</Value>
-              </Parameter>
-              <Parameter Name="TagMatching">
-                <Value>=Parameters!TagMatching.Value</Value>
-              </Parameter>
-            </Parameters>
-            <Top>2.15861in</Top>
-            <Height>0.72917in</Height>
-            <Width>11.32292in</Width>
-            <ZIndex>2</ZIndex>
-            <Style>
-              <Border>
-                <Style>None</Style>
-              </Border>
-            </Style>
-          </Subreport>
-          <Subreport Name="LogShipping">
-            <ReportName>LogShipping</ReportName>
-            <Parameters>
-              <Parameter Name="FilterLevel">
-                <Value>2</Value>
-              </Parameter>
-              <Parameter Name="InstanceIDs">
-                <Value>=Parameters!InstanceIDs.Value</Value>
-              </Parameter>
-            </Parameters>
-            <Top>2.92944in</Top>
-            <Left>0.05293cm</Left>
-            <Height>0.66667in</Height>
-            <Width>11.32292in</Width>
-            <ZIndex>3</ZIndex>
-            <Style>
-              <Border>
-                <Style>None</Style>
-              </Border>
-            </Style>
-          </Subreport>
-          <Subreport Name="Drives">
-            <ReportName>Drives</ReportName>
-            <Parameters>
-              <Parameter Name="InstanceIDs">
-                <Value>=Parameters!InstanceIDs.Value</Value>
-              </Parameter>
-            </Parameters>
-            <Top>1.33569in</Top>
-            <Left>0.05293cm</Left>
-            <Height>0.78125in</Height>
-            <Width>11.32292in</Width>
-            <ZIndex>4</ZIndex>
-            <Style>
-              <Border>
-                <Style>None</Style>
-              </Border>
-            </Style>
-          </Subreport>
-          <Subreport Name="Files">
-            <ReportName>Files</ReportName>
-            <Parameters>
-              <Parameter Name="InstanceIDs">
-                <Value>=Parameters!InstanceIDs.Value</Value>
-              </Parameter>
-              <Parameter Name="FilterLevel">
-                <Value>2</Value>
-              </Parameter>
-            </Parameters>
-            <Top>4.49612in</Top>
-            <Height>0.84375in</Height>
-            <Width>11.32292in</Width>
-            <ZIndex>5</ZIndex>
-            <Style>
-              <Border>
-                <Style>None</Style>
-              </Border>
-            </Style>
-          </Subreport>
-          <Subreport Name="Subreport1">
-            <ReportName>AgentJobs</ReportName>
-            <Parameters>
-              <Parameter Name="InstanceIDs">
-                <Value>=Parameters!InstanceIDs.Value</Value>
-              </Parameter>
-              <Parameter Name="FilterLevel">
-                <Value>2</Value>
-              </Parameter>
-            </Parameters>
-            <Top>3.63778in</Top>
-            <Height>0.81667in</Height>
-            <Width>11.32292in</Width>
-            <ZIndex>6</ZIndex>
-            <Style>
-              <Border>
-                <Style>None</Style>
-              </Border>
-            </Style>
-          </Subreport>
-          <Subreport Name="MaxFileSize">
-            <ReportName>DBMaxSize</ReportName>
-            <Parameters>
-              <Parameter Name="FilterLevel">
-                <Value>Warning</Value>
-              </Parameter>
-              <Parameter Name="TagMatching">
-                <Value>=Parameters!TagMatching.Value</Value>
-              </Parameter>
-              <Parameter Name="TagIDs">
-                <Value>=Parameters!TagIDs.Value</Value>
-              </Parameter>
-              <Parameter Name="InstanceIDs">
-                <Value>=Parameters!InstanceIDs.Value</Value>
-              </Parameter>
-            </Parameters>
-            <Top>5.38153in</Top>
-            <Height>0.89167in</Height>
-            <Width>11.32292in</Width>
-            <ZIndex>7</ZIndex>
-            <Style>
-              <Border>
-                <Style>None</Style>
-              </Border>
-            </Style>
-          </Subreport>
         </ReportItems>
-        <Height>6.2732in</Height>
+        <Height>1.27in</Height>
         <Style />
       </Body>
-      <Width>16.87292in</Width>
+      <Width>24.11667in</Width>
       <Page>
-        <InteractiveHeight>200in</InteractiveHeight>
-        <InteractiveWidth>8.5in</InteractiveWidth>
         <LeftMargin>1in</LeftMargin>
         <RightMargin>1in</RightMargin>
         <TopMargin>1in</TopMargin>
@@ -2030,6 +1961,30 @@ Fields!sqlserver_uptime.Value&lt;2880,"Yellow",
     </ReportSection>
   </ReportSections>
   <ReportParameters>
+    <ReportParameter Name="DateFormat">
+      <DataType>String</DataType>
+      <DefaultValue>
+        <Values>
+          <Value>yyyy-MM-dd HH:mm</Value>
+        </Values>
+      </DefaultValue>
+      <Prompt>DateFormat</Prompt>
+    </ReportParameter>
+    <ReportParameter Name="LastOccurrenceFrom">
+      <DataType>DateTime</DataType>
+      <Nullable>true</Nullable>
+      <Prompt>Last Occurrence From</Prompt>
+    </ReportParameter>
+    <ReportParameter Name="LastOccurrenceTo">
+      <DataType>DateTime</DataType>
+      <Nullable>true</Nullable>
+      <Prompt>Last Occurrence To</Prompt>
+    </ReportParameter>
+    <ReportParameter Name="IsCritical">
+      <DataType>Boolean</DataType>
+      <Nullable>true</Nullable>
+      <Prompt>Is Critical</Prompt>
+    </ReportParameter>
     <ReportParameter Name="TagIDs">
       <DataType>String</DataType>
       <DefaultValue>
@@ -2049,6 +2004,7 @@ Fields!sqlserver_uptime.Value&lt;2880,"Yellow",
     </ReportParameter>
     <ReportParameter Name="TagMatching">
       <DataType>String</DataType>
+      <Nullable>true</Nullable>
       <DefaultValue>
         <Values>
           <Value>ALL</Value>
@@ -2072,46 +2028,19 @@ Fields!sqlserver_uptime.Value&lt;2880,"Yellow",
       <DataType>String</DataType>
       <DefaultValue>
         <DataSetReference>
-          <DataSetName>Connections</DataSetName>
+          <DataSetName>Instances</DataSetName>
           <ValueField>InstanceID</ValueField>
         </DataSetReference>
       </DefaultValue>
       <Prompt>Instances</Prompt>
       <ValidValues>
         <DataSetReference>
-          <DataSetName>Connections</DataSetName>
+          <DataSetName>Instances</DataSetName>
           <ValueField>InstanceID</ValueField>
           <LabelField>ConnectionID</LabelField>
         </DataSetReference>
       </ValidValues>
       <MultiValue>true</MultiValue>
-    </ReportParameter>
-    <ReportParameter Name="DateFormat">
-      <DataType>String</DataType>
-      <DefaultValue>
-        <Values>
-          <Value>yyyy-MM-dd HH:mm</Value>
-        </Values>
-      </DefaultValue>
-      <Prompt>Date Format</Prompt>
-    </ReportParameter>
-    <ReportParameter Name="SnapshotAgeWarning">
-      <DataType>Integer</DataType>
-      <DefaultValue>
-        <Values>
-          <Value>120</Value>
-        </Values>
-      </DefaultValue>
-      <Prompt>SnapshotAgeWarning</Prompt>
-    </ReportParameter>
-    <ReportParameter Name="SnapshotAgeCritical">
-      <DataType>Integer</DataType>
-      <DefaultValue>
-        <Values>
-          <Value>1440</Value>
-        </Values>
-      </DefaultValue>
-      <Prompt>SnapshotAgeCritical</Prompt>
     </ReportParameter>
   </ReportParameters>
   <ReportParametersLayout>
@@ -2122,37 +2051,42 @@ Fields!sqlserver_uptime.Value&lt;2880,"Yellow",
         <CellDefinition>
           <ColumnIndex>0</ColumnIndex>
           <RowIndex>0</RowIndex>
-          <ParameterName>TagIDs</ParameterName>
-        </CellDefinition>
-        <CellDefinition>
-          <ColumnIndex>1</ColumnIndex>
-          <RowIndex>0</RowIndex>
-          <ParameterName>TagMatching</ParameterName>
-        </CellDefinition>
-        <CellDefinition>
-          <ColumnIndex>2</ColumnIndex>
-          <RowIndex>0</RowIndex>
-          <ParameterName>InstanceName</ParameterName>
-        </CellDefinition>
-        <CellDefinition>
-          <ColumnIndex>3</ColumnIndex>
-          <RowIndex>0</RowIndex>
-          <ParameterName>InstanceIDs</ParameterName>
-        </CellDefinition>
-        <CellDefinition>
-          <ColumnIndex>0</ColumnIndex>
-          <RowIndex>1</RowIndex>
           <ParameterName>DateFormat</ParameterName>
         </CellDefinition>
         <CellDefinition>
           <ColumnIndex>1</ColumnIndex>
+          <RowIndex>0</RowIndex>
+          <ParameterName>LastOccurrenceFrom</ParameterName>
+        </CellDefinition>
+        <CellDefinition>
+          <ColumnIndex>2</ColumnIndex>
+          <RowIndex>0</RowIndex>
+          <ParameterName>LastOccurrenceTo</ParameterName>
+        </CellDefinition>
+        <CellDefinition>
+          <ColumnIndex>3</ColumnIndex>
+          <RowIndex>0</RowIndex>
+          <ParameterName>IsCritical</ParameterName>
+        </CellDefinition>
+        <CellDefinition>
+          <ColumnIndex>0</ColumnIndex>
           <RowIndex>1</RowIndex>
-          <ParameterName>SnapshotAgeWarning</ParameterName>
+          <ParameterName>TagIDs</ParameterName>
+        </CellDefinition>
+        <CellDefinition>
+          <ColumnIndex>1</ColumnIndex>
+          <RowIndex>1</RowIndex>
+          <ParameterName>TagMatching</ParameterName>
         </CellDefinition>
         <CellDefinition>
           <ColumnIndex>2</ColumnIndex>
           <RowIndex>1</RowIndex>
-          <ParameterName>SnapshotAgeCritical</ParameterName>
+          <ParameterName>InstanceName</ParameterName>
+        </CellDefinition>
+        <CellDefinition>
+          <ColumnIndex>3</ColumnIndex>
+          <RowIndex>1</RowIndex>
+          <ParameterName>InstanceIDs</ParameterName>
         </CellDefinition>
       </CellDefinitions>
     </GridLayoutDefinition>
@@ -2160,5 +2094,5 @@ Fields!sqlserver_uptime.Value&lt;2880,"Yellow",
   <Language>en-US</Language>
   <ConsumeContainerWhitespace>true</ConsumeContainerWhitespace>
   <rd:ReportUnitType>Inch</rd:ReportUnitType>
-  <rd:ReportID>a7ade566-9c4c-4d32-a013-999f6be877eb</rd:ReportID>
+  <rd:ReportID>41ecd060-3c25-40cc-bdb7-2203a8dd854d</rd:ReportID>
 </Report>

@@ -16,5 +16,8 @@
     [job_id]                    UNIQUEIDENTIFIER NULL,
     [has_notification]          INT              NULL,
     [category_id]               INT              NULL,
+    [performance_condition]     NVARCHAR (512)   NULL,
     PRIMARY KEY CLUSTERED ([id] ASC));
+
+
 

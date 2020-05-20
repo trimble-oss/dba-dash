@@ -17,7 +17,10 @@
     [job_id]                    UNIQUEIDENTIFIER NULL,
     [has_notification]          INT              NULL,
     [category_id]               INT              NULL,
+    [performance_condition]     NVARCHAR (512)   NULL,
     CONSTRAINT [PK_Alerts] PRIMARY KEY CLUSTERED ([InstanceID] ASC, [id] ASC),
     CONSTRAINT [FK_Alerts_Instance] FOREIGN KEY ([InstanceID]) REFERENCES [dbo].[Instances] ([InstanceID])
 );
+
+
 
