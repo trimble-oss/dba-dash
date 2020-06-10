@@ -1,11 +1,7 @@
 ﻿using DBAChecksService;
 using Newtonsoft.Json;
 using System;
-using System.Collections.Generic;
 using System.Data.SqlClient;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace DBAChecks
 {
@@ -107,7 +103,7 @@ namespace DBAChecks
 
         public bool IsAzureDB()
         {
-            if(connectionType== ConnectionType.SQL)
+            if (connectionType == ConnectionType.SQL)
             {
                 SqlConnection cn = new SqlConnection(connectionString);
                 try
@@ -115,7 +111,7 @@ namespace DBAChecks
                     cn.Open();
                     SqlCommand cmd = new SqlCommand("SELECT CAST(SERVERPROPERTY('EditionID') AS BIGINT)", cn);
                     Int64 editionID = (Int64)cmd.ExecuteScalar();
-                    if (editionID== 1674378470)
+                    if (editionID == 1674378470)
                     {
                         return true;
                     }
@@ -124,7 +120,7 @@ namespace DBAChecks
                         return false;
                     }
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     Console.WriteLine(ex.Message);
                     return false;
@@ -255,7 +251,7 @@ namespace DBAChecks
                 if (builder.Password.StartsWith("¬=!"))
                 {
                     builder.Password = EncryptText.DecryptString(builder.Password.Substring(3), myString);
-                }               
+                }
                 return builder.ConnectionString;
             }
             else

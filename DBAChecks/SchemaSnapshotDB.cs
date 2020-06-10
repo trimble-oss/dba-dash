@@ -1,15 +1,12 @@
 ﻿using Microsoft.SqlServer.Management.Smo;
 using System;
-using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Data;
 using System.Data.SqlClient;
 using System.IO;
 using System.IO.Compression;
-using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace DBAChecks
 {
@@ -42,7 +39,7 @@ namespace DBAChecks
         {
 
             var cn = new SqlConnection(_connectionString);
-      
+
             DataTable dtSchema = new DataTable("Schema_" + DBName);
             dtSchema.Columns.Add("ObjectName");
             dtSchema.Columns.Add("SchemaName");
@@ -53,7 +50,7 @@ namespace DBAChecks
             dtSchema.Columns.Add("ObjectDateCreated", typeof(DateTime));
             dtSchema.Columns.Add("ObjectDateModified", typeof(DateTime));
             var instance = new Microsoft.SqlServer.Management.Smo.Server(new Microsoft.SqlServer.Management.Common.ServerConnection(cn));
-   
+
             instance.SetDefaultInitFields(typeof(Table), true);
 
             var db = instance.Databases[DBName];

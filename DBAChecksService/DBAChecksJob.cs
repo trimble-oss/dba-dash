@@ -1,6 +1,5 @@
 ﻿using Amazon.S3.Model;
 using DBAChecks;
-using Microsoft.SqlServer.Management.Smo;
 using Newtonsoft.Json;
 using Quartz;
 using System;
@@ -8,10 +7,6 @@ using System.Data;
 using System.Data.SqlClient;
 using System.IO;
 using System.Linq;
-using System.Runtime.Serialization.Formatters.Binary;
-using System.Threading.Tasks;
-using Topshelf;
-using Topshelf.Quartz;
 using static DBAChecks.DBAChecksConnection;
 
 namespace DBAChecksService

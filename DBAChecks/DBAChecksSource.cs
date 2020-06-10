@@ -1,18 +1,14 @@
 ﻿using DBAChecksService;
 using Newtonsoft.Json;
 using System;
-using System.Collections.Generic;
 using System.ComponentModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using static DBAChecks.DBAChecksConnection;
 
 namespace DBAChecks
 {
     public class DBAChecksSource
     {
-        private Int32 slowQueryThresholdMs=-1;
+        private Int32 slowQueryThresholdMs = -1;
 
         public CollectionConfigSchedule[] Schedules { get; set; }
 
@@ -77,7 +73,8 @@ namespace DBAChecks
         public bool NoWMI { get; set; }
 
         [DefaultValue(-1)]
-        public Int32 SlowQueryThresholdMs { 
+        public Int32 SlowQueryThresholdMs
+        {
             get { return slowQueryThresholdMs; }
             set { slowQueryThresholdMs = value; }
         }

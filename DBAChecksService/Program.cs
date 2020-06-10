@@ -1,5 +1,4 @@
 ﻿using DBAChecks;
-using Newtonsoft.Json;
 using System;
 using System.Diagnostics;
 using System.Reflection;
@@ -16,7 +15,7 @@ namespace DBAChecksService
             {
                 EventLog.WriteEntry("DBAChecksService", "ServiceConfig.json file is missing.  Please create.", EventLogEntryType.Error);
                 throw new Exception("ServiceConfig.json file is missing.Please create.");
-            }            
+            }
             string jsonConfig = System.IO.File.ReadAllText(jsonConfigPath);
             var conf = CollectionConfig.Deserialize(jsonConfig);
             if (conf.WasEncrypted())

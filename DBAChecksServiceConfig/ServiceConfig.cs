@@ -1,21 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
-using DBAChecksService;
+﻿using DBAChecks;
 using Newtonsoft.Json;
-using System.IO;
-using System.Data.SqlClient;
-using System.ServiceProcess;
-using System.Diagnostics;
-using DBAChecks;
-using static DBAChecks.DBAChecksConnection;
 using Quartz;
+using System;
+using System.ComponentModel;
+using System.Data.SqlClient;
+using System.Diagnostics;
+using System.IO;
+using System.Linq;
+using System.ServiceProcess;
+using System.Windows.Forms;
+using static DBAChecks.DBAChecksConnection;
 
 namespace DBAChecksServiceConfig
 {
@@ -26,7 +20,7 @@ namespace DBAChecksServiceConfig
             InitializeComponent();
         }
 
-        string originalJson="";
+        string originalJson = "";
         CollectionConfig collectionConfig = new CollectionConfig();
         string jsonPath = System.IO.Path.Combine(Application.StartupPath, "ServiceConfig.json");
         ServiceController svcCtrl;
@@ -34,7 +28,7 @@ namespace DBAChecksServiceConfig
         private void bttnAdd_Click(object sender, EventArgs e)
         {
             DBAChecksSource src = new DBAChecksSource(cboSource.Text);
-              src.NoWMI = chkNoWMI.Checked;
+            src.NoWMI = chkNoWMI.Checked;
             if (chkSlowQueryThreshold.Checked)
             {
                 src.SlowQueryThresholdMs = (Int32)numSlowQueryThreshold.Value;
@@ -47,7 +41,7 @@ namespace DBAChecksServiceConfig
             {
                 if (!CronExpression.IsValidExpression(txtSnapshotCron.Text))
                 {
-                    MessageBox.Show("Invalid cron expression","Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show("Invalid cron expression", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     return;
                 }
                 src.SchemaSnapshotDBs = txtSnapshotDBs.Text;
@@ -78,34 +72,35 @@ namespace DBAChecksServiceConfig
                         return;
                     }
                 }
-                else if (src.SourceConnection.IsAzureDB() && (src.SourceConnection.InitialCatalog()=="" || src.SourceConnection.InitialCatalog()=="master"))
+                else if (src.SourceConnection.IsAzureDB() && (src.SourceConnection.InitialCatalog() == "" || src.SourceConnection.InitialCatalog() == "master"))
                 {
-                    if(MessageBox.Show("Add all azure databases as connections?", "Add Connections", MessageBoxButtons.YesNo, MessageBoxIcon.Question)== DialogResult.Yes){
+                    if (MessageBox.Show("Add all azure databases as connections?", "Add Connections", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+                    {
                         SqlConnection cn = new SqlConnection(src.SourceConnection.ConnectionString);
                         using (cn)
                         {
                             cn.Open();
                             SqlCommand cmd = new SqlCommand("SELECT name from sys.databases", cn);
-                             var  rdr = cmd.ExecuteReader();
+                            var rdr = cmd.ExecuteReader();
                             var builder = new SqlConnectionStringBuilder(src.SourceConnection.ConnectionString);
                             while (rdr.Read())
                             {
                                 builder.InitialCatalog = rdr.GetString(0);
-                                DBAChecksSource dbCn  = new DBAChecksSource(builder.ConnectionString);
+                                DBAChecksSource dbCn = new DBAChecksSource(builder.ConnectionString);
                                 if (ConnectionExists(dbCn.SourceConnection) == false)
                                 {
                                     collectionConfig.SourceConnections.Add(dbCn);
                                 }
                             }
-                            
+
                         }
                     }
                 }
- 
+
                 var existingConnection = getConnection(cboSource.Text);
                 if (existingConnection != null)
                 {
-                    if (chkCustomizeSchedule.Checked && existingConnection.Schedules!=null)
+                    if (chkCustomizeSchedule.Checked && existingConnection.Schedules != null)
                     {
                         src.Schedules = existingConnection.Schedules;
                     }
@@ -118,13 +113,13 @@ namespace DBAChecksServiceConfig
                         return;
                     }
 
-               }
-                
+                }
+
                 collectionConfig.SourceConnections.Add(src);
                 txtJson.Text = jsonConfig();
                 populateDropDowns();
             }
-           // JsonConvert.DeserializeObject<CollectionConfig[]>(jsonConfig);
+            // JsonConvert.DeserializeObject<CollectionConfig[]>(jsonConfig);
         }
 
         private bool ConnectionExists(DBAChecksConnection newConnection)
@@ -152,11 +147,11 @@ namespace DBAChecksServiceConfig
         {
             foreach (var _cfg in collectionConfig.SourceConnections)
             {
-               if (!(cboSource.Items.Contains(_cfg.ConnectionString)))
+                if (!(cboSource.Items.Contains(_cfg.ConnectionString)))
                 {
                     cboSource.Items.Add(_cfg.ConnectionString);
                 }
-              }
+            }
         }
 
         private bool validateSource()
@@ -167,10 +162,10 @@ namespace DBAChecksServiceConfig
             {
                 return false;
             }
-            
+
             if (source.Type == ConnectionType.Invalid)
             {
-                errorProvider1.SetError(cboSource, "Invalid connection string, directory or S3 path");    
+                errorProvider1.SetError(cboSource, "Invalid connection string, directory or S3 path");
                 return false;
             }
             else
@@ -188,7 +183,7 @@ namespace DBAChecksServiceConfig
             {
                 return false;
             }
-            
+
             if (dest.Type == ConnectionType.Invalid)
             {
                 errorProvider1.SetError(txtDestination, "Invalid connection string, directory or S3 path");
@@ -223,11 +218,11 @@ namespace DBAChecksServiceConfig
             {
                 try
                 {
-                     originalJson=  System.IO.File.ReadAllText(jsonPath);
-                     txtJson.Text = originalJson;
+                    originalJson = System.IO.File.ReadAllText(jsonPath);
+                    txtJson.Text = originalJson;
                     setFromJson(originalJson);
                 }
-                catch 
+                catch
                 {
                     MessageBox.Show("Error reading ServiceConfig.json", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
@@ -244,14 +239,14 @@ namespace DBAChecksServiceConfig
             txtAccessKey.Text = collectionConfig.AccessKey;
             txtSecretKey.Text = collectionConfig.SecretKey;
             chkCustomizeMaintenanceCron.Checked = (collectionConfig.MaintenanceScheduleCron != null);
-           
+
         }
 
         private void refreshServiceStatus()
         {
             svcCtrl = ServiceController.GetServices()
     .FirstOrDefault(s => s.ServiceName == "DBAChecksService");
-            
+
             if (svcCtrl == null)
             {
                 lblServiceStatus.Text = "Service Status: Not Installed";
@@ -268,7 +263,7 @@ namespace DBAChecksServiceConfig
                 bttnStop.Enabled = (svcCtrl.Status == ServiceControllerStatus.Running);
                 bttnInstall.Enabled = false;
                 bttnUninstall.Enabled = true;
-               }
+            }
         }
 
         private void txtJson_Validating(object sender, CancelEventArgs e)
@@ -283,7 +278,7 @@ namespace DBAChecksServiceConfig
             {
                 setFromJson(txtJson.Text);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 errorProvider1.SetError(txtJson, ex.Message);
             }
@@ -293,7 +288,7 @@ namespace DBAChecksServiceConfig
         {
             if (originalJson != txtJson.Text)
             {
-                if (MessageBox.Show("Save Changes?","Save", MessageBoxButtons.YesNo , MessageBoxIcon.Question)== DialogResult.Yes)
+                if (MessageBox.Show("Save Changes?", "Save", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
                 {
                     saveChanges();
                 }
@@ -305,7 +300,8 @@ namespace DBAChecksServiceConfig
             svcCtrl.Refresh();
             if (svcCtrl.Status == ServiceControllerStatus.Stopped)
             {
-                try { 
+                try
+                {
                     svcCtrl.Start();
                     System.Threading.Thread.Sleep(500);
                 }
@@ -314,21 +310,21 @@ namespace DBAChecksServiceConfig
                     MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
-            
+
             refreshServiceStatus();
         }
 
         private void bttnStop_Click(object sender, EventArgs e)
         {
             svcCtrl.Refresh();
-            if (svcCtrl.Status== ServiceControllerStatus.Running)
+            if (svcCtrl.Status == ServiceControllerStatus.Running)
             {
                 try
                 {
                     svcCtrl.Stop();
                     System.Threading.Thread.Sleep(500);
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
@@ -345,7 +341,7 @@ namespace DBAChecksServiceConfig
         {
             if (!(File.Exists(jsonPath)))
             {
-                MessageBox.Show("Save configuration file before installing service", "Error",MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                MessageBox.Show("Save configuration file before installing service", "Error", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
                 return;
             }
             Process p = new Process();
@@ -355,8 +351,8 @@ namespace DBAChecksServiceConfig
             switch (cboServiceCredentials.SelectedIndex)
             {
                 case 0:
-                    arg = "--localsystem";  
-                break;
+                    arg = "--localsystem";
+                    break;
                 case 1:
                     arg = "--localservice";
                     break;
@@ -404,13 +400,13 @@ namespace DBAChecksServiceConfig
         private void txtAccessKey_TextChanged(object sender, EventArgs e)
         {
             txtAWSProfile.Enabled = (txtAccessKey.Text.Length == 0 && txtSecretKey.Text.Length == 0);
-           
+
         }
 
         private void txtSecretKey_TextChanged(object sender, EventArgs e)
         {
             txtAWSProfile.Enabled = (txtAccessKey.Text.Length == 0 && txtSecretKey.Text.Length == 0);
-           
+
         }
 
         private void cboDestination_SelectedIndexChanged(object sender, EventArgs e)
@@ -458,7 +454,7 @@ namespace DBAChecksServiceConfig
 
         private void bttnRemove_Click(object sender, EventArgs e)
         {
-           DBAChecksSource src=null;
+            DBAChecksSource src = null;
 
             src = getConnection(cboSource.Text);
             if (src != null)
@@ -481,13 +477,13 @@ namespace DBAChecksServiceConfig
 
         private void txtSecretKey_Validating(object sender, CancelEventArgs e)
         {
-            collectionConfig.SecretKey = (txtSecretKey.Text=="" ? null : txtSecretKey.Text);
+            collectionConfig.SecretKey = (txtSecretKey.Text == "" ? null : txtSecretKey.Text);
             txtJson.Text = collectionConfig.Serialize();
         }
 
         private void txtAWSProfile_Validating(object sender, CancelEventArgs e)
         {
-            collectionConfig.AWSProfile = (txtAWSProfile.Text=="" ? null : txtAWSProfile.Text);
+            collectionConfig.AWSProfile = (txtAWSProfile.Text == "" ? null : txtAWSProfile.Text);
             txtJson.Text = collectionConfig.Serialize();
         }
 
@@ -514,7 +510,7 @@ namespace DBAChecksServiceConfig
             }
             else
             {
-                numSlowQueryThreshold.Value = -1;      
+                numSlowQueryThreshold.Value = -1;
                 lblSlow.Text = "Extended events trace to capture slow rpc and batch completed events is NOT enabled";
             }
 
@@ -538,9 +534,9 @@ namespace DBAChecksServiceConfig
                 {
                     numSlowQueryThreshold.Value = 0;
                 }
-       
-               chkCustomizeSchedule.Checked = src.Schedules != null;
-                
+
+                chkCustomizeSchedule.Checked = src.Schedules != null;
+
             }
         }
     }

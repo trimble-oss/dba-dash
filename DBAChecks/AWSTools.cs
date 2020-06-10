@@ -21,11 +21,11 @@ namespace DBAChecks
         public static Amazon.S3.AmazonS3Client GetAWSClient(string profile, string accessKey, string secretKey, Amazon.S3.Util.AmazonS3Uri uri)
         {
             AWSCredentials cred = null;
-            if (accessKey != null && secretKey !=null && accessKey.Length>0 && secretKey.Length>0)
+            if (accessKey != null && secretKey != null && accessKey.Length > 0 && secretKey.Length > 0)
             {
                 cred = new BasicAWSCredentials(accessKey, secretKey);
             }
-            else if (profile != null && profile.Length>0)
+            else if (profile != null && profile.Length > 0)
             {
                 try
                 {
@@ -35,7 +35,7 @@ namespace DBAChecks
                 {
                     Console.WriteLine(ex.Message);
                     throw;
-                }      
+                }
             }
             else
             {

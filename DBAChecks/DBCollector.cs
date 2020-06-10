@@ -56,15 +56,15 @@ namespace DBAChecks
         public Int32 PerformanceCollectionPeriodMins = 60;
         string computerName;
         Int64 editionId;
-        CollectionType[] azureCollectionTypes = new CollectionType[] {CollectionType.SlowQueries,CollectionType.AzureDBElasticPoolResourceStats,CollectionType.AzureDBServiceObjectives,CollectionType.AzureDBResourceStats,CollectionType.CPU, CollectionType.DBFiles, CollectionType.General, CollectionType.Performance, CollectionType.Databases, CollectionType.DBConfig, CollectionType.TraceFlags, CollectionType.ProcStats, CollectionType.FunctionStats, CollectionType.BlockingSnapshot, CollectionType.IOStats, CollectionType.Waits, CollectionType.ServerProperties, CollectionType.DBTuningOptions ,CollectionType.SysConfig};
-        public Int64 SlowQueryThresholdMs=-1;
+        CollectionType[] azureCollectionTypes = new CollectionType[] { CollectionType.SlowQueries, CollectionType.AzureDBElasticPoolResourceStats, CollectionType.AzureDBServiceObjectives, CollectionType.AzureDBResourceStats, CollectionType.CPU, CollectionType.DBFiles, CollectionType.General, CollectionType.Performance, CollectionType.Databases, CollectionType.DBConfig, CollectionType.TraceFlags, CollectionType.ProcStats, CollectionType.FunctionStats, CollectionType.BlockingSnapshot, CollectionType.IOStats, CollectionType.Waits, CollectionType.ServerProperties, CollectionType.DBTuningOptions, CollectionType.SysConfig };
+        public Int64 SlowQueryThresholdMs = -1;
 
         private bool IsAzure = false;
         private bool isAzureMasterDB = false;
         private string instanceName;
         string dbName;
         string productVersion;
- 
+
 
         public bool IsXESupported()
         {
@@ -81,12 +81,12 @@ namespace DBAChecks
         public DBCollector(string connectionString, bool noWMI)
         {
             this.noWMI = noWMI;
-            startup(connectionString, null);       
+            startup(connectionString, null);
         }
 
         private void logError(string errorSource, string errorMessage)
         {
-            Console.WriteLine("Error: " + instanceName + "|" +  dbName + " " +  errorSource + " : " + errorMessage);
+            Console.WriteLine("Error: " + instanceName + "|" + dbName + " " + errorSource + " : " + errorMessage);
             var rError = dtErrors.NewRow();
             rError["ErrorSource"] = errorSource;
             rError["ErrorMessage"] = errorMessage;
@@ -166,13 +166,13 @@ namespace DBAChecks
             dt.Columns.Add("AgentHostName", typeof(string));
             dt.Rows[0]["AgentVersion"] = Assembly.GetEntryAssembly().GetName().Version;
             dt.Rows[0]["AgentHostName"] = Environment.MachineName;
-       
+
             editionId = (Int64)dt.Rows[0]["EditionId"];
             computerName = (string)dt.Rows[0]["ComputerNamePhysicalNetBIOS"];
             dbName = (string)dt.Rows[0]["DBName"];
             instanceName = (string)dt.Rows[0]["Instance"];
             productVersion = (string)dt.Rows[0]["ProductVersion"];
-            if ( editionId == 1674378470)
+            if (editionId == 1674378470)
             {
                 IsAzure = true;
                 if (dbName == "master")
@@ -191,7 +191,7 @@ namespace DBAChecks
                 {
                     dt.Rows[0]["ConnectionID"] = instanceName + "|" + dbName;
                     noWMI = true;
-                   // dt.Rows[0]["Instance"] = instanceName + "|" + dbName;
+                    // dt.Rows[0]["Instance"] = instanceName + "|" + dbName;
                 }
                 else
                 {
@@ -285,12 +285,12 @@ namespace DBAChecks
                 {
                     addDT(enumToString(collectionType), Properties.Resources.SQLCPU, new SqlParameter[] { pTop });
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     logError(collectionTypeString, ex.Message);
                 }
             }
-            else if(collectionType==CollectionType.AzureDBResourceStats || collectionType == CollectionType.AzureDBServiceObjectives)
+            else if (collectionType == CollectionType.AzureDBResourceStats || collectionType == CollectionType.AzureDBServiceObjectives)
             {
                 if (IsAzure)
                 {
@@ -299,7 +299,7 @@ namespace DBAChecks
                     {
                         addDT(collectionTypeString, Properties.Resources.ResourceManager.GetString("SQL" + collectionTypeString, Properties.Resources.Culture), new SqlParameter[] { pDate });
                     }
-                    catch(Exception ex)
+                    catch (Exception ex)
                     {
                         logError(collectionTypeString, ex.Message);
                     }
@@ -338,7 +338,7 @@ namespace DBAChecks
             {
                 try
                 {
-                    addDT(collectionTypeString, Properties.Resources.ResourceManager.GetString("SQL" + collectionTypeString, Properties.Resources.Culture));               
+                    addDT(collectionTypeString, Properties.Resources.ResourceManager.GetString("SQL" + collectionTypeString, Properties.Resources.Culture));
                 }
                 catch (Exception ex)
                 {
@@ -399,7 +399,7 @@ namespace DBAChecks
         {
             try
             {
-              
+
                 if (!this.IsAzure)
                 {
                     if (!noWMI)
@@ -415,7 +415,7 @@ namespace DBAChecks
                     if (WindowsSP != "") { Data.Tables["ServerExtraProperties"].Rows[0]["WindowsServicePackLevel"] = WindowsSP; }
                     if (Data.Tables["ServerExtraProperties"].Rows[0]["WindowsSKU"] == DBNull.Value) { Data.Tables["ServerExtraProperties"].Rows[0]["WindowsSKU"] = WindowsSKU; }
                     Data.Tables["ServerExtraProperties"].Rows[0]["WindowsCaption"] = WindowsCaption;
-                    if (Data.Tables["ServerExtraProperties"].Rows[0]["ActivePowerPlanGUID"] == DBNull.Value && noWMI==false)
+                    if (Data.Tables["ServerExtraProperties"].Rows[0]["ActivePowerPlanGUID"] == DBNull.Value && noWMI == false)
                     {
                         collectPowerPlanWMI();
                         Data.Tables["ServerExtraProperties"].Rows[0]["ActivePowerPlanGUID"] = activePowerPlanGUID;

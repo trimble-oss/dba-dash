@@ -58,7 +58,7 @@ namespace DBAChecks
             updateDB(connectionString, instanceID, snapshotDate, Data);
             foreach (DataTable dt in Data.Tables)
             {
-                string[] tables = { "Drives", "ServerProperties", "Backups", "AgentJobs", "LogRestores", "DBFiles", "DBConfig", "Corruption", "DatabasesHADR", "SysConfig", "OSInfo", "TraceFlags", "ProcStats", "FunctionStats", "CPU", "Drivers", "BlockingSnapshot", "IOStats", "Waits","OSLoadedModules","DBTuningOptions" ,"AzureDBResourceStats","AzureDBServiceObjectives","AzureDBElasticPoolResourceStats","SlowQueries","SlowQueriesStats","LastGoodCheckDB","Alerts"};
+                string[] tables = { "Drives", "ServerProperties", "Backups", "AgentJobs", "LogRestores", "DBFiles", "DBConfig", "Corruption", "DatabasesHADR", "SysConfig", "OSInfo", "TraceFlags", "ProcStats", "FunctionStats", "CPU", "Drivers", "BlockingSnapshot", "IOStats", "Waits", "OSLoadedModules", "DBTuningOptions", "AzureDBResourceStats", "AzureDBServiceObjectives", "AzureDBElasticPoolResourceStats", "SlowQueries", "SlowQueriesStats", "LastGoodCheckDB", "Alerts" };
                 if (tables.Contains(dt.TableName))
                 {
                     update(connectionString, instanceID, snapshotDate, dt);
@@ -67,7 +67,7 @@ namespace DBAChecks
                 if (dt.TableName.StartsWith(snapshotPrefix))
                 {
                     string databaseName = dt.TableName.Substring(snapshotPrefix.Length);
-                    updateSnapshot(connectionString, instanceID, snapshotDate,dt, databaseName);
+                    updateSnapshot(connectionString, instanceID, snapshotDate, dt, databaseName);
 
                 }
             }
@@ -76,15 +76,16 @@ namespace DBAChecks
             InsertErrors(connectionString, instanceID, snapshotDate, Data);
         }
 
-        private void updateSnapshot(string connectionString, Int32 instanceID, DateTime SnapshotDate, DataTable dtSS,string databaseName){
-            
+        private void updateSnapshot(string connectionString, Int32 instanceID, DateTime SnapshotDate, DataTable dtSS, string databaseName)
+        {
+
             try
             {
                 var cn = new SqlConnection(connectionString);
                 using (cn)
                 {
                     cn.Open();
-                    
+
                     SqlCommand cmd = new SqlCommand("DDLSnapshot_Add", cn);
                     cmd.Parameters.AddWithValue("ss", dtSS);
                     cmd.Parameters.AddWithValue("InstanceID", instanceID);
@@ -96,7 +97,7 @@ namespace DBAChecks
             }
             catch (Exception ex)
             {
-                logError("ImportDDLSnapshot:" + databaseName,ex.Message, dtSS);
+                logError("ImportDDLSnapshot:" + databaseName, ex.Message, dtSS);
             }
         }
 
@@ -226,13 +227,13 @@ namespace DBAChecks
                 cmd.Parameters.AddWithValue("ConnectionID", (string)rInstance["ConnectionID"]);
                 cmd.Parameters.AddWithValue("Instance", (string)rInstance["Instance"]);
                 cmd.Parameters.AddWithValue("SnapshotDate", (DateTime)rInstance["SnapshotDateUTC"]);
-           
+
                 cmd.Parameters.AddWithValue("AgentHostName", (string)rInstance["AgentHostName"]);
                 if (rInstance.Table.Columns.Contains("AgentVersion"))
                 {
                     cmd.Parameters.AddWithValue("AgentVersion", (string)rInstance["AgentVersion"]);
                 }
-                 var pInstanceID = cmd.Parameters.Add("InstanceID", SqlDbType.Int);
+                var pInstanceID = cmd.Parameters.Add("InstanceID", SqlDbType.Int);
                 pInstanceID.Direction = ParameterDirection.Output;
                 cmd.CommandType = CommandType.StoredProcedure;
                 cmd.ExecuteNonQuery();

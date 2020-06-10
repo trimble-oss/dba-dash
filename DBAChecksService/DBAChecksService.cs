@@ -1,15 +1,8 @@
-﻿using Amazon.S3.Model;
-using DBAChecks;
-using Microsoft.SqlServer.Management.Smo;
+﻿using DBAChecks;
 using Newtonsoft.Json;
 using Quartz;
 using System;
-using System.Data;
 using System.Data.SqlClient;
-using System.IO;
-using System.Linq;
-using System.Runtime.Serialization.Formatters.Binary;
-using System.Threading.Tasks;
 using Topshelf;
 using Topshelf.Quartz;
 using static DBAChecks.DBAChecksConnection;
@@ -74,7 +67,7 @@ namespace DBAChecksService
 
     }
 
-    public class MaintenanceJob: IJob
+    public class MaintenanceJob : IJob
     {
         public void Execute(IJobExecutionContext context)
         {
@@ -93,7 +86,7 @@ namespace DBAChecksService
                 cn.Open();
                 SqlCommand cmd = new SqlCommand("Partitions_Add", cn);
                 Console.WriteLine("Maintenance: Creating partitions");
-                cmd.ExecuteNonQuery();             
+                cmd.ExecuteNonQuery();
             }
         }
         public static void PurgeData(string connectionString)
@@ -108,8 +101,8 @@ namespace DBAChecksService
             }
         }
     }
-    
- 
+
+
 
 
 
@@ -165,7 +158,7 @@ namespace DBAChecksService
                                   .Build())
                               .AddTrigger(() => TriggerBuilder.Create()
                                       .WithSimpleSchedule(b => b
-                                          .WithIntervalInSeconds(1)                                        
+                                          .WithIntervalInSeconds(1)
                                           .WithRepeatCount(0)).StartAt(DateTime.Now.AddSeconds(5))
                                       .Build())
                               .AddTrigger(() => TriggerBuilder.Create()
@@ -199,9 +192,9 @@ namespace DBAChecksService
                         }
                     }
                 });
-       
+
                 //Setup Account that window service use to run.  
-               // configure.RunAsPrompt();
+                // configure.RunAsPrompt();
                 //configure.RunAsLocalSystem();
                 configure.SetServiceName("DBAChecksService");
                 configure.SetDisplayName("DBAChecksService");

@@ -1,9 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Data;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Xml.Linq;
 
 namespace DBAChecks
@@ -21,7 +17,7 @@ namespace DBAChecks
         public DataTable GetTable()
         {
             DataTable dt = new DataTable();
-            dt.Columns.Add("Truncated", typeof (Int32));
+            dt.Columns.Add("Truncated", typeof(Int32));
             dt.Columns.Add("ProcessingTime", typeof(Int32));
             dt.Columns.Add("TotalEventsProcessed", typeof(Int32));
             dt.Columns.Add("EventCount", typeof(Int32));
@@ -41,7 +37,7 @@ namespace DBAChecks
 
     class XETools
     {
-       public static DataTable XEStrToDT(string xe, out RingBufferTargetAttributes ringBufferAtt)
+        public static DataTable XEStrToDT(string xe, out RingBufferTargetAttributes ringBufferAtt)
         {
             var dtm = DateTime.Now;
             DataTable dt = new DataTable("XEL");
@@ -68,8 +64,8 @@ namespace DBAChecks
             ringBufferAtt.ProcessingTime = Int32.Parse(el.Attribute("processingTime").Value);
             ringBufferAtt.EventCount = Int32.Parse(el.Attribute("eventCount").Value);
             ringBufferAtt.MemoryUsed = Int32.Parse(el.Attribute("memoryUsed").Value);
-            ringBufferAtt.TotalEventsProcessed= Int32.Parse(el.Attribute("totalEventsProcessed").Value);
-    
+            ringBufferAtt.TotalEventsProcessed = Int32.Parse(el.Attribute("totalEventsProcessed").Value);
+
             foreach (XElement evt in el.Elements("event"))
             {
                 var r = dt.Rows.Add();
@@ -93,7 +89,7 @@ namespace DBAChecks
                     }
                 }
             }
-      
+
             return dt;
         }
     }

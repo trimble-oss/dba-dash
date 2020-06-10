@@ -1,10 +1,6 @@
 ﻿using DBAChecksService;
 using Newtonsoft.Json;
-using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data.SqlClient;
-using static DBAChecks.DBAChecksConnection;
 
 namespace DBAChecks
 {
@@ -52,7 +48,7 @@ namespace DBAChecks
                 {
                     _secretKey = null;
                 }
-               else if (value == null || value.StartsWith("¬=!"))
+                else if (value == null || value.StartsWith("¬=!"))
                 {
                     _secretKey = value;
                 }
@@ -88,7 +84,7 @@ namespace DBAChecks
 
         public string GetMaintenanceCron()
         {
-            if(MaintenanceScheduleCron==null || MaintenanceScheduleCron == "")
+            if (MaintenanceScheduleCron == null || MaintenanceScheduleCron == "")
             {
                 return defaultMaintenanceCron;
             }
@@ -128,7 +124,7 @@ namespace DBAChecks
                 {
                     if (c.SourceConnection.WasEncrypted)
                     {
-                        wasEncryptionPerformed= true;
+                        wasEncryptionPerformed = true;
                     }
                 }
             }
