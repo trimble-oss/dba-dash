@@ -98,6 +98,10 @@ namespace DBAChecks
                     cmd.ExecuteNonQuery();
                 }
             }
+            catch(System.Data.SqlClient.SqlException ex) when(ex.Number == 2627)
+            {
+                logError("ImportDDLSnapshot:" + databaseName,"Primary key violation.  This can occur if you have a case sensitive database collation that contains tables, SPs or other database objects with names that are no longer unique with a case insensitive comparison." + Environment.NewLine + ex.Message, dtSS);
+            }
             catch (Exception ex)
             {
                 logError("ImportDDLSnapshot:" + databaseName, ex.Message, dtSS);

@@ -71,6 +71,11 @@
             this.bttnRemove = new System.Windows.Forms.Button();
             this.tabPage2 = new System.Windows.Forms.TabPage();
             this.tabPage4 = new System.Windows.Forms.TabPage();
+            this.tabSchemaSnapshots = new System.Windows.Forms.TabControl();
+            this.tabGeneral = new System.Windows.Forms.TabPage();
+            this.tabExtendedEvents = new System.Windows.Forms.TabPage();
+            this.tabPage7 = new System.Windows.Forms.TabPage();
+            this.label9 = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.errorProvider1)).BeginInit();
             this.tabControl1.SuspendLayout();
             this.tabPage3.SuspendLayout();
@@ -78,13 +83,17 @@
             ((System.ComponentModel.ISupportInitialize)(this.numSlowQueryThreshold)).BeginInit();
             this.tabPage2.SuspendLayout();
             this.tabPage4.SuspendLayout();
+            this.tabSchemaSnapshots.SuspendLayout();
+            this.tabGeneral.SuspendLayout();
+            this.tabExtendedEvents.SuspendLayout();
+            this.tabPage7.SuspendLayout();
             this.SuspendLayout();
             // 
             // cboSource
             // 
             this.cboSource.FormattingEnabled = true;
             this.cboSource.ItemHeight = 16;
-            this.cboSource.Location = new System.Drawing.Point(9, 34);
+            this.cboSource.Location = new System.Drawing.Point(6, 27);
             this.cboSource.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.cboSource.Name = "cboSource";
             this.cboSource.Size = new System.Drawing.Size(718, 24);
@@ -94,7 +103,7 @@
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(6, 10);
+            this.label1.Location = new System.Drawing.Point(6, 8);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(61, 17);
             this.label1.TabIndex = 2;
@@ -116,7 +125,7 @@
             // 
             // bttnAdd
             // 
-            this.bttnAdd.Location = new System.Drawing.Point(624, 86);
+            this.bttnAdd.Location = new System.Drawing.Point(499, 214);
             this.bttnAdd.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.bttnAdd.Name = "bttnAdd";
             this.bttnAdd.Size = new System.Drawing.Size(103, 23);
@@ -131,11 +140,12 @@
             // 
             // chkNoWMI
             // 
-            this.chkNoWMI.AutoSize = true;
-            this.chkNoWMI.Location = new System.Drawing.Point(442, 9);
+            this.chkNoWMI.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.chkNoWMI.CheckAlign = System.Drawing.ContentAlignment.MiddleRight;
+            this.chkNoWMI.Location = new System.Drawing.Point(533, 62);
             this.chkNoWMI.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.chkNoWMI.Name = "chkNoWMI";
-            this.chkNoWMI.Size = new System.Drawing.Size(121, 21);
+            this.chkNoWMI.Size = new System.Drawing.Size(191, 21);
             this.chkNoWMI.TabIndex = 6;
             this.chkNoWMI.Text = "Don\'t use WMI";
             this.chkNoWMI.UseVisualStyleBackColor = true;
@@ -218,12 +228,12 @@
             // 
             // chkCustomizeSchedule
             // 
-            this.chkCustomizeSchedule.AutoSize = true;
+            this.chkCustomizeSchedule.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.chkCustomizeSchedule.CheckAlign = System.Drawing.ContentAlignment.MiddleRight;
-            this.chkCustomizeSchedule.Location = new System.Drawing.Point(569, 9);
+            this.chkCustomizeSchedule.Location = new System.Drawing.Point(533, 87);
             this.chkCustomizeSchedule.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.chkCustomizeSchedule.Name = "chkCustomizeSchedule";
-            this.chkCustomizeSchedule.Size = new System.Drawing.Size(158, 21);
+            this.chkCustomizeSchedule.Size = new System.Drawing.Size(191, 21);
             this.chkCustomizeSchedule.TabIndex = 7;
             this.chkCustomizeSchedule.Text = "Customize Schedule";
             this.chkCustomizeSchedule.UseVisualStyleBackColor = true;
@@ -386,20 +396,9 @@
             // 
             // tabPage1
             // 
-            this.tabPage1.Controls.Add(this.label8);
-            this.tabPage1.Controls.Add(this.txtSnapshotCron);
-            this.tabPage1.Controls.Add(this.label2);
-            this.tabPage1.Controls.Add(this.txtSnapshotDBs);
-            this.tabPage1.Controls.Add(this.chkPersistXESession);
-            this.tabPage1.Controls.Add(this.lblSlow);
-            this.tabPage1.Controls.Add(this.chkSlowQueryThreshold);
-            this.tabPage1.Controls.Add(this.numSlowQueryThreshold);
+            this.tabPage1.Controls.Add(this.tabSchemaSnapshots);
             this.tabPage1.Controls.Add(this.bttnRemove);
-            this.tabPage1.Controls.Add(this.chkCustomizeSchedule);
             this.tabPage1.Controls.Add(this.bttnAdd);
-            this.tabPage1.Controls.Add(this.cboSource);
-            this.tabPage1.Controls.Add(this.label1);
-            this.tabPage1.Controls.Add(this.chkNoWMI);
             this.tabPage1.Location = new System.Drawing.Point(4, 25);
             this.tabPage1.Name = "tabPage1";
             this.tabPage1.Padding = new System.Windows.Forms.Padding(3);
@@ -411,7 +410,7 @@
             // label8
             // 
             this.label8.AutoSize = true;
-            this.label8.Location = new System.Drawing.Point(9, 170);
+            this.label8.Location = new System.Drawing.Point(3, 5);
             this.label8.Name = "label8";
             this.label8.Size = new System.Drawing.Size(199, 17);
             this.label8.TabIndex = 20;
@@ -419,7 +418,7 @@
             // 
             // txtSnapshotCron
             // 
-            this.txtSnapshotCron.Location = new System.Drawing.Point(9, 239);
+            this.txtSnapshotCron.Location = new System.Drawing.Point(6, 78);
             this.txtSnapshotCron.Name = "txtSnapshotCron";
             this.txtSnapshotCron.Size = new System.Drawing.Size(172, 22);
             this.txtSnapshotCron.TabIndex = 19;
@@ -428,7 +427,7 @@
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(7, 219);
+            this.label2.Location = new System.Drawing.Point(4, 58);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(161, 17);
             this.label2.TabIndex = 18;
@@ -436,7 +435,7 @@
             // 
             // txtSnapshotDBs
             // 
-            this.txtSnapshotDBs.Location = new System.Drawing.Point(9, 190);
+            this.txtSnapshotDBs.Location = new System.Drawing.Point(6, 25);
             this.txtSnapshotDBs.Name = "txtSnapshotDBs";
             this.txtSnapshotDBs.Size = new System.Drawing.Size(557, 22);
             this.txtSnapshotDBs.TabIndex = 17;
@@ -444,7 +443,7 @@
             // chkPersistXESession
             // 
             this.chkPersistXESession.AutoSize = true;
-            this.chkPersistXESession.Location = new System.Drawing.Point(9, 136);
+            this.chkPersistXESession.Location = new System.Drawing.Point(6, 33);
             this.chkPersistXESession.Name = "chkPersistXESession";
             this.chkPersistXESession.Size = new System.Drawing.Size(372, 21);
             this.chkPersistXESession.TabIndex = 15;
@@ -454,7 +453,7 @@
             // lblSlow
             // 
             this.lblSlow.AutoSize = true;
-            this.lblSlow.Location = new System.Drawing.Point(9, 116);
+            this.lblSlow.Location = new System.Drawing.Point(6, 119);
             this.lblSlow.Name = "lblSlow";
             this.lblSlow.Size = new System.Drawing.Size(557, 17);
             this.lblSlow.TabIndex = 14;
@@ -464,11 +463,11 @@
             // chkSlowQueryThreshold
             // 
             this.chkSlowQueryThreshold.AutoSize = true;
-            this.chkSlowQueryThreshold.Location = new System.Drawing.Point(9, 63);
+            this.chkSlowQueryThreshold.Location = new System.Drawing.Point(6, 6);
             this.chkSlowQueryThreshold.Name = "chkSlowQueryThreshold";
-            this.chkSlowQueryThreshold.Size = new System.Drawing.Size(206, 21);
+            this.chkSlowQueryThreshold.Size = new System.Drawing.Size(280, 21);
             this.chkSlowQueryThreshold.TabIndex = 13;
-            this.chkSlowQueryThreshold.Text = "Slow Query Threshold (ms):";
+            this.chkSlowQueryThreshold.Text = "Capture Slow Queries (Extended Event)";
             this.chkSlowQueryThreshold.UseVisualStyleBackColor = true;
             this.chkSlowQueryThreshold.CheckedChanged += new System.EventHandler(this.chkSlowQueryThreshold_CheckedChanged);
             // 
@@ -480,7 +479,7 @@
             0,
             0,
             0});
-            this.numSlowQueryThreshold.Location = new System.Drawing.Point(9, 87);
+            this.numSlowQueryThreshold.Location = new System.Drawing.Point(117, 55);
             this.numSlowQueryThreshold.Maximum = new decimal(new int[] {
             604800000,
             0,
@@ -502,7 +501,7 @@
             // 
             // bttnRemove
             // 
-            this.bttnRemove.Location = new System.Drawing.Point(624, 113);
+            this.bttnRemove.Location = new System.Drawing.Point(624, 214);
             this.bttnRemove.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.bttnRemove.Name = "bttnRemove";
             this.bttnRemove.Size = new System.Drawing.Size(103, 23);
@@ -545,6 +544,71 @@
             this.tabPage4.Text = "Service";
             this.tabPage4.UseVisualStyleBackColor = true;
             // 
+            // tabSchemaSnapshots
+            // 
+            this.tabSchemaSnapshots.Controls.Add(this.tabGeneral);
+            this.tabSchemaSnapshots.Controls.Add(this.tabExtendedEvents);
+            this.tabSchemaSnapshots.Controls.Add(this.tabPage7);
+            this.tabSchemaSnapshots.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.tabSchemaSnapshots.Location = new System.Drawing.Point(6, 16);
+            this.tabSchemaSnapshots.Name = "tabSchemaSnapshots";
+            this.tabSchemaSnapshots.SelectedIndex = 0;
+            this.tabSchemaSnapshots.Size = new System.Drawing.Size(743, 177);
+            this.tabSchemaSnapshots.TabIndex = 21;
+            // 
+            // tabGeneral
+            // 
+            this.tabGeneral.Controls.Add(this.cboSource);
+            this.tabGeneral.Controls.Add(this.label1);
+            this.tabGeneral.Controls.Add(this.chkCustomizeSchedule);
+            this.tabGeneral.Controls.Add(this.chkNoWMI);
+            this.tabGeneral.Location = new System.Drawing.Point(4, 25);
+            this.tabGeneral.Name = "tabGeneral";
+            this.tabGeneral.Padding = new System.Windows.Forms.Padding(3);
+            this.tabGeneral.Size = new System.Drawing.Size(735, 148);
+            this.tabGeneral.TabIndex = 0;
+            this.tabGeneral.Text = "General";
+            this.tabGeneral.UseVisualStyleBackColor = true;
+            // 
+            // tabExtendedEvents
+            // 
+            this.tabExtendedEvents.Controls.Add(this.label9);
+            this.tabExtendedEvents.Controls.Add(this.chkSlowQueryThreshold);
+            this.tabExtendedEvents.Controls.Add(this.chkPersistXESession);
+            this.tabExtendedEvents.Controls.Add(this.lblSlow);
+            this.tabExtendedEvents.Controls.Add(this.numSlowQueryThreshold);
+            this.tabExtendedEvents.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.tabExtendedEvents.Location = new System.Drawing.Point(4, 25);
+            this.tabExtendedEvents.Name = "tabExtendedEvents";
+            this.tabExtendedEvents.Padding = new System.Windows.Forms.Padding(3);
+            this.tabExtendedEvents.Size = new System.Drawing.Size(735, 148);
+            this.tabExtendedEvents.TabIndex = 1;
+            this.tabExtendedEvents.Text = "Extended Events";
+            this.tabExtendedEvents.UseVisualStyleBackColor = true;
+            // 
+            // tabPage7
+            // 
+            this.tabPage7.Controls.Add(this.label8);
+            this.tabPage7.Controls.Add(this.txtSnapshotCron);
+            this.tabPage7.Controls.Add(this.label2);
+            this.tabPage7.Controls.Add(this.txtSnapshotDBs);
+            this.tabPage7.Location = new System.Drawing.Point(4, 25);
+            this.tabPage7.Name = "tabPage7";
+            this.tabPage7.Padding = new System.Windows.Forms.Padding(3);
+            this.tabPage7.Size = new System.Drawing.Size(735, 148);
+            this.tabPage7.TabIndex = 2;
+            this.tabPage7.Text = "Schema Snapshots";
+            this.tabPage7.UseVisualStyleBackColor = true;
+            // 
+            // label9
+            // 
+            this.label9.AutoSize = true;
+            this.label9.Location = new System.Drawing.Point(6, 57);
+            this.label9.Name = "label9";
+            this.label9.Size = new System.Drawing.Size(108, 17);
+            this.label9.TabIndex = 16;
+            this.label9.Text = "Threshold (ms):";
+            // 
             // ServiceConfig
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
@@ -566,12 +630,18 @@
             this.tabPage3.ResumeLayout(false);
             this.tabPage3.PerformLayout();
             this.tabPage1.ResumeLayout(false);
-            this.tabPage1.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.numSlowQueryThreshold)).EndInit();
             this.tabPage2.ResumeLayout(false);
             this.tabPage2.PerformLayout();
             this.tabPage4.ResumeLayout(false);
             this.tabPage4.PerformLayout();
+            this.tabSchemaSnapshots.ResumeLayout(false);
+            this.tabGeneral.ResumeLayout(false);
+            this.tabGeneral.PerformLayout();
+            this.tabExtendedEvents.ResumeLayout(false);
+            this.tabExtendedEvents.PerformLayout();
+            this.tabPage7.ResumeLayout(false);
+            this.tabPage7.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -620,6 +690,11 @@
         private System.Windows.Forms.TextBox txtSnapshotCron;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.TextBox txtSnapshotDBs;
+        private System.Windows.Forms.TabControl tabSchemaSnapshots;
+        private System.Windows.Forms.TabPage tabGeneral;
+        private System.Windows.Forms.TabPage tabExtendedEvents;
+        private System.Windows.Forms.Label label9;
+        private System.Windows.Forms.TabPage tabPage7;
     }
 }
 

@@ -536,6 +536,8 @@ namespace DBAChecksServiceConfig
                 }
 
                 chkCustomizeSchedule.Checked = src.Schedules != null;
+                txtSnapshotCron.Text = src.SchemaSnapshotCron;
+                txtSnapshotDBs.Text = src.SchemaSnapshotDBs;
 
             }
         }
