@@ -166,7 +166,7 @@ namespace DBAChecksService
                                   .Build()
                                   )); ; ;
                         }
-                        if (cfg.SchemaSnapshotDBs.Length > 0)
+                        if (cfg.SchemaSnapshotDBs !=null && cfg.SchemaSnapshotDBs.Length > 0)
                         {
                             var x = ScheduleJobServiceConfiguratorExtensions.ScheduleQuartzJob<DBAChecksService>(service, q =>
                  q.WithJob(() =>

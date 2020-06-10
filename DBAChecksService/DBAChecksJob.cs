@@ -7,6 +7,7 @@ using System.Data;
 using System.Data.SqlClient;
 using System.IO;
 using System.Linq;
+using System.Runtime.Serialization.Formatters.Binary;
 using static DBAChecks.DBAChecksConnection;
 
 namespace DBAChecksService
@@ -46,6 +47,17 @@ namespace DBAChecksService
                             DestinationHandling.WriteDB(ds, destination);
                             System.IO.File.Delete(f);
                         }
+                        foreach (string f in System.IO.Directory.GetFiles(folder, "DBAChecks_*.bin"))
+                        {
+                            BinaryFormatter fmt = new BinaryFormatter();
+                            DataSet ds;
+                            using(FileStream fs = new FileStream(f, FileMode.Open,FileAccess.Read))
+                            {
+                                ds = (DataSet)fmt.Deserialize(fs);                                                     
+                            }
+                            DestinationHandling.WriteDB(ds, destination);
+                            System.IO.File.Delete(f);
+                        }
                     }
                     else
                     {
@@ -60,20 +72,31 @@ namespace DBAChecksService
                     var resp = s3Cli.ListObjects(uri.Bucket, (uri.Key + "/DBAChecks_").Replace("//", "/"));
                     foreach (var f in resp.S3Objects)
                     {
-                        if (f.Key.EndsWith(".json"))
+                        if (f.Key.EndsWith(".json") || f.Key.EndsWith(".bin"))
                         {
                             using (GetObjectResponse response = s3Cli.GetObject(f.BucketName, f.Key))
                             using (Stream responseStream = response.ResponseStream)
-                            using (StreamReader reader = new StreamReader(responseStream))
                             {
-                                string json = reader.ReadToEnd();
-                                DataSet ds = JsonConvert.DeserializeObject<DataSet>(json);
+                                DataSet ds;
+                                if (f.Key.EndsWith(".bin"))
+                                {
+                                    BinaryFormatter fmt = new BinaryFormatter();
+                                    ds = (DataSet)fmt.Deserialize(responseStream);
+                                }
+                                else
+                                {
+                                    using (StreamReader reader = new StreamReader(responseStream))
+                                    {
+                                        string json = reader.ReadToEnd();
+                                        ds = JsonConvert.DeserializeObject<DataSet>(json);
+
+                                    }
+                                }
                                 DestinationHandling.WriteDB(ds, destination);
                                 s3Cli.DeleteObject(f.BucketName, f.Key);
+                                Console.WriteLine("Imported:" + f.Key);
                             }
-                            Console.WriteLine("Imported:" + f.Key);
-                        }
-
+                        }            
                     }
                 }
                 else
@@ -93,7 +116,7 @@ namespace DBAChecksService
                     collector.Collect(types);
                     try
                     {
-                        string fileName = System.IO.Path.ChangeExtension(cfg.GenerateFileName(), "bin");
+                        string fileName = cfg.GenerateFileName();
                         DestinationHandling.Write(collector.Data, destination, fileName, AWSProfile, AccessKey, SecretKey, destinationType);
                     }
                     catch (Exception ex)

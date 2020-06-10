@@ -35,7 +35,7 @@ namespace DBAChecksService
             var s3Cli = AWSTools.GetAWSClient(AWSProfile, AccessKey, SecretKey, uri);
             var r = new Amazon.S3.Model.PutObjectRequest();
 
-            if (System.IO.Path.GetExtension(fileName) == "bin")
+            if (System.IO.Path.GetExtension(fileName) == ".bin")
             {
 
                 ds.RemotingFormat = SerializationFormat.Binary;
@@ -62,7 +62,7 @@ namespace DBAChecksService
             {
                 string filePath = Path.Combine(destination, fileName);
                 Console.WriteLine("Write to " + filePath);
-                if (System.IO.Path.GetExtension(fileName) == "bin")
+                if (System.IO.Path.GetExtension(fileName) == ".bin")
                 {
                     ds.RemotingFormat = SerializationFormat.Binary;
                     BinaryFormatter fmt = new BinaryFormatter();
