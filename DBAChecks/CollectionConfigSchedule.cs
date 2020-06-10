@@ -7,7 +7,7 @@ namespace DBAChecksService
     public class CollectionConfigSchedule
     {
 
-        public string ChronSchedule { get; set; }
+        public string CronSchedule { get; set; }
         public bool RunOnServiceStart { get; set; }
         public CollectionType[] CollectionTypes { get; set; }
 
@@ -16,9 +16,9 @@ namespace DBAChecksService
 
         }
 
-        public CollectionConfigSchedule(string chronSchedule, bool runOnServiceStart, CollectionType[] collectionTypes)
+        public CollectionConfigSchedule(string cronSchedule, bool runOnServiceStart, CollectionType[] collectionTypes)
         {
-            this.ChronSchedule = chronSchedule;
+            this.CronSchedule = cronSchedule;
             this.CollectionTypes = collectionTypes;
             this.RunOnServiceStart = runOnServiceStart;
         }

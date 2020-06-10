@@ -63,10 +63,41 @@ namespace DBAChecks
                 {
                     update(connectionString, instanceID, snapshotDate, dt);
                 }
+                string snapshotPrefix = "Snapshot_";
+                if (dt.TableName.StartsWith(snapshotPrefix))
+                {
+                    string databaseName = dt.TableName.Substring(snapshotPrefix.Length);
+                    updateSnapshot(connectionString, instanceID, snapshotDate,dt, databaseName);
+
+                }
             }
 
             updateServerExtraProperties(connectionString, instanceID, snapshotDate, Data);
             InsertErrors(connectionString, instanceID, snapshotDate, Data);
+        }
+
+        private void updateSnapshot(string connectionString, Int32 instanceID, DateTime SnapshotDate, DataTable dtSS,string databaseName){
+            
+            try
+            {
+                var cn = new SqlConnection(connectionString);
+                using (cn)
+                {
+                    cn.Open();
+                    
+                    SqlCommand cmd = new SqlCommand("DDLSnapshot_Add", cn);
+                    cmd.Parameters.AddWithValue("ss", dtSS);
+                    cmd.Parameters.AddWithValue("InstanceID", instanceID);
+                    cmd.Parameters.AddWithValue("SnapshotDate", SnapshotDate);
+                    cmd.Parameters.AddWithValue("DB", databaseName);
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.ExecuteNonQuery();
+                }
+            }
+            catch (Exception ex)
+            {
+                logError("ImportDDLSnapshot:" + databaseName,ex.Message, dtSS);
+            }
         }
 
         private void updateServerExtraProperties(string connectionString, Int32 instanceID, DateTime SnapshotDate, DataSet ds)

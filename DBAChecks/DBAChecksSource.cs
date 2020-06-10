@@ -35,6 +35,9 @@ namespace DBAChecks
             }
         }
 
+        public string SchemaSnapshotCron;
+        public string SchemaSnapshotDBs;
+
 
         [JsonIgnore]
         public DBAChecksConnection SourceConnection { get; set; }
@@ -64,7 +67,6 @@ namespace DBAChecks
                 SourceConnection = new DBAChecksConnection(value);
             }
         }
-
 
         public string GenerateFileName()
         {

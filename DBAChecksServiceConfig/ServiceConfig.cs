@@ -15,6 +15,7 @@ using System.ServiceProcess;
 using System.Diagnostics;
 using DBAChecks;
 using static DBAChecks.DBAChecksConnection;
+using Quartz;
 
 namespace DBAChecksServiceConfig
 {
@@ -41,6 +42,16 @@ namespace DBAChecksServiceConfig
             if (chkCustomizeSchedule.Checked)
             {
                 src.Schedules = src.GetSchedule();
+            }
+            if (txtSnapshotDBs.Text.Trim().Length > 0)
+            {
+                if (!CronExpression.IsValidExpression(txtSnapshotCron.Text))
+                {
+                    MessageBox.Show("Invalid cron expression","Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
+                src.SchemaSnapshotDBs = txtSnapshotDBs.Text;
+                src.SchemaSnapshotCron = txtSnapshotCron.Text;
             }
             src.PersistXESessions = chkPersistXESession.Checked;
             bool validated = validateSource();
@@ -232,7 +243,7 @@ namespace DBAChecksServiceConfig
             txtAWSProfile.Text = collectionConfig.AWSProfile;
             txtAccessKey.Text = collectionConfig.AccessKey;
             txtSecretKey.Text = collectionConfig.SecretKey;
-            chkCustomizeMaintenanceChron.Checked = (collectionConfig.MaintenanceScheduleChron != null);
+            chkCustomizeMaintenanceCron.Checked = (collectionConfig.MaintenanceScheduleCron != null);
            
         }
 
@@ -480,15 +491,15 @@ namespace DBAChecksServiceConfig
             txtJson.Text = collectionConfig.Serialize();
         }
 
-        private void chkCustomizeMaintenanceChron_CheckedChanged(object sender, EventArgs e)
+        private void chkCustomizeMaintenanceCron_CheckedChanged(object sender, EventArgs e)
         {
-            if (chkCustomizeMaintenanceChron.Checked)
+            if (chkCustomizeMaintenanceCron.Checked)
             {
-                collectionConfig.MaintenanceScheduleChron = collectionConfig.GetMaintenanceChron();
+                collectionConfig.MaintenanceScheduleCron = collectionConfig.GetMaintenanceCron();
             }
             else
             {
-                collectionConfig.MaintenanceScheduleChron = null;
+                collectionConfig.MaintenanceScheduleCron = null;
             }
             txtJson.Text = collectionConfig.Serialize();
         }

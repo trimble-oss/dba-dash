@@ -56,10 +56,14 @@
             this.bttnCancel = new System.Windows.Forms.Button();
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabPage3 = new System.Windows.Forms.TabPage();
-            this.chkCustomizeMaintenanceChron = new System.Windows.Forms.CheckBox();
+            this.chkCustomizeMaintenanceCron = new System.Windows.Forms.CheckBox();
             this.label7 = new System.Windows.Forms.Label();
             this.txtDestination = new System.Windows.Forms.TextBox();
             this.tabPage1 = new System.Windows.Forms.TabPage();
+            this.label8 = new System.Windows.Forms.Label();
+            this.txtSnapshotCron = new System.Windows.Forms.TextBox();
+            this.label2 = new System.Windows.Forms.Label();
+            this.txtSnapshotDBs = new System.Windows.Forms.TextBox();
             this.chkPersistXESession = new System.Windows.Forms.CheckBox();
             this.lblSlow = new System.Windows.Forms.Label();
             this.chkSlowQueryThreshold = new System.Windows.Forms.CheckBox();
@@ -101,12 +105,12 @@
             this.txtJson.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.txtJson.Location = new System.Drawing.Point(37, 283);
+            this.txtJson.Location = new System.Drawing.Point(37, 318);
             this.txtJson.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.txtJson.Multiline = true;
             this.txtJson.Name = "txtJson";
             this.txtJson.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.txtJson.Size = new System.Drawing.Size(763, 330);
+            this.txtJson.Size = new System.Drawing.Size(763, 295);
             this.txtJson.TabIndex = 13;
             this.txtJson.Validating += new System.ComponentModel.CancelEventHandler(this.txtJson_Validating);
             // 
@@ -206,7 +210,7 @@
             // label5
             // 
             this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(37, 264);
+            this.label5.Location = new System.Drawing.Point(37, 299);
             this.label5.Name = "label5";
             this.label5.Size = new System.Drawing.Size(42, 17);
             this.label5.TabIndex = 12;
@@ -335,32 +339,32 @@
             this.tabControl1.Location = new System.Drawing.Point(40, 25);
             this.tabControl1.Name = "tabControl1";
             this.tabControl1.SelectedIndex = 0;
-            this.tabControl1.Size = new System.Drawing.Size(763, 214);
+            this.tabControl1.Size = new System.Drawing.Size(763, 310);
             this.tabControl1.TabIndex = 22;
             // 
             // tabPage3
             // 
-            this.tabPage3.Controls.Add(this.chkCustomizeMaintenanceChron);
+            this.tabPage3.Controls.Add(this.chkCustomizeMaintenanceCron);
             this.tabPage3.Controls.Add(this.label7);
             this.tabPage3.Controls.Add(this.txtDestination);
             this.tabPage3.Location = new System.Drawing.Point(4, 25);
             this.tabPage3.Name = "tabPage3";
             this.tabPage3.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage3.Size = new System.Drawing.Size(755, 185);
+            this.tabPage3.Size = new System.Drawing.Size(755, 281);
             this.tabPage3.TabIndex = 2;
             this.tabPage3.Text = "Destination:";
             this.tabPage3.UseVisualStyleBackColor = true;
             // 
-            // chkCustomizeMaintenanceChron
+            // chkCustomizeMaintenanceCron
             // 
-            this.chkCustomizeMaintenanceChron.AutoSize = true;
-            this.chkCustomizeMaintenanceChron.Location = new System.Drawing.Point(103, 49);
-            this.chkCustomizeMaintenanceChron.Name = "chkCustomizeMaintenanceChron";
-            this.chkCustomizeMaintenanceChron.Size = new System.Drawing.Size(222, 21);
-            this.chkCustomizeMaintenanceChron.TabIndex = 4;
-            this.chkCustomizeMaintenanceChron.Text = "Customize Maintenance Chron";
-            this.chkCustomizeMaintenanceChron.UseVisualStyleBackColor = true;
-            this.chkCustomizeMaintenanceChron.CheckedChanged += new System.EventHandler(this.chkCustomizeMaintenanceChron_CheckedChanged);
+            this.chkCustomizeMaintenanceCron.AutoSize = true;
+            this.chkCustomizeMaintenanceCron.Location = new System.Drawing.Point(103, 49);
+            this.chkCustomizeMaintenanceCron.Name = "chkCustomizeMaintenanceCron";
+            this.chkCustomizeMaintenanceCron.Size = new System.Drawing.Size(214, 21);
+            this.chkCustomizeMaintenanceCron.TabIndex = 4;
+            this.chkCustomizeMaintenanceCron.Text = "Customize Maintenance Cron";
+            this.chkCustomizeMaintenanceCron.UseVisualStyleBackColor = true;
+            this.chkCustomizeMaintenanceCron.CheckedChanged += new System.EventHandler(this.chkCustomizeMaintenanceCron_CheckedChanged);
             // 
             // label7
             // 
@@ -382,6 +386,10 @@
             // 
             // tabPage1
             // 
+            this.tabPage1.Controls.Add(this.label8);
+            this.tabPage1.Controls.Add(this.txtSnapshotCron);
+            this.tabPage1.Controls.Add(this.label2);
+            this.tabPage1.Controls.Add(this.txtSnapshotDBs);
             this.tabPage1.Controls.Add(this.chkPersistXESession);
             this.tabPage1.Controls.Add(this.lblSlow);
             this.tabPage1.Controls.Add(this.chkSlowQueryThreshold);
@@ -395,10 +403,43 @@
             this.tabPage1.Location = new System.Drawing.Point(4, 25);
             this.tabPage1.Name = "tabPage1";
             this.tabPage1.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage1.Size = new System.Drawing.Size(755, 185);
+            this.tabPage1.Size = new System.Drawing.Size(755, 281);
             this.tabPage1.TabIndex = 0;
             this.tabPage1.Text = "Source";
             this.tabPage1.UseVisualStyleBackColor = true;
+            // 
+            // label8
+            // 
+            this.label8.AutoSize = true;
+            this.label8.Location = new System.Drawing.Point(9, 170);
+            this.label8.Name = "label8";
+            this.label8.Size = new System.Drawing.Size(199, 17);
+            this.label8.TabIndex = 20;
+            this.label8.Text = "Schema Snapshot Databases:";
+            // 
+            // txtSnapshotCron
+            // 
+            this.txtSnapshotCron.Location = new System.Drawing.Point(9, 239);
+            this.txtSnapshotCron.Name = "txtSnapshotCron";
+            this.txtSnapshotCron.Size = new System.Drawing.Size(172, 22);
+            this.txtSnapshotCron.TabIndex = 19;
+            this.txtSnapshotCron.Text = "0 0 0 1/1 * ? *";
+            // 
+            // label2
+            // 
+            this.label2.AutoSize = true;
+            this.label2.Location = new System.Drawing.Point(7, 219);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(161, 17);
+            this.label2.TabIndex = 18;
+            this.label2.Text = "Schema Snapshot Cron:";
+            // 
+            // txtSnapshotDBs
+            // 
+            this.txtSnapshotDBs.Location = new System.Drawing.Point(9, 190);
+            this.txtSnapshotDBs.Name = "txtSnapshotDBs";
+            this.txtSnapshotDBs.Size = new System.Drawing.Size(557, 22);
+            this.txtSnapshotDBs.TabIndex = 17;
             // 
             // chkPersistXESession
             // 
@@ -481,7 +522,7 @@
             this.tabPage2.Location = new System.Drawing.Point(4, 25);
             this.tabPage2.Name = "tabPage2";
             this.tabPage2.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage2.Size = new System.Drawing.Size(755, 185);
+            this.tabPage2.Size = new System.Drawing.Size(755, 281);
             this.tabPage2.TabIndex = 1;
             this.tabPage2.Text = "AWS Credentials";
             this.tabPage2.UseVisualStyleBackColor = true;
@@ -499,7 +540,7 @@
             this.tabPage4.Location = new System.Drawing.Point(4, 25);
             this.tabPage4.Name = "tabPage4";
             this.tabPage4.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage4.Size = new System.Drawing.Size(755, 185);
+            this.tabPage4.Size = new System.Drawing.Size(755, 281);
             this.tabPage4.TabIndex = 3;
             this.tabPage4.Text = "Service";
             this.tabPage4.UseVisualStyleBackColor = true;
@@ -570,11 +611,15 @@
         private System.Windows.Forms.TabPage tabPage2;
         private System.Windows.Forms.TabPage tabPage4;
         private System.Windows.Forms.Button bttnRemove;
-        private System.Windows.Forms.CheckBox chkCustomizeMaintenanceChron;
+        private System.Windows.Forms.CheckBox chkCustomizeMaintenanceCron;
         private System.Windows.Forms.NumericUpDown numSlowQueryThreshold;
         private System.Windows.Forms.CheckBox chkSlowQueryThreshold;
         private System.Windows.Forms.Label lblSlow;
         private System.Windows.Forms.CheckBox chkPersistXESession;
+        private System.Windows.Forms.Label label8;
+        private System.Windows.Forms.TextBox txtSnapshotCron;
+        private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.TextBox txtSnapshotDBs;
     }
 }
 

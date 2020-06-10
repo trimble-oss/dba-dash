@@ -82,19 +82,19 @@ namespace DBAChecks
         [JsonIgnore]
         public DBAChecksConnection DestinationConnection { get; set; }
 
-        private string defaultMaintenanceChron = " 0 0 0 ? * * *";
+        private string defaultMaintenanceCron = " 0 0 0 ? * * *";
 
-        public string MaintenanceScheduleChron { get; set; }
+        public string MaintenanceScheduleCron { get; set; }
 
-        public string GetMaintenanceChron()
+        public string GetMaintenanceCron()
         {
-            if(MaintenanceScheduleChron==null || MaintenanceScheduleChron == "")
+            if(MaintenanceScheduleCron==null || MaintenanceScheduleCron == "")
             {
-                return defaultMaintenanceChron;
+                return defaultMaintenanceCron;
             }
             else
             {
-                return MaintenanceScheduleChron;
+                return MaintenanceScheduleCron;
             }
         }
 
