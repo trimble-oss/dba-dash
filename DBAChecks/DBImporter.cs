@@ -85,12 +85,15 @@ namespace DBAChecks
                 using (cn)
                 {
                     cn.Open();
-
+                    DateTime StartTime = (DateTime)dtSS.ExtendedProperties["StartTime"];
+                    DateTime EndTime = (DateTime)dtSS.ExtendedProperties["EndTime"];
                     SqlCommand cmd = new SqlCommand("DDLSnapshot_Add", cn);
                     cmd.Parameters.AddWithValue("ss", dtSS);
                     cmd.Parameters.AddWithValue("InstanceID", instanceID);
                     cmd.Parameters.AddWithValue("SnapshotDate", SnapshotDate);
                     cmd.Parameters.AddWithValue("DB", databaseName);
+                    cmd.Parameters.AddWithValue("StartTime", StartTime);
+                    cmd.Parameters.AddWithValue("EndTime", EndTime);
                     cmd.CommandType = CommandType.StoredProcedure;
                     cmd.ExecuteNonQuery();
                 }

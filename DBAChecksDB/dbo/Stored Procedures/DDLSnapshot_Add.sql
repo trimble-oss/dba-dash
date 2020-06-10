@@ -1,14 +1,36 @@
-﻿CREATE   PROC DDLSnapshot_Add(@ss dbo.DDLSnapshot READONLY,@ConnectionId SYSNAME,@DB SYSNAME,@SnapshotDate DATETIME2(3))
+﻿CREATE   PROC [dbo].[DDLSnapshot_Add](
+	@ss dbo.DDLSnapshot READONLY,
+	@ConnectionId SYSNAME=NULL,
+	@InstanceID INT=NULL,
+	@DB SYSNAME,
+	@SnapshotDate DATETIME2(3),
+	@StartTime DATETIME2(3),
+	@EndTime DATETIME2(3)
+)
 AS
 DECLARE @UpdateCount INT=-1
 DECLARE @DatabaseId INT
-SELECT @DatabaseId = D.DatabaseID
-FROM dbo.Instances I 
-JOIN dbo.Databases D ON D.InstanceID = I.InstanceID
-WHERE I.ConnectionID = @ConnectionId 
-AND D.name = @DB
-AND D.IsActive=1
-AND I.IsActive=1
+DECLARE @ValidatedSnapshotDate DATETIME2(3)
+IF @InstanceID IS NULL
+BEGIN
+	SELECT @DatabaseId = D.DatabaseID
+	FROM dbo.Instances I 
+	JOIN dbo.Databases D ON D.InstanceID = I.InstanceID
+	WHERE I.ConnectionID = @ConnectionId 
+	AND D.name = @DB
+	AND D.IsActive=1
+	AND I.IsActive=1
+END
+ELSE
+BEGIN
+	SELECT @DatabaseId = D.DatabaseID
+	FROM dbo.Instances I 
+	JOIN dbo.Databases D ON D.InstanceID = I.InstanceID
+	WHERE I.InstanceID=@InstanceID
+	AND D.name = @DB
+	AND D.IsActive=1
+	AND I.IsActive=1
+END
 
 DECLARE @LastSnapshotDate DATETIME2(3) 
 SELECT TOP(1) @LastSnapshotDate = s.SnapshotDate 
@@ -78,6 +100,9 @@ BEGIN
 			SET ValidatedDate =@SnapshotDate
 		WHERE SnapshotDate = @LastSnapshotDate 
 		AND DatabaseID = @DatabaseID
+
+		SET @ValidatedSnapshotDate=@LastSnapshotDate
+	
 	END
 	ELSE
 	BEGIN
@@ -95,4 +120,7 @@ BEGIN
 			@UpdateCount
 			)
 	END
+	INSERT INTO dbo.DDLSnapshotsLog(DatabaseID,SnapshotDate,ValidatedSnapshot,EndDate,Duration)
+	SELECT @DatabaseId,@SnapshotDate,@EndTime,@ValidatedSnapshotDate,DATEDIFF(ms,@StartTime,@EndTime)
+	
 END

@@ -58,8 +58,12 @@ namespace DBAChecksService
                     if (include)
                     {
                         Console.WriteLine("DB Snapshot {" + db.Name + "} from Instance:" + builder.DataSource);
+                        DateTime StartTime = DateTime.UtcNow;
                         var dt = ss.SnapshotDB(db.Name);
+                        DateTime EndTime = DateTime.UtcNow;
                         dt.TableName = "Snapshot_" + db.Name;
+                        dt.ExtendedProperties.Add("StartTime", StartTime);
+                        dt.ExtendedProperties.Add("EndTime", EndTime);
                         dsSnapshot.Tables.Add(dt);
                         string fileName = System.IO.Path.ChangeExtension(cfg.GenerateFileName(), "bin");
                         DestinationHandling.Write(dsSnapshot, destination, fileName, AWSProfile, AccessKey, SecretKey, destinationType);
