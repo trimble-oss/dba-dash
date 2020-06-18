@@ -46,6 +46,10 @@ namespace DBAChecksServiceConfig
                 }
                 src.SchemaSnapshotDBs = txtSnapshotDBs.Text;
                 src.SchemaSnapshotCron = txtSnapshotCron.Text;
+                if (collectionConfig.SchemaSnapshotOptions == null)
+                {
+                    collectionConfig.SchemaSnapshotOptions=  new SchemaSnapshotDBOptions();
+                }
             }
             src.PersistXESessions = chkPersistXESession.Checked;
             bool validated = validateSource();
@@ -116,7 +120,7 @@ namespace DBAChecksServiceConfig
                 }
 
                 collectionConfig.SourceConnections.Add(src);
-                txtJson.Text = jsonConfig();
+                txtJson.Text = collectionConfig.Serialize();
                 populateDropDowns();
             }
             // JsonConvert.DeserializeObject<CollectionConfig[]>(jsonConfig);
@@ -134,14 +138,7 @@ namespace DBAChecksServiceConfig
             }
         }
 
-        private string jsonConfig()
-        {
-            return JsonConvert.SerializeObject(collectionConfig, Formatting.Indented, new JsonSerializerSettings
-            {
-                NullValueHandling = NullValueHandling.Ignore,
-                DefaultValueHandling = DefaultValueHandling.Ignore
-            });
-        }
+
 
         private void populateDropDowns()
         {
@@ -205,7 +202,7 @@ namespace DBAChecksServiceConfig
 
         private void saveChanges()
         {
-            txtJson.Text = jsonConfig();
+            txtJson.Text = collectionConfig.Serialize();
             System.IO.File.WriteAllText(jsonPath, txtJson.Text);
             originalJson = txtJson.Text;
             MessageBox.Show("Config saved.  Restart service to apply changes.", "Save", MessageBoxButtons.OK, MessageBoxIcon.Information);
@@ -213,6 +210,7 @@ namespace DBAChecksServiceConfig
 
         private void ServiceConfig_Load(object sender, EventArgs e)
         {
+            txtJson.MaxLength = 0;
             cboServiceCredentials.SelectedIndex = 3;
             if (File.Exists(jsonPath))
             {
@@ -222,9 +220,9 @@ namespace DBAChecksServiceConfig
                     txtJson.Text = originalJson;
                     setFromJson(originalJson);
                 }
-                catch
+                catch(Exception ex)
                 {
-                    MessageBox.Show("Error reading ServiceConfig.json", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show("Error reading ServiceConfig.json: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
             refreshServiceStatus();

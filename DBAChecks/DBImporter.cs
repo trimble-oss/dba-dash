@@ -2,6 +2,7 @@
 using System.Data;
 using System.Data.SqlClient;
 using System.Linq;
+using System.Security.Cryptography;
 
 namespace DBAChecks
 {
@@ -87,6 +88,11 @@ namespace DBAChecks
                     cn.Open();
                     DateTime StartTime = (DateTime)dtSS.ExtendedProperties["StartTime"];
                     DateTime EndTime = (DateTime)dtSS.ExtendedProperties["EndTime"];
+                    string snapshotOptions = (string)dtSS.ExtendedProperties["SnapshotOptions"];
+                    var crypt = new SHA256Managed();
+                    var snapshptOptionsHash = crypt.ComputeHash(System.Text.Encoding.ASCII.GetBytes(snapshotOptions));
+                   
+
                     SqlCommand cmd = new SqlCommand("DDLSnapshot_Add", cn);
                     cmd.Parameters.AddWithValue("ss", dtSS);
                     cmd.Parameters.AddWithValue("InstanceID", instanceID);
@@ -94,6 +100,8 @@ namespace DBAChecks
                     cmd.Parameters.AddWithValue("DB", databaseName);
                     cmd.Parameters.AddWithValue("StartTime", StartTime);
                     cmd.Parameters.AddWithValue("EndTime", EndTime);
+                    cmd.Parameters.AddWithValue("SnapshotOptions", snapshotOptions);
+                    cmd.Parameters.AddWithValue("SnapshotOptionsHash",snapshptOptionsHash );
                     cmd.CommandType = CommandType.StoredProcedure;
                     cmd.ExecuteNonQuery();
                 }

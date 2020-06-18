@@ -178,6 +178,7 @@ namespace DBAChecksService
                       .UsingJobData("Source", cfg.SourceConnection.ConnectionString)
                       .UsingJobData("Destination", config.DestinationConnection.ConnectionString)
                       .UsingJobData("DestinationType", JsonConvert.SerializeObject(config.DestinationConnection.Type))
+                      .UsingJobData("Options", JsonConvert.SerializeObject(config.SchemaSnapshotOptions))
                       .UsingJobData("SchemaSnapshotDBs", cfg.SchemaSnapshotDBs)
                      .Build())
                  .AddTrigger(() => TriggerBuilder.Create()

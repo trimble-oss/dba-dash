@@ -1,4 +1,5 @@
 ﻿using DBAChecksService;
+using Microsoft.SqlServer.Management.Smo;
 using Newtonsoft.Json;
 using System.Collections.Generic;
 
@@ -11,6 +12,7 @@ namespace DBAChecks
         private bool wasEncryptionPerformed = false;
         private bool isEncrypted = false;
         private string myString = "g&hAs2&mVOLwE6DqO!I5";
+        public SchemaSnapshotDBOptions SchemaSnapshotOptions=null;
 
         public List<DBAChecksSource> SourceConnections = new List<DBAChecksSource>();
 
@@ -24,7 +26,8 @@ namespace DBAChecks
             return JsonConvert.SerializeObject(this, Formatting.Indented, new JsonSerializerSettings
             {
                 NullValueHandling = NullValueHandling.Ignore,
-                DefaultValueHandling = DefaultValueHandling.Ignore
+                DefaultValueHandling = DefaultValueHandling.Include,
+
             });
         }
 

@@ -5,9 +5,12 @@
 	@DB SYSNAME,
 	@SnapshotDate DATETIME2(3),
 	@StartTime DATETIME2(3),
-	@EndTime DATETIME2(3)
+	@EndTime DATETIME2(3),
+	@SnapshotOptions VARCHAR(MAX),
+	@SnapshotOptionsHash BINARY(32)
 )
 AS
+SET XACT_ABORT ON
 DECLARE @UpdateCount INT=-1
 DECLARE @DatabaseId INT
 DECLARE @ValidatedSnapshotDate DATETIME2(3)
@@ -38,6 +41,26 @@ FROM dbo.DDLSnapshots s
 WHERE s.DatabaseID = @DatabaseID
 ORDER BY s.SnapshotDate DESC
 
+DECLARE @DDLSnapshotOptionsID INT
+
+SELECT @DDLSnapshotOptionsID= DDLSnapshotOptionsID 
+FROM dbo.DDLSnapshotOptions 
+WHERE SnapshotOptionsHash = @SnapshotOptionsHash
+
+IF @@ROWCOUNT =0
+BEGIN
+	INSERT INTO dbo.DDLSnapshotOptions
+	(
+	    SnapshotOptionsHash,
+	    SnapshotOptions
+	)
+	VALUES
+	(  @SnapshotOptionsHash,
+	    @SnapshotOptions
+	    )
+	SET @DDLSnapshotOptionsID = SCOPE_IDENTITY()
+END
+
 
 IF @DatabaseId IS NOT NULL
 BEGIN
@@ -50,7 +73,7 @@ BEGIN
 			FROM dbo.DDL 
 			WHERE ss.DDLHash = DDL.DDLHash
 			);
-
+	BEGIN TRAN
 	INSERT INTO dbo.DBObjects
 	(
 		DatabaseID,
@@ -111,16 +134,18 @@ BEGIN
 			DatabaseID,
 			SnapshotDate,
 			ValidatedDate,
-			DiffCount
+			DiffCount,
+			DDLSnapshotOptionsID
 		)
 		VALUES
 		(   @DatabaseID,
 			@SnapshotDate,
 			@SnapshotDate,
-			@UpdateCount
+			@UpdateCount,
+			@DDLSnapshotOptionsID
 			)
 	END
 	INSERT INTO dbo.DDLSnapshotsLog(DatabaseID,SnapshotDate,ValidatedSnapshot,EndDate,Duration)
-	SELECT @DatabaseId,@SnapshotDate,@EndTime,@ValidatedSnapshotDate,DATEDIFF(ms,@StartTime,@EndTime)
-	
+	SELECT @DatabaseId,@SnapshotDate,@ValidatedSnapshotDate,@EndTime,DATEDIFF(ms,@StartTime,@EndTime)
+	COMMIT
 END
