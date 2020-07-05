@@ -258,3 +258,39 @@ BEGIN
 	( -1, 0xe3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855, 0x )
 	SET IDENTITY_INSERT dbo.DDL OFF
 END
+IF NOT EXISTS(SELECT 1 FROM dbo.ObjectType)
+BEGIN
+	INSERT INTO dbo.ObjectType
+	(
+		ObjectType,
+		TypeDescription
+	)
+	VALUES( 'P','Stored Procedure'),
+	('V','View'),
+	('IF','Inline Function'),
+	('U','Table'),
+	('TF','Table Function'),
+	('FN','Scalar Function'),
+	('AF','Aggregate Function'),
+	('DTR','Database Trigger'),
+	('CLR','CLR Assembly'),
+	('FT','CLR Table Function'),
+	('FS','CLR Scalar Function'),
+	('TYP','User Defined Data Type'),
+	('TT','User Defined Table Type'),
+	('UTY','User Defined Type'),
+	('XSC','XML Schema Collection'),
+	('SO','Sequence Object'),
+	('SCH','Schema'),
+	('SN','Synonym'),
+	('DB','Database'),
+	('PC','CLR Procedure'),
+	('ROL','Role'),
+	('SBM','Service Broker Message Type'),
+	('SBS','Service Broker Service'),
+	('SBC','Service Broker Contract'),
+	('SBB','Service Broker Binding'),
+	('SBP','Service Broker Priorities'),
+	('SQ','Service Broker Queue'),
+	('SBR','Service Broker Route')
+END

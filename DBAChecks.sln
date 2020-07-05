@@ -15,6 +15,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DBAChecks", "DBAChecks\DBAC
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DBAChecksServiceConfig", "DBAChecksServiceConfig\DBAChecksServiceConfig.csproj", "{799E3EC5-E66D-4953-9182-38E7471770A0}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DBAChecksGUI", "DBAChecksGUI\DBAChecksGUI.csproj", "{C3356F62-9C3B-425C-8F23-4540D567A72A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -63,6 +65,12 @@ Global
 		{799E3EC5-E66D-4953-9182-38E7471770A0}.DebugLocal|Any CPU.Build.0 = Debug|Any CPU
 		{799E3EC5-E66D-4953-9182-38E7471770A0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{799E3EC5-E66D-4953-9182-38E7471770A0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C3356F62-9C3B-425C-8F23-4540D567A72A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C3356F62-9C3B-425C-8F23-4540D567A72A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C3356F62-9C3B-425C-8F23-4540D567A72A}.DebugLocal|Any CPU.ActiveCfg = Debug|Any CPU
+		{C3356F62-9C3B-425C-8F23-4540D567A72A}.DebugLocal|Any CPU.Build.0 = Debug|Any CPU
+		{C3356F62-9C3B-425C-8F23-4540D567A72A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C3356F62-9C3B-425C-8F23-4540D567A72A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

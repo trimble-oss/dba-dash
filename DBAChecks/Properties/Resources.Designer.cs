@@ -61,7 +61,8 @@ namespace DBAChecks.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to WITH T
+        ///   Looks up a localized string similar to SET TRANSACTION ISOLATION LEVEL READ UNCOMMITTED;
+        ///WITH T
         ///AS (SELECT j.job_id,
         ///           j.name,
         ///           MAX(   CASE
@@ -75,9 +76,7 @@ namespace DBAChecks.Properties {
         ///           MAX(   CASE
         ///                      WHEN jh.step_id = 0
         ///                      AND  jh.run_status = 1 THEN
-        ///                          dt.RunDateTime
-        ///                      ELSE
-        ///    [rest of string was truncated]&quot;;.
+        ///                       [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string SQLAgentJobs {
             get {

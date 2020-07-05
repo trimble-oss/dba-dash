@@ -362,7 +362,7 @@
             this.tabPage3.Location = new System.Drawing.Point(4, 25);
             this.tabPage3.Name = "tabPage3";
             this.tabPage3.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage3.Size = new System.Drawing.Size(755, 281);
+            this.tabPage3.Size = new System.Drawing.Size(783, 281);
             this.tabPage3.TabIndex = 2;
             this.tabPage3.Text = "Destination:";
             this.tabPage3.UseVisualStyleBackColor = true;
@@ -383,9 +383,9 @@
             this.label7.AutoSize = true;
             this.label7.Location = new System.Drawing.Point(6, 20);
             this.label7.Name = "label7";
-            this.label7.Size = new System.Drawing.Size(82, 17);
+            this.label7.Size = new System.Drawing.Size(83, 17);
             this.label7.TabIndex = 3;
-            this.label7.Text = "Destinction:";
+            this.label7.Text = "Destination:";
             // 
             // txtDestination
             // 
@@ -588,7 +588,7 @@
             this.tabPage2.Location = new System.Drawing.Point(4, 25);
             this.tabPage2.Name = "tabPage2";
             this.tabPage2.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage2.Size = new System.Drawing.Size(755, 281);
+            this.tabPage2.Size = new System.Drawing.Size(783, 281);
             this.tabPage2.TabIndex = 1;
             this.tabPage2.Text = "AWS Credentials";
             this.tabPage2.UseVisualStyleBackColor = true;
@@ -606,7 +606,7 @@
             this.tabPage4.Location = new System.Drawing.Point(4, 25);
             this.tabPage4.Name = "tabPage4";
             this.tabPage4.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage4.Size = new System.Drawing.Size(755, 281);
+            this.tabPage4.Size = new System.Drawing.Size(783, 281);
             this.tabPage4.TabIndex = 3;
             this.tabPage4.Text = "Service";
             this.tabPage4.UseVisualStyleBackColor = true;

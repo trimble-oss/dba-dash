@@ -318,11 +318,13 @@
     <Build Include="dbo\Tables\DDLSnapshots.sql" />
     <Build Include="dbo\Tables\DDL.sql" />
     <Build Include="dbo\Tables\DBObjects.sql" />
-    <Build Include="dbo\Tables\DBObjectHistory.sql" />
     <Build Include="dbo\Stored Procedures\DDLSnapshot_Add.sql" />
     <Build Include="dbo\User Defined Types\DDLSnapshot.sql" />
     <Build Include="dbo\Tables\DDLSnapshotsLog.sql" />
     <Build Include="dbo\Tables\DDLSnapshotOptions.sql" />
+    <Build Include="dbo\Tables\DDLHistory.sql" />
+    <Build Include="dbo\Tables\ObjectType.sql" />
+    <Build Include="dbo\Functions\DBSchemaAtDate.sql" />
   </ItemGroup>
   <ItemGroup>
     <PostDeploy Include="Script.PostDeployment1.sql" />

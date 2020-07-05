@@ -221,7 +221,8 @@ SELECT @ActivePowerPlan ActivePowerPlanGUID,
        @DumpCount AS MemoryDumpCount;</value>
   </data>
   <data name="SQLAgentJobs" xml:space="preserve">
-    <value>WITH T
+    <value>SET TRANSACTION ISOLATION LEVEL READ UNCOMMITTED;
+WITH T
 AS (SELECT j.job_id,
            j.name,
            MAX(   CASE
