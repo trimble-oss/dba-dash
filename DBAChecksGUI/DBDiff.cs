@@ -120,6 +120,7 @@ ORDER BY Instance
 
         private void getDatabases(ComboBox cbo, string instance)
         {
+            cbo.Items.Clear();
             SqlConnection cn = new SqlConnection(ConnectionString);
             using (cn)
             {
@@ -200,6 +201,7 @@ ORDER BY TypeDescription
 
         private void bttnCompare_Click(object sender, EventArgs e)
         {
+            chkIgnoreWhiteSpace.Checked = false;
             if (cboDatabaseA.SelectedItem != null && cboDatabaseB.SelectedItem != null)
             {
                 SqlConnection cn = new SqlConnection(ConnectionString);
@@ -268,9 +270,13 @@ FULL JOIN B ON A.ObjectName = B.ObjectName AND A.SchemaName = B.SchemaName AND A
                     SqlDataAdapter da = new SqlDataAdapter(cmd);
                     DataTable dt = new DataTable();
                     da.Fill(dt);
+                    dt.Columns.Add("A_Text");
+                    dt.Columns.Add("B_Text");
+                    dt.Columns.Add("WhitespaceDiff", typeof(bool));
                     gvDiff.AutoGenerateColumns = false;
                     string rowFilter = getRowFilter();
-                    gvDiff.DataSource = new DataView(dt, rowFilter ,"", DataViewRowState.CurrentRows);
+                    dvDiff = new DataView(dt, rowFilter ,"", DataViewRowState.CurrentRows);
+                    gvDiff.DataSource = dvDiff;
                 }
             }
             else
@@ -279,13 +285,26 @@ FULL JOIN B ON A.ObjectName = B.ObjectName AND A.SchemaName = B.SchemaName AND A
             }
         }
 
+        DataView dvDiff;
+
         private void gvDiff_SelectionChanged(object sender, EventArgs e)
         {
             if (gvDiff.SelectedRows.Count == 1)
             {
                 var row = (DataRowView)gvDiff.SelectedRows[0].DataBoundItem;
-                string a = String.Empty;
-                string b = String.Empty;
+                string a, b;
+                getTextForRow(row.Row, out a, out b);               
+                diffControl.OldText = a;
+                diffControl.NewText = b;
+            }
+        }
+
+        private void getTextForRow(DataRow row, out string a,out string b)
+        {
+            a = String.Empty;
+            b = String.Empty;
+            if (row["A_Text"] == DBNull.Value)
+            {
                 if (row["DDLID_A"] != DBNull.Value)
                 {
                     a = Common.DDL((Int64)row["DDLID_A"], ConnectionString);
@@ -294,9 +313,22 @@ FULL JOIN B ON A.ObjectName = B.ObjectName AND A.SchemaName = B.SchemaName AND A
                 {
                     b = Common.DDL((Int64)row["DDLID_B"], ConnectionString);
                 }
-
-                diffControl.OldText = a;
-                diffControl.NewText = b;
+                lblStatus.Text = (string)row["DiffType"];
+                if ((string)row["DiffType"] == "Diff" && a.Trim() == b.Trim())
+                {
+                    row["WhitespaceDiff"] = true;
+                }
+                else
+                {
+                    row["WhitespaceDiff"] = false;
+                }
+                row["A_Text"] = a;
+                row["B_Text"] = b;
+            }
+            else
+            {
+                a = (string)row["A_Text"];
+                b = (string)row["B_Text"];
             }
         }
 
@@ -326,9 +358,13 @@ FULL JOIN B ON A.ObjectName = B.ObjectName AND A.SchemaName = B.SchemaName AND A
             if (chkDiffType.CheckedItems.Count > 0)
             {
                 sb.Append("DiffType IN(");
-                foreach (var itm in chkDiffType.CheckedItems)
+                foreach (string itm in chkDiffType.CheckedItems)
                 {
                     sb.Append("'" + itm + "',");
+                    if (itm == "Equal")
+                    {
+                        sb.Append("'Equal (Whitespace)',");
+                    }
                 }
                 sb.Remove(sb.Length - 1, 1);
                 sb.Append(") ");
@@ -363,9 +399,7 @@ FULL JOIN B ON A.ObjectName = B.ObjectName AND A.SchemaName = B.SchemaName AND A
                     toggleCheck(false);
                 }
 
-                var dv = (DataView)gvDiff.DataSource;
-
-                dv.RowFilter = getRowFilter();
+                dvDiff.RowFilter = getRowFilter();
             }
         }
 
@@ -413,9 +447,71 @@ ORDER BY ValidatedDate DESC
 
         private void chkDiffType_SelectedValueChanged(object sender, EventArgs e)
         {
-            var dv = (DataView)gvDiff.DataSource;
+            if (dvDiff != null)
+            {
+                dvDiff.RowFilter = getRowFilter();
+            }
+        }
 
-            dv.RowFilter = getRowFilter();
+        private void bttnSwitch_Click(object sender, EventArgs e)
+        {
+            var instanceA = cboInstanceA.SelectedItem;
+            var instanceB = cboInstanceB.SelectedItem;
+            var db_A = cboDatabaseA.SelectedItem;
+            var db_B = cboDatabaseB.SelectedItem;
+            var verA = cboDate_A.SelectedItem;
+            var verB = cboDate_B.SelectedItem;
+            cboInstanceA.SelectedItem = instanceB;
+            cboInstanceB.SelectedItem = instanceA;
+            cboDatabaseA.SelectedItem = db_B;
+            cboDatabaseB.SelectedItem = db_A;
+            cboDate_A.SelectedItem = verB;
+            cboDate_B.SelectedItem = verA;
+
+        }
+
+        private void bttnCopyA_Click(object sender, EventArgs e)
+        {
+            cboInstanceB.SelectedItem = cboInstanceA.SelectedItem;
+            cboDatabaseB.SelectedItem = cboDatabaseA.SelectedItem;
+            cboDate_B.SelectedItem = cboDate_A.SelectedItem;
+        }
+
+        private void bttnCopyB_Click(object sender, EventArgs e)
+        {
+            cboInstanceA.SelectedItem = cboInstanceB.SelectedItem;
+            cboDatabaseA.SelectedItem = cboDatabaseB.SelectedItem;
+            cboDate_A.SelectedItem = cboDate_B.SelectedItem;
+        }
+
+        private void chkIgnoreWhiteSpace_CheckedChanged(object sender, EventArgs e)
+        {
+            ignoreWhitespace();
+        }
+
+        private void ignoreWhitespace()
+        {
+            foreach (DataRow r in dvDiff.Table.Rows)
+            {
+                string a, b;
+
+                if ((string)r["DiffType"] == "Diff" && r["WhitespaceDiff"] == DBNull.Value)
+                {
+                    getTextForRow(r, out a, out b);
+                }
+                if (r["WhitespaceDiff"] != DBNull.Value && (bool)r["WhitespaceDiff"] == true)
+                {
+                    r["DiffType"] = chkIgnoreWhiteSpace.Checked ? "Equal (Whitespace)" : "Diff";
+
+                }
+            }
+         
+
+        }
+
+        private void chkDiffType_SelectedIndexChanged_1(object sender, EventArgs e)
+        {
+
         }
     }
 }

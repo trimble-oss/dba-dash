@@ -232,6 +232,10 @@
       <Project>{32225995-f2e7-4a4b-8734-57ce087f1220}</Project>
       <Name>DBAChecksConfigTool</Name>
     </ProjectReference>
+    <ProjectReference Include="..\DBAChecksGUI\DBAChecksGUI.csproj">
+      <Project>{c3356f62-9c3b-425c-8f23-4540d567a72a}</Project>
+      <Name>DBAChecksGUI</Name>
+    </ProjectReference>
     <ProjectReference Include="..\DBAChecksServiceConfig\DBAChecksServiceConfig.csproj">
       <Project>{799e3ec5-e66d-4953-9182-38e7471770a0}</Project>
       <Name>DBAChecksServiceConfig</Name>

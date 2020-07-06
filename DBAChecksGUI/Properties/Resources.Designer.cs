@@ -121,6 +121,26 @@ namespace DBAChecksGUI.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap Next_grey_16x {
+            get {
+                object obj = ResourceManager.GetObject("Next_grey_16x", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap Previous_grey_16x {
+            get {
+                object obj = ResourceManager.GetObject("Previous_grey_16x", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized resource of type System.Byte[].
         /// </summary>
         internal static byte[] SQL_Mode {
@@ -136,6 +156,16 @@ namespace DBAChecksGUI.Properties {
         internal static string String1 {
             get {
                 return ResourceManager.GetString("String1", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap SwitchSourceOrTarget_16x {
+            get {
+                object obj = ResourceManager.GetObject("SwitchSourceOrTarget_16x", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
             }
         }
         

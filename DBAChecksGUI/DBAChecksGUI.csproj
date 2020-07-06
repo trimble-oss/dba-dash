@@ -165,6 +165,9 @@
     <None Include="Resources\Diff_16x.png" />
     <None Include="Resources\Code_16x.png" />
     <Content Include="DatabaseUnknown_16x.ico" />
+    <None Include="Resources\SwitchSourceOrTarget_16x.png" />
+    <None Include="Resources\Previous_grey_16x.png" />
+    <None Include="Resources\Next_grey_16x.png" />
     <Content Include="SqlServerTypes\readme.htm" />
     <Content Include="SqlServerTypes\x64\msvcr120.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>

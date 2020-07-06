@@ -44,21 +44,30 @@
             this.ObjectType = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.DiffType = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.panel1 = new System.Windows.Forms.Panel();
-            this.splitContainer1 = new System.Windows.Forms.SplitContainer();
-            this.chkObjectType = new System.Windows.Forms.CheckedListBox();
-            this.cboDate_A = new System.Windows.Forms.ComboBox();
-            this.cboDate_B = new System.Windows.Forms.ComboBox();
-            this.label5 = new System.Windows.Forms.Label();
+            this.bttnCopyA = new System.Windows.Forms.Button();
+            this.bttnCopyB = new System.Windows.Forms.Button();
+            this.bttnSwitch = new System.Windows.Forms.Button();
             this.label6 = new System.Windows.Forms.Label();
-            this.label7 = new System.Windows.Forms.Label();
+            this.label5 = new System.Windows.Forms.Label();
+            this.cboDate_B = new System.Windows.Forms.ComboBox();
+            this.cboDate_A = new System.Windows.Forms.ComboBox();
+            this.splitContainer1 = new System.Windows.Forms.SplitContainer();
+            this.pnlDiffType = new System.Windows.Forms.Panel();
             this.chkDiffType = new System.Windows.Forms.CheckedListBox();
             this.label8 = new System.Windows.Forms.Label();
+            this.chkObjectType = new System.Windows.Forms.CheckedListBox();
+            this.statusStrip1 = new System.Windows.Forms.StatusStrip();
+            this.lblStatus = new System.Windows.Forms.ToolStripStatusLabel();
+            this.label7 = new System.Windows.Forms.Label();
+            this.chkIgnoreWhiteSpace = new System.Windows.Forms.CheckBox();
             ((System.ComponentModel.ISupportInitialize)(this.gvDiff)).BeginInit();
             this.panel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
             this.splitContainer1.Panel2.SuspendLayout();
             this.splitContainer1.SuspendLayout();
+            this.pnlDiffType.SuspendLayout();
+            this.statusStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
             // cboInstanceA
@@ -85,7 +94,7 @@
             // 
             this.cboInstanceB.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.cboInstanceB.FormattingEnabled = true;
-            this.cboInstanceB.Location = new System.Drawing.Point(488, 10);
+            this.cboInstanceB.Location = new System.Drawing.Point(612, 13);
             this.cboInstanceB.Name = "cboInstanceB";
             this.cboInstanceB.Size = new System.Drawing.Size(181, 24);
             this.cboInstanceB.TabIndex = 2;
@@ -95,7 +104,7 @@
             // 
             this.cboDatabaseB.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.cboDatabaseB.FormattingEnabled = true;
-            this.cboDatabaseB.Location = new System.Drawing.Point(488, 40);
+            this.cboDatabaseB.Location = new System.Drawing.Point(612, 43);
             this.cboDatabaseB.Name = "cboDatabaseB";
             this.cboDatabaseB.Size = new System.Drawing.Size(181, 24);
             this.cboDatabaseB.TabIndex = 3;
@@ -113,7 +122,7 @@
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(353, 12);
+            this.label2.Location = new System.Drawing.Point(477, 15);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(78, 17);
             this.label2.TabIndex = 5;
@@ -131,7 +140,7 @@
             // label4
             // 
             this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(353, 45);
+            this.label4.Location = new System.Drawing.Point(477, 48);
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(86, 17);
             this.label4.TabIndex = 7;
@@ -139,7 +148,7 @@
             // 
             // bttnCompare
             // 
-            this.bttnCompare.Location = new System.Drawing.Point(746, 71);
+            this.bttnCompare.Location = new System.Drawing.Point(870, 74);
             this.bttnCompare.Name = "bttnCompare";
             this.bttnCompare.Size = new System.Drawing.Size(75, 23);
             this.bttnCompare.TabIndex = 8;
@@ -164,7 +173,7 @@
             this.gvDiff.RowHeadersWidth = 51;
             this.gvDiff.RowTemplate.Height = 24;
             this.gvDiff.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-            this.gvDiff.Size = new System.Drawing.Size(937, 351);
+            this.gvDiff.Size = new System.Drawing.Size(937, 372);
             this.gvDiff.TabIndex = 9;
             this.gvDiff.SelectionChanged += new System.EventHandler(this.gvDiff_SelectionChanged);
             // 
@@ -207,6 +216,10 @@
             // 
             // panel1
             // 
+            this.panel1.Controls.Add(this.chkIgnoreWhiteSpace);
+            this.panel1.Controls.Add(this.bttnCopyA);
+            this.panel1.Controls.Add(this.bttnCopyB);
+            this.panel1.Controls.Add(this.bttnSwitch);
             this.panel1.Controls.Add(this.label6);
             this.panel1.Controls.Add(this.label5);
             this.panel1.Controls.Add(this.cboDate_B);
@@ -226,36 +239,62 @@
             this.panel1.Size = new System.Drawing.Size(1144, 149);
             this.panel1.TabIndex = 10;
             // 
-            // splitContainer1
+            // bttnCopyA
             // 
-            this.splitContainer1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.splitContainer1.Location = new System.Drawing.Point(0, 149);
-            this.splitContainer1.Name = "splitContainer1";
-            this.splitContainer1.Orientation = System.Windows.Forms.Orientation.Horizontal;
+            this.bttnCopyA.Image = global::DBAChecksGUI.Properties.Resources.Next_grey_16x;
+            this.bttnCopyA.Location = new System.Drawing.Point(252, 103);
+            this.bttnCopyA.Name = "bttnCopyA";
+            this.bttnCopyA.Size = new System.Drawing.Size(75, 23);
+            this.bttnCopyA.TabIndex = 16;
+            this.bttnCopyA.UseVisualStyleBackColor = true;
+            this.bttnCopyA.Click += new System.EventHandler(this.bttnCopyA_Click);
             // 
-            // splitContainer1.Panel1
+            // bttnCopyB
             // 
-            this.splitContainer1.Panel1.Controls.Add(this.label8);
-            this.splitContainer1.Panel1.Controls.Add(this.gvDiff);
-            this.splitContainer1.Panel1.Controls.Add(this.chkDiffType);
-            this.splitContainer1.Panel1.Controls.Add(this.chkObjectType);
+            this.bttnCopyB.Image = global::DBAChecksGUI.Properties.Resources.Previous_grey_16x;
+            this.bttnCopyB.Location = new System.Drawing.Point(612, 103);
+            this.bttnCopyB.Name = "bttnCopyB";
+            this.bttnCopyB.Size = new System.Drawing.Size(75, 23);
+            this.bttnCopyB.TabIndex = 15;
+            this.bttnCopyB.UseVisualStyleBackColor = true;
+            this.bttnCopyB.Click += new System.EventHandler(this.bttnCopyB_Click);
             // 
-            // splitContainer1.Panel2
+            // bttnSwitch
             // 
-            this.splitContainer1.Panel2.Controls.Add(this.label7);
-            this.splitContainer1.Size = new System.Drawing.Size(1144, 732);
-            this.splitContainer1.SplitterDistance = 372;
-            this.splitContainer1.TabIndex = 11;
+            this.bttnSwitch.Image = global::DBAChecksGUI.Properties.Resources.SwitchSourceOrTarget_16x;
+            this.bttnSwitch.Location = new System.Drawing.Point(361, 37);
+            this.bttnSwitch.Name = "bttnSwitch";
+            this.bttnSwitch.Size = new System.Drawing.Size(75, 23);
+            this.bttnSwitch.TabIndex = 14;
+            this.bttnSwitch.UseVisualStyleBackColor = true;
+            this.bttnSwitch.Click += new System.EventHandler(this.bttnSwitch_Click);
             // 
-            // chkObjectType
+            // label6
             // 
-            this.chkObjectType.Dock = System.Windows.Forms.DockStyle.Left;
-            this.chkObjectType.FormattingEnabled = true;
-            this.chkObjectType.Location = new System.Drawing.Point(0, 0);
-            this.chkObjectType.Name = "chkObjectType";
-            this.chkObjectType.Size = new System.Drawing.Size(207, 372);
-            this.chkObjectType.TabIndex = 9;
-            this.chkObjectType.SelectedValueChanged += new System.EventHandler(this.chkObjectType_SelectedValueChanged);
+            this.label6.AutoSize = true;
+            this.label6.Location = new System.Drawing.Point(477, 78);
+            this.label6.Name = "label6";
+            this.label6.Size = new System.Drawing.Size(124, 17);
+            this.label6.TabIndex = 13;
+            this.label6.Text = "Snapshot Version:";
+            // 
+            // label5
+            // 
+            this.label5.AutoSize = true;
+            this.label5.Location = new System.Drawing.Point(12, 73);
+            this.label5.Name = "label5";
+            this.label5.Size = new System.Drawing.Size(124, 17);
+            this.label5.TabIndex = 12;
+            this.label5.Text = "Snapshot Version:";
+            // 
+            // cboDate_B
+            // 
+            this.cboDate_B.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cboDate_B.FormattingEnabled = true;
+            this.cboDate_B.Location = new System.Drawing.Point(612, 73);
+            this.cboDate_B.Name = "cboDate_B";
+            this.cboDate_B.Size = new System.Drawing.Size(181, 24);
+            this.cboDate_B.TabIndex = 11;
             // 
             // cboDate_A
             // 
@@ -267,32 +306,83 @@
             this.cboDate_A.TabIndex = 10;
             this.cboDate_A.SelectedIndexChanged += new System.EventHandler(this.cboDate_A_SelectedIndexChanged);
             // 
-            // cboDate_B
+            // splitContainer1
             // 
-            this.cboDate_B.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.cboDate_B.FormattingEnabled = true;
-            this.cboDate_B.Location = new System.Drawing.Point(488, 70);
-            this.cboDate_B.Name = "cboDate_B";
-            this.cboDate_B.Size = new System.Drawing.Size(181, 24);
-            this.cboDate_B.TabIndex = 11;
+            this.splitContainer1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.splitContainer1.Location = new System.Drawing.Point(0, 149);
+            this.splitContainer1.Name = "splitContainer1";
+            this.splitContainer1.Orientation = System.Windows.Forms.Orientation.Horizontal;
             // 
-            // label5
+            // splitContainer1.Panel1
             // 
-            this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(12, 73);
-            this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(124, 17);
-            this.label5.TabIndex = 12;
-            this.label5.Text = "Snapshot Version:";
+            this.splitContainer1.Panel1.Controls.Add(this.pnlDiffType);
+            this.splitContainer1.Panel1.Controls.Add(this.gvDiff);
+            this.splitContainer1.Panel1.Controls.Add(this.chkObjectType);
             // 
-            // label6
+            // splitContainer1.Panel2
             // 
-            this.label6.AutoSize = true;
-            this.label6.Location = new System.Drawing.Point(353, 75);
-            this.label6.Name = "label6";
-            this.label6.Size = new System.Drawing.Size(124, 17);
-            this.label6.TabIndex = 13;
-            this.label6.Text = "Snapshot Version:";
+            this.splitContainer1.Panel2.Controls.Add(this.statusStrip1);
+            this.splitContainer1.Panel2.Controls.Add(this.label7);
+            this.splitContainer1.Size = new System.Drawing.Size(1144, 732);
+            this.splitContainer1.SplitterDistance = 372;
+            this.splitContainer1.TabIndex = 11;
+            // 
+            // pnlDiffType
+            // 
+            this.pnlDiffType.Controls.Add(this.chkDiffType);
+            this.pnlDiffType.Controls.Add(this.label8);
+            this.pnlDiffType.Dock = System.Windows.Forms.DockStyle.Bottom;
+            this.pnlDiffType.Location = new System.Drawing.Point(207, 323);
+            this.pnlDiffType.Name = "pnlDiffType";
+            this.pnlDiffType.Size = new System.Drawing.Size(937, 49);
+            this.pnlDiffType.TabIndex = 16;
+            // 
+            // chkDiffType
+            // 
+            this.chkDiffType.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.chkDiffType.FormattingEnabled = true;
+            this.chkDiffType.Location = new System.Drawing.Point(0, 17);
+            this.chkDiffType.MultiColumn = true;
+            this.chkDiffType.Name = "chkDiffType";
+            this.chkDiffType.Size = new System.Drawing.Size(937, 32);
+            this.chkDiffType.TabIndex = 17;
+            this.chkDiffType.SelectedIndexChanged += new System.EventHandler(this.chkDiffType_SelectedIndexChanged_1);
+            this.chkDiffType.SelectedValueChanged += new System.EventHandler(this.chkDiffType_SelectedValueChanged);
+            // 
+            // label8
+            // 
+            this.label8.Dock = System.Windows.Forms.DockStyle.Top;
+            this.label8.Location = new System.Drawing.Point(0, 0);
+            this.label8.Name = "label8";
+            this.label8.Size = new System.Drawing.Size(937, 17);
+            this.label8.TabIndex = 16;
+            this.label8.Text = "Diff Type:";
+            // 
+            // chkObjectType
+            // 
+            this.chkObjectType.Dock = System.Windows.Forms.DockStyle.Left;
+            this.chkObjectType.FormattingEnabled = true;
+            this.chkObjectType.Location = new System.Drawing.Point(0, 0);
+            this.chkObjectType.Name = "chkObjectType";
+            this.chkObjectType.Size = new System.Drawing.Size(207, 372);
+            this.chkObjectType.TabIndex = 9;
+            this.chkObjectType.SelectedValueChanged += new System.EventHandler(this.chkObjectType_SelectedValueChanged);
+            // 
+            // statusStrip1
+            // 
+            this.statusStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
+            this.statusStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.lblStatus});
+            this.statusStrip1.Location = new System.Drawing.Point(0, 334);
+            this.statusStrip1.Name = "statusStrip1";
+            this.statusStrip1.Size = new System.Drawing.Size(1144, 22);
+            this.statusStrip1.TabIndex = 1;
+            this.statusStrip1.Text = "statusStrip1";
+            // 
+            // lblStatus
+            // 
+            this.lblStatus.Name = "lblStatus";
+            this.lblStatus.Size = new System.Drawing.Size(0, 16);
             // 
             // label7
             // 
@@ -304,26 +394,16 @@
             this.label7.Text = "Diff (Loaded programatically due to designer issue)";
             this.label7.Visible = false;
             // 
-            // chkDiffType
+            // chkIgnoreWhiteSpace
             // 
-            this.chkDiffType.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.chkDiffType.FormattingEnabled = true;
-            this.chkDiffType.Location = new System.Drawing.Point(207, 351);
-            this.chkDiffType.MultiColumn = true;
-            this.chkDiffType.Name = "chkDiffType";
-            this.chkDiffType.Size = new System.Drawing.Size(937, 21);
-            this.chkDiffType.TabIndex = 14;
-            this.chkDiffType.SelectedIndexChanged += new System.EventHandler(this.chkDiffType_SelectedIndexChanged);
-            this.chkDiffType.SelectedValueChanged += new System.EventHandler(this.chkDiffType_SelectedValueChanged);
-            // 
-            // label8
-            // 
-            this.label8.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.label8.Location = new System.Drawing.Point(207, 334);
-            this.label8.Name = "label8";
-            this.label8.Size = new System.Drawing.Size(937, 17);
-            this.label8.TabIndex = 15;
-            this.label8.Text = "Diff Type:";
+            this.chkIgnoreWhiteSpace.AutoSize = true;
+            this.chkIgnoreWhiteSpace.Location = new System.Drawing.Point(870, 13);
+            this.chkIgnoreWhiteSpace.Name = "chkIgnoreWhiteSpace";
+            this.chkIgnoreWhiteSpace.Size = new System.Drawing.Size(148, 21);
+            this.chkIgnoreWhiteSpace.TabIndex = 17;
+            this.chkIgnoreWhiteSpace.Text = "Ignore Whitespace";
+            this.chkIgnoreWhiteSpace.UseVisualStyleBackColor = true;
+            this.chkIgnoreWhiteSpace.CheckedChanged += new System.EventHandler(this.chkIgnoreWhiteSpace_CheckedChanged);
             // 
             // DBDiff
             // 
@@ -345,6 +425,9 @@
             this.splitContainer1.Panel2.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).EndInit();
             this.splitContainer1.ResumeLayout(false);
+            this.pnlDiffType.ResumeLayout(false);
+            this.statusStrip1.ResumeLayout(false);
+            this.statusStrip1.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -373,7 +456,14 @@
         private System.Windows.Forms.Label label6;
         private System.Windows.Forms.Label label5;
         private System.Windows.Forms.Label label7;
+        private System.Windows.Forms.Panel pnlDiffType;
         private System.Windows.Forms.CheckedListBox chkDiffType;
         private System.Windows.Forms.Label label8;
+        private System.Windows.Forms.Button bttnSwitch;
+        private System.Windows.Forms.Button bttnCopyB;
+        private System.Windows.Forms.Button bttnCopyA;
+        private System.Windows.Forms.StatusStrip statusStrip1;
+        private System.Windows.Forms.ToolStripStatusLabel lblStatus;
+        private System.Windows.Forms.CheckBox chkIgnoreWhiteSpace;
     }
 }
