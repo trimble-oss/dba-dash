@@ -412,10 +412,11 @@ namespace DBAChecks.Properties {
         ///		   total_physical_reads,
         ///		   cached_time,
         ///		   execution_count,
-        ///		   GETUTCDATE() AS current_time_utc
+        ///		   GETUTCDATE() AS current_time_utc,
+        ///		   type,
+        ///		   OBJECT_SCHEMA_NAME(object_id,database_id) schema_name
         ///	FROM sys.dm_exec_function_stats
-        ///	WHERE database_id &lt;&gt; 32767;
-        ///END.
+        ///	WHERE database_id &lt;&gt;  [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string SQLFunctionStats {
             get {
@@ -553,9 +554,9 @@ namespace DBAChecks.Properties {
         ///			   total_physical_reads,
         ///			   cached_time,
         ///			   execution_count,
-        ///			   GETUTCDATE() AS current_time_utc
-        ///		FROM sys.dm_exec_procedure_stats
-        ///		WHERE database_ [rest of string was truncated]&quot;;.
+        ///			   GETUTCDATE() AS current_time_utc,
+        ///			   type,
+        ///			   OBJECT_SCHEMA_NAME(object_id, dat [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string SQLProcStats {
             get {

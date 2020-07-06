@@ -5,13 +5,25 @@ INSERT INTO dbo.Procs
 (
     DatabaseID,
     object_name,
-	object_id
+	object_id,
+    type,
+    schema_name
 )
-SELECT DISTINCT d.DatabaseID,t.object_name,t.object_id
+SELECT DISTINCT d.DatabaseID,t.object_name,t.object_id,t.type,t.schema_name
 FROM @ProcStats t
 JOIN dbo.Databases d ON t.database_id = d.database_id AND D.InstanceID=@InstanceID
 WHERE D.IsActive=1
 AND NOT EXISTS(SELECT 1 FROM dbo.Procs p WHERE p.DatabaseID = d.DatabaseID AND p.object_id = t.object_id AND p.object_name = t.object_name);
+
+UPDATE P 
+    SET P.type = t.type,
+    P.schema_name = t.schema_name
+FROM @ProcStats t
+JOIN dbo.Databases d ON t.database_id = d.database_id AND D.InstanceID=@InstanceID
+JOIN dbo.Procs P ON p.DatabaseID = d.DatabaseID AND p.object_id = t.object_id AND p.object_name = t.object_name
+WHERE D.IsActive=1
+AND P.schema_name IS NULL
+AND P.type IS NULL;
 
 WITH t AS (
 	SELECT P.ProcID,

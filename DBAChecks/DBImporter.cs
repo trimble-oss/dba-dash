@@ -60,6 +60,11 @@ namespace DBAChecks
             foreach (DataTable dt in Data.Tables)
             {
                 string[] tables = { "Drives", "ServerProperties", "Backups", "AgentJobs", "LogRestores", "DBFiles", "DBConfig", "Corruption", "DatabasesHADR", "SysConfig", "OSInfo", "TraceFlags", "ProcStats", "FunctionStats", "CPU", "Drivers", "BlockingSnapshot", "IOStats", "Waits", "OSLoadedModules", "DBTuningOptions", "AzureDBResourceStats", "AzureDBServiceObjectives", "AzureDBElasticPoolResourceStats", "SlowQueries", "SlowQueriesStats", "LastGoodCheckDB", "Alerts" };
+                if((dt.TableName=="ProcStats" || dt.TableName== "FunctionStats") && !dt.Columns.Contains("type"))
+                {
+                    dt.Columns.Add("type");
+                    dt.Columns.Add("schema_name");
+                }
                 if (tables.Contains(dt.TableName))
                 {
                     update(connectionString, instanceID, snapshotDate, dt);

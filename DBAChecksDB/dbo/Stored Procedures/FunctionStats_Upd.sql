@@ -6,13 +6,25 @@ INSERT INTO dbo.Functions
 (
     DatabaseID,
     object_name,
-	object_id
+	object_id,
+    type,
+    schema_name
 )
-SELECT DISTINCT d.DatabaseID,t.object_name,t.object_id
+SELECT DISTINCT d.DatabaseID,t.object_name,t.object_id,t.type,t.schema_name
 FROM @FunctionStats t
 JOIN dbo.Databases d ON t.database_id = d.database_id AND D.InstanceID=@InstanceID
 WHERE D.IsActive=1
 AND NOT EXISTS(SELECT 1 FROM dbo.Functions p WHERE p.DatabaseID = d.DatabaseID AND p.object_id = t.object_id AND p.object_name = t.object_name);
+
+UPDATE P 
+    SET P.type = t.type,
+    P.schema_name = t.schema_name
+FROM @FunctionStats t
+JOIN dbo.Databases d ON t.database_id = d.database_id AND D.InstanceID=@InstanceID
+JOIN dbo.Functions p ON p.DatabaseID = d.DatabaseID AND p.object_id = t.object_id AND p.object_name = t.object_name
+WHERE D.IsActive=1
+AND p.type IS NULL
+AND p.schema_name IS NULL;
 
 WITH t AS (
 	SELECT P.FunctionID,

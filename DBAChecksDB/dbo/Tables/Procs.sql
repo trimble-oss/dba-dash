@@ -3,6 +3,8 @@
     [DatabaseID]  INT       NOT NULL,
     [object_name] [sysname] NOT NULL,
     [object_id]   INT       NOT NULL,
+    type CHAR(2) NULL,
+    [schema_name] [sysname] NULL,
     CONSTRAINT [PK_Procs] PRIMARY KEY CLUSTERED ([ProcID] ASC),
     CONSTRAINT [FK_Procs_Databases] FOREIGN KEY ([DatabaseID]) REFERENCES [dbo].[Databases] ([DatabaseID])
 );
