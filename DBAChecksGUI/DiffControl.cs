@@ -20,7 +20,7 @@ namespace DBAChecksGUI
 
         private string oldText;
         private string newText;
-
+        private ViewMode mode;
 
         public enum ViewMode
         {
@@ -34,34 +34,29 @@ namespace DBAChecksGUI
         {
             get
             {
-                if (txtCode.Visible)
-                {
-                    return ViewMode.Code;
-                }
-                else if (diffViewer1.IsInlineViewMode)
-                {
-                    return ViewMode.Inline;
-                }
-                else
-                {
-                    return ViewMode.Diff;
-                }
+                return mode;
             }
             set
             {
-                txtCode.Visible = (value == ViewMode.Code);
-                elementHost1.Visible = (value != ViewMode.Code);
-                if (value == ViewMode.Diff)
-                {
-                    diffViewer1.ShowSideBySide();
-                }
-                if (value == ViewMode.Inline)
-                {
-                    diffViewer1.ShowInline();
-                }
-
+                mode = value;
+                setMode();
             }
         }
+
+        private void setMode()
+        {
+            txtCode.Visible = (mode == ViewMode.Code);
+            elementHost1.Visible = (mode != ViewMode.Code);
+            if (mode == ViewMode.Diff)
+            {
+                diffViewer1.ShowSideBySide();
+            }
+            if (mode == ViewMode.Inline)
+            {
+                diffViewer1.ShowInline();
+            }
+        }
+
         [Description("Old text to compare"), Category("Diff")]
         public string OldText
         {
@@ -128,7 +123,6 @@ namespace DBAChecksGUI
 
         private void DiffControl_Load(object sender, EventArgs e)
         {
-            Mode = ViewMode.Diff;
             HighlightingManager.Manager.AddSyntaxModeFileProvider(new AppSyntaxModeProvider());
             txtCode.SetHighlighting("SQL");
         }

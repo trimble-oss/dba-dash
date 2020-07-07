@@ -56,8 +56,6 @@
             this.chkDiffType = new System.Windows.Forms.CheckedListBox();
             this.label8 = new System.Windows.Forms.Label();
             this.chkObjectType = new System.Windows.Forms.CheckedListBox();
-            this.statusStrip1 = new System.Windows.Forms.StatusStrip();
-            this.lblStatus = new System.Windows.Forms.ToolStripStatusLabel();
             this.label7 = new System.Windows.Forms.Label();
             this.chkIgnoreWhiteSpace = new System.Windows.Forms.CheckBox();
             ((System.ComponentModel.ISupportInitialize)(this.gvDiff)).BeginInit();
@@ -67,7 +65,6 @@
             this.splitContainer1.Panel2.SuspendLayout();
             this.splitContainer1.SuspendLayout();
             this.pnlDiffType.SuspendLayout();
-            this.statusStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
             // cboInstanceA
@@ -321,7 +318,6 @@
             // 
             // splitContainer1.Panel2
             // 
-            this.splitContainer1.Panel2.Controls.Add(this.statusStrip1);
             this.splitContainer1.Panel2.Controls.Add(this.label7);
             this.splitContainer1.Size = new System.Drawing.Size(1144, 732);
             this.splitContainer1.SplitterDistance = 372;
@@ -368,22 +364,6 @@
             this.chkObjectType.TabIndex = 9;
             this.chkObjectType.SelectedValueChanged += new System.EventHandler(this.chkObjectType_SelectedValueChanged);
             // 
-            // statusStrip1
-            // 
-            this.statusStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
-            this.statusStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.lblStatus});
-            this.statusStrip1.Location = new System.Drawing.Point(0, 334);
-            this.statusStrip1.Name = "statusStrip1";
-            this.statusStrip1.Size = new System.Drawing.Size(1144, 22);
-            this.statusStrip1.TabIndex = 1;
-            this.statusStrip1.Text = "statusStrip1";
-            // 
-            // lblStatus
-            // 
-            this.lblStatus.Name = "lblStatus";
-            this.lblStatus.Size = new System.Drawing.Size(0, 16);
-            // 
             // label7
             // 
             this.label7.AutoSize = true;
@@ -426,8 +406,6 @@
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).EndInit();
             this.splitContainer1.ResumeLayout(false);
             this.pnlDiffType.ResumeLayout(false);
-            this.statusStrip1.ResumeLayout(false);
-            this.statusStrip1.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -462,8 +440,6 @@
         private System.Windows.Forms.Button bttnSwitch;
         private System.Windows.Forms.Button bttnCopyB;
         private System.Windows.Forms.Button bttnCopyA;
-        private System.Windows.Forms.StatusStrip statusStrip1;
-        private System.Windows.Forms.ToolStripStatusLabel lblStatus;
         private System.Windows.Forms.CheckBox chkIgnoreWhiteSpace;
     }
 }

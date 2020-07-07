@@ -38,17 +38,26 @@ namespace DBAChecksGUI
 
         public void setText(string oldText,string newText, ViewMode mode= ViewMode.Diff)
         {
-            diff1.OldText = oldText;
-            diff1.NewText = newText;
+                addDiffControl();
+                diff1.OldText = oldText;
+                diff1.NewText = newText;
+                diff1.Mode = mode;
+            
 
        }
 
+        private void addDiffControl()
+        {
+               if (!this.Controls.Contains(diff1)){
+                    this.Controls.Add(diff1);
+                    diff1.Dock = DockStyle.Fill;
+                }
+        }
      
 
         private void Diff_Load(object sender, EventArgs e)
         {
-            this.Controls.Add(diff1);
-            diff1.Dock = DockStyle.Fill;
+            addDiffControl();
         }
     }
 }

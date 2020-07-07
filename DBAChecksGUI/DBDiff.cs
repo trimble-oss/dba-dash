@@ -313,7 +313,6 @@ FULL JOIN B ON A.ObjectName = B.ObjectName AND A.SchemaName = B.SchemaName AND A
                 {
                     b = Common.DDL((Int64)row["DDLID_B"], ConnectionString);
                 }
-                lblStatus.Text = (string)row["DiffType"];
                 if ((string)row["DiffType"] == "Diff" && a.Trim() == b.Trim())
                 {
                     row["WhitespaceDiff"] = true;

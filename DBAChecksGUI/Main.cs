@@ -46,11 +46,7 @@ FROM dbo.Instances I
 WHERE I.IsActive=1
 GROUP BY Instance
 ORDER BY Instance", cn);
-                //cmd.CommandType = CommandType.StoredProcedure;
-                //if (tagIds.Length > 0)
-                //{
-                //    cmd.Parameters.AddWithValue("TagIDs", tagIds);
-                //}
+
                 var rdr = cmd.ExecuteReader();
                 while (rdr.Read())
                 {
@@ -394,14 +390,7 @@ JOIN dbo.DBObjects O ON Hold.ObjectID = O.ObjectID OR Hnew.ObjectID= O.ObjectID"
                     gvSnapshotsDetail.DataSource = ds.Tables[0];
                     
             
-                    
-             
-
-
-                    //tsPageNum.Text = "Page " + pageNum;
-
-                    //tsPrevious.Enabled = (PageNum > 1);
-                    //tsNext.Enabled = ds.Tables[0].Rows.Count == pageSize;
+                  
 
                 }
             }
