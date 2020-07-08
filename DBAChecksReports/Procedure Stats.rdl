@@ -131,9 +131,6 @@
           <QueryParameter Name="@TagIDs">
             <Value>=Parameters!TagIDs.Value</Value>
           </QueryParameter>
-          <QueryParameter Name="@TagMatching">
-            <Value>=Parameters!TagMatching.Value</Value>
-          </QueryParameter>
           <QueryParameter Name="@InstanceName">
             <Value>=Parameters!InstanceName.Value</Value>
           </QueryParameter>
@@ -1070,16 +1067,6 @@ Environment.NewLine &amp; "Avg Writes: " &amp;  Format(SUM(Fields!TotalWrites.Va
       <Nullable>true</Nullable>
       <Hidden>true</Hidden>
     </ReportParameter>
-    <ReportParameter Name="TagMatching">
-      <DataType>String</DataType>
-      <Nullable>true</Nullable>
-      <DefaultValue>
-        <Values>
-          <Value>ALL</Value>
-        </Values>
-      </DefaultValue>
-      <Hidden>true</Hidden>
-    </ReportParameter>
     <ReportParameter Name="TagIDs">
       <DataType>String</DataType>
       <Nullable>true</Nullable>
@@ -1338,11 +1325,6 @@ CDATE(Parameters!ToDateUser.Value).AddMinutes(IIF(ISNOTHING(Parameters!ToDateUse
           <ColumnIndex>0</ColumnIndex>
           <RowIndex>0</RowIndex>
           <ParameterName>InstanceName</ParameterName>
-        </CellDefinition>
-        <CellDefinition>
-          <ColumnIndex>1</ColumnIndex>
-          <RowIndex>0</RowIndex>
-          <ParameterName>TagMatching</ParameterName>
         </CellDefinition>
         <CellDefinition>
           <ColumnIndex>2</ColumnIndex>

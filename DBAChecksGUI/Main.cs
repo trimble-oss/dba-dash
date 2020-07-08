@@ -31,31 +31,115 @@ namespace DBAChecksGUI
         Int32 currentSummaryPageSize = 100;
 
 
-        private void addInstanes(string tagIds="")
+        private void addInstanes()
         {
             tv1.Nodes.Clear();
             var root = new SQLTreeItem("DBAChecks", SQLTreeItem.TreeType.DBAChecksRoot);
             tv1.Nodes.Add(root);
+
+            var tags = String.Join(",", SelectedTags());
 
             SqlConnection cn = new SqlConnection(connectionString);
             using (cn)
             {
                 cn.Open();
                 SqlCommand cmd = new SqlCommand(@"SELECT Instance
-FROM dbo.Instances I
+FROM dbo.InstancesMatchingTags(@TagIDs) I
 WHERE I.IsActive=1
 GROUP BY Instance
 ORDER BY Instance", cn);
 
+                cmd.Parameters.AddWithValue("TagIDs",tags);
                 var rdr = cmd.ExecuteReader();
                 while (rdr.Read())
                 {
                     var n = new SQLTreeItem((string)rdr[0], SQLTreeItem.TreeType.Instance);
+                    
                     n.AddDummyNode();
                     root.Nodes.Add(n);                   
                 }
             }
             root.Expand();
+            tv1.SelectedNode = root;
+        }
+
+        private void buildTagMenu(List<Int16>selected=null)
+        {
+            mnuTags.DropDownItems.Clear();
+            cboTagName.Items.Clear();
+            SqlConnection cn = new SqlConnection(connectionString);
+            using (cn)
+            {
+                cn.Open();
+                SqlCommand cmd = new SqlCommand(@"SELECT TagID,TagName,TagValue 
+FROM dbo.Tags
+ORDER BY TagName,TagValue
+", cn);
+                var rdr = cmd.ExecuteReader();
+                string currentTag=String.Empty, tag,tagValue;
+                ToolStripMenuItem mTagName = new ToolStripMenuItem();
+                Int16 tagID;
+                while (rdr.Read())
+                {
+                    tag = (string)rdr[1];
+                    tagValue = (string)rdr[2];
+                    tagID = (Int16)rdr[0];
+                    if (tag != currentTag)
+                    {
+                        mTagName = new ToolStripMenuItem(tag);
+                        mnuTags.DropDownItems.Add(mTagName);
+                        cboTagName.Items.Add(tag);
+                        currentTag = tag;
+                    }
+                    var mTagValue = new ToolStripMenuItem(tagValue);
+                    mTagValue.Tag = tagID;
+                    mTagValue.CheckOnClick = true;
+
+                    if (selected!=null && selected.Contains(tagID))
+                    {
+                        mTagValue.Checked = true;
+                    }
+                    mTagValue.CheckedChanged += MTagValue_CheckedChanged;
+                    mTagName.DropDownItems.Add(mTagValue);
+                }
+            }
+        }
+
+        private List<Int16> SelectedTags()
+        {
+            var selected = new List<Int16>();
+            foreach(ToolStripMenuItem mnuTagName in mnuTags.DropDownItems)
+            {
+                foreach(ToolStripMenuItem mnuTagValue in mnuTagName.DropDownItems)
+                {
+                    if (mnuTagValue.Checked)
+                    {
+                        selected.Add((Int16)mnuTagValue.Tag);
+                    }
+                }
+            }
+            return selected;
+        }
+
+        private void MTagValue_CheckedChanged(object sender, EventArgs e)
+        {
+            addInstanes();
+            var mnuTag = (ToolStripMenuItem)sender;
+            var mnuName = (ToolStripMenuItem)mnuTag.OwnerItem;
+            mnuName.Font = new Font(mnuName.Font, FontStyle.Regular);
+            foreach (ToolStripMenuItem itm in mnuName.DropDownItems)
+            {
+                if (itm.Checked)
+                {
+                    mnuName.Font = new Font(mnuName.Font, FontStyle.Bold);
+                    itm.Font = new Font(itm.Font, FontStyle.Bold);
+                }
+                else
+                {
+                    itm.Font = new Font(itm.Font, FontStyle.Regular);
+                }
+            }
+            
         }
 
         private void addDatabases(SQLTreeItem instanceNode)
@@ -215,6 +299,7 @@ FETCH NEXT @PageSize ROWS ONLY";
 
         private void Main_Load(object sender, EventArgs e)
         {
+            
             splitSchemaSnapshot.Panel1.Controls.Add(diffSchemaSnapshot);
             diffSchemaSnapshot.Dock = DockStyle.Fill;
 
@@ -226,44 +311,31 @@ FETCH NEXT @PageSize ROWS ONLY";
                 connectionString = cfg.DestinationConnection.ConnectionString;
             }
             addInstanes();
-            
-    
+            buildTagMenu();
+
         }
 
         private void tv1_AfterSelect(object sender, TreeViewEventArgs e)
         {
             var n = (SQLTreeItem)e.Node;
-       
-            if (n.ObjectID >0)
+            tabs.TabPages.Clear();
+
+            if (n.Type == SQLTreeItem.TreeType.Database || n.Type == SQLTreeItem.TreeType.Instance)
             {
-                if (!tabs.TabPages.Contains(tabSchema))
-                {
-                    tabs.TabPages.Add(tabSchema);
-                };
-                getHistory(n.ObjectID);
-            }
-            else
-            {
-                if (tabs.TabPages.Contains(tabSchema))
-                {
-                    tabs.TabPages.Remove(tabSchema);
-                };
-            }
-            if(n.Type== SQLTreeItem.TreeType.Database || n.Type== SQLTreeItem.TreeType.Instance)
-            {
-                if (!tabs.TabPages.Contains(tabSnapshotsSummary))
-                {
-                    tabs.TabPages.Insert(0, tabSnapshotsSummary);
-                };
+                tabs.TabPages.Add(tabSnapshotsSummary);
                 loadSnapshots();
             }
-            else
+            if (n.ObjectID >0)
             {
-                if (tabs.TabPages.Contains(tabSnapshotsSummary))
-                {
-                    tabs.TabPages.Remove(tabSnapshotsSummary);
-                }
+                tabs.TabPages.Add(tabSchema);
+                getHistory(n.ObjectID);
             }
+
+            if (n.Type == SQLTreeItem.TreeType.Instance)
+            {
+                tabs.TabPages.Add(tabTags);
+            }
+           
         }
 
 
@@ -515,6 +587,132 @@ OPTION(RECOMPILE)";
             frm.SelectedInstanceA = n.InstanceName;
             frm.SelectedDatabaseA = new DBDiff.DatabaseItem() { DatabaseID = n.DatabaseID, DatabaseName = n.DatabaseName };
             frm.ShowDialog();
+        }
+
+        private void tabs_TabIndexChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void tabs_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (tabs.SelectedTab == tabTags)
+            {
+                getTags();
+            }
+        }
+
+        private class InstanceTag
+        {
+            public Int32 TagID { get; set; } 
+            public string TagName { get; set; }
+            public string TagValue { get; set; }
+
+            public override string ToString()
+            {
+                return TagName + " | " + TagValue;
+            }
+
+        }
+
+        private void getTags()
+        {
+            SQLTreeItem n = (SQLTreeItem)tv1.SelectedNode;
+            SqlConnection cn = new SqlConnection(connectionString);
+            chkTags.Items.Clear();
+            using (cn)
+            {
+                cn.Open();
+                string sql = @"	SELECT T.TagID,T.TagName,T.TagValue,CASE WHEN IT.TagID IS NOT NULL THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END AS Checked
+	FROM dbo.Tags T
+	LEFT JOIN dbo.InstanceTags IT ON IT.TagID = T.TagID AND IT.Instance=@Instance
+	ORDER BY TagName,TagValue";
+                SqlCommand cmd = new SqlCommand(sql, cn);
+
+                cmd.Parameters.AddWithValue("Instance", n.InstanceName);
+                using (SqlDataReader rdr = cmd.ExecuteReader())
+                {
+                    while (rdr.Read())
+                    {
+                        var t = new InstanceTag() { TagID = (Int16)rdr[0], TagName = (string)rdr[1], TagValue = (string)rdr[2] };
+                        chkTags.Items.Add(t, (bool)rdr[3]);
+                    }
+                }
+            }
+        }
+
+        public Int16 addTag(string Instance,string TagName,string TagValue)
+        {
+
+            SqlConnection cn = new SqlConnection(connectionString);
+            using (cn)
+            {
+                cn.Open();
+                string sql = @"InstanceTags_Add";
+                SqlCommand cmd = new SqlCommand(sql, cn);
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.Parameters.AddWithValue("Instance", Instance);
+                cmd.Parameters.AddWithValue("TagName", TagName);
+                cmd.Parameters.AddWithValue("TagValue", TagValue);
+                var pTagID= cmd.Parameters.Add("TagID", SqlDbType.SmallInt);
+                pTagID.Direction = ParameterDirection.Output;
+                cmd.ExecuteNonQuery();
+                return (Int16)pTagID.Value;
+            }
+        }
+
+        public void removeTag(string Instance, string TagName, string TagValue)
+        {
+            SqlConnection cn = new SqlConnection(connectionString);
+            using (cn)
+            {
+                cn.Open();
+                string sql = @"InstanceTags_Del";
+                SqlCommand cmd = new SqlCommand(sql, cn);
+                cmd.CommandType = CommandType.StoredProcedure;
+
+                cmd.Parameters.AddWithValue("Instance", Instance);
+                cmd.Parameters.AddWithValue("TagName", TagName);
+                cmd.Parameters.AddWithValue("TagValue", TagValue);
+                cmd.ExecuteNonQuery();
+            }
+        }
+
+        private void chkTags_ItemCheck(object sender, ItemCheckEventArgs e)
+        {
+            SQLTreeItem n = (SQLTreeItem)tv1.SelectedNode;
+            var InstanceTag = (InstanceTag)chkTags.Items[e.Index];
+            if(e.NewValue== CheckState.Checked)
+            {
+                addTag(n.InstanceName, InstanceTag.TagName, InstanceTag.TagValue);
+            }
+            else
+            {
+                removeTag(n.InstanceName, InstanceTag.TagName, InstanceTag.TagValue);
+            }
+        }
+
+        private void bttnAdd_Click(object sender, EventArgs e)
+        {
+            SQLTreeItem n = (SQLTreeItem)tv1.SelectedNode;
+            Int16 tagID = addTag(n.InstanceName, cboTagName.Text, cboTagValue.Text);
+            getTags();
+            buildTagMenu(SelectedTags());
+        }
+
+        private void cboTagName_SelectedValueChanged(object sender, EventArgs e)
+        {
+            cboTagValue.Items.Clear();
+            foreach(ToolStripMenuItem mnuName in mnuTags.DropDownItems)
+            {
+                if(mnuName.Text == cboTagName.Text)
+                {
+                    foreach (ToolStripMenuItem mnuValue in mnuName.DropDownItems) {
+                        cboTagValue.Items.Add(mnuValue.Text);
+                    }
+                    break;
+                }
+            }
         }
     }
 }

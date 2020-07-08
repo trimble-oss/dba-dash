@@ -365,9 +365,6 @@
           <QueryParameter Name="@TagIDs">
             <Value>=Parameters!TagIDs.Value</Value>
           </QueryParameter>
-          <QueryParameter Name="@TagMatching">
-            <Value>=Parameters!TagMatching.Value</Value>
-          </QueryParameter>
           <QueryParameter Name="@InstanceName">
             <Value>=Parameters!InstanceName.Value</Value>
           </QueryParameter>
@@ -17358,23 +17355,6 @@ CDATE(Parameters!ToDateUser.Value).AddMinutes(IIF(ISNOTHING(Parameters!ToDateUse
       </ValidValues>
       <MultiValue>true</MultiValue>
     </ReportParameter>
-    <ReportParameter Name="TagMatching">
-      <DataType>String</DataType>
-      <Nullable>true</Nullable>
-      <DefaultValue>
-        <Values>
-          <Value>ALL</Value>
-        </Values>
-      </DefaultValue>
-      <Prompt>Tag Matching</Prompt>
-      <ValidValues>
-        <DataSetReference>
-          <DataSetName>TagMatching</DataSetName>
-          <ValueField>Value</ValueField>
-          <LabelField>Label</LabelField>
-        </DataSetReference>
-      </ValidValues>
-    </ReportParameter>
     <ReportParameter Name="InstanceName">
       <DataType>String</DataType>
       <Nullable>true</Nullable>
@@ -17477,11 +17457,6 @@ CDATE(Parameters!ToDateUser.Value).AddMinutes(IIF(ISNOTHING(Parameters!ToDateUse
           <ColumnIndex>1</ColumnIndex>
           <RowIndex>2</RowIndex>
           <ParameterName>TagIDs</ParameterName>
-        </CellDefinition>
-        <CellDefinition>
-          <ColumnIndex>2</ColumnIndex>
-          <RowIndex>2</RowIndex>
-          <ParameterName>TagMatching</ParameterName>
         </CellDefinition>
         <CellDefinition>
           <ColumnIndex>3</ColumnIndex>

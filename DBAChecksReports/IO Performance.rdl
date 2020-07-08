@@ -146,9 +146,6 @@
           <QueryParameter Name="@TagIDs">
             <Value>=Parameters!TagIDs.Value</Value>
           </QueryParameter>
-          <QueryParameter Name="@TagMatching">
-            <Value>=Parameters!TagMatching.Value</Value>
-          </QueryParameter>
           <QueryParameter Name="@InstanceName">
             <Value>=Parameters!InstanceName.Value</Value>
           </QueryParameter>
@@ -306,9 +303,6 @@
                                 <Parameter Name="TagIDs">
                                   <Value>=Parameters!TagIDs.Value</Value>
                                 </Parameter>
-                                <Parameter Name="TagMatching">
-                                  <Value>=Parameters!TagMatching.Value</Value>
-                                </Parameter>
                                 <Parameter Name="InstanceName">
                                   <Value>=Parameters!InstanceName.Value</Value>
                                 </Parameter>
@@ -402,9 +396,6 @@ Parameters!ToDate.Value))))</Value>
                                 </Parameter>
                                 <Parameter Name="TagIDs">
                                   <Value>=Parameters!TagIDs.Value</Value>
-                                </Parameter>
-                                <Parameter Name="TagMatching">
-                                  <Value>=Parameters!TagMatching.Value</Value>
                                 </Parameter>
                                 <Parameter Name="InstanceIDs">
                                   <Value>=Parameters!InstanceIDs.Value</Value>
@@ -873,9 +864,6 @@ Parameters!ToDate.Value))))</Value>
                                 </Parameter>
                                 <Parameter Name="TagIDs">
                                   <Value>=Parameters!TagIDs.Value</Value>
-                                </Parameter>
-                                <Parameter Name="TagMatching">
-                                  <Value>=Parameters!TagMatching.Value</Value>
                                 </Parameter>
                                 <Parameter Name="GroupByDB">
                                   <Value>true</Value>
@@ -3134,23 +3122,6 @@ IIF(Avg(Fields!Latency.Value)&lt;50,"Yellow","Red"))</Color>
       </ValidValues>
       <MultiValue>true</MultiValue>
     </ReportParameter>
-    <ReportParameter Name="TagMatching">
-      <DataType>String</DataType>
-      <Nullable>true</Nullable>
-      <DefaultValue>
-        <Values>
-          <Value>ALL</Value>
-        </Values>
-      </DefaultValue>
-      <Prompt>Tag Matching</Prompt>
-      <ValidValues>
-        <DataSetReference>
-          <DataSetName>TagMatching</DataSetName>
-          <ValueField>Value</ValueField>
-          <LabelField>Label</LabelField>
-        </DataSetReference>
-      </ValidValues>
-    </ReportParameter>
     <ReportParameter Name="InstanceIDs">
       <DataType>String</DataType>
       <DefaultValue>
@@ -3220,6 +3191,52 @@ IIF(Avg(Fields!Latency.Value)&lt;50,"Yellow","Red"))</Color>
       </DefaultValue>
       <Prompt>Group By Drive</Prompt>
     </ReportParameter>
+    <ReportParameter Name="ReadMBsec">
+      <DataType>Boolean</DataType>
+      <DefaultValue>
+        <Values>
+          <Value>true</Value>
+        </Values>
+      </DefaultValue>
+      <Prompt>Read MB/sec</Prompt>
+    </ReportParameter>
+    <ReportParameter Name="Latency">
+      <DataType>Boolean</DataType>
+      <DefaultValue>
+        <Values>
+          <Value>true</Value>
+        </Values>
+      </DefaultValue>
+      <Prompt>Latency</Prompt>
+    </ReportParameter>
+    <ReportParameter Name="ShowTable">
+      <DataType>Boolean</DataType>
+      <DefaultValue>
+        <Values>
+          <Value>true</Value>
+        </Values>
+      </DefaultValue>
+      <Prompt>ShowTable</Prompt>
+    </ReportParameter>
+    <ReportParameter Name="WriteMBsec">
+      <DataType>Boolean</DataType>
+      <DefaultValue>
+        <Values>
+          <Value>true</Value>
+        </Values>
+      </DefaultValue>
+      <Prompt>Write MB/sec</Prompt>
+    </ReportParameter>
+    <ReportParameter Name="FromDateUser">
+      <DataType>DateTime</DataType>
+      <Nullable>true</Nullable>
+      <Prompt>From Date</Prompt>
+    </ReportParameter>
+    <ReportParameter Name="ToDateUser">
+      <DataType>DateTime</DataType>
+      <Nullable>true</Nullable>
+      <Prompt>To Date:</Prompt>
+    </ReportParameter>
     <ReportParameter Name="TimeGroup">
       <DataType>Integer</DataType>
       <DefaultValue>
@@ -3249,40 +3266,24 @@ IIF(Avg(Fields!Latency.Value)&lt;50,"Yellow","Red"))</Color>
         </ParameterValues>
       </ValidValues>
     </ReportParameter>
-    <ReportParameter Name="FromDateUser">
-      <DataType>DateTime</DataType>
-      <Nullable>true</Nullable>
-      <Prompt>From Date</Prompt>
-    </ReportParameter>
-    <ReportParameter Name="FromDate">
-      <DataType>DateTime</DataType>
-      <Nullable>true</Nullable>
+    <ReportParameter Name="AvgLatencyChart">
+      <DataType>Boolean</DataType>
       <DefaultValue>
         <Values>
-          <Value>=IIF(ISNOTHING(Parameters!FromDateUser.Value),NOTHING,
-CDATE(Parameters!FromDateUser.Value).AddMinutes(IIF(ISNOTHING(Parameters!FromDateUser.Value),NOTHING,DateTime.Now.Date.Subtract(System.TimeZone.CurrentTimeZone.ToLocalTime(DateTime.UtcNow.Date)).TotalMinutes))
-)</Value>
+          <Value>true</Value>
         </Values>
       </DefaultValue>
-      <Prompt>From Date</Prompt>
+      <Prompt>AvgLatencyChart</Prompt>
       <Hidden>true</Hidden>
-      <ValidValues>
-        <ParameterValues>
-          <ParameterValue>
-            <Value>=IIF(ISNOTHING(Parameters!FromDateUser.Value),NOTHING,
-CDATE(Parameters!FromDateUser.Value).AddMinutes(IIF(ISNOTHING(Parameters!FromDateUser.Value),NOTHING,DateTime.Now.Date.Subtract(System.TimeZone.CurrentTimeZone.ToLocalTime(DateTime.UtcNow.Date)).TotalMinutes))
-)</Value>
-            <Label>=IIF(ISNOTHING(Parameters!FromDateUser.Value),NOTHING,
-CDATE(Parameters!FromDateUser.Value).AddMinutes(IIF(ISNOTHING(Parameters!FromDateUser.Value),NOTHING,DateTime.Now.Date.Subtract(System.TimeZone.CurrentTimeZone.ToLocalTime(DateTime.UtcNow.Date)).TotalMinutes))
-)</Label>
-          </ParameterValue>
-        </ParameterValues>
-      </ValidValues>
     </ReportParameter>
-    <ReportParameter Name="ToDateUser">
-      <DataType>DateTime</DataType>
-      <Nullable>true</Nullable>
-      <Prompt>To Date:</Prompt>
+    <ReportParameter Name="DateFormat">
+      <DataType>String</DataType>
+      <DefaultValue>
+        <Values>
+          <Value>yyyy-MM-dd HH:mm</Value>
+        </Values>
+      </DefaultValue>
+      <Prompt>DateFormat</Prompt>
     </ReportParameter>
     <ReportParameter Name="ToDate">
       <DataType>DateTime</DataType>
@@ -3309,15 +3310,6 @@ CDATE(Parameters!ToDateUser.Value).AddMinutes(IIF(ISNOTHING(Parameters!ToDateUse
         </ParameterValues>
       </ValidValues>
     </ReportParameter>
-    <ReportParameter Name="DateFormat">
-      <DataType>String</DataType>
-      <DefaultValue>
-        <Values>
-          <Value>yyyy-MM-dd HH:mm</Value>
-        </Values>
-      </DefaultValue>
-      <Prompt>DateFormat</Prompt>
-    </ReportParameter>
     <ReportParameter Name="AvgThroughputChart">
       <DataType>Boolean</DataType>
       <DefaultValue>
@@ -3328,51 +3320,30 @@ CDATE(Parameters!ToDateUser.Value).AddMinutes(IIF(ISNOTHING(Parameters!ToDateUse
       <Prompt>AvgThroughputChart</Prompt>
       <Hidden>true</Hidden>
     </ReportParameter>
-    <ReportParameter Name="AvgLatencyChart">
-      <DataType>Boolean</DataType>
+    <ReportParameter Name="FromDate">
+      <DataType>DateTime</DataType>
+      <Nullable>true</Nullable>
       <DefaultValue>
         <Values>
-          <Value>true</Value>
+          <Value>=IIF(ISNOTHING(Parameters!FromDateUser.Value),NOTHING,
+CDATE(Parameters!FromDateUser.Value).AddMinutes(IIF(ISNOTHING(Parameters!FromDateUser.Value),NOTHING,DateTime.Now.Date.Subtract(System.TimeZone.CurrentTimeZone.ToLocalTime(DateTime.UtcNow.Date)).TotalMinutes))
+)</Value>
         </Values>
       </DefaultValue>
-      <Prompt>AvgLatencyChart</Prompt>
+      <Prompt>From Date</Prompt>
       <Hidden>true</Hidden>
-    </ReportParameter>
-    <ReportParameter Name="ShowTable">
-      <DataType>Boolean</DataType>
-      <DefaultValue>
-        <Values>
-          <Value>true</Value>
-        </Values>
-      </DefaultValue>
-      <Prompt>ShowTable</Prompt>
-    </ReportParameter>
-    <ReportParameter Name="Latency">
-      <DataType>Boolean</DataType>
-      <DefaultValue>
-        <Values>
-          <Value>true</Value>
-        </Values>
-      </DefaultValue>
-      <Prompt>Latency</Prompt>
-    </ReportParameter>
-    <ReportParameter Name="ReadMBsec">
-      <DataType>Boolean</DataType>
-      <DefaultValue>
-        <Values>
-          <Value>true</Value>
-        </Values>
-      </DefaultValue>
-      <Prompt>Read MB/sec</Prompt>
-    </ReportParameter>
-    <ReportParameter Name="WriteMBsec">
-      <DataType>Boolean</DataType>
-      <DefaultValue>
-        <Values>
-          <Value>true</Value>
-        </Values>
-      </DefaultValue>
-      <Prompt>Write MB/sec</Prompt>
+      <ValidValues>
+        <ParameterValues>
+          <ParameterValue>
+            <Value>=IIF(ISNOTHING(Parameters!FromDateUser.Value),NOTHING,
+CDATE(Parameters!FromDateUser.Value).AddMinutes(IIF(ISNOTHING(Parameters!FromDateUser.Value),NOTHING,DateTime.Now.Date.Subtract(System.TimeZone.CurrentTimeZone.ToLocalTime(DateTime.UtcNow.Date)).TotalMinutes))
+)</Value>
+            <Label>=IIF(ISNOTHING(Parameters!FromDateUser.Value),NOTHING,
+CDATE(Parameters!FromDateUser.Value).AddMinutes(IIF(ISNOTHING(Parameters!FromDateUser.Value),NOTHING,DateTime.Now.Date.Subtract(System.TimeZone.CurrentTimeZone.ToLocalTime(DateTime.UtcNow.Date)).TotalMinutes))
+)</Label>
+          </ParameterValue>
+        </ParameterValues>
+      </ValidValues>
     </ReportParameter>
   </ReportParameters>
   <ReportParametersLayout>
@@ -3392,11 +3363,6 @@ CDATE(Parameters!ToDateUser.Value).AddMinutes(IIF(ISNOTHING(Parameters!ToDateUse
         </CellDefinition>
         <CellDefinition>
           <ColumnIndex>2</ColumnIndex>
-          <RowIndex>0</RowIndex>
-          <ParameterName>TagMatching</ParameterName>
-        </CellDefinition>
-        <CellDefinition>
-          <ColumnIndex>3</ColumnIndex>
           <RowIndex>0</RowIndex>
           <ParameterName>InstanceIDs</ParameterName>
         </CellDefinition>
@@ -3436,38 +3402,38 @@ CDATE(Parameters!ToDateUser.Value).AddMinutes(IIF(ISNOTHING(Parameters!ToDateUse
           <ParameterName>GroupByDrive</ParameterName>
         </CellDefinition>
         <CellDefinition>
-          <ColumnIndex>0</ColumnIndex>
-          <RowIndex>3</RowIndex>
+          <ColumnIndex>2</ColumnIndex>
+          <RowIndex>4</RowIndex>
           <ParameterName>TimeGroup</ParameterName>
         </CellDefinition>
         <CellDefinition>
-          <ColumnIndex>1</ColumnIndex>
-          <RowIndex>3</RowIndex>
+          <ColumnIndex>0</ColumnIndex>
+          <RowIndex>4</RowIndex>
           <ParameterName>FromDateUser</ParameterName>
         </CellDefinition>
         <CellDefinition>
-          <ColumnIndex>2</ColumnIndex>
-          <RowIndex>3</RowIndex>
-          <ParameterName>FromDate</ParameterName>
-        </CellDefinition>
-        <CellDefinition>
           <ColumnIndex>3</ColumnIndex>
-          <RowIndex>3</RowIndex>
-          <ParameterName>ToDateUser</ParameterName>
-        </CellDefinition>
-        <CellDefinition>
-          <ColumnIndex>0</ColumnIndex>
-          <RowIndex>4</RowIndex>
-          <ParameterName>ToDate</ParameterName>
+          <RowIndex>5</RowIndex>
+          <ParameterName>FromDate</ParameterName>
         </CellDefinition>
         <CellDefinition>
           <ColumnIndex>1</ColumnIndex>
           <RowIndex>4</RowIndex>
+          <ParameterName>ToDateUser</ParameterName>
+        </CellDefinition>
+        <CellDefinition>
+          <ColumnIndex>1</ColumnIndex>
+          <RowIndex>5</RowIndex>
+          <ParameterName>ToDate</ParameterName>
+        </CellDefinition>
+        <CellDefinition>
+          <ColumnIndex>0</ColumnIndex>
+          <RowIndex>5</RowIndex>
           <ParameterName>DateFormat</ParameterName>
         </CellDefinition>
         <CellDefinition>
           <ColumnIndex>2</ColumnIndex>
-          <RowIndex>4</RowIndex>
+          <RowIndex>5</RowIndex>
           <ParameterName>AvgThroughputChart</ParameterName>
         </CellDefinition>
         <CellDefinition>
@@ -3476,23 +3442,23 @@ CDATE(Parameters!ToDateUser.Value).AddMinutes(IIF(ISNOTHING(Parameters!ToDateUse
           <ParameterName>AvgLatencyChart</ParameterName>
         </CellDefinition>
         <CellDefinition>
-          <ColumnIndex>0</ColumnIndex>
-          <RowIndex>5</RowIndex>
+          <ColumnIndex>2</ColumnIndex>
+          <RowIndex>3</RowIndex>
           <ParameterName>ShowTable</ParameterName>
         </CellDefinition>
         <CellDefinition>
           <ColumnIndex>1</ColumnIndex>
-          <RowIndex>5</RowIndex>
+          <RowIndex>3</RowIndex>
           <ParameterName>Latency</ParameterName>
         </CellDefinition>
         <CellDefinition>
-          <ColumnIndex>2</ColumnIndex>
-          <RowIndex>5</RowIndex>
+          <ColumnIndex>0</ColumnIndex>
+          <RowIndex>3</RowIndex>
           <ParameterName>ReadMBsec</ParameterName>
         </CellDefinition>
         <CellDefinition>
           <ColumnIndex>3</ColumnIndex>
-          <RowIndex>5</RowIndex>
+          <RowIndex>3</RowIndex>
           <ParameterName>WriteMBsec</ParameterName>
         </CellDefinition>
       </CellDefinitions>

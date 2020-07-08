@@ -10,17 +10,25 @@
           <OmitFromQuery>false</OmitFromQuery>
           <rd:DbType>String</rd:DbType>
         </DataSetParameter>
-        <DataSetParameter Name="@TagMatching">
-          <ReadOnly>false</ReadOnly>
-          <Nullable>true</Nullable>
-          <OmitFromQuery>false</OmitFromQuery>
-          <rd:DbType>AnsiString</rd:DbType>
-        </DataSetParameter>
         <DataSetParameter Name="@InstanceName">
           <ReadOnly>false</ReadOnly>
           <Nullable>true</Nullable>
           <OmitFromQuery>false</OmitFromQuery>
           <rd:DbType>String</rd:DbType>
+        </DataSetParameter>
+        <DataSetParameter Name="@ExcludeAzure">
+          <DefaultValue>0</DefaultValue>
+          <ReadOnly>false</ReadOnly>
+          <Nullable>false</Nullable>
+          <OmitFromQuery>false</OmitFromQuery>
+          <rd:DbType>Boolean</rd:DbType>
+        </DataSetParameter>
+        <DataSetParameter Name="@AzureOnly">
+          <DefaultValue>0</DefaultValue>
+          <ReadOnly>false</ReadOnly>
+          <Nullable>false</Nullable>
+          <OmitFromQuery>false</OmitFromQuery>
+          <rd:DbType>Boolean</rd:DbType>
         </DataSetParameter>
       </DataSetParameters>
       <CommandType>StoredProcedure</CommandType>

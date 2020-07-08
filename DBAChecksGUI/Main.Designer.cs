@@ -42,8 +42,8 @@
             this.tv1 = new System.Windows.Forms.TreeView();
             this.TreeViewImageList = new System.Windows.Forms.ImageList(this.components);
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
+            this.mnuTags = new System.Windows.Forms.ToolStripMenuItem();
             this.dBDiffToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.splitter1 = new System.Windows.Forms.Splitter();
             this.splitMain = new System.Windows.Forms.SplitContainer();
             this.tabs = new System.Windows.Forms.TabControl();
             this.tabSnapshotsSummary = new System.Windows.Forms.TabPage();
@@ -87,6 +87,14 @@
             this.ObjectDateCreated = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.ObjectDateModified = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.label1 = new System.Windows.Forms.Label();
+            this.tabTags = new System.Windows.Forms.TabPage();
+            this.chkTags = new System.Windows.Forms.CheckedListBox();
+            this.panel1 = new System.Windows.Forms.Panel();
+            this.label2 = new System.Windows.Forms.Label();
+            this.bttnAdd = new System.Windows.Forms.Button();
+            this.cboTagName = new System.Windows.Forms.ComboBox();
+            this.label3 = new System.Windows.Forms.Label();
+            this.cboTagValue = new System.Windows.Forms.ComboBox();
             this.menuStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitMain)).BeginInit();
             this.splitMain.Panel1.SuspendLayout();
@@ -108,6 +116,8 @@
             this.splitSchemaSnapshot.SuspendLayout();
             this.toolStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.gvHistory)).BeginInit();
+            this.tabTags.SuspendLayout();
+            this.panel1.SuspendLayout();
             this.SuspendLayout();
             // 
             // tv1
@@ -118,7 +128,7 @@
             this.tv1.Location = new System.Drawing.Point(0, 0);
             this.tv1.Name = "tv1";
             this.tv1.SelectedImageIndex = 0;
-            this.tv1.Size = new System.Drawing.Size(506, 1039);
+            this.tv1.Size = new System.Drawing.Size(406, 841);
             this.tv1.TabIndex = 0;
             this.tv1.BeforeExpand += new System.Windows.Forms.TreeViewCancelEventHandler(this.tv1_BeforeExpand);
             this.tv1.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.tv1_AfterSelect);
@@ -138,33 +148,32 @@
             // 
             this.menuStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
             this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.mnuTags,
             this.dBDiffToolStripMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
-            this.menuStrip1.Size = new System.Drawing.Size(1484, 38);
+            this.menuStrip1.Size = new System.Drawing.Size(1187, 28);
             this.menuStrip1.TabIndex = 1;
             this.menuStrip1.Text = "menuStrip1";
+            // 
+            // mnuTags
+            // 
+            this.mnuTags.Name = "mnuTags";
+            this.mnuTags.Size = new System.Drawing.Size(52, 24);
+            this.mnuTags.Text = "Tags";
             // 
             // dBDiffToolStripMenuItem
             // 
             this.dBDiffToolStripMenuItem.Name = "dBDiffToolStripMenuItem";
-            this.dBDiffToolStripMenuItem.Size = new System.Drawing.Size(68, 34);
+            this.dBDiffToolStripMenuItem.Size = new System.Drawing.Size(68, 24);
             this.dBDiffToolStripMenuItem.Text = "DBDiff";
             this.dBDiffToolStripMenuItem.Click += new System.EventHandler(this.dBDiffToolStripMenuItem_Click);
-            // 
-            // splitter1
-            // 
-            this.splitter1.Location = new System.Drawing.Point(0, 48);
-            this.splitter1.Name = "splitter1";
-            this.splitter1.Size = new System.Drawing.Size(5, 1039);
-            this.splitter1.TabIndex = 2;
-            this.splitter1.TabStop = false;
             // 
             // splitMain
             // 
             this.splitMain.AccessibleRole = System.Windows.Forms.AccessibleRole.ScrollBar;
             this.splitMain.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.splitMain.Location = new System.Drawing.Point(6, 48);
+            this.splitMain.Location = new System.Drawing.Point(0, 28);
             this.splitMain.Name = "splitMain";
             // 
             // splitMain.Panel1
@@ -176,20 +185,22 @@
             // 
             this.splitMain.Panel2.Controls.Add(this.tabs);
             this.splitMain.Panel2MinSize = 100;
-            this.splitMain.Size = new System.Drawing.Size(1478, 1039);
-            this.splitMain.SplitterDistance = 506;
+            this.splitMain.Size = new System.Drawing.Size(1187, 841);
+            this.splitMain.SplitterDistance = 406;
             this.splitMain.TabIndex = 3;
             // 
             // tabs
             // 
             this.tabs.Controls.Add(this.tabSnapshotsSummary);
             this.tabs.Controls.Add(this.tabSchema);
+            this.tabs.Controls.Add(this.tabTags);
             this.tabs.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tabs.Location = new System.Drawing.Point(0, 0);
             this.tabs.Name = "tabs";
             this.tabs.SelectedIndex = 0;
-            this.tabs.Size = new System.Drawing.Size(968, 1039);
+            this.tabs.Size = new System.Drawing.Size(777, 841);
             this.tabs.TabIndex = 0;
+            this.tabs.SelectedIndexChanged += new System.EventHandler(this.tabs_SelectedIndexChanged);
             // 
             // tabSnapshotsSummary
             // 
@@ -197,7 +208,7 @@
             this.tabSnapshotsSummary.Location = new System.Drawing.Point(4, 25);
             this.tabSnapshotsSummary.Name = "tabSnapshotsSummary";
             this.tabSnapshotsSummary.Padding = new System.Windows.Forms.Padding(3);
-            this.tabSnapshotsSummary.Size = new System.Drawing.Size(960, 1010);
+            this.tabSnapshotsSummary.Size = new System.Drawing.Size(769, 812);
             this.tabSnapshotsSummary.TabIndex = 1;
             this.tabSnapshotsSummary.Text = "Snapshot Summary";
             this.tabSnapshotsSummary.UseVisualStyleBackColor = true;
@@ -217,8 +228,8 @@
             // splitSnapshotSummary.Panel2
             // 
             this.splitSnapshotSummary.Panel2.Controls.Add(this.gvSnapshotsDetail);
-            this.splitSnapshotSummary.Size = new System.Drawing.Size(954, 1004);
-            this.splitSnapshotSummary.SplitterDistance = 309;
+            this.splitSnapshotSummary.Size = new System.Drawing.Size(763, 806);
+            this.splitSnapshotSummary.SplitterDistance = 248;
             this.splitSnapshotSummary.TabIndex = 0;
             // 
             // toolStrip2
@@ -231,9 +242,9 @@
             this.tsSummaryNext,
             this.toolStripLabel3,
             this.tsSummaryPageSize});
-            this.toolStrip2.Location = new System.Drawing.Point(0, 348);
+            this.toolStrip2.Location = new System.Drawing.Point(0, 220);
             this.toolStrip2.Name = "toolStrip2";
-            this.toolStrip2.Size = new System.Drawing.Size(1193, 39);
+            this.toolStrip2.Size = new System.Drawing.Size(763, 28);
             this.toolStrip2.TabIndex = 2;
             this.toolStrip2.Text = "toolStrip2";
             // 
@@ -243,14 +254,14 @@
             this.tsSummaryBack.Image = ((System.Drawing.Image)(resources.GetObject("tsSummaryBack.Image")));
             this.tsSummaryBack.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsSummaryBack.Name = "tsSummaryBack";
-            this.tsSummaryBack.Size = new System.Drawing.Size(29, 36);
+            this.tsSummaryBack.Size = new System.Drawing.Size(29, 25);
             this.tsSummaryBack.Text = "Previous";
             this.tsSummaryBack.Click += new System.EventHandler(this.tsSummaryBack_Click);
             // 
             // tsSummaryPageNum
             // 
             this.tsSummaryPageNum.Name = "tsSummaryPageNum";
-            this.tsSummaryPageNum.Size = new System.Drawing.Size(53, 36);
+            this.tsSummaryPageNum.Size = new System.Drawing.Size(53, 25);
             this.tsSummaryPageNum.Text = "Page 1";
             // 
             // tsSummaryNext
@@ -259,14 +270,14 @@
             this.tsSummaryNext.Image = ((System.Drawing.Image)(resources.GetObject("tsSummaryNext.Image")));
             this.tsSummaryNext.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsSummaryNext.Name = "tsSummaryNext";
-            this.tsSummaryNext.Size = new System.Drawing.Size(29, 36);
+            this.tsSummaryNext.Size = new System.Drawing.Size(29, 25);
             this.tsSummaryNext.Text = "Next";
             this.tsSummaryNext.Click += new System.EventHandler(this.tsSummaryNext_Click);
             // 
             // toolStripLabel3
             // 
             this.toolStripLabel3.Name = "toolStripLabel3";
-            this.toolStripLabel3.Size = new System.Drawing.Size(75, 36);
+            this.toolStripLabel3.Size = new System.Drawing.Size(75, 25);
             this.toolStripLabel3.Text = "Page Size:";
             // 
             // tsSummaryPageSize
@@ -278,7 +289,7 @@
             "1000",
             "5000"});
             this.tsSummaryPageSize.Name = "tsSummaryPageSize";
-            this.tsSummaryPageSize.Size = new System.Drawing.Size(121, 39);
+            this.tsSummaryPageSize.Size = new System.Drawing.Size(121, 28);
             this.tsSummaryPageSize.Text = "100";
             this.tsSummaryPageSize.Validating += new System.ComponentModel.CancelEventHandler(this.tsSummaryPageSize_Validating);
             this.tsSummaryPageSize.Validated += new System.EventHandler(this.tsSummaryPageSize_Validated);
@@ -328,7 +339,7 @@
             this.gvSnapshots.RowHeadersWidth = 51;
             this.gvSnapshots.RowTemplate.Height = 24;
             this.gvSnapshots.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-            this.gvSnapshots.Size = new System.Drawing.Size(954, 309);
+            this.gvSnapshots.Size = new System.Drawing.Size(763, 248);
             this.gvSnapshots.TabIndex = 0;
             this.gvSnapshots.SelectionChanged += new System.EventHandler(this.gvSnapshots_SelectionChanged);
             // 
@@ -452,7 +463,7 @@
             this.gvSnapshotsDetail.RowHeadersWidth = 51;
             this.gvSnapshotsDetail.RowTemplate.Height = 24;
             this.gvSnapshotsDetail.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.CellSelect;
-            this.gvSnapshotsDetail.Size = new System.Drawing.Size(954, 691);
+            this.gvSnapshotsDetail.Size = new System.Drawing.Size(763, 554);
             this.gvSnapshotsDetail.TabIndex = 0;
             this.gvSnapshotsDetail.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.gvSnapshotsDetail_CellContentClick);
             // 
@@ -516,7 +527,7 @@
             this.tabSchema.Location = new System.Drawing.Point(4, 25);
             this.tabSchema.Name = "tabSchema";
             this.tabSchema.Padding = new System.Windows.Forms.Padding(3);
-            this.tabSchema.Size = new System.Drawing.Size(766, 810);
+            this.tabSchema.Size = new System.Drawing.Size(769, 812);
             this.tabSchema.TabIndex = 0;
             this.tabSchema.Text = "Schema Snapshot";
             this.tabSchema.UseVisualStyleBackColor = true;
@@ -537,8 +548,8 @@
             this.splitSchemaSnapshot.Panel2.Controls.Add(this.toolStrip1);
             this.splitSchemaSnapshot.Panel2.Controls.Add(this.gvHistory);
             this.splitSchemaSnapshot.Panel2.Controls.Add(this.label1);
-            this.splitSchemaSnapshot.Size = new System.Drawing.Size(760, 804);
-            this.splitSchemaSnapshot.SplitterDistance = 487;
+            this.splitSchemaSnapshot.Size = new System.Drawing.Size(763, 806);
+            this.splitSchemaSnapshot.SplitterDistance = 488;
             this.splitSchemaSnapshot.TabIndex = 1;
             // 
             // label7
@@ -561,9 +572,9 @@
             this.tsNext,
             this.toolStripLabel1,
             this.tsPageSize});
-            this.toolStrip1.Location = new System.Drawing.Point(0, 285);
+            this.toolStrip1.Location = new System.Drawing.Point(0, 286);
             this.toolStrip1.Name = "toolStrip1";
-            this.toolStrip1.Size = new System.Drawing.Size(760, 28);
+            this.toolStrip1.Size = new System.Drawing.Size(763, 28);
             this.toolStrip1.TabIndex = 1;
             this.toolStrip1.Text = "toolStrip1";
             // 
@@ -659,7 +670,7 @@
             this.gvHistory.RowHeadersWidth = 51;
             this.gvHistory.RowTemplate.Height = 24;
             this.gvHistory.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-            this.gvHistory.Size = new System.Drawing.Size(760, 296);
+            this.gvHistory.Size = new System.Drawing.Size(763, 297);
             this.gvHistory.TabIndex = 0;
             this.gvHistory.SelectionChanged += new System.EventHandler(this.gvHistory_SelectionChanged);
             // 
@@ -737,10 +748,90 @@
             this.label1.Dock = System.Windows.Forms.DockStyle.Top;
             this.label1.Location = new System.Drawing.Point(0, 0);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(760, 17);
+            this.label1.Size = new System.Drawing.Size(763, 17);
             this.label1.TabIndex = 2;
             this.label1.Text = "Snapshot History";
             this.label1.TextAlign = System.Drawing.ContentAlignment.TopCenter;
+            // 
+            // tabTags
+            // 
+            this.tabTags.Controls.Add(this.chkTags);
+            this.tabTags.Controls.Add(this.panel1);
+            this.tabTags.Location = new System.Drawing.Point(4, 25);
+            this.tabTags.Name = "tabTags";
+            this.tabTags.Padding = new System.Windows.Forms.Padding(3);
+            this.tabTags.Size = new System.Drawing.Size(769, 812);
+            this.tabTags.TabIndex = 2;
+            this.tabTags.Text = "Tags";
+            this.tabTags.UseVisualStyleBackColor = true;
+            // 
+            // chkTags
+            // 
+            this.chkTags.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.chkTags.FormattingEnabled = true;
+            this.chkTags.Location = new System.Drawing.Point(3, 68);
+            this.chkTags.Name = "chkTags";
+            this.chkTags.Size = new System.Drawing.Size(763, 741);
+            this.chkTags.TabIndex = 0;
+            this.chkTags.ItemCheck += new System.Windows.Forms.ItemCheckEventHandler(this.chkTags_ItemCheck);
+            // 
+            // panel1
+            // 
+            this.panel1.Controls.Add(this.label2);
+            this.panel1.Controls.Add(this.bttnAdd);
+            this.panel1.Controls.Add(this.cboTagName);
+            this.panel1.Controls.Add(this.label3);
+            this.panel1.Controls.Add(this.cboTagValue);
+            this.panel1.Dock = System.Windows.Forms.DockStyle.Top;
+            this.panel1.Location = new System.Drawing.Point(3, 3);
+            this.panel1.Name = "panel1";
+            this.panel1.Size = new System.Drawing.Size(763, 65);
+            this.panel1.TabIndex = 6;
+            // 
+            // label2
+            // 
+            this.label2.AutoSize = true;
+            this.label2.Location = new System.Drawing.Point(3, 20);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(78, 17);
+            this.label2.TabIndex = 2;
+            this.label2.Text = "Tag Name:";
+            // 
+            // bttnAdd
+            // 
+            this.bttnAdd.Location = new System.Drawing.Point(640, 17);
+            this.bttnAdd.Name = "bttnAdd";
+            this.bttnAdd.Size = new System.Drawing.Size(75, 23);
+            this.bttnAdd.TabIndex = 5;
+            this.bttnAdd.Text = "Add";
+            this.bttnAdd.UseVisualStyleBackColor = true;
+            this.bttnAdd.Click += new System.EventHandler(this.bttnAdd_Click);
+            // 
+            // cboTagName
+            // 
+            this.cboTagName.FormattingEnabled = true;
+            this.cboTagName.Location = new System.Drawing.Point(102, 17);
+            this.cboTagName.Name = "cboTagName";
+            this.cboTagName.Size = new System.Drawing.Size(177, 24);
+            this.cboTagName.TabIndex = 1;
+            this.cboTagName.SelectedValueChanged += new System.EventHandler(this.cboTagName_SelectedValueChanged);
+            // 
+            // label3
+            // 
+            this.label3.AutoSize = true;
+            this.label3.Location = new System.Drawing.Point(311, 20);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(77, 17);
+            this.label3.TabIndex = 4;
+            this.label3.Text = "Tag Value:";
+            // 
+            // cboTagValue
+            // 
+            this.cboTagValue.FormattingEnabled = true;
+            this.cboTagValue.Location = new System.Drawing.Point(408, 17);
+            this.cboTagValue.Name = "cboTagValue";
+            this.cboTagValue.Size = new System.Drawing.Size(178, 24);
+            this.cboTagValue.TabIndex = 3;
             // 
             // Main
             // 
@@ -748,7 +839,6 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1187, 869);
             this.Controls.Add(this.splitMain);
-            this.Controls.Add(this.splitter1);
             this.Controls.Add(this.menuStrip1);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MainMenuStrip = this.menuStrip1;
@@ -783,6 +873,9 @@
             this.toolStrip1.ResumeLayout(false);
             this.toolStrip1.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.gvHistory)).EndInit();
+            this.tabTags.ResumeLayout(false);
+            this.panel1.ResumeLayout(false);
+            this.panel1.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -792,7 +885,6 @@
 
         private System.Windows.Forms.TreeView tv1;
         private System.Windows.Forms.MenuStrip menuStrip1;
-        private System.Windows.Forms.Splitter splitter1;
         private System.Windows.Forms.SplitContainer splitMain;
         private System.Windows.Forms.TabControl tabs;
         private System.Windows.Forms.TabPage tabSchema;
@@ -838,5 +930,14 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn ObjectDateModified;
         private System.Windows.Forms.ToolStripMenuItem dBDiffToolStripMenuItem;
         private System.Windows.Forms.Label label7;
+        private System.Windows.Forms.TabPage tabTags;
+        private System.Windows.Forms.CheckedListBox chkTags;
+        private System.Windows.Forms.ToolStripMenuItem mnuTags;
+        private System.Windows.Forms.Button bttnAdd;
+        private System.Windows.Forms.Label label3;
+        private System.Windows.Forms.ComboBox cboTagValue;
+        private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.ComboBox cboTagName;
+        private System.Windows.Forms.Panel panel1;
     }
 }

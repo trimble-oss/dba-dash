@@ -165,9 +165,6 @@
           <QueryParameter Name="@TagIDs">
             <Value>=Parameters!TagIDs.Value</Value>
           </QueryParameter>
-          <QueryParameter Name="@TagMatching">
-            <Value>=Parameters!TagMatching.Value</Value>
-          </QueryParameter>
           <QueryParameter Name="@InstanceName">
             <Value>=Parameters!InstanceName.Value</Value>
           </QueryParameter>
@@ -2231,7 +2228,7 @@ Parameters!Mins.Value&lt;=300,"10MIN",
         <Height>25.28in</Height>
         <Style />
       </Body>
-      <Width>23.45489in</Width>
+      <Width>23.4549in</Width>
       <Page>
         <InteractiveHeight>200in</InteractiveHeight>
         <InteractiveWidth>8.5in</InteractiveWidth>
@@ -2253,17 +2250,6 @@ Parameters!Mins.Value&lt;=300,"10MIN",
         </Values>
       </DefaultValue>
       <Prompt>Tag IDs</Prompt>
-      <Hidden>true</Hidden>
-    </ReportParameter>
-    <ReportParameter Name="TagMatching">
-      <DataType>String</DataType>
-      <Nullable>true</Nullable>
-      <DefaultValue>
-        <Values>
-          <Value>ALL</Value>
-        </Values>
-      </DefaultValue>
-      <Prompt>Tag Matching</Prompt>
       <Hidden>true</Hidden>
     </ReportParameter>
     <ReportParameter Name="InstanceName">
@@ -2340,11 +2326,6 @@ Parameters!Mins.Value&lt;=300,2,
           <ColumnIndex>0</ColumnIndex>
           <RowIndex>0</RowIndex>
           <ParameterName>TagIDs</ParameterName>
-        </CellDefinition>
-        <CellDefinition>
-          <ColumnIndex>1</ColumnIndex>
-          <RowIndex>0</RowIndex>
-          <ParameterName>TagMatching</ParameterName>
         </CellDefinition>
         <CellDefinition>
           <ColumnIndex>0</ColumnIndex>

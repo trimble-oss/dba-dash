@@ -86,9 +86,6 @@
           <QueryParameter Name="@TagIDs">
             <Value>=Parameters!TagIDs.Value</Value>
           </QueryParameter>
-          <QueryParameter Name="@TagMatching">
-            <Value>=Parameters!TagMatching.Value</Value>
-          </QueryParameter>
           <QueryParameter Name="@InstanceName">
             <Value>=Parameters!InstanceName.Value</Value>
           </QueryParameter>
@@ -116,21 +113,6 @@
         </Field>
         <Field Name="Tag">
           <DataField>Tag</DataField>
-          <rd:TypeName>System.String</rd:TypeName>
-        </Field>
-      </Fields>
-    </DataSet>
-    <DataSet Name="TagMatching">
-      <SharedDataSet>
-        <SharedDataSetReference>TagMatching</SharedDataSetReference>
-      </SharedDataSet>
-      <Fields>
-        <Field Name="Label">
-          <DataField>Label</DataField>
-          <rd:TypeName>System.String</rd:TypeName>
-        </Field>
-        <Field Name="Value">
-          <DataField>Value</DataField>
           <rd:TypeName>System.String</rd:TypeName>
         </Field>
       </Fields>
@@ -1123,7 +1105,6 @@ IIF(Fields!AvailablePct.Value*100&lt;=Parameters!WarningThreshold.Value,"Yellow"
             </TablixRowHierarchy>
             <DataSetName>DBMaxSize</DataSetName>
             <Top>1.24206cm</Top>
-            <Left>0cm</Left>
             <Height>2.5685cm</Height>
             <Width>39.7625cm</Width>
             <Style>
@@ -1182,23 +1163,6 @@ IIF(Fields!AvailablePct.Value*100&lt;=Parameters!WarningThreshold.Value,"Yellow"
     </ReportSection>
   </ReportSections>
   <ReportParameters>
-    <ReportParameter Name="TagMatching">
-      <DataType>String</DataType>
-      <Nullable>true</Nullable>
-      <DefaultValue>
-        <Values>
-          <Value>ALL</Value>
-        </Values>
-      </DefaultValue>
-      <Prompt>Tag Matching</Prompt>
-      <ValidValues>
-        <DataSetReference>
-          <DataSetName>TagMatching</DataSetName>
-          <ValueField>Value</ValueField>
-          <LabelField>Label</LabelField>
-        </DataSetReference>
-      </ValidValues>
-    </ReportParameter>
     <ReportParameter Name="TagIDs">
       <DataType>String</DataType>
       <DefaultValue>
@@ -1311,20 +1275,15 @@ IIF(Parameters!FilterLevel.Value="Warning",Parameters!WarningThreshold.Value,
         <CellDefinition>
           <ColumnIndex>0</ColumnIndex>
           <RowIndex>0</RowIndex>
-          <ParameterName>TagMatching</ParameterName>
+          <ParameterName>TagIDs</ParameterName>
         </CellDefinition>
         <CellDefinition>
           <ColumnIndex>1</ColumnIndex>
           <RowIndex>0</RowIndex>
-          <ParameterName>TagIDs</ParameterName>
-        </CellDefinition>
-        <CellDefinition>
-          <ColumnIndex>2</ColumnIndex>
-          <RowIndex>0</RowIndex>
           <ParameterName>InstanceName</ParameterName>
         </CellDefinition>
         <CellDefinition>
-          <ColumnIndex>3</ColumnIndex>
+          <ColumnIndex>2</ColumnIndex>
           <RowIndex>0</RowIndex>
           <ParameterName>InstanceIDs</ParameterName>
         </CellDefinition>

@@ -91,11 +91,12 @@
           <QueryParameter Name="@TagIDs">
             <Value>=Parameters!TagIDs.Value</Value>
           </QueryParameter>
-          <QueryParameter Name="@TagMatching">
-            <Value>=Parameters!TagMatching.Value</Value>
-          </QueryParameter>
           <QueryParameter Name="@InstanceName">
             <Value>=Parameters!InstanceName.Value</Value>
+          </QueryParameter>
+          <QueryParameter Name="@ExcludeAzure">
+            <Value>true</Value>
+            <rd:UserDefined>true</rd:UserDefined>
           </QueryParameter>
         </QueryParameters>
       </SharedDataSet>
@@ -111,21 +112,6 @@
         <Field Name="EditionID">
           <DataField>EditionID</DataField>
           <rd:TypeName>System.Int64</rd:TypeName>
-        </Field>
-      </Fields>
-    </DataSet>
-    <DataSet Name="TagMatching">
-      <SharedDataSet>
-        <SharedDataSetReference>TagMatching</SharedDataSetReference>
-      </SharedDataSet>
-      <Fields>
-        <Field Name="Label">
-          <DataField>Label</DataField>
-          <rd:TypeName>System.String</rd:TypeName>
-        </Field>
-        <Field Name="Value">
-          <DataField>Value</DataField>
-          <rd:TypeName>System.String</rd:TypeName>
         </Field>
       </Fields>
     </DataSet>
@@ -1187,7 +1173,7 @@ IIF(Fields!Status.Value=4,"Green","Transparent")))</BackgroundColor>
             </TablixRowHierarchy>
             <DataSetName>LastGoodCheckDB</DataSetName>
             <Height>0.85in</Height>
-            <Width>14.5in</Width>
+            <Width>14.49999in</Width>
             <Style />
           </Tablix>
         </ReportItems>
@@ -1247,23 +1233,6 @@ IIF(Fields!Status.Value=4,"Green","Transparent")))</BackgroundColor>
       </ValidValues>
       <MultiValue>true</MultiValue>
     </ReportParameter>
-    <ReportParameter Name="TagMatching">
-      <DataType>String</DataType>
-      <Nullable>true</Nullable>
-      <DefaultValue>
-        <Values>
-          <Value>ALL</Value>
-        </Values>
-      </DefaultValue>
-      <Prompt>Tag Matching</Prompt>
-      <ValidValues>
-        <DataSetReference>
-          <DataSetName>TagMatching</DataSetName>
-          <ValueField>Value</ValueField>
-          <LabelField>Label</LabelField>
-        </DataSetReference>
-      </ValidValues>
-    </ReportParameter>
     <ReportParameter Name="InstanceName">
       <DataType>String</DataType>
       <Nullable>true</Nullable>
@@ -1307,11 +1276,6 @@ IIF(Fields!Status.Value=4,"Green","Transparent")))</BackgroundColor>
           <ColumnIndex>2</ColumnIndex>
           <RowIndex>0</RowIndex>
           <ParameterName>TagIDs</ParameterName>
-        </CellDefinition>
-        <CellDefinition>
-          <ColumnIndex>3</ColumnIndex>
-          <RowIndex>0</RowIndex>
-          <ParameterName>TagMatching</ParameterName>
         </CellDefinition>
         <CellDefinition>
           <ColumnIndex>0</ColumnIndex>

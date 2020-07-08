@@ -84,9 +84,6 @@
           <QueryParameter Name="@TagIDs">
             <Value>=Parameters!TagIDs.Value</Value>
           </QueryParameter>
-          <QueryParameter Name="@TagMatching">
-            <Value>=Parameters!TagMatching.Value</Value>
-          </QueryParameter>
           <QueryParameter Name="@InstanceName">
             <Value>=Parameters!InstanceName.Value</Value>
           </QueryParameter>
@@ -2727,15 +2724,6 @@ Sum(IIF(Fields!DT.Value&gt;=DateTime.Now.Date.AddDays(-60) and Fields!DT.Value&l
     </ReportSection>
   </ReportSections>
   <ReportParameters>
-    <ReportParameter Name="DateFormat">
-      <DataType>String</DataType>
-      <DefaultValue>
-        <Values>
-          <Value>yyyy-MM-dd</Value>
-        </Values>
-      </DefaultValue>
-      <Prompt>DateFormat</Prompt>
-    </ReportParameter>
     <ReportParameter Name="TagIDs">
       <DataType>String</DataType>
       <Nullable>true</Nullable>
@@ -2747,21 +2735,20 @@ Sum(IIF(Fields!DT.Value&gt;=DateTime.Now.Date.AddDays(-60) and Fields!DT.Value&l
       <Prompt>Tag IDs</Prompt>
       <Hidden>true</Hidden>
     </ReportParameter>
-    <ReportParameter Name="TagMatching">
-      <DataType>String</DataType>
-      <Nullable>true</Nullable>
-      <DefaultValue>
-        <Values>
-          <Value>ALL</Value>
-        </Values>
-      </DefaultValue>
-      <Prompt>Tag Matching</Prompt>
-      <Hidden>true</Hidden>
-    </ReportParameter>
     <ReportParameter Name="InstanceName">
       <DataType>String</DataType>
       <Nullable>true</Nullable>
       <Prompt>Instance Name</Prompt>
+      <Hidden>true</Hidden>
+    </ReportParameter>
+    <ReportParameter Name="UTCOffSet">
+      <DataType>String</DataType>
+      <DefaultValue>
+        <Values>
+          <Value>=System.TimeZone.CurrentTimeZone.ToLocalTime(DateTime.UtcNow.Date).Subtract(DateTime.Now.Date).TotalMinutes</Value>
+        </Values>
+      </DefaultValue>
+      <Prompt>UTCOffset</Prompt>
       <Hidden>true</Hidden>
     </ReportParameter>
     <ReportParameter Name="Instance">
@@ -2796,16 +2783,6 @@ Sum(IIF(Fields!DT.Value&gt;=DateTime.Now.Date.AddDays(-60) and Fields!DT.Value&l
       </DefaultValue>
       <Prompt>Top</Prompt>
     </ReportParameter>
-    <ReportParameter Name="UTCOffSet">
-      <DataType>String</DataType>
-      <DefaultValue>
-        <Values>
-          <Value>=System.TimeZone.CurrentTimeZone.ToLocalTime(DateTime.UtcNow.Date).Subtract(DateTime.Now.Date).TotalMinutes</Value>
-        </Values>
-      </DefaultValue>
-      <Prompt>UTCOffset</Prompt>
-      <Hidden>true</Hidden>
-    </ReportParameter>
     <ReportParameter Name="Type">
       <DataType>String</DataType>
       <DefaultValue>
@@ -2827,6 +2804,15 @@ Sum(IIF(Fields!DT.Value&gt;=DateTime.Now.Date.AddDays(-60) and Fields!DT.Value&l
         </ParameterValues>
       </ValidValues>
     </ReportParameter>
+    <ReportParameter Name="DateFormat">
+      <DataType>String</DataType>
+      <DefaultValue>
+        <Values>
+          <Value>yyyy-MM-dd</Value>
+        </Values>
+      </DefaultValue>
+      <Prompt>DateFormat</Prompt>
+    </ReportParameter>
   </ReportParameters>
   <ReportParametersLayout>
     <GridLayoutDefinition>
@@ -2836,37 +2822,7 @@ Sum(IIF(Fields!DT.Value&gt;=DateTime.Now.Date.AddDays(-60) and Fields!DT.Value&l
         <CellDefinition>
           <ColumnIndex>0</ColumnIndex>
           <RowIndex>0</RowIndex>
-          <ParameterName>DateFormat</ParameterName>
-        </CellDefinition>
-        <CellDefinition>
-          <ColumnIndex>1</ColumnIndex>
-          <RowIndex>0</RowIndex>
           <ParameterName>TagIDs</ParameterName>
-        </CellDefinition>
-        <CellDefinition>
-          <ColumnIndex>2</ColumnIndex>
-          <RowIndex>0</RowIndex>
-          <ParameterName>TagMatching</ParameterName>
-        </CellDefinition>
-        <CellDefinition>
-          <ColumnIndex>3</ColumnIndex>
-          <RowIndex>0</RowIndex>
-          <ParameterName>InstanceName</ParameterName>
-        </CellDefinition>
-        <CellDefinition>
-          <ColumnIndex>0</ColumnIndex>
-          <RowIndex>1</RowIndex>
-          <ParameterName>Instance</ParameterName>
-        </CellDefinition>
-        <CellDefinition>
-          <ColumnIndex>3</ColumnIndex>
-          <RowIndex>1</RowIndex>
-          <ParameterName>UTCOffSet</ParameterName>
-        </CellDefinition>
-        <CellDefinition>
-          <ColumnIndex>2</ColumnIndex>
-          <RowIndex>1</RowIndex>
-          <ParameterName>Top</ParameterName>
         </CellDefinition>
         <CellDefinition>
           <ColumnIndex>1</ColumnIndex>
@@ -2876,6 +2832,31 @@ Sum(IIF(Fields!DT.Value&gt;=DateTime.Now.Date.AddDays(-60) and Fields!DT.Value&l
         <CellDefinition>
           <ColumnIndex>0</ColumnIndex>
           <RowIndex>2</RowIndex>
+          <ParameterName>DateFormat</ParameterName>
+        </CellDefinition>
+        <CellDefinition>
+          <ColumnIndex>1</ColumnIndex>
+          <RowIndex>0</RowIndex>
+          <ParameterName>InstanceName</ParameterName>
+        </CellDefinition>
+        <CellDefinition>
+          <ColumnIndex>3</ColumnIndex>
+          <RowIndex>0</RowIndex>
+          <ParameterName>UTCOffSet</ParameterName>
+        </CellDefinition>
+        <CellDefinition>
+          <ColumnIndex>2</ColumnIndex>
+          <RowIndex>1</RowIndex>
+          <ParameterName>Top</ParameterName>
+        </CellDefinition>
+        <CellDefinition>
+          <ColumnIndex>0</ColumnIndex>
+          <RowIndex>1</RowIndex>
+          <ParameterName>Instance</ParameterName>
+        </CellDefinition>
+        <CellDefinition>
+          <ColumnIndex>3</ColumnIndex>
+          <RowIndex>1</RowIndex>
           <ParameterName>Type</ParameterName>
         </CellDefinition>
       </CellDefinitions>

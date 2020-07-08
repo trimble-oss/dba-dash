@@ -135,11 +135,12 @@
           <QueryParameter Name="@TagIDs">
             <Value>=Parameters!TagIDs.Value</Value>
           </QueryParameter>
-          <QueryParameter Name="@TagMatching">
-            <Value>=Parameters!TagMatching.Value</Value>
-          </QueryParameter>
           <QueryParameter Name="@InstanceName">
             <Value>=Parameters!InstanceName.Value</Value>
+          </QueryParameter>
+          <QueryParameter Name="@ExcludeAzure">
+            <Value>true</Value>
+            <rd:UserDefined>true</rd:UserDefined>
           </QueryParameter>
         </QueryParameters>
       </SharedDataSet>
@@ -2021,22 +2022,6 @@ Fields!LogBackupStatus.Value=4,"Green")</BackgroundColor>
       </ValidValues>
       <MultiValue>true</MultiValue>
     </ReportParameter>
-    <ReportParameter Name="TagMatching">
-      <DataType>String</DataType>
-      <DefaultValue>
-        <Values>
-          <Value>ALL</Value>
-        </Values>
-      </DefaultValue>
-      <Prompt>Tag Matching</Prompt>
-      <ValidValues>
-        <DataSetReference>
-          <DataSetName>TagMatching</DataSetName>
-          <ValueField>Value</ValueField>
-          <LabelField>Label</LabelField>
-        </DataSetReference>
-      </ValidValues>
-    </ReportParameter>
     <ReportParameter Name="InstanceName">
       <DataType>String</DataType>
       <Nullable>true</Nullable>
@@ -2051,7 +2036,6 @@ Fields!LogBackupStatus.Value=4,"Green")</BackgroundColor>
         </DataSetReference>
       </DefaultValue>
       <Prompt>Instances</Prompt>
-      <Hidden>true</Hidden>
       <ValidValues>
         <DataSetReference>
           <DataSetName>Connections</DataSetName>
@@ -2085,11 +2069,6 @@ Fields!LogBackupStatus.Value=4,"Green")</BackgroundColor>
           <ColumnIndex>1</ColumnIndex>
           <RowIndex>0</RowIndex>
           <ParameterName>TagIDs</ParameterName>
-        </CellDefinition>
-        <CellDefinition>
-          <ColumnIndex>2</ColumnIndex>
-          <RowIndex>0</RowIndex>
-          <ParameterName>TagMatching</ParameterName>
         </CellDefinition>
         <CellDefinition>
           <ColumnIndex>3</ColumnIndex>

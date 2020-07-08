@@ -53,21 +53,6 @@
         </Field>
       </Fields>
     </DataSet>
-    <DataSet Name="TagMatching">
-      <SharedDataSet>
-        <SharedDataSetReference>TagMatching</SharedDataSetReference>
-      </SharedDataSet>
-      <Fields>
-        <Field Name="Label">
-          <DataField>Label</DataField>
-          <rd:TypeName>System.String</rd:TypeName>
-        </Field>
-        <Field Name="Value">
-          <DataField>Value</DataField>
-          <rd:TypeName>System.String</rd:TypeName>
-        </Field>
-      </Fields>
-    </DataSet>
     <DataSet Name="Tags">
       <SharedDataSet>
         <SharedDataSetReference>Tags</SharedDataSetReference>
@@ -90,11 +75,12 @@
           <QueryParameter Name="@TagIDs">
             <Value>=Parameters!TagIDs.Value</Value>
           </QueryParameter>
-          <QueryParameter Name="@TagMatching">
-            <Value>=Parameters!TagMatching.Value</Value>
-          </QueryParameter>
           <QueryParameter Name="@InstanceName">
             <Value>=Parameters!InstanceName.Value</Value>
+          </QueryParameter>
+          <QueryParameter Name="@ExcludeAzure">
+            <Value>true</Value>
+            <rd:UserDefined>true</rd:UserDefined>
           </QueryParameter>
         </QueryParameters>
       </SharedDataSet>
@@ -2718,7 +2704,7 @@ IIF(Max(Fields!has_notification.Value)=0,"Yellow",
             </Style>
           </Textbox>
         </ReportItems>
-        <Height>9.14611in</Height>
+        <Height>9.14612in</Height>
         <Style />
       </Body>
       <Width>19.86667in</Width>
@@ -2750,23 +2736,6 @@ IIF(Max(Fields!has_notification.Value)=0,"Yellow",
         </DataSetReference>
       </ValidValues>
       <MultiValue>true</MultiValue>
-    </ReportParameter>
-    <ReportParameter Name="TagMatching">
-      <DataType>String</DataType>
-      <Nullable>true</Nullable>
-      <DefaultValue>
-        <Values>
-          <Value>ALL</Value>
-        </Values>
-      </DefaultValue>
-      <Prompt>Tag Matching</Prompt>
-      <ValidValues>
-        <DataSetReference>
-          <DataSetName>TagMatching</DataSetName>
-          <ValueField>Value</ValueField>
-          <LabelField>Label</LabelField>
-        </DataSetReference>
-      </ValidValues>
     </ReportParameter>
     <ReportParameter Name="InstanceName">
       <DataType>String</DataType>
@@ -2830,15 +2799,10 @@ IIF(Max(Fields!has_notification.Value)=0,"Yellow",
         <CellDefinition>
           <ColumnIndex>1</ColumnIndex>
           <RowIndex>0</RowIndex>
-          <ParameterName>TagMatching</ParameterName>
-        </CellDefinition>
-        <CellDefinition>
-          <ColumnIndex>2</ColumnIndex>
-          <RowIndex>0</RowIndex>
           <ParameterName>InstanceName</ParameterName>
         </CellDefinition>
         <CellDefinition>
-          <ColumnIndex>3</ColumnIndex>
+          <ColumnIndex>2</ColumnIndex>
           <RowIndex>0</RowIndex>
           <ParameterName>InstanceIDs</ParameterName>
         </CellDefinition>

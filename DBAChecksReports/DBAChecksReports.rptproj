@@ -54,7 +54,6 @@
     <DataSet Include="FilterLevel.rsd" />
     <DataSet Include="Instances.rsd" />
     <DataSet Include="Procs.rsd" />
-    <DataSet Include="TagMatching.rsd" />
     <DataSet Include="Tags.rsd" />
   </ItemGroup>
   <ItemGroup>

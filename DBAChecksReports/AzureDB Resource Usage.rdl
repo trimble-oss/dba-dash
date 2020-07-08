@@ -106,11 +106,12 @@
           <QueryParameter Name="@TagIDs">
             <Value>=Parameters!TagIDs.Value</Value>
           </QueryParameter>
-          <QueryParameter Name="@TagMatching">
-            <Value>=Parameters!TagMatching.Value</Value>
-          </QueryParameter>
           <QueryParameter Name="@InstanceName">
             <Value>=Parameters!InstanceName.Value</Value>
+          </QueryParameter>
+          <QueryParameter Name="@AzureOnly">
+            <Value>true</Value>
+            <rd:UserDefined>true</rd:UserDefined>
           </QueryParameter>
         </QueryParameters>
       </SharedDataSet>
@@ -137,21 +138,6 @@
           </FilterValues>
         </Filter>
       </Filters>
-    </DataSet>
-    <DataSet Name="TagMatching">
-      <SharedDataSet>
-        <SharedDataSetReference>TagMatching</SharedDataSetReference>
-      </SharedDataSet>
-      <Fields>
-        <Field Name="Label">
-          <DataField>Label</DataField>
-          <rd:TypeName>System.String</rd:TypeName>
-        </Field>
-        <Field Name="Value">
-          <DataField>Value</DataField>
-          <rd:TypeName>System.String</rd:TypeName>
-        </Field>
-      </Fields>
     </DataSet>
     <DataSet Name="Tags">
       <SharedDataSet>
@@ -261,7 +247,6 @@
             </Paragraphs>
             <rd:DefaultName>textbox1</rd:DefaultName>
             <Top>26.2763cm</Top>
-            <Left>0cm</Left>
             <Height>0.42in</Height>
             <Width>17in</Width>
             <Style>
@@ -316,9 +301,6 @@
                                     <Parameter Name="InstanceID">
                                       <Value>=Fields!InstanceID.Value</Value>
                                     </Parameter>
-                                    <Parameter Name="TagMatching">
-                                      <Value>=Parameters!TagMatching.Value</Value>
-                                    </Parameter>
                                     <Parameter Name="DateFormat">
                                       <Value>=Parameters!DateFormat.Value</Value>
                                     </Parameter>
@@ -339,7 +321,6 @@
                             <PaddingBottom>2pt</PaddingBottom>
                           </Style>
                         </Textbox>
-                        <rd:Selected>true</rd:Selected>
                       </CellContents>
                     </TablixCell>
                     <TablixCell>
@@ -1269,7 +1250,6 @@ AVG(Fields!avg_log_write_percent.Value)</Value>
             </TablixRowHierarchy>
             <DataSetName>DataSet1</DataSetName>
             <Top>10.765in</Top>
-            <Left>0cm</Left>
             <Height>8.68333in</Height>
             <Width>18.73333in</Width>
             <ZIndex>1</ZIndex>
@@ -2258,7 +2238,6 @@ AVG(Fields!avg_log_write_percent.Value)</Value>
             </TablixRowHierarchy>
             <DataSetName>ResourcePoolStats</DataSetName>
             <Top>0.42in</Top>
-            <Left>0in</Left>
             <Height>9.925in</Height>
             <Width>18.73333in</Width>
             <ZIndex>2</ZIndex>
@@ -2290,7 +2269,6 @@ AVG(Fields!avg_log_write_percent.Value)</Value>
               </Paragraph>
             </Paragraphs>
             <rd:DefaultName>textbox1</rd:DefaultName>
-            <Left>0cm</Left>
             <Height>0.42in</Height>
             <Width>17in</Width>
             <ZIndex>3</ZIndex>
@@ -2404,22 +2382,6 @@ CDATE(Parameters!ToDateUser.Value).AddMinutes(IIF(ISNOTHING(Parameters!ToDateUse
       </ValidValues>
       <MultiValue>true</MultiValue>
     </ReportParameter>
-    <ReportParameter Name="TagMatching">
-      <DataType>String</DataType>
-      <DefaultValue>
-        <Values>
-          <Value>ALL</Value>
-        </Values>
-      </DefaultValue>
-      <Prompt>Tag Matching</Prompt>
-      <ValidValues>
-        <DataSetReference>
-          <DataSetName>TagMatching</DataSetName>
-          <ValueField>Value</ValueField>
-          <LabelField>Label</LabelField>
-        </DataSetReference>
-      </ValidValues>
-    </ReportParameter>
     <ReportParameter Name="InstanceName">
       <DataType>String</DataType>
       <Nullable>true</Nullable>
@@ -2486,21 +2448,16 @@ CDATE(Parameters!ToDateUser.Value).AddMinutes(IIF(ISNOTHING(Parameters!ToDateUse
         <CellDefinition>
           <ColumnIndex>1</ColumnIndex>
           <RowIndex>2</RowIndex>
-          <ParameterName>TagMatching</ParameterName>
-        </CellDefinition>
-        <CellDefinition>
-          <ColumnIndex>0</ColumnIndex>
-          <RowIndex>3</RowIndex>
           <ParameterName>InstanceName</ParameterName>
         </CellDefinition>
         <CellDefinition>
-          <ColumnIndex>1</ColumnIndex>
+          <ColumnIndex>0</ColumnIndex>
           <RowIndex>3</RowIndex>
           <ParameterName>InstanceIDs</ParameterName>
         </CellDefinition>
         <CellDefinition>
-          <ColumnIndex>0</ColumnIndex>
-          <RowIndex>4</RowIndex>
+          <ColumnIndex>1</ColumnIndex>
+          <RowIndex>3</RowIndex>
           <ParameterName>DateFormat</ParameterName>
         </CellDefinition>
       </CellDefinitions>

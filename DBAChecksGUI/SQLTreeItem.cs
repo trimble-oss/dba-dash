@@ -138,6 +138,7 @@ namespace DBAChecksGUI
 
         private bool hasInstanceName=false;
         private string instanceName=null;
+        public Int32 InstanceID;
 
         public TreeType Type;
         public string InstanceName {

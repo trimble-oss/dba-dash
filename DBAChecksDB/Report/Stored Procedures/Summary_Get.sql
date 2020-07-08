@@ -107,7 +107,6 @@ a AS(
 )
 SELECT I.InstanceID,
 	I.Instance,
-	STUFF((SELECT ',' + T.Tag FROM dbo.InstanceTag IT JOIN dbo.Tags T ON T.TagID = IT.TagID WHERE IT.InstanceID = I.InstanceID AND IT.TagID <> -1 ORDER BY T.Tag FOR XML PATH(''),TYPE).value('.','NVARCHAR(MAX)'),1,1,'') AS Tags,
 	ISNULL(LS.LogShippingStatus,3) AS LogShippingStatus,
 	ISNULL(B.FullBackupStatus,3) AS FullBackupStatus,
 	ISNULL(B.LogBackupStatus,3) AS LogBackupStatus,

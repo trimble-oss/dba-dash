@@ -70,9 +70,6 @@
           <QueryParameter Name="@TagIDs">
             <Value>=Parameters!TagIDs.Value</Value>
           </QueryParameter>
-          <QueryParameter Name="@TagMatching">
-            <Value>=Parameters!TagMatching.Value</Value>
-          </QueryParameter>
           <QueryParameter Name="@InstanceName">
             <Value>=Parameters!InstanceName.Value</Value>
           </QueryParameter>
@@ -85,21 +82,6 @@
         </Field>
         <Field Name="ConnectionID">
           <DataField>ConnectionID</DataField>
-          <rd:TypeName>System.String</rd:TypeName>
-        </Field>
-      </Fields>
-    </DataSet>
-    <DataSet Name="TagMatching">
-      <SharedDataSet>
-        <SharedDataSetReference>TagMatching</SharedDataSetReference>
-      </SharedDataSet>
-      <Fields>
-        <Field Name="Label">
-          <DataField>Label</DataField>
-          <rd:TypeName>System.String</rd:TypeName>
-        </Field>
-        <Field Name="Value">
-          <DataField>Value</DataField>
           <rd:TypeName>System.String</rd:TypeName>
         </Field>
       </Fields>
@@ -680,21 +662,14 @@
     </ReportSection>
   </ReportSections>
   <ReportParameters>
-    <ReportParameter Name="TagMatching">
-      <DataType>String</DataType>
+    <ReportParameter Name="Days">
+      <DataType>Integer</DataType>
       <DefaultValue>
         <Values>
-          <Value>ALL</Value>
+          <Value>90</Value>
         </Values>
       </DefaultValue>
-      <Prompt>Tag Matching</Prompt>
-      <ValidValues>
-        <DataSetReference>
-          <DataSetName>TagMatching</DataSetName>
-          <ValueField>Value</ValueField>
-          <LabelField>Label</LabelField>
-        </DataSetReference>
-      </ValidValues>
+      <Prompt>Days</Prompt>
     </ReportParameter>
     <ReportParameter Name="TagIDs">
       <DataType>String</DataType>
@@ -736,15 +711,6 @@
       </ValidValues>
       <MultiValue>true</MultiValue>
     </ReportParameter>
-    <ReportParameter Name="Days">
-      <DataType>Integer</DataType>
-      <DefaultValue>
-        <Values>
-          <Value>90</Value>
-        </Values>
-      </DefaultValue>
-      <Prompt>Days</Prompt>
-    </ReportParameter>
     <ReportParameter Name="DatabaseID">
       <DataType>Integer</DataType>
       <Nullable>true</Nullable>
@@ -757,11 +723,6 @@
       <NumberOfColumns>4</NumberOfColumns>
       <NumberOfRows>2</NumberOfRows>
       <CellDefinitions>
-        <CellDefinition>
-          <ColumnIndex>0</ColumnIndex>
-          <RowIndex>0</RowIndex>
-          <ParameterName>TagMatching</ParameterName>
-        </CellDefinition>
         <CellDefinition>
           <ColumnIndex>1</ColumnIndex>
           <RowIndex>0</RowIndex>
@@ -779,7 +740,7 @@
         </CellDefinition>
         <CellDefinition>
           <ColumnIndex>0</ColumnIndex>
-          <RowIndex>1</RowIndex>
+          <RowIndex>0</RowIndex>
           <ParameterName>Days</ParameterName>
         </CellDefinition>
         <CellDefinition>
