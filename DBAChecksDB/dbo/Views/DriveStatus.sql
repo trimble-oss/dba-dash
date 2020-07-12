@@ -1,6 +1,8 @@
 ﻿
 
 
+
+
 CREATE VIEW [dbo].[DriveStatus]
 AS
 SELECT I.InstanceID,
@@ -21,9 +23,10 @@ SELECT I.InstanceID,
 	chk.Status,
 	CASE chk.Status WHEN 1 THEN 'Critical' WHEN 2 THEN 'Warning' WHEN 3 THEN 'N/A' WHEN 4 THEN 'OK' END AS StatusDescription,
 	CASE WHEN cfg.InstanceID = -1 AND cfg.DriveID = -1 THEN 'Root'
-	WHEN cfg.InstanceID =-1 THEN 'Instance'
+	WHEN cfg.DriveID =-1 THEN 'Instance'
 	WHEN cfg.InstanceID IS NULL THEN 'None'
-	ELSE 'Drive' END DriveCheckConfiguredLevel
+	ELSE 'Drive' END DriveCheckConfiguredLevel,
+	CASE WHEN cfg.DriveID=-1 OR cfg.InstanceID=-1 THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END AS IsInheritedThreshold
 FROM dbo.Drives D
 INNER JOIN dbo.Instances I ON D.InstanceID = I.InstanceID
 INNER JOIN dbo.CollectionDates SSD ON SSD.InstanceID = I.InstanceID AND SSD.Reference='Drives'

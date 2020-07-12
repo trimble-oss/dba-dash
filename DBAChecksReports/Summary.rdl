@@ -2094,12 +2094,12 @@ Fields!sqlserver_uptime.Value&lt;2880,"Yellow",
           <ParameterName>TagIDs</ParameterName>
         </CellDefinition>
         <CellDefinition>
-          <ColumnIndex>2</ColumnIndex>
+          <ColumnIndex>1</ColumnIndex>
           <RowIndex>0</RowIndex>
           <ParameterName>InstanceName</ParameterName>
         </CellDefinition>
         <CellDefinition>
-          <ColumnIndex>3</ColumnIndex>
+          <ColumnIndex>2</ColumnIndex>
           <RowIndex>0</RowIndex>
           <ParameterName>InstanceIDs</ParameterName>
         </CellDefinition>

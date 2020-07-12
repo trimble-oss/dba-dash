@@ -1,7 +1,6 @@
-﻿CREATE PROC InstanceTags_Get(@InstanceID INT)
+﻿CREATE PROC [dbo].[InstanceTags_Get](@Instance SYSNAME)
 AS
-SELECT T.TagID,T.Tag,CASE WHEN IT.TagID IS NULL THEN CAST(0 AS BIT) ELSE CAST(1 AS BIT) END AS Checked 
+SELECT T.TagID,T.TagName,T.TagValue,CASE WHEN IT.TagID IS NOT NULL THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END AS Checked
 FROM dbo.Tags T
-LEFT JOIN dbo.InstanceTag IT ON IT.TagID = T.TagID AND IT.InstanceID = @InstanceID
-WHERE T.TagID>0
-ORDER BY T.Tag
+LEFT JOIN dbo.InstanceTags IT ON IT.TagID = T.TagID AND IT.Instance=@Instance
+ORDER BY TagName,TagValue

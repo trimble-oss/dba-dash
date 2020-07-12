@@ -103,6 +103,16 @@ namespace DBAChecksGUI.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap Hard_Drive {
+            get {
+                object obj = ResourceManager.GetObject("Hard_Drive", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap Inline_16x {
             get {
                 object obj = ResourceManager.GetObject("Inline_16x", resourceCulture);
@@ -147,6 +157,26 @@ namespace DBAChecksGUI.Properties {
             get {
                 object obj = ResourceManager.GetObject("SQL_Mode", resourceCulture);
                 return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap StatusAnnotations_Warning_16xLG_color {
+            get {
+                object obj = ResourceManager.GetObject("StatusAnnotations_Warning_16xLG_color", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap StatusAnnotations_Warning_32xLG_color {
+            get {
+                object obj = ResourceManager.GetObject("StatusAnnotations_Warning_32xLG_color", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
             }
         }
         

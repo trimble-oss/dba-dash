@@ -116,10 +116,7 @@
     <Build Include="dbo\Views\DBFileStatus.sql" />
     <Build Include="dbo\Views\ConfigurationCheck.sql" />
     <Build Include="dbo\Tables\Tags.sql" />
-    <Build Include="dbo\Tables\InstanceTag.sql" />
     <Build Include="dbo\Functions\SplitStrings.sql" />
-    <Build Include="dbo\Stored Procedures\Tag_Remove.sql" />
-    <Build Include="dbo\Stored Procedures\Tag_Add.sql" />
     <Build Include="Report\Stored Procedures\TagMatching_Get.sql" />
     <Build Include="Report\Stored Procedures\Tags_Get.sql" />
     <Build Include="Report\Stored Procedures\Instances_Get.sql" />
@@ -325,6 +322,12 @@
     <Build Include="dbo\Tables\DDLHistory.sql" />
     <Build Include="dbo\Tables\ObjectType.sql" />
     <Build Include="dbo\Functions\DBSchemaAtDate.sql" />
+    <Build Include="dbo\Tables\InstanceTags.sql" />
+    <Build Include="dbo\Functions\InstancesMatchingTags.sql" />
+    <Build Include="dbo\Stored Procedures\InstanceTags_Del.sql" />
+    <Build Include="dbo\Stored Procedures\InstanceTags_Add.sql" />
+    <Build Include="dbo\Stored Procedures\Tags_Get.sql" />
+    <Build Include="dbo\Stored Procedures\DriveThreshold_Get.sql" />
   </ItemGroup>
   <ItemGroup>
     <PostDeploy Include="Script.PostDeployment1.sql" />

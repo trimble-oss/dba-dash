@@ -39,12 +39,12 @@
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle7 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle8 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle9 = new System.Windows.Forms.DataGridViewCellStyle();
-            this.tv1 = new System.Windows.Forms.TreeView();
             this.TreeViewImageList = new System.Windows.Forms.ImageList(this.components);
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.mnuTags = new System.Windows.Forms.ToolStripMenuItem();
             this.dBDiffToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.splitMain = new System.Windows.Forms.SplitContainer();
+            this.tv1 = new System.Windows.Forms.TreeView();
             this.tabs = new System.Windows.Forms.TabControl();
             this.tabSnapshotsSummary = new System.Windows.Forms.TabPage();
             this.splitSnapshotSummary = new System.Windows.Forms.SplitContainer();
@@ -95,6 +95,8 @@
             this.cboTagName = new System.Windows.Forms.ComboBox();
             this.label3 = new System.Windows.Forms.Label();
             this.cboTagValue = new System.Windows.Forms.ComboBox();
+            this.tabDrives = new System.Windows.Forms.TabPage();
+            this.drivesControl1 = new DBAChecksGUI.Properties.DrivesControl();
             this.menuStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitMain)).BeginInit();
             this.splitMain.Panel1.SuspendLayout();
@@ -118,20 +120,8 @@
             ((System.ComponentModel.ISupportInitialize)(this.gvHistory)).BeginInit();
             this.tabTags.SuspendLayout();
             this.panel1.SuspendLayout();
+            this.tabDrives.SuspendLayout();
             this.SuspendLayout();
-            // 
-            // tv1
-            // 
-            this.tv1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.tv1.ImageIndex = 0;
-            this.tv1.ImageList = this.TreeViewImageList;
-            this.tv1.Location = new System.Drawing.Point(0, 0);
-            this.tv1.Name = "tv1";
-            this.tv1.SelectedImageIndex = 0;
-            this.tv1.Size = new System.Drawing.Size(406, 841);
-            this.tv1.TabIndex = 0;
-            this.tv1.BeforeExpand += new System.Windows.Forms.TreeViewCancelEventHandler(this.tv1_BeforeExpand);
-            this.tv1.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.tv1_AfterSelect);
             // 
             // TreeViewImageList
             // 
@@ -189,11 +179,25 @@
             this.splitMain.SplitterDistance = 406;
             this.splitMain.TabIndex = 3;
             // 
+            // tv1
+            // 
+            this.tv1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.tv1.ImageIndex = 0;
+            this.tv1.ImageList = this.TreeViewImageList;
+            this.tv1.Location = new System.Drawing.Point(0, 0);
+            this.tv1.Name = "tv1";
+            this.tv1.SelectedImageIndex = 0;
+            this.tv1.Size = new System.Drawing.Size(406, 841);
+            this.tv1.TabIndex = 0;
+            this.tv1.BeforeExpand += new System.Windows.Forms.TreeViewCancelEventHandler(this.tv1_BeforeExpand);
+            this.tv1.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.tv1_AfterSelect);
+            // 
             // tabs
             // 
             this.tabs.Controls.Add(this.tabSnapshotsSummary);
             this.tabs.Controls.Add(this.tabSchema);
             this.tabs.Controls.Add(this.tabTags);
+            this.tabs.Controls.Add(this.tabDrives);
             this.tabs.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tabs.Location = new System.Drawing.Point(0, 0);
             this.tabs.Name = "tabs";
@@ -229,7 +233,7 @@
             // 
             this.splitSnapshotSummary.Panel2.Controls.Add(this.gvSnapshotsDetail);
             this.splitSnapshotSummary.Size = new System.Drawing.Size(763, 806);
-            this.splitSnapshotSummary.SplitterDistance = 248;
+            this.splitSnapshotSummary.SplitterDistance = 245;
             this.splitSnapshotSummary.TabIndex = 0;
             // 
             // toolStrip2
@@ -242,7 +246,7 @@
             this.tsSummaryNext,
             this.toolStripLabel3,
             this.tsSummaryPageSize});
-            this.toolStrip2.Location = new System.Drawing.Point(0, 220);
+            this.toolStrip2.Location = new System.Drawing.Point(0, 217);
             this.toolStrip2.Name = "toolStrip2";
             this.toolStrip2.Size = new System.Drawing.Size(763, 28);
             this.toolStrip2.TabIndex = 2;
@@ -339,7 +343,7 @@
             this.gvSnapshots.RowHeadersWidth = 51;
             this.gvSnapshots.RowTemplate.Height = 24;
             this.gvSnapshots.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-            this.gvSnapshots.Size = new System.Drawing.Size(763, 248);
+            this.gvSnapshots.Size = new System.Drawing.Size(763, 245);
             this.gvSnapshots.TabIndex = 0;
             this.gvSnapshots.SelectionChanged += new System.EventHandler(this.gvSnapshots_SelectionChanged);
             // 
@@ -463,7 +467,7 @@
             this.gvSnapshotsDetail.RowHeadersWidth = 51;
             this.gvSnapshotsDetail.RowTemplate.Height = 24;
             this.gvSnapshotsDetail.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.CellSelect;
-            this.gvSnapshotsDetail.Size = new System.Drawing.Size(763, 554);
+            this.gvSnapshotsDetail.Size = new System.Drawing.Size(763, 557);
             this.gvSnapshotsDetail.TabIndex = 0;
             this.gvSnapshotsDetail.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.gvSnapshotsDetail_CellContentClick);
             // 
@@ -549,7 +553,7 @@
             this.splitSchemaSnapshot.Panel2.Controls.Add(this.gvHistory);
             this.splitSchemaSnapshot.Panel2.Controls.Add(this.label1);
             this.splitSchemaSnapshot.Size = new System.Drawing.Size(763, 806);
-            this.splitSchemaSnapshot.SplitterDistance = 488;
+            this.splitSchemaSnapshot.SplitterDistance = 446;
             this.splitSchemaSnapshot.TabIndex = 1;
             // 
             // label7
@@ -572,7 +576,7 @@
             this.tsNext,
             this.toolStripLabel1,
             this.tsPageSize});
-            this.toolStrip1.Location = new System.Drawing.Point(0, 286);
+            this.toolStrip1.Location = new System.Drawing.Point(0, 328);
             this.toolStrip1.Name = "toolStrip1";
             this.toolStrip1.Size = new System.Drawing.Size(763, 28);
             this.toolStrip1.TabIndex = 1;
@@ -670,7 +674,7 @@
             this.gvHistory.RowHeadersWidth = 51;
             this.gvHistory.RowTemplate.Height = 24;
             this.gvHistory.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-            this.gvHistory.Size = new System.Drawing.Size(763, 297);
+            this.gvHistory.Size = new System.Drawing.Size(763, 339);
             this.gvHistory.TabIndex = 0;
             this.gvHistory.SelectionChanged += new System.EventHandler(this.gvHistory_SelectionChanged);
             // 
@@ -833,6 +837,26 @@
             this.cboTagValue.Size = new System.Drawing.Size(178, 24);
             this.cboTagValue.TabIndex = 3;
             // 
+            // tabDrives
+            // 
+            this.tabDrives.AutoScroll = true;
+            this.tabDrives.Controls.Add(this.drivesControl1);
+            this.tabDrives.Location = new System.Drawing.Point(4, 25);
+            this.tabDrives.Name = "tabDrives";
+            this.tabDrives.Padding = new System.Windows.Forms.Padding(3);
+            this.tabDrives.Size = new System.Drawing.Size(769, 812);
+            this.tabDrives.TabIndex = 3;
+            this.tabDrives.Text = "Drives";
+            this.tabDrives.UseVisualStyleBackColor = true;
+            // 
+            // drivesControl1
+            // 
+            this.drivesControl1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.drivesControl1.Location = new System.Drawing.Point(3, 3);
+            this.drivesControl1.Name = "drivesControl1";
+            this.drivesControl1.Size = new System.Drawing.Size(763, 806);
+            this.drivesControl1.TabIndex = 0;
+            // 
             // Main
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
@@ -843,7 +867,7 @@
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MainMenuStrip = this.menuStrip1;
             this.Name = "Main";
-            this.Text = "Main";
+            this.Text = "DBAChecks";
             this.WindowState = System.Windows.Forms.FormWindowState.Maximized;
             this.Load += new System.EventHandler(this.Main_Load);
             this.menuStrip1.ResumeLayout(false);
@@ -876,6 +900,7 @@
             this.tabTags.ResumeLayout(false);
             this.panel1.ResumeLayout(false);
             this.panel1.PerformLayout();
+            this.tabDrives.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -939,5 +964,7 @@
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.ComboBox cboTagName;
         private System.Windows.Forms.Panel panel1;
+        private System.Windows.Forms.TabPage tabDrives;
+        private Properties.DrivesControl drivesControl1;
     }
 }

@@ -85,6 +85,9 @@
   <ItemGroup>
     <Compile Include="AppSyntaxModeProvider.cs" />
     <Compile Include="Common.cs" />
+    <Compile Include="CustomProgressBar.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="DBDiff.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -103,6 +106,20 @@
     <Compile Include="DiffControl.Designer.cs">
       <DependentUpon>DiffControl.cs</DependentUpon>
     </Compile>
+    <Compile Include="Drives\DriveControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Drives\DriveControl.Designer.cs">
+      <DependentUpon>DriveControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Drives\Drive.cs" />
+    <Compile Include="Drives\DriveThreshold.cs" />
+    <Compile Include="Drives\DriveThresholdConfig.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Drives\DriveThresholdConfig.Designer.cs">
+      <DependentUpon>DriveThresholdConfig.cs</DependentUpon>
+    </Compile>
     <Compile Include="Main.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -111,8 +128,15 @@
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Drives\DrivesControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Drives\DrivesControl.Designer.cs">
+      <DependentUpon>DrivesControl.cs</DependentUpon>
+    </Compile>
     <Compile Include="SqlServerTypes\Loader.cs" />
     <Compile Include="SQLTreeItem.cs" />
+    <Compile Include="Tagging\InstanceTag.cs" />
     <EmbeddedResource Include="DBDiff.resx">
       <DependentUpon>DBDiff.cs</DependentUpon>
     </EmbeddedResource>
@@ -122,8 +146,17 @@
     <EmbeddedResource Include="DiffControl.resx">
       <DependentUpon>DiffControl.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="Drives\DriveControl.resx">
+      <DependentUpon>DriveControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Drives\DriveThresholdConfig.resx">
+      <DependentUpon>DriveThresholdConfig.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Main.resx">
       <DependentUpon>Main.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Drives\DrivesControl.resx">
+      <DependentUpon>DrivesControl.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
@@ -169,6 +202,9 @@
     <None Include="Resources\SwitchSourceOrTarget_16x.png" />
     <None Include="Resources\Previous_grey_16x.png" />
     <None Include="Resources\Next_grey_16x.png" />
+    <None Include="Resources\Hard_Drive.png" />
+    <None Include="Resources\StatusAnnotations_Warning_16xLG_color.png" />
+    <None Include="Resources\StatusAnnotations_Warning_32xLG_color.png" />
     <Content Include="SqlServerTypes\readme.htm" />
     <Content Include="SqlServerTypes\x64\msvcr120.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>

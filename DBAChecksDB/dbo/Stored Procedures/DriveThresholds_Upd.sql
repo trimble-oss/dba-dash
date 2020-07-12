@@ -1,4 +1,4 @@
-﻿CREATE PROC DriveThresholds_Upd(@InstanceID INT,@DriveID INT,@Warning DECIMAL(9,3),@Critical DECIMAL(9,3),@DriveCheckType CHAR(1))
+﻿CREATE PROC [dbo].[DriveThresholds_Upd](@InstanceID INT,@DriveID INT,@Warning DECIMAL(9,3),@Critical DECIMAL(9,3),@DriveCheckType CHAR(1))
 AS
 SET NOCOUNT ON
 SET XACT_ABORT ON
@@ -30,4 +30,5 @@ BEGIN
 		@DriveCheckType    
 		)
 END
-COMMIT
+COMMIT;
+EXEC dbo.DriveThreshold_Get @InstanceID=@InstanceID,@DriveID=@DriveID;
