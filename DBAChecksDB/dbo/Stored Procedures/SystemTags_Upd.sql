@@ -1,11 +1,11 @@
-﻿CREATE PROC dbo.SystemTags_Upd(@InstanceID INT)
+﻿CREATE PROC [dbo].[SystemTags_Upd](@InstanceID INT)
 AS
 DECLARE @Version SYSNAME
 DECLARE @Edition SYSNAME
 DECLARE @Instance SYSNAME
 DECLARE @PatchLevel SYSNAME
 
-SELECT @Version= v.SQLVersionName, @Edition=I.Edition,@Instance=I.Instance,@PatchLevel = ProductLevel + ISNULL(' ' + I.ProductUpdateLevel,'')
+SELECT @Version= v.SQLVersionName, @Edition=I.Edition,@Instance=I.Instance,@PatchLevel = v.SQLVersionName + ' ' + ProductLevel + ISNULL(' ' + I.ProductUpdateLevel,'')
 FROM dbo.Instances I
 CROSS APPLY SQLVersionName(EditionID,ProductVersion) v
 WHERE I.InstanceID=@InstanceID
@@ -58,3 +58,8 @@ WHERE NOT EXISTS(SELECT 1
 			FROM dbo.InstanceTags IT 
 			WHERE IT.Instance = @Instance 
 			AND IT.TagID = tg.TagID)
+
+
+DELETE T 
+FROM dbo.Tags T
+WHERE NOT EXISTS(SELECT 1 FROM dbo.InstanceTags IT WHERE IT.TagID=T.TagID)
