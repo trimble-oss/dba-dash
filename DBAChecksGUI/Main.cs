@@ -56,7 +56,12 @@ namespace DBAChecksGUI
 
         private void tabs_SelectedIndexChanged(object sender, EventArgs e)
         {
-            var n = (SQLTreeItem)tv1.SelectedNode;
+            loadSelectedTab();
+        }
+
+        private void loadSelectedTab()
+        {
+            var n = (SQLTreeItem) tv1.SelectedNode;
             if (tabs.SelectedTab == tabTags)
             {
                 getTags();
@@ -66,7 +71,6 @@ namespace DBAChecksGUI
                 drivesControl1.LoadDrives(connectionString, n.InstanceID);
             }
         }
-
 
 
         #region Tree
@@ -181,31 +185,59 @@ ORDER BY SchemaName,ObjectName
 
         }
 
+        private SQLTreeItem selectedItem;
+
         private void tv1_AfterSelect(object sender, TreeViewEventArgs e)
         {
+            bool cleared = false;
             var n = (SQLTreeItem)e.Node;
-            tabs.TabPages.Clear();
 
+            var selectedTab  = tabs.SelectedTab;
+            if (selectedItem==null || selectedItem.Type != n.Type)
+            {
+                tabs.TabPages.Clear();
+                cleared = true;
+            }
+            selectedItem = n;
             if (n.Type == SQLTreeItem.TreeType.Database || n.Type == SQLTreeItem.TreeType.Instance)
             {
-                tabs.TabPages.Add(tabSnapshotsSummary);
+                if (cleared) { tabs.TabPages.Add(tabSnapshotsSummary); }
                 loadSnapshots();
             }
             if (n.ObjectID >0)
             {
-                tabs.TabPages.Add(tabSchema);
+                if (cleared) { tabs.TabPages.Add(tabSchema); };
                 getHistory(n.ObjectID);
             }
 
             if (n.Type == SQLTreeItem.TreeType.Instance)
             {
-                tabs.TabPages.Add(tabTags);
+                if (cleared) { tabs.TabPages.Add(tabTags); }
                 if (n.InstanceID > 0){
-                    tabs.TabPages.Add(tabDrives);
+                    if (!tabs.TabPages.Contains(tabDrives))
+                    {
+                        tabs.TabPages.Add(tabDrives);
+                    }
+                }
+                else
+                {
+                    if (tabs.TabPages.Contains(tabDrives))
+                    {
+                        tabs.TabPages.Remove(tabDrives);
+                    }
                 }
             }
             this.Text ="DBAChecks" + (n.Type== SQLTreeItem.TreeType.DBAChecksRoot ? "" : " - " + n.InstanceName);
-       
+
+            if (cleared && selectedTab !=null && tabs.TabPages.Contains(selectedTab))
+            {
+                tabs.SelectedTab = selectedTab;
+            }
+            if(!cleared)
+            {
+                loadSelectedTab();
+            }
+ 
            
         }
 
@@ -533,6 +565,8 @@ OPTION(RECOMPILE)";
 
         #region Tagging
 
+        bool isClearTags = false;
+
         private void buildTagMenu(List<Int16> selected = null)
         {
             mnuTags.DropDownItems.Clear();
@@ -546,6 +580,8 @@ OPTION(RECOMPILE)";
                 var rdr = cmd.ExecuteReader();
                 string currentTag = String.Empty, tag, tagValue;
                 ToolStripMenuItem mTagName = new ToolStripMenuItem();
+                ToolStripMenuItem mSystemTags = new ToolStripMenuItem("System Tags");
+                mSystemTags.Font = new Font(mSystemTags.Font, FontStyle.Italic);
                 Int16 tagID;
                 while (rdr.Read())
                 {
@@ -555,8 +591,17 @@ OPTION(RECOMPILE)";
                     if (tag != currentTag)
                     {
                         mTagName = new ToolStripMenuItem(tag);
-                        mnuTags.DropDownItems.Add(mTagName);
-                        cboTagName.Items.Add(tag);
+                        
+                        if (tag.StartsWith("{"))
+                        {
+                            mSystemTags.DropDownItems.Add(mTagName);
+                        }
+                        else
+                        {
+                            mnuTags.DropDownItems.Add(mTagName);
+                            cboTagName.Items.Add(tag);
+                        }
+                       
                         currentTag = tag;
                     }
                     var mTagValue = new ToolStripMenuItem(tagValue);
@@ -569,6 +614,39 @@ OPTION(RECOMPILE)";
                     }
                     mTagValue.CheckedChanged += MTagValue_CheckedChanged;
                     mTagName.DropDownItems.Add(mTagValue);
+                }
+                mnuTags.DropDownItems.Add(mSystemTags);
+                var clearTag = new ToolStripMenuItem("Clear All");
+                clearTag.Font = new Font(clearTag.Font, FontStyle.Italic);
+                clearTag.Click += ClearTag_Click;
+                mnuTags.DropDownItems.Add("-");
+                mnuTags.DropDownItems.Add(clearTag);
+            }
+            setFont(mnuTags);
+        }
+
+        private void ClearTag_Click(object sender, EventArgs e)
+        {
+            isClearTags = true;
+            mnuTags.Font = Font = new Font(mnuTags.Font, mnuTags.Font.Style & ~FontStyle.Bold);
+            clearTags(mnuTags);
+            isClearTags = false;
+            addInstanes();
+        }
+
+        private void clearTags(ToolStripMenuItem rootMnu)
+        {
+            
+            foreach (ToolStripItem mnu in rootMnu.DropDownItems)
+            {
+                if (mnu.GetType() == typeof(ToolStripMenuItem))
+                {
+                    ((ToolStripMenuItem)mnu).Checked = false;
+                    clearTags((ToolStripMenuItem)mnu);
+                    if (mnu.Font.Bold)
+                    {
+                        mnu.Font = Font = new Font(mnu.Font, mnu.Font.Style & ~FontStyle.Bold);
+                    }
                 }
             }
         }
@@ -583,7 +661,7 @@ OPTION(RECOMPILE)";
             var tags = InstanceTag.GetInstanceTags(connectionString, n.InstanceName);
             foreach (var t in tags)
             {
-                chkTags.Items.Add(t, t.IsTagged);
+                if (!t.TagName.StartsWith("{")) { chkTags.Items.Add(t, t.IsTagged); }
             }
             isTagPopulation = false;
         }
@@ -608,6 +686,10 @@ OPTION(RECOMPILE)";
 
         private void bttnAdd_Click(object sender, EventArgs e)
         {
+            if (cboTagName.Text.StartsWith("{")){
+                MessageBox.Show("Invalid TagName.  TagNames starting with { are system reserved.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                return;
+            }
             SQLTreeItem n = (SQLTreeItem)tv1.SelectedNode;
             InstanceTag newTag = new InstanceTag() { Instance = n.InstanceName, TagName = cboTagName.Text, TagValue = cboTagValue.Text };
             newTag.Save(connectionString);
@@ -630,16 +712,25 @@ OPTION(RECOMPILE)";
             }
         }
 
-        private List<Int16> SelectedTags()
+        private List<Int16> SelectedTags(ToolStripMenuItem mnu = null)
         {
-            var selected = new List<Int16>();
-            foreach (ToolStripMenuItem mnuTagName in mnuTags.DropDownItems)
+            if (mnu == null)
             {
-                foreach (ToolStripMenuItem mnuTagValue in mnuTagName.DropDownItems)
+                mnu = mnuTags;
+                
+            }
+            var selected = new List<Int16>();
+            foreach (ToolStripItem mnuTag in mnu.DropDownItems)
+            {
+                if (mnuTag.GetType() == typeof(ToolStripMenuItem))
                 {
-                    if (mnuTagValue.Checked)
+                    if (((ToolStripMenuItem)mnuTag).Checked)
                     {
-                        selected.Add((Int16)mnuTagValue.Tag);
+                        selected.Add((Int16)mnuTag.Tag);                 
+                    }
+                    if (((ToolStripMenuItem)mnuTag).DropDownItems.Count > 0)
+                    {
+                        selected.AddRange(SelectedTags((ToolStripMenuItem)mnuTag));
                     }
                 }
             }
@@ -648,23 +739,68 @@ OPTION(RECOMPILE)";
 
         private void MTagValue_CheckedChanged(object sender, EventArgs e)
         {
-            addInstanes();
-            var mnuTag = (ToolStripMenuItem)sender;
-            var mnuName = (ToolStripMenuItem)mnuTag.OwnerItem;
-            mnuName.Font = new Font(mnuName.Font, FontStyle.Regular);
-            foreach (ToolStripMenuItem itm in mnuName.DropDownItems)
+            if (!isClearTags)
             {
-                if (itm.Checked)
-                {
-                    mnuName.Font = new Font(mnuName.Font, FontStyle.Bold);
-                    itm.Font = new Font(itm.Font, FontStyle.Bold);
+                addInstanes();
+                var mnuTag = (ToolStripMenuItem)sender;
+                while (mnuTag.OwnerItem != null) {
+                    mnuTag = (ToolStripMenuItem)mnuTag.OwnerItem;
                 }
-                else
-                {
-                    itm.Font = new Font(itm.Font, FontStyle.Regular);
-                }
+                setFont(mnuTag);
+                //var mnuName = (ToolStripMenuItem)mnuTag.OwnerItem;
+                //mnuName.Font = new Font(mnuName.Font, mnuName.Font.Style & ~FontStyle.Bold);
+                //foreach (ToolStripMenuItem itm in mnuName.DropDownItems)
+                //{
+                //    if (itm.Checked)
+                //    {
+                //        mnuName.Font = new Font(mnuName.Font, mnuName.Font.Style | FontStyle.Bold);
+                //        itm.Font = new Font(itm.Font,itm.Font.Style | FontStyle.Bold);
+                //    }
+                //    else
+                //    {
+                //        itm.Font = new Font(itm.Font, itm.Font.Style & ~FontStyle.Bold);                        
+                //    }
+                //}
+                //if(mnuName.OwnerItem.Text=="System Tags")
+                //{
+                //    var mnuSystemTags = (ToolStripMenuItem)mnuName.OwnerItem;
+                //    mnuSystemTags.Font = new Font(mnuSystemTags.Font, mnuSystemTags.Font.Style & ~FontStyle.Bold);
+                //    foreach (ToolStripMenuItem itm in mnuSystemTags.DropDownItems)
+                //    {
+                //        if (itm.Font.Bold)
+                //        {
+                //            mnuSystemTags.Font = new Font(mnuSystemTags.Font, mnuSystemTags.Font.Style | FontStyle.Bold);
+                //            break;
+                //        }
+                //    }
+                //}
+                
             }
+        }
 
+
+        private void setFont(ToolStripMenuItem mnu)
+        {
+            if (mnu.Checked)
+            {
+                mnu.Font = new Font(mnu.Font, mnu.Font.Style | FontStyle.Bold);
+            }
+            else if (SelectedTags(mnu).Count > 0)
+            {
+                mnu.Font = new Font(mnu.Font, mnu.Font.Style | FontStyle.Bold);
+            }
+            else
+            {
+                mnu.Font = new Font(mnu.Font, mnu.Font.Style & ~FontStyle.Bold);
+            }
+            foreach (ToolStripItem itm in mnu.DropDownItems)
+            {
+                if (itm.GetType() == typeof(ToolStripMenuItem))
+                {
+                    setFont((ToolStripMenuItem)itm);
+                }
+
+            }
         }
 
         #endregion

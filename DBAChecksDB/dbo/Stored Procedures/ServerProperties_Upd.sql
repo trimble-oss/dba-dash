@@ -78,6 +78,7 @@ BEGIN
 	CROSS JOIN @ServerProperties T
 	WHERE I.InstanceID = @InstanceID
 
+	EXEC dbo.SystemTags_Upd @InstanceID = @InstanceID
 	EXEC dbo.CollectionDates_Upd @InstanceID = @InstanceID,  
 										 @Reference = @Ref,
 										 @SnapshotDate = @SnapshotDate

@@ -45,7 +45,7 @@
             // pictureBox1
             // 
             this.pictureBox1.Image = global::DBAChecksGUI.Properties.Resources.Hard_Drive;
-            this.pictureBox1.Location = new System.Drawing.Point(3, 0);
+            this.pictureBox1.Location = new System.Drawing.Point(0, 0);
             this.pictureBox1.Name = "pictureBox1";
             this.pictureBox1.Size = new System.Drawing.Size(54, 56);
             this.pictureBox1.TabIndex = 1;
@@ -92,7 +92,7 @@
             // picStatus
             // 
             this.picStatus.Image = global::DBAChecksGUI.Properties.Resources.StatusAnnotations_Warning_32xLG_color;
-            this.picStatus.Location = new System.Drawing.Point(25, 46);
+            this.picStatus.Location = new System.Drawing.Point(22, 50);
             this.picStatus.Name = "picStatus";
             this.picStatus.Size = new System.Drawing.Size(32, 32);
             this.picStatus.TabIndex = 30;

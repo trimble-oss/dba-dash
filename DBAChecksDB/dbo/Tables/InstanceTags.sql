@@ -5,3 +5,10 @@
     CONSTRAINT [FK_InstanceTags_Tags] FOREIGN KEY ([TagID]) REFERENCES [dbo].[Tags] ([TagID])
 );
 
+
+
+
+GO
+CREATE UNIQUE NONCLUSTERED INDEX [InstanceTags_TagID]
+    ON [dbo].[InstanceTags]([TagID] ASC, [Instance] ASC);
+
