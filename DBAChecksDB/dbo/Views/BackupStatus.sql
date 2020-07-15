@@ -1,6 +1,9 @@
 ﻿
 
 
+
+
+
 CREATE VIEW [dbo].[BackupStatus]
 AS
 WITH hadr AS (
@@ -33,6 +36,7 @@ SELECT I.InstanceID,
 	I.Instance,
 	d.name,
 	D.recovery_model,
+	CASE D.recovery_model WHEN 1 THEN 'FULL' WHEN 2 THEN 'BULK_LOGGED' WHEN 3 THEN 'SIMPLE' ELSE '???' END AS recovery_model_desc,
 	B.LastFull,
 	B.LastDiff,
 	B.LastLog,
@@ -43,6 +47,10 @@ SELECT I.InstanceID,
 	chk.FullBackupStatus,
 	chk.LogBackupStatus,
 	chk.DiffBackupStatus,
+	CASE WHEN chk.FullBackupStatus=1 OR chk.DiffBackupStatus=1 OR chk.LogBackupStatus=1 THEN 1
+		WHEN chk.FullBackupStatus=2 OR chk.DiffBackupStatus=2 OR chk.LogBackupStatus=2 THEN 2
+		WHEN chk.FullBackupStatus=4 OR chk.DiffBackupStatus=4 OR chk.LogBackupStatus=4 THEN 4
+		ELSE 3 END AS BackupStatus,
 	cfg.[LogBackupWarningThreshold],
     cfg.[LogBackupCriticalThreshold],
     cfg.[FullBackupWarningThreshold],
@@ -51,6 +59,7 @@ SELECT I.InstanceID,
     cfg.[DiffBackupCriticalThreshold],
     cfg.[ConsiderPartialBackups],
     cfg.[ConsiderFGBackups],
+	CASE WHEN cfg.InstanceID = D.InstanceID AND cfg.DatabaseID = D.DatabaseID THEN 'Database' WHEN cfg.InstanceID=D.InstanceID THEN 'Instance' ELSE 'Root' END AS ThresholdsConfiguredLevel,
 	SSD.SnapshotDate,
 	DATEDIFF(mi,SSD.SnapshotDate,GETUTCDATE()) AS SnapshotAge,
 	CASE WHEN hadr.DatabaseID IS NULL THEN CAST(0 AS BIT) ELSE CAST(1 AS BIT) END AS IsHADRReplica

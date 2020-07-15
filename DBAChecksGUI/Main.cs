@@ -51,6 +51,7 @@ namespace DBAChecksGUI
             }
             addInstanes();
             buildTagMenu();
+            loadSelectedTab();
 
         }
 
@@ -70,7 +71,63 @@ namespace DBAChecksGUI
             {
                 drivesControl1.LoadDrives(connectionString, n.InstanceID);
             }
+            if(tabs.SelectedTab == tabBackups)
+            {
+                if (n.Type == SQLTreeItem.TreeType.DBAChecksRoot)
+                {
+                    backupsControl1.InstanceIDs = InstanceIDs();
+                    backupsControl1.ConnectionString = connectionString;
+                    backupsControl1.IncludeNA = false;
+                    backupsControl1.IncludeOK = false;
+                    backupsControl1.IncludeWarning = true;
+                    backupsControl1.InclueCritical = true;
+                    backupsControl1.RefreshBackups();
+                }
+                else
+                {
+                    backupsControl1.InstanceIDs = new List<Int32>() { n.InstanceID };
+                    backupsControl1.IncludeNA = true;
+                    backupsControl1.IncludeOK = true;
+                    backupsControl1.IncludeWarning = true;
+                    backupsControl1.InclueCritical = true;
+                    backupsControl1.ConnectionString = connectionString;
+                    backupsControl1.RefreshBackups();
+                }
+            }
+            if(tabs.SelectedTab== tabLogShipping)
+            {
+                logShippingControl1.IncludeNA = n.Type != SQLTreeItem.TreeType.DBAChecksRoot;
+                logShippingControl1.IncludeOK = n.Type != SQLTreeItem.TreeType.DBAChecksRoot;
+                logShippingControl1.IncludeWarning = true;
+                logShippingControl1.InclueCritical = true;
+                if (n.InstanceID > 0)
+                {
+                    logShippingControl1.InstanceIDs = new List<Int32> { n.InstanceID };
+                }
+                else
+                {
+                    logShippingControl1.InstanceIDs = InstanceIDs();
+                }
+                logShippingControl1.ConnectionString = connectionString;
+                logShippingControl1.RefreshData();
+            }
         }
+
+    
+
+        private List<Int32> InstanceIDs()
+        {
+            var instanceIDs = new List<Int32>();
+            foreach(SQLTreeItem itm in tv1.Nodes[0].Nodes)
+            {
+                if (itm.InstanceID > 0)
+                {
+                    instanceIDs.Add(itm.InstanceID);
+                }
+            }
+            return instanceIDs;
+        }
+
 
 
         #region Tree
@@ -209,7 +266,18 @@ ORDER BY SchemaName,ObjectName
                 if (cleared) { tabs.TabPages.Add(tabSchema); };
                 getHistory(n.ObjectID);
             }
-
+            if(n.Type== SQLTreeItem.TreeType.DBAChecksRoot)
+            {
+                if (!tabs.TabPages.Contains(tabBackups))
+                {
+                    tabs.TabPages.Add(tabBackups);
+                    loadSelectedTab();
+                }
+                if (!tabs.TabPages.Contains(tabLogShipping))
+                {
+                    tabs.TabPages.Add(tabLogShipping);
+                }
+            }
             if (n.Type == SQLTreeItem.TreeType.Instance)
             {
                 if (cleared) { tabs.TabPages.Add(tabTags); }
@@ -218,12 +286,28 @@ ORDER BY SchemaName,ObjectName
                     {
                         tabs.TabPages.Add(tabDrives);
                     }
+                    if (!tabs.TabPages.Contains(tabBackups))
+                    {
+                        tabs.TabPages.Add(tabBackups);
+                    }
+                    if (!tabs.TabPages.Contains(tabLogShipping))
+                    {
+                        tabs.TabPages.Add(tabLogShipping);
+                    }
                 }
                 else
                 {
                     if (tabs.TabPages.Contains(tabDrives))
                     {
                         tabs.TabPages.Remove(tabDrives);
+                    }
+                    if (!tabs.TabPages.Contains(tabBackups))
+                    {
+                        tabs.TabPages.Add(tabBackups);
+                    }
+                    if (!tabs.TabPages.Contains(tabLogShipping))
+                    {
+                        tabs.TabPages.Add(tabLogShipping);
                     }
                 }
             }
@@ -473,6 +557,7 @@ JOIN dbo.DBObjects O ON Hold.ObjectID = O.ObjectID OR Hnew.ObjectID= O.ObjectID"
 
         private void loadSnapshots(Int32 pageNum = 1)
         {
+            gvSnapshotsDetail.DataSource = null;
             var n = (SQLTreeItem)tv1.SelectedNode;
             currentSummaryPage = Int32.Parse(tsSummaryPageSize.Text);
             if (n.Type == SQLTreeItem.TreeType.Database || n.Type == SQLTreeItem.TreeType.Instance)
@@ -747,33 +832,6 @@ OPTION(RECOMPILE)";
                     mnuTag = (ToolStripMenuItem)mnuTag.OwnerItem;
                 }
                 setFont(mnuTag);
-                //var mnuName = (ToolStripMenuItem)mnuTag.OwnerItem;
-                //mnuName.Font = new Font(mnuName.Font, mnuName.Font.Style & ~FontStyle.Bold);
-                //foreach (ToolStripMenuItem itm in mnuName.DropDownItems)
-                //{
-                //    if (itm.Checked)
-                //    {
-                //        mnuName.Font = new Font(mnuName.Font, mnuName.Font.Style | FontStyle.Bold);
-                //        itm.Font = new Font(itm.Font,itm.Font.Style | FontStyle.Bold);
-                //    }
-                //    else
-                //    {
-                //        itm.Font = new Font(itm.Font, itm.Font.Style & ~FontStyle.Bold);                        
-                //    }
-                //}
-                //if(mnuName.OwnerItem.Text=="System Tags")
-                //{
-                //    var mnuSystemTags = (ToolStripMenuItem)mnuName.OwnerItem;
-                //    mnuSystemTags.Font = new Font(mnuSystemTags.Font, mnuSystemTags.Font.Style & ~FontStyle.Bold);
-                //    foreach (ToolStripMenuItem itm in mnuSystemTags.DropDownItems)
-                //    {
-                //        if (itm.Font.Bold)
-                //        {
-                //            mnuSystemTags.Font = new Font(mnuSystemTags.Font, mnuSystemTags.Font.Style | FontStyle.Bold);
-                //            break;
-                //        }
-                //    }
-                //}
                 
             }
         }

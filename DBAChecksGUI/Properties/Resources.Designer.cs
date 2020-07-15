@@ -103,6 +103,16 @@ namespace DBAChecksGUI.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap FilterDropdown_16x {
+            get {
+                object obj = ResourceManager.GetObject("FilterDropdown_16x", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap Hard_Drive {
             get {
                 object obj = ResourceManager.GetObject("Hard_Drive", resourceCulture);
@@ -151,6 +161,16 @@ namespace DBAChecksGUI.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap SettingsOutline_16x {
+            get {
+                object obj = ResourceManager.GetObject("SettingsOutline_16x", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized resource of type System.Byte[].
         /// </summary>
         internal static byte[] SQL_Mode {
@@ -176,6 +196,26 @@ namespace DBAChecksGUI.Properties {
         internal static System.Drawing.Bitmap StatusAnnotations_Warning_32xLG_color {
             get {
                 object obj = ResourceManager.GetObject("StatusAnnotations_Warning_32xLG_color", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap StatusCriticalError_16x {
+            get {
+                object obj = ResourceManager.GetObject("StatusCriticalError_16x", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap StatusOK_16x {
+            get {
+                object obj = ResourceManager.GetObject("StatusOK_16x", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

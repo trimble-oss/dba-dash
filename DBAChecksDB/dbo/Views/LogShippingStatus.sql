@@ -1,5 +1,6 @@
 ﻿
 
+
 CREATE VIEW [dbo].[LogShippingStatus] 
 AS
 SELECT I.InstanceID,
@@ -16,7 +17,8 @@ SELECT I.InstanceID,
 	chk.Status,
 	CASE chk.Status WHEN 1 THEN 'Critical' WHEN 2 THEN 'Warning' WHEN 3 THEN 'N/A' WHEN 4 THEN 'OK' END AS StatusDescription,
 	LR.last_file,
-	D.state_desc
+	D.state_desc,
+	CASE WHEN cfg.InstanceID=D.InstanceID AND cfg.DatabaseID=D.DatabaseID THEN 'Database' WHEN cfg.InstanceID = D.InstanceID THEN 'Instance' ELSE 'Root' END AS ThresholdConfiguredLevel
 FROM dbo.Instances I 
 JOIN dbo.Databases D ON I.InstanceID = D.InstanceID
 JOIN dbo.CollectionDates SSD ON SSD.InstanceID = I.InstanceID AND SSD.Reference='LogRestores'

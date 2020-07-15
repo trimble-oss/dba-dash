@@ -330,6 +330,8 @@
     <Build Include="dbo\Stored Procedures\DriveThreshold_Get.sql" />
     <Build Include="dbo\Functions\SQLVersionName.sql" />
     <Build Include="dbo\Stored Procedures\SystemTags_Upd.sql" />
+    <Build Include="dbo\Stored Procedures\Backups_Get.sql" />
+    <Build Include="dbo\Stored Procedures\Logshipping_Get.sql" />
   </ItemGroup>
   <ItemGroup>
     <PostDeploy Include="Script.PostDeployment1.sql" />

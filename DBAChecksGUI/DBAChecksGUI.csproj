@@ -84,10 +84,24 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AppSyntaxModeProvider.cs" />
+    <Compile Include="Backups\BackupsControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Backups\BackupsControl.Designer.cs">
+      <DependentUpon>BackupsControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Backups\BackupThresholds.cs" />
+    <Compile Include="Backups\BackupThresholdsConfig.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Backups\BackupThresholdsConfig.Designer.cs">
+      <DependentUpon>BackupThresholdsConfig.cs</DependentUpon>
+    </Compile>
     <Compile Include="Common.cs" />
     <Compile Include="CustomProgressBar.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="DBAChecksStatus.cs" />
     <Compile Include="DBDiff.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -120,6 +134,19 @@
     <Compile Include="Drives\DriveThresholdConfig.Designer.cs">
       <DependentUpon>DriveThresholdConfig.cs</DependentUpon>
     </Compile>
+    <Compile Include="LogShipping\LogShippingControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="LogShipping\LogShippingControl.Designer.cs">
+      <DependentUpon>LogShippingControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="LogShipping\LogShippingThreshold.cs" />
+    <Compile Include="LogShipping\LogShippingThresholdsConfig.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="LogShipping\LogShippingThresholdsConfig.Designer.cs">
+      <DependentUpon>LogShippingThresholdsConfig.cs</DependentUpon>
+    </Compile>
     <Compile Include="Main.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -137,6 +164,12 @@
     <Compile Include="SqlServerTypes\Loader.cs" />
     <Compile Include="SQLTreeItem.cs" />
     <Compile Include="Tagging\InstanceTag.cs" />
+    <EmbeddedResource Include="Backups\BackupsControl.resx">
+      <DependentUpon>BackupsControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Backups\BackupThresholdsConfig.resx">
+      <DependentUpon>BackupThresholdsConfig.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="DBDiff.resx">
       <DependentUpon>DBDiff.cs</DependentUpon>
     </EmbeddedResource>
@@ -151,6 +184,12 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Drives\DriveThresholdConfig.resx">
       <DependentUpon>DriveThresholdConfig.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="LogShipping\LogShippingControl.resx">
+      <DependentUpon>LogShippingControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="LogShipping\LogShippingThresholdsConfig.resx">
+      <DependentUpon>LogShippingThresholdsConfig.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Main.resx">
       <DependentUpon>Main.cs</DependentUpon>
@@ -205,6 +244,10 @@
     <None Include="Resources\Hard_Drive.png" />
     <None Include="Resources\StatusAnnotations_Warning_16xLG_color.png" />
     <None Include="Resources\StatusAnnotations_Warning_32xLG_color.png" />
+    <None Include="Resources\SettingsOutline_16x.png" />
+    <None Include="Resources\FilterDropdown_16x.png" />
+    <None Include="Resources\StatusCriticalError_16x.png" />
+    <None Include="Resources\StatusOK_16x.png" />
     <Content Include="SqlServerTypes\readme.htm" />
     <Content Include="SqlServerTypes\x64\msvcr120.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
