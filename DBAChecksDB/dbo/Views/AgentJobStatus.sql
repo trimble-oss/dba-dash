@@ -2,6 +2,7 @@
 
 
 
+
 CREATE VIEW [dbo].[AgentJobStatus]
 AS
 SELECT I.Instance, 
@@ -67,5 +68,5 @@ OUTER APPLY(SELECT CASE WHEN DATEDIFF(mi,J.LastFail,GETUTCDATE())  <= cfg.TimeSi
 				CASE WHEN J.FailCount7Days >= cfg.FailCount7DaysCritical THEN 1 WHEN J.FailCount7Days >= cfg.FailCount7DaysWarning THEN 2 WHEN cfg.FailCount7DaysWarning IS NULL AND cfg.FailCount7DaysCritical IS NULL THEN 3  ELSE 4 END AS FailCount7DaysStatus,
 					CASE WHEN J.JobStepFails7Days >= cfg.JobStepFails7DaysCritical THEN 1 WHEN J.JobStepFails7Days >= cfg.JobStepFails7DaysWarning THEN 2 WHEN cfg.JobStepFails7DaysWarning IS NULL AND cfg.JobStepFails7DaysCritical IS NULL THEN 3  ELSE 4 END AS JobStepFail7DaysStatus,
 					CASE WHEN J.JobStepFails24Hrs >= cfg.JobStepFails24HrsCritical THEN 1 WHEN J.JobStepFails24Hrs >= cfg.JobStepFails24HrsWarning THEN 2 WHEN cfg.JobStepFails24HrsWarning IS NULL AND cfg.JobStepFails24HrsCritical IS NULL THEN 3  ELSE 4 END AS JobStepFail24HrsStatus,
-						CASE WHEN J.IsLastFail=1 AND cfg.LastFailIsCritical=1 THEN 1 WHEN J.IsLastFail=1 AND cfg.LastFailIsWarning=1 THEN 2 WHEN cfg.LastFailIsCritical IS NULL AND cfg.LastFailIsWarning IS NULL THEN 3 ELSE 4 END AS LastFailStatus
+						CASE WHEN J.IsLastFail=1 AND cfg.LastFailIsCritical=1 THEN 1 WHEN J.IsLastFail=1 AND cfg.LastFailIsWarning=1 THEN 2 WHEN cfg.LastFailIsCritical =0 AND cfg.LastFailIsWarning =0 THEN 3 ELSE 4 END AS LastFailStatus
 				) St

@@ -62,7 +62,16 @@ namespace DBAChecksGUI
 
         private void loadSelectedTab()
         {
+            List<Int32> instanceIDs;         
             var n = (SQLTreeItem) tv1.SelectedNode;
+            if (n.InstanceID > 0)
+            {
+                instanceIDs = new List<Int32>() { n.InstanceID };
+            }
+            else
+            {
+                instanceIDs = InstanceIDs();
+            }
             if (tabs.SelectedTab == tabTags)
             {
                 getTags();
@@ -73,26 +82,13 @@ namespace DBAChecksGUI
             }
             if(tabs.SelectedTab == tabBackups)
             {
-                if (n.Type == SQLTreeItem.TreeType.DBAChecksRoot)
-                {
-                    backupsControl1.InstanceIDs = InstanceIDs();
-                    backupsControl1.ConnectionString = connectionString;
-                    backupsControl1.IncludeNA = false;
-                    backupsControl1.IncludeOK = false;
-                    backupsControl1.IncludeWarning = true;
-                    backupsControl1.InclueCritical = true;
-                    backupsControl1.RefreshBackups();
-                }
-                else
-                {
-                    backupsControl1.InstanceIDs = new List<Int32>() { n.InstanceID };
-                    backupsControl1.IncludeNA = true;
-                    backupsControl1.IncludeOK = true;
-                    backupsControl1.IncludeWarning = true;
-                    backupsControl1.InclueCritical = true;
-                    backupsControl1.ConnectionString = connectionString;
-                    backupsControl1.RefreshBackups();
-                }
+                backupsControl1.InstanceIDs = instanceIDs;
+                backupsControl1.ConnectionString = connectionString;          
+                backupsControl1.IncludeNA = (n.Type != SQLTreeItem.TreeType.DBAChecksRoot);
+                backupsControl1.IncludeOK = (n.Type != SQLTreeItem.TreeType.DBAChecksRoot);
+                backupsControl1.IncludeWarning = true;
+                backupsControl1.InclueCritical = true;
+                backupsControl1.RefreshBackups();
             }
             if(tabs.SelectedTab== tabLogShipping)
             {
@@ -100,16 +96,19 @@ namespace DBAChecksGUI
                 logShippingControl1.IncludeOK = n.Type != SQLTreeItem.TreeType.DBAChecksRoot;
                 logShippingControl1.IncludeWarning = true;
                 logShippingControl1.InclueCritical = true;
-                if (n.InstanceID > 0)
-                {
-                    logShippingControl1.InstanceIDs = new List<Int32> { n.InstanceID };
-                }
-                else
-                {
-                    logShippingControl1.InstanceIDs = InstanceIDs();
-                }
+                logShippingControl1.InstanceIDs = instanceIDs;
                 logShippingControl1.ConnectionString = connectionString;
                 logShippingControl1.RefreshData();
+            }
+            if(tabs.SelectedTab== tabJobs)
+            {
+                agentJobsControl1.IncludeNA = n.Type != SQLTreeItem.TreeType.DBAChecksRoot;
+                agentJobsControl1.IncludeOK = n.Type != SQLTreeItem.TreeType.DBAChecksRoot;
+                agentJobsControl1.IncludeWarning = true;
+                agentJobsControl1.InclueCritical = true;
+                agentJobsControl1.ConnectionString = connectionString;
+                agentJobsControl1.InstanceIDs = instanceIDs;
+                agentJobsControl1.RefreshData();
             }
         }
 
@@ -136,18 +135,17 @@ namespace DBAChecksGUI
         {
             tv1.Nodes.Clear();
             var root = new SQLTreeItem("DBAChecks", SQLTreeItem.TreeType.DBAChecksRoot);
-            tv1.Nodes.Add(root);
-
+            
             var tags = String.Join(",", SelectedTags());
 
             SqlConnection cn = new SqlConnection(connectionString);
             using (cn)
             {
                 cn.Open();
-                SqlCommand cmd = new SqlCommand(@"SELECT Instance,CASE WHEN MAX(InstanceID)=MIN(InstanceID) THEN MAX(InstanceID) ELSE NULL END as InstanceID
+                SqlCommand cmd = new SqlCommand(@"SELECT Instance,CASE WHEN EditionID <> 1674378470 THEN InstanceID ELSE NULL END as InstanceID
 FROM dbo.InstancesMatchingTags(@TagIDs) I
 WHERE I.IsActive=1
-GROUP BY Instance
+GROUP BY Instance,CASE WHEN EditionID <> 1674378470 THEN InstanceID ELSE NULL END
 ORDER BY Instance", cn);
 
                 cmd.Parameters.AddWithValue("TagIDs", tags);
@@ -163,6 +161,7 @@ ORDER BY Instance", cn);
                     root.Nodes.Add(n);
                 }
             }
+            tv1.Nodes.Add(root);
             root.Expand();
             tv1.SelectedNode = root;
         }
@@ -277,6 +276,10 @@ ORDER BY SchemaName,ObjectName
                 {
                     tabs.TabPages.Add(tabLogShipping);
                 }
+                if (!tabs.TabPages.Contains(tabJobs))
+                {
+                    tabs.TabPages.Add(tabJobs);
+                }
             }
             if (n.Type == SQLTreeItem.TreeType.Instance)
             {
@@ -294,6 +297,10 @@ ORDER BY SchemaName,ObjectName
                     {
                         tabs.TabPages.Add(tabLogShipping);
                     }
+                    if (!tabs.TabPages.Contains(tabJobs))
+                    {
+                        tabs.TabPages.Add(tabJobs);
+                    }
                 }
                 else
                 {
@@ -301,13 +308,17 @@ ORDER BY SchemaName,ObjectName
                     {
                         tabs.TabPages.Remove(tabDrives);
                     }
-                    if (!tabs.TabPages.Contains(tabBackups))
+                    if (tabs.TabPages.Contains(tabBackups))
                     {
                         tabs.TabPages.Add(tabBackups);
                     }
-                    if (!tabs.TabPages.Contains(tabLogShipping))
+                    if (tabs.TabPages.Contains(tabLogShipping))
                     {
-                        tabs.TabPages.Add(tabLogShipping);
+                        tabs.TabPages.Remove(tabLogShipping);
+                    }
+                    if (tabs.TabPages.Contains(tabJobs))
+                    {
+                        tabs.TabPages.Remove(tabJobs);
                     }
                 }
             }
@@ -717,6 +728,7 @@ OPTION(RECOMPILE)";
             clearTags(mnuTags);
             isClearTags = false;
             addInstanes();
+            this.Font = new Font(this.Font, FontStyle.Regular);
         }
 
         private void clearTags(ToolStripMenuItem rootMnu)

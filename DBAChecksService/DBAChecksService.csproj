@@ -228,10 +228,6 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\DBAChecksConfigTool\DBAChecksConfigTool.csproj">
-      <Project>{32225995-f2e7-4a4b-8734-57ce087f1220}</Project>
-      <Name>DBAChecksConfigTool</Name>
-    </ProjectReference>
     <ProjectReference Include="..\DBAChecksGUI\DBAChecksGUI.csproj">
       <Project>{c3356f62-9c3b-425c-8f23-4540d567a72a}</Project>
       <Name>DBAChecksGUI</Name>

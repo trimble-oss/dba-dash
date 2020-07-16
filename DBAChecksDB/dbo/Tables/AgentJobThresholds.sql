@@ -13,8 +13,10 @@
     [JobStepFails24HrsCritical]      INT              NULL,
     [JobStepFails7DaysWarning]       INT              NULL,
     [JobStepFails7DaysCritical]      INT              NULL,
-    [LastFailIsCritical]             BIT              NULL,
-    [LastFailIsWarning]              BIT              NULL,
+    [LastFailIsCritical]             BIT              NOT NULL,
+    [LastFailIsWarning]              BIT              NOT NULL,
     CONSTRAINT [PK_AgentJobThresholds] PRIMARY KEY CLUSTERED ([InstanceId] ASC, [job_id] ASC)
 );
+
+
 

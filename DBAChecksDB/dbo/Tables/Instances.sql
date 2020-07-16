@@ -100,7 +100,14 @@
 
 
 
+
+
 GO
 CREATE UNIQUE NONCLUSTERED INDEX [IX_Instances_ConnectionID]
     ON [dbo].[Instances]([ConnectionID] ASC);
+
+
+GO
+CREATE UNIQUE NONCLUSTERED INDEX [FIX_Instances_Instance]
+    ON [dbo].[Instances]([Instance] ASC) WHERE ([EditionID]<>'1674378470');
 

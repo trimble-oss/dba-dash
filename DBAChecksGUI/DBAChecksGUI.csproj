@@ -83,6 +83,19 @@
     <Reference Include="WindowsFormsIntegration" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AgentJobs\AgentJobsControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="AgentJobs\AgentJobsControl.Designer.cs">
+      <DependentUpon>AgentJobsControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="AgentJobs\AgentJobThreshold.cs" />
+    <Compile Include="AgentJobs\AgentJobThresholdsConfig.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="AgentJobs\AgentJobThresholdsConfig.Designer.cs">
+      <DependentUpon>AgentJobThresholdsConfig.cs</DependentUpon>
+    </Compile>
     <Compile Include="AppSyntaxModeProvider.cs" />
     <Compile Include="Backups\BackupsControl.cs">
       <SubType>UserControl</SubType>
@@ -164,6 +177,12 @@
     <Compile Include="SqlServerTypes\Loader.cs" />
     <Compile Include="SQLTreeItem.cs" />
     <Compile Include="Tagging\InstanceTag.cs" />
+    <EmbeddedResource Include="AgentJobs\AgentJobsControl.resx">
+      <DependentUpon>AgentJobsControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="AgentJobs\AgentJobThresholdsConfig.resx">
+      <DependentUpon>AgentJobThresholdsConfig.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Backups\BackupsControl.resx">
       <DependentUpon>BackupsControl.cs</DependentUpon>
     </EmbeddedResource>
@@ -268,5 +287,6 @@
       <Name>DBAChecks</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
