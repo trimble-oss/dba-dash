@@ -335,6 +335,7 @@
     <Build Include="dbo\Stored Procedures\AgentJobThresholds_Upd.sql" />
     <Build Include="dbo\Stored Procedures\AgentJobThresholds_Get.sql" />
     <Build Include="dbo\Stored Procedures\AgentJobs_Get.sql" />
+    <Build Include="dbo\Stored Procedures\Summary_Get.sql" />
   </ItemGroup>
   <ItemGroup>
     <PostDeploy Include="Script.PostDeployment1.sql" />

@@ -110,6 +110,12 @@ namespace DBAChecksGUI
                 agentJobsControl1.InstanceIDs = instanceIDs;
                 agentJobsControl1.RefreshData();
             }
+            if(tabs.SelectedTab == tabSummary)
+            {
+                summary1.ConnectionString = connectionString;
+                summary1.InstanceIDs = instanceIDs;
+                summary1.RefreshData();
+            }
         }
 
     
@@ -267,6 +273,10 @@ ORDER BY SchemaName,ObjectName
             }
             if(n.Type== SQLTreeItem.TreeType.DBAChecksRoot)
             {
+                if (!tabs.TabPages.Contains(tabSummary))
+                {
+                    tabs.TabPages.Add(tabSummary);
+                }
                 if (!tabs.TabPages.Contains(tabBackups))
                 {
                     tabs.TabPages.Add(tabBackups);
@@ -301,9 +311,17 @@ ORDER BY SchemaName,ObjectName
                     {
                         tabs.TabPages.Add(tabJobs);
                     }
+                    if (!tabs.TabPages.Contains(tabSummary))
+                    {
+                        tabs.TabPages.Add(tabSummary);
+                    }
                 }
                 else
                 {
+                    if (tabs.TabPages.Contains(tabSummary))
+                    {
+                        tabs.TabPages.Remove(tabSummary);
+                    }
                     if (tabs.TabPages.Contains(tabDrives))
                     {
                         tabs.TabPages.Remove(tabDrives);
@@ -320,6 +338,7 @@ ORDER BY SchemaName,ObjectName
                     {
                         tabs.TabPages.Remove(tabJobs);
                     }
+
                 }
             }
             this.Text ="DBAChecks" + (n.Type== SQLTreeItem.TreeType.DBAChecksRoot ? "" : " - " + n.InstanceName);
