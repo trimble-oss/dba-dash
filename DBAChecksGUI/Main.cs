@@ -87,7 +87,7 @@ namespace DBAChecksGUI
                 backupsControl1.IncludeNA = (n.Type != SQLTreeItem.TreeType.DBAChecksRoot);
                 backupsControl1.IncludeOK = (n.Type != SQLTreeItem.TreeType.DBAChecksRoot);
                 backupsControl1.IncludeWarning = true;
-                backupsControl1.InclueCritical = true;
+                backupsControl1.IncludeCritical = true;
                 backupsControl1.RefreshBackups();
             }
             if(tabs.SelectedTab== tabLogShipping)
@@ -95,7 +95,7 @@ namespace DBAChecksGUI
                 logShippingControl1.IncludeNA = n.Type != SQLTreeItem.TreeType.DBAChecksRoot;
                 logShippingControl1.IncludeOK = n.Type != SQLTreeItem.TreeType.DBAChecksRoot;
                 logShippingControl1.IncludeWarning = true;
-                logShippingControl1.InclueCritical = true;
+                logShippingControl1.IncludeCritical = true;
                 logShippingControl1.InstanceIDs = instanceIDs;
                 logShippingControl1.ConnectionString = connectionString;
                 logShippingControl1.RefreshData();
@@ -105,7 +105,7 @@ namespace DBAChecksGUI
                 agentJobsControl1.IncludeNA = n.Type != SQLTreeItem.TreeType.DBAChecksRoot;
                 agentJobsControl1.IncludeOK = n.Type != SQLTreeItem.TreeType.DBAChecksRoot;
                 agentJobsControl1.IncludeWarning = true;
-                agentJobsControl1.InclueCritical = true;
+                agentJobsControl1.IncludeCritical = true;
                 agentJobsControl1.ConnectionString = connectionString;
                 agentJobsControl1.InstanceIDs = instanceIDs;
                 agentJobsControl1.RefreshData();
@@ -115,6 +115,17 @@ namespace DBAChecksGUI
                 summary1.ConnectionString = connectionString;
                 summary1.InstanceIDs = instanceIDs;
                 summary1.RefreshData();
+            }
+            if(tabs.SelectedTab == tabFiles)
+            {
+                dbFilesControl1.ConnectionString = connectionString;
+                dbFilesControl1.InstanceIDs = instanceIDs;
+                dbFilesControl1.DatabaseID = (n.DatabaseID > 0 ? (Int32?)n.DatabaseID : null);
+                dbFilesControl1.IncludeCritical = true;
+                dbFilesControl1.IncludeWarning = true;
+                dbFilesControl1.IncludeNA = dbFilesControl1.DatabaseID != null;
+                dbFilesControl1.IncludeOK = dbFilesControl1.DatabaseID != null;
+                dbFilesControl1.RefreshData();
             }
         }
 
@@ -290,10 +301,25 @@ ORDER BY SchemaName,ObjectName
                 {
                     tabs.TabPages.Add(tabJobs);
                 }
+                if (!tabs.TabPages.Contains(tabFiles))
+                {
+                    tabs.TabPages.Add(tabFiles);
+                }
+            }
+            if(n.Type== SQLTreeItem.TreeType.Database)
+            {
+                if (!tabs.TabPages.Contains(tabFiles))
+                {
+                    tabs.TabPages.Add(tabFiles);
+                }
             }
             if (n.Type == SQLTreeItem.TreeType.Instance)
             {
                 if (cleared) { tabs.TabPages.Add(tabTags); }
+                if (!tabs.TabPages.Contains(tabDrives))
+                {
+                    tabs.TabPages.Add(tabFiles);
+                }
                 if (n.InstanceID > 0){
                     if (!tabs.TabPages.Contains(tabDrives))
                     {

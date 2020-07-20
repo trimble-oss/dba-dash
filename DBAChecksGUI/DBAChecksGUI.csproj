@@ -121,6 +121,19 @@
     <Compile Include="DBDiff.Designer.cs">
       <DependentUpon>DBDiff.cs</DependentUpon>
     </Compile>
+    <Compile Include="DBFiles\DBFilesControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="DBFiles\DBFilesControl.Designer.cs">
+      <DependentUpon>DBFilesControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="DBFiles\FileThreshold.cs" />
+    <Compile Include="DBFiles\FileThresholdConfig.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="DBFiles\FileThresholdConfig.Designer.cs">
+      <DependentUpon>FileThresholdConfig.cs</DependentUpon>
+    </Compile>
     <Compile Include="Diff.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -197,6 +210,12 @@
     </EmbeddedResource>
     <EmbeddedResource Include="DBDiff.resx">
       <DependentUpon>DBDiff.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="DBFiles\DBFilesControl.resx">
+      <DependentUpon>DBFilesControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="DBFiles\FileThresholdConfig.resx">
+      <DependentUpon>FileThresholdConfig.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Diff.resx">
       <DependentUpon>Diff.cs</DependentUpon>

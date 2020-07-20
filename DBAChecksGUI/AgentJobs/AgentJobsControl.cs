@@ -16,7 +16,7 @@ namespace DBAChecksGUI.AgentJobs
         public List<Int32> InstanceIDs;
         public string ConnectionString;
 
-        public bool InclueCritical
+        public bool IncludeCritical
         {
             get
             {
@@ -72,7 +72,7 @@ namespace DBAChecksGUI.AgentJobs
                 cn.Open();
                 SqlCommand cmd = new SqlCommand("dbo.AgentJobs_Get", cn);
                 cmd.Parameters.AddWithValue("InstanceIDs", string.Join(",", InstanceIDs));
-                cmd.Parameters.AddWithValue("IncludeCritical", InclueCritical);
+                cmd.Parameters.AddWithValue("IncludeCritical", IncludeCritical);
                 cmd.Parameters.AddWithValue("IncludeWarning", IncludeWarning);
                 cmd.Parameters.AddWithValue("IncludeNA", IncludeNA);
                 cmd.Parameters.AddWithValue("IncludeOK", IncludeOK);

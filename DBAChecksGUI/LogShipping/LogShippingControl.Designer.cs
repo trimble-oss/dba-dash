@@ -76,12 +76,12 @@
             this.ThresholdConfiguredLevel,
             this.Configure});
             this.dgvLogShipping.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.dgvLogShipping.Location = new System.Drawing.Point(0, 49);
+            this.dgvLogShipping.Location = new System.Drawing.Point(0, 31);
             this.dgvLogShipping.Name = "dgvLogShipping";
             this.dgvLogShipping.ReadOnly = true;
             this.dgvLogShipping.RowHeadersWidth = 51;
             this.dgvLogShipping.RowTemplate.Height = 24;
-            this.dgvLogShipping.Size = new System.Drawing.Size(873, 493);
+            this.dgvLogShipping.Size = new System.Drawing.Size(698, 402);
             this.dgvLogShipping.TabIndex = 0;
             this.dgvLogShipping.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgvLogShipping_CellContentClick);
             this.dgvLogShipping.RowsAdded += new System.Windows.Forms.DataGridViewRowsAddedEventHandler(this.dgvLogShipping_RowsAdded);
@@ -214,7 +214,7 @@
             this.tsConfigure});
             this.toolStrip1.Location = new System.Drawing.Point(0, 0);
             this.toolStrip1.Name = "toolStrip1";
-            this.toolStrip1.Size = new System.Drawing.Size(873, 39);
+            this.toolStrip1.Size = new System.Drawing.Size(698, 31);
             this.toolStrip1.TabIndex = 2;
             this.toolStrip1.Text = "toolStrip1";
             // 
@@ -229,7 +229,7 @@
             this.toolStripFilter.Image = global::DBAChecksGUI.Properties.Resources.FilterDropdown_16x;
             this.toolStripFilter.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripFilter.Name = "toolStripFilter";
-            this.toolStripFilter.Size = new System.Drawing.Size(34, 36);
+            this.toolStripFilter.Size = new System.Drawing.Size(34, 28);
             this.toolStripFilter.Text = "Filter";
             // 
             // criticalToolStripMenuItem
@@ -273,7 +273,7 @@
             this.tsConfigure.Image = global::DBAChecksGUI.Properties.Resources.SettingsOutline_16x;
             this.tsConfigure.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsConfigure.Name = "tsConfigure";
-            this.tsConfigure.Size = new System.Drawing.Size(34, 36);
+            this.tsConfigure.Size = new System.Drawing.Size(34, 28);
             this.tsConfigure.Text = "Configure";
             // 
             // configureInstanceThresholdsToolStripMenuItem
