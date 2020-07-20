@@ -774,7 +774,6 @@ namespace DBAChecks
                 catch (Exception ex)
                 {
                     logError("Drivers (WMI)", ex.Message);
-                    throw ex;
                 }
             }
         }
@@ -828,7 +827,6 @@ namespace DBAChecks
             catch (Exception ex)
             {
                 logError("Collect Drives (WMI)", ex.Message);
-                throw ex;
             }
         }
 

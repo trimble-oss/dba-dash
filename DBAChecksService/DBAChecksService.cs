@@ -6,51 +6,67 @@ using System.Data.SqlClient;
 using Topshelf;
 using Topshelf.Quartz;
 using static DBAChecks.DBAChecksConnection;
+using System.Diagnostics;
 
 namespace DBAChecksService
 {
     class DBAChecksService
     {
+
+        public static void ErrorLogger(Exception ex, string context)
+        {
+            Console.WriteLine(context + ": " + ex.Message);
+            EventLog.WriteEntry("DBAChecksService", context+ ": " +  ex.Message, EventLogEntryType.Error);
+        }
+
         public void Start(CollectionConfig config)
         {
-            removeEventSessions(config);
+              removeEventSessions(config);
+
         }
 
         private void removeEventSessions(CollectionConfig config)
         {
-            foreach (DBAChecksSource cfg in config.SourceConnections)
+            try
             {
-
-                string cfgString = JsonConvert.SerializeObject(cfg);
-                if (cfg.SourceConnection.Type == ConnectionType.SQL)
+                foreach (DBAChecksSource cfg in config.SourceConnections)
                 {
-                    var collector = new DBCollector(cfg.GetSource(), cfg.NoWMI);
-                    if (cfg.PersistXESessions)
-                    {
-                        try
-                        {
-                            Console.WriteLine("Stop DBAChecks event sessions: " + cfg.SourceConnection.DataSource());
-                            collector.StopEventSessions();
-                        }
-                        catch (Exception ex)
-                        {
-                            Console.WriteLine("Error stopping event sessions" + ex.Message);
-                        }
-                    }
-                    else
-                    {
-                        try
-                        {
-                            Console.WriteLine("Remove DBAChecks event sessions: " + cfg.SourceConnection.DataSource());
-                            collector.RemoveEventSessions();
-                        }
-                        catch (Exception ex)
-                        {
-                            Console.WriteLine("Error removing event sessions" + ex.Message);
-                        }
-                    }
 
+                    string cfgString = JsonConvert.SerializeObject(cfg);
+                    if (cfg.SourceConnection.Type == ConnectionType.SQL)
+                    {
+                        var collector = new DBCollector(cfg.GetSource(), cfg.NoWMI);
+                        if (cfg.PersistXESessions)
+                        {
+                            try
+                            {
+                                Console.WriteLine("Stop DBAChecks event sessions: " + cfg.SourceConnection.DataSource());
+                                collector.StopEventSessions();
+                            }
+                            catch (Exception ex)
+                            {
+                                ErrorLogger(ex, "Stop Event Sessions:");
+                            }
+                        }
+                        else
+                        {
+                            try
+                            {
+                                Console.WriteLine("Remove DBAChecks event sessions: " + cfg.SourceConnection.DataSource());
+                                collector.RemoveEventSessions();
+                            }
+                            catch (Exception ex)
+                            {
+                                ErrorLogger(ex, "Remove DBAChecks Event Sessions:");
+                            }
+                        }
+
+                    }
                 }
+            }
+            catch(Exception ex)
+            {
+                ErrorLogger(ex, "Remove Event Sessions:");
             }
         }
 

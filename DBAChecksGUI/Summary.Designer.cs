@@ -78,8 +78,9 @@
             this.dgvSummary.RowHeadersVisible = false;
             this.dgvSummary.RowHeadersWidth = 51;
             this.dgvSummary.RowTemplate.Height = 24;
-            this.dgvSummary.Size = new System.Drawing.Size(424, 363);
+            this.dgvSummary.Size = new System.Drawing.Size(1800, 213);
             this.dgvSummary.TabIndex = 0;
+            this.dgvSummary.ColumnHeaderMouseClick += new System.Windows.Forms.DataGridViewCellMouseEventHandler(this.dgvSummary_ColumnHeaderMouseClick);
             this.dgvSummary.RowsAdded += new System.Windows.Forms.DataGridViewRowsAddedEventHandler(this.dgvSummary_RowAdded);
             // 
             // Instance
@@ -93,7 +94,6 @@
             // 
             // MemoryDumpStatus
             // 
-            this.MemoryDumpStatus.DataPropertyName = "LastMemoryDump";
             this.MemoryDumpStatus.HeaderText = "Memory Dump";
             this.MemoryDumpStatus.MinimumWidth = 6;
             this.MemoryDumpStatus.Name = "MemoryDumpStatus";
@@ -119,7 +119,6 @@
             // 
             // AlertStatus
             // 
-            this.AlertStatus.DataPropertyName = "LastAlert";
             this.AlertStatus.HeaderText = "Alerts";
             this.AlertStatus.MinimumWidth = 6;
             this.AlertStatus.Name = "AlertStatus";
@@ -132,6 +131,7 @@
             this.FullBackupStatus.MinimumWidth = 6;
             this.FullBackupStatus.Name = "FullBackupStatus";
             this.FullBackupStatus.ReadOnly = true;
+            this.FullBackupStatus.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Programmatic;
             this.FullBackupStatus.Width = 101;
             // 
             // DiffBackupStatus
@@ -218,7 +218,7 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.Controls.Add(this.dgvSummary);
             this.Name = "Summary";
-            this.Size = new System.Drawing.Size(424, 363);
+            this.Size = new System.Drawing.Size(1800, 213);
             ((System.ComponentModel.ISupportInitialize)(this.dgvSummary)).EndInit();
             this.ResumeLayout(false);
 
