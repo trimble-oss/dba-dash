@@ -127,6 +127,14 @@ namespace DBAChecksGUI
                 dbFilesControl1.IncludeOK = dbFilesControl1.DatabaseID != null;
                 dbFilesControl1.RefreshData();
             }
+            if(tabs.SelectedTab == tabSnapshotsSummary)
+            {
+                loadSnapshots();
+            }
+            if( tabs.SelectedTab == tabSchema)
+            {
+                getHistory(n.ObjectID);
+            }
         }
 
     
@@ -191,7 +199,7 @@ ORDER BY Instance", cn);
             using (cn)
             {
                 cn.Open();
-                SqlCommand cmd = new SqlCommand(@"SELECT D.DatabaseID,D.name,O.ObjectID
+                SqlCommand cmd = new SqlCommand(@"SELECT D.DatabaseID,D.name,O.ObjectID,D.InstanceID
 FROM dbo.Databases D
 JOIN dbo.Instances I ON I.InstanceID = D.InstanceID
 LEFT JOIN dbo.DBObjects O ON O.DatabaseID = D.DatabaseID AND O.ObjectType='DB'
@@ -211,6 +219,7 @@ ORDER BY D.Name
                 {
                     var n = new SQLTreeItem((string)rdr[1], SQLTreeItem.TreeType.Database);
                     n.DatabaseID = (Int32)rdr[0];
+                    n.InstanceID = (Int32)rdr[3];
                     if (!rdr.IsDBNull(2))
                     {
                         n.ObjectID = (Int64)rdr[2];
@@ -262,122 +271,69 @@ ORDER BY SchemaName,ObjectName
 
         private void tv1_AfterSelect(object sender, TreeViewEventArgs e)
         {
-            bool cleared = false;
             var n = (SQLTreeItem)e.Node;
 
-            var selectedTab  = tabs.SelectedTab;
-            if (selectedItem==null || selectedItem.Type != n.Type)
-            {
-                tabs.TabPages.Clear();
-                cleared = true;
-            }
+            List<TabPage> allowedTabs = new List<TabPage>();         
             selectedItem = n;
-            if (n.Type == SQLTreeItem.TreeType.Database || n.Type == SQLTreeItem.TreeType.Instance)
-            {
-                if (cleared) { tabs.TabPages.Add(tabSnapshotsSummary); }
-                loadSnapshots();
-            }
-            if (n.ObjectID >0)
-            {
-                if (cleared) { tabs.TabPages.Add(tabSchema); };
-                getHistory(n.ObjectID);
-            }
+
+
             if(n.Type== SQLTreeItem.TreeType.DBAChecksRoot)
             {
-                if (!tabs.TabPages.Contains(tabSummary))
-                {
-                    tabs.TabPages.Add(tabSummary);
-                }
-                if (!tabs.TabPages.Contains(tabBackups))
-                {
-                    tabs.TabPages.Add(tabBackups);
-                    loadSelectedTab();
-                }
-                if (!tabs.TabPages.Contains(tabLogShipping))
-                {
-                    tabs.TabPages.Add(tabLogShipping);
-                }
-                if (!tabs.TabPages.Contains(tabJobs))
-                {
-                    tabs.TabPages.Add(tabJobs);
-                }
-                if (!tabs.TabPages.Contains(tabFiles))
-                {
-                    tabs.TabPages.Add(tabFiles);
-                }
+                allowedTabs.Add(tabSummary);
+                allowedTabs.Add(tabBackups);
+                allowedTabs.Add(tabLogShipping);
+                allowedTabs.Add(tabJobs);
+                allowedTabs.Add(tabFiles);
             }
-            if(n.Type== SQLTreeItem.TreeType.Database)
+            else if(n.Type== SQLTreeItem.TreeType.Database)
             {
-                if (!tabs.TabPages.Contains(tabFiles))
-                {
-                    tabs.TabPages.Add(tabFiles);
-                }
+                allowedTabs.Add(tabFiles);
+                allowedTabs.Add(tabSnapshotsSummary);
             }
-            if (n.Type == SQLTreeItem.TreeType.Instance)
+            else if (n.Type == SQLTreeItem.TreeType.Instance)
             {
-                if (cleared) { tabs.TabPages.Add(tabTags); }
-                if (!tabs.TabPages.Contains(tabDrives))
-                {
-                    tabs.TabPages.Add(tabFiles);
-                }
+                            
                 if (n.InstanceID > 0){
-                    if (!tabs.TabPages.Contains(tabDrives))
-                    {
-                        tabs.TabPages.Add(tabDrives);
-                    }
-                    if (!tabs.TabPages.Contains(tabBackups))
-                    {
-                        tabs.TabPages.Add(tabBackups);
-                    }
-                    if (!tabs.TabPages.Contains(tabLogShipping))
-                    {
-                        tabs.TabPages.Add(tabLogShipping);
-                    }
-                    if (!tabs.TabPages.Contains(tabJobs))
-                    {
-                        tabs.TabPages.Add(tabJobs);
-                    }
-                    if (!tabs.TabPages.Contains(tabSummary))
-                    {
-                        tabs.TabPages.Add(tabSummary);
-                    }
+                    allowedTabs.Add(tabSummary);
+                    allowedTabs.Add(tabBackups);
+                    allowedTabs.Add(tabDrives);              
+                    allowedTabs.Add(tabLogShipping);
+                    allowedTabs.Add(tabJobs);
+                    allowedTabs.Add(tabSnapshotsSummary);
                 }
-                else
-                {
-                    if (tabs.TabPages.Contains(tabSummary))
-                    {
-                        tabs.TabPages.Remove(tabSummary);
-                    }
-                    if (tabs.TabPages.Contains(tabDrives))
-                    {
-                        tabs.TabPages.Remove(tabDrives);
-                    }
-                    if (tabs.TabPages.Contains(tabBackups))
-                    {
-                        tabs.TabPages.Add(tabBackups);
-                    }
-                    if (tabs.TabPages.Contains(tabLogShipping))
-                    {
-                        tabs.TabPages.Remove(tabLogShipping);
-                    }
-                    if (tabs.TabPages.Contains(tabJobs))
-                    {
-                        tabs.TabPages.Remove(tabJobs);
-                    }
-
-                }
+                allowedTabs.Add(tabTags);
+            }
+            if (n.ObjectID > 0)
+            {
+                allowedTabs.Add(tabSchema);
             }
             this.Text ="DBAChecks" + (n.Type== SQLTreeItem.TreeType.DBAChecksRoot ? "" : " - " + n.InstanceName);
 
-            if (cleared && selectedTab !=null && tabs.TabPages.Contains(selectedTab))
+            bool validatedTabs = true;
+            if (allowedTabs.Count == tabs.TabPages.Count)
             {
-                tabs.SelectedTab = selectedTab;
+                foreach (TabPage t in tabs.TabPages)
+                {
+                    if (!allowedTabs.Contains(t))
+                    {
+                        validatedTabs=false;
+                    }
+                }
             }
-            if(!cleared)
+            else
             {
-                loadSelectedTab();
+                validatedTabs = false;
             }
- 
+            if (!validatedTabs)
+            {
+                tabs.TabPages.Clear();
+                foreach (TabPage t in allowedTabs)
+                {
+                    tabs.TabPages.Add(t);
+                }
+            }
+             loadSelectedTab();
+            
            
         }
 
