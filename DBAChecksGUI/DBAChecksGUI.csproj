@@ -160,6 +160,19 @@
     <Compile Include="Drives\DriveThresholdConfig.Designer.cs">
       <DependentUpon>DriveThresholdConfig.cs</DependentUpon>
     </Compile>
+    <Compile Include="LastGoodCheckDB\LastGoodCheckDBConfig.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="LastGoodCheckDB\LastGoodCheckDBConfig.Designer.cs">
+      <DependentUpon>LastGoodCheckDBConfig.cs</DependentUpon>
+    </Compile>
+    <Compile Include="LastGoodCheckDB\LastGoodCheckDBControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="LastGoodCheckDB\LastGoodCheckDBControl.Designer.cs">
+      <DependentUpon>LastGoodCheckDBControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="LastGoodCheckDB\LastGoodCheckDBThreshold.cs" />
     <Compile Include="LogShipping\LogShippingControl.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -228,6 +241,12 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Drives\DriveThresholdConfig.resx">
       <DependentUpon>DriveThresholdConfig.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="LastGoodCheckDB\LastGoodCheckDBConfig.resx">
+      <DependentUpon>LastGoodCheckDBConfig.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="LastGoodCheckDB\LastGoodCheckDBControl.resx">
+      <DependentUpon>LastGoodCheckDBControl.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="LogShipping\LogShippingControl.resx">
       <DependentUpon>LogShippingControl.cs</DependentUpon>

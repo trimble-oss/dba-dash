@@ -135,6 +135,16 @@ namespace DBAChecksGUI
             {
                 getHistory(n.ObjectID);
             }
+            if(tabs.SelectedTab == tabLastGood)
+            {
+                lastGoodCheckDBControl1.InstanceIDs = instanceIDs;
+                lastGoodCheckDBControl1.connectionString = connectionString;
+                lastGoodCheckDBControl1.IncludeCritical = true;
+                lastGoodCheckDBControl1.IncludeWarning = true;
+                lastGoodCheckDBControl1.IncludeNA = n.InstanceID>0;
+                lastGoodCheckDBControl1.IncludeOK = n.InstanceID > 0;
+                lastGoodCheckDBControl1.RefreshData();
+            }
         }
 
     
@@ -284,6 +294,7 @@ ORDER BY SchemaName,ObjectName
                 allowedTabs.Add(tabLogShipping);
                 allowedTabs.Add(tabJobs);
                 allowedTabs.Add(tabFiles);
+                allowedTabs.Add(tabLastGood);
             }
             else if(n.Type== SQLTreeItem.TreeType.Database)
             {
@@ -300,6 +311,7 @@ ORDER BY SchemaName,ObjectName
                     allowedTabs.Add(tabLogShipping);
                     allowedTabs.Add(tabJobs);
                     allowedTabs.Add(tabSnapshotsSummary);
+                    allowedTabs.Add(tabLastGood);
                 }
                 allowedTabs.Add(tabTags);
             }

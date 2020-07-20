@@ -7,30 +7,6 @@
 	@IncludeOK BIT=0
 )
 AS
-DECLARE @Instances TABLE(
-	InstanceID INT PRIMARY KEY
-)
-IF @InstanceIDs IS NULL
-BEGIN
-	INSERT INTO @Instances
-	(
-	    InstanceID
-	)
-	SELECT InstanceID 
-	FROM dbo.Instances 
-	WHERE IsActive=1
-END 
-ELSE 
-BEGIN
-	INSERT INTO @Instances
-	(
-		InstanceID
-	)
-	SELECT value
-	FROM STRING_SPLIT(@InstanceIDs,',')
-END;
-
-
 DECLARE @StatusSQL NVARCHAR(MAX)
 
 SELECT @StatusSQL = CASE WHEN @IncludeCritical=1 THEN ',1' ELSE '' END

@@ -1,8 +1,10 @@
 ﻿
 
+
 CREATE VIEW [dbo].[LastGoodCheckDB]
 AS
 SELECT I.InstanceID,
+	D.DatabaseID,
 	I.Instance,
 	D.Name,
 	D.state,

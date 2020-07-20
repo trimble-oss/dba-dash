@@ -1,0 +1,247 @@
+﻿namespace DBAChecksGUI.LastGoodCheckDB
+{
+    partial class LastGoodCheckDBControl
+    {
+        /// <summary> 
+        /// Required designer variable.
+        /// </summary>
+        private System.ComponentModel.IContainer components = null;
+
+        /// <summary> 
+        /// Clean up any resources being used.
+        /// </summary>
+        /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing && (components != null))
+            {
+                components.Dispose();
+            }
+            base.Dispose(disposing);
+        }
+
+        #region Component Designer generated code
+
+        /// <summary> 
+        /// Required method for Designer support - do not modify 
+        /// the contents of this method with the code editor.
+        /// </summary>
+        private void InitializeComponent()
+        {
+            this.dgvLastGoodCheckDB = new System.Windows.Forms.DataGridView();
+            this.Instance = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.Database = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.LastGoodCheckDbTime = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.DaysSinceLastGoodCheckDB = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.ExcludedFromCheck = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.Configure = new System.Windows.Forms.DataGridViewLinkColumn();
+            this.toolStrip1 = new System.Windows.Forms.ToolStrip();
+            this.toolStripFilter = new System.Windows.Forms.ToolStripDropDownButton();
+            this.criticalToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.warningToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.undefinedToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.OKToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.tsConfigure = new System.Windows.Forms.ToolStripDropDownButton();
+            this.configureInstanceThresholdsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.configureRootThresholdsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            ((System.ComponentModel.ISupportInitialize)(this.dgvLastGoodCheckDB)).BeginInit();
+            this.toolStrip1.SuspendLayout();
+            this.SuspendLayout();
+            // 
+            // dgvLastGoodCheckDB
+            // 
+            this.dgvLastGoodCheckDB.AllowUserToAddRows = false;
+            this.dgvLastGoodCheckDB.AllowUserToDeleteRows = false;
+            this.dgvLastGoodCheckDB.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.dgvLastGoodCheckDB.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
+            this.Instance,
+            this.Database,
+            this.LastGoodCheckDbTime,
+            this.DaysSinceLastGoodCheckDB,
+            this.ExcludedFromCheck,
+            this.Configure});
+            this.dgvLastGoodCheckDB.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.dgvLastGoodCheckDB.Location = new System.Drawing.Point(0, 27);
+            this.dgvLastGoodCheckDB.Name = "dgvLastGoodCheckDB";
+            this.dgvLastGoodCheckDB.ReadOnly = true;
+            this.dgvLastGoodCheckDB.RowHeadersWidth = 51;
+            this.dgvLastGoodCheckDB.Size = new System.Drawing.Size(1250, 252);
+            this.dgvLastGoodCheckDB.TabIndex = 0;
+            this.dgvLastGoodCheckDB.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgvLastGoodCheckDB_CellContentClick);
+            this.dgvLastGoodCheckDB.RowsAdded += new System.Windows.Forms.DataGridViewRowsAddedEventHandler(this.dgvLastGoodCheckDB_RowsAdded);
+            // 
+            // Instance
+            // 
+            this.Instance.DataPropertyName = "Instance";
+            this.Instance.HeaderText = "Instance";
+            this.Instance.MinimumWidth = 6;
+            this.Instance.Name = "Instance";
+            this.Instance.ReadOnly = true;
+            this.Instance.Width = 125;
+            // 
+            // Database
+            // 
+            this.Database.DataPropertyName = "Name";
+            this.Database.HeaderText = "Database";
+            this.Database.MinimumWidth = 6;
+            this.Database.Name = "Database";
+            this.Database.ReadOnly = true;
+            this.Database.Width = 125;
+            // 
+            // LastGoodCheckDbTime
+            // 
+            this.LastGoodCheckDbTime.DataPropertyName = "LastGoodCheckDbTime";
+            this.LastGoodCheckDbTime.HeaderText = "Last Good Check DB";
+            this.LastGoodCheckDbTime.MinimumWidth = 6;
+            this.LastGoodCheckDbTime.Name = "LastGoodCheckDbTime";
+            this.LastGoodCheckDbTime.ReadOnly = true;
+            this.LastGoodCheckDbTime.Width = 125;
+            // 
+            // DaysSinceLastGoodCheckDB
+            // 
+            this.DaysSinceLastGoodCheckDB.DataPropertyName = "DaysSinceLastGoodCheckDB";
+            this.DaysSinceLastGoodCheckDB.HeaderText = "Days Since Last Good CheckDB";
+            this.DaysSinceLastGoodCheckDB.MinimumWidth = 6;
+            this.DaysSinceLastGoodCheckDB.Name = "DaysSinceLastGoodCheckDB";
+            this.DaysSinceLastGoodCheckDB.ReadOnly = true;
+            this.DaysSinceLastGoodCheckDB.Width = 125;
+            // 
+            // ExcludedFromCheck
+            // 
+            this.ExcludedFromCheck.DataPropertyName = "ExcludedFromCheck";
+            this.ExcludedFromCheck.HeaderText = "Excluded";
+            this.ExcludedFromCheck.MinimumWidth = 6;
+            this.ExcludedFromCheck.Name = "ExcludedFromCheck";
+            this.ExcludedFromCheck.ReadOnly = true;
+            this.ExcludedFromCheck.Width = 125;
+            // 
+            // Configure
+            // 
+            this.Configure.HeaderText = "Configure";
+            this.Configure.MinimumWidth = 6;
+            this.Configure.Name = "Configure";
+            this.Configure.ReadOnly = true;
+            this.Configure.Text = "Configure";
+            this.Configure.UseColumnTextForLinkValue = true;
+            this.Configure.Width = 125;
+            // 
+            // toolStrip1
+            // 
+            this.toolStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
+            this.toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.toolStripFilter,
+            this.tsConfigure});
+            this.toolStrip1.Location = new System.Drawing.Point(0, 0);
+            this.toolStrip1.Name = "toolStrip1";
+            this.toolStrip1.Size = new System.Drawing.Size(1250, 27);
+            this.toolStrip1.TabIndex = 4;
+            this.toolStrip1.Text = "toolStrip1";
+            // 
+            // toolStripFilter
+            // 
+            this.toolStripFilter.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.toolStripFilter.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.criticalToolStripMenuItem,
+            this.warningToolStripMenuItem,
+            this.undefinedToolStripMenuItem,
+            this.OKToolStripMenuItem});
+            this.toolStripFilter.Image = global::DBAChecksGUI.Properties.Resources.FilterDropdown_16x;
+            this.toolStripFilter.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolStripFilter.Name = "toolStripFilter";
+            this.toolStripFilter.Size = new System.Drawing.Size(34, 24);
+            this.toolStripFilter.Text = "Filter";
+            // 
+            // criticalToolStripMenuItem
+            // 
+            this.criticalToolStripMenuItem.CheckOnClick = true;
+            this.criticalToolStripMenuItem.Name = "criticalToolStripMenuItem";
+            this.criticalToolStripMenuItem.Size = new System.Drawing.Size(161, 26);
+            this.criticalToolStripMenuItem.Text = "Critical";
+            this.criticalToolStripMenuItem.Click += new System.EventHandler(this.criticalToolStripMenuItem_Click);
+            // 
+            // warningToolStripMenuItem
+            // 
+            this.warningToolStripMenuItem.CheckOnClick = true;
+            this.warningToolStripMenuItem.Name = "warningToolStripMenuItem";
+            this.warningToolStripMenuItem.Size = new System.Drawing.Size(161, 26);
+            this.warningToolStripMenuItem.Text = "Warning";
+            this.warningToolStripMenuItem.Click += new System.EventHandler(this.warningToolStripMenuItem_Click);
+            // 
+            // undefinedToolStripMenuItem
+            // 
+            this.undefinedToolStripMenuItem.CheckOnClick = true;
+            this.undefinedToolStripMenuItem.Name = "undefinedToolStripMenuItem";
+            this.undefinedToolStripMenuItem.Size = new System.Drawing.Size(161, 26);
+            this.undefinedToolStripMenuItem.Text = "Undefined";
+            this.undefinedToolStripMenuItem.Click += new System.EventHandler(this.undefinedToolStripMenuItem_Click);
+            // 
+            // OKToolStripMenuItem
+            // 
+            this.OKToolStripMenuItem.CheckOnClick = true;
+            this.OKToolStripMenuItem.Name = "OKToolStripMenuItem";
+            this.OKToolStripMenuItem.Size = new System.Drawing.Size(161, 26);
+            this.OKToolStripMenuItem.Text = "OK";
+            this.OKToolStripMenuItem.Click += new System.EventHandler(this.OKToolStripMenuItem_Click);
+            // 
+            // tsConfigure
+            // 
+            this.tsConfigure.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.tsConfigure.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.configureInstanceThresholdsToolStripMenuItem,
+            this.configureRootThresholdsToolStripMenuItem});
+            this.tsConfigure.Image = global::DBAChecksGUI.Properties.Resources.SettingsOutline_16x;
+            this.tsConfigure.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tsConfigure.Name = "tsConfigure";
+            this.tsConfigure.Size = new System.Drawing.Size(34, 24);
+            this.tsConfigure.Text = "Configure";
+            // 
+            // configureInstanceThresholdsToolStripMenuItem
+            // 
+            this.configureInstanceThresholdsToolStripMenuItem.Name = "configureInstanceThresholdsToolStripMenuItem";
+            this.configureInstanceThresholdsToolStripMenuItem.Size = new System.Drawing.Size(299, 26);
+            this.configureInstanceThresholdsToolStripMenuItem.Text = "Configure Instance Thresholds";
+            this.configureInstanceThresholdsToolStripMenuItem.Click += new System.EventHandler(this.configureInstanceThresholdsToolStripMenuItem_Click);
+            // 
+            // configureRootThresholdsToolStripMenuItem
+            // 
+            this.configureRootThresholdsToolStripMenuItem.Name = "configureRootThresholdsToolStripMenuItem";
+            this.configureRootThresholdsToolStripMenuItem.Size = new System.Drawing.Size(299, 26);
+            this.configureRootThresholdsToolStripMenuItem.Text = "Configure Root Thresholds";
+            this.configureRootThresholdsToolStripMenuItem.Click += new System.EventHandler(this.configureRootThresholdsToolStripMenuItem_Click);
+            // 
+            // LastGoodCheckDBControl
+            // 
+            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
+            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.Controls.Add(this.dgvLastGoodCheckDB);
+            this.Controls.Add(this.toolStrip1);
+            this.Name = "LastGoodCheckDBControl";
+            this.Size = new System.Drawing.Size(1250, 279);
+            ((System.ComponentModel.ISupportInitialize)(this.dgvLastGoodCheckDB)).EndInit();
+            this.toolStrip1.ResumeLayout(false);
+            this.toolStrip1.PerformLayout();
+            this.ResumeLayout(false);
+            this.PerformLayout();
+
+        }
+
+        #endregion
+
+        private System.Windows.Forms.DataGridView dgvLastGoodCheckDB;
+        private System.Windows.Forms.ToolStrip toolStrip1;
+        private System.Windows.Forms.ToolStripDropDownButton toolStripFilter;
+        private System.Windows.Forms.ToolStripMenuItem criticalToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem warningToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem undefinedToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem OKToolStripMenuItem;
+        private System.Windows.Forms.ToolStripDropDownButton tsConfigure;
+        private System.Windows.Forms.ToolStripMenuItem configureInstanceThresholdsToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem configureRootThresholdsToolStripMenuItem;
+        private System.Windows.Forms.DataGridViewTextBoxColumn Instance;
+        private System.Windows.Forms.DataGridViewTextBoxColumn Database;
+        private System.Windows.Forms.DataGridViewTextBoxColumn LastGoodCheckDbTime;
+        private System.Windows.Forms.DataGridViewTextBoxColumn DaysSinceLastGoodCheckDB;
+        private System.Windows.Forms.DataGridViewTextBoxColumn ExcludedFromCheck;
+        private System.Windows.Forms.DataGridViewLinkColumn Configure;
+    }
+}
