@@ -28,21 +28,11 @@
         /// </summary>
         private void InitializeComponent()
         {
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle5 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle6 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle7 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle8 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle3 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle4 = new System.Windows.Forms.DataGridViewCellStyle();
             this.dgvFiles = new System.Windows.Forms.DataGridView();
-            this.toolStrip1 = new System.Windows.Forms.ToolStrip();
-            this.toolStripFilter = new System.Windows.Forms.ToolStripDropDownButton();
-            this.criticalToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.warningToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.undefinedToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.OKToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.tsConfigure = new System.Windows.Forms.ToolStripDropDownButton();
-            this.configureInstanceThresholdsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.configureRootThresholdsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.configureDatabaseThresholdsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.Instance = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Database = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.FileGroup = new System.Windows.Forms.DataGridViewTextBoxColumn();
@@ -58,6 +48,16 @@
             this.ConfiguredLevel = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.FileSnapshotAge = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Configure = new System.Windows.Forms.DataGridViewLinkColumn();
+            this.toolStrip1 = new System.Windows.Forms.ToolStrip();
+            this.toolStripFilter = new System.Windows.Forms.ToolStripDropDownButton();
+            this.criticalToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.warningToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.undefinedToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.OKToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.tsConfigure = new System.Windows.Forms.ToolStripDropDownButton();
+            this.configureDatabaseThresholdsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.configureInstanceThresholdsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.configureRootThresholdsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             ((System.ComponentModel.ISupportInitialize)(this.dgvFiles)).BeginInit();
             this.toolStrip1.SuspendLayout();
             this.SuspendLayout();
@@ -85,107 +85,15 @@
             this.FileSnapshotAge,
             this.Configure});
             this.dgvFiles.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.dgvFiles.Location = new System.Drawing.Point(0, 27);
+            this.dgvFiles.Location = new System.Drawing.Point(0, 31);
             this.dgvFiles.Name = "dgvFiles";
             this.dgvFiles.ReadOnly = true;
             this.dgvFiles.RowHeadersWidth = 51;
             this.dgvFiles.RowTemplate.Height = 24;
-            this.dgvFiles.Size = new System.Drawing.Size(1616, 259);
+            this.dgvFiles.Size = new System.Drawing.Size(1616, 255);
             this.dgvFiles.TabIndex = 0;
             this.dgvFiles.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgvFiles_CellContentClick);
             this.dgvFiles.RowsAdded += new System.Windows.Forms.DataGridViewRowsAddedEventHandler(this.dgvFiles_RowsAdded);
-            // 
-            // toolStrip1
-            // 
-            this.toolStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
-            this.toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.toolStripFilter,
-            this.tsConfigure});
-            this.toolStrip1.Location = new System.Drawing.Point(0, 0);
-            this.toolStrip1.Name = "toolStrip1";
-            this.toolStrip1.Size = new System.Drawing.Size(1616, 27);
-            this.toolStrip1.TabIndex = 3;
-            this.toolStrip1.Text = "toolStrip1";
-            // 
-            // toolStripFilter
-            // 
-            this.toolStripFilter.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.toolStripFilter.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.criticalToolStripMenuItem,
-            this.warningToolStripMenuItem,
-            this.undefinedToolStripMenuItem,
-            this.OKToolStripMenuItem});
-            this.toolStripFilter.Image = global::DBAChecksGUI.Properties.Resources.FilterDropdown_16x;
-            this.toolStripFilter.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.toolStripFilter.Name = "toolStripFilter";
-            this.toolStripFilter.Size = new System.Drawing.Size(34, 24);
-            this.toolStripFilter.Text = "Filter";
-            // 
-            // criticalToolStripMenuItem
-            // 
-            this.criticalToolStripMenuItem.CheckOnClick = true;
-            this.criticalToolStripMenuItem.Name = "criticalToolStripMenuItem";
-            this.criticalToolStripMenuItem.Size = new System.Drawing.Size(161, 26);
-            this.criticalToolStripMenuItem.Text = "Critical";
-            this.criticalToolStripMenuItem.Click += new System.EventHandler(this.criticalToolStripMenuItem_Click);
-            // 
-            // warningToolStripMenuItem
-            // 
-            this.warningToolStripMenuItem.CheckOnClick = true;
-            this.warningToolStripMenuItem.Name = "warningToolStripMenuItem";
-            this.warningToolStripMenuItem.Size = new System.Drawing.Size(161, 26);
-            this.warningToolStripMenuItem.Text = "Warning";
-            this.warningToolStripMenuItem.Click += new System.EventHandler(this.warningToolStripMenuItem_Click);
-            // 
-            // undefinedToolStripMenuItem
-            // 
-            this.undefinedToolStripMenuItem.CheckOnClick = true;
-            this.undefinedToolStripMenuItem.Name = "undefinedToolStripMenuItem";
-            this.undefinedToolStripMenuItem.Size = new System.Drawing.Size(161, 26);
-            this.undefinedToolStripMenuItem.Text = "Undefined";
-            this.undefinedToolStripMenuItem.Click += new System.EventHandler(this.undefinedToolStripMenuItem_Click);
-            // 
-            // OKToolStripMenuItem
-            // 
-            this.OKToolStripMenuItem.CheckOnClick = true;
-            this.OKToolStripMenuItem.Name = "OKToolStripMenuItem";
-            this.OKToolStripMenuItem.Size = new System.Drawing.Size(161, 26);
-            this.OKToolStripMenuItem.Text = "OK";
-            this.OKToolStripMenuItem.Click += new System.EventHandler(this.OKToolStripMenuItem_Click);
-            // 
-            // tsConfigure
-            // 
-            this.tsConfigure.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.tsConfigure.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.configureDatabaseThresholdsToolStripMenuItem,
-            this.configureInstanceThresholdsToolStripMenuItem,
-            this.configureRootThresholdsToolStripMenuItem});
-            this.tsConfigure.Image = global::DBAChecksGUI.Properties.Resources.SettingsOutline_16x;
-            this.tsConfigure.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsConfigure.Name = "tsConfigure";
-            this.tsConfigure.Size = new System.Drawing.Size(34, 24);
-            this.tsConfigure.Text = "Configure";
-            // 
-            // configureInstanceThresholdsToolStripMenuItem
-            // 
-            this.configureInstanceThresholdsToolStripMenuItem.Name = "configureInstanceThresholdsToolStripMenuItem";
-            this.configureInstanceThresholdsToolStripMenuItem.Size = new System.Drawing.Size(299, 26);
-            this.configureInstanceThresholdsToolStripMenuItem.Text = "Configure Instance Thresholds";
-            this.configureInstanceThresholdsToolStripMenuItem.Click += new System.EventHandler(this.configureInstanceThresholdsToolStripMenuItem_Click);
-            // 
-            // configureRootThresholdsToolStripMenuItem
-            // 
-            this.configureRootThresholdsToolStripMenuItem.Name = "configureRootThresholdsToolStripMenuItem";
-            this.configureRootThresholdsToolStripMenuItem.Size = new System.Drawing.Size(299, 26);
-            this.configureRootThresholdsToolStripMenuItem.Text = "Configure Root Thresholds";
-            this.configureRootThresholdsToolStripMenuItem.Click += new System.EventHandler(this.configureRootThresholdsToolStripMenuItem_Click);
-            // 
-            // configureDatabaseThresholdsToolStripMenuItem
-            // 
-            this.configureDatabaseThresholdsToolStripMenuItem.Name = "configureDatabaseThresholdsToolStripMenuItem";
-            this.configureDatabaseThresholdsToolStripMenuItem.Size = new System.Drawing.Size(299, 26);
-            this.configureDatabaseThresholdsToolStripMenuItem.Text = "Configure Database Thresholds";
-            this.configureDatabaseThresholdsToolStripMenuItem.Click += new System.EventHandler(this.configureDatabaseThresholdsToolStripMenuItem_Click);
             // 
             // Instance
             // 
@@ -217,8 +125,8 @@
             // SizeMB
             // 
             this.SizeMB.DataPropertyName = "SizeMB";
-            dataGridViewCellStyle5.Format = "0.0";
-            this.SizeMB.DefaultCellStyle = dataGridViewCellStyle5;
+            dataGridViewCellStyle1.Format = "0.0";
+            this.SizeMB.DefaultCellStyle = dataGridViewCellStyle1;
             this.SizeMB.HeaderText = "SizeMB";
             this.SizeMB.MinimumWidth = 6;
             this.SizeMB.Name = "SizeMB";
@@ -228,9 +136,9 @@
             // UsedMB
             // 
             this.UsedMB.DataPropertyName = "UsedMB";
-            dataGridViewCellStyle6.Format = "N1";
-            dataGridViewCellStyle6.NullValue = null;
-            this.UsedMB.DefaultCellStyle = dataGridViewCellStyle6;
+            dataGridViewCellStyle2.Format = "N1";
+            dataGridViewCellStyle2.NullValue = null;
+            this.UsedMB.DefaultCellStyle = dataGridViewCellStyle2;
             this.UsedMB.HeaderText = "UsedMB";
             this.UsedMB.MinimumWidth = 6;
             this.UsedMB.Name = "UsedMB";
@@ -240,24 +148,25 @@
             // FreeMB
             // 
             this.FreeMB.DataPropertyName = "FreeMB";
-            dataGridViewCellStyle7.Format = "N1";
-            this.FreeMB.DefaultCellStyle = dataGridViewCellStyle7;
+            dataGridViewCellStyle3.Format = "N1";
+            this.FreeMB.DefaultCellStyle = dataGridViewCellStyle3;
             this.FreeMB.HeaderText = "Free (MB)";
             this.FreeMB.MinimumWidth = 6;
             this.FreeMB.Name = "FreeMB";
             this.FreeMB.ReadOnly = true;
+            this.FreeMB.Width = 92;
             // 
             // PctFree
             // 
             this.PctFree.DataPropertyName = "PctFree";
-            dataGridViewCellStyle8.Format = "P1";
-            dataGridViewCellStyle8.NullValue = null;
-            this.PctFree.DefaultCellStyle = dataGridViewCellStyle8;
+            dataGridViewCellStyle4.Format = "P1";
+            dataGridViewCellStyle4.NullValue = null;
+            this.PctFree.DefaultCellStyle = dataGridViewCellStyle4;
             this.PctFree.HeaderText = "Free %";
             this.PctFree.MinimumWidth = 6;
             this.PctFree.Name = "PctFree";
             this.PctFree.ReadOnly = true;
-            this.PctFree.Width = 82;
+            this.PctFree.Width = 76;
             // 
             // NumberOfFiles
             // 
@@ -333,6 +242,98 @@
             this.Configure.Text = "Configure";
             this.Configure.UseColumnTextForLinkValue = true;
             this.Configure.Width = 98;
+            // 
+            // toolStrip1
+            // 
+            this.toolStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
+            this.toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.toolStripFilter,
+            this.tsConfigure});
+            this.toolStrip1.Location = new System.Drawing.Point(0, 0);
+            this.toolStrip1.Name = "toolStrip1";
+            this.toolStrip1.Size = new System.Drawing.Size(1616, 31);
+            this.toolStrip1.TabIndex = 3;
+            this.toolStrip1.Text = "toolStrip1";
+            // 
+            // toolStripFilter
+            // 
+            this.toolStripFilter.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.toolStripFilter.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.criticalToolStripMenuItem,
+            this.warningToolStripMenuItem,
+            this.undefinedToolStripMenuItem,
+            this.OKToolStripMenuItem});
+            this.toolStripFilter.Image = global::DBAChecksGUI.Properties.Resources.FilterDropdown_16x;
+            this.toolStripFilter.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolStripFilter.Name = "toolStripFilter";
+            this.toolStripFilter.Size = new System.Drawing.Size(34, 28);
+            this.toolStripFilter.Text = "Filter";
+            // 
+            // criticalToolStripMenuItem
+            // 
+            this.criticalToolStripMenuItem.CheckOnClick = true;
+            this.criticalToolStripMenuItem.Name = "criticalToolStripMenuItem";
+            this.criticalToolStripMenuItem.Size = new System.Drawing.Size(161, 26);
+            this.criticalToolStripMenuItem.Text = "Critical";
+            this.criticalToolStripMenuItem.Click += new System.EventHandler(this.criticalToolStripMenuItem_Click);
+            // 
+            // warningToolStripMenuItem
+            // 
+            this.warningToolStripMenuItem.CheckOnClick = true;
+            this.warningToolStripMenuItem.Name = "warningToolStripMenuItem";
+            this.warningToolStripMenuItem.Size = new System.Drawing.Size(161, 26);
+            this.warningToolStripMenuItem.Text = "Warning";
+            this.warningToolStripMenuItem.Click += new System.EventHandler(this.warningToolStripMenuItem_Click);
+            // 
+            // undefinedToolStripMenuItem
+            // 
+            this.undefinedToolStripMenuItem.CheckOnClick = true;
+            this.undefinedToolStripMenuItem.Name = "undefinedToolStripMenuItem";
+            this.undefinedToolStripMenuItem.Size = new System.Drawing.Size(161, 26);
+            this.undefinedToolStripMenuItem.Text = "Undefined";
+            this.undefinedToolStripMenuItem.Click += new System.EventHandler(this.undefinedToolStripMenuItem_Click);
+            // 
+            // OKToolStripMenuItem
+            // 
+            this.OKToolStripMenuItem.CheckOnClick = true;
+            this.OKToolStripMenuItem.Name = "OKToolStripMenuItem";
+            this.OKToolStripMenuItem.Size = new System.Drawing.Size(161, 26);
+            this.OKToolStripMenuItem.Text = "OK";
+            this.OKToolStripMenuItem.Click += new System.EventHandler(this.OKToolStripMenuItem_Click);
+            // 
+            // tsConfigure
+            // 
+            this.tsConfigure.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.tsConfigure.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.configureDatabaseThresholdsToolStripMenuItem,
+            this.configureInstanceThresholdsToolStripMenuItem,
+            this.configureRootThresholdsToolStripMenuItem});
+            this.tsConfigure.Image = global::DBAChecksGUI.Properties.Resources.SettingsOutline_16x;
+            this.tsConfigure.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tsConfigure.Name = "tsConfigure";
+            this.tsConfigure.Size = new System.Drawing.Size(34, 28);
+            this.tsConfigure.Text = "Configure";
+            // 
+            // configureDatabaseThresholdsToolStripMenuItem
+            // 
+            this.configureDatabaseThresholdsToolStripMenuItem.Name = "configureDatabaseThresholdsToolStripMenuItem";
+            this.configureDatabaseThresholdsToolStripMenuItem.Size = new System.Drawing.Size(299, 26);
+            this.configureDatabaseThresholdsToolStripMenuItem.Text = "Configure Database Thresholds";
+            this.configureDatabaseThresholdsToolStripMenuItem.Click += new System.EventHandler(this.configureDatabaseThresholdsToolStripMenuItem_Click);
+            // 
+            // configureInstanceThresholdsToolStripMenuItem
+            // 
+            this.configureInstanceThresholdsToolStripMenuItem.Name = "configureInstanceThresholdsToolStripMenuItem";
+            this.configureInstanceThresholdsToolStripMenuItem.Size = new System.Drawing.Size(299, 26);
+            this.configureInstanceThresholdsToolStripMenuItem.Text = "Configure Instance Thresholds";
+            this.configureInstanceThresholdsToolStripMenuItem.Click += new System.EventHandler(this.configureInstanceThresholdsToolStripMenuItem_Click);
+            // 
+            // configureRootThresholdsToolStripMenuItem
+            // 
+            this.configureRootThresholdsToolStripMenuItem.Name = "configureRootThresholdsToolStripMenuItem";
+            this.configureRootThresholdsToolStripMenuItem.Size = new System.Drawing.Size(299, 26);
+            this.configureRootThresholdsToolStripMenuItem.Text = "Configure Root Thresholds";
+            this.configureRootThresholdsToolStripMenuItem.Click += new System.EventHandler(this.configureRootThresholdsToolStripMenuItem_Click);
             // 
             // DBFilesControl
             // 

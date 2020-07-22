@@ -36,7 +36,7 @@ namespace DBAChecksGUI
             NA=3
         }
 
-
+        public string InstanceName;
         public DriveStatusEnum DriveStatus;
 
         public void RefreshDriveStatus()

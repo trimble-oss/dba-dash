@@ -68,6 +68,37 @@ namespace DBAChecksGUI
         }
 
 
+        public static DriveThreshold GetDriveThreshold(Int32 InstanceID, Int32 DriveID,string ConnectionString)
+        {
+            DriveThreshold drv = new DriveThreshold();
+            drv.InstanceID = InstanceID;
+            drv.DriveID = DriveID;
+            drv.ConnectionString = ConnectionString;
+            SqlConnection cn = new SqlConnection(ConnectionString);
+            using (cn)
+            {
+                cn.Open();
+                SqlCommand cmd = new SqlCommand(@"DriveThreshold_Get", cn);
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.Parameters.AddWithValue("InstanceID", InstanceID);
+                cmd.Parameters.AddWithValue("DriveID", -1);
+                var rdr = cmd.ExecuteReader();
+                if (rdr.Read())
+                {
+                    drv.WarningThreshold = rdr["DriveWarningThreshold"] == DBNull.Value ? 0 : (decimal)rdr["DriveWarningThreshold"];
+                    drv.CriticalThreshold = rdr["DriveCriticalThreshold"] == DBNull.Value ? 0 : (decimal)rdr["DriveCriticalThreshold"];
+                    drv.Inherited = (bool)rdr["Inherited"];
+                    drv.DriveCheckTypeChar = char.Parse((string)rdr["DriveCheckType"]);
+                }
+                else
+                {
+                    drv.Inherited = DriveID != -1;
+                }
+                return drv;
+            }
+        }
+
+
         public void UpdateThresholds()
         {
            SqlConnection cn = new SqlConnection(ConnectionString);

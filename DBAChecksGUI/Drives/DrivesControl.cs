@@ -18,51 +18,55 @@ namespace DBAChecksGUI.Properties
             InitializeComponent();
         }
 
-        private DriveThreshold rootDrive;
-        private DriveThreshold instanceDrive;
+        public List<Int32> InstanceIDs;
+        public string ConnectionString;
 
-        private void GetInheritedThresholds(string connectionString, Int32 InstanceID)
+        public bool IncludeCritical
         {
-            instanceDrive = null;
-            rootDrive = null;
-
-            rootDrive = getDriveThreshold(-1, -1, connectionString);
-            instanceDrive = getDriveThreshold(InstanceID, -1, connectionString);
-
-            setLinkText(rootDrive, lblRootThreshold);
-            setLinkText(instanceDrive, lblInstanceThreshold);
-  
-        }
-
-        private DriveThreshold getDriveThreshold(Int32 InstanceID,Int32 DriveID,string connectionString)
-        {
-            DriveThreshold drv = new DriveThreshold();
-            drv.InstanceID = InstanceID;
-            drv.DriveID = DriveID;
-            drv.ConnectionString = connectionString;
-            SqlConnection cn = new SqlConnection(connectionString);
-            using (cn)
+            get
             {
-                cn.Open();
-                SqlCommand cmd = new SqlCommand(@"DriveThreshold_Get", cn);
-                cmd.CommandType = CommandType.StoredProcedure;
-                cmd.Parameters.AddWithValue("InstanceID", InstanceID);
-                cmd.Parameters.AddWithValue("DriveID", -1);
-                var rdr = cmd.ExecuteReader();
-                if (rdr.Read())
-                {
-                    drv.WarningThreshold = rdr["DriveWarningThreshold"] == DBNull.Value ? 0 : (decimal)rdr["DriveWarningThreshold"];
-                    drv.CriticalThreshold = rdr["DriveCriticalThreshold"] == DBNull.Value ? 0 : (decimal)rdr["DriveCriticalThreshold"];
-                    drv.Inherited = (bool)rdr["Inherited"];
-                    drv.DriveCheckTypeChar = char.Parse((string)rdr["DriveCheckType"]);
-                }
-                else
-                {
-                    drv.Inherited = DriveID != -1;
-                }
-                return drv;
+                return criticalToolStripMenuItem.Checked;
+            }
+            set
+            {
+                criticalToolStripMenuItem.Checked = value;
             }
         }
+
+        public bool IncludeWarning
+        {
+            get
+            {
+                return warningToolStripMenuItem.Checked;
+            }
+            set
+            {
+                warningToolStripMenuItem.Checked = value;
+            }
+        }
+        public bool IncludeNA
+        {
+            get
+            {
+                return undefinedToolStripMenuItem.Checked;
+            }
+            set
+            {
+                undefinedToolStripMenuItem.Checked = value;
+            }
+        }
+        public bool IncludeOK
+        {
+            get
+            {
+                return OKToolStripMenuItem.Checked;
+            }
+            set
+            {
+                OKToolStripMenuItem.Checked = value;
+            }
+        }
+
 
         private void setLinkText(DriveThreshold drive,Label lbl)
         {
@@ -89,17 +93,21 @@ namespace DBAChecksGUI.Properties
         }
 
 
-        public void LoadDrives(string connectionString,Int32 InstanceID)
+        public void RefreshData()
         {
             pnlDrives.Controls.Clear();
 
-            SqlConnection cn = new SqlConnection(connectionString);
+            SqlConnection cn = new SqlConnection(ConnectionString);
             using (cn)
             {
                 cn.Open();
                 SqlCommand cmd = new SqlCommand("dbo.Drives_Get", cn);
                 cmd.CommandType = CommandType.StoredProcedure;
-                cmd.Parameters.AddWithValue("InstanceID", InstanceID);
+                cmd.Parameters.AddWithValue("InstanceIDs", String.Join(",",InstanceIDs));
+                cmd.Parameters.AddWithValue("IncludeCritical", IncludeCritical);
+                cmd.Parameters.AddWithValue("IncludeWarning", IncludeWarning);
+                cmd.Parameters.AddWithValue("IncludeNA", IncludeNA);
+                cmd.Parameters.AddWithValue("IncludeOK", IncludeOK);
                 var rdr = cmd.ExecuteReader();
                 while (rdr.Read())
                 {
@@ -107,7 +115,9 @@ namespace DBAChecksGUI.Properties
 
                     drv.Drive.WarningThreshold = rdr["DriveWarningThreshold"] == DBNull.Value ? 0 : (decimal)rdr["DriveWarningThreshold"];
                     drv.Drive.CriticalThreshold = rdr["DriveCriticalThreshold"] == DBNull.Value ? 0 : (decimal)rdr["DriveCriticalThreshold"];
+
                     drv.Drive.DriveLabel = rdr["Label"] == DBNull.Value ? "" : (string)rdr["Label"];
+                    drv.Drive.InstanceName = (string)rdr["Instance"];                   
                     drv.Drive.DriveLetter = (string)rdr["Name"];
                     drv.Drive.DriveCapacityGB = (decimal)rdr["TotalGB"];
                     drv.Drive.FreeSpaceGB = (decimal)rdr["FreeGB"];
@@ -116,35 +126,61 @@ namespace DBAChecksGUI.Properties
                     drv.Drive.InstanceID = (Int32)rdr["InstanceID"];
                     drv.Drive.DriveID = (Int32)rdr["DriveID"];
                     drv.Drive.DriveCheckTypeChar = char.Parse((string)rdr["DriveCheckType"]);
-                    drv.Drive.ConnectionString = connectionString;
+                    drv.DisplayInstanceName = InstanceIDs.Count > 1;
+                    drv.Drive.ConnectionString = ConnectionString;
                     pnlDrives.Controls.Add(drv);
                     drv.Dock = DockStyle.Top;
                 }
-                GetInheritedThresholds(connectionString, InstanceID);
             }
+            configureInstanceThresholdsToolStripMenuItem.Enabled = InstanceIDs.Count == 1;
 
         }
 
-        private void linkConfigureRoot_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        public void Configure(Int32 InstanceID,Int32 DriveID)
         {
+            var drv = DriveThreshold.GetDriveThreshold(InstanceID, DriveID,ConnectionString);
             var frm = new DriveThresholdConfig();
-            frm.DriveThreshold = rootDrive;
-            frm.ShowDialog();
-            if(frm.DialogResult == DialogResult.OK)
-            {
-                LoadDrives(instanceDrive.ConnectionString, instanceDrive.InstanceID);
-            }
-        }
-
-        private void lnkConfigureInstance_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
-        {
-            var frm = new DriveThresholdConfig();
-            frm.DriveThreshold = instanceDrive;
+            frm.DriveThreshold = drv;
             frm.ShowDialog();
             if (frm.DialogResult == DialogResult.OK)
             {
-                LoadDrives(instanceDrive.ConnectionString, instanceDrive.InstanceID);
+                RefreshData();
             }
+        }
+
+
+        
+        private void configureInstanceThresholdsToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (InstanceIDs.Count == 1)
+            {
+                Configure(InstanceIDs[0], -1);
+            }
+        }
+
+        private void configureRootThresholdsToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Configure(-1, -1);
+        }
+
+        private void criticalToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            RefreshData();
+        }
+
+        private void warningToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            RefreshData();
+        }
+
+        private void undefinedToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            RefreshData();
+        }
+
+        private void OKToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            RefreshData();
         }
     }
 }

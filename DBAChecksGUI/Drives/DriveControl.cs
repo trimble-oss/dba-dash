@@ -14,7 +14,7 @@ namespace DBAChecksGUI
     public partial class DriveControl : UserControl
     {
 
-
+        public bool DisplayInstanceName { get; set; }
 
         public DriveControl()
         {
@@ -35,7 +35,15 @@ namespace DBAChecksGUI
 
         private void setDrive()
         {
-            lblDriveLabel.Text = drive.DriveLabel + " (" + drive.DriveLetter + ")";
+            if (DisplayInstanceName)
+            {
+                lblDriveLabel.Text = drive.InstanceName + " | " +  drive.DriveLabel + " (" + drive.DriveLetter + ")";
+            }
+            else
+            {
+                lblDriveLabel.Text = drive.DriveLabel + " (" + drive.DriveLetter + ")";
+            }
+      
             var pct = drive.PercentFreeSpace;
 
             pbSpace.Value = (Int32)drive.PercentUsedSpace;

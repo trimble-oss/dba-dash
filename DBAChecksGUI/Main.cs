@@ -78,7 +78,13 @@ namespace DBAChecksGUI
             }
             if (tabs.SelectedTab == tabDrives)
             {
-                drivesControl1.LoadDrives(connectionString, n.InstanceID);
+                drivesControl1.ConnectionString = connectionString;
+                drivesControl1.InstanceIDs = instanceIDs;
+                drivesControl1.IncludeNA = (n.Type != SQLTreeItem.TreeType.DBAChecksRoot);
+                drivesControl1.IncludeOK = (n.Type != SQLTreeItem.TreeType.DBAChecksRoot);
+                drivesControl1.IncludeWarning = true;
+                drivesControl1.IncludeCritical = true;
+                drivesControl1.RefreshData();
             }
             if(tabs.SelectedTab == tabBackups)
             {
@@ -291,10 +297,11 @@ ORDER BY SchemaName,ObjectName
             {
                 allowedTabs.Add(tabSummary);
                 allowedTabs.Add(tabBackups);
+                allowedTabs.Add(tabDrives);
                 allowedTabs.Add(tabLogShipping);
                 allowedTabs.Add(tabJobs);
                 allowedTabs.Add(tabFiles);
-                allowedTabs.Add(tabLastGood);
+                allowedTabs.Add(tabLastGood);           
             }
             else if(n.Type== SQLTreeItem.TreeType.Database)
             {
