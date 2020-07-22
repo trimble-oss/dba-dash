@@ -252,5 +252,15 @@ namespace DBAChecksGUI.Properties {
                 return ResourceManager.GetString("SyntaxModes", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap Table_16x {
+            get {
+                object obj = ResourceManager.GetObject("Table_16x", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
     }
 }

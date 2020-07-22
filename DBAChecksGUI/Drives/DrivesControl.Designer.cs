@@ -38,7 +38,9 @@
             this.tsConfigure = new System.Windows.Forms.ToolStripDropDownButton();
             this.configureInstanceThresholdsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.configureRootThresholdsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.tsGridView = new System.Windows.Forms.ToolStripButton();
             this.pnlSpacing = new System.Windows.Forms.Panel();
+            this.tsDrivesView = new System.Windows.Forms.ToolStripButton();
             this.driveControl1 = new DBAChecksGUI.DriveControl();
             this.pnlDrives.SuspendLayout();
             this.toolStrip1.SuspendLayout();
@@ -59,7 +61,9 @@
             this.toolStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
             this.toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripFilter,
-            this.tsConfigure});
+            this.tsConfigure,
+            this.tsGridView,
+            this.tsDrivesView});
             this.toolStrip1.Location = new System.Drawing.Point(0, 0);
             this.toolStrip1.Name = "toolStrip1";
             this.toolStrip1.Size = new System.Drawing.Size(735, 27);
@@ -138,6 +142,16 @@
             this.configureRootThresholdsToolStripMenuItem.Text = "Configure Root Thresholds";
             this.configureRootThresholdsToolStripMenuItem.Click += new System.EventHandler(this.configureRootThresholdsToolStripMenuItem_Click);
             // 
+            // tsGridView
+            // 
+            this.tsGridView.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.tsGridView.Image = global::DBAChecksGUI.Properties.Resources.Table_16x;
+            this.tsGridView.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tsGridView.Name = "tsGridView";
+            this.tsGridView.Size = new System.Drawing.Size(29, 24);
+            this.tsGridView.Text = "Table View";
+            this.tsGridView.Click += new System.EventHandler(this.tsGridView_Click);
+            // 
             // pnlSpacing
             // 
             this.pnlSpacing.Dock = System.Windows.Forms.DockStyle.Top;
@@ -145,6 +159,16 @@
             this.pnlSpacing.Name = "pnlSpacing";
             this.pnlSpacing.Size = new System.Drawing.Size(735, 16);
             this.pnlSpacing.TabIndex = 8;
+            // 
+            // tsDrivesView
+            // 
+            this.tsDrivesView.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.tsDrivesView.Image = global::DBAChecksGUI.Properties.Resources.Hard_Drive;
+            this.tsDrivesView.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tsDrivesView.Name = "tsDrivesView";
+            this.tsDrivesView.Size = new System.Drawing.Size(29, 24);
+            this.tsDrivesView.Text = "Drives View";
+            this.tsDrivesView.Click += new System.EventHandler(this.tsDrivesView_Click);
             // 
             // driveControl1
             // 
@@ -215,5 +239,7 @@
         private System.Windows.Forms.ToolStripMenuItem configureInstanceThresholdsToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem configureRootThresholdsToolStripMenuItem;
         private System.Windows.Forms.Panel pnlSpacing;
+        private System.Windows.Forms.ToolStripButton tsGridView;
+        private System.Windows.Forms.ToolStripButton tsDrivesView;
     }
 }

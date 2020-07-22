@@ -20,6 +20,7 @@ namespace DBAChecksGUI.Properties
 
         public List<Int32> InstanceIDs;
         public string ConnectionString;
+        public Int32 DrivesViewMaxRows = 30;
 
         public bool IncludeCritical
         {
@@ -67,6 +68,8 @@ namespace DBAChecksGUI.Properties
             }
         }
 
+        public bool gridview = false;
+
 
         private void setLinkText(DriveThreshold drive,Label lbl)
         {
@@ -92,6 +95,7 @@ namespace DBAChecksGUI.Properties
             }
         }
 
+        DataView dvDrives;
 
         public void RefreshData()
         {
@@ -108,32 +112,127 @@ namespace DBAChecksGUI.Properties
                 cmd.Parameters.AddWithValue("IncludeWarning", IncludeWarning);
                 cmd.Parameters.AddWithValue("IncludeNA", IncludeNA);
                 cmd.Parameters.AddWithValue("IncludeOK", IncludeOK);
-                var rdr = cmd.ExecuteReader();
-                while (rdr.Read())
+                SqlDataAdapter da = new SqlDataAdapter(cmd);
+                DataTable dt = new DataTable();
+                da.Fill(dt);
+                dvDrives = new DataView(dt);
+
+                if (dt.Rows.Count > DrivesViewMaxRows || gridview)
                 {
-                    var drv = new DriveControl();
-
-                    drv.Drive.WarningThreshold = rdr["DriveWarningThreshold"] == DBNull.Value ? 0 : (decimal)rdr["DriveWarningThreshold"];
-                    drv.Drive.CriticalThreshold = rdr["DriveCriticalThreshold"] == DBNull.Value ? 0 : (decimal)rdr["DriveCriticalThreshold"];
-
-                    drv.Drive.DriveLabel = rdr["Label"] == DBNull.Value ? "" : (string)rdr["Label"];
-                    drv.Drive.InstanceName = (string)rdr["Instance"];                   
-                    drv.Drive.DriveLetter = (string)rdr["Name"];
-                    drv.Drive.DriveCapacityGB = (decimal)rdr["TotalGB"];
-                    drv.Drive.FreeSpaceGB = (decimal)rdr["FreeGB"];
-                    drv.Drive.DriveStatus = (Drive.DriveStatusEnum)rdr["Status"];
-                    drv.Drive.Inherited = (bool)rdr["IsInheritedThreshold"];
-                    drv.Drive.InstanceID = (Int32)rdr["InstanceID"];
-                    drv.Drive.DriveID = (Int32)rdr["DriveID"];
-                    drv.Drive.DriveCheckTypeChar = char.Parse((string)rdr["DriveCheckType"]);
-                    drv.DisplayInstanceName = InstanceIDs.Count > 1;
-                    drv.Drive.ConnectionString = ConnectionString;
-                    pnlDrives.Controls.Add(drv);
-                    drv.Dock = DockStyle.Top;
+                    ShowGridView();
                 }
+                else
+                {
+                    ShowDrivesView();
+                }
+          
             }
             configureInstanceThresholdsToolStripMenuItem.Enabled = InstanceIDs.Count == 1;
+        }
 
+        private DataGridView dgv;
+        public void ShowGridView()
+        {
+            gridview = true;
+            pnlDrives.Controls.Clear();
+            pnlSpacing.Visible = false;
+            dgv = new DataGridView();
+            dgv.AllowUserToAddRows = false;
+            dgv.AllowUserToDeleteRows = false;
+            dgv.ReadOnly = true;
+            dgv.Columns.Add(new DataGridViewTextBoxColumn() { Name = "Instance", DataPropertyName = "Instance", HeaderText = "Instance" });
+            dgv.Columns.Add(new DataGridViewTextBoxColumn() { Name = "Name", DataPropertyName = "Name", HeaderText = "Name" });
+            dgv.Columns.Add(new DataGridViewTextBoxColumn() { Name = "Label", DataPropertyName = "Label", HeaderText = "Label" });
+            dgv.Columns.Add(new DataGridViewTextBoxColumn() { Name = "TotalGB", DataPropertyName = "TotalGB", HeaderText = "Total GB", DefaultCellStyle = new DataGridViewCellStyle() { Format = "0.0" } });
+            dgv.Columns.Add(new DataGridViewTextBoxColumn() { Name = "FreeGB", DataPropertyName = "FreeGB", HeaderText = "Free GB", DefaultCellStyle = new DataGridViewCellStyle() { Format = "0.0" } });
+            dgv.Columns.Add(new DataGridViewTextBoxColumn() { Name = "PctFreeSpace", DataPropertyName = "PctFreeSpace", HeaderText = "Free %", DefaultCellStyle = new DataGridViewCellStyle() { Format = "P1" } });
+            dgv.Columns.Add(new DataGridViewTextBoxColumn() { Name = "DriveCheckConfiguredLevel", DataPropertyName = "DriveCheckConfiguredLevel", HeaderText = "Configured Level" });
+            dgv.Columns.Add(new DataGridViewTextBoxColumn() { Name = "Warning",DataPropertyName="DriveWarningThreshold", HeaderText = "Warning" });
+            dgv.Columns.Add(new DataGridViewTextBoxColumn() { Name = "Critical", DataPropertyName = "DriveCriticalThreshold", HeaderText = "Critical" });
+            dgv.Columns.Add(new DataGridViewLinkColumn() { Name = "Configure", HeaderText = "Configure", UseColumnTextForLinkValue = true, Text = "Configure" });
+            dgv.AutoGenerateColumns = false;
+            dgv.CellContentClick += Dgv_CellContentClick;
+            dgv.RowsAdded += Dgv_RowsAdded;
+            dgv.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.DisplayedCells;
+            dgv.DataSource = dvDrives;
+            dgv.Dock =  DockStyle.Fill;
+            pnlDrives.Controls.Add(dgv);
+            tsGridView.Enabled = false;
+            tsDrivesView.Enabled = dvDrives.Table.Rows.Count<= DrivesViewMaxRows;
+        }
+
+        private void Dgv_RowsAdded(object sender, DataGridViewRowsAddedEventArgs e)
+        {
+            for (Int32 idx = e.RowIndex; idx < e.RowIndex + e.RowCount; idx += 1)
+            {
+                var row = (DataRowView)dgv.Rows[idx].DataBoundItem;
+                var Status = (DBAChecksStatus.DBAChecksStatusEnum)row["Status"];
+                if(row["DriveCheckType"]!=DBNull.Value && (string)row["DriveCheckType"]== "G")
+                {
+                    dgv.Rows[idx].Cells["FreeGB"].Style.BackColor = DBAChecksStatus.GetStatusColour(Status);
+                    dgv.Rows[idx].Cells["PctFreeSpace"].Style.BackColor = Color.White;
+                    dgv.Rows[idx].Cells["Warning"].Style.Format = "0.0 GB";
+                    dgv.Rows[idx].Cells["Critical"].Style.Format = "0.0 GB";
+                }
+                else
+                {
+                    dgv.Rows[idx].Cells["PctFreeSpace"].Style.BackColor = DBAChecksStatus.GetStatusColour(Status);
+                    dgv.Rows[idx].Cells["FreeGB"].Style.BackColor = Color.White;
+                    dgv.Rows[idx].Cells["Warning"].Style.Format = "P2";
+                    dgv.Rows[idx].Cells["Critical"].Style.Format = "P2";
+                }
+           
+             
+                if ((bool)row["IsInheritedThreshold"])
+                {
+                    dgv.Rows[idx].Cells["Configure"].Style.Font = new Font(dgv.Font, FontStyle.Regular);
+                }
+                else
+                {
+                    dgv.Rows[idx].Cells["Configure"].Style.Font = new Font(dgv.Font, FontStyle.Bold);
+                }
+            }
+        }
+
+        private void Dgv_CellContentClick(object sender, DataGridViewCellEventArgs e)
+        {
+            if (dgv.Columns[e.ColumnIndex].Name == "Configure")
+            {
+                DataRowView row = (DataRowView)dgv.Rows[e.RowIndex].DataBoundItem;
+                Configure((Int32)row["InstanceID"], (Int32)row["DriveID"]);
+            }
+        }
+
+        public void ShowDrivesView()
+        {
+            gridview = false;
+            var driveControls = new List<DriveControl>();
+            pnlDrives.Controls.Clear();
+            pnlSpacing.Visible = true;
+            foreach (DataRow r in dvDrives.Table.Rows)
+            {
+                var drv = new DriveControl();
+                drv.Drive.WarningThreshold = r["DriveWarningThreshold"] == DBNull.Value ? 0 : (decimal)r["DriveWarningThreshold"];
+                drv.Drive.CriticalThreshold = r["DriveCriticalThreshold"] == DBNull.Value ? 0 : (decimal)r["DriveCriticalThreshold"];
+
+                drv.Drive.DriveLabel = r["Label"] == DBNull.Value ? "" : (string)r["Label"];
+                drv.Drive.InstanceName = (string)r["Instance"];
+                drv.Drive.DriveLetter = (string)r["Name"];
+                drv.Drive.DriveCapacityGB = (decimal)r["TotalGB"];
+                drv.Drive.FreeSpaceGB = (decimal)r["FreeGB"];
+                drv.Drive.DriveStatus = (Drive.DriveStatusEnum)r["Status"];
+                drv.Drive.Inherited = (bool)r["IsInheritedThreshold"];
+                drv.Drive.InstanceID = (Int32)r["InstanceID"];
+                drv.Drive.DriveID = (Int32)r["DriveID"];
+                drv.Drive.DriveCheckTypeChar = char.Parse((string)r["DriveCheckType"]);
+                drv.DisplayInstanceName = InstanceIDs.Count > 1;
+                drv.Drive.ConnectionString = ConnectionString;
+                drv.Dock = DockStyle.Top;
+                driveControls.Add(drv);
+            }
+            pnlDrives.Controls.AddRange(driveControls.ToArray());
+            tsDrivesView.Enabled = false;
+            tsGridView.Enabled = true;
         }
 
         public void Configure(Int32 InstanceID,Int32 DriveID)
@@ -181,6 +280,17 @@ namespace DBAChecksGUI.Properties
         private void OKToolStripMenuItem_Click(object sender, EventArgs e)
         {
             RefreshData();
+        }
+
+
+        private void tsDrivesView_Click(object sender, EventArgs e)
+        {
+            ShowDrivesView();
+        }
+
+        private void tsGridView_Click(object sender, EventArgs e)
+        {
+            ShowGridView();
         }
     }
 }

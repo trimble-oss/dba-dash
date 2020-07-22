@@ -314,6 +314,7 @@
     <None Include="Resources\FilterDropdown_16x.png" />
     <None Include="Resources\StatusCriticalError_16x.png" />
     <None Include="Resources\StatusOK_16x.png" />
+    <None Include="Resources\Table_16x.png" />
     <Content Include="SqlServerTypes\readme.htm" />
     <Content Include="SqlServerTypes\x64\msvcr120.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>

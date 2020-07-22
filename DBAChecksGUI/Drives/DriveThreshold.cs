@@ -81,7 +81,7 @@ namespace DBAChecksGUI
                 SqlCommand cmd = new SqlCommand(@"DriveThreshold_Get", cn);
                 cmd.CommandType = CommandType.StoredProcedure;
                 cmd.Parameters.AddWithValue("InstanceID", InstanceID);
-                cmd.Parameters.AddWithValue("DriveID", -1);
+                cmd.Parameters.AddWithValue("DriveID", DriveID);
                 var rdr = cmd.ExecuteReader();
                 if (rdr.Read())
                 {

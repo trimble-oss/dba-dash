@@ -202,7 +202,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(436, 234);
+            this.ClientSize = new System.Drawing.Size(416, 230);
             this.Controls.Add(this.bttnCancel);
             this.Controls.Add(this.bttnUpdate);
             this.Controls.Add(this.pnlThresholds);
@@ -210,7 +210,7 @@
             this.Controls.Add(this.OptDisabled);
             this.Controls.Add(this.optGB);
             this.Controls.Add(this.optPercent);
-            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedToolWindow;
             this.Name = "DriveThresholdConfig";
             this.Text = "Drive Threshold";
             this.Load += new System.EventHandler(this.DriveThresholdConfig_Load);
