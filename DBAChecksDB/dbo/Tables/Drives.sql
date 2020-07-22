@@ -7,15 +7,10 @@
     [UsedSpace]  AS             ([Capacity]-[FreeSpace]),
     [Label]      NVARCHAR (256) NULL,
     [IsActive]   BIT            NOT NULL,
-    PRIMARY KEY CLUSTERED ([DriveID] ASC),
+    CONSTRAINT [PK_Drives] PRIMARY KEY CLUSTERED ([DriveID] ASC),
     CONSTRAINT [FK_Drives_Instance] FOREIGN KEY ([InstanceID]) REFERENCES [dbo].[Instances] ([InstanceID]),
     CONSTRAINT [FK_Drives_SQLInstance] FOREIGN KEY ([InstanceID]) REFERENCES [dbo].[Instances] ([InstanceID])
 );
-
-
-
-
-
 
 GO
 CREATE UNIQUE NONCLUSTERED INDEX [IX_Drives_InstanceID_Name]

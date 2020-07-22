@@ -1,7 +1,7 @@
 ﻿CREATE TABLE [dbo].[ObjectType] (
     [ObjectType]      CHAR (3)     NOT NULL,
     [TypeDescription] VARCHAR (50) NOT NULL,
-    PRIMARY KEY CLUSTERED ([ObjectType] ASC)
+    CONSTRAINT [PK_ObjectType] PRIMARY KEY CLUSTERED ([ObjectType] ASC)
 );
 
 
