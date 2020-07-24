@@ -11,6 +11,7 @@ using System.Data.SqlClient;
 using LiveCharts.Wpf;
 using LiveCharts;
 using LiveCharts.Defaults;
+using static DBAChecksGUI.Performance.Performance;
 
 namespace DBAChecksGUI.Performance
 {
@@ -21,47 +22,19 @@ namespace DBAChecksGUI.Performance
             InitializeComponent();
         }
 
-        public Int32 Mins
-        {
-            get
-            {
-                return (Int32)ToDate.Subtract(FromDate).TotalMinutes;
-            }
-        }
-        LineSeries lineMBsec;
-        LineSeries lineIOPs;
-        LineSeries lineLatency;
-        LineSeries lineReadMBsec;
-        LineSeries writeMBsec;
+        Int32 mins;
         DateTime ioTime = DateTime.MinValue;
-        public DateTime FromDate { get; set; }
-        public DateTime ToDate { get; set; }
-        public string ConnectionString { get; set; }
-        public Int32 InstanceID { get; set; }
+        DateTime from;
+        DateTime to;
+        string connectionString;
+        Int32 instanceID;
+        DateGroup dateGrouping;
 
         List<LineSeries> series;
 
-        public string DateGrouping
-        {
-            get
-            {
-                if (Mins < 200)
-                {
-                    return "None";
-                }
-                if (Mins < 2000)
-                {
-                    return "10MIN";
-                }
-                if(Mins< 12000)
-                {
-                    return "60MIN";
-                }
-                return "DAY";
-            }
-        }
 
-        private static DataTable IOStats(Int32 instanceid, DateTime from, DateTime to, string connectionString,string dateGrouping="None")
+
+        private static DataTable IOStats(Int32 instanceid, DateTime from, DateTime to, string connectionString,DateGroup dateGrouping= DateGroup.None)
         {
             var dt = new DataTable();
             SqlConnection cn = new SqlConnection(connectionString);
@@ -72,7 +45,7 @@ namespace DBAChecksGUI.Performance
                 cmd.Parameters.AddWithValue("@InstanceID", instanceid);
                 cmd.Parameters.AddWithValue("@FromDate", from);
                 cmd.Parameters.AddWithValue("@ToDate", to);
-                cmd.Parameters.AddWithValue("DateGrouping", dateGrouping);
+                cmd.Parameters.AddWithValue("DateGrouping", dateGrouping.ToString().Replace("_",""));
                 cmd.CommandType = CommandType.StoredProcedure;
                 var da = new SqlDataAdapter(cmd);
                 da.Fill(dt);
@@ -90,48 +63,81 @@ namespace DBAChecksGUI.Performance
 
         }
 
+        public void RefreshData(Int32 InstanceID, DateTime fromDate, DateTime toDate, string connectionString, DateGroup dateGrouping)
+        {
+            if (this.dateGrouping != dateGrouping) {
+                this.dateGrouping = dateGrouping;
+                disableEnableDropdowns();
+            }
+            this.instanceID = InstanceID;
+            this.from = fromDate;
+            this.to = toDate;
+            this.connectionString = connectionString;
+            
+            mins = (Int32)toDate.Subtract(fromDate).TotalMinutes;
+            refreshData();
+            
+        }
 
+        private void disableEnableDropdowns()
+        {
+            foreach(ToolStripMenuItem ts in tsMeasures.DropDownItems)
+            {
+                ts.Visible= (!(dateGrouping== DateGroup.None && ts.Name.StartsWith("Max")));
+                ts.Checked = ts.Enabled ? ts.Checked : false;
+            }
+        }
 
-        public void RefreshData(bool update = false)
+        public void RefreshData()
+        {
+           
+            if (DateTime.UtcNow.Subtract(ioTime).TotalMinutes > 30 || dateGrouping !=  DateGroup.None)
+            {
+                from = DateTime.UtcNow.AddMinutes(-mins);
+                to = DateTime.UtcNow.AddMinutes(1);
+                refreshData(false);
+            }
+            else
+            {
+                from = ioTime.AddSeconds(1);
+                to = DateTime.UtcNow.AddMinutes(1);
+                refreshData(true);
+            }
+        }
+
+        private void refreshData(bool update = false)
         {
 
-            DateTime from = FromDate;
-            DateTime to = ToDate;
-            if (update)
-            {
-                if (DateTime.UtcNow.Subtract(ioTime).TotalMinutes > 30 || DateGrouping!="None")
-                {
-                    update = false;
-                }
-                else
-                {
-                    from = ioTime.AddSeconds(1);
-                    to = DateTime.UtcNow.AddMinutes(1);
-                }
-            }
             string DateFormat = "HH:mm";
-            if (Mins > 1440)
+            if (mins > 1440)
             {
                 DateFormat = "yyyy-MM-dd HH:mm";
             }
-            var dt = IOStats(InstanceID, from, to, ConnectionString, DateGrouping);
+            var dt = IOStats(instanceID, from, to, connectionString, dateGrouping);
             var cnt = dt.Rows.Count;
 
             var columns = new Dictionary<string, columnMetaData>
             {
                 {"MBsec", new columnMetaData{Alias="MB/sec",isVisible=true } },
-                {"MaxMBsec", new columnMetaData{Alias="Max MB/sec",isVisible=true } },
-                {"ReadMBsec", new columnMetaData{Alias="Read MB/sec",isVisible=false } },
-                {"MaxReadMBsec", new columnMetaData{Alias="Max Read MB/sec",isVisible=false } },
-                {"WriteMBsec", new columnMetaData{Alias="Write MB/sec",isVisible=false } },
-                {"MaxWriteMBsec", new columnMetaData{Alias="Max Write MB/sec",isVisible=false } },
-                {"IOPs", new columnMetaData{Alias="IOPs",isVisible=true,axis=1 } },
+                {"ReadMBsec", new columnMetaData{Alias="Read MB/sec",isVisible=false } },          
+                {"WriteMBsec", new columnMetaData{Alias="Write MB/sec",isVisible=false } },          
+                {"IOPs", new columnMetaData{Alias="IOPs",isVisible=true,axis=1 } },          
                 {"ReadIOPs", new columnMetaData{Alias="Read IOPs",isVisible=false,axis=1 } },
                 {"WriteIOPs", new columnMetaData{Alias="Write IOPs",isVisible=false ,axis=1} },
                 {"Latency", new columnMetaData{Alias="Latency",isVisible=true,axis=2 } },
                 {"ReadLatency", new columnMetaData{Alias="Read Latency",isVisible=false,axis=2} },
-                {"WriteLatency", new columnMetaData{Alias="Write Latency",isVisible=false,axis=2 } }
+                {"WriteLatency", new columnMetaData{Alias="Write Latency",isVisible=false,axis=2 } },
+                {"MaxMBsec", new columnMetaData{Alias="Max MB/sec",isVisible=false } },
+                {"MaxReadMBsec", new columnMetaData{Alias="Max Read MB/sec",isVisible=false } },
+                {"MaxWriteMBsec", new columnMetaData{Alias="Max Write MB/sec",isVisible=false } },
+                {"MaxIOPs", new columnMetaData{Alias="Max IOPs",isVisible=false,axis=1 } },
+                {"MaxReadIOPs", new columnMetaData{Alias="Max Read IOPs",isVisible=false,axis=1 } },
+                {"MaxWriteIOPs", new columnMetaData{Alias="Max Write IOPs",isVisible=false ,axis=1} },
+                {"MaxLatency", new columnMetaData{Alias="Max Latency",isVisible=false,axis=1 } },
+                {"MaxReadLatency", new columnMetaData{Alias="Max Read Latency",isVisible=false ,axis=1} },
+                {"MaxWriteLatency", new columnMetaData{Alias="Max Write Latency",isVisible=false ,axis=1} }
             };
+
             foreach(ToolStripMenuItem ts in tsMeasures.DropDownItems)
             {
                 columns[ts.Name].isVisible = ts.Checked;
@@ -165,7 +171,7 @@ namespace DBAChecksGUI.Performance
                         Title = columns[s].Alias,
                         Tag = s,
                         ScalesYAt = columns[s].axis,
-                        PointGeometrySize = Mins <= 100 ? 10 : 0
+                        PointGeometrySize = cnt <= 100 ? 10 : 0
                     }
                     );
                 }
@@ -222,16 +228,17 @@ namespace DBAChecksGUI.Performance
                 }
                 s.Visibility = c.isVisible ? System.Windows.Visibility.Visible : System.Windows.Visibility.Hidden;
                 if (addDropdowns)
-                {
+                {                  
                     var dd = new ToolStripMenuItem(c.Alias);
                     dd.Name = (string)s.Tag;
                     dd.CheckOnClick = true;
-                    dd.Checked = c.isVisible;
+                    dd.Visible = (!(dd.Name.StartsWith("Max") && dateGrouping ==  DateGroup.None));
+                    dd.Checked = dd.Enabled ? c.isVisible : false;
                     dd.Click += measureDropDown_Click;
                     tsMeasures.DropDownItems.Add(dd);
                 }
             }
-
+         
         }
 
         private void measureDropDown_Click(object sender, EventArgs e)

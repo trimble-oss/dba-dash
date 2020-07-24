@@ -24,43 +24,56 @@ namespace DBAChecksGUI.Performance
         {
             InitializeComponent();
         }
+        public enum DateGroup
+        {
+            None,
+            _10MIN,
+            _60MIN,
+            DAY
+        }
+
+        DateGroup dateGrp =  DateGroup.None;
 
         public void Refresh(Int32 mins = 60)
         {
-           //this.mins = mins;
+            
             var from = DateTime.UtcNow.AddMinutes(-mins);
             var to = DateTime.UtcNow.AddMinutes(1);           
             Refresh(from, to);
-            enableTimer(true);
+            if (dateGrp == DateGroup.None)
+            {
+                enableTimer(true);
+            }
+            else
+            {
+                enableTimer(false);
+                tsEnableTimer.Enabled = false;
+            }
         }
 
-        public string DateGrouping(Int32 Mins)
+        public DateGroup DateGrouping(Int32 Mins)
         {
             if (Mins < 200)
             {
-                return "None";
+                return  DateGroup.None;
             }
             if (Mins < 2000)
             {
-                return "10MIN";
+                return DateGroup._10MIN;
             }
             if (Mins < 12000)
             {
-                return "60MIN";
+                return DateGroup._60MIN;
             }
-            return "DAY";
+            return DateGroup.DAY;
         }
 
         public void Refresh(DateTime from,DateTime to)
         {
-            var dateGrp = DateGrouping((Int32)to.Subtract(from).TotalMinutes);
+            dateGrp = DateGrouping((Int32)to.Subtract(from).TotalMinutes);
             enableTimer(false);
-            ioPerformance1.ConnectionString = ConnectionString;
-            ioPerformance1.InstanceID = InstanceID;
-            ioPerformance1.FromDate = from;
-            ioPerformance1.ToDate = to;
-            ioPerformance1.RefreshData();
-            cpu1.RefreshData(from, to, ConnectionString, InstanceID,dateGrp);
+            ioPerformance1.RefreshData(InstanceID, from, to, ConnectionString, dateGrp);
+            cpu1.RefreshData(InstanceID,from, to, ConnectionString, dateGrp);
         }
 
 
@@ -85,11 +98,9 @@ namespace DBAChecksGUI.Performance
 
         private void timer1_Tick(object sender, EventArgs e)
         {
-            
-            //RefreshCPU(eventTime.AddSeconds(1), DateTime.UtcNow, true);
-            ioPerformance1.RefreshData(true);
+
+            ioPerformance1.RefreshData();
             cpu1.RefreshData();
-            //RefreshIO(ioTime.AddSeconds(1), DateTime.UtcNow, true);
         }
 
         private void tsDisableTimer_Click(object sender, EventArgs e)
@@ -121,6 +132,11 @@ namespace DBAChecksGUI.Performance
                 tsEnableTimer.Enabled = false;
             }
        
+        }
+
+        private void tsTime_Click_1(object sender, EventArgs e)
+        {
+
         }
     }
 }

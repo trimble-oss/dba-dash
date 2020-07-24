@@ -11,6 +11,7 @@ using LiveCharts.Defaults;
 using System.Data.SqlClient;
 using LiveCharts.Wpf;
 using LiveCharts;
+using static DBAChecksGUI.Performance.Performance;
 
 namespace DBAChecksGUI.Performance
 {
@@ -28,9 +29,9 @@ namespace DBAChecksGUI.Performance
         Int32 InstanceID;
         DateTime fromDate;
         DateTime toDate;
-        string DateGrouping;
+        DateGroup DateGrouping;
 
-        public void RefreshData(DateTime fromDate, DateTime toDate, string connectionString, Int32 InstanceID,string dateGrouping="None")
+        public void RefreshData(Int32 InstanceID,DateTime fromDate, DateTime toDate, string connectionString,DateGroup dateGrouping= DateGroup.None)
         {
             mins = (Int32)toDate.Subtract(fromDate).TotalMinutes;
             this.InstanceID = InstanceID;
@@ -58,7 +59,7 @@ namespace DBAChecksGUI.Performance
                 cmd.Parameters.AddWithValue("@InstanceID", InstanceID);
                 cmd.Parameters.AddWithValue("@FromDate", fromDate);
                 cmd.Parameters.AddWithValue("@ToDate", toDate);
-                cmd.Parameters.AddWithValue("@DateGrouping", DateGrouping);
+                cmd.Parameters.AddWithValue("@DateGrouping", DateGrouping.ToString().Replace("_",""));
                 cmd.CommandType = CommandType.StoredProcedure;
                 var rdr = cmd.ExecuteReader();
 

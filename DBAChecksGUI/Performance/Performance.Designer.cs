@@ -77,12 +77,13 @@
             this.tsTime.Name = "tsTime";
             this.tsTime.Size = new System.Drawing.Size(34, 24);
             this.tsTime.Text = "Time";
+            this.tsTime.Click += new System.EventHandler(this.tsTime_Click_1);
             // 
             // ts30Min
             // 
             this.ts30Min.CheckOnClick = true;
             this.ts30Min.Name = "ts30Min";
-            this.ts30Min.Size = new System.Drawing.Size(143, 26);
+            this.ts30Min.Size = new System.Drawing.Size(224, 26);
             this.ts30Min.Tag = "30";
             this.ts30Min.Text = "30 Mins";
             this.ts30Min.Click += new System.EventHandler(this.tsTime_Click);
@@ -92,7 +93,7 @@
             this.ts1Hr.Checked = true;
             this.ts1Hr.CheckState = System.Windows.Forms.CheckState.Checked;
             this.ts1Hr.Name = "ts1Hr";
-            this.ts1Hr.Size = new System.Drawing.Size(143, 26);
+            this.ts1Hr.Size = new System.Drawing.Size(224, 26);
             this.ts1Hr.Tag = "60";
             this.ts1Hr.Text = "1Hr";
             this.ts1Hr.Click += new System.EventHandler(this.tsTime_Click);
@@ -101,7 +102,7 @@
             // 
             this.ts2Hr.CheckOnClick = true;
             this.ts2Hr.Name = "ts2Hr";
-            this.ts2Hr.Size = new System.Drawing.Size(143, 26);
+            this.ts2Hr.Size = new System.Drawing.Size(224, 26);
             this.ts2Hr.Tag = "120";
             this.ts2Hr.Text = "2Hr";
             this.ts2Hr.Click += new System.EventHandler(this.tsTime_Click);
@@ -110,7 +111,7 @@
             // 
             this.ts3Hr.CheckOnClick = true;
             this.ts3Hr.Name = "ts3Hr";
-            this.ts3Hr.Size = new System.Drawing.Size(143, 26);
+            this.ts3Hr.Size = new System.Drawing.Size(224, 26);
             this.ts3Hr.Tag = "180";
             this.ts3Hr.Text = "3Hr";
             this.ts3Hr.Click += new System.EventHandler(this.tsTime_Click);
@@ -119,7 +120,7 @@
             // 
             this.ts6Hr.CheckOnClick = true;
             this.ts6Hr.Name = "ts6Hr";
-            this.ts6Hr.Size = new System.Drawing.Size(143, 26);
+            this.ts6Hr.Size = new System.Drawing.Size(224, 26);
             this.ts6Hr.Tag = "360";
             this.ts6Hr.Text = "6Hr";
             this.ts6Hr.Click += new System.EventHandler(this.tsTime_Click);
@@ -128,7 +129,7 @@
             // 
             this.ts12Hr.CheckOnClick = true;
             this.ts12Hr.Name = "ts12Hr";
-            this.ts12Hr.Size = new System.Drawing.Size(143, 26);
+            this.ts12Hr.Size = new System.Drawing.Size(224, 26);
             this.ts12Hr.Tag = "720";
             this.ts12Hr.Text = "12Hr";
             this.ts12Hr.Click += new System.EventHandler(this.tsTime_Click);
@@ -136,12 +137,12 @@
             // toolStripSeparator1
             // 
             this.toolStripSeparator1.Name = "toolStripSeparator1";
-            this.toolStripSeparator1.Size = new System.Drawing.Size(140, 6);
+            this.toolStripSeparator1.Size = new System.Drawing.Size(221, 6);
             // 
             // tsCustom
             // 
             this.tsCustom.Name = "tsCustom";
-            this.tsCustom.Size = new System.Drawing.Size(143, 26);
+            this.tsCustom.Size = new System.Drawing.Size(224, 26);
             this.tsCustom.Text = "Custom";
             this.tsCustom.Click += new System.EventHandler(this.customToolStripMenuItem_Click);
             // 
@@ -172,15 +173,11 @@
             // 
             // ioPerformance1
             // 
-            this.ioPerformance1.ConnectionString = null;
             this.ioPerformance1.Dock = System.Windows.Forms.DockStyle.Top;
-            this.ioPerformance1.FromDate = new System.DateTime(((long)(0)));
-            this.ioPerformance1.InstanceID = 0;
             this.ioPerformance1.Location = new System.Drawing.Point(0, 291);
             this.ioPerformance1.Name = "ioPerformance1";
             this.ioPerformance1.Size = new System.Drawing.Size(883, 294);
             this.ioPerformance1.TabIndex = 3;
-            this.ioPerformance1.ToDate = new System.DateTime(((long)(0)));
             // 
             // cpu1
             // 

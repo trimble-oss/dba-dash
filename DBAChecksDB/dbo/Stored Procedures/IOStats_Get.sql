@@ -27,7 +27,10 @@ WITH stats AS(
 			SUM(IOS.num_of_bytes_written) num_of_bytes_written,
 			SUM(IOS.io_stall_read_ms) io_stall_read_ms,
 			SUM(IOS.io_stall_write_ms) io_stall_write_ms,
-			MAX(IOS.sample_ms_diff) sample_ms_diff
+			MAX(IOS.sample_ms_diff) sample_ms_diff,
+			SUM(IOS.io_stall_read_ms)/(NULLIF(SUM(IOS.num_of_reads),0)*1.0) AS ReadLatency,
+			SUM(IOS.io_stall_write_ms)/(NULLIF(SUM(IOS.num_of_writes),0)*1.0) AS WriteLatency,
+			SUM(IOS.io_stall_read_ms+IOS.io_stall_write_ms)/(NULLIF(SUM(IOS.num_of_writes+IOS.num_of_reads),0)*1.0) AS Latency
 	FROM dbo.IOStats IOS
 	WHERE IOS.InstanceID = @InstanceID
 	AND IOS.SnapshotDate >= @FromDate
@@ -49,7 +52,10 @@ SELECT ' + @DateGroupingSQL + ' as SnapshotDate,
 		MAX((a.num_of_writes+a.num_of_reads)/(a.sample_ms_diff/1000.0)) AS MaxIOPs,
 		MAX(a.num_of_bytes_read/(a.sample_ms_diff/1000.0))/POWER(1024.0,2) AS MaxReadMBsec,
 		MAX(a.num_of_bytes_written/(a.sample_ms_diff/1000.0))/POWER(1024.0,2) AS MaxWriteMBsec,
-		MAX((a.num_of_bytes_written+a.num_of_bytes_read)/(a.sample_ms_diff/1000.0))/POWER(1024.0,2) AS MaxMBsec
+		MAX((a.num_of_bytes_written+a.num_of_bytes_read)/(a.sample_ms_diff/1000.0))/POWER(1024.0,2) AS MaxMBsec,
+		MAX(ReadLatency) MaxReadLatency,
+		MAX(WriteLatency) MaxWriteLatency,
+		MAX(Latency) MaxLatency
 FROM stats a
 GROUP BY ' + @DateGroupingSQL + '
 ORDER BY SnapshotDate'
