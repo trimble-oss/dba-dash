@@ -31,6 +31,7 @@ namespace DBAChecksGUI.Performance
         DateTime toDate;
         DateGroup DateGrouping;
 
+
         public void RefreshData(Int32 InstanceID,DateTime fromDate, DateTime toDate, string connectionString,DateGroup dateGrouping= DateGroup.None)
         {
             mins = (Int32)toDate.Subtract(fromDate).TotalMinutes;
@@ -65,18 +66,25 @@ namespace DBAChecksGUI.Performance
 
                 var sqlProcessValues = new ChartValues<DateTimePoint>();
                 var otherValues = new ChartValues<DateTimePoint>();
+                var maxValues = new ChartValues<DateTimePoint>();
 
                 while (rdr.Read())
                 {
                     eventTime = (DateTime)rdr["EventTime"];
                     sqlProcessValues.Add(new DateTimePoint(eventTime.ToLocalTime(), (Int32)rdr["SQLProcessCPU"] / 100.0));
-                    otherValues.Add(new DateTimePoint(eventTime.ToLocalTime(), (Int32)rdr["otherCPU"] / 100.0));
+                    otherValues.Add(new DateTimePoint(eventTime.ToLocalTime(), (Int32)rdr["OtherCPU"] / 100.0));
+                    maxValues.Add(new DateTimePoint(eventTime.ToLocalTime(), (Int32)rdr["MaxCPU"] / 100.0));
 
+                }
+                if(update && maxValues.Count == 0)
+                {
+                    return;
                 }
                 if (update)
                 {
                     chartCPU.Series[0].Values.AddRange(sqlProcessValues);
                     chartCPU.Series[1].Values.AddRange(otherValues);
+                    chartCPU.Series[1].Values.AddRange(maxValues);
                     while (chartCPU.Series[0].Values.Count > mins)
                     {
                         if (((DateTimePoint)chartCPU.Series[0].Values[0]).DateTime > DateTime.Now.AddMinutes(-mins))
@@ -87,6 +95,7 @@ namespace DBAChecksGUI.Performance
                         {
                             chartCPU.Series[0].Values.RemoveAt(0);
                             chartCPU.Series[1].Values.RemoveAt(0);
+                            chartCPU.Series[2].Values.RemoveAt(0);
                         }
                     }
                 }
@@ -103,6 +112,11 @@ namespace DBAChecksGUI.Performance
                         {
                         Title = "Other",
                         Values = otherValues
+                        },
+                        new LineSeries
+                        {
+                        Title = "Max CPU",
+                        Values = maxValues
                         }
                     };
                     chartCPU.AxisX.Clear();
@@ -120,6 +134,7 @@ namespace DBAChecksGUI.Performance
 
                     });
                     chartCPU.Series = s1;
+                    updateVisibility();
                 }
 
 
@@ -127,6 +142,23 @@ namespace DBAChecksGUI.Performance
 
         }
 
+        private void updateVisibility()
+        {
+            ((StackedAreaSeries)chartCPU.Series[0]).Visibility = AVGToolStripMenuItem.Checked ? System.Windows.Visibility.Visible : System.Windows.Visibility.Hidden;
+            ((StackedAreaSeries)chartCPU.Series[1]).Visibility = AVGToolStripMenuItem.Checked ? System.Windows.Visibility.Visible : System.Windows.Visibility.Hidden;
+            ((LineSeries)chartCPU.Series[2]).Visibility = MAXToolStripMenuItem.Checked ? System.Windows.Visibility.Visible : System.Windows.Visibility.Hidden;
+        }
 
+        private void AVGToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            MAXToolStripMenuItem.Checked = (!AVGToolStripMenuItem.Checked);
+            updateVisibility();
+        }
+
+        private void MAXToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            AVGToolStripMenuItem.Checked = (!MAXToolStripMenuItem.Checked);
+            updateVisibility();
+        }
     }
 }

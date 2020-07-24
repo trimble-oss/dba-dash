@@ -115,6 +115,10 @@ namespace DBAChecksGUI.Performance
             }
             var dt = IOStats(instanceID, from, to, connectionString, dateGrouping);
             var cnt = dt.Rows.Count;
+            if(cnt==0 && update)
+            {
+                return;
+            }
 
             var columns = new Dictionary<string, columnMetaData>
             {
@@ -133,9 +137,9 @@ namespace DBAChecksGUI.Performance
                 {"MaxIOPs", new columnMetaData{Alias="Max IOPs",isVisible=false,axis=1 } },
                 {"MaxReadIOPs", new columnMetaData{Alias="Max Read IOPs",isVisible=false,axis=1 } },
                 {"MaxWriteIOPs", new columnMetaData{Alias="Max Write IOPs",isVisible=false ,axis=1} },
-                {"MaxLatency", new columnMetaData{Alias="Max Latency",isVisible=false,axis=1 } },
-                {"MaxReadLatency", new columnMetaData{Alias="Max Read Latency",isVisible=false ,axis=1} },
-                {"MaxWriteLatency", new columnMetaData{Alias="Max Write Latency",isVisible=false ,axis=1} }
+                {"MaxLatency", new columnMetaData{Alias="Max Latency",isVisible=false,axis=2 } },
+                {"MaxReadLatency", new columnMetaData{Alias="Max Read Latency",isVisible=false ,axis=2} },
+                {"MaxWriteLatency", new columnMetaData{Alias="Max Write Latency",isVisible=false ,axis=2} }
             };
 
             foreach(ToolStripMenuItem ts in tsMeasures.DropDownItems)

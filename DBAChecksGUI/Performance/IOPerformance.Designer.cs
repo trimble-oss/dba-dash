@@ -38,9 +38,9 @@
             // chartIO
             // 
             this.chartIO.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.chartIO.Location = new System.Drawing.Point(0, 0);
+            this.chartIO.Location = new System.Drawing.Point(0, 27);
             this.chartIO.Name = "chartIO";
-            this.chartIO.Size = new System.Drawing.Size(773, 294);
+            this.chartIO.Size = new System.Drawing.Size(773, 267);
             this.chartIO.TabIndex = 4;
             this.chartIO.Text = "cartesianChart1";
             // 
@@ -77,8 +77,8 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.Controls.Add(this.toolStrip1);
             this.Controls.Add(this.chartIO);
+            this.Controls.Add(this.toolStrip1);
             this.Name = "IOPerformance";
             this.Size = new System.Drawing.Size(773, 294);
             this.toolStrip1.ResumeLayout(false);

@@ -33,14 +33,27 @@ namespace DBAChecksGUI.Performance
         }
 
         DateGroup dateGrp =  DateGroup.None;
+        Int32 mins=60;
+        DateTime customFrom = DateTime.MinValue;
+        DateTime customTo = DateTime.MinValue;
 
-        public void Refresh(Int32 mins = 60)
+        public void RefreshData(Int32 mins = 60)
         {
-            
+            this.mins = mins;
+            this.dateGrp = DateGrouping(mins);
             var from = DateTime.UtcNow.AddMinutes(-mins);
-            var to = DateTime.UtcNow.AddMinutes(1);           
-            Refresh(from, to);
-            if (dateGrp == DateGroup.None)
+            var to = DateTime.UtcNow.AddMinutes(1);
+            uncheckTime();
+            foreach(ToolStripMenuItem ts in tsTime.DropDownItems)
+            {
+                if (Int32.Parse((string)ts.Tag) == mins)
+                {
+                    ts.Checked = true;
+                    break;
+                }
+            }
+            RefreshData(from, to);
+            if (dateGrp == DateGroup.None && mins<=180)
             {
                 enableTimer(true);
             }
@@ -53,22 +66,22 @@ namespace DBAChecksGUI.Performance
 
         public DateGroup DateGrouping(Int32 Mins)
         {
-            if (Mins < 200)
+            if (Mins < 721)
             {
                 return  DateGroup.None;
             }
-            if (Mins < 2000)
+            if (Mins < 2881)
             {
                 return DateGroup._10MIN;
             }
-            if (Mins < 12000)
+            if (Mins < 46001)
             {
                 return DateGroup._60MIN;
             }
             return DateGroup.DAY;
         }
 
-        public void Refresh(DateTime from,DateTime to)
+        public void RefreshData(DateTime from,DateTime to)
         {
             dateGrp = DateGrouping((Int32)to.Subtract(from).TotalMinutes);
             enableTimer(false);
@@ -82,7 +95,7 @@ namespace DBAChecksGUI.Performance
         private void tsTime_Click(object sender, EventArgs e)
         {
             var itm = (ToolStripMenuItem)sender;
-            Refresh(Int32.Parse((string)itm.Tag));
+            RefreshData(Int32.Parse((string)itm.Tag));
             uncheckTime();
             itm.Checked = true;
         }
@@ -123,10 +136,23 @@ namespace DBAChecksGUI.Performance
         private void customToolStripMenuItem_Click(object sender, EventArgs e)
         {
             var frm = new CustomTimePicker();
+            if (mins > 0)
+            {
+                frm.FromDate = DateTime.Now.AddMinutes(-mins);
+                frm.ToDate = DateTime.Now;
+            }
+            else
+            {
+                frm.FromDate = customFrom;
+                frm.ToDate = customTo;
+            }
             frm.ShowDialog();
             if(frm.DialogResult == DialogResult.OK)
             {
-                Refresh(frm.FromDate.ToUniversalTime(), frm.ToDate.ToUniversalTime());
+                customFrom = frm.FromDate;
+                customTo = frm.ToDate;
+                mins = 0;
+                RefreshData(frm.FromDate.ToUniversalTime(), frm.ToDate.ToUniversalTime());
                 uncheckTime();
                 tsCustom.Checked = true;
                 tsEnableTimer.Enabled = false;

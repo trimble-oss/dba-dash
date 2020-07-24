@@ -155,7 +155,7 @@ namespace DBAChecksGUI
             {
                 performance1.InstanceID = n.InstanceID;
                 performance1.ConnectionString = connectionString;
-                performance1.Refresh();
+                performance1.RefreshData();
             }
         }
 
@@ -318,14 +318,14 @@ ORDER BY SchemaName,ObjectName
             {
                             
                 if (n.InstanceID > 0){
+                    allowedTabs.Add(tabPerformance);
                     allowedTabs.Add(tabSummary);
                     allowedTabs.Add(tabBackups);
                     allowedTabs.Add(tabDrives);              
                     allowedTabs.Add(tabLogShipping);
                     allowedTabs.Add(tabJobs);
                     allowedTabs.Add(tabSnapshotsSummary);
-                    allowedTabs.Add(tabLastGood);
-                    allowedTabs.Add(tabPerformance);
+                    allowedTabs.Add(tabLastGood);                 
                 }
                 allowedTabs.Add(tabTags);
             }

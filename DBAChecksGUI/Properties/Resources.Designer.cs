@@ -93,6 +93,16 @@ namespace DBAChecksGUI.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap AutoSum_16x {
+            get {
+                object obj = ResourceManager.GetObject("AutoSum_16x", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap Code_16x {
             get {
                 object obj = ResourceManager.GetObject("Code_16x", resourceCulture);
