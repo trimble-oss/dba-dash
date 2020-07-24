@@ -63,6 +63,16 @@ namespace DBAChecksGUI.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap AddComputedField_16x {
+            get {
+                object obj = ResourceManager.GetObject("AddComputedField_16x", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap ASX_Copy_blue_16x {
             get {
                 object obj = ResourceManager.GetObject("ASX_Copy_blue_16x", resourceCulture);
@@ -183,6 +193,16 @@ namespace DBAChecksGUI.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap StartTime_16x {
+            get {
+                object obj = ResourceManager.GetObject("StartTime_16x", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap StatusAnnotations_Warning_16xLG_color {
             get {
                 object obj = ResourceManager.GetObject("StatusAnnotations_Warning_16xLG_color", resourceCulture);
@@ -216,6 +236,16 @@ namespace DBAChecksGUI.Properties {
         internal static System.Drawing.Bitmap StatusOK_16x {
             get {
                 object obj = ResourceManager.GetObject("StatusOK_16x", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap StopTime_16x {
+            get {
+                object obj = ResourceManager.GetObject("StopTime_16x", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -259,6 +289,16 @@ namespace DBAChecksGUI.Properties {
         internal static System.Drawing.Bitmap Table_16x {
             get {
                 object obj = ResourceManager.GetObject("Table_16x", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap Time_16x {
+            get {
+                object obj = ResourceManager.GetObject("Time_16x", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

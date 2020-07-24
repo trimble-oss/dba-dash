@@ -45,6 +45,15 @@
     <Reference Include="ICSharpCode.TextEditor, Version=3.2.1.6466, Culture=neutral, PublicKeyToken=4d61825e8dd49f1a, processorArchitecture=MSIL">
       <HintPath>..\packages\ICSharpCode.TextEditor.3.2.1.6466\lib\Net20\ICSharpCode.TextEditor.dll</HintPath>
     </Reference>
+    <Reference Include="LiveCharts, Version=0.9.7.0, Culture=neutral, PublicKeyToken=0bc1f845d1ebb8df, processorArchitecture=MSIL">
+      <HintPath>..\packages\LiveCharts.0.9.7\lib\net45\LiveCharts.dll</HintPath>
+    </Reference>
+    <Reference Include="LiveCharts.WinForms, Version=0.9.7.1, Culture=neutral, PublicKeyToken=0bc1f845d1ebb8df, processorArchitecture=MSIL">
+      <HintPath>..\packages\LiveCharts.WinForms.0.9.7.1\lib\net45\LiveCharts.WinForms.dll</HintPath>
+    </Reference>
+    <Reference Include="LiveCharts.Wpf, Version=0.9.7.0, Culture=neutral, PublicKeyToken=0bc1f845d1ebb8df, processorArchitecture=MSIL">
+      <HintPath>..\packages\LiveCharts.Wpf.0.9.7\lib\net45\LiveCharts.Wpf.dll</HintPath>
+    </Reference>
     <Reference Include="Microsoft.ReportViewer.Common, Version=15.0.0.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.ReportingServices.ReportViewerControl.Winforms.150.1404.0\lib\net40\Microsoft.ReportViewer.Common.dll</HintPath>
     </Reference>
@@ -192,6 +201,30 @@
     <Compile Include="Main.Designer.cs">
       <DependentUpon>Main.cs</DependentUpon>
     </Compile>
+    <Compile Include="Performance\CPU.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Performance\CPU.Designer.cs">
+      <DependentUpon>CPU.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Performance\CustomTimePicker.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Performance\CustomTimePicker.Designer.cs">
+      <DependentUpon>CustomTimePicker.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Performance\IOPerformance.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Performance\IOPerformance.Designer.cs">
+      <DependentUpon>IOPerformance.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Performance\Performance.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Performance\Performance.Designer.cs">
+      <DependentUpon>Performance.cs</DependentUpon>
+    </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Drives\DrivesControl.cs">
@@ -260,6 +293,18 @@
     <EmbeddedResource Include="Drives\DrivesControl.resx">
       <DependentUpon>DrivesControl.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="Performance\CPU.resx">
+      <DependentUpon>CPU.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Performance\CustomTimePicker.resx">
+      <DependentUpon>CustomTimePicker.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Performance\IOPerformance.resx">
+      <DependentUpon>IOPerformance.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Performance\Performance.resx">
+      <DependentUpon>Performance.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
@@ -294,6 +339,10 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Resources\Time_16x.png" />
+    <None Include="Resources\StartTime_16x.png" />
+    <None Include="Resources\StopTime_16x.png" />
+    <None Include="Resources\AddComputedField_16x.png" />
     <Content Include="SqlServerTypes\readme.htm" />
     <Content Include="SqlServerTypes\x64\msvcr120.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -335,6 +384,5 @@
       <Name>DBAChecks</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

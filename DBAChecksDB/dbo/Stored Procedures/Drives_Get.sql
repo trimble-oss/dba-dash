@@ -18,7 +18,7 @@ SELECT @StatusSQL = CASE WHEN @StatusSQL='' THEN 'AND 1=2'
 
 DECLARE @SQL NVARCHAR(MAX)
 SET @SQL = N'
-SELECT D.DriveID,D.Name,D.InstanceID,D.Label,D.TotalGB,D.FreeGB,D.DriveCheckType,D.Status,D.DriveWarningThreshold,D.DriveCriticalThreshold,D.IsInheritedThreshold,D.Instance
+SELECT D.DriveID,D.Name,D.InstanceID,D.Label,D.TotalGB,D.FreeGB,D.DriveCheckType,D.Status,D.DriveWarningThreshold,D.DriveCriticalThreshold,D.IsInheritedThreshold,D.Instance,D.PctFreeSpace,D.DriveCheckType,D.DriveCheckConfiguredLevel
 FROM dbo.DriveStatus D
 WHERE ' + CASE WHEN @InstanceIDs IS NULL OR @InstanceIDs = '' 
 			THEN '1=1' 

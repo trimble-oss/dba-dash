@@ -151,6 +151,12 @@ namespace DBAChecksGUI
                 lastGoodCheckDBControl1.IncludeOK = n.InstanceID > 0;
                 lastGoodCheckDBControl1.RefreshData();
             }
+            if(tabs.SelectedTab == tabPerformance)
+            {
+                performance1.InstanceID = n.InstanceID;
+                performance1.ConnectionString = connectionString;
+                performance1.Refresh();
+            }
         }
 
     
@@ -319,6 +325,7 @@ ORDER BY SchemaName,ObjectName
                     allowedTabs.Add(tabJobs);
                     allowedTabs.Add(tabSnapshotsSummary);
                     allowedTabs.Add(tabLastGood);
+                    allowedTabs.Add(tabPerformance);
                 }
                 allowedTabs.Add(tabTags);
             }
