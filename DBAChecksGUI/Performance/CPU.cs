@@ -22,7 +22,7 @@ namespace DBAChecksGUI.Performance
             InitializeComponent();
         }
 
-        DateTime eventTime;
+        DateTime eventTime=DateTime.MinValue;
         Int32 mins;
 
         string connectionString;
@@ -34,6 +34,7 @@ namespace DBAChecksGUI.Performance
 
         public void RefreshData(Int32 InstanceID,DateTime fromDate, DateTime toDate, string connectionString,DateGroup dateGrouping= DateGroup.None)
         {
+            eventTime = DateTime.MinValue;
             mins = (Int32)toDate.Subtract(fromDate).TotalMinutes;
             this.InstanceID = InstanceID;
             this.fromDate = fromDate;
@@ -45,9 +46,12 @@ namespace DBAChecksGUI.Performance
 
         public void RefreshData()
         {
-            fromDate = eventTime.AddSeconds(1);
-            toDate = DateTime.UtcNow.AddSeconds(60);
-            refreshData(true);
+            if (eventTime > DateTime.MinValue)
+            {
+                fromDate = eventTime.AddSeconds(1);
+                toDate = DateTime.UtcNow.AddSeconds(60);
+                refreshData(true);
+            }
         }
 
         private void refreshData(bool update = false)

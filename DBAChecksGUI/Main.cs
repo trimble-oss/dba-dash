@@ -327,6 +327,7 @@ ORDER BY SchemaName,ObjectName
                     allowedTabs.Add(tabSnapshotsSummary);
                     allowedTabs.Add(tabLastGood);                 
                 }
+                allowedTabs.Add(tabFiles);
                 allowedTabs.Add(tabTags);
             }
             if (n.ObjectID > 0)
