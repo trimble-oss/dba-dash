@@ -29,9 +29,12 @@
         private void InitializeComponent()
         {
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle6 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle7 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle3 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle4 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle5 = new System.Windows.Forms.DataGridViewCellStyle();
             this.dgvFiles = new System.Windows.Forms.DataGridView();
             this.Instance = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Database = new System.Windows.Forms.DataGridViewTextBoxColumn();
@@ -67,6 +70,14 @@
             this.dgvFiles.AllowUserToAddRows = false;
             this.dgvFiles.AllowUserToDeleteRows = false;
             this.dgvFiles.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.DisplayedCells;
+            dataGridViewCellStyle1.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle1.BackColor = System.Drawing.SystemColors.Control;
+            dataGridViewCellStyle1.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            dataGridViewCellStyle1.ForeColor = System.Drawing.SystemColors.WindowText;
+            dataGridViewCellStyle1.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle1.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle1.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
+            this.dgvFiles.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle1;
             this.dgvFiles.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.dgvFiles.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
             this.Instance,
@@ -84,10 +95,26 @@
             this.ConfiguredLevel,
             this.FileSnapshotAge,
             this.Configure});
+            dataGridViewCellStyle6.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle6.BackColor = System.Drawing.SystemColors.Window;
+            dataGridViewCellStyle6.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            dataGridViewCellStyle6.ForeColor = System.Drawing.SystemColors.ControlText;
+            dataGridViewCellStyle6.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle6.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle6.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
+            this.dgvFiles.DefaultCellStyle = dataGridViewCellStyle6;
             this.dgvFiles.Dock = System.Windows.Forms.DockStyle.Fill;
             this.dgvFiles.Location = new System.Drawing.Point(0, 31);
             this.dgvFiles.Name = "dgvFiles";
             this.dgvFiles.ReadOnly = true;
+            dataGridViewCellStyle7.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle7.BackColor = System.Drawing.SystemColors.Control;
+            dataGridViewCellStyle7.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            dataGridViewCellStyle7.ForeColor = System.Drawing.SystemColors.WindowText;
+            dataGridViewCellStyle7.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle7.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle7.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
+            this.dgvFiles.RowHeadersDefaultCellStyle = dataGridViewCellStyle7;
             this.dgvFiles.RowHeadersWidth = 51;
             this.dgvFiles.RowTemplate.Height = 24;
             this.dgvFiles.Size = new System.Drawing.Size(1616, 255);
@@ -125,8 +152,8 @@
             // SizeMB
             // 
             this.SizeMB.DataPropertyName = "SizeMB";
-            dataGridViewCellStyle1.Format = "0.0";
-            this.SizeMB.DefaultCellStyle = dataGridViewCellStyle1;
+            dataGridViewCellStyle2.Format = "0.0";
+            this.SizeMB.DefaultCellStyle = dataGridViewCellStyle2;
             this.SizeMB.HeaderText = "SizeMB";
             this.SizeMB.MinimumWidth = 6;
             this.SizeMB.Name = "SizeMB";
@@ -136,9 +163,9 @@
             // UsedMB
             // 
             this.UsedMB.DataPropertyName = "UsedMB";
-            dataGridViewCellStyle2.Format = "N1";
-            dataGridViewCellStyle2.NullValue = null;
-            this.UsedMB.DefaultCellStyle = dataGridViewCellStyle2;
+            dataGridViewCellStyle3.Format = "N1";
+            dataGridViewCellStyle3.NullValue = null;
+            this.UsedMB.DefaultCellStyle = dataGridViewCellStyle3;
             this.UsedMB.HeaderText = "UsedMB";
             this.UsedMB.MinimumWidth = 6;
             this.UsedMB.Name = "UsedMB";
@@ -148,8 +175,8 @@
             // FreeMB
             // 
             this.FreeMB.DataPropertyName = "FreeMB";
-            dataGridViewCellStyle3.Format = "N1";
-            this.FreeMB.DefaultCellStyle = dataGridViewCellStyle3;
+            dataGridViewCellStyle4.Format = "N1";
+            this.FreeMB.DefaultCellStyle = dataGridViewCellStyle4;
             this.FreeMB.HeaderText = "Free (MB)";
             this.FreeMB.MinimumWidth = 6;
             this.FreeMB.Name = "FreeMB";
@@ -159,9 +186,9 @@
             // PctFree
             // 
             this.PctFree.DataPropertyName = "PctFree";
-            dataGridViewCellStyle4.Format = "P1";
-            dataGridViewCellStyle4.NullValue = null;
-            this.PctFree.DefaultCellStyle = dataGridViewCellStyle4;
+            dataGridViewCellStyle5.Format = "P1";
+            dataGridViewCellStyle5.NullValue = null;
+            this.PctFree.DefaultCellStyle = dataGridViewCellStyle5;
             this.PctFree.HeaderText = "Free %";
             this.PctFree.MinimumWidth = 6;
             this.PctFree.Name = "PctFree";

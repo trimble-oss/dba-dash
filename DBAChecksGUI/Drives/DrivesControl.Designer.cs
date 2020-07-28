@@ -29,6 +29,7 @@
         private void InitializeComponent()
         {
             this.pnlDrives = new System.Windows.Forms.Panel();
+            this.driveControl1 = new DBAChecksGUI.DriveControl();
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
             this.toolStripFilter = new System.Windows.Forms.ToolStripDropDownButton();
             this.criticalToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -39,9 +40,8 @@
             this.configureInstanceThresholdsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.configureRootThresholdsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.tsGridView = new System.Windows.Forms.ToolStripButton();
-            this.pnlSpacing = new System.Windows.Forms.Panel();
             this.tsDrivesView = new System.Windows.Forms.ToolStripButton();
-            this.driveControl1 = new DBAChecksGUI.DriveControl();
+            this.pnlSpacing = new System.Windows.Forms.Panel();
             this.pnlDrives.SuspendLayout();
             this.toolStrip1.SuspendLayout();
             this.SuspendLayout();
@@ -51,10 +51,49 @@
             this.pnlDrives.AutoScroll = true;
             this.pnlDrives.Controls.Add(this.driveControl1);
             this.pnlDrives.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.pnlDrives.Location = new System.Drawing.Point(0, 43);
+            this.pnlDrives.Location = new System.Drawing.Point(0, 47);
             this.pnlDrives.Name = "pnlDrives";
-            this.pnlDrives.Size = new System.Drawing.Size(735, 214);
+            this.pnlDrives.Size = new System.Drawing.Size(735, 210);
             this.pnlDrives.TabIndex = 3;
+            // 
+            // driveControl1
+            // 
+            this.driveControl1.DisplayInstanceName = false;
+            this.driveControl1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.driveControl1.Drive.ConnectionString = null;
+            this.driveControl1.Drive.CriticalThreshold = new decimal(new int[] {
+            0,
+            0,
+            0,
+            0});
+            this.driveControl1.Drive.DriveCapacity = ((long)(0));
+            this.driveControl1.Drive.DriveCapacityGB = new decimal(new int[] {
+            0,
+            0,
+            0,
+            0});
+            this.driveControl1.Drive.DriveCheckType = DBAChecksGUI.DriveThreshold.DriveCheckTypeEnum.None;
+            this.driveControl1.Drive.DriveCheckTypeChar = '-';
+            this.driveControl1.Drive.DriveID = 0;
+            this.driveControl1.Drive.DriveLabel = null;
+            this.driveControl1.Drive.DriveLetter = null;
+            this.driveControl1.Drive.FreeSpace = ((long)(0));
+            this.driveControl1.Drive.FreeSpaceGB = new decimal(new int[] {
+            0,
+            0,
+            0,
+            0});
+            this.driveControl1.Drive.Inherited = false;
+            this.driveControl1.Drive.InstanceID = 0;
+            this.driveControl1.Drive.WarningThreshold = new decimal(new int[] {
+            0,
+            0,
+            0,
+            0});
+            this.driveControl1.Location = new System.Drawing.Point(0, 0);
+            this.driveControl1.Name = "driveControl1";
+            this.driveControl1.Size = new System.Drawing.Size(735, 210);
+            this.driveControl1.TabIndex = 0;
             // 
             // toolStrip1
             // 
@@ -66,7 +105,7 @@
             this.tsDrivesView});
             this.toolStrip1.Location = new System.Drawing.Point(0, 0);
             this.toolStrip1.Name = "toolStrip1";
-            this.toolStrip1.Size = new System.Drawing.Size(735, 27);
+            this.toolStrip1.Size = new System.Drawing.Size(735, 31);
             this.toolStrip1.TabIndex = 7;
             this.toolStrip1.Text = "toolStrip1";
             // 
@@ -81,7 +120,7 @@
             this.toolStripFilter.Image = global::DBAChecksGUI.Properties.Resources.FilterDropdown_16x;
             this.toolStripFilter.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripFilter.Name = "toolStripFilter";
-            this.toolStripFilter.Size = new System.Drawing.Size(34, 24);
+            this.toolStripFilter.Size = new System.Drawing.Size(34, 28);
             this.toolStripFilter.Text = "Filter";
             // 
             // criticalToolStripMenuItem
@@ -125,7 +164,7 @@
             this.tsConfigure.Image = global::DBAChecksGUI.Properties.Resources.SettingsOutline_16x;
             this.tsConfigure.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsConfigure.Name = "tsConfigure";
-            this.tsConfigure.Size = new System.Drawing.Size(34, 24);
+            this.tsConfigure.Size = new System.Drawing.Size(34, 28);
             this.tsConfigure.Text = "Configure";
             // 
             // configureInstanceThresholdsToolStripMenuItem
@@ -148,17 +187,9 @@
             this.tsGridView.Image = global::DBAChecksGUI.Properties.Resources.Table_16x;
             this.tsGridView.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsGridView.Name = "tsGridView";
-            this.tsGridView.Size = new System.Drawing.Size(29, 24);
+            this.tsGridView.Size = new System.Drawing.Size(29, 28);
             this.tsGridView.Text = "Table View";
             this.tsGridView.Click += new System.EventHandler(this.tsGridView_Click);
-            // 
-            // pnlSpacing
-            // 
-            this.pnlSpacing.Dock = System.Windows.Forms.DockStyle.Top;
-            this.pnlSpacing.Location = new System.Drawing.Point(0, 27);
-            this.pnlSpacing.Name = "pnlSpacing";
-            this.pnlSpacing.Size = new System.Drawing.Size(735, 16);
-            this.pnlSpacing.TabIndex = 8;
             // 
             // tsDrivesView
             // 
@@ -166,48 +197,17 @@
             this.tsDrivesView.Image = global::DBAChecksGUI.Properties.Resources.Hard_Drive;
             this.tsDrivesView.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsDrivesView.Name = "tsDrivesView";
-            this.tsDrivesView.Size = new System.Drawing.Size(29, 24);
+            this.tsDrivesView.Size = new System.Drawing.Size(29, 28);
             this.tsDrivesView.Text = "Drives View";
             this.tsDrivesView.Click += new System.EventHandler(this.tsDrivesView_Click);
             // 
-            // driveControl1
+            // pnlSpacing
             // 
-            this.driveControl1.DisplayInstanceName = false;
-            this.driveControl1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.driveControl1.Drive.ConnectionString = null;
-            this.driveControl1.Drive.CriticalThreshold = new decimal(new int[] {
-            0,
-            0,
-            0,
-            0});
-            this.driveControl1.Drive.DriveCapacity = ((long)(0));
-            this.driveControl1.Drive.DriveCapacityGB = new decimal(new int[] {
-            0,
-            0,
-            0,
-            0});
-            this.driveControl1.Drive.DriveCheckType = DBAChecksGUI.DriveThreshold.DriveCheckTypeEnum.None;
-            this.driveControl1.Drive.DriveCheckTypeChar = '-';
-            this.driveControl1.Drive.DriveID = 0;
-            this.driveControl1.Drive.DriveLabel = null;
-            this.driveControl1.Drive.DriveLetter = null;
-            this.driveControl1.Drive.FreeSpace = ((long)(0));
-            this.driveControl1.Drive.FreeSpaceGB = new decimal(new int[] {
-            0,
-            0,
-            0,
-            0});
-            this.driveControl1.Drive.Inherited = false;
-            this.driveControl1.Drive.InstanceID = 0;
-            this.driveControl1.Drive.WarningThreshold = new decimal(new int[] {
-            0,
-            0,
-            0,
-            0});
-            this.driveControl1.Location = new System.Drawing.Point(0, 0);
-            this.driveControl1.Name = "driveControl1";
-            this.driveControl1.Size = new System.Drawing.Size(735, 214);
-            this.driveControl1.TabIndex = 0;
+            this.pnlSpacing.Dock = System.Windows.Forms.DockStyle.Top;
+            this.pnlSpacing.Location = new System.Drawing.Point(0, 31);
+            this.pnlSpacing.Name = "pnlSpacing";
+            this.pnlSpacing.Size = new System.Drawing.Size(735, 16);
+            this.pnlSpacing.TabIndex = 8;
             // 
             // DrivesControl
             // 

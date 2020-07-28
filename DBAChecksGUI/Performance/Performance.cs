@@ -87,6 +87,7 @@ namespace DBAChecksGUI.Performance
             enableTimer(false);
             ioPerformance1.RefreshData(InstanceID, from, to, ConnectionString, dateGrp);
             cpu1.RefreshData(InstanceID,from, to, ConnectionString, dateGrp);
+            waits1.RefreshData(InstanceID, from, to, ConnectionString, dateGrp);
         }
 
 
@@ -114,6 +115,7 @@ namespace DBAChecksGUI.Performance
 
             ioPerformance1.RefreshData();
             cpu1.RefreshData();
+            waits1.RefreshData();
         }
 
         private void tsDisableTimer_Click(object sender, EventArgs e)

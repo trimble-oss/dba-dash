@@ -211,6 +211,13 @@ namespace DBAChecksGUI.Performance
             else
             {
                 sc = chartIO.Series;
+                foreach(LineSeries s in sc)
+                {
+                    if(s.Values.Count>0 && DateTime.Now.Subtract(((DateTimePoint)s.Values[0]).DateTime).TotalMinutes > mins)
+                    {
+                        s.Values.RemoveAt(0);
+                    }
+                }
             };
 
             bool addDropdowns = tsMeasures.DropDownItems.Count == 0;

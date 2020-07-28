@@ -63,7 +63,7 @@
             this.toolStripLabel1.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
             this.toolStripLabel1.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
             this.toolStripLabel1.Name = "toolStripLabel1";
-            this.toolStripLabel1.Size = new System.Drawing.Size(38, 24);
+            this.toolStripLabel1.Size = new System.Drawing.Size(38, 28);
             this.toolStripLabel1.Text = "CPU";
             // 
             // tsAgg
@@ -75,7 +75,7 @@
             this.tsAgg.Image = global::DBAChecksGUI.Properties.Resources.AutoSum_16x;
             this.tsAgg.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsAgg.Name = "tsAgg";
-            this.tsAgg.Size = new System.Drawing.Size(34, 24);
+            this.tsAgg.Size = new System.Drawing.Size(34, 28);
             this.tsAgg.Text = "Aggregation";
             // 
             // AVGToolStripMenuItem
@@ -84,7 +84,7 @@
             this.AVGToolStripMenuItem.CheckOnClick = true;
             this.AVGToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
             this.AVGToolStripMenuItem.Name = "AVGToolStripMenuItem";
-            this.AVGToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            this.AVGToolStripMenuItem.Size = new System.Drawing.Size(124, 26);
             this.AVGToolStripMenuItem.Text = "AVG";
             this.AVGToolStripMenuItem.Click += new System.EventHandler(this.AVGToolStripMenuItem_Click);
             // 
@@ -92,7 +92,7 @@
             // 
             this.MAXToolStripMenuItem.CheckOnClick = true;
             this.MAXToolStripMenuItem.Name = "MAXToolStripMenuItem";
-            this.MAXToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            this.MAXToolStripMenuItem.Size = new System.Drawing.Size(124, 26);
             this.MAXToolStripMenuItem.Text = "MAX";
             this.MAXToolStripMenuItem.Click += new System.EventHandler(this.MAXToolStripMenuItem_Click);
             // 

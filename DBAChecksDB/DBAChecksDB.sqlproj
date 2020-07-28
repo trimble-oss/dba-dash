@@ -344,6 +344,7 @@
     <Build Include="dbo\Stored Procedures\LastGoodCheckDB_Get.sql" />
     <Build Include="dbo\Stored Procedures\IOStats_Get.sql" />
     <Build Include="dbo\Stored Procedures\CPU_Get.sql" />
+    <Build Include="dbo\Stored Procedures\Waits_Get.sql" />
   </ItemGroup>
   <ItemGroup>
     <PostDeploy Include="Script.PostDeployment1.sql" />
