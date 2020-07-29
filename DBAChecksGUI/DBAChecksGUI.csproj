@@ -353,6 +353,7 @@
     <None Include="Resources\StopTime_16x.png" />
     <None Include="Resources\AddComputedField_16x.png" />
     <None Include="Resources\AutoSum_16x.png" />
+    <None Include="Resources\LineChart_16x.png" />
     <Content Include="SqlServerTypes\readme.htm" />
     <Content Include="SqlServerTypes\x64\msvcr120.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>

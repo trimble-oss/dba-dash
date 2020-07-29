@@ -29,7 +29,19 @@ namespace DBAChecksGUI.Performance
         string connectionString;
         Int32 instanceID;
         DateGroup dateGrouping;
-
+        bool smoothLines = true;
+        public bool SmoothLines { 
+            get {
+                return smoothLines;
+            }
+            set {
+                smoothLines = value;
+                foreach(LineSeries s in chartIO.Series)
+                {
+                    s.LineSmoothness = smoothLines ? 1 : 0;
+                }
+            }
+        }
         List<LineSeries> series;
 
 
@@ -175,7 +187,8 @@ namespace DBAChecksGUI.Performance
                         Title = columns[s].Alias,
                         Tag = s,
                         ScalesYAt = columns[s].axis,
-                        PointGeometrySize = cnt <= 100 ? 10 : 0
+                        PointGeometrySize = cnt <= 100 ? 10 : 0,
+                        LineSmoothness = SmoothLines ? 1 : 0
                     }
                     );
                 }

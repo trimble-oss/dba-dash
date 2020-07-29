@@ -30,6 +30,30 @@ namespace DBAChecksGUI.Performance
         DateTime fromDate;
         DateTime toDate;
         DateGroup DateGrouping;
+        bool smoothLines = true;
+        public bool SmoothLines
+        {
+            get
+            {
+                return smoothLines;
+            }
+            set
+            {
+                smoothLines = value;
+                foreach (Series s in chartCPU.Series)
+                {
+                    if(s.GetType() == typeof(LineSeries))
+                    {
+                        ((LineSeries)s).LineSmoothness = smoothLines ? 1 : 0;
+                    }
+                    else if (s.GetType() == typeof(StackedAreaSeries))
+                    {
+                        ((StackedAreaSeries)s).LineSmoothness = smoothLines ? 1 : 0;
+                    }
+           
+                }
+            }
+        }
 
 
         public void RefreshData(Int32 InstanceID,DateTime fromDate, DateTime toDate, string connectionString,DateGroup dateGrouping= DateGroup.None)
@@ -113,17 +137,20 @@ namespace DBAChecksGUI.Performance
                         new StackedAreaSeries
                         {
                             Title="SQL Process",
-                            Values = sqlProcessValues
+                            Values = sqlProcessValues,
+                            LineSmoothness = SmoothLines ? 1 : 0
                         },
                         new StackedAreaSeries
                         {
                         Title = "Other",
-                        Values = otherValues
+                        Values = otherValues,
+                        LineSmoothness = SmoothLines ? 1 : 0
                         },
                         new LineSeries
                         {
                         Title = "Max CPU",
-                        Values = maxValues
+                        Values = maxValues,
+                        LineSmoothness = SmoothLines ? 1 : 0
                         }
                     };
                     chartCPU.AxisX.Clear();

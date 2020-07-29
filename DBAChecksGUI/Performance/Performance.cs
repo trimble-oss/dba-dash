@@ -37,12 +37,22 @@ namespace DBAChecksGUI.Performance
         DateTime customFrom = DateTime.MinValue;
         DateTime customTo = DateTime.MinValue;
 
-        public void RefreshData(Int32 mins = 60)
+        public void RefreshData(Int32 mins)
         {
             this.mins = mins;
+            RefreshData();
+        }
+
+        public void RefreshData()
+        {
             this.dateGrp = DateGrouping(mins);
             var from = DateTime.UtcNow.AddMinutes(-mins);
             var to = DateTime.UtcNow.AddMinutes(1);
+            if (mins == 0)
+            {
+                from = customFrom;
+                to = customTo;
+            }
             uncheckTime();
             foreach(ToolStripMenuItem ts in tsTime.DropDownItems)
             {
@@ -176,6 +186,12 @@ namespace DBAChecksGUI.Performance
         private void tsTime_Click_1(object sender, EventArgs e)
         {
 
+        }
+
+        private void smoothLinesToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            ioPerformance1.SmoothLines = smoothLinesToolStripMenuItem.Checked;
+            cpu1.SmoothLines = smoothLinesToolStripMenuItem.Checked;
         }
     }
 }

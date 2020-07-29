@@ -45,6 +45,8 @@
             this.ioPerformance1 = new DBAChecksGUI.Performance.IOPerformance();
             this.cpu1 = new DBAChecksGUI.Performance.CPU();
             this.waits1 = new DBAChecksGUI.Performance.Waits();
+            this.toolStripDropDownButton1 = new System.Windows.Forms.ToolStripDropDownButton();
+            this.smoothLinesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -54,7 +56,8 @@
             this.toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.tsTime,
             this.tsEnableTimer,
-            this.tsDisableTimer});
+            this.tsDisableTimer,
+            this.toolStripDropDownButton1});
             this.toolStrip1.Location = new System.Drawing.Point(0, 0);
             this.toolStrip1.Name = "toolStrip1";
             this.toolStrip1.Size = new System.Drawing.Size(883, 31);
@@ -196,6 +199,27 @@
             this.waits1.Size = new System.Drawing.Size(883, 282);
             this.waits1.TabIndex = 5;
             // 
+            // toolStripDropDownButton1
+            // 
+            this.toolStripDropDownButton1.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.toolStripDropDownButton1.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.smoothLinesToolStripMenuItem});
+            this.toolStripDropDownButton1.Image = global::DBAChecksGUI.Properties.Resources.LineChart_16x;
+            this.toolStripDropDownButton1.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolStripDropDownButton1.Name = "toolStripDropDownButton1";
+            this.toolStripDropDownButton1.Size = new System.Drawing.Size(34, 28);
+            this.toolStripDropDownButton1.Text = "Chart Options";
+            // 
+            // smoothLinesToolStripMenuItem
+            // 
+            this.smoothLinesToolStripMenuItem.Checked = true;
+            this.smoothLinesToolStripMenuItem.CheckOnClick = true;
+            this.smoothLinesToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.smoothLinesToolStripMenuItem.Name = "smoothLinesToolStripMenuItem";
+            this.smoothLinesToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            this.smoothLinesToolStripMenuItem.Text = "Smooth Lines";
+            this.smoothLinesToolStripMenuItem.Click += new System.EventHandler(this.smoothLinesToolStripMenuItem_Click);
+            // 
             // Performance
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
@@ -230,5 +254,7 @@
         private System.Windows.Forms.ToolStripMenuItem tsCustom;
         private CPU cpu1;
         private Waits waits1;
+        private System.Windows.Forms.ToolStripDropDownButton toolStripDropDownButton1;
+        private System.Windows.Forms.ToolStripMenuItem smoothLinesToolStripMenuItem;
     }
 }

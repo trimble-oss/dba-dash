@@ -40,9 +40,9 @@
             // chartCPU
             // 
             this.chartCPU.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.chartCPU.Location = new System.Drawing.Point(0, 31);
+            this.chartCPU.Location = new System.Drawing.Point(0, 27);
             this.chartCPU.Name = "chartCPU";
-            this.chartCPU.Size = new System.Drawing.Size(878, 233);
+            this.chartCPU.Size = new System.Drawing.Size(878, 237);
             this.chartCPU.TabIndex = 1;
             this.chartCPU.Text = "CPU";
             // 
@@ -54,7 +54,7 @@
             this.tsAgg});
             this.toolStrip1.Location = new System.Drawing.Point(0, 0);
             this.toolStrip1.Name = "toolStrip1";
-            this.toolStrip1.Size = new System.Drawing.Size(878, 31);
+            this.toolStrip1.Size = new System.Drawing.Size(878, 27);
             this.toolStrip1.TabIndex = 2;
             this.toolStrip1.Text = "toolStrip1";
             // 
@@ -63,7 +63,7 @@
             this.toolStripLabel1.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
             this.toolStripLabel1.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
             this.toolStripLabel1.Name = "toolStripLabel1";
-            this.toolStripLabel1.Size = new System.Drawing.Size(38, 28);
+            this.toolStripLabel1.Size = new System.Drawing.Size(38, 24);
             this.toolStripLabel1.Text = "CPU";
             // 
             // tsAgg
@@ -75,7 +75,7 @@
             this.tsAgg.Image = global::DBAChecksGUI.Properties.Resources.AutoSum_16x;
             this.tsAgg.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsAgg.Name = "tsAgg";
-            this.tsAgg.Size = new System.Drawing.Size(34, 28);
+            this.tsAgg.Size = new System.Drawing.Size(34, 24);
             this.tsAgg.Text = "Aggregation";
             // 
             // AVGToolStripMenuItem
