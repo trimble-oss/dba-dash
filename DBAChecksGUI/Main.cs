@@ -49,6 +49,10 @@ namespace DBAChecksGUI
                 var cfg= CollectionConfig.Deserialize(jsonConfig);
                 connectionString = cfg.DestinationConnection.ConnectionString;
             }
+            SqlConnectionStringBuilder builder = new SqlConnectionStringBuilder(connectionString);
+            builder.ApplicationName = "DBAChecksGUI";
+            connectionString = builder.ConnectionString;
+
             addInstanes();
             buildTagMenu();
             loadSelectedTab();
@@ -311,6 +315,10 @@ ORDER BY SchemaName,ObjectName
             }
             else if(n.Type== SQLTreeItem.TreeType.Database)
             {
+                if (((SQLTreeItem)n.Parent).InstanceID == 0) //azure
+                {
+                    allowedTabs.Add(tabPerformance);
+                }
                 allowedTabs.Add(tabFiles);
                 allowedTabs.Add(tabSnapshotsSummary);
             }

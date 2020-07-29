@@ -12,11 +12,15 @@ IF @ToDate IS NULL
 	SET @ToDate = GETUTCDATE()
 DECLARE @SQL NVARCHAR(MAX)
 DECLARE @DateGroupingSQL NVARCHAR(MAX)
+DECLARE @Table NVARCHAR(MAX)
 SELECT @DateGroupingSQL= CASE WHEN @DateGrouping = 'None' THEN 'W.SnapshotDate'
 			WHEN @DateGrouping ='10MIN' THEN 'CONVERT(DATETIME,LEFT(CONVERT(VARCHAR,W.SnapshotDate,120),15) + ''0'',120)'
 			WHEN @DateGrouping = '60MIN' THEN 'CONVERT(DATETIME,LEFT(CONVERT(VARCHAR,W.SnapshotDate,120),13) + '':00'',120)'
 			WHEN @DateGrouping ='DAY' THEN 'CAST(CAST(W.SnapshotDate as DATE) as DATETIME)'
 			ELSE NULL END
+
+
+SELECT @Table = CASE WHEN @DateGrouping IN('60MIN','DAY') THEN 'dbo.Waits_60MIN' ELSE 'dbo.Waits' END
 
 
 SET @SQL = N'
@@ -25,7 +29,7 @@ SELECT ' + @DateGroupingSQL + ' AS [Time],
 			WT.WaitType,
 			SUM(W.wait_time_ms)*1000.0 / SUM(W.sample_ms_diff) WaitTimeMsPerSec,
 			ROW_NUMBER() OVER(PARTITION BY ' + @DateGroupingSQL + ' ORDER BY SUM(W.wait_time_ms) DESC) rnum
-FROM dbo.Waits W 
+FROM ' + @Table + ' W 
 JOIN dbo.WaitType WT ON WT.WaitTypeID = W.WaitTypeID
 WHERE W.SnapshotDate>= @FromDate
 AND W.SnapshotDate <= @ToDate

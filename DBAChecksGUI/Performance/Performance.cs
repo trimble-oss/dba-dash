@@ -40,27 +40,18 @@ namespace DBAChecksGUI.Performance
         public void RefreshData(Int32 mins)
         {
             this.mins = mins;
+            this.dateGrp = DateGrouping(mins);
             RefreshData();
         }
 
         public void RefreshData()
-        {
-            this.dateGrp = DateGrouping(mins);
+        {           
             var from = DateTime.UtcNow.AddMinutes(-mins);
             var to = DateTime.UtcNow.AddMinutes(1);
             if (mins == 0)
             {
                 from = customFrom;
                 to = customTo;
-            }
-            uncheckTime();
-            foreach(ToolStripMenuItem ts in tsTime.DropDownItems)
-            {
-                if (Int32.Parse((string)ts.Tag) == mins)
-                {
-                    ts.Checked = true;
-                    break;
-                }
             }
             try
             {
@@ -93,7 +84,7 @@ namespace DBAChecksGUI.Performance
             {
                 return DateGroup._10MIN;
             }
-            if (Mins < 46001)
+            if (Mins < 20161)
             {
                 return DateGroup._60MIN;
             }
@@ -124,10 +115,12 @@ namespace DBAChecksGUI.Performance
 
         private void uncheckTime()
         {
-            var items = new List<ToolStripMenuItem>() { ts30Min, ts1Hr, ts2Hr, ts3Hr, ts6Hr, ts12Hr,tsCustom };
-            foreach (var ts in items)
+            foreach (var ts in tsTime.DropDownItems)
             {
-                ts.Checked = false;
+                if (ts.GetType() == typeof(ToolStripMenuItem))
+                {
+                    ((ToolStripMenuItem)ts).Checked = false;
+                }
             }
         }
 
@@ -174,6 +167,7 @@ namespace DBAChecksGUI.Performance
             {
                 customFrom = frm.FromDate;
                 customTo = frm.ToDate;
+                this.dateGrp = DateGrouping((Int32)customTo.Subtract(customFrom).TotalMinutes);
                 mins = 0;
                 RefreshData(frm.FromDate.ToUniversalTime(), frm.ToDate.ToUniversalTime());
                 uncheckTime();
