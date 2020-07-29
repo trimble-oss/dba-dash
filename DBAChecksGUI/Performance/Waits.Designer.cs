@@ -37,9 +37,9 @@
             // waitChart
             // 
             this.waitChart.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.waitChart.Location = new System.Drawing.Point(0, 0);
+            this.waitChart.Location = new System.Drawing.Point(0, 31);
             this.waitChart.Name = "waitChart";
-            this.waitChart.Size = new System.Drawing.Size(492, 282);
+            this.waitChart.Size = new System.Drawing.Size(492, 251);
             this.waitChart.TabIndex = 0;
             this.waitChart.Text = "cartesianChart1";
             // 
@@ -66,8 +66,8 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.Controls.Add(this.toolStrip1);
             this.Controls.Add(this.waitChart);
+            this.Controls.Add(this.toolStrip1);
             this.Name = "Waits";
             this.Size = new System.Drawing.Size(492, 282);
             this.toolStrip1.ResumeLayout(false);

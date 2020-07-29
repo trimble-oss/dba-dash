@@ -105,7 +105,7 @@ namespace DBAChecksGUI.Performance
                         values = new ChartValues<DateTimePoint>();
                         current = waitType;
                     }
-                    values.Add(new DateTimePoint(((DateTime)r["Time"]).ToLocalTime(), (double)(Int64)r["WaitTimeMsPerSec"]));
+                    values.Add(new DateTimePoint(((DateTime)r["Time"]).ToLocalTime(), (double)(decimal)r["WaitTimeMsPerSec"]));
                 }
                 if (values.Count > 0)
                 {
@@ -183,10 +183,18 @@ namespace DBAChecksGUI.Performance
                     }
                     waitChart.Series = s1;
 
-
+                    string format = "t";
+                    if (fromMins >= 1440)
+                    {
+                        format = "yyyy-MM-dd";
+                    }
+                    else if (mins >= 1440)
+                    {
+                        format = "yyyy-MM-dd HH:mm";
+                    }
                     waitChart.AxisX.Add(new Axis
                     {
-                        LabelFormatter = value => new DateTime((long)(value * TimeSpan.FromMinutes(fromMins).Ticks)).ToString("t")
+                        LabelFormatter = value => new DateTime((long)(value * TimeSpan.FromMinutes(fromMins).Ticks)).ToString(format)
                     });
                     waitChart.AxisY.Add(new Axis
                     {

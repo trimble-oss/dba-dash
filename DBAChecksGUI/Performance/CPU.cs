@@ -88,7 +88,7 @@ namespace DBAChecksGUI.Performance
                 {
                     chartCPU.Series[0].Values.AddRange(sqlProcessValues);
                     chartCPU.Series[1].Values.AddRange(otherValues);
-                    chartCPU.Series[1].Values.AddRange(maxValues);
+                    chartCPU.Series[2].Values.AddRange(maxValues);
                     while (chartCPU.Series[0].Values.Count > mins)
                     {
                         if (((DateTimePoint)chartCPU.Series[0].Values[0]).DateTime > DateTime.Now.AddMinutes(-mins))
@@ -97,9 +97,12 @@ namespace DBAChecksGUI.Performance
                         }
                         else
                         {
-                            chartCPU.Series[0].Values.RemoveAt(0);
-                            chartCPU.Series[1].Values.RemoveAt(0);
-                            chartCPU.Series[2].Values.RemoveAt(0);
+                            if (chartCPU.Series[0].Values.Count > 0 && DateTime.Now.Subtract(((DateTimePoint)chartCPU.Series[0].Values[0]).DateTime).TotalMinutes > mins)
+                            {
+                                chartCPU.Series[0].Values.RemoveAt(0);
+                                chartCPU.Series[1].Values.RemoveAt(0);
+                                chartCPU.Series[2].Values.RemoveAt(0);
+                            }
                         }
                     }
                 }

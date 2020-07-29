@@ -52,7 +52,16 @@ namespace DBAChecksGUI.Performance
                     break;
                 }
             }
-            RefreshData(from, to);
+            try
+            {
+                RefreshData(from, to);
+            }
+            catch(Exception ex)
+            {
+                MessageBox.Show(ex.ToString(), "Chart Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                tsEnableTimer.Enabled = false;
+                return;
+            }
             if (dateGrp == DateGroup.None && mins<=180)
             {
                 enableTimer(true);
@@ -66,7 +75,7 @@ namespace DBAChecksGUI.Performance
 
         public DateGroup DateGrouping(Int32 Mins)
         {
-            if (Mins < 721)
+            if (Mins < 181)
             {
                 return  DateGroup.None;
             }
@@ -85,9 +94,11 @@ namespace DBAChecksGUI.Performance
         {
             dateGrp = DateGrouping((Int32)to.Subtract(from).TotalMinutes);
             enableTimer(false);
+
             ioPerformance1.RefreshData(InstanceID, from, to, ConnectionString, dateGrp);
-            cpu1.RefreshData(InstanceID,from, to, ConnectionString, dateGrp);
+            cpu1.RefreshData(InstanceID, from, to, ConnectionString, dateGrp);
             waits1.RefreshData(InstanceID, from, to, ConnectionString, dateGrp);
+          
         }
 
 
