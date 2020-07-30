@@ -103,7 +103,7 @@ namespace DBAChecksGUI.Performance
         public void RefreshData()
         {
            
-            if (DateTime.UtcNow.Subtract(ioTime).TotalMinutes > 30 || dateGrouping !=  DateGroup.None)
+            if (DateTime.UtcNow.Subtract(ioTime).TotalMinutes > 30 || dateGrouping !=  DateGroup._1MIN)
             {
                 from = DateTime.UtcNow.AddMinutes(-mins);
                 to = DateTime.UtcNow.AddMinutes(1);

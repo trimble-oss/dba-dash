@@ -27,8 +27,10 @@ namespace DBAChecksGUI.Performance
         public enum DateGroup
         {
             None,
+            _1MIN,
             _10MIN,
             _60MIN,
+            _120MIN,
             DAY
         }
 
@@ -63,7 +65,7 @@ namespace DBAChecksGUI.Performance
                 tsEnableTimer.Enabled = false;
                 return;
             }
-            if (dateGrp == DateGroup.None && mins<=180)
+            if (dateGrp == DateGroup._1MIN && mins<=180)
             {
                 enableTimer(true);
             }
@@ -78,15 +80,19 @@ namespace DBAChecksGUI.Performance
         {
             if (Mins < 181)
             {
-                return  DateGroup.None;
+                return  DateGroup._1MIN;
             }
             if (Mins < 2881)
             {
                 return DateGroup._10MIN;
             }
-            if (Mins < 20161)
+            if (Mins < 11520)
             {
                 return DateGroup._60MIN;
+            }
+            if (Mins < 28800)
+            {
+                return DateGroup._120MIN;
             }
             return DateGroup.DAY;
         }

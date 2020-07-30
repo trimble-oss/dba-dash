@@ -12,8 +12,10 @@ IF @ToDate IS NULL
 DECLARE @SQL NVARCHAR(MAX)
 DECLARE @DateGroupingSQL NVARCHAR(MAX)
 SELECT @DateGroupingSQL= CASE WHEN @DateGrouping = 'None' THEN 'EventTime'
+			WHEN @DateGrouping = '1MIN' THEN 'DATEADD(mi, DATEDIFF(mi, 0, DATEADD(s, 30, EventTime)), 0)'
 			WHEN @DateGrouping ='10MIN' THEN 'CONVERT(DATETIME,LEFT(CONVERT(VARCHAR,EventTime,120),15) + ''0'',120)'
 			WHEN @DateGrouping = '60MIN' THEN 'CONVERT(DATETIME,LEFT(CONVERT(VARCHAR,EventTime,120),13) + '':00'',120)'
+			WHEN @DateGrouping = '120MIN' THEN 'DATEADD(hh,DATEPART(hh,EventTime) - DATEPART(hh,EventTime) % 2, CAST(CAST(EventTime AS DATE) AS DATETIME))'
 			WHEN @DateGrouping ='DAY' THEN 'CAST(CAST(EventTime as DATE) as DATETIME)'
 			ELSE NULL END
 

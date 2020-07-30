@@ -80,7 +80,7 @@
             dataGridViewCellStyle2.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
             this.dgvLastGoodCheckDB.DefaultCellStyle = dataGridViewCellStyle2;
             this.dgvLastGoodCheckDB.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.dgvLastGoodCheckDB.Location = new System.Drawing.Point(0, 31);
+            this.dgvLastGoodCheckDB.Location = new System.Drawing.Point(0, 27);
             this.dgvLastGoodCheckDB.Name = "dgvLastGoodCheckDB";
             this.dgvLastGoodCheckDB.ReadOnly = true;
             dataGridViewCellStyle3.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
@@ -91,8 +91,9 @@
             dataGridViewCellStyle3.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
             dataGridViewCellStyle3.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
             this.dgvLastGoodCheckDB.RowHeadersDefaultCellStyle = dataGridViewCellStyle3;
+            this.dgvLastGoodCheckDB.RowHeadersVisible = false;
             this.dgvLastGoodCheckDB.RowHeadersWidth = 51;
-            this.dgvLastGoodCheckDB.Size = new System.Drawing.Size(1250, 248);
+            this.dgvLastGoodCheckDB.Size = new System.Drawing.Size(1250, 252);
             this.dgvLastGoodCheckDB.TabIndex = 0;
             this.dgvLastGoodCheckDB.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgvLastGoodCheckDB_CellContentClick);
             this.dgvLastGoodCheckDB.RowsAdded += new System.Windows.Forms.DataGridViewRowsAddedEventHandler(this.dgvLastGoodCheckDB_RowsAdded);
@@ -160,7 +161,7 @@
             this.tsConfigure});
             this.toolStrip1.Location = new System.Drawing.Point(0, 0);
             this.toolStrip1.Name = "toolStrip1";
-            this.toolStrip1.Size = new System.Drawing.Size(1250, 31);
+            this.toolStrip1.Size = new System.Drawing.Size(1250, 27);
             this.toolStrip1.TabIndex = 4;
             this.toolStrip1.Text = "toolStrip1";
             // 
@@ -175,7 +176,7 @@
             this.toolStripFilter.Image = global::DBAChecksGUI.Properties.Resources.FilterDropdown_16x;
             this.toolStripFilter.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripFilter.Name = "toolStripFilter";
-            this.toolStripFilter.Size = new System.Drawing.Size(34, 28);
+            this.toolStripFilter.Size = new System.Drawing.Size(34, 24);
             this.toolStripFilter.Text = "Filter";
             // 
             // criticalToolStripMenuItem
@@ -219,7 +220,7 @@
             this.tsConfigure.Image = global::DBAChecksGUI.Properties.Resources.SettingsOutline_16x;
             this.tsConfigure.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsConfigure.Name = "tsConfigure";
-            this.tsConfigure.Size = new System.Drawing.Size(34, 28);
+            this.tsConfigure.Size = new System.Drawing.Size(34, 24);
             this.tsConfigure.Text = "Configure";
             // 
             // configureInstanceThresholdsToolStripMenuItem

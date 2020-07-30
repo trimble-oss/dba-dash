@@ -14,8 +14,10 @@ DECLARE @SQL NVARCHAR(MAX)
 DECLARE @DateGroupingSQL NVARCHAR(MAX)
 DECLARE @Table NVARCHAR(MAX)
 SELECT @DateGroupingSQL= CASE WHEN @DateGrouping = 'None' THEN 'W.SnapshotDate'
-			WHEN @DateGrouping ='10MIN' THEN 'CONVERT(DATETIME,LEFT(CONVERT(VARCHAR,W.SnapshotDate,120),15) + ''0'',120)'
+			WHEN @DateGrouping = '1MIN' THEN 'DATEADD(mi, DATEDIFF(mi, 0, DATEADD(s, 30, W.SnapshotDate)), 0)'
+			WHEN @DateGrouping = '10MIN' THEN 'CONVERT(DATETIME,LEFT(CONVERT(VARCHAR,W.SnapshotDate,120),15) + ''0'',120)'
 			WHEN @DateGrouping = '60MIN' THEN 'CONVERT(DATETIME,LEFT(CONVERT(VARCHAR,W.SnapshotDate,120),13) + '':00'',120)'
+			WHEN @DateGrouping = '120MIN' THEN 'DATEADD(hh,DATEPART(hh,W.SnapshotDate) - DATEPART(hh,W.SnapshotDate) % 2, CAST(CAST(W.SnapshotDate AS DATE) AS DATETIME))'
 			WHEN @DateGrouping ='DAY' THEN 'CAST(CAST(W.SnapshotDate as DATE) as DATETIME)'
 			ELSE NULL END
 

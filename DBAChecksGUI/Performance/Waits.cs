@@ -40,10 +40,9 @@ namespace DBAChecksGUI.Performance
 
         public void RefreshData()
         {
-            if (lastWait != DateTime.MinValue && dateGrouping == DateGroup.None)
+            if (lastWait != DateTime.MinValue && dateGrouping == DateGroup._1MIN)
             {
-                //this.from = DateTime.UtcNow.AddMinutes(-mins);
-                 this.to = DateTime.UtcNow.AddMinutes(1);
+                this.to = DateTime.UtcNow.AddMinutes(1);
                 this.from = lastWait.AddSeconds(1);
                 refreshData(true);
             }
@@ -119,7 +118,7 @@ namespace DBAChecksGUI.Performance
                 {
                     fromMins = 1440;
                 }
-                else if( dateGrouping == DateGroup.None)
+                else if( dateGrouping == DateGroup.None || dateGrouping == DateGroup._1MIN)
                 {
                     fromMins = 1;
                 }
@@ -130,6 +129,10 @@ namespace DBAChecksGUI.Performance
                 else if(dateGrouping == DateGroup._60MIN)
                 {
                     fromMins = 60;
+                }
+                else if (dateGrouping == DateGroup._120MIN)
+                {
+                    fromMins = 120;
                 }
                 else
                 {

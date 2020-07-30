@@ -72,7 +72,7 @@ namespace DBAChecksGUI.Performance
         {
             if (eventTime > DateTime.MinValue)
             {
-                fromDate = eventTime.AddSeconds(1);
+                fromDate = eventTime.AddSeconds(-30);
                 toDate = DateTime.UtcNow.AddSeconds(60);
                 refreshData(true);
             }
@@ -110,6 +110,17 @@ namespace DBAChecksGUI.Performance
                 }
                 if (update)
                 {
+                    var cnt = chartCPU.Series[0].Values.Count;
+                    if (cnt > 0) {
+                        while(((DateTimePoint)chartCPU.Series[0].Values[cnt - 1]).DateTime >= sqlProcessValues[0].DateTime)
+                        {
+                            chartCPU.Series[0].Values.RemoveAt(cnt-1);
+                            chartCPU.Series[1].Values.RemoveAt(cnt-1);
+                            chartCPU.Series[2].Values.RemoveAt(cnt-1);
+                            cnt -= 1;
+                        }
+                    }
+
                     chartCPU.Series[0].Values.AddRange(sqlProcessValues);
                     chartCPU.Series[1].Values.AddRange(otherValues);
                     chartCPU.Series[2].Values.AddRange(maxValues);

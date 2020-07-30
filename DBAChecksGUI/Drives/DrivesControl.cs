@@ -139,6 +139,7 @@ namespace DBAChecksGUI.Properties
             dgv = new DataGridView();
             dgv.AllowUserToAddRows = false;
             dgv.AllowUserToDeleteRows = false;
+            dgv.RowHeadersVisible = false;
             dgv.ReadOnly = true;
             dgv.Columns.Add(new DataGridViewTextBoxColumn() { Name = "Instance", DataPropertyName = "Instance", HeaderText = "Instance" });
             dgv.Columns.Add(new DataGridViewTextBoxColumn() { Name = "Name", DataPropertyName = "Name", HeaderText = "Name" });
