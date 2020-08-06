@@ -104,7 +104,7 @@
             dataGridViewCellStyle6.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
             this.dgvFiles.DefaultCellStyle = dataGridViewCellStyle6;
             this.dgvFiles.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.dgvFiles.Location = new System.Drawing.Point(0, 27);
+            this.dgvFiles.Location = new System.Drawing.Point(0, 49);
             this.dgvFiles.Name = "dgvFiles";
             this.dgvFiles.ReadOnly = true;
             dataGridViewCellStyle7.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
@@ -118,7 +118,7 @@
             this.dgvFiles.RowHeadersVisible = false;
             this.dgvFiles.RowHeadersWidth = 51;
             this.dgvFiles.RowTemplate.Height = 24;
-            this.dgvFiles.Size = new System.Drawing.Size(1616, 259);
+            this.dgvFiles.Size = new System.Drawing.Size(2020, 309);
             this.dgvFiles.TabIndex = 0;
             this.dgvFiles.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgvFiles_CellContentClick);
             this.dgvFiles.RowsAdded += new System.Windows.Forms.DataGridViewRowsAddedEventHandler(this.dgvFiles_RowsAdded);
@@ -279,7 +279,7 @@
             this.tsConfigure});
             this.toolStrip1.Location = new System.Drawing.Point(0, 0);
             this.toolStrip1.Name = "toolStrip1";
-            this.toolStrip1.Size = new System.Drawing.Size(1616, 27);
+            this.toolStrip1.Size = new System.Drawing.Size(2020, 39);
             this.toolStrip1.TabIndex = 3;
             this.toolStrip1.Text = "toolStrip1";
             // 
@@ -294,7 +294,7 @@
             this.toolStripFilter.Image = global::DBAChecksGUI.Properties.Resources.FilterDropdown_16x;
             this.toolStripFilter.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripFilter.Name = "toolStripFilter";
-            this.toolStripFilter.Size = new System.Drawing.Size(34, 24);
+            this.toolStripFilter.Size = new System.Drawing.Size(34, 36);
             this.toolStripFilter.Text = "Filter";
             // 
             // criticalToolStripMenuItem
@@ -339,7 +339,7 @@
             this.tsConfigure.Image = global::DBAChecksGUI.Properties.Resources.SettingsOutline_16x;
             this.tsConfigure.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsConfigure.Name = "tsConfigure";
-            this.tsConfigure.Size = new System.Drawing.Size(34, 24);
+            this.tsConfigure.Size = new System.Drawing.Size(34, 36);
             this.tsConfigure.Text = "Configure";
             // 
             // configureDatabaseThresholdsToolStripMenuItem

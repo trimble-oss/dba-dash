@@ -39,42 +39,9 @@ namespace DBAChecksGUI.Performance
         DateTime customFrom = DateTime.MinValue;
         DateTime customTo = DateTime.MinValue;
 
-        public void RefreshData(Int32 mins)
-        {
-            this.mins = mins;
-            this.dateGrp = DateGrouping(mins);
-            RefreshData();
-        }
 
-        public void RefreshData()
-        {           
-            var from = DateTime.UtcNow.AddMinutes(-mins);
-            var to = DateTime.UtcNow.AddMinutes(1);
-            if (mins == 0)
-            {
-                from = customFrom;
-                to = customTo;
-            }
-            try
-            {
-                RefreshData(from, to);
-            }
-            catch(Exception ex)
-            {
-                MessageBox.Show(ex.ToString(), "Chart Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                tsEnableTimer.Enabled = false;
-                return;
-            }
-            if (dateGrp == DateGroup._1MIN && mins<=180)
-            {
-                enableTimer(true);
-            }
-            else
-            {
-                enableTimer(false);
-                tsEnableTimer.Enabled = false;
-            }
-        }
+
+
 
         public DateGroup DateGrouping(Int32 Mins)
         {
@@ -97,6 +64,13 @@ namespace DBAChecksGUI.Performance
             return DateGroup.DAY;
         }
 
+        public void RefreshData(Int32 mins)
+        {
+            this.mins = mins;
+            this.dateGrp = DateGrouping(mins);
+            RefreshData();
+        }
+
         public void RefreshData(DateTime from,DateTime to)
         {
             dateGrp = DateGrouping((Int32)to.Subtract(from).TotalMinutes);
@@ -105,10 +79,39 @@ namespace DBAChecksGUI.Performance
             ioPerformance1.RefreshData(InstanceID, from, to, ConnectionString, dateGrp);
             cpu1.RefreshData(InstanceID, from, to, ConnectionString, dateGrp);
             waits1.RefreshData(InstanceID, from, to, ConnectionString, dateGrp);
+            blocking1.RefreshData(InstanceID, from, to, ConnectionString, dateGrp);
           
         }
 
-
+        public void RefreshData()
+        {
+            var from = DateTime.UtcNow.AddMinutes(-mins);
+            var to = DateTime.UtcNow.AddMinutes(1);
+            if (mins == 0)
+            {
+                from = customFrom;
+                to = customTo;
+            }
+            try
+            {
+                RefreshData(from, to);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.ToString(), "Chart Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                tsEnableTimer.Enabled = false;
+                return;
+            }
+            if (dateGrp == DateGroup._1MIN && mins <= 180)
+            {
+                enableTimer(true);
+            }
+            else
+            {
+                enableTimer(false);
+                tsEnableTimer.Enabled = false;
+            }
+        }
 
 
         private void tsTime_Click(object sender, EventArgs e)
@@ -136,6 +139,7 @@ namespace DBAChecksGUI.Performance
             ioPerformance1.RefreshData();
             cpu1.RefreshData();
             waits1.RefreshData();
+            blocking1.RefreshData();
         }
 
         private void tsDisableTimer_Click(object sender, EventArgs e)

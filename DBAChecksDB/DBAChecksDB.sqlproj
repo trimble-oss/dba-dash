@@ -345,6 +345,8 @@
     <Build Include="dbo\Stored Procedures\IOStats_Get.sql" />
     <Build Include="dbo\Stored Procedures\CPU_Get.sql" />
     <Build Include="dbo\Stored Procedures\Waits_Get.sql" />
+    <Build Include="dbo\Stored Procedures\BlockingSummary_Get.sql" />
+    <Build Include="dbo\Stored Procedures\BlockingSnapshots_Get.sql" />
   </ItemGroup>
   <ItemGroup>
     <PostDeploy Include="Script.PostDeployment1.sql" />

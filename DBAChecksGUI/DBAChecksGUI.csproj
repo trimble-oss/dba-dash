@@ -201,6 +201,18 @@
     <Compile Include="Main.Designer.cs">
       <DependentUpon>Main.cs</DependentUpon>
     </Compile>
+    <Compile Include="Performance\Blocking.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Performance\Blocking.Designer.cs">
+      <DependentUpon>Blocking.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Performance\BlockingViewer.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Performance\BlockingViewer.Designer.cs">
+      <DependentUpon>BlockingViewer.cs</DependentUpon>
+    </Compile>
     <Compile Include="Performance\CPU.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -298,6 +310,12 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Drives\DrivesControl.resx">
       <DependentUpon>DrivesControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Performance\Blocking.resx">
+      <DependentUpon>Blocking.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Performance\BlockingViewer.resx">
+      <DependentUpon>BlockingViewer.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Performance\CPU.resx">
       <DependentUpon>CPU.cs</DependentUpon>

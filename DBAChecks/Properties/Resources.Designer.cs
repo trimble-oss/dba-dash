@@ -203,7 +203,8 @@ namespace DBAChecks.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to DECLARE @Corruption TABLE(
+        ///   Looks up a localized string similar to SET TRANSACTION ISOLATION LEVEL READ UNCOMMITTED
+        ///DECLARE @Corruption TABLE(
         ///		SourceTable TINYINT,
         ///		database_id INT NOT NULL,
         ///		last_update_date DATETIME NOT NULL
@@ -217,9 +218,7 @@ namespace DBAChecks.Properties {
         ///	FROM msdb.dbo.suspect_pages
         ///	GROUP BY database_id
         ///END
-        ///IF OBJECT_ID(&apos;msdb.sys.dm_db_mirroring_auto_page_repair&apos;) IS NOT NULL
-        ///BEGIN
-        ///	INSERT INTO @Corru [rest of string was truncated]&quot;;.
+        ///IF OBJECT_ID(&apos;msdb.sys.dm_db_mirroring_auto_pag [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string SQLCorruption {
             get {
