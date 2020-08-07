@@ -137,9 +137,12 @@ namespace DBAChecksGUI.Performance
             {
                 ScatterSeries ss = (ScatterSeries)chartBlocking.Series[0];
                 ss.Values.AddRange(points);
-                while(((BlockingPoint)ss.Values[0]).SnapshotDate < DateTime.UtcNow.AddMinutes(-mins))
+                if (ss.Values.Count > 0)
                 {
-                    ss.Values.RemoveAt(0);
+                    while (((BlockingPoint)ss.Values[0]).SnapshotDate < DateTime.UtcNow.AddMinutes(-mins))
+                    {
+                        ss.Values.RemoveAt(0);
+                    }
                 }
                 Ymax = chartBlocking.AxisY[0].MaxValue > Ymax ? chartBlocking.AxisY[0].MaxValue : Ymax;
                 chartBlocking.AxisX[0].MinValue = DateTime.Now.AddMinutes(-mins).Ticks;
