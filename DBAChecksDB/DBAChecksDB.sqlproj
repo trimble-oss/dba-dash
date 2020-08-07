@@ -347,6 +347,9 @@
     <Build Include="dbo\Stored Procedures\Waits_Get.sql" />
     <Build Include="dbo\Stored Procedures\BlockingSummary_Get.sql" />
     <Build Include="dbo\Stored Procedures\BlockingSnapshots_Get.sql" />
+    <Build Include="dbo\Stored Procedures\DDLSnapshots_Get.sql" />
+    <Build Include="dbo\Stored Procedures\DDLSnapshotDiff_Get.sql" />
+    <Build Include="dbo\Stored Procedures\DDLHistoryForObject_Get.sql" />
   </ItemGroup>
   <ItemGroup>
     <PostDeploy Include="Script.PostDeployment1.sql" />

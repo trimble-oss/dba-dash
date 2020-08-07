@@ -30,12 +30,12 @@
         {
             this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Main));
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle7 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle8 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle9 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle10 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle11 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle12 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle3 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle4 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle5 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle6 = new System.Windows.Forms.DataGridViewCellStyle();
             this.TreeViewImageList = new System.Windows.Forms.ImageList(this.components);
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.mnuTags = new System.Windows.Forms.ToolStripMenuItem();
@@ -93,20 +93,20 @@
             this.label3 = new System.Windows.Forms.Label();
             this.cboTagValue = new System.Windows.Forms.ComboBox();
             this.tabDrives = new System.Windows.Forms.TabPage();
-            this.tabBackups = new System.Windows.Forms.TabPage();
-            this.tabLogShipping = new System.Windows.Forms.TabPage();
-            this.tabJobs = new System.Windows.Forms.TabPage();
-            this.tabSummary = new System.Windows.Forms.TabPage();
-            this.tabFiles = new System.Windows.Forms.TabPage();
-            this.tabLastGood = new System.Windows.Forms.TabPage();
-            this.tabPerformance = new System.Windows.Forms.TabPage();
             this.drivesControl1 = new DBAChecksGUI.Properties.DrivesControl();
+            this.tabBackups = new System.Windows.Forms.TabPage();
             this.backupsControl1 = new DBAChecksGUI.Backups.BackupsControl();
+            this.tabLogShipping = new System.Windows.Forms.TabPage();
             this.logShippingControl1 = new DBAChecksGUI.LogShipping.LogShippingControl();
+            this.tabJobs = new System.Windows.Forms.TabPage();
             this.agentJobsControl1 = new DBAChecksGUI.AgentJobs.AgentJobsControl();
+            this.tabSummary = new System.Windows.Forms.TabPage();
             this.summary1 = new DBAChecksGUI.Summary();
+            this.tabFiles = new System.Windows.Forms.TabPage();
             this.dbFilesControl1 = new DBAChecksGUI.DBFiles.DBFilesControl();
+            this.tabLastGood = new System.Windows.Forms.TabPage();
             this.lastGoodCheckDBControl1 = new DBAChecksGUI.LastGoodCheckDB.LastGoodCheckDBControl();
+            this.tabPerformance = new System.Windows.Forms.TabPage();
             this.performance1 = new DBAChecksGUI.Performance.Performance();
             this.menuStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitMain)).BeginInit();
@@ -160,20 +160,20 @@
             this.dBDiffToolStripMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
-            this.menuStrip1.Size = new System.Drawing.Size(1614, 38);
+            this.menuStrip1.Size = new System.Drawing.Size(1291, 28);
             this.menuStrip1.TabIndex = 1;
             this.menuStrip1.Text = "menuStrip1";
             // 
             // mnuTags
             // 
             this.mnuTags.Name = "mnuTags";
-            this.mnuTags.Size = new System.Drawing.Size(52, 34);
+            this.mnuTags.Size = new System.Drawing.Size(52, 24);
             this.mnuTags.Text = "Tags";
             // 
             // dBDiffToolStripMenuItem
             // 
             this.dBDiffToolStripMenuItem.Name = "dBDiffToolStripMenuItem";
-            this.dBDiffToolStripMenuItem.Size = new System.Drawing.Size(68, 34);
+            this.dBDiffToolStripMenuItem.Size = new System.Drawing.Size(68, 24);
             this.dBDiffToolStripMenuItem.Text = "DBDiff";
             this.dBDiffToolStripMenuItem.Click += new System.EventHandler(this.dBDiffToolStripMenuItem_Click);
             // 
@@ -181,7 +181,7 @@
             // 
             this.splitMain.AccessibleRole = System.Windows.Forms.AccessibleRole.ScrollBar;
             this.splitMain.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.splitMain.Location = new System.Drawing.Point(0, 48);
+            this.splitMain.Location = new System.Drawing.Point(0, 28);
             this.splitMain.Name = "splitMain";
             // 
             // splitMain.Panel1
@@ -193,8 +193,8 @@
             // 
             this.splitMain.Panel2.Controls.Add(this.tabs);
             this.splitMain.Panel2MinSize = 100;
-            this.splitMain.Size = new System.Drawing.Size(1614, 1216);
-            this.splitMain.SplitterDistance = 405;
+            this.splitMain.Size = new System.Drawing.Size(1291, 983);
+            this.splitMain.SplitterDistance = 323;
             this.splitMain.TabIndex = 3;
             // 
             // tv1
@@ -205,7 +205,7 @@
             this.tv1.Location = new System.Drawing.Point(0, 0);
             this.tv1.Name = "tv1";
             this.tv1.SelectedImageIndex = 0;
-            this.tv1.Size = new System.Drawing.Size(405, 1216);
+            this.tv1.Size = new System.Drawing.Size(323, 983);
             this.tv1.TabIndex = 0;
             this.tv1.BeforeExpand += new System.Windows.Forms.TreeViewCancelEventHandler(this.tv1_BeforeExpand);
             this.tv1.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.tv1_AfterSelect);
@@ -227,7 +227,7 @@
             this.tabs.Location = new System.Drawing.Point(0, 0);
             this.tabs.Name = "tabs";
             this.tabs.SelectedIndex = 0;
-            this.tabs.Size = new System.Drawing.Size(1205, 1216);
+            this.tabs.Size = new System.Drawing.Size(964, 983);
             this.tabs.TabIndex = 0;
             this.tabs.Tag = "";
             this.tabs.SelectedIndexChanged += new System.EventHandler(this.tabs_SelectedIndexChanged);
@@ -238,7 +238,7 @@
             this.tabSnapshotsSummary.Location = new System.Drawing.Point(4, 25);
             this.tabSnapshotsSummary.Name = "tabSnapshotsSummary";
             this.tabSnapshotsSummary.Padding = new System.Windows.Forms.Padding(3);
-            this.tabSnapshotsSummary.Size = new System.Drawing.Size(1197, 1187);
+            this.tabSnapshotsSummary.Size = new System.Drawing.Size(956, 954);
             this.tabSnapshotsSummary.TabIndex = 1;
             this.tabSnapshotsSummary.Text = "Snapshot Summary";
             this.tabSnapshotsSummary.UseVisualStyleBackColor = true;
@@ -258,8 +258,8 @@
             // splitSnapshotSummary.Panel2
             // 
             this.splitSnapshotSummary.Panel2.Controls.Add(this.gvSnapshotsDetail);
-            this.splitSnapshotSummary.Size = new System.Drawing.Size(1191, 1181);
-            this.splitSnapshotSummary.SplitterDistance = 351;
+            this.splitSnapshotSummary.Size = new System.Drawing.Size(950, 948);
+            this.splitSnapshotSummary.SplitterDistance = 281;
             this.splitSnapshotSummary.TabIndex = 0;
             // 
             // toolStrip2
@@ -272,9 +272,9 @@
             this.tsSummaryNext,
             this.toolStripLabel3,
             this.tsSummaryPageSize});
-            this.toolStrip2.Location = new System.Drawing.Point(0, 400);
+            this.toolStrip2.Location = new System.Drawing.Point(0, 253);
             this.toolStrip2.Name = "toolStrip2";
-            this.toolStrip2.Size = new System.Drawing.Size(1489, 39);
+            this.toolStrip2.Size = new System.Drawing.Size(950, 28);
             this.toolStrip2.TabIndex = 2;
             this.toolStrip2.Text = "toolStrip2";
             // 
@@ -284,14 +284,14 @@
             this.tsSummaryBack.Image = ((System.Drawing.Image)(resources.GetObject("tsSummaryBack.Image")));
             this.tsSummaryBack.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsSummaryBack.Name = "tsSummaryBack";
-            this.tsSummaryBack.Size = new System.Drawing.Size(29, 36);
+            this.tsSummaryBack.Size = new System.Drawing.Size(29, 25);
             this.tsSummaryBack.Text = "Previous";
             this.tsSummaryBack.Click += new System.EventHandler(this.tsSummaryBack_Click);
             // 
             // tsSummaryPageNum
             // 
             this.tsSummaryPageNum.Name = "tsSummaryPageNum";
-            this.tsSummaryPageNum.Size = new System.Drawing.Size(53, 36);
+            this.tsSummaryPageNum.Size = new System.Drawing.Size(53, 25);
             this.tsSummaryPageNum.Text = "Page 1";
             // 
             // tsSummaryNext
@@ -300,14 +300,14 @@
             this.tsSummaryNext.Image = ((System.Drawing.Image)(resources.GetObject("tsSummaryNext.Image")));
             this.tsSummaryNext.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsSummaryNext.Name = "tsSummaryNext";
-            this.tsSummaryNext.Size = new System.Drawing.Size(29, 36);
+            this.tsSummaryNext.Size = new System.Drawing.Size(29, 25);
             this.tsSummaryNext.Text = "Next";
             this.tsSummaryNext.Click += new System.EventHandler(this.tsSummaryNext_Click);
             // 
             // toolStripLabel3
             // 
             this.toolStripLabel3.Name = "toolStripLabel3";
-            this.toolStripLabel3.Size = new System.Drawing.Size(75, 36);
+            this.toolStripLabel3.Size = new System.Drawing.Size(75, 25);
             this.toolStripLabel3.Text = "Page Size:";
             // 
             // tsSummaryPageSize
@@ -319,7 +319,7 @@
             "1000",
             "5000"});
             this.tsSummaryPageSize.Name = "tsSummaryPageSize";
-            this.tsSummaryPageSize.Size = new System.Drawing.Size(121, 39);
+            this.tsSummaryPageSize.Size = new System.Drawing.Size(121, 28);
             this.tsSummaryPageSize.Text = "100";
             this.tsSummaryPageSize.Validating += new System.ComponentModel.CancelEventHandler(this.tsSummaryPageSize_Validating);
             this.tsSummaryPageSize.Validated += new System.EventHandler(this.tsSummaryPageSize_Validated);
@@ -328,14 +328,14 @@
             // 
             this.gvSnapshots.AllowUserToAddRows = false;
             this.gvSnapshots.AllowUserToDeleteRows = false;
-            dataGridViewCellStyle7.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle7.BackColor = System.Drawing.SystemColors.Control;
-            dataGridViewCellStyle7.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            dataGridViewCellStyle7.ForeColor = System.Drawing.SystemColors.WindowText;
-            dataGridViewCellStyle7.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-            dataGridViewCellStyle7.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-            dataGridViewCellStyle7.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
-            this.gvSnapshots.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle7;
+            dataGridViewCellStyle1.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle1.BackColor = System.Drawing.SystemColors.Control;
+            dataGridViewCellStyle1.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            dataGridViewCellStyle1.ForeColor = System.Drawing.SystemColors.WindowText;
+            dataGridViewCellStyle1.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle1.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle1.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
+            this.gvSnapshots.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle1;
             this.gvSnapshots.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.gvSnapshots.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
             this.DB,
@@ -346,14 +346,14 @@
             this.Created,
             this.Modified,
             this.Dropped});
-            dataGridViewCellStyle8.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle8.BackColor = System.Drawing.SystemColors.Window;
-            dataGridViewCellStyle8.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            dataGridViewCellStyle8.ForeColor = System.Drawing.SystemColors.ControlText;
-            dataGridViewCellStyle8.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-            dataGridViewCellStyle8.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-            dataGridViewCellStyle8.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
-            this.gvSnapshots.DefaultCellStyle = dataGridViewCellStyle8;
+            dataGridViewCellStyle2.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle2.BackColor = System.Drawing.SystemColors.Window;
+            dataGridViewCellStyle2.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            dataGridViewCellStyle2.ForeColor = System.Drawing.SystemColors.ControlText;
+            dataGridViewCellStyle2.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle2.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle2.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
+            this.gvSnapshots.DefaultCellStyle = dataGridViewCellStyle2;
             this.gvSnapshots.Dock = System.Windows.Forms.DockStyle.Fill;
             this.gvSnapshots.Location = new System.Drawing.Point(0, 0);
             this.gvSnapshots.Name = "gvSnapshots";
@@ -362,7 +362,7 @@
             this.gvSnapshots.RowHeadersWidth = 51;
             this.gvSnapshots.RowTemplate.Height = 24;
             this.gvSnapshots.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-            this.gvSnapshots.Size = new System.Drawing.Size(1191, 351);
+            this.gvSnapshots.Size = new System.Drawing.Size(950, 281);
             this.gvSnapshots.TabIndex = 0;
             this.gvSnapshots.SelectionChanged += new System.EventHandler(this.gvSnapshots_SelectionChanged);
             // 
@@ -448,14 +448,14 @@
             // 
             this.gvSnapshotsDetail.AllowUserToAddRows = false;
             this.gvSnapshotsDetail.AllowUserToDeleteRows = false;
-            dataGridViewCellStyle9.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle9.BackColor = System.Drawing.SystemColors.Control;
-            dataGridViewCellStyle9.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            dataGridViewCellStyle9.ForeColor = System.Drawing.SystemColors.WindowText;
-            dataGridViewCellStyle9.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-            dataGridViewCellStyle9.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-            dataGridViewCellStyle9.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
-            this.gvSnapshotsDetail.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle9;
+            dataGridViewCellStyle3.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle3.BackColor = System.Drawing.SystemColors.Control;
+            dataGridViewCellStyle3.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            dataGridViewCellStyle3.ForeColor = System.Drawing.SystemColors.WindowText;
+            dataGridViewCellStyle3.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle3.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle3.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
+            this.gvSnapshotsDetail.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle3;
             this.gvSnapshotsDetail.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.gvSnapshotsDetail.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
             this.colObjectName,
@@ -463,14 +463,14 @@
             this.colAction,
             this.colView,
             this.Diff});
-            dataGridViewCellStyle10.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle10.BackColor = System.Drawing.SystemColors.Window;
-            dataGridViewCellStyle10.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            dataGridViewCellStyle10.ForeColor = System.Drawing.SystemColors.ControlText;
-            dataGridViewCellStyle10.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-            dataGridViewCellStyle10.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-            dataGridViewCellStyle10.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
-            this.gvSnapshotsDetail.DefaultCellStyle = dataGridViewCellStyle10;
+            dataGridViewCellStyle4.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle4.BackColor = System.Drawing.SystemColors.Window;
+            dataGridViewCellStyle4.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            dataGridViewCellStyle4.ForeColor = System.Drawing.SystemColors.ControlText;
+            dataGridViewCellStyle4.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle4.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle4.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
+            this.gvSnapshotsDetail.DefaultCellStyle = dataGridViewCellStyle4;
             this.gvSnapshotsDetail.Dock = System.Windows.Forms.DockStyle.Fill;
             this.gvSnapshotsDetail.Location = new System.Drawing.Point(0, 0);
             this.gvSnapshotsDetail.Name = "gvSnapshotsDetail";
@@ -479,7 +479,7 @@
             this.gvSnapshotsDetail.RowHeadersWidth = 51;
             this.gvSnapshotsDetail.RowTemplate.Height = 24;
             this.gvSnapshotsDetail.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.CellSelect;
-            this.gvSnapshotsDetail.Size = new System.Drawing.Size(1191, 826);
+            this.gvSnapshotsDetail.Size = new System.Drawing.Size(950, 663);
             this.gvSnapshotsDetail.TabIndex = 0;
             this.gvSnapshotsDetail.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.gvSnapshotsDetail_CellContentClick);
             // 
@@ -543,7 +543,7 @@
             this.tabSchema.Location = new System.Drawing.Point(4, 25);
             this.tabSchema.Name = "tabSchema";
             this.tabSchema.Padding = new System.Windows.Forms.Padding(3);
-            this.tabSchema.Size = new System.Drawing.Size(1496, 1484);
+            this.tabSchema.Size = new System.Drawing.Size(1197, 1187);
             this.tabSchema.TabIndex = 0;
             this.tabSchema.Text = "Schema Snapshot";
             this.tabSchema.UseVisualStyleBackColor = true;
@@ -564,8 +564,8 @@
             this.splitSchemaSnapshot.Panel2.Controls.Add(this.toolStrip1);
             this.splitSchemaSnapshot.Panel2.Controls.Add(this.gvHistory);
             this.splitSchemaSnapshot.Panel2.Controls.Add(this.label1);
-            this.splitSchemaSnapshot.Size = new System.Drawing.Size(1863, 1848);
-            this.splitSchemaSnapshot.SplitterDistance = 1003;
+            this.splitSchemaSnapshot.Size = new System.Drawing.Size(1191, 1181);
+            this.splitSchemaSnapshot.SplitterDistance = 640;
             this.splitSchemaSnapshot.TabIndex = 1;
             // 
             // label7
@@ -588,9 +588,9 @@
             this.tsNext,
             this.toolStripLabel1,
             this.tsPageSize});
-            this.toolStrip1.Location = new System.Drawing.Point(0, 1013);
+            this.toolStrip1.Location = new System.Drawing.Point(0, 509);
             this.toolStrip1.Name = "toolStrip1";
-            this.toolStrip1.Size = new System.Drawing.Size(2329, 39);
+            this.toolStrip1.Size = new System.Drawing.Size(1191, 28);
             this.toolStrip1.TabIndex = 1;
             this.toolStrip1.Text = "toolStrip1";
             // 
@@ -600,14 +600,14 @@
             this.tsPrevious.Image = ((System.Drawing.Image)(resources.GetObject("tsPrevious.Image")));
             this.tsPrevious.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsPrevious.Name = "tsPrevious";
-            this.tsPrevious.Size = new System.Drawing.Size(29, 36);
+            this.tsPrevious.Size = new System.Drawing.Size(29, 25);
             this.tsPrevious.Text = "Previous";
             this.tsPrevious.Click += new System.EventHandler(this.tsPrevious_Click);
             // 
             // tsPageNum
             // 
             this.tsPageNum.Name = "tsPageNum";
-            this.tsPageNum.Size = new System.Drawing.Size(53, 36);
+            this.tsPageNum.Size = new System.Drawing.Size(53, 25);
             this.tsPageNum.Text = "Page 1";
             // 
             // tsNext
@@ -616,14 +616,14 @@
             this.tsNext.Image = ((System.Drawing.Image)(resources.GetObject("tsNext.Image")));
             this.tsNext.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsNext.Name = "tsNext";
-            this.tsNext.Size = new System.Drawing.Size(29, 36);
+            this.tsNext.Size = new System.Drawing.Size(29, 25);
             this.tsNext.Text = "Next";
             this.tsNext.Click += new System.EventHandler(this.tsNext_Click);
             // 
             // toolStripLabel1
             // 
             this.toolStripLabel1.Name = "toolStripLabel1";
-            this.toolStripLabel1.Size = new System.Drawing.Size(75, 36);
+            this.toolStripLabel1.Size = new System.Drawing.Size(75, 25);
             this.toolStripLabel1.Text = "Page Size:";
             // 
             // tsPageSize
@@ -635,7 +635,7 @@
             "1000",
             "5000"});
             this.tsPageSize.Name = "tsPageSize";
-            this.tsPageSize.Size = new System.Drawing.Size(121, 39);
+            this.tsPageSize.Size = new System.Drawing.Size(121, 28);
             this.tsPageSize.Text = "100";
             this.tsPageSize.Validating += new System.ComponentModel.CancelEventHandler(this.tsPageSize_Validating);
             this.tsPageSize.Validated += new System.EventHandler(this.tsPageSize_Validated);
@@ -645,14 +645,14 @@
             this.gvHistory.AllowUserToAddRows = false;
             this.gvHistory.AllowUserToDeleteRows = false;
             this.gvHistory.AllowUserToOrderColumns = true;
-            dataGridViewCellStyle11.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle11.BackColor = System.Drawing.SystemColors.Control;
-            dataGridViewCellStyle11.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            dataGridViewCellStyle11.ForeColor = System.Drawing.SystemColors.WindowText;
-            dataGridViewCellStyle11.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-            dataGridViewCellStyle11.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-            dataGridViewCellStyle11.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
-            this.gvHistory.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle11;
+            dataGridViewCellStyle5.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle5.BackColor = System.Drawing.SystemColors.Control;
+            dataGridViewCellStyle5.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            dataGridViewCellStyle5.ForeColor = System.Drawing.SystemColors.WindowText;
+            dataGridViewCellStyle5.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle5.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle5.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
+            this.gvHistory.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle5;
             this.gvHistory.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.gvHistory.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
             this.ObjectName,
@@ -662,14 +662,14 @@
             this.SnapshotValidTo,
             this.ObjectDateCreated,
             this.ObjectDateModified});
-            dataGridViewCellStyle12.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle12.BackColor = System.Drawing.SystemColors.Window;
-            dataGridViewCellStyle12.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            dataGridViewCellStyle12.ForeColor = System.Drawing.SystemColors.ControlText;
-            dataGridViewCellStyle12.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-            dataGridViewCellStyle12.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-            dataGridViewCellStyle12.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
-            this.gvHistory.DefaultCellStyle = dataGridViewCellStyle12;
+            dataGridViewCellStyle6.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle6.BackColor = System.Drawing.SystemColors.Window;
+            dataGridViewCellStyle6.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            dataGridViewCellStyle6.ForeColor = System.Drawing.SystemColors.ControlText;
+            dataGridViewCellStyle6.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle6.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle6.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
+            this.gvHistory.DefaultCellStyle = dataGridViewCellStyle6;
             this.gvHistory.Dock = System.Windows.Forms.DockStyle.Fill;
             this.gvHistory.Location = new System.Drawing.Point(0, 125);
             this.gvHistory.MultiSelect = false;
@@ -678,7 +678,7 @@
             this.gvHistory.RowHeadersWidth = 51;
             this.gvHistory.RowTemplate.Height = 24;
             this.gvHistory.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-            this.gvHistory.Size = new System.Drawing.Size(1863, 716);
+            this.gvHistory.Size = new System.Drawing.Size(1191, 412);
             this.gvHistory.TabIndex = 0;
             this.gvHistory.SelectionChanged += new System.EventHandler(this.gvHistory_SelectionChanged);
             // 
@@ -756,7 +756,7 @@
             this.label1.Dock = System.Windows.Forms.DockStyle.Top;
             this.label1.Location = new System.Drawing.Point(0, 0);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(1863, 125);
+            this.label1.Size = new System.Drawing.Size(1191, 125);
             this.label1.TabIndex = 2;
             this.label1.Text = "Snapshot History";
             this.label1.TextAlign = System.Drawing.ContentAlignment.TopCenter;
@@ -768,7 +768,7 @@
             this.tabTags.Location = new System.Drawing.Point(4, 25);
             this.tabTags.Name = "tabTags";
             this.tabTags.Padding = new System.Windows.Forms.Padding(3);
-            this.tabTags.Size = new System.Drawing.Size(1496, 1484);
+            this.tabTags.Size = new System.Drawing.Size(1197, 1187);
             this.tabTags.TabIndex = 2;
             this.tabTags.Text = "Tags";
             this.tabTags.UseVisualStyleBackColor = true;
@@ -777,9 +777,9 @@
             // 
             this.chkTags.Dock = System.Windows.Forms.DockStyle.Fill;
             this.chkTags.FormattingEnabled = true;
-            this.chkTags.Location = new System.Drawing.Point(4, 1189);
+            this.chkTags.Location = new System.Drawing.Point(3, 951);
             this.chkTags.Name = "chkTags";
-            this.chkTags.Size = new System.Drawing.Size(2329, 663);
+            this.chkTags.Size = new System.Drawing.Size(1191, 233);
             this.chkTags.TabIndex = 0;
             this.chkTags.ItemCheck += new System.Windows.Forms.ItemCheckEventHandler(this.chkTags_ItemCheck);
             // 
@@ -793,7 +793,7 @@
             this.panel1.Dock = System.Windows.Forms.DockStyle.Top;
             this.panel1.Location = new System.Drawing.Point(3, 3);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(1863, 948);
+            this.panel1.Size = new System.Drawing.Size(1191, 948);
             this.panel1.TabIndex = 6;
             // 
             // label2
@@ -848,88 +848,10 @@
             this.tabDrives.Location = new System.Drawing.Point(4, 25);
             this.tabDrives.Name = "tabDrives";
             this.tabDrives.Padding = new System.Windows.Forms.Padding(3);
-            this.tabDrives.Size = new System.Drawing.Size(1496, 1484);
+            this.tabDrives.Size = new System.Drawing.Size(1197, 1187);
             this.tabDrives.TabIndex = 3;
             this.tabDrives.Text = "Drives";
             this.tabDrives.UseVisualStyleBackColor = true;
-            // 
-            // tabBackups
-            // 
-            this.tabBackups.Controls.Add(this.backupsControl1);
-            this.tabBackups.Location = new System.Drawing.Point(4, 25);
-            this.tabBackups.Name = "tabBackups";
-            this.tabBackups.Padding = new System.Windows.Forms.Padding(3);
-            this.tabBackups.Size = new System.Drawing.Size(1496, 1484);
-            this.tabBackups.TabIndex = 4;
-            this.tabBackups.Tag = "1";
-            this.tabBackups.Text = "Backups";
-            this.tabBackups.UseVisualStyleBackColor = true;
-            // 
-            // tabLogShipping
-            // 
-            this.tabLogShipping.Controls.Add(this.logShippingControl1);
-            this.tabLogShipping.Location = new System.Drawing.Point(4, 25);
-            this.tabLogShipping.Name = "tabLogShipping";
-            this.tabLogShipping.Padding = new System.Windows.Forms.Padding(3);
-            this.tabLogShipping.Size = new System.Drawing.Size(1496, 1484);
-            this.tabLogShipping.TabIndex = 5;
-            this.tabLogShipping.Text = "Log Shipping";
-            this.tabLogShipping.UseVisualStyleBackColor = true;
-            // 
-            // tabJobs
-            // 
-            this.tabJobs.Controls.Add(this.agentJobsControl1);
-            this.tabJobs.Location = new System.Drawing.Point(4, 25);
-            this.tabJobs.Name = "tabJobs";
-            this.tabJobs.Padding = new System.Windows.Forms.Padding(3);
-            this.tabJobs.Size = new System.Drawing.Size(1496, 1484);
-            this.tabJobs.TabIndex = 6;
-            this.tabJobs.Text = "Agent Jobs";
-            this.tabJobs.UseVisualStyleBackColor = true;
-            // 
-            // tabSummary
-            // 
-            this.tabSummary.Controls.Add(this.summary1);
-            this.tabSummary.Location = new System.Drawing.Point(4, 25);
-            this.tabSummary.Name = "tabSummary";
-            this.tabSummary.Padding = new System.Windows.Forms.Padding(3);
-            this.tabSummary.Size = new System.Drawing.Size(1496, 1484);
-            this.tabSummary.TabIndex = 7;
-            this.tabSummary.Text = "Summary";
-            this.tabSummary.UseVisualStyleBackColor = true;
-            // 
-            // tabFiles
-            // 
-            this.tabFiles.Controls.Add(this.dbFilesControl1);
-            this.tabFiles.Location = new System.Drawing.Point(4, 25);
-            this.tabFiles.Name = "tabFiles";
-            this.tabFiles.Padding = new System.Windows.Forms.Padding(3);
-            this.tabFiles.Size = new System.Drawing.Size(1496, 1484);
-            this.tabFiles.TabIndex = 8;
-            this.tabFiles.Text = "Files";
-            this.tabFiles.UseVisualStyleBackColor = true;
-            // 
-            // tabLastGood
-            // 
-            this.tabLastGood.Controls.Add(this.lastGoodCheckDBControl1);
-            this.tabLastGood.Location = new System.Drawing.Point(4, 25);
-            this.tabLastGood.Name = "tabLastGood";
-            this.tabLastGood.Padding = new System.Windows.Forms.Padding(3);
-            this.tabLastGood.Size = new System.Drawing.Size(1496, 1484);
-            this.tabLastGood.TabIndex = 9;
-            this.tabLastGood.Text = "Last Good CheckDB";
-            this.tabLastGood.UseVisualStyleBackColor = true;
-            // 
-            // tabPerformance
-            // 
-            this.tabPerformance.Controls.Add(this.performance1);
-            this.tabPerformance.Location = new System.Drawing.Point(4, 25);
-            this.tabPerformance.Name = "tabPerformance";
-            this.tabPerformance.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPerformance.Size = new System.Drawing.Size(1496, 1484);
-            this.tabPerformance.TabIndex = 10;
-            this.tabPerformance.Text = "Performance";
-            this.tabPerformance.UseVisualStyleBackColor = true;
             // 
             // drivesControl1
             // 
@@ -940,8 +862,20 @@
             this.drivesControl1.IncludeWarning = false;
             this.drivesControl1.Location = new System.Drawing.Point(3, 3);
             this.drivesControl1.Name = "drivesControl1";
-            this.drivesControl1.Size = new System.Drawing.Size(1490, 1478);
+            this.drivesControl1.Size = new System.Drawing.Size(1191, 1181);
             this.drivesControl1.TabIndex = 0;
+            // 
+            // tabBackups
+            // 
+            this.tabBackups.Controls.Add(this.backupsControl1);
+            this.tabBackups.Location = new System.Drawing.Point(4, 25);
+            this.tabBackups.Name = "tabBackups";
+            this.tabBackups.Padding = new System.Windows.Forms.Padding(3);
+            this.tabBackups.Size = new System.Drawing.Size(1197, 1187);
+            this.tabBackups.TabIndex = 4;
+            this.tabBackups.Tag = "1";
+            this.tabBackups.Text = "Backups";
+            this.tabBackups.UseVisualStyleBackColor = true;
             // 
             // backupsControl1
             // 
@@ -954,8 +888,19 @@
             this.backupsControl1.InstanceIDs = null;
             this.backupsControl1.Location = new System.Drawing.Point(3, 3);
             this.backupsControl1.Name = "backupsControl1";
-            this.backupsControl1.Size = new System.Drawing.Size(1490, 1478);
+            this.backupsControl1.Size = new System.Drawing.Size(1191, 1181);
             this.backupsControl1.TabIndex = 0;
+            // 
+            // tabLogShipping
+            // 
+            this.tabLogShipping.Controls.Add(this.logShippingControl1);
+            this.tabLogShipping.Location = new System.Drawing.Point(4, 25);
+            this.tabLogShipping.Name = "tabLogShipping";
+            this.tabLogShipping.Padding = new System.Windows.Forms.Padding(3);
+            this.tabLogShipping.Size = new System.Drawing.Size(1197, 1187);
+            this.tabLogShipping.TabIndex = 5;
+            this.tabLogShipping.Text = "Log Shipping";
+            this.tabLogShipping.UseVisualStyleBackColor = true;
             // 
             // logShippingControl1
             // 
@@ -966,8 +911,19 @@
             this.logShippingControl1.IncludeWarning = false;
             this.logShippingControl1.Location = new System.Drawing.Point(3, 3);
             this.logShippingControl1.Name = "logShippingControl1";
-            this.logShippingControl1.Size = new System.Drawing.Size(1490, 1478);
+            this.logShippingControl1.Size = new System.Drawing.Size(1191, 1181);
             this.logShippingControl1.TabIndex = 0;
+            // 
+            // tabJobs
+            // 
+            this.tabJobs.Controls.Add(this.agentJobsControl1);
+            this.tabJobs.Location = new System.Drawing.Point(4, 25);
+            this.tabJobs.Name = "tabJobs";
+            this.tabJobs.Padding = new System.Windows.Forms.Padding(3);
+            this.tabJobs.Size = new System.Drawing.Size(1197, 1187);
+            this.tabJobs.TabIndex = 6;
+            this.tabJobs.Text = "Agent Jobs";
+            this.tabJobs.UseVisualStyleBackColor = true;
             // 
             // agentJobsControl1
             // 
@@ -978,8 +934,19 @@
             this.agentJobsControl1.IncludeWarning = false;
             this.agentJobsControl1.Location = new System.Drawing.Point(3, 3);
             this.agentJobsControl1.Name = "agentJobsControl1";
-            this.agentJobsControl1.Size = new System.Drawing.Size(1490, 1478);
+            this.agentJobsControl1.Size = new System.Drawing.Size(1191, 1181);
             this.agentJobsControl1.TabIndex = 0;
+            // 
+            // tabSummary
+            // 
+            this.tabSummary.Controls.Add(this.summary1);
+            this.tabSummary.Location = new System.Drawing.Point(4, 25);
+            this.tabSummary.Name = "tabSummary";
+            this.tabSummary.Padding = new System.Windows.Forms.Padding(3);
+            this.tabSummary.Size = new System.Drawing.Size(1197, 1187);
+            this.tabSummary.TabIndex = 7;
+            this.tabSummary.Text = "Summary";
+            this.tabSummary.UseVisualStyleBackColor = true;
             // 
             // summary1
             // 
@@ -987,8 +954,19 @@
             this.summary1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.summary1.Location = new System.Drawing.Point(3, 3);
             this.summary1.Name = "summary1";
-            this.summary1.Size = new System.Drawing.Size(1490, 1478);
+            this.summary1.Size = new System.Drawing.Size(1191, 1181);
             this.summary1.TabIndex = 0;
+            // 
+            // tabFiles
+            // 
+            this.tabFiles.Controls.Add(this.dbFilesControl1);
+            this.tabFiles.Location = new System.Drawing.Point(4, 25);
+            this.tabFiles.Name = "tabFiles";
+            this.tabFiles.Padding = new System.Windows.Forms.Padding(3);
+            this.tabFiles.Size = new System.Drawing.Size(1197, 1187);
+            this.tabFiles.TabIndex = 8;
+            this.tabFiles.Text = "Files";
+            this.tabFiles.UseVisualStyleBackColor = true;
             // 
             // dbFilesControl1
             // 
@@ -999,8 +977,19 @@
             this.dbFilesControl1.IncludeWarning = false;
             this.dbFilesControl1.Location = new System.Drawing.Point(3, 3);
             this.dbFilesControl1.Name = "dbFilesControl1";
-            this.dbFilesControl1.Size = new System.Drawing.Size(1490, 1478);
+            this.dbFilesControl1.Size = new System.Drawing.Size(1191, 1181);
             this.dbFilesControl1.TabIndex = 0;
+            // 
+            // tabLastGood
+            // 
+            this.tabLastGood.Controls.Add(this.lastGoodCheckDBControl1);
+            this.tabLastGood.Location = new System.Drawing.Point(4, 25);
+            this.tabLastGood.Name = "tabLastGood";
+            this.tabLastGood.Padding = new System.Windows.Forms.Padding(3);
+            this.tabLastGood.Size = new System.Drawing.Size(1197, 1187);
+            this.tabLastGood.TabIndex = 9;
+            this.tabLastGood.Text = "Last Good CheckDB";
+            this.tabLastGood.UseVisualStyleBackColor = true;
             // 
             // lastGoodCheckDBControl1
             // 
@@ -1011,15 +1000,26 @@
             this.lastGoodCheckDBControl1.IncludeWarning = false;
             this.lastGoodCheckDBControl1.Location = new System.Drawing.Point(3, 3);
             this.lastGoodCheckDBControl1.Name = "lastGoodCheckDBControl1";
-            this.lastGoodCheckDBControl1.Size = new System.Drawing.Size(1490, 1478);
+            this.lastGoodCheckDBControl1.Size = new System.Drawing.Size(1191, 1181);
             this.lastGoodCheckDBControl1.TabIndex = 0;
+            // 
+            // tabPerformance
+            // 
+            this.tabPerformance.Controls.Add(this.performance1);
+            this.tabPerformance.Location = new System.Drawing.Point(4, 25);
+            this.tabPerformance.Name = "tabPerformance";
+            this.tabPerformance.Padding = new System.Windows.Forms.Padding(3);
+            this.tabPerformance.Size = new System.Drawing.Size(1197, 1187);
+            this.tabPerformance.TabIndex = 10;
+            this.tabPerformance.Text = "Performance";
+            this.tabPerformance.UseVisualStyleBackColor = true;
             // 
             // performance1
             // 
             this.performance1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.performance1.Location = new System.Drawing.Point(3, 3);
             this.performance1.Name = "performance1";
-            this.performance1.Size = new System.Drawing.Size(1863, 1848);
+            this.performance1.Size = new System.Drawing.Size(1191, 1181);
             this.performance1.TabIndex = 0;
             // 
             // Main

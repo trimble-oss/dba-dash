@@ -410,48 +410,11 @@ ORDER BY SchemaName,ObjectName
             using (cn)
             {
                 cn.Open();
-                string sql = @"WITH T AS (
-SELECT O.ObjectName,O.SchemaName,O.ObjectType,H.SnapshotValidFrom,H.SnapshotValidTo,H.ObjectDateCreated,H.ObjectDateModified,H.DDLID,H2.DDLID AS DDLIDOld,CASE WHEN H2.DDLID IS NOT NULL THEN 'Modified' ELSE 'Created' END AS Action
-FROM dbo.DDLHistory H
-JOIN dbo.DBObjects O ON O.ObjectID = H.ObjectID
-LEFT JOIN dbo.DDLHistory H2 ON H2.ObjectID = O.ObjectID AND H2.SnapshotValidTo = H.SnapshotValidFrom
-WHERE H.ObjectID=@ObjectID
-UNION ALL
-SELECT O.ObjectName,O.SchemaName,O.ObjectType,H.SnapshotValidTo AS SnapshotValidFrom,x.SnapshotValidTo,NULL,NULL,NULL AS DDLID,H.DDLID AS DDLIDOld,'Dropped' AS Action
-FROM dbo.DDLHistory H
-JOIN dbo.DBObjects O ON O.ObjectID = H.ObjectID
-OUTER APPLY(SELECT TOP(1) nH.SnapshotValidFrom AS SnapshotValidTo
-			FROM dbo.DDLHistory nH 
-			WHERE nH.ObjectID = H.ObjectID
-			AND nH.SnapshotValidFrom> H.SnapshotValidTo
-			ORDER BY nh.SnapshotValidFrom
-			) x
-WHERE H.ObjectID=@ObjectID
-AND NOT EXISTS(SELECT 1 
-				FROM dbo.DDLHistory H2 
-				WHERE H.ObjectID = H2.ObjectID
-				AND H.SnapshotValidTo = H2.SnapshotValidFrom
-				)
-AND H.SnapshotValidTo<>'9999-12-31 00:00:00.000'
-)
-SELECT T.ObjectName,
-       T.SchemaName,
-       T.ObjectType,
-       T.SnapshotValidFrom,
-       T.SnapshotValidTo,
-       T.ObjectDateCreated,
-       T.ObjectDateModified,
-       T.DDLID,
-       T.DDLIDOld,
-	   T.Action
-FROM T
-ORDER BY T.SnapshotValidFrom DESC
-OFFSET @PageSize* (@PageNumber-1) ROWS
-FETCH NEXT @PageSize ROWS ONLY";
-                SqlCommand cmd = new SqlCommand(sql, cn);
+                SqlCommand cmd = new SqlCommand("dbo.DDLHistoryForObject_Get", cn);
                 cmd.Parameters.AddWithValue("ObjectID", ObjectID);
                 cmd.Parameters.AddWithValue("PageSize", currentPageSize);
                 cmd.Parameters.AddWithValue("PageNumber", PageNum);
+                cmd.CommandType = CommandType.StoredProcedure;
                 SqlDataAdapter da = new SqlDataAdapter(cmd);
                 DataSet ds = new DataSet();
                 da.Fill(ds);
@@ -535,28 +498,10 @@ FETCH NEXT @PageSize ROWS ONLY";
                 using (cn)
                 {
                     cn.Open();
-                    string sql = @"WITH Hold AS (
-	SELECT * 
-	FROM dbo.DDLHistory H
-	WHERE H.DatabaseID = @DatabaseID
-	AND H.SnapshotValidTo = @SnapshotDate
-),
-Hnew AS (
-	SELECT * 
-	FROM dbo.DDLHistory H
-	WHERE H.DatabaseID = @DatabaseID
-	AND H.SnapshotValidFrom = @SnapshotDate
-)
-SELECT O.ObjectName,O.SchemaName,O.ObjectType, CASE WHEN Hold.ObjectID IS NULL THEN 'Created' WHEN Hnew.ObjectID IS NULL THEN 'Dropped' ELSE 'Modified' END AS Action,
-		Hnew.DDLID NewDDLID,
-		HOld.DDLID OldDDLID
-FROM Hnew
-FULL JOIN Hold ON Hold.ObjectID = Hnew.ObjectID
-JOIN dbo.DBObjects O ON Hold.ObjectID = O.ObjectID OR Hnew.ObjectID= O.ObjectID";
-                    SqlCommand cmd = new SqlCommand(sql, cn);
 
+                    SqlCommand cmd = new SqlCommand("dbo.DDLSnapshotDiff_Get", cn);
                     cmd.Parameters.AddWithValue("DatabaseID", DatabaseID);
-
+                    cmd.CommandType = CommandType.StoredProcedure;
                     var p = cmd.Parameters.AddWithValue("SnapshotDate", SnapshotDate);
                     p.DbType = DbType.DateTime2;
 
@@ -613,28 +558,9 @@ JOIN dbo.DBObjects O ON Hold.ObjectID = O.ObjectID OR Hnew.ObjectID= O.ObjectID"
                 using (cn)
                 {
                     cn.Open();
-                    string sql = @"
-SELECT ss.DatabaseID,
-       ss.SnapshotDate,
-       ss.ValidatedDate,
-	   DATEDIFF(d,SnapshotDate,ValidatedDate) AS ValidForDays,
-	   DATEDIFF(d,ss.ValidatedDate,GETUTCDATE()) AS DaysSinceValidation,
-       ss.Created,
-       ss.Modified,
-       ss.Dropped,
-       ss.DDLSnapshotOptionsID,
-        D.Name as DB
-FROM dbo.DDLSnapshots ss
-JOIN dbo.Databases D ON ss.DatabaseID = D.DatabaseID
-JOIN dbo.Instances I ON D.InstanceID = I.InstanceID
-WHERE (d.DatabaseID=@DatabaseID OR @DatabaseID =-1)
-AND I.Instance = @Instance
-ORDER BY SnapshotDate DESC
-OFFSET @PageSize* (@PageNumber-1) ROWS
-FETCH NEXT @PageSize ROWS ONLY
-OPTION(RECOMPILE)";
-                    SqlCommand cmd = new SqlCommand(sql, cn);
 
+                    SqlCommand cmd = new SqlCommand("dbo.DDLSnapshots_Get", cn);
+                    cmd.CommandType = CommandType.StoredProcedure;
                     cmd.Parameters.AddWithValue("DatabaseID", n.DatabaseID);
                     cmd.Parameters.AddWithValue("Instance", n.InstanceName);
                     cmd.Parameters.AddWithValue("PageSize", currentSummaryPage);
