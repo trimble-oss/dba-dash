@@ -179,7 +179,8 @@ namespace DBAChecksGUI.Performance
                 });
                 chartBlocking.AxisY.Add(new Axis
                 {
-                    LabelFormatter = val => val.ToString("0 Blocked Sessions"),
+                    Title="Blocked Sessions",
+                    LabelFormatter = val => val.ToString(),
                     MinValue = 0,
                     MaxValue = Ymax
                 });
