@@ -35,7 +35,7 @@ FROM ' + @Table + ' W
 JOIN dbo.WaitType WT ON WT.WaitTypeID = W.WaitTypeID
 WHERE W.SnapshotDate>= @FromDate
 AND W.SnapshotDate <= @ToDate
-AND WT.WaitType <>''REDO_THREAD_PENDING_WORK''
+AND WT.WaitType NOT IN(N''PVS_PREALLOCATE'',N''REDO_THREAD_PENDING_WORK'')
 AND W.InstanceID=@InstanceID
 GROUP BY WT.WaitType, ' + @DateGroupingSQL + ' 
 HAVING SUM(W.wait_time_ms)*1000.0 / SUM(W.sample_ms_diff) > 0
