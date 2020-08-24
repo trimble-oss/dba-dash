@@ -429,6 +429,7 @@
                           <CanGrow>true</CanGrow>
                           <UserSort>
                             <SortExpression>=Sum(Fields!ExecutionCount.Value)</SortExpression>
+                            <SortExpressionScope>table1_ObjectID</SortExpressionScope>
                           </UserSort>
                           <KeepTogether>true</KeepTogether>
                           <Paragraphs>
