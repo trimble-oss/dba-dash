@@ -59,6 +59,7 @@ namespace DBAChecksGUI.Performance
                 cmd.Parameters.AddWithValue("@ToDate", to);
                 cmd.Parameters.AddWithValue("DateGrouping", dateGrouping.ToString().Replace("_",""));
                 cmd.CommandType = CommandType.StoredProcedure;
+                cmd.CommandTimeout = Properties.Settings.Default.CommandTimeout;
                 var da = new SqlDataAdapter(cmd);
                 da.Fill(dt);
 

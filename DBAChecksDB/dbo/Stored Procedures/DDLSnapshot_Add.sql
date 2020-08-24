@@ -98,25 +98,12 @@ BEGIN
 									object_id,
 									SchemaName,
 									ObjectName,
-									DDLID,
-									SnapshotDateCreated,
-									SnapshotDateModified,
-									ObjectDateCreated,
-									ObjectDateModified,
-									RevisionCount,
 									IsActive)
-		VALUES(@DatabaseID,s.ObjectType,s.object_id,s.SchemaName,s.ObjectName,S.DDLID,@SnapshotDate,@SnapshotDate,s.ObjectDateCreated,s.ObjectDateModified,0,1 )
-		WHEN MATCHED AND S.DDLID<> T.DDLID OR T.IsActive=0
-		THEN UPDATE SET T.DDLID = S.DDLID,
-			T.SnapshotDateModified = @SnapshotDate,
-			T.SnapshotReCreated = CASE WHEN T.IsActive = 0 THEN @SnapshotDate ELSE T.SnapshotReCreated END,
-			T.RevisionCount+=1,
-			T.IsActive=1
+		VALUES(@DatabaseID,s.ObjectType,s.object_id,s.SchemaName,s.ObjectName,1 )
+		WHEN MATCHED AND T.IsActive=0
+		THEN UPDATE SET T.IsActive=1
 		WHEN NOT MATCHED BY SOURCE AND T.IsActive=1 
-					THEN UPDATE SET T.IsActive=0,
-					T.SnapshotDateModified=@SnapshotDate,
-					T.RevisionCount+=1;
-
+					THEN UPDATE SET T.IsActive=0;
 
 		UPDATE H
 			SET H.SnapshotValidTo = @SnapshotDate
@@ -190,12 +177,12 @@ BEGIN
 			SELECT @DatabaseId,
 					@SnapshotDate,
 					@SnapshotDate,
-					SUM(CASE WHEN SnapshotDateCreated = @SnapshotDate OR SnapshotReCreated = @SnapshotDate THEN 1 ELSE 0 END) AS Created,
-					SUM(CASE WHEN IsActive=0 THEN 1 ELSE 0 END) AS Dropped,
-					SUM(CASE WHEN SnapshotDateCreated< @SnapshotDate AND IsActive=1 AND (SnapshotReCreated< @SnapshotDate OR SnapshotReCreated IS NULL) THEN 1 ELSE 0 END) AS Modified,
+					SUM(CASE WHEN [Action] = 'Created' THEN 1 ELSE 0 END) AS Created,
+					SUM(CASE WHEN [Action] = 'Dropped' THEN 1 ELSE 0 END) AS Dropped,
+					SUM(CASE WHEN [Action] = 'Modified' THEN 1 ELSE 0 END) AS Modified,
 					@DDLSnapshotOptionsID
-			FROM dbo.DBObjects
-			WHERE SnapshotDateModified=@SnapshotDate
+			FROM dbo.DBSnapshotDiff(@DatabaseID,@SnapshotDate)
+
 
 		END
 		INSERT INTO dbo.DDLSnapshotsLog(DatabaseID,SnapshotDate,ValidatedSnapshot,EndDate,Duration)

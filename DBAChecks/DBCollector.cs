@@ -26,8 +26,6 @@ namespace DBAChecks
         OSInfo,
         TraceFlags,
         DriversWMI,
-        ProcStats,
-        FunctionStats,
         CPU,
         BlockingSnapshot,
         IOStats,
@@ -43,7 +41,8 @@ namespace DBAChecks
         AzureDBElasticPoolResourceStats,
         SlowQueries,
         LastGoodCheckDB,
-        Alerts
+        Alerts,
+        ObjectExecutionStats
     }
 
 
@@ -56,7 +55,7 @@ namespace DBAChecks
         public Int32 PerformanceCollectionPeriodMins = 60;
         string computerName;
         Int64 editionId;
-        CollectionType[] azureCollectionTypes = new CollectionType[] { CollectionType.SlowQueries, CollectionType.AzureDBElasticPoolResourceStats, CollectionType.AzureDBServiceObjectives, CollectionType.AzureDBResourceStats, CollectionType.CPU, CollectionType.DBFiles, CollectionType.General, CollectionType.Performance, CollectionType.Databases, CollectionType.DBConfig, CollectionType.TraceFlags, CollectionType.ProcStats, CollectionType.FunctionStats, CollectionType.BlockingSnapshot, CollectionType.IOStats, CollectionType.Waits, CollectionType.ServerProperties, CollectionType.DBTuningOptions, CollectionType.SysConfig };
+        CollectionType[] azureCollectionTypes = new CollectionType[] { CollectionType.SlowQueries, CollectionType.AzureDBElasticPoolResourceStats, CollectionType.AzureDBServiceObjectives, CollectionType.AzureDBResourceStats, CollectionType.CPU, CollectionType.DBFiles, CollectionType.General, CollectionType.Performance, CollectionType.Databases, CollectionType.DBConfig, CollectionType.TraceFlags, CollectionType.ObjectExecutionStats, CollectionType.BlockingSnapshot, CollectionType.IOStats, CollectionType.Waits, CollectionType.ServerProperties, CollectionType.DBTuningOptions, CollectionType.SysConfig };
         public Int64 SlowQueryThresholdMs = -1;
 
         private bool IsAzure = false;
@@ -256,8 +255,7 @@ namespace DBAChecks
             }
             else if (collectionType == CollectionType.Performance)
             {
-                Collect(CollectionType.ProcStats);
-                Collect(CollectionType.FunctionStats);
+                Collect(CollectionType.ObjectExecutionStats);
                 Collect(CollectionType.CPU);
                 Collect(CollectionType.BlockingSnapshot);
                 Collect(CollectionType.IOStats);

@@ -26,8 +26,8 @@
           <QueryParameter Name="@DatabaseID">
             <Value>=Parameters!DatabaseID.Value</Value>
           </QueryParameter>
-          <QueryParameter Name="@Type">
-            <Value>=Parameters!Type.Value</Value>
+          <QueryParameter Name="@Types">
+            <Value>=Parameters!Types.Value</Value>
           </QueryParameter>
         </QueryParameters>
         <CommandType>StoredProcedure</CommandType>
@@ -43,8 +43,12 @@
           <DataField>name</DataField>
           <rd:TypeName>System.String</rd:TypeName>
         </Field>
-        <Field Name="object_name">
-          <DataField>object_name</DataField>
+        <Field Name="ObjectName">
+          <DataField>ObjectName</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
+        <Field Name="SchemaName">
+          <DataField>SchemaName</DataField>
           <rd:TypeName>System.String</rd:TypeName>
         </Field>
         <Field Name="object_id">
@@ -55,9 +59,9 @@
           <DataField>DatabaseID</DataField>
           <rd:TypeName>System.Int32</rd:TypeName>
         </Field>
-        <Field Name="ProcID">
-          <DataField>ProcID</DataField>
-          <rd:TypeName>System.Int32</rd:TypeName>
+        <Field Name="ObjectID">
+          <DataField>ObjectID</DataField>
+          <rd:TypeName>System.Int64</rd:TypeName>
         </Field>
         <Field Name="TotalDuration">
           <DataField>TotalDuration</DataField>
@@ -252,14 +256,14 @@
                         <Textbox Name="textbox5">
                           <CanGrow>true</CanGrow>
                           <UserSort>
-                            <SortExpression>=Fields!object_name.Value</SortExpression>
+                            <SortExpression>=Fields!SchemaName.Value + "." + Fields!ObjectName.Value</SortExpression>
                           </UserSort>
                           <KeepTogether>true</KeepTogether>
                           <Paragraphs>
                             <Paragraph>
                               <TextRuns>
                                 <TextRun>
-                                  <Value>object name</Value>
+                                  <Value>Name</Value>
                                   <Style>
                                     <FontFamily />
                                     <FontSize>11pt</FontSize>
@@ -333,7 +337,7 @@
                           <CanGrow>true</CanGrow>
                           <UserSort>
                             <SortExpression>=Sum(Fields!TotalDuration.Value)</SortExpression>
-                            <SortExpressionScope>table1_ProcID</SortExpressionScope>
+                            <SortExpressionScope>table1_ObjectID</SortExpressionScope>
                           </UserSort>
                           <KeepTogether>true</KeepTogether>
                           <Paragraphs>
@@ -379,7 +383,7 @@
                           <CanGrow>true</CanGrow>
                           <UserSort>
                             <SortExpression>=(SUM(Fields!TotalDuration.Value)/SUM(Fields!ExecutionCount.Value))</SortExpression>
-                            <SortExpressionScope>table1_ProcID</SortExpressionScope>
+                            <SortExpressionScope>table1_ObjectID</SortExpressionScope>
                           </UserSort>
                           <KeepTogether>true</KeepTogether>
                           <Paragraphs>
@@ -425,7 +429,6 @@
                           <CanGrow>true</CanGrow>
                           <UserSort>
                             <SortExpression>=Sum(Fields!ExecutionCount.Value)</SortExpression>
-                            <SortExpressionScope>table1_ProcID</SortExpressionScope>
                           </UserSort>
                           <KeepTogether>true</KeepTogether>
                           <Paragraphs>
@@ -806,14 +809,14 @@
                     </TablixCell>
                     <TablixCell>
                       <CellContents>
-                        <Textbox Name="object_name">
+                        <Textbox Name="SchemaName">
                           <CanGrow>true</CanGrow>
                           <KeepTogether>true</KeepTogether>
                           <Paragraphs>
                             <Paragraph>
                               <TextRuns>
                                 <TextRun>
-                                  <Value>=Fields!object_name.Value</Value>
+                                  <Value>=Fields!SchemaName.Value + "." + Fields!ObjectName.Value</Value>
                                   <Style>
                                     <FontFamily />
                                     <Color>#333333</Color>
@@ -823,7 +826,7 @@
                               <Style />
                             </Paragraph>
                           </Paragraphs>
-                          <rd:DefaultName>object_name</rd:DefaultName>
+                          <rd:DefaultName>SchemaName</rd:DefaultName>
                           <Style>
                             <Border>
                               <Color>LightGrey</Color>
@@ -2684,9 +2687,9 @@ Sum(IIF(Fields!DT.Value&gt;=DateTime.Now.Date.AddDays(-60) and Fields!DT.Value&l
                   <KeepTogether>true</KeepTogether>
                 </TablixMember>
                 <TablixMember>
-                  <Group Name="table1_ProcID">
+                  <Group Name="table1_ObjectID">
                     <GroupExpressions>
-                      <GroupExpression>=Fields!ProcID.Value</GroupExpression>
+                      <GroupExpression>=Fields!ObjectID.Value</GroupExpression>
                     </GroupExpressions>
                   </Group>
                   <SortExpressions>
@@ -2783,26 +2786,48 @@ Sum(IIF(Fields!DT.Value&gt;=DateTime.Now.Date.AddDays(-60) and Fields!DT.Value&l
       </DefaultValue>
       <Prompt>Top</Prompt>
     </ReportParameter>
-    <ReportParameter Name="Type">
+    <ReportParameter Name="Types">
       <DataType>String</DataType>
       <DefaultValue>
         <Values>
-          <Value>PROCEDURE</Value>
+          <Value>P</Value>
+          <Value>FN</Value>
+          <Value>TR</Value>
+          <Value>TA</Value>
+          <Value>X</Value>
+          <Value>PC</Value>
         </Values>
       </DefaultValue>
-      <Prompt>Type</Prompt>
+      <Prompt>Types</Prompt>
       <ValidValues>
         <ParameterValues>
           <ParameterValue>
-            <Value>PROCEDURE</Value>
+            <Value>P</Value>
             <Label>Procedure</Label>
           </ParameterValue>
           <ParameterValue>
-            <Value>FUNCTION</Value>
+            <Value>FN</Value>
             <Label>Function</Label>
+          </ParameterValue>
+          <ParameterValue>
+            <Value>TR</Value>
+            <Label>Trigger</Label>
+          </ParameterValue>
+          <ParameterValue>
+            <Value>TA</Value>
+            <Label>Trigger CLR</Label>
+          </ParameterValue>
+          <ParameterValue>
+            <Value>PC</Value>
+            <Label>CLR Procedure</Label>
+          </ParameterValue>
+          <ParameterValue>
+            <Value>X</Value>
+            <Label>Extended Stored Procedure</Label>
           </ParameterValue>
         </ParameterValues>
       </ValidValues>
+      <MultiValue>true</MultiValue>
     </ReportParameter>
     <ReportParameter Name="DateFormat">
       <DataType>String</DataType>
@@ -2857,7 +2882,7 @@ Sum(IIF(Fields!DT.Value&gt;=DateTime.Now.Date.AddDays(-60) and Fields!DT.Value&l
         <CellDefinition>
           <ColumnIndex>3</ColumnIndex>
           <RowIndex>1</RowIndex>
-          <ParameterName>Type</ParameterName>
+          <ParameterName>Types</ParameterName>
         </CellDefinition>
       </CellDefinitions>
     </GridLayoutDefinition>

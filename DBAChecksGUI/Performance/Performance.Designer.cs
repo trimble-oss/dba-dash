@@ -48,10 +48,11 @@
             this.toolStripDropDownButton1 = new System.Windows.Forms.ToolStripDropDownButton();
             this.smoothLinesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.timer1 = new System.Windows.Forms.Timer(this.components);
+            this.blocking1 = new DBAChecksGUI.Performance.Blocking();
             this.waits1 = new DBAChecksGUI.Performance.Waits();
             this.ioPerformance1 = new DBAChecksGUI.Performance.IOPerformance();
             this.cpu1 = new DBAChecksGUI.Performance.CPU();
-            this.blocking1 = new DBAChecksGUI.Performance.Blocking();
+            this.objectExecution1 = new DBAChecksGUI.Performance.ObjectExecution();
             this.toolStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -238,6 +239,14 @@
             this.timer1.Interval = 10000;
             this.timer1.Tick += new System.EventHandler(this.timer1_Tick);
             // 
+            // blocking1
+            // 
+            this.blocking1.Dock = System.Windows.Forms.DockStyle.Top;
+            this.blocking1.Location = new System.Drawing.Point(0, 871);
+            this.blocking1.Name = "blocking1";
+            this.blocking1.Size = new System.Drawing.Size(883, 408);
+            this.blocking1.TabIndex = 6;
+            // 
             // waits1
             // 
             this.waits1.Dock = System.Windows.Forms.DockStyle.Top;
@@ -264,25 +273,26 @@
             this.cpu1.SmoothLines = true;
             this.cpu1.TabIndex = 4;
             // 
-            // blocking1
+            // objectExecution1
             // 
-            this.blocking1.Dock = System.Windows.Forms.DockStyle.Top;
-            this.blocking1.Location = new System.Drawing.Point(0, 871);
-            this.blocking1.Name = "blocking1";
-            this.blocking1.Size = new System.Drawing.Size(883, 408);
-            this.blocking1.TabIndex = 6;
+            this.objectExecution1.Dock = System.Windows.Forms.DockStyle.Top;
+            this.objectExecution1.Location = new System.Drawing.Point(0, 1279);
+            this.objectExecution1.Name = "objectExecution1";
+            this.objectExecution1.Size = new System.Drawing.Size(883, 282);
+            this.objectExecution1.TabIndex = 7;
             // 
             // Performance
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.Controls.Add(this.objectExecution1);
             this.Controls.Add(this.blocking1);
             this.Controls.Add(this.waits1);
             this.Controls.Add(this.ioPerformance1);
             this.Controls.Add(this.cpu1);
             this.Controls.Add(this.toolStrip1);
             this.Name = "Performance";
-            this.Size = new System.Drawing.Size(883, 1319);
+            this.Size = new System.Drawing.Size(883, 1620);
             this.toolStrip1.ResumeLayout(false);
             this.toolStrip1.PerformLayout();
             this.ResumeLayout(false);
@@ -314,5 +324,6 @@
         private System.Windows.Forms.ToolStripMenuItem days14toolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem days28ToolStripMenuItem;
         private Blocking blocking1;
+        private ObjectExecution objectExecution1;
     }
 }

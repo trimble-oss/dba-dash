@@ -1,24 +1,21 @@
-﻿CREATE  PROC [Report].[ProcStats](
+﻿CREATE  PROC [dbo].[ObjectExecutionStats_Get](
 	@Instance SYSNAME=NULL,
 	@DatabaseID INT=NULL,
-	@Proc SYSNAME=NULL,
-	@FromDate DATETIME=NULL,
-	@ToDate DATETIME=NULL,
+	@ObjectName SYSNAME=NULL,
+	@SchemaName SYSNAME=NULL,
+	@FromDateUTC DATETIME=NULL,
+	@ToDateUTC DATETIME=NULL,
 	@Measure VARCHAR(30)='TotalDuration',
-	@DateAgg VARCHAR(20)='NONE',
-	@IsFunction BIT=0,
+	@DateAgg VARCHAR(20)='10MIN',
 	@UTCOffset INT=0,
 	@InstanceID INT=NULL
 )
 WITH EXECUTE AS OWNER
 AS
-SELECT @FromDate= DATEADD(mi, -@UTCOffset, @FromDate),
-	@ToDate = DATEADD(mi, -@UTCOffset, @ToDate) 
-
-IF @FromDate IS NULL
-	SET @FromDate = CONVERT(DATETIME,STUFF(CONVERT(VARCHAR,DATEADD(mi,-120,GETUTCDATE()),120),16,4,'0:00'),120) 
-IF @ToDate IS NULL
-	SET @ToDate = GETUTCDATE()
+IF @FromDateUTC IS NULL
+	SET @FromDateUTC = CONVERT(DATETIME,STUFF(CONVERT(VARCHAR,DATEADD(mi,-120,GETUTCDATE()),120),16,4,'0:00'),120) 
+IF @ToDateUTC IS NULL
+	SET @ToDateUTC = GETUTCDATE()
 
 DECLARE @DateAggString NVARCHAR(MAX)
 DECLARE @MeasureString NVARCHAR(MAX) 
@@ -34,6 +31,7 @@ WITH agg AS (
 SELECT ' + @DateAggString + ' as SnapshotDate,
        D.name AS DatabaseName,
 	   D.DatabaseID,
+	   O.ObjectID,
        O.SchemaName + ''.'' + O.objectname as object_name,
 	   SUM(PS.total_worker_time)/1000000.0 as TotalCPU,
 	   SUM(PS.total_worker_time)/NULLIF(SUM(PS.execution_count),0)/1000000.0 as AvgCPU,
@@ -52,30 +50,30 @@ FROM dbo.ObjectExecutionStats' + CASE WHEN @DateAgg IN('60MIN','1DAY') THEN '_60
     JOIN dbo.Databases D ON D.DatabaseID = O.DatabaseID
 	JOIN dbo.Instances I ON D.InstanceID = I.InstanceID AND PS.InstanceID = I.InstanceID
 WHERE D.IsActive=1
-' + CASE WHEN @IsFunction=1 THEN 'AND O.ObjectType = ''FN''' ELSE 'AND O.ObjectType IN(''P'',''PC'',''X'')' END + '
 ' + CASE WHEN @Instance IS NOT NULL THEN 'AND I.Instance = @Instance' ELSE '' END + '
 ' + CASE WHEN @InstanceID IS NOT NULL THEN 'AND I.InstanceID = @InstanceID' ELSE '' END + '
 AND PS.SnapshotDate >= @FromDate 
 AND PS.SnapshotDate< @ToDate
 ' + CASE WHEN @DatabaseID IS NULL THEN '' ELSE 'AND D.DatabaseID=@DatabaseID' END + '
-' + CASE WHEN @Proc IS NULL THEN '' ELSE 'AND O.objectname=@Proc' END + '
-GROUP BY ' + @DateAggString + ',D.Name,O.objectname,D.DatabaseID,O.SchemaName
+' + CASE WHEN @ObjectName IS NULL THEN '' ELSE 'AND O.objectname=@ObjectName' END + '
+GROUP BY ' + @DateAggString + ',D.Name,O.objectname,D.DatabaseID,O.SchemaName,O.ObjectID
 )
 , T AS (
 	SELECT agg.*,
 		' + @MeasureString + ' as Measure,
-		ROW_NUMBER() OVER (PARTITION BY SnapshotDate ORDER BY ' + @MeasureString + ' DESC) ProcRank
+		ROW_NUMBER() OVER (PARTITION BY SnapshotDate ORDER BY ' + @MeasureString + ' DESC) ProcRank,
+		SUM(' + @MeasureString + ') OVER(PARTITION BY ObjectID) TotalMeasure
 	FROM agg
 )
 SELECT T.*
 FROM T
-WHERE ProcRank <=50
-ORDER BY DatabaseName, object_name'
+WHERE ProcRank <=20
+ORDER BY TotalMeasure DESC,ObjectID'
 PRINT @SQL
 IF @SQL IS NOT NULL
 BEGIN
-EXEC sp_executesql @SQL,N'@Instance SYSNAME,@DatabaseID INT,@FromDate DATETIME,@ToDate DATETIME,@Proc SYSNAME,@UTCOffset INT,@InstanceID INT',
-	@Instance,@DatabaseID,@FromDate,@ToDate,@Proc,@UTCOffset,@InstanceID
+EXEC sp_executesql @SQL,N'@Instance SYSNAME,@DatabaseID INT,@FromDate DATETIME,@ToDate DATETIME,@ObjectName SYSNAME,@SchemaName SYSNAME,@UTCOffset INT,@InstanceID INT',
+	@Instance,@DatabaseID,@FromDateUTC,@ToDateUTC,@ObjectName,@SchemaName,@UTCOffset,@InstanceID
 END 
 ELSE
 BEGIN

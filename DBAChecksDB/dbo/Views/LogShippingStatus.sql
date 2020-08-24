@@ -1,6 +1,4 @@
 ﻿
-
-
 CREATE VIEW [dbo].[LogShippingStatus] 
 AS
 SELECT I.InstanceID,
@@ -40,7 +38,7 @@ OUTER APPLY(SELECT CASE WHEN l.TimeSinceLast >cfg.TimeSinceLastCriticalThreshold
 	WHEN l.LatencyOfLast > cfg.LatencyWarningThreshold THEN 2
 	WHEN cfg.LatencyCriticalThreshold IS NULL AND cfg.TimeSinceLastCriticalThreshold IS NULL AND cfg.LatencyWarningThreshold IS NULL AND cfg.TimeSinceLastWarningThreshold IS NULL  THEN 3
 	ELSE 4 END AS Status) chk
-WHERE (D.state IN(1,2) OR D.is_in_standby=1)
+WHERE (D.state =1 OR D.is_in_standby=1)
 AND D.IsActive=1
 AND I.IsActive=1
 AND D.create_date < DATEADD(d,-1,GETUTCDATE())

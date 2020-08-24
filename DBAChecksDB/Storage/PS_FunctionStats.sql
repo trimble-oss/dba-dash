@@ -1,3 +1,0 @@
-﻿CREATE PARTITION SCHEME [PS_FunctionStats]
-    AS PARTITION [PF_FunctionStats]
-    ALL TO ([PRIMARY])

@@ -16,9 +16,9 @@ using static DBAChecksGUI.Performance.Performance;
 
 namespace DBAChecksGUI.Performance
 {
-    public partial class Waits : UserControl
+    public partial class ObjectExecution : UserControl
     {
-        public Waits()
+        public ObjectExecution()
         {
             InitializeComponent();
         }
@@ -31,7 +31,7 @@ namespace DBAChecksGUI.Performance
 
         public DateTimePoint x;
         Int32 instanceID;
-        DateTime lastWait = DateTime.MinValue;
+        DateTime chartMaxDate = DateTime.MinValue;
         string connectionString;
         DateGroup dateGrouping;
         DateTime from;
@@ -40,10 +40,10 @@ namespace DBAChecksGUI.Performance
 
         public void RefreshData()
         {
-            if (lastWait != DateTime.MinValue && dateGrouping == DateGroup._1MIN)
+            if (chartMaxDate != DateTime.MinValue && dateGrouping == DateGroup._1MIN)
             {
                 this.to = DateTime.UtcNow.AddMinutes(1);
-                this.from = lastWait.AddSeconds(1);
+                this.from = chartMaxDate.AddMinutes(-utcOffset()).AddSeconds(1);
                 refreshData(true);
             }
         }
@@ -58,6 +58,10 @@ namespace DBAChecksGUI.Performance
             refreshData(false);
         }
 
+        private Int32 utcOffset()
+        {
+           return  (Int32)DateTime.Now.Subtract(DateTime.UtcNow).TotalMinutes;
+        }
 
          private void refreshData(bool update)
         {
@@ -67,7 +71,7 @@ namespace DBAChecksGUI.Performance
                 waitChart.Series.Clear();
                 waitChart.AxisX.Clear();
                 waitChart.AxisY.Clear();
-                lastWait = DateTime.MinValue;
+                chartMaxDate = DateTime.MinValue;
             }
          
 
@@ -75,13 +79,13 @@ namespace DBAChecksGUI.Performance
             using (cn)
             {
                 cn.Open();
-                SqlCommand cmd = new SqlCommand("dbo.Waits_Get", cn);
+                SqlCommand cmd = new SqlCommand("dbo.ObjectExecutionStats_Get", cn);
                 cmd.Parameters.AddWithValue("InstanceID", instanceID);
-                cmd.Parameters.AddWithValue("FromDate", from);
-                cmd.Parameters.AddWithValue("ToDate", to);
-                cmd.Parameters.AddWithValue("DateGrouping", dateGrouping.ToString().Replace("_",""));
+                cmd.Parameters.AddWithValue("FromDateUTC", from);
+                cmd.Parameters.AddWithValue("ToDateUTC", to);
+                cmd.Parameters.AddWithValue("UTCOffset", utcOffset());
+                cmd.Parameters.AddWithValue("DateAgg", dateGrouping.ToString().Replace("_",""));
                 cmd.CommandType = CommandType.StoredProcedure;
-                cmd.CommandTimeout = Properties.Settings.Default.CommandTimeout;
                 SqlDataAdapter da = new SqlDataAdapter(cmd);
                 DataTable dt = new DataTable();
                 da.Fill(dt);
@@ -93,11 +97,11 @@ namespace DBAChecksGUI.Performance
                 string current = string.Empty;
                 ChartValues<DateTimePoint> values = new ChartValues<DateTimePoint>();               
                 foreach (DataRow r in dt.Rows){
-                    var waitType = (string)r["WaitType"];
-                    var time = (DateTime)r["Time"];
-                    if (time > lastWait)
+                    var waitType =(string)r["DatabaseName"] + " | " + (string)r["object_name"];
+                    var time = (DateTime)r["SnapshotDate"];
+                    if (time > chartMaxDate)
                     {
-                        lastWait = time;
+                        chartMaxDate = time;
                     }
                     if (current!= waitType)
                     {
@@ -105,7 +109,7 @@ namespace DBAChecksGUI.Performance
                         values = new ChartValues<DateTimePoint>();
                         current = waitType;
                     }
-                    values.Add(new DateTimePoint(((DateTime)r["Time"]).ToLocalTime(), (double)(decimal)r["WaitTimeMsPerSec"]));
+                    values.Add(new DateTimePoint(((DateTime)r["SnapshotDate"]), (double)(decimal)r["Measure"]));
                 }
                 if (values.Count > 0)
                 {

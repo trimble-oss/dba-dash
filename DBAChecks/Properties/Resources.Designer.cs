@@ -399,31 +399,6 @@ namespace DBAChecks.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to IF OBJECT_ID(&apos;sys.dm_exec_function_stats&apos;) IS NOT NULL
-        ///BEGIN
-        ///	SELECT object_id,
-        ///		   database_id,
-        ///		   ISNULL(OBJECT_NAME(object_id, database_id),&apos;&apos;) object_name,
-        ///		   total_worker_time,
-        ///		   total_elapsed_time,
-        ///		   total_logical_reads,
-        ///		   total_logical_writes,
-        ///		   total_physical_reads,
-        ///		   cached_time,
-        ///		   execution_count,
-        ///		   GETUTCDATE() AS current_time_utc,
-        ///		   type,
-        ///		   OBJECT_SCHEMA_NAME(object_id,database_id) schema_name
-        ///	FROM sys.dm_exec_function_stats
-        ///	WHERE database_id &lt;&gt;  [rest of string was truncated]&quot;;.
-        /// </summary>
-        internal static string SQLFunctionStats {
-            get {
-                return ResourceManager.GetString("SQLFunctionStats", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to SELECT GETUTCDATE() AS SnapshotDate,
         ///       [database_id],
         ///       [file_id],
@@ -491,6 +466,29 @@ namespace DBAChecks.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to DECLARE @SQL NVARCHAR(MAX)
+        ///DECLARE @IsAzure BIT
+        ///SELECT @IsAzure = CASE WHEN SERVERPROPERTY(&apos;EditionID&apos;) =1674378470 THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END
+        ///IF OBJECT_ID(&apos;sys.dm_exec_procedure_stats&apos;) IS NOT NULL
+        ///BEGIN
+        ///	SET @SQL = N&apos;
+        ///			SELECT object_id,
+        ///				   database_id,
+        ///				   ISNULL(OBJECT_NAME(object_id, database_id),&apos;&apos;&apos;&apos;) object_name,
+        ///				   total_worker_time,
+        ///				   total_elapsed_time,
+        ///				   total_logical_reads,
+        ///				   total_logical_writes,
+        ///				   total_physical_reads,
+        ///				   cache [rest of string was truncated]&quot;;.
+        /// </summary>
+        internal static string SQLObjectExecutionStats {
+            get {
+                return ResourceManager.GetString("SQLObjectExecutionStats", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to DECLARE @SQL NVARCHAR(MAX);
         ///
         ///WITH cols AS (
@@ -534,32 +532,6 @@ namespace DBAChecks.Properties {
         internal static string SQLOSLoadedModules {
             get {
                 return ResourceManager.GetString("SQLOSLoadedModules", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to IF OBJECT_ID(&apos;sys.dm_exec_procedure_stats&apos;) IS NOT NULL
-        ///BEGIN
-        ///	IF SERVERPROPERTY(&apos;EditionID&apos;) =1674378470
-        ///	BEGIN
-        ///		--azure
-        ///		SELECT object_id,
-        ///			   database_id,
-        ///			   ISNULL(OBJECT_NAME(object_id, database_id),&apos;&apos;) object_name,
-        ///			   total_worker_time,
-        ///			   total_elapsed_time,
-        ///			   total_logical_reads,
-        ///			   total_logical_writes,
-        ///			   total_physical_reads,
-        ///			   cached_time,
-        ///			   execution_count,
-        ///			   GETUTCDATE() AS current_time_utc,
-        ///			   type,
-        ///			   OBJECT_SCHEMA_NAME(object_id, dat [rest of string was truncated]&quot;;.
-        /// </summary>
-        internal static string SQLProcStats {
-            get {
-                return ResourceManager.GetString("SQLProcStats", resourceCulture);
             }
         }
         

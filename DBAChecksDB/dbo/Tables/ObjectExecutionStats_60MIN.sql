@@ -1,6 +1,6 @@
-﻿CREATE TABLE [Switch].[ProcStats] (
+﻿CREATE TABLE [dbo].[ObjectExecutionStats_60MIN] (
     [InstanceID]           INT           NOT NULL,
-    [ProcID]               INT           NOT NULL,
+    [ObjectID]             BIGINT        NOT NULL,
     [SnapshotDate]         DATETIME2 (3) NOT NULL,
     [PeriodTime]           BIGINT        NOT NULL,
     [total_worker_time]    BIGINT        NOT NULL,
@@ -10,6 +10,7 @@
     [total_physical_reads] BIGINT        NOT NULL,
     [execution_count]      BIGINT        NOT NULL,
     [IsCompile]            BIT           NOT NULL,
-    CONSTRAINT [PK_ProcStats] PRIMARY KEY CLUSTERED ([InstanceID] ASC, [SnapshotDate] ASC, [ProcID] ASC) WITH (DATA_COMPRESSION = PAGE)
+    CONSTRAINT [PK_ObjectExecutionStats_60MIN] PRIMARY KEY CLUSTERED ([InstanceID] ASC, [SnapshotDate] ASC, [ObjectID] ASC) WITH (DATA_COMPRESSION = PAGE),
+    CONSTRAINT [FK_ObjectExecutionStats_60MIN_DBObjects] FOREIGN KEY ([ObjectID]) REFERENCES [dbo].[DBObjects] ([ObjectID])
 );
 

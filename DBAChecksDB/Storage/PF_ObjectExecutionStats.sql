@@ -1,0 +1,3 @@
+﻿CREATE PARTITION FUNCTION [PF_ObjectExecutionStats](DATETIME2 (3))
+    AS RANGE RIGHT
+    FOR VALUES ()

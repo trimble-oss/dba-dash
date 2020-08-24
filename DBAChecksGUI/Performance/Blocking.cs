@@ -67,6 +67,7 @@ namespace DBAChecksGUI.Performance
                 cmd.Parameters.AddWithValue("@FromDate", fromDate);
                 cmd.Parameters.AddWithValue("@ToDate", toDate);
                 cmd.CommandType = CommandType.StoredProcedure;
+                cmd.CommandTimeout = Properties.Settings.Default.CommandTimeout;
                 SqlDataAdapter da = new SqlDataAdapter(cmd);
                 DataTable dt = new DataTable();
                 da.Fill(dt);

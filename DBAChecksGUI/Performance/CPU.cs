@@ -90,6 +90,7 @@ namespace DBAChecksGUI.Performance
                 cmd.Parameters.AddWithValue("@ToDate", toDate);
                 cmd.Parameters.AddWithValue("@DateGrouping", DateGrouping.ToString().Replace("_",""));
                 cmd.CommandType = CommandType.StoredProcedure;
+                cmd.CommandTimeout = Properties.Settings.Default.CommandTimeout;
                 var rdr = cmd.ExecuteReader();
 
                 var sqlProcessValues = new ChartValues<DateTimePoint>();

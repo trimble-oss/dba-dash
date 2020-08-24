@@ -161,6 +161,32 @@ namespace DBAChecksGUI
                 performance1.ConnectionString = connectionString;
                 performance1.RefreshData();
             }
+            if(tabs.SelectedTab== tabDBAChecksErrorLog)
+            {
+                loadDBAChecksErrorLog(n.InstanceID);
+            }
+        }
+
+        private void loadDBAChecksErrorLog(Int32 InstanceID)
+        {
+            SqlConnection cn = new SqlConnection(connectionString);
+
+            using (cn)
+            {
+                SqlCommand cmd = new SqlCommand("Report.DBAChecksErrorLog",cn);
+                cmd.CommandType = CommandType.StoredProcedure;
+                if (InstanceID > 0)
+                {
+                    cmd.Parameters.AddWithValue("InstanceID", InstanceID);
+                }
+                SqlDataAdapter da = new SqlDataAdapter(cmd);
+                DataTable dt = new DataTable();
+               
+                da.Fill(dt);
+                dgvDBAChecksErrors.AutoGenerateColumns = false;
+                dgvDBAChecksErrors.DataSource = dt;
+            }
+
         }
 
     
@@ -311,13 +337,15 @@ ORDER BY SchemaName,ObjectName
                 allowedTabs.Add(tabLogShipping);
                 allowedTabs.Add(tabJobs);
                 allowedTabs.Add(tabFiles);
-                allowedTabs.Add(tabLastGood);           
+                allowedTabs.Add(tabLastGood);
+                allowedTabs.Add(tabDBAChecksErrorLog);
             }
             else if(n.Type== SQLTreeItem.TreeType.Database)
             {
                 if (((SQLTreeItem)n.Parent).InstanceID == 0) //azure
                 {
                     allowedTabs.Add(tabPerformance);
+                    allowedTabs.Add(tabDBAChecksErrorLog);
                 }
                 allowedTabs.Add(tabFiles);
                 allowedTabs.Add(tabSnapshotsSummary);
@@ -333,7 +361,8 @@ ORDER BY SchemaName,ObjectName
                     allowedTabs.Add(tabLogShipping);
                     allowedTabs.Add(tabJobs);
                     allowedTabs.Add(tabSnapshotsSummary);
-                    allowedTabs.Add(tabLastGood);                 
+                    allowedTabs.Add(tabLastGood);
+                    allowedTabs.Add(tabDBAChecksErrorLog);
                 }
                 allowedTabs.Add(tabFiles);
                 allowedTabs.Add(tabTags);

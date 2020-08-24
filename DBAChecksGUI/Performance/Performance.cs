@@ -75,11 +75,11 @@ namespace DBAChecksGUI.Performance
         {
             dateGrp = DateGrouping((Int32)to.Subtract(from).TotalMinutes);
             enableTimer(false);
-
             ioPerformance1.RefreshData(InstanceID, from, to, ConnectionString, dateGrp);
             cpu1.RefreshData(InstanceID, from, to, ConnectionString, dateGrp);
             waits1.RefreshData(InstanceID, from, to, ConnectionString, dateGrp);
             blocking1.RefreshData(InstanceID, from, to, ConnectionString, dateGrp);
+            objectExecution1.RefreshData(InstanceID, from, to, ConnectionString, dateGrp);
           
         }
 
@@ -94,7 +94,7 @@ namespace DBAChecksGUI.Performance
             }
             try
             {
-                RefreshData(from, to);
+              RefreshData(from, to);
             }
             catch (Exception ex)
             {
@@ -102,7 +102,7 @@ namespace DBAChecksGUI.Performance
                 tsEnableTimer.Enabled = false;
                 return;
             }
-            if (dateGrp == DateGroup._1MIN && mins <= 180)
+            if (dateGrp == DateGroup._1MIN && mins>0 && mins <= 180)
             {
                 enableTimer(true);
             }
@@ -140,6 +140,7 @@ namespace DBAChecksGUI.Performance
             cpu1.RefreshData();
             waits1.RefreshData();
             blocking1.RefreshData();
+            objectExecution1.RefreshData();
         }
 
         private void tsDisableTimer_Click(object sender, EventArgs e)

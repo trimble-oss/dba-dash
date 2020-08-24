@@ -225,10 +225,6 @@
     <Content Include="services.ico" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\DBAChecksDB\DBAChecksDB.sqlproj">
-      <Project>{dde14068-5c6e-4e82-bf2f-7ed7681dbbc4}</Project>
-      <Name>DBAChecksDB</Name>
-    </ProjectReference>
     <ProjectReference Include="..\DBAChecks\DBAChecks.csproj">
       <Project>{176c91f1-d5f4-4695-b1ed-2c021249b88f}</Project>
       <Name>DBAChecks</Name>

@@ -1,33 +1,46 @@
-﻿
-
-CREATE PROC [dbo].[FunctionStats_Upd](@FunctionStats dbo.ProcStats READONLY,@InstanceID INT,@SnapshotDate DATETIME2(3))
+﻿CREATE PROC [dbo].[ObjectExecutionStats_Upd](@ObjectExecutionStats dbo.ProcStats READONLY,@InstanceID INT,@SnapshotDate DATETIME2(3))
 AS
-INSERT INTO dbo.Functions
+INSERT INTO dbo.DBObjects
 (
     DatabaseID,
-    object_name,
-	object_id,
-    type,
-    schema_name
+	ObjectName,
+    object_id,
+	ObjectType,
+    SchemaName,
+    IsActive
 )
-SELECT DISTINCT d.DatabaseID,t.object_name,t.object_id,t.type,t.schema_name
-FROM @FunctionStats t
+SELECT DISTINCT d.DatabaseID,
+	t.object_name,
+	t.object_id,
+	t.type,
+	t.schema_name,
+	CAST(1 AS BIT)
+FROM @ObjectExecutionStats t
 JOIN dbo.Databases d ON t.database_id = d.database_id AND D.InstanceID=@InstanceID
 WHERE D.IsActive=1
-AND NOT EXISTS(SELECT 1 FROM dbo.Functions p WHERE p.DatabaseID = d.DatabaseID AND p.object_id = t.object_id AND p.object_name = t.object_name);
+AND NOT EXISTS(SELECT 1 
+			FROM dbo.DBObjects O 
+			WHERE O.DatabaseID = d.DatabaseID 
+			AND O.objectname = t.object_name 
+			AND O.SchemaName = t.schema_name
+			AND O.ObjectType = t.type
+			);
 
-UPDATE P 
-    SET P.type = t.type,
-    P.schema_name = t.schema_name
-FROM @FunctionStats t
+UPDATE O 
+	SET O.IsActive=1,
+	O.object_id = t.object_id
+FROM @ObjectExecutionStats t
 JOIN dbo.Databases d ON t.database_id = d.database_id AND D.InstanceID=@InstanceID
-JOIN dbo.Functions p ON p.DatabaseID = d.DatabaseID AND p.object_id = t.object_id AND p.object_name = t.object_name
+JOIN dbo.DBObjects O ON O.DatabaseID = d.DatabaseID 
+					AND O.objectname = t.object_name 
+					AND O.ObjectType = t.type
+					AND O.SchemaName = t.schema_name
 WHERE D.IsActive=1
-AND p.type IS NULL
-AND p.schema_name IS NULL;
+AND (O.IsActive=0 OR o.object_id <> t.object_id);
+
 
 WITH t AS (
-	SELECT P.FunctionID,
+	SELECT O.ObjectID,
 		   a.current_time_utc,
 		   DATEDIFF_BIG(mcs, MAX(MAX(b.current_time_utc)) OVER (), a.current_time_utc) diff,
 		   SUM(a.total_worker_time - ISNULL(b.total_worker_time, 0)) total_worker_time,
@@ -42,22 +55,22 @@ WITH t AS (
 			   ELSE
 				   0
 		   END) AS IsCompile
-	FROM @FunctionStats a
-		LEFT JOIN Staging.FunctionStats b ON  a.object_id = b.object_id
+	FROM @ObjectExecutionStats a
+		LEFT JOIN Staging.ObjectExecutionStats b ON  a.object_id = b.object_id
 							 AND a.database_id = b.database_id
 							 AND a.cached_time = b.cached_time
 							 AND b.InstanceID = @InstanceID
 							 AND a.current_time_utc > b.current_time_utc
 							 AND a.total_elapsed_time>= b.total_elapsed_time
 	JOIN dbo.Databases d ON a.database_id = d.database_id AND D.InstanceID=@InstanceID
-	JOIN dbo.Functions p ON a.OBJECT_NAME = p.OBJECT_NAME AND p.object_id = a.object_id AND p.DatabaseID = d.DatabaseID
+	JOIN dbo.DBObjects O ON a.OBJECT_NAME = O.OBJECTNAME AND O.object_id = a.object_id AND O.DatabaseID = d.DatabaseID AND O.ObjectType = a.type
 	WHERE D.IsActive=1
-	GROUP BY p.FunctionID,a.current_time_utc
+	GROUP BY O.ObjectID,a.current_time_utc
 )
-INSERT INTO dbo.FunctionStats
+INSERT INTO dbo.ObjectExecutionStats
 (
 	InstanceID,
-    FunctionID,
+    ObjectID,
     SnapshotDate,
     PeriodTime,
     total_worker_time,
@@ -69,7 +82,7 @@ INSERT INTO dbo.FunctionStats
     IsCompile
 )
 SELECT @InstanceID,
-		t.FunctionID,
+		t.ObjectID,
 	   t.current_time_utc,
 	   t.diff,
        t.total_worker_time,
@@ -82,10 +95,10 @@ SELECT @InstanceID,
 FROM T
 WHERE t.diff IS NOT NULL
 AND t.execution_count>0
-AND NOT EXISTS(SELECT 1 FROM dbo.FunctionStats FS WHERE FS.FunctionID = T.FunctionID AND FS.SnapshotDate = T.current_time_utc AND FS.InstanceID = @InstanceID)
+AND NOT EXISTS(SELECT 1 FROM dbo.ObjectExecutionStats S WHERE S.ObjectID = T.ObjectID AND S.InstanceID=@InstanceID AND S.SnapshotDate = T.current_time_utc)
 
-DELETE Staging.FunctionStats WHERE InstanceID=@InstanceID
-INSERT INTO Staging.FunctionStats(
+DELETE Staging.ObjectExecutionStats WHERE InstanceID=@InstanceID
+INSERT INTO Staging.ObjectExecutionStats(
 			InstanceID
 			,[object_id]
            ,[database_id]
@@ -110,22 +123,20 @@ SELECT @InstanceID
            ,[cached_time]
            ,[execution_count]
            ,[current_time_utc]
-FROM @FunctionStats
+FROM @ObjectExecutionStats
 
 DECLARE @MaxDate DATETIME 
-SELECT @MaxDate=MAX(SnapshotDate) 
-FROM dbo.FunctionStats_60MIN
+SELECT @MaxDate = ISNULL(MAX(SnapshotDate),'19000101')
+FROM dbo.ObjectExecutionStats_60MIN 
 WHERE InstanceID = @InstanceID
+
 
 BEGIN TRAN
-DELETE dbo.FunctionStats_60MIN
-WHERE InstanceID = @InstanceID
-AND SnapshotDate = @MaxDate
-
-INSERT INTO dbo.FunctionStats_60MIN
+DELETE dbo.ObjectExecutionStats_60MIN WHERE InstanceID=@InstanceID AND SnapshotDate=@MaxDate
+INSERT INTO dbo.ObjectExecutionStats_60MIN
 (
 	InstanceID,
-    FunctionID,
+    ObjectID,
     SnapshotDate,
     PeriodTime,
     total_worker_time,
@@ -136,22 +147,21 @@ INSERT INTO dbo.FunctionStats_60MIN
     execution_count,
     IsCompile
 )
-SELECT FS.InstanceID,
-	FS.FunctionID,
-	CONVERT(DATETIME,SUBSTRING(CONVERT(VARCHAR,FS.SnapshotDate,120),0,14) + ':00',120) AS SnapshotDate,
-	MAX(SUM(PeriodTime)) OVER(PARTITION BY FS.InstanceID,CONVERT(DATETIME,SUBSTRING(CONVERT(VARCHAR,FS.SnapshotDate,120),0,14) + ':00',120)) PeriodTime,
-	SUM(total_worker_time) total_worker_time,
-	SUM(total_elapsed_time) total_elapsed_time,
-	SUM(total_logical_reads) total_logical_reads,
-	SUM(total_logical_writes) total_logical_writes,
-	SUM(total_physical_reads) total_physical_reads,
-	SUM(execution_count) execution_count,
-	CAST(MAX(CAST(IsCompile AS INT)) AS BIT) IsCompile
-FROM dbo.FunctionStats FS 
-WHERE FS.InstanceID = @InstanceID
-AND FS.SnapshotDate >= @MaxDate
-GROUP BY FS.InstanceID,
-	FS.FunctionID,
-	CONVERT(DATETIME,SUBSTRING(CONVERT(VARCHAR,FS.SnapshotDate,120),0,14) + ':00',120) 
+SELECT S.InstanceID,
+	S.ObjectID,
+	CONVERT(DATETIME,SUBSTRING(CONVERT(VARCHAR,S.SnapshotDate,120),0,14) + ':00',120) AS SnapshotDate,
+	MAX(SUM(S.PeriodTime)) OVER(PARTITION BY S.InstanceID,CONVERT(DATETIME,SUBSTRING(CONVERT(VARCHAR,S.SnapshotDate,120),0,14) + ':00',120)) PeriodTime,
+	SUM(S.total_worker_time) total_worker_time,
+	SUM(S.total_elapsed_time) total_elapsed_time,
+	SUM(S.total_logical_reads) total_logical_reads,
+	SUM(S.total_logical_writes) total_logical_writes,
+	SUM(S.total_physical_reads) total_physical_reads,
+	SUM(S.execution_count) execution_count,
+	CAST(MAX(CAST(S.IsCompile AS INT)) AS BIT) IsCompile
+FROM dbo.ObjectExecutionStats S
+WHERE S.InstanceID = @InstanceID 
+AND S.SnapshotDate >=@MaxDate
+GROUP BY S.ObjectID,S.InstanceID,
+	CONVERT(DATETIME,SUBSTRING(CONVERT(VARCHAR,SnapshotDate,120),0,14) + ':00',120) 
  OPTION(OPTIMIZE FOR(@MaxDate='9999-12-31'))
 COMMIT

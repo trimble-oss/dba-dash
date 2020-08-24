@@ -237,6 +237,12 @@
     <Compile Include="Performance\Performance.Designer.cs">
       <DependentUpon>Performance.cs</DependentUpon>
     </Compile>
+    <Compile Include="Performance\ObjectExecution.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Performance\ObjectExecution.Designer.cs">
+      <DependentUpon>ObjectExecution.cs</DependentUpon>
+    </Compile>
     <Compile Include="Performance\Waits.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -328,6 +334,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Performance\Performance.resx">
       <DependentUpon>Performance.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Performance\ObjectExecution.resx">
+      <DependentUpon>ObjectExecution.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Performance\Waits.resx">
       <DependentUpon>Waits.cs</DependentUpon>

@@ -1,11 +1,11 @@
-﻿CREATE PROC PurgeData
+﻿CREATE PROC [dbo].[PurgeData]
 AS
 DECLARE @TableName SYSNAME,@RetentionDays INT
 DECLARE cTables CURSOR FAST_FORWARD LOCAL FOR
 	SELECT TableName,RetentionDays
 	FROM dbo.DataRetention
 	WHERE RetentionDays IS NOT NULL
-	AND TableName IN('ProcStats','FunctionStats','Waits','IOStats','CPU','BlockingSnapshot')
+	AND TableName IN('Waits','IOStats','CPU','BlockingSnapshot','ObjectExecutionStats')
 
 OPEN cTables
 WHILE 1=1

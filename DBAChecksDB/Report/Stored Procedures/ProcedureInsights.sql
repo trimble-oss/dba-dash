@@ -1,31 +1,34 @@
-﻿CREATE PROC [Report].[ProcedureInsights](@UTCOffset INT = 0, @Top INT=30,@Instance SYSNAME,@DatabaseID INT=NULL,@Type VARCHAR(50)='PROCEDURE')
+﻿CREATE PROC [Report].[ProcedureInsights](@UTCOffset INT = 0, @Top INT=30,@Instance SYSNAME,@DatabaseID INT=NULL,@Types VARCHAR(200)='P,FN,TR,TA,PC,X')
 WITH EXEC AS OWNER
 AS
 DECLARE @SQL NVARCHAR(MAX)=N'
 WITH T AS (
-SELECT CAST(DATEADD(mi, @UTCOffset, PS.SnapshotDate) AS DATE) DT,
+SELECT CAST(DATEADD(mi, @UTCOffset, OES.SnapshotDate) AS DATE) DT,
        D.name,
-       P.object_name,
-       P.object_id,
+       O.ObjectName,
+	   O.SchemaName,
+       O.object_id,
        D.DatabaseID,
-	   ' + CASE @Type WHEN 'PROCEDURE' THEN 'P.ProcID' WHEN 'FUNCTION' THEN 'P.FunctionID' ELSE NULL END + ' AS ProcID,
-       SUM(PS.total_elapsed_time) TotalDuration,
-	   SUM(PS.execution_count) ExecutionCount,
-	   SUM(SUM(PS.total_elapsed_time)) OVER(PARTITION BY ' + CASE @Type WHEN 'PROCEDURE' THEN 'P.ProcID' WHEN 'FUNCTION' THEN 'P.FunctionID' ELSE NULL END + ') TotalDurationAllDays
-FROM ' + CASE @Type WHEN 'PROCEDURE' THEN 'dbo.ProcStats_60MIN' WHEN 'FUNCTION' THEN 'dbo.FunctionStats_60MIN' ELSE NULL END + ' AS PS
-    ' + CASE @Type WHEN 'PROCEDURE' THEN 'JOIN dbo.Procs P ON P.ProcID = PS.ProcID' WHEN 'FUNCTION' THEN 'JOIN dbo.Functions P ON P.FunctionID = PS.FunctionID' ELSE NULL END + '
-    JOIN dbo.Databases D ON D.DatabaseID = P.DatabaseID
+	   O.ObjectID,
+       SUM(OES.total_elapsed_time) TotalDuration,
+	   SUM(OES.execution_count) ExecutionCount,
+	   SUM(SUM(OES.total_elapsed_time)) OVER(PARTITION BY O.ObjectID) TotalDurationAllDays
+FROM dbo.ObjectExecutionStats_60MIN OES
+JOIN dbo.DBObjects O ON O.ObjectID = OES.ObjectID
+    JOIN dbo.Databases D ON D.DatabaseID = O.DatabaseID
     JOIN dbo.Instances I ON I.InstanceID = D.InstanceID
 WHERE I.Instance = @Instance
-AND PS.InstanceID = I.InstanceID
+AND OES.InstanceID = I.InstanceID
 ' + CASE WHEN @DatabaseID IS NULL THEN '' ELSE 'AND D.DatabaseID= @DatabaseID' END + '
-AND PS.SnapshotDate>= DATEADD(d,-90,CAST(DATEADD(mi,-@UTCOffset,GETUTCDATE()) AS DATE))
-GROUP BY CAST(DATEADD(mi, @UTCOffset, PS.SnapshotDate) AS DATE),
+AND OES.SnapshotDate>= DATEADD(d,-90,CAST(DATEADD(mi,-@UTCOffset,GETUTCDATE()) AS DATE))
+AND EXISTS(SELECT 1 FROM STRING_SPLIT(@Types,'','') ss WHERE ss.Value =  O.ObjectType)
+GROUP BY CAST(DATEADD(mi, @UTCOffset, OES.SnapshotDate) AS DATE),
          D.name,
-         P.object_name,
-         P.object_id,
-         D.DatabaseID,
-		 ' + CASE @Type WHEN 'PROCEDURE' THEN 'P.ProcID' WHEN 'FUNCTION' THEN 'P.FunctionID' ELSE NULL END + '
+         O.ObjectName,
+		 O.SchemaName,
+         O.object_id,
+		 O.ObjectID,
+         D.DatabaseID
 )
 , rankings AS (
 	SELECT *,
@@ -42,7 +45,7 @@ PRINT @SQL
 
 IF @Instance IS NOT NULL
 BEGIN
-	EXEC sp_executesql @SQL,N'@Instance SYSNAME,@DatabaseID INT,@UTCOffset INT,@Top INT',@Instance,@DatabaseID,@UTCOffset,@Top
+	EXEC sp_executesql @SQL,N'@Instance SYSNAME,@DatabaseID INT,@UTCOffset INT,@Top INT,@Types VARCHAR(200)',@Instance,@DatabaseID,@UTCOffset,@Top,@Types
 END 
 ELSE
 BEGIN
@@ -50,10 +53,11 @@ BEGIN
 	(
 		[DT] DATE,
 		[name] NVARCHAR(128),
-		[object_name] NVARCHAR(128),
+		[ObjectName] NVARCHAR(128),
+		[SchemaName] NVARCHAR(128),
 		[object_id] INT,
 		[DatabaseID] INT,
-		[ProcID] INT,
+		[ObjectID] BIGINT,
 		[TotalDuration] BIGINT,
 		[ExecutionCount] BIGINT,
 		[TotalDurationAllDays] BIGINT,
