@@ -9,9 +9,9 @@ INSERT INTO dbo.DBObjects
     SchemaName,
     IsActive
 )
-SELECT DISTINCT d.DatabaseID,
+SELECT d.DatabaseID,
 	t.object_name,
-	t.object_id,
+	MAX(t.object_id),
 	t.type,
 	t.schema_name,
 	CAST(1 AS BIT)
@@ -24,7 +24,11 @@ AND NOT EXISTS(SELECT 1
 			AND O.objectname = t.object_name 
 			AND O.SchemaName = t.schema_name
 			AND O.ObjectType = t.type
-			);
+			)
+GROUP BY d.DatabaseID,
+	t.object_name,
+	t.type,
+	t.schema_name;
 
 UPDATE O 
 	SET O.IsActive=1,
@@ -65,6 +69,7 @@ WITH t AS (
 	JOIN dbo.Databases d ON a.database_id = d.database_id AND D.InstanceID=@InstanceID
 	JOIN dbo.DBObjects O ON a.OBJECT_NAME = O.OBJECTNAME AND O.object_id = a.object_id AND O.DatabaseID = d.DatabaseID AND O.ObjectType = a.type
 	WHERE D.IsActive=1
+	AND (a.cached_time> DATEADD(s,-70,a.current_time_utc) OR b.object_id IS NOT NULL) -- recently cached or we can calculate diff from staging table
 	GROUP BY O.ObjectID,a.current_time_utc
 )
 INSERT INTO dbo.ObjectExecutionStats
@@ -97,7 +102,25 @@ WHERE t.diff IS NOT NULL
 AND t.execution_count>0
 AND NOT EXISTS(SELECT 1 FROM dbo.ObjectExecutionStats S WHERE S.ObjectID = T.ObjectID AND S.InstanceID=@InstanceID AND S.SnapshotDate = T.current_time_utc)
 
-DELETE Staging.ObjectExecutionStats WHERE InstanceID=@InstanceID
+DELETE Staging.ObjectExecutionStats WHERE InstanceID=@InstanceID;
+
+WITH T AS (
+	-- handle infrequent dupes on object_id,cached_time,database_id
+	SELECT @InstanceID as InstanceID
+				,[object_id]
+			   ,[database_id]
+			   ,[object_name]
+			   ,[total_worker_time]
+			   ,[total_elapsed_time]
+			   ,[total_logical_reads]
+			   ,[total_logical_writes]
+			   ,[total_physical_reads]
+			   ,[cached_time]
+			   ,[execution_count]
+			   ,[current_time_utc],
+			   ROW_NUMBER() OVER(PARTITION BY object_id,cached_time,database_id ORDER BY total_elapsed_time DESC) rnum
+	FROM @ObjectExecutionStats
+)
 INSERT INTO Staging.ObjectExecutionStats(
 			InstanceID
 			,[object_id]
@@ -111,7 +134,7 @@ INSERT INTO Staging.ObjectExecutionStats(
            ,[cached_time]
            ,[execution_count]
            ,[current_time_utc])
-SELECT @InstanceID
+SELECT  InstanceID
 			,[object_id]
            ,[database_id]
            ,[object_name]
@@ -123,7 +146,8 @@ SELECT @InstanceID
            ,[cached_time]
            ,[execution_count]
            ,[current_time_utc]
-FROM @ObjectExecutionStats
+FROM T
+WHERE rnum=1
 
 DECLARE @MaxDate DATETIME 
 SELECT @MaxDate = ISNULL(MAX(SnapshotDate),'19000101')
