@@ -47,12 +47,13 @@
             this.tsDisableTimer = new System.Windows.Forms.ToolStripButton();
             this.toolStripDropDownButton1 = new System.Windows.Forms.ToolStripDropDownButton();
             this.smoothLinesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.tsRefresh = new System.Windows.Forms.ToolStripButton();
             this.timer1 = new System.Windows.Forms.Timer(this.components);
+            this.objectExecution1 = new DBAChecksGUI.Performance.ObjectExecution();
             this.blocking1 = new DBAChecksGUI.Performance.Blocking();
             this.waits1 = new DBAChecksGUI.Performance.Waits();
             this.ioPerformance1 = new DBAChecksGUI.Performance.IOPerformance();
             this.cpu1 = new DBAChecksGUI.Performance.CPU();
-            this.objectExecution1 = new DBAChecksGUI.Performance.ObjectExecution();
             this.toolStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -63,10 +64,11 @@
             this.tsTime,
             this.tsEnableTimer,
             this.tsDisableTimer,
-            this.toolStripDropDownButton1});
+            this.toolStripDropDownButton1,
+            this.tsRefresh});
             this.toolStrip1.Location = new System.Drawing.Point(0, 0);
             this.toolStrip1.Name = "toolStrip1";
-            this.toolStrip1.Size = new System.Drawing.Size(883, 31);
+            this.toolStrip1.Size = new System.Drawing.Size(883, 27);
             this.toolStrip1.TabIndex = 2;
             this.toolStrip1.Text = "toolStrip1";
             // 
@@ -89,7 +91,7 @@
             this.tsTime.Image = global::DBAChecksGUI.Properties.Resources.Time_16x;
             this.tsTime.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsTime.Name = "tsTime";
-            this.tsTime.Size = new System.Drawing.Size(34, 28);
+            this.tsTime.Size = new System.Drawing.Size(34, 24);
             this.tsTime.Text = "Time";
             this.tsTime.Click += new System.EventHandler(this.tsTime_Click_1);
             // 
@@ -199,7 +201,7 @@
             this.tsEnableTimer.Image = global::DBAChecksGUI.Properties.Resources.StartTime_16x;
             this.tsEnableTimer.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsEnableTimer.Name = "tsEnableTimer";
-            this.tsEnableTimer.Size = new System.Drawing.Size(29, 28);
+            this.tsEnableTimer.Size = new System.Drawing.Size(29, 24);
             this.tsEnableTimer.Text = "Enable auto refresh timer";
             this.tsEnableTimer.Click += new System.EventHandler(this.tsEnableTimer_Click);
             // 
@@ -209,7 +211,7 @@
             this.tsDisableTimer.Image = global::DBAChecksGUI.Properties.Resources.StopTime_16x;
             this.tsDisableTimer.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsDisableTimer.Name = "tsDisableTimer";
-            this.tsDisableTimer.Size = new System.Drawing.Size(29, 28);
+            this.tsDisableTimer.Size = new System.Drawing.Size(29, 24);
             this.tsDisableTimer.Text = "Disable auto refresh timer";
             this.tsDisableTimer.Click += new System.EventHandler(this.tsDisableTimer_Click);
             // 
@@ -221,7 +223,7 @@
             this.toolStripDropDownButton1.Image = global::DBAChecksGUI.Properties.Resources.LineChart_16x;
             this.toolStripDropDownButton1.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripDropDownButton1.Name = "toolStripDropDownButton1";
-            this.toolStripDropDownButton1.Size = new System.Drawing.Size(34, 28);
+            this.toolStripDropDownButton1.Size = new System.Drawing.Size(34, 24);
             this.toolStripDropDownButton1.Text = "Chart Options";
             // 
             // smoothLinesToolStripMenuItem
@@ -234,15 +236,33 @@
             this.smoothLinesToolStripMenuItem.Text = "Smooth Lines";
             this.smoothLinesToolStripMenuItem.Click += new System.EventHandler(this.smoothLinesToolStripMenuItem_Click);
             // 
+            // tsRefresh
+            // 
+            this.tsRefresh.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.tsRefresh.Image = global::DBAChecksGUI.Properties.Resources._112_RefreshArrow_Green_16x16_72;
+            this.tsRefresh.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tsRefresh.Name = "tsRefresh";
+            this.tsRefresh.Size = new System.Drawing.Size(29, 24);
+            this.tsRefresh.Text = "Refresh";
+            this.tsRefresh.Click += new System.EventHandler(this.tsRefresh_Click);
+            // 
             // timer1
             // 
             this.timer1.Interval = 10000;
             this.timer1.Tick += new System.EventHandler(this.timer1_Tick);
             // 
+            // objectExecution1
+            // 
+            this.objectExecution1.Dock = System.Windows.Forms.DockStyle.Top;
+            this.objectExecution1.Location = new System.Drawing.Point(0, 1275);
+            this.objectExecution1.Name = "objectExecution1";
+            this.objectExecution1.Size = new System.Drawing.Size(883, 282);
+            this.objectExecution1.TabIndex = 7;
+            // 
             // blocking1
             // 
             this.blocking1.Dock = System.Windows.Forms.DockStyle.Top;
-            this.blocking1.Location = new System.Drawing.Point(0, 871);
+            this.blocking1.Location = new System.Drawing.Point(0, 867);
             this.blocking1.Name = "blocking1";
             this.blocking1.Size = new System.Drawing.Size(883, 408);
             this.blocking1.TabIndex = 6;
@@ -250,7 +270,7 @@
             // waits1
             // 
             this.waits1.Dock = System.Windows.Forms.DockStyle.Top;
-            this.waits1.Location = new System.Drawing.Point(0, 589);
+            this.waits1.Location = new System.Drawing.Point(0, 585);
             this.waits1.Name = "waits1";
             this.waits1.Size = new System.Drawing.Size(883, 282);
             this.waits1.TabIndex = 5;
@@ -258,7 +278,7 @@
             // ioPerformance1
             // 
             this.ioPerformance1.Dock = System.Windows.Forms.DockStyle.Top;
-            this.ioPerformance1.Location = new System.Drawing.Point(0, 295);
+            this.ioPerformance1.Location = new System.Drawing.Point(0, 291);
             this.ioPerformance1.Name = "ioPerformance1";
             this.ioPerformance1.Size = new System.Drawing.Size(883, 294);
             this.ioPerformance1.SmoothLines = true;
@@ -267,19 +287,11 @@
             // cpu1
             // 
             this.cpu1.Dock = System.Windows.Forms.DockStyle.Top;
-            this.cpu1.Location = new System.Drawing.Point(0, 31);
+            this.cpu1.Location = new System.Drawing.Point(0, 27);
             this.cpu1.Name = "cpu1";
             this.cpu1.Size = new System.Drawing.Size(883, 264);
             this.cpu1.SmoothLines = true;
             this.cpu1.TabIndex = 4;
-            // 
-            // objectExecution1
-            // 
-            this.objectExecution1.Dock = System.Windows.Forms.DockStyle.Top;
-            this.objectExecution1.Location = new System.Drawing.Point(0, 1279);
-            this.objectExecution1.Name = "objectExecution1";
-            this.objectExecution1.Size = new System.Drawing.Size(883, 282);
-            this.objectExecution1.TabIndex = 7;
             // 
             // Performance
             // 
@@ -325,5 +337,6 @@
         private System.Windows.Forms.ToolStripMenuItem days28ToolStripMenuItem;
         private Blocking blocking1;
         private ObjectExecution objectExecution1;
+        private System.Windows.Forms.ToolStripButton tsRefresh;
     }
 }

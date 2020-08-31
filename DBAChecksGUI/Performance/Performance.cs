@@ -68,19 +68,33 @@ namespace DBAChecksGUI.Performance
         {
             this.mins = mins;
             this.dateGrp = DateGrouping(mins);
+            toggleTimer();
             RefreshData();
         }
 
         public void RefreshData(DateTime from,DateTime to)
         {
             dateGrp = DateGrouping((Int32)to.Subtract(from).TotalMinutes);
-            enableTimer(false);
+            toggleTimer();
             ioPerformance1.RefreshData(InstanceID, from, to, ConnectionString, dateGrp);
             cpu1.RefreshData(InstanceID, from, to, ConnectionString, dateGrp);
             waits1.RefreshData(InstanceID, from, to, ConnectionString, dateGrp);
             blocking1.RefreshData(InstanceID, from, to, ConnectionString, dateGrp);
             objectExecution1.RefreshData(InstanceID, from, to, ConnectionString, dateGrp);
           
+        }
+
+        private void toggleTimer()
+        {
+            enableTimer(false);
+            if (dateGrp == DateGroup._1MIN && mins > 0 && mins <= 180)
+            {
+                tsEnableTimer.Enabled = true;
+            }
+            else
+            {
+                tsEnableTimer.Enabled = false;
+            }
         }
 
         public void RefreshData()
@@ -99,18 +113,10 @@ namespace DBAChecksGUI.Performance
             catch (Exception ex)
             {
                 MessageBox.Show(ex.ToString(), "Chart Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                tsEnableTimer.Enabled = false;
+                toggleTimer();
                 return;
             }
-            if (dateGrp == DateGroup._1MIN && mins>0 && mins <= 180)
-            {
-                enableTimer(true);
-            }
-            else
-            {
-                enableTimer(false);
-                tsEnableTimer.Enabled = false;
-            }
+
         }
 
 
@@ -151,6 +157,11 @@ namespace DBAChecksGUI.Performance
         private void tsEnableTimer_Click(object sender, EventArgs e)
         {
             enableTimer(true);
+        }
+
+        public void StopTimer()
+        {
+            enableTimer(false);
         }
 
         private void enableTimer(bool isEnabled)
@@ -197,6 +208,11 @@ namespace DBAChecksGUI.Performance
         {
             ioPerformance1.SmoothLines = smoothLinesToolStripMenuItem.Checked;
             cpu1.SmoothLines = smoothLinesToolStripMenuItem.Checked;
+        }
+
+        private void tsRefresh_Click(object sender, EventArgs e)
+        {
+            RefreshData();
         }
     }
 }

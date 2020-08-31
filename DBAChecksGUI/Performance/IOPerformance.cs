@@ -44,7 +44,7 @@ namespace DBAChecksGUI.Performance
         }
         List<LineSeries> series;
 
-
+  
 
         private static DataTable IOStats(Int32 instanceid, DateTime from, DateTime to, string connectionString,DateGroup dateGrouping= DateGroup.None)
         {

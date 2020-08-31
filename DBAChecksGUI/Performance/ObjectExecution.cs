@@ -29,6 +29,7 @@ namespace DBAChecksGUI.Performance
             public double Value { get; set; }
         }
 
+        public string measure = "TotalDuration";
         public DateTimePoint x;
         Int32 instanceID;
         DateTime chartMaxDate = DateTime.MinValue;
@@ -85,6 +86,7 @@ namespace DBAChecksGUI.Performance
                 cmd.Parameters.AddWithValue("ToDateUTC", to);
                 cmd.Parameters.AddWithValue("UTCOffset", utcOffset());
                 cmd.Parameters.AddWithValue("DateAgg", dateGrouping.ToString().Replace("_",""));
+                cmd.Parameters.AddWithValue("Measure", measure);
                 cmd.CommandType = CommandType.StoredProcedure;
                 SqlDataAdapter da = new SqlDataAdapter(cmd);
                 DataTable dt = new DataTable();
@@ -213,6 +215,39 @@ namespace DBAChecksGUI.Performance
                 }
 
             }
+        }
+
+        private void ObjectExecution_Load(object sender, EventArgs e)
+        {
+            var measures = new Dictionary<string, string>
+            {
+                {"TotalDuraiton", "Total Duration"},
+                {"TotalCPU", "Total CPU"},
+                {"ExecutionCount", "Execution Count"},
+            };
+            foreach(var m in measures)
+            {
+                ToolStripMenuItem itm = new ToolStripMenuItem(m.Value);
+                itm.Name = m.Key;
+                if (m.Key == measure) { itm.Checked = true; }
+
+                itm.Click += Itm_Click;
+                tsMeasures.DropDownItems.Add(itm);
+            }
+        }
+
+        private void Itm_Click(object sender, EventArgs e)
+        {
+            var tsItm = ((ToolStripMenuItem)sender);
+            if(measure!= tsItm.Name)
+            {
+                measure = tsItm.Name;
+                foreach(ToolStripMenuItem itm in tsMeasures.DropDownItems)
+                {
+                    itm.Checked = itm.Name == measure;
+                }
+            }
+            RefreshData(instanceID, to.AddMinutes(-mins), to, connectionString, dateGrouping);
         }
     }
 }
