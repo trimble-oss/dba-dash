@@ -2,12 +2,9 @@
 AS
 SELECT NULL AS Value,'{ALL}' as Name
 UNION ALL
-SELECT DISTINCT object_name,object_name
-FROM dbo.Procs
-WHERE DatabaseID=@DatabaseID
-AND @IsFunction=0
-UNION ALL
-SELECT DISTINCT object_name,object_name
-FROM dbo.Functions
-WHERE DatabaseID=@DatabaseID
-AND @IsFunction=1
+SELECT ObjectName,ObjectName 
+FROM dbo.DBObjects
+WHERE DatabaseID = @DatabaseID
+AND ((ObjectType IN('P','PC','X') AND @IsFunction=0)
+	OR ObjectType='FN' AND @IsFunction=1
+	)

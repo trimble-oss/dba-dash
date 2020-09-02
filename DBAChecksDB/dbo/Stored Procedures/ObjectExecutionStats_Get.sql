@@ -8,7 +8,8 @@
 	@Measure VARCHAR(30)='TotalDuration',
 	@DateAgg VARCHAR(20)='10MIN',
 	@UTCOffset INT=0,
-	@InstanceID INT=NULL
+	@InstanceID INT=NULL,
+	@ObjectID BIGINT=NULL
 )
 WITH EXECUTE AS OWNER
 AS
@@ -24,11 +25,12 @@ SELECT @DateAggString = CASE @DateAgg WHEN 'NONE' THEN 'DATEADD(mi, @UTCOffset, 
 		WHEN '1MIN' THEN 'DATEADD(mi, DATEDIFF(mi, 0, DATEADD(s, 30, DATEADD(mi, @UTCOffset, PS.SnapshotDate))), 0)'
 		WHEN '10MIN' THEN 'CONVERT(DATETIME,STUFF(CONVERT(VARCHAR,DATEADD(mi, @UTCOffset, PS.SnapshotDate),120),16,4,''0:00''),120)'
 		WHEN '60MIN' THEN 'DATEADD(mi, @UTCOffset, PS.SnapshotDate) '
-		WHEN '1DAY' THEN 'CAST(DATEADD(mi, @UTCOffset, PS.SnapshotDate) AS DATE)' ELSE NULL END
+		WHEN '120MIN' THEN 'DATEADD(hh,DATEPART(hh,PS.SnapshotDate) - DATEPART(hh,PS.SnapshotDate) % 2, CAST(CAST(PS.SnapshotDate AS DATE) AS DATETIME))'
+		WHEN 'DAY' THEN 'CAST(DATEADD(mi, @UTCOffset, PS.SnapshotDate) AS DATE)' ELSE NULL END
 DECLARE @SQL NVARCHAR(MAX)
 SET @SQL = N'
 WITH agg AS (
-SELECT ' + @DateAggString + ' as SnapshotDate,
+SELECT ' + @DateAggString + N' as SnapshotDate,
        D.name AS DatabaseName,
 	   D.DatabaseID,
 	   O.ObjectID,
@@ -45,24 +47,25 @@ SELECT ' + @DateAggString + ' as SnapshotDate,
 	   SUM(PS.total_physical_reads)/NULLIF(SUM(PS.execution_count),0) as AvgPhysicalReads,
 	   SUM(PS.total_logical_writes) as TotalWrites,
 	   SUM(PS.total_logical_writes)/NULLIF(SUM(PS.execution_count),0) as AvgWrites
-FROM dbo.ObjectExecutionStats' + CASE WHEN @DateAgg IN('60MIN','1DAY') THEN '_60MIN' ELSE '' END + ' PS
+FROM dbo.ObjectExecutionStats' + CASE WHEN @DateAgg IN('60MIN','DAY') THEN N'_60MIN' ELSE N'' END + N' PS
     JOIN dbo.DBObjects O ON PS.ObjectID = O.ObjectID
     JOIN dbo.Databases D ON D.DatabaseID = O.DatabaseID
 	JOIN dbo.Instances I ON D.InstanceID = I.InstanceID AND PS.InstanceID = I.InstanceID
 WHERE D.IsActive=1
-' + CASE WHEN @Instance IS NOT NULL THEN 'AND I.Instance = @Instance' ELSE '' END + '
-' + CASE WHEN @InstanceID IS NOT NULL THEN 'AND I.InstanceID = @InstanceID' ELSE '' END + '
+' + CASE WHEN @Instance IS NOT NULL THEN N'AND I.Instance = @Instance' ELSE '' END + N'
+' + CASE WHEN @InstanceID IS NOT NULL THEN N'AND I.InstanceID = @InstanceID' ELSE '' END + N'
 AND PS.SnapshotDate >= @FromDate 
 AND PS.SnapshotDate< @ToDate
-' + CASE WHEN @DatabaseID IS NULL THEN '' ELSE 'AND D.DatabaseID=@DatabaseID' END + '
-' + CASE WHEN @ObjectName IS NULL THEN '' ELSE 'AND O.objectname=@ObjectName' END + '
-GROUP BY ' + @DateAggString + ',D.Name,O.objectname,D.DatabaseID,O.SchemaName,O.ObjectID
+' + CASE WHEN @DatabaseID IS NULL THEN N'' ELSE N'AND D.DatabaseID=@DatabaseID' END + N'
+' + CASE WHEN @ObjectName IS NULL THEN N'' ELSE N'AND O.objectname=@ObjectName' END + N'
+' + CASE WHEN @ObjectID IS NULL THEN N'' ELSE N'AND PS.ObjectID = @ObjectID' END + N'
+GROUP BY ' + @DateAggString + N',D.Name,O.objectname,D.DatabaseID,O.SchemaName,O.ObjectID
 )
 , T AS (
 	SELECT agg.*,
-		' + @MeasureString + ' as Measure,
-		ROW_NUMBER() OVER (PARTITION BY SnapshotDate ORDER BY ' + @MeasureString + ' DESC) ProcRank,
-		SUM(' + @MeasureString + ') OVER(PARTITION BY ObjectID) TotalMeasure
+		' + @MeasureString + N' as Measure,
+		ROW_NUMBER() OVER (PARTITION BY SnapshotDate ORDER BY ' + @MeasureString + N' DESC) ProcRank,
+		SUM(' + @MeasureString + N') OVER(PARTITION BY ObjectID) TotalMeasure
 	FROM agg
 )
 SELECT T.*
@@ -72,8 +75,8 @@ ORDER BY TotalMeasure DESC,ObjectID'
 PRINT @SQL
 IF @SQL IS NOT NULL
 BEGIN
-EXEC sp_executesql @SQL,N'@Instance SYSNAME,@DatabaseID INT,@FromDate DATETIME,@ToDate DATETIME,@ObjectName SYSNAME,@SchemaName SYSNAME,@UTCOffset INT,@InstanceID INT',
-	@Instance,@DatabaseID,@FromDateUTC,@ToDateUTC,@ObjectName,@SchemaName,@UTCOffset,@InstanceID
+EXEC sp_executesql @SQL,N'@Instance SYSNAME,@DatabaseID INT,@FromDate DATETIME,@ToDate DATETIME,@ObjectName SYSNAME,@SchemaName SYSNAME,@UTCOffset INT,@InstanceID INT,@ObjectID BIGINT',
+	@Instance,@DatabaseID,@FromDateUTC,@ToDateUTC,@ObjectName,@SchemaName,@UTCOffset,@InstanceID,@ObjectID
 END 
 ELSE
 BEGIN

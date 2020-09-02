@@ -127,6 +127,9 @@ namespace DBAChecksGUI
                 case "SO":
                     Type = TreeType.SequenceObject;
                     break;
+                case "PC":
+                    Type = TreeType.CLRProcedure;
+                    break;
                  default:
                     throw new ArgumentOutOfRangeException();
             }
@@ -138,7 +141,29 @@ namespace DBAChecksGUI
 
         private bool hasInstanceName=false;
         private string instanceName=null;
-        public Int32 InstanceID;
+        private Int32 instanceID = 0;
+        public Int32 InstanceID { 
+            get {
+                if (instanceID > 0)
+                {
+                    return instanceID;
+                }
+                else
+                {
+                    if (this.Parent == null)
+                    {
+                        return 0;
+                    }
+                    else
+                    {
+                        return ((SQLTreeItem)this.Parent).InstanceID;
+                    }
+                }
+            } 
+            set {
+                instanceID = value;
+            } 
+        }
 
         public TreeType Type;
         public string InstanceName {

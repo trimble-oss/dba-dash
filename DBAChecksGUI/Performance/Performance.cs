@@ -34,12 +34,11 @@ namespace DBAChecksGUI.Performance
             DAY
         }
 
-        DateGroup dateGrp =  DateGroup.None;
+        DateGroup dateGrp =  DateGroup._1MIN;
         Int32 mins=60;
         DateTime customFrom = DateTime.MinValue;
         DateTime customTo = DateTime.MinValue;
-
-
+        public Int64 ObjectID { get; set; }
 
 
 
@@ -72,15 +71,41 @@ namespace DBAChecksGUI.Performance
             RefreshData();
         }
 
-        public void RefreshData(DateTime from,DateTime to)
+        private void setDateGroup(DateGroup grp)
         {
-            dateGrp = DateGrouping((Int32)to.Subtract(from).TotalMinutes);
+            string itmName="Date Grouping";
+            foreach(ToolStripMenuItem itm in tsGrouping.DropDownItems)
+            {
+                itm.Checked = (string)itm.Tag == grp.ToString();
+                if (itm.Checked){ itmName = itm.Text; }
+            }
+            dateGrp = grp;
+            tsGrouping.Text = itmName;
+        }
+
+        public void RefreshData(DateTime from, DateTime to)
+        {
+            dateGrp = DateGrouping((Int32)to.Subtract(from).TotalMinutes);          
+            RefreshData(from, to, dateGrp);
+        }
+
+        public void RefreshData(DateTime from,DateTime to, DateGroup dateGrp)
+        {
+            setDateGroup(dateGrp);
             toggleTimer();
-            ioPerformance1.RefreshData(InstanceID, from, to, ConnectionString, dateGrp);
-            cpu1.RefreshData(InstanceID, from, to, ConnectionString, dateGrp);
-            waits1.RefreshData(InstanceID, from, to, ConnectionString, dateGrp);
-            blocking1.RefreshData(InstanceID, from, to, ConnectionString, dateGrp);
-            objectExecution1.RefreshData(InstanceID, from, to, ConnectionString, dateGrp);
+            if (ObjectID == 0)
+            {
+                ioPerformance1.RefreshData(InstanceID, from, to, ConnectionString, dateGrp);
+                cpu1.RefreshData(InstanceID, from, to, ConnectionString, dateGrp);
+                waits1.RefreshData(InstanceID, from, to, ConnectionString, dateGrp);
+                blocking1.RefreshData(InstanceID, from, to, ConnectionString, dateGrp);
+            }
+            ioPerformance1.Visible = ObjectID == 0;
+            cpu1.Visible = ObjectID == 0;
+            waits1.Visible = ObjectID == 0;
+            blocking1.Visible = ObjectID == 0;
+        
+            objectExecution1.RefreshData(InstanceID, from, to, ConnectionString, ObjectID, dateGrp);
           
         }
 
@@ -101,6 +126,10 @@ namespace DBAChecksGUI.Performance
         {
             var from = DateTime.UtcNow.AddMinutes(-mins);
             var to = DateTime.UtcNow.AddMinutes(1);
+            if (mins >= 1440)
+            {
+                from = DateTime.UtcNow.Date.AddMinutes(-mins);
+            }
             if (mins == 0)
             {
                 from = customFrom;
@@ -108,7 +137,7 @@ namespace DBAChecksGUI.Performance
             }
             try
             {
-              RefreshData(from, to);
+              RefreshData(from, to,dateGrp);
             }
             catch (Exception ex)
             {
@@ -177,6 +206,10 @@ namespace DBAChecksGUI.Performance
             if (mins > 0)
             {
                 frm.FromDate = DateTime.Now.AddMinutes(-mins);
+                if (mins >= 1440)
+                {
+                    frm.FromDate = DateTime.UtcNow.Date.AddMinutes(-mins);
+                }
                 frm.ToDate = DateTime.Now;
             }
             else
@@ -213,6 +246,24 @@ namespace DBAChecksGUI.Performance
         private void tsRefresh_Click(object sender, EventArgs e)
         {
             RefreshData();
+        }
+
+        private void tsDateGroup_Click(object sender, EventArgs e)
+        {
+            string tag = (string)((ToolStripMenuItem)sender).Tag;
+            DateGroup grp =  (DateGroup)Enum.Parse(typeof(DateGroup),tag);
+            var from = DateTime.UtcNow.AddMinutes(-mins);
+            if (mins >= 1440)
+            {
+                from = DateTime.UtcNow.Date.AddMinutes(-mins);
+            }
+            var to = DateTime.UtcNow.AddMinutes(1);
+            if (mins == 0)
+            {
+                from = customFrom;
+                to = customTo;
+            }
+            RefreshData(from, to, grp);
         }
     }
 }

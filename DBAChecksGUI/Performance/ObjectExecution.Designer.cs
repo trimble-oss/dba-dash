@@ -38,9 +38,9 @@
             // waitChart
             // 
             this.waitChart.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.waitChart.Location = new System.Drawing.Point(0, 27);
+            this.waitChart.Location = new System.Drawing.Point(0, 31);
             this.waitChart.Name = "waitChart";
-            this.waitChart.Size = new System.Drawing.Size(492, 255);
+            this.waitChart.Size = new System.Drawing.Size(492, 251);
             this.waitChart.TabIndex = 0;
             this.waitChart.Text = "cartesianChart1";
             // 
@@ -52,7 +52,7 @@
             this.tsMeasures});
             this.toolStrip1.Location = new System.Drawing.Point(0, 0);
             this.toolStrip1.Name = "toolStrip1";
-            this.toolStrip1.Size = new System.Drawing.Size(492, 27);
+            this.toolStrip1.Size = new System.Drawing.Size(492, 31);
             this.toolStrip1.TabIndex = 1;
             this.toolStrip1.Text = "toolStrip1";
             // 

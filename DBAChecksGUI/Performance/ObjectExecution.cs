@@ -38,6 +38,7 @@ namespace DBAChecksGUI.Performance
         DateTime from;
         DateTime to;
         Int32 mins;
+        private Int64 objectID;
 
         public void RefreshData()
         {
@@ -48,12 +49,13 @@ namespace DBAChecksGUI.Performance
                 refreshData(true);
             }
         }
-        public void RefreshData(Int32 instanceID, DateTime from, DateTime to, string connectionString, DateGroup dateGrouping = DateGroup.None)
+        public void RefreshData(Int32 instanceID, DateTime from, DateTime to, string connectionString, Int64 objectID, DateGroup dateGrouping = DateGroup.None)
         {
             this.instanceID = instanceID;
             this.connectionString = connectionString;
             this.from = from;
             this.to = to;
+            this.objectID = objectID;
             mins = (Int32)to.Subtract(from).TotalMinutes;
             this.dateGrouping = dateGrouping;
             refreshData(false);
@@ -85,6 +87,10 @@ namespace DBAChecksGUI.Performance
                 cmd.Parameters.AddWithValue("FromDateUTC", from);
                 cmd.Parameters.AddWithValue("ToDateUTC", to);
                 cmd.Parameters.AddWithValue("UTCOffset", utcOffset());
+                if (objectID > 0)
+                {
+                    cmd.Parameters.AddWithValue("ObjectID", objectID);
+                }
                 cmd.Parameters.AddWithValue("DateAgg", dateGrouping.ToString().Replace("_",""));
                 cmd.Parameters.AddWithValue("Measure", measure);
                 cmd.CommandType = CommandType.StoredProcedure;
@@ -111,7 +117,7 @@ namespace DBAChecksGUI.Performance
                         values = new ChartValues<DateTimePoint>();
                         current = waitType;
                     }
-                    values.Add(new DateTimePoint(((DateTime)r["SnapshotDate"]), (double)(decimal)r["Measure"]));
+                    values.Add(new DateTimePoint(((DateTime)r["SnapshotDate"]), Convert.ToDouble(r["Measure"])));
                 }
                 if (values.Count > 0)
                 {
@@ -206,9 +212,10 @@ namespace DBAChecksGUI.Performance
                     {
                         LabelFormatter = value => new DateTime((long)(value * TimeSpan.FromMinutes(fromMins).Ticks)).ToString(format)
                     });
+                   
                     waitChart.AxisY.Add(new Axis
                     {
-                        LabelFormatter = val => val.ToString("0ms/sec")
+                        LabelFormatter = val => val.ToString(measures[measure].LabelFormat)
 
                     });
 
@@ -217,17 +224,48 @@ namespace DBAChecksGUI.Performance
             }
         }
 
+        private class Measure
+        {
+
+            public string Name { get; set; }
+            public string DisplayName { get; set; }
+            public string LabelFormat { get; set; }
+
+
+        }
+
+        private class Measures: Dictionary<string, Measure>
+        {
+            public void Add(string Name,string displayName,string labelFormat)
+            {
+                Add(Name, new Measure() { Name = Name, DisplayName = displayName, LabelFormat = labelFormat });
+            }
+
+        }
+
+        private Measures measures = new Measures()
+            {
+                {"TotalDuration", "Total Duration","#,##0.000 sec"},
+                {"AvgDuration", "Avg Duration","#,##0.000 sec"},
+                {"TotalCPU", "Total CPU","#,##0.000 sec"},
+                {"AvgCPU","Avg CPU", "#,##0.000  sec"},
+                {"ExecutionCount", "Execution Count","N0"},
+                {"ExecutionsPerMin", "Executions Per Min","#,##0.000"},
+                { "TotalLogicalReads","Total Logical Reads","N0" },
+                {"AvgLogicalReads","Avg Logical Reads","N0" },
+                {"TotalPhysicalReads","TotalPhysicalReads" ,"N0"},
+                {"AvgPhysicalReads","Avg Physical Reads" ,"N0"},
+                {"TotalWrites","Total Writes" ,"N0"},
+                {"AvgWrites","Avg Writes","N0" }
+
+            };
+
         private void ObjectExecution_Load(object sender, EventArgs e)
         {
-            var measures = new Dictionary<string, string>
-            {
-                {"TotalDuraiton", "Total Duration"},
-                {"TotalCPU", "Total CPU"},
-                {"ExecutionCount", "Execution Count"},
-            };
+
             foreach(var m in measures)
             {
-                ToolStripMenuItem itm = new ToolStripMenuItem(m.Value);
+                ToolStripMenuItem itm = new ToolStripMenuItem(m.Value.DisplayName);
                 itm.Name = m.Key;
                 if (m.Key == measure) { itm.Checked = true; }
 
@@ -247,7 +285,7 @@ namespace DBAChecksGUI.Performance
                     itm.Checked = itm.Name == measure;
                 }
             }
-            RefreshData(instanceID, to.AddMinutes(-mins), to, connectionString, dateGrouping);
+            RefreshData(instanceID, to.AddMinutes(-mins), to, connectionString,objectID, dateGrouping);
         }
     }
 }

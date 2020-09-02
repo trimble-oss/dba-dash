@@ -241,7 +241,7 @@
             this.tabSnapshotsSummary.Location = new System.Drawing.Point(4, 25);
             this.tabSnapshotsSummary.Name = "tabSnapshotsSummary";
             this.tabSnapshotsSummary.Padding = new System.Windows.Forms.Padding(3);
-            this.tabSnapshotsSummary.Size = new System.Drawing.Size(956, 954);
+            this.tabSnapshotsSummary.Size = new System.Drawing.Size(956, 952);
             this.tabSnapshotsSummary.TabIndex = 1;
             this.tabSnapshotsSummary.Text = "Snapshot Summary";
             this.tabSnapshotsSummary.UseVisualStyleBackColor = true;
@@ -261,8 +261,8 @@
             // splitSnapshotSummary.Panel2
             // 
             this.splitSnapshotSummary.Panel2.Controls.Add(this.gvSnapshotsDetail);
-            this.splitSnapshotSummary.Size = new System.Drawing.Size(950, 948);
-            this.splitSnapshotSummary.SplitterDistance = 280;
+            this.splitSnapshotSummary.Size = new System.Drawing.Size(950, 946);
+            this.splitSnapshotSummary.SplitterDistance = 279;
             this.splitSnapshotSummary.TabIndex = 0;
             // 
             // toolStrip2
@@ -275,7 +275,7 @@
             this.tsSummaryNext,
             this.toolStripLabel3,
             this.tsSummaryPageSize});
-            this.toolStrip2.Location = new System.Drawing.Point(0, 252);
+            this.toolStrip2.Location = new System.Drawing.Point(0, 251);
             this.toolStrip2.Name = "toolStrip2";
             this.toolStrip2.Size = new System.Drawing.Size(950, 28);
             this.toolStrip2.TabIndex = 2;
@@ -349,7 +349,7 @@
             this.gvSnapshots.RowHeadersWidth = 51;
             this.gvSnapshots.RowTemplate.Height = 24;
             this.gvSnapshots.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-            this.gvSnapshots.Size = new System.Drawing.Size(950, 280);
+            this.gvSnapshots.Size = new System.Drawing.Size(950, 279);
             this.gvSnapshots.TabIndex = 0;
             this.gvSnapshots.SelectionChanged += new System.EventHandler(this.gvSnapshots_SelectionChanged);
             // 
@@ -450,7 +450,7 @@
             this.gvSnapshotsDetail.RowHeadersWidth = 51;
             this.gvSnapshotsDetail.RowTemplate.Height = 24;
             this.gvSnapshotsDetail.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.CellSelect;
-            this.gvSnapshotsDetail.Size = new System.Drawing.Size(950, 664);
+            this.gvSnapshotsDetail.Size = new System.Drawing.Size(950, 663);
             this.gvSnapshotsDetail.TabIndex = 0;
             this.gvSnapshotsDetail.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.gvSnapshotsDetail_CellContentClick);
             // 
@@ -536,7 +536,7 @@
             this.splitSchemaSnapshot.Panel2.Controls.Add(this.gvHistory);
             this.splitSchemaSnapshot.Panel2.Controls.Add(this.label1);
             this.splitSchemaSnapshot.Size = new System.Drawing.Size(950, 946);
-            this.splitSchemaSnapshot.SplitterDistance = 511;
+            this.splitSchemaSnapshot.SplitterDistance = 510;
             this.splitSchemaSnapshot.TabIndex = 1;
             // 
             // label7
@@ -559,7 +559,7 @@
             this.tsNext,
             this.toolStripLabel1,
             this.tsPageSize});
-            this.toolStrip1.Location = new System.Drawing.Point(0, 403);
+            this.toolStrip1.Location = new System.Drawing.Point(0, 404);
             this.toolStrip1.Name = "toolStrip1";
             this.toolStrip1.Size = new System.Drawing.Size(950, 28);
             this.toolStrip1.TabIndex = 1;
@@ -633,7 +633,7 @@
             this.gvHistory.RowHeadersWidth = 51;
             this.gvHistory.RowTemplate.Height = 24;
             this.gvHistory.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-            this.gvHistory.Size = new System.Drawing.Size(950, 306);
+            this.gvHistory.Size = new System.Drawing.Size(950, 307);
             this.gvHistory.TabIndex = 0;
             this.gvHistory.SelectionChanged += new System.EventHandler(this.gvHistory_SelectionChanged);
             // 
@@ -964,7 +964,7 @@
             this.tabPerformance.Location = new System.Drawing.Point(4, 25);
             this.tabPerformance.Name = "tabPerformance";
             this.tabPerformance.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPerformance.Size = new System.Drawing.Size(956, 952);
+            this.tabPerformance.Size = new System.Drawing.Size(956, 954);
             this.tabPerformance.TabIndex = 10;
             this.tabPerformance.Text = "Performance";
             this.tabPerformance.UseVisualStyleBackColor = true;
@@ -974,7 +974,8 @@
             this.performance1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.performance1.Location = new System.Drawing.Point(3, 3);
             this.performance1.Name = "performance1";
-            this.performance1.Size = new System.Drawing.Size(950, 946);
+            this.performance1.ObjectID = ((long)(0));
+            this.performance1.Size = new System.Drawing.Size(950, 948);
             this.performance1.TabIndex = 0;
             // 
             // tabDBAChecksErrorLog
@@ -983,7 +984,7 @@
             this.tabDBAChecksErrorLog.Location = new System.Drawing.Point(4, 25);
             this.tabDBAChecksErrorLog.Name = "tabDBAChecksErrorLog";
             this.tabDBAChecksErrorLog.Padding = new System.Windows.Forms.Padding(3);
-            this.tabDBAChecksErrorLog.Size = new System.Drawing.Size(956, 954);
+            this.tabDBAChecksErrorLog.Size = new System.Drawing.Size(956, 952);
             this.tabDBAChecksErrorLog.TabIndex = 11;
             this.tabDBAChecksErrorLog.Text = "DBAChecks ErrorLog";
             this.tabDBAChecksErrorLog.UseVisualStyleBackColor = true;
@@ -1005,7 +1006,7 @@
             this.dgvDBAChecksErrors.ReadOnly = true;
             this.dgvDBAChecksErrors.RowHeadersWidth = 51;
             this.dgvDBAChecksErrors.RowTemplate.Height = 24;
-            this.dgvDBAChecksErrors.Size = new System.Drawing.Size(950, 948);
+            this.dgvDBAChecksErrors.Size = new System.Drawing.Size(950, 946);
             this.dgvDBAChecksErrors.TabIndex = 0;
             // 
             // Instance

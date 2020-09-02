@@ -160,6 +160,15 @@ namespace DBAChecksGUI
             {
                 performance1.InstanceID = n.InstanceID;
                 performance1.ConnectionString = connectionString;
+                if (n.Type == SQLTreeItem.TreeType.Database || n.Type == SQLTreeItem.TreeType.Instance)
+                {
+                    performance1.ObjectID = 0;
+               
+                }
+                else
+                {
+                    performance1.ObjectID = n.ObjectID;
+                }
                 performance1.RefreshData();
             }
             if(tabs.SelectedTab== tabDBAChecksErrorLog)
@@ -370,7 +379,11 @@ ORDER BY SchemaName,ObjectName
             }
             if (n.ObjectID > 0)
             {
-                allowedTabs.Add(tabSchema);
+                if (n.Type == SQLTreeItem.TreeType.StoredProcedure || n.Type == SQLTreeItem.TreeType.CLRProcedure || n.Type == SQLTreeItem.TreeType.ScalarFunction || n.Type == SQLTreeItem.TreeType.CLRScalarFunction)
+                {
+                    allowedTabs.Add(tabPerformance);
+                }
+                allowedTabs.Add(tabSchema);               
             }
             this.Text ="DBAChecks" + (n.Type== SQLTreeItem.TreeType.DBAChecksRoot ? "" : " - " + n.InstanceName);
 
