@@ -275,7 +275,6 @@ namespace DBAChecksGUI.Performance
                 itm.Click += Itm_Click;
                 tsMeasures.DropDownItems.Add(itm);
             }
-            tsMeasures.Text = measure;
         }
 
         private void Itm_Click(object sender, EventArgs e)

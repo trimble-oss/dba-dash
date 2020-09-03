@@ -43,8 +43,9 @@ namespace DBAChecksGUI
             UserDefinedTableType,
             UserDefinedType,
             View,
-            XMLSchemaCollection
-
+            XMLSchemaCollection,
+            Trigger,
+            CLRTrigger
         }
 
         public string FullName()
@@ -129,6 +130,12 @@ namespace DBAChecksGUI
                     break;
                 case "PC":
                     Type = TreeType.CLRProcedure;
+                    break;
+                case "TR":
+                    Type = TreeType.Trigger;
+                    break;
+                case "TA":
+                    Type = TreeType.CLRTrigger;
                     break;
                  default:
                     throw new ArgumentOutOfRangeException();
@@ -327,7 +334,7 @@ namespace DBAChecksGUI
             var nTableFunctions = newFolder("Table Functions", "IF,TF,FT", true);
             var nScalarFunctions = newFolder("Scalar Functions","FN,FS",true);
             var nAggFunctions = newFolder("Aggregate Functions", "AF",true);
-            var nTriggers = newFolder("Database Triggers", "DTR",true);
+            var nDBTriggers = newFolder("Database Triggers", "DTR",true);
             var nAssemblies = newFolder("Assemblies", "CLR", true);
             var nTypes = newFolder("Types", "", false);
             var nTableTypes = newFolder("User-Defined Table Types", "TT", true);
@@ -335,21 +342,24 @@ namespace DBAChecksGUI
             var nUserDefinedTypes = newFolder("User-Defined Types", "UTY", true);
             var nXML = newFolder("XML Schema Collections", "XSC", true);
             var nSeq = newFolder("Sequences", "SO", true);
+            var nTriggers = newFolder("Triggers", "TA,TR", true);
 
             nTypes.Nodes.Add(nTableTypes);
             nTypes.Nodes.Add(nDataTypes);
             nTypes.Nodes.Add(nUserDefinedTypes);
             nTypes.Nodes.Add(nXML);
-            nProgrammability.Nodes.Add(nAggFunctions);
-            nProgrammability.Nodes.Add(nTableFunctions);
             nProgrammability.Nodes.Add(nStoredProcs);
+            nProgrammability.Nodes.Add(nAggFunctions);
+            nProgrammability.Nodes.Add(nTableFunctions);   
             nProgrammability.Nodes.Add(nScalarFunctions);
+            nProgrammability.Nodes.Add(nDBTriggers);
+            nProgrammability.Nodes.Add(nTriggers);
             nProgrammability.Nodes.Add(nAssemblies);
 
             this.Nodes.Add(nTables);
             this.Nodes.Add(nViews);
             this.Nodes.Add(nProgrammability);
-            this.Nodes.Add(nTriggers);
+   
             this.Nodes.Add(nTypes);
             this.Nodes.Add(nSeq);
  
