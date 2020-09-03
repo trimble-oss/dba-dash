@@ -38,9 +38,9 @@
             // chartIO
             // 
             this.chartIO.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.chartIO.Location = new System.Drawing.Point(0, 31);
+            this.chartIO.Location = new System.Drawing.Point(0, 27);
             this.chartIO.Name = "chartIO";
-            this.chartIO.Size = new System.Drawing.Size(773, 263);
+            this.chartIO.Size = new System.Drawing.Size(773, 267);
             this.chartIO.TabIndex = 4;
             this.chartIO.Text = "cartesianChart1";
             // 
@@ -52,7 +52,7 @@
             this.toolStripLabel1});
             this.toolStrip1.Location = new System.Drawing.Point(0, 0);
             this.toolStrip1.Name = "toolStrip1";
-            this.toolStrip1.Size = new System.Drawing.Size(773, 31);
+            this.toolStrip1.Size = new System.Drawing.Size(773, 27);
             this.toolStrip1.TabIndex = 5;
             this.toolStrip1.Text = "toolStrip1";
             // 
@@ -62,7 +62,7 @@
             this.tsMeasures.Image = global::DBAChecksGUI.Properties.Resources.AddComputedField_16x;
             this.tsMeasures.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsMeasures.Name = "tsMeasures";
-            this.tsMeasures.Size = new System.Drawing.Size(34, 28);
+            this.tsMeasures.Size = new System.Drawing.Size(34, 24);
             this.tsMeasures.Text = "Measures";
             // 
             // toolStripLabel1
@@ -70,7 +70,7 @@
             this.toolStripLabel1.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
             this.toolStripLabel1.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
             this.toolStripLabel1.Name = "toolStripLabel1";
-            this.toolStripLabel1.Size = new System.Drawing.Size(119, 28);
+            this.toolStripLabel1.Size = new System.Drawing.Size(119, 24);
             this.toolStripLabel1.Text = "IO Performance";
             // 
             // IOPerformance

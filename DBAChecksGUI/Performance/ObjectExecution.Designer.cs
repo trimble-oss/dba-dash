@@ -38,9 +38,9 @@
             // waitChart
             // 
             this.waitChart.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.waitChart.Location = new System.Drawing.Point(0, 31);
+            this.waitChart.Location = new System.Drawing.Point(0, 27);
             this.waitChart.Name = "waitChart";
-            this.waitChart.Size = new System.Drawing.Size(492, 251);
+            this.waitChart.Size = new System.Drawing.Size(492, 255);
             this.waitChart.TabIndex = 0;
             this.waitChart.Text = "cartesianChart1";
             // 
@@ -52,7 +52,7 @@
             this.tsMeasures});
             this.toolStrip1.Location = new System.Drawing.Point(0, 0);
             this.toolStrip1.Name = "toolStrip1";
-            this.toolStrip1.Size = new System.Drawing.Size(492, 31);
+            this.toolStrip1.Size = new System.Drawing.Size(492, 27);
             this.toolStrip1.TabIndex = 1;
             this.toolStrip1.Text = "toolStrip1";
             // 
@@ -61,16 +61,15 @@
             this.toolStripLabel1.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
             this.toolStripLabel1.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
             this.toolStripLabel1.Name = "toolStripLabel1";
-            this.toolStripLabel1.Size = new System.Drawing.Size(116, 28);
+            this.toolStripLabel1.Size = new System.Drawing.Size(116, 24);
             this.toolStripLabel1.Text = "Execution Stats";
             // 
             // tsMeasures
             // 
-            this.tsMeasures.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
             this.tsMeasures.Image = global::DBAChecksGUI.Properties.Resources.AddComputedField_16x;
             this.tsMeasures.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsMeasures.Name = "tsMeasures";
-            this.tsMeasures.Size = new System.Drawing.Size(34, 28);
+            this.tsMeasures.Size = new System.Drawing.Size(105, 24);
             this.tsMeasures.Text = "Measures";
             // 
             // ObjectExecution

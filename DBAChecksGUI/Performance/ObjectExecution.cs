@@ -267,11 +267,15 @@ namespace DBAChecksGUI.Performance
             {
                 ToolStripMenuItem itm = new ToolStripMenuItem(m.Value.DisplayName);
                 itm.Name = m.Key;
-                if (m.Key == measure) { itm.Checked = true; }
+                if (m.Key == measure) { 
+                    itm.Checked = true;
+                    tsMeasures.Text = m.Value.DisplayName;
+                }
 
                 itm.Click += Itm_Click;
                 tsMeasures.DropDownItems.Add(itm);
             }
+            tsMeasures.Text = measure;
         }
 
         private void Itm_Click(object sender, EventArgs e)
@@ -284,6 +288,7 @@ namespace DBAChecksGUI.Performance
                 {
                     itm.Checked = itm.Name == measure;
                 }
+                tsMeasures.Text = tsItm.Text;
             }
             RefreshData(instanceID, to.AddMinutes(-mins), to, connectionString,objectID, dateGrouping);
         }
