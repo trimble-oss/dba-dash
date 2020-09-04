@@ -1,27 +1,37 @@
 ﻿CREATE PROC [dbo].[SystemTags_Upd](@InstanceID INT)
 AS
-DECLARE @Version SYSNAME
-DECLARE @Edition SYSNAME
+DECLARE @Tags TABLE(
+	TagName NVARCHAR(50),
+	TagValue NVARCHAR(50)
+);
 DECLARE @Instance SYSNAME
-DECLARE @PatchLevel SYSNAME
+sELECT @Instance = Instance 
+FROM dbo.Instances 
+WHERE InstanceID = @InstanceID;
 
-SELECT @Version= v.SQLVersionName, @Edition=I.Edition,@Instance=I.Instance,@PatchLevel = v.SQLVersionName + ' ' + ProductLevel + ISNULL(' ' + I.ProductUpdateLevel,'')
-FROM dbo.Instances I
-CROSS APPLY SQLVersionName(EditionID,ProductVersion) v
-WHERE I.InstanceID=@InstanceID
-
-
-DECLARE @Tags TABLE(TagName NVARCHAR(50),TagValue NVARCHAR(50))
+WITH T AS (
+	SELECT CAST(v.SQLVersionName as NVARCHAR(50)) as [Version], 
+			CAST(I.Edition as NVARCHAR(50)) as Edition,
+			CAST(v.SQLVersionName + ' ' + ProductLevel + ISNULL(' ' + I.ProductUpdateLevel,'') as NVARCHAR(50)) as PatchLevel,
+			CAST(I.Collation as NVARCHAR(50)) Collation,
+			CAST(I.SystemManufacturer as NVARCHAR(50)) as SystemManufacturer,
+			CAST(I.SystemProductName as NVARCHAR(50)) as SystemProductName,
+			CAST(I.cpu_count as NVARCHAR(50)) as CPUCount,
+			CAST(AgentHostName + ' {' + AgentVersion + '}' as NVARCHAR(50)) DBAChecksAgent
+	FROM dbo.Instances I
+	CROSS APPLY SQLVersionName(EditionID,ProductVersion) v
+	WHERE I.InstanceID=@InstanceID
+)
 INSERT INTO @Tags
 (
     TagName,
     TagValue
 )
-SELECT '{Edition}',@Edition 
-UNION ALL
-SELECT '{Version}',@Version
-UNION ALL
-SELECT '{PatchLevel}',@PatchLevel
+SELECT 	'{' + TagName + '}' as TagName,
+		TagValue 
+FROM T
+UNPIVOT(TagValue FOR TagName IN(PatchLevel, [Version], Edition, Collation, SystemManufacturer, SystemProductName, CPUCount, DBAChecksAgent)) upvt
+
 
 INSERT INTO dbo.Tags
 (
