@@ -1563,4 +1563,17 @@ exec sp_executesql @SQL</value>
        member_principal_id
 FROM sys.server_role_members</value>
   </data>
+  <data name="SQLServerPermissions" xml:space="preserve">
+    <value>SELECT class,
+        class_desc,
+        major_id,
+        minor_id,
+        grantee_principal_id,
+        grantor_principal_id,
+        type,
+        permission_name,
+        state,
+        state_desc
+FROM sys.server_permissions</value>
+  </data>
 </root>

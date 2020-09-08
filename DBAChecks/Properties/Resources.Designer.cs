@@ -596,6 +596,25 @@ namespace DBAChecks.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to SELECT class,
+        ///        class_desc,
+        ///        major_id,
+        ///        minor_id,
+        ///        grantee_principal_id,
+        ///        grantor_principal_id,
+        ///        type,
+        ///        permission_name,
+        ///        state,
+        ///        state_desc
+        ///FROM sys.server_permissions.
+        /// </summary>
+        internal static string SQLServerPermissions {
+            get {
+                return ResourceManager.GetString("SQLServerPermissions", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to DECLARE @SQL NVARCHAR(MAX)
         ///SET @SQL = N&apos;
         ///SELECT name,

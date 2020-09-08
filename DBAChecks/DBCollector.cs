@@ -45,7 +45,8 @@ namespace DBAChecks
         Alerts,
         ObjectExecutionStats,
         ServerPrincipals,
-        ServerRoleMembers
+        ServerRoleMembers,
+        ServerPermissions
     }
 
 
@@ -271,6 +272,7 @@ namespace DBAChecks
             {
                 Collect(CollectionType.ServerPrincipals);
                 Collect(CollectionType.ServerRoleMembers);
+                Collect(CollectionType.ServerPermissions);
             }
             else if (collectionType == CollectionType.Drives)
             {
