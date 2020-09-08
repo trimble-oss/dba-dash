@@ -362,6 +362,9 @@
     <Build Include="dbo\Tables\ServerPermissions.sql" />
     <Build Include="dbo\Stored Procedures\ServerPermissions_Upd.sql" />
     <Build Include="dbo\User Defined Types\ServerPermissions.sql" />
+    <Build Include="dbo\Tables\DatabasePrincipals.sql" />
+    <Build Include="dbo\Stored Procedures\DatabasePrincipals_Upd.sql" />
+    <Build Include="dbo\User Defined Types\DatabasePrincipals.sql" />
   </ItemGroup>
   <ItemGroup>
     <PostDeploy Include="Script.PostDeployment1.sql" />

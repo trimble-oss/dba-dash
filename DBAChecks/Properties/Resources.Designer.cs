@@ -251,6 +251,34 @@ namespace DBAChecks.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to SET NOCOUNT ON
+        ///DECLARE @EditionID BIGINT
+        ///SELECT @EditionID = CAST(SERVERPROPERTY(&apos;EditionID&apos;) as bigint) 
+        ///
+        ///DECLARE @DBName SYSNAME
+        ///DECLARE @SQL NVARCHAR(MAX)
+        ///CREATE TABLE #DBPrincipals
+        ///(
+        ///	database_id INT NOT NULL,
+        ///    [name] NVARCHAR(128),
+        ///    [principal_id] INT,
+        ///    [type] CHAR(1),
+        ///    [type_desc] NVARCHAR(60),
+        ///    [default_schema_name] NVARCHAR(128),
+        ///    [create_date] DATETIME,
+        ///    [modify_date] DATETIME,
+        ///    [owning_principal_id] INT,
+        ///    [sid] VARBINARY(85),
+        ///    [is_fixed_role] BIT,
+        ///  [rest of string was truncated]&quot;;.
+        /// </summary>
+        internal static string SQLDatabasePrincipals {
+            get {
+                return ResourceManager.GetString("SQLDatabasePrincipals", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to CREATE TABLE #sysdb(
         ///	[name] [sysname] NOT NULL,
         ///	[database_id] [int] NOT NULL,

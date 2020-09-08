@@ -46,7 +46,8 @@ namespace DBAChecks
         ObjectExecutionStats,
         ServerPrincipals,
         ServerRoleMembers,
-        ServerPermissions
+        ServerPermissions,
+        DatabasePrincipals
     }
 
 
@@ -59,7 +60,7 @@ namespace DBAChecks
         public Int32 PerformanceCollectionPeriodMins = 60;
         string computerName;
         Int64 editionId;
-        CollectionType[] azureCollectionTypes = new CollectionType[] { CollectionType.SlowQueries, CollectionType.AzureDBElasticPoolResourceStats, CollectionType.AzureDBServiceObjectives, CollectionType.AzureDBResourceStats, CollectionType.CPU, CollectionType.DBFiles, CollectionType.General, CollectionType.Performance, CollectionType.Databases, CollectionType.DBConfig, CollectionType.TraceFlags, CollectionType.ObjectExecutionStats, CollectionType.BlockingSnapshot, CollectionType.IOStats, CollectionType.Waits, CollectionType.ServerProperties, CollectionType.DBTuningOptions, CollectionType.SysConfig };
+        CollectionType[] azureCollectionTypes = new CollectionType[] { CollectionType.SlowQueries, CollectionType.AzureDBElasticPoolResourceStats, CollectionType.AzureDBServiceObjectives, CollectionType.AzureDBResourceStats, CollectionType.CPU, CollectionType.DBFiles, CollectionType.General, CollectionType.Performance, CollectionType.Databases, CollectionType.DBConfig, CollectionType.TraceFlags, CollectionType.ObjectExecutionStats, CollectionType.BlockingSnapshot, CollectionType.IOStats, CollectionType.Waits, CollectionType.ServerProperties, CollectionType.DBTuningOptions, CollectionType.SysConfig, CollectionType.DatabasePrincipals };
         public Int64 SlowQueryThresholdMs = -1;
 
         private bool IsAzure = false;
@@ -273,6 +274,7 @@ namespace DBAChecks
                 Collect(CollectionType.ServerPrincipals);
                 Collect(CollectionType.ServerRoleMembers);
                 Collect(CollectionType.ServerPermissions);
+                Collect(CollectionType.DatabasePrincipals);
             }
             else if (collectionType == CollectionType.Drives)
             {
