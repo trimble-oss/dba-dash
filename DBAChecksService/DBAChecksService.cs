@@ -164,6 +164,7 @@ namespace DBAChecksService
                               JobBuilder.Create<DBAChecksJob>()
                                    .UsingJobData("Type", JsonConvert.SerializeObject(s.CollectionTypes))
                                    .UsingJobData("CFG", cfgString)
+                                   .UsingJobData("BinarySerialization", config.BinarySerialization)
                                    .UsingJobData("AccessKey", config.AccessKey)
                                    .UsingJobData("SecretKey", config.GetSecretKey())
                                    .UsingJobData("AWSProfile", config.AWSProfile)

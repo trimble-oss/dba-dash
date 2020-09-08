@@ -13,6 +13,7 @@ namespace DBAChecks
         private bool isEncrypted = false;
         private string myString = "g&hAs2&mVOLwE6DqO!I5";
         public SchemaSnapshotDBOptions SchemaSnapshotOptions=null;
+        public bool BinarySerialization { get; set; } = false;
 
         public List<DBAChecksSource> SourceConnections = new List<DBAChecksSource>();
 

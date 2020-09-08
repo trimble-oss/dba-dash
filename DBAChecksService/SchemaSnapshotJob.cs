@@ -74,7 +74,7 @@ namespace DBAChecksService
                             dt.ExtendedProperties.Add("SnapshotOptions", strSchemaSnapshotOptions);
                             dsSnapshot.Tables.Add(dt);
 
-                            string fileName = System.IO.Path.ChangeExtension(cfg.GenerateFileName(), "bin");
+                            string fileName = cfg.GenerateFileName(true);
                             DestinationHandling.Write(dsSnapshot, destination, fileName, AWSProfile, AccessKey, SecretKey, destinationType);
                             dsSnapshot.Tables.Remove(dt);
                         }

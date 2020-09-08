@@ -28,6 +28,7 @@ namespace DBAChecksService
             var SecretKey = dataMap.GetString("SecretKey");
             var AWSProfile = dataMap.GetString("AWSProfile");
             var source = dataMap.GetString("Source");
+            var binarySerialization = dataMap.GetBoolean("BinarySerialization");
             var destination = dataMap.GetString("Destination");
             var sourceType = JsonConvert.DeserializeObject<ConnectionType>(dataMap.GetString("SourceType"));
             var destinationType = JsonConvert.DeserializeObject<ConnectionType>(dataMap.GetString("DestinationType"));
@@ -45,7 +46,7 @@ namespace DBAChecksService
                             foreach (string f in System.IO.Directory.GetFiles(folder, "DBAChecks_*.json"))
                             {
                                 string json = System.IO.File.ReadAllText(f);
-                                DataSet ds = JsonConvert.DeserializeObject<DataSet>(json);
+                                DataSet ds  = DataSetSerialization.DeserializeDS(json);
                                 DestinationHandling.WriteDB(ds, destination);
                                 System.IO.File.Delete(f);
                             }
@@ -97,7 +98,8 @@ namespace DBAChecksService
                                         using (StreamReader reader = new StreamReader(responseStream))
                                         {
                                             string json = reader.ReadToEnd();
-                                            ds = JsonConvert.DeserializeObject<DataSet>(json);
+                                            
+                                            ds = DataSetSerialization.DeserializeDS(json);
 
                                         }
                                     }
@@ -132,7 +134,7 @@ namespace DBAChecksService
                         }
                         collector.SlowQueryThresholdMs = cfg.SlowQueryThresholdMs;
                         collector.Collect(types);
-                        string fileName = cfg.GenerateFileName();
+                        string fileName = cfg.GenerateFileName(binarySerialization);
                         try
                         {
                             DestinationHandling.Write(collector.Data, destination, fileName, AWSProfile, AccessKey, SecretKey, destinationType);

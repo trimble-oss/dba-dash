@@ -46,7 +46,7 @@ namespace DBAChecksService
             }
             else
             {
-                string json = JsonConvert.SerializeObject(ds, Formatting.None);
+                string json = DataSetSerialization.SerializeDS(ds);
                 r.ContentBody = json;
                 r.BucketName = uri.Bucket;
             }
@@ -73,7 +73,7 @@ namespace DBAChecksService
                 }
                 else
                 {
-                    string json = JsonConvert.SerializeObject(ds, Formatting.None);
+                    string json = DataSetSerialization.SerializeDS(ds);
                     File.WriteAllText(filePath, json);
                 }
             }

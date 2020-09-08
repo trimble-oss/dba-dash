@@ -15,6 +15,7 @@ namespace DBAChecks
     {
         General,
         Performance,
+        Security,
         AgentJobs,
         Databases,
         DatabasesHADR,
@@ -42,7 +43,9 @@ namespace DBAChecks
         SlowQueries,
         LastGoodCheckDB,
         Alerts,
-        ObjectExecutionStats
+        ObjectExecutionStats,
+        ServerPrincipals,
+        ServerRoleMembers
     }
 
 
@@ -263,6 +266,11 @@ namespace DBAChecks
                 Collect(CollectionType.AzureDBResourceStats);
                 Collect(CollectionType.AzureDBElasticPoolResourceStats);
                 Collect(CollectionType.SlowQueries);
+            }
+            else if(collectionType == CollectionType.Security)
+            {
+                Collect(CollectionType.ServerPrincipals);
+                Collect(CollectionType.ServerRoleMembers);
             }
             else if (collectionType == CollectionType.Drives)
             {

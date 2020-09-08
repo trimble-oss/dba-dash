@@ -25,7 +25,9 @@ namespace DBAChecksService
 
         public static CollectionConfigSchedule[] DefaultSchedules()
         {
-            return new CollectionConfigSchedule[] { new CollectionConfigSchedule("0 0 * ? * *", true, new CollectionType[] { CollectionType.General }), new CollectionConfigSchedule("0 * * ? * *", true, new CollectionType[] { CollectionType.Performance }) };
+            return new CollectionConfigSchedule[] { new CollectionConfigSchedule("0 0 * ? * *", true, new CollectionType[] { CollectionType.General }), 
+                                                    new CollectionConfigSchedule("0 * * ? * *", true, new CollectionType[] { CollectionType.Performance }),
+                                                    new CollectionConfigSchedule("0 0 0 1/1 * ? *", true, new CollectionType[] { CollectionType.Security})};
         }
         public static CollectionConfigSchedule[] DefaultImportSchedule()
         {

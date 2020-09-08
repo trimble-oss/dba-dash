@@ -596,6 +596,29 @@ namespace DBAChecks.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to DECLARE @SQL NVARCHAR(MAX)
+        ///SET @SQL = N&apos;
+        ///SELECT name,
+        ///       principal_id,
+        ///       sid,
+        ///       type,
+        ///       type_desc,
+        ///       is_disabled,
+        ///       create_date,
+        ///       modify_date,
+        ///       default_database_name,
+        ///       default_language_name,
+        ///       credential_id,
+        ///	   &apos; + CASE WHEN COLUMNPROPERTY(OBJECT_ID(&apos;sys.server_principals&apos;),&apos;owning_principal_id&apos;,&apos;ColumnID&apos;) IS NULL THEN &apos;CAST(NULL AS INT) as owning_principal_id,&apos; ELSE &apos;owning_principal_id,&apos; END + &apos;
+        ///	   &apos; + CASE WHEN COLUMNPROPERTY(OBJECT_ID(&apos;sys.server_pr [rest of string was truncated]&quot;;.
+        /// </summary>
+        internal static string SQLServerPrincipals {
+            get {
+                return ResourceManager.GetString("SQLServerPrincipals", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to SELECT CAST(SERVERPROPERTY(&apos;BuildClrVersion&apos;) as nvarchar(128)) as BuildClrVersion ,
         ///CAST(SERVERPROPERTY(&apos;Collation&apos;) as nvarchar(128)) as Collation ,
         ///CAST(SERVERPROPERTY(&apos;CollationID&apos;) as int) as CollationID ,
@@ -608,6 +631,17 @@ namespace DBAChecks.Properties {
         internal static string SQLServerProperties {
             get {
                 return ResourceManager.GetString("SQLServerProperties", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to SELECT role_principal_id,
+        ///       member_principal_id
+        ///FROM sys.server_role_members.
+        /// </summary>
+        internal static string SQLServerRoleMembers {
+            get {
+                return ResourceManager.GetString("SQLServerRoleMembers", resourceCulture);
             }
         }
         

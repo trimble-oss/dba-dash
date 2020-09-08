@@ -64,9 +64,9 @@ namespace DBAChecks
             }
         }
 
-        public string GenerateFileName()
+        public string GenerateFileName(bool binarySerialization)
         {
-            return "DBAChecks_" + DateTime.UtcNow.ToString("yyyy-MM-dd HHmmss") + Guid.NewGuid().ToString() + ".json";
+            return "DBAChecks_" + DateTime.UtcNow.ToString("yyyy-MM-dd HHmmss") + Guid.NewGuid().ToString() + (binarySerialization ? ".bin" : ".json");
         }
 
         [DefaultValue(false)]
