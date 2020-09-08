@@ -47,7 +47,8 @@ namespace DBAChecks
         ServerPrincipals,
         ServerRoleMembers,
         ServerPermissions,
-        DatabasePrincipals
+        DatabasePrincipals,
+        DatabaseRoleMembers
     }
 
 
@@ -60,7 +61,7 @@ namespace DBAChecks
         public Int32 PerformanceCollectionPeriodMins = 60;
         string computerName;
         Int64 editionId;
-        CollectionType[] azureCollectionTypes = new CollectionType[] { CollectionType.SlowQueries, CollectionType.AzureDBElasticPoolResourceStats, CollectionType.AzureDBServiceObjectives, CollectionType.AzureDBResourceStats, CollectionType.CPU, CollectionType.DBFiles, CollectionType.General, CollectionType.Performance, CollectionType.Databases, CollectionType.DBConfig, CollectionType.TraceFlags, CollectionType.ObjectExecutionStats, CollectionType.BlockingSnapshot, CollectionType.IOStats, CollectionType.Waits, CollectionType.ServerProperties, CollectionType.DBTuningOptions, CollectionType.SysConfig, CollectionType.DatabasePrincipals };
+        CollectionType[] azureCollectionTypes = new CollectionType[] { CollectionType.SlowQueries, CollectionType.AzureDBElasticPoolResourceStats, CollectionType.AzureDBServiceObjectives, CollectionType.AzureDBResourceStats, CollectionType.CPU, CollectionType.DBFiles, CollectionType.General, CollectionType.Performance, CollectionType.Databases, CollectionType.DBConfig, CollectionType.TraceFlags, CollectionType.ObjectExecutionStats, CollectionType.BlockingSnapshot, CollectionType.IOStats, CollectionType.Waits, CollectionType.ServerProperties, CollectionType.DBTuningOptions, CollectionType.SysConfig, CollectionType.DatabasePrincipals, CollectionType.DatabaseRoleMembers };
         public Int64 SlowQueryThresholdMs = -1;
 
         private bool IsAzure = false;
@@ -275,6 +276,7 @@ namespace DBAChecks
                 Collect(CollectionType.ServerRoleMembers);
                 Collect(CollectionType.ServerPermissions);
                 Collect(CollectionType.DatabasePrincipals);
+                Collect(CollectionType.DatabaseRoleMembers);
             }
             else if (collectionType == CollectionType.Drives)
             {

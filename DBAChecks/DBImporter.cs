@@ -59,7 +59,7 @@ namespace DBAChecks
             updateDB(connectionString, instanceID, snapshotDate, Data);
             foreach (DataTable dt in Data.Tables)
             {
-                string[] tables = { "Drives", "ServerProperties", "Backups", "AgentJobs", "LogRestores", "DBFiles", "DBConfig", "Corruption", "DatabasesHADR", "SysConfig", "OSInfo", "TraceFlags", "CPU", "Drivers", "BlockingSnapshot", "IOStats", "Waits", "OSLoadedModules", "DBTuningOptions", "AzureDBResourceStats", "AzureDBServiceObjectives", "AzureDBElasticPoolResourceStats", "SlowQueries", "SlowQueriesStats", "LastGoodCheckDB", "Alerts" ,"ObjectExecutionStats","ServerPrincipals","ServerRoleMembers","ServerPermissions","DatabasePrincipals"};
+                string[] tables = { "Drives", "ServerProperties", "Backups", "AgentJobs", "LogRestores", "DBFiles", "DBConfig", "Corruption", "DatabasesHADR", "SysConfig", "OSInfo", "TraceFlags", "CPU", "Drivers", "BlockingSnapshot", "IOStats", "Waits", "OSLoadedModules", "DBTuningOptions", "AzureDBResourceStats", "AzureDBServiceObjectives", "AzureDBElasticPoolResourceStats", "SlowQueries", "SlowQueriesStats", "LastGoodCheckDB", "Alerts" ,"ObjectExecutionStats","ServerPrincipals","ServerRoleMembers","ServerPermissions","DatabasePrincipals","DatabaseRoleMembers"};
 
                 if (tables.Contains(dt.TableName))
                 {

@@ -279,6 +279,42 @@ namespace DBAChecks.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to SET NOCOUNT ON
+        ///
+        ///DECLARE @DBName SYSNAME
+        ///DECLARE @SQL NVARCHAR(MAX)
+        ///CREATE TABLE #DBRoleMembers
+        ///(
+        ///	database_id INT NOT NULL,
+        ///    [role_principal_id] INT NOT NULL,
+        ///	[member_principal_id] INT NOT NULL
+        ///);
+        ///
+        ///
+        ///
+        ///DECLARE DBs CURSOR FAST_FORWARD READ_ONLY LOCAL FOR
+        ///SELECT name
+        ///FROM sys.databases
+        ///WHERE state  = 0
+        ///AND HAS_DBACCESS(name)=1
+        ///
+        ///OPEN DBs
+        ///FETCH NEXT FROM DBs INTO @DBName
+        ///
+        ///WHILE @@FETCH_STATUS = 0
+        ///BEGIN
+        ///
+        ///	SET @SQL =  N&apos;USE &apos; + QUOTENAME(@DBName)  + &apos; 
+        ///SELECT DB_ID(), 
+        ///	   	           [rest of string was truncated]&quot;;.
+        /// </summary>
+        internal static string SQLDatabaseRoleMembers {
+            get {
+                return ResourceManager.GetString("SQLDatabaseRoleMembers", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to CREATE TABLE #sysdb(
         ///	[name] [sysname] NOT NULL,
         ///	[database_id] [int] NOT NULL,
