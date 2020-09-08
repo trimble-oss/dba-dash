@@ -365,6 +365,12 @@
     <Build Include="dbo\Tables\DatabasePrincipals.sql" />
     <Build Include="dbo\Stored Procedures\DatabasePrincipals_Upd.sql" />
     <Build Include="dbo\User Defined Types\DatabasePrincipals.sql" />
+    <Build Include="dbo\Tables\DatabaseRoleMembers.sql" />
+    <Build Include="dbo\Stored Procedures\DatabaseRoleMembers_Upd.sql" />
+    <Build Include="dbo\User Defined Types\DatabaseRoleMembers.sql" />
+    <Build Include="dbo\Tables\DatabasePermissions.sql" />
+    <Build Include="dbo\Stored Procedures\DatabasePermissions_Upd.sql" />
+    <Build Include="dbo\User Defined Types\DatabasePermissions.sql" />
   </ItemGroup>
   <ItemGroup>
     <PostDeploy Include="Script.PostDeployment1.sql" />

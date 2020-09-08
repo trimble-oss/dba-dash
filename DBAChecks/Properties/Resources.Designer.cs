@@ -252,6 +252,32 @@ namespace DBAChecks.Properties {
         
         /// <summary>
         ///   Looks up a localized string similar to SET NOCOUNT ON
+        ///
+        ///DECLARE @DBName SYSNAME
+        ///DECLARE @SQL NVARCHAR(MAX)
+        ///CREATE TABLE #permissions
+        ///(
+        ///	database_id INT NOT NULL,
+        ///    [class] TINYINT NOT NULL,
+        ///    [class_desc] NVARCHAR(60) NULL,
+        ///    [major_id] INT NOT NULL,
+        ///    [minor_id] INT NOT NULL,
+        ///    [grantee_principal_id] INT NOT NULL,
+        ///    [grantor_principal_id] INT NOT NULL,
+        ///    [type] CHAR(4) NOT NULL,
+        ///    [permission_name] NVARCHAR(128) NULL,
+        ///    [state] CHAR(1) NOT NULL,
+        ///    [state_desc] NVARCHAR(60) NULL,
+        ///    [schema_name] NVARCHAR(128 [rest of string was truncated]&quot;;.
+        /// </summary>
+        internal static string SQLDatabasePermissions {
+            get {
+                return ResourceManager.GetString("SQLDatabasePermissions", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to SET NOCOUNT ON
         ///DECLARE @EditionID BIGINT
         ///SELECT @EditionID = CAST(SERVERPROPERTY(&apos;EditionID&apos;) as bigint) 
         ///
