@@ -2,11 +2,17 @@
 
 CREATE PROC [dbo].[SlowQueries_Upd](@SlowQueries dbo.SlowQueries READONLY,@InstanceID INT,@SnapshotDate DATETIME2(3))
 AS
+DECLARE @MinDate DATETIME2(3)
+SELECT @MinDate =MIN(timestamp) 
+FROM @SlowQueries
+
 DECLARE @Ref VARCHAR(30)='SlowQueries'
 DECLARE @MaxDate DATETIME2(3)
 SELECT @MaxDate = ISNULL(MAX(timestamp),'19000101')
 FROM dbo.SlowQueries 
 WHERE InstanceID = @InstanceID
+AND timestamp>=@MinDate
+
 INSERT INTO dbo.SlowQueries
 (
 	InstanceID,
