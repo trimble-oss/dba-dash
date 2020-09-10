@@ -2,7 +2,7 @@
 AS
 SELECT NULL AS Value,'{ALL}' as Name
 UNION ALL
-SELECT ObjectName,ObjectName 
+SELECT DISTINCT ObjectName,ObjectName 
 FROM dbo.DBObjects
 WHERE DatabaseID = @DatabaseID
 AND ((ObjectType IN('P','PC','X') AND @IsFunction=0)

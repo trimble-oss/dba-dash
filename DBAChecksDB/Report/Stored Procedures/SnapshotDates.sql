@@ -19,8 +19,8 @@ BEGIN
 	(
 		InstanceID
 	)
-	SELECT Item
-	FROM dbo.SplitStrings(@InstanceIDs,',')
+	SELECT value
+	FROM STRING_SPLIT(@InstanceIDs,',')
 END
 
 SELECT I.Instance,
@@ -28,8 +28,12 @@ SELECT I.Instance,
 	SSD.Reference,
 	I.AgentHostName,
 	SSD.SnapshotDate,
-	DATEDIFF(mi,SSD.SnapshotDate,GETUTCDATE()) AS SnapshotAge 
+	SSD.SnapshotAge,
+	SSD.Status,
+	SSD.WarningThreshold,
+	SSD.CriticalThreshold,
+	SSD.ConfiguredLevel
 FROM dbo.Instances I 
-JOIN dbo.CollectionDates SSD ON SSD.InstanceID = I.InstanceID
+JOIN dbo.CollectionDatesStatus SSD ON SSD.InstanceID = I.InstanceID
 WHERE I.IsActive=1
 AND EXISTS(SELECT 1 FROM @Instances t WHERE I.InstanceID = t.InstanceID)

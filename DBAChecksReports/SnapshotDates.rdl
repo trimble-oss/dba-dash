@@ -47,6 +47,22 @@
           <DataField>SnapshotAge</DataField>
           <rd:TypeName>System.Int32</rd:TypeName>
         </Field>
+        <Field Name="Status">
+          <DataField>Status</DataField>
+          <rd:TypeName>System.Int32</rd:TypeName>
+        </Field>
+        <Field Name="WarningThreshold">
+          <DataField>WarningThreshold</DataField>
+          <rd:TypeName>System.Int32</rd:TypeName>
+        </Field>
+        <Field Name="CriticalThreshold">
+          <DataField>CriticalThreshold</DataField>
+          <rd:TypeName>System.Int32</rd:TypeName>
+        </Field>
+        <Field Name="ConfiguredLevel">
+          <DataField>ConfiguredLevel</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
+        </Field>
       </Fields>
     </DataSet>
     <DataSet Name="Tags">
@@ -235,15 +251,19 @@ System.TimeZone.CurrentTimeZone.ToLocalTime(Min(Fields!SnapshotDate.Value)))</Va
                             </Paragraph>
                           </Paragraphs>
                           <rd:DefaultName>SnapshotAge</rd:DefaultName>
+                          <ToolTip>="Snapshot Age:" &amp; CSTR(Fields!SnapshotAge.Value) &amp; "min" &amp; Environment.NewLine &amp;
+"Snapshot Date:" &amp; System.TimeZone.CurrentTimeZone.ToLocalTime(Fields!SnapshotDate.Value).ToString(Parameters!DateFormat.Value) &amp; Environment.NewLine &amp;
+"Warning Threshold: " &amp; CSTR(Fields!WarningThreshold.Value) &amp; Environment.NewLine &amp;
+"Critical Threshold:" &amp; CSTR(Fields!CriticalThreshold.Value) &amp; Environment.NewLine &amp; 
+"Configured Level:" &amp; Fields!ConfiguredLevel.Value.ToString()</ToolTip>
                           <Style>
                             <Border>
                               <Color>LightGrey</Color>
                               <Style>Solid</Style>
                             </Border>
-                            <BackgroundColor>=switch(Fields!SnapshotAge.Value&gt;Parameters!SnapshotAgeCritical.Value,"Red",
-Fields!SnapshotAge.Value&gt;Parameters!SnapshotAgeWarning.Value,"Yellow",
-ISNOTHING(Fields!SnapshotAge.Value),"LightGrey",
-Fields!SnapshotAge.Value&lt;=Parameters!SnapshotAgeWarning.Value,"Green",
+                            <BackgroundColor>=switch(Fields!Status.Value=1,"Red",
+Fields!Status.Value=2,"Yellow",
+Fields!Status.Value=4,"Green",
 1=1,"LightGrey")</BackgroundColor>
                             <PaddingLeft>2pt</PaddingLeft>
                             <PaddingRight>2pt</PaddingRight>
@@ -425,24 +445,6 @@ Fields!SnapshotAge.Value&lt;=Parameters!SnapshotAgeWarning.Value,"Green",
       </DefaultValue>
       <Prompt>Date Format</Prompt>
     </ReportParameter>
-    <ReportParameter Name="SnapshotAgeWarning">
-      <DataType>String</DataType>
-      <DefaultValue>
-        <Values>
-          <Value>120</Value>
-        </Values>
-      </DefaultValue>
-      <Prompt>SnapshotAgeWarning</Prompt>
-    </ReportParameter>
-    <ReportParameter Name="SnapshotAgeCritical">
-      <DataType>String</DataType>
-      <DefaultValue>
-        <Values>
-          <Value>1440</Value>
-        </Values>
-      </DefaultValue>
-      <Prompt>SnapshotAgeCritical</Prompt>
-    </ReportParameter>
     <ReportParameter Name="TagIDs">
       <DataType>String</DataType>
       <DefaultValue>
@@ -450,36 +452,12 @@ Fields!SnapshotAge.Value&lt;=Parameters!SnapshotAgeWarning.Value,"Green",
           <Value>-1</Value>
         </Values>
       </DefaultValue>
-      <Prompt>Tag IDs</Prompt>
+      <Prompt>Tags</Prompt>
       <ValidValues>
         <DataSetReference>
           <DataSetName>Tags</DataSetName>
           <ValueField>TagID</ValueField>
           <LabelField>Tag</LabelField>
-        </DataSetReference>
-      </ValidValues>
-      <MultiValue>true</MultiValue>
-    </ReportParameter>
-    <ReportParameter Name="InstanceName">
-      <DataType>String</DataType>
-      <Nullable>true</Nullable>
-      <Prompt>Instance Name</Prompt>
-    </ReportParameter>
-    <ReportParameter Name="InstanceIDs">
-      <DataType>String</DataType>
-      <DefaultValue>
-        <DataSetReference>
-          <DataSetName>Connections</DataSetName>
-          <ValueField>InstanceID</ValueField>
-        </DataSetReference>
-      </DefaultValue>
-      <Prompt>Instances</Prompt>
-      <Hidden>true</Hidden>
-      <ValidValues>
-        <DataSetReference>
-          <DataSetName>Connections</DataSetName>
-          <ValueField>InstanceID</ValueField>
-          <LabelField>ConnectionID</LabelField>
         </DataSetReference>
       </ValidValues>
       <MultiValue>true</MultiValue>
@@ -505,6 +483,30 @@ Fields!SnapshotAge.Value&lt;=Parameters!SnapshotAgeWarning.Value,"Green",
         </ParameterValues>
       </ValidValues>
     </ReportParameter>
+    <ReportParameter Name="InstanceName">
+      <DataType>String</DataType>
+      <Nullable>true</Nullable>
+      <Prompt>Instance Name</Prompt>
+    </ReportParameter>
+    <ReportParameter Name="InstanceIDs">
+      <DataType>String</DataType>
+      <DefaultValue>
+        <DataSetReference>
+          <DataSetName>Connections</DataSetName>
+          <ValueField>InstanceID</ValueField>
+        </DataSetReference>
+      </DefaultValue>
+      <Prompt>Instances</Prompt>
+      <Hidden>true</Hidden>
+      <ValidValues>
+        <DataSetReference>
+          <DataSetName>Connections</DataSetName>
+          <ValueField>InstanceID</ValueField>
+          <LabelField>ConnectionID</LabelField>
+        </DataSetReference>
+      </ValidValues>
+      <MultiValue>true</MultiValue>
+    </ReportParameter>
   </ReportParameters>
   <ReportParametersLayout>
     <GridLayoutDefinition>
@@ -519,31 +521,21 @@ Fields!SnapshotAge.Value&lt;=Parameters!SnapshotAgeWarning.Value,"Green",
         <CellDefinition>
           <ColumnIndex>1</ColumnIndex>
           <RowIndex>0</RowIndex>
-          <ParameterName>SnapshotAgeWarning</ParameterName>
-        </CellDefinition>
-        <CellDefinition>
-          <ColumnIndex>2</ColumnIndex>
-          <RowIndex>0</RowIndex>
-          <ParameterName>SnapshotAgeCritical</ParameterName>
-        </CellDefinition>
-        <CellDefinition>
-          <ColumnIndex>3</ColumnIndex>
-          <RowIndex>0</RowIndex>
           <ParameterName>TagIDs</ParameterName>
         </CellDefinition>
         <CellDefinition>
-          <ColumnIndex>1</ColumnIndex>
+          <ColumnIndex>0</ColumnIndex>
           <RowIndex>1</RowIndex>
           <ParameterName>InstanceName</ParameterName>
         </CellDefinition>
         <CellDefinition>
-          <ColumnIndex>2</ColumnIndex>
+          <ColumnIndex>1</ColumnIndex>
           <RowIndex>1</RowIndex>
           <ParameterName>InstanceIDs</ParameterName>
         </CellDefinition>
         <CellDefinition>
-          <ColumnIndex>3</ColumnIndex>
-          <RowIndex>1</RowIndex>
+          <ColumnIndex>2</ColumnIndex>
+          <RowIndex>0</RowIndex>
           <ParameterName>Display</ParameterName>
         </CellDefinition>
       </CellDefinitions>

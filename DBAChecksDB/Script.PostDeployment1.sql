@@ -294,3 +294,52 @@ BEGIN
 	('SQ','Service Broker Queue'),
 	('SBR','Service Broker Route')
 END
+
+INSERT INTO dbo.CollectionDatesThresholds
+(
+    InstanceID,
+    Reference,
+    WarningThreshold,
+    CriticalThreshold
+)
+
+SELECT T.InstanceID,
+       T.Reference,
+       T.WarningThreshold,
+       T.CriticalThreshold
+FROM 
+(VALUES
+(-1,'DBFiles',125,180),
+(-1,'ServerExtraProperties',125,180),
+(-1,'OSLoadedModules',125,180),
+(-1,'TraceFlags',125,180),
+(-1,'ServerProperties',125,180),
+(-1,'LogRestores',125,180),
+(-1,'DatabaseHADR',125,180),
+(-1,'AgentJobs',125,180),
+(-1,'LastGoodCheckDB',125,180),
+(-1,'Alerts',125,180),
+(-1,'DBTuningOptions',125,180),
+(-1,'DBConfig',125,180),
+(-1,'OSInfo',125,180),
+(-1,'Drives',125,180),
+(-1,'Database',125,180),
+(-1,'Instance',125,180),
+(-1,'Drivers',125,180),
+(-1,'SysConfig',125,180),
+(-1,'Backups',125,180),
+(-1,'AzureDBServiceObjectives',125,180),
+(-1,'Corruption',125,180),
+(-1,'BlockingSnapshot',5,10),
+(-1,'CPU',5,10),
+(-1,'SlowQueries',5,10),
+(-1,'AzureDBElasticPoolResourceStat',5,10),
+(-1,'Waits',5,10),
+(-1,'AzureDBResourceStats',5,10),
+(-1,'DatabasePrincipals',1445,2880),
+(-1,'ServerPermissions',1445,2880),
+(-1,'ServerPrincipals',1445,2880),
+(-1,'DatabasePermissions',1445,2880),
+(-1,'ServerRoleMembers',1445,2880),
+(-1,'DatabaseRoleMembers',1445,2880)) T(InstanceID,Reference,WarningThreshold,CriticalThreshold)
+WHERE NOT EXISTS(SELECT 1 FROM dbo.CollectionDatesThresholds CDT WHERE CDT.InstanceID = T.InstanceID AND CDT.Reference = T.Reference)

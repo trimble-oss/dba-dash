@@ -1635,9 +1635,11 @@ WHILE @@FETCH_STATUS = 0
 BEGIN
 
 	SET @SQL =  N'USE ' + QUOTENAME(@DBName) + ';' + @PrincipalsSQL
-
-	INSERT INTO #DBPrincipals
-	EXEC  (	@SQL )
+	IF HAS_DBACCESS(@DBName)=1
+	BEGIN
+		INSERT INTO #DBPrincipals
+		EXEC  (	@SQL )
+	END
 
 	FETCH NEXT FROM DBs INTO @DBName
 END
@@ -1696,13 +1698,16 @@ SELECT DB_ID(),
 						   member_principal_id
 FROM sys.database_role_members'
 
-	INSERT INTO #DBRoleMembers
-	(
-	    database_id,
-	    role_principal_id,
-	    member_principal_id
-	)
-	EXEC  (	@SQL )
+	IF HAS_DBACCESS(@DBName)=1
+	BEGIN
+		INSERT INTO #DBRoleMembers
+		(
+			database_id,
+			role_principal_id,
+			member_principal_id
+		)
+		EXEC  (	@SQL )
+	END
 
 	FETCH NEXT FROM DBs INTO @DBName
 END
@@ -1790,8 +1795,11 @@ LEFT JOIN sys.asymmetric_keys asym ON p.major_id = asym.asymmetric_key_id AND p.
 WHERE NOT(p.major_id&lt;0 AND p.grantee_principal_id=0 AND p.type = ''SL'') --Ignore Select on system objects to public
 AND NOT(p.major_id&lt;0 AND DB_ID()=1 AND p.type=''EX'') --ignore execute on system objects in master db'
 
-	INSERT INTO #permissions
-	EXEC  (	@SQL )
+	IF HAS_DBACCESS(@DBName)=1
+	BEGIN
+		INSERT INTO #permissions
+		EXEC  (	@SQL )
+	END
 
 	FETCH NEXT FROM DBs INTO @DBName
 END

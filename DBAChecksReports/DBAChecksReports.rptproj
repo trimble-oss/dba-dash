@@ -94,6 +94,7 @@
     <Report Include="Performance Dashboard.rdl" />
     <Report Include="Procedure Insights.rdl" />
     <Report Include="Procedure Stats.rdl" />
+    <Report Include="Server Login Summary.rdl" />
     <Report Include="Server Performance.rdl" />
     <Report Include="SlowQueries.rdl" />
     <Report Include="SnapshotDates.rdl" />

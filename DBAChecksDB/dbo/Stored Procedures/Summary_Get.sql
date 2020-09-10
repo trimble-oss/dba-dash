@@ -26,7 +26,7 @@ END;
 
 WITH LS AS (
 	SELECT InstanceID,MIN(Status) AS LogShippingStatus
-	FROM LogShippingStatus
+	FROM dbo.LogShippingStatus
 	WHERE Status<>3
 	GROUP BY InstanceID
 )
@@ -80,10 +80,11 @@ err AS (
 ),
 SSD AS (
 	SELECT InstanceID,
-		MIN(DATEDIFF(mi,SnapshotDate,GETUTCDATE())) AS SnapshotAgeMin,
-		MAX(DATEDIFF(mi,SnapshotDate,GETUTCDATE())) AS SnapshotAgeMax,
+		MIN(CASE WHEN Status=3 THEN NULL ELSE Status END) AS CollectionDatesStatus,
+		MAX(SnapshotAge) AS SnapshotAgeMax,
+		MIN(SnapshotAge) AS SnapshotAgeMin,
 		MIN(SnapshotDate) AS OldestSnapshot
-	FROM dbo.CollectionDates
+	FROM dbo.CollectionDatesStatus
 	GROUP BY InstanceID
 ),
 dbc AS (
@@ -124,7 +125,7 @@ SELECT I.InstanceID,
 	CASE WHEN err.LastError >= SSD.OldestSnapshot THEN 1 WHEN err.cnt>0 THEN 2 ELSE 4 END AS CollectionErrorStatus,
 	SSD.SnapshotAgeMin,
 	SSD.SnapshotAgeMax,
-	CASE WHEN SSD.SnapshotAgeMax>1440 THEN 1 WHEN SSD.SnapshotAgeMax>120 THEN 2 ELSE 4 END AS SnapshotAgeStatus,
+	SSD.CollectionDatesStatus as SnapshotAgeStatus,
 	DATEADD(mi,I.UtcOffSet,I.sqlserver_start_time) AS sqlserver_start_time_utc,
 	I.UTCOffset,
 	DATEDIFF(mi,DATEADD(mi,I.UtcOffSet,I.sqlserver_start_time),OSInfoCD.SnapshotDate) AS sqlserver_uptime,

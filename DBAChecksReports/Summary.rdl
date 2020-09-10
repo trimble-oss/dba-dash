@@ -31,10 +31,6 @@
           <DataField>Instance</DataField>
           <rd:TypeName>System.String</rd:TypeName>
         </Field>
-        <Field Name="Tags">
-          <DataField>Tags</DataField>
-          <rd:TypeName>System.String</rd:TypeName>
-        </Field>
         <Field Name="LogShippingStatus">
           <DataField>LogShippingStatus</DataField>
           <rd:TypeName>System.Int32</rd:TypeName>
@@ -71,6 +67,10 @@
           <DataField>DetectedCorruptionDate</DataField>
           <rd:TypeName>System.DateTime</rd:TypeName>
         </Field>
+        <Field Name="CorruptionStatus">
+          <DataField>CorruptionStatus</DataField>
+          <rd:TypeName>System.Int32</rd:TypeName>
+        </Field>
         <Field Name="CollectionErrorStatus">
           <DataField>CollectionErrorStatus</DataField>
           <rd:TypeName>System.Int32</rd:TypeName>
@@ -86,6 +86,10 @@
         <Field Name="sqlserver_start_time_utc">
           <DataField>sqlserver_start_time_utc</DataField>
           <rd:TypeName>System.DateTime</rd:TypeName>
+        </Field>
+        <Field Name="SnapshotAgeStatus">
+          <DataField>SnapshotAgeStatus</DataField>
+          <rd:TypeName>System.Int32</rd:TypeName>
         </Field>
         <Field Name="UTCOffset">
           <DataField>UTCOffset</DataField>
@@ -107,9 +111,17 @@
           <DataField>MemoryDumpCount</DataField>
           <rd:TypeName>System.Int32</rd:TypeName>
         </Field>
+        <Field Name="UptimeStatus">
+          <DataField>UptimeStatus</DataField>
+          <rd:TypeName>System.Int32</rd:TypeName>
+        </Field>
         <Field Name="LastMemoryDump">
           <DataField>LastMemoryDump</DataField>
           <rd:TypeName>System.DateTime</rd:TypeName>
+        </Field>
+        <Field Name="AdditionalUptime">
+          <DataField>AdditionalUptime</DataField>
+          <rd:TypeName>System.Int32</rd:TypeName>
         </Field>
         <Field Name="LastGoodCheckDBStatus">
           <DataField>LastGoodCheckDBStatus</DataField>
@@ -125,6 +137,10 @@
         </Field>
         <Field Name="LastGoodCheckDBHealthyCount">
           <DataField>LastGoodCheckDBHealthyCount</DataField>
+          <rd:TypeName>System.Int32</rd:TypeName>
+        </Field>
+        <Field Name="MemoryDumpStatus">
+          <DataField>MemoryDumpStatus</DataField>
           <rd:TypeName>System.Int32</rd:TypeName>
         </Field>
         <Field Name="LastGoodCheckDBNACount">
@@ -154,6 +170,10 @@
         <Field Name="AlertSnapshotDate">
           <DataField>AlertSnapshotDate</DataField>
           <rd:TypeName>System.DateTime</rd:TypeName>
+        </Field>
+        <Field Name="AlertStatus">
+          <DataField>AlertStatus</DataField>
+          <rd:TypeName>System.Int32</rd:TypeName>
         </Field>
       </Fields>
     </DataSet>
@@ -1037,7 +1057,6 @@
                             </Paragraph>
                           </Paragraphs>
                           <rd:DefaultName>Instance</rd:DefaultName>
-                          <ToolTip>=Fields!Tags.Value.ToString().Replace(",",Environment.NewLine)</ToolTip>
                           <Style>
                             <Border>
                               <Color>Gainsboro</Color>
@@ -1611,12 +1630,9 @@ System.TimeZone.CurrentTimeZone.ToLocalTime(Fields!LastAlert.Value)) + Environme
                               <Style>Solid</Style>
                             </Border>
                             <BackgroundColor>=SWITCH(
-isnothing(Fields!AlertSnapshotDate.Value),"LightGray",
-DateTime.UtcNow.Subtract(IIF(isnothing(Fields!LastCritical.Value),"1900-01-01",Fields!LastCritical.Value)).TotalHours&lt;168
-,"Red",
-DateTime.UtcNow.Subtract(iif(isnothing(Fields!LastAlert.Value),"1900-01-01",Fields!LastAlert.Value)).TotalHours&lt;72,"Yellow",
-DateTime.UtcNow.Subtract(iif(isnothing(Fields!AlertSnapshotDate.Value),"1900-01-01",Fields!AlertSnapshotDate.Value)).TotalHours&gt;24,"LightGray",
-DateTime.UtcNow.Subtract(iif(isnothing(Fields!LastAlert.Value),"1900-01-01",Fields!LastAlert.Value)).TotalHours&gt;=72,"Green",
+Fields!AlertStatus.Value=1,"Red",
+Fields!AlertStatus.Value=2,"Yellow",
+Fields!AlertStatus.Value=4,"Green",
 1=1,"LightGray")</BackgroundColor>
                             <PaddingLeft>2pt</PaddingLeft>
                             <PaddingRight>2pt</PaddingRight>
@@ -1765,9 +1781,9 @@ Fields!SnapshotAgeMin.Value &amp; " to " &amp; Fields!SnapshotAgeMax.Value)</Val
                               <Color>Gainsboro</Color>
                               <Style>Solid</Style>
                             </Border>
-                            <BackgroundColor>=switch(Fields!SnapshotAgeMax.Value&gt;Parameters!SnapshotAgeCritical.Value,"Red",
-Fields!SnapshotAgeMax.Value&gt;Parameters!SnapshotAgeWarning.Value,"Yellow",
-Fields!SnapshotAgeMax.Value&lt;=Parameters!SnapshotAgeWarning.Value,"Green",
+                            <BackgroundColor>=switch(Fields!SnapshotAgeStatus.Value=1,"Red",
+Fields!SnapshotAgeStatus.Value=2,"Yellow",
+Fields!SnapshotAgeStatus.Value=4,"Green",
 1=1,"LightGrey")</BackgroundColor>
                             <PaddingLeft>2pt</PaddingLeft>
                             <PaddingRight>2pt</PaddingRight>
@@ -2064,24 +2080,6 @@ Fields!sqlserver_uptime.Value&lt;2880,"Yellow",
       </DefaultValue>
       <Prompt>Date Format</Prompt>
     </ReportParameter>
-    <ReportParameter Name="SnapshotAgeWarning">
-      <DataType>Integer</DataType>
-      <DefaultValue>
-        <Values>
-          <Value>120</Value>
-        </Values>
-      </DefaultValue>
-      <Prompt>SnapshotAgeWarning</Prompt>
-    </ReportParameter>
-    <ReportParameter Name="SnapshotAgeCritical">
-      <DataType>Integer</DataType>
-      <DefaultValue>
-        <Values>
-          <Value>1440</Value>
-        </Values>
-      </DefaultValue>
-      <Prompt>SnapshotAgeCritical</Prompt>
-    </ReportParameter>
   </ReportParameters>
   <ReportParametersLayout>
     <GridLayoutDefinition>
@@ -2107,16 +2105,6 @@ Fields!sqlserver_uptime.Value&lt;2880,"Yellow",
           <ColumnIndex>0</ColumnIndex>
           <RowIndex>1</RowIndex>
           <ParameterName>DateFormat</ParameterName>
-        </CellDefinition>
-        <CellDefinition>
-          <ColumnIndex>1</ColumnIndex>
-          <RowIndex>1</RowIndex>
-          <ParameterName>SnapshotAgeWarning</ParameterName>
-        </CellDefinition>
-        <CellDefinition>
-          <ColumnIndex>2</ColumnIndex>
-          <RowIndex>1</RowIndex>
-          <ParameterName>SnapshotAgeCritical</ParameterName>
         </CellDefinition>
       </CellDefinitions>
     </GridLayoutDefinition>

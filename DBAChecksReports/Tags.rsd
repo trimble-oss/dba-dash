@@ -10,7 +10,7 @@
     <Fields>
       <Field Name="TagID">
         <DataField>TagID</DataField>
-        <rd:TypeName>System.Int16</rd:TypeName>
+        <rd:TypeName>System.Int32</rd:TypeName>
       </Field>
       <Field Name="Tag">
         <DataField>Tag</DataField>
