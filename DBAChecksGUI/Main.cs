@@ -720,11 +720,21 @@ ORDER BY SchemaName,ObjectName
                 var clearTag = new ToolStripMenuItem("Clear All");
                 clearTag.Font = new Font(clearTag.Font, FontStyle.Italic);
                 clearTag.Click += ClearTag_Click;
+                var refreshTag = new ToolStripMenuItem("Refresh Tags");
+                refreshTag.Font = new Font(refreshTag.Font, FontStyle.Italic);
+                refreshTag.Click += RefreshTag_Click;
                 mnuTags.DropDownItems.Add("-");
+                mnuTags.DropDownItems.Add(refreshTag);
                 mnuTags.DropDownItems.Add(clearTag);
             }
             setFont(mnuTags);
         }
+
+        private void RefreshTag_Click(object sender, EventArgs e)
+        {
+            buildTagMenu();
+        }
+
 
         private void ClearTag_Click(object sender, EventArgs e)
         {
