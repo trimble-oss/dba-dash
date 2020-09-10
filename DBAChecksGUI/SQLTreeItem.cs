@@ -327,6 +327,7 @@ namespace DBAChecksGUI
 
         public void AddDatabaseFolders()
         {
+         
             var nTables = newFolder("Tables","U",true);
             var nViews = newFolder("Views","V",true);
             var nProgrammability = newFolder("Programmability", null, false);
@@ -355,6 +356,22 @@ namespace DBAChecksGUI
             nProgrammability.Nodes.Add(nDBTriggers);
             nProgrammability.Nodes.Add(nTriggers);
             nProgrammability.Nodes.Add(nAssemblies);
+            addContextMenu(nStoredProcs);
+            addContextMenu(nAggFunctions);
+            addContextMenu(nTableFunctions);
+            addContextMenu(nScalarFunctions);
+            addContextMenu(nDBTriggers);
+            addContextMenu(nTriggers);
+            addContextMenu(nAssemblies);
+            addContextMenu(nTableTypes);
+            addContextMenu(nDataTypes);
+            addContextMenu(nUserDefinedTypes);
+            addContextMenu(nXML);
+            addContextMenu(nViews);
+            addContextMenu(nTables);
+            addContextMenu(nTypes);
+            addContextMenu(nSeq);
+           
 
             this.Nodes.Add(nTables);
             this.Nodes.Add(nViews);
@@ -363,6 +380,101 @@ namespace DBAChecksGUI
             this.Nodes.Add(nTypes);
             this.Nodes.Add(nSeq);
  
+        }
+
+        private void addContextMenu(SQLTreeItem n)
+        {
+            var ctxMnu = new ContextMenu();
+            var mnuFilter = ctxMnu.MenuItems.Add("Filter");
+            mnuFilter.Click += MnuFilter_Click;
+            mnuFilter.Tag = n;
+            n.ContextMenu = ctxMnu;
+        }
+        public String FilterText = "";
+    
+        private void MnuFilter_Click(object sender, EventArgs e)
+        {
+            var itm = (SQLTreeItem)((MenuItem)sender).Tag;
+            string filter = itm.FilterText;
+            if (ShowInputDialog(ref filter,"Filter") == DialogResult.OK)
+            {
+                itm.Filter(filter);
+            }
+        }
+
+        private static DialogResult ShowInputDialog(ref string input,string title)
+        {
+            System.Drawing.Size size = new System.Drawing.Size(400, 70);
+            Form inputBox = new Form();
+
+            inputBox.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
+            inputBox.ClientSize = size;
+            inputBox.Text = title;
+            inputBox.MaximizeBox = false;
+            inputBox.MinimizeBox = false;
+
+            System.Windows.Forms.TextBox textBox = new TextBox();
+            textBox.Size = new System.Drawing.Size(size.Width - 10, 23);
+            textBox.Location = new System.Drawing.Point(5, 5);
+            textBox.Text = input;
+            inputBox.Controls.Add(textBox);
+
+            Button okButton = new Button();
+            okButton.DialogResult = System.Windows.Forms.DialogResult.OK;
+            okButton.Name = "okButton";
+            okButton.Size = new System.Drawing.Size(75, 23);
+            okButton.Text = "&OK";
+            okButton.Location = new System.Drawing.Point(size.Width - 80 - 80, 39);
+            inputBox.Controls.Add(okButton);
+
+            Button cancelButton = new Button();
+            cancelButton.DialogResult = System.Windows.Forms.DialogResult.Cancel;
+            cancelButton.Name = "cancelButton";
+            cancelButton.Size = new System.Drawing.Size(75, 23);
+            cancelButton.Text = "&Cancel";
+            cancelButton.Location = new System.Drawing.Point(size.Width - 80, 39);
+            inputBox.Controls.Add(cancelButton);
+
+            inputBox.AcceptButton = okButton;
+            inputBox.CancelButton = cancelButton;
+
+            DialogResult result = inputBox.ShowDialog();
+            input = textBox.Text;
+            return result;
+        }
+
+        List<SQLTreeItem> unfilteredNodes = new List<SQLTreeItem>();
+
+        public void Filter(string filter)
+        {
+         
+            this.Expand();
+            if (unfilteredNodes.Count == 0)
+            {
+                foreach(SQLTreeItem itm in this.Nodes)
+                {
+                    unfilteredNodes.Add(itm)
+;                }
+            }
+            this.Nodes.Clear();
+            foreach(SQLTreeItem n in unfilteredNodes)
+            {
+                if (filter==null || filter=="" || n.Text.ToLower().Contains(filter.ToLower()))
+                {
+                    this.Nodes.Add(n);
+                }
+            }
+            if (unfilteredNodes.Count == this.Nodes.Count)
+            {
+                this.ImageIndex = 3;
+                this.SelectedImageIndex = 3;
+            }
+            else
+            {
+                this.ImageIndex = 6;
+                this.SelectedImageIndex = 6;
+            }
+            this.FilterText = filter;
         }
 
     }
