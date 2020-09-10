@@ -719,7 +719,7 @@ namespace DBAChecks.Properties {
         ///       default_language_name,
         ///       credential_id,
         ///	   &apos; + CASE WHEN COLUMNPROPERTY(OBJECT_ID(&apos;sys.server_principals&apos;),&apos;owning_principal_id&apos;,&apos;ColumnID&apos;) IS NULL THEN &apos;CAST(NULL AS INT) as owning_principal_id,&apos; ELSE &apos;owning_principal_id,&apos; END + &apos;
-        ///	   &apos; + CASE WHEN COLUMNPROPERTY(OBJECT_ID(&apos;sys.server_pr [rest of string was truncated]&quot;;.
+        ///	   &apos; + CASE WHEN COLUMNPROPERTY(OBJECT_ID( [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string SQLServerPrincipals {
             get {
