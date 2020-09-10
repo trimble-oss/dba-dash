@@ -45,7 +45,10 @@
             this.CollectionErrorStatus = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.SnapshotAgeStatus = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.UptimeStatus = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.toolStrip1 = new System.Windows.Forms.ToolStrip();
+            this.tsRefresh = new System.Windows.Forms.ToolStripButton();
             ((System.ComponentModel.ISupportInitialize)(this.dgvSummary)).BeginInit();
+            this.toolStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
             // dgvSummary
@@ -72,13 +75,13 @@
             this.SnapshotAgeStatus,
             this.UptimeStatus});
             this.dgvSummary.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.dgvSummary.Location = new System.Drawing.Point(0, 0);
+            this.dgvSummary.Location = new System.Drawing.Point(0, 31);
             this.dgvSummary.Name = "dgvSummary";
             this.dgvSummary.ReadOnly = true;
             this.dgvSummary.RowHeadersVisible = false;
             this.dgvSummary.RowHeadersWidth = 51;
             this.dgvSummary.RowTemplate.Height = 24;
-            this.dgvSummary.Size = new System.Drawing.Size(1800, 213);
+            this.dgvSummary.Size = new System.Drawing.Size(1800, 182);
             this.dgvSummary.TabIndex = 0;
             this.dgvSummary.ColumnHeaderMouseClick += new System.Windows.Forms.DataGridViewCellMouseEventHandler(this.dgvSummary_ColumnHeaderMouseClick);
             this.dgvSummary.RowsAdded += new System.Windows.Forms.DataGridViewRowsAddedEventHandler(this.dgvSummary_RowAdded);
@@ -90,7 +93,7 @@
             this.Instance.MinimumWidth = 6;
             this.Instance.Name = "Instance";
             this.Instance.ReadOnly = true;
-            this.Instance.Width = 90;
+            this.Instance.Width = 82;
             // 
             // MemoryDumpStatus
             // 
@@ -98,7 +101,7 @@
             this.MemoryDumpStatus.MinimumWidth = 6;
             this.MemoryDumpStatus.Name = "MemoryDumpStatus";
             this.MemoryDumpStatus.ReadOnly = true;
-            this.MemoryDumpStatus.Width = 128;
+            this.MemoryDumpStatus.Width = 109;
             // 
             // CorruptionStatus
             // 
@@ -107,7 +110,7 @@
             this.CorruptionStatus.MinimumWidth = 6;
             this.CorruptionStatus.Name = "CorruptionStatus";
             this.CorruptionStatus.ReadOnly = true;
-            this.CorruptionStatus.Width = 103;
+            this.CorruptionStatus.Width = 93;
             // 
             // LastGoodCheckDBStatus
             // 
@@ -115,7 +118,7 @@
             this.LastGoodCheckDBStatus.MinimumWidth = 6;
             this.LastGoodCheckDBStatus.Name = "LastGoodCheckDBStatus";
             this.LastGoodCheckDBStatus.ReadOnly = true;
-            this.LastGoodCheckDBStatus.Width = 137;
+            this.LastGoodCheckDBStatus.Width = 121;
             // 
             // AlertStatus
             // 
@@ -123,7 +126,7 @@
             this.AlertStatus.MinimumWidth = 6;
             this.AlertStatus.Name = "AlertStatus";
             this.AlertStatus.ReadOnly = true;
-            this.AlertStatus.Width = 73;
+            this.AlertStatus.Width = 66;
             // 
             // FullBackupStatus
             // 
@@ -132,7 +135,7 @@
             this.FullBackupStatus.Name = "FullBackupStatus";
             this.FullBackupStatus.ReadOnly = true;
             this.FullBackupStatus.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Programmatic;
-            this.FullBackupStatus.Width = 101;
+            this.FullBackupStatus.Width = 92;
             // 
             // DiffBackupStatus
             // 
@@ -140,6 +143,7 @@
             this.DiffBackupStatus.MinimumWidth = 6;
             this.DiffBackupStatus.Name = "DiffBackupStatus";
             this.DiffBackupStatus.ReadOnly = true;
+            this.DiffBackupStatus.Width = 91;
             // 
             // LogBackupStatus
             // 
@@ -147,7 +151,7 @@
             this.LogBackupStatus.MinimumWidth = 6;
             this.LogBackupStatus.Name = "LogBackupStatus";
             this.LogBackupStatus.ReadOnly = true;
-            this.LogBackupStatus.Width = 103;
+            this.LogBackupStatus.Width = 93;
             // 
             // LogShippingStatus
             // 
@@ -155,7 +159,6 @@
             this.LogShippingStatus.MinimumWidth = 6;
             this.LogShippingStatus.Name = "LogShippingStatus";
             this.LogShippingStatus.ReadOnly = true;
-            this.LogShippingStatus.Width = 110;
             // 
             // DriveStatus
             // 
@@ -163,7 +166,7 @@
             this.DriveStatus.MinimumWidth = 6;
             this.DriveStatus.Name = "DriveStatus";
             this.DriveStatus.ReadOnly = true;
-            this.DriveStatus.Width = 105;
+            this.DriveStatus.Width = 94;
             // 
             // JobStatus
             // 
@@ -171,6 +174,7 @@
             this.JobStatus.MinimumWidth = 6;
             this.JobStatus.Name = "JobStatus";
             this.JobStatus.ReadOnly = true;
+            this.JobStatus.Width = 89;
             // 
             // AGStatus
             // 
@@ -178,7 +182,7 @@
             this.AGStatus.MinimumWidth = 6;
             this.AGStatus.Name = "AGStatus";
             this.AGStatus.ReadOnly = true;
-            this.AGStatus.Width = 141;
+            this.AGStatus.Width = 124;
             // 
             // FileFreeSpaceStatus
             // 
@@ -186,7 +190,7 @@
             this.FileFreeSpaceStatus.MinimumWidth = 6;
             this.FileFreeSpaceStatus.Name = "FileFreeSpaceStatus";
             this.FileFreeSpaceStatus.ReadOnly = true;
-            this.FileFreeSpaceStatus.Width = 121;
+            this.FileFreeSpaceStatus.Width = 109;
             // 
             // CollectionErrorStatus
             // 
@@ -194,7 +198,7 @@
             this.CollectionErrorStatus.MinimumWidth = 6;
             this.CollectionErrorStatus.Name = "CollectionErrorStatus";
             this.CollectionErrorStatus.ReadOnly = true;
-            this.CollectionErrorStatus.Width = 141;
+            this.CollectionErrorStatus.Width = 125;
             // 
             // SnapshotAgeStatus
             // 
@@ -202,7 +206,7 @@
             this.SnapshotAgeStatus.MinimumWidth = 6;
             this.SnapshotAgeStatus.Name = "SnapshotAgeStatus";
             this.SnapshotAgeStatus.ReadOnly = true;
-            this.SnapshotAgeStatus.Width = 116;
+            this.SnapshotAgeStatus.Width = 103;
             // 
             // UptimeStatus
             // 
@@ -210,17 +214,42 @@
             this.UptimeStatus.MinimumWidth = 6;
             this.UptimeStatus.Name = "UptimeStatus";
             this.UptimeStatus.ReadOnly = true;
-            this.UptimeStatus.Width = 127;
+            this.UptimeStatus.Width = 115;
+            // 
+            // toolStrip1
+            // 
+            this.toolStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
+            this.toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.tsRefresh});
+            this.toolStrip1.Location = new System.Drawing.Point(0, 0);
+            this.toolStrip1.Name = "toolStrip1";
+            this.toolStrip1.Size = new System.Drawing.Size(1800, 31);
+            this.toolStrip1.TabIndex = 1;
+            this.toolStrip1.Text = "toolStrip1";
+            // 
+            // tsRefresh
+            // 
+            this.tsRefresh.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.tsRefresh.Image = global::DBAChecksGUI.Properties.Resources._112_RefreshArrow_Green_16x16_72;
+            this.tsRefresh.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tsRefresh.Name = "tsRefresh";
+            this.tsRefresh.Size = new System.Drawing.Size(29, 28);
+            this.tsRefresh.Text = "Refresh";
+            this.tsRefresh.Click += new System.EventHandler(this.tsRefresh_Click);
             // 
             // Summary
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.Controls.Add(this.dgvSummary);
+            this.Controls.Add(this.toolStrip1);
             this.Name = "Summary";
             this.Size = new System.Drawing.Size(1800, 213);
             ((System.ComponentModel.ISupportInitialize)(this.dgvSummary)).EndInit();
+            this.toolStrip1.ResumeLayout(false);
+            this.toolStrip1.PerformLayout();
             this.ResumeLayout(false);
+            this.PerformLayout();
 
         }
 
@@ -243,5 +272,7 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn CollectionErrorStatus;
         private System.Windows.Forms.DataGridViewTextBoxColumn SnapshotAgeStatus;
         private System.Windows.Forms.DataGridViewTextBoxColumn UptimeStatus;
+        private System.Windows.Forms.ToolStrip toolStrip1;
+        private System.Windows.Forms.ToolStripButton tsRefresh;
     }
 }

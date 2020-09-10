@@ -226,5 +226,10 @@ namespace DBAChecksGUI
                 }
             }
         }
+
+        private void tsRefresh_Click(object sender, EventArgs e)
+        {
+            RefreshData();
+        }
     }
 }
