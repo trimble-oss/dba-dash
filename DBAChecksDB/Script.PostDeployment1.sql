@@ -343,3 +343,12 @@ FROM
 (-1,'ServerRoleMembers',1445,2880),
 (-1,'DatabaseRoleMembers',1445,2880)) T(InstanceID,Reference,WarningThreshold,CriticalThreshold)
 WHERE NOT EXISTS(SELECT 1 FROM dbo.CollectionDatesThresholds CDT WHERE CDT.InstanceID = T.InstanceID AND CDT.Reference = T.Reference)
+
+INSERT INTO dbo.InstanceUptimeThresholds
+(
+    InstanceID,
+    WarningThreshold,
+    CriticalThreshold
+)
+SELECT -1 AS InstanceID,2880,720
+WHERE NOT EXISTS(SELECT 1 FROM dbo.InstanceUptimeThresholds T WHERE T.InstanceID = -1)

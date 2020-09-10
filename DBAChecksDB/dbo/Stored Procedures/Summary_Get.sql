@@ -129,9 +129,13 @@ SELECT I.InstanceID,
 	DATEADD(mi,I.UtcOffSet,I.sqlserver_start_time) AS sqlserver_start_time_utc,
 	I.UTCOffset,
 	DATEDIFF(mi,DATEADD(mi,I.UtcOffSet,I.sqlserver_start_time),OSInfoCD.SnapshotDate) AS sqlserver_uptime,
-	CASE WHEN DATEDIFF(mi,DATEADD(mi,I.UtcOffSet,I.sqlserver_start_time),OSInfoCD.SnapshotDate)<720 THEN 1
-		WHEN DATEDIFF(mi,DATEADD(mi,I.UtcOffSet,I.sqlserver_start_time),OSInfoCD.SnapshotDate)<2880 THEN 2
+	CASE WHEN DATEDIFF(mi,DATEADD(mi,I.UtcOffSet,I.sqlserver_start_time),OSInfoCD.SnapshotDate)<UTT.UptimeCriticalThreshold THEN 1
+		WHEN DATEDIFF(mi,DATEADD(mi,I.UtcOffSet,I.sqlserver_start_time),OSInfoCD.SnapshotDate)<UTT.UptimeWarningThreshold THEN 2
+		WHEN UTT.UptimeWarningThreshold IS NULL AND UTT.UptimeCriticalThreshold IS NULL THEN 3
 		ELSE 4 END AS UptimeStatus,
+	UTT.UptimeWarningThreshold,
+	UTT.UptimeCriticalThreshold,
+	UTT.UptimeConfiguredLevel,
 	DATEDIFF(mi,OSInfoCD.SnapshotDate,GETUTCDATE()) AS AdditionalUptime,
 	I.ms_ticks/60000 AS host_uptime,
 	DATEADD(s,-I.ms_ticks/1000,OSInfoCD.SnapshotDate) AS host_start_time_utc,
@@ -171,6 +175,12 @@ LEFT JOIN dbc ON I.InstanceID = dbc.InstanceID
 LEFT JOIN a ON I.InstanceID = a.InstanceID 
 LEFT JOIN dbo.CollectionDates OSInfoCD ON OSInfoCD.InstanceID = I.InstanceID AND OSInfoCD.Reference='OSInfo'
 LEFT JOIN dbo.CollectionDates AlertCD ON AlertCD.InstanceID = I.InstanceID AND AlertCD.Reference='Alerts'
+OUTER APPLY(SELECT TOP(1) IUT.WarningThreshold AS UptimeWarningThreshold,
+                          IUT.CriticalThreshold AS UptimeCriticalThreshold,
+						  CASE WHEN IUT.InstanceID =-1 THEN 'Root' ELSE 'Instance' END AS UptimeConfiguredLevel
+			FROM dbo.InstanceUptimeThresholds IUT
+			WHERE (IUT.InstanceID = I.InstanceID OR IUT.InstanceID=-1) 
+			ORDER BY IUT.InstanceID DESC) UTT		
 WHERE EXISTS(SELECT 1 FROM @Instances t WHERE I.InstanceID = t.InstanceID)
 AND I.IsActive=1
 AND I.EditionID<>1674378470 -- exclude azure 
