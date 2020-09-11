@@ -33,8 +33,9 @@ namespace DBAChecksGUI.Performance
         bool smoothLines = true;
         DateTime snapshotTime;
         double maxBlockedTime = 0;
+        Int32 databaseID = 0;
 
-        public void RefreshData(Int32 InstanceID, DateTime fromDate, DateTime toDate, string connectionString, DateGroup dateGrouping = DateGroup.None)
+        public void RefreshData(Int32 InstanceID, DateTime fromDate, DateTime toDate, string connectionString, Int32 databaseID, DateGroup dateGrouping = DateGroup.None)
         {
             eventTime = DateTime.MinValue;
             mins = (Int32)toDate.Subtract(fromDate).TotalMinutes;
@@ -43,6 +44,7 @@ namespace DBAChecksGUI.Performance
             this.toDate = toDate;
             this.connectionString = connectionString;
             this.DateGrouping = dateGrouping;
+            this.databaseID = databaseID;
             refreshData(false);
         }
 
@@ -66,6 +68,10 @@ namespace DBAChecksGUI.Performance
                 cmd.Parameters.AddWithValue("@InstanceID", InstanceID);
                 cmd.Parameters.AddWithValue("@FromDate", fromDate);
                 cmd.Parameters.AddWithValue("@ToDate", toDate);
+                if (databaseID>0){
+                    cmd.Parameters.AddWithValue("@DatabaseID", databaseID);
+                }
+
                 cmd.CommandType = CommandType.StoredProcedure;
                 cmd.CommandTimeout = Properties.Settings.Default.CommandTimeout;
                 SqlDataAdapter da = new SqlDataAdapter(cmd);
@@ -188,7 +194,7 @@ namespace DBAChecksGUI.Performance
                 chartBlocking.Series = s1;
 
             }
-
+            lblBlocking.Text = databaseID > 0 ? "Blocking: Database" : "Blocking: Instance";
 
         }
       

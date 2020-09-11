@@ -30,7 +30,7 @@
         {
             this.chartCPU = new LiveCharts.WinForms.CartesianChart();
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
-            this.toolStripLabel1 = new System.Windows.Forms.ToolStripLabel();
+            this.lblCPU = new System.Windows.Forms.ToolStripLabel();
             this.tsAgg = new System.Windows.Forms.ToolStripDropDownButton();
             this.AVGToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.MAXToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -40,9 +40,9 @@
             // chartCPU
             // 
             this.chartCPU.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.chartCPU.Location = new System.Drawing.Point(0, 27);
+            this.chartCPU.Location = new System.Drawing.Point(0, 31);
             this.chartCPU.Name = "chartCPU";
-            this.chartCPU.Size = new System.Drawing.Size(878, 237);
+            this.chartCPU.Size = new System.Drawing.Size(878, 233);
             this.chartCPU.TabIndex = 1;
             this.chartCPU.Text = "CPU";
             // 
@@ -50,21 +50,21 @@
             // 
             this.toolStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
             this.toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.toolStripLabel1,
+            this.lblCPU,
             this.tsAgg});
             this.toolStrip1.Location = new System.Drawing.Point(0, 0);
             this.toolStrip1.Name = "toolStrip1";
-            this.toolStrip1.Size = new System.Drawing.Size(878, 27);
+            this.toolStrip1.Size = new System.Drawing.Size(878, 31);
             this.toolStrip1.TabIndex = 2;
             this.toolStrip1.Text = "toolStrip1";
             // 
-            // toolStripLabel1
+            // lblCPU
             // 
-            this.toolStripLabel1.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
-            this.toolStripLabel1.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
-            this.toolStripLabel1.Name = "toolStripLabel1";
-            this.toolStripLabel1.Size = new System.Drawing.Size(38, 24);
-            this.toolStripLabel1.Text = "CPU";
+            this.lblCPU.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
+            this.lblCPU.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
+            this.lblCPU.Name = "lblCPU";
+            this.lblCPU.Size = new System.Drawing.Size(105, 28);
+            this.lblCPU.Text = "CPU: Instance";
             // 
             // tsAgg
             // 
@@ -75,7 +75,7 @@
             this.tsAgg.Image = global::DBAChecksGUI.Properties.Resources.AutoSum_16x;
             this.tsAgg.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsAgg.Name = "tsAgg";
-            this.tsAgg.Size = new System.Drawing.Size(34, 24);
+            this.tsAgg.Size = new System.Drawing.Size(34, 28);
             this.tsAgg.Text = "Aggregation";
             // 
             // AVGToolStripMenuItem
@@ -115,7 +115,7 @@
 
         private LiveCharts.WinForms.CartesianChart chartCPU;
         private System.Windows.Forms.ToolStrip toolStrip1;
-        private System.Windows.Forms.ToolStripLabel toolStripLabel1;
+        private System.Windows.Forms.ToolStripLabel lblCPU;
         private System.Windows.Forms.ToolStripDropDownButton tsAgg;
         private System.Windows.Forms.ToolStripMenuItem AVGToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem MAXToolStripMenuItem;

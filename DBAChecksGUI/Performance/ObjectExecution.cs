@@ -39,6 +39,7 @@ namespace DBAChecksGUI.Performance
         DateTime to;
         Int32 mins;
         private Int64 objectID;
+        Int32 databaseid=0;
 
         public void RefreshData()
         {
@@ -49,7 +50,7 @@ namespace DBAChecksGUI.Performance
                 refreshData(true);
             }
         }
-        public void RefreshData(Int32 instanceID, DateTime from, DateTime to, string connectionString, Int64 objectID, DateGroup dateGrouping = DateGroup.None)
+        public void RefreshData(Int32 instanceID, DateTime from, DateTime to, string connectionString, Int64 objectID, Int32 databaseID, DateGroup dateGrouping = DateGroup.None)
         {
             this.instanceID = instanceID;
             this.connectionString = connectionString;
@@ -58,6 +59,7 @@ namespace DBAChecksGUI.Performance
             this.objectID = objectID;
             mins = (Int32)to.Subtract(from).TotalMinutes;
             this.dateGrouping = dateGrouping;
+            this.databaseid = databaseID;
             refreshData(false);
         }
 
@@ -93,6 +95,10 @@ namespace DBAChecksGUI.Performance
                 }
                 cmd.Parameters.AddWithValue("DateAgg", dateGrouping.ToString().Replace("_",""));
                 cmd.Parameters.AddWithValue("Measure", measure);
+                if (this.databaseid > 0)
+                {
+                    cmd.Parameters.AddWithValue("DatabaseID", databaseid);
+                }
                 cmd.CommandType = CommandType.StoredProcedure;
                 SqlDataAdapter da = new SqlDataAdapter(cmd);
                 DataTable dt = new DataTable();
@@ -222,6 +228,7 @@ namespace DBAChecksGUI.Performance
                 }
 
             }
+            lblExecution.Text = databaseid > 0 ? "Excution Stats: Database" : "Execution Stats: Instance";
         }
 
         private class Measure
@@ -289,7 +296,7 @@ namespace DBAChecksGUI.Performance
                 }
                 tsMeasures.Text = tsItm.Text;
             }
-            RefreshData(instanceID, to.AddMinutes(-mins), to, connectionString,objectID, dateGrouping);
+            RefreshData(instanceID, to.AddMinutes(-mins), to, connectionString,objectID, databaseid, dateGrouping);
         }
     }
 }

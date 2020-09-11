@@ -31,7 +31,7 @@
             this.chartIO = new LiveCharts.WinForms.CartesianChart();
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
             this.tsMeasures = new System.Windows.Forms.ToolStripDropDownButton();
-            this.toolStripLabel1 = new System.Windows.Forms.ToolStripLabel();
+            this.lblIOPerformance = new System.Windows.Forms.ToolStripLabel();
             this.toolStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -49,7 +49,7 @@
             this.toolStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
             this.toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.tsMeasures,
-            this.toolStripLabel1});
+            this.lblIOPerformance});
             this.toolStrip1.Location = new System.Drawing.Point(0, 0);
             this.toolStrip1.Name = "toolStrip1";
             this.toolStrip1.Size = new System.Drawing.Size(773, 27);
@@ -65,13 +65,13 @@
             this.tsMeasures.Size = new System.Drawing.Size(34, 24);
             this.tsMeasures.Text = "Measures";
             // 
-            // toolStripLabel1
+            // lblIOPerformance
             // 
-            this.toolStripLabel1.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
-            this.toolStripLabel1.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
-            this.toolStripLabel1.Name = "toolStripLabel1";
-            this.toolStripLabel1.Size = new System.Drawing.Size(119, 24);
-            this.toolStripLabel1.Text = "IO Performance";
+            this.lblIOPerformance.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
+            this.lblIOPerformance.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
+            this.lblIOPerformance.Name = "lblIOPerformance";
+            this.lblIOPerformance.Size = new System.Drawing.Size(119, 24);
+            this.lblIOPerformance.Text = "IO Performance";
             // 
             // IOPerformance
             // 
@@ -93,6 +93,6 @@
         private LiveCharts.WinForms.CartesianChart chartIO;
         private System.Windows.Forms.ToolStrip toolStrip1;
         private System.Windows.Forms.ToolStripDropDownButton tsMeasures;
-        private System.Windows.Forms.ToolStripLabel toolStripLabel1;
+        private System.Windows.Forms.ToolStripLabel lblIOPerformance;
     }
 }

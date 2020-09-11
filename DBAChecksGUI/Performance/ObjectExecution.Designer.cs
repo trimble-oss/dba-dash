@@ -30,7 +30,7 @@
         {
             this.waitChart = new LiveCharts.WinForms.CartesianChart();
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
-            this.toolStripLabel1 = new System.Windows.Forms.ToolStripLabel();
+            this.lblExecution = new System.Windows.Forms.ToolStripLabel();
             this.tsMeasures = new System.Windows.Forms.ToolStripDropDownButton();
             this.toolStrip1.SuspendLayout();
             this.SuspendLayout();
@@ -48,7 +48,7 @@
             // 
             this.toolStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
             this.toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.toolStripLabel1,
+            this.lblExecution,
             this.tsMeasures});
             this.toolStrip1.Location = new System.Drawing.Point(0, 0);
             this.toolStrip1.Name = "toolStrip1";
@@ -56,13 +56,13 @@
             this.toolStrip1.TabIndex = 1;
             this.toolStrip1.Text = "toolStrip1";
             // 
-            // toolStripLabel1
+            // lblExecution
             // 
-            this.toolStripLabel1.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
-            this.toolStripLabel1.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
-            this.toolStripLabel1.Name = "toolStripLabel1";
-            this.toolStripLabel1.Size = new System.Drawing.Size(116, 24);
-            this.toolStripLabel1.Text = "Execution Stats";
+            this.lblExecution.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
+            this.lblExecution.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
+            this.lblExecution.Name = "lblExecution";
+            this.lblExecution.Size = new System.Drawing.Size(116, 24);
+            this.lblExecution.Text = "Execution Stats";
             // 
             // tsMeasures
             // 
@@ -92,7 +92,7 @@
 
         private LiveCharts.WinForms.CartesianChart waitChart;
         private System.Windows.Forms.ToolStrip toolStrip1;
-        private System.Windows.Forms.ToolStripLabel toolStripLabel1;
+        private System.Windows.Forms.ToolStripLabel lblExecution;
         private System.Windows.Forms.ToolStripDropDownButton tsMeasures;
     }
 }

@@ -2,7 +2,8 @@
 	@InstanceID INT,
 	@FromDate DATETIME2(3)=NULL, 
 	@ToDate DATETIME2(3)=NULL,
-	@DateGrouping VARCHAR(50)='None'
+	@DateGrouping VARCHAR(50)='None',
+	@DatabaseID INT=NULL
 )
 AS
 IF @FromDate IS NULL
@@ -34,7 +35,9 @@ WITH stats AS(
 			SUM(IOS.io_stall_write_ms)/(NULLIF(SUM(IOS.num_of_writes),0)*1.0) AS WriteLatency,
 			SUM(IOS.io_stall_read_ms+IOS.io_stall_write_ms)/(NULLIF(SUM(IOS.num_of_writes+IOS.num_of_reads),0)*1.0) AS Latency
 	FROM dbo.IOStats IOS
+	JOIN dbo.DBFiles F ON IOS.FileID = F.FileID
 	WHERE IOS.InstanceID = @InstanceID
+	' + CASE WHEN @DatabaseID IS NULL THEN '' ELSE 'AND F.DatabaseID = @DatabaseID' END + '
 	AND IOS.SnapshotDate >= @FromDate
 	AND IOS.SnapshotDate < @ToDate
 	GROUP BY IOS.SnapshotDate
@@ -63,4 +66,4 @@ GROUP BY ' + @DateGroupingSQL + '
 ORDER BY SnapshotDate'
 
 PRINT @SQL
-EXEC sp_executesql @SQL,N'@InstanceID INT,@FromDate DATETIME,@ToDate DATETIME',@InstanceID,@FromDate,@ToDate
+EXEC sp_executesql @SQL,N'@InstanceID INT,@FromDate DATETIME,@ToDate DATETIME,@DatabaseID INT',@InstanceID,@FromDate,@ToDate,@DatabaseID

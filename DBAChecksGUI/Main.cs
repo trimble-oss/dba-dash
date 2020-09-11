@@ -159,6 +159,7 @@ namespace DBAChecksGUI
             if(tabs.SelectedTab == tabPerformance)
             {
                 performance1.InstanceID = n.InstanceID;
+                performance1.DatabaseID = n.DatabaseID;
                 performance1.ConnectionString = connectionString;
                 if (n.Type == SQLTreeItem.TreeType.Database || n.Type == SQLTreeItem.TreeType.Instance)
                 {
@@ -287,7 +288,7 @@ ORDER BY D.Name
                         n.ObjectID = (Int64)rdr[2];
                     }
                     n.AddDatabaseFolders();
-                    if ((new string[] { "master", "model", "msdb" }).Contains((string)rdr[1]))
+                    if ((new string[] { "master", "model", "msdb" ,"tempdb"}).Contains((string)rdr[1]))
                     {
                         systemNode.Nodes.Add(n);
                     }
@@ -352,9 +353,9 @@ ORDER BY SchemaName,ObjectName
             }
             else if(n.Type== SQLTreeItem.TreeType.Database)
             {
+                allowedTabs.Add(tabPerformance);
                 if (((SQLTreeItem)n.Parent).InstanceID == 0) //azure
-                {
-                    allowedTabs.Add(tabPerformance);
+                {                   
                     allowedTabs.Add(tabDBAChecksErrorLog);
                 }
                 allowedTabs.Add(tabFiles);

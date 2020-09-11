@@ -30,6 +30,7 @@ namespace DBAChecksGUI.Performance
         Int32 instanceID;
         DateGroup dateGrouping;
         bool smoothLines = true;
+        Int32 databaseid=0;
         public bool SmoothLines { 
             get {
                 return smoothLines;
@@ -46,7 +47,7 @@ namespace DBAChecksGUI.Performance
 
   
 
-        private static DataTable IOStats(Int32 instanceid, DateTime from, DateTime to, string connectionString,DateGroup dateGrouping= DateGroup.None)
+        private static DataTable IOStats(Int32 instanceid, DateTime from, DateTime to, string connectionString,Int32 DatabaseID, DateGroup dateGrouping = DateGroup.None)
         {
             var dt = new DataTable();
             SqlConnection cn = new SqlConnection(connectionString);
@@ -58,6 +59,10 @@ namespace DBAChecksGUI.Performance
                 cmd.Parameters.AddWithValue("@FromDate", from);
                 cmd.Parameters.AddWithValue("@ToDate", to);
                 cmd.Parameters.AddWithValue("DateGrouping", dateGrouping.ToString().Replace("_",""));
+                if (DatabaseID > 0)
+                {
+                    cmd.Parameters.AddWithValue("@DatabaseID", DatabaseID);
+                }
                 cmd.CommandType = CommandType.StoredProcedure;
                 cmd.CommandTimeout = Properties.Settings.Default.CommandTimeout;
                 var da = new SqlDataAdapter(cmd);
@@ -76,7 +81,7 @@ namespace DBAChecksGUI.Performance
 
         }
 
-        public void RefreshData(Int32 InstanceID, DateTime fromDate, DateTime toDate, string connectionString, DateGroup dateGrouping)
+        public void RefreshData(Int32 InstanceID, DateTime fromDate, DateTime toDate, string connectionString,Int32 databaseID, DateGroup dateGrouping)
         {
             if (this.dateGrouping != dateGrouping) {
                 this.dateGrouping = dateGrouping;
@@ -86,6 +91,7 @@ namespace DBAChecksGUI.Performance
             this.from = fromDate;
             this.to = toDate;
             this.connectionString = connectionString;
+            this.databaseid  = databaseID;
             
             mins = (Int32)toDate.Subtract(fromDate).TotalMinutes;
             refreshData();
@@ -126,7 +132,7 @@ namespace DBAChecksGUI.Performance
             {
                 DateFormat = "yyyy-MM-dd HH:mm";
             }
-            var dt = IOStats(instanceID, from, to, connectionString, dateGrouping);
+            var dt = IOStats(instanceID, from, to, connectionString,databaseid, dateGrouping);
             var cnt = dt.Rows.Count;
             if(cnt==0 && update)
             {
@@ -263,7 +269,7 @@ namespace DBAChecksGUI.Performance
                     tsMeasures.DropDownItems.Add(dd);
                 }
             }
-         
+            lblIOPerformance.Text = databaseid > 0 ? "IO Performance: Database" : "IO Performance: Instance";
         }
 
         private void measureDropDown_Click(object sender, EventArgs e)

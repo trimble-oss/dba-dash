@@ -39,6 +39,7 @@ namespace DBAChecksGUI.Performance
         DateTime customFrom = DateTime.MinValue;
         DateTime customTo = DateTime.MinValue;
         public Int64 ObjectID { get; set; }
+        public Int32 DatabaseID { get; set; } = 0;
 
 
 
@@ -95,17 +96,17 @@ namespace DBAChecksGUI.Performance
             toggleTimer();
             if (ObjectID == 0)
             {
-                ioPerformance1.RefreshData(InstanceID, from, to, ConnectionString, dateGrp);
+                ioPerformance1.RefreshData(InstanceID, from, to, ConnectionString, DatabaseID, dateGrp);
                 cpu1.RefreshData(InstanceID, from, to, ConnectionString, dateGrp);
                 waits1.RefreshData(InstanceID, from, to, ConnectionString, dateGrp);
-                blocking1.RefreshData(InstanceID, from, to, ConnectionString, dateGrp);
+                blocking1.RefreshData(InstanceID, from, to, ConnectionString,DatabaseID, dateGrp);
             }
             ioPerformance1.Visible = ObjectID == 0;
             cpu1.Visible = ObjectID == 0;
             waits1.Visible = ObjectID == 0;
             blocking1.Visible = ObjectID == 0;
         
-            objectExecution1.RefreshData(InstanceID, from, to, ConnectionString, ObjectID, dateGrp);
+            objectExecution1.RefreshData(InstanceID, from, to, ConnectionString, ObjectID, DatabaseID, dateGrp);
           
         }
 
