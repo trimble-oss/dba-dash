@@ -5,7 +5,7 @@ DECLARE @Tags TABLE(
 	TagValue NVARCHAR(50)
 );
 DECLARE @Instance SYSNAME
-sELECT @Instance = Instance 
+SELECT @Instance = Instance 
 FROM dbo.Instances 
 WHERE InstanceID = @InstanceID;
 
@@ -16,7 +16,7 @@ WITH T AS (
 			CAST(I.Collation as NVARCHAR(50)) Collation,
 			CAST(I.SystemManufacturer as NVARCHAR(50)) as SystemManufacturer,
 			CAST(I.SystemProductName as NVARCHAR(50)) as SystemProductName,
-			CAST(I.cpu_count as NVARCHAR(50)) as CPUCount,
+			CAST(RIGHT(REPLICATE(' ',5) +  CAST(I.cpu_count as NVARCHAR(50)),5) as NVARCHAR(50)) as CPUCount,
 			CAST(AgentHostName + ' {' + AgentVersion + '}' as NVARCHAR(50)) DBAChecksAgent
 	FROM dbo.Instances I
 	CROSS APPLY SQLVersionName(EditionID,ProductVersion) v
