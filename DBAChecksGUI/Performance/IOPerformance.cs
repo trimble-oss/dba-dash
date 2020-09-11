@@ -31,6 +31,8 @@ namespace DBAChecksGUI.Performance
         DateGroup dateGrouping;
         bool smoothLines = true;
         Int32 databaseid=0;
+        string drive="";
+
         public bool SmoothLines { 
             get {
                 return smoothLines;
@@ -45,9 +47,42 @@ namespace DBAChecksGUI.Performance
         }
         List<LineSeries> series;
 
-  
 
-        private static DataTable IOStats(Int32 instanceid, DateTime from, DateTime to, string connectionString,Int32 DatabaseID, DateGroup dateGrouping = DateGroup.None)
+        private void getDrives()
+        {
+            tsDrives.DropDownItems.Clear();
+            drive = "";
+            tsDrives.Text = drive;
+            SqlConnection cn = new SqlConnection(connectionString);
+            using (cn)
+            {
+                cn.Open();
+                SqlCommand cmd = new SqlCommand("DriveLetters_Get", cn);
+                cmd.Parameters.AddWithValue("@InstanceID", instanceID);
+                cmd.CommandType = CommandType.StoredProcedure;
+                var rdr = cmd.ExecuteReader();
+                while (rdr.Read())
+                {
+                    var name = (string)rdr["Name"];
+                    var label = rdr["Label"] == DBNull.Value ? "" : (string)rdr["Label"];
+                    var ddDrive = tsDrives.DropDownItems.Add(name + "     |     " + label);
+                    ddDrive.Tag = name;
+                    ddDrive.Click += DdDrive_Click;
+                }
+            }
+            var ddAll = tsDrives.DropDownItems.Add("{All}");
+            ddAll.Tag = "";
+            ddAll.Click += DdDrive_Click;
+        }
+
+        private void DdDrive_Click(object sender, EventArgs e)
+        {
+            drive =  (string)((ToolStripDropDownItem)sender).Tag;
+            tsDrives.Text = drive;
+            refreshData(false);    
+        }
+
+        private static DataTable IOStats(Int32 instanceid, DateTime from, DateTime to, string connectionString,Int32 DatabaseID,string drive, DateGroup dateGrouping = DateGroup.None)
         {
             var dt = new DataTable();
             SqlConnection cn = new SqlConnection(connectionString);
@@ -59,6 +94,10 @@ namespace DBAChecksGUI.Performance
                 cmd.Parameters.AddWithValue("@FromDate", from);
                 cmd.Parameters.AddWithValue("@ToDate", to);
                 cmd.Parameters.AddWithValue("DateGrouping", dateGrouping.ToString().Replace("_",""));
+                if (drive != "")
+                {
+                    cmd.Parameters.AddWithValue("Drive", drive);
+                }
                 if (DatabaseID > 0)
                 {
                     cmd.Parameters.AddWithValue("@DatabaseID", DatabaseID);
@@ -83,6 +122,7 @@ namespace DBAChecksGUI.Performance
 
         public void RefreshData(Int32 InstanceID, DateTime fromDate, DateTime toDate, string connectionString,Int32 databaseID, DateGroup dateGrouping)
         {
+            
             if (this.dateGrouping != dateGrouping) {
                 this.dateGrouping = dateGrouping;
                 disableEnableDropdowns();
@@ -94,6 +134,7 @@ namespace DBAChecksGUI.Performance
             this.databaseid  = databaseID;
             
             mins = (Int32)toDate.Subtract(fromDate).TotalMinutes;
+            getDrives();
             refreshData();
             
         }
@@ -132,7 +173,7 @@ namespace DBAChecksGUI.Performance
             {
                 DateFormat = "yyyy-MM-dd HH:mm";
             }
-            var dt = IOStats(instanceID, from, to, connectionString,databaseid, dateGrouping);
+            var dt = IOStats(instanceID, from, to, connectionString,databaseid,drive, dateGrouping);
             var cnt = dt.Rows.Count;
             if(cnt==0 && update)
             {

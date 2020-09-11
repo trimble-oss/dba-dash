@@ -32,6 +32,7 @@
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
             this.tsMeasures = new System.Windows.Forms.ToolStripDropDownButton();
             this.lblIOPerformance = new System.Windows.Forms.ToolStripLabel();
+            this.tsDrives = new System.Windows.Forms.ToolStripDropDownButton();
             this.toolStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -49,7 +50,8 @@
             this.toolStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
             this.toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.tsMeasures,
-            this.lblIOPerformance});
+            this.lblIOPerformance,
+            this.tsDrives});
             this.toolStrip1.Location = new System.Drawing.Point(0, 0);
             this.toolStrip1.Name = "toolStrip1";
             this.toolStrip1.Size = new System.Drawing.Size(773, 27);
@@ -73,6 +75,13 @@
             this.lblIOPerformance.Size = new System.Drawing.Size(119, 24);
             this.lblIOPerformance.Text = "IO Performance";
             // 
+            // tsDrives
+            // 
+            this.tsDrives.Image = global::DBAChecksGUI.Properties.Resources.Hard_Drive;
+            this.tsDrives.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tsDrives.Name = "tsDrives";
+            this.tsDrives.Size = new System.Drawing.Size(34, 24);
+            // 
             // IOPerformance
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
@@ -94,5 +103,6 @@
         private System.Windows.Forms.ToolStrip toolStrip1;
         private System.Windows.Forms.ToolStripDropDownButton tsMeasures;
         private System.Windows.Forms.ToolStripLabel lblIOPerformance;
+        private System.Windows.Forms.ToolStripDropDownButton tsDrives;
     }
 }

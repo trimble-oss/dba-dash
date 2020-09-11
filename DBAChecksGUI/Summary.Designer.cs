@@ -93,7 +93,7 @@
             this.Instance.MinimumWidth = 6;
             this.Instance.Name = "Instance";
             this.Instance.ReadOnly = true;
-            this.Instance.Width = 82;
+            this.Instance.Width = 90;
             // 
             // MemoryDumpStatus
             // 
@@ -101,7 +101,7 @@
             this.MemoryDumpStatus.MinimumWidth = 6;
             this.MemoryDumpStatus.Name = "MemoryDumpStatus";
             this.MemoryDumpStatus.ReadOnly = true;
-            this.MemoryDumpStatus.Width = 109;
+            this.MemoryDumpStatus.Width = 118;
             // 
             // CorruptionStatus
             // 
@@ -110,7 +110,7 @@
             this.CorruptionStatus.MinimumWidth = 6;
             this.CorruptionStatus.Name = "CorruptionStatus";
             this.CorruptionStatus.ReadOnly = true;
-            this.CorruptionStatus.Width = 93;
+            this.CorruptionStatus.Width = 103;
             // 
             // LastGoodCheckDBStatus
             // 
@@ -118,7 +118,7 @@
             this.LastGoodCheckDBStatus.MinimumWidth = 6;
             this.LastGoodCheckDBStatus.Name = "LastGoodCheckDBStatus";
             this.LastGoodCheckDBStatus.ReadOnly = true;
-            this.LastGoodCheckDBStatus.Width = 121;
+            this.LastGoodCheckDBStatus.Width = 137;
             // 
             // AlertStatus
             // 
@@ -126,7 +126,7 @@
             this.AlertStatus.MinimumWidth = 6;
             this.AlertStatus.Name = "AlertStatus";
             this.AlertStatus.ReadOnly = true;
-            this.AlertStatus.Width = 66;
+            this.AlertStatus.Width = 73;
             // 
             // FullBackupStatus
             // 
@@ -135,7 +135,7 @@
             this.FullBackupStatus.Name = "FullBackupStatus";
             this.FullBackupStatus.ReadOnly = true;
             this.FullBackupStatus.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Programmatic;
-            this.FullBackupStatus.Width = 92;
+            this.FullBackupStatus.Width = 101;
             // 
             // DiffBackupStatus
             // 
@@ -143,7 +143,6 @@
             this.DiffBackupStatus.MinimumWidth = 6;
             this.DiffBackupStatus.Name = "DiffBackupStatus";
             this.DiffBackupStatus.ReadOnly = true;
-            this.DiffBackupStatus.Width = 91;
             // 
             // LogBackupStatus
             // 
@@ -151,7 +150,7 @@
             this.LogBackupStatus.MinimumWidth = 6;
             this.LogBackupStatus.Name = "LogBackupStatus";
             this.LogBackupStatus.ReadOnly = true;
-            this.LogBackupStatus.Width = 93;
+            this.LogBackupStatus.Width = 103;
             // 
             // LogShippingStatus
             // 
@@ -159,6 +158,7 @@
             this.LogShippingStatus.MinimumWidth = 6;
             this.LogShippingStatus.Name = "LogShippingStatus";
             this.LogShippingStatus.ReadOnly = true;
+            this.LogShippingStatus.Width = 110;
             // 
             // DriveStatus
             // 
@@ -166,7 +166,7 @@
             this.DriveStatus.MinimumWidth = 6;
             this.DriveStatus.Name = "DriveStatus";
             this.DriveStatus.ReadOnly = true;
-            this.DriveStatus.Width = 94;
+            this.DriveStatus.Width = 105;
             // 
             // JobStatus
             // 
@@ -174,7 +174,6 @@
             this.JobStatus.MinimumWidth = 6;
             this.JobStatus.Name = "JobStatus";
             this.JobStatus.ReadOnly = true;
-            this.JobStatus.Width = 89;
             // 
             // AGStatus
             // 
@@ -182,7 +181,7 @@
             this.AGStatus.MinimumWidth = 6;
             this.AGStatus.Name = "AGStatus";
             this.AGStatus.ReadOnly = true;
-            this.AGStatus.Width = 124;
+            this.AGStatus.Width = 141;
             // 
             // FileFreeSpaceStatus
             // 
@@ -190,7 +189,7 @@
             this.FileFreeSpaceStatus.MinimumWidth = 6;
             this.FileFreeSpaceStatus.Name = "FileFreeSpaceStatus";
             this.FileFreeSpaceStatus.ReadOnly = true;
-            this.FileFreeSpaceStatus.Width = 109;
+            this.FileFreeSpaceStatus.Width = 121;
             // 
             // CollectionErrorStatus
             // 
@@ -198,7 +197,7 @@
             this.CollectionErrorStatus.MinimumWidth = 6;
             this.CollectionErrorStatus.Name = "CollectionErrorStatus";
             this.CollectionErrorStatus.ReadOnly = true;
-            this.CollectionErrorStatus.Width = 125;
+            this.CollectionErrorStatus.Width = 141;
             // 
             // SnapshotAgeStatus
             // 
@@ -206,7 +205,7 @@
             this.SnapshotAgeStatus.MinimumWidth = 6;
             this.SnapshotAgeStatus.Name = "SnapshotAgeStatus";
             this.SnapshotAgeStatus.ReadOnly = true;
-            this.SnapshotAgeStatus.Width = 103;
+            this.SnapshotAgeStatus.Width = 116;
             // 
             // UptimeStatus
             // 
@@ -214,7 +213,7 @@
             this.UptimeStatus.MinimumWidth = 6;
             this.UptimeStatus.Name = "UptimeStatus";
             this.UptimeStatus.ReadOnly = true;
-            this.UptimeStatus.Width = 115;
+            this.UptimeStatus.Width = 127;
             // 
             // toolStrip1
             // 

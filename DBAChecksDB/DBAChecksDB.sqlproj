@@ -375,6 +375,7 @@
     <Build Include="dbo\Views\CollectionDatesStatus.sql" />
     <Build Include="Report\Stored Procedures\ServerLoginSummary.sql" />
     <Build Include="dbo\Tables\InstanceUptimeThresholds.sql" />
+    <Build Include="dbo\Stored Procedures\DriveLetters_Get.sql" />
   </ItemGroup>
   <ItemGroup>
     <PostDeploy Include="Script.PostDeployment1.sql" />
