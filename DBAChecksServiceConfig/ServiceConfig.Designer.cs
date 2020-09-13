@@ -56,6 +56,7 @@
             this.bttnCancel = new System.Windows.Forms.Button();
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabPage3 = new System.Windows.Forms.TabPage();
+            this.bttnDeployDatabase = new System.Windows.Forms.Button();
             this.chkCustomizeMaintenanceCron = new System.Windows.Forms.CheckBox();
             this.label7 = new System.Windows.Forms.Label();
             this.txtDestination = new System.Windows.Forms.TextBox();
@@ -356,6 +357,7 @@
             // 
             // tabPage3
             // 
+            this.tabPage3.Controls.Add(this.bttnDeployDatabase);
             this.tabPage3.Controls.Add(this.chkCustomizeMaintenanceCron);
             this.tabPage3.Controls.Add(this.label7);
             this.tabPage3.Controls.Add(this.txtDestination);
@@ -366,6 +368,16 @@
             this.tabPage3.TabIndex = 2;
             this.tabPage3.Text = "Destination:";
             this.tabPage3.UseVisualStyleBackColor = true;
+            // 
+            // bttnDeployDatabase
+            // 
+            this.bttnDeployDatabase.Location = new System.Drawing.Point(103, 111);
+            this.bttnDeployDatabase.Name = "bttnDeployDatabase";
+            this.bttnDeployDatabase.Size = new System.Drawing.Size(214, 32);
+            this.bttnDeployDatabase.TabIndex = 5;
+            this.bttnDeployDatabase.Text = "Deploy/Update Database";
+            this.bttnDeployDatabase.UseVisualStyleBackColor = true;
+            this.bttnDeployDatabase.Click += new System.EventHandler(this.bttnDeployDatabase_Click);
             // 
             // chkCustomizeMaintenanceCron
             // 
@@ -698,6 +710,7 @@
         private System.Windows.Forms.TabPage tabExtendedEvents;
         private System.Windows.Forms.Label label9;
         private System.Windows.Forms.TabPage tabPage7;
+        private System.Windows.Forms.Button bttnDeployDatabase;
     }
 }
 

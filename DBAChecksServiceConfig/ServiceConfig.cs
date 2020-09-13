@@ -8,6 +8,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.ServiceProcess;
+using System.Text;
 using System.Windows.Forms;
 using static DBAChecks.DBAChecksConnection;
 
@@ -538,6 +539,15 @@ namespace DBAChecksServiceConfig
                 txtSnapshotDBs.Text = src.SchemaSnapshotDBs;
 
             }
+        }
+
+        private void bttnDeployDatabase_Click(object sender, EventArgs e)
+        {
+            var frm = new DBDeploy();
+            frm.ConnectionString = txtDestination.Text;
+            frm.ShowDialog();
+
+
         }
     }
 }
