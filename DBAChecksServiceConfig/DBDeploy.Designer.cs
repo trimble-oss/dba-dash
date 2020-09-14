@@ -37,6 +37,7 @@
             this.lblNotice = new System.Windows.Forms.Label();
             this.bttnCancel = new System.Windows.Forms.Button();
             this.bttnCopy = new System.Windows.Forms.Button();
+            this.lblVersionInfo = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
             // txtConnectionString
@@ -65,6 +66,8 @@
             this.cboDatabase.TabIndex = 2;
             this.cboDatabase.Text = "DBAChecksDB";
             this.cboDatabase.DropDown += new System.EventHandler(this.cboDatabase_DropDown);
+            this.cboDatabase.SelectedIndexChanged += new System.EventHandler(this.cboDatabase_SelectedIndexChanged);
+            this.cboDatabase.Validated += new System.EventHandler(this.cboDatabase_Validated);
             // 
             // label1
             // 
@@ -103,7 +106,7 @@
             // 
             this.lblNotice.AutoSize = true;
             this.lblNotice.ForeColor = System.Drawing.Color.Blue;
-            this.lblNotice.Location = new System.Drawing.Point(13, 112);
+            this.lblNotice.Location = new System.Drawing.Point(58, 160);
             this.lblNotice.Name = "lblNotice";
             this.lblNotice.Size = new System.Drawing.Size(91, 17);
             this.lblNotice.TabIndex = 6;
@@ -132,13 +135,22 @@
             this.bttnCopy.UseVisualStyleBackColor = true;
             this.bttnCopy.Click += new System.EventHandler(this.bttnCopy_Click);
             // 
+            // lblVersionInfo
+            // 
+            this.lblVersionInfo.Location = new System.Drawing.Point(16, 112);
+            this.lblVersionInfo.Name = "lblVersionInfo";
+            this.lblVersionInfo.Size = new System.Drawing.Size(536, 16);
+            this.lblVersionInfo.TabIndex = 9;
+            this.lblVersionInfo.Text = "Version...";
+            this.lblVersionInfo.TextAlign = System.Drawing.ContentAlignment.TopRight;
+            // 
             // DBDeploy
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(571, 649);
+            this.Controls.Add(this.lblVersionInfo);
             this.Controls.Add(this.bttnCopy);
-            this.Controls.Add(this.bttnCancel);
             this.Controls.Add(this.lblNotice);
             this.Controls.Add(this.txtDeployScript);
             this.Controls.Add(this.bttnGenerate);
@@ -146,6 +158,7 @@
             this.Controls.Add(this.cboDatabase);
             this.Controls.Add(this.lblConnectionString);
             this.Controls.Add(this.txtConnectionString);
+            this.Controls.Add(this.bttnCancel);
             this.Name = "DBDeploy";
             this.Text = "DB Deploy";
             this.Load += new System.EventHandler(this.DBDeploy_Load);
@@ -165,5 +178,6 @@
         private System.Windows.Forms.Label lblNotice;
         private System.Windows.Forms.Button bttnCancel;
         private System.Windows.Forms.Button bttnCopy;
+        private System.Windows.Forms.Label lblVersionInfo;
     }
 }

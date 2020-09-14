@@ -30,6 +30,7 @@
     <QueryStoreStaleQueryThreshold>15</QueryStoreStaleQueryThreshold>
     <QueryStoreMaxStorageSize>512</QueryStoreMaxStorageSize>
     <QueryStoreMaxPlansPerQuery>50</QueryStoreMaxPlansPerQuery>
+    <DacVersion>1.9.0.1</DacVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <OutputPath>bin\Release\</OutputPath>
@@ -377,6 +378,7 @@
     <Build Include="Report\Stored Procedures\ServerLoginSummary.sql" />
     <Build Include="dbo\Tables\InstanceUptimeThresholds.sql" />
     <Build Include="dbo\Stored Procedures\DriveLetters_Get.sql" />
+    <Build Include="dbo\Tables\DBVersionHistory.sql" />
   </ItemGroup>
   <ItemGroup>
     <PostDeploy Include="Script.PostDeployment1.sql" />
@@ -391,6 +393,13 @@
   <ItemGroup>
     <None Include="DBAChecksDB.publish.xml" />
     <None Include="Schema_Compare.scmp" />
+  </ItemGroup>
+  <ItemGroup>
+    <SqlCmdVariable Include="VersionNumber">
+      <DefaultValue>
+      </DefaultValue>
+      <Value>$(SqlCmdVar__1)</Value>
+    </SqlCmdVariable>
   </ItemGroup>
   <PropertyGroup>
     <PreBuildEvent>xcopy /y "$(ProjectDir)$(OutDir)*.dacpac" "$(SolutionDir)DBAChecksServiceConfig\$(OutDir)"</PreBuildEvent>

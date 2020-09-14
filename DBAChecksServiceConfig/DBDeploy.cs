@@ -17,14 +17,21 @@ namespace DBAChecksServiceConfig
             InitializeComponent();
         }
 
+        public Version DACVersion;
 
 
         public string ConnectionString { 
             get {
-                return txtConnectionString.Text;
+                SqlConnectionStringBuilder builder = new SqlConnectionStringBuilder(txtConnectionString.Text);
+                builder.InitialCatalog = cboDatabase.Text;
+                return builder.ConnectionString;
             }
             set {
                 txtConnectionString.Text = value;
+                if (txtConnectionString.Text.Length == 0)
+                {
+                    txtConnectionString.Text = "Data Source=localhost;Initial Catalog=DBAChecksDB;Integrated Security=SSPI;";
+                }
                 string db = "DBAChecksDB";
                 try
                 {
@@ -100,8 +107,8 @@ AND database_id > 4 ", cn);
 
         private void DBDeploy_Load(object sender, EventArgs e)
         {
-                  
 
+            dbChanged();
         }
 
         private void bttnGenerate_Click(object sender, EventArgs e)
@@ -175,7 +182,7 @@ AND database_id > 4 ", cn);
 
         private void txtConnectionString_Validated(object sender, EventArgs e)
         {
-            
+            dbChanged();
         }
 
         string dbListConnectionString;
@@ -223,6 +230,58 @@ AND database_id > 4 ", cn);
         private void txtDeployScript_TextChanged(object sender, EventArgs e)
         {
             bttnCopy.Enabled = txtDeployScript.Text.Length > 0;
+        }
+
+        private void cboDatabase_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            dbChanged();
+        }
+
+        private void dbChanged()
+        {
+            try
+            {
+                if (!DBValidations.DBExists(ConnectionString))
+                {
+                    lblVersionInfo.Text = "Create Database";
+                    lblVersionInfo.ForeColor = System.Drawing.Color.Blue;
+                }
+                else
+                {
+                    var dbVersion = DBValidations.GetDBVersion(ConnectionString);
+                    lblVersionInfo.Text = dbVersion.ToString();
+
+                    Int32 compare = dbVersion.CompareTo(DACVersion);
+                    if (compare == 0)
+                    {
+                        lblVersionInfo.Text = dbVersion.ToString() + " (OK)";
+                        lblVersionInfo.ForeColor = System.Drawing.Color.Green;
+                        bttnGenerate.Enabled = true;
+                    }
+                    else if (compare > 0)
+                    {
+                        lblVersionInfo.Text = dbVersion.ToString() + "Newer than app:" + DACVersion.ToString() + ". Upgrade app";
+                        lblVersionInfo.ForeColor = System.Drawing.Color.Red;
+                        bttnGenerate.Enabled = false;
+                    }
+                    else
+                    {
+                        lblVersionInfo.Text = dbVersion.ToString() + " Upgrade to " + DACVersion.ToString();
+                        lblVersionInfo.ForeColor = System.Drawing.Color.Red;
+                        bttnGenerate.Enabled = true;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+
+        }
+
+        private void cboDatabase_Validated(object sender, EventArgs e)
+        {
+            dbChanged();
         }
     }
 }

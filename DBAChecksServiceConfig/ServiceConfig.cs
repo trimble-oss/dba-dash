@@ -176,7 +176,8 @@ namespace DBAChecksServiceConfig
         {
             errorProvider1.SetError(txtDestination, null);
             DBAChecksConnection dest = new DBAChecksConnection(txtDestination.Text);
-
+            lblVersionInfo.ForeColor = System.Drawing.Color.Black;
+            lblVersionInfo.Text = "";
             if (txtDestination.Text == "")
             {
                 return false;
@@ -187,6 +188,44 @@ namespace DBAChecksServiceConfig
                 errorProvider1.SetError(txtDestination, "Invalid connection string, directory or S3 path");
                 return false;
             }
+            if(dest.Type == ConnectionType.SQL)
+            {
+                try
+                {
+                    if (! DBValidations.DBExists(txtDestination.Text))
+                    {
+                        lblVersionInfo.Text = "Run Deploy to create database.";
+                        lblVersionInfo.ForeColor = System.Drawing.Color.Red;
+                        return true;
+                    }
+                     dbVersion= DBValidations.GetDBVersion(txtDestination.Text);
+                    Int32 compare = dbVersion.CompareTo(dacVersion);
+                    if (compare == 0)
+                    {
+                        lblVersionInfo.Text = "DB upgrade not required. DacVersion/DB Version: " + dacVersion.ToString();
+                        lblVersionInfo.ForeColor = System.Drawing.Color.Green;
+                        bttnDeployDatabase.Enabled = true;
+                    }
+                    else if (compare > 0)
+                    {
+                        lblVersionInfo.Text = "DB version " + dbVersion.ToString() + " is newer. Please update the app";
+                        lblVersionInfo.ForeColor = System.Drawing.Color.Red;
+                        bttnDeployDatabase.Enabled = false;
+                    }
+                    else
+                    {
+                        lblVersionInfo.Text = "DB version " + dbVersion + " requires upgrade to " + dacVersion;
+                        lblVersionInfo.ForeColor = System.Drawing.Color.Red;
+                        bttnDeployDatabase.Enabled = true;
+                    }
+                    return true;
+                }
+                catch(Exception ex)
+                {
+                    MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return false;
+                }
+            }
             else
             {
                 return true;
@@ -194,6 +233,15 @@ namespace DBAChecksServiceConfig
         }
 
 
+
+        System.Version dbVersion;
+        System.Version dacVersion;
+
+        private void getDacVersion()
+        {
+            DacpacUtility.DacpacService dac = new DacpacUtility.DacpacService();
+            dacVersion=  dac.GetVersion("DBAChecksDB.dacpac");
+        }
 
 
         private void bttnSave_Click(object sender, EventArgs e)
@@ -227,6 +275,8 @@ namespace DBAChecksServiceConfig
                 }
             }
             refreshServiceStatus();
+            getDacVersion();
+            validateDestination();
         }
 
         private void setFromJson(string json)
@@ -420,9 +470,19 @@ namespace DBAChecksServiceConfig
 
         private void txtDestination_Validated(object sender, EventArgs e)
         {
-            validateDestination();
-            collectionConfig.Destination = txtDestination.Text;
-            txtJson.Text = collectionConfig.Serialize();
+            destinationChanged();
+        }
+
+        private void destinationChanged()
+        {
+            if(collectionConfig.Destination!= txtDestination.Text)
+            {
+                validateDestination();
+
+                collectionConfig.Destination = txtDestination.Text;
+                txtJson.Text = collectionConfig.Serialize();
+            }
+
         }
 
 
@@ -545,7 +605,16 @@ namespace DBAChecksServiceConfig
         {
             var frm = new DBDeploy();
             frm.ConnectionString = txtDestination.Text;
+            frm.DACVersion = dacVersion;
             frm.ShowDialog();
+            if (frm.ConnectionString != txtDestination.Text)
+            {
+                if(MessageBox.Show("Update connection string?","Update", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+                {
+                    txtDestination.Text = frm.ConnectionString;
+                    destinationChanged();
+                }
+            }
 
 
         }

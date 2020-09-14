@@ -352,3 +352,6 @@ INSERT INTO dbo.InstanceUptimeThresholds
 )
 SELECT -1 AS InstanceID,2880,720
 WHERE NOT EXISTS(SELECT 1 FROM dbo.InstanceUptimeThresholds T WHERE T.InstanceID = -1)
+
+INSERT INTO dbo.DBVersionHistory(DeployDate,Version)
+VALUES(GETUTCDATE(),'$(VersionNumber)')

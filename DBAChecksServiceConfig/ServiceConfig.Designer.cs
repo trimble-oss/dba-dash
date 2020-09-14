@@ -77,6 +77,7 @@
             this.bttnRemove = new System.Windows.Forms.Button();
             this.tabPage2 = new System.Windows.Forms.TabPage();
             this.tabPage4 = new System.Windows.Forms.TabPage();
+            this.lblVersionInfo = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.errorProvider1)).BeginInit();
             this.tabControl1.SuspendLayout();
             this.tabPage3.SuspendLayout();
@@ -357,6 +358,7 @@
             // 
             // tabPage3
             // 
+            this.tabPage3.Controls.Add(this.lblVersionInfo);
             this.tabPage3.Controls.Add(this.bttnDeployDatabase);
             this.tabPage3.Controls.Add(this.chkCustomizeMaintenanceCron);
             this.tabPage3.Controls.Add(this.label7);
@@ -623,6 +625,15 @@
             this.tabPage4.Text = "Service";
             this.tabPage4.UseVisualStyleBackColor = true;
             // 
+            // lblVersionInfo
+            // 
+            this.lblVersionInfo.AutoSize = true;
+            this.lblVersionInfo.Location = new System.Drawing.Point(103, 150);
+            this.lblVersionInfo.Name = "lblVersionInfo";
+            this.lblVersionInfo.Size = new System.Drawing.Size(93, 17);
+            this.lblVersionInfo.TabIndex = 6;
+            this.lblVersionInfo.Text = "version info...";
+            // 
             // ServiceConfig
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
@@ -711,6 +722,7 @@
         private System.Windows.Forms.Label label9;
         private System.Windows.Forms.TabPage tabPage7;
         private System.Windows.Forms.Button bttnDeployDatabase;
+        private System.Windows.Forms.Label lblVersionInfo;
     }
 }
 

@@ -219,6 +219,7 @@
     <Compile Include="DBDeploy.Designer.cs">
       <DependentUpon>DBDeploy.cs</DependentUpon>
     </Compile>
+    <Compile Include="DBValidations.cs" />
     <Compile Include="ServiceConfig.cs">
       <SubType>Form</SubType>
     </Compile>

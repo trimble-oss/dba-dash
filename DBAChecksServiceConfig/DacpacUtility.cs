@@ -29,10 +29,8 @@ namespace DacpacUtility
                     ObjectType.RoleMembership,
                     ObjectType.Permissions
                 }
-
             };
-       
-        }
+                   }
 
         public bool ProcessDacPac(string connectionString,
                                     string databaseName,
@@ -43,8 +41,6 @@ namespace DacpacUtility
             MessageList.Add("*** Start of processing for " +
                              databaseName);
 
-            var dacOptions = new DacDeployOptions();
-            dacOptions.BlockOnPossibleDataLoss = false;
 
             var dacServiceInstance = new DacServices(connectionString);
             dacServiceInstance.ProgressChanged +=
@@ -58,9 +54,14 @@ namespace DacpacUtility
             {
                 using (DacPackage dacpac = DacPackage.Load(dacpacName))
                 {
+                    if (_dacDeployOptions.SqlCommandVariableValues.ContainsKey("VersionNumber"))
+                    {
+                        _dacDeployOptions.SqlCommandVariableValues.Remove("VersionNumber");
+                    }
+                    _dacDeployOptions.SqlCommandVariableValues.Add("VersionNumber", dacpac.Version.ToString());
                     dacServiceInstance.Deploy(dacpac, databaseName,
                                             upgradeExisting: true,
-                                            options: dacOptions);
+                                            options: _dacDeployOptions);
                 }
 
             }
@@ -87,13 +88,20 @@ namespace DacpacUtility
             }
         }
 
+        public System.Version GetVersion(string dacpacName)
+        {
+            using (DacPackage dacpac = DacPackage.Load(dacpacName))
+            {
+                return dacpac.Version;
+            }
+        }
+
 
         public string GenerateDeployScript(string connectionString,
                                 string databaseName,
                                 string dacpacName)
         {
-            bool success = true;
-
+  
             MessageList.Add("*** Start of processing for " +
                              databaseName);
 
@@ -110,6 +118,11 @@ namespace DacpacUtility
             {
                 using (DacPackage dacpac = DacPackage.Load(dacpacName))
                 {
+                    if (_dacDeployOptions.SqlCommandVariableValues.ContainsKey("VersionNumber"))
+                    {
+                        _dacDeployOptions.SqlCommandVariableValues.Remove("VersionNumber");
+                    }
+                    _dacDeployOptions.SqlCommandVariableValues.Add("VersionNumber", dacpac.Version.ToString());
                     return dacServiceInstance.GenerateDeployScript(dacpac, databaseName,
                                             options: _dacDeployOptions);
                 }
@@ -117,7 +130,6 @@ namespace DacpacUtility
             }
             catch (Exception ex)
             {
-                success = false;
                 MessageList.Add(ex.Message);
                 return null;
             }
