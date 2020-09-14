@@ -176,6 +176,17 @@ namespace DBAChecksGUI
             {
                 loadDBAChecksErrorLog(n.InstanceID);
             }
+            if(tabs.SelectedTab== tabCollectionDates)
+            {
+                collectionDates1.InstanceIDs = instanceIDs;
+                collectionDates1.ConnectionString = connectionString;
+                collectionDates1.IncludeCritical = true;
+                collectionDates1.IncludeWarning = true;
+                collectionDates1.IncludeNA = n.InstanceID > 0;
+                collectionDates1.IncludeOK = n.InstanceID > 0;
+                collectionDates1.RefreshData();
+
+            }
         }
 
         private void loadDBAChecksErrorLog(Int32 InstanceID)
@@ -350,6 +361,7 @@ ORDER BY SchemaName,ObjectName
                 allowedTabs.Add(tabFiles);
                 allowedTabs.Add(tabLastGood);
                 allowedTabs.Add(tabDBAChecksErrorLog);
+                allowedTabs.Add(tabCollectionDates);
             }
             else if(n.Type== SQLTreeItem.TreeType.Database)
             {
@@ -377,6 +389,7 @@ ORDER BY SchemaName,ObjectName
                 }
                 allowedTabs.Add(tabFiles);
                 allowedTabs.Add(tabTags);
+                allowedTabs.Add(tabCollectionDates);
             }
             if (n.ObjectID > 0)
             {

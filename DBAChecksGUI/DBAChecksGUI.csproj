@@ -130,6 +130,18 @@
     <Compile Include="Backups\BackupThresholdsConfig.Designer.cs">
       <DependentUpon>BackupThresholdsConfig.cs</DependentUpon>
     </Compile>
+    <Compile Include="CollectionDates\CollectionDates.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="CollectionDates\CollectionDates.Designer.cs">
+      <DependentUpon>CollectionDates.cs</DependentUpon>
+    </Compile>
+    <Compile Include="CollectionDates\CollectionDatesThresholds.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="CollectionDates\CollectionDatesThresholds.Designer.cs">
+      <DependentUpon>CollectionDatesThresholds.cs</DependentUpon>
+    </Compile>
     <Compile Include="Common.cs" />
     <Compile Include="CustomProgressBar.cs">
       <SubType>Component</SubType>
@@ -288,6 +300,12 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Backups\BackupThresholdsConfig.resx">
       <DependentUpon>BackupThresholdsConfig.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="CollectionDates\CollectionDates.resx">
+      <DependentUpon>CollectionDates.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="CollectionDates\CollectionDatesThresholds.resx">
+      <DependentUpon>CollectionDatesThresholds.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="DBDiff.resx">
       <DependentUpon>DBDiff.cs</DependentUpon>

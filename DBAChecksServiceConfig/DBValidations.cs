@@ -48,7 +48,7 @@ ELSE IF NOT EXISTS(SELECT *
 			FROM sys.objects
 			WHERE type NOT IN('S','IT','SQ'))
 BEGIN
-	SELECT '' AS Version
+	SELECT '0.0.0.0' AS Version
 END
 ELSE
 BEGIN 
@@ -56,6 +56,10 @@ BEGIN
 END
 ", cn);
                 string version = (string)cmd.ExecuteScalar();
+                if (version == null)
+                {
+                    version = "0.0.0.1";
+                }
                 return System.Version.Parse(version);
             }
         }

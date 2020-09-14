@@ -1,4 +1,5 @@
-﻿CREATE VIEW CollectionDatesStatus
+﻿
+CREATE VIEW [dbo].[CollectionDatesStatus]
 AS
 SELECT CD.InstanceID,
 	  CD.Reference, 
@@ -10,7 +11,7 @@ SELECT CD.InstanceID,
 	T.CriticalThreshold,
 	DATEDIFF(mi,CD.SnapshotDate,GETUTCDATE()) AS SnapshotAge,
 	CD.SnapshotDate,
-	CASE WHEN CD.InstanceID =-1 THEN 'Root' ELSE 'Instance' END AS ConfiguredLevel
+	CASE WHEN T.InstanceID =-1 THEN 'Root' ELSE 'Instance' END AS ConfiguredLevel
 FROM dbo.CollectionDates CD 
 OUTER APPLY(SELECT TOP(1) CDT.WarningThreshold,
 				CDT.CriticalThreshold,

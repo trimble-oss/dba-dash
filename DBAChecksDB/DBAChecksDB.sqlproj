@@ -30,7 +30,7 @@
     <QueryStoreStaleQueryThreshold>15</QueryStoreStaleQueryThreshold>
     <QueryStoreMaxStorageSize>512</QueryStoreMaxStorageSize>
     <QueryStoreMaxPlansPerQuery>50</QueryStoreMaxPlansPerQuery>
-    <DacVersion>1.9.0.1</DacVersion>
+    <DacVersion>1.9.0.3</DacVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <OutputPath>bin\Release\</OutputPath>
@@ -379,6 +379,9 @@
     <Build Include="dbo\Tables\InstanceUptimeThresholds.sql" />
     <Build Include="dbo\Stored Procedures\DriveLetters_Get.sql" />
     <Build Include="dbo\Tables\DBVersionHistory.sql" />
+    <Build Include="dbo\Stored Procedures\CollectionDatesThresholds_Upd.sql" />
+    <Build Include="dbo\Stored Procedures\CollectionDates_Get.sql" />
+    <Build Include="dbo\Stored Procedures\CollectionDatesThresholds_Get.sql" />
   </ItemGroup>
   <ItemGroup>
     <PostDeploy Include="Script.PostDeployment1.sql" />
@@ -402,6 +405,7 @@
     </SqlCmdVariable>
   </ItemGroup>
   <PropertyGroup>
-    <PreBuildEvent>xcopy /y "$(ProjectDir)$(OutDir)*.dacpac" "$(SolutionDir)DBAChecksServiceConfig\$(OutDir)"</PreBuildEvent>
+    <PreBuildEvent>xcopy /y "$(ProjectDir)$(OutDir)*.dacpac" "$(SolutionDir)DBAChecksServiceConfig\$(OutDir)"
+xcopy /y "$(ProjectDir)$(OutDir)*.dacpac" "$(SolutionDir)DBAChecksService\$(OutDir)"</PreBuildEvent>
   </PropertyGroup>
 </Project>
