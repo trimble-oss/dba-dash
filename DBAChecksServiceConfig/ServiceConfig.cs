@@ -615,7 +615,7 @@ namespace DBAChecksServiceConfig
                     destinationChanged();
                 }
             }
-
+            validateDestination();
 
         }
     }

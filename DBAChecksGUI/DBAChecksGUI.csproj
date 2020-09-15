@@ -266,6 +266,12 @@
     <Compile Include="Performance\ObjectExecution.Designer.cs">
       <DependentUpon>ObjectExecution.cs</DependentUpon>
     </Compile>
+    <Compile Include="Performance\PerformanceSummary.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Performance\PerformanceSummary.Designer.cs">
+      <DependentUpon>PerformanceSummary.cs</DependentUpon>
+    </Compile>
     <Compile Include="Performance\Waits.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -367,6 +373,9 @@
     <EmbeddedResource Include="Performance\ObjectExecution.resx">
       <DependentUpon>ObjectExecution.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="Performance\PerformanceSummary.resx">
+      <DependentUpon>PerformanceSummary.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Performance\Waits.resx">
       <DependentUpon>Waits.cs</DependentUpon>
     </EmbeddedResource>
@@ -411,6 +420,7 @@
     <None Include="Resources\AutoSum_16x.png" />
     <None Include="Resources\LineChart_16x.png" />
     <None Include="Resources\112_RefreshArrow_Green_16x16_72.png" />
+    <None Include="Resources\Column_16x.png" />
     <Content Include="SqlServerTypes\readme.htm" />
     <Content Include="SqlServerTypes\x64\msvcr120.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
