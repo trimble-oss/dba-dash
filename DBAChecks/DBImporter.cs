@@ -29,6 +29,11 @@ namespace DBAChecks
                 {
                     dtErrors.Columns.Add("ErrorSource");
                     dtErrors.Columns.Add("ErrorMessage");
+                    dtErrors.Columns.Add("ErrorContext");
+                }
+                if (dtErrors.Columns.Count == 2)
+                {
+                    dtErrors.Columns.Add("ErrorContext");
                 }
             }
             else
@@ -36,6 +41,7 @@ namespace DBAChecks
                 dtErrors = new DataTable("Errors");
                 dtErrors.Columns.Add("ErrorSource");
                 dtErrors.Columns.Add("ErrorMessage");
+                dtErrors.Columns.Add("ErrorContext");
                 Data.Tables.Add(dtErrors);
             }
 
@@ -43,6 +49,7 @@ namespace DBAChecks
             var rError = dtErrors.NewRow();
             rError["ErrorSource"] = errorSource;
             rError["ErrorMessage"] = errorMessage;
+            rError["ErrorContext"] = "Import";
             dtErrors.Rows.Add(rError);
         }
 
@@ -216,6 +223,10 @@ namespace DBAChecks
         {
             if (ds.Tables.Contains("Errors") && ds.Tables["Errors"].Rows.Count > 0)
             {
+                if (ds.Tables["Errors"].Columns.Count == 2)
+                {
+                    ds.Tables["Errors"].Columns.Add("ErrorContext");
+                }
                 var cn = new SqlConnection(connectionString);
                 using (cn)
                 {

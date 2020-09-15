@@ -195,7 +195,7 @@ namespace DBAChecksGUI
 
             using (cn)
             {
-                SqlCommand cmd = new SqlCommand("Report.DBAChecksErrorLog",cn);
+                SqlCommand cmd = new SqlCommand("dbo.CollectionErrorLog_Get",cn);
                 cmd.CommandType = CommandType.StoredProcedure;
                 if (InstanceID > 0)
                 {

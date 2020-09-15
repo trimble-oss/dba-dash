@@ -3,9 +3,12 @@
     [InstanceID]   INT            NOT NULL,
     [ErrorSource]  VARCHAR (100)  NOT NULL,
     [ErrorMessage] NVARCHAR (MAX) NOT NULL,
+    [ErrorContext] VARCHAR (100)  NULL,
     CONSTRAINT [PK_CollectionErrorLog] PRIMARY KEY CLUSTERED ([ErrorDate] ASC, [InstanceID] ASC, [ErrorSource] ASC),
     CONSTRAINT [FK_CollectionErrorLog_Instances] FOREIGN KEY ([InstanceID]) REFERENCES [dbo].[Instances] ([InstanceID])
 );
+
+
 
 
 

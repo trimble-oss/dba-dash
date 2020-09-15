@@ -1,4 +1,4 @@
-﻿CREATE PROC CollectionErrorLog_Add(
+﻿CREATE PROC [dbo].[CollectionErrorLog_Add](
 	@Errors dbo.CollectionError READONLY,
 	@InstanceID INT,
 	@ErrorDate DATETIME2(2) 
@@ -14,8 +14,9 @@ INSERT INTO dbo.CollectionErrorLog
     ErrorDate,
     InstanceID,
     ErrorSource,
-    ErrorMessage
+    ErrorMessage,
+	ErrorContext
 )
-SELECT @ErrorDate,@InstanceID, ErrorSource,ErrorMessage 
+SELECT @ErrorDate,@InstanceID, ErrorSource,ErrorMessage ,ErrorContext
 FROM @Errors
 END

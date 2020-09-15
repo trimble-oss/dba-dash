@@ -90,12 +90,13 @@ namespace DBAChecks
             startup(connectionString, null);
         }
 
-        private void logError(string errorSource, string errorMessage)
+        private void logError(string errorSource, string errorMessage,string errorContext="Collect")
         {
             Console.WriteLine("Error: " + instanceName + "|" + dbName + " " + errorSource + " : " + errorMessage);
             var rError = dtErrors.NewRow();
             rError["ErrorSource"] = errorSource;
             rError["ErrorMessage"] = errorMessage;
+            rError["ErrorContext"] = errorContext;
             dtErrors.Rows.Add(rError);
         }
 
@@ -107,6 +108,7 @@ namespace DBAChecks
             dtErrors = new DataTable("Errors");
             dtErrors.Columns.Add("ErrorSource");
             dtErrors.Columns.Add("ErrorMessage");
+            dtErrors.Columns.Add("ErrorContext");
 
             Data.Tables.Add(dtErrors);
             GetInstance(connectionID);
@@ -505,7 +507,7 @@ namespace DBAChecks
             }
             catch (Exception ex)
             {
-                logError("Collect Drives(SQL)", ex.Message);
+                logError("Drives", ex.Message);
             }
         }
 
@@ -524,7 +526,7 @@ namespace DBAChecks
                 }
                 catch (Exception ex)
                 {
-                    logError("Collect Drives", "Error collecting drives via WMI.  Drive info will be collected from SQL, but might be incomplete.  Use --nowmi switch to collect through SQL as default.");
+                    logError("Drives", "Error collecting drives via WMI.  Drive info will be collected from SQL, but might be incomplete.  Use --nowmi switch to collect through SQL as default.", "Collect:WMI");
                     collectDrivesSQL();
                 }
             }
@@ -575,7 +577,7 @@ namespace DBAChecks
                 }
                 catch (Exception ex)
                 {
-                    logError("Win32_OperatingSystem WMI", ex.Message);
+                    logError("ServerExtraProperties", ex.Message, "Collect:Win32_OperatingSystem WMI");
                 }
             }
         }
@@ -611,7 +613,7 @@ namespace DBAChecks
                 }
                 catch (Exception ex)
                 {
-                    logError("Win32_ComputerSystem WMI", ex.Message);
+                    logError("ServerExtraProperties", ex.Message, "Collect:Win32_ComputerSystem WMI");
                 }
             }
         }
@@ -664,7 +666,7 @@ namespace DBAChecks
                 }
                 catch (Exception ex)
                 {
-                    logError("Win32_PowerPlan WMI", ex.Message);
+                    logError("ServerExtraProperties", ex.Message, "Collect:Win32_PowerPlan WMI");
                 }
             }
         }
@@ -779,7 +781,7 @@ namespace DBAChecks
                         }
                         catch (Exception ex)
                         {
-                            logError("AWSPVDriver", ex.Message);
+                            logError("Drivers", ex.Message,"Collect:AWSPVDriver");
                         }
                         Data.Tables.Add(dtDrivers);
                     }
@@ -787,7 +789,7 @@ namespace DBAChecks
                 }
                 catch (Exception ex)
                 {
-                    logError("Drivers (WMI)", ex.Message);
+                    logError("Drivers", ex.Message, "Collect:WMI");
                 }
             }
         }
@@ -840,7 +842,7 @@ namespace DBAChecks
             }
             catch (Exception ex)
             {
-                logError("Collect Drives (WMI)", ex.Message);
+                logError("Drives", ex.Message, "Collect:WMI");
             }
         }
 

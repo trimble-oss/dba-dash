@@ -1,5 +1,6 @@
 ﻿CREATE PROC [dbo].[ObjectExecutionStats_Upd](@ObjectExecutionStats dbo.ProcStats READONLY,@InstanceID INT,@SnapshotDate DATETIME2(3))
 AS
+DECLARE @Ref VARCHAR(30)='ObjectExecutionStats'
 INSERT INTO dbo.DBObjects
 (
     DatabaseID,
@@ -189,3 +190,7 @@ GROUP BY S.ObjectID,S.InstanceID,
 	CONVERT(DATETIME,SUBSTRING(CONVERT(VARCHAR,SnapshotDate,120),0,14) + ':00',120) 
  OPTION(OPTIMIZE FOR(@MaxDate='9999-12-31'))
 COMMIT
+
+EXEC dbo.CollectionDates_Upd @InstanceID = @InstanceID,  
+										@Reference = @Ref,
+										@SnapshotDate = @SnapshotDate
