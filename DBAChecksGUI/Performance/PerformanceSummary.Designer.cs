@@ -46,6 +46,8 @@
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle16 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle17 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle18 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle19 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle20 = new System.Windows.Forms.DataGridViewCellStyle();
             this.dgv = new System.Windows.Forms.DataGridView();
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
             this.tsTime = new System.Windows.Forms.ToolStripDropDownButton();
@@ -72,6 +74,8 @@
             this.WaitMsPerSec = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.LatchWaitMsPerSec = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Latency = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.ReadLatency = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.WriteLatency = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.MBsec = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.MaxReadMBsec = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.MaxWriteMBsec = new System.Windows.Forms.DataGridViewTextBoxColumn();
@@ -102,6 +106,8 @@
             this.WaitMsPerSec,
             this.LatchWaitMsPerSec,
             this.Latency,
+            this.ReadLatency,
+            this.WriteLatency,
             this.MBsec,
             this.MaxReadMBsec,
             this.MaxWriteMBsec,
@@ -113,13 +119,14 @@
             this.MaxWriteIOPs,
             this.MaxIOPs});
             this.dgv.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.dgv.Location = new System.Drawing.Point(0, 27);
+            this.dgv.Location = new System.Drawing.Point(0, 31);
             this.dgv.Name = "dgv";
             this.dgv.ReadOnly = true;
             this.dgv.RowHeadersVisible = false;
             this.dgv.RowHeadersWidth = 51;
-            this.dgv.Size = new System.Drawing.Size(1048, 626);
+            this.dgv.Size = new System.Drawing.Size(1048, 622);
             this.dgv.TabIndex = 0;
+            this.dgv.RowsAdded += new System.Windows.Forms.DataGridViewRowsAddedEventHandler(this.dgv_RowsAdded);
             // 
             // toolStrip1
             // 
@@ -130,7 +137,7 @@
             this.tsColumns});
             this.toolStrip1.Location = new System.Drawing.Point(0, 0);
             this.toolStrip1.Name = "toolStrip1";
-            this.toolStrip1.Size = new System.Drawing.Size(1048, 27);
+            this.toolStrip1.Size = new System.Drawing.Size(1048, 31);
             this.toolStrip1.TabIndex = 3;
             this.toolStrip1.Text = "toolStrip1";
             // 
@@ -153,7 +160,7 @@
             this.tsTime.Image = global::DBAChecksGUI.Properties.Resources.Time_16x;
             this.tsTime.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsTime.Name = "tsTime";
-            this.tsTime.Size = new System.Drawing.Size(34, 24);
+            this.tsTime.Size = new System.Drawing.Size(34, 28);
             this.tsTime.Text = "Time";
             // 
             // toolStripMenuItem2
@@ -262,7 +269,7 @@
             this.tsRefresh.Image = global::DBAChecksGUI.Properties.Resources._112_RefreshArrow_Green_16x16_72;
             this.tsRefresh.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsRefresh.Name = "tsRefresh";
-            this.tsRefresh.Size = new System.Drawing.Size(29, 24);
+            this.tsRefresh.Size = new System.Drawing.Size(29, 28);
             this.tsRefresh.Text = "Refresh";
             this.tsRefresh.Click += new System.EventHandler(this.tsRefresh_Click);
             // 
@@ -272,7 +279,7 @@
             this.tsColumns.Image = global::DBAChecksGUI.Properties.Resources.Column_16x;
             this.tsColumns.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsColumns.Name = "tsColumns";
-            this.tsColumns.Size = new System.Drawing.Size(34, 24);
+            this.tsColumns.Size = new System.Drawing.Size(34, 28);
             this.tsColumns.Text = "Columns";
             // 
             // ConnectionID
@@ -372,13 +379,36 @@
             this.Latency.MinimumWidth = 6;
             this.Latency.Name = "Latency";
             this.Latency.ReadOnly = true;
+            this.Latency.Visible = false;
             this.Latency.Width = 126;
+            // 
+            // ReadLatency
+            // 
+            this.ReadLatency.DataPropertyName = "ReadLatency";
+            dataGridViewCellStyle9.Format = "N1";
+            this.ReadLatency.DefaultCellStyle = dataGridViewCellStyle9;
+            this.ReadLatency.HeaderText = "Read Latency (ms)";
+            this.ReadLatency.MinimumWidth = 6;
+            this.ReadLatency.Name = "ReadLatency";
+            this.ReadLatency.ReadOnly = true;
+            this.ReadLatency.Width = 144;
+            // 
+            // WriteLatency
+            // 
+            this.WriteLatency.DataPropertyName = "WriteLatency";
+            dataGridViewCellStyle10.Format = "N1";
+            this.WriteLatency.DefaultCellStyle = dataGridViewCellStyle10;
+            this.WriteLatency.HeaderText = "Write Latency (ms)";
+            this.WriteLatency.MinimumWidth = 6;
+            this.WriteLatency.Name = "WriteLatency";
+            this.WriteLatency.ReadOnly = true;
+            this.WriteLatency.Width = 143;
             // 
             // MBsec
             // 
             this.MBsec.DataPropertyName = "MBsec";
-            dataGridViewCellStyle9.Format = "N1";
-            this.MBsec.DefaultCellStyle = dataGridViewCellStyle9;
+            dataGridViewCellStyle11.Format = "N1";
+            this.MBsec.DefaultCellStyle = dataGridViewCellStyle11;
             this.MBsec.HeaderText = "MB/sec";
             this.MBsec.MinimumWidth = 6;
             this.MBsec.Name = "MBsec";
@@ -388,8 +418,8 @@
             // MaxReadMBsec
             // 
             this.MaxReadMBsec.DataPropertyName = "MaxReadMBsec";
-            dataGridViewCellStyle10.Format = "N1";
-            this.MaxReadMBsec.DefaultCellStyle = dataGridViewCellStyle10;
+            dataGridViewCellStyle12.Format = "N1";
+            this.MaxReadMBsec.DefaultCellStyle = dataGridViewCellStyle12;
             this.MaxReadMBsec.HeaderText = "Max Read MB/sec";
             this.MaxReadMBsec.MinimumWidth = 6;
             this.MaxReadMBsec.Name = "MaxReadMBsec";
@@ -400,8 +430,8 @@
             // MaxWriteMBsec
             // 
             this.MaxWriteMBsec.DataPropertyName = "MaxWriteMBsec";
-            dataGridViewCellStyle11.Format = "N1";
-            this.MaxWriteMBsec.DefaultCellStyle = dataGridViewCellStyle11;
+            dataGridViewCellStyle13.Format = "N1";
+            this.MaxWriteMBsec.DefaultCellStyle = dataGridViewCellStyle13;
             this.MaxWriteMBsec.HeaderText = "Max Write MB/sec";
             this.MaxWriteMBsec.MinimumWidth = 6;
             this.MaxWriteMBsec.Name = "MaxWriteMBsec";
@@ -412,8 +442,8 @@
             // MaxMBsec
             // 
             this.MaxMBsec.DataPropertyName = "MaxMBsec";
-            dataGridViewCellStyle12.Format = "N1";
-            this.MaxMBsec.DefaultCellStyle = dataGridViewCellStyle12;
+            dataGridViewCellStyle14.Format = "N1";
+            this.MaxMBsec.DefaultCellStyle = dataGridViewCellStyle14;
             this.MaxMBsec.HeaderText = "Max MB/sec";
             this.MaxMBsec.MinimumWidth = 6;
             this.MaxMBsec.Name = "MaxMBsec";
@@ -424,8 +454,8 @@
             // IOPs
             // 
             this.IOPs.DataPropertyName = "IOPs";
-            dataGridViewCellStyle13.Format = "N0";
-            this.IOPs.DefaultCellStyle = dataGridViewCellStyle13;
+            dataGridViewCellStyle15.Format = "N0";
+            this.IOPs.DefaultCellStyle = dataGridViewCellStyle15;
             this.IOPs.HeaderText = "IOPs";
             this.IOPs.MinimumWidth = 6;
             this.IOPs.Name = "IOPs";
@@ -435,8 +465,8 @@
             // ReadIOPs
             // 
             this.ReadIOPs.DataPropertyName = "ReadIOPs";
-            dataGridViewCellStyle14.Format = "N0";
-            this.ReadIOPs.DefaultCellStyle = dataGridViewCellStyle14;
+            dataGridViewCellStyle16.Format = "N0";
+            this.ReadIOPs.DefaultCellStyle = dataGridViewCellStyle16;
             this.ReadIOPs.HeaderText = "Read IOPs";
             this.ReadIOPs.MinimumWidth = 6;
             this.ReadIOPs.Name = "ReadIOPs";
@@ -447,8 +477,8 @@
             // WriteIOPs
             // 
             this.WriteIOPs.DataPropertyName = "WriteIOPs";
-            dataGridViewCellStyle15.Format = "N0";
-            this.WriteIOPs.DefaultCellStyle = dataGridViewCellStyle15;
+            dataGridViewCellStyle17.Format = "N0";
+            this.WriteIOPs.DefaultCellStyle = dataGridViewCellStyle17;
             this.WriteIOPs.HeaderText = "Write IOPs";
             this.WriteIOPs.MinimumWidth = 6;
             this.WriteIOPs.Name = "WriteIOPs";
@@ -459,8 +489,8 @@
             // MaxReadIOPs
             // 
             this.MaxReadIOPs.DataPropertyName = "MaxReadIOPs";
-            dataGridViewCellStyle16.Format = "N0";
-            this.MaxReadIOPs.DefaultCellStyle = dataGridViewCellStyle16;
+            dataGridViewCellStyle18.Format = "N0";
+            this.MaxReadIOPs.DefaultCellStyle = dataGridViewCellStyle18;
             this.MaxReadIOPs.HeaderText = "Max Read IOPs";
             this.MaxReadIOPs.MinimumWidth = 6;
             this.MaxReadIOPs.Name = "MaxReadIOPs";
@@ -471,8 +501,8 @@
             // MaxWriteIOPs
             // 
             this.MaxWriteIOPs.DataPropertyName = "MaxWriteIOPs";
-            dataGridViewCellStyle17.Format = "N0";
-            this.MaxWriteIOPs.DefaultCellStyle = dataGridViewCellStyle17;
+            dataGridViewCellStyle19.Format = "N0";
+            this.MaxWriteIOPs.DefaultCellStyle = dataGridViewCellStyle19;
             this.MaxWriteIOPs.HeaderText = "Max Write IOPs";
             this.MaxWriteIOPs.MinimumWidth = 6;
             this.MaxWriteIOPs.Name = "MaxWriteIOPs";
@@ -483,8 +513,8 @@
             // MaxIOPs
             // 
             this.MaxIOPs.DataPropertyName = "MaxIOPs";
-            dataGridViewCellStyle18.Format = "N0";
-            this.MaxIOPs.DefaultCellStyle = dataGridViewCellStyle18;
+            dataGridViewCellStyle20.Format = "N0";
+            this.MaxIOPs.DefaultCellStyle = dataGridViewCellStyle20;
             this.MaxIOPs.HeaderText = "Max IOPs";
             this.MaxIOPs.MinimumWidth = 6;
             this.MaxIOPs.Name = "MaxIOPs";
@@ -537,6 +567,8 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn WaitMsPerSec;
         private System.Windows.Forms.DataGridViewTextBoxColumn LatchWaitMsPerSec;
         private System.Windows.Forms.DataGridViewTextBoxColumn Latency;
+        private System.Windows.Forms.DataGridViewTextBoxColumn ReadLatency;
+        private System.Windows.Forms.DataGridViewTextBoxColumn WriteLatency;
         private System.Windows.Forms.DataGridViewTextBoxColumn MBsec;
         private System.Windows.Forms.DataGridViewTextBoxColumn MaxReadMBsec;
         private System.Windows.Forms.DataGridViewTextBoxColumn MaxWriteMBsec;

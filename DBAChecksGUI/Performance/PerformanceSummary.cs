@@ -16,6 +16,7 @@ namespace DBAChecksGUI.Performance
 
         public List<Int32> InstanceIDs;
         public string ConnectionString;
+        public string TagIDs;
 
         public PerformanceSummary()
         {
@@ -66,9 +67,17 @@ namespace DBAChecksGUI.Performance
                 {
                     cn.Open();
                     SqlCommand cmd = new SqlCommand("dbo.PerformanceSummary_Get", cn);
-                    cmd.Parameters.AddWithValue("InstanceIDs", string.Join(",", InstanceIDs));
+                    if (InstanceIDs.Count > 0)
+                    {
+                        cmd.Parameters.AddWithValue("InstanceIDs", string.Join(",", InstanceIDs));
+                    }
+                    else
+                    {
+                        cmd.Parameters.AddWithValue("TagIDs", TagIDs);
+                    }
                     cmd.Parameters.AddWithValue("FromDate", fromDate);
                     cmd.Parameters.AddWithValue("ToDate",toDate);
+                    
                     cmd.CommandType = CommandType.StoredProcedure;
                     SqlDataAdapter da = new SqlDataAdapter(cmd);
                     DataTable dt = new DataTable();
@@ -146,6 +155,21 @@ namespace DBAChecksGUI.Performance
             }
             RefreshData();
             tsCustom.Checked = true;
+        }
+
+        private void dgv_RowsAdded(object sender, DataGridViewRowsAddedEventArgs e)
+        {
+            for (Int32 idx = e.RowIndex; idx < e.RowIndex + e.RowCount; idx += 1)
+            {
+                var row = (DataRowView)dgv.Rows[idx].DataBoundItem;
+               
+
+                dgv.Rows[idx].Cells["AvgCPU"].Style.BackColor = DBAChecksStatus.GetStatusColour((DBAChecksStatus.DBAChecksStatusEnum)row["AvgCPUStatus"]);
+                dgv.Rows[idx].Cells["ReadLatency"].Style.BackColor = DBAChecksStatus.GetStatusColour((DBAChecksStatus.DBAChecksStatusEnum)row["ReadLatencyStatus"]);
+                dgv.Rows[idx].Cells["WriteLatency"].Style.BackColor = DBAChecksStatus.GetStatusColour((DBAChecksStatus.DBAChecksStatusEnum)row["WriteLatencyStatus"]);
+                dgv.Rows[idx].Cells["CriticalWaitMsPerSec"].Style.BackColor = DBAChecksStatus.GetStatusColour((DBAChecksStatus.DBAChecksStatusEnum)row["CriticalWaitStatus"]);
+            }
+             
         }
     }
 }

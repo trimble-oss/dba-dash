@@ -189,7 +189,23 @@ namespace DBAChecksGUI
             }
             if(tabs.SelectedTab== tabPerformanceSummary)
             {
-                performanceSummary1.InstanceIDs = instanceIDs;
+                if (n.Type == SQLTreeItem.TreeType.DBAChecksRoot)
+                {
+                    performanceSummary1.TagIDs = String.Join(",", SelectedTags());
+                    performanceSummary1.InstanceIDs = new List<int>();
+                }
+                else
+                {
+                    if (n.InstanceID > 0)
+                    {
+                        performanceSummary1.InstanceIDs = instanceIDs;
+                    }
+                    else
+                    {
+                        performanceSummary1.InstanceIDs = ChildInstanceIDs(n);
+                    }
+                    performanceSummary1.TagIDs = "";
+                }
                 performanceSummary1.ConnectionString = connectionString;
                 performanceSummary1.RefreshData();
             }
@@ -232,6 +248,22 @@ namespace DBAChecksGUI
             return instanceIDs;
         }
 
+        private List<Int32> ChildInstanceIDs(SQLTreeItem n)
+        {
+            var instanceIDs = new List<Int32>();
+            if(n.Nodes.Count==1 && n.Type == SQLTreeItem.TreeType.Instance)
+            {
+                addDatabases(n);
+            }
+            foreach (SQLTreeItem itm in n.Nodes)
+            {
+                if (itm.InstanceID > 0)
+                {
+                    instanceIDs.Add(itm.InstanceID);
+                }
+            }
+            return instanceIDs;
+        }
 
 
         #region Tree
@@ -383,10 +415,9 @@ ORDER BY SchemaName,ObjectName
             }
             else if (n.Type == SQLTreeItem.TreeType.Instance)
             {
-                            
+                allowedTabs.Add(tabPerformanceSummary);
                 if (n.InstanceID > 0){
-                    allowedTabs.Add(tabPerformance);
-                    allowedTabs.Add(tabPerformanceSummary);
+                    allowedTabs.Add(tabPerformance);                  
                     allowedTabs.Add(tabSummary);
                     allowedTabs.Add(tabBackups);
                     allowedTabs.Add(tabDrives);              

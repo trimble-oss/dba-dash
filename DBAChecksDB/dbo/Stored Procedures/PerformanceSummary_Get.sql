@@ -1,7 +1,8 @@
 ﻿CREATE PROC PerformanceSummary_Get(
 	@InstanceIDs VARCHAR(MAX)=NULL,
 	@FromDate DATETIME2(3)=NULL,
-	@ToDate DATETIME2(3)=NULL
+	@ToDate DATETIME2(3)=NULL,
+	@TagIDs VARCHAR(MAX)=NULL
 )
 AS
 IF @FromDate IS NULL
@@ -12,15 +13,15 @@ IF @ToDate IS NULL
 DECLARE @Instances TABLE(
 	InstanceID INT PRIMARY KEY
 )
+
 IF @InstanceIDs IS NULL
 BEGIN
 	INSERT INTO @Instances
 	(
-	    InstanceID
+		InstanceID
 	)
-	SELECT InstanceID 
-	FROM dbo.Instances 
-	WHERE IsActive=1
+	SELECT InstanceID
+	FROM dbo.InstancesMatchingTags(@TagIDs)
 END 
 ELSE 
 BEGIN
@@ -30,6 +31,7 @@ BEGIN
 	)
 	SELECT value
 	FROM STRING_SPLIT(@InstanceIDs,',')
+
 END;
 
 WITH io1 AS (
@@ -102,6 +104,7 @@ SELECT i.InstanceID,
 		i.ConnectionID,
        i.Instance,
 	   cpuAgg.AvgCPU,
+	   CASE WHEN cpuAgg.AvgCPU>90 THEN 1 WHEN cpuAgg.AvgCPU >75 THEN 2 WHEN cpuAgg.AvgCPU<50 THEN 4 ELSE 3 END AS AvgCPUStatus,
 	   cpuAgg.MaxCPU,
        io2.ReadIOPs,
        io2.WriteIOPs,
@@ -110,7 +113,9 @@ SELECT i.InstanceID,
        io2.WriteMBsec,
 	   io2.MBsec,
        io2.ReadLatency,
+	   CASE WHEN io2.ReadLatency>50 THEN 1 WHEN io2.ReadLatency>10 THEN 2 WHEN io2.ReadLatency<=10 THEN 4 ELSE 3 END AS ReadLatencyStatus,
        io2.WriteLatency,
+	   CASE WHEN io2.WriteLatency>50 THEN 1 WHEN io2.WriteLatency>10 THEN 2 WHEN io2.WriteLatency<=10 THEN 4 ELSE 3 END AS WriteLatencyStatus,
        io2.Latency,
        io2.MaxReadIOPs,
        io2.MaxWriteIOPs,
@@ -119,6 +124,7 @@ SELECT i.InstanceID,
        io2.MaxWriteMBsec,
        io2.MaxMBsec,
        wait.CriticalWaitMsPerSec,
+	   CASE WHEN wait.CriticalWaitMsPerSec=0 THEN 4 WHEN wait.CriticalWaitMsPerSec>1000 THEN 1 WHEN wait.CriticalWaitMsPerSec>1 THEN 2 ELSE 3 END AS CriticalWaitStatus, 
        wait.LatchWaitMsPerSec,
        wait.LockWaitMsPerSec,
        wait.IOWaitMsPerSec,
