@@ -33,6 +33,7 @@ namespace DBAChecks
 
         public string SchemaSnapshotCron;
         public string SchemaSnapshotDBs;
+        public bool SchemaSnapshotOnServiceStart = true;
 
 
         [JsonIgnore]

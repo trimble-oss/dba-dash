@@ -8,6 +8,7 @@ using System.Data.SqlClient;
 using System.IO;
 using System.Linq;
 using System.Runtime.Serialization.Formatters.Binary;
+using System.Threading.Tasks;
 using static DBAChecks.DBAChecksConnection;
 
 namespace DBAChecksService
@@ -16,8 +17,7 @@ namespace DBAChecksService
     {
 
 
-
-        public void Execute(IJobExecutionContext context)
+        public Task Execute(IJobExecutionContext context)
         {
 
             JobDataMap dataMap = context.JobDetail.JobDataMap;
@@ -64,12 +64,12 @@ namespace DBAChecksService
                         }
                         catch(Exception ex)
                         {
-                            DBAChecksService.ErrorLogger(ex, "Import from folder");
+                            DBAChecksService.ScheduleService.ErrorLogger(ex, "Import from folder");
                         }
                     }
                     else
                     {
-                        DBAChecksService.ErrorLogger(new Exception("Source directory doesn't exist: " + folder), "Import from Folder");
+                        DBAChecksService.ScheduleService.ErrorLogger(new Exception("Source directory doesn't exist: " + folder), "Import from Folder");
                     }
                 }
                 else if (cfg.SourceConnection.Type == ConnectionType.AWSS3)
@@ -112,7 +112,7 @@ namespace DBAChecksService
                     }
                     catch(Exception ex)
                     {
-                        DBAChecksService.ErrorLogger(ex, "Import from S3");
+                        DBAChecksService.ScheduleService.ErrorLogger(ex, "Import from S3");
                     }
        
                 }
@@ -141,22 +141,22 @@ namespace DBAChecksService
                         }
                         catch (Exception ex)
                         {
-                            DBAChecksService.ErrorLogger(ex, "Write to destination");
+                            DBAChecksService.ScheduleService.ErrorLogger(ex, "Write to destination");
                         }
                     }
                     catch (Exception ex)
                     {
-                        DBAChecksService.ErrorLogger(ex, collectDescription);
+                        DBAChecksService.ScheduleService.ErrorLogger(ex, collectDescription);
                     }
 
                 }
             }
             catch (Exception ex)
             {
-                DBAChecksService.ErrorLogger(ex, "JobExecute");
+                DBAChecksService.ScheduleService.ErrorLogger(ex, "JobExecute");
             }
 
-
+            return Task.CompletedTask;
 
         }
 

@@ -2,6 +2,7 @@
 using System;
 using System.Diagnostics;
 using System.Reflection;
+using Topshelf;
 
 namespace DBAChecksService
 {
@@ -9,34 +10,26 @@ namespace DBAChecksService
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("Agent Version:" + Assembly.GetEntryAssembly().GetName().Version);
-            string jsonConfigPath = System.IO.Path.Combine(AppContext.BaseDirectory, "ServiceConfig.json");
-            if (!(System.IO.File.Exists(jsonConfigPath)))
+            var rc = HostFactory.Run(x =>
             {
-                EventLog.WriteEntry("DBAChecksService", "ServiceConfig.json file is missing.  Please create.", EventLogEntryType.Error);
-                throw new Exception("ServiceConfig.json file is missing.Please create.");
-            }
-            string jsonConfig = System.IO.File.ReadAllText(jsonConfigPath);
-            var conf = CollectionConfig.Deserialize(jsonConfig);
-            if (conf.WasEncrypted())
-            {
-                Console.WriteLine("Saving ServiceConfig.json with encrypted password");
+                x.Service<ScheduleService>(s =>
+                {
+                    s.ConstructUsing(name => new ScheduleService());
+                    s.WhenStarted(tc => tc.Start());
+                    s.WhenStopped(tc => tc.Stop());
+                });
+          
 
-                string confString = conf.Serialize();
-                System.IO.File.WriteAllText(jsonConfigPath, confString);
-            }
+                x.SetDescription("Collect data from SQL Instances");
+                x.SetDisplayName("DBAChecksService");
+                x.SetServiceName("DBAChecksService");
+            });
 
-
-            ConfigureService.Configure(conf);
+            var exitCode = (int)Convert.ChangeType(rc, rc.GetTypeCode());
+            Environment.ExitCode = exitCode;
         }
 
-        private static void CreateEventLogSource()
-        {
-            if (!EventLog.SourceExists("DBAChecksService"))
-            {
-                EventLog.CreateEventSource("DBAChecksService", "Application");
-            }
-        }
+
     }
 
 

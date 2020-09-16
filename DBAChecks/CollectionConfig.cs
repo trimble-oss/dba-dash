@@ -1,6 +1,7 @@
 ﻿using DBAChecksService;
 using Microsoft.SqlServer.Management.Smo;
 using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 
 namespace DBAChecks
@@ -8,9 +9,9 @@ namespace DBAChecks
 
     public class CollectionConfig
     {
+        public Int32 ServiceThreads=-1;
         private string _secretKey;
         private bool wasEncryptionPerformed = false;
-        private bool isEncrypted = false;
         private string myString = "g&hAs2&mVOLwE6DqO!I5";
         public SchemaSnapshotDBOptions SchemaSnapshotOptions=null;
         public bool BinarySerialization { get; set; } = false;

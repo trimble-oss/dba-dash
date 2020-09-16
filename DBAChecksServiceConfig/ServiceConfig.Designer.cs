@@ -56,6 +56,7 @@
             this.bttnCancel = new System.Windows.Forms.Button();
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabPage3 = new System.Windows.Forms.TabPage();
+            this.lblVersionInfo = new System.Windows.Forms.Label();
             this.bttnDeployDatabase = new System.Windows.Forms.Button();
             this.chkCustomizeMaintenanceCron = new System.Windows.Forms.CheckBox();
             this.label7 = new System.Windows.Forms.Label();
@@ -77,7 +78,7 @@
             this.bttnRemove = new System.Windows.Forms.Button();
             this.tabPage2 = new System.Windows.Forms.TabPage();
             this.tabPage4 = new System.Windows.Forms.TabPage();
-            this.lblVersionInfo = new System.Windows.Forms.Label();
+            this.chkSchemaSnapshotOnStart = new System.Windows.Forms.CheckBox();
             ((System.ComponentModel.ISupportInitialize)(this.errorProvider1)).BeginInit();
             this.tabControl1.SuspendLayout();
             this.tabPage3.SuspendLayout();
@@ -371,6 +372,15 @@
             this.tabPage3.Text = "Destination:";
             this.tabPage3.UseVisualStyleBackColor = true;
             // 
+            // lblVersionInfo
+            // 
+            this.lblVersionInfo.AutoSize = true;
+            this.lblVersionInfo.Location = new System.Drawing.Point(103, 150);
+            this.lblVersionInfo.Name = "lblVersionInfo";
+            this.lblVersionInfo.Size = new System.Drawing.Size(93, 17);
+            this.lblVersionInfo.TabIndex = 6;
+            this.lblVersionInfo.Text = "version info...";
+            // 
             // bttnDeployDatabase
             // 
             this.bttnDeployDatabase.Location = new System.Drawing.Point(103, 111);
@@ -535,6 +545,7 @@
             // 
             // tabPage7
             // 
+            this.tabPage7.Controls.Add(this.chkSchemaSnapshotOnStart);
             this.tabPage7.Controls.Add(this.label8);
             this.tabPage7.Controls.Add(this.txtSnapshotCron);
             this.tabPage7.Controls.Add(this.label2);
@@ -625,14 +636,15 @@
             this.tabPage4.Text = "Service";
             this.tabPage4.UseVisualStyleBackColor = true;
             // 
-            // lblVersionInfo
+            // chkSchemaSnapshotOnStart
             // 
-            this.lblVersionInfo.AutoSize = true;
-            this.lblVersionInfo.Location = new System.Drawing.Point(103, 150);
-            this.lblVersionInfo.Name = "lblVersionInfo";
-            this.lblVersionInfo.Size = new System.Drawing.Size(93, 17);
-            this.lblVersionInfo.TabIndex = 6;
-            this.lblVersionInfo.Text = "version info...";
+            this.chkSchemaSnapshotOnStart.AutoSize = true;
+            this.chkSchemaSnapshotOnStart.Location = new System.Drawing.Point(6, 107);
+            this.chkSchemaSnapshotOnStart.Name = "chkSchemaSnapshotOnStart";
+            this.chkSchemaSnapshotOnStart.Size = new System.Drawing.Size(272, 21);
+            this.chkSchemaSnapshotOnStart.TabIndex = 21;
+            this.chkSchemaSnapshotOnStart.Text = "Run schema snapshot on service start";
+            this.chkSchemaSnapshotOnStart.UseVisualStyleBackColor = true;
             // 
             // ServiceConfig
             // 
@@ -723,6 +735,7 @@
         private System.Windows.Forms.TabPage tabPage7;
         private System.Windows.Forms.Button bttnDeployDatabase;
         private System.Windows.Forms.Label lblVersionInfo;
+        private System.Windows.Forms.CheckBox chkSchemaSnapshotOnStart;
     }
 }
 

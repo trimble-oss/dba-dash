@@ -38,6 +38,7 @@ namespace DBAChecksServiceConfig
             {
                 src.Schedules = src.GetSchedule();
             }
+            src.SchemaSnapshotOnServiceStart = chkSchemaSnapshotOnStart.Checked;
             if (txtSnapshotDBs.Text.Trim().Length > 0)
             {
                 if (!CronExpression.IsValidExpression(txtSnapshotCron.Text))
@@ -597,6 +598,7 @@ namespace DBAChecksServiceConfig
                 chkCustomizeSchedule.Checked = src.Schedules != null;
                 txtSnapshotCron.Text = src.SchemaSnapshotCron;
                 txtSnapshotDBs.Text = src.SchemaSnapshotDBs;
+                chkSchemaSnapshotOnStart.Checked = src.SchemaSnapshotOnServiceStart;
 
             }
         }

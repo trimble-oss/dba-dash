@@ -5,6 +5,7 @@ using Quartz;
 using System;
 using System.Data;
 using System.Data.SqlClient;
+using System.Threading.Tasks;
 using static DBAChecks.DBAChecksConnection;
 
 namespace DBAChecksService
@@ -13,7 +14,7 @@ namespace DBAChecksService
     {
 
 
-        public void Execute(IJobExecutionContext context)
+        public Task Execute(IJobExecutionContext context)
         {
             JobDataMap dataMap = context.JobDetail.JobDataMap;
 
@@ -86,7 +87,7 @@ namespace DBAChecksService
                     }
                 }
             }
-
+            return Task.CompletedTask;
         }
 
     }
