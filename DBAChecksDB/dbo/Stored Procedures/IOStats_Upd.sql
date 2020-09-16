@@ -1,5 +1,6 @@
 ﻿CREATE PROC [dbo].[IOStats_Upd](@IOStats dbo.IOStats READONLY,@InstanceID INT,@SnapshotDate DATETIME2(2))
 AS
+DECLARE @Ref VARCHAR(30)='IOStats'
 INSERT INTO dbo.IOStats
 (
     InstanceID,
@@ -76,3 +77,7 @@ SELECT @InstanceID InstanceID,
     io_stall,
     size_on_disk_bytes
 FROM @IOStats
+
+EXEC dbo.CollectionDates_Upd @InstanceID = @InstanceID,  
+										@Reference = @Ref,
+										@SnapshotDate = @SnapshotDate

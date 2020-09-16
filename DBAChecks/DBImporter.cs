@@ -159,7 +159,7 @@ namespace DBAChecks
                 }
                 catch (Exception ex)
                 {
-                    logError("Import:ServerExtraProperties", ex.Message, ds);
+                    logError("ServerExtraProperties", ex.Message, ds);
                 }
             }
         }
@@ -186,37 +186,10 @@ namespace DBAChecks
             }
             catch (Exception ex)
             {
-                logError("Import:" + dt.TableName, ex.Message, dt);
+                logError(dt.TableName, ex.Message, dt);
             }
         }
 
-        private void update(string connectionString, Int32 instanceID, DateTime SnapshotDate, DataSet ds, string TableName)
-        {
-            if (ds.Tables.Contains(TableName))
-            {
-                try
-                {
-                    var cn = new SqlConnection(connectionString);
-                    using (cn)
-                    {
-                        cn.Open();
-                        SqlCommand cmd = new SqlCommand(TableName + "_Upd", cn);
-                        if (ds.Tables[TableName].Rows.Count > 0)
-                        {
-                            cmd.Parameters.AddWithValue(TableName, ds.Tables[TableName]);
-                        }
-                        cmd.Parameters.AddWithValue("InstanceID", instanceID);
-                        cmd.Parameters.AddWithValue("SnapshotDate", SnapshotDate);
-                        cmd.CommandType = CommandType.StoredProcedure;
-                        cmd.ExecuteNonQuery();
-                    }
-                }
-                catch (Exception ex)
-                {
-                    logError("Import:" + TableName, ex.Message, ds);
-                }
-            }
-        }
 
 
         private void InsertErrors(string connectionString, Int32 instanceID, DateTime SnapshotDate, DataSet ds)
@@ -307,7 +280,7 @@ namespace DBAChecks
                 }
                 catch (Exception ex)
                 {
-                    logError("Import:Database", ex.Message, ds);
+                    logError("Database", ex.Message, ds);
                 }
             }
         }

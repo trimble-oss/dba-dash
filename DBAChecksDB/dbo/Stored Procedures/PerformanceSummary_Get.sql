@@ -1,4 +1,4 @@
-﻿CREATE PROC PerformanceSummary_Get(
+﻿CREATE PROC [dbo].[PerformanceSummary_Get](
 	@InstanceIDs VARCHAR(MAX)=NULL,
 	@FromDate DATETIME2(3)=NULL,
 	@ToDate DATETIME2(3)=NULL,
@@ -82,7 +82,7 @@ WITH io1 AS (
 , wait1 AS (
 	SELECT W.InstanceID,
 		W.WaitTypeID,
-		SUM(W.wait_time_ms)*1000.0 / SUM(W.sample_ms_diff) WaitMsPerSec
+		SUM(W.wait_time_ms)*1000.0 / MAX(SUM(W.sample_ms_diff)) OVER(PARTITION BY InstanceID) WaitMsPerSec
 	FROM dbo.Waits W 
 	WHERE W.SnapshotDate>= @FromDate
 	AND W.SnapshotDate < @ToDate

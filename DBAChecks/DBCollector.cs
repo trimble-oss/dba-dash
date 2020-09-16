@@ -454,6 +454,7 @@ namespace DBAChecks
                 cn.Open();
                 DataTable dt = new DataTable();
                 SqlDataAdapter da = new SqlDataAdapter(SQL, cn);
+                da.SelectCommand.CommandTimeout = 60;
                 if (param != null)
                 {
                     da.SelectCommand.Parameters.AddRange(param);
