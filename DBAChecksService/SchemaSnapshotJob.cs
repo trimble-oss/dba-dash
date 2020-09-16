@@ -34,7 +34,7 @@ namespace DBAChecksService
             var dsSnapshot = collector.Data;
             var dbs = schemaSnapshotDBs.Split(',');
 
-            var cn = new System.Data.SqlClient.SqlConnection(connectionString);
+            var cn = new Microsoft.Data.SqlClient.SqlConnection(connectionString);
             var ss = new SchemaSnapshotDB(connectionString, schemaSnapshotOptions);
             var instance = new Microsoft.SqlServer.Management.Smo.Server(new Microsoft.SqlServer.Management.Common.ServerConnection(cn));
            

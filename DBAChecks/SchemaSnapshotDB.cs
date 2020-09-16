@@ -107,7 +107,7 @@ namespace DBAChecks
         public DataTable SnapshotDB(string DBName)
         {
 
-            var cn = new SqlConnection(_connectionString);
+            var cn = new Microsoft.Data.SqlClient.SqlConnection(_connectionString);
 
             DataTable dtSchema = new DataTable("Schema_" + DBName);
             dtSchema.Columns.Add("ObjectName");
