@@ -245,6 +245,12 @@
       <DependentUpon>DBDeploy.cs</DependentUpon>
     </Compile>
     <Compile Include="DBValidations.cs" />
+    <Compile Include="DBConnection.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="DBConnection.Designer.cs">
+      <DependentUpon>DBConnection.cs</DependentUpon>
+    </Compile>
     <Compile Include="ServiceConfig.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -255,6 +261,9 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <EmbeddedResource Include="DBDeploy.resx">
       <DependentUpon>DBDeploy.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="DBConnection.resx">
+      <DependentUpon>DBConnection.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="ServiceConfig.resx">
       <DependentUpon>ServiceConfig.cs</DependentUpon>
@@ -286,6 +295,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\ASX_Copy_blue_16x.png" />
+    <None Include="Resources\Connect_16x.png" />
     <Content Include="services.ico" />
   </ItemGroup>
   <ItemGroup>

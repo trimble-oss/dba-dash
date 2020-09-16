@@ -606,19 +606,70 @@ namespace DBAChecksServiceConfig
         private void bttnDeployDatabase_Click(object sender, EventArgs e)
         {
             var frm = new DBDeploy();
-            frm.ConnectionString = txtDestination.Text;
+            var cn =  new DBAChecksConnection(txtDestination.Text);
+            if (cn.Type == ConnectionType.SQL)
+            {
+                frm.ConnectionString = cn.ConnectionString;
+            }
+            else
+            {
+                if (setDestination())
+                {
+                    cn = new DBAChecksConnection(txtDestination.Text);
+                    frm.ConnectionString = cn.ConnectionString;
+                }
+                else
+                {
+                    return;
+                }
+
+            }
+
             frm.DACVersion = dacVersion;
             frm.ShowDialog();
-            if (frm.ConnectionString != txtDestination.Text)
+            if (frm.DatabaseName != cn.InitialCatalog())
             {
                 if(MessageBox.Show("Update connection string?","Update", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
                 {
-                    txtDestination.Text = frm.ConnectionString;
+                    SqlConnectionStringBuilder builder = new SqlConnectionStringBuilder(txtDestination.Text);
+                    builder.InitialCatalog = frm.DatabaseName;
+                    txtDestination.Text = builder.ConnectionString;
                     destinationChanged();
                 }
             }
             validateDestination();
 
+        }
+
+        private bool setDestination()
+        {
+            var frm = new DBConnection();
+            var cn = new DBAChecksConnection(txtDestination.Text);
+            if (cn.Type == ConnectionType.SQL)
+            {
+                frm.ConnectionString = cn.ConnectionString;
+            }
+            frm.ShowDialog();
+            if (frm.DialogResult == DialogResult.OK)
+            {
+
+                var builder = new SqlConnectionStringBuilder(frm.ConnectionString);
+                if(builder.InitialCatalog==null || builder.InitialCatalog.Length == 0)
+                {
+                    builder.InitialCatalog = "DBAChecksDB";
+                }
+                cn = new DBAChecksConnection(builder.ConnectionString) ;
+
+                txtDestination.Text = cn.EncryptedConnectionString;
+                destinationChanged();
+                return true;
+            }
+            return false;
+        }
+
+        private void bttnConnect_Click(object sender, EventArgs e)
+        {
+            setDestination();
         }
     }
 }

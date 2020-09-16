@@ -71,6 +71,7 @@
             this.lblSlow = new System.Windows.Forms.Label();
             this.numSlowQueryThreshold = new System.Windows.Forms.NumericUpDown();
             this.tabPage7 = new System.Windows.Forms.TabPage();
+            this.chkSchemaSnapshotOnStart = new System.Windows.Forms.CheckBox();
             this.label8 = new System.Windows.Forms.Label();
             this.txtSnapshotCron = new System.Windows.Forms.TextBox();
             this.label2 = new System.Windows.Forms.Label();
@@ -78,7 +79,7 @@
             this.bttnRemove = new System.Windows.Forms.Button();
             this.tabPage2 = new System.Windows.Forms.TabPage();
             this.tabPage4 = new System.Windows.Forms.TabPage();
-            this.chkSchemaSnapshotOnStart = new System.Windows.Forms.CheckBox();
+            this.bttnConnect = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.errorProvider1)).BeginInit();
             this.tabControl1.SuspendLayout();
             this.tabPage3.SuspendLayout();
@@ -359,6 +360,7 @@
             // 
             // tabPage3
             // 
+            this.tabPage3.Controls.Add(this.bttnConnect);
             this.tabPage3.Controls.Add(this.lblVersionInfo);
             this.tabPage3.Controls.Add(this.bttnDeployDatabase);
             this.tabPage3.Controls.Add(this.chkCustomizeMaintenanceCron);
@@ -558,6 +560,16 @@
             this.tabPage7.Text = "Schema Snapshots";
             this.tabPage7.UseVisualStyleBackColor = true;
             // 
+            // chkSchemaSnapshotOnStart
+            // 
+            this.chkSchemaSnapshotOnStart.AutoSize = true;
+            this.chkSchemaSnapshotOnStart.Location = new System.Drawing.Point(6, 107);
+            this.chkSchemaSnapshotOnStart.Name = "chkSchemaSnapshotOnStart";
+            this.chkSchemaSnapshotOnStart.Size = new System.Drawing.Size(272, 21);
+            this.chkSchemaSnapshotOnStart.TabIndex = 21;
+            this.chkSchemaSnapshotOnStart.Text = "Run schema snapshot on service start";
+            this.chkSchemaSnapshotOnStart.UseVisualStyleBackColor = true;
+            // 
             // label8
             // 
             this.label8.AutoSize = true;
@@ -636,15 +648,15 @@
             this.tabPage4.Text = "Service";
             this.tabPage4.UseVisualStyleBackColor = true;
             // 
-            // chkSchemaSnapshotOnStart
+            // bttnConnect
             // 
-            this.chkSchemaSnapshotOnStart.AutoSize = true;
-            this.chkSchemaSnapshotOnStart.Location = new System.Drawing.Point(6, 107);
-            this.chkSchemaSnapshotOnStart.Name = "chkSchemaSnapshotOnStart";
-            this.chkSchemaSnapshotOnStart.Size = new System.Drawing.Size(272, 21);
-            this.chkSchemaSnapshotOnStart.TabIndex = 21;
-            this.chkSchemaSnapshotOnStart.Text = "Run schema snapshot on service start";
-            this.chkSchemaSnapshotOnStart.UseVisualStyleBackColor = true;
+            this.bttnConnect.Image = global::DBAChecksServiceConfig.Properties.Resources.Connect_16x;
+            this.bttnConnect.Location = new System.Drawing.Point(659, 20);
+            this.bttnConnect.Name = "bttnConnect";
+            this.bttnConnect.Size = new System.Drawing.Size(28, 23);
+            this.bttnConnect.TabIndex = 7;
+            this.bttnConnect.UseVisualStyleBackColor = true;
+            this.bttnConnect.Click += new System.EventHandler(this.bttnConnect_Click);
             // 
             // ServiceConfig
             // 
@@ -736,6 +748,7 @@
         private System.Windows.Forms.Button bttnDeployDatabase;
         private System.Windows.Forms.Label lblVersionInfo;
         private System.Windows.Forms.CheckBox chkSchemaSnapshotOnStart;
+        private System.Windows.Forms.Button bttnConnect;
     }
 }
 

@@ -49,22 +49,6 @@
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle19 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle20 = new System.Windows.Forms.DataGridViewCellStyle();
             this.dgv = new System.Windows.Forms.DataGridView();
-            this.toolStrip1 = new System.Windows.Forms.ToolStrip();
-            this.tsTime = new System.Windows.Forms.ToolStripDropDownButton();
-            this.toolStripMenuItem2 = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
-            this.ts30Min = new System.Windows.Forms.ToolStripMenuItem();
-            this.ts1Hr = new System.Windows.Forms.ToolStripMenuItem();
-            this.ts2Hr = new System.Windows.Forms.ToolStripMenuItem();
-            this.ts3Hr = new System.Windows.Forms.ToolStripMenuItem();
-            this.ts6Hr = new System.Windows.Forms.ToolStripMenuItem();
-            this.ts12Hr = new System.Windows.Forms.ToolStripMenuItem();
-            this.dayToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.days7ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
-            this.tsCustom = new System.Windows.Forms.ToolStripMenuItem();
-            this.tsRefresh = new System.Windows.Forms.ToolStripButton();
-            this.tsColumns = new System.Windows.Forms.ToolStripDropDownButton();
             this.ConnectionID = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.AvgCPU = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.MaxCPU = new System.Windows.Forms.DataGridViewTextBoxColumn();
@@ -86,6 +70,22 @@
             this.MaxReadIOPs = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.MaxWriteIOPs = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.MaxIOPs = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.toolStrip1 = new System.Windows.Forms.ToolStrip();
+            this.tsTime = new System.Windows.Forms.ToolStripDropDownButton();
+            this.toolStripMenuItem2 = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
+            this.ts30Min = new System.Windows.Forms.ToolStripMenuItem();
+            this.ts1Hr = new System.Windows.Forms.ToolStripMenuItem();
+            this.ts2Hr = new System.Windows.Forms.ToolStripMenuItem();
+            this.ts3Hr = new System.Windows.Forms.ToolStripMenuItem();
+            this.ts6Hr = new System.Windows.Forms.ToolStripMenuItem();
+            this.ts12Hr = new System.Windows.Forms.ToolStripMenuItem();
+            this.dayToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.days7ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
+            this.tsCustom = new System.Windows.Forms.ToolStripMenuItem();
+            this.tsRefresh = new System.Windows.Forms.ToolStripButton();
+            this.tsColumns = new System.Windows.Forms.ToolStripDropDownButton();
             ((System.ComponentModel.ISupportInitialize)(this.dgv)).BeginInit();
             this.toolStrip1.SuspendLayout();
             this.SuspendLayout();
@@ -128,160 +128,6 @@
             this.dgv.TabIndex = 0;
             this.dgv.RowsAdded += new System.Windows.Forms.DataGridViewRowsAddedEventHandler(this.dgv_RowsAdded);
             // 
-            // toolStrip1
-            // 
-            this.toolStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
-            this.toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.tsTime,
-            this.tsRefresh,
-            this.tsColumns});
-            this.toolStrip1.Location = new System.Drawing.Point(0, 0);
-            this.toolStrip1.Name = "toolStrip1";
-            this.toolStrip1.Size = new System.Drawing.Size(1048, 31);
-            this.toolStrip1.TabIndex = 3;
-            this.toolStrip1.Text = "toolStrip1";
-            // 
-            // tsTime
-            // 
-            this.tsTime.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.tsTime.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.toolStripMenuItem2,
-            this.toolStripMenuItem1,
-            this.ts30Min,
-            this.ts1Hr,
-            this.ts2Hr,
-            this.ts3Hr,
-            this.ts6Hr,
-            this.ts12Hr,
-            this.dayToolStripMenuItem,
-            this.days7ToolStripMenuItem,
-            this.toolStripSeparator1,
-            this.tsCustom});
-            this.tsTime.Image = global::DBAChecksGUI.Properties.Resources.Time_16x;
-            this.tsTime.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsTime.Name = "tsTime";
-            this.tsTime.Size = new System.Drawing.Size(34, 28);
-            this.tsTime.Text = "Time";
-            // 
-            // toolStripMenuItem2
-            // 
-            this.toolStripMenuItem2.Name = "toolStripMenuItem2";
-            this.toolStripMenuItem2.Size = new System.Drawing.Size(143, 26);
-            this.toolStripMenuItem2.Tag = "5";
-            this.toolStripMenuItem2.Text = "5 Mins";
-            this.toolStripMenuItem2.Click += new System.EventHandler(this.tsTime_Click);
-            // 
-            // toolStripMenuItem1
-            // 
-            this.toolStripMenuItem1.Name = "toolStripMenuItem1";
-            this.toolStripMenuItem1.Size = new System.Drawing.Size(143, 26);
-            this.toolStripMenuItem1.Tag = "15";
-            this.toolStripMenuItem1.Text = "15 Mins";
-            this.toolStripMenuItem1.Click += new System.EventHandler(this.tsTime_Click);
-            // 
-            // ts30Min
-            // 
-            this.ts30Min.CheckOnClick = true;
-            this.ts30Min.Name = "ts30Min";
-            this.ts30Min.Size = new System.Drawing.Size(143, 26);
-            this.ts30Min.Tag = "30";
-            this.ts30Min.Text = "30 Mins";
-            this.ts30Min.Click += new System.EventHandler(this.tsTime_Click);
-            // 
-            // ts1Hr
-            // 
-            this.ts1Hr.Checked = true;
-            this.ts1Hr.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.ts1Hr.Name = "ts1Hr";
-            this.ts1Hr.Size = new System.Drawing.Size(143, 26);
-            this.ts1Hr.Tag = "60";
-            this.ts1Hr.Text = "1Hr";
-            this.ts1Hr.Click += new System.EventHandler(this.tsTime_Click);
-            // 
-            // ts2Hr
-            // 
-            this.ts2Hr.CheckOnClick = true;
-            this.ts2Hr.Name = "ts2Hr";
-            this.ts2Hr.Size = new System.Drawing.Size(143, 26);
-            this.ts2Hr.Tag = "120";
-            this.ts2Hr.Text = "2Hr";
-            this.ts2Hr.Click += new System.EventHandler(this.tsTime_Click);
-            // 
-            // ts3Hr
-            // 
-            this.ts3Hr.CheckOnClick = true;
-            this.ts3Hr.Name = "ts3Hr";
-            this.ts3Hr.Size = new System.Drawing.Size(143, 26);
-            this.ts3Hr.Tag = "180";
-            this.ts3Hr.Text = "3Hr";
-            this.ts3Hr.Click += new System.EventHandler(this.tsTime_Click);
-            // 
-            // ts6Hr
-            // 
-            this.ts6Hr.CheckOnClick = true;
-            this.ts6Hr.Name = "ts6Hr";
-            this.ts6Hr.Size = new System.Drawing.Size(143, 26);
-            this.ts6Hr.Tag = "360";
-            this.ts6Hr.Text = "6Hr";
-            this.ts6Hr.Click += new System.EventHandler(this.tsTime_Click);
-            // 
-            // ts12Hr
-            // 
-            this.ts12Hr.CheckOnClick = true;
-            this.ts12Hr.Name = "ts12Hr";
-            this.ts12Hr.Size = new System.Drawing.Size(143, 26);
-            this.ts12Hr.Tag = "720";
-            this.ts12Hr.Text = "12Hr";
-            this.ts12Hr.Click += new System.EventHandler(this.tsTime_Click);
-            // 
-            // dayToolStripMenuItem
-            // 
-            this.dayToolStripMenuItem.Name = "dayToolStripMenuItem";
-            this.dayToolStripMenuItem.Size = new System.Drawing.Size(143, 26);
-            this.dayToolStripMenuItem.Tag = "1440";
-            this.dayToolStripMenuItem.Text = "1 Day";
-            this.dayToolStripMenuItem.Click += new System.EventHandler(this.tsTime_Click);
-            // 
-            // days7ToolStripMenuItem
-            // 
-            this.days7ToolStripMenuItem.Name = "days7ToolStripMenuItem";
-            this.days7ToolStripMenuItem.Size = new System.Drawing.Size(143, 26);
-            this.days7ToolStripMenuItem.Tag = "10080";
-            this.days7ToolStripMenuItem.Text = "7 Days";
-            this.days7ToolStripMenuItem.Click += new System.EventHandler(this.tsTime_Click);
-            // 
-            // toolStripSeparator1
-            // 
-            this.toolStripSeparator1.Name = "toolStripSeparator1";
-            this.toolStripSeparator1.Size = new System.Drawing.Size(140, 6);
-            // 
-            // tsCustom
-            // 
-            this.tsCustom.Name = "tsCustom";
-            this.tsCustom.Size = new System.Drawing.Size(143, 26);
-            this.tsCustom.Tag = "-1";
-            this.tsCustom.Text = "Custom";
-            this.tsCustom.Click += new System.EventHandler(this.tsCustom_Click);
-            // 
-            // tsRefresh
-            // 
-            this.tsRefresh.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.tsRefresh.Image = global::DBAChecksGUI.Properties.Resources._112_RefreshArrow_Green_16x16_72;
-            this.tsRefresh.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsRefresh.Name = "tsRefresh";
-            this.tsRefresh.Size = new System.Drawing.Size(29, 28);
-            this.tsRefresh.Text = "Refresh";
-            this.tsRefresh.Click += new System.EventHandler(this.tsRefresh_Click);
-            // 
-            // tsColumns
-            // 
-            this.tsColumns.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.tsColumns.Image = global::DBAChecksGUI.Properties.Resources.Column_16x;
-            this.tsColumns.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsColumns.Name = "tsColumns";
-            this.tsColumns.Size = new System.Drawing.Size(34, 28);
-            this.tsColumns.Text = "Columns";
-            // 
             // ConnectionID
             // 
             this.ConnectionID.DataPropertyName = "ConnectionID";
@@ -301,7 +147,7 @@
             this.AvgCPU.MinimumWidth = 6;
             this.AvgCPU.Name = "AvgCPU";
             this.AvgCPU.ReadOnly = true;
-            this.AvgCPU.Width = 93;
+            this.AvgCPU.Width = 86;
             // 
             // MaxCPU
             // 
@@ -312,7 +158,7 @@
             this.MaxCPU.MinimumWidth = 6;
             this.MaxCPU.Name = "MaxCPU";
             this.MaxCPU.ReadOnly = true;
-            this.MaxCPU.Width = 94;
+            this.MaxCPU.Width = 87;
             // 
             // CriticalWaitMsPerSec
             // 
@@ -521,6 +367,160 @@
             this.MaxIOPs.ReadOnly = true;
             this.MaxIOPs.Visible = false;
             this.MaxIOPs.Width = 89;
+            // 
+            // toolStrip1
+            // 
+            this.toolStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
+            this.toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.tsTime,
+            this.tsRefresh,
+            this.tsColumns});
+            this.toolStrip1.Location = new System.Drawing.Point(0, 0);
+            this.toolStrip1.Name = "toolStrip1";
+            this.toolStrip1.Size = new System.Drawing.Size(1048, 31);
+            this.toolStrip1.TabIndex = 3;
+            this.toolStrip1.Text = "toolStrip1";
+            // 
+            // tsTime
+            // 
+            this.tsTime.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.tsTime.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.toolStripMenuItem2,
+            this.toolStripMenuItem1,
+            this.ts30Min,
+            this.ts1Hr,
+            this.ts2Hr,
+            this.ts3Hr,
+            this.ts6Hr,
+            this.ts12Hr,
+            this.dayToolStripMenuItem,
+            this.days7ToolStripMenuItem,
+            this.toolStripSeparator1,
+            this.tsCustom});
+            this.tsTime.Image = global::DBAChecksGUI.Properties.Resources.Time_16x;
+            this.tsTime.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tsTime.Name = "tsTime";
+            this.tsTime.Size = new System.Drawing.Size(34, 28);
+            this.tsTime.Text = "Time";
+            // 
+            // toolStripMenuItem2
+            // 
+            this.toolStripMenuItem2.Name = "toolStripMenuItem2";
+            this.toolStripMenuItem2.Size = new System.Drawing.Size(143, 26);
+            this.toolStripMenuItem2.Tag = "5";
+            this.toolStripMenuItem2.Text = "5 Mins";
+            this.toolStripMenuItem2.Click += new System.EventHandler(this.tsTime_Click);
+            // 
+            // toolStripMenuItem1
+            // 
+            this.toolStripMenuItem1.Name = "toolStripMenuItem1";
+            this.toolStripMenuItem1.Size = new System.Drawing.Size(143, 26);
+            this.toolStripMenuItem1.Tag = "15";
+            this.toolStripMenuItem1.Text = "15 Mins";
+            this.toolStripMenuItem1.Click += new System.EventHandler(this.tsTime_Click);
+            // 
+            // ts30Min
+            // 
+            this.ts30Min.CheckOnClick = true;
+            this.ts30Min.Name = "ts30Min";
+            this.ts30Min.Size = new System.Drawing.Size(143, 26);
+            this.ts30Min.Tag = "30";
+            this.ts30Min.Text = "30 Mins";
+            this.ts30Min.Click += new System.EventHandler(this.tsTime_Click);
+            // 
+            // ts1Hr
+            // 
+            this.ts1Hr.Checked = true;
+            this.ts1Hr.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.ts1Hr.Name = "ts1Hr";
+            this.ts1Hr.Size = new System.Drawing.Size(143, 26);
+            this.ts1Hr.Tag = "60";
+            this.ts1Hr.Text = "1Hr";
+            this.ts1Hr.Click += new System.EventHandler(this.tsTime_Click);
+            // 
+            // ts2Hr
+            // 
+            this.ts2Hr.CheckOnClick = true;
+            this.ts2Hr.Name = "ts2Hr";
+            this.ts2Hr.Size = new System.Drawing.Size(143, 26);
+            this.ts2Hr.Tag = "120";
+            this.ts2Hr.Text = "2Hr";
+            this.ts2Hr.Click += new System.EventHandler(this.tsTime_Click);
+            // 
+            // ts3Hr
+            // 
+            this.ts3Hr.CheckOnClick = true;
+            this.ts3Hr.Name = "ts3Hr";
+            this.ts3Hr.Size = new System.Drawing.Size(143, 26);
+            this.ts3Hr.Tag = "180";
+            this.ts3Hr.Text = "3Hr";
+            this.ts3Hr.Click += new System.EventHandler(this.tsTime_Click);
+            // 
+            // ts6Hr
+            // 
+            this.ts6Hr.CheckOnClick = true;
+            this.ts6Hr.Name = "ts6Hr";
+            this.ts6Hr.Size = new System.Drawing.Size(143, 26);
+            this.ts6Hr.Tag = "360";
+            this.ts6Hr.Text = "6Hr";
+            this.ts6Hr.Click += new System.EventHandler(this.tsTime_Click);
+            // 
+            // ts12Hr
+            // 
+            this.ts12Hr.CheckOnClick = true;
+            this.ts12Hr.Name = "ts12Hr";
+            this.ts12Hr.Size = new System.Drawing.Size(143, 26);
+            this.ts12Hr.Tag = "720";
+            this.ts12Hr.Text = "12Hr";
+            this.ts12Hr.Click += new System.EventHandler(this.tsTime_Click);
+            // 
+            // dayToolStripMenuItem
+            // 
+            this.dayToolStripMenuItem.Name = "dayToolStripMenuItem";
+            this.dayToolStripMenuItem.Size = new System.Drawing.Size(143, 26);
+            this.dayToolStripMenuItem.Tag = "1440";
+            this.dayToolStripMenuItem.Text = "1 Day";
+            this.dayToolStripMenuItem.Click += new System.EventHandler(this.tsTime_Click);
+            // 
+            // days7ToolStripMenuItem
+            // 
+            this.days7ToolStripMenuItem.Name = "days7ToolStripMenuItem";
+            this.days7ToolStripMenuItem.Size = new System.Drawing.Size(143, 26);
+            this.days7ToolStripMenuItem.Tag = "10080";
+            this.days7ToolStripMenuItem.Text = "7 Days";
+            this.days7ToolStripMenuItem.Click += new System.EventHandler(this.tsTime_Click);
+            // 
+            // toolStripSeparator1
+            // 
+            this.toolStripSeparator1.Name = "toolStripSeparator1";
+            this.toolStripSeparator1.Size = new System.Drawing.Size(140, 6);
+            // 
+            // tsCustom
+            // 
+            this.tsCustom.Name = "tsCustom";
+            this.tsCustom.Size = new System.Drawing.Size(143, 26);
+            this.tsCustom.Tag = "-1";
+            this.tsCustom.Text = "Custom";
+            this.tsCustom.Click += new System.EventHandler(this.tsCustom_Click);
+            // 
+            // tsRefresh
+            // 
+            this.tsRefresh.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.tsRefresh.Image = global::DBAChecksGUI.Properties.Resources._112_RefreshArrow_Green_16x16_72;
+            this.tsRefresh.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tsRefresh.Name = "tsRefresh";
+            this.tsRefresh.Size = new System.Drawing.Size(29, 28);
+            this.tsRefresh.Text = "Refresh";
+            this.tsRefresh.Click += new System.EventHandler(this.tsRefresh_Click);
+            // 
+            // tsColumns
+            // 
+            this.tsColumns.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.tsColumns.Image = global::DBAChecksGUI.Properties.Resources.Column_16x;
+            this.tsColumns.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tsColumns.Name = "tsColumns";
+            this.tsColumns.Size = new System.Drawing.Size(34, 28);
+            this.tsColumns.Text = "Columns";
             // 
             // PerformanceSummary
             // 

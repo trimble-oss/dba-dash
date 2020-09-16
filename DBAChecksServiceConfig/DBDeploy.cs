@@ -19,20 +19,29 @@ namespace DBAChecksServiceConfig
 
         public Version DACVersion;
 
+        string _connectionString;
+
+        public string DatabaseName
+        {
+            get
+            {
+                return cboDatabase.Text;
+            }
+            set
+            {
+                cboDatabase.Text = value;
+            }
+        }
 
         public string ConnectionString { 
             get {
-                SqlConnectionStringBuilder builder = new SqlConnectionStringBuilder(txtConnectionString.Text);
+                SqlConnectionStringBuilder builder = new SqlConnectionStringBuilder(_connectionString);
                 builder.InitialCatalog = cboDatabase.Text;
                 return builder.ConnectionString;
             }
             set {
-                txtConnectionString.Text = value;
-                if (txtConnectionString.Text.Length == 0)
-                {
-                    txtConnectionString.Text = "Data Source=localhost;Initial Catalog=DBAChecksDB;Integrated Security=SSPI;";
-                }
                 string db = "DBAChecksDB";
+                _connectionString = value;
                 try
                 {
                     SqlConnectionStringBuilder builder = new SqlConnectionStringBuilder(value);
@@ -185,17 +194,16 @@ AND database_id > 4 ", cn);
             dbChanged();
         }
 
-        string dbListConnectionString;
+
 
         private void cboDatabase_DropDown(object sender, EventArgs e)
         {
-            if (dbListConnectionString != ConnectionString)
+            if (cboDatabase.Items.Count == 0)
             {
                 try
                 {
                     this.Cursor = Cursors.WaitCursor;
                     getDatabases();
-                    dbListConnectionString = ConnectionString;
                 }
                 catch (Exception ex)
                 {
@@ -206,6 +214,7 @@ AND database_id > 4 ", cn);
                     this.Cursor = Cursors.Default;
                 }
             }
+            
         }
         bool isCancel;
 
