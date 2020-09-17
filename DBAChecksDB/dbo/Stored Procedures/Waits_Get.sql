@@ -28,7 +28,7 @@ SELECT @Table = CASE WHEN @DateGrouping IN('60MIN','DAY') THEN 'dbo.Waits_60MIN'
 SET @SQL = N'
 WITH T AS (
 SELECT ' + @DateGroupingSQL + ' AS [Time],
-			WT.WaitType,
+			CASE WHEN WT.IsCriticalWait=1 THEN ''!!'' ELSE '''' END + WT.WaitType as WaitType,
 			SUM(W.wait_time_ms)*1000.0 / SUM(W.sample_ms_diff) WaitTimeMsPerSec,
 			ROW_NUMBER() OVER(PARTITION BY ' + @DateGroupingSQL + ' ORDER BY SUM(W.wait_time_ms) DESC) rnum
 FROM ' + @Table + ' W 
@@ -37,7 +37,7 @@ WHERE W.SnapshotDate>= @FromDate
 AND W.SnapshotDate <= @ToDate
 AND WT.WaitType NOT IN(N''PVS_PREALLOCATE'',N''REDO_THREAD_PENDING_WORK'')
 AND W.InstanceID=@InstanceID
-GROUP BY WT.WaitType, ' + @DateGroupingSQL + ' 
+GROUP BY WT.WaitType,WT.IsCriticalWait, ' + @DateGroupingSQL + ' 
 HAVING SUM(W.wait_time_ms)*1000.0 / SUM(W.sample_ms_diff) > 0
 )
 SELECT [Time],
