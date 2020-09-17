@@ -228,7 +228,7 @@ namespace DBAChecksGUI
                 sqlPatching1.RefreshData();
             }
             if(tabs.SelectedTab == tabInstanceConfigChange)
-            {
+            {                
                 configurationHistory1.InstanceIDs = instanceIDs;
                 configurationHistory1.ConnectionString = connectionString;
                 configurationHistory1.RefreshData();
@@ -348,7 +348,12 @@ AND I.Instance = @Instance
 ORDER BY D.Name
 ", cn);
                 //    cmd.CommandType = CommandType.StoredProcedure;
-
+                if (instanceNode.InstanceID > 0)
+                {
+                    var changesNode = new SQLTreeItem("Changes", SQLTreeItem.TreeType.DBAChecksChanges);
+                    changesNode.InstanceID = instanceNode.InstanceID;
+                    instanceNode.Nodes.Add(changesNode);
+                }
                 cmd.Parameters.AddWithValue("Instance", instanceNode.ObjectName);
                 var systemNode = new SQLTreeItem("System Databases", SQLTreeItem.TreeType.Folder);
                 instanceNode.Nodes.Add(systemNode);
