@@ -30,7 +30,7 @@
     <QueryStoreStaleQueryThreshold>15</QueryStoreStaleQueryThreshold>
     <QueryStoreMaxStorageSize>512</QueryStoreMaxStorageSize>
     <QueryStoreMaxPlansPerQuery>50</QueryStoreMaxPlansPerQuery>
-    <DacVersion>1.9.0.7</DacVersion>
+    <DacVersion>1.9.0.8</DacVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <OutputPath>bin\Release\</OutputPath>
@@ -384,6 +384,7 @@
     <Build Include="dbo\Stored Procedures\CollectionDatesThresholds_Get.sql" />
     <Build Include="dbo\Stored Procedures\CollectionErrorLog_Get.sql" />
     <Build Include="dbo\Stored Procedures\PerformanceSummary_Get.sql" />
+    <Build Include="dbo\Stored Procedures\InstanceInfo_Get.sql" />
   </ItemGroup>
   <ItemGroup>
     <PostDeploy Include="Script.PostDeployment1.sql" />

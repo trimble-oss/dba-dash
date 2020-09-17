@@ -286,6 +286,12 @@
     <Compile Include="Drives\DrivesControl.Designer.cs">
       <DependentUpon>DrivesControl.cs</DependentUpon>
     </Compile>
+    <Compile Include="Info.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Info.Designer.cs">
+      <DependentUpon>Info.cs</DependentUpon>
+    </Compile>
     <Compile Include="SqlServerTypes\Loader.cs" />
     <Compile Include="SQLTreeItem.cs" />
     <Compile Include="Summary.cs">
@@ -333,6 +339,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Drives\DriveThresholdConfig.resx">
       <DependentUpon>DriveThresholdConfig.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Info.resx">
+      <DependentUpon>Info.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="LastGoodCheckDB\LastGoodCheckDBConfig.resx">
       <DependentUpon>LastGoodCheckDBConfig.cs</DependentUpon>
@@ -402,9 +411,6 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
-    <None Include="Reports\Blocking.rdl">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
     <None Include="Resources\SQL-Mode.xshd">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

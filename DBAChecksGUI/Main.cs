@@ -209,6 +209,12 @@ namespace DBAChecksGUI
                 performanceSummary1.ConnectionString = connectionString;
                 performanceSummary1.RefreshData();
             }
+            if(tabs.SelectedTab== tabInfo)
+            {
+                info1.InstanceID = n.InstanceID;
+                info1.ConnectionString = connectionString;
+                info1.RefreshData();
+            }
         }
 
         private void loadDBAChecksErrorLog(Int32 InstanceID)
@@ -426,6 +432,7 @@ ORDER BY SchemaName,ObjectName
                     allowedTabs.Add(tabSnapshotsSummary);
                     allowedTabs.Add(tabLastGood);
                     allowedTabs.Add(tabDBAChecksErrorLog);
+                    allowedTabs.Add(tabInfo);
                 }
                 allowedTabs.Add(tabFiles);
                 allowedTabs.Add(tabTags);
