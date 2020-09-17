@@ -215,6 +215,24 @@ namespace DBAChecksGUI
                 info1.ConnectionString = connectionString;
                 info1.RefreshData();
             }
+            if(tabs.SelectedTab== tabHardwareChanges)
+            {
+                hardwareChanges1.InstanceIDs = instanceIDs;
+                hardwareChanges1.ConnectionString = connectionString;
+                hardwareChanges1.RefreshData();
+            }
+            if (tabs.SelectedTab == tabSQLPatching)
+            {
+                sqlPatching1.InstanceIDs = instanceIDs;
+                sqlPatching1.ConnectionString = connectionString;
+                sqlPatching1.RefreshData();
+            }
+            if(tabs.SelectedTab == tabInstanceConfigChange)
+            {
+                configurationHistory1.InstanceIDs = instanceIDs;
+                configurationHistory1.ConnectionString = connectionString;
+                configurationHistory1.RefreshData();
+            }
         }
 
         private void loadDBAChecksErrorLog(Int32 InstanceID)
@@ -278,6 +296,8 @@ namespace DBAChecksGUI
         {
             tv1.Nodes.Clear();
             var root = new SQLTreeItem("DBAChecks", SQLTreeItem.TreeType.DBAChecksRoot);
+            var changes = new SQLTreeItem("Changes", SQLTreeItem.TreeType.DBAChecksChanges);
+            root.Nodes.Add(changes);
             
             var tags = String.Join(",", SelectedTags());
 
@@ -437,6 +457,12 @@ ORDER BY SchemaName,ObjectName
                 allowedTabs.Add(tabFiles);
                 allowedTabs.Add(tabTags);
                 allowedTabs.Add(tabCollectionDates);
+            }
+            else if (n.Type == SQLTreeItem.TreeType.DBAChecksChanges)
+            {
+                allowedTabs.Add(tabHardwareChanges);
+                allowedTabs.Add(tabSQLPatching);
+                allowedTabs.Add(tabInstanceConfigChange);
             }
             if (n.ObjectID > 0)
             {

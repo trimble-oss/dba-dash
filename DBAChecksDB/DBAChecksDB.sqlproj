@@ -385,6 +385,9 @@
     <Build Include="dbo\Stored Procedures\CollectionErrorLog_Get.sql" />
     <Build Include="dbo\Stored Procedures\PerformanceSummary_Get.sql" />
     <Build Include="dbo\Stored Procedures\InstanceInfo_Get.sql" />
+    <Build Include="dbo\Stored Procedures\SysConfigHistory_Get.sql" />
+    <Build Include="dbo\Stored Procedures\SQLPatching_Get.sql" />
+    <Build Include="dbo\Stored Procedures\HostUpgradeHistory_Get.sql" />
   </ItemGroup>
   <ItemGroup>
     <PostDeploy Include="Script.PostDeployment1.sql" />

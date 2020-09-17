@@ -143,6 +143,12 @@
       <DependentUpon>CollectionDatesThresholds.cs</DependentUpon>
     </Compile>
     <Compile Include="Common.cs" />
+    <Compile Include="ConfigurationHistory.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="ConfigurationHistory.Designer.cs">
+      <DependentUpon>ConfigurationHistory.cs</DependentUpon>
+    </Compile>
     <Compile Include="CustomProgressBar.cs">
       <SubType>Component</SubType>
     </Compile>
@@ -191,6 +197,12 @@
     </Compile>
     <Compile Include="Drives\DriveThresholdConfig.Designer.cs">
       <DependentUpon>DriveThresholdConfig.cs</DependentUpon>
+    </Compile>
+    <Compile Include="HardwareChanges.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="HardwareChanges.Designer.cs">
+      <DependentUpon>HardwareChanges.cs</DependentUpon>
     </Compile>
     <Compile Include="LastGoodCheckDB\LastGoodCheckDBConfig.cs">
       <SubType>Form</SubType>
@@ -292,6 +304,12 @@
     <Compile Include="Info.Designer.cs">
       <DependentUpon>Info.cs</DependentUpon>
     </Compile>
+    <Compile Include="SQLPatching.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="SQLPatching.Designer.cs">
+      <DependentUpon>SQLPatching.cs</DependentUpon>
+    </Compile>
     <Compile Include="SqlServerTypes\Loader.cs" />
     <Compile Include="SQLTreeItem.cs" />
     <Compile Include="Summary.cs">
@@ -319,6 +337,9 @@
     <EmbeddedResource Include="CollectionDates\CollectionDatesThresholds.resx">
       <DependentUpon>CollectionDatesThresholds.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="ConfigurationHistory.resx">
+      <DependentUpon>ConfigurationHistory.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="DBDiff.resx">
       <DependentUpon>DBDiff.cs</DependentUpon>
     </EmbeddedResource>
@@ -339,6 +360,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Drives\DriveThresholdConfig.resx">
       <DependentUpon>DriveThresholdConfig.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="HardwareChanges.resx">
+      <DependentUpon>HardwareChanges.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Info.resx">
       <DependentUpon>Info.cs</DependentUpon>
@@ -398,6 +422,9 @@
       <DependentUpon>Resources.resx</DependentUpon>
       <DesignTime>True</DesignTime>
     </Compile>
+    <EmbeddedResource Include="SQLPatching.resx">
+      <DependentUpon>SQLPatching.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Summary.resx">
       <DependentUpon>Summary.cs</DependentUpon>
     </EmbeddedResource>
