@@ -35,7 +35,8 @@ namespace DBAChecks
         Users,
         ApplicationRole,
         Sequence,
-        ServiceBroker
+        ServiceBroker,
+        Trigger
     }
 
   
@@ -56,7 +57,7 @@ namespace DBAChecks
 
         public static SchemaSnapshotDBObjectTypes[] DefaultSchemaSnapshotDBObjectTypes()
         {
-            return new SchemaSnapshotDBObjectTypes[] {SchemaSnapshotDBObjectTypes.Database, SchemaSnapshotDBObjectTypes.Aggregate, SchemaSnapshotDBObjectTypes.Assembly, SchemaSnapshotDBObjectTypes.DDLTrigger, SchemaSnapshotDBObjectTypes.Schema, SchemaSnapshotDBObjectTypes.StoredProcedures, SchemaSnapshotDBObjectTypes.Synonym, SchemaSnapshotDBObjectTypes.Tables, SchemaSnapshotDBObjectTypes.UserDefinedDataType, SchemaSnapshotDBObjectTypes.UserDefinedFunction, SchemaSnapshotDBObjectTypes.UserDefinedTableType, SchemaSnapshotDBObjectTypes.UserDefinedType, SchemaSnapshotDBObjectTypes.View, SchemaSnapshotDBObjectTypes.XMLSchema , SchemaSnapshotDBObjectTypes.Roles, SchemaSnapshotDBObjectTypes.ApplicationRole, SchemaSnapshotDBObjectTypes.Sequence, SchemaSnapshotDBObjectTypes.ServiceBroker};
+            return new SchemaSnapshotDBObjectTypes[] {SchemaSnapshotDBObjectTypes.Database, SchemaSnapshotDBObjectTypes.Aggregate, SchemaSnapshotDBObjectTypes.Assembly, SchemaSnapshotDBObjectTypes.DDLTrigger, SchemaSnapshotDBObjectTypes.Schema, SchemaSnapshotDBObjectTypes.StoredProcedures, SchemaSnapshotDBObjectTypes.Synonym, SchemaSnapshotDBObjectTypes.Tables, SchemaSnapshotDBObjectTypes.UserDefinedDataType, SchemaSnapshotDBObjectTypes.UserDefinedFunction, SchemaSnapshotDBObjectTypes.UserDefinedTableType, SchemaSnapshotDBObjectTypes.UserDefinedType, SchemaSnapshotDBObjectTypes.View, SchemaSnapshotDBObjectTypes.XMLSchema , SchemaSnapshotDBObjectTypes.Roles, SchemaSnapshotDBObjectTypes.ApplicationRole, SchemaSnapshotDBObjectTypes.Sequence, SchemaSnapshotDBObjectTypes.ServiceBroker,  SchemaSnapshotDBObjectTypes.Trigger};
         }
 
 
@@ -237,6 +238,7 @@ namespace DBAChecks
                     }
                    
                 }
+
                 Console.WriteLine(DateTime.Now.ToString("HH:mm:ss") + " SchemaSnapshot: " + DBName + ": Complete");
                 // break;
             }
@@ -700,6 +702,8 @@ namespace DBAChecks
                     r["ObjectDateCreated"] = v.CreateDate;
                     r["ObjectDateModified"] = v.DateLastModified;
                     dtSchema.Rows.Add(r);
+
+                    addTriggers(v.Triggers, v.Schema, dtSchema);
                 }
             }
         }
@@ -756,10 +760,38 @@ namespace DBAChecks
                     r["ObjectDateCreated"] = t.CreateDate;
                     r["ObjectDateModified"] = t.DateLastModified;
                     dtSchema.Rows.Add(r);
+
+                    addTriggers(t.Triggers, t.Schema, dtSchema);
                 }
             }
         }
 
+        private void addTriggers(TriggerCollection triggers,string schema,DataTable dtSchema)
+        {
+            if (options.ObjectTypes.Contains(SchemaSnapshotDBObjectTypes.Trigger))
+            {
+                foreach (Trigger t in triggers)
+                {
+                    if (!t.IsSystemObject)
+                    {
+                        var r = dtSchema.NewRow();
+                        var sDDL = stringCollectionToString(t.Script(ScriptingOptions));
+                        var bDDL = Zip(sDDL);
+                        r["ObjectName"] = t.Name;
+                        r["SchemaName"] = schema;
+                        r["ObjectType"] = t.ImplementationType == ImplementationType.SqlClr ? "TA" : "TR";
+                        r["object_id"] = t.ID;
+                        r["DDL"] = bDDL;
+                        r["DDLHash"] = crypt.ComputeHash(bDDL);
+                        r["ObjectDateCreated"] = t.CreateDate;
+                        r["ObjectDateModified"] = t.DateLastModified;
+                        dtSchema.Rows.Add(r);
+                    }
+                }
+            }
+        }
+
+ 
         public static void CopyTo(Stream src, Stream dest)
         {
             byte[] bytes = new byte[4096];
