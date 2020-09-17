@@ -55,6 +55,7 @@ SELECT t.InstanceID,
        t.dtu_limit_previous
 FROM T 
 WHERE t.dtu_limit<> t.dtu_limit_previous
+OPTION(OPTIMIZE FOR(@MaxDate='9999-12-31'))
 
 EXEC dbo.CollectionDates_Upd @InstanceID = @InstanceID, 
                              @Reference = 'AzureDBResourceStats', 
