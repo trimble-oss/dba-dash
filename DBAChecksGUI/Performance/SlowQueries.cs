@@ -74,11 +74,12 @@ namespace DBAChecksGUI
 
         public void RefreshData()
         {
+            dgvSlow.DataSource = null;
             SqlConnection cn = new SqlConnection(ConnectionString);
             using (cn)
             {
                 cn.Open();
-                SqlCommand cmd = new SqlCommand("Report.SlowQueriesSummary", cn);
+                SqlCommand cmd = new SqlCommand("dbo.SlowQueriesSummary", cn);
                 cmd.Parameters.AddWithValue("InstanceIDs", string.Join(",", InstanceIDs));
                 cmd.Parameters.AddWithValue("FromDate", fromDate);
                 cmd.Parameters.AddWithValue("ToDate", toDate);
@@ -244,6 +245,50 @@ namespace DBAChecksGUI
                 selectGroupBy();
                 RefreshData();
             }
+            else if(dgvSummary.Columns[e.ColumnIndex] == Total)
+            {
+                loadSlowQueriesDetail();
+            }
+            else if(dgvSummary.Columns[e.ColumnIndex] == _1hrPlus)
+            {
+                loadSlowQueriesDetail(3600, -1);
+            }
+            else if (dgvSummary.Columns[e.ColumnIndex] == _30to60min)
+            {
+                loadSlowQueriesDetail(1800,3600);
+            }
+            else if (dgvSummary.Columns[e.ColumnIndex] == _10to30min)
+            {
+                loadSlowQueriesDetail(600, 1800);
+            }
+            else if (dgvSummary.Columns[e.ColumnIndex] == _5to10min)
+            {
+                loadSlowQueriesDetail(300,600);
+            }
+            else if (dgvSummary.Columns[e.ColumnIndex] == _1to5min)
+            {
+                loadSlowQueriesDetail(60, 300);
+            }
+            else if (dgvSummary.Columns[e.ColumnIndex] == _30to60)
+            {
+                loadSlowQueriesDetail(30,60);
+            }
+            else if (dgvSummary.Columns[e.ColumnIndex] == _20to30)
+            {
+                loadSlowQueriesDetail(20,30);
+            }
+            else if (dgvSummary.Columns[e.ColumnIndex] == _10to20)
+            {
+                loadSlowQueriesDetail(10,20);
+            }
+            else if (dgvSummary.Columns[e.ColumnIndex] == _5to10)
+            {
+                loadSlowQueriesDetail(5,10);
+            }
+            else if (dgvSummary.Columns[e.ColumnIndex] == _1to5)
+            {
+                loadSlowQueriesDetail(1,5);
+            }
         }
 
         private void SlowQueries_Load(object sender, EventArgs e)
@@ -302,6 +347,69 @@ namespace DBAChecksGUI
         private void txtText_TextChanged(object sender, EventArgs e)
         {
             setFilterHighlight(txtText, lblText);
+        }
+
+        private void loadSlowQueriesDetail(Int32 durationFrom=-1,Int32 durationTo=-1)
+        {
+        
+            SqlConnection cn = new SqlConnection(ConnectionString);
+            using (cn)
+            {
+                cn.Open();
+                SqlCommand cmd = new SqlCommand("dbo.SlowQueriesDetail", cn);
+                cmd.Parameters.AddWithValue("InstanceIDs", string.Join(",", InstanceIDs));
+                cmd.Parameters.AddWithValue("FromDate", fromDate);
+                cmd.Parameters.AddWithValue("ToDate", toDate);
+                cmd.Parameters.AddWithValue("Top", 1000);
+                if (txtClient.Text.Length > 0)
+                {
+                    cmd.Parameters.AddWithValue("ClientHostName", txtClient.Text);
+                }
+                if (txtInstance.Text.Length > 0)
+                {
+                    cmd.Parameters.AddWithValue("ConnectionID", txtInstance.Text);
+                }
+                if (txtApp.Text.Length > 0)
+                {
+                    cmd.Parameters.AddWithValue("ClientAppName", txtApp.Text);
+                }
+                if (txtDatabase.Text.Length > 0)
+                {
+                    cmd.Parameters.AddWithValue("DatabaseName", txtDatabase.Text);
+                }
+                if (txtObject.Text.Length > 0)
+                {
+                    cmd.Parameters.AddWithValue("ObjectName", txtObject.Text);
+                }
+                if (txtUser.Text.Length > 0)
+                {
+                    cmd.Parameters.AddWithValue("UserName", txtUser.Text);
+                }
+                if (txtText.Text.Length > 0)
+                {
+                    cmd.Parameters.AddWithValue("Text", txtText.Text);
+                }
+                if (durationFrom > 0)
+                {
+                    cmd.Parameters.AddWithValue("DurationFromSec", durationFrom);
+                }
+                if (durationTo > 0)
+                {
+                    cmd.Parameters.AddWithValue("DurationToSec", durationTo);
+                }
+                cmd.CommandType = CommandType.StoredProcedure;
+                SqlDataAdapter da = new SqlDataAdapter(cmd);
+                var dt = new DataTable();
+                da.Fill(dt);
+               dgvSlow.AutoGenerateColumns = false;
+                dgvSlow.DataSource = dt;
+
+            }
+        }
+
+        private void tsRefresh_Click(object sender, EventArgs e)
+        {
+            RefreshData();
         }
     }
 }
