@@ -79,7 +79,7 @@ namespace DBAChecksGUI
             using (cn)
             {
                 cn.Open();
-                SqlCommand cmd = new SqlCommand("dbo.SlowQueriesSummary", cn);
+                SqlCommand cmd = new SqlCommand("dbo.SlowQueriesSummary_Get", cn);
                 cmd.Parameters.AddWithValue("InstanceIDs", string.Join(",", InstanceIDs));
                 cmd.Parameters.AddWithValue("FromDate", fromDate);
                 cmd.Parameters.AddWithValue("ToDate", toDate);
@@ -185,111 +185,117 @@ namespace DBAChecksGUI
 
         private void dgvSummary_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
-            if (dgvSummary.Columns[e.ColumnIndex] == Grp)
+            if (e.RowIndex >= 0)
             {
                 var row = (DataRowView)dgvSummary.Rows[e.RowIndex].DataBoundItem;
-                string value = row["Grp"] == DBNull.Value ? "" : (string)row["Grp"];
-                if (groupBy == "ConnectionID")
+                selectedGroupValue = row["Grp"] == DBNull.Value ? "" : (string)row["Grp"];
+                if (dgvSummary.Columns[e.ColumnIndex] == Grp)
                 {
-                    txtInstance.Text = value;
-                }
-                else if (groupBy == "client_hostname")
-                {
-                    txtClient.Text = value;
-                }
-                else if (groupBy == "client_app_name")
-                {
-                    txtApp.Text = value;
-                }
-                else if (groupBy == "DatabaseName")
-                {
-                    txtDatabase.Text = value;
-                }
-                else if (groupBy == "object_name")
-                {
-                    txtObject.Text= value;
-                }
-                else if(groupBy == "username")
-                {
-                    txtUser.Text = value;
-                }
-                else
-                {
-                    throw new Exception("Invalid group by");
-                }
 
-                if (txtInstance.Text.Length == 0)
-                {
-                    groupBy = "ConnectionID";
+                    if (groupBy == "ConnectionID")
+                    {
+                        txtInstance.Text = selectedGroupValue;
+                    }
+                    else if (groupBy == "client_hostname")
+                    {
+                        txtClient.Text = selectedGroupValue;
+                    }
+                    else if (groupBy == "client_app_name")
+                    {
+                        txtApp.Text = selectedGroupValue;
+                    }
+                    else if (groupBy == "DatabaseName")
+                    {
+                        txtDatabase.Text = selectedGroupValue;
+                    }
+                    else if (groupBy == "object_name")
+                    {
+                        txtObject.Text = selectedGroupValue;
+                    }
+                    else if (groupBy == "username")
+                    {
+                        txtUser.Text = selectedGroupValue;
+                    }
+                    else
+                    {
+                        throw new Exception("Invalid group by");
+                    }
+
+                    if (txtInstance.Text.Length == 0)
+                    {
+                        groupBy = "ConnectionID";
+                    }
+                    else if (txtDatabase.Text.Length == 0)
+                    {
+                        groupBy = "DatabaseName";
+                    }
+                    else if (txtApp.Text.Length == 0)
+                    {
+                        groupBy = "client_app_name";
+                    }
+                    else if (txtClient.Text.Length == 0)
+                    {
+                        groupBy = "client_hostname";
+                    }
+                    else if (txtObject.Text.Length == 0)
+                    {
+                        groupBy = "object_name";
+                    }
+                    else
+                    {
+                        groupBy = "username";
+                    }
+                    selectGroupBy();
+                    RefreshData();
                 }
-                else if (txtDatabase.Text.Length == 0)
+                else if (dgvSummary.Columns[e.ColumnIndex] == Total)
                 {
-                    groupBy = "DatabaseName";
+                    loadSlowQueriesDetail();
                 }
-                else if (txtApp.Text.Length == 0)
+                else if (dgvSummary.Columns[e.ColumnIndex] == _1hrPlus)
                 {
-                    groupBy = "client_app_name";
+                    loadSlowQueriesDetail(3600, -1);
                 }
-                else if (txtClient.Text.Length == 0)
+                else if (dgvSummary.Columns[e.ColumnIndex] == _30to60min)
                 {
-                    groupBy = "client_hostname";
+                    loadSlowQueriesDetail(1800, 3600);
                 }
-                else if (txtObject.Text.Length == 0)
+                else if (dgvSummary.Columns[e.ColumnIndex] == _10to30min)
                 {
-                    groupBy = "object_name";
+                    loadSlowQueriesDetail(600, 1800);
                 }
-                else
+                else if (dgvSummary.Columns[e.ColumnIndex] == _5to10min)
                 {
-                    groupBy = "username";
+                    loadSlowQueriesDetail(300, 600);
                 }
-                selectGroupBy();
-                RefreshData();
-            }
-            else if(dgvSummary.Columns[e.ColumnIndex] == Total)
-            {
-                loadSlowQueriesDetail();
-            }
-            else if(dgvSummary.Columns[e.ColumnIndex] == _1hrPlus)
-            {
-                loadSlowQueriesDetail(3600, -1);
-            }
-            else if (dgvSummary.Columns[e.ColumnIndex] == _30to60min)
-            {
-                loadSlowQueriesDetail(1800,3600);
-            }
-            else if (dgvSummary.Columns[e.ColumnIndex] == _10to30min)
-            {
-                loadSlowQueriesDetail(600, 1800);
-            }
-            else if (dgvSummary.Columns[e.ColumnIndex] == _5to10min)
-            {
-                loadSlowQueriesDetail(300,600);
-            }
-            else if (dgvSummary.Columns[e.ColumnIndex] == _1to5min)
-            {
-                loadSlowQueriesDetail(60, 300);
-            }
-            else if (dgvSummary.Columns[e.ColumnIndex] == _30to60)
-            {
-                loadSlowQueriesDetail(30,60);
-            }
-            else if (dgvSummary.Columns[e.ColumnIndex] == _20to30)
-            {
-                loadSlowQueriesDetail(20,30);
-            }
-            else if (dgvSummary.Columns[e.ColumnIndex] == _10to20)
-            {
-                loadSlowQueriesDetail(10,20);
-            }
-            else if (dgvSummary.Columns[e.ColumnIndex] == _5to10)
-            {
-                loadSlowQueriesDetail(5,10);
-            }
-            else if (dgvSummary.Columns[e.ColumnIndex] == _1to5)
-            {
-                loadSlowQueriesDetail(1,5);
+                else if (dgvSummary.Columns[e.ColumnIndex] == _1to5min)
+                {
+                    loadSlowQueriesDetail(60, 300);
+                }
+                else if (dgvSummary.Columns[e.ColumnIndex] == _30to60)
+                {
+                    loadSlowQueriesDetail(30, 60);
+                }
+                else if (dgvSummary.Columns[e.ColumnIndex] == _20to30)
+                {
+                    loadSlowQueriesDetail(20, 30);
+                }
+                else if (dgvSummary.Columns[e.ColumnIndex] == _10to20)
+                {
+                    loadSlowQueriesDetail(10, 20);
+                }
+                else if (dgvSummary.Columns[e.ColumnIndex] == _5to10)
+                {
+                    loadSlowQueriesDetail(5, 10);
+                }
+                else if (dgvSummary.Columns[e.ColumnIndex] == _1to5)
+                {
+                    loadSlowQueriesDetail(1, 5);
+                }
             }
         }
+
+        string selectedGroupValue;
 
         private void SlowQueries_Load(object sender, EventArgs e)
         {
@@ -356,34 +362,71 @@ namespace DBAChecksGUI
             using (cn)
             {
                 cn.Open();
-                SqlCommand cmd = new SqlCommand("dbo.SlowQueriesDetail", cn);
+                SqlCommand cmd = new SqlCommand("dbo.SlowQueriesDetail_Get", cn);
                 cmd.Parameters.AddWithValue("InstanceIDs", string.Join(",", InstanceIDs));
                 cmd.Parameters.AddWithValue("FromDate", fromDate);
                 cmd.Parameters.AddWithValue("ToDate", toDate);
                 cmd.Parameters.AddWithValue("Top", 1000);
-                if (txtClient.Text.Length > 0)
+
+                string connectionID = txtInstance.Text;
+                string client = txtClient.Text;
+                string user = txtUser.Text;
+                string db = txtDatabase.Text;
+                string objectname = txtObject.Text;
+                string app = txtApp.Text;
+                
+                if (groupBy == "ConnectionID")
                 {
-                    cmd.Parameters.AddWithValue("ClientHostName", txtClient.Text);
+                    connectionID = selectedGroupValue;
                 }
-                if (txtInstance.Text.Length > 0)
+                else if (groupBy == "client_hostname")
                 {
-                    cmd.Parameters.AddWithValue("ConnectionID", txtInstance.Text);
+                    client = selectedGroupValue;
                 }
-                if (txtApp.Text.Length > 0)
+                else if (groupBy == "client_app_name")
                 {
-                    cmd.Parameters.AddWithValue("ClientAppName", txtApp.Text);
+                    app= selectedGroupValue;
                 }
-                if (txtDatabase.Text.Length > 0)
+                else if (groupBy == "DatabaseName")
                 {
-                    cmd.Parameters.AddWithValue("DatabaseName", txtDatabase.Text);
+                    db = selectedGroupValue;
                 }
-                if (txtObject.Text.Length > 0)
+                else if (groupBy == "object_name")
                 {
-                    cmd.Parameters.AddWithValue("ObjectName", txtObject.Text);
+                    objectname = selectedGroupValue;
                 }
-                if (txtUser.Text.Length > 0)
+                else if (groupBy == "username")
                 {
-                    cmd.Parameters.AddWithValue("UserName", txtUser.Text);
+                   user= selectedGroupValue;
+                }
+                else
+                {
+                    throw new Exception("Invalid group by");
+                }
+
+                if (client.Length > 0)
+                {
+                    cmd.Parameters.AddWithValue("ClientHostName", client);
+                }
+                if (connectionID.Length > 0)
+                {
+                    cmd.Parameters.AddWithValue("ConnectionID", connectionID);
+                }
+                if (app.Length > 0)
+                {
+                    cmd.Parameters.AddWithValue("ClientAppName", app);
+                }
+                if (db.Length > 0)
+                {
+                    cmd.Parameters.AddWithValue("DatabaseName", db);
+                }
+                if (objectname.Length > 0)
+                {
+                    cmd.Parameters.AddWithValue("ObjectName", objectname);
+                }
+                if (user.Length > 0)
+                {
+                    cmd.Parameters.AddWithValue("UserName", user);
                 }
                 if (txtText.Text.Length > 0)
                 {

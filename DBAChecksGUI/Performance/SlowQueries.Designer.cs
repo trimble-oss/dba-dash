@@ -357,6 +357,7 @@
             this.appToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
             this.appToolStripMenuItem.Tag = "client_app_name";
             this.appToolStripMenuItem.Text = "App";
+            this.appToolStripMenuItem.Click += new System.EventHandler(this.GroupBy_Click);
             // 
             // toolStripDropDownButton1
             // 
@@ -716,7 +717,7 @@
             this._1to5.MinimumWidth = 6;
             this._1to5.Name = "_1to5";
             this._1to5.ReadOnly = true;
-            this._1to5.Width = 94;
+            this._1to5.Width = 85;
             // 
             // _5to10
             // 
@@ -727,6 +728,7 @@
             this._5to10.MinimumWidth = 6;
             this._5to10.Name = "_5to10";
             this._5to10.ReadOnly = true;
+            this._5to10.Width = 90;
             // 
             // _10to20
             // 

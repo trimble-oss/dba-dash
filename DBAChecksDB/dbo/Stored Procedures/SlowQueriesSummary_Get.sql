@@ -1,4 +1,4 @@
-﻿CREATE PROC [dbo].[SlowQueriesSummary](
+﻿CREATE PROC [dbo].[SlowQueriesSummary_Get](
 	@FromDate DATETIME2(3)=NULL,
 	@ToDate DATETIME2(3)=NULL,
 	@ObjectName SYSNAME=NULL,
