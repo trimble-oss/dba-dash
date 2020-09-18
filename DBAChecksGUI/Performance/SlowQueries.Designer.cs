@@ -29,10 +29,10 @@
         private void InitializeComponent()
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(SlowQueries));
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle5 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle6 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle7 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle8 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle33 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle34 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle35 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle36 = new System.Windows.Forms.DataGridViewCellStyle();
             this.dgvSummary = new System.Windows.Forms.DataGridView();
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
             this.tsTime = new System.Windows.Forms.ToolStripDropDownButton();
@@ -69,21 +69,24 @@
             this.TotalCPU = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.TotalIO = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.TotalPhysicalIO = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.txtInstance = new System.Windows.Forms.ToolStripTextBox();
-            this.toolStripLabel1 = new System.Windows.Forms.ToolStripLabel();
-            this.toolStripLabel2 = new System.Windows.Forms.ToolStripLabel();
-            this.txtClient = new System.Windows.Forms.ToolStripTextBox();
-            this.toolStripLabel3 = new System.Windows.Forms.ToolStripLabel();
-            this.txtApp = new System.Windows.Forms.ToolStripTextBox();
-            this.toolStripLabel4 = new System.Windows.Forms.ToolStripLabel();
-            this.txtDatabase = new System.Windows.Forms.ToolStripTextBox();
-            this.toolStripLabel5 = new System.Windows.Forms.ToolStripLabel();
-            this.txtObject = new System.Windows.Forms.ToolStripTextBox();
-            this.toolStripLabel6 = new System.Windows.Forms.ToolStripLabel();
-            this.txtUser = new System.Windows.Forms.ToolStripTextBox();
-            this.toolStripLabel7 = new System.Windows.Forms.ToolStripLabel();
-            this.txtText = new System.Windows.Forms.ToolStripTextBox();
             this.appToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripDropDownButton1 = new System.Windows.Forms.ToolStripDropDownButton();
+            this.lblInstance = new System.Windows.Forms.ToolStripMenuItem();
+            this.txtInstance = new System.Windows.Forms.ToolStripTextBox();
+            this.lblClient = new System.Windows.Forms.ToolStripMenuItem();
+            this.txtClient = new System.Windows.Forms.ToolStripTextBox();
+            this.lblApp = new System.Windows.Forms.ToolStripMenuItem();
+            this.txtApp = new System.Windows.Forms.ToolStripTextBox();
+            this.lblDatabase = new System.Windows.Forms.ToolStripMenuItem();
+            this.txtDatabase = new System.Windows.Forms.ToolStripTextBox();
+            this.lblObject = new System.Windows.Forms.ToolStripMenuItem();
+            this.txtObject = new System.Windows.Forms.ToolStripTextBox();
+            this.lblUser = new System.Windows.Forms.ToolStripMenuItem();
+            this.txtUser = new System.Windows.Forms.ToolStripTextBox();
+            this.lblText = new System.Windows.Forms.ToolStripMenuItem();
+            this.txtText = new System.Windows.Forms.ToolStripTextBox();
+            this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
+            this.resetToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             ((System.ComponentModel.ISupportInitialize)(this.dgvSummary)).BeginInit();
             this.toolStrip1.SuspendLayout();
             this.SuspendLayout();
@@ -130,20 +133,7 @@
             this.tsTime,
             this.tsRefresh,
             this.tsGroup,
-            this.toolStripLabel1,
-            this.txtInstance,
-            this.toolStripLabel2,
-            this.txtClient,
-            this.toolStripLabel3,
-            this.txtApp,
-            this.toolStripLabel4,
-            this.txtDatabase,
-            this.toolStripLabel5,
-            this.txtObject,
-            this.toolStripLabel6,
-            this.txtUser,
-            this.toolStripLabel7,
-            this.txtText});
+            this.toolStripDropDownButton1});
             this.toolStrip1.LayoutStyle = System.Windows.Forms.ToolStripLayoutStyle.Flow;
             this.toolStrip1.Location = new System.Drawing.Point(0, 0);
             this.toolStrip1.Name = "toolStrip1";
@@ -437,8 +427,8 @@
             // TotalDuration
             // 
             this.TotalDuration.DataPropertyName = "TotalDuration";
-            dataGridViewCellStyle5.Format = "#,#,,.000";
-            this.TotalDuration.DefaultCellStyle = dataGridViewCellStyle5;
+            dataGridViewCellStyle33.Format = "#,#,,.000";
+            this.TotalDuration.DefaultCellStyle = dataGridViewCellStyle33;
             this.TotalDuration.HeaderText = "Total Duration (sec)";
             this.TotalDuration.MinimumWidth = 6;
             this.TotalDuration.Name = "TotalDuration";
@@ -448,8 +438,8 @@
             // TotalCPU
             // 
             this.TotalCPU.DataPropertyName = "TotalCPU";
-            dataGridViewCellStyle6.Format = "#,#,,.000";
-            this.TotalCPU.DefaultCellStyle = dataGridViewCellStyle6;
+            dataGridViewCellStyle34.Format = "#,#,,.000";
+            this.TotalCPU.DefaultCellStyle = dataGridViewCellStyle34;
             this.TotalCPU.HeaderText = "Total CPU (sec)";
             this.TotalCPU.MinimumWidth = 6;
             this.TotalCPU.Name = "TotalCPU";
@@ -459,8 +449,8 @@
             // TotalIO
             // 
             this.TotalIO.DataPropertyName = "TotalIO";
-            dataGridViewCellStyle7.Format = "N0";
-            this.TotalIO.DefaultCellStyle = dataGridViewCellStyle7;
+            dataGridViewCellStyle35.Format = "N0";
+            this.TotalIO.DefaultCellStyle = dataGridViewCellStyle35;
             this.TotalIO.HeaderText = "Total IO";
             this.TotalIO.MinimumWidth = 6;
             this.TotalIO.Name = "TotalIO";
@@ -470,97 +460,13 @@
             // TotalPhysicalIO
             // 
             this.TotalPhysicalIO.DataPropertyName = "TotalPhysicalIO";
-            dataGridViewCellStyle8.Format = "N0";
-            this.TotalPhysicalIO.DefaultCellStyle = dataGridViewCellStyle8;
+            dataGridViewCellStyle36.Format = "N0";
+            this.TotalPhysicalIO.DefaultCellStyle = dataGridViewCellStyle36;
             this.TotalPhysicalIO.HeaderText = "Total Physical IO";
             this.TotalPhysicalIO.MinimumWidth = 6;
             this.TotalPhysicalIO.Name = "TotalPhysicalIO";
             this.TotalPhysicalIO.ReadOnly = true;
             this.TotalPhysicalIO.Width = 118;
-            // 
-            // txtInstance
-            // 
-            this.txtInstance.Font = new System.Drawing.Font("Segoe UI", 9F);
-            this.txtInstance.Name = "txtInstance";
-            this.txtInstance.Size = new System.Drawing.Size(100, 27);
-            // 
-            // toolStripLabel1
-            // 
-            this.toolStripLabel1.Name = "toolStripLabel1";
-            this.toolStripLabel1.Size = new System.Drawing.Size(66, 20);
-            this.toolStripLabel1.Text = "Instance:";
-            // 
-            // toolStripLabel2
-            // 
-            this.toolStripLabel2.Name = "toolStripLabel2";
-            this.toolStripLabel2.Size = new System.Drawing.Size(50, 20);
-            this.toolStripLabel2.Text = "Client:";
-            // 
-            // txtClient
-            // 
-            this.txtClient.Font = new System.Drawing.Font("Segoe UI", 9F);
-            this.txtClient.Name = "txtClient";
-            this.txtClient.Size = new System.Drawing.Size(100, 27);
-            // 
-            // toolStripLabel3
-            // 
-            this.toolStripLabel3.Name = "toolStripLabel3";
-            this.toolStripLabel3.Size = new System.Drawing.Size(40, 20);
-            this.toolStripLabel3.Text = "App:";
-            // 
-            // txtApp
-            // 
-            this.txtApp.Font = new System.Drawing.Font("Segoe UI", 9F);
-            this.txtApp.Name = "txtApp";
-            this.txtApp.Size = new System.Drawing.Size(100, 27);
-            // 
-            // toolStripLabel4
-            // 
-            this.toolStripLabel4.Name = "toolStripLabel4";
-            this.toolStripLabel4.Size = new System.Drawing.Size(75, 20);
-            this.toolStripLabel4.Text = "Database:";
-            // 
-            // txtDatabase
-            // 
-            this.txtDatabase.Font = new System.Drawing.Font("Segoe UI", 9F);
-            this.txtDatabase.Name = "txtDatabase";
-            this.txtDatabase.Size = new System.Drawing.Size(100, 27);
-            // 
-            // toolStripLabel5
-            // 
-            this.toolStripLabel5.Name = "toolStripLabel5";
-            this.toolStripLabel5.Size = new System.Drawing.Size(56, 20);
-            this.toolStripLabel5.Text = "Object:";
-            // 
-            // txtObject
-            // 
-            this.txtObject.Font = new System.Drawing.Font("Segoe UI", 9F);
-            this.txtObject.Name = "txtObject";
-            this.txtObject.Size = new System.Drawing.Size(100, 27);
-            // 
-            // toolStripLabel6
-            // 
-            this.toolStripLabel6.Name = "toolStripLabel6";
-            this.toolStripLabel6.Size = new System.Drawing.Size(38, 20);
-            this.toolStripLabel6.Text = "User";
-            // 
-            // txtUser
-            // 
-            this.txtUser.Font = new System.Drawing.Font("Segoe UI", 9F);
-            this.txtUser.Name = "txtUser";
-            this.txtUser.Size = new System.Drawing.Size(100, 27);
-            // 
-            // toolStripLabel7
-            // 
-            this.toolStripLabel7.Name = "toolStripLabel7";
-            this.toolStripLabel7.Size = new System.Drawing.Size(36, 20);
-            this.toolStripLabel7.Text = "Text";
-            // 
-            // txtText
-            // 
-            this.txtText.Font = new System.Drawing.Font("Segoe UI", 9F);
-            this.txtText.Name = "txtText";
-            this.txtText.Size = new System.Drawing.Size(100, 27);
             // 
             // appToolStripMenuItem
             // 
@@ -568,6 +474,149 @@
             this.appToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
             this.appToolStripMenuItem.Tag = "client_app_name";
             this.appToolStripMenuItem.Text = "App";
+            // 
+            // toolStripDropDownButton1
+            // 
+            this.toolStripDropDownButton1.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.toolStripDropDownButton1.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.lblInstance,
+            this.lblClient,
+            this.lblApp,
+            this.lblDatabase,
+            this.lblObject,
+            this.lblUser,
+            this.lblText,
+            this.toolStripSeparator2,
+            this.resetToolStripMenuItem});
+            this.toolStripDropDownButton1.Image = global::DBAChecksGUI.Properties.Resources.FilterDropdown_16x;
+            this.toolStripDropDownButton1.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolStripDropDownButton1.Name = "toolStripDropDownButton1";
+            this.toolStripDropDownButton1.Size = new System.Drawing.Size(34, 24);
+            this.toolStripDropDownButton1.Text = "toolStripDropDownButton1";
+            // 
+            // lblInstance
+            // 
+            this.lblInstance.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.txtInstance});
+            this.lblInstance.Name = "lblInstance";
+            this.lblInstance.Size = new System.Drawing.Size(224, 26);
+            this.lblInstance.Text = "Instance";
+            // 
+            // txtInstance
+            // 
+            this.txtInstance.BackColor = System.Drawing.Color.AliceBlue;
+            this.txtInstance.Font = new System.Drawing.Font("Segoe UI", 9F);
+            this.txtInstance.Name = "txtInstance";
+            this.txtInstance.Size = new System.Drawing.Size(200, 27);
+            this.txtInstance.TextChanged += new System.EventHandler(this.txtInstance_TextChanged);
+            // 
+            // lblClient
+            // 
+            this.lblClient.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.txtClient});
+            this.lblClient.Name = "lblClient";
+            this.lblClient.Size = new System.Drawing.Size(224, 26);
+            this.lblClient.Text = "Client";
+            // 
+            // txtClient
+            // 
+            this.txtClient.BackColor = System.Drawing.Color.AliceBlue;
+            this.txtClient.Font = new System.Drawing.Font("Segoe UI", 9F);
+            this.txtClient.Name = "txtClient";
+            this.txtClient.Size = new System.Drawing.Size(200, 27);
+            this.txtClient.TextChanged += new System.EventHandler(this.txtClient_TextChanged);
+            // 
+            // lblApp
+            // 
+            this.lblApp.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.txtApp});
+            this.lblApp.Name = "lblApp";
+            this.lblApp.Size = new System.Drawing.Size(224, 26);
+            this.lblApp.Text = "App";
+            // 
+            // txtApp
+            // 
+            this.txtApp.BackColor = System.Drawing.Color.AliceBlue;
+            this.txtApp.Font = new System.Drawing.Font("Segoe UI", 9F);
+            this.txtApp.Name = "txtApp";
+            this.txtApp.Size = new System.Drawing.Size(200, 27);
+            this.txtApp.TextChanged += new System.EventHandler(this.txtApp_TextChanged);
+            // 
+            // lblDatabase
+            // 
+            this.lblDatabase.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.txtDatabase});
+            this.lblDatabase.Name = "lblDatabase";
+            this.lblDatabase.Size = new System.Drawing.Size(224, 26);
+            this.lblDatabase.Text = "Database";
+            // 
+            // txtDatabase
+            // 
+            this.txtDatabase.BackColor = System.Drawing.Color.AliceBlue;
+            this.txtDatabase.Font = new System.Drawing.Font("Segoe UI", 9F);
+            this.txtDatabase.Name = "txtDatabase";
+            this.txtDatabase.Size = new System.Drawing.Size(200, 27);
+            this.txtDatabase.TextChanged += new System.EventHandler(this.txtDatabase_TextChanged);
+            // 
+            // lblObject
+            // 
+            this.lblObject.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.txtObject});
+            this.lblObject.Name = "lblObject";
+            this.lblObject.Size = new System.Drawing.Size(224, 26);
+            this.lblObject.Text = "Object";
+            // 
+            // txtObject
+            // 
+            this.txtObject.BackColor = System.Drawing.Color.AliceBlue;
+            this.txtObject.Font = new System.Drawing.Font("Segoe UI", 9F);
+            this.txtObject.Name = "txtObject";
+            this.txtObject.Size = new System.Drawing.Size(200, 27);
+            this.txtObject.TextChanged += new System.EventHandler(this.txtObject_TextChanged);
+            // 
+            // lblUser
+            // 
+            this.lblUser.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.txtUser});
+            this.lblUser.Name = "lblUser";
+            this.lblUser.Size = new System.Drawing.Size(224, 26);
+            this.lblUser.Text = "User";
+            // 
+            // txtUser
+            // 
+            this.txtUser.BackColor = System.Drawing.Color.AliceBlue;
+            this.txtUser.Font = new System.Drawing.Font("Segoe UI", 9F);
+            this.txtUser.Name = "txtUser";
+            this.txtUser.Size = new System.Drawing.Size(200, 27);
+            this.txtUser.TextChanged += new System.EventHandler(this.txtUser_TextChanged);
+            // 
+            // lblText
+            // 
+            this.lblText.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.txtText});
+            this.lblText.Name = "lblText";
+            this.lblText.Size = new System.Drawing.Size(224, 26);
+            this.lblText.Text = "Text";
+            // 
+            // txtText
+            // 
+            this.txtText.BackColor = System.Drawing.Color.AliceBlue;
+            this.txtText.Font = new System.Drawing.Font("Segoe UI", 9F);
+            this.txtText.Name = "txtText";
+            this.txtText.Size = new System.Drawing.Size(200, 27);
+            this.txtText.TextChanged += new System.EventHandler(this.txtText_TextChanged);
+            // 
+            // toolStripSeparator2
+            // 
+            this.toolStripSeparator2.Name = "toolStripSeparator2";
+            this.toolStripSeparator2.Size = new System.Drawing.Size(221, 6);
+            // 
+            // resetToolStripMenuItem
+            // 
+            this.resetToolStripMenuItem.Name = "resetToolStripMenuItem";
+            this.resetToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            this.resetToolStripMenuItem.Text = "Reset";
+            this.resetToolStripMenuItem.Click += new System.EventHandler(this.resetToolStripMenuItem_Click);
             // 
             // SlowQueries
             // 
@@ -624,20 +673,23 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn TotalCPU;
         private System.Windows.Forms.DataGridViewTextBoxColumn TotalIO;
         private System.Windows.Forms.DataGridViewTextBoxColumn TotalPhysicalIO;
-        private System.Windows.Forms.ToolStripLabel toolStripLabel1;
-        private System.Windows.Forms.ToolStripTextBox txtInstance;
-        private System.Windows.Forms.ToolStripLabel toolStripLabel2;
-        private System.Windows.Forms.ToolStripTextBox txtClient;
-        private System.Windows.Forms.ToolStripLabel toolStripLabel3;
-        private System.Windows.Forms.ToolStripTextBox txtApp;
-        private System.Windows.Forms.ToolStripLabel toolStripLabel4;
-        private System.Windows.Forms.ToolStripTextBox txtDatabase;
-        private System.Windows.Forms.ToolStripLabel toolStripLabel5;
-        private System.Windows.Forms.ToolStripTextBox txtObject;
-        private System.Windows.Forms.ToolStripLabel toolStripLabel6;
-        private System.Windows.Forms.ToolStripTextBox txtUser;
-        private System.Windows.Forms.ToolStripLabel toolStripLabel7;
-        private System.Windows.Forms.ToolStripTextBox txtText;
         private System.Windows.Forms.ToolStripMenuItem appToolStripMenuItem;
+        private System.Windows.Forms.ToolStripDropDownButton toolStripDropDownButton1;
+        private System.Windows.Forms.ToolStripMenuItem lblInstance;
+        private System.Windows.Forms.ToolStripTextBox txtInstance;
+        private System.Windows.Forms.ToolStripMenuItem lblClient;
+        private System.Windows.Forms.ToolStripTextBox txtClient;
+        private System.Windows.Forms.ToolStripMenuItem lblApp;
+        private System.Windows.Forms.ToolStripTextBox txtApp;
+        private System.Windows.Forms.ToolStripMenuItem lblDatabase;
+        private System.Windows.Forms.ToolStripTextBox txtDatabase;
+        private System.Windows.Forms.ToolStripMenuItem lblObject;
+        private System.Windows.Forms.ToolStripTextBox txtObject;
+        private System.Windows.Forms.ToolStripMenuItem lblUser;
+        private System.Windows.Forms.ToolStripTextBox txtUser;
+        private System.Windows.Forms.ToolStripMenuItem lblText;
+        private System.Windows.Forms.ToolStripTextBox txtText;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator2;
+        private System.Windows.Forms.ToolStripMenuItem resetToolStripMenuItem;
     }
 }

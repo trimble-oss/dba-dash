@@ -66,6 +66,9 @@ namespace DBAChecksGUI
             txtObject.Text = "";
             txtText.Text = "";
             txtUser.Text = "";
+            txtApp.Text = "";
+            groupBy = "ConnectionID";
+            selectGroupBy();
         }
 
 
@@ -246,6 +249,59 @@ namespace DBAChecksGUI
         private void SlowQueries_Load(object sender, EventArgs e)
         {
             selectGroupBy();
+        }
+
+        private void resetToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            ResetFilters();
+            RefreshData();
+        }
+
+        private void txtInstance_TextChanged(object sender, EventArgs e)
+        {
+            setFilterHighlight(txtInstance, lblInstance);
+        }
+
+        private void setFilterHighlight(ToolStripTextBox txt, ToolStripMenuItem lbl)
+        {
+            if (txt.Text.Length > 0)
+            {
+                lbl.Font = new Font(lbl.Font, FontStyle.Bold);
+            }
+            else
+            {
+                lbl.Font = new Font(lbl.Font, FontStyle.Regular);
+            }
+        }
+
+        private void txtClient_TextChanged(object sender, EventArgs e)
+        {
+            setFilterHighlight(txtClient, lblClient);
+        }
+
+        private void txtApp_TextChanged(object sender, EventArgs e)
+        {
+            setFilterHighlight(txtApp, lblApp);
+        }
+
+        private void txtDatabase_TextChanged(object sender, EventArgs e)
+        {
+            setFilterHighlight(txtDatabase, lblDatabase);
+        }
+
+        private void txtObject_TextChanged(object sender, EventArgs e)
+        {
+            setFilterHighlight(txtObject, lblObject);
+        }
+
+        private void txtUser_TextChanged(object sender, EventArgs e)
+        {
+            setFilterHighlight(txtUser, lblUser);
+        }
+
+        private void txtText_TextChanged(object sender, EventArgs e)
+        {
+            setFilterHighlight(txtText, lblText);
         }
     }
 }
