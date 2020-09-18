@@ -11,6 +11,7 @@
 	@GroupBy VARCHAR(50)='ConnectionID',
 	@Text NVARCHAR(MAX)=NULL,
 	@DatabaseName SYSNAME=NULL,
+	@UserName SYSNAME=NULL,
 	@Top INT=20
 )
 AS
@@ -71,12 +72,13 @@ AND timestamp< @ToDate
 ' + CASE WHEN @DurationToUS IS NULL THEN '' ELSE 'AND SQ.Duration < @DurationTo' END + '
 ' + CASE WHEN @Text IS NULL THEN '' ELSE 'AND SQ.Text LIKE ''%'' + @Text + ''%''' END + '
 ' + CASE WHEN @DatabaseName IS NULL THEN '' ELSE 'AND D.name = @DatabaseName' END + '
+' + CASE WHEN @UserName IS NULL THEN '' ELSE 'AND SQ.username = @UserName' END + '
 GROUP BY ' + @GroupSQL +'
 ORDER BY SUM(Duration) DESC'
 
 EXEC sp_executesql @sql,N'@Instances IDs READONLY,@ObjectName SYSNAME,@ClientHostName SYSNAME,
 						@ConnectionID SYSNAME,@ClientAppName SYSNAME,@DurationFrom BIGINT,
 						@DurationTo BIGINT,@Text NVARCHAR(MAX),@DatabaseName SYSNAME,
-						@FromDate DATETIME2(3),@ToDate DATETIME2(3),@Top INT',
+						@FromDate DATETIME2(3),@ToDate DATETIME2(3),@UserName SYSNAME,@Top INT',
 						@Instances,@ObjectName,@ClientHostName,@ConnectionID,@ClientAppName,
-						@DurationFromUS,@DurationToUS,@Text,@DatabaseName,@FromDate,@ToDate,@Top
+						@DurationFromUS,@DurationToUS,@Text,@DatabaseName,@FromDate,@ToDate,@UserName,@Top

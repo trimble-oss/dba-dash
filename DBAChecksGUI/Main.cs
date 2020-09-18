@@ -233,6 +233,12 @@ namespace DBAChecksGUI
                 configurationHistory1.ConnectionString = connectionString;
                 configurationHistory1.RefreshData();
             }
+            if(tabs.SelectedTab== tabSlowQueries)
+            {
+                slowQueries1.InstanceIDs = instanceIDs;
+                slowQueries1.ConnectionString = connectionString;
+                slowQueries1.RefreshData();
+            }
         }
 
         private void loadDBAChecksErrorLog(Int32 InstanceID)
@@ -432,6 +438,7 @@ ORDER BY SchemaName,ObjectName
                 allowedTabs.Add(tabLastGood);
                 allowedTabs.Add(tabDBAChecksErrorLog);
                 allowedTabs.Add(tabCollectionDates);
+                allowedTabs.Add(tabSlowQueries);
              
             }
             else if(n.Type== SQLTreeItem.TreeType.Database)
@@ -443,6 +450,7 @@ ORDER BY SchemaName,ObjectName
                 }
                 allowedTabs.Add(tabFiles);
                 allowedTabs.Add(tabSnapshotsSummary);
+                allowedTabs.Add(tabSlowQueries);
             }
             else if (n.Type == SQLTreeItem.TreeType.Instance)
             {
@@ -458,6 +466,7 @@ ORDER BY SchemaName,ObjectName
                     allowedTabs.Add(tabLastGood);
                     allowedTabs.Add(tabDBAChecksErrorLog);
                     allowedTabs.Add(tabInfo);
+                    allowedTabs.Add(tabSlowQueries);
                 }
                 allowedTabs.Add(tabFiles);
                 allowedTabs.Add(tabTags);

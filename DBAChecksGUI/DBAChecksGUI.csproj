@@ -304,6 +304,12 @@
     <Compile Include="Info.Designer.cs">
       <DependentUpon>Info.cs</DependentUpon>
     </Compile>
+    <Compile Include="Performance\SlowQueries.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Performance\SlowQueries.Designer.cs">
+      <DependentUpon>SlowQueries.cs</DependentUpon>
+    </Compile>
     <Compile Include="SQLPatching.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -422,6 +428,9 @@
       <DependentUpon>Resources.resx</DependentUpon>
       <DesignTime>True</DesignTime>
     </Compile>
+    <EmbeddedResource Include="Performance\SlowQueries.resx">
+      <DependentUpon>SlowQueries.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="SQLPatching.resx">
       <DependentUpon>SQLPatching.cs</DependentUpon>
     </EmbeddedResource>
