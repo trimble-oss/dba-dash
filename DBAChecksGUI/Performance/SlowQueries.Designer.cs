@@ -120,6 +120,7 @@
             this.TotalCPU = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.TotalIO = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.TotalPhysicalIO = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.lblPageSize = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.dgvSummary)).BeginInit();
             this.toolStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dgvSlow)).BeginInit();
@@ -526,13 +527,13 @@
             this.Result,
             this.Text});
             this.dgvSlow.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.dgvSlow.Location = new System.Drawing.Point(0, 0);
+            this.dgvSlow.Location = new System.Drawing.Point(0, 17);
             this.dgvSlow.Name = "dgvSlow";
             this.dgvSlow.ReadOnly = true;
             this.dgvSlow.RowHeadersVisible = false;
             this.dgvSlow.RowHeadersWidth = 51;
             this.dgvSlow.RowTemplate.Height = 24;
-            this.dgvSlow.Size = new System.Drawing.Size(1829, 679);
+            this.dgvSlow.Size = new System.Drawing.Size(1829, 662);
             this.dgvSlow.TabIndex = 4;
             // 
             // splitContainer1
@@ -549,6 +550,7 @@
             // splitContainer1.Panel2
             // 
             this.splitContainer1.Panel2.Controls.Add(this.dgvSlow);
+            this.splitContainer1.Panel2.Controls.Add(this.lblPageSize);
             this.splitContainer1.Size = new System.Drawing.Size(1829, 1071);
             this.splitContainer1.SplitterDistance = 388;
             this.splitContainer1.TabIndex = 5;
@@ -875,6 +877,17 @@
             this.TotalPhysicalIO.ReadOnly = true;
             this.TotalPhysicalIO.Width = 118;
             // 
+            // lblPageSize
+            // 
+            this.lblPageSize.Dock = System.Windows.Forms.DockStyle.Top;
+            this.lblPageSize.ForeColor = System.Drawing.Color.Red;
+            this.lblPageSize.Location = new System.Drawing.Point(0, 0);
+            this.lblPageSize.Name = "lblPageSize";
+            this.lblPageSize.Size = new System.Drawing.Size(1829, 17);
+            this.lblPageSize.TabIndex = 5;
+            this.lblPageSize.Text = "Top 1000 rows";
+            this.lblPageSize.Visible = false;
+            // 
             // SlowQueries
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
@@ -970,5 +983,6 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn TotalCPU;
         private System.Windows.Forms.DataGridViewTextBoxColumn TotalIO;
         private System.Windows.Forms.DataGridViewTextBoxColumn TotalPhysicalIO;
+        private System.Windows.Forms.Label lblPageSize;
     }
 }

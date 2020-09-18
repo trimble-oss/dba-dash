@@ -75,7 +75,17 @@ namespace DBAChecksGUI
             }
             else
             {
-                instanceIDs = InstanceIDs();
+
+               
+                if (n.Type == SQLTreeItem.TreeType.Instance && !(n.InstanceID>0))
+                {
+                    instanceIDs = ChildInstanceIDs(n);
+                }
+                else
+                {
+                    instanceIDs = InstanceIDs();
+                }
+               
             }
             if (tabs.SelectedTab == tabTags)
             {
@@ -196,14 +206,7 @@ namespace DBAChecksGUI
                 }
                 else
                 {
-                    if (n.InstanceID > 0)
-                    {
-                        performanceSummary1.InstanceIDs = instanceIDs;
-                    }
-                    else
-                    {
-                        performanceSummary1.InstanceIDs = ChildInstanceIDs(n);
-                    }
+                    performanceSummary1.InstanceIDs = instanceIDs;                
                     performanceSummary1.TagIDs = "";
                 }
                 performanceSummary1.ConnectionString = connectionString;
@@ -237,6 +240,15 @@ namespace DBAChecksGUI
             {
                 slowQueries1.InstanceIDs = instanceIDs;
                 slowQueries1.ConnectionString = connectionString;
+                if(n.Type== SQLTreeItem.TreeType.Database)
+                {
+                    slowQueries1.DBName = n.DatabaseName;
+                }
+                else
+                {
+                    slowQueries1.DBName = "";
+                }
+                slowQueries1.ResetFilters();
                 slowQueries1.RefreshData();
             }
         }
@@ -465,9 +477,9 @@ ORDER BY SchemaName,ObjectName
                     allowedTabs.Add(tabSnapshotsSummary);
                     allowedTabs.Add(tabLastGood);
                     allowedTabs.Add(tabDBAChecksErrorLog);
-                    allowedTabs.Add(tabInfo);
-                    allowedTabs.Add(tabSlowQueries);
+                    allowedTabs.Add(tabInfo);                   
                 }
+                allowedTabs.Add(tabSlowQueries);
                 allowedTabs.Add(tabFiles);
                 allowedTabs.Add(tabTags);
                 allowedTabs.Add(tabCollectionDates);

@@ -22,6 +22,21 @@ namespace DBAChecksGUI
         public List<Int32> InstanceIDs;
         public string ConnectionString;
         string groupBy = "ConnectionID";
+        string _db="";
+        public string DBName {
+            get {
+                return _db;
+            }
+            set {
+                _db = value;
+           
+                lblDatabase.Visible = _db.Length == 0;
+                lblInstance.Visible = _db.Length == 0;
+                instanceToolStripMenuItem.Visible = _db.Length == 0;
+                databaseNameToolStripMenuItem.Visible = _db.Length == 0;
+            } 
+        }
+      
 
         Int32 mins = 15;
         private DateTime _from = DateTime.MinValue;
@@ -67,7 +82,17 @@ namespace DBAChecksGUI
             txtText.Text = "";
             txtUser.Text = "";
             txtApp.Text = "";
-            groupBy = "ConnectionID";
+            if(_db.Length > 0){
+                groupBy = "object_name";
+            }
+            else if (InstanceIDs.Count == 1)
+            {
+                groupBy = "DatabaseName";
+            }
+            else
+            {
+                groupBy = "ConnectionID";
+            }
             selectGroupBy();
         }
 
@@ -75,6 +100,7 @@ namespace DBAChecksGUI
         public void RefreshData()
         {
             dgvSlow.DataSource = null;
+            lblPageSize.Visible = false;
             SqlConnection cn = new SqlConnection(ConnectionString);
             using (cn)
             {
@@ -84,6 +110,7 @@ namespace DBAChecksGUI
                 cmd.Parameters.AddWithValue("FromDate", fromDate);
                 cmd.Parameters.AddWithValue("ToDate", toDate);
                 cmd.Parameters.AddWithValue("GroupBy", groupBy);
+                string db = DBName.Length > 0 ? DBName : txtDatabase.Text;
                 if (txtClient.Text.Length > 0)
                 {
                     cmd.Parameters.AddWithValue("ClientHostName", txtClient.Text);
@@ -96,9 +123,9 @@ namespace DBAChecksGUI
                 {
                     cmd.Parameters.AddWithValue("ClientAppName", txtApp.Text);
                 }
-                if (txtDatabase.Text.Length > 0)
+                if (db.Length > 0)
                 {
-                    cmd.Parameters.AddWithValue("DatabaseName", txtDatabase.Text);
+                    cmd.Parameters.AddWithValue("DatabaseName", db);
                 }
                 if (txtObject.Text.Length > 0)
                 {
@@ -182,6 +209,8 @@ namespace DBAChecksGUI
             }
         }
 
+        public Int32 pageSize = 1000;
+
 
         private void dgvSummary_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
@@ -221,11 +250,11 @@ namespace DBAChecksGUI
                         throw new Exception("Invalid group by");
                     }
 
-                    if (txtInstance.Text.Length == 0)
+                    if (txtInstance.Text.Length == 0 && _db.Length==0)
                     {
                         groupBy = "ConnectionID";
                     }
-                    else if (txtDatabase.Text.Length == 0)
+                    else if (txtDatabase.Text.Length == 0 && _db.Length==0)
                     {
                         groupBy = "DatabaseName";
                     }
@@ -366,12 +395,12 @@ namespace DBAChecksGUI
                 cmd.Parameters.AddWithValue("InstanceIDs", string.Join(",", InstanceIDs));
                 cmd.Parameters.AddWithValue("FromDate", fromDate);
                 cmd.Parameters.AddWithValue("ToDate", toDate);
-                cmd.Parameters.AddWithValue("Top", 1000);
+                cmd.Parameters.AddWithValue("Top", pageSize);
 
                 string connectionID = txtInstance.Text;
                 string client = txtClient.Text;
                 string user = txtUser.Text;
-                string db = txtDatabase.Text;
+                string db = DBName.Length>0 ?  DBName : txtDatabase.Text;
                 string objectname = txtObject.Text;
                 string app = txtApp.Text;
                 
@@ -444,6 +473,15 @@ namespace DBAChecksGUI
                 SqlDataAdapter da = new SqlDataAdapter(cmd);
                 var dt = new DataTable();
                 da.Fill(dt);
+                if(dt.Rows.Count== pageSize)
+                {
+                    lblPageSize.Text = string.Format("Top {0} rows", pageSize);
+                    lblPageSize.Visible = true;
+                }
+                else
+                {
+                    lblPageSize.Visible = false;
+                }
                dgvSlow.AutoGenerateColumns = false;
                 dgvSlow.DataSource = dt;
 
