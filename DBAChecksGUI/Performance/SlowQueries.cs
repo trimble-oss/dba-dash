@@ -492,5 +492,16 @@ namespace DBAChecksGUI
         {
             RefreshData();
         }
+
+        private void dgvSlow_CellContentClick(object sender, DataGridViewCellEventArgs e)
+        {
+            if (e.RowIndex >= 0 && dgvSlow.Columns[e.ColumnIndex] == Text)
+            {
+                var row = (DataRowView)dgvSlow.Rows[e.RowIndex].DataBoundItem;
+                var frm = new CodeViewer();
+                frm.SQL = (string)row["Text"];
+                frm.ShowDialog();
+            }
+        }
     }
 }

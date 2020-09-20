@@ -130,6 +130,12 @@
     <Compile Include="Backups\BackupThresholdsConfig.Designer.cs">
       <DependentUpon>BackupThresholdsConfig.cs</DependentUpon>
     </Compile>
+    <Compile Include="CodeViewer.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="CodeViewer.Designer.cs">
+      <DependentUpon>CodeViewer.cs</DependentUpon>
+    </Compile>
     <Compile Include="CollectionDates\CollectionDates.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -336,6 +342,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Backups\BackupThresholdsConfig.resx">
       <DependentUpon>BackupThresholdsConfig.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="CodeViewer.resx">
+      <DependentUpon>CodeViewer.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="CollectionDates\CollectionDates.resx">
       <DependentUpon>CollectionDates.cs</DependentUpon>
