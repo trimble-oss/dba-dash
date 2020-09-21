@@ -133,6 +133,8 @@
             this.slowQueries1 = new DBAChecksGUI.SlowQueries();
             this.tabTraceFlags = new System.Windows.Forms.TabPage();
             this.traceFlagHistory1 = new DBAChecksGUI.Changes.TraceFlagHistory();
+            this.tabAlerts = new System.Windows.Forms.TabPage();
+            this.alerts1 = new DBAChecksGUI.Changes.Alerts();
             this.menuStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitMain)).BeginInit();
             this.splitMain.Panel1.SuspendLayout();
@@ -174,6 +176,7 @@
             this.tabInstanceConfig.SuspendLayout();
             this.tabSlowQueries.SuspendLayout();
             this.tabTraceFlags.SuspendLayout();
+            this.tabAlerts.SuspendLayout();
             this.SuspendLayout();
             // 
             // TreeViewImageList
@@ -269,6 +272,7 @@
             this.tabs.Controls.Add(this.tabInstanceConfig);
             this.tabs.Controls.Add(this.tabSlowQueries);
             this.tabs.Controls.Add(this.tabTraceFlags);
+            this.tabs.Controls.Add(this.tabAlerts);
             this.tabs.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tabs.Location = new System.Drawing.Point(0, 0);
             this.tabs.Name = "tabs";
@@ -1323,6 +1327,25 @@
             this.traceFlagHistory1.Size = new System.Drawing.Size(1469, 1246);
             this.traceFlagHistory1.TabIndex = 0;
             // 
+            // tabAlerts
+            // 
+            this.tabAlerts.Controls.Add(this.alerts1);
+            this.tabAlerts.Location = new System.Drawing.Point(4, 25);
+            this.tabAlerts.Name = "tabAlerts";
+            this.tabAlerts.Padding = new System.Windows.Forms.Padding(3);
+            this.tabAlerts.Size = new System.Drawing.Size(1475, 1252);
+            this.tabAlerts.TabIndex = 20;
+            this.tabAlerts.Text = "Alerts";
+            this.tabAlerts.UseVisualStyleBackColor = true;
+            // 
+            // alerts1
+            // 
+            this.alerts1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.alerts1.Location = new System.Drawing.Point(3, 3);
+            this.alerts1.Name = "alerts1";
+            this.alerts1.Size = new System.Drawing.Size(1469, 1246);
+            this.alerts1.TabIndex = 0;
+            // 
             // Main
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
@@ -1385,6 +1408,7 @@
             this.tabInstanceConfig.ResumeLayout(false);
             this.tabSlowQueries.ResumeLayout(false);
             this.tabTraceFlags.ResumeLayout(false);
+            this.tabAlerts.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -1487,5 +1511,7 @@
         private SlowQueries slowQueries1;
         private System.Windows.Forms.TabPage tabTraceFlags;
         private Changes.TraceFlagHistory traceFlagHistory1;
+        private System.Windows.Forms.TabPage tabAlerts;
+        private Changes.Alerts alerts1;
     }
 }

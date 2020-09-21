@@ -130,6 +130,12 @@
     <Compile Include="Backups\BackupThresholdsConfig.Designer.cs">
       <DependentUpon>BackupThresholdsConfig.cs</DependentUpon>
     </Compile>
+    <Compile Include="Changes\Alerts.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Changes\Alerts.Designer.cs">
+      <DependentUpon>Alerts.cs</DependentUpon>
+    </Compile>
     <Compile Include="Changes\Configuration.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -354,6 +360,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Backups\BackupThresholdsConfig.resx">
       <DependentUpon>BackupThresholdsConfig.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Changes\Alerts.resx">
+      <DependentUpon>Alerts.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Changes\Configuration.resx">
       <DependentUpon>Configuration.cs</DependentUpon>

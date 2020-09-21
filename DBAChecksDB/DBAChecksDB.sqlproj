@@ -30,7 +30,7 @@
     <QueryStoreStaleQueryThreshold>15</QueryStoreStaleQueryThreshold>
     <QueryStoreMaxStorageSize>512</QueryStoreMaxStorageSize>
     <QueryStoreMaxPlansPerQuery>50</QueryStoreMaxPlansPerQuery>
-    <DacVersion>1.9.1.4</DacVersion>
+    <DacVersion>1.9.1.5</DacVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <OutputPath>bin\Release\</OutputPath>
@@ -393,6 +393,8 @@
     <Build Include="dbo\Stored Procedures\TraceFlags_Get.sql" />
     <Build Include="dbo\Stored Procedures\TraceFlagHistory_Get.sql" />
     <Build Include="dbo\Stored Procedures\Configuration_Get.sql" />
+    <Build Include="dbo\Stored Procedures\AlertsConfig_Get.sql" />
+    <Build Include="dbo\Stored Procedures\Alerts_Get.sql" />
   </ItemGroup>
   <ItemGroup>
     <PostDeploy Include="Script.PostDeployment1.sql" />

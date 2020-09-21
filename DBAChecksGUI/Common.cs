@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Data.SqlClient;
 using System.Linq;
 using System.Text;
@@ -25,6 +26,43 @@ WHERE DDLID = @DDLID";
                 return DBAChecks.SchemaSnapshotDB.Unzip(bDDL);
 
             }
+        }
+
+        public static DataTable ConvertUTCToLocal(ref DataTable dt,List<string>convertCols=null)
+        {
+            List<Int32> convertColsIdx = new List<int>();
+            if (convertCols == null || convertCols.Count == 0) {
+                convertCols = new List<string>();
+                foreach (DataColumn col in dt.Columns)
+                {
+                    if ( col.DataType == typeof(DateTime))
+                    {
+                        convertColsIdx.Add(col.Ordinal);
+                    }
+                }
+            }
+            else
+            {
+                foreach(string col in convertCols)
+                {
+                    convertColsIdx.Add(dt.Columns[col].Ordinal);
+                }
+            }
+            if (convertColsIdx.Count > 0)
+            {
+                foreach (DataRow row in dt.Rows)
+                {
+                    foreach(var col in convertColsIdx)
+                    {
+                        if (row[col] != DBNull.Value)
+                        {
+                            row[col] = ((DateTime)row[col]).ToLocalTime();
+                        }
+                    }
+                }
+            }
+            return dt;
+
         }
     }
 }

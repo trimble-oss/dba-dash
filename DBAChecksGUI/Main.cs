@@ -257,6 +257,12 @@ namespace DBAChecksGUI
                 traceFlagHistory1.ConnectionString = connectionString;
                 traceFlagHistory1.RefreshData();
             }
+            if(tabs.SelectedTab == tabAlerts)
+            {
+                alerts1.InstanceIDs = instanceIDs;
+                alerts1.ConnectionString = connectionString;
+                alerts1.RefreshData();
+            }
         }
 
         private void loadDBAChecksErrorLog(Int32 InstanceID)
@@ -495,6 +501,7 @@ ORDER BY SchemaName,ObjectName
                 allowedTabs.Add(tabSQLPatching);
                 allowedTabs.Add(tabInstanceConfig);
                 allowedTabs.Add(tabTraceFlags);
+                allowedTabs.Add(tabAlerts);
             }
             if (n.ObjectID > 0)
             {
