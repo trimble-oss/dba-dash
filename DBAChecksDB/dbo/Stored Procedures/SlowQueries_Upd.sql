@@ -2,6 +2,11 @@
 
 CREATE PROC [dbo].[SlowQueries_Upd](@SlowQueries dbo.SlowQueries READONLY,@InstanceID INT,@SnapshotDate DATETIME2(3))
 AS
+DECLARE @UTCOffset INT
+SELECT @UTCOffset = UTCOffset 
+FROM dbo.Instances 
+WHERE InstanceID=@InstanceID
+
 DECLARE @MinDate DATETIME2(3)
 SELECT @MinDate =MIN(timestamp) 
 FROM @SlowQueries
@@ -36,7 +41,7 @@ SELECT @InstanceID,
 		D.DatabaseID,
 		event_type,
 		object_name,
-		timestamp,
+		DATEADD(mi,@UTCOffset,timestamp) AS timestamp,
 		duration,
 		cpu_time,
 		logical_reads,

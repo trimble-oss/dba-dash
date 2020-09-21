@@ -12,6 +12,7 @@
 	@Text NVARCHAR(MAX)=NULL,
 	@DatabaseName SYSNAME=NULL,
 	@UserName SYSNAME=NULL,
+	@Result SYSNAME=NULL,
 	@Top INT=20
 )
 AS
@@ -38,6 +39,7 @@ DECLARE @GroupSQL NVARCHAR(MAX) = CASE @GroupBy WHEN 'ConnectionID' THEN 'I.Conn
 												WHEN 'object_name' THEN 'SQ.object_name'
 												WHEN 'client_app_name' THEN 'SQ.client_app_name'
 												WHEN 'DatabaseName' THEN 'D.name'
+												WHEN 'Result' THEN 'SQ.Result'
 												ELSE 'ConnectionID' END
 
 DECLARE @SQL NVARCHAR(MAX)
@@ -73,12 +75,13 @@ AND timestamp< @ToDate
 ' + CASE WHEN @Text IS NULL THEN '' ELSE 'AND SQ.Text LIKE ''%'' + @Text + ''%''' END + '
 ' + CASE WHEN @DatabaseName IS NULL THEN '' ELSE 'AND D.name = @DatabaseName' END + '
 ' + CASE WHEN @UserName IS NULL THEN '' ELSE 'AND SQ.username = @UserName' END + '
+' + CASE WHEN @Result IS NULL THEN '' ELSE 'AND SQ.Result = @Result' END + '
 GROUP BY ' + @GroupSQL +'
 ORDER BY SUM(Duration) DESC'
 
 EXEC sp_executesql @sql,N'@Instances IDs READONLY,@ObjectName SYSNAME,@ClientHostName SYSNAME,
 						@ConnectionID SYSNAME,@ClientAppName SYSNAME,@DurationFrom BIGINT,
 						@DurationTo BIGINT,@Text NVARCHAR(MAX),@DatabaseName SYSNAME,
-						@FromDate DATETIME2(3),@ToDate DATETIME2(3),@UserName SYSNAME,@Top INT',
+						@FromDate DATETIME2(3),@ToDate DATETIME2(3),@UserName SYSNAME,@Result SYSNAME,@Top INT',
 						@Instances,@ObjectName,@ClientHostName,@ConnectionID,@ClientAppName,
-						@DurationFromUS,@DurationToUS,@Text,@DatabaseName,@FromDate,@ToDate,@UserName,@Top
+						@DurationFromUS,@DurationToUS,@Text,@DatabaseName,@FromDate,@ToDate,@UserName,@Result,@Top

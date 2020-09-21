@@ -82,6 +82,7 @@ namespace DBAChecksGUI
             txtText.Text = "";
             txtUser.Text = "";
             txtApp.Text = "";
+            txtResult.Text = "";
             if(_db.Length > 0){
                 groupBy = "object_name";
             }
@@ -138,6 +139,10 @@ namespace DBAChecksGUI
                 if (txtText.Text.Length > 0)
                 {
                     cmd.Parameters.AddWithValue("Text", txtText.Text);
+                }
+                if (txtResult.Text.Length > 0)
+                {
+                    cmd.Parameters.AddWithValue("Result", txtResult.Text);
                 }
                 cmd.CommandType = CommandType.StoredProcedure;
                 SqlDataAdapter da = new SqlDataAdapter(cmd);
@@ -245,6 +250,10 @@ namespace DBAChecksGUI
                     {
                         txtUser.Text = selectedGroupValue;
                     }
+                    else if(groupBy == "Result")
+                    {
+                        txtResult.Text = selectedGroupValue;
+                    }
                     else
                     {
                         throw new Exception("Invalid group by");
@@ -270,9 +279,13 @@ namespace DBAChecksGUI
                     {
                         groupBy = "object_name";
                     }
-                    else
+                    else if(txtUser.Text.Length==0)
                     {
                         groupBy = "username";
+                    }
+                    else
+                    {
+                        groupBy = "Result";
                     }
                     selectGroupBy();
                     RefreshData();
@@ -383,6 +396,10 @@ namespace DBAChecksGUI
         {
             setFilterHighlight(txtText, lblText);
         }
+        private void txtResult_TextChanged(object sender, EventArgs e)
+        {
+            setFilterHighlight(txtResult, lblResult);
+        }
 
         private void loadSlowQueriesDetail(Int32 durationFrom=-1,Int32 durationTo=-1)
         {
@@ -403,6 +420,7 @@ namespace DBAChecksGUI
                 string db = DBName.Length>0 ?  DBName : txtDatabase.Text;
                 string objectname = txtObject.Text;
                 string app = txtApp.Text;
+                string result = txtResult.Text;
                 
                 if (groupBy == "ConnectionID")
                 {
@@ -427,6 +445,10 @@ namespace DBAChecksGUI
                 else if (groupBy == "username")
                 {
                    user= selectedGroupValue;
+                }
+                else if (groupBy == "Result")
+                {
+                    result = selectedGroupValue;
                 }
                 else
                 {
@@ -469,6 +491,10 @@ namespace DBAChecksGUI
                 {
                     cmd.Parameters.AddWithValue("DurationToSec", durationTo);
                 }
+                if (result.Length > 0)
+                {
+                    cmd.Parameters.AddWithValue("Result", result);
+                }
                 cmd.CommandType = CommandType.StoredProcedure;
                 SqlDataAdapter da = new SqlDataAdapter(cmd);
                 var dt = new DataTable();
@@ -503,5 +529,7 @@ namespace DBAChecksGUI
                 frm.ShowDialog();
             }
         }
+
+
     }
 }

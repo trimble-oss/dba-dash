@@ -70,11 +70,15 @@ namespace DBAChecks
             {
                 var r = dt.Rows.Add();
                 r["event_type"] = evt.Attribute("name").Value;
-                r["timestamp"] = evt.Attribute("timestamp").Value;
+                r["timestamp"] =  evt.Attribute("timestamp").Value;
                 foreach (XElement data in evt.Elements("data"))
                 {
                     name = data.Attribute("name").Value;
-                    if (dt.Columns.Contains(name))
+                    if (name == "result")
+                    {
+                        r[name] = data.Element("value").Value + " - " + data.Element("text").Value;
+                    }
+                    else if (dt.Columns.Contains(name))
                     {
                         r[name] = data.Element("value").Value;
                     }
