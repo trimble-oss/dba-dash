@@ -130,6 +130,12 @@
     <Compile Include="Backups\BackupThresholdsConfig.Designer.cs">
       <DependentUpon>BackupThresholdsConfig.cs</DependentUpon>
     </Compile>
+    <Compile Include="Changes\TraceFlagHistory.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Changes\TraceFlagHistory.Designer.cs">
+      <DependentUpon>TraceFlagHistory.cs</DependentUpon>
+    </Compile>
     <Compile Include="CodeViewer.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -149,10 +155,10 @@
       <DependentUpon>CollectionDatesThresholds.cs</DependentUpon>
     </Compile>
     <Compile Include="Common.cs" />
-    <Compile Include="ConfigurationHistory.cs">
+    <Compile Include="Changes\ConfigurationHistory.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="ConfigurationHistory.Designer.cs">
+    <Compile Include="Changes\ConfigurationHistory.Designer.cs">
       <DependentUpon>ConfigurationHistory.cs</DependentUpon>
     </Compile>
     <Compile Include="CustomProgressBar.cs">
@@ -204,10 +210,10 @@
     <Compile Include="Drives\DriveThresholdConfig.Designer.cs">
       <DependentUpon>DriveThresholdConfig.cs</DependentUpon>
     </Compile>
-    <Compile Include="HardwareChanges.cs">
+    <Compile Include="Changes\HardwareChanges.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="HardwareChanges.Designer.cs">
+    <Compile Include="Changes\HardwareChanges.Designer.cs">
       <DependentUpon>HardwareChanges.cs</DependentUpon>
     </Compile>
     <Compile Include="LastGoodCheckDB\LastGoodCheckDBConfig.cs">
@@ -316,10 +322,10 @@
     <Compile Include="Performance\SlowQueries.Designer.cs">
       <DependentUpon>SlowQueries.cs</DependentUpon>
     </Compile>
-    <Compile Include="SQLPatching.cs">
+    <Compile Include="Changes\SQLPatching.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="SQLPatching.Designer.cs">
+    <Compile Include="Changes\SQLPatching.Designer.cs">
       <DependentUpon>SQLPatching.cs</DependentUpon>
     </Compile>
     <Compile Include="SqlServerTypes\Loader.cs" />
@@ -343,6 +349,9 @@
     <EmbeddedResource Include="Backups\BackupThresholdsConfig.resx">
       <DependentUpon>BackupThresholdsConfig.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="Changes\TraceFlagHistory.resx">
+      <DependentUpon>TraceFlagHistory.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="CodeViewer.resx">
       <DependentUpon>CodeViewer.cs</DependentUpon>
     </EmbeddedResource>
@@ -352,7 +361,7 @@
     <EmbeddedResource Include="CollectionDates\CollectionDatesThresholds.resx">
       <DependentUpon>CollectionDatesThresholds.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="ConfigurationHistory.resx">
+    <EmbeddedResource Include="Changes\ConfigurationHistory.resx">
       <DependentUpon>ConfigurationHistory.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="DBDiff.resx">
@@ -376,7 +385,7 @@
     <EmbeddedResource Include="Drives\DriveThresholdConfig.resx">
       <DependentUpon>DriveThresholdConfig.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="HardwareChanges.resx">
+    <EmbeddedResource Include="Changes\HardwareChanges.resx">
       <DependentUpon>HardwareChanges.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Info.resx">
@@ -440,7 +449,7 @@
     <EmbeddedResource Include="Performance\SlowQueries.resx">
       <DependentUpon>SlowQueries.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="SQLPatching.resx">
+    <EmbeddedResource Include="Changes\SQLPatching.resx">
       <DependentUpon>SQLPatching.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Summary.resx">
