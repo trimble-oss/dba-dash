@@ -230,7 +230,7 @@ namespace DBAChecksGUI
                 sqlPatching1.ConnectionString = connectionString;
                 sqlPatching1.RefreshData();
             }
-            if(tabs.SelectedTab == tabInstanceConfigChange)
+            if(tabs.SelectedTab == tabInstanceConfig)
             {                
                 configurationHistory1.InstanceIDs = instanceIDs;
                 configurationHistory1.ConnectionString = connectionString;
@@ -251,7 +251,7 @@ namespace DBAChecksGUI
                 slowQueries1.ResetFilters();
                 slowQueries1.RefreshData();
             }
-            if(tabs.SelectedTab== tabTraceFlagHistory)
+            if(tabs.SelectedTab== tabTraceFlags)
             {
                 traceFlagHistory1.InstanceIDs = instanceIDs;
                 traceFlagHistory1.ConnectionString = connectionString;
@@ -493,8 +493,8 @@ ORDER BY SchemaName,ObjectName
             {
                 allowedTabs.Add(tabHardwareChanges);
                 allowedTabs.Add(tabSQLPatching);
-                allowedTabs.Add(tabInstanceConfigChange);
-                allowedTabs.Add(tabTraceFlagHistory);
+                allowedTabs.Add(tabInstanceConfig);
+                allowedTabs.Add(tabTraceFlags);
             }
             if (n.ObjectID > 0)
             {

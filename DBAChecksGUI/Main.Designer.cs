@@ -127,11 +127,11 @@
             this.hardwareChanges1 = new DBAChecksGUI.HardwareChanges();
             this.tabSQLPatching = new System.Windows.Forms.TabPage();
             this.sqlPatching1 = new DBAChecksGUI.SQLPatching();
-            this.tabInstanceConfigChange = new System.Windows.Forms.TabPage();
+            this.tabInstanceConfig = new System.Windows.Forms.TabPage();
             this.configurationHistory1 = new DBAChecksGUI.ConfigurationHistory();
             this.tabSlowQueries = new System.Windows.Forms.TabPage();
             this.slowQueries1 = new DBAChecksGUI.SlowQueries();
-            this.tabTraceFlagHistory = new System.Windows.Forms.TabPage();
+            this.tabTraceFlags = new System.Windows.Forms.TabPage();
             this.traceFlagHistory1 = new DBAChecksGUI.Changes.TraceFlagHistory();
             this.menuStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitMain)).BeginInit();
@@ -171,9 +171,9 @@
             this.tabInfo.SuspendLayout();
             this.tabHardwareChanges.SuspendLayout();
             this.tabSQLPatching.SuspendLayout();
-            this.tabInstanceConfigChange.SuspendLayout();
+            this.tabInstanceConfig.SuspendLayout();
             this.tabSlowQueries.SuspendLayout();
-            this.tabTraceFlagHistory.SuspendLayout();
+            this.tabTraceFlags.SuspendLayout();
             this.SuspendLayout();
             // 
             // TreeViewImageList
@@ -266,9 +266,9 @@
             this.tabs.Controls.Add(this.tabInfo);
             this.tabs.Controls.Add(this.tabHardwareChanges);
             this.tabs.Controls.Add(this.tabSQLPatching);
-            this.tabs.Controls.Add(this.tabInstanceConfigChange);
+            this.tabs.Controls.Add(this.tabInstanceConfig);
             this.tabs.Controls.Add(this.tabSlowQueries);
-            this.tabs.Controls.Add(this.tabTraceFlagHistory);
+            this.tabs.Controls.Add(this.tabTraceFlags);
             this.tabs.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tabs.Location = new System.Drawing.Point(0, 0);
             this.tabs.Name = "tabs";
@@ -1265,16 +1265,16 @@
             this.sqlPatching1.Size = new System.Drawing.Size(1469, 1246);
             this.sqlPatching1.TabIndex = 0;
             // 
-            // tabInstanceConfigChange
+            // tabInstanceConfig
             // 
-            this.tabInstanceConfigChange.Controls.Add(this.configurationHistory1);
-            this.tabInstanceConfigChange.Location = new System.Drawing.Point(4, 25);
-            this.tabInstanceConfigChange.Name = "tabInstanceConfigChange";
-            this.tabInstanceConfigChange.Padding = new System.Windows.Forms.Padding(3);
-            this.tabInstanceConfigChange.Size = new System.Drawing.Size(1475, 1252);
-            this.tabInstanceConfigChange.TabIndex = 17;
-            this.tabInstanceConfigChange.Text = "Configuration Change";
-            this.tabInstanceConfigChange.UseVisualStyleBackColor = true;
+            this.tabInstanceConfig.Controls.Add(this.configurationHistory1);
+            this.tabInstanceConfig.Location = new System.Drawing.Point(4, 25);
+            this.tabInstanceConfig.Name = "tabInstanceConfig";
+            this.tabInstanceConfig.Padding = new System.Windows.Forms.Padding(3);
+            this.tabInstanceConfig.Size = new System.Drawing.Size(1475, 1252);
+            this.tabInstanceConfig.TabIndex = 17;
+            this.tabInstanceConfig.Text = "Configuration";
+            this.tabInstanceConfig.UseVisualStyleBackColor = true;
             // 
             // configurationHistory1
             // 
@@ -1304,16 +1304,16 @@
             this.slowQueries1.Size = new System.Drawing.Size(1469, 1246);
             this.slowQueries1.TabIndex = 0;
             // 
-            // tabTraceFlagHistory
+            // tabTraceFlags
             // 
-            this.tabTraceFlagHistory.Controls.Add(this.traceFlagHistory1);
-            this.tabTraceFlagHistory.Location = new System.Drawing.Point(4, 25);
-            this.tabTraceFlagHistory.Name = "tabTraceFlagHistory";
-            this.tabTraceFlagHistory.Padding = new System.Windows.Forms.Padding(3);
-            this.tabTraceFlagHistory.Size = new System.Drawing.Size(1475, 1252);
-            this.tabTraceFlagHistory.TabIndex = 19;
-            this.tabTraceFlagHistory.Text = "Trace Flag History";
-            this.tabTraceFlagHistory.UseVisualStyleBackColor = true;
+            this.tabTraceFlags.Controls.Add(this.traceFlagHistory1);
+            this.tabTraceFlags.Location = new System.Drawing.Point(4, 25);
+            this.tabTraceFlags.Name = "tabTraceFlags";
+            this.tabTraceFlags.Padding = new System.Windows.Forms.Padding(3);
+            this.tabTraceFlags.Size = new System.Drawing.Size(1475, 1252);
+            this.tabTraceFlags.TabIndex = 19;
+            this.tabTraceFlags.Text = "Trace Flags";
+            this.tabTraceFlags.UseVisualStyleBackColor = true;
             // 
             // traceFlagHistory1
             // 
@@ -1382,9 +1382,9 @@
             this.tabInfo.ResumeLayout(false);
             this.tabHardwareChanges.ResumeLayout(false);
             this.tabSQLPatching.ResumeLayout(false);
-            this.tabInstanceConfigChange.ResumeLayout(false);
+            this.tabInstanceConfig.ResumeLayout(false);
             this.tabSlowQueries.ResumeLayout(false);
-            this.tabTraceFlagHistory.ResumeLayout(false);
+            this.tabTraceFlags.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -1481,11 +1481,11 @@
         private HardwareChanges hardwareChanges1;
         private System.Windows.Forms.TabPage tabSQLPatching;
         private SQLPatching sqlPatching1;
-        private System.Windows.Forms.TabPage tabInstanceConfigChange;
+        private System.Windows.Forms.TabPage tabInstanceConfig;
         private ConfigurationHistory configurationHistory1;
         private System.Windows.Forms.TabPage tabSlowQueries;
         private SlowQueries slowQueries1;
-        private System.Windows.Forms.TabPage tabTraceFlagHistory;
+        private System.Windows.Forms.TabPage tabTraceFlags;
         private Changes.TraceFlagHistory traceFlagHistory1;
     }
 }

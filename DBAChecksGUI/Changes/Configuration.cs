@@ -25,7 +25,7 @@ namespace DBAChecksGUI.Changes
         {
             dgvConfig.Columns.Clear();
 
-            dgvConfig.Columns.Add(new DataGridViewTextBoxColumn() { Name = "Instance", HeaderText = "Instance", DataPropertyName = "Instance" });
+            dgvConfig.Columns.Add(new DataGridViewTextBoxColumn() { Name = "Instance", HeaderText = "Instance"});
             SqlConnection cn = new SqlConnection(ConnectionString);
             using (cn)
             {
@@ -34,78 +34,44 @@ namespace DBAChecksGUI.Changes
                 cmd.CommandType = CommandType.StoredProcedure;
                 cmd.Parameters.AddWithValue("@InstanceIDs", string.Join(",", InstanceIDs));
                 cmd.Parameters.AddWithValue("@ConfiguredOnly", configuredOnlyToolStripMenuItem.Checked);
-                SqlDataReader rdr = cmd.ExecuteReader();
-                var dt = new DataTable();
-                dt.Columns.Add("Instance");
 
-                string instance = "";
-                string previousInstance = "";
-                DataRow r = null;
-                while (rdr.Read())
+                SqlDataAdapter da = new SqlDataAdapter(cmd);
+                DataTable dt = new DataTable();
+                da.Fill(dt);
+                foreach(DataRow r in dt.DefaultView.ToTable(true, "name").Rows)
                 {
-                    instance = (string)rdr["ConnectionID"];
-                    if (instance != previousInstance)
-                    {
-                        r = dt.NewRow();
-                        dt.Rows.Add(r);
-                        r["Instance"] = instance;
-                    }
-                    var configid = (Int32)rdr["configuration_id"];
-                    var configName = (string)rdr["name"];
-                    var colName = configid.ToString();
-                    if (!dt.Columns.Contains(colName))
-                    {
-                        DataGridViewTextBoxColumn col = new DataGridViewTextBoxColumn() { Name = colName, HeaderText = configName, DataPropertyName = colName };
-                        col.Tag = colName + "_IsDefault";
-                        dgvConfig.Columns.Add(col);
-                        dt.Columns.Add(colName);
-
-                        var c = new DataColumn(col.Name + "_IsDefault") { DataType = typeof(bool) };
-                        dt.Columns.Add(c);
-
-                    }
-                    r[colName] = rdr["value"];
-                    r[colName + "_IsDefault"] = (bool)rdr["IsDefault"];
-                                    
-                    previousInstance = instance;
+                    DataGridViewTextBoxColumn col = new DataGridViewTextBoxColumn() { HeaderText = (string)r["name"], Name = (string)r["name"] };
+                    dgvConfig.Columns.Add(col);
                 }
-                dgvConfig.AutoGenerateColumns = false;
+                string lastInstance = "";
+                List<DataGridViewRow> rows = new List<DataGridViewRow>();
+                DataGridViewRow row=null;
+                foreach (DataRow r in dt.Rows)
+                {
+                    string instance = (string)r["ConnectionID"];
+                    if (instance != lastInstance)
+                    {
+                        row = new DataGridViewRow();
+                        row.CreateCells(dgvConfig);
+                        row.Cells[0].Value = instance;
+                        rows.Add(row);
+                    }
+
+                    string configName = (string)r["name"];
+                    var idx = dgvConfig.Columns[configName].Index;
+                    row.Cells[idx].Value = r["value"];
+                    row.Cells[idx].Style.BackColor = (bool)r["IsDefault"] ? Color.MintCream : Color.BlanchedAlmond;
+                    if (!(bool)r["IsDefault"]) {
+                        row.Cells[idx].Style.Font = new Font(dgvConfig.Font, FontStyle.Bold);
+                    }
+                    lastInstance = instance;
+                }
                 dgvConfig.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.DisplayedCells;
-                dgvConfig.DataSource = dt;
+                dgvConfig.Rows.AddRange(rows.ToArray());
             }
         }
 
-        private void dgvConfig_RowsAdded(object sender, DataGridViewRowsAddedEventArgs e)
-        {
-            for (Int32 idx = e.RowIndex; idx < e.RowIndex + e.RowCount; idx += 1)
-            {
-                var row = (DataRowView)dgvConfig.Rows[idx].DataBoundItem;
-                foreach(DataGridViewTextBoxColumn col in dgvConfig.Columns)
-                {
-                    if(col.Tag != null)
-                    {
-                        var isDefaultCol = (string)col.Tag;
-                        if (row[isDefaultCol] == DBNull.Value)
-                        {
-                            dgvConfig.Rows[idx].Cells[col.Index].Style.BackColor = Color.Gainsboro;
-                            dgvConfig.Rows[idx].Cells[col.Index].Style.Font = new Font(dgvConfig.Font, FontStyle.Regular);
-                        }
-                        else if ((bool)row[isDefaultCol] == true)
-                        {
-                          
-                            dgvConfig.Rows[idx].Cells[col.Index].Style.BackColor = Color.MintCream;
-                            dgvConfig.Rows[idx].Cells[col.Index].Style.Font = new Font(dgvConfig.Font, FontStyle.Regular);
-                        }
-                        else
-                        {
-                            dgvConfig.Rows[idx].Cells[col.Index].Style.Font = new Font(dgvConfig.Font, FontStyle.Bold);
-                            dgvConfig.Rows[idx].Cells[col.Index].Style.BackColor = Color.BlanchedAlmond;
-                        }
-                    }
-                }
-                
-            }
-        }
+
 
         private void configuredOnlyToolStripMenuItem_Click(object sender, EventArgs e)
         {
