@@ -263,6 +263,12 @@ namespace DBAChecksGUI
                 alerts1.ConnectionString = connectionString;
                 alerts1.RefreshData();
             }
+            if (tabs.SelectedTab == tabDrivers)
+            {
+                drivers1.InstanceIDs = instanceIDs;
+                drivers1.ConnectionString = connectionString;
+                drivers1.RefreshData();
+            }
         }
 
         private void loadDBAChecksErrorLog(Int32 InstanceID)
@@ -502,6 +508,7 @@ ORDER BY SchemaName,ObjectName
                 allowedTabs.Add(tabInstanceConfig);
                 allowedTabs.Add(tabTraceFlags);
                 allowedTabs.Add(tabAlerts);
+                allowedTabs.Add(tabDrivers);
             }
             if (n.ObjectID > 0)
             {

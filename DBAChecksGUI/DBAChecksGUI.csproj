@@ -142,6 +142,12 @@
     <Compile Include="Changes\Configuration.Designer.cs">
       <DependentUpon>Configuration.cs</DependentUpon>
     </Compile>
+    <Compile Include="Changes\Drivers.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Changes\Drivers.Designer.cs">
+      <DependentUpon>Drivers.cs</DependentUpon>
+    </Compile>
     <Compile Include="Changes\TraceFlagHistory.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -366,6 +372,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Changes\Configuration.resx">
       <DependentUpon>Configuration.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Changes\Drivers.resx">
+      <DependentUpon>Drivers.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Changes\TraceFlagHistory.resx">
       <DependentUpon>TraceFlagHistory.cs</DependentUpon>

@@ -32,11 +32,11 @@
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
             this.toolStripLabel1 = new System.Windows.Forms.ToolStripLabel();
+            this.toolStripDropDownButton1 = new System.Windows.Forms.ToolStripDropDownButton();
+            this.pivotByAlertNameToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.dgv = new System.Windows.Forms.DataGridView();
             this.toolStrip2 = new System.Windows.Forms.ToolStrip();
             this.toolStripLabel2 = new System.Windows.Forms.ToolStripLabel();
-            this.toolStripDropDownButton1 = new System.Windows.Forms.ToolStripDropDownButton();
-            this.pivotByAlertNameToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             ((System.ComponentModel.ISupportInitialize)(this.dgvAlerts)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
@@ -55,13 +55,13 @@
             this.dgvAlerts.BackgroundColor = System.Drawing.Color.White;
             this.dgvAlerts.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.dgvAlerts.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.dgvAlerts.Location = new System.Drawing.Point(0, 27);
+            this.dgvAlerts.Location = new System.Drawing.Point(0, 31);
             this.dgvAlerts.Name = "dgvAlerts";
             this.dgvAlerts.ReadOnly = true;
             this.dgvAlerts.RowHeadersVisible = false;
             this.dgvAlerts.RowHeadersWidth = 51;
             this.dgvAlerts.RowTemplate.Height = 24;
-            this.dgvAlerts.Size = new System.Drawing.Size(667, 266);
+            this.dgvAlerts.Size = new System.Drawing.Size(667, 262);
             this.dgvAlerts.TabIndex = 0;
             // 
             // splitContainer1
@@ -92,7 +92,7 @@
             this.toolStripDropDownButton1});
             this.toolStrip1.Location = new System.Drawing.Point(0, 0);
             this.toolStrip1.Name = "toolStrip1";
-            this.toolStrip1.Size = new System.Drawing.Size(667, 27);
+            this.toolStrip1.Size = new System.Drawing.Size(667, 31);
             this.toolStrip1.TabIndex = 1;
             this.toolStrip1.Text = "toolStrip1";
             // 
@@ -101,8 +101,27 @@
             this.toolStripLabel1.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
             this.toolStripLabel1.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
             this.toolStripLabel1.Name = "toolStripLabel1";
-            this.toolStripLabel1.Size = new System.Drawing.Size(152, 22);
+            this.toolStripLabel1.Size = new System.Drawing.Size(152, 28);
             this.toolStripLabel1.Text = "Alerts Configuration";
+            // 
+            // toolStripDropDownButton1
+            // 
+            this.toolStripDropDownButton1.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.toolStripDropDownButton1.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.pivotByAlertNameToolStripMenuItem});
+            this.toolStripDropDownButton1.Image = global::DBAChecksGUI.Properties.Resources.Column_16x;
+            this.toolStripDropDownButton1.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolStripDropDownButton1.Name = "toolStripDropDownButton1";
+            this.toolStripDropDownButton1.Size = new System.Drawing.Size(34, 28);
+            this.toolStripDropDownButton1.Text = "Pivot";
+            // 
+            // pivotByAlertNameToolStripMenuItem
+            // 
+            this.pivotByAlertNameToolStripMenuItem.CheckOnClick = true;
+            this.pivotByAlertNameToolStripMenuItem.Name = "pivotByAlertNameToolStripMenuItem";
+            this.pivotByAlertNameToolStripMenuItem.Size = new System.Drawing.Size(225, 26);
+            this.pivotByAlertNameToolStripMenuItem.Text = "Pivot By Alert Name";
+            this.pivotByAlertNameToolStripMenuItem.Click += new System.EventHandler(this.pivotByAlertNameToolStripMenuItem_Click);
             // 
             // dgv
             // 
@@ -137,27 +156,8 @@
             this.toolStripLabel2.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
             this.toolStripLabel2.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
             this.toolStripLabel2.Name = "toolStripLabel2";
-            this.toolStripLabel2.Size = new System.Drawing.Size(51, 22);
+            this.toolStripLabel2.Size = new System.Drawing.Size(51, 28);
             this.toolStripLabel2.Text = "Alerts";
-            // 
-            // toolStripDropDownButton1
-            // 
-            this.toolStripDropDownButton1.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.toolStripDropDownButton1.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.pivotByAlertNameToolStripMenuItem});
-            this.toolStripDropDownButton1.Image = global::DBAChecksGUI.Properties.Resources.Column_16x;
-            this.toolStripDropDownButton1.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.toolStripDropDownButton1.Name = "toolStripDropDownButton1";
-            this.toolStripDropDownButton1.Size = new System.Drawing.Size(34, 24);
-            this.toolStripDropDownButton1.Text = "Pivot";
-            // 
-            // pivotByAlertNameToolStripMenuItem
-            // 
-            this.pivotByAlertNameToolStripMenuItem.CheckOnClick = true;
-            this.pivotByAlertNameToolStripMenuItem.Name = "pivotByAlertNameToolStripMenuItem";
-            this.pivotByAlertNameToolStripMenuItem.Size = new System.Drawing.Size(225, 26);
-            this.pivotByAlertNameToolStripMenuItem.Text = "Pivot By Alert Name";
-            this.pivotByAlertNameToolStripMenuItem.Click += new System.EventHandler(this.pivotByAlertNameToolStripMenuItem_Click);
             // 
             // Alerts
             // 
