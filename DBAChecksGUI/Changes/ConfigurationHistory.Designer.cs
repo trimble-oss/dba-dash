@@ -43,7 +43,16 @@
             this.default_value = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Minimum = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Maximum = new System.Windows.Forms.DataGridViewCheckBoxColumn();
+            this.splitContainer1 = new System.Windows.Forms.SplitContainer();
+            this.configuration1 = new DBAChecksGUI.Changes.Configuration();
+            this.toolStrip1 = new System.Windows.Forms.ToolStrip();
+            this.toolStripLabel1 = new System.Windows.Forms.ToolStripLabel();
             ((System.ComponentModel.ISupportInitialize)(this.dgv)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
+            this.splitContainer1.Panel1.SuspendLayout();
+            this.splitContainer1.Panel2.SuspendLayout();
+            this.splitContainer1.SuspendLayout();
+            this.toolStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
             // dgv
@@ -69,12 +78,12 @@
             this.Minimum,
             this.Maximum});
             this.dgv.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.dgv.Location = new System.Drawing.Point(0, 0);
+            this.dgv.Location = new System.Drawing.Point(0, 25);
             this.dgv.Name = "dgv";
             this.dgv.ReadOnly = true;
             this.dgv.RowHeadersVisible = false;
             this.dgv.RowHeadersWidth = 51;
-            this.dgv.Size = new System.Drawing.Size(706, 418);
+            this.dgv.Size = new System.Drawing.Size(1678, 387);
             this.dgv.TabIndex = 0;
             // 
             // Instance
@@ -120,7 +129,7 @@
             this.value_in_use.MinimumWidth = 6;
             this.value_in_use.Name = "value_in_use";
             this.value_in_use.ReadOnly = true;
-            this.value_in_use.Width = 117;
+            this.value_in_use.Width = 85;
             // 
             // new_value
             // 
@@ -129,7 +138,7 @@
             this.new_value.MinimumWidth = 6;
             this.new_value.Name = "new_value";
             this.new_value.ReadOnly = true;
-            this.new_value.Width = 104;
+            this.new_value.Width = 96;
             // 
             // new_value_in_use
             // 
@@ -207,13 +216,67 @@
             this.Maximum.ReadOnly = true;
             this.Maximum.Width = 72;
             // 
+            // splitContainer1
+            // 
+            this.splitContainer1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.splitContainer1.Location = new System.Drawing.Point(0, 0);
+            this.splitContainer1.Name = "splitContainer1";
+            this.splitContainer1.Orientation = System.Windows.Forms.Orientation.Horizontal;
+            // 
+            // splitContainer1.Panel1
+            // 
+            this.splitContainer1.Panel1.Controls.Add(this.configuration1);
+            // 
+            // splitContainer1.Panel2
+            // 
+            this.splitContainer1.Panel2.Controls.Add(this.dgv);
+            this.splitContainer1.Panel2.Controls.Add(this.toolStrip1);
+            this.splitContainer1.Size = new System.Drawing.Size(1678, 832);
+            this.splitContainer1.SplitterDistance = 416;
+            this.splitContainer1.TabIndex = 2;
+            // 
+            // configuration1
+            // 
+            this.configuration1.BackColor = System.Drawing.Color.White;
+            this.configuration1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.configuration1.Location = new System.Drawing.Point(0, 0);
+            this.configuration1.Name = "configuration1";
+            this.configuration1.Size = new System.Drawing.Size(1678, 416);
+            this.configuration1.TabIndex = 1;
+            // 
+            // toolStrip1
+            // 
+            this.toolStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
+            this.toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.toolStripLabel1});
+            this.toolStrip1.Location = new System.Drawing.Point(0, 0);
+            this.toolStrip1.Name = "toolStrip1";
+            this.toolStrip1.Size = new System.Drawing.Size(1678, 25);
+            this.toolStrip1.TabIndex = 1;
+            this.toolStrip1.Text = "toolStrip1";
+            // 
+            // toolStripLabel1
+            // 
+            this.toolStripLabel1.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
+            this.toolStripLabel1.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
+            this.toolStripLabel1.Name = "toolStripLabel1";
+            this.toolStripLabel1.Size = new System.Drawing.Size(192, 22);
+            this.toolStripLabel1.Text = "Configuration Change Log";
+            // 
             // ConfigurationHistory
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.Controls.Add(this.dgv);
-            this.Size = new System.Drawing.Size(706, 418);
+            this.Controls.Add(this.splitContainer1);
+            this.Size = new System.Drawing.Size(1678, 832);
             ((System.ComponentModel.ISupportInitialize)(this.dgv)).EndInit();
+            this.splitContainer1.Panel1.ResumeLayout(false);
+            this.splitContainer1.Panel2.ResumeLayout(false);
+            this.splitContainer1.Panel2.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).EndInit();
+            this.splitContainer1.ResumeLayout(false);
+            this.toolStrip1.ResumeLayout(false);
+            this.toolStrip1.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -235,5 +298,9 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn default_value;
         private System.Windows.Forms.DataGridViewTextBoxColumn Minimum;
         private System.Windows.Forms.DataGridViewCheckBoxColumn Maximum;
+        private Changes.Configuration configuration1;
+        private System.Windows.Forms.SplitContainer splitContainer1;
+        private System.Windows.Forms.ToolStrip toolStrip1;
+        private System.Windows.Forms.ToolStripLabel toolStripLabel1;
     }
 }

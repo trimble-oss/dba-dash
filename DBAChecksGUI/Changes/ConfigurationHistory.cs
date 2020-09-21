@@ -23,6 +23,9 @@ namespace DBAChecksGUI
 
         public void RefreshData()
         {
+            configuration1.ConnectionString = this.ConnectionString;
+            configuration1.InstanceIDs = this.InstanceIDs;
+            configuration1.RefreshData();
             SqlConnection cn = new SqlConnection(ConnectionString);
             using (cn)
             {
