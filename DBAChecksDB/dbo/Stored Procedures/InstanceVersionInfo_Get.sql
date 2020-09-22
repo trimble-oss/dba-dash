@@ -43,6 +43,6 @@ SELECT I.ConnectionID,
 		I.WindowsSKU,
 		H.ChangedDate AS PatchDate
 FROM dbo.InstanceInfo I
-OUTER APPLY(SELECT TOP(1) H.ChangedDate FROM dbo.SQLPatchingHistory H WHERE H.InstanceID = I.InstanceID) H
+OUTER APPLY(SELECT TOP(1) H.ChangedDate FROM dbo.SQLPatchingHistory H WHERE H.InstanceID = I.InstanceID ORDER BY H.ChangedDate DESC) H
 WHERE EXISTS(SELECT 1 FROM @Instances t WHERE t.InstanceID = I.InstanceID)
 AND I.IsActive=1
