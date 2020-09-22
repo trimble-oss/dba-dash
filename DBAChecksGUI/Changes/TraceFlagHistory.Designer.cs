@@ -34,9 +34,9 @@
             this.ChangeDate = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Change = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
-            this.dgvFlags = new System.Windows.Forms.DataGridView();
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
             this.toolStripLabel1 = new System.Windows.Forms.ToolStripLabel();
+            this.dgvFlags = new System.Windows.Forms.DataGridView();
             this.toolStrip2 = new System.Windows.Forms.ToolStrip();
             this.toolStripLabel2 = new System.Windows.Forms.ToolStripLabel();
             ((System.ComponentModel.ISupportInitialize)(this.dgv)).BeginInit();
@@ -44,8 +44,8 @@
             this.splitContainer1.Panel1.SuspendLayout();
             this.splitContainer1.Panel2.SuspendLayout();
             this.splitContainer1.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.dgvFlags)).BeginInit();
             this.toolStrip1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.dgvFlags)).BeginInit();
             this.toolStrip2.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -62,12 +62,12 @@
             this.ChangeDate,
             this.Change});
             this.dgv.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.dgv.Location = new System.Drawing.Point(0, 31);
+            this.dgv.Location = new System.Drawing.Point(0, 25);
             this.dgv.Name = "dgv";
             this.dgv.ReadOnly = true;
             this.dgv.RowHeadersVisible = false;
             this.dgv.RowHeadersWidth = 51;
-            this.dgv.Size = new System.Drawing.Size(676, 163);
+            this.dgv.Size = new System.Drawing.Size(676, 169);
             this.dgv.TabIndex = 0;
             // 
             // Instance
@@ -115,8 +115,8 @@
             // 
             // splitContainer1.Panel1
             // 
-            this.splitContainer1.Panel1.Controls.Add(this.toolStrip1);
             this.splitContainer1.Panel1.Controls.Add(this.dgvFlags);
+            this.splitContainer1.Panel1.Controls.Add(this.toolStrip1);
             // 
             // splitContainer1.Panel2
             // 
@@ -126,23 +126,6 @@
             this.splitContainer1.SplitterDistance = 197;
             this.splitContainer1.TabIndex = 2;
             // 
-            // dgvFlags
-            // 
-            this.dgvFlags.AllowUserToAddRows = false;
-            this.dgvFlags.AllowUserToDeleteRows = false;
-            this.dgvFlags.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.DisplayedCells;
-            this.dgvFlags.BackgroundColor = System.Drawing.Color.White;
-            this.dgvFlags.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.dgvFlags.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.dgvFlags.Location = new System.Drawing.Point(0, 0);
-            this.dgvFlags.Name = "dgvFlags";
-            this.dgvFlags.ReadOnly = true;
-            this.dgvFlags.RowHeadersVisible = false;
-            this.dgvFlags.RowHeadersWidth = 51;
-            this.dgvFlags.RowTemplate.Height = 24;
-            this.dgvFlags.Size = new System.Drawing.Size(676, 197);
-            this.dgvFlags.TabIndex = 0;
-            // 
             // toolStrip1
             // 
             this.toolStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
@@ -150,7 +133,7 @@
             this.toolStripLabel1});
             this.toolStrip1.Location = new System.Drawing.Point(0, 0);
             this.toolStrip1.Name = "toolStrip1";
-            this.toolStrip1.Size = new System.Drawing.Size(676, 25);
+            this.toolStrip1.Size = new System.Drawing.Size(676, 31);
             this.toolStrip1.TabIndex = 1;
             this.toolStrip1.Text = "toolStrip1";
             // 
@@ -159,8 +142,25 @@
             this.toolStripLabel1.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
             this.toolStripLabel1.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
             this.toolStripLabel1.Name = "toolStripLabel1";
-            this.toolStripLabel1.Size = new System.Drawing.Size(86, 22);
+            this.toolStripLabel1.Size = new System.Drawing.Size(86, 28);
             this.toolStripLabel1.Text = "Trace Flags";
+            // 
+            // dgvFlags
+            // 
+            this.dgvFlags.AllowUserToAddRows = false;
+            this.dgvFlags.AllowUserToDeleteRows = false;
+            this.dgvFlags.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.DisplayedCells;
+            this.dgvFlags.BackgroundColor = System.Drawing.Color.White;
+            this.dgvFlags.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.dgvFlags.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.dgvFlags.Location = new System.Drawing.Point(0, 31);
+            this.dgvFlags.Name = "dgvFlags";
+            this.dgvFlags.ReadOnly = true;
+            this.dgvFlags.RowHeadersVisible = false;
+            this.dgvFlags.RowHeadersWidth = 51;
+            this.dgvFlags.RowTemplate.Height = 24;
+            this.dgvFlags.Size = new System.Drawing.Size(676, 166);
+            this.dgvFlags.TabIndex = 0;
             // 
             // toolStrip2
             // 
@@ -169,7 +169,7 @@
             this.toolStripLabel2});
             this.toolStrip2.Location = new System.Drawing.Point(0, 0);
             this.toolStrip2.Name = "toolStrip2";
-            this.toolStrip2.Size = new System.Drawing.Size(676, 31);
+            this.toolStrip2.Size = new System.Drawing.Size(676, 25);
             this.toolStrip2.TabIndex = 1;
             this.toolStrip2.Text = "toolStrip2";
             // 
@@ -178,7 +178,7 @@
             this.toolStripLabel2.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
             this.toolStripLabel2.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
             this.toolStripLabel2.Name = "toolStripLabel2";
-            this.toolStripLabel2.Size = new System.Drawing.Size(61, 28);
+            this.toolStripLabel2.Size = new System.Drawing.Size(61, 22);
             this.toolStripLabel2.Text = "History";
             // 
             // TraceFlagHistory
@@ -195,9 +195,9 @@
             this.splitContainer1.Panel2.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).EndInit();
             this.splitContainer1.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.dgvFlags)).EndInit();
             this.toolStrip1.ResumeLayout(false);
             this.toolStrip1.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.dgvFlags)).EndInit();
             this.toolStrip2.ResumeLayout(false);
             this.toolStrip2.PerformLayout();
             this.ResumeLayout(false);

@@ -79,8 +79,8 @@ namespace DBAChecksGUI.Changes
                 DataGridViewRow row = null;
                 foreach (DataRow r in dt.Select("","DriverProviderName,DeviceName"))
                 {
-                    string device = (string)r["DeviceName"];
-                    string provider = (string)r["DriverProviderName"];
+                    string device = r["DeviceName"]==DBNull.Value ? "" : (string)r["DeviceName"];
+                    string provider = r["DriverProviderName"]==DBNull.Value ? "" : (string)r["DriverProviderName"];
                     if (lastDevice != device | lastProvider!=provider)
                     {
                         row = new DataGridViewRow();
@@ -92,7 +92,7 @@ namespace DBAChecksGUI.Changes
                     }
 
                     string instance = (string)r[pivotCol];
-                    string version = (string)r["DriverVersion"];
+                    string version = r["DriverVersion"]==DBNull.Value ? "" :(string)r["DriverVersion"];
                     DateTime validFrom = (DateTime)r["ValidFrom"];
                     var idx = dgvDrivers.Columns[instance].Index;
 
@@ -117,7 +117,7 @@ namespace DBAChecksGUI.Changes
             tsProvider.DropDownItems.Clear();
             foreach (DataRow r in dt.DefaultView.ToTable(true, "DriverProviderName").Select("", "DriverProviderName"))
             {
-                if (r["DriverProviderName"] != DBNull.Value)
+                if (r["DriverProviderName"] != DBNull.Value && (string)r["DriverProviderName"]!="")
                 {
                    var tsItem= new ToolStripMenuItem((string)r["DriverProviderName"]);
                     tsItem.Checked = tsItem.Text == provider;

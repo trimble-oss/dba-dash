@@ -46,7 +46,7 @@ namespace DBAChecksGUI
             XMLSchemaCollection,
             Trigger,
             CLRTrigger,
-            DBAChecksChanges
+            Configuration
         }
 
         public string FullName()
@@ -301,7 +301,7 @@ namespace DBAChecksGUI
                 case TreeType.Folder:
                     ImageIndex = 3;
                     break;
-                case TreeType.DBAChecksChanges:
+                case TreeType.Configuration:
                     ImageIndex = 7;
                     break;
                 default:

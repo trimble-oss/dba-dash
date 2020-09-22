@@ -332,7 +332,7 @@ namespace DBAChecksGUI
         {
             tv1.Nodes.Clear();
             var root = new SQLTreeItem("DBAChecks", SQLTreeItem.TreeType.DBAChecksRoot);
-            var changes = new SQLTreeItem("Changes", SQLTreeItem.TreeType.DBAChecksChanges);
+            var changes = new SQLTreeItem("Configuration", SQLTreeItem.TreeType.Configuration);
             root.Nodes.Add(changes);
             
             var tags = String.Join(",", SelectedTags());
@@ -386,7 +386,7 @@ ORDER BY D.Name
                 //    cmd.CommandType = CommandType.StoredProcedure;
                 if (instanceNode.InstanceID > 0)
                 {
-                    var changesNode = new SQLTreeItem("Changes", SQLTreeItem.TreeType.DBAChecksChanges);
+                    var changesNode = new SQLTreeItem("Configuration", SQLTreeItem.TreeType.Configuration);
                     changesNode.InstanceID = instanceNode.InstanceID;
                     instanceNode.Nodes.Add(changesNode);
                 }
@@ -501,12 +501,12 @@ ORDER BY SchemaName,ObjectName
                 allowedTabs.Add(tabTags);
                 allowedTabs.Add(tabCollectionDates);
             }
-            else if (n.Type == SQLTreeItem.TreeType.DBAChecksChanges)
+            else if (n.Type == SQLTreeItem.TreeType.Configuration)
             {
-                allowedTabs.Add(tabHardwareChanges);
-                allowedTabs.Add(tabSQLPatching);
                 allowedTabs.Add(tabInstanceConfig);
                 allowedTabs.Add(tabTraceFlags);
+                allowedTabs.Add(tabHardwareChanges);
+                allowedTabs.Add(tabSQLPatching);
                 allowedTabs.Add(tabAlerts);
                 allowedTabs.Add(tabDrivers);
             }
