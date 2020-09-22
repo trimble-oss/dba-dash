@@ -4,6 +4,7 @@
 
 
 
+
 CREATE VIEW [dbo].[InstanceInfo]
 AS
 SELECT I.InstanceID,
@@ -21,8 +22,8 @@ SELECT I.InstanceID,
 	I.physical_memory_kb,
 	I.physical_memory_kb/POWER(1024.0,2) PhysicalMemoryGB,
 	CAST(maxmem.value AS BIGINT) BufferPoolMB, 
-	CAST(maxmem.value AS BIGINT) / (I.physical_memory_kb/1024.0) PctMemoryAllocatedToBufferPool,
-	((I.physical_memory_kb/1024)-CAST(maxmem.value AS BIGINT)) / 1024.0 AS MemoryNotAllocatedToBufferPoolGB,
+	CASE WHEN CAST(maxmem.value AS BIGINT)*1024 > I.physical_memory_kb THEN 1.0 ELSE CAST(maxmem.value AS BIGINT) / (I.physical_memory_kb/1024.0) END AS  PctMemoryAllocatedToBufferPool,
+	CASE WHEN CAST(maxmem.value AS BIGINT)*1024 > I.physical_memory_kb THEN 0.0 ELSE ((I.physical_memory_kb/1024)-CAST(maxmem.value AS BIGINT)) / 1024.0 END AS MemoryNotAllocatedToBufferPoolGB,
     I.sql_memory_model,	  
    	CASE I.sql_memory_model WHEN 1 THEN 'CONVENTIONAL' WHEN 2 THEN 'LOCK_PAGES' WHEN 3 THEN 'LARGE_PAGES' ELSE NULL END AS sql_memory_model_desc,
 	I.OfflineSchedulers,

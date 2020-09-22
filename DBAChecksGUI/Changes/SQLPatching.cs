@@ -23,6 +23,30 @@ namespace DBAChecksGUI
 
         public void RefreshData()
         {
+            refreshHistory();
+            refreshVersion();
+        }
+
+        private void refreshVersion()
+        {
+            SqlConnection cn = new SqlConnection(ConnectionString);
+            using (cn)
+            {
+                cn.Open();
+                SqlCommand cmd = new SqlCommand("dbo.InstanceVersionInfo_Get", cn);
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.Parameters.AddWithValue("@InstanceIDs", string.Join(",", InstanceIDs));
+                SqlDataAdapter da = new SqlDataAdapter(cmd);
+                DataTable dt = new DataTable();
+                da.Fill(dt);
+                Common.ConvertUTCToLocal(ref dt);
+                dgvVersion.AutoGenerateColumns = false;
+                dgvVersion.DataSource = dt;
+            }
+        }
+
+        private void refreshHistory()
+        {
             SqlConnection cn = new SqlConnection(ConnectionString);
             using (cn)
             {
@@ -33,9 +57,34 @@ namespace DBAChecksGUI
                 SqlDataAdapter da = new SqlDataAdapter(cmd);
                 DataTable dt = new DataTable();
                 da.Fill(dt);
+                Common.ConvertUTCToLocal(ref dt);
                 dgv.AutoGenerateColumns = false;
                 dgv.DataSource = dt;
             }
+        }
+
+        private void tsCopyVersion_Click(object sender, EventArgs e)
+        {
+            dgvVersion.SelectAll();
+            DataObject dataObj = dgvVersion.GetClipboardContent();
+            Clipboard.SetDataObject(dataObj, true);
+        }
+
+        private void tsCopyHistory_Click(object sender, EventArgs e)
+        {
+            dgv.SelectAll();
+            DataObject dataObj = dgv.GetClipboardContent();
+            Clipboard.SetDataObject(dataObj, true);
+        }
+
+        private void tsRefreshVersion_Click(object sender, EventArgs e)
+        {
+            refreshVersion();
+        }
+
+        private void tsRefreshHistory_Click(object sender, EventArgs e)
+        {
+            refreshHistory();
         }
     }
 }

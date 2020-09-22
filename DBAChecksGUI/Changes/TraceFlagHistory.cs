@@ -22,7 +22,7 @@ namespace DBAChecksGUI.Changes
         public List<Int32> InstanceIDs;
 
 
-        private void getFlags()
+        private void refreshFlags()
         {
             SqlConnection cn = new SqlConnection(ConnectionString);
             using (cn)
@@ -71,9 +71,8 @@ namespace DBAChecksGUI.Changes
             }
         }
 
-        public void RefreshData()
+        private void refreshHistory()
         {
-            getFlags();
             SqlConnection cn = new SqlConnection(ConnectionString);
             using (cn)
             {
@@ -84,9 +83,41 @@ namespace DBAChecksGUI.Changes
                 SqlDataAdapter da = new SqlDataAdapter(cmd);
                 DataTable dt = new DataTable();
                 da.Fill(dt);
+                Common.ConvertUTCToLocal(ref dt);
                 dgv.AutoGenerateColumns = false;
                 dgv.DataSource = dt;
             }
+        }
+
+        public void RefreshData()
+        {
+            refreshFlags();
+            refreshHistory();
+
+        }
+
+        private void tsRefreshHistory_Click(object sender, EventArgs e)
+        {
+            refreshHistory();
+        }
+
+        private void tsRefresh_Click(object sender, EventArgs e)
+        {
+            refreshFlags();
+        }
+
+        private void tsCopy_Click(object sender, EventArgs e)
+        {
+            dgvFlags.SelectAll();
+            DataObject dataObj = dgvFlags.GetClipboardContent();
+            Clipboard.SetDataObject(dataObj, true);
+        }
+
+        private void tsCopyHistory_Click(object sender, EventArgs e)
+        {
+            dgv.SelectAll();
+            DataObject dataObj = dgv.GetClipboardContent();
+            Clipboard.SetDataObject(dataObj, true);
         }
     }
 

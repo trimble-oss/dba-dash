@@ -218,7 +218,7 @@ namespace DBAChecksGUI
                 info1.ConnectionString = connectionString;
                 info1.RefreshData();
             }
-            if(tabs.SelectedTab== tabHardwareChanges)
+            if(tabs.SelectedTab== tabHardware)
             {
                 hardwareChanges1.InstanceIDs = instanceIDs;
                 hardwareChanges1.ConnectionString = connectionString;
@@ -311,8 +311,9 @@ namespace DBAChecksGUI
         private List<Int32> ChildInstanceIDs(SQLTreeItem n)
         {
             var instanceIDs = new List<Int32>();
-            if(n.Nodes.Count==1 && n.Type == SQLTreeItem.TreeType.Instance)
+            if(n.Nodes.Count==1 && n.Type == SQLTreeItem.TreeType.Instance && ((SQLTreeItem)n.Nodes[0]).Type == SQLTreeItem.TreeType.DummyNode)
             {
+                n.Nodes.Clear();
                 addDatabases(n);
             }
             foreach (SQLTreeItem itm in n.Nodes)
@@ -505,7 +506,7 @@ ORDER BY SchemaName,ObjectName
             {
                 allowedTabs.Add(tabInstanceConfig);
                 allowedTabs.Add(tabTraceFlags);
-                allowedTabs.Add(tabHardwareChanges);
+                allowedTabs.Add(tabHardware);
                 allowedTabs.Add(tabSQLPatching);
                 allowedTabs.Add(tabAlerts);
                 allowedTabs.Add(tabDrivers);

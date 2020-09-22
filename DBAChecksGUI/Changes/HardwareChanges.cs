@@ -23,19 +23,67 @@ namespace DBAChecksGUI
 
         public void RefreshData()
         {
+            refreshHistory();
+            refreshHardware();
+        }
+
+        private void refreshHistory()
+        {
             SqlConnection cn = new SqlConnection(ConnectionString);
             using (cn)
             {
                 cn.Open();
                 SqlCommand cmd = new SqlCommand("dbo.HostUpgradeHistory_Get", cn);
                 cmd.CommandType = CommandType.StoredProcedure;
-                cmd.Parameters.AddWithValue("@InstanceIDs", string.Join(",",InstanceIDs));
+                cmd.Parameters.AddWithValue("@InstanceIDs", string.Join(",", InstanceIDs));
                 SqlDataAdapter da = new SqlDataAdapter(cmd);
                 DataTable dt = new DataTable();
                 da.Fill(dt);
+                Common.ConvertUTCToLocal(ref dt);
                 dgv.AutoGenerateColumns = false;
                 dgv.DataSource = dt;
             }
+        }
+
+        private void refreshHardware()
+        {
+            SqlConnection cn = new SqlConnection(ConnectionString);
+            using (cn)
+            {
+                cn.Open();
+                SqlCommand cmd = new SqlCommand("dbo.Hardware_Get", cn);
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.Parameters.AddWithValue("@InstanceIDs", string.Join(",", InstanceIDs));
+                SqlDataAdapter da = new SqlDataAdapter(cmd);
+                DataTable dt = new DataTable();
+                da.Fill(dt);
+                dgvHardware.AutoGenerateColumns = false;
+                dgvHardware.DataSource = dt;
+            }
+        }
+
+        private void tsCopy_Click(object sender, EventArgs e)
+        {
+            dgvHardware.SelectAll();
+            DataObject dataObj = dgvHardware.GetClipboardContent();
+            Clipboard.SetDataObject(dataObj, true);
+        }
+
+        private void tsRefreshHardware_Click(object sender, EventArgs e)
+        {
+            refreshHardware();
+        }
+
+        private void tsRefreshHistory_Click(object sender, EventArgs e)
+        {
+            refreshHistory();
+        }
+
+        private void tsCopyHistory_Click(object sender, EventArgs e)
+        {
+            dgv.SelectAll();
+            DataObject dataObj = dgv.GetClipboardContent();
+            Clipboard.SetDataObject(dataObj, true);
         }
     }
 }

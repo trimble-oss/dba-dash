@@ -530,6 +530,12 @@ namespace DBAChecksGUI
             }
         }
 
-
+        private void Filter_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            if (e.KeyChar == (char)13)
+            {
+                RefreshData();
+            }
+        }
     }
 }

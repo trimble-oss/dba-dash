@@ -28,27 +28,27 @@
         /// </summary>
         private void InitializeComponent()
         {
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle21 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle22 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle23 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle24 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle25 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle26 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle27 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle28 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle29 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle30 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle31 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle32 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle33 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle34 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle35 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle61 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle62 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle63 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle64 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle65 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle66 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle67 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle68 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle69 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle70 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle71 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle72 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle73 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle74 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle75 = new System.Windows.Forms.DataGridViewCellStyle();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(SlowQueries));
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle36 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle37 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle38 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle39 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle40 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle76 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle77 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle78 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle79 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle80 = new System.Windows.Forms.DataGridViewCellStyle();
             this.dgvSummary = new System.Windows.Forms.DataGridView();
             this.Grp = new System.Windows.Forms.DataGridViewLinkColumn();
             this._1to5 = new System.Windows.Forms.DataGridViewLinkColumn();
@@ -86,6 +86,7 @@
             this.instanceToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.objectNameToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.usernameToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.resultToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.tsFilter = new System.Windows.Forms.ToolStripDropDownButton();
             this.lblInstance = new System.Windows.Forms.ToolStripMenuItem();
             this.txtInstance = new System.Windows.Forms.ToolStripTextBox();
@@ -101,6 +102,8 @@
             this.txtUser = new System.Windows.Forms.ToolStripTextBox();
             this.lblText = new System.Windows.Forms.ToolStripMenuItem();
             this.txtText = new System.Windows.Forms.ToolStripTextBox();
+            this.lblResult = new System.Windows.Forms.ToolStripMenuItem();
+            this.txtResult = new System.Windows.Forms.ToolStripTextBox();
             this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
             this.resetToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.dgvSlow = new System.Windows.Forms.DataGridView();
@@ -121,9 +124,6 @@
             this.Text = new System.Windows.Forms.DataGridViewLinkColumn();
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
             this.lblPageSize = new System.Windows.Forms.Label();
-            this.lblResult = new System.Windows.Forms.ToolStripMenuItem();
-            this.txtResult = new System.Windows.Forms.ToolStripTextBox();
-            this.resultToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             ((System.ComponentModel.ISupportInitialize)(this.dgvSummary)).BeginInit();
             this.toolStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dgvSlow)).BeginInit();
@@ -182,8 +182,8 @@
             // _1to5
             // 
             this._1to5.DataPropertyName = "1-5 seconds";
-            dataGridViewCellStyle21.Format = "#,#";
-            this._1to5.DefaultCellStyle = dataGridViewCellStyle21;
+            dataGridViewCellStyle61.Format = "#,#";
+            this._1to5.DefaultCellStyle = dataGridViewCellStyle61;
             this._1to5.HeaderText = "1-5 Seconds";
             this._1to5.MinimumWidth = 6;
             this._1to5.Name = "_1to5";
@@ -193,8 +193,8 @@
             // _5to10
             // 
             this._5to10.DataPropertyName = "5-10 seconds";
-            dataGridViewCellStyle22.Format = "#,#";
-            this._5to10.DefaultCellStyle = dataGridViewCellStyle22;
+            dataGridViewCellStyle62.Format = "#,#";
+            this._5to10.DefaultCellStyle = dataGridViewCellStyle62;
             this._5to10.HeaderText = "5-10 seconds";
             this._5to10.MinimumWidth = 6;
             this._5to10.Name = "_5to10";
@@ -204,8 +204,8 @@
             // _10to20
             // 
             this._10to20.DataPropertyName = "10-20 seconds";
-            dataGridViewCellStyle23.Format = "#,#";
-            this._10to20.DefaultCellStyle = dataGridViewCellStyle23;
+            dataGridViewCellStyle63.Format = "#,#";
+            this._10to20.DefaultCellStyle = dataGridViewCellStyle63;
             this._10to20.HeaderText = "10-20 Seconds";
             this._10to20.MinimumWidth = 6;
             this._10to20.Name = "_10to20";
@@ -217,8 +217,8 @@
             // _20to30
             // 
             this._20to30.DataPropertyName = "20-30 seconds";
-            dataGridViewCellStyle24.Format = "#,#";
-            this._20to30.DefaultCellStyle = dataGridViewCellStyle24;
+            dataGridViewCellStyle64.Format = "#,#";
+            this._20to30.DefaultCellStyle = dataGridViewCellStyle64;
             this._20to30.HeaderText = "20-30 Seconds";
             this._20to30.MinimumWidth = 6;
             this._20to30.Name = "_20to30";
@@ -228,8 +228,8 @@
             // _30to60
             // 
             this._30to60.DataPropertyName = "30-60 seconds";
-            dataGridViewCellStyle25.Format = "#,#";
-            this._30to60.DefaultCellStyle = dataGridViewCellStyle25;
+            dataGridViewCellStyle65.Format = "#,#";
+            this._30to60.DefaultCellStyle = dataGridViewCellStyle65;
             this._30to60.HeaderText = "30-60 Seconds";
             this._30to60.MinimumWidth = 6;
             this._30to60.Name = "_30to60";
@@ -239,8 +239,8 @@
             // _1to5min
             // 
             this._1to5min.DataPropertyName = "1-5 minutes";
-            dataGridViewCellStyle26.Format = "#,#";
-            this._1to5min.DefaultCellStyle = dataGridViewCellStyle26;
+            dataGridViewCellStyle66.Format = "#,#";
+            this._1to5min.DefaultCellStyle = dataGridViewCellStyle66;
             this._1to5min.HeaderText = "1-5 min";
             this._1to5min.MinimumWidth = 6;
             this._1to5min.Name = "_1to5min";
@@ -250,8 +250,8 @@
             // _5to10min
             // 
             this._5to10min.DataPropertyName = "5-10 minutes";
-            dataGridViewCellStyle27.Format = "#,#";
-            this._5to10min.DefaultCellStyle = dataGridViewCellStyle27;
+            dataGridViewCellStyle67.Format = "#,#";
+            this._5to10min.DefaultCellStyle = dataGridViewCellStyle67;
             this._5to10min.HeaderText = "5-10 min";
             this._5to10min.MinimumWidth = 6;
             this._5to10min.Name = "_5to10min";
@@ -261,8 +261,8 @@
             // _10to30min
             // 
             this._10to30min.DataPropertyName = "10-30 minutes";
-            dataGridViewCellStyle28.Format = "#,#";
-            this._10to30min.DefaultCellStyle = dataGridViewCellStyle28;
+            dataGridViewCellStyle68.Format = "#,#";
+            this._10to30min.DefaultCellStyle = dataGridViewCellStyle68;
             this._10to30min.HeaderText = "10-30 min";
             this._10to30min.MinimumWidth = 6;
             this._10to30min.Name = "_10to30min";
@@ -272,8 +272,8 @@
             // _30to60min
             // 
             this._30to60min.DataPropertyName = "30-60 minutes";
-            dataGridViewCellStyle29.Format = "#,#";
-            this._30to60min.DefaultCellStyle = dataGridViewCellStyle29;
+            dataGridViewCellStyle69.Format = "#,#";
+            this._30to60min.DefaultCellStyle = dataGridViewCellStyle69;
             this._30to60min.HeaderText = "30-60 min";
             this._30to60min.MinimumWidth = 6;
             this._30to60min.Name = "_30to60min";
@@ -283,8 +283,8 @@
             // _1hrPlus
             // 
             this._1hrPlus.DataPropertyName = "1hr+";
-            dataGridViewCellStyle30.Format = "#,#";
-            this._1hrPlus.DefaultCellStyle = dataGridViewCellStyle30;
+            dataGridViewCellStyle70.Format = "#,#";
+            this._1hrPlus.DefaultCellStyle = dataGridViewCellStyle70;
             this._1hrPlus.HeaderText = "1Hr+";
             this._1hrPlus.MinimumWidth = 6;
             this._1hrPlus.Name = "_1hrPlus";
@@ -294,8 +294,8 @@
             // Total
             // 
             this.Total.DataPropertyName = "Total";
-            dataGridViewCellStyle31.Format = "#,#";
-            this.Total.DefaultCellStyle = dataGridViewCellStyle31;
+            dataGridViewCellStyle71.Format = "#,#";
+            this.Total.DefaultCellStyle = dataGridViewCellStyle71;
             this.Total.HeaderText = "Total";
             this.Total.MinimumWidth = 6;
             this.Total.Name = "Total";
@@ -305,8 +305,8 @@
             // TotalDuration
             // 
             this.TotalDuration.DataPropertyName = "TotalDuration";
-            dataGridViewCellStyle32.Format = "#,#,,.000";
-            this.TotalDuration.DefaultCellStyle = dataGridViewCellStyle32;
+            dataGridViewCellStyle72.Format = "#,#,,.000";
+            this.TotalDuration.DefaultCellStyle = dataGridViewCellStyle72;
             this.TotalDuration.HeaderText = "Total Duration (sec)";
             this.TotalDuration.MinimumWidth = 6;
             this.TotalDuration.Name = "TotalDuration";
@@ -316,8 +316,8 @@
             // TotalCPU
             // 
             this.TotalCPU.DataPropertyName = "TotalCPU";
-            dataGridViewCellStyle33.Format = "#,#,,.000";
-            this.TotalCPU.DefaultCellStyle = dataGridViewCellStyle33;
+            dataGridViewCellStyle73.Format = "#,#,,.000";
+            this.TotalCPU.DefaultCellStyle = dataGridViewCellStyle73;
             this.TotalCPU.HeaderText = "Total CPU (sec)";
             this.TotalCPU.MinimumWidth = 6;
             this.TotalCPU.Name = "TotalCPU";
@@ -327,8 +327,8 @@
             // TotalIO
             // 
             this.TotalIO.DataPropertyName = "TotalIO";
-            dataGridViewCellStyle34.Format = "N0";
-            this.TotalIO.DefaultCellStyle = dataGridViewCellStyle34;
+            dataGridViewCellStyle74.Format = "N0";
+            this.TotalIO.DefaultCellStyle = dataGridViewCellStyle74;
             this.TotalIO.HeaderText = "Total IO";
             this.TotalIO.MinimumWidth = 6;
             this.TotalIO.Name = "TotalIO";
@@ -338,8 +338,8 @@
             // TotalPhysicalIO
             // 
             this.TotalPhysicalIO.DataPropertyName = "TotalPhysicalIO";
-            dataGridViewCellStyle35.Format = "N0";
-            this.TotalPhysicalIO.DefaultCellStyle = dataGridViewCellStyle35;
+            dataGridViewCellStyle75.Format = "N0";
+            this.TotalPhysicalIO.DefaultCellStyle = dataGridViewCellStyle75;
             this.TotalPhysicalIO.HeaderText = "Total Physical IO";
             this.TotalPhysicalIO.MinimumWidth = 6;
             this.TotalPhysicalIO.Name = "TotalPhysicalIO";
@@ -495,7 +495,7 @@
             // appToolStripMenuItem
             // 
             this.appToolStripMenuItem.Name = "appToolStripMenuItem";
-            this.appToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            this.appToolStripMenuItem.Size = new System.Drawing.Size(199, 26);
             this.appToolStripMenuItem.Tag = "client_app_name";
             this.appToolStripMenuItem.Text = "App";
             this.appToolStripMenuItem.Click += new System.EventHandler(this.GroupBy_Click);
@@ -503,7 +503,7 @@
             // clientToolStripMenuItem
             // 
             this.clientToolStripMenuItem.Name = "clientToolStripMenuItem";
-            this.clientToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            this.clientToolStripMenuItem.Size = new System.Drawing.Size(199, 26);
             this.clientToolStripMenuItem.Tag = "client_hostname";
             this.clientToolStripMenuItem.Text = "Client";
             this.clientToolStripMenuItem.Click += new System.EventHandler(this.GroupBy_Click);
@@ -511,7 +511,7 @@
             // databaseNameToolStripMenuItem
             // 
             this.databaseNameToolStripMenuItem.Name = "databaseNameToolStripMenuItem";
-            this.databaseNameToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            this.databaseNameToolStripMenuItem.Size = new System.Drawing.Size(199, 26);
             this.databaseNameToolStripMenuItem.Tag = "DatabaseName";
             this.databaseNameToolStripMenuItem.Text = "Database Name";
             this.databaseNameToolStripMenuItem.Click += new System.EventHandler(this.GroupBy_Click);
@@ -521,7 +521,7 @@
             this.instanceToolStripMenuItem.Checked = true;
             this.instanceToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
             this.instanceToolStripMenuItem.Name = "instanceToolStripMenuItem";
-            this.instanceToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            this.instanceToolStripMenuItem.Size = new System.Drawing.Size(199, 26);
             this.instanceToolStripMenuItem.Tag = "ConnectionID";
             this.instanceToolStripMenuItem.Text = "Instance";
             this.instanceToolStripMenuItem.Click += new System.EventHandler(this.GroupBy_Click);
@@ -529,7 +529,7 @@
             // objectNameToolStripMenuItem
             // 
             this.objectNameToolStripMenuItem.Name = "objectNameToolStripMenuItem";
-            this.objectNameToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            this.objectNameToolStripMenuItem.Size = new System.Drawing.Size(199, 26);
             this.objectNameToolStripMenuItem.Tag = "object_name";
             this.objectNameToolStripMenuItem.Text = "Object Name";
             this.objectNameToolStripMenuItem.Click += new System.EventHandler(this.GroupBy_Click);
@@ -537,10 +537,18 @@
             // usernameToolStripMenuItem
             // 
             this.usernameToolStripMenuItem.Name = "usernameToolStripMenuItem";
-            this.usernameToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            this.usernameToolStripMenuItem.Size = new System.Drawing.Size(199, 26);
             this.usernameToolStripMenuItem.Tag = "username";
             this.usernameToolStripMenuItem.Text = "Username";
             this.usernameToolStripMenuItem.Click += new System.EventHandler(this.GroupBy_Click);
+            // 
+            // resultToolStripMenuItem1
+            // 
+            this.resultToolStripMenuItem1.Name = "resultToolStripMenuItem1";
+            this.resultToolStripMenuItem1.Size = new System.Drawing.Size(199, 26);
+            this.resultToolStripMenuItem1.Tag = "Result";
+            this.resultToolStripMenuItem1.Text = "Result";
+            this.resultToolStripMenuItem1.Click += new System.EventHandler(this.GroupBy_Click);
             // 
             // tsFilter
             // 
@@ -576,6 +584,7 @@
             this.txtInstance.Font = new System.Drawing.Font("Segoe UI", 9F);
             this.txtInstance.Name = "txtInstance";
             this.txtInstance.Size = new System.Drawing.Size(200, 27);
+            this.txtInstance.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.Filter_KeyPress);
             this.txtInstance.TextChanged += new System.EventHandler(this.txtInstance_TextChanged);
             // 
             // lblClient
@@ -592,6 +601,7 @@
             this.txtClient.Font = new System.Drawing.Font("Segoe UI", 9F);
             this.txtClient.Name = "txtClient";
             this.txtClient.Size = new System.Drawing.Size(200, 27);
+            this.txtClient.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.Filter_KeyPress);
             this.txtClient.TextChanged += new System.EventHandler(this.txtClient_TextChanged);
             // 
             // lblApp
@@ -608,6 +618,7 @@
             this.txtApp.Font = new System.Drawing.Font("Segoe UI", 9F);
             this.txtApp.Name = "txtApp";
             this.txtApp.Size = new System.Drawing.Size(200, 27);
+            this.txtApp.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.Filter_KeyPress);
             this.txtApp.TextChanged += new System.EventHandler(this.txtApp_TextChanged);
             // 
             // lblDatabase
@@ -624,6 +635,7 @@
             this.txtDatabase.Font = new System.Drawing.Font("Segoe UI", 9F);
             this.txtDatabase.Name = "txtDatabase";
             this.txtDatabase.Size = new System.Drawing.Size(200, 27);
+            this.txtDatabase.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.Filter_KeyPress);
             this.txtDatabase.TextChanged += new System.EventHandler(this.txtDatabase_TextChanged);
             // 
             // lblObject
@@ -640,6 +652,7 @@
             this.txtObject.Font = new System.Drawing.Font("Segoe UI", 9F);
             this.txtObject.Name = "txtObject";
             this.txtObject.Size = new System.Drawing.Size(200, 27);
+            this.txtObject.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.Filter_KeyPress);
             this.txtObject.TextChanged += new System.EventHandler(this.txtObject_TextChanged);
             // 
             // lblUser
@@ -656,6 +669,7 @@
             this.txtUser.Font = new System.Drawing.Font("Segoe UI", 9F);
             this.txtUser.Name = "txtUser";
             this.txtUser.Size = new System.Drawing.Size(200, 27);
+            this.txtUser.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.Filter_KeyPress);
             this.txtUser.TextChanged += new System.EventHandler(this.txtUser_TextChanged);
             // 
             // lblText
@@ -672,7 +686,25 @@
             this.txtText.Font = new System.Drawing.Font("Segoe UI", 9F);
             this.txtText.Name = "txtText";
             this.txtText.Size = new System.Drawing.Size(200, 27);
+            this.txtText.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.Filter_KeyPress);
             this.txtText.TextChanged += new System.EventHandler(this.txtText_TextChanged);
+            // 
+            // lblResult
+            // 
+            this.lblResult.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.txtResult});
+            this.lblResult.Name = "lblResult";
+            this.lblResult.Size = new System.Drawing.Size(224, 26);
+            this.lblResult.Text = "Result";
+            // 
+            // txtResult
+            // 
+            this.txtResult.BackColor = System.Drawing.Color.Azure;
+            this.txtResult.Font = new System.Drawing.Font("Segoe UI", 9F);
+            this.txtResult.Name = "txtResult";
+            this.txtResult.Size = new System.Drawing.Size(200, 27);
+            this.txtResult.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.Filter_KeyPress);
+            this.txtResult.TextChanged += new System.EventHandler(this.txtResult_TextChanged);
             // 
             // toolStripSeparator2
             // 
@@ -767,8 +799,8 @@
             // duration
             // 
             this.duration.DataPropertyName = "duration";
-            dataGridViewCellStyle36.Format = "#,#,,.000";
-            this.duration.DefaultCellStyle = dataGridViewCellStyle36;
+            dataGridViewCellStyle76.Format = "#,#,,.000";
+            this.duration.DefaultCellStyle = dataGridViewCellStyle76;
             this.duration.HeaderText = "Duration (sec)";
             this.duration.MinimumWidth = 6;
             this.duration.Name = "duration";
@@ -778,8 +810,8 @@
             // cpu_time
             // 
             this.cpu_time.DataPropertyName = "cpu_time";
-            dataGridViewCellStyle37.Format = "#,#,,.000";
-            this.cpu_time.DefaultCellStyle = dataGridViewCellStyle37;
+            dataGridViewCellStyle77.Format = "#,#,,.000";
+            this.cpu_time.DefaultCellStyle = dataGridViewCellStyle77;
             this.cpu_time.HeaderText = "CPU (sec)";
             this.cpu_time.MinimumWidth = 6;
             this.cpu_time.Name = "cpu_time";
@@ -789,8 +821,8 @@
             // logical_reads
             // 
             this.logical_reads.DataPropertyName = "logical_reads";
-            dataGridViewCellStyle38.Format = "N0";
-            this.logical_reads.DefaultCellStyle = dataGridViewCellStyle38;
+            dataGridViewCellStyle78.Format = "N0";
+            this.logical_reads.DefaultCellStyle = dataGridViewCellStyle78;
             this.logical_reads.HeaderText = "Logical Reads";
             this.logical_reads.MinimumWidth = 6;
             this.logical_reads.Name = "logical_reads";
@@ -800,8 +832,8 @@
             // physical_reads
             // 
             this.physical_reads.DataPropertyName = "physical_reads";
-            dataGridViewCellStyle39.Format = "N0";
-            this.physical_reads.DefaultCellStyle = dataGridViewCellStyle39;
+            dataGridViewCellStyle79.Format = "N0";
+            this.physical_reads.DefaultCellStyle = dataGridViewCellStyle79;
             this.physical_reads.HeaderText = "Physical Reads";
             this.physical_reads.MinimumWidth = 6;
             this.physical_reads.Name = "physical_reads";
@@ -811,8 +843,8 @@
             // Writes
             // 
             this.Writes.DataPropertyName = "Writes";
-            dataGridViewCellStyle40.Format = "N0";
-            this.Writes.DefaultCellStyle = dataGridViewCellStyle40;
+            dataGridViewCellStyle80.Format = "N0";
+            this.Writes.DefaultCellStyle = dataGridViewCellStyle80;
             this.Writes.HeaderText = "Writes";
             this.Writes.MinimumWidth = 6;
             this.Writes.Name = "Writes";
@@ -895,30 +927,6 @@
             this.lblPageSize.TabIndex = 5;
             this.lblPageSize.Text = "Top 1000 rows";
             this.lblPageSize.Visible = false;
-            // 
-            // lblResult
-            // 
-            this.lblResult.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.txtResult});
-            this.lblResult.Name = "lblResult";
-            this.lblResult.Size = new System.Drawing.Size(224, 26);
-            this.lblResult.Text = "Result";
-            // 
-            // txtResult
-            // 
-            this.txtResult.BackColor = System.Drawing.Color.Azure;
-            this.txtResult.Font = new System.Drawing.Font("Segoe UI", 9F);
-            this.txtResult.Name = "txtResult";
-            this.txtResult.Size = new System.Drawing.Size(200, 27);
-            this.txtResult.TextChanged += new System.EventHandler(this.txtResult_TextChanged);
-            // 
-            // resultToolStripMenuItem1
-            // 
-            this.resultToolStripMenuItem1.Name = "resultToolStripMenuItem1";
-            this.resultToolStripMenuItem1.Size = new System.Drawing.Size(224, 26);
-            this.resultToolStripMenuItem1.Tag = "Result";
-            this.resultToolStripMenuItem1.Text = "Result";
-            this.resultToolStripMenuItem1.Click += new System.EventHandler(this.GroupBy_Click);
             // 
             // SlowQueries
             // 

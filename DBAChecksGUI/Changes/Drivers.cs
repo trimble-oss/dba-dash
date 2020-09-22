@@ -165,5 +165,12 @@ namespace DBAChecksGUI.Changes
             tsProvider.DropDownItems.Clear();
             RefreshData();
         }
+
+        private void tsCopy_Click(object sender, EventArgs e)
+        {
+            dgvDrivers.SelectAll();
+            DataObject dataObj = dgvDrivers.GetClipboardContent();
+            Clipboard.SetDataObject(dataObj, true);
+        }
     }
 }

@@ -41,9 +41,9 @@ namespace DBAChecksGUI.Changes
 
         private void refreshAlertConfig()
         {
-            dgvAlerts.Columns.Clear();
+            dgvAlertsConfig.Columns.Clear();
 
-            dgvAlerts.Columns.Add(new DataGridViewTextBoxColumn() { Name = "Instance", HeaderText = "Instance" });
+            dgvAlertsConfig.Columns.Add(new DataGridViewTextBoxColumn() { Name = "Instance", HeaderText = "Instance" });
             SqlConnection cn = new SqlConnection(ConnectionString);
             using (cn)
             {
@@ -62,7 +62,7 @@ namespace DBAChecksGUI.Changes
                     if (r[pivotCol] != DBNull.Value)
                     {
                         DataGridViewTextBoxColumn col = new DataGridViewTextBoxColumn() { HeaderText = (string)r[pivotCol], Name = (string)r[pivotCol] };
-                        dgvAlerts.Columns.Add(col);
+                        dgvAlertsConfig.Columns.Add(col);
                     }
                 }
                 string lastInstance = "";
@@ -74,14 +74,14 @@ namespace DBAChecksGUI.Changes
                     if (instance != lastInstance)
                     {
                         row = new DataGridViewRow();
-                        row.CreateCells(dgvAlerts);
+                        row.CreateCells(dgvAlertsConfig);
                         row.Cells[0].Value = instance;
                         rows.Add(row);
                     }
                     if (r[pivotCol] != DBNull.Value)
                     {
                         string alertName = (string)r[pivotCol];
-                        var idx = dgvAlerts.Columns[alertName].Index;
+                        var idx = dgvAlertsConfig.Columns[alertName].Index;
 
                         bool enabled = (Byte)r["enabled"] == 0x1;
                         bool notification = (Int32)r["has_notification"] > 0;
@@ -96,8 +96,8 @@ namespace DBAChecksGUI.Changes
                     }
                     lastInstance = instance;
                 }
-                dgvAlerts.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.DisplayedCells;
-                dgvAlerts.Rows.AddRange(rows.ToArray());
+                dgvAlertsConfig.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.DisplayedCells;
+                dgvAlertsConfig.Rows.AddRange(rows.ToArray());
             }
         }
 
@@ -114,13 +114,37 @@ namespace DBAChecksGUI.Changes
                 DataTable dt = new DataTable();
                 da.Fill(dt);
                 Common.ConvertUTCToLocal(ref dt);
-                dgv.DataSource = dt;
+                dgvAlerts.DataSource = dt;
             }
         }
 
         private void pivotByAlertNameToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            RefreshData();
+            refreshAlertConfig();
+        }
+
+        private void tsCopy_Click(object sender, EventArgs e)
+        {
+            dgvAlertsConfig.SelectAll();
+            DataObject dataObj = dgvAlertsConfig.GetClipboardContent();
+            Clipboard.SetDataObject(dataObj, true);
+        }
+
+        private void tsRefresh_Click(object sender, EventArgs e)
+        {
+            refreshAlertConfig();
+        }
+
+        private void tsRefreshAlerts_Click(object sender, EventArgs e)
+        {
+            refreshAlerts();
+        }
+
+        private void tsCopyAlerts_Click(object sender, EventArgs e)
+        {
+            dgvAlerts.SelectAll();
+            DataObject dataObj = dgvAlerts.GetClipboardContent();
+            Clipboard.SetDataObject(dataObj, true);
         }
     }
 }

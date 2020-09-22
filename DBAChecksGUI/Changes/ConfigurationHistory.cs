@@ -34,11 +34,24 @@ namespace DBAChecksGUI
                 cmd.CommandType = CommandType.StoredProcedure;
                 cmd.Parameters.AddWithValue("@InstanceIDs", string.Join(",", InstanceIDs));
                 SqlDataAdapter da = new SqlDataAdapter(cmd);
-                DataTable dt = new DataTable();
+                DataTable dt = new DataTable();        
                 da.Fill(dt);
+                Common.ConvertUTCToLocal(ref dt);
                 dgv.AutoGenerateColumns = false;
                 dgv.DataSource = dt;
             }
+        }
+
+        private void tsRefresh_Click(object sender, EventArgs e)
+        {
+            RefreshData();
+        }
+
+        private void tsCopy_Click(object sender, EventArgs e)
+        {
+            dgv.SelectAll();
+            DataObject dataObj = dgv.GetClipboardContent();
+            Clipboard.SetDataObject(dataObj, true);
         }
     }
 }

@@ -35,24 +35,28 @@
             this.tsProvider = new System.Windows.Forms.ToolStripMenuItem();
             this.searchToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.txtSearch = new System.Windows.Forms.ToolStripTextBox();
-            this.tsRefresh = new System.Windows.Forms.ToolStripButton();
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.clearToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.tsRefresh = new System.Windows.Forms.ToolStripButton();
+            this.tsCopy = new System.Windows.Forms.ToolStripButton();
             ((System.ComponentModel.ISupportInitialize)(this.dgvDrivers)).BeginInit();
             this.toolStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
             // dgvDrivers
             // 
+            this.dgvDrivers.AllowUserToAddRows = false;
+            this.dgvDrivers.AllowUserToDeleteRows = false;
             this.dgvDrivers.BackgroundColor = System.Drawing.Color.White;
             this.dgvDrivers.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.dgvDrivers.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.dgvDrivers.Location = new System.Drawing.Point(0, 31);
+            this.dgvDrivers.Location = new System.Drawing.Point(0, 27);
             this.dgvDrivers.Name = "dgvDrivers";
+            this.dgvDrivers.ReadOnly = true;
             this.dgvDrivers.RowHeadersVisible = false;
             this.dgvDrivers.RowHeadersWidth = 51;
             this.dgvDrivers.RowTemplate.Height = 24;
-            this.dgvDrivers.Size = new System.Drawing.Size(630, 419);
+            this.dgvDrivers.Size = new System.Drawing.Size(630, 423);
             this.dgvDrivers.TabIndex = 0;
             // 
             // toolStrip1
@@ -60,11 +64,12 @@
             this.toolStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
             this.toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripLabel1,
-            this.tsFilter,
-            this.tsRefresh});
+            this.tsRefresh,
+            this.tsCopy,
+            this.tsFilter});
             this.toolStrip1.Location = new System.Drawing.Point(0, 0);
             this.toolStrip1.Name = "toolStrip1";
-            this.toolStrip1.Size = new System.Drawing.Size(630, 31);
+            this.toolStrip1.Size = new System.Drawing.Size(630, 27);
             this.toolStrip1.TabIndex = 1;
             this.toolStrip1.Text = "toolStrip1";
             // 
@@ -87,13 +92,13 @@
             this.tsFilter.Image = global::DBAChecksGUI.Properties.Resources.FilterDropdown_16x;
             this.tsFilter.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsFilter.Name = "tsFilter";
-            this.tsFilter.Size = new System.Drawing.Size(34, 28);
+            this.tsFilter.Size = new System.Drawing.Size(34, 24);
             this.tsFilter.Text = "Filter";
             // 
             // tsProvider
             // 
             this.tsProvider.Name = "tsProvider";
-            this.tsProvider.Size = new System.Drawing.Size(224, 26);
+            this.tsProvider.Size = new System.Drawing.Size(147, 26);
             this.tsProvider.Text = "Provider";
             // 
             // searchToolStripMenuItem
@@ -101,7 +106,7 @@
             this.searchToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.txtSearch});
             this.searchToolStripMenuItem.Name = "searchToolStripMenuItem";
-            this.searchToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            this.searchToolStripMenuItem.Size = new System.Drawing.Size(147, 26);
             this.searchToolStripMenuItem.Text = "Search";
             // 
             // txtSearch
@@ -111,6 +116,18 @@
             this.txtSearch.Name = "txtSearch";
             this.txtSearch.Size = new System.Drawing.Size(200, 27);
             this.txtSearch.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.txtSearch_KeyPress);
+            // 
+            // toolStripSeparator1
+            // 
+            this.toolStripSeparator1.Name = "toolStripSeparator1";
+            this.toolStripSeparator1.Size = new System.Drawing.Size(144, 6);
+            // 
+            // clearToolStripMenuItem
+            // 
+            this.clearToolStripMenuItem.Name = "clearToolStripMenuItem";
+            this.clearToolStripMenuItem.Size = new System.Drawing.Size(147, 26);
+            this.clearToolStripMenuItem.Text = "Clear";
+            this.clearToolStripMenuItem.Click += new System.EventHandler(this.clearToolStripMenuItem_Click);
             // 
             // tsRefresh
             // 
@@ -122,17 +139,15 @@
             this.tsRefresh.Text = "toolStripButton1";
             this.tsRefresh.Click += new System.EventHandler(this.tsRefresh_Click);
             // 
-            // toolStripSeparator1
+            // tsCopy
             // 
-            this.toolStripSeparator1.Name = "toolStripSeparator1";
-            this.toolStripSeparator1.Size = new System.Drawing.Size(221, 6);
-            // 
-            // clearToolStripMenuItem
-            // 
-            this.clearToolStripMenuItem.Name = "clearToolStripMenuItem";
-            this.clearToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
-            this.clearToolStripMenuItem.Text = "Clear";
-            this.clearToolStripMenuItem.Click += new System.EventHandler(this.clearToolStripMenuItem_Click);
+            this.tsCopy.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.tsCopy.Image = global::DBAChecksGUI.Properties.Resources.ASX_Copy_blue_16x;
+            this.tsCopy.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tsCopy.Name = "tsCopy";
+            this.tsCopy.Size = new System.Drawing.Size(29, 24);
+            this.tsCopy.Text = "Copy";
+            this.tsCopy.Click += new System.EventHandler(this.tsCopy_Click);
             // 
             // Drivers
             // 
@@ -162,5 +177,6 @@
         private System.Windows.Forms.ToolStripButton tsRefresh;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
         private System.Windows.Forms.ToolStripMenuItem clearToolStripMenuItem;
+        private System.Windows.Forms.ToolStripButton tsCopy;
     }
 }

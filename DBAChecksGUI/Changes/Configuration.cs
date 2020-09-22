@@ -77,5 +77,17 @@ namespace DBAChecksGUI.Changes
         {
             RefreshData();
         }
+
+        private void tsRefresh_Click(object sender, EventArgs e)
+        {
+            RefreshData();
+        }
+
+        private void tsCopy_Click(object sender, EventArgs e)
+        {
+            dgvConfig.SelectAll();
+            DataObject dataObj = dgvConfig.GetClipboardContent();
+            Clipboard.SetDataObject(dataObj, true);
+        }
     }
 }
