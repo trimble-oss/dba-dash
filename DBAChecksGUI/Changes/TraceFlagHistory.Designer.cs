@@ -67,12 +67,12 @@
             this.ChangeDate,
             this.Change});
             this.dgv.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.dgv.Location = new System.Drawing.Point(0, 27);
+            this.dgv.Location = new System.Drawing.Point(0, 31);
             this.dgv.Name = "dgv";
             this.dgv.ReadOnly = true;
             this.dgv.RowHeadersVisible = false;
             this.dgv.RowHeadersWidth = 51;
-            this.dgv.Size = new System.Drawing.Size(676, 167);
+            this.dgv.Size = new System.Drawing.Size(676, 163);
             this.dgv.TabIndex = 0;
             // 
             // Instance
@@ -140,7 +140,7 @@
             this.tsCopy});
             this.toolStrip1.Location = new System.Drawing.Point(0, 0);
             this.toolStrip1.Name = "toolStrip1";
-            this.toolStrip1.Size = new System.Drawing.Size(676, 27);
+            this.toolStrip1.Size = new System.Drawing.Size(676, 31);
             this.toolStrip1.TabIndex = 1;
             this.toolStrip1.Text = "toolStrip1";
             // 
@@ -160,13 +160,13 @@
             this.dgvFlags.BackgroundColor = System.Drawing.Color.White;
             this.dgvFlags.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.dgvFlags.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.dgvFlags.Location = new System.Drawing.Point(0, 27);
+            this.dgvFlags.Location = new System.Drawing.Point(0, 31);
             this.dgvFlags.Name = "dgvFlags";
             this.dgvFlags.ReadOnly = true;
             this.dgvFlags.RowHeadersVisible = false;
             this.dgvFlags.RowHeadersWidth = 51;
             this.dgvFlags.RowTemplate.Height = 24;
-            this.dgvFlags.Size = new System.Drawing.Size(676, 170);
+            this.dgvFlags.Size = new System.Drawing.Size(676, 166);
             this.dgvFlags.TabIndex = 0;
             // 
             // toolStrip2
@@ -178,7 +178,7 @@
             this.tsCopyHistory});
             this.toolStrip2.Location = new System.Drawing.Point(0, 0);
             this.toolStrip2.Name = "toolStrip2";
-            this.toolStrip2.Size = new System.Drawing.Size(676, 27);
+            this.toolStrip2.Size = new System.Drawing.Size(676, 31);
             this.toolStrip2.TabIndex = 1;
             this.toolStrip2.Text = "toolStrip2";
             // 
@@ -226,7 +226,7 @@
             this.tsCopyHistory.Image = ((System.Drawing.Image)(resources.GetObject("tsCopyHistory.Image")));
             this.tsCopyHistory.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsCopyHistory.Name = "tsCopyHistory";
-            this.tsCopyHistory.Size = new System.Drawing.Size(29, 24);
+            this.tsCopyHistory.Size = new System.Drawing.Size(29, 28);
             this.tsCopyHistory.Text = "toolStripButton1";
             this.tsCopyHistory.Click += new System.EventHandler(this.tsCopyHistory_Click);
             // 

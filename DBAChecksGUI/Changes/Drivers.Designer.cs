@@ -50,13 +50,13 @@
             this.dgvDrivers.BackgroundColor = System.Drawing.Color.White;
             this.dgvDrivers.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.dgvDrivers.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.dgvDrivers.Location = new System.Drawing.Point(0, 27);
+            this.dgvDrivers.Location = new System.Drawing.Point(0, 31);
             this.dgvDrivers.Name = "dgvDrivers";
             this.dgvDrivers.ReadOnly = true;
             this.dgvDrivers.RowHeadersVisible = false;
             this.dgvDrivers.RowHeadersWidth = 51;
             this.dgvDrivers.RowTemplate.Height = 24;
-            this.dgvDrivers.Size = new System.Drawing.Size(630, 423);
+            this.dgvDrivers.Size = new System.Drawing.Size(630, 419);
             this.dgvDrivers.TabIndex = 0;
             // 
             // toolStrip1
@@ -69,7 +69,7 @@
             this.tsFilter});
             this.toolStrip1.Location = new System.Drawing.Point(0, 0);
             this.toolStrip1.Name = "toolStrip1";
-            this.toolStrip1.Size = new System.Drawing.Size(630, 27);
+            this.toolStrip1.Size = new System.Drawing.Size(630, 31);
             this.toolStrip1.TabIndex = 1;
             this.toolStrip1.Text = "toolStrip1";
             // 

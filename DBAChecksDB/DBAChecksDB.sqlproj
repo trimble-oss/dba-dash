@@ -30,7 +30,9 @@
     <QueryStoreStaleQueryThreshold>15</QueryStoreStaleQueryThreshold>
     <QueryStoreMaxStorageSize>512</QueryStoreMaxStorageSize>
     <QueryStoreMaxPlansPerQuery>50</QueryStoreMaxPlansPerQuery>
-    <DacVersion>1.9.1.7</DacVersion>
+    <DacVersion>1.9.1.8</DacVersion>
+    <ReadCommittedSnapshot>True</ReadCommittedSnapshot>
+    <AllowSnapshotIsolation>True</AllowSnapshotIsolation>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <OutputPath>bin\Release\</OutputPath>

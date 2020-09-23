@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Performance));
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
             this.tsTime = new System.Windows.Forms.ToolStripDropDownButton();
@@ -54,7 +55,7 @@
             this.hrToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.hrsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.dayToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
-            this.timer1 = new System.Windows.Forms.Timer();
+            this.timer1 = new System.Windows.Forms.Timer(this.components);
             this.objectExecution1 = new DBAChecksGUI.Performance.ObjectExecution();
             this.blocking1 = new DBAChecksGUI.Performance.Blocking();
             this.waits1 = new DBAChecksGUI.Performance.Waits();

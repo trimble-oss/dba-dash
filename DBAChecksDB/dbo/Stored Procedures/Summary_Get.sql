@@ -105,7 +105,7 @@ dbc AS (
 		SUM(CASE WHEN Status=2 THEN 1 ELSE 0 END) AS LastGoodCheckDBWarningCount,
 		SUM(CASE WHEN Status=4 THEN 1 ELSE 0 END) AS LastGoodCheckDBHealthyCount,
 		SUM(CASE WHEN Status=3 OR Status IS NULL THEN 1 ELSE 0 END) AS LastGoodCheckDBNACount,
-		MIN(CASE WHEN ExcludedFromCheck = 1 THEN NULL ELSE LastGoodCheckDbTime END) AS OldestLastGoodCheckDBTime,
+		MIN(CASE WHEN Status=3 THEN NULL ELSE LastGoodCheckDbTime END) AS OldestLastGoodCheckDBTime,
 		DATEDIFF(d,NULLIF(MIN(CASE WHEN Status <> 3 THEN LastGoodCheckDbTime ELSE NULL END),'1900-01-01'),GETUTCDATE()) AS DaysSinceLastGoodCheckDB
 	FROM dbo.LastGoodCheckDB
 	GROUP BY InstanceID
