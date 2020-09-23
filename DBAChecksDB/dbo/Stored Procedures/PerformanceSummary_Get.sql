@@ -135,4 +135,4 @@ LEFT JOIN cpuAgg ON I.InstanceID = cpuAgg.InstanceID
 LEFT JOIN wait ON I.InstanceID = wait.InstanceID
 WHERE EXISTS(SELECT 1 FROM @Instances t WHERE I.InstanceID = t.InstanceID)
 AND I.IsActive=1
-ORDER BY wait.CriticalWaitMsPerSec DESC, cpuAgg.AvgCPU DESC
+ORDER BY CASE WHEN wait.CriticalWaitMsPerSec> 1 THEN CriticalWaitMsPerSec ELSE 0 END DESC, cpuAgg.AvgCPU DESC
