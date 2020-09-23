@@ -3,7 +3,7 @@
 CREATE PROC [dbo].[SlowQueries_Upd](@SlowQueries dbo.SlowQueries READONLY,@InstanceID INT,@SnapshotDate DATETIME2(3))
 AS
 DECLARE @UTCOffset INT
-SELECT @UTCOffset = UTCOffset 
+SELECT @UTCOffset = ISNULL(UTCOffset,0) 
 FROM dbo.Instances 
 WHERE InstanceID=@InstanceID
 
