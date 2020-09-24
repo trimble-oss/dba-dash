@@ -1023,5 +1023,18 @@ ORDER BY SchemaName,ObjectName
         }
 
         #endregion
+
+        private void tsRefreshErrors_Click(object sender, EventArgs e)
+        {
+            SQLTreeItem n = (SQLTreeItem)tv1.SelectedNode;
+            loadDBAChecksErrorLog(n.InstanceID);
+        }
+
+        private void tsCopyErrors_Click(object sender, EventArgs e)
+        {
+            dgvDBAChecksErrors.SelectAll();
+            DataObject dataObj = dgvDBAChecksErrors.GetClipboardContent();
+            Clipboard.SetDataObject(dataObj, true);
+        }
     }
 }

@@ -185,5 +185,17 @@ namespace DBAChecksGUI.DBFiles
         {
             ConfigureThresholds(-1, -1, -1);
         }
+
+        private void tsRefresh_Click(object sender, EventArgs e)
+        {
+            RefreshData();
+        }
+
+        private void tsCopy_Click(object sender, EventArgs e)
+        {
+            dgvFiles.SelectAll();
+            DataObject dataObj = dgvFiles.GetClipboardContent();
+            Clipboard.SetDataObject(dataObj, true);
+        }
     }
 }

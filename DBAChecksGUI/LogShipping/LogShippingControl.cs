@@ -168,5 +168,17 @@ namespace DBAChecksGUI.LogShipping
                 }
             }
         }
+
+        private void tsCopy_Click(object sender, EventArgs e)
+        {
+            dgvLogShipping.SelectAll();
+            DataObject dataObj = dgvLogShipping.GetClipboardContent();
+            Clipboard.SetDataObject(dataObj, true);
+        }
+
+        private void tsRefresh_Click(object sender, EventArgs e)
+        {
+            RefreshData();
+        }
     }
 }

@@ -180,5 +180,17 @@ namespace DBAChecksGUI.CollectionDates
                 }
             }
         }
+
+        private void tsRefresh_Click(object sender, EventArgs e)
+        {
+            RefreshData();
+        }
+
+        private void tsCopy_Click(object sender, EventArgs e)
+        {
+            dgvCollectionDates.SelectAll();
+            DataObject dataObj = dgvCollectionDates.GetClipboardContent();
+            Clipboard.SetDataObject(dataObj, true);
+        }
     }
 }

@@ -61,6 +61,8 @@
             this.configureDatabaseThresholdsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.configureInstanceThresholdsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.configureRootThresholdsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.tsRefresh = new System.Windows.Forms.ToolStripButton();
+            this.tsCopy = new System.Windows.Forms.ToolStripButton();
             ((System.ComponentModel.ISupportInitialize)(this.dgvFiles)).BeginInit();
             this.toolStrip1.SuspendLayout();
             this.SuspendLayout();
@@ -70,6 +72,7 @@
             this.dgvFiles.AllowUserToAddRows = false;
             this.dgvFiles.AllowUserToDeleteRows = false;
             this.dgvFiles.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.DisplayedCells;
+            this.dgvFiles.ClipboardCopyMode = System.Windows.Forms.DataGridViewClipboardCopyMode.EnableAlwaysIncludeHeaderText;
             dataGridViewCellStyle1.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
             dataGridViewCellStyle1.BackColor = System.Drawing.SystemColors.Control;
             dataGridViewCellStyle1.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
@@ -275,6 +278,8 @@
             // 
             this.toolStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
             this.toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.tsRefresh,
+            this.tsCopy,
             this.toolStripFilter,
             this.tsConfigure});
             this.toolStrip1.Location = new System.Drawing.Point(0, 0);
@@ -363,6 +368,26 @@
             this.configureRootThresholdsToolStripMenuItem.Text = "Configure Root Thresholds";
             this.configureRootThresholdsToolStripMenuItem.Click += new System.EventHandler(this.configureRootThresholdsToolStripMenuItem_Click);
             // 
+            // tsRefresh
+            // 
+            this.tsRefresh.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.tsRefresh.Image = global::DBAChecksGUI.Properties.Resources._112_RefreshArrow_Green_16x16_72;
+            this.tsRefresh.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tsRefresh.Name = "tsRefresh";
+            this.tsRefresh.Size = new System.Drawing.Size(29, 28);
+            this.tsRefresh.Text = "Refresh";
+            this.tsRefresh.Click += new System.EventHandler(this.tsRefresh_Click);
+            // 
+            // tsCopy
+            // 
+            this.tsCopy.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.tsCopy.Image = global::DBAChecksGUI.Properties.Resources.ASX_Copy_blue_16x;
+            this.tsCopy.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tsCopy.Name = "tsCopy";
+            this.tsCopy.Size = new System.Drawing.Size(29, 28);
+            this.tsCopy.Text = "Copy";
+            this.tsCopy.Click += new System.EventHandler(this.tsCopy_Click);
+            // 
             // DBFilesControl
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
@@ -407,5 +432,7 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn ConfiguredLevel;
         private System.Windows.Forms.DataGridViewTextBoxColumn FileSnapshotAge;
         private System.Windows.Forms.DataGridViewLinkColumn Configure;
+        private System.Windows.Forms.ToolStripButton tsRefresh;
+        private System.Windows.Forms.ToolStripButton tsCopy;
     }
 }

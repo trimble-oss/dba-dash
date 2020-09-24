@@ -44,6 +44,8 @@
             this.ConfiguredLevel = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Configure = new System.Windows.Forms.DataGridViewLinkColumn();
             this.ConfigureRoot = new System.Windows.Forms.DataGridViewLinkColumn();
+            this.tsRefresh = new System.Windows.Forms.ToolStripButton();
+            this.tsCopy = new System.Windows.Forms.ToolStripButton();
             this.toolStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dgvCollectionDates)).BeginInit();
             this.SuspendLayout();
@@ -52,6 +54,8 @@
             // 
             this.toolStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
             this.toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.tsRefresh,
+            this.tsCopy,
             this.toolStripFilter});
             this.toolStrip1.Location = new System.Drawing.Point(0, 0);
             this.toolStrip1.Name = "toolStrip1";
@@ -70,7 +74,7 @@
             this.toolStripFilter.Image = global::DBAChecksGUI.Properties.Resources.FilterDropdown_16x;
             this.toolStripFilter.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripFilter.Name = "toolStripFilter";
-            this.toolStripFilter.Size = new System.Drawing.Size(34, 28);
+            this.toolStripFilter.Size = new System.Drawing.Size(34, 24);
             this.toolStripFilter.Text = "Filter";
             // 
             // criticalToolStripMenuItem
@@ -107,6 +111,10 @@
             // 
             // dgvCollectionDates
             // 
+            this.dgvCollectionDates.AllowUserToAddRows = false;
+            this.dgvCollectionDates.AllowUserToDeleteRows = false;
+            this.dgvCollectionDates.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.DisplayedCells;
+            this.dgvCollectionDates.ClipboardCopyMode = System.Windows.Forms.DataGridViewClipboardCopyMode.EnableAlwaysIncludeHeaderText;
             this.dgvCollectionDates.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.dgvCollectionDates.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
             this.Instance,
@@ -121,6 +129,7 @@
             this.dgvCollectionDates.Dock = System.Windows.Forms.DockStyle.Fill;
             this.dgvCollectionDates.Location = new System.Drawing.Point(0, 27);
             this.dgvCollectionDates.Name = "dgvCollectionDates";
+            this.dgvCollectionDates.ReadOnly = true;
             this.dgvCollectionDates.RowHeadersVisible = false;
             this.dgvCollectionDates.RowHeadersWidth = 51;
             this.dgvCollectionDates.RowTemplate.Height = 24;
@@ -135,7 +144,8 @@
             this.Instance.HeaderText = "Instance";
             this.Instance.MinimumWidth = 6;
             this.Instance.Name = "Instance";
-            this.Instance.Width = 125;
+            this.Instance.ReadOnly = true;
+            this.Instance.Width = 90;
             // 
             // Reference
             // 
@@ -143,7 +153,8 @@
             this.Reference.HeaderText = "Reference";
             this.Reference.MinimumWidth = 6;
             this.Reference.Name = "Reference";
-            this.Reference.Width = 125;
+            this.Reference.ReadOnly = true;
+            this.Reference.Width = 103;
             // 
             // WarningThreshold
             // 
@@ -151,7 +162,8 @@
             this.WarningThreshold.HeaderText = "WarningThreshold";
             this.WarningThreshold.MinimumWidth = 6;
             this.WarningThreshold.Name = "WarningThreshold";
-            this.WarningThreshold.Width = 125;
+            this.WarningThreshold.ReadOnly = true;
+            this.WarningThreshold.Width = 154;
             // 
             // CriticalThreshold
             // 
@@ -159,7 +171,8 @@
             this.CriticalThreshold.HeaderText = "Critical Threshold";
             this.CriticalThreshold.MinimumWidth = 6;
             this.CriticalThreshold.Name = "CriticalThreshold";
-            this.CriticalThreshold.Width = 125;
+            this.CriticalThreshold.ReadOnly = true;
+            this.CriticalThreshold.Width = 135;
             // 
             // SnapshotAge
             // 
@@ -167,7 +180,8 @@
             this.SnapshotAge.HeaderText = "SnapshotAge";
             this.SnapshotAge.MinimumWidth = 6;
             this.SnapshotAge.Name = "SnapshotAge";
-            this.SnapshotAge.Width = 125;
+            this.SnapshotAge.ReadOnly = true;
+            this.SnapshotAge.Width = 122;
             // 
             // SnapshotDate
             // 
@@ -175,7 +189,8 @@
             this.SnapshotDate.HeaderText = "Snapshot Date";
             this.SnapshotDate.MinimumWidth = 6;
             this.SnapshotDate.Name = "SnapshotDate";
-            this.SnapshotDate.Width = 125;
+            this.SnapshotDate.ReadOnly = true;
+            this.SnapshotDate.Width = 120;
             // 
             // ConfiguredLevel
             // 
@@ -183,26 +198,49 @@
             this.ConfiguredLevel.HeaderText = "Configured Level";
             this.ConfiguredLevel.MinimumWidth = 6;
             this.ConfiguredLevel.Name = "ConfiguredLevel";
+            this.ConfiguredLevel.ReadOnly = true;
             this.ConfiguredLevel.Resizable = System.Windows.Forms.DataGridViewTriState.True;
-            this.ConfiguredLevel.Width = 125;
+            this.ConfiguredLevel.Width = 132;
             // 
             // Configure
             // 
             this.Configure.HeaderText = "Configure Instance";
             this.Configure.MinimumWidth = 6;
             this.Configure.Name = "Configure";
+            this.Configure.ReadOnly = true;
             this.Configure.Text = "Configure Instance";
             this.Configure.UseColumnTextForLinkValue = true;
-            this.Configure.Width = 125;
+            this.Configure.Width = 119;
             // 
             // ConfigureRoot
             // 
             this.ConfigureRoot.HeaderText = "Configure Root";
             this.ConfigureRoot.MinimumWidth = 6;
             this.ConfigureRoot.Name = "ConfigureRoot";
+            this.ConfigureRoot.ReadOnly = true;
             this.ConfigureRoot.Text = "Configure Root";
             this.ConfigureRoot.UseColumnTextForLinkValue = true;
-            this.ConfigureRoot.Width = 125;
+            this.ConfigureRoot.Width = 98;
+            // 
+            // tsRefresh
+            // 
+            this.tsRefresh.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.tsRefresh.Image = global::DBAChecksGUI.Properties.Resources._112_RefreshArrow_Green_16x16_72;
+            this.tsRefresh.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tsRefresh.Name = "tsRefresh";
+            this.tsRefresh.Size = new System.Drawing.Size(29, 24);
+            this.tsRefresh.Text = "toolStripButton1";
+            this.tsRefresh.Click += new System.EventHandler(this.tsRefresh_Click);
+            // 
+            // tsCopy
+            // 
+            this.tsCopy.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.tsCopy.Image = global::DBAChecksGUI.Properties.Resources.ASX_Copy_blue_16x;
+            this.tsCopy.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tsCopy.Name = "tsCopy";
+            this.tsCopy.Size = new System.Drawing.Size(29, 24);
+            this.tsCopy.Text = "Copy";
+            this.tsCopy.Click += new System.EventHandler(this.tsCopy_Click);
             // 
             // CollectionDates
             // 
@@ -238,5 +276,7 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn ConfiguredLevel;
         private System.Windows.Forms.DataGridViewLinkColumn Configure;
         private System.Windows.Forms.DataGridViewLinkColumn ConfigureRoot;
+        private System.Windows.Forms.ToolStripButton tsRefresh;
+        private System.Windows.Forms.ToolStripButton tsCopy;
     }
 }

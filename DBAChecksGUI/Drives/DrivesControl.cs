@@ -157,6 +157,7 @@ namespace DBAChecksGUI.Properties
             dgv.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.DisplayedCells;
             dgv.DataSource = dvDrives;
             dgv.Dock =  DockStyle.Fill;
+            dgv.ClipboardCopyMode = DataGridViewClipboardCopyMode.EnableAlwaysIncludeHeaderText;
             pnlDrives.Controls.Add(dgv);
             tsGridView.Enabled = false;
             tsDrivesView.Enabled = dvDrives.Table.Rows.Count<= DrivesViewMaxRows;
@@ -292,6 +293,22 @@ namespace DBAChecksGUI.Properties
         private void tsGridView_Click(object sender, EventArgs e)
         {
             ShowGridView();
+        }
+
+        private void tsRefresh_Click(object sender, EventArgs e)
+        {
+            RefreshData();
+        }
+
+        private void tsCopy_Click(object sender, EventArgs e)
+        {
+            if (!gridview)
+            {
+                ShowGridView();              
+            }
+            dgv.SelectAll();
+            DataObject dataObj = dgv.GetClipboardContent();
+            Clipboard.SetDataObject(dataObj, true);
         }
     }
 }

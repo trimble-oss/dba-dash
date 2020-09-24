@@ -47,6 +47,8 @@
             this.tsConfigure = new System.Windows.Forms.ToolStripDropDownButton();
             this.configureInstanceThresholdsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.configureRootThresholdsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.tsRefresh = new System.Windows.Forms.ToolStripButton();
+            this.tsCopy = new System.Windows.Forms.ToolStripButton();
             ((System.ComponentModel.ISupportInitialize)(this.dgvLastGoodCheckDB)).BeginInit();
             this.toolStrip1.SuspendLayout();
             this.SuspendLayout();
@@ -55,6 +57,7 @@
             // 
             this.dgvLastGoodCheckDB.AllowUserToAddRows = false;
             this.dgvLastGoodCheckDB.AllowUserToDeleteRows = false;
+            this.dgvLastGoodCheckDB.ClipboardCopyMode = System.Windows.Forms.DataGridViewClipboardCopyMode.EnableAlwaysIncludeHeaderText;
             dataGridViewCellStyle1.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
             dataGridViewCellStyle1.BackColor = System.Drawing.SystemColors.Control;
             dataGridViewCellStyle1.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
@@ -80,7 +83,7 @@
             dataGridViewCellStyle2.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
             this.dgvLastGoodCheckDB.DefaultCellStyle = dataGridViewCellStyle2;
             this.dgvLastGoodCheckDB.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.dgvLastGoodCheckDB.Location = new System.Drawing.Point(0, 49);
+            this.dgvLastGoodCheckDB.Location = new System.Drawing.Point(0, 31);
             this.dgvLastGoodCheckDB.Name = "dgvLastGoodCheckDB";
             this.dgvLastGoodCheckDB.ReadOnly = true;
             dataGridViewCellStyle3.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
@@ -93,7 +96,7 @@
             this.dgvLastGoodCheckDB.RowHeadersDefaultCellStyle = dataGridViewCellStyle3;
             this.dgvLastGoodCheckDB.RowHeadersVisible = false;
             this.dgvLastGoodCheckDB.RowHeadersWidth = 51;
-            this.dgvLastGoodCheckDB.Size = new System.Drawing.Size(1563, 300);
+            this.dgvLastGoodCheckDB.Size = new System.Drawing.Size(1250, 248);
             this.dgvLastGoodCheckDB.TabIndex = 0;
             this.dgvLastGoodCheckDB.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgvLastGoodCheckDB_CellContentClick);
             this.dgvLastGoodCheckDB.RowsAdded += new System.Windows.Forms.DataGridViewRowsAddedEventHandler(this.dgvLastGoodCheckDB_RowsAdded);
@@ -157,11 +160,13 @@
             // 
             this.toolStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
             this.toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.tsRefresh,
+            this.tsCopy,
             this.toolStripFilter,
             this.tsConfigure});
             this.toolStrip1.Location = new System.Drawing.Point(0, 0);
             this.toolStrip1.Name = "toolStrip1";
-            this.toolStrip1.Size = new System.Drawing.Size(1563, 39);
+            this.toolStrip1.Size = new System.Drawing.Size(1250, 31);
             this.toolStrip1.TabIndex = 4;
             this.toolStrip1.Text = "toolStrip1";
             // 
@@ -176,7 +181,7 @@
             this.toolStripFilter.Image = global::DBAChecksGUI.Properties.Resources.FilterDropdown_16x;
             this.toolStripFilter.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripFilter.Name = "toolStripFilter";
-            this.toolStripFilter.Size = new System.Drawing.Size(34, 36);
+            this.toolStripFilter.Size = new System.Drawing.Size(34, 28);
             this.toolStripFilter.Text = "Filter";
             // 
             // criticalToolStripMenuItem
@@ -220,7 +225,7 @@
             this.tsConfigure.Image = global::DBAChecksGUI.Properties.Resources.SettingsOutline_16x;
             this.tsConfigure.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsConfigure.Name = "tsConfigure";
-            this.tsConfigure.Size = new System.Drawing.Size(34, 36);
+            this.tsConfigure.Size = new System.Drawing.Size(34, 28);
             this.tsConfigure.Text = "Configure";
             // 
             // configureInstanceThresholdsToolStripMenuItem
@@ -236,6 +241,26 @@
             this.configureRootThresholdsToolStripMenuItem.Size = new System.Drawing.Size(290, 26);
             this.configureRootThresholdsToolStripMenuItem.Text = "Configure Root Thresholds";
             this.configureRootThresholdsToolStripMenuItem.Click += new System.EventHandler(this.configureRootThresholdsToolStripMenuItem_Click);
+            // 
+            // tsRefresh
+            // 
+            this.tsRefresh.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.tsRefresh.Image = global::DBAChecksGUI.Properties.Resources._112_RefreshArrow_Green_16x16_72;
+            this.tsRefresh.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tsRefresh.Name = "tsRefresh";
+            this.tsRefresh.Size = new System.Drawing.Size(29, 28);
+            this.tsRefresh.Text = "Refresh";
+            this.tsRefresh.Click += new System.EventHandler(this.tsRefresh_Click);
+            // 
+            // tsCopy
+            // 
+            this.tsCopy.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.tsCopy.Image = global::DBAChecksGUI.Properties.Resources.ASX_Copy_blue_16x;
+            this.tsCopy.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tsCopy.Name = "tsCopy";
+            this.tsCopy.Size = new System.Drawing.Size(29, 28);
+            this.tsCopy.Text = "Copy";
+            this.tsCopy.Click += new System.EventHandler(this.tsCopy_Click);
             // 
             // LastGoodCheckDBControl
             // 
@@ -271,5 +296,7 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn DaysSinceLastGoodCheckDB;
         private System.Windows.Forms.DataGridViewTextBoxColumn ExcludedFromCheck;
         private System.Windows.Forms.DataGridViewLinkColumn Configure;
+        private System.Windows.Forms.ToolStripButton tsRefresh;
+        private System.Windows.Forms.ToolStripButton tsCopy;
     }
 }

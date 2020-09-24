@@ -180,6 +180,18 @@ namespace DBAChecksGUI.AgentJobs
         {
             RefreshData();
         }
+
+        private void tsRefresh_Click(object sender, EventArgs e)
+        {
+            RefreshData();
+        }
+
+        private void tsCopy_Click(object sender, EventArgs e)
+        {
+            dgvJobs.SelectAll();
+            DataObject dataObj = dgvJobs.GetClipboardContent();
+            Clipboard.SetDataObject(dataObj, true);
+        }
     }
     }
 
