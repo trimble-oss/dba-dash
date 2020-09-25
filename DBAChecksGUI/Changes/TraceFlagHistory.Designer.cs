@@ -28,29 +28,28 @@
         /// </summary>
         private void InitializeComponent()
         {
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(TraceFlagHistory));
             this.dgv = new System.Windows.Forms.DataGridView();
             this.Instance = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.TraceFlag = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.ChangeDate = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Change = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
+            this.dgvFlags = new System.Windows.Forms.DataGridView();
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
             this.toolStripLabel1 = new System.Windows.Forms.ToolStripLabel();
-            this.dgvFlags = new System.Windows.Forms.DataGridView();
+            this.tsRefresh = new System.Windows.Forms.ToolStripButton();
+            this.tsCopy = new System.Windows.Forms.ToolStripButton();
             this.toolStrip2 = new System.Windows.Forms.ToolStrip();
             this.toolStripLabel2 = new System.Windows.Forms.ToolStripLabel();
-            this.tsRefresh = new System.Windows.Forms.ToolStripButton();
             this.tsRefreshHistory = new System.Windows.Forms.ToolStripButton();
-            this.tsCopy = new System.Windows.Forms.ToolStripButton();
             this.tsCopyHistory = new System.Windows.Forms.ToolStripButton();
             ((System.ComponentModel.ISupportInitialize)(this.dgv)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
             this.splitContainer1.Panel2.SuspendLayout();
             this.splitContainer1.SuspendLayout();
-            this.toolStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dgvFlags)).BeginInit();
+            this.toolStrip1.SuspendLayout();
             this.toolStrip2.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -131,6 +130,23 @@
             this.splitContainer1.SplitterDistance = 197;
             this.splitContainer1.TabIndex = 2;
             // 
+            // dgvFlags
+            // 
+            this.dgvFlags.AllowUserToAddRows = false;
+            this.dgvFlags.AllowUserToDeleteRows = false;
+            this.dgvFlags.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.DisplayedCells;
+            this.dgvFlags.BackgroundColor = System.Drawing.Color.White;
+            this.dgvFlags.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.dgvFlags.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.dgvFlags.Location = new System.Drawing.Point(0, 31);
+            this.dgvFlags.Name = "dgvFlags";
+            this.dgvFlags.ReadOnly = true;
+            this.dgvFlags.RowHeadersVisible = false;
+            this.dgvFlags.RowHeadersWidth = 51;
+            this.dgvFlags.RowTemplate.Height = 24;
+            this.dgvFlags.Size = new System.Drawing.Size(676, 166);
+            this.dgvFlags.TabIndex = 0;
+            // 
             // toolStrip1
             // 
             this.toolStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
@@ -152,22 +168,25 @@
             this.toolStripLabel1.Size = new System.Drawing.Size(86, 24);
             this.toolStripLabel1.Text = "Trace Flags";
             // 
-            // dgvFlags
+            // tsRefresh
             // 
-            this.dgvFlags.AllowUserToAddRows = false;
-            this.dgvFlags.AllowUserToDeleteRows = false;
-            this.dgvFlags.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.DisplayedCells;
-            this.dgvFlags.BackgroundColor = System.Drawing.Color.White;
-            this.dgvFlags.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.dgvFlags.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.dgvFlags.Location = new System.Drawing.Point(0, 31);
-            this.dgvFlags.Name = "dgvFlags";
-            this.dgvFlags.ReadOnly = true;
-            this.dgvFlags.RowHeadersVisible = false;
-            this.dgvFlags.RowHeadersWidth = 51;
-            this.dgvFlags.RowTemplate.Height = 24;
-            this.dgvFlags.Size = new System.Drawing.Size(676, 166);
-            this.dgvFlags.TabIndex = 0;
+            this.tsRefresh.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.tsRefresh.Image = global::DBAChecksGUI.Properties.Resources._112_RefreshArrow_Green_16x16_72;
+            this.tsRefresh.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tsRefresh.Name = "tsRefresh";
+            this.tsRefresh.Size = new System.Drawing.Size(29, 24);
+            this.tsRefresh.Text = "Refresh";
+            this.tsRefresh.Click += new System.EventHandler(this.tsRefresh_Click);
+            // 
+            // tsCopy
+            // 
+            this.tsCopy.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.tsCopy.Image = global::DBAChecksGUI.Properties.Resources.ASX_Copy_blue_16x;
+            this.tsCopy.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tsCopy.Name = "tsCopy";
+            this.tsCopy.Size = new System.Drawing.Size(29, 24);
+            this.tsCopy.Text = "toolStripButton1";
+            this.tsCopy.Click += new System.EventHandler(this.tsCopy_Click);
             // 
             // toolStrip2
             // 
@@ -190,16 +209,6 @@
             this.toolStripLabel2.Size = new System.Drawing.Size(61, 24);
             this.toolStripLabel2.Text = "History";
             // 
-            // tsRefresh
-            // 
-            this.tsRefresh.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.tsRefresh.Image = global::DBAChecksGUI.Properties.Resources._112_RefreshArrow_Green_16x16_72;
-            this.tsRefresh.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsRefresh.Name = "tsRefresh";
-            this.tsRefresh.Size = new System.Drawing.Size(29, 24);
-            this.tsRefresh.Text = "Refresh";
-            this.tsRefresh.Click += new System.EventHandler(this.tsRefresh_Click);
-            // 
             // tsRefreshHistory
             // 
             this.tsRefreshHistory.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
@@ -210,23 +219,13 @@
             this.tsRefreshHistory.Text = "toolStripButton1";
             this.tsRefreshHistory.Click += new System.EventHandler(this.tsRefreshHistory_Click);
             // 
-            // tsCopy
-            // 
-            this.tsCopy.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.tsCopy.Image = global::DBAChecksGUI.Properties.Resources.ASX_Copy_blue_16x;
-            this.tsCopy.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsCopy.Name = "tsCopy";
-            this.tsCopy.Size = new System.Drawing.Size(29, 24);
-            this.tsCopy.Text = "toolStripButton1";
-            this.tsCopy.Click += new System.EventHandler(this.tsCopy_Click);
-            // 
             // tsCopyHistory
             // 
             this.tsCopyHistory.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.tsCopyHistory.Image = ((System.Drawing.Image)(resources.GetObject("tsCopyHistory.Image")));
+            this.tsCopyHistory.Image = global::DBAChecksGUI.Properties.Resources.ASX_Copy_blue_16x;
             this.tsCopyHistory.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsCopyHistory.Name = "tsCopyHistory";
-            this.tsCopyHistory.Size = new System.Drawing.Size(29, 28);
+            this.tsCopyHistory.Size = new System.Drawing.Size(29, 24);
             this.tsCopyHistory.Text = "toolStripButton1";
             this.tsCopyHistory.Click += new System.EventHandler(this.tsCopyHistory_Click);
             // 
@@ -244,9 +243,9 @@
             this.splitContainer1.Panel2.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).EndInit();
             this.splitContainer1.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.dgvFlags)).EndInit();
             this.toolStrip1.ResumeLayout(false);
             this.toolStrip1.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.dgvFlags)).EndInit();
             this.toolStrip2.ResumeLayout(false);
             this.toolStrip2.PerformLayout();
             this.ResumeLayout(false);

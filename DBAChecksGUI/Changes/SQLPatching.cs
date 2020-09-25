@@ -65,16 +65,12 @@ namespace DBAChecksGUI
 
         private void tsCopyVersion_Click(object sender, EventArgs e)
         {
-            dgvVersion.SelectAll();
-            DataObject dataObj = dgvVersion.GetClipboardContent();
-            Clipboard.SetDataObject(dataObj, true);
+            Common.CopyDataGridViewToClipboard(dgvVersion);
         }
 
         private void tsCopyHistory_Click(object sender, EventArgs e)
         {
-            dgv.SelectAll();
-            DataObject dataObj = dgv.GetClipboardContent();
-            Clipboard.SetDataObject(dataObj, true);
+            Common.CopyDataGridViewToClipboard(dgv);
         }
 
         private void tsRefreshVersion_Click(object sender, EventArgs e)

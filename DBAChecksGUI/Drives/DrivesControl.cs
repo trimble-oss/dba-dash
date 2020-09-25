@@ -306,9 +306,10 @@ namespace DBAChecksGUI.Properties
             {
                 ShowGridView();              
             }
-            dgv.SelectAll();
-            DataObject dataObj = dgv.GetClipboardContent();
-            Clipboard.SetDataObject(dataObj, true);
+            dgv.Columns["Configure"].Visible = false;
+            Common.CopyDataGridViewToClipboard(dgv);
+            dgv.Columns["Configure"].Visible = true;
+
         }
     }
 }

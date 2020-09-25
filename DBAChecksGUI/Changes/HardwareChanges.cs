@@ -64,9 +64,7 @@ namespace DBAChecksGUI
 
         private void tsCopy_Click(object sender, EventArgs e)
         {
-            dgvHardware.SelectAll();
-            DataObject dataObj = dgvHardware.GetClipboardContent();
-            Clipboard.SetDataObject(dataObj, true);
+            Common.CopyDataGridViewToClipboard(dgvHardware);
         }
 
         private void tsRefreshHardware_Click(object sender, EventArgs e)
@@ -81,9 +79,7 @@ namespace DBAChecksGUI
 
         private void tsCopyHistory_Click(object sender, EventArgs e)
         {
-            dgv.SelectAll();
-            DataObject dataObj = dgv.GetClipboardContent();
-            Clipboard.SetDataObject(dataObj, true);
+            Common.CopyDataGridViewToClipboard(dgv);
         }
     }
 }

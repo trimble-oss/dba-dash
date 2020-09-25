@@ -49,9 +49,12 @@ namespace DBAChecksGUI
 
         private void tsCopy_Click(object sender, EventArgs e)
         {
-            dgv.SelectAll();
-            DataObject dataObj = dgv.GetClipboardContent();
-            Clipboard.SetDataObject(dataObj, true);
+            Common.CopyDataGridViewToClipboard(dgv);
+        }
+
+        private void configuration1_Load(object sender, EventArgs e)
+        {
+
         }
     }
 }

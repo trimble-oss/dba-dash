@@ -188,9 +188,11 @@ namespace DBAChecksGUI.CollectionDates
 
         private void tsCopy_Click(object sender, EventArgs e)
         {
-            dgvCollectionDates.SelectAll();
-            DataObject dataObj = dgvCollectionDates.GetClipboardContent();
-            Clipboard.SetDataObject(dataObj, true);
+            Configure.Visible = false;
+            ConfigureRoot.Visible = false;
+            Common.CopyDataGridViewToClipboard(dgvCollectionDates);
+            Configure.Visible = true;
+            ConfigureRoot.Visible = true;
         }
     }
 }

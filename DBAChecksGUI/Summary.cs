@@ -231,5 +231,10 @@ namespace DBAChecksGUI
         {
             RefreshData();
         }
+
+        private void tsCopy_Click(object sender, EventArgs e)
+        {
+            Common.CopyDataGridViewToClipboard(dgvSummary);
+        }
     }
 }

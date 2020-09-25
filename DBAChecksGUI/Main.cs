@@ -1032,9 +1032,9 @@ ORDER BY SchemaName,ObjectName
 
         private void tsCopyErrors_Click(object sender, EventArgs e)
         {
-            dgvDBAChecksErrors.SelectAll();
-            DataObject dataObj = dgvDBAChecksErrors.GetClipboardContent();
-            Clipboard.SetDataObject(dataObj, true);
+            
+            Common.CopyDataGridViewToClipboard(dgvDBAChecksErrors);
+
         }
     }
 }

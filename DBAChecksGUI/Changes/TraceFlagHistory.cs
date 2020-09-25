@@ -108,16 +108,12 @@ namespace DBAChecksGUI.Changes
 
         private void tsCopy_Click(object sender, EventArgs e)
         {
-            dgvFlags.SelectAll();
-            DataObject dataObj = dgvFlags.GetClipboardContent();
-            Clipboard.SetDataObject(dataObj, true);
+            Common.CopyDataGridViewToClipboard(dgvFlags);
         }
 
         private void tsCopyHistory_Click(object sender, EventArgs e)
         {
-            dgv.SelectAll();
-            DataObject dataObj = dgv.GetClipboardContent();
-            Clipboard.SetDataObject(dataObj, true);
+            Common.CopyDataGridViewToClipboard(dgv);
         }
     }
 

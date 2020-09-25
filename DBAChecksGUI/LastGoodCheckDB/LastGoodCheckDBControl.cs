@@ -171,9 +171,9 @@ namespace DBAChecksGUI.LastGoodCheckDB
 
         private void tsCopy_Click(object sender, EventArgs e)
         {
-            dgvLastGoodCheckDB.SelectAll();
-            DataObject dataObj = dgvLastGoodCheckDB.GetClipboardContent();
-            Clipboard.SetDataObject(dataObj, true);
+            Configure.Visible = false;
+            Common.CopyDataGridViewToClipboard(dgvLastGoodCheckDB);
+            Configure.Visible = true;
         }
     }
 

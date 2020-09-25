@@ -86,6 +86,7 @@
             this.tsCustom = new System.Windows.Forms.ToolStripMenuItem();
             this.tsRefresh = new System.Windows.Forms.ToolStripButton();
             this.tsColumns = new System.Windows.Forms.ToolStripDropDownButton();
+            this.tsCopy = new System.Windows.Forms.ToolStripButton();
             ((System.ComponentModel.ISupportInitialize)(this.dgv)).BeginInit();
             this.toolStrip1.SuspendLayout();
             this.SuspendLayout();
@@ -119,12 +120,12 @@
             this.MaxWriteIOPs,
             this.MaxIOPs});
             this.dgv.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.dgv.Location = new System.Drawing.Point(0, 31);
+            this.dgv.Location = new System.Drawing.Point(0, 27);
             this.dgv.Name = "dgv";
             this.dgv.ReadOnly = true;
             this.dgv.RowHeadersVisible = false;
             this.dgv.RowHeadersWidth = 51;
-            this.dgv.Size = new System.Drawing.Size(1048, 622);
+            this.dgv.Size = new System.Drawing.Size(1048, 626);
             this.dgv.TabIndex = 0;
             this.dgv.RowsAdded += new System.Windows.Forms.DataGridViewRowsAddedEventHandler(this.dgv_RowsAdded);
             // 
@@ -372,12 +373,13 @@
             // 
             this.toolStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
             this.toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.tsTime,
             this.tsRefresh,
+            this.tsCopy,
+            this.tsTime,
             this.tsColumns});
             this.toolStrip1.Location = new System.Drawing.Point(0, 0);
             this.toolStrip1.Name = "toolStrip1";
-            this.toolStrip1.Size = new System.Drawing.Size(1048, 31);
+            this.toolStrip1.Size = new System.Drawing.Size(1048, 27);
             this.toolStrip1.TabIndex = 3;
             this.toolStrip1.Text = "toolStrip1";
             // 
@@ -400,7 +402,7 @@
             this.tsTime.Image = global::DBAChecksGUI.Properties.Resources.Time_16x;
             this.tsTime.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsTime.Name = "tsTime";
-            this.tsTime.Size = new System.Drawing.Size(34, 28);
+            this.tsTime.Size = new System.Drawing.Size(34, 24);
             this.tsTime.Text = "Time";
             // 
             // toolStripMenuItem2
@@ -509,7 +511,7 @@
             this.tsRefresh.Image = global::DBAChecksGUI.Properties.Resources._112_RefreshArrow_Green_16x16_72;
             this.tsRefresh.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsRefresh.Name = "tsRefresh";
-            this.tsRefresh.Size = new System.Drawing.Size(29, 28);
+            this.tsRefresh.Size = new System.Drawing.Size(29, 24);
             this.tsRefresh.Text = "Refresh";
             this.tsRefresh.Click += new System.EventHandler(this.tsRefresh_Click);
             // 
@@ -519,8 +521,18 @@
             this.tsColumns.Image = global::DBAChecksGUI.Properties.Resources.Column_16x;
             this.tsColumns.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsColumns.Name = "tsColumns";
-            this.tsColumns.Size = new System.Drawing.Size(34, 28);
+            this.tsColumns.Size = new System.Drawing.Size(34, 24);
             this.tsColumns.Text = "Columns";
+            // 
+            // tsCopy
+            // 
+            this.tsCopy.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.tsCopy.Image = global::DBAChecksGUI.Properties.Resources.ASX_Copy_blue_16x;
+            this.tsCopy.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tsCopy.Name = "tsCopy";
+            this.tsCopy.Size = new System.Drawing.Size(29, 24);
+            this.tsCopy.Text = "Copy";
+            this.tsCopy.Click += new System.EventHandler(this.tsCopy_Click);
             // 
             // PerformanceSummary
             // 
@@ -579,5 +591,6 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn MaxReadIOPs;
         private System.Windows.Forms.DataGridViewTextBoxColumn MaxWriteIOPs;
         private System.Windows.Forms.DataGridViewTextBoxColumn MaxIOPs;
+        private System.Windows.Forms.ToolStripButton tsCopy;
     }
 }

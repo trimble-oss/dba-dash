@@ -85,9 +85,7 @@ namespace DBAChecksGUI.Changes
 
         private void tsCopy_Click(object sender, EventArgs e)
         {
-            dgvConfig.SelectAll();
-            DataObject dataObj = dgvConfig.GetClipboardContent();
-            Clipboard.SetDataObject(dataObj, true);
+            Common.CopyDataGridViewToClipboard(dgvConfig);
         }
     }
 }

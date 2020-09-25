@@ -193,9 +193,9 @@ namespace DBAChecksGUI.DBFiles
 
         private void tsCopy_Click(object sender, EventArgs e)
         {
-            dgvFiles.SelectAll();
-            DataObject dataObj = dgvFiles.GetClipboardContent();
-            Clipboard.SetDataObject(dataObj, true);
+            Configure.Visible = false;
+            Common.CopyDataGridViewToClipboard(dgvFiles);
+            Configure.Visible = true;
         }
     }
 }

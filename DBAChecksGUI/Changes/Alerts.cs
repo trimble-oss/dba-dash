@@ -125,9 +125,7 @@ namespace DBAChecksGUI.Changes
 
         private void tsCopy_Click(object sender, EventArgs e)
         {
-            dgvAlertsConfig.SelectAll();
-            DataObject dataObj = dgvAlertsConfig.GetClipboardContent();
-            Clipboard.SetDataObject(dataObj, true);
+            Common.CopyDataGridViewToClipboard(dgvAlertsConfig);
         }
 
         private void tsRefresh_Click(object sender, EventArgs e)
@@ -142,9 +140,7 @@ namespace DBAChecksGUI.Changes
 
         private void tsCopyAlerts_Click(object sender, EventArgs e)
         {
-            dgvAlerts.SelectAll();
-            DataObject dataObj = dgvAlerts.GetClipboardContent();
-            Clipboard.SetDataObject(dataObj, true);
+            Common.CopyDataGridViewToClipboard(dgvAlerts);
         }
     }
 }

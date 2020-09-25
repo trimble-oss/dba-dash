@@ -188,9 +188,9 @@ namespace DBAChecksGUI.AgentJobs
 
         private void tsCopy_Click(object sender, EventArgs e)
         {
-            dgvJobs.SelectAll();
-            DataObject dataObj = dgvJobs.GetClipboardContent();
-            Clipboard.SetDataObject(dataObj, true);
+            Configure.Visible = false;
+            Common.CopyDataGridViewToClipboard(dgvJobs);
+            Configure.Visible = true;
         }
     }
     }

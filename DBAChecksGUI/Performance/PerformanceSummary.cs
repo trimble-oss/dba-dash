@@ -171,5 +171,10 @@ namespace DBAChecksGUI.Performance
             }
              
         }
+
+        private void tsCopy_Click(object sender, EventArgs e)
+        {
+            Common.CopyDataGridViewToClipboard(dgv);
+        }
     }
 }
