@@ -29,6 +29,8 @@
         private void InitializeComponent()
         {
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
+            this.tsRefresh = new System.Windows.Forms.ToolStripButton();
+            this.tsCopy = new System.Windows.Forms.ToolStripButton();
             this.toolStripFilter = new System.Windows.Forms.ToolStripDropDownButton();
             this.criticalToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.warningToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -44,8 +46,6 @@
             this.ConfiguredLevel = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Configure = new System.Windows.Forms.DataGridViewLinkColumn();
             this.ConfigureRoot = new System.Windows.Forms.DataGridViewLinkColumn();
-            this.tsRefresh = new System.Windows.Forms.ToolStripButton();
-            this.tsCopy = new System.Windows.Forms.ToolStripButton();
             this.toolStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dgvCollectionDates)).BeginInit();
             this.SuspendLayout();
@@ -59,9 +59,29 @@
             this.toolStripFilter});
             this.toolStrip1.Location = new System.Drawing.Point(0, 0);
             this.toolStrip1.Name = "toolStrip1";
-            this.toolStrip1.Size = new System.Drawing.Size(882, 27);
+            this.toolStrip1.Size = new System.Drawing.Size(882, 31);
             this.toolStrip1.TabIndex = 2;
             this.toolStrip1.Text = "toolStrip1";
+            // 
+            // tsRefresh
+            // 
+            this.tsRefresh.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.tsRefresh.Image = global::DBAChecksGUI.Properties.Resources._112_RefreshArrow_Green_16x16_72;
+            this.tsRefresh.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tsRefresh.Name = "tsRefresh";
+            this.tsRefresh.Size = new System.Drawing.Size(29, 28);
+            this.tsRefresh.Text = "Refresh";
+            this.tsRefresh.Click += new System.EventHandler(this.tsRefresh_Click);
+            // 
+            // tsCopy
+            // 
+            this.tsCopy.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.tsCopy.Image = global::DBAChecksGUI.Properties.Resources.ASX_Copy_blue_16x;
+            this.tsCopy.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tsCopy.Name = "tsCopy";
+            this.tsCopy.Size = new System.Drawing.Size(29, 28);
+            this.tsCopy.Text = "Copy";
+            this.tsCopy.Click += new System.EventHandler(this.tsCopy_Click);
             // 
             // toolStripFilter
             // 
@@ -74,14 +94,14 @@
             this.toolStripFilter.Image = global::DBAChecksGUI.Properties.Resources.FilterDropdown_16x;
             this.toolStripFilter.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripFilter.Name = "toolStripFilter";
-            this.toolStripFilter.Size = new System.Drawing.Size(34, 24);
+            this.toolStripFilter.Size = new System.Drawing.Size(34, 28);
             this.toolStripFilter.Text = "Filter";
             // 
             // criticalToolStripMenuItem
             // 
             this.criticalToolStripMenuItem.CheckOnClick = true;
             this.criticalToolStripMenuItem.Name = "criticalToolStripMenuItem";
-            this.criticalToolStripMenuItem.Size = new System.Drawing.Size(161, 26);
+            this.criticalToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
             this.criticalToolStripMenuItem.Text = "Critical";
             this.criticalToolStripMenuItem.Click += new System.EventHandler(this.criticalToolStripMenuItem_Click);
             // 
@@ -89,7 +109,7 @@
             // 
             this.warningToolStripMenuItem.CheckOnClick = true;
             this.warningToolStripMenuItem.Name = "warningToolStripMenuItem";
-            this.warningToolStripMenuItem.Size = new System.Drawing.Size(161, 26);
+            this.warningToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
             this.warningToolStripMenuItem.Text = "Warning";
             this.warningToolStripMenuItem.Click += new System.EventHandler(this.warningToolStripMenuItem_Click);
             // 
@@ -97,7 +117,7 @@
             // 
             this.undefinedToolStripMenuItem.CheckOnClick = true;
             this.undefinedToolStripMenuItem.Name = "undefinedToolStripMenuItem";
-            this.undefinedToolStripMenuItem.Size = new System.Drawing.Size(161, 26);
+            this.undefinedToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
             this.undefinedToolStripMenuItem.Text = "Undefined";
             this.undefinedToolStripMenuItem.Click += new System.EventHandler(this.undefinedToolStripMenuItem_Click);
             // 
@@ -105,7 +125,7 @@
             // 
             this.OKToolStripMenuItem.CheckOnClick = true;
             this.OKToolStripMenuItem.Name = "OKToolStripMenuItem";
-            this.OKToolStripMenuItem.Size = new System.Drawing.Size(161, 26);
+            this.OKToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
             this.OKToolStripMenuItem.Text = "OK";
             this.OKToolStripMenuItem.Click += new System.EventHandler(this.OKToolStripMenuItem_Click);
             // 
@@ -127,13 +147,13 @@
             this.Configure,
             this.ConfigureRoot});
             this.dgvCollectionDates.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.dgvCollectionDates.Location = new System.Drawing.Point(0, 27);
+            this.dgvCollectionDates.Location = new System.Drawing.Point(0, 31);
             this.dgvCollectionDates.Name = "dgvCollectionDates";
             this.dgvCollectionDates.ReadOnly = true;
             this.dgvCollectionDates.RowHeadersVisible = false;
             this.dgvCollectionDates.RowHeadersWidth = 51;
             this.dgvCollectionDates.RowTemplate.Height = 24;
-            this.dgvCollectionDates.Size = new System.Drawing.Size(882, 278);
+            this.dgvCollectionDates.Size = new System.Drawing.Size(882, 274);
             this.dgvCollectionDates.TabIndex = 3;
             this.dgvCollectionDates.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgv_CellContentClick);
             this.dgvCollectionDates.RowsAdded += new System.Windows.Forms.DataGridViewRowsAddedEventHandler(this.dgv_RowsAdded);
@@ -221,26 +241,6 @@
             this.ConfigureRoot.Text = "Configure Root";
             this.ConfigureRoot.UseColumnTextForLinkValue = true;
             this.ConfigureRoot.Width = 98;
-            // 
-            // tsRefresh
-            // 
-            this.tsRefresh.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.tsRefresh.Image = global::DBAChecksGUI.Properties.Resources._112_RefreshArrow_Green_16x16_72;
-            this.tsRefresh.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsRefresh.Name = "tsRefresh";
-            this.tsRefresh.Size = new System.Drawing.Size(29, 24);
-            this.tsRefresh.Text = "toolStripButton1";
-            this.tsRefresh.Click += new System.EventHandler(this.tsRefresh_Click);
-            // 
-            // tsCopy
-            // 
-            this.tsCopy.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.tsCopy.Image = global::DBAChecksGUI.Properties.Resources.ASX_Copy_blue_16x;
-            this.tsCopy.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsCopy.Name = "tsCopy";
-            this.tsCopy.Size = new System.Drawing.Size(29, 24);
-            this.tsCopy.Text = "Copy";
-            this.tsCopy.Click += new System.EventHandler(this.tsCopy_Click);
             // 
             // CollectionDates
             // 

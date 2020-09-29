@@ -10,6 +10,15 @@ IF @FromDate IS NULL
 IF @ToDate IS NULL
 	SET @ToDate=GETUTCDATE()
 
+DECLARE @Use60MIN BIT
+SELECT @Use60MIN = CASE WHEN DATEDIFF(hh,@FromDate,@ToDate)>24 THEN 1
+					WHEN DATEPART(mi,@FromDate)+DATEPART(s,@FromDate)+DATEPART(ms,@FromDate)=0 
+						AND (DATEPART(mi,@ToDate)+DATEPART(s,@ToDate)+DATEPART(ms,@ToDate)=0 
+								OR @ToDate>=DATEADD(s,-2,GETUTCDATE())
+							)
+					THEN 1
+					ELSE 0 END
+
 DECLARE @Instances TABLE(
 	InstanceID INT PRIMARY KEY
 )
@@ -82,12 +91,21 @@ WITH io1 AS (
 , wait1 AS (
 	SELECT W.InstanceID,
 		W.WaitTypeID,
-		SUM(W.wait_time_ms)*1000.0 / MAX(SUM(W.sample_ms_diff)) OVER(PARTITION BY InstanceID) WaitMsPerSec
+		SUM(W.wait_time_ms)*1000.0 / MAX(SUM(W.sample_ms_diff*1.0)) OVER(PARTITION BY InstanceID) WaitMsPerSec
 	FROM dbo.Waits W 
 	WHERE W.SnapshotDate>= @FromDate
 	AND W.SnapshotDate < @ToDate
+	AND @Use60MIN=0
 	GROUP BY W.InstanceID,W.WaitTypeID
-
+	UNION ALL 
+	SELECT W.InstanceID,
+		W.WaitTypeID,
+		SUM(W.wait_time_ms)*1000.0 / MAX(SUM(W.sample_ms_diff*1.0)) OVER(PARTITION BY InstanceID) WaitMsPerSec
+	FROM dbo.Waits_60MIN W 
+	WHERE W.SnapshotDate>= @FromDate
+	AND W.SnapshotDate < @ToDate
+	AND @Use60MIN=1
+	GROUP BY W.InstanceID,W.WaitTypeID
 )
 , wait AS (
 	SELECT W.InstanceID,	
@@ -135,4 +153,4 @@ LEFT JOIN cpuAgg ON I.InstanceID = cpuAgg.InstanceID
 LEFT JOIN wait ON I.InstanceID = wait.InstanceID
 WHERE EXISTS(SELECT 1 FROM @Instances t WHERE I.InstanceID = t.InstanceID)
 AND I.IsActive=1
-ORDER BY CASE WHEN wait.CriticalWaitMsPerSec> 1 THEN CriticalWaitMsPerSec ELSE 0 END DESC, cpuAgg.AvgCPU DESC
+ORDER BY CASE WHEN wait.CriticalWaitMsPerSec> 1 THEN wait.CriticalWaitMsPerSec ELSE 0 END DESC, cpuAgg.AvgCPU DESC

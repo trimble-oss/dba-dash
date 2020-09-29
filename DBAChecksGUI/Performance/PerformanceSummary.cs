@@ -33,7 +33,12 @@ namespace DBAChecksGUI.Performance
             {
                 if (_from == DateTime.MinValue)
                 {
-                    return DateTime.UtcNow.AddMinutes(-mins);
+                    DateTime now = DateTime.UtcNow;
+                    if (mins >= 720)  // round to nearest hr
+                    {
+                        now = new DateTime(now.Year, now.Month, now.Day, now.Hour, 0, 0, 0);
+                    }
+                    return now.AddMinutes(-mins);
                 }
                 else
                 {
