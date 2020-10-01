@@ -14,7 +14,7 @@ CREATE PROC [Report].[SlowQueriesDetail](
 	@Top INT = 30
 )
 AS
-EXEC [dbo].[SlowQueriesDetail]
+EXEC [dbo].[SlowQueriesDetail_Get]
 	@FromDate=@FromDate,
 	@ToDate=@ToDate,
 	@ObjectName=@ObjectName,
@@ -25,5 +25,5 @@ EXEC [dbo].[SlowQueriesDetail]
 	@DurationFromSec=@DurationFromSec,
 	@DurationToSec=@DurationToSec,
 	@Text=@Text,
-	@DatabaseName@=@DatabaseName,
+	@DatabaseName=@DatabaseName,
 	@Top=@Top

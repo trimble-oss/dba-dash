@@ -16,6 +16,16 @@ DECLARE @DateGroupingSQL NVARCHAR(MAX)
 
 SELECT @DatabaseID=ISNULL(@DatabaseID,-1),@Drive=ISNULL(@Drive,'*')
 
+IF EXISTS(SELECT 1 
+		FROM dbo.Databases d 
+		JOIN dbo.Instances I ON d.InstanceID = I.InstanceID 
+		WHERE I.EditionID=1674378470 --azure
+		AND d.DatabaseID = @DatabaseID
+		)
+BEGIN
+	SET @DatabaseID=-1
+END
+
 SELECT @DateGroupingSQL= CASE WHEN @DateGrouping = 'None' THEN 'IOS.SnapshotDate'
 			WHEN @DateGrouping = '1MIN' THEN 'DATEADD(mi, DATEDIFF(mi, 0, DATEADD(s, 30, IOS.SnapshotDate)), 0)'
 			WHEN @DateGrouping = '10MIN' THEN 'CONVERT(DATETIME,LEFT(CONVERT(VARCHAR,IOS.SnapshotDate,120),15) + ''0'',120)'

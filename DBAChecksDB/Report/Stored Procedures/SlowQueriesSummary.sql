@@ -16,7 +16,7 @@ CREATE PROC [Report].[SlowQueriesSummary](
 	@Top INT=20
 )
 AS
-EXEC dbo.SlowQueriesSummary @FromDate = @FromDate,
+EXEC dbo.SlowQueriesSummary_Get @FromDate = @FromDate,
                             @ToDate = @ToDate,
                             @ObjectName = @ObjectName,
                             @ClientHostName = @ClientHostName,
