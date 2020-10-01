@@ -30,7 +30,7 @@
     <QueryStoreStaleQueryThreshold>15</QueryStoreStaleQueryThreshold>
     <QueryStoreMaxStorageSize>512</QueryStoreMaxStorageSize>
     <QueryStoreMaxPlansPerQuery>50</QueryStoreMaxPlansPerQuery>
-    <DacVersion>1.9.1.8</DacVersion>
+    <DacVersion>1.2.0.0</DacVersion>
     <ReadCommittedSnapshot>True</ReadCommittedSnapshot>
     <AllowSnapshotIsolation>True</AllowSnapshotIsolation>
   </PropertyGroup>
@@ -93,6 +93,7 @@
     <Folder Include="Switch\" />
     <Folder Include="Switch\Tables\" />
     <Folder Include="Storage\" />
+    <Folder Include="Scripts" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="dbo\Tables\LogRestoreThresholds.sql" />
@@ -400,6 +401,12 @@
     <Build Include="dbo\Stored Procedures\Drivers_Get.sql" />
     <Build Include="dbo\Stored Procedures\InstanceVersionInfo_Get.sql" />
     <Build Include="dbo\Stored Procedures\Hardware_Get.sql" />
+    <Build Include="dbo\Tables\DBIOStats_60MIN.sql" />
+    <Build Include="dbo\Tables\DBIOStats.sql" />
+    <Build Include="Switch\Tables\DBIOStats.sql" />
+    <Build Include="Storage\PF_DBIOStats.sql" />
+    <Build Include="Storage\PS_DBIOStats.sql" />
+    <None Include="Scripts\DBIOStats_Migration.sql" />
   </ItemGroup>
   <ItemGroup>
     <PostDeploy Include="Script.PostDeployment1.sql" />
@@ -414,6 +421,7 @@
   <ItemGroup>
     <None Include="DBAChecksDB.publish.xml" />
     <None Include="Schema_Compare.scmp" />
+    <None Include="Scripts\DBIOStatsMigration_60MIN.sql" />
   </ItemGroup>
   <ItemGroup>
     <SqlCmdVariable Include="VersionNumber">

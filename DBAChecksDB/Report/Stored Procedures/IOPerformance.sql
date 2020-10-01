@@ -2,14 +2,14 @@
 	@InstanceIDs VARCHAR(MAX)=NULL,
 	@DatabaseName SYSNAME=NULL,
 	@FileGroupName SYSNAME=NULL,
-	@Drive CHAR(3)=NULL,
+	@Drive CHAR(1)=NULL,
 	@GroupByDB BIT=0,
 	@GroupByFileGroup BIT=0,
 	@GroupByFile BIT=0,
 	@GroupByDrive BIT=0,
 	@TimeGroup TINYINT=0,
-	@FromDate DATETIME=NULL,
-	@ToDate DATETIME=NULL
+	@FromDate DATETIME2(2)=NULL,
+	@ToDate DATETIME2(2)=NULL
 )
 AS
 IF @FromDate IS NULL	
@@ -56,15 +56,18 @@ WITH instanceAgg AS (
 			SUM(IOS.io_stall_write_ms) io_stall_write_ms,
 			MAX(IOS.sample_ms_diff) sample_ms_diff
 	FROM dbo.Instances I
-	JOIN dbo.IOStats IOS ON IOS.InstanceID = I.InstanceID
-	LEFT JOIN dbo.DBFiles F ON IOS.FileID = F.FileID
-	LEFT JOIN dbo.Databases D ON D.DatabaseID = F.DatabaseID
+	JOIN dbo.DBIOStats IOS ON IOS.InstanceID = I.InstanceID
+	JOIN dbo.DBFiles F ON IOS.FileID = F.FileID
+	JOIN dbo.Databases D ON D.DatabaseID = IOS.DatabaseID
 	WHERE IOS.SnapshotDate>=@FromDate
 		AND IOS.SnapshotDate<@ToDate
 		AND I.IsActive=1
+		AND IOS.DatabaseID<>-1
+		AND IOS.FileID<>-1
+		AND IOS.Drive <> '*'
 		AND (D.name = @DatabaseName OR @DatabaseName IS NULL)
 		AND (F.filegroup_name  = @FileGroupName OR @FileGroupName IS NULL)
-		AND (F.physical_name LIKE @Drive + '%' OR @Drive IS NULL)
+		AND (IOS.Drive = @Drive OR @Drive IS NULL)
 		AND EXISTS(SELECT 1 FROM @Instances t WHERE I.InstanceID = t.InstanceID)
 	GROUP BY I.InstanceID,
 			I.Instance,

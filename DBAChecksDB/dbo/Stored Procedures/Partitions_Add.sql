@@ -8,3 +8,4 @@ EXEC dbo.DailyPartitions_Add @TableName = 'BlockingSnapshot',@DaysInFuture=@Days
 EXEC dbo.DailyPartitions_Add @TableName = 'AzureDBResourceStats',@DaysInFuture=@DaysInFuture
 EXEC dbo.DailyPartitions_Add @TableName = 'AzureDBElasticPoolResourceStats',@DaysInFuture=@DaysInFuture
 EXEC dbo.DailyPartitions_Add @TableName = 'ObjectExecutionStats',@DaysInFuture=@DaysInFuture
+EXEC dbo.DailyPartitions_Add @TableName = 'DBIOStats',@DaysInFuture=@DaysInFuture
