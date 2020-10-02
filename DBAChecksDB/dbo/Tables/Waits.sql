@@ -16,6 +16,8 @@
 
 
 
+
+
 GO
 CREATE UNIQUE NONCLUSTERED INDEX [IX_Waits_SnapshotDate_InstanceID_WaitTypeID]
     ON [dbo].[Waits]([SnapshotDate] ASC, [InstanceID] ASC, [WaitTypeID] ASC)
@@ -23,4 +25,10 @@ CREATE UNIQUE NONCLUSTERED INDEX [IX_Waits_SnapshotDate_InstanceID_WaitTypeID]
     ON [PS_Waits] ([SnapshotDate]);
 
 
+
+
+GO
+CREATE COLUMNSTORE INDEX [CI_Waits]
+    ON [dbo].[Waits]([InstanceID], [SnapshotDate], [WaitTypeID], [waiting_tasks_count], [wait_time_ms], [signal_wait_time_ms], [sample_ms_diff])
+    ON [PS_Waits] ([SnapshotDate]);
 

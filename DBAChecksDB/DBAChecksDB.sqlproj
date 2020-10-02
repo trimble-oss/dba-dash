@@ -30,7 +30,7 @@
     <QueryStoreStaleQueryThreshold>15</QueryStoreStaleQueryThreshold>
     <QueryStoreMaxStorageSize>512</QueryStoreMaxStorageSize>
     <QueryStoreMaxPlansPerQuery>50</QueryStoreMaxPlansPerQuery>
-    <DacVersion>2.0.0.1</DacVersion>
+    <DacVersion>2.0.0.2</DacVersion>
     <ReadCommittedSnapshot>True</ReadCommittedSnapshot>
     <AllowSnapshotIsolation>True</AllowSnapshotIsolation>
   </PropertyGroup>
@@ -407,6 +407,7 @@
     <Build Include="Storage\PF_DBIOStats.sql" />
     <Build Include="Storage\PS_DBIOStats.sql" />
     <None Include="Scripts\DBIOStats_Migration.sql" />
+    <Build Include="dbo\Tables\CPU_60MIN.sql" />
   </ItemGroup>
   <ItemGroup>
     <PostDeploy Include="Script.PostDeployment1.sql" />

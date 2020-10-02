@@ -45,11 +45,14 @@ BEGIN
 
 END;
 
+DECLARE @SQL NVARCHAR(MAX) 
+SET @SQL = CAST(N'' AS NVARCHAR(MAX)) + N'
 WITH cpuAgg AS (
 	SELECT InstanceID,
-		AVG(TotalCPU*1.0) AvgCPU,
-		MAX(TotalCPU) as MaxCPU
-	FROM dbo.CPU
+		SUM(SumTotalCPU*1.0)/SUM(SampleCount*1.0) as AvgCPU,
+	    SUM(SumOtherCPU*1.0)/SUM(SampleCount*1.0) as OtherCPU,
+	    MAX(MaxTotalCPU*1.0) as MaxCPU
+	FROM ' + CASE WHEN @Use60MIN=1 THEN 'dbo.CPU_60MIN' ELSE 'dbo.CPU' END + ' as CPU
 	WHERE EventTime >=@FromDate
 	AND EventTime <@ToDate
 	AND EXISTS(SELECT 1 FROM #Instances t WHERE CPU.InstanceID = t.InstanceID)
@@ -66,45 +69,18 @@ WITH cpuAgg AS (
 			SUM(IOS.io_stall_read_ms)/(NULLIF(SUM(IOS.num_of_reads),0)*1.0) AS ReadLatency,
 			SUM(IOS.io_stall_write_ms)/(NULLIF(SUM(IOS.num_of_writes),0)*1.0) AS WriteLatency,
 			SUM(IOS.io_stall_read_ms+IOS.io_stall_write_ms)/(NULLIF(SUM(IOS.num_of_writes+IOS.num_of_reads),0)*1.0) AS Latency,
-			MAX(IOS.num_of_reads/(IOS.sample_ms_diff/1000.0)) AS MaxReadIOPs,
-			MAX(IOS.num_of_writes/(IOS.sample_ms_diff/1000.0)) AS MaxWriteIOPs,
-			MAX((IOS.num_of_writes+IOS.num_of_reads)/(IOS.sample_ms_diff/1000.0)) AS MaxIOPs,
-			MAX(IOS.num_of_bytes_read/(IOS.sample_ms_diff/1000.0))/POWER(1024.0,2) AS MaxReadMBsec,
-			MAX(IOS.num_of_bytes_written/(IOS.sample_ms_diff/1000.0))/POWER(1024.0,2) AS MaxWriteMBsec,
-			MAX((IOS.num_of_bytes_written+IOS.num_of_bytes_read)/(IOS.sample_ms_diff/1000.0))/POWER(1024.0,2) AS MaxMBsec
-	FROM dbo.DBIOStats IOS
-	WHERE IOS.DatabaseID=-1
-	AND IOS.Drive='*'
-	AND IOS.FileID=-1
-	AND IOS.SnapshotDate>=CAST(@FromDate AS DATETIME2(2))
-	AND IOS.SnapshotDate<CAST(@ToDate AS DATETIME2(2))
-	AND @Use60MIN=0
-	AND EXISTS(SELECT 1 FROM #Instances t WHERE IOS.InstanceID = t.InstanceID)
-	GROUP BY IOS.InstanceID
-	UNION ALL
-	SELECT IOS.InstanceID,
-			SUM(IOS.num_of_reads)/(SUM(IOS.sample_ms_diff)/1000.0) AS ReadIOPs,
-			SUM(IOS.num_of_writes)/(SUM(IOS.sample_ms_diff)/1000.0) AS WriteIOPs,
-			SUM(IOS.num_of_reads+IOS.num_of_writes)/(SUM(IOS.sample_ms_diff)/1000.0) AS IOPs,
-			SUM(IOS.num_of_bytes_read)/POWER(1024.0,2)/(SUM(IOS.sample_ms_diff)/1000.0) ReadMBsec,
-			SUM(IOS.num_of_bytes_written)/POWER(1024.0,2)/(SUM(IOS.sample_ms_diff)/1000.0) WriteMBsec,
-			SUM(IOS.num_of_bytes_read+IOS.num_of_bytes_written)/POWER(1024.0,2)/(SUM(IOS.sample_ms_diff)/1000.0) MBsec,
-			SUM(IOS.io_stall_read_ms)/(NULLIF(SUM(IOS.num_of_reads),0)*1.0) AS ReadLatency,
-			SUM(IOS.io_stall_write_ms)/(NULLIF(SUM(IOS.num_of_writes),0)*1.0) AS WriteLatency,
-			SUM(IOS.io_stall_read_ms+IOS.io_stall_write_ms)/(NULLIF(SUM(IOS.num_of_writes+IOS.num_of_reads),0)*1.0) AS Latency,
 			MAX(IOS.MaxReadIOPs) AS MaxReadIOPs,
 			MAX(IOS.MaxWriteIOPs) AS MaxWriteIOPs,
 			MAX(IOS.MaxIOPs) AS MaxIOPs,
 			MAX(IOS.MaxReadMBsec) AS MaxReadMBsec,
 			MAX(IOS.MaxWriteMBsec) AS MaxWriteMBsec,
 			MAX(IOS.MaxMBsec) AS MaxMBsec
-	FROM dbo.DBIOStats_60MIN IOS
+	FROM ' + CASE WHEN @Use60MIN = 1 THEN 'dbo.DBIOStats_60MIN' ELSE 'dbo.DBIOStats' END + ' AS IOS
 	WHERE IOS.DatabaseID=-1
-	AND IOS.Drive='*'
+	AND IOS.Drive=''*''
 	AND IOS.FileID=-1
 	AND IOS.SnapshotDate>=CAST(@FromDate AS DATETIME2(2))
 	AND IOS.SnapshotDate<CAST(@ToDate AS DATETIME2(2))
-	AND @Use60MIN=1
 	AND EXISTS(SELECT 1 FROM #Instances t WHERE IOS.InstanceID = t.InstanceID)
 	GROUP BY IOS.InstanceID
 )
@@ -112,20 +88,9 @@ WITH cpuAgg AS (
 	SELECT W.InstanceID,
 		W.WaitTypeID,
 		SUM(W.wait_time_ms)*1000.0 / MAX(SUM(W.sample_ms_diff*1.0)) OVER(PARTITION BY InstanceID) WaitMsPerSec
-	FROM dbo.Waits W 
+	FROM ' + CASE WHEN @Use60MIN=1 THEN 'dbo.Waits_60MIN' ELSE 'dbo.Waits' END + ' W 
 	WHERE W.SnapshotDate>= CAST(@FromDate AS DATETIME2(2))
 	AND W.SnapshotDate < CAST(@ToDate AS DATETIME2(2))
-	AND @Use60MIN=0
-	AND EXISTS(SELECT 1 FROM #Instances t WHERE W.InstanceID = t.InstanceID)
-	GROUP BY W.InstanceID,W.WaitTypeID
-	UNION ALL 
-	SELECT W.InstanceID,
-		W.WaitTypeID,
-		SUM(W.wait_time_ms)*1000.0 / MAX(SUM(W.sample_ms_diff*1.0)) OVER(PARTITION BY InstanceID) WaitMsPerSec
-	FROM dbo.Waits_60MIN W 
-	WHERE W.SnapshotDate>= CAST(@FromDate AS DATETIME2(2))
-	AND W.SnapshotDate < CAST(@ToDate AS DATETIME2(2))
-	AND @Use60MIN=1
 	AND EXISTS(SELECT 1 FROM #Instances t WHERE W.InstanceID = t.InstanceID)
 	GROUP BY W.InstanceID,W.WaitTypeID
 
@@ -133,9 +98,9 @@ WITH cpuAgg AS (
 , wait AS (
 	SELECT W.InstanceID,	
 		SUM(CASE WHEN WT.IsCriticalWait =1 THEN W.WaitMsPerSec ELSE 0 END) CriticalWaitMsPerSec,
-		SUM(CASE WHEN WT.WaitType LIKE 'LATCH%' THEN W.WaitMsPerSec  ELSE 0 END) LatchWaitMsPerSec,
-		SUM(CASE WHEN WT.WaitType LIKE 'LCK%' THEN W.WaitMsPerSec  ELSE 0 END) LockWaitMsPerSec,
-		SUM(CASE WHEN WT.WaitType LIKE 'PAGEIO%' OR WT.WaitType LIKE 'WRITE%' THEN W.WaitMsPerSec  ELSE 0 END) IOWaitMsPerSec,
+		SUM(CASE WHEN WT.WaitType LIKE ''LATCH%'' THEN W.WaitMsPerSec  ELSE 0 END) LatchWaitMsPerSec,
+		SUM(CASE WHEN WT.WaitType LIKE ''LCK%'' THEN W.WaitMsPerSec  ELSE 0 END) LockWaitMsPerSec,
+		SUM(CASE WHEN WT.WaitType LIKE ''PAGEIO%'' OR WT.WaitType LIKE ''WRITE%'' THEN W.WaitMsPerSec  ELSE 0 END) IOWaitMsPerSec,
 		SUM(W.WaitMsPerSec) WaitMsPerSec
 	FROM wait1 w
 	JOIN dbo.WaitType WT ON WT.WaitTypeID = W.WaitTypeID
@@ -177,3 +142,7 @@ LEFT JOIN wait ON I.InstanceID = wait.InstanceID
 WHERE EXISTS(SELECT 1 FROM #Instances t WHERE I.InstanceID = t.InstanceID)
 AND I.IsActive=1
 ORDER BY CASE WHEN wait.CriticalWaitMsPerSec> 1 THEN wait.CriticalWaitMsPerSec ELSE 0 END DESC, cpuAgg.AvgCPU DESC
+OPTION(RECOMPILE)'
+
+
+EXEC sp_executesql @SQL,N'@FromDate DATETIME2(3),@ToDate DATETIME2(3)',@FromDate,@ToDate

@@ -21,10 +21,10 @@ SELECT @DateGroupingSQL= CASE WHEN @DateGrouping = 'None' THEN 'EventTime'
 
 SET @SQL = N'
 SELECT ' + @DateGroupingSQL + ' AS EventTime,
-       AVG(SQLProcessCPU) SQLProcessCPU,
-	   AVG(OtherCPU) as OtherCPU,
-	   MAX(TotalCPU) as MaxCPU
-FROM dbo.CPU
+       SUM(SumSQLProcessCPU*1.0)/SUM(SampleCount*1.0) as SQLProcessCPU,
+	   SUM(SumOtherCPU*1.0)/SUM(SampleCount*1.0) as OtherCPU,
+	   MAX(MaxTotalCPU*1.0) as MaxCPU
+FROM '+ CASE WHEN @DateGrouping IN('DAY','120MIN','60MIN') THEN 'dbo.CPU_60MIN' ELSE 'dbo.CPU' END + '
 WHERE InstanceID = @InstanceID
 AND EventTime >= @fromDate
 AND EventTime < @ToDate
