@@ -22,11 +22,11 @@ SELECT @DateGroupingSQL= CASE WHEN @DateGrouping = 'None' THEN 'EventTime'
 SET @SQL = N'
 SELECT ' + @DateGroupingSQL + ' AS EventTime,
        AVG(SQLProcessCPU) SQLProcessCPU,
-	   AVG(100-(SQLProcessCPU+SystemIdleCPU)) as OtherCPU,
-	   MAX(100-SystemIdleCPU) as MaxCPU
+	   AVG(OtherCPU) as OtherCPU,
+	   MAX(TotalCPU) as MaxCPU
 FROM dbo.CPU
 WHERE InstanceID = @InstanceID
-AND EventTime>=@fromDate
+AND EventTime >= @fromDate
 AND EventTime < @ToDate
 GROUP BY ' + @DateGroupingSQL + '
 ORDER BY EventTime'

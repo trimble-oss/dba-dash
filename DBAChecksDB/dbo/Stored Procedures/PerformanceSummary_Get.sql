@@ -47,8 +47,8 @@ END;
 
 WITH cpuAgg AS (
 	SELECT InstanceID,
-		AVG(100.0-SystemIdleCPU) AvgCPU,
-		MAX(100-SystemIdleCPU) as MaxCPU
+		AVG(TotalCPU*1.0) AvgCPU,
+		MAX(TotalCPU) as MaxCPU
 	FROM dbo.CPU
 	WHERE EventTime >=@FromDate
 	AND EventTime <@ToDate
