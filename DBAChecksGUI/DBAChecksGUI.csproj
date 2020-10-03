@@ -346,6 +346,12 @@
     <Compile Include="Changes\SQLPatching.Designer.cs">
       <DependentUpon>SQLPatching.cs</DependentUpon>
     </Compile>
+    <Compile Include="SpaceTracking.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="SpaceTracking.Designer.cs">
+      <DependentUpon>SpaceTracking.cs</DependentUpon>
+    </Compile>
     <Compile Include="SqlServerTypes\Loader.cs" />
     <Compile Include="SQLTreeItem.cs" />
     <Compile Include="Summary.cs">
@@ -478,6 +484,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Changes\SQLPatching.resx">
       <DependentUpon>SQLPatching.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="SpaceTracking.resx">
+      <DependentUpon>SpaceTracking.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Summary.resx">
       <DependentUpon>Summary.cs</DependentUpon>

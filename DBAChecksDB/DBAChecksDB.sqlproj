@@ -423,6 +423,7 @@
     <None Include="DBAChecksDB.publish.xml" />
     <None Include="Schema_Compare.scmp" />
     <None Include="Scripts\DBIOStatsMigration_60MIN.sql" />
+    <None Include="Scripts\CPU_60MIN Population.sql" />
   </ItemGroup>
   <ItemGroup>
     <SqlCmdVariable Include="VersionNumber">

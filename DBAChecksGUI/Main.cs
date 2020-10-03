@@ -269,6 +269,13 @@ namespace DBAChecksGUI
                 drivers1.ConnectionString = connectionString;
                 drivers1.RefreshData();
             }
+            if (tabs.SelectedTab == tabDBSpace)
+            {
+                spaceTracking1.InstanceIDs = instanceIDs;
+                spaceTracking1.DatabaseID = n.DatabaseID;
+                spaceTracking1.ConnectionString = connectionString;
+                spaceTracking1.RefreshData();
+            }
         }
 
         private void loadDBAChecksErrorLog(Int32 InstanceID)
@@ -469,7 +476,8 @@ ORDER BY SchemaName,ObjectName
                 allowedTabs.Add(tabLastGood);
                 allowedTabs.Add(tabDBAChecksErrorLog);
                 allowedTabs.Add(tabCollectionDates);
-                allowedTabs.Add(tabSlowQueries);            
+                allowedTabs.Add(tabSlowQueries);
+                allowedTabs.Add(tabDBSpace);
             }
             else if(n.Type== SQLTreeItem.TreeType.Database)
             {
@@ -481,6 +489,7 @@ ORDER BY SchemaName,ObjectName
                 allowedTabs.Add(tabFiles);
                 allowedTabs.Add(tabSnapshotsSummary);
                 allowedTabs.Add(tabSlowQueries);
+                allowedTabs.Add(tabDBSpace);
             }
             else if (n.Type == SQLTreeItem.TreeType.Instance)
             {
@@ -501,6 +510,7 @@ ORDER BY SchemaName,ObjectName
                 allowedTabs.Add(tabFiles);
                 allowedTabs.Add(tabTags);
                 allowedTabs.Add(tabCollectionDates);
+                allowedTabs.Add(tabDBSpace);
             }
             else if (n.Type == SQLTreeItem.TreeType.Configuration)
             {
