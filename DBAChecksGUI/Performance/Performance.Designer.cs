@@ -272,7 +272,7 @@
             // minToolStripMenuItem
             // 
             this.minToolStripMenuItem.Name = "minToolStripMenuItem";
-            this.minToolStripMenuItem.Size = new System.Drawing.Size(133, 26);
+            this.minToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
             this.minToolStripMenuItem.Tag = "_1MIN";
             this.minToolStripMenuItem.Text = "1min";
             this.minToolStripMenuItem.Click += new System.EventHandler(this.tsDateGroup_Click);
@@ -280,7 +280,7 @@
             // minToolStripMenuItem1
             // 
             this.minToolStripMenuItem1.Name = "minToolStripMenuItem1";
-            this.minToolStripMenuItem1.Size = new System.Drawing.Size(133, 26);
+            this.minToolStripMenuItem1.Size = new System.Drawing.Size(224, 26);
             this.minToolStripMenuItem1.Tag = "_10MIN";
             this.minToolStripMenuItem1.Text = "10min";
             this.minToolStripMenuItem1.Click += new System.EventHandler(this.tsDateGroup_Click);
@@ -288,7 +288,7 @@
             // hrToolStripMenuItem
             // 
             this.hrToolStripMenuItem.Name = "hrToolStripMenuItem";
-            this.hrToolStripMenuItem.Size = new System.Drawing.Size(133, 26);
+            this.hrToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
             this.hrToolStripMenuItem.Tag = "_60MIN";
             this.hrToolStripMenuItem.Text = "1Hr";
             this.hrToolStripMenuItem.Click += new System.EventHandler(this.tsDateGroup_Click);
@@ -296,7 +296,7 @@
             // hrsToolStripMenuItem
             // 
             this.hrsToolStripMenuItem.Name = "hrsToolStripMenuItem";
-            this.hrsToolStripMenuItem.Size = new System.Drawing.Size(133, 26);
+            this.hrsToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
             this.hrsToolStripMenuItem.Tag = "_120MIN";
             this.hrsToolStripMenuItem.Text = "2Hrs";
             this.hrsToolStripMenuItem.Click += new System.EventHandler(this.tsDateGroup_Click);
@@ -304,7 +304,7 @@
             // dayToolStripMenuItem1
             // 
             this.dayToolStripMenuItem1.Name = "dayToolStripMenuItem1";
-            this.dayToolStripMenuItem1.Size = new System.Drawing.Size(133, 26);
+            this.dayToolStripMenuItem1.Size = new System.Drawing.Size(224, 26);
             this.dayToolStripMenuItem1.Tag = "DAY";
             this.dayToolStripMenuItem1.Text = "Day";
             this.dayToolStripMenuItem1.Click += new System.EventHandler(this.tsDateGroup_Click);
