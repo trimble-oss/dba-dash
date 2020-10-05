@@ -1,10 +1,4 @@
-﻿
-
-
-
-
-
-CREATE VIEW [dbo].[BackupStatus]
+﻿CREATE VIEW [dbo].[BackupStatus]
 AS
 WITH hadr AS (
 	SELECT D.DatabaseId,partnr.DatabaseID BackupDatabaseID
@@ -23,7 +17,7 @@ B AS(
 			DATEADD(mi,I.UTCOffset,MAX(CASE WHEN B.type='F' THEN B.LastBackup ELSE NULL END)) AS LastFG,
 			DATEADD(mi,I.UTCOffset,MAX(CASE WHEN B.type='G' THEN B.LastBackup ELSE NULL END)) AS LastFGDiff,
 			DATEADD(mi,I.UTCOffset,MAX(CASE WHEN B.type='P' THEN B.LastBackup ELSE NULL END)) AS LastPartial,
-			DATEADD(mi,I.UTCOffset,MAX(CASE WHEN B.type='P' THEN B.LastBackup ELSE NULL END)) AS LastPartialDiff,
+			DATEADD(mi,I.UTCOffset,MAX(CASE WHEN B.type='Q' THEN B.LastBackup ELSE NULL END)) AS LastPartialDiff,
 			DATEADD(mi,I.UTCOffset,MAX(CASE WHEN hadr.DatabaseID<>hadr.BackupDatabaseID THEN 1 ELSE 0 END)) AS AGPartnerBackupsConsidered
 	FROM dbo.Backups B
 	JOIN hadr ON hadr.BackupDatabaseID = B.DatabaseID
@@ -78,7 +72,7 @@ OUTER APPLY(SELECT DATEDIFF(mi,CASE WHEN cfg.ConsiderFGBackups=1 AND (LastFG> La
 					WHEN cfg.ConsiderPartialBackups=1 AND (LastPartial>LastFull OR LastFull IS NULL) THEN LastPartial
 					ELSE LastFull END,GETUTCDATE()) AS FullBackupAge,
 					DATEDIFF(mi,CASE WHEN cfg.ConsiderFGBackups=1 AND (LastFGDiff> LastDiff OR LastDiff IS NULL) AND (cfg.ConsiderPartialBackups=0 OR LastPartialDiff<LastFGDiff OR LastPartialDiff IS NULL) THEN LastFGDiff
-					WHEN cfg.ConsiderPartialBackups=1 AND (LastPartialDiff>LastFull OR LastDiff IS NULL) THEN LastPartialDiff
+					WHEN cfg.ConsiderPartialBackups=1 AND (LastPartialDiff>LastDiff OR LastDiff IS NULL) THEN LastPartialDiff
 					ELSE LastDiff END,GETUTCDATE()) DiffBackupAge,DATEDIFF(mi,LastLog,GETUTCDATE()) LogBackupAge) f
 OUTER APPLY(SELECT CASE WHEN ISNULL(f.FullBackupAge,cfg.FullBackupCriticalThreshold) >= cfg.FullBackupCriticalThreshold THEN 1
 	WHEN f.FullBackupAge>=cfg.FullBackupWarningThreshold THEN 2
