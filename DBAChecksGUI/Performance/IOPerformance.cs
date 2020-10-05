@@ -246,6 +246,7 @@ namespace DBAChecksGUI.Performance
                 {
                     Title = "Time",
                     LabelFormatter = val => new System.DateTime((long)val).ToString(DateFormat)
+
                 });
                 chartIO.AxisY.Add(new Axis
                 {
@@ -309,6 +310,10 @@ namespace DBAChecksGUI.Performance
                     dd.Click += measureDropDown_Click;
                     tsMeasures.DropDownItems.Add(dd);
                 }
+            }
+            if (chartIO.Series[0].Values.Count == 1)
+            {
+                chartIO.Series.Clear();
             }
             lblIOPerformance.Text = databaseid > 0 ? "IO Performance: Database" : "IO Performance: Instance";
         }
