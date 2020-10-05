@@ -671,5 +671,21 @@ namespace DBAChecksServiceConfig
         {
             setDestination();
         }
+
+        private void bttnConnectSource_Click(object sender, EventArgs e)
+        {
+            var frm = new DBConnection();
+            var cn = new DBAChecksConnection(cboSource.Text);
+            if (cn.Type == ConnectionType.SQL)
+            {
+                frm.ConnectionString = cn.ConnectionString;
+            }
+            frm.ShowDialog();
+            if (frm.DialogResult == DialogResult.OK)
+            {
+                cn = new DBAChecksConnection(frm.ConnectionString);
+                cboSource.Text = cn.EncryptedConnectionString;
+            }
+        }
     }
 }

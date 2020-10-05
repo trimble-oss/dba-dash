@@ -22,6 +22,7 @@ namespace DacpacUtility
                 DropObjectsNotInSource = true,
                 BlockOnPossibleDataLoss = true,
                 RegisterDataTierApplication = true,
+                BlockWhenDriftDetected = false,
                 ExcludeObjectTypes = new[]
                 {
                     ObjectType.Users,

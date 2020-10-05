@@ -36,6 +36,7 @@
             this.bttnCancel = new System.Windows.Forms.Button();
             this.lblVersionInfo = new System.Windows.Forms.Label();
             this.bttnCopy = new System.Windows.Forms.Button();
+            this.bttnDeploy = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // cboDatabase
@@ -125,11 +126,22 @@
             this.bttnCopy.UseVisualStyleBackColor = true;
             this.bttnCopy.Click += new System.EventHandler(this.bttnCopy_Click);
             // 
+            // bttnDeploy
+            // 
+            this.bttnDeploy.Location = new System.Drawing.Point(262, 102);
+            this.bttnDeploy.Name = "bttnDeploy";
+            this.bttnDeploy.Size = new System.Drawing.Size(112, 23);
+            this.bttnDeploy.TabIndex = 10;
+            this.bttnDeploy.Text = "Deploy";
+            this.bttnDeploy.UseVisualStyleBackColor = true;
+            this.bttnDeploy.Click += new System.EventHandler(this.bttnDeploy_Click);
+            // 
             // DBDeploy
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(571, 649);
+            this.Controls.Add(this.bttnDeploy);
             this.Controls.Add(this.lblVersionInfo);
             this.Controls.Add(this.bttnCopy);
             this.Controls.Add(this.lblNotice);
@@ -139,6 +151,7 @@
             this.Controls.Add(this.cboDatabase);
             this.Controls.Add(this.bttnCancel);
             this.Name = "DBDeploy";
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "DB Deploy";
             this.Load += new System.EventHandler(this.DBDeploy_Load);
             this.ResumeLayout(false);
@@ -155,5 +168,6 @@
         private System.Windows.Forms.Button bttnCancel;
         private System.Windows.Forms.Button bttnCopy;
         private System.Windows.Forms.Label lblVersionInfo;
+        private System.Windows.Forms.Button bttnDeploy;
     }
 }
