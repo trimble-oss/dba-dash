@@ -313,7 +313,7 @@ namespace DBAChecksGUI.Performance
             }
             if (chartIO.Series[0].Values.Count == 1)
             {
-                chartIO.Series.Clear();
+                chartIO.Series.Clear(); // fix tends to zero error
             }
             lblIOPerformance.Text = databaseid > 0 ? "IO Performance: Database" : "IO Performance: Instance";
         }

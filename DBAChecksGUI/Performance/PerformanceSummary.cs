@@ -116,6 +116,39 @@ namespace DBAChecksGUI.Performance
                 mnu.CheckOnClick = true;
                 tsColumns.DropDownItems.Add(mnu);
             }
+            tsColumns.DropDownItems.Add(new ToolStripSeparator());
+            ToolStripMenuItem mnuCheckAll = new ToolStripMenuItem("Check All");
+            mnuCheckAll.Click += MnuCheckAll_Click;
+            tsColumns.DropDownItems.Add(mnuCheckAll);
+            ToolStripMenuItem mnuUnCheckAll = new ToolStripMenuItem("Uncheck All");
+            mnuUnCheckAll.Click += MnuUnCheckAll_Click;
+            tsColumns.DropDownItems.Add(mnuUnCheckAll);
+        }
+
+        private void MnuUnCheckAll_Click(object sender, EventArgs e)
+        {
+            checkAll(false);
+        }
+
+        private void checkAll(bool isChecked)
+        {
+            foreach (ToolStripItem itm in tsColumns.DropDownItems)
+            {
+                if (itm.GetType() == typeof(ToolStripMenuItem))
+                {
+                    var mnu = (ToolStripMenuItem)itm;
+                    if (mnu.CheckOnClick)
+                    {
+                        mnu.Checked = isChecked;
+                        dgv.Columns[mnu.Name].Visible = isChecked;
+                    }
+                }
+            }
+        }
+
+        private void MnuCheckAll_Click(object sender, EventArgs e)
+        {
+            checkAll(true);
         }
 
         private void ColumnMenu_Click(object sender, EventArgs e)

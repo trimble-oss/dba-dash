@@ -32,8 +32,9 @@ namespace DBAChecksGUI
         {
             DBName = "";
             Instance = "";
+            bool drillDownEnabled = DatabaseID > 0;
             tsBack.Enabled = false;
-            diableHyperLinks(false);
+            diableHyperLinks(drillDownEnabled);
             refreshData();
         }
 

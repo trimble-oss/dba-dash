@@ -17,6 +17,9 @@ INSERT INTO dbo.CPU(InstanceID,EventTime,SQLProcessCPU,SystemIdleCPU)
 SELECT @InstanceID,EventTime,SQLProcessCPU,SystemIdleCPU 
 FROM @CPU t
 WHERE t.EventTime>=@MaxEventTime
+AND SQLProcessCPU>=0 AND SQLProcessCPU<=100
+AND SystemIdleCPU>=0 AND SystemIdleCPU<=100
+AND (SystemIdleCPU+SQLProcessCPU)<=100
 
 IF @@ROWCOUNT>0
 BEGIN
