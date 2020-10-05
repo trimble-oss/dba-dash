@@ -28,8 +28,8 @@
         /// </summary>
         private void InitializeComponent()
         {
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle3 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle4 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
             this.elementHost1 = new System.Windows.Forms.Integration.ElementHost();
             this.pieChart1 = new LiveCharts.Wpf.PieChart();
             this.dgv = new System.Windows.Forms.DataGridView();
@@ -38,8 +38,8 @@
             this.UsedGB = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
-            this.tsCopy = new System.Windows.Forms.ToolStripButton();
             this.tsRefresh = new System.Windows.Forms.ToolStripButton();
+            this.tsCopy = new System.Windows.Forms.ToolStripButton();
             this.tsBack = new System.Windows.Forms.ToolStripButton();
             ((System.ComponentModel.ISupportInitialize)(this.dgv)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
@@ -71,13 +71,13 @@
             this.AllocatedGB,
             this.UsedGB});
             this.dgv.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.dgv.Location = new System.Drawing.Point(0, 27);
+            this.dgv.Location = new System.Drawing.Point(0, 31);
             this.dgv.Name = "dgv";
             this.dgv.ReadOnly = true;
             this.dgv.RowHeadersVisible = false;
             this.dgv.RowHeadersWidth = 51;
             this.dgv.RowTemplate.Height = 24;
-            this.dgv.Size = new System.Drawing.Size(516, 746);
+            this.dgv.Size = new System.Drawing.Size(516, 742);
             this.dgv.TabIndex = 1;
             this.dgv.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgv_CellContentClick);
             // 
@@ -95,8 +95,8 @@
             // AllocatedGB
             // 
             this.AllocatedGB.DataPropertyName = "AllocatedGB";
-            dataGridViewCellStyle3.Format = "N1";
-            this.AllocatedGB.DefaultCellStyle = dataGridViewCellStyle3;
+            dataGridViewCellStyle1.Format = "N1";
+            this.AllocatedGB.DefaultCellStyle = dataGridViewCellStyle1;
             this.AllocatedGB.HeaderText = "Allocated GB";
             this.AllocatedGB.MinimumWidth = 6;
             this.AllocatedGB.Name = "AllocatedGB";
@@ -106,8 +106,8 @@
             // UsedGB
             // 
             this.UsedGB.DataPropertyName = "UsedGB";
-            dataGridViewCellStyle4.Format = "N1";
-            this.UsedGB.DefaultCellStyle = dataGridViewCellStyle4;
+            dataGridViewCellStyle2.Format = "N1";
+            this.UsedGB.DefaultCellStyle = dataGridViewCellStyle2;
             this.UsedGB.HeaderText = "Used GB";
             this.UsedGB.MinimumWidth = 6;
             this.UsedGB.Name = "UsedGB";
@@ -141,19 +141,9 @@
             this.tsBack});
             this.toolStrip1.Location = new System.Drawing.Point(0, 0);
             this.toolStrip1.Name = "toolStrip1";
-            this.toolStrip1.Size = new System.Drawing.Size(516, 27);
+            this.toolStrip1.Size = new System.Drawing.Size(516, 31);
             this.toolStrip1.TabIndex = 2;
             this.toolStrip1.Text = "toolStrip1";
-            // 
-            // tsCopy
-            // 
-            this.tsCopy.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.tsCopy.Image = global::DBAChecksGUI.Properties.Resources.ASX_Copy_blue_16x;
-            this.tsCopy.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsCopy.Name = "tsCopy";
-            this.tsCopy.Size = new System.Drawing.Size(29, 24);
-            this.tsCopy.Text = "Copy";
-            this.tsCopy.Click += new System.EventHandler(this.tsCopy_Click);
             // 
             // tsRefresh
             // 
@@ -161,9 +151,19 @@
             this.tsRefresh.Image = global::DBAChecksGUI.Properties.Resources._112_RefreshArrow_Green_16x16_72;
             this.tsRefresh.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsRefresh.Name = "tsRefresh";
-            this.tsRefresh.Size = new System.Drawing.Size(29, 24);
+            this.tsRefresh.Size = new System.Drawing.Size(29, 28);
             this.tsRefresh.Text = "Refresh";
             this.tsRefresh.Click += new System.EventHandler(this.tsRefresh_Click);
+            // 
+            // tsCopy
+            // 
+            this.tsCopy.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.tsCopy.Image = global::DBAChecksGUI.Properties.Resources.ASX_Copy_blue_16x;
+            this.tsCopy.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tsCopy.Name = "tsCopy";
+            this.tsCopy.Size = new System.Drawing.Size(29, 28);
+            this.tsCopy.Text = "Copy";
+            this.tsCopy.Click += new System.EventHandler(this.tsCopy_Click);
             // 
             // tsBack
             // 
@@ -172,7 +172,7 @@
             this.tsBack.Image = global::DBAChecksGUI.Properties.Resources.Previous_grey_16x;
             this.tsBack.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsBack.Name = "tsBack";
-            this.tsBack.Size = new System.Drawing.Size(29, 24);
+            this.tsBack.Size = new System.Drawing.Size(29, 28);
             this.tsBack.Text = "Back";
             this.tsBack.Click += new System.EventHandler(this.tsBack_Click);
             // 
