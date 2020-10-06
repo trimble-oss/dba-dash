@@ -36,6 +36,18 @@
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle4 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle5 = new System.Windows.Forms.DataGridViewCellStyle();
             this.dgvFiles = new System.Windows.Forms.DataGridView();
+            this.toolStrip1 = new System.Windows.Forms.ToolStrip();
+            this.tsRefresh = new System.Windows.Forms.ToolStripButton();
+            this.tsCopy = new System.Windows.Forms.ToolStripButton();
+            this.toolStripFilter = new System.Windows.Forms.ToolStripDropDownButton();
+            this.criticalToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.warningToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.undefinedToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.OKToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.tsConfigure = new System.Windows.Forms.ToolStripDropDownButton();
+            this.configureDatabaseThresholdsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.configureInstanceThresholdsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.configureRootThresholdsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.Instance = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Database = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.FileGroup = new System.Windows.Forms.DataGridViewTextBoxColumn();
@@ -51,18 +63,6 @@
             this.ConfiguredLevel = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.FileSnapshotAge = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Configure = new System.Windows.Forms.DataGridViewLinkColumn();
-            this.toolStrip1 = new System.Windows.Forms.ToolStrip();
-            this.toolStripFilter = new System.Windows.Forms.ToolStripDropDownButton();
-            this.criticalToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.warningToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.undefinedToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.OKToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.tsConfigure = new System.Windows.Forms.ToolStripDropDownButton();
-            this.configureDatabaseThresholdsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.configureInstanceThresholdsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.configureRootThresholdsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.tsRefresh = new System.Windows.Forms.ToolStripButton();
-            this.tsCopy = new System.Windows.Forms.ToolStripButton();
             ((System.ComponentModel.ISupportInitialize)(this.dgvFiles)).BeginInit();
             this.toolStrip1.SuspendLayout();
             this.SuspendLayout();
@@ -126,154 +126,6 @@
             this.dgvFiles.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgvFiles_CellContentClick);
             this.dgvFiles.RowsAdded += new System.Windows.Forms.DataGridViewRowsAddedEventHandler(this.dgvFiles_RowsAdded);
             // 
-            // Instance
-            // 
-            this.Instance.DataPropertyName = "Instance";
-            this.Instance.HeaderText = "Instance";
-            this.Instance.MinimumWidth = 6;
-            this.Instance.Name = "Instance";
-            this.Instance.ReadOnly = true;
-            this.Instance.Width = 90;
-            // 
-            // Database
-            // 
-            this.Database.DataPropertyName = "name";
-            this.Database.HeaderText = "Database";
-            this.Database.MinimumWidth = 6;
-            this.Database.Name = "Database";
-            this.Database.ReadOnly = true;
-            this.Database.Width = 98;
-            // 
-            // FileGroup
-            // 
-            this.FileGroup.DataPropertyName = "filegroup_name";
-            this.FileGroup.HeaderText = "FileGroup";
-            this.FileGroup.MinimumWidth = 6;
-            this.FileGroup.Name = "FileGroup";
-            this.FileGroup.ReadOnly = true;
-            this.FileGroup.Width = 99;
-            // 
-            // SizeMB
-            // 
-            this.SizeMB.DataPropertyName = "SizeMB";
-            dataGridViewCellStyle2.Format = "0.0";
-            this.SizeMB.DefaultCellStyle = dataGridViewCellStyle2;
-            this.SizeMB.HeaderText = "SizeMB";
-            this.SizeMB.MinimumWidth = 6;
-            this.SizeMB.Name = "SizeMB";
-            this.SizeMB.ReadOnly = true;
-            this.SizeMB.Width = 84;
-            // 
-            // UsedMB
-            // 
-            this.UsedMB.DataPropertyName = "UsedMB";
-            dataGridViewCellStyle3.Format = "N1";
-            dataGridViewCellStyle3.NullValue = null;
-            this.UsedMB.DefaultCellStyle = dataGridViewCellStyle3;
-            this.UsedMB.HeaderText = "UsedMB";
-            this.UsedMB.MinimumWidth = 6;
-            this.UsedMB.Name = "UsedMB";
-            this.UsedMB.ReadOnly = true;
-            this.UsedMB.Width = 90;
-            // 
-            // FreeMB
-            // 
-            this.FreeMB.DataPropertyName = "FreeMB";
-            dataGridViewCellStyle4.Format = "N1";
-            this.FreeMB.DefaultCellStyle = dataGridViewCellStyle4;
-            this.FreeMB.HeaderText = "Free (MB)";
-            this.FreeMB.MinimumWidth = 6;
-            this.FreeMB.Name = "FreeMB";
-            this.FreeMB.ReadOnly = true;
-            this.FreeMB.Width = 92;
-            // 
-            // PctFree
-            // 
-            this.PctFree.DataPropertyName = "PctFree";
-            dataGridViewCellStyle5.Format = "P1";
-            dataGridViewCellStyle5.NullValue = null;
-            this.PctFree.DefaultCellStyle = dataGridViewCellStyle5;
-            this.PctFree.HeaderText = "Free %";
-            this.PctFree.MinimumWidth = 6;
-            this.PctFree.Name = "PctFree";
-            this.PctFree.ReadOnly = true;
-            this.PctFree.Width = 76;
-            // 
-            // NumberOfFiles
-            // 
-            this.NumberOfFiles.DataPropertyName = "NumberOfFiles";
-            this.NumberOfFiles.HeaderText = "Number of Files";
-            this.NumberOfFiles.MinimumWidth = 6;
-            this.NumberOfFiles.Name = "NumberOfFiles";
-            this.NumberOfFiles.ReadOnly = true;
-            this.NumberOfFiles.Width = 99;
-            // 
-            // ReadOnly
-            // 
-            this.ReadOnly.DataPropertyName = "is_read_only";
-            this.ReadOnly.HeaderText = "Read Only";
-            this.ReadOnly.MinimumWidth = 6;
-            this.ReadOnly.Name = "ReadOnly";
-            this.ReadOnly.ReadOnly = true;
-            this.ReadOnly.Width = 96;
-            // 
-            // DBReadOnly
-            // 
-            this.DBReadOnly.DataPropertyName = "is_db_readonly";
-            this.DBReadOnly.HeaderText = "DB ReadOnly";
-            this.DBReadOnly.MinimumWidth = 6;
-            this.DBReadOnly.Name = "DBReadOnly";
-            this.DBReadOnly.ReadOnly = true;
-            this.DBReadOnly.Width = 113;
-            // 
-            // Standby
-            // 
-            this.Standby.DataPropertyName = "is_in_standby";
-            this.Standby.HeaderText = "Standby";
-            this.Standby.MinimumWidth = 6;
-            this.Standby.Name = "Standby";
-            this.Standby.ReadOnly = true;
-            this.Standby.Width = 89;
-            // 
-            // State
-            // 
-            this.State.DataPropertyName = "state_desc";
-            this.State.HeaderText = "State";
-            this.State.MinimumWidth = 6;
-            this.State.Name = "State";
-            this.State.ReadOnly = true;
-            this.State.Width = 70;
-            // 
-            // ConfiguredLevel
-            // 
-            this.ConfiguredLevel.DataPropertyName = "ConfiguredLevel";
-            this.ConfiguredLevel.HeaderText = "Configured Level";
-            this.ConfiguredLevel.MinimumWidth = 6;
-            this.ConfiguredLevel.Name = "ConfiguredLevel";
-            this.ConfiguredLevel.ReadOnly = true;
-            this.ConfiguredLevel.Width = 132;
-            // 
-            // FileSnapshotAge
-            // 
-            this.FileSnapshotAge.DataPropertyName = "FileSnapshotAge";
-            this.FileSnapshotAge.HeaderText = "File Snapshot Age";
-            this.FileSnapshotAge.MinimumWidth = 6;
-            this.FileSnapshotAge.Name = "FileSnapshotAge";
-            this.FileSnapshotAge.ReadOnly = true;
-            this.FileSnapshotAge.Width = 139;
-            // 
-            // Configure
-            // 
-            this.Configure.HeaderText = "Configure";
-            this.Configure.MinimumWidth = 6;
-            this.Configure.Name = "Configure";
-            this.Configure.ReadOnly = true;
-            this.Configure.Resizable = System.Windows.Forms.DataGridViewTriState.True;
-            this.Configure.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
-            this.Configure.Text = "Configure";
-            this.Configure.UseColumnTextForLinkValue = true;
-            this.Configure.Width = 98;
-            // 
             // toolStrip1
             // 
             this.toolStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
@@ -287,6 +139,26 @@
             this.toolStrip1.Size = new System.Drawing.Size(1616, 27);
             this.toolStrip1.TabIndex = 3;
             this.toolStrip1.Text = "toolStrip1";
+            // 
+            // tsRefresh
+            // 
+            this.tsRefresh.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.tsRefresh.Image = global::DBAChecksGUI.Properties.Resources._112_RefreshArrow_Green_16x16_72;
+            this.tsRefresh.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tsRefresh.Name = "tsRefresh";
+            this.tsRefresh.Size = new System.Drawing.Size(29, 24);
+            this.tsRefresh.Text = "Refresh";
+            this.tsRefresh.Click += new System.EventHandler(this.tsRefresh_Click);
+            // 
+            // tsCopy
+            // 
+            this.tsCopy.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.tsCopy.Image = global::DBAChecksGUI.Properties.Resources.ASX_Copy_blue_16x;
+            this.tsCopy.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tsCopy.Name = "tsCopy";
+            this.tsCopy.Size = new System.Drawing.Size(29, 24);
+            this.tsCopy.Text = "Copy";
+            this.tsCopy.Click += new System.EventHandler(this.tsCopy_Click);
             // 
             // toolStripFilter
             // 
@@ -368,25 +240,152 @@
             this.configureRootThresholdsToolStripMenuItem.Text = "Configure Root Thresholds";
             this.configureRootThresholdsToolStripMenuItem.Click += new System.EventHandler(this.configureRootThresholdsToolStripMenuItem_Click);
             // 
-            // tsRefresh
+            // Instance
             // 
-            this.tsRefresh.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.tsRefresh.Image = global::DBAChecksGUI.Properties.Resources._112_RefreshArrow_Green_16x16_72;
-            this.tsRefresh.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsRefresh.Name = "tsRefresh";
-            this.tsRefresh.Size = new System.Drawing.Size(29, 24);
-            this.tsRefresh.Text = "Refresh";
-            this.tsRefresh.Click += new System.EventHandler(this.tsRefresh_Click);
+            this.Instance.DataPropertyName = "Instance";
+            this.Instance.HeaderText = "Instance";
+            this.Instance.MinimumWidth = 6;
+            this.Instance.Name = "Instance";
+            this.Instance.ReadOnly = true;
+            this.Instance.Width = 90;
             // 
-            // tsCopy
+            // Database
             // 
-            this.tsCopy.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.tsCopy.Image = global::DBAChecksGUI.Properties.Resources.ASX_Copy_blue_16x;
-            this.tsCopy.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsCopy.Name = "tsCopy";
-            this.tsCopy.Size = new System.Drawing.Size(29, 24);
-            this.tsCopy.Text = "Copy";
-            this.tsCopy.Click += new System.EventHandler(this.tsCopy_Click);
+            this.Database.DataPropertyName = "name";
+            this.Database.HeaderText = "Database";
+            this.Database.MinimumWidth = 6;
+            this.Database.Name = "Database";
+            this.Database.ReadOnly = true;
+            this.Database.Width = 98;
+            // 
+            // FileGroup
+            // 
+            this.FileGroup.DataPropertyName = "filegroup_name";
+            this.FileGroup.HeaderText = "FileGroup";
+            this.FileGroup.MinimumWidth = 6;
+            this.FileGroup.Name = "FileGroup";
+            this.FileGroup.ReadOnly = true;
+            this.FileGroup.Width = 99;
+            // 
+            // SizeMB
+            // 
+            this.SizeMB.DataPropertyName = "SizeMB";
+            dataGridViewCellStyle2.Format = "N1";
+            this.SizeMB.DefaultCellStyle = dataGridViewCellStyle2;
+            this.SizeMB.HeaderText = "SizeMB";
+            this.SizeMB.MinimumWidth = 6;
+            this.SizeMB.Name = "SizeMB";
+            this.SizeMB.ReadOnly = true;
+            this.SizeMB.Width = 84;
+            // 
+            // UsedMB
+            // 
+            this.UsedMB.DataPropertyName = "UsedMB";
+            dataGridViewCellStyle3.Format = "N1";
+            dataGridViewCellStyle3.NullValue = null;
+            this.UsedMB.DefaultCellStyle = dataGridViewCellStyle3;
+            this.UsedMB.HeaderText = "UsedMB";
+            this.UsedMB.MinimumWidth = 6;
+            this.UsedMB.Name = "UsedMB";
+            this.UsedMB.ReadOnly = true;
+            this.UsedMB.Width = 90;
+            // 
+            // FreeMB
+            // 
+            this.FreeMB.DataPropertyName = "FreeMB";
+            dataGridViewCellStyle4.Format = "N1";
+            this.FreeMB.DefaultCellStyle = dataGridViewCellStyle4;
+            this.FreeMB.HeaderText = "Free (MB)";
+            this.FreeMB.MinimumWidth = 6;
+            this.FreeMB.Name = "FreeMB";
+            this.FreeMB.ReadOnly = true;
+            // 
+            // PctFree
+            // 
+            this.PctFree.DataPropertyName = "PctFree";
+            dataGridViewCellStyle5.Format = "P1";
+            dataGridViewCellStyle5.NullValue = null;
+            this.PctFree.DefaultCellStyle = dataGridViewCellStyle5;
+            this.PctFree.HeaderText = "Free %";
+            this.PctFree.MinimumWidth = 6;
+            this.PctFree.Name = "PctFree";
+            this.PctFree.ReadOnly = true;
+            this.PctFree.Width = 82;
+            // 
+            // NumberOfFiles
+            // 
+            this.NumberOfFiles.DataPropertyName = "NumberOfFiles";
+            this.NumberOfFiles.HeaderText = "Number of Files";
+            this.NumberOfFiles.MinimumWidth = 6;
+            this.NumberOfFiles.Name = "NumberOfFiles";
+            this.NumberOfFiles.ReadOnly = true;
+            this.NumberOfFiles.Width = 99;
+            // 
+            // ReadOnly
+            // 
+            this.ReadOnly.DataPropertyName = "is_read_only";
+            this.ReadOnly.HeaderText = "Read Only";
+            this.ReadOnly.MinimumWidth = 6;
+            this.ReadOnly.Name = "ReadOnly";
+            this.ReadOnly.ReadOnly = true;
+            this.ReadOnly.Width = 96;
+            // 
+            // DBReadOnly
+            // 
+            this.DBReadOnly.DataPropertyName = "is_db_readonly";
+            this.DBReadOnly.HeaderText = "DB ReadOnly";
+            this.DBReadOnly.MinimumWidth = 6;
+            this.DBReadOnly.Name = "DBReadOnly";
+            this.DBReadOnly.ReadOnly = true;
+            this.DBReadOnly.Width = 113;
+            // 
+            // Standby
+            // 
+            this.Standby.DataPropertyName = "is_in_standby";
+            this.Standby.HeaderText = "Standby";
+            this.Standby.MinimumWidth = 6;
+            this.Standby.Name = "Standby";
+            this.Standby.ReadOnly = true;
+            this.Standby.Width = 89;
+            // 
+            // State
+            // 
+            this.State.DataPropertyName = "state_desc";
+            this.State.HeaderText = "State";
+            this.State.MinimumWidth = 6;
+            this.State.Name = "State";
+            this.State.ReadOnly = true;
+            this.State.Width = 70;
+            // 
+            // ConfiguredLevel
+            // 
+            this.ConfiguredLevel.DataPropertyName = "ConfiguredLevel";
+            this.ConfiguredLevel.HeaderText = "Configured Level";
+            this.ConfiguredLevel.MinimumWidth = 6;
+            this.ConfiguredLevel.Name = "ConfiguredLevel";
+            this.ConfiguredLevel.ReadOnly = true;
+            this.ConfiguredLevel.Width = 132;
+            // 
+            // FileSnapshotAge
+            // 
+            this.FileSnapshotAge.DataPropertyName = "FileSnapshotAge";
+            this.FileSnapshotAge.HeaderText = "File Snapshot Age";
+            this.FileSnapshotAge.MinimumWidth = 6;
+            this.FileSnapshotAge.Name = "FileSnapshotAge";
+            this.FileSnapshotAge.ReadOnly = true;
+            this.FileSnapshotAge.Width = 139;
+            // 
+            // Configure
+            // 
+            this.Configure.HeaderText = "Configure";
+            this.Configure.MinimumWidth = 6;
+            this.Configure.Name = "Configure";
+            this.Configure.ReadOnly = true;
+            this.Configure.Resizable = System.Windows.Forms.DataGridViewTriState.True;
+            this.Configure.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
+            this.Configure.Text = "Configure";
+            this.Configure.UseColumnTextForLinkValue = true;
+            this.Configure.Width = 98;
             // 
             // DBFilesControl
             // 
@@ -417,6 +416,8 @@
         private System.Windows.Forms.ToolStripMenuItem configureInstanceThresholdsToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem configureRootThresholdsToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem configureDatabaseThresholdsToolStripMenuItem;
+        private System.Windows.Forms.ToolStripButton tsRefresh;
+        private System.Windows.Forms.ToolStripButton tsCopy;
         private System.Windows.Forms.DataGridViewTextBoxColumn Instance;
         private System.Windows.Forms.DataGridViewTextBoxColumn Database;
         private System.Windows.Forms.DataGridViewTextBoxColumn FileGroup;
@@ -432,7 +433,5 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn ConfiguredLevel;
         private System.Windows.Forms.DataGridViewTextBoxColumn FileSnapshotAge;
         private System.Windows.Forms.DataGridViewLinkColumn Configure;
-        private System.Windows.Forms.ToolStripButton tsRefresh;
-        private System.Windows.Forms.ToolStripButton tsCopy;
     }
 }
