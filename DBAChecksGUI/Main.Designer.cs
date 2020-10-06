@@ -839,9 +839,9 @@
             // 
             this.chkTags.Dock = System.Windows.Forms.DockStyle.Fill;
             this.chkTags.FormattingEnabled = true;
-            this.chkTags.Location = new System.Drawing.Point(3, 951);
+            this.chkTags.Location = new System.Drawing.Point(3, 71);
             this.chkTags.Name = "chkTags";
-            this.chkTags.Size = new System.Drawing.Size(1469, 298);
+            this.chkTags.Size = new System.Drawing.Size(1469, 1178);
             this.chkTags.TabIndex = 0;
             this.chkTags.ItemCheck += new System.Windows.Forms.ItemCheckEventHandler(this.chkTags_ItemCheck);
             // 
@@ -855,7 +855,7 @@
             this.panel1.Dock = System.Windows.Forms.DockStyle.Top;
             this.panel1.Location = new System.Drawing.Point(3, 3);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(1469, 948);
+            this.panel1.Size = new System.Drawing.Size(1469, 68);
             this.panel1.TabIndex = 6;
             // 
             // label2
@@ -1081,6 +1081,7 @@
             this.performance1.AutoScroll = true;
             this.performance1.DatabaseID = 0;
             this.performance1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.performance1.InstanceID = 0;
             this.performance1.Location = new System.Drawing.Point(3, 3);
             this.performance1.Name = "performance1";
             this.performance1.ObjectID = ((long)(0));
