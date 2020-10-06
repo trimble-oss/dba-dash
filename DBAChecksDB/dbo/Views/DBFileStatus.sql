@@ -1,6 +1,7 @@
 ﻿
 
 
+
 CREATE VIEW [dbo].[DBFileStatus]
 AS
 WITH agg AS (SELECT D.InstanceID,
@@ -19,7 +20,8 @@ WITH agg AS (SELECT D.InstanceID,
 	   D.is_read_only AS is_db_read_only,
 	   D.is_in_standby,
 	   D.state,
-	   D.state_desc
+	   D.state_desc,
+	   F.type
 FROM dbo.DBFiles F
     JOIN dbo.Databases D ON D.DatabaseID = F.DatabaseID
     JOIN dbo.Instances I ON I.InstanceID = D.InstanceID
@@ -36,7 +38,8 @@ GROUP BY D.InstanceID,
 		 D.is_in_standby,
 		 D.is_read_only,
 		 D.state,
-		 D.state_desc
+		 D.state_desc,
+		 F.type
 )
 SELECT agg.InstanceID,
        agg.DatabaseID,
@@ -56,8 +59,8 @@ SELECT agg.InstanceID,
 	   agg.state,
 	   agg.state_desc,
 	   CASE WHEN agg.is_in_standby=1 THEN 'Standby' WHEN agg.is_read_only=1 THEN 'Filegroup Readonly' WHEN agg.is_db_read_only=1 THEN 'Database Readonly' WHEN agg.state<>0 THEN
-	   'Database State:' + agg.state_desc ELSE NULL END AS ExcludedReason, 
-	   CASE WHEN agg.is_in_standby=1 OR agg.is_read_only=1 OR agg.is_db_read_only=1 OR agg.state<>0 THEN 3 WHEN cfg.FreeSpaceCheckType='%' AND agg.PctFree<= cfg.FreeSpaceCriticalThreshold THEN 1 
+	   'Database State:' + agg.state_desc WHEN agg.type=2 THEN 'Filestream' ELSE NULL END AS ExcludedReason, 
+	   CASE WHEN agg.is_in_standby=1 OR agg.is_read_only=1 OR agg.is_db_read_only=1 OR agg.state<>0 OR agg.type=2 THEN 3 WHEN cfg.FreeSpaceCheckType='%' AND agg.PctFree<= cfg.FreeSpaceCriticalThreshold THEN 1 
 			WHEN cfg.FreeSpaceCheckType='M' AND agg.FreeMB<cfg.FreeSpaceCriticalThreshold THEN 1
 			WHEN cfg.FreeSpaceCheckType='%' AND agg.PctFree<=cfg.FreeSpaceWarningThreshold THEN 2
 			WHEN cfg.FreeSpaceCheckType='M' AND agg.FreeMB <=cfg.FreeSpaceWarningThreshold THEN 2
