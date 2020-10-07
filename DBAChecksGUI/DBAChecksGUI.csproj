@@ -117,17 +117,17 @@
       <DependentUpon>AgentJobThresholdsConfig.cs</DependentUpon>
     </Compile>
     <Compile Include="AppSyntaxModeProvider.cs" />
-    <Compile Include="Backups\BackupsControl.cs">
+    <Compile Include="Bak\BackupsControl.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="Backups\BackupsControl.Designer.cs">
+    <Compile Include="Bak\BackupsControl.Designer.cs">
       <DependentUpon>BackupsControl.cs</DependentUpon>
     </Compile>
-    <Compile Include="Backups\BackupThresholds.cs" />
-    <Compile Include="Backups\BackupThresholdsConfig.cs">
+    <Compile Include="Bak\BackupThresholds.cs" />
+    <Compile Include="Bak\BackupThresholdsConfig.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Backups\BackupThresholdsConfig.Designer.cs">
+    <Compile Include="Bak\BackupThresholdsConfig.Designer.cs">
       <DependentUpon>BackupThresholdsConfig.cs</DependentUpon>
     </Compile>
     <Compile Include="Changes\Alerts.cs">
@@ -367,10 +367,10 @@
     <EmbeddedResource Include="AgentJobs\AgentJobThresholdsConfig.resx">
       <DependentUpon>AgentJobThresholdsConfig.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Backups\BackupsControl.resx">
+    <EmbeddedResource Include="Bak\BackupsControl.resx">
       <DependentUpon>BackupsControl.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Backups\BackupThresholdsConfig.resx">
+    <EmbeddedResource Include="Bak\BackupThresholdsConfig.resx">
       <DependentUpon>BackupThresholdsConfig.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Changes\Alerts.resx">
