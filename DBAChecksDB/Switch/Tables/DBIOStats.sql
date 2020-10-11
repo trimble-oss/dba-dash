@@ -21,6 +21,6 @@
     [MaxReadLatency]       AS            (isnull([io_stall_read_ms]/nullif([num_of_reads]*(1.0),(0)),(0))),
     [MaxWriteLatency]      AS            (isnull([io_stall_write_ms]/nullif([num_of_writes]*(1.0),(0)),(0))),
     [MaxLatency]           AS            (isnull(([io_stall_read_ms]+[io_stall_write_ms])/nullif([num_of_writes]+[num_of_reads]*(1.0),(0)),(0))),
-    CONSTRAINT [PK_DBIOStats] PRIMARY KEY CLUSTERED ([InstanceID] ASC, [DatabaseID] ASC, [FileID] ASC, [Drive] ASC, [SnapshotDate] ASC) WITH (DATA_COMPRESSION = PAGE) ON [PS_DBIOStats] ([SnapshotDate])
-) ON [PS_DBIOStats] ([SnapshotDate]);
+    CONSTRAINT [PK_DBIOStats] PRIMARY KEY CLUSTERED ([InstanceID] ASC, [DatabaseID] ASC, [FileID] ASC, [Drive] ASC, [SnapshotDate] ASC) WITH (DATA_COMPRESSION = PAGE) 
+) ;
 

@@ -142,6 +142,8 @@
             this.drivers1 = new DBAChecksGUI.Changes.Drivers();
             this.tabDBSpace = new System.Windows.Forms.TabPage();
             this.spaceTracking1 = new DBAChecksGUI.SpaceTracking();
+            this.optionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.dataRetentionToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitMain)).BeginInit();
             this.splitMain.Panel1.SuspendLayout();
@@ -207,7 +209,8 @@
             this.menuStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
             this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.mnuTags,
-            this.dBDiffToolStripMenuItem});
+            this.dBDiffToolStripMenuItem,
+            this.optionsToolStripMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
             this.menuStrip1.Size = new System.Drawing.Size(1983, 28);
@@ -1433,6 +1436,21 @@
             this.spaceTracking1.Size = new System.Drawing.Size(1469, 1246);
             this.spaceTracking1.TabIndex = 0;
             // 
+            // optionsToolStripMenuItem
+            // 
+            this.optionsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.dataRetentionToolStripMenuItem});
+            this.optionsToolStripMenuItem.Name = "optionsToolStripMenuItem";
+            this.optionsToolStripMenuItem.Size = new System.Drawing.Size(75, 24);
+            this.optionsToolStripMenuItem.Text = "Options";
+            // 
+            // dataRetentionToolStripMenuItem
+            // 
+            this.dataRetentionToolStripMenuItem.Name = "dataRetentionToolStripMenuItem";
+            this.dataRetentionToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            this.dataRetentionToolStripMenuItem.Text = "Data Retention";
+            this.dataRetentionToolStripMenuItem.Click += new System.EventHandler(this.dataRetentionToolStripMenuItem_Click);
+            // 
             // Main
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
@@ -1612,5 +1630,7 @@
         private System.Windows.Forms.ToolStripButton tsCopyErrors;
         private System.Windows.Forms.TabPage tabDBSpace;
         private SpaceTracking spaceTracking1;
+        private System.Windows.Forms.ToolStripMenuItem optionsToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem dataRetentionToolStripMenuItem;
     }
 }

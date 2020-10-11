@@ -79,6 +79,7 @@
             this.txtDeployScript.Multiline = true;
             this.txtDeployScript.Name = "txtDeployScript";
             this.txtDeployScript.ReadOnly = true;
+            this.txtDeployScript.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
             this.txtDeployScript.Size = new System.Drawing.Size(536, 451);
             this.txtDeployScript.TabIndex = 5;
             this.txtDeployScript.TextChanged += new System.EventHandler(this.txtDeployScript_TextChanged);

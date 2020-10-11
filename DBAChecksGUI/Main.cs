@@ -1046,5 +1046,12 @@ ORDER BY SchemaName,ObjectName
             Common.CopyDataGridViewToClipboard(dgvDBAChecksErrors);
 
         }
+
+        private void dataRetentionToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            var frm = new DataRetention();
+            frm.ConnectionString = connectionString;
+            frm.ShowDialog();
+        }
     }
 }
