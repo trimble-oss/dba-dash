@@ -37,7 +37,9 @@
             this.imageList1 = new System.Windows.Forms.ImageList(this.components);
             this.picStatus = new System.Windows.Forms.PictureBox();
             this.lblThresholds = new System.Windows.Forms.Label();
+            this.lnkHistory = new System.Windows.Forms.LinkLabel();
             this.pbSpace = new DBAChecksGUI.CustomProgressBar();
+            this.lblUpdated = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.picStatus)).BeginInit();
             this.SuspendLayout();
@@ -109,6 +111,18 @@
             this.lblThresholds.Text = "Warning: 20%, Critical 10%";
             this.lblThresholds.TextAlign = System.Drawing.ContentAlignment.TopRight;
             // 
+            // lnkHistory
+            // 
+            this.lnkHistory.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.lnkHistory.AutoSize = true;
+            this.lnkHistory.Location = new System.Drawing.Point(455, 46);
+            this.lnkHistory.Name = "lnkHistory";
+            this.lnkHistory.Size = new System.Drawing.Size(52, 17);
+            this.lnkHistory.TabIndex = 33;
+            this.lnkHistory.TabStop = true;
+            this.lnkHistory.Text = "History";
+            this.lnkHistory.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.lnkHistory_LinkClicked);
+            // 
             // pbSpace
             // 
             this.pbSpace.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
@@ -122,10 +136,24 @@
             this.pbSpace.TabIndex = 31;
             this.pbSpace.Value = 50;
             // 
+            // lblUpdated
+            // 
+            this.lblUpdated.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.lblUpdated.AutoSize = true;
+            this.lblUpdated.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Italic, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblUpdated.ForeColor = System.Drawing.Color.Black;
+            this.lblUpdated.Location = new System.Drawing.Point(63, 63);
+            this.lblUpdated.Name = "lblUpdated";
+            this.lblUpdated.Size = new System.Drawing.Size(143, 17);
+            this.lblUpdated.TabIndex = 34;
+            this.lblUpdated.Text = "Updated minutes ago";
+            // 
             // DriveControl
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.Controls.Add(this.lblUpdated);
+            this.Controls.Add(this.lnkHistory);
             this.Controls.Add(this.lblThresholds);
             this.Controls.Add(this.pbSpace);
             this.Controls.Add(this.picStatus);
@@ -152,5 +180,7 @@
         private System.Windows.Forms.PictureBox picStatus;
         private CustomProgressBar pbSpace;
         private System.Windows.Forms.Label lblThresholds;
+        private System.Windows.Forms.LinkLabel lnkHistory;
+        private System.Windows.Forms.Label lblUpdated;
     }
 }

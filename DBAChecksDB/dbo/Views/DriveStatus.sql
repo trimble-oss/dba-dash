@@ -3,6 +3,7 @@
 
 
 
+
 CREATE VIEW [dbo].[DriveStatus]
 AS
 SELECT I.InstanceID,
@@ -11,12 +12,13 @@ SELECT I.InstanceID,
 	I.ConnectionID,
 	D.Name,
 	D.Label,
-	Capacity/POWER(1024.0,3) TotalGB,
-	UsedSpace/POWER(1024.0,3) UsedGB,
-	FreeSpace/POWER(1024.0,3) FreeGB,
-	FreeSpace/CAST(Capacity AS DECIMAL) AS PctFreeSpace,
+	D.Capacity/POWER(1024.0,3) TotalGB,
+	D.UsedSpace/POWER(1024.0,3) UsedGB,
+	D.FreeSpace/POWER(1024.0,3) FreeGB,
+	D.FreeSpace/CAST(D.Capacity AS DECIMAL) AS PctFreeSpace,
 	DATEDIFF(mi,SSD.SnapshotDate,GETUTCDATE()) AS SnapshotAgeMins,
 	SSD.SnapshotDate,
+	CASE WHEN cdt.WarningThreshold IS NULL AND cdt.CriticalThreshold IS NULL THEN 3 WHEN DATEDIFF(mi,SSD.SnapshotDate,GETUTCDATE()) > cdt.CriticalThreshold THEN 1 WHEN DATEDIFF(mi,SSD.SnapshotDate,GETUTCDATE()) > cdt.WarningThreshold THEN 2 ELSE 4 END AS SnapshotStatus,
 	cfg.DriveWarningThreshold,
 	cfg.DriveCriticalThreshold,
 	cfg.DriveCheckType,
@@ -36,6 +38,11 @@ OUTER APPLY(SELECT TOP(1) T.*
 			AND (D.DriveID = T.DriveID  OR T.DriveID = -1)
 			ORDER BY InstanceID DESC,DriveID DESC
 			) cfg
+OUTER APPLY(SELECT TOP(1) T.WarningThreshold, T.CriticalThreshold
+			FROM dbo.CollectionDatesThresholds T
+			WHERE T.InstanceID = D.InstanceID OR T.InstanceID=-1
+			AND T.Reference = 'Drives'
+			ORDER BY T.InstanceID DESC) cdt
 OUTER APPLY(SELECT CASE WHEN cfg.DriveCheckType = '%' 
 		AND FreeSpace/CAST(Capacity AS DECIMAL) < cfg.DriveCriticalThreshold THEN 1
 		WHEN cfg.DriveCheckType = '%' 

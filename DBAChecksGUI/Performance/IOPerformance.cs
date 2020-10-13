@@ -111,14 +111,7 @@ namespace DBAChecksGUI.Performance
             return dt;
         }
 
-        class columnMetaData
-        {
-            public string Alias;
-            public bool isVisible;
-            public DateTimePoint[] Points;
-            public Int32 axis = 0;
-
-        }
+   
 
         public void RefreshData(Int32 InstanceID, DateTime fromDate, DateTime toDate, string connectionString,Int32 databaseID, DateGroup dateGrouping)
         {

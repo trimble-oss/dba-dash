@@ -30,6 +30,8 @@
         {
             this.pnlDrives = new System.Windows.Forms.Panel();
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
+            this.tsRefresh = new System.Windows.Forms.ToolStripButton();
+            this.tsCopy = new System.Windows.Forms.ToolStripButton();
             this.toolStripFilter = new System.Windows.Forms.ToolStripDropDownButton();
             this.criticalToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.warningToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -40,9 +42,9 @@
             this.configureRootThresholdsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.tsGridView = new System.Windows.Forms.ToolStripButton();
             this.tsDrivesView = new System.Windows.Forms.ToolStripButton();
+            this.tsColumns = new System.Windows.Forms.ToolStripDropDownButton();
+            this.includeAllMetricsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.pnlSpacing = new System.Windows.Forms.Panel();
-            this.tsCopy = new System.Windows.Forms.ToolStripButton();
-            this.tsRefresh = new System.Windows.Forms.ToolStripButton();
             this.driveControl1 = new DBAChecksGUI.DriveControl();
             this.pnlDrives.SuspendLayout();
             this.toolStrip1.SuspendLayout();
@@ -67,12 +69,33 @@
             this.toolStripFilter,
             this.tsConfigure,
             this.tsGridView,
-            this.tsDrivesView});
+            this.tsDrivesView,
+            this.tsColumns});
             this.toolStrip1.Location = new System.Drawing.Point(0, 0);
             this.toolStrip1.Name = "toolStrip1";
             this.toolStrip1.Size = new System.Drawing.Size(735, 27);
             this.toolStrip1.TabIndex = 7;
             this.toolStrip1.Text = "toolStrip1";
+            // 
+            // tsRefresh
+            // 
+            this.tsRefresh.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.tsRefresh.Image = global::DBAChecksGUI.Properties.Resources._112_RefreshArrow_Green_16x16_72;
+            this.tsRefresh.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tsRefresh.Name = "tsRefresh";
+            this.tsRefresh.Size = new System.Drawing.Size(29, 24);
+            this.tsRefresh.Text = "Refresh";
+            this.tsRefresh.Click += new System.EventHandler(this.tsRefresh_Click);
+            // 
+            // tsCopy
+            // 
+            this.tsCopy.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.tsCopy.Image = global::DBAChecksGUI.Properties.Resources.ASX_Copy_blue_16x;
+            this.tsCopy.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tsCopy.Name = "tsCopy";
+            this.tsCopy.Size = new System.Drawing.Size(29, 24);
+            this.tsCopy.Text = "Copy";
+            this.tsCopy.Click += new System.EventHandler(this.tsCopy_Click);
             // 
             // toolStripFilter
             // 
@@ -166,6 +189,25 @@
             this.tsDrivesView.Text = "Drives View";
             this.tsDrivesView.Click += new System.EventHandler(this.tsDrivesView_Click);
             // 
+            // tsColumns
+            // 
+            this.tsColumns.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.tsColumns.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.includeAllMetricsToolStripMenuItem});
+            this.tsColumns.Image = global::DBAChecksGUI.Properties.Resources.Column_16x;
+            this.tsColumns.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tsColumns.Name = "tsColumns";
+            this.tsColumns.Size = new System.Drawing.Size(34, 24);
+            this.tsColumns.Text = "Columns";
+            // 
+            // includeAllMetricsToolStripMenuItem
+            // 
+            this.includeAllMetricsToolStripMenuItem.CheckOnClick = true;
+            this.includeAllMetricsToolStripMenuItem.Name = "includeAllMetricsToolStripMenuItem";
+            this.includeAllMetricsToolStripMenuItem.Size = new System.Drawing.Size(214, 26);
+            this.includeAllMetricsToolStripMenuItem.Text = "Include All Metrics";
+            this.includeAllMetricsToolStripMenuItem.Click += new System.EventHandler(this.includeAllMetricsToolStripMenuItem_Click);
+            // 
             // pnlSpacing
             // 
             this.pnlSpacing.Dock = System.Windows.Forms.DockStyle.Top;
@@ -173,26 +215,6 @@
             this.pnlSpacing.Name = "pnlSpacing";
             this.pnlSpacing.Size = new System.Drawing.Size(735, 16);
             this.pnlSpacing.TabIndex = 8;
-            // 
-            // tsCopy
-            // 
-            this.tsCopy.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.tsCopy.Image = global::DBAChecksGUI.Properties.Resources.ASX_Copy_blue_16x;
-            this.tsCopy.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsCopy.Name = "tsCopy";
-            this.tsCopy.Size = new System.Drawing.Size(29, 24);
-            this.tsCopy.Text = "Copy";
-            this.tsCopy.Click += new System.EventHandler(this.tsCopy_Click);
-            // 
-            // tsRefresh
-            // 
-            this.tsRefresh.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.tsRefresh.Image = global::DBAChecksGUI.Properties.Resources._112_RefreshArrow_Green_16x16_72;
-            this.tsRefresh.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsRefresh.Name = "tsRefresh";
-            this.tsRefresh.Size = new System.Drawing.Size(29, 24);
-            this.tsRefresh.Text = "Refresh";
-            this.tsRefresh.Click += new System.EventHandler(this.tsRefresh_Click);
             // 
             // driveControl1
             // 
@@ -267,5 +289,7 @@
         private System.Windows.Forms.ToolStripButton tsDrivesView;
         private System.Windows.Forms.ToolStripButton tsRefresh;
         private System.Windows.Forms.ToolStripButton tsCopy;
+        private System.Windows.Forms.ToolStripDropDownButton tsColumns;
+        private System.Windows.Forms.ToolStripMenuItem includeAllMetricsToolStripMenuItem;
     }
 }

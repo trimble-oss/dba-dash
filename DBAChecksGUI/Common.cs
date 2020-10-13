@@ -12,8 +12,10 @@ using System.Windows.Forms;
 
 namespace DBAChecksGUI
 {
-    class Common
+    static class Common
     {
+        public static string ConnectionString;
+
         public static string DDL(Int64 DDLID,string connectionString)
         {
             SqlConnection cn = new SqlConnection(connectionString);

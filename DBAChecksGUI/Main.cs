@@ -52,6 +52,7 @@ namespace DBAChecksGUI
             SqlConnectionStringBuilder builder = new SqlConnectionStringBuilder(connectionString);
             builder.ApplicationName = "DBAChecksGUI";
             connectionString = builder.ConnectionString;
+            Common.ConnectionString = connectionString;
 
             addInstanes();
             buildTagMenu();
