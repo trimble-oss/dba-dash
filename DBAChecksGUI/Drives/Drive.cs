@@ -28,7 +28,7 @@ namespace DBAChecksGUI
     {
         const Int64 bytesPerGB = 1073741824;
 
-        public enum DriveStatusEnum
+        public enum StatusEnum
         {
             OK=4,
             Warning=2,
@@ -37,7 +37,7 @@ namespace DBAChecksGUI
         }
 
         public string InstanceName;
-        public DriveStatusEnum DriveStatus;
+        public StatusEnum DriveStatus;
 
         public void RefreshDriveStatus()
         {
@@ -45,35 +45,35 @@ namespace DBAChecksGUI
             {
                 if (FreeSpaceGB <= CriticalThreshold)
                 {
-                    DriveStatus = DriveStatusEnum.Critical;
+                    DriveStatus = StatusEnum.Critical;
                 }
                 else if (FreeSpaceGB <= WarningThreshold)
                 {
-                    DriveStatus = DriveStatusEnum.Warning;
+                    DriveStatus = StatusEnum.Warning;
                 }
                 else
                 {
-                    DriveStatus = DriveStatusEnum.OK;
+                    DriveStatus = StatusEnum.OK;
                 }
             }
             else if(DriveCheckType == DriveCheckTypeEnum.Percent)
             {
                 if(PercentFreeSpace<= ((double)CriticalThreshold*100))
                 {
-                    DriveStatus = DriveStatusEnum.Critical;
+                    DriveStatus = StatusEnum.Critical;
                 }
                 else if(PercentFreeSpace<= ((double)WarningThreshold*100))
                 {
-                    DriveStatus = DriveStatusEnum.Warning;
+                    DriveStatus = StatusEnum.Warning;
                 }
                 else
                 {
-                    DriveStatus = DriveStatusEnum.OK;
+                    DriveStatus = StatusEnum.OK;
                 }
             }
             else
             {
-                DriveStatus = DriveStatusEnum.NA;
+                DriveStatus = StatusEnum.NA;
             }
         }
 
@@ -82,6 +82,10 @@ namespace DBAChecksGUI
 
         public string DriveLabel { get; set; }
 
+        public DateTime SnapshotDate { get; set; }
+
+        public StatusEnum SnapshotStatus { get; set; }
+        
        public  decimal FreeSpaceGB
         {
             get

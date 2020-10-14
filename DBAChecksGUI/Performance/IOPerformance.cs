@@ -111,14 +111,7 @@ namespace DBAChecksGUI.Performance
             return dt;
         }
 
-        class columnMetaData
-        {
-            public string Alias;
-            public bool isVisible;
-            public DateTimePoint[] Points;
-            public Int32 axis = 0;
-
-        }
+   
 
         public void RefreshData(Int32 InstanceID, DateTime fromDate, DateTime toDate, string connectionString,Int32 databaseID, DateGroup dateGrouping)
         {
@@ -246,6 +239,7 @@ namespace DBAChecksGUI.Performance
                 {
                     Title = "Time",
                     LabelFormatter = val => new System.DateTime((long)val).ToString(DateFormat)
+
                 });
                 chartIO.AxisY.Add(new Axis
                 {
@@ -309,6 +303,10 @@ namespace DBAChecksGUI.Performance
                     dd.Click += measureDropDown_Click;
                     tsMeasures.DropDownItems.Add(dd);
                 }
+            }
+            if (chartIO.Series[0].Values.Count == 1)
+            {
+                chartIO.Series.Clear(); // fix tends to zero error
             }
             lblIOPerformance.Text = databaseid > 0 ? "IO Performance: Database" : "IO Performance: Instance";
         }

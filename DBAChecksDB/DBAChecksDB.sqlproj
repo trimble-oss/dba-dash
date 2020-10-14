@@ -30,7 +30,7 @@
     <QueryStoreStaleQueryThreshold>15</QueryStoreStaleQueryThreshold>
     <QueryStoreMaxStorageSize>512</QueryStoreMaxStorageSize>
     <QueryStoreMaxPlansPerQuery>50</QueryStoreMaxPlansPerQuery>
-    <DacVersion>1.9.1.8</DacVersion>
+    <DacVersion>2.0.0.6</DacVersion>
     <ReadCommittedSnapshot>True</ReadCommittedSnapshot>
     <AllowSnapshotIsolation>True</AllowSnapshotIsolation>
   </PropertyGroup>
@@ -93,6 +93,7 @@
     <Folder Include="Switch\" />
     <Folder Include="Switch\Tables\" />
     <Folder Include="Storage\" />
+    <Folder Include="Scripts" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="dbo\Tables\LogRestoreThresholds.sql" />
@@ -215,7 +216,6 @@
     <Build Include="Report\Stored Procedures\BlockingSummary.sql" />
     <Build Include="Report\Stored Procedures\Blocking.sql" />
     <Build Include="Staging\Tables\IOStats.sql" />
-    <Build Include="dbo\Tables\IOStats.sql" />
     <Build Include="dbo\Stored Procedures\IOStats_Upd.sql" />
     <Build Include="dbo\User Defined Types\IOStats.sql" />
     <Build Include="Report\Stored Procedures\PerformanceDashboard.sql" />
@@ -244,16 +244,13 @@
     <Build Include="dbo\Stored Procedures\DailyPartitions_Add.sql" />
     <Build Include="Security\Switch.sql" />
     <Build Include="Switch\Tables\Waits.sql" />
-    <Build Include="Switch\Tables\IOStats.sql" />
     <Build Include="Switch\Tables\CPU.sql" />
     <Build Include="Switch\Tables\BlockingSnapshot.sql" />
     <Build Include="dbo\Tables\DataRetention.sql" />
     <Build Include="Storage\PF_Waits.sql" />
-    <Build Include="Storage\PF_IOStats.sql" />
     <Build Include="Storage\PF_CPU.sql" />
     <Build Include="Storage\PF_BlockingSnapshot.sql" />
     <Build Include="Storage\PS_Waits.sql" />
-    <Build Include="Storage\PS_IOStats.sql" />
     <Build Include="Storage\PS_CPU.sql" />
     <Build Include="Storage\PS_BlockingSnapshot.sql" />
     <Build Include="dbo\Stored Procedures\PurgeData.sql" />
@@ -400,6 +397,21 @@
     <Build Include="dbo\Stored Procedures\Drivers_Get.sql" />
     <Build Include="dbo\Stored Procedures\InstanceVersionInfo_Get.sql" />
     <Build Include="dbo\Stored Procedures\Hardware_Get.sql" />
+    <Build Include="dbo\Tables\DBIOStats_60MIN.sql" />
+    <Build Include="dbo\Tables\DBIOStats.sql" />
+    <Build Include="Switch\Tables\DBIOStats.sql" />
+    <Build Include="Storage\PF_DBIOStats.sql" />
+    <Build Include="Storage\PS_DBIOStats.sql" />
+    <None Include="Scripts\DBIOStats_Migration.sql" />
+    <Build Include="dbo\Tables\CPU_60MIN.sql" />
+    <Build Include="dbo\Stored Procedures\DBSpace_Get.sql" />
+    <Build Include="Switch\Tables\SlowQueries.sql" />
+    <Build Include="dbo\Functions\PartitionFunctionName.sql" />
+    <Build Include="dbo\Stored Procedures\DataRetention_Upd.sql" />
+    <Build Include="dbo\Stored Procedures\DataRetention_Get.sql" />
+    <Build Include="Switch\Tables\AzureDBResourceStats.sql" />
+    <Build Include="Switch\Tables\AzureDBElasticPoolResourceStats.sql" />
+    <Build Include="dbo\Stored Procedures\DriveSnapshot_Get.sql" />
   </ItemGroup>
   <ItemGroup>
     <PostDeploy Include="Script.PostDeployment1.sql" />
@@ -414,6 +426,8 @@
   <ItemGroup>
     <None Include="DBAChecksDB.publish.xml" />
     <None Include="Schema_Compare.scmp" />
+    <None Include="Scripts\DBIOStatsMigration_60MIN.sql" />
+    <None Include="Scripts\CPU_60MIN Population.sql" />
   </ItemGroup>
   <ItemGroup>
     <SqlCmdVariable Include="VersionNumber">

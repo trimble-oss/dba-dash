@@ -56,6 +56,7 @@
             this.bttnCancel = new System.Windows.Forms.Button();
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabPage3 = new System.Windows.Forms.TabPage();
+            this.bttnConnect = new System.Windows.Forms.Button();
             this.lblVersionInfo = new System.Windows.Forms.Label();
             this.bttnDeployDatabase = new System.Windows.Forms.Button();
             this.chkCustomizeMaintenanceCron = new System.Windows.Forms.CheckBox();
@@ -79,7 +80,7 @@
             this.bttnRemove = new System.Windows.Forms.Button();
             this.tabPage2 = new System.Windows.Forms.TabPage();
             this.tabPage4 = new System.Windows.Forms.TabPage();
-            this.bttnConnect = new System.Windows.Forms.Button();
+            this.bttnConnectSource = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.errorProvider1)).BeginInit();
             this.tabControl1.SuspendLayout();
             this.tabPage3.SuspendLayout();
@@ -100,7 +101,7 @@
             this.cboSource.Location = new System.Drawing.Point(6, 27);
             this.cboSource.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.cboSource.Name = "cboSource";
-            this.cboSource.Size = new System.Drawing.Size(718, 24);
+            this.cboSource.Size = new System.Drawing.Size(684, 24);
             this.cboSource.TabIndex = 0;
             this.cboSource.SelectedIndexChanged += new System.EventHandler(this.cboSource_SelectedIndexChanged);
             // 
@@ -374,6 +375,16 @@
             this.tabPage3.Text = "Destination:";
             this.tabPage3.UseVisualStyleBackColor = true;
             // 
+            // bttnConnect
+            // 
+            this.bttnConnect.Image = global::DBAChecksServiceConfig.Properties.Resources.Connect_16x;
+            this.bttnConnect.Location = new System.Drawing.Point(659, 20);
+            this.bttnConnect.Name = "bttnConnect";
+            this.bttnConnect.Size = new System.Drawing.Size(28, 23);
+            this.bttnConnect.TabIndex = 7;
+            this.bttnConnect.UseVisualStyleBackColor = true;
+            this.bttnConnect.Click += new System.EventHandler(this.bttnConnect_Click);
+            // 
             // lblVersionInfo
             // 
             this.lblVersionInfo.AutoSize = true;
@@ -449,6 +460,7 @@
             // 
             // tabGeneral
             // 
+            this.tabGeneral.Controls.Add(this.bttnConnectSource);
             this.tabGeneral.Controls.Add(this.cboSource);
             this.tabGeneral.Controls.Add(this.label1);
             this.tabGeneral.Controls.Add(this.chkCustomizeSchedule);
@@ -648,15 +660,15 @@
             this.tabPage4.Text = "Service";
             this.tabPage4.UseVisualStyleBackColor = true;
             // 
-            // bttnConnect
+            // bttnConnectSource
             // 
-            this.bttnConnect.Image = global::DBAChecksServiceConfig.Properties.Resources.Connect_16x;
-            this.bttnConnect.Location = new System.Drawing.Point(659, 20);
-            this.bttnConnect.Name = "bttnConnect";
-            this.bttnConnect.Size = new System.Drawing.Size(28, 23);
-            this.bttnConnect.TabIndex = 7;
-            this.bttnConnect.UseVisualStyleBackColor = true;
-            this.bttnConnect.Click += new System.EventHandler(this.bttnConnect_Click);
+            this.bttnConnectSource.Image = global::DBAChecksServiceConfig.Properties.Resources.Connect_16x;
+            this.bttnConnectSource.Location = new System.Drawing.Point(696, 27);
+            this.bttnConnectSource.Name = "bttnConnectSource";
+            this.bttnConnectSource.Size = new System.Drawing.Size(28, 23);
+            this.bttnConnectSource.TabIndex = 8;
+            this.bttnConnectSource.UseVisualStyleBackColor = true;
+            this.bttnConnectSource.Click += new System.EventHandler(this.bttnConnectSource_Click);
             // 
             // ServiceConfig
             // 
@@ -749,6 +761,7 @@
         private System.Windows.Forms.Label lblVersionInfo;
         private System.Windows.Forms.CheckBox chkSchemaSnapshotOnStart;
         private System.Windows.Forms.Button bttnConnect;
+        private System.Windows.Forms.Button bttnConnectSource;
     }
 }
 

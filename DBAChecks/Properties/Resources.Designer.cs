@@ -430,14 +430,13 @@ namespace DBAChecks.Properties {
         ///state TINYINT
         ///)
         ///
-        ///DECLARE DBs CURSOR FOR
+        ///DECLARE DBs CURSOR FAST_FORWARD LOCAL FOR
         ///SELECT name
         ///FROM sys.databases
         ///WHERE state  = 0
         ///AND DATABASEPROPERTYEX(name, &apos;Updateability&apos;) = &apos;READ_WRITE&apos;
         ///
-        ///OPEN DBs
-        ///FETCH NEXT FROM [rest of string was truncated]&quot;;.
+        ///OPEN D [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string SQLDBFiles {
             get {

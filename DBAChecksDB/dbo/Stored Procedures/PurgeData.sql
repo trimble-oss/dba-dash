@@ -2,10 +2,11 @@
 AS
 DECLARE @TableName SYSNAME,@RetentionDays INT
 DECLARE cTables CURSOR FAST_FORWARD LOCAL FOR
-	SELECT TableName,RetentionDays
-	FROM dbo.DataRetention
-	WHERE RetentionDays IS NOT NULL
-	AND TableName IN('Waits','IOStats','CPU','BlockingSnapshot','ObjectExecutionStats')
+	SELECT DR.TableName,DR.RetentionDays
+	FROM dbo.DataRetention DR
+	CROSS APPLY [dbo].[PartitionFunctionName](DR.TableName) PF
+	WHERE RetentionDays > 0
+	
 
 OPEN cTables
 WHILE 1=1

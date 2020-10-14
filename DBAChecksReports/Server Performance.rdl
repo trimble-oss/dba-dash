@@ -1707,9 +1707,6 @@ Parameters!Mins.Value&lt;=300,"10MIN",
               <Parameter Name="TagIDs">
                 <Value>-1</Value>
               </Parameter>
-              <Parameter Name="TagMatching">
-                <Value>ALL</Value>
-              </Parameter>
               <Parameter Name="FromDateUser">
                 <Value>=DateTime.Now.AddMinutes(-Parameters!Mins.Value)</Value>
               </Parameter>
@@ -1866,7 +1863,7 @@ Parameters!Mins.Value&lt;=300,"10MIN",
               </Parameter>
             </Parameters>
             <Top>13.53695in</Top>
-            <Left>0.00002in</Left>
+            <Left>0.00005in</Left>
             <Height>1.575in</Height>
             <Width>23.45485in</Width>
             <ZIndex>11</ZIndex>

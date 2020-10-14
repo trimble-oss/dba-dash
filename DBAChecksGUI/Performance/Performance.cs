@@ -17,7 +17,24 @@ namespace DBAChecksGUI.Performance
     public partial class Performance : UserControl
     {
 
-        public Int32 InstanceID;
+        private Int32 instanceID;
+
+        public Int32 InstanceID {
+            get
+            {
+                return instanceID;
+            }
+            set
+            {
+                if (instanceID != value)
+                {
+                    instanceID = value;
+                    Reset();
+                }
+            }
+        }
+
+
         public string ConnectionString;
 
         public Performance()
@@ -34,12 +51,48 @@ namespace DBAChecksGUI.Performance
             DAY
         }
 
+        public void Reset()
+        {
+            mins = 60;
+            customFrom = DateTime.MinValue;
+            customTo = DateTime.MinValue;
+            dateGrp = DateGroup._1MIN;
+            setDateGroup(dateGrp);
+            checkTime();
+
+        }
+
         DateGroup dateGrp =  DateGroup._1MIN;
         Int32 mins=60;
         DateTime customFrom = DateTime.MinValue;
         DateTime customTo = DateTime.MinValue;
-        public Int64 ObjectID { get; set; }
-        public Int32 DatabaseID { get; set; } = 0;
+        Int32 databaseID = 0;
+        Int64 objectID = 0;
+        public Int64 ObjectID { 
+            get {
+                return objectID;
+            }
+            set {
+                if (objectID != value)
+                {
+                    objectID = value;
+                    Reset();
+                }
+            }
+        }
+        
+        public Int32 DatabaseID { 
+            get {
+                return databaseID;
+            }
+            set {
+                if (databaseID != value)
+                {
+                    databaseID = value;
+                    Reset();
+                }
+            }
+        }
 
 
 
@@ -154,17 +207,23 @@ namespace DBAChecksGUI.Performance
         {
             var itm = (ToolStripMenuItem)sender;
             RefreshData(Int32.Parse((string)itm.Tag));
-            uncheckTime();
-            itm.Checked = true;
+            checkTime();
+      
         }
 
-        private void uncheckTime()
+        private void checkTime()
         {
+            Int32 tag = mins;
+            if(customFrom>DateTime.MinValue | customTo> DateTime.MinValue)
+            {
+                tag = -1;
+            }
             foreach (var ts in tsTime.DropDownItems)
             {
                 if (ts.GetType() == typeof(ToolStripMenuItem))
                 {
-                    ((ToolStripMenuItem)ts).Checked = false;
+                    var mnu = (ToolStripMenuItem)ts;
+                    mnu.Checked = Int32.Parse((string)mnu.Tag)==tag;
                 }
             }
         }
@@ -226,8 +285,7 @@ namespace DBAChecksGUI.Performance
                 this.dateGrp = DateGrouping((Int32)customTo.Subtract(customFrom).TotalMinutes);
                 mins = 0;
                 RefreshData(frm.FromDate.ToUniversalTime(), frm.ToDate.ToUniversalTime());
-                uncheckTime();
-                tsCustom.Checked = true;
+                checkTime();
                 tsEnableTimer.Enabled = false;
             }
        

@@ -12,7 +12,7 @@
     [elastic_pool_dtu_limit]        INT            NULL,
     [elastic_pool_storage_limit_mb] BIGINT         NULL,
     [avg_allocated_storage_percent] DECIMAL (5, 2) NULL,
-    CONSTRAINT [PK_AzureDBElasticPoolResourceStats] PRIMARY KEY CLUSTERED ([InstanceID] ASC, [end_time] ASC) ON [PS_AzureDBElasticPoolResourceStats] ([end_time]),
+    CONSTRAINT [PK_AzureDBElasticPoolResourceStats] PRIMARY KEY CLUSTERED ([InstanceID] ASC, [end_time] ASC) WITH(DATA_COMPRESSION=PAGE) ON [PS_AzureDBElasticPoolResourceStats] ([end_time]),
     CONSTRAINT [FK_AzureDBElasticPoolResourceStats_Instances] FOREIGN KEY ([InstanceID]) REFERENCES [dbo].[Instances] ([InstanceID])
 ) ON [PS_AzureDBElasticPoolResourceStats] ([end_time]);
 

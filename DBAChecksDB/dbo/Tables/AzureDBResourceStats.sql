@@ -13,6 +13,6 @@
     [avg_instance_memory_percent] DECIMAL (5, 2) NOT NULL,
     [cpu_limit]                   DECIMAL (5, 2) NULL,
     [replica_role]                INT            NOT NULL,
-    CONSTRAINT [PK_AzureDBResourceStats] PRIMARY KEY CLUSTERED ([InstanceID] ASC, [end_time] ASC) ON [PS_AzureDBResourceStats] ([end_time])
+    CONSTRAINT [PK_AzureDBResourceStats] PRIMARY KEY CLUSTERED ([InstanceID] ASC, [end_time] ASC) WITH(DATA_COMPRESSION=PAGE) ON [PS_AzureDBResourceStats] ([end_time])
 ) ON [PS_AzureDBResourceStats] ([end_time]);
 

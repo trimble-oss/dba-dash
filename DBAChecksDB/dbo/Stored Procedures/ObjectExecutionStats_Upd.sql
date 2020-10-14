@@ -1,6 +1,7 @@
 ﻿CREATE PROC [dbo].[ObjectExecutionStats_Upd](@ObjectExecutionStats dbo.ProcStats READONLY,@InstanceID INT,@SnapshotDate DATETIME2(3))
 AS
 DECLARE @Ref VARCHAR(30)='ObjectExecutionStats'
+SET XACT_ABORT ON
 INSERT INTO dbo.DBObjects
 (
     DatabaseID,
@@ -43,6 +44,7 @@ JOIN dbo.DBObjects O ON O.DatabaseID = d.DatabaseID
 WHERE D.IsActive=1
 AND (O.IsActive=0 OR o.object_id <> t.object_id);
 
+BEGIN TRAN;
 
 WITH t AS (
 	SELECT O.ObjectID,
@@ -150,14 +152,16 @@ SELECT  InstanceID
 FROM T
 WHERE rnum=1
 
-DECLARE @MaxDate DATETIME 
-SELECT @MaxDate = ISNULL(MAX(SnapshotDate),'19000101')
-FROM dbo.ObjectExecutionStats_60MIN 
-WHERE InstanceID = @InstanceID
-
+DECLARE @From60 DATETIME2(3) 
+DECLARE @To60 DATETIME2(3)
+SELECT @From60 = MIN(CONVERT(DATETIME2(3),SUBSTRING(CONVERT(VARCHAR,t.current_time_utc,120),0,14) + ':00',120)),
+@To60 = DATEADD(hh,1,MAX(t.current_time_utc))
+FROM @ObjectExecutionStats t
 
 BEGIN TRAN
-DELETE dbo.ObjectExecutionStats_60MIN WHERE InstanceID=@InstanceID AND SnapshotDate=@MaxDate
+DELETE dbo.ObjectExecutionStats_60MIN WHERE InstanceID=@InstanceID AND SnapshotDate>=@From60
+AND SnapshotDate< @To60
+
 INSERT INTO dbo.ObjectExecutionStats_60MIN
 (
 	InstanceID,
@@ -174,8 +178,8 @@ INSERT INTO dbo.ObjectExecutionStats_60MIN
 )
 SELECT S.InstanceID,
 	S.ObjectID,
-	CONVERT(DATETIME,SUBSTRING(CONVERT(VARCHAR,S.SnapshotDate,120),0,14) + ':00',120) AS SnapshotDate,
-	MAX(SUM(S.PeriodTime)) OVER(PARTITION BY S.InstanceID,CONVERT(DATETIME,SUBSTRING(CONVERT(VARCHAR,S.SnapshotDate,120),0,14) + ':00',120)) PeriodTime,
+	CONVERT(DATETIME2(3),SUBSTRING(CONVERT(VARCHAR,S.SnapshotDate,120),0,14) + ':00',120) AS SnapshotDate,
+	MAX(SUM(S.PeriodTime)) OVER(PARTITION BY S.InstanceID,CONVERT(DATETIME2(3),SUBSTRING(CONVERT(VARCHAR,S.SnapshotDate,120),0,14) + ':00',120)) PeriodTime,
 	SUM(S.total_worker_time) total_worker_time,
 	SUM(S.total_elapsed_time) total_elapsed_time,
 	SUM(S.total_logical_reads) total_logical_reads,
@@ -185,12 +189,15 @@ SELECT S.InstanceID,
 	CAST(MAX(CAST(S.IsCompile AS INT)) AS BIT) IsCompile
 FROM dbo.ObjectExecutionStats S
 WHERE S.InstanceID = @InstanceID 
-AND S.SnapshotDate >=@MaxDate
+AND S.SnapshotDate >=@From60
+AND S.SnapshotDate< @To60
 GROUP BY S.ObjectID,S.InstanceID,
-	CONVERT(DATETIME,SUBSTRING(CONVERT(VARCHAR,SnapshotDate,120),0,14) + ':00',120) 
- OPTION(OPTIMIZE FOR(@MaxDate='9999-12-31'))
+	CONVERT(DATETIME2(3),SUBSTRING(CONVERT(VARCHAR,S.SnapshotDate,120),0,14) + ':00',120) 
+ OPTION(OPTIMIZE FOR(@From60='9999-12-31'))
 COMMIT
 
 EXEC dbo.CollectionDates_Upd @InstanceID = @InstanceID,  
 										@Reference = @Ref,
 										@SnapshotDate = @SnapshotDate
+
+COMMIT

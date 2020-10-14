@@ -100,9 +100,9 @@ namespace DBAChecksGUI.Performance
                 while (rdr.Read())
                 {
                     eventTime = (DateTime)rdr["EventTime"];
-                    sqlProcessValues.Add(new DateTimePoint(eventTime.ToLocalTime(), (Int32)rdr["SQLProcessCPU"] / 100.0));
-                    otherValues.Add(new DateTimePoint(eventTime.ToLocalTime(), (Int32)rdr["OtherCPU"] / 100.0));
-                    maxValues.Add(new DateTimePoint(eventTime.ToLocalTime(), (Int32)rdr["MaxCPU"] / 100.0));
+                    sqlProcessValues.Add(new DateTimePoint(eventTime.ToLocalTime(), Decimal.ToDouble((decimal)rdr["SQLProcessCPU"]) / 100.0));
+                    otherValues.Add(new DateTimePoint(eventTime.ToLocalTime(), Decimal.ToDouble((decimal)rdr["OtherCPU"]) / 100.0));
+                    maxValues.Add(new DateTimePoint(eventTime.ToLocalTime(), Decimal.ToDouble((decimal)rdr["MaxCPU"]) / 100.0));
 
                 }
                 if(update && maxValues.Count == 0)

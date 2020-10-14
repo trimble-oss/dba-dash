@@ -151,14 +151,18 @@ INSERT INTO dbo.DataRetention
     RetentionDays
 )
 SELECT t.TableName,t.RetentionDays
-FROM (VALUES('ProcStats',180),
-				('FunctionStats',180),
-				('Waits',180),
-				('IOStats',365),
+FROM (VALUES('ObjectExecutionExecutionStStats',120),
+				('Waits',120),
+				('DBIOStats',120),
 				('CPU',365),
-				('BlockingSnapshot',120)
+				('BlockingSnapshot',120),
+				('SlowQueries',120),
+				('AzureDBElasticPoolResourceStats',120),
+				('AzureDBResourceStats',120)
 				) AS t(TableName,RetentionDays)
 WHERE NOT EXISTS(SELECT 1 FROM dbo.DataRetention DR WHERE DR.TableName = T.TableName)
+
+DELETE DataRetention WHERE TableName NOT IN('BlockingSnapshot','CPU','DBIOStats','IOStats','ObjectExecutionStats','SlowQueries','Waits','AzureDBResourceStats','AzureDBElasticPoolResourceStats')
 
 INSERT INTO dbo.OSLoadedModulesStatus
 (
@@ -332,7 +336,10 @@ FROM
 (-1,'Corruption',125,180),
 (-1,'BlockingSnapshot',5,10),
 (-1,'CPU',5,10),
+(-1,'IOStats',5,10),
+(-1,'ObjectExecutionStats',5,10),
 (-1,'SlowQueries',5,10),
+(-1,'SlowQueriesStats',5,10),
 (-1,'AzureDBElasticPoolResourceStat',5,10),
 (-1,'Waits',5,10),
 (-1,'AzureDBResourceStats',5,10),

@@ -117,17 +117,17 @@
       <DependentUpon>AgentJobThresholdsConfig.cs</DependentUpon>
     </Compile>
     <Compile Include="AppSyntaxModeProvider.cs" />
-    <Compile Include="Backups\BackupsControl.cs">
+    <Compile Include="Bak\BackupsControl.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="Backups\BackupsControl.Designer.cs">
+    <Compile Include="Bak\BackupsControl.Designer.cs">
       <DependentUpon>BackupsControl.cs</DependentUpon>
     </Compile>
-    <Compile Include="Backups\BackupThresholds.cs" />
-    <Compile Include="Backups\BackupThresholdsConfig.cs">
+    <Compile Include="Bak\BackupThresholds.cs" />
+    <Compile Include="Bak\BackupThresholdsConfig.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Backups\BackupThresholdsConfig.Designer.cs">
+    <Compile Include="Bak\BackupThresholdsConfig.Designer.cs">
       <DependentUpon>BackupThresholdsConfig.cs</DependentUpon>
     </Compile>
     <Compile Include="Changes\Alerts.cs">
@@ -172,6 +172,7 @@
     <Compile Include="CollectionDates\CollectionDatesThresholds.Designer.cs">
       <DependentUpon>CollectionDatesThresholds.cs</DependentUpon>
     </Compile>
+    <Compile Include="ColumnMetaData.cs" />
     <Compile Include="Common.cs" />
     <Compile Include="Changes\ConfigurationHistory.cs">
       <SubType>UserControl</SubType>
@@ -181,6 +182,12 @@
     </Compile>
     <Compile Include="CustomProgressBar.cs">
       <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="DataRetention.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="DataRetention.Designer.cs">
+      <DependentUpon>DataRetention.cs</DependentUpon>
     </Compile>
     <Compile Include="DBAChecksStatus.cs" />
     <Compile Include="DBDiff.cs">
@@ -221,6 +228,18 @@
       <DependentUpon>DriveControl.cs</DependentUpon>
     </Compile>
     <Compile Include="Drives\Drive.cs" />
+    <Compile Include="Drives\DriveHistory.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Drives\DriveHistory.Designer.cs">
+      <DependentUpon>DriveHistory.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Drives\DriveHistoryView.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Drives\DriveHistoryView.Designer.cs">
+      <DependentUpon>DriveHistoryView.cs</DependentUpon>
+    </Compile>
     <Compile Include="Drives\DriveThreshold.cs" />
     <Compile Include="Drives\DriveThresholdConfig.cs">
       <SubType>Form</SubType>
@@ -346,6 +365,12 @@
     <Compile Include="Changes\SQLPatching.Designer.cs">
       <DependentUpon>SQLPatching.cs</DependentUpon>
     </Compile>
+    <Compile Include="SpaceTracking.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="SpaceTracking.Designer.cs">
+      <DependentUpon>SpaceTracking.cs</DependentUpon>
+    </Compile>
     <Compile Include="SqlServerTypes\Loader.cs" />
     <Compile Include="SQLTreeItem.cs" />
     <Compile Include="Summary.cs">
@@ -361,10 +386,10 @@
     <EmbeddedResource Include="AgentJobs\AgentJobThresholdsConfig.resx">
       <DependentUpon>AgentJobThresholdsConfig.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Backups\BackupsControl.resx">
+    <EmbeddedResource Include="Bak\BackupsControl.resx">
       <DependentUpon>BackupsControl.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Backups\BackupThresholdsConfig.resx">
+    <EmbeddedResource Include="Bak\BackupThresholdsConfig.resx">
       <DependentUpon>BackupThresholdsConfig.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Changes\Alerts.resx">
@@ -391,6 +416,9 @@
     <EmbeddedResource Include="Changes\ConfigurationHistory.resx">
       <DependentUpon>ConfigurationHistory.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="DataRetention.resx">
+      <DependentUpon>DataRetention.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="DBDiff.resx">
       <DependentUpon>DBDiff.cs</DependentUpon>
     </EmbeddedResource>
@@ -408,6 +436,12 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Drives\DriveControl.resx">
       <DependentUpon>DriveControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Drives\DriveHistory.resx">
+      <DependentUpon>DriveHistory.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Drives\DriveHistoryView.resx">
+      <DependentUpon>DriveHistoryView.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Drives\DriveThresholdConfig.resx">
       <DependentUpon>DriveThresholdConfig.cs</DependentUpon>
@@ -478,6 +512,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Changes\SQLPatching.resx">
       <DependentUpon>SQLPatching.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="SpaceTracking.resx">
+      <DependentUpon>SpaceTracking.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Summary.resx">
       <DependentUpon>Summary.cs</DependentUpon>

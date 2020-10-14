@@ -10,6 +10,6 @@
     [total_physical_reads] BIGINT        NOT NULL,
     [execution_count]      BIGINT        NOT NULL,
     [IsCompile]            BIT           NOT NULL,
-    CONSTRAINT [PK_ObjectExecutionStats] PRIMARY KEY CLUSTERED ([InstanceID] ASC, [SnapshotDate] ASC, [ObjectID] ASC) WITH (DATA_COMPRESSION = PAGE) ON [PS_ObjectExecutionStats] ([SnapshotDate])
-) ON [PS_ObjectExecutionStats] ([SnapshotDate]);
+    CONSTRAINT [PK_ObjectExecutionStats] PRIMARY KEY CLUSTERED ([InstanceID] ASC, [SnapshotDate] ASC, [ObjectID] ASC) WITH (DATA_COMPRESSION = PAGE) 
+) ;
 

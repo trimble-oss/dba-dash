@@ -63,8 +63,27 @@ namespace DBAChecksServiceConfig
             this.DialogResult = DialogResult.Cancel;
         }
 
+        public void testConnection(string connectionString)
+        {
+            SqlConnection cn = new SqlConnection(connectionString);
+            using (cn)
+            {
+                cn.Open();
+            }
+          
+        }
+
         private void bttnConnect_Click(object sender, EventArgs e)
         {
+            try
+            {
+                testConnection(ConnectionString);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error connecting to data source:" +ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
             this.DialogResult = DialogResult.OK;
         }
     }

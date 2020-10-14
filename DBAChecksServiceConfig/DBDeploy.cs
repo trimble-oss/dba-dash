@@ -149,6 +149,7 @@ AND database_id > 4 ", cn);
             lblNotice.Visible = true;
             bttnCancel.Visible = true;
             bttnGenerate.Visible = false;
+            bttnDeploy.Enabled = false;
             while (!t.IsCompleted)
             {
                 if (lblNotice.Text.Length > 50)
@@ -169,6 +170,7 @@ AND database_id > 4 ", cn);
             lblNotice.Visible = false;
             bttnCancel.Visible = false;
             bttnGenerate.Visible = true;
+            bttnDeploy.Enabled = true;
             if (t.IsCompleted)
             {
                 string deployScript = t.Result;
@@ -186,6 +188,57 @@ AND database_id > 4 ", cn);
                     DeployScript = deployScript;
                     MessageBox.Show("Please copy/paste the script into SSMS and run in SQLCMD mode", "Note", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 }
+            }
+        }
+
+        private void deploy()
+        {
+            isCancel = false;
+            DacpacUtility.DacpacService dac = new DacpacUtility.DacpacService();
+            string _db = DB;
+            string _connectionString = ConnectionString;
+            var t = Task.Run(() => dac.ProcessDacPac(_connectionString, _db, "DBAChecksDB.dacpac"));
+            lblNotice.Visible = true;
+            bttnGenerate.Enabled = false;
+            bttnDeploy.Enabled = false;
+            while (!t.IsCompleted)
+            {
+                if (lblNotice.Text.Length > 50)
+                {
+                    lblNotice.Text = "Please Wait";
+                }
+                else
+                {
+                    lblNotice.Text = lblNotice.Text + ".";
+                }
+                Application.DoEvents();
+                if (isCancel)
+                {
+                    break;
+                }
+                System.Threading.Thread.Sleep(500);
+            }
+            lblNotice.Visible = false;
+            bttnGenerate.Enabled= false;
+            if (t.IsCompleted)
+            {
+                if(t.Result == true)
+                {
+                    MessageBox.Show("Deploy succeeded", "Deploy", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    this.DialogResult = DialogResult.OK;
+                    this.Close();
+                }
+                else
+                {
+                    MessageBox.Show("Deploy failed", "Deploy", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    var sb = new StringBuilder();
+                    foreach (var item in dac.MessageList)
+                    {
+                        sb.AppendLine(item);
+                    }
+                    DeployScript = sb.ToString();
+                }
+
             }
         }
 
@@ -280,9 +333,13 @@ AND database_id > 4 ", cn);
                         bttnGenerate.Enabled = true;
                     }
                 }
+                bttnGenerate.Enabled = true;
+                bttnDeploy.Enabled = true;
             }
             catch (Exception ex)
             {
+                bttnGenerate.Enabled = false;
+                bttnDeploy.Enabled = false;
                 MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
 
@@ -291,6 +348,11 @@ AND database_id > 4 ", cn);
         private void cboDatabase_Validated(object sender, EventArgs e)
         {
             dbChanged();
+        }
+
+        private void bttnDeploy_Click(object sender, EventArgs e)
+        {
+            deploy();
         }
     }
 }

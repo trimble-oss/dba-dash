@@ -154,6 +154,7 @@
             this.Controls.Add(this.txtServerName);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "DBConnection";
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "Connect";
             this.pnlAuth.ResumeLayout(false);
             this.pnlAuth.PerformLayout();

@@ -652,7 +652,7 @@ is_read_only BIT,
 state TINYINT
 )
 
-DECLARE DBs CURSOR FOR
+DECLARE DBs CURSOR FAST_FORWARD LOCAL FOR
 SELECT name
 FROM sys.databases
 WHERE state  = 0
@@ -675,7 +675,7 @@ isnull(fg.name,''LOG'') as filegroup_name,
 f.physical_name,
 f.type,
 f.size,
-FILEPROPERTY(f.name,''spaceused'') as spaceused,
+CASE WHEN f.type=2 THEN f.size ELSE FILEPROPERTY(f.name,''spaceused'') END as spaceused,
 f.max_size,
 f.growth,
 f.is_percent_growth,
