@@ -26,6 +26,10 @@
         <rd:UseGenericDesigner>true</rd:UseGenericDesigner>
       </Query>
       <Fields>
+        <Field Name="FileID">
+          <DataField>FileID</DataField>
+          <rd:TypeName>System.Int32</rd:TypeName>
+        </Field>
         <Field Name="InstanceID">
           <DataField>InstanceID</DataField>
           <rd:TypeName>System.Int32</rd:TypeName>
@@ -51,40 +55,52 @@
           <rd:TypeName>System.String</rd:TypeName>
         </Field>
         <Field Name="filegroup_name">
-          <DataField>filegroup_name</DataField>
+          <DataField>Filegroup_name</DataField>
           <rd:TypeName>System.String</rd:TypeName>
         </Field>
-        <Field Name="SizeMB">
-          <DataField>SizeMB</DataField>
-          <rd:TypeName>System.Decimal</rd:TypeName>
-        </Field>
-        <Field Name="UsedMB">
-          <DataField>UsedMB</DataField>
-          <rd:TypeName>System.Decimal</rd:TypeName>
-        </Field>
-        <Field Name="FreeMB">
-          <DataField>FreeMB</DataField>
-          <rd:TypeName>System.Decimal</rd:TypeName>
-        </Field>
-        <Field Name="PctFree">
-          <DataField>PctFree</DataField>
-          <rd:TypeName>System.Decimal</rd:TypeName>
-        </Field>
-        <Field Name="NumberOfFiles">
-          <DataField>NumberOfFiles</DataField>
+        <Field Name="file_name">
+          <DataField>file_name</DataField>
           <rd:TypeName>System.Int32</rd:TypeName>
+        </Field>
+        <Field Name="physical_name">
+          <DataField>physical_name</DataField>
+          <rd:TypeName>System.Int32</rd:TypeName>
+        </Field>
+        <Field Name="FileSizeMB">
+          <DataField>FileSizeMB</DataField>
+          <rd:TypeName>System.Decimal</rd:TypeName>
+        </Field>
+        <Field Name="FileUsedMB">
+          <DataField>FileUsedMB</DataField>
+          <rd:TypeName>System.Decimal</rd:TypeName>
+        </Field>
+        <Field Name="FileFreeMB">
+          <DataField>FileFreeMB</DataField>
+          <rd:TypeName>System.Decimal</rd:TypeName>
         </Field>
         <Field Name="is_read_only">
           <DataField>is_read_only</DataField>
           <rd:TypeName>System.Boolean</rd:TypeName>
         </Field>
+        <Field Name="FilePctFree">
+          <DataField>FilePctFree</DataField>
+          <rd:TypeName>System.Decimal</rd:TypeName>
+        </Field>
         <Field Name="is_db_read_only">
           <DataField>is_db_read_only</DataField>
           <rd:TypeName>System.Boolean</rd:TypeName>
         </Field>
+        <Field Name="FilegroupSizeMB">
+          <DataField>FilegroupSizeMB</DataField>
+          <rd:TypeName>System.Decimal</rd:TypeName>
+        </Field>
         <Field Name="is_in_standby">
           <DataField>is_in_standby</DataField>
           <rd:TypeName>System.Boolean</rd:TypeName>
+        </Field>
+        <Field Name="FilegroupUsedMB">
+          <DataField>FilegroupUsedMB</DataField>
+          <rd:TypeName>System.Decimal</rd:TypeName>
         </Field>
         <Field Name="state">
           <DataField>state</DataField>
@@ -94,6 +110,14 @@
           <DataField>state_desc</DataField>
           <rd:TypeName>System.String</rd:TypeName>
         </Field>
+        <Field Name="FilegroupFreeMB">
+          <DataField>FilegroupFreeMB</DataField>
+          <rd:TypeName>System.Decimal</rd:TypeName>
+        </Field>
+        <Field Name="FilegroupPctFree">
+          <DataField>FilegroupPctFree</DataField>
+          <rd:TypeName>System.Decimal</rd:TypeName>
+        </Field>
         <Field Name="FreeSpaceStatus">
           <DataField>FreeSpaceStatus</DataField>
           <rd:TypeName>System.Int32</rd:TypeName>
@@ -101,6 +125,10 @@
         <Field Name="FreeSpaceWarningThreshold">
           <DataField>FreeSpaceWarningThreshold</DataField>
           <rd:TypeName>System.Decimal</rd:TypeName>
+        </Field>
+        <Field Name="FilegroupNumberOfFiles">
+          <DataField>FilegroupNumberOfFiles</DataField>
+          <rd:TypeName>System.Int32</rd:TypeName>
         </Field>
         <Field Name="FreeSpaceCriticalThreshold">
           <DataField>FreeSpaceCriticalThreshold</DataField>
@@ -124,6 +152,10 @@
         </Field>
         <Field Name="FileSnapshotAge">
           <DataField>FileSnapshotAge</DataField>
+          <rd:TypeName>System.Int32</rd:TypeName>
+        </Field>
+        <Field Name="FileSnapshotAgeStatus">
+          <DataField>FileSnapshotAgeStatus</DataField>
           <rd:TypeName>System.Int32</rd:TypeName>
         </Field>
       </Fields>
@@ -410,7 +442,7 @@
                         <Textbox Name="textbox8">
                           <CanGrow>true</CanGrow>
                           <UserSort>
-                            <SortExpression>=Fields!SizeMB.Value</SortExpression>
+                            <SortExpression>=Fields!FilegroupSizeMB.Value</SortExpression>
                           </UserSort>
                           <KeepTogether>true</KeepTogether>
                           <Paragraphs>
@@ -455,7 +487,7 @@
                         <Textbox Name="textbox9">
                           <CanGrow>true</CanGrow>
                           <UserSort>
-                            <SortExpression>=Fields!UsedMB.Value</SortExpression>
+                            <SortExpression>=Fields!FilegroupUsedMB.Value</SortExpression>
                           </UserSort>
                           <KeepTogether>true</KeepTogether>
                           <Paragraphs>
@@ -500,7 +532,7 @@
                         <Textbox Name="textbox10">
                           <CanGrow>true</CanGrow>
                           <UserSort>
-                            <SortExpression>=Fields!FreeMB.Value</SortExpression>
+                            <SortExpression>=Fields!FilegroupFreeMB.Value</SortExpression>
                           </UserSort>
                           <KeepTogether>true</KeepTogether>
                           <Paragraphs>
@@ -545,7 +577,7 @@
                         <Textbox Name="textbox11">
                           <CanGrow>true</CanGrow>
                           <UserSort>
-                            <SortExpression>=Fields!PctFree.Value</SortExpression>
+                            <SortExpression>=Fields!FilegroupPctFree.Value</SortExpression>
                           </UserSort>
                           <KeepTogether>true</KeepTogether>
                           <Paragraphs>
@@ -590,7 +622,7 @@
                         <Textbox Name="textbox12">
                           <CanGrow>true</CanGrow>
                           <UserSort>
-                            <SortExpression>=Fields!NumberOfFiles.Value</SortExpression>
+                            <SortExpression>=Fields!FilegroupNumberOfFiles.Value</SortExpression>
                           </UserSort>
                           <KeepTogether>true</KeepTogether>
                           <Paragraphs>
@@ -1213,14 +1245,14 @@
                     </TablixCell>
                     <TablixCell>
                       <CellContents>
-                        <Textbox Name="SizeMB">
+                        <Textbox Name="FilegroupSizeMB">
                           <CanGrow>true</CanGrow>
                           <KeepTogether>true</KeepTogether>
                           <Paragraphs>
                             <Paragraph>
                               <TextRuns>
                                 <TextRun>
-                                  <Value>=Fields!SizeMB.Value</Value>
+                                  <Value>=Fields!FilegroupSizeMB.Value</Value>
                                   <Style>
                                     <FontFamily />
                                     <Format>#,0;(#,0)</Format>
@@ -1231,7 +1263,7 @@
                               <Style />
                             </Paragraph>
                           </Paragraphs>
-                          <rd:DefaultName>SizeMB</rd:DefaultName>
+                          <rd:DefaultName>FilegroupSizeMB</rd:DefaultName>
                           <Style>
                             <Border>
                               <Color>LightGrey</Color>
@@ -1250,14 +1282,14 @@
                     </TablixCell>
                     <TablixCell>
                       <CellContents>
-                        <Textbox Name="UsedMB">
+                        <Textbox Name="FilegroupUsedMB">
                           <CanGrow>true</CanGrow>
                           <KeepTogether>true</KeepTogether>
                           <Paragraphs>
                             <Paragraph>
                               <TextRuns>
                                 <TextRun>
-                                  <Value>=Fields!UsedMB.Value</Value>
+                                  <Value>=Fields!FilegroupUsedMB.Value</Value>
                                   <Style>
                                     <FontFamily />
                                     <Format>#,0;(#,0)</Format>
@@ -1268,7 +1300,7 @@
                               <Style />
                             </Paragraph>
                           </Paragraphs>
-                          <rd:DefaultName>UsedMB</rd:DefaultName>
+                          <rd:DefaultName>FilegroupUsedMB</rd:DefaultName>
                           <Style>
                             <Border>
                               <Color>LightGrey</Color>
@@ -1287,14 +1319,14 @@
                     </TablixCell>
                     <TablixCell>
                       <CellContents>
-                        <Textbox Name="FreeMB">
+                        <Textbox Name="FilegroupFreeMB">
                           <CanGrow>true</CanGrow>
                           <KeepTogether>true</KeepTogether>
                           <Paragraphs>
                             <Paragraph>
                               <TextRuns>
                                 <TextRun>
-                                  <Value>=Fields!FreeMB.Value</Value>
+                                  <Value>=Fields!FilegroupFreeMB.Value</Value>
                                   <Style>
                                     <FontFamily />
                                     <Format>#,0;(#,0)</Format>
@@ -1305,7 +1337,7 @@
                               <Style />
                             </Paragraph>
                           </Paragraphs>
-                          <rd:DefaultName>FreeMB</rd:DefaultName>
+                          <rd:DefaultName>FilegroupFreeMB</rd:DefaultName>
                           <Style>
                             <Border>
                               <Color>LightGrey</Color>
@@ -1327,14 +1359,14 @@ Fields!FreeSpaceStatus.Value=4,"Green")</BackgroundColor>
                     </TablixCell>
                     <TablixCell>
                       <CellContents>
-                        <Textbox Name="PctFree">
+                        <Textbox Name="FilegroupPctFree">
                           <CanGrow>true</CanGrow>
                           <KeepTogether>true</KeepTogether>
                           <Paragraphs>
                             <Paragraph>
                               <TextRuns>
                                 <TextRun>
-                                  <Value>=Fields!PctFree.Value</Value>
+                                  <Value>=Fields!FilegroupPctFree.Value</Value>
                                   <Style>
                                     <FontFamily />
                                     <Format>0.00%</Format>
@@ -1345,7 +1377,7 @@ Fields!FreeSpaceStatus.Value=4,"Green")</BackgroundColor>
                               <Style />
                             </Paragraph>
                           </Paragraphs>
-                          <rd:DefaultName>PctFree</rd:DefaultName>
+                          <rd:DefaultName>FilegroupPctFree</rd:DefaultName>
                           <Style>
                             <Border>
                               <Color>LightGrey</Color>
@@ -1367,14 +1399,14 @@ Fields!FreeSpaceStatus.Value=4,"Green")</BackgroundColor>
                     </TablixCell>
                     <TablixCell>
                       <CellContents>
-                        <Textbox Name="NumberOfFiles">
+                        <Textbox Name="FilegroupNumberOfFiles">
                           <CanGrow>true</CanGrow>
                           <KeepTogether>true</KeepTogether>
                           <Paragraphs>
                             <Paragraph>
                               <TextRuns>
                                 <TextRun>
-                                  <Value>=Fields!NumberOfFiles.Value</Value>
+                                  <Value>=Fields!FilegroupNumberOfFiles.Value</Value>
                                   <Style>
                                     <FontFamily />
                                     <Color>#333333</Color>
@@ -1384,7 +1416,7 @@ Fields!FreeSpaceStatus.Value=4,"Green")</BackgroundColor>
                               <Style />
                             </Paragraph>
                           </Paragraphs>
-                          <rd:DefaultName>NumberOfFiles</rd:DefaultName>
+                          <rd:DefaultName>FilegroupNumberOfFiles</rd:DefaultName>
                           <Style>
                             <Border>
                               <Color>LightGrey</Color>

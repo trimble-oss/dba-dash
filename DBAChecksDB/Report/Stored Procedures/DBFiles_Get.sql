@@ -1,53 +1,17 @@
 ﻿CREATE PROC [Report].[DBFiles_Get](@InstanceIDs VARCHAR(MAX)=NULL,@FilterLevel TINYINT=2)
 AS
-DECLARE @Instances TABLE(
-	InstanceID INT PRIMARY KEY
-)
-IF @InstanceIDs IS NULL
-BEGIN
-	INSERT INTO @Instances
-	(
-	    InstanceID
-	)
-	SELECT InstanceID 
-	FROM dbo.Instances 
-	WHERE IsActive=1
-END 
-ELSE 
-BEGIN
-	INSERT INTO @Instances
-	(
-		InstanceID
-	)
-	SELECT Item
-	FROM dbo.SplitStrings(@InstanceIDs,',')
-END
+DECLARE @Critical BIT 
+DECLARE @Warning BIT 
+DECLARE @OK BIT 
+DECLARE @NA BIT 
+SELECT @Critical = CASE WHEN @FilterLevel IN(1,2,4) THEN 1 ELSE 0 END,
+	@Warning = CASE WHEN @FilterLevel IN(2,4) THEN 1 ELSE 0 END,
+	@OK = CASE WHEN @FilterLevel =4 THEN 1 ELSE 0 END,
+	@NA = CASE WHEN @FilterLevel=4 THEN 1 ELSE 0 END
 
-SELECT InstanceID,
-       DatabaseID,
-       data_space_id,
-       Instance,
-	   ConnectionID,
-       name,
-       filegroup_name,
-       SizeMB,
-       UsedMB,
-       FreeMB,
-       PctFree,
-       NumberOfFiles,
-       is_read_only,
-       is_db_read_only,
-       is_in_standby,
-       state,
-	   state_desc,
-       FreeSpaceStatus,
-       FreeSpaceWarningThreshold,
-       FreeSpaceCriticalThreshold,
-       FreeSpaceCheckType,
-	   ConfiguredLevel,
-	   ExcludedReason,
-	   FileSnapshotDate,
-	   FileSnapshotAge
-FROM dbo.DBFileStatus F
-WHERE EXISTS(SELECT 1 FROM @Instances I WHERE I.InstanceID = F.InstanceID)
-AND (FreeSpaceStatus<=@FilterLevel OR @FilterLevel IS NULL)
+
+EXEC dbo.DBFiles_Get @InstanceIDs = @InstanceIDs,
+                     @IncludeCritical = @Critical, 
+                     @IncludeWarning = @Warning, 
+                     @IncludeNA = @NA, 
+                     @IncludeOK = @OK
