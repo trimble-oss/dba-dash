@@ -36,11 +36,13 @@
             this.Grp = new System.Windows.Forms.DataGridViewLinkColumn();
             this.AllocatedGB = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.UsedGB = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.History = new System.Windows.Forms.DataGridViewLinkColumn();
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
             this.tsRefresh = new System.Windows.Forms.ToolStripButton();
             this.tsCopy = new System.Windows.Forms.ToolStripButton();
             this.tsBack = new System.Windows.Forms.ToolStripButton();
+            this.tsHistory = new System.Windows.Forms.ToolStripButton();
             ((System.ComponentModel.ISupportInitialize)(this.dgv)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
@@ -69,7 +71,8 @@
             this.dgv.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
             this.Grp,
             this.AllocatedGB,
-            this.UsedGB});
+            this.UsedGB,
+            this.History});
             this.dgv.Dock = System.Windows.Forms.DockStyle.Fill;
             this.dgv.Location = new System.Drawing.Point(0, 31);
             this.dgv.Name = "dgv";
@@ -114,6 +117,16 @@
             this.UsedGB.ReadOnly = true;
             this.UsedGB.Width = 94;
             // 
+            // History
+            // 
+            this.History.HeaderText = "History";
+            this.History.MinimumWidth = 6;
+            this.History.Name = "History";
+            this.History.ReadOnly = true;
+            this.History.Text = "History";
+            this.History.UseColumnTextForLinkValue = true;
+            this.History.Width = 58;
+            // 
             // splitContainer1
             // 
             this.splitContainer1.Dock = System.Windows.Forms.DockStyle.Fill;
@@ -138,7 +151,8 @@
             this.toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.tsRefresh,
             this.tsCopy,
-            this.tsBack});
+            this.tsBack,
+            this.tsHistory});
             this.toolStrip1.Location = new System.Drawing.Point(0, 0);
             this.toolStrip1.Name = "toolStrip1";
             this.toolStrip1.Size = new System.Drawing.Size(516, 31);
@@ -176,6 +190,16 @@
             this.tsBack.Text = "Back";
             this.tsBack.Click += new System.EventHandler(this.tsBack_Click);
             // 
+            // tsHistory
+            // 
+            this.tsHistory.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.tsHistory.Image = global::DBAChecksGUI.Properties.Resources.LineChart_16x;
+            this.tsHistory.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tsHistory.Name = "tsHistory";
+            this.tsHistory.Size = new System.Drawing.Size(29, 28);
+            this.tsHistory.Text = "History";
+            this.tsHistory.Click += new System.EventHandler(this.tsHistory_Click);
+            // 
             // SpaceTracking
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
@@ -201,12 +225,14 @@
         private LiveCharts.Wpf.PieChart pieChart1;
         private System.Windows.Forms.DataGridView dgv;
         private System.Windows.Forms.SplitContainer splitContainer1;
-        private System.Windows.Forms.DataGridViewLinkColumn Grp;
-        private System.Windows.Forms.DataGridViewTextBoxColumn AllocatedGB;
-        private System.Windows.Forms.DataGridViewTextBoxColumn UsedGB;
         private System.Windows.Forms.ToolStrip toolStrip1;
         private System.Windows.Forms.ToolStripButton tsCopy;
         private System.Windows.Forms.ToolStripButton tsRefresh;
         private System.Windows.Forms.ToolStripButton tsBack;
+        private System.Windows.Forms.DataGridViewLinkColumn Grp;
+        private System.Windows.Forms.DataGridViewTextBoxColumn AllocatedGB;
+        private System.Windows.Forms.DataGridViewTextBoxColumn UsedGB;
+        private System.Windows.Forms.DataGridViewLinkColumn History;
+        private System.Windows.Forms.ToolStripButton tsHistory;
     }
 }

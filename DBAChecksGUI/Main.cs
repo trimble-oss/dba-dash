@@ -274,7 +274,8 @@ namespace DBAChecksGUI
             {
                 spaceTracking1.InstanceIDs = instanceIDs;
                 spaceTracking1.DatabaseID = n.DatabaseID;
-                spaceTracking1.ConnectionString = connectionString;
+                spaceTracking1.Instance = n.InstanceName;
+                spaceTracking1.DBName = n.DatabaseName;
                 spaceTracking1.RefreshData();
             }
         }

@@ -10,6 +10,7 @@ using System.Windows.Forms;
 using System.Data.SqlClient;
 using LiveCharts;
 using LiveCharts.Wpf;
+using DBAChecksGUI.DBFiles;
 
 namespace DBAChecksGUI
 {
@@ -22,16 +23,14 @@ namespace DBAChecksGUI
 
 
         public List<Int32> InstanceIDs;
-        public string ConnectionString;
+    
         public Int32 DatabaseID = -1;
 
-        private string DBName="";
-        private string Instance="";
+        public string DBName="";
+        public string Instance="";
 
         public void RefreshData()
         {
-            DBName = "";
-            Instance = "";
             bool drillDownEnabled = DatabaseID > 0;
             tsBack.Enabled = false;
             diableHyperLinks(drillDownEnabled);
@@ -40,7 +39,7 @@ namespace DBAChecksGUI
 
         private void refreshData()
         {
-            SqlConnection cn = new SqlConnection(ConnectionString);
+            SqlConnection cn = new SqlConnection(Common.ConnectionString);
             using (cn)
             {
                 cn.Open();
@@ -96,6 +95,8 @@ namespace DBAChecksGUI
             }
         }
 
+
+
         private void dgv_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
             if (e.RowIndex >= 0)
@@ -121,6 +122,30 @@ namespace DBAChecksGUI
                     }
                     tsBack.Enabled = true;
                     refreshData();
+                }
+                else if(dgv.Columns[e.ColumnIndex] == History)
+                {
+                    var frm = new DBSpaceHistoryView();
+                    frm.DatabaseID = DatabaseID;
+                    frm.Instance =  Instance;
+                    frm.DBName = DBName;
+                    if (InstanceIDs.Count > 1 && Instance.Length == 0)
+                    {
+                        frm.Instance = selectedGroupValue;
+                    }
+                    else if (DBName.Length == 0)
+                    {
+                        frm.DBName = selectedGroupValue;
+                    }
+                    else
+                    {
+                        frm.FileName = selectedGroupValue;
+                    }
+                    if (frm.DatabaseID < 1)
+                    {
+                        frm.DatabaseID  = Common.GetDatabaseID(frm.Instance, frm.DBName);
+                    }
+                    frm.Show();
                 }
             }
         }
@@ -164,6 +189,19 @@ namespace DBAChecksGUI
             }
             diableHyperLinks(false);
             refreshData();
+        }
+
+        private void tsHistory_Click(object sender, EventArgs e)
+        {
+            var frm = new DBSpaceHistoryView();
+            frm.DatabaseID = DatabaseID;
+            frm.Instance = Instance;
+            frm.DBName = DBName;
+            if (frm.DatabaseID < 1)
+            {
+                frm.DatabaseID = Common.GetDatabaseID(frm.Instance, frm.DBName);
+            }
+            frm.Show();
         }
     }
 }

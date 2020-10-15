@@ -4,7 +4,8 @@
 	@IncludeCritical BIT=1,
 	@IncludeWarning BIT=1,
 	@IncludeNA BIT=0,
-	@IncludeOK BIT=0
+	@IncludeOK BIT=0,
+	@FilegroupLevel BIT=1
 )
 AS
 DECLARE @StatusSQL NVARCHAR(MAX)
@@ -20,33 +21,40 @@ SELECT @StatusSQL = CASE WHEN @StatusSQL='' THEN 'AND 1=2'
 DECLARE @SQL NVARCHAR(MAX)
 
 SET @SQL = N'
-SELECT InstanceID,
+SELECT FileID,
+       InstanceID,
        DatabaseID,
        data_space_id,
        Instance,
-	   ConnectionID,
+       ConnectionID,
        name,
-       filegroup_name,
-       SizeMB,
-       UsedMB,
-       FreeMB,
-       PctFree,
-       NumberOfFiles,
+       file_name,
+       Filegroup_name,
+       physical_name,
+       FileSizeMB,
+       FileUsedMB,
+       FileFreeMB,
+       FilePctFree,
+       FilegroupSizeMB,
+       FilegroupUsedMB,
+       FilegroupFreeMB,
+       FilegroupPctFree,
+       FilegroupNumberOfFiles,
        is_read_only,
        is_db_read_only,
        is_in_standby,
        state,
-	   state_desc,
+       state_desc,
+       ExcludedReason,
        FreeSpaceStatus,
        FreeSpaceWarningThreshold,
        FreeSpaceCriticalThreshold,
        FreeSpaceCheckType,
-	   ConfiguredLevel,
-	   ExcludedReason,
-	   FileSnapshotDate,
-	   FileSnapshotAge,
-	   CASE WHEN FileSnapshotAge>1440 THEN 1 WHEN FileSnapshotAge>120 THEN 2 WHEN FileSnapshotAge<60 THEN 4 ELSE 3 END AS SnapshotAgeStatus
-FROM dbo.DBFileStatus F
+       ConfiguredLevel,
+       FileSnapshotDate,
+       FileSnapshotAge,
+       FileSnapshotAgeStatus
+FROM ' + CASE WHEN @FilegroupLevel = 1 THEN 'dbo.FileGroupStatus' ELSE 'dbo.FileStatus' END + ' AS F
 WHERE 1=1' + 
 CASE WHEN @InstanceIDs IS NULL THEN '' ELSE 'AND EXISTS (SELECT 1
 			FROM STRING_SPLIT(@InstanceIDs,'','') ss

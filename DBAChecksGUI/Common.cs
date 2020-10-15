@@ -34,6 +34,27 @@ WHERE DDLID = @DDLID";
             }
         }
 
+        public static Int32 GetDatabaseID(string instance, string dbName)
+        {
+            if (instance == null || instance.Length == 0 || dbName == null || dbName.Length == 0)
+            {
+                return -1;
+            }
+            else
+            {
+                SqlConnection cn = new SqlConnection(Common.ConnectionString);
+                using (cn)
+                {
+                    cn.Open();
+                    SqlCommand cmd = new SqlCommand("DatabaseID_Get", cn);
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.Parameters.AddWithValue("Instance", instance);
+                    cmd.Parameters.AddWithValue("DBName", dbName);
+                    return (Int32)cmd.ExecuteScalar();
+                }
+            }
+        }
+
         public static DataTable ConvertUTCToLocal(ref DataTable dt,List<string>convertCols=null)
         {
             List<Int32> convertColsIdx = new List<int>();

@@ -21,6 +21,7 @@ JOIN dbo.Databases D ON D.InstanceID = I.InstanceID
 JOIN dbo.DBFiles F ON F.DatabaseID = D.DatabaseID
 WHERE I.IsActive=1
 AND D.IsActive=1
+AND F.IsActive=1
 AND D.source_database_id IS NULL
 ' + CASE WHEN @InstanceIDs IS NULL THEN '' ELSE 'AND EXISTS (SELECT 1
 			FROM STRING_SPLIT(@InstanceIDs,'','') ss

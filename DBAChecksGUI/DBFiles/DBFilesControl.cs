@@ -81,6 +81,7 @@ namespace DBAChecksGUI.DBFiles
                 cmd.Parameters.AddWithValue("IncludeOK", IncludeOK);
                 cmd.Parameters.AddWithValue("IncludeWarning", IncludeWarning);
                 cmd.Parameters.AddWithValue("IncludeCritical", IncludeCritical);
+                cmd.Parameters.AddWithValue("FilegroupLevel", tsFilegroup.Checked);
                 cmd.CommandType = CommandType.StoredProcedure;
                 SqlDataAdapter da = new SqlDataAdapter(cmd);
                 DataTable dt = new DataTable();
@@ -116,10 +117,20 @@ namespace DBAChecksGUI.DBFiles
 
         private void dgvFiles_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
+            var row = (DataRowView)dgvFiles.Rows[e.RowIndex].DataBoundItem;
             if (dgvFiles.Columns[e.ColumnIndex].HeaderText == "Configure")
             {
-                var row = (DataRowView)dgvFiles.Rows[e.RowIndex].DataBoundItem;
-                ConfigureThresholds((Int32)row["InstanceID"], (Int32)row["DatabaseID"],(Int32)row["data_space_id"]);
+                ConfigureThresholds((Int32)row["InstanceID"], (Int32)row["DatabaseID"], (Int32)row["data_space_id"]);
+            }
+            else if (dgvFiles.Columns[e.ColumnIndex].HeaderText == "History")
+            {
+                var frm = new DBSpaceHistoryView();
+                frm.DatabaseID = (Int32)row["DatabaseID"];
+                frm.DataSpaceID = row["data_space_id"] == DBNull.Value ? null : (Int32?)row["data_space_id"];
+                frm.Instance = (string)row["Instance"];
+                frm.DBName = (string)row["name"];
+                frm.FileName = row["file_name"] == DBNull.Value ?  null : (string)row["file_name"];
+                frm.Show();
             }
         }
 
@@ -141,18 +152,18 @@ namespace DBAChecksGUI.DBFiles
             {
                 var row = (DataRowView)dgvFiles.Rows[idx].DataBoundItem;
                 var Status = (DBAChecksStatus.DBAChecksStatusEnum)row["FreeSpaceStatus"];
-                var snapshotStatus = (DBAChecksStatus.DBAChecksStatusEnum)row["SnapshotAgeStatus"];
+                var snapshotStatus = (DBAChecksStatus.DBAChecksStatusEnum)row["FileSnapshotAgeStatus"];
                 string checkType = row["FreeSpaceCheckType"] == DBNull.Value ? "-" : (string)row["FreeSpaceCheckType"];
                 dgvFiles.Rows[idx].Cells["FileSnapshotAge"].Style.BackColor = DBAChecksStatus.GetStatusColour(snapshotStatus);
-                dgvFiles.Rows[idx].Cells["PctFree"].Style.BackColor = Color.White;
-                dgvFiles.Rows[idx].Cells["FreeMB"].Style.BackColor = Color.White;
+                dgvFiles.Rows[idx].Cells["FilegroupPctFree"].Style.BackColor = Color.White;
+                dgvFiles.Rows[idx].Cells["FilegroupFreeMB"].Style.BackColor = Color.White;
                 if (checkType != "M")
                 {
-                    dgvFiles.Rows[idx].Cells["PctFree"].Style.BackColor = DBAChecksStatus.GetStatusColour(Status);
+                    dgvFiles.Rows[idx].Cells["FilegroupPctFree"].Style.BackColor = DBAChecksStatus.GetStatusColour(Status);
                 }
                 if (checkType != "%")
                 {
-                    dgvFiles.Rows[idx].Cells["FreeMB"].Style.BackColor = DBAChecksStatus.GetStatusColour(Status);
+                    dgvFiles.Rows[idx].Cells["FilegroupFreeMB"].Style.BackColor = DBAChecksStatus.GetStatusColour(Status);
                 }
 
                 if (row["ConfiguredLevel"]!=DBNull.Value && (string)row["ConfiguredLevel"] == "FG")
@@ -194,8 +205,34 @@ namespace DBAChecksGUI.DBFiles
         private void tsCopy_Click(object sender, EventArgs e)
         {
             Configure.Visible = false;
+            History.Visible = false;
             Common.CopyDataGridViewToClipboard(dgvFiles);
             Configure.Visible = true;
+            History.Visible = true;
+        }
+
+        private void tsFilegroup_Click(object sender, EventArgs e)
+        {
+            toggleFileLevel(false);
+            RefreshData();
+        }
+
+        private void tsFile_Click(object sender, EventArgs e)
+        {
+            toggleFileLevel(true);
+            RefreshData();
+        }
+
+        private void toggleFileLevel(bool isFileLevel)
+        {
+            tsFilegroup.Checked = !isFileLevel;
+            tsFile.Checked = isFileLevel;
+            foreach(DataGridViewColumn col in dgvFiles.Columns)
+            {
+                if (col.Name.StartsWith("FileLevel_")){
+                    col.Visible = isFileLevel;
+                }
+            }
         }
     }
 }
