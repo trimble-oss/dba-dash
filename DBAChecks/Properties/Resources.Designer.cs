@@ -418,7 +418,7 @@ namespace DBAChecks.Properties {
         ///file_id INT,
         ///data_space_id INT,
         ///name SYSNAME,
-        ///filegroup_name SYSNAME,
+        ///filegroup_name SYSNAME NULL,
         ///physical_name nvarchar(260),
         ///type TINYINT,
         ///size bigint,
@@ -436,7 +436,7 @@ namespace DBAChecks.Properties {
         ///WHERE state  = 0
         ///AND DATABASEPROPERTYEX(name, &apos;Updateability&apos;) = &apos;READ_WRITE&apos;
         ///
-        ///OPEN D [rest of string was truncated]&quot;;.
+        ///O [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string SQLDBFiles {
             get {

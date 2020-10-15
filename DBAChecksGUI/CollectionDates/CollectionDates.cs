@@ -144,16 +144,19 @@ namespace DBAChecksGUI.CollectionDates
 
         private void dgv_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
-            var row = (DataRowView)dgvCollectionDates.Rows[e.RowIndex].DataBoundItem;
-            if (dgvCollectionDates.Columns[e.ColumnIndex].HeaderText == "Configure Instance")
+            if (e.RowIndex >= 0)
             {
+                var row = (DataRowView)dgvCollectionDates.Rows[e.RowIndex].DataBoundItem;
+                if (dgvCollectionDates.Columns[e.ColumnIndex].HeaderText == "Configure Instance")
+                {
 
-                var InstanceID = (Int32)row["InstanceID"];
-                ConfigureThresholds(InstanceID,row);
-            }
-            else if (dgvCollectionDates.Columns[e.ColumnIndex].HeaderText == "Configure Root")
-            {
-                ConfigureThresholds(-1,row);
+                    var InstanceID = (Int32)row["InstanceID"];
+                    ConfigureThresholds(InstanceID, row);
+                }
+                else if (dgvCollectionDates.Columns[e.ColumnIndex].HeaderText == "Configure Root")
+                {
+                    ConfigureThresholds(-1, row);
+                }
             }
         }
 

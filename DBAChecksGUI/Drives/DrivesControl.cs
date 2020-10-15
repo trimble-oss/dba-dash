@@ -220,18 +220,21 @@ namespace DBAChecksGUI.Properties
 
         private void Dgv_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
-            if (dgv.Columns[e.ColumnIndex].Name == "Configure")
+            if (e.RowIndex >= 0)
             {
-                DataRowView row = (DataRowView)dgv.Rows[e.RowIndex].DataBoundItem;
-                Configure((Int32)row["InstanceID"], (Int32)row["DriveID"]);
-            }
-            else if (dgv.Columns[e.ColumnIndex].Name == "History")
-            {
-                DataRowView row = (DataRowView)dgv.Rows[e.RowIndex].DataBoundItem;
-                var frm = new DriveHistoryView();
-                frm.DriveID = (Int32)row["DriveID"];
-                frm.Text = row["Instance"] + " | " + (string)row["Name"] + " " + (row["Label"]==DBNull.Value ? "" : (string)row["Label"]);
-                frm.Show();
+                if (dgv.Columns[e.ColumnIndex].Name == "Configure")
+                {
+                    DataRowView row = (DataRowView)dgv.Rows[e.RowIndex].DataBoundItem;
+                    Configure((Int32)row["InstanceID"], (Int32)row["DriveID"]);
+                }
+                else if (dgv.Columns[e.ColumnIndex].Name == "History")
+                {
+                    DataRowView row = (DataRowView)dgv.Rows[e.RowIndex].DataBoundItem;
+                    var frm = new DriveHistoryView();
+                    frm.DriveID = (Int32)row["DriveID"];
+                    frm.Text = row["Instance"] + " | " + (string)row["Name"] + " " + (row["Label"] == DBNull.Value ? "" : (string)row["Label"]);
+                    frm.Show();
+                }
             }
         }
 

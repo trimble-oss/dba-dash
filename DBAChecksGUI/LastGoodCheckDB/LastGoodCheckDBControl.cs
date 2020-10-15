@@ -130,10 +130,13 @@ namespace DBAChecksGUI.LastGoodCheckDB
 
         private void dgvLastGoodCheckDB_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
-            if (dgvLastGoodCheckDB.Columns[e.ColumnIndex].HeaderText == "Configure")
+            if (e.RowIndex >= 0)
             {
-                var row = (DataRowView)dgvLastGoodCheckDB.Rows[e.RowIndex].DataBoundItem;
-                ConfigureThresholds((Int32)row["InstanceID"], (Int32)row["DatabaseID"]);
+                if (dgvLastGoodCheckDB.Columns[e.ColumnIndex].HeaderText == "Configure")
+                {
+                    var row = (DataRowView)dgvLastGoodCheckDB.Rows[e.RowIndex].DataBoundItem;
+                    ConfigureThresholds((Int32)row["InstanceID"], (Int32)row["DatabaseID"]);
+                }
             }
         }
 

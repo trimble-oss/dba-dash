@@ -137,10 +137,13 @@ namespace DBAChecksGUI.Backups
 
         private void dgvBackups_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
-            if (dgvBackups.Columns[e.ColumnIndex].HeaderText == "Configure")
+            if (e.RowIndex >= 0)
             {
-                var row = (DataRowView)dgvBackups.Rows[e.RowIndex].DataBoundItem;
-                ConfigureThresholds((Int32)row["InstanceID"], (Int32)row["DatabaseID"]);
+                if (dgvBackups.Columns[e.ColumnIndex].HeaderText == "Configure")
+                {
+                    var row = (DataRowView)dgvBackups.Rows[e.RowIndex].DataBoundItem;
+                    ConfigureThresholds((Int32)row["InstanceID"], (Int32)row["DatabaseID"]);
+                }
             }
         }
 

@@ -1,5 +1,4 @@
-﻿
-CREATE VIEW [dbo].[FileStatus]
+﻿CREATE VIEW [dbo].[FileStatus]
 AS
 WITH F AS (SELECT F.FileID,
 	   D.InstanceID,
@@ -14,11 +13,11 @@ WITH F AS (SELECT F.FileID,
 	   f.size/128.0 AS FileSizeMB,
 	   f.space_used /128.0 AS FileUsedMB,
 	   (f.size-f.space_used) / 128.0 AS FileFreeMB,
-	   1.0 - (f.space_used/(f.size*1.0)) AS FilePctFree,
+	   1.0 - (f.space_used/(NULLIF(f.size,0)*1.0)) AS FilePctFree,
 	   SUM(F.size) OVER(PARTITION BY F.data_space_id, F.DatabaseID) /128.0 AS FilegroupSizeMB,
        SUM(F.space_used) OVER(PARTITION BY F.data_space_id, F.DatabaseID) /128.0 AS FilegroupUsedMB,
 	   SUM(F.size-F.space_used) OVER(PARTITION BY F.data_space_id, F.DatabaseID) / 128.0 AS FilegroupFreeMB,
-	   1.0-(SUM(f.space_used) OVER(PARTITION BY F.data_space_id, F.DatabaseID) /SUM(f.size*1.0) OVER(PARTITION BY f.data_space_id, F.DatabaseID)) AS FilegroupPctFree,
+	   1.0-(SUM(f.space_used) OVER(PARTITION BY F.data_space_id, F.DatabaseID) /SUM(NULLIF(f.size,0)*1.0) OVER(PARTITION BY f.data_space_id, F.DatabaseID)) AS FilegroupPctFree,
        COUNT(*) OVER(PARTITION BY F.data_space_id,F.DatabaseID) AS FilegroupNumberOfFiles,
 	   f.is_read_only,
 	   D.is_read_only AS is_db_read_only,

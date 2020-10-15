@@ -117,20 +117,23 @@ namespace DBAChecksGUI.DBFiles
 
         private void dgvFiles_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
-            var row = (DataRowView)dgvFiles.Rows[e.RowIndex].DataBoundItem;
-            if (dgvFiles.Columns[e.ColumnIndex].HeaderText == "Configure")
+            if (e.RowIndex >= 0)
             {
-                ConfigureThresholds((Int32)row["InstanceID"], (Int32)row["DatabaseID"], (Int32)row["data_space_id"]);
-            }
-            else if (dgvFiles.Columns[e.ColumnIndex].HeaderText == "History")
-            {
-                var frm = new DBSpaceHistoryView();
-                frm.DatabaseID = (Int32)row["DatabaseID"];
-                frm.DataSpaceID = row["data_space_id"] == DBNull.Value ? null : (Int32?)row["data_space_id"];
-                frm.Instance = (string)row["Instance"];
-                frm.DBName = (string)row["name"];
-                frm.FileName = row["file_name"] == DBNull.Value ?  null : (string)row["file_name"];
-                frm.Show();
+                var row = (DataRowView)dgvFiles.Rows[e.RowIndex].DataBoundItem;
+                if (dgvFiles.Columns[e.ColumnIndex].HeaderText == "Configure")
+                {
+                    ConfigureThresholds((Int32)row["InstanceID"], (Int32)row["DatabaseID"], (Int32)row["data_space_id"]);
+                }
+                else if (dgvFiles.Columns[e.ColumnIndex].HeaderText == "History")
+                {
+                    var frm = new DBSpaceHistoryView();
+                    frm.DatabaseID = (Int32)row["DatabaseID"];
+                    frm.DataSpaceID = row["data_space_id"] == DBNull.Value ? null : (Int32?)row["data_space_id"];
+                    frm.Instance = (string)row["Instance"];
+                    frm.DBName = (string)row["name"];
+                    frm.FileName = row["file_name"] == DBNull.Value ? null : (string)row["file_name"];
+                    frm.Show();
+                }
             }
         }
 

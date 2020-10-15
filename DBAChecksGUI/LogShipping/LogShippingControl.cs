@@ -116,10 +116,13 @@ namespace DBAChecksGUI.LogShipping
 
         private void dgvLogShipping_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
-            if (dgvLogShipping.Columns[e.ColumnIndex].HeaderText == "Configure")
+            if (e.RowIndex >= 0)
             {
-                var row = (DataRowView)dgvLogShipping.Rows[e.RowIndex].DataBoundItem;
-                ConfigureThresholds((Int32)row["InstanceID"], (Int32)row["DatabaseID"]);     
+                if (dgvLogShipping.Columns[e.ColumnIndex].HeaderText == "Configure")
+                {
+                    var row = (DataRowView)dgvLogShipping.Rows[e.RowIndex].DataBoundItem;
+                    ConfigureThresholds((Int32)row["InstanceID"], (Int32)row["DatabaseID"]);
+                }
             }
         }
 

@@ -120,10 +120,13 @@ namespace DBAChecksGUI.AgentJobs
 
         private void dgvJobs_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
-            if (dgvJobs.Columns[e.ColumnIndex].HeaderText == "Configure")
+            if (e.RowIndex >= 0)
             {
-                var row = (DataRowView)dgvJobs.Rows[e.RowIndex].DataBoundItem;
-                configureThresholds((Int32)row["InstanceID"], (Guid)row["job_id"]);
+                if (dgvJobs.Columns[e.ColumnIndex].HeaderText == "Configure")
+                {
+                    var row = (DataRowView)dgvJobs.Rows[e.RowIndex].DataBoundItem;
+                    configureThresholds((Int32)row["InstanceID"], (Guid)row["job_id"]);
+                }
             }
         }
 

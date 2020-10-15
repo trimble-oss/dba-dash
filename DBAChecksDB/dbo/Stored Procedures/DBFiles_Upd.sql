@@ -39,7 +39,7 @@ BEGIN
 	 UPDATE 
 	 SET T.[data_space_id]=S.[data_space_id]
 		  ,T.[name]=S.[name]
-		  ,T.[filegroup_name]=S.[filegroup_name]
+		  ,T.[filegroup_name]=ISNULL(S.[filegroup_name],T.filegroup_name)
 		  ,T.[physical_name]=S.[physical_name]
 		  ,T.[type]=S.[type]
 		  ,T.[size]=S.[size]
