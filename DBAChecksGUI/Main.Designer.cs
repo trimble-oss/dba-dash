@@ -42,6 +42,8 @@
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.mnuTags = new System.Windows.Forms.ToolStripMenuItem();
             this.dBDiffToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.optionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.dataRetentionToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.splitMain = new System.Windows.Forms.SplitContainer();
             this.tv1 = new System.Windows.Forms.TreeView();
             this.tabs = new System.Windows.Forms.TabControl();
@@ -142,8 +144,31 @@
             this.drivers1 = new DBAChecksGUI.Changes.Drivers();
             this.tabDBSpace = new System.Windows.Forms.TabPage();
             this.spaceTracking1 = new DBAChecksGUI.SpaceTracking();
-            this.optionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.dataRetentionToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.tabAzureSummary = new System.Windows.Forms.TabPage();
+            this.azureSummary1 = new DBAChecksGUI.Performance.AzureSummary();
+            this.dataGridViewTextBoxColumn1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.dataGridViewTextBoxColumn2 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.dataGridViewTextBoxColumn3 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.dataGridViewTextBoxColumn4 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.dataGridViewTextBoxColumn5 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.dataGridViewTextBoxColumn6 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.dataGridViewTextBoxColumn7 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.dataGridViewTextBoxColumn8 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.dataGridViewTextBoxColumn9 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.dataGridViewTextBoxColumn10 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.dataGridViewTextBoxColumn11 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.dataGridViewTextBoxColumn12 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.dataGridViewTextBoxColumn13 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.dataGridViewTextBoxColumn14 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.dataGridViewTextBoxColumn15 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.dataGridViewTextBoxColumn16 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.dataGridViewTextBoxColumn17 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.dataGridViewTextBoxColumn18 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.dataGridViewTextBoxColumn19 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.dataGridViewTextBoxColumn20 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.dataGridViewTextBoxColumn21 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.dataGridViewTextBoxColumn22 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.dataGridViewTextBoxColumn23 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.menuStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitMain)).BeginInit();
             this.splitMain.Panel1.SuspendLayout();
@@ -189,6 +214,7 @@
             this.tabAlerts.SuspendLayout();
             this.tabDrivers.SuspendLayout();
             this.tabDBSpace.SuspendLayout();
+            this.tabAzureSummary.SuspendLayout();
             this.SuspendLayout();
             // 
             // TreeViewImageList
@@ -229,6 +255,21 @@
             this.dBDiffToolStripMenuItem.Size = new System.Drawing.Size(68, 24);
             this.dBDiffToolStripMenuItem.Text = "DBDiff";
             this.dBDiffToolStripMenuItem.Click += new System.EventHandler(this.dBDiffToolStripMenuItem_Click);
+            // 
+            // optionsToolStripMenuItem
+            // 
+            this.optionsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.dataRetentionToolStripMenuItem});
+            this.optionsToolStripMenuItem.Name = "optionsToolStripMenuItem";
+            this.optionsToolStripMenuItem.Size = new System.Drawing.Size(75, 24);
+            this.optionsToolStripMenuItem.Text = "Options";
+            // 
+            // dataRetentionToolStripMenuItem
+            // 
+            this.dataRetentionToolStripMenuItem.Name = "dataRetentionToolStripMenuItem";
+            this.dataRetentionToolStripMenuItem.Size = new System.Drawing.Size(192, 26);
+            this.dataRetentionToolStripMenuItem.Text = "Data Retention";
+            this.dataRetentionToolStripMenuItem.Click += new System.EventHandler(this.dataRetentionToolStripMenuItem_Click);
             // 
             // splitMain
             // 
@@ -288,6 +329,7 @@
             this.tabs.Controls.Add(this.tabAlerts);
             this.tabs.Controls.Add(this.tabDrivers);
             this.tabs.Controls.Add(this.tabDBSpace);
+            this.tabs.Controls.Add(this.tabAzureSummary);
             this.tabs.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tabs.Location = new System.Drawing.Point(0, 0);
             this.tabs.Name = "tabs";
@@ -324,7 +366,7 @@
             // 
             this.splitSnapshotSummary.Panel2.Controls.Add(this.gvSnapshotsDetail);
             this.splitSnapshotSummary.Size = new System.Drawing.Size(1469, 1246);
-            this.splitSnapshotSummary.SplitterDistance = 358;
+            this.splitSnapshotSummary.SplitterDistance = 357;
             this.splitSnapshotSummary.TabIndex = 0;
             // 
             // toolStrip2
@@ -337,7 +379,7 @@
             this.tsSummaryNext,
             this.toolStripLabel3,
             this.tsSummaryPageSize});
-            this.toolStrip2.Location = new System.Drawing.Point(0, 330);
+            this.toolStrip2.Location = new System.Drawing.Point(0, 329);
             this.toolStrip2.Name = "toolStrip2";
             this.toolStrip2.Size = new System.Drawing.Size(1469, 28);
             this.toolStrip2.TabIndex = 2;
@@ -427,7 +469,7 @@
             this.gvSnapshots.RowHeadersWidth = 51;
             this.gvSnapshots.RowTemplate.Height = 24;
             this.gvSnapshots.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-            this.gvSnapshots.Size = new System.Drawing.Size(1469, 358);
+            this.gvSnapshots.Size = new System.Drawing.Size(1469, 357);
             this.gvSnapshots.TabIndex = 0;
             this.gvSnapshots.SelectionChanged += new System.EventHandler(this.gvSnapshots_SelectionChanged);
             // 
@@ -544,7 +586,7 @@
             this.gvSnapshotsDetail.RowHeadersWidth = 51;
             this.gvSnapshotsDetail.RowTemplate.Height = 24;
             this.gvSnapshotsDetail.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.CellSelect;
-            this.gvSnapshotsDetail.Size = new System.Drawing.Size(1469, 884);
+            this.gvSnapshotsDetail.Size = new System.Drawing.Size(1469, 885);
             this.gvSnapshotsDetail.TabIndex = 0;
             this.gvSnapshotsDetail.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.gvSnapshotsDetail_CellContentClick);
             // 
@@ -608,7 +650,7 @@
             this.tabSchema.Location = new System.Drawing.Point(4, 25);
             this.tabSchema.Name = "tabSchema";
             this.tabSchema.Padding = new System.Windows.Forms.Padding(3);
-            this.tabSchema.Size = new System.Drawing.Size(1475, 1252);
+            this.tabSchema.Size = new System.Drawing.Size(1475, 1250);
             this.tabSchema.TabIndex = 0;
             this.tabSchema.Text = "Schema Snapshot";
             this.tabSchema.UseVisualStyleBackColor = true;
@@ -629,8 +671,8 @@
             this.splitSchemaSnapshot.Panel2.Controls.Add(this.toolStrip1);
             this.splitSchemaSnapshot.Panel2.Controls.Add(this.gvHistory);
             this.splitSchemaSnapshot.Panel2.Controls.Add(this.label1);
-            this.splitSchemaSnapshot.Size = new System.Drawing.Size(1469, 1246);
-            this.splitSchemaSnapshot.SplitterDistance = 632;
+            this.splitSchemaSnapshot.Size = new System.Drawing.Size(1469, 1244);
+            this.splitSchemaSnapshot.SplitterDistance = 612;
             this.splitSchemaSnapshot.TabIndex = 1;
             // 
             // label7
@@ -653,7 +695,7 @@
             this.tsNext,
             this.toolStripLabel1,
             this.tsPageSize});
-            this.toolStrip1.Location = new System.Drawing.Point(0, 582);
+            this.toolStrip1.Location = new System.Drawing.Point(0, 600);
             this.toolStrip1.Name = "toolStrip1";
             this.toolStrip1.Size = new System.Drawing.Size(1469, 28);
             this.toolStrip1.TabIndex = 1;
@@ -743,7 +785,7 @@
             this.gvHistory.RowHeadersWidth = 51;
             this.gvHistory.RowTemplate.Height = 24;
             this.gvHistory.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-            this.gvHistory.Size = new System.Drawing.Size(1469, 485);
+            this.gvHistory.Size = new System.Drawing.Size(1469, 503);
             this.gvHistory.TabIndex = 0;
             this.gvHistory.SelectionChanged += new System.EventHandler(this.gvHistory_SelectionChanged);
             // 
@@ -833,7 +875,7 @@
             this.tabTags.Location = new System.Drawing.Point(4, 25);
             this.tabTags.Name = "tabTags";
             this.tabTags.Padding = new System.Windows.Forms.Padding(3);
-            this.tabTags.Size = new System.Drawing.Size(1475, 1252);
+            this.tabTags.Size = new System.Drawing.Size(1475, 1250);
             this.tabTags.TabIndex = 2;
             this.tabTags.Text = "Tags";
             this.tabTags.UseVisualStyleBackColor = true;
@@ -844,7 +886,7 @@
             this.chkTags.FormattingEnabled = true;
             this.chkTags.Location = new System.Drawing.Point(3, 71);
             this.chkTags.Name = "chkTags";
-            this.chkTags.Size = new System.Drawing.Size(1469, 1178);
+            this.chkTags.Size = new System.Drawing.Size(1469, 1176);
             this.chkTags.TabIndex = 0;
             this.chkTags.ItemCheck += new System.Windows.Forms.ItemCheckEventHandler(this.chkTags_ItemCheck);
             // 
@@ -913,7 +955,7 @@
             this.tabDrives.Location = new System.Drawing.Point(4, 25);
             this.tabDrives.Name = "tabDrives";
             this.tabDrives.Padding = new System.Windows.Forms.Padding(3);
-            this.tabDrives.Size = new System.Drawing.Size(1475, 1252);
+            this.tabDrives.Size = new System.Drawing.Size(1475, 1250);
             this.tabDrives.TabIndex = 3;
             this.tabDrives.Text = "Drives";
             this.tabDrives.UseVisualStyleBackColor = true;
@@ -927,7 +969,7 @@
             this.drivesControl1.IncludeWarning = false;
             this.drivesControl1.Location = new System.Drawing.Point(3, 3);
             this.drivesControl1.Name = "drivesControl1";
-            this.drivesControl1.Size = new System.Drawing.Size(1469, 1246);
+            this.drivesControl1.Size = new System.Drawing.Size(1469, 1244);
             this.drivesControl1.TabIndex = 0;
             // 
             // tabBackups
@@ -936,7 +978,7 @@
             this.tabBackups.Location = new System.Drawing.Point(4, 25);
             this.tabBackups.Name = "tabBackups";
             this.tabBackups.Padding = new System.Windows.Forms.Padding(3);
-            this.tabBackups.Size = new System.Drawing.Size(1475, 1252);
+            this.tabBackups.Size = new System.Drawing.Size(1475, 1250);
             this.tabBackups.TabIndex = 4;
             this.tabBackups.Tag = "1";
             this.tabBackups.Text = "Backups";
@@ -953,7 +995,7 @@
             this.backupsControl1.InstanceIDs = null;
             this.backupsControl1.Location = new System.Drawing.Point(3, 3);
             this.backupsControl1.Name = "backupsControl1";
-            this.backupsControl1.Size = new System.Drawing.Size(1469, 1246);
+            this.backupsControl1.Size = new System.Drawing.Size(1469, 1244);
             this.backupsControl1.TabIndex = 0;
             // 
             // tabLogShipping
@@ -962,7 +1004,7 @@
             this.tabLogShipping.Location = new System.Drawing.Point(4, 25);
             this.tabLogShipping.Name = "tabLogShipping";
             this.tabLogShipping.Padding = new System.Windows.Forms.Padding(3);
-            this.tabLogShipping.Size = new System.Drawing.Size(1475, 1252);
+            this.tabLogShipping.Size = new System.Drawing.Size(1475, 1250);
             this.tabLogShipping.TabIndex = 5;
             this.tabLogShipping.Text = "Log Shipping";
             this.tabLogShipping.UseVisualStyleBackColor = true;
@@ -976,7 +1018,7 @@
             this.logShippingControl1.IncludeWarning = false;
             this.logShippingControl1.Location = new System.Drawing.Point(3, 3);
             this.logShippingControl1.Name = "logShippingControl1";
-            this.logShippingControl1.Size = new System.Drawing.Size(1469, 1246);
+            this.logShippingControl1.Size = new System.Drawing.Size(1469, 1244);
             this.logShippingControl1.TabIndex = 0;
             // 
             // tabJobs
@@ -985,7 +1027,7 @@
             this.tabJobs.Location = new System.Drawing.Point(4, 25);
             this.tabJobs.Name = "tabJobs";
             this.tabJobs.Padding = new System.Windows.Forms.Padding(3);
-            this.tabJobs.Size = new System.Drawing.Size(1475, 1252);
+            this.tabJobs.Size = new System.Drawing.Size(1475, 1250);
             this.tabJobs.TabIndex = 6;
             this.tabJobs.Text = "Agent Jobs";
             this.tabJobs.UseVisualStyleBackColor = true;
@@ -999,7 +1041,7 @@
             this.agentJobsControl1.IncludeWarning = false;
             this.agentJobsControl1.Location = new System.Drawing.Point(3, 3);
             this.agentJobsControl1.Name = "agentJobsControl1";
-            this.agentJobsControl1.Size = new System.Drawing.Size(1469, 1246);
+            this.agentJobsControl1.Size = new System.Drawing.Size(1469, 1244);
             this.agentJobsControl1.TabIndex = 0;
             // 
             // tabSummary
@@ -1008,7 +1050,7 @@
             this.tabSummary.Location = new System.Drawing.Point(4, 25);
             this.tabSummary.Name = "tabSummary";
             this.tabSummary.Padding = new System.Windows.Forms.Padding(3);
-            this.tabSummary.Size = new System.Drawing.Size(1475, 1252);
+            this.tabSummary.Size = new System.Drawing.Size(1475, 1250);
             this.tabSummary.TabIndex = 7;
             this.tabSummary.Text = "Summary";
             this.tabSummary.UseVisualStyleBackColor = true;
@@ -1019,7 +1061,7 @@
             this.summary1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.summary1.Location = new System.Drawing.Point(3, 3);
             this.summary1.Name = "summary1";
-            this.summary1.Size = new System.Drawing.Size(1469, 1246);
+            this.summary1.Size = new System.Drawing.Size(1469, 1244);
             this.summary1.TabIndex = 0;
             // 
             // tabFiles
@@ -1028,7 +1070,7 @@
             this.tabFiles.Location = new System.Drawing.Point(4, 25);
             this.tabFiles.Name = "tabFiles";
             this.tabFiles.Padding = new System.Windows.Forms.Padding(3);
-            this.tabFiles.Size = new System.Drawing.Size(1475, 1252);
+            this.tabFiles.Size = new System.Drawing.Size(1475, 1250);
             this.tabFiles.TabIndex = 8;
             this.tabFiles.Text = "Files";
             this.tabFiles.UseVisualStyleBackColor = true;
@@ -1042,7 +1084,7 @@
             this.dbFilesControl1.IncludeWarning = false;
             this.dbFilesControl1.Location = new System.Drawing.Point(3, 3);
             this.dbFilesControl1.Name = "dbFilesControl1";
-            this.dbFilesControl1.Size = new System.Drawing.Size(1469, 1246);
+            this.dbFilesControl1.Size = new System.Drawing.Size(1469, 1244);
             this.dbFilesControl1.TabIndex = 0;
             // 
             // tabLastGood
@@ -1051,7 +1093,7 @@
             this.tabLastGood.Location = new System.Drawing.Point(4, 25);
             this.tabLastGood.Name = "tabLastGood";
             this.tabLastGood.Padding = new System.Windows.Forms.Padding(3);
-            this.tabLastGood.Size = new System.Drawing.Size(1475, 1252);
+            this.tabLastGood.Size = new System.Drawing.Size(1475, 1250);
             this.tabLastGood.TabIndex = 9;
             this.tabLastGood.Text = "Last Good CheckDB";
             this.tabLastGood.UseVisualStyleBackColor = true;
@@ -1065,7 +1107,7 @@
             this.lastGoodCheckDBControl1.IncludeWarning = false;
             this.lastGoodCheckDBControl1.Location = new System.Drawing.Point(3, 3);
             this.lastGoodCheckDBControl1.Name = "lastGoodCheckDBControl1";
-            this.lastGoodCheckDBControl1.Size = new System.Drawing.Size(1469, 1246);
+            this.lastGoodCheckDBControl1.Size = new System.Drawing.Size(1469, 1244);
             this.lastGoodCheckDBControl1.TabIndex = 0;
             // 
             // tabPerformance
@@ -1074,7 +1116,7 @@
             this.tabPerformance.Location = new System.Drawing.Point(4, 25);
             this.tabPerformance.Name = "tabPerformance";
             this.tabPerformance.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPerformance.Size = new System.Drawing.Size(1475, 1252);
+            this.tabPerformance.Size = new System.Drawing.Size(1475, 1250);
             this.tabPerformance.TabIndex = 10;
             this.tabPerformance.Text = "Performance";
             this.tabPerformance.UseVisualStyleBackColor = true;
@@ -1088,7 +1130,7 @@
             this.performance1.Location = new System.Drawing.Point(3, 3);
             this.performance1.Name = "performance1";
             this.performance1.ObjectID = ((long)(0));
-            this.performance1.Size = new System.Drawing.Size(1469, 1246);
+            this.performance1.Size = new System.Drawing.Size(1469, 1244);
             this.performance1.TabIndex = 0;
             // 
             // tabDBAChecksErrorLog
@@ -1098,7 +1140,7 @@
             this.tabDBAChecksErrorLog.Location = new System.Drawing.Point(4, 25);
             this.tabDBAChecksErrorLog.Name = "tabDBAChecksErrorLog";
             this.tabDBAChecksErrorLog.Padding = new System.Windows.Forms.Padding(3);
-            this.tabDBAChecksErrorLog.Size = new System.Drawing.Size(1475, 1252);
+            this.tabDBAChecksErrorLog.Size = new System.Drawing.Size(1475, 1250);
             this.tabDBAChecksErrorLog.TabIndex = 11;
             this.tabDBAChecksErrorLog.Text = "DBAChecks ErrorLog";
             this.tabDBAChecksErrorLog.UseVisualStyleBackColor = true;
@@ -1139,7 +1181,7 @@
             this.dgvDBAChecksErrors.RowHeadersVisible = false;
             this.dgvDBAChecksErrors.RowHeadersWidth = 51;
             this.dgvDBAChecksErrors.RowTemplate.Height = 24;
-            this.dgvDBAChecksErrors.Size = new System.Drawing.Size(1469, 1219);
+            this.dgvDBAChecksErrors.Size = new System.Drawing.Size(1469, 1217);
             this.dgvDBAChecksErrors.TabIndex = 0;
             // 
             // Instance
@@ -1225,7 +1267,7 @@
             this.tabCollectionDates.Location = new System.Drawing.Point(4, 25);
             this.tabCollectionDates.Name = "tabCollectionDates";
             this.tabCollectionDates.Padding = new System.Windows.Forms.Padding(3);
-            this.tabCollectionDates.Size = new System.Drawing.Size(1475, 1252);
+            this.tabCollectionDates.Size = new System.Drawing.Size(1475, 1250);
             this.tabCollectionDates.TabIndex = 12;
             this.tabCollectionDates.Text = "Collection Dates";
             this.tabCollectionDates.UseVisualStyleBackColor = true;
@@ -1241,7 +1283,7 @@
             this.collectionDates1.InstanceIDs = null;
             this.collectionDates1.Location = new System.Drawing.Point(3, 3);
             this.collectionDates1.Name = "collectionDates1";
-            this.collectionDates1.Size = new System.Drawing.Size(1469, 1246);
+            this.collectionDates1.Size = new System.Drawing.Size(1469, 1244);
             this.collectionDates1.TabIndex = 0;
             // 
             // tabPerformanceSummary
@@ -1250,7 +1292,7 @@
             this.tabPerformanceSummary.Location = new System.Drawing.Point(4, 25);
             this.tabPerformanceSummary.Name = "tabPerformanceSummary";
             this.tabPerformanceSummary.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPerformanceSummary.Size = new System.Drawing.Size(1475, 1252);
+            this.tabPerformanceSummary.Size = new System.Drawing.Size(1475, 1250);
             this.tabPerformanceSummary.TabIndex = 13;
             this.tabPerformanceSummary.Text = "Performance Summary";
             this.tabPerformanceSummary.UseVisualStyleBackColor = true;
@@ -1260,7 +1302,7 @@
             this.performanceSummary1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.performanceSummary1.Location = new System.Drawing.Point(3, 3);
             this.performanceSummary1.Name = "performanceSummary1";
-            this.performanceSummary1.Size = new System.Drawing.Size(1469, 1246);
+            this.performanceSummary1.Size = new System.Drawing.Size(1469, 1244);
             this.performanceSummary1.TabIndex = 0;
             // 
             // tabInfo
@@ -1269,7 +1311,7 @@
             this.tabInfo.Location = new System.Drawing.Point(4, 25);
             this.tabInfo.Name = "tabInfo";
             this.tabInfo.Padding = new System.Windows.Forms.Padding(3);
-            this.tabInfo.Size = new System.Drawing.Size(1475, 1252);
+            this.tabInfo.Size = new System.Drawing.Size(1475, 1250);
             this.tabInfo.TabIndex = 14;
             this.tabInfo.Text = "Info";
             this.tabInfo.UseVisualStyleBackColor = true;
@@ -1279,7 +1321,7 @@
             this.info1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.info1.Location = new System.Drawing.Point(3, 3);
             this.info1.Name = "info1";
-            this.info1.Size = new System.Drawing.Size(1469, 1246);
+            this.info1.Size = new System.Drawing.Size(1469, 1244);
             this.info1.TabIndex = 0;
             // 
             // tabHardware
@@ -1288,7 +1330,7 @@
             this.tabHardware.Location = new System.Drawing.Point(4, 25);
             this.tabHardware.Name = "tabHardware";
             this.tabHardware.Padding = new System.Windows.Forms.Padding(3);
-            this.tabHardware.Size = new System.Drawing.Size(1475, 1252);
+            this.tabHardware.Size = new System.Drawing.Size(1475, 1250);
             this.tabHardware.TabIndex = 15;
             this.tabHardware.Text = "Hardware";
             this.tabHardware.UseVisualStyleBackColor = true;
@@ -1298,7 +1340,7 @@
             this.hardwareChanges1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.hardwareChanges1.Location = new System.Drawing.Point(3, 3);
             this.hardwareChanges1.Name = "hardwareChanges1";
-            this.hardwareChanges1.Size = new System.Drawing.Size(1469, 1246);
+            this.hardwareChanges1.Size = new System.Drawing.Size(1469, 1244);
             this.hardwareChanges1.TabIndex = 0;
             // 
             // tabSQLPatching
@@ -1307,7 +1349,7 @@
             this.tabSQLPatching.Location = new System.Drawing.Point(4, 25);
             this.tabSQLPatching.Name = "tabSQLPatching";
             this.tabSQLPatching.Padding = new System.Windows.Forms.Padding(3);
-            this.tabSQLPatching.Size = new System.Drawing.Size(1475, 1252);
+            this.tabSQLPatching.Size = new System.Drawing.Size(1475, 1250);
             this.tabSQLPatching.TabIndex = 16;
             this.tabSQLPatching.Text = "SQL Patching";
             this.tabSQLPatching.UseVisualStyleBackColor = true;
@@ -1317,7 +1359,7 @@
             this.sqlPatching1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.sqlPatching1.Location = new System.Drawing.Point(3, 3);
             this.sqlPatching1.Name = "sqlPatching1";
-            this.sqlPatching1.Size = new System.Drawing.Size(1469, 1246);
+            this.sqlPatching1.Size = new System.Drawing.Size(1469, 1244);
             this.sqlPatching1.TabIndex = 0;
             // 
             // tabInstanceConfig
@@ -1326,7 +1368,7 @@
             this.tabInstanceConfig.Location = new System.Drawing.Point(4, 25);
             this.tabInstanceConfig.Name = "tabInstanceConfig";
             this.tabInstanceConfig.Padding = new System.Windows.Forms.Padding(3);
-            this.tabInstanceConfig.Size = new System.Drawing.Size(1475, 1252);
+            this.tabInstanceConfig.Size = new System.Drawing.Size(1475, 1250);
             this.tabInstanceConfig.TabIndex = 17;
             this.tabInstanceConfig.Text = "Configuration";
             this.tabInstanceConfig.UseVisualStyleBackColor = true;
@@ -1336,7 +1378,7 @@
             this.configurationHistory1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.configurationHistory1.Location = new System.Drawing.Point(3, 3);
             this.configurationHistory1.Name = "configurationHistory1";
-            this.configurationHistory1.Size = new System.Drawing.Size(1469, 1246);
+            this.configurationHistory1.Size = new System.Drawing.Size(1469, 1244);
             this.configurationHistory1.TabIndex = 0;
             // 
             // tabSlowQueries
@@ -1345,7 +1387,7 @@
             this.tabSlowQueries.Location = new System.Drawing.Point(4, 25);
             this.tabSlowQueries.Name = "tabSlowQueries";
             this.tabSlowQueries.Padding = new System.Windows.Forms.Padding(3);
-            this.tabSlowQueries.Size = new System.Drawing.Size(1475, 1252);
+            this.tabSlowQueries.Size = new System.Drawing.Size(1475, 1250);
             this.tabSlowQueries.TabIndex = 18;
             this.tabSlowQueries.Text = "Slow Queries";
             this.tabSlowQueries.UseVisualStyleBackColor = true;
@@ -1356,7 +1398,7 @@
             this.slowQueries1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.slowQueries1.Location = new System.Drawing.Point(3, 3);
             this.slowQueries1.Name = "slowQueries1";
-            this.slowQueries1.Size = new System.Drawing.Size(1469, 1246);
+            this.slowQueries1.Size = new System.Drawing.Size(1469, 1244);
             this.slowQueries1.TabIndex = 0;
             // 
             // tabTraceFlags
@@ -1365,7 +1407,7 @@
             this.tabTraceFlags.Location = new System.Drawing.Point(4, 25);
             this.tabTraceFlags.Name = "tabTraceFlags";
             this.tabTraceFlags.Padding = new System.Windows.Forms.Padding(3);
-            this.tabTraceFlags.Size = new System.Drawing.Size(1475, 1252);
+            this.tabTraceFlags.Size = new System.Drawing.Size(1475, 1250);
             this.tabTraceFlags.TabIndex = 19;
             this.tabTraceFlags.Text = "Trace Flags";
             this.tabTraceFlags.UseVisualStyleBackColor = true;
@@ -1375,7 +1417,7 @@
             this.traceFlagHistory1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.traceFlagHistory1.Location = new System.Drawing.Point(3, 3);
             this.traceFlagHistory1.Name = "traceFlagHistory1";
-            this.traceFlagHistory1.Size = new System.Drawing.Size(1469, 1246);
+            this.traceFlagHistory1.Size = new System.Drawing.Size(1469, 1244);
             this.traceFlagHistory1.TabIndex = 0;
             // 
             // tabAlerts
@@ -1384,7 +1426,7 @@
             this.tabAlerts.Location = new System.Drawing.Point(4, 25);
             this.tabAlerts.Name = "tabAlerts";
             this.tabAlerts.Padding = new System.Windows.Forms.Padding(3);
-            this.tabAlerts.Size = new System.Drawing.Size(1475, 1252);
+            this.tabAlerts.Size = new System.Drawing.Size(1475, 1250);
             this.tabAlerts.TabIndex = 20;
             this.tabAlerts.Text = "Alerts";
             this.tabAlerts.UseVisualStyleBackColor = true;
@@ -1394,7 +1436,7 @@
             this.alerts1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.alerts1.Location = new System.Drawing.Point(3, 3);
             this.alerts1.Name = "alerts1";
-            this.alerts1.Size = new System.Drawing.Size(1469, 1246);
+            this.alerts1.Size = new System.Drawing.Size(1469, 1244);
             this.alerts1.TabIndex = 0;
             this.alerts1.UseAlertName = false;
             // 
@@ -1404,7 +1446,7 @@
             this.tabDrivers.Location = new System.Drawing.Point(4, 25);
             this.tabDrivers.Name = "tabDrivers";
             this.tabDrivers.Padding = new System.Windows.Forms.Padding(3);
-            this.tabDrivers.Size = new System.Drawing.Size(1475, 1252);
+            this.tabDrivers.Size = new System.Drawing.Size(1475, 1250);
             this.tabDrivers.TabIndex = 21;
             this.tabDrivers.Text = "Drivers";
             this.tabDrivers.UseVisualStyleBackColor = true;
@@ -1414,7 +1456,7 @@
             this.drivers1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.drivers1.Location = new System.Drawing.Point(3, 3);
             this.drivers1.Name = "drivers1";
-            this.drivers1.Size = new System.Drawing.Size(1469, 1246);
+            this.drivers1.Size = new System.Drawing.Size(1469, 1244);
             this.drivers1.TabIndex = 0;
             // 
             // tabDBSpace
@@ -1423,7 +1465,7 @@
             this.tabDBSpace.Location = new System.Drawing.Point(4, 25);
             this.tabDBSpace.Name = "tabDBSpace";
             this.tabDBSpace.Padding = new System.Windows.Forms.Padding(3);
-            this.tabDBSpace.Size = new System.Drawing.Size(1475, 1252);
+            this.tabDBSpace.Size = new System.Drawing.Size(1475, 1250);
             this.tabDBSpace.TabIndex = 22;
             this.tabDBSpace.Text = "DB Space";
             this.tabDBSpace.UseVisualStyleBackColor = true;
@@ -1433,23 +1475,249 @@
             this.spaceTracking1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.spaceTracking1.Location = new System.Drawing.Point(3, 3);
             this.spaceTracking1.Name = "spaceTracking1";
-            this.spaceTracking1.Size = new System.Drawing.Size(1469, 1246);
+            this.spaceTracking1.Size = new System.Drawing.Size(1469, 1244);
             this.spaceTracking1.TabIndex = 0;
             // 
-            // optionsToolStripMenuItem
+            // tabAzureSummary
             // 
-            this.optionsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.dataRetentionToolStripMenuItem});
-            this.optionsToolStripMenuItem.Name = "optionsToolStripMenuItem";
-            this.optionsToolStripMenuItem.Size = new System.Drawing.Size(75, 24);
-            this.optionsToolStripMenuItem.Text = "Options";
+            this.tabAzureSummary.Controls.Add(this.azureSummary1);
+            this.tabAzureSummary.Location = new System.Drawing.Point(4, 25);
+            this.tabAzureSummary.Name = "tabAzureSummary";
+            this.tabAzureSummary.Padding = new System.Windows.Forms.Padding(3);
+            this.tabAzureSummary.Size = new System.Drawing.Size(1475, 1252);
+            this.tabAzureSummary.TabIndex = 23;
+            this.tabAzureSummary.Text = "Azure Summary";
+            this.tabAzureSummary.UseVisualStyleBackColor = true;
             // 
-            // dataRetentionToolStripMenuItem
+            // azureSummary1
             // 
-            this.dataRetentionToolStripMenuItem.Name = "dataRetentionToolStripMenuItem";
-            this.dataRetentionToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
-            this.dataRetentionToolStripMenuItem.Text = "Data Retention";
-            this.dataRetentionToolStripMenuItem.Click += new System.EventHandler(this.dataRetentionToolStripMenuItem_Click);
+            this.azureSummary1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.azureSummary1.Location = new System.Drawing.Point(3, 3);
+            this.azureSummary1.Name = "azureSummary1";
+            this.azureSummary1.Size = new System.Drawing.Size(1469, 1246);
+            this.azureSummary1.TabIndex = 0;
+            // 
+            // dataGridViewTextBoxColumn1
+            // 
+            this.dataGridViewTextBoxColumn1.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.DisplayedCells;
+            this.dataGridViewTextBoxColumn1.DataPropertyName = "DB";
+            this.dataGridViewTextBoxColumn1.HeaderText = "DB";
+            this.dataGridViewTextBoxColumn1.MinimumWidth = 6;
+            this.dataGridViewTextBoxColumn1.Name = "dataGridViewTextBoxColumn1";
+            this.dataGridViewTextBoxColumn1.ReadOnly = true;
+            this.dataGridViewTextBoxColumn1.Width = 125;
+            // 
+            // dataGridViewTextBoxColumn2
+            // 
+            this.dataGridViewTextBoxColumn2.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.ColumnHeader;
+            this.dataGridViewTextBoxColumn2.DataPropertyName = "SnapshotDate";
+            this.dataGridViewTextBoxColumn2.HeaderText = "Snapshot Date";
+            this.dataGridViewTextBoxColumn2.MinimumWidth = 6;
+            this.dataGridViewTextBoxColumn2.Name = "dataGridViewTextBoxColumn2";
+            this.dataGridViewTextBoxColumn2.ReadOnly = true;
+            this.dataGridViewTextBoxColumn2.Width = 125;
+            // 
+            // dataGridViewTextBoxColumn3
+            // 
+            this.dataGridViewTextBoxColumn3.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.ColumnHeader;
+            this.dataGridViewTextBoxColumn3.DataPropertyName = "ValidatedDate";
+            this.dataGridViewTextBoxColumn3.HeaderText = "Validated Date";
+            this.dataGridViewTextBoxColumn3.MinimumWidth = 6;
+            this.dataGridViewTextBoxColumn3.Name = "dataGridViewTextBoxColumn3";
+            this.dataGridViewTextBoxColumn3.ReadOnly = true;
+            this.dataGridViewTextBoxColumn3.Width = 125;
+            // 
+            // dataGridViewTextBoxColumn4
+            // 
+            this.dataGridViewTextBoxColumn4.DataPropertyName = "ValidForDays";
+            this.dataGridViewTextBoxColumn4.HeaderText = "Valid For (Days)";
+            this.dataGridViewTextBoxColumn4.MinimumWidth = 6;
+            this.dataGridViewTextBoxColumn4.Name = "dataGridViewTextBoxColumn4";
+            this.dataGridViewTextBoxColumn4.ReadOnly = true;
+            this.dataGridViewTextBoxColumn4.Width = 125;
+            // 
+            // dataGridViewTextBoxColumn5
+            // 
+            this.dataGridViewTextBoxColumn5.DataPropertyName = "DaysSinceValidation";
+            this.dataGridViewTextBoxColumn5.HeaderText = "Days Since Validation";
+            this.dataGridViewTextBoxColumn5.MinimumWidth = 6;
+            this.dataGridViewTextBoxColumn5.Name = "dataGridViewTextBoxColumn5";
+            this.dataGridViewTextBoxColumn5.ReadOnly = true;
+            this.dataGridViewTextBoxColumn5.Width = 125;
+            // 
+            // dataGridViewTextBoxColumn6
+            // 
+            this.dataGridViewTextBoxColumn6.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.ColumnHeader;
+            this.dataGridViewTextBoxColumn6.DataPropertyName = "Created";
+            this.dataGridViewTextBoxColumn6.HeaderText = "Created";
+            this.dataGridViewTextBoxColumn6.MinimumWidth = 6;
+            this.dataGridViewTextBoxColumn6.Name = "dataGridViewTextBoxColumn6";
+            this.dataGridViewTextBoxColumn6.ReadOnly = true;
+            this.dataGridViewTextBoxColumn6.Width = 125;
+            // 
+            // dataGridViewTextBoxColumn7
+            // 
+            this.dataGridViewTextBoxColumn7.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.ColumnHeader;
+            this.dataGridViewTextBoxColumn7.DataPropertyName = "Modified";
+            this.dataGridViewTextBoxColumn7.HeaderText = "Modified";
+            this.dataGridViewTextBoxColumn7.MinimumWidth = 6;
+            this.dataGridViewTextBoxColumn7.Name = "dataGridViewTextBoxColumn7";
+            this.dataGridViewTextBoxColumn7.ReadOnly = true;
+            this.dataGridViewTextBoxColumn7.Width = 125;
+            // 
+            // dataGridViewTextBoxColumn8
+            // 
+            this.dataGridViewTextBoxColumn8.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.ColumnHeader;
+            this.dataGridViewTextBoxColumn8.DataPropertyName = "Dropped";
+            this.dataGridViewTextBoxColumn8.HeaderText = "Dropped";
+            this.dataGridViewTextBoxColumn8.MinimumWidth = 6;
+            this.dataGridViewTextBoxColumn8.Name = "dataGridViewTextBoxColumn8";
+            this.dataGridViewTextBoxColumn8.ReadOnly = true;
+            this.dataGridViewTextBoxColumn8.Width = 125;
+            // 
+            // dataGridViewTextBoxColumn9
+            // 
+            this.dataGridViewTextBoxColumn9.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.DisplayedCells;
+            this.dataGridViewTextBoxColumn9.DataPropertyName = "ObjectName";
+            this.dataGridViewTextBoxColumn9.HeaderText = "Object Name";
+            this.dataGridViewTextBoxColumn9.MinimumWidth = 6;
+            this.dataGridViewTextBoxColumn9.Name = "dataGridViewTextBoxColumn9";
+            this.dataGridViewTextBoxColumn9.ReadOnly = true;
+            this.dataGridViewTextBoxColumn9.Width = 125;
+            // 
+            // dataGridViewTextBoxColumn10
+            // 
+            this.dataGridViewTextBoxColumn10.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.DisplayedCells;
+            this.dataGridViewTextBoxColumn10.DataPropertyName = "SchemaName";
+            this.dataGridViewTextBoxColumn10.HeaderText = "Schema Name";
+            this.dataGridViewTextBoxColumn10.MinimumWidth = 6;
+            this.dataGridViewTextBoxColumn10.Name = "dataGridViewTextBoxColumn10";
+            this.dataGridViewTextBoxColumn10.ReadOnly = true;
+            this.dataGridViewTextBoxColumn10.Width = 125;
+            // 
+            // dataGridViewTextBoxColumn11
+            // 
+            this.dataGridViewTextBoxColumn11.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.ColumnHeader;
+            this.dataGridViewTextBoxColumn11.DataPropertyName = "Action";
+            this.dataGridViewTextBoxColumn11.HeaderText = "Action";
+            this.dataGridViewTextBoxColumn11.MinimumWidth = 6;
+            this.dataGridViewTextBoxColumn11.Name = "dataGridViewTextBoxColumn11";
+            this.dataGridViewTextBoxColumn11.ReadOnly = true;
+            this.dataGridViewTextBoxColumn11.Width = 125;
+            // 
+            // dataGridViewTextBoxColumn12
+            // 
+            this.dataGridViewTextBoxColumn12.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.DisplayedCells;
+            this.dataGridViewTextBoxColumn12.DataPropertyName = "ObjectName";
+            this.dataGridViewTextBoxColumn12.HeaderText = "Object Name";
+            this.dataGridViewTextBoxColumn12.MinimumWidth = 6;
+            this.dataGridViewTextBoxColumn12.Name = "dataGridViewTextBoxColumn12";
+            this.dataGridViewTextBoxColumn12.ReadOnly = true;
+            this.dataGridViewTextBoxColumn12.Width = 125;
+            // 
+            // dataGridViewTextBoxColumn13
+            // 
+            this.dataGridViewTextBoxColumn13.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.DisplayedCells;
+            this.dataGridViewTextBoxColumn13.DataPropertyName = "SchemaName";
+            this.dataGridViewTextBoxColumn13.HeaderText = "Schema Name";
+            this.dataGridViewTextBoxColumn13.MinimumWidth = 6;
+            this.dataGridViewTextBoxColumn13.Name = "dataGridViewTextBoxColumn13";
+            this.dataGridViewTextBoxColumn13.ReadOnly = true;
+            this.dataGridViewTextBoxColumn13.Width = 125;
+            // 
+            // dataGridViewTextBoxColumn14
+            // 
+            this.dataGridViewTextBoxColumn14.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.DisplayedCells;
+            this.dataGridViewTextBoxColumn14.HeaderText = "Object Type";
+            this.dataGridViewTextBoxColumn14.MinimumWidth = 6;
+            this.dataGridViewTextBoxColumn14.Name = "dataGridViewTextBoxColumn14";
+            this.dataGridViewTextBoxColumn14.ReadOnly = true;
+            this.dataGridViewTextBoxColumn14.Width = 125;
+            // 
+            // dataGridViewTextBoxColumn15
+            // 
+            this.dataGridViewTextBoxColumn15.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.ColumnHeader;
+            this.dataGridViewTextBoxColumn15.DataPropertyName = "SnapshotValidFrom";
+            this.dataGridViewTextBoxColumn15.HeaderText = "Snapshot Valid From";
+            this.dataGridViewTextBoxColumn15.MinimumWidth = 6;
+            this.dataGridViewTextBoxColumn15.Name = "dataGridViewTextBoxColumn15";
+            this.dataGridViewTextBoxColumn15.ReadOnly = true;
+            this.dataGridViewTextBoxColumn15.Width = 125;
+            // 
+            // dataGridViewTextBoxColumn16
+            // 
+            this.dataGridViewTextBoxColumn16.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.ColumnHeader;
+            this.dataGridViewTextBoxColumn16.DataPropertyName = "SnapshotValidTo";
+            this.dataGridViewTextBoxColumn16.HeaderText = "Snapshot Valid To";
+            this.dataGridViewTextBoxColumn16.MinimumWidth = 6;
+            this.dataGridViewTextBoxColumn16.Name = "dataGridViewTextBoxColumn16";
+            this.dataGridViewTextBoxColumn16.ReadOnly = true;
+            this.dataGridViewTextBoxColumn16.Width = 125;
+            // 
+            // dataGridViewTextBoxColumn17
+            // 
+            this.dataGridViewTextBoxColumn17.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.ColumnHeader;
+            this.dataGridViewTextBoxColumn17.DataPropertyName = "ObjectDateCreated";
+            this.dataGridViewTextBoxColumn17.HeaderText = "Date Created";
+            this.dataGridViewTextBoxColumn17.MinimumWidth = 6;
+            this.dataGridViewTextBoxColumn17.Name = "dataGridViewTextBoxColumn17";
+            this.dataGridViewTextBoxColumn17.ReadOnly = true;
+            this.dataGridViewTextBoxColumn17.Width = 125;
+            // 
+            // dataGridViewTextBoxColumn18
+            // 
+            this.dataGridViewTextBoxColumn18.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.ColumnHeader;
+            this.dataGridViewTextBoxColumn18.DataPropertyName = "ObjectDateModified";
+            this.dataGridViewTextBoxColumn18.HeaderText = "Date Modified";
+            this.dataGridViewTextBoxColumn18.MinimumWidth = 6;
+            this.dataGridViewTextBoxColumn18.Name = "dataGridViewTextBoxColumn18";
+            this.dataGridViewTextBoxColumn18.ReadOnly = true;
+            this.dataGridViewTextBoxColumn18.Width = 125;
+            // 
+            // dataGridViewTextBoxColumn19
+            // 
+            this.dataGridViewTextBoxColumn19.DataPropertyName = "Instance";
+            this.dataGridViewTextBoxColumn19.HeaderText = "Instance";
+            this.dataGridViewTextBoxColumn19.MinimumWidth = 6;
+            this.dataGridViewTextBoxColumn19.Name = "dataGridViewTextBoxColumn19";
+            this.dataGridViewTextBoxColumn19.ReadOnly = true;
+            this.dataGridViewTextBoxColumn19.Width = 90;
+            // 
+            // dataGridViewTextBoxColumn20
+            // 
+            this.dataGridViewTextBoxColumn20.DataPropertyName = "ErrorDate";
+            this.dataGridViewTextBoxColumn20.HeaderText = "Date";
+            this.dataGridViewTextBoxColumn20.MinimumWidth = 6;
+            this.dataGridViewTextBoxColumn20.Name = "dataGridViewTextBoxColumn20";
+            this.dataGridViewTextBoxColumn20.ReadOnly = true;
+            this.dataGridViewTextBoxColumn20.Width = 67;
+            // 
+            // dataGridViewTextBoxColumn21
+            // 
+            this.dataGridViewTextBoxColumn21.DataPropertyName = "ErrorSource";
+            this.dataGridViewTextBoxColumn21.HeaderText = "Source";
+            this.dataGridViewTextBoxColumn21.MinimumWidth = 6;
+            this.dataGridViewTextBoxColumn21.Name = "dataGridViewTextBoxColumn21";
+            this.dataGridViewTextBoxColumn21.ReadOnly = true;
+            this.dataGridViewTextBoxColumn21.Width = 82;
+            // 
+            // dataGridViewTextBoxColumn22
+            // 
+            this.dataGridViewTextBoxColumn22.DataPropertyName = "ErrorContext";
+            this.dataGridViewTextBoxColumn22.HeaderText = "Error Context";
+            this.dataGridViewTextBoxColumn22.MinimumWidth = 6;
+            this.dataGridViewTextBoxColumn22.Name = "dataGridViewTextBoxColumn22";
+            this.dataGridViewTextBoxColumn22.ReadOnly = true;
+            this.dataGridViewTextBoxColumn22.Width = 120;
+            // 
+            // dataGridViewTextBoxColumn23
+            // 
+            this.dataGridViewTextBoxColumn23.DataPropertyName = "ErrorMessage";
+            this.dataGridViewTextBoxColumn23.HeaderText = "Message";
+            this.dataGridViewTextBoxColumn23.MinimumWidth = 6;
+            this.dataGridViewTextBoxColumn23.Name = "dataGridViewTextBoxColumn23";
+            this.dataGridViewTextBoxColumn23.ReadOnly = true;
+            this.dataGridViewTextBoxColumn23.Width = 94;
             // 
             // Main
             // 
@@ -1519,6 +1787,7 @@
             this.tabAlerts.ResumeLayout(false);
             this.tabDrivers.ResumeLayout(false);
             this.tabDBSpace.ResumeLayout(false);
+            this.tabAzureSummary.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -1632,5 +1901,30 @@
         private SpaceTracking spaceTracking1;
         private System.Windows.Forms.ToolStripMenuItem optionsToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem dataRetentionToolStripMenuItem;
+        private System.Windows.Forms.TabPage tabAzureSummary;
+        private Performance.AzureSummary azureSummary1;
+        private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn1;
+        private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn2;
+        private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn3;
+        private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn4;
+        private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn5;
+        private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn6;
+        private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn7;
+        private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn8;
+        private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn9;
+        private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn10;
+        private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn11;
+        private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn12;
+        private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn13;
+        private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn14;
+        private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn15;
+        private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn16;
+        private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn17;
+        private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn18;
+        private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn19;
+        private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn20;
+        private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn21;
+        private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn22;
+        private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn23;
     }
 }

@@ -417,6 +417,8 @@
     <Build Include="dbo\Stored Procedures\FileGroup_Get.sql" />
     <Build Include="dbo\Stored Procedures\DBFileSnapshot_Get.sql" />
     <Build Include="dbo\Stored Procedures\DatabaseID_Get.sql" />
+    <Build Include="dbo\Stored Procedures\AzureDBPoolSummary_Get.sql" />
+    <Build Include="dbo\Stored Procedures\AzureDBPerformanceSummary_Get.sql" />
   </ItemGroup>
   <ItemGroup>
     <PostDeploy Include="Script.PostDeployment1.sql" />

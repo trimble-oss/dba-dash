@@ -1,30 +1,36 @@
-﻿CREATE PROC [Report].[AzureDBUtilization](@FromDate DATETIME2(3)=NULL,@ToDate DATETIME2(3)=NULL,@Instance SYSNAME=NULL,@DatabaseName SYSNAME=NULL)
+﻿CREATE PROC [dbo].[AzureDBPerformanceSummary_Get](
+	@FromDate DATETIME2(3)=NULL,
+	@ToDate DATETIME2(3)=NULL,
+	@InstanceIDs SYSNAME=NULL,
+	@DatabaseName SYSNAME=NULL
+)
 AS
 IF @FromDate IS NULL
 	SET @FromDate = DATEADD(d,-1,GETUTCDATE())
 IF @ToDate IS NULL 
 	SET @ToDate = GETUTCDATE()
-DECLARE @Instances TABLE(
-	Instance SYSNAME PRIMARY KEY
+DECLARE @tInstanceIDs TABLE(
+	InstanceID INT NOT NULL PRIMARY KEY
 )
-IF @Instance IS NULL
+IF @InstanceIDs IS NULL
 BEGIN
-	INSERT INTO @Instances
+	INSERT INTO @tInstanceIDs
 	(
-	    Instance
+	    InstanceID
 	)
-	SELECT DISTINCT Instance 
+	SELECT DISTINCT InstanceID
 	FROM dbo.Instances 
 	WHERE IsActive=1
+	AND EditionID=1674378470
 END 
 ELSE 
 BEGIN
-	INSERT INTO @Instances
+	INSERT INTO @tInstanceIDs
 	(
-		Instance
+		InstanceID
 	)
-	SELECT Item
-	FROM dbo.SplitStrings(@Instance,',')
+	SELECT value
+	FROM STRING_SPLIT(@InstanceIDs,',')
 END;
 
 WITH T AS (
@@ -78,6 +84,6 @@ JOIN dbo.Databases D ON I.InstanceID = D.InstanceID
 LEFT JOIN dbo.AzureDBServiceObjectives O ON O.InstanceID = I.InstanceID
 WHERE I.IsActive=1
 AND D.IsActive=1
-AND EXISTS(SELECT 1 FROM @Instances t WHERE I.Instance = t.Instance)
+AND EXISTS(SELECT 1 FROM @tInstanceIDs t WHERE I.InstanceID = t.InstanceID)
 AND (D.name=@DatabaseName OR @DatabaseName IS NULL)
 ORDER BY T.UnusedDTU DESC;

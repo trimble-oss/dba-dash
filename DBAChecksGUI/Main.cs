@@ -278,6 +278,11 @@ namespace DBAChecksGUI
                 spaceTracking1.DBName = n.DatabaseName;
                 spaceTracking1.RefreshData();
             }
+            if(tabs.SelectedTab == tabAzureSummary)
+            {
+                azureSummary1.InstanceIDs = instanceIDs;
+                azureSummary1.RefreshData();
+            }
         }
 
         private void loadDBAChecksErrorLog(Int32 InstanceID)
@@ -470,6 +475,7 @@ ORDER BY SchemaName,ObjectName
             {
                 allowedTabs.Add(tabSummary);
                 allowedTabs.Add(tabPerformanceSummary);
+                allowedTabs.Add(tabAzureSummary);
                 allowedTabs.Add(tabBackups);
                 allowedTabs.Add(tabDrives);
                 allowedTabs.Add(tabLogShipping);
@@ -479,14 +485,15 @@ ORDER BY SchemaName,ObjectName
                 allowedTabs.Add(tabDBAChecksErrorLog);
                 allowedTabs.Add(tabCollectionDates);
                 allowedTabs.Add(tabSlowQueries);
-                allowedTabs.Add(tabDBSpace);
+                allowedTabs.Add(tabDBSpace);           
             }
             else if(n.Type== SQLTreeItem.TreeType.Database)
             {
                 allowedTabs.Add(tabPerformance);
                 if (((SQLTreeItem)n.Parent).InstanceID == 0) //azure
-                {                   
-                    allowedTabs.Add(tabDBAChecksErrorLog);
+                {
+                    allowedTabs.Add(tabAzureSummary);
+                    allowedTabs.Add(tabDBAChecksErrorLog);                  
                 }
                 allowedTabs.Add(tabFiles);
                 allowedTabs.Add(tabSnapshotsSummary);
@@ -507,6 +514,10 @@ ORDER BY SchemaName,ObjectName
                     allowedTabs.Add(tabLastGood);
                     allowedTabs.Add(tabDBAChecksErrorLog);
                     allowedTabs.Add(tabInfo);                   
+                }
+                else
+                {
+                    allowedTabs.Add(tabAzureSummary);
                 }
                 allowedTabs.Add(tabSlowQueries);
                 allowedTabs.Add(tabFiles);

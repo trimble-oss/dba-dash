@@ -26,7 +26,8 @@ namespace CustomProgressControl
             DefaultCellStyle.Padding = pad;
 
             // Set the default format
-            DefaultCellStyle.Format = "## \\%";
+            DefaultCellStyle.Format = "0.#\\%";
+            DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
         }
 
 

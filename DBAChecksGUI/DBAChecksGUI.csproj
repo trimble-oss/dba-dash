@@ -298,6 +298,12 @@
     <Compile Include="Main.Designer.cs">
       <DependentUpon>Main.cs</DependentUpon>
     </Compile>
+    <Compile Include="Performance\AzureSummary.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Performance\AzureSummary.Designer.cs">
+      <DependentUpon>AzureSummary.cs</DependentUpon>
+    </Compile>
     <Compile Include="Performance\Blocking.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -488,6 +494,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Drives\DrivesControl.resx">
       <DependentUpon>DrivesControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Performance\AzureSummary.resx">
+      <DependentUpon>AzureSummary.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Performance\Blocking.resx">
       <DependentUpon>Blocking.cs</DependentUpon>
