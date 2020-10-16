@@ -183,6 +183,7 @@
     <Compile Include="CustomProgressBar.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="CustomProgressControl.cs" />
     <Compile Include="DataRetention.cs">
       <SubType>Form</SubType>
     </Compile>

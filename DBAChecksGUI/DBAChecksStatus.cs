@@ -37,5 +37,29 @@ namespace DBAChecksGUI
             }
             return Color.Pink;
         }
+
+        public static void SetProgressBarColor(DBAChecksStatusEnum status, ref CustomProgressControl.DataGridViewProgressBarCell pCell )
+        {
+            if (status == DBAChecksStatus.DBAChecksStatusEnum.OK)
+            {
+                pCell.ProgressBarColorFrom = Color.MintCream;
+                pCell.ProgressBarColorTo = Color.Green;
+            }
+            else if (status == DBAChecksStatus.DBAChecksStatusEnum.Warning)
+            {
+                pCell.ProgressBarColorFrom = Color.LightYellow;
+                pCell.ProgressBarColorTo = Color.Yellow;
+            }
+            else if (status == DBAChecksStatus.DBAChecksStatusEnum.Critical)
+            {
+                pCell.ProgressBarColorFrom = Color.LightSalmon;
+                pCell.ProgressBarColorTo = Color.Red;
+            }
+            else
+            {
+                pCell.ProgressBarColorFrom = Color.Azure;
+                pCell.ProgressBarColorTo = Color.LightSkyBlue;
+            }
+        }
     }
 }

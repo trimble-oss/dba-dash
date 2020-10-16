@@ -200,9 +200,14 @@ namespace DBAChecksGUI.Performance
             for (Int32 idx = e.RowIndex; idx < e.RowIndex + e.RowCount; idx += 1)
             {
                 var row = (DataRowView)dgv.Rows[idx].DataBoundItem;
-               
+                var pAvgCPU = (CustomProgressControl.DataGridViewProgressBarCell)dgv.Rows[idx].Cells["AvgCPU"];
+                var pMaxCPU = (CustomProgressControl.DataGridViewProgressBarCell)dgv.Rows[idx].Cells["MaxCPU"];
+                var avgCPUstatus = (DBAChecksStatus.DBAChecksStatusEnum)row["AvgCPUStatus"];
+                var maxCPUstatus = (DBAChecksStatus.DBAChecksStatusEnum)row["MaxCPUStatus"];
 
-                dgv.Rows[idx].Cells["AvgCPU"].Style.BackColor = DBAChecksStatus.GetStatusColour((DBAChecksStatus.DBAChecksStatusEnum)row["AvgCPUStatus"]);
+                DBAChecksStatus.SetProgressBarColor(avgCPUstatus,ref pAvgCPU);
+                DBAChecksStatus.SetProgressBarColor(maxCPUstatus, ref pMaxCPU);
+
                 dgv.Rows[idx].Cells["ReadLatency"].Style.BackColor = DBAChecksStatus.GetStatusColour((DBAChecksStatus.DBAChecksStatusEnum)row["ReadLatencyStatus"]);
                 dgv.Rows[idx].Cells["WriteLatency"].Style.BackColor = DBAChecksStatus.GetStatusColour((DBAChecksStatus.DBAChecksStatusEnum)row["WriteLatencyStatus"]);
                 dgv.Rows[idx].Cells["CriticalWaitMsPerSec"].Style.BackColor = DBAChecksStatus.GetStatusColour((DBAChecksStatus.DBAChecksStatusEnum)row["CriticalWaitStatus"]);
