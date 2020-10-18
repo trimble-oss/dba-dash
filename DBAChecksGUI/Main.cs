@@ -76,15 +76,14 @@ namespace DBAChecksGUI
             }
             else
             {
-
-               
+            
                 if (n.Type == SQLTreeItem.TreeType.Instance && !(n.InstanceID>0))
                 {
-                    instanceIDs = ChildInstanceIDs(n);
+                    instanceIDs = n.ChildInstanceIDs;
                 }
                 else
                 {
-                    instanceIDs = InstanceIDs();
+                    instanceIDs = InstanceIDs;
                 }
                
             }
@@ -272,7 +271,7 @@ namespace DBAChecksGUI
             }
             if (tabs.SelectedTab == tabDBSpace)
             {
-                spaceTracking1.InstanceIDs = instanceIDs;
+                spaceTracking1.InstanceIDs = n.Type == SQLTreeItem.TreeType.DBAChecksRoot ? AllInstanceIDs : instanceIDs;
                 spaceTracking1.DatabaseID = n.DatabaseID;
                 spaceTracking1.Instance = n.InstanceName;
                 spaceTracking1.DBName = n.DatabaseName;
@@ -280,7 +279,7 @@ namespace DBAChecksGUI
             }
             if(tabs.SelectedTab == tabAzureSummary)
             {
-                azureSummary1.InstanceIDs = instanceIDs;
+                azureSummary1.InstanceIDs =n.Type == SQLTreeItem.TreeType.DBAChecksRoot ? AzureInstanceIDs : instanceIDs;
                 azureSummary1.RefreshData();
             }
         }
@@ -307,39 +306,10 @@ namespace DBAChecksGUI
 
         }
 
+        private List<Int32> InstanceIDs = new List<Int32>();
+        private List<Int32> AllInstanceIDs=new List<Int32>();
+        private List<Int32> AzureInstanceIDs= new List<Int32>();
     
-
-        private List<Int32> InstanceIDs()
-        {
-            var instanceIDs = new List<Int32>();
-            foreach(SQLTreeItem itm in tv1.Nodes[0].Nodes)
-            {
-                if (itm.InstanceID > 0)
-                {
-                    instanceIDs.Add(itm.InstanceID);
-                }
-            }
-            return instanceIDs;
-        }
-
-        private List<Int32> ChildInstanceIDs(SQLTreeItem n)
-        {
-            var instanceIDs = new List<Int32>();
-            if(n.Nodes.Count==1 && n.Type == SQLTreeItem.TreeType.Instance && ((SQLTreeItem)n.Nodes[0]).Type == SQLTreeItem.TreeType.DummyNode)
-            {
-                n.Nodes.Clear();
-                addDatabases(n);
-            }
-            foreach (SQLTreeItem itm in n.Nodes)
-            {
-                if (itm.InstanceID > 0)
-                {
-                    instanceIDs.Add(itm.InstanceID);
-                }
-            }
-            return instanceIDs;
-        }
-
 
         #region Tree
 
@@ -356,23 +326,40 @@ namespace DBAChecksGUI
             using (cn)
             {
                 cn.Open();
-                SqlCommand cmd = new SqlCommand(@"SELECT Instance,CASE WHEN EditionID <> 1674378470 THEN InstanceID ELSE NULL END as InstanceID
-FROM dbo.InstancesMatchingTags(@TagIDs) I
-WHERE I.IsActive=1
-GROUP BY Instance,CASE WHEN EditionID <> 1674378470 THEN InstanceID ELSE NULL END
-ORDER BY Instance", cn);
+                SqlCommand cmd = new SqlCommand(@"dbo.Instances_Get", cn);
 
                 cmd.Parameters.AddWithValue("TagIDs", tags);
+                cmd.CommandType = CommandType.StoredProcedure;
                 var rdr = cmd.ExecuteReader();
+                SQLTreeItem AzureNode=null;
                 while (rdr.Read())
                 {
-                    var n = new SQLTreeItem((string)rdr[0], SQLTreeItem.TreeType.Instance);
-                    if (rdr["InstanceID"] != DBNull.Value)
+                    string instance = (string)rdr["Instance"];
+                    Int32 instanceID = (Int32)rdr["InstanceID"];
+                    if ((bool)rdr["IsAzure"])
                     {
-                        n.InstanceID = (Int32)rdr["InstanceID"];
+                        string db = (string)rdr["AzureDBName"];
+                        if (AzureNode == null || AzureNode.InstanceName != instance)
+                        {
+                            AzureNode = new SQLTreeItem(instance, SQLTreeItem.TreeType.Instance);
+                            root.Nodes.Add(AzureNode);
+                        }
+                        var azureDBNode = new SQLTreeItem(db, SQLTreeItem.TreeType.Database);
+                        azureDBNode.DatabaseID = (Int32)rdr["AzureDatabaseID"];
+                        azureDBNode.InstanceID = instanceID;
+                        azureDBNode.AddDatabaseFolders();
+                        AzureNode.Nodes.Add(azureDBNode);
+                        AzureInstanceIDs.Add(instanceID);
                     }
-                    n.AddDummyNode();
-                    root.Nodes.Add(n);
+                    else
+                    {
+                        var n = new SQLTreeItem(instance, SQLTreeItem.TreeType.Instance);
+                        n.InstanceID = instanceID;
+                        n.AddDummyNode();
+                        root.Nodes.Add(n);
+                        InstanceIDs.Add(instanceID);
+                    }
+                    AllInstanceIDs.Add(instanceID);
                 }
             }
             tv1.Nodes.Add(root);

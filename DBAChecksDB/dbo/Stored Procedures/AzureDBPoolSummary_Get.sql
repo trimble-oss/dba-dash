@@ -1,7 +1,7 @@
 ﻿CREATE PROC  [dbo].[AzureDBPoolSummary_Get](
 	@FromDate DATETIME2(3)=NULL,
 	@ToDate DATETIME2(3)=NULL,
-	@InstanceIDs SYSNAME=NULL,
+	@InstanceIDs VARCHAR(MAX)=NULL,
 	@DatabaseName SYSNAME=NULL
 )
 AS

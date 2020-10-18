@@ -49,6 +49,30 @@ namespace DBAChecksGUI
             Configuration
         }
 
+        private List<Int32> _childInstanceIDs;
+
+        public List<Int32> ChildInstanceIDs { 
+            get {
+                
+                if (_childInstanceIDs == null)
+                {
+                    _childInstanceIDs = new List<Int32>();
+                    if( (instanceID==0) && (this.Type == TreeType.DBAChecksRoot || this.Type == TreeType.Instance))
+                    {
+                        foreach (SQLTreeItem itm in this.Nodes)
+                        {
+                            if (itm.InstanceID > 0)
+                            {
+                                _childInstanceIDs.Add(itm.InstanceID);
+                            }
+                        }
+                    }
+                    
+                }
+                return _childInstanceIDs;
+            } 
+        }
+
         public string FullName()
         {
             if (_schemaName == null || _schemaName.Length == 0)
