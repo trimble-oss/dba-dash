@@ -61,6 +61,10 @@
             this.colEdition = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.colServiceObjective = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.colElasticPool = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colDTUHistogram = new System.Windows.Forms.DataGridViewImageColumn();
+            this.colCPUHistogram = new System.Windows.Forms.DataGridViewImageColumn();
+            this.colDataHistogram = new System.Windows.Forms.DataGridViewImageColumn();
+            this.colLogHistogram = new System.Windows.Forms.DataGridViewImageColumn();
             this.colMaxDTU = new CustomProgressControl.DataGridViewProgressBarColumn();
             this.colMaxDTUUsed = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.colUnusedDTUs = new System.Windows.Forms.DataGridViewTextBoxColumn();
@@ -119,8 +123,18 @@
             this.dataGridViewTextBoxColumn17 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dataGridViewTextBoxColumn18 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dgvPool = new System.Windows.Forms.DataGridView();
+            this.splitContainer1 = new System.Windows.Forms.SplitContainer();
+            this.toolStrip2 = new System.Windows.Forms.ToolStrip();
+            this.tsRefreshPool = new System.Windows.Forms.ToolStripButton();
+            this.tsCopyPool = new System.Windows.Forms.ToolStripButton();
+            this.toolStripLabel1 = new System.Windows.Forms.ToolStripLabel();
+            this.tsPoolColumns = new System.Windows.Forms.ToolStripDropDownButton();
             this.poolInstance = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.colPoolName = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colPoolDTUHistogram = new System.Windows.Forms.DataGridViewImageColumn();
+            this.colPoolCPUHistogram = new System.Windows.Forms.DataGridViewImageColumn();
+            this.colPoolDataHistogram = new System.Windows.Forms.DataGridViewImageColumn();
+            this.colPoolLogHistogram = new System.Windows.Forms.DataGridViewImageColumn();
             this.poolMaxDTUPct = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.poolMaxDTU = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.poolUnusedDTU = new System.Windows.Forms.DataGridViewTextBoxColumn();
@@ -134,11 +148,6 @@
             this.poolAvgCPU = new CustomProgressControl.DataGridViewProgressBarColumn();
             this.poolAvgData = new CustomProgressControl.DataGridViewProgressBarColumn();
             this.poolAvgLogWrite = new CustomProgressControl.DataGridViewProgressBarColumn();
-            this.splitContainer1 = new System.Windows.Forms.SplitContainer();
-            this.toolStrip2 = new System.Windows.Forms.ToolStrip();
-            this.tsCopyPool = new System.Windows.Forms.ToolStripButton();
-            this.toolStripLabel1 = new System.Windows.Forms.ToolStripLabel();
-            this.tsPoolColumns = new System.Windows.Forms.ToolStripDropDownButton();
             ((System.ComponentModel.ISupportInitialize)(this.dgv)).BeginInit();
             this.toolStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dgvPool)).BeginInit();
@@ -162,6 +171,10 @@
             this.colEdition,
             this.colServiceObjective,
             this.colElasticPool,
+            this.colDTUHistogram,
+            this.colCPUHistogram,
+            this.colDataHistogram,
+            this.colLogHistogram,
             this.colMaxDTU,
             this.colMaxDTUUsed,
             this.colUnusedDTUs,
@@ -229,6 +242,44 @@
             this.colElasticPool.Name = "colElasticPool";
             this.colElasticPool.ReadOnly = true;
             this.colElasticPool.Width = 101;
+            // 
+            // colDTUHistogram
+            // 
+            this.colDTUHistogram.HeaderText = "DTU Histogram";
+            this.colDTUHistogram.MinimumWidth = 6;
+            this.colDTUHistogram.Name = "colDTUHistogram";
+            this.colDTUHistogram.ReadOnly = true;
+            this.colDTUHistogram.Resizable = System.Windows.Forms.DataGridViewTriState.True;
+            this.colDTUHistogram.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
+            this.colDTUHistogram.Visible = false;
+            this.colDTUHistogram.Width = 123;
+            // 
+            // colCPUHistogram
+            // 
+            this.colCPUHistogram.HeaderText = "CPU Histogram";
+            this.colCPUHistogram.MinimumWidth = 6;
+            this.colCPUHistogram.Name = "colCPUHistogram";
+            this.colCPUHistogram.ReadOnly = true;
+            this.colCPUHistogram.Visible = false;
+            this.colCPUHistogram.Width = 99;
+            // 
+            // colDataHistogram
+            // 
+            this.colDataHistogram.HeaderText = "Data Histogram";
+            this.colDataHistogram.MinimumWidth = 6;
+            this.colDataHistogram.Name = "colDataHistogram";
+            this.colDataHistogram.ReadOnly = true;
+            this.colDataHistogram.Visible = false;
+            this.colDataHistogram.Width = 101;
+            // 
+            // colLogHistogram
+            // 
+            this.colLogHistogram.HeaderText = "Log Write Histogram";
+            this.colLogHistogram.MinimumWidth = 6;
+            this.colLogHistogram.Name = "colLogHistogram";
+            this.colLogHistogram.ReadOnly = true;
+            this.colLogHistogram.Visible = false;
+            this.colLogHistogram.Width = 129;
             // 
             // colMaxDTU
             // 
@@ -847,6 +898,10 @@
             this.dgvPool.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
             this.poolInstance,
             this.colPoolName,
+            this.colPoolDTUHistogram,
+            this.colPoolCPUHistogram,
+            this.colPoolDataHistogram,
+            this.colPoolLogHistogram,
             this.poolMaxDTUPct,
             this.poolMaxDTU,
             this.poolUnusedDTU,
@@ -870,6 +925,76 @@
             this.dgvPool.Size = new System.Drawing.Size(1455, 341);
             this.dgvPool.TabIndex = 5;
             // 
+            // splitContainer1
+            // 
+            this.splitContainer1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.splitContainer1.Location = new System.Drawing.Point(0, 27);
+            this.splitContainer1.Name = "splitContainer1";
+            this.splitContainer1.Orientation = System.Windows.Forms.Orientation.Horizontal;
+            // 
+            // splitContainer1.Panel1
+            // 
+            this.splitContainer1.Panel1.Controls.Add(this.dgv);
+            // 
+            // splitContainer1.Panel2
+            // 
+            this.splitContainer1.Panel2.Controls.Add(this.dgvPool);
+            this.splitContainer1.Panel2.Controls.Add(this.toolStrip2);
+            this.splitContainer1.Size = new System.Drawing.Size(1455, 974);
+            this.splitContainer1.SplitterDistance = 602;
+            this.splitContainer1.TabIndex = 6;
+            // 
+            // toolStrip2
+            // 
+            this.toolStrip2.ImageScalingSize = new System.Drawing.Size(20, 20);
+            this.toolStrip2.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.tsRefreshPool,
+            this.tsCopyPool,
+            this.toolStripLabel1,
+            this.tsPoolColumns});
+            this.toolStrip2.Location = new System.Drawing.Point(0, 0);
+            this.toolStrip2.Name = "toolStrip2";
+            this.toolStrip2.Size = new System.Drawing.Size(1455, 27);
+            this.toolStrip2.TabIndex = 6;
+            this.toolStrip2.Text = "toolStrip2";
+            // 
+            // tsRefreshPool
+            // 
+            this.tsRefreshPool.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.tsRefreshPool.Image = global::DBAChecksGUI.Properties.Resources._112_RefreshArrow_Green_16x16_72;
+            this.tsRefreshPool.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tsRefreshPool.Name = "tsRefreshPool";
+            this.tsRefreshPool.Size = new System.Drawing.Size(29, 24);
+            this.tsRefreshPool.Text = "toolStripButton1";
+            this.tsRefreshPool.Click += new System.EventHandler(this.tsRefreshPool_Click);
+            // 
+            // tsCopyPool
+            // 
+            this.tsCopyPool.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.tsCopyPool.Image = global::DBAChecksGUI.Properties.Resources.ASX_Copy_blue_16x;
+            this.tsCopyPool.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tsCopyPool.Name = "tsCopyPool";
+            this.tsCopyPool.Size = new System.Drawing.Size(29, 24);
+            this.tsCopyPool.Text = "Copy";
+            this.tsCopyPool.Click += new System.EventHandler(this.tsCopyPool_Click);
+            // 
+            // toolStripLabel1
+            // 
+            this.toolStripLabel1.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
+            this.toolStripLabel1.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
+            this.toolStripLabel1.Name = "toolStripLabel1";
+            this.toolStripLabel1.Size = new System.Drawing.Size(88, 24);
+            this.toolStripLabel1.Text = "Elastic Pool";
+            // 
+            // tsPoolColumns
+            // 
+            this.tsPoolColumns.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.tsPoolColumns.Image = global::DBAChecksGUI.Properties.Resources.Column_16x;
+            this.tsPoolColumns.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tsPoolColumns.Name = "tsPoolColumns";
+            this.tsPoolColumns.Size = new System.Drawing.Size(34, 24);
+            this.tsPoolColumns.Text = "Columns";
+            // 
             // poolInstance
             // 
             this.poolInstance.DataPropertyName = "Instance";
@@ -886,7 +1011,43 @@
             this.colPoolName.MinimumWidth = 6;
             this.colPoolName.Name = "colPoolName";
             this.colPoolName.ReadOnly = true;
-            this.colPoolName.Width = 101;
+            this.colPoolName.Width = 110;
+            // 
+            // colPoolDTUHistogram
+            // 
+            this.colPoolDTUHistogram.HeaderText = "DTU Histogram";
+            this.colPoolDTUHistogram.MinimumWidth = 6;
+            this.colPoolDTUHistogram.Name = "colPoolDTUHistogram";
+            this.colPoolDTUHistogram.ReadOnly = true;
+            this.colPoolDTUHistogram.Visible = false;
+            this.colPoolDTUHistogram.Width = 111;
+            // 
+            // colPoolCPUHistogram
+            // 
+            this.colPoolCPUHistogram.HeaderText = "CPU Histogram";
+            this.colPoolCPUHistogram.MinimumWidth = 6;
+            this.colPoolCPUHistogram.Name = "colPoolCPUHistogram";
+            this.colPoolCPUHistogram.ReadOnly = true;
+            this.colPoolCPUHistogram.Visible = false;
+            this.colPoolCPUHistogram.Width = 110;
+            // 
+            // colPoolDataHistogram
+            // 
+            this.colPoolDataHistogram.HeaderText = "Data Histogram";
+            this.colPoolDataHistogram.MinimumWidth = 6;
+            this.colPoolDataHistogram.Name = "colPoolDataHistogram";
+            this.colPoolDataHistogram.ReadOnly = true;
+            this.colPoolDataHistogram.Visible = false;
+            this.colPoolDataHistogram.Width = 112;
+            // 
+            // colPoolLogHistogram
+            // 
+            this.colPoolLogHistogram.HeaderText = "Log Histogram";
+            this.colPoolLogHistogram.MinimumWidth = 6;
+            this.colPoolLogHistogram.Name = "colPoolLogHistogram";
+            this.colPoolLogHistogram.ReadOnly = true;
+            this.colPoolLogHistogram.Visible = false;
+            this.colPoolLogHistogram.Width = 106;
             // 
             // poolMaxDTUPct
             // 
@@ -895,7 +1056,7 @@
             this.poolMaxDTUPct.MinimumWidth = 6;
             this.poolMaxDTUPct.Name = "poolMaxDTUPct";
             this.poolMaxDTUPct.ReadOnly = true;
-            this.poolMaxDTUPct.Width = 91;
+            this.poolMaxDTUPct.Width = 111;
             // 
             // poolMaxDTU
             // 
@@ -1029,65 +1190,6 @@
             this.poolAvgLogWrite.ReadOnly = true;
             this.poolAvgLogWrite.Width = 119;
             // 
-            // splitContainer1
-            // 
-            this.splitContainer1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.splitContainer1.Location = new System.Drawing.Point(0, 27);
-            this.splitContainer1.Name = "splitContainer1";
-            this.splitContainer1.Orientation = System.Windows.Forms.Orientation.Horizontal;
-            // 
-            // splitContainer1.Panel1
-            // 
-            this.splitContainer1.Panel1.Controls.Add(this.dgv);
-            // 
-            // splitContainer1.Panel2
-            // 
-            this.splitContainer1.Panel2.Controls.Add(this.dgvPool);
-            this.splitContainer1.Panel2.Controls.Add(this.toolStrip2);
-            this.splitContainer1.Size = new System.Drawing.Size(1455, 974);
-            this.splitContainer1.SplitterDistance = 602;
-            this.splitContainer1.TabIndex = 6;
-            // 
-            // toolStrip2
-            // 
-            this.toolStrip2.ImageScalingSize = new System.Drawing.Size(20, 20);
-            this.toolStrip2.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.tsCopyPool,
-            this.toolStripLabel1,
-            this.tsPoolColumns});
-            this.toolStrip2.Location = new System.Drawing.Point(0, 0);
-            this.toolStrip2.Name = "toolStrip2";
-            this.toolStrip2.Size = new System.Drawing.Size(1455, 27);
-            this.toolStrip2.TabIndex = 6;
-            this.toolStrip2.Text = "toolStrip2";
-            // 
-            // tsCopyPool
-            // 
-            this.tsCopyPool.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.tsCopyPool.Image = global::DBAChecksGUI.Properties.Resources.ASX_Copy_blue_16x;
-            this.tsCopyPool.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsCopyPool.Name = "tsCopyPool";
-            this.tsCopyPool.Size = new System.Drawing.Size(29, 24);
-            this.tsCopyPool.Text = "toolStripButton1";
-            this.tsCopyPool.Click += new System.EventHandler(this.tsCopyPool_Click);
-            // 
-            // toolStripLabel1
-            // 
-            this.toolStripLabel1.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
-            this.toolStripLabel1.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
-            this.toolStripLabel1.Name = "toolStripLabel1";
-            this.toolStripLabel1.Size = new System.Drawing.Size(88, 24);
-            this.toolStripLabel1.Text = "Elastic Pool";
-            // 
-            // tsPoolColumns
-            // 
-            this.tsPoolColumns.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.tsPoolColumns.Image = global::DBAChecksGUI.Properties.Resources.Column_16x;
-            this.tsPoolColumns.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsPoolColumns.Name = "tsPoolColumns";
-            this.tsPoolColumns.Size = new System.Drawing.Size(34, 24);
-            this.tsPoolColumns.Text = "Columns";
-            // 
             // AzureSummary
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
@@ -1159,11 +1261,22 @@
         private CustomProgressControl.DataGridViewProgressBarColumn dataGridViewProgressBarColumn6;
         private CustomProgressControl.DataGridViewProgressBarColumn dataGridViewProgressBarColumn7;
         private CustomProgressControl.DataGridViewProgressBarColumn dataGridViewProgressBarColumn8;
+        private System.Windows.Forms.DataGridView dgvPool;
+        private System.Windows.Forms.SplitContainer splitContainer1;
+        private System.Windows.Forms.ToolStrip toolStrip2;
+        private System.Windows.Forms.ToolStripButton tsCopyPool;
+        private System.Windows.Forms.ToolStripLabel toolStripLabel2;
+        private System.Windows.Forms.ToolStripLabel toolStripLabel1;
+        private System.Windows.Forms.ToolStripDropDownButton tsPoolColumns;
         private System.Windows.Forms.DataGridViewTextBoxColumn Instance;
         private System.Windows.Forms.DataGridViewTextBoxColumn colDB;
         private System.Windows.Forms.DataGridViewTextBoxColumn colEdition;
         private System.Windows.Forms.DataGridViewTextBoxColumn colServiceObjective;
         private System.Windows.Forms.DataGridViewTextBoxColumn colElasticPool;
+        private System.Windows.Forms.DataGridViewImageColumn colDTUHistogram;
+        private System.Windows.Forms.DataGridViewImageColumn colCPUHistogram;
+        private System.Windows.Forms.DataGridViewImageColumn colDataHistogram;
+        private System.Windows.Forms.DataGridViewImageColumn colLogHistogram;
         private CustomProgressControl.DataGridViewProgressBarColumn colMaxDTU;
         private System.Windows.Forms.DataGridViewTextBoxColumn colMaxDTUUsed;
         private System.Windows.Forms.DataGridViewTextBoxColumn colUnusedDTUs;
@@ -1177,10 +1290,13 @@
         private CustomProgressControl.DataGridViewProgressBarColumn colAvgCPUPct;
         private CustomProgressControl.DataGridViewProgressBarColumn colAvgDataPct;
         private CustomProgressControl.DataGridViewProgressBarColumn colAvgLogWrite;
-        private System.Windows.Forms.DataGridView dgvPool;
-        private System.Windows.Forms.SplitContainer splitContainer1;
+        private System.Windows.Forms.ToolStripButton tsRefreshPool;
         private System.Windows.Forms.DataGridViewTextBoxColumn poolInstance;
         private System.Windows.Forms.DataGridViewTextBoxColumn colPoolName;
+        private System.Windows.Forms.DataGridViewImageColumn colPoolDTUHistogram;
+        private System.Windows.Forms.DataGridViewImageColumn colPoolCPUHistogram;
+        private System.Windows.Forms.DataGridViewImageColumn colPoolDataHistogram;
+        private System.Windows.Forms.DataGridViewImageColumn colPoolLogHistogram;
         private System.Windows.Forms.DataGridViewTextBoxColumn poolMaxDTUPct;
         private System.Windows.Forms.DataGridViewTextBoxColumn poolMaxDTU;
         private System.Windows.Forms.DataGridViewTextBoxColumn poolUnusedDTU;
@@ -1194,10 +1310,5 @@
         private CustomProgressControl.DataGridViewProgressBarColumn poolAvgCPU;
         private CustomProgressControl.DataGridViewProgressBarColumn poolAvgData;
         private CustomProgressControl.DataGridViewProgressBarColumn poolAvgLogWrite;
-        private System.Windows.Forms.ToolStrip toolStrip2;
-        private System.Windows.Forms.ToolStripButton tsCopyPool;
-        private System.Windows.Forms.ToolStripLabel toolStripLabel2;
-        private System.Windows.Forms.ToolStripLabel toolStripLabel1;
-        private System.Windows.Forms.ToolStripDropDownButton tsPoolColumns;
     }
 }

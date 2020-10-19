@@ -51,7 +51,27 @@ WITH cpuAgg AS (
 	SELECT InstanceID,
 		SUM(SumTotalCPU*1.0)/SUM(SampleCount*1.0) as AvgCPU,
 	    SUM(SumOtherCPU*1.0)/SUM(SampleCount*1.0) as OtherCPU,
-	    MAX(MaxTotalCPU*1.0) as MaxCPU
+	    MAX(MaxTotalCPU*1.0) as MaxCPU,
+		'+ CASE WHEN @Use60MIN=1 THEN 'NULL AS CPU10,
+		NULL AS CPU20,
+		NULL AS CPU30,
+		NULL AS CPU40,
+		NULL AS CPU50,
+		NULL AS CPU60,
+		NULL AS CPU70,
+		NULL AS CPU80,
+		NULL AS CPU90,
+		NULL AS CPU100' ELSE 
+		'SUM(CASE WHEN TotalCPU <10 THEN 1 ELSE 0 END) AS CPU10,
+		SUM(CASE WHEN TotalCPU >=10 AND TotalCPU <20 THEN 1 ELSE 0 END) AS CPU20,
+		SUM(CASE WHEN TotalCPU >=20 AND TotalCPU <30 THEN 1 ELSE 0 END) AS CPU30,
+		SUM(CASE WHEN TotalCPU >=30 AND TotalCPU <40 THEN 1 ELSE 0 END) AS CPU40,
+		SUM(CASE WHEN TotalCPU >=40 AND TotalCPU <50 THEN 1 ELSE 0 END) AS CPU50,
+		SUM(CASE WHEN TotalCPU >=50 AND TotalCPU <60 THEN 1 ELSE 0 END) AS CPU60,
+		SUM(CASE WHEN TotalCPU >=60 AND TotalCPU <70 THEN 1 ELSE 0 END) AS CPU70,
+		SUM(CASE WHEN TotalCPU >=70 AND TotalCPU <80 THEN 1 ELSE 0 END) AS CPU80,
+		SUM(CASE WHEN TotalCPU >=80 AND TotalCPU <90 THEN 1 ELSE 0 END) AS CPU90,
+		SUM(CASE WHEN TotalCPU>= 90 THEN 1 ELSE 0 END) AS CPU100' END + '
 	FROM ' + CASE WHEN @Use60MIN=1 THEN 'dbo.CPU_60MIN' ELSE 'dbo.CPU' END + ' as CPU
 	WHERE EventTime >=@FromDate
 	AND EventTime <@ToDate
@@ -135,7 +155,17 @@ SELECT i.InstanceID,
        wait.LatchWaitMsPerSec,
        wait.LockWaitMsPerSec,
        wait.IOWaitMsPerSec,
-       wait.WaitMsPerSec	
+       wait.WaitMsPerSec,
+	   CPU10,
+	   CPU20,
+	   CPU30,
+	   CPU40,
+	   CPU50,
+	   CPU60,
+	   CPU70,
+	   CPU80,
+	   CPU90,
+	   CPU100
 FROM dbo.Instances I 
 LEFT JOIN dbio ON I.InstanceID = dbio.InstanceID
 LEFT JOIN cpuAgg ON I.InstanceID = cpuAgg.InstanceID

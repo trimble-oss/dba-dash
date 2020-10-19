@@ -89,6 +89,40 @@ namespace DBAChecksGUI.Performance
                     da.Fill(dt);
                     dgv.AutoGenerateColumns = false;
                     dgv.DataSource = new DataView(dt);
+                    generateHistogram();
+                }
+            }
+        }
+
+        private void generateHistogram()
+        {
+            if (dgv.Rows.Count > 0 && dgv.Rows[0].Cells["colCPUHistogram"].Visible && dgv.Rows[0].Cells["colCPUHistogram"].Value == null)
+            {
+                foreach (DataGridViewRow r in dgv.Rows)
+                {
+                    DataRowView row = (DataRowView)r.DataBoundItem;
+
+                    
+                     var hist = new List<double>();
+                    if (row["CPU10"] != DBNull.Value)
+                    {
+                        StringBuilder sbToolTip = new StringBuilder();
+                        for (Int32 i = 10; i <= 100; i += 10)
+                        {
+                            var v = Convert.ToDouble(row["CPU" + i.ToString()]);
+                            hist.Add(v);
+                            sbToolTip.AppendLine((i-10).ToString() + " to " +  i.ToString() + "% | " + v.ToString("N0"));
+                        }
+                        r.Cells["colCPUHistogram"].Value = Histogram.GetHistogram(hist, 200, 100, true);
+                        r.Height = 100;
+                        r.Cells["colCPUHistogram"].ToolTipText = sbToolTip.ToString();
+             
+                    }
+                    else
+                    {
+                        r.Cells["colCPUHistogram"].Value = new Bitmap(1, 1);
+                    }
+                    
                 }
             }
         }
@@ -149,12 +183,14 @@ namespace DBAChecksGUI.Performance
         private void MnuCheckAll_Click(object sender, EventArgs e)
         {
             checkAll(true);
+            generateHistogram();
         }
 
         private void ColumnMenu_Click(object sender, EventArgs e)
         {
             var mnu = (ToolStripMenuItem)sender;
             dgv.Columns[mnu.Name].Visible = mnu.Checked;
+            generateHistogram();
         }
 
         private void PerformanceSummary_Load(object sender, EventArgs e)
@@ -217,7 +253,11 @@ namespace DBAChecksGUI.Performance
 
         private void tsCopy_Click(object sender, EventArgs e)
         {
+            var cpuHistVisible = colCPUHistogram.Visible;
+
+            colCPUHistogram.Visible = false;
             Common.CopyDataGridViewToClipboard(dgv);
+            colCPUHistogram.Visible = cpuHistVisible;
         }
     }
 }

@@ -266,6 +266,7 @@
     <Compile Include="Changes\HardwareChanges.Designer.cs">
       <DependentUpon>HardwareChanges.cs</DependentUpon>
     </Compile>
+    <Compile Include="Histogram.cs" />
     <Compile Include="LastGoodCheckDB\LastGoodCheckDBConfig.cs">
       <SubType>Form</SubType>
     </Compile>

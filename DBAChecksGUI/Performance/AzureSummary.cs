@@ -19,7 +19,7 @@ namespace DBAChecksGUI.Performance
         }
 
         public List<Int32> InstanceIDs;
-    
+
 
 
         Int32 mins = 15;
@@ -82,6 +82,10 @@ namespace DBAChecksGUI.Performance
                 {
                     cmd.Parameters.AddWithValue("InstanceIDs", string.Join(",", InstanceIDs));
                 }
+                cmd.Parameters.AddWithValue("CPUHist", colCPUHistogram.Visible);
+                cmd.Parameters.AddWithValue("DataHist", colDataHistogram.Visible);
+                cmd.Parameters.AddWithValue("LogHist", colLogHistogram.Visible);
+                cmd.Parameters.AddWithValue("DTUHist", colDTUHistogram.Visible);
                 cmd.Parameters.AddWithValue("FromDate", fromDate);
                 cmd.Parameters.AddWithValue("ToDate", toDate);
                 cmd.CommandTimeout = Properties.Settings.Default.CommandTimeout;
@@ -91,12 +95,13 @@ namespace DBAChecksGUI.Performance
                 da.Fill(dt);
                 dgv.AutoGenerateColumns = false;
                 dgv.DataSource = new DataView(dt);
+                generateHistogram(dgv);
             }
         }
 
         private void refreshPool()
         {
- 
+
             SqlConnection cn = new SqlConnection(Common.ConnectionString);
             using (cn)
             {
@@ -106,6 +111,10 @@ namespace DBAChecksGUI.Performance
                 {
                     cmd.Parameters.AddWithValue("InstanceIDs", string.Join(",", InstanceIDs));
                 }
+                cmd.Parameters.AddWithValue("CPUHist", colPoolCPUHistogram.Visible);
+                cmd.Parameters.AddWithValue("DataHist", colPoolDataHistogram.Visible);
+                cmd.Parameters.AddWithValue("LogHist", colPoolLogHistogram.Visible);
+                cmd.Parameters.AddWithValue("DTUHist", colPoolDTUHistogram.Visible);
                 cmd.Parameters.AddWithValue("FromDate", fromDate);
                 cmd.Parameters.AddWithValue("ToDate", toDate);
                 cmd.CommandTimeout = Properties.Settings.Default.CommandTimeout;
@@ -115,8 +124,9 @@ namespace DBAChecksGUI.Performance
                 da.Fill(dt);
                 dgvPool.AutoGenerateColumns = false;
                 dgvPool.DataSource = new DataView(dt);
+                generateHistogram(dgvPool, "colPool");
             }
-            
+
         }
 
         private void checkTime()
@@ -129,6 +139,51 @@ namespace DBAChecksGUI.Performance
                     tsmi.Checked = Int32.Parse((string)tsmi.Tag) == mins;
                 }
             }
+        }
+
+        string[] histograms = new string[] { "DTU", "CPU", "Data", "Log" };
+
+        private void generateHistogram(DataGridView dgv,string colPrefix="col" )
+        {
+      
+            foreach(string histogram in histograms)
+            {
+                string colName = colPrefix + histogram + "Histogram";
+                if (dgv.Rows.Count > 0 && dgv.Rows[0].Cells[colName].Visible && dgv.Rows[0].Cells[colName].Value == null)
+                {
+                    foreach (DataGridViewRow r in dgv.Rows)
+                    {
+                        DataRowView row = (DataRowView)r.DataBoundItem;
+                        StringBuilder sbToolTip = new StringBuilder();
+                        var hist = new List<double>();
+                        double total = 0;
+
+                        for (Int32 i = 10; i <= 100; i += 10)
+                        {
+                            var v = Convert.ToDouble(row[histogram + i.ToString()]);
+                            hist.Add(v);
+                            total += v;
+                        }
+                        
+                        if (total == 0)
+                        {
+                            r.Cells[colName].Value = new Bitmap(1, 1);
+                        }
+                        else
+                        {
+                            for (Int32 i = 10; i <= 100; i += 10)
+                            {
+                                var v = Convert.ToDouble(row[histogram + i.ToString()]);
+                                sbToolTip.AppendLine((i - 10).ToString() + " to " + i.ToString() + "% | " + v.ToString("N0") + " (" + (v/total).ToString("P2") + ")")  ;
+                            }
+                            r.Cells[colName].Value = Histogram.GetHistogram(hist, 200, 100, true);
+                            r.Height = 100;
+                            r.Cells[colName].ToolTipText = sbToolTip.ToString();
+                        }
+
+                    }
+                }
+            }       
         }
 
         private void addColumnsMenu()
@@ -181,6 +236,15 @@ namespace DBAChecksGUI.Performance
         private void MnuPoolCheckAll_Click(object sender, EventArgs e)
         {
             checkAll(true, ref tsPoolColumns, ref dgvPool);
+            DataView dv = (DataView)dgvPool.DataSource;
+            foreach (string histogram in histograms)
+            {
+                if (!dv.Table.Columns.Contains(histogram + "10"))
+                {
+                    refreshPool();
+                    break;
+                }
+            }
         }
 
         private void MnuUnCheckAll_Click(object sender, EventArgs e)
@@ -207,18 +271,47 @@ namespace DBAChecksGUI.Performance
         private void MnuCheckAll_Click(object sender, EventArgs e)
         {
             checkAll(true,ref tsColumns,ref dgv);
+            DataView dv = (DataView)dgv.DataSource;
+
+            foreach (string histogram in histograms)
+            {
+                if (!dv.Table.Columns.Contains(histogram + "10"))
+                {
+                    refreshDB() ;
+                    break;
+                }
+            }
+
         }
 
         private void PoolColumnMenu_Click(object sender, EventArgs e)
         {
             var mnu = (ToolStripMenuItem)sender;
             dgvPool.Columns[mnu.Name].Visible = mnu.Checked;
+            if (mnu.Checked && mnu.Text.Contains("Histogram"))
+            {
+                string histogram = mnu.Name.Replace("colPool", "").Replace("Histogram", "");
+                DataView dv = (DataView)dgvPool.DataSource;
+                if (!dv.Table.Columns.Contains(histogram + "10"))
+                {
+                    refreshPool();
+                }
+            }
         }
 
         private void ColumnMenu_Click(object sender, EventArgs e)
         {
             var mnu = (ToolStripMenuItem)sender;
             dgv.Columns[mnu.Name].Visible = mnu.Checked;
+            if(mnu.Checked && mnu.Text.Contains("Histogram"))
+            {
+                string histogram = mnu.Name.Replace("col", "").Replace("Histogram", "");
+                DataView dv = (DataView)dgv.DataSource;
+                if (!dv.Table.Columns.Contains(histogram + "10"))
+                {
+                    refreshDB();
+                }
+            }
         }
 
         private void AzureSummary_Load(object sender, EventArgs e)
@@ -240,7 +333,7 @@ namespace DBAChecksGUI.Performance
 
         private void tsRefresh_Click(object sender, EventArgs e)
         {
-            RefreshData();
+            refreshDB();
         }
 
         private void tsCustom_Click(object sender, EventArgs e)
@@ -263,12 +356,39 @@ namespace DBAChecksGUI.Performance
 
         private void tsCopy_Click(object sender, EventArgs e)
         {
+            var visibleCols = (new DataGridViewColumn[] { colCPUHistogram, colDataHistogram, colDTUHistogram, colLogHistogram }).Where(col => col.Visible == true).ToList();
+            
+            foreach(var c in visibleCols)
+            {
+                c.Visible = false;
+            }
             Common.CopyDataGridViewToClipboard(dgv);
+            foreach (var c in visibleCols)
+            {
+                c.Visible = true;
+            }
+
         }
 
         private void tsCopyPool_Click(object sender, EventArgs e)
         {
+            var visibleCols = (new DataGridViewColumn[] { colPoolCPUHistogram, colPoolDataHistogram, colPoolDTUHistogram, colPoolLogHistogram }).Where(col => col.Visible == true).ToList();
+
+            foreach (var c in visibleCols)
+            {
+                c.Visible = false;
+            }
             Common.CopyDataGridViewToClipboard(dgvPool);
+            foreach (var c in visibleCols)
+            {
+                c.Visible = true;
+            }
+
+        }
+
+        private void tsRefreshPool_Click(object sender, EventArgs e)
+        {
+            refreshPool();
         }
     }
 }
