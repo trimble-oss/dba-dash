@@ -36,7 +36,17 @@ BEGIN
 		SampleCount,
 		MaxSQLProcessCPU,
 		MaxOtherProcessCPU,
-		MaxTotalCPU
+		MaxTotalCPU,
+		CPU10,
+		CPU20,
+		CPU30,
+		CPU40,
+		CPU50,
+		CPU60,
+		CPU70,
+		CPU80,
+		CPU90,
+		CPU100
 	)
 	SELECT InstanceID,
 		CONVERT(DATETIME,SUBSTRING(CONVERT(VARCHAR,EventTime,120),0,14) + ':00',120) AS EventTime,
@@ -45,8 +55,18 @@ BEGIN
 		COUNT(*) cnt,
 		MAX(SQLProcessCPU),
 		MAX(OtherCPU),
-		MAX(TotalCPU)
-	FROM dbo.CPU
+		MAX(TotalCPU),
+		SUM(CPU10) AS CPU10,
+		SUM(CPU20) AS CPU20,
+		SUM(CPU30) AS CPU30,
+		SUM(CPU40) AS CPU40,
+		SUM(CPU50) AS CPU50,
+		SUM(CPU60) AS CPU60,
+		SUM(CPU70) AS CPU70,
+		SUM(CPU80) AS CPU80,
+		SUM(CPU90) AS CPU90,
+		SUM(CPU100) AS CPU100
+	FROM dbo.CPU_Histogram
 	WHERE InstanceID = @InstanceID
 	AND EventTime>=@MaxEventTimeHr
 	GROUP BY InstanceID,

@@ -9,8 +9,20 @@
     [MaxTotalCPU]        TINYINT       NOT NULL,
     [SumOtherCPU]        AS            ([SampleCount]*(100)-([SumSQLProcessCPU]+[SumSystemIdleCPU])),
     [SumTotalCPU]        AS            ([SampleCount]*(100)-[SumSystemIdleCPU]),
+    [CPU10]              SMALLINT      NULL,
+    [CPU20]              SMALLINT      NULL,
+    [CPU30]              SMALLINT      NULL,
+    [CPU40]              SMALLINT      NULL,
+    [CPU50]              SMALLINT      NULL,
+    [CPU60]              SMALLINT      NULL,
+    [CPU70]              SMALLINT      NULL,
+    [CPU80]              SMALLINT      NULL,
+    [CPU90]              SMALLINT      NULL,
+    [CPU100]             SMALLINT      NULL,
     CONSTRAINT [PK_CPU_60MIN] PRIMARY KEY CLUSTERED ([InstanceID] ASC, [EventTime] ASC) WITH (DATA_COMPRESSION = PAGE)
 );
+
+
 
 
 GO

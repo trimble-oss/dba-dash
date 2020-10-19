@@ -1,0 +1,26 @@
+﻿CREATE VIEW CPU_Histogram
+AS
+SELECT InstanceID,
+       EventTime,
+       SQLProcessCPU,
+       SystemIdleCPU,
+       OtherCPU,
+       TotalCPU,
+       SampleCount,
+       MaxSQLProcessCPU,
+       MaxOtherProcessCPU,
+       MaxTotalCPU,
+       SumOtherCPU,
+       SumTotalCPU,
+       SumSQLProcessCPU,
+	   CASE WHEN TotalCPU <10 THEN 1 ELSE 0 END AS CPU10,
+	   CASE WHEN TotalCPU >=10 AND TotalCPU <20 THEN 1 ELSE 0 END AS CPU20,
+	   CASE WHEN TotalCPU >=20 AND TotalCPU <30 THEN 1 ELSE 0 END AS CPU30,
+	   CASE WHEN TotalCPU >=30 AND TotalCPU <40 THEN 1 ELSE 0 END AS CPU40,
+	   CASE WHEN TotalCPU >=40 AND TotalCPU <50 THEN 1 ELSE 0 END AS CPU50,
+	   CASE WHEN TotalCPU >=50 AND TotalCPU <60 THEN 1 ELSE 0 END AS CPU60,
+	   CASE WHEN TotalCPU >=60 AND TotalCPU <70 THEN 1 ELSE 0 END AS CPU70,
+	   CASE WHEN TotalCPU >=70 AND TotalCPU <80 THEN 1 ELSE 0 END AS CPU80,
+	   CASE WHEN TotalCPU >=80 AND TotalCPU <90 THEN 1 ELSE 0 END AS CPU90,
+	   CASE WHEN TotalCPU>= 90 THEN 1 ELSE 0 END AS CPU100
+FROM dbo.CPU
