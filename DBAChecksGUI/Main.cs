@@ -316,6 +316,9 @@ namespace DBAChecksGUI
         private void addInstanes()
         {
             tv1.Nodes.Clear();
+            InstanceIDs.Clear();
+            AzureInstanceIDs.Clear();
+            AllInstanceIDs.Clear();
             var root = new SQLTreeItem("DBAChecks", SQLTreeItem.TreeType.DBAChecksRoot);
             var changes = new SQLTreeItem("Configuration", SQLTreeItem.TreeType.Configuration);
             root.Nodes.Add(changes);
