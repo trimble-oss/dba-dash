@@ -242,9 +242,10 @@ namespace DBAChecksGUI.Performance
                 if (!dv.Table.Columns.Contains(histogram + "10"))
                 {
                     refreshPool();
-                    break;
+                    return;
                 }
             }
+            generateHistogram(dgvPool, "colPool");
         }
 
         private void MnuUnCheckAll_Click(object sender, EventArgs e)
@@ -278,9 +279,10 @@ namespace DBAChecksGUI.Performance
                 if (!dv.Table.Columns.Contains(histogram + "10"))
                 {
                     refreshDB() ;
-                    break;
-                }
+                    return;
+                }                           
             }
+            generateHistogram(dgv, "col");
 
         }
 
@@ -296,6 +298,10 @@ namespace DBAChecksGUI.Performance
                 {
                     refreshPool();
                 }
+                else
+                {
+                    generateHistogram(dgvPool, "colPool");
+                }
             }
         }
 
@@ -310,6 +316,10 @@ namespace DBAChecksGUI.Performance
                 if (!dv.Table.Columns.Contains(histogram + "10"))
                 {
                     refreshDB();
+                }
+                else
+                {
+                    generateHistogram(dgv, "col");
                 }
             }
         }
@@ -389,6 +399,16 @@ namespace DBAChecksGUI.Performance
         private void tsRefreshPool_Click(object sender, EventArgs e)
         {
             refreshPool();
+        }
+
+        private void dgv_Sorted(object sender, EventArgs e)
+        {
+            generateHistogram(dgv, "col");
+        }
+
+        private void dgvPool_Sorted(object sender, EventArgs e)
+        {
+            generateHistogram(dgvPool, "colPool");
         }
     }
 }

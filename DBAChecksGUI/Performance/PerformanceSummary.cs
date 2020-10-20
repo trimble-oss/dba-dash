@@ -67,6 +67,7 @@ namespace DBAChecksGUI.Performance
         {
             if (ConnectionString != null)
             {
+                dgv.DataSource = null;
                 SqlConnection cn = new SqlConnection(ConnectionString);
                 using (cn)
                 {
@@ -88,22 +89,25 @@ namespace DBAChecksGUI.Performance
                     DataTable dt = new DataTable();
                     da.Fill(dt);
                     dgv.AutoGenerateColumns = false;
-                    dgv.DataSource = new DataView(dt);
-                    generateHistogram();
+                    generateHistogram(ref dt);
+                    if (dgv.DataSource == null)
+                    {
+                        dgv.DataSource = new DataView(dt);
+                    }
                 }
             }
         }
 
-        private void generateHistogram()
+        private void generateHistogram(ref DataTable dt)
         {
-            if (dgv.Rows.Count > 0 && dgv.Rows[0].Cells["colCPUHistogram"].Visible && dgv.Rows[0].Cells["colCPUHistogram"].Value == null)
+            if (dt.Rows.Count > 0 && dgv.Columns["colCPUHistogram"].Visible && (!dt.Columns.Contains("CPUHistogram")) )
             {
-                foreach (DataGridViewRow r in dgv.Rows)
-                {
-                    DataRowView row = (DataRowView)r.DataBoundItem;
-
-                    
-                     var hist = new List<double>();
+                dgv.DataSource = null;
+                dt.Columns.Add("CPUHistogram", typeof(Bitmap));
+                dt.Columns.Add("CPUHistogramTooltip", typeof(string));
+                foreach (DataRow row in dt.Rows)
+                {                    
+                    var hist = new List<double>();
                     if (row["CPU10"] != DBNull.Value)
                     {
                         StringBuilder sbToolTip = new StringBuilder();
@@ -113,17 +117,17 @@ namespace DBAChecksGUI.Performance
                             hist.Add(v);
                             sbToolTip.AppendLine((i-10).ToString() + " to " +  i.ToString() + "% | " + v.ToString("N0"));
                         }
-                        r.Cells["colCPUHistogram"].Value = Histogram.GetHistogram(hist, 200, 100, true);
-                        r.Height = 100;
-                        r.Cells["colCPUHistogram"].ToolTipText = sbToolTip.ToString();
-             
+                        row["CPUHistogram"] = Histogram.GetHistogram(hist, 200, 100, true);
+                        row["CPUHistogramToolTip"] = sbToolTip.ToString();
+
                     }
                     else
                     {
-                        r.Cells["colCPUHistogram"].Value = new Bitmap(1, 1);
+                        row["CPUHistogram"] = new Bitmap(1, 1);
                     }
                     
                 }
+                dgv.DataSource = new DataView(dt);
             }
         }
 
@@ -183,14 +187,19 @@ namespace DBAChecksGUI.Performance
         private void MnuCheckAll_Click(object sender, EventArgs e)
         {
             checkAll(true);
-            generateHistogram();
+            var dt = ((DataView)dgv.DataSource).Table;
+            generateHistogram(ref dt);
         }
 
         private void ColumnMenu_Click(object sender, EventArgs e)
         {
             var mnu = (ToolStripMenuItem)sender;
             dgv.Columns[mnu.Name].Visible = mnu.Checked;
-            generateHistogram();
+            if (mnu.Name == "colCPUHistogram" && mnu.Checked)
+            {
+                var dt = ((DataView)dgv.DataSource).Table;
+                generateHistogram(ref dt);
+            }
         }
 
         private void PerformanceSummary_Load(object sender, EventArgs e)
@@ -233,20 +242,27 @@ namespace DBAChecksGUI.Performance
 
         private void dgv_RowsAdded(object sender, DataGridViewRowsAddedEventArgs e)
         {
+            bool histogram = ((DataView)dgv.DataSource).Table.Columns.Contains("CPUHistogram");
             for (Int32 idx = e.RowIndex; idx < e.RowIndex + e.RowCount; idx += 1)
             {
-                var row = (DataRowView)dgv.Rows[idx].DataBoundItem;
-                var pAvgCPU = (CustomProgressControl.DataGridViewProgressBarCell)dgv.Rows[idx].Cells["AvgCPU"];
-                var pMaxCPU = (CustomProgressControl.DataGridViewProgressBarCell)dgv.Rows[idx].Cells["MaxCPU"];
+                var r = dgv.Rows[idx];
+                var row = (DataRowView)r.DataBoundItem;
+                var pAvgCPU = (CustomProgressControl.DataGridViewProgressBarCell)r.Cells["AvgCPU"];
+                var pMaxCPU = (CustomProgressControl.DataGridViewProgressBarCell)r.Cells["MaxCPU"];
                 var avgCPUstatus = (DBAChecksStatus.DBAChecksStatusEnum)row["AvgCPUStatus"];
                 var maxCPUstatus = (DBAChecksStatus.DBAChecksStatusEnum)row["MaxCPUStatus"];
 
                 DBAChecksStatus.SetProgressBarColor(avgCPUstatus,ref pAvgCPU);
                 DBAChecksStatus.SetProgressBarColor(maxCPUstatus, ref pMaxCPU);
 
-                dgv.Rows[idx].Cells["ReadLatency"].Style.BackColor = DBAChecksStatus.GetStatusColour((DBAChecksStatus.DBAChecksStatusEnum)row["ReadLatencyStatus"]);
-                dgv.Rows[idx].Cells["WriteLatency"].Style.BackColor = DBAChecksStatus.GetStatusColour((DBAChecksStatus.DBAChecksStatusEnum)row["WriteLatencyStatus"]);
-                dgv.Rows[idx].Cells["CriticalWaitMsPerSec"].Style.BackColor = DBAChecksStatus.GetStatusColour((DBAChecksStatus.DBAChecksStatusEnum)row["CriticalWaitStatus"]);
+                r.Cells["ReadLatency"].Style.BackColor = DBAChecksStatus.GetStatusColour((DBAChecksStatus.DBAChecksStatusEnum)row["ReadLatencyStatus"]);
+                r.Cells["WriteLatency"].Style.BackColor = DBAChecksStatus.GetStatusColour((DBAChecksStatus.DBAChecksStatusEnum)row["WriteLatencyStatus"]);
+                r.Cells["CriticalWaitMsPerSec"].Style.BackColor = DBAChecksStatus.GetStatusColour((DBAChecksStatus.DBAChecksStatusEnum)row["CriticalWaitStatus"]);
+                if (histogram)
+                {
+                     r.Height = 100;
+                    r.Cells["colCPUHistogram"].ToolTipText = row["CPUHistogramTooltip"]==DBNull.Value ? "" : (string)row["CPUHistogramTooltip"];
+                }
             }
              
         }

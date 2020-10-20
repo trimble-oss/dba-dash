@@ -597,14 +597,14 @@
             // 
             // colCPUHistogram
             // 
+            this.colCPUHistogram.DataPropertyName = "CPUHistogram";
             this.colCPUHistogram.HeaderText = "CPU Histogram";
             this.colCPUHistogram.MinimumWidth = 6;
             this.colCPUHistogram.Name = "colCPUHistogram";
             this.colCPUHistogram.ReadOnly = true;
             this.colCPUHistogram.Resizable = System.Windows.Forms.DataGridViewTriState.True;
-            this.colCPUHistogram.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
             this.colCPUHistogram.Visible = false;
-            this.colCPUHistogram.Width = 133;
+            this.colCPUHistogram.Width = 110;
             // 
             // CriticalWaitMsPerSec
             // 

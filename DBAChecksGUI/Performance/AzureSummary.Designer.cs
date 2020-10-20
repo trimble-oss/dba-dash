@@ -28,33 +28,33 @@
         /// </summary>
         private void InitializeComponent()
         {
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle3 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle4 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle5 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle6 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle7 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle8 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle9 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle10 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle11 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle12 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle13 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle14 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle15 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle16 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle17 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle18 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle19 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle20 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle21 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle22 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle23 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle24 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle25 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle26 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle27 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle28 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle29 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle30 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle31 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle32 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle33 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle34 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle35 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle36 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle37 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle38 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle39 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle40 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle41 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle42 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle43 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle44 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle45 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle46 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle47 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle48 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle49 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle50 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle51 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle52 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle53 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle54 = new System.Windows.Forms.DataGridViewCellStyle();
             this.dgv = new System.Windows.Forms.DataGridView();
             this.Instance = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.colDB = new System.Windows.Forms.DataGridViewTextBoxColumn();
@@ -123,12 +123,6 @@
             this.dataGridViewTextBoxColumn17 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dataGridViewTextBoxColumn18 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dgvPool = new System.Windows.Forms.DataGridView();
-            this.splitContainer1 = new System.Windows.Forms.SplitContainer();
-            this.toolStrip2 = new System.Windows.Forms.ToolStrip();
-            this.tsRefreshPool = new System.Windows.Forms.ToolStripButton();
-            this.tsCopyPool = new System.Windows.Forms.ToolStripButton();
-            this.toolStripLabel1 = new System.Windows.Forms.ToolStripLabel();
-            this.tsPoolColumns = new System.Windows.Forms.ToolStripDropDownButton();
             this.poolInstance = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.colPoolName = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.colPoolDTUHistogram = new System.Windows.Forms.DataGridViewImageColumn();
@@ -148,6 +142,12 @@
             this.poolAvgCPU = new CustomProgressControl.DataGridViewProgressBarColumn();
             this.poolAvgData = new CustomProgressControl.DataGridViewProgressBarColumn();
             this.poolAvgLogWrite = new CustomProgressControl.DataGridViewProgressBarColumn();
+            this.splitContainer1 = new System.Windows.Forms.SplitContainer();
+            this.toolStrip2 = new System.Windows.Forms.ToolStrip();
+            this.tsRefreshPool = new System.Windows.Forms.ToolStripButton();
+            this.tsCopyPool = new System.Windows.Forms.ToolStripButton();
+            this.toolStripLabel1 = new System.Windows.Forms.ToolStripLabel();
+            this.tsPoolColumns = new System.Windows.Forms.ToolStripDropDownButton();
             ((System.ComponentModel.ISupportInitialize)(this.dgv)).BeginInit();
             this.toolStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dgvPool)).BeginInit();
@@ -197,6 +197,7 @@
             this.dgv.RowTemplate.Height = 24;
             this.dgv.Size = new System.Drawing.Size(1455, 602);
             this.dgv.TabIndex = 0;
+            this.dgv.Sorted += new System.EventHandler(this.dgv_Sorted);
             // 
             // Instance
             // 
@@ -284,10 +285,10 @@
             // colMaxDTU
             // 
             this.colMaxDTU.DataPropertyName = "Max_DTUPercent";
-            dataGridViewCellStyle1.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight;
-            dataGridViewCellStyle1.Format = "0.#\\%";
-            dataGridViewCellStyle1.Padding = new System.Windows.Forms.Padding(4);
-            this.colMaxDTU.DefaultCellStyle = dataGridViewCellStyle1;
+            dataGridViewCellStyle28.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight;
+            dataGridViewCellStyle28.Format = "0.#\\%";
+            dataGridViewCellStyle28.Padding = new System.Windows.Forms.Padding(4);
+            this.colMaxDTU.DefaultCellStyle = dataGridViewCellStyle28;
             this.colMaxDTU.HeaderText = "Max DTU (%)";
             this.colMaxDTU.MinimumWidth = 6;
             this.colMaxDTU.Name = "colMaxDTU";
@@ -298,8 +299,8 @@
             // colMaxDTUUsed
             // 
             this.colMaxDTUUsed.DataPropertyName = "Max_DTUsUsed";
-            dataGridViewCellStyle2.Format = "N0";
-            this.colMaxDTUUsed.DefaultCellStyle = dataGridViewCellStyle2;
+            dataGridViewCellStyle29.Format = "N0";
+            this.colMaxDTUUsed.DefaultCellStyle = dataGridViewCellStyle29;
             this.colMaxDTUUsed.HeaderText = "Max DTUs Used";
             this.colMaxDTUUsed.MinimumWidth = 6;
             this.colMaxDTUUsed.Name = "colMaxDTUUsed";
@@ -309,8 +310,8 @@
             // colUnusedDTUs
             // 
             this.colUnusedDTUs.DataPropertyName = "UnusedDTU";
-            dataGridViewCellStyle3.Format = "N0";
-            this.colUnusedDTUs.DefaultCellStyle = dataGridViewCellStyle3;
+            dataGridViewCellStyle30.Format = "N0";
+            this.colUnusedDTUs.DefaultCellStyle = dataGridViewCellStyle30;
             this.colUnusedDTUs.HeaderText = "Unused DTUs";
             this.colUnusedDTUs.MinimumWidth = 6;
             this.colUnusedDTUs.Name = "colUnusedDTUs";
@@ -320,10 +321,10 @@
             // colAvgDTUPercent
             // 
             this.colAvgDTUPercent.DataPropertyName = "Avg_DTUPercent";
-            dataGridViewCellStyle4.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight;
-            dataGridViewCellStyle4.Format = "0.#\\%";
-            dataGridViewCellStyle4.Padding = new System.Windows.Forms.Padding(4);
-            this.colAvgDTUPercent.DefaultCellStyle = dataGridViewCellStyle4;
+            dataGridViewCellStyle31.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight;
+            dataGridViewCellStyle31.Format = "0.#\\%";
+            dataGridViewCellStyle31.Padding = new System.Windows.Forms.Padding(4);
+            this.colAvgDTUPercent.DefaultCellStyle = dataGridViewCellStyle31;
             this.colAvgDTUPercent.HeaderText = "Avg DTU %";
             this.colAvgDTUPercent.MinimumWidth = 6;
             this.colAvgDTUPercent.Name = "colAvgDTUPercent";
@@ -334,8 +335,8 @@
             // colAVGDTUsUsed
             // 
             this.colAVGDTUsUsed.DataPropertyName = "Avg_DTUsUsed";
-            dataGridViewCellStyle5.Format = "N0";
-            this.colAVGDTUsUsed.DefaultCellStyle = dataGridViewCellStyle5;
+            dataGridViewCellStyle32.Format = "N0";
+            this.colAVGDTUsUsed.DefaultCellStyle = dataGridViewCellStyle32;
             this.colAVGDTUsUsed.HeaderText = "Avg DTUs Used";
             this.colAVGDTUsUsed.MinimumWidth = 6;
             this.colAVGDTUsUsed.Name = "colAVGDTUsUsed";
@@ -345,8 +346,8 @@
             // colMinDTULimit
             // 
             this.colMinDTULimit.DataPropertyName = "Min_DTULimit";
-            dataGridViewCellStyle6.Format = "N0";
-            this.colMinDTULimit.DefaultCellStyle = dataGridViewCellStyle6;
+            dataGridViewCellStyle33.Format = "N0";
+            this.colMinDTULimit.DefaultCellStyle = dataGridViewCellStyle33;
             this.colMinDTULimit.HeaderText = "DTU Limit (Min)";
             this.colMinDTULimit.MinimumWidth = 6;
             this.colMinDTULimit.Name = "colMinDTULimit";
@@ -356,8 +357,8 @@
             // colDTULimitMax
             // 
             this.colDTULimitMax.DataPropertyName = "Max_DTULimit";
-            dataGridViewCellStyle7.Format = "N0";
-            this.colDTULimitMax.DefaultCellStyle = dataGridViewCellStyle7;
+            dataGridViewCellStyle34.Format = "N0";
+            this.colDTULimitMax.DefaultCellStyle = dataGridViewCellStyle34;
             this.colDTULimitMax.HeaderText = "DTU Limit (Max)";
             this.colDTULimitMax.MinimumWidth = 6;
             this.colDTULimitMax.Name = "colDTULimitMax";
@@ -367,10 +368,10 @@
             // colMaxCPUPercent
             // 
             this.colMaxCPUPercent.DataPropertyName = "MaxCPUPercent";
-            dataGridViewCellStyle8.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight;
-            dataGridViewCellStyle8.Format = "0.#\\%";
-            dataGridViewCellStyle8.Padding = new System.Windows.Forms.Padding(4);
-            this.colMaxCPUPercent.DefaultCellStyle = dataGridViewCellStyle8;
+            dataGridViewCellStyle35.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight;
+            dataGridViewCellStyle35.Format = "0.#\\%";
+            dataGridViewCellStyle35.Padding = new System.Windows.Forms.Padding(4);
+            this.colMaxCPUPercent.DefaultCellStyle = dataGridViewCellStyle35;
             this.colMaxCPUPercent.HeaderText = "Max CPU %";
             this.colMaxCPUPercent.MinimumWidth = 6;
             this.colMaxCPUPercent.Name = "colMaxCPUPercent";
@@ -381,10 +382,10 @@
             // colMaxDataPct
             // 
             this.colMaxDataPct.DataPropertyName = "MaxDataPercent";
-            dataGridViewCellStyle9.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight;
-            dataGridViewCellStyle9.Format = "0.#\\%";
-            dataGridViewCellStyle9.Padding = new System.Windows.Forms.Padding(4);
-            this.colMaxDataPct.DefaultCellStyle = dataGridViewCellStyle9;
+            dataGridViewCellStyle36.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight;
+            dataGridViewCellStyle36.Format = "0.#\\%";
+            dataGridViewCellStyle36.Padding = new System.Windows.Forms.Padding(4);
+            this.colMaxDataPct.DefaultCellStyle = dataGridViewCellStyle36;
             this.colMaxDataPct.HeaderText = "Max Data %";
             this.colMaxDataPct.MinimumWidth = 6;
             this.colMaxDataPct.Name = "colMaxDataPct";
@@ -395,10 +396,10 @@
             // colMaxLog
             // 
             this.colMaxLog.DataPropertyName = "MaxLogWritePercent";
-            dataGridViewCellStyle10.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight;
-            dataGridViewCellStyle10.Format = "0.#\\%";
-            dataGridViewCellStyle10.Padding = new System.Windows.Forms.Padding(4);
-            this.colMaxLog.DefaultCellStyle = dataGridViewCellStyle10;
+            dataGridViewCellStyle37.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight;
+            dataGridViewCellStyle37.Format = "0.#\\%";
+            dataGridViewCellStyle37.Padding = new System.Windows.Forms.Padding(4);
+            this.colMaxLog.DefaultCellStyle = dataGridViewCellStyle37;
             this.colMaxLog.HeaderText = "Max Log Write %";
             this.colMaxLog.MinimumWidth = 6;
             this.colMaxLog.Name = "colMaxLog";
@@ -409,10 +410,10 @@
             // colAvgCPUPct
             // 
             this.colAvgCPUPct.DataPropertyName = "AvgCPUPercent";
-            dataGridViewCellStyle11.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight;
-            dataGridViewCellStyle11.Format = "0.#\\%";
-            dataGridViewCellStyle11.Padding = new System.Windows.Forms.Padding(4);
-            this.colAvgCPUPct.DefaultCellStyle = dataGridViewCellStyle11;
+            dataGridViewCellStyle38.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight;
+            dataGridViewCellStyle38.Format = "0.#\\%";
+            dataGridViewCellStyle38.Padding = new System.Windows.Forms.Padding(4);
+            this.colAvgCPUPct.DefaultCellStyle = dataGridViewCellStyle38;
             this.colAvgCPUPct.HeaderText = "Avg CPU %";
             this.colAvgCPUPct.MinimumWidth = 6;
             this.colAvgCPUPct.Name = "colAvgCPUPct";
@@ -423,10 +424,10 @@
             // colAvgDataPct
             // 
             this.colAvgDataPct.DataPropertyName = "AvgDataPercent";
-            dataGridViewCellStyle12.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight;
-            dataGridViewCellStyle12.Format = "0.#\\%";
-            dataGridViewCellStyle12.Padding = new System.Windows.Forms.Padding(4);
-            this.colAvgDataPct.DefaultCellStyle = dataGridViewCellStyle12;
+            dataGridViewCellStyle39.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight;
+            dataGridViewCellStyle39.Format = "0.#\\%";
+            dataGridViewCellStyle39.Padding = new System.Windows.Forms.Padding(4);
+            this.colAvgDataPct.DefaultCellStyle = dataGridViewCellStyle39;
             this.colAvgDataPct.HeaderText = "Avg Data %";
             this.colAvgDataPct.MinimumWidth = 6;
             this.colAvgDataPct.Name = "colAvgDataPct";
@@ -437,10 +438,10 @@
             // colAvgLogWrite
             // 
             this.colAvgLogWrite.DataPropertyName = "AvgLogWritePercent";
-            dataGridViewCellStyle13.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight;
-            dataGridViewCellStyle13.Format = "0.#\\%";
-            dataGridViewCellStyle13.Padding = new System.Windows.Forms.Padding(4);
-            this.colAvgLogWrite.DefaultCellStyle = dataGridViewCellStyle13;
+            dataGridViewCellStyle40.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight;
+            dataGridViewCellStyle40.Format = "0.#\\%";
+            dataGridViewCellStyle40.Padding = new System.Windows.Forms.Padding(4);
+            this.colAvgLogWrite.DefaultCellStyle = dataGridViewCellStyle40;
             this.colAvgLogWrite.HeaderText = "Avg Log Write %";
             this.colAvgLogWrite.MinimumWidth = 6;
             this.colAvgLogWrite.Name = "colAvgLogWrite";
@@ -670,10 +671,10 @@
             // dataGridViewProgressBarColumn1
             // 
             this.dataGridViewProgressBarColumn1.DataPropertyName = "Max_DTUPercent";
-            dataGridViewCellStyle14.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight;
-            dataGridViewCellStyle14.Format = "P1";
-            dataGridViewCellStyle14.Padding = new System.Windows.Forms.Padding(4);
-            this.dataGridViewProgressBarColumn1.DefaultCellStyle = dataGridViewCellStyle14;
+            dataGridViewCellStyle41.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight;
+            dataGridViewCellStyle41.Format = "P1";
+            dataGridViewCellStyle41.Padding = new System.Windows.Forms.Padding(4);
+            this.dataGridViewProgressBarColumn1.DefaultCellStyle = dataGridViewCellStyle41;
             this.dataGridViewProgressBarColumn1.HeaderText = "Max DPU (%)";
             this.dataGridViewProgressBarColumn1.MinimumWidth = 6;
             this.dataGridViewProgressBarColumn1.Name = "dataGridViewProgressBarColumn1";
@@ -701,10 +702,10 @@
             // dataGridViewProgressBarColumn2
             // 
             this.dataGridViewProgressBarColumn2.DataPropertyName = "Avg_DTUPercent";
-            dataGridViewCellStyle15.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight;
-            dataGridViewCellStyle15.Format = "P1";
-            dataGridViewCellStyle15.Padding = new System.Windows.Forms.Padding(4);
-            this.dataGridViewProgressBarColumn2.DefaultCellStyle = dataGridViewCellStyle15;
+            dataGridViewCellStyle42.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight;
+            dataGridViewCellStyle42.Format = "P1";
+            dataGridViewCellStyle42.Padding = new System.Windows.Forms.Padding(4);
+            this.dataGridViewProgressBarColumn2.DefaultCellStyle = dataGridViewCellStyle42;
             this.dataGridViewProgressBarColumn2.HeaderText = "Avg DTU %";
             this.dataGridViewProgressBarColumn2.MinimumWidth = 6;
             this.dataGridViewProgressBarColumn2.Name = "dataGridViewProgressBarColumn2";
@@ -741,10 +742,10 @@
             // dataGridViewProgressBarColumn3
             // 
             this.dataGridViewProgressBarColumn3.DataPropertyName = "MaxCPUPercent";
-            dataGridViewCellStyle16.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight;
-            dataGridViewCellStyle16.Format = "P1";
-            dataGridViewCellStyle16.Padding = new System.Windows.Forms.Padding(4);
-            this.dataGridViewProgressBarColumn3.DefaultCellStyle = dataGridViewCellStyle16;
+            dataGridViewCellStyle43.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight;
+            dataGridViewCellStyle43.Format = "P1";
+            dataGridViewCellStyle43.Padding = new System.Windows.Forms.Padding(4);
+            this.dataGridViewProgressBarColumn3.DefaultCellStyle = dataGridViewCellStyle43;
             this.dataGridViewProgressBarColumn3.HeaderText = "Max CPU %";
             this.dataGridViewProgressBarColumn3.MinimumWidth = 6;
             this.dataGridViewProgressBarColumn3.Name = "dataGridViewProgressBarColumn3";
@@ -754,10 +755,10 @@
             // dataGridViewProgressBarColumn4
             // 
             this.dataGridViewProgressBarColumn4.DataPropertyName = "MaxDataPercent";
-            dataGridViewCellStyle17.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight;
-            dataGridViewCellStyle17.Format = "P1";
-            dataGridViewCellStyle17.Padding = new System.Windows.Forms.Padding(4);
-            this.dataGridViewProgressBarColumn4.DefaultCellStyle = dataGridViewCellStyle17;
+            dataGridViewCellStyle44.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight;
+            dataGridViewCellStyle44.Format = "P1";
+            dataGridViewCellStyle44.Padding = new System.Windows.Forms.Padding(4);
+            this.dataGridViewProgressBarColumn4.DefaultCellStyle = dataGridViewCellStyle44;
             this.dataGridViewProgressBarColumn4.HeaderText = "Max Data %";
             this.dataGridViewProgressBarColumn4.MinimumWidth = 6;
             this.dataGridViewProgressBarColumn4.Name = "dataGridViewProgressBarColumn4";
@@ -767,10 +768,10 @@
             // dataGridViewProgressBarColumn5
             // 
             this.dataGridViewProgressBarColumn5.DataPropertyName = "MaxLogWritePercent";
-            dataGridViewCellStyle18.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight;
-            dataGridViewCellStyle18.Format = "P1";
-            dataGridViewCellStyle18.Padding = new System.Windows.Forms.Padding(4);
-            this.dataGridViewProgressBarColumn5.DefaultCellStyle = dataGridViewCellStyle18;
+            dataGridViewCellStyle45.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight;
+            dataGridViewCellStyle45.Format = "P1";
+            dataGridViewCellStyle45.Padding = new System.Windows.Forms.Padding(4);
+            this.dataGridViewProgressBarColumn5.DefaultCellStyle = dataGridViewCellStyle45;
             this.dataGridViewProgressBarColumn5.HeaderText = "Max Log Write %";
             this.dataGridViewProgressBarColumn5.MinimumWidth = 6;
             this.dataGridViewProgressBarColumn5.Name = "dataGridViewProgressBarColumn5";
@@ -780,10 +781,10 @@
             // dataGridViewProgressBarColumn6
             // 
             this.dataGridViewProgressBarColumn6.DataPropertyName = "AvgCPUPercent";
-            dataGridViewCellStyle19.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight;
-            dataGridViewCellStyle19.Format = "P1";
-            dataGridViewCellStyle19.Padding = new System.Windows.Forms.Padding(4);
-            this.dataGridViewProgressBarColumn6.DefaultCellStyle = dataGridViewCellStyle19;
+            dataGridViewCellStyle46.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight;
+            dataGridViewCellStyle46.Format = "P1";
+            dataGridViewCellStyle46.Padding = new System.Windows.Forms.Padding(4);
+            this.dataGridViewProgressBarColumn6.DefaultCellStyle = dataGridViewCellStyle46;
             this.dataGridViewProgressBarColumn6.HeaderText = "Avg CPU %";
             this.dataGridViewProgressBarColumn6.MinimumWidth = 6;
             this.dataGridViewProgressBarColumn6.Name = "dataGridViewProgressBarColumn6";
@@ -793,10 +794,10 @@
             // dataGridViewProgressBarColumn7
             // 
             this.dataGridViewProgressBarColumn7.DataPropertyName = "AvgDataPercent";
-            dataGridViewCellStyle20.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight;
-            dataGridViewCellStyle20.Format = "P1";
-            dataGridViewCellStyle20.Padding = new System.Windows.Forms.Padding(4);
-            this.dataGridViewProgressBarColumn7.DefaultCellStyle = dataGridViewCellStyle20;
+            dataGridViewCellStyle47.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight;
+            dataGridViewCellStyle47.Format = "P1";
+            dataGridViewCellStyle47.Padding = new System.Windows.Forms.Padding(4);
+            this.dataGridViewProgressBarColumn7.DefaultCellStyle = dataGridViewCellStyle47;
             this.dataGridViewProgressBarColumn7.HeaderText = "Avg Data %";
             this.dataGridViewProgressBarColumn7.MinimumWidth = 6;
             this.dataGridViewProgressBarColumn7.Name = "dataGridViewProgressBarColumn7";
@@ -806,10 +807,10 @@
             // dataGridViewProgressBarColumn8
             // 
             this.dataGridViewProgressBarColumn8.DataPropertyName = "AvgLogWritePercent";
-            dataGridViewCellStyle21.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight;
-            dataGridViewCellStyle21.Format = "P1";
-            dataGridViewCellStyle21.Padding = new System.Windows.Forms.Padding(4);
-            this.dataGridViewProgressBarColumn8.DefaultCellStyle = dataGridViewCellStyle21;
+            dataGridViewCellStyle48.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight;
+            dataGridViewCellStyle48.Format = "P1";
+            dataGridViewCellStyle48.Padding = new System.Windows.Forms.Padding(4);
+            this.dataGridViewProgressBarColumn8.DefaultCellStyle = dataGridViewCellStyle48;
             this.dataGridViewProgressBarColumn8.HeaderText = "Avg Log Write %";
             this.dataGridViewProgressBarColumn8.MinimumWidth = 6;
             this.dataGridViewProgressBarColumn8.Name = "dataGridViewProgressBarColumn8";
@@ -924,6 +925,202 @@
             this.dgvPool.RowTemplate.Height = 24;
             this.dgvPool.Size = new System.Drawing.Size(1455, 341);
             this.dgvPool.TabIndex = 5;
+            this.dgvPool.Sorted += new System.EventHandler(this.dgvPool_Sorted);
+            // 
+            // poolInstance
+            // 
+            this.poolInstance.DataPropertyName = "Instance";
+            this.poolInstance.HeaderText = "Instance";
+            this.poolInstance.MinimumWidth = 6;
+            this.poolInstance.Name = "poolInstance";
+            this.poolInstance.ReadOnly = true;
+            this.poolInstance.Width = 90;
+            // 
+            // colPoolName
+            // 
+            this.colPoolName.DataPropertyName = "elastic_pool_name";
+            this.colPoolName.HeaderText = "Elastic Pool";
+            this.colPoolName.MinimumWidth = 6;
+            this.colPoolName.Name = "colPoolName";
+            this.colPoolName.ReadOnly = true;
+            this.colPoolName.Width = 101;
+            // 
+            // colPoolDTUHistogram
+            // 
+            this.colPoolDTUHistogram.HeaderText = "DTU Histogram";
+            this.colPoolDTUHistogram.MinimumWidth = 6;
+            this.colPoolDTUHistogram.Name = "colPoolDTUHistogram";
+            this.colPoolDTUHistogram.ReadOnly = true;
+            this.colPoolDTUHistogram.Visible = false;
+            this.colPoolDTUHistogram.Width = 111;
+            // 
+            // colPoolCPUHistogram
+            // 
+            this.colPoolCPUHistogram.HeaderText = "CPU Histogram";
+            this.colPoolCPUHistogram.MinimumWidth = 6;
+            this.colPoolCPUHistogram.Name = "colPoolCPUHistogram";
+            this.colPoolCPUHistogram.ReadOnly = true;
+            this.colPoolCPUHistogram.Visible = false;
+            this.colPoolCPUHistogram.Width = 110;
+            // 
+            // colPoolDataHistogram
+            // 
+            this.colPoolDataHistogram.HeaderText = "Data Histogram";
+            this.colPoolDataHistogram.MinimumWidth = 6;
+            this.colPoolDataHistogram.Name = "colPoolDataHistogram";
+            this.colPoolDataHistogram.ReadOnly = true;
+            this.colPoolDataHistogram.Visible = false;
+            this.colPoolDataHistogram.Width = 112;
+            // 
+            // colPoolLogHistogram
+            // 
+            this.colPoolLogHistogram.HeaderText = "Log Histogram";
+            this.colPoolLogHistogram.MinimumWidth = 6;
+            this.colPoolLogHistogram.Name = "colPoolLogHistogram";
+            this.colPoolLogHistogram.ReadOnly = true;
+            this.colPoolLogHistogram.Visible = false;
+            this.colPoolLogHistogram.Width = 106;
+            // 
+            // poolMaxDTUPct
+            // 
+            this.poolMaxDTUPct.DataPropertyName = "Max_DTUPercent";
+            this.poolMaxDTUPct.HeaderText = "Max DTU %";
+            this.poolMaxDTUPct.MinimumWidth = 6;
+            this.poolMaxDTUPct.Name = "poolMaxDTUPct";
+            this.poolMaxDTUPct.ReadOnly = true;
+            this.poolMaxDTUPct.Width = 91;
+            // 
+            // poolMaxDTU
+            // 
+            this.poolMaxDTU.DataPropertyName = "Max_DTUsUsed";
+            this.poolMaxDTU.HeaderText = "Max DTUs Used";
+            this.poolMaxDTU.MinimumWidth = 6;
+            this.poolMaxDTU.Name = "poolMaxDTU";
+            this.poolMaxDTU.ReadOnly = true;
+            this.poolMaxDTU.Width = 127;
+            // 
+            // poolUnusedDTU
+            // 
+            this.poolUnusedDTU.DataPropertyName = "UnusedDTU";
+            this.poolUnusedDTU.HeaderText = "Unused DTUs";
+            this.poolUnusedDTU.MinimumWidth = 6;
+            this.poolUnusedDTU.Name = "poolUnusedDTU";
+            this.poolUnusedDTU.ReadOnly = true;
+            this.poolUnusedDTU.Width = 116;
+            // 
+            // poolAVGDTUPct
+            // 
+            this.poolAVGDTUPct.DataPropertyName = "Avg_DTUPercent";
+            this.poolAVGDTUPct.HeaderText = "Avg DTU %";
+            this.poolAVGDTUPct.MinimumWidth = 6;
+            this.poolAVGDTUPct.Name = "poolAVGDTUPct";
+            this.poolAVGDTUPct.ReadOnly = true;
+            this.poolAVGDTUPct.Width = 91;
+            // 
+            // poolAVGDTU
+            // 
+            this.poolAVGDTU.DataPropertyName = "Avg_DTUsUsed";
+            this.poolAVGDTU.HeaderText = "Avg DTUs Used";
+            this.poolAVGDTU.MinimumWidth = 6;
+            this.poolAVGDTU.Name = "poolAVGDTU";
+            this.poolAVGDTU.ReadOnly = true;
+            this.poolAVGDTU.Width = 127;
+            // 
+            // poolMinDTULimit
+            // 
+            this.poolMinDTULimit.DataPropertyName = "Min_DTULimit";
+            this.poolMinDTULimit.HeaderText = "DTU Limit (Min)";
+            this.poolMinDTULimit.MinimumWidth = 6;
+            this.poolMinDTULimit.Name = "poolMinDTULimit";
+            this.poolMinDTULimit.ReadOnly = true;
+            this.poolMinDTULimit.Width = 124;
+            // 
+            // poolDTULimitMax
+            // 
+            this.poolDTULimitMax.DataPropertyName = "Max_DTULimit";
+            this.poolDTULimitMax.HeaderText = "DTU Limit (Max)";
+            this.poolDTULimitMax.MinimumWidth = 6;
+            this.poolDTULimitMax.Name = "poolDTULimitMax";
+            this.poolDTULimitMax.ReadOnly = true;
+            this.poolDTULimitMax.Width = 127;
+            // 
+            // poolMaxCPU
+            // 
+            this.poolMaxCPU.DataPropertyName = "MaxCPUPercent";
+            dataGridViewCellStyle49.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight;
+            dataGridViewCellStyle49.Format = "0.#\\%";
+            dataGridViewCellStyle49.Padding = new System.Windows.Forms.Padding(4);
+            this.poolMaxCPU.DefaultCellStyle = dataGridViewCellStyle49;
+            this.poolMaxCPU.HeaderText = "Max CPU %";
+            this.poolMaxCPU.MinimumWidth = 6;
+            this.poolMaxCPU.Name = "poolMaxCPU";
+            this.poolMaxCPU.ReadOnly = true;
+            this.poolMaxCPU.Width = 91;
+            // 
+            // poolMaxDataPct
+            // 
+            this.poolMaxDataPct.DataPropertyName = "MaxDataPercent";
+            dataGridViewCellStyle50.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight;
+            dataGridViewCellStyle50.Format = "0.#\\%";
+            dataGridViewCellStyle50.Padding = new System.Windows.Forms.Padding(4);
+            this.poolMaxDataPct.DefaultCellStyle = dataGridViewCellStyle50;
+            this.poolMaxDataPct.HeaderText = "Max Data %";
+            this.poolMaxDataPct.MinimumWidth = 6;
+            this.poolMaxDataPct.Name = "poolMaxDataPct";
+            this.poolMaxDataPct.ReadOnly = true;
+            this.poolMaxDataPct.Width = 92;
+            // 
+            // poolMaxLogWrite
+            // 
+            this.poolMaxLogWrite.DataPropertyName = "MaxLogWritePercent";
+            dataGridViewCellStyle51.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight;
+            dataGridViewCellStyle51.Format = "0.#\\%";
+            dataGridViewCellStyle51.Padding = new System.Windows.Forms.Padding(4);
+            this.poolMaxLogWrite.DefaultCellStyle = dataGridViewCellStyle51;
+            this.poolMaxLogWrite.HeaderText = "Max Log Write %";
+            this.poolMaxLogWrite.MinimumWidth = 6;
+            this.poolMaxLogWrite.Name = "poolMaxLogWrite";
+            this.poolMaxLogWrite.ReadOnly = true;
+            this.poolMaxLogWrite.Width = 120;
+            // 
+            // poolAvgCPU
+            // 
+            this.poolAvgCPU.DataPropertyName = "AvgCPUPercent";
+            dataGridViewCellStyle52.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight;
+            dataGridViewCellStyle52.Format = "0.#\\%";
+            dataGridViewCellStyle52.Padding = new System.Windows.Forms.Padding(4);
+            this.poolAvgCPU.DefaultCellStyle = dataGridViewCellStyle52;
+            this.poolAvgCPU.HeaderText = "Avg CPU %";
+            this.poolAvgCPU.MinimumWidth = 6;
+            this.poolAvgCPU.Name = "poolAvgCPU";
+            this.poolAvgCPU.ReadOnly = true;
+            this.poolAvgCPU.Width = 90;
+            // 
+            // poolAvgData
+            // 
+            this.poolAvgData.DataPropertyName = "AvgDataPercent";
+            dataGridViewCellStyle53.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight;
+            dataGridViewCellStyle53.Format = "0.#\\%";
+            dataGridViewCellStyle53.Padding = new System.Windows.Forms.Padding(4);
+            this.poolAvgData.DefaultCellStyle = dataGridViewCellStyle53;
+            this.poolAvgData.HeaderText = "Avg Data %";
+            this.poolAvgData.MinimumWidth = 6;
+            this.poolAvgData.Name = "poolAvgData";
+            this.poolAvgData.ReadOnly = true;
+            this.poolAvgData.Width = 91;
+            // 
+            // poolAvgLogWrite
+            // 
+            this.poolAvgLogWrite.DataPropertyName = "AvgLogWritePercent";
+            dataGridViewCellStyle54.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight;
+            dataGridViewCellStyle54.Format = "0.#\\%";
+            dataGridViewCellStyle54.Padding = new System.Windows.Forms.Padding(4);
+            this.poolAvgLogWrite.DefaultCellStyle = dataGridViewCellStyle54;
+            this.poolAvgLogWrite.HeaderText = "Avg Log Write %";
+            this.poolAvgLogWrite.MinimumWidth = 6;
+            this.poolAvgLogWrite.Name = "poolAvgLogWrite";
+            this.poolAvgLogWrite.ReadOnly = true;
+            this.poolAvgLogWrite.Width = 119;
             // 
             // splitContainer1
             // 
@@ -994,201 +1191,6 @@
             this.tsPoolColumns.Name = "tsPoolColumns";
             this.tsPoolColumns.Size = new System.Drawing.Size(34, 24);
             this.tsPoolColumns.Text = "Columns";
-            // 
-            // poolInstance
-            // 
-            this.poolInstance.DataPropertyName = "Instance";
-            this.poolInstance.HeaderText = "Instance";
-            this.poolInstance.MinimumWidth = 6;
-            this.poolInstance.Name = "poolInstance";
-            this.poolInstance.ReadOnly = true;
-            this.poolInstance.Width = 90;
-            // 
-            // colPoolName
-            // 
-            this.colPoolName.DataPropertyName = "elastic_pool_name";
-            this.colPoolName.HeaderText = "Elastic Pool";
-            this.colPoolName.MinimumWidth = 6;
-            this.colPoolName.Name = "colPoolName";
-            this.colPoolName.ReadOnly = true;
-            this.colPoolName.Width = 110;
-            // 
-            // colPoolDTUHistogram
-            // 
-            this.colPoolDTUHistogram.HeaderText = "DTU Histogram";
-            this.colPoolDTUHistogram.MinimumWidth = 6;
-            this.colPoolDTUHistogram.Name = "colPoolDTUHistogram";
-            this.colPoolDTUHistogram.ReadOnly = true;
-            this.colPoolDTUHistogram.Visible = false;
-            this.colPoolDTUHistogram.Width = 111;
-            // 
-            // colPoolCPUHistogram
-            // 
-            this.colPoolCPUHistogram.HeaderText = "CPU Histogram";
-            this.colPoolCPUHistogram.MinimumWidth = 6;
-            this.colPoolCPUHistogram.Name = "colPoolCPUHistogram";
-            this.colPoolCPUHistogram.ReadOnly = true;
-            this.colPoolCPUHistogram.Visible = false;
-            this.colPoolCPUHistogram.Width = 110;
-            // 
-            // colPoolDataHistogram
-            // 
-            this.colPoolDataHistogram.HeaderText = "Data Histogram";
-            this.colPoolDataHistogram.MinimumWidth = 6;
-            this.colPoolDataHistogram.Name = "colPoolDataHistogram";
-            this.colPoolDataHistogram.ReadOnly = true;
-            this.colPoolDataHistogram.Visible = false;
-            this.colPoolDataHistogram.Width = 112;
-            // 
-            // colPoolLogHistogram
-            // 
-            this.colPoolLogHistogram.HeaderText = "Log Histogram";
-            this.colPoolLogHistogram.MinimumWidth = 6;
-            this.colPoolLogHistogram.Name = "colPoolLogHistogram";
-            this.colPoolLogHistogram.ReadOnly = true;
-            this.colPoolLogHistogram.Visible = false;
-            this.colPoolLogHistogram.Width = 106;
-            // 
-            // poolMaxDTUPct
-            // 
-            this.poolMaxDTUPct.DataPropertyName = "Max_DTUPercent";
-            this.poolMaxDTUPct.HeaderText = "Max DTU %";
-            this.poolMaxDTUPct.MinimumWidth = 6;
-            this.poolMaxDTUPct.Name = "poolMaxDTUPct";
-            this.poolMaxDTUPct.ReadOnly = true;
-            this.poolMaxDTUPct.Width = 111;
-            // 
-            // poolMaxDTU
-            // 
-            this.poolMaxDTU.DataPropertyName = "Max_DTUsUsed";
-            this.poolMaxDTU.HeaderText = "Max DTUs Used";
-            this.poolMaxDTU.MinimumWidth = 6;
-            this.poolMaxDTU.Name = "poolMaxDTU";
-            this.poolMaxDTU.ReadOnly = true;
-            this.poolMaxDTU.Width = 127;
-            // 
-            // poolUnusedDTU
-            // 
-            this.poolUnusedDTU.DataPropertyName = "UnusedDTU";
-            this.poolUnusedDTU.HeaderText = "Unused DTUs";
-            this.poolUnusedDTU.MinimumWidth = 6;
-            this.poolUnusedDTU.Name = "poolUnusedDTU";
-            this.poolUnusedDTU.ReadOnly = true;
-            this.poolUnusedDTU.Width = 116;
-            // 
-            // poolAVGDTUPct
-            // 
-            this.poolAVGDTUPct.DataPropertyName = "Avg_DTUPercent";
-            this.poolAVGDTUPct.HeaderText = "Avg DTU %";
-            this.poolAVGDTUPct.MinimumWidth = 6;
-            this.poolAVGDTUPct.Name = "poolAVGDTUPct";
-            this.poolAVGDTUPct.ReadOnly = true;
-            this.poolAVGDTUPct.Width = 91;
-            // 
-            // poolAVGDTU
-            // 
-            this.poolAVGDTU.DataPropertyName = "Avg_DTUsUsed";
-            this.poolAVGDTU.HeaderText = "Avg DTUs Used";
-            this.poolAVGDTU.MinimumWidth = 6;
-            this.poolAVGDTU.Name = "poolAVGDTU";
-            this.poolAVGDTU.ReadOnly = true;
-            this.poolAVGDTU.Width = 127;
-            // 
-            // poolMinDTULimit
-            // 
-            this.poolMinDTULimit.DataPropertyName = "Min_DTULimit";
-            this.poolMinDTULimit.HeaderText = "DTU Limit (Min)";
-            this.poolMinDTULimit.MinimumWidth = 6;
-            this.poolMinDTULimit.Name = "poolMinDTULimit";
-            this.poolMinDTULimit.ReadOnly = true;
-            this.poolMinDTULimit.Width = 124;
-            // 
-            // poolDTULimitMax
-            // 
-            this.poolDTULimitMax.DataPropertyName = "Max_DTULimit";
-            this.poolDTULimitMax.HeaderText = "DTU Limit (Max)";
-            this.poolDTULimitMax.MinimumWidth = 6;
-            this.poolDTULimitMax.Name = "poolDTULimitMax";
-            this.poolDTULimitMax.ReadOnly = true;
-            this.poolDTULimitMax.Width = 127;
-            // 
-            // poolMaxCPU
-            // 
-            this.poolMaxCPU.DataPropertyName = "MaxCPUPercent";
-            dataGridViewCellStyle22.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight;
-            dataGridViewCellStyle22.Format = "0.#\\%";
-            dataGridViewCellStyle22.Padding = new System.Windows.Forms.Padding(4);
-            this.poolMaxCPU.DefaultCellStyle = dataGridViewCellStyle22;
-            this.poolMaxCPU.HeaderText = "Max CPU %";
-            this.poolMaxCPU.MinimumWidth = 6;
-            this.poolMaxCPU.Name = "poolMaxCPU";
-            this.poolMaxCPU.ReadOnly = true;
-            this.poolMaxCPU.Width = 91;
-            // 
-            // poolMaxDataPct
-            // 
-            this.poolMaxDataPct.DataPropertyName = "MaxDataPercent";
-            dataGridViewCellStyle23.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight;
-            dataGridViewCellStyle23.Format = "0.#\\%";
-            dataGridViewCellStyle23.Padding = new System.Windows.Forms.Padding(4);
-            this.poolMaxDataPct.DefaultCellStyle = dataGridViewCellStyle23;
-            this.poolMaxDataPct.HeaderText = "Max Data %";
-            this.poolMaxDataPct.MinimumWidth = 6;
-            this.poolMaxDataPct.Name = "poolMaxDataPct";
-            this.poolMaxDataPct.ReadOnly = true;
-            this.poolMaxDataPct.Width = 92;
-            // 
-            // poolMaxLogWrite
-            // 
-            this.poolMaxLogWrite.DataPropertyName = "MaxLogWritePercent";
-            dataGridViewCellStyle24.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight;
-            dataGridViewCellStyle24.Format = "0.#\\%";
-            dataGridViewCellStyle24.Padding = new System.Windows.Forms.Padding(4);
-            this.poolMaxLogWrite.DefaultCellStyle = dataGridViewCellStyle24;
-            this.poolMaxLogWrite.HeaderText = "Max Log Write %";
-            this.poolMaxLogWrite.MinimumWidth = 6;
-            this.poolMaxLogWrite.Name = "poolMaxLogWrite";
-            this.poolMaxLogWrite.ReadOnly = true;
-            this.poolMaxLogWrite.Width = 120;
-            // 
-            // poolAvgCPU
-            // 
-            this.poolAvgCPU.DataPropertyName = "AvgCPUPercent";
-            dataGridViewCellStyle25.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight;
-            dataGridViewCellStyle25.Format = "0.#\\%";
-            dataGridViewCellStyle25.Padding = new System.Windows.Forms.Padding(4);
-            this.poolAvgCPU.DefaultCellStyle = dataGridViewCellStyle25;
-            this.poolAvgCPU.HeaderText = "Avg CPU %";
-            this.poolAvgCPU.MinimumWidth = 6;
-            this.poolAvgCPU.Name = "poolAvgCPU";
-            this.poolAvgCPU.ReadOnly = true;
-            this.poolAvgCPU.Width = 90;
-            // 
-            // poolAvgData
-            // 
-            this.poolAvgData.DataPropertyName = "AvgDataPercent";
-            dataGridViewCellStyle26.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight;
-            dataGridViewCellStyle26.Format = "0.#\\%";
-            dataGridViewCellStyle26.Padding = new System.Windows.Forms.Padding(4);
-            this.poolAvgData.DefaultCellStyle = dataGridViewCellStyle26;
-            this.poolAvgData.HeaderText = "Avg Data %";
-            this.poolAvgData.MinimumWidth = 6;
-            this.poolAvgData.Name = "poolAvgData";
-            this.poolAvgData.ReadOnly = true;
-            this.poolAvgData.Width = 91;
-            // 
-            // poolAvgLogWrite
-            // 
-            this.poolAvgLogWrite.DataPropertyName = "AvgLogWritePercent";
-            dataGridViewCellStyle27.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight;
-            dataGridViewCellStyle27.Format = "0.#\\%";
-            dataGridViewCellStyle27.Padding = new System.Windows.Forms.Padding(4);
-            this.poolAvgLogWrite.DefaultCellStyle = dataGridViewCellStyle27;
-            this.poolAvgLogWrite.HeaderText = "Avg Log Write %";
-            this.poolAvgLogWrite.MinimumWidth = 6;
-            this.poolAvgLogWrite.Name = "poolAvgLogWrite";
-            this.poolAvgLogWrite.ReadOnly = true;
-            this.poolAvgLogWrite.Width = 119;
             // 
             // AzureSummary
             // 
