@@ -206,6 +206,26 @@ namespace DBAChecksGUI.Performance
         {
             checkTime();
             addColumnsMenu();
+            addHistCols(dgv, "col");
+        }
+
+        private void addHistCols(DataGridView dgv, string prefix)
+        {
+            string histogram = "CPU";        
+
+            for (int i = 10; i <= 100; i += 10)
+            {
+                var col = new DataGridViewTextBoxColumn()
+                {
+                    Name = prefix + histogram + "Histogram_" + i,
+                    DataPropertyName = histogram + i.ToString(),
+                    Visible = false,
+                    HeaderText = histogram + " Histogram " + (i - 10).ToString() + " to " + i.ToString() + "%"
+                };
+                dgv.Columns.Add(col);
+            }
+            
+
         }
 
         private void tsTime_Click(object sender, EventArgs e)
@@ -270,10 +290,23 @@ namespace DBAChecksGUI.Performance
         private void tsCopy_Click(object sender, EventArgs e)
         {
             var cpuHistVisible = colCPUHistogram.Visible;
-
+            if (cpuHistVisible)
+            {
+                for (int i = 10; i <= 100; i += 10)
+                {
+                    dgv.Columns["colCPUHistogram_" + i.ToString()].Visible = true;
+                }
+            }
             colCPUHistogram.Visible = false;
             Common.CopyDataGridViewToClipboard(dgv);
             colCPUHistogram.Visible = cpuHistVisible;
+            if (cpuHistVisible)
+            {
+                for (int i = 10; i <= 100; i += 10)
+                {
+                    dgv.Columns["colCPUHistogram_" + i.ToString()].Visible = false ;
+                }
+            }
         }
     }
 }

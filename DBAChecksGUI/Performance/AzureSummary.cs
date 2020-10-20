@@ -329,6 +329,29 @@ namespace DBAChecksGUI.Performance
             checkTime();
             addColumnsMenu();
             addPoolColumnsMenu();
+            addHistCols(dgv,"col");
+            addHistCols(dgvPool, "colPool");
+
+        }
+
+        private void addHistCols(DataGridView dgv,string prefix)
+        {
+            foreach(string histogram in histograms)
+            {
+
+                for (int i = 10; i <= 100; i += 10)
+                {
+                    var col = new DataGridViewTextBoxColumn()
+                    {
+                        Name = prefix + histogram + "Histogram_" + i,
+                        DataPropertyName = histogram + i.ToString(),
+                        Visible = false,
+                        HeaderText = histogram + " Histogram " + (i - 10).ToString() + " to " + i.ToString() + "%"
+                    };
+                    dgv.Columns.Add(col);
+                }
+            }
+        
         }
 
         private void tsTime_Click(object sender, EventArgs e)
@@ -371,11 +394,19 @@ namespace DBAChecksGUI.Performance
             foreach(var c in visibleCols)
             {
                 c.Visible = false;
+                for(int i = 10; i <= 100; i += 10)
+                {
+                    dgv.Columns[c.Name + "_" + i.ToString()].Visible = true;
+                }
             }
             Common.CopyDataGridViewToClipboard(dgv);
             foreach (var c in visibleCols)
             {
                 c.Visible = true;
+                for (int i = 10; i <= 100; i += 10)
+                {
+                    dgv.Columns[c.Name + "_" + i.ToString()].Visible = false;
+                }
             }
 
         }
@@ -387,11 +418,19 @@ namespace DBAChecksGUI.Performance
             foreach (var c in visibleCols)
             {
                 c.Visible = false;
+                for (int i = 10; i <= 100; i += 10)
+                {
+                    dgvPool.Columns[c.Name + "_" + i.ToString()].Visible = true;
+                }
             }
             Common.CopyDataGridViewToClipboard(dgvPool);
             foreach (var c in visibleCols)
             {
                 c.Visible = true;
+                for (int i = 10; i <= 100; i += 10)
+                {
+                    dgvPool.Columns[c.Name + "_" + i.ToString()].Visible = false;
+                }
             }
 
         }
