@@ -23,14 +23,14 @@ namespace DBAChecksGUI.Performance
 
 
         Int32 mins = 15;
-        private DateTime _from = DateTime.MinValue;
-        private DateTime _to = DateTime.MinValue;
+        private DateTime _fromUTC = DateTime.MinValue;
+        private DateTime _toUTC = DateTime.MinValue;
 
-        private DateTime fromDate
+        private DateTime fromDateUTC
         {
             get
             {
-                if (_from == DateTime.MinValue)
+                if (_fromUTC == DateTime.MinValue)
                 {
                     DateTime now = DateTime.UtcNow;
                     if (mins >= 720)  // round to nearest hr
@@ -41,22 +41,22 @@ namespace DBAChecksGUI.Performance
                 }
                 else
                 {
-                    return _from;
+                    return _fromUTC;
                 }
             }
         }
 
-        private DateTime toDate
+        private DateTime toDateUTC
         {
             get
             {
-                if (_to == DateTime.MinValue)
+                if (_toUTC == DateTime.MinValue)
                 {
                     return DateTime.UtcNow;
                 }
                 else
                 {
-                    return _to;
+                    return _toUTC;
                 }
 
             }
@@ -86,8 +86,8 @@ namespace DBAChecksGUI.Performance
                 cmd.Parameters.AddWithValue("DataHist", colDataHistogram.Visible);
                 cmd.Parameters.AddWithValue("LogHist", colLogHistogram.Visible);
                 cmd.Parameters.AddWithValue("DTUHist", colDTUHistogram.Visible);
-                cmd.Parameters.AddWithValue("FromDate", fromDate);
-                cmd.Parameters.AddWithValue("ToDate", toDate);
+                cmd.Parameters.AddWithValue("FromDate", fromDateUTC);
+                cmd.Parameters.AddWithValue("ToDate", toDateUTC);
                 cmd.CommandTimeout = Properties.Settings.Default.CommandTimeout;
                 cmd.CommandType = CommandType.StoredProcedure;
                 SqlDataAdapter da = new SqlDataAdapter(cmd);
@@ -115,8 +115,8 @@ namespace DBAChecksGUI.Performance
                 cmd.Parameters.AddWithValue("DataHist", colPoolDataHistogram.Visible);
                 cmd.Parameters.AddWithValue("LogHist", colPoolLogHistogram.Visible);
                 cmd.Parameters.AddWithValue("DTUHist", colPoolDTUHistogram.Visible);
-                cmd.Parameters.AddWithValue("FromDate", fromDate);
-                cmd.Parameters.AddWithValue("ToDate", toDate);
+                cmd.Parameters.AddWithValue("FromDate", fromDateUTC);
+                cmd.Parameters.AddWithValue("ToDate", toDateUTC);
                 cmd.CommandTimeout = Properties.Settings.Default.CommandTimeout;
                 cmd.CommandType = CommandType.StoredProcedure;
                 SqlDataAdapter da = new SqlDataAdapter(cmd);
@@ -358,8 +358,8 @@ namespace DBAChecksGUI.Performance
         {
             var itm = (ToolStripMenuItem)sender;
             mins = Int32.Parse((string)itm.Tag);
-            _from = DateTime.MinValue;
-            _to = DateTime.MinValue;
+            _fromUTC = DateTime.MinValue;
+            _toUTC = DateTime.MinValue;
             RefreshData();
             checkTime();
         }
@@ -372,13 +372,13 @@ namespace DBAChecksGUI.Performance
         private void tsCustom_Click(object sender, EventArgs e)
         {
             var frm = new CustomTimePicker();
-            frm.FromDate = fromDate;
-            frm.ToDate = toDate;
+            frm.FromDate = fromDateUTC.ToLocalTime();
+            frm.ToDate = toDateUTC.ToLocalTime();
             frm.ShowDialog();
             if (frm.DialogResult == DialogResult.OK)
             {
-                _from = frm.FromDate;
-                _to = frm.ToDate;
+                _fromUTC = frm.FromDate.ToUniversalTime();
+                _toUTC = frm.ToDate.ToUniversalTime();
                 mins = 0;
                 checkTime();
             }
@@ -448,6 +448,52 @@ namespace DBAChecksGUI.Performance
         private void dgvPool_Sorted(object sender, EventArgs e)
         {
             generateHistogram(dgvPool, "colPool");
+        }
+
+        private void dgv_CellContentClick(object sender, DataGridViewCellEventArgs e)
+        {
+            var col = dgv.Columns[e.ColumnIndex];
+            if (e.RowIndex>=0 && col == colDB || col==colElasticPool)
+            {
+                DataRowView row = (DataRowView)dgv.Rows[e.RowIndex].DataBoundItem;
+                string instance =(string)row["Instance"];
+                string db= (string)row["DB"];
+         
+                var frm = new AzureDBResourceStatsView();
+                frm.FromDate = fromDateUTC.ToLocalTime();
+                frm.ToDate = toDateUTC.ToLocalTime();
+                frm.InstanceID = (Int32)row["InstanceID"];
+                if (col == colElasticPool)
+                {
+                    string pool = (string)row["elastic_pool_name"];
+                    frm.ElasticPoolName = pool;
+                    frm.Text = instance + " | " + pool;
+                }
+                else
+                {
+                    frm.Text = instance + " | " + db;
+                }
+     
+                frm.Show();
+            }
+            
+        }
+
+        private void dgvPool_CellContentClick(object sender, DataGridViewCellEventArgs e)
+        {
+            if (e.RowIndex >= 0 && dgvPool.Columns[e.ColumnIndex] == colPoolName)
+            {
+                DataRowView row = (DataRowView)dgvPool.Rows[e.RowIndex].DataBoundItem;
+                string instance = (string)row["Instance"];
+                string pool = (string)row["elastic_pool_name"];
+                var frm = new AzureDBResourceStatsView();
+                frm.FromDate = fromDateUTC.ToLocalTime();
+                frm.ToDate = toDateUTC.ToLocalTime();
+                frm.InstanceID = (Int32)row["InstanceID"];
+                frm.ElasticPoolName = pool;
+                frm.Text = instance + " | " + pool;
+                frm.Show();
+            }
         }
     }
 }

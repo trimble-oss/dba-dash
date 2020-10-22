@@ -299,6 +299,18 @@
     <Compile Include="Main.Designer.cs">
       <DependentUpon>Main.cs</DependentUpon>
     </Compile>
+    <Compile Include="Performance\AzureDBResourceStats.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Performance\AzureDBResourceStats.Designer.cs">
+      <DependentUpon>AzureDBResourceStats.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Performance\AzureDBResourceStatsView.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Performance\AzureDBResourceStatsView.Designer.cs">
+      <DependentUpon>AzureDBResourceStatsView.cs</DependentUpon>
+    </Compile>
     <Compile Include="Performance\AzureSummary.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -495,6 +507,12 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Drives\DrivesControl.resx">
       <DependentUpon>DrivesControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Performance\AzureDBResourceStats.resx">
+      <DependentUpon>AzureDBResourceStats.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Performance\AzureDBResourceStatsView.resx">
+      <DependentUpon>AzureDBResourceStatsView.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Performance\AzureSummary.resx">
       <DependentUpon>AzureSummary.cs</DependentUpon>

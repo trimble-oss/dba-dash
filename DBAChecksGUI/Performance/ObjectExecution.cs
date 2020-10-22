@@ -46,7 +46,7 @@ namespace DBAChecksGUI.Performance
             if (chartMaxDate != DateTime.MinValue && dateGrouping == DateGroup._1MIN)
             {
                 this.to = DateTime.UtcNow.AddMinutes(1);
-                this.from = chartMaxDate.AddMinutes(-utcOffset()).AddSeconds(1);
+                this.from = chartMaxDate.AddMinutes(-Common.UtcOffset).AddSeconds(1);
                 refreshData(true);
             }
         }
@@ -63,10 +63,6 @@ namespace DBAChecksGUI.Performance
             refreshData(false);
         }
 
-        private Int32 utcOffset()
-        {
-           return  (Int32)DateTime.Now.Subtract(DateTime.UtcNow).TotalMinutes;
-        }
 
          private void refreshData(bool update)
         {
@@ -88,7 +84,7 @@ namespace DBAChecksGUI.Performance
                 cmd.Parameters.AddWithValue("InstanceID", instanceID);
                 cmd.Parameters.AddWithValue("FromDateUTC", from);
                 cmd.Parameters.AddWithValue("ToDateUTC", to);
-                cmd.Parameters.AddWithValue("UTCOffset", utcOffset());
+                cmd.Parameters.AddWithValue("UTCOffset", Common.UtcOffset);
                 if (objectID > 0)
                 {
                     cmd.Parameters.AddWithValue("ObjectID", objectID);

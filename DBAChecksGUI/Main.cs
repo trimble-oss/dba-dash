@@ -282,6 +282,11 @@ namespace DBAChecksGUI
                 azureSummary1.InstanceIDs =n.Type == SQLTreeItem.TreeType.DBAChecksRoot ? AzureInstanceIDs : instanceIDs;
                 azureSummary1.RefreshData();
             }
+            if(tabs.SelectedTab== tabAzureDB)
+            {
+                azureDBResourceStats1.InstanceID = n.InstanceID;
+                azureDBResourceStats1.RefreshData();
+            }
         }
 
         private void loadDBAChecksErrorLog(Int32 InstanceID)
@@ -483,6 +488,7 @@ ORDER BY SchemaName,ObjectName
                 if (((SQLTreeItem)n.Parent).InstanceID == 0) //azure
                 {
                     allowedTabs.Add(tabAzureSummary);
+                    allowedTabs.Add(tabAzureDB);
                     allowedTabs.Add(tabDBAChecksErrorLog);                  
                 }
                 allowedTabs.Add(tabFiles);

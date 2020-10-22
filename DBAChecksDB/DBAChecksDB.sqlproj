@@ -420,6 +420,8 @@
     <Build Include="dbo\Stored Procedures\AzureDBPoolSummary_Get.sql" />
     <Build Include="dbo\Stored Procedures\AzureDBPerformanceSummary_Get.sql" />
     <Build Include="dbo\Views\CPU_Histogram.sql" />
+    <Build Include="dbo\Stored Procedures\AzureDBResourceStats_Get.sql" />
+    <Build Include="dbo\Stored Procedures\AzureDBElasticPoolResourceStats_Get.sql" />
   </ItemGroup>
   <ItemGroup>
     <PostDeploy Include="Script.PostDeployment1.sql" />

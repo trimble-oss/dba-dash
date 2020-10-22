@@ -34,6 +34,14 @@ WHERE DDLID = @DDLID";
             }
         }
 
+        public static Int32 UtcOffset
+        {
+            get
+            {
+                return (Int32)DateTime.Now.Subtract(DateTime.UtcNow).TotalMinutes;
+            }
+        }
+
         public static Int32 GetDatabaseID(string instance, string dbName)
         {
             if (instance == null || instance.Length == 0 || dbName == null || dbName.Length == 0)
