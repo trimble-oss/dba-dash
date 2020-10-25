@@ -238,6 +238,9 @@ FakesAssemblies/
 **/*.DesktopClient/ModelManifest.xml
 **/*.Server/GeneratedArtifacts
 **/*.Server/ModelManifest.xml
+
+!SqlServerSpatial140.dll
+!msvcr120.dll
 _Pvt_Extensions
 
 # Paket dependency manager
