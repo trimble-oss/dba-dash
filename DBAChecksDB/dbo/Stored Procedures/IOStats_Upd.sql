@@ -11,7 +11,7 @@ WHERE InstanceID = @InstanceID
 CREATE TABLE #DBIOStatsTemp(
 	[InstanceID] [int] NOT NULL,
 	[DatabaseID] [int] NOT NULL,
-	[Drive] [char](1) NOT NULL,
+	[Drive] [char](1) COLLATE DATABASE_DEFAULT NOT NULL ,
 	[FileID] [int] NOT NULL,
 	[SnapshotDate] [datetime2](2) NOT NULL,
 	[num_of_reads] [bigint] NOT NULL,
