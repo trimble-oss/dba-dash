@@ -70,6 +70,7 @@ namespace DBAChecksGUI
             performance1.StopTimer();
             List<Int32> instanceIDs;         
             var n = (SQLTreeItem) tv1.SelectedNode;
+            var parent = (SQLTreeItem)n.Parent;
             if (n.InstanceID > 0)
             {
                 instanceIDs = new List<Int32>() { n.InstanceID };
@@ -77,9 +78,13 @@ namespace DBAChecksGUI
             else
             {
             
-                if (n.Type == SQLTreeItem.TreeType.Instance && !(n.InstanceID>0))
+                if (n.Type == SQLTreeItem.TreeType.AzureInstance)
                 {
                     instanceIDs = n.ChildInstanceIDs;
+                }
+                if(n.Type == SQLTreeItem.TreeType.Configuration && parent.Type == SQLTreeItem.TreeType.AzureInstance)
+                {
+                    instanceIDs = parent.ChildInstanceIDs;
                 }
                 else
                 {
@@ -287,6 +292,11 @@ namespace DBAChecksGUI
                 azureDBResourceStats1.InstanceID = n.InstanceID;
                 azureDBResourceStats1.RefreshData();
             }
+            if(tabs.SelectedTab == tabServiceObjectives)
+            {
+                azureServiceObjectivesHistory1.InstanceIDs = ((SQLTreeItem)n.Parent).Type == SQLTreeItem.TreeType.DBAChecksRoot ? AzureInstanceIDs : instanceIDs;
+                azureServiceObjectivesHistory1.RefreshData();
+            }
         }
 
         private void loadDBAChecksErrorLog(Int32 InstanceID)
@@ -349,10 +359,12 @@ namespace DBAChecksGUI
                         string db = (string)rdr["AzureDBName"];
                         if (AzureNode == null || AzureNode.InstanceName != instance)
                         {
-                            AzureNode = new SQLTreeItem(instance, SQLTreeItem.TreeType.Instance);
+                            AzureNode = new SQLTreeItem(instance, SQLTreeItem.TreeType.AzureInstance);
                             root.Nodes.Add(AzureNode);
+                            var cfgNode = new SQLTreeItem("Configuration", SQLTreeItem.TreeType.Configuration);
+                            AzureNode.Nodes.Add(cfgNode);
                         }
-                        var azureDBNode = new SQLTreeItem(db, SQLTreeItem.TreeType.Database);
+                        var azureDBNode = new SQLTreeItem(db, SQLTreeItem.TreeType.AzureDatabase);
                         azureDBNode.DatabaseID = (Int32)rdr["AzureDatabaseID"];
                         azureDBNode.InstanceID = instanceID;
                         azureDBNode.AddDatabaseFolders();
@@ -393,13 +405,11 @@ AND D.source_database_id IS NULL
 AND I.Instance = @Instance
 ORDER BY D.Name
 ", cn);
-                //    cmd.CommandType = CommandType.StoredProcedure;
-                if (instanceNode.InstanceID > 0)
-                {
-                    var changesNode = new SQLTreeItem("Configuration", SQLTreeItem.TreeType.Configuration);
-                    changesNode.InstanceID = instanceNode.InstanceID;
-                    instanceNode.Nodes.Add(changesNode);
-                }
+
+                var changesNode = new SQLTreeItem("Configuration", SQLTreeItem.TreeType.Configuration);
+                changesNode.InstanceID = instanceNode.InstanceID;
+                instanceNode.Nodes.Add(changesNode);
+                
                 cmd.Parameters.AddWithValue("Instance", instanceNode.ObjectName);
                 var systemNode = new SQLTreeItem("System Databases", SQLTreeItem.TreeType.Folder);
                 instanceNode.Nodes.Add(systemNode);
@@ -461,6 +471,7 @@ ORDER BY SchemaName,ObjectName
         private void tv1_AfterSelect(object sender, TreeViewEventArgs e)
         {
             var n = (SQLTreeItem)e.Node;
+            var parent = (SQLTreeItem)n.Parent;
 
             List<TabPage> allowedTabs = new List<TabPage>();         
             selectedItem = n;
@@ -485,36 +496,46 @@ ORDER BY SchemaName,ObjectName
             else if(n.Type== SQLTreeItem.TreeType.Database)
             {
                 allowedTabs.Add(tabPerformance);
-                if (((SQLTreeItem)n.Parent).InstanceID == 0) //azure
-                {
-                    allowedTabs.Add(tabAzureSummary);
-                    allowedTabs.Add(tabAzureDB);
-                    allowedTabs.Add(tabDBAChecksErrorLog);                  
-                }
                 allowedTabs.Add(tabFiles);
                 allowedTabs.Add(tabSnapshotsSummary);
                 allowedTabs.Add(tabSlowQueries);
                 allowedTabs.Add(tabDBSpace);
             }
+            else if(n.Type == SQLTreeItem.TreeType.AzureDatabase)
+            {
+                allowedTabs.Add(tabPerformance);
+                allowedTabs.Add(tabAzureSummary);
+                allowedTabs.Add(tabAzureDB);
+                allowedTabs.Add(tabDBAChecksErrorLog);
+                allowedTabs.Add(tabFiles);
+                allowedTabs.Add(tabSnapshotsSummary);
+                allowedTabs.Add(tabSlowQueries);
+                allowedTabs.Add(tabDBSpace);
+                allowedTabs.Add(tabServiceObjectives);
+            }
             else if (n.Type == SQLTreeItem.TreeType.Instance)
             {
                 allowedTabs.Add(tabPerformanceSummary);
-                if (n.InstanceID > 0){
-                    allowedTabs.Add(tabPerformance);                  
-                    allowedTabs.Add(tabSummary);
-                    allowedTabs.Add(tabBackups);
-                    allowedTabs.Add(tabDrives);              
-                    allowedTabs.Add(tabLogShipping);
-                    allowedTabs.Add(tabJobs);
-                    allowedTabs.Add(tabSnapshotsSummary);
-                    allowedTabs.Add(tabLastGood);
-                    allowedTabs.Add(tabDBAChecksErrorLog);
-                    allowedTabs.Add(tabInfo);                   
-                }
-                else
-                {
-                    allowedTabs.Add(tabAzureSummary);
-                }
+                allowedTabs.Add(tabPerformance);                  
+                allowedTabs.Add(tabSummary);
+                allowedTabs.Add(tabBackups);
+                allowedTabs.Add(tabDrives);              
+                allowedTabs.Add(tabLogShipping);
+                allowedTabs.Add(tabJobs);
+                allowedTabs.Add(tabSnapshotsSummary);
+                allowedTabs.Add(tabLastGood);
+                allowedTabs.Add(tabDBAChecksErrorLog);
+                allowedTabs.Add(tabInfo);                   
+                allowedTabs.Add(tabSlowQueries);
+                allowedTabs.Add(tabFiles);
+                allowedTabs.Add(tabTags);
+                allowedTabs.Add(tabCollectionDates);
+                allowedTabs.Add(tabDBSpace);
+            }
+            else if(n.Type == SQLTreeItem.TreeType.AzureInstance)
+            {
+                allowedTabs.Add(tabPerformanceSummary);         
+                allowedTabs.Add(tabAzureSummary);              
                 allowedTabs.Add(tabSlowQueries);
                 allowedTabs.Add(tabFiles);
                 allowedTabs.Add(tabTags);
@@ -523,12 +544,19 @@ ORDER BY SchemaName,ObjectName
             }
             else if (n.Type == SQLTreeItem.TreeType.Configuration)
             {
-                allowedTabs.Add(tabInstanceConfig);
-                allowedTabs.Add(tabTraceFlags);
-                allowedTabs.Add(tabHardware);
-                allowedTabs.Add(tabSQLPatching);
-                allowedTabs.Add(tabAlerts);
-                allowedTabs.Add(tabDrivers);
+                if(parent.Type != SQLTreeItem.TreeType.AzureDatabase && parent.Type != SQLTreeItem.TreeType.AzureInstance)
+                {
+                    allowedTabs.Add(tabInstanceConfig);
+                    allowedTabs.Add(tabTraceFlags);
+                    allowedTabs.Add(tabHardware);
+                    allowedTabs.Add(tabSQLPatching);
+                    allowedTabs.Add(tabAlerts);
+                    allowedTabs.Add(tabDrivers);
+                }
+                if (n.Type != SQLTreeItem.TreeType.Instance)
+                {
+                    allowedTabs.Add(tabServiceObjectives);
+                }
             }
             if (n.ObjectID > 0)
             {

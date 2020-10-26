@@ -46,7 +46,9 @@ namespace DBAChecksGUI
             XMLSchemaCollection,
             Trigger,
             CLRTrigger,
-            Configuration
+            Configuration,
+            AzureInstance,
+            AzureDatabase
         }
 
         private List<Int32> _childInstanceIDs;
@@ -57,7 +59,7 @@ namespace DBAChecksGUI
                 if (_childInstanceIDs == null)
                 {
                     _childInstanceIDs = new List<Int32>();
-                    if( (instanceID==0) && (this.Type == TreeType.DBAChecksRoot || this.Type == TreeType.Instance))
+                    if( (instanceID==0) && (this.Type == TreeType.DBAChecksRoot || this.Type == TreeType.Instance || this.Type == TreeType.AzureInstance))
                     {
                         foreach (SQLTreeItem itm in this.Nodes)
                         {
@@ -208,7 +210,7 @@ namespace DBAChecksGUI
                 var n = this;
                 do
                 {
-                    if (n.Type == TreeType.Instance)
+                    if (n.Type == TreeType.Instance || n.Type== TreeType.AzureInstance)
                     {
                         instanceName = n.ObjectName;
                         hasInstanceName = true;
@@ -260,11 +262,11 @@ namespace DBAChecksGUI
         {
             get
             {
-                if (Type == TreeType.DBAChecksRoot || Type == TreeType.Instance)
+                if (Type == TreeType.DBAChecksRoot || Type == TreeType.Instance || Type == TreeType.AzureInstance)
                 {
                     return String.Empty;
                 }
-                else if(Type== TreeType.Database)
+                else if(Type== TreeType.Database || Type == TreeType.AzureDatabase)
                 {
                     return this.ObjectName;
                 }
@@ -327,6 +329,12 @@ namespace DBAChecksGUI
                     break;
                 case TreeType.Configuration:
                     ImageIndex = 7;
+                    break;
+                case TreeType.AzureInstance:
+                    ImageIndex = 8;
+                    break;
+                case TreeType.AzureDatabase:
+                    ImageIndex = 9;
                     break;
                 default:
                     ImageIndex = 5;

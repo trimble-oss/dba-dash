@@ -136,6 +136,12 @@
     <Compile Include="Changes\Alerts.Designer.cs">
       <DependentUpon>Alerts.cs</DependentUpon>
     </Compile>
+    <Compile Include="Changes\AzureServiceObjectivesHistory.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Changes\AzureServiceObjectivesHistory.Designer.cs">
+      <DependentUpon>AzureServiceObjectivesHistory.cs</DependentUpon>
+    </Compile>
     <Compile Include="Changes\Configuration.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -426,6 +432,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Changes\Alerts.resx">
       <DependentUpon>Alerts.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Changes\AzureServiceObjectivesHistory.resx">
+      <DependentUpon>AzureServiceObjectivesHistory.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Changes\Configuration.resx">
       <DependentUpon>Configuration.cs</DependentUpon>

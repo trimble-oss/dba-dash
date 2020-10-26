@@ -76,7 +76,7 @@
             this.tsGrouping});
             this.toolStrip1.Location = new System.Drawing.Point(0, 0);
             this.toolStrip1.Name = "toolStrip1";
-            this.toolStrip1.Size = new System.Drawing.Size(883, 31);
+            this.toolStrip1.Size = new System.Drawing.Size(862, 31);
             this.toolStrip1.TabIndex = 2;
             this.toolStrip1.Text = "toolStrip1";
             // 
@@ -272,7 +272,7 @@
             // minToolStripMenuItem
             // 
             this.minToolStripMenuItem.Name = "minToolStripMenuItem";
-            this.minToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            this.minToolStripMenuItem.Size = new System.Drawing.Size(133, 26);
             this.minToolStripMenuItem.Tag = "_1MIN";
             this.minToolStripMenuItem.Text = "1min";
             this.minToolStripMenuItem.Click += new System.EventHandler(this.tsDateGroup_Click);
@@ -280,7 +280,7 @@
             // minToolStripMenuItem1
             // 
             this.minToolStripMenuItem1.Name = "minToolStripMenuItem1";
-            this.minToolStripMenuItem1.Size = new System.Drawing.Size(224, 26);
+            this.minToolStripMenuItem1.Size = new System.Drawing.Size(133, 26);
             this.minToolStripMenuItem1.Tag = "_10MIN";
             this.minToolStripMenuItem1.Text = "10min";
             this.minToolStripMenuItem1.Click += new System.EventHandler(this.tsDateGroup_Click);
@@ -288,7 +288,7 @@
             // hrToolStripMenuItem
             // 
             this.hrToolStripMenuItem.Name = "hrToolStripMenuItem";
-            this.hrToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            this.hrToolStripMenuItem.Size = new System.Drawing.Size(133, 26);
             this.hrToolStripMenuItem.Tag = "_60MIN";
             this.hrToolStripMenuItem.Text = "1Hr";
             this.hrToolStripMenuItem.Click += new System.EventHandler(this.tsDateGroup_Click);
@@ -296,7 +296,7 @@
             // hrsToolStripMenuItem
             // 
             this.hrsToolStripMenuItem.Name = "hrsToolStripMenuItem";
-            this.hrsToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            this.hrsToolStripMenuItem.Size = new System.Drawing.Size(133, 26);
             this.hrsToolStripMenuItem.Tag = "_120MIN";
             this.hrsToolStripMenuItem.Text = "2Hrs";
             this.hrsToolStripMenuItem.Click += new System.EventHandler(this.tsDateGroup_Click);
@@ -304,7 +304,7 @@
             // dayToolStripMenuItem1
             // 
             this.dayToolStripMenuItem1.Name = "dayToolStripMenuItem1";
-            this.dayToolStripMenuItem1.Size = new System.Drawing.Size(224, 26);
+            this.dayToolStripMenuItem1.Size = new System.Drawing.Size(133, 26);
             this.dayToolStripMenuItem1.Tag = "DAY";
             this.dayToolStripMenuItem1.Text = "Day";
             this.dayToolStripMenuItem1.Click += new System.EventHandler(this.tsDateGroup_Click);
@@ -317,33 +317,33 @@
             // objectExecution1
             // 
             this.objectExecution1.Dock = System.Windows.Forms.DockStyle.Top;
-            this.objectExecution1.Location = new System.Drawing.Point(0, 1279);
+            this.objectExecution1.Location = new System.Drawing.Point(0, 5239);
             this.objectExecution1.Name = "objectExecution1";
-            this.objectExecution1.Size = new System.Drawing.Size(883, 282);
+            this.objectExecution1.Size = new System.Drawing.Size(862, 2116);
             this.objectExecution1.TabIndex = 7;
             // 
             // blocking1
             // 
             this.blocking1.Dock = System.Windows.Forms.DockStyle.Top;
-            this.blocking1.Location = new System.Drawing.Point(0, 871);
+            this.blocking1.Location = new System.Drawing.Point(0, 2800);
             this.blocking1.Name = "blocking1";
-            this.blocking1.Size = new System.Drawing.Size(883, 408);
+            this.blocking1.Size = new System.Drawing.Size(862, 2438);
             this.blocking1.TabIndex = 6;
             // 
             // waits1
             // 
             this.waits1.Dock = System.Windows.Forms.DockStyle.Top;
-            this.waits1.Location = new System.Drawing.Point(0, 589);
+            this.waits1.Location = new System.Drawing.Point(0, 1447);
             this.waits1.Name = "waits1";
-            this.waits1.Size = new System.Drawing.Size(883, 282);
+            this.waits1.Size = new System.Drawing.Size(862, 1354);
             this.waits1.TabIndex = 5;
             // 
             // ioPerformance1
             // 
             this.ioPerformance1.Dock = System.Windows.Forms.DockStyle.Top;
-            this.ioPerformance1.Location = new System.Drawing.Point(0, 295);
+            this.ioPerformance1.Location = new System.Drawing.Point(0, 547);
             this.ioPerformance1.Name = "ioPerformance1";
-            this.ioPerformance1.Size = new System.Drawing.Size(883, 294);
+            this.ioPerformance1.Size = new System.Drawing.Size(862, 899);
             this.ioPerformance1.SmoothLines = true;
             this.ioPerformance1.TabIndex = 3;
             // 
@@ -352,7 +352,7 @@
             this.cpu1.Dock = System.Windows.Forms.DockStyle.Top;
             this.cpu1.Location = new System.Drawing.Point(0, 31);
             this.cpu1.Name = "cpu1";
-            this.cpu1.Size = new System.Drawing.Size(883, 264);
+            this.cpu1.Size = new System.Drawing.Size(862, 516);
             this.cpu1.SmoothLines = true;
             this.cpu1.TabIndex = 4;
             // 
@@ -368,7 +368,7 @@
             this.Controls.Add(this.cpu1);
             this.Controls.Add(this.toolStrip1);
             this.Name = "Performance";
-            this.Size = new System.Drawing.Size(883, 1620);
+            this.Size = new System.Drawing.Size(862, 1620);
             this.toolStrip1.ResumeLayout(false);
             this.toolStrip1.PerformLayout();
             this.ResumeLayout(false);
