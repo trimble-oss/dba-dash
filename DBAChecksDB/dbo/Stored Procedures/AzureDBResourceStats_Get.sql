@@ -1,4 +1,10 @@
-﻿CREATE PROC AzureDBResourceStats_Get(@InstanceID INT,@FromDate DATETIME2(3),@ToDate DATETIME2(3),@DateGrouping VARCHAR(50)='None', @UTCOffset INT=0)
+﻿CREATE PROC [dbo].[AzureDBResourceStats_Get](
+	@InstanceID INT,
+	@FromDate DATETIME2(3),
+	@ToDate DATETIME2(3),
+	@DateGroupingMin INT=NULL, 
+	@UTCOffset INT=0
+)
 AS
 SELECT @FromDate= DATEADD(mi, -@UTCOffset, @FromDate),
 	@ToDate = DATEADD(mi, -@UTCOffset, @ToDate) 
@@ -6,13 +12,11 @@ SELECT @FromDate= DATEADD(mi, -@UTCOffset, @FromDate),
 DECLARE @DateTimeCol VARCHAR(MAX) ='DATEADD(mi, @UTCOffset, RS.end_time)' 
 DECLARE @SQL NVARCHAR(MAX)
 DECLARE @DateGroupingSQL NVARCHAR(MAX)
-SELECT @DateGroupingSQL= CASE WHEN @DateGrouping = 'None' THEN '@DateTimeCol'
-			WHEN @DateGrouping = '1MIN' THEN 'DATEADD(mi, DATEDIFF(mi, 0, DATEADD(s, 30, @DateTimeCol)), 0)'
-			WHEN @DateGrouping ='10MIN' THEN 'CONVERT(DATETIME,LEFT(CONVERT(VARCHAR,@DateTimeCol,120),15) + ''0'',120)'
-			WHEN @DateGrouping = '60MIN' THEN 'CONVERT(DATETIME,LEFT(CONVERT(VARCHAR,@DateTimeCol,120),13) + '':00'',120)'
-			WHEN @DateGrouping = '120MIN' THEN 'DATEADD(hh,DATEPART(hh,@DateTimeCol) - DATEPART(hh,@DateTimeCol) % 2, CAST(CAST(@DateTimeCol AS DATE) AS DATETIME))'
-			WHEN @DateGrouping ='DAY' THEN 'CAST(CAST(@DateTimeCol as DATE) as DATETIME)'
-			ELSE NULL END
+DECLARE @DateGroupingJoin NVARCHAR(MAX)
+SELECT @DateGroupingSQL= CASE WHEN @DateGroupingMin IS NULL OR @DateGroupingMin=0 THEN 'DATEADD(mi, @UTCOffset, RS.end_time)'
+			ELSE 'DG.DateGroup' END,
+			@DateGroupingJoin= CASE WHEN @DateGroupingMin IS NULL OR @DateGroupingMin=0 THEN ''
+			ELSE 'CROSS APPLY dbo.DateGroupingMins(DATEADD(mi, @UTCOffset, RS.end_time),@DateGroupingMin) DG' END
 SELECT @DateGroupingSQL = REPLACE(@DateGroupingSQL,'@DateTimeCol',@DateTimeCol)
 
 SET @SQL = N'
@@ -39,6 +43,7 @@ SELECT ' + @DateGroupingSQL + ' as end_time,
 	   MAX(RS.avg_instance_cpu_percent) max_instance_cpu_percent,
        MAX(RS.avg_instance_memory_percent) max_instance_memory_percent
 FROM dbo.AzureDBResourceStats RS
+' + @DateGroupingJoin + '
 OUTER APPLY(SELECT 	CASE WHEN dtu_limit>0 THEN (SELECT Max(v) FROM (VALUES (avg_cpu_percent), (avg_data_io_percent), (avg_log_write_percent)) AS value(v)) ELSE NULL END AS [AvgDTUPercent],
 					CASE WHEN dtu_limit>0 THEN ((dtu_limit)*((SELECT Max(v) FROM (VALUES (avg_cpu_percent), (avg_data_io_percent), (avg_log_write_percent)) AS value(v))/100.00)) ELSE NULL END AS [AvgDTUsUsed]
 			) AS DTU
@@ -49,4 +54,4 @@ GROUP BY ' + @DateGroupingSQL +'
 ORDER BY end_time'
 
 PRINT @SQL
-EXEC sp_executesql @sql, N'@InstanceID INT,@FromDate DATETIME2(3),@ToDate DATETIME2(3),@UTCOffset INT',@InstanceID,@FromDate,@ToDate,@UTCOffset
+EXEC sp_executesql @sql, N'@InstanceID INT,@FromDate DATETIME2(3),@ToDate DATETIME2(3),@UTCOffset INT,@DateGroupingMin INT',@InstanceID,@FromDate,@ToDate,@UTCOffset,@DateGroupingMin

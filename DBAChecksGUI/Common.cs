@@ -16,6 +16,19 @@ namespace DBAChecksGUI
     {
         public static string ConnectionString;
 
+        public static Dictionary<Int32, string> DateGroups = new Dictionary<Int32, string>() { { 1, "1min" },
+                { 2, "2min" },
+                { 5, "5min" },
+                { 10, "10min" },
+                { 15, "15min" },
+                { 30, "30min" },
+                { 60, "1hr" },
+                { 120, "2hrs" },
+                { 240, "4hrs" },
+                { 360, "6hrs" },
+                { 720, "12hrs" },
+                { 1440, "1 Day" }
+            };
         public static string DDL(Int64 DDLID,string connectionString)
         {
             SqlConnection cn = new SqlConnection(connectionString);

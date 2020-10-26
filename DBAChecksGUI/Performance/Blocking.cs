@@ -29,13 +29,12 @@ namespace DBAChecksGUI.Performance
         Int32 InstanceID;
         DateTime fromDate;
         DateTime toDate;
-        DateGroup DateGrouping;
         bool smoothLines = true;
         DateTime snapshotTime;
         double maxBlockedTime = 0;
         Int32 databaseID = 0;
 
-        public void RefreshData(Int32 InstanceID, DateTime fromDate, DateTime toDate, string connectionString, Int32 databaseID, DateGroup dateGrouping = DateGroup.None)
+        public void RefreshData(Int32 InstanceID, DateTime fromDate, DateTime toDate, string connectionString, Int32 databaseID)
         {
             eventTime = DateTime.MinValue;
             mins = (Int32)toDate.Subtract(fromDate).TotalMinutes;
@@ -43,7 +42,6 @@ namespace DBAChecksGUI.Performance
             this.fromDate = fromDate;
             this.toDate = toDate;
             this.connectionString = connectionString;
-            this.DateGrouping = dateGrouping;
             this.databaseID = databaseID;
             refreshData(false);
         }

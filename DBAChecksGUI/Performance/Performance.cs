@@ -41,28 +41,20 @@ namespace DBAChecksGUI.Performance
         {
             InitializeComponent();
         }
-        public enum DateGroup
-        {
-            None,
-            _1MIN,
-            _10MIN,
-            _60MIN,
-            _120MIN,
-            DAY
-        }
+
 
         public void Reset()
         {
             mins = 60;
             customFrom = DateTime.MinValue;
             customTo = DateTime.MinValue;
-            dateGrp = DateGroup._1MIN;
+            dateGrp = 1;
             setDateGroup(dateGrp);
             checkTime();
 
         }
 
-        DateGroup dateGrp =  DateGroup._1MIN;
+        Int32 dateGrp =  1;
         Int32 mins=60;
         DateTime customFrom = DateTime.MinValue;
         DateTime customTo = DateTime.MinValue;
@@ -96,25 +88,20 @@ namespace DBAChecksGUI.Performance
 
 
 
-        public DateGroup DateGrouping(Int32 Mins)
+        public Int32 DateGrouping(Int32 Mins)
         {
-            if (Mins < 181)
+            Int32 lastMins=0;
+            foreach (var mins in Common.DateGroups.OrderBy(k => k.Key)
+                .Select(k => k.Key)
+                .ToList())
             {
-                return  DateGroup._1MIN;
+                if(Mins/ mins < 200)
+                {
+                    return mins;
+                }
+                lastMins = mins;
             }
-            if (Mins < 2881)
-            {
-                return DateGroup._10MIN;
-            }
-            if (Mins < 11520)
-            {
-                return DateGroup._60MIN;
-            }
-            if (Mins < 28800)
-            {
-                return DateGroup._120MIN;
-            }
-            return DateGroup.DAY;
+            return lastMins;
         }
 
         public void RefreshData(Int32 mins)
@@ -125,12 +112,12 @@ namespace DBAChecksGUI.Performance
             RefreshData();
         }
 
-        private void setDateGroup(DateGroup grp)
+        private void setDateGroup(Int32 grp)
         {
             string itmName="Date Grouping";
             foreach(ToolStripMenuItem itm in tsGrouping.DropDownItems)
             {
-                itm.Checked = (string)itm.Tag == grp.ToString();
+                itm.Checked = Convert.ToInt32(itm.Tag) == grp;
                 if (itm.Checked){ itmName = itm.Text; }
             }
             dateGrp = grp;
@@ -143,7 +130,7 @@ namespace DBAChecksGUI.Performance
             RefreshData(from, to, dateGrp);
         }
 
-        public void RefreshData(DateTime from,DateTime to, DateGroup dateGrp)
+        public void RefreshData(DateTime from,DateTime to, Int32 dateGrp)
         {
             setDateGroup(dateGrp);
             toggleTimer();
@@ -152,7 +139,7 @@ namespace DBAChecksGUI.Performance
                 ioPerformance1.RefreshData(InstanceID, from, to, ConnectionString, DatabaseID, dateGrp);
                 cpu1.RefreshData(InstanceID, from, to, ConnectionString, dateGrp);
                 waits1.RefreshData(InstanceID, from, to, ConnectionString, dateGrp);
-                blocking1.RefreshData(InstanceID, from, to, ConnectionString,DatabaseID, dateGrp);
+                blocking1.RefreshData(InstanceID, from, to, ConnectionString,DatabaseID);
             }
             ioPerformance1.Visible = ObjectID == 0;
             cpu1.Visible = ObjectID == 0;
@@ -166,7 +153,7 @@ namespace DBAChecksGUI.Performance
         private void toggleTimer()
         {
             enableTimer(false);
-            if (dateGrp == DateGroup._1MIN && mins > 0 && mins <= 180)
+            if (dateGrp == 1 && mins > 0 && mins <= 180)
             {
                 tsEnableTimer.Enabled = true;
             }
@@ -307,10 +294,22 @@ namespace DBAChecksGUI.Performance
             RefreshData();
         }
 
+        private void addDateGroups()
+        {
+            foreach(var dg in Common.DateGroups)
+            {
+                var ts = new ToolStripMenuItem(dg.Value);
+                ts.Tag = dg.Key;
+                ts.Click += tsDateGroup_Click;
+                tsGrouping.DropDownItems.Add(ts);
+            }
+        }
+
+
         private void tsDateGroup_Click(object sender, EventArgs e)
         {
-            string tag = (string)((ToolStripMenuItem)sender).Tag;
-            DateGroup grp =  (DateGroup)Enum.Parse(typeof(DateGroup),tag);
+            var grp = Convert.ToInt32(((ToolStripMenuItem)sender).Tag);
+
             var from = DateTime.UtcNow.AddMinutes(-mins);
             if (mins >= 1440)
             {
@@ -323,6 +322,11 @@ namespace DBAChecksGUI.Performance
                 to = customTo;
             }
             RefreshData(from, to, grp);
+        }
+
+        private void Performance_Load(object sender, EventArgs e)
+        {
+            addDateGroups();
         }
     }
 }

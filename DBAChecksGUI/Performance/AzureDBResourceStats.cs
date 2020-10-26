@@ -102,12 +102,11 @@ namespace DBAChecksGUI.Performance
         {
             get
             {
-                DateGroup dg = DateGrouping;
-                if(dg== DateGroup.None)
+                if(DateGrouping== 0)
                 {
                     return "yyyy-MM-dd HH:mm:ss";
                 }
-                else if(dg== DateGroup.DAY)
+                else if(DateGrouping>=1440)
                 {
                     return "yyyy-MM-dd";
                 }
@@ -119,34 +118,27 @@ namespace DBAChecksGUI.Performance
             }
         }
 
-        public DateGroup DateGrouping
+        public Int32 DateGrouping
         {
             get
             {
-                var Mins = to.Subtract(from).TotalMinutes;
-                if (Mins < 61)
+                Int32 lastMins = 0;
+                var actualMins = to.Subtract(from).TotalMinutes;
+                foreach (var mins in Common.DateGroups.OrderBy(k => k.Key)
+                    .Select(k => k.Key)
+                    .ToList())
                 {
-                    return DateGroup.None;
+                    if (actualMins / mins < 200)
+                    {
+                        return mins;
+                    }
+                    lastMins = mins;
                 }
-                else if (Mins < 181)
-                {
-                    return DateGroup._1MIN;
-                }
-                if (Mins < 2881)
-                {
-                    return DateGroup._10MIN;
-                }
-                if (Mins < 11520)
-                {
-                    return DateGroup._60MIN;
-                }
-                if (Mins < 28800)
-                {
-                    return DateGroup._120MIN;
-                }
-                return DateGroup.DAY;
+                return lastMins;
             }
+          
         }
+
 
         Dictionary<string, columnMetaData> columns;
 
@@ -335,7 +327,7 @@ namespace DBAChecksGUI.Performance
                 cmd.Parameters.AddWithValue("ToDate", to);
                 cmd.Parameters.AddWithValue("InstanceID", InstanceID);
                 cmd.Parameters.AddWithValue("elastic_pool_name", ElasticPoolName);
-                cmd.Parameters.AddWithValue("DateGrouping", DateGrouping.ToString().Replace("_", ""));
+                cmd.Parameters.AddWithValue("DateGroupingMin", DateGrouping);
                 cmd.Parameters.AddWithValue("UTCOffset", Common.UtcOffset);
                 SqlDataAdapter da = new SqlDataAdapter(cmd);
                 DataTable dt = new DataTable();
@@ -356,7 +348,7 @@ namespace DBAChecksGUI.Performance
                 cmd.Parameters.AddWithValue("FromDate", from);
                 cmd.Parameters.AddWithValue("ToDate",to);
                 cmd.Parameters.AddWithValue("InstanceID", InstanceID);
-                cmd.Parameters.AddWithValue("DateGrouping", DateGrouping.ToString().Replace("_", ""));
+                cmd.Parameters.AddWithValue("DateGroupingMin", DateGrouping);
                 cmd.Parameters.AddWithValue("UTCOffset",Common.UtcOffset);
                 SqlDataAdapter da = new SqlDataAdapter(cmd);
                 DataTable dt = new DataTable();

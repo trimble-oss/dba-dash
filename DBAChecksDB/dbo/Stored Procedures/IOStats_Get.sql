@@ -2,9 +2,9 @@
 	@InstanceID INT,
 	@FromDate DATETIME2(2)=NULL, 
 	@ToDate DATETIME2(2)=NULL,
-	@DateGrouping VARCHAR(50)='None',
 	@DatabaseID INT=NULL,
-	@Drive CHAR(1)=NULL
+	@Drive CHAR(1)=NULL,
+	@DateGroupingMin INT=NULL
 )
 AS
 IF @FromDate IS NULL
@@ -26,13 +26,8 @@ BEGIN
 	SET @DatabaseID=-1
 END
 
-SELECT @DateGroupingSQL= CASE WHEN @DateGrouping = 'None' THEN 'IOS.SnapshotDate'
-			WHEN @DateGrouping = '1MIN' THEN 'DATEADD(mi, DATEDIFF(mi, 0, DATEADD(s, 30, IOS.SnapshotDate)), 0)'
-			WHEN @DateGrouping = '10MIN' THEN 'CONVERT(DATETIME,LEFT(CONVERT(VARCHAR,IOS.SnapshotDate,120),15) + ''0'',120)'
-			WHEN @DateGrouping = '60MIN' THEN 'CONVERT(DATETIME,LEFT(CONVERT(VARCHAR,IOS.SnapshotDate,120),13) + '':00'',120)'
-			WHEN @DateGrouping = '120MIN' THEN 'DATEADD(hh,DATEPART(hh,IOS.SnapshotDate) - DATEPART(hh,IOS.SnapshotDate) % 2, CAST(CAST(IOS.SnapshotDate AS DATE) AS DATETIME))'
-			WHEN @DateGrouping ='DAY' THEN 'CAST(CAST(IOS.SnapshotDate as DATE) as DATETIME)'
-			ELSE NULL END
+SELECT @DateGroupingSQL= CASE WHEN @DateGroupingMin IS NULL OR @DateGroupingMin =0 THEN 'IOS.SnapshotDate'
+			ELSE 'DG.DateGroup' END
 
 SET @SQL = N'
 SELECT	' + @DateGroupingSQL + ' as SnapshotDate,
@@ -54,7 +49,8 @@ SELECT	' + @DateGroupingSQL + ' as SnapshotDate,
 			MAX(MaxReadLatency) AS MaxReadLatency,
 			MAX(MaxWriteLatency) AS MaxWriteLatency,
 			MAX(MaxLatency) AS MaxLatency
-	FROM ' + CASE WHEN @DateGrouping IN('60MIN','120MIN','DAY') THEN 'dbo.DBIOStats_60MIN' ELSE 'dbo.DBIOStats' END + ' AS IOS
+	FROM ' + CASE WHEN @DateGroupingMin>=60 THEN 'dbo.DBIOStats_60MIN' ELSE 'dbo.DBIOStats' END + ' AS IOS
+	' + CASE WHEN @DateGroupingMin IS NULL OR @DateGroupingMin =0 THEN '' ELSE 'CROSS APPLY dbo.DateGroupingMins(IOS.SnapshotDate,@DateGroupingMin) DG' END + '
 	WHERE IOS.InstanceID = @InstanceID
 	AND IOS.DatabaseID = @DatabaseID
 	AND IOS.SnapshotDate >= @FromDate
@@ -65,4 +61,4 @@ SELECT	' + @DateGroupingSQL + ' as SnapshotDate,
 ORDER BY SnapshotDate'
 
 PRINT @SQL
-EXEC sp_executesql @SQL,N'@InstanceID INT,@FromDate DATETIME2(2),@ToDate DATETIME2(2),@DatabaseID INT,@Drive CHAR(3)',@InstanceID,@FromDate,@ToDate,@DatabaseID,@Drive
+EXEC sp_executesql @SQL,N'@InstanceID INT,@FromDate DATETIME2(2),@ToDate DATETIME2(2),@DatabaseID INT,@Drive CHAR(3),@DateGroupingMin INT',@InstanceID,@FromDate,@ToDate,@DatabaseID,@Drive,@DateGroupingMin

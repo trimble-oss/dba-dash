@@ -1,0 +1,5 @@
+﻿CREATE FUNCTION dbo.DateGroupingMins(@DateTime DATETIME,@Mins INT)
+RETURNS TABLE
+AS
+RETURN
+SELECT DATEADD(MINUTE, (DATEDIFF(MINUTE, 0, @DateTime) / @Mins) * @Mins, 0) AS DateGroup

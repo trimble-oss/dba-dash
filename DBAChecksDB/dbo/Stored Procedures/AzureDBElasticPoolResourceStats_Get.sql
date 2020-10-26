@@ -1,9 +1,9 @@
-﻿CREATE PROC dbo.AzureDBElasticPoolResourceStats_Get(
+﻿CREATE PROC [dbo].[AzureDBElasticPoolResourceStats_Get](
 	@InstanceID INT,
 	@elastic_pool_name SYSNAME,
 	@FromDate DATETIME2(3),
 	@ToDate DATETIME2(3),
-	@DateGrouping VARCHAR(50)='None', 
+	@DateGroupingMin INT=NULL, 
 	@UTCOffset INT=0
 ) 
 AS
@@ -12,17 +12,13 @@ FROM dbo.AzureDBMasterInstance(@InstanceID)
 SELECT @FromDate= DATEADD(mi, -@UTCOffset, @FromDate),
 	@ToDate = DATEADD(mi, -@UTCOffset, @ToDate) 
 
-DECLARE @DateTimeCol VARCHAR(MAX) ='DATEADD(mi, @UTCOffset, RS.end_time)' 
+
 DECLARE @SQL NVARCHAR(MAX)
 DECLARE @DateGroupingSQL NVARCHAR(MAX)
-SELECT @DateGroupingSQL= CASE WHEN @DateGrouping = 'None' THEN '@DateTimeCol'
-			WHEN @DateGrouping = '1MIN' THEN 'DATEADD(mi, DATEDIFF(mi, 0, DATEADD(s, 30, @DateTimeCol)), 0)'
-			WHEN @DateGrouping ='10MIN' THEN 'CONVERT(DATETIME,LEFT(CONVERT(VARCHAR,@DateTimeCol,120),15) + ''0'',120)'
-			WHEN @DateGrouping = '60MIN' THEN 'CONVERT(DATETIME,LEFT(CONVERT(VARCHAR,@DateTimeCol,120),13) + '':00'',120)'
-			WHEN @DateGrouping = '120MIN' THEN 'DATEADD(hh,DATEPART(hh,@DateTimeCol) - DATEPART(hh,@DateTimeCol) % 2, CAST(CAST(@DateTimeCol AS DATE) AS DATETIME))'
-			WHEN @DateGrouping ='DAY' THEN 'CAST(CAST(@DateTimeCol as DATE) as DATETIME)'
-			ELSE NULL END
-SELECT @DateGroupingSQL = REPLACE(@DateGroupingSQL,'@DateTimeCol',@DateTimeCol)
+DECLARE @DateGroupingJoin NVARCHAR(MAX)
+SELECT @DateGroupingSQL= CASE WHEN @DateGroupingMin IS NULL OR @DateGroupingMin=0 THEN 'DATEADD(mi, @UTCOffset, RS.end_time)'
+			ELSE 'DG.DateGroup' END,
+		@DateGroupingJoin = CASE WHEN @DateGroupingMin IS NULL OR @DateGroupingMin=0 THEN '' ELSE 'CROSS APPLY dbo.DateGroupingMins(DATEADD(mi, @UTCOffset, RS.end_time),@DateGroupingMin) DG' END
 
 SET @SQL = N'
 SELECT ' + @DateGroupingSQL + ' as end_time,
@@ -40,6 +36,7 @@ SELECT ' + @DateGroupingSQL + ' as end_time,
 	   MAX(DTU.AvgDTUPercent) as MaxDTUPercent,
 	   MAX(DTU.AvgDTUsUsed) as MaxDTUsUsed
 FROM dbo.AzureDBElasticPoolResourceStats RS
+' + @DateGroupingJoin + '
 OUTER APPLY(SELECT 	CASE WHEN elastic_pool_dtu_limit>0 THEN (SELECT Max(v) FROM (VALUES (avg_cpu_percent), (avg_data_io_percent), (avg_log_write_percent)) AS value(v)) ELSE NULL END AS [AvgDTUPercent],
 					CASE WHEN elastic_pool_dtu_limit>0 THEN ((elastic_pool_dtu_limit)*((SELECT Max(v) FROM (VALUES (avg_cpu_percent), (avg_data_io_percent), (avg_log_write_percent)) AS value(v))/100.00)) ELSE NULL END AS [AvgDTUsUsed]
 			) AS DTU
@@ -51,4 +48,4 @@ GROUP BY ' + @DateGroupingSQL +'
 ORDER BY end_time'
 
 PRINT @SQL
-EXEC sp_executesql @sql, N'@InstanceID INT,@FromDate DATETIME2(3),@ToDate DATETIME2(3),@UTCOffset INT,@elastic_pool_name SYSNAME',@InstanceID,@FromDate,@ToDate,@UTCOffset,@elastic_pool_name
+EXEC sp_executesql @sql, N'@InstanceID INT,@FromDate DATETIME2(3),@ToDate DATETIME2(3),@UTCOffset INT,@elastic_pool_name SYSNAME,@DateGroupingMin INT',@InstanceID,@FromDate,@ToDate,@UTCOffset,@elastic_pool_name,@DateGroupingMin

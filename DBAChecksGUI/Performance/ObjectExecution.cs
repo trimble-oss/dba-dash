@@ -34,7 +34,7 @@ namespace DBAChecksGUI.Performance
         Int32 instanceID;
         DateTime chartMaxDate = DateTime.MinValue;
         string connectionString;
-        DateGroup dateGrouping;
+        Int32 dateGrouping;
         DateTime from;
         DateTime to;
         Int32 mins;
@@ -43,14 +43,14 @@ namespace DBAChecksGUI.Performance
 
         public void RefreshData()
         {
-            if (chartMaxDate != DateTime.MinValue && dateGrouping == DateGroup._1MIN)
+            if (chartMaxDate != DateTime.MinValue && dateGrouping == 1)
             {
                 this.to = DateTime.UtcNow.AddMinutes(1);
                 this.from = chartMaxDate.AddMinutes(-Common.UtcOffset).AddSeconds(1);
                 refreshData(true);
             }
         }
-        public void RefreshData(Int32 instanceID, DateTime from, DateTime to, string connectionString, Int64 objectID, Int32 databaseID, DateGroup dateGrouping = DateGroup.None)
+        public void RefreshData(Int32 instanceID, DateTime from, DateTime to, string connectionString, Int64 objectID, Int32 databaseID, Int32 dateGrouping = 1)
         {
             this.instanceID = instanceID;
             this.connectionString = connectionString;
@@ -89,7 +89,7 @@ namespace DBAChecksGUI.Performance
                 {
                     cmd.Parameters.AddWithValue("ObjectID", objectID);
                 }
-                cmd.Parameters.AddWithValue("DateAgg", dateGrouping.ToString().Replace("_",""));
+                cmd.Parameters.AddWithValue("DateGroupingMin", dateGrouping);
                 cmd.Parameters.AddWithValue("Measure", measure);
                 if (this.databaseid > 0)
                 {
@@ -128,31 +128,7 @@ namespace DBAChecksGUI.Performance
                 }
 
 
-                Int32 fromMins = 1;
-                if(dateGrouping == DateGroup.DAY)
-                {
-                    fromMins = 1440;
-                }
-                else if( dateGrouping == DateGroup.None || dateGrouping == DateGroup._1MIN)
-                {
-                    fromMins = 1;
-                }
-                else if (dateGrouping == DateGroup._10MIN)
-                {
-                    fromMins = 10;
-                }
-                else if(dateGrouping == DateGroup._60MIN)
-                {
-                    fromMins = 60;
-                }
-                else if (dateGrouping == DateGroup._120MIN)
-                {
-                    fromMins = 120;
-                }
-                else
-                {
-                    throw new NotImplementedException("dateGrouping");
-                }
+         
 
                 if (update)
                 {
@@ -186,7 +162,7 @@ namespace DBAChecksGUI.Performance
                 else
                 {
                     CartesianMapper<DateTimePoint> dayConfig = Mappers.Xy<DateTimePoint>()
-.X(dateModel => dateModel.DateTime.Ticks / TimeSpan.FromMinutes(fromMins).Ticks)
+.X(dateModel => dateModel.DateTime.Ticks / TimeSpan.FromMinutes(dateGrouping).Ticks)
 .Y(dateModel => dateModel.Value);
 
 
@@ -202,7 +178,7 @@ namespace DBAChecksGUI.Performance
                     waitChart.Series = s1;
 
                     string format = "t";
-                    if (fromMins >= 1440)
+                    if (dateGrouping >= 1440)
                     {
                         format = "yyyy-MM-dd";
                     }
@@ -212,7 +188,7 @@ namespace DBAChecksGUI.Performance
                     }
                     waitChart.AxisX.Add(new Axis
                     {
-                        LabelFormatter = value => new DateTime((long)(value * TimeSpan.FromMinutes(fromMins).Ticks)).ToString(format)
+                        LabelFormatter = value => new DateTime((long)(value * TimeSpan.FromMinutes(dateGrouping).Ticks)).ToString(format)
                     });
                    
                     waitChart.AxisY.Add(new Axis

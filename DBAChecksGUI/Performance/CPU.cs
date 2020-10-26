@@ -29,7 +29,7 @@ namespace DBAChecksGUI.Performance
         Int32 InstanceID;
         DateTime fromDate;
         DateTime toDate;
-        DateGroup DateGrouping;
+        Int32 DateGrouping;
         bool smoothLines = true;
         public bool SmoothLines
         {
@@ -56,7 +56,7 @@ namespace DBAChecksGUI.Performance
         }
 
 
-        public void RefreshData(Int32 InstanceID,DateTime fromDate, DateTime toDate, string connectionString,DateGroup dateGrouping= DateGroup.None)
+        public void RefreshData(Int32 InstanceID,DateTime fromDate, DateTime toDate, string connectionString,Int32 dateGrouping= 1)
         {
             eventTime = DateTime.MinValue;
             mins = (Int32)toDate.Subtract(fromDate).TotalMinutes;
@@ -88,7 +88,7 @@ namespace DBAChecksGUI.Performance
                 cmd.Parameters.AddWithValue("@InstanceID", InstanceID);
                 cmd.Parameters.AddWithValue("@FromDate", fromDate);
                 cmd.Parameters.AddWithValue("@ToDate", toDate);
-                cmd.Parameters.AddWithValue("@DateGrouping", DateGrouping.ToString().Replace("_",""));
+                cmd.Parameters.AddWithValue("@DateGroupingMin", DateGrouping);
                 cmd.CommandType = CommandType.StoredProcedure;
                 cmd.CommandTimeout = Properties.Settings.Default.CommandTimeout;
                 var rdr = cmd.ExecuteReader();
