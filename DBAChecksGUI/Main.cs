@@ -82,7 +82,7 @@ namespace DBAChecksGUI
                 {
                     instanceIDs = n.ChildInstanceIDs;
                 }
-                if(n.Type == SQLTreeItem.TreeType.Configuration && parent.Type == SQLTreeItem.TreeType.AzureInstance)
+                else if(n.Type == SQLTreeItem.TreeType.Configuration && parent.Type == SQLTreeItem.TreeType.AzureInstance)
                 {
                     instanceIDs = parent.ChildInstanceIDs;
                 }
