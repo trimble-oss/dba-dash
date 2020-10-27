@@ -67,7 +67,6 @@ namespace DBAChecksGUI
 
         private void loadSelectedTab()
         {
-            performance1.StopTimer();
             List<Int32> instanceIDs;         
             var n = (SQLTreeItem) tv1.SelectedNode;
             var parent = (SQLTreeItem)n.Parent;

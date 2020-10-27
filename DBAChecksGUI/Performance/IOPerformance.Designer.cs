@@ -28,11 +28,13 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(IOPerformance));
             this.chartIO = new LiveCharts.WinForms.CartesianChart();
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
             this.tsMeasures = new System.Windows.Forms.ToolStripDropDownButton();
             this.lblIOPerformance = new System.Windows.Forms.ToolStripLabel();
             this.tsDrives = new System.Windows.Forms.ToolStripDropDownButton();
+            this.tsDateGroup = new System.Windows.Forms.ToolStripDropDownButton();
             this.toolStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -51,7 +53,8 @@
             this.toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.tsMeasures,
             this.lblIOPerformance,
-            this.tsDrives});
+            this.tsDrives,
+            this.tsDateGroup});
             this.toolStrip1.Location = new System.Drawing.Point(0, 0);
             this.toolStrip1.Name = "toolStrip1";
             this.toolStrip1.Size = new System.Drawing.Size(773, 31);
@@ -82,6 +85,15 @@
             this.tsDrives.Name = "tsDrives";
             this.tsDrives.Size = new System.Drawing.Size(34, 28);
             // 
+            // tsDateGroup
+            // 
+            this.tsDateGroup.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.tsDateGroup.Image = ((System.Drawing.Image)(resources.GetObject("tsDateGroup.Image")));
+            this.tsDateGroup.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tsDateGroup.Name = "tsDateGroup";
+            this.tsDateGroup.Size = new System.Drawing.Size(56, 28);
+            this.tsDateGroup.Text = "1min";
+            // 
             // IOPerformance
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
@@ -90,6 +102,7 @@
             this.Controls.Add(this.toolStrip1);
             this.Name = "IOPerformance";
             this.Size = new System.Drawing.Size(773, 294);
+            this.Load += new System.EventHandler(this.IOPerformance_Load);
             this.toolStrip1.ResumeLayout(false);
             this.toolStrip1.PerformLayout();
             this.ResumeLayout(false);
@@ -104,5 +117,6 @@
         private System.Windows.Forms.ToolStripDropDownButton tsMeasures;
         private System.Windows.Forms.ToolStripLabel lblIOPerformance;
         private System.Windows.Forms.ToolStripDropDownButton tsDrives;
+        private System.Windows.Forms.ToolStripDropDownButton tsDateGroup;
     }
 }

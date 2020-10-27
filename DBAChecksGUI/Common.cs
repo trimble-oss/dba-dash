@@ -29,6 +29,39 @@ namespace DBAChecksGUI
                 { 720, "12hrs" },
                 { 1440, "1 Day" }
             };
+
+        public static string DateGroupString(Int32 mins)
+        {
+            return (DateGroups.Where(k => k.Key == mins).First()).Value;
+        }
+
+        public static void AddDateGroups(ToolStripDropDownButton tsRoot, EventHandler click)
+        {
+            foreach (var dg in Common.DateGroups)
+            {
+                var ts = new ToolStripMenuItem(dg.Value);
+                ts.Tag = dg.Key;
+                ts.Click += click;
+                tsRoot.DropDownItems.Add(ts);
+            }
+        }
+
+        public static Int32 DateGrouping(Int32 Mins, Int32 MaxPoints)
+        {
+            Int32 lastMins = 0;
+            foreach (var mins in Common.DateGroups.OrderBy(k => k.Key)
+                .Select(k => k.Key)
+                .ToList())
+            {
+                if (Mins / mins < MaxPoints)
+                {
+                    return mins;
+                }
+                lastMins = mins;
+            }
+            return lastMins;
+        }
+
         public static string DDL(Int64 DDLID,string connectionString)
         {
             SqlConnection cn = new SqlConnection(connectionString);

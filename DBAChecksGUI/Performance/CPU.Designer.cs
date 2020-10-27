@@ -28,12 +28,14 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(CPU));
             this.chartCPU = new LiveCharts.WinForms.CartesianChart();
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
             this.lblCPU = new System.Windows.Forms.ToolStripLabel();
             this.tsAgg = new System.Windows.Forms.ToolStripDropDownButton();
             this.AVGToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.MAXToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.tsDateGrouping = new System.Windows.Forms.ToolStripDropDownButton();
             this.toolStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -51,7 +53,8 @@
             this.toolStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
             this.toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.lblCPU,
-            this.tsAgg});
+            this.tsAgg,
+            this.tsDateGrouping});
             this.toolStrip1.Location = new System.Drawing.Point(0, 0);
             this.toolStrip1.Name = "toolStrip1";
             this.toolStrip1.Size = new System.Drawing.Size(878, 31);
@@ -96,6 +99,15 @@
             this.MAXToolStripMenuItem.Text = "MAX";
             this.MAXToolStripMenuItem.Click += new System.EventHandler(this.MAXToolStripMenuItem_Click);
             // 
+            // tsDateGrouping
+            // 
+            this.tsDateGrouping.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.tsDateGrouping.Image = ((System.Drawing.Image)(resources.GetObject("tsDateGrouping.Image")));
+            this.tsDateGrouping.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tsDateGrouping.Name = "tsDateGrouping";
+            this.tsDateGrouping.Size = new System.Drawing.Size(56, 28);
+            this.tsDateGrouping.Text = "1min";
+            // 
             // CPU
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
@@ -104,6 +116,7 @@
             this.Controls.Add(this.toolStrip1);
             this.Name = "CPU";
             this.Size = new System.Drawing.Size(878, 264);
+            this.Load += new System.EventHandler(this.CPU_Load);
             this.toolStrip1.ResumeLayout(false);
             this.toolStrip1.PerformLayout();
             this.ResumeLayout(false);
@@ -119,5 +132,6 @@
         private System.Windows.Forms.ToolStripDropDownButton tsAgg;
         private System.Windows.Forms.ToolStripMenuItem AVGToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem MAXToolStripMenuItem;
+        private System.Windows.Forms.ToolStripDropDownButton tsDateGrouping;
     }
 }

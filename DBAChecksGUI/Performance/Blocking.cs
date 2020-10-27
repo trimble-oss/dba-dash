@@ -30,7 +30,6 @@ namespace DBAChecksGUI.Performance
         DateTime fromDate;
         DateTime toDate;
         bool smoothLines = true;
-        DateTime snapshotTime;
         double maxBlockedTime = 0;
         Int32 databaseID = 0;
 

@@ -56,15 +56,19 @@ namespace DBAChecksGUI.Performance
         }
 
 
-        public void RefreshData(Int32 InstanceID,DateTime fromDate, DateTime toDate, string connectionString,Int32 dateGrouping= 1)
+        public void RefreshData(Int32 InstanceID,DateTime fromDate, DateTime toDate, string connectionString)
         {
             eventTime = DateTime.MinValue;
             mins = (Int32)toDate.Subtract(fromDate).TotalMinutes;
             this.InstanceID = InstanceID;
+            if(this.fromDate!=fromDate || this.toDate != toDate)
+            {
+                DateGrouping = Common.DateGrouping(mins, 200);
+                tsDateGrouping.Text = Common.DateGroupString(DateGrouping);
+            }
             this.fromDate = fromDate;
             this.toDate = toDate;
             this.connectionString = connectionString;
-            this.DateGrouping = dateGrouping;
             refreshData(false);
         }
 
@@ -205,6 +209,21 @@ namespace DBAChecksGUI.Performance
         {
             AVGToolStripMenuItem.Checked = (!MAXToolStripMenuItem.Checked);
             updateVisibility();
+        }
+
+        private void CPU_Load(object sender, EventArgs e)
+        {
+            Common.AddDateGroups(tsDateGrouping,TsDateGrouping_Click);
+     
+        }
+
+        private void TsDateGrouping_Click(object sender, EventArgs e)
+        {
+            var ts = (ToolStripMenuItem)sender;
+            DateGrouping = Convert.ToInt32(ts.Tag);
+            tsDateGrouping.Text = Common.DateGroupString(DateGrouping);
+            refreshData();
+
         }
     }
 }

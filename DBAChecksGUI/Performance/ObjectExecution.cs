@@ -34,12 +34,14 @@ namespace DBAChecksGUI.Performance
         Int32 instanceID;
         DateTime chartMaxDate = DateTime.MinValue;
         string connectionString;
-        Int32 dateGrouping;
+      
         DateTime from;
         DateTime to;
         Int32 mins;
         private Int64 objectID;
         Int32 databaseid=0;
+        private Int32 dateGrouping;
+
 
         public void RefreshData()
         {
@@ -50,15 +52,20 @@ namespace DBAChecksGUI.Performance
                 refreshData(true);
             }
         }
-        public void RefreshData(Int32 instanceID, DateTime from, DateTime to, string connectionString, Int64 objectID, Int32 databaseID, Int32 dateGrouping = 1)
+        public void RefreshData(Int32 instanceID, DateTime from, DateTime to, string connectionString, Int64 objectID, Int32 databaseID)
         {
             this.instanceID = instanceID;
             this.connectionString = connectionString;
-            this.from = from;
-            this.to = to;
-            this.objectID = objectID;
             mins = (Int32)to.Subtract(from).TotalMinutes;
-            this.dateGrouping = dateGrouping;
+            if (this.from!=from | this.to != to)
+            {
+                dateGrouping = Common.DateGrouping(mins, 61);
+                tsDateGroup.Text = Common.DateGroupString(dateGrouping);
+                this.from = from;
+                this.to = to;
+            }
+            this.objectID = objectID;
+    
             this.databaseid = databaseID;
             refreshData(false);
         }
@@ -241,7 +248,7 @@ namespace DBAChecksGUI.Performance
 
         private void ObjectExecution_Load(object sender, EventArgs e)
         {
-
+            Common.AddDateGroups(tsDateGroup, TsDateGrouping_Click);
             foreach(var m in measures)
             {
                 ToolStripMenuItem itm = new ToolStripMenuItem(m.Value.DisplayName);
@@ -256,6 +263,14 @@ namespace DBAChecksGUI.Performance
             }
         }
 
+        private void TsDateGrouping_Click(object sender, EventArgs e)
+        {
+            var ts = (ToolStripMenuItem)sender;
+            dateGrouping = Convert.ToInt32(ts.Tag);
+            tsDateGroup.Text = Common.DateGroupString(dateGrouping);
+            refreshData(false);
+        }
+
         private void Itm_Click(object sender, EventArgs e)
         {
             var tsItm = ((ToolStripMenuItem)sender);
@@ -268,7 +283,7 @@ namespace DBAChecksGUI.Performance
                 }
                 tsMeasures.Text = tsItm.Text;
             }
-            RefreshData(instanceID, to.AddMinutes(-mins), to, connectionString,objectID, databaseid, dateGrouping);
+            RefreshData(instanceID, to.AddMinutes(-mins), to, connectionString,objectID, databaseid);
         }
     }
 }

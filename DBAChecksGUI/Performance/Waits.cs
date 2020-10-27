@@ -13,6 +13,7 @@ using LiveCharts.Wpf;
 using LiveCharts.Defaults;
 using LiveCharts;
 using static DBAChecksGUI.Performance.Performance;
+using System.Xml.Schema;
 
 namespace DBAChecksGUI.Performance
 {
@@ -33,7 +34,8 @@ namespace DBAChecksGUI.Performance
         Int32 instanceID;
         DateTime lastWait = DateTime.MinValue;
         string connectionString;
-        Int32 dateGrouping;
+        private Int32 dateGrouping;
+
         DateTime from;
         DateTime to;
         Int32 mins;
@@ -47,14 +49,18 @@ namespace DBAChecksGUI.Performance
                 refreshData(true);
             }
         }
-        public void RefreshData(Int32 instanceID, DateTime from, DateTime to, string connectionString, Int32 dateGrouping = 1)
+        public void RefreshData(Int32 instanceID, DateTime from, DateTime to, string connectionString)
         {
             this.instanceID = instanceID;
             this.connectionString = connectionString;
+            mins = (Int32)to.Subtract(from).TotalMinutes;
+            if(this.from!=from || this.to!=to){
+                dateGrouping = Common.DateGrouping(mins, 61);
+                tsDateGrouping.Text = Common.DateGroupString(dateGrouping);
+            }
             this.from = from;
             this.to = to;
-            mins = (Int32)to.Subtract(from).TotalMinutes;
-            this.dateGrouping = dateGrouping;
+        
             refreshData(false);
         }
 
@@ -183,6 +189,19 @@ namespace DBAChecksGUI.Performance
                 }
 
             }
+        }
+
+        private void Waits_Load(object sender, EventArgs e)
+        {
+            Common.AddDateGroups(tsDateGrouping, TsDateGrouping_Click);
+        }
+
+        private void TsDateGrouping_Click(object sender, EventArgs e)
+        {
+            var ts = (ToolStripMenuItem)sender;
+            dateGrouping = Convert.ToInt32(ts.Tag);
+            tsDateGrouping.Text = Common.DateGroupString(dateGrouping);
+            refreshData(false);
         }
     }
 }
