@@ -121,13 +121,33 @@ namespace DBAChecksGUI.Performance
                 waits1.RefreshData(InstanceID, from, to, ConnectionString);
                 blocking1.RefreshData(InstanceID, from, to, ConnectionString,DatabaseID);
             }
+            this.SuspendLayout();
+            objectExecution1.SuspendLayout();
+            ioPerformance1.SuspendLayout();
+            cpu1.SuspendLayout();
+            blocking1.SuspendLayout();
+            waits1.SuspendLayout();
+
             ioPerformance1.Visible = ObjectID == 0;
             cpu1.Visible = ObjectID == 0;
             waits1.Visible = ObjectID == 0;
             blocking1.Visible = ObjectID == 0;
+          
+            this.tableLayoutPanel1.RowStyles[0].Height = ObjectID == 0 ? 20 : 0;
+            this.tableLayoutPanel1.RowStyles[1].Height = ObjectID == 0 ? 20 : 0;
+            this.tableLayoutPanel1.RowStyles[2].Height = ObjectID == 0 ? 20 : 0;
+            this.tableLayoutPanel1.RowStyles[3].Height = ObjectID == 0 ? 20 : 0;
+            this.tableLayoutPanel1.RowStyles[4].Height = ObjectID == 0 ? 20 : 100;
+    
+            
         
             objectExecution1.RefreshData(InstanceID, from, to, ConnectionString, ObjectID, DatabaseID);
-          
+            this.ResumeLayout();
+            objectExecution1.ResumeLayout();
+            ioPerformance1.ResumeLayout();
+            cpu1.ResumeLayout();
+            blocking1.ResumeLayout();
+            waits1.ResumeLayout();
         }
 
 
