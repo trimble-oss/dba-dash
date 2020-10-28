@@ -29,6 +29,8 @@ namespace DBAChecksGUI.Performance
             this.FromDate = from;
             this.ToDate = to;
             this.Mins = -1;
+            var actualMins = Convert.ToInt32(to.Subtract(from).TotalMinutes);
+            DateGrouping = Common.DateGrouping(actualMins, 400);
             checkTime();
         }
 
@@ -37,6 +39,7 @@ namespace DBAChecksGUI.Performance
             this.Mins = mins;
             FromDate = DateTime.MinValue;
             ToDate = DateTime.MinValue;
+            DateGrouping = Common.DateGrouping(Mins, 400);
             checkTime();
         }
 
@@ -118,27 +121,24 @@ namespace DBAChecksGUI.Performance
             }
         }
 
+
+
+        Int32 _dateGrouping=0;
         public Int32 DateGrouping
         {
             get
             {
-                Int32 lastMins = 0;
-                var actualMins = to.Subtract(from).TotalMinutes;
-                foreach (var mins in Common.DateGroups.OrderBy(k => k.Key)
-                    .Select(k => k.Key)
-                    .ToList())
-                {
-                    if (actualMins / mins < 200)
-                    {
-                        return mins;
-                    }
-                    lastMins = mins;
-                }
-                return lastMins;
+                return _dateGrouping;
             }
-          
+            set
+            {
+                _dateGrouping = value;
+                tsDateGrouping.Text = Common.DateGroupString(_dateGrouping);
+            }
+
         }
 
+  
 
         Dictionary<string, columnMetaData> columns;
 
@@ -373,7 +373,15 @@ namespace DBAChecksGUI.Performance
                 columns = PoolColumns;
             }
             addMeasures();
+            Common.AddDateGroups(tsDateGrouping,TsDateGrouping_Click);
            
+        }
+
+        private void TsDateGrouping_Click(object sender, EventArgs e)
+        {
+            var ts = (ToolStripMenuItem)sender;
+            DateGrouping = Convert.ToInt32(ts.Tag);
+            RefreshData();
         }
 
         private void smoothLinesToolStripMenuItem_Click(object sender, EventArgs e)

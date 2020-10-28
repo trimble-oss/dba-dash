@@ -59,7 +59,11 @@ namespace DBAChecksGUI.Performance
             mins = (Int32)to.Subtract(from).TotalMinutes;
             if (this.from!=from | this.to != to)
             {
-                dateGrouping = Common.DateGrouping(mins, 61);
+                dateGrouping = Common.DateGrouping(mins, 65);
+                if (dateGrouping < 1)
+                {
+                    dateGrouping = 1;
+                }
                 tsDateGroup.Text = Common.DateGroupString(dateGrouping);
                 this.from = from;
                 this.to = to;

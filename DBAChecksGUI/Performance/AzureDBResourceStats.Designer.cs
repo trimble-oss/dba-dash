@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(AzureDBResourceStats));
             this.chart1 = new LiveCharts.WinForms.CartesianChart();
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
             this.tsRefresh = new System.Windows.Forms.ToolStripButton();
@@ -48,6 +49,7 @@
             this.smoothLinesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.pointsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.tsMeasures = new System.Windows.Forms.ToolStripDropDownButton();
+            this.tsDateGrouping = new System.Windows.Forms.ToolStripDropDownButton();
             this.toolStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -68,7 +70,8 @@
             this.tsRefresh,
             this.tsTime,
             this.tsOptions,
-            this.tsMeasures});
+            this.tsMeasures,
+            this.tsDateGrouping});
             this.toolStrip1.Location = new System.Drawing.Point(0, 0);
             this.toolStrip1.Name = "toolStrip1";
             this.toolStrip1.Size = new System.Drawing.Size(882, 27);
@@ -223,7 +226,7 @@
             // 
             this.smoothLinesToolStripMenuItem.CheckOnClick = true;
             this.smoothLinesToolStripMenuItem.Name = "smoothLinesToolStripMenuItem";
-            this.smoothLinesToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            this.smoothLinesToolStripMenuItem.Size = new System.Drawing.Size(178, 26);
             this.smoothLinesToolStripMenuItem.Text = "Smooth lines";
             this.smoothLinesToolStripMenuItem.Click += new System.EventHandler(this.smoothLinesToolStripMenuItem_Click);
             // 
@@ -231,7 +234,7 @@
             // 
             this.pointsToolStripMenuItem.CheckOnClick = true;
             this.pointsToolStripMenuItem.Name = "pointsToolStripMenuItem";
-            this.pointsToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            this.pointsToolStripMenuItem.Size = new System.Drawing.Size(178, 26);
             this.pointsToolStripMenuItem.Text = "Points";
             this.pointsToolStripMenuItem.Click += new System.EventHandler(this.pointsToolStripMenuItem_Click);
             // 
@@ -243,6 +246,16 @@
             this.tsMeasures.Name = "tsMeasures";
             this.tsMeasures.Size = new System.Drawing.Size(34, 24);
             this.tsMeasures.Text = "Columns";
+            // 
+            // tsDateGrouping
+            // 
+            this.tsDateGrouping.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.tsDateGrouping.Image = ((System.Drawing.Image)(resources.GetObject("tsDateGrouping.Image")));
+            this.tsDateGrouping.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tsDateGrouping.Name = "tsDateGrouping";
+            this.tsDateGrouping.Size = new System.Drawing.Size(59, 24);
+            this.tsDateGrouping.Text = "None";
+            this.tsDateGrouping.ToolTipText = "Date Grouping";
             // 
             // AzureDBResourceStats
             // 
@@ -282,5 +295,6 @@
         private System.Windows.Forms.ToolStripDropDownButton tsOptions;
         private System.Windows.Forms.ToolStripMenuItem smoothLinesToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem pointsToolStripMenuItem;
+        private System.Windows.Forms.ToolStripDropDownButton tsDateGrouping;
     }
 }

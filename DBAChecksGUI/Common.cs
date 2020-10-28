@@ -16,7 +16,9 @@ namespace DBAChecksGUI
     {
         public static string ConnectionString;
 
-        public static Dictionary<Int32, string> DateGroups = new Dictionary<Int32, string>() { { 1, "1min" },
+        public static Dictionary<Int32, string> DateGroups = new Dictionary<Int32, string>() {
+                {0,"None" },
+                { 1, "1min" },
                 { 2, "2min" },
                 { 5, "5min" },
                 { 10, "10min" },
@@ -49,11 +51,13 @@ namespace DBAChecksGUI
         public static Int32 DateGrouping(Int32 Mins, Int32 MaxPoints)
         {
             Int32 lastMins = 0;
+         
             foreach (var mins in Common.DateGroups.OrderBy(k => k.Key)
                 .Select(k => k.Key)
                 .ToList())
             {
-                if (Mins / mins < MaxPoints)
+                double div = mins == 0 ? 0.2 : mins;
+                if (Mins / div < MaxPoints)
                 {
                     return mins;
                 }
