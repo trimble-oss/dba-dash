@@ -241,6 +241,7 @@ namespace DBAChecksGUI.Performance
                 {"AvgCPU","Avg CPU", "#,##0.000  sec"},
                 {"ExecutionCount", "Execution Count","N0"},
                 {"ExecutionsPerMin", "Executions Per Min","#,##0.000"},
+                {"MaxExecutionsPerMin", "Max Executions Per Min","#,##0.000"},
                 { "TotalLogicalReads","Total Logical Reads","N0" },
                 {"AvgLogicalReads","Avg Logical Reads","N0" },
                 {"TotalPhysicalReads","TotalPhysicalReads" ,"N0"},

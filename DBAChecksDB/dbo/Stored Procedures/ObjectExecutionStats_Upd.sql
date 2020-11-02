@@ -174,7 +174,8 @@ INSERT INTO dbo.ObjectExecutionStats_60MIN
     total_logical_writes,
     total_physical_reads,
     execution_count,
-    IsCompile
+    IsCompile,
+	MaxExecutionsPerMin
 )
 SELECT S.InstanceID,
 	S.ObjectID,
@@ -186,7 +187,8 @@ SELECT S.InstanceID,
 	SUM(S.total_logical_writes) total_logical_writes,
 	SUM(S.total_physical_reads) total_physical_reads,
 	SUM(S.execution_count) execution_count,
-	CAST(MAX(CAST(S.IsCompile AS INT)) AS BIT) IsCompile
+	CAST(MAX(CAST(S.IsCompile AS INT)) AS BIT) IsCompile,
+	MAX(MaxExecutionsPerMin) AS MaxExecutionsPerMin
 FROM dbo.ObjectExecutionStats S
 WHERE S.InstanceID = @InstanceID 
 AND S.SnapshotDate >=@From60

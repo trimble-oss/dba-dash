@@ -20,7 +20,7 @@ IF @ToDateUTC IS NULL
 
 DECLARE @DateAggString NVARCHAR(MAX)
 DECLARE @MeasureString NVARCHAR(MAX) 
-SELECT @MeasureString = CASE WHEN @Measure IN('TotalCPU','AvgCPU','TotalDuration','AvgDuration','ExecutionCount','ExecutionsPerMin','AvgLogicalReads','AvgPhysicalReads','AvgWrites','TotalWrites','TotalLogicalReads','TotalPhysicalReads') THEN @Measure ELSE NULL END
+SELECT @MeasureString = CASE WHEN @Measure IN('TotalCPU','AvgCPU','TotalDuration','AvgDuration','ExecutionCount','ExecutionsPerMin','AvgLogicalReads','AvgPhysicalReads','AvgWrites','TotalWrites','TotalLogicalReads','TotalPhysicalReads','MaxExecutionsPerMin') THEN @Measure ELSE NULL END
 SELECT @DateAggString = CASE WHEN @DateGroupingMin IS NULL OR @DateGroupingMin =0 THEN 'DATEADD(mi, @UTCOffset, PS.SnapshotDate)'
 		 ELSE 'DG.DateGroup' END
 DECLARE @SQL NVARCHAR(MAX)
@@ -42,7 +42,8 @@ SELECT ' + @DateAggString + N' as SnapshotDate,
 	   SUM(PS.total_physical_reads) as TotalPhysicalReads,
 	   SUM(PS.total_physical_reads)/NULLIF(SUM(PS.execution_count),0) as AvgPhysicalReads,
 	   SUM(PS.total_logical_writes) as TotalWrites,
-	   SUM(PS.total_logical_writes)/NULLIF(SUM(PS.execution_count),0) as AvgWrites
+	   SUM(PS.total_logical_writes)/NULLIF(SUM(PS.execution_count),0) as AvgWrites,
+	   MAX(MaxExecutionsPerMin) as MaxExecutionsPerMin
 FROM dbo.ObjectExecutionStats' + CASE WHEN @DateGroupingMin>=60 THEN N'_60MIN' ELSE N'' END + N' PS
 	' + CASE WHEN @DateGroupingMin IS NULL OR @DateGroupingMin =0 THEN '' ELSE 'CROSS APPLY dbo.DateGroupingMins(DATEADD(mi, @UTCOffset, PS.SnapshotDate),@DateGroupingMin) DG' END + '
     JOIN dbo.DBObjects O ON PS.ObjectID = O.ObjectID
