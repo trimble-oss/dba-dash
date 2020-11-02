@@ -1,5 +1,4 @@
-﻿
-CREATE PROC [dbo].[Summary_Get](@InstanceIDs VARCHAR(MAX)=NULL)
+﻿CREATE PROC [dbo].[Summary_Get](@InstanceIDs VARCHAR(MAX)=NULL)
 AS
 DECLARE @Instances TABLE(
 	InstanceID INT PRIMARY KEY
@@ -171,7 +170,8 @@ SELECT I.InstanceID,
 		WHEN DATEDIFF(hh,a.LastCritical,GETUTCDATE())<168 THEN 1
 		WHEN DATEDIFF(hh,a.LastAlert,GETUTCDATE())<72 THEN 2
 		ELSE 4 END AS AlertStatus,
-	AlertCD.SnapshotDate AS AlertSnapshotDate
+	AlertCD.SnapshotDate AS AlertSnapshotDate,
+	I.IsAgentRunning
 FROM dbo.Instances I 
 LEFT JOIN LS ON I.InstanceID = LS.InstanceID
 LEFT JOIN B ON I.InstanceID = B.InstanceID
