@@ -1,3 +1,4 @@
+
 # DBAChecks
 ## Project Summary
 DBAChecks is a tool for SQL Server DBAs to assist with daily checks, performance monitoring and change tracking.
@@ -16,7 +17,7 @@ DBAChecks is a tool for SQL Server DBAs to assist with daily checks, performance
  - SQL Server 2016 SP1 or later required for DBAChecks repository database.
  - SQL 2005*-SQL 2019 & Azure DB supported for monitored instances.
  - Windows machine to run agent.  Agent can monitor multiple SQL instances.
- - 
+ 
 ## Installation
  - Extract the application binaries on the server where you want to run the agent. 
 	 *Ideally it's best NOT to run the agent on your production SQL Server to limit the impact of monitoring your SQL instance as 			much as possible*
@@ -41,3 +42,19 @@ DBAChecks is a tool for SQL Server DBAs to assist with daily checks, performance
 
 **Note:**
 More advanced service configuration is possible.  e.g. A remote agent can be configured to write to a S3 bucket and another agent that connects to your repository database can use the S3 bucket as a source instead of a SQL connection string.  
+
+## Upgrade Process
+
+ - Stop the DBAChecks agent.  Use `net stop dbachecksservice` from the commandline or use the DBAChecksServiceConfig.exe tool (Service Tab) to stop the service.
+ - Close any running instances of the GUI or DBAChecks Service Config tool.
+ - Replace all the app binaries with the ones from the new release (copy/paste).  All the configuration information for the agent is stored in the ServiceConfig.json file so this file must be kept. 
+ - Run DBAChecksServiceConfig.exe.  On the destination tab you should be notified if there are database schema changes that need to be deployed.  If necessary click Deploy/Update Database. Either click the "Deploy" button to apply the schema changes or click "Generate Script" if you want to review the changes/deploy manually. Note: The script must be run in sqlcmd mode.
+ **Ensure you have a backup prior to deploying changes.**
+ - Click the service tab and click "Start" to start the service.
+
+*Note: If you are running multiple agents you should stop all the agents then run the upgrade process for each agent.  The schema changes for the DB would get deployed for the first agent only.*  
+
+## Monitoring "Remote"  Instances
+It's possible to monitor instances where there isn't direct connectivity between the instance and your monitoring server. The destination you set in the DBAChecks Service config tool can be a folder path or point to a AWS S3 bucket.  You setup an agent in the remote environment to push data to the S3 Bucket location.  You then use that same location as a source connection on an agent where the destination is pointing to your DBAChecksDB central repository database.  The "AWS Credentials" tab can be used to specify credentials if required.  
+If you chose to use a local folder instead of an S3 bucket then you would need to find a way to move files from that folder to a folder that can be accessed by the other agent connecting to your DBAChecks database.  An S3 bucket is the easiest option but you could use a local folder and sync via a different cloud storage provider.
+
