@@ -296,6 +296,11 @@ namespace DBAChecksGUI
                 azureServiceObjectivesHistory1.InstanceIDs = ((SQLTreeItem)n.Parent).Type == SQLTreeItem.TreeType.DBAChecksRoot ? AzureInstanceIDs : instanceIDs;
                 azureServiceObjectivesHistory1.RefreshData();
             }
+            if (tabs.SelectedTab == tabDBConfiguration)
+            {
+                dbConfiguration1.InstanceIDs = instanceIDs;
+                dbConfiguration1.RefreshData();
+            }
         }
 
         private void loadDBAChecksErrorLog(Int32 InstanceID)
@@ -556,6 +561,7 @@ ORDER BY SchemaName,ObjectName
                 {
                     allowedTabs.Add(tabServiceObjectives);
                 }
+                allowedTabs.Add(tabDBConfiguration);
             }
             if (n.ObjectID > 0)
             {

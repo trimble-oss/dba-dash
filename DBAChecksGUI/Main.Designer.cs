@@ -105,6 +105,7 @@
             this.tabAzureSummary = new System.Windows.Forms.TabPage();
             this.tabAzureDB = new System.Windows.Forms.TabPage();
             this.tabServiceObjectives = new System.Windows.Forms.TabPage();
+            this.tabDBConfiguration = new System.Windows.Forms.TabPage();
             this.dataGridViewTextBoxColumn1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dataGridViewTextBoxColumn2 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dataGridViewTextBoxColumn3 = new System.Windows.Forms.DataGridViewTextBoxColumn();
@@ -173,6 +174,7 @@
             this.azureSummary1 = new DBAChecksGUI.Performance.AzureSummary();
             this.azureDBResourceStats1 = new DBAChecksGUI.Performance.AzureDBResourceStats();
             this.azureServiceObjectivesHistory1 = new DBAChecksGUI.Changes.AzureServiceObjectivesHistory();
+            this.dbConfiguration1 = new DBAChecksGUI.Changes.DBConfiguration();
             this.menuStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitMain)).BeginInit();
             this.splitMain.Panel1.SuspendLayout();
@@ -221,6 +223,7 @@
             this.tabAzureSummary.SuspendLayout();
             this.tabAzureDB.SuspendLayout();
             this.tabServiceObjectives.SuspendLayout();
+            this.tabDBConfiguration.SuspendLayout();
             this.SuspendLayout();
             // 
             // TreeViewImageList
@@ -247,20 +250,20 @@
             this.optionsToolStripMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
-            this.menuStrip1.Size = new System.Drawing.Size(1983, 28);
+            this.menuStrip1.Size = new System.Drawing.Size(1983, 30);
             this.menuStrip1.TabIndex = 1;
             this.menuStrip1.Text = "menuStrip1";
             // 
             // mnuTags
             // 
             this.mnuTags.Name = "mnuTags";
-            this.mnuTags.Size = new System.Drawing.Size(52, 24);
+            this.mnuTags.Size = new System.Drawing.Size(52, 26);
             this.mnuTags.Text = "Tags";
             // 
             // dBDiffToolStripMenuItem
             // 
             this.dBDiffToolStripMenuItem.Name = "dBDiffToolStripMenuItem";
-            this.dBDiffToolStripMenuItem.Size = new System.Drawing.Size(68, 24);
+            this.dBDiffToolStripMenuItem.Size = new System.Drawing.Size(68, 26);
             this.dBDiffToolStripMenuItem.Text = "DBDiff";
             this.dBDiffToolStripMenuItem.Click += new System.EventHandler(this.dBDiffToolStripMenuItem_Click);
             // 
@@ -269,7 +272,7 @@
             this.optionsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.dataRetentionToolStripMenuItem});
             this.optionsToolStripMenuItem.Name = "optionsToolStripMenuItem";
-            this.optionsToolStripMenuItem.Size = new System.Drawing.Size(75, 24);
+            this.optionsToolStripMenuItem.Size = new System.Drawing.Size(75, 26);
             this.optionsToolStripMenuItem.Text = "Options";
             // 
             // dataRetentionToolStripMenuItem
@@ -283,7 +286,7 @@
             // 
             this.splitMain.AccessibleRole = System.Windows.Forms.AccessibleRole.ScrollBar;
             this.splitMain.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.splitMain.Location = new System.Drawing.Point(0, 28);
+            this.splitMain.Location = new System.Drawing.Point(0, 30);
             this.splitMain.Name = "splitMain";
             // 
             // splitMain.Panel1
@@ -295,7 +298,7 @@
             // 
             this.splitMain.Panel2.Controls.Add(this.tabs);
             this.splitMain.Panel2MinSize = 100;
-            this.splitMain.Size = new System.Drawing.Size(1983, 1281);
+            this.splitMain.Size = new System.Drawing.Size(1983, 1279);
             this.splitMain.SplitterDistance = 496;
             this.splitMain.TabIndex = 3;
             // 
@@ -307,7 +310,7 @@
             this.tv1.Location = new System.Drawing.Point(0, 0);
             this.tv1.Name = "tv1";
             this.tv1.SelectedImageIndex = 0;
-            this.tv1.Size = new System.Drawing.Size(496, 1281);
+            this.tv1.Size = new System.Drawing.Size(496, 1279);
             this.tv1.TabIndex = 0;
             this.tv1.BeforeExpand += new System.Windows.Forms.TreeViewCancelEventHandler(this.tv1_BeforeExpand);
             this.tv1.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.tv1_AfterSelect);
@@ -340,11 +343,12 @@
             this.tabs.Controls.Add(this.tabAzureSummary);
             this.tabs.Controls.Add(this.tabAzureDB);
             this.tabs.Controls.Add(this.tabServiceObjectives);
+            this.tabs.Controls.Add(this.tabDBConfiguration);
             this.tabs.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tabs.Location = new System.Drawing.Point(0, 0);
             this.tabs.Name = "tabs";
             this.tabs.SelectedIndex = 0;
-            this.tabs.Size = new System.Drawing.Size(1483, 1281);
+            this.tabs.Size = new System.Drawing.Size(1483, 1279);
             this.tabs.TabIndex = 0;
             this.tabs.Tag = "";
             this.tabs.SelectedIndexChanged += new System.EventHandler(this.tabs_SelectedIndexChanged);
@@ -355,7 +359,7 @@
             this.tabSnapshotsSummary.Location = new System.Drawing.Point(4, 25);
             this.tabSnapshotsSummary.Name = "tabSnapshotsSummary";
             this.tabSnapshotsSummary.Padding = new System.Windows.Forms.Padding(3);
-            this.tabSnapshotsSummary.Size = new System.Drawing.Size(1475, 1252);
+            this.tabSnapshotsSummary.Size = new System.Drawing.Size(1475, 1250);
             this.tabSnapshotsSummary.TabIndex = 1;
             this.tabSnapshotsSummary.Text = "Snapshot Summary";
             this.tabSnapshotsSummary.UseVisualStyleBackColor = true;
@@ -375,8 +379,8 @@
             // splitSnapshotSummary.Panel2
             // 
             this.splitSnapshotSummary.Panel2.Controls.Add(this.gvSnapshotsDetail);
-            this.splitSnapshotSummary.Size = new System.Drawing.Size(1469, 1246);
-            this.splitSnapshotSummary.SplitterDistance = 355;
+            this.splitSnapshotSummary.Size = new System.Drawing.Size(1469, 1244);
+            this.splitSnapshotSummary.SplitterDistance = 354;
             this.splitSnapshotSummary.TabIndex = 0;
             // 
             // toolStrip2
@@ -389,7 +393,7 @@
             this.tsSummaryNext,
             this.toolStripLabel3,
             this.tsSummaryPageSize});
-            this.toolStrip2.Location = new System.Drawing.Point(0, 327);
+            this.toolStrip2.Location = new System.Drawing.Point(0, 326);
             this.toolStrip2.Name = "toolStrip2";
             this.toolStrip2.Size = new System.Drawing.Size(1469, 28);
             this.toolStrip2.TabIndex = 2;
@@ -479,7 +483,7 @@
             this.gvSnapshots.RowHeadersWidth = 51;
             this.gvSnapshots.RowTemplate.Height = 24;
             this.gvSnapshots.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-            this.gvSnapshots.Size = new System.Drawing.Size(1469, 355);
+            this.gvSnapshots.Size = new System.Drawing.Size(1469, 354);
             this.gvSnapshots.TabIndex = 0;
             this.gvSnapshots.SelectionChanged += new System.EventHandler(this.gvSnapshots_SelectionChanged);
             // 
@@ -518,7 +522,7 @@
             this.gvSnapshotsDetail.RowHeadersWidth = 51;
             this.gvSnapshotsDetail.RowTemplate.Height = 24;
             this.gvSnapshotsDetail.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.CellSelect;
-            this.gvSnapshotsDetail.Size = new System.Drawing.Size(1469, 887);
+            this.gvSnapshotsDetail.Size = new System.Drawing.Size(1469, 886);
             this.gvSnapshotsDetail.TabIndex = 0;
             this.gvSnapshotsDetail.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.gvSnapshotsDetail_CellContentClick);
             // 
@@ -1107,6 +1111,17 @@
             this.tabServiceObjectives.TabIndex = 25;
             this.tabServiceObjectives.Text = "Azure Service Objectives";
             this.tabServiceObjectives.UseVisualStyleBackColor = true;
+            // 
+            // tabDBConfiguration
+            // 
+            this.tabDBConfiguration.Controls.Add(this.dbConfiguration1);
+            this.tabDBConfiguration.Location = new System.Drawing.Point(4, 25);
+            this.tabDBConfiguration.Name = "tabDBConfiguration";
+            this.tabDBConfiguration.Padding = new System.Windows.Forms.Padding(3);
+            this.tabDBConfiguration.Size = new System.Drawing.Size(1475, 1250);
+            this.tabDBConfiguration.TabIndex = 26;
+            this.tabDBConfiguration.Text = "DB Configuration";
+            this.tabDBConfiguration.UseVisualStyleBackColor = true;
             // 
             // dataGridViewTextBoxColumn1
             // 
@@ -1753,6 +1768,7 @@
             // 
             // azureDBResourceStats1
             // 
+            this.azureDBResourceStats1.DateGrouping = 0;
             this.azureDBResourceStats1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.azureDBResourceStats1.Location = new System.Drawing.Point(3, 3);
             this.azureDBResourceStats1.Name = "azureDBResourceStats1";
@@ -1766,6 +1782,14 @@
             this.azureServiceObjectivesHistory1.Name = "azureServiceObjectivesHistory1";
             this.azureServiceObjectivesHistory1.Size = new System.Drawing.Size(1469, 1246);
             this.azureServiceObjectivesHistory1.TabIndex = 0;
+            // 
+            // dbConfiguration1
+            // 
+            this.dbConfiguration1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.dbConfiguration1.Location = new System.Drawing.Point(3, 3);
+            this.dbConfiguration1.Name = "dbConfiguration1";
+            this.dbConfiguration1.Size = new System.Drawing.Size(1469, 1244);
+            this.dbConfiguration1.TabIndex = 0;
             // 
             // Main
             // 
@@ -1838,6 +1862,7 @@
             this.tabAzureSummary.ResumeLayout(false);
             this.tabAzureDB.ResumeLayout(false);
             this.tabServiceObjectives.ResumeLayout(false);
+            this.tabDBConfiguration.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -1980,5 +2005,7 @@
         private Performance.AzureDBResourceStats azureDBResourceStats1;
         private System.Windows.Forms.TabPage tabServiceObjectives;
         private Changes.AzureServiceObjectivesHistory azureServiceObjectivesHistory1;
+        private System.Windows.Forms.TabPage tabDBConfiguration;
+        private Changes.DBConfiguration dbConfiguration1;
     }
 }
