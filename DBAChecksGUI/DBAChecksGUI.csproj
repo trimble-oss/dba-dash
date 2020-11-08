@@ -154,6 +154,12 @@
     <Compile Include="Changes\DBConfiguration.Designer.cs">
       <DependentUpon>DBConfiguration.cs</DependentUpon>
     </Compile>
+    <Compile Include="Changes\DBOptions.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Changes\DBOptions.Designer.cs">
+      <DependentUpon>DBOptions.cs</DependentUpon>
+    </Compile>
     <Compile Include="Changes\Drivers.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -447,6 +453,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Changes\DBConfiguration.resx">
       <DependentUpon>DBConfiguration.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Changes\DBOptions.resx">
+      <DependentUpon>DBOptions.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Changes\Drivers.resx">
       <DependentUpon>Drivers.cs</DependentUpon>

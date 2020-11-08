@@ -106,6 +106,7 @@
             this.tabAzureDB = new System.Windows.Forms.TabPage();
             this.tabServiceObjectives = new System.Windows.Forms.TabPage();
             this.tabDBConfiguration = new System.Windows.Forms.TabPage();
+            this.tabDBOptions = new System.Windows.Forms.TabPage();
             this.dataGridViewTextBoxColumn1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dataGridViewTextBoxColumn2 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dataGridViewTextBoxColumn3 = new System.Windows.Forms.DataGridViewTextBoxColumn();
@@ -175,6 +176,7 @@
             this.azureDBResourceStats1 = new DBAChecksGUI.Performance.AzureDBResourceStats();
             this.azureServiceObjectivesHistory1 = new DBAChecksGUI.Changes.AzureServiceObjectivesHistory();
             this.dbConfiguration1 = new DBAChecksGUI.Changes.DBConfiguration();
+            this.dbOptions1 = new DBAChecksGUI.Changes.DBOptions();
             this.menuStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitMain)).BeginInit();
             this.splitMain.Panel1.SuspendLayout();
@@ -224,6 +226,7 @@
             this.tabAzureDB.SuspendLayout();
             this.tabServiceObjectives.SuspendLayout();
             this.tabDBConfiguration.SuspendLayout();
+            this.tabDBOptions.SuspendLayout();
             this.SuspendLayout();
             // 
             // TreeViewImageList
@@ -344,6 +347,7 @@
             this.tabs.Controls.Add(this.tabAzureDB);
             this.tabs.Controls.Add(this.tabServiceObjectives);
             this.tabs.Controls.Add(this.tabDBConfiguration);
+            this.tabs.Controls.Add(this.tabDBOptions);
             this.tabs.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tabs.Location = new System.Drawing.Point(0, 0);
             this.tabs.Name = "tabs";
@@ -1118,10 +1122,21 @@
             this.tabDBConfiguration.Location = new System.Drawing.Point(4, 25);
             this.tabDBConfiguration.Name = "tabDBConfiguration";
             this.tabDBConfiguration.Padding = new System.Windows.Forms.Padding(3);
-            this.tabDBConfiguration.Size = new System.Drawing.Size(1475, 1250);
+            this.tabDBConfiguration.Size = new System.Drawing.Size(1475, 1252);
             this.tabDBConfiguration.TabIndex = 26;
             this.tabDBConfiguration.Text = "DB Configuration";
             this.tabDBConfiguration.UseVisualStyleBackColor = true;
+            // 
+            // tabDBOptions
+            // 
+            this.tabDBOptions.Controls.Add(this.dbOptions1);
+            this.tabDBOptions.Location = new System.Drawing.Point(4, 25);
+            this.tabDBOptions.Name = "tabDBOptions";
+            this.tabDBOptions.Padding = new System.Windows.Forms.Padding(3);
+            this.tabDBOptions.Size = new System.Drawing.Size(1475, 1250);
+            this.tabDBOptions.TabIndex = 27;
+            this.tabDBOptions.Text = "DB Options";
+            this.tabDBOptions.UseVisualStyleBackColor = true;
             // 
             // dataGridViewTextBoxColumn1
             // 
@@ -1788,8 +1803,16 @@
             this.dbConfiguration1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.dbConfiguration1.Location = new System.Drawing.Point(3, 3);
             this.dbConfiguration1.Name = "dbConfiguration1";
-            this.dbConfiguration1.Size = new System.Drawing.Size(1469, 1244);
+            this.dbConfiguration1.Size = new System.Drawing.Size(1469, 1246);
             this.dbConfiguration1.TabIndex = 0;
+            // 
+            // dbOptions1
+            // 
+            this.dbOptions1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.dbOptions1.Location = new System.Drawing.Point(3, 3);
+            this.dbOptions1.Name = "dbOptions1";
+            this.dbOptions1.Size = new System.Drawing.Size(1469, 1244);
+            this.dbOptions1.TabIndex = 0;
             // 
             // Main
             // 
@@ -1863,6 +1886,7 @@
             this.tabAzureDB.ResumeLayout(false);
             this.tabServiceObjectives.ResumeLayout(false);
             this.tabDBConfiguration.ResumeLayout(false);
+            this.tabDBOptions.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -2007,5 +2031,7 @@
         private Changes.AzureServiceObjectivesHistory azureServiceObjectivesHistory1;
         private System.Windows.Forms.TabPage tabDBConfiguration;
         private Changes.DBConfiguration dbConfiguration1;
+        private System.Windows.Forms.TabPage tabDBOptions;
+        private Changes.DBOptions dbOptions1;
     }
 }

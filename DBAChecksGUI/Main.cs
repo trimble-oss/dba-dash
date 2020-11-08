@@ -301,6 +301,12 @@ namespace DBAChecksGUI
                 dbConfiguration1.InstanceIDs = instanceIDs;
                 dbConfiguration1.RefreshData();
             }
+            if(tabs.SelectedTab == tabDBOptions)
+            {
+                dbOptions1.InstanceIDs = instanceIDs;
+                dbOptions1.DatabaseID = n.DatabaseID;
+                dbOptions1.RefreshData();
+            }
         }
 
         private void loadDBAChecksErrorLog(Int32 InstanceID)
@@ -504,6 +510,8 @@ ORDER BY SchemaName,ObjectName
                 allowedTabs.Add(tabSnapshotsSummary);
                 allowedTabs.Add(tabSlowQueries);
                 allowedTabs.Add(tabDBSpace);
+                allowedTabs.Add(tabDBConfiguration);
+                allowedTabs.Add(tabDBOptions);
             }
             else if(n.Type == SQLTreeItem.TreeType.AzureDatabase)
             {
@@ -516,6 +524,8 @@ ORDER BY SchemaName,ObjectName
                 allowedTabs.Add(tabSlowQueries);
                 allowedTabs.Add(tabDBSpace);
                 allowedTabs.Add(tabServiceObjectives);
+                allowedTabs.Add(tabDBConfiguration);
+                allowedTabs.Add(tabDBOptions);
             }
             else if (n.Type == SQLTreeItem.TreeType.Instance)
             {
@@ -557,11 +567,12 @@ ORDER BY SchemaName,ObjectName
                     allowedTabs.Add(tabAlerts);
                     allowedTabs.Add(tabDrivers);
                 }
-                if (n.Type != SQLTreeItem.TreeType.Instance)
+                if (parent.Type != SQLTreeItem.TreeType.Instance)
                 {
                     allowedTabs.Add(tabServiceObjectives);
                 }
                 allowedTabs.Add(tabDBConfiguration);
+                allowedTabs.Add(tabDBOptions);
             }
             if (n.ObjectID > 0)
             {

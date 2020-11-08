@@ -32,6 +32,14 @@ namespace DBAChecksGUI
                 { 1440, "1 Day" }
             };
 
+        public static Guid HighPerformancePowerPlanGUID
+        {
+            get
+            {
+                return Guid.Parse("8C5E7FDA-E8BF-4A96-9A85-A6E23A8C635C");
+            }
+        }
+
         public static string DateGroupString(Int32 mins)
         {
             return (DateGroups.Where(k => k.Key == mins).First()).Value;
@@ -266,6 +274,15 @@ WHERE DDLID = @DDLID";
             DialogResult result = inputBox.ShowDialog();
             input = textBox.Text;
             return result;
+        }
+
+        public static string ByteArrayToString(byte[] ba)
+        {
+            StringBuilder hex = new StringBuilder(ba.Length * 2);
+            hex.Append("0x");
+            foreach (byte b in ba)
+                hex.AppendFormat("{0:x2}", b);
+            return hex.ToString();
         }
     }
 }

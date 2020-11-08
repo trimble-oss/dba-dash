@@ -42,8 +42,13 @@ SELECT ConnectionID,
 	sql_memory_model_desc,
 	OfflineSchedulers,
 	ActivePowerPlan,
+	I.ActivePowerPlanGUID,
+	I.os_priority_class,
 	os_priority_class_desc,
-	InstantFileInitializationEnabled
+	InstantFileInitializationEnabled,
+	I.scheduler_count,
+	I.max_workers_count,
+	I.os_priority_class
 FROM dbo.InstanceInfo I
 WHERE EditionID<>'1674378470'
 AND EXISTS(SELECT 1 FROM @Instances t WHERE t.InstanceID = I.InstanceID)
