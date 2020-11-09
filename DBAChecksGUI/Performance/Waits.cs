@@ -14,6 +14,7 @@ using LiveCharts.Defaults;
 using LiveCharts;
 using static DBAChecksGUI.Performance.Performance;
 using System.Xml.Schema;
+using ICSharpCode.TextEditor.Actions;
 
 namespace DBAChecksGUI.Performance
 {
@@ -39,6 +40,20 @@ namespace DBAChecksGUI.Performance
         DateTime from;
         DateTime to;
         Int32 mins;
+        string _waitType;
+
+        public string WaitType
+        {
+            get
+            {
+                return _waitType;
+            }
+            set
+            {
+                tsFilterWaitType.Text = value == "" ? "Wait Type" : value;
+                _waitType = value;
+            }
+        }
 
         public void RefreshData()
         {
@@ -90,6 +105,10 @@ namespace DBAChecksGUI.Performance
                 cmd.Parameters.AddWithValue("FromDate", from);
                 cmd.Parameters.AddWithValue("ToDate", to);
                 cmd.Parameters.AddWithValue("DateGroupingMin", dateGrouping);
+                if (_waitType != null && _waitType.Length > 0)
+                {
+                    cmd.Parameters.AddWithValue("WaitType", _waitType);
+                }
                 cmd.CommandType = CommandType.StoredProcedure;
                 cmd.CommandTimeout = Properties.Settings.Default.CommandTimeout;
                 SqlDataAdapter da = new SqlDataAdapter(cmd);
@@ -206,6 +225,16 @@ namespace DBAChecksGUI.Performance
             dateGrouping = Convert.ToInt32(ts.Tag);
             tsDateGrouping.Text = Common.DateGroupString(dateGrouping);
             refreshData(false);
+        }
+
+        private void tsFilterWaitType_Click(object sender, EventArgs e)
+        {
+            string wt = _waitType;
+            if (Common.ShowInputDialog(ref wt,"Wait Type (LIKE):") == DialogResult.OK)
+            {
+                WaitType = wt.EndsWith("%") || wt.Length==0 ? wt : wt+"%";
+                refreshData(false);
+            }
         }
     }
 }

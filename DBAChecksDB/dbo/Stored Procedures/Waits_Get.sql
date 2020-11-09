@@ -3,7 +3,8 @@
 	@FromDate DATETIME2(3)=NULL, 
 	@ToDate DATETIME2(3)=NULL,
 	@DateGroupingMin INT=NULL,
-	@Top INT=10
+	@Top INT=10,
+	@WaitType NVARCHAR(60)=NULL
 )
 AS
 IF @FromDate IS NULL
@@ -35,6 +36,7 @@ WHERE W.SnapshotDate>= @FromDate
 AND W.SnapshotDate <= @ToDate
 AND WT.WaitType NOT IN(N''PVS_PREALLOCATE'',N''REDO_THREAD_PENDING_WORK'')
 AND W.InstanceID=@InstanceID
+' + CASE WHEN @WaitType IS NULL THEN '' ELSE 'AND WT.WaitType LIKE @WaitType' END + '
 GROUP BY WT.WaitType,WT.IsCriticalWait, ' + @DateGroupingSQL + ' 
 HAVING SUM(W.wait_time_ms)*1000.0 / SUM(W.sample_ms_diff) > 0
 )
@@ -45,4 +47,4 @@ FROM T
 GROUP BY [Time],CASE WHEN rnum<=@Top THEN WaitType ELSE ''{Other}'' END
 ORDER BY WaitType'
 
-EXEC sp_executesql @SQL,N'@FromDate DATETIME2(3),@ToDate DATETIME2(3),@InstanceID INT,@Top INT,@DateGroupingMin INT',@FromDate,@ToDate,@InstanceID,@Top,@DateGroupingMin
+EXEC sp_executesql @SQL,N'@FromDate DATETIME2(3),@ToDate DATETIME2(3),@InstanceID INT,@Top INT,@DateGroupingMin INT,@WaitType NVARCHAR(60)',@FromDate,@ToDate,@InstanceID,@Top,@DateGroupingMin,@WaitType
