@@ -183,7 +183,7 @@ BEGIN;
 				  DatabaseID,
 				  Drive,
 				  FileID,
-				  SnapshotDate,
+				  DG.DateGroup AS SnapshotDate,
 				  num_of_reads,
 				  num_of_writes,
 				  num_of_bytes_read,
@@ -201,7 +201,9 @@ BEGIN;
 				  num_of_bytes_read/(sample_ms_diff/1000.0)/POWER(1024.0,2) AS MaxReadMBsec,
 				  num_of_bytes_written/(sample_ms_diff/1000.0)/POWER(1024.0,2) AS MaxWriteMBsec,
 				  (num_of_bytes_written+num_of_bytes_read)/(sample_ms_diff/1000.0)/POWER(1024.0,2) AS MaxMBsec	
-				  FROM #DBIOStatsTemp) AS S
+				  FROM #DBIOStatsTemp
+				  CROSS APPLY [dbo].[DateGroupingMins](SnapshotDate,60) DG
+				  ) AS S
 	ON S.InstanceID= T.InstanceID
 	AND S.DatabaseID = T.DatabaseID
 	AND S.Drive = T.Drive
