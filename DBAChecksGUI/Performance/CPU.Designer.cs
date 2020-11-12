@@ -42,9 +42,9 @@
             // chartCPU
             // 
             this.chartCPU.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.chartCPU.Location = new System.Drawing.Point(0, 31);
+            this.chartCPU.Location = new System.Drawing.Point(0, 27);
             this.chartCPU.Name = "chartCPU";
-            this.chartCPU.Size = new System.Drawing.Size(878, 233);
+            this.chartCPU.Size = new System.Drawing.Size(878, 237);
             this.chartCPU.TabIndex = 1;
             this.chartCPU.Text = "CPU";
             // 
@@ -57,7 +57,7 @@
             this.tsDateGrouping});
             this.toolStrip1.Location = new System.Drawing.Point(0, 0);
             this.toolStrip1.Name = "toolStrip1";
-            this.toolStrip1.Size = new System.Drawing.Size(878, 31);
+            this.toolStrip1.Size = new System.Drawing.Size(878, 27);
             this.toolStrip1.TabIndex = 2;
             this.toolStrip1.Text = "toolStrip1";
             // 
@@ -66,7 +66,7 @@
             this.lblCPU.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
             this.lblCPU.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
             this.lblCPU.Name = "lblCPU";
-            this.lblCPU.Size = new System.Drawing.Size(105, 28);
+            this.lblCPU.Size = new System.Drawing.Size(105, 24);
             this.lblCPU.Text = "CPU: Instance";
             // 
             // tsAgg
@@ -78,7 +78,7 @@
             this.tsAgg.Image = global::DBAChecksGUI.Properties.Resources.AutoSum_16x;
             this.tsAgg.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsAgg.Name = "tsAgg";
-            this.tsAgg.Size = new System.Drawing.Size(34, 28);
+            this.tsAgg.Size = new System.Drawing.Size(34, 24);
             this.tsAgg.Text = "Aggregation";
             // 
             // AVGToolStripMenuItem
@@ -105,7 +105,7 @@
             this.tsDateGrouping.Image = ((System.Drawing.Image)(resources.GetObject("tsDateGrouping.Image")));
             this.tsDateGrouping.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsDateGrouping.Name = "tsDateGrouping";
-            this.tsDateGrouping.Size = new System.Drawing.Size(56, 28);
+            this.tsDateGrouping.Size = new System.Drawing.Size(56, 24);
             this.tsDateGrouping.Text = "1min";
             // 
             // CPU

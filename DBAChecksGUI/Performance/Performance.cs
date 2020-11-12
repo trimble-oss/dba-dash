@@ -34,6 +34,20 @@ namespace DBAChecksGUI.Performance
             }
         }
 
+        Int32 pointSize
+        {
+            get
+            {
+                if (dataPointsToolStripMenuItem.Checked)
+                {
+                    return 10;
+                }
+                else
+                {
+                    return 0;
+                }
+            }
+        }
 
         public string ConnectionString;
 
@@ -262,7 +276,16 @@ namespace DBAChecksGUI.Performance
 
         private void Performance_Load(object sender, EventArgs e)
         {
- 
+            cpu1.PointSize = pointSize;
+            ioPerformance1.PointSize = pointSize;
+        }
+
+        private void dataPointsToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            cpu1.PointSize = pointSize;
+            ioPerformance1.PointSize = pointSize;
+            RefreshData();
+
         }
     }
 }

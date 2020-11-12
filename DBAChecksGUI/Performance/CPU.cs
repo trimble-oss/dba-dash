@@ -31,6 +31,9 @@ namespace DBAChecksGUI.Performance
         DateTime toDate;
         Int32 DateGrouping;
         bool smoothLines = true;
+
+        public Int32 PointSize;
+
         public bool SmoothLines
         {
             get
@@ -166,7 +169,8 @@ namespace DBAChecksGUI.Performance
                         {
                         Title = "Max CPU",
                         Values = maxValues,
-                        LineSmoothness = SmoothLines ? 1 : 0
+                        LineSmoothness = SmoothLines ? 1 : 0,
+                        PointGeometrySize = PointSize,
                         }
                     };
                     chartCPU.AxisX.Clear();

@@ -32,6 +32,7 @@ namespace DBAChecksGUI.Performance
         bool smoothLines = true;
         Int32 databaseid=0;
         string drive="";
+        public Int32 PointSize;
 
         public bool SmoothLines { 
             get {
@@ -233,7 +234,7 @@ namespace DBAChecksGUI.Performance
                         Title = columns[s].Alias,
                         Tag = s,
                         ScalesYAt = columns[s].axis,
-                        PointGeometrySize = cnt <= 100 ? 10 : 0,
+                        PointGeometrySize = cnt <= 100 ? PointSize : 0,
                         LineSmoothness = SmoothLines ? 1 : 0
                     }
                     );
