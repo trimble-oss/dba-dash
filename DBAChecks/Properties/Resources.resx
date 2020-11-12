@@ -984,6 +984,7 @@ SET @SQL =N'
 		OUTER APPLY sys.dm_exec_sql_text(R.sql_handle) AS Rtxt
 		OUTER APPLY sys.dm_exec_sql_text(C.most_recent_sql_handle) AS Ctxt
 		WHERE S.session_id&gt;0
+		AND R.command&lt;&gt;''BRKR TASK''
 		AND S.is_user_process=1
 	)
 	SELECT *
