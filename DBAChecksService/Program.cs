@@ -8,6 +8,8 @@ namespace DBAChecksService
 {
     class Program
     {
+        public static readonly NamedLocker Locker = new NamedLocker();
+
         static void Main(string[] args)
         {
             var rc = HostFactory.Run(x =>
