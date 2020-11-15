@@ -1,10 +1,11 @@
 ﻿CREATE PROC [dbo].[Waits_Get](
 	@InstanceID INT,
-	@FromDate DATETIME2(3)=NULL, 
-	@ToDate DATETIME2(3)=NULL,
+	@FromDate DATETIME2(2)=NULL, 
+	@ToDate DATETIME2(2)=NULL,
 	@DateGroupingMin INT=NULL,
 	@Top INT=10,
-	@WaitType NVARCHAR(60)=NULL
+	@WaitType NVARCHAR(60)=NULL,
+	@CriticalWaitsOnly BIT=0
 )
 AS
 IF @FromDate IS NULL
@@ -36,6 +37,7 @@ WHERE W.SnapshotDate>= @FromDate
 AND W.SnapshotDate <= @ToDate
 AND WT.WaitType NOT IN(N''PVS_PREALLOCATE'',N''REDO_THREAD_PENDING_WORK'')
 AND W.InstanceID=@InstanceID
+' + CASE WHEN @CriticalWaitsOnly=1 THEN 'AND WT.IsCriticalWait=1' ELSE '' END + '
 ' + CASE WHEN @WaitType IS NULL THEN '' ELSE 'AND WT.WaitType LIKE @WaitType' END + '
 GROUP BY WT.WaitType,WT.IsCriticalWait, ' + @DateGroupingSQL + ' 
 HAVING SUM(W.wait_time_ms)*1000.0 / SUM(W.sample_ms_diff) > 0
@@ -45,6 +47,7 @@ SELECT [Time],
 	SUM(WaitTimeMsPerSec) as WaitTimeMsPerSec
 FROM T 
 GROUP BY [Time],CASE WHEN rnum<=@Top THEN WaitType ELSE ''{Other}'' END
-ORDER BY WaitType'
+ORDER BY WaitType
+OPTION(MAX_GRANT_PERCENT=0.1)'
 
-EXEC sp_executesql @SQL,N'@FromDate DATETIME2(3),@ToDate DATETIME2(3),@InstanceID INT,@Top INT,@DateGroupingMin INT,@WaitType NVARCHAR(60)',@FromDate,@ToDate,@InstanceID,@Top,@DateGroupingMin,@WaitType
+EXEC sp_executesql @SQL,N'@FromDate DATETIME2(2),@ToDate DATETIME2(2),@InstanceID INT,@Top INT,@DateGroupingMin INT,@WaitType NVARCHAR(60)',@FromDate,@ToDate,@InstanceID,@Top,@DateGroupingMin,@WaitType

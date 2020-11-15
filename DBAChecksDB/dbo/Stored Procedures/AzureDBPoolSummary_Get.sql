@@ -41,7 +41,7 @@ SET @SQL =CAST('' AS NVARCHAR(MAX)) + N'
 SELECT I.InstanceID,
 	I.ConnectionID,
 	I.Instance,
-	RS.elastic_pool_name,
+	EP.elastic_pool_name,
 	MAX(dtu.AvgDTUPercent) Max_DTUPercent,
 	MAX(dtu.AvgDTUsUsed) AS Max_DTUsUsed,
 	MAX(RS.elastic_pool_dtu_limit )-MAX(dtu.AvgDTUsUsed) AS UnusedDTU,
@@ -106,7 +106,8 @@ SELECT I.InstanceID,
 	DATEDIFF(mi,MIN(RS.end_time),MAX(RS.end_time)) AS Minutes
 
 FROM dbo.AzureDBElasticPoolResourceStats RS
-JOIN dbo.Instances I ON I.InstanceID = RS.InstanceID
+JOIN dbo.AzureDBElasticPool EP ON RS.PoolID = EP.PoolID
+JOIN dbo.Instances I ON I.InstanceID = EP.InstanceID
 OUTER APPLY (SELECT CASE WHEN elastic_pool_dtu_limit>0 THEN (SELECT Max(v) FROM (VALUES (avg_cpu_percent), (avg_data_io_percent), (avg_log_write_percent)) AS value(v)) ELSE NULL END AS [AvgDTUPercent],
 	CASE WHEN elastic_pool_dtu_limit>0 THEN ((elastic_pool_dtu_limit)*((SELECT Max(v) FROM (VALUES (avg_cpu_percent), (avg_data_io_percent), (avg_log_write_percent)) AS value(v))/100.00)) ELSE NULL END AS [AvgDTUsUsed]) AS dtu
 WHERE RS.end_time>=@FromDate
@@ -114,14 +115,14 @@ AND RS.end_time <@ToDate
 AND I.IsActive=1
 AND EXISTS(SELECT 1
 			FROM @Instances ids
-			JOIN dbo.AzureDBServiceObjectives SO ON SO.InstanceID = ids.ID
+			JOIN dbo.AzureDBServiceObjectives SO ON SO.InstanceID = ids.ID 
 			JOIN dbo.Instances SOI ON SOI.InstanceID = SO.InstanceID
 			JOIN dbo.Databases SOD ON SOD.InstanceID = SOI.InstanceID		
 			WHERE SOI.Instance = I.Instance
-			AND SO.elastic_pool_name = RS.elastic_pool_name
+			AND SO.elastic_pool_name = EP.elastic_pool_name
 			' + CASE WHEN @DatabaseName IS NULL THEN '' ELSE 'AND SOD.Name = @DatabaseName' END + '
 			) 
-GROUP BY I.InstanceID,I.ConnectionID,I.Instance, RS.elastic_pool_name
+GROUP BY I.InstanceID,I.ConnectionID,I.Instance, EP.elastic_pool_name
 ORDER BY UnusedDTU DESC;'
 
 EXEC sp_executesql @SQL,N'@FromDate DATETIME2(3),@ToDate DATETIME2(3),@Instances IDs READONLY,@DatabaseName SYSNAME',@FromDate,@ToDate,@Instances,@DatabaseName

@@ -97,7 +97,9 @@ WITH cpuAgg AS (
 , wait1 AS (
 	SELECT W.InstanceID,
 		W.WaitTypeID,
-		SUM(W.wait_time_ms)*1000.0 / MAX(SUM(W.sample_ms_diff*1.0)) OVER(PARTITION BY InstanceID) WaitMsPerSec
+		SUM(W.wait_time_ms)*1000.0 / MAX(SUM(W.sample_ms_diff*1.0)) OVER(PARTITION BY InstanceID) WaitMsPerSec,
+		SUM(W.wait_time_ms) wait_time_ms,
+		SUM(W.signal_wait_time_ms) as signal_wait_time_ms
 	FROM ' + CASE WHEN @Use60MIN=1 THEN 'dbo.Waits_60MIN' ELSE 'dbo.Waits' END + ' W 
 	WHERE W.SnapshotDate>= CAST(@FromDate AS DATETIME2(2))
 	AND W.SnapshotDate < CAST(@ToDate AS DATETIME2(2))
@@ -111,7 +113,8 @@ WITH cpuAgg AS (
 		SUM(CASE WHEN WT.WaitType LIKE ''LATCH%'' THEN W.WaitMsPerSec  ELSE 0 END) LatchWaitMsPerSec,
 		SUM(CASE WHEN WT.WaitType LIKE ''LCK%'' THEN W.WaitMsPerSec  ELSE 0 END) LockWaitMsPerSec,
 		SUM(CASE WHEN WT.WaitType LIKE ''PAGEIO%'' OR WT.WaitType LIKE ''WRITE%'' THEN W.WaitMsPerSec  ELSE 0 END) IOWaitMsPerSec,
-		SUM(W.WaitMsPerSec) WaitMsPerSec
+		SUM(W.WaitMsPerSec) WaitMsPerSec,
+		SUM(signal_wait_time_ms)/NULLIF(SUM(wait_time_ms*1.0),0) as SignalWaitPct
 	FROM wait1 w
 	JOIN dbo.WaitType WT ON WT.WaitTypeID = W.WaitTypeID
 	GROUP BY w.InstanceID
@@ -146,6 +149,7 @@ SELECT i.InstanceID,
        wait.LockWaitMsPerSec,
        wait.IOWaitMsPerSec,
        wait.WaitMsPerSec,
+	   wait.SignalWaitPct,
 	   CPU10,
 	   CPU20,
 	   CPU30,

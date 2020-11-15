@@ -32,7 +32,7 @@ BEGIN
 END;
 SELECT I.InstanceID,
 	   I.Instance,
-	   RPS.elastic_pool_name,
+	   EP.elastic_pool_name,
        RPS.end_time,
        RPS.avg_cpu_percent,
        RPS.avg_data_io_percent,
@@ -43,7 +43,8 @@ SELECT I.InstanceID,
        DTU.AvgDTUPercent,
        DTU.AvgDTUsUsed
 FROM dbo.AzureDBElasticPoolResourceStats RPS
-JOIN dbo.Instances I ON I.InstanceID = RPS.InstanceID
+JOIN dbo.AzureDBElasticPool EP ON RPS.PoolID = EP.PoolID
+JOIN dbo.Instances I ON I.InstanceID = EP.InstanceID
 OUTER APPLY(SELECT 	CASE WHEN RPS.elastic_pool_dtu_limit>0 THEN (SELECT Max(value.v) FROM (VALUES (avg_cpu_percent), (avg_data_io_percent), (avg_log_write_percent)) AS value(v)) ELSE NULL END AS [AvgDTUPercent],
 					CASE WHEN RPS.elastic_pool_dtu_limit>0 THEN ((RPS.elastic_pool_dtu_limit)*((SELECT Max(value.v) FROM (VALUES (avg_cpu_percent), (avg_data_io_percent), (avg_log_write_percent)) AS value(v))/100.00)) ELSE NULL END AS [AvgDTUsUsed]
 			) AS DTU
@@ -52,7 +53,7 @@ WHERE EXISTS(SELECT 1
 			JOIN dbo.AzureDBServiceObjectives SO ON SO.InstanceID = t.InstanceID
 			JOIN dbo.Instances I2 ON I2.InstanceID = t.InstanceID
 			WHERE I2.Instance = I.Instance
-			AND RPS.elastic_pool_name = SO.elastic_pool_name)
+			AND EP.elastic_pool_name = SO.elastic_pool_name)
 AND RPS.end_time>=@FromDate
 AND RPS.end_time<@ToDate
 AND I.IsActive=1

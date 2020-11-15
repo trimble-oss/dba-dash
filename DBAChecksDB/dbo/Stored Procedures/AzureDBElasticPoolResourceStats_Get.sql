@@ -36,14 +36,15 @@ SELECT ' + @DateGroupingSQL + ' as end_time,
 	   MAX(DTU.AvgDTUPercent) as MaxDTUPercent,
 	   MAX(DTU.AvgDTUsUsed) as MaxDTUsUsed
 FROM dbo.AzureDBElasticPoolResourceStats RS
+JOIN dbo.AzureDBElasticPool EP ON RS.PoolID = EP.PoolID
 ' + @DateGroupingJoin + '
 OUTER APPLY(SELECT 	CASE WHEN elastic_pool_dtu_limit>0 THEN (SELECT Max(v) FROM (VALUES (avg_cpu_percent), (avg_data_io_percent), (avg_log_write_percent)) AS value(v)) ELSE NULL END AS [AvgDTUPercent],
 					CASE WHEN elastic_pool_dtu_limit>0 THEN ((elastic_pool_dtu_limit)*((SELECT Max(v) FROM (VALUES (avg_cpu_percent), (avg_data_io_percent), (avg_log_write_percent)) AS value(v))/100.00)) ELSE NULL END AS [AvgDTUsUsed]
 			) AS DTU
-WHERE RS.InstanceID = @InstanceID
+WHERE EP.InstanceID = @InstanceID
 AND RS.end_time>=@FromDate 
 AND RS.end_time<@ToDate
-AND RS.elastic_pool_name=@elastic_pool_name
+AND EP.elastic_pool_name=@elastic_pool_name
 GROUP BY ' + @DateGroupingSQL +'
 ORDER BY end_time'
 

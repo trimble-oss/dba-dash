@@ -195,3 +195,4 @@ OUTER APPLY(SELECT TOP(1) IUT.WarningThreshold AS UptimeWarningThreshold,
 WHERE EXISTS(SELECT 1 FROM @Instances t WHERE I.InstanceID = t.InstanceID)
 AND I.IsActive=1
 AND I.EditionID<>1674378470 -- exclude azure 
+OPTION(MAX_GRANT_PERCENT=0.1)
