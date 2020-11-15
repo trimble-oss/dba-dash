@@ -50,7 +50,7 @@ namespace DBAChecksGUI.Performance
             }
             set
             {
-                tsFilterWaitType.Text = value == "" ? "Wait Type" : value;
+                tsFilter.Text = value == "" ? (criticalWaitsOnlyToolStripMenuItem.Checked ? "*Critical Waits*":"") : value;
                 _waitType = value;
             }
         }
@@ -105,6 +105,7 @@ namespace DBAChecksGUI.Performance
                 cmd.Parameters.AddWithValue("FromDate", from);
                 cmd.Parameters.AddWithValue("ToDate", to);
                 cmd.Parameters.AddWithValue("DateGroupingMin", dateGrouping);
+                cmd.Parameters.AddWithValue("CriticalWaitsOnly", criticalWaitsOnlyToolStripMenuItem.Checked);
                 if (_waitType != null && _waitType.Length > 0)
                 {
                     cmd.Parameters.AddWithValue("WaitType", _waitType);
@@ -235,6 +236,23 @@ namespace DBAChecksGUI.Performance
                 WaitType = wt.EndsWith("%") || wt.Length==0 ? wt : wt+"%";
                 refreshData(false);
             }
+        }
+
+        private void stringFilterToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            string wt = _waitType;
+            if (Common.ShowInputDialog(ref wt, "Wait Type (LIKE):") == DialogResult.OK)
+            {
+                WaitType = wt.EndsWith("%") || wt.Length == 0 ? wt : wt + "%";
+                criticalWaitsOnlyToolStripMenuItem.Checked = false;
+                refreshData(false);
+            }
+        }
+
+        private void criticalWaitsOnlyToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            WaitType = "";
+            refreshData(false);
         }
     }
 }

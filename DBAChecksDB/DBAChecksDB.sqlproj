@@ -30,7 +30,7 @@
     <QueryStoreStaleQueryThreshold>15</QueryStoreStaleQueryThreshold>
     <QueryStoreMaxStorageSize>512</QueryStoreMaxStorageSize>
     <QueryStoreMaxPlansPerQuery>50</QueryStoreMaxPlansPerQuery>
-    <DacVersion>2.0.1.4</DacVersion>
+    <DacVersion>2.0.1.5</DacVersion>
     <ReadCommittedSnapshot>True</ReadCommittedSnapshot>
     <AllowSnapshotIsolation>True</AllowSnapshotIsolation>
   </PropertyGroup>
@@ -430,6 +430,8 @@
     <Build Include="dbo\Tables\DBOptionsHistory.sql" />
     <Build Include="dbo\Stored Procedures\DBOptionsHistory_Get.sql" />
     <Build Include="dbo\Stored Procedures\DatabasesAllInfo_Get.sql" />
+    <Build Include="dbo\Tables\AzureDBResourceStats_60MIN.sql" />
+    <Build Include="dbo\Views\AzureDBResourceStats_Raw.sql" />
   </ItemGroup>
   <ItemGroup>
     <PostDeploy Include="Script.PostDeployment1.sql" />

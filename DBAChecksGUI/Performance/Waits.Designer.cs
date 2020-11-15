@@ -33,7 +33,9 @@
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
             this.lblWaits = new System.Windows.Forms.ToolStripLabel();
             this.tsDateGrouping = new System.Windows.Forms.ToolStripDropDownButton();
-            this.tsFilterWaitType = new System.Windows.Forms.ToolStripButton();
+            this.tsFilter = new System.Windows.Forms.ToolStripDropDownButton();
+            this.criticalWaitsOnlyToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.stringFilterToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -52,7 +54,7 @@
             this.toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.lblWaits,
             this.tsDateGrouping,
-            this.tsFilterWaitType});
+            this.tsFilter});
             this.toolStrip1.Location = new System.Drawing.Point(0, 0);
             this.toolStrip1.Name = "toolStrip1";
             this.toolStrip1.Size = new System.Drawing.Size(492, 27);
@@ -76,14 +78,32 @@
             this.tsDateGrouping.Size = new System.Drawing.Size(56, 24);
             this.tsDateGrouping.Text = "1min";
             // 
-            // tsFilterWaitType
+            // tsFilter
             // 
-            this.tsFilterWaitType.Image = global::DBAChecksGUI.Properties.Resources.FilterDropdown_16x;
-            this.tsFilterWaitType.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsFilterWaitType.Name = "tsFilterWaitType";
-            this.tsFilterWaitType.Size = new System.Drawing.Size(98, 24);
-            this.tsFilterWaitType.Text = "Wait Type";
-            this.tsFilterWaitType.Click += new System.EventHandler(this.tsFilterWaitType_Click);
+            this.tsFilter.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.criticalWaitsOnlyToolStripMenuItem,
+            this.stringFilterToolStripMenuItem});
+            this.tsFilter.Image = global::DBAChecksGUI.Properties.Resources.FilterDropdown_16x;
+            this.tsFilter.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tsFilter.Name = "tsFilter";
+            this.tsFilter.Size = new System.Drawing.Size(34, 24);
+            // 
+            // criticalWaitsOnlyToolStripMenuItem
+            // 
+            this.criticalWaitsOnlyToolStripMenuItem.CheckOnClick = true;
+            this.criticalWaitsOnlyToolStripMenuItem.Name = "criticalWaitsOnlyToolStripMenuItem";
+            this.criticalWaitsOnlyToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            this.criticalWaitsOnlyToolStripMenuItem.Text = "Critical Waits Only";
+            this.criticalWaitsOnlyToolStripMenuItem.ToolTipText = "Wait types that can indicate serious performance problems. e.g. RESOURCE_SEMAPHOR" +
+    "E, THREADPOOL";
+            this.criticalWaitsOnlyToolStripMenuItem.Click += new System.EventHandler(this.criticalWaitsOnlyToolStripMenuItem_Click);
+            // 
+            // stringFilterToolStripMenuItem
+            // 
+            this.stringFilterToolStripMenuItem.Name = "stringFilterToolStripMenuItem";
+            this.stringFilterToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            this.stringFilterToolStripMenuItem.Text = "String Filter";
+            this.stringFilterToolStripMenuItem.Click += new System.EventHandler(this.stringFilterToolStripMenuItem_Click);
             // 
             // Waits
             // 
@@ -107,6 +127,8 @@
         private System.Windows.Forms.ToolStrip toolStrip1;
         private System.Windows.Forms.ToolStripLabel lblWaits;
         private System.Windows.Forms.ToolStripDropDownButton tsDateGrouping;
-        private System.Windows.Forms.ToolStripButton tsFilterWaitType;
+        private System.Windows.Forms.ToolStripDropDownButton tsFilter;
+        private System.Windows.Forms.ToolStripMenuItem criticalWaitsOnlyToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem stringFilterToolStripMenuItem;
     }
 }
