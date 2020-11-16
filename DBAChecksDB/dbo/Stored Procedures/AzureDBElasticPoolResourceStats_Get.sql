@@ -4,13 +4,19 @@
 	@FromDate DATETIME2(3),
 	@ToDate DATETIME2(3),
 	@DateGroupingMin INT=NULL, 
-	@UTCOffset INT=0
+	@UTCOffset INT=0,
+	@Use60MIN BIT=NULL
 ) 
 AS
 SELECT @InstanceID =MasterInstanceID 
 FROM dbo.AzureDBMasterInstance(@InstanceID)
 SELECT @FromDate= DATEADD(mi, -@UTCOffset, @FromDate),
 	@ToDate = DATEADD(mi, -@UTCOffset, @ToDate) 
+
+IF @Use60MIN IS NULL
+BEGIN
+	SELECT @Use60MIN = CASE WHEN @DateGroupingMin>=60 THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END
+END
 
 
 DECLARE @SQL NVARCHAR(MAX)
@@ -28,19 +34,16 @@ SELECT ' + @DateGroupingSQL + ' as end_time,
        MAX(RS.max_worker_percent) as max_worker_percent,
        MAX(RS.max_session_percent) as max_session_percent,
        MAX(RS.elastic_pool_dtu_limit) as dtu_limit,
-	   AVG(DTU.AvgDTUPercent) as AvgDTUPercent,
-	   AVG(DTU.AvgDTUsUsed) as AvgDTUsUsed,
-	   MAX(RS.avg_cpu_percent) as max_cpu_percent,
-       MAX(RS.avg_data_io_percent) as max_data_io_percent,
-       MAX(RS.avg_log_write_percent) as max_log_write_percent,
-	   MAX(DTU.AvgDTUPercent) as MaxDTUPercent,
-	   MAX(DTU.AvgDTUsUsed) as MaxDTUsUsed
-FROM dbo.AzureDBElasticPoolResourceStats RS
+	   AVG(RS.avg_dtu_percent) as AvgDTUPercent,
+	   AVG(RS.avg_dtu) as AvgDTUsUsed,
+	   MAX(RS.max_cpu_percent) as max_cpu_percent,
+       MAX(RS.max_data_io_percent) as max_data_io_percent,
+       MAX(RS.max_log_write_percent) as max_log_write_percent,
+	   MAX(RS.max_dtu_percent) as MaxDTUPercent,
+	   MAX(RS.max_dtu) as MaxDTUsUsed
+FROM ' + CASE WHEN @Use60MIN=1 THEN 'dbo.AzureDBElasticPoolResourceStats_60MIN' ELSE 'dbo.AzureDBElasticPoolResourceStats_Raw' END + ' RS
 JOIN dbo.AzureDBElasticPool EP ON RS.PoolID = EP.PoolID
 ' + @DateGroupingJoin + '
-OUTER APPLY(SELECT 	CASE WHEN RS.elastic_pool_dtu_limit>0 THEN (SELECT Max(v) FROM (VALUES (RS.avg_cpu_percent), (RS.avg_data_io_percent), (RS.avg_log_write_percent)) AS value(v)) ELSE NULL END AS [AvgDTUPercent],
-					CASE WHEN RS.elastic_pool_dtu_limit>0 THEN ((RS.elastic_pool_dtu_limit)*((SELECT Max(v) FROM (VALUES (RS.avg_cpu_percent), (RS.avg_data_io_percent), (RS.avg_log_write_percent)) AS value(v))/100.00)) ELSE NULL END AS [AvgDTUsUsed]
-			) AS DTU
 WHERE EP.InstanceID = @InstanceID
 AND RS.end_time>=@FromDate 
 AND RS.end_time<@ToDate
