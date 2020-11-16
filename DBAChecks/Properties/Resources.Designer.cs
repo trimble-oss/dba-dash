@@ -121,7 +121,8 @@ namespace DBAChecks.Properties {
         ///       max_session_percent,
         ///       elastic_pool_dtu_limit,
         ///       elastic_pool_storage_limit_mb,
-        ///       avg_allocated_storage_percent
+        ///       avg_allocated_storage_percent,
+        ///       elastic_pool_cpu_limit
         ///FROM sys.elastic_pool_resource_stats 
         ///WHERE start_time&gt;=@Date.
         /// </summary>

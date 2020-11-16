@@ -52,13 +52,15 @@
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle22 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle23 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle24 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle31 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle33 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle25 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle26 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle27 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle28 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle29 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle30 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle31 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle32 = new System.Windows.Forms.DataGridViewCellStyle();
             this.dgv = new System.Windows.Forms.DataGridView();
             this.colInstance = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.colDB = new System.Windows.Forms.DataGridViewLinkColumn();
@@ -140,6 +142,8 @@
             this.poolAVGDTU = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.poolMinDTULimit = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.poolDTULimitMax = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colCPULimitMin = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colCPULimitMax = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.poolMaxCPU = new CustomProgressControl.DataGridViewProgressBarColumn();
             this.poolMaxDataPct = new CustomProgressControl.DataGridViewProgressBarColumn();
             this.poolMaxLogWrite = new CustomProgressControl.DataGridViewProgressBarColumn();
@@ -215,7 +219,7 @@
             this.dgv.RowHeadersVisible = false;
             this.dgv.RowHeadersWidth = 51;
             this.dgv.RowTemplate.Height = 24;
-            this.dgv.Size = new System.Drawing.Size(1455, 598);
+            this.dgv.Size = new System.Drawing.Size(1455, 597);
             this.dgv.TabIndex = 0;
             this.dgv.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgv_CellContentClick);
             this.dgv.Sorted += new System.EventHandler(this.dgv_Sorted);
@@ -944,20 +948,22 @@
             this.poolAVGDTU,
             this.poolMinDTULimit,
             this.poolDTULimitMax,
+            this.colCPULimitMin,
+            this.colCPULimitMax,
             this.poolMaxCPU,
             this.poolMaxDataPct,
             this.poolMaxLogWrite,
             this.poolAvgCPU,
             this.poolAvgData,
             this.poolAvgLogWrite});
-            dataGridViewCellStyle31.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle31.BackColor = System.Drawing.SystemColors.Window;
-            dataGridViewCellStyle31.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            dataGridViewCellStyle31.ForeColor = System.Drawing.SystemColors.ControlText;
-            dataGridViewCellStyle31.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-            dataGridViewCellStyle31.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-            dataGridViewCellStyle31.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
-            this.dgvPool.DefaultCellStyle = dataGridViewCellStyle31;
+            dataGridViewCellStyle33.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle33.BackColor = System.Drawing.SystemColors.Window;
+            dataGridViewCellStyle33.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            dataGridViewCellStyle33.ForeColor = System.Drawing.SystemColors.ControlText;
+            dataGridViewCellStyle33.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle33.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle33.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
+            this.dgvPool.DefaultCellStyle = dataGridViewCellStyle33;
             this.dgvPool.Dock = System.Windows.Forms.DockStyle.Fill;
             this.dgvPool.Location = new System.Drawing.Point(0, 31);
             this.dgvPool.Name = "dgvPool";
@@ -965,7 +971,7 @@
             this.dgvPool.RowHeadersVisible = false;
             this.dgvPool.RowHeadersWidth = 51;
             this.dgvPool.RowTemplate.Height = 24;
-            this.dgvPool.Size = new System.Drawing.Size(1455, 337);
+            this.dgvPool.Size = new System.Drawing.Size(1455, 338);
             this.dgvPool.TabIndex = 5;
             this.dgvPool.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgvPool_CellContentClick);
             this.dgvPool.Sorted += new System.EventHandler(this.dgvPool_Sorted);
@@ -1078,6 +1084,7 @@
             this.poolMinDTULimit.MinimumWidth = 6;
             this.poolMinDTULimit.Name = "poolMinDTULimit";
             this.poolMinDTULimit.ReadOnly = true;
+            this.poolMinDTULimit.Visible = false;
             this.poolMinDTULimit.Width = 124;
             // 
             // poolDTULimitMax
@@ -1089,13 +1096,36 @@
             this.poolDTULimitMax.ReadOnly = true;
             this.poolDTULimitMax.Width = 127;
             // 
+            // colCPULimitMin
+            // 
+            this.colCPULimitMin.DataPropertyName = "MinCPULimit";
+            dataGridViewCellStyle25.Format = "N2";
+            this.colCPULimitMin.DefaultCellStyle = dataGridViewCellStyle25;
+            this.colCPULimitMin.HeaderText = "CPU Limit (Min)";
+            this.colCPULimitMin.MinimumWidth = 6;
+            this.colCPULimitMin.Name = "colCPULimitMin";
+            this.colCPULimitMin.ReadOnly = true;
+            this.colCPULimitMin.Visible = false;
+            this.colCPULimitMin.Width = 123;
+            // 
+            // colCPULimitMax
+            // 
+            this.colCPULimitMax.DataPropertyName = "MaxCPULimit";
+            dataGridViewCellStyle26.Format = "N2";
+            this.colCPULimitMax.DefaultCellStyle = dataGridViewCellStyle26;
+            this.colCPULimitMax.HeaderText = "CPU Limit (Max)";
+            this.colCPULimitMax.MinimumWidth = 6;
+            this.colCPULimitMax.Name = "colCPULimitMax";
+            this.colCPULimitMax.ReadOnly = true;
+            this.colCPULimitMax.Width = 126;
+            // 
             // poolMaxCPU
             // 
             this.poolMaxCPU.DataPropertyName = "MaxCPUPercent";
-            dataGridViewCellStyle25.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight;
-            dataGridViewCellStyle25.Format = "0.#\\%";
-            dataGridViewCellStyle25.Padding = new System.Windows.Forms.Padding(4);
-            this.poolMaxCPU.DefaultCellStyle = dataGridViewCellStyle25;
+            dataGridViewCellStyle27.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight;
+            dataGridViewCellStyle27.Format = "0.#\\%";
+            dataGridViewCellStyle27.Padding = new System.Windows.Forms.Padding(4);
+            this.poolMaxCPU.DefaultCellStyle = dataGridViewCellStyle27;
             this.poolMaxCPU.HeaderText = "Max CPU %";
             this.poolMaxCPU.MinimumWidth = 6;
             this.poolMaxCPU.Name = "poolMaxCPU";
@@ -1105,10 +1135,10 @@
             // poolMaxDataPct
             // 
             this.poolMaxDataPct.DataPropertyName = "MaxDataPercent";
-            dataGridViewCellStyle26.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight;
-            dataGridViewCellStyle26.Format = "0.#\\%";
-            dataGridViewCellStyle26.Padding = new System.Windows.Forms.Padding(4);
-            this.poolMaxDataPct.DefaultCellStyle = dataGridViewCellStyle26;
+            dataGridViewCellStyle28.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight;
+            dataGridViewCellStyle28.Format = "0.#\\%";
+            dataGridViewCellStyle28.Padding = new System.Windows.Forms.Padding(4);
+            this.poolMaxDataPct.DefaultCellStyle = dataGridViewCellStyle28;
             this.poolMaxDataPct.HeaderText = "Max Data %";
             this.poolMaxDataPct.MinimumWidth = 6;
             this.poolMaxDataPct.Name = "poolMaxDataPct";
@@ -1118,10 +1148,10 @@
             // poolMaxLogWrite
             // 
             this.poolMaxLogWrite.DataPropertyName = "MaxLogWritePercent";
-            dataGridViewCellStyle27.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight;
-            dataGridViewCellStyle27.Format = "0.#\\%";
-            dataGridViewCellStyle27.Padding = new System.Windows.Forms.Padding(4);
-            this.poolMaxLogWrite.DefaultCellStyle = dataGridViewCellStyle27;
+            dataGridViewCellStyle29.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight;
+            dataGridViewCellStyle29.Format = "0.#\\%";
+            dataGridViewCellStyle29.Padding = new System.Windows.Forms.Padding(4);
+            this.poolMaxLogWrite.DefaultCellStyle = dataGridViewCellStyle29;
             this.poolMaxLogWrite.HeaderText = "Max Log Write %";
             this.poolMaxLogWrite.MinimumWidth = 6;
             this.poolMaxLogWrite.Name = "poolMaxLogWrite";
@@ -1131,10 +1161,10 @@
             // poolAvgCPU
             // 
             this.poolAvgCPU.DataPropertyName = "AvgCPUPercent";
-            dataGridViewCellStyle28.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight;
-            dataGridViewCellStyle28.Format = "0.#\\%";
-            dataGridViewCellStyle28.Padding = new System.Windows.Forms.Padding(4);
-            this.poolAvgCPU.DefaultCellStyle = dataGridViewCellStyle28;
+            dataGridViewCellStyle30.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight;
+            dataGridViewCellStyle30.Format = "0.#\\%";
+            dataGridViewCellStyle30.Padding = new System.Windows.Forms.Padding(4);
+            this.poolAvgCPU.DefaultCellStyle = dataGridViewCellStyle30;
             this.poolAvgCPU.HeaderText = "Avg CPU %";
             this.poolAvgCPU.MinimumWidth = 6;
             this.poolAvgCPU.Name = "poolAvgCPU";
@@ -1144,10 +1174,10 @@
             // poolAvgData
             // 
             this.poolAvgData.DataPropertyName = "AvgDataPercent";
-            dataGridViewCellStyle29.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight;
-            dataGridViewCellStyle29.Format = "0.#\\%";
-            dataGridViewCellStyle29.Padding = new System.Windows.Forms.Padding(4);
-            this.poolAvgData.DefaultCellStyle = dataGridViewCellStyle29;
+            dataGridViewCellStyle31.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight;
+            dataGridViewCellStyle31.Format = "0.#\\%";
+            dataGridViewCellStyle31.Padding = new System.Windows.Forms.Padding(4);
+            this.poolAvgData.DefaultCellStyle = dataGridViewCellStyle31;
             this.poolAvgData.HeaderText = "Avg Data %";
             this.poolAvgData.MinimumWidth = 6;
             this.poolAvgData.Name = "poolAvgData";
@@ -1157,10 +1187,10 @@
             // poolAvgLogWrite
             // 
             this.poolAvgLogWrite.DataPropertyName = "AvgLogWritePercent";
-            dataGridViewCellStyle30.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight;
-            dataGridViewCellStyle30.Format = "0.#\\%";
-            dataGridViewCellStyle30.Padding = new System.Windows.Forms.Padding(4);
-            this.poolAvgLogWrite.DefaultCellStyle = dataGridViewCellStyle30;
+            dataGridViewCellStyle32.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleRight;
+            dataGridViewCellStyle32.Format = "0.#\\%";
+            dataGridViewCellStyle32.Padding = new System.Windows.Forms.Padding(4);
+            this.poolAvgLogWrite.DefaultCellStyle = dataGridViewCellStyle32;
             this.poolAvgLogWrite.HeaderText = "Avg Log Write %";
             this.poolAvgLogWrite.MinimumWidth = 6;
             this.poolAvgLogWrite.Name = "poolAvgLogWrite";
@@ -1183,7 +1213,7 @@
             this.splitContainer1.Panel2.Controls.Add(this.dgvPool);
             this.splitContainer1.Panel2.Controls.Add(this.toolStrip2);
             this.splitContainer1.Size = new System.Drawing.Size(1455, 970);
-            this.splitContainer1.SplitterDistance = 598;
+            this.splitContainer1.SplitterDistance = 597;
             this.splitContainer1.TabIndex = 6;
             // 
             // toolStrip2
@@ -1316,25 +1346,6 @@
         private System.Windows.Forms.ToolStripLabel toolStripLabel1;
         private System.Windows.Forms.ToolStripDropDownButton tsPoolColumns;
         private System.Windows.Forms.ToolStripButton tsRefreshPool;
-        private System.Windows.Forms.DataGridViewTextBoxColumn poolInstance;
-        private System.Windows.Forms.DataGridViewLinkColumn colPoolName;
-        private System.Windows.Forms.DataGridViewImageColumn colPoolDTUHistogram;
-        private System.Windows.Forms.DataGridViewImageColumn colPoolCPUHistogram;
-        private System.Windows.Forms.DataGridViewImageColumn colPoolDataHistogram;
-        private System.Windows.Forms.DataGridViewImageColumn colPoolLogHistogram;
-        private System.Windows.Forms.DataGridViewTextBoxColumn poolMaxDTUPct;
-        private System.Windows.Forms.DataGridViewTextBoxColumn poolMaxDTU;
-        private System.Windows.Forms.DataGridViewTextBoxColumn poolUnusedDTU;
-        private System.Windows.Forms.DataGridViewTextBoxColumn poolAVGDTUPct;
-        private System.Windows.Forms.DataGridViewTextBoxColumn poolAVGDTU;
-        private System.Windows.Forms.DataGridViewTextBoxColumn poolMinDTULimit;
-        private System.Windows.Forms.DataGridViewTextBoxColumn poolDTULimitMax;
-        private CustomProgressControl.DataGridViewProgressBarColumn poolMaxCPU;
-        private CustomProgressControl.DataGridViewProgressBarColumn poolMaxDataPct;
-        private CustomProgressControl.DataGridViewProgressBarColumn poolMaxLogWrite;
-        private CustomProgressControl.DataGridViewProgressBarColumn poolAvgCPU;
-        private CustomProgressControl.DataGridViewProgressBarColumn poolAvgData;
-        private CustomProgressControl.DataGridViewProgressBarColumn poolAvgLogWrite;
         private System.Windows.Forms.DataGridViewTextBoxColumn colInstance;
         private System.Windows.Forms.DataGridViewLinkColumn colDB;
         private System.Windows.Forms.DataGridViewTextBoxColumn colEdition;
@@ -1357,5 +1368,26 @@
         private CustomProgressControl.DataGridViewProgressBarColumn colAvgCPUPct;
         private CustomProgressControl.DataGridViewProgressBarColumn colAvgDataPct;
         private CustomProgressControl.DataGridViewProgressBarColumn colAvgLogWrite;
+        private System.Windows.Forms.DataGridViewTextBoxColumn poolInstance;
+        private System.Windows.Forms.DataGridViewLinkColumn colPoolName;
+        private System.Windows.Forms.DataGridViewImageColumn colPoolDTUHistogram;
+        private System.Windows.Forms.DataGridViewImageColumn colPoolCPUHistogram;
+        private System.Windows.Forms.DataGridViewImageColumn colPoolDataHistogram;
+        private System.Windows.Forms.DataGridViewImageColumn colPoolLogHistogram;
+        private System.Windows.Forms.DataGridViewTextBoxColumn poolMaxDTUPct;
+        private System.Windows.Forms.DataGridViewTextBoxColumn poolMaxDTU;
+        private System.Windows.Forms.DataGridViewTextBoxColumn poolUnusedDTU;
+        private System.Windows.Forms.DataGridViewTextBoxColumn poolAVGDTUPct;
+        private System.Windows.Forms.DataGridViewTextBoxColumn poolAVGDTU;
+        private System.Windows.Forms.DataGridViewTextBoxColumn poolMinDTULimit;
+        private System.Windows.Forms.DataGridViewTextBoxColumn poolDTULimitMax;
+        private System.Windows.Forms.DataGridViewTextBoxColumn colCPULimitMin;
+        private System.Windows.Forms.DataGridViewTextBoxColumn colCPULimitMax;
+        private CustomProgressControl.DataGridViewProgressBarColumn poolMaxCPU;
+        private CustomProgressControl.DataGridViewProgressBarColumn poolMaxDataPct;
+        private CustomProgressControl.DataGridViewProgressBarColumn poolMaxLogWrite;
+        private CustomProgressControl.DataGridViewProgressBarColumn poolAvgCPU;
+        private CustomProgressControl.DataGridViewProgressBarColumn poolAvgData;
+        private CustomProgressControl.DataGridViewProgressBarColumn poolAvgLogWrite;
     }
 }

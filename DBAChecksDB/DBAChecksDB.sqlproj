@@ -433,6 +433,7 @@
     <Build Include="dbo\Tables\AzureDBResourceStats_60MIN.sql" />
     <Build Include="dbo\Views\AzureDBResourceStats_Raw.sql" />
     <Build Include="dbo\Tables\AzureDBElasticPool.sql" />
+    <Build Include="dbo\Tables\AzureDBElasticPoolHistory.sql" />
   </ItemGroup>
   <ItemGroup>
     <PostDeploy Include="Script.PostDeployment1.sql" />

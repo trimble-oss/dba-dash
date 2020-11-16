@@ -10,5 +10,7 @@
     [max_session_percent]           DECIMAL (5, 2) NULL,
     [elastic_pool_dtu_limit]        INT            NULL,
     [elastic_pool_storage_limit_mb] BIGINT         NULL,
-    [avg_allocated_storage_percent] DECIMAL (5, 2) NULL);
+    [avg_allocated_storage_percent] DECIMAL (5, 2) NULL,
+    [elastic_pool_cpu_limit] decimal(5,2) NULL
+);
 

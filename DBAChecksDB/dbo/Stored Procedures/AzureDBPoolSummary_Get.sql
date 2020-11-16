@@ -49,6 +49,8 @@ SELECT I.InstanceID,
 	AVG(dtu.AvgDTUsUsed) AS Avg_DTUsUsed,
 	MIN(RS.elastic_pool_dtu_limit) Min_DTULimit,
 	MAX(RS.elastic_pool_dtu_limit ) MAX_DTULimit,
+	MIN(RS.elastic_pool_cpu_limit)  as MinCPULimit,
+	MAX(RS.elastic_pool_cpu_limit) as MaxCPULimit,
 	MAX(RS.avg_cpu_percent) AS MaxCPUPercent,
 	MAX(RS.avg_data_io_percent) AS MaxDataPercent,
 	MAX(RS.avg_log_write_percent) MaxLogWritePercent,
@@ -108,8 +110,8 @@ SELECT I.InstanceID,
 FROM dbo.AzureDBElasticPoolResourceStats RS
 JOIN dbo.AzureDBElasticPool EP ON RS.PoolID = EP.PoolID
 JOIN dbo.Instances I ON I.InstanceID = EP.InstanceID
-OUTER APPLY (SELECT CASE WHEN elastic_pool_dtu_limit>0 THEN (SELECT Max(v) FROM (VALUES (avg_cpu_percent), (avg_data_io_percent), (avg_log_write_percent)) AS value(v)) ELSE NULL END AS [AvgDTUPercent],
-	CASE WHEN elastic_pool_dtu_limit>0 THEN ((elastic_pool_dtu_limit)*((SELECT Max(v) FROM (VALUES (avg_cpu_percent), (avg_data_io_percent), (avg_log_write_percent)) AS value(v))/100.00)) ELSE NULL END AS [AvgDTUsUsed]) AS dtu
+OUTER APPLY (SELECT CASE WHEN RS.elastic_pool_dtu_limit>0 THEN (SELECT Max(v) FROM (VALUES (RS.avg_cpu_percent), (RS.avg_data_io_percent), (RS.avg_log_write_percent)) AS value(v)) ELSE NULL END AS [AvgDTUPercent],
+	CASE WHEN RS.elastic_pool_dtu_limit>0 THEN ((RS.elastic_pool_dtu_limit)*((SELECT Max(v) FROM (VALUES (RS.avg_cpu_percent), (RS.avg_data_io_percent), (RS.avg_log_write_percent)) AS value(v))/100.00)) ELSE NULL END AS [AvgDTUsUsed]) AS dtu
 WHERE RS.end_time>=@FromDate
 AND RS.end_time <@ToDate
 AND I.IsActive=1

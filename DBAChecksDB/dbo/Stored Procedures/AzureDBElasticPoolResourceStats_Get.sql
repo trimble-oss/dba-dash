@@ -38,8 +38,8 @@ SELECT ' + @DateGroupingSQL + ' as end_time,
 FROM dbo.AzureDBElasticPoolResourceStats RS
 JOIN dbo.AzureDBElasticPool EP ON RS.PoolID = EP.PoolID
 ' + @DateGroupingJoin + '
-OUTER APPLY(SELECT 	CASE WHEN elastic_pool_dtu_limit>0 THEN (SELECT Max(v) FROM (VALUES (avg_cpu_percent), (avg_data_io_percent), (avg_log_write_percent)) AS value(v)) ELSE NULL END AS [AvgDTUPercent],
-					CASE WHEN elastic_pool_dtu_limit>0 THEN ((elastic_pool_dtu_limit)*((SELECT Max(v) FROM (VALUES (avg_cpu_percent), (avg_data_io_percent), (avg_log_write_percent)) AS value(v))/100.00)) ELSE NULL END AS [AvgDTUsUsed]
+OUTER APPLY(SELECT 	CASE WHEN RS.elastic_pool_dtu_limit>0 THEN (SELECT Max(v) FROM (VALUES (RS.avg_cpu_percent), (RS.avg_data_io_percent), (RS.avg_log_write_percent)) AS value(v)) ELSE NULL END AS [AvgDTUPercent],
+					CASE WHEN RS.elastic_pool_dtu_limit>0 THEN ((RS.elastic_pool_dtu_limit)*((SELECT Max(v) FROM (VALUES (RS.avg_cpu_percent), (RS.avg_data_io_percent), (RS.avg_log_write_percent)) AS value(v))/100.00)) ELSE NULL END AS [AvgDTUsUsed]
 			) AS DTU
 WHERE EP.InstanceID = @InstanceID
 AND RS.end_time>=@FromDate 

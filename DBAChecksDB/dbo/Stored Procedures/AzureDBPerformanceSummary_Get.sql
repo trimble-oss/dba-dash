@@ -1,7 +1,7 @@
 ﻿CREATE PROC [dbo].[AzureDBPerformanceSummary_Get](
 	@FromDate DATETIME2(3)=NULL,
 	@ToDate DATETIME2(3)=NULL,
-	@InstanceIDs SYSNAME=NULL,
+	@InstanceIDs VARCHAR(MAX)=NULL,
 	@DatabaseName SYSNAME=NULL,
 	@DTUHist BIT=0,
 	@CPUHist BIT=0,
