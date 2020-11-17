@@ -62,8 +62,7 @@ namespace DBAChecksGUI
                 string tableName = (string)dgv["colTableName", e.RowIndex].Value;
                 if (Common.ShowInputDialog(ref sDays, "Enter number of days") == DialogResult.OK) {
                     
-                    Int32 newRetention;
-                    if (Int32.TryParse(sDays, out newRetention))
+                    if (Int32.TryParse(sDays, out int newRetention))
                     {
                         if (newRetention != days)
                         {
