@@ -192,7 +192,7 @@ namespace DBAChecksGUI
             }
             if(tabs.SelectedTab== tabCollectionDates)
             {
-                collectionDates1.InstanceIDs = instanceIDs;
+                collectionDates1.InstanceIDs =  n.Type == SQLTreeItem.TreeType.DBAChecksRoot ? AllInstanceIDs : instanceIDs;
                 collectionDates1.ConnectionString = connectionString;
                 collectionDates1.IncludeCritical = true;
                 collectionDates1.IncludeWarning = true;
@@ -299,6 +299,7 @@ namespace DBAChecksGUI
             if (tabs.SelectedTab == tabDBConfiguration)
             {
                 dbConfiguration1.InstanceIDs = instanceIDs;
+                dbConfiguration1.DatabaseID = n.DatabaseID;
                 dbConfiguration1.RefreshData();
             }
             if(tabs.SelectedTab == tabDBOptions)

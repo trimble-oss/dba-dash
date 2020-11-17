@@ -22,11 +22,17 @@ namespace DBAChecksGUI.Changes
 
         public void RefreshData()
         {
+            refreshDB();
+            refreshPool();
+        }
+
+        private void refreshDB()
+        {
             SqlConnection cn = new SqlConnection(Common.ConnectionString);
             using (cn)
             {
                 SqlCommand cmd = new SqlCommand("dbo.AzureServiceObjectivesHistory_Get", cn);
-                cmd.Parameters.AddWithValue("InstanceIDs" ,string.Join(",", InstanceIDs));
+                cmd.Parameters.AddWithValue("InstanceIDs", string.Join(",", InstanceIDs));
                 cmd.CommandType = CommandType.StoredProcedure;
                 SqlDataAdapter da = new SqlDataAdapter(cmd);
                 DataTable dt = new DataTable();
@@ -37,14 +43,41 @@ namespace DBAChecksGUI.Changes
             }
         }
 
+        private void refreshPool()
+        {
+            SqlConnection cn = new SqlConnection(Common.ConnectionString);
+            using (cn)
+            {
+                SqlCommand cmd = new SqlCommand("dbo.AzureDBElasticPoolHistory_Get", cn);
+                cmd.Parameters.AddWithValue("InstanceIDs", string.Join(",", InstanceIDs));
+                cmd.CommandType = CommandType.StoredProcedure;
+                SqlDataAdapter da = new SqlDataAdapter(cmd);
+                DataTable dt = new DataTable();
+                da.Fill(dt);
+                Common.ConvertUTCToLocal(ref dt);
+                dgvPool.AutoGenerateColumns = false;
+                dgvPool.DataSource = dt;
+            }
+        }
+
         private void tsRefresh_Click(object sender, EventArgs e)
         {
-            RefreshData();
+            refreshDB();
         }
 
         private void tsCopy_Click(object sender, EventArgs e)
         {
             Common.CopyDataGridViewToClipboard(dgv);
+        }
+
+        private void tsRefreshPool_Click(object sender, EventArgs e)
+        {
+            refreshPool();
+        }
+
+        private void tsCopyPool_Click(object sender, EventArgs e)
+        {
+            Common.CopyDataGridViewToClipboard(dgvPool);
         }
     }
 }

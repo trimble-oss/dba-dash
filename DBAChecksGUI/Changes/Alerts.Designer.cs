@@ -32,13 +32,13 @@
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
             this.toolStripLabel1 = new System.Windows.Forms.ToolStripLabel();
+            this.tsRefresh = new System.Windows.Forms.ToolStripButton();
+            this.tsCopy = new System.Windows.Forms.ToolStripButton();
             this.toolStripDropDownButton1 = new System.Windows.Forms.ToolStripDropDownButton();
             this.pivotByAlertNameToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.dgvAlerts = new System.Windows.Forms.DataGridView();
             this.toolStrip2 = new System.Windows.Forms.ToolStrip();
             this.toolStripLabel2 = new System.Windows.Forms.ToolStripLabel();
-            this.tsCopy = new System.Windows.Forms.ToolStripButton();
-            this.tsRefresh = new System.Windows.Forms.ToolStripButton();
             this.tsRefreshAlerts = new System.Windows.Forms.ToolStripButton();
             this.tsCopyAlerts = new System.Windows.Forms.ToolStripButton();
             ((System.ComponentModel.ISupportInitialize)(this.dgvAlertsConfig)).BeginInit();
@@ -110,6 +110,26 @@
             this.toolStripLabel1.Size = new System.Drawing.Size(152, 24);
             this.toolStripLabel1.Text = "Alerts Configuration";
             // 
+            // tsRefresh
+            // 
+            this.tsRefresh.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.tsRefresh.Image = global::DBAChecksGUI.Properties.Resources._112_RefreshArrow_Green_16x16_72;
+            this.tsRefresh.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tsRefresh.Name = "tsRefresh";
+            this.tsRefresh.Size = new System.Drawing.Size(29, 24);
+            this.tsRefresh.Text = "Refresh";
+            this.tsRefresh.Click += new System.EventHandler(this.tsRefresh_Click);
+            // 
+            // tsCopy
+            // 
+            this.tsCopy.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.tsCopy.Image = global::DBAChecksGUI.Properties.Resources.ASX_Copy_blue_16x;
+            this.tsCopy.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tsCopy.Name = "tsCopy";
+            this.tsCopy.Size = new System.Drawing.Size(29, 24);
+            this.tsCopy.Text = "Copy";
+            this.tsCopy.Click += new System.EventHandler(this.tsCopy_Click);
+            // 
             // toolStripDropDownButton1
             // 
             this.toolStripDropDownButton1.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
@@ -137,13 +157,13 @@
             this.dgvAlerts.BackgroundColor = System.Drawing.Color.White;
             this.dgvAlerts.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.dgvAlerts.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.dgvAlerts.Location = new System.Drawing.Point(0, 27);
+            this.dgvAlerts.Location = new System.Drawing.Point(0, 31);
             this.dgvAlerts.Name = "dgvAlerts";
             this.dgvAlerts.ReadOnly = true;
             this.dgvAlerts.RowHeadersVisible = false;
             this.dgvAlerts.RowHeadersWidth = 51;
             this.dgvAlerts.RowTemplate.Height = 24;
-            this.dgvAlerts.Size = new System.Drawing.Size(667, 263);
+            this.dgvAlerts.Size = new System.Drawing.Size(667, 259);
             this.dgvAlerts.TabIndex = 0;
             // 
             // toolStrip2
@@ -155,7 +175,7 @@
             this.tsCopyAlerts});
             this.toolStrip2.Location = new System.Drawing.Point(0, 0);
             this.toolStrip2.Name = "toolStrip2";
-            this.toolStrip2.Size = new System.Drawing.Size(667, 27);
+            this.toolStrip2.Size = new System.Drawing.Size(667, 31);
             this.toolStrip2.TabIndex = 1;
             this.toolStrip2.Text = "toolStrip2";
             // 
@@ -164,28 +184,8 @@
             this.toolStripLabel2.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
             this.toolStripLabel2.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
             this.toolStripLabel2.Name = "toolStripLabel2";
-            this.toolStripLabel2.Size = new System.Drawing.Size(51, 24);
+            this.toolStripLabel2.Size = new System.Drawing.Size(51, 28);
             this.toolStripLabel2.Text = "Alerts";
-            // 
-            // tsCopy
-            // 
-            this.tsCopy.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.tsCopy.Image = global::DBAChecksGUI.Properties.Resources.ASX_Copy_blue_16x;
-            this.tsCopy.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsCopy.Name = "tsCopy";
-            this.tsCopy.Size = new System.Drawing.Size(29, 24);
-            this.tsCopy.Text = "Copy";
-            this.tsCopy.Click += new System.EventHandler(this.tsCopy_Click);
-            // 
-            // tsRefresh
-            // 
-            this.tsRefresh.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.tsRefresh.Image = global::DBAChecksGUI.Properties.Resources._112_RefreshArrow_Green_16x16_72;
-            this.tsRefresh.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsRefresh.Name = "tsRefresh";
-            this.tsRefresh.Size = new System.Drawing.Size(29, 24);
-            this.tsRefresh.Text = "Refresh";
-            this.tsRefresh.Click += new System.EventHandler(this.tsRefresh_Click);
             // 
             // tsRefreshAlerts
             // 
@@ -193,8 +193,8 @@
             this.tsRefreshAlerts.Image = global::DBAChecksGUI.Properties.Resources._112_RefreshArrow_Green_16x16_72;
             this.tsRefreshAlerts.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsRefreshAlerts.Name = "tsRefreshAlerts";
-            this.tsRefreshAlerts.Size = new System.Drawing.Size(29, 24);
-            this.tsRefreshAlerts.Text = "toolStripButton1";
+            this.tsRefreshAlerts.Size = new System.Drawing.Size(29, 28);
+            this.tsRefreshAlerts.Text = "Refresh";
             this.tsRefreshAlerts.Click += new System.EventHandler(this.tsRefreshAlerts_Click);
             // 
             // tsCopyAlerts
@@ -203,7 +203,7 @@
             this.tsCopyAlerts.Image = global::DBAChecksGUI.Properties.Resources.ASX_Copy_blue_16x;
             this.tsCopyAlerts.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsCopyAlerts.Name = "tsCopyAlerts";
-            this.tsCopyAlerts.Size = new System.Drawing.Size(29, 24);
+            this.tsCopyAlerts.Size = new System.Drawing.Size(29, 28);
             this.tsCopyAlerts.Text = "Copy";
             this.tsCopyAlerts.Click += new System.EventHandler(this.tsCopyAlerts_Click);
             // 

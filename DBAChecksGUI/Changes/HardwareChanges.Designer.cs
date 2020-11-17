@@ -28,21 +28,63 @@
         /// </summary>
         private void InitializeComponent()
         {
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle7 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle8 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle9 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle10 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle11 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle12 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle3 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle4 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle5 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle6 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle7 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle8 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle9 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle10 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle11 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle12 = new System.Windows.Forms.DataGridViewCellStyle();
             this.dgv = new System.Windows.Forms.DataGridView();
+            this.Instance = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.ChangeDate = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.SystemManufacturerOld = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.SystemManufacturerNew = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.SystemProductNameOld = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.SystemProductNameNew = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.Processor_old = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.Processor_new = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.cpu_count_old = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.cpu_count_new = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.cores_per_socket_old = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.cores_per_socket_new = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.socket_count_old = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.socket_count_new = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.hyperthread_ratio_old = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.hyperthread_ratio_new = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.physical_memory_gb_old = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.physical_memory_gb_new = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
             this.dgvHardware = new System.Windows.Forms.DataGridView();
+            this.colInstance = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colManufacturer = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colModel = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colProcessor = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colCoresPerSocket = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colSockets = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colCPUs = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colCPUCores = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colPhysicalCPUs = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colHTRatio = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colNUMA = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colSoftNUMA = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colAffinity = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colPhysicalMemory = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colBufferPool = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colPctMemoryBufferPool = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colMemNotAllocated = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colMemoryModel = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colPriority = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colMaxWorkerCount = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colSchedulerCount = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colOfflineSchedulers = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colPowerPlan = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colInstantFileInitialization = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
             this.toolStripLabel1 = new System.Windows.Forms.ToolStripLabel();
             this.tsRefreshHardware = new System.Windows.Forms.ToolStripButton();
@@ -91,48 +133,6 @@
             this.dataGridViewTextBoxColumn38 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dataGridViewTextBoxColumn39 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dataGridViewTextBoxColumn40 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.Instance = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.ChangeDate = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.SystemManufacturerOld = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.SystemManufacturerNew = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.SystemProductNameOld = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.SystemProductNameNew = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.Processor_old = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.Processor_new = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.cpu_count_old = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.cpu_count_new = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.cores_per_socket_old = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.cores_per_socket_new = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.socket_count_old = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.socket_count_new = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.hyperthread_ratio_old = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.hyperthread_ratio_new = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.physical_memory_gb_old = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.physical_memory_gb_new = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colInstance = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colManufacturer = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colModel = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colProcessor = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colCoresPerSocket = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colSockets = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colCPUs = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colCPUCores = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colPhysicalCPUs = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colHTRatio = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colNUMA = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colSoftNUMA = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colAffinity = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colPhysicalMemory = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colBufferPool = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colPctMemoryBufferPool = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colMemNotAllocated = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colMemoryModel = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colPriority = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colMaxWorkerCount = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colSchedulerCount = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colOfflineSchedulers = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colPowerPlan = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colInstantFileInitialization = new System.Windows.Forms.DataGridViewTextBoxColumn();
             ((System.ComponentModel.ISupportInitialize)(this.dgv)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
@@ -171,531 +171,14 @@
             this.physical_memory_gb_old,
             this.physical_memory_gb_new});
             this.dgv.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.dgv.Location = new System.Drawing.Point(0, 31);
+            this.dgv.Location = new System.Drawing.Point(0, 27);
             this.dgv.Name = "dgv";
             this.dgv.ReadOnly = true;
             this.dgv.RowHeadersVisible = false;
             this.dgv.RowHeadersWidth = 51;
             this.dgv.RowTemplate.Height = 24;
-            this.dgv.Size = new System.Drawing.Size(850, 280);
+            this.dgv.Size = new System.Drawing.Size(850, 284);
             this.dgv.TabIndex = 0;
-            // 
-            // splitContainer1
-            // 
-            this.splitContainer1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.splitContainer1.Location = new System.Drawing.Point(0, 0);
-            this.splitContainer1.Name = "splitContainer1";
-            this.splitContainer1.Orientation = System.Windows.Forms.Orientation.Horizontal;
-            // 
-            // splitContainer1.Panel1
-            // 
-            this.splitContainer1.Panel1.Controls.Add(this.dgvHardware);
-            this.splitContainer1.Panel1.Controls.Add(this.toolStrip1);
-            // 
-            // splitContainer1.Panel2
-            // 
-            this.splitContainer1.Panel2.Controls.Add(this.dgv);
-            this.splitContainer1.Panel2.Controls.Add(this.toolStrip2);
-            this.splitContainer1.Size = new System.Drawing.Size(850, 629);
-            this.splitContainer1.SplitterDistance = 314;
-            this.splitContainer1.TabIndex = 1;
-            // 
-            // dgvHardware
-            // 
-            this.dgvHardware.AllowUserToAddRows = false;
-            this.dgvHardware.AllowUserToDeleteRows = false;
-            this.dgvHardware.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.DisplayedCells;
-            this.dgvHardware.BackgroundColor = System.Drawing.Color.White;
-            this.dgvHardware.ClipboardCopyMode = System.Windows.Forms.DataGridViewClipboardCopyMode.EnableAlwaysIncludeHeaderText;
-            this.dgvHardware.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.dgvHardware.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
-            this.colInstance,
-            this.colManufacturer,
-            this.colModel,
-            this.colProcessor,
-            this.colCoresPerSocket,
-            this.colSockets,
-            this.colCPUs,
-            this.colCPUCores,
-            this.colPhysicalCPUs,
-            this.colHTRatio,
-            this.colNUMA,
-            this.colSoftNUMA,
-            this.colAffinity,
-            this.colPhysicalMemory,
-            this.colBufferPool,
-            this.colPctMemoryBufferPool,
-            this.colMemNotAllocated,
-            this.colMemoryModel,
-            this.colPriority,
-            this.colMaxWorkerCount,
-            this.colSchedulerCount,
-            this.colOfflineSchedulers,
-            this.colPowerPlan,
-            this.colInstantFileInitialization});
-            this.dgvHardware.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.dgvHardware.Location = new System.Drawing.Point(0, 27);
-            this.dgvHardware.Name = "dgvHardware";
-            this.dgvHardware.ReadOnly = true;
-            this.dgvHardware.RowHeadersVisible = false;
-            this.dgvHardware.RowHeadersWidth = 51;
-            this.dgvHardware.RowTemplate.Height = 24;
-            this.dgvHardware.Size = new System.Drawing.Size(850, 287);
-            this.dgvHardware.TabIndex = 0;
-            this.dgvHardware.RowsAdded += new System.Windows.Forms.DataGridViewRowsAddedEventHandler(this.dgvHardware_RowsAdded);
-            // 
-            // toolStrip1
-            // 
-            this.toolStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
-            this.toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.toolStripLabel1,
-            this.tsRefreshHardware,
-            this.tsCopy});
-            this.toolStrip1.Location = new System.Drawing.Point(0, 0);
-            this.toolStrip1.Name = "toolStrip1";
-            this.toolStrip1.Size = new System.Drawing.Size(850, 27);
-            this.toolStrip1.TabIndex = 1;
-            this.toolStrip1.Text = "toolStrip1";
-            // 
-            // toolStripLabel1
-            // 
-            this.toolStripLabel1.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
-            this.toolStripLabel1.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
-            this.toolStripLabel1.Name = "toolStripLabel1";
-            this.toolStripLabel1.Size = new System.Drawing.Size(77, 24);
-            this.toolStripLabel1.Text = "Hardware";
-            // 
-            // tsRefreshHardware
-            // 
-            this.tsRefreshHardware.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.tsRefreshHardware.Image = global::DBAChecksGUI.Properties.Resources._112_RefreshArrow_Green_16x16_72;
-            this.tsRefreshHardware.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsRefreshHardware.Name = "tsRefreshHardware";
-            this.tsRefreshHardware.Size = new System.Drawing.Size(29, 24);
-            this.tsRefreshHardware.Text = "toolStripButton1";
-            this.tsRefreshHardware.Click += new System.EventHandler(this.tsRefreshHardware_Click);
-            // 
-            // tsCopy
-            // 
-            this.tsCopy.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.tsCopy.Image = global::DBAChecksGUI.Properties.Resources.ASX_Copy_blue_16x;
-            this.tsCopy.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsCopy.Name = "tsCopy";
-            this.tsCopy.Size = new System.Drawing.Size(29, 24);
-            this.tsCopy.Text = "Copy";
-            this.tsCopy.Click += new System.EventHandler(this.tsCopy_Click);
-            // 
-            // toolStrip2
-            // 
-            this.toolStrip2.ImageScalingSize = new System.Drawing.Size(20, 20);
-            this.toolStrip2.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.toolStripLabel2,
-            this.tsRefreshHistory,
-            this.tsCopyHistory});
-            this.toolStrip2.Location = new System.Drawing.Point(0, 0);
-            this.toolStrip2.Name = "toolStrip2";
-            this.toolStrip2.Size = new System.Drawing.Size(850, 31);
-            this.toolStrip2.TabIndex = 1;
-            this.toolStrip2.Text = "toolStrip2";
-            // 
-            // toolStripLabel2
-            // 
-            this.toolStripLabel2.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
-            this.toolStripLabel2.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
-            this.toolStripLabel2.Name = "toolStripLabel2";
-            this.toolStripLabel2.Size = new System.Drawing.Size(61, 28);
-            this.toolStripLabel2.Text = "History";
-            // 
-            // tsRefreshHistory
-            // 
-            this.tsRefreshHistory.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.tsRefreshHistory.Image = global::DBAChecksGUI.Properties.Resources._112_RefreshArrow_Green_16x16_72;
-            this.tsRefreshHistory.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsRefreshHistory.Name = "tsRefreshHistory";
-            this.tsRefreshHistory.Size = new System.Drawing.Size(29, 28);
-            this.tsRefreshHistory.Text = "Refresh";
-            this.tsRefreshHistory.Click += new System.EventHandler(this.tsRefreshHistory_Click);
-            // 
-            // tsCopyHistory
-            // 
-            this.tsCopyHistory.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.tsCopyHistory.Image = global::DBAChecksGUI.Properties.Resources.ASX_Copy_blue_16x;
-            this.tsCopyHistory.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsCopyHistory.Name = "tsCopyHistory";
-            this.tsCopyHistory.Size = new System.Drawing.Size(29, 28);
-            this.tsCopyHistory.Text = "Copy";
-            this.tsCopyHistory.Click += new System.EventHandler(this.tsCopyHistory_Click);
-            // 
-            // dataGridViewTextBoxColumn1
-            // 
-            this.dataGridViewTextBoxColumn1.DataPropertyName = "ConnectionID";
-            this.dataGridViewTextBoxColumn1.HeaderText = "Instance";
-            this.dataGridViewTextBoxColumn1.MinimumWidth = 6;
-            this.dataGridViewTextBoxColumn1.Name = "dataGridViewTextBoxColumn1";
-            this.dataGridViewTextBoxColumn1.ReadOnly = true;
-            this.dataGridViewTextBoxColumn1.Width = 90;
-            // 
-            // dataGridViewTextBoxColumn2
-            // 
-            this.dataGridViewTextBoxColumn2.DataPropertyName = "SystemManufacturer";
-            this.dataGridViewTextBoxColumn2.HeaderText = "Manufacturer";
-            this.dataGridViewTextBoxColumn2.MinimumWidth = 6;
-            this.dataGridViewTextBoxColumn2.Name = "dataGridViewTextBoxColumn2";
-            this.dataGridViewTextBoxColumn2.ReadOnly = true;
-            this.dataGridViewTextBoxColumn2.Width = 121;
-            // 
-            // dataGridViewTextBoxColumn3
-            // 
-            this.dataGridViewTextBoxColumn3.DataPropertyName = "SystemProductName";
-            this.dataGridViewTextBoxColumn3.HeaderText = "Model";
-            this.dataGridViewTextBoxColumn3.MinimumWidth = 6;
-            this.dataGridViewTextBoxColumn3.Name = "dataGridViewTextBoxColumn3";
-            this.dataGridViewTextBoxColumn3.ReadOnly = true;
-            this.dataGridViewTextBoxColumn3.Width = 75;
-            // 
-            // dataGridViewTextBoxColumn4
-            // 
-            this.dataGridViewTextBoxColumn4.DataPropertyName = "ProcessorNameString";
-            this.dataGridViewTextBoxColumn4.HeaderText = "Processor";
-            this.dataGridViewTextBoxColumn4.MinimumWidth = 6;
-            this.dataGridViewTextBoxColumn4.Name = "dataGridViewTextBoxColumn4";
-            this.dataGridViewTextBoxColumn4.ReadOnly = true;
-            this.dataGridViewTextBoxColumn4.Width = 101;
-            // 
-            // dataGridViewTextBoxColumn5
-            // 
-            this.dataGridViewTextBoxColumn5.DataPropertyName = "cores_per_socket";
-            this.dataGridViewTextBoxColumn5.HeaderText = "Cores Per Socket";
-            this.dataGridViewTextBoxColumn5.MinimumWidth = 6;
-            this.dataGridViewTextBoxColumn5.Name = "dataGridViewTextBoxColumn5";
-            this.dataGridViewTextBoxColumn5.ReadOnly = true;
-            this.dataGridViewTextBoxColumn5.Width = 135;
-            // 
-            // dataGridViewTextBoxColumn6
-            // 
-            this.dataGridViewTextBoxColumn6.DataPropertyName = "socket_count";
-            this.dataGridViewTextBoxColumn6.HeaderText = "Sockets";
-            this.dataGridViewTextBoxColumn6.MinimumWidth = 6;
-            this.dataGridViewTextBoxColumn6.Name = "dataGridViewTextBoxColumn6";
-            this.dataGridViewTextBoxColumn6.ReadOnly = true;
-            this.dataGridViewTextBoxColumn6.Width = 87;
-            // 
-            // dataGridViewTextBoxColumn7
-            // 
-            this.dataGridViewTextBoxColumn7.DataPropertyName = "cpu_count";
-            this.dataGridViewTextBoxColumn7.HeaderText = "CPUs";
-            this.dataGridViewTextBoxColumn7.MinimumWidth = 6;
-            this.dataGridViewTextBoxColumn7.Name = "dataGridViewTextBoxColumn7";
-            this.dataGridViewTextBoxColumn7.ReadOnly = true;
-            this.dataGridViewTextBoxColumn7.Width = 72;
-            // 
-            // dataGridViewTextBoxColumn8
-            // 
-            this.dataGridViewTextBoxColumn8.DataPropertyName = "cpu_core_count";
-            this.dataGridViewTextBoxColumn8.HeaderText = "CPU Cores";
-            this.dataGridViewTextBoxColumn8.MinimumWidth = 6;
-            this.dataGridViewTextBoxColumn8.Name = "dataGridViewTextBoxColumn8";
-            this.dataGridViewTextBoxColumn8.ReadOnly = true;
-            this.dataGridViewTextBoxColumn8.Width = 98;
-            // 
-            // dataGridViewTextBoxColumn9
-            // 
-            this.dataGridViewTextBoxColumn9.DataPropertyName = "physical_cpu_count";
-            this.dataGridViewTextBoxColumn9.HeaderText = "Physical CPUs";
-            this.dataGridViewTextBoxColumn9.MinimumWidth = 6;
-            this.dataGridViewTextBoxColumn9.Name = "dataGridViewTextBoxColumn9";
-            this.dataGridViewTextBoxColumn9.ReadOnly = true;
-            this.dataGridViewTextBoxColumn9.Width = 118;
-            // 
-            // dataGridViewTextBoxColumn10
-            // 
-            this.dataGridViewTextBoxColumn10.DataPropertyName = "hyperthread_ratio";
-            this.dataGridViewTextBoxColumn10.HeaderText = "HT Ratio";
-            this.dataGridViewTextBoxColumn10.MinimumWidth = 6;
-            this.dataGridViewTextBoxColumn10.Name = "dataGridViewTextBoxColumn10";
-            this.dataGridViewTextBoxColumn10.ReadOnly = true;
-            this.dataGridViewTextBoxColumn10.ToolTipText = "Hyperthread Ratio";
-            this.dataGridViewTextBoxColumn10.Width = 86;
-            // 
-            // dataGridViewTextBoxColumn11
-            // 
-            this.dataGridViewTextBoxColumn11.DataPropertyName = "numa_node_count";
-            this.dataGridViewTextBoxColumn11.HeaderText = "NUMA nodes";
-            this.dataGridViewTextBoxColumn11.MinimumWidth = 6;
-            this.dataGridViewTextBoxColumn11.Name = "dataGridViewTextBoxColumn11";
-            this.dataGridViewTextBoxColumn11.ReadOnly = true;
-            this.dataGridViewTextBoxColumn11.Width = 110;
-            // 
-            // dataGridViewTextBoxColumn12
-            // 
-            this.dataGridViewTextBoxColumn12.DataPropertyName = "softnuma_configuration_desc";
-            this.dataGridViewTextBoxColumn12.HeaderText = "Soft NUMA";
-            this.dataGridViewTextBoxColumn12.MinimumWidth = 6;
-            this.dataGridViewTextBoxColumn12.Name = "dataGridViewTextBoxColumn12";
-            this.dataGridViewTextBoxColumn12.ReadOnly = true;
-            this.dataGridViewTextBoxColumn12.Width = 98;
-            // 
-            // dataGridViewTextBoxColumn13
-            // 
-            this.dataGridViewTextBoxColumn13.DataPropertyName = "affinity_type_desc";
-            this.dataGridViewTextBoxColumn13.HeaderText = "Affinity";
-            this.dataGridViewTextBoxColumn13.MinimumWidth = 6;
-            this.dataGridViewTextBoxColumn13.Name = "dataGridViewTextBoxColumn13";
-            this.dataGridViewTextBoxColumn13.ReadOnly = true;
-            this.dataGridViewTextBoxColumn13.Width = 79;
-            // 
-            // dataGridViewTextBoxColumn14
-            // 
-            this.dataGridViewTextBoxColumn14.DataPropertyName = "PhysicalMemoryGB";
-            dataGridViewCellStyle7.Format = "N1";
-            this.dataGridViewTextBoxColumn14.DefaultCellStyle = dataGridViewCellStyle7;
-            this.dataGridViewTextBoxColumn14.HeaderText = "Physical Memory (GB)";
-            this.dataGridViewTextBoxColumn14.MinimumWidth = 6;
-            this.dataGridViewTextBoxColumn14.Name = "dataGridViewTextBoxColumn14";
-            this.dataGridViewTextBoxColumn14.ReadOnly = true;
-            this.dataGridViewTextBoxColumn14.Width = 135;
-            // 
-            // dataGridViewTextBoxColumn15
-            // 
-            this.dataGridViewTextBoxColumn15.DataPropertyName = "BufferPoolMB";
-            dataGridViewCellStyle8.Format = "N0";
-            this.dataGridViewTextBoxColumn15.DefaultCellStyle = dataGridViewCellStyle8;
-            this.dataGridViewTextBoxColumn15.HeaderText = "Buffer Pool (MB)";
-            this.dataGridViewTextBoxColumn15.MinimumWidth = 6;
-            this.dataGridViewTextBoxColumn15.Name = "dataGridViewTextBoxColumn15";
-            this.dataGridViewTextBoxColumn15.ReadOnly = true;
-            this.dataGridViewTextBoxColumn15.Width = 102;
-            // 
-            // dataGridViewTextBoxColumn16
-            // 
-            this.dataGridViewTextBoxColumn16.DataPropertyName = "PctMemoryAllocatedToBufferPool";
-            dataGridViewCellStyle9.Format = "P1";
-            this.dataGridViewTextBoxColumn16.DefaultCellStyle = dataGridViewCellStyle9;
-            this.dataGridViewTextBoxColumn16.HeaderText = "% Memory allocated to buffer pool";
-            this.dataGridViewTextBoxColumn16.MinimumWidth = 6;
-            this.dataGridViewTextBoxColumn16.Name = "dataGridViewTextBoxColumn16";
-            this.dataGridViewTextBoxColumn16.ReadOnly = true;
-            this.dataGridViewTextBoxColumn16.Width = 168;
-            // 
-            // dataGridViewTextBoxColumn17
-            // 
-            this.dataGridViewTextBoxColumn17.DataPropertyName = "MemoryNotAllocatedToBufferPoolGB";
-            dataGridViewCellStyle10.Format = "N1";
-            this.dataGridViewTextBoxColumn17.DefaultCellStyle = dataGridViewCellStyle10;
-            this.dataGridViewTextBoxColumn17.HeaderText = "Memory not allocated to buffer pool (GB)";
-            this.dataGridViewTextBoxColumn17.MinimumWidth = 6;
-            this.dataGridViewTextBoxColumn17.Name = "dataGridViewTextBoxColumn17";
-            this.dataGridViewTextBoxColumn17.ReadOnly = true;
-            this.dataGridViewTextBoxColumn17.Width = 175;
-            // 
-            // dataGridViewTextBoxColumn18
-            // 
-            this.dataGridViewTextBoxColumn18.DataPropertyName = "sql_memory_model_desc";
-            this.dataGridViewTextBoxColumn18.HeaderText = "Memory Model";
-            this.dataGridViewTextBoxColumn18.MinimumWidth = 6;
-            this.dataGridViewTextBoxColumn18.Name = "dataGridViewTextBoxColumn18";
-            this.dataGridViewTextBoxColumn18.ReadOnly = true;
-            this.dataGridViewTextBoxColumn18.Width = 118;
-            // 
-            // dataGridViewTextBoxColumn19
-            // 
-            this.dataGridViewTextBoxColumn19.DataPropertyName = "OfflineSchedulers";
-            this.dataGridViewTextBoxColumn19.HeaderText = "Offline Schedulers";
-            this.dataGridViewTextBoxColumn19.MinimumWidth = 6;
-            this.dataGridViewTextBoxColumn19.Name = "dataGridViewTextBoxColumn19";
-            this.dataGridViewTextBoxColumn19.ReadOnly = true;
-            this.dataGridViewTextBoxColumn19.Width = 140;
-            // 
-            // dataGridViewTextBoxColumn20
-            // 
-            this.dataGridViewTextBoxColumn20.DataPropertyName = "ActivePowerPlan";
-            this.dataGridViewTextBoxColumn20.HeaderText = "Power Plan";
-            this.dataGridViewTextBoxColumn20.MinimumWidth = 6;
-            this.dataGridViewTextBoxColumn20.Name = "dataGridViewTextBoxColumn20";
-            this.dataGridViewTextBoxColumn20.ReadOnly = true;
-            // 
-            // dataGridViewTextBoxColumn21
-            // 
-            this.dataGridViewTextBoxColumn21.DataPropertyName = "os_priority_class_desc";
-            this.dataGridViewTextBoxColumn21.HeaderText = "Priority";
-            this.dataGridViewTextBoxColumn21.MinimumWidth = 6;
-            this.dataGridViewTextBoxColumn21.Name = "dataGridViewTextBoxColumn21";
-            this.dataGridViewTextBoxColumn21.ReadOnly = true;
-            this.dataGridViewTextBoxColumn21.Width = 81;
-            // 
-            // dataGridViewTextBoxColumn22
-            // 
-            this.dataGridViewTextBoxColumn22.DataPropertyName = "InstantFileInitializationEnabled";
-            this.dataGridViewTextBoxColumn22.HeaderText = "Instant File Initialization";
-            this.dataGridViewTextBoxColumn22.MinimumWidth = 6;
-            this.dataGridViewTextBoxColumn22.Name = "dataGridViewTextBoxColumn22";
-            this.dataGridViewTextBoxColumn22.ReadOnly = true;
-            this.dataGridViewTextBoxColumn22.Width = 166;
-            // 
-            // dataGridViewTextBoxColumn23
-            // 
-            this.dataGridViewTextBoxColumn23.DataPropertyName = "Instance";
-            this.dataGridViewTextBoxColumn23.HeaderText = "Instance";
-            this.dataGridViewTextBoxColumn23.MinimumWidth = 6;
-            this.dataGridViewTextBoxColumn23.Name = "dataGridViewTextBoxColumn23";
-            this.dataGridViewTextBoxColumn23.ReadOnly = true;
-            this.dataGridViewTextBoxColumn23.Width = 90;
-            // 
-            // dataGridViewTextBoxColumn24
-            // 
-            this.dataGridViewTextBoxColumn24.DataPropertyName = "ChangeDate";
-            this.dataGridViewTextBoxColumn24.HeaderText = "Change Date";
-            this.dataGridViewTextBoxColumn24.MinimumWidth = 6;
-            this.dataGridViewTextBoxColumn24.Name = "dataGridViewTextBoxColumn24";
-            this.dataGridViewTextBoxColumn24.ReadOnly = true;
-            this.dataGridViewTextBoxColumn24.Width = 110;
-            // 
-            // dataGridViewTextBoxColumn25
-            // 
-            this.dataGridViewTextBoxColumn25.DataPropertyName = "SystemManufacturerOld";
-            this.dataGridViewTextBoxColumn25.HeaderText = "Manufacturer (Old)";
-            this.dataGridViewTextBoxColumn25.MinimumWidth = 6;
-            this.dataGridViewTextBoxColumn25.Name = "dataGridViewTextBoxColumn25";
-            this.dataGridViewTextBoxColumn25.ReadOnly = true;
-            this.dataGridViewTextBoxColumn25.Width = 144;
-            // 
-            // dataGridViewTextBoxColumn26
-            // 
-            this.dataGridViewTextBoxColumn26.DataPropertyName = "SystemManufacturerNew";
-            this.dataGridViewTextBoxColumn26.HeaderText = "Manufacturer (New)";
-            this.dataGridViewTextBoxColumn26.MinimumWidth = 6;
-            this.dataGridViewTextBoxColumn26.Name = "dataGridViewTextBoxColumn26";
-            this.dataGridViewTextBoxColumn26.ReadOnly = true;
-            this.dataGridViewTextBoxColumn26.Width = 148;
-            // 
-            // dataGridViewTextBoxColumn27
-            // 
-            this.dataGridViewTextBoxColumn27.DataPropertyName = "SystemProductNameOld";
-            this.dataGridViewTextBoxColumn27.HeaderText = "Model (Old)";
-            this.dataGridViewTextBoxColumn27.MinimumWidth = 6;
-            this.dataGridViewTextBoxColumn27.Name = "dataGridViewTextBoxColumn27";
-            this.dataGridViewTextBoxColumn27.ReadOnly = true;
-            this.dataGridViewTextBoxColumn27.Width = 102;
-            // 
-            // dataGridViewTextBoxColumn28
-            // 
-            this.dataGridViewTextBoxColumn28.DataPropertyName = "SystemProductNameNew";
-            this.dataGridViewTextBoxColumn28.HeaderText = "Model (New)";
-            this.dataGridViewTextBoxColumn28.MinimumWidth = 6;
-            this.dataGridViewTextBoxColumn28.Name = "dataGridViewTextBoxColumn28";
-            this.dataGridViewTextBoxColumn28.ReadOnly = true;
-            this.dataGridViewTextBoxColumn28.Width = 107;
-            // 
-            // dataGridViewTextBoxColumn29
-            // 
-            this.dataGridViewTextBoxColumn29.DataPropertyName = "Processor_old";
-            this.dataGridViewTextBoxColumn29.HeaderText = "Processor (Old)";
-            this.dataGridViewTextBoxColumn29.MinimumWidth = 6;
-            this.dataGridViewTextBoxColumn29.Name = "dataGridViewTextBoxColumn29";
-            this.dataGridViewTextBoxColumn29.ReadOnly = true;
-            this.dataGridViewTextBoxColumn29.Width = 126;
-            // 
-            // dataGridViewTextBoxColumn30
-            // 
-            this.dataGridViewTextBoxColumn30.DataPropertyName = "Processor_new";
-            this.dataGridViewTextBoxColumn30.HeaderText = "Processor (New)";
-            this.dataGridViewTextBoxColumn30.MinimumWidth = 6;
-            this.dataGridViewTextBoxColumn30.Name = "dataGridViewTextBoxColumn30";
-            this.dataGridViewTextBoxColumn30.ReadOnly = true;
-            this.dataGridViewTextBoxColumn30.Width = 130;
-            // 
-            // dataGridViewTextBoxColumn31
-            // 
-            this.dataGridViewTextBoxColumn31.DataPropertyName = "cpu_count_old";
-            this.dataGridViewTextBoxColumn31.HeaderText = "CPUs (Old)";
-            this.dataGridViewTextBoxColumn31.MinimumWidth = 6;
-            this.dataGridViewTextBoxColumn31.Name = "dataGridViewTextBoxColumn31";
-            this.dataGridViewTextBoxColumn31.ReadOnly = true;
-            // 
-            // dataGridViewTextBoxColumn32
-            // 
-            this.dataGridViewTextBoxColumn32.DataPropertyName = "cpu_count_new";
-            this.dataGridViewTextBoxColumn32.HeaderText = "CPUs (new)";
-            this.dataGridViewTextBoxColumn32.MinimumWidth = 6;
-            this.dataGridViewTextBoxColumn32.Name = "dataGridViewTextBoxColumn32";
-            this.dataGridViewTextBoxColumn32.ReadOnly = true;
-            this.dataGridViewTextBoxColumn32.Width = 102;
-            // 
-            // dataGridViewTextBoxColumn33
-            // 
-            this.dataGridViewTextBoxColumn33.DataPropertyName = "cores_per_socket_old";
-            this.dataGridViewTextBoxColumn33.HeaderText = "Core per Socket (Old)";
-            this.dataGridViewTextBoxColumn33.MinimumWidth = 6;
-            this.dataGridViewTextBoxColumn33.Name = "dataGridViewTextBoxColumn33";
-            this.dataGridViewTextBoxColumn33.ReadOnly = true;
-            this.dataGridViewTextBoxColumn33.Width = 131;
-            // 
-            // dataGridViewTextBoxColumn34
-            // 
-            this.dataGridViewTextBoxColumn34.DataPropertyName = "cores_per_socket_new";
-            this.dataGridViewTextBoxColumn34.HeaderText = "Cores per Socket (New)";
-            this.dataGridViewTextBoxColumn34.MinimumWidth = 6;
-            this.dataGridViewTextBoxColumn34.Name = "dataGridViewTextBoxColumn34";
-            this.dataGridViewTextBoxColumn34.ReadOnly = true;
-            this.dataGridViewTextBoxColumn34.Width = 137;
-            // 
-            // dataGridViewTextBoxColumn35
-            // 
-            this.dataGridViewTextBoxColumn35.DataPropertyName = "socket_count_old";
-            this.dataGridViewTextBoxColumn35.HeaderText = "Socket Count (Old)";
-            this.dataGridViewTextBoxColumn35.MinimumWidth = 6;
-            this.dataGridViewTextBoxColumn35.Name = "dataGridViewTextBoxColumn35";
-            this.dataGridViewTextBoxColumn35.ReadOnly = true;
-            this.dataGridViewTextBoxColumn35.Width = 115;
-            // 
-            // dataGridViewTextBoxColumn36
-            // 
-            this.dataGridViewTextBoxColumn36.DataPropertyName = "socket_count_new";
-            this.dataGridViewTextBoxColumn36.HeaderText = "Socket Count (New)";
-            this.dataGridViewTextBoxColumn36.MinimumWidth = 6;
-            this.dataGridViewTextBoxColumn36.Name = "dataGridViewTextBoxColumn36";
-            this.dataGridViewTextBoxColumn36.ReadOnly = true;
-            this.dataGridViewTextBoxColumn36.Width = 115;
-            // 
-            // dataGridViewTextBoxColumn37
-            // 
-            this.dataGridViewTextBoxColumn37.DataPropertyName = "hyperthread_ratio_old";
-            this.dataGridViewTextBoxColumn37.HeaderText = "HT Ratio (Old)";
-            this.dataGridViewTextBoxColumn37.MinimumWidth = 6;
-            this.dataGridViewTextBoxColumn37.Name = "dataGridViewTextBoxColumn37";
-            this.dataGridViewTextBoxColumn37.ReadOnly = true;
-            this.dataGridViewTextBoxColumn37.Width = 118;
-            // 
-            // dataGridViewTextBoxColumn38
-            // 
-            this.dataGridViewTextBoxColumn38.DataPropertyName = "hyperthread_ratio_new";
-            this.dataGridViewTextBoxColumn38.HeaderText = "HT Ratio (New)";
-            this.dataGridViewTextBoxColumn38.MinimumWidth = 6;
-            this.dataGridViewTextBoxColumn38.Name = "dataGridViewTextBoxColumn38";
-            this.dataGridViewTextBoxColumn38.ReadOnly = true;
-            this.dataGridViewTextBoxColumn38.Width = 123;
-            // 
-            // dataGridViewTextBoxColumn39
-            // 
-            this.dataGridViewTextBoxColumn39.DataPropertyName = "physical_memory_gb_old";
-            dataGridViewCellStyle11.Format = "N1";
-            this.dataGridViewTextBoxColumn39.DefaultCellStyle = dataGridViewCellStyle11;
-            this.dataGridViewTextBoxColumn39.HeaderText = "Physical Memory (Old)";
-            this.dataGridViewTextBoxColumn39.MinimumWidth = 6;
-            this.dataGridViewTextBoxColumn39.Name = "dataGridViewTextBoxColumn39";
-            this.dataGridViewTextBoxColumn39.ReadOnly = true;
-            this.dataGridViewTextBoxColumn39.Width = 135;
-            // 
-            // dataGridViewTextBoxColumn40
-            // 
-            this.dataGridViewTextBoxColumn40.DataPropertyName = "physical_memory_gb_new";
-            dataGridViewCellStyle12.Format = "N1";
-            this.dataGridViewTextBoxColumn40.DefaultCellStyle = dataGridViewCellStyle12;
-            this.dataGridViewTextBoxColumn40.HeaderText = "Physical Memory (New)";
-            this.dataGridViewTextBoxColumn40.MinimumWidth = 6;
-            this.dataGridViewTextBoxColumn40.Name = "dataGridViewTextBoxColumn40";
-            this.dataGridViewTextBoxColumn40.ReadOnly = true;
-            this.dataGridViewTextBoxColumn40.Width = 135;
             // 
             // Instance
             // 
@@ -713,7 +196,7 @@
             this.ChangeDate.MinimumWidth = 6;
             this.ChangeDate.Name = "ChangeDate";
             this.ChangeDate.ReadOnly = true;
-            this.ChangeDate.Width = 120;
+            this.ChangeDate.Width = 110;
             // 
             // SystemManufacturerOld
             // 
@@ -861,6 +344,70 @@
             this.physical_memory_gb_new.Name = "physical_memory_gb_new";
             this.physical_memory_gb_new.ReadOnly = true;
             this.physical_memory_gb_new.Width = 135;
+            // 
+            // splitContainer1
+            // 
+            this.splitContainer1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.splitContainer1.Location = new System.Drawing.Point(0, 0);
+            this.splitContainer1.Name = "splitContainer1";
+            this.splitContainer1.Orientation = System.Windows.Forms.Orientation.Horizontal;
+            // 
+            // splitContainer1.Panel1
+            // 
+            this.splitContainer1.Panel1.Controls.Add(this.dgvHardware);
+            this.splitContainer1.Panel1.Controls.Add(this.toolStrip1);
+            // 
+            // splitContainer1.Panel2
+            // 
+            this.splitContainer1.Panel2.Controls.Add(this.dgv);
+            this.splitContainer1.Panel2.Controls.Add(this.toolStrip2);
+            this.splitContainer1.Size = new System.Drawing.Size(850, 629);
+            this.splitContainer1.SplitterDistance = 314;
+            this.splitContainer1.TabIndex = 1;
+            // 
+            // dgvHardware
+            // 
+            this.dgvHardware.AllowUserToAddRows = false;
+            this.dgvHardware.AllowUserToDeleteRows = false;
+            this.dgvHardware.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.DisplayedCells;
+            this.dgvHardware.BackgroundColor = System.Drawing.Color.White;
+            this.dgvHardware.ClipboardCopyMode = System.Windows.Forms.DataGridViewClipboardCopyMode.EnableAlwaysIncludeHeaderText;
+            this.dgvHardware.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.dgvHardware.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
+            this.colInstance,
+            this.colManufacturer,
+            this.colModel,
+            this.colProcessor,
+            this.colCoresPerSocket,
+            this.colSockets,
+            this.colCPUs,
+            this.colCPUCores,
+            this.colPhysicalCPUs,
+            this.colHTRatio,
+            this.colNUMA,
+            this.colSoftNUMA,
+            this.colAffinity,
+            this.colPhysicalMemory,
+            this.colBufferPool,
+            this.colPctMemoryBufferPool,
+            this.colMemNotAllocated,
+            this.colMemoryModel,
+            this.colPriority,
+            this.colMaxWorkerCount,
+            this.colSchedulerCount,
+            this.colOfflineSchedulers,
+            this.colPowerPlan,
+            this.colInstantFileInitialization});
+            this.dgvHardware.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.dgvHardware.Location = new System.Drawing.Point(0, 27);
+            this.dgvHardware.Name = "dgvHardware";
+            this.dgvHardware.ReadOnly = true;
+            this.dgvHardware.RowHeadersVisible = false;
+            this.dgvHardware.RowHeadersWidth = 51;
+            this.dgvHardware.RowTemplate.Height = 24;
+            this.dgvHardware.Size = new System.Drawing.Size(850, 287);
+            this.dgvHardware.TabIndex = 0;
+            this.dgvHardware.RowsAdded += new System.Windows.Forms.DataGridViewRowsAddedEventHandler(this.dgvHardware_RowsAdded);
             // 
             // colInstance
             // 
@@ -1085,6 +632,461 @@
             this.colInstantFileInitialization.Name = "colInstantFileInitialization";
             this.colInstantFileInitialization.ReadOnly = true;
             this.colInstantFileInitialization.Width = 166;
+            // 
+            // toolStrip1
+            // 
+            this.toolStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
+            this.toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.toolStripLabel1,
+            this.tsRefreshHardware,
+            this.tsCopy});
+            this.toolStrip1.Location = new System.Drawing.Point(0, 0);
+            this.toolStrip1.Name = "toolStrip1";
+            this.toolStrip1.Size = new System.Drawing.Size(850, 27);
+            this.toolStrip1.TabIndex = 1;
+            this.toolStrip1.Text = "toolStrip1";
+            // 
+            // toolStripLabel1
+            // 
+            this.toolStripLabel1.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
+            this.toolStripLabel1.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
+            this.toolStripLabel1.Name = "toolStripLabel1";
+            this.toolStripLabel1.Size = new System.Drawing.Size(77, 24);
+            this.toolStripLabel1.Text = "Hardware";
+            // 
+            // tsRefreshHardware
+            // 
+            this.tsRefreshHardware.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.tsRefreshHardware.Image = global::DBAChecksGUI.Properties.Resources._112_RefreshArrow_Green_16x16_72;
+            this.tsRefreshHardware.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tsRefreshHardware.Name = "tsRefreshHardware";
+            this.tsRefreshHardware.Size = new System.Drawing.Size(29, 24);
+            this.tsRefreshHardware.Text = "Refresh";
+            this.tsRefreshHardware.Click += new System.EventHandler(this.tsRefreshHardware_Click);
+            // 
+            // tsCopy
+            // 
+            this.tsCopy.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.tsCopy.Image = global::DBAChecksGUI.Properties.Resources.ASX_Copy_blue_16x;
+            this.tsCopy.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tsCopy.Name = "tsCopy";
+            this.tsCopy.Size = new System.Drawing.Size(29, 24);
+            this.tsCopy.Text = "Copy";
+            this.tsCopy.Click += new System.EventHandler(this.tsCopy_Click);
+            // 
+            // toolStrip2
+            // 
+            this.toolStrip2.ImageScalingSize = new System.Drawing.Size(20, 20);
+            this.toolStrip2.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.toolStripLabel2,
+            this.tsRefreshHistory,
+            this.tsCopyHistory});
+            this.toolStrip2.Location = new System.Drawing.Point(0, 0);
+            this.toolStrip2.Name = "toolStrip2";
+            this.toolStrip2.Size = new System.Drawing.Size(850, 27);
+            this.toolStrip2.TabIndex = 1;
+            this.toolStrip2.Text = "toolStrip2";
+            // 
+            // toolStripLabel2
+            // 
+            this.toolStripLabel2.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
+            this.toolStripLabel2.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
+            this.toolStripLabel2.Name = "toolStripLabel2";
+            this.toolStripLabel2.Size = new System.Drawing.Size(61, 24);
+            this.toolStripLabel2.Text = "History";
+            // 
+            // tsRefreshHistory
+            // 
+            this.tsRefreshHistory.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.tsRefreshHistory.Image = global::DBAChecksGUI.Properties.Resources._112_RefreshArrow_Green_16x16_72;
+            this.tsRefreshHistory.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tsRefreshHistory.Name = "tsRefreshHistory";
+            this.tsRefreshHistory.Size = new System.Drawing.Size(29, 24);
+            this.tsRefreshHistory.Text = "Refresh";
+            this.tsRefreshHistory.Click += new System.EventHandler(this.tsRefreshHistory_Click);
+            // 
+            // tsCopyHistory
+            // 
+            this.tsCopyHistory.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.tsCopyHistory.Image = global::DBAChecksGUI.Properties.Resources.ASX_Copy_blue_16x;
+            this.tsCopyHistory.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tsCopyHistory.Name = "tsCopyHistory";
+            this.tsCopyHistory.Size = new System.Drawing.Size(29, 24);
+            this.tsCopyHistory.Text = "Copy";
+            this.tsCopyHistory.Click += new System.EventHandler(this.tsCopyHistory_Click);
+            // 
+            // dataGridViewTextBoxColumn1
+            // 
+            this.dataGridViewTextBoxColumn1.DataPropertyName = "ConnectionID";
+            this.dataGridViewTextBoxColumn1.HeaderText = "Instance";
+            this.dataGridViewTextBoxColumn1.MinimumWidth = 6;
+            this.dataGridViewTextBoxColumn1.Name = "dataGridViewTextBoxColumn1";
+            this.dataGridViewTextBoxColumn1.ReadOnly = true;
+            this.dataGridViewTextBoxColumn1.Width = 90;
+            // 
+            // dataGridViewTextBoxColumn2
+            // 
+            this.dataGridViewTextBoxColumn2.DataPropertyName = "SystemManufacturer";
+            this.dataGridViewTextBoxColumn2.HeaderText = "Manufacturer";
+            this.dataGridViewTextBoxColumn2.MinimumWidth = 6;
+            this.dataGridViewTextBoxColumn2.Name = "dataGridViewTextBoxColumn2";
+            this.dataGridViewTextBoxColumn2.ReadOnly = true;
+            this.dataGridViewTextBoxColumn2.Width = 121;
+            // 
+            // dataGridViewTextBoxColumn3
+            // 
+            this.dataGridViewTextBoxColumn3.DataPropertyName = "SystemProductName";
+            this.dataGridViewTextBoxColumn3.HeaderText = "Model";
+            this.dataGridViewTextBoxColumn3.MinimumWidth = 6;
+            this.dataGridViewTextBoxColumn3.Name = "dataGridViewTextBoxColumn3";
+            this.dataGridViewTextBoxColumn3.ReadOnly = true;
+            this.dataGridViewTextBoxColumn3.Width = 75;
+            // 
+            // dataGridViewTextBoxColumn4
+            // 
+            this.dataGridViewTextBoxColumn4.DataPropertyName = "ProcessorNameString";
+            this.dataGridViewTextBoxColumn4.HeaderText = "Processor";
+            this.dataGridViewTextBoxColumn4.MinimumWidth = 6;
+            this.dataGridViewTextBoxColumn4.Name = "dataGridViewTextBoxColumn4";
+            this.dataGridViewTextBoxColumn4.ReadOnly = true;
+            this.dataGridViewTextBoxColumn4.Width = 101;
+            // 
+            // dataGridViewTextBoxColumn5
+            // 
+            this.dataGridViewTextBoxColumn5.DataPropertyName = "cores_per_socket";
+            this.dataGridViewTextBoxColumn5.HeaderText = "Cores Per Socket";
+            this.dataGridViewTextBoxColumn5.MinimumWidth = 6;
+            this.dataGridViewTextBoxColumn5.Name = "dataGridViewTextBoxColumn5";
+            this.dataGridViewTextBoxColumn5.ReadOnly = true;
+            this.dataGridViewTextBoxColumn5.Width = 135;
+            // 
+            // dataGridViewTextBoxColumn6
+            // 
+            this.dataGridViewTextBoxColumn6.DataPropertyName = "socket_count";
+            this.dataGridViewTextBoxColumn6.HeaderText = "Sockets";
+            this.dataGridViewTextBoxColumn6.MinimumWidth = 6;
+            this.dataGridViewTextBoxColumn6.Name = "dataGridViewTextBoxColumn6";
+            this.dataGridViewTextBoxColumn6.ReadOnly = true;
+            this.dataGridViewTextBoxColumn6.Width = 87;
+            // 
+            // dataGridViewTextBoxColumn7
+            // 
+            this.dataGridViewTextBoxColumn7.DataPropertyName = "cpu_count";
+            this.dataGridViewTextBoxColumn7.HeaderText = "CPUs";
+            this.dataGridViewTextBoxColumn7.MinimumWidth = 6;
+            this.dataGridViewTextBoxColumn7.Name = "dataGridViewTextBoxColumn7";
+            this.dataGridViewTextBoxColumn7.ReadOnly = true;
+            this.dataGridViewTextBoxColumn7.Width = 72;
+            // 
+            // dataGridViewTextBoxColumn8
+            // 
+            this.dataGridViewTextBoxColumn8.DataPropertyName = "cpu_core_count";
+            this.dataGridViewTextBoxColumn8.HeaderText = "CPU Cores";
+            this.dataGridViewTextBoxColumn8.MinimumWidth = 6;
+            this.dataGridViewTextBoxColumn8.Name = "dataGridViewTextBoxColumn8";
+            this.dataGridViewTextBoxColumn8.ReadOnly = true;
+            this.dataGridViewTextBoxColumn8.Width = 98;
+            // 
+            // dataGridViewTextBoxColumn9
+            // 
+            this.dataGridViewTextBoxColumn9.DataPropertyName = "physical_cpu_count";
+            this.dataGridViewTextBoxColumn9.HeaderText = "Physical CPUs";
+            this.dataGridViewTextBoxColumn9.MinimumWidth = 6;
+            this.dataGridViewTextBoxColumn9.Name = "dataGridViewTextBoxColumn9";
+            this.dataGridViewTextBoxColumn9.ReadOnly = true;
+            this.dataGridViewTextBoxColumn9.Width = 118;
+            // 
+            // dataGridViewTextBoxColumn10
+            // 
+            this.dataGridViewTextBoxColumn10.DataPropertyName = "hyperthread_ratio";
+            this.dataGridViewTextBoxColumn10.HeaderText = "HT Ratio";
+            this.dataGridViewTextBoxColumn10.MinimumWidth = 6;
+            this.dataGridViewTextBoxColumn10.Name = "dataGridViewTextBoxColumn10";
+            this.dataGridViewTextBoxColumn10.ReadOnly = true;
+            this.dataGridViewTextBoxColumn10.ToolTipText = "Hyperthread Ratio";
+            this.dataGridViewTextBoxColumn10.Width = 86;
+            // 
+            // dataGridViewTextBoxColumn11
+            // 
+            this.dataGridViewTextBoxColumn11.DataPropertyName = "numa_node_count";
+            this.dataGridViewTextBoxColumn11.HeaderText = "NUMA nodes";
+            this.dataGridViewTextBoxColumn11.MinimumWidth = 6;
+            this.dataGridViewTextBoxColumn11.Name = "dataGridViewTextBoxColumn11";
+            this.dataGridViewTextBoxColumn11.ReadOnly = true;
+            this.dataGridViewTextBoxColumn11.Width = 110;
+            // 
+            // dataGridViewTextBoxColumn12
+            // 
+            this.dataGridViewTextBoxColumn12.DataPropertyName = "softnuma_configuration_desc";
+            this.dataGridViewTextBoxColumn12.HeaderText = "Soft NUMA";
+            this.dataGridViewTextBoxColumn12.MinimumWidth = 6;
+            this.dataGridViewTextBoxColumn12.Name = "dataGridViewTextBoxColumn12";
+            this.dataGridViewTextBoxColumn12.ReadOnly = true;
+            this.dataGridViewTextBoxColumn12.Width = 98;
+            // 
+            // dataGridViewTextBoxColumn13
+            // 
+            this.dataGridViewTextBoxColumn13.DataPropertyName = "affinity_type_desc";
+            this.dataGridViewTextBoxColumn13.HeaderText = "Affinity";
+            this.dataGridViewTextBoxColumn13.MinimumWidth = 6;
+            this.dataGridViewTextBoxColumn13.Name = "dataGridViewTextBoxColumn13";
+            this.dataGridViewTextBoxColumn13.ReadOnly = true;
+            this.dataGridViewTextBoxColumn13.Width = 79;
+            // 
+            // dataGridViewTextBoxColumn14
+            // 
+            this.dataGridViewTextBoxColumn14.DataPropertyName = "PhysicalMemoryGB";
+            dataGridViewCellStyle7.Format = "N1";
+            this.dataGridViewTextBoxColumn14.DefaultCellStyle = dataGridViewCellStyle7;
+            this.dataGridViewTextBoxColumn14.HeaderText = "Physical Memory (GB)";
+            this.dataGridViewTextBoxColumn14.MinimumWidth = 6;
+            this.dataGridViewTextBoxColumn14.Name = "dataGridViewTextBoxColumn14";
+            this.dataGridViewTextBoxColumn14.ReadOnly = true;
+            this.dataGridViewTextBoxColumn14.Width = 135;
+            // 
+            // dataGridViewTextBoxColumn15
+            // 
+            this.dataGridViewTextBoxColumn15.DataPropertyName = "BufferPoolMB";
+            dataGridViewCellStyle8.Format = "N0";
+            this.dataGridViewTextBoxColumn15.DefaultCellStyle = dataGridViewCellStyle8;
+            this.dataGridViewTextBoxColumn15.HeaderText = "Buffer Pool (MB)";
+            this.dataGridViewTextBoxColumn15.MinimumWidth = 6;
+            this.dataGridViewTextBoxColumn15.Name = "dataGridViewTextBoxColumn15";
+            this.dataGridViewTextBoxColumn15.ReadOnly = true;
+            this.dataGridViewTextBoxColumn15.Width = 102;
+            // 
+            // dataGridViewTextBoxColumn16
+            // 
+            this.dataGridViewTextBoxColumn16.DataPropertyName = "PctMemoryAllocatedToBufferPool";
+            dataGridViewCellStyle9.Format = "P1";
+            this.dataGridViewTextBoxColumn16.DefaultCellStyle = dataGridViewCellStyle9;
+            this.dataGridViewTextBoxColumn16.HeaderText = "% Memory allocated to buffer pool";
+            this.dataGridViewTextBoxColumn16.MinimumWidth = 6;
+            this.dataGridViewTextBoxColumn16.Name = "dataGridViewTextBoxColumn16";
+            this.dataGridViewTextBoxColumn16.ReadOnly = true;
+            this.dataGridViewTextBoxColumn16.Width = 168;
+            // 
+            // dataGridViewTextBoxColumn17
+            // 
+            this.dataGridViewTextBoxColumn17.DataPropertyName = "MemoryNotAllocatedToBufferPoolGB";
+            dataGridViewCellStyle10.Format = "N1";
+            this.dataGridViewTextBoxColumn17.DefaultCellStyle = dataGridViewCellStyle10;
+            this.dataGridViewTextBoxColumn17.HeaderText = "Memory not allocated to buffer pool (GB)";
+            this.dataGridViewTextBoxColumn17.MinimumWidth = 6;
+            this.dataGridViewTextBoxColumn17.Name = "dataGridViewTextBoxColumn17";
+            this.dataGridViewTextBoxColumn17.ReadOnly = true;
+            this.dataGridViewTextBoxColumn17.Width = 175;
+            // 
+            // dataGridViewTextBoxColumn18
+            // 
+            this.dataGridViewTextBoxColumn18.DataPropertyName = "sql_memory_model_desc";
+            this.dataGridViewTextBoxColumn18.HeaderText = "Memory Model";
+            this.dataGridViewTextBoxColumn18.MinimumWidth = 6;
+            this.dataGridViewTextBoxColumn18.Name = "dataGridViewTextBoxColumn18";
+            this.dataGridViewTextBoxColumn18.ReadOnly = true;
+            this.dataGridViewTextBoxColumn18.Width = 118;
+            // 
+            // dataGridViewTextBoxColumn19
+            // 
+            this.dataGridViewTextBoxColumn19.DataPropertyName = "OfflineSchedulers";
+            this.dataGridViewTextBoxColumn19.HeaderText = "Offline Schedulers";
+            this.dataGridViewTextBoxColumn19.MinimumWidth = 6;
+            this.dataGridViewTextBoxColumn19.Name = "dataGridViewTextBoxColumn19";
+            this.dataGridViewTextBoxColumn19.ReadOnly = true;
+            this.dataGridViewTextBoxColumn19.Width = 140;
+            // 
+            // dataGridViewTextBoxColumn20
+            // 
+            this.dataGridViewTextBoxColumn20.DataPropertyName = "ActivePowerPlan";
+            this.dataGridViewTextBoxColumn20.HeaderText = "Power Plan";
+            this.dataGridViewTextBoxColumn20.MinimumWidth = 6;
+            this.dataGridViewTextBoxColumn20.Name = "dataGridViewTextBoxColumn20";
+            this.dataGridViewTextBoxColumn20.ReadOnly = true;
+            this.dataGridViewTextBoxColumn20.Width = 125;
+            // 
+            // dataGridViewTextBoxColumn21
+            // 
+            this.dataGridViewTextBoxColumn21.DataPropertyName = "os_priority_class_desc";
+            this.dataGridViewTextBoxColumn21.HeaderText = "Priority";
+            this.dataGridViewTextBoxColumn21.MinimumWidth = 6;
+            this.dataGridViewTextBoxColumn21.Name = "dataGridViewTextBoxColumn21";
+            this.dataGridViewTextBoxColumn21.ReadOnly = true;
+            this.dataGridViewTextBoxColumn21.Width = 81;
+            // 
+            // dataGridViewTextBoxColumn22
+            // 
+            this.dataGridViewTextBoxColumn22.DataPropertyName = "InstantFileInitializationEnabled";
+            this.dataGridViewTextBoxColumn22.HeaderText = "Instant File Initialization";
+            this.dataGridViewTextBoxColumn22.MinimumWidth = 6;
+            this.dataGridViewTextBoxColumn22.Name = "dataGridViewTextBoxColumn22";
+            this.dataGridViewTextBoxColumn22.ReadOnly = true;
+            this.dataGridViewTextBoxColumn22.Width = 166;
+            // 
+            // dataGridViewTextBoxColumn23
+            // 
+            this.dataGridViewTextBoxColumn23.DataPropertyName = "Instance";
+            this.dataGridViewTextBoxColumn23.HeaderText = "Instance";
+            this.dataGridViewTextBoxColumn23.MinimumWidth = 6;
+            this.dataGridViewTextBoxColumn23.Name = "dataGridViewTextBoxColumn23";
+            this.dataGridViewTextBoxColumn23.ReadOnly = true;
+            this.dataGridViewTextBoxColumn23.Width = 90;
+            // 
+            // dataGridViewTextBoxColumn24
+            // 
+            this.dataGridViewTextBoxColumn24.DataPropertyName = "ChangeDate";
+            this.dataGridViewTextBoxColumn24.HeaderText = "Change Date";
+            this.dataGridViewTextBoxColumn24.MinimumWidth = 6;
+            this.dataGridViewTextBoxColumn24.Name = "dataGridViewTextBoxColumn24";
+            this.dataGridViewTextBoxColumn24.ReadOnly = true;
+            this.dataGridViewTextBoxColumn24.Width = 110;
+            // 
+            // dataGridViewTextBoxColumn25
+            // 
+            this.dataGridViewTextBoxColumn25.DataPropertyName = "SystemManufacturerOld";
+            this.dataGridViewTextBoxColumn25.HeaderText = "Manufacturer (Old)";
+            this.dataGridViewTextBoxColumn25.MinimumWidth = 6;
+            this.dataGridViewTextBoxColumn25.Name = "dataGridViewTextBoxColumn25";
+            this.dataGridViewTextBoxColumn25.ReadOnly = true;
+            this.dataGridViewTextBoxColumn25.Width = 144;
+            // 
+            // dataGridViewTextBoxColumn26
+            // 
+            this.dataGridViewTextBoxColumn26.DataPropertyName = "SystemManufacturerNew";
+            this.dataGridViewTextBoxColumn26.HeaderText = "Manufacturer (New)";
+            this.dataGridViewTextBoxColumn26.MinimumWidth = 6;
+            this.dataGridViewTextBoxColumn26.Name = "dataGridViewTextBoxColumn26";
+            this.dataGridViewTextBoxColumn26.ReadOnly = true;
+            this.dataGridViewTextBoxColumn26.Width = 148;
+            // 
+            // dataGridViewTextBoxColumn27
+            // 
+            this.dataGridViewTextBoxColumn27.DataPropertyName = "SystemProductNameOld";
+            this.dataGridViewTextBoxColumn27.HeaderText = "Model (Old)";
+            this.dataGridViewTextBoxColumn27.MinimumWidth = 6;
+            this.dataGridViewTextBoxColumn27.Name = "dataGridViewTextBoxColumn27";
+            this.dataGridViewTextBoxColumn27.ReadOnly = true;
+            this.dataGridViewTextBoxColumn27.Width = 102;
+            // 
+            // dataGridViewTextBoxColumn28
+            // 
+            this.dataGridViewTextBoxColumn28.DataPropertyName = "SystemProductNameNew";
+            this.dataGridViewTextBoxColumn28.HeaderText = "Model (New)";
+            this.dataGridViewTextBoxColumn28.MinimumWidth = 6;
+            this.dataGridViewTextBoxColumn28.Name = "dataGridViewTextBoxColumn28";
+            this.dataGridViewTextBoxColumn28.ReadOnly = true;
+            this.dataGridViewTextBoxColumn28.Width = 107;
+            // 
+            // dataGridViewTextBoxColumn29
+            // 
+            this.dataGridViewTextBoxColumn29.DataPropertyName = "Processor_old";
+            this.dataGridViewTextBoxColumn29.HeaderText = "Processor (Old)";
+            this.dataGridViewTextBoxColumn29.MinimumWidth = 6;
+            this.dataGridViewTextBoxColumn29.Name = "dataGridViewTextBoxColumn29";
+            this.dataGridViewTextBoxColumn29.ReadOnly = true;
+            this.dataGridViewTextBoxColumn29.Width = 126;
+            // 
+            // dataGridViewTextBoxColumn30
+            // 
+            this.dataGridViewTextBoxColumn30.DataPropertyName = "Processor_new";
+            this.dataGridViewTextBoxColumn30.HeaderText = "Processor (New)";
+            this.dataGridViewTextBoxColumn30.MinimumWidth = 6;
+            this.dataGridViewTextBoxColumn30.Name = "dataGridViewTextBoxColumn30";
+            this.dataGridViewTextBoxColumn30.ReadOnly = true;
+            this.dataGridViewTextBoxColumn30.Width = 130;
+            // 
+            // dataGridViewTextBoxColumn31
+            // 
+            this.dataGridViewTextBoxColumn31.DataPropertyName = "cpu_count_old";
+            this.dataGridViewTextBoxColumn31.HeaderText = "CPUs (Old)";
+            this.dataGridViewTextBoxColumn31.MinimumWidth = 6;
+            this.dataGridViewTextBoxColumn31.Name = "dataGridViewTextBoxColumn31";
+            this.dataGridViewTextBoxColumn31.ReadOnly = true;
+            this.dataGridViewTextBoxColumn31.Width = 125;
+            // 
+            // dataGridViewTextBoxColumn32
+            // 
+            this.dataGridViewTextBoxColumn32.DataPropertyName = "cpu_count_new";
+            this.dataGridViewTextBoxColumn32.HeaderText = "CPUs (new)";
+            this.dataGridViewTextBoxColumn32.MinimumWidth = 6;
+            this.dataGridViewTextBoxColumn32.Name = "dataGridViewTextBoxColumn32";
+            this.dataGridViewTextBoxColumn32.ReadOnly = true;
+            this.dataGridViewTextBoxColumn32.Width = 102;
+            // 
+            // dataGridViewTextBoxColumn33
+            // 
+            this.dataGridViewTextBoxColumn33.DataPropertyName = "cores_per_socket_old";
+            this.dataGridViewTextBoxColumn33.HeaderText = "Core per Socket (Old)";
+            this.dataGridViewTextBoxColumn33.MinimumWidth = 6;
+            this.dataGridViewTextBoxColumn33.Name = "dataGridViewTextBoxColumn33";
+            this.dataGridViewTextBoxColumn33.ReadOnly = true;
+            this.dataGridViewTextBoxColumn33.Width = 131;
+            // 
+            // dataGridViewTextBoxColumn34
+            // 
+            this.dataGridViewTextBoxColumn34.DataPropertyName = "cores_per_socket_new";
+            this.dataGridViewTextBoxColumn34.HeaderText = "Cores per Socket (New)";
+            this.dataGridViewTextBoxColumn34.MinimumWidth = 6;
+            this.dataGridViewTextBoxColumn34.Name = "dataGridViewTextBoxColumn34";
+            this.dataGridViewTextBoxColumn34.ReadOnly = true;
+            this.dataGridViewTextBoxColumn34.Width = 137;
+            // 
+            // dataGridViewTextBoxColumn35
+            // 
+            this.dataGridViewTextBoxColumn35.DataPropertyName = "socket_count_old";
+            this.dataGridViewTextBoxColumn35.HeaderText = "Socket Count (Old)";
+            this.dataGridViewTextBoxColumn35.MinimumWidth = 6;
+            this.dataGridViewTextBoxColumn35.Name = "dataGridViewTextBoxColumn35";
+            this.dataGridViewTextBoxColumn35.ReadOnly = true;
+            this.dataGridViewTextBoxColumn35.Width = 115;
+            // 
+            // dataGridViewTextBoxColumn36
+            // 
+            this.dataGridViewTextBoxColumn36.DataPropertyName = "socket_count_new";
+            this.dataGridViewTextBoxColumn36.HeaderText = "Socket Count (New)";
+            this.dataGridViewTextBoxColumn36.MinimumWidth = 6;
+            this.dataGridViewTextBoxColumn36.Name = "dataGridViewTextBoxColumn36";
+            this.dataGridViewTextBoxColumn36.ReadOnly = true;
+            this.dataGridViewTextBoxColumn36.Width = 115;
+            // 
+            // dataGridViewTextBoxColumn37
+            // 
+            this.dataGridViewTextBoxColumn37.DataPropertyName = "hyperthread_ratio_old";
+            this.dataGridViewTextBoxColumn37.HeaderText = "HT Ratio (Old)";
+            this.dataGridViewTextBoxColumn37.MinimumWidth = 6;
+            this.dataGridViewTextBoxColumn37.Name = "dataGridViewTextBoxColumn37";
+            this.dataGridViewTextBoxColumn37.ReadOnly = true;
+            this.dataGridViewTextBoxColumn37.Width = 118;
+            // 
+            // dataGridViewTextBoxColumn38
+            // 
+            this.dataGridViewTextBoxColumn38.DataPropertyName = "hyperthread_ratio_new";
+            this.dataGridViewTextBoxColumn38.HeaderText = "HT Ratio (New)";
+            this.dataGridViewTextBoxColumn38.MinimumWidth = 6;
+            this.dataGridViewTextBoxColumn38.Name = "dataGridViewTextBoxColumn38";
+            this.dataGridViewTextBoxColumn38.ReadOnly = true;
+            this.dataGridViewTextBoxColumn38.Width = 123;
+            // 
+            // dataGridViewTextBoxColumn39
+            // 
+            this.dataGridViewTextBoxColumn39.DataPropertyName = "physical_memory_gb_old";
+            dataGridViewCellStyle11.Format = "N1";
+            this.dataGridViewTextBoxColumn39.DefaultCellStyle = dataGridViewCellStyle11;
+            this.dataGridViewTextBoxColumn39.HeaderText = "Physical Memory (Old)";
+            this.dataGridViewTextBoxColumn39.MinimumWidth = 6;
+            this.dataGridViewTextBoxColumn39.Name = "dataGridViewTextBoxColumn39";
+            this.dataGridViewTextBoxColumn39.ReadOnly = true;
+            this.dataGridViewTextBoxColumn39.Width = 135;
+            // 
+            // dataGridViewTextBoxColumn40
+            // 
+            this.dataGridViewTextBoxColumn40.DataPropertyName = "physical_memory_gb_new";
+            dataGridViewCellStyle12.Format = "N1";
+            this.dataGridViewTextBoxColumn40.DefaultCellStyle = dataGridViewCellStyle12;
+            this.dataGridViewTextBoxColumn40.HeaderText = "Physical Memory (New)";
+            this.dataGridViewTextBoxColumn40.MinimumWidth = 6;
+            this.dataGridViewTextBoxColumn40.Name = "dataGridViewTextBoxColumn40";
+            this.dataGridViewTextBoxColumn40.ReadOnly = true;
+            this.dataGridViewTextBoxColumn40.Width = 135;
             // 
             // HardwareChanges
             // 

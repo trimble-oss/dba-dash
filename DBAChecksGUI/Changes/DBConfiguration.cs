@@ -19,6 +19,7 @@ namespace DBAChecksGUI.Changes
         }
 
         public List<Int32> InstanceIDs;
+        public Int32 DatabaseID=-1;
 
 
         public void RefreshData()
@@ -41,6 +42,10 @@ namespace DBAChecksGUI.Changes
                 cmd.CommandType = CommandType.StoredProcedure;
                 cmd.Parameters.AddWithValue("@InstanceIDs", string.Join(",", InstanceIDs));
                 cmd.Parameters.AddWithValue("@ConfiguredOnly", configuredOnlyToolStripMenuItem.Checked);
+                if (DatabaseID > 0)
+                {
+                    cmd.Parameters.AddWithValue("DatabaseID", DatabaseID);
+                }
 
                 SqlDataAdapter da = new SqlDataAdapter(cmd);
                 DataTable dt = new DataTable();
@@ -87,7 +92,13 @@ namespace DBAChecksGUI.Changes
             {
                 cn.Open();
                 SqlCommand cmd = new SqlCommand("dbo.DBConfigurationHistory_Get", cn);
+                cmd.CommandType = CommandType.StoredProcedure;
                 cmd.Parameters.AddWithValue("InstanceIDs", string.Join(",", InstanceIDs));
+                if (DatabaseID > 0)
+                {
+                    cmd.Parameters.AddWithValue("DatabaseID", DatabaseID);
+                }
+
                 SqlDataAdapter da = new SqlDataAdapter(cmd);
                 DataTable dt = new DataTable();
                 da.Fill(dt);

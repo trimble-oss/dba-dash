@@ -6,6 +6,11 @@ DECLARE @Ref VARCHAR(30)='AzureDBElasticPoolResourceStats'
 IF NOT EXISTS(SELECT 1 FROM dbo.CollectionDates WHERE SnapshotDate>=@SnapshotDate AND InstanceID = @InstanceID AND Reference=@Ref)
 BEGIN
 	DECLARE @MaxDate DATETIME2(7);
+	DECLARE @AggFrom DATETIME2(7);
+	SELECT @AggFrom = DG.DateGroup
+	FROM dbo.DateGroupingMins((SELECT MIN(end_time)
+										FROM @AzureDBElasticPoolResourceStats S)
+	,60) DG;
 
 	WITH poolUpd AS (
 		SELECT elastic_pool_name,elastic_pool_dtu_limit,elastic_pool_cpu_limit,end_time,ROW_NUMBER() OVER(PARTITION BY elastic_pool_name ORDER BY end_time DESC) rnum
@@ -27,6 +32,7 @@ BEGIN
 	FROM dbo.AzureDBElasticPoolResourceStats RS 
 	JOIN dbo.AzureDBElasticPool EP ON EP.PoolID = RS.PoolID
 	WHERE EP.InstanceID=@InstanceID
+	AND RS.end_time >= @AggFrom
 
 	BEGIN TRAN
 	INSERT INTO dbo.AzureDBElasticPoolResourceStats
@@ -64,11 +70,7 @@ BEGIN
 
 	IF @@ROWCOUNT>0
 	BEGIN
-		DECLARE @AggFrom DATETIME2(7)
-		SELECT @AggFrom = DG.DateGroup
-		FROM dbo.DateGroupingMins((SELECT MIN(end_time)
-											FROM @AzureDBElasticPoolResourceStats S)
-		,60) DG;
+
 
 		DELETE agg
 		FROM dbo.AzureDBElasticPoolResourceStats_60MIN agg

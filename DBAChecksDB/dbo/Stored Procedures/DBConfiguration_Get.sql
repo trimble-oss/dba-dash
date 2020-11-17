@@ -1,6 +1,7 @@
 ﻿CREATE PROC [dbo].[DBConfiguration_Get](
 	@InstanceIDs VARCHAR(MAX)=NULL,
-	@ConfiguredOnly BIT=0
+	@ConfiguredOnly BIT=0,
+	@DatabaseID INT=NULL
 )
 AS
 DECLARE @Instances TABLE(
@@ -46,6 +47,7 @@ WITH T AS (
 	WHERE EXISTS(SELECT 1 
 				FROM @Instances t 
 				WHERE t.InstanceID = I.InstanceID)
+	AND (D.DatabaseID = @DatabaseID OR @DatabaseID IS NULL)
 )
 SELECT T.Instance,
        T.DB,

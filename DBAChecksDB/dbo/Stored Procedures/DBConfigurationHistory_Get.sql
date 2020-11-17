@@ -1,6 +1,7 @@
 ﻿CREATE PROC [dbo].[DBConfigurationHistory_Get](
 	@InstanceIDs VARCHAR(MAX)=NULL,
-	@ConfiguredOnly BIT=0
+	@ConfiguredOnly BIT=0,
+	@DatabaseID INT=NULL
 )
 AS
 DECLARE @Instances TABLE(
@@ -33,4 +34,5 @@ JOIN dbo.Instances I ON I.InstanceID = D.InstanceID
 WHERE EXISTS(SELECT 1 FROM @Instances t WHERE I.InstanceID = t.InstanceID)
 AND I.IsActive=1
 AND D.IsActive=1
+AND (D.DatabaseID = @DatabaseID OR @DatabaseID IS NULL)
 ORDER BY H.ValidTo DESC
