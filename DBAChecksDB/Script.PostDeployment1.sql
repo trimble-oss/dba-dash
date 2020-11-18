@@ -403,3 +403,9 @@ WHEN MATCHED AND (
 WHEN NOT MATCHED BY TARGET THEN
  INSERT([configuration_id],[name],[default_value])
  VALUES([Source].[configuration_id],[Source].[name],[Source].[default_value]);
+
+IF NOT EXISTS(SELECT 1 FROM dbo.LastGoodCheckDBThresholds WHERE InstanceID=-1 AND DatabaseID=-1)
+BEGIN
+	INSERT INTO dbo.LastGoodCheckDBThresholds
+	VALUES(-1,-1,11520,21600)
+END
