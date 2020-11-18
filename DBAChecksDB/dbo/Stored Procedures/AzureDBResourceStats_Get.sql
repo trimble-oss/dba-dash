@@ -51,4 +51,4 @@ GROUP BY ' + @DateGroupingSQL +'
 ORDER BY end_time'
 
 PRINT @SQL
-EXEC sp_executesql @sql, N'@InstanceID INT,@FromDate DATETIME2(3),@ToDate DATETIME2(3),@UTCOffset INT,@DateGroupingMin INT',@InstanceID,@FromDate,@ToDate,@UTCOffset,@DateGroupingMin
+EXEC sp_executesql @SQL, N'@InstanceID INT,@FromDate DATETIME2(3),@ToDate DATETIME2(3),@UTCOffset INT,@DateGroupingMin INT',@InstanceID,@FromDate,@ToDate,@UTCOffset,@DateGroupingMin

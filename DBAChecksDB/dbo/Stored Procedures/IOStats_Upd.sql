@@ -66,7 +66,7 @@ BEGIN
 						@InstanceID AS InstanceID
 						) x
 	WHERE A.sample_ms > b.sample_ms
-				AND A.snapshotdate > B.snapshotdate
+				AND A.SnapshotDate > B.SnapshotDate
 				AND A.num_of_bytes_read>=B.num_of_bytes_read
 				AND A.num_of_reads>=B.num_of_reads
 				AND A.num_of_writes>=B.num_of_writes
@@ -119,7 +119,7 @@ BEGIN
 						@InstanceID AS InstanceID
 						) x
 	WHERE A.sample_ms > b.sample_ms
-				AND A.snapshotdate > B.snapshotdate
+				AND A.SnapshotDate > B.SnapshotDate
 				AND A.num_of_bytes_read>=B.num_of_bytes_read
 				AND A.num_of_reads>=B.num_of_reads
 				AND A.num_of_writes>=B.num_of_writes

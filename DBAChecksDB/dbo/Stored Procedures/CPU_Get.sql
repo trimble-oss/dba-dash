@@ -22,10 +22,10 @@ SELECT ' + @DateGroupingSQL + ' AS EventTime,
 FROM '+ CASE WHEN @DateGroupingMin >=60 THEN 'dbo.CPU_60MIN' ELSE 'dbo.CPU' END + '
 ' + CASE WHEN @DateGroupingMin IS NULL OR @DateGroupingMin= 0 THEN '' ELSE 'CROSS APPLY dbo.DateGroupingMins(EventTime,@DateGroupingMin)' END + '
 WHERE InstanceID = @InstanceID
-AND EventTime >= @fromDate
+AND EventTime >= @FromDate
 AND EventTime < @ToDate
 GROUP BY ' + @DateGroupingSQL + '
 ORDER BY EventTime'
 
 PRINT @SQL
-EXEC sp_executesql @sql,N'@InstanceID INT,@FromDate DATETIME2(3),@ToDate DATETIME2(3),@DateGroupingMin INT',@InstanceID,@FromDate,@ToDate,@DateGroupingMin
+EXEC sp_executesql @SQL,N'@InstanceID INT,@FromDate DATETIME2(3),@ToDate DATETIME2(3),@DateGroupingMin INT',@InstanceID,@FromDate,@ToDate,@DateGroupingMin

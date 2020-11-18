@@ -38,7 +38,7 @@ END
 DECLARE @LastSnapshotDate DATETIME2(3) 
 SELECT TOP(1) @LastSnapshotDate = s.SnapshotDate 
 FROM dbo.DDLSnapshots s
-WHERE s.DatabaseID = @DatabaseID
+WHERE s.DatabaseID = @DatabaseId
 ORDER BY s.SnapshotDate DESC
 
 DECLARE @DDLSnapshotOptionsID INT
@@ -99,7 +99,7 @@ BEGIN
 									SchemaName,
 									ObjectName,
 									IsActive)
-		VALUES(@DatabaseID,s.ObjectType,s.object_id,s.SchemaName,s.ObjectName,1 )
+		VALUES(@DatabaseId,s.ObjectType,s.object_id,s.SchemaName,s.ObjectName,1 )
 		WHEN MATCHED AND T.IsActive=0
 		THEN UPDATE SET T.IsActive=1
 		WHEN NOT MATCHED BY SOURCE AND T.IsActive=1 
@@ -112,7 +112,7 @@ BEGIN
 		AND H.SnapshotValidTo = '9999-12-31'
 		AND NOT EXISTS(
 				SELECT 1
-				FROM @SS AS SS 
+				FROM @ss AS SS 
 				JOIN dbo.DDL ON SS.DDLHash = DDL.DDLHash
 				JOIN dbo.DBObjects O ON O.ObjectName = SS.ObjectName
 									AND O.ObjectType = SS.ObjectType
@@ -134,8 +134,8 @@ BEGIN
 			ObjectDateCreated,
 			ObjectDateModified
 		)
-		SELECT O.DatabaseID,O.ObjectID,DDL.DDLID,@SnapshotDate,'9999-12-31',SS.object_id,SS.ObjectDateCreated,SS.ObjectDateModified
-		FROM @SS AS SS 
+		SELECT O.DatabaseID,O.ObjectID,DDL.DDLID,@SnapshotDate,'9999-12-31',SS.OBJECT_ID,SS.ObjectDateCreated,SS.ObjectDateModified
+		FROM @ss AS SS 
 		JOIN dbo.DDL ON SS.DDLHash = DDL.DDLHash
 		JOIN dbo.DBObjects O ON O.ObjectName = SS.ObjectName
 							AND O.ObjectType = SS.ObjectType
@@ -156,7 +156,7 @@ BEGIN
 			UPDATE dbo.DDLSnapshots 
 				SET ValidatedDate =@SnapshotDate
 			WHERE SnapshotDate = @LastSnapshotDate 
-			AND DatabaseID = @DatabaseID
+			AND DatabaseID = @DatabaseId
 
 			SET @ValidatedSnapshotDate=@LastSnapshotDate
 	
@@ -181,7 +181,7 @@ BEGIN
 					SUM(CASE WHEN [Action] = 'Dropped' THEN 1 ELSE 0 END) AS Dropped,
 					SUM(CASE WHEN [Action] = 'Modified' THEN 1 ELSE 0 END) AS Modified,
 					@DDLSnapshotOptionsID
-			FROM dbo.DBSnapshotDiff(@DatabaseID,@SnapshotDate)
+			FROM dbo.DBSnapshotDiff(@DatabaseId,@SnapshotDate)
 
 
 		END
