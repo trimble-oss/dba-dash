@@ -2,11 +2,6 @@
 
 CREATE PROC [dbo].[SlowQueries_Upd](@SlowQueries dbo.SlowQueries READONLY,@InstanceID INT,@SnapshotDate DATETIME2(3))
 AS
-DECLARE @UTCOffset INT
-SELECT @UTCOffset = ISNULL(UTCOffset,0) 
-FROM dbo.Instances 
-WHERE InstanceID=@InstanceID
-
 DECLARE @MinDate DATETIME2(3)
 SELECT @MinDate =MIN(timestamp) 
 FROM @SlowQueries
@@ -41,7 +36,7 @@ SELECT @InstanceID,
 		D.DatabaseID,
 		event_type,
 		object_name,
-		DATEADD(mi,@UTCOffset,timestamp) AS timestamp,
+		timestamp,
 		duration,
 		cpu_time,
 		logical_reads,
@@ -55,7 +50,7 @@ SELECT @InstanceID,
 		ROW_NUMBER() OVER(PARTITION BY timestamp ORDER BY timestamp) -- just to ensure uniqueness in key
 FROM @SlowQueries SQ
 LEFT JOIN dbo.Databases D ON D.database_id = SQ.database_id AND D.InstanceID = @InstanceID AND D.IsActive=1
-WHERE timestamp > DATEADD(mi,-@UTCOffset,@MaxDate)
+WHERE timestamp > @MaxDate
 
 
 EXEC dbo.CollectionDates_Upd @InstanceID = @InstanceID,  
