@@ -499,6 +499,7 @@ namespace DBAChecksGUI
                 SqlDataAdapter da = new SqlDataAdapter(cmd);
                 var dt = new DataTable();
                 da.Fill(dt);
+                Common.ConvertUTCToLocal(ref dt);
                 if(dt.Rows.Count== pageSize)
                 {
                     lblPageSize.Text = string.Format("Top {0} rows", pageSize);
