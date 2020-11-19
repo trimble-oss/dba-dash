@@ -55,7 +55,7 @@ SELECT @InstanceID,
 		ROW_NUMBER() OVER(PARTITION BY timestamp ORDER BY timestamp) -- just to ensure uniqueness in key
 FROM @SlowQueries SQ
 LEFT JOIN dbo.Databases D ON D.database_id = SQ.database_id AND D.InstanceID = @InstanceID AND D.IsActive=1
-WHERE timestamp>@MaxDate
+WHERE timestamp > DATEADD(mi,-@UTCOffset,@MaxDate)
 
 
 EXEC dbo.CollectionDates_Upd @InstanceID = @InstanceID,  
