@@ -308,6 +308,11 @@ namespace DBAChecksGUI
                 dbOptions1.DatabaseID = n.DatabaseID;
                 dbOptions1.RefreshData();
             }
+            if(tabs.SelectedTab == tabTempDB)
+            {
+                tempDBConfig1.InstanceIDs = instanceIDs;
+                tempDBConfig1.RefreshData();
+            }
         }
 
         private void loadDBAChecksErrorLog(Int32 InstanceID)
@@ -567,6 +572,7 @@ ORDER BY SchemaName,ObjectName
                     allowedTabs.Add(tabSQLPatching);
                     allowedTabs.Add(tabAlerts);
                     allowedTabs.Add(tabDrivers);
+                    allowedTabs.Add(tabTempDB);
                 }
                 if (parent.Type != SQLTreeItem.TreeType.Instance)
                 {

@@ -30,7 +30,7 @@
     <QueryStoreStaleQueryThreshold>15</QueryStoreStaleQueryThreshold>
     <QueryStoreMaxStorageSize>512</QueryStoreMaxStorageSize>
     <QueryStoreMaxPlansPerQuery>50</QueryStoreMaxPlansPerQuery>
-    <DacVersion>2.0.1.7</DacVersion>
+    <DacVersion>2.0.1.8</DacVersion>
     <ReadCommittedSnapshot>True</ReadCommittedSnapshot>
     <AllowSnapshotIsolation>True</AllowSnapshotIsolation>
   </PropertyGroup>
@@ -437,6 +437,7 @@
     <Build Include="dbo\Tables\AzureDBElasticPoolResourceStats_60MIN.sql" />
     <Build Include="dbo\Views\AzureDBElasticPoolResourceStats_Raw.sql" />
     <Build Include="dbo\Stored Procedures\AzureDBElasticPoolHistory_Get.sql" />
+    <Build Include="dbo\Stored Procedures\TempDBConfig_Get.sql" />
   </ItemGroup>
   <ItemGroup>
     <PostDeploy Include="Script.PostDeployment1.sql" />

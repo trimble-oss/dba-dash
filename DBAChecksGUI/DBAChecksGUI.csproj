@@ -240,6 +240,12 @@
     <Compile Include="DBFiles\FileThresholdConfig.Designer.cs">
       <DependentUpon>FileThresholdConfig.cs</DependentUpon>
     </Compile>
+    <Compile Include="DBFiles\TempDBConfig.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="DBFiles\TempDBConfig.Designer.cs">
+      <DependentUpon>TempDBConfig.cs</DependentUpon>
+    </Compile>
     <Compile Include="Diff.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -492,6 +498,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="DBFiles\FileThresholdConfig.resx">
       <DependentUpon>FileThresholdConfig.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="DBFiles\TempDBConfig.resx">
+      <DependentUpon>TempDBConfig.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Diff.resx">
       <DependentUpon>Diff.cs</DependentUpon>
