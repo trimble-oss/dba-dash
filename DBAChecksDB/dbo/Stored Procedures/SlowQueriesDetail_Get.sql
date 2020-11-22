@@ -73,7 +73,7 @@ AND timestamp< @ToDate
 ' + CASE WHEN @Result IS NULL THEN '' ELSE 'AND SQ.Result = @Result' END + '
 ORDER BY SQ.Duration DESC'
 
-EXEC sp_executesql @sql,N'@Instances IDs READONLY,@ObjectName SYSNAME,@ClientHostName SYSNAME,
+EXEC sp_executesql @SQL,N'@Instances IDs READONLY,@ObjectName SYSNAME,@ClientHostName SYSNAME,
 							@ConnectionID SYSNAME,@ClientAppName SYSNAME,@DurationFrom BIGINT,
 							@DurationTo BIGINT,@Top INT,@Text NVARCHAR(MAX),@DatabaseName SYSNAME,
 							@FromDate DATETIME2(3),@ToDate DATETIME2(3),@UserName SYSNAME,@Result SYSNAME',

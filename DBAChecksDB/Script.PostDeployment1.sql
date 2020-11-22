@@ -362,3 +362,50 @@ WHERE NOT EXISTS(SELECT 1 FROM dbo.InstanceUptimeThresholds T WHERE T.InstanceID
 
 INSERT INTO dbo.DBVersionHistory(DeployDate,Version)
 VALUES(GETUTCDATE(),'$(VersionNumber)')
+
+MERGE INTO [DBConfigOptions] AS [Target]
+USING (VALUES
+  (1,N'MAXDOP',N'0')
+ ,(2,N'LEGACY_CARDINALITY_ESTIMATION',N'0')
+ ,(3,N'PARAMETER_SNIFFING',N'1')
+ ,(4,N'QUERY_OPTIMIZER_HOTFIXES',N'0')
+ ,(6,N'IDENTITY_CACHE',N'1')
+ ,(7,N'INTERLEAVED_EXECUTION_TVF',N'1')
+ ,(8,N'BATCH_MODE_MEMORY_GRANT_FEEDBACK',N'1')
+ ,(9,N'BATCH_MODE_ADAPTIVE_JOINS',N'1')
+ ,(10,N'TSQL_SCALAR_UDF_INLINING',N'1')
+ ,(11,N'ELEVATE_ONLINE',N'OFF')
+ ,(12,N'ELEVATE_RESUMABLE',N'OFF')
+ ,(13,N'OPTIMIZE_FOR_AD_HOC_WORKLOADS',N'0')
+ ,(14,N'XTP_PROCEDURE_EXECUTION_STATISTICS',N'0')
+ ,(15,N'XTP_QUERY_EXECUTION_STATISTICS',N'0')
+ ,(16,N'ROW_MODE_MEMORY_GRANT_FEEDBACK',N'1')
+ ,(17,N'ISOLATE_SECURITY_POLICY_CARDINALITY',N'0')
+ ,(18,N'BATCH_MODE_ON_ROWSTORE',N'1')
+ ,(19,N'DEFERRED_COMPILATION_TV',N'1')
+ ,(20,N'ACCELERATED_PLAN_FORCING',N'1')
+ ,(21,N'GLOBAL_TEMPORARY_TABLE_AUTO_DROP',N'1')
+ ,(22,N'LIGHTWEIGHT_QUERY_PROFILING',N'1')
+ ,(23,N'VERBOSE_TRUNCATION_WARNINGS',N'1')
+ ,(24,N'LAST_QUERY_PLAN_STATS',N'0')
+ ,(25,N'PAUSED_RESUMABLE_INDEX_ABORT_DURATION_MINUTES',N'1440')
+ ,(26,N'DW_COMPATIBILITY_LEVEL',N'0')
+ ,(27,N'EXEC_QUERY_STATS_FOR_SCALAR_FUNCTIONS',N'1')
+ ,(29,N'ASYNC_STATS_UPDATE_WAIT_AT_LOW_PRIORITY',N'0')
+) AS [Source] ([configuration_id],[name],[default_value])
+ON ([Target].[configuration_id] = [Source].[configuration_id])
+WHEN MATCHED AND (
+	NULLIF([Source].[name], [Target].[name]) IS NOT NULL OR NULLIF([Target].[name], [Source].[name]) IS NOT NULL OR 
+	NULLIF([Source].[default_value], [Target].[default_value]) IS NOT NULL OR NULLIF([Target].[default_value], [Source].[default_value]) IS NOT NULL) THEN
+ UPDATE SET
+  [Target].[name] = [Source].[name], 
+  [Target].[default_value] = [Source].[default_value]
+WHEN NOT MATCHED BY TARGET THEN
+ INSERT([configuration_id],[name],[default_value])
+ VALUES([Source].[configuration_id],[Source].[name],[Source].[default_value]);
+
+IF NOT EXISTS(SELECT 1 FROM dbo.LastGoodCheckDBThresholds WHERE InstanceID=-1 AND DatabaseID=-1)
+BEGIN
+	INSERT INTO dbo.LastGoodCheckDBThresholds
+	VALUES(-1,-1,11520,21600)
+END

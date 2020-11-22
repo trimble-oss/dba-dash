@@ -2,7 +2,7 @@
 	@InstanceID INT,
 	@FromDate DATETIME2(3)=NULL,
 	@ToDate DATETIME2(3)=NULL,
-	@DateGrouping VARCHAR(50)='None'
+	@DateGroupingMin INT=NULL
 )
 AS
 IF @FromDate IS NULL
@@ -11,25 +11,21 @@ IF @ToDate IS NULL
 	SET @ToDate = GETUTCDATE()
 DECLARE @SQL NVARCHAR(MAX)
 DECLARE @DateGroupingSQL NVARCHAR(MAX)
-SELECT @DateGroupingSQL= CASE WHEN @DateGrouping = 'None' THEN 'EventTime'
-			WHEN @DateGrouping = '1MIN' THEN 'DATEADD(mi, DATEDIFF(mi, 0, DATEADD(s, 30, EventTime)), 0)'
-			WHEN @DateGrouping ='10MIN' THEN 'CONVERT(DATETIME,LEFT(CONVERT(VARCHAR,EventTime,120),15) + ''0'',120)'
-			WHEN @DateGrouping = '60MIN' THEN 'CONVERT(DATETIME,LEFT(CONVERT(VARCHAR,EventTime,120),13) + '':00'',120)'
-			WHEN @DateGrouping = '120MIN' THEN 'DATEADD(hh,DATEPART(hh,EventTime) - DATEPART(hh,EventTime) % 2, CAST(CAST(EventTime AS DATE) AS DATETIME))'
-			WHEN @DateGrouping ='DAY' THEN 'CAST(CAST(EventTime as DATE) as DATETIME)'
-			ELSE NULL END
+SELECT @DateGroupingSQL= CASE WHEN @DateGroupingMin = 0 OR @DateGroupingMin IS NULL THEN 'EventTime'
+			ELSE 'DateGroup' END
 
 SET @SQL = N'
 SELECT ' + @DateGroupingSQL + ' AS EventTime,
        SUM(SumSQLProcessCPU*1.0)/SUM(SampleCount*1.0) as SQLProcessCPU,
 	   SUM(SumOtherCPU*1.0)/SUM(SampleCount*1.0) as OtherCPU,
 	   MAX(MaxTotalCPU*1.0) as MaxCPU
-FROM '+ CASE WHEN @DateGrouping IN('DAY','120MIN','60MIN') THEN 'dbo.CPU_60MIN' ELSE 'dbo.CPU' END + '
+FROM '+ CASE WHEN @DateGroupingMin >=60 THEN 'dbo.CPU_60MIN' ELSE 'dbo.CPU' END + '
+' + CASE WHEN @DateGroupingMin IS NULL OR @DateGroupingMin= 0 THEN '' ELSE 'CROSS APPLY dbo.DateGroupingMins(EventTime,@DateGroupingMin)' END + '
 WHERE InstanceID = @InstanceID
-AND EventTime >= @fromDate
+AND EventTime >= @FromDate
 AND EventTime < @ToDate
 GROUP BY ' + @DateGroupingSQL + '
 ORDER BY EventTime'
 
 PRINT @SQL
-EXEC sp_executesql @sql,N'@InstanceID INT,@FromDate DATETIME2(3),@ToDate DATETIME2(3)',@InstanceID,@FromDate,@ToDate
+EXEC sp_executesql @SQL,N'@InstanceID INT,@FromDate DATETIME2(3),@ToDate DATETIME2(3),@DateGroupingMin INT',@InstanceID,@FromDate,@ToDate,@DateGroupingMin

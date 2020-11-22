@@ -30,7 +30,7 @@
     <QueryStoreStaleQueryThreshold>15</QueryStoreStaleQueryThreshold>
     <QueryStoreMaxStorageSize>512</QueryStoreMaxStorageSize>
     <QueryStoreMaxPlansPerQuery>50</QueryStoreMaxPlansPerQuery>
-    <DacVersion>2.0.0.9</DacVersion>
+    <DacVersion>2.0.1.8</DacVersion>
     <ReadCommittedSnapshot>True</ReadCommittedSnapshot>
     <AllowSnapshotIsolation>True</AllowSnapshotIsolation>
   </PropertyGroup>
@@ -420,6 +420,24 @@
     <Build Include="dbo\Stored Procedures\AzureDBPoolSummary_Get.sql" />
     <Build Include="dbo\Stored Procedures\AzureDBPerformanceSummary_Get.sql" />
     <Build Include="dbo\Views\CPU_Histogram.sql" />
+    <Build Include="dbo\Stored Procedures\AzureDBResourceStats_Get.sql" />
+    <Build Include="dbo\Stored Procedures\AzureDBElasticPoolResourceStats_Get.sql" />
+    <Build Include="dbo\Functions\AzureDBMasterInstance.sql" />
+    <Build Include="dbo\Stored Procedures\AzureServiceObjectivesHistory_Get.sql" />
+    <Build Include="dbo\Functions\DateGroupingMins.sql" />
+    <Build Include="dbo\Stored Procedures\DBConfigurationHistory_Get.sql" />
+    <Build Include="dbo\Stored Procedures\DBConfiguration_Get.sql" />
+    <Build Include="dbo\Tables\DBOptionsHistory.sql" />
+    <Build Include="dbo\Stored Procedures\DBOptionsHistory_Get.sql" />
+    <Build Include="dbo\Stored Procedures\DatabasesAllInfo_Get.sql" />
+    <Build Include="dbo\Tables\AzureDBResourceStats_60MIN.sql" />
+    <Build Include="dbo\Views\AzureDBResourceStats_Raw.sql" />
+    <Build Include="dbo\Tables\AzureDBElasticPool.sql" />
+    <Build Include="dbo\Tables\AzureDBElasticPoolHistory.sql" />
+    <Build Include="dbo\Tables\AzureDBElasticPoolResourceStats_60MIN.sql" />
+    <Build Include="dbo\Views\AzureDBElasticPoolResourceStats_Raw.sql" />
+    <Build Include="dbo\Stored Procedures\AzureDBElasticPoolHistory_Get.sql" />
+    <Build Include="dbo\Stored Procedures\TempDBConfig_Get.sql" />
   </ItemGroup>
   <ItemGroup>
     <PostDeploy Include="Script.PostDeployment1.sql" />

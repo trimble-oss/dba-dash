@@ -16,6 +16,64 @@ namespace DBAChecksGUI
     {
         public static string ConnectionString;
 
+        public static Dictionary<Int32, string> DateGroups = new Dictionary<Int32, string>() {
+                {0,"None" },
+                { 1, "1min" },
+                { 2, "2min" },
+                { 5, "5min" },
+                { 10, "10min" },
+                { 15, "15min" },
+                { 30, "30min" },
+                { 60, "1hr" },
+                { 120, "2hrs" },
+                { 240, "4hrs" },
+                { 360, "6hrs" },
+                { 720, "12hrs" },
+                { 1440, "1 Day" }
+            };
+
+        public static Guid HighPerformancePowerPlanGUID
+        {
+            get
+            {
+                return Guid.Parse("8C5E7FDA-E8BF-4A96-9A85-A6E23A8C635C");
+            }
+        }
+
+        public static string DateGroupString(Int32 mins)
+        {
+            return (DateGroups.Where(k => k.Key == mins).First()).Value;
+        }
+
+        public static void AddDateGroups(ToolStripDropDownButton tsRoot, EventHandler click)
+        {
+            foreach (var dg in Common.DateGroups)
+            {
+                var ts = new ToolStripMenuItem(dg.Value);
+                ts.Tag = dg.Key;
+                ts.Click += click;
+                tsRoot.DropDownItems.Add(ts);
+            }
+        }
+
+        public static Int32 DateGrouping(Int32 Mins, Int32 MaxPoints)
+        {
+            Int32 lastMins = 0;
+         
+            foreach (var mins in Common.DateGroups.OrderBy(k => k.Key)
+                .Select(k => k.Key)
+                .ToList())
+            {
+                double div = mins == 0 ? 0.2 : mins;
+                if (Mins / div < MaxPoints)
+                {
+                    return mins;
+                }
+                lastMins = mins;
+            }
+            return lastMins;
+        }
+
         public static string DDL(Int64 DDLID,string connectionString)
         {
             SqlConnection cn = new SqlConnection(connectionString);
@@ -31,6 +89,14 @@ WHERE DDLID = @DDLID";
 
                 return DBAChecks.SchemaSnapshotDB.Unzip(bDDL);
 
+            }
+        }
+
+        public static Int32 UtcOffset
+        {
+            get
+            {
+                return (Int32)DateTime.Now.Subtract(DateTime.UtcNow).TotalMinutes;
             }
         }
 
@@ -208,6 +274,15 @@ WHERE DDLID = @DDLID";
             DialogResult result = inputBox.ShowDialog();
             input = textBox.Text;
             return result;
+        }
+
+        public static string ByteArrayToString(byte[] ba)
+        {
+            StringBuilder hex = new StringBuilder(ba.Length * 2);
+            hex.Append("0x");
+            foreach (byte b in ba)
+                hex.AppendFormat("{0:x2}", b);
+            return hex.ToString();
         }
     }
 }

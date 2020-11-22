@@ -34,39 +34,46 @@ namespace DBAChecksGUI.Performance
         Int32 instanceID;
         DateTime chartMaxDate = DateTime.MinValue;
         string connectionString;
-        DateGroup dateGrouping;
+      
         DateTime from;
         DateTime to;
         Int32 mins;
         private Int64 objectID;
         Int32 databaseid=0;
+        private Int32 dateGrouping;
+
 
         public void RefreshData()
         {
-            if (chartMaxDate != DateTime.MinValue && dateGrouping == DateGroup._1MIN)
+            if (chartMaxDate != DateTime.MinValue && dateGrouping == 1)
             {
                 this.to = DateTime.UtcNow.AddMinutes(1);
-                this.from = chartMaxDate.AddMinutes(-utcOffset()).AddSeconds(1);
+                this.from = chartMaxDate.AddMinutes(-Common.UtcOffset).AddSeconds(1);
                 refreshData(true);
             }
         }
-        public void RefreshData(Int32 instanceID, DateTime from, DateTime to, string connectionString, Int64 objectID, Int32 databaseID, DateGroup dateGrouping = DateGroup.None)
+        public void RefreshData(Int32 instanceID, DateTime from, DateTime to, string connectionString, Int64 objectID, Int32 databaseID)
         {
             this.instanceID = instanceID;
             this.connectionString = connectionString;
-            this.from = from;
-            this.to = to;
-            this.objectID = objectID;
             mins = (Int32)to.Subtract(from).TotalMinutes;
-            this.dateGrouping = dateGrouping;
+            if (this.from!=from | this.to != to)
+            {
+                dateGrouping = Common.DateGrouping(mins, 65);
+                if (dateGrouping < 1)
+                {
+                    dateGrouping = 1;
+                }
+                tsDateGroup.Text = Common.DateGroupString(dateGrouping);
+                this.from = from;
+                this.to = to;
+            }
+            this.objectID = objectID;
+    
             this.databaseid = databaseID;
             refreshData(false);
         }
 
-        private Int32 utcOffset()
-        {
-           return  (Int32)DateTime.Now.Subtract(DateTime.UtcNow).TotalMinutes;
-        }
 
          private void refreshData(bool update)
         {
@@ -88,12 +95,12 @@ namespace DBAChecksGUI.Performance
                 cmd.Parameters.AddWithValue("InstanceID", instanceID);
                 cmd.Parameters.AddWithValue("FromDateUTC", from);
                 cmd.Parameters.AddWithValue("ToDateUTC", to);
-                cmd.Parameters.AddWithValue("UTCOffset", utcOffset());
+                cmd.Parameters.AddWithValue("UTCOffset", Common.UtcOffset);
                 if (objectID > 0)
                 {
                     cmd.Parameters.AddWithValue("ObjectID", objectID);
                 }
-                cmd.Parameters.AddWithValue("DateAgg", dateGrouping.ToString().Replace("_",""));
+                cmd.Parameters.AddWithValue("DateGroupingMin", dateGrouping);
                 cmd.Parameters.AddWithValue("Measure", measure);
                 if (this.databaseid > 0)
                 {
@@ -132,31 +139,7 @@ namespace DBAChecksGUI.Performance
                 }
 
 
-                Int32 fromMins = 1;
-                if(dateGrouping == DateGroup.DAY)
-                {
-                    fromMins = 1440;
-                }
-                else if( dateGrouping == DateGroup.None || dateGrouping == DateGroup._1MIN)
-                {
-                    fromMins = 1;
-                }
-                else if (dateGrouping == DateGroup._10MIN)
-                {
-                    fromMins = 10;
-                }
-                else if(dateGrouping == DateGroup._60MIN)
-                {
-                    fromMins = 60;
-                }
-                else if (dateGrouping == DateGroup._120MIN)
-                {
-                    fromMins = 120;
-                }
-                else
-                {
-                    throw new NotImplementedException("dateGrouping");
-                }
+         
 
                 if (update)
                 {
@@ -190,7 +173,7 @@ namespace DBAChecksGUI.Performance
                 else
                 {
                     CartesianMapper<DateTimePoint> dayConfig = Mappers.Xy<DateTimePoint>()
-.X(dateModel => dateModel.DateTime.Ticks / TimeSpan.FromMinutes(fromMins).Ticks)
+.X(dateModel => dateModel.DateTime.Ticks / TimeSpan.FromMinutes(dateGrouping).Ticks)
 .Y(dateModel => dateModel.Value);
 
 
@@ -206,7 +189,7 @@ namespace DBAChecksGUI.Performance
                     waitChart.Series = s1;
 
                     string format = "t";
-                    if (fromMins >= 1440)
+                    if (dateGrouping >= 1440)
                     {
                         format = "yyyy-MM-dd";
                     }
@@ -216,7 +199,7 @@ namespace DBAChecksGUI.Performance
                     }
                     waitChart.AxisX.Add(new Axis
                     {
-                        LabelFormatter = value => new DateTime((long)(value * TimeSpan.FromMinutes(fromMins).Ticks)).ToString(format)
+                        LabelFormatter = value => new DateTime((long)(value * TimeSpan.FromMinutes(dateGrouping).Ticks)).ToString(format)
                     });
                    
                     waitChart.AxisY.Add(new Axis
@@ -258,6 +241,7 @@ namespace DBAChecksGUI.Performance
                 {"AvgCPU","Avg CPU", "#,##0.000  sec"},
                 {"ExecutionCount", "Execution Count","N0"},
                 {"ExecutionsPerMin", "Executions Per Min","#,##0.000"},
+                {"MaxExecutionsPerMin", "Max Executions Per Min","#,##0.000"},
                 { "TotalLogicalReads","Total Logical Reads","N0" },
                 {"AvgLogicalReads","Avg Logical Reads","N0" },
                 {"TotalPhysicalReads","TotalPhysicalReads" ,"N0"},
@@ -269,7 +253,7 @@ namespace DBAChecksGUI.Performance
 
         private void ObjectExecution_Load(object sender, EventArgs e)
         {
-
+            Common.AddDateGroups(tsDateGroup, TsDateGrouping_Click);
             foreach(var m in measures)
             {
                 ToolStripMenuItem itm = new ToolStripMenuItem(m.Value.DisplayName);
@@ -284,6 +268,14 @@ namespace DBAChecksGUI.Performance
             }
         }
 
+        private void TsDateGrouping_Click(object sender, EventArgs e)
+        {
+            var ts = (ToolStripMenuItem)sender;
+            dateGrouping = Convert.ToInt32(ts.Tag);
+            tsDateGroup.Text = Common.DateGroupString(dateGrouping);
+            refreshData(false);
+        }
+
         private void Itm_Click(object sender, EventArgs e)
         {
             var tsItm = ((ToolStripMenuItem)sender);
@@ -296,7 +288,7 @@ namespace DBAChecksGUI.Performance
                 }
                 tsMeasures.Text = tsItm.Text;
             }
-            RefreshData(instanceID, to.AddMinutes(-mins), to, connectionString,objectID, databaseid, dateGrouping);
+            RefreshData(instanceID, to.AddMinutes(-mins), to, connectionString,objectID, databaseid);
         }
     }
 }

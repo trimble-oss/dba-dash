@@ -30,16 +30,17 @@ BEGIN
 	FROM dbo.SplitStrings(@Instance,',')
 END;
 WITH T AS (
-SELECT InstanceID,
-	elastic_pool_name,
+SELECT EP.InstanceID,
+	EP.elastic_pool_name,
 	end_time AS [EndTime],
-	CASE WHEN elastic_pool_dtu_limit>0 THEN (SELECT Max(v) FROM (VALUES (avg_cpu_percent), (avg_data_io_percent), (avg_log_write_percent)) AS value(v)) ELSE NULL END AS [AvgDTUPercent],
-	CASE WHEN elastic_pool_dtu_limit>0 THEN ((elastic_pool_dtu_limit)*((SELECT Max(v) FROM (VALUES (avg_cpu_percent), (avg_data_io_percent), (avg_log_write_percent)) AS value(v))/100.00)) ELSE NULL END AS [AvgDTUsUsed],
+	CASE WHEN RS.elastic_pool_dtu_limit>0 THEN (SELECT Max(v) FROM (VALUES (avg_cpu_percent), (avg_data_io_percent), (avg_log_write_percent)) AS value(v)) ELSE NULL END AS [AvgDTUPercent],
+	CASE WHEN RS.elastic_pool_dtu_limit>0 THEN ((RS.elastic_pool_dtu_limit)*((SELECT Max(v) FROM (VALUES (RS.avg_cpu_percent), (RS.avg_data_io_percent), (RS.avg_log_write_percent)) AS value(v))/100.00)) ELSE NULL END AS [AvgDTUsUsed],
 	avg_cpu_percent,
 	avg_data_io_percent,
 	avg_log_write_percent,
-	elastic_pool_dtu_limit AS [DTULimit]
+	RS.elastic_pool_dtu_limit AS [DTULimit]
 FROM dbo.AzureDBElasticPoolResourceStats RS
+JOIN dbo.AzureDBElasticPool EP ON RS.PoolID = EP.PoolID
 WHERE RS.end_time>=@FromDate
 AND RS.end_time <@ToDate
 )

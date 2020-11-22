@@ -128,6 +128,10 @@ namespace DBAChecksGUI.DBFiles
         {
             var dt = DriveSnapshot();
             var cnt =dt.Rows.Count;
+            if (dt.Rows.Count < 2)
+            {
+                return;
+            }
             var columns = new Dictionary<string, columnMetaData>
             {
                 {"SizeMB", new columnMetaData{Alias="Size (MB)",isVisible=true } },

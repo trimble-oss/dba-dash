@@ -18,8 +18,8 @@ namespace DBAChecksGUI.LastGoodCheckDB
         public LastGoodCheckDBThreshold Threshold
         {
             get{
-        
-                threshold.Inherit= chkInherit.Checked = chkInherit.Checked;
+
+                threshold.Inherit = chkInherit.Visible ? chkInherit.Checked : false;
                 threshold.WarningThreshold = chkEnabled.Checked ? (Int32?)numWarning.Value : null;
                 threshold.CriticalThreshold = chkEnabled.Checked ? (Int32?)numCritical.Value : null;
                 return threshold;
@@ -27,6 +27,7 @@ namespace DBAChecksGUI.LastGoodCheckDB
             }
             set{
                 threshold = value;
+                chkInherit.Visible = !(threshold.InstanceID == -1 && threshold.DatabaseID == -1);
                 chkInherit.Checked = threshold.Inherit;
                 if(threshold.WarningThreshold!= null && threshold.CriticalThreshold != null)
                 {

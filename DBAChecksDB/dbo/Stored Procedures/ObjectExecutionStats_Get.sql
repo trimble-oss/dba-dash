@@ -6,10 +6,10 @@
 	@FromDateUTC DATETIME=NULL,
 	@ToDateUTC DATETIME=NULL,
 	@Measure VARCHAR(30)='TotalDuration',
-	@DateAgg VARCHAR(20)='10MIN',
 	@UTCOffset INT=0,
 	@InstanceID INT=NULL,
-	@ObjectID BIGINT=NULL
+	@ObjectID BIGINT=NULL,
+	@DateGroupingMin INT=NULL
 )
 WITH EXECUTE AS OWNER
 AS
@@ -20,13 +20,9 @@ IF @ToDateUTC IS NULL
 
 DECLARE @DateAggString NVARCHAR(MAX)
 DECLARE @MeasureString NVARCHAR(MAX) 
-SELECT @MeasureString = CASE WHEN @Measure IN('TotalCPU','AvgCPU','TotalDuration','AvgDuration','ExecutionCount','ExecutionsPerMin','AvgLogicalReads','AvgPhysicalReads','AvgWrites','TotalWrites','TotalLogicalReads','TotalPhysicalReads') THEN @Measure ELSE NULL END
-SELECT @DateAggString = CASE @DateAgg WHEN 'NONE' THEN 'DATEADD(mi, @UTCOffset, PS.SnapshotDate)'
-		WHEN '1MIN' THEN 'DATEADD(mi, DATEDIFF(mi, 0, DATEADD(s, 30, DATEADD(mi, @UTCOffset, PS.SnapshotDate))), 0)'
-		WHEN '10MIN' THEN 'CONVERT(DATETIME,STUFF(CONVERT(VARCHAR,DATEADD(mi, @UTCOffset, PS.SnapshotDate),120),16,4,''0:00''),120)'
-		WHEN '60MIN' THEN 'DATEADD(mi, @UTCOffset, PS.SnapshotDate) '
-		WHEN '120MIN' THEN 'DATEADD(hh,DATEPART(hh,PS.SnapshotDate) - DATEPART(hh,PS.SnapshotDate) % 2, CAST(CAST(PS.SnapshotDate AS DATE) AS DATETIME))'
-		WHEN 'DAY' THEN 'CAST(DATEADD(mi, @UTCOffset, PS.SnapshotDate) AS DATE)' ELSE NULL END
+SELECT @MeasureString = CASE WHEN @Measure IN('TotalCPU','AvgCPU','TotalDuration','AvgDuration','ExecutionCount','ExecutionsPerMin','AvgLogicalReads','AvgPhysicalReads','AvgWrites','TotalWrites','TotalLogicalReads','TotalPhysicalReads','MaxExecutionsPerMin') THEN @Measure ELSE NULL END
+SELECT @DateAggString = CASE WHEN @DateGroupingMin IS NULL OR @DateGroupingMin =0 THEN 'DATEADD(mi, @UTCOffset, PS.SnapshotDate)'
+		 ELSE 'DG.DateGroup' END
 DECLARE @SQL NVARCHAR(MAX)
 SET @SQL = N'
 WITH agg AS (
@@ -46,8 +42,10 @@ SELECT ' + @DateAggString + N' as SnapshotDate,
 	   SUM(PS.total_physical_reads) as TotalPhysicalReads,
 	   SUM(PS.total_physical_reads)/NULLIF(SUM(PS.execution_count),0) as AvgPhysicalReads,
 	   SUM(PS.total_logical_writes) as TotalWrites,
-	   SUM(PS.total_logical_writes)/NULLIF(SUM(PS.execution_count),0) as AvgWrites
-FROM dbo.ObjectExecutionStats' + CASE WHEN @DateAgg IN('60MIN','DAY') THEN N'_60MIN' ELSE N'' END + N' PS
+	   SUM(PS.total_logical_writes)/NULLIF(SUM(PS.execution_count),0) as AvgWrites,
+	   MAX(MaxExecutionsPerMin) as MaxExecutionsPerMin
+FROM dbo.ObjectExecutionStats' + CASE WHEN @DateGroupingMin>=60 THEN N'_60MIN' ELSE N'' END + N' PS
+	' + CASE WHEN @DateGroupingMin IS NULL OR @DateGroupingMin =0 THEN '' ELSE 'CROSS APPLY dbo.DateGroupingMins(DATEADD(mi, @UTCOffset, PS.SnapshotDate),@DateGroupingMin) DG' END + '
     JOIN dbo.DBObjects O ON PS.ObjectID = O.ObjectID
     JOIN dbo.Databases D ON D.DatabaseID = O.DatabaseID
 	JOIN dbo.Instances I ON D.InstanceID = I.InstanceID AND PS.InstanceID = I.InstanceID
@@ -75,11 +73,11 @@ ORDER BY TotalMeasure DESC,ObjectID'
 PRINT @SQL
 IF @SQL IS NOT NULL
 BEGIN
-EXEC sp_executesql @SQL,N'@Instance SYSNAME,@DatabaseID INT,@FromDate DATETIME,@ToDate DATETIME,@ObjectName SYSNAME,@SchemaName SYSNAME,@UTCOffset INT,@InstanceID INT,@ObjectID BIGINT',
-	@Instance,@DatabaseID,@FromDateUTC,@ToDateUTC,@ObjectName,@SchemaName,@UTCOffset,@InstanceID,@ObjectID
+EXEC sp_executesql @SQL,N'@Instance SYSNAME,@DatabaseID INT,@FromDate DATETIME,@ToDate DATETIME,@ObjectName SYSNAME,@SchemaName SYSNAME,@UTCOffset INT,@InstanceID INT,@ObjectID BIGINT,@DateGroupingMin INT',
+	@Instance,@DatabaseID,@FromDateUTC,@ToDateUTC,@ObjectName,@SchemaName,@UTCOffset,@InstanceID,@ObjectID,@DateGroupingMin
 END 
 ELSE
 BEGIN
 DECLARE  @results TABLE( [SnapshotDate] DATETIME, [DatabaseName] NVARCHAR(128),[DatabaseID] INT, [object_name] NVARCHAR(128), [TotalCPU] DECIMAL(29,9), [AvgCPU] DECIMAL(29,9), [ExecutionCount] BIGINT, [ExecutionsPerMin] DECIMAL(38,9), [TotalDuration] DECIMAL(29,9), [AvgDuration] DECIMAL(29,9), [TotalLogicalReads] BIGINT, [AvgLogicalReads] BIGINT, [TotalPhysicalReads] BIGINT, [AvgPhysicalReads] BIGINT, [TotalWrites] BIGINT, [AvgWrites] BIGINT, [Measure] DECIMAL(29,9), [ProcRank] BIGINT )
-SELECT * FROM @Results
+SELECT * FROM @results
 END

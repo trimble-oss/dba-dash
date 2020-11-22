@@ -29,8 +29,11 @@ namespace DBAChecksGUI.Performance
         Int32 InstanceID;
         DateTime fromDate;
         DateTime toDate;
-        DateGroup DateGrouping;
+        Int32 DateGrouping;
         bool smoothLines = true;
+
+        public Int32 PointSize;
+
         public bool SmoothLines
         {
             get
@@ -56,15 +59,19 @@ namespace DBAChecksGUI.Performance
         }
 
 
-        public void RefreshData(Int32 InstanceID,DateTime fromDate, DateTime toDate, string connectionString,DateGroup dateGrouping= DateGroup.None)
+        public void RefreshData(Int32 InstanceID,DateTime fromDate, DateTime toDate, string connectionString)
         {
             eventTime = DateTime.MinValue;
             mins = (Int32)toDate.Subtract(fromDate).TotalMinutes;
             this.InstanceID = InstanceID;
+            if(this.fromDate!=fromDate || this.toDate != toDate)
+            {
+                DateGrouping = Common.DateGrouping(mins, 200);
+                tsDateGrouping.Text = Common.DateGroupString(DateGrouping);
+            }
             this.fromDate = fromDate;
             this.toDate = toDate;
             this.connectionString = connectionString;
-            this.DateGrouping = dateGrouping;
             refreshData(false);
         }
 
@@ -88,7 +95,7 @@ namespace DBAChecksGUI.Performance
                 cmd.Parameters.AddWithValue("@InstanceID", InstanceID);
                 cmd.Parameters.AddWithValue("@FromDate", fromDate);
                 cmd.Parameters.AddWithValue("@ToDate", toDate);
-                cmd.Parameters.AddWithValue("@DateGrouping", DateGrouping.ToString().Replace("_",""));
+                cmd.Parameters.AddWithValue("@DateGroupingMin", DateGrouping);
                 cmd.CommandType = CommandType.StoredProcedure;
                 cmd.CommandTimeout = Properties.Settings.Default.CommandTimeout;
                 var rdr = cmd.ExecuteReader();
@@ -162,7 +169,8 @@ namespace DBAChecksGUI.Performance
                         {
                         Title = "Max CPU",
                         Values = maxValues,
-                        LineSmoothness = SmoothLines ? 1 : 0
+                        LineSmoothness = SmoothLines ? 1 : 0,
+                        PointGeometrySize = PointSize,
                         }
                     };
                     chartCPU.AxisX.Clear();
@@ -205,6 +213,21 @@ namespace DBAChecksGUI.Performance
         {
             AVGToolStripMenuItem.Checked = (!MAXToolStripMenuItem.Checked);
             updateVisibility();
+        }
+
+        private void CPU_Load(object sender, EventArgs e)
+        {
+            Common.AddDateGroups(tsDateGrouping,TsDateGrouping_Click);
+     
+        }
+
+        private void TsDateGrouping_Click(object sender, EventArgs e)
+        {
+            var ts = (ToolStripMenuItem)sender;
+            DateGrouping = Convert.ToInt32(ts.Tag);
+            tsDateGrouping.Text = Common.DateGroupString(DateGrouping);
+            refreshData();
+
         }
     }
 }

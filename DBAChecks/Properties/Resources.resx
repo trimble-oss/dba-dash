@@ -966,24 +966,25 @@ SET @SQL =N'
 			@UTCOffset AS UTCOffset,
 			S.session_id,
 			ISNULL(R.blocking_session_id,0) AS blocking_session_id,
-			ISNULL(RTXT.text,CTXT.text) AS Txt,
+			ISNULL(Rtxt.text,Ctxt.text) AS Txt,
 			DATEADD(mi,@UTCOffset,ISNULL(R.start_time,S.last_request_start_time)) as start_time_utc,
 			R.command,
 			' + @DBIDTable + 'database_id,
 			DB_NAME(' + @DBIDTable + 'database_id) database_name,
 			S.host_name,
-			s.program_name,
+			S.program_name,
 			R.wait_time,
 			S.login_name,
 			R.wait_resource,
 			R.Status,
-			wait_type
-		FROM sys.dm_exec_sessions s
-		INNER JOIN sys.dm_exec_connections c ON c.session_id= S.session_id
+			R.wait_type
+		FROM sys.dm_exec_sessions S
+		INNER JOIN sys.dm_exec_connections C ON C.session_id= S.session_id
 		LEFT JOIN sys.dm_exec_requests as R ON S.session_id = R.session_id
 		OUTER APPLY sys.dm_exec_sql_text(R.sql_handle) AS Rtxt
 		OUTER APPLY sys.dm_exec_sql_text(C.most_recent_sql_handle) AS Ctxt
 		WHERE S.session_id&gt;0
+		AND R.command&lt;&gt;''BRKR TASK''
 		AND S.is_user_process=1
 	)
 	SELECT *
@@ -1171,7 +1172,8 @@ WHERE database_id = DB_ID()</value>
        max_session_percent,
        elastic_pool_dtu_limit,
        elastic_pool_storage_limit_mb,
-       avg_allocated_storage_percent
+       avg_allocated_storage_percent,
+       elastic_pool_cpu_limit
 FROM sys.elastic_pool_resource_stats 
 WHERE start_time&gt;=@Date</value>
   </data>
@@ -1476,14 +1478,14 @@ END</value>
 	severity,
 	enabled,
 	delay_between_responses,
-	msdb.dbo.AGENT_DATETIME(NULLIF(last_occurrence_date,0),last_occurrence_time) last_occurrence,
-	msdb.dbo.AGENT_DATETIME(NULLIF(last_response_date,0),last_response_time) last_response,
+	msdb.dbo.agent_datetime(NULLIF(last_occurrence_date,0),last_occurrence_time) last_occurrence,
+	msdb.dbo.agent_datetime(NULLIF(last_response_date,0),last_response_time) last_response,
 	notification_message,
 	include_event_description,
 	database_name,
 	event_description_keyword,
 	occurrence_count,
-	msdb.dbo.AGENT_DATETIME(NULLIF(count_reset_date,0),count_reset_time) as count_reset,
+	msdb.dbo.agent_datetime(NULLIF(count_reset_date,0),count_reset_time) as count_reset,
 	job_id,
 	has_notification,
 	category_id,

@@ -28,10 +28,11 @@ namespace DBAChecksGUI.Performance
         DateTime to;
         string connectionString;
         Int32 instanceID;
-        DateGroup dateGrouping;
+        private Int32 dateGrouping;
         bool smoothLines = true;
         Int32 databaseid=0;
         string drive="";
+        public Int32 PointSize;
 
         public bool SmoothLines { 
             get {
@@ -45,7 +46,7 @@ namespace DBAChecksGUI.Performance
                 }
             }
         }
-        List<LineSeries> series;
+
 
 
         private void getDrives()
@@ -82,7 +83,7 @@ namespace DBAChecksGUI.Performance
             refreshData(false);    
         }
 
-        private static DataTable IOStats(Int32 instanceid, DateTime from, DateTime to, string connectionString,Int32 DatabaseID,string drive, DateGroup dateGrouping = DateGroup.None)
+        private DataTable IOStats(Int32 instanceid, DateTime from, DateTime to, string connectionString,Int32 DatabaseID,string drive)
         {
             var dt = new DataTable();
             SqlConnection cn = new SqlConnection(connectionString);
@@ -93,7 +94,7 @@ namespace DBAChecksGUI.Performance
                 cmd.Parameters.AddWithValue("@InstanceID", instanceid);
                 cmd.Parameters.AddWithValue("@FromDate", from);
                 cmd.Parameters.AddWithValue("@ToDate", to);
-                cmd.Parameters.AddWithValue("DateGrouping", dateGrouping.ToString().Replace("_",""));
+                cmd.Parameters.AddWithValue("DateGroupingMin", dateGrouping);
                 if (drive != "")
                 {
                     cmd.Parameters.AddWithValue("Drive", drive);
@@ -113,20 +114,25 @@ namespace DBAChecksGUI.Performance
 
    
 
-        public void RefreshData(Int32 InstanceID, DateTime fromDate, DateTime toDate, string connectionString,Int32 databaseID, DateGroup dateGrouping)
+        public void RefreshData(Int32 InstanceID, DateTime fromDate, DateTime toDate, string connectionString,Int32 databaseID)
         {
             
-            if (this.dateGrouping != dateGrouping) {
-                this.dateGrouping = dateGrouping;
-                disableEnableDropdowns();
-            }
+             disableEnableDropdowns();
+            
             this.instanceID = InstanceID;
+            mins = (Int32)toDate.Subtract(fromDate).TotalMinutes;
+
+            if (this.from!=fromDate || this.to != toDate)
+            {
+                dateGrouping = Common.DateGrouping(mins, 200);
+                tsDateGroup.Text = Common.DateGroupString(dateGrouping);
+            }
             this.from = fromDate;
             this.to = toDate;
             this.connectionString = connectionString;
             this.databaseid  = databaseID;
             
-            mins = (Int32)toDate.Subtract(fromDate).TotalMinutes;
+      
             getDrives();
             refreshData();
             
@@ -136,7 +142,7 @@ namespace DBAChecksGUI.Performance
         {
             foreach(ToolStripMenuItem ts in tsMeasures.DropDownItems)
             {
-                ts.Visible= (!(dateGrouping== DateGroup.None && ts.Name.StartsWith("Max")));
+                ts.Visible= (!(dateGrouping<=1 && ts.Name.StartsWith("Max")));
                 ts.Checked = ts.Enabled ? ts.Checked : false;
             }
         }
@@ -144,7 +150,7 @@ namespace DBAChecksGUI.Performance
         public void RefreshData()
         {
            
-            if (DateTime.UtcNow.Subtract(ioTime).TotalMinutes > 30 || dateGrouping !=  DateGroup._1MIN)
+            if (DateTime.UtcNow.Subtract(ioTime).TotalMinutes > 30 || dateGrouping !=  1)
             {
                 from = DateTime.UtcNow.AddMinutes(-mins);
                 to = DateTime.UtcNow.AddMinutes(1);
@@ -166,7 +172,7 @@ namespace DBAChecksGUI.Performance
             {
                 DateFormat = "yyyy-MM-dd HH:mm";
             }
-            var dt = IOStats(instanceID, from, to, connectionString,databaseid,drive, dateGrouping);
+            var dt = IOStats(instanceID, from, to, connectionString,databaseid,drive);
             var cnt = dt.Rows.Count;
             if(cnt==0 && update)
             {
@@ -228,7 +234,7 @@ namespace DBAChecksGUI.Performance
                         Title = columns[s].Alias,
                         Tag = s,
                         ScalesYAt = columns[s].axis,
-                        PointGeometrySize = cnt <= 100 ? 10 : 0,
+                        PointGeometrySize = cnt <= 100 ? PointSize : 0,
                         LineSmoothness = SmoothLines ? 1 : 0
                     }
                     );
@@ -298,7 +304,7 @@ namespace DBAChecksGUI.Performance
                     var dd = new ToolStripMenuItem(c.Alias);
                     dd.Name = (string)s.Tag;
                     dd.CheckOnClick = true;
-                    dd.Visible = (!(dd.Name.StartsWith("Max") && dateGrouping ==  DateGroup.None));
+                    dd.Visible = (!(dd.Name.StartsWith("Max") && dateGrouping <=1));
                     dd.Checked = dd.Enabled ? c.isVisible : false;
                     dd.Click += measureDropDown_Click;
                     tsMeasures.DropDownItems.Add(dd);
@@ -321,6 +327,20 @@ namespace DBAChecksGUI.Performance
                     s.Visibility = dd.Checked ? System.Windows.Visibility.Visible : System.Windows.Visibility.Hidden;
                 }
             }
+        }
+
+        private void IOPerformance_Load(object sender, EventArgs e)
+        {
+            Common.AddDateGroups(tsDateGroup, TsDateGroup_Click);
+
+        }
+
+        private void TsDateGroup_Click(object sender, EventArgs e)
+        {
+            var ts = (ToolStripMenuItem)sender;
+            dateGrouping = Convert.ToInt32(ts.Tag);
+            tsDateGroup.Text = Common.DateGroupString(dateGrouping);
+            refreshData(false);
         }
     }
 }

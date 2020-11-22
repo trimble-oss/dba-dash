@@ -136,11 +136,29 @@
     <Compile Include="Changes\Alerts.Designer.cs">
       <DependentUpon>Alerts.cs</DependentUpon>
     </Compile>
+    <Compile Include="Changes\AzureServiceObjectivesHistory.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Changes\AzureServiceObjectivesHistory.Designer.cs">
+      <DependentUpon>AzureServiceObjectivesHistory.cs</DependentUpon>
+    </Compile>
     <Compile Include="Changes\Configuration.cs">
       <SubType>UserControl</SubType>
     </Compile>
     <Compile Include="Changes\Configuration.Designer.cs">
       <DependentUpon>Configuration.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Changes\DBConfiguration.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Changes\DBConfiguration.Designer.cs">
+      <DependentUpon>DBConfiguration.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Changes\DBOptions.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Changes\DBOptions.Designer.cs">
+      <DependentUpon>DBOptions.cs</DependentUpon>
     </Compile>
     <Compile Include="Changes\Drivers.cs">
       <SubType>UserControl</SubType>
@@ -222,6 +240,12 @@
     <Compile Include="DBFiles\FileThresholdConfig.Designer.cs">
       <DependentUpon>FileThresholdConfig.cs</DependentUpon>
     </Compile>
+    <Compile Include="DBFiles\TempDBConfig.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="DBFiles\TempDBConfig.Designer.cs">
+      <DependentUpon>TempDBConfig.cs</DependentUpon>
+    </Compile>
     <Compile Include="Diff.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -298,6 +322,18 @@
     </Compile>
     <Compile Include="Main.Designer.cs">
       <DependentUpon>Main.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Performance\AzureDBResourceStats.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Performance\AzureDBResourceStats.Designer.cs">
+      <DependentUpon>AzureDBResourceStats.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Performance\AzureDBResourceStatsView.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Performance\AzureDBResourceStatsView.Designer.cs">
+      <DependentUpon>AzureDBResourceStatsView.cs</DependentUpon>
     </Compile>
     <Compile Include="Performance\AzureSummary.cs">
       <SubType>UserControl</SubType>
@@ -415,8 +451,17 @@
     <EmbeddedResource Include="Changes\Alerts.resx">
       <DependentUpon>Alerts.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="Changes\AzureServiceObjectivesHistory.resx">
+      <DependentUpon>AzureServiceObjectivesHistory.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Changes\Configuration.resx">
       <DependentUpon>Configuration.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Changes\DBConfiguration.resx">
+      <DependentUpon>DBConfiguration.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Changes\DBOptions.resx">
+      <DependentUpon>DBOptions.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Changes\Drivers.resx">
       <DependentUpon>Drivers.cs</DependentUpon>
@@ -453,6 +498,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="DBFiles\FileThresholdConfig.resx">
       <DependentUpon>FileThresholdConfig.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="DBFiles\TempDBConfig.resx">
+      <DependentUpon>TempDBConfig.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Diff.resx">
       <DependentUpon>Diff.cs</DependentUpon>
@@ -495,6 +543,12 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Drives\DrivesControl.resx">
       <DependentUpon>DrivesControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Performance\AzureDBResourceStats.resx">
+      <DependentUpon>AzureDBResourceStats.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Performance\AzureDBResourceStatsView.resx">
+      <DependentUpon>AzureDBResourceStatsView.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Performance\AzureSummary.resx">
       <DependentUpon>AzureSummary.cs</DependentUpon>

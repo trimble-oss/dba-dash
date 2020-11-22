@@ -70,7 +70,7 @@ WITH t AS (
 							 AND a.current_time_utc > b.current_time_utc
 							 AND a.total_elapsed_time>= b.total_elapsed_time
 	JOIN dbo.Databases d ON a.database_id = d.database_id AND D.InstanceID=@InstanceID
-	JOIN dbo.DBObjects O ON a.OBJECT_NAME = O.OBJECTNAME AND O.object_id = a.object_id AND O.DatabaseID = d.DatabaseID AND O.ObjectType = a.type
+	JOIN dbo.DBObjects O ON a.object_name = O.OBJECTNAME AND a.schema_name = O.SchemaName AND O.DatabaseID = d.DatabaseID AND O.ObjectType = a.type
 	WHERE D.IsActive=1
 	AND (a.cached_time> DATEADD(s,-70,a.current_time_utc) OR b.object_id IS NOT NULL) -- recently cached or we can calculate diff from staging table
 	GROUP BY O.ObjectID,a.current_time_utc
@@ -174,7 +174,8 @@ INSERT INTO dbo.ObjectExecutionStats_60MIN
     total_logical_writes,
     total_physical_reads,
     execution_count,
-    IsCompile
+    IsCompile,
+	MaxExecutionsPerMin
 )
 SELECT S.InstanceID,
 	S.ObjectID,
@@ -186,7 +187,8 @@ SELECT S.InstanceID,
 	SUM(S.total_logical_writes) total_logical_writes,
 	SUM(S.total_physical_reads) total_physical_reads,
 	SUM(S.execution_count) execution_count,
-	CAST(MAX(CAST(S.IsCompile AS INT)) AS BIT) IsCompile
+	CAST(MAX(CAST(S.IsCompile AS INT)) AS BIT) IsCompile,
+	MAX(MaxExecutionsPerMin) AS MaxExecutionsPerMin
 FROM dbo.ObjectExecutionStats S
 WHERE S.InstanceID = @InstanceID 
 AND S.SnapshotDate >=@From60

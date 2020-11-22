@@ -84,28 +84,31 @@ namespace DBAChecksService
                         {
                             if (f.Key.EndsWith(".json") || f.Key.EndsWith(".bin"))
                             {
-                                using (GetObjectResponse response = s3Cli.GetObject(f.BucketName, f.Key))
-                                using (Stream responseStream = response.ResponseStream)
+                                lock (Program.Locker.GetLock(f.Key))
                                 {
-                                    DataSet ds;
-                                    if (f.Key.EndsWith(".bin"))
+                                    using (GetObjectResponse response = s3Cli.GetObject(f.BucketName, f.Key))
+                                    using (Stream responseStream = response.ResponseStream)
                                     {
-                                        BinaryFormatter fmt = new BinaryFormatter();
-                                        ds = (DataSet)fmt.Deserialize(responseStream);
-                                    }
-                                    else
-                                    {
-                                        using (StreamReader reader = new StreamReader(responseStream))
+                                        DataSet ds;
+                                        if (f.Key.EndsWith(".bin"))
                                         {
-                                            string json = reader.ReadToEnd();
-                                            
-                                            ds = DataSetSerialization.DeserializeDS(json);
-
+                                            BinaryFormatter fmt = new BinaryFormatter();
+                                            ds = (DataSet)fmt.Deserialize(responseStream);
                                         }
+                                        else
+                                        {
+                                            using (StreamReader reader = new StreamReader(responseStream))
+                                            {
+                                                string json = reader.ReadToEnd();
+
+                                                ds = DataSetSerialization.DeserializeDS(json);
+
+                                            }
+                                        }
+                                        DestinationHandling.WriteDB(ds, destination);
+                                        s3Cli.DeleteObject(f.BucketName, f.Key);
+                                        Console.WriteLine("Imported:" + f.Key);
                                     }
-                                    DestinationHandling.WriteDB(ds, destination);
-                                    s3Cli.DeleteObject(f.BucketName, f.Key);
-                                    Console.WriteLine("Imported:" + f.Key);
                                 }
                             }
                         }

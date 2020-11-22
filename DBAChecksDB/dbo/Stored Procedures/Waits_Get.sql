@@ -1,9 +1,11 @@
 ﻿CREATE PROC [dbo].[Waits_Get](
 	@InstanceID INT,
-	@FromDate DATETIME2(3)=NULL, 
-	@ToDate DATETIME2(3)=NULL,
-	@DateGrouping VARCHAR(50)='None',
-	@Top INT=10
+	@FromDate DATETIME2(2)=NULL, 
+	@ToDate DATETIME2(2)=NULL,
+	@DateGroupingMin INT=NULL,
+	@Top INT=10,
+	@WaitType NVARCHAR(60)=NULL,
+	@CriticalWaitsOnly BIT=0
 )
 AS
 IF @FromDate IS NULL
@@ -12,17 +14,14 @@ IF @ToDate IS NULL
 	SET @ToDate = GETUTCDATE()
 DECLARE @SQL NVARCHAR(MAX)
 DECLARE @DateGroupingSQL NVARCHAR(MAX)
+DECLARE @DateGroupingJoin NVARCHAR(MAX)
 DECLARE @Table NVARCHAR(MAX)
-SELECT @DateGroupingSQL= CASE WHEN @DateGrouping = 'None' THEN 'W.SnapshotDate'
-			WHEN @DateGrouping = '1MIN' THEN 'DATEADD(mi, DATEDIFF(mi, 0, DATEADD(s, 30, W.SnapshotDate)), 0)'
-			WHEN @DateGrouping = '10MIN' THEN 'CONVERT(DATETIME,LEFT(CONVERT(VARCHAR,W.SnapshotDate,120),15) + ''0'',120)'
-			WHEN @DateGrouping = '60MIN' THEN 'CONVERT(DATETIME,LEFT(CONVERT(VARCHAR,W.SnapshotDate,120),13) + '':00'',120)'
-			WHEN @DateGrouping = '120MIN' THEN 'DATEADD(hh,DATEPART(hh,W.SnapshotDate) - DATEPART(hh,W.SnapshotDate) % 2, CAST(CAST(W.SnapshotDate AS DATE) AS DATETIME))'
-			WHEN @DateGrouping ='DAY' THEN 'CAST(CAST(W.SnapshotDate as DATE) as DATETIME)'
-			ELSE NULL END
+SELECT @DateGroupingSQL= CASE WHEN @DateGroupingMin IS NULL OR @DateGroupingMin=0 THEN 'W.SnapshotDate'
+			ELSE 'DG.DateGroup' END,
+		 @DateGroupingJoin = CASE WHEN @DateGroupingMin IS NULL OR @DateGroupingMin=0 THEN ''
+			ELSE 'CROSS APPLY dbo.DateGroupingMins(W.SnapshotDate,@DateGroupingMin) DG' END 
 
-
-SELECT @Table = CASE WHEN @DateGrouping IN('60MIN','DAY') THEN 'dbo.Waits_60MIN' ELSE 'dbo.Waits' END
+SELECT @Table = CASE WHEN @DateGroupingMin>=60 THEN 'dbo.Waits_60MIN' ELSE 'dbo.Waits' END
 
 
 SET @SQL = N'
@@ -32,11 +31,14 @@ SELECT ' + @DateGroupingSQL + ' AS [Time],
 			SUM(W.wait_time_ms)*1000.0 / SUM(W.sample_ms_diff) WaitTimeMsPerSec,
 			ROW_NUMBER() OVER(PARTITION BY ' + @DateGroupingSQL + ' ORDER BY SUM(W.wait_time_ms) DESC) rnum
 FROM ' + @Table + ' W 
+' + @DateGroupingJoin + '
 JOIN dbo.WaitType WT ON WT.WaitTypeID = W.WaitTypeID
 WHERE W.SnapshotDate>= @FromDate
 AND W.SnapshotDate <= @ToDate
 AND WT.WaitType NOT IN(N''PVS_PREALLOCATE'',N''REDO_THREAD_PENDING_WORK'')
 AND W.InstanceID=@InstanceID
+' + CASE WHEN @CriticalWaitsOnly=1 THEN 'AND WT.IsCriticalWait=1' ELSE '' END + '
+' + CASE WHEN @WaitType IS NULL THEN '' ELSE 'AND WT.WaitType LIKE @WaitType' END + '
 GROUP BY WT.WaitType,WT.IsCriticalWait, ' + @DateGroupingSQL + ' 
 HAVING SUM(W.wait_time_ms)*1000.0 / SUM(W.sample_ms_diff) > 0
 )
@@ -45,6 +47,7 @@ SELECT [Time],
 	SUM(WaitTimeMsPerSec) as WaitTimeMsPerSec
 FROM T 
 GROUP BY [Time],CASE WHEN rnum<=@Top THEN WaitType ELSE ''{Other}'' END
-ORDER BY WaitType'
+ORDER BY WaitType
+OPTION(MAX_GRANT_PERCENT=0.1)'
 
-EXEC sp_executesql @SQL,N'@FromDate DATETIME2(3),@ToDate DATETIME2(3),@InstanceID INT,@Top INT',@FromDate,@ToDate,@InstanceID,@Top
+EXEC sp_executesql @SQL,N'@FromDate DATETIME2(2),@ToDate DATETIME2(2),@InstanceID INT,@Top INT,@DateGroupingMin INT,@WaitType NVARCHAR(60)',@FromDate,@ToDate,@InstanceID,@Top,@DateGroupingMin,@WaitType

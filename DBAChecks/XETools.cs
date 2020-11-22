@@ -70,7 +70,9 @@ namespace DBAChecks
             {
                 var r = dt.Rows.Add();
                 r["event_type"] = evt.Attribute("name").Value;
-                r["timestamp"] =  evt.Attribute("timestamp").Value;
+
+                r["timestamp"] = DateTime.Parse(evt.Attribute("timestamp").Value).ToUniversalTime();
+
                 foreach (XElement data in evt.Elements("data"))
                 {
                     name = data.Attribute("name").Value;

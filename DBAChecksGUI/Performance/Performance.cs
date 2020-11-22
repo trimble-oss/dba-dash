@@ -34,6 +34,20 @@ namespace DBAChecksGUI.Performance
             }
         }
 
+        Int32 pointSize
+        {
+            get
+            {
+                if (dataPointsToolStripMenuItem.Checked)
+                {
+                    return 10;
+                }
+                else
+                {
+                    return 0;
+                }
+            }
+        }
 
         public string ConnectionString;
 
@@ -41,28 +55,18 @@ namespace DBAChecksGUI.Performance
         {
             InitializeComponent();
         }
-        public enum DateGroup
-        {
-            None,
-            _1MIN,
-            _10MIN,
-            _60MIN,
-            _120MIN,
-            DAY
-        }
+
 
         public void Reset()
         {
             mins = 60;
             customFrom = DateTime.MinValue;
             customTo = DateTime.MinValue;
-            dateGrp = DateGroup._1MIN;
-            setDateGroup(dateGrp);
             checkTime();
 
         }
 
-        DateGroup dateGrp =  DateGroup._1MIN;
+
         Int32 mins=60;
         DateTime customFrom = DateTime.MinValue;
         DateTime customTo = DateTime.MinValue;
@@ -96,85 +100,71 @@ namespace DBAChecksGUI.Performance
 
 
 
-        public DateGroup DateGrouping(Int32 Mins)
-        {
-            if (Mins < 181)
-            {
-                return  DateGroup._1MIN;
-            }
-            if (Mins < 2881)
-            {
-                return DateGroup._10MIN;
-            }
-            if (Mins < 11520)
-            {
-                return DateGroup._60MIN;
-            }
-            if (Mins < 28800)
-            {
-                return DateGroup._120MIN;
-            }
-            return DateGroup.DAY;
-        }
+
 
         public void RefreshData(Int32 mins)
         {
             this.mins = mins;
-            this.dateGrp = DateGrouping(mins);
-            toggleTimer();
             RefreshData();
         }
 
-        private void setDateGroup(DateGroup grp)
-        {
-            string itmName="Date Grouping";
-            foreach(ToolStripMenuItem itm in tsGrouping.DropDownItems)
-            {
-                itm.Checked = (string)itm.Tag == grp.ToString();
-                if (itm.Checked){ itmName = itm.Text; }
-            }
-            dateGrp = grp;
-            tsGrouping.Text = itmName;
-        }
+        //private void setDateGroup(Int32 grp)
+        //{
+        //    string itmName="Date Grouping";
+        //    foreach(ToolStripMenuItem itm in tsGrouping.DropDownItems)
+        //    {
+        //        itm.Checked = Convert.ToInt32(itm.Tag) == grp;
+        //        if (itm.Checked){ itmName = itm.Text; }
+        //    }
+        //    dateGrp = grp;
+        //    tsGrouping.Text = itmName;
+        //}
 
-        public void RefreshData(DateTime from, DateTime to)
-        {
-            dateGrp = DateGrouping((Int32)to.Subtract(from).TotalMinutes);          
-            RefreshData(from, to, dateGrp);
-        }
+        //public void RefreshData(DateTime from, DateTime to)
+        //{
+        //    dateGrp = DateGrouping((Int32)to.Subtract(from).TotalMinutes);          
+        //    RefreshData(from, to, dateGrp);
+        //}
 
-        public void RefreshData(DateTime from,DateTime to, DateGroup dateGrp)
+        public void RefreshData(DateTime from,DateTime to)
         {
-            setDateGroup(dateGrp);
-            toggleTimer();
             if (ObjectID == 0)
             {
-                ioPerformance1.RefreshData(InstanceID, from, to, ConnectionString, DatabaseID, dateGrp);
-                cpu1.RefreshData(InstanceID, from, to, ConnectionString, dateGrp);
-                waits1.RefreshData(InstanceID, from, to, ConnectionString, dateGrp);
-                blocking1.RefreshData(InstanceID, from, to, ConnectionString,DatabaseID, dateGrp);
+                ioPerformance1.RefreshData(InstanceID, from, to, ConnectionString, DatabaseID);
+                cpu1.RefreshData(InstanceID, from, to, ConnectionString);
+                waits1.RefreshData(InstanceID, from, to, ConnectionString);
+                blocking1.RefreshData(InstanceID, from, to, ConnectionString,DatabaseID);
             }
+            this.SuspendLayout();
+            objectExecution1.SuspendLayout();
+            ioPerformance1.SuspendLayout();
+            cpu1.SuspendLayout();
+            blocking1.SuspendLayout();
+            waits1.SuspendLayout();
+
             ioPerformance1.Visible = ObjectID == 0;
             cpu1.Visible = ObjectID == 0;
             waits1.Visible = ObjectID == 0;
             blocking1.Visible = ObjectID == 0;
-        
-            objectExecution1.RefreshData(InstanceID, from, to, ConnectionString, ObjectID, DatabaseID, dateGrp);
           
+            this.tableLayoutPanel1.RowStyles[0].Height = ObjectID == 0 ? 20 : 0;
+            this.tableLayoutPanel1.RowStyles[1].Height = ObjectID == 0 ? 20 : 0;
+            this.tableLayoutPanel1.RowStyles[2].Height = ObjectID == 0 ? 20 : 0;
+            this.tableLayoutPanel1.RowStyles[3].Height = ObjectID == 0 ? 20 : 0;
+            this.tableLayoutPanel1.RowStyles[4].Height = ObjectID == 0 ? 20 : 100;
+    
+            
+        
+            objectExecution1.RefreshData(InstanceID, from, to, ConnectionString, ObjectID, DatabaseID);
+            this.ResumeLayout();
+            objectExecution1.ResumeLayout();
+            ioPerformance1.ResumeLayout();
+            cpu1.ResumeLayout();
+            blocking1.ResumeLayout();
+            waits1.ResumeLayout();
         }
 
-        private void toggleTimer()
-        {
-            enableTimer(false);
-            if (dateGrp == DateGroup._1MIN && mins > 0 && mins <= 180)
-            {
-                tsEnableTimer.Enabled = true;
-            }
-            else
-            {
-                tsEnableTimer.Enabled = false;
-            }
-        }
+
 
         public void RefreshData()
         {
@@ -191,12 +181,11 @@ namespace DBAChecksGUI.Performance
             }
             try
             {
-              RefreshData(from, to,dateGrp);
+              RefreshData(from, to);
             }
             catch (Exception ex)
             {
                 MessageBox.Show(ex.ToString(), "Chart Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                toggleTimer();
                 return;
             }
 
@@ -238,27 +227,7 @@ namespace DBAChecksGUI.Performance
             objectExecution1.RefreshData();
         }
 
-        private void tsDisableTimer_Click(object sender, EventArgs e)
-        {
-            enableTimer(false);
-        }
-
-        private void tsEnableTimer_Click(object sender, EventArgs e)
-        {
-            enableTimer(true);
-        }
-
-        public void StopTimer()
-        {
-            enableTimer(false);
-        }
-
-        private void enableTimer(bool isEnabled)
-        {
-            timer1.Enabled = isEnabled;
-            tsEnableTimer.Enabled = !isEnabled;
-            tsDisableTimer.Enabled = isEnabled;
-        }
+   
 
         private void customToolStripMenuItem_Click(object sender, EventArgs e)
         {
@@ -282,11 +251,9 @@ namespace DBAChecksGUI.Performance
             {
                 customFrom = frm.FromDate;
                 customTo = frm.ToDate;
-                this.dateGrp = DateGrouping((Int32)customTo.Subtract(customFrom).TotalMinutes);
                 mins = 0;
                 RefreshData(frm.FromDate.ToUniversalTime(), frm.ToDate.ToUniversalTime());
                 checkTime();
-                tsEnableTimer.Enabled = false;
             }
        
         }
@@ -307,22 +274,18 @@ namespace DBAChecksGUI.Performance
             RefreshData();
         }
 
-        private void tsDateGroup_Click(object sender, EventArgs e)
+        private void Performance_Load(object sender, EventArgs e)
         {
-            string tag = (string)((ToolStripMenuItem)sender).Tag;
-            DateGroup grp =  (DateGroup)Enum.Parse(typeof(DateGroup),tag);
-            var from = DateTime.UtcNow.AddMinutes(-mins);
-            if (mins >= 1440)
-            {
-                from = DateTime.UtcNow.Date.AddMinutes(-mins);
-            }
-            var to = DateTime.UtcNow.AddMinutes(1);
-            if (mins == 0)
-            {
-                from = customFrom;
-                to = customTo;
-            }
-            RefreshData(from, to, grp);
+            cpu1.PointSize = pointSize;
+            ioPerformance1.PointSize = pointSize;
+        }
+
+        private void dataPointsToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            cpu1.PointSize = pointSize;
+            ioPerformance1.PointSize = pointSize;
+            RefreshData();
+
         }
     }
 }

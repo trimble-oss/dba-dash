@@ -52,6 +52,13 @@ namespace DBAChecksGUI
                 {
                     dgvSummary.Rows[idx].Cells[col].Style.BackColor = DBAChecksStatus.GetStatusColour((DBAChecksStatus.DBAChecksStatusEnum)row[col]);
                 }
+                if(row["IsAgentRunning"]!=DBNull.Value && (bool)row["IsAgentRunning"] == false)
+                {
+                    dgvSummary.Rows[idx].Cells["JobStatus"].Style.BackColor = Color.Black;
+                    dgvSummary.Rows[idx].Cells["JobStatus"].Style.ForeColor= Color.White;
+                    dgvSummary.Rows[idx].Cells["JobStatus"].Value = "Not Running";
+                }
+
                 string uptimeString;
                 Int32 uptime = (Int32)row["sqlserver_uptime"];
                 Int32 addUptime = (Int32)row["AdditionalUptime"];

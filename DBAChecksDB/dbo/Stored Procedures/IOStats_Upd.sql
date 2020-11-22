@@ -11,7 +11,7 @@ WHERE InstanceID = @InstanceID
 CREATE TABLE #DBIOStatsTemp(
 	[InstanceID] [int] NOT NULL,
 	[DatabaseID] [int] NOT NULL,
-	[Drive] [char](1) NOT NULL,
+	[Drive] [char](1) COLLATE DATABASE_DEFAULT NOT NULL ,
 	[FileID] [int] NOT NULL,
 	[SnapshotDate] [datetime2](2) NOT NULL,
 	[num_of_reads] [bigint] NOT NULL,
@@ -66,7 +66,7 @@ BEGIN
 						@InstanceID AS InstanceID
 						) x
 	WHERE A.sample_ms > b.sample_ms
-				AND A.snapshotdate > B.snapshotdate
+				AND A.SnapshotDate > B.SnapshotDate
 				AND A.num_of_bytes_read>=B.num_of_bytes_read
 				AND A.num_of_reads>=B.num_of_reads
 				AND A.num_of_writes>=B.num_of_writes
@@ -119,7 +119,7 @@ BEGIN
 						@InstanceID AS InstanceID
 						) x
 	WHERE A.sample_ms > b.sample_ms
-				AND A.snapshotdate > B.snapshotdate
+				AND A.SnapshotDate > B.SnapshotDate
 				AND A.num_of_bytes_read>=B.num_of_bytes_read
 				AND A.num_of_reads>=B.num_of_reads
 				AND A.num_of_writes>=B.num_of_writes
@@ -183,7 +183,7 @@ BEGIN;
 				  DatabaseID,
 				  Drive,
 				  FileID,
-				  SnapshotDate,
+				  DG.DateGroup AS SnapshotDate,
 				  num_of_reads,
 				  num_of_writes,
 				  num_of_bytes_read,
@@ -201,7 +201,9 @@ BEGIN;
 				  num_of_bytes_read/(sample_ms_diff/1000.0)/POWER(1024.0,2) AS MaxReadMBsec,
 				  num_of_bytes_written/(sample_ms_diff/1000.0)/POWER(1024.0,2) AS MaxWriteMBsec,
 				  (num_of_bytes_written+num_of_bytes_read)/(sample_ms_diff/1000.0)/POWER(1024.0,2) AS MaxMBsec	
-				  FROM #DBIOStatsTemp) AS S
+				  FROM #DBIOStatsTemp
+				  CROSS APPLY [dbo].[DateGroupingMins](SnapshotDate,60) DG
+				  ) AS S
 	ON S.InstanceID= T.InstanceID
 	AND S.DatabaseID = T.DatabaseID
 	AND S.Drive = T.Drive
