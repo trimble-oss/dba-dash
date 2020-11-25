@@ -522,7 +522,7 @@ namespace DBAChecks.Properties {
         ///   Looks up a localized string similar to DECLARE @SQL NVARCHAR(MAX)
         ///DECLARE @DBName SYSNAME
         ///DECLARE @DBID INT
-        ///IF DATABASEPROPERTYEX(DB_NAME(),&apos;LastGoodCheckDbTime&apos;) IS NULL
+        ///IF DATABASEPROPERTYEX(DB_NAME(),&apos;LastGoodCheckDbTime&apos;) IS NULL AND IS_SRVROLEMEMBER(&apos;sysadmin&apos;)=1
         ///BEGIN
         ///	DECLARE DBs CURSOR FAST_FORWARD READ_ONLY FOR
         ///	SELECT name,database_id
@@ -536,8 +536,7 @@ namespace DBAChecks.Properties {
         ///			  Field VARCHAR(255) ,
         ///			  Value VARCHAR(255) 
         ///			);
-        ///	DECLARE @LastGoodDBCC TABLE(
-        ///		database_id [rest of string was truncated]&quot;;.
+        ///	DECLARE  [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string SQLLastGoodCheckDB {
             get {
@@ -679,14 +678,16 @@ namespace DBAChecks.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to DECLARE @ProcessorNameString NVARCHAR(512)
+        ///   Looks up a localized string similar to SET NOCOUNT ON
+        ///DECLARE @ProcessorNameString NVARCHAR(512)
         ///DECLARE @SystemManufacturer NVARCHAR(512)
         ///DECLARE @SystemProductName NVARCHAR(512)
         ///DECLARE @IsAgentRunning BIT
         ///DECLARE @InstantFileInitializationEnabled BIT
-        ///IF OBJECT_ID(&apos;sys.xp_instance_regread&apos;) IS NOT NULL AND EXISTS(SELECT * FROM fn_my_permissions ( &apos;sys.xp_instance_regread&apos;, &apos;OBJECT&apos; ) WHERE permission_name=&apos;EXECUTE&apos;)
+        ///IF OBJECT_ID(&apos;sys.xp_instance_regread&apos;) IS NOT NULL AND IS_SRVROLEMEMBER(&apos;sysadmin&apos;)=1
         ///BEGIN  
-        ///	EXEC sys.xp_instance_regread N&apos;HKEY_LOCAL_MACHINE&apos;, N&apos;HARDWARE\DESCRIPTION\System\CentralProcessor\0&apos;, N&apos;ProcessorNameString&apos;,@P [rest of string was truncated]&quot;;.
+        ///	EXEC sys.xp_instance_regread N&apos;HKEY_LOCAL_MACHINE&apos;, N&apos;HARDWARE\DESCRIPTION\System\CentralProcessor\0&apos;, N&apos;ProcessorNameString&apos;,@ProcessorNameString OUT;
+        ///	EXEC sys.xp_instance_regread N&apos;HKEY_LOC [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string SQLServerExtraProperties {
             get {
