@@ -29,7 +29,10 @@ namespace DBAChecksGUI
                 { 240, "4hrs" },
                 { 360, "6hrs" },
                 { 720, "12hrs" },
-                { 1440, "1 Day" }
+                { 1440, "1 Day" },
+                { 2880, "2 Days" },
+                { 10880, "7 Days" },
+                { 20160, "14 Days" }
             };
 
         public static Guid HighPerformancePowerPlanGUID

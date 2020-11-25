@@ -510,7 +510,12 @@ namespace DBAChecksGUI
                     lblPageSize.Visible = false;
                 }
                dgvSlow.AutoGenerateColumns = false;
+          
                 dgvSlow.DataSource = dt;
+                Text.AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
+                dgvSlow.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
+                Text.AutoSizeMode = DataGridViewAutoSizeColumnMode.None;
+                dgvSlow.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.None;
 
             }
         }
