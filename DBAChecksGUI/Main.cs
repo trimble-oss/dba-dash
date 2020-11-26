@@ -304,7 +304,7 @@ namespace DBAChecksGUI
             }
             if(tabs.SelectedTab == tabDBOptions)
             {
-                dbOptions1.InstanceIDs = instanceIDs;
+                dbOptions1.InstanceIDs = parent.Type == SQLTreeItem.TreeType.DBAChecksRoot ? AllInstanceIDs : instanceIDs;
                 dbOptions1.DatabaseID = n.DatabaseID;
                 dbOptions1.RefreshData();
             }
