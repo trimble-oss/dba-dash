@@ -1,4 +1,4 @@
-﻿CREATE PROC dbo.DatabasesAllInfo_Get(
+﻿CREATE PROC [dbo].[DatabasesAllInfo_Get](
 		@InstanceIDs VARCHAR(MAX)=NULL,
 		@DatabaseID INT=NULL
 )
@@ -27,6 +27,7 @@ SELECT I.Instance,
         D.is_read_committed_snapshot_on,
         D.recovery_model,
         D.page_verify_option,
+		CASE WHEN D.page_verify_option=0 THEN ''NONE'' WHEN D.page_verify_option=1 THEN ''TORN_PAGE_DETECTION'' WHEN D.page_verify_option=2 THEN ''CHECKSUM'' ELSE NULL END as page_verify_option_desc,
         D.is_auto_create_stats_on,
         D.is_auto_create_stats_incremental_on,
         D.is_auto_update_stats_on,
