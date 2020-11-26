@@ -92,7 +92,7 @@ namespace DBAChecks
 
         private void logError(string errorSource, string errorMessage,string errorContext="Collect")
         {
-            Console.WriteLine("Error: " + instanceName + "|" + dbName + " " + errorSource + " : " + errorMessage);
+            Console.WriteLine("Error: " + instanceName + "{" + dbName + "} - " + errorContext + " - " + errorSource  + " : " + errorMessage);
             var rError = dtErrors.NewRow();
             rError["ErrorSource"] = errorSource;
             rError["ErrorMessage"] = errorMessage;
