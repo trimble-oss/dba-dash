@@ -439,6 +439,8 @@
     <Build Include="dbo\Stored Procedures\AzureDBElasticPoolHistory_Get.sql" />
     <Build Include="dbo\Stored Procedures\TempDBConfig_Get.sql" />
     <Build Include="dbo\Stored Procedures\DBSummary_Get.sql" />
+    <Build Include="dbo\Views\FGIOStats_60MIN.sql" />
+    <Build Include="dbo\Views\FGIOStats.sql" />
   </ItemGroup>
   <ItemGroup>
     <PostDeploy Include="Script.PostDeployment1.sql" />

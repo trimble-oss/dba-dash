@@ -124,6 +124,43 @@ WHERE DDLID = @DDLID";
             }
         }
 
+        public static DataTable GetFiles(Int32 DatabaseID)
+        {
+            SqlConnection cn = new SqlConnection(Common.ConnectionString);
+            using (cn)
+            {
+                cn.Open();
+                SqlCommand cmd = new SqlCommand("dbo.DBFiles_Get", cn);
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.Parameters.AddWithValue("DatabaseID", DatabaseID);
+                cmd.Parameters.AddWithValue("IncludeWarning", true);
+                cmd.Parameters.AddWithValue("IncludeNA", true);
+                cmd.Parameters.AddWithValue("IncludeCritical", true);
+                cmd.Parameters.AddWithValue("IncludeOK", true);
+                cmd.Parameters.AddWithValue("FileGroupLevel", 0);
+                SqlDataAdapter da = new SqlDataAdapter(cmd);
+                DataTable dt = new DataTable();
+                da.Fill(dt);
+                return dt;
+            }
+        }
+
+        public static DataTable GetFileGroups(Int32 DatabaseID)
+        {
+            SqlConnection cn = new SqlConnection(Common.ConnectionString);
+            using (cn)
+            {
+                cn.Open();
+                SqlCommand cmd = new SqlCommand("dbo.FileGroup_Get", cn);
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.Parameters.AddWithValue("DatabaseID", DatabaseID);
+                SqlDataAdapter da = new SqlDataAdapter(cmd);
+                DataTable dt = new DataTable();
+                da.Fill(dt);
+                return dt;
+            }
+        }
+
         public static DataTable ConvertUTCToLocal(ref DataTable dt,List<string>convertCols=null)
         {
             List<Int32> convertColsIdx = new List<int>();
