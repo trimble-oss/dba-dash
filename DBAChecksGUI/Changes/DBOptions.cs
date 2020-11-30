@@ -22,18 +22,39 @@ namespace DBAChecksGUI.Changes
             InitializeComponent();
         }
 
+        public bool SummaryMode
+        {
+            get
+            {
+                if (DatabaseID > 0)
+                {
+                    return false;
+                }
+                else
+                {
+                    return tsDetail.Visible;
+                }
+            }
+            set
+            {
+                tsDetail.Visible = value;
+                tsSummary.Visible = !value;
+            }
+        }
+
         public void RefreshData()
         {
-            refreshHistory();
-            if (InstanceIDs.Count == 1)
+            if (InstanceIDs != null)
             {
-                refreshDBInfo();
-            }
-            else
-            {
-                tsRefreshInfo.DisplayStyle = ToolStripItemDisplayStyle.ImageAndText;
-                tsRefreshInfo.Text = "Show All";
-                lblInfo.Visible = true;
+                refreshHistory();
+                if (SummaryMode)
+                {
+                    refreshDBSummary();
+                }
+                else
+                {
+                    refreshDBInfo();
+                }
             }
         }
 
@@ -53,6 +74,21 @@ namespace DBAChecksGUI.Changes
                 }
             }
             dgv.DataSource = pivotDT;
+        }
+
+        private void refreshDBSummary()
+        {
+            SqlConnection cn = new SqlConnection(Common.ConnectionString);
+            using (cn)
+            {
+                SqlCommand cmd = new SqlCommand("dbo.DBSummary_Get", cn);
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.Parameters.AddWithValue("InstanceIDs", String.Join(",", InstanceIDs));
+                SqlDataAdapter da = new SqlDataAdapter(cmd);
+                DataTable dt = new DataTable();
+                da.Fill(dt);
+                dgv.DataSource = dt;
+            }
         }
 
         private void refreshDBInfo()
@@ -82,9 +118,6 @@ namespace DBAChecksGUI.Changes
                 }
 
             }
-            tsRefreshInfo.DisplayStyle = ToolStripItemDisplayStyle.Image;
-            tsRefreshInfo.Text = "Refresh";
-            lblInfo.Visible = false;
         }
 
         private void refreshHistory()
@@ -132,7 +165,14 @@ namespace DBAChecksGUI.Changes
 
         private void tsRefreshInfo_Click(object sender, EventArgs e)
         {
-            refreshDBInfo();
+            if (SummaryMode)
+            {
+                refreshDBSummary();
+            }
+            else
+            {
+                refreshDBInfo();
+            }
         }
 
         private void tsCopyInfo_Click(object sender, EventArgs e)
@@ -143,6 +183,49 @@ namespace DBAChecksGUI.Changes
         private void excludeStateChangesToolStripMenuItem_Click(object sender, EventArgs e)
         {
             refreshHistory();
+        }
+
+        private void tsSummary_Click(object sender, EventArgs e)
+        {
+            SummaryMode = true;
+            refreshDBSummary();
+        }
+
+        private void tsDetail_Click(object sender, EventArgs e)
+        {
+            SummaryMode = false;
+            refreshDBInfo();
+        }
+
+        private void DBOptions_Load(object sender, EventArgs e)
+        {
+            if (DatabaseID > 0)
+            {
+                SummaryMode = false;
+            }
+           
+        }
+
+        private void dgv_RowsAdded(object sender, DataGridViewRowsAddedEventArgs e)
+        {
+            if (SummaryMode)
+            {
+                var warningCols = new string[] { "Auto Create Stats Disabled", "Auto Update Stats Disabled", "Old Compat Level", "DB Owner Not SA", "In Recovery", "Offline" };
+                var criticalCols = new string[] { "Page Verify Not Optimal", "Auto Close", "Auto Shrink", "Suspect", "Emergency" };
+                for (Int32 idx = e.RowIndex; idx < e.RowIndex + e.RowCount; idx += 1)
+                {
+                    var r = dgv.Rows[idx];
+                    var row = (DataRowView)r.DataBoundItem;
+                    foreach (var col in warningCols)
+                    {
+                        dgv.Rows[idx].Cells[col].Style.BackColor = (Int32)dgv.Rows[idx].Cells[col].Value > 0 ? Color.Yellow : Color.White;
+                    }
+                    foreach (var col in criticalCols)
+                    {
+                        dgv.Rows[idx].Cells[col].Style.BackColor = (Int32)dgv.Rows[idx].Cells[col].Value > 0 ? Color.Red : Color.White;
+                    }
+                }
+            }
         }
     }
 }

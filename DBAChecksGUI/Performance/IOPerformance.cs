@@ -33,6 +33,48 @@ namespace DBAChecksGUI.Performance
         Int32 databaseid=0;
         string drive="";
         public Int32 PointSize;
+        string filegroup="";
+        public string FileGroup
+        {
+            get
+            {
+                return filegroup;
+            }
+            set
+            {
+                filegroup = value;
+                tsFileGroup.Text = filegroup.Length > 0 ? filegroup : "Filegroup";
+                var style = filegroup.Length > 0 ? FontStyle.Bold : FontStyle.Regular;
+                tsFileGroup.Font = new Font(tsFileGroup.Font, style);
+                foreach (ToolStripMenuItem itm in tsFileGroup.DropDownItems)
+                {
+                    style = itm.Text == filegroup ? FontStyle.Bold : FontStyle.Regular;
+                    itm.Font = new Font(itm.Font, style);
+                    itm.Checked = itm.Text == filegroup;                  
+                }
+                if (drive != "")
+                {
+                    Drive = "";
+                }
+            }
+        }
+
+        public string Drive
+        {
+            get
+            {
+                return drive;
+            }
+            set
+            {
+                tsDrives.Text = value;
+                drive = value;
+                if( filegroup != "")
+                {
+                    FileGroup = "";
+                }
+            }
+        }
 
         public bool SmoothLines { 
             get {
@@ -47,7 +89,44 @@ namespace DBAChecksGUI.Performance
             }
         }
 
+        private void populateFileGroupFilter()
+        {
+            if (databaseid > 0)
+            {
+                tsFileGroup.DropDownItems.Clear();
+                var dt = Common.GetFileGroups(databaseid);
+                foreach (DataRow r in dt.Rows)
+                {
+                    string fg = r["FileGroup"] == DBNull.Value ? "{NULL}" : (string)r["FileGroup"];
 
+                    var mnu = new ToolStripMenuItem(fg);
+                    mnu.Checked = fg == filegroup;
+                    mnu.CheckOnClick = true;
+                    mnu.Click += filegroup_Click; ;
+                    tsFileGroup.DropDownItems.Add(mnu);
+
+                }
+                tsFileGroup.Visible = tsFileGroup.DropDownItems.Count > 0;
+            }
+            else
+            {
+                tsFileGroup.Visible = false;
+            }
+        }
+
+        private void filegroup_Click(object sender, EventArgs e)
+        {
+            var mnu = (ToolStripMenuItem)sender;
+            if (mnu.Checked)
+            {   
+                FileGroup = mnu.Text;
+            }
+            else
+            {
+                FileGroup = "";
+            }
+            refreshData();
+        }
 
         private void getDrives()
         {
@@ -78,8 +157,7 @@ namespace DBAChecksGUI.Performance
 
         private void DdDrive_Click(object sender, EventArgs e)
         {
-            drive =  (string)((ToolStripDropDownItem)sender).Tag;
-            tsDrives.Text = drive;
+            Drive =  (string)((ToolStripDropDownItem)sender).Tag;
             refreshData(false);    
         }
 
@@ -94,6 +172,10 @@ namespace DBAChecksGUI.Performance
                 cmd.Parameters.AddWithValue("@InstanceID", instanceid);
                 cmd.Parameters.AddWithValue("@FromDate", from);
                 cmd.Parameters.AddWithValue("@ToDate", to);
+                if (filegroup.Length > 0)
+                {
+                    cmd.Parameters.AddWithValue("@FileGroup", filegroup);
+                }
                 cmd.Parameters.AddWithValue("DateGroupingMin", dateGrouping);
                 if (drive != "")
                 {
@@ -131,8 +213,8 @@ namespace DBAChecksGUI.Performance
             this.to = toDate;
             this.connectionString = connectionString;
             this.databaseid  = databaseID;
-            
-      
+            FileGroup = "";
+            populateFileGroupFilter();     
             getDrives();
             refreshData();
             

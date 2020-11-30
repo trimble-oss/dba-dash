@@ -90,12 +90,23 @@ namespace DBAChecksGUI.Performance
 
         private void gvBlocking_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
-            if(e.ColumnIndex == BlockedSessions.Index && e.RowIndex>=0)
+            if (e.RowIndex >= 0)
             {
                 var row = (DataRowView)gvBlocking.Rows[e.RowIndex].DataBoundItem;
-                BlockingSessionID = (Int16)row["session_id"];                
-                loadData();               
+                if (e.ColumnIndex == BlockedSessions.Index)
+                {
+                    BlockingSessionID = (Int16)row["session_id"];
+                    loadData();
+                }
+                if (e.ColumnIndex == Txt.Index && e.RowIndex >= 0)
+                {
+                    string txt = (string)row["Txt"];
+                    var frm = new CodeViewer();
+                    frm.SQL = txt;
+                    frm.Show();
+                }
             }
+    
         }
 
         void updatePath()

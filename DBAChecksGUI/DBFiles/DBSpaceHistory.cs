@@ -293,7 +293,7 @@ namespace DBAChecksGUI.DBFiles
 
         private void populateFileGroupFilter()
         {
-            var dt = GetFileGroups(DatabaseID);
+            var dt = Common.GetFileGroups(DatabaseID);
             foreach(DataRow r in dt.Rows)
             {
                 string fg = r["FileGroup"] == DBNull.Value ? "{NULL}" : (string)r["FileGroup"];
@@ -311,7 +311,7 @@ namespace DBAChecksGUI.DBFiles
 
         private void populateFileFilesFilter()
         {
-            var dt = GetFiles(DatabaseID);
+            var dt = Common.GetFiles(DatabaseID);
             foreach (DataRow r in dt.Rows)
             {
                 string fileName = r["file_name"] == DBNull.Value ? "" : (string)r["file_name"];
@@ -380,41 +380,6 @@ namespace DBAChecksGUI.DBFiles
             }
         }
 
-        private DataTable GetFiles(Int32 DatabaseID)
-        {
-            SqlConnection cn = new SqlConnection(connectionString);
-            using (cn)
-            {
-                cn.Open();
-                SqlCommand cmd = new SqlCommand("dbo.DBFiles_Get", cn);
-                cmd.CommandType = CommandType.StoredProcedure;
-                cmd.Parameters.AddWithValue("DatabaseID", DatabaseID);
-                cmd.Parameters.AddWithValue("IncludeWarning", true);
-                cmd.Parameters.AddWithValue("IncludeNA", true);
-                cmd.Parameters.AddWithValue("IncludeCritical", true);
-                cmd.Parameters.AddWithValue("IncludeOK", true);
-                cmd.Parameters.AddWithValue("FileGroupLevel", 0);
-                SqlDataAdapter da = new SqlDataAdapter(cmd);
-                DataTable dt = new DataTable();
-                da.Fill(dt);
-                return dt;
-            }
-        }
 
-        private DataTable GetFileGroups(Int32 DatabaseID)
-        {
-            SqlConnection cn = new SqlConnection(connectionString);
-            using (cn)
-            {
-                cn.Open();
-                SqlCommand cmd = new SqlCommand("dbo.FileGroup_Get", cn);
-                cmd.CommandType = CommandType.StoredProcedure;
-                cmd.Parameters.AddWithValue("DatabaseID", DatabaseID);
-                SqlDataAdapter da = new SqlDataAdapter(cmd);
-                DataTable dt = new DataTable();
-                da.Fill(dt);
-                return dt;
-            }
-        }
     }
 }

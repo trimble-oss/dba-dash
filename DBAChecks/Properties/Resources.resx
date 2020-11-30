@@ -118,17 +118,21 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="SQLServerExtraProperties" xml:space="preserve">
-    <value>DECLARE @ProcessorNameString NVARCHAR(512)
+    <value>SET NOCOUNT ON
+DECLARE @ProcessorNameString NVARCHAR(512)
 DECLARE @SystemManufacturer NVARCHAR(512)
 DECLARE @SystemProductName NVARCHAR(512)
 DECLARE @IsAgentRunning BIT
 DECLARE @InstantFileInitializationEnabled BIT
-IF OBJECT_ID('sys.xp_instance_regread') IS NOT NULL AND EXISTS(SELECT * FROM fn_my_permissions ( 'sys.xp_instance_regread', 'OBJECT' ) WHERE permission_name='EXECUTE')
+IF OBJECT_ID('sys.xp_instance_regread') IS NOT NULL AND IS_SRVROLEMEMBER('sysadmin')=1
 BEGIN  
 	EXEC sys.xp_instance_regread N'HKEY_LOCAL_MACHINE', N'HARDWARE\DESCRIPTION\System\CentralProcessor\0', N'ProcessorNameString',@ProcessorNameString OUT;
 	EXEC sys.xp_instance_regread N'HKEY_LOCAL_MACHINE', N'SYSTEM\HardwareConfig\Current', N'SystemManufacturer',@SystemManufacturer OUT;
 	EXEC sys.xp_instance_regread N'HKEY_LOCAL_MACHINE', N'SYSTEM\HardwareConfig\Current', N'SystemProductName', @SystemProductName OUT;
-
+END
+ELSE
+BEGIN
+	PRINT 'Sysadmin required to get ProcessorNameString, SystemManufacturer and SystemProductName'
 END
 DECLARE @ActivePowerPlan UNIQUEIDENTIFIER
 DECLARE @HighPerformance VARCHAR(36)  
@@ -143,6 +147,7 @@ WHERE name = 'xp_cmdshell'
 AND value_in_use=1
 ) AND EXISTS(SELECT * FROM fn_my_permissions ( 'xp_cmdshell', 'OBJECT' ) WHERE permission_name='EXECUTE')
 BEGIN
+	BEGIN TRY
 	INSERT INTO @output
 	(
 		output
@@ -150,6 +155,10 @@ BEGIN
 	EXEC xp_cmdshell 'powercfg /list';
 	SELECT @ActivePowerPlan = CAST(MAX(CASE WHEN output LIKE  '%' + @HighPerformance + '%*%' THEN @HighPerformance WHEN output LIKE '%' + @Balanced + '%*%' THEN @Balanced WHEN output LIKE '%' + @PowerSaver + '%*%' THEN @PowerSaver ELSE NULL END) AS UNIQUEIDENTIFIER)
 	FROM @output
+	END TRY
+	BEGIN CATCH
+		PRINT 'Unable to get powerplan using xp_cmdshell: ' + ERROR_MESSAGE()
+	END CATCH
 
 END
 ELSE
@@ -1419,7 +1428,7 @@ END</value>
     <value>DECLARE @SQL NVARCHAR(MAX)
 DECLARE @DBName SYSNAME
 DECLARE @DBID INT
-IF DATABASEPROPERTYEX(DB_NAME(),'LastGoodCheckDbTime') IS NULL
+IF DATABASEPROPERTYEX(DB_NAME(),'LastGoodCheckDbTime') IS NULL AND IS_SRVROLEMEMBER('sysadmin')=1
 BEGIN
 	DECLARE DBs CURSOR FAST_FORWARD READ_ONLY FOR
 	SELECT name,database_id

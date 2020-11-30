@@ -62,7 +62,7 @@ namespace DBAChecks
         public Int32 PerformanceCollectionPeriodMins = 60;
         string computerName;
         Int64 editionId;
-        CollectionType[] azureCollectionTypes = new CollectionType[] { CollectionType.SlowQueries, CollectionType.AzureDBElasticPoolResourceStats, CollectionType.AzureDBServiceObjectives, CollectionType.AzureDBResourceStats, CollectionType.CPU, CollectionType.DBFiles, CollectionType.General, CollectionType.Performance, CollectionType.Databases, CollectionType.DBConfig, CollectionType.TraceFlags, CollectionType.ObjectExecutionStats, CollectionType.BlockingSnapshot, CollectionType.IOStats, CollectionType.Waits, CollectionType.ServerProperties, CollectionType.DBTuningOptions, CollectionType.SysConfig, CollectionType.DatabasePrincipals, CollectionType.DatabaseRoleMembers, CollectionType.DatabasePermissions, CollectionType.Security };
+        CollectionType[] azureCollectionTypes = new CollectionType[] { CollectionType.SlowQueries, CollectionType.AzureDBElasticPoolResourceStats, CollectionType.AzureDBServiceObjectives, CollectionType.AzureDBResourceStats, CollectionType.CPU, CollectionType.DBFiles, CollectionType.General, CollectionType.Performance, CollectionType.Databases, CollectionType.DBConfig, CollectionType.TraceFlags, CollectionType.ObjectExecutionStats, CollectionType.BlockingSnapshot, CollectionType.IOStats, CollectionType.Waits, CollectionType.ServerProperties, CollectionType.DBTuningOptions, CollectionType.SysConfig, CollectionType.DatabasePrincipals, CollectionType.DatabaseRoleMembers, CollectionType.DatabasePermissions, CollectionType.Security, CollectionType.OSInfo };
         public Int64 SlowQueryThresholdMs = -1;
 
         private bool IsAzure = false;
@@ -92,7 +92,7 @@ namespace DBAChecks
 
         private void logError(string errorSource, string errorMessage,string errorContext="Collect")
         {
-            Console.WriteLine("Error: " + instanceName + "|" + dbName + " " + errorSource + " : " + errorMessage);
+            Console.WriteLine("Error: " + instanceName + "{" + dbName + "} - " + errorContext + " - " + errorSource  + " : " + errorMessage);
             var rError = dtErrors.NewRow();
             rError["ErrorSource"] = errorSource;
             rError["ErrorMessage"] = errorMessage;

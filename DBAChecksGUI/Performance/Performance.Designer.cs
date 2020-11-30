@@ -45,10 +45,10 @@
             this.tsCustom = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripDropDownButton1 = new System.Windows.Forms.ToolStripDropDownButton();
             this.smoothLinesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.dataPointsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.tsRefresh = new System.Windows.Forms.ToolStripButton();
             this.timer1 = new System.Windows.Forms.Timer(this.components);
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
-            this.dataPointsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.cpu1 = new DBAChecksGUI.Performance.CPU();
             this.objectExecution1 = new DBAChecksGUI.Performance.ObjectExecution();
             this.ioPerformance1 = new DBAChecksGUI.Performance.IOPerformance();
@@ -67,7 +67,7 @@
             this.tsRefresh});
             this.toolStrip1.Location = new System.Drawing.Point(0, 0);
             this.toolStrip1.Name = "toolStrip1";
-            this.toolStrip1.Size = new System.Drawing.Size(1757, 27);
+            this.toolStrip1.Size = new System.Drawing.Size(1757, 31);
             this.toolStrip1.TabIndex = 2;
             this.toolStrip1.Text = "toolStrip1";
             // 
@@ -90,7 +90,7 @@
             this.tsTime.Image = global::DBAChecksGUI.Properties.Resources.Time_16x;
             this.tsTime.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsTime.Name = "tsTime";
-            this.tsTime.Size = new System.Drawing.Size(34, 24);
+            this.tsTime.Size = new System.Drawing.Size(34, 28);
             this.tsTime.Text = "Time";
             this.tsTime.Click += new System.EventHandler(this.tsTime_Click_1);
             // 
@@ -203,7 +203,7 @@
             this.toolStripDropDownButton1.Image = global::DBAChecksGUI.Properties.Resources.LineChart_16x;
             this.toolStripDropDownButton1.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripDropDownButton1.Name = "toolStripDropDownButton1";
-            this.toolStripDropDownButton1.Size = new System.Drawing.Size(34, 24);
+            this.toolStripDropDownButton1.Size = new System.Drawing.Size(34, 28);
             this.toolStripDropDownButton1.Text = "Chart Options";
             // 
             // smoothLinesToolStripMenuItem
@@ -212,9 +212,19 @@
             this.smoothLinesToolStripMenuItem.CheckOnClick = true;
             this.smoothLinesToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
             this.smoothLinesToolStripMenuItem.Name = "smoothLinesToolStripMenuItem";
-            this.smoothLinesToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            this.smoothLinesToolStripMenuItem.Size = new System.Drawing.Size(181, 26);
             this.smoothLinesToolStripMenuItem.Text = "Smooth Lines";
             this.smoothLinesToolStripMenuItem.Click += new System.EventHandler(this.smoothLinesToolStripMenuItem_Click);
+            // 
+            // dataPointsToolStripMenuItem
+            // 
+            this.dataPointsToolStripMenuItem.Checked = true;
+            this.dataPointsToolStripMenuItem.CheckOnClick = true;
+            this.dataPointsToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.dataPointsToolStripMenuItem.Name = "dataPointsToolStripMenuItem";
+            this.dataPointsToolStripMenuItem.Size = new System.Drawing.Size(181, 26);
+            this.dataPointsToolStripMenuItem.Text = "Data Points";
+            this.dataPointsToolStripMenuItem.Click += new System.EventHandler(this.dataPointsToolStripMenuItem_Click);
             // 
             // tsRefresh
             // 
@@ -222,7 +232,7 @@
             this.tsRefresh.Image = global::DBAChecksGUI.Properties.Resources._112_RefreshArrow_Green_16x16_72;
             this.tsRefresh.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsRefresh.Name = "tsRefresh";
-            this.tsRefresh.Size = new System.Drawing.Size(29, 24);
+            this.tsRefresh.Size = new System.Drawing.Size(29, 28);
             this.tsRefresh.Text = "Refresh";
             this.tsRefresh.Click += new System.EventHandler(this.tsRefresh_Click);
             // 
@@ -241,7 +251,7 @@
             this.tableLayoutPanel1.Controls.Add(this.blocking1, 0, 3);
             this.tableLayoutPanel1.Controls.Add(this.waits1, 0, 2);
             this.tableLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.tableLayoutPanel1.Location = new System.Drawing.Point(0, 27);
+            this.tableLayoutPanel1.Location = new System.Drawing.Point(0, 31);
             this.tableLayoutPanel1.Name = "tableLayoutPanel1";
             this.tableLayoutPanel1.RowCount = 5;
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 20F));
@@ -249,32 +259,22 @@
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 20F));
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 20F));
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 20F));
-            this.tableLayoutPanel1.Size = new System.Drawing.Size(1757, 1865);
+            this.tableLayoutPanel1.Size = new System.Drawing.Size(1757, 1861);
             this.tableLayoutPanel1.TabIndex = 8;
-            // 
-            // dataPointsToolStripMenuItem
-            // 
-            this.dataPointsToolStripMenuItem.Checked = true;
-            this.dataPointsToolStripMenuItem.CheckOnClick = true;
-            this.dataPointsToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.dataPointsToolStripMenuItem.Name = "dataPointsToolStripMenuItem";
-            this.dataPointsToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
-            this.dataPointsToolStripMenuItem.Text = "Data Points";
-            this.dataPointsToolStripMenuItem.Click += new System.EventHandler(this.dataPointsToolStripMenuItem_Click);
             // 
             // cpu1
             // 
             this.cpu1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.cpu1.Location = new System.Drawing.Point(3, 3);
             this.cpu1.Name = "cpu1";
-            this.cpu1.Size = new System.Drawing.Size(1751, 367);
+            this.cpu1.Size = new System.Drawing.Size(1751, 366);
             this.cpu1.SmoothLines = true;
             this.cpu1.TabIndex = 4;
             // 
             // objectExecution1
             // 
             this.objectExecution1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.objectExecution1.Location = new System.Drawing.Point(3, 1495);
+            this.objectExecution1.Location = new System.Drawing.Point(3, 1491);
             this.objectExecution1.Name = "objectExecution1";
             this.objectExecution1.Size = new System.Drawing.Size(1751, 367);
             this.objectExecution1.TabIndex = 7;
@@ -282,26 +282,28 @@
             // ioPerformance1
             // 
             this.ioPerformance1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.ioPerformance1.Location = new System.Drawing.Point(3, 376);
+            this.ioPerformance1.Drive = "";
+            this.ioPerformance1.FileGroup = "";
+            this.ioPerformance1.Location = new System.Drawing.Point(3, 375);
             this.ioPerformance1.Name = "ioPerformance1";
-            this.ioPerformance1.Size = new System.Drawing.Size(1751, 367);
+            this.ioPerformance1.Size = new System.Drawing.Size(1751, 366);
             this.ioPerformance1.SmoothLines = true;
             this.ioPerformance1.TabIndex = 3;
             // 
             // blocking1
             // 
             this.blocking1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.blocking1.Location = new System.Drawing.Point(3, 1122);
+            this.blocking1.Location = new System.Drawing.Point(3, 1119);
             this.blocking1.Name = "blocking1";
-            this.blocking1.Size = new System.Drawing.Size(1751, 367);
+            this.blocking1.Size = new System.Drawing.Size(1751, 366);
             this.blocking1.TabIndex = 6;
             // 
             // waits1
             // 
             this.waits1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.waits1.Location = new System.Drawing.Point(3, 749);
+            this.waits1.Location = new System.Drawing.Point(3, 747);
             this.waits1.Name = "waits1";
-            this.waits1.Size = new System.Drawing.Size(1751, 367);
+            this.waits1.Size = new System.Drawing.Size(1751, 366);
             this.waits1.TabIndex = 5;
             this.waits1.WaitType = null;
             // 

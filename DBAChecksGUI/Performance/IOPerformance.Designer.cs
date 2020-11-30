@@ -33,8 +33,9 @@
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
             this.tsMeasures = new System.Windows.Forms.ToolStripDropDownButton();
             this.lblIOPerformance = new System.Windows.Forms.ToolStripLabel();
-            this.tsDrives = new System.Windows.Forms.ToolStripDropDownButton();
             this.tsDateGroup = new System.Windows.Forms.ToolStripDropDownButton();
+            this.tsDrives = new System.Windows.Forms.ToolStripDropDownButton();
+            this.tsFileGroup = new System.Windows.Forms.ToolStripDropDownButton();
             this.toolStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -53,8 +54,9 @@
             this.toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.tsMeasures,
             this.lblIOPerformance,
+            this.tsDateGroup,
             this.tsDrives,
-            this.tsDateGroup});
+            this.tsFileGroup});
             this.toolStrip1.Location = new System.Drawing.Point(0, 0);
             this.toolStrip1.Name = "toolStrip1";
             this.toolStrip1.Size = new System.Drawing.Size(773, 31);
@@ -78,13 +80,6 @@
             this.lblIOPerformance.Size = new System.Drawing.Size(119, 28);
             this.lblIOPerformance.Text = "IO Performance";
             // 
-            // tsDrives
-            // 
-            this.tsDrives.Image = global::DBAChecksGUI.Properties.Resources.Hard_Drive;
-            this.tsDrives.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsDrives.Name = "tsDrives";
-            this.tsDrives.Size = new System.Drawing.Size(34, 28);
-            // 
             // tsDateGroup
             // 
             this.tsDateGroup.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
@@ -93,6 +88,22 @@
             this.tsDateGroup.Name = "tsDateGroup";
             this.tsDateGroup.Size = new System.Drawing.Size(56, 28);
             this.tsDateGroup.Text = "1min";
+            // 
+            // tsDrives
+            // 
+            this.tsDrives.Image = global::DBAChecksGUI.Properties.Resources.Hard_Drive;
+            this.tsDrives.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tsDrives.Name = "tsDrives";
+            this.tsDrives.Size = new System.Drawing.Size(34, 28);
+            // 
+            // tsFileGroup
+            // 
+            this.tsFileGroup.Image = global::DBAChecksGUI.Properties.Resources.FilterDropdown_16x;
+            this.tsFileGroup.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tsFileGroup.Name = "tsFileGroup";
+            this.tsFileGroup.Size = new System.Drawing.Size(106, 24);
+            this.tsFileGroup.Text = "Filegroup";
+            this.tsFileGroup.Visible = false;
             // 
             // IOPerformance
             // 
@@ -118,5 +129,6 @@
         private System.Windows.Forms.ToolStripLabel lblIOPerformance;
         private System.Windows.Forms.ToolStripDropDownButton tsDrives;
         private System.Windows.Forms.ToolStripDropDownButton tsDateGroup;
+        private System.Windows.Forms.ToolStripDropDownButton tsFileGroup;
     }
 }

@@ -1,4 +1,5 @@
-﻿CREATE PROC [dbo].[Database_Upd](@DB SQLDB READONLY,@InstanceID INT,@SnapshotDate DATETIME2(2))
+﻿
+CREATE PROC [dbo].[Database_Upd](@DB SQLDB READONLY,@InstanceID INT,@SnapshotDate DATETIME2(2))
 AS
 DECLARE @Ref VARCHAR(30)='Database'
 IF NOT EXISTS(SELECT 1 FROM dbo.CollectionDates WHERE SnapshotDate>=@SnapshotDate AND InstanceID = @InstanceID AND Reference=@Ref)
@@ -7,7 +8,6 @@ BEGIN
 	WITH OldDB AS (
 		SELECT DatabaseID,
 				CAST(owner_sid AS SQL_VARIANT) AS owner_sid,
-				CAST(create_date AS SQL_VARIANT) AS create_date,
 				CAST(compatibility_level AS SQL_VARIANT) AS compatibility_level,
 				CAST(collation_name AS SQL_VARIANT) AS collation_name,
 				CAST(user_access AS SQL_VARIANT) AS user_access,
@@ -76,7 +76,6 @@ BEGIN
 	),
 	NewDB AS (SELECT DatabaseID,
 		CAST(owner_sid AS SQL_VARIANT) AS owner_sid,
-		CAST(create_date AS SQL_VARIANT) AS create_date,
 		CAST(compatibility_level AS SQL_VARIANT) AS compatibility_level,
 		CAST(collation_name AS SQL_VARIANT) AS collation_name,
 		CAST(user_access AS SQL_VARIANT) AS user_access,
@@ -148,11 +147,10 @@ BEGIN
 		) id
 	),
 	OldUnPvt AS (
-		SELECT DatabaseID, Setting,Value    
+		SELECT DatabaseID, Setting,Value,is_in_standby    
 		FROM OldDB
 		UNPIVOT(Value FOR Setting IN(
 			   owner_sid,
-			   create_date,
 			   compatibility_level,
 			   collation_name,
 			   user_access,
@@ -160,7 +158,6 @@ BEGIN
 			   is_auto_close_on,
 			   is_auto_shrink_on,
 			   state,
-			   is_in_standby,
 			   is_cleanly_shutdown,
 			   is_supplemental_logging_enabled,
 			   snapshot_isolation_state,
@@ -218,11 +215,10 @@ BEGIN
 			   ) AS upvt
 	),
 	NewUnPvt AS (
-		SELECT DatabaseID, Setting,Value    
+		SELECT DatabaseID, Setting,Value, is_in_standby    
 		FROM NewDB
 		UNPIVOT(Value FOR Setting IN(
 			   owner_sid,
-			   create_date,
 			   compatibility_level,
 			   collation_name,
 			   user_access,
@@ -230,7 +226,6 @@ BEGIN
 			   is_auto_close_on,
 			   is_auto_shrink_on,
 			   state,
-			   is_in_standby,
 			   is_cleanly_shutdown,
 			   is_supplemental_logging_enabled,
 			   snapshot_isolation_state,
@@ -288,13 +283,15 @@ BEGIN
 			   ) AS upvt
 	)
 	INSERT INTO dbo.DBOptionsHistory(DatabaseID,Setting,OldValue,NewValue,ChangeDate)
-	SELECT o.DatabaseID,o.setting,o.value,n.value,@SnapshotDate AS ChangeDate 
+	SELECT o.DatabaseID,o.Setting,o.value,n.value,@SnapshotDate AS ChangeDate 
 	FROM OldUnPvt o
 	JOIN NewUnpvt n ON o.DatabaseID = n.DatabaseID AND o.Setting = n.Setting
 	WHERE NOT EXISTS(SELECT o.value 
 					INTERSECT
-					SELECT n.Value);
-
+					SELECT n.Value)
+	AND NOT (o.Setting<>'is_read_only' AND n.is_in_standby=1 AND n.Value=1)
+	AND NOT (o.Setting<>'is_read_only' AND o.is_in_standby=1 AND o.Value=1)
+	AND NOT (o.Setting='state' AND n.value IN(0,1,2,3) AND o.value IN(0,1,2,3));
 
 	WITH T AS (
 		SELECT D.* 

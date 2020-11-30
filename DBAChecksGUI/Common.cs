@@ -29,7 +29,10 @@ namespace DBAChecksGUI
                 { 240, "4hrs" },
                 { 360, "6hrs" },
                 { 720, "12hrs" },
-                { 1440, "1 Day" }
+                { 1440, "1 Day" },
+                { 2880, "2 Days" },
+                { 10880, "7 Days" },
+                { 20160, "14 Days" }
             };
 
         public static Guid HighPerformancePowerPlanGUID
@@ -118,6 +121,43 @@ WHERE DDLID = @DDLID";
                     cmd.Parameters.AddWithValue("DBName", dbName);
                     return (Int32)cmd.ExecuteScalar();
                 }
+            }
+        }
+
+        public static DataTable GetFiles(Int32 DatabaseID)
+        {
+            SqlConnection cn = new SqlConnection(Common.ConnectionString);
+            using (cn)
+            {
+                cn.Open();
+                SqlCommand cmd = new SqlCommand("dbo.DBFiles_Get", cn);
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.Parameters.AddWithValue("DatabaseID", DatabaseID);
+                cmd.Parameters.AddWithValue("IncludeWarning", true);
+                cmd.Parameters.AddWithValue("IncludeNA", true);
+                cmd.Parameters.AddWithValue("IncludeCritical", true);
+                cmd.Parameters.AddWithValue("IncludeOK", true);
+                cmd.Parameters.AddWithValue("FileGroupLevel", 0);
+                SqlDataAdapter da = new SqlDataAdapter(cmd);
+                DataTable dt = new DataTable();
+                da.Fill(dt);
+                return dt;
+            }
+        }
+
+        public static DataTable GetFileGroups(Int32 DatabaseID)
+        {
+            SqlConnection cn = new SqlConnection(Common.ConnectionString);
+            using (cn)
+            {
+                cn.Open();
+                SqlCommand cmd = new SqlCommand("dbo.FileGroup_Get", cn);
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.Parameters.AddWithValue("DatabaseID", DatabaseID);
+                SqlDataAdapter da = new SqlDataAdapter(cmd);
+                DataTable dt = new DataTable();
+                da.Fill(dt);
+                return dt;
             }
         }
 
