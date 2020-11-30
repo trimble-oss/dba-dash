@@ -3,7 +3,7 @@ AS
 SELECT 
        BSS.session_id,
        BSS.blocking_session_id,
-       BSS.Txt,
+       ISNULL(BSS.Txt,'') Txt,
        BSS.start_time_utc,
        BSS.command,
        BSS.database_id,
