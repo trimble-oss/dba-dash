@@ -1594,6 +1594,7 @@
             this.dbOptions1.Location = new System.Drawing.Point(3, 3);
             this.dbOptions1.Name = "dbOptions1";
             this.dbOptions1.Size = new System.Drawing.Size(1469, 1244);
+            this.dbOptions1.SummaryMode = false;
             this.dbOptions1.TabIndex = 0;
             // 
             // tabTempDB

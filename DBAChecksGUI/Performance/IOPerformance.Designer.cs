@@ -33,8 +33,8 @@
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
             this.tsMeasures = new System.Windows.Forms.ToolStripDropDownButton();
             this.lblIOPerformance = new System.Windows.Forms.ToolStripLabel();
-            this.tsDrives = new System.Windows.Forms.ToolStripDropDownButton();
             this.tsDateGroup = new System.Windows.Forms.ToolStripDropDownButton();
+            this.tsDrives = new System.Windows.Forms.ToolStripDropDownButton();
             this.tsFileGroup = new System.Windows.Forms.ToolStripDropDownButton();
             this.toolStrip1.SuspendLayout();
             this.SuspendLayout();
@@ -42,9 +42,9 @@
             // chartIO
             // 
             this.chartIO.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.chartIO.Location = new System.Drawing.Point(0, 27);
+            this.chartIO.Location = new System.Drawing.Point(0, 31);
             this.chartIO.Name = "chartIO";
-            this.chartIO.Size = new System.Drawing.Size(773, 267);
+            this.chartIO.Size = new System.Drawing.Size(773, 263);
             this.chartIO.TabIndex = 4;
             this.chartIO.Text = "cartesianChart1";
             // 
@@ -59,7 +59,7 @@
             this.tsFileGroup});
             this.toolStrip1.Location = new System.Drawing.Point(0, 0);
             this.toolStrip1.Name = "toolStrip1";
-            this.toolStrip1.Size = new System.Drawing.Size(773, 27);
+            this.toolStrip1.Size = new System.Drawing.Size(773, 31);
             this.toolStrip1.TabIndex = 5;
             this.toolStrip1.Text = "toolStrip1";
             // 
@@ -69,7 +69,7 @@
             this.tsMeasures.Image = global::DBAChecksGUI.Properties.Resources.AddComputedField_16x;
             this.tsMeasures.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsMeasures.Name = "tsMeasures";
-            this.tsMeasures.Size = new System.Drawing.Size(34, 24);
+            this.tsMeasures.Size = new System.Drawing.Size(34, 28);
             this.tsMeasures.Text = "Measures";
             // 
             // lblIOPerformance
@@ -77,15 +77,8 @@
             this.lblIOPerformance.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
             this.lblIOPerformance.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
             this.lblIOPerformance.Name = "lblIOPerformance";
-            this.lblIOPerformance.Size = new System.Drawing.Size(119, 24);
+            this.lblIOPerformance.Size = new System.Drawing.Size(119, 28);
             this.lblIOPerformance.Text = "IO Performance";
-            // 
-            // tsDrives
-            // 
-            this.tsDrives.Image = global::DBAChecksGUI.Properties.Resources.Hard_Drive;
-            this.tsDrives.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsDrives.Name = "tsDrives";
-            this.tsDrives.Size = new System.Drawing.Size(34, 24);
             // 
             // tsDateGroup
             // 
@@ -93,15 +86,22 @@
             this.tsDateGroup.Image = ((System.Drawing.Image)(resources.GetObject("tsDateGroup.Image")));
             this.tsDateGroup.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsDateGroup.Name = "tsDateGroup";
-            this.tsDateGroup.Size = new System.Drawing.Size(56, 24);
+            this.tsDateGroup.Size = new System.Drawing.Size(56, 28);
             this.tsDateGroup.Text = "1min";
+            // 
+            // tsDrives
+            // 
+            this.tsDrives.Image = global::DBAChecksGUI.Properties.Resources.Hard_Drive;
+            this.tsDrives.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tsDrives.Name = "tsDrives";
+            this.tsDrives.Size = new System.Drawing.Size(34, 28);
             // 
             // tsFileGroup
             // 
             this.tsFileGroup.Image = global::DBAChecksGUI.Properties.Resources.FilterDropdown_16x;
             this.tsFileGroup.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsFileGroup.Name = "tsFileGroup";
-            this.tsFileGroup.Size = new System.Drawing.Size(106, 28);
+            this.tsFileGroup.Size = new System.Drawing.Size(106, 24);
             this.tsFileGroup.Text = "Filegroup";
             this.tsFileGroup.Visible = false;
             // 

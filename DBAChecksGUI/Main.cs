@@ -35,7 +35,6 @@ namespace DBAChecksGUI
         bool isTagPopulation = false;
         private DiffControl diffSchemaSnapshot = new DiffControl();
 
-
         private void Main_Load(object sender, EventArgs e)
         {
             
@@ -491,13 +490,17 @@ ORDER BY SchemaName,ObjectName
 
             List<TabPage> allowedTabs = new List<TabPage>();         
             selectedItem = n;
+            bool hasAzureDBs = AzureInstanceIDs.Count > 0;
 
 
             if(n.Type== SQLTreeItem.TreeType.DBAChecksRoot)
             {
                 allowedTabs.Add(tabSummary);
                 allowedTabs.Add(tabPerformanceSummary);
-                allowedTabs.Add(tabAzureSummary);
+                if (hasAzureDBs)
+                {
+                    allowedTabs.Add(tabAzureSummary);
+                }
                 allowedTabs.Add(tabBackups);
                 allowedTabs.Add(tabDrives);
                 allowedTabs.Add(tabLogShipping);
@@ -574,7 +577,7 @@ ORDER BY SchemaName,ObjectName
                     allowedTabs.Add(tabDrivers);
                     allowedTabs.Add(tabTempDB);
                 }
-                if (parent.Type != SQLTreeItem.TreeType.Instance)
+                if (parent.Type != SQLTreeItem.TreeType.Instance && hasAzureDBs)
                 {
                     allowedTabs.Add(tabServiceObjectives);
                 }

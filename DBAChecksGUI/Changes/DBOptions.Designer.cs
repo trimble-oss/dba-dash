@@ -34,27 +34,27 @@
             this.toolStripLabel2 = new System.Windows.Forms.ToolStripLabel();
             this.tsRefreshInfo = new System.Windows.Forms.ToolStripButton();
             this.tsCopyInfo = new System.Windows.Forms.ToolStripButton();
-            this.dgvHistory = new System.Windows.Forms.DataGridView();
-            this.toolStrip1 = new System.Windows.Forms.ToolStrip();
-            this.toolStripLabel1 = new System.Windows.Forms.ToolStripLabel();
-            this.tsRefreshHistory = new System.Windows.Forms.ToolStripButton();
-            this.tsCopyHistory = new System.Windows.Forms.ToolStripButton();
-            this.tsFilter = new System.Windows.Forms.ToolStripDropDownButton();
-            this.excludeStateChangesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.tsSummary = new System.Windows.Forms.ToolStripButton();
             this.tsDetail = new System.Windows.Forms.ToolStripButton();
-            this.dataGridViewTextBoxColumn1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.dataGridViewTextBoxColumn2 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.dataGridViewTextBoxColumn3 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.dataGridViewTextBoxColumn4 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.dataGridViewTextBoxColumn5 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.dataGridViewTextBoxColumn6 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.dgvHistory = new System.Windows.Forms.DataGridView();
             this.colHInstance = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.colHDB = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.colHSetting = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.colHOldValue = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.colHValueNew = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.colHChangeDate = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.toolStrip1 = new System.Windows.Forms.ToolStrip();
+            this.toolStripLabel1 = new System.Windows.Forms.ToolStripLabel();
+            this.tsRefreshHistory = new System.Windows.Forms.ToolStripButton();
+            this.tsCopyHistory = new System.Windows.Forms.ToolStripButton();
+            this.tsFilter = new System.Windows.Forms.ToolStripDropDownButton();
+            this.excludeStateChangesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.dataGridViewTextBoxColumn1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.dataGridViewTextBoxColumn2 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.dataGridViewTextBoxColumn3 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.dataGridViewTextBoxColumn4 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.dataGridViewTextBoxColumn5 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.dataGridViewTextBoxColumn6 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
             this.splitContainer1.Panel2.SuspendLayout();
@@ -123,7 +123,7 @@
             this.toolStripLabel2.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
             this.toolStripLabel2.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
             this.toolStripLabel2.Name = "toolStripLabel2";
-            this.toolStripLabel2.Size = new System.Drawing.Size(107, 24);
+            this.toolStripLabel2.Size = new System.Drawing.Size(107, 28);
             this.toolStripLabel2.Text = "Database Info";
             // 
             // tsRefreshInfo
@@ -132,7 +132,7 @@
             this.tsRefreshInfo.Image = global::DBAChecksGUI.Properties.Resources._112_RefreshArrow_Green_16x16_72;
             this.tsRefreshInfo.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsRefreshInfo.Name = "tsRefreshInfo";
-            this.tsRefreshInfo.Size = new System.Drawing.Size(29, 24);
+            this.tsRefreshInfo.Size = new System.Drawing.Size(29, 28);
             this.tsRefreshInfo.Text = "Refresh";
             this.tsRefreshInfo.Click += new System.EventHandler(this.tsRefreshInfo_Click);
             // 
@@ -142,9 +142,28 @@
             this.tsCopyInfo.Image = global::DBAChecksGUI.Properties.Resources.ASX_Copy_blue_16x;
             this.tsCopyInfo.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsCopyInfo.Name = "tsCopyInfo";
-            this.tsCopyInfo.Size = new System.Drawing.Size(29, 24);
+            this.tsCopyInfo.Size = new System.Drawing.Size(29, 28);
             this.tsCopyInfo.Text = "Copy";
             this.tsCopyInfo.Click += new System.EventHandler(this.tsCopyInfo_Click);
+            // 
+            // tsSummary
+            // 
+            this.tsSummary.Image = global::DBAChecksGUI.Properties.Resources.Table_16x;
+            this.tsSummary.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tsSummary.Name = "tsSummary";
+            this.tsSummary.Size = new System.Drawing.Size(95, 24);
+            this.tsSummary.Text = "Summary";
+            this.tsSummary.Visible = false;
+            this.tsSummary.Click += new System.EventHandler(this.tsSummary_Click);
+            // 
+            // tsDetail
+            // 
+            this.tsDetail.Image = global::DBAChecksGUI.Properties.Resources.Table_16x;
+            this.tsDetail.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tsDetail.Name = "tsDetail";
+            this.tsDetail.Size = new System.Drawing.Size(73, 28);
+            this.tsDetail.Text = "Detail";
+            this.tsDetail.Click += new System.EventHandler(this.tsDetail_Click);
             // 
             // dgvHistory
             // 
@@ -169,6 +188,60 @@
             this.dgvHistory.RowTemplate.Height = 24;
             this.dgvHistory.Size = new System.Drawing.Size(839, 170);
             this.dgvHistory.TabIndex = 0;
+            // 
+            // colHInstance
+            // 
+            this.colHInstance.DataPropertyName = "Instance";
+            this.colHInstance.HeaderText = "Instance";
+            this.colHInstance.MinimumWidth = 6;
+            this.colHInstance.Name = "colHInstance";
+            this.colHInstance.ReadOnly = true;
+            this.colHInstance.Width = 90;
+            // 
+            // colHDB
+            // 
+            this.colHDB.DataPropertyName = "DB";
+            this.colHDB.HeaderText = "DB";
+            this.colHDB.MinimumWidth = 6;
+            this.colHDB.Name = "colHDB";
+            this.colHDB.ReadOnly = true;
+            this.colHDB.Width = 56;
+            // 
+            // colHSetting
+            // 
+            this.colHSetting.DataPropertyName = "Setting";
+            this.colHSetting.HeaderText = "Setting";
+            this.colHSetting.MinimumWidth = 6;
+            this.colHSetting.Name = "colHSetting";
+            this.colHSetting.ReadOnly = true;
+            this.colHSetting.Width = 81;
+            // 
+            // colHOldValue
+            // 
+            this.colHOldValue.DataPropertyName = "OldValue";
+            this.colHOldValue.HeaderText = "Value (Old)";
+            this.colHOldValue.MinimumWidth = 6;
+            this.colHOldValue.Name = "colHOldValue";
+            this.colHOldValue.ReadOnly = true;
+            this.colHOldValue.Width = 109;
+            // 
+            // colHValueNew
+            // 
+            this.colHValueNew.DataPropertyName = "NewValue";
+            this.colHValueNew.HeaderText = "Value (New)";
+            this.colHValueNew.MinimumWidth = 6;
+            this.colHValueNew.Name = "colHValueNew";
+            this.colHValueNew.ReadOnly = true;
+            this.colHValueNew.Width = 114;
+            // 
+            // colHChangeDate
+            // 
+            this.colHChangeDate.DataPropertyName = "ChangeDate";
+            this.colHChangeDate.HeaderText = "Change Date";
+            this.colHChangeDate.MinimumWidth = 6;
+            this.colHChangeDate.Name = "colHChangeDate";
+            this.colHChangeDate.ReadOnly = true;
+            this.colHChangeDate.Width = 120;
             // 
             // toolStrip1
             // 
@@ -233,25 +306,6 @@
             this.excludeStateChangesToolStripMenuItem.Text = "Exclude State Changes";
             this.excludeStateChangesToolStripMenuItem.Click += new System.EventHandler(this.excludeStateChangesToolStripMenuItem_Click);
             // 
-            // tsSummary
-            // 
-            this.tsSummary.Image = global::DBAChecksGUI.Properties.Resources.Table_16x;
-            this.tsSummary.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsSummary.Name = "tsSummary";
-            this.tsSummary.Size = new System.Drawing.Size(95, 24);
-            this.tsSummary.Text = "Summary";
-            this.tsSummary.Visible = false;
-            this.tsSummary.Click += new System.EventHandler(this.tsSummary_Click);
-            // 
-            // tsDetail
-            // 
-            this.tsDetail.Image = global::DBAChecksGUI.Properties.Resources.Table_16x;
-            this.tsDetail.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsDetail.Name = "tsDetail";
-            this.tsDetail.Size = new System.Drawing.Size(73, 24);
-            this.tsDetail.Text = "Detail";
-            this.tsDetail.Click += new System.EventHandler(this.tsDetail_Click);
-            // 
             // dataGridViewTextBoxColumn1
             // 
             this.dataGridViewTextBoxColumn1.DataPropertyName = "Instance";
@@ -305,60 +359,6 @@
             this.dataGridViewTextBoxColumn6.Name = "dataGridViewTextBoxColumn6";
             this.dataGridViewTextBoxColumn6.ReadOnly = true;
             this.dataGridViewTextBoxColumn6.Width = 120;
-            // 
-            // colHInstance
-            // 
-            this.colHInstance.DataPropertyName = "Instance";
-            this.colHInstance.HeaderText = "Instance";
-            this.colHInstance.MinimumWidth = 6;
-            this.colHInstance.Name = "colHInstance";
-            this.colHInstance.ReadOnly = true;
-            this.colHInstance.Width = 90;
-            // 
-            // colHDB
-            // 
-            this.colHDB.DataPropertyName = "DB";
-            this.colHDB.HeaderText = "DB";
-            this.colHDB.MinimumWidth = 6;
-            this.colHDB.Name = "colHDB";
-            this.colHDB.ReadOnly = true;
-            this.colHDB.Width = 56;
-            // 
-            // colHSetting
-            // 
-            this.colHSetting.DataPropertyName = "Setting";
-            this.colHSetting.HeaderText = "Setting";
-            this.colHSetting.MinimumWidth = 6;
-            this.colHSetting.Name = "colHSetting";
-            this.colHSetting.ReadOnly = true;
-            this.colHSetting.Width = 81;
-            // 
-            // colHOldValue
-            // 
-            this.colHOldValue.DataPropertyName = "OldValue";
-            this.colHOldValue.HeaderText = "Value (Old)";
-            this.colHOldValue.MinimumWidth = 6;
-            this.colHOldValue.Name = "colHOldValue";
-            this.colHOldValue.ReadOnly = true;
-            this.colHOldValue.Width = 109;
-            // 
-            // colHValueNew
-            // 
-            this.colHValueNew.DataPropertyName = "NewValue";
-            this.colHValueNew.HeaderText = "Value (New)";
-            this.colHValueNew.MinimumWidth = 6;
-            this.colHValueNew.Name = "colHValueNew";
-            this.colHValueNew.ReadOnly = true;
-            this.colHValueNew.Width = 114;
-            // 
-            // colHChangeDate
-            // 
-            this.colHChangeDate.DataPropertyName = "ChangeDate";
-            this.colHChangeDate.HeaderText = "Change Date";
-            this.colHChangeDate.MinimumWidth = 6;
-            this.colHChangeDate.Name = "colHChangeDate";
-            this.colHChangeDate.ReadOnly = true;
-            this.colHChangeDate.Width = 120;
             // 
             // DBOptions
             // 

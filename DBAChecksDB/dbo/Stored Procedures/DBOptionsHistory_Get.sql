@@ -1,4 +1,4 @@
-﻿CREATE PROC dbo.DBOptionsHistory_Get(
+﻿CREATE PROC [dbo].[DBOptionsHistory_Get](
 		@InstanceIDs VARCHAR(MAX)=NULL,
 		@DatabaseID INT=NULL,
 		@ExcludeStateChanges BIT=1
@@ -21,6 +21,7 @@ WHERE 1=1
 			WHERE ss.value = D.InstanceID
 			)' END +'
 ' + CASE WHEN @DatabaseID IS NULL THEN 'AND D.IsActive=1' ELSE 'AND D.DatabaseID = @DatabaseID' END + '
-' + CASE WHEN @ExcludeStateChanges=1 THEN 'AND H.Setting NOT IN(''state'',''is_read_only'',''is_in_standby'')' ELSE '' END
+' + CASE WHEN @ExcludeStateChanges=1 THEN 'AND H.Setting NOT IN(''state'',''is_read_only'',''is_in_standby'')' ELSE '' END + '
+ORDER BY H.ChangeDate DESC'
 
 EXEC sp_executesql @SQL,N'@InstanceIDs VARCHAR(MAX),@DatabaseID INT',@InstanceIDs,@DatabaseID
