@@ -5,9 +5,9 @@ SELECT I.Instance,
 	E.InstanceID,
 	E.ErrorSource,
 	E.ErrorMessage,
-	ErrorContext
+	E.ErrorContext
 FROM dbo.CollectionErrorLog E
-JOIN dbo.Instances I ON I.InstanceID = E.InstanceID
+LEFT JOIN dbo.Instances I ON I.InstanceID = E.InstanceID
 WHERE (I.InstanceID = @InstanceID OR @InstanceID IS NULL)
 AND E.ErrorDate>=DATEADD(d,-@Days,GETUTCDATE())
 ORDER BY E.ErrorDate DESC

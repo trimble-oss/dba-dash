@@ -1,6 +1,6 @@
 ﻿CREATE TABLE [dbo].[CollectionErrorLog] (
     [ErrorDate]    DATETIME2 (2)  NOT NULL,
-    [InstanceID]   INT            NOT NULL,
+    [InstanceID]   INT            NULL,
     [ErrorSource]  VARCHAR (100)  NOT NULL,
     [ErrorMessage] NVARCHAR (MAX) NOT NULL,
     [ErrorContext] VARCHAR (100)  NULL,
@@ -8,6 +8,8 @@
     CONSTRAINT [PK_CollectionErrorLog] PRIMARY KEY NONCLUSTERED ([ErrorID] ASC),
     CONSTRAINT [FK_CollectionErrorLog_Instances] FOREIGN KEY ([InstanceID]) REFERENCES [dbo].[Instances] ([InstanceID])
 );
+
+
 
 
 

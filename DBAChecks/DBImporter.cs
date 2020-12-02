@@ -192,7 +192,7 @@ namespace DBAChecks
 
 
 
-        private void InsertErrors(string connectionString, Int32 instanceID, DateTime SnapshotDate, DataSet ds)
+        public static void InsertErrors(string connectionString, Int32? instanceID, DateTime SnapshotDate, DataSet ds)
         {
             if (ds.Tables.Contains("Errors") && ds.Tables["Errors"].Rows.Count > 0)
             {
@@ -206,7 +206,14 @@ namespace DBAChecks
                     cn.Open();
                     SqlCommand cmd = new SqlCommand("CollectionErrorLog_Add", cn);
                     cmd.Parameters.AddWithValue("Errors", ds.Tables["Errors"]);
-                    cmd.Parameters.AddWithValue("InstanceID", instanceID);
+                    if (instanceID ==null)
+                    {
+                        cmd.Parameters.AddWithValue("InstanceID", DBNull.Value);
+                    }
+                    else
+                    {
+                        cmd.Parameters.AddWithValue("InstanceID", instanceID);
+                    }
                     cmd.Parameters.AddWithValue("ErrorDate", SnapshotDate);
                     cmd.CommandType = CommandType.StoredProcedure;
                     cmd.ExecuteNonQuery();
