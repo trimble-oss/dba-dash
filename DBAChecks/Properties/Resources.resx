@@ -1854,4 +1854,10 @@ FROM #permissions
 
 DROP TABLE #permissions</value>
   </data>
+  <data name="SQLCustomChecks" xml:space="preserve">
+    <value>IF OBJECT_ID('DBAChecks_CustomCheck')&gt;0
+BEGIN
+	EXEC dbo.DBAChecks_CustomCheck
+END</value>
+  </data>
 </root>

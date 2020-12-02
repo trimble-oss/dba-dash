@@ -130,6 +130,9 @@
   <data name="AutoSum_16x" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\AutoSum_16x.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
+  <data name="AddComputedField_16x" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\AddComputedField_16x.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
   <data name="FilterDropdown_16x" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\FilterDropdown_16x.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
@@ -154,8 +157,8 @@
   <data name="StatusOK_16x" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\StatusOK_16x.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="AddComputedField_16x" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\AddComputedField_16x.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="Inline_16x1" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Inline_16x1.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="SettingsOutline_16x" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\SettingsOutline_16x.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
@@ -187,6 +190,9 @@
   <data name="Previous_grey_16x" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\Previous_grey_16x.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
+  <data name="Column_16x" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Column_16x.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
   <data name="String1" xml:space="preserve">
     <value>h</value>
   </data>
@@ -196,10 +202,7 @@
   <data name="SwitchSourceOrTarget_16x" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\SwitchSourceOrTarget_16x.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="Inline_16x1" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\Inline_16x1.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="Column_16x" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\Column_16x.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="Eraser_16x" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Eraser_16x.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
 </root>

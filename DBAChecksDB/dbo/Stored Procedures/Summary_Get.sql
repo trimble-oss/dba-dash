@@ -117,6 +117,12 @@ a AS(
 	FROM dbo.sysalerts
 	GROUP BY InstanceID
 )
+,cus AS (
+	SELECT cc.InstanceID, MIN(cc.Status) AS Status
+	FROM dbo.CustomChecks cc
+	WHERE Status <> 3
+	GROUP BY cc.InstanceID
+)
 SELECT I.InstanceID,
 	I.Instance,
 	ISNULL(LS.LogShippingStatus,3) AS LogShippingStatus,
@@ -171,7 +177,8 @@ SELECT I.InstanceID,
 		WHEN DATEDIFF(hh,a.LastAlert,GETUTCDATE())<72 THEN 2
 		ELSE 4 END AS AlertStatus,
 	AlertCD.SnapshotDate AS AlertSnapshotDate,
-	I.IsAgentRunning
+	I.IsAgentRunning,
+	ISNULL(cus.Status,3) AS CustomCheckStatus
 FROM dbo.Instances I 
 LEFT JOIN LS ON I.InstanceID = LS.InstanceID
 LEFT JOIN B ON I.InstanceID = B.InstanceID
@@ -192,7 +199,60 @@ OUTER APPLY(SELECT TOP(1) IUT.WarningThreshold AS UptimeWarningThreshold,
 			FROM dbo.InstanceUptimeThresholds IUT
 			WHERE (IUT.InstanceID = I.InstanceID OR IUT.InstanceID=-1) 
 			ORDER BY IUT.InstanceID DESC) UTT		
+LEFT JOIN cus ON cus.InstanceID = I.InstanceID
 WHERE EXISTS(SELECT 1 FROM @Instances t WHERE I.InstanceID = t.InstanceID)
 AND I.IsActive=1
-AND I.EditionID<>1674378470 -- exclude azure 
-OPTION(MAX_GRANT_PERCENT=0.1)
+AND I.EngineEdition<> 5 -- not azure
+UNION ALL
+SELECT NULL AS InstanceID,
+	I.Instance,
+	3 AS LogShippingStatus,
+	3 AS FullBackupStatus,
+	3 AS LogBackupStatus,
+	3 AS DiffBackupStatus,
+	3 AS DriveStatus,
+	ISNULL(MIN(NULLIF(F.FileFreeSpaceStatus,3)),3) AS FileFreeSpaceStatus,
+	3 AS JobStatus,
+	3 AS AGStatus,
+	NULL AS DetectedCorruptionDate,
+	3 AS CorruptionStatus,
+	MIN(CASE WHEN  errSummary.SucceedAfterErrorCount=0 THEN 1 WHEN errSummary.cnt>0 THEN 2 ELSE 4 END) AS CollectionErrorStatus,
+	MIN(SSD.SnapshotAgeMin) AS SnapshotAgeMin,
+	MAX(SSD.SnapshotAgeMax) AS SnapshotAgeMax,
+	MIN(SSD.CollectionDatesStatus) as SnapshotAgeStatus,
+	NULL AS sqlserver_start_time_utc,
+	0 AS UTCOffset,
+	NULL AS sqlserver_uptime,
+	3 AS UptimeStatus,
+	NULL AS UptimeWarningThreshold,
+	NULL AS UptimeCriticalThreshold,
+	NULL AS UptimeConfiguredLevel,
+	NULL AS AdditionalUptime,
+	NULL AS host_uptime,
+	NULL AS	host_start_time_utc,
+	NULL AS MemoryDumpCount,
+	NULL AS LastMemoryDump,
+	3 AS MemoryDumpStatus,
+    3 AS  LastGoodCheckDBStatus,
+    NULL AS LastGoodCheckDBCriticalCount,
+    NULL AS LastGoodCheckDBWarningCount,
+    NULL AS LastGoodCheckDBHealthyCount,
+    NULL as LastGoodCheckDBNACount,
+	NULL AS OldestLastGoodCheckDBTime,
+	NULL AS DaysSinceLastGoodCheckDB,
+	NULL AS LastAlert,
+	NULL AS LastCritical,
+	NULL AS TotalAlerts,
+	3 AlertStatus,
+	NULL AS AlertSnapshotDate,
+	NULL AS IsAgentRunning,
+	ISNULL(MIN(cus.Status),3) AS CustomCheckStatus
+FROM dbo.Instances I
+LEFT JOIN errSummary  ON I.InstanceID = errSummary.InstanceID
+LEFT JOIN F ON I.InstanceID = F.InstanceID
+LEFT JOIN SSD ON I.InstanceID = SSD.InstanceID
+LEFT JOIN cus ON cus.InstanceID = I.InstanceID
+WHERE I.EngineEdition=5 -- azure
+AND EXISTS(SELECT 1 FROM @Instances t WHERE I.InstanceID = t.InstanceID)
+AND I.IsActive=1
+GROUP BY I.Instance

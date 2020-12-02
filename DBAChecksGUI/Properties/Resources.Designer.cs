@@ -143,6 +143,16 @@ namespace DBAChecksGUI.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap Eraser_16x {
+            get {
+                object obj = ResourceManager.GetObject("Eraser_16x", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap FilterDropdown_16x {
             get {
                 object obj = ResourceManager.GetObject("FilterDropdown_16x", resourceCulture);

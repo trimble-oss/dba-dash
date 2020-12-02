@@ -252,6 +252,18 @@ namespace DBAChecks.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to IF OBJECT_ID(&apos;DBAChecks_CustomCheck&apos;)&gt;0
+        ///BEGIN
+        ///	EXEC dbo.DBAChecks_CustomCheck
+        ///END.
+        /// </summary>
+        internal static string SQLCustomChecks {
+            get {
+                return ResourceManager.GetString("SQLCustomChecks", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to SET NOCOUNT ON
         ///
         ///DECLARE @DBName SYSNAME

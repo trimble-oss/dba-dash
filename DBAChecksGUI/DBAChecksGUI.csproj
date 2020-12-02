@@ -172,6 +172,12 @@
     <Compile Include="Changes\TraceFlagHistory.Designer.cs">
       <DependentUpon>TraceFlagHistory.cs</DependentUpon>
     </Compile>
+    <Compile Include="Checks\CustomChecks.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Checks\CustomChecks.Designer.cs">
+      <DependentUpon>CustomChecks.cs</DependentUpon>
+    </Compile>
     <Compile Include="CodeViewer.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -429,10 +435,10 @@
     </Compile>
     <Compile Include="SqlServerTypes\Loader.cs" />
     <Compile Include="SQLTreeItem.cs" />
-    <Compile Include="Summary.cs">
+    <Compile Include="Checks\Summary.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="Summary.Designer.cs">
+    <Compile Include="Checks\Summary.Designer.cs">
       <DependentUpon>Summary.cs</DependentUpon>
     </Compile>
     <Compile Include="Tagging\InstanceTag.cs" />
@@ -468,6 +474,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Changes\TraceFlagHistory.resx">
       <DependentUpon>TraceFlagHistory.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Checks\CustomChecks.resx">
+      <DependentUpon>CustomChecks.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="CodeViewer.resx">
       <DependentUpon>CodeViewer.cs</DependentUpon>
@@ -599,7 +608,7 @@
     <EmbeddedResource Include="DBFiles\SpaceTracking.resx">
       <DependentUpon>SpaceTracking.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Summary.resx">
+    <EmbeddedResource Include="Checks\Summary.resx">
       <DependentUpon>Summary.cs</DependentUpon>
     </EmbeddedResource>
     <None Include="packages.config" />
@@ -628,6 +637,7 @@
     <None Include="Resources\LineChart_16x.png" />
     <None Include="Resources\112_RefreshArrow_Green_16x16_72.png" />
     <None Include="Resources\Column_16x.png" />
+    <None Include="Resources\Eraser_16x.png" />
     <Content Include="SqlServerTypes\readme.htm" />
     <Content Include="SqlServerTypes\x64\msvcr120.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>

@@ -47,10 +47,10 @@ namespace DBAChecksGUI
             for (Int32 idx = e.RowIndex; idx < e.RowIndex + e.RowCount; idx += 1)
             {
                 var row = (DataRowView)dgvSummary.Rows[idx].DataBoundItem;
-                string[] StatusColumns = new string[] { "FullBackupStatus", "LogShippingStatus", "DiffBackupStatus", "LogBackupStatus","DriveStatus","JobStatus","CollectionErrorStatus" ,"AGStatus","LastGoodCheckDBStatus","SnapshotAgeStatus","MemoryDumpStatus","UptimeStatus","CorruptionStatus","AlertStatus","FileFreeSpaceStatus"};
+                string[] StatusColumns = new string[] { "FullBackupStatus", "LogShippingStatus", "DiffBackupStatus", "LogBackupStatus","DriveStatus","JobStatus","CollectionErrorStatus" ,"AGStatus","LastGoodCheckDBStatus","SnapshotAgeStatus","MemoryDumpStatus","UptimeStatus","CorruptionStatus","AlertStatus","FileFreeSpaceStatus","CustomCheckStatus"};
                 foreach(string col in StatusColumns)
                 {
-                    dgvSummary.Rows[idx].Cells[col].Style.BackColor = DBAChecksStatus.GetStatusColour((DBAChecksStatus.DBAChecksStatusEnum)row[col]);
+                    dgvSummary.Rows[idx].Cells[col].Style.BackColor = DBAChecksStatus.GetStatusColour((DBAChecksStatus.DBAChecksStatusEnum)Convert.ToInt32(row[col]));
                 }
                 if(row["IsAgentRunning"]!=DBNull.Value && (bool)row["IsAgentRunning"] == false)
                 {
@@ -60,21 +60,25 @@ namespace DBAChecksGUI
                 }
 
                 string uptimeString;
-                Int32 uptime = (Int32)row["sqlserver_uptime"];
-                Int32 addUptime = (Int32)row["AdditionalUptime"];
-                if (uptime < 120)
+                if (row["sqlserver_uptime"] != DBNull.Value)
                 {
-                    uptimeString = uptime.ToString() + " Mins (+" + addUptime.ToString() + "mins)";
+                    Int32 uptime = (Int32)row["sqlserver_uptime"];
+                    Int32 addUptime = (Int32)row["AdditionalUptime"];
+                    if (uptime < 120)
+                    {
+                        uptimeString = uptime.ToString() + " Mins (+" + addUptime.ToString() + "mins)";
+                    }
+                    else if (uptime < 1440)
+                    {
+                        uptimeString = (uptime / 60).ToString("0") + " Hours  (+" + addUptime.ToString() + "mins)";
+                    }
+                    else
+                    {
+                        uptimeString = (uptime / 1440).ToString("0") + " days";
+                    }
+                    dgvSummary.Rows[idx].Cells["UptimeStatus"].Value = uptimeString;
                 }
-                else if (uptime < 1440)
-                {
-                    uptimeString = (uptime / 60).ToString("0") + " Hours  (+" + addUptime.ToString() + "mins)";
-                }
-                else
-                {
-                    uptimeString = (uptime / 1440).ToString("0") + " days";
-                }
-                dgvSummary.Rows[idx].Cells["UptimeStatus"].Value = uptimeString;
+               
                 Int32 snapshotAgeMin = (Int32)row["SnapshotAgeMin"];
                 Int32 snapshotAgeMax= (Int32)row["SnapshotAgeMax"];
                 if (snapshotAgeMax == snapshotAgeMin)
@@ -103,13 +107,15 @@ namespace DBAChecksGUI
                     }
 
                 }
-                
-                dgvSummary.Rows[idx].Cells["LastGoodCheckDBStatus"].ToolTipText = "Last Good CheckDB Critical:" + (Int32)row["LastGoodCheckDBCriticalCount"] + Environment.NewLine +
+                if (row["LastGoodCheckDBCriticalCount"] != DBNull.Value)
+                {
+                    dgvSummary.Rows[idx].Cells["LastGoodCheckDBStatus"].ToolTipText = "Last Good CheckDB Critical:" + (Int32)row["LastGoodCheckDBCriticalCount"] + Environment.NewLine +
                                                                                "Last Good CheckDB Warning:" + (Int32)row["LastGoodCheckDBWarningCount"] + Environment.NewLine +
                                                                                "Last Good CheckDB Good:" + (Int32)row["LastGoodCheckDBHealthyCount"] + Environment.NewLine +
                                                                                "Last Good CheckDB NA:" + (Int32)row["LastGoodCheckDBNACount"] + Environment.NewLine +
                                                                                "Oldest Last Good CheckDB:" + oldestLastGoodCheckDB;
-                                                                               ;
+                    ;
+                }
                 if (row["LastMemoryDump"]!= DBNull.Value)
                 {
                     DateTime lastMemoryDump = (DateTime)row["LastMemoryDump"];

@@ -137,7 +137,7 @@ namespace DBAChecksGUI
             if(tabs.SelectedTab == tabSummary)
             {
                 summary1.ConnectionString = connectionString;
-                summary1.InstanceIDs = instanceIDs;
+                summary1.InstanceIDs = n.Type == SQLTreeItem.TreeType.DBAChecksRoot ? AllInstanceIDs : instanceIDs;
                 summary1.RefreshData();
             }
             if(tabs.SelectedTab == tabFiles)
@@ -311,6 +311,15 @@ namespace DBAChecksGUI
             {
                 tempDBConfig1.InstanceIDs = instanceIDs;
                 tempDBConfig1.RefreshData();
+            }
+            if (tabs.SelectedTab == tabCustomChecks)
+            {
+               customChecks1.InstanceIDs = n.Type == SQLTreeItem.TreeType.DBAChecksRoot ? AllInstanceIDs : instanceIDs;
+               customChecks1.IncludeCritical = true;
+               customChecks1.IncludeWarning = true;
+               customChecks1.IncludeNA = n.InstanceID > 0;
+               customChecks1.IncludeOK = n.InstanceID > 0;
+               customChecks1.RefreshData();
             }
         }
 
@@ -510,7 +519,8 @@ ORDER BY SchemaName,ObjectName
                 allowedTabs.Add(tabDBAChecksErrorLog);
                 allowedTabs.Add(tabCollectionDates);
                 allowedTabs.Add(tabSlowQueries);
-                allowedTabs.Add(tabDBSpace);           
+                allowedTabs.Add(tabDBSpace);
+                allowedTabs.Add(tabCustomChecks);
             }
             else if(n.Type== SQLTreeItem.TreeType.Database)
             {
@@ -535,6 +545,7 @@ ORDER BY SchemaName,ObjectName
                 allowedTabs.Add(tabServiceObjectives);
                 allowedTabs.Add(tabDBConfiguration);
                 allowedTabs.Add(tabDBOptions);
+                allowedTabs.Add(tabCustomChecks);
             }
             else if (n.Type == SQLTreeItem.TreeType.Instance)
             {
@@ -554,6 +565,7 @@ ORDER BY SchemaName,ObjectName
                 allowedTabs.Add(tabTags);
                 allowedTabs.Add(tabCollectionDates);
                 allowedTabs.Add(tabDBSpace);
+                allowedTabs.Add(tabCustomChecks);
             }
             else if(n.Type == SQLTreeItem.TreeType.AzureInstance)
             {
@@ -564,6 +576,7 @@ ORDER BY SchemaName,ObjectName
                 allowedTabs.Add(tabTags);
                 allowedTabs.Add(tabCollectionDates);
                 allowedTabs.Add(tabDBSpace);
+                allowedTabs.Add(tabCustomChecks);
             }
             else if (n.Type == SQLTreeItem.TreeType.Configuration)
             {
