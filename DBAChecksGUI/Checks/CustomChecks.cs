@@ -279,6 +279,7 @@ namespace DBAChecksGUI.Checks
             refreshTest();
             refreshCustomChecks();
             Context = context;
+            Test = test;
            
         }
 
