@@ -12,7 +12,8 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using static DBAChecksGUI.DiffControl;
-
+using System.Diagnostics;
+using System.IO;
 namespace DBAChecksGUI
 {
 
@@ -25,7 +26,7 @@ namespace DBAChecksGUI
             InitializeComponent();
         }
 
-        string connectionString = "Data Source=.;Initial Catalog=DBAChecksDB;Integrated Security=SSPI";
+        string connectionString = "";
 
         Int32 currentSummaryPage = 1;
         Int32 currentSummaryPageSize = 100;
@@ -46,16 +47,31 @@ namespace DBAChecksGUI
             {
                 string jsonConfig = System.IO.File.ReadAllText(jsonPath);
                 var cfg= CollectionConfig.Deserialize(jsonConfig);
-                connectionString = cfg.DestinationConnection.ConnectionString;
+                if(cfg.DestinationConnection.Type == DBAChecksConnection.ConnectionType.SQL)
+                {
+                    connectionString = cfg.DestinationConnection.ConnectionString;                }
+           
             }
-            SqlConnectionStringBuilder builder = new SqlConnectionStringBuilder(connectionString);
-            builder.ApplicationName = "DBAChecksGUI";
-            connectionString = builder.ConnectionString;
-            Common.ConnectionString = connectionString;
+            if (connectionString == "")
+            {
+                MessageBox.Show("Please use DBAChecksServiceConfig.exe to configure the service" + Environment.NewLine + "This GUI tool requires a destination connection string pointing to the DBAChecks repository database.", "Info", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                if (File.Exists("DBAChecksServiceConfig.exe"))
+                {
+                    Process.Start("DBAChecksServiceConfig.exe");
+                }
+                Application.Exit();
+            }
+            else
+            {
+                SqlConnectionStringBuilder builder = new SqlConnectionStringBuilder(connectionString);
+                builder.ApplicationName = "DBAChecksGUI";
+                connectionString = builder.ConnectionString;
+                Common.ConnectionString = connectionString;
 
-            addInstanes();
-            buildTagMenu();
-            loadSelectedTab();
+                addInstanes();
+                buildTagMenu();
+                loadSelectedTab();
+            }
 
         }
 
