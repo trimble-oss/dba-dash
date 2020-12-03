@@ -11,6 +11,7 @@ DBAChecks is a tool for SQL Server DBAs to assist with daily checks, performance
  - Track changes to configuration, SQL Patching, drivers etc.
  - Schema change tracking
  - Option to monitor instances in isolated environments via S3 bucket.
+ - [Custom Checks](../Docs/CustomChecks)
 
 ## Requirements
  
