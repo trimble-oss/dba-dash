@@ -9,3 +9,4 @@ EXEC dbo.DailyPartitions_Add @TableName = 'AzureDBElasticPoolResourceStats',@Day
 EXEC dbo.DailyPartitions_Add @TableName = 'ObjectExecutionStats',@DaysInFuture=@DaysInFuture
 EXEC dbo.DailyPartitions_Add @TableName = 'DBIOStats',@DaysInFuture=@DaysInFuture
 EXEC dbo.DailyPartitions_Add @TableName = 'SlowQueries',@DaysInFuture=@DaysInFuture
+EXEC dbo.DailyPartitions_Add @TableName = 'CustomChecksHistory',@DaysInFuture=@DaysInFuture

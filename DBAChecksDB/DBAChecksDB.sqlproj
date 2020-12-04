@@ -447,6 +447,11 @@
     <Build Include="dbo\Stored Procedures\CustomCheckContext_Get.sql" />
     <Build Include="dbo\Stored Procedures\CustomCheck_Get.sql" />
     <Build Include="dbo\User Defined Types\CustomChecks.sql" />
+    <Build Include="Switch\Tables\CustomChecksHistory.sql" />
+    <Build Include="dbo\Tables\CustomChecksHistory.sql" />
+    <Build Include="Storage\PF_CustomChecksHistory.sql" />
+    <Build Include="Storage\PS_CustomChecksHistory.sql" />
+    <Build Include="dbo\Stored Procedures\CustomChecksHistory_Get.sql" />
   </ItemGroup>
   <ItemGroup>
     <PostDeploy Include="Script.PostDeployment1.sql" />

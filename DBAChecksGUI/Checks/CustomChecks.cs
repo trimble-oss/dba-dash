@@ -311,6 +311,45 @@ namespace DBAChecksGUI.Checks
                 Common.ConvertUTCToLocal(ref dt);
                 dgvCustom.AutoGenerateColumns = false;
                 dgvCustom.DataSource = dt;
+                HistoryView(false);
+            }
+        }
+
+        private void HistoryView(bool isHistory)
+        {
+            dgvCustom.Columns["History"].Visible = !isHistory;
+            tsBack.Visible = isHistory;
+            tsClear.Visible = !isHistory;
+            tsFilter.Visible = !isHistory;
+            tsRefresh.Visible = !isHistory;
+        }
+
+        private void getHistory(Int32 InstanceID,string test,string context)
+        {
+            var cn = new SqlConnection(Common.ConnectionString);
+            using (cn)
+            {
+                cn.Open();
+                SqlCommand cmd = new SqlCommand("dbo.CustomChecksHistory_Get", cn);
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.Parameters.AddWithValue("InstanceID", InstanceID);
+
+                if (context != null)
+                {
+                    cmd.Parameters.AddWithValue("Context", context);
+                }
+                if (test != null)
+                {
+                    cmd.Parameters.AddWithValue("Test", test);
+                }
+                cmd.CommandType = CommandType.StoredProcedure;
+                SqlDataAdapter da = new SqlDataAdapter(cmd);
+                DataTable dt = new DataTable();
+                da.Fill(dt);
+                Common.ConvertUTCToLocal(ref dt);
+                dgvCustom.AutoGenerateColumns = false;
+                dgvCustom.DataSource = dt;
+                HistoryView(true);
             }
         }
 
@@ -351,6 +390,7 @@ namespace DBAChecksGUI.Checks
         {
             if (e.RowIndex >= 0)
             {
+                var row = (DataRowView)dgvCustom.Rows[e.RowIndex].DataBoundItem;
                 if(e.ColumnIndex== colContext.Index)
                 {
                     Context = (string)dgvCustom.Rows[e.RowIndex].Cells[e.ColumnIndex].Value;
@@ -360,6 +400,10 @@ namespace DBAChecksGUI.Checks
                 {
                     Test = (string)dgvCustom.Rows[e.RowIndex].Cells[e.ColumnIndex].Value;
                     refreshCustomChecks();
+                }
+                else if(e.ColumnIndex == History.Index)
+                {
+                    getHistory((Int32)row["InstanceID"], (string)row["Test"], (string)row["Context"]);
                 }
             }
         }
@@ -372,6 +416,11 @@ namespace DBAChecksGUI.Checks
             IncludeNA = true;
             IncludeCritical = true;
             IncludeWarning = true;
+            refreshCustomChecks();
+        }
+
+        private void tsBack_Click(object sender, EventArgs e)
+        {
             refreshCustomChecks();
         }
     }

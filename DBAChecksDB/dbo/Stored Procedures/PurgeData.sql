@@ -5,7 +5,7 @@ DECLARE cTables CURSOR FAST_FORWARD LOCAL FOR
 	SELECT DR.TableName,DR.RetentionDays
 	FROM dbo.DataRetention DR
 	CROSS APPLY [dbo].[PartitionFunctionName](DR.TableName) PF
-	WHERE RetentionDays > 0
+	WHERE DR.RetentionDays > 0
 	
 
 OPEN cTables

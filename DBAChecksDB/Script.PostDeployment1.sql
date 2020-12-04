@@ -158,7 +158,8 @@ FROM (VALUES('ObjectExecutionExecutionStStats',120),
 				('BlockingSnapshot',120),
 				('SlowQueries',120),
 				('AzureDBElasticPoolResourceStats',120),
-				('AzureDBResourceStats',120)
+				('AzureDBResourceStats',120),
+				('CustomChecksHistory',120)
 				) AS t(TableName,RetentionDays)
 WHERE NOT EXISTS(SELECT 1 FROM dbo.DataRetention DR WHERE DR.TableName = T.TableName)
 

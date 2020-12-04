@@ -1,4 +1,4 @@
-﻿CREATE PROC dbo.CustomCheck_Get(
+﻿CREATE PROC [dbo].[CustomCheck_Get](
 	@InstanceIDs VARCHAR(MAX)=NULL,
 	@IncludeCritical BIT=1,
 	@IncludeWarning BIT=1,
@@ -20,7 +20,8 @@ SELECT @StatusSQL = CASE WHEN @StatusSQL='' THEN '1=2'
 
 DECLARE @SQL NVARCHAR(MAX) 
 SET @SQL = N'
-SELECT I.ConnectionID,
+SELECT I.InstanceID,
+		I.ConnectionID,
         cc.Test,
         cc.Context,
         cc.Status,
@@ -31,6 +32,7 @@ JOIN dbo.Instances I ON	 I.InstanceID = cc.InstanceID
 WHERE ' + @StatusSQL + '
 ' + CASE WHEN @Test IS NULL THEN '' ELSE 'AND cc.Test = @Test' END + '
 ' + CASE WHEN @Context IS NULL THEN '' ELSE 'AND cc.Context = @Context' END + '
-' + CASE WHEN @InstanceIDs IS NULL THEN '' ELSE 'AND EXISTS(SELECT 1 FROM STRING_SPLIT(@InstanceIDs,'','') ss WHERE ss.Value = I.InstanceID)' END
+' + CASE WHEN @InstanceIDs IS NULL THEN '' ELSE 'AND EXISTS(SELECT 1 FROM STRING_SPLIT(@InstanceIDs,'','') ss WHERE ss.Value = I.InstanceID)' END + '
+ORDER BY cc.Status'
 
 EXEC sp_executesql @SQL,N'@InstanceIDs VARCHAR(MAX),@Test NVARCHAR(128),@Context NVARCHAR(128)',@InstanceIDs,@Test,@Context
