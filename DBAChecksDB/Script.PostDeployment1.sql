@@ -142,9 +142,6 @@ FROM dbo.WaitType wt
 JOIN @waits t ON  t.WaitType = wt.WaitType
 WHERE WT.IsCriticalWait<>t.IsCriticalWait
 GO
-EXEC dbo.Partitions_Add
-GO
-
 INSERT INTO dbo.DataRetention
 (
     TableName,
@@ -159,11 +156,14 @@ FROM (VALUES('ObjectExecutionExecutionStStats',120),
 				('SlowQueries',120),
 				('AzureDBElasticPoolResourceStats',120),
 				('AzureDBResourceStats',120),
-				('CustomChecksHistory',120)
+				('CustomChecksHistory',120),
+				('DBIOStats_60MIN',730),
+				('CPU_60MIN',730),
+				('ObjectExecutionStats_60MIN',730),
+				('AzureDBElasticPoolResourceStats_60MIN',730),
+				('AzureDBResourceStats_60MIN',730)
 				) AS t(TableName,RetentionDays)
 WHERE NOT EXISTS(SELECT 1 FROM dbo.DataRetention DR WHERE DR.TableName = T.TableName)
-
-DELETE DataRetention WHERE TableName NOT IN('BlockingSnapshot','CPU','DBIOStats','IOStats','ObjectExecutionStats','SlowQueries','Waits','AzureDBResourceStats','AzureDBElasticPoolResourceStats')
 
 INSERT INTO dbo.OSLoadedModulesStatus
 (
@@ -410,3 +410,5 @@ BEGIN
 	INSERT INTO dbo.LastGoodCheckDBThresholds
 	VALUES(-1,-1,11520,21600)
 END
+
+EXEC dbo.Partitions_Add

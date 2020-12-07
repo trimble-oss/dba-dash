@@ -1,8 +1,5 @@
-﻿CREATE PROC [dbo].[DailyPartitions_Add](@TableName SYSNAME,@DaysInFuture INT=14)
+﻿CREATE PROC [dbo].[MonthlyPartitions_Add](@TableName SYSNAME,@MonthsInFuture INT=1)
 AS
-/* 
-	Generic proc to handle adding new daily partitions to the partitioned tables.
-*/
 DECLARE @PartitionFunction SYSNAME
 DECLARE @PartitionScheme SYSNAME
 
@@ -25,12 +22,12 @@ DECLARE @Boundary DATETIME2(3)
 SELECT TOP(1) @Boundary= lb 
 FROM dbo.PartitionBoundaryHelper(@PartitionFunction,@TableName)
 ORDER BY partition_number DESC
-SELECT @Boundary = ISNULL(@Boundary,CAST(GETUTCDATE() AS DATE))
--- Repeat until we are @DaysInFuture in the future
-WHILE DATEDIFF(day, GETUTCDATE(), @Boundary) < @DaysInFuture
+SELECT @Boundary = ISNULL(@Boundary,DATEADD(m, DATEDIFF(m, 0, GETUTCDATE()), 0))
+-- Repeat until we are @MonthsInFuture in the future
+WHILE DATEDIFF(m, GETUTCDATE(), @Boundary) < @MonthsInFuture
 BEGIN;
-   -- Increase by a day and split partition
-   SET @Boundary = DATEADD(day, 1, @Boundary);
+   -- Increase by 1 month and split partition
+   SET @Boundary = DATEADD(m, 1, @Boundary);
 
    ALTER PARTITION SCHEME ' + QUOTENAME(@PartitionScheme) + '
    NEXT USED [PRIMARY]
@@ -39,4 +36,6 @@ BEGIN;
          SPLIT RANGE (@Boundary);
 END;'
 
-EXEC sp_executesql @SQL,N'@PartitionFunction SYSNAME,@TableName SYSNAME,@DaysInFuture INT',@PartitionFunction,@TableName,@DaysInFuture
+
+PRINT @SQL
+EXEC sp_executesql @SQL,N'@PartitionFunction SYSNAME,@TableName SYSNAME,@MonthsInFuture INT',@PartitionFunction,@TableName,@MonthsInFuture

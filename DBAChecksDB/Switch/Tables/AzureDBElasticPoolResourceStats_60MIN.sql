@@ -1,4 +1,4 @@
-﻿CREATE TABLE [dbo].[AzureDBElasticPoolResourceStats_60MIN] (
+﻿CREATE TABLE [Switch].[AzureDBElasticPoolResourceStats_60MIN] (
     [PoolID]                        INT            NOT NULL,
     [end_time]                      DATETIME2 (3)  NOT NULL,
     [avg_cpu_percent]               DECIMAL (5, 2) NOT NULL,
@@ -59,6 +59,6 @@
     [Log80]                         SMALLINT       NOT NULL,
     [Log90]                         SMALLINT       NOT NULL,
     [Log100]                        SMALLINT       NOT NULL,
-    CONSTRAINT [PK_AzureDBElasticPoolResourceStats_60MIN] PRIMARY KEY CLUSTERED ([PoolID] ASC, [end_time] ASC) WITH (DATA_COMPRESSION = PAGE) ON [PS_AzureDBElasticPoolResourceStats_60MIN](end_time)
-) ON [PS_AzureDBElasticPoolResourceStats_60MIN](end_time);
+    CONSTRAINT [PK_AzureDBElasticPoolResourceStats_60MIN] PRIMARY KEY CLUSTERED ([PoolID] ASC, [end_time] ASC) WITH (DATA_COMPRESSION = PAGE)
+);
 

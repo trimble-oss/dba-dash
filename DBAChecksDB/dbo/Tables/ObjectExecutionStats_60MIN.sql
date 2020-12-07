@@ -11,7 +11,7 @@
     [execution_count]      BIGINT        NOT NULL,
     [IsCompile]            BIT           NOT NULL,
     [MaxExecutionsPerMin]  DECIMAL (19, 6)   NULL,
-    CONSTRAINT [PK_ObjectExecutionStats_60MIN] PRIMARY KEY CLUSTERED ([InstanceID] ASC, [SnapshotDate] ASC, [ObjectID] ASC) WITH (DATA_COMPRESSION = PAGE),
+    CONSTRAINT [PK_ObjectExecutionStats_60MIN] PRIMARY KEY CLUSTERED ([InstanceID] ASC, [SnapshotDate] ASC, [ObjectID] ASC) WITH (DATA_COMPRESSION = PAGE) ON PS_ObjectExecutionStats_60MIN(SnapshotDate),
     CONSTRAINT [FK_ObjectExecutionStats_60MIN_DBObjects] FOREIGN KEY ([ObjectID]) REFERENCES [dbo].[DBObjects] ([ObjectID])
-);
+) ON PS_ObjectExecutionStats_60MIN(SnapshotDate);
 

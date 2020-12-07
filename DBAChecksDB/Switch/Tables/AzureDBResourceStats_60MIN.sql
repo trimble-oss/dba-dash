@@ -1,4 +1,4 @@
-﻿CREATE TABLE [dbo].[AzureDBResourceStats_60MIN] (
+﻿CREATE TABLE [Switch].[AzureDBResourceStats_60MIN] (
     [InstanceID]                  INT            NOT NULL,
     [end_time]                    DATETIME2 (3)  NOT NULL,
     [avg_cpu_percent]             DECIMAL (5, 2) NOT NULL,
@@ -64,6 +64,6 @@
     [Log80]                       SMALLINT       NOT NULL,
     [Log90]                       SMALLINT       NOT NULL,
     [Log100]                      SMALLINT       NOT NULL,
-    CONSTRAINT [PK_AzureDBResourceStats_60MIN] PRIMARY KEY CLUSTERED ([InstanceID] ASC, [end_time] ASC) WITH (DATA_COMPRESSION = PAGE) ON PS_AzureDBResourceStats_60MIN(end_time)
-) ON PS_AzureDBResourceStats_60MIN(end_time);
+    CONSTRAINT [PK_AzureDBResourceStats_60MIN] PRIMARY KEY CLUSTERED ([InstanceID] ASC, [end_time] ASC) WITH (DATA_COMPRESSION = PAGE)
+);
 

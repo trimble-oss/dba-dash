@@ -30,7 +30,7 @@
     <QueryStoreStaleQueryThreshold>15</QueryStoreStaleQueryThreshold>
     <QueryStoreMaxStorageSize>512</QueryStoreMaxStorageSize>
     <QueryStoreMaxPlansPerQuery>50</QueryStoreMaxPlansPerQuery>
-    <DacVersion>2.0.1.9</DacVersion>
+    <DacVersion>2.0.2.0</DacVersion>
     <ReadCommittedSnapshot>True</ReadCommittedSnapshot>
     <AllowSnapshotIsolation>True</AllowSnapshotIsolation>
   </PropertyGroup>
@@ -452,6 +452,25 @@
     <Build Include="Storage\PF_CustomChecksHistory.sql" />
     <Build Include="Storage\PS_CustomChecksHistory.sql" />
     <Build Include="dbo\Stored Procedures\CustomChecksHistory_Get.sql" />
+    <Build Include="Storage\PF_AzureDBElasticPoolResourceStats_60MIN.sql" />
+    <Build Include="Storage\PS_AzureDBElasticPoolResourceStats_60MIN.sql" />
+    <Build Include="dbo\Stored Procedures\MonthlyPartitions_Add.sql" />
+    <Build Include="Storage\PF_AzureDBResourceStats_60MIN.sql" />
+    <Build Include="Storage\PS_AzureDBResourceStats_60MIN.sql" />
+    <Build Include="Storage\PF_Waits_60MIN.sql" />
+    <Build Include="Storage\PF_ObjectExecutionStats_60MIN.sql" />
+    <Build Include="Storage\PF_DBIOStats_60MIN.sql" />
+    <Build Include="Storage\PF_CPU_60MIN.sql" />
+    <Build Include="Storage\PS_Waits_60MIN.sql" />
+    <Build Include="Storage\PS_ObjectExecutionStats_60MIN.sql" />
+    <Build Include="Storage\PS_DBIOStats_60MIN.sql" />
+    <Build Include="Storage\PS_CPU_60MIN.sql" />
+    <Build Include="Switch\Tables\Waits_60MIN.sql" />
+    <Build Include="Switch\Tables\DBIOStats_60MIN.sql" />
+    <Build Include="Switch\Tables\CPU_60MIN.sql" />
+    <Build Include="Switch\Tables\AzureDBResourceStats_60MIN.sql" />
+    <Build Include="Switch\Tables\AzureDBElasticPoolResourceStats_60MIN.sql" />
+    <Build Include="Switch\Tables\ObjectExecutionStats_60MIN.sql" />
   </ItemGroup>
   <ItemGroup>
     <PostDeploy Include="Script.PostDeployment1.sql" />

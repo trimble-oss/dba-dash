@@ -1,4 +1,4 @@
-﻿CREATE TABLE [dbo].[DBIOStats_60MIN] (
+﻿CREATE TABLE [Switch].[DBIOStats_60MIN] (
     [InstanceID]           INT              NOT NULL,
     [DatabaseID]           INT              NOT NULL,
     [Drive]                CHAR (1)         NOT NULL,
@@ -20,6 +20,6 @@
     [MaxReadMBsec]         DECIMAL (19, 7)  NOT NULL,
     [MaxWriteMBsec]        DECIMAL (19, 7)  NOT NULL,
     [MaxMBsec]             DECIMAL (19, 7)  NOT NULL,
-    CONSTRAINT [PK_IOStats_60MIN] PRIMARY KEY CLUSTERED ([InstanceID] ASC, [DatabaseID] ASC, [FileID] ASC, [Drive] ASC, [SnapshotDate] ASC) WITH (DATA_COMPRESSION = PAGE) ON PS_DBIOStats_60MIN(SnapshotDate)
-) ON PS_DBIOStats_60MIN(SnapshotDate);
+    CONSTRAINT [PK_IOStats_60MIN] PRIMARY KEY CLUSTERED ([InstanceID] ASC, [DatabaseID] ASC, [FileID] ASC, [Drive] ASC, [SnapshotDate] ASC) WITH (DATA_COMPRESSION = PAGE)
+);
 
