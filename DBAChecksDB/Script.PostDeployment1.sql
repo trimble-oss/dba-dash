@@ -161,7 +161,8 @@ FROM (VALUES('ObjectExecutionExecutionStStats',120),
 				('CPU_60MIN',730),
 				('ObjectExecutionStats_60MIN',730),
 				('AzureDBElasticPoolResourceStats_60MIN',730),
-				('AzureDBResourceStats_60MIN',730)
+				('AzureDBResourceStats_60MIN',730),
+				('Waits_60MIN',730)
 				) AS t(TableName,RetentionDays)
 WHERE NOT EXISTS(SELECT 1 FROM dbo.DataRetention DR WHERE DR.TableName = T.TableName)
 
