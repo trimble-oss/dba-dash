@@ -20,7 +20,10 @@ namespace DBAChecksService
                     s.WhenStarted(tc => tc.Start());
                     s.WhenStopped(tc => tc.Stop());
                 });
-          
+                x.EnableServiceRecovery(r =>
+                {
+                    r.RestartService(1);
+                });
 
                 x.SetDescription("Collect data from SQL Instances");
                 x.SetDisplayName("DBAChecksService");
