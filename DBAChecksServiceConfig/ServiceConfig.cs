@@ -11,6 +11,7 @@ using System.ServiceProcess;
 using System.Text;
 using System.Windows.Forms;
 using static DBAChecks.DBAChecksConnection;
+using System.Drawing;
 
 namespace DBAChecksServiceConfig
 {
@@ -23,13 +24,15 @@ namespace DBAChecksServiceConfig
 
         string originalJson = "";
         CollectionConfig collectionConfig = new CollectionConfig();
-        string jsonPath = System.IO.Path.Combine(Application.StartupPath, "ServiceConfig.json");
+        readonly string jsonPath = System.IO.Path.Combine(Application.StartupPath, "ServiceConfig.json");
         ServiceController svcCtrl;
 
         private void bttnAdd_Click(object sender, EventArgs e)
         {
-            DBAChecksSource src = new DBAChecksSource(cboSource.Text);
-            src.NoWMI = chkNoWMI.Checked;
+            var src = new DBAChecksSource(cboSource.Text)
+            {
+                NoWMI = chkNoWMI.Checked
+            };
             if (chkSlowQueryThreshold.Checked)
             {
                 src.SlowQueryThresholdMs = (Int32)numSlowQueryThreshold.Value;
@@ -177,7 +180,7 @@ namespace DBAChecksServiceConfig
         {
             errorProvider1.SetError(txtDestination, null);
             DBAChecksConnection dest = new DBAChecksConnection(txtDestination.Text);
-            lblVersionInfo.ForeColor = System.Drawing.Color.Black;
+            lblVersionInfo.ForeColor = Color.Black;
             lblVersionInfo.Text = "";
             if (txtDestination.Text == "")
             {
@@ -196,7 +199,7 @@ namespace DBAChecksServiceConfig
                     if (! DBValidations.DBExists(txtDestination.Text))
                     {
                         lblVersionInfo.Text = "Run Deploy to create database.";
-                        lblVersionInfo.ForeColor = System.Drawing.Color.Red;
+                        lblVersionInfo.ForeColor = Color.Red;
                         return true;
                     }
                      dbVersion= DBValidations.GetDBVersion(txtDestination.Text);
@@ -204,19 +207,19 @@ namespace DBAChecksServiceConfig
                     if (compare == 0)
                     {
                         lblVersionInfo.Text = "DB upgrade not required. DacVersion/DB Version: " + dacVersion.ToString();
-                        lblVersionInfo.ForeColor = System.Drawing.Color.Green;
+                        lblVersionInfo.ForeColor = Color.Green;
                         bttnDeployDatabase.Enabled = true;
                     }
                     else if (compare > 0)
                     {
                         lblVersionInfo.Text = "DB version " + dbVersion.ToString() + " is newer. Please update the app";
-                        lblVersionInfo.ForeColor = System.Drawing.Color.Red;
+                        lblVersionInfo.ForeColor = Color.Red;
                         bttnDeployDatabase.Enabled = false;
                     }
                     else
                     {
                         lblVersionInfo.Text = "DB version " + dbVersion + " requires upgrade to " + dacVersion;
-                        lblVersionInfo.ForeColor = System.Drawing.Color.Red;
+                        lblVersionInfo.ForeColor = Color.Red;
                         bttnDeployDatabase.Enabled = true;
                     }
                     return true;
@@ -300,6 +303,7 @@ namespace DBAChecksServiceConfig
             if (svcCtrl == null)
             {
                 lblServiceStatus.Text = "Service Status: Not Installed";
+                lblServiceStatus.ForeColor = Color.Red;
                 bttnStart.Enabled = false;
                 bttnStop.Enabled = false;
                 bttnInstall.Enabled = true;
@@ -309,6 +313,18 @@ namespace DBAChecksServiceConfig
             else
             {
                 lblServiceStatus.Text = Enum.GetName(typeof(ServiceControllerStatus), svcCtrl.Status);
+                if(svcCtrl.Status == ServiceControllerStatus.Running)
+                {
+                    lblServiceStatus.ForeColor = Color.Green;
+                }
+                else if(svcCtrl.Status== ServiceControllerStatus.Stopped || svcCtrl.Status == ServiceControllerStatus.StopPending || svcCtrl.Status == ServiceControllerStatus.Paused)
+                {
+                    lblServiceStatus.ForeColor = Color.Red;
+                }
+                else
+                {
+                    lblServiceStatus.ForeColor = Color.Orange;
+                }
                 bttnStart.Enabled = (svcCtrl.Status == ServiceControllerStatus.Stopped);
                 bttnStop.Enabled = (svcCtrl.Status == ServiceControllerStatus.Running);
                 bttnInstall.Enabled = false;
@@ -395,8 +411,10 @@ namespace DBAChecksServiceConfig
                 return;
             }
             Process p = new Process();
-            ProcessStartInfo psi = new ProcessStartInfo();
-            psi.FileName = "CMD.EXE";
+            var psi = new ProcessStartInfo()
+            {
+                FileName = "CMD.EXE"
+            };
             string arg = "";
             switch (cboServiceCredentials.SelectedIndex)
             {
@@ -425,9 +443,10 @@ namespace DBAChecksServiceConfig
         private void bttnUninstall_Click(object sender, EventArgs e)
         {
             Process p = new Process();
-            ProcessStartInfo psi = new ProcessStartInfo();
-            psi.FileName = "CMD.EXE";
-            psi.Arguments = "/K DBAChecksService UnInstall";
+            ProcessStartInfo psi = new ProcessStartInfo() {
+                FileName = "CMD.EXE",
+                Arguments = "/K DBAChecksService UnInstall"
+            };
             p.StartInfo = psi;
             p.Start();
             p.WaitForExit();
@@ -514,7 +533,7 @@ namespace DBAChecksServiceConfig
 
         private void bttnRemove_Click(object sender, EventArgs e)
         {
-            DBAChecksSource src = null;
+            DBAChecksSource src;
 
             src = getConnection(cboSource.Text);
             if (src != null)
@@ -578,7 +597,7 @@ namespace DBAChecksServiceConfig
 
         private void cboSource_SelectedIndexChanged(object sender, EventArgs e)
         {
-            DBAChecksSource src = null;
+            DBAChecksSource src;
 
             src = getConnection(cboSource.Text);
             if (src != null)
@@ -631,8 +650,10 @@ namespace DBAChecksServiceConfig
             {
                 if(MessageBox.Show("Update connection string?","Update", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
                 {
-                    SqlConnectionStringBuilder builder = new SqlConnectionStringBuilder(txtDestination.Text);
-                    builder.InitialCatalog = frm.DatabaseName;
+                    var builder = new SqlConnectionStringBuilder(txtDestination.Text)
+                    {
+                        InitialCatalog = frm.DatabaseName
+                    };
                     txtDestination.Text = builder.ConnectionString;
                     destinationChanged();
                 }

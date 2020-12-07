@@ -20,6 +20,7 @@ namespace DBAChecksService
                     s.WhenStarted(tc => tc.Start());
                     s.WhenStopped(tc => tc.Stop());
                 });
+                x.StartAutomaticallyDelayed();
                 x.EnableServiceRecovery(r =>
                 {
                     r.RestartService(1);
