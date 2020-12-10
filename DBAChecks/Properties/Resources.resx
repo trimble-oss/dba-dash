@@ -1860,4 +1860,99 @@ BEGIN
 	EXEC dbo.DBAChecks_CustomCheck
 END</value>
   </data>
+  <data name="SQLPerformanceCounters" xml:space="preserve">
+    <value>SELECT SYSUTCDATETIME() AS SnapshotDate,
+		STUFF(pc.object_name,1,CHARINDEX(':',pc.object_name),'') AS object_name,
+       pc.counter_name,
+       pc.instance_name,
+       pc.cntr_value,
+       pc.cntr_type 
+FROM sys.dm_os_performance_counters pc
+WHERE EXISTS(SELECT 1 FROM (VALUES
+('Buffer Manager','Buffer cache hit ratio',''),
+('Buffer Manager','Buffer cache hit ratio base',''),
+('Buffer Manager','Lazy writes/sec',''),
+('Buffer Manager','Checkpoint pages/sec',''),
+('Buffer Manager','Free list stalls/sec',''),
+('Buffer Manager','Page life expectancy',''),
+('Buffer Manager','Page reads/sec',NULL),
+('Buffer Manager','Page writes/sec',NULL),
+('SQL Statistics','SQL Compilations/sec',''),
+('SQL Statistics','SQL Re-Compilations/sec',''),
+('SQL Statistics','Batch Requests/sec',''),
+('General Statistics','Active Temp Tables',NULL),
+('General Statistics','Temp Tables Creation Rate',''),
+('General Statistics','Temp Tables For Destruction',''),
+('General Statistics','Processes blocked',NULL),
+('Locks','Number of Deadlocks/sec','_Total'),
+('Locks','Lock Waits/sec','_Total'),
+('Locks','Lock Wait Time (ms)','_Total'),
+('Locks','Average Wait Time (ms)','_Total'),
+('Locks','Average Wait Time Base','_Total'),
+('Access Methods','Page Splits/sec',''),
+('Access Methods','Forwarded Records/sec',''),
+('Memory Manager','Memory Grants Outstanding',NULL),
+('Memory Manager','Memory Grants Pending',NULL),
+('Memory Manager','Granted Workspace Memory (KB)',NULL),
+('Memory Manager','Total Server Memory (KB)',NULL),
+('Memory Manager','Target Server Memory (KB)',NULL),
+('Resource Pool Stats','Active memory grant amount (KB)',NULL),
+('Resource Pool Stats','Active memory grants count',NULL),
+('Resource Pool Stats','Memory grant timeouts/sec',NULL),
+('Resource Pool Stats','Memory grants/sec',NULL),
+('Resource Pool Stats','Pending memory grants count',NULL),
+('Wait Statistics','Memory grant queue waits',NULL)
+) ctrs(object_name,counter_name,instance_name)
+WHERE ctrs.object_name = STUFF(pc.object_name,1,CHARINDEX(':',pc.object_name),'')
+AND ctrs.counter_name = pc.counter_name
+AND (ctrs.instance_name = pc.instance_name OR ctrs.instance_name IS NULL)
+)
+AND pc.instance_name NOT IN('AuditingGroup',
+'AutoShrinkLogGroup',
+'CheckpointGroup',
+'DACGroup',
+'GhostCleanupGroup',
+'InMemBackupGroup',
+'InMemBackupRestorePool',
+'InMemDmvCollectorGroup',
+'InMemDmvCollectorPool',
+'InMemDTAPool',
+'InMemFullBackupGroup',
+'InMemMetricsDownloaderGroup',
+'InMemMetricsDownloaderPool',
+'InMemQueryStoreGroup',
+'InMemQueryStoreGroupFeedback',
+'InMemQueryStoreGroupLowPri',
+'InMemQueryStorePool',
+'InMemRestoreGroup',
+'InMemTdeScanGroup',
+'InMemTdeScanPool',
+'InMemWIAutoTuningPool',
+'InMemWIIndexValidationGroup',
+'InMemXdbLoginPool',
+'InMemXdbSeedingPool',
+'LazywriterGroup',
+'PVSCleanerGroup',
+'PVSCleanerPool',
+'RecoveryWriterGroup',
+'RedoGroup',
+'ResourceMonitorGroup',
+'SeedingGroup',
+'SloDTAGroup',
+'SloHkPool',
+'SloSecSharedInitGroup',
+'SloSecSharedPool',
+'UcsGroup',
+'UpdateAutoStatsAsyncGroup',
+'XdbLoginGroup',
+'XOdbcGroup',
+'mssqlsystemresource'
+)
+AND NOT (pc.counter_name= 'Percent Log Used' AND pc.instance_name='_Total')
+AND (SERVERPROPERTY('EngineEdition')&lt;&gt; 5
+	OR (pc.instance_name NOT IN('msdb','master','model','model_masterdb','model_userdb','mssqlsystemresource','tempdb')		
+		AND NOT (pc.counter_name= 'Log Growths' AND pc.instance_name='_Total')
+		)
+	)</value>
+  </data>
 </root>

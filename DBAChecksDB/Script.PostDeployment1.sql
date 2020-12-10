@@ -162,7 +162,8 @@ FROM (VALUES('ObjectExecutionExecutionStStats',120),
 				('ObjectExecutionStats_60MIN',730),
 				('AzureDBElasticPoolResourceStats_60MIN',730),
 				('AzureDBResourceStats_60MIN',730),
-				('Waits_60MIN',730)
+				('Waits_60MIN',730),
+				('PerformanceCounters', 180)
 				) AS t(TableName,RetentionDays)
 WHERE NOT EXISTS(SELECT 1 FROM dbo.DataRetention DR WHERE DR.TableName = T.TableName)
 
@@ -411,5 +412,51 @@ BEGIN
 	INSERT INTO dbo.LastGoodCheckDBThresholds
 	VALUES(-1,-1,11520,21600)
 END
+
+MERGE INTO [CounterMapping] AS [Target]
+USING (VALUES
+  (N'SQLServer:Latches',N'Average Latch Wait Time (ms)',N'Average Latch Wait Time Base')
+ ,(N'SQLServer:Locks',N'Average Wait Time (ms)',N'Average Wait Time Base')
+ ,(N'SQLServer:Resource Pool Stats',N'Avg Disk Read IO (ms)',N'Avg Disk Read IO (ms) Base')
+ ,(N'SQLServer:Resource Pool Stats',N'Avg Disk Write IO (ms)',N'Avg Disk Write IO (ms) Base')
+ ,(N'SQLServer:HTTP Storage',N'Avg. Bytes/Read',N'Avg. Bytes/Read BASE')
+ ,(N'SQLServer:HTTP Storage',N'Avg. Bytes/Transfer',N'Avg. Bytes/Transfer BASE')
+ ,(N'SQLServer:HTTP Storage',N'Avg. Bytes/Write',N'Avg. Bytes/Write BASE')
+ ,(N'SQLServer:Broker TO Statistics',N'Avg. Length of Batched Writes',N'Avg. Length of Batched Writes BS')
+ ,(N'SQLServer:HTTP Storage',N'Avg. microsec/Read',N'Avg. microsec/Read BASE')
+ ,(N'SQLServer:HTTP Storage',N'Avg. microsec/Read Comp',N'Avg. microsec/Read Comp BASE')
+ ,(N'SQLServer:HTTP Storage',N'Avg. microsec/Transfer',N'Avg. microsec/Transfer BASE')
+ ,(N'SQLServer:HTTP Storage',N'Avg. microsec/Write',N'Avg. microsec/Write BASE')
+ ,(N'SQLServer:HTTP Storage',N'Avg. microsec/Write Comp',N'Avg. microsec/Write Comp BASE')
+ ,(N'SQLServer:Broker TO Statistics',N'Avg. Time Between Batches (ms)',N'Avg. Time Between Batches Base')
+ ,(N'SQLServer:Broker TO Statistics',N'Avg. Time to Write Batch (ms)',N'Avg. Time to Write Batch Base')
+ ,(N'SQLServer:Buffer Manager',N'Buffer cache hit ratio',N'Buffer cache hit ratio base')
+ ,(N'SQLServer:Catalog Metadata',N'Cache Hit Ratio',N'Cache Hit Ratio Base')
+ ,(N'SQLServer:Cursor Manager by Type',N'Cache Hit Ratio',N'Cache Hit Ratio Base')
+ ,(N'SQLServer:Plan Cache',N'Cache Hit Ratio',N'Cache Hit Ratio Base')
+ ,(N'SQLServer:Resource Pool Stats',N'CPU delayed %',N'CPU delayed % base')
+ ,(N'SQLServer:Workload Group Stats',N'CPU delayed %',N'CPU delayed % base')
+ ,(N'SQLServer:Resource Pool Stats',N'CPU effective %',N'CPU effective % base')
+ ,(N'SQLServer:Workload Group Stats',N'CPU effective %',N'CPU effective % base')
+ ,(N'SQLServer:Resource Pool Stats',N'CPU usage %',N'CPU usage % base')
+ ,(N'SQLServer:Workload Group Stats',N'CPU usage %',N'CPU usage % base')
+ ,(N'SQLServer:Databases',N'Log Cache Hit Ratio',N'Log Cache Hit Ratio Base')
+ ,(N'SQLServer:Broker/DBM Transport',N'Msg Fragment Recv Size Avg',N'Msg Fragment Recv Size Avg Base')
+ ,(N'SQLServer:Broker/DBM Transport',N'Msg Fragment Send Size Avg',N'Msg Fragment Send Size Avg Base')
+ ,(N'SQLServer:Broker/DBM Transport',N'Receive I/O Len Avg',N'Receive I/O Len Avg Base')
+ ,(N'SQLServer:Columnstore',N'Segment Cache Hit Ratio',N'Segment Cache Hit Ratio Base')
+ ,(N'SQLServer:Broker/DBM Transport',N'Send I/O Len Avg',N'Send I/O Len Avg Base')
+ ,(N'SQLServer:Transactions',N'Update conflict ratio',N'Update conflict ratio base')
+ ,(N'SQLServer:Access Methods',N'Worktables From Cache Ratio',N'Worktables From Cache Base')
+) AS [Source] ([object_name],[counter_name],[base_counter_name])
+ON ([Target].[counter_name] = [Source].[counter_name] AND [Target].[object_name] = [Source].[object_name])
+WHEN MATCHED AND (
+	NULLIF([Source].[base_counter_name], [Target].[base_counter_name]) IS NOT NULL OR NULLIF([Target].[base_counter_name], [Source].[base_counter_name]) IS NOT NULL) THEN
+ UPDATE SET
+  [Target].[base_counter_name] = [Source].[base_counter_name]
+WHEN NOT MATCHED BY TARGET THEN
+ INSERT([object_name],[counter_name],[base_counter_name])
+ VALUES([Source].[object_name],[Source].[counter_name],[Source].[base_counter_name]);
+
 
 EXEC dbo.Partitions_Add

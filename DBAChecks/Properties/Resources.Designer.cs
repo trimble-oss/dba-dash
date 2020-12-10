@@ -646,6 +646,27 @@ namespace DBAChecks.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to SELECT SYSUTCDATETIME() AS SnapshotDate,
+        ///		STUFF(pc.object_name,1,CHARINDEX(&apos;:&apos;,pc.object_name),&apos;&apos;) AS object_name,
+        ///       pc.counter_name,
+        ///       pc.instance_name,
+        ///       pc.cntr_value,
+        ///       pc.cntr_type 
+        ///FROM sys.dm_os_performance_counters pc
+        ///WHERE EXISTS(SELECT 1 FROM (VALUES
+        ///(&apos;Buffer Manager&apos;,&apos;Buffer cache hit ratio&apos;,&apos;&apos;),
+        ///(&apos;Buffer Manager&apos;,&apos;Buffer cache hit ratio base&apos;,&apos;&apos;),
+        ///(&apos;Buffer Manager&apos;,&apos;Lazy writes/sec&apos;,&apos;&apos;),
+        ///(&apos;Buffer Manager&apos;,&apos;Checkpoint pages/sec&apos;,&apos;&apos;),
+        ///(&apos;Buffer Manager&apos;,&apos;Free list s [rest of string was truncated]&quot;;.
+        /// </summary>
+        internal static string SQLPerformanceCounters {
+            get {
+                return ResourceManager.GetString("SQLPerformanceCounters", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to IF EXISTS(SELECT 1 
         ///			FROM sys.server_event_sessions
         ///			WHERE name = &apos;DBAChecks_1&apos;

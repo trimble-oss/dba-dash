@@ -337,6 +337,11 @@ namespace DBAChecksGUI
                customChecks1.IncludeOK = n.InstanceID > 0;
                customChecks1.RefreshData();
             }
+            if (tabs.SelectedTab == tabPC)
+            {
+                performanceCounterSummary1.InstanceID = n.InstanceID;
+                performanceCounterSummary1.RefreshData();
+            }
         }
 
         private void loadDBAChecksErrorLog(Int32 InstanceID)
@@ -562,6 +567,7 @@ ORDER BY SchemaName,ObjectName
                 allowedTabs.Add(tabDBConfiguration);
                 allowedTabs.Add(tabDBOptions);
                 allowedTabs.Add(tabCustomChecks);
+                allowedTabs.Add(tabPC);
             }
             else if (n.Type == SQLTreeItem.TreeType.Instance)
             {
@@ -582,6 +588,7 @@ ORDER BY SchemaName,ObjectName
                 allowedTabs.Add(tabCollectionDates);
                 allowedTabs.Add(tabDBSpace);
                 allowedTabs.Add(tabCustomChecks);
+                allowedTabs.Add(tabPC);
             }
             else if(n.Type == SQLTreeItem.TreeType.AzureInstance)
             {

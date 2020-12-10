@@ -389,6 +389,18 @@
     <Compile Include="Performance\ObjectExecution.Designer.cs">
       <DependentUpon>ObjectExecution.cs</DependentUpon>
     </Compile>
+    <Compile Include="Performance\PerformanceCounters.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Performance\PerformanceCounters.Designer.cs">
+      <DependentUpon>PerformanceCounters.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Performance\PerformanceCounterSummary.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Performance\PerformanceCounterSummary.Designer.cs">
+      <DependentUpon>PerformanceCounterSummary.cs</DependentUpon>
+    </Compile>
     <Compile Include="Performance\PerformanceSummary.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -583,8 +595,14 @@
     <EmbeddedResource Include="Performance\ObjectExecution.resx">
       <DependentUpon>ObjectExecution.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="Performance\PerformanceCounters.resx">
+      <DependentUpon>PerformanceCounters.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Performance\PerformanceSummary.resx">
       <DependentUpon>PerformanceSummary.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Performance\PerformanceCounterSummary.resx">
+      <DependentUpon>PerformanceCounterSummary.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Performance\Waits.resx">
       <DependentUpon>Waits.cs</DependentUpon>
