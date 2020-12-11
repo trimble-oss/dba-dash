@@ -653,12 +653,11 @@ namespace DBAChecks.Properties {
         ///       pc.cntr_value,
         ///       pc.cntr_type 
         ///FROM sys.dm_os_performance_counters pc
-        ///WHERE EXISTS(SELECT 1 FROM (VALUES
-        ///(&apos;Buffer Manager&apos;,&apos;Buffer cache hit ratio&apos;,&apos;&apos;),
-        ///(&apos;Buffer Manager&apos;,&apos;Buffer cache hit ratio base&apos;,&apos;&apos;),
-        ///(&apos;Buffer Manager&apos;,&apos;Lazy writes/sec&apos;,&apos;&apos;),
-        ///(&apos;Buffer Manager&apos;,&apos;Checkpoint pages/sec&apos;,&apos;&apos;),
-        ///(&apos;Buffer Manager&apos;,&apos;Free list s [rest of string was truncated]&quot;;.
+        ///WHERE EXISTS(SELECT 1 
+        ///FROM @CountersXML.nodes(&apos;Counters/Counter&apos;) ctrs(c)
+        ///WHERE ctrs.c.value(&apos;@object_name&apos;,&apos;NCHAR(128)&apos;) = STUFF(pc.object_name,1,CHARINDEX(&apos;:&apos;,pc.object_name),&apos;&apos;)
+        ///AND ctrs.c.value(&apos;@counter_name&apos;,&apos;NCHAR(128)&apos;) = pc.counter_name
+        ///AND (ct [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string SQLPerformanceCounters {
             get {

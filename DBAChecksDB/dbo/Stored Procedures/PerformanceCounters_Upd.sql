@@ -27,8 +27,8 @@ WITH PC AS (
 	SELECT @InstanceID AS InstanceID,
 		C.CounterID,
 		B.SnapshotDate,
-		CASE WHEN B.cntr_type = 65792 AND B.object_name='SQLServer:Batch Resp Statistics' AND B.cntr_value >= A.cntr_value THEN B.cntr_value - A.cntr_value
-			WHEN B.cntr_type = 65792 THEN B.cntr_value 
+		CASE WHEN B.cntr_type = 65792 AND B.object_name='Batch Resp Statistics' AND B.cntr_value >= A.cntr_value THEN B.cntr_value - A.cntr_value
+			WHEN B.cntr_type = 65792 AND B.object_name<>'Batch Resp Statistics' THEN B.cntr_value 
 			WHEN B.cntr_type = 272696576 AND B.cntr_value>=A.cntr_value THEN (B.cntr_value-A.cntr_value) / (DATEDIFF(ms,A.SnapshotDate,B.SnapshotDate)/1000.0)
 			WHEN B.cntr_type=537003264 THEN B.cntr_value*1.0 / Bbase.cntr_value
 			WHEN B.cntr_type=1073874176 AND Bbase.cntr_value>=Abase.cntr_value THEN (B.cntr_value-A.cntr_value*1.0) / (Bbase.cntr_value-Abase.cntr_value)

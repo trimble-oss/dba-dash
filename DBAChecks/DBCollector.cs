@@ -354,6 +354,25 @@ namespace DBAChecks
                     }
                 }
             }
+            else if(collectionType == CollectionType.PerformanceCounters)
+            {
+                try
+                {
+                    string xml = PerformanceCounters.PerformanceCountersXML;
+                    if (xml.Length > 0)
+                    {
+                        SqlParameter pCountersXML = new SqlParameter("CountersXML", PerformanceCounters.PerformanceCountersXML)
+                        {
+                            SqlDbType = SqlDbType.Xml
+                        };
+                        addDT(collectionTypeString, Properties.Resources.ResourceManager.GetString("SQL" + collectionTypeString, Properties.Resources.Culture), new SqlParameter[] { pCountersXML });
+                    }
+                }
+                catch(Exception ex)
+                {
+                    logError(collectionTypeString, ex.Message);
+                }
+            }
             else
             {
                 try
