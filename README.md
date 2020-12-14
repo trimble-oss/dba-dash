@@ -4,6 +4,7 @@ DBAChecks is a tool for SQL Server DBAs to assist with daily checks, performance
 
  - Backups, Log Shipping, Agent Jobs, DBCC, Corruption, Drive space, AGs
  - IO Performance, CPU, Waits, Blocking
+ - [OS Performance Counters + Custom Metrics](Docs/OSPerformanceCounters.md)
  - Stored Procedure/Function/Trigger execution stats
  - Capture slow queries (Extended Event trace)
  - Azure DB monitoring
