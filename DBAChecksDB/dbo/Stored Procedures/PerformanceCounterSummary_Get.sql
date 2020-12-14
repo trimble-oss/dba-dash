@@ -1,4 +1,4 @@
-﻿CREATE PROC dbo.PerformanceCounterSummary_Get(@InstanceID INT,@FromDate DATETIME2(2),@ToDate DATETIME2(2),@Search NVARCHAR(128)=NULL)
+﻿CREATE PROC [dbo].[PerformanceCounterSummary_Get](@InstanceID INT,@FromDate DATETIME2(2),@ToDate DATETIME2(2),@Search NVARCHAR(128)=NULL)
 AS
 WITH T AS (
 SELECT C.CounterID,
@@ -7,7 +7,7 @@ SELECT C.CounterID,
        C.instance_name,
 	   PC.Value,
 	   PC.SnapshotDate,
-	   LAST_VALUE(PC.Value) OVER(PARTITION BY PC.InstanceID,PC.CounterID ORDER BY PC.SnapshotDate DESC) AS LastValue
+	   FIRST_VALUE(PC.Value) OVER(PARTITION BY PC.InstanceID,PC.CounterID ORDER BY PC.SnapshotDate DESC) AS LastValue
 FROM dbo.InstanceCounters IC
 JOIN dbo.Counters C ON C.CounterID = IC.CounterID
 JOIN dbo.PerformanceCounters PC ON PC.InstanceID = IC.InstanceID AND PC.CounterID = IC.CounterID
