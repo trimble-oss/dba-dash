@@ -20,7 +20,7 @@ namespace DBAChecksGUI.Performance
 
         public Int32 InstanceID { get; set; }
 
-        Int32 mins = 15;
+        Int32 mins = 60;
         private DateTime _from = DateTime.MinValue;
         private DateTime _to = DateTime.MinValue;
 
@@ -187,6 +187,7 @@ namespace DBAChecksGUI.Performance
         private void PerformanceCounterSummary_Load(object sender, EventArgs e)
         {
             splitContainer1.Panel1Collapsed = true;
+            checkTime();
         }
 
         private void tsClear_Click(object sender, EventArgs e)

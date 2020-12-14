@@ -112,8 +112,9 @@ namespace DBAChecksGUI.Performance
                 cmd.Parameters.AddWithValue("ToDate", ToDate);
                 cmd.Parameters.AddWithValue("CounterID", CounterID);
                 SqlDataAdapter da = new SqlDataAdapter(cmd);
-                DataTable dt = new DataTable();
+                DataTable dt = new DataTable();              
                 da.Fill(dt);
+                Common.ConvertUTCToLocal(ref dt);
                 return dt;
             }
         }

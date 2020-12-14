@@ -1865,7 +1865,7 @@ END</value>
 		STUFF(pc.object_name,1,CHARINDEX(':',pc.object_name),'') AS object_name,
        pc.counter_name,
        pc.instance_name,
-       pc.cntr_value,
+       CAST(pc.cntr_value AS DECIMAL(28,9)) cntr_value,
        pc.cntr_type 
 FROM sys.dm_os_performance_counters pc
 WHERE EXISTS(SELECT 1 
@@ -1920,6 +1920,16 @@ AND (SERVERPROPERTY('EngineEdition')&lt;&gt; 5
 	OR (pc.instance_name NOT IN('msdb','master','model','model_masterdb','model_userdb','mssqlsystemresource','tempdb')		
 		AND NOT (pc.counter_name= 'Log Growths' AND pc.instance_name='_Total')
 		)
-	)</value>
+	)
+IF (OBJECT_ID('dbo.DBAChecks_CustomPerformanceCounters')) IS NOT NULL
+BEGIN
+	EXEC dbo.DBAChecks_CustomPerformanceCounters
+END</value>
+  </data>
+  <data name="SQLCustomPerformanceCounters" xml:space="preserve">
+    <value>IF (OBJECT_ID('dbo.DBAChecks_CustomPerformanceCounters')) IS NOT NULL
+BEGIN
+	EXEC dbo.DBAChecks_CustomPerformanceCounters
+END</value>
   </data>
 </root>

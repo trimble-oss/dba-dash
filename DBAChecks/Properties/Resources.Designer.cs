@@ -264,6 +264,18 @@ namespace DBAChecks.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to IF (OBJECT_ID(&apos;dbo.DBAChecks_CustomPerformanceCounters&apos;)) IS NOT NULL
+        ///BEGIN
+        ///	EXEC dbo.DBAChecks_CustomPerformanceCounters
+        ///END.
+        /// </summary>
+        internal static string SQLCustomPerformanceCounters {
+            get {
+                return ResourceManager.GetString("SQLCustomPerformanceCounters", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to SET NOCOUNT ON
         ///
         ///DECLARE @DBName SYSNAME
@@ -650,14 +662,13 @@ namespace DBAChecks.Properties {
         ///		STUFF(pc.object_name,1,CHARINDEX(&apos;:&apos;,pc.object_name),&apos;&apos;) AS object_name,
         ///       pc.counter_name,
         ///       pc.instance_name,
-        ///       pc.cntr_value,
+        ///       CAST(pc.cntr_value AS DECIMAL(28,9)) cntr_value,
         ///       pc.cntr_type 
         ///FROM sys.dm_os_performance_counters pc
         ///WHERE EXISTS(SELECT 1 
         ///FROM @CountersXML.nodes(&apos;Counters/Counter&apos;) ctrs(c)
         ///WHERE ctrs.c.value(&apos;@object_name&apos;,&apos;NCHAR(128)&apos;) = STUFF(pc.object_name,1,CHARINDEX(&apos;:&apos;,pc.object_name),&apos;&apos;)
-        ///AND ctrs.c.value(&apos;@counter_name&apos;,&apos;NCHAR(128)&apos;) = pc.counter_name
-        ///AND (ct [rest of string was truncated]&quot;;.
+        ///AND ctrs.c.value(&apos;@counter_name&apos;,&apos;NCHAR [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string SQLPerformanceCounters {
             get {

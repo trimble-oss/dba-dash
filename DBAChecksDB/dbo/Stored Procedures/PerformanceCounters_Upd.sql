@@ -55,6 +55,7 @@ WITH PC AS (
 												AND Abase.InstanceID = @InstanceID 
 												AND Abase.cntr_type=1073939712	
 	WHERE B.cntr_type IN(65792,272696576,537003264,1073874176)
+	AND NOT EXISTS(SELECT 1 FROM dbo.PerformanceCounters PC WHERE PC.SnapshotDate = B.SnapshotDate AND PC.InstanceID = @InstanceID AND PC.CounterID=C.CounterID)
 )
 INSERT INTO dbo.PerformanceCounters
 (
@@ -89,8 +90,7 @@ SELECT @InstanceID,
        cntr_value,
        cntr_type
 FROM @PerformanceCounters
-
-
+WHERE (cntr_type <> 65792 OR object_name='Batch Resp Statistics')
 
 EXEC dbo.CollectionDates_Upd @InstanceID = @InstanceID,
                              @Reference = @Ref,

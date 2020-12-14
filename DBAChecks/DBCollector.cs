@@ -358,17 +358,9 @@ namespace DBAChecks
             {
                 try
                 {
-                    string xml = PerformanceCounters.PerformanceCountersXML;
-                    if (xml.Length > 0)
-                    {
-                        SqlParameter pCountersXML = new SqlParameter("CountersXML", PerformanceCounters.PerformanceCountersXML)
-                        {
-                            SqlDbType = SqlDbType.Xml
-                        };
-                        addDT(collectionTypeString, Properties.Resources.ResourceManager.GetString("SQL" + collectionTypeString, Properties.Resources.Culture), new SqlParameter[] { pCountersXML });
-                    }
+                    collectPerformanceCounters();
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     logError(collectionTypeString, ex.Message);
                 }
@@ -385,6 +377,49 @@ namespace DBAChecks
                 }
 
             }
+        }
+
+        private void collectPerformanceCounters()
+        {
+  
+            string xml = PerformanceCounters.PerformanceCountersXML;
+            if (xml.Length > 0)
+            {
+                SqlConnection cn = new SqlConnection(_connectionString);
+                string sql = Properties.Resources.ResourceManager.GetString("SQLPerformanceCounters", Properties.Resources.Culture);
+                using (cn)
+                {
+                    cn.Open();
+                    var ds = new DataSet();
+                    SqlDataAdapter da = new SqlDataAdapter(sql, cn);
+                    SqlParameter pCountersXML = new SqlParameter("CountersXML", PerformanceCounters.PerformanceCountersXML)
+                    {
+                        SqlDbType = SqlDbType.Xml
+                    };
+                    da.SelectCommand.CommandTimeout = 60;
+                    da.SelectCommand.Parameters.Add(pCountersXML);             
+                    da.Fill(ds);
+
+                    var dt = ds.Tables[0];
+                    if (ds.Tables.Count == 2)
+                    {
+                        var userDT = ds.Tables[1];
+                        if (dt.Columns.Count == userDT.Columns.Count)
+                        {
+                            dt.Merge(userDT);
+                        }
+                        else
+                        {
+                            logError("PerformanceCounters", "Invalid DataTable schema for custom metrics");
+                        }
+                    }
+                    ds.Tables.Remove(dt);
+                    dt.TableName = "PerformanceCounters";
+                    Data.Tables.Add(dt);
+                }
+            }
+            
+       
         }
 
 
