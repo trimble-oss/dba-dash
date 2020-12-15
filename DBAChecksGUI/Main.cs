@@ -21,6 +21,11 @@ namespace DBAChecksGUI
     public partial class Main : Form
     {
 
+        public class InstanceSelectedEventArgs : EventArgs
+        {
+            public int InstanceID;
+            public string Tab;
+        }
         public Main()
         {
             InitializeComponent();
@@ -28,13 +33,13 @@ namespace DBAChecksGUI
 
         string connectionString = "";
 
-        Int32 currentSummaryPage = 1;
-        Int32 currentSummaryPageSize = 100;
+        int currentSummaryPage = 1;
+        readonly Int32 currentSummaryPageSize = 100;
         private Int64 currentObjectID;
         private Int32 currentPage=1;
         private Int32 currentPageSize=100;
         bool isTagPopulation = false;
-        private DiffControl diffSchemaSnapshot = new DiffControl();
+        private readonly DiffControl diffSchemaSnapshot = new DiffControl();
 
         private void Main_Load(object sender, EventArgs e)
         {
@@ -63,8 +68,10 @@ namespace DBAChecksGUI
             }
             else
             {
-                SqlConnectionStringBuilder builder = new SqlConnectionStringBuilder(connectionString);
-                builder.ApplicationName = "DBAChecksGUI";
+                SqlConnectionStringBuilder builder = new SqlConnectionStringBuilder(connectionString)
+                {
+                    ApplicationName = "DBAChecksGUI"
+                };
                 connectionString = builder.ConnectionString;
                 Common.ConnectionString = connectionString;
 
@@ -350,8 +357,10 @@ namespace DBAChecksGUI
 
             using (cn)
             {
-                SqlCommand cmd = new SqlCommand("dbo.CollectionErrorLog_Get",cn);
-                cmd.CommandType = CommandType.StoredProcedure;
+                SqlCommand cmd = new SqlCommand("dbo.CollectionErrorLog_Get", cn)
+                {
+                    CommandType = CommandType.StoredProcedure
+                };
                 if (InstanceID > 0)
                 {
                     cmd.Parameters.AddWithValue("InstanceID", InstanceID);
@@ -366,9 +375,9 @@ namespace DBAChecksGUI
 
         }
 
-        private List<Int32> InstanceIDs = new List<Int32>();
-        private List<Int32> AllInstanceIDs=new List<Int32>();
-        private List<Int32> AzureInstanceIDs= new List<Int32>();
+        private readonly List<Int32> InstanceIDs = new List<Int32>();
+        private readonly List<Int32> AllInstanceIDs=new List<Int32>();
+        private readonly List<Int32> AzureInstanceIDs= new List<Int32>();
     
 
         #region Tree
@@ -409,17 +418,21 @@ namespace DBAChecksGUI
                             var cfgNode = new SQLTreeItem("Configuration", SQLTreeItem.TreeType.Configuration);
                             AzureNode.Nodes.Add(cfgNode);
                         }
-                        var azureDBNode = new SQLTreeItem(db, SQLTreeItem.TreeType.AzureDatabase);
-                        azureDBNode.DatabaseID = (Int32)rdr["AzureDatabaseID"];
-                        azureDBNode.InstanceID = instanceID;
+                        var azureDBNode = new SQLTreeItem(db, SQLTreeItem.TreeType.AzureDatabase)
+                        {
+                            DatabaseID = (Int32)rdr["AzureDatabaseID"],
+                            InstanceID = instanceID
+                        };
                         azureDBNode.AddDatabaseFolders();
                         AzureNode.Nodes.Add(azureDBNode);
                         AzureInstanceIDs.Add(instanceID);
                     }
                     else
                     {
-                        var n = new SQLTreeItem(instance, SQLTreeItem.TreeType.Instance);
-                        n.InstanceID = instanceID;
+                        var n = new SQLTreeItem(instance, SQLTreeItem.TreeType.Instance)
+                        {
+                            InstanceID = instanceID
+                        };
                         n.AddDummyNode();
                         root.Nodes.Add(n);
                         InstanceIDs.Add(instanceID);
@@ -451,8 +464,10 @@ AND I.Instance = @Instance
 ORDER BY D.Name
 ", cn);
 
-                var changesNode = new SQLTreeItem("Configuration", SQLTreeItem.TreeType.Configuration);
-                changesNode.InstanceID = instanceNode.InstanceID;
+                var changesNode = new SQLTreeItem("Configuration", SQLTreeItem.TreeType.Configuration)
+                {
+                    InstanceID = instanceNode.InstanceID
+                };
                 instanceNode.Nodes.Add(changesNode);
                 
                 cmd.Parameters.AddWithValue("Instance", instanceNode.ObjectName);
@@ -461,9 +476,11 @@ ORDER BY D.Name
                 var rdr = cmd.ExecuteReader();
                 while (rdr.Read())
                 {
-                    var n = new SQLTreeItem((string)rdr[1], SQLTreeItem.TreeType.Database);
-                    n.DatabaseID = (Int32)rdr[0];
-                    n.InstanceID = (Int32)rdr[3];
+                    var n = new SQLTreeItem((string)rdr[1], SQLTreeItem.TreeType.Database)
+                    {
+                        DatabaseID = (Int32)rdr[0],
+                        InstanceID = (Int32)rdr[3]
+                    };
                     if (!rdr.IsDBNull(2))
                     {
                         n.ObjectID = (Int64)rdr[2];
@@ -503,23 +520,23 @@ ORDER BY SchemaName,ObjectName
                 while (rdr.Read())
                 {
                     string type = ((string)rdr[1]).Trim();
-                    var objN = new SQLTreeItem((string)rdr[3], (string)rdr[2], type);
-                    objN.ObjectID = (Int64)rdr[0];
+                    var objN = new SQLTreeItem((string)rdr[3], (string)rdr[2], type)
+                    {
+                        ObjectID = (Int64)rdr[0]
+                    };
                     n.Nodes.Add(objN);
                 }
             }
 
         }
 
-        private SQLTreeItem selectedItem;
-
+ 
         private void tv1_AfterSelect(object sender, TreeViewEventArgs e)
         {
             var n = (SQLTreeItem)e.Node;
             var parent = (SQLTreeItem)n.Parent;
 
             List<TabPage> allowedTabs = new List<TabPage>();         
-            selectedItem = n;
             bool hasAzureDBs = AzureInstanceIDs.Count > 0;
 
 
@@ -765,8 +782,7 @@ ORDER BY SchemaName,ObjectName
 
         private void tsPageSize_Validating(object sender, CancelEventArgs e)
         {
-            Int32 i;
-            Int32.TryParse(tsPageSize.Text, out i);
+            int.TryParse(tsPageSize.Text, out int i);
             if (i <= 0)
             {
                 tsPageSize.Text = currentPageSize.ToString();
@@ -845,8 +861,10 @@ ORDER BY SchemaName,ObjectName
                 {
                     cn.Open();
 
-                    SqlCommand cmd = new SqlCommand("dbo.DDLSnapshots_Get", cn);
-                    cmd.CommandType = CommandType.StoredProcedure;
+                    SqlCommand cmd = new SqlCommand("dbo.DDLSnapshots_Get", cn)
+                    {
+                        CommandType = CommandType.StoredProcedure
+                    };
                     cmd.Parameters.AddWithValue("DatabaseID", n.DatabaseID);
                     cmd.Parameters.AddWithValue("Instance", n.InstanceName);
                     cmd.Parameters.AddWithValue("PageSize", currentSummaryPage);
@@ -885,8 +903,7 @@ ORDER BY SchemaName,ObjectName
 
         private void tsSummaryPageSize_Validating(object sender, CancelEventArgs e)
         {
-            Int32 i;
-            Int32.TryParse(tsSummaryPageSize.Text, out i);
+            int.TryParse(tsSummaryPageSize.Text, out int i);
             if (i <= 0)
             {
                 tsSummaryPageSize.Text = currentSummaryPageSize.ToString();
@@ -896,8 +913,10 @@ ORDER BY SchemaName,ObjectName
 
         private void dBDiffToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            var frm = new DBDiff();
-            frm.ConnectionString = connectionString;
+            var frm = new DBDiff
+            {
+                ConnectionString = connectionString
+            };
             var n = (SQLTreeItem)tv1.SelectedNode;
             frm.SelectedInstanceA = n.InstanceName;
             frm.SelectedDatabaseA = new DBDiff.DatabaseItem() { DatabaseID = n.DatabaseID, DatabaseName = n.DatabaseName };
@@ -919,8 +938,10 @@ ORDER BY SchemaName,ObjectName
             using (cn)
             {
                 cn.Open();
-                SqlCommand cmd = new SqlCommand("Tags_Get", cn);
-                cmd.CommandType = CommandType.StoredProcedure;
+                SqlCommand cmd = new SqlCommand("Tags_Get", cn)
+                {
+                    CommandType = CommandType.StoredProcedure
+                };
                 var rdr = cmd.ExecuteReader();
                 string currentTag = String.Empty, tag, tagValue;
                 ToolStripMenuItem mTagName = new ToolStripMenuItem();
@@ -948,9 +969,11 @@ ORDER BY SchemaName,ObjectName
                        
                         currentTag = tag;
                     }
-                    var mTagValue = new ToolStripMenuItem(tagValue);
-                    mTagValue.Tag = tagID;
-                    mTagValue.CheckOnClick = true;
+                    var mTagValue = new ToolStripMenuItem(tagValue)
+                    {
+                        Tag = tagID,
+                        CheckOnClick = true
+                    };
 
                     if (selected != null && selected.Contains(tagID))
                     {
@@ -1011,7 +1034,6 @@ ORDER BY SchemaName,ObjectName
         {
             isTagPopulation = true;
             SQLTreeItem n = (SQLTreeItem)tv1.SelectedNode;
-            SqlConnection cn = new SqlConnection(connectionString);
             chkTags.Items.Clear();
             var tags = InstanceTag.GetInstanceTags(connectionString, n.InstanceName);
             foreach (var t in tags)
@@ -1026,7 +1048,6 @@ ORDER BY SchemaName,ObjectName
         {
             if (!isTagPopulation)
             {
-                SQLTreeItem n = (SQLTreeItem)tv1.SelectedNode;
                 var InstanceTag = (InstanceTag)chkTags.Items[e.Index];
                 if (e.NewValue == CheckState.Checked)
                 {
@@ -1146,11 +1167,41 @@ ORDER BY SchemaName,ObjectName
 
         }
 
-        private void dataRetentionToolStripMenuItem_Click(object sender, EventArgs e)
+        private void DataRetentionToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            var frm = new DataRetention();
-            frm.ConnectionString = connectionString;
+            DataRetention frm = new DataRetention
+            {
+                ConnectionString = connectionString
+            };
             frm.ShowDialog();
+        }
+
+        private void Instance_Selected(object sender, InstanceSelectedEventArgs e)
+        {
+            var root = tv1.Nodes[0];
+            foreach(SQLTreeItem child in root.Nodes)
+            {
+                if(child.InstanceID  == e.InstanceID)
+                {
+                    tv1.SelectedNode = child;
+                    break;
+                }
+                if (child.InstanceID <= 0)
+                {
+                    foreach(SQLTreeItem azureDB in child.Nodes)
+                    {
+                        if(azureDB.InstanceID == e.InstanceID)
+                        {
+                            tv1.SelectedNode = azureDB;
+                            break;
+                        }
+                    }
+                }
+            }
+            if (e.Tab != null && e.Tab.Length > 0)
+            {
+                tabs.SelectedTab = tabs.TabPages[e.Tab];
+            }
         }
     }
 }

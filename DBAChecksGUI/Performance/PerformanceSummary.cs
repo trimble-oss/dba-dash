@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Data.SqlClient;
+using static DBAChecksGUI.Main;
 
 namespace DBAChecksGUI.Performance
 {
@@ -147,8 +148,10 @@ namespace DBAChecksGUI.Performance
         {
             foreach(DataGridViewColumn col in dgv.Columns)
             {
-                ToolStripMenuItem mnu = new ToolStripMenuItem(col.HeaderText); 
-                mnu.Name = col.Name;
+                ToolStripMenuItem mnu = new ToolStripMenuItem(col.HeaderText)
+                {
+                    Name = col.Name,
+                };
                 mnu.Click += ColumnMenu_Click;
                 mnu.Checked = col.Visible;
                 mnu.CheckOnClick = true;
@@ -245,9 +248,11 @@ namespace DBAChecksGUI.Performance
 
         private void tsCustom_Click(object sender, EventArgs e)
         {
-            var frm = new CustomTimePicker();
-            frm.FromDate = fromDate;
-            frm.ToDate = toDate;
+            var frm = new CustomTimePicker
+            {
+                FromDate = fromDate,
+                ToDate = toDate
+            };
             frm.ShowDialog();
             if(frm.DialogResult == DialogResult.OK)
             {
@@ -308,5 +313,19 @@ namespace DBAChecksGUI.Performance
                 }
             }
         }
+
+        public event EventHandler<InstanceSelectedEventArgs> Instance_Selected;
+
+
+        private void dgv_CellContentClick(object sender, DataGridViewCellEventArgs e)
+        {
+            if (e.RowIndex >= 0 && e.ColumnIndex == 0)
+            {
+                DataRowView row = (DataRowView)dgv.Rows[e.RowIndex].DataBoundItem;
+                Instance_Selected(this, new InstanceSelectedEventArgs() { InstanceID = (Int32)row["InstanceID"], Tab="tabPerformance"});
+            }
+        }
+
+
     }
 }
