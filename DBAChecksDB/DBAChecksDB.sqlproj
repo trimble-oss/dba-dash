@@ -30,7 +30,7 @@
     <QueryStoreStaleQueryThreshold>15</QueryStoreStaleQueryThreshold>
     <QueryStoreMaxStorageSize>512</QueryStoreMaxStorageSize>
     <QueryStoreMaxPlansPerQuery>50</QueryStoreMaxPlansPerQuery>
-    <DacVersion>2.0.1.9</DacVersion>
+    <DacVersion>2.0.2.1</DacVersion>
     <ReadCommittedSnapshot>True</ReadCommittedSnapshot>
     <AllowSnapshotIsolation>True</AllowSnapshotIsolation>
   </PropertyGroup>
@@ -447,6 +447,42 @@
     <Build Include="dbo\Stored Procedures\CustomCheckContext_Get.sql" />
     <Build Include="dbo\Stored Procedures\CustomCheck_Get.sql" />
     <Build Include="dbo\User Defined Types\CustomChecks.sql" />
+    <Build Include="Switch\Tables\CustomChecksHistory.sql" />
+    <Build Include="dbo\Tables\CustomChecksHistory.sql" />
+    <Build Include="Storage\PF_CustomChecksHistory.sql" />
+    <Build Include="Storage\PS_CustomChecksHistory.sql" />
+    <Build Include="dbo\Stored Procedures\CustomChecksHistory_Get.sql" />
+    <Build Include="Storage\PF_AzureDBElasticPoolResourceStats_60MIN.sql" />
+    <Build Include="Storage\PS_AzureDBElasticPoolResourceStats_60MIN.sql" />
+    <Build Include="dbo\Stored Procedures\MonthlyPartitions_Add.sql" />
+    <Build Include="Storage\PF_AzureDBResourceStats_60MIN.sql" />
+    <Build Include="Storage\PS_AzureDBResourceStats_60MIN.sql" />
+    <Build Include="Storage\PF_Waits_60MIN.sql" />
+    <Build Include="Storage\PF_ObjectExecutionStats_60MIN.sql" />
+    <Build Include="Storage\PF_DBIOStats_60MIN.sql" />
+    <Build Include="Storage\PF_CPU_60MIN.sql" />
+    <Build Include="Storage\PS_Waits_60MIN.sql" />
+    <Build Include="Storage\PS_ObjectExecutionStats_60MIN.sql" />
+    <Build Include="Storage\PS_DBIOStats_60MIN.sql" />
+    <Build Include="Storage\PS_CPU_60MIN.sql" />
+    <Build Include="Switch\Tables\Waits_60MIN.sql" />
+    <Build Include="Switch\Tables\DBIOStats_60MIN.sql" />
+    <Build Include="Switch\Tables\CPU_60MIN.sql" />
+    <Build Include="Switch\Tables\AzureDBResourceStats_60MIN.sql" />
+    <Build Include="Switch\Tables\AzureDBElasticPoolResourceStats_60MIN.sql" />
+    <Build Include="Switch\Tables\ObjectExecutionStats_60MIN.sql" />
+    <Build Include="Staging\Tables\PerformanceCounters.sql" />
+    <Build Include="dbo\Tables\PerformanceCounters.sql" />
+    <Build Include="dbo\Tables\InstanceCounters.sql" />
+    <Build Include="dbo\Tables\Counters.sql" />
+    <Build Include="dbo\Tables\CounterMapping.sql" />
+    <Build Include="dbo\Stored Procedures\PerformanceCounterSummary_Get.sql" />
+    <Build Include="dbo\Stored Procedures\PerformanceCounters_Upd.sql" />
+    <Build Include="dbo\Stored Procedures\PerformanceCounter_Get.sql" />
+    <Build Include="dbo\User Defined Types\PerformanceCounters.sql" />
+    <Build Include="Storage\PF_PerformanceCounters.sql" />
+    <Build Include="Storage\PS_PerformanceCounters.sql" />
+    <Build Include="Switch\Tables\PerformanceCounters.sql" />
   </ItemGroup>
   <ItemGroup>
     <PostDeploy Include="Script.PostDeployment1.sql" />

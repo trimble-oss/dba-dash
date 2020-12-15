@@ -1,0 +1,25 @@
+﻿CREATE TABLE [Switch].[DBIOStats_60MIN] (
+    [InstanceID]           INT              NOT NULL,
+    [DatabaseID]           INT              NOT NULL,
+    [Drive]                CHAR (1)         NOT NULL,
+    [FileID]               INT              NOT NULL,
+    [SnapshotDate]         DATETIME2 (2)    NOT NULL,
+    [num_of_reads]         BIGINT           NOT NULL,
+    [num_of_writes]        BIGINT           NOT NULL,
+    [num_of_bytes_read]    BIGINT           NOT NULL,
+    [num_of_bytes_written] BIGINT           NOT NULL,
+    [io_stall_read_ms]     BIGINT           NOT NULL,
+    [io_stall_write_ms]    BIGINT           NOT NULL,
+    [sample_ms_diff]       BIGINT           NOT NULL,
+    [MaxReadLatency]       DECIMAL (19, 10) NOT NULL,
+    [MaxWriteLatency]      DECIMAL (19, 10) NOT NULL,
+    [MaxLatency]           DECIMAL (19, 10) NOT NULL,
+    [MaxReadIOPs]          DECIMAL (19, 3)  NOT NULL,
+    [MaxWriteIOPs]         DECIMAL (19, 3)  NOT NULL,
+    [MaxIOPs]              DECIMAL (19, 3)  NOT NULL,
+    [MaxReadMBsec]         DECIMAL (19, 7)  NOT NULL,
+    [MaxWriteMBsec]        DECIMAL (19, 7)  NOT NULL,
+    [MaxMBsec]             DECIMAL (19, 7)  NOT NULL,
+    CONSTRAINT [PK_IOStats_60MIN] PRIMARY KEY CLUSTERED ([InstanceID] ASC, [DatabaseID] ASC, [FileID] ASC, [Drive] ASC, [SnapshotDate] ASC) WITH (DATA_COMPRESSION = PAGE)
+);
+

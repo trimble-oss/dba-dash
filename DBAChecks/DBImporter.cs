@@ -66,7 +66,7 @@ namespace DBAChecks
             updateDB(connectionString, instanceID, snapshotDate, Data);
             foreach (DataTable dt in Data.Tables)
             {
-                string[] tables = { "Drives", "ServerProperties", "Backups", "AgentJobs", "LogRestores", "DBFiles", "DBConfig", "Corruption", "DatabasesHADR", "SysConfig", "OSInfo", "TraceFlags", "CPU", "Drivers", "BlockingSnapshot", "IOStats", "Waits", "OSLoadedModules", "DBTuningOptions", "AzureDBResourceStats", "AzureDBServiceObjectives", "AzureDBElasticPoolResourceStats", "SlowQueries", "SlowQueriesStats", "LastGoodCheckDB", "Alerts" ,"ObjectExecutionStats","ServerPrincipals","ServerRoleMembers","ServerPermissions","DatabasePrincipals","DatabaseRoleMembers","DatabasePermissions","CustomChecks"};
+                string[] tables = { "Drives", "ServerProperties", "Backups", "AgentJobs", "LogRestores", "DBFiles", "DBConfig", "Corruption", "DatabasesHADR", "SysConfig", "OSInfo", "TraceFlags", "CPU", "Drivers", "BlockingSnapshot", "IOStats", "Waits", "OSLoadedModules", "DBTuningOptions", "AzureDBResourceStats", "AzureDBServiceObjectives", "AzureDBElasticPoolResourceStats", "SlowQueries", "SlowQueriesStats", "LastGoodCheckDB", "Alerts" ,"ObjectExecutionStats","ServerPrincipals","ServerRoleMembers","ServerPermissions","DatabasePrincipals","DatabaseRoleMembers","DatabasePermissions","CustomChecks","PerformanceCounters"};
 
                 if (tables.Contains(dt.TableName))
                 {

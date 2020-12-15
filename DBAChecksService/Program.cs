@@ -20,11 +20,15 @@ namespace DBAChecksService
                     s.WhenStarted(tc => tc.Start());
                     s.WhenStopped(tc => tc.Stop());
                 });
-          
+                x.StartAutomaticallyDelayed();
+                x.EnableServiceRecovery(r =>
+                {
+                    r.RestartService(1);
+                });
 
-                x.SetDescription("Collect data from SQL Instances");
-                x.SetDisplayName("DBAChecksService");
-                x.SetServiceName("DBAChecksService");
+                x.SetDescription("DBAChecks Service - SQL Server monitoring tool");
+                x.SetDisplayName(Properties.Settings.Default.ServiceName);
+                x.SetServiceName(Properties.Settings.Default.ServiceName);
             });
 
             var exitCode = (int)Convert.ChangeType(rc, rc.GetTypeCode());

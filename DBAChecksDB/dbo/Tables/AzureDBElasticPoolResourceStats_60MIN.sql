@@ -59,6 +59,6 @@
     [Log80]                         SMALLINT       NOT NULL,
     [Log90]                         SMALLINT       NOT NULL,
     [Log100]                        SMALLINT       NOT NULL,
-    CONSTRAINT [PK_AzureDBElasticPoolResourceStats_60MIN] PRIMARY KEY CLUSTERED ([PoolID] ASC, [end_time] ASC) WITH (DATA_COMPRESSION = PAGE)
-);
+    CONSTRAINT [PK_AzureDBElasticPoolResourceStats_60MIN] PRIMARY KEY CLUSTERED ([PoolID] ASC, [end_time] ASC) WITH (DATA_COMPRESSION = PAGE) ON [PS_AzureDBElasticPoolResourceStats_60MIN](end_time)
+) ON [PS_AzureDBElasticPoolResourceStats_60MIN](end_time);
 

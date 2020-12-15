@@ -20,6 +20,6 @@
     [MaxReadMBsec]         DECIMAL (19, 7)  NOT NULL,
     [MaxWriteMBsec]        DECIMAL (19, 7)  NOT NULL,
     [MaxMBsec]             DECIMAL (19, 7)  NOT NULL,
-    CONSTRAINT [PK_IOStats_60MIN] PRIMARY KEY CLUSTERED ([InstanceID] ASC, [DatabaseID] ASC, [FileID] ASC, [Drive] ASC, [SnapshotDate] ASC) WITH (DATA_COMPRESSION = PAGE)
-);
+    CONSTRAINT [PK_IOStats_60MIN] PRIMARY KEY CLUSTERED ([InstanceID] ASC, [DatabaseID] ASC, [FileID] ASC, [Drive] ASC, [SnapshotDate] ASC) WITH (DATA_COMPRESSION = PAGE) ON PS_DBIOStats_60MIN(SnapshotDate)
+) ON PS_DBIOStats_60MIN(SnapshotDate);
 

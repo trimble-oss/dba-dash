@@ -64,6 +64,6 @@
     [Log80]                       SMALLINT       NOT NULL,
     [Log90]                       SMALLINT       NOT NULL,
     [Log100]                      SMALLINT       NOT NULL,
-    CONSTRAINT [PK_AzureDBResourceStats_60MIN] PRIMARY KEY CLUSTERED ([InstanceID] ASC, [end_time] ASC) WITH (DATA_COMPRESSION = PAGE)
-);
+    CONSTRAINT [PK_AzureDBResourceStats_60MIN] PRIMARY KEY CLUSTERED ([InstanceID] ASC, [end_time] ASC) WITH (DATA_COMPRESSION = PAGE) ON PS_AzureDBResourceStats_60MIN(end_time)
+) ON PS_AzureDBResourceStats_60MIN(end_time);
 

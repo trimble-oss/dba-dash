@@ -19,13 +19,13 @@
     [CPU80]              SMALLINT      NULL,
     [CPU90]              SMALLINT      NULL,
     [CPU100]             SMALLINT      NULL,
-    CONSTRAINT [PK_CPU_60MIN] PRIMARY KEY CLUSTERED ([InstanceID] ASC, [EventTime] ASC) WITH (DATA_COMPRESSION = PAGE)
-);
+    CONSTRAINT [PK_CPU_60MIN] PRIMARY KEY CLUSTERED ([InstanceID] ASC, [EventTime] ASC) WITH (DATA_COMPRESSION = PAGE) ON PS_CPU_60MIN(EventTime)
+) ON PS_CPU_60MIN(EventTime);
 
 
 
 
 GO
 CREATE COLUMNSTORE INDEX [CI_CPU_60MIN]
-    ON [dbo].[CPU_60MIN]([InstanceID], [EventTime], [SumSQLProcessCPU], [SumSystemIdleCPU], [SampleCount], [MaxSQLProcessCPU], [MaxOtherProcessCPU], [MaxTotalCPU]);
+    ON [dbo].[CPU_60MIN]([InstanceID], [EventTime], [SumSQLProcessCPU], [SumSystemIdleCPU], [SampleCount], [MaxSQLProcessCPU], [MaxOtherProcessCPU], [MaxTotalCPU]) ON PS_CPU_60MIN(EventTime);
 

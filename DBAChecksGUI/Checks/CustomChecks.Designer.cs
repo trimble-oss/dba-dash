@@ -29,12 +29,10 @@
         private void InitializeComponent()
         {
             this.dgvCustom = new System.Windows.Forms.DataGridView();
-            this.colTest = new System.Windows.Forms.DataGridViewLinkColumn();
-            this.colContext = new System.Windows.Forms.DataGridViewLinkColumn();
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
             this.tsRefresh = new System.Windows.Forms.ToolStripButton();
             this.tsCopy = new System.Windows.Forms.ToolStripButton();
-            this.toolStripFilter = new System.Windows.Forms.ToolStripDropDownButton();
+            this.tsFilter = new System.Windows.Forms.ToolStripDropDownButton();
             this.criticalToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.warningToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.undefinedToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -43,6 +41,10 @@
             this.testToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.contextToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.tsClear = new System.Windows.Forms.ToolStripButton();
+            this.colTest = new System.Windows.Forms.DataGridViewLinkColumn();
+            this.colContext = new System.Windows.Forms.DataGridViewLinkColumn();
+            this.History = new System.Windows.Forms.DataGridViewLinkColumn();
+            this.tsBack = new System.Windows.Forms.ToolStripButton();
             this.dataGridViewTextBoxColumn1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dataGridViewTextBoxColumn2 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dataGridViewTextBoxColumn3 = new System.Windows.Forms.DataGridViewTextBoxColumn();
@@ -69,7 +71,8 @@
             this.colContext,
             this.colStatus,
             this.colInfo,
-            this.colSSDate});
+            this.colSSDate,
+            this.History});
             this.dgvCustom.Dock = System.Windows.Forms.DockStyle.Fill;
             this.dgvCustom.Location = new System.Drawing.Point(0, 27);
             this.dgvCustom.Name = "dgvCustom";
@@ -82,35 +85,14 @@
             this.dgvCustom.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgvCustom_CellContentClick);
             this.dgvCustom.RowsAdded += new System.Windows.Forms.DataGridViewRowsAddedEventHandler(this.dgvCustom_RowsAdded);
             // 
-            // colTest
-            // 
-            this.colTest.DataPropertyName = "Test";
-            this.colTest.HeaderText = "Test";
-            this.colTest.MinimumWidth = 6;
-            this.colTest.Name = "colTest";
-            this.colTest.ReadOnly = true;
-            this.colTest.Resizable = System.Windows.Forms.DataGridViewTriState.True;
-            this.colTest.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
-            this.colTest.Width = 65;
-            // 
-            // colContext
-            // 
-            this.colContext.DataPropertyName = "Context";
-            this.colContext.HeaderText = "Context";
-            this.colContext.MinimumWidth = 6;
-            this.colContext.Name = "colContext";
-            this.colContext.ReadOnly = true;
-            this.colContext.Resizable = System.Windows.Forms.DataGridViewTriState.True;
-            this.colContext.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
-            this.colContext.Width = 84;
-            // 
             // toolStrip1
             // 
             this.toolStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
             this.toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.tsBack,
             this.tsRefresh,
             this.tsCopy,
-            this.toolStripFilter,
+            this.tsFilter,
             this.tsClear});
             this.toolStrip1.Location = new System.Drawing.Point(0, 0);
             this.toolStrip1.Name = "toolStrip1";
@@ -138,10 +120,10 @@
             this.tsCopy.Text = "Copy";
             this.tsCopy.Click += new System.EventHandler(this.tsCopy_Click);
             // 
-            // toolStripFilter
+            // tsFilter
             // 
-            this.toolStripFilter.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.toolStripFilter.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.tsFilter.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.tsFilter.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.criticalToolStripMenuItem,
             this.warningToolStripMenuItem,
             this.undefinedToolStripMenuItem,
@@ -149,11 +131,11 @@
             this.toolStripMenuItem1,
             this.testToolStripMenuItem,
             this.contextToolStripMenuItem});
-            this.toolStripFilter.Image = global::DBAChecksGUI.Properties.Resources.FilterDropdown_16x;
-            this.toolStripFilter.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.toolStripFilter.Name = "toolStripFilter";
-            this.toolStripFilter.Size = new System.Drawing.Size(34, 24);
-            this.toolStripFilter.Text = "Filter";
+            this.tsFilter.Image = global::DBAChecksGUI.Properties.Resources.FilterDropdown_16x;
+            this.tsFilter.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tsFilter.Name = "tsFilter";
+            this.tsFilter.Size = new System.Drawing.Size(34, 24);
+            this.tsFilter.Text = "Filter";
             // 
             // criticalToolStripMenuItem
             // 
@@ -217,6 +199,49 @@
             this.tsClear.Size = new System.Drawing.Size(29, 24);
             this.tsClear.Text = "Clear Filters";
             this.tsClear.Click += new System.EventHandler(this.tsClear_Click);
+            // 
+            // colTest
+            // 
+            this.colTest.DataPropertyName = "Test";
+            this.colTest.HeaderText = "Test";
+            this.colTest.MinimumWidth = 6;
+            this.colTest.Name = "colTest";
+            this.colTest.ReadOnly = true;
+            this.colTest.Resizable = System.Windows.Forms.DataGridViewTriState.True;
+            this.colTest.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
+            this.colTest.Width = 65;
+            // 
+            // colContext
+            // 
+            this.colContext.DataPropertyName = "Context";
+            this.colContext.HeaderText = "Context";
+            this.colContext.MinimumWidth = 6;
+            this.colContext.Name = "colContext";
+            this.colContext.ReadOnly = true;
+            this.colContext.Resizable = System.Windows.Forms.DataGridViewTriState.True;
+            this.colContext.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
+            this.colContext.Width = 84;
+            // 
+            // History
+            // 
+            this.History.HeaderText = "History";
+            this.History.MinimumWidth = 6;
+            this.History.Name = "History";
+            this.History.ReadOnly = true;
+            this.History.Text = "History";
+            this.History.UseColumnTextForLinkValue = true;
+            this.History.Width = 58;
+            // 
+            // tsBack
+            // 
+            this.tsBack.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.tsBack.Image = global::DBAChecksGUI.Properties.Resources.Previous_grey_16x;
+            this.tsBack.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tsBack.Name = "tsBack";
+            this.tsBack.Size = new System.Drawing.Size(29, 24);
+            this.tsBack.Text = "Back";
+            this.tsBack.Visible = false;
+            this.tsBack.Click += new System.EventHandler(this.tsBack_Click);
             // 
             // dataGridViewTextBoxColumn1
             // 
@@ -337,7 +362,7 @@
         private System.Windows.Forms.ToolStrip toolStrip1;
         private System.Windows.Forms.ToolStripButton tsRefresh;
         private System.Windows.Forms.ToolStripButton tsCopy;
-        private System.Windows.Forms.ToolStripDropDownButton toolStripFilter;
+        private System.Windows.Forms.ToolStripDropDownButton tsFilter;
         private System.Windows.Forms.ToolStripMenuItem criticalToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem warningToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem undefinedToolStripMenuItem;
@@ -345,12 +370,14 @@
         private System.Windows.Forms.ToolStripSeparator toolStripMenuItem1;
         private System.Windows.Forms.ToolStripMenuItem testToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem contextToolStripMenuItem;
+        private System.Windows.Forms.ToolStripButton tsClear;
         private System.Windows.Forms.DataGridViewTextBoxColumn colInstance;
         private System.Windows.Forms.DataGridViewLinkColumn colTest;
         private System.Windows.Forms.DataGridViewLinkColumn colContext;
         private System.Windows.Forms.DataGridViewTextBoxColumn colStatus;
         private System.Windows.Forms.DataGridViewTextBoxColumn colInfo;
         private System.Windows.Forms.DataGridViewTextBoxColumn colSSDate;
-        private System.Windows.Forms.ToolStripButton tsClear;
+        private System.Windows.Forms.DataGridViewLinkColumn History;
+        private System.Windows.Forms.ToolStripButton tsBack;
     }
 }

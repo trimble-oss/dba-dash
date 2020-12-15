@@ -15,7 +15,7 @@ WHERE i.object_id = OBJECT_ID(@TableName);
 
 IF (@PartitionFunction IS NULL)
 BEGIN
-	RAISERROR('Invalid table',11,1)
+	RAISERROR('Invalid table %s',11,1,@TableName)
 	RETURN
 END
 
