@@ -1,4 +1,7 @@
 # DBAChecks
+
+[Download](https://github.com/DavidWiseman/DBAChecks/releases)
+
 ## Project Summary
 DBAChecks is a tool for SQL Server DBAs to assist with daily checks, performance monitoring and change tracking.
 
