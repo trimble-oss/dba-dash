@@ -406,11 +406,29 @@ namespace DBAChecks
                         var userDT = ds.Tables[1];
                         if (dt.Columns.Count == userDT.Columns.Count)
                         {
-                            dt.Merge(userDT);
+                            try
+                            {
+                                for (Int32 i = 0; i < (dt.Columns.Count - 1); i++)
+                                {
+                                    if (dt.Columns[i].ColumnName != userDT.Columns[i].ColumnName)
+                                    {
+                                        throw new Exception(String.Format("Invalid schema for custom metrics.  Expected column '{0}' in position {1} instead of '{2}'", dt.Columns[i].ColumnName, i + 1, userDT.Columns[i].ColumnName));
+                                    }
+                                    if(dt.Columns[i].DataType != userDT.Columns[i].DataType)
+                                    {
+                                        throw new Exception(String.Format("Invalid schema for custom metrics.  Column {0} expected data type is {1} instead of {2}", dt.Columns[i].ColumnName, dt.Columns[i].DataType.Name,userDT.Columns[i].DataType.Name));
+                                    }
+                                }
+                                dt.Merge(userDT);
+                            }
+                            catch(Exception ex)
+                            {
+                                logError("PerformanceCounters", ex.Message);
+                            }                                                   
                         }
                         else
                         {
-                            logError("PerformanceCounters", "Invalid DataTable schema for custom metrics");
+                            logError("PerformanceCounters", String.Format("Invalid schema for custom metrics. Expected {0} columns instead of {1}.",dt.Columns.Count,userDT.Columns.Count));
                         }
                     }
                     ds.Tables.Remove(dt);
