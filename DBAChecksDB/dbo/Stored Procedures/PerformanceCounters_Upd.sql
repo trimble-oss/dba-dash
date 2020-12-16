@@ -30,8 +30,8 @@ WITH PC AS (
 		CASE WHEN B.cntr_type = 65792 AND B.object_name='Batch Resp Statistics' AND B.cntr_value >= A.cntr_value THEN B.cntr_value - A.cntr_value
 			WHEN B.cntr_type = 65792 AND B.object_name<>'Batch Resp Statistics' THEN B.cntr_value 
 			WHEN B.cntr_type = 272696576 AND B.cntr_value>=A.cntr_value THEN (B.cntr_value-A.cntr_value) / (DATEDIFF(ms,A.SnapshotDate,B.SnapshotDate)/1000.0)
-			WHEN B.cntr_type=537003264 THEN B.cntr_value*1.0 / Bbase.cntr_value
-			WHEN B.cntr_type=1073874176 AND Bbase.cntr_value>=Abase.cntr_value THEN (B.cntr_value-A.cntr_value*1.0) / (Bbase.cntr_value-Abase.cntr_value)
+			WHEN B.cntr_type=537003264 THEN B.cntr_value*1.0 / NULLIF(Bbase.cntr_value,0)
+			WHEN B.cntr_type=1073874176 AND Bbase.cntr_value>=Abase.cntr_value THEN (B.cntr_value-A.cntr_value*1.0) / NULLIF(Bbase.cntr_value-Abase.cntr_value,0)
 		ELSE NULL END AS Value
 	FROM @PerformanceCounters B
 	JOIN dbo.Counters C ON C.counter_name = B.counter_name AND C.object_name = B.object_name AND C.instance_name = B.instance_name
@@ -48,12 +48,14 @@ WITH PC AS (
 												AND A.instance_name = B.instance_name 
 												AND B.cntr_type = A.cntr_type 
 												AND A.InstanceID = @InstanceID
+												AND A.SnapshotDate< B.SnapshotDate
 	LEFT JOIN Staging.PerformanceCounters Abase ON Abase.object_name = M.object_name 
 												AND Abase.counter_name = M.base_counter_name 
 												AND Abase.instance_name = B.instance_name 
 												AND A.cntr_type = 1073874176 
 												AND Abase.InstanceID = @InstanceID 
 												AND Abase.cntr_type=1073939712	
+												AND ABase.SnapshotDate <B.SnapshotDate
 	WHERE B.cntr_type IN(65792,272696576,537003264,1073874176)
 	AND NOT EXISTS(SELECT 1 FROM dbo.PerformanceCounters PC WHERE PC.SnapshotDate = B.SnapshotDate AND PC.InstanceID = @InstanceID AND PC.CounterID=C.CounterID)
 )
