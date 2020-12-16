@@ -410,7 +410,7 @@ WHEN NOT MATCHED BY TARGET THEN
 IF NOT EXISTS(SELECT 1 FROM dbo.LastGoodCheckDBThresholds WHERE InstanceID=-1 AND DatabaseID=-1)
 BEGIN
 	INSERT INTO dbo.LastGoodCheckDBThresholds
-	VALUES(-1,-1,11520,21600)
+	VALUES(-1,-1,192,360)
 END
 
 MERGE INTO [CounterMapping] AS [Target]
