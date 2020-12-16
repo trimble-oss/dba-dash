@@ -702,7 +702,7 @@
             this.splitSchemaSnapshot.Panel2.Controls.Add(this.gvHistory);
             this.splitSchemaSnapshot.Panel2.Controls.Add(this.label1);
             this.splitSchemaSnapshot.Size = new System.Drawing.Size(1469, 1246);
-            this.splitSchemaSnapshot.SplitterDistance = 573;
+            this.splitSchemaSnapshot.SplitterDistance = 572;
             this.splitSchemaSnapshot.TabIndex = 1;
             // 
             // label7
@@ -725,7 +725,7 @@
             this.tsNext,
             this.toolStripLabel1,
             this.tsPageSize});
-            this.toolStrip1.Location = new System.Drawing.Point(0, 641);
+            this.toolStrip1.Location = new System.Drawing.Point(0, 642);
             this.toolStrip1.Name = "toolStrip1";
             this.toolStrip1.Size = new System.Drawing.Size(1469, 28);
             this.toolStrip1.TabIndex = 1;
@@ -815,7 +815,7 @@
             this.gvHistory.RowHeadersWidth = 51;
             this.gvHistory.RowTemplate.Height = 24;
             this.gvHistory.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-            this.gvHistory.Size = new System.Drawing.Size(1469, 544);
+            this.gvHistory.Size = new System.Drawing.Size(1469, 545);
             this.gvHistory.TabIndex = 0;
             this.gvHistory.SelectionChanged += new System.EventHandler(this.gvHistory_SelectionChanged);
             // 
@@ -1092,6 +1092,7 @@
             this.summary1.Name = "summary1";
             this.summary1.Size = new System.Drawing.Size(1469, 1246);
             this.summary1.TabIndex = 0;
+            this.summary1.Instance_Selected += new System.EventHandler<DBAChecksGUI.Main.InstanceSelectedEventArgs>(this.Instance_Selected);
             // 
             // tabFiles
             // 
@@ -1333,7 +1334,7 @@
             this.performanceSummary1.Name = "performanceSummary1";
             this.performanceSummary1.Size = new System.Drawing.Size(1469, 1246);
             this.performanceSummary1.TabIndex = 0;
-            this.performanceSummary1.Instance_Selected += new System.EventHandler<InstanceSelectedEventArgs>(this.Instance_Selected);
+            this.performanceSummary1.Instance_Selected += new System.EventHandler<DBAChecksGUI.Main.InstanceSelectedEventArgs>(this.Instance_Selected);
             // 
             // tabInfo
             // 

@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Data.SqlClient;
+using static DBAChecksGUI.Main;
 
 namespace DBAChecksGUI
 {
@@ -47,12 +48,19 @@ namespace DBAChecksGUI
             for (Int32 idx = e.RowIndex; idx < e.RowIndex + e.RowCount; idx += 1)
             {
                 var row = (DataRowView)dgvSummary.Rows[idx].DataBoundItem;
+                bool isAzure = row["InstanceID"] == DBNull.Value ? true : false;
                 string[] StatusColumns = new string[] { "FullBackupStatus", "LogShippingStatus", "DiffBackupStatus", "LogBackupStatus","DriveStatus","JobStatus","CollectionErrorStatus" ,"AGStatus","LastGoodCheckDBStatus","SnapshotAgeStatus","MemoryDumpStatus","UptimeStatus","CorruptionStatus","AlertStatus","FileFreeSpaceStatus","CustomCheckStatus"};
                 foreach(string col in StatusColumns)
                 {
                     dgvSummary.Rows[idx].Cells[col].Style.BackColor = DBAChecksStatus.GetStatusColour((DBAChecksStatus.DBAChecksStatusEnum)Convert.ToInt32(row[col]));
                 }
-                if(row["IsAgentRunning"]!=DBNull.Value && (bool)row["IsAgentRunning"] == false)
+                dgvSummary.Rows[idx].Cells["FullBackupStatus"].Value = isAzure ? "" : "View";
+                dgvSummary.Rows[idx].Cells["DiffBackupStatus"].Value = isAzure ? "" : "View";
+                dgvSummary.Rows[idx].Cells["LogBackupStatus"].Value = isAzure ? "" : "View";
+                dgvSummary.Rows[idx].Cells["DriveStatus"].Value = isAzure ? "" : "View";
+                dgvSummary.Rows[idx].Cells["JobStatus"].Value = isAzure ? "" : "View";
+                dgvSummary.Rows[idx].Cells["LogShippingStatus"].Value = isAzure ? "" : "View";
+                if (row["IsAgentRunning"]!=DBNull.Value && (bool)row["IsAgentRunning"] == false)
                 {
                     dgvSummary.Rows[idx].Cells["JobStatus"].Style.BackColor = Color.Black;
                     dgvSummary.Rows[idx].Cells["JobStatus"].Style.ForeColor= Color.White;
@@ -248,6 +256,77 @@ namespace DBAChecksGUI
         private void tsCopy_Click(object sender, EventArgs e)
         {
             Common.CopyDataGridViewToClipboard(dgvSummary);
+        }
+
+        public event EventHandler<InstanceSelectedEventArgs> Instance_Selected;
+
+        private void dgvSummary_CellContentClick(object sender, DataGridViewCellEventArgs e)
+        {
+            if (e.RowIndex >= 0)
+            {
+                DataRowView row = (DataRowView)dgvSummary.Rows[e.RowIndex].DataBoundItem;
+                if (e.ColumnIndex== LastGoodCheckDBStatus.Index)
+                {
+                    if (row["InstanceID"] != DBNull.Value)
+                    {
+                        Instance_Selected(this, new InstanceSelectedEventArgs() { InstanceID = (Int32)row["InstanceID"], Tab = "tabLastGood" });
+                    }                   
+                }
+                else if(e.ColumnIndex == FullBackupStatus.Index || e.ColumnIndex == DiffBackupStatus.Index || e.ColumnIndex == LogBackupStatus.Index)
+                {
+                    if (row["InstanceID"] != DBNull.Value)
+                    {
+                        Instance_Selected(this, new InstanceSelectedEventArgs() { InstanceID = (Int32)row["InstanceID"], Tab = "tabBackups" });
+                    }
+                }
+                else if (e.ColumnIndex == LogShippingStatus.Index)
+                {
+                    if (row["InstanceID"] != DBNull.Value)
+                    {
+                        Instance_Selected(this, new InstanceSelectedEventArgs() { InstanceID = (Int32)row["InstanceID"], Tab = "tabLogShipping" });
+                    }
+                }
+                else if(e.ColumnIndex == DriveStatus.Index)
+                {
+                    if (row["InstanceID"] != DBNull.Value)
+                    {
+                        Instance_Selected(this, new InstanceSelectedEventArgs() { InstanceID = (Int32)row["InstanceID"], Tab = "tabDrives" });
+                    }
+                }
+                else if (e.ColumnIndex == JobStatus.Index)
+                {
+                    if (row["InstanceID"] != DBNull.Value)
+                    {
+                        Instance_Selected(this, new InstanceSelectedEventArgs() { InstanceID = (Int32)row["InstanceID"], Tab = "tabJobs" });
+                    }
+                }
+                else if (e.ColumnIndex == FileFreeSpaceStatus.Index)
+                {
+                     Instance_Selected(this, new InstanceSelectedEventArgs() { Instance = (string)row["Instance"], Tab = "tabFiles" });
+                }
+                else if (e.ColumnIndex == CustomCheckStatus.Index)
+                {
+                       Instance_Selected(this, new InstanceSelectedEventArgs() { Instance = (string)row["Instance"], Tab = "tabCustomChecks" });
+                }
+                else if (e.ColumnIndex ==  CollectionErrorStatus.Index)
+                {
+                    if (row["InstanceID"] != DBNull.Value)
+                    {
+                        Instance_Selected(this, new InstanceSelectedEventArgs() { InstanceID = (Int32)row["InstanceID"], Tab = "tabDBAChecksErrorLog" });
+                    }
+                }
+                else if (e.ColumnIndex == SnapshotAgeStatus.Index)
+                {
+                    Instance_Selected(this, new InstanceSelectedEventArgs() { Instance = (string)row["Instance"], Tab = "tabCollectionDates" });                   
+                }
+                else if (e.ColumnIndex == AlertStatus.Index)
+                {
+                    if (row["InstanceID"] != DBNull.Value)
+                    {
+                        Instance_Selected(this, new InstanceSelectedEventArgs() { InstanceID = (Int32)row["InstanceID"], Tab = "tabAlerts" });
+                    }
+                }
+            }
         }
     }
 }

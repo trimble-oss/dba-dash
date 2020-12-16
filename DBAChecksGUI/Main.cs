@@ -23,7 +23,8 @@ namespace DBAChecksGUI
 
         public class InstanceSelectedEventArgs : EventArgs
         {
-            public int InstanceID;
+            public int InstanceID=-1;
+            public string Instance;
             public string Tab;
         }
         public Main()
@@ -40,6 +41,7 @@ namespace DBAChecksGUI
         private Int32 currentPageSize=100;
         bool isTagPopulation = false;
         private readonly DiffControl diffSchemaSnapshot = new DiffControl();
+        private bool suppressLoadTab=false;
 
         private void Main_Load(object sender, EventArgs e)
         {
@@ -89,6 +91,10 @@ namespace DBAChecksGUI
 
         private void loadSelectedTab()
         {
+            if (suppressLoadTab)
+            {
+                return;
+            }
             List<Int32> instanceIDs;         
             var n = (SQLTreeItem) tv1.SelectedNode;
             var parent = (SQLTreeItem)n.Parent;
@@ -538,7 +544,8 @@ ORDER BY SchemaName,ObjectName
 
             List<TabPage> allowedTabs = new List<TabPage>();         
             bool hasAzureDBs = AzureInstanceIDs.Count > 0;
-
+            var suppress = suppressLoadTab;
+            suppressLoadTab = true;
 
             if(n.Type== SQLTreeItem.TreeType.DBAChecksRoot)
             {
@@ -670,6 +677,7 @@ ORDER BY SchemaName,ObjectName
                     tabs.TabPages.Add(t);
                 }
             }
+            suppressLoadTab = suppress;
              loadSelectedTab();
             
            
@@ -1178,12 +1186,21 @@ ORDER BY SchemaName,ObjectName
 
         private void Instance_Selected(object sender, InstanceSelectedEventArgs e)
         {
+            suppressLoadTab = true;
             var root = tv1.Nodes[0];
             foreach(SQLTreeItem child in root.Nodes)
             {
-                if(child.InstanceID  == e.InstanceID)
+                if((child.InstanceID  == e.InstanceID && e.InstanceID>0 ) || (child.InstanceName == e.Instance && e.Instance!=null))
                 {
-                    tv1.SelectedNode = child;
+                    if (e.Tab == "tabAlerts") // Configuration Node
+                    {
+                        child.Expand();
+                        tv1.SelectedNode = child.Nodes[0];
+                    }
+                    else
+                    {
+                        tv1.SelectedNode = child;
+                    }
                     break;
                 }
                 if (child.InstanceID <= 0)
@@ -1202,6 +1219,8 @@ ORDER BY SchemaName,ObjectName
             {
                 tabs.SelectedTab = tabs.TabPages[e.Tab];
             }
+            suppressLoadTab = false;
+            loadSelectedTab();
         }
     }
 }

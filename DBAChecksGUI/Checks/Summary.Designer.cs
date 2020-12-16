@@ -28,6 +28,12 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle4 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle5 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle6 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle3 = new System.Windows.Forms.DataGridViewCellStyle();
             this.dgvSummary = new System.Windows.Forms.DataGridView();
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
             this.tsRefresh = new System.Windows.Forms.ToolStripButton();
@@ -52,19 +58,19 @@
             this.Instance = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.MemoryDumpStatus = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.CorruptionStatus = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.LastGoodCheckDBStatus = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.AlertStatus = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.FullBackupStatus = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.DiffBackupStatus = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.LogBackupStatus = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.LogShippingStatus = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.DriveStatus = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.JobStatus = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.LastGoodCheckDBStatus = new System.Windows.Forms.DataGridViewLinkColumn();
+            this.AlertStatus = new System.Windows.Forms.DataGridViewLinkColumn();
+            this.FullBackupStatus = new System.Windows.Forms.DataGridViewLinkColumn();
+            this.DiffBackupStatus = new System.Windows.Forms.DataGridViewLinkColumn();
+            this.LogBackupStatus = new System.Windows.Forms.DataGridViewLinkColumn();
+            this.LogShippingStatus = new System.Windows.Forms.DataGridViewLinkColumn();
+            this.DriveStatus = new System.Windows.Forms.DataGridViewLinkColumn();
+            this.JobStatus = new System.Windows.Forms.DataGridViewLinkColumn();
             this.AGStatus = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.FileFreeSpaceStatus = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.CustomCheckStatus = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.CollectionErrorStatus = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.SnapshotAgeStatus = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.FileFreeSpaceStatus = new System.Windows.Forms.DataGridViewLinkColumn();
+            this.CustomCheckStatus = new System.Windows.Forms.DataGridViewLinkColumn();
+            this.CollectionErrorStatus = new System.Windows.Forms.DataGridViewLinkColumn();
+            this.SnapshotAgeStatus = new System.Windows.Forms.DataGridViewLinkColumn();
             this.UptimeStatus = new System.Windows.Forms.DataGridViewTextBoxColumn();
             ((System.ComponentModel.ISupportInitialize)(this.dgvSummary)).BeginInit();
             this.toolStrip1.SuspendLayout();
@@ -103,6 +109,7 @@
             this.dgvSummary.RowTemplate.Height = 24;
             this.dgvSummary.Size = new System.Drawing.Size(1800, 182);
             this.dgvSummary.TabIndex = 0;
+            this.dgvSummary.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgvSummary_CellContentClick);
             this.dgvSummary.ColumnHeaderMouseClick += new System.Windows.Forms.DataGridViewCellMouseEventHandler(this.dgvSummary_ColumnHeaderMouseClick);
             this.dgvSummary.RowsAdded += new System.Windows.Forms.DataGridViewRowsAddedEventHandler(this.dgvSummary_RowAdded);
             // 
@@ -144,6 +151,7 @@
             this.dataGridViewTextBoxColumn1.HeaderText = "Instance";
             this.dataGridViewTextBoxColumn1.MinimumWidth = 6;
             this.dataGridViewTextBoxColumn1.Name = "dataGridViewTextBoxColumn1";
+            this.dataGridViewTextBoxColumn1.ReadOnly = true;
             this.dataGridViewTextBoxColumn1.Width = 90;
             // 
             // dataGridViewTextBoxColumn2
@@ -151,6 +159,7 @@
             this.dataGridViewTextBoxColumn2.HeaderText = "Memory Dump";
             this.dataGridViewTextBoxColumn2.MinimumWidth = 6;
             this.dataGridViewTextBoxColumn2.Name = "dataGridViewTextBoxColumn2";
+            this.dataGridViewTextBoxColumn2.ReadOnly = true;
             this.dataGridViewTextBoxColumn2.Width = 128;
             // 
             // dataGridViewTextBoxColumn3
@@ -159,6 +168,7 @@
             this.dataGridViewTextBoxColumn3.HeaderText = "Corruption";
             this.dataGridViewTextBoxColumn3.MinimumWidth = 6;
             this.dataGridViewTextBoxColumn3.Name = "dataGridViewTextBoxColumn3";
+            this.dataGridViewTextBoxColumn3.ReadOnly = true;
             this.dataGridViewTextBoxColumn3.Width = 103;
             // 
             // dataGridViewTextBoxColumn4
@@ -166,34 +176,47 @@
             this.dataGridViewTextBoxColumn4.HeaderText = "Last Good Check DB";
             this.dataGridViewTextBoxColumn4.MinimumWidth = 6;
             this.dataGridViewTextBoxColumn4.Name = "dataGridViewTextBoxColumn4";
+            this.dataGridViewTextBoxColumn4.ReadOnly = true;
             this.dataGridViewTextBoxColumn4.Width = 137;
             // 
             // dataGridViewTextBoxColumn5
             // 
+            dataGridViewCellStyle4.NullValue = "View";
+            this.dataGridViewTextBoxColumn5.DefaultCellStyle = dataGridViewCellStyle4;
             this.dataGridViewTextBoxColumn5.HeaderText = "Alerts";
             this.dataGridViewTextBoxColumn5.MinimumWidth = 6;
             this.dataGridViewTextBoxColumn5.Name = "dataGridViewTextBoxColumn5";
+            this.dataGridViewTextBoxColumn5.ReadOnly = true;
+            this.dataGridViewTextBoxColumn5.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Programmatic;
             this.dataGridViewTextBoxColumn5.Width = 73;
             // 
             // dataGridViewTextBoxColumn6
             // 
+            dataGridViewCellStyle5.NullValue = "View";
+            this.dataGridViewTextBoxColumn6.DefaultCellStyle = dataGridViewCellStyle5;
             this.dataGridViewTextBoxColumn6.HeaderText = "Full Backup";
             this.dataGridViewTextBoxColumn6.MinimumWidth = 6;
             this.dataGridViewTextBoxColumn6.Name = "dataGridViewTextBoxColumn6";
+            this.dataGridViewTextBoxColumn6.ReadOnly = true;
             this.dataGridViewTextBoxColumn6.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Programmatic;
             this.dataGridViewTextBoxColumn6.Width = 101;
             // 
             // dataGridViewTextBoxColumn7
             // 
+            dataGridViewCellStyle6.NullValue = "View";
+            this.dataGridViewTextBoxColumn7.DefaultCellStyle = dataGridViewCellStyle6;
             this.dataGridViewTextBoxColumn7.HeaderText = "Diff Backup";
             this.dataGridViewTextBoxColumn7.MinimumWidth = 6;
             this.dataGridViewTextBoxColumn7.Name = "dataGridViewTextBoxColumn7";
+            this.dataGridViewTextBoxColumn7.ReadOnly = true;
+            this.dataGridViewTextBoxColumn7.Width = 125;
             // 
             // dataGridViewTextBoxColumn8
             // 
             this.dataGridViewTextBoxColumn8.HeaderText = "Log Backup";
             this.dataGridViewTextBoxColumn8.MinimumWidth = 6;
             this.dataGridViewTextBoxColumn8.Name = "dataGridViewTextBoxColumn8";
+            this.dataGridViewTextBoxColumn8.ReadOnly = true;
             this.dataGridViewTextBoxColumn8.Width = 103;
             // 
             // dataGridViewTextBoxColumn9
@@ -201,6 +224,7 @@
             this.dataGridViewTextBoxColumn9.HeaderText = "Log Shipping";
             this.dataGridViewTextBoxColumn9.MinimumWidth = 6;
             this.dataGridViewTextBoxColumn9.Name = "dataGridViewTextBoxColumn9";
+            this.dataGridViewTextBoxColumn9.ReadOnly = true;
             this.dataGridViewTextBoxColumn9.Width = 110;
             // 
             // dataGridViewTextBoxColumn10
@@ -208,6 +232,7 @@
             this.dataGridViewTextBoxColumn10.HeaderText = "Drive Space";
             this.dataGridViewTextBoxColumn10.MinimumWidth = 6;
             this.dataGridViewTextBoxColumn10.Name = "dataGridViewTextBoxColumn10";
+            this.dataGridViewTextBoxColumn10.ReadOnly = true;
             this.dataGridViewTextBoxColumn10.Width = 105;
             // 
             // dataGridViewTextBoxColumn11
@@ -215,12 +240,15 @@
             this.dataGridViewTextBoxColumn11.HeaderText = "Agent Jobs";
             this.dataGridViewTextBoxColumn11.MinimumWidth = 6;
             this.dataGridViewTextBoxColumn11.Name = "dataGridViewTextBoxColumn11";
+            this.dataGridViewTextBoxColumn11.ReadOnly = true;
+            this.dataGridViewTextBoxColumn11.Width = 125;
             // 
             // dataGridViewTextBoxColumn12
             // 
             this.dataGridViewTextBoxColumn12.HeaderText = "Availability Groups";
             this.dataGridViewTextBoxColumn12.MinimumWidth = 6;
             this.dataGridViewTextBoxColumn12.Name = "dataGridViewTextBoxColumn12";
+            this.dataGridViewTextBoxColumn12.ReadOnly = true;
             this.dataGridViewTextBoxColumn12.Width = 141;
             // 
             // dataGridViewTextBoxColumn13
@@ -228,6 +256,7 @@
             this.dataGridViewTextBoxColumn13.HeaderText = "File FreeSpace";
             this.dataGridViewTextBoxColumn13.MinimumWidth = 6;
             this.dataGridViewTextBoxColumn13.Name = "dataGridViewTextBoxColumn13";
+            this.dataGridViewTextBoxColumn13.ReadOnly = true;
             this.dataGridViewTextBoxColumn13.Width = 121;
             // 
             // dataGridViewTextBoxColumn14
@@ -235,6 +264,7 @@
             this.dataGridViewTextBoxColumn14.HeaderText = "Custom Checks";
             this.dataGridViewTextBoxColumn14.MinimumWidth = 6;
             this.dataGridViewTextBoxColumn14.Name = "dataGridViewTextBoxColumn14";
+            this.dataGridViewTextBoxColumn14.ReadOnly = true;
             this.dataGridViewTextBoxColumn14.Width = 123;
             // 
             // dataGridViewTextBoxColumn15
@@ -242,6 +272,7 @@
             this.dataGridViewTextBoxColumn15.HeaderText = "DBAChecks Errors";
             this.dataGridViewTextBoxColumn15.MinimumWidth = 6;
             this.dataGridViewTextBoxColumn15.Name = "dataGridViewTextBoxColumn15";
+            this.dataGridViewTextBoxColumn15.ReadOnly = true;
             this.dataGridViewTextBoxColumn15.Width = 141;
             // 
             // dataGridViewTextBoxColumn16
@@ -249,6 +280,7 @@
             this.dataGridViewTextBoxColumn16.HeaderText = "Snapshot Age";
             this.dataGridViewTextBoxColumn16.MinimumWidth = 6;
             this.dataGridViewTextBoxColumn16.Name = "dataGridViewTextBoxColumn16";
+            this.dataGridViewTextBoxColumn16.ReadOnly = true;
             this.dataGridViewTextBoxColumn16.Width = 116;
             // 
             // dataGridViewTextBoxColumn17
@@ -287,65 +319,88 @@
             // LastGoodCheckDBStatus
             // 
             this.LastGoodCheckDBStatus.HeaderText = "Last Good Check DB";
+            this.LastGoodCheckDBStatus.LinkColor = System.Drawing.Color.Black;
             this.LastGoodCheckDBStatus.MinimumWidth = 6;
             this.LastGoodCheckDBStatus.Name = "LastGoodCheckDBStatus";
             this.LastGoodCheckDBStatus.ReadOnly = true;
+            this.LastGoodCheckDBStatus.Resizable = System.Windows.Forms.DataGridViewTriState.True;
+            this.LastGoodCheckDBStatus.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
             this.LastGoodCheckDBStatus.Width = 137;
             // 
             // AlertStatus
             // 
             this.AlertStatus.HeaderText = "Alerts";
+            this.AlertStatus.LinkColor = System.Drawing.Color.Black;
             this.AlertStatus.MinimumWidth = 6;
             this.AlertStatus.Name = "AlertStatus";
             this.AlertStatus.ReadOnly = true;
+            this.AlertStatus.Resizable = System.Windows.Forms.DataGridViewTriState.True;
+            this.AlertStatus.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
             this.AlertStatus.Width = 73;
             // 
             // FullBackupStatus
             // 
             this.FullBackupStatus.HeaderText = "Full Backup";
+            this.FullBackupStatus.LinkColor = System.Drawing.Color.Black;
             this.FullBackupStatus.MinimumWidth = 6;
             this.FullBackupStatus.Name = "FullBackupStatus";
             this.FullBackupStatus.ReadOnly = true;
+            this.FullBackupStatus.Resizable = System.Windows.Forms.DataGridViewTriState.True;
             this.FullBackupStatus.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Programmatic;
             this.FullBackupStatus.Width = 101;
             // 
             // DiffBackupStatus
             // 
             this.DiffBackupStatus.HeaderText = "Diff Backup";
+            this.DiffBackupStatus.LinkColor = System.Drawing.Color.Black;
             this.DiffBackupStatus.MinimumWidth = 6;
             this.DiffBackupStatus.Name = "DiffBackupStatus";
             this.DiffBackupStatus.ReadOnly = true;
+            this.DiffBackupStatus.Resizable = System.Windows.Forms.DataGridViewTriState.True;
+            this.DiffBackupStatus.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
             // 
             // LogBackupStatus
             // 
             this.LogBackupStatus.HeaderText = "Log Backup";
+            this.LogBackupStatus.LinkColor = System.Drawing.Color.Black;
             this.LogBackupStatus.MinimumWidth = 6;
             this.LogBackupStatus.Name = "LogBackupStatus";
             this.LogBackupStatus.ReadOnly = true;
+            this.LogBackupStatus.Resizable = System.Windows.Forms.DataGridViewTriState.True;
+            this.LogBackupStatus.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
             this.LogBackupStatus.Width = 103;
             // 
             // LogShippingStatus
             // 
             this.LogShippingStatus.HeaderText = "Log Shipping";
+            this.LogShippingStatus.LinkColor = System.Drawing.Color.Black;
             this.LogShippingStatus.MinimumWidth = 6;
             this.LogShippingStatus.Name = "LogShippingStatus";
             this.LogShippingStatus.ReadOnly = true;
+            this.LogShippingStatus.Resizable = System.Windows.Forms.DataGridViewTriState.True;
+            this.LogShippingStatus.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
             this.LogShippingStatus.Width = 110;
             // 
             // DriveStatus
             // 
             this.DriveStatus.HeaderText = "Drive Space";
+            this.DriveStatus.LinkColor = System.Drawing.Color.Black;
             this.DriveStatus.MinimumWidth = 6;
             this.DriveStatus.Name = "DriveStatus";
             this.DriveStatus.ReadOnly = true;
+            this.DriveStatus.Resizable = System.Windows.Forms.DataGridViewTriState.True;
+            this.DriveStatus.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
             this.DriveStatus.Width = 105;
             // 
             // JobStatus
             // 
             this.JobStatus.HeaderText = "Agent Jobs";
+            this.JobStatus.LinkColor = System.Drawing.Color.Black;
             this.JobStatus.MinimumWidth = 6;
             this.JobStatus.Name = "JobStatus";
             this.JobStatus.ReadOnly = true;
+            this.JobStatus.Resizable = System.Windows.Forms.DataGridViewTriState.True;
+            this.JobStatus.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
             // 
             // AGStatus
             // 
@@ -357,34 +412,52 @@
             // 
             // FileFreeSpaceStatus
             // 
+            dataGridViewCellStyle1.NullValue = "View";
+            this.FileFreeSpaceStatus.DefaultCellStyle = dataGridViewCellStyle1;
             this.FileFreeSpaceStatus.HeaderText = "File FreeSpace";
+            this.FileFreeSpaceStatus.LinkColor = System.Drawing.Color.Black;
             this.FileFreeSpaceStatus.MinimumWidth = 6;
             this.FileFreeSpaceStatus.Name = "FileFreeSpaceStatus";
             this.FileFreeSpaceStatus.ReadOnly = true;
+            this.FileFreeSpaceStatus.Resizable = System.Windows.Forms.DataGridViewTriState.True;
+            this.FileFreeSpaceStatus.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
             this.FileFreeSpaceStatus.Width = 121;
             // 
             // CustomCheckStatus
             // 
+            dataGridViewCellStyle2.NullValue = "View";
+            this.CustomCheckStatus.DefaultCellStyle = dataGridViewCellStyle2;
             this.CustomCheckStatus.HeaderText = "Custom Checks";
+            this.CustomCheckStatus.LinkColor = System.Drawing.Color.Black;
             this.CustomCheckStatus.MinimumWidth = 6;
             this.CustomCheckStatus.Name = "CustomCheckStatus";
             this.CustomCheckStatus.ReadOnly = true;
+            this.CustomCheckStatus.Resizable = System.Windows.Forms.DataGridViewTriState.True;
+            this.CustomCheckStatus.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
             this.CustomCheckStatus.Width = 123;
             // 
             // CollectionErrorStatus
             // 
+            dataGridViewCellStyle3.NullValue = "View";
+            this.CollectionErrorStatus.DefaultCellStyle = dataGridViewCellStyle3;
             this.CollectionErrorStatus.HeaderText = "DBAChecks Errors";
+            this.CollectionErrorStatus.LinkColor = System.Drawing.Color.Black;
             this.CollectionErrorStatus.MinimumWidth = 6;
             this.CollectionErrorStatus.Name = "CollectionErrorStatus";
             this.CollectionErrorStatus.ReadOnly = true;
+            this.CollectionErrorStatus.Resizable = System.Windows.Forms.DataGridViewTriState.True;
+            this.CollectionErrorStatus.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
             this.CollectionErrorStatus.Width = 141;
             // 
             // SnapshotAgeStatus
             // 
             this.SnapshotAgeStatus.HeaderText = "Snapshot Age";
+            this.SnapshotAgeStatus.LinkColor = System.Drawing.Color.Black;
             this.SnapshotAgeStatus.MinimumWidth = 6;
             this.SnapshotAgeStatus.Name = "SnapshotAgeStatus";
             this.SnapshotAgeStatus.ReadOnly = true;
+            this.SnapshotAgeStatus.Resizable = System.Windows.Forms.DataGridViewTriState.True;
+            this.SnapshotAgeStatus.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
             this.SnapshotAgeStatus.Width = 116;
             // 
             // UptimeStatus
@@ -417,23 +490,6 @@
         private System.Windows.Forms.ToolStrip toolStrip1;
         private System.Windows.Forms.ToolStripButton tsRefresh;
         private System.Windows.Forms.ToolStripButton tsCopy;
-        private System.Windows.Forms.DataGridViewTextBoxColumn Instance;
-        private System.Windows.Forms.DataGridViewTextBoxColumn MemoryDumpStatus;
-        private System.Windows.Forms.DataGridViewTextBoxColumn CorruptionStatus;
-        private System.Windows.Forms.DataGridViewTextBoxColumn LastGoodCheckDBStatus;
-        private System.Windows.Forms.DataGridViewTextBoxColumn AlertStatus;
-        private System.Windows.Forms.DataGridViewTextBoxColumn FullBackupStatus;
-        private System.Windows.Forms.DataGridViewTextBoxColumn DiffBackupStatus;
-        private System.Windows.Forms.DataGridViewTextBoxColumn LogBackupStatus;
-        private System.Windows.Forms.DataGridViewTextBoxColumn LogShippingStatus;
-        private System.Windows.Forms.DataGridViewTextBoxColumn DriveStatus;
-        private System.Windows.Forms.DataGridViewTextBoxColumn JobStatus;
-        private System.Windows.Forms.DataGridViewTextBoxColumn AGStatus;
-        private System.Windows.Forms.DataGridViewTextBoxColumn FileFreeSpaceStatus;
-        private System.Windows.Forms.DataGridViewTextBoxColumn CustomCheckStatus;
-        private System.Windows.Forms.DataGridViewTextBoxColumn CollectionErrorStatus;
-        private System.Windows.Forms.DataGridViewTextBoxColumn SnapshotAgeStatus;
-        private System.Windows.Forms.DataGridViewTextBoxColumn UptimeStatus;
         private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn1;
         private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn2;
         private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn3;
@@ -451,5 +507,22 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn15;
         private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn16;
         private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn17;
+        private System.Windows.Forms.DataGridViewTextBoxColumn Instance;
+        private System.Windows.Forms.DataGridViewTextBoxColumn MemoryDumpStatus;
+        private System.Windows.Forms.DataGridViewTextBoxColumn CorruptionStatus;
+        private System.Windows.Forms.DataGridViewLinkColumn LastGoodCheckDBStatus;
+        private System.Windows.Forms.DataGridViewLinkColumn AlertStatus;
+        private System.Windows.Forms.DataGridViewLinkColumn FullBackupStatus;
+        private System.Windows.Forms.DataGridViewLinkColumn DiffBackupStatus;
+        private System.Windows.Forms.DataGridViewLinkColumn LogBackupStatus;
+        private System.Windows.Forms.DataGridViewLinkColumn LogShippingStatus;
+        private System.Windows.Forms.DataGridViewLinkColumn DriveStatus;
+        private System.Windows.Forms.DataGridViewLinkColumn JobStatus;
+        private System.Windows.Forms.DataGridViewTextBoxColumn AGStatus;
+        private System.Windows.Forms.DataGridViewLinkColumn FileFreeSpaceStatus;
+        private System.Windows.Forms.DataGridViewLinkColumn CustomCheckStatus;
+        private System.Windows.Forms.DataGridViewLinkColumn CollectionErrorStatus;
+        private System.Windows.Forms.DataGridViewLinkColumn SnapshotAgeStatus;
+        private System.Windows.Forms.DataGridViewTextBoxColumn UptimeStatus;
     }
 }
