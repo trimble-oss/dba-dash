@@ -148,7 +148,7 @@ INSERT INTO dbo.DataRetention
     RetentionDays
 )
 SELECT t.TableName,t.RetentionDays
-FROM (VALUES('ObjectExecutionExecutionStStats',120),
+FROM (VALUES('ObjectExecutionStats',120),
 				('Waits',120),
 				('DBIOStats',120),
 				('CPU',365),
