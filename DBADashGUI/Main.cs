@@ -61,7 +61,7 @@ namespace DBADashGUI
             }
             if (connectionString == "")
             {
-                MessageBox.Show("Please use" + Properties.Resources.ServiceConfigToolName + " to configure the service" + Environment.NewLine + "This GUI tool requires a destination connection string pointing to the DBADash repository database.", "Info", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                MessageBox.Show("Please use " + Properties.Resources.ServiceConfigToolName + " to configure the service" + Environment.NewLine + "This GUI tool requires a destination connection string pointing to the DBADash repository database.", "Info", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 if (File.Exists(Properties.Resources.ServiceConfigToolName))
                 {
                     Process.Start(Properties.Resources.ServiceConfigToolName);

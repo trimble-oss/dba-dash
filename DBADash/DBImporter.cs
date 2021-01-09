@@ -55,7 +55,7 @@ namespace DBADash
 
         public void Update(string connectionString, DataSet Data)
         {
-            var rInstance =Data.Tables.Contains("DBAChecks") ? Data.Tables["DBAChecks"].Rows[0] : Data.Tables["DBADash"].Rows[0];
+            var rInstance =Data.Tables["DBADash"].Rows[0];
             DateTime snapshotDate = (DateTime)rInstance["SnapshotDateUTC"];
             Int32 instanceID;
             string connectionID = (string)rInstance["ConnectionID"];
