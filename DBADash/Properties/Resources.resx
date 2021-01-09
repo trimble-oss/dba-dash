@@ -1,0 +1,1929 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="SQLServerExtraProperties" xml:space="preserve">
+    <value>SET NOCOUNT ON
+DECLARE @ProcessorNameString NVARCHAR(512)
+DECLARE @SystemManufacturer NVARCHAR(512)
+DECLARE @SystemProductName NVARCHAR(512)
+DECLARE @IsAgentRunning BIT
+DECLARE @InstantFileInitializationEnabled BIT
+IF OBJECT_ID('sys.xp_instance_regread') IS NOT NULL AND IS_SRVROLEMEMBER('sysadmin')=1
+BEGIN  
+	EXEC sys.xp_instance_regread N'HKEY_LOCAL_MACHINE', N'HARDWARE\DESCRIPTION\System\CentralProcessor\0', N'ProcessorNameString',@ProcessorNameString OUT;
+	EXEC sys.xp_instance_regread N'HKEY_LOCAL_MACHINE', N'SYSTEM\HardwareConfig\Current', N'SystemManufacturer',@SystemManufacturer OUT;
+	EXEC sys.xp_instance_regread N'HKEY_LOCAL_MACHINE', N'SYSTEM\HardwareConfig\Current', N'SystemProductName', @SystemProductName OUT;
+END
+ELSE
+BEGIN
+	PRINT 'Sysadmin required to get ProcessorNameString, SystemManufacturer and SystemProductName'
+END
+DECLARE @ActivePowerPlan UNIQUEIDENTIFIER
+DECLARE @HighPerformance VARCHAR(36)  
+DECLARE @Balanced  VARCHAR(36) 
+DECLARE @PowerSaver  VARCHAR(36)
+SELECT @HighPerformance='8c5e7fda-e8bf-4a96-9a85-a6e23a8c635c',@Balanced='381b4222-f694-41f0-9685-ff5bb260df2e',@PowerSaver='a1841308-3541-4fab-bc81-f71556f20b4a'
+DECLARE @output TABLE(
+	output NVARCHAR(MAX)
+)
+IF EXISTS(SELECT * FROM sys.configurations
+WHERE name = 'xp_cmdshell'
+AND value_in_use=1
+) AND EXISTS(SELECT * FROM fn_my_permissions ( 'xp_cmdshell', 'OBJECT' ) WHERE permission_name='EXECUTE')
+BEGIN
+	BEGIN TRY
+	INSERT INTO @output
+	(
+		output
+	)
+	EXEC xp_cmdshell 'powercfg /list';
+	SELECT @ActivePowerPlan = CAST(MAX(CASE WHEN output LIKE  '%' + @HighPerformance + '%*%' THEN @HighPerformance WHEN output LIKE '%' + @Balanced + '%*%' THEN @Balanced WHEN output LIKE '%' + @PowerSaver + '%*%' THEN @PowerSaver ELSE NULL END) AS UNIQUEIDENTIFIER)
+	FROM @output
+	END TRY
+	BEGIN CATCH
+		PRINT 'Unable to get powerplan using xp_cmdshell: ' + ERROR_MESSAGE()
+	END CATCH
+
+END
+ELSE
+BEGIN
+	PRINT 'Enable xp_cmdshell to check power plan'
+END
+IF OBJECT_ID('sys.dm_server_services') IS NOT NULL
+BEGIN
+	SELECT @IsAgentRunning = CASE WHEN status=4 THEN 1 ELSE 0 END
+	FROM   sys.dm_server_services dss
+	WHERE  dss.[servicename] LIKE N'SQL Server Agent (%'
+
+	IF COL_LENGTH('sys.dm_server_services','instant_file_initialization_enabled') IS NOT NULL
+	BEGIN
+		SELECT @InstantFileInitializationEnabled=CASE WHEN instant_file_initialization_enabled='Y' THEN 1 ELSE 0 END
+		FROM   sys.dm_server_services dss
+		WHERE  dss.[servicename] LIKE N'SQL Server (%';
+	END
+END
+DECLARE @OfflineSchedulers INT
+DECLARE @ResourceGovernorEnabled BIT
+SELECT @OfflineSchedulers=COUNT(*)
+FROM sys.dm_os_schedulers
+WHERE is_online=0
+IF OBJECT_ID('sys.resource_governor_configuration') IS  NOT NULL
+BEGIN
+	SELECT  @ResourceGovernorEnabled = CASE WHEN EXISTS(SELECT * 
+										FROM sys.resource_governor_configuration
+										WHERE is_enabled=1)
+										THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END
+END
+DECLARE @WindowsRelease NVARCHAR(256)
+DECLARE @WindowsSP NVARCHAR(256)
+DECLARE @WindowsSKU INT
+IF OBJECT_ID('sys.dm_os_windows_info') IS NOT NULL
+BEGIN
+	SELECT @WindowsRelease=windows_release,@WindowsSP = windows_service_pack_level,@WindowsSKU = windows_sku
+	FROM sys.dm_os_windows_info
+END
+DECLARE @LastMemoryDump DATETIME
+DECLARE @DumpCount INT
+IF OBJECT_ID('sys.dm_server_memory_dumps') IS NOT NULL
+BEGIN
+	select @LastMemoryDump=MAX(creation_time),@DumpCount=COUNT(*) 
+	from sys.dm_server_memory_dumps
+END
+SELECT @ActivePowerPlan ActivePowerPlanGUID,
+       CASE
+           WHEN @ActivePowerPlan = @HighPerformance THEN
+               'High Performance'
+           WHEN @ActivePowerPlan = @Balanced THEN
+               'Balanced'
+           WHEN @ActivePowerPlan = @PowerSaver THEN
+               'Power Saver'
+           ELSE
+               NULL
+       END AS ActivePowerPlan,
+       @ProcessorNameString AS ProcessorNameString,
+       @SystemManufacturer AS SystemManufacturer,
+       @SystemProductName AS SystemProductName,
+       @IsAgentRunning IsAgentRunning,
+       @InstantFileInitializationEnabled InstantFileInitializationEnabled,
+       @OfflineSchedulers OfflineSchedulers,
+       @ResourceGovernorEnabled AS ResourceGovernorEnabled,
+       @WindowsRelease AS WindowsRelease,
+       @WindowsSP AS WindowsServicePackLevel,
+       @WindowsSKU AS WindowsSKU,
+       @LastMemoryDump LastMemoryDump,
+       @DumpCount AS MemoryDumpCount;</value>
+  </data>
+  <data name="SQLAgentJobs" xml:space="preserve">
+    <value>SET TRANSACTION ISOLATION LEVEL READ UNCOMMITTED;
+WITH T
+AS (SELECT j.job_id,
+           j.name,
+           MAX(   CASE
+                      WHEN jh.step_id = 0
+                      AND  jh.run_status &lt;&gt; 1 THEN
+                          dt.RunDateTime
+                      ELSE
+                          NULL
+                  END
+              ) LastFail,
+           MAX(   CASE
+                      WHEN jh.step_id = 0
+                      AND  jh.run_status = 1 THEN
+                          dt.RunDateTime
+                      ELSE
+                          NULL
+                  END
+              ) LastSucceed,
+           SUM(   CASE
+                      WHEN jh.step_id = 0
+                      AND  jh.run_status &lt;&gt; 1
+                      AND  dt.RunDateTime &gt;= DATEADD(hh, -24, GETDATE()) THEN
+                          1
+                      ELSE
+                          0
+                  END
+              ) FailCount24Hrs,
+           SUM(   CASE
+                      WHEN jh.step_id = 0
+                      AND  jh.run_status = 1
+                      AND  dt.RunDateTime &gt;= DATEADD(hh, -24, GETDATE()) THEN
+                          1
+                      ELSE
+                          0
+                  END
+              ) SucceedCount24Hrs,
+           SUM(   CASE
+                      WHEN jh.step_id = 0
+                      AND  jh.run_status &lt;&gt; 1
+                      AND  dt.RunDateTime &gt;= DATEADD(d, -7, GETDATE()) THEN
+                          1
+                      ELSE
+                          0
+                  END
+              ) FailCount7Days,
+           SUM(   CASE
+                      WHEN jh.step_id = 0
+                      AND  jh.run_status = 1
+                      AND  dt.RunDateTime &gt;= DATEADD(d, -7, GETDATE()) THEN
+                          1
+                      ELSE
+                          0
+                  END
+              ) SucceedCount7Days,
+           SUM(   CASE
+                      WHEN jh.step_id &lt;&gt; 0
+                      AND  jh.run_status &lt;&gt; 1
+                      AND  dt.RunDateTime &gt;= DATEADD(d, -7, GETDATE()) THEN
+                          1
+                      ELSE
+                          0
+                  END
+              ) AS JobStepFails7Days,
+           SUM(   CASE
+                      WHEN jh.step_id &lt;&gt; 0
+                      AND  jh.run_status &lt;&gt; 1
+                      AND  dt.RunDateTime &gt;= DATEADD(hh, -24, GETDATE()) THEN
+                          1
+                      ELSE
+                          0
+                  END
+              ) AS JobStepFails24Hrs,
+           j.enabled,
+           MAX(   CASE
+                      WHEN jh.step_id = 0 THEN
+                          dt.RunDurationSec
+                      ELSE
+                          NULL
+                  END
+              ) AS MaxDurationSec,
+           AVG(   CASE
+                      WHEN jh.step_id = 0 THEN
+                          dt.RunDurationSec
+                      ELSE
+                          NULL
+                  END
+              ) AS AvgDurationSec,
+           j.start_step_id,
+           j.category_id,
+           CONVERT(VARCHAR(MAX), j.owner_sid, 2) owner_sid_string,
+           j.notify_email_operator_id,
+           j.notify_netsend_operator_id,
+           j.notify_page_operator_id,
+           j.notify_level_eventlog,
+           j.notify_level_email,
+           j.notify_level_netsend,
+           j.notify_level_page,
+           j.date_created,
+           j.date_modified,
+           j.description,
+		   j.delete_level,
+		   j.version_number
+    FROM msdb.dbo.sysjobs j
+        LEFT JOIN msdb.dbo.sysjobhistory jh ON j.job_id = jh.job_id
+        OUTER APPLY
+    (
+        SELECT msdb.dbo.agent_datetime(run_date, run_time) AS RunDateTime,
+               ((jh.run_duration / 1000000) * 86400)
+               + (((jh.run_duration - ((jh.run_duration / 1000000) * 1000000)) / 10000) * 3600)
+               + (((jh.run_duration - ((jh.run_duration / 10000) * 10000)) / 100) * 60)
+               + (jh.run_duration - (jh.run_duration / 100) * 100) AS RunDurationSec
+    ) dt
+    GROUP BY j.job_id,
+             j.name,
+             j.enabled,
+             j.start_step_id,
+             j.category_id,
+             j.owner_sid,
+             j.owner_sid,
+             j.notify_email_operator_id,
+             j.notify_netsend_operator_id,
+             j.notify_page_operator_id,
+             j.description,
+             j.date_modified,
+             j.date_created,
+             j.notify_level_eventlog,
+             j.notify_level_email,
+             j.notify_level_netsend,
+             j.notify_level_page,
+			 j.delete_level,
+			 j.version_number)
+SELECT T.job_id,
+       T.name,
+       T.enabled,
+       T.LastFail,
+       T.LastSucceed,
+       T.FailCount24Hrs,
+       T.SucceedCount24Hrs,
+       T.FailCount7Days,
+       T.SucceedCount7Days,
+       T.JobStepFails7Days,
+       T.JobStepFails24Hrs,
+       T.MaxDurationSec,
+       T.AvgDurationSec,
+       CASE
+           WHEN LastFail &gt; ISNULL(LastSucceed, 0) THEN
+               1
+           ELSE
+               0
+       END AS IsLastFail,
+       T.start_step_id,
+       T.category_id,
+       T.owner_sid_string,
+       T.notify_email_operator_id,
+       T.notify_netsend_operator_id,
+       T.notify_page_operator_id,
+	   T.notify_level_eventlog,
+	   T.notify_level_email,
+	   T.notify_level_netsend,
+	   T.notify_level_page,
+       T.date_created,
+       T.date_modified,
+       T.description,
+	   T.delete_level,
+	   T.version_number
+FROM T
+ORDER BY T.date_modified DESC;</value>
+  </data>
+  <data name="SQLBackups" xml:space="preserve">
+    <value>select database_name,type, MAX(backup_start_date) LastBackup
+from msdb.dbo.backupset
+where server_name=@@SERVERNAME
+AND backup_finish_date&gt;=DATEADD(d,-10,GETUTCDATE())
+group by database_name, type</value>
+  </data>
+  <data name="SQLSysConfig" xml:space="preserve">
+    <value>SELECT configuration_id,CAST(value as BIGINT) as value,CAST(value_in_use as BIGINT) as value_in_use
+FROM sys.configurations</value>
+  </data>
+  <data name="SQLDatabases" xml:space="preserve">
+    <value>CREATE TABLE #sysdb(
+	[name] [sysname] NOT NULL,
+	[database_id] [int] NOT NULL,
+	[source_database_id] [int] NULL,
+	[owner_sid] [varbinary](85) NULL,
+	[create_date] [datetime] NOT NULL,
+	[compatibility_level] [tinyint] NOT NULL,
+	[collation_name] [sysname] NULL,
+	[user_access] [tinyint] NULL,
+	[is_read_only] [bit] NULL,
+	[is_auto_close_on] [bit] NOT NULL,
+	[is_auto_shrink_on] [bit] NULL,
+	[state] [tinyint] NULL,
+	[is_in_standby] [bit] NULL,
+	[is_cleanly_shutdown] [bit] NULL,
+	[is_supplemental_logging_enabled] [bit] NULL,
+	[snapshot_isolation_state] [tinyint] NULL,
+	[is_read_committed_snapshot_on] [bit] NULL,
+	[recovery_model] [tinyint] NULL,
+	[page_verify_option] [tinyint] NULL,
+	[is_auto_create_stats_on] [bit] NULL,
+	[is_auto_create_stats_incremental_on] [bit] NULL,
+	[is_auto_update_stats_on] [bit] NULL,
+	[is_auto_update_stats_async_on] [bit] NULL,
+	[is_ansi_null_default_on] [bit] NULL,
+	[is_ansi_nulls_on] [bit] NULL,
+	[is_ansi_padding_on] [bit] NULL,
+	[is_ansi_warnings_on] [bit] NULL,
+	[is_arithabort_on] [bit] NULL,
+	[is_concat_null_yields_null_on] [bit] NULL,
+	[is_numeric_roundabort_on] [bit] NULL,
+	[is_quoted_identifier_on] [bit] NULL,
+	[is_recursive_triggers_on] [bit] NULL,
+	[is_cursor_close_on_commit_on] [bit] NULL,
+	[is_local_cursor_default] [bit] NULL,
+	[is_fulltext_enabled] [bit] NULL,
+	[is_trustworthy_on] [bit] NULL,
+	[is_db_chaining_on] [bit] NULL,
+	[is_parameterization_forced] [bit] NULL,
+	[is_master_key_encrypted_by_server] [bit] NOT NULL,
+	[is_query_store_on] [bit] NULL,
+	[is_published] [bit] NOT NULL,
+	[is_subscribed] [bit] NOT NULL,
+	[is_merge_published] [bit] NOT NULL,
+	[is_distributor] [bit] NOT NULL,
+	[is_sync_with_backup] [bit] NOT NULL,
+	[is_broker_enabled] [bit] NOT NULL,
+	[log_reuse_wait] [tinyint] NULL,
+	[is_date_correlation_on] [bit] NOT NULL,
+	[is_cdc_enabled] [bit] NULL, --
+	[is_encrypted] [bit] NULL,
+	[is_honor_broker_priority_on] [bit] NULL,
+	[replica_id] [uniqueidentifier] NULL,
+	[group_database_id] [uniqueidentifier] NULL,
+	[resource_pool_id] [int] NULL,
+	[default_language_lcid] [smallint] NULL,
+	[default_language_name] [nvarchar](128) NULL,
+	[default_fulltext_language_lcid] [int] NULL,
+	[default_fulltext_language_name] [nvarchar](128) NULL,
+	[is_nested_triggers_on] [bit] NULL,
+	[is_transform_noise_words_on] [bit] NULL,
+	[two_digit_year_cutoff] [smallint] NULL,
+	[containment] [tinyint] NULL,
+	[target_recovery_time_in_seconds] [int] NULL,
+	[delayed_durability] [int] NULL,
+	[is_memory_optimized_elevate_to_snapshot_on] [bit] NULL,
+	[is_federation_member] [bit] NULL,
+	[is_remote_data_archive_enabled] [bit] NULL,
+	[is_mixed_page_allocation_on] [bit] NULL
+) 
+
+SELECT *
+INTO #sysdbcols
+FROM sys.databases 
+WHERE 1=2
+
+DECLARE @SQL NVARCHAR(MAX)
+DECLARE @cols NVARCHAR(MAX)
+SET @cols = 
+STUFF((SELECT ',' + name  
+FROM (
+	SELECT name  FROM tempdb.sys.columns WHERE OBJECT_ID = OBJECT_ID('tempdb..#sysdb')
+	INTERSECT
+	SELECT name FROM tempdb.sys.columns WHERE OBJECT_ID = OBJECT_ID('tempdb..#sysdbcols')
+	) T
+FOR XML PATH(''),TYPE).value('.','NVARCHAR(MAX)'),1,1,'')
+
+DECLARE @EditionID BIGINT
+SELECT @EditionID = CAST(SERVERPROPERTY('EditionID') as bigint) 
+
+SELECT @SQL = 'INSERT INTO #sysdb(' + @cols + ')
+		SELECT ' + @cols + ' FROM sys.databases 
+		' + CASE WHEN @EditionID = 1674378470 THEN ' WHERE name = DB_NAME()' ELSE '' END -- current DB only for azure
+
+EXEC sp_executesql @SQL
+
+SELECT name,
+       database_id,
+       source_database_id,
+       owner_sid,
+       create_date,
+       compatibility_level,
+       collation_name,
+       user_access,
+       is_read_only,
+       is_auto_close_on,
+       is_auto_shrink_on,
+       state,
+       is_in_standby,
+       is_cleanly_shutdown,
+       is_supplemental_logging_enabled,
+       snapshot_isolation_state,
+       is_read_committed_snapshot_on,
+       recovery_model,
+       page_verify_option,
+       is_auto_create_stats_on,
+       is_auto_create_stats_incremental_on,
+       is_auto_update_stats_on,
+       is_auto_update_stats_async_on,
+       is_ansi_null_default_on,
+       is_ansi_nulls_on,
+       is_ansi_padding_on,
+       is_ansi_warnings_on,
+       is_arithabort_on,
+       is_concat_null_yields_null_on,
+       is_numeric_roundabort_on,
+       is_quoted_identifier_on,
+       is_recursive_triggers_on,
+       is_cursor_close_on_commit_on,
+       is_local_cursor_default,
+       is_fulltext_enabled,
+       is_trustworthy_on,
+       is_db_chaining_on,
+       is_parameterization_forced,
+       is_master_key_encrypted_by_server,
+       is_query_store_on,
+       is_published,
+       is_subscribed,
+       is_merge_published,
+       is_distributor,
+       is_sync_with_backup,
+       is_broker_enabled,
+       log_reuse_wait,
+       is_date_correlation_on,
+       is_cdc_enabled,
+       is_encrypted,
+       is_honor_broker_priority_on,
+       replica_id,
+       group_database_id,
+       resource_pool_id,
+       default_language_lcid,
+       default_language_name,
+       default_fulltext_language_lcid,
+       default_fulltext_language_name,
+       is_nested_triggers_on,
+       is_transform_noise_words_on,
+       two_digit_year_cutoff,
+       containment,
+       target_recovery_time_in_seconds,
+       delayed_durability,
+       is_memory_optimized_elevate_to_snapshot_on,
+       is_federation_member,
+       is_remote_data_archive_enabled,
+       is_mixed_page_allocation_on
+FROM #sysdb
+DROP TABLE #sysdb
+DROP TABLE #sysdbcols</value>
+  </data>
+  <data name="SQLDBConfig" xml:space="preserve">
+    <value>DECLARE @DBName SYSNAME
+DECLARE @SQL NVARCHAR(MAX)
+CREATE TABLE #DBConfig( 
+	database_id INT NOT NULL,
+	configuration_id INT NOT NULL,
+	name NVARCHAR(60) NOT NULL,
+	value NVARCHAR(128) NULL,
+	value_for_secondary NVARCHAR(128) NULL,
+	PRIMARY KEY (database_id,configuration_id)
+)
+
+IF OBJECT_ID('sys.database_scoped_configurations') IS NOT NULL
+BEGIN
+	DECLARE DBs CURSOR FAST_FORWARD READ_ONLY FOR
+	SELECT name
+	FROM sys.databases
+	WHERE state  = 0
+	AND DATABASEPROPERTYEX(name, 'Updateability') = 'READ_WRITE'
+
+	OPEN DBs
+	FETCH NEXT FROM DBs INTO @DBName
+
+	WHILE @@FETCH_STATUS = 0
+	BEGIN
+
+	SET @SQL =  N'USE ' + QUOTENAME(@DBName) + ';
+	SELECT DB_ID(),configuration_id,name,CAST(value as NVARCHAR(128)),CAST(value_for_secondary as NVARCHAR(128))
+	FROM sys.database_scoped_configurations'
+
+	INSERT INTO #DBConfig
+	EXEC  (	@SQL )
+
+	FETCH NEXT FROM DBs INTO @DBName
+	END
+	CLOSE DBs
+	DEALLOCATE DBs
+
+END
+
+
+SELECT database_id,
+       configuration_id,
+       name,
+       value,
+       value_for_secondary
+FROM #DBConfig
+
+DROP TABLE #DBConfig</value>
+  </data>
+  <data name="SQLDrives" xml:space="preserve">
+    <value>IF OBJECT_ID('sys.dm_os_volume_stats') IS NOT NULL
+BEGIN
+	SELECT DISTINCT dovs.volume_mount_point AS Name,
+		dovs.total_bytes as Capacity,
+		dovs.available_bytes as FreeSpace,
+		dovs.logical_volume_name as Label
+	FROM sys.master_files mf
+	CROSS APPLY sys.dm_os_volume_stats(mf.database_id, mf.FILE_ID) dovs
+END</value>
+  </data>
+  <data name="SQLDBFiles" xml:space="preserve">
+    <value>DECLARE @DBName SYSNAME
+DECLARE @SQL NVARCHAR(MAX)
+CREATE TABLE #FileList ( 
+database_id INT,
+file_id INT,
+data_space_id INT,
+name SYSNAME,
+filegroup_name SYSNAME NULL,
+physical_name nvarchar(260),
+type TINYINT,
+size bigint,
+space_used bigint,
+max_size bigint,
+growth bigint,
+is_percent_growth bit,
+is_read_only BIT,
+state TINYINT
+)
+
+DECLARE DBs CURSOR FAST_FORWARD LOCAL FOR
+SELECT name
+FROM sys.databases
+WHERE state  = 0
+AND DATABASEPROPERTYEX(name, 'Updateability') = 'READ_WRITE'
+
+OPEN DBs
+FETCH NEXT FROM DBs INTO @DBName
+
+WHILE @@FETCH_STATUS = 0
+BEGIN
+
+PRINT @DBName
+SET @SQL =  N'USE ' + QUOTENAME(@DBName) + ';
+select 
+DB_ID() database_id,
+file_id,
+f.data_space_id,
+f.name,
+CASE WHEN f.type=1 THEN ''LOG'' ELSE ISNULL(fg.name,f.name) END as filegroup_name,
+f.physical_name,
+f.type,
+f.size,
+CASE WHEN f.type=2 THEN f.size ELSE FILEPROPERTY(f.name,''spaceused'') END as spaceused,
+f.max_size,
+f.growth,
+f.is_percent_growth,
+f.is_read_only,
+f.state
+from sys.database_files f
+LEFT JOIN sys.filegroups fg on f.data_space_id = fg.data_space_id
+where f.type_desc &lt;&gt; ''FULLTEXT'''
+
+INSERT INTO #FileList 
+EXEC  (	@SQL )
+
+FETCH NEXT FROM DBs INTO @DBName
+END
+CLOSE DBs
+DEALLOCATE DBs
+
+IF OBJECT_ID('sys.master_files') IS NULL
+BEGIN
+	SELECT database_id,
+       file_id,
+       data_space_id,
+       name,
+       filegroup_name,
+       physical_name,
+       type,
+       size,
+       space_used,
+       max_size,
+       growth,
+       is_percent_growth,
+       is_read_only,
+	   state
+	FROM #FileList
+END
+ELSE
+BEGIN
+	SELECT database_id,
+		   file_id,
+		   data_space_id,
+		   name,
+		   filegroup_name,
+		   physical_name,
+		   type,
+		   size,
+		   space_used,
+		   max_size,
+		   growth,
+		   is_percent_growth,
+		   is_read_only,
+		   state
+	FROM #FileList
+	UNION ALL	
+	SELECT database_id,
+			file_id,
+			data_space_id,
+			name,
+			CASE WHEN type=1 THEN 'LOG' ELSE NULL END AS filegroup_name,
+			physical_name,
+			type,
+			CASE WHEN mf.state=3 THEN 0 ELSE size END,
+			NULL AS SpaceUsed,
+			max_size,
+			growth,
+			is_percent_growth,
+			Is_Read_Only,
+			state
+	FROM sys.master_files mf
+	WHERE NOT EXISTS(SELECT 1 FROM #FileList fl WHERE fl.database_id = mf.database_id AND fl.file_id = mf.file_id)
+END
+DROP TABLE #FileList</value>
+  </data>
+  <data name="SQLDatabasesHADR" xml:space="preserve">
+    <value>IF OBJECT_ID('sys.dm_hadr_database_replica_states') IS NOT NULL
+BEGIN
+    SELECT database_id,
+           group_database_id,
+           is_primary_replica,
+           synchronization_state,
+           synchronization_health,
+           is_suspended,
+           suspend_reason
+    FROM sys.dm_hadr_database_replica_states
+    WHERE is_local = 1;
+END;</value>
+  </data>
+  <data name="SQLLogRestores" xml:space="preserve">
+    <value>WITH t
+AS (SELECT rsh.destination_database_name AS database_name,
+           rsh.restore_date,
+           bs.backup_start_date,
+           bmf.physical_device_name AS last_file,
+           ROW_NUMBER() OVER (PARTITION BY rsh.destination_database_name
+                              ORDER BY rsh.restore_date DESC
+                             ) rnum
+    FROM msdb.dbo.restorehistory rsh
+        INNER JOIN msdb.dbo.backupset bs ON rsh.backup_set_id = bs.backup_set_id
+        INNER JOIN msdb.dbo.restorefile rf ON rsh.restore_history_id = rf.restore_history_id
+        INNER JOIN msdb.dbo.backupmediafamily bmf ON bmf.media_set_id = bs.media_set_id
+        INNER JOIN sys.databases d ON rsh.destination_database_name = d.name
+    WHERE rsh.restore_type = 'L'
+	AND restore_date&gt;=DATEADD(d,-14,GETUTCDATE())
+)
+SELECT t.database_name,
+       t.restore_date,
+       t.backup_start_date,
+       t.last_file
+FROM t
+WHERE rnum = 1;</value>
+  </data>
+  <data name="SQLServerProperties" xml:space="preserve">
+    <value>SELECT CAST(SERVERPROPERTY('BuildClrVersion') as nvarchar(128)) as BuildClrVersion ,
+CAST(SERVERPROPERTY('Collation') as nvarchar(128)) as Collation ,
+CAST(SERVERPROPERTY('CollationID') as int) as CollationID ,
+CAST(SERVERPROPERTY('ComparisonStyle') as int) as ComparisonStyle ,
+CAST(SERVERPROPERTY('ComputerNamePhysicalNetBIOS') as nvarchar(128)) as ComputerNamePhysicalNetBIOS ,
+CAST(SERVERPROPERTY('Edition') as nvarchar(128)) as Edition ,
+CAST(SERVERPROPERTY('EditionID') as bigint) as EditionID ,
+CAST(SERVERPROPERTY('EngineEdition') as int) as EngineEdition ,
+CAST(SERVERPROPERTY('FileStreamConfiguredLevel') as tinyint) as FileStreamConfiguredLevel ,
+CAST(SERVERPROPERTY('FileStreamEffectiveLevel') as tinyint) as FileStreamEffectiveLevel ,
+CAST(SERVERPROPERTY('FileStreamShareName') as nvarchar(128)) as FileStreamShareName ,
+CAST(SERVERPROPERTY('HadrManagerStatus') as tinyint) as HadrManagerStatus ,
+CAST(SERVERPROPERTY('InstanceDefaultDataPath') as nvarchar(128)) as InstanceDefaultDataPath ,
+CAST(SERVERPROPERTY('InstanceDefaultLogPath') as nvarchar(128)) as InstanceDefaultLogPath ,
+CAST(SERVERPROPERTY('InstanceName') as nvarchar(128)) as InstanceName ,
+CAST(SERVERPROPERTY('IsAdvancedAnalyticsInstalled') as bit) as IsAdvancedAnalyticsInstalled ,
+CAST(SERVERPROPERTY('IsClustered') as int) as IsClustered ,
+CAST(SERVERPROPERTY('IsFullTextInstalled') as int) as IsFullTextInstalled ,
+CAST(SERVERPROPERTY('IsHadrEnabled') as int) as IsHadrEnabled ,
+CAST(SERVERPROPERTY('IsIntegratedSecurityOnly') as int) as IsIntegratedSecurityOnly ,
+CAST(SERVERPROPERTY('IsLocalDB') as int) as IsLocalDB ,
+CAST(SERVERPROPERTY('IsPolybaseInstalled') as int) as IsPolybaseInstalled ,
+CAST(SERVERPROPERTY('IsXTPSupported') as int) as IsXTPSupported ,
+CAST(SERVERPROPERTY('LCID') as int) as LCID ,
+CAST(SERVERPROPERTY('LicenseType') as nvarchar(128)) as LicenseType ,
+CAST(SERVERPROPERTY('MachineName') as nvarchar(128)) as MachineName ,
+CAST(SERVERPROPERTY('NumLicenses') as int) as NumLicenses ,
+CAST(SERVERPROPERTY('ProductBuild') as nvarchar(128)) as ProductBuild ,
+CAST(SERVERPROPERTY('ProductBuildType') as nvarchar(128)) as ProductBuildType ,
+CAST(SERVERPROPERTY('ProductLevel') as nvarchar(128)) as ProductLevel ,
+CAST(SERVERPROPERTY('ProductMajorVersion') as nvarchar(128)) as ProductMajorVersion ,
+CAST(SERVERPROPERTY('ProductUpdateLevel') as nvarchar(128)) as ProductUpdateLevel ,
+CAST(SERVERPROPERTY('ProductUpdateReference') as nvarchar(128)) as ProductUpdateReference ,
+CAST(SERVERPROPERTY('ProductVersion') as nvarchar(128)) as ProductVersion ,
+CAST(SERVERPROPERTY('ResourceLastUpdateDateTime') as datetime) as ResourceLastUpdateDateTime ,
+CAST(SERVERPROPERTY('ResourceVersion') as nvarchar(128)) as ResourceVersion ,
+CAST(SERVERPROPERTY('ServerName') as nvarchar(128)) as ServerName ,
+CAST(SERVERPROPERTY('SqlCharSet') as tinyint) as SqlCharSet ,
+CAST(SERVERPROPERTY('SqlCharSetName') as nvarchar(128)) as SqlCharSetName ,
+CAST(SERVERPROPERTY('SqlSortOrder') as tinyint) as SqlSortOrder ,
+CAST(SERVERPROPERTY('SqlSortOrderName') as nvarchar(128)) as SqlSortOrderName</value>
+  </data>
+  <data name="SQLCorruption" xml:space="preserve">
+    <value>SET TRANSACTION ISOLATION LEVEL READ UNCOMMITTED
+DECLARE @Corruption TABLE(
+		SourceTable TINYINT,
+		database_id INT NOT NULL,
+		last_update_date DATETIME NOT NULL
+)
+IF OBJECT_ID('msdb.dbo.suspect_pages') IS NOT NULL
+BEGIN
+	INSERT INTO @Corruption(SourceTable,database_id,last_update_date)
+	SELECT CAST(1 AS TINYINT) AS SourceTable,
+		   database_id,
+		   MAX(last_update_date) last_update_date
+	FROM msdb.dbo.suspect_pages
+	GROUP BY database_id
+END
+IF OBJECT_ID('msdb.sys.dm_db_mirroring_auto_page_repair') IS NOT NULL
+BEGIN
+	--Query can be blocked by a database restore even if mirroring is not used, so check if mirroring is being used before running this query
+	IF EXISTS(select * from sys.database_mirroring_endpoints)
+	BEGIN
+		INSERT INTO @Corruption(SourceTable,database_id,last_update_date)
+		SELECT CAST(2 AS TINYINT) AS SourceTable,
+			   database_id,
+			   MAX(modification_time)
+		FROM msdb.sys.dm_db_mirroring_auto_page_repair
+		GROUP BY database_id
+	END
+END
+IF OBJECT_ID('msdb.sys.dm_hadr_auto_page_repair') IS NOT NULL
+BEGIN
+	INSERT INTO @Corruption(SourceTable,database_id,last_update_date)
+	SELECT CAST(3 AS TINYINT) AS SourceTable,
+		   database_id,
+		   MAX(modification_time)
+	FROM msdb.sys.dm_hadr_auto_page_repair
+	GROUP BY database_id;
+END
+SELECT SourceTable,
+       database_id,
+       last_update_date
+FROM @Corruption</value>
+  </data>
+  <data name="SQLOSInfo" xml:space="preserve">
+    <value>DECLARE @SQL NVARCHAR(MAX);
+
+WITH cols AS (
+	SELECT 'softnuma_configuration' AS col,'INT' AS typ
+	UNION ALL
+	SELECT 'sql_memory_model' AS col,'INT' AS typ
+	UNION ALL
+	SELECT 'socket_count' AS col,'INT' AS typ
+	UNION ALL
+	SELECT 'cores_per_socket' AS col,'INT' AS typ
+	UNION ALL
+	SELECT 'numa_node_count' AS col,'INT' AS typ
+	UNION ALL
+	SELECT 'affinity_type' AS col,'INT' AS typ
+	UNION ALL
+	SELECT 'sqlserver_start_time' AS col,'DATETIME' AS typ
+	UNION ALL
+	SELECT 'os_priority_class' AS col,'INT' AS typ
+	UNION ALL
+	SELECT 'physical_memory_kb' AS col,'BIGINT' AS typ
+	UNION ALL
+	SELECT 'cpu_count' AS col,'INT' AS typ
+	UNION ALL
+	SELECT 'hyperthread_ratio' AS col,'INT' AS typ
+	UNION ALL
+	SELECT 'ms_ticks' AS col,'BIGINT' AS typ
+	UNION ALL
+	SELECT 'scheduler_count','INT'
+	UNION ALL
+	SELECT 'max_workers_count','INT'
+)
+SELECT @SQL ='SELECT ' + STUFF((SELECT ',' + CASE WHEN col='physical_memory_kb' 
+												AND COLUMNPROPERTY(OBJECT_ID('sys.dm_os_sys_info'),'physical_memory_kb','ColumnID') IS NULL 
+												AND COLUMNPROPERTY(OBJECT_ID('sys.dm_os_sys_info'),'physical_memory_in_bytes','ColumnID') IS NOT NULL 
+												THEN 'physical_memory_in_bytes/1024 as physical_memory_kb'
+												WHEN col='sqlserver_start_time' AND COLUMNPROPERTY(OBJECT_ID('sys.dm_os_sys_info'),col,'ColumnID') IS NULL
+												THEN '(SELECT create_date FROM sys.databases WHERE name=''tempdb'') as sqlserver_start_time'
+												WHEN COLUMNPROPERTY(OBJECT_ID('sys.dm_os_sys_info'),col,'ColumnID') IS NULL THEN 'CAST(NULL AS ' + typ + ') as ' + QUOTENAME(col) ELSE col END
+FROM cols
+ORDER BY col
+FOR XML PATH(''),TYPE).value('.','NVARCHAR(MAX)'),1,1,'') + ',DATEDIFF(mi,GETDATE(),GETUTCDATE()) AS UTCOffset
+FROM sys.dm_os_sys_info'
+PRINT @SQL
+
+EXEC sp_executesql @SQL</value>
+  </data>
+  <data name="SQLTraceFlags" xml:space="preserve">
+    <value>DBCC TRACESTATUS(-1)</value>
+  </data>
+  <data name="SQLCPU" xml:space="preserve">
+    <value>IF OBJECT_ID('sys.dm_db_resource_stats') IS NOT NULL
+BEGIN
+	SELECT TOP(@TOP) end_time AS EventTime,
+		CAST(avg_cpu_percent AS INT),
+		100-CAST(avg_cpu_percent AS INT) AS SystemIdle
+	FROM sys.dm_db_resource_stats
+END
+ELSE
+BEGIN
+	DECLARE @ts_now bigint 
+	SELECT @ts_now= cpu_ticks/(cpu_ticks/ms_ticks) 
+	FROM sys.dm_os_sys_info; 
+ 
+	SELECT TOP(@TOP) DATEADD(ms, -1 * (@ts_now - [timestamp]), GETUTCDATE()) AS [EventTime],
+					SQLProcessUtilization AS [SQLProcessCPU], 
+				   SystemIdle AS [SystemIdleProcess] 
+	FROM (SELECT record.value('(./Record/@id)[1]', 'int') AS record_id, 
+				record.value('(./Record/SchedulerMonitorEvent/SystemHealth/SystemIdle)[1]', 'int') 
+				AS [SystemIdle], 
+				record.value('(./Record/SchedulerMonitorEvent/SystemHealth/ProcessUtilization)[1]', 'int') 
+				AS [SQLProcessUtilization], [timestamp] 
+		  FROM (SELECT [timestamp], CONVERT(xml, record) AS [record] 
+				FROM sys.dm_os_ring_buffers WITH (NOLOCK)
+				WHERE ring_buffer_type = N'RING_BUFFER_SCHEDULER_MONITOR' 
+				AND record LIKE N'%&lt;SystemHealth&gt;%') AS x) AS y 
+	ORDER BY record_id DESC OPTION (RECOMPILE);
+END</value>
+  </data>
+  <data name="SQLBlockingSnapshot" xml:space="preserve">
+    <value>DECLARE @MinWaitTimeMs INT 
+SET @MinWaitTimeMs= 1000
+
+DECLARE @DBIDTable NVARCHAR(MAX)
+DECLARE @SQL NVARCHAR(MAX)
+SELECT @DBIDTable= CASE WHEN COLUMNPROPERTY(OBJECT_ID('sys.dm_exec_sessions'),'database_id','ColumnId') IS NULL THEN 'R.' ELSE 'S.' END 
+SET @SQL =N'
+	DECLARE @UTCOffset INT 
+	SELECT @UTCOffset= DATEDIFF(mi,GETDATE(),GETUTCDATE());
+	WITH R AS (
+		SELECT GETUTCDATE() SnapshotDateUTC,
+			@UTCOffset AS UTCOffset,
+			S.session_id,
+			ISNULL(R.blocking_session_id,0) AS blocking_session_id,
+			ISNULL(Rtxt.text,Ctxt.text) AS Txt,
+			DATEADD(mi,@UTCOffset,ISNULL(R.start_time,S.last_request_start_time)) as start_time_utc,
+			R.command,
+			' + @DBIDTable + 'database_id,
+			DB_NAME(' + @DBIDTable + 'database_id) database_name,
+			S.host_name,
+			S.program_name,
+			R.wait_time,
+			S.login_name,
+			R.wait_resource,
+			R.Status,
+			R.wait_type
+		FROM sys.dm_exec_sessions S
+		INNER JOIN sys.dm_exec_connections C ON C.session_id= S.session_id
+		LEFT JOIN sys.dm_exec_requests as R ON S.session_id = R.session_id
+		OUTER APPLY sys.dm_exec_sql_text(R.sql_handle) AS Rtxt
+		OUTER APPLY sys.dm_exec_sql_text(C.most_recent_sql_handle) AS Ctxt
+		WHERE S.session_id&gt;0
+		AND R.command&lt;&gt;''BRKR TASK''
+		AND S.is_user_process=1
+	)
+	SELECT *
+	FROM R
+	WHERE ( R.blocking_session_id &gt; 0  AND R.wait_time&gt; @MinWaitTimeMs
+	OR EXISTS(SELECT * FROM R R2 WHERE R2.blocking_session_id = R.session_id AND R2.wait_time&gt;@MinWaitTimeMs)
+	)'
+
+EXEC sp_executesql @SQL,N'@MinWaitTimeMs INT',@MinWaitTimeMs</value>
+  </data>
+  <data name="SQLIOStats" xml:space="preserve">
+    <value>IF SERVERPROPERTY('EditionID')=1674378470
+BEGIN
+	SELECT GETUTCDATE() AS SnapshotDate,
+		   [database_id],
+		   [file_id],
+		   [sample_ms],
+		   [num_of_reads],
+		   [num_of_bytes_read],
+		   [io_stall_read_ms],
+		   [num_of_writes],
+		   [num_of_bytes_written],
+		   [io_stall_write_ms],
+		   [io_stall],
+		   [size_on_disk_bytes]
+	FROM sys.dm_io_virtual_file_stats(DB_ID(), NULL) vfs;
+END
+ELSE
+BEGIN
+	SELECT GETUTCDATE() AS SnapshotDate,
+		   [database_id],
+		   [file_id],
+		   [sample_ms],
+		   [num_of_reads],
+		   [num_of_bytes_read],
+		   [io_stall_read_ms],
+		   [num_of_writes],
+		   [num_of_bytes_written],
+		   [io_stall_write_ms],
+		   [io_stall],
+		   [size_on_disk_bytes]
+	FROM sys.dm_io_virtual_file_stats(NULL, NULL) vfs;
+END</value>
+  </data>
+  <data name="SQLWaits" xml:space="preserve">
+    <value>SELECT wait_type,
+       waiting_tasks_count,
+       wait_time_ms,
+       signal_wait_time_ms
+FROM sys.dm_os_wait_stats WITH (NOLOCK)
+WHERE [wait_type] NOT IN ( N'BROKER_EVENTHANDLER', N'BROKER_RECEIVE_WAITFOR', N'BROKER_TASK_STOP', N'BROKER_TO_FLUSH',
+                           N'BROKER_TRANSMITTER', N'CHECKPOINT_QUEUE', N'CHKPT', N'CLR_AUTO_EVENT',
+                           N'CLR_MANUAL_EVENT', N'CLR_SEMAPHORE', N'CXCONSUMER', N'DBMIRROR_DBM_EVENT',
+                           N'DBMIRROR_EVENTS_QUEUE', N'DBMIRROR_WORKER_QUEUE', N'DBMIRRORING_CMD', N'DIRTY_PAGE_POLL',
+                           N'DISPATCHER_QUEUE_SEMAPHORE', N'EXECSYNC', N'FSAGENT', N'FT_IFTS_SCHEDULER_IDLE_WAIT',
+                           N'FT_IFTSHC_MUTEX', N'HADR_CLUSAPI_CALL', N'HADR_FABRIC_CALLBACK',
+                           N'HADR_FILESTREAM_IOMGR_IOCOMPLETION', N'HADR_LOGCAPTURE_WAIT',
+                           N'HADR_NOTIFICATION_DEQUEUE', N'HADR_TIMER_TASK', N'HADR_WORK_QUEUE', N'KSOURCE_WAKEUP',
+                           N'LAZYWRITER_SLEEP', N'LOGMGR_QUEUE', N'MEMORY_ALLOCATION_EXT', N'ONDEMAND_TASK_QUEUE',
+                           N'PARALLEL_REDO_DRAIN_WORKER', N'PARALLEL_REDO_LOG_CACHE', N'PARALLEL_REDO_TRAN_LIST',
+                           N'PARALLEL_REDO_WORKER_SYNC', N'PARALLEL_REDO_WORKER_WAIT_WORK',
+                           N'PREEMPTIVE_HADR_LEASE_MECHANISM', N'PREEMPTIVE_SP_SERVER_DIAGNOSTICS',
+                           N'PREEMPTIVE_OS_LIBRARYOPS', N'PREEMPTIVE_OS_COMOPS', N'PREEMPTIVE_OS_CRYPTOPS',
+                           N'PREEMPTIVE_OS_PIPEOPS', N'PREEMPTIVE_OS_AUTHENTICATIONOPS', N'PREEMPTIVE_OS_GENERICOPS',
+                           N'PREEMPTIVE_OS_VERIFYTRUST', N'PREEMPTIVE_OS_FILEOPS', N'PREEMPTIVE_OS_DEVICEOPS',
+                           N'PREEMPTIVE_OS_QUERYREGISTRY', N'PREEMPTIVE_OS_WRITEFILE',
+                           N'PREEMPTIVE_XE_CALLBACKEXECUTE', N'PREEMPTIVE_XE_DISPATCHER',
+                           N'PREEMPTIVE_XE_GETTARGETSTATE', N'PREEMPTIVE_XE_SESSIONCOMMIT',
+                           N'PREEMPTIVE_XE_TARGETINIT', N'PREEMPTIVE_XE_TARGETFINALIZE',
+                           N'PWAIT_ALL_COMPONENTS_INITIALIZED', N'PWAIT_DIRECTLOGCONSUMER_GETNEXT',
+                           N'PWAIT_EXTENSIBILITY_CLEANUP_TASK', N'QDS_PERSIST_TASK_MAIN_LOOP_SLEEP',
+                           N'QDS_ASYNC_QUEUE', N'QDS_CLEANUP_STALE_QUERIES_TASK_MAIN_LOOP_SLEEP',
+                           N'REQUEST_FOR_DEADLOCK_SEARCH', N'RESOURCE_QUEUE', N'SERVER_IDLE_CHECK',
+                           N'SLEEP_BPOOL_FLUSH', N'SLEEP_DBSTARTUP', N'SLEEP_DCOMSTARTUP', N'SLEEP_MASTERDBREADY',
+                           N'SLEEP_MASTERMDREADY', N'SLEEP_MASTERUPGRADED', N'SLEEP_MSDBSTARTUP', N'SLEEP_SYSTEMTASK',
+                           N'SLEEP_TASK', N'SLEEP_TEMPDBSTARTUP', N'SNI_HTTP_ACCEPT', N'SOS_WORK_DISPATCHER',
+                           N'SP_SERVER_DIAGNOSTICS_SLEEP', N'SQLTRACE_BUFFER_FLUSH',
+                           N'SQLTRACE_INCREMENTAL_FLUSH_SLEEP', N'SQLTRACE_WAIT_ENTRIES',
+                           N'STARTUP_DEPENDENCY_MANAGER', N'WAIT_FOR_RESULTS', N'WAITFOR', N'WAITFOR_TASKSHUTDOWN',
+                           N'WAIT_XTP_HOST_WAIT', N'WAIT_XTP_OFFLINE_CKPT_NEW_LOG', N'WAIT_XTP_CKPT_CLOSE',
+                           N'WAIT_XTP_RECOVERY', N'XE_BUFFERMGR_ALLPROCESSED_EVENT', N'XE_DISPATCHER_JOIN',
+                           N'XE_DISPATCHER_WAIT', N'XE_LIVE_TARGET_TVF', N'XE_TIMER_EVENT',N'VDI_CLIENT_OTHER',
+						   N'PVS_PREALLOCATE',N'REDO_THREAD_PENDING_WORK'
+                         )
+AND   waiting_tasks_count &gt; 0;</value>
+  </data>
+  <data name="SQLOSLoadedModules" xml:space="preserve">
+    <value>SELECT CONVERT(CHAR(16), base_address, 2) base_address_string,
+       file_version,
+       product_version,
+       debug,
+       patched,
+       prerelease,
+       private_build,
+       special_build,
+       language,
+       company,
+       description,
+       name
+FROM sys.dm_os_loaded_modules</value>
+  </data>
+  <data name="SQLDBTuningOptions" xml:space="preserve">
+    <value>DECLARE @DBName SYSNAME
+DECLARE @SQL NVARCHAR(MAX)
+CREATE TABLE #autotune( 
+	database_id INT NOT NULL,
+	[name] nvarchar(128), 
+	[desired_state_desc] nvarchar(60), 
+	[actual_state_desc] nvarchar(60), 
+	[reason_desc] nvarchar(60) 
+	PRIMARY KEY (database_id,name)
+)
+
+IF OBJECT_ID('sys.database_automatic_tuning_options') IS NOT NULL
+BEGIN
+	DECLARE DBs CURSOR FAST_FORWARD READ_ONLY LOCAL FOR
+	SELECT name
+	FROM sys.databases
+	WHERE state  = 0
+	AND DATABASEPROPERTYEX(name, 'Updateability') = 'READ_WRITE'
+
+	OPEN DBs
+	FETCH NEXT FROM DBs INTO @DBName
+
+	WHILE @@FETCH_STATUS = 0
+	BEGIN
+
+	SET @SQL =  N'USE ' + QUOTENAME(@DBName) + ';
+	SELECT DB_ID(), name, desired_state_desc, actual_state_desc, reason_desc
+	FROM sys.database_automatic_tuning_options;'
+
+	INSERT INTO #autotune(database_id,name,desired_state_desc,actual_state_desc,reason_desc)
+	EXEC  (	@SQL )
+
+	FETCH NEXT FROM DBs INTO @DBName
+	END
+	CLOSE DBs
+	DEALLOCATE DBs
+
+END
+
+
+SELECT database_id,
+       name,
+       desired_state_desc,
+       actual_state_desc,
+       reason_desc 
+FROM #autotune
+
+DROP TABLE #autotune</value>
+  </data>
+  <data name="SQLAzureDBResourceStats" xml:space="preserve">
+    <value>SELECT end_time,
+       avg_cpu_percent,
+       avg_data_io_percent,
+       avg_log_write_percent,
+       avg_memory_usage_percent,
+       xtp_storage_percent,
+       max_worker_percent,
+       max_session_percent,
+       dtu_limit,
+       avg_instance_cpu_percent,
+       avg_instance_memory_percent,
+       cpu_limit,
+       replica_role
+FROM sys.dm_db_resource_stats
+WHERE end_time &gt;= @Date</value>
+  </data>
+  <data name="SQLAzureDBServiceObjectives" xml:space="preserve">
+    <value>SELECT edition,
+       service_objective,
+       elastic_pool_name 
+FROM sys.database_service_objectives
+WHERE database_id = DB_ID()</value>
+  </data>
+  <data name="SQLAzureDBElasticPoolResourceStats" xml:space="preserve">
+    <value>SELECT start_time,
+       end_time,
+       elastic_pool_name,
+       avg_cpu_percent,
+       avg_data_io_percent,
+       avg_log_write_percent,
+       avg_storage_percent,
+       max_worker_percent,
+       max_session_percent,
+       elastic_pool_dtu_limit,
+       elastic_pool_storage_limit_mb,
+       avg_allocated_storage_percent,
+       elastic_pool_cpu_limit
+FROM sys.elastic_pool_resource_stats 
+WHERE start_time&gt;=@Date</value>
+  </data>
+  <data name="SQLSlowQueries" xml:space="preserve">
+    <value>/* Setup - create event sessions if they don't exist */
+DECLARE @SQL NVARCHAR(MAX)
+DECLARE @EventSessionTemplate NVARCHAR(MAX) = N'CREATE EVENT SESSION [{EventSessionName}] ON SERVER 
+	ADD EVENT sqlserver.rpc_completed(
+		ACTION(sqlserver.client_app_name,sqlserver.client_hostname,sqlserver.database_id,sqlserver.username)
+		WHERE ([duration]&gt;(' + CAST(@SlowQueryThreshold AS NVARCHAR(MAX)) + ') AND ([sqlserver].[client_app_name]&lt;&gt;N''DBADashXE'' AND [object_name]&lt;&gt;N''sp_readrequest''))),
+	ADD EVENT sqlserver.sql_batch_completed(
+		ACTION(sqlserver.client_app_name,sqlserver.client_hostname,sqlserver.database_id,sqlserver.username)
+		WHERE ([duration]&gt;(' + CAST(@SlowQueryThreshold AS NVARCHAR(MAX)) + ') AND ([sqlserver].[client_app_name]&lt;&gt;N''DBADashXE'')))
+	ADD TARGET package0.ring_buffer
+	WITH (MAX_MEMORY=4096 KB,EVENT_RETENTION_MODE=ALLOW_MULTIPLE_EVENT_LOSS,MAX_DISPATCH_LATENCY=2 SECONDS,MAX_EVENT_SIZE=0 KB,MEMORY_PARTITION_MODE=NONE,TRACK_CAUSALITY=OFF,STARTUP_STATE=OFF)'
+
+IF NOT EXISTS(SELECT 1 
+			FROM sys.server_event_sessions
+			WHERE name = 'DBADash_1'
+			)
+BEGIN
+	SET @SQL = REPLACE(@EventSessionTemplate,'{EventSessionName}','DBADash_1')
+	EXEC sp_executesql @SQL
+END
+IF NOT EXISTS(SELECT 1 
+			FROM sys.server_event_sessions
+			WHERE name = 'DBADash_2'
+			)
+BEGIN
+	SET @SQL = REPLACE(@EventSessionTemplate,'{EventSessionName}','DBADash_2')
+	EXEC sp_executesql @SQL
+END
+
+-- Start the session that is not running to create overlap
+IF NOT EXISTS(
+	SELECT * 
+	FROM sys.dm_xe_sessions
+	WHERE name = 'DBADash_1'
+	)
+BEGIN
+	ALTER EVENT SESSION DBADash_1
+	ON SERVER
+	State = START
+END
+IF NOT EXISTS(
+	SELECT * 
+	FROM sys.dm_xe_sessions
+	WHERE name = 'DBADash_2'
+	)
+BEGIN
+	ALTER EVENT SESSION DBADash_2
+	ON SERVER
+	State = START
+END
+
+-- Allow time for events to be dispatched
+WAITFOR DELAY '00:00:01'
+
+DECLARE @target_data NVARCHAR(MAX)
+DECLARE @OldestSession SYSNAME
+-- Return ring buffer from oldest session
+SELECT TOP(1) @target_data= target_data, @OldestSession=s.name
+FROM sys.dm_xe_sessions AS s 
+JOIN sys.dm_xe_session_targets AS t 
+    ON t.event_session_address = s.address
+WHERE s.name IN('DBADash_1','DBADash_2')
+and t.target_name='ring_buffer'
+ORDER BY s.create_time 
+
+SELECT @target_data as target_data
+-- 
+IF @OldestSession='DBADash_1'
+BEGIN
+	ALTER EVENT SESSION DBADash_1
+	ON SERVER
+	State = STOP
+END
+ELSE IF @OldestSession='DBADash_2'
+BEGIN
+	ALTER EVENT SESSION DBADash_2
+	ON SERVER
+	State = STOP
+END</value>
+  </data>
+  <data name="SQLRemoveEventSessions" xml:space="preserve">
+    <value>IF EXISTS(SELECT 1 
+			FROM sys.server_event_sessions
+			WHERE name = 'DBADash_1'
+			)
+BEGIN
+	DROP EVENT SESSION DBADash_1 ON SERVER;
+END
+IF EXISTS(SELECT 1 
+			FROM sys.server_event_sessions
+			WHERE name = 'DBADash_2'
+			)
+BEGIN
+	DROP EVENT SESSION DBADash_2 ON SERVER;
+END</value>
+  </data>
+  <data name="SQLSlowQueriesAzure" xml:space="preserve">
+    <value>/* Setup - create event sessions if they don't exist */
+DECLARE @SQL NVARCHAR(MAX)
+DECLARE @EventSessionTemplate NVARCHAR(MAX) = N'CREATE EVENT SESSION [{EventSessionName}] ON DATABASE 
+	ADD EVENT sqlserver.rpc_completed(
+		ACTION(sqlserver.client_app_name,sqlserver.client_hostname,sqlserver.database_id,sqlserver.username)
+		WHERE ([duration]&gt;(' + CAST(@SlowQueryThreshold AS NVARCHAR(MAX)) + ') AND ([sqlserver].[client_app_name]&lt;&gt;N''DBADashXE''))),
+	ADD EVENT sqlserver.sql_batch_completed(
+		ACTION(sqlserver.client_app_name,sqlserver.client_hostname,sqlserver.database_id,sqlserver.username)
+		WHERE ([duration]&gt;(' + CAST(@SlowQueryThreshold AS NVARCHAR(MAX)) + ') AND ([sqlserver].[client_app_name]&lt;&gt;N''DBADashXE'')))
+	ADD TARGET package0.ring_buffer
+	WITH (MAX_MEMORY=4096 KB,EVENT_RETENTION_MODE=ALLOW_MULTIPLE_EVENT_LOSS,MAX_DISPATCH_LATENCY=2 SECONDS,MAX_EVENT_SIZE=0 KB,MEMORY_PARTITION_MODE=NONE,TRACK_CAUSALITY=OFF,STARTUP_STATE=OFF)'
+
+IF NOT EXISTS(SELECT 1 
+			FROM sys.database_event_sessions
+			WHERE name = 'DBADash_1'
+			)
+BEGIN
+	SET @SQL = REPLACE(@EventSessionTemplate,'{EventSessionName}','DBADash_1')
+	EXEC sp_executesql @SQL
+END
+IF NOT EXISTS(SELECT 1 
+			FROM sys.database_event_sessions
+			WHERE name = 'DBADash_2'
+			)
+BEGIN
+	SET @SQL = REPLACE(@EventSessionTemplate,'{EventSessionName}','DBADash_2')
+	EXEC sp_executesql @SQL
+END
+
+-- Start the session that is not running to create overlap
+IF NOT EXISTS(
+	SELECT * 
+	FROM sys.dm_xe_database_sessions
+	WHERE name = 'DBADash_1'
+	)
+BEGIN
+	ALTER EVENT SESSION DBADash_1
+	ON DATABASE
+	State = START
+END
+IF NOT EXISTS(
+	SELECT * 
+	FROM sys.dm_xe_database_sessions
+	WHERE name = 'DBADash_2'
+	)
+BEGIN
+	ALTER EVENT SESSION DBADash_2
+	ON DATABASE
+	State = START
+END
+
+-- Allow time for events to be dispatched
+WAITFOR DELAY '00:00:01'
+
+DECLARE @target_data NVARCHAR(MAX)
+DECLARE @OldestSession SYSNAME
+-- Return ring buffer from oldest session
+SELECT TOP(1) @target_data= target_data, @OldestSession=s.name
+FROM sys.dm_xe_database_sessions AS s 
+JOIN sys.dm_xe_database_session_targets AS t 
+    ON t.event_session_address = s.address
+WHERE s.name IN('DBADash_1','DBADash_2')
+and t.target_name='ring_buffer'
+ORDER BY s.create_time 
+
+SELECT @target_data as target_data
+-- 
+IF @OldestSession='DBADash_1'
+BEGIN
+	ALTER EVENT SESSION DBADash_1
+	ON DATABASE
+	State = STOP
+END
+ELSE IF @OldestSession='DBADash_2'
+BEGIN
+	ALTER EVENT SESSION DBADash_2
+	ON DATABASE
+	State = STOP
+END</value>
+  </data>
+  <data name="SQLRemoveEventSessionsAzure" xml:space="preserve">
+    <value>IF EXISTS(SELECT 1 
+			FROM sys.database_event_sessions
+			WHERE name = 'DBADash_1'
+			)
+BEGIN
+	DROP EVENT SESSION DBADash_1 ON DATABASE;
+END
+IF EXISTS(SELECT 1 
+			FROM sys.database_event_sessions
+			WHERE name = 'DBADash_2'
+			)
+BEGIN
+	DROP EVENT SESSION DBADash_2 ON DATABASE;
+END</value>
+  </data>
+  <data name="SQLStopEventSessions" xml:space="preserve">
+    <value>IF EXISTS(
+	SELECT * 
+	FROM sys.dm_xe_sessions
+	WHERE name = 'DBADash_1'
+	)
+BEGIN
+	ALTER EVENT SESSION DBADash_1
+	ON SERVER
+	State = STOP
+END
+IF EXISTS(
+	SELECT * 
+	FROM sys.dm_xe_sessions
+	WHERE name = 'DBADash_2'
+	)
+BEGIN
+	ALTER EVENT SESSION DBADash_2
+	ON SERVER
+	State = STOP
+END</value>
+  </data>
+  <data name="SQLStopEventSessionsAzure" xml:space="preserve">
+    <value>IF EXISTS(
+	SELECT * 
+	FROM sys.dm_xe_database_sessions
+	WHERE name = 'DBADash_1'
+	)
+BEGIN
+	ALTER EVENT SESSION DBADash_1
+	ON DATABASE
+	State = STOP
+END
+IF EXISTS(
+	SELECT * 
+	FROM sys.dm_xe_database_sessions
+	WHERE name = 'DBADash_2'
+	)
+BEGIN
+	ALTER EVENT SESSION DBADash_2
+	ON DATABASE
+	State = STOP
+END</value>
+  </data>
+  <data name="SQLLastGoodCheckDB" xml:space="preserve">
+    <value>DECLARE @SQL NVARCHAR(MAX)
+DECLARE @DBName SYSNAME
+DECLARE @DBID INT
+IF DATABASEPROPERTYEX(DB_NAME(),'LastGoodCheckDbTime') IS NULL AND IS_SRVROLEMEMBER('sysadmin')=1
+BEGIN
+	DECLARE DBs CURSOR FAST_FORWARD READ_ONLY FOR
+	SELECT name,database_id
+	FROM sys.databases
+	WHERE state  = 0
+	AND DATABASEPROPERTYEX(name, 'Updateability') = 'READ_WRITE'
+
+	DECLARE @dbinfo TABLE
+			( ParentObject VARCHAR(255) ,
+			  Object VARCHAR(255) ,
+			  Field VARCHAR(255) ,
+			  Value VARCHAR(255) 
+			);
+	DECLARE @LastGoodDBCC TABLE(
+		database_id INT PRIMARY KEY,
+		LastGoodCheckDbTime DATETIME
+	)
+
+	OPEN DBs
+
+
+	WHILE 1=1
+	BEGIN
+		FETCH NEXT FROM DBs INTO @DBName,@DBID
+		IF @@FETCH_STATUS&lt;&gt;0
+			BREAK
+		SET @SQL =  N'USE ' + QUOTENAME(@DBName) + ';
+		DBCC DBInfo() With TableResults, NO_INFOMSGS'
+
+		INSERT INTO @dbinfo(ParentObject,Object,Field,Value)
+		EXEC  (	@SQL )
+
+		INSERT INTO @LastGoodDBCC(database_id,LastGoodCheckDbTime)
+		SELECT @DBID, CAST(Value as DATETIME)
+		FROM @dbinfo
+		WHERE Field = 'dbi_dbccLastKnownGood'
+
+		DELETE @dbinfo
+	END
+	CLOSE DBs
+	DEALLOCATE DBs
+	SELECT database_id,LastGoodCheckDbTime
+	FROM @LastGoodDBCC
+
+END
+ELSE
+BEGIN
+	SELECT database_id,CAST(DATABASEPROPERTYEX(name,'LastGoodCheckDbTime') as DATETIME) as LastGoodCheckDbTime
+	FROM sys.databases
+END</value>
+  </data>
+  <data name="SQLAlerts" xml:space="preserve">
+    <value>SELECT id,
+	name,
+	message_id,
+	severity,
+	enabled,
+	delay_between_responses,
+	msdb.dbo.agent_datetime(NULLIF(last_occurrence_date,0),last_occurrence_time) last_occurrence,
+	msdb.dbo.agent_datetime(NULLIF(last_response_date,0),last_response_time) last_response,
+	notification_message,
+	include_event_description,
+	database_name,
+	event_description_keyword,
+	occurrence_count,
+	msdb.dbo.agent_datetime(NULLIF(count_reset_date,0),count_reset_time) as count_reset,
+	job_id,
+	has_notification,
+	category_id,
+	performance_condition
+FROM msdb..sysalerts</value>
+  </data>
+  <data name="SQLObjectExecutionStats" xml:space="preserve">
+    <value>DECLARE @SQL NVARCHAR(MAX)
+DECLARE @IsAzure BIT
+SELECT @IsAzure = CASE WHEN SERVERPROPERTY('EditionID') =1674378470 THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END
+IF OBJECT_ID('sys.dm_exec_procedure_stats') IS NOT NULL
+BEGIN
+	SET @SQL = N'
+			SELECT object_id,
+				   database_id,
+				   ISNULL(OBJECT_NAME(object_id, database_id),'''') object_name,
+				   total_worker_time,
+				   total_elapsed_time,
+				   total_logical_reads,
+				   total_logical_writes,
+				   total_physical_reads,
+				   cached_time,
+				   execution_count,
+				   GETUTCDATE() AS current_time_utc,
+				   type,
+				   ISNULL(OBJECT_SCHEMA_NAME(object_id, database_id),'''') AS schema_name
+			FROM sys.dm_exec_procedure_stats
+			WHERE database_id ' + CASE WHEN @IsAzure=1 THEN '= DB_ID()' ELSE '&lt;&gt; 32767' END + '
+			'
+END
+IF OBJECT_ID('sys.dm_exec_function_stats') IS NOT NULL
+BEGIN
+	SET @SQL = @SQL + 'UNION ALL
+		SELECT object_id,
+		   database_id,
+		   ISNULL(OBJECT_NAME(object_id, database_id),'''') object_name,
+		   total_worker_time,
+		   total_elapsed_time,
+		   total_logical_reads,
+		   total_logical_writes,
+		   total_physical_reads,
+		   cached_time,
+		   execution_count,
+		   GETUTCDATE() AS current_time_utc,
+		   type,
+		   ISNULL(OBJECT_SCHEMA_NAME(object_id,database_id),'''') schema_name
+	FROM sys.dm_exec_function_stats
+	WHERE database_id ' + CASE WHEN @IsAzure=1 THEN '= DB_ID()' ELSE '&lt;&gt; 32767' END + '
+	'
+END
+IF OBJECT_ID('sys.dm_exec_trigger_stats') IS NOT NULL
+BEGIN
+	SET @SQL = @SQL + 'UNION ALL
+		SELECT object_id,
+		   database_id,
+		   ISNULL(OBJECT_NAME(object_id, database_id),'''') object_name,
+		   total_worker_time,
+		   total_elapsed_time,
+		   total_logical_reads,
+		   total_logical_writes,
+		   total_physical_reads,
+		   cached_time,
+		   execution_count,
+		   GETUTCDATE() AS current_time_utc,
+		   type,
+		   ISNULL(OBJECT_SCHEMA_NAME(object_id,database_id),'''') schema_name
+	FROM sys.dm_exec_trigger_stats
+	WHERE database_id ' + CASE WHEN @IsAzure=1 THEN '= DB_ID()' ELSE '&lt;&gt; 32767' END + '
+	'
+END
+PRINT @SQL
+EXEC sp_executesql @SQL</value>
+  </data>
+  <data name="SQLServerPrincipals" xml:space="preserve">
+    <value>DECLARE @SQL NVARCHAR(MAX)
+SET @SQL = N'
+SELECT name,
+       principal_id,
+       sid,
+       type,
+       type_desc,
+       is_disabled,
+       create_date,
+       modify_date,
+       default_database_name,
+       default_language_name,
+       credential_id,
+	   ' + CASE WHEN COLUMNPROPERTY(OBJECT_ID('sys.server_principals'),'owning_principal_id','ColumnID') IS NULL THEN 'CAST(NULL AS INT) as owning_principal_id,' ELSE 'owning_principal_id,' END + '
+	   ' + CASE WHEN COLUMNPROPERTY(OBJECT_ID('sys.server_principals'),'is_fixed_role','ColumnID') IS NULL THEN 'CASE WHEN type=''R'' AND name IN(''sysadmin'',''securityadmin'',''serveradmin'',''setupadmin'',''processadmin'',''diskadmin'',''dbcreator'',''bulkadmin'') THEN CAST(1 as BIT) ELSE CAST(0 as BIT) END as is_fixed_role' ELSE 'is_fixed_role' END + '
+FROM sys.server_principals'
+
+exec sp_executesql @SQL</value>
+  </data>
+  <data name="SQLServerRoleMembers" xml:space="preserve">
+    <value>SELECT role_principal_id,
+       member_principal_id
+FROM sys.server_role_members</value>
+  </data>
+  <data name="SQLServerPermissions" xml:space="preserve">
+    <value>SELECT class,
+        class_desc,
+        major_id,
+        minor_id,
+        grantee_principal_id,
+        grantor_principal_id,
+        type,
+        permission_name,
+        state,
+        state_desc
+FROM sys.server_permissions</value>
+  </data>
+  <data name="SQLDatabasePrincipals" xml:space="preserve">
+    <value>SET NOCOUNT ON
+DECLARE @EditionID BIGINT
+SELECT @EditionID = CAST(SERVERPROPERTY('EditionID') as bigint) 
+
+DECLARE @DBName SYSNAME
+DECLARE @SQL NVARCHAR(MAX)
+CREATE TABLE #DBPrincipals
+(
+	database_id INT NOT NULL,
+    [name] NVARCHAR(128),
+    [principal_id] INT,
+    [type] CHAR(1),
+    [type_desc] NVARCHAR(60),
+    [default_schema_name] NVARCHAR(128),
+    [create_date] DATETIME,
+    [modify_date] DATETIME,
+    [owning_principal_id] INT,
+    [sid] VARBINARY(85),
+    [is_fixed_role] BIT,
+    [authentication_type] INT,
+    [authentication_type_desc] NVARCHAR(60),
+    [default_language_name] NVARCHAR(128),
+    [default_language_lcid] INT,
+    [allow_encrypted_value_modifications] BIT
+);
+
+DECLARE @PrincipalsSQL NVARCHAR(MAX)
+SET @PrincipalsSQL = N'SELECT DB_ID(), 
+	   name,
+       principal_id,
+       type,
+       type_desc,
+       default_schema_name,
+       create_date,
+       modify_date,
+       owning_principal_id,
+       sid,
+       is_fixed_role,
+       ' + CASE WHEN COLUMNPROPERTY(OBJECT_ID('sys.database_principals'),'authentication_type','ColumnID') IS NULL THEN 'CAST(NULL as INT) as authentication_type,' ELSE 'authentication_type,' END + '
+	   ' + CASE WHEN COLUMNPROPERTY(OBJECT_ID('sys.database_principals'),'authentication_type_desc','ColumnID') IS NULL THEN 'CAST(NULL as NVARCHAR(60)) as authentication_type_desc,' ELSE 'authentication_type_desc,' END + '
+       ' + CASE WHEN COLUMNPROPERTY(OBJECT_ID('sys.database_principals'),'default_language_name','ColumnID') IS NULL THEN 'CAST(NULL as SYSNAME) as default_language_name,' ELSE 'default_language_name,' END + '
+	   ' + CASE WHEN COLUMNPROPERTY(OBJECT_ID('sys.database_principals'),'default_language_lcid','ColumnID') IS NULL THEN 'CAST(NULL as NVARCHAR(60)) as default_language_lcid,' ELSE 'default_language_lcid,' END + '
+       ' + CASE WHEN COLUMNPROPERTY(OBJECT_ID('sys.database_principals'),'allow_encrypted_value_modifications','ColumnID') IS NULL THEN 'CAST(NULL as BIT) as allow_encrypted_value_modifications' ELSE 'allow_encrypted_value_modifications' END + ' 
+FROM sys.database_principals'
+
+DECLARE DBs CURSOR FAST_FORWARD READ_ONLY LOCAL FOR
+SELECT name
+FROM sys.databases
+WHERE state  = 0
+AND HAS_DBACCESS(name)=1
+
+OPEN DBs
+FETCH NEXT FROM DBs INTO @DBName
+
+WHILE @@FETCH_STATUS = 0
+BEGIN
+
+	SET @SQL =  N'USE ' + QUOTENAME(@DBName) + ';' + @PrincipalsSQL
+	IF HAS_DBACCESS(@DBName)=1
+	BEGIN
+		INSERT INTO #DBPrincipals
+		EXEC  (	@SQL )
+	END
+
+	FETCH NEXT FROM DBs INTO @DBName
+END
+CLOSE DBs
+DEALLOCATE DBs
+
+SELECT database_id,
+	   name,
+       principal_id,
+       type,
+       type_desc,
+       default_schema_name,
+       create_date,
+       modify_date,
+       owning_principal_id,
+       sid,
+       is_fixed_role,
+       authentication_type,
+       authentication_type_desc,
+       default_language_name,
+       default_language_lcid,
+       allow_encrypted_value_modifications
+FROM #DBPrincipals
+
+DROP TABLE #DBPrincipals</value>
+  </data>
+  <data name="SQLDatabaseRoleMembers" xml:space="preserve">
+    <value>SET NOCOUNT ON
+
+DECLARE @DBName SYSNAME
+DECLARE @SQL NVARCHAR(MAX)
+CREATE TABLE #DBRoleMembers
+(
+	database_id INT NOT NULL,
+    [role_principal_id] INT NOT NULL,
+	[member_principal_id] INT NOT NULL
+);
+
+
+
+DECLARE DBs CURSOR FAST_FORWARD READ_ONLY LOCAL FOR
+SELECT name
+FROM sys.databases
+WHERE state  = 0
+AND HAS_DBACCESS(name)=1
+
+OPEN DBs
+FETCH NEXT FROM DBs INTO @DBName
+
+WHILE @@FETCH_STATUS = 0
+BEGIN
+
+	SET @SQL =  N'USE ' + QUOTENAME(@DBName)  + ' 
+SELECT DB_ID(), 
+	   	                   role_principal_id,
+						   member_principal_id
+FROM sys.database_role_members'
+
+	IF HAS_DBACCESS(@DBName)=1
+	BEGIN
+		INSERT INTO #DBRoleMembers
+		(
+			database_id,
+			role_principal_id,
+			member_principal_id
+		)
+		EXEC  (	@SQL )
+	END
+
+	FETCH NEXT FROM DBs INTO @DBName
+END
+CLOSE DBs
+DEALLOCATE DBs
+
+SELECT database_id,
+       role_principal_id,
+       member_principal_id
+FROM #DBRoleMembers
+
+DROP TABLE #DBRoleMembers</value>
+  </data>
+  <data name="SQLDatabasePermissions" xml:space="preserve">
+    <value>SET NOCOUNT ON
+
+DECLARE @DBName SYSNAME
+DECLARE @SQL NVARCHAR(MAX)
+CREATE TABLE #permissions
+(
+	database_id INT NOT NULL,
+    [class] TINYINT NOT NULL,
+    [class_desc] NVARCHAR(60) NULL,
+    [major_id] INT NOT NULL,
+    [minor_id] INT NOT NULL,
+    [grantee_principal_id] INT NOT NULL,
+    [grantor_principal_id] INT NOT NULL,
+    [type] CHAR(4) NOT NULL,
+    [permission_name] NVARCHAR(128) NULL,
+    [state] CHAR(1) NOT NULL,
+    [state_desc] NVARCHAR(60) NULL,
+    [schema_name] NVARCHAR(128) NULL,
+    [object_name] NVARCHAR(128) NULL,
+    [column_name] NVARCHAR(128) NULL
+);
+
+
+
+DECLARE DBs CURSOR FAST_FORWARD READ_ONLY LOCAL FOR
+SELECT name
+FROM sys.databases
+WHERE state  = 0
+AND HAS_DBACCESS(name)=1
+
+OPEN DBs
+FETCH NEXT FROM DBs INTO @DBName
+
+WHILE @@FETCH_STATUS = 0
+BEGIN
+
+	SET @SQL =  N'USE ' + QUOTENAME(@DBName)  + ' 
+SELECT DB_ID() AS database_id,
+		p.class,
+       p.class_desc,
+       p.major_id,
+       p.minor_id,
+       p.grantee_principal_id,
+       p.grantor_principal_id,
+       p.type,
+       p.permission_name,
+       p.state,
+       p.state_desc,
+	   COALESCE(os.name,xs.name) AS schema_name,
+	   COALESCE(o.name,s.name,t.name,dbp.name,a.name,x.name,mt.name,sc.name,svc.name,rsb.name,rt.name,ftc.name,sym.name,ct.name,asym.name) COLLATE Latin1_General_BIN AS object_name,
+	   c.name AS column_name
+FROM sys.database_permissions p
+LEFT JOIN sys.objects o ON p.major_id = o.object_id AND p.class=1
+LEFT JOIN sys.schemas os ON o.schema_id = os.schema_id AND p.class=1
+LEFT JOIN sys.columns c ON c.object_id = p.major_id AND c.column_id = p.minor_id AND p.class=1
+LEFT JOIN sys.schemas s ON p.major_id = s.schema_id AND p.class = 3
+LEFT JOIN sys.types t ON t.user_type_id = p.major_id AND p.class=6
+LEFT JOIN sys.database_principals dbp ON p.major_id = dbp.principal_id AND p.class=4
+LEFT JOIN sys.assemblies a ON p.major_id = a.assembly_id AND p.class=5
+LEFT JOIN sys.xml_schema_collections x ON p.major_id = x.xml_collection_id AND p.class=10
+LEFT JOIN sys.schemas xs ON x.schema_id = xs.schema_id AND p.class=10
+LEFT JOIN sys.service_message_types mt ON p.major_id = mt.message_type_id AND p.class=15
+LEFT JOIN sys.service_contracts sc ON p.major_id = sc.service_contract_id AND p.class=16
+LEFT JOIN sys.services svc ON p.major_id = svc.service_id AND p.class = 17
+LEFT JOIN sys.remote_service_bindings rsb ON p.major_id = rsb.remote_service_binding_id AND p.class=18
+LEFT JOIN sys.routes rt ON p.major_id = rt.route_id AND p.class=19
+LEFT JOIN sys.fulltext_catalogs ftc ON p.major_id = ftc.fulltext_catalog_id AND p.class=23
+LEFT JOIN sys.symmetric_keys sym ON p.major_id = sym.symmetric_key_id AND p.class=24
+LEFT JOIN sys.certificates ct ON p.major_id = ct.certificate_id AND p.class=25
+LEFT JOIN sys.asymmetric_keys asym ON p.major_id = asym.asymmetric_key_id AND p.class=26
+WHERE NOT(p.major_id&lt;0 AND p.grantee_principal_id=0 AND p.type = ''SL'') --Ignore Select on system objects to public
+AND NOT(p.major_id&lt;0 AND DB_ID()=1 AND p.type=''EX'') --ignore execute on system objects in master db'
+
+	IF HAS_DBACCESS(@DBName)=1
+	BEGIN
+		INSERT INTO #permissions
+		EXEC  (	@SQL )
+	END
+
+	FETCH NEXT FROM DBs INTO @DBName
+END
+CLOSE DBs
+DEALLOCATE DBs
+
+SELECT database_id,
+       class,
+       class_desc,
+       major_id,
+       minor_id,
+       grantee_principal_id,
+       grantor_principal_id,
+       type,
+       permission_name,
+       state,
+       state_desc,
+       schema_name,
+       object_name,
+       column_name 
+FROM #permissions
+
+DROP TABLE #permissions</value>
+  </data>
+  <data name="SQLCustomChecks" xml:space="preserve">
+    <value>IF OBJECT_ID('DBADash_CustomCheck')&gt;0
+BEGIN
+	EXEC dbo.DBADash_CustomCheck
+END</value>
+  </data>
+  <data name="SQLPerformanceCounters" xml:space="preserve">
+    <value>SELECT SYSUTCDATETIME() AS SnapshotDate,
+		STUFF(pc.object_name,1,CHARINDEX(':',pc.object_name),'') AS object_name,
+       pc.counter_name,
+       pc.instance_name,
+       CAST(pc.cntr_value AS DECIMAL(28,9)) cntr_value,
+       pc.cntr_type 
+FROM sys.dm_os_performance_counters pc
+WHERE EXISTS(SELECT 1 
+FROM @CountersXML.nodes('Counters/Counter') ctrs(c)
+WHERE ctrs.c.value('@object_name','NCHAR(128)') = STUFF(pc.object_name,1,CHARINDEX(':',pc.object_name),'')
+AND ctrs.c.value('@counter_name','NCHAR(128)') = pc.counter_name
+AND (ctrs.c.value('@instance_name','NCHAR(128)') = pc.instance_name OR ctrs.c.value('@instance_name','NCHAR(128)') IS NULL)
+)
+AND pc.instance_name NOT IN('AuditingGroup',
+'AutoShrinkLogGroup',
+'CheckpointGroup',
+'DACGroup',
+'GhostCleanupGroup',
+'InMemBackupGroup',
+'InMemBackupRestorePool',
+'InMemDmvCollectorGroup',
+'InMemDmvCollectorPool',
+'InMemDTAPool',
+'InMemFullBackupGroup',
+'InMemMetricsDownloaderGroup',
+'InMemMetricsDownloaderPool',
+'InMemQueryStoreGroup',
+'InMemQueryStoreGroupFeedback',
+'InMemQueryStoreGroupLowPri',
+'InMemQueryStorePool',
+'InMemRestoreGroup',
+'InMemTdeScanGroup',
+'InMemTdeScanPool',
+'InMemWIAutoTuningPool',
+'InMemWIIndexValidationGroup',
+'InMemXdbLoginPool',
+'InMemXdbSeedingPool',
+'LazywriterGroup',
+'PVSCleanerGroup',
+'PVSCleanerPool',
+'RecoveryWriterGroup',
+'RedoGroup',
+'ResourceMonitorGroup',
+'SeedingGroup',
+'SloDTAGroup',
+'SloHkPool',
+'SloSecSharedInitGroup',
+'SloSecSharedPool',
+'UcsGroup',
+'UpdateAutoStatsAsyncGroup',
+'XdbLoginGroup',
+'XOdbcGroup',
+'mssqlsystemresource'
+)
+AND NOT (pc.counter_name= 'Percent Log Used' AND pc.instance_name='_Total')
+AND (SERVERPROPERTY('EngineEdition')&lt;&gt; 5
+	OR (pc.instance_name NOT IN('msdb','master','model','model_masterdb','model_userdb','mssqlsystemresource','tempdb')		
+		AND NOT (pc.counter_name= 'Log Growths' AND pc.instance_name='_Total')
+		)
+	)
+IF (OBJECT_ID('dbo.DBADash_CustomPerformanceCounters')) IS NOT NULL
+BEGIN
+	EXEC dbo.DBADash_CustomPerformanceCounters
+END</value>
+  </data>
+</root>

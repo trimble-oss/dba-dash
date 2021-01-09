@@ -1,15 +1,15 @@
 
 # Custom Checks
-The DBAChecks summary dashboard is used to highlight issues with agent jobs, backups, corruption and other things that DBAs are typically interested in monitoring.  You might want to extend these monitoring capabilities to include some more bespoke tests and this is possible through the use of custom checks.  e.g. Application specific health tests, azure elastic jobs, SSRS subscriptions.  
+The DBADash summary dashboard is used to highlight issues with agent jobs, backups, corruption and other things that DBAs are typically interested in monitoring.  You might want to extend these monitoring capabilities to include some more bespoke tests and this is possible through the use of custom checks.  e.g. Application specific health tests, azure elastic jobs, SSRS subscriptions.  
 
-To include your own custom checks you need to create a stored procedure called "DBAChecks_CustomCheck" in the database that the agent connects to.  If the stored procedure exists, the agent will run the stored procedure and collect the results of your custom checks.  The results of the SP need to be in the format that the agent expects - use the template stored procedure below as a staring point.  
+To include your own custom checks you need to create a stored procedure called "DBADash_CustomCheck" in the database that the agent connects to.  If the stored procedure exists, the agent will run the stored procedure and collect the results of your custom checks.  The results of the SP need to be in the format that the agent expects - use the template stored procedure below as a staring point.  
 
 ```SQL
 /*
-	DBAChecks Custom Check template
+	DBADash Custom Check template
 	Replace "Edit Here" section to run your own custom checks
 */
-CREATE PROC [dbo].[DBAChecks_CustomCheck]
+CREATE PROC [dbo].[DBADash_CustomCheck]
 AS
 -- Table variable used to ensure the output is in the required format
 DECLARE @CustomChecks TABLE(

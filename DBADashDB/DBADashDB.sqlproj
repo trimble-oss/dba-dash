@@ -1,0 +1,514 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <Name>DBADashDB</Name>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectVersion>4.1</ProjectVersion>
+    <ProjectGuid>{dde14068-5c6e-4e82-bf2f-7ed7681dbbc4}</ProjectGuid>
+    <DSP>Microsoft.Data.Tools.Schema.Sql.Sql130DatabaseSchemaProvider</DSP>
+    <OutputType>Database</OutputType>
+    <RootPath>
+    </RootPath>
+    <RootNamespace>DBADashDB</RootNamespace>
+    <AssemblyName>DBADashDB</AssemblyName>
+    <ModelCollation>1033,CI</ModelCollation>
+    <DefaultFileStructure>BySchemaAndSchemaType</DefaultFileStructure>
+    <DeployToDatabase>True</DeployToDatabase>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <TargetLanguage>CS</TargetLanguage>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <SqlServerVerification>False</SqlServerVerification>
+    <IncludeCompositeObjects>True</IncludeCompositeObjects>
+    <TargetDatabaseSet>True</TargetDatabaseSet>
+    <DefaultCollation>SQL_Latin1_General_CP1_CI_AS</DefaultCollation>
+    <DefaultFilegroup>PRIMARY</DefaultFilegroup>
+    <PageVerify>CHECKSUM</PageVerify>
+    <QueryStoreDesiredState>ReadWrite</QueryStoreDesiredState>
+    <QueryStoreStaleQueryThreshold>15</QueryStoreStaleQueryThreshold>
+    <QueryStoreMaxStorageSize>512</QueryStoreMaxStorageSize>
+    <QueryStoreMaxPlansPerQuery>50</QueryStoreMaxPlansPerQuery>
+    <DacVersion>2.0.3.0</DacVersion>
+    <ReadCommittedSnapshot>True</ReadCommittedSnapshot>
+    <AllowSnapshotIsolation>True</AllowSnapshotIsolation>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <OutputPath>bin\Release\</OutputPath>
+    <BuildScriptName>$(MSBuildProjectName).sql</BuildScriptName>
+    <TreatWarningsAsErrors>False</TreatWarningsAsErrors>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <DefineDebug>false</DefineDebug>
+    <DefineTrace>true</DefineTrace>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <BuildScriptName>$(MSBuildProjectName).sql</BuildScriptName>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <DefineDebug>true</DefineDebug>
+    <DefineTrace>true</DefineTrace>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <OutputPath>bin\Debug\</OutputPath>
+  </PropertyGroup>
+  <PropertyGroup>
+    <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">11.0</VisualStudioVersion>
+    <!-- Default to the v11.0 targets path if the targets file for the current VS version is not found -->
+    <SSDTExists Condition="Exists('$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v$(VisualStudioVersion)\SSDT\Microsoft.Data.Tools.Schema.SqlTasks.targets')">True</SSDTExists>
+    <VisualStudioVersion Condition="'$(SSDTExists)' == ''">11.0</VisualStudioVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug2|AnyCPU' ">
+    <OutputPath>bin\Debug\</OutputPath>
+    <BuildScriptName>$(MSBuildProjectName).sql</BuildScriptName>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <DefineDebug>true</DefineDebug>
+    <DefineTrace>true</DefineTrace>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <Import Condition="'$(SQLDBExtensionsRefPath)' != ''" Project="$(SQLDBExtensionsRefPath)\Microsoft.Data.Tools.Schema.SqlTasks.targets" />
+  <Import Condition="'$(SQLDBExtensionsRefPath)' == ''" Project="$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v$(VisualStudioVersion)\SSDT\Microsoft.Data.Tools.Schema.SqlTasks.targets" />
+  <ItemGroup>
+    <Folder Include="Properties" />
+    <Folder Include="dbo\" />
+    <Folder Include="dbo\Tables\" />
+    <Folder Include="dbo\Views\" />
+    <Folder Include="dbo\Stored Procedures\" />
+    <Folder Include="dbo\User Defined Types\" />
+    <Folder Include="dbo\Functions\" />
+    <Folder Include="Report\" />
+    <Folder Include="Report\Stored Procedures\" />
+    <Folder Include="Security\" />
+    <Folder Include="Staging\" />
+    <Folder Include="Staging\Tables\" />
+    <Folder Include="Switch\" />
+    <Folder Include="Switch\Tables\" />
+    <Folder Include="Storage\" />
+    <Folder Include="Scripts" />
+  </ItemGroup>
+  <ItemGroup>
+    <Build Include="dbo\Tables\LogRestoreThresholds.sql" />
+    <Build Include="dbo\Tables\BackupThresholds.sql" />
+    <Build Include="dbo\Tables\Instances.sql" />
+    <Build Include="dbo\Tables\Databases.sql" />
+    <Build Include="dbo\Tables\Drives.sql" />
+    <Build Include="dbo\Tables\DriveSnapshot.sql" />
+    <Build Include="dbo\Tables\Backups.sql" />
+    <Build Include="dbo\Tables\AgentJobs.sql" />
+    <Build Include="dbo\Tables\LogRestores.sql" />
+    <Build Include="dbo\Tables\DriveThresholds.sql" />
+    <Build Include="dbo\Views\BackupStatus.sql" />
+    <Build Include="dbo\Views\LogShippingStatus.sql" />
+    <Build Include="dbo\Views\DriveStatus.sql" />
+    <Build Include="dbo\Stored Procedures\Instance_Upd.sql" />
+    <Build Include="dbo\Stored Procedures\Database_Upd.sql" />
+    <Build Include="dbo\Stored Procedures\Drives_Upd.sql" />
+    <Build Include="dbo\Stored Procedures\Backups_Upd.sql" />
+    <Build Include="dbo\Stored Procedures\AgentJobs_Upd.sql" />
+    <Build Include="dbo\Stored Procedures\LogRestores_Upd.sql" />
+    <Build Include="dbo\User Defined Types\SQLDB.sql" />
+    <Build Include="dbo\User Defined Types\Drives.sql" />
+    <Build Include="dbo\User Defined Types\Backups.sql" />
+    <Build Include="dbo\User Defined Types\AgentJobs.sql" />
+    <Build Include="dbo\User Defined Types\LogRestores.sql" />
+    <Build Include="dbo\Stored Procedures\ServerProperties_Upd.sql" />
+    <Build Include="dbo\User Defined Types\ServerProperties.sql" />
+    <Build Include="dbo\Tables\AgentJobThresholds.sql" />
+    <Build Include="dbo\Views\AgentJobStatus.sql" />
+    <Build Include="dbo\Tables\DBFiles.sql" />
+    <Build Include="dbo\Stored Procedures\DBFiles_Upd.sql" />
+    <Build Include="dbo\User Defined Types\DBFiles.sql" />
+    <Build Include="dbo\Tables\DBFileThresholds.sql" />
+    <Build Include="dbo\Tables\DBFileSnapshot.sql" />
+    <Build Include="dbo\Views\DBFileStatus.sql" />
+    <Build Include="dbo\Views\ConfigurationCheck.sql" />
+    <Build Include="dbo\Tables\Tags.sql" />
+    <Build Include="dbo\Functions\SplitStrings.sql" />
+    <Build Include="Report\Stored Procedures\TagMatching_Get.sql" />
+    <Build Include="Report\Stored Procedures\Tags_Get.sql" />
+    <Build Include="Report\Stored Procedures\Instances_Get.sql" />
+    <Build Include="Report\Stored Procedures\DBADashAll.sql" />
+    <Build Include="Report\Stored Procedures\Summary_Get.sql" />
+    <Build Include="Report\Stored Procedures\DBFiles_Get.sql" />
+    <Build Include="Report\Stored Procedures\AgentJobs_Get.sql" />
+    <Build Include="Report\Stored Procedures\Backups_Get.sql" />
+    <Build Include="Report\Stored Procedures\Logshipping_Get.sql" />
+    <Build Include="Report\Stored Procedures\Drives_Get.sql" />
+    <Build Include="Security\Report.sql" />
+    <Build Include="dbo\Tables\SysConfig.sql" />
+    <Build Include="dbo\Stored Procedures\SysConfig_Upd.sql" />
+    <Build Include="dbo\User Defined Types\SysConfig.sql" />
+    <Build Include="dbo\Tables\SysConfigOptions.sql" />
+    <Build Include="Report\Stored Procedures\SnapshotDates.sql" />
+    <Build Include="dbo\Stored Procedures\InstanceTags_Get.sql" />
+    <Build Include="dbo\Stored Procedures\Instances_Get.sql" />
+    <Build Include="dbo\Stored Procedures\DriveThresholds_Upd.sql" />
+    <Build Include="dbo\Stored Procedures\DriveThresholds_Get.sql" />
+    <Build Include="dbo\Stored Procedures\Drives_Get.sql" />
+    <Build Include="dbo\Stored Procedures\Databases_Get.sql" />
+    <Build Include="dbo\Stored Procedures\BackupThresholds_Upd.sql" />
+    <Build Include="dbo\Stored Procedures\BackupThresholds_Get.sql" />
+    <Build Include="Security\Reports.sql" />
+    <Build Include="dbo\Tables\DatabasesHADR.sql" />
+    <Build Include="dbo\Stored Procedures\DatabasesHADR_Upd.sql" />
+    <Build Include="dbo\User Defined Types\DatabasesHADR.sql" />
+    <Build Include="Report\Stored Procedures\Configuration_Get.sql" />
+    <Build Include="dbo\Tables\SysConfigHistory.sql" />
+    <Build Include="Report\Stored Procedures\ConfigurationHistory_Get.sql" />
+    <Build Include="Report\Stored Procedures\DriveUsedGrowth.sql" />
+    <Build Include="Report\Stored Procedures\DriveHistory_Get.sql" />
+    <Build Include="Report\Stored Procedures\DriveExpansion.sql" />
+    <Build Include="dbo\Tables\DBConfigOptions.sql" />
+    <Build Include="dbo\Tables\DBConfigHistory.sql" />
+    <Build Include="dbo\Tables\DBConfig.sql" />
+    <Build Include="dbo\Tables\Corruption.sql" />
+    <Build Include="dbo\Tables\CollectionErrorLog.sql" />
+    <Build Include="dbo\Stored Procedures\DBConfig_Upd.sql" />
+    <Build Include="dbo\Stored Procedures\Corruption_Upd.sql" />
+    <Build Include="dbo\Stored Procedures\CollectionErrorLog_Add.sql" />
+    <Build Include="dbo\User Defined Types\DBConfig.sql" />
+    <Build Include="dbo\User Defined Types\Corruption.sql" />
+    <Build Include="dbo\User Defined Types\CollectionError.sql" />
+    <Build Include="dbo\Stored Procedures\ServerExtraProperties_Upd.sql" />
+    <Build Include="dbo\Views\vwTempDBConfiguration.sql" />
+    <Build Include="dbo\Tables\CollectionDates.sql" />
+    <Build Include="dbo\Stored Procedures\OSInfo_Upd.sql" />
+    <Build Include="dbo\Stored Procedures\CollectionDates_Upd.sql" />
+    <Build Include="dbo\User Defined Types\OSInfo.sql" />
+    <Build Include="dbo\Views\InstanceInfo.sql" />
+    <Build Include="dbo\Tables\TraceFlags.sql" />
+    <Build Include="dbo\Stored Procedures\TraceFlags_Upd.sql" />
+    <Build Include="dbo\User Defined Types\TraceFlags.sql" />
+    <Build Include="Report\Stored Procedures\TraceFlags_Get.sql" />
+    <Build Include="Report\Stored Procedures\DBADashErrorLog.sql" />
+    <Build Include="Report\Stored Procedures\DatabaseGrowth_Get.sql" />
+    <Build Include="Report\Stored Procedures\ProcStats.sql" />
+    <Build Include="Report\Stored Procedures\Procs_Get.sql" />
+    <Build Include="Report\Stored Procedures\Databases_Get.sql" />
+    <Build Include="dbo\User Defined Types\ProcStats.sql" />
+    <Build Include="Security\Staging.sql" />
+    <Build Include="dbo\Tables\CPU.sql" />
+    <Build Include="dbo\Stored Procedures\CPU_Upd.sql" />
+    <Build Include="dbo\User Defined Types\CPU.sql" />
+    <Build Include="Report\Stored Procedures\CPU.sql" />
+    <Build Include="dbo\Stored Procedures\LogRestoreThresholds_Upd.sql" />
+    <Build Include="dbo\Stored Procedures\LogRestoreThresholds_Get.sql" />
+    <Build Include="dbo\Tables\Drivers.sql" />
+    <Build Include="dbo\Stored Procedures\Drivers_Upd.sql" />
+    <Build Include="dbo\User Defined Types\Drivers.sql" />
+    <Build Include="dbo\Tables\DriversHistory.sql" />
+    <Build Include="Report\Stored Procedures\AWSDriver_Get.sql" />
+    <Build Include="Report\Stored Procedures\Drivers_Get.sql" />
+    <Build Include="dbo\Tables\BlockingSnapshotSummary.sql" />
+    <Build Include="dbo\Tables\BlockingSnapshot.sql" />
+    <Build Include="dbo\Stored Procedures\BlockingSnapshot_Upd.sql" />
+    <Build Include="dbo\User Defined Types\BlockingSnapshot.sql" />
+    <Build Include="dbo\Functions\BlockingSnapshotRecursiveStats.sql" />
+    <Build Include="Report\Stored Procedures\BlockingSummary.sql" />
+    <Build Include="Report\Stored Procedures\Blocking.sql" />
+    <Build Include="Staging\Tables\IOStats.sql" />
+    <Build Include="dbo\Stored Procedures\IOStats_Upd.sql" />
+    <Build Include="dbo\User Defined Types\IOStats.sql" />
+    <Build Include="Report\Stored Procedures\PerformanceDashboard.sql" />
+    <Build Include="dbo\Tables\SQLPatchingHistory.sql" />
+    <Build Include="dbo\Tables\HostUpgradeHistory.sql" />
+    <Build Include="Report\Stored Procedures\SQLPatching_Get.sql" />
+    <Build Include="Report\Stored Procedures\ProcedureInsights.sql" />
+    <Build Include="Report\Stored Procedures\IOPerformance.sql" />
+    <Build Include="Report\Stored Procedures\HostUpgrade.sql" />
+    <Build Include="Staging\Tables\Waits.sql" />
+    <Build Include="dbo\Tables\WaitType.sql" />
+    <Build Include="dbo\Tables\Waits.sql" />
+    <Build Include="dbo\Stored Procedures\Waits_Upd.sql" />
+    <Build Include="dbo\User Defined Types\Waits.sql" />
+    <Build Include="dbo\Tables\TraceFlagHistory.sql" />
+    <Build Include="Report\Stored Procedures\Waits_Get.sql" />
+    <Build Include="Report\Stored Procedures\InstanceInfo_Get.sql" />
+    <Build Include="dbo\Views\LogShippingStatusSummary.sql" />
+    <Build Include="dbo\Functions\ParseFileName.sql" />
+    <Build Include="Report\Stored Procedures\LogShippingSummary_Get.sql" />
+    <Build Include="dbo\Tables\Waits_60MIN.sql" />
+    <Build Include="dbo\Views\NonDefaultDBConfig.sql" />
+    <Build Include="dbo\Functions\PartitionBoundaryHelper.sql" />
+    <Build Include="dbo\Stored Procedures\PartitionTable_Cleanup.sql" />
+    <Build Include="dbo\Stored Procedures\Partitions_Add.sql" />
+    <Build Include="dbo\Stored Procedures\DailyPartitions_Add.sql" />
+    <Build Include="Security\Switch.sql" />
+    <Build Include="Switch\Tables\Waits.sql" />
+    <Build Include="Switch\Tables\CPU.sql" />
+    <Build Include="Switch\Tables\BlockingSnapshot.sql" />
+    <Build Include="dbo\Tables\DataRetention.sql" />
+    <Build Include="Storage\PF_Waits.sql" />
+    <Build Include="Storage\PF_CPU.sql" />
+    <Build Include="Storage\PF_BlockingSnapshot.sql" />
+    <Build Include="Storage\PS_Waits.sql" />
+    <Build Include="Storage\PS_CPU.sql" />
+    <Build Include="Storage\PS_BlockingSnapshot.sql" />
+    <Build Include="dbo\Stored Procedures\PurgeData.sql" />
+    <Build Include="dbo\Tables\OSLoadedModules.sql" />
+    <Build Include="dbo\Tables\DBTuningOptionsHistory.sql" />
+    <Build Include="dbo\Tables\DBTuningOptions.sql" />
+    <Build Include="dbo\Stored Procedures\OSLoadedModules_Upd.sql" />
+    <Build Include="dbo\Stored Procedures\DBTuningOptions_Upd.sql" />
+    <Build Include="dbo\User Defined Types\OSLoadedModules.sql" />
+    <Build Include="dbo\User Defined Types\DBTuningOptions.sql" />
+    <Build Include="dbo\Tables\OSLoadedModulesStatus.sql" />
+    <Build Include="Report\Stored Procedures\OSLoadedModules_Get.sql" />
+    <Build Include="dbo\Stored Procedures\OSLoadedModulesStatus_Upd.sql" />
+    <Build Include="Report\Stored Procedures\Connections_Get.sql" />
+    <Build Include="dbo\Tables\AzureDBResourceStats.sql" />
+    <Build Include="dbo\Stored Procedures\AzureDBResourceStats_Upd.sql" />
+    <Build Include="dbo\User Defined Types\AzureDBResourceStats.sql" />
+    <Build Include="Storage\PF_AzureDBResourceStats.sql" />
+    <Build Include="Storage\PS_AzureDBResourceStats.sql" />
+    <Build Include="dbo\Tables\AzureDBServiceObjectivesHistory.sql" />
+    <Build Include="dbo\Tables\AzureDBServiceObjectives.sql" />
+    <Build Include="dbo\Stored Procedures\AzureDBServiceObjectives_Upd.sql" />
+    <Build Include="dbo\User Defined Types\AzureDBServiceObjectives.sql" />
+    <Build Include="dbo\Tables\AzureDBElasticPoolResourceStats.sql" />
+    <Build Include="dbo\Stored Procedures\AzureDBElasticPoolResourceStats_Upd.sql" />
+    <Build Include="dbo\User Defined Types\AzureDBElasticPoolResourceStats.sql" />
+    <Build Include="Storage\PF_AzureDBElasticPoolResourceStats.sql" />
+    <Build Include="Storage\PS_AzureDBElasticPoolResourceStats.sql" />
+    <Build Include="Report\Stored Procedures\DBMaxSize.sql" />
+    <Build Include="Report\Stored Procedures\AzureDBUtilization.sql" />
+    <Build Include="Report\Stored Procedures\AzureDBResourceUsage.sql" />
+    <Build Include="Report\Stored Procedures\AzureDBPoolUtilization.sql" />
+    <Build Include="Report\Stored Procedures\AzureDBResourcePoolUsage.sql" />
+    <Build Include="dbo\Tables\SlowQueries.sql" />
+    <Build Include="dbo\Stored Procedures\SlowQueries_Upd.sql" />
+    <Build Include="dbo\User Defined Types\SlowQueries.sql" />
+    <Build Include="Storage\PF_SlowQueries.sql" />
+    <Build Include="Storage\PS_SlowQueries.sql" />
+    <Build Include="dbo\Tables\SlowQueriesStats.sql" />
+    <Build Include="dbo\User Defined Types\SlowQueriesStats.sql" />
+    <Build Include="dbo\Stored Procedures\SlowQueriesStats_Upd.sql" />
+    <Build Include="Report\Stored Procedures\SlowQueriesSummary.sql" />
+    <Build Include="Report\Stored Procedures\SlowQueriesDetail.sql" />
+    <Build Include="dbo\User Defined Types\IDs.sql" />
+    <Build Include="dbo\Stored Procedures\LastGoodCheckDB_Upd.sql" />
+    <Build Include="dbo\User Defined Types\LastGoodCheckDB.sql" />
+    <Build Include="dbo\Tables\LastGoodCheckDBThresholds.sql" />
+    <Build Include="dbo\Views\LastGoodCheckDB.sql" />
+    <Build Include="Report\Stored Procedures\LastGoodCheckDB_Get.sql" />
+    <Build Include="dbo\Tables\Alerts.sql" />
+    <Build Include="dbo\Stored Procedures\Alerts_Upd.sql" />
+    <Build Include="dbo\User Defined Types\Alerts.sql" />
+    <Build Include="dbo\Views\SysAlerts.sql" />
+    <Build Include="Report\Stored Procedures\Alerts_Get.sql" />
+    <Build Include="Report\Stored Procedures\AlertsConfig_Get.sql" />
+    <Build Include="dbo\Tables\AzureDBDTULimitChange.sql" />
+    <Build Include="dbo\Tables\DDLSnapshots.sql" />
+    <Build Include="dbo\Tables\DDL.sql" />
+    <Build Include="dbo\Tables\DBObjects.sql" />
+    <Build Include="dbo\Stored Procedures\DDLSnapshot_Add.sql" />
+    <Build Include="dbo\User Defined Types\DDLSnapshot.sql" />
+    <Build Include="dbo\Tables\DDLSnapshotsLog.sql" />
+    <Build Include="dbo\Tables\DDLSnapshotOptions.sql" />
+    <Build Include="dbo\Tables\DDLHistory.sql" />
+    <Build Include="dbo\Tables\ObjectType.sql" />
+    <Build Include="dbo\Functions\DBSchemaAtDate.sql" />
+    <Build Include="dbo\Tables\InstanceTags.sql" />
+    <Build Include="dbo\Functions\InstancesMatchingTags.sql" />
+    <Build Include="dbo\Stored Procedures\InstanceTags_Del.sql" />
+    <Build Include="dbo\Stored Procedures\InstanceTags_Add.sql" />
+    <Build Include="dbo\Stored Procedures\Tags_Get.sql" />
+    <Build Include="dbo\Stored Procedures\DriveThreshold_Get.sql" />
+    <Build Include="dbo\Functions\SQLVersionName.sql" />
+    <Build Include="dbo\Stored Procedures\SystemTags_Upd.sql" />
+    <Build Include="dbo\Stored Procedures\Backups_Get.sql" />
+    <Build Include="dbo\Stored Procedures\Logshipping_Get.sql" />
+    <Build Include="dbo\Stored Procedures\AgentJobThresholds_Upd.sql" />
+    <Build Include="dbo\Stored Procedures\AgentJobThresholds_Get.sql" />
+    <Build Include="dbo\Stored Procedures\AgentJobs_Get.sql" />
+    <Build Include="dbo\Stored Procedures\Summary_Get.sql" />
+    <Build Include="dbo\Stored Procedures\DBFileThresholds_Upd.sql" />
+    <Build Include="dbo\Stored Procedures\DBFileThresholds_Get.sql" />
+    <Build Include="dbo\Stored Procedures\DBFiles_Get.sql" />
+    <Build Include="dbo\Stored Procedures\LastGoodCheckDBThresholds_Upd.sql" />
+    <Build Include="dbo\Stored Procedures\LastGoodCheckDBThresholds_Get.sql" />
+    <Build Include="dbo\Stored Procedures\LastGoodCheckDB_Get.sql" />
+    <Build Include="dbo\Stored Procedures\IOStats_Get.sql" />
+    <Build Include="dbo\Stored Procedures\CPU_Get.sql" />
+    <Build Include="dbo\Stored Procedures\Waits_Get.sql" />
+    <Build Include="dbo\Stored Procedures\BlockingSummary_Get.sql" />
+    <Build Include="dbo\Stored Procedures\BlockingSnapshots_Get.sql" />
+    <Build Include="dbo\Stored Procedures\DDLSnapshots_Get.sql" />
+    <Build Include="dbo\Stored Procedures\DDLSnapshotDiff_Get.sql" />
+    <Build Include="dbo\Stored Procedures\DDLHistoryForObject_Get.sql" />
+    <Build Include="dbo\Tables\ObjectExecutionStats.sql" />
+    <Build Include="Storage\PF_ObjectExecutionStats.sql" />
+    <Build Include="Storage\PS_ObjectExecutionStats.sql" />
+    <Build Include="dbo\Functions\DBSnapshotDiff.sql" />
+    <Build Include="Staging\Tables\ObjectExecutionStats.sql" />
+    <Build Include="dbo\Tables\ObjectExecutionStats_60MIN.sql" />
+    <Build Include="dbo\Stored Procedures\ObjectExecutionStats_Upd.sql" />
+    <Build Include="dbo\Stored Procedures\ObjectExecutionStats_Get.sql" />
+    <Build Include="Switch\Tables\ObjectExecutionStats.sql" />
+    <Build Include="dbo\Tables\ServerRoleMembers.sql" />
+    <Build Include="dbo\Tables\ServerPrincipals.sql" />
+    <Build Include="dbo\Stored Procedures\ServerRoleMembers_Upd.sql" />
+    <Build Include="dbo\Stored Procedures\ServerPrincipals_Upd.sql" />
+    <Build Include="dbo\User Defined Types\ServerRoleMembers.sql" />
+    <Build Include="dbo\User Defined Types\ServerPrincipals.sql" />
+    <Build Include="dbo\Tables\ServerPermissions.sql" />
+    <Build Include="dbo\Stored Procedures\ServerPermissions_Upd.sql" />
+    <Build Include="dbo\User Defined Types\ServerPermissions.sql" />
+    <Build Include="dbo\Tables\DatabasePrincipals.sql" />
+    <Build Include="dbo\Stored Procedures\DatabasePrincipals_Upd.sql" />
+    <Build Include="dbo\User Defined Types\DatabasePrincipals.sql" />
+    <Build Include="dbo\Tables\DatabaseRoleMembers.sql" />
+    <Build Include="dbo\Stored Procedures\DatabaseRoleMembers_Upd.sql" />
+    <Build Include="dbo\User Defined Types\DatabaseRoleMembers.sql" />
+    <Build Include="dbo\Tables\DatabasePermissions.sql" />
+    <Build Include="dbo\Stored Procedures\DatabasePermissions_Upd.sql" />
+    <Build Include="dbo\User Defined Types\DatabasePermissions.sql" />
+    <Build Include="dbo\Tables\CollectionDatesThresholds.sql" />
+    <Build Include="dbo\Views\CollectionDatesStatus.sql" />
+    <Build Include="Report\Stored Procedures\ServerLoginSummary.sql" />
+    <Build Include="dbo\Tables\InstanceUptimeThresholds.sql" />
+    <Build Include="dbo\Stored Procedures\DriveLetters_Get.sql" />
+    <Build Include="dbo\Tables\DBVersionHistory.sql" />
+    <Build Include="dbo\Stored Procedures\CollectionDatesThresholds_Upd.sql" />
+    <Build Include="dbo\Stored Procedures\CollectionDates_Get.sql" />
+    <Build Include="dbo\Stored Procedures\CollectionDatesThresholds_Get.sql" />
+    <Build Include="dbo\Stored Procedures\CollectionErrorLog_Get.sql" />
+    <Build Include="dbo\Stored Procedures\PerformanceSummary_Get.sql" />
+    <Build Include="dbo\Stored Procedures\InstanceInfo_Get.sql" />
+    <Build Include="dbo\Stored Procedures\SysConfigHistory_Get.sql" />
+    <Build Include="dbo\Stored Procedures\SQLPatching_Get.sql" />
+    <Build Include="dbo\Stored Procedures\HostUpgradeHistory_Get.sql" />
+    <Build Include="dbo\Stored Procedures\SlowQueriesSummary_Get.sql" />
+    <Build Include="dbo\Stored Procedures\SlowQueriesDetail_Get.sql" />
+    <Build Include="dbo\Stored Procedures\TraceFlags_Get.sql" />
+    <Build Include="dbo\Stored Procedures\TraceFlagHistory_Get.sql" />
+    <Build Include="dbo\Stored Procedures\Configuration_Get.sql" />
+    <Build Include="dbo\Stored Procedures\AlertsConfig_Get.sql" />
+    <Build Include="dbo\Stored Procedures\Alerts_Get.sql" />
+    <Build Include="dbo\Stored Procedures\Drivers_Get.sql" />
+    <Build Include="dbo\Stored Procedures\InstanceVersionInfo_Get.sql" />
+    <Build Include="dbo\Stored Procedures\Hardware_Get.sql" />
+    <Build Include="dbo\Tables\DBIOStats_60MIN.sql" />
+    <Build Include="dbo\Tables\DBIOStats.sql" />
+    <Build Include="Switch\Tables\DBIOStats.sql" />
+    <Build Include="Storage\PF_DBIOStats.sql" />
+    <Build Include="Storage\PS_DBIOStats.sql" />
+    <None Include="Scripts\DBIOStats_Migration.sql" />
+    <Build Include="dbo\Tables\CPU_60MIN.sql" />
+    <Build Include="dbo\Stored Procedures\DBSpace_Get.sql" />
+    <Build Include="Switch\Tables\SlowQueries.sql" />
+    <Build Include="dbo\Functions\PartitionFunctionName.sql" />
+    <Build Include="dbo\Stored Procedures\DataRetention_Upd.sql" />
+    <Build Include="dbo\Stored Procedures\DataRetention_Get.sql" />
+    <Build Include="Switch\Tables\AzureDBResourceStats.sql" />
+    <Build Include="Switch\Tables\AzureDBElasticPoolResourceStats.sql" />
+    <Build Include="dbo\Stored Procedures\DriveSnapshot_Get.sql" />
+    <Build Include="dbo\Views\FileStatus.sql" />
+    <Build Include="dbo\Views\FileGroupStatus.sql" />
+    <Build Include="dbo\Stored Procedures\FileGroup_Get.sql" />
+    <Build Include="dbo\Stored Procedures\DBFileSnapshot_Get.sql" />
+    <Build Include="dbo\Stored Procedures\DatabaseID_Get.sql" />
+    <Build Include="dbo\Stored Procedures\AzureDBPoolSummary_Get.sql" />
+    <Build Include="dbo\Stored Procedures\AzureDBPerformanceSummary_Get.sql" />
+    <Build Include="dbo\Views\CPU_Histogram.sql" />
+    <Build Include="dbo\Stored Procedures\AzureDBResourceStats_Get.sql" />
+    <Build Include="dbo\Stored Procedures\AzureDBElasticPoolResourceStats_Get.sql" />
+    <Build Include="dbo\Functions\AzureDBMasterInstance.sql" />
+    <Build Include="dbo\Stored Procedures\AzureServiceObjectivesHistory_Get.sql" />
+    <Build Include="dbo\Functions\DateGroupingMins.sql" />
+    <Build Include="dbo\Stored Procedures\DBConfigurationHistory_Get.sql" />
+    <Build Include="dbo\Stored Procedures\DBConfiguration_Get.sql" />
+    <Build Include="dbo\Tables\DBOptionsHistory.sql" />
+    <Build Include="dbo\Stored Procedures\DBOptionsHistory_Get.sql" />
+    <Build Include="dbo\Stored Procedures\DatabasesAllInfo_Get.sql" />
+    <Build Include="dbo\Tables\AzureDBResourceStats_60MIN.sql" />
+    <Build Include="dbo\Views\AzureDBResourceStats_Raw.sql" />
+    <Build Include="dbo\Tables\AzureDBElasticPool.sql" />
+    <Build Include="dbo\Tables\AzureDBElasticPoolHistory.sql" />
+    <Build Include="dbo\Tables\AzureDBElasticPoolResourceStats_60MIN.sql" />
+    <Build Include="dbo\Views\AzureDBElasticPoolResourceStats_Raw.sql" />
+    <Build Include="dbo\Stored Procedures\AzureDBElasticPoolHistory_Get.sql" />
+    <Build Include="dbo\Stored Procedures\TempDBConfig_Get.sql" />
+    <Build Include="dbo\Stored Procedures\DBSummary_Get.sql" />
+    <Build Include="dbo\Views\FGIOStats_60MIN.sql" />
+    <Build Include="dbo\Views\FGIOStats.sql" />
+    <Build Include="dbo\Tables\CustomChecks.sql" />
+    <Build Include="dbo\Stored Procedures\CustomCheckTest_Get.sql" />
+    <Build Include="dbo\Stored Procedures\CustomChecks_Upd.sql" />
+    <Build Include="dbo\Stored Procedures\CustomCheckContext_Get.sql" />
+    <Build Include="dbo\Stored Procedures\CustomCheck_Get.sql" />
+    <Build Include="dbo\User Defined Types\CustomChecks.sql" />
+    <Build Include="Switch\Tables\CustomChecksHistory.sql" />
+    <Build Include="dbo\Tables\CustomChecksHistory.sql" />
+    <Build Include="Storage\PF_CustomChecksHistory.sql" />
+    <Build Include="Storage\PS_CustomChecksHistory.sql" />
+    <Build Include="dbo\Stored Procedures\CustomChecksHistory_Get.sql" />
+    <Build Include="Storage\PF_AzureDBElasticPoolResourceStats_60MIN.sql" />
+    <Build Include="Storage\PS_AzureDBElasticPoolResourceStats_60MIN.sql" />
+    <Build Include="dbo\Stored Procedures\MonthlyPartitions_Add.sql" />
+    <Build Include="Storage\PF_AzureDBResourceStats_60MIN.sql" />
+    <Build Include="Storage\PS_AzureDBResourceStats_60MIN.sql" />
+    <Build Include="Storage\PF_Waits_60MIN.sql" />
+    <Build Include="Storage\PF_ObjectExecutionStats_60MIN.sql" />
+    <Build Include="Storage\PF_DBIOStats_60MIN.sql" />
+    <Build Include="Storage\PF_CPU_60MIN.sql" />
+    <Build Include="Storage\PS_Waits_60MIN.sql" />
+    <Build Include="Storage\PS_ObjectExecutionStats_60MIN.sql" />
+    <Build Include="Storage\PS_DBIOStats_60MIN.sql" />
+    <Build Include="Storage\PS_CPU_60MIN.sql" />
+    <Build Include="Switch\Tables\Waits_60MIN.sql" />
+    <Build Include="Switch\Tables\DBIOStats_60MIN.sql" />
+    <Build Include="Switch\Tables\CPU_60MIN.sql" />
+    <Build Include="Switch\Tables\AzureDBResourceStats_60MIN.sql" />
+    <Build Include="Switch\Tables\AzureDBElasticPoolResourceStats_60MIN.sql" />
+    <Build Include="Switch\Tables\ObjectExecutionStats_60MIN.sql" />
+    <Build Include="Staging\Tables\PerformanceCounters.sql" />
+    <Build Include="dbo\Tables\PerformanceCounters.sql" />
+    <Build Include="dbo\Tables\InstanceCounters.sql" />
+    <Build Include="dbo\Tables\Counters.sql" />
+    <Build Include="dbo\Tables\CounterMapping.sql" />
+    <Build Include="dbo\Stored Procedures\PerformanceCounterSummary_Get.sql" />
+    <Build Include="dbo\Stored Procedures\PerformanceCounters_Upd.sql" />
+    <Build Include="dbo\Stored Procedures\PerformanceCounter_Get.sql" />
+    <Build Include="dbo\User Defined Types\PerformanceCounters.sql" />
+    <Build Include="Storage\PF_PerformanceCounters.sql" />
+    <Build Include="Storage\PS_PerformanceCounters.sql" />
+    <Build Include="Switch\Tables\PerformanceCounters.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <PostDeploy Include="Script.PostDeployment1.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <ArtifactReference Include="$(DacPacRootPath)\Extensions\Microsoft\SQLDB\Extensions\SqlServer\130\SqlSchemas\master.dacpac">
+      <HintPath>$(DacPacRootPath)\Extensions\Microsoft\SQLDB\Extensions\SqlServer\130\SqlSchemas\master.dacpac</HintPath>
+      <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
+      <DatabaseVariableLiteralValue>master</DatabaseVariableLiteralValue>
+    </ArtifactReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="DBADashDB.publish.xml" />
+    <None Include="Schema_Compare.scmp" />
+    <None Include="Scripts\DBIOStatsMigration_60MIN.sql" />
+    <None Include="Scripts\CPU_60MIN Population.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <SqlCmdVariable Include="VersionNumber">
+      <DefaultValue>
+      </DefaultValue>
+      <Value>$(SqlCmdVar__1)</Value>
+    </SqlCmdVariable>
+  </ItemGroup>
+  <PropertyGroup>
+    <PreBuildEvent>xcopy /y "$(ProjectDir)$(OutDir)*.dacpac" "$(SolutionDir)DBADashServiceConfig\$(OutDir)"
+xcopy /y "$(ProjectDir)$(OutDir)*.dacpac" "$(SolutionDir)DBADashService\$(OutDir)"</PreBuildEvent>
+  </PropertyGroup>
+</Project>
