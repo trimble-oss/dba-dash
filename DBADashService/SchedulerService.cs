@@ -50,7 +50,6 @@ namespace DBADashService
         }
 
 
-
         private void removeEventSessions(CollectionConfig config)
         {
             try
@@ -93,18 +92,6 @@ namespace DBADashService
                 ErrorLogger(ex, "Remove Event Sessions:");
             }
         }
-
-
-        public void Stop(CollectionConfig config)
-        {
-            removeEventSessions(config);
-        }
-
-        public void Shutdown(CollectionConfig config)
-        {
-            removeEventSessions(config);
-        }
-
 
 
         public void Start()
@@ -221,6 +208,8 @@ namespace DBADashService
         }
         public void Stop()
         {
+            var conf = getConfig();
+            removeEventSessions(conf);
             scheduler.Shutdown().ConfigureAwait(false).GetAwaiter().GetResult();
         }
     }
