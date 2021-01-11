@@ -1,7 +1,7 @@
 # OS Performance Counters & Custom Metrics
 
 # Summary
-DBADash will automatically capture key performance metrics from the sys.dm_os_performance_counters DMV.  e.g. Page reads/sec, Memory Grants Pending, SQL Compilations/sec and more. The performance counters collected can easily be customized - adding additional counters or removing counters that you are not interested in.  It's also possible to add your own appliation performance metrics by creating a stored procedure that will return this data in a specified format.
+DBA Dash will automatically capture key performance metrics from the sys.dm_os_performance_counters DMV.  e.g. Page reads/sec, Memory Grants Pending, SQL Compilations/sec and more. The performance counters collected can easily be customized - adding additional counters or removing counters that you are not interested in.  It's also possible to add your own appliation performance metrics by creating a stored procedure that will return this data in a specified format.
 
 # OS Performance Counters
 To customize what is collected, edit the "PerformanceCounters.xml" file or create a copy of the file called "PerformanceCountersCustom.xml".  It's recommended to create a "PerformanceCountersCustom.xml" file which will completely override the existing "PerformanceCounters.xml" file.  This will simplify appliation upgrades - otherwise you would need to take care not to overwrite your custom version of "PerformanceCounters.xml".
