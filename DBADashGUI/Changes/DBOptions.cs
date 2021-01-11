@@ -210,7 +210,7 @@ namespace DBADashGUI.Changes
         {
             if (SummaryMode)
             {
-                var warningCols = new string[] { "Auto Create Stats Disabled", "Auto Update Stats Disabled", "Old Compat Level", "DB Owner Not SA", "In Recovery", "Offline" };
+                var warningCols = new string[] { "Auto Create Stats Disabled", "Auto Update Stats Disabled", "Old Compat Level", "In Recovery", "Offline","Trustworthy" };
                 var criticalCols = new string[] { "Page Verify Not Optimal", "Auto Close", "Auto Shrink", "Suspect", "Emergency" };
                 for (Int32 idx = e.RowIndex; idx < e.RowIndex + e.RowCount; idx += 1)
                 {
