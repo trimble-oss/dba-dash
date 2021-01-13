@@ -250,19 +250,20 @@ namespace DBADashGUI.Performance
         {
             var frm = new CustomTimePicker
             {
-                FromDate = fromDate,
-                ToDate = toDate
+                FromDate = fromDate.ToLocalTime(),
+                ToDate = toDate.ToLocalTime()
             };
             frm.ShowDialog();
             if(frm.DialogResult == DialogResult.OK)
             {
-                _from = frm.FromDate;
-                _to = frm.ToDate;
+                _from = frm.FromDate.ToUniversalTime();
+                _to = frm.ToDate.ToUniversalTime();
                 mins = 0;
                 checkTime();
+                RefreshData();
+                tsCustom.Checked = true;
             }
-            RefreshData();
-            tsCustom.Checked = true;
+
         }
 
         private void dgv_RowsAdded(object sender, DataGridViewRowsAddedEventArgs e)

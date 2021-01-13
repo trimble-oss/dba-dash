@@ -136,18 +136,19 @@ namespace DBADashGUI.Performance
         private void tsCustom_Click(object sender, EventArgs e)
         {
             var frm = new CustomTimePicker();
-            frm.FromDate = fromDate;
-            frm.ToDate = toDate;
+            frm.FromDate = fromDate.ToLocalTime();
+            frm.ToDate = toDate.ToLocalTime();
             frm.ShowDialog();
             if (frm.DialogResult == DialogResult.OK)
             {
-                _from = frm.FromDate;
-                _to = frm.ToDate;
+                _from = frm.FromDate.ToUniversalTime();
+                _to = frm.ToDate.ToUniversalTime();
                 mins = 0;
                 checkTime();
+                RefreshData();
+                tsCustom.Checked = true;
             }
-            RefreshData();
-            tsCustom.Checked = true;
+      
         }
 
         private void dgv_CellContentClick(object sender, DataGridViewCellEventArgs e)

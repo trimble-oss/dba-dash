@@ -189,9 +189,10 @@ namespace DBADashGUI
                 _to = frm.ToDate.ToUniversalTime();
                 mins = 0;
                 checkTime();
+                RefreshData();
+                tsCustom.Checked = true;
             }
-            RefreshData();
-            tsCustom.Checked = true;
+
         }
 
         private void GroupBy_Click(object sender, EventArgs e)

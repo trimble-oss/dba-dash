@@ -33,6 +33,7 @@
             this.label1 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
             this.bttnOK = new System.Windows.Forms.Button();
+            this.bttnCancel = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // time1
@@ -73,7 +74,7 @@
             // 
             // bttnOK
             // 
-            this.bttnOK.Location = new System.Drawing.Point(469, 99);
+            this.bttnOK.Location = new System.Drawing.Point(469, 100);
             this.bttnOK.Name = "bttnOK";
             this.bttnOK.Size = new System.Drawing.Size(80, 28);
             this.bttnOK.TabIndex = 4;
@@ -81,11 +82,22 @@
             this.bttnOK.UseVisualStyleBackColor = true;
             this.bttnOK.Click += new System.EventHandler(this.bttnOK_Click);
             // 
+            // bttnCancel
+            // 
+            this.bttnCancel.Location = new System.Drawing.Point(383, 100);
+            this.bttnCancel.Name = "bttnCancel";
+            this.bttnCancel.Size = new System.Drawing.Size(80, 28);
+            this.bttnCancel.TabIndex = 5;
+            this.bttnCancel.Text = "Cancel";
+            this.bttnCancel.UseVisualStyleBackColor = true;
+            this.bttnCancel.Click += new System.EventHandler(this.bttnCancel_Click);
+            // 
             // CustomTimePicker
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(591, 162);
+            this.Controls.Add(this.bttnCancel);
             this.Controls.Add(this.bttnOK);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.label1);
@@ -105,5 +117,6 @@
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.Button bttnOK;
+        private System.Windows.Forms.Button bttnCancel;
     }
 }
