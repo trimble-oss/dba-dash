@@ -180,13 +180,13 @@ namespace DBADashGUI
         private void tsCustom_Click(object sender, EventArgs e)
         {
             var frm = new CustomTimePicker();
-            frm.FromDate = fromDate;
-            frm.ToDate = toDate;
+            frm.FromDate = fromDate.ToLocalTime();
+            frm.ToDate = toDate.ToLocalTime();
             frm.ShowDialog();
             if (frm.DialogResult == DialogResult.OK)
             {
-                _from = frm.FromDate;
-                _to = frm.ToDate;
+                _from = frm.FromDate.ToUniversalTime();
+                _to = frm.ToDate.ToUniversalTime();
                 mins = 0;
                 checkTime();
             }

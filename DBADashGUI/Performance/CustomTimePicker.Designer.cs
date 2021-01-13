@@ -73,9 +73,9 @@
             // 
             // bttnOK
             // 
-            this.bttnOK.Location = new System.Drawing.Point(474, 139);
+            this.bttnOK.Location = new System.Drawing.Point(469, 99);
             this.bttnOK.Name = "bttnOK";
-            this.bttnOK.Size = new System.Drawing.Size(75, 23);
+            this.bttnOK.Size = new System.Drawing.Size(80, 28);
             this.bttnOK.TabIndex = 4;
             this.bttnOK.Text = "OK";
             this.bttnOK.UseVisualStyleBackColor = true;
@@ -85,7 +85,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(591, 217);
+            this.ClientSize = new System.Drawing.Size(591, 162);
             this.Controls.Add(this.bttnOK);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.label1);
