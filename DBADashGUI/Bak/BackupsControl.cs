@@ -85,6 +85,7 @@ namespace DBADashGUI.Backups
                     SqlDataAdapter da = new SqlDataAdapter(cmd);
                     DataTable dtBackups = new DataTable();
                     da.Fill(dtBackups);
+                    Common.ConvertUTCToLocal(ref dtBackups);
                     dgvBackups.AutoGenerateColumns = false;
                     dgvBackups.DataSource = new DataView(dtBackups);
                 }
