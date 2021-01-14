@@ -1462,7 +1462,7 @@ BEGIN
 		EXEC  (	@SQL )
 
 		INSERT INTO @LastGoodDBCC(database_id,LastGoodCheckDbTime)
-		SELECT @DBID, CAST(Value as DATETIME)
+		SELECT TOP(1) @DBID, CAST(Value as DATETIME)
 		FROM @dbinfo
 		WHERE Field = 'dbi_dbccLastKnownGood'
 
