@@ -46,42 +46,42 @@ namespace DBADashService
         public static void ErrorLogger(Exception ex, string context)
         {
             Console.WriteLine(context + ": " + ex.Message);
-            EventLog.WriteEntry("DBADashService", context + ": " + ex.Message, EventLogEntryType.Error);
+            try
+            {
+                EventLog.WriteEntry("DBADashService", context + ": " + ex.Message, EventLogEntryType.Error);
+            }
+            catch(Exception ex2)
+            {
+                Console.WriteLine("Unable to write error to eventlog: " + ex2.Message + Environment.NewLine + ex.Message);
+            }
         }
 
 
         private void removeEventSessions(CollectionConfig config)
-        {
+        {   
             try
             {
                 Parallel.ForEach(config.SourceConnections, cfg => {
-                    string cfgString = JsonConvert.SerializeObject(cfg);
+                    string sourceName = cfg.SourceConnection.DataSource() + '|' + cfg.SourceConnection.InitialCatalog();
                     if (cfg.SourceConnection.Type == ConnectionType.SQL)
                     {
-                        var collector = new DBCollector(cfg.GetSource(), cfg.NoWMI);
-                        if (cfg.PersistXESessions)
+                        try
                         {
-                            try
+                            var collector = new DBCollector(cfg.GetSource(), cfg.NoWMI);
+                            if (cfg.PersistXESessions)
                             {
-                                Console.WriteLine("Stop DBADash event sessions: " + cfg.SourceConnection.DataSource());
+                                Console.WriteLine("Stop DBADash event sessions: " + sourceName);
                                 collector.StopEventSessions();
                             }
-                            catch (Exception ex)
+                            else
                             {
-                                ErrorLogger(ex, "Stop Event Sessions:");
-                            }
-                        }
-                        else
-                        {
-                            try
-                            {
-                                Console.WriteLine("Remove DBADash event sessions: " + cfg.SourceConnection.DataSource());
+                                Console.WriteLine("Remove DBADash event sessions: " + sourceName);
                                 collector.RemoveEventSessions();
                             }
-                            catch (Exception ex)
-                            {
-                                ErrorLogger(ex, "Remove DBADash Event Sessions:");
-                            }
+                        }
+                        catch(Exception ex)
+                        {
+                            ErrorLogger(ex, "Stop/Remove DBADash Event Sessions:" + sourceName);
                         }
 
                     }
@@ -89,7 +89,7 @@ namespace DBADashService
             }
             catch (Exception ex)
             {
-                ErrorLogger(ex, "Remove Event Sessions:");
+                ErrorLogger(ex, "Remove Event Sessions");
             }
         }
 
