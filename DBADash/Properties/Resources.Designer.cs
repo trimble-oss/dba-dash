@@ -380,16 +380,18 @@ namespace DBADash.Properties {
         /// <summary>
         ///   Looks up a localized string similar to IF OBJECT_ID(&apos;sys.dm_hadr_database_replica_states&apos;) IS NOT NULL
         ///BEGIN
+        ///	DECLARE @SQL NVARCHAR(MAX)
+        ///	SET @SQL =N&apos;
         ///    SELECT database_id,
         ///           group_database_id,
-        ///           is_primary_replica,
+        ///           &apos; + CASE WHEN @@VERSION LIKE &apos;%SQL Server 2012%&apos; THEN &apos;CAST(NULL as BIT) AS is_primary_replica,&apos; ELSE &apos;is_primary_replica,&apos; END + &apos;
         ///           synchronization_state,
         ///           synchronization_health,
         ///           is_suspended,
         ///           suspend_reason
         ///    FROM sys.dm_hadr_database_replica_states
-        ///    WHERE is_local = 1;
-        ///END;.
+        ///    WHERE is_local = 1;&apos;
+        /// [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string SQLDatabasesHADR {
             get {

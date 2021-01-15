@@ -21,6 +21,7 @@ namespace DBADash
         private string encryptedConnectionString = "";
         private string connectionString = "";
         private ConnectionType connectionType;
+        private string productVersion = "";
 
         public bool WasEncrypted
         {
@@ -99,6 +100,42 @@ namespace DBADash
                 }
             }
             return true;
+        }
+
+        public string ProductVersion()
+        {
+            if (connectionType == ConnectionType.SQL && productVersion.Length==0)
+            {
+                SqlConnection cn = new SqlConnection(connectionString);
+                try
+                {
+                    cn.Open();
+                    SqlCommand cmd = new SqlCommand("SELECT SERVERPROPERTY('ProductVersion')", cn);
+                    productVersion =(string)cmd.ExecuteScalar();
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.Message);
+                }
+            }
+            return productVersion;            
+        }
+
+        public bool IsXESupported()
+        {
+            return IsXESupported(ProductVersion());
+        }
+
+        public static bool IsXESupported(string productVersion)
+        {
+            if (productVersion.StartsWith("8.") || productVersion.StartsWith("9.") || productVersion.StartsWith("10.")) // Note: Extended events added in SQL 2008 (10.*).  Batch completed not supported in this version & there are other differences like recording durations in ms instead of microseconds
+            {
+                return false;
+            }
+            else
+            {
+                return true;
+            }
         }
 
         public bool IsAzureDB()

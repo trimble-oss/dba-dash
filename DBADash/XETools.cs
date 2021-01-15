@@ -59,7 +59,10 @@ namespace DBADash
             string name;
             var el = XElement.Parse(xe);
             ringBufferAtt = new RingBufferTargetAttributes();
-            ringBufferAtt.Truncated = Int32.Parse(el.Attribute("truncated").Value);
+            if(el.Attribute("truncated") != null)
+            {
+                ringBufferAtt.Truncated = Int32.Parse(el.Attribute("truncated").Value);
+            }
             ringBufferAtt.DroppedCount = Int32.Parse(el.Attribute("droppedCount").Value);
             ringBufferAtt.ProcessingTime = Int32.Parse(el.Attribute("processingTime").Value);
             ringBufferAtt.EventCount = Int32.Parse(el.Attribute("eventCount").Value);
