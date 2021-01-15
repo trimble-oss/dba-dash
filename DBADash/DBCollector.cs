@@ -76,14 +76,7 @@ namespace DBADash
 
         public bool IsXESupported()
         {
-            if (productVersion.StartsWith("8.") || productVersion.StartsWith("9."))
-            {
-                return false;
-            }
-            else
-            {
-                return true;
-            }
+            return DBADashConnection.IsXESupported(productVersion);
         }
 
         public DBCollector(string connectionString, bool noWMI)
@@ -342,7 +335,7 @@ namespace DBADash
             }
             else if (collectionType == CollectionType.SlowQueries)
             {
-                if (SlowQueryThresholdMs > 0)
+                if (SlowQueryThresholdMs >= 0)
                 {
                     try
                     {

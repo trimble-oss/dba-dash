@@ -81,6 +81,12 @@ namespace DBADashServiceConfig
                         return;
                     }
                 }
+                else if(!src.SourceConnection.IsXESupported() && src.SlowQueryThresholdMs >= 0)
+                {
+                    MessageBox.Show("Warning: Slow query capture is supported for SQL 2012 and later and is not available for this SQL instance", "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    src.SlowQueryThresholdMs = -1;
+                    src.PersistXESessions = false;
+                }
                 else if (src.SourceConnection.IsAzureDB() && (src.SourceConnection.InitialCatalog() == "" || src.SourceConnection.InitialCatalog() == "master"))
                 {
                     if (MessageBox.Show("Add all azure databases as connections?", "Add Connections", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
