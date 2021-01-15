@@ -91,28 +91,11 @@ namespace DBADashServiceConfig
                 {
                     if (MessageBox.Show("Add all azure databases as connections?", "Add Connections", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
                     {
-                        SqlConnection cn = new SqlConnection(src.SourceConnection.ConnectionString);
-                        using (cn)
-                        {
-                            cn.Open();
-                            SqlCommand cmd = new SqlCommand("SELECT name from sys.databases", cn);
-                            var rdr = cmd.ExecuteReader();
-                            var builder = new SqlConnectionStringBuilder(src.SourceConnection.ConnectionString);
-                            while (rdr.Read())
-                            {
-                                builder.InitialCatalog = rdr.GetString(0);
-                                DBADashSource dbCn = new DBADashSource(builder.ConnectionString);
-                                if (ConnectionExists(dbCn.SourceConnection) == false)
-                                {
-                                    collectionConfig.SourceConnections.Add(dbCn);
-                                }
-                            }
-
-                        }
+                        collectionConfig.AddAzureDBs(src);                     
                     }
                 }
 
-                var existingConnection = getConnection(cboSource.Text);
+                var existingConnection = collectionConfig.GetSourceFromConnectionString(cboSource.Text);
                 if (existingConnection != null)
                 {
                     if (chkCustomizeSchedule.Checked && existingConnection.Schedules != null)
@@ -137,17 +120,6 @@ namespace DBADashServiceConfig
             // JsonConvert.DeserializeObject<CollectionConfig[]>(jsonConfig);
         }
 
-        private bool ConnectionExists(DBADashConnection newConnection)
-        {
-            if (getConnection(newConnection.ConnectionString) != null)
-            {
-                return true;
-            }
-            else
-            {
-                return false;
-            }
-        }
 
 
 
@@ -512,36 +484,11 @@ namespace DBADashServiceConfig
         }
 
 
-        private DBADashSource getConnection(string connectionString)
-        {
-            if (collectionConfig == null)
-            {
-                return null;
-            }
-            var findConnection = new DBADashConnection(connectionString);
-            foreach (var s in collectionConfig.SourceConnections)
-            {
-
-                if (s.SourceConnection.Type == findConnection.Type)
-                {
-                    if (s.SourceConnection.Type == ConnectionType.SQL && s.SourceConnection.DataSource() == findConnection.DataSource() && (s.SourceConnection.InitialCatalog() == findConnection.InitialCatalog()))
-                    {
-                        return s;
-                    }
-                    else if (s.SourceConnection.ConnectionString == findConnection.ConnectionString)
-                    {
-                        return s;
-                    }
-                }
-            }
-            return null;
-        }
-
         private void bttnRemove_Click(object sender, EventArgs e)
         {
             DBADashSource src;
 
-            src = getConnection(cboSource.Text);
+            src = collectionConfig.GetSourceFromConnectionString(cboSource.Text);
             if (src != null)
             {
                 collectionConfig.SourceConnections.Remove(src);
@@ -605,7 +552,7 @@ namespace DBADashServiceConfig
         {
             DBADashSource src;
 
-            src = getConnection(cboSource.Text);
+            src = collectionConfig.GetSourceFromConnectionString(cboSource.Text);
             if (src != null)
             {
                 chkNoWMI.Checked = src.NoWMI;

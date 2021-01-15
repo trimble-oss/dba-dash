@@ -118,6 +118,10 @@ namespace DBADashService
                 string confString = conf.Serialize();
                 System.IO.File.WriteAllText(jsonConfigPath, confString);
             }
+            if (conf.ScanForAzureDBs)
+            {
+                conf.AddAzureDBs();
+            }
             return conf;
         }
 

@@ -65,6 +65,7 @@
             this.tabPage1 = new System.Windows.Forms.TabPage();
             this.tabSchemaSnapshots = new System.Windows.Forms.TabControl();
             this.tabGeneral = new System.Windows.Forms.TabPage();
+            this.bttnConnectSource = new System.Windows.Forms.Button();
             this.tabExtendedEvents = new System.Windows.Forms.TabPage();
             this.label9 = new System.Windows.Forms.Label();
             this.chkSlowQueryThreshold = new System.Windows.Forms.CheckBox();
@@ -80,7 +81,6 @@
             this.bttnRemove = new System.Windows.Forms.Button();
             this.tabPage2 = new System.Windows.Forms.TabPage();
             this.tabPage4 = new System.Windows.Forms.TabPage();
-            this.bttnConnectSource = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.errorProvider1)).BeginInit();
             this.tabControl1.SuspendLayout();
             this.tabPage3.SuspendLayout();
@@ -133,7 +133,7 @@
             this.bttnAdd.Location = new System.Drawing.Point(499, 214);
             this.bttnAdd.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.bttnAdd.Name = "bttnAdd";
-            this.bttnAdd.Size = new System.Drawing.Size(103, 23);
+            this.bttnAdd.Size = new System.Drawing.Size(103, 30);
             this.bttnAdd.TabIndex = 8;
             this.bttnAdd.Text = "Add/Update";
             this.bttnAdd.UseVisualStyleBackColor = true;
@@ -473,6 +473,16 @@
             this.tabGeneral.Text = "General";
             this.tabGeneral.UseVisualStyleBackColor = true;
             // 
+            // bttnConnectSource
+            // 
+            this.bttnConnectSource.Image = global::DBADashServiceConfig.Properties.Resources.Connect_16x;
+            this.bttnConnectSource.Location = new System.Drawing.Point(696, 27);
+            this.bttnConnectSource.Name = "bttnConnectSource";
+            this.bttnConnectSource.Size = new System.Drawing.Size(28, 23);
+            this.bttnConnectSource.TabIndex = 8;
+            this.bttnConnectSource.UseVisualStyleBackColor = true;
+            this.bttnConnectSource.Click += new System.EventHandler(this.bttnConnectSource_Click);
+            // 
             // tabExtendedEvents
             // 
             this.tabExtendedEvents.Controls.Add(this.label9);
@@ -620,7 +630,7 @@
             this.bttnRemove.Location = new System.Drawing.Point(624, 214);
             this.bttnRemove.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.bttnRemove.Name = "bttnRemove";
-            this.bttnRemove.Size = new System.Drawing.Size(103, 23);
+            this.bttnRemove.Size = new System.Drawing.Size(103, 30);
             this.bttnRemove.TabIndex = 9;
             this.bttnRemove.Text = "Remove";
             this.bttnRemove.UseVisualStyleBackColor = true;
@@ -659,16 +669,6 @@
             this.tabPage4.TabIndex = 3;
             this.tabPage4.Text = "Service";
             this.tabPage4.UseVisualStyleBackColor = true;
-            // 
-            // bttnConnectSource
-            // 
-            this.bttnConnectSource.Image = global::DBADashServiceConfig.Properties.Resources.Connect_16x;
-            this.bttnConnectSource.Location = new System.Drawing.Point(696, 27);
-            this.bttnConnectSource.Name = "bttnConnectSource";
-            this.bttnConnectSource.Size = new System.Drawing.Size(28, 23);
-            this.bttnConnectSource.TabIndex = 8;
-            this.bttnConnectSource.UseVisualStyleBackColor = true;
-            this.bttnConnectSource.Click += new System.EventHandler(this.bttnConnectSource_Click);
             // 
             // ServiceConfig
             // 
