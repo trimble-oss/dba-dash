@@ -19,7 +19,7 @@ namespace DBADashService
         private readonly IScheduler scheduler;
         public ScheduleService()
         {
-            var conf = getConfig();
+            var conf = GetConfig();
             Int32 threads = conf.ServiceThreads;
             if (threads < 1)
             {
@@ -101,7 +101,7 @@ namespace DBADashService
             ScheduleJobs();
         }
 
-        private CollectionConfig getConfig()
+        public static CollectionConfig GetConfig()
         {
             string jsonConfigPath = System.IO.Path.Combine(AppContext.BaseDirectory, "ServiceConfig.json");
             if (!(System.IO.File.Exists(jsonConfigPath)))
@@ -118,10 +118,7 @@ namespace DBADashService
                 string confString = conf.Serialize();
                 System.IO.File.WriteAllText(jsonConfigPath, confString);
             }
-            if (conf.ScanForAzureDBs)
-            {
-                conf.AddAzureDBs();
-            }
+
             return conf;
         }
 
@@ -130,7 +127,11 @@ namespace DBADashService
         {
             Console.WriteLine("Agent Version:" + Assembly.GetEntryAssembly().GetName().Version);
 
-            var conf = getConfig();
+            var conf = GetConfig();
+            if (conf.ScanForAzureDBs)
+            {
+                conf.AddAzureDBs();
+            }
             removeEventSessions(conf);
 
             
@@ -212,7 +213,7 @@ namespace DBADashService
         }
         public void Stop()
         {
-            var conf = getConfig();
+            var conf = GetConfig();
             removeEventSessions(conf);
             scheduler.Shutdown().ConfigureAwait(false).GetAwaiter().GetResult();
         }

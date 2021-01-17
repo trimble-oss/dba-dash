@@ -12,6 +12,7 @@ namespace DBADashService
 
         static void Main(string[] args)
         {
+            var cfg = ScheduleService.GetConfig();
             var rc = HostFactory.Run(x =>
             {
                 x.Service<ScheduleService>(s =>
@@ -27,8 +28,9 @@ namespace DBADashService
                 });
 
                 x.SetDescription("DBADash Service - SQL Server monitoring tool");
-                x.SetDisplayName(Properties.Settings.Default.ServiceName);
-                x.SetServiceName(Properties.Settings.Default.ServiceName);
+                Console.WriteLine("Service Name:" + cfg.ServiceName);
+                x.SetDisplayName(cfg.ServiceName);
+                x.SetServiceName(cfg.ServiceName);
             });
 
             var exitCode = (int)Convert.ChangeType(rc, rc.GetTypeCode());

@@ -330,6 +330,11 @@ namespace DBADashServiceConfig
 
         private void ServiceConfig_FromClosing(object sender, FormClosingEventArgs e)
         {
+            promptSaveChanges();
+        }
+
+        private void promptSaveChanges()
+        {
             if (originalJson != txtJson.Text)
             {
                 if (MessageBox.Show("Save Changes?", "Save", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
@@ -341,6 +346,7 @@ namespace DBADashServiceConfig
 
         private void bttnStart_Click(object sender, EventArgs e)
         {
+            promptSaveChanges();
             svcCtrl.Refresh();
             if (svcCtrl.Status == ServiceControllerStatus.Stopped)
             {
@@ -383,6 +389,7 @@ namespace DBADashServiceConfig
 
         private void bttnInstall_Click(object sender, EventArgs e)
         {
+            promptSaveChanges();
             if (!(File.Exists(jsonPath)))
             {
                 MessageBox.Show("Save configuration file before installing service", "Error", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);

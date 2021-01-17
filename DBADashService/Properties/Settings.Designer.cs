@@ -22,14 +22,5 @@ namespace DBADashService.Properties {
                 return defaultInstance;
             }
         }
-        
-        [global::System.Configuration.ApplicationScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("DBADashService")]
-        public string ServiceName {
-            get {
-                return ((string)(this["ServiceName"]));
-            }
-        }
     }
 }

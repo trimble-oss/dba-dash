@@ -18,6 +18,7 @@ namespace DBADash
         public SchemaSnapshotDBOptions SchemaSnapshotOptions=null;
         public bool BinarySerialization { get; set; } = false;
         public bool ScanForAzureDBs { get; set; } = false;
+        public string ServiceName { get; set; } = "DBADashService";
 
         public List<DBADashSource> SourceConnections = new List<DBADashSource>();
 
