@@ -174,17 +174,28 @@ namespace DBADash
 
         }
 
+        public void AddConnections(List<DBADashSource> connections)
+        {
+            SourceConnections.AddRange(connections);
+        }
+
         public void AddAzureDBs()
+        {
+            var newConnections = GetNewAzureDBConnections();
+            SourceConnections.AddRange(newConnections);
+        }
+
+        public List<DBADashSource> GetNewAzureDBConnections()
         {
             var newConnections = new List<DBADashSource>();
             foreach (var cfg in SourceConnections)
             {
                 if (cfg.SourceConnection.InitialCatalog() == "master" && cfg.SourceConnection.IsAzureDB())
                 {
-                   newConnections.AddRange(GetNewAzureDBConnections(cfg));
+                    newConnections.AddRange(GetNewAzureDBConnections(cfg));
                 }
             }
-            SourceConnections.AddRange(newConnections);
+            return newConnections;
         }
 
         public List<DBADashSource> GetNewAzureDBConnections(DBADashSource masterConnection)

@@ -269,6 +269,7 @@ namespace DBADashServiceConfig
             txtAWSProfile.Text = collectionConfig.AWSProfile;
             txtAccessKey.Text = collectionConfig.AccessKey;
             txtSecretKey.Text = collectionConfig.SecretKey;
+            chkScanAzureDB.Checked = collectionConfig.ScanForAzureDBs;
             chkCustomizeMaintenanceCron.Checked = (collectionConfig.MaintenanceScheduleCron != null);
 
         }
@@ -460,11 +461,6 @@ namespace DBADashServiceConfig
         private void txtSecretKey_TextChanged(object sender, EventArgs e)
         {
             txtAWSProfile.Enabled = (txtAccessKey.Text.Length == 0 && txtSecretKey.Text.Length == 0);
-
-        }
-
-        private void cboDestination_SelectedIndexChanged(object sender, EventArgs e)
-        {
 
         }
 
@@ -667,6 +663,29 @@ namespace DBADashServiceConfig
                 cn = new DBADashConnection(frm.ConnectionString);
                 cboSource.Text = cn.EncryptedConnectionString;
             }
+        }
+
+        private void bttnScanNow_Click(object sender, EventArgs e)
+        {
+           var newConnections= collectionConfig.GetNewAzureDBConnections();
+            if (newConnections.Count == 0)
+            {
+                MessageBox.Show("No new Azure DB connections found", "Scan",  MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            else
+            {
+                if( MessageBox.Show(String.Format("Found {0} new connections.  Add connections to config file?",newConnections.Count), "Scan", MessageBoxButtons.YesNo, MessageBoxIcon.Question)== DialogResult.Yes)
+                {
+                    collectionConfig.AddConnections(newConnections);
+                    txtJson.Text = collectionConfig.Serialize();
+                }
+            }
+        }
+
+        private void chkScanAzureDB_CheckedChanged(object sender, EventArgs e)
+        {
+            collectionConfig.ScanForAzureDBs = chkScanAzureDB.Checked;
+            txtJson.Text = collectionConfig.Serialize();
         }
     }
 }
