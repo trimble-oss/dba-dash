@@ -314,6 +314,10 @@ namespace DBADashGUI
                     {
                         Instance_Selected(this, new InstanceSelectedEventArgs() { InstanceID = (Int32)row["InstanceID"], Tab = "tabDBADashErrorLog" });
                     }
+                    else
+                    {
+                        Instance_Selected(this, new InstanceSelectedEventArgs() { InstanceID=-1, Instance = (string)row["Instance"], Tab = "tabDBADashErrorLog" });
+                    }
                 }
                 else if (e.ColumnIndex == SnapshotAgeStatus.Index)
                 {

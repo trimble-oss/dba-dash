@@ -216,7 +216,10 @@ namespace DBADashGUI
             }
             if(tabs.SelectedTab== tabDBADashErrorLog)
             {
-                loadDBADashErrorLog(n.InstanceID);
+                collectionErrors1.InstanceID = n.InstanceID;
+                collectionErrors1.InstanceName = n.InstanceName;
+                collectionErrors1.Days = 1;
+                collectionErrors1.RefreshData();
             }
             if(tabs.SelectedTab== tabCollectionDates)
             {
@@ -357,29 +360,7 @@ namespace DBADashGUI
             }
         }
 
-        private void loadDBADashErrorLog(Int32 InstanceID)
-        {
-            SqlConnection cn = new SqlConnection(connectionString);
-
-            using (cn)
-            {
-                SqlCommand cmd = new SqlCommand("dbo.CollectionErrorLog_Get", cn)
-                {
-                    CommandType = CommandType.StoredProcedure
-                };
-                if (InstanceID > 0)
-                {
-                    cmd.Parameters.AddWithValue("InstanceID", InstanceID);
-                }
-                SqlDataAdapter da = new SqlDataAdapter(cmd);
-                DataTable dt = new DataTable();
-               
-                da.Fill(dt);
-                dgvDBADashErrors.AutoGenerateColumns = false;
-                dgvDBADashErrors.DataSource = dt;
-            }
-
-        }
+ 
 
         private readonly List<Int32> InstanceIDs = new List<Int32>();
         private readonly List<Int32> AllInstanceIDs=new List<Int32>();
@@ -394,7 +375,7 @@ namespace DBADashGUI
             InstanceIDs.Clear();
             AzureInstanceIDs.Clear();
             AllInstanceIDs.Clear();
-            var root = new SQLTreeItem("DBADash", SQLTreeItem.TreeType.DBADashRoot);
+            var root = new SQLTreeItem("DBA Dash", SQLTreeItem.TreeType.DBADashRoot);
             var changes = new SQLTreeItem("Configuration", SQLTreeItem.TreeType.Configuration);
             root.Nodes.Add(changes);
             
@@ -624,6 +605,7 @@ ORDER BY SchemaName,ObjectName
                 allowedTabs.Add(tabCollectionDates);
                 allowedTabs.Add(tabDBSpace);
                 allowedTabs.Add(tabCustomChecks);
+                allowedTabs.Add(tabDBADashErrorLog);
             }
             else if (n.Type == SQLTreeItem.TreeType.Configuration)
             {
@@ -1162,18 +1144,7 @@ ORDER BY SchemaName,ObjectName
 
         #endregion
 
-        private void tsRefreshErrors_Click(object sender, EventArgs e)
-        {
-            SQLTreeItem n = (SQLTreeItem)tv1.SelectedNode;
-            loadDBADashErrorLog(n.InstanceID);
-        }
-
-        private void tsCopyErrors_Click(object sender, EventArgs e)
-        {
-            
-            Common.CopyDataGridViewToClipboard(dgvDBADashErrors);
-
-        }
+         
 
         private void DataRetentionToolStripMenuItem_Click(object sender, EventArgs e)
         {
@@ -1221,6 +1192,11 @@ ORDER BY SchemaName,ObjectName
             }
             suppressLoadTab = false;
             loadSelectedTab();
+        }
+
+        private void tsErrorsDays_Click(object sender, EventArgs e)
+        {
+
         }
     }
 }

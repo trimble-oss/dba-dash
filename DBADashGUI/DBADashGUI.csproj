@@ -196,6 +196,12 @@
     <Compile Include="CollectionDates\CollectionDatesThresholds.Designer.cs">
       <DependentUpon>CollectionDatesThresholds.cs</DependentUpon>
     </Compile>
+    <Compile Include="CollectionDates\CollectionErrors.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="CollectionDates\CollectionErrors.Designer.cs">
+      <DependentUpon>CollectionErrors.cs</DependentUpon>
+    </Compile>
     <Compile Include="ColumnMetaData.cs" />
     <Compile Include="Common.cs" />
     <Compile Include="Changes\ConfigurationHistory.cs">
@@ -501,6 +507,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Changes\ConfigurationHistory.resx">
       <DependentUpon>ConfigurationHistory.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="CollectionDates\CollectionErrors.resx">
+      <DependentUpon>CollectionErrors.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="DataRetention.resx">
       <DependentUpon>DataRetention.cs</DependentUpon>

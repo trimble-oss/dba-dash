@@ -28,12 +28,12 @@
         /// </summary>
         private void InitializeComponent()
         {
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle4 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle5 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle6 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle3 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle10 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle11 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle12 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle7 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle8 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle9 = new System.Windows.Forms.DataGridViewCellStyle();
             this.dgvSummary = new System.Windows.Forms.DataGridView();
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
             this.tsRefresh = new System.Windows.Forms.ToolStripButton();
@@ -101,13 +101,13 @@
             this.SnapshotAgeStatus,
             this.UptimeStatus});
             this.dgvSummary.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.dgvSummary.Location = new System.Drawing.Point(0, 31);
+            this.dgvSummary.Location = new System.Drawing.Point(0, 49);
             this.dgvSummary.Name = "dgvSummary";
             this.dgvSummary.ReadOnly = true;
             this.dgvSummary.RowHeadersVisible = false;
             this.dgvSummary.RowHeadersWidth = 51;
             this.dgvSummary.RowTemplate.Height = 24;
-            this.dgvSummary.Size = new System.Drawing.Size(1800, 182);
+            this.dgvSummary.Size = new System.Drawing.Size(2250, 218);
             this.dgvSummary.TabIndex = 0;
             this.dgvSummary.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgvSummary_CellContentClick);
             this.dgvSummary.ColumnHeaderMouseClick += new System.Windows.Forms.DataGridViewCellMouseEventHandler(this.dgvSummary_ColumnHeaderMouseClick);
@@ -121,7 +121,7 @@
             this.tsCopy});
             this.toolStrip1.Location = new System.Drawing.Point(0, 0);
             this.toolStrip1.Name = "toolStrip1";
-            this.toolStrip1.Size = new System.Drawing.Size(1800, 31);
+            this.toolStrip1.Size = new System.Drawing.Size(2250, 39);
             this.toolStrip1.TabIndex = 1;
             this.toolStrip1.Text = "toolStrip1";
             // 
@@ -131,7 +131,7 @@
             this.tsRefresh.Image = global::DBADashGUI.Properties.Resources._112_RefreshArrow_Green_16x16_72;
             this.tsRefresh.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsRefresh.Name = "tsRefresh";
-            this.tsRefresh.Size = new System.Drawing.Size(29, 28);
+            this.tsRefresh.Size = new System.Drawing.Size(29, 24);
             this.tsRefresh.Text = "Refresh";
             this.tsRefresh.Click += new System.EventHandler(this.tsRefresh_Click);
             // 
@@ -141,7 +141,7 @@
             this.tsCopy.Image = global::DBADashGUI.Properties.Resources.ASX_Copy_blue_16x;
             this.tsCopy.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsCopy.Name = "tsCopy";
-            this.tsCopy.Size = new System.Drawing.Size(29, 28);
+            this.tsCopy.Size = new System.Drawing.Size(29, 24);
             this.tsCopy.Text = "Copy";
             this.tsCopy.Click += new System.EventHandler(this.tsCopy_Click);
             // 
@@ -181,8 +181,8 @@
             // 
             // dataGridViewTextBoxColumn5
             // 
-            dataGridViewCellStyle4.NullValue = "View";
-            this.dataGridViewTextBoxColumn5.DefaultCellStyle = dataGridViewCellStyle4;
+            dataGridViewCellStyle10.NullValue = "View";
+            this.dataGridViewTextBoxColumn5.DefaultCellStyle = dataGridViewCellStyle10;
             this.dataGridViewTextBoxColumn5.HeaderText = "Alerts";
             this.dataGridViewTextBoxColumn5.MinimumWidth = 6;
             this.dataGridViewTextBoxColumn5.Name = "dataGridViewTextBoxColumn5";
@@ -192,8 +192,8 @@
             // 
             // dataGridViewTextBoxColumn6
             // 
-            dataGridViewCellStyle5.NullValue = "View";
-            this.dataGridViewTextBoxColumn6.DefaultCellStyle = dataGridViewCellStyle5;
+            dataGridViewCellStyle11.NullValue = "View";
+            this.dataGridViewTextBoxColumn6.DefaultCellStyle = dataGridViewCellStyle11;
             this.dataGridViewTextBoxColumn6.HeaderText = "Full Backup";
             this.dataGridViewTextBoxColumn6.MinimumWidth = 6;
             this.dataGridViewTextBoxColumn6.Name = "dataGridViewTextBoxColumn6";
@@ -203,8 +203,8 @@
             // 
             // dataGridViewTextBoxColumn7
             // 
-            dataGridViewCellStyle6.NullValue = "View";
-            this.dataGridViewTextBoxColumn7.DefaultCellStyle = dataGridViewCellStyle6;
+            dataGridViewCellStyle12.NullValue = "View";
+            this.dataGridViewTextBoxColumn7.DefaultCellStyle = dataGridViewCellStyle12;
             this.dataGridViewTextBoxColumn7.HeaderText = "Diff Backup";
             this.dataGridViewTextBoxColumn7.MinimumWidth = 6;
             this.dataGridViewTextBoxColumn7.Name = "dataGridViewTextBoxColumn7";
@@ -412,8 +412,8 @@
             // 
             // FileFreeSpaceStatus
             // 
-            dataGridViewCellStyle1.NullValue = "View";
-            this.FileFreeSpaceStatus.DefaultCellStyle = dataGridViewCellStyle1;
+            dataGridViewCellStyle7.NullValue = "View";
+            this.FileFreeSpaceStatus.DefaultCellStyle = dataGridViewCellStyle7;
             this.FileFreeSpaceStatus.HeaderText = "File FreeSpace";
             this.FileFreeSpaceStatus.LinkColor = System.Drawing.Color.Black;
             this.FileFreeSpaceStatus.MinimumWidth = 6;
@@ -425,8 +425,8 @@
             // 
             // CustomCheckStatus
             // 
-            dataGridViewCellStyle2.NullValue = "View";
-            this.CustomCheckStatus.DefaultCellStyle = dataGridViewCellStyle2;
+            dataGridViewCellStyle8.NullValue = "View";
+            this.CustomCheckStatus.DefaultCellStyle = dataGridViewCellStyle8;
             this.CustomCheckStatus.HeaderText = "Custom Checks";
             this.CustomCheckStatus.LinkColor = System.Drawing.Color.Black;
             this.CustomCheckStatus.MinimumWidth = 6;
@@ -438,16 +438,17 @@
             // 
             // CollectionErrorStatus
             // 
-            dataGridViewCellStyle3.NullValue = "View";
-            this.CollectionErrorStatus.DefaultCellStyle = dataGridViewCellStyle3;
-            this.CollectionErrorStatus.HeaderText = "DBADash Errors";
+            this.CollectionErrorStatus.DataPropertyName = "CollectionErrorCount";
+            dataGridViewCellStyle9.NullValue = "View";
+            this.CollectionErrorStatus.DefaultCellStyle = dataGridViewCellStyle9;
+            this.CollectionErrorStatus.HeaderText = "DBA Dash Errors (24hrs)";
             this.CollectionErrorStatus.LinkColor = System.Drawing.Color.Black;
             this.CollectionErrorStatus.MinimumWidth = 6;
             this.CollectionErrorStatus.Name = "CollectionErrorStatus";
             this.CollectionErrorStatus.ReadOnly = true;
             this.CollectionErrorStatus.Resizable = System.Windows.Forms.DataGridViewTriState.True;
             this.CollectionErrorStatus.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
-            this.CollectionErrorStatus.Width = 141;
+            this.CollectionErrorStatus.Width = 136;
             // 
             // SnapshotAgeStatus
             // 
