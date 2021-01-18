@@ -5,21 +5,22 @@ DECLARE @Tags TABLE(
 	TagValue NVARCHAR(50)
 );
 DECLARE @Instance SYSNAME
-SELECT @Instance = Instance 
-FROM dbo.Instances 
+DECLARE @IsAzure BIT
+SELECT @Instance = Instance, @IsAzure=CASE WHEN EditionID = 1674378470 THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END
+FROM dbo.Instances
 WHERE InstanceID = @InstanceID;
 
 WITH T AS (
 	SELECT CAST(v.SQLVersionName as NVARCHAR(50)) as [Version], 
 			CAST(I.Edition as NVARCHAR(50)) as Edition,
-			CAST(v.SQLVersionName + ' ' + ProductLevel + ISNULL(' ' + I.ProductUpdateLevel,'') as NVARCHAR(50)) as PatchLevel,
+			CAST(v.SQLVersionName + ' ' + I.ProductLevel + ISNULL(' ' + I.ProductUpdateLevel,'') as NVARCHAR(50)) as PatchLevel,
 			CAST(I.Collation as NVARCHAR(50)) Collation,
 			CAST(I.SystemManufacturer as NVARCHAR(50)) as SystemManufacturer,
 			CAST(I.SystemProductName as NVARCHAR(50)) as SystemProductName,
 			CAST(RIGHT(REPLICATE(' ',5) +  CAST(I.cpu_count as NVARCHAR(50)),5) as NVARCHAR(50)) as CPUCount,
-			CAST(AgentHostName + ' {' + AgentVersion + '}' as NVARCHAR(50)) DBADashAgent
+			CAST(I.AgentHostName + ' {' + I.AgentVersion + '}' as NVARCHAR(50)) DBADashAgent
 	FROM dbo.Instances I
-	CROSS APPLY SQLVersionName(EditionID,ProductVersion) v
+	CROSS APPLY dbo.SQLVersionName(I.EditionID,I.ProductVersion) v
 	WHERE I.InstanceID=@InstanceID
 )
 INSERT INTO @Tags
@@ -45,6 +46,7 @@ WHERE NOT EXISTS(SELECT 1
 			WHERE tg.TagName = t.TagName 
 			AND tg.TagValue = t.TagValue
 			)
+AND NOT(t.TagName='{CPUCount}' AND @IsAzure=1)
 
 DELETE IT 
 FROM dbo.InstanceTags IT
