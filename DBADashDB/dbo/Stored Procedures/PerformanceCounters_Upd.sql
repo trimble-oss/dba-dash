@@ -57,7 +57,7 @@ WITH PC AS (
 												AND Abase.cntr_type=1073939712	
 												AND ABase.SnapshotDate <B.SnapshotDate
 	WHERE B.cntr_type IN(65792,272696576,537003264,1073874176)
-	AND NOT EXISTS(SELECT 1 FROM dbo.PerformanceCounters PC WHERE PC.SnapshotDate = B.SnapshotDate AND PC.InstanceID = @InstanceID AND PC.CounterID=C.CounterID)
+	AND NOT EXISTS(SELECT 1 FROM dbo.PerformanceCounters PC WHERE PC.SnapshotDate = CAST(B.SnapshotDate as DATETIME2(2)) AND PC.InstanceID = @InstanceID AND PC.CounterID=C.CounterID)
 )
 INSERT INTO dbo.PerformanceCounters
 (
