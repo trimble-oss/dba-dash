@@ -53,7 +53,14 @@ SELECT FileID,
        ConfiguredLevel,
        FileSnapshotDate,
        FileSnapshotAge,
-       FileSnapshotAgeStatus
+       FileSnapshotAgeStatus' 
+	   + CASE WHEN @FilegroupLevel=0 THEN ',
+	   max_size,
+	   MaxSizeMB,
+	   GrowthMB,
+	   GrowthPct,
+	   growth,
+	   is_percent_growth' ELSE '' END + '
 FROM ' + CASE WHEN @FilegroupLevel = 1 THEN 'dbo.FileGroupStatus' ELSE 'dbo.FileStatus' END + ' AS F
 WHERE 1=1' + 
 CASE WHEN @InstanceIDs IS NULL THEN '' ELSE 'AND EXISTS (SELECT 1

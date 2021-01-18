@@ -1,4 +1,5 @@
-﻿CREATE VIEW [dbo].[FileStatus]
+﻿
+CREATE VIEW [dbo].[FileStatus]
 AS
 WITH F AS (SELECT F.FileID,
 	   D.InstanceID,
@@ -26,7 +27,13 @@ WITH F AS (SELECT F.FileID,
 	   D.state_desc,
 	   F.type,
 	   SSD.SnapshotDate AS FileSnapshotDate,
-	   DATEDIFF(mi,SSD.SnapshotDate,GETUTCDATE()) AS FileSnapshotAge
+	   DATEDIFF(mi,SSD.SnapshotDate,GETUTCDATE()) AS FileSnapshotAge,
+	   F.max_size,
+	   NULLIF(f.max_size,-1)/128.0 AS MaxSizeMB,
+	   CASE WHEN F.is_percent_growth=1 THEN (F.growth*0.01*F.size)/128.0 ELSE F.growth/128.0 END AS GrowthMB,
+	   F.growth,
+	   CASE WHEN F.is_percent_growth=1 THEN F.growth ELSE NULL END AS GrowthPct,
+	   F.is_percent_growth
 FROM dbo.DBFiles F
     JOIN dbo.Databases D ON D.DatabaseID = F.DatabaseID
     JOIN dbo.Instances I ON I.InstanceID = D.InstanceID
@@ -80,7 +87,13 @@ SELECT F.FileID,
 	   cfg.ConfiguredLevel,
 	   F.FileSnapshotDate,
 	   F.FileSnapshotAge,
-	   CASE WHEN cdt.WarningThreshold IS NULL AND cdt.CriticalThreshold IS NULL THEN 3 WHEN F.FileSnapshotAge > cdt.CriticalThreshold THEN 1 WHEN F.FileSnapshotAge>cdt.WarningThreshold THEN 2 ELSE 4 END AS FileSnapshotAgeStatus
+	   CASE WHEN cdt.WarningThreshold IS NULL AND cdt.CriticalThreshold IS NULL THEN 3 WHEN F.FileSnapshotAge > cdt.CriticalThreshold THEN 1 WHEN F.FileSnapshotAge>cdt.WarningThreshold THEN 2 ELSE 4 END AS FileSnapshotAgeStatus,
+	   F.max_size,
+	   F.MaxSizeMB,
+	   F.GrowthMB,
+	   F.growth,
+	   F.GrowthPct,
+	   F.is_percent_growth
 FROM F
 
 	OUTER APPLY(SELECT TOP(1) T.FreeSpaceWarningThreshold,
