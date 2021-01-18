@@ -74,11 +74,11 @@ dc AS (
 err AS (
 	SELECT InstanceID,ErrorSource,COUNT(*) cnt,MAX(ErrorDate) AS LastError
 	FROM dbo.CollectionErrorLog
-	WHERE ErrorDate>=DATEADD(d,-2,GETUTCDATE())
+	WHERE ErrorDate>=DATEADD(d,-1,GETUTCDATE())
 	GROUP BY InstanceID,ErrorSource
 ),
 errSummary AS(
-	SELECT err.InstanceID, SUM(err.cnt) cnt,MIN(x.SucceedAfterErrorCount) AS SucceedAfterErrorCount
+	SELECT err.InstanceID, SUM(err.cnt) CollectionErrorCount,MIN(x.SucceedAfterErrorCount) AS SucceedAfterErrorCount
 	FROM err
 	CROSS APPLY(SELECT COUNT(*) SucceedAfterErrorCount
 				FROM dbo.CollectionDates CD 
@@ -138,7 +138,8 @@ SELECT I.InstanceID,
 		WHEN DATEDIFF(d,dc.DetectedCorruptionDate,GETUTCDATE())<14 THEN 1
 		WHEN DATEDIFF(d,dc.DetectedCorruptionDate,GETUTCDATE())<30 THEN 2
 		ELSE 3 END AS CorruptionStatus,
-	CASE WHEN  errSummary.SucceedAfterErrorCount=0 THEN 1 WHEN errSummary.cnt>0 THEN 2 ELSE 4 END AS CollectionErrorStatus,
+	CASE WHEN  errSummary.SucceedAfterErrorCount=0 THEN 1 WHEN errSummary.CollectionErrorCount>0 THEN 2 ELSE 4 END AS CollectionErrorStatus,
+	ISNULL(errSummary.CollectionErrorCount,0) AS CollectionErrorCount, 
 	SSD.SnapshotAgeMin,
 	SSD.SnapshotAgeMax,
 	SSD.CollectionDatesStatus as SnapshotAgeStatus,
@@ -216,7 +217,8 @@ SELECT NULL AS InstanceID,
 	3 AS AGStatus,
 	NULL AS DetectedCorruptionDate,
 	3 AS CorruptionStatus,
-	MIN(CASE WHEN  errSummary.SucceedAfterErrorCount=0 THEN 1 WHEN errSummary.cnt>0 THEN 2 ELSE 4 END) AS CollectionErrorStatus,
+	MIN(CASE WHEN  errSummary.SucceedAfterErrorCount=0 THEN 1 WHEN errSummary.CollectionErrorCount>0 THEN 2 ELSE 4 END) AS CollectionErrorStatus,
+	ISNULL(SUM(errSummary.CollectionErrorCount),0) AS CollectionErrorCount,
 	MIN(SSD.SnapshotAgeMin) AS SnapshotAgeMin,
 	MAX(SSD.SnapshotAgeMax) AS SnapshotAgeMax,
 	MIN(SSD.CollectionDatesStatus) as SnapshotAgeStatus,
