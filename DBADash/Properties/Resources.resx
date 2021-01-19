@@ -338,7 +338,7 @@ AS (SELECT j.job_id,
         LEFT JOIN msdb.dbo.sysjobhistory jh ON j.job_id = jh.job_id
         OUTER APPLY
     (
-        SELECT msdb.dbo.agent_datetime(run_date, run_time) AS RunDateTime,
+        SELECT	DATEADD(s,run_time%100,DATEADD(mi,run_time/100%100,DATEADD(hh,run_time/10000,DATEADD(d,run_date%100-1,DATEADD(mm,run_date/100%100-1,DATEADD(yy,NULLIF(run_date,0)/10000-1900,0)))))) as RunDateTime,
                ((jh.run_duration / 1000000) * 86400)
                + (((jh.run_duration - ((jh.run_duration / 1000000) * 1000000)) / 10000) * 3600)
                + (((jh.run_duration - ((jh.run_duration / 10000) * 10000)) / 100) * 60)
@@ -1487,25 +1487,28 @@ BEGIN
 END</value>
   </data>
   <data name="SQLAlerts" xml:space="preserve">
-    <value>SELECT id,
-	name,
-	message_id,
-	severity,
-	enabled,
-	delay_between_responses,
-	msdb.dbo.agent_datetime(NULLIF(last_occurrence_date,0),last_occurrence_time) last_occurrence,
-	msdb.dbo.agent_datetime(NULLIF(last_response_date,0),last_response_time) last_response,
-	notification_message,
-	include_event_description,
-	database_name,
-	event_description_keyword,
-	occurrence_count,
-	msdb.dbo.agent_datetime(NULLIF(count_reset_date,0),count_reset_time) as count_reset,
-	job_id,
-	has_notification,
-	category_id,
-	performance_condition
-FROM msdb..sysalerts</value>
+    <value>IF HAS_PERMS_BY_NAME('msdb..sysalerts','OBJECT','SELECT')=1
+BEGIN
+	SELECT id,
+		name,
+		message_id,
+		severity,
+		enabled,
+		delay_between_responses,
+		DATEADD(s,last_occurrence_time%100,DATEADD(mi,last_occurrence_time/100%100,DATEADD(hh,last_occurrence_time/10000,DATEADD(d,last_occurrence_date%100-1,DATEADD(mm,last_occurrence_date/100%100-1,DATEADD(yy,NULLIF(last_occurrence_date,0)/10000-1900,0)))))) last_occurrence,
+		DATEADD(s,last_response_time%100,DATEADD(mi,last_response_time/100%100,DATEADD(hh,last_response_time/10000,DATEADD(d,last_response_date%100-1,DATEADD(mm,last_response_date/100%100-1,DATEADD(yy,NULLIF(last_response_date,0)/10000-1900,0)))))) as last_response,
+		notification_message,
+		include_event_description,
+		database_name,
+		event_description_keyword,
+		occurrence_count,
+		DATEADD(s,count_reset_time%100,DATEADD(mi,count_reset_time/100%100,DATEADD(hh,count_reset_time/10000,DATEADD(d,count_reset_date%100-1,DATEADD(mm,count_reset_date/100%100-1,DATEADD(yy,NULLIF(count_reset_date,0)/10000-1900,0)))))) as count_reset,
+		job_id,
+		has_notification,
+		category_id,
+		performance_condition
+	FROM msdb..sysalerts
+END</value>
   </data>
   <data name="SQLObjectExecutionStats" xml:space="preserve">
     <value>DECLARE @SQL NVARCHAR(MAX)

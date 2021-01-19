@@ -85,23 +85,16 @@ namespace DBADash.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to SELECT id,
-        ///	name,
-        ///	message_id,
-        ///	severity,
-        ///	enabled,
-        ///	delay_between_responses,
-        ///	msdb.dbo.agent_datetime(NULLIF(last_occurrence_date,0),last_occurrence_time) last_occurrence,
-        ///	msdb.dbo.agent_datetime(NULLIF(last_response_date,0),last_response_time) last_response,
-        ///	notification_message,
-        ///	include_event_description,
-        ///	database_name,
-        ///	event_description_keyword,
-        ///	occurrence_count,
-        ///	msdb.dbo.agent_datetime(NULLIF(count_reset_date,0),count_reset_time) as count_reset,
-        ///	job_id,
-        ///	has_notification,
-        ///	categ [rest of string was truncated]&quot;;.
+        ///   Looks up a localized string similar to IF HAS_PERMS_BY_NAME(&apos;msdb..sysalerts&apos;,&apos;OBJECT&apos;,&apos;SELECT&apos;)=1
+        ///BEGIN
+        ///	SELECT id,
+        ///		name,
+        ///		message_id,
+        ///		severity,
+        ///		enabled,
+        ///		delay_between_responses,
+        ///		DATEADD(s,last_occurrence_time%100,DATEADD(mi,last_occurrence_time/100%100,DATEADD(hh,last_occurrence_time/10000,DATEADD(d,last_occurrence_date%100-1,DATEADD(mm,last_occurrence_date/100%100-1,DATEADD(yy,NULLIF(last_occurrence_date,0)/10000-1900,0)))))) last_occurrence,
+        ///		DATEADD(s,last_response_time%100,DATEADD(mi,last_response_time/100%100,DATEADD( [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string SQLAlerts {
             get {
