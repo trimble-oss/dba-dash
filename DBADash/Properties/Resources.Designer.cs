@@ -450,8 +450,7 @@ namespace DBADash.Properties {
         ///FROM sys.databases
         ///WHERE state  = 0
         ///AND DATABASEPROPERTYEX(name, &apos;Updateability&apos;) = &apos;READ_WRITE&apos;
-        ///
-        ///O [rest of string was truncated]&quot;;.
+        ///AND [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string SQLDBFiles {
             get {
