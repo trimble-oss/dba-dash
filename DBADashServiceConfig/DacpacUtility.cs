@@ -21,7 +21,7 @@ namespace DacpacUtility
                 IgnoreRoleMembership = true,
                 DropObjectsNotInSource = true,
                 BlockOnPossibleDataLoss = true,
-                RegisterDataTierApplication = true,
+                RegisterDataTierApplication = false,
                 BlockWhenDriftDetected = false,
                 ExcludeObjectTypes = new[]
                 {
