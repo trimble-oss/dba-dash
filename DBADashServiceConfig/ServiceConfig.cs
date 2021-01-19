@@ -174,13 +174,13 @@ namespace DBADashServiceConfig
             {
                 try
                 {
-                    if (! DBValidations.DBExists(txtDestination.Text))
+                    if (! DBValidations.DBExists(dest.ConnectionString))
                     {
                         lblVersionInfo.Text = "Run Deploy to create database.";
                         lblVersionInfo.ForeColor = Color.Red;
                         return true;
                     }
-                     dbVersion= DBValidations.GetDBVersion(txtDestination.Text);
+                     dbVersion= DBValidations.GetDBVersion(dest.ConnectionString);
                     Int32 compare = dbVersion.CompareTo(dacVersion);
                     if (compare == 0)
                     {
@@ -464,10 +464,6 @@ namespace DBADashServiceConfig
 
         }
 
-        private void txtDestination_TextChanged(object sender, EventArgs e)
-        {
-
-        }
 
         private void txtDestination_Validated(object sender, EventArgs e)
         {

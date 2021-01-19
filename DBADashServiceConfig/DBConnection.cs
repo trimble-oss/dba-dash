@@ -53,6 +53,16 @@ namespace DBADashServiceConfig
             }
         }
 
+        public string ConnectionStringWithoutInitialCatalog
+        {
+            get
+            {
+                var builder = new SqlConnectionStringBuilder(ConnectionString);
+                builder.Remove("Initial Catalog");
+                return builder.ConnectionString;
+            }
+        }
+
         private void chkIntegratedSecurity_CheckedChanged(object sender, EventArgs e)
         {
             pnlAuth.Enabled = !chkIntegratedSecurity.Checked;
@@ -77,12 +87,25 @@ namespace DBADashServiceConfig
         {
             try
             {
+                this.Cursor = Cursors.WaitCursor;
                 testConnection(ConnectionString);
             }
             catch (Exception ex)
+            {          
+                try
+                {
+                    testConnection(ConnectionStringWithoutInitialCatalog); // Try without initial catalog as DB might not have been created yet
+                }
+                catch 
+                {
+                    this.Cursor = Cursors.Default;
+                    MessageBox.Show("Error connecting to data source:" + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
+            }
+            finally
             {
-                MessageBox.Show("Error connecting to data source:" +ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return;
+                this.Cursor = Cursors.Default;
             }
             this.DialogResult = DialogResult.OK;
         }

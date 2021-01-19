@@ -80,12 +80,12 @@
             this.txtSnapshotDBs = new System.Windows.Forms.TextBox();
             this.bttnRemove = new System.Windows.Forms.Button();
             this.tabPage2 = new System.Windows.Forms.TabPage();
-            this.tabPage4 = new System.Windows.Forms.TabPage();
+            this.tabAzureDB = new System.Windows.Forms.TabPage();
+            this.label10 = new System.Windows.Forms.Label();
             this.bttnScanNow = new System.Windows.Forms.Button();
             this.chkScanAzureDB = new System.Windows.Forms.CheckBox();
-            this.tabAzureDB = new System.Windows.Forms.TabPage();
+            this.tabPage4 = new System.Windows.Forms.TabPage();
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
-            this.label10 = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.errorProvider1)).BeginInit();
             this.tabControl1.SuspendLayout();
             this.tabPage3.SuspendLayout();
@@ -96,8 +96,8 @@
             ((System.ComponentModel.ISupportInitialize)(this.numSlowQueryThreshold)).BeginInit();
             this.tabPage7.SuspendLayout();
             this.tabPage2.SuspendLayout();
-            this.tabPage4.SuspendLayout();
             this.tabAzureDB.SuspendLayout();
+            this.tabPage4.SuspendLayout();
             this.SuspendLayout();
             // 
             // cboSource
@@ -437,7 +437,7 @@
             this.txtDestination.Name = "txtDestination";
             this.txtDestination.Size = new System.Drawing.Size(550, 22);
             this.txtDestination.TabIndex = 1;
-            this.txtDestination.TextChanged += new System.EventHandler(this.txtDestination_TextChanged);
+            this.txtDestination.Validated += new System.EventHandler(this.txtDestination_Validated);
             // 
             // tabPage1
             // 
@@ -658,23 +658,26 @@
             this.tabPage2.Text = "AWS Credentials";
             this.tabPage2.UseVisualStyleBackColor = true;
             // 
-            // tabPage4
+            // tabAzureDB
             // 
-            this.tabPage4.Controls.Add(this.cboServiceCredentials);
-            this.tabPage4.Controls.Add(this.lblServiceCredentials);
-            this.tabPage4.Controls.Add(this.lblServiceStatus);
-            this.tabPage4.Controls.Add(this.bttnRefresh);
-            this.tabPage4.Controls.Add(this.bttnUninstall);
-            this.tabPage4.Controls.Add(this.bttnStart);
-            this.tabPage4.Controls.Add(this.bttnInstall);
-            this.tabPage4.Controls.Add(this.bttnStop);
-            this.tabPage4.Location = new System.Drawing.Point(4, 25);
-            this.tabPage4.Name = "tabPage4";
-            this.tabPage4.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage4.Size = new System.Drawing.Size(783, 281);
-            this.tabPage4.TabIndex = 3;
-            this.tabPage4.Text = "Service";
-            this.tabPage4.UseVisualStyleBackColor = true;
+            this.tabAzureDB.Controls.Add(this.label10);
+            this.tabAzureDB.Controls.Add(this.bttnScanNow);
+            this.tabAzureDB.Controls.Add(this.chkScanAzureDB);
+            this.tabAzureDB.Location = new System.Drawing.Point(4, 25);
+            this.tabAzureDB.Name = "tabAzureDB";
+            this.tabAzureDB.Padding = new System.Windows.Forms.Padding(3);
+            this.tabAzureDB.Size = new System.Drawing.Size(783, 281);
+            this.tabAzureDB.TabIndex = 4;
+            this.tabAzureDB.Text = "AzureDB";
+            this.tabAzureDB.UseVisualStyleBackColor = true;
+            // 
+            // label10
+            // 
+            this.label10.Location = new System.Drawing.Point(21, 115);
+            this.label10.Name = "label10";
+            this.label10.Size = new System.Drawing.Size(728, 121);
+            this.label10.TabIndex = 24;
+            this.label10.Text = resources.GetString("label10.Text");
             // 
             // bttnScanNow
             // 
@@ -699,26 +702,23 @@
             this.chkScanAzureDB.UseVisualStyleBackColor = true;
             this.chkScanAzureDB.CheckedChanged += new System.EventHandler(this.chkScanAzureDB_CheckedChanged);
             // 
-            // tabAzureDB
+            // tabPage4
             // 
-            this.tabAzureDB.Controls.Add(this.label10);
-            this.tabAzureDB.Controls.Add(this.bttnScanNow);
-            this.tabAzureDB.Controls.Add(this.chkScanAzureDB);
-            this.tabAzureDB.Location = new System.Drawing.Point(4, 25);
-            this.tabAzureDB.Name = "tabAzureDB";
-            this.tabAzureDB.Padding = new System.Windows.Forms.Padding(3);
-            this.tabAzureDB.Size = new System.Drawing.Size(783, 281);
-            this.tabAzureDB.TabIndex = 4;
-            this.tabAzureDB.Text = "AzureDB";
-            this.tabAzureDB.UseVisualStyleBackColor = true;
-            // 
-            // label10
-            // 
-            this.label10.Location = new System.Drawing.Point(21, 115);
-            this.label10.Name = "label10";
-            this.label10.Size = new System.Drawing.Size(728, 121);
-            this.label10.TabIndex = 24;
-            this.label10.Text = resources.GetString("label10.Text");
+            this.tabPage4.Controls.Add(this.cboServiceCredentials);
+            this.tabPage4.Controls.Add(this.lblServiceCredentials);
+            this.tabPage4.Controls.Add(this.lblServiceStatus);
+            this.tabPage4.Controls.Add(this.bttnRefresh);
+            this.tabPage4.Controls.Add(this.bttnUninstall);
+            this.tabPage4.Controls.Add(this.bttnStart);
+            this.tabPage4.Controls.Add(this.bttnInstall);
+            this.tabPage4.Controls.Add(this.bttnStop);
+            this.tabPage4.Location = new System.Drawing.Point(4, 25);
+            this.tabPage4.Name = "tabPage4";
+            this.tabPage4.Padding = new System.Windows.Forms.Padding(3);
+            this.tabPage4.Size = new System.Drawing.Size(783, 281);
+            this.tabPage4.TabIndex = 3;
+            this.tabPage4.Text = "Service";
+            this.tabPage4.UseVisualStyleBackColor = true;
             // 
             // ServiceConfig
             // 
@@ -752,10 +752,10 @@
             this.tabPage7.PerformLayout();
             this.tabPage2.ResumeLayout(false);
             this.tabPage2.PerformLayout();
-            this.tabPage4.ResumeLayout(false);
-            this.tabPage4.PerformLayout();
             this.tabAzureDB.ResumeLayout(false);
             this.tabAzureDB.PerformLayout();
+            this.tabPage4.ResumeLayout(false);
+            this.tabPage4.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
