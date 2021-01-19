@@ -1119,6 +1119,7 @@ BEGIN
 	FROM sys.databases
 	WHERE state  = 0
 	AND DATABASEPROPERTYEX(name, 'Updateability') = 'READ_WRITE'
+	AND HAS_DBACCESS(name)=1
 
 	OPEN DBs
 	FETCH NEXT FROM DBs INTO @DBName
