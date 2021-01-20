@@ -18,8 +18,8 @@ DBA Dash is a tool for SQL Server DBAs to assist with daily checks, performance 
 
 ## Requirements
  
- - SQL Server 2016 SP1 or later required for DBADashDB repository database.
- - SQL 2005*-SQL 2019 & Azure DB supported for monitored instances.
+ - SQL Server 2016 SP1 or later required for DBADashDB repository database.  RDS supported.
+ - SQL 2008-SQL 2019 supported for monitored instances - including Azure and RDS (SQL Server).  
  - Windows machine to run agent.  Agent can monitor multiple SQL instances.
  
 ## Prerequisites 
