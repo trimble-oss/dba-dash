@@ -19,7 +19,7 @@ SELECT
        stat.BlockCount,
        stat.BlockWaitTime
 FROM dbo.BlockingSnapshot BSS
-OUTER APPLY dbo.BlockingSnapshotRecursiveStats(BSS.BlockingSnapshotID,BSS.session_id) stat
+OUTER APPLY dbo.BlockingSnapshotRecursiveStats(BSS.BlockingSnapshotID,BSS.session_id,BSS.SnapshotDateUTC) stat
 WHERE BSS.BlockingSnapshotID = @BlockingSnapshotID
 AND (BSS.blocking_session_id=@blocking_session_id
 	OR (@blocking_session_id=0
