@@ -489,7 +489,7 @@ namespace DBADashGUI
                 {
                     cmd.Parameters.AddWithValue("UserName", user);
                 }
-                if (txtText.Text.Length > 0)
+                if (text.Length > 0)
                 {
                     cmd.Parameters.AddWithValue("Text", text);
                 }
@@ -552,6 +552,16 @@ namespace DBADashGUI
             {
                 RefreshData();
             }
+        }
+
+        private void tsCopySummary_Click(object sender, EventArgs e)
+        {
+            Common.CopyDataGridViewToClipboard(dgvSummary);
+        }
+
+        private void tsCopyDetail_Click(object sender, EventArgs e)
+        {
+            Common.CopyDataGridViewToClipboard(dgvSlow);
         }
     }
 }
