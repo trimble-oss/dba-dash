@@ -33,6 +33,8 @@ BEGIN
 	SELECT value
 	FROM STRING_SPLIT(@InstanceIDs,',')
 END;
+SET @Text = REPLACE(REPLACE(REPLACE(@Text,'[','[[]'),'_','[_]'),'%','[%]') -- Like encode input
+
 DECLARE @GroupSQL NVARCHAR(MAX) = CASE @GroupBy WHEN 'ConnectionID' THEN 'I.ConnectionID' 
 												WHEN 'client_hostname' THEN 'SQ.client_hostname'  
 												WHEN 'username' THEN 'SQ.username'
@@ -40,6 +42,7 @@ DECLARE @GroupSQL NVARCHAR(MAX) = CASE @GroupBy WHEN 'ConnectionID' THEN 'I.Conn
 												WHEN 'client_app_name' THEN 'SQ.client_app_name'
 												WHEN 'DatabaseName' THEN 'D.name'
 												WHEN 'Result' THEN 'SQ.Result'
+												WHEN 'text' THEN 'LEFT(SQ.text,1000)'
 												ELSE 'ConnectionID' END
 
 DECLARE @SQL NVARCHAR(MAX)

@@ -255,6 +255,10 @@ namespace DBADashGUI
                     {
                         txtResult.Text = selectedGroupValue;
                     }
+                    else if (groupBy == "text")
+                    {
+                        txtText.Text = selectedGroupValue;
+                    }
                     else
                     {
                         throw new Exception("Invalid group by");
@@ -422,6 +426,7 @@ namespace DBADashGUI
                 string objectname = txtObject.Text;
                 string app = txtApp.Text;
                 string result = txtResult.Text;
+                string text = txtText.Text;
                 
                 if (groupBy == "ConnectionID")
                 {
@@ -450,6 +455,10 @@ namespace DBADashGUI
                 else if (groupBy == "Result")
                 {
                     result = selectedGroupValue;
+                }
+                else if (groupBy == "text")
+                {
+                    text = selectedGroupValue;
                 }
                 else
                 {
@@ -482,7 +491,7 @@ namespace DBADashGUI
                 }
                 if (txtText.Text.Length > 0)
                 {
-                    cmd.Parameters.AddWithValue("Text", txtText.Text);
+                    cmd.Parameters.AddWithValue("Text", text);
                 }
                 if (durationFrom > 0)
                 {

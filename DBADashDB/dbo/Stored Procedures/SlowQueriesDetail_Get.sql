@@ -33,7 +33,7 @@ BEGIN
 	SELECT value
 	FROM STRING_SPLIT(@InstanceIDs,',')
 END;
-
+SET @Text = REPLACE(REPLACE(REPLACE(@Text,'[','[[]'),'_','[_]'),'%','[%]') -- Like encode input
 
 DECLARE @SQL NVARCHAR(MAX)
 SET @SQL = 
