@@ -62,7 +62,6 @@ namespace DBADashService
             try
             {
                 Parallel.ForEach(config.SourceConnections, cfg => {
-                    string sourceName = cfg.SourceConnection.DataSource() + '|' + cfg.SourceConnection.InitialCatalog();
                     if (cfg.SourceConnection.Type == ConnectionType.SQL)
                     {
                         try
@@ -70,18 +69,18 @@ namespace DBADashService
                             var collector = new DBCollector(cfg.GetSource(), cfg.NoWMI);
                             if (cfg.PersistXESessions)
                             {
-                                Console.WriteLine("Stop DBADash event sessions: " + sourceName);
+                                Console.WriteLine("Stop DBADash event sessions: " + cfg.SourceConnection.ConnectionForPrint);
                                 collector.StopEventSessions();
                             }
                             else
                             {
-                                Console.WriteLine("Remove DBADash event sessions: " + sourceName);
+                                Console.WriteLine("Remove DBADash event sessions: " + cfg.SourceConnection.ConnectionForPrint);
                                 collector.RemoveEventSessions();
                             }
                         }
                         catch(Exception ex)
                         {
-                            ErrorLogger(ex, "Stop/Remove DBADash Event Sessions:" + sourceName);
+                            ErrorLogger(ex, "Stop/Remove DBADash Event Sessions:" + cfg.SourceConnection.ConnectionForPrint);
                         }
 
                     }

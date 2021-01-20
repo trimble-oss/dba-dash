@@ -143,12 +143,13 @@ namespace DBADash
        public DBADashSource GetSourceFromConnectionString(string connectionString)
         {
             var findConnection = new DBADashConnection(connectionString);
+            bool isAzure = findConnection.IsAzureDB();
             foreach (var s in SourceConnections)
             {
 
                 if (s.SourceConnection.Type == findConnection.Type)
                 {
-                    if (s.SourceConnection.Type == ConnectionType.SQL && s.SourceConnection.DataSource() == findConnection.DataSource() && (s.SourceConnection.InitialCatalog() == findConnection.InitialCatalog()))
+                    if (s.SourceConnection.Type == ConnectionType.SQL && s.SourceConnection.DataSource() == findConnection.DataSource() && (s.SourceConnection.InitialCatalog() == findConnection.InitialCatalog() || !isAzure))
                     {
                         return s;
                     }

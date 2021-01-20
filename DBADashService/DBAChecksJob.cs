@@ -121,8 +121,8 @@ namespace DBADashService
                 }
                 else
                 {
-                    SqlConnectionStringBuilder builder = new SqlConnectionStringBuilder(cfg.GetSource());
-                    string collectDescription = "Collect " + string.Join(", ", types.Select(s => s.ToString()).ToArray()) + " from Instance:" + builder.DataSource + "|" + builder.InitialCatalog;
+                  
+                    string collectDescription = "Collect " + string.Join(", ", types.Select(s => s.ToString()).ToArray()) + " from Instance:" + cfg.SourceConnection.ConnectionForPrint;
                     Console.WriteLine(collectDescription);
                     try
                     {

@@ -160,7 +160,14 @@ namespace DBADash
                 catch (Exception ex)
                 {
                     Console.WriteLine(ex.Message);
-                    return false;
+                    if (connectionString.Contains(".database.windows.net"))
+                    {
+                        return true;
+                    }
+                    else
+                    {
+                        return false;
+                    }
                 }
             }
             else
@@ -294,6 +301,23 @@ namespace DBADash
             else
             {
                 return connectionString;
+            }
+        }
+
+        public string ConnectionForPrint
+        {
+            get
+            {
+                if (Type == ConnectionType.SQL)
+                {
+                    SqlConnectionStringBuilder builder = new SqlConnectionStringBuilder(connectionString);
+                    return builder.DataSource + (builder.InitialCatalog == "" ? "" : "|" + builder.InitialCatalog);
+                }
+                else
+                {
+                    return connectionString;
+                }
+            
             }
         }
 
