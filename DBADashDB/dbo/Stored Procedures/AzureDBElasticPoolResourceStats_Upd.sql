@@ -2,7 +2,7 @@
 CREATE PROC [dbo].[AzureDBElasticPoolResourceStats_Upd](@AzureDBElasticPoolResourceStats dbo.AzureDBElasticPoolResourceStats READONLY,@InstanceID INT,@SnapshotDate DATETIME2(3))
 AS
 SET XACT_ABORT ON
-DECLARE @Ref VARCHAR(30)='AzureDBElasticPoolResourceStats'
+DECLARE @Ref VARCHAR(100)='AzureDBElasticPoolResourceStats'
 IF NOT EXISTS(SELECT 1 FROM dbo.CollectionDates WHERE SnapshotDate>=@SnapshotDate AND InstanceID = @InstanceID AND Reference=@Ref)
 BEGIN
 	DECLARE @MaxDate DATETIME2(7);
