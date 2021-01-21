@@ -299,7 +299,7 @@
             this.splitMain.Panel2.Controls.Add(this.tabs);
             this.splitMain.Panel2MinSize = 100;
             this.splitMain.Size = new System.Drawing.Size(1983, 1281);
-            this.splitMain.SplitterDistance = 496;
+            this.splitMain.SplitterDistance = 341;
             this.splitMain.TabIndex = 3;
             // 
             // tv1
@@ -310,7 +310,7 @@
             this.tv1.Location = new System.Drawing.Point(0, 0);
             this.tv1.Name = "tv1";
             this.tv1.SelectedImageIndex = 0;
-            this.tv1.Size = new System.Drawing.Size(496, 1281);
+            this.tv1.Size = new System.Drawing.Size(341, 1281);
             this.tv1.TabIndex = 0;
             this.tv1.BeforeExpand += new System.Windows.Forms.TreeViewCancelEventHandler(this.tv1_BeforeExpand);
             this.tv1.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.tv1_AfterSelect);
@@ -352,7 +352,7 @@
             this.tabs.Location = new System.Drawing.Point(0, 0);
             this.tabs.Name = "tabs";
             this.tabs.SelectedIndex = 0;
-            this.tabs.Size = new System.Drawing.Size(1483, 1281);
+            this.tabs.Size = new System.Drawing.Size(1638, 1281);
             this.tabs.TabIndex = 0;
             this.tabs.Tag = "";
             this.tabs.SelectedIndexChanged += new System.EventHandler(this.tabs_SelectedIndexChanged);
@@ -363,7 +363,7 @@
             this.tabSnapshotsSummary.Location = new System.Drawing.Point(4, 25);
             this.tabSnapshotsSummary.Name = "tabSnapshotsSummary";
             this.tabSnapshotsSummary.Padding = new System.Windows.Forms.Padding(3);
-            this.tabSnapshotsSummary.Size = new System.Drawing.Size(1475, 1252);
+            this.tabSnapshotsSummary.Size = new System.Drawing.Size(1630, 1252);
             this.tabSnapshotsSummary.TabIndex = 1;
             this.tabSnapshotsSummary.Text = "Snapshot Summary";
             this.tabSnapshotsSummary.UseVisualStyleBackColor = true;
@@ -383,7 +383,7 @@
             // splitSnapshotSummary.Panel2
             // 
             this.splitSnapshotSummary.Panel2.Controls.Add(this.gvSnapshotsDetail);
-            this.splitSnapshotSummary.Size = new System.Drawing.Size(1469, 1246);
+            this.splitSnapshotSummary.Size = new System.Drawing.Size(1624, 1246);
             this.splitSnapshotSummary.SplitterDistance = 353;
             this.splitSnapshotSummary.TabIndex = 0;
             // 
@@ -399,7 +399,7 @@
             this.tsSummaryPageSize});
             this.toolStrip2.Location = new System.Drawing.Point(0, 325);
             this.toolStrip2.Name = "toolStrip2";
-            this.toolStrip2.Size = new System.Drawing.Size(1469, 28);
+            this.toolStrip2.Size = new System.Drawing.Size(1624, 28);
             this.toolStrip2.TabIndex = 2;
             this.toolStrip2.Text = "toolStrip2";
             // 
@@ -487,7 +487,7 @@
             this.gvSnapshots.RowHeadersWidth = 51;
             this.gvSnapshots.RowTemplate.Height = 24;
             this.gvSnapshots.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-            this.gvSnapshots.Size = new System.Drawing.Size(1469, 353);
+            this.gvSnapshots.Size = new System.Drawing.Size(1624, 353);
             this.gvSnapshots.TabIndex = 0;
             this.gvSnapshots.SelectionChanged += new System.EventHandler(this.gvSnapshots_SelectionChanged);
             // 
@@ -604,7 +604,7 @@
             this.gvSnapshotsDetail.RowHeadersWidth = 51;
             this.gvSnapshotsDetail.RowTemplate.Height = 24;
             this.gvSnapshotsDetail.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.CellSelect;
-            this.gvSnapshotsDetail.Size = new System.Drawing.Size(1469, 889);
+            this.gvSnapshotsDetail.Size = new System.Drawing.Size(1624, 889);
             this.gvSnapshotsDetail.TabIndex = 0;
             this.gvSnapshotsDetail.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.gvSnapshotsDetail_CellContentClick);
             // 
@@ -713,9 +713,9 @@
             this.tsNext,
             this.toolStripLabel1,
             this.tsPageSize});
-            this.toolStrip1.Location = new System.Drawing.Point(0, 642);
+            this.toolStrip1.Location = new System.Drawing.Point(0, 639);
             this.toolStrip1.Name = "toolStrip1";
-            this.toolStrip1.Size = new System.Drawing.Size(1469, 28);
+            this.toolStrip1.Size = new System.Drawing.Size(1469, 31);
             this.toolStrip1.TabIndex = 1;
             this.toolStrip1.Text = "toolStrip1";
             // 
@@ -725,14 +725,14 @@
             this.tsPrevious.Image = ((System.Drawing.Image)(resources.GetObject("tsPrevious.Image")));
             this.tsPrevious.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsPrevious.Name = "tsPrevious";
-            this.tsPrevious.Size = new System.Drawing.Size(29, 25);
+            this.tsPrevious.Size = new System.Drawing.Size(29, 28);
             this.tsPrevious.Text = "Previous";
             this.tsPrevious.Click += new System.EventHandler(this.tsPrevious_Click);
             // 
             // tsPageNum
             // 
             this.tsPageNum.Name = "tsPageNum";
-            this.tsPageNum.Size = new System.Drawing.Size(53, 25);
+            this.tsPageNum.Size = new System.Drawing.Size(53, 28);
             this.tsPageNum.Text = "Page 1";
             // 
             // tsNext
@@ -741,14 +741,14 @@
             this.tsNext.Image = ((System.Drawing.Image)(resources.GetObject("tsNext.Image")));
             this.tsNext.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsNext.Name = "tsNext";
-            this.tsNext.Size = new System.Drawing.Size(29, 25);
+            this.tsNext.Size = new System.Drawing.Size(29, 28);
             this.tsNext.Text = "Next";
             this.tsNext.Click += new System.EventHandler(this.tsNext_Click);
             // 
             // toolStripLabel1
             // 
             this.toolStripLabel1.Name = "toolStripLabel1";
-            this.toolStripLabel1.Size = new System.Drawing.Size(75, 25);
+            this.toolStripLabel1.Size = new System.Drawing.Size(75, 28);
             this.toolStripLabel1.Text = "Page Size:";
             // 
             // tsPageSize
@@ -760,7 +760,7 @@
             "1000",
             "5000"});
             this.tsPageSize.Name = "tsPageSize";
-            this.tsPageSize.Size = new System.Drawing.Size(121, 28);
+            this.tsPageSize.Size = new System.Drawing.Size(121, 31);
             this.tsPageSize.Text = "100";
             this.tsPageSize.Validating += new System.ComponentModel.CancelEventHandler(this.tsPageSize_Validating);
             this.tsPageSize.Validated += new System.EventHandler(this.tsPageSize_Validated);

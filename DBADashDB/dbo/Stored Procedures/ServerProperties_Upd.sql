@@ -63,7 +63,7 @@ BEGIN
 		  ,[ProductBuild] = T.ProductBuild
 		  ,[ProductBuildType] = T.ProductBuildType
 		  ,[ProductLevel] = T.ProductLevel
-		  ,[ProductMajorVersion] = T.ProductMajorVersion
+		  ,[ProductMajorVersion] = ISNULL(T.ProductMajorVersion,LEFT(T.ProductVersion,NULLIF(CHARINDEX('.',T.ProductVersion)-1,-1)))
 		  ,[ProductUpdateLevel] = T.ProductUpdateLevel
 		  ,[ProductUpdateReference] = T.ProductUpdateReference
 		  ,[ProductVersion] = T.ProductVersion
