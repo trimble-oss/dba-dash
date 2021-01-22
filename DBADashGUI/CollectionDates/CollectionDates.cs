@@ -85,8 +85,9 @@ namespace DBADashGUI.CollectionDates
                     cmd.Parameters.AddWithValue("IncludeNA", IncludeNA);
                     cmd.Parameters.AddWithValue("IncludeOK", IncludeOK);
                     SqlDataAdapter da = new SqlDataAdapter(cmd);
-                    DataTable dt = new DataTable();
+                    DataTable dt = new DataTable();                   
                     da.Fill(dt);
+                    Common.ConvertUTCToLocal(ref dt);
                     dgvCollectionDates.AutoGenerateColumns = false;
                     dgvCollectionDates.DataSource = new DataView(dt);
                 }
@@ -170,7 +171,6 @@ namespace DBADashGUI.CollectionDates
                     var Status = (DBADashStatus.DBADashStatusEnum)row["Status"];
 
                     dgvCollectionDates.Rows[idx].Cells["SnapshotAge"].Style.BackColor = DBADashStatus.GetStatusColour(Status);
-                    dgvCollectionDates.Rows[idx].Cells["SnapshotDate"].Value = ((DateTime)row["SnapshotDate"]).ToLocalTime();
 
                     if ((string)row["ConfiguredLevel"] == "Instance")
                     {

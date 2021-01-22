@@ -58,8 +58,8 @@ namespace DBADashGUI.CollectionDates
                 cmd.Parameters.AddWithValue("Days", Days);
                 SqlDataAdapter da = new SqlDataAdapter(cmd);
                 DataTable dt = new DataTable();
-
                 da.Fill(dt);
+                Common.ConvertUTCToLocal(ref dt);
                 dgvDBADashErrors.AutoGenerateColumns = false;
                 dgvDBADashErrors.DataSource = dt;
             }
