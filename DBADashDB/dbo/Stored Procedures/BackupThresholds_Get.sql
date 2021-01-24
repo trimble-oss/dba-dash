@@ -3,7 +3,7 @@ AS
 SELECT BT.InstanceID,
        BT.DatabaseID,
 	   CASE WHEN BT.InstanceID=-1 THEN '{ALL}' ELSE I.Instance END AS Instance,
-	   CASE WHEN BT.DatabaseID =-1 THEN '{ALL}' ELSE D.Name END AS [Database],
+	   CASE WHEN BT.DatabaseID =-1 THEN '{ALL}' ELSE D.name END AS [Database],
        BT.LogBackupWarningThreshold,
        BT.LogBackupCriticalThreshold,
        BT.FullBackupWarningThreshold,

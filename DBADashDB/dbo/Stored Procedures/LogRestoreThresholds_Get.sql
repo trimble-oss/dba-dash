@@ -3,7 +3,7 @@ AS
 SELECT T.InstanceID,
        T.DatabaseID,
 	   CASE WHEN T.InstanceID=-1 THEN '{ALL}' ELSE I.Instance END AS Instance,
-	   CASE WHEN T.DatabaseID=-1 THEN '{ALL}' ELSE D.Name END AS DatabaseName,
+	   CASE WHEN T.DatabaseID=-1 THEN '{ALL}' ELSE D.name END AS DatabaseName,
        T.LatencyCriticalThreshold,
        T.LatencyWarningThreshold,
        T.TimeSinceLastCriticalThreshold,

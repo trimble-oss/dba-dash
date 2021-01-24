@@ -44,7 +44,7 @@ i AS (
 		MAX(IOS.MaxReadIOPs) AS MaxReadIOPs,
 		MAX(IOS.MaxWriteIOPs) AS MaxWriteIOPs,
 		MAX(IOS.MaxIOPs) AS MaxIOPs,
-		MAX(IOS.MaxReadMBSec) AS MaxReadMBsec,
+		MAX(IOS.MaxReadMBsec) AS MaxReadMBsec,
 		MAX(IOS.MaxWriteMBsec) AS MaxWriteMBsec,
 		MAX(MaxMBsec) AS MaxMBsec
 	FROM dbo.Instances I

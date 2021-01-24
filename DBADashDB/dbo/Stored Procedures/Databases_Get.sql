@@ -1,6 +1,6 @@
 ﻿CREATE PROC Databases_Get(@InstanceID INT)
 AS
-SELECT DatabaseID,Name
+SELECT DatabaseID,name
 FROM dbo.Databases
 WHERE InstanceID= @InstanceID
 AND IsActive=1

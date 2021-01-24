@@ -276,7 +276,7 @@ END
 
 DELETE Staging.IOStats
 WHERE InstanceID=@InstanceID
-INSERT INTO staging.IOStats
+INSERT INTO Staging.IOStats
 (
     InstanceID,
     SnapshotDate,

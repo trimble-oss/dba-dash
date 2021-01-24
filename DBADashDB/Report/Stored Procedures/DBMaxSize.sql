@@ -48,7 +48,7 @@ AND d.IsActive=1
 AND f.type=0
 GROUP BY i.Instance,
 		d.name,
-		f.FILEGROUP_NAME
+		f.filegroup_name
 HAVING MIN(f.max_size)>0
 AND (1.0-(SUM(f.space_used)*1.0/NULLIF(SUM(f.max_size),0))) *100 < @ThresholdPct
 ORDER BY AvailableGrowthPct

@@ -114,7 +114,7 @@ a AS(
 		MAX(last_occurrence_utc) AS LastAlert,
 		SUM(occurrence_count) AS TotalAlerts,
 		MAX(CASE WHEN IsCriticalAlert=1 THEN last_occurrence_utc ELSE NULL END) AS LastCritical
-	FROM dbo.sysalerts
+	FROM dbo.SysAlerts
 	GROUP BY InstanceID
 )
 ,cus AS (

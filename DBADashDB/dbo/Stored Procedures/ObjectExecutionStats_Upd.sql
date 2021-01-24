@@ -38,7 +38,7 @@ UPDATE O
 FROM @ObjectExecutionStats t
 JOIN dbo.Databases d ON t.database_id = d.database_id AND D.InstanceID=@InstanceID
 JOIN dbo.DBObjects O ON O.DatabaseID = d.DatabaseID 
-					AND O.objectname = t.object_name 
+					AND O.ObjectName = t.object_name 
 					AND O.ObjectType = t.type
 					AND O.SchemaName = t.schema_name
 WHERE D.IsActive=1

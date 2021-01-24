@@ -48,7 +48,7 @@ WITH Statuses AS(
 SELECT J.Instance,
        J.InstanceID,
        J.job_id,
-       J.name,
+       J.Name,
        J.LastFail,
 	   J.LastFailUTC,
        J.TimeSinceLastFail,

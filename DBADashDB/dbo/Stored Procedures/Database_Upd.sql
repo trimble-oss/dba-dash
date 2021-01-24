@@ -305,7 +305,7 @@ BEGIN
 		UPDATE  SET [name] = S.Name
 		  ,[source_database_id] = S.source_database_id
 		  ,[owner_sid] = S.owner_sid
-		  ,[create_date] = S.Create_date
+		  ,[create_date] = S.create_date
 		  ,[compatibility_level] = S.[compatibility_level]
 		  ,[collation_name] = S.collation_name
 		  ,[user_access] = S.user_access

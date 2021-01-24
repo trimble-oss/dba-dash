@@ -28,7 +28,7 @@ AND NOT EXISTS(SELECT 1 FROM dbo.Waits w WHERE w.InstanceID = @InstanceID AND w.
 
 DELETE Staging.Waits WHERE InstanceID=@InstanceID;
 
-INSERT INTO staging.Waits
+INSERT INTO Staging.Waits
 (
     InstanceID,
 	SnapshotDate,

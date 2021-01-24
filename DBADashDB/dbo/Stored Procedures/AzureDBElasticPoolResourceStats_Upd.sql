@@ -24,7 +24,7 @@ BEGIN
 			T.elastic_pool_cpu_limit = S.elastic_pool_cpu_limit,
 			T.ValidFrom=S.end_time
 	WHEN NOT MATCHED THEN INSERT(InstanceID,elastic_pool_name,elastic_pool_dtu_limit ,elastic_pool_cpu_limit,ValidFrom )
-	VALUES(@InstanceID,elastic_pool_name,elastic_pool_dtu_limit ,elastic_pool_cpu_limit,GETUTCDATE())
+	VALUES(@InstanceID,S.elastic_pool_name,S.elastic_pool_dtu_limit ,S.elastic_pool_cpu_limit,GETUTCDATE())
 	OUTPUT Inserted.PoolID, DELETED.elastic_pool_dtu_limit,DELETED.elastic_pool_cpu_limit,INSERTED.elastic_pool_dtu_limit,Inserted.elastic_pool_cpu_limit,ISNULL(Deleted.ValidFrom,'19000101'),Inserted.ValidFrom
 	INTO dbo.AzureDBElasticPoolHistory(PoolID,elastic_pool_dtu_limit_old,elastic_pool_cpu_limit_old,elastic_pool_dtu_limit_new,elastic_pool_cpu_limit_new,ValidFrom,ValidTo);
 

@@ -29,5 +29,5 @@ JOIN dbo.OSLoadedModules M ON M.InstanceID = I.InstanceID
 LEFT JOIN dbo.CollectionDates CD ON CD.InstanceID = I.InstanceID AND CD.Reference = 'OSLoadedModules'
 WHERE EXISTS(SELECT 1 FROM @Instances t WHERE I.InstanceID = t.InstanceID)
 AND I.IsActive=1
-AND M.STATUS <= @Status
+AND M.Status <= @Status
 ORDER BY M.Status

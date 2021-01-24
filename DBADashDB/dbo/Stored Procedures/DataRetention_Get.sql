@@ -15,7 +15,7 @@ WITH A AS (
 	FROM sys.dm_db_partition_stats AS ps
 	INNER JOIN sys.indexes AS si ON ps.[object_id] = si.[object_id] 
 				AND ps.[index_id] = si.[index_id]
-	INNER JOIN sys.tables t ON t.OBJECT_ID = si.object_id
+	INNER JOIN sys.tables t ON t.object_id = si.object_id
 	JOIN sys.schemas s on s.schema_id = t.schema_id
 	GROUP BY s.[name], t.[name]
 )

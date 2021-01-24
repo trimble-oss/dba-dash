@@ -70,7 +70,7 @@
     [is_remote_data_archive_enabled]             BIT              NULL,
     [is_mixed_page_allocation_on]                BIT              NULL,
     [IsActive]                                   BIT              NOT NULL,
-    [state_desc]                                 AS               (case when [STATE]=(0) then 'ONLINE' when [STATE]=(1) then 'RESTORING' when [STATE]=(2) then 'RECOVERING' when [STATE]=(3) then 'RECOVERY_PENDING' when [STATE]=(4) then 'SUSPECT' when [STATE]=(5) then 'EMERGENCY' when [STATE]=(6) then 'OFFLINE' when [STATE]=(7) then 'COPYING' when [STATE]=(10) then 'OFFLINE_SECONDARY' else CONVERT([nvarchar](60),[STATE]) end),
+    [state_desc]                                 AS               (case when [state]=(0) then 'ONLINE' when [state]=(1) then 'RESTORING' when [state]=(2) then 'RECOVERING' when [state]=(3) then 'RECOVERY_PENDING' when [state]=(4) then 'SUSPECT' when [state]=(5) then 'EMERGENCY' when [state]=(6) then 'OFFLINE' when [state]=(7) then 'COPYING' when [state]=(10) then 'OFFLINE_SECONDARY' else CONVERT([nvarchar](60),[state]) end),
     [LastGoodCheckDbTime]                        DATETIME2 (3)    NULL,
     CONSTRAINT [PK_Databases] PRIMARY KEY CLUSTERED ([DatabaseID] ASC),
     CONSTRAINT [FK_Databases_Instances] FOREIGN KEY ([InstanceID]) REFERENCES [dbo].[Instances] ([InstanceID])

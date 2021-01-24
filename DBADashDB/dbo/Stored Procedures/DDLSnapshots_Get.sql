@@ -14,7 +14,7 @@ SELECT ss.DatabaseID,
        ss.Modified,
        ss.Dropped,
        ss.DDLSnapshotOptionsID,
-        D.Name as DB
+        D.name as DB
 FROM dbo.DDLSnapshots ss
 JOIN dbo.Databases D ON ss.DatabaseID = D.DatabaseID
 JOIN dbo.Instances I ON D.InstanceID = I.InstanceID
