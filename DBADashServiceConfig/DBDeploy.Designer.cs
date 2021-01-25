@@ -75,7 +75,7 @@
             this.txtDeployScript.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.txtDeployScript.Location = new System.Drawing.Point(16, 164);
+            this.txtDeployScript.Location = new System.Drawing.Point(23, 164);
             this.txtDeployScript.Multiline = true;
             this.txtDeployScript.Name = "txtDeployScript";
             this.txtDeployScript.ReadOnly = true;

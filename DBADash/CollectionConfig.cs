@@ -20,6 +20,8 @@ namespace DBADash
         public bool ScanForAzureDBs { get; set; } = false;
         public string ServiceName { get; set; } = "DBADashService";
 
+        public bool AutoUpdateDatabase { get; set; }
+
         public List<DBADashSource> SourceConnections = new List<DBADashSource>();
 
         public CollectionConfig()
@@ -193,7 +195,14 @@ namespace DBADash
             {
                 if (cfg.SourceConnection.InitialCatalog() == "master" && cfg.SourceConnection.IsAzureDB())
                 {
-                    newConnections.AddRange(GetNewAzureDBConnections(cfg));
+                    try
+                    {
+                        newConnections.AddRange(GetNewAzureDBConnections(cfg));
+                    }
+                    catch(Exception ex)
+                    {
+                        Console.WriteLine(string.Format("Error getting AzureDB connections from master '{0}': {1}", cfg.SourceConnection.ConnectionForPrint, ex.Message));
+                    }
                 }
             }
             return newConnections;
@@ -234,8 +243,15 @@ namespace DBADash
 
         public void AddAzureDBs(DBADashSource masterConnection)
         {
-         
-            SourceConnections.AddRange(GetNewAzureDBConnections(masterConnection));
+            try
+            {
+                Console.WriteLine("Add azure DBs from " + masterConnection.SourceConnection.ConnectionForPrint);
+                SourceConnections.AddRange(GetNewAzureDBConnections(masterConnection));
+            }
+            catch(Exception ex)
+            {
+                Console.WriteLine(string.Format("Error getting AzureDB connections from master '{0}': {1}", masterConnection.SourceConnection.ConnectionForPrint, ex.Message));
+            }
 
         }
     }

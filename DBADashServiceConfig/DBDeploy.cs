@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Data.SqlClient;
+using DBADash;
 namespace DBADashServiceConfig
 {
     public partial class DBDeploy : Form
@@ -17,7 +18,7 @@ namespace DBADashServiceConfig
             InitializeComponent();
         }
 
-        public Version DACVersion;
+      // public Version DACVersion;
 
         string _connectionString;
 
@@ -197,7 +198,7 @@ AND database_id > 4 ", cn);
             DacpacUtility.DacpacService dac = new DacpacUtility.DacpacService();
             string _db = DB;
             string _connectionString = ConnectionString;
-            var t = Task.Run(() => dac.ProcessDacPac(_connectionString, _db, "DBADashDB.dacpac"));
+            var t = Task.Run(() => dac.ProcessDacPac(_connectionString, _db, DBValidations.DACPackFile));
             lblNotice.Visible = true;
             bttnGenerate.Enabled = false;
             bttnDeploy.Enabled = false;
@@ -303,38 +304,34 @@ AND database_id > 4 ", cn);
         {
             try
             {
-                if (!DBValidations.DBExists(ConnectionString))
+                var status = DBValidations.VersionStatus(ConnectionString);
+                bttnGenerate.Enabled = true;
+                bttnDeploy.Enabled = true;
+                if (status.VersionStatus == DBValidations.DBVersionStatusEnum.CreateDB)
                 {
                     lblVersionInfo.Text = "Create Database";
                     lblVersionInfo.ForeColor = System.Drawing.Color.Blue;
                 }
-                else
+                else if (status.VersionStatus == DBValidations.DBVersionStatusEnum.OK)
                 {
-                    var dbVersion = DBValidations.GetDBVersion(ConnectionString);
-                    lblVersionInfo.Text = dbVersion.ToString();
-
-                    Int32 compare = dbVersion.CompareTo(DACVersion);
-                    if (compare == 0)
-                    {
-                        lblVersionInfo.Text = dbVersion.ToString() + " (OK)";
-                        lblVersionInfo.ForeColor = System.Drawing.Color.Green;
-                        bttnGenerate.Enabled = true;
-                    }
-                    else if (compare > 0)
-                    {
-                        lblVersionInfo.Text = dbVersion.ToString() + "Newer than app:" + DACVersion.ToString() + ". Upgrade app";
-                        lblVersionInfo.ForeColor = System.Drawing.Color.Red;
-                        bttnGenerate.Enabled = false;
-                    }
-                    else
-                    {
-                        lblVersionInfo.Text = dbVersion.ToString() + " Upgrade to " + DACVersion.ToString();
-                        lblVersionInfo.ForeColor = System.Drawing.Color.Red;
-                        bttnGenerate.Enabled = true;
-                    }
+                    lblVersionInfo.Text = status.DBVersion.ToString() + " (OK)";
+                    lblVersionInfo.ForeColor = System.Drawing.Color.Green;
+                    bttnGenerate.Enabled = true;
                 }
-                bttnGenerate.Enabled = true;
-                bttnDeploy.Enabled = true;
+                else if(status.VersionStatus == DBValidations.DBVersionStatusEnum.UpgradeRequired)
+                {
+                    lblVersionInfo.Text = status.DBVersion.ToString() + " Upgrade to " + status.DACVersion.ToString();
+                    lblVersionInfo.ForeColor = System.Drawing.Color.Red;
+                    bttnGenerate.Enabled = true;
+                }
+                else if(status.VersionStatus== DBValidations.DBVersionStatusEnum.AppUpgradeRequired)
+                {
+                    lblVersionInfo.Text = status.DBVersion.ToString() + "Newer than app:" + status.DACVersion.ToString() + ". Upgrade app";
+                    lblVersionInfo.ForeColor = System.Drawing.Color.Red;
+                    bttnGenerate.Enabled = false;
+                    bttnDeploy.Enabled = false;
+                }
+      
             }
             catch (Exception ex)
             {

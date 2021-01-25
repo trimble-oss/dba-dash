@@ -86,6 +86,7 @@
             this.chkScanAzureDB = new System.Windows.Forms.CheckBox();
             this.tabPage4 = new System.Windows.Forms.TabPage();
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
+            this.chkAutoUpgradeRepoDB = new System.Windows.Forms.CheckBox();
             ((System.ComponentModel.ISupportInitialize)(this.errorProvider1)).BeginInit();
             this.tabControl1.SuspendLayout();
             this.tabPage3.SuspendLayout();
@@ -368,6 +369,7 @@
             // 
             // tabPage3
             // 
+            this.tabPage3.Controls.Add(this.chkAutoUpgradeRepoDB);
             this.tabPage3.Controls.Add(this.bttnConnect);
             this.tabPage3.Controls.Add(this.lblVersionInfo);
             this.tabPage3.Controls.Add(this.bttnDeployDatabase);
@@ -720,6 +722,17 @@
             this.tabPage4.Text = "Service";
             this.tabPage4.UseVisualStyleBackColor = true;
             // 
+            // chkAutoUpgradeRepoDB
+            // 
+            this.chkAutoUpgradeRepoDB.AutoSize = true;
+            this.chkAutoUpgradeRepoDB.Location = new System.Drawing.Point(103, 76);
+            this.chkAutoUpgradeRepoDB.Name = "chkAutoUpgradeRepoDB";
+            this.chkAutoUpgradeRepoDB.Size = new System.Drawing.Size(307, 21);
+            this.chkAutoUpgradeRepoDB.TabIndex = 8;
+            this.chkAutoUpgradeRepoDB.Text = "Auto upgrade repository DB on service start";
+            this.chkAutoUpgradeRepoDB.UseVisualStyleBackColor = true;
+            this.chkAutoUpgradeRepoDB.CheckedChanged += new System.EventHandler(this.chkAutoUpgradeRepoDB_CheckedChanged);
+            // 
             // ServiceConfig
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
@@ -819,6 +832,7 @@
         private System.Windows.Forms.CheckBox chkScanAzureDB;
         private System.Windows.Forms.ToolTip toolTip1;
         private System.Windows.Forms.Label label10;
+        private System.Windows.Forms.CheckBox chkAutoUpgradeRepoDB;
     }
 }
 

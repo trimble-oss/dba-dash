@@ -174,29 +174,28 @@ namespace DBADashServiceConfig
             {
                 try
                 {
-                    if (! DBValidations.DBExists(dest.ConnectionString))
+                    var status = DBValidations.VersionStatus(dest.ConnectionString);
+                    if (status.VersionStatus == DBValidations.DBVersionStatusEnum.CreateDB)
                     {
                         lblVersionInfo.Text = "Run Deploy to create database.";
                         lblVersionInfo.ForeColor = Color.Red;
                         return true;
                     }
-                     dbVersion= DBValidations.GetDBVersion(dest.ConnectionString);
-                    Int32 compare = dbVersion.CompareTo(dacVersion);
-                    if (compare == 0)
+                    if (status.VersionStatus == DBValidations.DBVersionStatusEnum.OK)
                     {
-                        lblVersionInfo.Text = "DB upgrade not required. DacVersion/DB Version: " + dacVersion.ToString();
+                        lblVersionInfo.Text = "DB upgrade not required. DacVersion/DB Version: " + status.DACVersion.ToString();
                         lblVersionInfo.ForeColor = Color.Green;
                         bttnDeployDatabase.Enabled = true;
                     }
-                    else if (compare > 0)
+                    else if (status.VersionStatus == DBValidations.DBVersionStatusEnum.AppUpgradeRequired)
                     {
-                        lblVersionInfo.Text = "DB version " + dbVersion.ToString() + " is newer. Please update the app";
+                        lblVersionInfo.Text = "DB version " + status.DBVersion.ToString() + " is newer. Please update the app";
                         lblVersionInfo.ForeColor = Color.Red;
                         bttnDeployDatabase.Enabled = false;
                     }
                     else
                     {
-                        lblVersionInfo.Text = "DB version " + dbVersion + " requires upgrade to " + dacVersion;
+                        lblVersionInfo.Text = "DB version " + status.DBVersion.ToString() + " requires upgrade to " + status.DACVersion.ToString();
                         lblVersionInfo.ForeColor = Color.Red;
                         bttnDeployDatabase.Enabled = true;
                     }
@@ -212,17 +211,6 @@ namespace DBADashServiceConfig
             {
                 return true;
             }
-        }
-
-
-
-        System.Version dbVersion;
-        System.Version dacVersion;
-
-        private void getDacVersion()
-        {
-            DacpacUtility.DacpacService dac = new DacpacUtility.DacpacService();
-            dacVersion=  dac.GetVersion("DBADashDB.dacpac");
         }
 
 
@@ -257,7 +245,6 @@ namespace DBADashServiceConfig
                 }
             }
             refreshServiceStatus();
-            getDacVersion();
             validateDestination();
         }
 
@@ -271,6 +258,7 @@ namespace DBADashServiceConfig
             txtSecretKey.Text = collectionConfig.SecretKey;
             chkScanAzureDB.Checked = collectionConfig.ScanForAzureDBs;
             chkCustomizeMaintenanceCron.Checked = (collectionConfig.MaintenanceScheduleCron != null);
+            chkAutoUpgradeRepoDB.Checked = collectionConfig.AutoUpdateDatabase;
 
         }
 
@@ -596,7 +584,6 @@ namespace DBADashServiceConfig
 
             }
 
-            frm.DACVersion = dacVersion;
             frm.ShowDialog();
             if (frm.DatabaseName != cn.InitialCatalog())
             {
@@ -681,6 +668,12 @@ namespace DBADashServiceConfig
         private void chkScanAzureDB_CheckedChanged(object sender, EventArgs e)
         {
             collectionConfig.ScanForAzureDBs = chkScanAzureDB.Checked;
+            txtJson.Text = collectionConfig.Serialize();
+        }
+
+        private void chkAutoUpgradeRepoDB_CheckedChanged(object sender, EventArgs e)
+        {
+            collectionConfig.AutoUpdateDatabase = chkAutoUpgradeRepoDB.Checked;
             txtJson.Text = collectionConfig.Serialize();
         }
     }
