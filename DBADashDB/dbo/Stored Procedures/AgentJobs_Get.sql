@@ -48,7 +48,7 @@ WITH Statuses AS(
 SELECT J.Instance,
        J.InstanceID,
        J.job_id,
-       J.Name,
+       J.name,
        J.LastFail,
 	   J.LastFailUTC,
        J.TimeSinceLastFail,
@@ -92,6 +92,6 @@ SELECT J.Instance,
 FROM dbo.AgentJobStatus J
 WHERE EXISTS(SELECT 1 FROM @Instances I WHERE I.InstanceID = J.InstanceID)
 AND J.enabled=@enabled
-AND (J.Name LIKE @JobName OR @JobName IS NULL)
+AND (J.name LIKE @JobName OR @JobName IS NULL)
 AND EXISTS(SELECT 1 FROM Statuses s WHERE S.Status=J.JobStatus)
 ORDER BY J.IsLastFail DESC,J.LastFail DESC

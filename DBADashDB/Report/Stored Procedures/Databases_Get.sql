@@ -2,7 +2,7 @@
 AS
 SELECT NULL AS DatabaseID,'{ALL}' AS Name
 UNION ALL
-SELECT DatabaseID,Name 
+SELECT d.DatabaseID,d.name 
 FROM dbo.Databases d
 JOIN dbo.Instances I ON I.InstanceID = d.InstanceID
 WHERE I.Instance=@Instance

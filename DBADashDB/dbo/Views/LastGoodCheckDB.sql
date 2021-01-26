@@ -6,7 +6,7 @@ AS
 SELECT I.InstanceID,
 	D.DatabaseID,
 	I.Instance,
-	D.Name,
+	D.name,
 	D.state,
 	D.state_desc,
 	D.is_in_standby,

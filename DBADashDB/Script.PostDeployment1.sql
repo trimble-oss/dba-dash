@@ -9,6 +9,12 @@ Post-Deployment Script Template
                SELECT * FROM [$(TableName)]					
 --------------------------------------------------------------------------------------
 */
+/* Security */
+GRANT SELECT ON SCHEMA::dbo TO [App]
+GRANT EXECUTE ON SCHEMA::dbo TO [App];
+GRANT SELECT ON SCHEMA::dbo TO [Reports]
+GRANT EXECUTE ON SCHEMA::[Report] TO [Reports];
+/************/
 IF NOT EXISTS(SELECT 1 FROM dbo.SysConfigOptions)
 BEGIN
 INSERT INTO dbo.SysConfigOptions

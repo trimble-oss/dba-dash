@@ -47,7 +47,7 @@ SELECT U.InstanceID,
 FROM (
 	SELECT I.Instance,
 		I.InstanceID,
-		D.Name + ' - ' + ISNULL(F.filegroup_name,F.data_space_id) AS Name,
+		D.name + ' - ' + ISNULL(F.filegroup_name,F.data_space_id) AS name,
 		MAX(CASE WHEN F.is_percent_growth=1 AND F.size>131072 THEN 1 ELSE 0 END) PercentGrowth,
 		CASE WHEN COUNT(DISTINCT F.growth)>1 OR COUNT(DISTINCT F.is_percent_growth)>1 THEN 1 ELSE 0 END AS UnevenGrowth,
 		MAX(CASE WHEN F.growth=128 AND F.size>131072 THEN 1 ELSE 0 END) AS SmallGrowth,

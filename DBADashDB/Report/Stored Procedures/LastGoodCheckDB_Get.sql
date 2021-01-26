@@ -25,7 +25,7 @@ END
 
 SELECT D.InstanceID,
        D.Instance,
-       D.Name,
+       D.name,
        D.LastGoodCheckDbTime,
        D.HrsSinceLastGoodCheckDB,
        D.DaysSinceLastGoodCheckDB,

@@ -483,6 +483,7 @@
     <Build Include="Storage\PF_PerformanceCounters.sql" />
     <Build Include="Storage\PS_PerformanceCounters.sql" />
     <Build Include="Switch\Tables\PerformanceCounters.sql" />
+    <Build Include="Security\App.sql" />
   </ItemGroup>
   <ItemGroup>
     <PostDeploy Include="Script.PostDeployment1.sql" />

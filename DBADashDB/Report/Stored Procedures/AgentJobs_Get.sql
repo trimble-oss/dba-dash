@@ -75,6 +75,6 @@ SELECT J.Instance,
 FROM dbo.AgentJobStatus J
 WHERE EXISTS(SELECT 1 FROM @Instances I WHERE I.InstanceID = J.InstanceID)
 AND J.enabled=@enabled
-AND (J.Name LIKE @JobName OR @JobName IS NULL)
+AND (J.name LIKE @JobName OR @JobName IS NULL)
 AND (J.TimeSinceLastFailureStatus<=@FilterLevel OR J.TimeSinceLastSucceededStatus<=@FilterLevel OR J.FailCount24HrsStatus<=@FilterLevel OR J.FailCount7DaysStatus<=@FilterLevel OR J.JobStepFail7DaysStatus<=@FilterLevel OR J.JobStepFail24HrsStatus<=@FilterLevel OR J.LastFailStatus<=@FilterLevel)
 ORDER BY J.IsLastFail DESC,J.LastFail DESC

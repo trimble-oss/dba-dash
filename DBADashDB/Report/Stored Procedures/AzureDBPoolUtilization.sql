@@ -71,7 +71,7 @@ AND (EXISTS(SELECT 1
 			FROM dbo.AzureDBServiceObjectives SO
 			JOIN dbo.Instances SOI ON SOI.InstanceID = SO.InstanceID
 			JOIN dbo.Databases SOD ON SOD.InstanceID = SOI.InstanceID
-			WHERE SOD.Name = @DatabaseName
+			WHERE SOD.name = @DatabaseName
 			AND SOI.Instance = I.Instance
 			AND SO.elastic_pool_name = T.elastic_pool_name) OR @DatabaseName IS NULL)
 GROUP BY I.InstanceID,I.ConnectionID,I.Instance, T.elastic_pool_name

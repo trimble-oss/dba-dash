@@ -1,7 +1,7 @@
 ﻿CREATE VIEW [dbo].[BackupStatus]
 AS
 WITH hadr AS (
-	SELECT D.DatabaseId,partnr.DatabaseID BackupDatabaseID
+	SELECT D.DatabaseID,partnr.DatabaseID BackupDatabaseID
 	FROM dbo.Databases D
 	JOIN dbo.DatabasesHADR hadr ON D.DatabaseID = hadr.DatabaseID
 	JOIN dbo.DatabasesHADR partnr ON hadr.group_database_id = partnr.group_database_id AND D.DatabaseID <> partnr.DatabaseID

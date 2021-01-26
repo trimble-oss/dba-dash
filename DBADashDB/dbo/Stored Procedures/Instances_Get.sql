@@ -4,4 +4,4 @@ SELECT  I.InstanceID,I.ConnectionID,I.Instance,CASE WHEN I.EditionID = 167437847
 FROM dbo.InstancesMatchingTags(@TagIDs) I
 LEFT JOIN dbo.Databases D ON D.InstanceID = I.InstanceID AND I.EditionID = 1674378470 
 WHERE I.IsActive=1
-ORDER BY I.Instance,D.Name
+ORDER BY I.Instance,D.name

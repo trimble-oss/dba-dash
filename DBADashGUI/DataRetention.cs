@@ -21,7 +21,15 @@ namespace DBADashGUI
 
         private void DataRetention_Load(object sender, EventArgs e)
         {
-            refreshData();
+            try
+            {
+                refreshData();
+            }
+            catch(SqlException ex) when (ex.Number == 262)
+            {
+                MessageBox.Show("Insufficient permissions", "Error", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                this.Close();
+            }
         }
 
         private void refreshData()

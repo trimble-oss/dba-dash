@@ -302,7 +302,7 @@ BEGIN
 	MERGE T
 	USING (SELECT * FROM @DB) as S ON S.database_id = T.database_id AND (S.create_date = T.create_date OR S.name=T.name)
 	WHEN MATCHED THEN 
-		UPDATE  SET [name] = S.Name
+		UPDATE  SET [name] = S.name
 		  ,[source_database_id] = S.source_database_id
 		  ,[owner_sid] = S.owner_sid
 		  ,[create_date] = S.create_date
