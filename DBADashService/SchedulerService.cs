@@ -20,44 +20,7 @@ namespace DBADashService
         public ScheduleService()
         {
             var conf = GetConfig();
-            if (conf.DestinationConnection.Type == DBADashConnection.ConnectionType.SQL)
-            {
-                var status = DBValidations.VersionStatus(conf.DestinationConnection.ConnectionString);
-                if (status.VersionStatus == DBValidations.DBVersionStatusEnum.AppUpgradeRequired)
-                {
-                    Console.WriteLine("Warning: This version of the app is older than the repository DB and should be upgraded");
-                }
-                else if (status.VersionStatus == DBValidations.DBVersionStatusEnum.CreateDB) {
-                    if (conf.AutoUpdateDatabase)
-                    {
-                        Console.WriteLine("Create repository DB...");
-                        DBValidations.UpgradeDBAsync(conf.DestinationConnection.ConnectionString).Wait();
-                        Console.WriteLine("Repository DB created");
-                    }
-                    else
-                    {
-                        throw new Exception("Repository database needs to be created.  Use to service configuration tool to deploy the repository database.");
-                    }                
-                }
-                else if(status.VersionStatus == DBValidations.DBVersionStatusEnum.UpgradeRequired)
-                {
-                    if (conf.AutoUpdateDatabase)
-                    {
-                        Console.WriteLine(string.Format("Upgrade DB from {0} to {1}",status.DBVersion.ToString(),status.DACVersion.ToString()));
-                        DBValidations.UpgradeDBAsync(conf.DestinationConnection.ConnectionString).Wait();
-                        Console.WriteLine("Upgrade completed");
-                    }
-                    else
-                    {
-                        throw new Exception("Database upgrade is required.  Enable auto updates or run the service configuration tool to update.");
-                    }
-                                  }
-                else if(status.VersionStatus == DBValidations.DBVersionStatusEnum.OK)
-                {
-                    Console.WriteLine("Version check passed: " + status.DBVersion.ToString());
-                }
 
-            }
             Int32 threads = conf.ServiceThreads;
             if (threads < 1)
             {
@@ -130,11 +93,63 @@ namespace DBADashService
             }
         }
 
+        private void upgradeDB()
+        {
+            var conf = GetConfig();
+            if (conf.DestinationConnection.Type == DBADashConnection.ConnectionType.SQL)
+            {
+                var status = DBValidations.VersionStatus(conf.DestinationConnection.ConnectionString);
+                if (status.VersionStatus == DBValidations.DBVersionStatusEnum.AppUpgradeRequired)
+                {
+                    ErrorLogger(new Exception("Warning: This version of the app is older than the repository DB and should be upgraded"),"DB Version Check");
+                }
+                else if (status.VersionStatus == DBValidations.DBVersionStatusEnum.CreateDB)
+                {
+                    if (conf.AutoUpdateDatabase)
+                    {
+                        Console.WriteLine("Create repository DB...");
+                        DBValidations.UpgradeDBAsync(conf.DestinationConnection.ConnectionString).Wait();
+                        Console.WriteLine("Repository DB created");
+                    }
+                    else
+                    {
+                        throw new Exception("Repository database needs to be created.  Use to service configuration tool to deploy the repository database.");
+                    }
+                }
+                else if (status.VersionStatus == DBValidations.DBVersionStatusEnum.UpgradeRequired)
+                {
+                    if (conf.AutoUpdateDatabase)
+                    {
+                        Console.WriteLine(string.Format("Upgrade DB from {0} to {1}", status.DBVersion.ToString(), status.DACVersion.ToString()));
+                        DBValidations.UpgradeDBAsync(conf.DestinationConnection.ConnectionString).Wait();
+                        status = DBValidations.VersionStatus(conf.DestinationConnection.ConnectionString);
+                        if(status.VersionStatus == DBValidations.DBVersionStatusEnum.OK)
+                        {
+                            Console.WriteLine("Upgrade completed");
+                        }
+                        else
+                        {
+                            throw new Exception(string.Format("Database version is {0} is not expected following upgrade to {1}", status.DBVersion.ToString(), status.DACVersion.ToString()));
+                        }
+                    }
+                    else
+                    {
+                        throw new Exception("Database upgrade is required.  Enable auto updates or run the service configuration tool to update.");
+                    }
+                }
+                else if (status.VersionStatus == DBValidations.DBVersionStatusEnum.OK)
+                {
+                    Console.WriteLine("Version check passed: " + status.DBVersion.ToString());
+                }
+
+            }
+        }
+
 
         public void Start()
         {
             scheduler.Start().ConfigureAwait(false).GetAwaiter().GetResult();
-
+            upgradeDB();
             ScheduleJobs();
         }
 
