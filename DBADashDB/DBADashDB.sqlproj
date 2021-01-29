@@ -30,7 +30,7 @@
     <QueryStoreStaleQueryThreshold>15</QueryStoreStaleQueryThreshold>
     <QueryStoreMaxStorageSize>512</QueryStoreMaxStorageSize>
     <QueryStoreMaxPlansPerQuery>50</QueryStoreMaxPlansPerQuery>
-    <DacVersion>2.0.3.3</DacVersion>
+    <DacVersion>2.0.3.4</DacVersion>
     <ReadCommittedSnapshot>True</ReadCommittedSnapshot>
     <AllowSnapshotIsolation>True</AllowSnapshotIsolation>
   </PropertyGroup>
@@ -484,6 +484,7 @@
     <Build Include="Storage\PS_PerformanceCounters.sql" />
     <Build Include="Switch\Tables\PerformanceCounters.sql" />
     <Build Include="Security\App.sql" />
+    <Build Include="dbo\Stored Procedures\ObjectExecutionStatsSummary_Get.sql" />
   </ItemGroup>
   <ItemGroup>
     <PostDeploy Include="Script.PostDeployment1.sql" />

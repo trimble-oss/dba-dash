@@ -383,6 +383,12 @@
     <Compile Include="Performance\IOPerformance.Designer.cs">
       <DependentUpon>IOPerformance.cs</DependentUpon>
     </Compile>
+    <Compile Include="Performance\ObjectExecutionSummary.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Performance\ObjectExecutionSummary.Designer.cs">
+      <DependentUpon>ObjectExecutionSummary.cs</DependentUpon>
+    </Compile>
     <Compile Include="Performance\Performance.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -597,6 +603,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Performance\IOPerformance.resx">
       <DependentUpon>IOPerformance.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Performance\ObjectExecutionSummary.resx">
+      <DependentUpon>ObjectExecutionSummary.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Performance\Performance.resx">
       <DependentUpon>Performance.cs</DependentUpon>

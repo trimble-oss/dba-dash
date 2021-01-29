@@ -358,6 +358,13 @@ namespace DBADashGUI
                 performanceCounterSummary1.InstanceID = n.InstanceID;
                 performanceCounterSummary1.RefreshData();
             }
+            if(tabs.SelectedTab== tabObjectExecutionSummary)
+            {
+                objectExecutionSummary1.Instance = n.InstanceName;
+                objectExecutionSummary1.InstanceID = n.InstanceID;
+                objectExecutionSummary1.DatabaseID = n.DatabaseID;
+                objectExecutionSummary1.RefreshData();
+            }
         }
 
  
@@ -557,6 +564,7 @@ ORDER BY SchemaName,ObjectName
                 allowedTabs.Add(tabDBSpace);
                 allowedTabs.Add(tabDBConfiguration);
                 allowedTabs.Add(tabDBOptions);
+                allowedTabs.Add(tabObjectExecutionSummary);
             }
             else if(n.Type == SQLTreeItem.TreeType.AzureDatabase)
             {
@@ -573,6 +581,7 @@ ORDER BY SchemaName,ObjectName
                 allowedTabs.Add(tabDBOptions);
                 allowedTabs.Add(tabCustomChecks);
                 allowedTabs.Add(tabPC);
+                allowedTabs.Add(tabObjectExecutionSummary);
             }
             else if (n.Type == SQLTreeItem.TreeType.Instance)
             {
@@ -594,6 +603,7 @@ ORDER BY SchemaName,ObjectName
                 allowedTabs.Add(tabDBSpace);
                 allowedTabs.Add(tabCustomChecks);
                 allowedTabs.Add(tabPC);
+                allowedTabs.Add(tabObjectExecutionSummary);
             }
             else if(n.Type == SQLTreeItem.TreeType.AzureInstance)
             {
@@ -606,6 +616,7 @@ ORDER BY SchemaName,ObjectName
                 allowedTabs.Add(tabDBSpace);
                 allowedTabs.Add(tabCustomChecks);
                 allowedTabs.Add(tabDBADashErrorLog);
+                allowedTabs.Add(tabObjectExecutionSummary);
             }
             else if (n.Type == SQLTreeItem.TreeType.Configuration)
             {
