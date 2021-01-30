@@ -12,6 +12,7 @@ namespace DBADashService
 
         static void Main(string[] args)
         {
+            Console.WriteLine(Properties.Resources.LogoText);
             var cfg = ScheduleService.GetConfig();
             var rc = HostFactory.Run(x =>
             {
