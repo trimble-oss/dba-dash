@@ -60,7 +60,11 @@ namespace DBADashGUI.Performance
                     DateTime now = DateTime.UtcNow;
                     if (mins >= 720)  // round to nearest hr
                     {
-                        now = new DateTime(now.Year, now.Month, now.Day, now.Hour, 0, 0, 0);
+                        now = new DateTime(now.Year, now.Month, now.Day, now.Hour, 0, 0, DateTimeKind.Utc);
+                    }
+                    else
+                    {
+                        now = new DateTime(now.Year, now.Month, now.Day, now.Hour, now.Minute, 0, DateTimeKind.Utc);
                     }
                     return now.AddMinutes(-mins);
                 }
@@ -95,7 +99,7 @@ namespace DBADashGUI.Performance
             get {
                 if (compareOffset > 0)
                 {
-                    return toDate.AddMinutes(-compareOffset);
+                    return new DateTime(toDate.Year, toDate.Month, toDate.Day, toDate.Hour, toDate.Minute, 0, DateTimeKind.Utc).AddMinutes(-compareOffset);
                 }
                 else
                 {
@@ -192,7 +196,7 @@ namespace DBADashGUI.Performance
                         if (col.DataPropertyName== "avg_duration_sec" || col.DataPropertyName == "avg_cpu_sec")
                         {
                             var diffCol = new DataGridViewTextBoxColumn() { Name = "Diff " + col.Name, DataPropertyName = "diff_" + col.DataPropertyName.Replace("_sec","_pct"), DisplayIndex = displayIdx };
-                            diffCol.DefaultCellStyle.Format = "0.00\\%";
+                            diffCol.DefaultCellStyle.Format = "P2";
                             diffCol.DefaultCellStyle.BackColor = Color.AliceBlue;
                             _cols.Add(diffCol);
                             displayIdx += 1;
@@ -272,7 +276,7 @@ namespace DBADashGUI.Performance
                 dgv.Columns.AddRange(Columns.ToArray());
                 setColVisibility();
 
-                dgv.DataSource = new DataView(dt);
+                dgv.DataSource = new DataView(dt,null,"total_duration_sec", DataViewRowState.CurrentRows);
                 dgv.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.DisplayedCells;
 
             }
@@ -327,6 +331,8 @@ namespace DBADashGUI.Performance
                 _to = frm.ToDate.ToUniversalTime();
                 mins = 0;
                 checkTime();
+                tsTimeOffset.Tag = _to.Subtract(_from).TotalMinutes.ToString();
+                tsTimeOffset.Text = "Previous " + _to.Subtract(_from).ToString();
                 RefreshData();
                 tsCustom.Checked = true;
             }          
@@ -352,6 +358,8 @@ namespace DBADashGUI.Performance
 
         private void checkOffset()
         {
+
+            tsNoCompare.Checked = compareOffset <= 0;          
             foreach (ToolStripItem itm in tsCompare.DropDownItems)
             {
                 if (itm.GetType() == typeof(ToolStripMenuItem))

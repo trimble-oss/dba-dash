@@ -25,7 +25,7 @@ namespace DBADashGUI.Performance
             }
             set
             {
-                time1.Value = value;
+                time1.Value = new DateTime(value.Year,value.Month,value.Day,value.Hour,value.Minute,0);
             }
         }
 
@@ -37,7 +37,7 @@ namespace DBADashGUI.Performance
             }
             set
             {
-                time2.Value = value;
+                time2.Value = new DateTime(value.Year, value.Month, value.Day, value.Hour, value.Minute, 0);
             }
         }
 

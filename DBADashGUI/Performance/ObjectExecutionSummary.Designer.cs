@@ -254,7 +254,7 @@
             // tsTimeOffset
             // 
             this.tsTimeOffset.Name = "tsTimeOffset";
-            this.tsTimeOffset.Size = new System.Drawing.Size(193, 26);
+            this.tsTimeOffset.Size = new System.Drawing.Size(224, 26);
             this.tsTimeOffset.Tag = "60";
             this.tsTimeOffset.Text = "Previous Period";
             this.tsTimeOffset.Click += new System.EventHandler(this.tsSetOffset_Click);
@@ -262,7 +262,7 @@
             // ts24Hrs
             // 
             this.ts24Hrs.Name = "ts24Hrs";
-            this.ts24Hrs.Size = new System.Drawing.Size(193, 26);
+            this.ts24Hrs.Size = new System.Drawing.Size(224, 26);
             this.ts24Hrs.Tag = "1440";
             this.ts24Hrs.Text = "-24hrs offset";
             this.ts24Hrs.Click += new System.EventHandler(this.tsSetOffset_Click);
@@ -270,7 +270,7 @@
             // ts7Days
             // 
             this.ts7Days.Name = "ts7Days";
-            this.ts7Days.Size = new System.Drawing.Size(193, 26);
+            this.ts7Days.Size = new System.Drawing.Size(224, 26);
             this.ts7Days.Tag = "10080";
             this.ts7Days.Text = "-7 days offset";
             this.ts7Days.Click += new System.EventHandler(this.tsSetOffset_Click);
@@ -278,12 +278,12 @@
             // toolStripSeparator2
             // 
             this.toolStripSeparator2.Name = "toolStripSeparator2";
-            this.toolStripSeparator2.Size = new System.Drawing.Size(190, 6);
+            this.toolStripSeparator2.Size = new System.Drawing.Size(221, 6);
             // 
             // tsCustomCompare
             // 
             this.tsCustomCompare.Name = "tsCustomCompare";
-            this.tsCustomCompare.Size = new System.Drawing.Size(193, 26);
+            this.tsCustomCompare.Size = new System.Drawing.Size(224, 26);
             this.tsCustomCompare.Tag = "-1";
             this.tsCustomCompare.Text = "Custom";
             this.tsCustomCompare.Click += new System.EventHandler(this.tsCustomCompare_Click);
@@ -293,7 +293,7 @@
             this.tsNoCompare.Checked = true;
             this.tsNoCompare.CheckState = System.Windows.Forms.CheckState.Checked;
             this.tsNoCompare.Name = "tsNoCompare";
-            this.tsNoCompare.Size = new System.Drawing.Size(193, 26);
+            this.tsNoCompare.Size = new System.Drawing.Size(224, 26);
             this.tsNoCompare.Tag = "0";
             this.tsNoCompare.Text = "None";
             this.tsNoCompare.Click += new System.EventHandler(this.tsSetOffset_Click);
