@@ -40,9 +40,9 @@
             // waitChart
             // 
             this.waitChart.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.waitChart.Location = new System.Drawing.Point(0, 27);
+            this.waitChart.Location = new System.Drawing.Point(0, 49);
             this.waitChart.Name = "waitChart";
-            this.waitChart.Size = new System.Drawing.Size(492, 255);
+            this.waitChart.Size = new System.Drawing.Size(615, 304);
             this.waitChart.TabIndex = 0;
             this.waitChart.Text = "cartesianChart1";
             // 
@@ -55,7 +55,7 @@
             this.tsDateGroup});
             this.toolStrip1.Location = new System.Drawing.Point(0, 0);
             this.toolStrip1.Name = "toolStrip1";
-            this.toolStrip1.Size = new System.Drawing.Size(492, 27);
+            this.toolStrip1.Size = new System.Drawing.Size(615, 39);
             this.toolStrip1.TabIndex = 1;
             this.toolStrip1.Text = "toolStrip1";
             // 
@@ -64,7 +64,7 @@
             this.lblExecution.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
             this.lblExecution.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
             this.lblExecution.Name = "lblExecution";
-            this.lblExecution.Size = new System.Drawing.Size(116, 24);
+            this.lblExecution.Size = new System.Drawing.Size(116, 36);
             this.lblExecution.Text = "Execution Stats";
             // 
             // tsMeasures
@@ -72,7 +72,7 @@
             this.tsMeasures.Image = global::DBADashGUI.Properties.Resources.AddComputedField_16x;
             this.tsMeasures.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsMeasures.Name = "tsMeasures";
-            this.tsMeasures.Size = new System.Drawing.Size(105, 24);
+            this.tsMeasures.Size = new System.Drawing.Size(105, 36);
             this.tsMeasures.Text = "Measures";
             // 
             // tsDateGroup
@@ -81,7 +81,7 @@
             this.tsDateGroup.Image = ((System.Drawing.Image)(resources.GetObject("tsDateGroup.Image")));
             this.tsDateGroup.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsDateGroup.Name = "tsDateGroup";
-            this.tsDateGroup.Size = new System.Drawing.Size(56, 24);
+            this.tsDateGroup.Size = new System.Drawing.Size(56, 36);
             this.tsDateGroup.Text = "1min";
             // 
             // ObjectExecution

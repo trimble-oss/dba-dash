@@ -78,6 +78,7 @@
             this.dgv.RowTemplate.Height = 24;
             this.dgv.Size = new System.Drawing.Size(1262, 888);
             this.dgv.TabIndex = 0;
+            this.dgv.RowsAdded += new System.Windows.Forms.DataGridViewRowsAddedEventHandler(this.dgv_RowsAdded);
             // 
             // toolStrip1
             // 

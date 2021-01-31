@@ -195,7 +195,7 @@ namespace DBADashGUI.Performance
                         displayIdx += 1;
                         if (col.DataPropertyName== "avg_duration_sec" || col.DataPropertyName == "avg_cpu_sec")
                         {
-                            var diffCol = new DataGridViewTextBoxColumn() { Name = "Diff " + col.Name, DataPropertyName = "diff_" + col.DataPropertyName.Replace("_sec","_pct"), DisplayIndex = displayIdx };
+                            var diffCol = new DataGridViewTextBoxColumn() { Name = "Diff " + col.Name.Replace("sec","%"), DataPropertyName = "diff_" + col.DataPropertyName.Replace("_sec","_pct"), DisplayIndex = displayIdx };
                             diffCol.DefaultCellStyle.Format = "P2";
                             diffCol.DefaultCellStyle.BackColor = Color.AliceBlue;
                             _cols.Add(diffCol);
@@ -276,7 +276,7 @@ namespace DBADashGUI.Performance
                 dgv.Columns.AddRange(Columns.ToArray());
                 setColVisibility();
 
-                dgv.DataSource = new DataView(dt,null,"total_duration_sec", DataViewRowState.CurrentRows);
+                dgv.DataSource = new DataView(dt,null,"total_duration_sec DESC", DataViewRowState.CurrentRows);
                 dgv.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.DisplayedCells;
 
             }
@@ -313,6 +313,7 @@ namespace DBADashGUI.Performance
             if(compareFrom!=DateTime.MinValue && compareFrom != DateTime.MaxValue)
             {
                 compareOffset = mins;
+                checkOffset();
             }          
             checkTime();
         }
@@ -397,6 +398,45 @@ namespace DBADashGUI.Performance
         private void tsType_Click(object sender, EventArgs e)
         {
             RefreshData();
+        }
+
+        private void dgv_RowsAdded(object sender, DataGridViewRowsAddedEventArgs e)
+        {
+
+            if (dgv.Columns.Contains("Diff Avg Duration (%)")){
+                for (Int32 idx = e.RowIndex; idx < e.RowIndex + e.RowCount; idx += 1)
+                {
+                    var r = dgv.Rows[idx];
+                    var row = (DataRowView)r.DataBoundItem;
+                    double diffAvgDurationPct = row["diff_avg_duration_pct"] == DBNull.Value ? 0d : Convert.ToDouble(row["diff_avg_duration_pct"]);
+                    double diffAvgCPUPct = row["diff_avg_cpu_pct"] == DBNull.Value ? 0d : Convert.ToDouble(row["diff_avg_cpu_pct"]);
+                    r.Cells["Diff Avg Duration (%)"].Style.BackColor = diffColourFromDouble(diffAvgDurationPct);
+                    r.Cells["Diff Avg CPU (%)"].Style.BackColor = diffColourFromDouble(diffAvgCPUPct);
+                }
+            }
+        }
+
+        private Color diffColourFromDouble(Double value)
+        {
+            if (value > 0.5)
+            {
+                return Color.Red;
+            }
+            else if (value>0.3){
+                return Color.FromArgb(242, 215, 213);
+            }
+            else if (value < -0.5)
+            {
+                return Color.Green;
+            }
+            else if (value<-0.3)
+            {
+                return Color.FromArgb(171, 235, 198);
+            }
+            else
+            {
+                return Color.AliceBlue;
+            }
         }
     }
 }
