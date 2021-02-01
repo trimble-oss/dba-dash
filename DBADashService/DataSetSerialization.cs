@@ -11,7 +11,7 @@ namespace DBADashService
     class DataSetSerialization
     {
 
-        private static string binaryPrefix = "###BINARY###";
+        private static readonly string binaryPrefix = "###BINARY###";
         public static string SerializeDS(DataSet ds)
         {
             foreach(DataTable dt in ds.Tables)

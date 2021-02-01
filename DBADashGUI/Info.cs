@@ -26,14 +26,15 @@ namespace DBADashGUI
             SqlConnection cn = new SqlConnection(ConnectionString);
             using (cn)
             {
-                cn.Open();
-                SqlCommand cmd = new SqlCommand("dbo.InstanceInfo_Get", cn);
-                cmd.CommandType = CommandType.StoredProcedure;
-                cmd.Parameters.AddWithValue("InstanceID", InstanceID);
-                SqlDataAdapter da = new SqlDataAdapter(cmd);
-                DataTable dt = new DataTable();
-                da.Fill(dt);
-                dgv.DataSource = dt;
+                using (SqlCommand cmd = new SqlCommand("dbo.InstanceInfo_Get", cn) {CommandType = CommandType.StoredProcedure}) {
+                    cn.Open();
+                  
+                    cmd.Parameters.AddWithValue("InstanceID", InstanceID);
+                    SqlDataAdapter da = new SqlDataAdapter(cmd);
+                    DataTable dt = new DataTable();
+                    da.Fill(dt);
+                    dgv.DataSource = dt;
+                }
             }
         }
     }

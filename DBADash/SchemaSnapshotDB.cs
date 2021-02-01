@@ -63,16 +63,18 @@ namespace DBADash
 
         public ScriptingOptions ScriptOptions()
         {
-            var so = new ScriptingOptions();
-            so.DriAll = DriAll;
-            so.Triggers = Triggers;
-            so.FullTextIndexes = FullTextIndexes;
-            so.Indexes = Indexes;
-            so.XmlIndexes = XMLIndexes;
-            so.ExtendedProperties = ExtendedProperties;
-            so.Statistics = Statistics;
-            so.DriIncludeSystemNames = DriIncludeSystemNames;
-            so.Permissions = Permissions;
+            var so = new ScriptingOptions
+            {
+                DriAll = DriAll,
+                Triggers = Triggers,
+                FullTextIndexes = FullTextIndexes,
+                Indexes = Indexes,
+                XmlIndexes = XMLIndexes,
+                ExtendedProperties = ExtendedProperties,
+                Statistics = Statistics,
+                DriIncludeSystemNames = DriIncludeSystemNames,
+                Permissions = Permissions
+            };
             return so;
         }
 
@@ -81,10 +83,10 @@ namespace DBADash
     public class SchemaSnapshotDB
     {
 
-        private string _connectionString;
-        private SHA256Managed crypt = new SHA256Managed();
-        private SchemaSnapshotDBOptions options;
-        private ScriptingOptions ScriptingOptions;
+        private readonly string _connectionString;
+        private readonly SHA256Managed crypt = new SHA256Managed();
+        private readonly SchemaSnapshotDBOptions options;
+        private readonly ScriptingOptions ScriptingOptions;
 
         public SchemaSnapshotDB(string connectionString,SchemaSnapshotDBOptions options)
         {

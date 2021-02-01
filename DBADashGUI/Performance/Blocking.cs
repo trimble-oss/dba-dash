@@ -29,7 +29,6 @@ namespace DBADashGUI.Performance
         Int32 InstanceID;
         DateTime fromDate;
         DateTime toDate;
-        bool smoothLines = true;
         double maxBlockedTime = 0;
         Int32 databaseID = 0;
 
@@ -199,9 +198,11 @@ namespace DBADashGUI.Performance
         private void ChartBlocking_DataClick(object sender, ChartPoint chartPoint)
         {
             var blockPoint = (BlockingPoint)chartPoint.Instance;
-            BlockingViewer frm = new BlockingViewer();
-            frm.ConnectionString = connectionString;
-            frm.BlockingSnapshotID = blockPoint.SnapshotID;
+            BlockingViewer frm = new BlockingViewer
+            {
+                ConnectionString = connectionString,
+                BlockingSnapshotID = blockPoint.SnapshotID
+            };
             frm.Show();
             
         }

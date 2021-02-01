@@ -179,9 +179,11 @@ namespace DBADashGUI
 
         private void tsCustom_Click(object sender, EventArgs e)
         {
-            var frm = new CustomTimePicker();
-            frm.FromDate = fromDate.ToLocalTime();
-            frm.ToDate = toDate.ToLocalTime();
+            var frm = new CustomTimePicker
+            {
+                FromDate = fromDate.ToLocalTime(),
+                ToDate = toDate.ToLocalTime()
+            };
             frm.ShowDialog();
             if (frm.DialogResult == DialogResult.OK)
             {
@@ -522,9 +524,9 @@ namespace DBADashGUI
                dgvSlow.AutoGenerateColumns = false;
           
                 dgvSlow.DataSource = dt;
-                Text.AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
+                colText.AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
                 dgvSlow.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
-                Text.AutoSizeMode = DataGridViewAutoSizeColumnMode.None;
+                colText.AutoSizeMode = DataGridViewAutoSizeColumnMode.None;
                 dgvSlow.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.None;
 
             }
@@ -537,11 +539,13 @@ namespace DBADashGUI
 
         private void dgvSlow_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
-            if (e.RowIndex >= 0 && dgvSlow.Columns[e.ColumnIndex] == Text)
+            if (e.RowIndex >= 0 && dgvSlow.Columns[e.ColumnIndex] == colText)
             {
                 var row = (DataRowView)dgvSlow.Rows[e.RowIndex].DataBoundItem;
-                var frm = new CodeViewer();
-                frm.SQL = (string)row["Text"];
+                var frm = new CodeViewer
+                {
+                    SQL = (string)row["Text"]
+                };
                 frm.ShowDialog();
             }
         }

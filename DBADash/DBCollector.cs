@@ -64,7 +64,7 @@ namespace DBADash
         public Int32 PerformanceCollectionPeriodMins = 60;
         string computerName;
         Int64 editionId;
-        CollectionType[] azureCollectionTypes = new CollectionType[] { CollectionType.SlowQueries, CollectionType.AzureDBElasticPoolResourceStats, CollectionType.AzureDBServiceObjectives, CollectionType.AzureDBResourceStats, CollectionType.CPU, CollectionType.DBFiles, CollectionType.General, CollectionType.Performance, CollectionType.Databases, CollectionType.DBConfig, CollectionType.TraceFlags, CollectionType.ObjectExecutionStats, CollectionType.BlockingSnapshot, CollectionType.IOStats, CollectionType.Waits, CollectionType.ServerProperties, CollectionType.DBTuningOptions, CollectionType.SysConfig, CollectionType.DatabasePrincipals, CollectionType.DatabaseRoleMembers, CollectionType.DatabasePermissions, CollectionType.Security, CollectionType.OSInfo,CollectionType.CustomChecks,CollectionType.PerformanceCounters };
+        readonly CollectionType[] azureCollectionTypes = new CollectionType[] { CollectionType.SlowQueries, CollectionType.AzureDBElasticPoolResourceStats, CollectionType.AzureDBServiceObjectives, CollectionType.AzureDBResourceStats, CollectionType.CPU, CollectionType.DBFiles, CollectionType.General, CollectionType.Performance, CollectionType.Databases, CollectionType.DBConfig, CollectionType.TraceFlags, CollectionType.ObjectExecutionStats, CollectionType.BlockingSnapshot, CollectionType.IOStats, CollectionType.Waits, CollectionType.ServerProperties, CollectionType.DBTuningOptions, CollectionType.SysConfig, CollectionType.DatabasePrincipals, CollectionType.DatabaseRoleMembers, CollectionType.DatabasePermissions, CollectionType.Security, CollectionType.OSInfo,CollectionType.CustomChecks,CollectionType.PerformanceCounters };
         public Int64 SlowQueryThresholdMs = -1;
 
         private bool IsAzure = false;
@@ -462,8 +462,10 @@ namespace DBADash
 
             if (IsXESupported())
             {
-                SqlConnectionStringBuilder builder = new SqlConnectionStringBuilder(_connectionString);
-                builder.ApplicationName = "DBADashXE";
+                SqlConnectionStringBuilder builder = new SqlConnectionStringBuilder(_connectionString)
+                {
+                    ApplicationName = "DBADashXE"
+                };
                 string slowQueriesSQL;
                 if (IsAzure)
                 {
@@ -489,8 +491,7 @@ namespace DBADash
                         string ringBuffer = (string)result;
                         if (ringBuffer.Length > 0)
                         {
-                            RingBufferTargetAttributes ringBufferAtt;
-                            var dt = XETools.XEStrToDT(ringBuffer, out ringBufferAtt);
+                            var dt = XETools.XEStrToDT(ringBuffer, out RingBufferTargetAttributes ringBufferAtt);
                             dt.TableName = "SlowQueries";
                             addDT(dt);
                             var dtAtt = ringBufferAtt.GetTable();

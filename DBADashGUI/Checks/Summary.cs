@@ -30,16 +30,18 @@ namespace DBADashGUI
             SqlConnection cn = new SqlConnection(ConnectionString);
             using (cn)
             {
-                cn.Open();
-                SqlCommand cmd = new SqlCommand("dbo.Summary_Get", cn);
-                cmd.CommandType = CommandType.StoredProcedure;
-                cmd.Parameters.AddWithValue("InstanceIDs", string.Join(",",InstanceIDs));
-                SqlDataAdapter da = new SqlDataAdapter(cmd);
-                DataTable dt = new DataTable();
-                da.Fill(dt);
-                dgvSummary.AutoGenerateColumns = false;
-                dv = new DataView(dt);
-                dgvSummary.DataSource = dv;
+                using (SqlCommand cmd = new SqlCommand("dbo.Summary_Get", cn){ CommandType = CommandType.StoredProcedure })
+                {
+                    cn.Open();
+
+                    cmd.Parameters.AddWithValue("InstanceIDs", string.Join(",", InstanceIDs));
+                    SqlDataAdapter da = new SqlDataAdapter(cmd);
+                    DataTable dt = new DataTable();
+                    da.Fill(dt);
+                    dgvSummary.AutoGenerateColumns = false;
+                    dv = new DataView(dt);
+                    dgvSummary.DataSource = dv;
+                }
             }
         }
 
@@ -48,7 +50,7 @@ namespace DBADashGUI
             for (Int32 idx = e.RowIndex; idx < e.RowIndex + e.RowCount; idx += 1)
             {
                 var row = (DataRowView)dgvSummary.Rows[idx].DataBoundItem;
-                bool isAzure = row["InstanceID"] == DBNull.Value ? true : false;
+                bool isAzure = row["InstanceID"] == DBNull.Value;
                 string[] StatusColumns = new string[] { "FullBackupStatus", "LogShippingStatus", "DiffBackupStatus", "LogBackupStatus","DriveStatus","JobStatus","CollectionErrorStatus" ,"AGStatus","LastGoodCheckDBStatus","SnapshotAgeStatus","MemoryDumpStatus","UptimeStatus","CorruptionStatus","AlertStatus","FileFreeSpaceStatus","CustomCheckStatus"};
                 foreach(string col in StatusColumns)
                 {

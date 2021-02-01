@@ -30,7 +30,7 @@ namespace DBADashGUI
                 {
                     return true;
                 }
-                if (Object.ReferenceEquals(obj, null))
+                if (obj is null)
                 {
                     return false;
                 }
@@ -41,7 +41,12 @@ namespace DBADashGUI
                 return ((DatabaseItem)obj).DatabaseID == this.DatabaseID && ((DatabaseItem)obj).DatabaseName == this.DatabaseName;
             }
 
-        
+            public override int GetHashCode()
+            {
+                return DatabaseName.GetHashCode();
+            }
+
+
         }
 
         public string ConnectionString;
@@ -163,7 +168,7 @@ ORDER BY D.Name
             cboDatabaseA.SelectedItem = selectedDB_A;
         }
 
-        DiffControl diffControl = new DiffControl();
+        readonly DiffControl diffControl = new DiffControl();
 
         private void DBDiff_Load(object sender, EventArgs e)
         {
@@ -292,8 +297,7 @@ FULL JOIN B ON A.ObjectName = B.ObjectName AND A.SchemaName = B.SchemaName AND A
             if (gvDiff.SelectedRows.Count == 1)
             {
                 var row = (DataRowView)gvDiff.SelectedRows[0].DataBoundItem;
-                string a, b;
-                getTextForRow(row.Row, out a, out b);               
+                getTextForRow(row.Row, out string a, out string b);               
                 diffControl.OldText = a;
                 diffControl.NewText = b;
             }
@@ -492,11 +496,9 @@ ORDER BY ValidatedDate DESC
         {
             foreach (DataRow r in dvDiff.Table.Rows)
             {
-                string a, b;
-
                 if ((string)r["DiffType"] == "Diff" && r["WhitespaceDiff"] == DBNull.Value)
                 {
-                    getTextForRow(r, out a, out b);
+                    getTextForRow(r, out _, out _);
                 }
                 if (r["WhitespaceDiff"] != DBNull.Value && (bool)r["WhitespaceDiff"] == true)
                 {

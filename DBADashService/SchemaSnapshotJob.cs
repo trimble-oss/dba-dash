@@ -22,7 +22,6 @@ namespace DBADashService
             var AccessKey = dataMap.GetString("AccessKey");
             var SecretKey = dataMap.GetString("SecretKey");
             var AWSProfile = dataMap.GetString("AWSProfile");
-            var source = dataMap.GetString("Source");
             var destination = dataMap.GetString("Destination");
             var schemaSnapshotDBs = dataMap.GetString("SchemaSnapshotDBs");
             string strSchemaSnapshotOptions = dataMap.GetString("Options");

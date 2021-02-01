@@ -16,7 +16,7 @@ namespace DBADash
 
         private void logError(string errorSource, string errorMessage, DataTable dt,string errorContext="Import")
         {
-            logError(errorSource, errorMessage, dt.DataSet);
+            logError(errorSource, errorMessage, dt.DataSet,errorContext);
         }
 
         private void logError(string errorSource, string errorMessage, DataSet Data,string errorContext="Import")
@@ -58,10 +58,7 @@ namespace DBADash
             var rInstance =Data.Tables["DBADash"].Rows[0];
             DateTime snapshotDate = (DateTime)rInstance["SnapshotDateUTC"];
             Int32 instanceID;
-            string connectionID = (string)rInstance["ConnectionID"];
-
             instanceID = updateInstance(connectionString, rInstance);
-
 
             updateDB(connectionString, instanceID, snapshotDate, Data);
             foreach (DataTable dt in Data.Tables)

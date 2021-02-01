@@ -30,8 +30,10 @@ namespace DBADashGUI
             using (cn)
             {
                 cn.Open();
-                SqlCommand cmd = new SqlCommand("dbo.SysConfigHistory_Get", cn);
-                cmd.CommandType = CommandType.StoredProcedure;
+                SqlCommand cmd = new SqlCommand("dbo.SysConfigHistory_Get", cn)
+                {
+                    CommandType = CommandType.StoredProcedure
+                };
                 cmd.Parameters.AddWithValue("@InstanceIDs", string.Join(",", InstanceIDs));
                 SqlDataAdapter da = new SqlDataAdapter(cmd);
                 DataTable dt = new DataTable();        

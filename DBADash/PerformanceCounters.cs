@@ -11,8 +11,8 @@ namespace DBADash
     {
 
        static string countersXML;
-       static string defaultFileName = "PerformanceCounters.xml";
-       static string userFileName = "PerformanceCountersCustom.xml";
+       static readonly string defaultFileName = "PerformanceCounters.xml";
+       static readonly string userFileName = "PerformanceCountersCustom.xml";
 
         public static string PerformanceCountersXML
         {

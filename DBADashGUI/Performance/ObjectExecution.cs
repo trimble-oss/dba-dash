@@ -233,7 +233,7 @@ namespace DBADashGUI.Performance
 
         }
 
-        private Measures measures = new Measures()
+        private readonly Measures measures = new Measures()
             {
                 {"TotalDuration", "Total Duration","#,##0.000 sec"},
                 {"AvgDuration", "Avg Duration","#,##0.000 sec"},
@@ -256,8 +256,10 @@ namespace DBADashGUI.Performance
             Common.AddDateGroups(tsDateGroup, TsDateGrouping_Click);
             foreach(var m in measures)
             {
-                ToolStripMenuItem itm = new ToolStripMenuItem(m.Value.DisplayName);
-                itm.Name = m.Key;
+                ToolStripMenuItem itm = new ToolStripMenuItem(m.Value.DisplayName)
+                {
+                    Name = m.Key
+                };
                 if (m.Key == measure) { 
                     itm.Checked = true;
                     tsMeasures.Text = m.Value.DisplayName;
