@@ -72,6 +72,8 @@ namespace DBADash
         private string instanceName;
         string dbName;
         string productVersion;
+        public Int32 RetryCount=1;
+        public Int32 RetryInterval = 30;
 
 
         public bool IsXESupported()
@@ -127,13 +129,14 @@ namespace DBADash
                 else
                 {
                     removeSQL = Properties.Resources.SQLRemoveEventSessions;
-                }
-                SqlConnection cn = new SqlConnection(_connectionString);
-                using (cn)
+                }  
+                using (var cn = new SqlConnection(_connectionString))
                 {
-                    cn.Open();
-                    var cmd = new SqlCommand(removeSQL, cn);
-                    cmd.ExecuteScalar();
+                    using (var cmd = new SqlCommand(removeSQL, cn))
+                    {
+                        cn.Open();
+                        cmd.ExecuteScalar();
+                    }
                 }
             }
         }
@@ -151,12 +154,13 @@ namespace DBADash
                 {
                     removeSQL = Properties.Resources.SQLStopEventSessions;
                 }
-                SqlConnection cn = new SqlConnection(_connectionString);
-                using (cn)
+                using (var cn = new SqlConnection(_connectionString))
                 {
-                    cn.Open();
-                    var cmd = new SqlCommand(removeSQL, cn);
-                    cmd.ExecuteScalar();
+                    using (var cmd = new SqlCommand(removeSQL, cn))
+                    {
+                        cn.Open();
+                        cmd.ExecuteScalar();
+                    }
                 }
             }
         }
@@ -335,7 +339,7 @@ namespace DBADash
             }
             else if (collectionType == CollectionType.SlowQueries)
             {
-                if (SlowQueryThresholdMs >= 0)
+                if (SlowQueryThresholdMs >= 0 && (!(IsAzure && isAzureMasterDB)))
                 {
                     try
                     {
@@ -360,13 +364,29 @@ namespace DBADash
             }
             else
             {
-                try
+                var completed = false;
+                var retry = 0;
+                while (!completed)
                 {
-                    addDT(collectionTypeString, Properties.Resources.ResourceManager.GetString("SQL" + collectionTypeString, Properties.Resources.Culture));
-                }
-                catch (Exception ex)
-                {
-                    logError(collectionTypeString, ex.Message);
+                    try
+                    {
+                        addDT(collectionTypeString, Properties.Resources.ResourceManager.GetString("SQL" + collectionTypeString, Properties.Resources.Culture));
+                        completed = true;
+                    }
+                    catch (Exception ex)
+                    {
+                        retry += 1;
+                        if (retry > RetryCount)
+                        {
+                            logError(collectionTypeString, ex.Message);
+                            completed = true;
+                        }
+                        else
+                        {
+                            logError(collectionTypeString, ex.Message + Environment.NewLine + "Retry in " + RetryInterval.ToString() + "seconds","Collect[Retrying]");
+                            System.Threading.Thread.Sleep(RetryInterval * 1000);
+                        }
+                    }
                 }
 
             }
@@ -378,55 +398,58 @@ namespace DBADash
             string xml = PerformanceCounters.PerformanceCountersXML;
             if (xml.Length > 0)
             {
-                SqlConnection cn = new SqlConnection(_connectionString);
+       
                 string sql = Properties.Resources.ResourceManager.GetString("SQLPerformanceCounters", Properties.Resources.Culture);
-                using (cn)
+                using (var cn = new SqlConnection(_connectionString))
                 {
-                    cn.Open();
-                    var ds = new DataSet();
-                    SqlDataAdapter da = new SqlDataAdapter(sql, cn);
-                    SqlParameter pCountersXML = new SqlParameter("CountersXML", PerformanceCounters.PerformanceCountersXML)
+                    using (var da = new SqlDataAdapter(sql, cn))
                     {
-                        SqlDbType = SqlDbType.Xml
-                    };
-                    da.SelectCommand.CommandTimeout = 60;
-                    da.SelectCommand.Parameters.Add(pCountersXML);             
-                    da.Fill(ds);
+                        cn.Open();
+                        var ds = new DataSet();
+                        SqlParameter pCountersXML = new SqlParameter("CountersXML", PerformanceCounters.PerformanceCountersXML)
+                        {
+                            SqlDbType = SqlDbType.Xml
+                        };
+                        da.SelectCommand.CommandTimeout = 60;
+                        da.SelectCommand.Parameters.Add(pCountersXML);
+                        da.Fill(ds);
 
-                    var dt = ds.Tables[0];
-                    if (ds.Tables.Count == 2)
-                    {
-                        var userDT = ds.Tables[1];
-                        if (dt.Columns.Count == userDT.Columns.Count)
+
+                        var dt = ds.Tables[0];
+                        if (ds.Tables.Count == 2)
                         {
-                            try
+                            var userDT = ds.Tables[1];
+                            if (dt.Columns.Count == userDT.Columns.Count)
                             {
-                                for (Int32 i = 0; i < (dt.Columns.Count - 1); i++)
+                                try
                                 {
-                                    if (dt.Columns[i].ColumnName != userDT.Columns[i].ColumnName)
+                                    for (Int32 i = 0; i < (dt.Columns.Count - 1); i++)
                                     {
-                                        throw new Exception(String.Format("Invalid schema for custom metrics.  Expected column '{0}' in position {1} instead of '{2}'", dt.Columns[i].ColumnName, i + 1, userDT.Columns[i].ColumnName));
+                                        if (dt.Columns[i].ColumnName != userDT.Columns[i].ColumnName)
+                                        {
+                                            throw new Exception(String.Format("Invalid schema for custom metrics.  Expected column '{0}' in position {1} instead of '{2}'", dt.Columns[i].ColumnName, i + 1, userDT.Columns[i].ColumnName));
+                                        }
+                                        if (dt.Columns[i].DataType != userDT.Columns[i].DataType)
+                                        {
+                                            throw new Exception(String.Format("Invalid schema for custom metrics.  Column {0} expected data type is {1} instead of {2}", dt.Columns[i].ColumnName, dt.Columns[i].DataType.Name, userDT.Columns[i].DataType.Name));
+                                        }
                                     }
-                                    if(dt.Columns[i].DataType != userDT.Columns[i].DataType)
-                                    {
-                                        throw new Exception(String.Format("Invalid schema for custom metrics.  Column {0} expected data type is {1} instead of {2}", dt.Columns[i].ColumnName, dt.Columns[i].DataType.Name,userDT.Columns[i].DataType.Name));
-                                    }
+                                    dt.Merge(userDT);
                                 }
-                                dt.Merge(userDT);
+                                catch (Exception ex)
+                                {
+                                    logError("PerformanceCounters", ex.Message);
+                                }
                             }
-                            catch(Exception ex)
+                            else
                             {
-                                logError("PerformanceCounters", ex.Message);
-                            }                                                   
+                                logError("PerformanceCounters", String.Format("Invalid schema for custom metrics. Expected {0} columns instead of {1}.", dt.Columns.Count, userDT.Columns.Count));
+                            }
                         }
-                        else
-                        {
-                            logError("PerformanceCounters", String.Format("Invalid schema for custom metrics. Expected {0} columns instead of {1}.",dt.Columns.Count,userDT.Columns.Count));
-                        }
+                        ds.Tables.Remove(dt);
+                        dt.TableName = "PerformanceCounters";
+                        Data.Tables.Add(dt);
                     }
-                    ds.Tables.Remove(dt);
-                    dt.TableName = "PerformanceCounters";
-                    Data.Tables.Add(dt);
                 }
             }
             
@@ -441,7 +464,6 @@ namespace DBADash
             {
                 SqlConnectionStringBuilder builder = new SqlConnectionStringBuilder(_connectionString);
                 builder.ApplicationName = "DBADashXE";
-                SqlConnection cn = new SqlConnection(builder.ConnectionString);
                 string slowQueriesSQL;
                 if (IsAzure)
                 {
@@ -451,29 +473,31 @@ namespace DBADash
                 {
                     slowQueriesSQL = Properties.Resources.SQLSlowQueries;
                 }
-                using (cn)
+                using (var cn = new SqlConnection(builder.ConnectionString))
                 {
-                    cn.Open();
-                    SqlCommand cmd = new SqlCommand(slowQueriesSQL, cn);
-
-                    cmd.Parameters.AddWithValue("SlowQueryThreshold", SlowQueryThresholdMs * 1000);
-                    var result = cmd.ExecuteScalar();
-                    if (result == DBNull.Value)
+                    using (var cmd = new SqlCommand(slowQueriesSQL, cn) { CommandTimeout = 90 })
                     {
-                        logError("SlowQueries", "Result IS NULL");
-                        return;
-                    }
-                    string ringBuffer = (string)result;
-                    if (ringBuffer.Length > 0)
-                    {
-                        RingBufferTargetAttributes ringBufferAtt;
-                        var dt = XETools.XEStrToDT(ringBuffer, out ringBufferAtt);
-                        dt.TableName = "SlowQueries";
-                        addDT(dt);
-                        var dtAtt = ringBufferAtt.GetTable();
-                        dtAtt.TableName = "SlowQueriesStats";
-                        addDT(dtAtt);
+                        cn.Open();
 
+                        cmd.Parameters.AddWithValue("SlowQueryThreshold", SlowQueryThresholdMs * 1000);
+                        var result = cmd.ExecuteScalar();
+                        if (result == DBNull.Value)
+                        {
+                            logError("SlowQueries", "Result IS NULL");
+                            return;
+                        }
+                        string ringBuffer = (string)result;
+                        if (ringBuffer.Length > 0)
+                        {
+                            RingBufferTargetAttributes ringBufferAtt;
+                            var dt = XETools.XEStrToDT(ringBuffer, out ringBufferAtt);
+                            dt.TableName = "SlowQueries";
+                            addDT(dt);
+                            var dtAtt = ringBufferAtt.GetTable();
+                            dtAtt.TableName = "SlowQueriesStats";
+                            addDT(dtAtt);
+
+                        }
                     }
                 }
             }
@@ -517,21 +541,20 @@ namespace DBADash
 
         public DataTable getDT(string tableName, string SQL, SqlParameter[] param = null)
         {
-            SqlConnection cn = new SqlConnection(_connectionString);
-            using (cn)
+            using (var cn = new SqlConnection(_connectionString))
             {
-                cn.Open();
-                DataTable dt = new DataTable();
-                SqlDataAdapter da = new SqlDataAdapter(SQL, cn);
-                da.SelectCommand.CommandTimeout = 60;
-                if (param != null)
-                {
-                    da.SelectCommand.Parameters.AddRange(param);
+                using (var da = new SqlDataAdapter(SQL,cn)) {
+                    cn.Open();
+                    DataTable dt = new DataTable();
+                    da.SelectCommand.CommandTimeout = 60;
+                    if (param != null)
+                    {
+                        da.SelectCommand.Parameters.AddRange(param);
+                    }
+                    da.Fill(dt);
+                    dt.TableName = tableName;
+                    return dt;
                 }
-                da.Fill(dt);
-                dt.TableName = tableName;
-                return dt;
-
 
             }
         }
@@ -553,21 +576,7 @@ namespace DBADash
                 Data.Tables.Add(dt);
             }
         }
-        public void addDT(DataTable dt, string sql)
-        {
-            if (!Data.Tables.Contains(dt.TableName))
-            {
-                SqlConnection cn = new SqlConnection(_connectionString);
-                using (cn)
-                {
-                    cn.Open();
-                    SqlDataAdapter da = new SqlDataAdapter(sql, cn);
-                    da.Fill(dt);
-                    Data.Tables.Add(dt);
 
-                }
-            }
-        }
 
         public void collectDrivesSQL()
         {
@@ -596,7 +605,7 @@ namespace DBADash
                 }
                 catch (Exception ex)
                 {
-                    logError("Drives", "Error collecting drives via WMI.  Drive info will be collected from SQL, but might be incomplete.  Use --nowmi switch to collect through SQL as default.", "Collect:WMI");
+                    logError("Drives", "Error collecting drives via WMI.  Drive info will be collected from SQL, but might be incomplete.  Use --nowmi switch to collect through SQL as default." + Environment.NewLine + ex.Message, "Collect:WMI");
                     collectDrivesSQL();
                 }
             }

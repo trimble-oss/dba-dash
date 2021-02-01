@@ -39,10 +39,11 @@ namespace DBADashService
             var cn = new SqlConnection(connectionString);
             using (cn)
             {
-                cn.Open();
-                SqlCommand cmd = new SqlCommand("Partitions_Add", cn);
-                Console.WriteLine("Maintenance: Creating partitions");
-                cmd.ExecuteNonQuery();
+                using (var cmd = new SqlCommand("dbo.Partitions_Add", cn) { CommandType = CommandType.StoredProcedure }) {
+                    cn.Open();
+                    Console.WriteLine("Maintenance: Creating partitions");
+                    cmd.ExecuteNonQuery();
+                }
             }
         }
         public static void PurgeData(string connectionString)
@@ -50,10 +51,12 @@ namespace DBADashService
             var cn = new SqlConnection(connectionString);
             using (cn)
             {
-                cn.Open();
-                Console.WriteLine("Maintenance: PurgeData");
-                SqlCommand cmd = new SqlCommand("PurgeData", cn);
-                cmd.ExecuteNonQuery();
+                using (var cmd = new SqlCommand("dbo.PurgeData", cn) { CommandType = CommandType.StoredProcedure })
+                {
+                    cn.Open();
+                    Console.WriteLine("Maintenance: PurgeData");
+                    cmd.ExecuteNonQuery();
+                }
             }
         }
 
