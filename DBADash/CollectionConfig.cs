@@ -18,6 +18,7 @@ namespace DBADash
         public SchemaSnapshotDBOptions SchemaSnapshotOptions=null;
         public bool BinarySerialization { get; set; } = false;
         public bool ScanForAzureDBs { get; set; } = false;
+        public Int32 ScanForAzureDBsInterval { get; set; } = 3600;
         public string ServiceName { get; set; } = "DBADashService";
 
         public bool AutoUpdateDatabase { get; set; }
@@ -194,10 +195,11 @@ namespace DBADash
             SourceConnections.AddRange(connections);
         }
 
-        public void AddAzureDBs()
+        public List<DBADashSource> AddAzureDBs()
         {
             var newConnections = GetNewAzureDBConnections();
             SourceConnections.AddRange(newConnections);
+            return newConnections;
         }
 
         public List<DBADashSource> GetNewAzureDBConnections()

@@ -10,6 +10,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using System.Timers;
 using static DBADash.DBADashConnection;
 
 namespace DBADashService
@@ -17,11 +18,14 @@ namespace DBADashService
     public class ScheduleService
     {
         private readonly IScheduler scheduler;
+        private CollectionConfig config;
+        System.Timers.Timer azureScanForNewDBsTimer;
+
         public ScheduleService()
         {
-            var conf = GetConfig();
+            config = GetConfig();
 
-            Int32 threads = conf.ServiceThreads;
+            Int32 threads = config.ServiceThreads;
             if (threads < 1)
             {
                 threads = 10;
@@ -95,20 +99,19 @@ namespace DBADashService
 
         private void upgradeDB()
         {
-            var conf = GetConfig();
-            if (conf.DestinationConnection.Type == DBADashConnection.ConnectionType.SQL)
+            if (config.DestinationConnection.Type == DBADashConnection.ConnectionType.SQL)
             {
-                var status = DBValidations.VersionStatus(conf.DestinationConnection.ConnectionString);
+                var status = DBValidations.VersionStatus(config.DestinationConnection.ConnectionString);
                 if (status.VersionStatus == DBValidations.DBVersionStatusEnum.AppUpgradeRequired)
                 {
                     ErrorLogger(new Exception("Warning: This version of the app is older than the repository DB and should be upgraded"),"DB Version Check");
                 }
                 else if (status.VersionStatus == DBValidations.DBVersionStatusEnum.CreateDB)
                 {
-                    if (conf.AutoUpdateDatabase)
+                    if (config.AutoUpdateDatabase)
                     {
                         Console.WriteLine("Create repository DB...");
-                        DBValidations.UpgradeDBAsync(conf.DestinationConnection.ConnectionString).Wait();
+                        DBValidations.UpgradeDBAsync(config.DestinationConnection.ConnectionString).Wait();
                         Console.WriteLine("Repository DB created");
                     }
                     else
@@ -118,11 +121,11 @@ namespace DBADashService
                 }
                 else if (status.VersionStatus == DBValidations.DBVersionStatusEnum.UpgradeRequired)
                 {
-                    if (conf.AutoUpdateDatabase)
+                    if (config.AutoUpdateDatabase)
                     {
                         Console.WriteLine(string.Format("Upgrade DB from {0} to {1}", status.DBVersion.ToString(), status.DACVersion.ToString()));
-                        DBValidations.UpgradeDBAsync(conf.DestinationConnection.ConnectionString).Wait();
-                        status = DBValidations.VersionStatus(conf.DestinationConnection.ConnectionString);
+                        DBValidations.UpgradeDBAsync(config.DestinationConnection.ConnectionString).Wait();
+                        status = DBValidations.VersionStatus(config.DestinationConnection.ConnectionString);
                         if(status.VersionStatus == DBValidations.DBVersionStatusEnum.OK)
                         {
                             Console.WriteLine("Upgrade completed");
@@ -179,21 +182,29 @@ namespace DBADashService
         {
             Console.WriteLine("Agent Version:" + Assembly.GetEntryAssembly().GetName().Version);
 
-            var conf = GetConfig();
-            if (conf.ScanForAzureDBs)
+            if (config.ScanForAzureDBs)
             {
-                conf.AddAzureDBs();
+                ScanForAzureDBs();
+                if (config.ScanForAzureDBsInterval > 0)
+                {
+                    Console.WriteLine($"Scan for new Azure DBS every {config.ScanForAzureDBsInterval} seconds");
+                    azureScanForNewDBsTimer = new System.Timers.Timer();
+                    azureScanForNewDBsTimer.Enabled = true;
+                    azureScanForNewDBsTimer.Interval = config.ScanForAzureDBsInterval * 1000;
+                    azureScanForNewDBsTimer.Elapsed += new System.Timers.ElapsedEventHandler(ScanForAzureDBs);
+                }
             }
-            removeEventSessions(conf);
+
+            removeEventSessions(config);
 
             
-            if (conf.DestinationConnection.Type == ConnectionType.SQL)
+            if (config.DestinationConnection.Type == ConnectionType.SQL)
             {
-                string maintenanceCron = conf.GetMaintenanceCron();
+                string maintenanceCron = config.GetMaintenanceCron();
 
                 IJobDetail job = JobBuilder.Create<MaintenanceJob>()
                         .WithIdentity("MaintenanceJob")
-                        .UsingJobData("ConnectionString", conf.DestinationConnection.ConnectionString)
+                        .UsingJobData("ConnectionString", config.DestinationConnection.ConnectionString)
                         .Build();
                 ITrigger trigger = TriggerBuilder.Create()
                 .StartNow()
@@ -204,7 +215,13 @@ namespace DBADashService
                 scheduler.TriggerJob(job.Key);
 
             }
-            foreach (DBADashSource cfg in conf.SourceConnections)
+            scheduleSourceCollection(config.SourceConnections);
+
+        }
+
+        private void scheduleSourceCollection(List<DBADashSource> sourceConnections)
+        {
+            foreach (DBADashSource cfg in sourceConnections)
             {
                 string cfgString = JsonConvert.SerializeObject(cfg);
 
@@ -213,20 +230,20 @@ namespace DBADashService
                     IJobDetail job = JobBuilder.Create<DBADashJob>()
                            .UsingJobData("Type", JsonConvert.SerializeObject(s.CollectionTypes))
                            .UsingJobData("CFG", cfgString)
-                           .UsingJobData("BinarySerialization", conf.BinarySerialization)
-                           .UsingJobData("AccessKey", conf.AccessKey)
-                           .UsingJobData("SecretKey", conf.GetSecretKey())
-                           .UsingJobData("AWSProfile", conf.AWSProfile)
+                           .UsingJobData("BinarySerialization", config.BinarySerialization)
+                           .UsingJobData("AccessKey", config.AccessKey)
+                           .UsingJobData("SecretKey", config.GetSecretKey())
+                           .UsingJobData("AWSProfile", config.AWSProfile)
                            .UsingJobData("Source", cfg.SourceConnection.ConnectionString)
-                           .UsingJobData("Destination", conf.DestinationConnection.ConnectionString)
+                           .UsingJobData("Destination", config.DestinationConnection.ConnectionString)
                            .UsingJobData("SourceType", JsonConvert.SerializeObject(cfg.SourceConnection.Type))
-                           .UsingJobData("DestinationType", JsonConvert.SerializeObject(conf.DestinationConnection.Type))
+                           .UsingJobData("DestinationType", JsonConvert.SerializeObject(config.DestinationConnection.Type))
                           .Build();
                     ITrigger trigger = TriggerBuilder.Create()
                     .StartNow()
                     .WithCronSchedule(s.CronSchedule)
                     .Build();
-             
+
                     scheduler.ScheduleJob(job, trigger).ConfigureAwait(false).GetAwaiter().GetResult();
                     if (s.RunOnServiceStart)
                     {
@@ -238,13 +255,13 @@ namespace DBADashService
                 {
                     IJobDetail job = JobBuilder.Create<SchemaSnapshotJob>()
                            .UsingJobData("CFG", cfgString)
-                          .UsingJobData("AccessKey", conf.AccessKey)
-                          .UsingJobData("SecretKey", conf.GetSecretKey())
-                          .UsingJobData("AWSProfile", conf.AWSProfile)
+                          .UsingJobData("AccessKey", config.AccessKey)
+                          .UsingJobData("SecretKey", config.GetSecretKey())
+                          .UsingJobData("AWSProfile", config.AWSProfile)
                           .UsingJobData("Source", cfg.SourceConnection.ConnectionString)
-                          .UsingJobData("Destination", conf.DestinationConnection.ConnectionString)
-                          .UsingJobData("DestinationType", JsonConvert.SerializeObject(conf.DestinationConnection.Type))
-                          .UsingJobData("Options", JsonConvert.SerializeObject(conf.SchemaSnapshotOptions))
+                          .UsingJobData("Destination", config.DestinationConnection.ConnectionString)
+                          .UsingJobData("DestinationType", JsonConvert.SerializeObject(config.DestinationConnection.Type))
+                          .UsingJobData("Options", JsonConvert.SerializeObject(config.SchemaSnapshotOptions))
                           .UsingJobData("SchemaSnapshotDBs", cfg.SchemaSnapshotDBs)
                              .Build();
                     ITrigger trigger = TriggerBuilder.Create()
@@ -252,21 +269,32 @@ namespace DBADashService
                       .WithCronSchedule(cfg.SchemaSnapshotCron)
                       .Build();
 
-                    
+
                     scheduler.ScheduleJob(job, trigger).ConfigureAwait(false).GetAwaiter().GetResult();
                     if (cfg.SchemaSnapshotOnServiceStart)
                     {
                         scheduler.TriggerJob(job.Key);
                     }
 
-
                 }
             }
         }
+
+        private void ScanForAzureDBs()
+        {
+            Console.WriteLine("Scan for AzureDBs...");
+            scheduleSourceCollection(config.AddAzureDBs());
+        }
+
+        private void ScanForAzureDBs(object sender, ElapsedEventArgs e)
+        {
+            ScanForAzureDBs();
+        }
+
+        bool isStop = false;
         public void Stop()
         {
-            var conf = GetConfig();
-            removeEventSessions(conf);
+            removeEventSessions(config);
             scheduler.Shutdown().ConfigureAwait(false).GetAwaiter().GetResult();
         }
     }
