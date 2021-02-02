@@ -142,18 +142,30 @@ namespace DBADash
             return wasEncryptionPerformed;
         }
 
-       public DBADashSource GetSourceFromConnectionString(string connectionString)
+       public DBADashSource GetSourceFromConnectionString(string connectionString,bool? isAzure=null)
         {
             var findConnection = new DBADashConnection(connectionString);
-            bool isAzure = findConnection.IsAzureDB();
             foreach (var s in SourceConnections)
             {
 
                 if (s.SourceConnection.Type == findConnection.Type)
                 {
-                    if (s.SourceConnection.Type == ConnectionType.SQL && s.SourceConnection.DataSource() == findConnection.DataSource() && (s.SourceConnection.InitialCatalog() == findConnection.InitialCatalog() || !isAzure))
-                    {
-                        return s;
+                    if (s.SourceConnection.Type == ConnectionType.SQL && s.SourceConnection.DataSource() == findConnection.DataSource()) {
+                        // normally we can treat as same connection if we just vary by initial catalog.  For AzureDB, a different DB is a different instance
+                        if (s.SourceConnection.InitialCatalog() == findConnection.InitialCatalog()) {
+                            return s;
+                        }
+                        else
+                        {
+                            if(isAzure == null)
+                            {
+                                isAzure = findConnection.IsAzureDB();
+                            }
+                            if (isAzure==false)
+                            {
+                                return s;
+                            }
+                        }
                     }
                     else if (s.SourceConnection.ConnectionString == findConnection.ConnectionString)
                     {
@@ -164,9 +176,9 @@ namespace DBADash
             return null;
         }
 
-        public bool SourceExists(string connectionString)
+        public bool SourceExists(string connectionString,bool? isAzure=null)
         {
-            if (GetSourceFromConnectionString(connectionString) != null)
+            if (GetSourceFromConnectionString(connectionString,isAzure) != null)
             {
                 return true;
             }
@@ -231,7 +243,7 @@ namespace DBADash
                         dbCn.SchemaSnapshotCron = masterConnection.SchemaSnapshotCron;
                         dbCn.SchemaSnapshotOnServiceStart = masterConnection.SchemaSnapshotOnServiceStart;
                     }
-                    if (!SourceExists(dbCn.SourceConnection.ConnectionString))
+                    if (!SourceExists(dbCn.SourceConnection.ConnectionString,true))
                     {
                         newConnections.Add(dbCn);
                         Console.WriteLine("Adding AzureDB Connection:" + builder.DataSource + "|" + builder.InitialCatalog);
