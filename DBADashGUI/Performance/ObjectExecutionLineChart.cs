@@ -24,6 +24,7 @@ namespace DBADashGUI.Performance
         public Int64 ObjectID;
         public DateTime FromDate;
         public DateTime ToDate;
+        int dateGrouping;
         public string Title
         {
             get
@@ -47,7 +48,15 @@ namespace DBADashGUI.Performance
 
         public void RefreshData()
         {
-            var dt = Common.ObjectExecutionStats(InstanceID, -1, FromDate,ToDate, ObjectID, 1, "AvgDuration",Instance);
+            var mins = (Int32)ToDate.Subtract(FromDate).TotalMinutes;
+            dateGrouping = Common.DateGrouping(mins, 200);
+            tsGroup.Text = Common.DateGroupString(dateGrouping);
+            refreshData();
+        }
+
+        private void refreshData()
+        {
+            var dt = Common.ObjectExecutionStats(InstanceID, -1, FromDate, ToDate, ObjectID, dateGrouping, "AvgDuration", Instance);
             chart1.Series.Clear();
             chart1.DefaultFill = System.Windows.Media.Brushes.Transparent;
 
@@ -85,7 +94,17 @@ namespace DBADashGUI.Performance
 
         private void ObjectExecutionLineChart_Load(object sender, EventArgs e)
         {
+            Common.AddDateGroups(tsGroup, tsGroup_Click);
             loadMeasures();
+        }
+
+        private void tsGroup_Click(object sender, EventArgs e)
+        {
+            var ts = (ToolStripMenuItem)sender;
+            dateGrouping = (Int32)ts.Tag;
+            tsGroup.Text = Common.DateGroupString(dateGrouping);
+            refreshData();
+
         }
 
         private void loadMeasures()
