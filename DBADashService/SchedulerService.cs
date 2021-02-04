@@ -18,7 +18,7 @@ namespace DBADashService
     public class ScheduleService
     {
         private readonly IScheduler scheduler;
-        private CollectionConfig config;
+        private readonly CollectionConfig config;
         System.Timers.Timer azureScanForNewDBsTimer;
 
         public ScheduleService()
@@ -188,9 +188,11 @@ namespace DBADashService
                 if (config.ScanForAzureDBsInterval > 0)
                 {
                     Console.WriteLine($"Scan for new Azure DBS every {config.ScanForAzureDBsInterval} seconds");
-                    azureScanForNewDBsTimer = new System.Timers.Timer();
-                    azureScanForNewDBsTimer.Enabled = true;
-                    azureScanForNewDBsTimer.Interval = config.ScanForAzureDBsInterval * 1000;
+                    azureScanForNewDBsTimer = new System.Timers.Timer
+                    {
+                        Enabled = true,
+                        Interval = config.ScanForAzureDBsInterval * 1000
+                    };
                     azureScanForNewDBsTimer.Elapsed += new System.Timers.ElapsedEventHandler(ScanForAzureDBs);
                 }
             }
@@ -291,7 +293,6 @@ namespace DBADashService
             ScanForAzureDBs();
         }
 
-        bool isStop = false;
         public void Stop()
         {
             removeEventSessions(config);

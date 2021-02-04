@@ -99,9 +99,11 @@ namespace DBADashGUI.Performance
                 {
                     string fg = r["FileGroup"] == DBNull.Value ? "{NULL}" : (string)r["FileGroup"];
 
-                    var mnu = new ToolStripMenuItem(fg);
-                    mnu.Checked = fg == filegroup;
-                    mnu.CheckOnClick = true;
+                    var mnu = new ToolStripMenuItem(fg)
+                    {
+                        Checked = fg == filegroup,
+                        CheckOnClick = true
+                    };
                     mnu.Click += filegroup_Click; ;
                     tsFileGroup.DropDownItems.Add(mnu);
 
@@ -225,7 +227,7 @@ namespace DBADashGUI.Performance
             foreach(ToolStripMenuItem ts in tsMeasures.DropDownItems)
             {
                 ts.Visible= (!(dateGrouping<=1 && ts.Name.StartsWith("Max")));
-                ts.Checked = ts.Enabled ? ts.Checked : false;
+                ts.Checked = ts.Enabled && ts.Checked;
             }
         }
 
@@ -382,12 +384,14 @@ namespace DBADashGUI.Performance
                 }
                 s.Visibility = c.isVisible ? System.Windows.Visibility.Visible : System.Windows.Visibility.Hidden;
                 if (addDropdowns)
-                {                  
-                    var dd = new ToolStripMenuItem(c.Alias);
-                    dd.Name = (string)s.Tag;
-                    dd.CheckOnClick = true;
+                {
+                    var dd = new ToolStripMenuItem(c.Alias)
+                    {
+                        Name = (string)s.Tag,
+                        CheckOnClick = true
+                    };
                     dd.Visible = (!(dd.Name.StartsWith("Max") && dateGrouping <=1));
-                    dd.Checked = dd.Enabled ? c.isVisible : false;
+                    dd.Checked = dd.Enabled && c.isVisible;
                     dd.Click += measureDropDown_Click;
                     tsMeasures.DropDownItems.Add(dd);
                 }

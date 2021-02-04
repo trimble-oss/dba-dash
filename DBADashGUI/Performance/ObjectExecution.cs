@@ -85,31 +85,9 @@ namespace DBADashGUI.Performance
                 waitChart.AxisY.Clear();
                 chartMaxDate = DateTime.MinValue;
             }
-         
 
-            SqlConnection cn = new SqlConnection(connectionString);
-            using (cn)
-            {
-                cn.Open();
-                SqlCommand cmd = new SqlCommand("dbo.ObjectExecutionStats_Get", cn);
-                cmd.Parameters.AddWithValue("InstanceID", instanceID);
-                cmd.Parameters.AddWithValue("FromDateUTC", from);
-                cmd.Parameters.AddWithValue("ToDateUTC", to);
-                cmd.Parameters.AddWithValue("UTCOffset", Common.UtcOffset);
-                if (objectID > 0)
-                {
-                    cmd.Parameters.AddWithValue("ObjectID", objectID);
-                }
-                cmd.Parameters.AddWithValue("DateGroupingMin", dateGrouping);
-                cmd.Parameters.AddWithValue("Measure", measure);
-                if (this.databaseid > 0)
-                {
-                    cmd.Parameters.AddWithValue("DatabaseID", databaseid);
-                }
-                cmd.CommandType = CommandType.StoredProcedure;
-                SqlDataAdapter da = new SqlDataAdapter(cmd);
-                DataTable dt = new DataTable();
-                da.Fill(dt);
+            var dt = Common.ObjectExecutionStats(instanceID, databaseid, from, to, objectID, dateGrouping, measure);
+           
                 if(dt.Rows.Count == 0)
                 {
                     return;
@@ -208,7 +186,7 @@ namespace DBADashGUI.Performance
 
                     });
 
-                }
+                
 
             }
             lblExecution.Text = databaseid > 0 ? "Excution Stats: Database" : "Execution Stats: Instance";

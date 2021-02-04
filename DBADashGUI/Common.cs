@@ -52,8 +52,10 @@ namespace DBADashGUI
         {
             foreach (var dg in Common.DateGroups)
             {
-                var ts = new ToolStripMenuItem(dg.Value);
-                ts.Tag = dg.Key;
+                var ts = new ToolStripMenuItem(dg.Value)
+                {
+                    Tag = dg.Key
+                };
                 ts.Click += click;
                 tsRoot.DropDownItems.Add(ts);
             }
@@ -62,7 +64,7 @@ namespace DBADashGUI
         public static Int32 DateGrouping(Int32 Mins, Int32 MaxPoints)
         {
             Int32 lastMins = 0;
-         
+
             foreach (var mins in Common.DateGroups.OrderBy(k => k.Key)
                 .Select(k => k.Key)
                 .ToList())
@@ -77,7 +79,7 @@ namespace DBADashGUI
             return lastMins;
         }
 
-        public static string DDL(Int64 DDLID,string connectionString)
+        public static string DDL(Int64 DDLID, string connectionString)
         {
             SqlConnection cn = new SqlConnection(connectionString);
             using (cn)
@@ -115,8 +117,10 @@ WHERE DDLID = @DDLID";
                 using (cn)
                 {
                     cn.Open();
-                    SqlCommand cmd = new SqlCommand("DatabaseID_Get", cn);
-                    cmd.CommandType = CommandType.StoredProcedure;
+                    SqlCommand cmd = new SqlCommand("DatabaseID_Get", cn)
+                    {
+                        CommandType = CommandType.StoredProcedure
+                    };
                     cmd.Parameters.AddWithValue("Instance", instance);
                     cmd.Parameters.AddWithValue("DBName", dbName);
                     return (Int32)cmd.ExecuteScalar();
@@ -130,8 +134,10 @@ WHERE DDLID = @DDLID";
             using (cn)
             {
                 cn.Open();
-                SqlCommand cmd = new SqlCommand("dbo.DBFiles_Get", cn);
-                cmd.CommandType = CommandType.StoredProcedure;
+                SqlCommand cmd = new SqlCommand("dbo.DBFiles_Get", cn)
+                {
+                    CommandType = CommandType.StoredProcedure
+                };
                 cmd.Parameters.AddWithValue("DatabaseID", DatabaseID);
                 cmd.Parameters.AddWithValue("IncludeWarning", true);
                 cmd.Parameters.AddWithValue("IncludeNA", true);
@@ -151,8 +157,10 @@ WHERE DDLID = @DDLID";
             using (cn)
             {
                 cn.Open();
-                SqlCommand cmd = new SqlCommand("dbo.FileGroup_Get", cn);
-                cmd.CommandType = CommandType.StoredProcedure;
+                SqlCommand cmd = new SqlCommand("dbo.FileGroup_Get", cn)
+                {
+                    CommandType = CommandType.StoredProcedure
+                };
                 cmd.Parameters.AddWithValue("DatabaseID", DatabaseID);
                 SqlDataAdapter da = new SqlDataAdapter(cmd);
                 DataTable dt = new DataTable();
@@ -161,14 +169,14 @@ WHERE DDLID = @DDLID";
             }
         }
 
-        public static DataTable ConvertUTCToLocal(ref DataTable dt,List<string>convertCols=null)
+        public static DataTable ConvertUTCToLocal(ref DataTable dt, List<string> convertCols = null)
         {
             List<Int32> convertColsIdx = new List<int>();
-            if (convertCols == null || convertCols.Count == 0) {
-                convertCols = new List<string>();
+            if (convertCols == null || convertCols.Count == 0)
+            {
                 foreach (DataColumn col in dt.Columns)
                 {
-                    if ( col.DataType == typeof(DateTime))
+                    if (col.DataType == typeof(DateTime))
                     {
                         convertColsIdx.Add(col.Ordinal);
                     }
@@ -176,7 +184,7 @@ WHERE DDLID = @DDLID";
             }
             else
             {
-                foreach(string col in convertCols)
+                foreach (string col in convertCols)
                 {
                     convertColsIdx.Add(dt.Columns[col].Ordinal);
                 }
@@ -185,7 +193,7 @@ WHERE DDLID = @DDLID";
             {
                 foreach (DataRow row in dt.Rows)
                 {
-                    foreach(var col in convertColsIdx)
+                    foreach (var col in convertColsIdx)
                     {
                         if (row[col] != DBNull.Value)
                         {
@@ -236,7 +244,7 @@ WHERE DDLID = @DDLID";
         }
 
 
-        public static void CopyDataGridViewToClipboard(DataGridView dgv,string headerBGcolor= "#696969",string headerColor= "#FFFFFF")
+        public static void CopyDataGridViewToClipboard(DataGridView dgv, string headerBGcolor = "#696969", string headerColor = "#FFFFFF")
         {
 
             var DataGridView1Counts = dgv.Rows.Count;
@@ -252,7 +260,7 @@ WHERE DDLID = @DDLID";
                 {
                     if (col.Visible)
                     {
-                        html.Append(string.Format("<th style=\"background-color:{1};color:{2};\">{0}</th>", col.HeaderText,headerBGcolor,headerColor));
+                        html.Append(string.Format("<th style=\"background-color:{1};color:{2};\">{0}</th>", col.HeaderText, headerBGcolor, headerColor));
                     }
                 }
                 html.Append("</tr>");
@@ -265,7 +273,7 @@ WHERE DDLID = @DDLID";
                     {
                         if (cell.Visible)
                         {
-                            html.AppendFormat("<td style=\"background-color:{1}; color:{2};\">{0}</td>", cell.FormattedValue, ColorTranslator.ToHtml(cell.Style.BackColor),ColorTranslator.ToHtml(cell.Style.ForeColor));
+                            html.AppendFormat("<td style=\"background-color:{1}; color:{2};\">{0}</td>", cell.FormattedValue, ColorTranslator.ToHtml(cell.Style.BackColor), ColorTranslator.ToHtml(cell.Style.ForeColor));
                         }
                     }
                     html.Append("</tr>");
@@ -278,34 +286,41 @@ WHERE DDLID = @DDLID";
         public static DialogResult ShowInputDialog(ref string input, string title)
         {
             System.Drawing.Size size = new System.Drawing.Size(400, 70);
-            Form inputBox = new Form();
+            Form inputBox = new Form
+            {
+                FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog,
+                ClientSize = size,
+                Text = title,
+                MaximizeBox = false,
+                MinimizeBox = false
+            };
 
-            inputBox.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
-            inputBox.ClientSize = size;
-            inputBox.Text = title;
-            inputBox.MaximizeBox = false;
-            inputBox.MinimizeBox = false;
-
-            System.Windows.Forms.TextBox textBox = new TextBox();
-            textBox.Size = new System.Drawing.Size(size.Width - 10, 23);
-            textBox.Location = new System.Drawing.Point(5, 5);
-            textBox.Text = input;
+            System.Windows.Forms.TextBox textBox = new TextBox
+            {
+                Size = new System.Drawing.Size(size.Width - 10, 23),
+                Location = new System.Drawing.Point(5, 5),
+                Text = input
+            };
             inputBox.Controls.Add(textBox);
 
-            Button okButton = new Button();
-            okButton.DialogResult = System.Windows.Forms.DialogResult.OK;
-            okButton.Name = "okButton";
-            okButton.Size = new System.Drawing.Size(75, 23);
-            okButton.Text = "&OK";
-            okButton.Location = new System.Drawing.Point(size.Width - 80 - 80, 39);
+            Button okButton = new Button
+            {
+                DialogResult = System.Windows.Forms.DialogResult.OK,
+                Name = "okButton",
+                Size = new System.Drawing.Size(75, 23),
+                Text = "&OK",
+                Location = new System.Drawing.Point(size.Width - 80 - 80, 39)
+            };
             inputBox.Controls.Add(okButton);
 
-            Button cancelButton = new Button();
-            cancelButton.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            cancelButton.Name = "cancelButton";
-            cancelButton.Size = new System.Drawing.Size(75, 23);
-            cancelButton.Text = "&Cancel";
-            cancelButton.Location = new System.Drawing.Point(size.Width - 80, 39);
+            Button cancelButton = new Button
+            {
+                DialogResult = System.Windows.Forms.DialogResult.Cancel,
+                Name = "cancelButton",
+                Size = new System.Drawing.Size(75, 23),
+                Text = "&Cancel",
+                Location = new System.Drawing.Point(size.Width - 80, 39)
+            };
             inputBox.Controls.Add(cancelButton);
 
             inputBox.AcceptButton = okButton;
@@ -323,6 +338,44 @@ WHERE DDLID = @DDLID";
             foreach (byte b in ba)
                 hex.AppendFormat("{0:x2}", b);
             return hex.ToString();
+        }
+
+        public static DataTable ObjectExecutionStats(Int32 instanceID, Int32 databaseID, DateTime from, DateTime to, Int64 objectID, Int32 dateGrouping, string measure,string instance="")
+        {
+            SqlConnection cn = new SqlConnection(Common.ConnectionString);
+            using (cn)
+            {
+                using (var cmd = new SqlCommand("dbo.ObjectExecutionStats_Get", cn))
+                {
+                    cn.Open();
+                    if (instanceID > 0)
+                    {
+                        cmd.Parameters.AddWithValue("InstanceID", instanceID);
+                    }
+                    if(instance!=null && instance.Length > 0)
+                    {
+                        cmd.Parameters.AddWithValue("Instance", instance);
+                    }
+                    cmd.Parameters.AddWithValue("FromDateUTC", from);
+                    cmd.Parameters.AddWithValue("ToDateUTC", to);
+                    cmd.Parameters.AddWithValue("UTCOffset", Common.UtcOffset);
+                    if (objectID > 0)
+                    {
+                        cmd.Parameters.AddWithValue("ObjectID", objectID);
+                    }
+                    cmd.Parameters.AddWithValue("DateGroupingMin", dateGrouping);
+                    cmd.Parameters.AddWithValue("Measure", measure);
+                    if (databaseID > 0)
+                    {
+                        cmd.Parameters.AddWithValue("DatabaseID", databaseID);
+                    }
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    SqlDataAdapter da = new SqlDataAdapter(cmd);
+                    DataTable dt = new DataTable();
+                    da.Fill(dt);
+                    return dt;
+                }
+            }
         }
     }
 }

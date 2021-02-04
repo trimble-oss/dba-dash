@@ -359,11 +359,18 @@
     <Compile Include="Performance\CustomTimePicker.Designer.cs">
       <DependentUpon>CustomTimePicker.cs</DependentUpon>
     </Compile>
+    <Compile Include="Performance\CartesianChartWithDataTable.cs" />
     <Compile Include="Performance\IOPerformance.cs">
       <SubType>UserControl</SubType>
     </Compile>
     <Compile Include="Performance\IOPerformance.Designer.cs">
       <DependentUpon>IOPerformance.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Performance\ObjectExecutionLineChart.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Performance\ObjectExecutionLineChart.Designer.cs">
+      <DependentUpon>ObjectExecutionLineChart.cs</DependentUpon>
     </Compile>
     <Compile Include="Performance\ObjectExecutionSummary.cs">
       <SubType>UserControl</SubType>
@@ -584,6 +591,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Performance\IOPerformance.resx">
       <DependentUpon>IOPerformance.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Performance\ObjectExecutionLineChart.resx">
+      <DependentUpon>ObjectExecutionLineChart.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Performance\ObjectExecutionSummary.resx">
       <DependentUpon>ObjectExecutionSummary.cs</DependentUpon>

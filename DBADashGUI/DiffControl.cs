@@ -68,7 +68,7 @@ namespace DBADashGUI
             {
                 oldText = value;
                 diffViewer1.OldText = value;
-                copyLeftToolStripMenuItem.Enabled = value == null ? false : value.Length > 0; ;
+                copyLeftToolStripMenuItem.Enabled = value != null && value.Length > 0; ;
             }
         }
         [Description("New text to compare"), Category("Diff")]
@@ -83,7 +83,7 @@ namespace DBADashGUI
                 newText = value;
                 txtCode.Text = value;
                 diffViewer1.NewText = value;
-                copyRightToolStripMenuItem.Enabled =value==null ? false : value.Length > 0;
+                copyRightToolStripMenuItem.Enabled =value!=null && value.Length > 0;
             }
         }
 

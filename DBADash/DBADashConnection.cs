@@ -15,7 +15,7 @@ namespace DBADash
             AWSS3,
             Invalid
         }
-        private string myString = "g&hAs2&mVOLwE6DqO!I5";
+        private readonly string myString = "g&hAs2&mVOLwE6DqO!I5";
         private bool wasEncryptionPerformed = false;
         private bool isEncrypted = false;
         private string encryptedConnectionString = "";

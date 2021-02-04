@@ -124,7 +124,7 @@ namespace DBADashGUI.Performance
 
         readonly List<DataGridViewColumn> StandardCols = new List<DataGridViewColumn> {new DataGridViewTextBoxColumn() { Name = "DB", DataPropertyName = "DB",DisplayIndex=0 },
                                                                         new DataGridViewTextBoxColumn() { Name = "Schema", DataPropertyName = "SchemaName",DisplayIndex=1},
-                                                                        new DataGridViewTextBoxColumn() { Name = "Name", DataPropertyName = "ObjectName",DisplayIndex=2},
+                                                                        new DataGridViewLinkColumn { Name = "Name", DataPropertyName = "ObjectName",DisplayIndex=2, SortMode = DataGridViewColumnSortMode.Automatic},
                                                                         new DataGridViewTextBoxColumn() { Name = "Type", DataPropertyName = "TypeDescription",DisplayIndex=3}
 
         };
@@ -229,6 +229,12 @@ namespace DBADashGUI.Performance
 
         public void RefreshData()
         {
+            splitContainer1.Panel1Collapsed = true;
+            refreshData();
+        }
+
+        private void refreshData()
+        {
             dgv.DataSource = null;
             SqlConnection cn = new SqlConnection(Common.ConnectionString);
             using (cn)
@@ -239,7 +245,7 @@ namespace DBADashGUI.Performance
                 {
                     cmd.Parameters.AddWithValue("InstanceID", InstanceID);
                 }
-                else if (Instance!= null && Instance.Length > 0)
+                else if (Instance != null && Instance.Length > 0)
                 {
                     cmd.Parameters.AddWithValue("Instance", Instance);
                 }
@@ -260,7 +266,7 @@ namespace DBADashGUI.Performance
                 {
                     cmd.Parameters.AddWithValue("Types", Types);
                 }
-              
+
                 cmd.Parameters.AddWithValue("FromDate", fromDate);
                 cmd.Parameters.AddWithValue("ToDate", toDate);
                 cmd.CommandTimeout = Properties.Settings.Default.CommandTimeout;
@@ -270,16 +276,22 @@ namespace DBADashGUI.Performance
                 da.Fill(dt);
                 dgv.Columns.Clear();
                 dgv.AutoGenerateColumns = false;
-             
+
 
                 dgv.Columns.AddRange(Columns.ToArray());
                 setColVisibility();
 
-                dgv.DataSource = new DataView(dt,null,"total_duration_sec DESC", DataViewRowState.CurrentRows);
+                dgv.DataSource = new DataView(dt, null, "total_duration_sec DESC", DataViewRowState.CurrentRows);
                 dgv.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.DisplayedCells;
+                if (splitContainer1.Panel1Collapsed == false)
+                {
+                    refreshChart();
+                }
 
             }
         }
+
+
         private void checkTime()
         {
             foreach (var ts in tsTime.DropDownItems)
@@ -301,7 +313,7 @@ namespace DBADashGUI.Performance
             var itm = (ToolStripMenuItem)sender;
             mins = Int32.Parse((string)itm.Tag);
             setMins();
-            RefreshData();
+            refreshData();
         }
 
         private void setMins()
@@ -333,7 +345,7 @@ namespace DBADashGUI.Performance
                 checkTime();
                 tsTimeOffset.Tag = _to.Subtract(_from).TotalMinutes.ToString();
                 tsTimeOffset.Text = "Previous " + _to.Subtract(_from).ToString();
-                RefreshData();
+                refreshData();
                 tsCustom.Checked = true;
             }          
         }
@@ -353,7 +365,7 @@ namespace DBADashGUI.Performance
         {
             compareOffset = Int32.Parse((string)((ToolStripMenuItem)sender).Tag);
             checkOffset();
-            RefreshData();
+            refreshData();
         }
 
         private void checkOffset()
@@ -371,6 +383,7 @@ namespace DBADashGUI.Performance
 
         private void ObjectExecutionSummary_Load(object sender, EventArgs e)
         {
+            splitContainer1.Panel1Collapsed = true;
             addColumns();
             setMins();
         }
@@ -389,14 +402,14 @@ namespace DBADashGUI.Performance
                 _compareTo = frm.ToDate.ToUniversalTime();
                 compareOffset = 0;
                 checkOffset();
-                RefreshData();
+                refreshData();
                 tsCustomCompare.Checked = true;
             }
         }
 
         private void tsType_Click(object sender, EventArgs e)
         {
-            RefreshData();
+            refreshData();
         }
 
         private void dgv_RowsAdded(object sender, DataGridViewRowsAddedEventArgs e)
@@ -435,6 +448,31 @@ namespace DBADashGUI.Performance
             else
             {
                 return Color.AliceBlue;
+            }
+        }
+
+        private void refreshChart()
+        {
+            objectExecutionLineChart1.FromDate = compareFrom> DateTime.MinValue && compareFrom<fromDate? compareFrom : fromDate;
+            objectExecutionLineChart1.ToDate = compareTo>=toDate && compareTo < DateTime.MaxValue ? compareTo : toDate;
+            objectExecutionLineChart1.RefreshData();
+        }
+
+
+        private void dgv_CellContentClick(object sender, DataGridViewCellEventArgs e)
+        {
+            if (e.RowIndex >= 0)
+            {
+                if(dgv.Columns[e.ColumnIndex].Name == "Name")
+                {
+                    splitContainer1.Panel1Collapsed = false;
+                    var row = (DataRowView)dgv.Rows[e.RowIndex].DataBoundItem;
+                    objectExecutionLineChart1.InstanceID = InstanceID;
+                    objectExecutionLineChart1.Instance = Instance;
+                    objectExecutionLineChart1.ObjectID = (Int64)row["ObjectID"];
+                    objectExecutionLineChart1.Title = (string)row["ObjectName"];
+                    refreshChart();
+                }
             }
         }
     }

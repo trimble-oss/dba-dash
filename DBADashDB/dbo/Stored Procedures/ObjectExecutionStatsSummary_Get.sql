@@ -1,4 +1,4 @@
-﻿CREATE   PROC dbo.ObjectExecutionStatsSummary_Get(
+﻿CREATE   PROC [dbo].[ObjectExecutionStatsSummary_Get](
 		@FromDate DATETIME2(3),
 		@ToDate DATETIME2(4),
 		@CompareFrom DATETIME2(3)=NULL,
@@ -51,7 +51,7 @@ WITH base AS (
 		SUM(execution_count) / MAX(SUM(PeriodTime)/60000000.0) OVER() execs_per_min,
 		SUM(total_worker_time)/1000000.0 as total_cpu_sec,
 		SUM(total_worker_time)/1000.0 / MAX(SUM(PeriodTime)/1000000.0) OVER() cpu_ms_per_sec,
-		AVG(total_worker_time)/1000000.0 as avg_cpu_sec,
+		SUM(total_worker_time) /1000000.0 / SUM(execution_count) as avg_cpu_sec,
 		SUM(total_physical_reads) as total_physical_reads,
 		SUM(total_logical_reads) as total_logical_reads,
 		SUM(total_logical_writes) as total_writes,
@@ -88,7 +88,7 @@ compare as(
 		SUM(execution_count) / MAX(SUM(PeriodTime)/60000000.0) OVER() compare_execs_per_min,
 		SUM(total_worker_time)/1000000.0 as compare_total_cpu_sec,
 		SUM(total_worker_time)/1000.0 / MAX(SUM(PeriodTime)/1000000.0) OVER() compare_cpu_ms_per_sec,
-		AVG(total_worker_time)/1000000.0 as compare_avg_cpu_sec,
+		SUM(total_worker_time) /1000000.0 / SUM(execution_count) as compare_avg_cpu_sec,
 		SUM(total_physical_reads) as compare_total_physical_reads,
 		SUM(total_logical_reads) as compare_total_logical_reads,
 		SUM(total_logical_writes) as compare_total_writes,
