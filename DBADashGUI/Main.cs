@@ -362,6 +362,7 @@ namespace DBADashGUI
                 objectExecutionSummary1.Instance = n.InstanceName;
                 objectExecutionSummary1.InstanceID = n.InstanceID;
                 objectExecutionSummary1.DatabaseID = n.DatabaseID;
+                objectExecutionSummary1.ObjectID = n.ObjectID;
                 objectExecutionSummary1.RefreshData();
             }
         }
@@ -640,7 +641,8 @@ ORDER BY SchemaName,ObjectName
             {
                 if (n.Type == SQLTreeItem.TreeType.StoredProcedure || n.Type == SQLTreeItem.TreeType.CLRProcedure || n.Type == SQLTreeItem.TreeType.ScalarFunction || n.Type == SQLTreeItem.TreeType.CLRScalarFunction || n.Type == SQLTreeItem.TreeType.Trigger || n.Type == SQLTreeItem.TreeType.CLRTrigger)
                 {
-                    allowedTabs.Add(tabPerformance);
+                    allowedTabs.Add(tabObjectExecutionSummary);
+                    allowedTabs.Add(tabPerformance);                  
                 }
                 allowedTabs.Add(tabSchema);               
             }

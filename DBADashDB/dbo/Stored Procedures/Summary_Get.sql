@@ -75,6 +75,7 @@ err AS (
 	SELECT InstanceID,ErrorSource,COUNT(*) cnt,MAX(ErrorDate) AS LastError
 	FROM dbo.CollectionErrorLog
 	WHERE ErrorDate>=DATEADD(d,-1,GETUTCDATE())
+	AND ErrorContext NOT LIKE '%[[]Retrying]'
 	GROUP BY InstanceID,ErrorSource
 ),
 errSummary AS(

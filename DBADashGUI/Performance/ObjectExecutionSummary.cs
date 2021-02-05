@@ -21,6 +21,7 @@ namespace DBADashGUI.Performance
         public string Instance { get; set; }
         public Int32 InstanceID { get; set; }
         public Int32 DatabaseID { get; set; }
+        public Int64 ObjectID { get; set; }
 
         public string Types { 
             get
@@ -253,6 +254,10 @@ namespace DBADashGUI.Performance
                 {
                     throw new Exception("Instance not provided to Object Execution Summary");
                 }
+                if (ObjectID > 0)
+                {
+                    cmd.Parameters.AddWithValue("ObjectID", ObjectID);
+                }
                 if (DatabaseID > 0)
                 {
                     cmd.Parameters.AddWithValue("DatabaseID", DatabaseID);
@@ -274,6 +279,10 @@ namespace DBADashGUI.Performance
                 SqlDataAdapter da = new SqlDataAdapter(cmd);
                 DataTable dt = new DataTable();
                 da.Fill(dt);
+                if (dt.Rows.Count == 1)
+                {
+                    refreshChart((Int64)dt.Rows[0]["ObjectID"], (string)dt.Rows[0]["ObjectName"]);
+                }
                 dgv.Columns.Clear();
                 dgv.AutoGenerateColumns = false;
 
@@ -458,20 +467,25 @@ namespace DBADashGUI.Performance
             objectExecutionLineChart1.RefreshData();
         }
 
+        private void refreshChart(Int64 objectID,string title)
+        {
+            splitContainer1.Panel1Collapsed = false;
+            objectExecutionLineChart1.InstanceID = InstanceID;
+            objectExecutionLineChart1.Instance = Instance;
+            objectExecutionLineChart1.ObjectID = objectID;
+            objectExecutionLineChart1.Title = title;
+            refreshChart();
+        }
+
 
         private void dgv_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
             if (e.RowIndex >= 0)
             {
                 if(dgv.Columns[e.ColumnIndex].Name == "Name")
-                {
-                    splitContainer1.Panel1Collapsed = false;
+                {                 
                     var row = (DataRowView)dgv.Rows[e.RowIndex].DataBoundItem;
-                    objectExecutionLineChart1.InstanceID = InstanceID;
-                    objectExecutionLineChart1.Instance = Instance;
-                    objectExecutionLineChart1.ObjectID = (Int64)row["ObjectID"];
-                    objectExecutionLineChart1.Title = (string)row["ObjectName"];
-                    refreshChart();
+                    refreshChart((Int64)row["ObjectID"], (string)row["ObjectName"]);               
                 }
             }
         }

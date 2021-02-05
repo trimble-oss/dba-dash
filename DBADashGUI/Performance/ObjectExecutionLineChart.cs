@@ -40,10 +40,17 @@ namespace DBADashGUI.Performance
         readonly Dictionary<string, columnMetaData>  columns = new Dictionary<string, columnMetaData>
             {
                 {"AvgCPU", new columnMetaData{Alias="Avg CPU (sec)",isVisible=true } },
+                {"TotalCPU", new columnMetaData{Alias="Total CPU (sec)",isVisible=false } },
                 {"ExecutionsPerMin", new columnMetaData{Alias="Executions/min",isVisible=true, axis=1 } },
+                {"ExecutionCount", new columnMetaData{Alias="Execution Count",isVisible=false, axis=1 } },
                 {"AvgDuration", new columnMetaData{Alias="Avg Duration (sec)",isVisible=true} },
+                {"TotalDuration", new columnMetaData{Alias="Total Duration (sec)",isVisible=false } },
                 {"AvgLogicalReads", new columnMetaData{Alias="Avg Logical Reads",isVisible=false,axis=2} },
+                {"TotalLogicalReads", new columnMetaData{Alias="Total Logical Reads",isVisible=false,axis=2} },
                 {"AvgPhysicalReads", new columnMetaData{Alias="Avg Physical Reads",isVisible=false,axis=2} },
+                {"TotalPhysicalReads", new columnMetaData{Alias="Total Physical Reads",isVisible=false,axis=2} },
+                {"AvgWrites", new columnMetaData{Alias="Avg Writes",isVisible=false,axis=2} },
+                {"TotalWrites", new columnMetaData{Alias="Total Writes",isVisible=false,axis=2} },
             };
 
         public void RefreshData()
@@ -66,13 +73,13 @@ namespace DBADashGUI.Performance
 
             chart1.AxisY.Add(new Axis
             {
-                Title = "sec",
+                Title = "",
                 LabelFormatter = val => val.ToString("0.000"),
                 MinValue = 0
             });
             chart1.AxisY.Add(new Axis
             {
-                Title = "Executions/min",
+                Title = "Executions",
                 LabelFormatter = val => val.ToString("0.0"),
                 Position = AxisPosition.RightTop,
                 MinValue = 0

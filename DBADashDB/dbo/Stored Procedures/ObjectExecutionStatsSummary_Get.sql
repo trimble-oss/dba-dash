@@ -9,6 +9,7 @@
 		@Types VARCHAR(200)=NULL, -- 'P,FN,TR,TA,PC,X'
 		@Use60MIN BIT=NULL,
 		@Use60MINCompare BIT=NULL,
+		@ObjectID BIGINT=NULL,
 		@Debug BIT=0
 )
 AS
@@ -70,6 +71,7 @@ WITH base AS (
 	' + CASE WHEN @InstanceID IS NULL THEN '' ELSE 'AND I.InstanceID=@InstanceID' END + '
 	' + CASE WHEN @Types IS NULL THEN '' ELSE 'AND EXISTS(SELECT 1 FROM STRING_SPLIT(@Types,'','') ss WHERE ss.Value =  O.ObjectType)' END + '
 	' + CASE WHEN @DatabaseID IS NULL THEN '' ELSE 'AND D.DatabaseID = @DatabaseID' END + '
+	' + CASE WHEN @ObjectID IS NULL THEN '' ELSE 'AND OES.ObjectID = @ObjectID' END + '
 	GROUP BY OES.InstanceID,OES.ObjectID,I.ConnectionID,D.name,O.SchemaName,O.ObjectName,O.ObjectType,OT.TypeDescription
 ),
 compare as(
@@ -107,6 +109,7 @@ compare as(
 	' + CASE WHEN @InstanceID IS NULL THEN '' ELSE 'AND I.InstanceID=@InstanceID' END + '
 	' + CASE WHEN @Types IS NULL THEN '' ELSE 'AND EXISTS(SELECT 1 FROM STRING_SPLIT(@Types,'','') ss WHERE ss.Value =  O.ObjectType)' END + '
 	' + CASE WHEN @DatabaseID IS NULL THEN '' ELSE 'AND D.DatabaseID = @DatabaseID' END + '
+	' + CASE WHEN @ObjectID IS NULL THEN '' ELSE 'AND OES.ObjectID = @ObjectID' END + '
 	GROUP BY OES.InstanceID,OES.ObjectID,I.ConnectionID,D.name,O.SchemaName,O.ObjectName,O.ObjectType,OT.TypeDescription
 )
 SELECT ISNULL(base.InstanceID,compare.InstanceID) as InstanceID,
@@ -155,5 +158,5 @@ FULL JOIN compare on base.ObjectID = compare.ObjectID'
 IF @Debug=1
 	PRINT @SQL
 
-EXEC sp_executesql @SQL,N'@InstanceID INT,@Instance SYSNAME,@FromDate DATETIME2(3),@ToDate DATETIME2(3),@CompareFrom DATETIME2(3),@CompareTo DATETIME2(3),@Types VARCHAR(200),@DatabaseID INT',@InstanceID,@Instance,@FromDate,@ToDate,@CompareFrom,@CompareTo,@Types,@DatabaseID
+EXEC sp_executesql @SQL,N'@InstanceID INT,@Instance SYSNAME,@FromDate DATETIME2(3),@ToDate DATETIME2(3),@CompareFrom DATETIME2(3),@CompareTo DATETIME2(3),@Types VARCHAR(200),@DatabaseID INT,@ObjectID BIGINT',@InstanceID,@Instance,@FromDate,@ToDate,@CompareFrom,@CompareTo,@Types,@DatabaseID,@ObjectID
 ;
