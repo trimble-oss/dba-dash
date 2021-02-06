@@ -20,7 +20,7 @@ IF @ToDateUTC IS NULL
 
 DECLARE @DateAggString NVARCHAR(MAX)
 DECLARE @MeasureString NVARCHAR(MAX) 
-SELECT @MeasureString = CASE WHEN @Measure IN('TotalCPU','AvgCPU','TotalDuration','AvgDuration','ExecutionCount','ExecutionsPerMin','AvgLogicalReads','AvgPhysicalReads','AvgWrites','TotalWrites','TotalLogicalReads','TotalPhysicalReads','MaxExecutionsPerMin') THEN @Measure ELSE NULL END
+SELECT @MeasureString = CASE WHEN @Measure IN('TotalCPU','AvgCPU','TotalDuration','AvgDuration','ExecutionCount','ExecutionsPerMin','AvgLogicalReads','AvgPhysicalReads','AvgWrites','TotalWrites','TotalLogicalReads','TotalPhysicalReads','MaxExecutionsPerMin','cpu_ms_per_sec','duration_ms_per_sec') THEN @Measure ELSE NULL END
 SELECT @DateAggString = CASE WHEN @DateGroupingMin IS NULL OR @DateGroupingMin =0 THEN 'DATEADD(mi, @UTCOffset, PS.SnapshotDate)'
 		 ELSE 'DG.DateGroup' END
 DECLARE @SQL NVARCHAR(MAX)
@@ -33,10 +33,12 @@ SELECT ' + @DateAggString + N' as SnapshotDate,
        O.SchemaName + ''.'' + O.objectname as object_name,
 	   SUM(PS.total_worker_time)/1000000.0 as TotalCPU,
 	   SUM(PS.total_worker_time)/NULLIF(SUM(PS.execution_count),0)/1000000.0 as AvgCPU,
+	   SUM(total_worker_time)/1000.0 / MAX(SUM(PeriodTime)/1000000.0) OVER() cpu_ms_per_sec,
 	   SUM(PS.execution_count) as ExecutionCount,
 	   SUM(PS.execution_count)/(NULLIF(SUM(PeriodTime),0)/60000000.0) as ExecutionsPerMin,
 	   SUM(PS.total_elapsed_time)/1000000.0 AS TotalDuration,
 	   SUM(PS.total_elapsed_time)/NULLIF(SUM(PS.execution_count),0)/1000000.0 AS AvgDuration,
+	   SUM(total_elapsed_time)/1000.0 / MAX(SUM(PeriodTime)/1000000.0) OVER() duration_ms_per_sec,
 	   SUM(PS.total_logical_reads) as TotalLogicalReads,
 	   SUM(PS.total_logical_reads)/NULLIF(SUM(PS.execution_count),0) as AvgLogicalReads,
 	   SUM(PS.total_physical_reads) as TotalPhysicalReads,

@@ -41,10 +41,12 @@ namespace DBADashGUI.Performance
             {
                 {"AvgCPU", new columnMetaData{Alias="Avg CPU (sec)",isVisible=true } },
                 {"TotalCPU", new columnMetaData{Alias="Total CPU (sec)",isVisible=false } },
+                {"cpu_ms_per_sec", new columnMetaData{Alias="CPU (ms/sec)",isVisible=false } },
                 {"ExecutionsPerMin", new columnMetaData{Alias="Executions/min",isVisible=true, axis=1 } },
                 {"ExecutionCount", new columnMetaData{Alias="Execution Count",isVisible=false, axis=1 } },
                 {"AvgDuration", new columnMetaData{Alias="Avg Duration (sec)",isVisible=true} },
                 {"TotalDuration", new columnMetaData{Alias="Total Duration (sec)",isVisible=false } },
+                {"duration_ms_per_sec", new columnMetaData{Alias="Duration (ms/sec)",isVisible=false } },
                 {"AvgLogicalReads", new columnMetaData{Alias="Avg Logical Reads",isVisible=false,axis=2} },
                 {"TotalLogicalReads", new columnMetaData{Alias="Total Logical Reads",isVisible=false,axis=2} },
                 {"AvgPhysicalReads", new columnMetaData{Alias="Avg Physical Reads",isVisible=false,axis=2} },
