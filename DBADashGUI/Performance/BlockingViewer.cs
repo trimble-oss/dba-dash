@@ -18,7 +18,7 @@ namespace DBADashGUI.Performance
         public Int32 BlockingSnapshotID { get; set; }
         public Int16 BlockingSessionID { get; set; } = 0;
 
-        List<Int16> BlockingNavigation = new List<Int16>();
+        readonly List<Int16> BlockingNavigation = new List<Int16>();
 
         public BlockingViewer()
         {
@@ -36,17 +36,18 @@ namespace DBADashGUI.Performance
             SqlConnection cn = new SqlConnection(ConnectionString);
             using (cn)
             {
-                cn.Open();
-                SqlCommand cmd = new SqlCommand("dbo.BlockingSummary_Get", cn);
-                cmd.Parameters.AddWithValue("@BlockingsnapshotID", BlockingSnapshotID);
-                cmd.CommandType = CommandType.StoredProcedure;
-                var rdr = cmd.ExecuteReader();
-                if (rdr.Read())
+                using (SqlCommand cmd = new SqlCommand("dbo.BlockingSummary_Get", cn) { CommandType = CommandType.StoredProcedure })
                 {
-                    lblInstance.Text = "Instance:" +  (string)rdr["ConnectionID"];
-                    lblSnapshotDate.Text = "Snapshot Date:" + ((DateTime)rdr["SnapshotDateUTC"]).ToLocalTime().ToString("yyyy-MM-dd HH:mm:ss");
-                    lblBlockedSessions.Text = "Blocked Sessions: " + (Int32)rdr["BlockedSessionCount"];
-                    lblBlockedWaitTime.Text = "Blocked Wait Time: " + MillisecondsToReadableDuration((Int64)rdr["BlockedWaitTime"]);
+                    cn.Open();
+                    cmd.Parameters.AddWithValue("@BlockingsnapshotID", BlockingSnapshotID);
+                    var rdr = cmd.ExecuteReader();
+                    if (rdr.Read())
+                    {
+                        lblInstance.Text = "Instance:" + (string)rdr["ConnectionID"];
+                        lblSnapshotDate.Text = "Snapshot Date:" + ((DateTime)rdr["SnapshotDateUTC"]).ToLocalTime().ToString("yyyy-MM-dd HH:mm:ss");
+                        lblBlockedSessions.Text = "Blocked Sessions: " + (Int32)rdr["BlockedSessionCount"];
+                        lblBlockedWaitTime.Text = "Blocked Wait Time: " + MillisecondsToReadableDuration((Int64)rdr["BlockedWaitTime"]);
+                    }
                 }
             }
         }
@@ -66,25 +67,26 @@ namespace DBADashGUI.Performance
             SqlConnection cn = new SqlConnection(ConnectionString);
             using (cn)
             {
-                cn.Open();
-                SqlCommand cmd = new SqlCommand("Report.Blocking", cn);
-                cmd.Parameters.AddWithValue("BlockingSnapshotID", BlockingSnapshotID);
-                cmd.Parameters.AddWithValue("blocking_session_id", BlockingSessionID);
-                cmd.CommandType = CommandType.StoredProcedure;
-                SqlDataAdapter da = new SqlDataAdapter(cmd);
-                DataTable dt = new DataTable();
-                da.Fill(dt);
-                gvBlocking.AutoGenerateColumns = false;
-                gvBlocking.DataSource = new DataView(dt);
-                lblBlockers.Text = BlockingSessionID == 0 ? "Root Blockers" : "Blocked By Session " + BlockingSessionID;
-                bttnRootBlockers.Enabled= BlockingSessionID != 0;
-                if (BlockingSessionID == 0)
+                using (SqlCommand cmd = new SqlCommand("Report.Blocking", cn) { CommandType = CommandType.StoredProcedure })
                 {
-                    BlockingNavigation.Clear();
+                    cn.Open();
+                    cmd.Parameters.AddWithValue("BlockingSnapshotID", BlockingSnapshotID);
+                    cmd.Parameters.AddWithValue("blocking_session_id", BlockingSessionID);
+                    SqlDataAdapter da = new SqlDataAdapter(cmd);
+                    DataTable dt = new DataTable();
+                    da.Fill(dt);
+                    gvBlocking.AutoGenerateColumns = false;
+                    gvBlocking.DataSource = new DataView(dt);
+                    lblBlockers.Text = BlockingSessionID == 0 ? "Root Blockers" : "Blocked By Session " + BlockingSessionID;
+                    bttnRootBlockers.Enabled = BlockingSessionID != 0;
+                    if (BlockingSessionID == 0)
+                    {
+                        BlockingNavigation.Clear();
+                    }
+                    BlockingNavigation.Add(BlockingSessionID);
+                    bttnBack.Enabled = BlockingNavigation.Count > 1;
+                    updatePath();
                 }
-                BlockingNavigation.Add(BlockingSessionID);
-                bttnBack.Enabled = BlockingNavigation.Count > 1;
-                updatePath();
             }
         }
 
@@ -101,8 +103,10 @@ namespace DBADashGUI.Performance
                 if (e.ColumnIndex == Txt.Index && e.RowIndex >= 0)
                 {
                     string txt = (string)row["Txt"];
-                    var frm = new CodeViewer();
-                    frm.SQL = txt;
+                    var frm = new CodeViewer
+                    {
+                        SQL = txt
+                    };
                     frm.Show();
                 }
             }

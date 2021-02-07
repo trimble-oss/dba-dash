@@ -26,21 +26,20 @@ namespace DBADashGUI
             configuration1.ConnectionString = this.ConnectionString;
             configuration1.InstanceIDs = this.InstanceIDs;
             configuration1.RefreshData();
-            SqlConnection cn = new SqlConnection(ConnectionString);
-            using (cn)
+            using (var cn = new SqlConnection(ConnectionString))
             {
-                cn.Open();
-                SqlCommand cmd = new SqlCommand("dbo.SysConfigHistory_Get", cn)
+                using (SqlCommand cmd = new SqlCommand("dbo.SysConfigHistory_Get", cn){CommandType = CommandType.StoredProcedure })
                 {
-                    CommandType = CommandType.StoredProcedure
-                };
-                cmd.Parameters.AddWithValue("@InstanceIDs", string.Join(",", InstanceIDs));
-                SqlDataAdapter da = new SqlDataAdapter(cmd);
-                DataTable dt = new DataTable();        
-                da.Fill(dt);
-                Common.ConvertUTCToLocal(ref dt);
-                dgv.AutoGenerateColumns = false;
-                dgv.DataSource = dt;
+                    cn.Open();
+
+                    cmd.Parameters.AddWithValue("@InstanceIDs", string.Join(",", InstanceIDs));
+                    SqlDataAdapter da = new SqlDataAdapter(cmd);
+                    DataTable dt = new DataTable();
+                    da.Fill(dt);
+                    Common.ConvertUTCToLocal(ref dt);
+                    dgv.AutoGenerateColumns = false;
+                    dgv.DataSource = dt;
+                }
             }
         }
 

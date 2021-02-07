@@ -138,18 +138,19 @@ namespace DBADashGUI.Performance
             SqlConnection cn = new SqlConnection(connectionString);
             using (cn)
             {
-                cn.Open();
-                SqlCommand cmd = new SqlCommand("DriveLetters_Get", cn);
-                cmd.Parameters.AddWithValue("@InstanceID", instanceID);
-                cmd.CommandType = CommandType.StoredProcedure;
-                var rdr = cmd.ExecuteReader();
-                while (rdr.Read())
+                using (SqlCommand cmd = new SqlCommand("DriveLetters_Get", cn) { CommandType = CommandType.StoredProcedure })
                 {
-                    var name = (string)rdr["Name"];
-                    var label = rdr["Label"] == DBNull.Value ? "" : (string)rdr["Label"];
-                    var ddDrive = tsDrives.DropDownItems.Add(name + "     |     " + label);
-                    ddDrive.Tag = name;
-                    ddDrive.Click += DdDrive_Click;
+                    cn.Open();
+                    cmd.Parameters.AddWithValue("@InstanceID", instanceID);
+                    var rdr = cmd.ExecuteReader();
+                    while (rdr.Read())
+                    {
+                        var name = (string)rdr["Name"];
+                        var label = rdr["Label"] == DBNull.Value ? "" : (string)rdr["Label"];
+                        var ddDrive = tsDrives.DropDownItems.Add(name + "     |     " + label);
+                        ddDrive.Tag = name;
+                        ddDrive.Click += DdDrive_Click;
+                    }
                 }
             }
             var ddAll = tsDrives.DropDownItems.Add("{All}");
@@ -169,28 +170,30 @@ namespace DBADashGUI.Performance
             SqlConnection cn = new SqlConnection(connectionString);
             using (cn)
             {
-                cn.Open();
-                SqlCommand cmd = new SqlCommand(@"IOStats_Get", cn);
-                cmd.Parameters.AddWithValue("@InstanceID", instanceid);
-                cmd.Parameters.AddWithValue("@FromDate", from);
-                cmd.Parameters.AddWithValue("@ToDate", to);
-                if (filegroup.Length > 0)
+                using (SqlCommand cmd = new SqlCommand(@"IOStats_Get", cn) { CommandType = CommandType.StoredProcedure })
                 {
-                    cmd.Parameters.AddWithValue("@FileGroup", filegroup);
+                    cn.Open();
+
+                    cmd.Parameters.AddWithValue("@InstanceID", instanceid);
+                    cmd.Parameters.AddWithValue("@FromDate", from);
+                    cmd.Parameters.AddWithValue("@ToDate", to);
+                    if (filegroup.Length > 0)
+                    {
+                        cmd.Parameters.AddWithValue("@FileGroup", filegroup);
+                    }
+                    cmd.Parameters.AddWithValue("DateGroupingMin", dateGrouping);
+                    if (drive != "")
+                    {
+                        cmd.Parameters.AddWithValue("Drive", drive);
+                    }
+                    if (DatabaseID > 0)
+                    {
+                        cmd.Parameters.AddWithValue("@DatabaseID", DatabaseID);
+                    }
+                    cmd.CommandTimeout = Properties.Settings.Default.CommandTimeout;
+                    var da = new SqlDataAdapter(cmd);
+                    da.Fill(dt);
                 }
-                cmd.Parameters.AddWithValue("DateGroupingMin", dateGrouping);
-                if (drive != "")
-                {
-                    cmd.Parameters.AddWithValue("Drive", drive);
-                }
-                if (DatabaseID > 0)
-                {
-                    cmd.Parameters.AddWithValue("@DatabaseID", DatabaseID);
-                }
-                cmd.CommandType = CommandType.StoredProcedure;
-                cmd.CommandTimeout = Properties.Settings.Default.CommandTimeout;
-                var da = new SqlDataAdapter(cmd);
-                da.Fill(dt);
 
             }
             return dt;

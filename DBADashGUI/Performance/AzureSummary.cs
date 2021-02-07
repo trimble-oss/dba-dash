@@ -76,26 +76,27 @@ namespace DBADashGUI.Performance
             SqlConnection cn = new SqlConnection(Common.ConnectionString);
             using (cn)
             {
-                cn.Open();
-                SqlCommand cmd = new SqlCommand("dbo.AzureDBPerformanceSummary_Get", cn);
-                if (InstanceIDs.Count > 0)
-                {
-                    cmd.Parameters.AddWithValue("InstanceIDs", string.Join(",", InstanceIDs));
+                using (SqlCommand cmd = new SqlCommand("dbo.AzureDBPerformanceSummary_Get", cn) { CommandType = CommandType.StoredProcedure }) {
+                    cn.Open();
+
+                    if (InstanceIDs.Count > 0)
+                    {
+                        cmd.Parameters.AddWithValue("InstanceIDs", string.Join(",", InstanceIDs));
+                    }
+                    cmd.Parameters.AddWithValue("CPUHist", colCPUHistogram.Visible);
+                    cmd.Parameters.AddWithValue("DataHist", colDataHistogram.Visible);
+                    cmd.Parameters.AddWithValue("LogHist", colLogHistogram.Visible);
+                    cmd.Parameters.AddWithValue("DTUHist", colDTUHistogram.Visible);
+                    cmd.Parameters.AddWithValue("FromDate", fromDateUTC);
+                    cmd.Parameters.AddWithValue("ToDate", toDateUTC);
+                    cmd.CommandTimeout = Properties.Settings.Default.CommandTimeout;
+                    SqlDataAdapter da = new SqlDataAdapter(cmd);
+                    DataTable dt = new DataTable();
+                    da.Fill(dt);
+                    dgv.AutoGenerateColumns = false;
+                    dgv.DataSource = new DataView(dt);
+                    generateHistogram(dgv);
                 }
-                cmd.Parameters.AddWithValue("CPUHist", colCPUHistogram.Visible);
-                cmd.Parameters.AddWithValue("DataHist", colDataHistogram.Visible);
-                cmd.Parameters.AddWithValue("LogHist", colLogHistogram.Visible);
-                cmd.Parameters.AddWithValue("DTUHist", colDTUHistogram.Visible);
-                cmd.Parameters.AddWithValue("FromDate", fromDateUTC);
-                cmd.Parameters.AddWithValue("ToDate", toDateUTC);
-                cmd.CommandTimeout = Properties.Settings.Default.CommandTimeout;
-                cmd.CommandType = CommandType.StoredProcedure;
-                SqlDataAdapter da = new SqlDataAdapter(cmd);
-                DataTable dt = new DataTable();
-                da.Fill(dt);
-                dgv.AutoGenerateColumns = false;
-                dgv.DataSource = new DataView(dt);
-                generateHistogram(dgv);
             }
         }
 
@@ -105,26 +106,28 @@ namespace DBADashGUI.Performance
             SqlConnection cn = new SqlConnection(Common.ConnectionString);
             using (cn)
             {
-                cn.Open();
-                SqlCommand cmd = new SqlCommand("dbo.AzureDBPoolSummary_Get", cn);
-                if (InstanceIDs.Count > 0)
+                using (SqlCommand cmd = new SqlCommand("dbo.AzureDBPoolSummary_Get", cn) { CommandType = CommandType.StoredProcedure })
                 {
-                    cmd.Parameters.AddWithValue("InstanceIDs", string.Join(",", InstanceIDs));
+                    cn.Open();
+
+                    if (InstanceIDs.Count > 0)
+                    {
+                        cmd.Parameters.AddWithValue("InstanceIDs", string.Join(",", InstanceIDs));
+                    }
+                    cmd.Parameters.AddWithValue("CPUHist", colPoolCPUHistogram.Visible);
+                    cmd.Parameters.AddWithValue("DataHist", colPoolDataHistogram.Visible);
+                    cmd.Parameters.AddWithValue("LogHist", colPoolLogHistogram.Visible);
+                    cmd.Parameters.AddWithValue("DTUHist", colPoolDTUHistogram.Visible);
+                    cmd.Parameters.AddWithValue("FromDate", fromDateUTC);
+                    cmd.Parameters.AddWithValue("ToDate", toDateUTC);
+                    cmd.CommandTimeout = Properties.Settings.Default.CommandTimeout;
+                    SqlDataAdapter da = new SqlDataAdapter(cmd);
+                    DataTable dt = new DataTable();
+                    da.Fill(dt);
+                    dgvPool.AutoGenerateColumns = false;
+                    dgvPool.DataSource = new DataView(dt);
+                    generateHistogram(dgvPool, "colPool");
                 }
-                cmd.Parameters.AddWithValue("CPUHist", colPoolCPUHistogram.Visible);
-                cmd.Parameters.AddWithValue("DataHist", colPoolDataHistogram.Visible);
-                cmd.Parameters.AddWithValue("LogHist", colPoolLogHistogram.Visible);
-                cmd.Parameters.AddWithValue("DTUHist", colPoolDTUHistogram.Visible);
-                cmd.Parameters.AddWithValue("FromDate", fromDateUTC);
-                cmd.Parameters.AddWithValue("ToDate", toDateUTC);
-                cmd.CommandTimeout = Properties.Settings.Default.CommandTimeout;
-                cmd.CommandType = CommandType.StoredProcedure;
-                SqlDataAdapter da = new SqlDataAdapter(cmd);
-                DataTable dt = new DataTable();
-                da.Fill(dt);
-                dgvPool.AutoGenerateColumns = false;
-                dgvPool.DataSource = new DataView(dt);
-                generateHistogram(dgvPool, "colPool");
             }
 
         }
@@ -141,7 +144,7 @@ namespace DBADashGUI.Performance
             }
         }
 
-        string[] histograms = new string[] { "DTU", "CPU", "Data", "Log" };
+        readonly string[] histograms = new string[] { "DTU", "CPU", "Data", "Log" };
 
         private void generateHistogram(DataGridView dgv,string colPrefix="col" )
         {
@@ -190,11 +193,13 @@ namespace DBADashGUI.Performance
         {
             foreach (DataGridViewColumn col in dgv.Columns)
             {
-                ToolStripMenuItem mnu = new ToolStripMenuItem(col.HeaderText);
-                mnu.Name = col.Name;
+                ToolStripMenuItem mnu = new ToolStripMenuItem(col.HeaderText)
+                {
+                    Name = col.Name,
+                    CheckOnClick=true,
+                    Checked = col.Visible,                 
+                };
                 mnu.Click += ColumnMenu_Click;
-                mnu.Checked = col.Visible;
-                mnu.CheckOnClick = true;
                 tsColumns.DropDownItems.Add(mnu);
             }
             tsColumns.DropDownItems.Add(new ToolStripSeparator());
@@ -210,11 +215,13 @@ namespace DBADashGUI.Performance
         {
             foreach (DataGridViewColumn col in dgvPool.Columns)
             {
-                ToolStripMenuItem mnu = new ToolStripMenuItem(col.HeaderText);
-                mnu.Name = col.Name;
-                mnu.Click += PoolColumnMenu_Click;
-                mnu.Checked = col.Visible;
-                mnu.CheckOnClick = true;
+                ToolStripMenuItem mnu = new ToolStripMenuItem(col.HeaderText)
+                {
+                    Name = col.Name,
+                    Checked = col.Visible,
+                    CheckOnClick = true
+                };
+                mnu.Click += PoolColumnMenu_Click;             
                 tsPoolColumns.DropDownItems.Add(mnu);
             }
             tsPoolColumns.DropDownItems.Add(new ToolStripSeparator());
@@ -371,9 +378,11 @@ namespace DBADashGUI.Performance
 
         private void tsCustom_Click(object sender, EventArgs e)
         {
-            var frm = new CustomTimePicker();
-            frm.FromDate = fromDateUTC.ToLocalTime();
-            frm.ToDate = toDateUTC.ToLocalTime();
+            var frm = new CustomTimePicker
+            {
+                FromDate = fromDateUTC.ToLocalTime(),
+                ToDate = toDateUTC.ToLocalTime()
+            };
             frm.ShowDialog();
             if (frm.DialogResult == DialogResult.OK)
             {
@@ -458,11 +467,13 @@ namespace DBADashGUI.Performance
                 DataRowView row = (DataRowView)dgv.Rows[e.RowIndex].DataBoundItem;
                 string instance =(string)row["Instance"];
                 string db= (string)row["DB"];
-         
-                var frm = new AzureDBResourceStatsView();
-                frm.FromDate = fromDateUTC.ToLocalTime();
-                frm.ToDate = toDateUTC.ToLocalTime();
-                frm.InstanceID = (Int32)row["InstanceID"];
+
+                var frm = new AzureDBResourceStatsView
+                {
+                    FromDate = fromDateUTC.ToLocalTime(),
+                    ToDate = toDateUTC.ToLocalTime(),
+                    InstanceID = (Int32)row["InstanceID"]
+                };
                 if (col == colElasticPool)
                 {
                     string pool = (string)row["elastic_pool_name"];
@@ -486,12 +497,14 @@ namespace DBADashGUI.Performance
                 DataRowView row = (DataRowView)dgvPool.Rows[e.RowIndex].DataBoundItem;
                 string instance = (string)row["Instance"];
                 string pool = (string)row["elastic_pool_name"];
-                var frm = new AzureDBResourceStatsView();
-                frm.FromDate = fromDateUTC.ToLocalTime();
-                frm.ToDate = toDateUTC.ToLocalTime();
-                frm.InstanceID = (Int32)row["InstanceID"];
-                frm.ElasticPoolName = pool;
-                frm.Text = instance + " | " + pool;
+                var frm = new AzureDBResourceStatsView
+                {
+                    FromDate = fromDateUTC.ToLocalTime(),
+                    ToDate = toDateUTC.ToLocalTime(),
+                    InstanceID = (Int32)row["InstanceID"],
+                    ElasticPoolName = pool,
+                    Text = instance + " | " + pool
+                };
                 frm.Show();
             }
         }

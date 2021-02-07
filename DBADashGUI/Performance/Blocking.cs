@@ -59,21 +59,22 @@ namespace DBADashGUI.Performance
             SqlConnection cn = new SqlConnection(connectionString);
             using (cn)
             {
-                cn.Open();
-                SqlCommand cmd = new SqlCommand("dbo.BlockingSnapshots_Get", cn);
-                cmd.Parameters.AddWithValue("@InstanceID", InstanceID);
-                cmd.Parameters.AddWithValue("@FromDate", fromDate);
-                cmd.Parameters.AddWithValue("@ToDate", toDate);
-                if (databaseID>0){
-                    cmd.Parameters.AddWithValue("@DatabaseID", databaseID);
+                using (SqlCommand cmd = new SqlCommand("dbo.BlockingSnapshots_Get", cn) { CommandType = CommandType.StoredProcedure })
+                {
+                    cn.Open();
+                    cmd.Parameters.AddWithValue("@InstanceID", InstanceID);
+                    cmd.Parameters.AddWithValue("@FromDate", fromDate);
+                    cmd.Parameters.AddWithValue("@ToDate", toDate);
+                    if (databaseID > 0)
+                    {
+                        cmd.Parameters.AddWithValue("@DatabaseID", databaseID);
+                    }
+                    cmd.CommandTimeout = Properties.Settings.Default.CommandTimeout;
+                    SqlDataAdapter da = new SqlDataAdapter(cmd);
+                    DataTable dt = new DataTable();
+                    da.Fill(dt);
+                    return dt;
                 }
-
-                cmd.CommandType = CommandType.StoredProcedure;
-                cmd.CommandTimeout = Properties.Settings.Default.CommandTimeout;
-                SqlDataAdapter da = new SqlDataAdapter(cmd);
-                DataTable dt = new DataTable();
-                da.Fill(dt);
-                return dt;
             }
         }
 

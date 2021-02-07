@@ -71,23 +71,24 @@ namespace DBADashGUI.Backups
             if (ConnectionString != null)
             {
                 configureInstanceThresholdsToolStripMenuItem.Enabled = (InstanceIDs.Count == 1);
-                SqlConnection cn = new SqlConnection(ConnectionString);
-                using (cn)
+
+                using (var cn = new SqlConnection(ConnectionString))
                 {
-                    cn.Open();
-                    SqlCommand cmd = new SqlCommand("dbo.Backups_Get", cn);
-                    cmd.CommandType = CommandType.StoredProcedure;
-                    cmd.Parameters.AddWithValue("InstanceIDs", string.Join(",", InstanceIDs));
-                    cmd.Parameters.AddWithValue("IncludeCritical", IncludeCritical);
-                    cmd.Parameters.AddWithValue("IncludeWarning", IncludeWarning);
-                    cmd.Parameters.AddWithValue("IncludeNA", IncludeNA);
-                    cmd.Parameters.AddWithValue("IncludeOK", IncludeOK);
-                    SqlDataAdapter da = new SqlDataAdapter(cmd);
-                    DataTable dtBackups = new DataTable();
-                    da.Fill(dtBackups);
-                    Common.ConvertUTCToLocal(ref dtBackups);
-                    dgvBackups.AutoGenerateColumns = false;
-                    dgvBackups.DataSource = new DataView(dtBackups);
+                    using (SqlCommand cmd = new SqlCommand("dbo.Backups_Get", cn) { CommandType = CommandType.StoredProcedure })
+                    {
+                        cn.Open();
+                        cmd.Parameters.AddWithValue("InstanceIDs", string.Join(",", InstanceIDs));
+                        cmd.Parameters.AddWithValue("IncludeCritical", IncludeCritical);
+                        cmd.Parameters.AddWithValue("IncludeWarning", IncludeWarning);
+                        cmd.Parameters.AddWithValue("IncludeNA", IncludeNA);
+                        cmd.Parameters.AddWithValue("IncludeOK", IncludeOK);
+                        SqlDataAdapter da = new SqlDataAdapter(cmd);
+                        DataTable dtBackups = new DataTable();
+                        da.Fill(dtBackups);
+                        Common.ConvertUTCToLocal(ref dtBackups);
+                        dgvBackups.AutoGenerateColumns = false;
+                        dgvBackups.DataSource = new DataView(dtBackups);
+                    }
                 }
                 
             }
@@ -150,10 +151,12 @@ namespace DBADashGUI.Backups
 
         private void ConfigureThresholds(Int32 InstanceID, Int32 DatabaseID)
         {
-            var frm = new BackupThresholdsConfig();
-            frm.InstanceID = InstanceID;
-            frm.DatabaseID = DatabaseID;
-            frm.ConnectionString = ConnectionString;
+            var frm = new BackupThresholdsConfig
+            {
+                InstanceID = InstanceID,
+                DatabaseID = DatabaseID,
+                ConnectionString = ConnectionString
+            };
             frm.ShowDialog();
             if (frm.DialogResult == DialogResult.OK)
             {

@@ -22,7 +22,7 @@ namespace DBADashGUI.Drives
             InitializeComponent();
         }
 
-        string connectionString = Common.ConnectionString;
+        readonly string connectionString = Common.ConnectionString;
 
         public Int32 DriveID { get; set; }
 
@@ -153,19 +153,18 @@ namespace DBADashGUI.Drives
 
         public DataTable DriveSnapshot()
         {
-            SqlConnection cn = new SqlConnection(connectionString);
-            using (cn)
+            using (var cn = new SqlConnection(connectionString))
             {
-                cn.Open();
-                SqlCommand cmd = new SqlCommand("dbo.DriveSnapshot_Get", cn);
-                cmd.CommandType = CommandType.StoredProcedure;
-                cmd.Parameters.AddWithValue("FromDate", From);
-                cmd.Parameters.AddWithValue("ToDate", To);
-                cmd.Parameters.AddWithValue("DriveID", DriveID);
-                SqlDataAdapter da = new SqlDataAdapter(cmd);
-                DataTable dt = new DataTable();
-                da.Fill(dt);
-                return dt;
+                using (SqlCommand cmd = new SqlCommand("dbo.DriveSnapshot_Get", cn) { CommandType = CommandType.StoredProcedure }) {
+                    cn.Open();
+                    cmd.Parameters.AddWithValue("FromDate", From);
+                    cmd.Parameters.AddWithValue("ToDate", To);
+                    cmd.Parameters.AddWithValue("DriveID", DriveID);
+                    SqlDataAdapter da = new SqlDataAdapter(cmd);
+                    DataTable dt = new DataTable();
+                    da.Fill(dt);
+                    return dt;
+                }
             }
         }
 
@@ -191,9 +190,11 @@ namespace DBADashGUI.Drives
 
         private void Custom_Click(object sender, EventArgs e)
         {
-            var frm = new CustomTimePicker();
-            frm.FromDate = From;
-            frm.ToDate = To;
+            var frm = new CustomTimePicker
+            {
+                FromDate = From,
+                ToDate = To
+            };
             frm.ShowDialog();
             if (frm.DialogResult == DialogResult.OK)
             {

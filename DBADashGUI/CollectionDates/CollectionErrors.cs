@@ -39,29 +39,26 @@ namespace DBADashGUI.CollectionDates
 
         public void RefreshData()
         {
-            SqlConnection cn = new SqlConnection(Common.ConnectionString);
-
-            using (cn)
+            using (var cn = new SqlConnection(Common.ConnectionString))
             {
-                SqlCommand cmd = new SqlCommand("dbo.CollectionErrorLog_Get", cn)
+                using (SqlCommand cmd = new SqlCommand("dbo.CollectionErrorLog_Get", cn) { CommandType = CommandType.StoredProcedure })
                 {
-                    CommandType = CommandType.StoredProcedure
-                };
-                if (InstanceID > 0)
-                {
-                    cmd.Parameters.AddWithValue("InstanceID", InstanceID);
+                    if (InstanceID > 0)
+                    {
+                        cmd.Parameters.AddWithValue("InstanceID", InstanceID);
+                    }
+                    if (InstanceName != "")
+                    {
+                        cmd.Parameters.AddWithValue("Instance", InstanceName);
+                    }
+                    cmd.Parameters.AddWithValue("Days", Days);
+                    SqlDataAdapter da = new SqlDataAdapter(cmd);
+                    DataTable dt = new DataTable();
+                    da.Fill(dt);
+                    Common.ConvertUTCToLocal(ref dt);
+                    dgvDBADashErrors.AutoGenerateColumns = false;
+                    dgvDBADashErrors.DataSource = dt;
                 }
-                if (InstanceName != "")
-                {
-                    cmd.Parameters.AddWithValue("Instance", InstanceName);
-                }
-                cmd.Parameters.AddWithValue("Days", Days);
-                SqlDataAdapter da = new SqlDataAdapter(cmd);
-                DataTable dt = new DataTable();
-                da.Fill(dt);
-                Common.ConvertUTCToLocal(ref dt);
-                dgvDBADashErrors.AutoGenerateColumns = false;
-                dgvDBADashErrors.DataSource = dt;
             }
 
         }

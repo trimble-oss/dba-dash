@@ -24,68 +24,67 @@ namespace DBADashGUI.Changes
 
         private void refreshFlags()
         {
-            SqlConnection cn = new SqlConnection(ConnectionString);
-            using (cn)
+            using (var cn = new SqlConnection(ConnectionString))
             {
-                cn.Open();
-                SqlCommand cmd = new SqlCommand("dbo.TraceFlags_Get", cn);
-                cmd.CommandType = CommandType.StoredProcedure;
-                cmd.Parameters.AddWithValue("@InstanceIDs", string.Join(",", InstanceIDs));
-                SqlDataReader rdr = cmd.ExecuteReader();
-                var dt = new DataTable();
-                dt.Columns.Add("Instance");
-                string instance = "";
-                string previousInstance = "";
-                DataRow r=null;
-                while (rdr.Read())
-                {
-                    instance = (string)rdr["ConnectionID"];
-                    if (instance != previousInstance)
+                using (var cmd = new SqlCommand("dbo.TraceFlags_Get", cn) { CommandType = CommandType.StoredProcedure }) {
+                    cn.Open();
+                    cmd.Parameters.AddWithValue("@InstanceIDs", string.Join(",", InstanceIDs));
+                    SqlDataReader rdr = cmd.ExecuteReader();
+                    var dt = new DataTable();
+                    dt.Columns.Add("Instance");
+                    string instance = "";
+                    string previousInstance = "";
+                    DataRow r = null;
+                    while (rdr.Read())
                     {
-                        r= dt.NewRow();
-                        dt.Rows.Add(r);
-                        r["Instance"] = instance;
+                        instance = (string)rdr["ConnectionID"];
+                        if (instance != previousInstance)
+                        {
+                            r = dt.NewRow();
+                            dt.Rows.Add(r);
+                            r["Instance"] = instance;
+                        }
+                        if (rdr["TraceFlag"] != DBNull.Value)
+                        {
+                            var flag = (Int16)rdr["TraceFlag"];
+                            var colName = "T" + flag.ToString();
+                            var validFrom = (DateTime)rdr["ValidFrom"];
+                            if (!dt.Columns.Contains(colName))
+                            {
+                                dt.Columns.Add(colName);
+                            }
+                            if (validFrom > DateTime.Parse("1900-01-01"))
+                            {
+                                r[colName] = "Y (" + validFrom.ToLocalTime().ToString("yyyy-MM-dd") + ")";
+                            }
+                            else
+                            {
+                                r[colName] = "Y";
+                            }
+                        }
+                        previousInstance = instance;
                     }
-                    if(rdr["TraceFlag"] != DBNull.Value)
-                    {
-                        var flag = (Int16)rdr["TraceFlag"];
-                        var colName = "T" + flag.ToString();
-                        var validFrom = (DateTime)rdr["ValidFrom"];
-                        if (!dt.Columns.Contains(colName))
-                        {
-                            dt.Columns.Add(colName);
-                        }
-                        if (validFrom > DateTime.Parse("1900-01-01"))
-                        {
-                            r[colName] = "Y (" + validFrom.ToLocalTime().ToString("yyyy-MM-dd") + ")";
-                        }
-                        else
-                        {
-                            r[colName] = "Y";
-                        }
-                    }
-                    previousInstance = instance;
+
+                    dgvFlags.DataSource = dt;
                 }
-                
-                dgvFlags.DataSource = dt;
             }
         }
 
         private void refreshHistory()
         {
-            SqlConnection cn = new SqlConnection(ConnectionString);
-            using (cn)
+            using (var cn = new SqlConnection(ConnectionString))
             {
-                cn.Open();
-                SqlCommand cmd = new SqlCommand("dbo.TraceFlagHistory_Get", cn);
-                cmd.CommandType = CommandType.StoredProcedure;
-                cmd.Parameters.AddWithValue("@InstanceIDs", string.Join(",", InstanceIDs));
-                SqlDataAdapter da = new SqlDataAdapter(cmd);
-                DataTable dt = new DataTable();
-                da.Fill(dt);
-                Common.ConvertUTCToLocal(ref dt);
-                dgv.AutoGenerateColumns = false;
-                dgv.DataSource = dt;
+                using (var cmd = new SqlCommand("dbo.TraceFlagHistory_Get", cn) { CommandType = CommandType.StoredProcedure })
+                {
+                    cn.Open();
+                    cmd.Parameters.AddWithValue("@InstanceIDs", string.Join(",", InstanceIDs));
+                    SqlDataAdapter da = new SqlDataAdapter(cmd);
+                    DataTable dt = new DataTable();
+                    da.Fill(dt);
+                    Common.ConvertUTCToLocal(ref dt);
+                    dgv.AutoGenerateColumns = false;
+                    dgv.DataSource = dt;
+                }
             }
         }
 

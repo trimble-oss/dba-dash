@@ -37,8 +37,8 @@
             this.tsSmooth0 = new System.Windows.Forms.ToolStripMenuItem();
             this.tsTitle = new System.Windows.Forms.ToolStripLabel();
             this.tsMeasures = new System.Windows.Forms.ToolStripDropDownButton();
-            this.chart1 = new DBADashGUI.Performance.CartesianChartWithDataTable();
             this.tsGroup = new System.Windows.Forms.ToolStripDropDownButton();
+            this.chart1 = new DBADashGUI.Performance.CartesianChartWithDataTable();
             this.toolStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -52,7 +52,7 @@
             this.tsGroup});
             this.toolStrip1.Location = new System.Drawing.Point(0, 0);
             this.toolStrip1.Name = "toolStrip1";
-            this.toolStrip1.Size = new System.Drawing.Size(546, 27);
+            this.toolStrip1.Size = new System.Drawing.Size(546, 31);
             this.toolStrip1.TabIndex = 1;
             this.toolStrip1.Text = "toolStrip1";
             // 
@@ -64,7 +64,7 @@
             this.tsOptions.Image = global::DBADashGUI.Properties.Resources.SettingsOutline_16x;
             this.tsOptions.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsOptions.Name = "tsOptions";
-            this.tsOptions.Size = new System.Drawing.Size(34, 24);
+            this.tsOptions.Size = new System.Drawing.Size(34, 28);
             this.tsOptions.Text = "Options";
             // 
             // lineSmoothnesToolStripMenuItem
@@ -106,7 +106,7 @@
             this.tsTitle.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
             this.tsTitle.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
             this.tsTitle.Name = "tsTitle";
-            this.tsTitle.Size = new System.Drawing.Size(33, 24);
+            this.tsTitle.Size = new System.Drawing.Size(33, 28);
             this.tsTitle.Text = "abc";
             // 
             // tsMeasures
@@ -115,17 +115,8 @@
             this.tsMeasures.Image = global::DBADashGUI.Properties.Resources.AddComputedField_16x;
             this.tsMeasures.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsMeasures.Name = "tsMeasures";
-            this.tsMeasures.Size = new System.Drawing.Size(34, 24);
+            this.tsMeasures.Size = new System.Drawing.Size(34, 28);
             this.tsMeasures.Text = "Measure";
-            // 
-            // chart1
-            // 
-            this.chart1.DefaultLineSmoothness = 0.5D;
-            this.chart1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.chart1.Location = new System.Drawing.Point(0, 27);
-            this.chart1.Name = "chart1";
-            this.chart1.Size = new System.Drawing.Size(546, 370);
-            this.chart1.TabIndex = 0;
             // 
             // tsGroup
             // 
@@ -133,8 +124,17 @@
             this.tsGroup.Image = ((System.Drawing.Image)(resources.GetObject("tsGroup.Image")));
             this.tsGroup.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsGroup.Name = "tsGroup";
-            this.tsGroup.Size = new System.Drawing.Size(56, 24);
+            this.tsGroup.Size = new System.Drawing.Size(56, 28);
             this.tsGroup.Text = "1min";
+            // 
+            // chart1
+            // 
+            this.chart1.DefaultLineSmoothness = 0.5D;
+            this.chart1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.chart1.Location = new System.Drawing.Point(0, 31);
+            this.chart1.Name = "chart1";
+            this.chart1.Size = new System.Drawing.Size(546, 366);
+            this.chart1.TabIndex = 0;
             // 
             // ObjectExecutionLineChart
             // 

@@ -19,7 +19,7 @@ namespace DBADashGUI.LastGoodCheckDB
         {
             get{
 
-                threshold.Inherit = chkInherit.Visible ? chkInherit.Checked : false;
+                threshold.Inherit = chkInherit.Visible && chkInherit.Checked;
                 threshold.WarningThreshold = chkEnabled.Checked ? (Int32?)numWarning.Value : null;
                 threshold.CriticalThreshold = chkEnabled.Checked ? (Int32?)numCritical.Value : null;
                 return threshold;

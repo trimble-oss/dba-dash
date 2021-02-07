@@ -345,8 +345,10 @@ namespace DBADashGUI
 
     private SQLTreeItem newFolder(string name,string tag,bool addDummyNode)
         {
-          var n=   new SQLTreeItem(name, TreeType.Folder);
-            n.Tag = tag;
+            var n = new SQLTreeItem(name, TreeType.Folder)
+            {
+                Tag = tag
+            };
             if (addDummyNode)
             {
                 n.AddDummyNode();
@@ -438,9 +440,7 @@ namespace DBADashGUI
             }
         }
 
-
-
-        List<SQLTreeItem> unfilteredNodes = new List<SQLTreeItem>();
+        readonly List<SQLTreeItem> unfilteredNodes = new List<SQLTreeItem>();
 
         public void Filter(string filter)
         {

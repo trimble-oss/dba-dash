@@ -102,20 +102,20 @@ namespace DBADashGUI.Performance
             var cn = new SqlConnection(Common.ConnectionString);
             using (cn)
             {
-                cn.Open();
-                SqlCommand cmd = new SqlCommand("dbo.PerformanceCounter_Get", cn)
+                using (SqlCommand cmd = new SqlCommand("dbo.PerformanceCounter_Get", cn) {  CommandType = CommandType.StoredProcedure })
                 {
-                    CommandType = CommandType.StoredProcedure
-                };
-                cmd.Parameters.AddWithValue("InstanceID", InstanceID);
-                cmd.Parameters.AddWithValue("FromDate", FromDate);
-                cmd.Parameters.AddWithValue("ToDate", ToDate);
-                cmd.Parameters.AddWithValue("CounterID", CounterID);
-                SqlDataAdapter da = new SqlDataAdapter(cmd);
-                DataTable dt = new DataTable();              
-                da.Fill(dt);
-                Common.ConvertUTCToLocal(ref dt);
-                return dt;
+                    cn.Open();
+
+                    cmd.Parameters.AddWithValue("InstanceID", InstanceID);
+                    cmd.Parameters.AddWithValue("FromDate", FromDate);
+                    cmd.Parameters.AddWithValue("ToDate", ToDate);
+                    cmd.Parameters.AddWithValue("CounterID", CounterID);
+                    SqlDataAdapter da = new SqlDataAdapter(cmd);
+                    DataTable dt = new DataTable();
+                    da.Fill(dt);
+                    Common.ConvertUTCToLocal(ref dt);
+                    return dt;
+                }
             }
         }
     }

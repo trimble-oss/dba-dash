@@ -29,36 +29,35 @@ namespace DBADashGUI
 
         private void refreshHistory()
         {
-            SqlConnection cn = new SqlConnection(ConnectionString);
-            using (cn)
+            using (var cn = new SqlConnection(ConnectionString))
             {
-                cn.Open();
-                SqlCommand cmd = new SqlCommand("dbo.HostUpgradeHistory_Get", cn);
-                cmd.CommandType = CommandType.StoredProcedure;
-                cmd.Parameters.AddWithValue("@InstanceIDs", string.Join(",", InstanceIDs));
-                SqlDataAdapter da = new SqlDataAdapter(cmd);
-                DataTable dt = new DataTable();
-                da.Fill(dt);
-                Common.ConvertUTCToLocal(ref dt);
-                dgv.AutoGenerateColumns = false;
-                dgv.DataSource = dt;
+                using (var cmd = new SqlCommand("dbo.HostUpgradeHistory_Get", cn) { CommandType = CommandType.StoredProcedure }) {
+                    cn.Open();
+
+                    cmd.Parameters.AddWithValue("@InstanceIDs", string.Join(",", InstanceIDs));
+                    SqlDataAdapter da = new SqlDataAdapter(cmd);
+                    DataTable dt = new DataTable();
+                    da.Fill(dt);
+                    Common.ConvertUTCToLocal(ref dt);
+                    dgv.AutoGenerateColumns = false;
+                    dgv.DataSource = dt;
+                }
             }
         }
 
         private void refreshHardware()
         {
-            SqlConnection cn = new SqlConnection(ConnectionString);
-            using (cn)
+            using (var cn = new SqlConnection(ConnectionString))
             {
-                cn.Open();
-                SqlCommand cmd = new SqlCommand("dbo.Hardware_Get", cn);
-                cmd.CommandType = CommandType.StoredProcedure;
-                cmd.Parameters.AddWithValue("@InstanceIDs", string.Join(",", InstanceIDs));
-                SqlDataAdapter da = new SqlDataAdapter(cmd);
-                DataTable dt = new DataTable();
-                da.Fill(dt);
-                dgvHardware.AutoGenerateColumns = false;
-                dgvHardware.DataSource = dt;
+                using (var cmd = new SqlCommand("dbo.Hardware_Get", cn) { CommandType = CommandType.StoredProcedure }) {
+                    cn.Open();
+                    cmd.Parameters.AddWithValue("@InstanceIDs", string.Join(",", InstanceIDs));
+                    SqlDataAdapter da = new SqlDataAdapter(cmd);
+                    DataTable dt = new DataTable();
+                    da.Fill(dt);
+                    dgvHardware.AutoGenerateColumns = false;
+                    dgvHardware.DataSource = dt;
+                }
             }
         }
 

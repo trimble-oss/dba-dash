@@ -22,7 +22,7 @@ namespace DBADashGUI.DBFiles
             InitializeComponent();
         }
 
-        string connectionString = Common.ConnectionString;
+        readonly string connectionString = Common.ConnectionString;
 
         private Int32 _databaseID;
         public Int32 DatabaseID
@@ -193,38 +193,37 @@ namespace DBADashGUI.DBFiles
 
         public DataTable DriveSnapshot()
         {
-            SqlConnection cn = new SqlConnection(connectionString);
-            using (cn)
+            using (var cn = new SqlConnection(connectionString))
             {
-                cn.Open();
-                SqlCommand cmd = new SqlCommand("dbo.DBFileSnapshot_Get", cn);
-                cmd.CommandType = CommandType.StoredProcedure;
-                cmd.Parameters.AddWithValue("FromDate", From);
-                cmd.Parameters.AddWithValue("ToDate", To);
-                if (DatabaseID > 0)
-                {
-                    cmd.Parameters.AddWithValue("DatabaseID", DatabaseID);
+                using (SqlCommand cmd = new SqlCommand("dbo.DBFileSnapshot_Get", cn) { CommandType = CommandType.StoredProcedure }) {
+                    cn.Open();
+                    cmd.Parameters.AddWithValue("FromDate", From);
+                    cmd.Parameters.AddWithValue("ToDate", To);
+                    if (DatabaseID > 0)
+                    {
+                        cmd.Parameters.AddWithValue("DatabaseID", DatabaseID);
+                    }
+                    if (Instance != null && Instance.Length > 0)
+                    {
+                        cmd.Parameters.AddWithValue("Instance", Instance);
+                    }
+                    if (DBName != null && DBName.Length > 0)
+                    {
+                        cmd.Parameters.AddWithValue("DBName", DBName);
+                    }
+                    if (DataSpaceID != null)
+                    {
+                        cmd.Parameters.AddWithValue("DataSpaceID", DataSpaceID);
+                    }
+                    if (FileName != null && FileName.Length > 0)
+                    {
+                        cmd.Parameters.AddWithValue("FileName", FileName);
+                    }
+                    SqlDataAdapter da = new SqlDataAdapter(cmd);
+                    DataTable dt = new DataTable();
+                    da.Fill(dt);
+                    return dt;
                 }
-                if (Instance!=null && Instance.Length > 0)
-                {
-                    cmd.Parameters.AddWithValue("Instance", Instance);
-                }
-                if (DBName !=null && DBName.Length > 0)
-                {
-                    cmd.Parameters.AddWithValue("DBName", DBName);
-                }
-                if (DataSpaceID !=null)
-                {
-                    cmd.Parameters.AddWithValue("DataSpaceID", DataSpaceID);
-                }
-                if(FileName!=null && FileName.Length > 0)
-                {
-                    cmd.Parameters.AddWithValue("FileName", FileName);
-                }
-                SqlDataAdapter da = new SqlDataAdapter(cmd);
-                DataTable dt = new DataTable();
-                da.Fill(dt);
-                return dt;
             }
         }
 
@@ -250,9 +249,11 @@ namespace DBADashGUI.DBFiles
 
         private void Custom_Click(object sender, EventArgs e)
         {
-            var frm = new CustomTimePicker();
-            frm.FromDate = From;
-            frm.ToDate = To;
+            var frm = new CustomTimePicker
+            {
+                FromDate = From,
+                ToDate = To
+            };
             frm.ShowDialog();
             if (frm.DialogResult == DialogResult.OK)
             {
@@ -299,9 +300,11 @@ namespace DBADashGUI.DBFiles
                 string fg = r["FileGroup"] == DBNull.Value ? "{NULL}" : (string)r["FileGroup"];
                 Int32? dataspaceid = r["data_space_id"] == DBNull.Value ? null : (Int32?)r["data_space_id"];
                 if (dataspaceid != null) {
-                    var mnu = new ToolStripMenuItem(fg);
-                    mnu.Tag = dataspaceid;
-                    mnu.Checked = dataspaceid == DataSpaceID;
+                    var mnu = new ToolStripMenuItem(fg)
+                    {
+                        Tag = dataspaceid,
+                        Checked = dataspaceid == DataSpaceID
+                    };
                     mnu.Click += Mnu_Click;
                     tsFileGroup.DropDownItems.Add(mnu);
                 }
@@ -317,8 +320,10 @@ namespace DBADashGUI.DBFiles
                 string fileName = r["file_name"] == DBNull.Value ? "" : (string)r["file_name"];
                 if (fileName.Length>0)
                 {
-                    var mnu = new ToolStripMenuItem(fileName);
-                    mnu.Checked = fileName ==FileName;
+                    var mnu = new ToolStripMenuItem(fileName)
+                    {
+                        Checked = fileName == FileName
+                    };
                     mnu.Click += MnuFile_Click;
                     tsFile.DropDownItems.Add(mnu);
                 }

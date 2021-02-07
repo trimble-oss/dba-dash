@@ -134,7 +134,7 @@ namespace DBADashGUI.Checks
             }
         }
 
-        private ToolStripMenuItem ddCustomContext=new ToolStripMenuItem("Custom");
+        private readonly ToolStripMenuItem ddCustomContext=new ToolStripMenuItem("Custom");
         private ToolStripMenuItem ddCustomTest = new ToolStripMenuItem("Custom");
         private string context = null;
         private string test = null;
@@ -143,30 +143,30 @@ namespace DBADashGUI.Checks
         {
             context = null;
             contextToolStripMenuItem.DropDownItems.Clear();
-            var cn = new SqlConnection(Common.ConnectionString);
-            using (cn)
-            {
-                cn.Open();
-                SqlCommand cmd = new SqlCommand("dbo.CustomCheckContext_Get", cn);
-                cmd.CommandType = CommandType.StoredProcedure;
-                cmd.Parameters.AddWithValue("InstanceIDs", String.Join(",", InstanceIDs));
-                cmd.CommandType = CommandType.StoredProcedure;
 
-                var rdr = cmd.ExecuteReader();
-                Int32 i=0;            
-                while (rdr.Read()){
-                    if (i >= 30)
+            using (var cn = new SqlConnection(Common.ConnectionString))
+            {
+                using (SqlCommand cmd = new SqlCommand("dbo.CustomCheckContext_Get", cn) { CommandType = CommandType.StoredProcedure })
+                {
+                    cn.Open();
+                    cmd.Parameters.AddWithValue("InstanceIDs", String.Join(",", InstanceIDs));
+                    var rdr = cmd.ExecuteReader();
+                    Int32 i = 0;
+                    while (rdr.Read())
                     {
-                        break;
+                        if (i >= 30)
+                        {
+                            break;
+                        }
+                        var ddContext = new ToolStripMenuItem((string)rdr[0]);
+                        ddContext.Click += DdContext_Click;
+                        // ddContext.CheckOnClick = true;
+                        contextToolStripMenuItem.DropDownItems.Add(ddContext);
+                        i += 1;
                     }
-                    var ddContext = new  ToolStripMenuItem((string)rdr[0]);
-                    ddContext.Click += DdContext_Click;
-                   // ddContext.CheckOnClick = true;
-                    contextToolStripMenuItem.DropDownItems.Add(ddContext);
-                    i += 1;
+                    contextToolStripMenuItem.DropDownItems.Add(new ToolStripSeparator());
+                    contextToolStripMenuItem.DropDownItems.Add(ddCustomContext);
                 }
-                contextToolStripMenuItem.DropDownItems.Add(new ToolStripSeparator());             
-                contextToolStripMenuItem.DropDownItems.Add(ddCustomContext);
             }
         }
 
@@ -212,33 +212,32 @@ namespace DBADashGUI.Checks
         {
             test = null;
             testToolStripMenuItem.DropDownItems.Clear();
-            var cn = new SqlConnection(Common.ConnectionString);
-            using (cn)
+            
+            using (var cn = new SqlConnection(Common.ConnectionString))
             {
-                cn.Open();
-                SqlCommand cmd = new SqlCommand("dbo.CustomCheckTest_Get", cn);
-                cmd.CommandType = CommandType.StoredProcedure;
-                cmd.Parameters.AddWithValue("InstanceIDs", String.Join(",", InstanceIDs));
-                cmd.CommandType = CommandType.StoredProcedure;
+                using (SqlCommand cmd = new SqlCommand("dbo.CustomCheckTest_Get", cn) { CommandType = CommandType.StoredProcedure }) {
+                    cn.Open();                  
+                    cmd.Parameters.AddWithValue("InstanceIDs", String.Join(",", InstanceIDs));
 
-                var rdr = cmd.ExecuteReader();
-                Int32 i = 0;
-                while (rdr.Read())
-                {
-                    if (i >= 30)
+                    var rdr = cmd.ExecuteReader();
+                    Int32 i = 0;
+                    while (rdr.Read())
                     {
-                        break;
+                        if (i >= 30)
+                        {
+                            break;
+                        }
+                        var ddTest = new ToolStripMenuItem((string)rdr[0]);
+                        ddTest.Click += DdTest_Click; ;
+                        ddTest.CheckOnClick = true;
+                        testToolStripMenuItem.DropDownItems.Add(ddTest);
+                        i += 1;
                     }
-                    var ddTest = new ToolStripMenuItem((string)rdr[0]);
-                    ddTest.Click += DdTest_Click; ;
-                    ddTest.CheckOnClick = true;
-                    testToolStripMenuItem.DropDownItems.Add(ddTest);
-                    i += 1;
+                    testToolStripMenuItem.DropDownItems.Add(new ToolStripSeparator());
+                    ddCustomTest = new ToolStripMenuItem("Custom");
+                    ddCustomTest.Click += DdCustomTest_Click;
+                    testToolStripMenuItem.DropDownItems.Add(ddCustomTest);
                 }
-                testToolStripMenuItem.DropDownItems.Add(new ToolStripSeparator());
-                ddCustomTest = new ToolStripMenuItem("Custom");
-                ddCustomTest.Click += DdCustomTest_Click;
-                testToolStripMenuItem.DropDownItems.Add(ddCustomTest);
             }
         }
 
@@ -284,34 +283,33 @@ namespace DBADashGUI.Checks
         }
 
         private void refreshCustomChecks()
-        {
-            var cn = new SqlConnection(Common.ConnectionString);
-            using (cn)
+        {        
+            using (var cn = new SqlConnection(Common.ConnectionString))
             {
-                cn.Open();
-                SqlCommand cmd = new SqlCommand("dbo.CustomCheck_Get", cn);
-                cmd.CommandType = CommandType.StoredProcedure;
-                cmd.Parameters.AddWithValue("InstanceIDs", String.Join(",", InstanceIDs));
-                cmd.Parameters.AddWithValue("IncludeNA", IncludeNA);
-                cmd.Parameters.AddWithValue("IncludeOK", IncludeOK);
-                cmd.Parameters.AddWithValue("IncludeWarning", IncludeWarning);
-                cmd.Parameters.AddWithValue("IncludeCritical", IncludeCritical);
-                if (context != null)
-                {
-                    cmd.Parameters.AddWithValue("Context", context);
+                using (SqlCommand cmd = new SqlCommand("dbo.CustomCheck_Get", cn) { CommandType = CommandType.StoredProcedure }) {
+                    cn.Open();
+                   
+                    cmd.Parameters.AddWithValue("InstanceIDs", String.Join(",", InstanceIDs));
+                    cmd.Parameters.AddWithValue("IncludeNA", IncludeNA);
+                    cmd.Parameters.AddWithValue("IncludeOK", IncludeOK);
+                    cmd.Parameters.AddWithValue("IncludeWarning", IncludeWarning);
+                    cmd.Parameters.AddWithValue("IncludeCritical", IncludeCritical);
+                    if (context != null)
+                    {
+                        cmd.Parameters.AddWithValue("Context", context);
+                    }
+                    if (test != null)
+                    {
+                        cmd.Parameters.AddWithValue("Test", test);
+                    }
+                    SqlDataAdapter da = new SqlDataAdapter(cmd);
+                    DataTable dt = new DataTable();
+                    da.Fill(dt);
+                    Common.ConvertUTCToLocal(ref dt);
+                    dgvCustom.AutoGenerateColumns = false;
+                    dgvCustom.DataSource = dt;
+                    HistoryView(false);
                 }
-                if (test != null)
-                {
-                    cmd.Parameters.AddWithValue("Test", test);
-                }
-                cmd.CommandType = CommandType.StoredProcedure;
-                SqlDataAdapter da = new SqlDataAdapter(cmd);
-                DataTable dt = new DataTable();
-                da.Fill(dt);
-                Common.ConvertUTCToLocal(ref dt);
-                dgvCustom.AutoGenerateColumns = false;
-                dgvCustom.DataSource = dt;
-                HistoryView(false);
             }
         }
 
@@ -326,30 +324,30 @@ namespace DBADashGUI.Checks
 
         private void getHistory(Int32 InstanceID,string test,string context)
         {
-            var cn = new SqlConnection(Common.ConnectionString);
-            using (cn)
+            using (var cn = new SqlConnection(Common.ConnectionString))
             {
-                cn.Open();
-                SqlCommand cmd = new SqlCommand("dbo.CustomChecksHistory_Get", cn);
-                cmd.CommandType = CommandType.StoredProcedure;
-                cmd.Parameters.AddWithValue("InstanceID", InstanceID);
+                using (SqlCommand cmd = new SqlCommand("dbo.CustomChecksHistory_Get", cn) { CommandType = CommandType.StoredProcedure })
+                {
+                    cn.Open();
+                    cmd.Parameters.AddWithValue("InstanceID", InstanceID);
 
-                if (context != null)
-                {
-                    cmd.Parameters.AddWithValue("Context", context);
+                    if (context != null)
+                    {
+                        cmd.Parameters.AddWithValue("Context", context);
+                    }
+                    if (test != null)
+                    {
+                        cmd.Parameters.AddWithValue("Test", test);
+                    }
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    SqlDataAdapter da = new SqlDataAdapter(cmd);
+                    DataTable dt = new DataTable();
+                    da.Fill(dt);
+                    Common.ConvertUTCToLocal(ref dt);
+                    dgvCustom.AutoGenerateColumns = false;
+                    dgvCustom.DataSource = dt;
+                    HistoryView(true);
                 }
-                if (test != null)
-                {
-                    cmd.Parameters.AddWithValue("Test", test);
-                }
-                cmd.CommandType = CommandType.StoredProcedure;
-                SqlDataAdapter da = new SqlDataAdapter(cmd);
-                DataTable dt = new DataTable();
-                da.Fill(dt);
-                Common.ConvertUTCToLocal(ref dt);
-                dgvCustom.AutoGenerateColumns = false;
-                dgvCustom.DataSource = dt;
-                HistoryView(true);
             }
         }
 

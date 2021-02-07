@@ -80,12 +80,14 @@ namespace DBADashGUI.Backups
         public BackupThresholds BackupThreshold { 
             get
             {
-                var thresholds = new BackupThresholds();
-                thresholds.DatabaseID = DatabaseID;
-                thresholds.InstanceID = InstanceID;
-                thresholds.Inherit = chkBackupInherit.Checked;
-                thresholds.UseFG = chkUseFG.Checked;
-                thresholds.UsePartial = chkUsePartial.Checked;
+                var thresholds = new BackupThresholds
+                {
+                    DatabaseID = DatabaseID,
+                    InstanceID = InstanceID,
+                    Inherit = chkBackupInherit.Checked,
+                    UseFG = chkUseFG.Checked,
+                    UsePartial = chkUsePartial.Checked
+                };
                 if (chkFull.Checked) { thresholds.FullCritical = (Int32?)numFullCritical.Value; }
                 if (chkFull.Checked) { thresholds.FullWarning = (Int32?)numFullWarning.Value; }
                 if (chkDiff.Checked) { thresholds.DiffCritical = (Int32?)numDiffCritical.Value; }

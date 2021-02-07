@@ -29,19 +29,19 @@ namespace DBADashGUI
 
         private void refreshVersion()
         {
-            SqlConnection cn = new SqlConnection(ConnectionString);
-            using (cn)
+            using (var cn = new SqlConnection(ConnectionString))
             {
-                cn.Open();
-                SqlCommand cmd = new SqlCommand("dbo.InstanceVersionInfo_Get", cn);
-                cmd.CommandType = CommandType.StoredProcedure;
-                cmd.Parameters.AddWithValue("@InstanceIDs", string.Join(",", InstanceIDs));
-                SqlDataAdapter da = new SqlDataAdapter(cmd);
-                DataTable dt = new DataTable();
-                da.Fill(dt);
-                Common.ConvertUTCToLocal(ref dt);
-                dgvVersion.AutoGenerateColumns = false;
-                dgvVersion.DataSource = dt;
+                using (SqlCommand cmd = new SqlCommand("dbo.InstanceVersionInfo_Get", cn) { CommandType = CommandType.StoredProcedure })
+                {
+                    cn.Open();
+                    cmd.Parameters.AddWithValue("@InstanceIDs", string.Join(",", InstanceIDs));
+                    SqlDataAdapter da = new SqlDataAdapter(cmd);
+                    DataTable dt = new DataTable();
+                    da.Fill(dt);
+                    Common.ConvertUTCToLocal(ref dt);
+                    dgvVersion.AutoGenerateColumns = false;
+                    dgvVersion.DataSource = dt;
+                }
             }
         }
 
@@ -50,16 +50,17 @@ namespace DBADashGUI
             SqlConnection cn = new SqlConnection(ConnectionString);
             using (cn)
             {
-                cn.Open();
-                SqlCommand cmd = new SqlCommand("dbo.SQLPatching_Get", cn);
-                cmd.CommandType = CommandType.StoredProcedure;
-                cmd.Parameters.AddWithValue("@InstanceIDs", string.Join(",", InstanceIDs));
-                SqlDataAdapter da = new SqlDataAdapter(cmd);
-                DataTable dt = new DataTable();
-                da.Fill(dt);
-                Common.ConvertUTCToLocal(ref dt);
-                dgv.AutoGenerateColumns = false;
-                dgv.DataSource = dt;
+                using (var cmd = new SqlCommand("dbo.SQLPatching_Get", cn) { CommandType = CommandType.StoredProcedure })
+                {
+                    cn.Open();
+                    cmd.Parameters.AddWithValue("@InstanceIDs", string.Join(",", InstanceIDs));
+                    SqlDataAdapter da = new SqlDataAdapter(cmd);
+                    DataTable dt = new DataTable();
+                    da.Fill(dt);
+                    Common.ConvertUTCToLocal(ref dt);
+                    dgv.AutoGenerateColumns = false;
+                    dgv.DataSource = dt;
+                }
             }
         }
 

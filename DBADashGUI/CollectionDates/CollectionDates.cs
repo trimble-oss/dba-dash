@@ -73,23 +73,23 @@ namespace DBADashGUI.CollectionDates
             UseWaitCursor = true;
             if (ConnectionString != null)
             {
-                SqlConnection cn = new SqlConnection(ConnectionString);
-                using (cn)
+                using (var cn = new SqlConnection(ConnectionString))
                 {
-                    cn.Open();
-                    SqlCommand cmd = new SqlCommand("dbo.CollectionDates_Get", cn);
-                    cmd.CommandType = CommandType.StoredProcedure;
-                    cmd.Parameters.AddWithValue("InstanceIDs", string.Join(",", InstanceIDs));
-                    cmd.Parameters.AddWithValue("IncludeCritical", IncludeCritical);
-                    cmd.Parameters.AddWithValue("IncludeWarning", IncludeWarning);
-                    cmd.Parameters.AddWithValue("IncludeNA", IncludeNA);
-                    cmd.Parameters.AddWithValue("IncludeOK", IncludeOK);
-                    SqlDataAdapter da = new SqlDataAdapter(cmd);
-                    DataTable dt = new DataTable();                   
-                    da.Fill(dt);
-                    Common.ConvertUTCToLocal(ref dt);
-                    dgvCollectionDates.AutoGenerateColumns = false;
-                    dgvCollectionDates.DataSource = new DataView(dt);
+                    using (SqlCommand cmd = new SqlCommand("dbo.CollectionDates_Get", cn) { CommandType = CommandType.StoredProcedure })
+                    {
+                        cn.Open();
+                        cmd.Parameters.AddWithValue("InstanceIDs", string.Join(",", InstanceIDs));
+                        cmd.Parameters.AddWithValue("IncludeCritical", IncludeCritical);
+                        cmd.Parameters.AddWithValue("IncludeWarning", IncludeWarning);
+                        cmd.Parameters.AddWithValue("IncludeNA", IncludeNA);
+                        cmd.Parameters.AddWithValue("IncludeOK", IncludeOK);
+                        SqlDataAdapter da = new SqlDataAdapter(cmd);
+                        DataTable dt = new DataTable();
+                        da.Fill(dt);
+                        Common.ConvertUTCToLocal(ref dt);
+                        dgvCollectionDates.AutoGenerateColumns = false;
+                        dgvCollectionDates.DataSource = new DataView(dt);
+                    }
                 }
 
             }
@@ -118,9 +118,11 @@ namespace DBADashGUI.CollectionDates
 
         private void ConfigureThresholds(Int32 InstanceID, DataRowView row)
         {
-        
-            var frm = new CollectionDatesThresholds();
-            frm.InstanceID = InstanceID;
+
+            var frm = new CollectionDatesThresholds
+            {
+                InstanceID = InstanceID
+            };
             if (row["WarningThreshold"] == DBNull.Value || row["CriticalThreshold"] == DBNull.Value)
             {
                 frm.Disabled = true;

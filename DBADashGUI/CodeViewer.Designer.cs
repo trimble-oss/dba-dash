@@ -39,10 +39,10 @@
             // 
             this.txtCode.Dock = System.Windows.Forms.DockStyle.Fill;
             this.txtCode.IsReadOnly = false;
-            this.txtCode.Location = new System.Drawing.Point(0, 27);
+            this.txtCode.Location = new System.Drawing.Point(0, 31);
             this.txtCode.Name = "txtCode";
             this.txtCode.ShowVRuler = false;
-            this.txtCode.Size = new System.Drawing.Size(800, 423);
+            this.txtCode.Size = new System.Drawing.Size(800, 419);
             this.txtCode.TabIndex = 0;
             // 
             // toolStrip1
@@ -52,7 +52,7 @@
             this.bttnCopy});
             this.toolStrip1.Location = new System.Drawing.Point(0, 0);
             this.toolStrip1.Name = "toolStrip1";
-            this.toolStrip1.Size = new System.Drawing.Size(800, 27);
+            this.toolStrip1.Size = new System.Drawing.Size(800, 31);
             this.toolStrip1.TabIndex = 1;
             this.toolStrip1.Text = "toolStrip1";
             // 
@@ -62,7 +62,7 @@
             this.bttnCopy.Image = global::DBADashGUI.Properties.Resources.ASX_Copy_blue_16x;
             this.bttnCopy.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.bttnCopy.Name = "bttnCopy";
-            this.bttnCopy.Size = new System.Drawing.Size(29, 24);
+            this.bttnCopy.Size = new System.Drawing.Size(29, 28);
             this.bttnCopy.Text = "toolStripButton1";
             this.bttnCopy.Click += new System.EventHandler(this.bttnCopy_Click);
             // 

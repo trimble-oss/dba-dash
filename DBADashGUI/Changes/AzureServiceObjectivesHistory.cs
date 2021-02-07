@@ -28,35 +28,35 @@ namespace DBADashGUI.Changes
 
         private void refreshDB()
         {
-            SqlConnection cn = new SqlConnection(Common.ConnectionString);
-            using (cn)
+            using (var cn = new SqlConnection(Common.ConnectionString))
             {
-                SqlCommand cmd = new SqlCommand("dbo.AzureServiceObjectivesHistory_Get", cn);
-                cmd.Parameters.AddWithValue("InstanceIDs", string.Join(",", InstanceIDs));
-                cmd.CommandType = CommandType.StoredProcedure;
-                SqlDataAdapter da = new SqlDataAdapter(cmd);
-                DataTable dt = new DataTable();
-                da.Fill(dt);
-                Common.ConvertUTCToLocal(ref dt);
-                dgv.AutoGenerateColumns = false;
-                dgv.DataSource = dt;
+                using (SqlCommand cmd = new SqlCommand("dbo.AzureServiceObjectivesHistory_Get", cn) { CommandType = CommandType.StoredProcedure })
+                {
+                    cmd.Parameters.AddWithValue("InstanceIDs", string.Join(",", InstanceIDs));
+                    SqlDataAdapter da = new SqlDataAdapter(cmd);
+                    DataTable dt = new DataTable();
+                    da.Fill(dt);
+                    Common.ConvertUTCToLocal(ref dt);
+                    dgv.AutoGenerateColumns = false;
+                    dgv.DataSource = dt;
+                }
             }
         }
 
         private void refreshPool()
         {
-            SqlConnection cn = new SqlConnection(Common.ConnectionString);
-            using (cn)
+            using (var cn = new SqlConnection(Common.ConnectionString))
             {
-                SqlCommand cmd = new SqlCommand("dbo.AzureDBElasticPoolHistory_Get", cn);
-                cmd.Parameters.AddWithValue("InstanceIDs", string.Join(",", InstanceIDs));
-                cmd.CommandType = CommandType.StoredProcedure;
-                SqlDataAdapter da = new SqlDataAdapter(cmd);
-                DataTable dt = new DataTable();
-                da.Fill(dt);
-                Common.ConvertUTCToLocal(ref dt);
-                dgvPool.AutoGenerateColumns = false;
-                dgvPool.DataSource = dt;
+                using (SqlCommand cmd = new SqlCommand("dbo.AzureDBElasticPoolHistory_Get", cn) { CommandType = CommandType.StoredProcedure })
+                {
+                    cmd.Parameters.AddWithValue("InstanceIDs", string.Join(",", InstanceIDs));
+                    SqlDataAdapter da = new SqlDataAdapter(cmd);
+                    DataTable dt = new DataTable();
+                    da.Fill(dt);
+                    Common.ConvertUTCToLocal(ref dt);
+                    dgvPool.AutoGenerateColumns = false;
+                    dgvPool.DataSource = dt;
+                }
             }
         }
 

@@ -67,22 +67,22 @@ namespace DBADashGUI.LogShipping
         {
             if (ConnectionString != null)
             {
-                SqlConnection cn = new SqlConnection(ConnectionString);
-                using (cn)
+                using (var cn = new SqlConnection(ConnectionString))
                 {
-                    cn.Open();
-                    SqlCommand cmd = new SqlCommand("dbo.LogShipping_Get", cn);
-                    cmd.Parameters.AddWithValue("InstanceIDs", string.Join(",", InstanceIDs));
-                    cmd.Parameters.AddWithValue("IncludeCritical", IncludeCritical);
-                    cmd.Parameters.AddWithValue("IncludeWarning", IncludeWarning);
-                    cmd.Parameters.AddWithValue("IncludeNA", IncludeNA);
-                    cmd.Parameters.AddWithValue("IncludeOK", IncludeOK);
-                    cmd.CommandType = CommandType.StoredProcedure;
-                    SqlDataAdapter da = new SqlDataAdapter(cmd);
-                    DataTable dt = new DataTable();
-                    da.Fill(dt);
-                    dgvLogShipping.AutoGenerateColumns = false;
-                    dgvLogShipping.DataSource = new DataView(dt);
+                    using (SqlCommand cmd = new SqlCommand("dbo.LogShipping_Get", cn) { CommandType = CommandType.StoredProcedure })
+                    {
+                        cn.Open();
+                        cmd.Parameters.AddWithValue("InstanceIDs", string.Join(",", InstanceIDs));
+                        cmd.Parameters.AddWithValue("IncludeCritical", IncludeCritical);
+                        cmd.Parameters.AddWithValue("IncludeWarning", IncludeWarning);
+                        cmd.Parameters.AddWithValue("IncludeNA", IncludeNA);
+                        cmd.Parameters.AddWithValue("IncludeOK", IncludeOK);
+                        SqlDataAdapter da = new SqlDataAdapter(cmd);
+                        DataTable dt = new DataTable();
+                        da.Fill(dt);
+                        dgvLogShipping.AutoGenerateColumns = false;
+                        dgvLogShipping.DataSource = new DataView(dt);
+                    }
                 }
             }
             configureInstanceThresholdsToolStripMenuItem.Enabled = InstanceIDs.Count == 1;
@@ -128,10 +128,12 @@ namespace DBADashGUI.LogShipping
 
         public void ConfigureThresholds(Int32 InstanceID,Int32 DatabaseID)
         {
-            var frm = new LogShippingThresholdsConfig();
-            frm.InstanceID = InstanceID;
-            frm.DatabaseID = DatabaseID;
-            frm.ConnectionString = ConnectionString;
+            var frm = new LogShippingThresholdsConfig
+            {
+                InstanceID = InstanceID,
+                DatabaseID = DatabaseID,
+                ConnectionString = ConnectionString
+            };
             frm.ShowDialog();
             if(frm.DialogResult == DialogResult.OK)
             {

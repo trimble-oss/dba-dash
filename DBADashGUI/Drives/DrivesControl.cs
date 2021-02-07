@@ -72,29 +72,6 @@ namespace DBADashGUI.Properties
         public bool gridview = false;
 
 
-        private void setLinkText(DriveThreshold drive,Label lbl)
-        {
-            if (drive == null)
-            {
-                lbl.Text = "{Not Configured}";
-                return;
-            }
-            var pctGB = drive.DriveCheckType == Drive.DriveCheckTypeEnum.Percent ? "%" : "GB";
-            var warning = drive.DriveCheckType == Drive.DriveCheckTypeEnum.Percent ? drive.WarningThreshold * 100 : drive.WarningThreshold;
-            var critical = drive.DriveCheckType == Drive.DriveCheckTypeEnum.Percent ? drive.CriticalThreshold * 100 : drive.CriticalThreshold;
-            if (drive.Inherited)
-            {
-                lbl.Text = "Inherited";
-            }
-            else if(drive.DriveCheckType == DriveThreshold.DriveCheckTypeEnum.None)
-            {
-                lbl.Text = "Disabled";
-            }
-            else
-            {
-                lbl.Text = string.Format("Warning: {0:0.0}{1}, Critical:{2:0.0}{1}", warning, pctGB, critical);
-            }
-        }
 
         DataView dvDrives;
 
@@ -105,30 +82,30 @@ namespace DBADashGUI.Properties
             SqlConnection cn = new SqlConnection(ConnectionString);
             using (cn)
             {
-                cn.Open();
-                SqlCommand cmd = new SqlCommand("dbo.Drives_Get", cn);
-                cmd.CommandType = CommandType.StoredProcedure;
-                cmd.Parameters.AddWithValue("InstanceIDs", String.Join(",",InstanceIDs));
-                cmd.Parameters.AddWithValue("IncludeCritical", IncludeCritical);
-                cmd.Parameters.AddWithValue("IncludeWarning", IncludeWarning);
-                cmd.Parameters.AddWithValue("IncludeNA", IncludeNA);
-                cmd.Parameters.AddWithValue("IncludeOK", IncludeOK);
-                cmd.Parameters.AddWithValue("IncludeMetrics", includeAllMetricsToolStripMenuItem.Checked);
-                SqlDataAdapter da = new SqlDataAdapter(cmd);
-                DataTable dt = new DataTable();
-                da.Fill(dt);
-                Common.ConvertUTCToLocal(ref dt);
-                dvDrives = new DataView(dt);
+                using (SqlCommand cmd = new SqlCommand("dbo.Drives_Get", cn) { CommandType = CommandType.StoredProcedure }) {
+                    cn.Open();
+                    cmd.Parameters.AddWithValue("InstanceIDs", String.Join(",", InstanceIDs));
+                    cmd.Parameters.AddWithValue("IncludeCritical", IncludeCritical);
+                    cmd.Parameters.AddWithValue("IncludeWarning", IncludeWarning);
+                    cmd.Parameters.AddWithValue("IncludeNA", IncludeNA);
+                    cmd.Parameters.AddWithValue("IncludeOK", IncludeOK);
+                    cmd.Parameters.AddWithValue("IncludeMetrics", includeAllMetricsToolStripMenuItem.Checked);
+                    SqlDataAdapter da = new SqlDataAdapter(cmd);
+                    DataTable dt = new DataTable();
+                    da.Fill(dt);
+                    Common.ConvertUTCToLocal(ref dt);
+                    dvDrives = new DataView(dt);
 
-                if (dt.Rows.Count > DrivesViewMaxRows || gridview)
-                {
-                    ShowGridView();
+                    if (dt.Rows.Count > DrivesViewMaxRows || gridview)
+                    {
+                        ShowGridView();
+                    }
+                    else
+                    {
+                        ShowDrivesView();
+                    }
+
                 }
-                else
-                {
-                    ShowDrivesView();
-                }
-          
             }
             configureInstanceThresholdsToolStripMenuItem.Enabled = InstanceIDs.Count == 1;
         }
@@ -139,13 +116,20 @@ namespace DBADashGUI.Properties
             gridview = true;
             pnlDrives.Controls.Clear();
             pnlSpacing.Visible = false;
-            dgv = new DataGridView();
-            dgv.AllowUserToAddRows = false;
-            dgv.AllowUserToDeleteRows = false;
-            dgv.RowHeadersVisible = false;
-            dgv.AllowUserToResizeColumns = true;
-            dgv.ReadOnly = true;
-            dgv.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            dgv = new DataGridView
+            {
+                AllowUserToAddRows = false,
+                AllowUserToDeleteRows = false,
+                RowHeadersVisible = false,
+                AllowUserToResizeColumns = true,
+                ReadOnly = true,
+                AutoGenerateColumns = false,
+                ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize,
+                DataSource = dvDrives,
+                Dock = DockStyle.Fill,
+                ClipboardCopyMode = DataGridViewClipboardCopyMode.EnableAlwaysIncludeHeaderText,
+                AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.DisplayedCells
+            };
             dgv.Columns.Add(new DataGridViewTextBoxColumn() { Name = "Instance", DataPropertyName = "Instance", HeaderText = "Instance" });
             dgv.Columns.Add(new DataGridViewTextBoxColumn() { Name = "Name", DataPropertyName = "Name", HeaderText = "Name" });
             dgv.Columns.Add(new DataGridViewTextBoxColumn() { Name = "Label", DataPropertyName = "Label", HeaderText = "Label" });
@@ -171,13 +155,9 @@ namespace DBADashGUI.Properties
             }
             dgv.Columns.Add(new DataGridViewLinkColumn() { Name = "History", HeaderText = "History", UseColumnTextForLinkValue = true, Text = "History" });
             dgv.Columns.Add(new DataGridViewLinkColumn() { Name = "Configure", HeaderText = "Configure", UseColumnTextForLinkValue = true, Text = "Configure" });
-            dgv.AutoGenerateColumns = false;
             dgv.CellContentClick += Dgv_CellContentClick;
             dgv.RowsAdded += Dgv_RowsAdded;
-            dgv.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.DisplayedCells;
-            dgv.DataSource = dvDrives;
-            dgv.Dock =  DockStyle.Fill;
-            dgv.ClipboardCopyMode = DataGridViewClipboardCopyMode.EnableAlwaysIncludeHeaderText;
+
             pnlDrives.Controls.Add(dgv);
             tsGridView.Enabled = false;
             tsDrivesView.Enabled = dvDrives.Table.Rows.Count<= DrivesViewMaxRows;
@@ -230,9 +210,11 @@ namespace DBADashGUI.Properties
                 else if (dgv.Columns[e.ColumnIndex].Name == "History")
                 {
                     DataRowView row = (DataRowView)dgv.Rows[e.RowIndex].DataBoundItem;
-                    var frm = new DriveHistoryView();
-                    frm.DriveID = (Int32)row["DriveID"];
-                    frm.Text = row["Instance"] + " | " + (string)row["Name"] + " " + (row["Label"] == DBNull.Value ? "" : (string)row["Label"]);
+                    var frm = new DriveHistoryView
+                    {
+                        DriveID = (Int32)row["DriveID"],
+                        Text = row["Instance"] + " | " + (string)row["Name"] + " " + (row["Label"] == DBNull.Value ? "" : (string)row["Label"])
+                    };
                     frm.Show();
                 }
             }
@@ -275,8 +257,10 @@ namespace DBADashGUI.Properties
         public void Configure(Int32 InstanceID,Int32 DriveID)
         {
             var drv = DriveThreshold.GetDriveThreshold(InstanceID, DriveID,ConnectionString);
-            var frm = new DriveThresholdConfig();
-            frm.DriveThreshold = drv;
+            var frm = new DriveThresholdConfig
+            {
+                DriveThreshold = drv
+            };
             frm.ShowDialog();
             if (frm.DialogResult == DialogResult.OK)
             {

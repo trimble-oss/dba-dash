@@ -78,78 +78,77 @@ namespace DBADashGUI.Changes
 
         private void refreshDBSummary()
         {
-            SqlConnection cn = new SqlConnection(Common.ConnectionString);
-            using (cn)
+            using (var cn = new SqlConnection(Common.ConnectionString))
             {
-                SqlCommand cmd = new SqlCommand("dbo.DBSummary_Get", cn);
-                cmd.CommandType = CommandType.StoredProcedure;
-                cmd.Parameters.AddWithValue("InstanceIDs", String.Join(",", InstanceIDs));
-                SqlDataAdapter da = new SqlDataAdapter(cmd);
-                DataTable dt = new DataTable();
-                da.Fill(dt);
-                dgv.DataSource = dt;
+                using (SqlCommand cmd = new SqlCommand("dbo.DBSummary_Get", cn) { CommandType = CommandType.StoredProcedure })
+                {
+                    cmd.Parameters.AddWithValue("InstanceIDs", String.Join(",", InstanceIDs));
+                    SqlDataAdapter da = new SqlDataAdapter(cmd);
+                    DataTable dt = new DataTable();
+                    da.Fill(dt);
+                    dgv.DataSource = dt;
+                }
             }
         }
 
         private void refreshDBInfo()
         {
-            SqlConnection cn = new SqlConnection(Common.ConnectionString);
-            using (cn)
+            using (var cn = new SqlConnection(Common.ConnectionString))
             {
-                SqlCommand cmd = new SqlCommand("dbo.DatabasesAllInfo_Get", cn);
-                cmd.CommandType = CommandType.StoredProcedure;
-                cmd.Parameters.AddWithValue("InstanceIDs", String.Join(",", InstanceIDs));
-                if (DatabaseID > 0)
+                using (SqlCommand cmd = new SqlCommand("dbo.DatabasesAllInfo_Get", cn) { CommandType = CommandType.StoredProcedure })
                 {
-                    cmd.Parameters.AddWithValue("DatabaseID", DatabaseID);
+                    cmd.Parameters.AddWithValue("InstanceIDs", String.Join(",", InstanceIDs));
+                    if (DatabaseID > 0)
+                    {
+                        cmd.Parameters.AddWithValue("DatabaseID", DatabaseID);
+                    }
+                    SqlDataAdapter da = new SqlDataAdapter(cmd);
+                    DataTable dt = new DataTable();
+                    da.Fill(dt);
+                    if (dt.Rows.Count == 1)
+                    {
+                        pivot(ref dt);
+                    }
+                    else
+                    {
+                        dgv.DataSource = dt;
+                        dgv.Columns["InstanceID"].Visible = false;
+                        dgv.Columns["DatabaseID"].Visible = false;
+                    }
                 }
-                SqlDataAdapter da = new SqlDataAdapter(cmd);
-                DataTable dt = new DataTable();
-                da.Fill(dt);
-                if (dt.Rows.Count == 1)
-                {
-                    pivot(ref dt);
-                }
-                else
-                {
-                    dgv.DataSource = dt;
-                    dgv.Columns["InstanceID"].Visible = false;
-                    dgv.Columns["DatabaseID"].Visible = false;
-                }
-
             }
         }
 
         private void refreshHistory()
         {
-            SqlConnection cn = new SqlConnection(Common.ConnectionString);
-            using (cn)
+            using (var cn = new SqlConnection(Common.ConnectionString))
             {
-                SqlCommand cmd = new SqlCommand("dbo.DBOptionsHistory_Get", cn);
-                cmd.CommandType = CommandType.StoredProcedure;
-                cmd.Parameters.AddWithValue("InstanceIDs", String.Join(",", InstanceIDs));
-                if (DatabaseID > 0)
+                using (SqlCommand cmd = new SqlCommand("dbo.DBOptionsHistory_Get", cn) { CommandType = CommandType.StoredProcedure })
                 {
-                    cmd.Parameters.AddWithValue("DatabaseID", DatabaseID);
-                }
-                cmd.Parameters.AddWithValue("ExcludeStateChanges", excludeStateChangesToolStripMenuItem.Checked);
-                SqlDataAdapter da = new SqlDataAdapter(cmd);
-                DataTable dt = new DataTable();
-                da.Fill(dt);
-                Common.ConvertUTCToLocal(ref dt);
-                foreach(DataRow r in dt.Rows)
-                {
-                    if(r["OldValue"].GetType() == typeof(byte[])){
-                        r["OldValue"] = Common.ByteArrayToString((byte[])r["OldValue"]);
-                    }
-                    if (r["NewValue"].GetType() == typeof(byte[]))
+                    cmd.Parameters.AddWithValue("InstanceIDs", String.Join(",", InstanceIDs));
+                    if (DatabaseID > 0)
                     {
-                        r["NewValue"] = Common.ByteArrayToString((byte[])r["NewValue"]);
+                        cmd.Parameters.AddWithValue("DatabaseID", DatabaseID);
                     }
+                    cmd.Parameters.AddWithValue("ExcludeStateChanges", excludeStateChangesToolStripMenuItem.Checked);
+                    SqlDataAdapter da = new SqlDataAdapter(cmd);
+                    DataTable dt = new DataTable();
+                    da.Fill(dt);
+                    Common.ConvertUTCToLocal(ref dt);
+                    foreach (DataRow r in dt.Rows)
+                    {
+                        if (r["OldValue"].GetType() == typeof(byte[]))
+                        {
+                            r["OldValue"] = Common.ByteArrayToString((byte[])r["OldValue"]);
+                        }
+                        if (r["NewValue"].GetType() == typeof(byte[]))
+                        {
+                            r["NewValue"] = Common.ByteArrayToString((byte[])r["NewValue"]);
+                        }
+                    }
+                    dgvHistory.AutoGenerateColumns = false;
+                    dgvHistory.DataSource = dt;
                 }
-                dgvHistory.AutoGenerateColumns = false;
-                dgvHistory.DataSource = dt;
-
             }
         }
 
@@ -215,14 +214,13 @@ namespace DBADashGUI.Changes
                 for (Int32 idx = e.RowIndex; idx < e.RowIndex + e.RowCount; idx += 1)
                 {
                     var r = dgv.Rows[idx];
-                    var row = (DataRowView)r.DataBoundItem;
                     foreach (var col in warningCols)
                     {
-                        dgv.Rows[idx].Cells[col].Style.BackColor = (Int32)dgv.Rows[idx].Cells[col].Value > 0 ? Color.Yellow : Color.White;
+                        r.Cells[col].Style.BackColor = (Int32)dgv.Rows[idx].Cells[col].Value > 0 ? Color.Yellow : Color.White;
                     }
                     foreach (var col in criticalCols)
                     {
-                        dgv.Rows[idx].Cells[col].Style.BackColor = (Int32)dgv.Rows[idx].Cells[col].Value > 0 ? Color.Red : Color.White;
+                        r.Cells[col].Style.BackColor = (Int32)dgv.Rows[idx].Cells[col].Value > 0 ? Color.Red : Color.White;
                     }
                 }
             }

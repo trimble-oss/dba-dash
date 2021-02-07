@@ -39,7 +39,6 @@ namespace DBADash
     {
         public static DataTable XEStrToDT(string xe, out RingBufferTargetAttributes ringBufferAtt)
         {
-            var dtm = DateTime.Now;
             DataTable dt = new DataTable("XEL");
             dt.Columns.Add("event_type", typeof(string));
             dt.Columns.Add("object_name", typeof(string));

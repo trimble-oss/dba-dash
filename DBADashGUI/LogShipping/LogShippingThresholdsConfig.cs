@@ -48,10 +48,12 @@ namespace DBADashGUI.LogShipping
         {
             get
             {
-                var threshold = new LogShippingThreshold();
-                threshold.InstanceID = InstanceID;
-                threshold.DatabaseID = DatabaseID;
-                threshold.Inherited = chkLRInherit.Checked;
+                var threshold = new LogShippingThreshold
+                {
+                    InstanceID = InstanceID,
+                    DatabaseID = DatabaseID,
+                    Inherited = chkLRInherit.Checked
+                };
                 if (chkLRLatency.Checked & !chkLRInherit.Checked)
                 {
                     threshold.LatencyCriticalThreshold = (Int32?)numLRLatencyCritical.Value;

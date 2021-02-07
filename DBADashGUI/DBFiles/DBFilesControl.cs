@@ -70,24 +70,24 @@ namespace DBADashGUI.DBFiles
 
         public void RefreshData()
         {
-            SqlConnection cn = new SqlConnection(ConnectionString);
-            using (cn)
+            using (var cn = new SqlConnection(ConnectionString))
             {
-                cn.Open();
-                SqlCommand cmd = new SqlCommand("dbo.DBFiles_Get", cn);
-                cmd.Parameters.AddWithValue("InstanceIDs", string.Join(",",InstanceIDs));
-                if (DatabaseID != null) { cmd.Parameters.AddWithValue("DatabaseID", DatabaseID); }
-                cmd.Parameters.AddWithValue("IncludeNA", IncludeNA);
-                cmd.Parameters.AddWithValue("IncludeOK", IncludeOK);
-                cmd.Parameters.AddWithValue("IncludeWarning", IncludeWarning);
-                cmd.Parameters.AddWithValue("IncludeCritical", IncludeCritical);
-                cmd.Parameters.AddWithValue("FilegroupLevel", tsFilegroup.Checked);
-                cmd.CommandType = CommandType.StoredProcedure;
-                SqlDataAdapter da = new SqlDataAdapter(cmd);
-                DataTable dt = new DataTable();
-                da.Fill(dt);
-                dgvFiles.AutoGenerateColumns = false;
-                dgvFiles.DataSource = new DataView(dt);
+                using (SqlCommand cmd = new SqlCommand("dbo.DBFiles_Get", cn) { CommandType = CommandType.StoredProcedure })
+                {
+                    cn.Open();
+                    cmd.Parameters.AddWithValue("InstanceIDs", string.Join(",", InstanceIDs));
+                    if (DatabaseID != null) { cmd.Parameters.AddWithValue("DatabaseID", DatabaseID); }
+                    cmd.Parameters.AddWithValue("IncludeNA", IncludeNA);
+                    cmd.Parameters.AddWithValue("IncludeOK", IncludeOK);
+                    cmd.Parameters.AddWithValue("IncludeWarning", IncludeWarning);
+                    cmd.Parameters.AddWithValue("IncludeCritical", IncludeCritical);
+                    cmd.Parameters.AddWithValue("FilegroupLevel", tsFilegroup.Checked);
+                    SqlDataAdapter da = new SqlDataAdapter(cmd);
+                    DataTable dt = new DataTable();
+                    da.Fill(dt);
+                    dgvFiles.AutoGenerateColumns = false;
+                    dgvFiles.DataSource = new DataView(dt);
+                }
             }
 
             configureInstanceThresholdsToolStripMenuItem.Enabled = InstanceIDs.Count == 1;
@@ -126,12 +126,14 @@ namespace DBADashGUI.DBFiles
                 }
                 else if (dgvFiles.Columns[e.ColumnIndex].HeaderText == "History")
                 {
-                    var frm = new DBSpaceHistoryView();
-                    frm.DatabaseID = (Int32)row["DatabaseID"];
-                    frm.DataSpaceID = row["data_space_id"] == DBNull.Value ? null : (Int32?)row["data_space_id"];
-                    frm.Instance = (string)row["Instance"];
-                    frm.DBName = (string)row["name"];
-                    frm.FileName = row["file_name"] == DBNull.Value ? null : (string)row["file_name"];
+                    var frm = new DBSpaceHistoryView
+                    {
+                        DatabaseID = (Int32)row["DatabaseID"],
+                        DataSpaceID = row["data_space_id"] == DBNull.Value ? null : (Int32?)row["data_space_id"],
+                        Instance = (string)row["Instance"],
+                        DBName = (string)row["name"],
+                        FileName = row["file_name"] == DBNull.Value ? null : (string)row["file_name"]
+                    };
                     frm.Show();
                 }
             }
@@ -140,8 +142,10 @@ namespace DBADashGUI.DBFiles
         public void ConfigureThresholds(Int32 InstanceID, Int32 DatabaseID,Int32 DataSpaceID)
         {
             var threshold = FileThreshold.GetFileThreshold(InstanceID, DatabaseID, DataSpaceID, ConnectionString);
-            var frm = new FileThresholdConfig();
-            frm.FileThreshold = threshold;
+            var frm = new FileThresholdConfig
+            {
+                FileThreshold = threshold
+            };
             frm.ShowDialog();
             if (frm.DialogResult == DialogResult.OK)
             {

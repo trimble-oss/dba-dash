@@ -72,28 +72,28 @@ namespace DBADashGUI.Performance
                 SqlConnection cn = new SqlConnection(ConnectionString);
                 using (cn)
                 {
-                    cn.Open();
-                    SqlCommand cmd = new SqlCommand("dbo.PerformanceSummary_Get", cn);
-                    if (InstanceIDs.Count > 0)
-                    {
-                        cmd.Parameters.AddWithValue("InstanceIDs", string.Join(",", InstanceIDs));
-                    }
-                    else
-                    {
-                        cmd.Parameters.AddWithValue("TagIDs", TagIDs);
-                    }
-                    cmd.Parameters.AddWithValue("FromDate", fromDate);
-                    cmd.Parameters.AddWithValue("ToDate",toDate);
-                    cmd.CommandTimeout = Properties.Settings.Default.CommandTimeout;
-                    cmd.CommandType = CommandType.StoredProcedure;
-                    SqlDataAdapter da = new SqlDataAdapter(cmd);
-                    DataTable dt = new DataTable();
-                    da.Fill(dt);
-                    dgv.AutoGenerateColumns = false;
-                    generateHistogram(ref dt);
-                    if (dgv.DataSource == null)
-                    {
-                        dgv.DataSource = new DataView(dt);
+                    using (SqlCommand cmd = new SqlCommand("dbo.PerformanceSummary_Get", cn) { CommandType = CommandType.StoredProcedure }) {
+                        cn.Open();
+                        if (InstanceIDs.Count > 0)
+                        {
+                            cmd.Parameters.AddWithValue("InstanceIDs", string.Join(",", InstanceIDs));
+                        }
+                        else
+                        {
+                            cmd.Parameters.AddWithValue("TagIDs", TagIDs);
+                        }
+                        cmd.Parameters.AddWithValue("FromDate", fromDate);
+                        cmd.Parameters.AddWithValue("ToDate", toDate);
+                        cmd.CommandTimeout = Properties.Settings.Default.CommandTimeout;
+                        SqlDataAdapter da = new SqlDataAdapter(cmd);
+                        DataTable dt = new DataTable();
+                        da.Fill(dt);
+                        dgv.AutoGenerateColumns = false;
+                        generateHistogram(ref dt);
+                        if (dgv.DataSource == null)
+                        {
+                            dgv.DataSource = new DataView(dt);
+                        }
                     }
                 }
             }

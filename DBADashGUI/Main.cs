@@ -391,47 +391,48 @@ namespace DBADashGUI
             SqlConnection cn = new SqlConnection(connectionString);
             using (cn)
             {
-                cn.Open();
-                SqlCommand cmd = new SqlCommand(@"dbo.Instances_Get", cn);
-
-                cmd.Parameters.AddWithValue("TagIDs", tags);
-                cmd.CommandType = CommandType.StoredProcedure;
-                var rdr = cmd.ExecuteReader();
-                SQLTreeItem AzureNode=null;
-                while (rdr.Read())
-                {
-                    string instance = (string)rdr["Instance"];
-                    Int32 instanceID = (Int32)rdr["InstanceID"];
-                    if ((bool)rdr["IsAzure"])
+                using (SqlCommand cmd = new SqlCommand(@"dbo.Instances_Get", cn) { CommandType = CommandType.StoredProcedure }){
+                    cn.Open();
+ 
+                    cmd.Parameters.AddWithValue("TagIDs", tags);
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    var rdr = cmd.ExecuteReader();
+                    SQLTreeItem AzureNode = null;
+                    while (rdr.Read())
                     {
-                        string db = (string)rdr["AzureDBName"];
-                        if (AzureNode == null || AzureNode.InstanceName != instance)
+                        string instance = (string)rdr["Instance"];
+                        Int32 instanceID = (Int32)rdr["InstanceID"];
+                        if ((bool)rdr["IsAzure"])
                         {
-                            AzureNode = new SQLTreeItem(instance, SQLTreeItem.TreeType.AzureInstance);
-                            root.Nodes.Add(AzureNode);
-                            var cfgNode = new SQLTreeItem("Configuration", SQLTreeItem.TreeType.Configuration);
-                            AzureNode.Nodes.Add(cfgNode);
+                            string db = (string)rdr["AzureDBName"];
+                            if (AzureNode == null || AzureNode.InstanceName != instance)
+                            {
+                                AzureNode = new SQLTreeItem(instance, SQLTreeItem.TreeType.AzureInstance);
+                                root.Nodes.Add(AzureNode);
+                                var cfgNode = new SQLTreeItem("Configuration", SQLTreeItem.TreeType.Configuration);
+                                AzureNode.Nodes.Add(cfgNode);
+                            }
+                            var azureDBNode = new SQLTreeItem(db, SQLTreeItem.TreeType.AzureDatabase)
+                            {
+                                DatabaseID = (Int32)rdr["AzureDatabaseID"],
+                                InstanceID = instanceID
+                            };
+                            azureDBNode.AddDatabaseFolders();
+                            AzureNode.Nodes.Add(azureDBNode);
+                            AzureInstanceIDs.Add(instanceID);
                         }
-                        var azureDBNode = new SQLTreeItem(db, SQLTreeItem.TreeType.AzureDatabase)
+                        else
                         {
-                            DatabaseID = (Int32)rdr["AzureDatabaseID"],
-                            InstanceID = instanceID
-                        };
-                        azureDBNode.AddDatabaseFolders();
-                        AzureNode.Nodes.Add(azureDBNode);
-                        AzureInstanceIDs.Add(instanceID);
+                            var n = new SQLTreeItem(instance, SQLTreeItem.TreeType.Instance)
+                            {
+                                InstanceID = instanceID
+                            };
+                            n.AddDummyNode();
+                            root.Nodes.Add(n);
+                            InstanceIDs.Add(instanceID);
+                        }
+                        AllInstanceIDs.Add(instanceID);
                     }
-                    else
-                    {
-                        var n = new SQLTreeItem(instance, SQLTreeItem.TreeType.Instance)
-                        {
-                            InstanceID = instanceID
-                        };
-                        n.AddDummyNode();
-                        root.Nodes.Add(n);
-                        InstanceIDs.Add(instanceID);
-                    }
-                    AllInstanceIDs.Add(instanceID);
                 }
             }
             tv1.Nodes.Add(root);
@@ -446,47 +447,40 @@ namespace DBADashGUI
             SqlConnection cn = new SqlConnection(connectionString);
             using (cn)
             {
-                cn.Open();
-                SqlCommand cmd = new SqlCommand(@"SELECT D.DatabaseID,D.name,O.ObjectID,D.InstanceID
-FROM dbo.Databases D
-JOIN dbo.Instances I ON I.InstanceID = D.InstanceID
-LEFT JOIN dbo.DBObjects O ON O.DatabaseID = D.DatabaseID AND O.ObjectType='DB'
-WHERE I.IsActive=1
-AND D.IsActive=1
-AND D.source_database_id IS NULL
-AND I.Instance = @Instance
-ORDER BY D.Name
-", cn);
+                using (SqlCommand cmd = new SqlCommand("dbo.DatabasesByInstance_Get", cn) { CommandType = CommandType.StoredProcedure })
+                {
+                    cn.Open();
 
-                var changesNode = new SQLTreeItem("Configuration", SQLTreeItem.TreeType.Configuration)
-                {
-                    InstanceID = instanceNode.InstanceID
-                };
-                instanceNode.Nodes.Add(changesNode);
-                
-                cmd.Parameters.AddWithValue("Instance", instanceNode.ObjectName);
-                var systemNode = new SQLTreeItem("System Databases", SQLTreeItem.TreeType.Folder);
-                instanceNode.Nodes.Add(systemNode);
-                var rdr = cmd.ExecuteReader();
-                while (rdr.Read())
-                {
-                    var n = new SQLTreeItem((string)rdr[1], SQLTreeItem.TreeType.Database)
+                    var changesNode = new SQLTreeItem("Configuration", SQLTreeItem.TreeType.Configuration)
                     {
-                        DatabaseID = (Int32)rdr[0],
-                        InstanceID = (Int32)rdr[3]
+                        InstanceID = instanceNode.InstanceID
                     };
-                    if (!rdr.IsDBNull(2))
+                    instanceNode.Nodes.Add(changesNode);
+
+                    cmd.Parameters.AddWithValue("Instance", instanceNode.ObjectName);
+                    var systemNode = new SQLTreeItem("System Databases", SQLTreeItem.TreeType.Folder);
+                    instanceNode.Nodes.Add(systemNode);
+                    var rdr = cmd.ExecuteReader();
+                    while (rdr.Read())
                     {
-                        n.ObjectID = (Int64)rdr[2];
-                    }
-                    n.AddDatabaseFolders();
-                    if ((new string[] { "master", "model", "msdb" ,"tempdb"}).Contains((string)rdr[1]))
-                    {
-                        systemNode.Nodes.Add(n);
-                    }
-                    else
-                    {
-                        instanceNode.Nodes.Add(n);
+                        var n = new SQLTreeItem((string)rdr[1], SQLTreeItem.TreeType.Database)
+                        {
+                            DatabaseID = (Int32)rdr[0],
+                            InstanceID = (Int32)rdr[3]
+                        };
+                        if (!rdr.IsDBNull(2))
+                        {
+                            n.ObjectID = (Int64)rdr[2];
+                        }
+                        n.AddDatabaseFolders();
+                        if ((new string[] { "master", "model", "msdb", "tempdb" }).Contains((string)rdr[1]))
+                        {
+                            systemNode.Nodes.Add(n);
+                        }
+                        else
+                        {
+                            instanceNode.Nodes.Add(n);
+                        }
                     }
                 }
             }
@@ -498,27 +492,22 @@ ORDER BY D.Name
             SqlConnection cn = new SqlConnection(connectionString);
             using (cn)
             {
-                cn.Open();
-                SqlCommand cmd = new SqlCommand(@"SELECT ObjectID,ObjectType,SchemaName,ObjectName
-FROM dbo.DBObjects
-WHERE DatabaseID=@DatabaseID
-AND IsActive=1
-AND ObjectType IN(SELECT value FROM STRING_SPLIT(@Types,','))
-ORDER BY SchemaName,ObjectName
-", cn);
-
-                cmd.Parameters.AddWithValue("DatabaseID", n.DatabaseID);
-                cmd.Parameters.AddWithValue("Types", n.Tag);
-                var rdr = cmd.ExecuteReader();
-
-                while (rdr.Read())
+                using (SqlCommand cmd = new SqlCommand("dbo.DBObjects_Get", cn) { CommandType = CommandType.StoredProcedure })
                 {
-                    string type = ((string)rdr[1]).Trim();
-                    var objN = new SQLTreeItem((string)rdr[3], (string)rdr[2], type)
+                    cn.Open();
+                    cmd.Parameters.AddWithValue("DatabaseID", n.DatabaseID);
+                    cmd.Parameters.AddWithValue("Types", n.Tag);
+                    var rdr = cmd.ExecuteReader();
+
+                    while (rdr.Read())
                     {
-                        ObjectID = (Int64)rdr[0]
-                    };
-                    n.Nodes.Add(objN);
+                        string type = ((string)rdr[1]).Trim();
+                        var objN = new SQLTreeItem((string)rdr[3], (string)rdr[2], type)
+                        {
+                            ObjectID = (Int64)rdr[0]
+                        };
+                        n.Nodes.Add(objN);
+                    }
                 }
             }
 
@@ -714,24 +703,24 @@ ORDER BY SchemaName,ObjectName
             SqlConnection cn = new SqlConnection(connectionString);
             using (cn)
             {
-                cn.Open();
-                SqlCommand cmd = new SqlCommand("dbo.DDLHistoryForObject_Get", cn);
-                cmd.Parameters.AddWithValue("ObjectID", ObjectID);
-                cmd.Parameters.AddWithValue("PageSize", currentPageSize);
-                cmd.Parameters.AddWithValue("PageNumber", PageNum);
-                cmd.CommandType = CommandType.StoredProcedure;
-                SqlDataAdapter da = new SqlDataAdapter(cmd);
-                DataSet ds = new DataSet();
-                da.Fill(ds);
-                gvHistory.AutoGenerateColumns = false;
-                gvHistory.DataSource = ds.Tables[0];
-                currentObjectID = ObjectID;
-                currentPage = PageNum;
-                tsPageNum.Text = "Page " + PageNum;
+                using (var cmd = new SqlCommand("dbo.DDLHistoryForObject_Get", cn) { CommandType = CommandType.StoredProcedure }) {
+                    cn.Open();
+                    cmd.Parameters.AddWithValue("ObjectID", ObjectID);
+                    cmd.Parameters.AddWithValue("PageSize", currentPageSize);
+                    cmd.Parameters.AddWithValue("PageNumber", PageNum);
+                    SqlDataAdapter da = new SqlDataAdapter(cmd);
+                    DataSet ds = new DataSet();
+                    da.Fill(ds);
+                    gvHistory.AutoGenerateColumns = false;
+                    gvHistory.DataSource = ds.Tables[0];
+                    currentObjectID = ObjectID;
+                    currentPage = PageNum;
+                    tsPageNum.Text = "Page " + PageNum;
 
-                tsPrevious.Enabled = (PageNum > 1);
-                tsNext.Enabled = ds.Tables[0].Rows.Count == currentPageSize;
+                    tsPrevious.Enabled = (PageNum > 1);
+                    tsNext.Enabled = ds.Tables[0].Rows.Count == currentPageSize;
 
+                }
             }
         }
 
@@ -801,24 +790,21 @@ ORDER BY SchemaName,ObjectName
                 SqlConnection cn = new SqlConnection(connectionString);
                 using (cn)
                 {
-                    cn.Open();
+                    using (SqlCommand cmd = new SqlCommand("dbo.DDLSnapshotDiff_Get", cn) { CommandType = CommandType.StoredProcedure })
+                    {
+                        cn.Open();
+                        cmd.Parameters.AddWithValue("DatabaseID", DatabaseID);
+                        var p = cmd.Parameters.AddWithValue("SnapshotDate", SnapshotDate);
+                        p.DbType = DbType.DateTime2;
 
-                    SqlCommand cmd = new SqlCommand("dbo.DDLSnapshotDiff_Get", cn);
-                    cmd.Parameters.AddWithValue("DatabaseID", DatabaseID);
-                    cmd.CommandType = CommandType.StoredProcedure;
-                    var p = cmd.Parameters.AddWithValue("SnapshotDate", SnapshotDate);
-                    p.DbType = DbType.DateTime2;
+                        SqlDataAdapter da = new SqlDataAdapter(cmd);
+                        DataSet ds = new DataSet();
+                        da.Fill(ds);
 
-                    SqlDataAdapter da = new SqlDataAdapter(cmd);
-                    DataSet ds = new DataSet();
-                    da.Fill(ds);
+                        gvSnapshotsDetail.AutoGenerateColumns = false;
+                        gvSnapshotsDetail.DataSource = ds.Tables[0];
 
-                    gvSnapshotsDetail.AutoGenerateColumns = false;
-                    gvSnapshotsDetail.DataSource = ds.Tables[0];
-
-
-
-
+                    }
                 }
             }
         }
@@ -861,27 +847,24 @@ ORDER BY SchemaName,ObjectName
                 SqlConnection cn = new SqlConnection(connectionString);
                 using (cn)
                 {
-                    cn.Open();
-
-                    SqlCommand cmd = new SqlCommand("dbo.DDLSnapshots_Get", cn)
+                    using (SqlCommand cmd = new SqlCommand("dbo.DDLSnapshots_Get", cn) { CommandType = CommandType.StoredProcedure })
                     {
-                        CommandType = CommandType.StoredProcedure
-                    };
-                    cmd.Parameters.AddWithValue("DatabaseID", n.DatabaseID);
-                    cmd.Parameters.AddWithValue("Instance", n.InstanceName);
-                    cmd.Parameters.AddWithValue("PageSize", currentSummaryPage);
-                    cmd.Parameters.AddWithValue("PageNumber", pageNum);
-                    SqlDataAdapter da = new SqlDataAdapter(cmd);
-                    DataSet ds = new DataSet();
-                    da.Fill(ds);
-                    gvSnapshots.AutoGenerateColumns = false;
-                    gvSnapshots.DataSource = ds.Tables[0];
+                        cn.Open();
+                        cmd.Parameters.AddWithValue("DatabaseID", n.DatabaseID);
+                        cmd.Parameters.AddWithValue("Instance", n.InstanceName);
+                        cmd.Parameters.AddWithValue("PageSize", currentSummaryPage);
+                        cmd.Parameters.AddWithValue("PageNumber", pageNum);
+                        SqlDataAdapter da = new SqlDataAdapter(cmd);
+                        DataSet ds = new DataSet();
+                        da.Fill(ds);
+                        gvSnapshots.AutoGenerateColumns = false;
+                        gvSnapshots.DataSource = ds.Tables[0];
 
-                    tsSummaryPageNum.Text = "Page " + pageNum;
-                    tsSummaryBack.Enabled = (pageNum > 1);
-                    tsSummaryNext.Enabled = ds.Tables[0].Rows.Count == currentSummaryPage;
-                    currentSummaryPage = pageNum;
-
+                        tsSummaryPageNum.Text = "Page " + pageNum;
+                        tsSummaryBack.Enabled = (pageNum > 1);
+                        tsSummaryNext.Enabled = ds.Tables[0].Rows.Count == currentSummaryPage;
+                        currentSummaryPage = pageNum;
+                    }
                 }
             }
         }
@@ -939,61 +922,59 @@ ORDER BY SchemaName,ObjectName
             SqlConnection cn = new SqlConnection(connectionString);
             using (cn)
             {
-                cn.Open();
-                SqlCommand cmd = new SqlCommand("Tags_Get", cn)
-                {
-                    CommandType = CommandType.StoredProcedure
-                };
-                var rdr = cmd.ExecuteReader();
-                string currentTag = String.Empty, tag, tagValue;
-                ToolStripMenuItem mTagName = new ToolStripMenuItem();
-                ToolStripMenuItem mSystemTags = new ToolStripMenuItem("System Tags");
-                mSystemTags.Font = new Font(mSystemTags.Font, FontStyle.Italic);
-                Int16 tagID;
-                while (rdr.Read())
-                {
-                    tag = (string)rdr[1];
-                    tagValue = (string)rdr[2];
-                    tagID = (Int16)rdr[0];
-                    if (tag != currentTag)
+                using (SqlCommand cmd = new SqlCommand("Tags_Get", cn) { CommandType = CommandType.StoredProcedure }) {
+                    cn.Open();
+                    var rdr = cmd.ExecuteReader();
+                    string currentTag = String.Empty, tag, tagValue;
+                    ToolStripMenuItem mTagName = new ToolStripMenuItem();
+                    ToolStripMenuItem mSystemTags = new ToolStripMenuItem("System Tags");
+                    mSystemTags.Font = new Font(mSystemTags.Font, FontStyle.Italic);
+                    Int16 tagID;
+                    while (rdr.Read())
                     {
-                        mTagName = new ToolStripMenuItem(tag);
-                        
-                        if (tag.StartsWith("{"))
+                        tag = (string)rdr[1];
+                        tagValue = (string)rdr[2];
+                        tagID = (Int16)rdr[0];
+                        if (tag != currentTag)
                         {
-                            mSystemTags.DropDownItems.Add(mTagName);
-                        }
-                        else
-                        {
-                            mnuTags.DropDownItems.Add(mTagName);
-                            cboTagName.Items.Add(tag);
-                        }
-                       
-                        currentTag = tag;
-                    }
-                    var mTagValue = new ToolStripMenuItem(tagValue)
-                    {
-                        Tag = tagID,
-                        CheckOnClick = true
-                    };
+                            mTagName = new ToolStripMenuItem(tag);
 
-                    if (selected != null && selected.Contains(tagID))
-                    {
-                        mTagValue.Checked = true;
+                            if (tag.StartsWith("{"))
+                            {
+                                mSystemTags.DropDownItems.Add(mTagName);
+                            }
+                            else
+                            {
+                                mnuTags.DropDownItems.Add(mTagName);
+                                cboTagName.Items.Add(tag);
+                            }
+
+                            currentTag = tag;
+                        }
+                        var mTagValue = new ToolStripMenuItem(tagValue)
+                        {
+                            Tag = tagID,
+                            CheckOnClick = true
+                        };
+
+                        if (selected != null && selected.Contains(tagID))
+                        {
+                            mTagValue.Checked = true;
+                        }
+                        mTagValue.CheckedChanged += MTagValue_CheckedChanged;
+                        mTagName.DropDownItems.Add(mTagValue);
                     }
-                    mTagValue.CheckedChanged += MTagValue_CheckedChanged;
-                    mTagName.DropDownItems.Add(mTagValue);
-                }
-                mnuTags.DropDownItems.Add(mSystemTags);
-                var clearTag = new ToolStripMenuItem("Clear All");
-                clearTag.Font = new Font(clearTag.Font, FontStyle.Italic);
-                clearTag.Click += ClearTag_Click;
-                var refreshTag = new ToolStripMenuItem("Refresh Tags");
-                refreshTag.Font = new Font(refreshTag.Font, FontStyle.Italic);
-                refreshTag.Click += RefreshTag_Click;
-                mnuTags.DropDownItems.Add("-");
-                mnuTags.DropDownItems.Add(refreshTag);
-                mnuTags.DropDownItems.Add(clearTag);
+                    mnuTags.DropDownItems.Add(mSystemTags);
+                    var clearTag = new ToolStripMenuItem("Clear All");
+                    clearTag.Font = new Font(clearTag.Font, FontStyle.Italic);
+                    clearTag.Click += ClearTag_Click;
+                    var refreshTag = new ToolStripMenuItem("Refresh Tags");
+                    refreshTag.Font = new Font(refreshTag.Font, FontStyle.Italic);
+                    refreshTag.Click += RefreshTag_Click;
+                    mnuTags.DropDownItems.Add("-");
+                    mnuTags.DropDownItems.Add(refreshTag);
+                    mnuTags.DropDownItems.Add(clearTag);
+                } 
             }
             setFont(mnuTags);
         }
@@ -1206,9 +1187,5 @@ ORDER BY SchemaName,ObjectName
             loadSelectedTab();
         }
 
-        private void tsErrorsDays_Click(object sender, EventArgs e)
-        {
-
-        }
     }
 }

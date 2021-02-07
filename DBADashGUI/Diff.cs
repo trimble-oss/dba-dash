@@ -14,8 +14,7 @@ namespace DBADashGUI
 {
     public partial class Diff : Form
     {
-
-        DiffControl diff1 = new DiffControl();
+        readonly DiffControl diff1 = new DiffControl();
 
         public Diff()
         {

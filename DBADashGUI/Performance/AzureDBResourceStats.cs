@@ -141,8 +141,7 @@ namespace DBADashGUI.Performance
   
 
         Dictionary<string, columnMetaData> columns;
-
-         Dictionary<string,columnMetaData> DBColumns = new Dictionary<string, columnMetaData>
+        readonly Dictionary<string,columnMetaData> DBColumns = new Dictionary<string, columnMetaData>
             {
                 {"avg_cpu_percent", new columnMetaData{Alias="Avg CPU %",isVisible=false } },
                 {"avg_data_io_percent", new columnMetaData{Alias="Avg Data %",isVisible=false } },
@@ -165,8 +164,7 @@ namespace DBADashGUI.Performance
                 {"dtu_limit", new columnMetaData{Alias="DTU Limit",isVisible=false,axis=1} },
                 {"cpu_limit", new columnMetaData{Alias="CPU Limit",isVisible=false,axis=1} },
             };
-
-        Dictionary<string, columnMetaData> PoolColumns = new Dictionary<string, columnMetaData>
+        readonly Dictionary<string, columnMetaData> PoolColumns = new Dictionary<string, columnMetaData>
             {
                 {"avg_cpu_percent", new columnMetaData{Alias="Avg CPU %",isVisible=false } },
                 {"avg_data_io_percent", new columnMetaData{Alias="Avg Data %",isVisible=false } },
@@ -299,10 +297,12 @@ namespace DBADashGUI.Performance
         {
             foreach(var k in columns)
             {
-                var dd = new ToolStripMenuItem(k.Value.Alias);
-                dd.Name = (string)k.Key;
-                dd.CheckOnClick = true;
-                dd.Checked = dd.Enabled ? k.Value.isVisible : false;
+                var dd = new ToolStripMenuItem(k.Value.Alias)
+                {
+                    Name = (string)k.Key,
+                    CheckOnClick = true
+                };
+                dd.Checked = dd.Enabled && k.Value.isVisible;
                 dd.Click += measureDropDown_Click;
                 tsMeasures.DropDownItems.Add(dd);
             }
@@ -317,43 +317,41 @@ namespace DBADashGUI.Performance
 
         private DataTable GetAzurePoolResourceStats()
         {
-            SqlConnection cn = new SqlConnection(Common.ConnectionString);
-            using (cn)
+            using (var cn = new SqlConnection(Common.ConnectionString))
             {
-                cn.Open();
-                SqlCommand cmd = new SqlCommand("dbo.AzureDBElasticPoolResourceStats_Get", cn);
-                cmd.CommandType = CommandType.StoredProcedure;
-                cmd.Parameters.AddWithValue("FromDate", from);
-                cmd.Parameters.AddWithValue("ToDate", to);
-                cmd.Parameters.AddWithValue("InstanceID", InstanceID);
-                cmd.Parameters.AddWithValue("elastic_pool_name", ElasticPoolName);
-                cmd.Parameters.AddWithValue("DateGroupingMin", DateGrouping);
-                cmd.Parameters.AddWithValue("UTCOffset", Common.UtcOffset);
-                SqlDataAdapter da = new SqlDataAdapter(cmd);
-                DataTable dt = new DataTable();
-                da.Fill(dt);
-                return dt;
+                using (SqlCommand cmd = new SqlCommand("dbo.AzureDBElasticPoolResourceStats_Get", cn) { CommandType = CommandType.StoredProcedure }) {
+                    cn.Open();
+                    cmd.Parameters.AddWithValue("FromDate", from);
+                    cmd.Parameters.AddWithValue("ToDate", to);
+                    cmd.Parameters.AddWithValue("InstanceID", InstanceID);
+                    cmd.Parameters.AddWithValue("elastic_pool_name", ElasticPoolName);
+                    cmd.Parameters.AddWithValue("DateGroupingMin", DateGrouping);
+                    cmd.Parameters.AddWithValue("UTCOffset", Common.UtcOffset);
+                    SqlDataAdapter da = new SqlDataAdapter(cmd);
+                    DataTable dt = new DataTable();
+                    da.Fill(dt);
+                    return dt;
+                }
             }
         }
 
 
         private DataTable GetAzureDBResourceStats()
         {
-            SqlConnection cn = new SqlConnection(Common.ConnectionString);
-            using (cn)
+            using (var cn = new SqlConnection(Common.ConnectionString))
             {
-                cn.Open();
-                SqlCommand cmd = new SqlCommand("dbo.AzureDBResourceStats_Get", cn);
-                cmd.CommandType = CommandType.StoredProcedure;
-                cmd.Parameters.AddWithValue("FromDate", from);
-                cmd.Parameters.AddWithValue("ToDate",to);
-                cmd.Parameters.AddWithValue("InstanceID", InstanceID);
-                cmd.Parameters.AddWithValue("DateGroupingMin", DateGrouping);
-                cmd.Parameters.AddWithValue("UTCOffset",Common.UtcOffset);
-                SqlDataAdapter da = new SqlDataAdapter(cmd);
-                DataTable dt = new DataTable();
-                da.Fill(dt);
-                return dt;
+                using (SqlCommand cmd = new SqlCommand("dbo.AzureDBResourceStats_Get", cn) { CommandType = CommandType.StoredProcedure }) {
+                    cn.Open();
+                    cmd.Parameters.AddWithValue("FromDate", from);
+                    cmd.Parameters.AddWithValue("ToDate", to);
+                    cmd.Parameters.AddWithValue("InstanceID", InstanceID);
+                    cmd.Parameters.AddWithValue("DateGroupingMin", DateGrouping);
+                    cmd.Parameters.AddWithValue("UTCOffset", Common.UtcOffset);
+                    SqlDataAdapter da = new SqlDataAdapter(cmd);
+                    DataTable dt = new DataTable();
+                    da.Fill(dt);
+                    return dt;
+                }
             }
         }
 
@@ -415,9 +413,11 @@ namespace DBADashGUI.Performance
 
         private void tsCustom_Click(object sender, EventArgs e)
         {
-            var frm = new CustomTimePicker();
-            frm.FromDate = from;
-            frm.ToDate = to;
+            var frm = new CustomTimePicker
+            {
+                FromDate = from,
+                ToDate = to
+            };
             frm.ShowDialog();
             if(frm.DialogResult == DialogResult.OK)
             {

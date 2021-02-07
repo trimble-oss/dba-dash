@@ -30,40 +30,40 @@ namespace DBADashGUI.Backups
         public static BackupThresholds GetThresholds(Int32 InstanceID,Int32 DatabaseID,string connectionString)
         {
             BackupThresholds thresholds = new BackupThresholds();
-            SqlConnection cn = new SqlConnection(connectionString);
-            using (cn)
+            using (var cn = new SqlConnection(connectionString))
             {
-                cn.Open();
-                SqlCommand cmd = new SqlCommand("dbo.BackupThresholds_Get", cn);
-                cmd.CommandType = CommandType.StoredProcedure;
-                cmd.Parameters.AddWithValue("InstanceID", InstanceID);
-                cmd.Parameters.AddWithValue("DatabaseID", DatabaseID);
-                var rdr = cmd.ExecuteReader();
-                if (rdr.Read())
+                using (var cmd = new SqlCommand("dbo.BackupThresholds_Get", cn) { CommandType = CommandType.StoredProcedure })
                 {
-                    if (rdr["FullBackupCriticalThreshold"] != DBNull.Value && rdr["FullBackupWarningThreshold"] != DBNull.Value)
+                    cn.Open();
+                    cmd.Parameters.AddWithValue("InstanceID", InstanceID);
+                    cmd.Parameters.AddWithValue("DatabaseID", DatabaseID);
+                    var rdr = cmd.ExecuteReader();
+                    if (rdr.Read())
                     {
-                       
-                        thresholds.FullCritical = (Int32)rdr["FullBackupCriticalThreshold"];
-                        thresholds.FullWarning = (Int32)rdr["FullBackupWarningThreshold"];
-                    }
-                    if (rdr["DiffBackupCriticalThreshold"] != DBNull.Value && rdr["DiffBackupWarningThreshold"] != DBNull.Value)
-                    {
-                        thresholds.DiffCritical = (Int32)rdr["DiffBackupCriticalThreshold"];
-                        thresholds.DiffWarning =(Int32)rdr["DiffBackupWarningThreshold"];                 
-                    }
+                        if (rdr["FullBackupCriticalThreshold"] != DBNull.Value && rdr["FullBackupWarningThreshold"] != DBNull.Value)
+                        {
 
-                    if (rdr["LogBackupCriticalThreshold"] != DBNull.Value && rdr["LogBackupWarningThreshold"] != DBNull.Value)
-                    {
-                        thresholds.LogCritical = (Int32)rdr["LogBackupCriticalThreshold"];
-                        thresholds.LogWarning = (Int32)rdr["LogBackupWarningThreshold"];
+                            thresholds.FullCritical = (Int32)rdr["FullBackupCriticalThreshold"];
+                            thresholds.FullWarning = (Int32)rdr["FullBackupWarningThreshold"];
+                        }
+                        if (rdr["DiffBackupCriticalThreshold"] != DBNull.Value && rdr["DiffBackupWarningThreshold"] != DBNull.Value)
+                        {
+                            thresholds.DiffCritical = (Int32)rdr["DiffBackupCriticalThreshold"];
+                            thresholds.DiffWarning = (Int32)rdr["DiffBackupWarningThreshold"];
+                        }
+
+                        if (rdr["LogBackupCriticalThreshold"] != DBNull.Value && rdr["LogBackupWarningThreshold"] != DBNull.Value)
+                        {
+                            thresholds.LogCritical = (Int32)rdr["LogBackupCriticalThreshold"];
+                            thresholds.LogWarning = (Int32)rdr["LogBackupWarningThreshold"];
+                        }
+                        thresholds.UsePartial = (bool)rdr["ConsiderPartialBackups"];
+                        thresholds.UseFG = (bool)rdr["ConsiderFGBackups"];
                     }
-                    thresholds.UsePartial = (bool)rdr["ConsiderPartialBackups"];
-                    thresholds.UseFG = (bool)rdr["ConsiderFGBackups"];
-                }
-                else
-                {
-                    thresholds.Inherit = true;
+                    else
+                    {
+                        thresholds.Inherit = true;
+                    }
                 }
 
             }
@@ -72,24 +72,24 @@ namespace DBADashGUI.Backups
 
         public void Save(string connectionString)
         {
-            SqlConnection cn = new SqlConnection(connectionString);
-            using (cn)
+            using (var cn = new SqlConnection(connectionString))
             {
-                cn.Open();
-                SqlCommand cmd = new SqlCommand("dbo.BackupThresholds_Upd", cn);
-                cmd.CommandType = CommandType.StoredProcedure;
-                cmd.Parameters.AddWithValue("InstanceID", InstanceID);
-                cmd.Parameters.AddWithValue("DatabaseID", DatabaseID);
-                if (FullWarning != null) { cmd.Parameters.AddWithValue("FullWarning", FullWarning); }
-                if (FullCritical != null) { cmd.Parameters.AddWithValue("FullCritical", FullCritical); }
-                if (DiffWarning != null) { cmd.Parameters.AddWithValue("DiffWarning", DiffWarning); }
-                if (DiffCritical != null) { cmd.Parameters.AddWithValue("DiffCritical", DiffCritical); }
-                if (LogWarning != null) { cmd.Parameters.AddWithValue("LogWarning", LogWarning); }
-                if (LogCritical != null) { cmd.Parameters.AddWithValue("LogCritical", LogCritical); }
-                cmd.Parameters.AddWithValue("UseFG", UseFG);
-                cmd.Parameters.AddWithValue("UsePartial", UsePartial);
-                cmd.Parameters.AddWithValue("Inherit", Inherit);
-                cmd.ExecuteNonQuery();
+                using (var cmd = new SqlCommand("dbo.BackupThresholds_Upd", cn) { CommandType = CommandType.StoredProcedure })
+                {
+                    cn.Open();
+                    cmd.Parameters.AddWithValue("InstanceID", InstanceID);
+                    cmd.Parameters.AddWithValue("DatabaseID", DatabaseID);
+                    if (FullWarning != null) { cmd.Parameters.AddWithValue("FullWarning", FullWarning); }
+                    if (FullCritical != null) { cmd.Parameters.AddWithValue("FullCritical", FullCritical); }
+                    if (DiffWarning != null) { cmd.Parameters.AddWithValue("DiffWarning", DiffWarning); }
+                    if (DiffCritical != null) { cmd.Parameters.AddWithValue("DiffCritical", DiffCritical); }
+                    if (LogWarning != null) { cmd.Parameters.AddWithValue("LogWarning", LogWarning); }
+                    if (LogCritical != null) { cmd.Parameters.AddWithValue("LogCritical", LogCritical); }
+                    cmd.Parameters.AddWithValue("UseFG", UseFG);
+                    cmd.Parameters.AddWithValue("UsePartial", UsePartial);
+                    cmd.Parameters.AddWithValue("Inherit", Inherit);
+                    cmd.ExecuteNonQuery();
+                }
             }
         }
 

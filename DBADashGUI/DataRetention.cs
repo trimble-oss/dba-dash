@@ -43,18 +43,16 @@ namespace DBADashGUI
             var cn = new SqlConnection(ConnectionString);
             using (cn)
             {
-                cn.Open();
-                SqlCommand cmd = new SqlCommand("dbo.DataRetention_Get", cn);
-                cmd.CommandType = CommandType.StoredProcedure;
-                cmd.Parameters.AddWithValue("AllTables", allTables);
-                SqlDataAdapter da = new SqlDataAdapter(cmd);
-                DataTable dt = new DataTable();
-                da.Fill(dt);
-                return dt;
-            }
-           
-
-        }
+                using (SqlCommand cmd = new SqlCommand("dbo.DataRetention_Get", cn) { CommandType = CommandType.StoredProcedure }) {
+                    cn.Open();
+                    cmd.Parameters.AddWithValue("AllTables", allTables);
+                    SqlDataAdapter da = new SqlDataAdapter(cmd);
+                    DataTable dt = new DataTable();
+                    da.Fill(dt);
+                    return dt;
+                }
+            }          
+      }
 
         private void showAllTablesToolStripMenuItem_Click(object sender, EventArgs e)
         {
@@ -100,12 +98,12 @@ namespace DBADashGUI
             SqlConnection cn = new SqlConnection(ConnectionString);
             using (cn)
             {
-                cn.Open();
-                SqlCommand cmd = new SqlCommand("dbo.DataRetention_Upd", cn);
-                cmd.CommandType = CommandType.StoredProcedure;
-                cmd.Parameters.AddWithValue("TableName", table);
-                cmd.Parameters.AddWithValue("RetentionDays", days);
-                cmd.ExecuteNonQuery();
+                using (SqlCommand cmd = new SqlCommand("dbo.DataRetention_Upd", cn) { CommandType = CommandType.StoredProcedure }) {
+                    cn.Open();
+                    cmd.Parameters.AddWithValue("TableName", table);
+                    cmd.Parameters.AddWithValue("RetentionDays", days);
+                    cmd.ExecuteNonQuery();
+                }
             }
         }
 

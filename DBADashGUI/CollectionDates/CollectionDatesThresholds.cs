@@ -71,38 +71,37 @@ namespace DBADashGUI.CollectionDates
 
         private void getThreshold()
         {
-            SqlConnection cn = new SqlConnection(ConnectionString);
-            using (cn)
+            using (var cn = new SqlConnection(ConnectionString))
             {
-                cn.Open();
-                SqlCommand cmd = new SqlCommand("CollectionDatesThresholds_Get", cn);
-                cmd.Parameters.AddWithValue("InstanceID", InstanceID);
-                cmd.Parameters.AddWithValue("Reference", Reference);
-                cmd.CommandType = CommandType.StoredProcedure;
-                var rdr = cmd.ExecuteReader();
-                if (rdr.Read())
-                {
-                    if (rdr["WarningThreshold"] != DBNull.Value && rdr["CriticalThreshold"] != DBNull.Value)
+                using (SqlCommand cmd = new SqlCommand("CollectionDatesThresholds_Get", cn) { CommandType = CommandType.StoredProcedure }) {
+                    cn.Open();
+                    cmd.Parameters.AddWithValue("InstanceID", InstanceID);
+                    cmd.Parameters.AddWithValue("Reference", Reference);
+                    var rdr = cmd.ExecuteReader();
+                    if (rdr.Read())
                     {
-                        WarningThreshold = (Int32)rdr["WarningThreshold"];
-                        CriticalThreshold = (Int32)rdr["CriticalThreshold"];
-                        optEnabled.Checked = true;
+                        if (rdr["WarningThreshold"] != DBNull.Value && rdr["CriticalThreshold"] != DBNull.Value)
+                        {
+                            WarningThreshold = (Int32)rdr["WarningThreshold"];
+                            CriticalThreshold = (Int32)rdr["CriticalThreshold"];
+                            optEnabled.Checked = true;
+                        }
+                        else
+                        {
+                            OptDisabled.Checked = true;
+                        }
+                        if ((Int32)rdr["InstanceID"] != InstanceID)
+                        {
+                            optInherit.Checked = true;
+                        }
+
                     }
                     else
                     {
                         OptDisabled.Checked = true;
                     }
-                    if ((Int32)rdr["InstanceID"] != InstanceID)
-                    {
-                        optInherit.Checked = true;
-                    }
-                    
+                    optInherit.Enabled = InstanceID > 0;
                 }
-                else
-                {
-                    OptDisabled.Checked = true;
-                }
-                optInherit.Enabled = InstanceID > 0;
             }
 
         }
@@ -113,27 +112,28 @@ namespace DBADashGUI.CollectionDates
 
         private void bttnUpdate_Click(object sender, EventArgs e)
         {
-            SqlConnection cn = new SqlConnection(ConnectionString);
-            using (cn)
+            using (var cn = new SqlConnection(ConnectionString))
             {
-                cn.Open();
-                SqlCommand cmd = new SqlCommand("CollectionDatesThresholds_Upd", cn);
-                cmd.Parameters.AddWithValue("InstanceID", InstanceID);
-                cmd.Parameters.AddWithValue("Reference", Reference);
-                if (OptDisabled.Checked)
+                using (SqlCommand cmd = new SqlCommand("CollectionDatesThresholds_Upd", cn) { CommandType = CommandType.StoredProcedure })
                 {
-                    cmd.Parameters.AddWithValue("WarningThreshold", DBNull.Value);
-                    cmd.Parameters.AddWithValue("CriticalThreshold", DBNull.Value);
+                    cn.Open();
+
+                    cmd.Parameters.AddWithValue("InstanceID", InstanceID);
+                    cmd.Parameters.AddWithValue("Reference", Reference);
+                    if (OptDisabled.Checked)
+                    {
+                        cmd.Parameters.AddWithValue("WarningThreshold", DBNull.Value);
+                        cmd.Parameters.AddWithValue("CriticalThreshold", DBNull.Value);
+                    }
+                    else
+                    {
+                        cmd.Parameters.AddWithValue("WarningThreshold", WarningThreshold);
+                        cmd.Parameters.AddWithValue("CriticalThreshold", CriticalThreshold);
+                    }
+                    cmd.Parameters.AddWithValue("Inherit", Inherit);
+                    cmd.ExecuteNonQuery();
+                    this.DialogResult = DialogResult.OK;
                 }
-                else
-                {
-                    cmd.Parameters.AddWithValue("WarningThreshold", WarningThreshold);
-                    cmd.Parameters.AddWithValue("CriticalThreshold", CriticalThreshold);
-                }
-                cmd.Parameters.AddWithValue("Inherit", Inherit);
-                cmd.CommandType = CommandType.StoredProcedure;
-                cmd.ExecuteNonQuery();
-                this.DialogResult = DialogResult.OK;
             }
         }
 

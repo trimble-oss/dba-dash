@@ -34,78 +34,77 @@ namespace DBADashGUI.Changes
 
             dgvConfig.Columns.Add(new DataGridViewTextBoxColumn() { Name = "Instance", HeaderText = "Instance" });
             dgvConfig.Columns.Add(new DataGridViewTextBoxColumn() { Name = "DB", HeaderText = "Database" });
-            SqlConnection cn = new SqlConnection(Common.ConnectionString);
-            using (cn)
+            using (var cn = new SqlConnection(Common.ConnectionString))
             {
-                cn.Open();
-                SqlCommand cmd = new SqlCommand("dbo.DBConfiguration_Get", cn);
-                cmd.CommandType = CommandType.StoredProcedure;
-                cmd.Parameters.AddWithValue("@InstanceIDs", string.Join(",", InstanceIDs));
-                cmd.Parameters.AddWithValue("@ConfiguredOnly", configuredOnlyToolStripMenuItem.Checked);
-                if (DatabaseID > 0)
+                using (SqlCommand cmd = new SqlCommand("dbo.DBConfiguration_Get", cn) { CommandType = CommandType.StoredProcedure })
                 {
-                    cmd.Parameters.AddWithValue("DatabaseID", DatabaseID);
-                }
-
-                SqlDataAdapter da = new SqlDataAdapter(cmd);
-                DataTable dt = new DataTable();
-                da.Fill(dt);
-                foreach (DataRow r in dt.DefaultView.ToTable(true, "name").Rows)
-                {
-                    DataGridViewTextBoxColumn col = new DataGridViewTextBoxColumn() { HeaderText = (string)r["name"], Name = (string)r["name"] };
-                    dgvConfig.Columns.Add(col);
-                }
-                Int32 lastDB = -1;
-                List<DataGridViewRow> rows = new List<DataGridViewRow>();
-                DataGridViewRow row = null;
-                foreach (DataRow r in dt.Rows)
-                {
-                    Int32 dbid = (Int32)r["DatabaseID"];
-                    if (dbid != lastDB)
+                    cn.Open();
+                    cmd.Parameters.AddWithValue("@InstanceIDs", string.Join(",", InstanceIDs));
+                    cmd.Parameters.AddWithValue("@ConfiguredOnly", configuredOnlyToolStripMenuItem.Checked);
+                    if (DatabaseID > 0)
                     {
-                        row = new DataGridViewRow();
-                        row.CreateCells(dgvConfig);
-                        row.Cells[0].Value = (string)r["Instance"];
-                        row.Cells[1].Value = (string)r["DB"];
-                        rows.Add(row);
+                        cmd.Parameters.AddWithValue("DatabaseID", DatabaseID);
                     }
 
-                    string configName = (string)r["name"];
-                    var idx = dgvConfig.Columns[configName].Index;
-                    row.Cells[idx].Value = r["value"];
-                    row.Cells[idx].Style.BackColor = (bool)r["IsDefault"] ? Color.MintCream : Color.BlanchedAlmond;
-                    if (!(bool)r["IsDefault"])
+                    SqlDataAdapter da = new SqlDataAdapter(cmd);
+                    DataTable dt = new DataTable();
+                    da.Fill(dt);
+                    foreach (DataRow r in dt.DefaultView.ToTable(true, "name").Rows)
                     {
-                        row.Cells[idx].Style.Font = new Font(dgvConfig.Font, FontStyle.Bold);
+                        DataGridViewTextBoxColumn col = new DataGridViewTextBoxColumn() { HeaderText = (string)r["name"], Name = (string)r["name"] };
+                        dgvConfig.Columns.Add(col);
                     }
-                    lastDB = dbid;
+                    Int32 lastDB = -1;
+                    List<DataGridViewRow> rows = new List<DataGridViewRow>();
+                    DataGridViewRow row = null;
+                    foreach (DataRow r in dt.Rows)
+                    {
+                        Int32 dbid = (Int32)r["DatabaseID"];
+                        if (dbid != lastDB)
+                        {
+                            row = new DataGridViewRow();
+                            row.CreateCells(dgvConfig);
+                            row.Cells[0].Value = (string)r["Instance"];
+                            row.Cells[1].Value = (string)r["DB"];
+                            rows.Add(row);
+                        }
+
+                        string configName = (string)r["name"];
+                        var idx = dgvConfig.Columns[configName].Index;
+                        row.Cells[idx].Value = r["value"];
+                        row.Cells[idx].Style.BackColor = (bool)r["IsDefault"] ? Color.MintCream : Color.BlanchedAlmond;
+                        if (!(bool)r["IsDefault"])
+                        {
+                            row.Cells[idx].Style.Font = new Font(dgvConfig.Font, FontStyle.Bold);
+                        }
+                        lastDB = dbid;
+                    }
+                    dgvConfig.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.DisplayedCells;
+                    dgvConfig.Rows.AddRange(rows.ToArray());
                 }
-                dgvConfig.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.DisplayedCells;
-                dgvConfig.Rows.AddRange(rows.ToArray());
             }
         }
 
         private void refreshHistory()
         {
-            SqlConnection cn = new SqlConnection(Common.ConnectionString);
-            using (cn)
+            using (var cn = new SqlConnection(Common.ConnectionString))
             {
-                cn.Open();
-                SqlCommand cmd = new SqlCommand("dbo.DBConfigurationHistory_Get", cn);
-                cmd.CommandType = CommandType.StoredProcedure;
-                cmd.Parameters.AddWithValue("InstanceIDs", string.Join(",", InstanceIDs));
-                if (DatabaseID > 0)
+                using (SqlCommand cmd = new SqlCommand("dbo.DBConfigurationHistory_Get", cn) { CommandType = CommandType.StoredProcedure })
                 {
-                    cmd.Parameters.AddWithValue("DatabaseID", DatabaseID);
+                    cn.Open();
+                    cmd.Parameters.AddWithValue("InstanceIDs", string.Join(",", InstanceIDs));
+                    if (DatabaseID > 0)
+                    {
+                        cmd.Parameters.AddWithValue("DatabaseID", DatabaseID);
+                    }
+
+                    SqlDataAdapter da = new SqlDataAdapter(cmd);
+                    DataTable dt = new DataTable();
+                    da.Fill(dt);
+                    dgvConfigHistory.AutoGenerateColumns = false;
+                    Common.ConvertUTCToLocal(ref dt);
+                    dgvConfigHistory.DataSource = dt;
                 }
-
-                SqlDataAdapter da = new SqlDataAdapter(cmd);
-                DataTable dt = new DataTable();
-                da.Fill(dt);
-                dgvConfigHistory.AutoGenerateColumns = false;
-                Common.ConvertUTCToLocal(ref dt);
-                dgvConfigHistory.DataSource = dt;
-
             }
         }
 

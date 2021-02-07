@@ -68,22 +68,22 @@ namespace DBADashGUI.LastGoodCheckDB
 
         public void RefreshData()
         {
-            SqlConnection cn = new SqlConnection(connectionString);
-            using (cn)
+            using (var cn = new SqlConnection(connectionString))
             {
-                cn.Open();
-                SqlCommand cmd = new SqlCommand("dbo.LastGoodCheckDB_Get", cn);
-                cmd.CommandType = CommandType.StoredProcedure;
-                cmd.Parameters.AddWithValue("InstanceIDs", string.Join(",", InstanceIDs));
-                cmd.Parameters.AddWithValue("IncludeCritical", IncludeCritical);
-                cmd.Parameters.AddWithValue("IncludeWarning", IncludeWarning);
-                cmd.Parameters.AddWithValue("IncludeOK", IncludeOK);
-                cmd.Parameters.AddWithValue("IncludeNA", IncludeNA);
-                SqlDataAdapter da = new SqlDataAdapter(cmd);
-                DataTable dt = new DataTable();
-                da.Fill(dt);
-                dgvLastGoodCheckDB.AutoGenerateColumns = false;
-                dgvLastGoodCheckDB.DataSource = new DataView(dt);
+                using (SqlCommand cmd = new SqlCommand("dbo.LastGoodCheckDB_Get", cn) { CommandType = CommandType.StoredProcedure })
+                {
+                    cn.Open();
+                    cmd.Parameters.AddWithValue("InstanceIDs", string.Join(",", InstanceIDs));
+                    cmd.Parameters.AddWithValue("IncludeCritical", IncludeCritical);
+                    cmd.Parameters.AddWithValue("IncludeWarning", IncludeWarning);
+                    cmd.Parameters.AddWithValue("IncludeOK", IncludeOK);
+                    cmd.Parameters.AddWithValue("IncludeNA", IncludeNA);
+                    SqlDataAdapter da = new SqlDataAdapter(cmd);
+                    DataTable dt = new DataTable();
+                    da.Fill(dt);
+                    dgvLastGoodCheckDB.AutoGenerateColumns = false;
+                    dgvLastGoodCheckDB.DataSource = new DataView(dt);
+                }
             }
             configureInstanceThresholdsToolStripMenuItem.Enabled = InstanceIDs.Count == 1;
         }

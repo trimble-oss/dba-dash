@@ -45,8 +45,6 @@ namespace DBADashGUI
                 lblDriveLabel.Text = drive.DriveLabel + " (" + drive.DriveLetter + ")";
             }
 
-            var pct = drive.PercentFreeSpace;
-
             pbSpace.Value = (Int32)drive.PercentUsedSpace;
 
             lblFree.Text = String.Format("{0:0.0} GB free ({2:0.0}%) of {1:0.0} GB", drive.FreeSpaceGB, drive.DriveCapacityGB, drive.PercentFreeSpace);
@@ -114,8 +112,10 @@ namespace DBADashGUI
 
         private void lnkThreshold_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            var frm = new DriveThresholdConfig();
-            frm.DriveThreshold = drive;
+            var frm = new DriveThresholdConfig
+            {
+                DriveThreshold = drive
+            };
             frm.ShowDialog();
             if(frm.DialogResult== DialogResult.OK)
             {
@@ -132,9 +132,11 @@ namespace DBADashGUI
 
         private void lnkHistory_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            var frm = new DriveHistoryView();
-            frm.DriveID = this.Drive.DriveID;
-            frm.Text = this.Drive.InstanceName + " | " + this.Drive.DriveLetter + " " + this.Drive.DriveLabel;
+            var frm = new DriveHistoryView
+            {
+                DriveID = this.Drive.DriveID,
+                Text = this.Drive.InstanceName + " | " + this.Drive.DriveLetter + " " + this.Drive.DriveLabel
+            };
             frm.Show();
         }
     }

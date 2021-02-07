@@ -71,18 +71,18 @@ namespace DBADashGUI.Performance
             var cn = new SqlConnection(Common.ConnectionString);
             using (cn)
             {
-                cn.Open();
-                SqlCommand cmd = new SqlCommand("dbo.PerformanceCounterSummary_Get", cn);
-                cmd.CommandType = CommandType.StoredProcedure;
-                cmd.Parameters.AddWithValue("InstanceID", InstanceID);
-                cmd.Parameters.AddWithValue("FromDate", fromDate);
-                cmd.Parameters.AddWithValue("ToDate", toDate);
-                cmd.Parameters.AddWithValue("Search", txtSearch.Text);
-                SqlDataAdapter da = new SqlDataAdapter(cmd);
-                DataTable dt = new DataTable();
-                da.Fill(dt);
-                dgv.AutoGenerateColumns = false;
-                dgv.DataSource = dt;
+                using (SqlCommand cmd = new SqlCommand("dbo.PerformanceCounterSummary_Get", cn) { CommandType = CommandType.StoredProcedure }) {
+                    cn.Open();
+                    cmd.Parameters.AddWithValue("InstanceID", InstanceID);
+                    cmd.Parameters.AddWithValue("FromDate", fromDate);
+                    cmd.Parameters.AddWithValue("ToDate", toDate);
+                    cmd.Parameters.AddWithValue("Search", txtSearch.Text);
+                    SqlDataAdapter da = new SqlDataAdapter(cmd);
+                    DataTable dt = new DataTable();                   
+                    da.Fill(dt);
+                    dgv.AutoGenerateColumns = false;
+                    dgv.DataSource = dt;
+                }
             }
         }
 
@@ -135,9 +135,11 @@ namespace DBADashGUI.Performance
 
         private void tsCustom_Click(object sender, EventArgs e)
         {
-            var frm = new CustomTimePicker();
-            frm.FromDate = fromDate.ToLocalTime();
-            frm.ToDate = toDate.ToLocalTime();
+            var frm = new CustomTimePicker
+            {
+                FromDate = fromDate.ToLocalTime(),
+                ToDate = toDate.ToLocalTime()
+            };
             frm.ShowDialog();
             if (frm.DialogResult == DialogResult.OK)
             {

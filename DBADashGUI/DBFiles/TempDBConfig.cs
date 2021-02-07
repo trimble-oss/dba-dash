@@ -20,18 +20,18 @@ namespace DBADashGUI.DBFiles
 
         public void RefreshData()
         {
-            var cn = new SqlConnection(Common.ConnectionString);
-            using (cn)
+            using (var cn = new SqlConnection(Common.ConnectionString))
             {
-                cn.Open();
-                SqlCommand cmd = new SqlCommand("dbo.TempDBConfig_Get", cn);
-                cmd.Parameters.AddWithValue("@InstanceIDs", string.Join(",", InstanceIDs));
-                cmd.CommandType = CommandType.StoredProcedure;
-                SqlDataAdapter da = new SqlDataAdapter(cmd);
-                DataTable dt = new DataTable();
-                da.Fill(dt);
-                dgvTempDB.AutoGenerateColumns = false;
-                dgvTempDB.DataSource = dt;
+                using (SqlCommand cmd = new SqlCommand("dbo.TempDBConfig_Get", cn) { CommandType = CommandType.StoredProcedure })
+                {
+                    cn.Open();
+                    cmd.Parameters.AddWithValue("@InstanceIDs", string.Join(",", InstanceIDs));
+                    SqlDataAdapter da = new SqlDataAdapter(cmd);
+                    DataTable dt = new DataTable();
+                    da.Fill(dt);
+                    dgvTempDB.AutoGenerateColumns = false;
+                    dgvTempDB.DataSource = dt;
+                }
             }
         }
 

@@ -108,23 +108,6 @@ namespace DBADashGUI.Performance
             RefreshData();
         }
 
-        //private void setDateGroup(Int32 grp)
-        //{
-        //    string itmName="Date Grouping";
-        //    foreach(ToolStripMenuItem itm in tsGrouping.DropDownItems)
-        //    {
-        //        itm.Checked = Convert.ToInt32(itm.Tag) == grp;
-        //        if (itm.Checked){ itmName = itm.Text; }
-        //    }
-        //    dateGrp = grp;
-        //    tsGrouping.Text = itmName;
-        //}
-
-        //public void RefreshData(DateTime from, DateTime to)
-        //{
-        //    dateGrp = DateGrouping((Int32)to.Subtract(from).TotalMinutes);          
-        //    RefreshData(from, to, dateGrp);
-        //}
 
         public void RefreshData(DateTime from,DateTime to)
         {

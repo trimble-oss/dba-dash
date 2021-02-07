@@ -90,68 +90,67 @@ namespace DBADashGUI.Performance
             SqlConnection cn = new SqlConnection(connectionString);
             using (cn)
             {
-                cn.Open();
-                SqlCommand cmd = new SqlCommand("dbo.CPU_Get", cn);
-                cmd.Parameters.AddWithValue("@InstanceID", InstanceID);
-                cmd.Parameters.AddWithValue("@FromDate", fromDate);
-                cmd.Parameters.AddWithValue("@ToDate", toDate);
-                cmd.Parameters.AddWithValue("@DateGroupingMin", DateGrouping);
-                cmd.CommandType = CommandType.StoredProcedure;
-                cmd.CommandTimeout = Properties.Settings.Default.CommandTimeout;
-                var rdr = cmd.ExecuteReader();
+                using (SqlCommand cmd = new SqlCommand("dbo.CPU_Get", cn) { CommandType = CommandType.StoredProcedure }) {
+                    cn.Open();
+                    cmd.Parameters.AddWithValue("@InstanceID", InstanceID);
+                    cmd.Parameters.AddWithValue("@FromDate", fromDate);
+                    cmd.Parameters.AddWithValue("@ToDate", toDate);
+                    cmd.Parameters.AddWithValue("@DateGroupingMin", DateGrouping);
+                    cmd.CommandTimeout = Properties.Settings.Default.CommandTimeout;
+                    var rdr = cmd.ExecuteReader();
 
-                var sqlProcessValues = new ChartValues<DateTimePoint>();
-                var otherValues = new ChartValues<DateTimePoint>();
-                var maxValues = new ChartValues<DateTimePoint>();
+                    var sqlProcessValues = new ChartValues<DateTimePoint>();
+                    var otherValues = new ChartValues<DateTimePoint>();
+                    var maxValues = new ChartValues<DateTimePoint>();
 
-                while (rdr.Read())
-                {
-                    eventTime = (DateTime)rdr["EventTime"];
-                    sqlProcessValues.Add(new DateTimePoint(eventTime.ToLocalTime(), Decimal.ToDouble((decimal)rdr["SQLProcessCPU"]) / 100.0));
-                    otherValues.Add(new DateTimePoint(eventTime.ToLocalTime(), Decimal.ToDouble((decimal)rdr["OtherCPU"]) / 100.0));
-                    maxValues.Add(new DateTimePoint(eventTime.ToLocalTime(), Decimal.ToDouble((decimal)rdr["MaxCPU"]) / 100.0));
-
-                }
-                if(update && maxValues.Count == 0)
-                {
-                    return;
-                }
-                if (update)
-                {
-                    var cnt = chartCPU.Series[0].Values.Count;
-                    if (cnt > 0) {
-                        while(((DateTimePoint)chartCPU.Series[0].Values[cnt - 1]).DateTime >= sqlProcessValues[0].DateTime)
-                        {
-                            chartCPU.Series[0].Values.RemoveAt(cnt-1);
-                            chartCPU.Series[1].Values.RemoveAt(cnt-1);
-                            chartCPU.Series[2].Values.RemoveAt(cnt-1);
-                            cnt -= 1;
-                        }
-                    }
-
-                    chartCPU.Series[0].Values.AddRange(sqlProcessValues);
-                    chartCPU.Series[1].Values.AddRange(otherValues);
-                    chartCPU.Series[2].Values.AddRange(maxValues);
-                    while (chartCPU.Series[0].Values.Count > mins)
+                    while (rdr.Read())
                     {
-                        if (((DateTimePoint)chartCPU.Series[0].Values[0]).DateTime > DateTime.Now.AddMinutes(-mins))
-                        {
-                            break;
-                        }
-                        else
-                        {
-                            if (chartCPU.Series[0].Values.Count > 0 && DateTime.Now.Subtract(((DateTimePoint)chartCPU.Series[0].Values[0]).DateTime).TotalMinutes > mins)
+                        eventTime = (DateTime)rdr["EventTime"];
+                        sqlProcessValues.Add(new DateTimePoint(eventTime.ToLocalTime(), Decimal.ToDouble((decimal)rdr["SQLProcessCPU"]) / 100.0));
+                        otherValues.Add(new DateTimePoint(eventTime.ToLocalTime(), Decimal.ToDouble((decimal)rdr["OtherCPU"]) / 100.0));
+                        maxValues.Add(new DateTimePoint(eventTime.ToLocalTime(), Decimal.ToDouble((decimal)rdr["MaxCPU"]) / 100.0));
+
+                    }
+                    if (update && maxValues.Count == 0)
+                    {
+                        return;
+                    }
+                    if (update)
+                    {
+                        var cnt = chartCPU.Series[0].Values.Count;
+                        if (cnt > 0) {
+                            while (((DateTimePoint)chartCPU.Series[0].Values[cnt - 1]).DateTime >= sqlProcessValues[0].DateTime)
                             {
-                                chartCPU.Series[0].Values.RemoveAt(0);
-                                chartCPU.Series[1].Values.RemoveAt(0);
-                                chartCPU.Series[2].Values.RemoveAt(0);
+                                chartCPU.Series[0].Values.RemoveAt(cnt - 1);
+                                chartCPU.Series[1].Values.RemoveAt(cnt - 1);
+                                chartCPU.Series[2].Values.RemoveAt(cnt - 1);
+                                cnt -= 1;
+                            }
+                        }
+
+                        chartCPU.Series[0].Values.AddRange(sqlProcessValues);
+                        chartCPU.Series[1].Values.AddRange(otherValues);
+                        chartCPU.Series[2].Values.AddRange(maxValues);
+                        while (chartCPU.Series[0].Values.Count > mins)
+                        {
+                            if (((DateTimePoint)chartCPU.Series[0].Values[0]).DateTime > DateTime.Now.AddMinutes(-mins))
+                            {
+                                break;
+                            }
+                            else
+                            {
+                                if (chartCPU.Series[0].Values.Count > 0 && DateTime.Now.Subtract(((DateTimePoint)chartCPU.Series[0].Values[0]).DateTime).TotalMinutes > mins)
+                                {
+                                    chartCPU.Series[0].Values.RemoveAt(0);
+                                    chartCPU.Series[1].Values.RemoveAt(0);
+                                    chartCPU.Series[2].Values.RemoveAt(0);
+                                }
                             }
                         }
                     }
-                }
-                else
-                {
-                    SeriesCollection s1 = new SeriesCollection
+                    else
+                    {
+                        SeriesCollection s1 = new SeriesCollection
                     {
                         new StackedAreaSeries
                         {
@@ -173,25 +172,25 @@ namespace DBADashGUI.Performance
                         PointGeometrySize = PointSize,
                         }
                     };
-                    chartCPU.AxisX.Clear();
-                    chartCPU.AxisY.Clear();
-                    string format = mins < 1440 ? "HH:mm" : "yyyy-MM-dd HH:mm";
-                    chartCPU.AxisX.Add(new Axis
-                    {
-                        LabelFormatter = val => new System.DateTime((long)val).ToString(format)
-                    });
-                    chartCPU.AxisY.Add(new Axis
-                    {
-                        LabelFormatter = val => val.ToString("P1"),
-                        MaxValue = 1,
-                        MinValue = 0,
+                        chartCPU.AxisX.Clear();
+                        chartCPU.AxisY.Clear();
+                        string format = mins < 1440 ? "HH:mm" : "yyyy-MM-dd HH:mm";
+                        chartCPU.AxisX.Add(new Axis
+                        {
+                            LabelFormatter = val => new System.DateTime((long)val).ToString(format)
+                        });
+                        chartCPU.AxisY.Add(new Axis
+                        {
+                            LabelFormatter = val => val.ToString("P1"),
+                            MaxValue = 1,
+                            MinValue = 0,
 
-                    });
-                    chartCPU.Series = s1;
-                    updateVisibility();
+                        });
+                        chartCPU.Series = s1;
+                        updateVisibility();
+                    }
+
                 }
-
-
             }
 
         }

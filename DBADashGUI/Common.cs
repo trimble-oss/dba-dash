@@ -81,19 +81,15 @@ namespace DBADashGUI
 
         public static string DDL(Int64 DDLID, string connectionString)
         {
-            SqlConnection cn = new SqlConnection(connectionString);
-            using (cn)
+            using (var cn = new SqlConnection(connectionString))
             {
-                cn.Open();
-                string sql = @"SELECT DDL
-FROM dbo.DDL
-WHERE DDLID = @DDLID";
-                SqlCommand cmd = new SqlCommand(sql, cn);
-                cmd.Parameters.AddWithValue("DDLID", DDLID);
-                var bDDL = (byte[])cmd.ExecuteScalar();
-
-                return DBADash.SchemaSnapshotDB.Unzip(bDDL);
-
+                using (var cmd = new SqlCommand("dbo.DDL_Get", cn) { CommandType = CommandType.StoredProcedure })
+                {
+                    cn.Open();
+                    cmd.Parameters.AddWithValue("DDLID", DDLID);
+                    var bDDL = (byte[])cmd.ExecuteScalar();
+                    return DBADash.SchemaSnapshotDB.Unzip(bDDL);
+                }
             }
         }
 
@@ -113,59 +109,51 @@ WHERE DDLID = @DDLID";
             }
             else
             {
-                SqlConnection cn = new SqlConnection(Common.ConnectionString);
-                using (cn)
+                using (var cn = new SqlConnection(Common.ConnectionString))
                 {
-                    cn.Open();
-                    SqlCommand cmd = new SqlCommand("DatabaseID_Get", cn)
+                    using (SqlCommand cmd = new SqlCommand("DatabaseID_Get", cn) { CommandType = CommandType.StoredProcedure })
                     {
-                        CommandType = CommandType.StoredProcedure
-                    };
-                    cmd.Parameters.AddWithValue("Instance", instance);
-                    cmd.Parameters.AddWithValue("DBName", dbName);
-                    return (Int32)cmd.ExecuteScalar();
+                        cn.Open();
+                        cmd.Parameters.AddWithValue("Instance", instance);
+                        cmd.Parameters.AddWithValue("DBName", dbName);
+                        return (Int32)cmd.ExecuteScalar();
+                    }
                 }
             }
         }
 
         public static DataTable GetFiles(Int32 DatabaseID)
         {
-            SqlConnection cn = new SqlConnection(Common.ConnectionString);
-            using (cn)
+            using (var cn = new SqlConnection(Common.ConnectionString))
             {
-                cn.Open();
-                SqlCommand cmd = new SqlCommand("dbo.DBFiles_Get", cn)
-                {
-                    CommandType = CommandType.StoredProcedure
-                };
-                cmd.Parameters.AddWithValue("DatabaseID", DatabaseID);
-                cmd.Parameters.AddWithValue("IncludeWarning", true);
-                cmd.Parameters.AddWithValue("IncludeNA", true);
-                cmd.Parameters.AddWithValue("IncludeCritical", true);
-                cmd.Parameters.AddWithValue("IncludeOK", true);
-                cmd.Parameters.AddWithValue("FileGroupLevel", 0);
-                SqlDataAdapter da = new SqlDataAdapter(cmd);
-                DataTable dt = new DataTable();
-                da.Fill(dt);
-                return dt;
+                using (SqlCommand cmd = new SqlCommand("dbo.DBFiles_Get", cn) { CommandType = CommandType.StoredProcedure }) {
+                    cn.Open();
+                    cmd.Parameters.AddWithValue("DatabaseID", DatabaseID);
+                    cmd.Parameters.AddWithValue("IncludeWarning", true);
+                    cmd.Parameters.AddWithValue("IncludeNA", true);
+                    cmd.Parameters.AddWithValue("IncludeCritical", true);
+                    cmd.Parameters.AddWithValue("IncludeOK", true);
+                    cmd.Parameters.AddWithValue("FileGroupLevel", 0);
+                    SqlDataAdapter da = new SqlDataAdapter(cmd);
+                    DataTable dt = new DataTable();
+                    da.Fill(dt);
+                    return dt;
+                }
             }
         }
 
         public static DataTable GetFileGroups(Int32 DatabaseID)
         {
-            SqlConnection cn = new SqlConnection(Common.ConnectionString);
-            using (cn)
+            using (var cn = new SqlConnection(Common.ConnectionString))
             {
-                cn.Open();
-                SqlCommand cmd = new SqlCommand("dbo.FileGroup_Get", cn)
-                {
-                    CommandType = CommandType.StoredProcedure
-                };
-                cmd.Parameters.AddWithValue("DatabaseID", DatabaseID);
-                SqlDataAdapter da = new SqlDataAdapter(cmd);
-                DataTable dt = new DataTable();
-                da.Fill(dt);
-                return dt;
+                using (var cmd = new SqlCommand("dbo.FileGroup_Get", cn) { CommandType = CommandType.StoredProcedure }) {
+                    cn.Open();
+                    cmd.Parameters.AddWithValue("DatabaseID", DatabaseID);
+                    SqlDataAdapter da = new SqlDataAdapter(cmd);
+                    DataTable dt = new DataTable();
+                    da.Fill(dt);
+                    return dt;
+                }
             }
         }
 
@@ -342,8 +330,7 @@ WHERE DDLID = @DDLID";
 
         public static DataTable ObjectExecutionStats(Int32 instanceID, Int32 databaseID, DateTime from, DateTime to, Int64 objectID, Int32 dateGrouping, string measure,string instance="")
         {
-            SqlConnection cn = new SqlConnection(Common.ConnectionString);
-            using (cn)
+            using (var cn = new SqlConnection(Common.ConnectionString))
             {
                 using (var cmd = new SqlCommand("dbo.ObjectExecutionStats_Get", cn))
                 {

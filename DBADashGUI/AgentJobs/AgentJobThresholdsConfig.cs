@@ -48,9 +48,11 @@ namespace DBADashGUI.AgentJobs
         {
             get
             {
-                var threshold = new AgentJobThreshold();
-                threshold.InstanceID = InstanceID;
-                threshold.JobID = JobID;
+                var threshold = new AgentJobThreshold
+                {
+                    InstanceID = InstanceID,
+                    JobID = JobID
+                };
                 if (chkFailCount24Hrs.Checked)
                 {
                     threshold.FailCount24HrsCritical = (Int32?)numFailCount24HrsCritical.Value;

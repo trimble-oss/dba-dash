@@ -42,56 +42,57 @@ namespace DBADashGUI
             SqlConnection cn = new SqlConnection(Common.ConnectionString);
             using (cn)
             {
-                cn.Open();
-                SqlCommand cmd = new SqlCommand("dbo.DBSpace_Get", cn);
-                cmd.CommandType = CommandType.StoredProcedure;
-                cmd.CommandTimeout = Properties.Settings.Default.CommandTimeout;
-                cmd.Parameters.AddWithValue("@InstanceIDs", string.Join(",", InstanceIDs));
-                if (DatabaseID > 0)
+                using (SqlCommand cmd = new SqlCommand("dbo.DBSpace_Get", cn) { CommandType = CommandType.StoredProcedure })
                 {
-                    cmd.Parameters.AddWithValue("@DatabaseID", DatabaseID);
-                }
-                if (Instance.Length > 0)
-                {
-                    cmd.Parameters.AddWithValue("@Instance", Instance);
-                }
-                if (DBName.Length > 0)
-                {
-                    cmd.Parameters.AddWithValue("@DBName", DBName);
-                }
-                SqlDataAdapter da = new SqlDataAdapter(cmd);
-                DataTable dt = new DataTable();
-                da.Fill(dt);
-                dgv.AutoGenerateColumns = false;
-                dgv.DataSource = dt;
-
-                pieChart1.Series.Clear();
-                Func<ChartPoint, string> labelPoint = chartPoint =>
-               string.Format("{0} ({1:P})", chartPoint.SeriesView.Title, chartPoint.Participation);
-                SeriesCollection sc = new SeriesCollection();
-                var other = (double)0;
-                foreach (DataRow r in dt.Rows)
-                {
-                    var pct = (double)(decimal)r["Pct"];
-                    var allocated = (double)(decimal)r["AllocatedGB"];
-                    if (pct > 0.02)
+                    cn.Open();
+                    cmd.CommandTimeout = Properties.Settings.Default.CommandTimeout;
+                    cmd.Parameters.AddWithValue("@InstanceIDs", string.Join(",", InstanceIDs));
+                    if (DatabaseID > 0)
                     {
-                        var s = new PieSeries() { Title = (string)r["Grp"], Values = new ChartValues<double> { allocated }, LabelPoint = labelPoint, DataLabels = true, ToolTip = false };
+                        cmd.Parameters.AddWithValue("@DatabaseID", DatabaseID);
+                    }
+                    if (Instance.Length > 0)
+                    {
+                        cmd.Parameters.AddWithValue("@Instance", Instance);
+                    }
+                    if (DBName.Length > 0)
+                    {
+                        cmd.Parameters.AddWithValue("@DBName", DBName);
+                    }
+                    SqlDataAdapter da = new SqlDataAdapter(cmd);
+                    DataTable dt = new DataTable();
+                    da.Fill(dt);
+                    dgv.AutoGenerateColumns = false;
+                    dgv.DataSource = dt;
+
+                    pieChart1.Series.Clear();
+                    string labelPoint(ChartPoint chartPoint) =>
+                   string.Format("{0} ({1:P})", chartPoint.SeriesView.Title, chartPoint.Participation);
+                    SeriesCollection sc = new SeriesCollection();
+                    var other = (double)0;
+                    foreach (DataRow r in dt.Rows)
+                    {
+                        var pct = (double)(decimal)r["Pct"];
+                        var allocated = (double)(decimal)r["AllocatedGB"];
+                        if (pct > 0.02)
+                        {
+                            var s = new PieSeries() { Title = (string)r["Grp"], Values = new ChartValues<double> { allocated }, LabelPoint = labelPoint, DataLabels = true, ToolTip = false };
+                            sc.Add(s);
+                        }
+                        else
+                        {
+                            other += allocated;
+                        }
+                    }
+                    if (other > 0)
+                    {
+                        var s = new PieSeries() { Title = "{Other}", Values = new ChartValues<double> { other }, LabelPoint = labelPoint, DataLabels = true, ToolTip = false };
                         sc.Add(s);
                     }
-                    else
-                    {
-                        other += allocated;
-                    }
-                }
-                if (other > 0)
-                {
-                    var s = new PieSeries() { Title = "{Other}", Values = new ChartValues<double> { other }, LabelPoint = labelPoint, DataLabels = true, ToolTip = false };
-                    sc.Add(s);
-                }
 
-                pieChart1.Series = sc;
-                pieChart1.LegendLocation = LegendLocation.Bottom;
+                    pieChart1.Series = sc;
+                    pieChart1.LegendLocation = LegendLocation.Bottom;
+                }
             }
         }
 
@@ -125,10 +126,12 @@ namespace DBADashGUI
                 }
                 else if(dgv.Columns[e.ColumnIndex] == History)
                 {
-                    var frm = new DBSpaceHistoryView();
-                    frm.DatabaseID = DatabaseID;
-                    frm.Instance =  Instance;
-                    frm.DBName = DBName;
+                    var frm = new DBSpaceHistoryView
+                    {
+                        DatabaseID = DatabaseID,
+                        Instance = Instance,
+                        DBName = DBName
+                    };
                     if (InstanceIDs.Count > 1 && Instance.Length == 0)
                     {
                         frm.Instance = selectedGroupValue;
@@ -193,10 +196,12 @@ namespace DBADashGUI
 
         private void tsHistory_Click(object sender, EventArgs e)
         {
-            var frm = new DBSpaceHistoryView();
-            frm.DatabaseID = DatabaseID;
-            frm.Instance = Instance;
-            frm.DBName = DBName;
+            var frm = new DBSpaceHistoryView
+            {
+                DatabaseID = DatabaseID,
+                Instance = Instance,
+                DBName = DBName
+            };
             if (frm.DatabaseID < 1)
             {
                 frm.DatabaseID = Common.GetDatabaseID(frm.Instance, frm.DBName);

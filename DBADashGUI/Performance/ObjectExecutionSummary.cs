@@ -240,63 +240,64 @@ namespace DBADashGUI.Performance
             SqlConnection cn = new SqlConnection(Common.ConnectionString);
             using (cn)
             {
-                cn.Open();
-                SqlCommand cmd = new SqlCommand("dbo.ObjectExecutionStatsSummary_Get", cn);
-                if (InstanceID > 0)
+                using (SqlCommand cmd = new SqlCommand("dbo.ObjectExecutionStatsSummary_Get", cn) { CommandType = CommandType.StoredProcedure })
                 {
-                    cmd.Parameters.AddWithValue("InstanceID", InstanceID);
-                }
-                else if (Instance != null && Instance.Length > 0)
-                {
-                    cmd.Parameters.AddWithValue("Instance", Instance);
-                }
-                else
-                {
-                    throw new Exception("Instance not provided to Object Execution Summary");
-                }
-                if (ObjectID > 0)
-                {
-                    cmd.Parameters.AddWithValue("ObjectID", ObjectID);
-                }
-                if (DatabaseID > 0)
-                {
-                    cmd.Parameters.AddWithValue("DatabaseID", DatabaseID);
-                }
-                if (compareFrom != DateTime.MinValue && compareFrom != DateTime.MaxValue && compareTo != DateTime.MinValue && compareTo != DateTime.MaxValue)
-                {
-                    cmd.Parameters.AddWithValue("CompareFrom", compareFrom);
-                    cmd.Parameters.AddWithValue("CompareTo", compareTo);
-                }
-                if (Types.Length > 0)
-                {
-                    cmd.Parameters.AddWithValue("Types", Types);
-                }
+                    cn.Open();
+                    if (InstanceID > 0)
+                    {
+                        cmd.Parameters.AddWithValue("InstanceID", InstanceID);
+                    }
+                    else if (Instance != null && Instance.Length > 0)
+                    {
+                        cmd.Parameters.AddWithValue("Instance", Instance);
+                    }
+                    else
+                    {
+                        throw new Exception("Instance not provided to Object Execution Summary");
+                    }
+                    if (ObjectID > 0)
+                    {
+                        cmd.Parameters.AddWithValue("ObjectID", ObjectID);
+                    }
+                    if (DatabaseID > 0)
+                    {
+                        cmd.Parameters.AddWithValue("DatabaseID", DatabaseID);
+                    }
+                    if (compareFrom != DateTime.MinValue && compareFrom != DateTime.MaxValue && compareTo != DateTime.MinValue && compareTo != DateTime.MaxValue)
+                    {
+                        cmd.Parameters.AddWithValue("CompareFrom", compareFrom);
+                        cmd.Parameters.AddWithValue("CompareTo", compareTo);
+                    }
+                    if (Types.Length > 0)
+                    {
+                        cmd.Parameters.AddWithValue("Types", Types);
+                    }
 
-                cmd.Parameters.AddWithValue("FromDate", fromDate);
-                cmd.Parameters.AddWithValue("ToDate", toDate);
-                cmd.CommandTimeout = Properties.Settings.Default.CommandTimeout;
-                cmd.CommandType = CommandType.StoredProcedure;
-                SqlDataAdapter da = new SqlDataAdapter(cmd);
-                DataTable dt = new DataTable();
-                da.Fill(dt);
-                if (dt.Rows.Count == 1)
-                {
-                    refreshChart((Int64)dt.Rows[0]["ObjectID"], (string)dt.Rows[0]["ObjectName"]);
+                    cmd.Parameters.AddWithValue("FromDate", fromDate);
+                    cmd.Parameters.AddWithValue("ToDate", toDate);
+                    cmd.CommandTimeout = Properties.Settings.Default.CommandTimeout;
+
+                    SqlDataAdapter da = new SqlDataAdapter(cmd);
+                    DataTable dt = new DataTable();
+                    da.Fill(dt);
+                    if (dt.Rows.Count == 1)
+                    {
+                        refreshChart((Int64)dt.Rows[0]["ObjectID"], (string)dt.Rows[0]["ObjectName"]);
+                    }
+                    dgv.Columns.Clear();
+                    dgv.AutoGenerateColumns = false;
+
+
+                    dgv.Columns.AddRange(Columns.ToArray());
+                    setColVisibility();
+
+                    dgv.DataSource = new DataView(dt, null, "total_duration_sec DESC", DataViewRowState.CurrentRows);
+                    dgv.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.DisplayedCells;
+                    if (splitContainer1.Panel1Collapsed == false)
+                    {
+                        refreshChart();
+                    }
                 }
-                dgv.Columns.Clear();
-                dgv.AutoGenerateColumns = false;
-
-
-                dgv.Columns.AddRange(Columns.ToArray());
-                setColVisibility();
-
-                dgv.DataSource = new DataView(dt, null, "total_duration_sec DESC", DataViewRowState.CurrentRows);
-                dgv.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.DisplayedCells;
-                if (splitContainer1.Panel1Collapsed == false)
-                {
-                    refreshChart();
-                }
-
             }
         }
 
