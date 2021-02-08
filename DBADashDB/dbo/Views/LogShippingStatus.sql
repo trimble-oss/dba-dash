@@ -42,3 +42,4 @@ WHERE (D.state =1 OR D.is_in_standby=1)
 AND D.IsActive=1
 AND I.IsActive=1
 AND D.create_date < DATEADD(d,-1,GETUTCDATE())
+AND D.recovery_model<>3
