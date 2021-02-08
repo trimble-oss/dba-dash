@@ -348,8 +348,8 @@ namespace DBADashGUI
                customChecks1.InstanceIDs = n.Type == SQLTreeItem.TreeType.DBADashRoot ? AllInstanceIDs : instanceIDs;
                customChecks1.IncludeCritical = true;
                customChecks1.IncludeWarning = true;
-               customChecks1.IncludeNA = n.InstanceID > 0;
-               customChecks1.IncludeOK = n.InstanceID > 0;
+               customChecks1.IncludeNA = n.InstanceID > 0 || n.Type == SQLTreeItem.TreeType.AzureInstance;
+               customChecks1.IncludeOK = n.InstanceID > 0 || n.Type == SQLTreeItem.TreeType.AzureInstance;
                customChecks1.RefreshData();
             }
             if (tabs.SelectedTab == tabPC)
