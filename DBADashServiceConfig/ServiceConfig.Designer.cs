@@ -56,6 +56,7 @@
             this.bttnCancel = new System.Windows.Forms.Button();
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabPage3 = new System.Windows.Forms.TabPage();
+            this.chkAutoUpgradeRepoDB = new System.Windows.Forms.CheckBox();
             this.bttnConnect = new System.Windows.Forms.Button();
             this.lblVersionInfo = new System.Windows.Forms.Label();
             this.bttnDeployDatabase = new System.Windows.Forms.Button();
@@ -81,12 +82,16 @@
             this.bttnRemove = new System.Windows.Forms.Button();
             this.tabPage2 = new System.Windows.Forms.TabPage();
             this.tabAzureDB = new System.Windows.Forms.TabPage();
+            this.numAzureScanInterval = new System.Windows.Forms.NumericUpDown();
+            this.label11 = new System.Windows.Forms.Label();
+            this.chkScanEvery = new System.Windows.Forms.CheckBox();
             this.label10 = new System.Windows.Forms.Label();
             this.bttnScanNow = new System.Windows.Forms.Button();
             this.chkScanAzureDB = new System.Windows.Forms.CheckBox();
             this.tabPage4 = new System.Windows.Forms.TabPage();
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
-            this.chkAutoUpgradeRepoDB = new System.Windows.Forms.CheckBox();
+            this.lblHHmm = new System.Windows.Forms.Label();
+            this.lnkCronBuilder = new System.Windows.Forms.LinkLabel();
             ((System.ComponentModel.ISupportInitialize)(this.errorProvider1)).BeginInit();
             this.tabControl1.SuspendLayout();
             this.tabPage3.SuspendLayout();
@@ -98,6 +103,7 @@
             this.tabPage7.SuspendLayout();
             this.tabPage2.SuspendLayout();
             this.tabAzureDB.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.numAzureScanInterval)).BeginInit();
             this.tabPage4.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -384,6 +390,19 @@
             this.tabPage3.Text = "Destination:";
             this.tabPage3.UseVisualStyleBackColor = true;
             // 
+            // chkAutoUpgradeRepoDB
+            // 
+            this.chkAutoUpgradeRepoDB.AutoSize = true;
+            this.chkAutoUpgradeRepoDB.Checked = true;
+            this.chkAutoUpgradeRepoDB.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.chkAutoUpgradeRepoDB.Location = new System.Drawing.Point(103, 76);
+            this.chkAutoUpgradeRepoDB.Name = "chkAutoUpgradeRepoDB";
+            this.chkAutoUpgradeRepoDB.Size = new System.Drawing.Size(307, 21);
+            this.chkAutoUpgradeRepoDB.TabIndex = 8;
+            this.chkAutoUpgradeRepoDB.Text = "Auto upgrade repository DB on service start";
+            this.chkAutoUpgradeRepoDB.UseVisualStyleBackColor = true;
+            this.chkAutoUpgradeRepoDB.CheckedChanged += new System.EventHandler(this.chkAutoUpgradeRepoDB_CheckedChanged);
+            // 
             // bttnConnect
             // 
             this.bttnConnect.Image = global::DBADashServiceConfig.Properties.Resources.Connect_16x;
@@ -577,6 +596,7 @@
             // 
             // tabPage7
             // 
+            this.tabPage7.Controls.Add(this.lnkCronBuilder);
             this.tabPage7.Controls.Add(this.chkSchemaSnapshotOnStart);
             this.tabPage7.Controls.Add(this.label8);
             this.tabPage7.Controls.Add(this.txtSnapshotCron);
@@ -662,6 +682,10 @@
             // 
             // tabAzureDB
             // 
+            this.tabAzureDB.Controls.Add(this.lblHHmm);
+            this.tabAzureDB.Controls.Add(this.numAzureScanInterval);
+            this.tabAzureDB.Controls.Add(this.label11);
+            this.tabAzureDB.Controls.Add(this.chkScanEvery);
             this.tabAzureDB.Controls.Add(this.label10);
             this.tabAzureDB.Controls.Add(this.bttnScanNow);
             this.tabAzureDB.Controls.Add(this.chkScanAzureDB);
@@ -673,9 +697,53 @@
             this.tabAzureDB.Text = "AzureDB";
             this.tabAzureDB.UseVisualStyleBackColor = true;
             // 
+            // numAzureScanInterval
+            // 
+            this.numAzureScanInterval.Increment = new decimal(new int[] {
+            3600,
+            0,
+            0,
+            0});
+            this.numAzureScanInterval.Location = new System.Drawing.Point(592, 23);
+            this.numAzureScanInterval.Maximum = new decimal(new int[] {
+            2147483647,
+            0,
+            0,
+            0});
+            this.numAzureScanInterval.Minimum = new decimal(new int[] {
+            1,
+            0,
+            0,
+            -2147483648});
+            this.numAzureScanInterval.Name = "numAzureScanInterval";
+            this.numAzureScanInterval.Size = new System.Drawing.Size(95, 22);
+            this.numAzureScanInterval.TabIndex = 28;
+            this.numAzureScanInterval.ValueChanged += new System.EventHandler(this.numAzureScanInterval_ValueChanged);
+            // 
+            // label11
+            // 
+            this.label11.AutoSize = true;
+            this.label11.Location = new System.Drawing.Point(693, 24);
+            this.label11.Name = "label11";
+            this.label11.Size = new System.Drawing.Size(61, 17);
+            this.label11.TabIndex = 27;
+            this.label11.Text = "seconds";
+            // 
+            // chkScanEvery
+            // 
+            this.chkScanEvery.AutoSize = true;
+            this.chkScanEvery.Location = new System.Drawing.Point(377, 23);
+            this.chkScanEvery.Name = "chkScanEvery";
+            this.chkScanEvery.Size = new System.Drawing.Size(218, 21);
+            this.chkScanEvery.TabIndex = 26;
+            this.chkScanEvery.Text = "Scan for new AzureDBs every";
+            this.toolTip1.SetToolTip(this.chkScanEvery, "Automatically detect when new azure DBs are created on this interval.");
+            this.chkScanEvery.UseVisualStyleBackColor = true;
+            this.chkScanEvery.CheckedChanged += new System.EventHandler(this.chkScanEvery_CheckedChanged);
+            // 
             // label10
             // 
-            this.label10.Location = new System.Drawing.Point(21, 115);
+            this.label10.Location = new System.Drawing.Point(21, 128);
             this.label10.Name = "label10";
             this.label10.Size = new System.Drawing.Size(728, 121);
             this.label10.TabIndex = 24;
@@ -688,6 +756,8 @@
             this.bttnScanNow.Size = new System.Drawing.Size(104, 30);
             this.bttnScanNow.TabIndex = 22;
             this.bttnScanNow.Text = "Scan Now";
+            this.toolTip1.SetToolTip(this.bttnScanNow, "Click this button to add connections for each Azure DB from the connection added " +
+        "for the master database.");
             this.bttnScanNow.UseVisualStyleBackColor = true;
             this.bttnScanNow.Click += new System.EventHandler(this.bttnScanNow_Click);
             // 
@@ -722,16 +792,25 @@
             this.tabPage4.Text = "Service";
             this.tabPage4.UseVisualStyleBackColor = true;
             // 
-            // chkAutoUpgradeRepoDB
+            // lblHHmm
             // 
-            this.chkAutoUpgradeRepoDB.AutoSize = true;
-            this.chkAutoUpgradeRepoDB.Location = new System.Drawing.Point(103, 76);
-            this.chkAutoUpgradeRepoDB.Name = "chkAutoUpgradeRepoDB";
-            this.chkAutoUpgradeRepoDB.Size = new System.Drawing.Size(307, 21);
-            this.chkAutoUpgradeRepoDB.TabIndex = 8;
-            this.chkAutoUpgradeRepoDB.Text = "Auto upgrade repository DB on service start";
-            this.chkAutoUpgradeRepoDB.UseVisualStyleBackColor = true;
-            this.chkAutoUpgradeRepoDB.CheckedChanged += new System.EventHandler(this.chkAutoUpgradeRepoDB_CheckedChanged);
+            this.lblHHmm.AutoSize = true;
+            this.lblHHmm.Location = new System.Drawing.Point(592, 51);
+            this.lblHHmm.Name = "lblHHmm";
+            this.lblHHmm.Size = new System.Drawing.Size(0, 17);
+            this.lblHHmm.TabIndex = 29;
+            // 
+            // lnkCronBuilder
+            // 
+            this.lnkCronBuilder.AutoSize = true;
+            this.lnkCronBuilder.Location = new System.Drawing.Point(197, 83);
+            this.lnkCronBuilder.Name = "lnkCronBuilder";
+            this.lnkCronBuilder.Size = new System.Drawing.Size(136, 17);
+            this.lnkCronBuilder.TabIndex = 22;
+            this.lnkCronBuilder.TabStop = true;
+            this.lnkCronBuilder.Text = "www.cronmaker.com";
+            this.toolTip1.SetToolTip(this.lnkCronBuilder, "For help building cron expressions");
+            this.lnkCronBuilder.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.lnkCronBuilder_LinkClicked);
             // 
             // ServiceConfig
             // 
@@ -767,6 +846,7 @@
             this.tabPage2.PerformLayout();
             this.tabAzureDB.ResumeLayout(false);
             this.tabAzureDB.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.numAzureScanInterval)).EndInit();
             this.tabPage4.ResumeLayout(false);
             this.tabPage4.PerformLayout();
             this.ResumeLayout(false);
@@ -833,6 +913,11 @@
         private System.Windows.Forms.ToolTip toolTip1;
         private System.Windows.Forms.Label label10;
         private System.Windows.Forms.CheckBox chkAutoUpgradeRepoDB;
+        private System.Windows.Forms.Label label11;
+        private System.Windows.Forms.CheckBox chkScanEvery;
+        private System.Windows.Forms.NumericUpDown numAzureScanInterval;
+        private System.Windows.Forms.Label lblHHmm;
+        private System.Windows.Forms.LinkLabel lnkCronBuilder;
     }
 }
 

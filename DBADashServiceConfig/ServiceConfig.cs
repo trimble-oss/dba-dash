@@ -257,8 +257,11 @@ namespace DBADashServiceConfig
             txtAccessKey.Text = collectionConfig.AccessKey;
             txtSecretKey.Text = collectionConfig.SecretKey;
             chkScanAzureDB.Checked = collectionConfig.ScanForAzureDBs;
+            chkScanEvery.Checked = collectionConfig.ScanForAzureDBsInterval > 0;
+            numAzureScanInterval.Value = collectionConfig.ScanForAzureDBsInterval;
             chkCustomizeMaintenanceCron.Checked = (collectionConfig.MaintenanceScheduleCron != null);
             chkAutoUpgradeRepoDB.Checked = collectionConfig.AutoUpdateDatabase;
+            updateScanInterval();
 
         }
 
@@ -675,6 +678,40 @@ namespace DBADashServiceConfig
         {
             collectionConfig.AutoUpdateDatabase = chkAutoUpgradeRepoDB.Checked;
             txtJson.Text = collectionConfig.Serialize();
+        }
+
+        private void chkScanEvery_CheckedChanged(object sender, EventArgs e)
+        {
+            if(numAzureScanInterval.Value==0 && chkScanEvery.Checked)
+            {
+                numAzureScanInterval.Value = 3600;
+            }
+            if (!chkScanEvery.Checked)
+            {
+                numAzureScanInterval.Value = 0;
+            }
+            collectionConfig.ScanForAzureDBsInterval = Convert.ToInt32(numAzureScanInterval.Value);
+            updateScanInterval();
+            txtJson.Text = collectionConfig.Serialize();
+        }
+
+        private void updateScanInterval()
+        {
+            lblHHmm.Visible = chkScanEvery.Checked;
+            lblHHmm.Text = TimeSpan.FromSeconds(Convert.ToInt32(numAzureScanInterval.Value)).ToString();
+        }
+
+        private void numAzureScanInterval_ValueChanged(object sender, EventArgs e)
+        {
+            chkScanEvery.Checked = numAzureScanInterval.Value > 0;
+            collectionConfig.ScanForAzureDBsInterval = Convert.ToInt32(numAzureScanInterval.Value);
+            updateScanInterval();
+            txtJson.Text = collectionConfig.Serialize();
+        }
+
+        private void lnkCronBuilder_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            Process.Start("http://www.cronmaker.com/");
         }
     }
 }

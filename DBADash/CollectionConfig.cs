@@ -17,11 +17,11 @@ namespace DBADash
         private string myString = "g&hAs2&mVOLwE6DqO!I5";
         public SchemaSnapshotDBOptions SchemaSnapshotOptions=null;
         public bool BinarySerialization { get; set; } = false;
-        public bool ScanForAzureDBs { get; set; } = false;
+        public bool ScanForAzureDBs { get; set; } = true;
         public Int32 ScanForAzureDBsInterval { get; set; } = 3600;
         public string ServiceName { get; set; } = "DBADashService";
 
-        public bool AutoUpdateDatabase { get; set; }
+        public bool AutoUpdateDatabase { get; set; } = true;
 
         public List<DBADashSource> SourceConnections = new List<DBADashSource>();
 
