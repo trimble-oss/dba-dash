@@ -173,6 +173,10 @@ namespace DBADashGUI
                 {
                     var tsmi = (ToolStripMenuItem)ts;
                     tsmi.Checked = Int32.Parse((string)tsmi.Tag) == mins;
+                    if (tsmi.Checked)
+                    {
+                        tsTime.Text = tsmi.Text;
+                    }
                 }
             }
         }
@@ -190,6 +194,7 @@ namespace DBADashGUI
                 _from = frm.FromDate.ToUniversalTime();
                 _to = frm.ToDate.ToUniversalTime();
                 mins = 0;
+                tsTime.Text = "Custom";
                 checkTime();
                 RefreshData();
                 tsCustom.Checked = true;
@@ -349,6 +354,7 @@ namespace DBADashGUI
         private void SlowQueries_Load(object sender, EventArgs e)
         {
             selectGroupBy();
+            checkTime();
         }
 
         private void resetToolStripMenuItem_Click(object sender, EventArgs e)
@@ -511,6 +517,15 @@ namespace DBADashGUI
                 SqlDataAdapter da = new SqlDataAdapter(cmd);
                 var dt = new DataTable();
                 da.Fill(dt);
+                dt.Columns.Add("text_trunc",typeof(string));
+                foreach(DataRow r in dt.Rows)
+                {
+                    if (r["text"] != DBNull.Value)
+                    {
+                        var txt = ((string)r["text"]);
+                        r["text_trunc"] = txt.Length > 10000 ? txt.Substring(0, 10000) : txt;
+                    }
+                }
                 Common.ConvertUTCToLocal(ref dt);
                 if(dt.Rows.Count== pageSize)
                 {

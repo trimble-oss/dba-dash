@@ -14,6 +14,8 @@ namespace DBADash
 
         }
 
+        private static readonly int commandTimeout = 60;
+
         private void logError(string errorSource, string errorMessage, DataTable dt,string errorContext="Import")
         {
             logError(errorSource, errorMessage, dt.DataSet,errorContext);
@@ -89,7 +91,7 @@ namespace DBADash
             {
                 using (var cn = new SqlConnection(connectionString))
                 {
-                    using (var cmd = new SqlCommand("DDLSnapshot_Add", cn)) {
+                    using (var cmd = new SqlCommand("DDLSnapshot_Add", cn) { CommandType = CommandType.StoredProcedure, CommandTimeout = commandTimeout }) {
                         cn.Open();
                         DateTime StartTime = (DateTime)dtSS.ExtendedProperties["StartTime"];
                         DateTime EndTime = (DateTime)dtSS.ExtendedProperties["EndTime"];
@@ -108,7 +110,6 @@ namespace DBADash
                         cmd.Parameters.AddWithValue("EndTime", EndTime);
                         cmd.Parameters.AddWithValue("SnapshotOptions", snapshotOptions);
                         cmd.Parameters.AddWithValue("SnapshotOptionsHash", snapshptOptionsHash);
-                        cmd.CommandType = CommandType.StoredProcedure;
                         cmd.ExecuteNonQuery();
                     }
                 }
@@ -132,7 +133,7 @@ namespace DBADash
                     var r = ds.Tables["ServerExtraProperties"].Rows[0];
                     using (var cn = new SqlConnection(connectionString))
                     {
-                        using (var cmd = new SqlCommand("ServerExtraProperties_Upd", cn))
+                        using (var cmd = new SqlCommand("ServerExtraProperties_Upd", cn) { CommandType = CommandType.StoredProcedure, CommandTimeout = commandTimeout })
                         {
                             cn.Open();
                             cmd.Parameters.AddWithValue("InstanceID", instanceID);
@@ -152,7 +153,6 @@ namespace DBADash
                             cmd.Parameters.AddWithValue("LastMemoryDump", r["LastMemoryDump"]);
                             cmd.Parameters.AddWithValue("MemoryDumpCount", r["MemoryDumpCount"]);
                             cmd.Parameters.AddWithValue("WindowsCaption", r["WindowsCaption"]);
-                            cmd.CommandType = CommandType.StoredProcedure;
                             cmd.ExecuteNonQuery();
                         }
                     }
@@ -171,7 +171,7 @@ namespace DBADash
             {
                 using (var cn = new SqlConnection(connectionString))
                 {
-                    using (var cmd = new SqlCommand(dt.TableName + "_Upd", cn)) {
+                    using (var cmd = new SqlCommand(dt.TableName + "_Upd", cn) { CommandTimeout = commandTimeout, CommandType = CommandType.StoredProcedure }) {
                         cn.Open();                        
                         if (dt.Rows.Count > 0)
                         {
@@ -179,7 +179,6 @@ namespace DBADash
                         }
                         cmd.Parameters.AddWithValue("InstanceID", instanceID);
                         cmd.Parameters.AddWithValue("SnapshotDate", SnapshotDate);
-                        cmd.CommandType = CommandType.StoredProcedure;
                         cmd.ExecuteNonQuery();
                     }
                 }
@@ -202,7 +201,7 @@ namespace DBADash
                 }
                 using (var cn =new SqlConnection(connectionString))
                 {
-                    using (var cmd = new SqlCommand("CollectionErrorLog_Add", cn)) {
+                    using (var cmd = new SqlCommand("CollectionErrorLog_Add", cn) { CommandType = CommandType.StoredProcedure, CommandTimeout = commandTimeout }) {
                         cn.Open();
                         
                         cmd.Parameters.AddWithValue("Errors", ds.Tables["Errors"]);
@@ -215,7 +214,6 @@ namespace DBADash
                             cmd.Parameters.AddWithValue("InstanceID", instanceID);
                         }
                         cmd.Parameters.AddWithValue("ErrorDate", SnapshotDate);
-                        cmd.CommandType = CommandType.StoredProcedure;
                         cmd.ExecuteNonQuery();
                     }
                 }
@@ -228,7 +226,7 @@ namespace DBADash
         {          
             using (var cn = new SqlConnection(connectionString))
             {
-                using (var cmd = new SqlCommand("Instance_Upd", cn)) {
+                using (var cmd = new SqlCommand("Instance_Upd", cn) { CommandType = CommandType.StoredProcedure, CommandTimeout = commandTimeout }) {
                     cn.Open();
                     
                     cmd.Parameters.AddWithValue("ConnectionID", (string)rInstance["ConnectionID"]);
@@ -242,7 +240,6 @@ namespace DBADash
                     }
                     var pInstanceID = cmd.Parameters.Add("InstanceID", SqlDbType.Int);
                     pInstanceID.Direction = ParameterDirection.Output;
-                    cmd.CommandType = CommandType.StoredProcedure;
                     cmd.ExecuteNonQuery();
                     return (Int32)pInstanceID.Value;
                 }
@@ -257,7 +254,7 @@ namespace DBADash
                 {                   
                     using (var cn = new SqlConnection(connectionString))
                     {
-                        using (SqlCommand cmd = new SqlCommand("Database_Upd", cn)) {
+                        using (SqlCommand cmd = new SqlCommand("Database_Upd", cn) { CommandType = CommandType.StoredProcedure, CommandTimeout = commandTimeout }) {
                             cn.Open();
                             var dtDB = ds.Tables["Databases"];
                             if (dtDB.Columns["owner_sid"].DataType == typeof(string))
@@ -279,8 +276,6 @@ namespace DBADash
                             cmd.Parameters.AddWithValue("DB", ds.Tables["Databases"]);
                             cmd.Parameters.AddWithValue("InstanceID", instanceID);
                             cmd.Parameters.AddWithValue("SnapshotDate", SnapshotDate);
-
-                            cmd.CommandType = CommandType.StoredProcedure;
                             cmd.ExecuteNonQuery();
                         }
                     }

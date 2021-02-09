@@ -313,6 +313,7 @@ namespace DBADashGUI.Performance
                     if (tsmi.Checked)
                     {
                         tsTimeOffset.Text = "Previous " + tsmi.Text;
+                        tsTime.Text = tsmi.Text;
                     }
                 }
             }
@@ -331,12 +332,13 @@ namespace DBADashGUI.Performance
             _from = DateTime.MinValue;
             _to = DateTime.MinValue;
             tsTimeOffset.Tag = mins.ToString();
-            if(compareFrom!=DateTime.MinValue && compareFrom != DateTime.MaxValue)
+            checkTime();
+            if (compareFrom!=DateTime.MinValue && compareFrom != DateTime.MaxValue)
             {
                 compareOffset = mins;
                 checkOffset();
             }          
-            checkTime();
+            
         }
 
         private void tsCustom_Click(object sender, EventArgs e)
@@ -352,6 +354,7 @@ namespace DBADashGUI.Performance
                 _from = frm.FromDate.ToUniversalTime();
                 _to = frm.ToDate.ToUniversalTime();
                 mins = 0;
+                tsTime.Text = "Custom";
                 checkTime();
                 tsTimeOffset.Tag = _to.Subtract(_from).TotalMinutes.ToString();
                 tsTimeOffset.Text = "Previous " + _to.Subtract(_from).ToString();
@@ -380,13 +383,17 @@ namespace DBADashGUI.Performance
 
         private void checkOffset()
         {
-
-            tsNoCompare.Checked = compareOffset <= 0;          
+            tsNoCompare.Checked = compareOffset == 0;          
             foreach (ToolStripItem itm in tsCompare.DropDownItems)
             {
                 if (itm.GetType() == typeof(ToolStripMenuItem))
                 {
-                    ((ToolStripMenuItem)itm).Checked = Int32.Parse((string)itm.Tag) == compareOffset;
+                    var ts = (ToolStripMenuItem)itm;
+                    ts.Checked = Int32.Parse((string)itm.Tag) == compareOffset;
+                    if (ts.Checked)
+                    {
+                        tsCompare.Text = "Compare To: " + ts.Text;
+                    }
                 }
             }
         }
@@ -410,7 +417,7 @@ namespace DBADashGUI.Performance
             {
                 _compareFrom = frm.FromDate.ToUniversalTime();
                 _compareTo = frm.ToDate.ToUniversalTime();
-                compareOffset = 0;
+                compareOffset = -1;
                 checkOffset();
                 refreshData();
                 tsCustomCompare.Checked = true;

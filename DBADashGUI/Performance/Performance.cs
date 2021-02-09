@@ -178,6 +178,8 @@ namespace DBADashGUI.Performance
         private void tsTime_Click(object sender, EventArgs e)
         {
             var itm = (ToolStripMenuItem)sender;
+            customFrom = DateTime.MinValue;
+            customTo = DateTime.MinValue;
             RefreshData(Int32.Parse((string)itm.Tag));
             checkTime();
       
@@ -196,6 +198,10 @@ namespace DBADashGUI.Performance
                 {
                     var mnu = (ToolStripMenuItem)ts;
                     mnu.Checked = Int32.Parse((string)mnu.Tag)==tag;
+                    if (mnu.Checked)
+                    {
+                        tsTime.Text = mnu.Text;
+                    }
                 }
             }
         }

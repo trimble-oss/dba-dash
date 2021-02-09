@@ -140,6 +140,10 @@ namespace DBADashGUI.Performance
                 {
                     var tsmi = (ToolStripMenuItem)ts;
                     tsmi.Checked = Int32.Parse((string)tsmi.Tag)== mins;
+                    if (tsmi.Checked)
+                    {
+                        tsTime.Text = tsmi.Text;
+                    }
                 }
             }
         }
@@ -258,6 +262,7 @@ namespace DBADashGUI.Performance
             {
                 _from = frm.FromDate.ToUniversalTime();
                 _to = frm.ToDate.ToUniversalTime();
+                tsTime.Text = "Custom";
                 mins = 0;
                 checkTime();
                 RefreshData();

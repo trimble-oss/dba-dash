@@ -362,7 +362,7 @@ namespace DBADashGUI
                 objectExecutionSummary1.Instance = n.InstanceName;
                 objectExecutionSummary1.InstanceID = n.InstanceID;
                 objectExecutionSummary1.DatabaseID = n.DatabaseID;
-                objectExecutionSummary1.ObjectID = n.ObjectID;
+                objectExecutionSummary1.ObjectID = (n.Type == SQLTreeItem.TreeType.Database || n.Type == SQLTreeItem.TreeType.AzureDatabase) ? -1 :  n.ObjectID;
                 objectExecutionSummary1.RefreshData();
             }
         }
