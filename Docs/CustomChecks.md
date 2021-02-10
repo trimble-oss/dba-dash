@@ -48,3 +48,30 @@ SELECT Test,
 FROM @CustomChecks
 ```
 By default the custom check stored procedure will be run as part of the general data collection which runs every 1hr.
+
+## Example - Azure Elastic Agent Jobs
+If you use elastic agent jobs in azure you could use the custom checks to add some basic monitoring for your elastic jobs.  Here is an example stored procedure that you could create in your job database.  Edit the script as required:
+
+```
+CREATE PROC [dbo].[DBADash_CustomCheck]
+AS
+WITH T AS (
+SELECT job_name,
+	SUM(CASE WHEN lifecycle='Failed' THEN 1 ELSE 0 END) AS FailCount,
+	SUM(CASE WHEN lifecycle='Succeeded' THEN 1 ELSE 0 END) AS SucceededCount,
+	MAX(CASE WHEN lifecycle='Failed' THEN end_time ELSE NULL END) AS LastFail,
+	MAX(CASE WHEN lifecycle='Succeeded' THEN end_time ELSE NULL END) AS LastSucceeded,
+	MAX(CASE WHEN lifecycle='WaitingForChildJobExecutions' THEN 'Y' ELSE 'N' END) AS IsInProgress
+FROM jobs.job_executions
+WHERE step_id IS NULL
+AND (end_time>=DATEADD(d,-7,GETUTCDATE()) OR end_time IS NULL)
+GROUP BY job_name
+)
+SELECT 'ElasticJobStatus' AS Test, 
+	job_name AS Context,
+	CASE WHEN T.LastFail IS NULL THEN 4 WHEN LastFail>ISNULL(LastSucceeded,'19000101') THEN 1 ELSE 2 END AS Status,
+	CONCAT('Fail Count 7 Days:',FailCount,', Succeed Count 7 Days:',SucceededCount, ', Last Fail: ', FORMAT(T.LastFail,'yyyy-MM-dd HH:mm'), ', Last Succeeded: ', T.LastSucceeded, ', Job In Progress:', T.IsInProgress) AS Info
+FROM T 
+GO
+```
+
