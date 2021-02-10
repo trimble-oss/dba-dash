@@ -16,9 +16,9 @@ If the tool doesn't run as sysadmin it won't be able to collect last good CHECKD
 * Connect Any Database
 * Alter Event Session (For Slow Query trace if used)
 * View Any Definition
+
 **MSDB Database:**
 * Add user to db_datareader role.
-* GRANT EXECUTE ON agent_datetime TO [DBADashUser]
 
 ## Config file Security
 
