@@ -18,7 +18,7 @@ DBA Dash is a tool for SQL Server DBAs to assist with daily checks, performance 
 
 ## Requirements
  
- - SQL Server 2016 SP1 or later required for DBADashDB repository database.  RDS supported.
+ - SQL Server 2016 SP1 or later required for DBADashDB repository database.  RDS is supported.  AzureDB is not supported.
  - SQL 2008-SQL 2019 supported for monitored instances - including Azure and RDS (SQL Server).  
  - Windows machine to run agent.  Agent can monitor multiple SQL instances.
  
@@ -52,11 +52,28 @@ Note: It's possible to run as a console app under your own user account for test
 **Note:**
 More advanced service configuration is possible.  e.g. A remote agent can be configured to write to a S3 bucket and another agent that connects to your repository database can use the S3 bucket as a source instead of a SQL connection string.  
 
+## AzureDB
+You can monitor Azure SQL Server databases with DBA Dash and the application includes some Azure specific dashboards that can help with performance/cost optimization.  Azure DB isn't supported for the repository database due to some deployment issues. The process for adding azure DB connections is similar to normal SQL instances but each database is considered a separate instance that we need a connection to.  You can manually add the connections for each database you want to monitor.  Alternatively you can just a connection to the **master** dastabase.
+
+If you have a connection to the master database, there are some options you can use on the "AzureDB" tab to add your other database connections:
+- Check the "Scan for AzureDBs on service start" option.  As the name suggests database connections will be added from the master connnection on service start.  
+- Check the "scan for new Azure DBs every 'x' seconds" option.  This is useful to pick up new AzureDBs.  Also if for some reason it fails to get the connections to your user databases on service start it would re-detect them on this interval.
+- Click the "Scan Now" option.  Use this option to add the individual database connections to the config file.
+
+Any database connections created from master will inherit the settings from the master connection for slow query capture etc.
+
+# Amazon RDS 
+Amazon RDS (SQL Server only) can be used for source connections and for the repository database.  
+
 ## Upgrade Process
 
  - Stop the DBA Dash agent.  Use `net stop dbadashservice` from the commandline or use the DBADashServiceConfigTool.exe tool (Service Tab) to stop the service.
  - Close any running instances of the GUI or DBA Dash Service Config tool.
  - Replace all the app binaries with the ones from the new release (copy/paste).  All the configuration information for the agent is stored in the ServiceConfig.json file so this file must be kept. 
+ - If the "auto upgrade repository DB on service start" option is enabled you can run `net start dbadashservice` to complete the installation.  Any database schema changes will be deployed automatically when the service starts. 
+
+** Alternatively:  **
+
  - Run DBADashServiceConfigTool.exe.  On the destination tab you should be notified if there are database schema changes that need to be deployed.  If necessary click Deploy/Update Database. Either click the "Deploy" button to apply the schema changes or click "Generate Script" if you want to review the changes/deploy manually. Note: The script must be run in sqlcmd mode.
  **Ensure you have a backup prior to deploying changes.**
  - Click the service tab and click "Start" to start the service.
