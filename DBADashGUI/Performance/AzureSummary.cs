@@ -467,7 +467,7 @@ namespace DBADashGUI.Performance
         private void dgv_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
             var col = dgv.Columns[e.ColumnIndex];
-            if (e.RowIndex>=0 && col == colDB || col==colElasticPool)
+            if (e.RowIndex>=0 && (col == colDB || col==colElasticPool))
             {
                 DataRowView row = (DataRowView)dgv.Rows[e.RowIndex].DataBoundItem;
                 string instance =(string)row["Instance"];
