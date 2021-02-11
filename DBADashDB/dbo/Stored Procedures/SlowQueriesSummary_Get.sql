@@ -48,7 +48,7 @@ DECLARE @GroupSQL NVARCHAR(MAX) = CASE @GroupBy WHEN 'ConnectionID' THEN 'I.Conn
 DECLARE @SQL NVARCHAR(MAX)
 SET @SQL = 
 N'SELECT TOP(@Top) ' + @GroupSQL + ' as Grp,
-		SUM(CASE WHEN Duration<5000000 THEN 1 ELSE 0 END) AS [1-5 seconds], 
+		SUM(CASE WHEN Duration<5000000 THEN 1 ELSE 0 END) AS [<5 seconds], 
 		SUM(CASE WHEN Duration>=5000000 AND Duration < 10000000 THEN 1 ELSE 0 END) AS [5-10 seconds], 
 		SUM(CASE WHEN Duration>=10000000 AND Duration < 20000000 THEN 1 ELSE 0 END) AS [10-20 seconds], 
 		SUM(CASE WHEN Duration>=20000000 AND Duration < 30000000 THEN 1 ELSE 0 END) AS [20-30 seconds], 

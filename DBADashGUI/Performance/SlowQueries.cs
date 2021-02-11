@@ -342,9 +342,9 @@ namespace DBADashGUI
                 {
                     loadSlowQueriesDetail(5, 10);
                 }
-                else if (dgvSummary.Columns[e.ColumnIndex] == _1to5)
+                else if (dgvSummary.Columns[e.ColumnIndex] == _lt5)
                 {
-                    loadSlowQueriesDetail(1, 5);
+                    loadSlowQueriesDetail(0, 5);
                 }
             }
         }
