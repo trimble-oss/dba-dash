@@ -470,14 +470,29 @@ namespace DBADashGUI.Performance
 
         private void refreshChart()
         {
-            objectExecutionLineChart1.FromDate = compareFrom> DateTime.MinValue && compareFrom<fromDate? compareFrom : fromDate;
-            objectExecutionLineChart1.ToDate = compareTo>=toDate && compareTo < DateTime.MaxValue ? compareTo : toDate;
+            if (compareFrom > DateTime.MinValue)
+            {
+                splitChart.Panel2Collapsed = false;
+                compareObjectExecutionLineChart.FromDate = compareFrom;
+                compareObjectExecutionLineChart.ToDate = compareTo;
+                compareObjectExecutionLineChart.RefreshData();
+
+            }
+            objectExecutionLineChart1.FromDate = fromDate;
+            objectExecutionLineChart1.ToDate = toDate;
             objectExecutionLineChart1.RefreshData();
         }
 
         private void refreshChart(Int64 objectID,string title)
         {
+
             splitContainer1.Panel1Collapsed = false;
+
+            compareObjectExecutionLineChart.InstanceID = InstanceID;
+            compareObjectExecutionLineChart.Instance = Instance;
+            compareObjectExecutionLineChart.ObjectID = objectID;
+            compareObjectExecutionLineChart.Title = title + " (Compare)";
+       
             objectExecutionLineChart1.InstanceID = InstanceID;
             objectExecutionLineChart1.Instance = Instance;
             objectExecutionLineChart1.ObjectID = objectID;

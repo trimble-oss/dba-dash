@@ -62,12 +62,18 @@
             this.extendedStoredProcedureToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.objectExecutionLineChart1 = new DBADashGUI.Performance.ObjectExecutionLineChart();
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
+            this.compareObjectExecutionLineChart = new DBADashGUI.Performance.ObjectExecutionLineChart();
+            this.splitChart = new System.Windows.Forms.SplitContainer();
             ((System.ComponentModel.ISupportInitialize)(this.dgv)).BeginInit();
             this.toolStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
             this.splitContainer1.Panel2.SuspendLayout();
             this.splitContainer1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.splitChart)).BeginInit();
+            this.splitChart.Panel1.SuspendLayout();
+            this.splitChart.Panel2.SuspendLayout();
+            this.splitChart.SuspendLayout();
             this.SuspendLayout();
             // 
             // dgv
@@ -82,7 +88,7 @@
             this.dgv.RowHeadersVisible = false;
             this.dgv.RowHeadersWidth = 51;
             this.dgv.RowTemplate.Height = 24;
-            this.dgv.Size = new System.Drawing.Size(1262, 253);
+            this.dgv.Size = new System.Drawing.Size(1262, 255);
             this.dgv.TabIndex = 0;
             this.dgv.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgv_CellContentClick);
             this.dgv.RowsAdded += new System.Windows.Forms.DataGridViewRowsAddedEventHandler(this.dgv_RowsAdded);
@@ -99,7 +105,7 @@
             this.tsType});
             this.toolStrip1.Location = new System.Drawing.Point(0, 0);
             this.toolStrip1.Name = "toolStrip1";
-            this.toolStrip1.Size = new System.Drawing.Size(1262, 31);
+            this.toolStrip1.Size = new System.Drawing.Size(1262, 27);
             this.toolStrip1.TabIndex = 4;
             this.toolStrip1.Text = "toolStrip1";
             // 
@@ -109,7 +115,7 @@
             this.tsRefresh.Image = global::DBADashGUI.Properties.Resources._112_RefreshArrow_Green_16x16_72;
             this.tsRefresh.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsRefresh.Name = "tsRefresh";
-            this.tsRefresh.Size = new System.Drawing.Size(29, 28);
+            this.tsRefresh.Size = new System.Drawing.Size(29, 24);
             this.tsRefresh.Text = "Refresh";
             this.tsRefresh.Click += new System.EventHandler(this.tsRefresh_Click);
             // 
@@ -119,7 +125,7 @@
             this.tsCopy.Image = global::DBADashGUI.Properties.Resources.ASX_Copy_blue_16x;
             this.tsCopy.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsCopy.Name = "tsCopy";
-            this.tsCopy.Size = new System.Drawing.Size(29, 28);
+            this.tsCopy.Size = new System.Drawing.Size(29, 24);
             this.tsCopy.Text = "Copy";
             this.tsCopy.Click += new System.EventHandler(this.tsCopy_Click);
             // 
@@ -141,7 +147,7 @@
             this.tsTime.Image = global::DBADashGUI.Properties.Resources.Time_16x;
             this.tsTime.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsTime.Name = "tsTime";
-            this.tsTime.Size = new System.Drawing.Size(76, 28);
+            this.tsTime.Size = new System.Drawing.Size(76, 24);
             this.tsTime.Text = "Time";
             // 
             // toolStripMenuItem2
@@ -256,7 +262,7 @@
             this.tsCompare.Image = global::DBADashGUI.Properties.Resources.Time_16x;
             this.tsCompare.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsCompare.Name = "tsCompare";
-            this.tsCompare.Size = new System.Drawing.Size(124, 28);
+            this.tsCompare.Size = new System.Drawing.Size(124, 24);
             this.tsCompare.Text = "Compare To";
             // 
             // tsTimeOffset
@@ -312,7 +318,7 @@
             this.tsColumns.Image = global::DBADashGUI.Properties.Resources.Column_16x;
             this.tsColumns.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsColumns.Name = "tsColumns";
-            this.tsColumns.Size = new System.Drawing.Size(34, 28);
+            this.tsColumns.Size = new System.Drawing.Size(34, 24);
             this.tsColumns.Text = "Columns";
             // 
             // tsType
@@ -327,7 +333,7 @@
             this.tsType.Image = global::DBADashGUI.Properties.Resources.FilterDropdown_16x;
             this.tsType.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsType.Name = "tsType";
-            this.tsType.Size = new System.Drawing.Size(74, 28);
+            this.tsType.Size = new System.Drawing.Size(74, 24);
             this.tsType.Text = "Type";
             // 
             // procedureToolStripMenuItem
@@ -389,27 +395,54 @@
             this.objectExecutionLineChart1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.objectExecutionLineChart1.Location = new System.Drawing.Point(0, 0);
             this.objectExecutionLineChart1.Name = "objectExecutionLineChart1";
-            this.objectExecutionLineChart1.Size = new System.Drawing.Size(1262, 627);
+            this.objectExecutionLineChart1.Size = new System.Drawing.Size(1262, 314);
             this.objectExecutionLineChart1.TabIndex = 5;
             this.objectExecutionLineChart1.Title = "abc";
             // 
             // splitContainer1
             // 
             this.splitContainer1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.splitContainer1.Location = new System.Drawing.Point(0, 31);
+            this.splitContainer1.Location = new System.Drawing.Point(0, 27);
             this.splitContainer1.Name = "splitContainer1";
             this.splitContainer1.Orientation = System.Windows.Forms.Orientation.Horizontal;
             // 
             // splitContainer1.Panel1
             // 
-            this.splitContainer1.Panel1.Controls.Add(this.objectExecutionLineChart1);
+            this.splitContainer1.Panel1.Controls.Add(this.splitChart);
             // 
             // splitContainer1.Panel2
             // 
             this.splitContainer1.Panel2.Controls.Add(this.dgv);
-            this.splitContainer1.Size = new System.Drawing.Size(1262, 884);
-            this.splitContainer1.SplitterDistance = 627;
+            this.splitContainer1.Size = new System.Drawing.Size(1262, 888);
+            this.splitContainer1.SplitterDistance = 629;
             this.splitContainer1.TabIndex = 6;
+            // 
+            // compareObjectExecutionLineChart
+            // 
+            this.compareObjectExecutionLineChart.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.compareObjectExecutionLineChart.Location = new System.Drawing.Point(0, 0);
+            this.compareObjectExecutionLineChart.Name = "compareObjectExecutionLineChart";
+            this.compareObjectExecutionLineChart.Size = new System.Drawing.Size(1262, 311);
+            this.compareObjectExecutionLineChart.TabIndex = 6;
+            this.compareObjectExecutionLineChart.Title = "abc";
+            // 
+            // splitChart
+            // 
+            this.splitChart.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.splitChart.Location = new System.Drawing.Point(0, 0);
+            this.splitChart.Name = "splitChart";
+            this.splitChart.Orientation = System.Windows.Forms.Orientation.Horizontal;
+            // 
+            // splitChart.Panel1
+            // 
+            this.splitChart.Panel1.Controls.Add(this.objectExecutionLineChart1);
+            // 
+            // splitChart.Panel2
+            // 
+            this.splitChart.Panel2.Controls.Add(this.compareObjectExecutionLineChart);
+            this.splitChart.Size = new System.Drawing.Size(1262, 629);
+            this.splitChart.SplitterDistance = 314;
+            this.splitChart.TabIndex = 7;
             // 
             // ObjectExecutionSummary
             // 
@@ -427,6 +460,10 @@
             this.splitContainer1.Panel2.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).EndInit();
             this.splitContainer1.ResumeLayout(false);
+            this.splitChart.Panel1.ResumeLayout(false);
+            this.splitChart.Panel2.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.splitChart)).EndInit();
+            this.splitChart.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -468,5 +505,7 @@
         private System.Windows.Forms.ToolStripMenuItem extendedStoredProcedureToolStripMenuItem;
         private ObjectExecutionLineChart objectExecutionLineChart1;
         private System.Windows.Forms.SplitContainer splitContainer1;
+        private System.Windows.Forms.SplitContainer splitChart;
+        private ObjectExecutionLineChart compareObjectExecutionLineChart;
     }
 }
