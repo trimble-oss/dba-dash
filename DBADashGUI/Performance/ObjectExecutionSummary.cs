@@ -478,6 +478,10 @@ namespace DBADashGUI.Performance
                 compareObjectExecutionLineChart.RefreshData();
 
             }
+            else
+            {
+                splitChart.Panel2Collapsed = true;
+            }
             objectExecutionLineChart1.FromDate = fromDate;
             objectExecutionLineChart1.ToDate = toDate;
             objectExecutionLineChart1.RefreshData();
