@@ -43,9 +43,9 @@
             // chart1
             // 
             this.chart1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.chart1.Location = new System.Drawing.Point(0, 27);
+            this.chart1.Location = new System.Drawing.Point(0, 31);
             this.chart1.Name = "chart1";
-            this.chart1.Size = new System.Drawing.Size(1299, 767);
+            this.chart1.Size = new System.Drawing.Size(1299, 763);
             this.chart1.TabIndex = 0;
             this.chart1.Text = "cartesianChart1";
             // 
@@ -57,7 +57,7 @@
             this.tsAgg});
             this.toolStrip1.Location = new System.Drawing.Point(0, 0);
             this.toolStrip1.Name = "toolStrip1";
-            this.toolStrip1.Size = new System.Drawing.Size(1299, 27);
+            this.toolStrip1.Size = new System.Drawing.Size(1299, 31);
             this.toolStrip1.TabIndex = 1;
             this.toolStrip1.Text = "toolStrip1";
             // 
@@ -71,7 +71,6 @@
             // 
             // tsAgg
             // 
-            this.tsAgg.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
             this.tsAgg.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.totalToolStripMenuItem,
             this.minToolStripMenuItem,
@@ -81,8 +80,8 @@
             this.tsAgg.Image = global::DBADashGUI.Properties.Resources.AddComputedField_16x;
             this.tsAgg.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsAgg.Name = "tsAgg";
-            this.tsAgg.Size = new System.Drawing.Size(34, 24);
-            this.tsAgg.Text = "Agg";
+            this.tsAgg.Size = new System.Drawing.Size(69, 28);
+            this.tsAgg.Text = "Avg";
             // 
             // totalToolStripMenuItem
             // 

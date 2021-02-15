@@ -25,12 +25,14 @@ SELECT C.CounterID,
 	   ' + CASE WHEN @Use60Min=1 THEN 'MAX(PC.Value_Max) AS MaxValue,
 	   MIN(PC.Value_Min) AS MinValue,
 	   SUM(PC.Value_Total)/SUM(PC.SampleCount*1.0) AS AvgValue,
-	   SUM(PC.Value_Total) AS TotalValue,' 
+	   SUM(PC.Value_Total) AS TotalValue,
+	   SUM(SampleCount) as SampleCount,' 
 	   ELSE '
        MAX(PC.Value) AS MaxValue,
 	   MIN(PC.Value) AS MinValue,
 	   AVG(PC.Value) AS AvgValue,
-	   SUM(PC.Value) as TotalValue,' END + '
+	   SUM(PC.Value) as TotalValue,
+	   COUNT(*) as SampleCount,' END + '
 	   (SELECT TOP(1) Value FROM dbo.PerformanceCounters LV WHERE LV.InstanceID = @InstanceID AND LV.CounterID = C.CounterID ORDER BY LV.SnapshotDate DESC) AS CurrentValue 
 FROM dbo.InstanceCounters IC
 JOIN dbo.Counters C ON C.CounterID = IC.CounterID

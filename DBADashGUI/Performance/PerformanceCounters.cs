@@ -156,6 +156,7 @@ namespace DBADashGUI.Performance
                 if (itm.Checked)
                 {
                     agg = (string)itm.Tag;
+                    tsAgg.Text = itm.Text;
                 }
             }
             refreshChart();
