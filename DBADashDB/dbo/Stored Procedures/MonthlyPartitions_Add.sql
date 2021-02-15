@@ -22,7 +22,7 @@ DECLARE @Boundary DATETIME2(3)
 SELECT TOP(1) @Boundary= lb 
 FROM dbo.PartitionBoundaryHelper(@PartitionFunction,@TableName)
 ORDER BY partition_number DESC
-SELECT @Boundary = ISNULL(@Boundary,DATEADD(m, DATEDIFF(m, 0, GETUTCDATE()), 0))
+SELECT @Boundary = ISNULL(@Boundary,DATEADD(m, DATEDIFF(m, 0, GETUTCDATE())-1, 0))
 -- Repeat until we are @MonthsInFuture in the future
 WHILE DATEDIFF(m, GETUTCDATE(), @Boundary) < @MonthsInFuture
 BEGIN;

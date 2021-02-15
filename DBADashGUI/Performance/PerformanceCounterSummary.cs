@@ -76,7 +76,10 @@ namespace DBADashGUI.Performance
                     cmd.Parameters.AddWithValue("InstanceID", InstanceID);
                     cmd.Parameters.AddWithValue("FromDate", fromDate);
                     cmd.Parameters.AddWithValue("ToDate", toDate);
-                    cmd.Parameters.AddWithValue("Search", txtSearch.Text);
+                    if (txtSearch.Text.Length > 0)
+                    {
+                        cmd.Parameters.AddWithValue("Search", "%" + txtSearch.Text + "%");
+                    }                   
                     SqlDataAdapter da = new SqlDataAdapter(cmd);
                     DataTable dt = new DataTable();                   
                     da.Fill(dt);

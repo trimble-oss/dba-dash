@@ -19,3 +19,4 @@ EXEC dbo.MonthlyPartitions_Add @TableName = 'CPU_60MIN',@MonthsInFuture=@MonthsI
 EXEC dbo.MonthlyPartitions_Add @TableName = 'DBIOStats_60MIN',@MonthsInFuture=@MonthsInFuture
 EXEC dbo.MonthlyPartitions_Add @TableName = 'Waits_60MIN',@MonthsInFuture=@MonthsInFuture
 EXEC dbo.MonthlyPartitions_Add @TableName = 'ObjectExecutionStats_60MIN',@MonthsInFuture=@MonthsInFuture
+EXEC dbo.MonthlyPartitions_Add @TableName = 'PerformanceCounters_60MIN',@MonthsInFuture=@MonthsInFuture

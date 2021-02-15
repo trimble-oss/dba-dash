@@ -30,7 +30,7 @@
     <QueryStoreStaleQueryThreshold>15</QueryStoreStaleQueryThreshold>
     <QueryStoreMaxStorageSize>512</QueryStoreMaxStorageSize>
     <QueryStoreMaxPlansPerQuery>50</QueryStoreMaxPlansPerQuery>
-    <DacVersion>2.0.3.5</DacVersion>
+    <DacVersion>2.0.3.6</DacVersion>
     <ReadCommittedSnapshot>True</ReadCommittedSnapshot>
     <AllowSnapshotIsolation>True</AllowSnapshotIsolation>
   </PropertyGroup>
@@ -488,6 +488,10 @@
     <Build Include="dbo\Stored Procedures\DDL_Get.sql" />
     <Build Include="dbo\Stored Procedures\DBObjects_Get.sql" />
     <Build Include="dbo\Stored Procedures\DatabasesByInstance_Get.sql" />
+    <Build Include="dbo\Tables\PerformanceCounters_60MIN.sql" />
+    <Build Include="Storage\PF_PerformanceCounters_60MIN.sql" />
+    <Build Include="Storage\PS_PerformanceCounters_60MIN.sql" />
+    <Build Include="Switch\Tables\PerformanceCounters_60MIN.sql" />
   </ItemGroup>
   <ItemGroup>
     <PostDeploy Include="Script.PostDeployment1.sql" />

@@ -169,7 +169,8 @@ FROM (VALUES('ObjectExecutionStats',120),
 				('AzureDBElasticPoolResourceStats_60MIN',730),
 				('AzureDBResourceStats_60MIN',730),
 				('Waits_60MIN',730),
-				('PerformanceCounters', 180)
+				('PerformanceCounters', 180),
+				('PerformanceCounters_60MIN',730)
 				) AS t(TableName,RetentionDays)
 WHERE NOT EXISTS(SELECT 1 FROM dbo.DataRetention DR WHERE DR.TableName = T.TableName)
 
@@ -466,3 +467,30 @@ WHEN NOT MATCHED BY TARGET THEN
 
 
 EXEC dbo.Partitions_Add
+
+-- transition to 2.0.3.6
+IF NOT EXISTS(SELECT * FROM dbo.PerformanceCounters_60MIN)
+BEGIN
+	INSERT INTO dbo.PerformanceCounters_60MIN
+	(
+		InstanceID,
+		CounterID,
+		SnapshotDate,
+		Value_Total,
+		Value_Min,
+		Value_Max,
+		SampleCount
+	)
+	SELECT PC.InstanceID,
+			PC.CounterID,
+			DG.DateGroup,
+			SUM(PC.Value),
+			MIN(PC.Value),
+			MAX(PC.Value),
+			COUNT(*)  
+	FROM dbo.PerformanceCounters PC
+	CROSS APPLY [dbo].[DateGroupingMins](PC.SnapshotDate,60) DG
+	GROUP BY  PC.InstanceID,
+			PC.CounterID,
+			DG.DateGroup
+END

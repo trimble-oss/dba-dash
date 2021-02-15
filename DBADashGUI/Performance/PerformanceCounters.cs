@@ -31,13 +31,27 @@ namespace DBADashGUI.Performance
 
         public bool SmoothLines = false;
         public Int32 PointSize = 5;
+        string agg = "Value_Avg";
+
+        Int32 DateGrouping;
+        DataTable dt;
 
         public void RefreshData()
+        {
+            var mins = (Int32)ToDate.Subtract(FromDate).TotalMinutes;
+            this.InstanceID = InstanceID;
+            DateGrouping = Common.DateGrouping(mins, 200);
+            tsDateGrouping.Text = Common.DateGroupString(DateGrouping);
+            dt = GetPerformanceCounter();
+            refreshChart();
+        }
+
+        private void refreshChart()
         {
             chart1.AxisX.Clear();
             chart1.AxisY.Clear();
             chart1.Series = null;
-            var dt = GetPerformanceCounter();
+            
             var values = new ChartValues<DateTimePoint>();
             double maxValue = 0;
             double minValue = 0;
@@ -47,7 +61,7 @@ namespace DBADashGUI.Performance
             }
             foreach (DataRow r in dt.Rows)
             {
-                var value = Convert.ToDouble(r["Value"]);
+                var value = Convert.ToDouble(r[agg]);
                 maxValue = value > maxValue ? value : maxValue;
                 minValue = value < minValue ? value : minValue;
                 values.Add(new DateTimePoint((DateTime)r["SnapshotDate"],value ));
@@ -110,6 +124,7 @@ namespace DBADashGUI.Performance
                     cmd.Parameters.AddWithValue("FromDate", FromDate);
                     cmd.Parameters.AddWithValue("ToDate", ToDate);
                     cmd.Parameters.AddWithValue("CounterID", CounterID);
+                    cmd.Parameters.AddWithValue("DateGroupingMin", DateGrouping);
                     SqlDataAdapter da = new SqlDataAdapter(cmd);
                     DataTable dt = new DataTable();
                     da.Fill(dt);
@@ -117,6 +132,33 @@ namespace DBADashGUI.Performance
                     return dt;
                 }
             }
+        }
+
+        private void PerformanceCounters_Load(object sender, EventArgs e)
+        {
+            Common.AddDateGroups(tsDateGrouping, tsDateGrouping_Click);
+        }
+
+        private void tsDateGrouping_Click(object sender, EventArgs e)
+        {
+            var ts = (ToolStripMenuItem)sender;
+            DateGrouping = Convert.ToInt32(ts.Tag);
+            tsDateGrouping.Text = Common.DateGroupString(DateGrouping);
+            dt = GetPerformanceCounter();
+            refreshChart();
+        }
+
+        private void tsAgg_Click(object sender, EventArgs e)
+        {
+            foreach(ToolStripMenuItem itm in tsAgg.DropDownItems)
+            {
+                itm.Checked = itm == sender;
+                if (itm.Checked)
+                {
+                    agg = (string)itm.Tag;
+                }
+            }
+            refreshChart();
         }
     }
 }

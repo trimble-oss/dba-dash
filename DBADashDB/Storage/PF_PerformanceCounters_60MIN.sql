@@ -1,0 +1,4 @@
+﻿CREATE PARTITION FUNCTION [PF_PerformanceCounters_60MIN](DATETIME2 (2))
+    AS RANGE RIGHT
+    FOR VALUES ();
+

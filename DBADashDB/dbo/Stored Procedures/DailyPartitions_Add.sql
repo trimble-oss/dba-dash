@@ -25,7 +25,7 @@ DECLARE @Boundary DATETIME2(3)
 SELECT TOP(1) @Boundary= lb 
 FROM dbo.PartitionBoundaryHelper(@PartitionFunction,@TableName)
 ORDER BY partition_number DESC
-SELECT @Boundary = ISNULL(@Boundary,CAST(GETUTCDATE() AS DATE))
+SELECT @Boundary = ISNULL(@Boundary,DATEADD(d, DATEDIFF(d, 0, GETUTCDATE())-1, 0))
 -- Repeat until we are @DaysInFuture in the future
 WHILE DATEDIFF(day, GETUTCDATE(), @Boundary) < @DaysInFuture
 BEGIN;
