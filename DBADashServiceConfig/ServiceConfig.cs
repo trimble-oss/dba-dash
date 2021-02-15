@@ -268,7 +268,7 @@ namespace DBADashServiceConfig
         private void refreshServiceStatus()
         {
             svcCtrl = ServiceController.GetServices()
-    .FirstOrDefault(s => s.ServiceName == "DBADashService");
+    .FirstOrDefault(s => s.ServiceName == collectionConfig.ServiceName);
 
             if (svcCtrl == null)
             {
