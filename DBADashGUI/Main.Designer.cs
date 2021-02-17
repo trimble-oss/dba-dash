@@ -42,6 +42,7 @@
             this.tv1 = new System.Windows.Forms.TreeView();
             this.tabs = new System.Windows.Forms.TabControl();
             this.tabSnapshotsSummary = new System.Windows.Forms.TabPage();
+            this.schemaSnapshots1 = new DBADashGUI.Changes.SchemaSnapshots();
             this.tabSchema = new System.Windows.Forms.TabPage();
             this.splitSchemaSnapshot = new System.Windows.Forms.SplitContainer();
             this.label7 = new System.Windows.Forms.Label();
@@ -149,7 +150,6 @@
             this.dataGridViewTextBoxColumn21 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dataGridViewTextBoxColumn22 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dataGridViewTextBoxColumn23 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.schemaSnapshots1 = new DBADashGUI.Changes.SchemaSnapshots();
             this.menuStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitMain)).BeginInit();
             this.splitMain.Panel1.SuspendLayout();
@@ -339,6 +339,14 @@
             this.tabSnapshotsSummary.TabIndex = 1;
             this.tabSnapshotsSummary.Text = "Snapshot Summary";
             this.tabSnapshotsSummary.UseVisualStyleBackColor = true;
+            // 
+            // schemaSnapshots1
+            // 
+            this.schemaSnapshots1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.schemaSnapshots1.Location = new System.Drawing.Point(3, 3);
+            this.schemaSnapshots1.Name = "schemaSnapshots1";
+            this.schemaSnapshots1.Size = new System.Drawing.Size(1625, 1246);
+            this.schemaSnapshots1.TabIndex = 0;
             // 
             // tabSchema
             // 
@@ -1475,14 +1483,6 @@
             this.dataGridViewTextBoxColumn23.Name = "dataGridViewTextBoxColumn23";
             this.dataGridViewTextBoxColumn23.ReadOnly = true;
             this.dataGridViewTextBoxColumn23.Width = 94;
-            // 
-            // schemaSnapshots1
-            // 
-            this.schemaSnapshots1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.schemaSnapshots1.Location = new System.Drawing.Point(3, 3);
-            this.schemaSnapshots1.Name = "schemaSnapshots1";
-            this.schemaSnapshots1.Size = new System.Drawing.Size(1625, 1246);
-            this.schemaSnapshots1.TabIndex = 0;
             // 
             // Main
             // 

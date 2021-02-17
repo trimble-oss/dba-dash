@@ -181,13 +181,11 @@ namespace DBADashGUI
             }
             if(tabs.SelectedTab == tabSnapshotsSummary)
             {
-                if (n.Type == SQLTreeItem.TreeType.Database || n.Type == SQLTreeItem.TreeType.Instance || n.Type == SQLTreeItem.TreeType.AzureInstance || n.Type == SQLTreeItem.TreeType.AzureDatabase)
-                {
-                    schemaSnapshots1.InstanceID = n.InstanceID;
-                    schemaSnapshots1.InstanceName = n.InstanceName;
-                    schemaSnapshots1.DatabaseID = n.DatabaseID;
-                    schemaSnapshots1.RefreshData();
-                }
+                schemaSnapshots1.InstanceID = n.InstanceID;
+                schemaSnapshots1.InstanceName = n.InstanceName;
+                schemaSnapshots1.DatabaseID = n.DatabaseID;
+                schemaSnapshots1.InstanceIDs = AllInstanceIDs;
+                schemaSnapshots1.RefreshData();
             }
             if ( tabs.SelectedTab == tabSchema)
             {
@@ -542,6 +540,7 @@ namespace DBADashGUI
                 allowedTabs.Add(tabDrives);
                 allowedTabs.Add(tabLogShipping);
                 allowedTabs.Add(tabJobs);
+                allowedTabs.Add(tabSnapshotsSummary);
                 allowedTabs.Add(tabFiles);
                 allowedTabs.Add(tabLastGood);
                 allowedTabs.Add(tabDBADashErrorLog);

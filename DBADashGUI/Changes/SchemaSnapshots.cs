@@ -20,7 +20,11 @@ namespace DBADashGUI.Changes
         }
         readonly Int32 currentSummaryPageSize = 100;
         int currentSummaryPage = 1;
-      
+        public Int32 InstanceID;
+        public string InstanceName;
+        public Int32 DatabaseID;
+        public List<Int32> InstanceIDs;
+
 
         private void gvSnapshots_SelectionChanged(object sender, EventArgs e)
         {
@@ -53,9 +57,7 @@ namespace DBADashGUI.Changes
 
         private void gvSnapshotsDetail_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
-            var colCount = gvSnapshotsDetail.Columns.Count;
-
-            if (e.ColumnIndex == colCount - 1 || e.ColumnIndex == colCount - 2)
+            if (e.RowIndex>=0 && (e.ColumnIndex ==  colView.Index|| e.ColumnIndex == colDiff.Index))
             {
                 var row = (DataRowView)gvSnapshotsDetail.Rows[e.RowIndex].DataBoundItem;
                 string ddl = "";
@@ -68,55 +70,76 @@ namespace DBADashGUI.Changes
                 {
                     ddlOld = Common.DDL((Int64)row["OldDDLID"], Common.ConnectionString);
                 }
-                ViewMode mode = ViewMode.Diff;
-                if (e.ColumnIndex == colCount - 2)
-                {
-                    mode = ViewMode.Code;
-                }
+                ViewMode mode = e.ColumnIndex == colDiff.Index ? ViewMode.Diff : ViewMode.Code;
                 var frm = new Diff();
                 frm.setText(ddlOld, ddl, mode);
                 frm.Show();
             }
         }
-
-        public Int32 InstanceID;
-        public string InstanceName;
-        public Int32 DatabaseID;
  
         public void RefreshData()
         {
-            loadSnapshots();
+            if (InstanceID >0 || InstanceName.Length> 0)
+            {
+                loadSnapshots();
+                tsBack.Enabled = true;
+            }
+            else {
+                tsBack.Enabled = false;
+                loadInstanceSummary();
+            }
+        }
+
+        private void loadInstanceSummary()
+        {
+            splitSnapshotSummary.Visible = false;
+            dgvInstanceSummary.Visible = true;
+            SqlConnection cn = new SqlConnection(Common.ConnectionString);
+            using (cn)
+            {
+                using (SqlCommand cmd = new SqlCommand("dbo.DDLSnapshotInstanceSummary_Get", cn) { CommandType = CommandType.StoredProcedure })
+                {
+                    cn.Open();
+                    cmd.Parameters.AddWithValue("InstanceIDs",string.Join(",",InstanceIDs));
+                    SqlDataAdapter da = new SqlDataAdapter(cmd);
+                    var dt = new DataTable();
+                    da.Fill(dt);
+                    Common.ConvertUTCToLocal(ref dt);
+                    dgvInstanceSummary.DataSource = dt;
+                }
+            }
         }
 
         private void loadSnapshots(Int32 pageNum = 1)
         {
+            splitSnapshotSummary.Visible = true;
+            dgvInstanceSummary.Visible = false;
             gvSnapshotsDetail.DataSource = null;
             currentSummaryPage = Int32.Parse(tsSummaryPageSize.Text);
-            //if (n.Type == SQLTreeItem.TreeType.Database || n.Type == SQLTreeItem.TreeType.Instance || n.Type == SQLTreeItem.TreeType.AzureInstance || n.Type == SQLTreeItem.TreeType.AzureDatabase)
-           // {
-                SqlConnection cn = new SqlConnection(Common.ConnectionString);
-                using (cn)
+            SqlConnection cn = new SqlConnection(Common.ConnectionString);
+            using (cn)
+            {
+                using (SqlCommand cmd = new SqlCommand("dbo.DDLSnapshots_Get", cn) { CommandType = CommandType.StoredProcedure })
                 {
-                    using (SqlCommand cmd = new SqlCommand("dbo.DDLSnapshots_Get", cn) { CommandType = CommandType.StoredProcedure })
-                    {
-                        cn.Open();
-                        cmd.Parameters.AddWithValue("DatabaseID", DatabaseID);
-                        cmd.Parameters.AddWithValue("Instance", InstanceName);
-                        cmd.Parameters.AddWithValue("PageSize", currentSummaryPage);
-                        cmd.Parameters.AddWithValue("PageNumber", pageNum);
-                        SqlDataAdapter da = new SqlDataAdapter(cmd);
-                        DataSet ds = new DataSet();
-                        da.Fill(ds);
-                        gvSnapshots.AutoGenerateColumns = false;
-                        gvSnapshots.DataSource = ds.Tables[0];
+                    cn.Open();
+                    cmd.Parameters.AddWithValue("DatabaseID", DatabaseID);
+                    cmd.Parameters.AddWithValue("Instance", InstanceName);
+                    cmd.Parameters.AddWithValue("PageSize", currentSummaryPage);
+                    cmd.Parameters.AddWithValue("PageNumber", pageNum);
+                    SqlDataAdapter da = new SqlDataAdapter(cmd);
+                    var dt = new DataTable();
+                    da.Fill(dt);
+                    Common.ConvertUTCToLocal(ref dt);
+                    gvSnapshots.AutoGenerateColumns = false;
+                    gvSnapshots.DataSource = dt;
 
-                        tsSummaryPageNum.Text = "Page " + pageNum;
-                        tsSummaryBack.Enabled = (pageNum > 1);
-                        tsSummaryNext.Enabled = ds.Tables[0].Rows.Count == currentSummaryPage;
-                        currentSummaryPage = pageNum;
-                    }
+                    tsSummaryPageNum.Text = "Page " + pageNum;
+                    tsSummaryBack.Enabled = (pageNum > 1);
+                    tsSummaryNext.Enabled = dt.Rows.Count == currentSummaryPage;
+                    currentSummaryPage = pageNum;
                 }
-            //}
+            }
+
         }
         private void tsSummaryBack_Click(object sender, EventArgs e)
         {
@@ -143,6 +166,49 @@ namespace DBADashGUI.Changes
             {
                 tsSummaryPageSize.Text = currentSummaryPageSize.ToString();
             }
+        }
+
+        private void dgvInstanceSummary_CellContentClick(object sender, DataGridViewCellEventArgs e)
+        {
+            if(e.RowIndex>=0 && e.ColumnIndex == colInstance.Index)
+            {
+                InstanceName = (string)dgvInstanceSummary.Rows[e.RowIndex].Cells[e.ColumnIndex].Value;
+                RefreshData();
+            }
+        }
+
+        private void SchemaSnapshots_Load(object sender, EventArgs e)
+        {
+            splitSnapshotSummary.Dock = DockStyle.Fill;
+        }
+
+        private void gvSnapshots_CellContentClick(object sender, DataGridViewCellEventArgs e)
+        {
+            if (e.RowIndex>=0 && e.ColumnIndex== colDB.Index)
+            {
+                var row = (DataRowView)gvSnapshots.Rows[e.RowIndex].DataBoundItem;
+                DatabaseID = (Int32)row["DatabaseID"];
+                RefreshData();
+            }
+        }
+
+        private void tsRefresh_Click(object sender, EventArgs e)
+        {
+            RefreshData();
+        }
+
+        private void tsBack_Click(object sender, EventArgs e)
+        {
+            if (DatabaseID > 0)
+            {
+                DatabaseID = -1;
+            }
+            else if( InstanceName.Length>0 || InstanceID>0)
+            {
+                InstanceName = "";
+                InstanceID = -1;
+            }
+            RefreshData();
         }
     }
 }
