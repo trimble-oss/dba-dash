@@ -63,7 +63,7 @@
             this.bttnCopy.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.bttnCopy.Name = "bttnCopy";
             this.bttnCopy.Size = new System.Drawing.Size(29, 28);
-            this.bttnCopy.Text = "toolStripButton1";
+            this.bttnCopy.Text = "Copy";
             this.bttnCopy.Click += new System.EventHandler(this.bttnCopy_Click);
             // 
             // CodeViewer
