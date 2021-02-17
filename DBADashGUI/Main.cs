@@ -606,6 +606,7 @@ namespace DBADashGUI
                 allowedTabs.Add(tabCustomChecks);
                 allowedTabs.Add(tabDBADashErrorLog);
                 allowedTabs.Add(tabObjectExecutionSummary);
+                allowedTabs.Add(tabSnapshotsSummary);
             }
             else if (n.Type == SQLTreeItem.TreeType.Configuration)
             {
@@ -842,7 +843,7 @@ namespace DBADashGUI
             gvSnapshotsDetail.DataSource = null;
             var n = (SQLTreeItem)tv1.SelectedNode;
             currentSummaryPage = Int32.Parse(tsSummaryPageSize.Text);
-            if (n.Type == SQLTreeItem.TreeType.Database || n.Type == SQLTreeItem.TreeType.Instance)
+            if (n.Type == SQLTreeItem.TreeType.Database || n.Type == SQLTreeItem.TreeType.Instance || n.Type == SQLTreeItem.TreeType.AzureInstance || n.Type == SQLTreeItem.TreeType.AzureDatabase)
             {
                 SqlConnection cn = new SqlConnection(connectionString);
                 using (cn)
