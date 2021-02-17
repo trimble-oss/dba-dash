@@ -148,6 +148,12 @@
     <Compile Include="Changes\Drivers.Designer.cs">
       <DependentUpon>Drivers.cs</DependentUpon>
     </Compile>
+    <Compile Include="Changes\SchemaSnapshots.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Changes\SchemaSnapshots.Designer.cs">
+      <DependentUpon>SchemaSnapshots.cs</DependentUpon>
+    </Compile>
     <Compile Include="Changes\TraceFlagHistory.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -483,6 +489,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Changes\Drivers.resx">
       <DependentUpon>Drivers.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Changes\SchemaSnapshots.resx">
+      <DependentUpon>SchemaSnapshots.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Changes\TraceFlagHistory.resx">
       <DependentUpon>TraceFlagHistory.cs</DependentUpon>

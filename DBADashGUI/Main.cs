@@ -33,11 +33,11 @@ namespace DBADashGUI
 
         string connectionString = "";
 
-        int currentSummaryPage = 1;
-        readonly Int32 currentSummaryPageSize = 100;
+       
+        
         private Int64 currentObjectID;
-        private Int32 currentPage=1;
-        private Int32 currentPageSize=100;
+        private Int32 currentPage = 1;
+        private Int32 currentPageSize = 100;
         bool isTagPopulation = false;
         private readonly DiffControl diffSchemaSnapshot = new DiffControl();
         private bool suppressLoadTab=false;
@@ -181,9 +181,15 @@ namespace DBADashGUI
             }
             if(tabs.SelectedTab == tabSnapshotsSummary)
             {
-                loadSnapshots();
+                if (n.Type == SQLTreeItem.TreeType.Database || n.Type == SQLTreeItem.TreeType.Instance || n.Type == SQLTreeItem.TreeType.AzureInstance || n.Type == SQLTreeItem.TreeType.AzureDatabase)
+                {
+                    schemaSnapshots1.InstanceID = n.InstanceID;
+                    schemaSnapshots1.InstanceName = n.InstanceName;
+                    schemaSnapshots1.DatabaseID = n.DatabaseID;
+                    schemaSnapshots1.RefreshData();
+                }
             }
-            if( tabs.SelectedTab == tabSchema)
+            if ( tabs.SelectedTab == tabSchema)
             {
                 getHistory(n.ObjectID);
             }
@@ -781,120 +787,7 @@ namespace DBADashGUI
             }
         }
 
-        private void gvSnapshots_SelectionChanged(object sender, EventArgs e)
-        {
-            if (gvSnapshots.SelectedRows.Count == 1)
-            {
-                var row = (DataRowView)gvSnapshots.SelectedRows[0].DataBoundItem;
-                DateTime SnapshotDate = (DateTime)row["SnapshotDate"];
-                Int32 DatabaseID = (Int32)row["DatabaseID"];
-                SqlConnection cn = new SqlConnection(connectionString);
-                using (cn)
-                {
-                    using (SqlCommand cmd = new SqlCommand("dbo.DDLSnapshotDiff_Get", cn) { CommandType = CommandType.StoredProcedure })
-                    {
-                        cn.Open();
-                        cmd.Parameters.AddWithValue("DatabaseID", DatabaseID);
-                        var p = cmd.Parameters.AddWithValue("SnapshotDate", SnapshotDate);
-                        p.DbType = DbType.DateTime2;
 
-                        SqlDataAdapter da = new SqlDataAdapter(cmd);
-                        DataSet ds = new DataSet();
-                        da.Fill(ds);
-
-                        gvSnapshotsDetail.AutoGenerateColumns = false;
-                        gvSnapshotsDetail.DataSource = ds.Tables[0];
-
-                    }
-                }
-            }
-        }
-
-        private void gvSnapshotsDetail_CellContentClick(object sender, DataGridViewCellEventArgs e)
-        {
-            var colCount = gvSnapshotsDetail.Columns.Count;
-
-            if (e.ColumnIndex == colCount - 1 || e.ColumnIndex == colCount - 2)
-            {
-                var row = (DataRowView)gvSnapshotsDetail.Rows[e.RowIndex].DataBoundItem;
-                string ddl = "";
-                if (row["NewDDLID"] != DBNull.Value)
-                {
-                    ddl = Common.DDL((Int64)row["NewDDLID"], connectionString);
-                }
-                string ddlOld = "";
-                if (row["OldDDLID"] != DBNull.Value)
-                {
-                    ddlOld = Common.DDL((Int64)row["OldDDLID"], connectionString);
-                }
-                ViewMode mode = ViewMode.Diff;
-                if (e.ColumnIndex == colCount - 2)
-                {
-                    mode = ViewMode.Code;
-                }
-                var frm = new Diff();
-                frm.setText(ddlOld, ddl, mode);
-                frm.Show();
-            }
-        }
-
-        private void loadSnapshots(Int32 pageNum = 1)
-        {
-            gvSnapshotsDetail.DataSource = null;
-            var n = (SQLTreeItem)tv1.SelectedNode;
-            currentSummaryPage = Int32.Parse(tsSummaryPageSize.Text);
-            if (n.Type == SQLTreeItem.TreeType.Database || n.Type == SQLTreeItem.TreeType.Instance || n.Type == SQLTreeItem.TreeType.AzureInstance || n.Type == SQLTreeItem.TreeType.AzureDatabase)
-            {
-                SqlConnection cn = new SqlConnection(connectionString);
-                using (cn)
-                {
-                    using (SqlCommand cmd = new SqlCommand("dbo.DDLSnapshots_Get", cn) { CommandType = CommandType.StoredProcedure })
-                    {
-                        cn.Open();
-                        cmd.Parameters.AddWithValue("DatabaseID", n.DatabaseID);
-                        cmd.Parameters.AddWithValue("Instance", n.InstanceName);
-                        cmd.Parameters.AddWithValue("PageSize", currentSummaryPage);
-                        cmd.Parameters.AddWithValue("PageNumber", pageNum);
-                        SqlDataAdapter da = new SqlDataAdapter(cmd);
-                        DataSet ds = new DataSet();
-                        da.Fill(ds);
-                        gvSnapshots.AutoGenerateColumns = false;
-                        gvSnapshots.DataSource = ds.Tables[0];
-
-                        tsSummaryPageNum.Text = "Page " + pageNum;
-                        tsSummaryBack.Enabled = (pageNum > 1);
-                        tsSummaryNext.Enabled = ds.Tables[0].Rows.Count == currentSummaryPage;
-                        currentSummaryPage = pageNum;
-                    }
-                }
-            }
-        }
-        private void tsSummaryBack_Click(object sender, EventArgs e)
-        {
-            loadSnapshots(currentSummaryPage - 1);
-        }
-
-        private void tsSummaryNext_Click(object sender, EventArgs e)
-        {
-            loadSnapshots(currentSummaryPage + 1);
-        }
-
-        private void tsSummaryPageSize_Validated(object sender, EventArgs e)
-        {
-            if (Int32.Parse(tsSummaryPageSize.Text) != currentPageSize)
-            {
-                loadSnapshots(1);
-            }
-        }
-
-        private void tsSummaryPageSize_Validating(object sender, CancelEventArgs e)
-        {
-            int.TryParse(tsSummaryPageSize.Text, out int i);
-            if (i <= 0)
-            {
-                tsSummaryPageSize.Text = currentSummaryPageSize.ToString();
-            }
-        }
 
 
         private void dBDiffToolStripMenuItem_Click(object sender, EventArgs e)
