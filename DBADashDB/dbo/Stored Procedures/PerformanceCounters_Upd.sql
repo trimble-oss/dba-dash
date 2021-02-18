@@ -91,17 +91,29 @@ SELECT PC.InstanceID,
 	   PC.SnapshotDate,
        PC.Value	
 FROM @PC PC
-WHERE Value IS NOT NULL
+WHERE Value IS NOT NULL;
 
-
+WITH T AS (
+	SELECT PC.InstanceID,
+		PC.CounterID,
+		PC.SnapshotDate60,
+		SUM(PC.Value) as Value_Total,
+		MIN(PC.Value) as Value_Min,
+		MAX(PC.Value) as Value_Max,
+		COUNT(*) as SampleCount  
+	FROM @PC PC
+	WHERE PC.Value IS NOT NULL
+	GROUP BY PC.InstanceID,
+		PC.CounterID,
+		PC.SnapshotDate60
+)
 UPDATE PC60
-	SET PC60.Value_Total += PC.Value,
-	PC60.Value_Min = CASE WHEN PC.Value < PC60.Value_Min THEN PC.Value ELSE PC60.Value_Min END,
-	PC60.Value_Max = CASE WHEN PC.Value > PC60.Value_Max THEN PC.Value ELSE PC60.Value_Max END,
-	PC60.SampleCount+=1
+	SET PC60.Value_Total += T.Value_Total,
+	PC60.Value_Min = CASE WHEN T.Value_Min < PC60.Value_Min THEN T.Value_Min ELSE PC60.Value_Min END,
+	PC60.Value_Max = CASE WHEN T.Value_Max > PC60.Value_Max THEN T.Value_Max ELSE PC60.Value_Max END,
+	PC60.SampleCount+=T.SampleCount
 FROM dbo.PerformanceCounters_60MIN PC60
-JOIN @PC PC ON PC.InstanceID = PC60.InstanceID AND PC.CounterID = PC60.CounterID AND PC.SnapshotDate60 = PC60.SnapshotDate
-WHERE PC.Value IS NOT NULL
+JOIN T ON T.InstanceID = PC60.InstanceID AND T.CounterID = PC60.CounterID AND T.SnapshotDate60 = PC60.SnapshotDate
 
 INSERT INTO dbo.PerformanceCounters_60MIN
 (
@@ -116,13 +128,16 @@ INSERT INTO dbo.PerformanceCounters_60MIN
 SELECT PC.InstanceID,
 		PC.CounterID,
 		PC.SnapshotDate60,
-		PC.Value,
-		PC.Value,
-		PC.Value,
-		1  
+		SUM(PC.Value),
+		MIN(PC.Value),
+		MAX(PC.Value),
+		COUNT(*)  
 FROM @PC PC
 WHERE Value IS NOT NULL
 AND NOT EXISTS(SELECT 1 FROM dbo.PerformanceCounters_60MIN PC60 WHERE PC60.InstanceID = PC.InstanceID AND PC60.CounterID = PC.CounterID AND PC60.SnapshotDate = PC.SnapshotDate60)
+GROUP BY PC.InstanceID,
+		PC.CounterID,
+		PC.SnapshotDate60
 
 DELETE Staging.PerformanceCounters WHERE InstanceID = @InstanceID
 INSERT INTO Staging.PerformanceCounters(
