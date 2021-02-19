@@ -20,46 +20,6 @@ namespace DBADashGUI.Performance
 
         public Int32 InstanceID { get; set; }
 
-        Int32 mins = 60;
-        private DateTime _from = DateTime.MinValue;
-        private DateTime _to = DateTime.MinValue;
-
-        private DateTime fromDate
-        {
-            get
-            {
-                if (_from == DateTime.MinValue)
-                {
-                    DateTime now = DateTime.UtcNow;
-                    if (mins >= 720)  // round to nearest hr
-                    {
-                        now = new DateTime(now.Year, now.Month, now.Day, now.Hour, 0, 0, 0);
-                    }
-                    return now.AddMinutes(-mins);
-                }
-                else
-                {
-                    return _from;
-                }
-            }
-        }
-
-        private DateTime toDate
-        {
-            get
-            {
-                if (_to == DateTime.MinValue)
-                {
-                    return DateTime.UtcNow;
-                }
-                else
-                {
-                    return _to;
-                }
-
-            }
-        }
-
         public void RefreshData()
         {
             refreshSummary();
@@ -74,8 +34,8 @@ namespace DBADashGUI.Performance
                 using (SqlCommand cmd = new SqlCommand("dbo.PerformanceCounterSummary_Get", cn) { CommandType = CommandType.StoredProcedure }) {
                     cn.Open();
                     cmd.Parameters.AddWithValue("InstanceID", InstanceID);
-                    cmd.Parameters.AddWithValue("FromDate", fromDate);
-                    cmd.Parameters.AddWithValue("ToDate", toDate);
+                    cmd.Parameters.AddWithValue("FromDate", DateRange.FromUTC);
+                    cmd.Parameters.AddWithValue("ToDate", DateRange.ToUTC);
                     if (txtSearch.Text.Length > 0)
                     {
                         cmd.Parameters.AddWithValue("Search", "%" + txtSearch.Text + "%");
@@ -105,61 +65,13 @@ namespace DBADashGUI.Performance
         {
             if (!splitContainer1.Panel1Collapsed)
             {
-                performanceCounters1.FromDate = fromDate;
-                performanceCounters1.ToDate = toDate;
+                performanceCounters1.FromDate = DateRange.FromUTC;
+                performanceCounters1.ToDate = DateRange.ToUTC;
                 performanceCounters1.InstanceID = InstanceID;
                 performanceCounters1.RefreshData();
             }
         }
 
-        private void checkTime()
-        {
-            foreach (var ts in tsTime.DropDownItems)
-            {
-                if (ts.GetType() == typeof(ToolStripMenuItem))
-                {
-                    var tsmi = (ToolStripMenuItem)ts;
-                    tsmi.Checked = Int32.Parse((string)tsmi.Tag) == mins;
-                    if (tsmi.Checked)
-                    {
-                        tsTime.Text = tsmi.Text;
-                    }
-                }
-            }
-        }
-
-
-        private void tsTime_Click(object sender, EventArgs e)
-        {
-            var itm = (ToolStripMenuItem)sender;
-            mins = Int32.Parse((string)itm.Tag);
-            _from = DateTime.MinValue;
-            _to = DateTime.MinValue;
-            refreshSummary();
-            refreshChart();
-            checkTime();
-        }
-
-        private void tsCustom_Click(object sender, EventArgs e)
-        {
-            var frm = new CustomTimePicker
-            {
-                FromDate = fromDate.ToLocalTime(),
-                ToDate = toDate.ToLocalTime()
-            };
-            frm.ShowDialog();
-            if (frm.DialogResult == DialogResult.OK)
-            {
-                _from = frm.FromDate.ToUniversalTime();
-                _to = frm.ToDate.ToUniversalTime();
-                mins = 0;
-                tsTime.Text = "Custom";
-                checkTime();
-                RefreshData();
-                tsCustom.Checked = true;
-            }
-      
-        }
 
         private void dgv_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
@@ -198,7 +110,6 @@ namespace DBADashGUI.Performance
         private void PerformanceCounterSummary_Load(object sender, EventArgs e)
         {
             splitContainer1.Panel1Collapsed = true;
-            checkTime();
         }
 
         private void tsClear_Click(object sender, EventArgs e)

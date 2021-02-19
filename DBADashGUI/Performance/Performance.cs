@@ -29,7 +29,6 @@ namespace DBADashGUI.Performance
                 if (instanceID != value)
                 {
                     instanceID = value;
-                    Reset();
                 }
             }
         }
@@ -57,19 +56,6 @@ namespace DBADashGUI.Performance
         }
 
 
-        public void Reset()
-        {
-            mins = 60;
-            customFrom = DateTime.MinValue;
-            customTo = DateTime.MinValue;
-            checkTime();
-
-        }
-
-
-        Int32 mins=60;
-        DateTime customFrom = DateTime.MinValue;
-        DateTime customTo = DateTime.MinValue;
         Int32 databaseID = 0;
         Int64 objectID = 0;
         public Int64 ObjectID { 
@@ -80,7 +66,6 @@ namespace DBADashGUI.Performance
                 if (objectID != value)
                 {
                     objectID = value;
-                    Reset();
                 }
             }
         }
@@ -93,19 +78,8 @@ namespace DBADashGUI.Performance
                 if (databaseID != value)
                 {
                     databaseID = value;
-                    Reset();
                 }
             }
-        }
-
-
-
-
-
-        public void RefreshData(Int32 mins)
-        {
-            this.mins = mins;
-            RefreshData();
         }
 
 
@@ -147,24 +121,11 @@ namespace DBADashGUI.Performance
             waits1.ResumeLayout();
         }
 
-
-
         public void RefreshData()
         {
-            var from = DateTime.UtcNow.AddMinutes(-mins);
-            var to = DateTime.UtcNow.AddMinutes(1);
-            if (mins >= 1440)
-            {
-                from = DateTime.UtcNow.Date.AddMinutes(-mins);
-            }
-            if (mins == 0)
-            {
-                from = customFrom;
-                to = customTo;
-            }
             try
             {
-              RefreshData(from, to);
+              RefreshData(DateRange.FromUTC,DateRange.ToUTC);
             }
             catch (Exception ex)
             {
@@ -174,37 +135,6 @@ namespace DBADashGUI.Performance
 
         }
 
-
-        private void tsTime_Click(object sender, EventArgs e)
-        {
-            var itm = (ToolStripMenuItem)sender;
-            customFrom = DateTime.MinValue;
-            customTo = DateTime.MinValue;
-            RefreshData(Int32.Parse((string)itm.Tag));
-            checkTime();
-      
-        }
-
-        private void checkTime()
-        {
-            Int32 tag = mins;
-            if(customFrom>DateTime.MinValue | customTo> DateTime.MinValue)
-            {
-                tag = -1;
-            }
-            foreach (var ts in tsTime.DropDownItems)
-            {
-                if (ts.GetType() == typeof(ToolStripMenuItem))
-                {
-                    var mnu = (ToolStripMenuItem)ts;
-                    mnu.Checked = Int32.Parse((string)mnu.Tag)==tag;
-                    if (mnu.Checked)
-                    {
-                        tsTime.Text = mnu.Text;
-                    }
-                }
-            }
-        }
 
         private void timer1_Tick(object sender, EventArgs e)
         {
@@ -217,41 +147,6 @@ namespace DBADashGUI.Performance
         }
 
    
-
-        private void customToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            var frm = new CustomTimePicker();
-            if (mins > 0)
-            {
-                frm.FromDate = DateTime.Now.AddMinutes(-mins);
-                if (mins >= 1440)
-                {
-                    frm.FromDate = DateTime.UtcNow.Date.AddMinutes(-mins);
-                }
-                frm.ToDate = DateTime.Now;
-            }
-            else
-            {
-                frm.FromDate = customFrom;
-                frm.ToDate = customTo;
-            }
-            frm.ShowDialog();
-            if(frm.DialogResult == DialogResult.OK)
-            {
-                customFrom = frm.FromDate;
-                customTo = frm.ToDate;
-                mins = 0;
-                RefreshData(frm.FromDate.ToUniversalTime(), frm.ToDate.ToUniversalTime());
-                checkTime();
-            }
-       
-        }
-
-        private void tsTime_Click_1(object sender, EventArgs e)
-        {
-
-        }
-
         private void smoothLinesToolStripMenuItem_Click(object sender, EventArgs e)
         {
             ioPerformance1.SmoothLines = smoothLinesToolStripMenuItem.Checked;

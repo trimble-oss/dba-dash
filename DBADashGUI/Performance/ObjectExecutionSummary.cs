@@ -46,51 +46,9 @@ namespace DBADashGUI.Performance
             }
         }
 
-        Int32 mins = 15;
-        private DateTime _from = DateTime.MinValue;
-        private DateTime _to = DateTime.MinValue;
-
         private Int32 compareOffset = 0;
 
-        private DateTime fromDate
-        {
-            get
-            {
-                if (_from == DateTime.MinValue)
-                {
-                    DateTime now = DateTime.UtcNow;
-                    if (mins >= 720)  // round to nearest hr
-                    {
-                        now = new DateTime(now.Year, now.Month, now.Day, now.Hour, 0, 0, DateTimeKind.Utc);
-                    }
-                    else
-                    {
-                        now = new DateTime(now.Year, now.Month, now.Day, now.Hour, now.Minute, 0, DateTimeKind.Utc);
-                    }
-                    return now.AddMinutes(-mins);
-                }
-                else
-                {
-                    return _from;
-                }
-            }
-        }
 
-        private DateTime toDate
-        {
-            get
-            {
-                if (_to == DateTime.MinValue)
-                {
-                    return DateTime.UtcNow;
-                }
-                else
-                {
-                    return _to;
-                }
-
-            }
-        }
 
         private DateTime _compareTo=DateTime.MinValue;
         private DateTime _compareFrom=DateTime.MinValue;
@@ -98,6 +56,7 @@ namespace DBADashGUI.Performance
         private DateTime compareTo
         {
             get {
+                var toDate = DateRange.ToUTC;
                 if (compareOffset > 0)
                 {
                     return new DateTime(toDate.Year, toDate.Month, toDate.Day, toDate.Hour, toDate.Minute, 0, DateTimeKind.Utc).AddMinutes(-compareOffset);
@@ -114,7 +73,7 @@ namespace DBADashGUI.Performance
             {
                 if (compareOffset > 0)
                 {
-                    return fromDate.AddMinutes(-compareOffset);
+                    return DateRange.FromUTC.AddMinutes(-compareOffset);
                 }
                 else
                 {
@@ -273,8 +232,8 @@ namespace DBADashGUI.Performance
                         cmd.Parameters.AddWithValue("Types", Types);
                     }
 
-                    cmd.Parameters.AddWithValue("FromDate", fromDate);
-                    cmd.Parameters.AddWithValue("ToDate", toDate);
+                    cmd.Parameters.AddWithValue("FromDate", DateRange.FromUTC);
+                    cmd.Parameters.AddWithValue("ToDate", DateRange.ToUTC);
                     cmd.CommandTimeout = Properties.Settings.Default.CommandTimeout;
 
                     SqlDataAdapter da = new SqlDataAdapter(cmd);
@@ -302,66 +261,7 @@ namespace DBADashGUI.Performance
         }
 
 
-        private void checkTime()
-        {
-            foreach (var ts in tsTime.DropDownItems)
-            {
-                if (ts.GetType() == typeof(ToolStripMenuItem))
-                {
-                    var tsmi = (ToolStripMenuItem)ts;
-                    tsmi.Checked = Int32.Parse((string)tsmi.Tag) == mins;
-                    if (tsmi.Checked)
-                    {
-                        tsTimeOffset.Text = "Previous " + tsmi.Text;
-                        tsTime.Text = tsmi.Text;
-                    }
-                }
-            }
-        }
 
-        private void tsTime_Click(object sender, EventArgs e)
-        {
-            var itm = (ToolStripMenuItem)sender;
-            mins = Int32.Parse((string)itm.Tag);
-            setMins();
-            refreshData();
-        }
-
-        private void setMins()
-        {
-            _from = DateTime.MinValue;
-            _to = DateTime.MinValue;
-            tsTimeOffset.Tag = mins.ToString();
-            checkTime();
-            if (compareFrom!=DateTime.MinValue && compareFrom != DateTime.MaxValue)
-            {
-                compareOffset = mins;
-                checkOffset();
-            }          
-            
-        }
-
-        private void tsCustom_Click(object sender, EventArgs e)
-        {
-            var frm = new CustomTimePicker
-            {
-                FromDate = fromDate.ToLocalTime(),
-                ToDate = toDate.ToLocalTime()
-            };
-            frm.ShowDialog();
-            if (frm.DialogResult == DialogResult.OK)
-            {
-                _from = frm.FromDate.ToUniversalTime();
-                _to = frm.ToDate.ToUniversalTime();
-                mins = 0;
-                tsTime.Text = "Custom";
-                checkTime();
-                tsTimeOffset.Tag = _to.Subtract(_from).TotalMinutes.ToString();
-                tsTimeOffset.Text = "Previous " + _to.Subtract(_from).ToString();
-                refreshData();
-                tsCustom.Checked = true;
-            }          
-        }
 
         private void tsRefresh_Click(object sender, EventArgs e)
         {
@@ -402,15 +302,14 @@ namespace DBADashGUI.Performance
         {
             splitContainer1.Panel1Collapsed = true;
             addColumns();
-            setMins();
         }
 
         private void tsCustomCompare_Click(object sender, EventArgs e)
         {
             var frm = new CustomTimePicker
             {
-                FromDate = compareFrom > DateTime.MinValue && compareFrom<DateTime.MaxValue ? compareFrom.ToLocalTime() : fromDate.ToLocalTime(),
-                ToDate = compareTo > DateTime.MinValue && compareTo<DateTime.MaxValue ? compareTo.ToLocalTime() : toDate.ToLocalTime()
+                FromDate = compareFrom > DateTime.MinValue && compareFrom<DateTime.MaxValue ? compareFrom.ToLocalTime() : DateRange.FromUTC.ToLocalTime(),
+                ToDate = compareTo > DateTime.MinValue && compareTo<DateTime.MaxValue ? compareTo.ToLocalTime() : DateRange.ToUTC.ToLocalTime()
             };
             frm.ShowDialog();
             if (frm.DialogResult == DialogResult.OK)
@@ -482,8 +381,8 @@ namespace DBADashGUI.Performance
             {
                 splitChart.Panel2Collapsed = true;
             }
-            objectExecutionLineChart1.FromDate = fromDate;
-            objectExecutionLineChart1.ToDate = toDate;
+            objectExecutionLineChart1.FromDate = DateRange.FromUTC;
+            objectExecutionLineChart1.ToDate = DateRange.ToUTC;
             objectExecutionLineChart1.RefreshData();
         }
 

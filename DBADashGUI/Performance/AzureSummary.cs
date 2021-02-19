@@ -21,47 +21,6 @@ namespace DBADashGUI.Performance
         public List<Int32> InstanceIDs;
 
 
-
-        Int32 mins = 15;
-        private DateTime _fromUTC = DateTime.MinValue;
-        private DateTime _toUTC = DateTime.MinValue;
-
-        private DateTime fromDateUTC
-        {
-            get
-            {
-                if (_fromUTC == DateTime.MinValue)
-                {
-                    DateTime now = DateTime.UtcNow;
-                    if (mins >= 720)  // round to nearest hr
-                    {
-                        now = new DateTime(now.Year, now.Month, now.Day, now.Hour, 0, 0, 0);
-                    }
-                    return now.AddMinutes(-mins);
-                }
-                else
-                {
-                    return _fromUTC;
-                }
-            }
-        }
-
-        private DateTime toDateUTC
-        {
-            get
-            {
-                if (_toUTC == DateTime.MinValue)
-                {
-                    return DateTime.UtcNow;
-                }
-                else
-                {
-                    return _toUTC;
-                }
-
-            }
-        }
-
         public void RefreshData()
         {
             if (Common.ConnectionString != null)
@@ -87,8 +46,8 @@ namespace DBADashGUI.Performance
                     cmd.Parameters.AddWithValue("DataHist", colDataHistogram.Visible);
                     cmd.Parameters.AddWithValue("LogHist", colLogHistogram.Visible);
                     cmd.Parameters.AddWithValue("DTUHist", colDTUHistogram.Visible);
-                    cmd.Parameters.AddWithValue("FromDate", fromDateUTC);
-                    cmd.Parameters.AddWithValue("ToDate", toDateUTC);
+                    cmd.Parameters.AddWithValue("FromDate",  DateRange.FromUTC);
+                    cmd.Parameters.AddWithValue("ToDate", DateRange.ToUTC);
                     cmd.CommandTimeout = Properties.Settings.Default.CommandTimeout;
                     SqlDataAdapter da = new SqlDataAdapter(cmd);
                     DataTable dt = new DataTable();
@@ -118,8 +77,8 @@ namespace DBADashGUI.Performance
                     cmd.Parameters.AddWithValue("DataHist", colPoolDataHistogram.Visible);
                     cmd.Parameters.AddWithValue("LogHist", colPoolLogHistogram.Visible);
                     cmd.Parameters.AddWithValue("DTUHist", colPoolDTUHistogram.Visible);
-                    cmd.Parameters.AddWithValue("FromDate", fromDateUTC);
-                    cmd.Parameters.AddWithValue("ToDate", toDateUTC);
+                    cmd.Parameters.AddWithValue("FromDate", DateRange.FromUTC);
+                    cmd.Parameters.AddWithValue("ToDate", DateRange.ToUTC);
                     cmd.CommandTimeout = Properties.Settings.Default.CommandTimeout;
                     SqlDataAdapter da = new SqlDataAdapter(cmd);
                     DataTable dt = new DataTable();
@@ -130,22 +89,6 @@ namespace DBADashGUI.Performance
                 }
             }
 
-        }
-
-        private void checkTime()
-        {
-            foreach (var ts in tsTime.DropDownItems)
-            {
-                if (ts.GetType() == typeof(ToolStripMenuItem))
-                {
-                    var tsmi = (ToolStripMenuItem)ts;
-                    tsmi.Checked = Int32.Parse((string)tsmi.Tag) == mins;
-                    if (tsmi.Checked)
-                    {
-                        tsTime.Text = tsmi.Text;
-                    }
-                }
-            }
         }
 
         readonly string[] histograms = new string[] { "DTU", "CPU", "Data", "Log" };
@@ -337,7 +280,6 @@ namespace DBADashGUI.Performance
 
         private void AzureSummary_Load(object sender, EventArgs e)
         {
-            checkTime();
             addColumnsMenu();
             addPoolColumnsMenu();
             addHistCols(dgv,"col");
@@ -365,40 +307,13 @@ namespace DBADashGUI.Performance
         
         }
 
-        private void tsTime_Click(object sender, EventArgs e)
-        {
-            var itm = (ToolStripMenuItem)sender;
-            mins = Int32.Parse((string)itm.Tag);
-            _fromUTC = DateTime.MinValue;
-            _toUTC = DateTime.MinValue;
-            RefreshData();
-            checkTime();
-        }
+
 
         private void tsRefresh_Click(object sender, EventArgs e)
         {
             refreshDB();
         }
 
-        private void tsCustom_Click(object sender, EventArgs e)
-        {
-            var frm = new CustomTimePicker
-            {
-                FromDate = fromDateUTC.ToLocalTime(),
-                ToDate = toDateUTC.ToLocalTime()
-            };
-            frm.ShowDialog();
-            if (frm.DialogResult == DialogResult.OK)
-            {
-                _fromUTC = frm.FromDate.ToUniversalTime();
-                _toUTC = frm.ToDate.ToUniversalTime();
-                mins = 0;
-                tsTime.Text = "Custom";
-                checkTime();
-            }
-            RefreshData();
-            tsCustom.Checked = true;
-        }
 
 
         private void tsCopy_Click(object sender, EventArgs e)
@@ -475,8 +390,8 @@ namespace DBADashGUI.Performance
 
                 var frm = new AzureDBResourceStatsView
                 {
-                    FromDate = fromDateUTC.ToLocalTime(),
-                    ToDate = toDateUTC.ToLocalTime(),
+                    FromDate = DateRange.FromUTC,
+                    ToDate = DateRange.ToUTC,
                     InstanceID = (Int32)row["InstanceID"]
                 };
                 if (col == colElasticPool)
@@ -504,8 +419,8 @@ namespace DBADashGUI.Performance
                 string pool = (string)row["elastic_pool_name"];
                 var frm = new AzureDBResourceStatsView
                 {
-                    FromDate = fromDateUTC.ToLocalTime(),
-                    ToDate = toDateUTC.ToLocalTime(),
+                    FromDate = DateRange.FromUTC,
+                    ToDate = DateRange.ToUTC,
                     InstanceID = (Int32)row["InstanceID"],
                     ElasticPoolName = pool,
                     Text = instance + " | " + pool

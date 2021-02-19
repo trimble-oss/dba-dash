@@ -25,7 +25,6 @@ namespace DBADashGUI.Performance
 
         private void AzureDBResourceStatsView_Load(object sender, EventArgs e)
         {
-            azureDBResourceStats1.SetDateRange(FromDate, ToDate);
             azureDBResourceStats1.RefreshData();
         }
     }

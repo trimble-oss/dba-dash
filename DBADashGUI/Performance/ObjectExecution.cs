@@ -33,6 +33,7 @@ namespace DBADashGUI.Performance
         public DateTimePoint x;
         Int32 instanceID;
         DateTime chartMaxDate = DateTime.MinValue;
+        DateTime chartMinDate = DateTime.MaxValue;
         string connectionString;
       
         DateTime from;
@@ -75,7 +76,7 @@ namespace DBADashGUI.Performance
         }
 
 
-         private void refreshData(bool update)
+        private void refreshData(bool update)
         {
 
             if (!update)
@@ -87,106 +88,104 @@ namespace DBADashGUI.Performance
             }
 
             var dt = Common.ObjectExecutionStats(instanceID, databaseid, from, to, objectID, dateGrouping, measure);
-           
-                if(dt.Rows.Count == 0)
+
+            if (dt.Rows.Count == 0)
+            {
+                return;
+            }
+            var dPoints = new Dictionary<string, ChartValues<DateTimePoint>>();
+            string current = string.Empty;
+            ChartValues<DateTimePoint> values = new ChartValues<DateTimePoint>();
+            foreach (DataRow r in dt.Rows)
+            {
+                var waitType = (string)r["DatabaseName"] + " | " + (string)r["object_name"];
+                var time = (DateTime)r["SnapshotDate"];
+                if (time > chartMaxDate)
                 {
-                    return;
+                    chartMaxDate = time;
                 }
-                var dPoints = new Dictionary<string, ChartValues<DateTimePoint>>();
-                string current = string.Empty;
-                ChartValues<DateTimePoint> values = new ChartValues<DateTimePoint>();               
-                foreach (DataRow r in dt.Rows){
-                    var waitType =(string)r["DatabaseName"] + " | " + (string)r["object_name"];
-                    var time = (DateTime)r["SnapshotDate"];
-                    if (time > chartMaxDate)
-                    {
-                        chartMaxDate = time;
-                    }
-                    if (current!= waitType)
-                    {
-                        if (values.Count > 0) { dPoints.Add(current, values); }
-                        values = new ChartValues<DateTimePoint>();
-                        current = waitType;
-                    }
-                    values.Add(new DateTimePoint(((DateTime)r["SnapshotDate"]), Convert.ToDouble(r["Measure"])));
-                }
-                if (values.Count > 0)
+                if (current != waitType)
                 {
-                    dPoints.Add(current, values);
+                    if (values.Count > 0) { dPoints.Add(current, values); }
                     values = new ChartValues<DateTimePoint>();
+                    current = waitType;
                 }
+                values.Add(new DateTimePoint(((DateTime)r["SnapshotDate"]), Convert.ToDouble(r["Measure"])));
+            }
+            if (values.Count > 0)
+            {
+                dPoints.Add(current, values);
+                values = new ChartValues<DateTimePoint>();
+            }
 
-
-         
-
-                if (update)
+            if (update)
+            {
+                List<string> existingTitles = new List<string>();
+                foreach (StackedColumnSeries s in waitChart.Series)
                 {
-                     List<string> existingTitles = new List<string>();
-                    foreach(StackedColumnSeries s in waitChart.Series)
+                    existingTitles.Add(s.Title);
+                    if (dPoints.ContainsKey(s.Title))
                     {
-                        existingTitles.Add(s.Title);
-                        if (dPoints.ContainsKey(s.Title))
-                        {
-                            values = dPoints[s.Title];
-                            s.Values.AddRange(values);
-                        }
-                     
-                        while(s.Values.Count>0 && DateTime.Now.Subtract(((DateTimePoint)s.Values[0]).DateTime).TotalMinutes > mins)
-                        {
-                            s.Values.RemoveAt(0);
-                        }
+                        values = dPoints[s.Title];
+                        s.Values.AddRange(values);
                     }
-                    foreach (var x in dPoints)
+
+                    while (s.Values.Count > 0 && DateTime.Now.Subtract(((DateTimePoint)s.Values[0]).DateTime).TotalMinutes > mins)
                     {
-                        if (!existingTitles.Contains(x.Key))
-                        {
-                            waitChart.Series.Add(new StackedColumnSeries
-                            {
-                                Title = x.Key,
-                                Values = x.Value
-                            });
-                        }
+                        s.Values.RemoveAt(0);
                     }
                 }
-                else
+                foreach (var x in dPoints)
                 {
-                    CartesianMapper<DateTimePoint> dayConfig = Mappers.Xy<DateTimePoint>()
-.X(dateModel => dateModel.DateTime.Ticks / TimeSpan.FromMinutes(dateGrouping).Ticks)
-.Y(dateModel => dateModel.Value);
-
-
-                    SeriesCollection s1 = new SeriesCollection(dayConfig);
-                    foreach (var x in dPoints)
+                    if (!existingTitles.Contains(x.Key))
                     {
-                        s1.Add(new StackedColumnSeries
+                        waitChart.Series.Add(new StackedColumnSeries
                         {
                             Title = x.Key,
                             Values = x.Value
                         });
                     }
-                    waitChart.Series = s1;
+                }
+            }
+            else
+            {
+                CartesianMapper<DateTimePoint> dayConfig = Mappers.Xy<DateTimePoint>()
+.X(dateModel => dateModel.DateTime.Ticks / TimeSpan.FromMinutes(dateGrouping).Ticks)
+.Y(dateModel => dateModel.Value);
 
-                    string format = "t";
-                    if (dateGrouping >= 1440)
+
+                SeriesCollection s1 = new SeriesCollection(dayConfig);
+                foreach (var x in dPoints)
+                {
+                    s1.Add(new StackedColumnSeries
                     {
-                        format = "yyyy-MM-dd";
-                    }
-                    else if (mins >= 1440)
-                    {
-                        format = "yyyy-MM-dd HH:mm";
-                    }
-                    waitChart.AxisX.Add(new Axis
-                    {
-                        LabelFormatter = value => new DateTime((long)(value * TimeSpan.FromMinutes(dateGrouping).Ticks)).ToString(format)
+                        Title = x.Key,
+                        Values = x.Value
                     });
-                   
-                    waitChart.AxisY.Add(new Axis
-                    {
-                        LabelFormatter = val => val.ToString(measures[measure].LabelFormat)
+                }
+                waitChart.Series = s1;
 
-                    });
+                string format = "t";
+                if (dateGrouping >= 1440)
+                {
+                    format = "yyyy-MM-dd";
+                }
+                else if (mins >= 1440)
+                {
+                    format = "yyyy-MM-dd HH:mm";
+                }
+                waitChart.AxisX.Add(new Axis
+                {
+                    LabelFormatter = value => new DateTime((long)(value * TimeSpan.FromMinutes(dateGrouping).Ticks)).ToString(format)
+                });
 
-                
+                waitChart.AxisY.Add(new Axis
+                {
+                    LabelFormatter = val => val.ToString(measures[measure].LabelFormat)
+
+                });
+
+
 
             }
             lblExecution.Text = databaseid > 0 ? "Excution Stats: Database" : "Execution Stats: Instance";

@@ -38,40 +38,6 @@ namespace DBADashGUI
         }
       
 
-        Int32 mins = 15;
-        private DateTime _from = DateTime.MinValue;
-        private DateTime _to = DateTime.MinValue;
-        private DateTime fromDate
-        {
-            get
-            {
-                if (_from == DateTime.MinValue)
-                {
-                    return DateTime.UtcNow.AddMinutes(-mins);
-                }
-                else
-                {
-                    return _from;
-                }
-            }
-        }
-
-        private DateTime toDate
-        {
-            get
-            {
-                if (_to == DateTime.MinValue)
-                {
-                    return DateTime.UtcNow;
-                }
-                else
-                {
-                    return _to;
-                }
-
-            }
-        }
-
         public void ResetFilters()
         {
             txtText.Text = "";
@@ -108,8 +74,8 @@ namespace DBADashGUI
                 cn.Open();
                 SqlCommand cmd = new SqlCommand("dbo.SlowQueriesSummary_Get", cn);
                 cmd.Parameters.AddWithValue("InstanceIDs", string.Join(",", InstanceIDs));
-                cmd.Parameters.AddWithValue("FromDate", fromDate);
-                cmd.Parameters.AddWithValue("ToDate", toDate);
+                cmd.Parameters.AddWithValue("FromDate", DateRange.FromUTC);
+                cmd.Parameters.AddWithValue("ToDate", DateRange.ToUTC);
                 cmd.Parameters.AddWithValue("GroupBy", groupBy);
                 string db = DBName.Length > 0 ? DBName : txtDatabase.Text;
                 if (txtClient.Text.Length > 0)
@@ -155,52 +121,6 @@ namespace DBADashGUI
 
         }
 
-        private void tsTime_Click(object sender, EventArgs e)
-        {
-            var itm = (ToolStripMenuItem)sender;
-            mins = Int32.Parse((string)itm.Tag);
-            _from = DateTime.MinValue;
-            _to = DateTime.MinValue;
-            RefreshData();
-            checkTime();
-        }
-
-        private void checkTime()
-        {
-            foreach (var ts in tsTime.DropDownItems)
-            {
-                if (ts.GetType() == typeof(ToolStripMenuItem))
-                {
-                    var tsmi = (ToolStripMenuItem)ts;
-                    tsmi.Checked = Int32.Parse((string)tsmi.Tag) == mins;
-                    if (tsmi.Checked)
-                    {
-                        tsTime.Text = tsmi.Text;
-                    }
-                }
-            }
-        }
-
-        private void tsCustom_Click(object sender, EventArgs e)
-        {
-            var frm = new CustomTimePicker
-            {
-                FromDate = fromDate.ToLocalTime(),
-                ToDate = toDate.ToLocalTime()
-            };
-            frm.ShowDialog();
-            if (frm.DialogResult == DialogResult.OK)
-            {
-                _from = frm.FromDate.ToUniversalTime();
-                _to = frm.ToDate.ToUniversalTime();
-                mins = 0;
-                tsTime.Text = "Custom";
-                checkTime();
-                RefreshData();
-                tsCustom.Checked = true;
-            }
-
-        }
 
         private void GroupBy_Click(object sender, EventArgs e)
         {
@@ -354,7 +274,6 @@ namespace DBADashGUI
         private void SlowQueries_Load(object sender, EventArgs e)
         {
             selectGroupBy();
-            checkTime();
         }
 
         private void resetToolStripMenuItem_Click(object sender, EventArgs e)
@@ -423,8 +342,8 @@ namespace DBADashGUI
                 cn.Open();
                 SqlCommand cmd = new SqlCommand("dbo.SlowQueriesDetail_Get", cn);
                 cmd.Parameters.AddWithValue("InstanceIDs", string.Join(",", InstanceIDs));
-                cmd.Parameters.AddWithValue("FromDate", fromDate);
-                cmd.Parameters.AddWithValue("ToDate", toDate);
+                cmd.Parameters.AddWithValue("FromDate", DateRange.FromUTC);
+                cmd.Parameters.AddWithValue("ToDate", DateRange.ToUTC);
                 cmd.Parameters.AddWithValue("Top", pageSize);
 
                 string connectionID = txtInstance.Text;

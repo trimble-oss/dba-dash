@@ -18,62 +18,9 @@ namespace DBADashGUI.Performance
     public partial class AzureDBResourceStats : UserControl
     {
 
-        DateTime FromDate;
-        DateTime ToDate;
         public Int32 InstanceID;
         public string ElasticPoolName = String.Empty;
-        Int32 Mins=60;
-
-        public void SetDateRange(DateTime from,DateTime to)
-        {
-            this.FromDate = from;
-            this.ToDate = to;
-            this.Mins = -1;
-            var actualMins = Convert.ToInt32(to.Subtract(from).TotalMinutes);
-            DateGrouping = Common.DateGrouping(actualMins, 400);
-            checkTime();
-        }
-
-        public void SetMins(Int32 mins)
-        {
-            this.Mins = mins;
-            FromDate = DateTime.MinValue;
-            ToDate = DateTime.MinValue;
-            DateGrouping = Common.DateGrouping(Mins, 400);
-            checkTime();
-        }
-
-
-
-        DateTime from
-        {
-            get
-            {
-                if (Mins > 0)
-                {
-                    return DateTime.Now.AddMinutes(-Mins);
-                }
-                else
-                {
-                    return FromDate;
-                }
-            }
-        }
-        DateTime to
-        {
-            get
-            {
-                if (Mins > 0)
-                {
-                    return DateTime.Now;
-                }
-                else
-                {
-                    return ToDate;
-                }
-            }
-        }
-
+      
         public AzureDBResourceStats()
         {
             InitializeComponent();
@@ -185,6 +132,12 @@ namespace DBADashGUI.Performance
         DataTable dt;
 
         public void RefreshData()
+        {
+            DateGrouping = Common.DateGrouping(DateRange.DurationMins, 400);
+            refreshData();
+        }
+
+        private void refreshData()
         {
             if (ElasticPoolName == string.Empty)
             {
@@ -321,8 +274,8 @@ namespace DBADashGUI.Performance
             {
                 using (SqlCommand cmd = new SqlCommand("dbo.AzureDBElasticPoolResourceStats_Get", cn) { CommandType = CommandType.StoredProcedure }) {
                     cn.Open();
-                    cmd.Parameters.AddWithValue("FromDate", from);
-                    cmd.Parameters.AddWithValue("ToDate", to);
+                    cmd.Parameters.AddWithValue("FromDate", DateRange.FromUTC);
+                    cmd.Parameters.AddWithValue("ToDate", DateRange.ToUTC);
                     cmd.Parameters.AddWithValue("InstanceID", InstanceID);
                     cmd.Parameters.AddWithValue("elastic_pool_name", ElasticPoolName);
                     cmd.Parameters.AddWithValue("DateGroupingMin", DateGrouping);
@@ -342,8 +295,8 @@ namespace DBADashGUI.Performance
             {
                 using (SqlCommand cmd = new SqlCommand("dbo.AzureDBResourceStats_Get", cn) { CommandType = CommandType.StoredProcedure }) {
                     cn.Open();
-                    cmd.Parameters.AddWithValue("FromDate", from);
-                    cmd.Parameters.AddWithValue("ToDate", to);
+                    cmd.Parameters.AddWithValue("FromDate", DateRange.FromUTC);
+                    cmd.Parameters.AddWithValue("ToDate", DateRange.ToUTC);
                     cmd.Parameters.AddWithValue("InstanceID", InstanceID);
                     cmd.Parameters.AddWithValue("DateGroupingMin", DateGrouping);
                     cmd.Parameters.AddWithValue("UTCOffset", Common.UtcOffset);
@@ -379,51 +332,12 @@ namespace DBADashGUI.Performance
         {
             var ts = (ToolStripMenuItem)sender;
             DateGrouping = Convert.ToInt32(ts.Tag);
-            RefreshData();
+            refreshData();
         }
 
         private void smoothLinesToolStripMenuItem_Click(object sender, EventArgs e)
         {
             updateChart();
-        }
-
-        private void tsTime_Click(object sender, EventArgs e)
-        {
-            var itm = (ToolStripMenuItem)sender;
-            SetMins(Convert.ToInt32(itm.Tag));
-
-            RefreshData();
-        }
-
-        private void checkTime()
-        {
-            foreach (var ts in tsTime.DropDownItems)
-            {
-                if (ts.GetType() == typeof(ToolStripMenuItem))
-                {
-                    var mnu = (ToolStripMenuItem)ts;
-                    mnu.Checked = Convert.ToInt32(mnu.Tag) == Mins;
-                }
-            }
-            if (FromDate > DateTime.MinValue)
-            {
-                tsCustom.Checked = true;
-            }
-        }
-
-        private void tsCustom_Click(object sender, EventArgs e)
-        {
-            var frm = new CustomTimePicker
-            {
-                FromDate = from,
-                ToDate = to
-            };
-            frm.ShowDialog();
-            if(frm.DialogResult == DialogResult.OK)
-            {
-                SetDateRange(frm.FromDate, frm.ToDate);   
-                RefreshData();
-            }
         }
 
         private void pointsToolStripMenuItem_Click(object sender, EventArgs e)

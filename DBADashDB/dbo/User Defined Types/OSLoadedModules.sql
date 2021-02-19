@@ -11,7 +11,7 @@
     [company]             NVARCHAR (256) NULL,
     [description]         NVARCHAR (256) NULL,
     [name]                NVARCHAR (255) NOT NULL,
-    PRIMARY KEY CLUSTERED ([name] ASC));
+    PRIMARY KEY CLUSTERED ([name] ASC) WITH(IGNORE_DUP_KEY = ON));
 
 
 

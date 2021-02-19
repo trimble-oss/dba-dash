@@ -24,46 +24,7 @@ namespace DBADashGUI.Performance
             InitializeComponent();
         }
 
-        Int32 mins=15;
-        private DateTime _from=DateTime.MinValue;
-        private DateTime _to = DateTime.MinValue;
-
-        private DateTime fromDate
-        {
-            get
-            {
-                if (_from == DateTime.MinValue)
-                {
-                    DateTime now = DateTime.UtcNow;
-                    if (mins >= 720)  // round to nearest hr
-                    {
-                        now = new DateTime(now.Year, now.Month, now.Day, now.Hour, 0, 0, 0);
-                    }
-                    return now.AddMinutes(-mins);
-                }
-                else
-                {
-                    return _from;
-                }
-            }
-        }
-
-        private DateTime toDate
-        {
-            get
-            {
-                if (_to == DateTime.MinValue)
-                {
-                    return DateTime.UtcNow;
-                }
-                else
-                {
-                    return _to;
-                }
-
-            }
-        }
-
+   
         public void RefreshData()
         {
             if (ConnectionString != null)
@@ -82,8 +43,8 @@ namespace DBADashGUI.Performance
                         {
                             cmd.Parameters.AddWithValue("TagIDs", TagIDs);
                         }
-                        cmd.Parameters.AddWithValue("FromDate", fromDate);
-                        cmd.Parameters.AddWithValue("ToDate", toDate);
+                        cmd.Parameters.AddWithValue("FromDate", DateRange.FromUTC);
+                        cmd.Parameters.AddWithValue("ToDate", DateRange.ToUTC);
                         cmd.CommandTimeout = Properties.Settings.Default.CommandTimeout;
                         SqlDataAdapter da = new SqlDataAdapter(cmd);
                         DataTable dt = new DataTable();
@@ -132,21 +93,6 @@ namespace DBADashGUI.Performance
             }
         }
 
-        private void checkTime()
-        {
-            foreach (var ts in tsTime.DropDownItems)
-            {
-                if (ts.GetType() == typeof(ToolStripMenuItem))
-                {
-                    var tsmi = (ToolStripMenuItem)ts;
-                    tsmi.Checked = Int32.Parse((string)tsmi.Tag)== mins;
-                    if (tsmi.Checked)
-                    {
-                        tsTime.Text = tsmi.Text;
-                    }
-                }
-            }
-        }
 
         private void addColumnsMenu()
         {
@@ -211,7 +157,6 @@ namespace DBADashGUI.Performance
 
         private void PerformanceSummary_Load(object sender, EventArgs e)
         {
-            checkTime();
             addColumnsMenu();
             addHistCols(dgv, "col");
         }
@@ -235,41 +180,13 @@ namespace DBADashGUI.Performance
 
         }
 
-        private void tsTime_Click(object sender, EventArgs e)
-        {
-            var itm = (ToolStripMenuItem)sender;
-            mins = Int32.Parse((string)itm.Tag);
-            _from = DateTime.MinValue;
-            _to = DateTime.MinValue;
-            RefreshData();
-            checkTime();
-        }
+
 
         private void tsRefresh_Click(object sender, EventArgs e)
         {
             RefreshData();
         }
 
-        private void tsCustom_Click(object sender, EventArgs e)
-        {
-            var frm = new CustomTimePicker
-            {
-                FromDate = fromDate.ToLocalTime(),
-                ToDate = toDate.ToLocalTime()
-            };
-            frm.ShowDialog();
-            if(frm.DialogResult == DialogResult.OK)
-            {
-                _from = frm.FromDate.ToUniversalTime();
-                _to = frm.ToDate.ToUniversalTime();
-                tsTime.Text = "Custom";
-                mins = 0;
-                checkTime();
-                RefreshData();
-                tsCustom.Checked = true;
-            }
-
-        }
 
         private void dgv_RowsAdded(object sender, DataGridViewRowsAddedEventArgs e)
         {

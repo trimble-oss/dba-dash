@@ -44,7 +44,6 @@ namespace DBADashGUI
 
         private void Main_Load(object sender, EventArgs e)
         {
-            
             splitSchemaSnapshot.Panel1.Controls.Add(diffSchemaSnapshot);
             diffSchemaSnapshot.Dock = DockStyle.Fill;
 
@@ -83,6 +82,7 @@ namespace DBADashGUI
 
         }
 
+
         private void tabs_SelectedIndexChanged(object sender, EventArgs e)
         {
             loadSelectedTab();
@@ -94,6 +94,7 @@ namespace DBADashGUI
             {
                 return;
             }
+            bool globalTimeisVisible = false;
             List<Int32> instanceIDs;         
             var n = (SQLTreeItem) tv1.SelectedNode;
             var parent = (SQLTreeItem)n.Parent;
@@ -122,7 +123,7 @@ namespace DBADashGUI
             {
                 getTags();
             }
-            if (tabs.SelectedTab == tabDrives)
+            else if (tabs.SelectedTab == tabDrives)
             {
                 drivesControl1.ConnectionString = connectionString;
                 drivesControl1.InstanceIDs = instanceIDs;
@@ -132,7 +133,7 @@ namespace DBADashGUI
                 drivesControl1.IncludeCritical = true;
                 drivesControl1.RefreshData();
             }
-            if(tabs.SelectedTab == tabBackups)
+            else if(tabs.SelectedTab == tabBackups)
             {
                 backupsControl1.InstanceIDs = instanceIDs;
                 backupsControl1.ConnectionString = connectionString;          
@@ -142,7 +143,7 @@ namespace DBADashGUI
                 backupsControl1.IncludeCritical = true;
                 backupsControl1.RefreshBackups();
             }
-            if(tabs.SelectedTab== tabLogShipping)
+            else if(tabs.SelectedTab== tabLogShipping)
             {
                 logShippingControl1.IncludeNA = n.Type != SQLTreeItem.TreeType.DBADashRoot;
                 logShippingControl1.IncludeOK = n.Type != SQLTreeItem.TreeType.DBADashRoot;
@@ -152,7 +153,7 @@ namespace DBADashGUI
                 logShippingControl1.ConnectionString = connectionString;
                 logShippingControl1.RefreshData();
             }
-            if(tabs.SelectedTab== tabJobs)
+            else if(tabs.SelectedTab== tabJobs)
             {
                 agentJobsControl1.IncludeNA = n.Type != SQLTreeItem.TreeType.DBADashRoot;
                 agentJobsControl1.IncludeOK = n.Type != SQLTreeItem.TreeType.DBADashRoot;
@@ -162,13 +163,13 @@ namespace DBADashGUI
                 agentJobsControl1.InstanceIDs = instanceIDs;
                 agentJobsControl1.RefreshData();
             }
-            if(tabs.SelectedTab == tabSummary)
+            else if(tabs.SelectedTab == tabSummary)
             {
                 summary1.ConnectionString = connectionString;
                 summary1.InstanceIDs = n.Type == SQLTreeItem.TreeType.DBADashRoot ? AllInstanceIDs : instanceIDs;
                 summary1.RefreshData();
             }
-            if(tabs.SelectedTab == tabFiles)
+            else if(tabs.SelectedTab == tabFiles)
             {
                 dbFilesControl1.ConnectionString = connectionString;
                 dbFilesControl1.InstanceIDs = instanceIDs;
@@ -179,7 +180,7 @@ namespace DBADashGUI
                 dbFilesControl1.IncludeOK = dbFilesControl1.DatabaseID != null;
                 dbFilesControl1.RefreshData();
             }
-            if(tabs.SelectedTab == tabSnapshotsSummary)
+            else if(tabs.SelectedTab == tabSnapshotsSummary)
             {
                 schemaSnapshots1.InstanceID = n.InstanceID;
                 schemaSnapshots1.InstanceName = n.InstanceName;
@@ -187,11 +188,11 @@ namespace DBADashGUI
                 schemaSnapshots1.InstanceIDs = AllInstanceIDs;
                 schemaSnapshots1.RefreshData();
             }
-            if ( tabs.SelectedTab == tabSchema)
+            else if ( tabs.SelectedTab == tabSchema)
             {
                 getHistory(n.ObjectID);
             }
-            if(tabs.SelectedTab == tabLastGood)
+            else if(tabs.SelectedTab == tabLastGood)
             {
                 lastGoodCheckDBControl1.InstanceIDs = instanceIDs;
                 lastGoodCheckDBControl1.connectionString = connectionString;
@@ -201,8 +202,9 @@ namespace DBADashGUI
                 lastGoodCheckDBControl1.IncludeOK = n.InstanceID > 0;
                 lastGoodCheckDBControl1.RefreshData();
             }
-            if(tabs.SelectedTab == tabPerformance)
+            else if(tabs.SelectedTab == tabPerformance)
             {
+                globalTimeisVisible = true;
                 performance1.InstanceID = n.InstanceID;
                 performance1.DatabaseID = n.DatabaseID;
                 performance1.ConnectionString = connectionString;
@@ -217,14 +219,14 @@ namespace DBADashGUI
                 }
                 performance1.RefreshData();
             }
-            if(tabs.SelectedTab== tabDBADashErrorLog)
+            else if(tabs.SelectedTab== tabDBADashErrorLog)
             {
                 collectionErrors1.InstanceID = n.InstanceID;
                 collectionErrors1.InstanceName = n.InstanceName;
                 collectionErrors1.Days = 1;
                 collectionErrors1.RefreshData();
             }
-            if(tabs.SelectedTab== tabCollectionDates)
+            else if(tabs.SelectedTab== tabCollectionDates)
             {
                 collectionDates1.InstanceIDs =  n.Type == SQLTreeItem.TreeType.DBADashRoot ? AllInstanceIDs : instanceIDs;
                 collectionDates1.ConnectionString = connectionString;
@@ -235,8 +237,9 @@ namespace DBADashGUI
                 collectionDates1.RefreshData();
 
             }
-            if(tabs.SelectedTab== tabPerformanceSummary)
+            else if(tabs.SelectedTab== tabPerformanceSummary)
             {
+                globalTimeisVisible = true;
                 if (n.Type == SQLTreeItem.TreeType.DBADashRoot)
                 {
                     performanceSummary1.TagIDs = String.Join(",", SelectedTags());
@@ -250,32 +253,33 @@ namespace DBADashGUI
                 performanceSummary1.ConnectionString = connectionString;
                 performanceSummary1.RefreshData();
             }
-            if(tabs.SelectedTab== tabInfo)
+            else if(tabs.SelectedTab== tabInfo)
             {
                 info1.InstanceID = n.InstanceID;
                 info1.ConnectionString = connectionString;
                 info1.RefreshData();
             }
-            if(tabs.SelectedTab== tabHardware)
+            else if(tabs.SelectedTab== tabHardware)
             {
                 hardwareChanges1.InstanceIDs = instanceIDs;
                 hardwareChanges1.ConnectionString = connectionString;
                 hardwareChanges1.RefreshData();
             }
-            if (tabs.SelectedTab == tabSQLPatching)
+            else if (tabs.SelectedTab == tabSQLPatching)
             {
                 sqlPatching1.InstanceIDs = instanceIDs;
                 sqlPatching1.ConnectionString = connectionString;
                 sqlPatching1.RefreshData();
             }
-            if(tabs.SelectedTab == tabInstanceConfig)
+            else if(tabs.SelectedTab == tabInstanceConfig)
             {                
                 configurationHistory1.InstanceIDs = instanceIDs;
                 configurationHistory1.ConnectionString = connectionString;
                 configurationHistory1.RefreshData();
             }
-            if(tabs.SelectedTab== tabSlowQueries)
+            else if(tabs.SelectedTab== tabSlowQueries)
             {
+                globalTimeisVisible = true;
                 slowQueries1.InstanceIDs = instanceIDs;
                 slowQueries1.ConnectionString = connectionString;
                 if(n.Type== SQLTreeItem.TreeType.Database)
@@ -289,25 +293,25 @@ namespace DBADashGUI
                 slowQueries1.ResetFilters();
                 slowQueries1.RefreshData();
             }
-            if(tabs.SelectedTab== tabTraceFlags)
+            else if(tabs.SelectedTab== tabTraceFlags)
             {
                 traceFlagHistory1.InstanceIDs = instanceIDs;
                 traceFlagHistory1.ConnectionString = connectionString;
                 traceFlagHistory1.RefreshData();
             }
-            if(tabs.SelectedTab == tabAlerts)
+            else if(tabs.SelectedTab == tabAlerts)
             {
                 alerts1.InstanceIDs = instanceIDs;
                 alerts1.ConnectionString = connectionString;
                 alerts1.RefreshData();
             }
-            if (tabs.SelectedTab == tabDrivers)
+            else if (tabs.SelectedTab == tabDrivers)
             {
                 drivers1.InstanceIDs = instanceIDs;
                 drivers1.ConnectionString = connectionString;
                 drivers1.RefreshData();
             }
-            if (tabs.SelectedTab == tabDBSpace)
+            else if (tabs.SelectedTab == tabDBSpace)
             {
                 spaceTracking1.InstanceIDs = n.Type == SQLTreeItem.TreeType.DBADashRoot ? AllInstanceIDs : instanceIDs;
                 spaceTracking1.DatabaseID = n.DatabaseID;
@@ -315,39 +319,41 @@ namespace DBADashGUI
                 spaceTracking1.DBName = n.DatabaseName;
                 spaceTracking1.RefreshData();
             }
-            if(tabs.SelectedTab == tabAzureSummary)
+            else if(tabs.SelectedTab == tabAzureSummary)
             {
+                globalTimeisVisible = true;
                 azureSummary1.InstanceIDs =n.Type == SQLTreeItem.TreeType.DBADashRoot ? AzureInstanceIDs : instanceIDs;
                 azureSummary1.RefreshData();
             }
-            if(tabs.SelectedTab== tabAzureDB)
+            else if(tabs.SelectedTab== tabAzureDB)
             {
+                globalTimeisVisible = true;
                 azureDBResourceStats1.InstanceID = n.InstanceID;
                 azureDBResourceStats1.RefreshData();
             }
-            if(tabs.SelectedTab == tabServiceObjectives)
+            else if(tabs.SelectedTab == tabServiceObjectives)
             {
                 azureServiceObjectivesHistory1.InstanceIDs = ((SQLTreeItem)n.Parent).Type == SQLTreeItem.TreeType.DBADashRoot ? AzureInstanceIDs : instanceIDs;
                 azureServiceObjectivesHistory1.RefreshData();
             }
-            if (tabs.SelectedTab == tabDBConfiguration)
+            else if (tabs.SelectedTab == tabDBConfiguration)
             {
                 dbConfiguration1.InstanceIDs = instanceIDs;
                 dbConfiguration1.DatabaseID = n.DatabaseID;
                 dbConfiguration1.RefreshData();
             }
-            if(tabs.SelectedTab == tabDBOptions)
+            else if(tabs.SelectedTab == tabDBOptions)
             {
                 dbOptions1.InstanceIDs = parent.Type == SQLTreeItem.TreeType.DBADashRoot ? AllInstanceIDs : instanceIDs;
                 dbOptions1.DatabaseID = n.DatabaseID;
                 dbOptions1.RefreshData();
             }
-            if(tabs.SelectedTab == tabTempDB)
+            else if(tabs.SelectedTab == tabTempDB)
             {
                 tempDBConfig1.InstanceIDs = instanceIDs;
                 tempDBConfig1.RefreshData();
             }
-            if (tabs.SelectedTab == tabCustomChecks)
+            else if (tabs.SelectedTab == tabCustomChecks)
             {
                customChecks1.InstanceIDs = n.Type == SQLTreeItem.TreeType.DBADashRoot ? AllInstanceIDs : instanceIDs;
                customChecks1.IncludeCritical = true;
@@ -356,19 +362,22 @@ namespace DBADashGUI
                customChecks1.IncludeOK = n.InstanceID > 0 || n.Type == SQLTreeItem.TreeType.AzureInstance;
                customChecks1.RefreshData();
             }
-            if (tabs.SelectedTab == tabPC)
+            else if (tabs.SelectedTab == tabPC)
             {
+                globalTimeisVisible = true;
                 performanceCounterSummary1.InstanceID = n.InstanceID;
                 performanceCounterSummary1.RefreshData();
             }
             if(tabs.SelectedTab== tabObjectExecutionSummary)
             {
+                globalTimeisVisible = true;
                 objectExecutionSummary1.Instance = n.InstanceName;
                 objectExecutionSummary1.InstanceID = n.InstanceID;
                 objectExecutionSummary1.DatabaseID = n.DatabaseID;
                 objectExecutionSummary1.ObjectID = (n.Type == SQLTreeItem.TreeType.Database || n.Type == SQLTreeItem.TreeType.AzureDatabase) ? -1 :  n.ObjectID;
                 objectExecutionSummary1.RefreshData();
             }
+            tsTime.Visible = globalTimeisVisible;
         }
 
  
@@ -536,6 +545,8 @@ namespace DBADashGUI
                 {
                     allowedTabs.Add(tabAzureSummary);
                 }
+                allowedTabs.Add(tabSlowQueries);
+
                 allowedTabs.Add(tabBackups);
                 allowedTabs.Add(tabDrives);
                 allowedTabs.Add(tabLogShipping);
@@ -545,72 +556,79 @@ namespace DBADashGUI
                 allowedTabs.Add(tabLastGood);
                 allowedTabs.Add(tabDBADashErrorLog);
                 allowedTabs.Add(tabCollectionDates);
-                allowedTabs.Add(tabSlowQueries);
+                
                 allowedTabs.Add(tabDBSpace);
                 allowedTabs.Add(tabCustomChecks);
             }
             else if(n.Type== SQLTreeItem.TreeType.Database)
             {
                 allowedTabs.Add(tabPerformance);
-                allowedTabs.Add(tabFiles);
-                allowedTabs.Add(tabSnapshotsSummary);
+                allowedTabs.Add(tabObjectExecutionSummary);
                 allowedTabs.Add(tabSlowQueries);
+
+                allowedTabs.Add(tabFiles);
+                allowedTabs.Add(tabSnapshotsSummary);             
                 allowedTabs.Add(tabDBSpace);
                 allowedTabs.Add(tabDBConfiguration);
                 allowedTabs.Add(tabDBOptions);
-                allowedTabs.Add(tabObjectExecutionSummary);
+                
             }
             else if(n.Type == SQLTreeItem.TreeType.AzureDatabase)
             {
                 allowedTabs.Add(tabPerformance);
                 allowedTabs.Add(tabAzureSummary);
                 allowedTabs.Add(tabAzureDB);
+                allowedTabs.Add(tabPC);
+                allowedTabs.Add(tabSlowQueries);
+                allowedTabs.Add(tabObjectExecutionSummary);
+
                 allowedTabs.Add(tabDBADashErrorLog);
                 allowedTabs.Add(tabFiles);
-                allowedTabs.Add(tabSnapshotsSummary);
-                allowedTabs.Add(tabSlowQueries);
+                allowedTabs.Add(tabSnapshotsSummary);             
                 allowedTabs.Add(tabDBSpace);
                 allowedTabs.Add(tabServiceObjectives);
                 allowedTabs.Add(tabDBConfiguration);
                 allowedTabs.Add(tabDBOptions);
                 allowedTabs.Add(tabCustomChecks);
-                allowedTabs.Add(tabPC);
-                allowedTabs.Add(tabObjectExecutionSummary);
+     
             }
             else if (n.Type == SQLTreeItem.TreeType.Instance)
             {
                 allowedTabs.Add(tabPerformanceSummary);
-                allowedTabs.Add(tabPerformance);                  
+                allowedTabs.Add(tabPerformance);
+                allowedTabs.Add(tabPC);
+                allowedTabs.Add(tabObjectExecutionSummary);
+                allowedTabs.Add(tabSlowQueries);
+
                 allowedTabs.Add(tabSummary);
                 allowedTabs.Add(tabBackups);
                 allowedTabs.Add(tabDrives);              
                 allowedTabs.Add(tabLogShipping);
                 allowedTabs.Add(tabJobs);
-                allowedTabs.Add(tabSnapshotsSummary);
                 allowedTabs.Add(tabLastGood);
                 allowedTabs.Add(tabDBADashErrorLog);
-                allowedTabs.Add(tabInfo);                   
-                allowedTabs.Add(tabSlowQueries);
+                allowedTabs.Add(tabInfo);                                  
                 allowedTabs.Add(tabFiles);
                 allowedTabs.Add(tabTags);
                 allowedTabs.Add(tabCollectionDates);
                 allowedTabs.Add(tabDBSpace);
                 allowedTabs.Add(tabCustomChecks);
-                allowedTabs.Add(tabPC);
-                allowedTabs.Add(tabObjectExecutionSummary);
+                allowedTabs.Add(tabSnapshotsSummary);
+
             }
             else if(n.Type == SQLTreeItem.TreeType.AzureInstance)
             {
                 allowedTabs.Add(tabPerformanceSummary);         
                 allowedTabs.Add(tabAzureSummary);              
                 allowedTabs.Add(tabSlowQueries);
+                allowedTabs.Add(tabObjectExecutionSummary);
+
                 allowedTabs.Add(tabFiles);
                 allowedTabs.Add(tabTags);
                 allowedTabs.Add(tabCollectionDates);
                 allowedTabs.Add(tabDBSpace);
                 allowedTabs.Add(tabCustomChecks);
-                allowedTabs.Add(tabDBADashErrorLog);
-                allowedTabs.Add(tabObjectExecutionSummary);
+                allowedTabs.Add(tabDBADashErrorLog);              
                 allowedTabs.Add(tabSnapshotsSummary);
             }
             else if (n.Type == SQLTreeItem.TreeType.Configuration)
@@ -1078,6 +1096,84 @@ namespace DBADashGUI
             }
             suppressLoadTab = false;
             loadSelectedTab();
+        }
+
+        private void tsTime_Click(object sender, EventArgs e)
+        {
+            string tag = (string)((ToolStripMenuItem)sender).Tag;
+            checkTime(tag);
+            Performance.DateRange.SetMins(Convert.ToInt32(tag));
+            DateRangeChanged();
+        }
+
+        private void checkTime(string tag)
+        {
+            if (tag != "60")
+            {
+                tsTime.Font = new Font(tsTime.Font, FontStyle.Bold);
+            }
+            else
+            {
+                tsTime.Font = new Font(tsTime.Font, FontStyle.Regular);
+            }
+            foreach (var itm in tsTime.DropDownItems)
+            {
+                if (itm.GetType() == typeof(ToolStripMenuItem))
+                {
+                    var ts = (ToolStripMenuItem)itm;
+                    ts.Font = new Font(ts.Font, FontStyle.Regular);
+                    ts.Checked = (string)ts.Tag == tag;
+                    if (ts.Checked)
+                    {
+                        tsTime.Text = ts.Text;
+                    }
+                }
+            }
+    
+        }
+
+        private void DateRangeChanged()
+        {
+            if (tabs.SelectedTab == tabPerformance)
+            {
+                performance1.RefreshData();
+            }
+            else if (tabs.SelectedTab == tabPerformanceSummary)
+            {
+                performanceSummary1.RefreshData();
+            }
+            else if(tabs.SelectedTab == tabPC)
+            {
+                performanceCounterSummary1.RefreshData();
+            }
+            else if(tabs.SelectedTab == tabSlowQueries)
+            {
+                slowQueries1.RefreshData();
+            }
+            else if (tabs.SelectedTab == tabObjectExecutionSummary)
+            {
+                objectExecutionSummary1.RefreshData();
+            }
+            else if(tabs.SelectedTab == tabAzureSummary)
+            {
+                azureSummary1.RefreshData();
+            }
+            else if(tabs.SelectedTab == tabAzureDB)
+            {
+                azureDBResourceStats1.RefreshData();
+            }
+        }
+
+        private void tsCustomTime_Click(object sender, EventArgs e)
+        {
+            var frm = new Performance.CustomTimePicker() { FromDate = Performance.DateRange.FromUTC.ToLocalTime(), ToDate = Performance.DateRange.ToUTC.ToLocalTime()};
+            frm.ShowDialog();
+            if(frm.DialogResult == DialogResult.OK)
+            {
+                Performance.DateRange.SetCustom(frm.FromDate.ToUniversalTime(), frm.ToDate.ToUniversalTime());
+                checkTime((string)((ToolStripMenuItem)sender).Tag);
+                DateRangeChanged();
+            }            
         }
 
     }

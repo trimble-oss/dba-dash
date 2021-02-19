@@ -366,6 +366,7 @@
       <DependentUpon>CustomTimePicker.cs</DependentUpon>
     </Compile>
     <Compile Include="Performance\CartesianChartWithDataTable.cs" />
+    <Compile Include="Performance\DateRange.cs" />
     <Compile Include="Performance\IOPerformance.cs">
       <SubType>UserControl</SubType>
     </Compile>
