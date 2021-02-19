@@ -43,6 +43,7 @@ namespace DBADashGUI.Performance
                 {"TotalCPU", new columnMetaData{Alias="Total CPU (sec)",isVisible=false } },
                 {"cpu_ms_per_sec", new columnMetaData{Alias="CPU (ms/sec)",isVisible=false } },
                 {"ExecutionsPerMin", new columnMetaData{Alias="Executions/min",isVisible=true, axis=1 } },
+                {"MaxExecutionsPerMin", new columnMetaData{Alias="Max Executions/min",isVisible=false, axis=1 } },
                 {"ExecutionCount", new columnMetaData{Alias="Execution Count",isVisible=false, axis=1 } },
                 {"AvgDuration", new columnMetaData{Alias="Avg Duration (sec)",isVisible=true} },
                 {"TotalDuration", new columnMetaData{Alias="Total Duration (sec)",isVisible=false } },

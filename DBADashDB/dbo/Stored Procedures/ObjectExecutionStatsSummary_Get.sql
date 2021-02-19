@@ -59,7 +59,8 @@ WITH base AS (
 		SUM(total_logical_writes)/SUM(execution_count) as avg_writes,
 		SUM(total_physical_reads)/SUM(execution_count) as avg_physical_reads,
 		SUM(total_logical_reads)/SUM(execution_count) as avg_logical_reads,
-		MAX(SUM(PeriodTime)/1000000.0) OVER() as period_time_sec
+		MAX(SUM(PeriodTime)/1000000.0) OVER() as period_time_sec,
+		MAX(MaxExecutionsPerMin) as max_execs_per_min
 	FROM dbo.ObjectExecutionStats' + CASE WHEN @Use60MIN=1 THEN '_60MIN' ELSE '' END + ' OES 
 	JOIN dbo.Instances I ON OES.InstanceID = I.InstanceID
 	JOIN dbo.DBObjects O ON OES.InstanceID = I.InstanceID AND OES.ObjectID = O.ObjectID
@@ -97,7 +98,8 @@ compare as(
 		SUM(total_logical_writes)/SUM(execution_count) as compare_avg_writes,
 		SUM(total_physical_reads)/SUM(execution_count) as compare_avg_physical_reads,
 		SUM(total_logical_reads)/SUM(execution_count) as compare_avg_logical_reads,
-		MAX(SUM(PeriodTime)/1000000.0) OVER() as compare_period_time_sec
+		MAX(SUM(PeriodTime)/1000000.0) OVER() as compare_period_time_sec,
+		MAX(MaxExecutionsPerMin) as compare_max_execs_per_min
 	FROM dbo.ObjectExecutionStats' + CASE WHEN @Use60MIN=1 THEN '_60MIN' ELSE '' END + ' OES 
 	JOIN dbo.Instances I ON OES.InstanceID = I.InstanceID
 	JOIN dbo.DBObjects O ON OES.InstanceID = I.InstanceID AND OES.ObjectID = O.ObjectID
@@ -125,6 +127,7 @@ SELECT ISNULL(base.InstanceID,compare.InstanceID) as InstanceID,
 		avg_duration_sec,
 		execution_count,
 		execs_per_min,
+		max_execs_per_min,
 		total_cpu_sec,
 		cpu_ms_per_sec,
 		avg_cpu_sec,
@@ -140,6 +143,7 @@ SELECT ISNULL(base.InstanceID,compare.InstanceID) as InstanceID,
 		compare_avg_duration_sec,
 		compare_execution_count,
 		compare_execs_per_min,
+		compare_max_execs_per_min
 		compare_total_cpu_sec,
 		compare_cpu_ms_per_sec,
 		compare_avg_cpu_sec,
@@ -151,7 +155,7 @@ SELECT ISNULL(base.InstanceID,compare.InstanceID) as InstanceID,
 		compare_avg_logical_reads,
 		compare_period_time_sec,
 		(avg_duration_sec-compare_avg_duration_sec)/compare_avg_duration_sec as diff_avg_duration_pct,
-		(avg_cpu_sec-compare_avg_cpu_sec)/compare_avg_cpu_sec as diff_avg_cpu_pct
+		(avg_cpu_sec-compare_avg_cpu_sec)/compare_avg_cpu_sec as diff_avg_cpu_pct	
 FROM base 
 FULL JOIN compare on base.ObjectID = compare.ObjectID'
 
