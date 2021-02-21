@@ -341,25 +341,57 @@ namespace DBADash
             {
                 if (SlowQueryThresholdMs >= 0 && (!(IsAzure && isAzureMasterDB)))
                 {
-                    try
+                    var completed = false;
+                    var retry = 0;
+                    while (!completed)
                     {
-                        collectSlowQueries();
-                    }
-                    catch (Exception ex)
-                    {
-                        logError(collectionTypeString, ex.Message);
+                        try
+                        {
+                            collectSlowQueries();
+                            completed = true;
+                        }
+                        catch (Exception ex)
+                        {
+                            retry += 1;
+                            if (retry > RetryCount)
+                            {
+                                logError(collectionTypeString, ex.Message);
+                                completed = true;
+                            }
+                            else
+                            {
+                                logError(collectionTypeString, ex.Message + Environment.NewLine + "Retry in " + RetryInterval.ToString() + "seconds", "Collect[Retrying]");
+                                System.Threading.Thread.Sleep(RetryInterval * 1000);
+                            }
+                        }
                     }
                 }
             }
             else if(collectionType == CollectionType.PerformanceCounters)
             {
-                try
+                var completed = false;
+                var retry = 0;
+                while (!completed)
                 {
-                    collectPerformanceCounters();
-                }
-                catch (Exception ex)
-                {
-                    logError(collectionTypeString, ex.Message);
+                    try
+                    {
+                        collectPerformanceCounters();
+                        completed = true;
+                    }
+                    catch (Exception ex)
+                    {
+                        retry += 1;
+                        if (retry > RetryCount)
+                        {
+                            logError(collectionTypeString, ex.Message);
+                            completed = true;
+                        }
+                        else
+                        {
+                            logError(collectionTypeString, ex.Message + Environment.NewLine + "Retry in " + RetryInterval.ToString() + "seconds", "Collect[Retrying]");
+                            System.Threading.Thread.Sleep(RetryInterval * 1000);
+                        }
+                    }
                 }
             }
             else
