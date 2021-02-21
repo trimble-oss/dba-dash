@@ -7,9 +7,9 @@
 	@Debug BIT=0
 )
 AS
-IF @Use60MIN IS NULL
+IF @Use60Min IS NULL
 BEGIN
-	SELECT @Use60MIN = CASE WHEN DATEDIFF(hh,@FromDate,@ToDate)>24 THEN 1
+	SELECT @Use60Min = CASE WHEN DATEDIFF(hh,@FromDate,@ToDate)>24 THEN 1
 						WHEN DATEPART(mi,@FromDate)+DATEPART(s,@FromDate)+DATEPART(ms,@FromDate)=0 
 							AND (DATEPART(mi,@ToDate)+DATEPART(s,@ToDate)+DATEPART(ms,@ToDate)=0 
 									OR @ToDate>=DATEADD(s,-2,GETUTCDATE())
