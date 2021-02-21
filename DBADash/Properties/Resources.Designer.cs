@@ -896,6 +896,35 @@ namespace DBADash.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to IF OBJECT_ID(&apos;sys.dm_db_log_info&apos;) IS NOT NULL
+        ///BEGIN
+        ///	SELECT d.database_id,COUNT(*) as VLFCount
+        ///	FROM sys.databases d 
+        ///	CROSS APPLY sys.dm_db_log_info(d.database_id)
+        ///	GROUP BY d.database_id
+        ///END
+        ///ELSE
+        ///BEGIN
+        ///	DECLARE @DBName SYSNAME
+        ///	DECLARE @SQL NVARCHAR(MAX)
+        ///	CREATE TABLE #VLF( 
+        ///		database_id INT NOT NULL,
+        ///		VLFCount INT NOT NULL,
+        ///		PRIMARY KEY (database_id)
+        ///	)
+        ///
+        ///	DECLARE @ProductMajorVersion INT
+        ///	SET @ProductMajorVersion = CAST(SERVERPROPERTY(&apos;ProductMajorVersion&apos;) as INT)
+        ///
+        ///	DECLARE DBs C [rest of string was truncated]&quot;;.
+        /// </summary>
+        internal static string SQLVLF {
+            get {
+                return ResourceManager.GetString("SQLVLF", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to SELECT wait_type,
         ///       waiting_tasks_count,
         ///       wait_time_ms,

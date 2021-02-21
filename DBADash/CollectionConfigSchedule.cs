@@ -27,7 +27,7 @@ namespace DBADashService
         {
             return new CollectionConfigSchedule[] { new CollectionConfigSchedule("0 0 * ? * *", true, new CollectionType[] { CollectionType.General }), 
                                                     new CollectionConfigSchedule("0 * * ? * *", true, new CollectionType[] { CollectionType.Performance }),
-                                                    new CollectionConfigSchedule("0 0 0 1/1 * ? *", true, new CollectionType[] { CollectionType.Security})};
+                                                    new CollectionConfigSchedule("0 0 0 1/1 * ? *", true, new CollectionType[] { CollectionType.Infrequent})};
         }
         public static CollectionConfigSchedule[] DefaultImportSchedule()
         {

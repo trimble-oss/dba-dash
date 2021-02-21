@@ -15,7 +15,7 @@ namespace DBADash
     {
         General,
         Performance,
-        Security,
+        Infrequent,
         AgentJobs,
         Databases,
         DatabasesHADR,
@@ -51,7 +51,8 @@ namespace DBADash
         DatabaseRoleMembers,
         DatabasePermissions,
         CustomChecks,
-        PerformanceCounters
+        PerformanceCounters,
+        VLF
     }
 
 
@@ -64,7 +65,7 @@ namespace DBADash
         public Int32 PerformanceCollectionPeriodMins = 60;
         string computerName;
         Int64 editionId;
-        readonly CollectionType[] azureCollectionTypes = new CollectionType[] { CollectionType.SlowQueries, CollectionType.AzureDBElasticPoolResourceStats, CollectionType.AzureDBServiceObjectives, CollectionType.AzureDBResourceStats, CollectionType.CPU, CollectionType.DBFiles, CollectionType.General, CollectionType.Performance, CollectionType.Databases, CollectionType.DBConfig, CollectionType.TraceFlags, CollectionType.ObjectExecutionStats, CollectionType.BlockingSnapshot, CollectionType.IOStats, CollectionType.Waits, CollectionType.ServerProperties, CollectionType.DBTuningOptions, CollectionType.SysConfig, CollectionType.DatabasePrincipals, CollectionType.DatabaseRoleMembers, CollectionType.DatabasePermissions, CollectionType.Security, CollectionType.OSInfo,CollectionType.CustomChecks,CollectionType.PerformanceCounters };
+        readonly CollectionType[] azureCollectionTypes = new CollectionType[] { CollectionType.SlowQueries, CollectionType.AzureDBElasticPoolResourceStats, CollectionType.AzureDBServiceObjectives, CollectionType.AzureDBResourceStats, CollectionType.CPU, CollectionType.DBFiles, CollectionType.General, CollectionType.Performance, CollectionType.Databases, CollectionType.DBConfig, CollectionType.TraceFlags, CollectionType.ObjectExecutionStats, CollectionType.BlockingSnapshot, CollectionType.IOStats, CollectionType.Waits, CollectionType.ServerProperties, CollectionType.DBTuningOptions, CollectionType.SysConfig, CollectionType.DatabasePrincipals, CollectionType.DatabaseRoleMembers, CollectionType.DatabasePermissions, CollectionType.Infrequent, CollectionType.OSInfo,CollectionType.CustomChecks,CollectionType.PerformanceCounters,CollectionType.VLF };
         public Int64 SlowQueryThresholdMs = -1;
 
         private bool IsAzure = false;
@@ -253,9 +254,7 @@ namespace DBADash
                 Collect(CollectionType.DBConfig);
                 Collect(CollectionType.Corruption);
                 Collect(CollectionType.OSInfo);
-                Collect(CollectionType.TraceFlags);
-                Collect(CollectionType.DriversWMI);
-                Collect(CollectionType.OSLoadedModules);
+                Collect(CollectionType.TraceFlags);                              
                 Collect(CollectionType.DBTuningOptions);
                 Collect(CollectionType.AzureDBServiceObjectives);
                 Collect(CollectionType.LastGoodCheckDB);
@@ -274,7 +273,7 @@ namespace DBADash
                 Collect(CollectionType.SlowQueries);
                 Collect(CollectionType.PerformanceCounters);
             }
-            else if(collectionType == CollectionType.Security)
+            else if(collectionType == CollectionType.Infrequent)
             {
                 Collect(CollectionType.ServerPrincipals);
                 Collect(CollectionType.ServerRoleMembers);
@@ -282,6 +281,9 @@ namespace DBADash
                 Collect(CollectionType.DatabasePrincipals);
                 Collect(CollectionType.DatabaseRoleMembers);
                 Collect(CollectionType.DatabasePermissions);
+                Collect(CollectionType.VLF);
+                Collect(CollectionType.DriversWMI);
+                Collect(CollectionType.OSLoadedModules);
             }
             else if (collectionType == CollectionType.Drives)
             {

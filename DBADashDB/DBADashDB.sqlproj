@@ -30,7 +30,7 @@
     <QueryStoreStaleQueryThreshold>15</QueryStoreStaleQueryThreshold>
     <QueryStoreMaxStorageSize>512</QueryStoreMaxStorageSize>
     <QueryStoreMaxPlansPerQuery>50</QueryStoreMaxPlansPerQuery>
-    <DacVersion>2.0.3.7</DacVersion>
+    <DacVersion>2.0.3.8</DacVersion>
     <ReadCommittedSnapshot>True</ReadCommittedSnapshot>
     <AllowSnapshotIsolation>True</AllowSnapshotIsolation>
   </PropertyGroup>
@@ -493,6 +493,8 @@
     <Build Include="Storage\PS_PerformanceCounters_60MIN.sql" />
     <Build Include="Switch\Tables\PerformanceCounters_60MIN.sql" />
     <Build Include="dbo\Stored Procedures\DDLSnapshotInstanceSummary_Get.sql" />
+    <Build Include="dbo\Stored Procedures\VLF_Upd.sql" />
+    <Build Include="dbo\User Defined Types\VLF.sql" />
   </ItemGroup>
   <ItemGroup>
     <PostDeploy Include="Script.PostDeployment1.sql" />
