@@ -216,11 +216,19 @@ namespace DBADashGUI.Changes
                     var r = dgv.Rows[idx];
                     foreach (var col in warningCols)
                     {
-                        r.Cells[col].Style.BackColor = (Int32)dgv.Rows[idx].Cells[col].Value > 0 ? Color.Yellow : Color.White;
+                        r.Cells[col].Style.BackColor = (Int32)r.Cells[col].Value > 0 ? Color.Yellow : Color.White;
                     }
                     foreach (var col in criticalCols)
                     {
-                        r.Cells[col].Style.BackColor = (Int32)dgv.Rows[idx].Cells[col].Value > 0 ? Color.Red : Color.White;
+                        r.Cells[col].Style.BackColor = (Int32)r.Cells[col].Value > 0 ? Color.Red : Color.White;
+                    }
+                    if (r.Cells["Max VLF Count"].Value == DBNull.Value)
+                    {
+                        r.Cells["Max VLF Count"].Style.BackColor = Color.LightGray;
+                    }
+                    else
+                    {
+                        r.Cells["Max VLF Count"].Style.BackColor = (Int32)r.Cells["Max VLF Count"].Value > 10000 ? Color.Red : ((Int32)r.Cells["Max VLF Count"].Value > 1000 ? Color.Yellow : Color.White);
                     }
                 }
             }

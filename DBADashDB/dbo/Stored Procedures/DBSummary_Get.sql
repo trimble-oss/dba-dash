@@ -12,7 +12,8 @@ SELECT I.Instance,
 	SUM(CASE WHEN D.state=4 THEN 1 ELSE 0 END) AS Suspect,
 	SUM(CASE WHEN D.state=5 THEN 1 ELSE 0 END) AS Emergency,
 	SUM(CASE WHEN D.state IN(6,10) THEN 1 ELSE 0 END) AS Offline,
-	SUM(CASE WHEN D.database_id >4 THEN 1 ELSE 0 END) AS [User Database Count]	
+	SUM(CASE WHEN D.database_id >4 THEN 1 ELSE 0 END) AS [User Database Count],
+	MAX(D.VLFCount) AS [Max VLF Count]
 FROM dbo.Instances I 
 JOIN dbo.Databases D ON I.InstanceID = D.InstanceID
 WHERE I.IsActive=1

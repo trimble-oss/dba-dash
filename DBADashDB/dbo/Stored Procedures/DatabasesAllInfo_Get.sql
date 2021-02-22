@@ -79,7 +79,8 @@ SELECT I.Instance,
         D.is_mixed_page_allocation_on,
         D.IsActive,
         D.state_desc,
-        D.LastGoodCheckDbTime 
+        D.LastGoodCheckDbTime,
+		D.VLFCount
 FROM dbo.Databases D
 JOIN dbo.Instances I ON I.InstanceID = D.InstanceID
 WHERE 1=1
