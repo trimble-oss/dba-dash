@@ -325,7 +325,7 @@ FROM
 (VALUES
 (-1,'DBFiles',125,180),
 (-1,'ServerExtraProperties',125,180),
-(-1,'OSLoadedModules',125,180),
+(-1,'OSLoadedModules',1445,2880),
 (-1,'TraceFlags',125,180),
 (-1,'ServerProperties',125,180),
 (-1,'LogRestores',125,180),
@@ -339,7 +339,7 @@ FROM
 (-1,'Drives',125,180),
 (-1,'Database',125,180),
 (-1,'Instance',125,180),
-(-1,'Drivers',125,180),
+(-1,'Drivers',1445,2880),
 (-1,'SysConfig',125,180),
 (-1,'Backups',125,180),
 (-1,'AzureDBServiceObjectives',125,180),
@@ -360,6 +360,14 @@ FROM
 (-1,'ServerRoleMembers',1445,2880),
 (-1,'DatabaseRoleMembers',1445,2880)) T(InstanceID,Reference,WarningThreshold,CriticalThreshold)
 WHERE NOT EXISTS(SELECT 1 FROM dbo.CollectionDatesThresholds CDT WHERE CDT.InstanceID = T.InstanceID AND CDT.Reference = T.Reference)
+
+--replace old defaults
+UPDATE CollectionDatesThresholds
+SET WarningThreshold=1445,
+	CriticalThreshold=2880
+WHERE Reference IN('Drivers','OSLoadedModules')
+AND WarningThreshold=125
+AND CriticalThreshold=180
 
 INSERT INTO dbo.InstanceUptimeThresholds
 (
