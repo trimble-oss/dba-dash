@@ -23,13 +23,16 @@ SELECT @DateGroupingSQL= CASE WHEN @DateGroupingMin IS NULL OR @DateGroupingMin=
 
 SELECT @Table = CASE WHEN @DateGroupingMin>=60 THEN 'dbo.Waits_60MIN' ELSE 'dbo.Waits' END
 
+CREATE TABLE #WaitGrp(
+	[Time] DATETIME2(2) NOT NULL,
+	WaitTypeID SMALLINT NOT NULL,
+	WaitTimeMsPerSec DECIMAL(19,5) NULL
+)
 
 SET @SQL = N'
-WITH T AS (
 SELECT ' + @DateGroupingSQL + ' AS [Time],
-			CASE WHEN WT.IsCriticalWait=1 THEN ''!!'' ELSE '''' END + WT.WaitType as WaitType,
-			SUM(W.wait_time_ms)*1000.0 / SUM(W.sample_ms_diff) WaitTimeMsPerSec,
-			ROW_NUMBER() OVER(PARTITION BY ' + @DateGroupingSQL + ' ORDER BY SUM(W.wait_time_ms) DESC) rnum
+			W.WaitTypeID,
+			SUM(W.wait_time_ms)*1000.0 / SUM(W.sample_ms_diff) WaitTimeMsPerSec
 FROM ' + @Table + ' W 
 ' + @DateGroupingJoin + '
 JOIN dbo.WaitType WT ON WT.WaitTypeID = W.WaitTypeID
@@ -39,15 +42,20 @@ AND WT.WaitType NOT IN(N''PVS_PREALLOCATE'',N''REDO_THREAD_PENDING_WORK'')
 AND W.InstanceID=@InstanceID
 ' + CASE WHEN @CriticalWaitsOnly=1 THEN 'AND WT.IsCriticalWait=1' ELSE '' END + '
 ' + CASE WHEN @WaitType IS NULL THEN '' ELSE 'AND WT.WaitType LIKE @WaitType' END + '
-GROUP BY WT.WaitType,WT.IsCriticalWait, ' + @DateGroupingSQL + ' 
-HAVING SUM(W.wait_time_ms)*1000.0 / SUM(W.sample_ms_diff) > 0
+GROUP BY W.WaitTypeID, ' + @DateGroupingSQL + ' 
+HAVING SUM(W.wait_time_ms)*1000.0 / SUM(W.sample_ms_diff) > 0;'
+
+INSERT INTO #WaitGrp([Time],WaitTypeID,WaitTimeMsPerSec)
+EXEC sp_executesql @SQL,N'@FromDate DATETIME2(2),@ToDate DATETIME2(2),@InstanceID INT,@Top INT,@DateGroupingMin INT,@WaitType NVARCHAR(60)',@FromDate,@ToDate,@InstanceID,@Top,@DateGroupingMin,@WaitType;
+
+WITH T AS (
+	SELECT *,ROW_NUMBER() OVER(PARTITION BY [Time] ORDER BY WaitTimeMsPerSec DESC) rnum
+	FROM #WaitGrp T1
 )
 SELECT [Time],
-	CASE WHEN rnum<=@Top THEN WaitType ELSE ''{Other}'' END as WaitType,
+	CASE WHEN rnum> @Top THEN '{Other}' WHEN WT.IsCriticalWait=1 THEN '!!'  + WT.WaitType ELSE WT.WaitType END as WaitType,
 	SUM(WaitTimeMsPerSec) as WaitTimeMsPerSec
 FROM T 
-GROUP BY [Time],CASE WHEN rnum<=@Top THEN WaitType ELSE ''{Other}'' END
+JOIN dbo.WaitType WT ON WT.WaitTypeID = T.WaitTypeID
+GROUP BY [Time],CASE WHEN rnum> @Top THEN '{Other}' WHEN WT.IsCriticalWait=1 THEN '!!'  + WT.WaitType ELSE WT.WaitType END
 ORDER BY WaitType
-OPTION(MAX_GRANT_PERCENT=0.1)'
-
-EXEC sp_executesql @SQL,N'@FromDate DATETIME2(2),@ToDate DATETIME2(2),@InstanceID INT,@Top INT,@DateGroupingMin INT,@WaitType NVARCHAR(60)',@FromDate,@ToDate,@InstanceID,@Top,@DateGroupingMin,@WaitType
