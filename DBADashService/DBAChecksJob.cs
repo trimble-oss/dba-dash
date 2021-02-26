@@ -10,12 +10,11 @@ using System.Linq;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Threading.Tasks;
 using static DBADash.DBADashConnection;
-
 namespace DBADashService
 {
     public class DBADashJob : IJob
     {
-
+        static readonly CollectionConfig config = SchedulerServiceConfig.Config;
 
         public Task Execute(IJobExecutionContext context)
         {
@@ -24,15 +23,6 @@ namespace DBADashService
 
             var cfg = JsonConvert.DeserializeObject<DBADashSource>(dataMap.GetString("CFG"));
             var types = JsonConvert.DeserializeObject<CollectionType[]>(dataMap.GetString("Type"));
-            var AccessKey = dataMap.GetString("AccessKey");
-            var SecretKey = dataMap.GetString("SecretKey");
-            var AWSProfile = dataMap.GetString("AWSProfile");
-            var source = dataMap.GetString("Source");
-            var binarySerialization = dataMap.GetBoolean("BinarySerialization");
-            var destination = dataMap.GetString("Destination");
-            var sourceType = JsonConvert.DeserializeObject<ConnectionType>(dataMap.GetString("SourceType"));
-            var destinationType = JsonConvert.DeserializeObject<ConnectionType>(dataMap.GetString("DestinationType"));
-
             try
             {
                 if (cfg.SourceConnection.Type == ConnectionType.Directory)
@@ -47,7 +37,7 @@ namespace DBADashService
                             {
                                 string json = System.IO.File.ReadAllText(f);
                                 DataSet ds  = DataSetSerialization.DeserializeDS(json);
-                                DestinationHandling.WriteDB(ds, destination);
+                                DestinationHandling.Write(ds,cfg);
                                 System.IO.File.Delete(f);
                             }
                             foreach (string f in System.IO.Directory.GetFiles(folder, "DBADash_*.bin"))
@@ -58,7 +48,7 @@ namespace DBADashService
                                 {
                                     ds = (DataSet)fmt.Deserialize(fs);
                                 }
-                                DestinationHandling.WriteDB(ds, destination);
+                                DestinationHandling.Write(ds, cfg);
                                 System.IO.File.Delete(f);
                             }
                         }
@@ -78,7 +68,7 @@ namespace DBADashService
                     try
                     {
                         var uri = new Amazon.S3.Util.AmazonS3Uri(cfg.ConnectionString);
-                        var s3Cli = AWSTools.GetAWSClient(AWSProfile, AccessKey, SecretKey, uri);
+                        var s3Cli = AWSTools.GetAWSClient(config.AWSProfile, config.AccessKey , config.GetSecretKey(), uri);
                         var resp = s3Cli.ListObjects(uri.Bucket, (uri.Key + "/DBADash_").Replace("//", "/"));
                         foreach (var f in resp.S3Objects)
                         {
@@ -105,7 +95,7 @@ namespace DBADashService
 
                                             }
                                         }
-                                        DestinationHandling.WriteDB(ds, destination);
+                                        DestinationHandling.Write(ds, cfg);
                                         s3Cli.DeleteObject(f.BucketName, f.Key);
                                         Console.WriteLine("Imported:" + f.Key);
                                     }
@@ -137,10 +127,10 @@ namespace DBADashService
                         }
                         collector.SlowQueryThresholdMs = cfg.SlowQueryThresholdMs;
                         collector.Collect(types);
-                        string fileName = cfg.GenerateFileName(binarySerialization);
+
                         try
                         {
-                            DestinationHandling.Write(collector.Data, destination, fileName, AWSProfile, AccessKey, SecretKey, destinationType);
+                            DestinationHandling.Write(collector.Data, cfg);
                         }
                         catch (Exception ex)
                         {

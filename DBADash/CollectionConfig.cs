@@ -14,7 +14,7 @@ namespace DBADash
         public Int32 ServiceThreads=-1;
         private string _secretKey;
         private bool wasEncryptionPerformed = false;
-        private string myString = "g&hAs2&mVOLwE6DqO!I5";
+        private readonly string myString = "g&hAs2&mVOLwE6DqO!I5";
         public SchemaSnapshotDBOptions SchemaSnapshotOptions=null;
         public bool BinarySerialization { get; set; } = false;
         public bool ScanForAzureDBs { get; set; } = true;
@@ -90,7 +90,7 @@ namespace DBADash
         [JsonIgnore]
         public DBADashConnection DestinationConnection { get; set; }
 
-        private string defaultMaintenanceCron = " 0 0 0 ? * * *";
+        private readonly string defaultMaintenanceCron = " 0 0 0 ? * * *";
 
         public string MaintenanceScheduleCron { get; set; }
 
@@ -103,6 +103,43 @@ namespace DBADash
             else
             {
                 return MaintenanceScheduleCron;
+            }
+        }
+        [JsonIgnore]
+        public List<DBADashConnection> SecondaryDestinationConnections { get; set; } = new List<DBADashConnection>();
+
+        public string[] SecondaryDestinations
+        {
+            get
+            {
+                var encryptedStrings = new List<string>();
+                foreach(var d in SecondaryDestinationConnections)
+                {
+                    encryptedStrings.Add(d.EncryptedConnectionString);
+                }
+                return encryptedStrings.ToArray();
+            }
+            set
+            {
+                SecondaryDestinationConnections = new List<DBADashConnection>();
+                foreach(string s in value)
+                {
+                    SecondaryDestinationConnections.Add(new DBADashConnection(s));
+                }
+            }
+        }
+
+        [JsonIgnore]
+        public List<DBADashConnection> AllDestinations
+        {
+            get
+            {
+                var all = new List<DBADashConnection>
+                {
+                    DestinationConnection
+                };
+                all.AddRange(SecondaryDestinationConnections);
+                return all;
             }
         }
 
@@ -236,9 +273,11 @@ namespace DBADash
                 while (rdr.Read())
                 {
                     builder.InitialCatalog = rdr.GetString(0);
-                    DBADashSource dbCn = new DBADashSource(builder.ConnectionString);
-                    dbCn.Schedules = masterConnection.Schedules;
-                    dbCn.SlowQueryThresholdMs = masterConnection.SlowQueryThresholdMs;
+                    DBADashSource dbCn = new DBADashSource(builder.ConnectionString)
+                    {
+                        Schedules = masterConnection.Schedules,
+                        SlowQueryThresholdMs = masterConnection.SlowQueryThresholdMs
+                    };
                     if (masterConnection.SchemaSnapshotDBs == "*")
                     {
                         dbCn.SchemaSnapshotDBs = masterConnection.SchemaSnapshotDBs;

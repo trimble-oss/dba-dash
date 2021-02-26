@@ -12,21 +12,15 @@ namespace DBADashService
 {
     public class SchemaSnapshotJob : IJob
     {
-
-
+    
         public Task Execute(IJobExecutionContext context)
         {
             JobDataMap dataMap = context.JobDetail.JobDataMap;
 
             var cfg = JsonConvert.DeserializeObject<DBADashSource>(dataMap.GetString("CFG"));
-            var AccessKey = dataMap.GetString("AccessKey");
-            var SecretKey = dataMap.GetString("SecretKey");
-            var AWSProfile = dataMap.GetString("AWSProfile");
-            var destination = dataMap.GetString("Destination");
             var schemaSnapshotDBs = dataMap.GetString("SchemaSnapshotDBs");
             string strSchemaSnapshotOptions = dataMap.GetString("Options");
             var schemaSnapshotOptions = JsonConvert.DeserializeObject <SchemaSnapshotDBOptions> (strSchemaSnapshotOptions);
-            var destinationType = JsonConvert.DeserializeObject<ConnectionType>(dataMap.GetString("DestinationType"));
             string connectionString = cfg.GetSource();
             SqlConnectionStringBuilder builder = new SqlConnectionStringBuilder(connectionString);
 
@@ -75,7 +69,7 @@ namespace DBADashService
                             dsSnapshot.Tables.Add(dt);
 
                             string fileName = cfg.GenerateFileName(true);
-                            DestinationHandling.Write(dsSnapshot, destination, fileName, AWSProfile, AccessKey, SecretKey, destinationType);
+                            DestinationHandling.Write(dsSnapshot, cfg);
                             dsSnapshot.Tables.Remove(dt);
                         }
                         catch(Exception ex)

@@ -11,28 +11,45 @@ namespace DBADashService
     public class DestinationHandling
     {
 
-        public static void Write(DataSet ds, string destination, string fileName, string AWSProfile, string AccessKey, string SecretKey, ConnectionType destinationType)
+        public static void Write(DataSet ds,DBADashSource src)
         {
-            switch (destinationType)
+            string fileName = src.GenerateFileName(SchedulerServiceConfig.Config.BinarySerialization);
+            foreach (var d in SchedulerServiceConfig.Config.AllDestinations)
+            {
+                try
+                {
+                    Console.WriteLine("Write to destination:" + d.ConnectionForPrint);
+                    Write(ds, d, fileName);
+                }
+                catch(Exception ex)
+                {
+                    DBADashService.ScheduleService.ErrorLogger(ex, "Error writing to destination:" + d.ConnectionForPrint);
+                }
+            }
+        }
+
+        public static void Write(DataSet ds, DBADashConnection d,string fileName)
+        {
+            switch (d.Type)
             {
                 case ConnectionType.AWSS3:
-                    WriteS3(ds, destination, fileName, AWSProfile, AccessKey, SecretKey);
+                    WriteS3(ds, d.ConnectionString, fileName);
                     break;
                 case ConnectionType.Directory:
-                    WriteFolder(ds, destination, fileName);
+                    WriteFolder(ds, d.ConnectionString, fileName);
                     break;
                 case ConnectionType.SQL:
-                    WriteDB(ds, destination);
+                    WriteDB(ds, d.ConnectionString);
                     break;
             }
 
         }
 
-        public static void WriteS3(DataSet ds, string destination, string fileName, string AWSProfile, string AccessKey, string SecretKey)
+  
+        public static void WriteS3(DataSet ds, string destination, string fileName)
         {
-            Console.WriteLine("Upload to S3");
             var uri = new Amazon.S3.Util.AmazonS3Uri(destination);
-            var s3Cli = AWSTools.GetAWSClient(AWSProfile, AccessKey, SecretKey, uri);
+            var s3Cli = AWSTools.GetAWSClient(SchedulerServiceConfig.Config.AWSProfile, SchedulerServiceConfig.Config.AccessKey, SchedulerServiceConfig.Config.GetSecretKey(), uri);
             var r = new Amazon.S3.Model.PutObjectRequest();
 
             if (System.IO.Path.GetExtension(fileName) == ".bin")
@@ -61,7 +78,6 @@ namespace DBADashService
             if (System.IO.Directory.Exists(destination))
             {
                 string filePath = Path.Combine(destination, fileName);
-                Console.WriteLine("Write to " + filePath);
                 if (System.IO.Path.GetExtension(fileName) == ".bin")
                 {
                     ds.RemotingFormat = SerializationFormat.Binary;
@@ -86,7 +102,6 @@ namespace DBADashService
         public static void WriteDB(DataSet ds, string destination)
         {
             var importer = new DBImporter();
-            Console.WriteLine("Update DBADash DB");
             importer.Update(destination, ds);
         }
     }
