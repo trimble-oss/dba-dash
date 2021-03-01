@@ -25,6 +25,16 @@ namespace DBADashService
                 }
             }
             string json = JsonConvert.SerializeObject(ds, Formatting.None);
+            foreach (DataTable dt in ds.Tables)
+            {
+                foreach (DataColumn col in dt.Columns)
+                {
+                    if (col.DataType == typeof(byte[]))
+                    {
+                        col.ColumnName = col.ColumnName.Replace(binaryPrefix, "");
+                    }
+                }
+            }
             return json;
         }
 
