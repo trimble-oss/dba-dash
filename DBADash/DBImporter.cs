@@ -16,6 +16,16 @@ namespace DBADash
 
         private static readonly int commandTimeout = 60;
 
+        private void logError(string errorSource, Exception ex, DataTable dt, string errorContext = "Import")
+        {
+            logError(errorSource, ex, dt.DataSet, errorContext);
+        }
+
+        private void logError(string errorSource, Exception ex, DataSet ds, string errorContext = "Import")
+        {
+            logError(errorSource, ex.ToString(), ds, errorContext);
+        }
+
         private void logError(string errorSource, string errorMessage, DataTable dt,string errorContext="Import")
         {
             logError(errorSource, errorMessage, dt.DataSet,errorContext);
@@ -120,7 +130,7 @@ namespace DBADash
             }
             catch (Exception ex)
             {
-                logError("DDLSnapshot:" + databaseName, ex.Message, dtSS);
+                logError("DDLSnapshot:" + databaseName, ex, dtSS);
             }
         }
 
@@ -159,7 +169,7 @@ namespace DBADash
                 }
                 catch (Exception ex)
                 {
-                    logError("ServerExtraProperties", ex.Message, ds);
+                    logError("ServerExtraProperties", ex, ds);
                 }
             }
         }
@@ -185,7 +195,7 @@ namespace DBADash
             }
             catch (Exception ex)
             {
-                logError(dt.TableName, ex.Message, dt);
+                logError(dt.TableName, ex, dt);
             }
         }
 
@@ -254,8 +264,8 @@ namespace DBADash
                 {                   
                     using (var cn = new SqlConnection(connectionString))
                     {
-                        using (SqlCommand cmd = new SqlCommand("Database_Upd", cn) { CommandType = CommandType.StoredProcedure, CommandTimeout = commandTimeout }) {
-                            cn.Open();
+                        cn.Open();
+                        using (SqlCommand cmd = new SqlCommand("Database_Upd", cn) { CommandType = CommandType.StoredProcedure, CommandTimeout = commandTimeout }) {                          
                             var dtDB = ds.Tables["Databases"];
                             if (dtDB.Columns["owner_sid"].DataType == typeof(string))
                             {
@@ -282,7 +292,7 @@ namespace DBADash
                 }
                 catch (Exception ex)
                 {
-                    logError("Database", ex.Message, ds);
+                    logError("Database", ex,ds);
                 }
             }
         }
