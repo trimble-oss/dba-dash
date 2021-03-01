@@ -5,7 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Data.SqlClient;
 using static DBADash.DBADashConnection;
-
+using System.Linq;
 namespace DBADash
 {
 
@@ -108,6 +108,7 @@ namespace DBADash
         [JsonIgnore]
         public List<DBADashConnection> SecondaryDestinationConnections { get; set; } = new List<DBADashConnection>();
 
+        // Required for serialization
         public string[] SecondaryDestinations
         {
             get
@@ -122,9 +123,9 @@ namespace DBADash
             set
             {
                 SecondaryDestinationConnections = new List<DBADashConnection>();
-                foreach(string s in value)
+                foreach(string s in value.Distinct().ToArray())
                 {
-                    SecondaryDestinationConnections.Add(new DBADashConnection(s));
+                      SecondaryDestinationConnections.Add(new DBADashConnection(s));
                 }
             }
         }
