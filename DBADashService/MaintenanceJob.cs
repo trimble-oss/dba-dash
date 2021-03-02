@@ -41,7 +41,7 @@ namespace DBADashService
             {
                 using (var cmd = new SqlCommand("dbo.Partitions_Add", cn) { CommandType = CommandType.StoredProcedure }) {
                     cn.Open();
-                    Console.WriteLine("Maintenance: Creating partitions");
+                    ScheduleService.InfoLogger("Maintenance: Creating partitions");
                     cmd.ExecuteNonQuery();
                 }
             }
@@ -54,7 +54,7 @@ namespace DBADashService
                 using (var cmd = new SqlCommand("dbo.PurgeData", cn) { CommandType = CommandType.StoredProcedure })
                 {
                     cn.Open();
-                    Console.WriteLine("Maintenance: PurgeData");
+                    ScheduleService.InfoLogger("Maintenance: PurgeData");
                     cmd.ExecuteNonQuery();
                 }
             }
@@ -63,7 +63,7 @@ namespace DBADashService
 
         private void logError(string connectionString, string errorSource, string errorMessage, string errorContext = "Maintenance")
         {
-            Console.WriteLine("Error: " + errorContext + " - " + errorSource + " : " + errorMessage);
+            ScheduleService.InfoLogger("Error: " + errorContext + " - " + errorSource + " : " + errorMessage);
             try
             {
                 var dtErrors = new DataTable("Errors");
@@ -81,7 +81,7 @@ namespace DBADashService
             }
             catch(Exception ex)
             {
-                Console.WriteLine("Error logging errors from MaintenanceJob: " + ex.Message);
+                ScheduleService.InfoLogger("Error logging errors from MaintenanceJob: " + ex.Message);
             }
         }
         

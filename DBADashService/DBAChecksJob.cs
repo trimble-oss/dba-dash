@@ -28,7 +28,7 @@ namespace DBADashService
                 if (cfg.SourceConnection.Type == ConnectionType.Directory)
                 {
                     string folder = cfg.GetSource();
-                    Console.WriteLine("Import from folder:" + folder);
+                    ScheduleService.InfoLogger("Import from folder:" + folder);
                     if (System.IO.Directory.Exists(folder))
                     {
                         try
@@ -37,7 +37,7 @@ namespace DBADashService
                             {
                                 string json = System.IO.File.ReadAllText(f);
                                 DataSet ds  = DataSetSerialization.DeserializeDS(json);
-                                DestinationHandling.Write(ds,cfg);
+                                DestinationHandling.WriteAllDestinations(ds,cfg, Path.GetFileName(f));
                                 System.IO.File.Delete(f);
                             }
                             foreach (string f in System.IO.Directory.GetFiles(folder, "DBADash_*.bin"))
@@ -48,7 +48,7 @@ namespace DBADashService
                                 {
                                     ds = (DataSet)fmt.Deserialize(fs);
                                 }
-                                DestinationHandling.Write(ds, cfg);
+                                DestinationHandling.WriteAllDestinations(ds, cfg, Path.GetFileName(f) );
                                 System.IO.File.Delete(f);
                             }
                         }
@@ -64,7 +64,7 @@ namespace DBADashService
                 }
                 else if (cfg.SourceConnection.Type == ConnectionType.AWSS3)
                 {
-                    Console.WriteLine("Import from S3: " + cfg.ConnectionString);
+                    ScheduleService.InfoLogger("Import from S3: " + cfg.ConnectionString);
                     try
                     {
                         var uri = new Amazon.S3.Util.AmazonS3Uri(cfg.ConnectionString);
@@ -95,9 +95,9 @@ namespace DBADashService
 
                                             }
                                         }
-                                        DestinationHandling.Write(ds, cfg);
+                                        DestinationHandling.WriteAllDestinations(ds, cfg, Path.GetFileName(f.Key));
                                         s3Cli.DeleteObject(f.BucketName, f.Key);
-                                        Console.WriteLine("Imported:" + f.Key);
+                                        ScheduleService.InfoLogger("Imported:" + f.Key);
                                     }
                                 }
                             }
@@ -113,7 +113,7 @@ namespace DBADashService
                 {
                   
                     string collectDescription = "Collect " + string.Join(", ", types.Select(s => s.ToString()).ToArray()) + " from Instance:" + cfg.SourceConnection.ConnectionForPrint;
-                    Console.WriteLine(collectDescription);
+                    ScheduleService.InfoLogger(collectDescription);
                     try
                     {
                         var collector = new DBCollector(cfg.GetSource(), cfg.NoWMI);
@@ -130,7 +130,7 @@ namespace DBADashService
 
                         try
                         {
-                            DestinationHandling.Write(collector.Data, cfg);
+                            DestinationHandling.WriteAllDestinations(collector.Data, cfg, cfg.GenerateFileName(SchedulerServiceConfig.Config.BinarySerialization,cfg.SourceConnection.ConnectionForFileName));
                         }
                         catch (Exception ex)
                         {

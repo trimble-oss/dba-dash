@@ -11,14 +11,13 @@ namespace DBADashService
     public class DestinationHandling
     {
 
-        public static void Write(DataSet ds,DBADashSource src)
+        public static void WriteAllDestinations(DataSet ds,DBADashSource src,string fileName)
         {
-            string fileName = src.GenerateFileName(SchedulerServiceConfig.Config.BinarySerialization);
             foreach (var d in SchedulerServiceConfig.Config.AllDestinations)
             {
                 try
                 {
-                    Console.WriteLine("Write to destination:" + d.ConnectionForPrint);
+                    ScheduleService.InfoLogger("Write to destination:" + d.ConnectionForPrint);
                     Write(ds, d, fileName);
                 }
                 catch(Exception ex)
@@ -95,7 +94,7 @@ namespace DBADashService
             }
             else
             {
-                Console.WriteLine("Destination Folder doesn't exist");
+                ScheduleService.InfoLogger("Destination Folder doesn't exist");
             }
         }
 

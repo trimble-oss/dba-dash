@@ -31,9 +31,8 @@ namespace DBADashService
             var cn = new Microsoft.Data.SqlClient.SqlConnection(connectionString);
             var ss = new SchemaSnapshotDB(connectionString, schemaSnapshotOptions);
             var instance = new Microsoft.SqlServer.Management.Smo.Server(new Microsoft.SqlServer.Management.Common.ServerConnection(cn));
-           
 
-            Console.WriteLine("DB Snapshots " + " from Instance:" + builder.DataSource);
+            ScheduleService.InfoLogger("DB Snapshots " + " from Instance:" + builder.DataSource);
             foreach (Database db in instance.Databases)
             {
                 bool include = false;
@@ -56,7 +55,7 @@ namespace DBADashService
                     }
                     if (include)
                     {
-                        Console.WriteLine("DB Snapshot {" + db.Name + "} from Instance:" + builder.DataSource);
+                        ScheduleService.InfoLogger("DB Snapshot {" + db.Name + "} from Instance:" + builder.DataSource);
                         DateTime StartTime = DateTime.UtcNow;
                         try
                         {
@@ -68,13 +67,13 @@ namespace DBADashService
                             dt.ExtendedProperties.Add("SnapshotOptions", strSchemaSnapshotOptions);
                             dsSnapshot.Tables.Add(dt);
 
-                            string fileName = cfg.GenerateFileName(true);
-                            DestinationHandling.Write(dsSnapshot, cfg);
+                            string fileName = cfg.GenerateFileName(true,cfg.SourceConnection.ConnectionForFileName);
+                            DestinationHandling.WriteAllDestinations(dsSnapshot, cfg,fileName);
                             dsSnapshot.Tables.Remove(dt);
                         }
                         catch(Exception ex)
                         {
-                            Console.WriteLine("Snapshot error:" + ex.Message);
+                            ScheduleService.InfoLogger("Snapshot error:" + ex.Message);
                         }
 
                     }

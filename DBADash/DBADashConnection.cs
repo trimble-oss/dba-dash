@@ -2,6 +2,8 @@
 using Newtonsoft.Json;
 using System;
 using System.Data.SqlClient;
+using System.IO;
+using System.Text.RegularExpressions;
 
 namespace DBADash
 {
@@ -301,6 +303,25 @@ namespace DBADash
             else
             {
                 return connectionString;
+            }
+        }
+
+        public string ConnectionForFileName
+        {
+            get
+            {
+                if (Type == ConnectionType.SQL)
+                {
+                    SqlConnectionStringBuilder builder = new SqlConnectionStringBuilder(connectionString);
+                    string connection = builder.DataSource + (builder.InitialCatalog == "" ? "" : "_" + builder.InitialCatalog);
+                    string regexSearch = new string(Path.GetInvalidFileNameChars()) + new string(Path.GetInvalidPathChars());
+                    Regex r = new Regex(string.Format("[{0}]", Regex.Escape(regexSearch)));
+                    return r.Replace(connection, "");
+                }
+                else
+                {
+                    throw new Exception("Invalid connection type for filename generation");
+                }
             }
         }
 

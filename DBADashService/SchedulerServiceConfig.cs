@@ -29,7 +29,7 @@ namespace DBADashService
             var conf = CollectionConfig.Deserialize(jsonConfig);
             if (conf.WasEncrypted())
             {
-                Console.WriteLine("Saving ServiceConfig.json with encrypted password");
+                ScheduleService.InfoLogger("Saving ServiceConfig.json with encrypted password");
 
                 string confString = conf.Serialize();
                 System.IO.File.WriteAllText(jsonConfigPath, confString);
