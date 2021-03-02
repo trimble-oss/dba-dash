@@ -156,6 +156,7 @@
             this.Name = "DBConnection";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "Connect";
+            this.Load += new System.EventHandler(this.DBConnection_Load);
             this.pnlAuth.ResumeLayout(false);
             this.pnlAuth.PerformLayout();
             this.ResumeLayout(false);

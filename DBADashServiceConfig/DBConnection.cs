@@ -101,5 +101,13 @@ namespace DBADashServiceConfig
             }
             this.DialogResult = DialogResult.OK;
         }
+
+        private void DBConnection_Load(object sender, EventArgs e)
+        {
+            if (txtServerName.Text == "localhost")
+            {
+                txtServerName.Text = Environment.MachineName;
+            }
+        }
     }
 }
