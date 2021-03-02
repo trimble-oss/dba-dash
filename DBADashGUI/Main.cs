@@ -13,6 +13,7 @@ using System.Windows.Forms;
 using static DBADashGUI.DiffControl;
 using System.Diagnostics;
 using System.IO;
+
 namespace DBADashGUI
 {
 
@@ -26,9 +27,14 @@ namespace DBADashGUI
             public string Instance;
             public string Tab;
         }
-        public Main()
+
+        private CommandLineOptions commandLine;
+        private List<Int16> commandLineTags = new List<Int16>();
+
+        public Main(CommandLineOptions opts)
         {
             InitializeComponent();
+            commandLine = opts;
         }
 
         string connectionString = "";
@@ -44,6 +50,7 @@ namespace DBADashGUI
 
         private void Main_Load(object sender, EventArgs e)
         {
+            dbOptions1.SummaryMode = true;
             splitSchemaSnapshot.Panel1.Controls.Add(diffSchemaSnapshot);
             diffSchemaSnapshot.Dock = DockStyle.Fill;
 
@@ -74,12 +81,24 @@ namespace DBADashGUI
                 };
                 connectionString = builder.ConnectionString;
                 Common.ConnectionString = connectionString;
-
+                mnuTags.Visible = !commandLine.NoTagMenu;
+                getCommandLineTags();
+                buildTagMenu(commandLineTags);
                 addInstanes();
-                buildTagMenu();
                 loadSelectedTab();
             }
 
+        }
+
+        private void getCommandLineTags()
+        {
+            if (commandLine.TagFilters !=null && commandLine.TagFilters.Length > 0)
+            {
+                foreach (var t in DBADashTag.GetTags(commandLine.TagFilters))
+                {
+                    commandLineTags.Add(t.TagID);
+                }
+            }
         }
 
 
@@ -826,67 +845,61 @@ namespace DBADashGUI
 
         bool isClearTags = false;
 
+
         private void buildTagMenu(List<Int16> selected = null)
         {
             mnuTags.DropDownItems.Clear();
             cboTagName.Items.Clear();
-            SqlConnection cn = new SqlConnection(connectionString);
-            using (cn)
+
+
+            string currentTag = String.Empty;
+            ToolStripMenuItem mTagName = new ToolStripMenuItem();
+            ToolStripMenuItem mSystemTags = new ToolStripMenuItem("System Tags");
+            mSystemTags.Font = new Font(mSystemTags.Font, FontStyle.Italic);
+            var tags = DBADashTag.GetTags();
+            foreach (var tag in tags)
             {
-                using (SqlCommand cmd = new SqlCommand("Tags_Get", cn) { CommandType = CommandType.StoredProcedure }) {
-                    cn.Open();
-                    var rdr = cmd.ExecuteReader();
-                    string currentTag = String.Empty, tag, tagValue;
-                    ToolStripMenuItem mTagName = new ToolStripMenuItem();
-                    ToolStripMenuItem mSystemTags = new ToolStripMenuItem("System Tags");
-                    mSystemTags.Font = new Font(mSystemTags.Font, FontStyle.Italic);
-                    Int16 tagID;
-                    while (rdr.Read())
+
+                if (tag.TagName != currentTag)
+                {
+                    mTagName = new ToolStripMenuItem(tag.TagName);
+
+                    if (tag.TagName.StartsWith("{"))
                     {
-                        tag = (string)rdr[1];
-                        tagValue = (string)rdr[2];
-                        tagID = (Int16)rdr[0];
-                        if (tag != currentTag)
-                        {
-                            mTagName = new ToolStripMenuItem(tag);
-
-                            if (tag.StartsWith("{"))
-                            {
-                                mSystemTags.DropDownItems.Add(mTagName);
-                            }
-                            else
-                            {
-                                mnuTags.DropDownItems.Add(mTagName);
-                                cboTagName.Items.Add(tag);
-                            }
-
-                            currentTag = tag;
-                        }
-                        var mTagValue = new ToolStripMenuItem(tagValue)
-                        {
-                            Tag = tagID,
-                            CheckOnClick = true
-                        };
-
-                        if (selected != null && selected.Contains(tagID))
-                        {
-                            mTagValue.Checked = true;
-                        }
-                        mTagValue.CheckedChanged += MTagValue_CheckedChanged;
-                        mTagName.DropDownItems.Add(mTagValue);
+                        mSystemTags.DropDownItems.Add(mTagName);
                     }
-                    mnuTags.DropDownItems.Add(mSystemTags);
-                    var clearTag = new ToolStripMenuItem("Clear All");
-                    clearTag.Font = new Font(clearTag.Font, FontStyle.Italic);
-                    clearTag.Click += ClearTag_Click;
-                    var refreshTag = new ToolStripMenuItem("Refresh Tags");
-                    refreshTag.Font = new Font(refreshTag.Font, FontStyle.Italic);
-                    refreshTag.Click += RefreshTag_Click;
-                    mnuTags.DropDownItems.Add("-");
-                    mnuTags.DropDownItems.Add(refreshTag);
-                    mnuTags.DropDownItems.Add(clearTag);
-                } 
+                    else
+                    {
+                        mnuTags.DropDownItems.Add(mTagName);
+                        cboTagName.Items.Add(tag);
+                    }
+
+                    currentTag = tag.TagName;
+                }
+                var mTagValue = new ToolStripMenuItem(tag.TagValue)
+                {
+                    Tag = tag.TagID,
+                    CheckOnClick = true
+                };
+
+                if (selected != null && selected.Contains(tag.TagID))
+                {
+                    mTagValue.Checked = true;
+                }
+                mTagValue.CheckedChanged += MTagValue_CheckedChanged;
+                mTagName.DropDownItems.Add(mTagValue);
             }
+            mnuTags.DropDownItems.Add(mSystemTags);
+            var clearTag = new ToolStripMenuItem("Clear All");
+            clearTag.Font = new Font(clearTag.Font, FontStyle.Italic);
+            clearTag.Click += ClearTag_Click;
+            var refreshTag = new ToolStripMenuItem("Refresh Tags");
+            refreshTag.Font = new Font(refreshTag.Font, FontStyle.Italic);
+            refreshTag.Click += RefreshTag_Click;
+            mnuTags.DropDownItems.Add("-");
+            mnuTags.DropDownItems.Add(refreshTag);
+            mnuTags.DropDownItems.Add(clearTag);
+
             setFont(mnuTags);
         }
 

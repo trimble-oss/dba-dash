@@ -47,6 +47,9 @@
     <Prefer32Bit>true</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="CommandLine, Version=2.8.0.0, Culture=neutral, PublicKeyToken=5a870481e358d379, processorArchitecture=MSIL">
+      <HintPath>..\packages\CommandLineParser.2.8.0\lib\net461\CommandLine.dll</HintPath>
+    </Reference>
     <Reference Include="DiffPlex, Version=1.6.3.0, Culture=neutral, PublicKeyToken=1d35e91d1bd7bc0f, processorArchitecture=MSIL">
       <HintPath>..\packages\DiffPlex.1.6.3\lib\net40\DiffPlex.dll</HintPath>
     </Reference>
@@ -191,6 +194,7 @@
       <DependentUpon>CollectionErrors.cs</DependentUpon>
     </Compile>
     <Compile Include="ColumnMetaData.cs" />
+    <Compile Include="CommandLineOptions.cs" />
     <Compile Include="Common.cs" />
     <Compile Include="Changes\ConfigurationHistory.cs">
       <SubType>UserControl</SubType>
@@ -461,6 +465,7 @@
       <DependentUpon>Summary.cs</DependentUpon>
     </Compile>
     <Compile Include="Tagging\InstanceTag.cs" />
+    <Compile Include="Tagging\Tag.cs" />
     <EmbeddedResource Include="AgentJobs\AgentJobsControl.resx">
       <DependentUpon>AgentJobsControl.cs</DependentUpon>
     </EmbeddedResource>

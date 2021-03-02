@@ -8,11 +8,8 @@ using System.Threading.Tasks;
 
 namespace DBADashGUI
 {
-    public class InstanceTag
+    public class InstanceTag :DBADashTag
     {
-        public Int32 TagID { get; set; }
-        public string TagName { get; set; }
-        public string TagValue { get; set; }
         public string Instance { get; set; }
 
         public bool IsTagged { get; set; } = true;
