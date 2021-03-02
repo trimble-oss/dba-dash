@@ -23,6 +23,12 @@ BEGIN
 	FROM STRING_SPLIT(@InstanceIDs,',')
 END;
 
+DECLARE @ErrorsFrom DATETIME
+SELECT @ErrorsFrom=CONVERT(DATETIME,SettingValue)
+FROM dbo.Settings 
+WHERE SettingName = 'ErrorAckDate';
+SET @ErrorsFrom = ISNULL(@ErrorsFrom,DATEADD(d,-1,GETUTCDATE()));
+
 WITH LS AS (
 	SELECT InstanceID,MIN(Status) AS LogShippingStatus
 	FROM dbo.LogShippingStatus
@@ -74,7 +80,7 @@ dc AS (
 err AS (
 	SELECT InstanceID,ErrorSource,COUNT(*) cnt,MAX(ErrorDate) AS LastError
 	FROM dbo.CollectionErrorLog
-	WHERE ErrorDate>=DATEADD(d,-1,GETUTCDATE())
+	WHERE ErrorDate>=@ErrorsFrom
 	AND ErrorContext NOT LIKE '%[[]Retrying]'
 	GROUP BY InstanceID,ErrorSource
 ),

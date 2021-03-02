@@ -37,6 +37,18 @@ namespace DBADashGUI.CollectionDates
             }
         }
 
+        public bool AckErrors
+        {
+            get
+            {
+                return tsAckErrors.Visible;
+            }
+            set
+            {
+                tsAckErrors.Visible = value;
+            }
+        }
+
         public void RefreshData()
         {
             using (var cn = new SqlConnection(Common.ConnectionString))
@@ -77,6 +89,24 @@ namespace DBADashGUI.CollectionDates
         private void tsRefreshErrors_Click(object sender, EventArgs e)
         {
             RefreshData();
+        }
+
+        private void tsAckErrors_Click(object sender, EventArgs e)
+        {
+            AcknowledgeErrors();
+        }
+
+        private void AcknowledgeErrors()
+        {
+            using(var cn = new SqlConnection(Common.ConnectionString))
+            {
+                cn.Open();
+                using (var cmd = new SqlCommand("dbo.AcknowledgeErrors", cn) { CommandType = CommandType.StoredProcedure })
+                {
+                    cmd.ExecuteNonQuery();
+                    MessageBox.Show("Errors up to current date acknowledged and cleared from summary page.", "Errors acknowledged", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+            }
         }
     }
 }

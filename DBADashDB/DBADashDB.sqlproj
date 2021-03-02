@@ -496,6 +496,8 @@
     <Build Include="dbo\Stored Procedures\DDLSnapshotInstanceSummary_Get.sql" />
     <Build Include="dbo\Stored Procedures\VLF_Upd.sql" />
     <Build Include="dbo\User Defined Types\VLF.sql" />
+    <Build Include="dbo\Tables\Settings.sql" />
+    <Build Include="dbo\Stored Procedures\AcknowledgeErrors.sql" />
   </ItemGroup>
   <ItemGroup>
     <PostDeploy Include="Script.PostDeployment1.sql" />

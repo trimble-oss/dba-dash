@@ -243,6 +243,7 @@ namespace DBADashGUI
                 collectionErrors1.InstanceID = n.InstanceID;
                 collectionErrors1.InstanceName = n.InstanceName;
                 collectionErrors1.Days = 1;
+                collectionErrors1.AckErrors =  SelectedTags().Count == 0 && n.Type == SQLTreeItem.TreeType.DBADashRoot;
                 collectionErrors1.RefreshData();
             }
             else if(tabs.SelectedTab== tabCollectionDates)
