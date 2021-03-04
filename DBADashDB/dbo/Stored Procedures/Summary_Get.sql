@@ -27,7 +27,8 @@ DECLARE @ErrorsFrom DATETIME
 SELECT @ErrorsFrom=CONVERT(DATETIME,SettingValue)
 FROM dbo.Settings 
 WHERE SettingName = 'ErrorAckDate';
-SET @ErrorsFrom = ISNULL(@ErrorsFrom,DATEADD(d,-1,GETUTCDATE()));
+
+SET @ErrorsFrom = CASE WHEN @ErrorsFrom > DATEADD(d,-1,GETUTCDATE()) THEN @ErrorsFrom ELSE DATEADD(d,-1,GETUTCDATE())  END;
 
 WITH LS AS (
 	SELECT InstanceID,MIN(Status) AS LogShippingStatus
