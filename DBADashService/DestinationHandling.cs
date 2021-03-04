@@ -17,12 +17,12 @@ namespace DBADashService
             {
                 try
                 {
-                    ScheduleService.InfoLogger("Write to destination:" + d.ConnectionForPrint);
+                    ScheduleService.InfoLogger("Write to destination:" + d.ConnectionForPrint + " from " + src.SourceConnection.ConnectionForPrint);
                     Write(ds, d, fileName);
                 }
                 catch(Exception ex)
                 {
-                    DBADashService.ScheduleService.ErrorLogger(ex, "Error writing to destination:" + d.ConnectionForPrint);
+                    DBADashService.ScheduleService.ErrorLogger(ex, "Error writing to destination:" + d.ConnectionForPrint + " from " + src.SourceConnection.ConnectionForPrint);
                 }
             }
         }

@@ -28,8 +28,8 @@ namespace DBADashGUI
             public string Tab;
         }
 
-        private CommandLineOptions commandLine;
-        private List<Int16> commandLineTags = new List<Int16>();
+        private readonly CommandLineOptions commandLine;
+        private readonly List<Int16> commandLineTags = new List<Int16>();
 
         public Main(CommandLineOptions opts)
         {
