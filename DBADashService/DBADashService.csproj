@@ -237,7 +237,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DataSetSerialization.cs" />
-    <Compile Include="DBAChecksJob.cs" />
+    <Compile Include="DBADashJob.cs" />
     <Compile Include="DestinationHandling.cs" />
     <Compile Include="MaintenanceJob.cs" />
     <Compile Include="NamedLocker.cs" />

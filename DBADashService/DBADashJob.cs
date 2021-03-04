@@ -12,6 +12,7 @@ using System.Threading.Tasks;
 using static DBADash.DBADashConnection;
 namespace DBADashService
 {
+    [DisallowConcurrentExecution]
     public class DBADashJob : IJob
     {
         static readonly CollectionConfig config = SchedulerServiceConfig.Config;

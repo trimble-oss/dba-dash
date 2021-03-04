@@ -19,8 +19,6 @@ namespace DBADashService
 
             var cfg = JsonConvert.DeserializeObject<DBADashSource>(dataMap.GetString("CFG"));
             var schemaSnapshotDBs = dataMap.GetString("SchemaSnapshotDBs");
-            string strSchemaSnapshotOptions = dataMap.GetString("Options");
-            var schemaSnapshotOptions = JsonConvert.DeserializeObject <SchemaSnapshotDBOptions> (strSchemaSnapshotOptions);
             string connectionString = cfg.GetSource();
             SqlConnectionStringBuilder builder = new SqlConnectionStringBuilder(connectionString);
 
@@ -29,9 +27,12 @@ namespace DBADashService
             var dbs = schemaSnapshotDBs.Split(',');
 
             var cn = new Microsoft.Data.SqlClient.SqlConnection(connectionString);
-            var ss = new SchemaSnapshotDB(connectionString, schemaSnapshotOptions);
+            var ss = new SchemaSnapshotDB(connectionString, SchedulerServiceConfig.Config.SchemaSnapshotOptions);
             var instance = new Microsoft.SqlServer.Management.Smo.Server(new Microsoft.SqlServer.Management.Common.ServerConnection(cn));
-
+            if (instance.ServerType ==  Microsoft.SqlServer.Management.Common.DatabaseEngineType.SqlAzureDatabase && (builder.InitialCatalog == null || builder.InitialCatalog == "master" || builder.InitialCatalog==""))
+            {
+                return Task.CompletedTask;
+            }
             ScheduleService.InfoLogger("DB Snapshots " + " from Instance:" + builder.DataSource);
             foreach (Database db in instance.Databases)
             {
@@ -64,7 +65,7 @@ namespace DBADashService
                             dt.TableName = "Snapshot_" + db.Name;
                             dt.ExtendedProperties.Add("StartTime", StartTime);
                             dt.ExtendedProperties.Add("EndTime", EndTime);
-                            dt.ExtendedProperties.Add("SnapshotOptions", strSchemaSnapshotOptions);
+                            dt.ExtendedProperties.Add("SnapshotOptions", JsonConvert.SerializeObject(SchedulerServiceConfig.Config.SchemaSnapshotOptions));
                             dsSnapshot.Tables.Add(dt);
 
                             string fileName = cfg.GenerateFileName(true,cfg.SourceConnection.ConnectionForFileName);
