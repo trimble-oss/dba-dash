@@ -43,8 +43,9 @@ namespace DBADashService
             { "quartz.serializer.type", "binary" },
             { "quartz.scheduler.instanceName", "DBADashScheduler" },
             { "quartz.jobStore.type", "Quartz.Simpl.RAMJobStore, Quartz" },
-            { "quartz.threadPool.threadCount", threads.ToString() }
-        };
+            { "quartz.threadPool.threadCount", threads.ToString() },
+            { "quartz.threadPool.maxConcurrency", threads.ToString() }
+            };
             
             StdSchedulerFactory factory = new StdSchedulerFactory(props);
             scheduler = factory.GetScheduler().ConfigureAwait(false).GetAwaiter().GetResult();
@@ -173,17 +174,7 @@ namespace DBADashService
 
             if (config.ScanForAzureDBs)
             {
-                ScanForAzureDBs();
-                if (config.ScanForAzureDBsInterval > 0)
-                {
-                    ScheduleService.InfoLogger($"Scan for new Azure DBS every {config.ScanForAzureDBsInterval} seconds");
-                    azureScanForNewDBsTimer = new System.Timers.Timer
-                    {
-                        Enabled = true,
-                        Interval = config.ScanForAzureDBsInterval * 1000
-                    };
-                    azureScanForNewDBsTimer.Elapsed += new System.Timers.ElapsedEventHandler(ScanForAzureDBs);
-                }
+                config.AddAzureDBs();
             }
 
             removeEventSessions(config);
@@ -209,6 +200,17 @@ namespace DBADashService
             }
             scheduleSourceCollection(config.SourceConnections);
 
+            if (config.ScanForAzureDBsInterval > 0)
+            {
+                ScheduleService.InfoLogger($"Scan for new Azure DBS every {config.ScanForAzureDBsInterval} seconds");
+                azureScanForNewDBsTimer = new System.Timers.Timer
+                {
+                    Enabled = true,
+                    Interval = config.ScanForAzureDBsInterval * 1000
+                };
+                azureScanForNewDBsTimer.Elapsed += new System.Timers.ElapsedEventHandler(ScanForAzureDBs);
+            }
+
         }
 
         private void scheduleSourceCollection(List<DBADashSource> sourceConnections)
@@ -228,7 +230,7 @@ namespace DBADashService
                           .Build();
                     ITrigger trigger = TriggerBuilder.Create()
                     .StartNow()
-                    .WithCronSchedule(s.CronSchedule)
+                    .WithCronSchedule(s.CronSchedule, x=> x.WithMisfireHandlingInstructionDoNothing())
                     .Build();
                     scheduler.ScheduleJob(job, trigger).ConfigureAwait(false).GetAwaiter().GetResult();
                     if (s.RunOnServiceStart)
