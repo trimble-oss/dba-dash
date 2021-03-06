@@ -127,6 +127,7 @@ namespace DBADashService
                             collector.PerformanceCollectionPeriodMins = 30;
                         }
                         collector.SlowQueryThresholdMs = cfg.SlowQueryThresholdMs;
+                        collector.SlowQueryMaxMemoryKB = cfg.SlowQuerySessionMaxMemoryKB;
                         collector.Collect(types);
 
                         try

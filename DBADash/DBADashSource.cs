@@ -73,6 +73,8 @@ namespace DBADash
         [DefaultValue(false)]
         public bool NoWMI { get; set; }
 
+        public Int32 SlowQuerySessionMaxMemoryKB { get; set; } = 4096;
+
         [DefaultValue(-1)]
         public Int32 SlowQueryThresholdMs
         {

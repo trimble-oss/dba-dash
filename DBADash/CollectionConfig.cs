@@ -277,7 +277,8 @@ namespace DBADash
                     DBADashSource dbCn = new DBADashSource(builder.ConnectionString)
                     {
                         Schedules = masterConnection.Schedules,
-                        SlowQueryThresholdMs = masterConnection.SlowQueryThresholdMs
+                        SlowQueryThresholdMs = masterConnection.SlowQueryThresholdMs,
+                        SlowQuerySessionMaxMemoryKB = masterConnection.SlowQuerySessionMaxMemoryKB
                     };
                     if (masterConnection.SchemaSnapshotDBs == "*")
                     {
