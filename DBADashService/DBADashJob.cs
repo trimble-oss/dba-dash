@@ -10,6 +10,7 @@ using System.Linq;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Threading.Tasks;
 using static DBADash.DBADashConnection;
+using System.Linq;
 namespace DBADashService
 {
     [DisallowConcurrentExecution]
@@ -86,39 +87,53 @@ namespace DBADashService
                     {
                         var uri = new Amazon.S3.Util.AmazonS3Uri(cfg.ConnectionString);
                         var s3Cli = AWSTools.GetAWSClient(config.AWSProfile, config.AccessKey, config.GetSecretKey(), uri);
-                        var resp = s3Cli.ListObjects(uri.Bucket, (uri.Key + "/DBADash_").Replace("//", "/"));
-                        foreach (var f in resp.S3Objects)
+                        ListObjectsRequest request = new ListObjectsRequest() { BucketName = uri.Bucket, Prefix = (uri.Key + "/DBADash_").Replace("//", "/") };
+                        do
                         {
-                            if (f.Key.EndsWith(".json") || f.Key.EndsWith(".bin"))
-                            {
-                                lock (Program.Locker.GetLock(f.Key))
+                            ListObjectsResponse resp = s3Cli.ListObjects(request);
+                            Parallel.ForEach(resp.S3Objects.Where(f => f.Key.EndsWith(".json") || f.Key.EndsWith(".bin")), f =>
                                 {
-                                    using (GetObjectResponse response = s3Cli.GetObject(f.BucketName, f.Key))
-                                    using (Stream responseStream = response.ResponseStream)
+                                    lock (Program.Locker.GetLock(f.Key))
                                     {
-                                        DataSet ds;
-                                        if (f.Key.EndsWith(".bin"))
+                                        using (GetObjectResponse response = s3Cli.GetObject(f.BucketName, f.Key))
+                                        using (Stream responseStream = response.ResponseStream)
                                         {
-                                            BinaryFormatter fmt = new BinaryFormatter();
-                                            ds = (DataSet)fmt.Deserialize(responseStream);
-                                        }
-                                        else
-                                        {
-                                            using (StreamReader reader = new StreamReader(responseStream))
+                                            DataSet ds;
+                                            if (f.Key.EndsWith(".bin"))
                                             {
-                                                string json = reader.ReadToEnd();
-
-                                                ds = DataSetSerialization.DeserializeDS(json);
-
+                                                BinaryFormatter fmt = new BinaryFormatter();
+                                                ds = (DataSet)fmt.Deserialize(responseStream);
                                             }
+                                            else
+                                            {
+                                                using (StreamReader reader = new StreamReader(responseStream))
+                                                {
+                                                    string json = reader.ReadToEnd();
+
+                                                    ds = DataSetSerialization.DeserializeDS(json);
+
+                                                }
+                                            }
+                                            lock (Program.Locker.GetLock(GetID(ds)))
+                                            {
+                                                DestinationHandling.WriteAllDestinations(ds, cfg, Path.GetFileName(f.Key));
+                                            }
+                                            s3Cli.DeleteObject(f.BucketName, f.Key);
+                                            ScheduleService.InfoLogger("Imported:" + f.Key);
                                         }
-                                        DestinationHandling.WriteAllDestinations(ds, cfg, Path.GetFileName(f.Key));
-                                        s3Cli.DeleteObject(f.BucketName, f.Key);
-                                        ScheduleService.InfoLogger("Imported:" + f.Key);
                                     }
-                                }
+                                });
+                            if (resp.IsTruncated)
+                            {
+                                request.Marker = resp.NextMarker;
                             }
+                            else
+                            {
+                                request = null;
+                            }
+
                         }
+                        while (request != null);
                     }
                     catch (Exception ex)
                     {
