@@ -17,6 +17,11 @@ namespace DBADashService
     {
         static readonly CollectionConfig config = SchedulerServiceConfig.Config;
 
+        string GetID(DataSet ds)
+        {
+            return ds.Tables["DBADash"].Rows[0]["Instance"] + "_" + ds.Tables["DBADash"].Rows[0]["DBName"];
+        }
+
         public Task Execute(IJobExecutionContext context)
         {
 
@@ -34,26 +39,37 @@ namespace DBADashService
                     {
                         try
                         {
-                            foreach (string f in System.IO.Directory.GetFiles(folder, "DBADash_*.json"))
+                            var files = System.IO.Directory.GetFiles(folder, "DBADash_*.json");
+
+                            Parallel.ForEach(files, f =>
                             {
                                 string json = System.IO.File.ReadAllText(f);
-                                DataSet ds  = DataSetSerialization.DeserializeDS(json);
-                                DestinationHandling.WriteAllDestinations(ds,cfg, Path.GetFileName(f));
+                                DataSet ds = DataSetSerialization.DeserializeDS(json);
+                                lock (Program.Locker.GetLock(GetID(ds)))
+                                {
+                                    DestinationHandling.WriteAllDestinations(ds, cfg, Path.GetFileName(f));
+                                }
                                 System.IO.File.Delete(f);
                             }
-                            foreach (string f in System.IO.Directory.GetFiles(folder, "DBADash_*.bin"))
+                            );
+                            files = System.IO.Directory.GetFiles(folder, "DBADash_*.bin");
+                            Parallel.ForEach(files, f =>
                             {
+
                                 BinaryFormatter fmt = new BinaryFormatter();
                                 DataSet ds;
                                 using (FileStream fs = new FileStream(f, FileMode.Open, FileAccess.Read))
                                 {
                                     ds = (DataSet)fmt.Deserialize(fs);
                                 }
-                                DestinationHandling.WriteAllDestinations(ds, cfg, Path.GetFileName(f) );
+                                lock (Program.Locker.GetLock(GetID(ds)))
+                                {
+                                    DestinationHandling.WriteAllDestinations(ds, cfg, Path.GetFileName(f));
+                                }
                                 System.IO.File.Delete(f);
-                            }
+                            });
                         }
-                        catch(Exception ex)
+                        catch (Exception ex)
                         {
                             DBADashService.ScheduleService.ErrorLogger(ex, "Import from folder");
                         }
@@ -69,7 +85,7 @@ namespace DBADashService
                     try
                     {
                         var uri = new Amazon.S3.Util.AmazonS3Uri(cfg.ConnectionString);
-                        var s3Cli = AWSTools.GetAWSClient(config.AWSProfile, config.AccessKey , config.GetSecretKey(), uri);
+                        var s3Cli = AWSTools.GetAWSClient(config.AWSProfile, config.AccessKey, config.GetSecretKey(), uri);
                         var resp = s3Cli.ListObjects(uri.Bucket, (uri.Key + "/DBADash_").Replace("//", "/"));
                         foreach (var f in resp.S3Objects)
                         {
@@ -104,15 +120,15 @@ namespace DBADashService
                             }
                         }
                     }
-                    catch(Exception ex)
+                    catch (Exception ex)
                     {
                         DBADashService.ScheduleService.ErrorLogger(ex, "Import from S3");
                     }
-       
+
                 }
                 else
                 {
-                  
+
                     string collectDescription = "Collect " + string.Join(", ", types.Select(s => s.ToString()).ToArray()) + " from Instance:" + cfg.SourceConnection.ConnectionForPrint;
                     ScheduleService.InfoLogger(collectDescription);
                     try
@@ -132,7 +148,7 @@ namespace DBADashService
 
                         try
                         {
-                            DestinationHandling.WriteAllDestinations(collector.Data, cfg, cfg.GenerateFileName(SchedulerServiceConfig.Config.BinarySerialization,cfg.SourceConnection.ConnectionForFileName));
+                            DestinationHandling.WriteAllDestinations(collector.Data, cfg, cfg.GenerateFileName(SchedulerServiceConfig.Config.BinarySerialization, cfg.SourceConnection.ConnectionForFileName));
                         }
                         catch (Exception ex)
                         {
