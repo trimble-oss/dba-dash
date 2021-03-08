@@ -67,7 +67,7 @@ namespace DBADashGUI.Performance
             SqlConnection cn = new SqlConnection(ConnectionString);
             using (cn)
             {
-                using (SqlCommand cmd = new SqlCommand("Report.Blocking", cn) { CommandType = CommandType.StoredProcedure })
+                using (SqlCommand cmd = new SqlCommand("dbo.Blocking_Get", cn) { CommandType = CommandType.StoredProcedure })
                 {
                     cn.Open();
                     cmd.Parameters.AddWithValue("BlockingSnapshotID", BlockingSnapshotID);
