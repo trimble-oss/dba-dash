@@ -44,10 +44,13 @@ DECLARE @GroupSQL NVARCHAR(MAX) = CASE @GroupBy WHEN 'ConnectionID' THEN 'I.Conn
 												WHEN 'Result' THEN 'SQ.Result'
 												WHEN 'text' THEN 'LEFT(SQ.text,1000)'
 												ELSE 'ConnectionID' END
-
+IF @Top<=0
+BEGIN
+	SET @Top=NULL;
+END
 DECLARE @SQL NVARCHAR(MAX)
 SET @SQL = 
-N'SELECT TOP(@Top) ' + @GroupSQL + ' as Grp,
+N'SELECT ' + CASE WHEN @Top IS NOT NULL THEN 'TOP(@Top) ' ELSE '' END + @GroupSQL + ' as Grp,
 		SUM(CASE WHEN Duration<5000000 THEN 1 ELSE 0 END) AS [<5 seconds], 
 		SUM(CASE WHEN Duration>=5000000 AND Duration < 10000000 THEN 1 ELSE 0 END) AS [5-10 seconds], 
 		SUM(CASE WHEN Duration>=10000000 AND Duration < 20000000 THEN 1 ELSE 0 END) AS [10-20 seconds], 

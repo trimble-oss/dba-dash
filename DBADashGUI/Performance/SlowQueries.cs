@@ -68,6 +68,7 @@ namespace DBADashGUI
         {
             dgvSlow.DataSource = null;
             lblPageSize.Visible = false;
+            int top = Convert.ToInt32(tsTop.Tag);
             SqlConnection cn = new SqlConnection(ConnectionString);
             using (cn)
             {
@@ -110,6 +111,7 @@ namespace DBADashGUI
                 {
                     cmd.Parameters.AddWithValue("Result", txtResult.Text);
                 }
+                cmd.Parameters.AddWithValue("Top", top);
                 cmd.CommandType = CommandType.StoredProcedure;
                 SqlDataAdapter da = new SqlDataAdapter(cmd);
                 var dt = new DataTable();
@@ -500,6 +502,21 @@ namespace DBADashGUI
         private void tsCopyDetail_Click(object sender, EventArgs e)
         {
             Common.CopyDataGridViewToClipboard(dgvSlow);
+        }
+
+        private void tsTop_Click(object sender, EventArgs e)
+        {
+            var ts = (ToolStripMenuItem)sender;
+            if(ts == tsTopAll)
+            {
+                tsTop.Text = "Top *";
+            }
+            else
+            {
+                tsTop.Text = "Top " + ts.Tag.ToString();
+            }
+            tsTop.Tag = ts.Tag;
+            RefreshData();
         }
     }
 }

@@ -300,7 +300,7 @@ namespace DBADashGUI
             else if(tabs.SelectedTab== tabSlowQueries)
             {
                 globalTimeisVisible = true;
-                slowQueries1.InstanceIDs = instanceIDs;
+                slowQueries1.InstanceIDs = n.Type == SQLTreeItem.TreeType.DBADashRoot ? AllInstanceIDs : instanceIDs;
                 slowQueries1.ConnectionString = connectionString;
                 if(n.Type== SQLTreeItem.TreeType.Database)
                 {
