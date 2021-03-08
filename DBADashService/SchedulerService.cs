@@ -230,8 +230,9 @@ namespace DBADashService
                           .Build();
                     ITrigger trigger = TriggerBuilder.Create()
                     .StartNow()
-                    .WithCronSchedule(s.CronSchedule, x=> x.WithMisfireHandlingInstructionDoNothing())
+                    .WithCronSchedule(s.CronSchedule)
                     .Build();
+
                     scheduler.ScheduleJob(job, trigger).ConfigureAwait(false).GetAwaiter().GetResult();
                     if (s.RunOnServiceStart)
                     {
