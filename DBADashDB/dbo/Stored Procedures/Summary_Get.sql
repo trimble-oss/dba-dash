@@ -98,11 +98,12 @@ errSummary AS(
 ),
 SSD AS (
 	SELECT InstanceID,
-		MIN(CASE WHEN Status=3 THEN NULL ELSE Status END) AS CollectionDatesStatus,
+		MIN(Status) AS CollectionDatesStatus,
 		MAX(SnapshotAge) AS SnapshotAgeMax,
 		MIN(SnapshotAge) AS SnapshotAgeMin,
 		MIN(SnapshotDate) AS OldestSnapshot
 	FROM dbo.CollectionDatesStatus
+	WHERE Status<>3
 	GROUP BY InstanceID
 ),
 dbc AS (
