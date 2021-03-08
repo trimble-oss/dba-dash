@@ -248,6 +248,7 @@ namespace DBADash
                     {
                         cmd.Parameters.AddWithValue("AgentVersion", (string)rInstance["AgentVersion"]);
                     }
+                    cmd.Parameters.AddWithValue("EditionID", (long)rInstance["EditionID"]);
                     var pInstanceID = cmd.Parameters.Add("InstanceID", SqlDbType.Int);
                     pInstanceID.Direction = ParameterDirection.Output;
                     cmd.ExecuteNonQuery();

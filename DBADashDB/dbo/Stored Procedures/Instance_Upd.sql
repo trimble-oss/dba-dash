@@ -4,6 +4,7 @@
 	@SnapshotDate DATETIME2(2),
 	@AgentHostName NVARCHAR(16),
 	@AgentVersion VARCHAR(30)=NULL,
+	@EditionID BIGINT=NULL,
 	@InstanceID INT OUT
 )
 AS
@@ -17,8 +18,8 @@ BEGIN
 	IF @InstanceID IS NULL
 	BEGIN
 		BEGIN TRAN
-		INSERT INTO dbo.Instances(Instance,ConnectionID,IsActive,AgentHostName,AgentVersion)
-		VALUES(@Instance,@ConnectionID,CAST(1 as BIT),@AgentHostName,@AgentVersion)
+		INSERT INTO dbo.Instances(Instance,ConnectionID,IsActive,AgentHostName,AgentVersion,EditionID)
+		VALUES(@Instance,@ConnectionID,CAST(1 as BIT),@AgentHostName,@AgentVersion,@EditionID)
 		SELECT @InstanceID = SCOPE_IDENTITY();
 
 		EXEC dbo.CollectionDates_Upd @InstanceID = @InstanceID,  
@@ -32,7 +33,8 @@ BEGIN
 		UPDATE dbo.Instances 
 		SET Instance = @Instance,
 			AgentHostName=@AgentHostName,
-			AgentVersion=@AgentVersion
+			AgentVersion=@AgentVersion,
+			EditionID=@EditionID
 		WHERE InstanceID = @InstanceID
 
 		EXEC dbo.CollectionDates_Upd @InstanceID = @InstanceID,  
