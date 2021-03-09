@@ -358,7 +358,7 @@ namespace DBADashGUI
             }
             else if (tabs.SelectedTab == tabDBConfiguration)
             {
-                dbConfiguration1.InstanceIDs = instanceIDs;
+                dbConfiguration1.InstanceIDs = ((SQLTreeItem)n.Parent).Type == SQLTreeItem.TreeType.DBADashRoot ? AllInstanceIDs : instanceIDs;
                 dbConfiguration1.DatabaseID = n.DatabaseID;
                 dbConfiguration1.RefreshData();
             }
@@ -554,6 +554,7 @@ namespace DBADashGUI
 
             List<TabPage> allowedTabs = new List<TabPage>();         
             bool hasAzureDBs = AzureInstanceIDs.Count > 0;
+            bool isAzureOnly = AllInstanceIDs.Count() == AzureInstanceIDs.Count();
             var suppress = suppressLoadTab;
             suppressLoadTab = true;
 
@@ -566,17 +567,18 @@ namespace DBADashGUI
                     allowedTabs.Add(tabAzureSummary);
                 }
                 allowedTabs.Add(tabSlowQueries);
-
-                allowedTabs.Add(tabBackups);
-                allowedTabs.Add(tabDrives);
-                allowedTabs.Add(tabLogShipping);
-                allowedTabs.Add(tabJobs);
+                if (!isAzureOnly)
+                {
+                    allowedTabs.Add(tabBackups);
+                    allowedTabs.Add(tabDrives);
+                    allowedTabs.Add(tabLogShipping);
+                    allowedTabs.Add(tabJobs);
+                    allowedTabs.Add(tabLastGood);
+                }    
                 allowedTabs.Add(tabSnapshotsSummary);
-                allowedTabs.Add(tabFiles);
-                allowedTabs.Add(tabLastGood);
+                allowedTabs.Add(tabFiles);           
                 allowedTabs.Add(tabDBADashErrorLog);
-                allowedTabs.Add(tabCollectionDates);
-                
+                allowedTabs.Add(tabCollectionDates);                
                 allowedTabs.Add(tabDBSpace);
                 allowedTabs.Add(tabCustomChecks);
             }
@@ -653,7 +655,7 @@ namespace DBADashGUI
             }
             else if (n.Type == SQLTreeItem.TreeType.Configuration)
             {
-                if(parent.Type != SQLTreeItem.TreeType.AzureDatabase && parent.Type != SQLTreeItem.TreeType.AzureInstance)
+                if(parent.Type != SQLTreeItem.TreeType.AzureDatabase && parent.Type != SQLTreeItem.TreeType.AzureInstance && !isAzureOnly)
                 {
                     allowedTabs.Add(tabInstanceConfig);
                     allowedTabs.Add(tabTraceFlags);
