@@ -640,17 +640,18 @@ namespace DBADash.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to SELECT SYSUTCDATETIME() AS SnapshotDate,
-        ///		STUFF(pc.object_name,1,CHARINDEX(&apos;:&apos;,pc.object_name),&apos;&apos;) AS object_name,
-        ///       pc.counter_name,
-        ///       pc.instance_name,
-        ///       CAST(pc.cntr_value AS DECIMAL(28,9)) cntr_value,
-        ///       pc.cntr_type 
-        ///FROM sys.dm_os_performance_counters pc
-        ///WHERE EXISTS(SELECT 1 
+        ///   Looks up a localized string similar to DECLARE @counters TABLE(
+        ///	object_name NCHAR(128) NOT NULL,
+        ///	counter_name NVARCHAR(128) NOT NULL,
+        ///	instance_name NCHAR(128) NULL
+        ///)
+        ///INSERT INTO @counters(object_name,counter_name,instance_name)
+        ///SELECT ctrs.c.value(&apos;@object_name&apos;,&apos;NCHAR(128)&apos;),ctrs.c.value(&apos;@counter_name&apos;,&apos;NCHAR(128)&apos;) ,ctrs.c.value(&apos;@instance_name&apos;,&apos;NCHAR(128)&apos;) 
         ///FROM @CountersXML.nodes(&apos;Counters/Counter&apos;) ctrs(c)
-        ///WHERE ctrs.c.value(&apos;@object_name&apos;,&apos;NCHAR(128)&apos;) = STUFF(pc.object_name,1,CHARINDEX(&apos;:&apos;,pc.object_name),&apos;&apos;)
-        ///AND ctrs.c.value(&apos;@counter_name&apos;,&apos;NCHAR [rest of string was truncated]&quot;;.
+        ///
+        ///SELECT SYSUTCDATETIME() AS SnapshotDate,
+        ///		STUFF(pc.object_name,1,CHARINDEX(&apos;:&apos;,pc.object_name),&apos;&apos;) AS object_name,
+        ///       pc [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string SQLPerformanceCounters {
             get {
