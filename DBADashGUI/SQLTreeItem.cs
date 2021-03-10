@@ -270,7 +270,7 @@ namespace DBADashGUI
                 {
                     return this.ObjectName;
                 }
-                else if (databaseName != string.Empty)
+                else if (databaseName != string.Empty && databaseName != null)
                 {
                     return databaseName;
                 }
