@@ -499,6 +499,7 @@
     <Build Include="dbo\Tables\Settings.sql" />
     <Build Include="dbo\Stored Procedures\AcknowledgeErrors.sql" />
     <Build Include="dbo\Stored Procedures\Blocking_Get.sql" />
+    <Build Include="dbo\Stored Procedures\WaitsSummary_Get.sql" />
   </ItemGroup>
   <ItemGroup>
     <PostDeploy Include="Script.PostDeployment1.sql" />

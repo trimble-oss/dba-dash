@@ -143,6 +143,8 @@
             this.performanceCounterSummary1 = new DBADashGUI.Performance.PerformanceCounterSummary();
             this.tabObjectExecutionSummary = new System.Windows.Forms.TabPage();
             this.objectExecutionSummary1 = new DBADashGUI.Performance.ObjectExecutionSummary();
+            this.tabWaits = new System.Windows.Forms.TabPage();
+            this.waitsSummary1 = new DBADashGUI.Performance.WaitsSummary();
             this.dataGridViewTextBoxColumn1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dataGridViewTextBoxColumn2 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dataGridViewTextBoxColumn3 = new System.Windows.Forms.DataGridViewTextBoxColumn();
@@ -211,6 +213,7 @@
             this.tabCustomChecks.SuspendLayout();
             this.tabPC.SuspendLayout();
             this.tabObjectExecutionSummary.SuspendLayout();
+            this.tabWaits.SuspendLayout();
             this.SuspendLayout();
             // 
             // TreeViewImageList
@@ -491,6 +494,7 @@
             this.tabs.Controls.Add(this.tabCustomChecks);
             this.tabs.Controls.Add(this.tabPC);
             this.tabs.Controls.Add(this.tabObjectExecutionSummary);
+            this.tabs.Controls.Add(this.tabWaits);
             this.tabs.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tabs.Location = new System.Drawing.Point(0, 0);
             this.tabs.Name = "tabs";
@@ -1021,6 +1025,7 @@
             // 
             // collectionErrors1
             // 
+            this.collectionErrors1.AckErrors = false;
             this.collectionErrors1.Days = 0;
             this.collectionErrors1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.collectionErrors1.InstanceID = 0;
@@ -1433,6 +1438,26 @@
             this.objectExecutionSummary1.TabIndex = 0;
             this.objectExecutionSummary1.Types = "";
             // 
+            // tabWaits
+            // 
+            this.tabWaits.Controls.Add(this.waitsSummary1);
+            this.tabWaits.Location = new System.Drawing.Point(4, 25);
+            this.tabWaits.Name = "tabWaits";
+            this.tabWaits.Padding = new System.Windows.Forms.Padding(3);
+            this.tabWaits.Size = new System.Drawing.Size(1631, 1246);
+            this.tabWaits.TabIndex = 32;
+            this.tabWaits.Text = "Waits";
+            this.tabWaits.UseVisualStyleBackColor = true;
+            // 
+            // waitsSummary1
+            // 
+            this.waitsSummary1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.waitsSummary1.InstanceID = 0;
+            this.waitsSummary1.Location = new System.Drawing.Point(3, 3);
+            this.waitsSummary1.Name = "waitsSummary1";
+            this.waitsSummary1.Size = new System.Drawing.Size(1625, 1240);
+            this.waitsSummary1.TabIndex = 0;
+            // 
             // dataGridViewTextBoxColumn1
             // 
             this.dataGridViewTextBoxColumn1.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.DisplayedCells;
@@ -1719,6 +1744,7 @@
             this.tabCustomChecks.ResumeLayout(false);
             this.tabPC.ResumeLayout(false);
             this.tabObjectExecutionSummary.ResumeLayout(false);
+            this.tabWaits.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
@@ -1859,5 +1885,7 @@
         private System.Windows.Forms.ToolStripMenuItem days28ToolStripMenuItem;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
         private System.Windows.Forms.ToolStripMenuItem tsCustom;
+        private System.Windows.Forms.TabPage tabWaits;
+        private Performance.WaitsSummary waitsSummary1;
     }
 }

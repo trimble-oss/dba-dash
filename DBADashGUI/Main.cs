@@ -397,6 +397,12 @@ namespace DBADashGUI
                 objectExecutionSummary1.ObjectID = (n.Type == SQLTreeItem.TreeType.Database || n.Type == SQLTreeItem.TreeType.AzureDatabase) ? -1 :  n.ObjectID;
                 objectExecutionSummary1.RefreshData();
             }
+            if(tabs.SelectedTab == tabWaits)
+            {
+                globalTimeisVisible = true;
+                waitsSummary1.InstanceID = n.InstanceID;
+                waitsSummary1.RefreshData();
+            }
             tsTime.Visible = globalTimeisVisible;
         }
 
@@ -603,6 +609,7 @@ namespace DBADashGUI
                 allowedTabs.Add(tabPC);
                 allowedTabs.Add(tabSlowQueries);
                 allowedTabs.Add(tabObjectExecutionSummary);
+                allowedTabs.Add(tabWaits);
 
                 allowedTabs.Add(tabDBADashErrorLog);
                 allowedTabs.Add(tabFiles);
@@ -621,6 +628,7 @@ namespace DBADashGUI
                 allowedTabs.Add(tabPC);
                 allowedTabs.Add(tabObjectExecutionSummary);
                 allowedTabs.Add(tabSlowQueries);
+                allowedTabs.Add(tabWaits);
 
                 allowedTabs.Add(tabSummary);
                 allowedTabs.Add(tabBackups);
@@ -1177,6 +1185,10 @@ namespace DBADashGUI
             else if(tabs.SelectedTab == tabAzureDB)
             {
                 azureDBResourceStats1.RefreshData();
+            }
+            else if (tabs.SelectedTab == tabWaits)
+            {
+                waitsSummary1.RefreshData();
             }
         }
 

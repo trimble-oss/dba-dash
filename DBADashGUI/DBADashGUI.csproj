@@ -425,6 +425,12 @@
     <Compile Include="Performance\Waits.Designer.cs">
       <DependentUpon>Waits.cs</DependentUpon>
     </Compile>
+    <Compile Include="Performance\WaitsSummary.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Performance\WaitsSummary.Designer.cs">
+      <DependentUpon>WaitsSummary.cs</DependentUpon>
+    </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Drives\DrivesControl.cs">
@@ -630,6 +636,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Performance\Waits.resx">
       <DependentUpon>Waits.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Performance\WaitsSummary.resx">
+      <DependentUpon>WaitsSummary.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
