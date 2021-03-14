@@ -651,7 +651,7 @@ namespace DBADash.Properties {
         ///
         ///SELECT SYSUTCDATETIME() AS SnapshotDate,
         ///		STUFF(pc.object_name,1,CHARINDEX(&apos;:&apos;,pc.object_name),&apos;&apos;) AS object_name,
-        ///       pc [rest of string was truncated]&quot;;.
+        ///   [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string SQLPerformanceCounters {
             get {

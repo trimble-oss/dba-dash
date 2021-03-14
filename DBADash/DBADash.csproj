@@ -243,6 +243,47 @@
     <Content Include="PerformanceCounters.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="SQL\SQLAgentJobs.sql" />
+    <Content Include="SQL\SQLAlerts.sql" />
+    <Content Include="SQL\SQLAzureDBElasticPoolResourceStats.sql" />
+    <Content Include="SQL\SQLAzureDBResourceStats.sql" />
+    <Content Include="SQL\SQLAzureDBServiceObjectives.sql" />
+    <Content Include="SQL\SQLBackups.sql" />
+    <Content Include="SQL\SQLBlockingSnapshot.sql" />
+    <Content Include="SQL\SQLCorruption.sql" />
+    <Content Include="SQL\SQLCPU.sql" />
+    <Content Include="SQL\SQLCustomChecks.sql" />
+    <Content Include="SQL\SQLDatabasePermissions.sql" />
+    <Content Include="SQL\SQLDatabasePrincipals.sql" />
+    <Content Include="SQL\SQLDatabaseRoleMembers.sql" />
+    <Content Include="SQL\SQLDatabases.sql" />
+    <Content Include="SQL\SQLDatabasesHADR.sql" />
+    <Content Include="SQL\SQLDBConfig.sql" />
+    <Content Include="SQL\SQLDBFiles.sql" />
+    <Content Include="SQL\SQLDBTuningOptions.sql" />
+    <Content Include="SQL\SQLDrives.sql" />
+    <Content Include="SQL\SQLIOStats.sql" />
+    <Content Include="SQL\SQLLastGoodCheckDB.sql" />
+    <Content Include="SQL\SQLLogRestores.sql" />
+    <Content Include="SQL\SQLObjectExecutionStats.sql" />
+    <Content Include="SQL\SQLOSInfo.sql" />
+    <Content Include="SQL\SQLOSLoadedModules.sql" />
+    <Content Include="SQL\SQLPerformanceCounters.sql" />
+    <Content Include="SQL\SQLRemoveEventSessions.sql" />
+    <Content Include="SQL\SQLRemoveEventSessionsAzure.sql" />
+    <Content Include="SQL\SQLServerExtraProperties.sql" />
+    <Content Include="SQL\SQLServerPermissions.sql" />
+    <Content Include="SQL\SQLServerPrincipals.sql" />
+    <Content Include="SQL\SQLServerProperties.sql" />
+    <Content Include="SQL\SQLServerRoleMembers.sql" />
+    <Content Include="SQL\SQLSlowQueries.sql" />
+    <Content Include="SQL\SQLSlowQueriesAzure.sql" />
+    <Content Include="SQL\SQLStopEventSessions.sql" />
+    <Content Include="SQL\SQLStopEventSessionsAzure.sql" />
+    <Content Include="SQL\SQLSysConfig.sql" />
+    <Content Include="SQL\SQLTraceFlags.sql" />
+    <Content Include="SQL\SQLVLF.sql" />
+    <Content Include="SQL\SQLWaits.sql" />
   </ItemGroup>
   <ItemGroup>
     <Analyzer Include="..\packages\AWSSDK.S3.3.5.7.12\analyzers\dotnet\cs\AWSSDK.S3.CodeAnalysis.dll" />
