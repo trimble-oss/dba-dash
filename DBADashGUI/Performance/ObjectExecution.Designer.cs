@@ -29,7 +29,7 @@
         private void InitializeComponent()
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(ObjectExecution));
-            this.waitChart = new LiveCharts.WinForms.CartesianChart();
+            this.objectExecChart = new LiveCharts.WinForms.CartesianChart();
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
             this.lblExecution = new System.Windows.Forms.ToolStripLabel();
             this.tsMeasures = new System.Windows.Forms.ToolStripDropDownButton();
@@ -37,14 +37,14 @@
             this.toolStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
-            // waitChart
+            // objectExecChart
             // 
-            this.waitChart.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.waitChart.Location = new System.Drawing.Point(0, 31);
-            this.waitChart.Name = "waitChart";
-            this.waitChart.Size = new System.Drawing.Size(492, 251);
-            this.waitChart.TabIndex = 0;
-            this.waitChart.Text = "cartesianChart1";
+            this.objectExecChart.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.objectExecChart.Location = new System.Drawing.Point(0, 31);
+            this.objectExecChart.Name = "objectExecChart";
+            this.objectExecChart.Size = new System.Drawing.Size(492, 251);
+            this.objectExecChart.TabIndex = 0;
+            this.objectExecChart.Text = "cartesianChart1";
             // 
             // toolStrip1
             // 
@@ -88,7 +88,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.Controls.Add(this.waitChart);
+            this.Controls.Add(this.objectExecChart);
             this.Controls.Add(this.toolStrip1);
             this.Name = "ObjectExecution";
             this.Size = new System.Drawing.Size(492, 282);
@@ -102,7 +102,7 @@
 
         #endregion
 
-        private LiveCharts.WinForms.CartesianChart waitChart;
+        private LiveCharts.WinForms.CartesianChart objectExecChart;
         private System.Windows.Forms.ToolStrip toolStrip1;
         private System.Windows.Forms.ToolStripLabel lblExecution;
         private System.Windows.Forms.ToolStripDropDownButton tsMeasures;

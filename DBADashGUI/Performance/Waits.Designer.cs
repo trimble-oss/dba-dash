@@ -42,9 +42,9 @@
             // waitChart
             // 
             this.waitChart.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.waitChart.Location = new System.Drawing.Point(0, 31);
+            this.waitChart.Location = new System.Drawing.Point(0, 49);
             this.waitChart.Name = "waitChart";
-            this.waitChart.Size = new System.Drawing.Size(492, 251);
+            this.waitChart.Size = new System.Drawing.Size(615, 304);
             this.waitChart.TabIndex = 0;
             this.waitChart.Text = "cartesianChart1";
             // 
@@ -57,7 +57,7 @@
             this.tsFilter});
             this.toolStrip1.Location = new System.Drawing.Point(0, 0);
             this.toolStrip1.Name = "toolStrip1";
-            this.toolStrip1.Size = new System.Drawing.Size(492, 31);
+            this.toolStrip1.Size = new System.Drawing.Size(615, 39);
             this.toolStrip1.TabIndex = 1;
             this.toolStrip1.Text = "toolStrip1";
             // 
@@ -66,7 +66,7 @@
             this.lblWaits.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
             this.lblWaits.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
             this.lblWaits.Name = "lblWaits";
-            this.lblWaits.Size = new System.Drawing.Size(119, 28);
+            this.lblWaits.Size = new System.Drawing.Size(119, 36);
             this.lblWaits.Text = "Waits : Instance";
             // 
             // tsDateGrouping
@@ -75,7 +75,7 @@
             this.tsDateGrouping.Image = ((System.Drawing.Image)(resources.GetObject("tsDateGrouping.Image")));
             this.tsDateGrouping.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsDateGrouping.Name = "tsDateGrouping";
-            this.tsDateGrouping.Size = new System.Drawing.Size(56, 28);
+            this.tsDateGrouping.Size = new System.Drawing.Size(56, 36);
             this.tsDateGrouping.Text = "1min";
             // 
             // tsFilter
@@ -86,7 +86,7 @@
             this.tsFilter.Image = global::DBADashGUI.Properties.Resources.FilterDropdown_16x;
             this.tsFilter.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsFilter.Name = "tsFilter";
-            this.tsFilter.Size = new System.Drawing.Size(34, 28);
+            this.tsFilter.Size = new System.Drawing.Size(34, 36);
             // 
             // criticalWaitsOnlyToolStripMenuItem
             // 

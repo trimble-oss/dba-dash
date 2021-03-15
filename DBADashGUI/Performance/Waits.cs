@@ -176,7 +176,7 @@ namespace DBADashGUI.Performance
                 else
                 {
                     CartesianMapper<DateTimePoint> dayConfig = Mappers.Xy<DateTimePoint>()
-.X(dateModel => dateModel.DateTime.Ticks / TimeSpan.FromMinutes(dateGrouping).Ticks)
+.X(dateModel => dateModel.DateTime.Ticks / TimeSpan.FromMinutes(dateGrouping ==0 ? 1 : dateGrouping).Ticks)
 .Y(dateModel => dateModel.Value);
 
 
@@ -202,7 +202,7 @@ namespace DBADashGUI.Performance
                     }
                     waitChart.AxisX.Add(new Axis
                     {
-                        LabelFormatter = value => new DateTime((long)(value * TimeSpan.FromMinutes(dateGrouping).Ticks)).ToString(format)
+                        LabelFormatter = value => new DateTime((long)(value * TimeSpan.FromMinutes(dateGrouping == 0 ? 1 : dateGrouping).Ticks)).ToString(format)
                     });
                     waitChart.AxisY.Add(new Axis
                     {

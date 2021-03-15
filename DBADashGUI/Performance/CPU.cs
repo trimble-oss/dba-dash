@@ -22,7 +22,7 @@ namespace DBADashGUI.Performance
             InitializeComponent();
         }
 
-        DateTime eventTime=DateTime.MinValue;
+        DateTime eventTime = DateTime.MinValue;
         Int32 mins;
 
         string connectionString;
@@ -45,7 +45,7 @@ namespace DBADashGUI.Performance
                 smoothLines = value;
                 foreach (Series s in chartCPU.Series)
                 {
-                    if(s.GetType() == typeof(LineSeries))
+                    if (s.GetType() == typeof(LineSeries))
                     {
                         ((LineSeries)s).LineSmoothness = smoothLines ? 1 : 0;
                     }
@@ -53,18 +53,18 @@ namespace DBADashGUI.Performance
                     {
                         ((StackedAreaSeries)s).LineSmoothness = smoothLines ? 1 : 0;
                     }
-           
+
                 }
             }
         }
 
 
-        public void RefreshData(Int32 InstanceID,DateTime fromDate, DateTime toDate, string connectionString)
+        public void RefreshData(Int32 InstanceID, DateTime fromDate, DateTime toDate, string connectionString)
         {
             eventTime = DateTime.MinValue;
             mins = (Int32)toDate.Subtract(fromDate).TotalMinutes;
             this.InstanceID = InstanceID;
-            if(this.fromDate!=fromDate || this.toDate != toDate)
+            if (this.fromDate != fromDate || this.toDate != toDate)
             {
                 DateGrouping = Common.DateGrouping(mins, 200);
                 tsDateGrouping.Text = Common.DateGroupString(DateGrouping);
@@ -90,7 +90,8 @@ namespace DBADashGUI.Performance
             SqlConnection cn = new SqlConnection(connectionString);
             using (cn)
             {
-                using (SqlCommand cmd = new SqlCommand("dbo.CPU_Get", cn) { CommandType = CommandType.StoredProcedure }) {
+                using (SqlCommand cmd = new SqlCommand("dbo.CPU_Get", cn) { CommandType = CommandType.StoredProcedure })
+                {
                     cn.Open();
                     cmd.Parameters.AddWithValue("@InstanceID", InstanceID);
                     cmd.Parameters.AddWithValue("@FromDate", fromDate);
@@ -118,7 +119,8 @@ namespace DBADashGUI.Performance
                     if (update)
                     {
                         var cnt = chartCPU.Series[0].Values.Count;
-                        if (cnt > 0) {
+                        if (cnt > 0)
+                        {
                             while (((DateTimePoint)chartCPU.Series[0].Values[cnt - 1]).DateTime >= sqlProcessValues[0].DateTime)
                             {
                                 chartCPU.Series[0].Values.RemoveAt(cnt - 1);
@@ -186,7 +188,14 @@ namespace DBADashGUI.Performance
                             MinValue = 0,
 
                         });
-                        chartCPU.Series = s1;
+                        if (maxValues.Count > 1)
+                        {
+                            chartCPU.Series = s1;
+                        }
+                        else
+                        {
+                            chartCPU.Series.Clear();
+                        }
                         updateVisibility();
                     }
 
@@ -197,9 +206,12 @@ namespace DBADashGUI.Performance
 
         private void updateVisibility()
         {
-            ((StackedAreaSeries)chartCPU.Series[0]).Visibility = AVGToolStripMenuItem.Checked ? System.Windows.Visibility.Visible : System.Windows.Visibility.Hidden;
-            ((StackedAreaSeries)chartCPU.Series[1]).Visibility = AVGToolStripMenuItem.Checked ? System.Windows.Visibility.Visible : System.Windows.Visibility.Hidden;
-            ((LineSeries)chartCPU.Series[2]).Visibility = MAXToolStripMenuItem.Checked ? System.Windows.Visibility.Visible : System.Windows.Visibility.Hidden;
+            if (chartCPU.Series.Count == 3)
+            {
+                ((StackedAreaSeries)chartCPU.Series[0]).Visibility = AVGToolStripMenuItem.Checked ? System.Windows.Visibility.Visible : System.Windows.Visibility.Hidden;
+                ((StackedAreaSeries)chartCPU.Series[1]).Visibility = AVGToolStripMenuItem.Checked ? System.Windows.Visibility.Visible : System.Windows.Visibility.Hidden;
+                ((LineSeries)chartCPU.Series[2]).Visibility = MAXToolStripMenuItem.Checked ? System.Windows.Visibility.Visible : System.Windows.Visibility.Hidden;
+            }
         }
 
         private void AVGToolStripMenuItem_Click(object sender, EventArgs e)
@@ -216,8 +228,8 @@ namespace DBADashGUI.Performance
 
         private void CPU_Load(object sender, EventArgs e)
         {
-            Common.AddDateGroups(tsDateGrouping,TsDateGrouping_Click);
-     
+            Common.AddDateGroups(tsDateGrouping, TsDateGrouping_Click);
+
         }
 
         private void TsDateGrouping_Click(object sender, EventArgs e)

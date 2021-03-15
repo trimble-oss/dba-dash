@@ -81,9 +81,9 @@ namespace DBADashGUI.Performance
 
             if (!update)
             {
-                waitChart.Series.Clear();
-                waitChart.AxisX.Clear();
-                waitChart.AxisY.Clear();
+                objectExecChart.Series.Clear();
+                objectExecChart.AxisX.Clear();
+                objectExecChart.AxisY.Clear();
                 chartMaxDate = DateTime.MinValue;
             }
 
@@ -121,7 +121,7 @@ namespace DBADashGUI.Performance
             if (update)
             {
                 List<string> existingTitles = new List<string>();
-                foreach (StackedColumnSeries s in waitChart.Series)
+                foreach (StackedColumnSeries s in objectExecChart.Series)
                 {
                     existingTitles.Add(s.Title);
                     if (dPoints.ContainsKey(s.Title))
@@ -139,7 +139,7 @@ namespace DBADashGUI.Performance
                 {
                     if (!existingTitles.Contains(x.Key))
                     {
-                        waitChart.Series.Add(new StackedColumnSeries
+                        objectExecChart.Series.Add(new StackedColumnSeries
                         {
                             Title = x.Key,
                             Values = x.Value
@@ -150,7 +150,7 @@ namespace DBADashGUI.Performance
             else
             {
                 CartesianMapper<DateTimePoint> dayConfig = Mappers.Xy<DateTimePoint>()
-.X(dateModel => dateModel.DateTime.Ticks / TimeSpan.FromMinutes(dateGrouping).Ticks)
+.X(dateModel => dateModel.DateTime.Ticks / TimeSpan.FromMinutes(dateGrouping==0?1:dateGrouping).Ticks)
 .Y(dateModel => dateModel.Value);
 
 
@@ -163,7 +163,7 @@ namespace DBADashGUI.Performance
                         Values = x.Value
                     });
                 }
-                waitChart.Series = s1;
+                objectExecChart.Series = s1;
 
                 string format = "t";
                 if (dateGrouping >= 1440)
@@ -174,12 +174,12 @@ namespace DBADashGUI.Performance
                 {
                     format = "yyyy-MM-dd HH:mm";
                 }
-                waitChart.AxisX.Add(new Axis
+                objectExecChart.AxisX.Add(new Axis
                 {
-                    LabelFormatter = value => new DateTime((long)(value * TimeSpan.FromMinutes(dateGrouping).Ticks)).ToString(format)
+                    LabelFormatter = value => new DateTime((long)(value * TimeSpan.FromMinutes(dateGrouping==0?1:dateGrouping).Ticks)).ToString(format)
                 });
 
-                waitChart.AxisY.Add(new Axis
+                objectExecChart.AxisY.Add(new Axis
                 {
                     LabelFormatter = val => val.ToString(measures[measure].LabelFormat)
 

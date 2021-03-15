@@ -1,11 +1,12 @@
-﻿CREATE PROC [dbo].[Waits_Get](
+﻿CREATE   PROC [dbo].[Waits_Get](
 	@InstanceID INT,
 	@FromDate DATETIME2(2)=NULL, 
 	@ToDate DATETIME2(2)=NULL,
 	@DateGroupingMin INT=NULL,
 	@Top INT=10,
 	@WaitType NVARCHAR(60)=NULL,
-	@CriticalWaitsOnly BIT=0
+	@CriticalWaitsOnly BIT=0,
+	@Use60MIN BIT=NULL
 )
 AS
 IF @FromDate IS NULL
@@ -15,13 +16,23 @@ IF @ToDate IS NULL
 DECLARE @SQL NVARCHAR(MAX)
 DECLARE @DateGroupingSQL NVARCHAR(MAX)
 DECLARE @DateGroupingJoin NVARCHAR(MAX)
-DECLARE @Table NVARCHAR(MAX)
+
 SELECT @DateGroupingSQL= CASE WHEN @DateGroupingMin IS NULL OR @DateGroupingMin=0 THEN 'W.SnapshotDate'
 			ELSE 'DG.DateGroup' END,
 		 @DateGroupingJoin = CASE WHEN @DateGroupingMin IS NULL OR @DateGroupingMin=0 THEN ''
 			ELSE 'CROSS APPLY dbo.DateGroupingMins(W.SnapshotDate,@DateGroupingMin) DG' END 
 
-SELECT @Table = CASE WHEN @DateGroupingMin>=60 THEN 'dbo.Waits_60MIN' ELSE 'dbo.Waits' END
+IF @Use60MIN IS NULL
+BEGIN
+	SELECT @Use60MIN = CASE WHEN @DateGroupingMin<60 THEN 0
+						WHEN DATEDIFF(hh,@FromDate,@ToDate)>24 THEN 1
+						WHEN DATEPART(mi,@FromDate)+DATEPART(s,@FromDate)+DATEPART(ms,@FromDate)=0 
+							AND (DATEPART(mi,@ToDate)+DATEPART(s,@ToDate)+DATEPART(ms,@ToDate)=0 
+									OR @ToDate>=DATEADD(s,-2,GETUTCDATE())
+								)
+						THEN 1
+						ELSE 0 END
+END
 
 CREATE TABLE #WaitGrp(
 	[Time] DATETIME2(2) NOT NULL,
@@ -33,7 +44,7 @@ SET @SQL = N'
 SELECT ' + @DateGroupingSQL + ' AS [Time],
 			W.WaitTypeID,
 			SUM(W.wait_time_ms)*1000.0 / SUM(W.sample_ms_diff) WaitTimeMsPerSec
-FROM ' + @Table + ' W 
+FROM dbo.Waits' + CASE WHEN @Use60MIN =1 THEN '_60MIN' ELSE '' END + ' W 
 ' + @DateGroupingJoin + '
 JOIN dbo.WaitType WT ON WT.WaitTypeID = W.WaitTypeID
 WHERE W.SnapshotDate>= @FromDate
