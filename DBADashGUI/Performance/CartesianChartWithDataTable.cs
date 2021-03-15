@@ -28,6 +28,16 @@ namespace DBADashGUI.Performance
                 }
             }
         }
+
+        public void SetPointSize(int pointSize)
+        {
+            DefaultPointSize = pointSize;
+            foreach(LineSeries s in this.Series)
+            {
+                s.PointGeometrySize = pointSize;
+            }
+        }
+
         public System.Windows.Media.Brush DefaultFill;
 
         public void UpdateColumnVisibility(Dictionary<string, columnMetaData> columns)
