@@ -17,7 +17,7 @@ WITH T AS (
 			CAST(I.Collation as NVARCHAR(50)) Collation,
 			CAST(I.SystemManufacturer as NVARCHAR(50)) as SystemManufacturer,
 			CAST(I.SystemProductName as NVARCHAR(50)) as SystemProductName,
-			CAST(RIGHT(REPLICATE(' ',5) +  CAST(I.cpu_count as NVARCHAR(50)),5) as NVARCHAR(50)) as CPUCount,
+			CASE WHEN @IsAzure=1 THEN '    -' ELSE CAST(RIGHT(REPLICATE(' ',5) +  CAST(I.cpu_count as NVARCHAR(50)),5) as NVARCHAR(50)) END as CPUCount,
 			CAST(I.AgentHostName + ' {' + I.AgentVersion + '}' as NVARCHAR(50)) DBADashAgent
 	FROM dbo.Instances I
 	CROSS APPLY dbo.SQLVersionName(I.EditionID,I.ProductVersion) v
@@ -46,7 +46,6 @@ WHERE NOT EXISTS(SELECT 1
 			WHERE tg.TagName = t.TagName 
 			AND tg.TagValue = t.TagValue
 			)
-AND NOT(t.TagName='{CPUCount}' AND @IsAzure=1)
 
 DELETE IT 
 FROM dbo.InstanceTags IT
