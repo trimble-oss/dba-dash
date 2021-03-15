@@ -33,7 +33,6 @@ namespace DBADashGUI.Performance
         public DateTimePoint x;
         Int32 instanceID;
         DateTime chartMaxDate = DateTime.MinValue;
-        DateTime chartMinDate = DateTime.MaxValue;
         string connectionString;
       
         DateTime from;

@@ -134,5 +134,11 @@ namespace DBADashGUI.Performance
             columns[(string)ts.Tag].isVisible = ts.Checked;
             chart1.UpdateColumnVisibility(columns);
         }
+
+        private void tsPointSize_Click(object sender, EventArgs e)
+        {
+            var ts = (ToolStripMenuItem)sender;
+            chart1.SetPointSize(Convert.ToInt32(ts.Tag));
+        }
     }
 }
