@@ -358,7 +358,8 @@ FROM
 (-1,'ServerPrincipals',1445,2880),
 (-1,'DatabasePermissions',1445,2880),
 (-1,'ServerRoleMembers',1445,2880),
-(-1,'DatabaseRoleMembers',1445,2880)) T(InstanceID,Reference,WarningThreshold,CriticalThreshold)
+(-1,'DatabaseRoleMembers',1445,2880),
+(-1,'DatabaseMirroring',125,180)) T(InstanceID,Reference,WarningThreshold,CriticalThreshold)
 WHERE NOT EXISTS(SELECT 1 FROM dbo.CollectionDatesThresholds CDT WHERE CDT.InstanceID = T.InstanceID AND CDT.Reference = T.Reference)
 
 --replace old defaults

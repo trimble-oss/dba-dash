@@ -43,3 +43,4 @@ WHERE (D.state =1 OR D.is_in_standby=1)
 AND D.IsActive=1
 AND I.IsActive=1
 AND D.recovery_model<>3
+AND NOT EXISTS(SELECT 1 FROM dbo.DatabaseMirroring DM WHERE DM.DatabaseID = D.DatabaseID AND DM.InstanceID = D.InstanceID)

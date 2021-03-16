@@ -145,6 +145,8 @@
             this.objectExecutionSummary1 = new DBADashGUI.Performance.ObjectExecutionSummary();
             this.tabWaits = new System.Windows.Forms.TabPage();
             this.waitsSummary1 = new DBADashGUI.Performance.WaitsSummary();
+            this.tabMirroring = new System.Windows.Forms.TabPage();
+            this.mirroring1 = new DBADashGUI.HA.Mirroring();
             this.dataGridViewTextBoxColumn1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dataGridViewTextBoxColumn2 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dataGridViewTextBoxColumn3 = new System.Windows.Forms.DataGridViewTextBoxColumn();
@@ -214,6 +216,7 @@
             this.tabPC.SuspendLayout();
             this.tabObjectExecutionSummary.SuspendLayout();
             this.tabWaits.SuspendLayout();
+            this.tabMirroring.SuspendLayout();
             this.SuspendLayout();
             // 
             // TreeViewImageList
@@ -495,6 +498,7 @@
             this.tabs.Controls.Add(this.tabPC);
             this.tabs.Controls.Add(this.tabObjectExecutionSummary);
             this.tabs.Controls.Add(this.tabWaits);
+            this.tabs.Controls.Add(this.tabMirroring);
             this.tabs.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tabs.Location = new System.Drawing.Point(0, 0);
             this.tabs.Name = "tabs";
@@ -1451,12 +1455,32 @@
             // 
             // waitsSummary1
             // 
+            this.waitsSummary1.DateGrouping = 1;
             this.waitsSummary1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.waitsSummary1.InstanceID = 0;
             this.waitsSummary1.Location = new System.Drawing.Point(3, 3);
             this.waitsSummary1.Name = "waitsSummary1";
             this.waitsSummary1.Size = new System.Drawing.Size(1625, 1240);
             this.waitsSummary1.TabIndex = 0;
+            // 
+            // tabMirroring
+            // 
+            this.tabMirroring.Controls.Add(this.mirroring1);
+            this.tabMirroring.Location = new System.Drawing.Point(4, 25);
+            this.tabMirroring.Name = "tabMirroring";
+            this.tabMirroring.Padding = new System.Windows.Forms.Padding(3);
+            this.tabMirroring.Size = new System.Drawing.Size(1631, 1246);
+            this.tabMirroring.TabIndex = 33;
+            this.tabMirroring.Text = "Mirroring";
+            this.tabMirroring.UseVisualStyleBackColor = true;
+            // 
+            // mirroring1
+            // 
+            this.mirroring1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.mirroring1.Location = new System.Drawing.Point(3, 3);
+            this.mirroring1.Name = "mirroring1";
+            this.mirroring1.Size = new System.Drawing.Size(1625, 1240);
+            this.mirroring1.TabIndex = 0;
             // 
             // dataGridViewTextBoxColumn1
             // 
@@ -1745,6 +1769,7 @@
             this.tabPC.ResumeLayout(false);
             this.tabObjectExecutionSummary.ResumeLayout(false);
             this.tabWaits.ResumeLayout(false);
+            this.tabMirroring.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
@@ -1887,5 +1912,7 @@
         private System.Windows.Forms.ToolStripMenuItem tsCustom;
         private System.Windows.Forms.TabPage tabWaits;
         private Performance.WaitsSummary waitsSummary1;
+        private System.Windows.Forms.TabPage tabMirroring;
+        private HA.Mirroring mirroring1;
     }
 }

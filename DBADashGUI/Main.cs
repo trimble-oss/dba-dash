@@ -403,6 +403,11 @@ namespace DBADashGUI
                 waitsSummary1.InstanceID = n.InstanceID;
                 waitsSummary1.RefreshData();
             }
+            if(tabs.SelectedTab == tabMirroring)
+            {
+                mirroring1.InstanceIDs = instanceIDs;
+                mirroring1.RefreshData();
+            }
             tsTime.Visible = globalTimeisVisible;
         }
 
@@ -578,6 +583,7 @@ namespace DBADashGUI
                     allowedTabs.Add(tabBackups);
                     allowedTabs.Add(tabDrives);
                     allowedTabs.Add(tabLogShipping);
+                    allowedTabs.Add(tabMirroring);
                     allowedTabs.Add(tabJobs);
                     allowedTabs.Add(tabLastGood);
                 }    
@@ -634,6 +640,7 @@ namespace DBADashGUI
                 allowedTabs.Add(tabBackups);
                 allowedTabs.Add(tabDrives);              
                 allowedTabs.Add(tabLogShipping);
+                allowedTabs.Add(tabMirroring);
                 allowedTabs.Add(tabJobs);
                 allowedTabs.Add(tabLastGood);
                 allowedTabs.Add(tabDBADashErrorLog);
@@ -644,7 +651,6 @@ namespace DBADashGUI
                 allowedTabs.Add(tabDBSpace);
                 allowedTabs.Add(tabCustomChecks);
                 allowedTabs.Add(tabSnapshotsSummary);
-
             }
             else if(n.Type == SQLTreeItem.TreeType.AzureInstance)
             {

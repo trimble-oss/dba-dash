@@ -30,7 +30,7 @@
     <QueryStoreStaleQueryThreshold>15</QueryStoreStaleQueryThreshold>
     <QueryStoreMaxStorageSize>512</QueryStoreMaxStorageSize>
     <QueryStoreMaxPlansPerQuery>50</QueryStoreMaxPlansPerQuery>
-    <DacVersion>2.0.3.10</DacVersion>
+    <DacVersion>2.0.3.11</DacVersion>
     <ReadCommittedSnapshot>True</ReadCommittedSnapshot>
     <AllowSnapshotIsolation>True</AllowSnapshotIsolation>
     <CompatibilityMode>130</CompatibilityMode>
@@ -500,6 +500,11 @@
     <Build Include="dbo\Stored Procedures\AcknowledgeErrors.sql" />
     <Build Include="dbo\Stored Procedures\Blocking_Get.sql" />
     <Build Include="dbo\Stored Procedures\WaitsSummary_Get.sql" />
+    <Build Include="dbo\Tables\DatabaseMirroring.sql" />
+    <Build Include="dbo\User Defined Types\DatabaseMirroring.sql" />
+    <Build Include="dbo\Stored Procedures\DatabaseMirroring_Upd.sql" />
+    <Build Include="dbo\Stored Procedures\DatabaseMirroringSummary_Get.sql" />
+    <Build Include="dbo\Stored Procedures\DatabaseMirroring_Get.sql" />
   </ItemGroup>
   <ItemGroup>
     <PostDeploy Include="Script.PostDeployment1.sql" />

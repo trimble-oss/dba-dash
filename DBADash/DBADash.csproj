@@ -253,6 +253,7 @@
     <Content Include="SQL\SQLCorruption.sql" />
     <Content Include="SQL\SQLCPU.sql" />
     <Content Include="SQL\SQLCustomChecks.sql" />
+    <Content Include="SQL\SQLDatabaseMirroring.sql" />
     <Content Include="SQL\SQLDatabasePermissions.sql" />
     <Content Include="SQL\SQLDatabasePrincipals.sql" />
     <Content Include="SQL\SQLDatabaseRoleMembers.sql" />

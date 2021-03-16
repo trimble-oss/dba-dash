@@ -172,6 +172,7 @@ namespace DBADashGUI
                                                                         "Total Alerts:" + totalAlerts;
 
 
+                dgvSummary.Rows[idx].Cells["colMirroring"].Style.BackColor = DBADashStatus.GetStatusColour((DBADashStatus.DBADashStatusEnum)row["MirroringStatus"]);
             }
         }
 

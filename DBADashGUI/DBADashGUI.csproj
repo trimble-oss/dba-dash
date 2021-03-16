@@ -294,6 +294,12 @@
     <Compile Include="Changes\HardwareChanges.Designer.cs">
       <DependentUpon>HardwareChanges.cs</DependentUpon>
     </Compile>
+    <Compile Include="HA\Mirroring.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="HA\Mirroring.Designer.cs">
+      <DependentUpon>Mirroring.cs</DependentUpon>
+    </Compile>
     <Compile Include="Histogram.cs" />
     <Compile Include="LastGoodCheckDB\LastGoodCheckDBConfig.cs">
       <SubType>Form</SubType>
@@ -308,17 +314,17 @@
       <DependentUpon>LastGoodCheckDBControl.cs</DependentUpon>
     </Compile>
     <Compile Include="LastGoodCheckDB\LastGoodCheckDBThreshold.cs" />
-    <Compile Include="LogShipping\LogShippingControl.cs">
+    <Compile Include="HA\LogShippingControl.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="LogShipping\LogShippingControl.Designer.cs">
+    <Compile Include="HA\LogShippingControl.Designer.cs">
       <DependentUpon>LogShippingControl.cs</DependentUpon>
     </Compile>
-    <Compile Include="LogShipping\LogShippingThreshold.cs" />
-    <Compile Include="LogShipping\LogShippingThresholdsConfig.cs">
+    <Compile Include="HA\LogShippingThreshold.cs" />
+    <Compile Include="HA\LogShippingThresholdsConfig.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="LogShipping\LogShippingThresholdsConfig.Designer.cs">
+    <Compile Include="HA\LogShippingThresholdsConfig.Designer.cs">
       <DependentUpon>LogShippingThresholdsConfig.cs</DependentUpon>
     </Compile>
     <Compile Include="Main.cs">
@@ -568,6 +574,9 @@
     <EmbeddedResource Include="Changes\HardwareChanges.resx">
       <DependentUpon>HardwareChanges.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="HA\Mirroring.resx">
+      <DependentUpon>Mirroring.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Info.resx">
       <DependentUpon>Info.cs</DependentUpon>
     </EmbeddedResource>
@@ -577,10 +586,10 @@
     <EmbeddedResource Include="LastGoodCheckDB\LastGoodCheckDBControl.resx">
       <DependentUpon>LastGoodCheckDBControl.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="LogShipping\LogShippingControl.resx">
+    <EmbeddedResource Include="HA\LogShippingControl.resx">
       <DependentUpon>LogShippingControl.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="LogShipping\LogShippingThresholdsConfig.resx">
+    <EmbeddedResource Include="HA\LogShippingThresholdsConfig.resx">
       <DependentUpon>LogShippingThresholdsConfig.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Main.resx">

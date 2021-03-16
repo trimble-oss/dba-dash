@@ -52,7 +52,8 @@ namespace DBADash
         DatabasePermissions,
         CustomChecks,
         PerformanceCounters,
-        VLF
+        VLF,
+        DatabaseMirroring
     }
 
 
@@ -261,6 +262,7 @@ namespace DBADash
                 Collect(CollectionType.LastGoodCheckDB);
                 Collect(CollectionType.Alerts);
                 Collect(CollectionType.CustomChecks);
+                Collect(CollectionType.DatabaseMirroring);
             }
             else if (collectionType == CollectionType.Performance)
             {
