@@ -68,7 +68,7 @@
             this.DriveStatus = new System.Windows.Forms.DataGridViewLinkColumn();
             this.JobStatus = new System.Windows.Forms.DataGridViewLinkColumn();
             this.LogShippingStatus = new System.Windows.Forms.DataGridViewLinkColumn();
-            this.colMirroring = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.MirroringStatus = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.AGStatus = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.FileFreeSpaceStatus = new System.Windows.Forms.DataGridViewLinkColumn();
             this.CustomCheckStatus = new System.Windows.Forms.DataGridViewLinkColumn();
@@ -105,7 +105,7 @@
             this.DriveStatus,
             this.JobStatus,
             this.LogShippingStatus,
-            this.colMirroring,
+            this.MirroringStatus,
             this.AGStatus,
             this.FileFreeSpaceStatus,
             this.CustomCheckStatus,
@@ -422,13 +422,13 @@
             this.LogShippingStatus.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
             this.LogShippingStatus.Width = 110;
             // 
-            // colMirroring
+            // MirroringStatus
             // 
-            this.colMirroring.HeaderText = "Mirroring";
-            this.colMirroring.MinimumWidth = 6;
-            this.colMirroring.Name = "colMirroring";
-            this.colMirroring.ReadOnly = true;
-            this.colMirroring.Width = 93;
+            this.MirroringStatus.HeaderText = "Mirroring";
+            this.MirroringStatus.MinimumWidth = 6;
+            this.MirroringStatus.Name = "MirroringStatus";
+            this.MirroringStatus.ReadOnly = true;
+            this.MirroringStatus.Width = 93;
             // 
             // AGStatus
             // 
@@ -547,7 +547,7 @@
         private System.Windows.Forms.DataGridViewLinkColumn DriveStatus;
         private System.Windows.Forms.DataGridViewLinkColumn JobStatus;
         private System.Windows.Forms.DataGridViewLinkColumn LogShippingStatus;
-        private System.Windows.Forms.DataGridViewTextBoxColumn colMirroring;
+        private System.Windows.Forms.DataGridViewTextBoxColumn MirroringStatus;
         private System.Windows.Forms.DataGridViewTextBoxColumn AGStatus;
         private System.Windows.Forms.DataGridViewLinkColumn FileFreeSpaceStatus;
         private System.Windows.Forms.DataGridViewLinkColumn CustomCheckStatus;
