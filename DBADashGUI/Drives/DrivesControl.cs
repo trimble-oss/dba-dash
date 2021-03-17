@@ -249,7 +249,15 @@ namespace DBADashGUI.Properties
                 drv.Dock = DockStyle.Top;
                 driveControls.Add(drv);
             }
-            pnlDrives.Controls.AddRange(driveControls.ToArray());
+            
+            if (driveControls.Count == 0)
+            {
+                pnlDrives.Controls.Add(new Label() { Text = "No drives to display matching the selected filters", Dock= DockStyle.Fill });
+            }
+            else
+            {
+                pnlDrives.Controls.AddRange(driveControls.ToArray());
+            }
             tsDrivesView.Enabled = false;
             tsGridView.Enabled = true;
         }
