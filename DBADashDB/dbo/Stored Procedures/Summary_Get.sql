@@ -132,6 +132,12 @@ a AS(
 	WHERE Status <> 3
 	GROUP BY cc.InstanceID
 )
+, dbm AS (
+	SELECT	DM.InstanceID,
+		MIN(CASE WHEN DM.mirroring_state IN(4,6) AND DM.mirroring_witness_state IN(0,1) THEN 4 WHEN DM.mirroring_state IN(2,4,6) THEN 2 ELSE 1 END) as MirroringStatus
+	FROM dbo.DatabaseMirroring DM 
+	GROUP BY DM.InstanceID
+)
 SELECT I.InstanceID,
 	I.Instance,
 	ISNULL(LS.LogShippingStatus,3) AS LogShippingStatus,
@@ -188,7 +194,8 @@ SELECT I.InstanceID,
 		ELSE 4 END AS AlertStatus,
 	AlertCD.SnapshotDate AS AlertSnapshotDate,
 	I.IsAgentRunning,
-	ISNULL(cus.Status,3) AS CustomCheckStatus
+	ISNULL(cus.Status,3) AS CustomCheckStatus,
+	ISNULL(dbm.MirroringStatus,3) as MirroringStatus
 FROM dbo.Instances I 
 LEFT JOIN LS ON I.InstanceID = LS.InstanceID
 LEFT JOIN B ON I.InstanceID = B.InstanceID
@@ -210,6 +217,7 @@ OUTER APPLY(SELECT TOP(1) IUT.WarningThreshold AS UptimeWarningThreshold,
 			WHERE (IUT.InstanceID = I.InstanceID OR IUT.InstanceID=-1) 
 			ORDER BY IUT.InstanceID DESC) UTT		
 LEFT JOIN cus ON cus.InstanceID = I.InstanceID
+LEFT JOIN dbm ON dbm.InstanceID = I.InstanceID
 WHERE EXISTS(SELECT 1 FROM @Instances t WHERE I.InstanceID = t.InstanceID)
 AND I.IsActive=1
 AND I.EngineEdition<> 5 -- not azure
@@ -257,7 +265,8 @@ SELECT NULL AS InstanceID,
 	3 AlertStatus,
 	NULL AS AlertSnapshotDate,
 	NULL AS IsAgentRunning,
-	ISNULL(MIN(cus.Status),3) AS CustomCheckStatus
+	ISNULL(MIN(cus.Status),3) AS CustomCheckStatus,
+	3 as MirroringStatus
 FROM dbo.Instances I
 LEFT JOIN errSummary  ON I.InstanceID = errSummary.InstanceID
 LEFT JOIN F ON I.InstanceID = F.InstanceID
