@@ -432,53 +432,45 @@ namespace DBADashGUI
             
             var tags = String.Join(",", SelectedTags());
 
-            SqlConnection cn = new SqlConnection(connectionString);
-            using (cn)
+            var dtInstances = CommonData.GetInstances(tags);
+        
+            SQLTreeItem AzureNode = null;
+            foreach(DataRow row in dtInstances.Rows)
             {
-                using (SqlCommand cmd = new SqlCommand(@"dbo.Instances_Get", cn) { CommandType = CommandType.StoredProcedure }){
-                    cn.Open();
- 
-                    cmd.Parameters.AddWithValue("TagIDs", tags);
-                    cmd.CommandType = CommandType.StoredProcedure;
-                    var rdr = cmd.ExecuteReader();
-                    SQLTreeItem AzureNode = null;
-                    while (rdr.Read())
+                string instance = (string)row["Instance"];
+                Int32 instanceID = (Int32)row["InstanceID"];
+                if ((bool)row["IsAzure"])
+                {
+                    string db = (string)row["AzureDBName"];
+                    if (AzureNode == null || AzureNode.InstanceName != instance)
                     {
-                        string instance = (string)rdr["Instance"];
-                        Int32 instanceID = (Int32)rdr["InstanceID"];
-                        if ((bool)rdr["IsAzure"])
-                        {
-                            string db = (string)rdr["AzureDBName"];
-                            if (AzureNode == null || AzureNode.InstanceName != instance)
-                            {
-                                AzureNode = new SQLTreeItem(instance, SQLTreeItem.TreeType.AzureInstance);
-                                root.Nodes.Add(AzureNode);
-                                var cfgNode = new SQLTreeItem("Configuration", SQLTreeItem.TreeType.Configuration);
-                                AzureNode.Nodes.Add(cfgNode);
-                            }
-                            var azureDBNode = new SQLTreeItem(db, SQLTreeItem.TreeType.AzureDatabase)
-                            {
-                                DatabaseID = (Int32)rdr["AzureDatabaseID"],
-                                InstanceID = instanceID
-                            };
-                            azureDBNode.AddDatabaseFolders();
-                            AzureNode.Nodes.Add(azureDBNode);
-                            AzureInstanceIDs.Add(instanceID);
-                        }
-                        else
-                        {
-                            var n = new SQLTreeItem(instance, SQLTreeItem.TreeType.Instance)
-                            {
-                                InstanceID = instanceID
-                            };
-                            n.AddDummyNode();
-                            root.Nodes.Add(n);
-                            InstanceIDs.Add(instanceID);
-                        }
-                        AllInstanceIDs.Add(instanceID);
+                        AzureNode = new SQLTreeItem(instance, SQLTreeItem.TreeType.AzureInstance);
+                        root.Nodes.Add(AzureNode);
+                        var cfgNode = new SQLTreeItem("Configuration", SQLTreeItem.TreeType.Configuration);
+                        AzureNode.Nodes.Add(cfgNode);
                     }
+                    var azureDBNode = new SQLTreeItem(db, SQLTreeItem.TreeType.AzureDatabase)
+                    {
+                        DatabaseID = (Int32)row["AzureDatabaseID"],
+                        InstanceID = instanceID
+                    };
+                    azureDBNode.AddDatabaseFolders();
+                    AzureNode.Nodes.Add(azureDBNode);
+                    AzureInstanceIDs.Add(instanceID);
                 }
+                else
+                {
+                    var n = new SQLTreeItem(instance, SQLTreeItem.TreeType.Instance)
+                    {
+                        InstanceID = instanceID
+                    };
+                    n.AddDummyNode();
+                    root.Nodes.Add(n);
+                    InstanceIDs.Add(instanceID);
+                }
+                AllInstanceIDs.Add(instanceID);
             }
+  
             tv1.Nodes.Add(root);
             root.Expand();
             tv1.SelectedNode = root;
@@ -1210,5 +1202,17 @@ namespace DBADashGUI
             }            
         }
 
+        private void manageInstancesToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            var frm = new ManageInstances
+            {
+                Tags = String.Join(",", SelectedTags())
+            };
+            frm.ShowDialog();
+            if (frm.InstanceActiveFlagChanged)
+            {
+                addInstanes(); // refresh the tree if instances deleted/restored
+            }
+        }
     }
 }

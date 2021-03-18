@@ -86,7 +86,7 @@ namespace DBADashGUI.Performance
                 chartMaxDate = DateTime.MinValue;
             }
 
-            var dt = Common.ObjectExecutionStats(instanceID, databaseid, from, to, objectID, dateGrouping, measure);
+            var dt = CommonData.ObjectExecutionStats(instanceID, databaseid, from, to, objectID, dateGrouping, measure);
 
             if (dt.Rows.Count == 0)
             {

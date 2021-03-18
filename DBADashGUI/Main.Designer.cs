@@ -38,6 +38,7 @@
             this.dBDiffToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.optionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.dataRetentionToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.manageInstancesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.tsTime = new System.Windows.Forms.ToolStripDropDownButton();
             this.minsToolStripMenuItem2 = new System.Windows.Forms.ToolStripMenuItem();
             this.minsToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
@@ -265,7 +266,8 @@
             // optionsToolStripMenuItem
             // 
             this.optionsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.dataRetentionToolStripMenuItem});
+            this.dataRetentionToolStripMenuItem,
+            this.manageInstancesToolStripMenuItem});
             this.optionsToolStripMenuItem.Name = "optionsToolStripMenuItem";
             this.optionsToolStripMenuItem.Size = new System.Drawing.Size(75, 30);
             this.optionsToolStripMenuItem.Text = "Options";
@@ -273,9 +275,16 @@
             // dataRetentionToolStripMenuItem
             // 
             this.dataRetentionToolStripMenuItem.Name = "dataRetentionToolStripMenuItem";
-            this.dataRetentionToolStripMenuItem.Size = new System.Drawing.Size(192, 26);
+            this.dataRetentionToolStripMenuItem.Size = new System.Drawing.Size(210, 26);
             this.dataRetentionToolStripMenuItem.Text = "Data Retention";
             this.dataRetentionToolStripMenuItem.Click += new System.EventHandler(this.DataRetentionToolStripMenuItem_Click);
+            // 
+            // manageInstancesToolStripMenuItem
+            // 
+            this.manageInstancesToolStripMenuItem.Name = "manageInstancesToolStripMenuItem";
+            this.manageInstancesToolStripMenuItem.Size = new System.Drawing.Size(210, 26);
+            this.manageInstancesToolStripMenuItem.Text = "Manage Instances";
+            this.manageInstancesToolStripMenuItem.Click += new System.EventHandler(this.manageInstancesToolStripMenuItem_Click);
             // 
             // tsTime
             // 
@@ -1480,6 +1489,7 @@
             this.mirroring1.Location = new System.Drawing.Point(3, 3);
             this.mirroring1.Name = "mirroring1";
             this.mirroring1.Size = new System.Drawing.Size(1625, 1240);
+            this.mirroring1.SummaryMode = true;
             this.mirroring1.TabIndex = 0;
             // 
             // dataGridViewTextBoxColumn1
@@ -1514,6 +1524,7 @@
             // 
             // dataGridViewTextBoxColumn4
             // 
+            this.dataGridViewTextBoxColumn4.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.ColumnHeader;
             this.dataGridViewTextBoxColumn4.DataPropertyName = "ValidForDays";
             this.dataGridViewTextBoxColumn4.HeaderText = "Valid For (Days)";
             this.dataGridViewTextBoxColumn4.MinimumWidth = 6;
@@ -1523,6 +1534,7 @@
             // 
             // dataGridViewTextBoxColumn5
             // 
+            this.dataGridViewTextBoxColumn5.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.ColumnHeader;
             this.dataGridViewTextBoxColumn5.DataPropertyName = "DaysSinceValidation";
             this.dataGridViewTextBoxColumn5.HeaderText = "Days Since Validation";
             this.dataGridViewTextBoxColumn5.MinimumWidth = 6;
@@ -1914,5 +1926,6 @@
         private Performance.WaitsSummary waitsSummary1;
         private System.Windows.Forms.TabPage tabMirroring;
         private HA.Mirroring mirroring1;
+        private System.Windows.Forms.ToolStripMenuItem manageInstancesToolStripMenuItem;
     }
 }

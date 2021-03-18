@@ -146,7 +146,7 @@ namespace DBADashGUI
                     }
                     if (frm.DatabaseID < 1)
                     {
-                        frm.DatabaseID  = Common.GetDatabaseID(frm.Instance, frm.DBName);
+                        frm.DatabaseID  = CommonData.GetDatabaseID(frm.Instance, frm.DBName);
                     }
                     frm.Show();
                 }
@@ -204,7 +204,7 @@ namespace DBADashGUI
             };
             if (frm.DatabaseID < 1)
             {
-                frm.DatabaseID = Common.GetDatabaseID(frm.Instance, frm.DBName);
+                frm.DatabaseID = CommonData.GetDatabaseID(frm.Instance, frm.DBName);
             }
             frm.Show();
         }

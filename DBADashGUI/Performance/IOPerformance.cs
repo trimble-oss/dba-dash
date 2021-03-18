@@ -94,7 +94,7 @@ namespace DBADashGUI.Performance
             if (databaseid > 0)
             {
                 tsFileGroup.DropDownItems.Clear();
-                var dt = Common.GetFileGroups(databaseid);
+                var dt = CommonData.GetFileGroups(databaseid);
                 foreach (DataRow r in dt.Rows)
                 {
                     string fg = r["FileGroup"] == DBNull.Value ? "{NULL}" : (string)r["FileGroup"];

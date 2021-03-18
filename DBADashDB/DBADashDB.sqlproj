@@ -505,6 +505,7 @@
     <Build Include="dbo\Stored Procedures\DatabaseMirroring_Upd.sql" />
     <Build Include="dbo\Stored Procedures\DatabaseMirroringSummary_Get.sql" />
     <Build Include="dbo\Stored Procedures\DatabaseMirroring_Get.sql" />
+    <Build Include="dbo\Stored Procedures\Instance_Del.sql" />
   </ItemGroup>
   <ItemGroup>
     <PostDeploy Include="Script.PostDeployment1.sql" />

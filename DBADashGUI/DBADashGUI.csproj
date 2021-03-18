@@ -202,14 +202,15 @@
     <Compile Include="Changes\ConfigurationHistory.Designer.cs">
       <DependentUpon>ConfigurationHistory.cs</DependentUpon>
     </Compile>
+    <Compile Include="CommonData.cs" />
     <Compile Include="CustomProgressBar.cs">
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="CustomProgressControl.cs" />
-    <Compile Include="DataRetention.cs">
+    <Compile Include="Options Menu\DataRetention.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="DataRetention.Designer.cs">
+    <Compile Include="Options Menu\DataRetention.Designer.cs">
       <DependentUpon>DataRetention.cs</DependentUpon>
     </Compile>
     <Compile Include="DBAChecksStatus.cs" />
@@ -332,6 +333,12 @@
     </Compile>
     <Compile Include="Main.Designer.cs">
       <DependentUpon>Main.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Options Menu\ManageInstances.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Options Menu\ManageInstances.Designer.cs">
+      <DependentUpon>ManageInstances.cs</DependentUpon>
     </Compile>
     <Compile Include="Performance\AzureDBResourceStats.cs">
       <SubType>UserControl</SubType>
@@ -532,7 +539,7 @@
     <EmbeddedResource Include="CollectionDates\CollectionErrors.resx">
       <DependentUpon>CollectionErrors.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="DataRetention.resx">
+    <EmbeddedResource Include="Options Menu\DataRetention.resx">
       <DependentUpon>DataRetention.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="DBDiff.resx">
@@ -597,6 +604,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Drives\DrivesControl.resx">
       <DependentUpon>DrivesControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Options Menu\ManageInstances.resx">
+      <DependentUpon>ManageInstances.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Performance\AzureDBResourceStats.resx">
       <DependentUpon>AzureDBResourceStats.cs</DependentUpon>

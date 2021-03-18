@@ -66,7 +66,7 @@ namespace DBADashGUI.Performance
 
         private void refreshData()
         {
-            var dt = Common.ObjectExecutionStats(InstanceID, -1, FromDate, ToDate, ObjectID, dateGrouping, "AvgDuration", Instance);
+            var dt = CommonData.ObjectExecutionStats(InstanceID, -1, FromDate, ToDate, ObjectID, dateGrouping, "AvgDuration", Instance);
             chart1.Series.Clear();
             chart1.DefaultFill = System.Windows.Media.Brushes.Transparent;
 

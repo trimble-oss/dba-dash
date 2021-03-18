@@ -294,7 +294,7 @@ namespace DBADashGUI.DBFiles
 
         private void populateFileGroupFilter()
         {
-            var dt = Common.GetFileGroups(DatabaseID);
+            var dt = CommonData.GetFileGroups(DatabaseID);
             foreach(DataRow r in dt.Rows)
             {
                 string fg = r["FileGroup"] == DBNull.Value ? "{NULL}" : (string)r["FileGroup"];
@@ -314,7 +314,7 @@ namespace DBADashGUI.DBFiles
 
         private void populateFileFilesFilter()
         {
-            var dt = Common.GetFiles(DatabaseID);
+            var dt = CommonData.GetFiles(DatabaseID);
             foreach (DataRow r in dt.Rows)
             {
                 string fileName = r["file_name"] == DBNull.Value ? "" : (string)r["file_name"];
