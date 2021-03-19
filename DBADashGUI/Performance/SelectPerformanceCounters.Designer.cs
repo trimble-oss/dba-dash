@@ -29,9 +29,6 @@
         private void InitializeComponent()
         {
             this.dgvCounters = new System.Windows.Forms.DataGridView();
-            this.colObjectName = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colCounterName = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colInstance = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.colAvg = new System.Windows.Forms.DataGridViewCheckBoxColumn();
             this.colMin = new System.Windows.Forms.DataGridViewCheckBoxColumn();
             this.colMax = new System.Windows.Forms.DataGridViewCheckBoxColumn();
@@ -39,10 +36,17 @@
             this.colCurrent = new System.Windows.Forms.DataGridViewCheckBoxColumn();
             this.colSampleCount = new System.Windows.Forms.DataGridViewCheckBoxColumn();
             this.panel1 = new System.Windows.Forms.Panel();
+            this.bttnCancel = new System.Windows.Forms.Button();
+            this.bttnClear = new System.Windows.Forms.Button();
+            this.label1 = new System.Windows.Forms.Label();
+            this.txtSearch = new System.Windows.Forms.TextBox();
             this.bttnOK = new System.Windows.Forms.Button();
             this.dataGridViewTextBoxColumn1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dataGridViewTextBoxColumn2 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dataGridViewTextBoxColumn3 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colObjectName = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colCounterName = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colInstance = new System.Windows.Forms.DataGridViewTextBoxColumn();
             ((System.ComponentModel.ISupportInitialize)(this.dgvCounters)).BeginInit();
             this.panel1.SuspendLayout();
             this.SuspendLayout();
@@ -72,30 +76,6 @@
             this.dgvCounters.RowTemplate.Height = 24;
             this.dgvCounters.Size = new System.Drawing.Size(1020, 605);
             this.dgvCounters.TabIndex = 0;
-            // 
-            // colObjectName
-            // 
-            this.colObjectName.DataPropertyName = "object_name";
-            this.colObjectName.HeaderText = "Object";
-            this.colObjectName.MinimumWidth = 6;
-            this.colObjectName.Name = "colObjectName";
-            this.colObjectName.Width = 78;
-            // 
-            // colCounterName
-            // 
-            this.colCounterName.DataPropertyName = "counter_name";
-            this.colCounterName.HeaderText = "Counter";
-            this.colCounterName.MinimumWidth = 6;
-            this.colCounterName.Name = "colCounterName";
-            this.colCounterName.Width = 87;
-            // 
-            // colInstance
-            // 
-            this.colInstance.DataPropertyName = "instance_name";
-            this.colInstance.HeaderText = "Instance";
-            this.colInstance.MinimumWidth = 6;
-            this.colInstance.Name = "colInstance";
-            this.colInstance.Width = 90;
             // 
             // colAvg
             // 
@@ -147,12 +127,54 @@
             // 
             // panel1
             // 
+            this.panel1.Controls.Add(this.bttnCancel);
+            this.panel1.Controls.Add(this.bttnClear);
+            this.panel1.Controls.Add(this.label1);
+            this.panel1.Controls.Add(this.txtSearch);
             this.panel1.Controls.Add(this.bttnOK);
             this.panel1.Dock = System.Windows.Forms.DockStyle.Bottom;
             this.panel1.Location = new System.Drawing.Point(0, 605);
             this.panel1.Name = "panel1";
             this.panel1.Size = new System.Drawing.Size(1020, 59);
             this.panel1.TabIndex = 1;
+            // 
+            // bttnCancel
+            // 
+            this.bttnCancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.bttnCancel.Location = new System.Drawing.Point(813, 16);
+            this.bttnCancel.Name = "bttnCancel";
+            this.bttnCancel.Size = new System.Drawing.Size(89, 31);
+            this.bttnCancel.TabIndex = 4;
+            this.bttnCancel.Text = "&Cancel";
+            this.bttnCancel.UseVisualStyleBackColor = true;
+            this.bttnCancel.Click += new System.EventHandler(this.bttnCancel_Click);
+            // 
+            // bttnClear
+            // 
+            this.bttnClear.Location = new System.Drawing.Point(611, 16);
+            this.bttnClear.Name = "bttnClear";
+            this.bttnClear.Size = new System.Drawing.Size(134, 31);
+            this.bttnClear.TabIndex = 3;
+            this.bttnClear.Text = "Clear Selected";
+            this.bttnClear.UseVisualStyleBackColor = true;
+            this.bttnClear.Click += new System.EventHandler(this.bttnClear_Click);
+            // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Location = new System.Drawing.Point(12, 23);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(57, 17);
+            this.label1.TabIndex = 2;
+            this.label1.Text = "Search:";
+            // 
+            // txtSearch
+            // 
+            this.txtSearch.Location = new System.Drawing.Point(75, 20);
+            this.txtSearch.Name = "txtSearch";
+            this.txtSearch.Size = new System.Drawing.Size(244, 22);
+            this.txtSearch.TabIndex = 1;
+            this.txtSearch.TextChanged += new System.EventHandler(this.txtSearch_TextChanged);
             // 
             // bttnOK
             // 
@@ -161,7 +183,7 @@
             this.bttnOK.Name = "bttnOK";
             this.bttnOK.Size = new System.Drawing.Size(89, 31);
             this.bttnOK.TabIndex = 0;
-            this.bttnOK.Text = "OK";
+            this.bttnOK.Text = "&OK";
             this.bttnOK.UseVisualStyleBackColor = true;
             this.bttnOK.Click += new System.EventHandler(this.bttnOK_Click);
             // 
@@ -189,6 +211,30 @@
             this.dataGridViewTextBoxColumn3.Name = "dataGridViewTextBoxColumn3";
             this.dataGridViewTextBoxColumn3.Width = 90;
             // 
+            // colObjectName
+            // 
+            this.colObjectName.DataPropertyName = "object_name";
+            this.colObjectName.HeaderText = "Object";
+            this.colObjectName.MinimumWidth = 6;
+            this.colObjectName.Name = "colObjectName";
+            this.colObjectName.Width = 78;
+            // 
+            // colCounterName
+            // 
+            this.colCounterName.DataPropertyName = "counter_name";
+            this.colCounterName.HeaderText = "Counter";
+            this.colCounterName.MinimumWidth = 6;
+            this.colCounterName.Name = "colCounterName";
+            this.colCounterName.Width = 87;
+            // 
+            // colInstance
+            // 
+            this.colInstance.DataPropertyName = "instance_name";
+            this.colInstance.HeaderText = "Instance";
+            this.colInstance.MinimumWidth = 6;
+            this.colInstance.Name = "colInstance";
+            this.colInstance.Width = 90;
+            // 
             // SelectPerformanceCounters
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
@@ -202,6 +248,7 @@
             this.Load += new System.EventHandler(this.SelectPerformanceCounters_Load);
             ((System.ComponentModel.ISupportInitialize)(this.dgvCounters)).EndInit();
             this.panel1.ResumeLayout(false);
+            this.panel1.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -223,5 +270,9 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn1;
         private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn2;
         private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn3;
+        private System.Windows.Forms.TextBox txtSearch;
+        private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.Button bttnCancel;
+        private System.Windows.Forms.Button bttnClear;
     }
 }

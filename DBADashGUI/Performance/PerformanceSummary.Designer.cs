@@ -99,6 +99,7 @@
             this.tsRefresh = new System.Windows.Forms.ToolStripButton();
             this.tsCopy = new System.Windows.Forms.ToolStripButton();
             this.tsColumns = new System.Windows.Forms.ToolStripDropDownButton();
+            this.tsPerformanceCounters = new System.Windows.Forms.ToolStripButton();
             this.dataGridViewTextBoxColumn1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dataGridViewProgressBarColumn1 = new CustomProgressControl.DataGridViewProgressBarColumn();
             this.dataGridViewProgressBarColumn2 = new CustomProgressControl.DataGridViewProgressBarColumn();
@@ -120,7 +121,6 @@
             this.dataGridViewTextBoxColumn17 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dataGridViewTextBoxColumn18 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dataGridViewTextBoxColumn19 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.tsPerformanceCounters = new System.Windows.Forms.ToolStripButton();
             ((System.ComponentModel.ISupportInitialize)(this.dgv)).BeginInit();
             this.toolStrip1.SuspendLayout();
             this.SuspendLayout();
@@ -172,12 +172,12 @@
             dataGridViewCellStyle23.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
             this.dgv.DefaultCellStyle = dataGridViewCellStyle23;
             this.dgv.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.dgv.Location = new System.Drawing.Point(0, 27);
+            this.dgv.Location = new System.Drawing.Point(0, 31);
             this.dgv.Name = "dgv";
             this.dgv.ReadOnly = true;
             this.dgv.RowHeadersVisible = false;
             this.dgv.RowHeadersWidth = 51;
-            this.dgv.Size = new System.Drawing.Size(1048, 626);
+            this.dgv.Size = new System.Drawing.Size(1048, 622);
             this.dgv.TabIndex = 0;
             this.dgv.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgv_CellContentClick);
             this.dgv.RowsAdded += new System.Windows.Forms.DataGridViewRowsAddedEventHandler(this.dgv_RowsAdded);
@@ -461,7 +461,7 @@
             this.tsPerformanceCounters});
             this.toolStrip1.Location = new System.Drawing.Point(0, 0);
             this.toolStrip1.Name = "toolStrip1";
-            this.toolStrip1.Size = new System.Drawing.Size(1048, 27);
+            this.toolStrip1.Size = new System.Drawing.Size(1048, 31);
             this.toolStrip1.TabIndex = 3;
             this.toolStrip1.Text = "toolStrip1";
             // 
@@ -471,7 +471,7 @@
             this.tsRefresh.Image = global::DBADashGUI.Properties.Resources._112_RefreshArrow_Green_16x16_72;
             this.tsRefresh.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsRefresh.Name = "tsRefresh";
-            this.tsRefresh.Size = new System.Drawing.Size(29, 24);
+            this.tsRefresh.Size = new System.Drawing.Size(29, 28);
             this.tsRefresh.Text = "Refresh";
             this.tsRefresh.Click += new System.EventHandler(this.tsRefresh_Click);
             // 
@@ -481,7 +481,7 @@
             this.tsCopy.Image = global::DBADashGUI.Properties.Resources.ASX_Copy_blue_16x;
             this.tsCopy.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsCopy.Name = "tsCopy";
-            this.tsCopy.Size = new System.Drawing.Size(29, 24);
+            this.tsCopy.Size = new System.Drawing.Size(29, 28);
             this.tsCopy.Text = "Copy";
             this.tsCopy.Click += new System.EventHandler(this.tsCopy_Click);
             // 
@@ -491,8 +491,18 @@
             this.tsColumns.Image = global::DBADashGUI.Properties.Resources.Column_16x;
             this.tsColumns.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsColumns.Name = "tsColumns";
-            this.tsColumns.Size = new System.Drawing.Size(34, 24);
+            this.tsColumns.Size = new System.Drawing.Size(34, 28);
             this.tsColumns.Text = "Columns";
+            // 
+            // tsPerformanceCounters
+            // 
+            this.tsPerformanceCounters.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.tsPerformanceCounters.Image = global::DBADashGUI.Properties.Resources.LineChart_16x;
+            this.tsPerformanceCounters.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tsPerformanceCounters.Name = "tsPerformanceCounters";
+            this.tsPerformanceCounters.Size = new System.Drawing.Size(29, 28);
+            this.tsPerformanceCounters.Text = "Add Performance Counters";
+            this.tsPerformanceCounters.Click += new System.EventHandler(this.tsPerformanceCounters_Click);
             // 
             // dataGridViewTextBoxColumn1
             // 
@@ -715,16 +725,6 @@
             this.dataGridViewTextBoxColumn19.Name = "dataGridViewTextBoxColumn19";
             this.dataGridViewTextBoxColumn19.Visible = false;
             this.dataGridViewTextBoxColumn19.Width = 89;
-            // 
-            // tsPerformanceCounters
-            // 
-            this.tsPerformanceCounters.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.tsPerformanceCounters.Image = global::DBADashGUI.Properties.Resources.LineChart_16x;
-            this.tsPerformanceCounters.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsPerformanceCounters.Name = "tsPerformanceCounters";
-            this.tsPerformanceCounters.Size = new System.Drawing.Size(29, 24);
-            this.tsPerformanceCounters.Text = "Add Performance Counters";
-            this.tsPerformanceCounters.Click += new System.EventHandler(this.tsPerformanceCounters_Click);
             // 
             // PerformanceSummary
             // 

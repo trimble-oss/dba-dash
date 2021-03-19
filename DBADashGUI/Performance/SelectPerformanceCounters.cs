@@ -84,13 +84,13 @@ namespace DBADashGUI.Performance
                             row["Max"] = counter.Max;
                             row["Min"] = counter.Min;
                             row["Current"] = counter.Current;
-                            row["colSampleCount"] = counter.SampleCount;
+                            row["SampleCount"] = counter.SampleCount;
                         }
                     }
                 }
             }
             dgvCounters.AutoGenerateColumns = false;
-            dgvCounters.DataSource = Counters;
+            dgvCounters.DataSource =new DataView(Counters);
         }
      
         private void dgvCounters_CurrentCellDirtyStateChanged(object sender, EventArgs e)
@@ -104,6 +104,31 @@ namespace DBADashGUI.Performance
         private void bttnOK_Click(object sender, EventArgs e)
         {
             this.DialogResult = DialogResult.OK;
+            this.Close();
+        }
+
+        private void txtSearch_TextChanged(object sender, EventArgs e)
+        {
+            var dv = (DataView)dgvCounters.DataSource;
+            dv.RowFilter = String.Format("counter_name LIKE '*{0}*' OR object_name LIKE '*{0}*' OR instance_name LIKE '*{0}*'", txtSearch.Text.Replace("'", ""));
+        }
+
+
+        private void bttnClear_Click(object sender, EventArgs e)
+        {
+            foreach(DataRow row in Counters.Rows)
+            {
+                row["Total"] = false;
+                row["Avg"] = false;
+                row["Max"] = false;
+                row["Min"] = false;
+                row["Current"] = false;
+                row["SampleCount"] = false;
+            }
+        }
+
+        private void bttnCancel_Click(object sender, EventArgs e)
+        {
             this.Close();
         }
     }
