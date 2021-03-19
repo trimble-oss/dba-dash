@@ -29,11 +29,6 @@
         private void InitializeComponent()
         {
             this.dgvCounters = new System.Windows.Forms.DataGridView();
-            this.panel1 = new System.Windows.Forms.Panel();
-            this.bttnOK = new System.Windows.Forms.Button();
-            this.dataGridViewTextBoxColumn1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.dataGridViewTextBoxColumn2 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.dataGridViewTextBoxColumn3 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.colObjectName = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.colCounterName = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.colInstance = new System.Windows.Forms.DataGridViewTextBoxColumn();
@@ -43,6 +38,11 @@
             this.colTotal = new System.Windows.Forms.DataGridViewCheckBoxColumn();
             this.colCurrent = new System.Windows.Forms.DataGridViewCheckBoxColumn();
             this.colSampleCount = new System.Windows.Forms.DataGridViewCheckBoxColumn();
+            this.panel1 = new System.Windows.Forms.Panel();
+            this.bttnOK = new System.Windows.Forms.Button();
+            this.dataGridViewTextBoxColumn1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.dataGridViewTextBoxColumn2 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.dataGridViewTextBoxColumn3 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             ((System.ComponentModel.ISupportInitialize)(this.dgvCounters)).BeginInit();
             this.panel1.SuspendLayout();
             this.SuspendLayout();
@@ -72,49 +72,6 @@
             this.dgvCounters.RowTemplate.Height = 24;
             this.dgvCounters.Size = new System.Drawing.Size(1020, 605);
             this.dgvCounters.TabIndex = 0;
-            // 
-            // panel1
-            // 
-            this.panel1.Controls.Add(this.bttnOK);
-            this.panel1.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.panel1.Location = new System.Drawing.Point(0, 605);
-            this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(1020, 59);
-            this.panel1.TabIndex = 1;
-            // 
-            // bttnOK
-            // 
-            this.bttnOK.Location = new System.Drawing.Point(919, 16);
-            this.bttnOK.Name = "bttnOK";
-            this.bttnOK.Size = new System.Drawing.Size(89, 31);
-            this.bttnOK.TabIndex = 0;
-            this.bttnOK.Text = "OK";
-            this.bttnOK.UseVisualStyleBackColor = true;
-            this.bttnOK.Click += new System.EventHandler(this.bttnOK_Click);
-            // 
-            // dataGridViewTextBoxColumn1
-            // 
-            this.dataGridViewTextBoxColumn1.DataPropertyName = "object_name";
-            this.dataGridViewTextBoxColumn1.HeaderText = "Object";
-            this.dataGridViewTextBoxColumn1.MinimumWidth = 6;
-            this.dataGridViewTextBoxColumn1.Name = "dataGridViewTextBoxColumn1";
-            this.dataGridViewTextBoxColumn1.Width = 78;
-            // 
-            // dataGridViewTextBoxColumn2
-            // 
-            this.dataGridViewTextBoxColumn2.DataPropertyName = "counter_name";
-            this.dataGridViewTextBoxColumn2.HeaderText = "Counter";
-            this.dataGridViewTextBoxColumn2.MinimumWidth = 6;
-            this.dataGridViewTextBoxColumn2.Name = "dataGridViewTextBoxColumn2";
-            this.dataGridViewTextBoxColumn2.Width = 87;
-            // 
-            // dataGridViewTextBoxColumn3
-            // 
-            this.dataGridViewTextBoxColumn3.DataPropertyName = "instance_name";
-            this.dataGridViewTextBoxColumn3.HeaderText = "Instance";
-            this.dataGridViewTextBoxColumn3.MinimumWidth = 6;
-            this.dataGridViewTextBoxColumn3.Name = "dataGridViewTextBoxColumn3";
-            this.dataGridViewTextBoxColumn3.Width = 90;
             // 
             // colObjectName
             // 
@@ -187,6 +144,50 @@
             this.colSampleCount.MinimumWidth = 6;
             this.colSampleCount.Name = "colSampleCount";
             this.colSampleCount.Width = 102;
+            // 
+            // panel1
+            // 
+            this.panel1.Controls.Add(this.bttnOK);
+            this.panel1.Dock = System.Windows.Forms.DockStyle.Bottom;
+            this.panel1.Location = new System.Drawing.Point(0, 605);
+            this.panel1.Name = "panel1";
+            this.panel1.Size = new System.Drawing.Size(1020, 59);
+            this.panel1.TabIndex = 1;
+            // 
+            // bttnOK
+            // 
+            this.bttnOK.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.bttnOK.Location = new System.Drawing.Point(919, 16);
+            this.bttnOK.Name = "bttnOK";
+            this.bttnOK.Size = new System.Drawing.Size(89, 31);
+            this.bttnOK.TabIndex = 0;
+            this.bttnOK.Text = "OK";
+            this.bttnOK.UseVisualStyleBackColor = true;
+            this.bttnOK.Click += new System.EventHandler(this.bttnOK_Click);
+            // 
+            // dataGridViewTextBoxColumn1
+            // 
+            this.dataGridViewTextBoxColumn1.DataPropertyName = "object_name";
+            this.dataGridViewTextBoxColumn1.HeaderText = "Object";
+            this.dataGridViewTextBoxColumn1.MinimumWidth = 6;
+            this.dataGridViewTextBoxColumn1.Name = "dataGridViewTextBoxColumn1";
+            this.dataGridViewTextBoxColumn1.Width = 78;
+            // 
+            // dataGridViewTextBoxColumn2
+            // 
+            this.dataGridViewTextBoxColumn2.DataPropertyName = "counter_name";
+            this.dataGridViewTextBoxColumn2.HeaderText = "Counter";
+            this.dataGridViewTextBoxColumn2.MinimumWidth = 6;
+            this.dataGridViewTextBoxColumn2.Name = "dataGridViewTextBoxColumn2";
+            this.dataGridViewTextBoxColumn2.Width = 87;
+            // 
+            // dataGridViewTextBoxColumn3
+            // 
+            this.dataGridViewTextBoxColumn3.DataPropertyName = "instance_name";
+            this.dataGridViewTextBoxColumn3.HeaderText = "Instance";
+            this.dataGridViewTextBoxColumn3.MinimumWidth = 6;
+            this.dataGridViewTextBoxColumn3.Name = "dataGridViewTextBoxColumn3";
+            this.dataGridViewTextBoxColumn3.Width = 90;
             // 
             // SelectPerformanceCounters
             // 

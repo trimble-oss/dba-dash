@@ -20,6 +20,8 @@ namespace DBADashGUI.Performance
 
         public DataTable Counters;
 
+        private Dictionary<int, Counter>selectedCounters;
+
         public Dictionary<int,Counter> SelectedCounters
         {
             get
@@ -34,6 +36,10 @@ namespace DBADashGUI.Performance
                     }
                 }
                 return selected;
+            }
+            set
+            {
+                selectedCounters = value;
             }
         }
 
@@ -65,6 +71,23 @@ namespace DBADashGUI.Performance
             if (Counters == null || Counters.Rows.Count == 0)
             {
                 Counters = GetCounters();
+                if(selectedCounters!=null && selectedCounters.Count > 0)
+                {
+                    foreach(DataRow row in Counters.Rows)
+                    {
+                        int counterID = (int)row["CounterID"];                       
+                        if (selectedCounters.ContainsKey(counterID))
+                        {
+                            var counter = selectedCounters[counterID];
+                            row["Total"] = counter.Total;
+                            row["Avg"] = counter.Avg;
+                            row["Max"] = counter.Max;
+                            row["Min"] = counter.Min;
+                            row["Current"] = counter.Current;
+                            row["colSampleCount"] = counter.SampleCount;
+                        }
+                    }
+                }
             }
             dgvCounters.AutoGenerateColumns = false;
             dgvCounters.DataSource = Counters;
