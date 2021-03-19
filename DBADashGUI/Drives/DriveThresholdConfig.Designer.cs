@@ -212,6 +212,7 @@
             this.Controls.Add(this.optPercent);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedToolWindow;
             this.Name = "DriveThresholdConfig";
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "Drive Threshold";
             this.Load += new System.EventHandler(this.DriveThresholdConfig_Load);
             this.pnlThresholds.ResumeLayout(false);

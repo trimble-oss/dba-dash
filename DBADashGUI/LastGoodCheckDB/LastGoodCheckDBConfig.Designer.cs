@@ -176,6 +176,7 @@
             this.Controls.Add(this.chkInherit);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedToolWindow;
             this.Name = "LastGoodCheckDBConfig";
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "Last Good CheckDB Config";
             this.pnlThresholds.ResumeLayout(false);
             this.pnlThresholds.PerformLayout();

@@ -213,6 +213,7 @@
             this.Controls.Add(this.label1);
             this.Controls.Add(this.txtReference);
             this.Name = "CollectionDatesThresholds";
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "Collection Dates Thresholds";
             this.Load += new System.EventHandler(this.CollectionDatesThresholds_Load);
             ((System.ComponentModel.ISupportInitialize)(this.numWarning)).EndInit();

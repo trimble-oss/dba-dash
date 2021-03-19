@@ -358,6 +358,7 @@
             this.Controls.Add(this.pnlBackupThresholds);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedToolWindow;
             this.Name = "BackupThresholdsConfig";
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "Backup Thresholds";
             this.Load += new System.EventHandler(this.BackupThresholds_Load);
             this.pnlBackupThresholds.ResumeLayout(false);

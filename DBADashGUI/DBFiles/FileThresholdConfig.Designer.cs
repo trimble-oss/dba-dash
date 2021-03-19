@@ -211,6 +211,7 @@
             this.Controls.Add(this.optPercent);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedToolWindow;
             this.Name = "FileThresholdConfig";
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "File Threshold Config";
             this.pnlThresholds.ResumeLayout(false);
             this.pnlThresholds.PerformLayout();

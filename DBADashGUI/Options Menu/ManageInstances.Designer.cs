@@ -30,11 +30,11 @@
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(ManageInstances));
             this.dgv = new System.Windows.Forms.DataGridView();
+            this.colInstance = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colIsAzure = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.colDeleteRestore = new System.Windows.Forms.DataGridViewLinkColumn();
             this.dataGridViewTextBoxColumn1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dataGridViewTextBoxColumn2 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colInstance = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colIsAzure = new System.Windows.Forms.DataGridViewTextBoxColumn();
             ((System.ComponentModel.ISupportInitialize)(this.dgv)).BeginInit();
             this.SuspendLayout();
             // 
@@ -57,6 +57,22 @@
             this.dgv.TabIndex = 0;
             this.dgv.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgv_CellContentClick);
             this.dgv.RowsAdded += new System.Windows.Forms.DataGridViewRowsAddedEventHandler(this.dgv_RowsAdded);
+            // 
+            // colInstance
+            // 
+            this.colInstance.DataPropertyName = "ConnectionID";
+            this.colInstance.HeaderText = "Instance";
+            this.colInstance.MinimumWidth = 6;
+            this.colInstance.Name = "colInstance";
+            this.colInstance.Width = 90;
+            // 
+            // colIsAzure
+            // 
+            this.colIsAzure.DataPropertyName = "IsAzure";
+            this.colIsAzure.HeaderText = "Is Azure?";
+            this.colIsAzure.MinimumWidth = 6;
+            this.colIsAzure.Name = "colIsAzure";
+            this.colIsAzure.Width = 96;
             // 
             // colDeleteRestore
             // 
@@ -81,22 +97,6 @@
             this.dataGridViewTextBoxColumn2.Name = "dataGridViewTextBoxColumn2";
             this.dataGridViewTextBoxColumn2.Width = 96;
             // 
-            // colInstance
-            // 
-            this.colInstance.DataPropertyName = "ConnectionID";
-            this.colInstance.HeaderText = "Instance";
-            this.colInstance.MinimumWidth = 6;
-            this.colInstance.Name = "colInstance";
-            this.colInstance.Width = 90;
-            // 
-            // colIsAzure
-            // 
-            this.colIsAzure.DataPropertyName = "IsAzure";
-            this.colIsAzure.HeaderText = "Is Azure?";
-            this.colIsAzure.MinimumWidth = 6;
-            this.colIsAzure.Name = "colIsAzure";
-            this.colIsAzure.Width = 96;
-            // 
             // ManageInstances
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
@@ -105,6 +105,7 @@
             this.Controls.Add(this.dgv);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "ManageInstances";
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "Manage Instances";
             this.Load += new System.EventHandler(this.ManageInstances_Load);
             ((System.ComponentModel.ISupportInitialize)(this.dgv)).EndInit();

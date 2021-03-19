@@ -34,6 +34,7 @@
             // 
             // azureDBResourceStats1
             // 
+            this.azureDBResourceStats1.DateGrouping = 0;
             this.azureDBResourceStats1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.azureDBResourceStats1.Location = new System.Drawing.Point(0, 0);
             this.azureDBResourceStats1.Name = "azureDBResourceStats1";
@@ -48,6 +49,7 @@
             this.Controls.Add(this.azureDBResourceStats1);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "AzureDBResourceStatsView";
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "Azure DB Resource Stats";
             this.Load += new System.EventHandler(this.AzureDBResourceStatsView_Load);
             this.ResumeLayout(false);

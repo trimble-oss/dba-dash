@@ -34,7 +34,11 @@
             // dbSpaceHistory1
             // 
             this.dbSpaceHistory1.DatabaseID = 0;
+            this.dbSpaceHistory1.DataSpaceID = null;
+            this.dbSpaceHistory1.DBName = null;
             this.dbSpaceHistory1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.dbSpaceHistory1.FileName = null;
+            this.dbSpaceHistory1.Instance = null;
             this.dbSpaceHistory1.Location = new System.Drawing.Point(0, 0);
             this.dbSpaceHistory1.Name = "dbSpaceHistory1";
             this.dbSpaceHistory1.Size = new System.Drawing.Size(800, 450);
@@ -48,6 +52,7 @@
             this.ClientSize = new System.Drawing.Size(800, 450);
             this.Controls.Add(this.dbSpaceHistory1);
             this.Name = "DBSpaceHistoryView";
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "DB Space";
             this.Load += new System.EventHandler(this.DBSpaceHistoryView_Load);
             this.ResumeLayout(false);

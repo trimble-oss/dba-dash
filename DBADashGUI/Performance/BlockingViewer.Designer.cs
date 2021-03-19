@@ -383,6 +383,7 @@
             this.Controls.Add(this.panel1);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "BlockingViewer";
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "Blocking Snapshot Viewer";
             this.Load += new System.EventHandler(this.BlockingViewer_Load);
             ((System.ComponentModel.ISupportInitialize)(this.gvBlocking)).EndInit();

@@ -44,6 +44,7 @@
             this.ObjectType = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.DiffType = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.panel1 = new System.Windows.Forms.Panel();
+            this.chkIgnoreWhiteSpace = new System.Windows.Forms.CheckBox();
             this.bttnCopyA = new System.Windows.Forms.Button();
             this.bttnCopyB = new System.Windows.Forms.Button();
             this.bttnSwitch = new System.Windows.Forms.Button();
@@ -57,7 +58,6 @@
             this.label8 = new System.Windows.Forms.Label();
             this.chkObjectType = new System.Windows.Forms.CheckedListBox();
             this.label7 = new System.Windows.Forms.Label();
-            this.chkIgnoreWhiteSpace = new System.Windows.Forms.CheckBox();
             ((System.ComponentModel.ISupportInitialize)(this.gvDiff)).BeginInit();
             this.panel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
@@ -236,6 +236,17 @@
             this.panel1.Size = new System.Drawing.Size(1144, 149);
             this.panel1.TabIndex = 10;
             // 
+            // chkIgnoreWhiteSpace
+            // 
+            this.chkIgnoreWhiteSpace.AutoSize = true;
+            this.chkIgnoreWhiteSpace.Location = new System.Drawing.Point(870, 13);
+            this.chkIgnoreWhiteSpace.Name = "chkIgnoreWhiteSpace";
+            this.chkIgnoreWhiteSpace.Size = new System.Drawing.Size(148, 21);
+            this.chkIgnoreWhiteSpace.TabIndex = 17;
+            this.chkIgnoreWhiteSpace.Text = "Ignore Whitespace";
+            this.chkIgnoreWhiteSpace.UseVisualStyleBackColor = true;
+            this.chkIgnoreWhiteSpace.CheckedChanged += new System.EventHandler(this.chkIgnoreWhiteSpace_CheckedChanged);
+            // 
             // bttnCopyA
             // 
             this.bttnCopyA.Image = global::DBADashGUI.Properties.Resources.Next_grey_16x;
@@ -374,17 +385,6 @@
             this.label7.Text = "Diff (Loaded programatically due to designer issue)";
             this.label7.Visible = false;
             // 
-            // chkIgnoreWhiteSpace
-            // 
-            this.chkIgnoreWhiteSpace.AutoSize = true;
-            this.chkIgnoreWhiteSpace.Location = new System.Drawing.Point(870, 13);
-            this.chkIgnoreWhiteSpace.Name = "chkIgnoreWhiteSpace";
-            this.chkIgnoreWhiteSpace.Size = new System.Drawing.Size(148, 21);
-            this.chkIgnoreWhiteSpace.TabIndex = 17;
-            this.chkIgnoreWhiteSpace.Text = "Ignore Whitespace";
-            this.chkIgnoreWhiteSpace.UseVisualStyleBackColor = true;
-            this.chkIgnoreWhiteSpace.CheckedChanged += new System.EventHandler(this.chkIgnoreWhiteSpace_CheckedChanged);
-            // 
             // DBDiff
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
@@ -394,6 +394,7 @@
             this.Controls.Add(this.panel1);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "DBDiff";
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "DBDiff";
             this.WindowState = System.Windows.Forms.FormWindowState.Maximized;
             this.Load += new System.EventHandler(this.DBDiff_Load);

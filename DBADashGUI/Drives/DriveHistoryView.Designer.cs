@@ -50,6 +50,7 @@
             this.Controls.Add(this.driveHistory1);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "DriveHistoryView";
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "Drive History";
             this.Load += new System.EventHandler(this.DriveHistoryView_Load);
             this.ResumeLayout(false);

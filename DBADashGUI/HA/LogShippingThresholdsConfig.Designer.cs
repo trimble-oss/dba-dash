@@ -255,6 +255,7 @@
             this.Controls.Add(this.chkLRInherit);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedToolWindow;
             this.Name = "LogShippingThresholdsConfig";
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "LogShippingThresholdsConfig";
             this.Load += new System.EventHandler(this.LogShippingThresholdsConfig_Load);
             this.pnlThresholds.ResumeLayout(false);

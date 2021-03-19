@@ -28,21 +28,21 @@
         /// </summary>
         private void InitializeComponent()
         {
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(DataRetention));
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(DataRetention));
             this.dgv = new System.Windows.Forms.DataGridView();
-            this.toolStrip1 = new System.Windows.Forms.ToolStrip();
-            this.tsRefresh = new System.Windows.Forms.ToolStripButton();
-            this.toolStripDropDownButton1 = new System.Windows.Forms.ToolStripDropDownButton();
-            this.showAllTablesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.tsCopy = new System.Windows.Forms.ToolStripButton();
-            this.tsPurge = new System.Windows.Forms.ToolStripButton();
             this.colSchema = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.colTableName = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.SizeMB = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.colRetentionDays = new System.Windows.Forms.DataGridViewLinkColumn();
             this.colActualRetention = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.colDataFrom = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.toolStrip1 = new System.Windows.Forms.ToolStrip();
+            this.tsRefresh = new System.Windows.Forms.ToolStripButton();
+            this.tsCopy = new System.Windows.Forms.ToolStripButton();
+            this.toolStripDropDownButton1 = new System.Windows.Forms.ToolStripDropDownButton();
+            this.showAllTablesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.tsPurge = new System.Windows.Forms.ToolStripButton();
             ((System.ComponentModel.ISupportInitialize)(this.dgv)).BeginInit();
             this.toolStrip1.SuspendLayout();
             this.SuspendLayout();
@@ -69,70 +69,6 @@
             this.dgv.Size = new System.Drawing.Size(1028, 532);
             this.dgv.TabIndex = 0;
             this.dgv.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgv_CellContentClick);
-            // 
-            // toolStrip1
-            // 
-            this.toolStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
-            this.toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.tsRefresh,
-            this.tsCopy,
-            this.toolStripDropDownButton1,
-            this.tsPurge});
-            this.toolStrip1.Location = new System.Drawing.Point(0, 0);
-            this.toolStrip1.Name = "toolStrip1";
-            this.toolStrip1.Size = new System.Drawing.Size(1028, 27);
-            this.toolStrip1.TabIndex = 1;
-            this.toolStrip1.Text = "toolStrip1";
-            // 
-            // tsRefresh
-            // 
-            this.tsRefresh.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.tsRefresh.Image = global::DBADashGUI.Properties.Resources._112_RefreshArrow_Green_16x16_72;
-            this.tsRefresh.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsRefresh.Name = "tsRefresh";
-            this.tsRefresh.Size = new System.Drawing.Size(29, 24);
-            this.tsRefresh.Text = "Refresh";
-            this.tsRefresh.Click += new System.EventHandler(this.tsRefresh_Click);
-            // 
-            // toolStripDropDownButton1
-            // 
-            this.toolStripDropDownButton1.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.toolStripDropDownButton1.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.showAllTablesToolStripMenuItem});
-            this.toolStripDropDownButton1.Image = global::DBADashGUI.Properties.Resources.FilterDropdown_16x;
-            this.toolStripDropDownButton1.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.toolStripDropDownButton1.Name = "toolStripDropDownButton1";
-            this.toolStripDropDownButton1.Size = new System.Drawing.Size(34, 24);
-            this.toolStripDropDownButton1.Text = "Filter";
-            // 
-            // showAllTablesToolStripMenuItem
-            // 
-            this.showAllTablesToolStripMenuItem.CheckOnClick = true;
-            this.showAllTablesToolStripMenuItem.Name = "showAllTablesToolStripMenuItem";
-            this.showAllTablesToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
-            this.showAllTablesToolStripMenuItem.Text = "Show All Tables";
-            this.showAllTablesToolStripMenuItem.Click += new System.EventHandler(this.showAllTablesToolStripMenuItem_Click);
-            // 
-            // tsCopy
-            // 
-            this.tsCopy.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.tsCopy.Image = global::DBADashGUI.Properties.Resources.ASX_Copy_blue_16x;
-            this.tsCopy.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsCopy.Name = "tsCopy";
-            this.tsCopy.Size = new System.Drawing.Size(29, 24);
-            this.tsCopy.Text = "Copy";
-            this.tsCopy.Click += new System.EventHandler(this.tsCopy_Click);
-            // 
-            // tsPurge
-            // 
-            this.tsPurge.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
-            this.tsPurge.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.tsPurge.Image = ((System.Drawing.Image)(resources.GetObject("tsPurge.Image")));
-            this.tsPurge.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsPurge.Name = "tsPurge";
-            this.tsPurge.Size = new System.Drawing.Size(29, 24);
-            this.tsPurge.Text = "Run Cleanup";
-            this.tsPurge.Click += new System.EventHandler(this.tsPurge_Click);
             // 
             // colSchema
             // 
@@ -161,7 +97,7 @@
             this.SizeMB.MinimumWidth = 6;
             this.SizeMB.Name = "SizeMB";
             this.SizeMB.ReadOnly = true;
-            this.SizeMB.Width = 98;
+            this.SizeMB.Width = 91;
             // 
             // colRetentionDays
             // 
@@ -192,6 +128,70 @@
             this.colDataFrom.ReadOnly = true;
             this.colDataFrom.Width = 123;
             // 
+            // toolStrip1
+            // 
+            this.toolStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
+            this.toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.tsRefresh,
+            this.tsCopy,
+            this.toolStripDropDownButton1,
+            this.tsPurge});
+            this.toolStrip1.Location = new System.Drawing.Point(0, 0);
+            this.toolStrip1.Name = "toolStrip1";
+            this.toolStrip1.Size = new System.Drawing.Size(1028, 27);
+            this.toolStrip1.TabIndex = 1;
+            this.toolStrip1.Text = "toolStrip1";
+            // 
+            // tsRefresh
+            // 
+            this.tsRefresh.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.tsRefresh.Image = global::DBADashGUI.Properties.Resources._112_RefreshArrow_Green_16x16_72;
+            this.tsRefresh.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tsRefresh.Name = "tsRefresh";
+            this.tsRefresh.Size = new System.Drawing.Size(29, 24);
+            this.tsRefresh.Text = "Refresh";
+            this.tsRefresh.Click += new System.EventHandler(this.tsRefresh_Click);
+            // 
+            // tsCopy
+            // 
+            this.tsCopy.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.tsCopy.Image = global::DBADashGUI.Properties.Resources.ASX_Copy_blue_16x;
+            this.tsCopy.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tsCopy.Name = "tsCopy";
+            this.tsCopy.Size = new System.Drawing.Size(29, 24);
+            this.tsCopy.Text = "Copy";
+            this.tsCopy.Click += new System.EventHandler(this.tsCopy_Click);
+            // 
+            // toolStripDropDownButton1
+            // 
+            this.toolStripDropDownButton1.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.toolStripDropDownButton1.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.showAllTablesToolStripMenuItem});
+            this.toolStripDropDownButton1.Image = global::DBADashGUI.Properties.Resources.FilterDropdown_16x;
+            this.toolStripDropDownButton1.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolStripDropDownButton1.Name = "toolStripDropDownButton1";
+            this.toolStripDropDownButton1.Size = new System.Drawing.Size(34, 24);
+            this.toolStripDropDownButton1.Text = "Filter";
+            // 
+            // showAllTablesToolStripMenuItem
+            // 
+            this.showAllTablesToolStripMenuItem.CheckOnClick = true;
+            this.showAllTablesToolStripMenuItem.Name = "showAllTablesToolStripMenuItem";
+            this.showAllTablesToolStripMenuItem.Size = new System.Drawing.Size(195, 26);
+            this.showAllTablesToolStripMenuItem.Text = "Show All Tables";
+            this.showAllTablesToolStripMenuItem.Click += new System.EventHandler(this.showAllTablesToolStripMenuItem_Click);
+            // 
+            // tsPurge
+            // 
+            this.tsPurge.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
+            this.tsPurge.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.tsPurge.Image = ((System.Drawing.Image)(resources.GetObject("tsPurge.Image")));
+            this.tsPurge.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tsPurge.Name = "tsPurge";
+            this.tsPurge.Size = new System.Drawing.Size(29, 24);
+            this.tsPurge.Text = "Run Cleanup";
+            this.tsPurge.Click += new System.EventHandler(this.tsPurge_Click);
+            // 
             // DataRetention
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
@@ -200,6 +200,7 @@
             this.Controls.Add(this.dgv);
             this.Controls.Add(this.toolStrip1);
             this.Name = "DataRetention";
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "Data Retention";
             this.Load += new System.EventHandler(this.DataRetention_Load);
             ((System.ComponentModel.ISupportInitialize)(this.dgv)).EndInit();

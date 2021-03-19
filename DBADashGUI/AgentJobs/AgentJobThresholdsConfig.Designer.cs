@@ -511,6 +511,7 @@
             this.Controls.Add(this.pnlThresholds);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedToolWindow;
             this.Name = "AgentJobThresholdsConfig";
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "Agent Job Thresholds";
             this.Load += new System.EventHandler(this.AgentJobThresholdsConfig_Load);
             this.pnlThresholds.ResumeLayout(false);

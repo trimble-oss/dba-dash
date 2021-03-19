@@ -104,6 +104,7 @@
             this.Controls.Add(this.time2);
             this.Controls.Add(this.time1);
             this.Name = "CustomTimePicker";
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "Time Picker";
             this.ResumeLayout(false);
             this.PerformLayout();
