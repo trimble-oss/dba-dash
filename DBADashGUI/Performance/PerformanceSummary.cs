@@ -16,8 +16,9 @@ namespace DBADashGUI.Performance
     {
 
         public List<Int32> InstanceIDs;
-        public string ConnectionString;
         public string TagIDs;
+
+        public Dictionary<int,Counter> SelectedPerformanceCounters =  new Dictionary<int, Counter>();
 
         public PerformanceSummary()
         {
@@ -27,38 +28,146 @@ namespace DBADashGUI.Performance
    
         public void RefreshData()
         {
-            if (ConnectionString != null)
+            dgv.DataSource = null;
+            var dt = getPerformanceSummary();
+            addPerformanceCounters(ref dt);
+            dgv.AutoGenerateColumns = false;
+            generateHistogram(ref dt);
+            if (dgv.DataSource == null)
             {
-                dgv.DataSource = null;
-                SqlConnection cn = new SqlConnection(ConnectionString);
-                using (cn)
+                dgv.DataSource = new DataView(dt);
+            }
+            
+        }
+
+        void addPerformanceCounters(ref DataTable dt)
+        {
+            List<string> colsToRemove = new List<string>();
+
+            foreach(DataGridViewColumn col in dgv.Columns)
+            {
+                if ((string)col.Tag == "PC") {
+                    colsToRemove.Add(col.Name);
+              }
+            }
+            foreach(var col in colsToRemove)
+            {
+                dgv.Columns.Remove(col);
+            }          
+            foreach(var ctr in SelectedPerformanceCounters.Values)
+            {
+                foreach(string agg in ctr.GetAggColumns())
                 {
-                    using (SqlCommand cmd = new SqlCommand("dbo.PerformanceSummary_Get", cn) { CommandType = CommandType.StoredProcedure }) {
-                        cn.Open();
-                        if (InstanceIDs.Count > 0)
+                    dt.Columns.Add(agg + "_" + ctr.CounterID, typeof(double));
+                    dgv.Columns.Add(new DataGridViewTextBoxColumn() { DataPropertyName = agg + "_" + ctr.CounterID, HeaderText = agg + " " + ctr.ToString(), Tag = "PC" });
+                }
+            }
+            if (SelectedPerformanceCounters.Count > 0)
+            {
+                var pcDT = getPerformanceCounters();
+                DataRow mainRow = null;
+                int instanceIdMainRow = -1;
+                foreach (DataRow r in pcDT.Rows)
+                {
+                    int instanceID = (int)r["InstanceID"];
+                    int CounterID = (int)r["CounterID"];
+                    var cntr = SelectedPerformanceCounters[CounterID];
+                    if (instanceID != instanceIdMainRow)
+                    {
+                        mainRow = dt.Select("InstanceId=" + (int)r["InstanceID"]).FirstOrDefault();
+                        instanceIdMainRow = instanceID;
+                    }
+                    if (mainRow != null)
+                    {
+                        if (cntr.Avg)
                         {
-                            cmd.Parameters.AddWithValue("InstanceIDs", string.Join(",", InstanceIDs));
+                            mainRow[("Avg_" + (int)r["CounterID"]).ToString()] = r["AvgValue"];
                         }
-                        else
+                        if (cntr.Max)
                         {
-                            cmd.Parameters.AddWithValue("TagIDs", TagIDs);
+                            mainRow[("Max_" + (int)r["CounterID"]).ToString()] = r["MaxValue"];
                         }
-                        cmd.Parameters.AddWithValue("FromDate", DateRange.FromUTC);
-                        cmd.Parameters.AddWithValue("ToDate", DateRange.ToUTC);
-                        cmd.CommandTimeout = Properties.Settings.Default.CommandTimeout;
-                        SqlDataAdapter da = new SqlDataAdapter(cmd);
-                        DataTable dt = new DataTable();
-                        da.Fill(dt);
-                        dgv.AutoGenerateColumns = false;
-                        generateHistogram(ref dt);
-                        if (dgv.DataSource == null)
+                        if (cntr.Total)
                         {
-                            dgv.DataSource = new DataView(dt);
+                            mainRow[("Total_" + (int)r["CounterID"]).ToString()] = r["TotalValue"];
+                        }
+                        if (cntr.Current)
+                        {
+                            mainRow[("Current_" + (int)r["CounterID"]).ToString()] = r["CurrentValue"];
+                        }
+                        if (cntr.Min)
+                        {
+                            mainRow[("Min_" + (int)r["CounterID"]).ToString()] = r["MinValue"];
+                        }
+                        if (cntr.SampleCount)
+                        {
+                            mainRow[("SampleCount_" + (int)r["CounterID"]).ToString()] = r["SampleCount"];
                         }
                     }
                 }
             }
         }
+
+        DataTable getPerformanceCounters()
+        {
+            SqlConnection cn = new SqlConnection(Common.ConnectionString);
+            using (cn)
+            {
+                using (SqlCommand cmd = new SqlCommand("dbo.PerformanceCounterSummary_Get", cn) { CommandType = CommandType.StoredProcedure })
+                {
+                    cn.Open();
+                    if (InstanceIDs.Count > 0)
+                    {
+                        cmd.Parameters.AddWithValue("InstanceIDs", string.Join(",", InstanceIDs));
+                    }
+                    else
+                    {
+                        cmd.Parameters.AddWithValue("TagIDs", TagIDs);
+                    }
+                    var counters =String.Join(",", SelectedPerformanceCounters.Values.Select(pc => pc.CounterID));
+                    cmd.Parameters.AddWithValue("Counters", counters);
+                    cmd.Parameters.AddWithValue("FromDate", DateRange.FromUTC);
+                    cmd.Parameters.AddWithValue("ToDate", DateRange.ToUTC);
+                    cmd.CommandTimeout = Properties.Settings.Default.CommandTimeout;
+                    SqlDataAdapter da = new SqlDataAdapter(cmd);
+                    DataTable dt = new DataTable();
+                    da.Fill(dt);
+                    return dt;
+                }
+            }
+        }
+
+
+        DataTable getPerformanceSummary()
+        {
+            SqlConnection cn = new SqlConnection(Common.ConnectionString);
+            using (cn)
+            {
+                using (SqlCommand cmd = new SqlCommand("dbo.PerformanceSummary_Get", cn) { CommandType = CommandType.StoredProcedure })
+                {
+                    cn.Open();
+                    if (InstanceIDs.Count > 0)
+                    {
+                        cmd.Parameters.AddWithValue("InstanceIDs", string.Join(",", InstanceIDs));
+                    }
+                    else
+                    {
+                        cmd.Parameters.AddWithValue("TagIDs", TagIDs);
+                    }
+                    cmd.Parameters.AddWithValue("FromDate", DateRange.FromUTC);
+                    cmd.Parameters.AddWithValue("ToDate", DateRange.ToUTC);
+                    cmd.CommandTimeout = Properties.Settings.Default.CommandTimeout;
+                    SqlDataAdapter da = new SqlDataAdapter(cmd);
+                    DataTable dt = new DataTable();
+                    var pkCols = new DataColumn[1];
+                    pkCols[0] =  dt.Columns.Add("InstanceID", typeof(int));
+                    dt.PrimaryKey = pkCols;
+                    da.Fill(dt);
+                    return dt;
+                }
+            }
+        }
+    
 
         private void generateHistogram(ref DataTable dt)
         {
@@ -249,6 +358,15 @@ namespace DBADashGUI.Performance
             }
         }
 
-
+        private void tsPerformanceCounters_Click(object sender, EventArgs e)
+        {
+            var frm = new SelectPerformanceCounters();
+            frm.ShowDialog();
+            if (frm.DialogResult == DialogResult.OK)
+            {
+                SelectedPerformanceCounters = frm.SelectedCounters;
+                RefreshData();
+            }
+        }
     }
 }

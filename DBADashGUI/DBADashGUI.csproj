@@ -370,6 +370,7 @@
     <Compile Include="Performance\BlockingViewer.Designer.cs">
       <DependentUpon>BlockingViewer.cs</DependentUpon>
     </Compile>
+    <Compile Include="Performance\Counter.cs" />
     <Compile Include="Performance\CPU.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -431,6 +432,12 @@
     </Compile>
     <Compile Include="Performance\PerformanceSummary.Designer.cs">
       <DependentUpon>PerformanceSummary.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Performance\SelectPerformanceCounters.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Performance\SelectPerformanceCounters.Designer.cs">
+      <DependentUpon>SelectPerformanceCounters.cs</DependentUpon>
     </Compile>
     <Compile Include="Performance\Waits.cs">
       <SubType>UserControl</SubType>
@@ -652,6 +659,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Performance\PerformanceCounterSummary.resx">
       <DependentUpon>PerformanceCounterSummary.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Performance\SelectPerformanceCounters.resx">
+      <DependentUpon>SelectPerformanceCounters.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Performance\Waits.resx">
       <DependentUpon>Waits.cs</DependentUpon>

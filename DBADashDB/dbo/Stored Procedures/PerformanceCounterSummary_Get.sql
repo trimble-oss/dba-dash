@@ -1,5 +1,8 @@
 ﻿CREATE PROC [dbo].[PerformanceCounterSummary_Get](
-	@InstanceID INT,
+	@InstanceIDs VARCHAR(MAX)=NULL,
+	@TagIDs VARCHAR(MAX)=NULL,
+	@Counters VARCHAR(MAX)=NULL,
+	@InstanceID INT=NULL,
 	@FromDate DATETIME2(2),
 	@ToDate DATETIME2(2),
 	@Search NVARCHAR(128)=NULL,
@@ -18,7 +21,8 @@ BEGIN
 						ELSE 0 END
 END
 DECLARE @SQL NVARCHAR(MAX) =N'
-SELECT C.CounterID,
+SELECT IC.InstanceID,
+		C.CounterID,
        C.object_name,
        C.counter_name,
        C.instance_name,
@@ -33,13 +37,16 @@ SELECT C.CounterID,
 	   AVG(PC.Value) AS AvgValue,
 	   SUM(PC.Value) as TotalValue,
 	   COUNT(*) as SampleCount,' END + '
-	   (SELECT TOP(1) Value FROM dbo.PerformanceCounters LV WHERE LV.InstanceID = @InstanceID AND LV.CounterID = C.CounterID ORDER BY LV.SnapshotDate DESC) AS CurrentValue 
+	   (SELECT TOP(1) Value FROM dbo.PerformanceCounters LV WHERE LV.InstanceID = IC.InstanceID AND LV.CounterID = C.CounterID ORDER BY LV.SnapshotDate DESC) AS CurrentValue 
 FROM dbo.InstanceCounters IC
 JOIN dbo.Counters C ON C.CounterID = IC.CounterID
 JOIN dbo.PerformanceCounters' + CASE WHEN @Use60Min=1 THEN '_60MIN' ELSE '' END + ' PC ON PC.InstanceID = IC.InstanceID AND PC.CounterID = IC.CounterID
-WHERE IC.InstanceID = @InstanceID
-AND PC.SnapshotDate>=@FromDate
+WHERE PC.SnapshotDate>=@FromDate
 AND PC.SnapshotDate<@ToDate
+' + CASE WHEN @InstanceID IS NULL THEN '' ELSE 'AND IC.InstanceID = @InstanceID' END + '
+' + CASE WHEN @InstanceIDs IS NULL THEN '' ELSE 'AND EXISTS(SELECT * FROM STRING_SPLIT(@InstanceIDs,'','') ss WHERE IC.InstanceID = ss.Value)' END + '
+' + CASE WHEN @Counters IS NULL THEN '' ELSE 'AND EXISTS(SELECT * FROM STRING_SPLIT(@Counters,'','') ss WHERE IC.CounterID = ss.Value)' END + '
+' + CASE WHEN @TagIDs IS NULL THEN '' ELSE 'AND EXISTS(SELECT 1 FROM dbo.InstancesMatchingTags(@TagIDs) tg WHERE tg.InstanceID = IC.InstanceID)' END + '
 ' + CASE WHEN @Search IS NULL THEN '' ELSE 'AND (C.object_name LIKE @Search
 	OR C.instance_name LIKE @Search
 	OR C.counter_name LIKE @Search
@@ -47,12 +54,15 @@ AND PC.SnapshotDate<@ToDate
 GROUP BY  C.CounterID,
        C.object_name,
        C.counter_name,
-       C.instance_name
-ORDER BY C.object_name,C.counter_name,C.instance_name;'
+       C.instance_name,
+	   IC.InstanceID
+ORDER BY IC.InstanceID,C.object_name,C.counter_name,C.instance_name;'
+
+
 
 IF @Debug=1
 BEGIN
 	PRINT @SQL
 END
 
-EXEC sp_executesql @SQL,N'@InstanceID INT,@FromDate DATETIME2(2),@ToDate DATETIME2(2),@Search NVARCHAR(128)=NULL',@InstanceID, @FromDate, @ToDate, @Search
+EXEC sp_executesql @SQL,N'@InstanceID INT,@FromDate DATETIME2(2),@ToDate DATETIME2(2),@Search NVARCHAR(128)=NULL,@InstanceIDs VARCHAR(MAX),@Counters VARCHAR(MAX),@TagIDs VARCHAR(MAX)',@InstanceID, @FromDate, @ToDate, @Search,@InstanceIDs,@Counters,@TagIDs

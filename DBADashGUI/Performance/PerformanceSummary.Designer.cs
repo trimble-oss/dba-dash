@@ -120,6 +120,7 @@
             this.dataGridViewTextBoxColumn17 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dataGridViewTextBoxColumn18 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dataGridViewTextBoxColumn19 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.tsPerformanceCounters = new System.Windows.Forms.ToolStripButton();
             ((System.ComponentModel.ISupportInitialize)(this.dgv)).BeginInit();
             this.toolStrip1.SuspendLayout();
             this.SuspendLayout();
@@ -456,7 +457,8 @@
             this.toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.tsRefresh,
             this.tsCopy,
-            this.tsColumns});
+            this.tsColumns,
+            this.tsPerformanceCounters});
             this.toolStrip1.Location = new System.Drawing.Point(0, 0);
             this.toolStrip1.Name = "toolStrip1";
             this.toolStrip1.Size = new System.Drawing.Size(1048, 27);
@@ -714,6 +716,16 @@
             this.dataGridViewTextBoxColumn19.Visible = false;
             this.dataGridViewTextBoxColumn19.Width = 89;
             // 
+            // tsPerformanceCounters
+            // 
+            this.tsPerformanceCounters.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.tsPerformanceCounters.Image = global::DBADashGUI.Properties.Resources.LineChart_16x;
+            this.tsPerformanceCounters.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tsPerformanceCounters.Name = "tsPerformanceCounters";
+            this.tsPerformanceCounters.Size = new System.Drawing.Size(29, 24);
+            this.tsPerformanceCounters.Text = "Add Performance Counters";
+            this.tsPerformanceCounters.Click += new System.EventHandler(this.tsPerformanceCounters_Click);
+            // 
             // PerformanceSummary
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
@@ -782,5 +794,6 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn MaxReadIOPs;
         private System.Windows.Forms.DataGridViewTextBoxColumn MaxWriteIOPs;
         private System.Windows.Forms.DataGridViewTextBoxColumn MaxIOPs;
+        private System.Windows.Forms.ToolStripButton tsPerformanceCounters;
     }
 }

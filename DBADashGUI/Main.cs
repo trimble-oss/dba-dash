@@ -270,7 +270,6 @@ namespace DBADashGUI
                     performanceSummary1.InstanceIDs = instanceIDs;                
                     performanceSummary1.TagIDs = "";
                 }
-                performanceSummary1.ConnectionString = connectionString;
                 performanceSummary1.RefreshData();
             }
             else if(tabs.SelectedTab== tabInfo)

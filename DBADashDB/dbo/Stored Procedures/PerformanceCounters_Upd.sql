@@ -11,6 +11,7 @@ INSERT INTO dbo.Counters
 )
 SELECT RTRIM(object_name),RTRIM(counter_name),RTRIM(instance_name) 
 FROM @PerformanceCounters
+WHERE cntr_type NOT IN(1073874176,537003264,1073939712)
 EXCEPT 
 SELECT object_name,counter_name,instance_name 
 FROM dbo.Counters WITH(UPDLOCK);
@@ -23,6 +24,17 @@ EXCEPT
 SELECT InstanceID,CounterID 
 FROM dbo.InstanceCounters
 WHERE InstanceID =@InstanceID;
+
+UPDATE IC 
+SET IC.UpdatedDate = @SnapshotDate
+FROM dbo.InstanceCounters IC 
+WHERE InstanceID = @InstanceID
+AND EXISTS(SELECT 1 
+		FROM @PerformanceCounters pc 
+		JOIN dbo.Counters C ON C.counter_name = pc.counter_name AND C.instance_name = pc.instance_name AND C.object_name = pc.object_name
+		WHERE C.CounterID= IC.CounterID
+		AND pc.cntr_type NOT IN(1073874176,537003264,1073939712)
+		)
 
 DECLARE @PC TABLE(
 [InstanceID] [int] NOT NULL,
