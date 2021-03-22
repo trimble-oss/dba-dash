@@ -507,6 +507,9 @@
     <Build Include="dbo\Stored Procedures\DatabaseMirroring_Get.sql" />
     <Build Include="dbo\Stored Procedures\Instance_Del.sql" />
     <Build Include="dbo\Stored Procedures\Counters_Get.sql" />
+    <Build Include="dbo\Tables\AzureDBElasticPoolStorageThresholds.sql" />
+    <Build Include="dbo\Views\AzureDBElasticPoolResourceStats_Current.sql" />
+    <Build Include="dbo\Views\AzureDBElasticPoolStorageStatus.sql" />
   </ItemGroup>
   <ItemGroup>
     <PostDeploy Include="Script.PostDeployment1.sql" />

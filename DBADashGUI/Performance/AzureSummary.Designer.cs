@@ -52,7 +52,7 @@
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle22 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle23 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle24 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle33 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle37 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle25 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle26 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle27 = new System.Windows.Forms.DataGridViewCellStyle();
@@ -61,6 +61,10 @@
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle30 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle31 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle32 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle33 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle34 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle35 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle36 = new System.Windows.Forms.DataGridViewCellStyle();
             this.dgv = new System.Windows.Forms.DataGridView();
             this.colInstance = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.colDB = new System.Windows.Forms.DataGridViewLinkColumn();
@@ -116,6 +120,12 @@
             this.dataGridViewTextBoxColumn17 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dataGridViewTextBoxColumn18 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dgvPool = new System.Windows.Forms.DataGridView();
+            this.splitContainer1 = new System.Windows.Forms.SplitContainer();
+            this.toolStrip2 = new System.Windows.Forms.ToolStrip();
+            this.tsRefreshPool = new System.Windows.Forms.ToolStripButton();
+            this.tsCopyPool = new System.Windows.Forms.ToolStripButton();
+            this.toolStripLabel1 = new System.Windows.Forms.ToolStripLabel();
+            this.tsPoolColumns = new System.Windows.Forms.ToolStripDropDownButton();
             this.poolInstance = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.colPoolName = new System.Windows.Forms.DataGridViewLinkColumn();
             this.colPoolDTUHistogram = new System.Windows.Forms.DataGridViewImageColumn();
@@ -137,12 +147,10 @@
             this.poolAvgCPU = new CustomProgressControl.DataGridViewProgressBarColumn();
             this.poolAvgData = new CustomProgressControl.DataGridViewProgressBarColumn();
             this.poolAvgLogWrite = new CustomProgressControl.DataGridViewProgressBarColumn();
-            this.splitContainer1 = new System.Windows.Forms.SplitContainer();
-            this.toolStrip2 = new System.Windows.Forms.ToolStrip();
-            this.tsRefreshPool = new System.Windows.Forms.ToolStripButton();
-            this.tsCopyPool = new System.Windows.Forms.ToolStripButton();
-            this.toolStripLabel1 = new System.Windows.Forms.ToolStripLabel();
-            this.tsPoolColumns = new System.Windows.Forms.ToolStripDropDownButton();
+            this.colAllocatedStoragePct = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colStorageLimit = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colCurrentUsedGB = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colCurrentFreeGB = new System.Windows.Forms.DataGridViewTextBoxColumn();
             ((System.ComponentModel.ISupportInitialize)(this.dgv)).BeginInit();
             this.toolStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dgvPool)).BeginInit();
@@ -819,15 +827,19 @@
             this.poolMaxLogWrite,
             this.poolAvgCPU,
             this.poolAvgData,
-            this.poolAvgLogWrite});
-            dataGridViewCellStyle33.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle33.BackColor = System.Drawing.SystemColors.Window;
-            dataGridViewCellStyle33.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            dataGridViewCellStyle33.ForeColor = System.Drawing.SystemColors.ControlText;
-            dataGridViewCellStyle33.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-            dataGridViewCellStyle33.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-            dataGridViewCellStyle33.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
-            this.dgvPool.DefaultCellStyle = dataGridViewCellStyle33;
+            this.poolAvgLogWrite,
+            this.colAllocatedStoragePct,
+            this.colStorageLimit,
+            this.colCurrentUsedGB,
+            this.colCurrentFreeGB});
+            dataGridViewCellStyle37.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle37.BackColor = System.Drawing.SystemColors.Window;
+            dataGridViewCellStyle37.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            dataGridViewCellStyle37.ForeColor = System.Drawing.SystemColors.ControlText;
+            dataGridViewCellStyle37.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle37.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle37.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
+            this.dgvPool.DefaultCellStyle = dataGridViewCellStyle37;
             this.dgvPool.Dock = System.Windows.Forms.DockStyle.Fill;
             this.dgvPool.Location = new System.Drawing.Point(0, 27);
             this.dgvPool.Name = "dgvPool";
@@ -838,7 +850,78 @@
             this.dgvPool.Size = new System.Drawing.Size(1455, 344);
             this.dgvPool.TabIndex = 5;
             this.dgvPool.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgvPool_CellContentClick);
+            this.dgvPool.RowsAdded += new System.Windows.Forms.DataGridViewRowsAddedEventHandler(this.dgvPol_RowsAdded);
             this.dgvPool.Sorted += new System.EventHandler(this.dgvPool_Sorted);
+            // 
+            // splitContainer1
+            // 
+            this.splitContainer1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.splitContainer1.Location = new System.Drawing.Point(0, 27);
+            this.splitContainer1.Name = "splitContainer1";
+            this.splitContainer1.Orientation = System.Windows.Forms.Orientation.Horizontal;
+            // 
+            // splitContainer1.Panel1
+            // 
+            this.splitContainer1.Panel1.Controls.Add(this.dgv);
+            // 
+            // splitContainer1.Panel2
+            // 
+            this.splitContainer1.Panel2.Controls.Add(this.dgvPool);
+            this.splitContainer1.Panel2.Controls.Add(this.toolStrip2);
+            this.splitContainer1.Size = new System.Drawing.Size(1455, 974);
+            this.splitContainer1.SplitterDistance = 599;
+            this.splitContainer1.TabIndex = 6;
+            // 
+            // toolStrip2
+            // 
+            this.toolStrip2.ImageScalingSize = new System.Drawing.Size(20, 20);
+            this.toolStrip2.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.tsRefreshPool,
+            this.tsCopyPool,
+            this.toolStripLabel1,
+            this.tsPoolColumns});
+            this.toolStrip2.Location = new System.Drawing.Point(0, 0);
+            this.toolStrip2.Name = "toolStrip2";
+            this.toolStrip2.Size = new System.Drawing.Size(1455, 27);
+            this.toolStrip2.TabIndex = 6;
+            this.toolStrip2.Text = "toolStrip2";
+            // 
+            // tsRefreshPool
+            // 
+            this.tsRefreshPool.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.tsRefreshPool.Image = global::DBADashGUI.Properties.Resources._112_RefreshArrow_Green_16x16_72;
+            this.tsRefreshPool.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tsRefreshPool.Name = "tsRefreshPool";
+            this.tsRefreshPool.Size = new System.Drawing.Size(29, 24);
+            this.tsRefreshPool.Text = "toolStripButton1";
+            this.tsRefreshPool.Click += new System.EventHandler(this.tsRefreshPool_Click);
+            // 
+            // tsCopyPool
+            // 
+            this.tsCopyPool.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.tsCopyPool.Image = global::DBADashGUI.Properties.Resources.ASX_Copy_blue_16x;
+            this.tsCopyPool.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tsCopyPool.Name = "tsCopyPool";
+            this.tsCopyPool.Size = new System.Drawing.Size(29, 24);
+            this.tsCopyPool.Text = "Copy";
+            this.tsCopyPool.Click += new System.EventHandler(this.tsCopyPool_Click);
+            // 
+            // toolStripLabel1
+            // 
+            this.toolStripLabel1.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
+            this.toolStripLabel1.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
+            this.toolStripLabel1.Name = "toolStripLabel1";
+            this.toolStripLabel1.Size = new System.Drawing.Size(88, 24);
+            this.toolStripLabel1.Text = "Elastic Pool";
+            // 
+            // tsPoolColumns
+            // 
+            this.tsPoolColumns.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.tsPoolColumns.Image = global::DBADashGUI.Properties.Resources.Column_16x;
+            this.tsPoolColumns.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tsPoolColumns.Name = "tsPoolColumns";
+            this.tsPoolColumns.Size = new System.Drawing.Size(34, 24);
+            this.tsPoolColumns.Text = "Columns";
             // 
             // poolInstance
             // 
@@ -858,7 +941,7 @@
             this.colPoolName.ReadOnly = true;
             this.colPoolName.Resizable = System.Windows.Forms.DataGridViewTriState.True;
             this.colPoolName.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
-            this.colPoolName.Width = 101;
+            this.colPoolName.Width = 110;
             // 
             // colPoolDTUHistogram
             // 
@@ -903,7 +986,7 @@
             this.poolMaxDTUPct.MinimumWidth = 6;
             this.poolMaxDTUPct.Name = "poolMaxDTUPct";
             this.poolMaxDTUPct.ReadOnly = true;
-            this.poolMaxDTUPct.Width = 91;
+            this.poolMaxDTUPct.Width = 111;
             // 
             // poolMaxDTU
             // 
@@ -1061,75 +1144,51 @@
             this.poolAvgLogWrite.ReadOnly = true;
             this.poolAvgLogWrite.Width = 119;
             // 
-            // splitContainer1
+            // colAllocatedStoragePct
             // 
-            this.splitContainer1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.splitContainer1.Location = new System.Drawing.Point(0, 27);
-            this.splitContainer1.Name = "splitContainer1";
-            this.splitContainer1.Orientation = System.Windows.Forms.Orientation.Horizontal;
+            this.colAllocatedStoragePct.DataPropertyName = "current_allocated_storage_percent";
+            dataGridViewCellStyle33.Format = "###.#\\%";
+            dataGridViewCellStyle33.NullValue = null;
+            this.colAllocatedStoragePct.DefaultCellStyle = dataGridViewCellStyle33;
+            this.colAllocatedStoragePct.HeaderText = "Current Allocated Storage %";
+            this.colAllocatedStoragePct.MinimumWidth = 6;
+            this.colAllocatedStoragePct.Name = "colAllocatedStoragePct";
+            this.colAllocatedStoragePct.ReadOnly = true;
+            this.colAllocatedStoragePct.Width = 197;
             // 
-            // splitContainer1.Panel1
+            // colStorageLimit
             // 
-            this.splitContainer1.Panel1.Controls.Add(this.dgv);
+            this.colStorageLimit.DataPropertyName = "current_elastic_pool_storage_limit_gb";
+            dataGridViewCellStyle34.Format = "#,##0.0";
+            dataGridViewCellStyle34.NullValue = null;
+            this.colStorageLimit.DefaultCellStyle = dataGridViewCellStyle34;
+            this.colStorageLimit.HeaderText = "Current Storage Limit (GB)";
+            this.colStorageLimit.MinimumWidth = 6;
+            this.colStorageLimit.Name = "colStorageLimit";
+            this.colStorageLimit.ReadOnly = true;
+            this.colStorageLimit.Width = 160;
             // 
-            // splitContainer1.Panel2
+            // colCurrentUsedGB
             // 
-            this.splitContainer1.Panel2.Controls.Add(this.dgvPool);
-            this.splitContainer1.Panel2.Controls.Add(this.toolStrip2);
-            this.splitContainer1.Size = new System.Drawing.Size(1455, 974);
-            this.splitContainer1.SplitterDistance = 599;
-            this.splitContainer1.TabIndex = 6;
+            this.colCurrentUsedGB.DataPropertyName = "current_elastic_pool_storage_used_gb";
+            dataGridViewCellStyle35.Format = "#,##0.0";
+            this.colCurrentUsedGB.DefaultCellStyle = dataGridViewCellStyle35;
+            this.colCurrentUsedGB.HeaderText = "Current Used GB";
+            this.colCurrentUsedGB.MinimumWidth = 6;
+            this.colCurrentUsedGB.Name = "colCurrentUsedGB";
+            this.colCurrentUsedGB.ReadOnly = true;
+            this.colCurrentUsedGB.Width = 115;
             // 
-            // toolStrip2
+            // colCurrentFreeGB
             // 
-            this.toolStrip2.ImageScalingSize = new System.Drawing.Size(20, 20);
-            this.toolStrip2.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.tsRefreshPool,
-            this.tsCopyPool,
-            this.toolStripLabel1,
-            this.tsPoolColumns});
-            this.toolStrip2.Location = new System.Drawing.Point(0, 0);
-            this.toolStrip2.Name = "toolStrip2";
-            this.toolStrip2.Size = new System.Drawing.Size(1455, 27);
-            this.toolStrip2.TabIndex = 6;
-            this.toolStrip2.Text = "toolStrip2";
-            // 
-            // tsRefreshPool
-            // 
-            this.tsRefreshPool.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.tsRefreshPool.Image = global::DBADashGUI.Properties.Resources._112_RefreshArrow_Green_16x16_72;
-            this.tsRefreshPool.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsRefreshPool.Name = "tsRefreshPool";
-            this.tsRefreshPool.Size = new System.Drawing.Size(29, 24);
-            this.tsRefreshPool.Text = "toolStripButton1";
-            this.tsRefreshPool.Click += new System.EventHandler(this.tsRefreshPool_Click);
-            // 
-            // tsCopyPool
-            // 
-            this.tsCopyPool.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.tsCopyPool.Image = global::DBADashGUI.Properties.Resources.ASX_Copy_blue_16x;
-            this.tsCopyPool.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsCopyPool.Name = "tsCopyPool";
-            this.tsCopyPool.Size = new System.Drawing.Size(29, 24);
-            this.tsCopyPool.Text = "Copy";
-            this.tsCopyPool.Click += new System.EventHandler(this.tsCopyPool_Click);
-            // 
-            // toolStripLabel1
-            // 
-            this.toolStripLabel1.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
-            this.toolStripLabel1.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
-            this.toolStripLabel1.Name = "toolStripLabel1";
-            this.toolStripLabel1.Size = new System.Drawing.Size(88, 24);
-            this.toolStripLabel1.Text = "Elastic Pool";
-            // 
-            // tsPoolColumns
-            // 
-            this.tsPoolColumns.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.tsPoolColumns.Image = global::DBADashGUI.Properties.Resources.Column_16x;
-            this.tsPoolColumns.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsPoolColumns.Name = "tsPoolColumns";
-            this.tsPoolColumns.Size = new System.Drawing.Size(34, 24);
-            this.tsPoolColumns.Text = "Columns";
+            this.colCurrentFreeGB.DataPropertyName = "current_elastic_pool_storage_free_gb";
+            dataGridViewCellStyle36.Format = "#,##0.0";
+            this.colCurrentFreeGB.DefaultCellStyle = dataGridViewCellStyle36;
+            this.colCurrentFreeGB.HeaderText = "Current Free GB";
+            this.colCurrentFreeGB.MinimumWidth = 6;
+            this.colCurrentFreeGB.Name = "colCurrentFreeGB";
+            this.colCurrentFreeGB.ReadOnly = true;
+            this.colCurrentFreeGB.Width = 111;
             // 
             // AzureSummary
             // 
@@ -1240,5 +1299,9 @@
         private CustomProgressControl.DataGridViewProgressBarColumn poolAvgCPU;
         private CustomProgressControl.DataGridViewProgressBarColumn poolAvgData;
         private CustomProgressControl.DataGridViewProgressBarColumn poolAvgLogWrite;
+        private System.Windows.Forms.DataGridViewTextBoxColumn colAllocatedStoragePct;
+        private System.Windows.Forms.DataGridViewTextBoxColumn colStorageLimit;
+        private System.Windows.Forms.DataGridViewTextBoxColumn colCurrentUsedGB;
+        private System.Windows.Forms.DataGridViewTextBoxColumn colCurrentFreeGB;
     }
 }

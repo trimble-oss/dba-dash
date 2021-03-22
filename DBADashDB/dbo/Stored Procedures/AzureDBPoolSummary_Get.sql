@@ -116,9 +116,15 @@ SELECT I.InstanceID,
 	SUM(Log90) AS Log90,
 	SUM(Log100) AS Log100,'
 	ELSE '' END + '
-	SUM(CPU10+CPU20+CPU30+CPU40+CPU50+CPU70+CPU80+CPU90+CPU100) AS TotalSamples
+	SUM(CPU10+CPU20+CPU30+CPU40+CPU50+CPU70+CPU80+CPU90+CPU100) AS TotalSamples,
+	PSS.avg_allocated_storage_percent as current_allocated_storage_percent, 
+	PSS.elastic_pool_storage_limit_mb/1024.0 as current_elastic_pool_storage_limit_gb,
+	PSS.elastic_pool_storage_used_mb/1024.0 as current_elastic_pool_storage_used_gb,
+	PSS.elastic_pool_storage_free_mb/1024.0 as current_elastic_pool_storage_free_gb,
+	PSS.ElasticPoolStorageStatus
 FROM ' + CASE WHEN @Use60MIN=1 THEN 'dbo.AzureDBElasticPoolResourceStats_60MIN' ELSE 'dbo.AzureDBElasticPoolResourceStats_Raw' END + ' RS
 JOIN dbo.AzureDBElasticPool EP ON RS.PoolID = EP.PoolID
+JOIN dbo.AzureDBElasticPoolStorageStatus PSS ON EP.PoolID = PSS.PoolID
 JOIN dbo.Instances I ON I.InstanceID = EP.InstanceID
 WHERE RS.end_time>=@FromDate
 AND RS.end_time <@ToDate
@@ -132,7 +138,15 @@ AND EXISTS(SELECT 1
 			AND SO.elastic_pool_name = EP.elastic_pool_name
 			' + CASE WHEN @DatabaseName IS NULL THEN '' ELSE 'AND SOD.Name = @DatabaseName' END + '
 			) 
-GROUP BY I.InstanceID,I.ConnectionID,I.Instance, EP.elastic_pool_name
+GROUP BY I.InstanceID,
+	I.ConnectionID,
+	I.Instance, 
+	EP.elastic_pool_name,	
+	PSS.avg_allocated_storage_percent,
+	PSS.elastic_pool_storage_limit_mb,
+	PSS.elastic_pool_storage_used_mb,
+	PSS.elastic_pool_storage_free_mb,
+	PSS.ElasticPoolStorageStatus
 ORDER BY UnusedDTU DESC;'
 
 EXEC sp_executesql @SQL,N'@FromDate DATETIME2(3),@ToDate DATETIME2(3),@Instances IDs READONLY,@DatabaseName SYSNAME',@FromDate,@ToDate,@Instances,@DatabaseName

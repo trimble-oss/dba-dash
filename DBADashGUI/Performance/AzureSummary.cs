@@ -428,5 +428,15 @@ namespace DBADashGUI.Performance
                 frm.Show();
             }
         }
+
+        private void dgvPol_RowsAdded(object sender, DataGridViewRowsAddedEventArgs e)
+        {
+            for (Int32 idx = e.RowIndex; idx < e.RowIndex + e.RowCount; idx += 1)
+            {
+                var row = (DataRowView)dgvPool.Rows[idx].DataBoundItem;
+                var poolStorageStatus = (DBADashStatus.DBADashStatusEnum)row["ElasticPoolStorageStatus"];
+                dgvPool.Rows[idx].Cells[colAllocatedStoragePct.Index].Style.BackColor = DBADashStatus.GetStatusColour(poolStorageStatus);
+            }
+        }
     }
 }

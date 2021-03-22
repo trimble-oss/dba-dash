@@ -195,7 +195,8 @@ SELECT I.InstanceID,
 	AlertCD.SnapshotDate AS AlertSnapshotDate,
 	I.IsAgentRunning,
 	ISNULL(cus.Status,3) AS CustomCheckStatus,
-	ISNULL(dbm.MirroringStatus,3) as MirroringStatus
+	ISNULL(dbm.MirroringStatus,3) as MirroringStatus,
+	3 AS ElasticPoolStorageStatus
 FROM dbo.Instances I 
 LEFT JOIN LS ON I.InstanceID = LS.InstanceID
 LEFT JOIN B ON I.InstanceID = B.InstanceID
@@ -266,12 +267,14 @@ SELECT NULL AS InstanceID,
 	NULL AS AlertSnapshotDate,
 	NULL AS IsAgentRunning,
 	ISNULL(MIN(cus.Status),3) AS CustomCheckStatus,
-	3 as MirroringStatus
+	3 as MirroringStatus,
+	ISNULL(MIN(NULLIF(EPS.ElasticPoolStorageStatus,3)),3) AS ElasticPoolStorageStatus
 FROM dbo.Instances I
 LEFT JOIN errSummary  ON I.InstanceID = errSummary.InstanceID
 LEFT JOIN F ON I.InstanceID = F.InstanceID
 LEFT JOIN SSD ON I.InstanceID = SSD.InstanceID
 LEFT JOIN cus ON cus.InstanceID = I.InstanceID
+LEFT JOIN dbo.AzureDBElasticPoolStorageStatus EPS ON I.InstanceID = EPS.InstanceID
 WHERE I.EngineEdition=5 -- azure
 AND EXISTS(SELECT 1 FROM @Instances t WHERE I.InstanceID = t.InstanceID)
 AND I.IsActive=1

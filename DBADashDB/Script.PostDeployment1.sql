@@ -474,6 +474,16 @@ WHEN NOT MATCHED BY TARGET THEN
  INSERT([object_name],[counter_name],[base_counter_name])
  VALUES([Source].[object_name],[Source].[counter_name],[Source].[base_counter_name]);
 
+ IF NOT EXISTS(SELECT 1 FROM dbo.AzureDBElasticPoolStorageThresholds)
+BEGIN
+	INSERT INTO dbo.AzureDBElasticPoolStorageThresholds
+	(
+		PoolID,
+		WarningThreshold,
+		CriticalThreshold
+	)
+	VALUES(-1,0.8,0.9)
+END
 
 EXEC dbo.Partitions_Add
 

@@ -47,10 +47,10 @@ namespace DBADashGUI
 
         private void dgvSummary_RowAdded(object sender, DataGridViewRowsAddedEventArgs e)
         {
-            var StatusColumns = new Dictionary<string,bool> { { "FullBackupStatus", false }, { "LogShippingStatus", false }, { "DiffBackupStatus", false }, { "LogBackupStatus", false }, { "DriveStatus", false }, 
-                                                            { "JobStatus", false }, { "CollectionErrorStatus", false }, { "AGStatus", false }, {"LastGoodCheckDBStatus",false}, {"SnapshotAgeStatus",false }, 
-                                                            {"MemoryDumpStatus",false }, {"UptimeStatus",false }, {"CorruptionStatus",false }, {"AlertStatus",false }, {"FileFreeSpaceStatus",false }, 
-                                                            {"CustomCheckStatus",false }, {"MirroringStatus",false } };
+            var StatusColumns = new Dictionary<string, bool> { { "FullBackupStatus", false }, { "LogShippingStatus", false }, { "DiffBackupStatus", false }, { "LogBackupStatus", false }, { "DriveStatus", false },
+                                                            { "JobStatus", false }, { "CollectionErrorStatus", false }, { "AGStatus", false }, {"LastGoodCheckDBStatus",false}, {"SnapshotAgeStatus",false },
+                                                            {"MemoryDumpStatus",false }, {"UptimeStatus",false }, {"CorruptionStatus",false }, {"AlertStatus",false }, {"FileFreeSpaceStatus",false },
+                                                            {"CustomCheckStatus",false }, {"MirroringStatus",false },{"ElasticPoolStorageStatus",false} };
 
             for (Int32 idx = e.RowIndex; idx < e.RowIndex + e.RowCount; idx += 1)
             {
@@ -177,6 +177,7 @@ namespace DBADashGUI
                 dgvSummary.Rows[idx].Cells["AlertStatus"].ToolTipText = "Last Alert:" + lastAlert + Environment.NewLine + 
                                                                         "Last Critical Alert:" + lastCriticalAlert + Environment.NewLine + 
                                                                         "Total Alerts:" + totalAlerts;
+                dgvSummary.Rows[idx].Cells["ElasticPoolStorageStatus"].Value = isAzure ? "View" : "";
             }
             // hide columns that all have status N/A
             foreach(var col in StatusColumns)
@@ -247,6 +248,10 @@ namespace DBADashGUI
             if (dgvSummary.Columns[e.ColumnIndex] == CollectionErrorStatus)
             {
                 sortCol = "CollectionErrorStatus";
+            }
+            if (dgvSummary.Columns[e.ColumnIndex] == ElasticPoolStorageStatus)
+            {
+                sortCol = "ElasticPoolStorageStatus";
             }
             if (sortCol != "")
             {
@@ -341,6 +346,10 @@ namespace DBADashGUI
                     {
                         Instance_Selected(this, new InstanceSelectedEventArgs() { InstanceID = (Int32)row["InstanceID"], Tab = "tabAlerts" });
                     }
+                }
+                else if(e.ColumnIndex == ElasticPoolStorageStatus.Index)
+                {
+                    Instance_Selected(this, new InstanceSelectedEventArgs() { Instance = (string)row["Instance"], Tab = "tabAzureSummary" });
                 }
             }
         }

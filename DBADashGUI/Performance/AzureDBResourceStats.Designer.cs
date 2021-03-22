@@ -44,9 +44,9 @@
             // 
             this.chart1.BackColor = System.Drawing.Color.White;
             this.chart1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.chart1.Location = new System.Drawing.Point(0, 27);
+            this.chart1.Location = new System.Drawing.Point(0, 31);
             this.chart1.Name = "chart1";
-            this.chart1.Size = new System.Drawing.Size(882, 498);
+            this.chart1.Size = new System.Drawing.Size(882, 494);
             this.chart1.TabIndex = 0;
             this.chart1.Text = "cartesianChart1";
             // 
@@ -60,7 +60,7 @@
             this.tsDateGrouping});
             this.toolStrip1.Location = new System.Drawing.Point(0, 0);
             this.toolStrip1.Name = "toolStrip1";
-            this.toolStrip1.Size = new System.Drawing.Size(882, 27);
+            this.toolStrip1.Size = new System.Drawing.Size(882, 31);
             this.toolStrip1.TabIndex = 4;
             this.toolStrip1.Text = "toolStrip1";
             // 
@@ -70,7 +70,7 @@
             this.tsRefresh.Image = global::DBADashGUI.Properties.Resources._112_RefreshArrow_Green_16x16_72;
             this.tsRefresh.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsRefresh.Name = "tsRefresh";
-            this.tsRefresh.Size = new System.Drawing.Size(29, 24);
+            this.tsRefresh.Size = new System.Drawing.Size(29, 28);
             this.tsRefresh.Text = "Refresh";
             this.tsRefresh.Click += new System.EventHandler(this.tsRefresh_Click);
             // 
@@ -83,14 +83,14 @@
             this.tsOptions.Image = global::DBADashGUI.Properties.Resources.LineChart_16x;
             this.tsOptions.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsOptions.Name = "tsOptions";
-            this.tsOptions.Size = new System.Drawing.Size(34, 24);
+            this.tsOptions.Size = new System.Drawing.Size(34, 28);
             this.tsOptions.Text = "Chart Options";
             // 
             // smoothLinesToolStripMenuItem
             // 
             this.smoothLinesToolStripMenuItem.CheckOnClick = true;
             this.smoothLinesToolStripMenuItem.Name = "smoothLinesToolStripMenuItem";
-            this.smoothLinesToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            this.smoothLinesToolStripMenuItem.Size = new System.Drawing.Size(178, 26);
             this.smoothLinesToolStripMenuItem.Text = "Smooth lines";
             this.smoothLinesToolStripMenuItem.Click += new System.EventHandler(this.smoothLinesToolStripMenuItem_Click);
             // 
@@ -98,7 +98,7 @@
             // 
             this.pointsToolStripMenuItem.CheckOnClick = true;
             this.pointsToolStripMenuItem.Name = "pointsToolStripMenuItem";
-            this.pointsToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            this.pointsToolStripMenuItem.Size = new System.Drawing.Size(178, 26);
             this.pointsToolStripMenuItem.Text = "Points";
             this.pointsToolStripMenuItem.Click += new System.EventHandler(this.pointsToolStripMenuItem_Click);
             // 
@@ -108,7 +108,7 @@
             this.tsMeasures.Image = global::DBADashGUI.Properties.Resources.AddComputedField_16x;
             this.tsMeasures.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsMeasures.Name = "tsMeasures";
-            this.tsMeasures.Size = new System.Drawing.Size(34, 24);
+            this.tsMeasures.Size = new System.Drawing.Size(34, 28);
             this.tsMeasures.Text = "Columns";
             // 
             // tsDateGrouping
@@ -117,7 +117,7 @@
             this.tsDateGrouping.Image = ((System.Drawing.Image)(resources.GetObject("tsDateGrouping.Image")));
             this.tsDateGrouping.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsDateGrouping.Name = "tsDateGrouping";
-            this.tsDateGrouping.Size = new System.Drawing.Size(59, 24);
+            this.tsDateGrouping.Size = new System.Drawing.Size(59, 28);
             this.tsDateGrouping.Text = "None";
             this.tsDateGrouping.ToolTipText = "Date Grouping";
             // 
