@@ -160,10 +160,14 @@ namespace DBADashGUI.DBFiles
                 var row = (DataRowView)dgvFiles.Rows[idx].DataBoundItem;
                 var Status = (DBADashStatus.DBADashStatusEnum)row["FreeSpaceStatus"];
                 var snapshotStatus = (DBADashStatus.DBADashStatusEnum)row["FileSnapshotAgeStatus"];
+                var maxSizeStatus = (DBADashStatus.DBADashStatusEnum)row["PctMaxSizeStatus"];
+                var fgAutogrowStatus = (DBADashStatus.DBADashStatusEnum)row["FilegroupAutogrowStatus"];
                 string checkType = row["FreeSpaceCheckType"] == DBNull.Value ? "-" : (string)row["FreeSpaceCheckType"];
                 dgvFiles.Rows[idx].Cells["FileSnapshotAge"].Style.BackColor = DBADashStatus.GetStatusColour(snapshotStatus);
                 dgvFiles.Rows[idx].Cells["FilegroupPctFree"].Style.BackColor = Color.White;
                 dgvFiles.Rows[idx].Cells["FilegroupFreeMB"].Style.BackColor = Color.White;
+                dgvFiles.Rows[idx].Cells["FilegroupPctMaxSize"].Style.BackColor = DBADashStatus.GetStatusColour(maxSizeStatus);
+                dgvFiles.Rows[idx].Cells["FilegroupAutogrow"].Style.BackColor = DBADashStatus.GetStatusColour(fgAutogrowStatus);
                 if (checkType != "M")
                 {
                     dgvFiles.Rows[idx].Cells["FilegroupPctFree"].Style.BackColor = DBADashStatus.GetStatusColour(Status);

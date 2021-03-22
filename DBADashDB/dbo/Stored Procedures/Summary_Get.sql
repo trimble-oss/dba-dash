@@ -1,4 +1,6 @@
-﻿CREATE PROC [dbo].[Summary_Get](@InstanceIDs VARCHAR(MAX)=NULL)
+﻿
+
+CREATE PROC [dbo].[Summary_Get](@InstanceIDs VARCHAR(MAX)=NULL)
 AS
 DECLARE @Instances TABLE(
 	InstanceID INT PRIMARY KEY
@@ -51,9 +53,10 @@ WITH LS AS (
 	GROUP BY InstanceID
 ),
  F AS (
-	SELECT InstanceID,MIN(FreeSpaceStatus) AS FileFreeSpaceStatus
-	FROM dbo.DBFileStatus
-	WHERE FreeSpaceStatus<>3
+	SELECT InstanceID,
+		MIN(NULLIF(FreeSpaceStatus,3)) AS FileFreeSpaceStatus,
+		MIN(NULLIF(PctMaxSizeStatus,3)) AS PctMaxSizeStatus
+	FROM dbo.FileGroupStatus
 	GROUP BY InstanceID
 ),
 J AS (
@@ -134,7 +137,7 @@ a AS(
 )
 , dbm AS (
 	SELECT	DM.InstanceID,
-		MIN(CASE WHEN DM.mirroring_state IN(4,6) AND DM.mirroring_witness_state IN(0,1) THEN 4 WHEN DM.mirroring_state IN(2,4,6) THEN 2 ELSE 1 END) as MirroringStatus
+		MIN(CASE WHEN DM.mirroring_state IN(4,6) AND DM.mirroring_witness_state IN(0,1) THEN 4 WHEN DM.mirroring_state IN(2,4,6) THEN 2 ELSE 1 END) AS MirroringStatus
 	FROM dbo.DatabaseMirroring DM 
 	GROUP BY DM.InstanceID
 )
@@ -157,7 +160,7 @@ SELECT I.InstanceID,
 	ISNULL(errSummary.CollectionErrorCount,0) AS CollectionErrorCount, 
 	SSD.SnapshotAgeMin,
 	SSD.SnapshotAgeMax,
-	SSD.CollectionDatesStatus as SnapshotAgeStatus,
+	SSD.CollectionDatesStatus AS SnapshotAgeStatus,
 	DATEADD(mi,I.UTCOffset,I.sqlserver_start_time) AS sqlserver_start_time_utc,
 	I.UTCOffset,
 	DATEDIFF(mi,DATEADD(mi,I.UTCOffset,I.sqlserver_start_time),OSInfoCD.SnapshotDate) AS sqlserver_uptime,
@@ -195,8 +198,9 @@ SELECT I.InstanceID,
 	AlertCD.SnapshotDate AS AlertSnapshotDate,
 	I.IsAgentRunning,
 	ISNULL(cus.Status,3) AS CustomCheckStatus,
-	ISNULL(dbm.MirroringStatus,3) as MirroringStatus,
-	3 AS ElasticPoolStorageStatus
+	ISNULL(dbm.MirroringStatus,3) AS MirroringStatus,
+	3 AS ElasticPoolStorageStatus,
+	ISNULL(F.PctMaxSizeStatus,3) AS PctMaxSizeStatus
 FROM dbo.Instances I 
 LEFT JOIN LS ON I.InstanceID = LS.InstanceID
 LEFT JOIN B ON I.InstanceID = B.InstanceID
@@ -239,7 +243,7 @@ SELECT NULL AS InstanceID,
 	ISNULL(SUM(errSummary.CollectionErrorCount),0) AS CollectionErrorCount,
 	MIN(SSD.SnapshotAgeMin) AS SnapshotAgeMin,
 	MAX(SSD.SnapshotAgeMax) AS SnapshotAgeMax,
-	MIN(SSD.CollectionDatesStatus) as SnapshotAgeStatus,
+	MIN(SSD.CollectionDatesStatus) AS SnapshotAgeStatus,
 	NULL AS sqlserver_start_time_utc,
 	0 AS UTCOffset,
 	NULL AS sqlserver_uptime,
@@ -257,7 +261,7 @@ SELECT NULL AS InstanceID,
     NULL AS LastGoodCheckDBCriticalCount,
     NULL AS LastGoodCheckDBWarningCount,
     NULL AS LastGoodCheckDBHealthyCount,
-    NULL as LastGoodCheckDBNACount,
+    NULL AS LastGoodCheckDBNACount,
 	NULL AS OldestLastGoodCheckDBTime,
 	NULL AS DaysSinceLastGoodCheckDB,
 	NULL AS LastAlert,
@@ -267,8 +271,9 @@ SELECT NULL AS InstanceID,
 	NULL AS AlertSnapshotDate,
 	NULL AS IsAgentRunning,
 	ISNULL(MIN(cus.Status),3) AS CustomCheckStatus,
-	3 as MirroringStatus,
-	ISNULL(MIN(NULLIF(EPS.ElasticPoolStorageStatus,3)),3) AS ElasticPoolStorageStatus
+	3 AS MirroringStatus,
+	ISNULL(MIN(NULLIF(EPS.ElasticPoolStorageStatus,3)),3) AS ElasticPoolStorageStatus,
+	ISNULL(MIN(NULLIF(F.PctMaxSizeStatus,3)),3) AS PctMaxSizeStatus
 FROM dbo.Instances I
 LEFT JOIN errSummary  ON I.InstanceID = errSummary.InstanceID
 LEFT JOIN F ON I.InstanceID = F.InstanceID

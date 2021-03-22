@@ -191,7 +191,7 @@ namespace DBADashGUI
             else if(tabs.SelectedTab == tabFiles)
             {
                 dbFilesControl1.ConnectionString = connectionString;
-                dbFilesControl1.InstanceIDs = instanceIDs;
+                dbFilesControl1.InstanceIDs = n.Type == SQLTreeItem.TreeType.DBADashRoot ? AllInstanceIDs : instanceIDs;
                 dbFilesControl1.DatabaseID = (n.DatabaseID > 0 ? (Int32?)n.DatabaseID : null);
                 dbFilesControl1.IncludeCritical = true;
                 dbFilesControl1.IncludeWarning = true;

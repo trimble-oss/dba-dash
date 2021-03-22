@@ -1,4 +1,13 @@
-﻿CREATE PROC [dbo].[DBFileThresholds_Upd](@InstanceID INT,@DatabaseID INT,@DataSpaceID INT,@Warning DECIMAL(9,3),@Critical DECIMAL(9,3),@CheckType CHAR(1))
+﻿CREATE PROC [dbo].[DBFileThresholds_Upd](
+	@InstanceID INT,
+	@DatabaseID INT,
+	@DataSpaceID INT,
+	@Warning DECIMAL(9,3),
+	@Critical DECIMAL(9,3),
+	@CheckType CHAR(1),
+	@PctMaxSizeWarningThreshold DECIMAL(9,3),
+	@PctMaxSizeCriticalThreshold DECIMAL(9,3)
+)
 AS
 SET NOCOUNT ON
 SET XACT_ABORT ON
@@ -13,6 +22,7 @@ DELETE dbo.DBFileThresholds
 WHERE InstanceID=@InstanceID 
 AND DatabaseID = @DatabaseID
 AND data_space_id=@DataSpaceID
+
 IF (@CheckType IN('M','%','-'))
 BEGIN
 	INSERT INTO dbo.DBFileThresholds
@@ -22,7 +32,9 @@ BEGIN
 		data_space_id,
 		FreeSpaceWarningThreshold,
 		FreeSpaceCriticalThreshold,
-		FreeSpaceCheckType
+		FreeSpaceCheckType,
+		PctMaxSizeWarningThreshold,
+		PctMaxSizeCriticalThreshold
 	)
 	VALUES
 	(   @InstanceID,    
@@ -30,7 +42,9 @@ BEGIN
 		@DataSpaceID,
 		@Warning, 
 		@Critical, 
-		@CheckType    
+		@CheckType,
+		@PctMaxSizeWarningThreshold,
+		@PctMaxSizeCriticalThreshold
 		)
 END
 COMMIT;

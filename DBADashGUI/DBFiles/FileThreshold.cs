@@ -21,6 +21,13 @@ namespace DBADashGUI.DBFiles
         public string ConnectionString { get; set; }
 
         public FileCheckTypeEnum FileCheckType { get; set; }
+
+        public decimal PctMaxSizeWarningThreshold { get; set; }
+
+        public decimal PctMaxSizeCriticalThreshold { get; set; }
+
+        public bool PctMaxCheckEnabled { get; set; }
+
         public enum FileCheckTypeEnum
         {
             Percent,
@@ -67,6 +74,26 @@ namespace DBADashGUI.DBFiles
 
         }
 
+        public FileThreshold GetInheritedThreshold()
+        {
+            if(!this.Inherited)
+            {
+                return this;
+            }
+            Int32 _DataSpaceID = -1;
+            Int32 _DatabaseID = this.DataSpaceID == -1 ? -1 : this.DatabaseID;
+            Int32 _InstanceID = this.DatabaseID ==-1 ? -1 : this.InstanceID;
+            var threshold = GetFileThreshold(_InstanceID, _DatabaseID, _DataSpaceID, ConnectionString);
+            if (threshold.Inherited && InstanceID!=-1)
+            {
+                return threshold.GetInheritedThreshold();
+            }
+            else
+            {
+                return threshold;
+            }
+        }
+
         public static FileThreshold GetFileThreshold(Int32 InstanceID, Int32 DatabaseID, Int32 DataSpaceID, string connectionString)
         {
             FileThreshold threshold = new FileThreshold
@@ -92,6 +119,16 @@ namespace DBADashGUI.DBFiles
                         {
                             threshold.CriticalThreshold = (decimal)rdr["FreeSpaceCriticalThreshold"];
                             threshold.WarningThreshold = (decimal)rdr["FreeSpaceWarningThreshold"];
+                        }
+                        if(rdr["PctMaxSizeWarningThreshold"] != DBNull.Value && rdr["PctMaxSizeCriticalThreshold"] != DBNull.Value)
+                        {
+                            threshold.PctMaxSizeCriticalThreshold = (decimal)rdr["PctMaxSizeCriticalThreshold"];
+                            threshold.PctMaxSizeWarningThreshold= (decimal)rdr["PctMaxSizeWarningThreshold"];
+                            threshold.PctMaxCheckEnabled = true;
+                        }
+                        else
+                        {
+                            threshold.PctMaxCheckEnabled = false;
                         }
                         threshold.FileCheckTypeChar = char.Parse((string)rdr["FreeSpaceCheckType"]);
                         threshold.Inherited = false;
@@ -136,6 +173,16 @@ namespace DBADashGUI.DBFiles
                     {
 
                         cmd.Parameters.AddWithValue("Critical", CriticalThreshold);
+                    }
+                    if (PctMaxCheckEnabled)
+                    {
+                        cmd.Parameters.AddWithValue("PctMaxSizeWarningThreshold", PctMaxSizeWarningThreshold);
+                        cmd.Parameters.AddWithValue("PctMaxSizeCriticalThreshold", PctMaxSizeCriticalThreshold);
+                    }
+                    else
+                    {
+                        cmd.Parameters.AddWithValue("PctMaxSizeWarningThreshold", DBNull.Value);
+                        cmd.Parameters.AddWithValue("PctMaxSizeCriticalThreshold", DBNull.Value);
                     }
                     cmd.ExecuteNonQuery();
                     var rdr = cmd.ExecuteNonQuery();

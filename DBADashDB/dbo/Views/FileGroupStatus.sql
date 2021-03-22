@@ -1,4 +1,7 @@
-﻿CREATE VIEW FileGroupStatus
+﻿
+
+
+CREATE VIEW [dbo].[FilegroupStatus]
 AS
 WITH F AS (
 SELECT InstanceID,
@@ -8,7 +11,7 @@ SELECT InstanceID,
        ConnectionID,
        name,
        file_name,
-       filegroup_name,
+       Filegroup_name,
        physical_name,
        FileSizeMB,
        FileUsedMB,
@@ -33,6 +36,13 @@ SELECT InstanceID,
        FileSnapshotDate,
        FileSnapshotAge,
 	   FileSnapshotAgeStatus,
+	   FilegroupMaxSizeMB,
+	   FilegroupPctOfMaxSize,
+	   FilegroupUsedPctOfMaxSize,
+	   PctMaxSizeStatus,
+	   MaxSizeExcludedReason,
+	   FilegroupAutogrowFileCount,
+	   FilegroupAutogrowStatus,
 	   ROW_NUMBER() OVER(PARTITION BY DatabaseID,data_space_id ORDER BY FileID) rnum
 FROM dbo.FileStatus
 ) 
@@ -44,7 +54,7 @@ SELECT NULL AS FileID,
        F.ConnectionID,
        F.name,
        NULL AS file_name,
-       F.filegroup_name,
+       F.Filegroup_name,
        NULL AS physical_name,
        F.FilegroupSizeMB AS FileSizeMB,
        F.FilegroupUsedMB AS FileUsedMB,
@@ -68,6 +78,13 @@ SELECT NULL AS FileID,
        F.ConfiguredLevel,
        F.FileSnapshotDate,
        F.FileSnapshotAge,
-	   F.FileSnapshotAgeStatus
+	   F.FileSnapshotAgeStatus,
+	   F.FilegroupMaxSizeMB,
+	   F.FilegroupPctOfMaxSize,
+	   F.FilegroupUsedPctOfMaxSize,
+	   F.PctMaxSizeStatus,
+	   F.MaxSizeExcludedReason,
+	   F.FilegroupAutogrowFileCount,
+	   FilegroupAutogrowStatus
 FROM F 
 WHERE rnum=1

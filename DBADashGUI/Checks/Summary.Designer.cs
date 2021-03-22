@@ -29,13 +29,14 @@
         private void InitializeComponent()
         {
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle5 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle6 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle7 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle8 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle9 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle3 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle4 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle5 = new System.Windows.Forms.DataGridViewCellStyle();
             this.dgvSummary = new System.Windows.Forms.DataGridView();
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
             this.tsRefresh = new System.Windows.Forms.ToolStripButton();
@@ -71,6 +72,7 @@
             this.MirroringStatus = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.AGStatus = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.FileFreeSpaceStatus = new System.Windows.Forms.DataGridViewLinkColumn();
+            this.PctMaxSizeStatus = new System.Windows.Forms.DataGridViewLinkColumn();
             this.ElasticPoolStorageStatus = new System.Windows.Forms.DataGridViewLinkColumn();
             this.CustomCheckStatus = new System.Windows.Forms.DataGridViewLinkColumn();
             this.CollectionErrorStatus = new System.Windows.Forms.DataGridViewLinkColumn();
@@ -109,27 +111,28 @@
             this.MirroringStatus,
             this.AGStatus,
             this.FileFreeSpaceStatus,
+            this.PctMaxSizeStatus,
             this.ElasticPoolStorageStatus,
             this.CustomCheckStatus,
             this.CollectionErrorStatus,
             this.SnapshotAgeStatus,
             this.UptimeStatus});
-            dataGridViewCellStyle5.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle5.BackColor = System.Drawing.SystemColors.Window;
-            dataGridViewCellStyle5.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            dataGridViewCellStyle5.ForeColor = System.Drawing.SystemColors.ControlText;
-            dataGridViewCellStyle5.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-            dataGridViewCellStyle5.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-            dataGridViewCellStyle5.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
-            this.dgvSummary.DefaultCellStyle = dataGridViewCellStyle5;
+            dataGridViewCellStyle6.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle6.BackColor = System.Drawing.SystemColors.Window;
+            dataGridViewCellStyle6.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            dataGridViewCellStyle6.ForeColor = System.Drawing.SystemColors.ControlText;
+            dataGridViewCellStyle6.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle6.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle6.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
+            this.dgvSummary.DefaultCellStyle = dataGridViewCellStyle6;
             this.dgvSummary.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.dgvSummary.Location = new System.Drawing.Point(0, 31);
+            this.dgvSummary.Location = new System.Drawing.Point(0, 27);
             this.dgvSummary.Name = "dgvSummary";
             this.dgvSummary.ReadOnly = true;
             this.dgvSummary.RowHeadersVisible = false;
             this.dgvSummary.RowHeadersWidth = 51;
             this.dgvSummary.RowTemplate.Height = 24;
-            this.dgvSummary.Size = new System.Drawing.Size(1800, 182);
+            this.dgvSummary.Size = new System.Drawing.Size(1800, 186);
             this.dgvSummary.TabIndex = 0;
             this.dgvSummary.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgvSummary_CellContentClick);
             this.dgvSummary.ColumnHeaderMouseClick += new System.Windows.Forms.DataGridViewCellMouseEventHandler(this.dgvSummary_ColumnHeaderMouseClick);
@@ -143,7 +146,7 @@
             this.tsCopy});
             this.toolStrip1.Location = new System.Drawing.Point(0, 0);
             this.toolStrip1.Name = "toolStrip1";
-            this.toolStrip1.Size = new System.Drawing.Size(1800, 31);
+            this.toolStrip1.Size = new System.Drawing.Size(1800, 27);
             this.toolStrip1.TabIndex = 1;
             this.toolStrip1.Text = "toolStrip1";
             // 
@@ -153,7 +156,7 @@
             this.tsRefresh.Image = global::DBADashGUI.Properties.Resources._112_RefreshArrow_Green_16x16_72;
             this.tsRefresh.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsRefresh.Name = "tsRefresh";
-            this.tsRefresh.Size = new System.Drawing.Size(29, 28);
+            this.tsRefresh.Size = new System.Drawing.Size(29, 24);
             this.tsRefresh.Text = "Refresh";
             this.tsRefresh.Click += new System.EventHandler(this.tsRefresh_Click);
             // 
@@ -163,7 +166,7 @@
             this.tsCopy.Image = global::DBADashGUI.Properties.Resources.ASX_Copy_blue_16x;
             this.tsCopy.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsCopy.Name = "tsCopy";
-            this.tsCopy.Size = new System.Drawing.Size(29, 28);
+            this.tsCopy.Size = new System.Drawing.Size(29, 24);
             this.tsCopy.Text = "Copy";
             this.tsCopy.Click += new System.EventHandler(this.tsCopy_Click);
             // 
@@ -203,8 +206,8 @@
             // 
             // dataGridViewTextBoxColumn5
             // 
-            dataGridViewCellStyle6.NullValue = "View";
-            this.dataGridViewTextBoxColumn5.DefaultCellStyle = dataGridViewCellStyle6;
+            dataGridViewCellStyle7.NullValue = "View";
+            this.dataGridViewTextBoxColumn5.DefaultCellStyle = dataGridViewCellStyle7;
             this.dataGridViewTextBoxColumn5.HeaderText = "Alerts";
             this.dataGridViewTextBoxColumn5.MinimumWidth = 6;
             this.dataGridViewTextBoxColumn5.Name = "dataGridViewTextBoxColumn5";
@@ -214,8 +217,8 @@
             // 
             // dataGridViewTextBoxColumn6
             // 
-            dataGridViewCellStyle7.NullValue = "View";
-            this.dataGridViewTextBoxColumn6.DefaultCellStyle = dataGridViewCellStyle7;
+            dataGridViewCellStyle8.NullValue = "View";
+            this.dataGridViewTextBoxColumn6.DefaultCellStyle = dataGridViewCellStyle8;
             this.dataGridViewTextBoxColumn6.HeaderText = "Full Backup";
             this.dataGridViewTextBoxColumn6.MinimumWidth = 6;
             this.dataGridViewTextBoxColumn6.Name = "dataGridViewTextBoxColumn6";
@@ -225,8 +228,8 @@
             // 
             // dataGridViewTextBoxColumn7
             // 
-            dataGridViewCellStyle8.NullValue = "View";
-            this.dataGridViewTextBoxColumn7.DefaultCellStyle = dataGridViewCellStyle8;
+            dataGridViewCellStyle9.NullValue = "View";
+            this.dataGridViewTextBoxColumn7.DefaultCellStyle = dataGridViewCellStyle9;
             this.dataGridViewTextBoxColumn7.HeaderText = "Diff Backup";
             this.dataGridViewTextBoxColumn7.MinimumWidth = 6;
             this.dataGridViewTextBoxColumn7.Name = "dataGridViewTextBoxColumn7";
@@ -444,14 +447,28 @@
             // 
             dataGridViewCellStyle2.NullValue = "View";
             this.FileFreeSpaceStatus.DefaultCellStyle = dataGridViewCellStyle2;
-            this.FileFreeSpaceStatus.HeaderText = "File FreeSpace";
+            this.FileFreeSpaceStatus.HeaderText = "File Space";
             this.FileFreeSpaceStatus.LinkColor = System.Drawing.Color.Black;
             this.FileFreeSpaceStatus.MinimumWidth = 6;
             this.FileFreeSpaceStatus.Name = "FileFreeSpaceStatus";
             this.FileFreeSpaceStatus.ReadOnly = true;
             this.FileFreeSpaceStatus.Resizable = System.Windows.Forms.DataGridViewTriState.True;
             this.FileFreeSpaceStatus.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
-            this.FileFreeSpaceStatus.Width = 121;
+            this.FileFreeSpaceStatus.Width = 95;
+            // 
+            // PctMaxSizeStatus
+            // 
+            dataGridViewCellStyle3.Format = "P1";
+            this.PctMaxSizeStatus.DefaultCellStyle = dataGridViewCellStyle3;
+            this.PctMaxSizeStatus.HeaderText = "% Max Size";
+            this.PctMaxSizeStatus.LinkColor = System.Drawing.Color.Black;
+            this.PctMaxSizeStatus.MinimumWidth = 6;
+            this.PctMaxSizeStatus.Name = "PctMaxSizeStatus";
+            this.PctMaxSizeStatus.ReadOnly = true;
+            this.PctMaxSizeStatus.Resizable = System.Windows.Forms.DataGridViewTriState.True;
+            this.PctMaxSizeStatus.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
+            this.PctMaxSizeStatus.Text = "View";
+            this.PctMaxSizeStatus.UseColumnTextForLinkValue = true;
             // 
             // ElasticPoolStorageStatus
             // 
@@ -466,8 +483,8 @@
             // 
             // CustomCheckStatus
             // 
-            dataGridViewCellStyle3.NullValue = "View";
-            this.CustomCheckStatus.DefaultCellStyle = dataGridViewCellStyle3;
+            dataGridViewCellStyle4.NullValue = "View";
+            this.CustomCheckStatus.DefaultCellStyle = dataGridViewCellStyle4;
             this.CustomCheckStatus.HeaderText = "Custom Checks";
             this.CustomCheckStatus.LinkColor = System.Drawing.Color.Black;
             this.CustomCheckStatus.MinimumWidth = 6;
@@ -480,8 +497,8 @@
             // CollectionErrorStatus
             // 
             this.CollectionErrorStatus.DataPropertyName = "CollectionErrorCount";
-            dataGridViewCellStyle4.NullValue = "View";
-            this.CollectionErrorStatus.DefaultCellStyle = dataGridViewCellStyle4;
+            dataGridViewCellStyle5.NullValue = "View";
+            this.CollectionErrorStatus.DefaultCellStyle = dataGridViewCellStyle5;
             this.CollectionErrorStatus.HeaderText = "DBA Dash Errors (24hrs)";
             this.CollectionErrorStatus.LinkColor = System.Drawing.Color.Black;
             this.CollectionErrorStatus.MinimumWidth = 6;
@@ -563,6 +580,7 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn MirroringStatus;
         private System.Windows.Forms.DataGridViewTextBoxColumn AGStatus;
         private System.Windows.Forms.DataGridViewLinkColumn FileFreeSpaceStatus;
+        private System.Windows.Forms.DataGridViewLinkColumn PctMaxSizeStatus;
         private System.Windows.Forms.DataGridViewLinkColumn ElasticPoolStorageStatus;
         private System.Windows.Forms.DataGridViewLinkColumn CustomCheckStatus;
         private System.Windows.Forms.DataGridViewLinkColumn CollectionErrorStatus;

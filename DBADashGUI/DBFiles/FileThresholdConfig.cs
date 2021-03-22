@@ -21,50 +21,62 @@ namespace DBADashGUI.DBFiles
         {
             get
             {
-                fileThres.Inherited = optInherit.Checked;
+                fileThres.Inherited = chkInherit.Checked;
                 if (optPercent.Checked)
                 {
-                    fileThres.WarningThreshold = numDriveWarning.Value / 100;
-                    fileThres.CriticalThreshold = numDriveCritical.Value / 100;
+                    fileThres.WarningThreshold = numWarning.Value / 100;
+                    fileThres.CriticalThreshold = numCritical.Value / 100;
                     fileThres.FileCheckType = FileThreshold.FileCheckTypeEnum.Percent;
                 }
                 if (optMB.Checked)
                 {
-                    fileThres.WarningThreshold = numDriveWarning.Value;
-                    fileThres.CriticalThreshold = numDriveCritical.Value;
+                    fileThres.WarningThreshold = numWarning.Value;
+                    fileThres.CriticalThreshold = numCritical.Value;
                     fileThres.FileCheckType =    FileThreshold.FileCheckTypeEnum.MB;
                 }
                 if (OptDisabled.Checked)
                 {
                     fileThres.FileCheckType = FileThreshold.FileCheckTypeEnum.None;
                 }
-
+                fileThres.PctMaxCheckEnabled = !chkMaxSizeDisable.Checked;
+                fileThres.PctMaxSizeCriticalThreshold = numMaxSizeCritical.Value/100;
+                fileThres.PctMaxSizeWarningThreshold = numMaxSizeWarning.Value/100;
+                
                 return fileThres;
             }
             set
             {
                 fileThres = value;
+                var setValueByThres = fileThres;
                 if (fileThres.InstanceID == -1)
                 {
-                    optInherit.Enabled = false;
+                    chkInherit.Enabled = false;
                     fileThres.Inherited = false;
                 }
-                if (!fileThres.Inherited)
+                if (fileThres.Inherited)
                 {
-                    optMB.Checked = fileThres.FileCheckType == FileThreshold.FileCheckTypeEnum.MB;
-                    optPercent.Checked = fileThres.FileCheckType==  FileThreshold.FileCheckTypeEnum.Percent;
-                    OptDisabled.Checked = fileThres.FileCheckType ==  FileThreshold.FileCheckTypeEnum.None;
+                    chkInherit.Checked = true;
+                    var inherited = fileThres.GetInheritedThreshold();
+                    setValueByThres = inherited;
                 }
                 else
                 {
-                    optInherit.Checked = true;
+                    chkInherit.Checked = false;
                 }
-                numDriveWarning.Value = fileThres.WarningThreshold;
-                numDriveCritical.Value = fileThres.CriticalThreshold;
+
+  
+                optMB.Checked = setValueByThres.FileCheckType == FileThreshold.FileCheckTypeEnum.MB;
+                optPercent.Checked = setValueByThres.FileCheckType==  FileThreshold.FileCheckTypeEnum.Percent;
+                OptDisabled.Checked = setValueByThres.FileCheckType ==  FileThreshold.FileCheckTypeEnum.None;      
+                numWarning.Value = setValueByThres.WarningThreshold;
+                numCritical.Value = setValueByThres.CriticalThreshold;
+                numMaxSizeCritical.Value = setValueByThres.PctMaxSizeCriticalThreshold>1 ? 100 : setValueByThres.PctMaxSizeCriticalThreshold * 100;
+                numMaxSizeWarning.Value = setValueByThres.PctMaxSizeWarningThreshold>1 ? 100 : setValueByThres.PctMaxSizeWarningThreshold * 100;
+                chkMaxSizeDisable.Checked = !setValueByThres.PctMaxCheckEnabled;
                 if (fileThres.FileCheckType ==  FileThreshold.FileCheckTypeEnum.Percent)
                 {
-                    numDriveWarning.Value *= 100;
-                    numDriveCritical.Value *= 100;
+                    numWarning.Value *= 100;
+                    numCritical.Value *= 100;
                 }
             }
         }
@@ -75,32 +87,40 @@ namespace DBADashGUI.DBFiles
             this.Close();
         }
 
-        private void optInherit_CheckedChanged(object sender, EventArgs e)
-        {
-            pnlThresholds.Enabled = false;
-        }
+
 
         private void OptDisabled_CheckedChanged(object sender, EventArgs e)
         {
-            pnlThresholds.Enabled = false;
+            numWarning.Enabled = !OptDisabled.Checked;
+            numCritical.Enabled= !OptDisabled.Checked;
         }
 
         private void optMB_CheckedChanged(object sender, EventArgs e)
         {
-            pnlThresholds.Enabled = true;
-            lblDriveCritical.Text = "MB";
-            lblDriveWarning.Text = "MB";
-            numDriveCritical.Maximum = Int32.MaxValue;
-            numDriveWarning.Maximum = Int32.MaxValue;
+            setThresholdType();
+        }
+
+        private void setThresholdType()
+        {
+            if (optMB.Checked)
+            {
+                lblDriveCritical.Text = "MB";
+                lblDriveWarning.Text = "MB";
+                numCritical.Maximum = Int32.MaxValue;
+                numWarning.Maximum = Int32.MaxValue;
+            }
+            else
+            {
+                lblDriveCritical.Text = "%";
+                lblDriveWarning.Text = "%";
+                numCritical.Maximum = 100;
+                numWarning.Maximum = 100;
+            }
         }
 
         private void optPercent_CheckedChanged(object sender, EventArgs e)
         {
-            pnlThresholds.Enabled = true;
-            lblDriveCritical.Text = "%";
-            lblDriveWarning.Text = "%";
-            numDriveCritical.Maximum = 100;
-            numDriveWarning.Maximum = 100;
+            setThresholdType();
         }
 
         private void bttnUpdate_Click(object sender, EventArgs e)
@@ -110,5 +130,21 @@ namespace DBADashGUI.DBFiles
             this.Close();
         }
 
+        private void chkInherit_CheckedChanged(object sender, EventArgs e)
+        {
+            grpMaxSize.Enabled = !chkInherit.Checked;
+            grpFreespace.Enabled = !chkInherit.Checked;
+        }
+
+        private void chkMaxSizeDisable_CheckedChanged(object sender, EventArgs e)
+        {
+            numMaxSizeCritical.Enabled = !chkMaxSizeDisable.Checked;
+            numMaxSizeWarning.Enabled = !chkMaxSizeDisable.Checked;
+            if(!chkMaxSizeDisable.Checked && numMaxSizeWarning.Value==0 && numMaxSizeCritical.Value == 0)
+            {
+                numMaxSizeCritical.Value = 90;
+                numMaxSizeWarning.Value = 80;
+            }
+        }
     }
 }

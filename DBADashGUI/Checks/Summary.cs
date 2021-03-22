@@ -50,7 +50,7 @@ namespace DBADashGUI
             var StatusColumns = new Dictionary<string, bool> { { "FullBackupStatus", false }, { "LogShippingStatus", false }, { "DiffBackupStatus", false }, { "LogBackupStatus", false }, { "DriveStatus", false },
                                                             { "JobStatus", false }, { "CollectionErrorStatus", false }, { "AGStatus", false }, {"LastGoodCheckDBStatus",false}, {"SnapshotAgeStatus",false },
                                                             {"MemoryDumpStatus",false }, {"UptimeStatus",false }, {"CorruptionStatus",false }, {"AlertStatus",false }, {"FileFreeSpaceStatus",false },
-                                                            {"CustomCheckStatus",false }, {"MirroringStatus",false },{"ElasticPoolStorageStatus",false} };
+                                                            {"CustomCheckStatus",false }, {"MirroringStatus",false },{"ElasticPoolStorageStatus",false},{"PctMaxSizeStatus",false} };
 
             for (Int32 idx = e.RowIndex; idx < e.RowIndex + e.RowCount; idx += 1)
             {
@@ -253,6 +253,10 @@ namespace DBADashGUI
             {
                 sortCol = "ElasticPoolStorageStatus";
             }
+            if (dgvSummary.Columns[e.ColumnIndex] == PctMaxSizeStatus)
+            {
+                sortCol = "PctMaxSizeStatus";
+            }
             if (sortCol != "")
             {
                 if (dv.Sort == sortCol) {
@@ -317,7 +321,7 @@ namespace DBADashGUI
                         Instance_Selected(this, new InstanceSelectedEventArgs() { InstanceID = (Int32)row["InstanceID"], Tab = "tabJobs" });
                     }
                 }
-                else if (e.ColumnIndex == FileFreeSpaceStatus.Index)
+                else if (e.ColumnIndex == FileFreeSpaceStatus.Index || e.ColumnIndex == PctMaxSizeStatus.Index)
                 {
                      Instance_Selected(this, new InstanceSelectedEventArgs() { Instance = (string)row["Instance"], Tab = "tabFiles" });
                 }

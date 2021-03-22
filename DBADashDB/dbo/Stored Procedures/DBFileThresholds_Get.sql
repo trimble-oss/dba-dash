@@ -4,16 +4,14 @@
 	@DataSpaceID INT
 )
 AS
-SET NOCOUNT ON
-SET XACT_ABORT ON
-BEGIN TRAN
-
 SELECT InstanceID,
        DatabaseID,
        data_space_id,
        FreeSpaceWarningThreshold,
        FreeSpaceCriticalThreshold,
-       FreeSpaceCheckType 
+       FreeSpaceCheckType,
+	   PctMaxSizeCriticalThreshold,
+	   PctMaxSizeWarningThreshold
 FROM dbo.DBFileThresholds
 WHERE InstanceID=@InstanceID 
 AND DatabaseID = @DatabaseID

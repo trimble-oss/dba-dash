@@ -10,17 +10,17 @@
 AS
 DECLARE @StatusSQL NVARCHAR(MAX)
 
-SELECT @StatusSQL = CASE WHEN @IncludeCritical=1 THEN ',1' ELSE '' END
+SELECT @StatusSQL = STUFF(CASE WHEN @IncludeCritical=1 THEN ',1' ELSE '' END
 	+ CASE WHEN @IncludeWarning=1 THEN ',2' ELSE '' END
 	+ CASE WHEN @IncludeNA=1 THEN ',3' ELSE '' END
-	+ CASE WHEN @IncludeOK=1 THEN ',4' ELSE '' END
+	+ CASE WHEN @IncludeOK=1 THEN ',4' ELSE '' END,1,1,'')
 
 SELECT @StatusSQL = CASE WHEN @StatusSQL='' THEN 'AND 1=2'
-		ELSE 'AND F.FreeSpaceStatus IN(' + STUFF(@StatusSQL,1,1,'') + ')' END
+		ELSE 'AND (F.FreeSpaceStatus IN(' + @StatusSQL + ') OR F.PctMaxSizeStatus IN(' + @StatusSQL + ') OR FilegroupAutogrowStatus IN(' + @StatusSQL + '))' END
 
 DECLARE @SQL NVARCHAR(MAX)
 
-SET @SQL = N'
+SET @SQL = CAST('' AS NVARCHAR(MAX)) + N'
 SELECT FileID,
        InstanceID,
        DatabaseID,
@@ -53,7 +53,14 @@ SELECT FileID,
        ConfiguredLevel,
        FileSnapshotDate,
        FileSnapshotAge,
-       FileSnapshotAgeStatus' 
+       FileSnapshotAgeStatus,
+	   FilegroupMaxSizeMB,
+	   FilegroupPctOfMaxSize,
+	   FilegroupUsedPctOfMaxSize,
+	   PctMaxSizeStatus,
+	   MaxSizeExcludedReason,
+	   FilegroupAutogrowFileCount,
+	   FilegroupAutogrowStatus' 
 	   + CASE WHEN @FilegroupLevel=0 THEN ',
 	   max_size,
 	   MaxSizeMB,
@@ -61,14 +68,14 @@ SELECT FileID,
 	   GrowthPct,
 	   growth,
 	   is_percent_growth' ELSE '' END + '
-FROM ' + CASE WHEN @FilegroupLevel = 1 THEN 'dbo.FileGroupStatus' ELSE 'dbo.FileStatus' END + ' AS F
-WHERE 1=1' + 
-CASE WHEN @InstanceIDs IS NULL THEN '' ELSE 'AND EXISTS (SELECT 1
+FROM ' + CASE WHEN @FilegroupLevel = 1 THEN 'dbo.FilegroupStatus' ELSE 'dbo.FileStatus' END + ' AS F
+WHERE 1=1
+' + CASE WHEN @InstanceIDs IS NULL THEN '' ELSE 'AND EXISTS (SELECT 1
 			FROM STRING_SPLIT(@InstanceIDs,'','') ss
 			WHERE ss.value = F.InstanceID
 			)' END + '
 ' + @StatusSQL + '
 ' + CASE WHEN @DatabaseID IS NULL THEN '' ELSE 'AND F.DatabaseID = @DatabaseID' END 
 
-
+PRINT @SQL
 EXEC sp_executesql @SQL,N'@InstanceIDs VARCHAR(MAX),@DatabaseID INT',@InstanceIDs,@DatabaseID
