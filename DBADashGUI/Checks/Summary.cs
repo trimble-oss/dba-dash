@@ -25,8 +25,20 @@ namespace DBADashGUI
 
         DataView dv;
 
+        Dictionary<string, bool> statusColumns;
+
+
+        private void resetStatusCols()
+        {
+           statusColumns= new Dictionary<string, bool> { { "FullBackupStatus", false }, { "LogShippingStatus", false }, { "DiffBackupStatus", false }, { "LogBackupStatus", false }, { "DriveStatus", false },
+                                                            { "JobStatus", false }, { "CollectionErrorStatus", false }, { "AGStatus", false }, {"LastGoodCheckDBStatus",false}, {"SnapshotAgeStatus",false },
+                                                            {"MemoryDumpStatus",false }, {"UptimeStatus",false }, {"CorruptionStatus",false }, {"AlertStatus",false }, {"FileFreeSpaceStatus",false },
+                                                            {"CustomCheckStatus",false }, {"MirroringStatus",false },{"ElasticPoolStorageStatus",false},{"PctMaxSizeStatus",false} };
+        }
+
         public void RefreshData()
         {
+            resetStatusCols();
             SqlConnection cn = new SqlConnection(ConnectionString);
             using (cn)
             {
@@ -39,29 +51,38 @@ namespace DBADashGUI
                     DataTable dt = new DataTable();
                     da.Fill(dt);
                     dgvSummary.AutoGenerateColumns = false;
-                    dv = new DataView(dt); 
+                    dv = new DataView(dt);
                     dgvSummary.DataSource = dv;
+                    var cols = (statusColumns.Keys).ToList<string>();
+                    foreach (DataRow row in dt.Rows)
+                    {
+                        foreach (string col in cols)
+                        {
+                            var status = (DBADashStatus.DBADashStatusEnum)Convert.ToInt32(row[col]);
+                            statusColumns[col] = statusColumns[col] || status != DBADashStatus.DBADashStatusEnum.NA;
+                        }
+                    }
+                    // hide columns that all have status N/A
+                    foreach (var col in statusColumns)
+                    {
+                        dgvSummary.Columns[col.Key].Visible = col.Value;
+                    }
                 }
             }
         }
 
         private void dgvSummary_RowAdded(object sender, DataGridViewRowsAddedEventArgs e)
         {
-            var StatusColumns = new Dictionary<string, bool> { { "FullBackupStatus", false }, { "LogShippingStatus", false }, { "DiffBackupStatus", false }, { "LogBackupStatus", false }, { "DriveStatus", false },
-                                                            { "JobStatus", false }, { "CollectionErrorStatus", false }, { "AGStatus", false }, {"LastGoodCheckDBStatus",false}, {"SnapshotAgeStatus",false },
-                                                            {"MemoryDumpStatus",false }, {"UptimeStatus",false }, {"CorruptionStatus",false }, {"AlertStatus",false }, {"FileFreeSpaceStatus",false },
-                                                            {"CustomCheckStatus",false }, {"MirroringStatus",false },{"ElasticPoolStorageStatus",false},{"PctMaxSizeStatus",false} };
-
+     
             for (Int32 idx = e.RowIndex; idx < e.RowIndex + e.RowCount; idx += 1)
             {
                 var row = (DataRowView)dgvSummary.Rows[idx].DataBoundItem;
                 bool isAzure = row["InstanceID"] == DBNull.Value;
-                var cols = (StatusColumns.Keys).ToList<string>();
+                var cols = (statusColumns.Keys).ToList<string>();
                 foreach (var col in cols)
                 {
                     var status = (DBADashStatus.DBADashStatusEnum)Convert.ToInt32(row[col]);
-                    dgvSummary.Rows[idx].Cells[col].Style.BackColor = DBADashStatus.GetStatusColour(status);
-                    StatusColumns[col] = StatusColumns[col] || status != DBADashStatus.DBADashStatusEnum.NA;
+                    dgvSummary.Rows[idx].Cells[col].Style.BackColor = DBADashStatus.GetStatusColour(status);                    
                 }
                 dgvSummary.Rows[idx].Cells["FullBackupStatus"].Value = isAzure ? "" : "View";
                 dgvSummary.Rows[idx].Cells["DiffBackupStatus"].Value = isAzure ? "" : "View";
@@ -178,11 +199,6 @@ namespace DBADashGUI
                                                                         "Last Critical Alert:" + lastCriticalAlert + Environment.NewLine + 
                                                                         "Total Alerts:" + totalAlerts;
                 dgvSummary.Rows[idx].Cells["ElasticPoolStorageStatus"].Value = isAzure ? "View" : "";
-            }
-            // hide columns that all have status N/A
-            foreach(var col in StatusColumns)
-            {
-                dgvSummary.Columns[col.Key].Visible = col.Value;
             }
         }
 
