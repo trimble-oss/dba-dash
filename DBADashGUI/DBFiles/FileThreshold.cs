@@ -18,6 +18,8 @@ namespace DBADashGUI.DBFiles
         public decimal WarningThreshold { get; set; }
         public decimal CriticalThreshold { get; set; }
 
+        public bool ZeroAuthgrowthOnly { get; set; }
+
         public string ConnectionString { get; set; }
 
         public FileCheckTypeEnum FileCheckType { get; set; }
@@ -132,6 +134,7 @@ namespace DBADashGUI.DBFiles
                         }
                         threshold.FileCheckTypeChar = char.Parse((string)rdr["FreeSpaceCheckType"]);
                         threshold.Inherited = false;
+                        threshold.ZeroAuthgrowthOnly = (bool)rdr["FreeSpaceCheckZeroAutogrowthOnly"];
                         if (rdr.Read())
                         {
                             throw new Exception("More than 1 row returned");
@@ -184,6 +187,7 @@ namespace DBADashGUI.DBFiles
                         cmd.Parameters.AddWithValue("PctMaxSizeWarningThreshold", DBNull.Value);
                         cmd.Parameters.AddWithValue("PctMaxSizeCriticalThreshold", DBNull.Value);
                     }
+                    cmd.Parameters.AddWithValue("FreeSpaceCheckZeroAutogrowthOnly", ZeroAuthgrowthOnly);
                     cmd.ExecuteNonQuery();
                     var rdr = cmd.ExecuteNonQuery();
                 }

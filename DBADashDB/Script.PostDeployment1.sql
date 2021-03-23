@@ -484,6 +484,32 @@ BEGIN
 	)
 	VALUES(-1,0.8,0.9)
 END
+IF NOT EXISTS(SELECT 1 FROM dbo.DBFileThresholds)
+BEGIN
+	INSERT INTO dbo.DBFileThresholds
+	(
+		InstanceID,
+		DatabaseID,
+		data_space_id,
+		FreeSpaceWarningThreshold,
+		FreeSpaceCriticalThreshold,
+		FreeSpaceCheckType,
+		PctMaxSizeWarningThreshold,
+		PctMaxSizeCriticalThreshold,
+		FreeSpaceCheckZeroAutogrowthOnly
+	)
+	VALUES
+	(   -1,
+		-1,
+		-1,
+		0.2,
+		0.1,
+		'%',  
+		0.8, 
+		0.9, 
+		1 
+		)
+END
 
 EXEC dbo.Partitions_Add
 

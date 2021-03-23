@@ -51,6 +51,7 @@
             this.numMaxSizeWarning = new System.Windows.Forms.NumericUpDown();
             this.label4 = new System.Windows.Forms.Label();
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
+            this.chkZeroAutogrowthOnly = new System.Windows.Forms.CheckBox();
             ((System.ComponentModel.ISupportInitialize)(this.numWarning)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.numCritical)).BeginInit();
             this.grpFreespace.SuspendLayout();
@@ -61,18 +62,18 @@
             // 
             // bttnCancel
             // 
-            this.bttnCancel.Location = new System.Drawing.Point(305, 305);
+            this.bttnCancel.Location = new System.Drawing.Point(263, 325);
             this.bttnCancel.Name = "bttnCancel";
-            this.bttnCancel.Size = new System.Drawing.Size(75, 23);
+            this.bttnCancel.Size = new System.Drawing.Size(91, 23);
             this.bttnCancel.TabIndex = 41;
             this.bttnCancel.Text = "Cancel";
             this.bttnCancel.UseVisualStyleBackColor = true;
             // 
             // bttnUpdate
             // 
-            this.bttnUpdate.Location = new System.Drawing.Point(386, 305);
+            this.bttnUpdate.Location = new System.Drawing.Point(370, 325);
             this.bttnUpdate.Name = "bttnUpdate";
-            this.bttnUpdate.Size = new System.Drawing.Size(75, 23);
+            this.bttnUpdate.Size = new System.Drawing.Size(91, 23);
             this.bttnUpdate.TabIndex = 40;
             this.bttnUpdate.Text = "Update";
             this.bttnUpdate.UseVisualStyleBackColor = true;
@@ -135,7 +136,7 @@
             // numCritical
             // 
             this.numCritical.DecimalPlaces = 1;
-            this.numCritical.Location = new System.Drawing.Point(79, 65);
+            this.numCritical.Location = new System.Drawing.Point(79, 68);
             this.numCritical.Margin = new System.Windows.Forms.Padding(4);
             this.numCritical.Name = "numCritical";
             this.numCritical.Size = new System.Drawing.Size(160, 22);
@@ -149,7 +150,7 @@
             // OptDisabled
             // 
             this.OptDisabled.AutoSize = true;
-            this.OptDisabled.Location = new System.Drawing.Point(337, 80);
+            this.OptDisabled.Location = new System.Drawing.Point(337, 103);
             this.OptDisabled.Margin = new System.Windows.Forms.Padding(4);
             this.OptDisabled.Name = "OptDisabled";
             this.OptDisabled.Size = new System.Drawing.Size(84, 21);
@@ -161,7 +162,7 @@
             // optMB
             // 
             this.optMB.AutoSize = true;
-            this.optMB.Location = new System.Drawing.Point(337, 51);
+            this.optMB.Location = new System.Drawing.Point(337, 68);
             this.optMB.Margin = new System.Windows.Forms.Padding(4);
             this.optMB.Name = "optMB";
             this.optMB.Size = new System.Drawing.Size(49, 21);
@@ -174,7 +175,7 @@
             // 
             this.optPercent.AutoSize = true;
             this.optPercent.Checked = true;
-            this.optPercent.Location = new System.Drawing.Point(337, 22);
+            this.optPercent.Location = new System.Drawing.Point(337, 33);
             this.optPercent.Margin = new System.Windows.Forms.Padding(4);
             this.optPercent.Name = "optPercent";
             this.optPercent.Size = new System.Drawing.Size(94, 21);
@@ -186,6 +187,7 @@
             // 
             // grpFreespace
             // 
+            this.grpFreespace.Controls.Add(this.chkZeroAutogrowthOnly);
             this.grpFreespace.Controls.Add(this.label6);
             this.grpFreespace.Controls.Add(this.label5);
             this.grpFreespace.Controls.Add(this.lblDriveCritical);
@@ -197,12 +199,12 @@
             this.grpFreespace.Controls.Add(this.optPercent);
             this.grpFreespace.Location = new System.Drawing.Point(13, 39);
             this.grpFreespace.Name = "grpFreespace";
-            this.grpFreespace.Size = new System.Drawing.Size(448, 121);
+            this.grpFreespace.Size = new System.Drawing.Size(448, 144);
             this.grpFreespace.TabIndex = 42;
             this.grpFreespace.TabStop = false;
             this.grpFreespace.Text = "File Freespace";
             this.toolTip1.SetToolTip(this.grpFreespace, "Use this to set thresholds for the amount of free space in your database filegrou" +
-        "ps (for manually growing files).  ");
+        "ps (for manually growing files).  e.g. Warn when there is less than 20% free.");
             // 
             // chkInherit
             // 
@@ -224,14 +226,14 @@
             this.grpMaxSize.Controls.Add(this.numMaxSizeCritical);
             this.grpMaxSize.Controls.Add(this.numMaxSizeWarning);
             this.grpMaxSize.Controls.Add(this.label4);
-            this.grpMaxSize.Location = new System.Drawing.Point(13, 166);
+            this.grpMaxSize.Location = new System.Drawing.Point(13, 189);
             this.grpMaxSize.Name = "grpMaxSize";
             this.grpMaxSize.Size = new System.Drawing.Size(448, 121);
             this.grpMaxSize.TabIndex = 44;
             this.grpMaxSize.TabStop = false;
             this.grpMaxSize.Text = "% Max Size";
             this.toolTip1.SetToolTip(this.grpMaxSize, "Use this to set a threshold that will alert you when filegroups are approaching t" +
-        "heir max size. ");
+        "heir max size. e.g. Warn when we are at 80% of the configured max file size.");
             // 
             // chkMaxSizeDisable
             // 
@@ -312,11 +314,21 @@
             this.label4.TabIndex = 24;
             this.label4.Text = "%";
             // 
+            // chkZeroAutogrowthOnly
+            // 
+            this.chkZeroAutogrowthOnly.CheckAlign = System.Drawing.ContentAlignment.MiddleRight;
+            this.chkZeroAutogrowthOnly.Location = new System.Drawing.Point(10, 103);
+            this.chkZeroAutogrowthOnly.Name = "chkZeroAutogrowthOnly";
+            this.chkZeroAutogrowthOnly.Size = new System.Drawing.Size(229, 24);
+            this.chkZeroAutogrowthOnly.TabIndex = 38;
+            this.chkZeroAutogrowthOnly.Text = "Zero autogrowth only";
+            this.chkZeroAutogrowthOnly.UseVisualStyleBackColor = true;
+            // 
             // FileThresholdConfig
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(473, 346);
+            this.ClientSize = new System.Drawing.Size(473, 360);
             this.Controls.Add(this.grpMaxSize);
             this.Controls.Add(this.chkInherit);
             this.Controls.Add(this.grpFreespace);
@@ -363,5 +375,6 @@
         private System.Windows.Forms.NumericUpDown numMaxSizeWarning;
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.ToolTip toolTip1;
+        private System.Windows.Forms.CheckBox chkZeroAutogrowthOnly;
     }
 }

@@ -6,7 +6,8 @@
 	@Critical DECIMAL(9,3),
 	@CheckType CHAR(1),
 	@PctMaxSizeWarningThreshold DECIMAL(9,3),
-	@PctMaxSizeCriticalThreshold DECIMAL(9,3)
+	@PctMaxSizeCriticalThreshold DECIMAL(9,3),
+	@FreeSpaceCheckZeroAutogrowthOnly BIT
 )
 AS
 SET NOCOUNT ON
@@ -34,7 +35,8 @@ BEGIN
 		FreeSpaceCriticalThreshold,
 		FreeSpaceCheckType,
 		PctMaxSizeWarningThreshold,
-		PctMaxSizeCriticalThreshold
+		PctMaxSizeCriticalThreshold,
+		FreeSpaceCheckZeroAutogrowthOnly
 	)
 	VALUES
 	(   @InstanceID,    
@@ -44,7 +46,8 @@ BEGIN
 		@Critical, 
 		@CheckType,
 		@PctMaxSizeWarningThreshold,
-		@PctMaxSizeCriticalThreshold
+		@PctMaxSizeCriticalThreshold,
+		@FreeSpaceCheckZeroAutogrowthOnly
 		)
 END
 COMMIT;

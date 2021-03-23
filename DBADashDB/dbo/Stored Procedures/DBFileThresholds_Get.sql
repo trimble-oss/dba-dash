@@ -11,7 +11,8 @@ SELECT InstanceID,
        FreeSpaceCriticalThreshold,
        FreeSpaceCheckType,
 	   PctMaxSizeCriticalThreshold,
-	   PctMaxSizeWarningThreshold
+	   PctMaxSizeWarningThreshold,
+	   FreeSpaceCheckZeroAutogrowthOnly
 FROM dbo.DBFileThresholds
 WHERE InstanceID=@InstanceID 
 AND DatabaseID = @DatabaseID

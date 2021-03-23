@@ -2,6 +2,7 @@
 
 
 
+
 CREATE VIEW [dbo].[FileStatus]
 AS
 WITH F AS (SELECT F.FileID,
@@ -81,9 +82,11 @@ SELECT F.FileID,
 			WHEN F.type=2 THEN 'Filestream' 
 			WHEN cfg.FreeSpaceWarningThreshold IS NULL AND cfg.FreeSpaceCriticalThreshold IS NULL THEN 'No Threshold'
 			WHEN F.FilegroupUsedMB IS NULL THEN 'UsedMB is NULL'
+			WHEN cfg.FreeSpaceCheckZeroAutogrowthOnly=1 AND F.FilegroupAutogrowFileCount>0 THEN 'Autogrow enabled'
 			ELSE NULL END AS ExcludedReason, 
 	   CASE WHEN F.is_in_standby=1 OR F.is_read_only=1 OR F.is_db_read_only=1 OR F.state<>0 OR F.type=2 THEN 3 
 			WHEN F.FilegroupUsedMB IS NULL THEN 3
+			WHEN cfg.FreeSpaceCheckZeroAutogrowthOnly=1 AND F.FilegroupAutogrowFileCount>0 THEN 3
 			WHEN cfg.FreeSpaceCheckType='%' AND F.FilegroupPctFree<= cfg.FreeSpaceCriticalThreshold THEN 1 
 			WHEN cfg.FreeSpaceCheckType='M' AND F.FilegroupFreeMB<cfg.FreeSpaceCriticalThreshold THEN 1
 			WHEN cfg.FreeSpaceCheckType='%' AND F.FilegroupPctFree<=cfg.FreeSpaceWarningThreshold THEN 2
@@ -120,7 +123,7 @@ SELECT F.FileID,
 			WHEN F.type=2 THEN 'Filestream' 
 			WHEN cfg.PctMaxSizeWarningThreshold IS NULL AND cfg.PctMaxSizeCriticalThreshold IS NULL THEN 'No Threshold'
 			ELSE NULL END AS MaxSizeExcludedReason,
-	  CASE WHEN F.is_db_read_only=0 AND F.state=0 AND F.is_db_read_only=0 and F.is_in_standby=0 AND F.FilegroupAutogrowFileCount=0 THEN 2 WHEN F.FilegroupAutogrowFileCount=0 THEN 3 ELSE 4 END AS FilegroupAutogrowStatus
+	  CASE WHEN F.is_db_read_only=0 AND F.state=0 AND F.is_db_read_only=0 AND F.is_in_standby=0 AND F.FilegroupAutogrowFileCount=0 THEN 2 WHEN F.FilegroupAutogrowFileCount=0 THEN 3 ELSE 4 END AS FilegroupAutogrowStatus
 FROM F
 OUTER APPLY(SELECT TOP(1) T.FreeSpaceWarningThreshold,
                     T.FreeSpaceCriticalThreshold,
@@ -131,7 +134,8 @@ OUTER APPLY(SELECT TOP(1) T.FreeSpaceWarningThreshold,
 					WHEN T.InstanceID=-1 THEN 'Root'
 					ELSE 'N/A' END AS ConfiguredLevel,
 					T.PctMaxSizeWarningThreshold,
-					T.PctMaxSizeCriticalThreshold
+					T.PctMaxSizeCriticalThreshold,
+					T.FreeSpaceCheckZeroAutogrowthOnly
 			FROM dbo.DBFileThresholds T 
 			WHERE (T.InstanceID = F.InstanceID OR T.InstanceID=-1)
 			AND (T.DatabaseID = F.DatabaseID OR T.DatabaseID=-1)
