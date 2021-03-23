@@ -1,6 +1,12 @@
 ﻿CREATE PROC [dbo].[CPU_Upd](@CPU dbo.CPU READONLY,@InstanceID INT,@SnapshotDate DATETIME2(2))
 AS
 SET XACT_ABORT ON
+DECLARE @IsLinux BIT 
+SELECT @IsLinux = CASE WHEN EXISTS(SELECT 1 
+									FROM dbo.Instances
+									WHERE InstanceID = @InstanceID
+									AND host_platform = 'Linux') 
+						THEN CAST(1 as BIT) ELSE CAST(0 as BIT) END
 DECLARE @Ref VARCHAR(30)='CPU'
 
 DECLARE @MaxEventTime DATETIME2(3)
@@ -14,7 +20,7 @@ SET @MaxEventTimeHr = CONVERT(DATETIME,SUBSTRING(CONVERT(VARCHAR,@MaxEventTime,1
 
 BEGIN TRAN
 INSERT INTO dbo.CPU(InstanceID,EventTime,SQLProcessCPU,SystemIdleCPU)
-SELECT @InstanceID,EventTime,SQLProcessCPU,SystemIdleCPU 
+SELECT @InstanceID,EventTime,SQLProcessCPU,CASE WHEN @IsLinux=1 THEN 100-SQLProcessCPU ELSE SystemIdleCPU END
 FROM @CPU t
 WHERE t.EventTime>=@MaxEventTime
 AND SQLProcessCPU>=0 AND SQLProcessCPU<=100

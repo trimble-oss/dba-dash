@@ -157,9 +157,11 @@ namespace DBADash
                             cmd.Parameters.AddWithValue("InstantFileInitializationEnabled", r["InstantFileInitializationEnabled"]);
                             cmd.Parameters.AddWithValue("OfflineSchedulers", r["OfflineSchedulers"]);
                             cmd.Parameters.AddWithValue("ResourceGovernorEnabled", r["ResourceGovernorEnabled"]);
-                            cmd.Parameters.AddWithValue("WindowsRelease", r["WindowsRelease"]);
-                            cmd.Parameters.AddWithValue("WindowsSP", r["WindowsServicePackLevel"]);
-                            cmd.Parameters.AddWithValue("WindowsSKU", r["WindowsSKU"]);
+                            if (r.Table.Columns.Contains("WindowsRelease")) { // older version of the agent.  no longer collected here
+                                cmd.Parameters.AddWithValue("WindowsRelease", r["WindowsRelease"]);
+                                cmd.Parameters.AddWithValue("WindowsSP", r["WindowsServicePackLevel"]);
+                                cmd.Parameters.AddWithValue("WindowsSKU", r["WindowsSKU"]);
+                            }
                             cmd.Parameters.AddWithValue("LastMemoryDump", r["LastMemoryDump"]);
                             cmd.Parameters.AddWithValue("MemoryDumpCount", r["MemoryDumpCount"]);
                             cmd.Parameters.AddWithValue("WindowsCaption", r["WindowsCaption"]);
@@ -247,6 +249,15 @@ namespace DBADash
                     if (rInstance.Table.Columns.Contains("AgentVersion"))
                     {
                         cmd.Parameters.AddWithValue("AgentVersion", (string)rInstance["AgentVersion"]);
+                    }
+                    if (rInstance.Table.Columns.Contains("host_platform"))
+                    {
+                        cmd.Parameters.AddWithValue("HostPlatform", rInstance["host_platform"]);
+                        cmd.Parameters.AddWithValue("HostDistribution", rInstance["host_distribution"]);
+                        cmd.Parameters.AddWithValue("HostRelease", rInstance["host_release"]);
+                        cmd.Parameters.AddWithValue("HostServicePackLevel", rInstance["host_service_pack_level"]);
+                        cmd.Parameters.AddWithValue("HostSKU", rInstance["host_sku"]);
+                        cmd.Parameters.AddWithValue("OSLanguageVersion", rInstance["os_language_version"]);
                     }
                     cmd.Parameters.AddWithValue("EditionID", (long)rInstance["EditionID"]);
                     var pInstanceID = cmd.Parameters.Add("InstanceID", SqlDbType.Int);

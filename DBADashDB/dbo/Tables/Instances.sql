@@ -69,13 +69,16 @@
     [scheduler_count]                  INT              NULL,
     [ResourceGovernorEnabled]          BIT              NULL,
     [UTCOffset]                        INT              NULL,
-    [WindowsRelease]                   NVARCHAR (256)   NULL,
-    [WindowsSP]                        NVARCHAR (256)   NULL,
-    [WindowsSKU]                       NVARCHAR (256)   NULL,
+    [host_release]                   NVARCHAR (256)   NULL,
+    [host_service_pack_level]                        NVARCHAR (256)   NULL,
+    [host_sku]                       NVARCHAR (256)   NULL,
     [LastMemoryDump]                   DATETIME         NULL,
     [MemoryDumpCount]                  INT              NULL,
     [WindowsCaption]                   NVARCHAR (256)   NULL,
     [AgentVersion]                     VARCHAR (30)     NULL,
+    host_distribution NVARCHAR(256) NULL,
+    os_language_version INT NULL,
+    host_platform NVARCHAR(256) NULL,
     CONSTRAINT [PK_Instances] PRIMARY KEY CLUSTERED ([InstanceID] ASC)
 );
 

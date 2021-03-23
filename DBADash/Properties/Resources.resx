@@ -178,6 +178,9 @@
   <data name="SQLDrives" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\SQL\SQLDrives.sql;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
   </data>
+  <data name="SQLInstance" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\SQL\SQLInstance.sql;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
+  </data>
   <data name="SQLIOStats" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\SQL\SQLIOStats.sql;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
   </data>

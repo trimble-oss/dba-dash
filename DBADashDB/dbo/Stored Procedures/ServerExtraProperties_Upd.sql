@@ -10,10 +10,13 @@
     @IsAgentRunning BIT,
     @InstantFileInitializationEnabled BIT,
 	@OfflineSchedulers INT=NULL,
-	@ResourceGovernorEnabled BIT=NULL,
+	@ResourceGovernorEnabled BIT=NULL,	
+	-----------------------------------
+	-- no longer required (backward compatability)
 	@WindowsRelease NVARCHAR(256)= NULL,
 	@WindowsSP NVARCHAR(256)= NULL,
 	@WindowsSKU NVARCHAR(256)= NULL,
+	-----------------------------------
 	@LastMemoryDump DATETIME=NULL,
 	@MemoryDumpCount INT= NULL,
 	@WindowsCaption NVARCHAR(256)= NULL
@@ -60,9 +63,9 @@ BEGIN
 		InstantFileInitializationEnabled = @InstantFileInitializationEnabled,
 		OfflineSchedulers=@OfflineSchedulers,
 		ResourceGovernorEnabled=@ResourceGovernorEnabled,
-		WindowsRelease=@WindowsRelease,
-		WindowsSP=@WindowsSP,
-		WindowsSKU =@WindowsSKU,
+		host_release=ISNULL(@WindowsRelease,host_release),
+		host_service_pack_level=ISNULL(@WindowsSP, host_service_pack_level),
+		host_sku =ISNULL(@WindowsSKU,host_sku),
 		LastMemoryDump =@LastMemoryDump,
 		MemoryDumpCount=@MemoryDumpCount,
 		WindowsCaption =@WindowsCaption

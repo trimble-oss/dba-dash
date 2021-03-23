@@ -56,6 +56,12 @@ namespace DBADash
         DatabaseMirroring
     }
 
+    public enum HostPlatform
+    {
+        Linux,
+        Windows
+    }
+
 
     public class DBCollector
     {
@@ -77,6 +83,7 @@ namespace DBADash
         string productVersion;
         public Int32 RetryCount=1;
         public Int32 RetryInterval = 30;
+        private HostPlatform platform;
 
 
         public bool IsXESupported()
@@ -170,7 +177,7 @@ namespace DBADash
 
         public void GetInstance(string connectionID)
         {
-            var dt = getDT("DBADash", "SELECT @@SERVERNAME as Instance,GETUTCDATE() As SnapshotDateUTC,CAST(SERVERPROPERTY('EditionID') as bigint) as EditionID,ISNULL(CAST(SERVERPROPERTY('ComputerNamePhysicalNetBIOS') as nvarchar(128)),'') as ComputerNamePhysicalNetBIOS,DB_NAME() as DBName,SERVERPROPERTY ('productversion') as ProductVersion");
+            var dt = getDT("DBADash", Properties.Resources.SQLInstance);
             dt.Columns.Add("AgentVersion", typeof(string));
             dt.Columns.Add("ConnectionID", typeof(string));
             dt.Columns.Add("AgentHostName", typeof(string));
@@ -182,6 +189,16 @@ namespace DBADash
             dbName = (string)dt.Rows[0]["DBName"];
             instanceName = (string)dt.Rows[0]["Instance"];
             productVersion = (string)dt.Rows[0]["ProductVersion"];
+            string hostPlatform = (string)dt.Rows[0]["host_platform"];
+            if (!Enum.TryParse(hostPlatform, out platform))
+            {
+                logError("Instance", "host_platform parse error");
+                platform = HostPlatform.Windows;
+            }
+            if(platform == HostPlatform.Linux)
+            {
+                noWMI = true;
+            }
             if (editionId == 1674378470)
             {
                 IsAzure = true;
@@ -290,7 +307,10 @@ namespace DBADash
             }
             else if (collectionType == CollectionType.Drives)
             {
-                collectDrives();
+                if (platform == HostPlatform.Windows) // drive collection not supported on linux
+                {
+                    collectDrives();
+                }
             }
             else if (collectionType == CollectionType.ServerExtraProperties)
             {
@@ -559,9 +579,6 @@ namespace DBADash
                     Data.Tables["ServerExtraProperties"].Columns.Add("WindowsCaption");
                     if (manufacturer != "") { Data.Tables["ServerExtraProperties"].Rows[0]["SystemManufacturer"] = manufacturer; }
                     if (model != "") { Data.Tables["ServerExtraProperties"].Rows[0]["SystemProductName"] = model; }
-                    if (WindowsVersion != "") { Data.Tables["ServerExtraProperties"].Rows[0]["WindowsRelease"] = WindowsVersion; }
-                    if (WindowsSP != "") { Data.Tables["ServerExtraProperties"].Rows[0]["WindowsServicePackLevel"] = WindowsSP; }
-                    if (Data.Tables["ServerExtraProperties"].Rows[0]["WindowsSKU"] == DBNull.Value) { Data.Tables["ServerExtraProperties"].Rows[0]["WindowsSKU"] = WindowsSKU; }
                     Data.Tables["ServerExtraProperties"].Rows[0]["WindowsCaption"] = WindowsCaption;
                     if (Data.Tables["ServerExtraProperties"].Rows[0]["ActivePowerPlanGUID"] == DBNull.Value && noWMI == false)
                     {

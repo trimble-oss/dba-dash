@@ -5,6 +5,12 @@
 	@AgentHostName NVARCHAR(16),
 	@AgentVersion VARCHAR(30)=NULL,
 	@EditionID BIGINT=NULL,
+	@HostPlatform NVARCHAR(256)=NULL,
+	@HostDistribution NVARCHAR(256)=NULL,
+	@HostRelease NVARCHAR(256)=NULL,
+	@HostServicePackLevel NVARCHAR(256)=NULL,
+	@HostSKU INT=NULL,
+	@OSLanguageVersion INT=NULL,
 	@InstanceID INT OUT
 )
 AS
@@ -34,8 +40,37 @@ BEGIN
 		SET Instance = @Instance,
 			AgentHostName=@AgentHostName,
 			AgentVersion=@AgentVersion,
-			EditionID=@EditionID
+			EditionID=@EditionID,
+			host_platform=@HostPlatform,
+			host_distribution = @HostDistribution,
+			host_release = @HostRelease,
+			host_service_pack_level = @HostServicePackLevel,
+			host_sku = @HostSKU,
+			os_language_version = @OSLanguageVersion
 		WHERE InstanceID = @InstanceID
+		AND EXISTS(SELECT Instance,
+						AgentHostName,
+						AgentVersion,
+						EditionID,
+						host_platform,
+						host_distribution,
+						host_release,
+						host_service_pack_level,
+						host_sku,
+						os_language_version
+					EXCEPT
+					SELECT @Instance,
+							@AgentHostName,
+							@AgentVersion,
+							@EditionID,
+							@HostPlatform,
+							@HostDistribution,
+							@HostRelease,
+							@HostServicePackLevel,
+							@HostSKU,
+							@OSLanguageVersion
+					)
+		AND @HostPlatform IS NOT NULL -- for older agent version
 
 		EXEC dbo.CollectionDates_Upd @InstanceID = @InstanceID,  
 										 @Reference = @Ref,

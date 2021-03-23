@@ -70,14 +70,6 @@ BEGIN
 										WHERE is_enabled=1)
 										THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END
 END
-DECLARE @WindowsRelease NVARCHAR(256)
-DECLARE @WindowsSP NVARCHAR(256)
-DECLARE @WindowsSKU INT
-IF OBJECT_ID('sys.dm_os_windows_info') IS NOT NULL
-BEGIN
-	SELECT @WindowsRelease=windows_release,@WindowsSP = windows_service_pack_level,@WindowsSKU = windows_sku
-	FROM sys.dm_os_windows_info
-END
 DECLARE @LastMemoryDump DATETIME
 DECLARE @DumpCount INT
 IF OBJECT_ID('sys.dm_server_memory_dumps') IS NOT NULL
@@ -103,8 +95,5 @@ SELECT @ActivePowerPlan ActivePowerPlanGUID,
        @InstantFileInitializationEnabled InstantFileInitializationEnabled,
        @OfflineSchedulers OfflineSchedulers,
        @ResourceGovernorEnabled AS ResourceGovernorEnabled,
-       @WindowsRelease AS WindowsRelease,
-       @WindowsSP AS WindowsServicePackLevel,
-       @WindowsSKU AS WindowsSKU,
        @LastMemoryDump LastMemoryDump,
        @DumpCount AS MemoryDumpCount;

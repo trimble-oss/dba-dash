@@ -1,0 +1,24 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Operations Version="1.0" xmlns="http://schemas.microsoft.com/sqlserver/dac/Serialization/2012/02">
+  <Operation Name="Rename Refactor" Key="d6fb0ac3-7da1-4a4c-bf68-6e6c992d2c9c" ChangeDateTime="03/23/2021 21:18:57">
+    <Property Name="ElementName" Value="[dbo].[Instances].[WindowsRelease]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[Instances]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="host_release" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="a0c7a369-1569-4689-a57b-fd0339f7220b" ChangeDateTime="03/23/2021 21:19:15">
+    <Property Name="ElementName" Value="[dbo].[Instances].[WindowsSP]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[Instances]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="host_service_pack_level" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="8338c652-48d2-4d01-9912-539c5945ff72" ChangeDateTime="03/23/2021 21:19:26">
+    <Property Name="ElementName" Value="[dbo].[Instances].[WindowsSKU]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[Instances]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="host_sku" />
+  </Operation>
+</Operations>

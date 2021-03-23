@@ -520,6 +520,20 @@ namespace DBADash.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to IF OBJECT_ID(&apos;sys.dm_os_host_info&apos;) IS NOT NULL
+        ///BEGIN
+        ///	SELECT host_platform,host_distribution,host_release,host_service_pack_level,host_sku,os_language_version,@@SERVERNAME as Instance,GETUTCDATE() As SnapshotDateUTC,CAST(SERVERPROPERTY(&apos;EditionID&apos;) as bigint) as EditionID,ISNULL(CAST(SERVERPROPERTY(&apos;ComputerNamePhysicalNetBIOS&apos;) as nvarchar(128)),&apos;&apos;) as ComputerNamePhysicalNetBIOS,DB_NAME() as DBName,SERVERPROPERTY (&apos;productversion&apos;) as ProductVersion
+        ///	FROM sys.dm_os_host_info
+        ///END
+        ///ELSE IF OBJECT_ID(&apos;s [rest of string was truncated]&quot;;.
+        /// </summary>
+        internal static string SQLInstance {
+            get {
+                return ResourceManager.GetString("SQLInstance", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to IF SERVERPROPERTY(&apos;EditionID&apos;)=1674378470
         ///BEGIN
         ///	SELECT GETUTCDATE() AS SnapshotDate,
