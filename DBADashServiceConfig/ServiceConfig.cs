@@ -88,13 +88,6 @@ namespace DBADashServiceConfig
                     src.SlowQueryThresholdMs = -1;
                     src.PersistXESessions = false;
                 }
-                else if (src.SourceConnection.IsAzureDB() && (src.SourceConnection.InitialCatalog() == "" || src.SourceConnection.InitialCatalog() == "master"))
-                {
-                    if (MessageBox.Show("Add all azure databases as connections?", "Add Connections", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
-                    {
-                        collectionConfig.AddAzureDBs(src);                     
-                    }
-                }
 
                 var existingConnection = collectionConfig.GetSourceFromConnectionString(cboSource.Text);
                 if (existingConnection != null)
