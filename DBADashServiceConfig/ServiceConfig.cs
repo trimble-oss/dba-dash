@@ -41,6 +41,7 @@ namespace DBADashServiceConfig
             {
                 src.Schedules = src.GetSchedule();
             }
+            src.UseDualEventSession = chkDualSession.Checked;
             src.SchemaSnapshotOnServiceStart = chkSchemaSnapshotOnStart.Checked;
             if (txtSnapshotDBs.Text.Trim().Length > 0)
             {
@@ -117,10 +118,7 @@ namespace DBADashServiceConfig
                 txtJson.Text = collectionConfig.Serialize();
                 populateDropDowns();
             }
-            // JsonConvert.DeserializeObject<CollectionConfig[]>(jsonConfig);
         }
-
-
 
 
         private void populateDropDowns()
@@ -535,6 +533,8 @@ namespace DBADashServiceConfig
                 numSlowQueryThreshold.Value = -1;
                 lblSlow.Text = "Extended events trace to capture slow rpc and batch completed events is NOT enabled";
             }
+            chkDualSession.Enabled= chkSlowQueryThreshold.Checked;
+            chkPersistXESession.Enabled = chkSlowQueryThreshold.Checked;
 
         }
 
@@ -561,7 +561,7 @@ namespace DBADashServiceConfig
                 txtSnapshotCron.Text = src.SchemaSnapshotCron;
                 txtSnapshotDBs.Text = src.SchemaSnapshotDBs;
                 chkSchemaSnapshotOnStart.Checked = src.SchemaSnapshotOnServiceStart;
-
+                chkDualSession.Checked = src.UseDualEventSession;
             }
         }
 

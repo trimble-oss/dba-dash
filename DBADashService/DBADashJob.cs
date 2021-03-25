@@ -159,6 +159,7 @@ namespace DBADashService
                         }
                         collector.SlowQueryThresholdMs = cfg.SlowQueryThresholdMs;
                         collector.SlowQueryMaxMemoryKB = cfg.SlowQuerySessionMaxMemoryKB;
+                        collector.UseDualEventSession = cfg.UseDualEventSession;
                         collector.Collect(types);
 
                         try

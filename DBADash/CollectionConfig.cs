@@ -278,7 +278,8 @@ namespace DBADash
                     {
                         Schedules = masterConnection.Schedules,
                         SlowQueryThresholdMs = masterConnection.SlowQueryThresholdMs,
-                        SlowQuerySessionMaxMemoryKB = masterConnection.SlowQuerySessionMaxMemoryKB
+                        SlowQuerySessionMaxMemoryKB = masterConnection.SlowQuerySessionMaxMemoryKB,
+                        UseDualEventSession = masterConnection.UseDualEventSession
                     };
                     if (masterConnection.SchemaSnapshotDBs == "*")
                     {

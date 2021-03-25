@@ -74,6 +74,7 @@
             this.lblSlow = new System.Windows.Forms.Label();
             this.numSlowQueryThreshold = new System.Windows.Forms.NumericUpDown();
             this.tabPage7 = new System.Windows.Forms.TabPage();
+            this.lnkCronBuilder = new System.Windows.Forms.LinkLabel();
             this.chkSchemaSnapshotOnStart = new System.Windows.Forms.CheckBox();
             this.label8 = new System.Windows.Forms.Label();
             this.txtSnapshotCron = new System.Windows.Forms.TextBox();
@@ -82,6 +83,7 @@
             this.bttnRemove = new System.Windows.Forms.Button();
             this.tabPage2 = new System.Windows.Forms.TabPage();
             this.tabAzureDB = new System.Windows.Forms.TabPage();
+            this.lblHHmm = new System.Windows.Forms.Label();
             this.numAzureScanInterval = new System.Windows.Forms.NumericUpDown();
             this.label11 = new System.Windows.Forms.Label();
             this.chkScanEvery = new System.Windows.Forms.CheckBox();
@@ -90,8 +92,7 @@
             this.chkScanAzureDB = new System.Windows.Forms.CheckBox();
             this.tabPage4 = new System.Windows.Forms.TabPage();
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
-            this.lblHHmm = new System.Windows.Forms.Label();
-            this.lnkCronBuilder = new System.Windows.Forms.LinkLabel();
+            this.chkDualSession = new System.Windows.Forms.CheckBox();
             ((System.ComponentModel.ISupportInitialize)(this.errorProvider1)).BeginInit();
             this.tabControl1.SuspendLayout();
             this.tabPage3.SuspendLayout();
@@ -512,6 +513,7 @@
             // 
             // tabExtendedEvents
             // 
+            this.tabExtendedEvents.Controls.Add(this.chkDualSession);
             this.tabExtendedEvents.Controls.Add(this.label9);
             this.tabExtendedEvents.Controls.Add(this.chkSlowQueryThreshold);
             this.tabExtendedEvents.Controls.Add(this.chkPersistXESession);
@@ -529,7 +531,7 @@
             // label9
             // 
             this.label9.AutoSize = true;
-            this.label9.Location = new System.Drawing.Point(6, 57);
+            this.label9.Location = new System.Drawing.Point(6, 91);
             this.label9.Name = "label9";
             this.label9.Size = new System.Drawing.Size(108, 17);
             this.label9.TabIndex = 16;
@@ -549,6 +551,7 @@
             // chkPersistXESession
             // 
             this.chkPersistXESession.AutoSize = true;
+            this.chkPersistXESession.Enabled = false;
             this.chkPersistXESession.Location = new System.Drawing.Point(6, 33);
             this.chkPersistXESession.Name = "chkPersistXESession";
             this.chkPersistXESession.Size = new System.Drawing.Size(372, 21);
@@ -574,7 +577,7 @@
             0,
             0,
             0});
-            this.numSlowQueryThreshold.Location = new System.Drawing.Point(117, 55);
+            this.numSlowQueryThreshold.Location = new System.Drawing.Point(117, 89);
             this.numSlowQueryThreshold.Maximum = new decimal(new int[] {
             604800000,
             0,
@@ -609,6 +612,18 @@
             this.tabPage7.TabIndex = 2;
             this.tabPage7.Text = "Schema Snapshots";
             this.tabPage7.UseVisualStyleBackColor = true;
+            // 
+            // lnkCronBuilder
+            // 
+            this.lnkCronBuilder.AutoSize = true;
+            this.lnkCronBuilder.Location = new System.Drawing.Point(197, 83);
+            this.lnkCronBuilder.Name = "lnkCronBuilder";
+            this.lnkCronBuilder.Size = new System.Drawing.Size(136, 17);
+            this.lnkCronBuilder.TabIndex = 22;
+            this.lnkCronBuilder.TabStop = true;
+            this.lnkCronBuilder.Text = "www.cronmaker.com";
+            this.toolTip1.SetToolTip(this.lnkCronBuilder, "For help building cron expressions");
+            this.lnkCronBuilder.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.lnkCronBuilder_LinkClicked);
             // 
             // chkSchemaSnapshotOnStart
             // 
@@ -696,6 +711,14 @@
             this.tabAzureDB.TabIndex = 4;
             this.tabAzureDB.Text = "AzureDB";
             this.tabAzureDB.UseVisualStyleBackColor = true;
+            // 
+            // lblHHmm
+            // 
+            this.lblHHmm.AutoSize = true;
+            this.lblHHmm.Location = new System.Drawing.Point(592, 51);
+            this.lblHHmm.Name = "lblHHmm";
+            this.lblHHmm.Size = new System.Drawing.Size(0, 17);
+            this.lblHHmm.TabIndex = 29;
             // 
             // numAzureScanInterval
             // 
@@ -792,25 +815,20 @@
             this.tabPage4.Text = "Service";
             this.tabPage4.UseVisualStyleBackColor = true;
             // 
-            // lblHHmm
+            // chkDualSession
             // 
-            this.lblHHmm.AutoSize = true;
-            this.lblHHmm.Location = new System.Drawing.Point(592, 51);
-            this.lblHHmm.Name = "lblHHmm";
-            this.lblHHmm.Size = new System.Drawing.Size(0, 17);
-            this.lblHHmm.TabIndex = 29;
-            // 
-            // lnkCronBuilder
-            // 
-            this.lnkCronBuilder.AutoSize = true;
-            this.lnkCronBuilder.Location = new System.Drawing.Point(197, 83);
-            this.lnkCronBuilder.Name = "lnkCronBuilder";
-            this.lnkCronBuilder.Size = new System.Drawing.Size(136, 17);
-            this.lnkCronBuilder.TabIndex = 22;
-            this.lnkCronBuilder.TabStop = true;
-            this.lnkCronBuilder.Text = "www.cronmaker.com";
-            this.toolTip1.SetToolTip(this.lnkCronBuilder, "For help building cron expressions");
-            this.lnkCronBuilder.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.lnkCronBuilder_LinkClicked);
+            this.chkDualSession.AutoSize = true;
+            this.chkDualSession.Checked = true;
+            this.chkDualSession.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.chkDualSession.Enabled = false;
+            this.chkDualSession.Location = new System.Drawing.Point(6, 60);
+            this.chkDualSession.Name = "chkDualSession";
+            this.chkDualSession.Size = new System.Drawing.Size(138, 21);
+            this.chkDualSession.TabIndex = 17;
+            this.chkDualSession.Text = "Use dual session";
+            this.toolTip1.SetToolTip(this.chkDualSession, "Uses overlapping event sessions to try to capture events that occur during the br" +
+        "eif period where the session is stopped to flush the ring buffer.");
+            this.chkDualSession.UseVisualStyleBackColor = true;
             // 
             // ServiceConfig
             // 
@@ -918,6 +936,7 @@
         private System.Windows.Forms.NumericUpDown numAzureScanInterval;
         private System.Windows.Forms.Label lblHHmm;
         private System.Windows.Forms.LinkLabel lnkCronBuilder;
+        private System.Windows.Forms.CheckBox chkDualSession;
     }
 }
 

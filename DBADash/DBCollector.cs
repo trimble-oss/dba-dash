@@ -75,6 +75,7 @@ namespace DBADash
         readonly CollectionType[] azureCollectionTypes = new CollectionType[] { CollectionType.SlowQueries, CollectionType.AzureDBElasticPoolResourceStats, CollectionType.AzureDBServiceObjectives, CollectionType.AzureDBResourceStats, CollectionType.CPU, CollectionType.DBFiles, CollectionType.General, CollectionType.Performance, CollectionType.Databases, CollectionType.DBConfig, CollectionType.TraceFlags, CollectionType.ObjectExecutionStats, CollectionType.BlockingSnapshot, CollectionType.IOStats, CollectionType.Waits, CollectionType.ServerProperties, CollectionType.DBTuningOptions, CollectionType.SysConfig, CollectionType.DatabasePrincipals, CollectionType.DatabaseRoleMembers, CollectionType.DatabasePermissions, CollectionType.Infrequent, CollectionType.OSInfo,CollectionType.CustomChecks,CollectionType.PerformanceCounters,CollectionType.VLF };
         public Int64 SlowQueryThresholdMs = -1;
         public Int32 SlowQueryMaxMemoryKB { get; set; } = 4096;
+        public bool UseDualEventSession { get; set; } = true;
 
         private bool IsAzure = false;
         private bool isAzureMasterDB = false;
@@ -540,6 +541,7 @@ namespace DBADash
 
                         cmd.Parameters.AddWithValue("SlowQueryThreshold", SlowQueryThresholdMs * 1000);
                         cmd.Parameters.AddWithValue("MaxMemory", SlowQueryMaxMemoryKB);
+                        cmd.Parameters.AddWithValue("UseDualSession", UseDualEventSession);
                         var result = cmd.ExecuteScalar();
                         if (result == DBNull.Value)
                         {

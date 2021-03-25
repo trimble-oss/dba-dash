@@ -75,6 +75,9 @@ namespace DBADash
 
         public Int32 SlowQuerySessionMaxMemoryKB { get; set; } = 4096;
 
+        [DefaultValue(true)]
+        public bool UseDualEventSession { get; set; } = true;
+
         [DefaultValue(-1)]
         public Int32 SlowQueryThresholdMs
         {
