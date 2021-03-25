@@ -276,6 +276,7 @@
   <ItemGroup>
     <None Include="Resources\ASX_Copy_blue_16x.png" />
     <None Include="Resources\Connect_16x.png" />
+    <None Include="Resources\FolderOpened_16x.png" />
     <Content Include="services.ico" />
   </ItemGroup>
   <ItemGroup>

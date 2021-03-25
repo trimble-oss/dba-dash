@@ -706,5 +706,27 @@ namespace DBADashServiceConfig
         {
             Process.Start("http://www.cronmaker.com/");
         }
+
+        private void bttnDestFolder_Click(object sender, EventArgs e)
+        {
+            using (var fbd = new FolderBrowserDialog())
+            {
+                if (fbd.ShowDialog() == DialogResult.OK)
+                {
+                    txtDestination.Text = fbd.SelectedPath;
+                }
+            }
+        }
+
+        private void bttnSrcFolder_Click_1(object sender, EventArgs e)
+        {
+            using (var fbd = new FolderBrowserDialog())
+            {
+                if (fbd.ShowDialog() == DialogResult.OK)
+                {
+                    cboSource.Text  = fbd.SelectedPath;
+                }
+            }
+        }
     }
 }

@@ -56,6 +56,7 @@
             this.bttnCancel = new System.Windows.Forms.Button();
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabPage3 = new System.Windows.Forms.TabPage();
+            this.bttnDestFolder = new System.Windows.Forms.Button();
             this.chkAutoUpgradeRepoDB = new System.Windows.Forms.CheckBox();
             this.bttnConnect = new System.Windows.Forms.Button();
             this.lblVersionInfo = new System.Windows.Forms.Label();
@@ -68,6 +69,7 @@
             this.tabGeneral = new System.Windows.Forms.TabPage();
             this.bttnConnectSource = new System.Windows.Forms.Button();
             this.tabExtendedEvents = new System.Windows.Forms.TabPage();
+            this.chkDualSession = new System.Windows.Forms.CheckBox();
             this.label9 = new System.Windows.Forms.Label();
             this.chkSlowQueryThreshold = new System.Windows.Forms.CheckBox();
             this.chkPersistXESession = new System.Windows.Forms.CheckBox();
@@ -92,7 +94,7 @@
             this.chkScanAzureDB = new System.Windows.Forms.CheckBox();
             this.tabPage4 = new System.Windows.Forms.TabPage();
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
-            this.chkDualSession = new System.Windows.Forms.CheckBox();
+            this.bttnSrcFolder = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.errorProvider1)).BeginInit();
             this.tabControl1.SuspendLayout();
             this.tabPage3.SuspendLayout();
@@ -115,7 +117,7 @@
             this.cboSource.Location = new System.Drawing.Point(6, 27);
             this.cboSource.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.cboSource.Name = "cboSource";
-            this.cboSource.Size = new System.Drawing.Size(684, 24);
+            this.cboSource.Size = new System.Drawing.Size(655, 24);
             this.cboSource.TabIndex = 0;
             this.cboSource.SelectedIndexChanged += new System.EventHandler(this.cboSource_SelectedIndexChanged);
             // 
@@ -376,6 +378,7 @@
             // 
             // tabPage3
             // 
+            this.tabPage3.Controls.Add(this.bttnDestFolder);
             this.tabPage3.Controls.Add(this.chkAutoUpgradeRepoDB);
             this.tabPage3.Controls.Add(this.bttnConnect);
             this.tabPage3.Controls.Add(this.lblVersionInfo);
@@ -390,6 +393,17 @@
             this.tabPage3.TabIndex = 2;
             this.tabPage3.Text = "Destination:";
             this.tabPage3.UseVisualStyleBackColor = true;
+            // 
+            // bttnDestFolder
+            // 
+            this.bttnDestFolder.Image = global::DBADashServiceConfig.Properties.Resources.FolderOpened_16x;
+            this.bttnDestFolder.Location = new System.Drawing.Point(693, 20);
+            this.bttnDestFolder.Name = "bttnDestFolder";
+            this.bttnDestFolder.Size = new System.Drawing.Size(28, 23);
+            this.bttnDestFolder.TabIndex = 9;
+            this.toolTip1.SetToolTip(this.bttnDestFolder, "Choose a folder destination path");
+            this.bttnDestFolder.UseVisualStyleBackColor = true;
+            this.bttnDestFolder.Click += new System.EventHandler(this.bttnDestFolder_Click);
             // 
             // chkAutoUpgradeRepoDB
             // 
@@ -488,6 +502,7 @@
             // 
             // tabGeneral
             // 
+            this.tabGeneral.Controls.Add(this.bttnSrcFolder);
             this.tabGeneral.Controls.Add(this.bttnConnectSource);
             this.tabGeneral.Controls.Add(this.cboSource);
             this.tabGeneral.Controls.Add(this.label1);
@@ -504,7 +519,7 @@
             // bttnConnectSource
             // 
             this.bttnConnectSource.Image = global::DBADashServiceConfig.Properties.Resources.Connect_16x;
-            this.bttnConnectSource.Location = new System.Drawing.Point(696, 27);
+            this.bttnConnectSource.Location = new System.Drawing.Point(667, 27);
             this.bttnConnectSource.Name = "bttnConnectSource";
             this.bttnConnectSource.Size = new System.Drawing.Size(28, 23);
             this.bttnConnectSource.TabIndex = 8;
@@ -527,6 +542,21 @@
             this.tabExtendedEvents.TabIndex = 1;
             this.tabExtendedEvents.Text = "Extended Events";
             this.tabExtendedEvents.UseVisualStyleBackColor = true;
+            // 
+            // chkDualSession
+            // 
+            this.chkDualSession.AutoSize = true;
+            this.chkDualSession.Checked = true;
+            this.chkDualSession.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.chkDualSession.Enabled = false;
+            this.chkDualSession.Location = new System.Drawing.Point(6, 60);
+            this.chkDualSession.Name = "chkDualSession";
+            this.chkDualSession.Size = new System.Drawing.Size(138, 21);
+            this.chkDualSession.TabIndex = 17;
+            this.chkDualSession.Text = "Use dual session";
+            this.toolTip1.SetToolTip(this.chkDualSession, "Uses overlapping event sessions to try to capture events that occur during the br" +
+        "eif period where the session is stopped to flush the ring buffer.");
+            this.chkDualSession.UseVisualStyleBackColor = true;
             // 
             // label9
             // 
@@ -815,20 +845,16 @@
             this.tabPage4.Text = "Service";
             this.tabPage4.UseVisualStyleBackColor = true;
             // 
-            // chkDualSession
+            // bttnSrcFolder
             // 
-            this.chkDualSession.AutoSize = true;
-            this.chkDualSession.Checked = true;
-            this.chkDualSession.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.chkDualSession.Enabled = false;
-            this.chkDualSession.Location = new System.Drawing.Point(6, 60);
-            this.chkDualSession.Name = "chkDualSession";
-            this.chkDualSession.Size = new System.Drawing.Size(138, 21);
-            this.chkDualSession.TabIndex = 17;
-            this.chkDualSession.Text = "Use dual session";
-            this.toolTip1.SetToolTip(this.chkDualSession, "Uses overlapping event sessions to try to capture events that occur during the br" +
-        "eif period where the session is stopped to flush the ring buffer.");
-            this.chkDualSession.UseVisualStyleBackColor = true;
+            this.bttnSrcFolder.Image = global::DBADashServiceConfig.Properties.Resources.FolderOpened_16x;
+            this.bttnSrcFolder.Location = new System.Drawing.Point(701, 28);
+            this.bttnSrcFolder.Name = "bttnSrcFolder";
+            this.bttnSrcFolder.Size = new System.Drawing.Size(28, 23);
+            this.bttnSrcFolder.TabIndex = 10;
+            this.toolTip1.SetToolTip(this.bttnSrcFolder, "Choose a folder source path");
+            this.bttnSrcFolder.UseVisualStyleBackColor = true;
+            this.bttnSrcFolder.Click += new System.EventHandler(this.bttnSrcFolder_Click_1);
             // 
             // ServiceConfig
             // 
@@ -937,6 +963,8 @@
         private System.Windows.Forms.Label lblHHmm;
         private System.Windows.Forms.LinkLabel lnkCronBuilder;
         private System.Windows.Forms.CheckBox chkDualSession;
+        private System.Windows.Forms.Button bttnDestFolder;
+        private System.Windows.Forms.Button bttnSrcFolder;
     }
 }
 
