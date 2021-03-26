@@ -670,14 +670,14 @@
             dataGridViewCellStyle2.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
             this.gvHistory.DefaultCellStyle = dataGridViewCellStyle2;
             this.gvHistory.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.gvHistory.Location = new System.Drawing.Point(0, 305);
+            this.gvHistory.Location = new System.Drawing.Point(0, 25);
             this.gvHistory.MultiSelect = false;
             this.gvHistory.Name = "gvHistory";
             this.gvHistory.ReadOnly = true;
             this.gvHistory.RowHeadersWidth = 51;
             this.gvHistory.RowTemplate.Height = 24;
             this.gvHistory.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-            this.gvHistory.Size = new System.Drawing.Size(1625, 365);
+            this.gvHistory.Size = new System.Drawing.Size(1625, 645);
             this.gvHistory.TabIndex = 0;
             this.gvHistory.SelectionChanged += new System.EventHandler(this.gvHistory_SelectionChanged);
             // 
@@ -755,7 +755,7 @@
             this.label1.Dock = System.Windows.Forms.DockStyle.Top;
             this.label1.Location = new System.Drawing.Point(0, 0);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(1625, 305);
+            this.label1.Size = new System.Drawing.Size(1625, 25);
             this.label1.TabIndex = 2;
             this.label1.Text = "Snapshot History";
             this.label1.TextAlign = System.Drawing.ContentAlignment.TopCenter;
