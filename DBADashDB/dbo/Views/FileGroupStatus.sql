@@ -1,7 +1,4 @@
-﻿
-
-
-CREATE VIEW [dbo].[FilegroupStatus]
+﻿CREATE VIEW [dbo].[FilegroupStatus]
 AS
 WITH F AS (
 SELECT InstanceID,
@@ -11,7 +8,7 @@ SELECT InstanceID,
        ConnectionID,
        name,
        file_name,
-       Filegroup_name,
+       filegroup_name,
        physical_name,
        FileSizeMB,
        FileUsedMB,
@@ -54,7 +51,7 @@ SELECT NULL AS FileID,
        F.ConnectionID,
        F.name,
        NULL AS file_name,
-       F.Filegroup_name,
+       F.filegroup_name,
        NULL AS physical_name,
        F.FilegroupSizeMB AS FileSizeMB,
        F.FilegroupUsedMB AS FileUsedMB,

@@ -56,7 +56,7 @@ WITH LS AS (
 	SELECT InstanceID,
 		MIN(NULLIF(FreeSpaceStatus,3)) AS FileFreeSpaceStatus,
 		MIN(NULLIF(PctMaxSizeStatus,3)) AS PctMaxSizeStatus
-	FROM dbo.FileGroupStatus
+	FROM dbo.FilegroupStatus
 	GROUP BY InstanceID
 ),
 J AS (

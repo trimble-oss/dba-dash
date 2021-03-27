@@ -1,54 +1,50 @@
-﻿
-
-
-
-
-CREATE VIEW [dbo].[FileStatus]
+﻿CREATE VIEW [dbo].[FileStatus]
 AS
-WITH F AS (SELECT F.FileID,
-	   D.InstanceID,
-       F.DatabaseID,
-       F.data_space_id,
-       I.Instance,
-	   I.ConnectionID,
-       D.name,
-	   F.name AS file_name,
-       F.Filegroup_name,
-	   F.physical_name,
-	   f.size/128.0 AS FileSizeMB,
-	   f.space_used /128.0 AS FileUsedMB,
-	   (f.size-f.space_used) / 128.0 AS FileFreeMB,
-	   1.0 - (f.space_used/(NULLIF(f.size,0)*1.0)) AS FilePctFree,
-	   SUM(F.size) OVER(PARTITION BY F.data_space_id, F.DatabaseID) /128.0 AS FilegroupSizeMB,
-       SUM(F.space_used) OVER(PARTITION BY F.data_space_id, F.DatabaseID) /128.0 AS FilegroupUsedMB,
-	   SUM(F.size-F.space_used) OVER(PARTITION BY F.data_space_id, F.DatabaseID) / 128.0 AS FilegroupFreeMB,
-	   1.0-(SUM(f.space_used) OVER(PARTITION BY F.data_space_id, F.DatabaseID) /SUM(NULLIF(f.size,0)*1.0) OVER(PARTITION BY f.data_space_id, F.DatabaseID)) AS FilegroupPctFree,
-       COUNT(*) OVER(PARTITION BY F.data_space_id,F.DatabaseID) AS FilegroupNumberOfFiles,
-	   CASE WHEN MIN(f.max_size) OVER(PARTITION BY F.data_space_id, F.DatabaseID) <0 THEN NULL ELSE SUM(F.max_size) OVER(PARTITION BY F.data_space_id, F.DatabaseID)  /128.0 END AS FilegroupMaxSizeMB,
-	   CASE WHEN MIN(f.max_size) OVER(PARTITION BY F.data_space_id, F.DatabaseID) <0 THEN NULL ELSE SUM(F.size) OVER(PARTITION BY F.data_space_id, F.DatabaseID) /NULLIF(SUM(F.max_size) OVER(PARTITION BY F.data_space_id, F.DatabaseID) *1.0,0) END AS FilegroupPctOfMaxSize,
-	   CASE WHEN MIN(f.max_size) OVER(PARTITION BY F.data_space_id, F.DatabaseID) <0 THEN NULL ELSE SUM(F.space_used) OVER(PARTITION BY F.data_space_id, F.DatabaseID) /NULLIF(SUM(F.max_size) OVER(PARTITION BY F.data_space_id, F.DatabaseID) *1.0,0) END AS FilegroupUsedPctOfMaxSize,
-	   SUM(CASE WHEN f.growth>0 THEN 1 WHEN f.type=2 THEN NULL ELSE 0 END) OVER(PARTITION BY F.data_space_id,F.DatabaseID) AS FilegroupAutogrowFileCount,
-	   f.is_read_only,
-	   D.is_read_only AS is_db_read_only,
-	   D.is_in_standby,
-	   D.state,
-	   D.state_desc,
-	   F.type,
-	   SSD.SnapshotDate AS FileSnapshotDate,
-	   DATEDIFF(mi,SSD.SnapshotDate,GETUTCDATE()) AS FileSnapshotAge,
-	   F.max_size,
-	   NULLIF(f.max_size,-1)/128.0 AS MaxSizeMB,
-	   CASE WHEN F.is_percent_growth=1 THEN (F.growth*0.01*F.size)/128.0 ELSE F.growth/128.0 END AS GrowthMB,
-	   F.growth,
-	   CASE WHEN F.is_percent_growth=1 THEN F.growth ELSE NULL END AS GrowthPct,
-	   F.is_percent_growth
-FROM dbo.DBFiles F
-    JOIN dbo.Databases D ON D.DatabaseID = F.DatabaseID
-    JOIN dbo.Instances I ON I.InstanceID = D.InstanceID
-	LEFT JOIN dbo.CollectionDates SSD ON I.InstanceID = SSD.InstanceID AND SSD.Reference='DBFiles'
-	WHERE F.IsActive=1
-	AND I.IsActive=1
-	AND D.IsActive=1
+WITH F AS (
+	SELECT F.FileID,
+				   D.InstanceID,
+				   F.DatabaseID,
+				   F.data_space_id,
+				   I.Instance,
+				   I.ConnectionID,
+				   D.name,
+				   F.name AS file_name,
+				   F.filegroup_name,
+				   F.physical_name,
+				   f.size/128.0 AS FileSizeMB,
+				   f.space_used /128.0 AS FileUsedMB,
+				   (f.size-f.space_used) / 128.0 AS FileFreeMB,
+				   1.0 - (f.space_used/(NULLIF(f.size,0)*1.0)) AS FilePctFree,
+				   SUM(F.size) OVER(PARTITION BY F.data_space_id, F.DatabaseID) /128.0 AS FilegroupSizeMB,
+				   SUM(F.space_used) OVER(PARTITION BY F.data_space_id, F.DatabaseID) /128.0 AS FilegroupUsedMB,
+				   SUM(F.size-F.space_used) OVER(PARTITION BY F.data_space_id, F.DatabaseID) / 128.0 AS FilegroupFreeMB,
+				   1.0-(SUM(f.space_used) OVER(PARTITION BY F.data_space_id, F.DatabaseID) /SUM(NULLIF(f.size,0)*1.0) OVER(PARTITION BY f.data_space_id, F.DatabaseID)) AS FilegroupPctFree,
+				   COUNT(*) OVER(PARTITION BY F.data_space_id,F.DatabaseID) AS FilegroupNumberOfFiles,
+				   CASE WHEN MIN(f.max_size) OVER(PARTITION BY F.data_space_id, F.DatabaseID) <0 THEN NULL ELSE SUM(F.max_size) OVER(PARTITION BY F.data_space_id, F.DatabaseID)  /128.0 END AS FilegroupMaxSizeMB,
+				   CASE WHEN MIN(f.max_size) OVER(PARTITION BY F.data_space_id, F.DatabaseID) <0 THEN NULL ELSE SUM(F.size) OVER(PARTITION BY F.data_space_id, F.DatabaseID) /NULLIF(SUM(F.max_size) OVER(PARTITION BY F.data_space_id, F.DatabaseID) *1.0,0) END AS FilegroupPctOfMaxSize,
+				   CASE WHEN MIN(f.max_size) OVER(PARTITION BY F.data_space_id, F.DatabaseID) <0 THEN NULL ELSE SUM(F.space_used) OVER(PARTITION BY F.data_space_id, F.DatabaseID) /NULLIF(SUM(F.max_size) OVER(PARTITION BY F.data_space_id, F.DatabaseID) *1.0,0) END AS FilegroupUsedPctOfMaxSize,
+				   SUM(CASE WHEN f.growth>0 THEN 1 WHEN f.type=2 THEN NULL ELSE 0 END) OVER(PARTITION BY F.data_space_id,F.DatabaseID) AS FilegroupAutogrowFileCount,
+				   f.is_read_only,
+				   D.is_read_only AS is_db_read_only,
+				   D.is_in_standby,
+				   D.state,
+				   D.state_desc,
+				   F.type,
+				   SSD.SnapshotDate AS FileSnapshotDate,
+				   DATEDIFF(mi,SSD.SnapshotDate,GETUTCDATE()) AS FileSnapshotAge,
+				   F.max_size,
+				   NULLIF(f.max_size,-1)/128.0 AS MaxSizeMB,
+				   CASE WHEN F.is_percent_growth=1 THEN (F.growth*0.01*F.size)/128.0 ELSE F.growth/128.0 END AS GrowthMB,
+				   F.growth,
+				   CASE WHEN F.is_percent_growth=1 THEN F.growth ELSE NULL END AS GrowthPct,
+				   F.is_percent_growth
+		FROM dbo.DBFiles F
+			JOIN dbo.Databases D ON D.DatabaseID = F.DatabaseID
+			JOIN dbo.Instances I ON I.InstanceID = D.InstanceID
+			LEFT JOIN dbo.CollectionDates SSD ON I.InstanceID = SSD.InstanceID AND SSD.Reference='DBFiles'
+			WHERE F.IsActive=1
+			AND I.IsActive=1
+			AND D.IsActive=1
 )
 SELECT F.FileID,
 	   F.InstanceID,
@@ -58,7 +54,7 @@ SELECT F.FileID,
 	   F.ConnectionID,
        F.name,
 	   F.file_name,
-       F.Filegroup_name,
+       F.filegroup_name,
 	   F.physical_name,
 	   F.FileSizeMB,
 	   F.FileUsedMB,
@@ -123,7 +119,7 @@ SELECT F.FileID,
 			WHEN F.type=2 THEN 'Filestream' 
 			WHEN cfg.PctMaxSizeWarningThreshold IS NULL AND cfg.PctMaxSizeCriticalThreshold IS NULL THEN 'No Threshold'
 			ELSE NULL END AS MaxSizeExcludedReason,
-	  CASE WHEN F.is_db_read_only=0 AND F.state=0 AND F.is_db_read_only=0 AND F.is_in_standby=0 AND F.FilegroupAutogrowFileCount=0 THEN 2 WHEN F.FilegroupAutogrowFileCount=0 THEN 3 ELSE 4 END AS FilegroupAutogrowStatus
+	  CASE WHEN F.is_db_read_only=0 AND F.state=0 AND F.is_read_only=0 AND F.is_in_standby=0 AND F.FilegroupAutogrowFileCount=0 THEN 2 WHEN F.FilegroupAutogrowFileCount=0 THEN 3 ELSE 4 END AS FilegroupAutogrowStatus
 FROM F
 OUTER APPLY(SELECT TOP(1) T.FreeSpaceWarningThreshold,
                     T.FreeSpaceCriticalThreshold,

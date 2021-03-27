@@ -11,8 +11,7 @@ namespace DBADash
         public static AWSCredentials GetAWSCredentialsFromProfile(string profileName)
         {
             var credentialProfileStoreChain = new CredentialProfileStoreChain();
-            AWSCredentials defaultCredentials;
-            if (credentialProfileStoreChain.TryGetAWSCredentials(profileName, out defaultCredentials))
+            if (credentialProfileStoreChain.TryGetAWSCredentials(profileName, out AWSCredentials defaultCredentials))
                 return defaultCredentials;
             else
                 throw new AmazonClientException("Unable to find profile in CredentialProfileStoreChain.");
@@ -20,7 +19,7 @@ namespace DBADash
 
         public static AWSCredentials GetCredentials(string profile, string accessKey, string secretKey)
         {
-            AWSCredentials cred = null;
+            AWSCredentials cred;
             if (accessKey != null && secretKey != null && accessKey.Length > 0 && secretKey.Length > 0)
             {
                 cred = new BasicAWSCredentials(accessKey, secretKey);
@@ -47,22 +46,22 @@ namespace DBADash
         public static Amazon.S3.AmazonS3Client GetAWSClient(string profile, string accessKey, string secretKey, Amazon.S3.Util.AmazonS3Uri uri)
         {
             AWSCredentials cred = GetCredentials(profile, accessKey, secretKey);
-
-            Amazon.S3.AmazonS3Client cli = new AmazonS3Client(cred, RegionEndpoint.EUWest2);
-
-
-            RegionEndpoint AWSRegion;
-            if (uri.Region != null)
+            
+            using (Amazon.S3.AmazonS3Client cli = new AmazonS3Client(cred, RegionEndpoint.EUWest2))
             {
-                AWSRegion = uri.Region;
-            }
-            else
-            {
-                AWSRegion = RegionEndpoint.GetBySystemName(cli.GetBucketLocation(uri.Bucket).Location);
-            }
-            var s3Cli = new AmazonS3Client(cred, AWSRegion);
-            return s3Cli;
+                RegionEndpoint AWSRegion;
+                if (uri.Region != null)
+                {
+                    AWSRegion = uri.Region;
+                }
+                else
+                {
+                    AWSRegion = RegionEndpoint.GetBySystemName(cli.GetBucketLocation(uri.Bucket).Location);
+                }
+                var s3Cli = new AmazonS3Client(cred, AWSRegion);
+                return s3Cli;
 
+            }
 
         }
     }

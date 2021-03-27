@@ -673,11 +673,7 @@ namespace DBADash
         Guid activePowerPlanGUID;
         string manufacturer;
         string model;
-        string WindowsVersion;
         string WindowsCaption;
-        Int32 WindowsSKU;
-        string WindowsSP;
-
 
         #region "WMI"
 
@@ -694,7 +690,7 @@ namespace DBADash
                     };
                     ManagementScope scopeCIMV2 = new ManagementScope(path);
 
-                    SelectQuery query = new SelectQuery("Win32_OperatingSystem", "", new string[] { "Version", "Caption", "OperatingSystemSKU", "ServicePackMajorVersion", "ServicePackMinorVersion" });
+                    SelectQuery query = new SelectQuery("Win32_OperatingSystem", "", new string[] { "Caption" });
                     using (ManagementObjectSearcher searcher = new ManagementObjectSearcher(scopeCIMV2, query))
                     using (ManagementObjectCollection results = searcher.Get())
                     {
@@ -703,11 +699,7 @@ namespace DBADash
                             var mo = results.OfType<ManagementObject>().FirstOrDefault();
                             if (mo != null)
                             {
-                                WindowsVersion = getMOStringValue(mo, "Version", 256);
                                 WindowsCaption = getMOStringValue(mo, "Caption", 256);
-                                WindowsSKU = Int32.Parse(getMOStringValue(mo, "OperatingSystemSKU"));
-                                WindowsSP = getMOStringValue(mo, "ServicePackMajorVersion", 128) + "." + getMOStringValue(mo, "ServicePackMinorVersion", 127);
-
                             }
                         }
                     }
