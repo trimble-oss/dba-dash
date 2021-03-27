@@ -63,6 +63,16 @@ namespace DBADashServiceConfig.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap Arch_Amazon_Simple_Storage_Service_16 {
+            get {
+                object obj = ResourceManager.GetObject("Arch_Amazon-Simple-Storage-Service_16", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap ASX_Copy_blue_16x {
             get {
                 object obj = ResourceManager.GetObject("ASX_Copy_blue_16x", resourceCulture);

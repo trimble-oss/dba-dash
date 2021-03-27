@@ -56,6 +56,7 @@
             this.bttnCancel = new System.Windows.Forms.Button();
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabPage3 = new System.Windows.Forms.TabPage();
+            this.bttnS3 = new System.Windows.Forms.Button();
             this.bttnDestFolder = new System.Windows.Forms.Button();
             this.chkAutoUpgradeRepoDB = new System.Windows.Forms.CheckBox();
             this.bttnConnect = new System.Windows.Forms.Button();
@@ -67,6 +68,7 @@
             this.tabPage1 = new System.Windows.Forms.TabPage();
             this.tabSchemaSnapshots = new System.Windows.Forms.TabControl();
             this.tabGeneral = new System.Windows.Forms.TabPage();
+            this.bttnSrcFolder = new System.Windows.Forms.Button();
             this.bttnConnectSource = new System.Windows.Forms.Button();
             this.tabExtendedEvents = new System.Windows.Forms.TabPage();
             this.chkDualSession = new System.Windows.Forms.CheckBox();
@@ -94,7 +96,8 @@
             this.chkScanAzureDB = new System.Windows.Forms.CheckBox();
             this.tabPage4 = new System.Windows.Forms.TabPage();
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
-            this.bttnSrcFolder = new System.Windows.Forms.Button();
+            this.button1 = new System.Windows.Forms.Button();
+            this.bttnS3Src = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.errorProvider1)).BeginInit();
             this.tabControl1.SuspendLayout();
             this.tabPage3.SuspendLayout();
@@ -117,7 +120,7 @@
             this.cboSource.Location = new System.Drawing.Point(6, 27);
             this.cboSource.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.cboSource.Name = "cboSource";
-            this.cboSource.Size = new System.Drawing.Size(655, 24);
+            this.cboSource.Size = new System.Drawing.Size(617, 24);
             this.cboSource.TabIndex = 0;
             this.cboSource.SelectedIndexChanged += new System.EventHandler(this.cboSource_SelectedIndexChanged);
             // 
@@ -378,6 +381,7 @@
             // 
             // tabPage3
             // 
+            this.tabPage3.Controls.Add(this.bttnS3);
             this.tabPage3.Controls.Add(this.bttnDestFolder);
             this.tabPage3.Controls.Add(this.chkAutoUpgradeRepoDB);
             this.tabPage3.Controls.Add(this.bttnConnect);
@@ -393,6 +397,17 @@
             this.tabPage3.TabIndex = 2;
             this.tabPage3.Text = "Destination:";
             this.tabPage3.UseVisualStyleBackColor = true;
+            // 
+            // bttnS3
+            // 
+            this.bttnS3.Image = global::DBADashServiceConfig.Properties.Resources.Arch_Amazon_Simple_Storage_Service_16;
+            this.bttnS3.Location = new System.Drawing.Point(727, 19);
+            this.bttnS3.Name = "bttnS3";
+            this.bttnS3.Size = new System.Drawing.Size(28, 23);
+            this.bttnS3.TabIndex = 10;
+            this.toolTip1.SetToolTip(this.bttnS3, "Choose a S3 bucket destination");
+            this.bttnS3.UseVisualStyleBackColor = true;
+            this.bttnS3.Click += new System.EventHandler(this.bttnS3_Click);
             // 
             // bttnDestFolder
             // 
@@ -425,6 +440,7 @@
             this.bttnConnect.Name = "bttnConnect";
             this.bttnConnect.Size = new System.Drawing.Size(28, 23);
             this.bttnConnect.TabIndex = 7;
+            this.toolTip1.SetToolTip(this.bttnConnect, "Connect to a SQL Instance that will store your DBA Dash repository database");
             this.bttnConnect.UseVisualStyleBackColor = true;
             this.bttnConnect.Click += new System.EventHandler(this.bttnConnect_Click);
             // 
@@ -444,6 +460,7 @@
             this.bttnDeployDatabase.Size = new System.Drawing.Size(214, 32);
             this.bttnDeployDatabase.TabIndex = 5;
             this.bttnDeployDatabase.Text = "Deploy/Update Database";
+            this.toolTip1.SetToolTip(this.bttnDeployDatabase, "Click to create/upgrade your DBA Dash repository database");
             this.bttnDeployDatabase.UseVisualStyleBackColor = true;
             this.bttnDeployDatabase.Click += new System.EventHandler(this.bttnDeployDatabase_Click);
             // 
@@ -502,6 +519,7 @@
             // 
             // tabGeneral
             // 
+            this.tabGeneral.Controls.Add(this.bttnS3Src);
             this.tabGeneral.Controls.Add(this.bttnSrcFolder);
             this.tabGeneral.Controls.Add(this.bttnConnectSource);
             this.tabGeneral.Controls.Add(this.cboSource);
@@ -516,13 +534,25 @@
             this.tabGeneral.Text = "General";
             this.tabGeneral.UseVisualStyleBackColor = true;
             // 
+            // bttnSrcFolder
+            // 
+            this.bttnSrcFolder.Image = global::DBADashServiceConfig.Properties.Resources.FolderOpened_16x;
+            this.bttnSrcFolder.Location = new System.Drawing.Point(663, 27);
+            this.bttnSrcFolder.Name = "bttnSrcFolder";
+            this.bttnSrcFolder.Size = new System.Drawing.Size(28, 23);
+            this.bttnSrcFolder.TabIndex = 10;
+            this.toolTip1.SetToolTip(this.bttnSrcFolder, "Choose a folder source path");
+            this.bttnSrcFolder.UseVisualStyleBackColor = true;
+            this.bttnSrcFolder.Click += new System.EventHandler(this.bttnSrcFolder_Click_1);
+            // 
             // bttnConnectSource
             // 
             this.bttnConnectSource.Image = global::DBADashServiceConfig.Properties.Resources.Connect_16x;
-            this.bttnConnectSource.Location = new System.Drawing.Point(667, 27);
+            this.bttnConnectSource.Location = new System.Drawing.Point(629, 27);
             this.bttnConnectSource.Name = "bttnConnectSource";
             this.bttnConnectSource.Size = new System.Drawing.Size(28, 23);
             this.bttnConnectSource.TabIndex = 8;
+            this.toolTip1.SetToolTip(this.bttnConnectSource, "Connect to a SQL Instance to monitor with DBA Dash");
             this.bttnConnectSource.UseVisualStyleBackColor = true;
             this.bttnConnectSource.Click += new System.EventHandler(this.bttnConnectSource_Click);
             // 
@@ -845,16 +875,25 @@
             this.tabPage4.Text = "Service";
             this.tabPage4.UseVisualStyleBackColor = true;
             // 
-            // bttnSrcFolder
+            // button1
             // 
-            this.bttnSrcFolder.Image = global::DBADashServiceConfig.Properties.Resources.FolderOpened_16x;
-            this.bttnSrcFolder.Location = new System.Drawing.Point(701, 28);
-            this.bttnSrcFolder.Name = "bttnSrcFolder";
-            this.bttnSrcFolder.Size = new System.Drawing.Size(28, 23);
-            this.bttnSrcFolder.TabIndex = 10;
-            this.toolTip1.SetToolTip(this.bttnSrcFolder, "Choose a folder source path");
-            this.bttnSrcFolder.UseVisualStyleBackColor = true;
-            this.bttnSrcFolder.Click += new System.EventHandler(this.bttnSrcFolder_Click_1);
+            this.button1.Location = new System.Drawing.Point(727, 19);
+            this.button1.Name = "button1";
+            this.button1.Size = new System.Drawing.Size(28, 23);
+            this.button1.TabIndex = 10;
+            this.toolTip1.SetToolTip(this.button1, "Choose a folder destination path");
+            this.button1.UseVisualStyleBackColor = true;
+            // 
+            // bttnS3Src
+            // 
+            this.bttnS3Src.Image = global::DBADashServiceConfig.Properties.Resources.Arch_Amazon_Simple_Storage_Service_16;
+            this.bttnS3Src.Location = new System.Drawing.Point(696, 28);
+            this.bttnS3Src.Name = "bttnS3Src";
+            this.bttnS3Src.Size = new System.Drawing.Size(28, 23);
+            this.bttnS3Src.TabIndex = 12;
+            this.toolTip1.SetToolTip(this.bttnS3Src, "Choose a S3 bucket source");
+            this.bttnS3Src.UseVisualStyleBackColor = true;
+            this.bttnS3Src.Click += new System.EventHandler(this.bttnS3Src_Click);
             // 
             // ServiceConfig
             // 
@@ -965,6 +1004,9 @@
         private System.Windows.Forms.CheckBox chkDualSession;
         private System.Windows.Forms.Button bttnDestFolder;
         private System.Windows.Forms.Button bttnSrcFolder;
+        private System.Windows.Forms.Button bttnS3;
+        private System.Windows.Forms.Button button1;
+        private System.Windows.Forms.Button bttnS3Src;
     }
 }
 

@@ -18,7 +18,7 @@ namespace DBADash
                 throw new AmazonClientException("Unable to find profile in CredentialProfileStoreChain.");
         }
 
-        public static Amazon.S3.AmazonS3Client GetAWSClient(string profile, string accessKey, string secretKey, Amazon.S3.Util.AmazonS3Uri uri)
+        public static AWSCredentials GetCredentials(string profile, string accessKey, string secretKey)
         {
             AWSCredentials cred = null;
             if (accessKey != null && secretKey != null && accessKey.Length > 0 && secretKey.Length > 0)
@@ -41,6 +41,12 @@ namespace DBADash
             {
                 cred = new InstanceProfileAWSCredentials();
             }
+            return cred;
+        }
+
+        public static Amazon.S3.AmazonS3Client GetAWSClient(string profile, string accessKey, string secretKey, Amazon.S3.Util.AmazonS3Uri uri)
+        {
+            AWSCredentials cred = GetCredentials(profile, accessKey, secretKey);
 
             Amazon.S3.AmazonS3Client cli = new AmazonS3Client(cred, RegionEndpoint.EUWest2);
 

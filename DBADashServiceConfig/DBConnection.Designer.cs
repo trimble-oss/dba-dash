@@ -82,7 +82,7 @@
             this.pnlAuth.Enabled = false;
             this.pnlAuth.Location = new System.Drawing.Point(122, 123);
             this.pnlAuth.Name = "pnlAuth";
-            this.pnlAuth.Size = new System.Drawing.Size(358, 88);
+            this.pnlAuth.Size = new System.Drawing.Size(364, 88);
             this.pnlAuth.TabIndex = 3;
             // 
             // txtPassword

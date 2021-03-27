@@ -728,5 +728,38 @@ namespace DBADashServiceConfig
                 }
             }
         }
+
+        private void bttnS3_Click(object sender, EventArgs e)
+        {
+            var cfg = new CollectionConfig();
+            cfg.AccessKey = txtAccessKey.Text;
+            cfg.SecretKey = txtSecretKey.Text;
+            cfg.AWSProfile = txtAWSProfile.Text;
+          
+            using (var frm = new S3Browser() { AccessKey = cfg.AccessKey, SecretKey = cfg.GetSecretKey(), Folder= "DBADash_" + Environment.MachineName })
+            {                
+                frm.ShowDialog();
+                if(frm.DialogResult== DialogResult.OK)
+                {
+                    txtDestination.Text = frm.AWSURL;
+                }
+            }
+        }
+
+        private void bttnS3Src_Click(object sender, EventArgs e)
+        {
+            var cfg = new CollectionConfig();
+            cfg.AccessKey = txtAccessKey.Text;
+            cfg.SecretKey = txtSecretKey.Text;
+            cfg.AWSProfile = txtAWSProfile.Text;
+            using (var frm = new S3Browser() { AccessKey = cfg.AccessKey, SecretKey = cfg.GetSecretKey(), Folder = "DBADash_{HostName}" })
+            {
+                frm.ShowDialog();
+                if (frm.DialogResult == DialogResult.OK)
+                {
+                   cboSource.Text= frm.AWSURL;
+                }
+            }
+        }
     }
 }
