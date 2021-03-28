@@ -38,9 +38,9 @@ namespace DBADashGUI
         }
 
         string connectionString = "";
+        string jsonPath = Common.JsonConfigPath;
 
-       
-        
+
         private Int64 currentObjectID;
         private Int32 currentPage = 1;
         private Int32 currentPageSize = 100;
@@ -54,40 +54,41 @@ namespace DBADashGUI
             splitSchemaSnapshot.Panel1.Controls.Add(diffSchemaSnapshot);
             diffSchemaSnapshot.Dock = DockStyle.Fill;
 
-            string jsonPath = System.IO.Path.Combine(Application.StartupPath, "ServiceConfig.json");
             if (System.IO.File.Exists(jsonPath))
             {
                 string jsonConfig = System.IO.File.ReadAllText(jsonPath);
-                var cfg= CollectionConfig.Deserialize(jsonConfig);
+                var cfg= BasicConfig.Deserialize(jsonConfig);
                 if(cfg.DestinationConnection.Type == DBADashConnection.ConnectionType.SQL)
                 {
                     connectionString = cfg.DestinationConnection.ConnectionString;                }
            
             }
-            if (connectionString == "")
+            else 
             {
-                MessageBox.Show("Please use " + Properties.Resources.ServiceConfigToolName + " to configure the service" + Environment.NewLine + "This GUI tool requires a destination connection string pointing to the DBADash repository database.", "Info", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                if (File.Exists(Properties.Resources.ServiceConfigToolName))
+                using(var frm = new ConnectionOptions())
                 {
-                    Process.Start(Properties.Resources.ServiceConfigToolName);
+                    frm.ShowDialog();
+                    if(frm.cfg == null)
+                    {
+                        Application.Exit();
+                        return;
+                    }
+                    connectionString = frm.cfg.DestinationConnection.ConnectionString;
                 }
-                Application.Exit();
-            }
-            else
-            {
-                SqlConnectionStringBuilder builder = new SqlConnectionStringBuilder(connectionString)
-                {
-                    ApplicationName = "DBADashGUI"
-                };
-                connectionString = builder.ConnectionString;
-                Common.ConnectionString = connectionString;
-                mnuTags.Visible = !commandLine.NoTagMenu;
-                getCommandLineTags();
-                buildTagMenu(commandLineTags);
-                addInstanes();
-                loadSelectedTab();
             }
 
+            SqlConnectionStringBuilder builder = new SqlConnectionStringBuilder(connectionString)
+            {
+                ApplicationName = "DBADashGUI"
+            };
+            connectionString = builder.ConnectionString;
+            Common.ConnectionString = connectionString;
+            mnuTags.Visible = !commandLine.NoTagMenu;
+            getCommandLineTags();
+            buildTagMenu(commandLineTags);
+            addInstanes();
+            loadSelectedTab();
+            
         }
 
         private void getCommandLineTags()

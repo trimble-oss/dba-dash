@@ -203,6 +203,12 @@
       <DependentUpon>ConfigurationHistory.cs</DependentUpon>
     </Compile>
     <Compile Include="CommonData.cs" />
+    <Compile Include="ConnectionOptions.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ConnectionOptions.Designer.cs">
+      <DependentUpon>ConnectionOptions.cs</DependentUpon>
+    </Compile>
     <Compile Include="CustomProgressBar.cs">
       <SubType>Component</SubType>
     </Compile>
@@ -545,6 +551,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="CollectionDates\CollectionErrors.resx">
       <DependentUpon>CollectionErrors.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ConnectionOptions.resx">
+      <DependentUpon>ConnectionOptions.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Options Menu\DataRetention.resx">
       <DependentUpon>DataRetention.cs</DependentUpon>

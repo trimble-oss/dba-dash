@@ -212,6 +212,12 @@
     <Compile Include="AWSTools.cs" />
     <Compile Include="CollectionConfig.cs" />
     <Compile Include="CollectionConfigSchedule.cs" />
+    <Compile Include="DBConnection.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="DBConnection.Designer.cs">
+      <DependentUpon>DBConnection.cs</DependentUpon>
+    </Compile>
     <Compile Include="DBUpgrade\DacpacUtility.cs" />
     <Compile Include="DBADashConnection.cs" />
     <Compile Include="DBADashSource.cs" />
@@ -234,6 +240,9 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="DBConnection.resx">
+      <DependentUpon>DBConnection.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>

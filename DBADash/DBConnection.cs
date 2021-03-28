@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Windows.Forms;
 using System.Data.SqlClient;
-namespace DBADashServiceConfig
+using System.Collections.Generic;
+
+namespace DBADash
 {
     public partial class DBConnection : Form
     {
@@ -31,6 +33,7 @@ namespace DBADashServiceConfig
                 }
                 builder.IntegratedSecurity = chkIntegratedSecurity.Checked;
                 builder.DataSource= txtServerName.Text;
+                builder.InitialCatalog = cboDatabase.Text;
                 return builder.ConnectionString;
             }
             set
@@ -38,6 +41,7 @@ namespace DBADashServiceConfig
                 connectionString = value;
                 var builder = new SqlConnectionStringBuilder(connectionString);
                 chkIntegratedSecurity.Checked = builder.IntegratedSecurity;
+                cboDatabase.Text = builder.InitialCatalog;
                 txtUserName.Text = builder.UserID;
                 txtPassword.Text = builder.Password;
                 txtServerName.Text = builder.DataSource;
@@ -108,6 +112,43 @@ namespace DBADashServiceConfig
             {
                 txtServerName.Text = Environment.MachineName;
             }
+        }
+
+        private void cboDatabase_Dropdown(object sender, EventArgs e)
+        {
+            try
+            {
+                cboDatabase.Items.Clear();
+                var DBs = GetDatabases(ConnectionString);
+                foreach(string db in DBs)
+                {
+                    cboDatabase.Items.Add(db);
+                }
+            }
+            catch(Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+
+
+        }
+
+        public List<string> GetDatabases(string ConnectionString)
+        {
+            using (var cn = new SqlConnection(ConnectionString))
+            using (SqlCommand cmd = new SqlCommand("SELECT name FROM sys.databases WHERE state=0", cn))
+            {
+                cn.Open();
+                var DBs = new List<string>();
+                using (var rdr = cmd.ExecuteReader())
+                {
+                    while (rdr.Read())
+                    {
+                        DBs.Add((string)rdr[0]);
+                    }
+                    return DBs;
+                }
+            }           
         }
     }
 }

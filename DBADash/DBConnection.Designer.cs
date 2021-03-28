@@ -1,4 +1,4 @@
-﻿namespace DBADashServiceConfig
+﻿namespace DBADash
 {
     partial class DBConnection
     {
@@ -39,6 +39,8 @@
             this.txtUserName = new System.Windows.Forms.TextBox();
             this.bttnConnect = new System.Windows.Forms.Button();
             this.bttnCancel = new System.Windows.Forms.Button();
+            this.cboDatabase = new System.Windows.Forms.ComboBox();
+            this.lblDatabase = new System.Windows.Forms.Label();
             this.pnlAuth.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -120,7 +122,7 @@
             // 
             // bttnConnect
             // 
-            this.bttnConnect.Location = new System.Drawing.Point(306, 249);
+            this.bttnConnect.Location = new System.Drawing.Point(296, 285);
             this.bttnConnect.Name = "bttnConnect";
             this.bttnConnect.Size = new System.Drawing.Size(75, 23);
             this.bttnConnect.TabIndex = 4;
@@ -131,13 +133,31 @@
             // bttnCancel
             // 
             this.bttnCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.bttnCancel.Location = new System.Drawing.Point(405, 249);
+            this.bttnCancel.Location = new System.Drawing.Point(405, 285);
             this.bttnCancel.Name = "bttnCancel";
             this.bttnCancel.Size = new System.Drawing.Size(75, 23);
             this.bttnCancel.TabIndex = 5;
             this.bttnCancel.Text = "Cancel";
             this.bttnCancel.UseVisualStyleBackColor = true;
             this.bttnCancel.Click += new System.EventHandler(this.bttnCancel_Click);
+            // 
+            // cboDatabase
+            // 
+            this.cboDatabase.FormattingEnabled = true;
+            this.cboDatabase.Location = new System.Drawing.Point(122, 234);
+            this.cboDatabase.Name = "cboDatabase";
+            this.cboDatabase.Size = new System.Drawing.Size(358, 24);
+            this.cboDatabase.TabIndex = 6;
+            this.cboDatabase.DropDown += new System.EventHandler(this.cboDatabase_Dropdown);
+            // 
+            // lblDatabase
+            // 
+            this.lblDatabase.AutoSize = true;
+            this.lblDatabase.Location = new System.Drawing.Point(21, 237);
+            this.lblDatabase.Name = "lblDatabase";
+            this.lblDatabase.Size = new System.Drawing.Size(73, 17);
+            this.lblDatabase.TabIndex = 7;
+            this.lblDatabase.Text = "Database:";
             // 
             // DBConnection
             // 
@@ -146,6 +166,8 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.CancelButton = this.bttnCancel;
             this.ClientSize = new System.Drawing.Size(512, 320);
+            this.Controls.Add(this.lblDatabase);
+            this.Controls.Add(this.cboDatabase);
             this.Controls.Add(this.bttnCancel);
             this.Controls.Add(this.bttnConnect);
             this.Controls.Add(this.pnlAuth);
@@ -176,5 +198,7 @@
         private System.Windows.Forms.TextBox txtUserName;
         private System.Windows.Forms.Button bttnConnect;
         private System.Windows.Forms.Button bttnCancel;
+        private System.Windows.Forms.ComboBox cboDatabase;
+        private System.Windows.Forms.Label lblDatabase;
     }
 }

@@ -231,12 +231,6 @@
     <Compile Include="DBDeploy.Designer.cs">
       <DependentUpon>DBDeploy.cs</DependentUpon>
     </Compile>
-    <Compile Include="DBConnection.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="DBConnection.Designer.cs">
-      <DependentUpon>DBConnection.cs</DependentUpon>
-    </Compile>
     <Compile Include="S3Browser.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -253,9 +247,6 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <EmbeddedResource Include="DBDeploy.resx">
       <DependentUpon>DBDeploy.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="DBConnection.resx">
-      <DependentUpon>DBConnection.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="S3Browser.resx">
       <DependentUpon>S3Browser.cs</DependentUpon>

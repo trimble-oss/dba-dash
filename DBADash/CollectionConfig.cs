@@ -9,7 +9,48 @@ using System.Linq;
 namespace DBADash
 {
 
-    public class CollectionConfig
+    public class BasicConfig
+    {
+
+        [JsonIgnore]
+        public DBADashConnection DestinationConnection { get; set; }
+
+        public BasicConfig()
+        {
+            DestinationConnection = new DBADashConnection();
+        }
+
+        // Note if destination is SQL connection string, password is encrypted.  Use GetDestination() to return with real password
+        public string Destination
+        {
+            get
+            {
+                return DestinationConnection.EncryptedConnectionString;
+            }
+            set
+            {
+                DestinationConnection = new DBADashConnection(value);
+            }
+        }
+
+        public string Serialize()
+        {
+            return JsonConvert.SerializeObject(this, Formatting.Indented, new JsonSerializerSettings
+            {
+                NullValueHandling = NullValueHandling.Ignore,
+                DefaultValueHandling = DefaultValueHandling.Include,
+
+            });
+        }
+
+        public static BasicConfig Deserialize(string json)
+        {
+            return JsonConvert.DeserializeObject<BasicConfig>(json);
+        }
+
+    }
+
+    public class CollectionConfig:BasicConfig
     {
         public Int32 ServiceThreads=-1;
         private string _secretKey;
@@ -25,22 +66,7 @@ namespace DBADash
 
         public List<DBADashSource> SourceConnections = new List<DBADashSource>();
 
-        public CollectionConfig()
-        {
-            DestinationConnection = new DBADashConnection();
-        }
-
-        public string Serialize()
-        {
-            return JsonConvert.SerializeObject(this, Formatting.Indented, new JsonSerializerSettings
-            {
-                NullValueHandling = NullValueHandling.Ignore,
-                DefaultValueHandling = DefaultValueHandling.Include,
-
-            });
-        }
-
-        public static CollectionConfig Deserialize(string json)
+        public static new CollectionConfig Deserialize(string json)
         {
             return JsonConvert.DeserializeObject<CollectionConfig>(json);
         }
@@ -72,7 +98,6 @@ namespace DBADash
             }
         }
 
-
         public string GetSecretKey()
         {
 
@@ -86,9 +111,6 @@ namespace DBADash
             }
 
         }
-
-        [JsonIgnore]
-        public DBADashConnection DestinationConnection { get; set; }
 
         private readonly string defaultMaintenanceCron = " 0 0 0 ? * * *";
 
@@ -141,20 +163,6 @@ namespace DBADash
                 };
                 all.AddRange(SecondaryDestinationConnections);
                 return all;
-            }
-        }
-
-
-        // Note if destination is SQL connection string, password is encrypted.  Use GetDestination() to return with real password
-        public string Destination
-        {
-            get
-            {
-                return DestinationConnection.EncryptedConnectionString;
-            }
-            set
-            {
-                DestinationConnection = new DBADashConnection(value);
             }
         }
 
