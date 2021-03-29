@@ -9,16 +9,8 @@
     CONSTRAINT [FK_CollectionErrorLog_Instances] FOREIGN KEY ([InstanceID]) REFERENCES [dbo].[Instances] ([InstanceID])
 );
 
-
-
-
-
-
-
-
-
-
 GO
 CREATE CLUSTERED INDEX [IX_CollectionErrorLog_ErrorDate]
     ON [dbo].[CollectionErrorLog]([ErrorDate] ASC);
-
+GO
+CREATE NONCLUSTERED INDEX IX_CollectionErrorLog_InstanceID_ErrorDate ON dbo.CollectionErrorLog(InstanceID,ErrorDate) INCLUDE(ErrorSource,ErrorContext)
