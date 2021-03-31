@@ -48,7 +48,9 @@ namespace DBADashGUI
             CLRTrigger,
             Configuration,
             AzureInstance,
-            AzureDatabase
+            AzureDatabase,
+            AgentJobs,
+            AgentJob
         }
 
         private List<Int32> _childInstanceIDs;
@@ -335,6 +337,9 @@ namespace DBADashGUI
                     break;
                 case TreeType.AzureDatabase:
                     ImageIndex = 9;
+                    break;
+                case TreeType.AgentJobs:
+                    ImageIndex = 3;
                     break;
                 default:
                     ImageIndex = 5;

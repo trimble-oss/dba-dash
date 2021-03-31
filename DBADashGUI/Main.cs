@@ -408,6 +408,12 @@ namespace DBADashGUI
                 mirroring1.InstanceIDs = instanceIDs;
                 mirroring1.RefreshData();
             }
+            if(tabs.SelectedTab == tabJobDDL)
+            {
+                jobDDLHistory1.InstanceID = n.InstanceID;
+                jobDDLHistory1.JobID = (Guid)n.Tag;
+                jobDDLHistory1.RefreshData();
+            }
             tsTime.Visible = globalTimeisVisible;
         }
 
@@ -476,7 +482,34 @@ namespace DBADashGUI
             tv1.SelectedNode = root;
         }
 
+        private void expandJobs(SQLTreeItem jobsNode)
+        {
+            var jobs = GetJobs(jobsNode.InstanceID);
+            foreach(var job in jobs)
+            {
+                var jobItem = new SQLTreeItem(job.Value, SQLTreeItem.TreeType.AgentJob) { InstanceID = jobsNode.InstanceID,Tag=job.Key };
+                jobsNode.Nodes.Add(jobItem);
+            }
+        }
 
+        private Dictionary<Guid, String> GetJobs(int instanceId)
+        {
+            var jobs = new Dictionary<Guid,String>();
+            using(var cn = new SqlConnection(Common.ConnectionString))
+            using(var cmd = new SqlCommand("dbo.Jobs_Get", cn) {  CommandType = CommandType.StoredProcedure})
+            {
+                cmd.Parameters.AddWithValue("InstanceID", instanceId);
+                cn.Open();
+                using(var rdr = cmd.ExecuteReader())
+                {
+                    while (rdr.Read())
+                    {
+                        jobs.Add((Guid)rdr[0], (string)rdr[1]);
+                    }
+                }
+            }
+            return jobs;
+        }
 
         private void addDatabases(SQLTreeItem instanceNode)
         {
@@ -518,6 +551,9 @@ namespace DBADashGUI
                             instanceNode.Nodes.Add(n);
                         }
                     }
+                    var jobs = new SQLTreeItem("Jobs", SQLTreeItem.TreeType.AgentJobs) { InstanceID = instanceNode.InstanceID };
+                    jobs.AddDummyNode();
+                    instanceNode.Nodes.Add(jobs);
                 }
             }
         }
@@ -678,6 +714,13 @@ namespace DBADashGUI
                 allowedTabs.Add(tabDBConfiguration);
                 allowedTabs.Add(tabDBOptions);
             }
+            else if(n.Type == SQLTreeItem.TreeType.AgentJobs)
+            {
+                allowedTabs.Add(tabJobs);
+            }
+            else if(n.Type== SQLTreeItem.TreeType.AgentJob) {
+                allowedTabs.Add(tabJobDDL);
+            }
             if (n.ObjectID > 0)
             {
                 if (n.Type == SQLTreeItem.TreeType.StoredProcedure || n.Type == SQLTreeItem.TreeType.CLRProcedure || n.Type == SQLTreeItem.TreeType.ScalarFunction || n.Type == SQLTreeItem.TreeType.CLRScalarFunction || n.Type == SQLTreeItem.TreeType.Trigger || n.Type == SQLTreeItem.TreeType.CLRTrigger)
@@ -727,6 +770,10 @@ namespace DBADashGUI
                 if (n.Type == SQLTreeItem.TreeType.Instance)
                 {
                     addDatabases(n);
+                }
+                else if(n.Type== SQLTreeItem.TreeType.AgentJobs)
+                {
+                    expandJobs(n);
                 }
                 else
                 {

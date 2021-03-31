@@ -151,6 +151,12 @@
     <Compile Include="Changes\Drivers.Designer.cs">
       <DependentUpon>Drivers.cs</DependentUpon>
     </Compile>
+    <Compile Include="AgentJobs\JobDDLHistory.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="AgentJobs\JobDDLHistory.Designer.cs">
+      <DependentUpon>JobDDLHistory.cs</DependentUpon>
+    </Compile>
     <Compile Include="Changes\SchemaSnapshots.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -527,6 +533,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Changes\Drivers.resx">
       <DependentUpon>Drivers.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="AgentJobs\JobDDLHistory.resx">
+      <DependentUpon>JobDDLHistory.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Changes\SchemaSnapshots.resx">
       <DependentUpon>SchemaSnapshots.cs</DependentUpon>
