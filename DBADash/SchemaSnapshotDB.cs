@@ -107,6 +107,76 @@ namespace DBADash
             return sb.ToString();
         }
 
+        public DataTable SnapshotJobs()
+        {
+            DataTable dtSchema = new DataTable("Jobs");
+            dtSchema.Columns.Add("job_id", typeof(Guid));
+            dtSchema.Columns.Add("originating_server");
+            dtSchema.Columns.Add("name");
+            dtSchema.Columns.Add("enabled", typeof(bool));
+            dtSchema.Columns.Add("description");
+            dtSchema.Columns.Add("start_step_id", typeof(int));
+            dtSchema.Columns.Add("category_id", typeof(int));
+            dtSchema.Columns.Add("category");          
+            dtSchema.Columns.Add("owner");
+            dtSchema.Columns.Add("notify_level_eventlog", typeof(int));
+            dtSchema.Columns.Add("notify_level_email", typeof(int));
+            dtSchema.Columns.Add("notify_level_netsend", typeof(int));
+            dtSchema.Columns.Add("notify_level_page", typeof(int));
+            dtSchema.Columns.Add("notify_email_operator");
+            dtSchema.Columns.Add("notify_netsend_operator");
+            dtSchema.Columns.Add("notify_page_operator");
+            dtSchema.Columns.Add("delete_level", typeof(int));
+            dtSchema.Columns.Add("date_created", typeof(DateTime));
+            dtSchema.Columns.Add("date_modified", typeof(DateTime));
+            dtSchema.Columns.Add("version_number", typeof(int));
+            dtSchema.Columns.Add("has_schedule", typeof(bool));
+            dtSchema.Columns.Add("has_server", typeof(bool));
+            dtSchema.Columns.Add("has_step", typeof(bool));
+
+            dtSchema.Columns.Add("DDLHash", typeof(byte[]));
+            dtSchema.Columns.Add("DDL", typeof(byte[]));
+       
+          
+            using (var cn = new Microsoft.Data.SqlClient.SqlConnection(_connectionString))
+            {
+                var instance = new Microsoft.SqlServer.Management.Smo.Server(new Microsoft.SqlServer.Management.Common.ServerConnection(cn));
+                foreach(Microsoft.SqlServer.Management.Smo.Agent.Job job in instance.JobServer.Jobs)
+                {
+                    DataRow r = dtSchema.NewRow();
+                    var sDDL = stringCollectionToString(job.Script(ScriptingOptions));
+                   
+                    var bDDL = Zip(sDDL);
+                    r["name"] = job.Name;
+                    r["job_id"] = job.JobID;
+                    r["enabled"] = job.IsEnabled;
+                    r["DDL"] = bDDL;
+                    r["DDLHash"] = crypt.ComputeHash(bDDL);
+                    r["date_created"] = job.DateCreated;
+                    r["date_modified"] = job.DateLastModified;
+                    r["category"] = job.Category;
+                    r["category_id"] = job.CategoryID;
+                    r["description"] = job.Description;
+                    r["version_number"] = job.VersionNumber;
+                    r["delete_level"] = job.DeleteLevel;
+                    r["notify_level_page"] = job.DeleteLevel;
+                    r["notify_level_netsend"] = job.NetSendLevel;
+                    r["notify_level_email"] = job.EmailLevel;
+                    r["notify_level_eventlog"] = job.EventLogLevel;
+                    r["notify_email_operator"] = job.OperatorToEmail;
+                    r["notify_netsend_operator"] = job.OperatorToNetSend;
+                    r["notify_page_operator"] = job.OperatorToPage;
+                    r["owner"] = job.OwnerLoginName;
+                    r["start_step_id"] = job.StartStepID;
+                    r["has_schedule"] = job.HasSchedule;
+                    r["has_server"] = job.HasServer;
+                    r["has_step"] = job.HasSchedule;
+                    dtSchema.Rows.Add(r);
+                }
+            }
+            return dtSchema;
+        }
+
         public DataTable SnapshotDB(string DBName)
         {
 

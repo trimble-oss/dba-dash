@@ -53,7 +53,8 @@ namespace DBADash
         CustomChecks,
         PerformanceCounters,
         VLF,
-        DatabaseMirroring
+        DatabaseMirroring,
+        Jobs
     }
 
     public enum HostPlatform
@@ -305,6 +306,7 @@ namespace DBADash
                 Collect(CollectionType.VLF);
                 Collect(CollectionType.DriversWMI);
                 Collect(CollectionType.OSLoadedModules);
+                Collect(CollectionType.Jobs);
             }
             else if (collectionType == CollectionType.Drives)
             {
@@ -418,6 +420,21 @@ namespace DBADash
                             System.Threading.Thread.Sleep(RetryInterval * 1000);
                         }
                     }
+                }
+            }
+            else if(collectionType == CollectionType.Jobs)
+            {
+                try
+                {
+                    if (!Data.Tables.Contains(collectionTypeString))
+                    {
+                        var ss = new SchemaSnapshotDB(_connectionString, new SchemaSnapshotDBOptions());
+                        Data.Tables.Add(ss.SnapshotJobs());
+                    }
+                 }
+                catch(Exception ex)
+                {
+                    logError(collectionTypeString, ex.ToString());
                 }
             }
             else
