@@ -17,7 +17,6 @@ using System.IO;
 namespace DBADashGUI
 {
 
-
     public partial class Main : Form
     {
 
@@ -1259,6 +1258,16 @@ namespace DBADashGUI
             if (frm.InstanceActiveFlagChanged)
             {
                 addInstanes(); // refresh the tree if instances deleted/restored
+            }
+        }
+
+        private void tsJobDiff_Click(object sender, EventArgs e)
+        {
+           using(var frm = new JobDiff())
+            {
+                var selected = (SQLTreeItem)tv1.SelectedNode;
+                frm.InstanceID_A = selected.InstanceID;
+                frm.ShowDialog();
             }
         }
     }

@@ -10,7 +10,7 @@ namespace DBADashGUI
 {
     static class CommonData
     {
-        public static DataTable GetInstances(string tagIDs="",bool? Active=true)
+        public static DataTable GetInstances(string tagIDs="",bool? Active=true,bool? azureDB=null)
         {
 
             SqlConnection cn = new SqlConnection(Common.ConnectionString);
@@ -29,6 +29,10 @@ namespace DBADashGUI
                     else
                     {
                         cmd.Parameters.AddWithValue("IsActive", Active);
+                    }
+                    if (azureDB != null)
+                    {
+                        cmd.Parameters.AddWithValue("IsAzure", azureDB);
                     }
                     
                     using (SqlDataAdapter da = new SqlDataAdapter(cmd))

@@ -515,6 +515,7 @@
     <Build Include="dbo\User Defined Types\Jobs.sql" />
     <Build Include="dbo\Stored Procedures\Jobs_Get.sql" />
     <Build Include="dbo\Stored Procedures\JobDDLHistory_Get.sql" />
+    <Build Include="dbo\Stored Procedures\Job_Diff.sql" />
   </ItemGroup>
   <ItemGroup>
     <PostDeploy Include="Script.PostDeployment1.sql" />

@@ -44,24 +44,27 @@ namespace DBADashGUI.Changes
             dgv.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
         }
 
-        private void dgv_RowEnter(object sender, DataGridViewCellEventArgs e)
+        private void dgv_SelectionChanged(object sender, EventArgs e)
         {
-            var row = (DataRowView)dgv.Rows[e.RowIndex].DataBoundItem;
-            long DDLID = (long)row["DDLID"];
-            long DDLIDold = row["PreviousDDLID"]== DBNull.Value ? -1 : (long)row["PreviousDDLID"];
-
-            string newText = Common.DDL(DDLID, Common.ConnectionString);
-            string oldText =DDLIDold>0 ?  Common.DDL(DDLIDold, Common.ConnectionString) : "";
-
-            diffControl1.OldText = oldText;
-            diffControl1.NewText = newText;
-            if (string.IsNullOrEmpty(oldText))
+            if (dgv.SelectedRows.Count == 1)
             {
-                diffControl1.Mode = DiffControl.ViewMode.Code;
-            }
-            else
-            {
-                diffControl1.Mode = DiffControl.ViewMode.Diff;
+                var row = (DataRowView)dgv.SelectedRows[0].DataBoundItem;
+                long DDLID = (long)row["DDLID"];
+                long DDLIDold = row["PreviousDDLID"] == DBNull.Value ? -1 : (long)row["PreviousDDLID"];
+
+                string newText = Common.DDL(DDLID, Common.ConnectionString);
+                string oldText = DDLIDold > 0 ? Common.DDL(DDLIDold, Common.ConnectionString) : "";
+
+                diffControl1.OldText = oldText;
+                diffControl1.NewText = newText;
+                if (string.IsNullOrEmpty(oldText))
+                {
+                    diffControl1.Mode = DiffControl.ViewMode.Code;
+                }
+                else
+                {
+                    diffControl1.Mode = DiffControl.ViewMode.Diff;
+                }
             }
         }
     }

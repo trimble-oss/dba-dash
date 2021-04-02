@@ -101,6 +101,12 @@
     <Compile Include="AgentJobs\AgentJobThresholdsConfig.Designer.cs">
       <DependentUpon>AgentJobThresholdsConfig.cs</DependentUpon>
     </Compile>
+    <Compile Include="AgentJobs\JobDiff.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="AgentJobs\JobDiff.Designer.cs">
+      <DependentUpon>JobDiff.cs</DependentUpon>
+    </Compile>
     <Compile Include="AppSyntaxModeProvider.cs" />
     <Compile Include="Bak\BackupsControl.cs">
       <SubType>UserControl</SubType>
@@ -509,6 +515,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="AgentJobs\AgentJobThresholdsConfig.resx">
       <DependentUpon>AgentJobThresholdsConfig.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="AgentJobs\JobDiff.resx">
+      <DependentUpon>JobDiff.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Bak\BackupsControl.resx">
       <DependentUpon>BackupsControl.cs</DependentUpon>
