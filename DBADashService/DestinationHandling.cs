@@ -100,8 +100,8 @@ namespace DBADashService
 
         public static void WriteDB(DataSet ds, string destination)
         {
-            var importer = new DBImporter();
-            importer.Update(destination, ds);
+            var importer = new DBImporter(ds, destination);
+            importer.Update();
         }
     }
 }
