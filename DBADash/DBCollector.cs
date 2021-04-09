@@ -54,7 +54,8 @@ namespace DBADash
         PerformanceCounters,
         VLF,
         DatabaseMirroring,
-        Jobs
+        Jobs,
+        JobHistory
     }
 
     public enum HostPlatform
@@ -86,6 +87,25 @@ namespace DBADash
         public Int32 RetryCount=1;
         public Int32 RetryInterval = 30;
         private HostPlatform platform;
+
+        public int Job_instance_id {
+            get
+            {
+                if (Data.Tables.Contains("JobHistory"))
+                {
+                    DataTable jh = Data.Tables["JobHistory"];
+                    if (jh.Rows.Count > 0)
+                    {
+                        job_instance_id = Convert.ToInt32(jh.Compute("max(instance_id)", string.Empty));
+                    }                   
+                }
+                return job_instance_id;
+            }
+            set {
+                job_instance_id=value;
+            }
+        }
+        int job_instance_id = 0;
 
 
         public bool IsXESupported()
@@ -251,6 +271,12 @@ namespace DBADash
         public void Collect(CollectionType collectionType)
         {
             var collectionTypeString = enumToString(collectionType);
+            SqlParameter[] param=null;
+            if(collectionType == CollectionType.JobHistory)
+            {
+                param =new SqlParameter[] { new SqlParameter { DbType = DbType.Int32, Value = Job_instance_id, ParameterName = "instance_id" }, new SqlParameter { DbType = DbType.Int32, ParameterName="run_date", Value = Convert.ToInt32(DateTime.Now.AddDays(-7).ToString("yyyyMMdd"))} };
+            }
+
             if (Data.Tables.Contains(collectionTypeString))
             {
                 // Already collected
@@ -269,7 +295,6 @@ namespace DBADash
                 Collect(CollectionType.Drives);
                 Collect(CollectionType.DBFiles);
                 Collect(CollectionType.Backups);
-                Collect(CollectionType.AgentJobs);
                 Collect(CollectionType.LogRestores);
                 Collect(CollectionType.ServerExtraProperties);
                 Collect(CollectionType.DBConfig);
@@ -294,6 +319,7 @@ namespace DBADash
                 Collect(CollectionType.AzureDBElasticPoolResourceStats);
                 Collect(CollectionType.SlowQueries);
                 Collect(CollectionType.PerformanceCounters);
+                Collect(CollectionType.JobHistory);
             }
             else if(collectionType == CollectionType.Infrequent)
             {
@@ -445,7 +471,7 @@ namespace DBADash
                 {
                     try
                     {
-                        addDT(collectionTypeString, Properties.Resources.ResourceManager.GetString("SQL" + collectionTypeString, Properties.Resources.Culture));
+                        addDT(collectionTypeString, Properties.Resources.ResourceManager.GetString("SQL" + collectionTypeString, Properties.Resources.Culture),param);
                         completed = true;
                     }
                     catch (Exception ex)

@@ -11,6 +11,7 @@ EXEC dbo.DailyPartitions_Add @TableName = 'DBIOStats',@DaysInFuture=@DaysInFutur
 EXEC dbo.DailyPartitions_Add @TableName = 'SlowQueries',@DaysInFuture=@DaysInFuture
 EXEC dbo.DailyPartitions_Add @TableName = 'CustomChecksHistory',@DaysInFuture=@DaysInFuture
 EXEC dbo.DailyPartitions_Add @TableName = 'PerformanceCounters',@DaysInFuture=@DaysInFuture
+EXEC dbo.DailyPartitions_Add @TableName = 'JobHistory',@DaysInFuture=@DaysInFuture
 
 DECLARE @MonthsInFuture INT=2
 EXEC dbo.MonthlyPartitions_Add @TableName = 'AzureDBElasticPoolResourceStats_60MIN',@MonthsInFuture=@MonthsInFuture
@@ -20,3 +21,4 @@ EXEC dbo.MonthlyPartitions_Add @TableName = 'DBIOStats_60MIN',@MonthsInFuture=@M
 EXEC dbo.MonthlyPartitions_Add @TableName = 'Waits_60MIN',@MonthsInFuture=@MonthsInFuture
 EXEC dbo.MonthlyPartitions_Add @TableName = 'ObjectExecutionStats_60MIN',@MonthsInFuture=@MonthsInFuture
 EXEC dbo.MonthlyPartitions_Add @TableName = 'PerformanceCounters_60MIN',@MonthsInFuture=@MonthsInFuture
+EXEC dbo.MonthlyPartitions_Add @TableName = 'JobStats_60MIN',@MonthsInFuture=@MonthsInFuture

@@ -522,10 +522,17 @@ namespace DBADash.Properties {
         /// <summary>
         ///   Looks up a localized string similar to IF OBJECT_ID(&apos;sys.dm_os_host_info&apos;) IS NOT NULL
         ///BEGIN
-        ///	SELECT host_platform,host_distribution,host_release,host_service_pack_level,host_sku,os_language_version,@@SERVERNAME as Instance,GETUTCDATE() As SnapshotDateUTC,CAST(SERVERPROPERTY(&apos;EditionID&apos;) as bigint) as EditionID,ISNULL(CAST(SERVERPROPERTY(&apos;ComputerNamePhysicalNetBIOS&apos;) as nvarchar(128)),&apos;&apos;) as ComputerNamePhysicalNetBIOS,DB_NAME() as DBName,SERVERPROPERTY (&apos;productversion&apos;) as ProductVersion
-        ///	FROM sys.dm_os_host_info
-        ///END
-        ///ELSE IF OBJECT_ID(&apos;s [rest of string was truncated]&quot;;.
+        ///	SELECT host_platform,
+        ///		host_distribution,
+        ///		host_release,
+        ///		host_service_pack_level,
+        ///		host_sku,os_language_version,
+        ///		@@SERVERNAME as Instance,
+        ///		GETUTCDATE() As SnapshotDateUTC,
+        ///		CAST(SERVERPROPERTY(&apos;EditionID&apos;) as bigint) as EditionID,
+        ///		ISNULL(CAST(SERVERPROPERTY(&apos;ComputerNamePhysicalNetBIOS&apos;) as nvarchar(128)),&apos;&apos;) as ComputerNamePhysicalNetBIOS,
+        ///		DB_NAME() as DBName,SERVERPROPERTY (&apos;productversion&apos;) as ProductVersion
+        ///	FROM sys.dm_os_ [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string SQLInstance {
             get {
@@ -560,6 +567,32 @@ namespace DBADash.Properties {
         internal static string SQLIOStats {
             get {
                 return ResourceManager.GetString("SQLIOStats", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to SELECT instance_id,
+        ///		job_id,
+        ///		step_id,
+        ///		step_name,
+        ///		sql_message_id,
+        ///		sql_severity,
+        ///		message,
+        ///		run_status,
+        ///		run_date,
+        ///		run_time,
+        ///		run_duration,
+        ///		operator_id_emailed,
+        ///		operator_id_netsent,
+        ///		operator_id_paged,
+        ///		retries_attempted,
+        ///		server
+        ///FROM msdb.dbo.sysjobhistory
+        ///WHERE instance_id&gt; @instance_id.
+        /// </summary>
+        internal static string SQLJobHistory {
+            get {
+                return ResourceManager.GetString("SQLJobHistory", resourceCulture);
             }
         }
         
@@ -832,11 +865,11 @@ namespace DBADash.Properties {
         /// <summary>
         ///   Looks up a localized string similar to /* Setup - create event sessions if they don&apos;t exist */
         ///DECLARE @SQL NVARCHAR(MAX)
-        ///DECLARE @EventSessionTemplate NVARCHAR(MAX) = N&apos;CREATE EVENT SESSION [{EventSessionName}] ON SERVER 
+        ///DECLARE @EventSessionTemplate NVARCHAR(MAX) = N&apos;CREATE EVENT SESSION [{EventSessionName}] ON SERVER
         ///	ADD EVENT sqlserver.rpc_completed(
         ///		ACTION(sqlserver.client_app_name,sqlserver.client_hostname,sqlserver.database_id,sqlserver.username)
         ///		WHERE ([duration]&gt;(&apos; + CAST(@SlowQueryThreshold AS NVARCHAR(MAX)) + &apos;) AND ([sqlserver].[client_app_name]&lt;&gt;N&apos;&apos;DBADashXE&apos;&apos; AND [object_name]&lt;&gt;N&apos;&apos;sp_readrequest&apos;&apos;))),
-        ///	ADD EVENT sqlse [rest of string was truncated]&quot;;.
+        ///	ADD EVENT sqlser [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string SQLSlowQueries {
             get {
@@ -847,12 +880,11 @@ namespace DBADash.Properties {
         /// <summary>
         ///   Looks up a localized string similar to /* Setup - create event sessions if they don&apos;t exist */
         ///DECLARE @SQL NVARCHAR(MAX)
-        ///DECLARE @EventSessionTemplate NVARCHAR(MAX) = N&apos;CREATE EVENT SESSION [{EventSessionName}] ON DATABASE 
+        ///DECLARE @EventSessionTemplate NVARCHAR(MAX) = N&apos;CREATE EVENT SESSION [{EventSessionName}] ON DATABASE
         ///	ADD EVENT sqlserver.rpc_completed(
         ///		ACTION(sqlserver.client_app_name,sqlserver.client_hostname,sqlserver.database_id,sqlserver.username)
-        ///		WHERE ([duration]&gt;(&apos; + CAST(@SlowQueryThreshold AS NVARCHAR(MAX)) + &apos;) AND ([sqlserver].[client_app_name]&lt;&gt;N&apos;&apos;DBADashXE&apos;&apos;))),
-        ///	ADD EVENT sqlserver.sql_batch_completed(
-        ///		ACTION(s [rest of string was truncated]&quot;;.
+        ///		WHERE ([duration]&gt;(&apos; + CAST(@SlowQueryThreshold AS NVARCHAR(MAX)) + &apos;) AND ([sqlserver].[client_app_name]&lt;&gt;N&apos;&apos;DBADashXE&apos;&apos; AND [object_name]&lt;&gt;N&apos;&apos;sp_readrequest&apos;&apos;))),
+        ///	ADD EVENT sqls [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string SQLSlowQueriesAzure {
             get {

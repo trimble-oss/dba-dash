@@ -280,6 +280,7 @@
     <Content Include="SQL\SQLDrives.sql" />
     <Content Include="SQL\SQLInstance.sql" />
     <Content Include="SQL\SQLIOStats.sql" />
+    <Content Include="SQL\SQLJobHistory.sql" />
     <Content Include="SQL\SQLLastGoodCheckDB.sql" />
     <Content Include="SQL\SQLLogRestores.sql" />
     <Content Include="SQL\SQLObjectExecutionStats.sql" />

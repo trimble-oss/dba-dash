@@ -79,6 +79,10 @@
           <DataField>SnapshotAgeMin</DataField>
           <rd:TypeName>System.Int32</rd:TypeName>
         </Field>
+        <Field Name="CollectionErrorCount">
+          <DataField>CollectionErrorCount</DataField>
+          <rd:TypeName>System.Int32</rd:TypeName>
+        </Field>
         <Field Name="SnapshotAgeMax">
           <DataField>SnapshotAgeMax</DataField>
           <rd:TypeName>System.Int32</rd:TypeName>
@@ -107,6 +111,10 @@
           <DataField>host_start_time_utc</DataField>
           <rd:TypeName>System.DateTime</rd:TypeName>
         </Field>
+        <Field Name="UptimeWarningThreshold">
+          <DataField>UptimeWarningThreshold</DataField>
+          <rd:TypeName>System.Int32</rd:TypeName>
+        </Field>
         <Field Name="MemoryDumpCount">
           <DataField>MemoryDumpCount</DataField>
           <rd:TypeName>System.Int32</rd:TypeName>
@@ -115,9 +123,17 @@
           <DataField>UptimeStatus</DataField>
           <rd:TypeName>System.Int32</rd:TypeName>
         </Field>
+        <Field Name="UptimeCriticalThreshold">
+          <DataField>UptimeCriticalThreshold</DataField>
+          <rd:TypeName>System.Int32</rd:TypeName>
+        </Field>
         <Field Name="LastMemoryDump">
           <DataField>LastMemoryDump</DataField>
           <rd:TypeName>System.DateTime</rd:TypeName>
+        </Field>
+        <Field Name="UptimeConfiguredLevel">
+          <DataField>UptimeConfiguredLevel</DataField>
+          <rd:TypeName>System.String</rd:TypeName>
         </Field>
         <Field Name="AdditionalUptime">
           <DataField>AdditionalUptime</DataField>
@@ -173,6 +189,26 @@
         </Field>
         <Field Name="AlertStatus">
           <DataField>AlertStatus</DataField>
+          <rd:TypeName>System.Int32</rd:TypeName>
+        </Field>
+        <Field Name="IsAgentRunning">
+          <DataField>IsAgentRunning</DataField>
+          <rd:TypeName>System.Boolean</rd:TypeName>
+        </Field>
+        <Field Name="CustomCheckStatus">
+          <DataField>CustomCheckStatus</DataField>
+          <rd:TypeName>System.Byte</rd:TypeName>
+        </Field>
+        <Field Name="MirroringStatus">
+          <DataField>MirroringStatus</DataField>
+          <rd:TypeName>System.Int32</rd:TypeName>
+        </Field>
+        <Field Name="ElasticPoolStorageStatus">
+          <DataField>ElasticPoolStorageStatus</DataField>
+          <rd:TypeName>System.Int32</rd:TypeName>
+        </Field>
+        <Field Name="PctMaxSizeStatus">
+          <DataField>PctMaxSizeStatus</DataField>
           <rd:TypeName>System.Int32</rd:TypeName>
         </Field>
       </Fields>

@@ -13,7 +13,7 @@ using static DBADash.DBADashConnection;
 
 namespace DBADashService
 {
-    [DisallowConcurrentExecution]
+    [DisallowConcurrentExecution, PersistJobDataAfterExecution]
     public class DBADashJob : IJob
     {
         static readonly CollectionConfig config = SchedulerServiceConfig.Config;
@@ -149,6 +149,8 @@ namespace DBADashService
                     try
                     {
                         var collector = new DBCollector(cfg.GetSource(), cfg.NoWMI);
+                        collector.Job_instance_id = dataMap.GetInt("Job_instance_id");
+                        
                         if (context.PreviousFireTimeUtc.HasValue)
                         {
                             collector.PerformanceCollectionPeriodMins = (Int32)DateTime.UtcNow.Subtract(context.PreviousFireTimeUtc.Value.UtcDateTime).TotalMinutes + 5;
@@ -165,11 +167,13 @@ namespace DBADashService
                         try
                         {
                             DestinationHandling.WriteAllDestinations(collector.Data, cfg, cfg.GenerateFileName(SchedulerServiceConfig.Config.BinarySerialization, cfg.SourceConnection.ConnectionForFileName));
+                            dataMap.Put("Job_instance_id", collector.Job_instance_id);
                         }
                         catch (Exception ex)
                         {
                             DBADashService.ScheduleService.ErrorLogger(ex, "Write to destination");
                         }
+                        
                     }
                     catch (Exception ex)
                     {

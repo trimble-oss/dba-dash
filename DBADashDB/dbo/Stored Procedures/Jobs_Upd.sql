@@ -126,6 +126,7 @@ BEGIN
 		has_step = T.has_step,
 		DDLID = DDL.DDLID,
 		Isactive=1,
+		SnapshotCreatedDate = ISNULL(J.SnapshotCreatedDate,@SnapshotDate),
 		SnapshotUpdatedDate = @SnapshotDate
 	FROM dbo.Jobs J
 	JOIN @Jobs T ON T.job_id = J.job_id

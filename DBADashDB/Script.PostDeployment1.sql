@@ -170,7 +170,9 @@ FROM (VALUES('ObjectExecutionStats',120),
 				('AzureDBResourceStats_60MIN',730),
 				('Waits_60MIN',730),
 				('PerformanceCounters', 180),
-				('PerformanceCounters_60MIN',730)
+				('PerformanceCounters_60MIN',730),
+				('JobStats_60MIN',730),
+				('JobHistory',8)
 				) AS t(TableName,RetentionDays)
 WHERE NOT EXISTS(SELECT 1 FROM dbo.DataRetention DR WHERE DR.TableName = T.TableName)
 
@@ -538,4 +540,10 @@ BEGIN
 	GROUP BY  PC.InstanceID,
 			PC.CounterID,
 			DG.DateGroup
+END
+
+IF NOT EXISTS(SELECT 1 FROM dbo.AgentJobThresholds WHERE InstanceId=-1 AND job_id = '00000000-0000-0000-0000-000000000000')
+BEGIN
+	INSERT INTO dbo.AgentJobThresholds(InstanceId,job_id,TimeSinceLastFailureCritical,TimeSinceLastFailureWarning,LastFailIsCritical,LastFailIsWarning)
+	SELECT -1,'00000000-0000-0000-0000-000000000000',60,10080,1,0
 END

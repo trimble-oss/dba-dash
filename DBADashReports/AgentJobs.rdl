@@ -48,24 +48,20 @@
           <DataField>name</DataField>
           <rd:TypeName>System.String</rd:TypeName>
         </Field>
-        <Field Name="LastFail">
-          <DataField>LastFail</DataField>
+        <Field Name="LastFailed">
+          <DataField>LastFailed</DataField>
           <rd:TypeName>System.DateTime</rd:TypeName>
         </Field>
-        <Field Name="LastFailUTC">
-          <DataField>LastFailUTC</DataField>
-          <rd:TypeName>System.DateTime</rd:TypeName>
-        </Field>
-        <Field Name="TimeSinceLastFail">
-          <DataField>TimeSinceLastFail</DataField>
+        <Field Name="TimeSinceLastFailed">
+          <DataField>TimeSinceLastFailed</DataField>
           <rd:TypeName>System.Int32</rd:TypeName>
         </Field>
         <Field Name="TimeSinceLastFailureStatus">
           <DataField>TimeSinceLastFailureStatus</DataField>
           <rd:TypeName>System.Int32</rd:TypeName>
         </Field>
-        <Field Name="LastSucceed">
-          <DataField>LastSucceed</DataField>
+        <Field Name="LastSucceeded">
+          <DataField>LastSucceeded</DataField>
           <rd:TypeName>System.DateTime</rd:TypeName>
         </Field>
         <Field Name="TimeSinceLastSucceeded">
@@ -76,12 +72,8 @@
           <DataField>TimeSinceLastSucceededStatus</DataField>
           <rd:TypeName>System.Int32</rd:TypeName>
         </Field>
-        <Field Name="LastSucceedUTC">
-          <DataField>LastSucceedUTC</DataField>
-          <rd:TypeName>System.DateTime</rd:TypeName>
-        </Field>
-        <Field Name="TimeSinceLastSucceed">
-          <DataField>TimeSinceLastSucceed</DataField>
+        <Field Name="SucceededCount24Hrs">
+          <DataField>SucceededCount24Hrs</DataField>
           <rd:TypeName>System.Int32</rd:TypeName>
         </Field>
         <Field Name="FailCount24Hrs">
@@ -92,8 +84,8 @@
           <DataField>FailCount24HrsStatus</DataField>
           <rd:TypeName>System.Int32</rd:TypeName>
         </Field>
-        <Field Name="SucceedCount24Hrs">
-          <DataField>SucceedCount24Hrs</DataField>
+        <Field Name="SucceededCount7Days">
+          <DataField>SucceededCount7Days</DataField>
           <rd:TypeName>System.Int32</rd:TypeName>
         </Field>
         <Field Name="FailCount7Days">
@@ -102,10 +94,6 @@
         </Field>
         <Field Name="FailCount7DaysStatus">
           <DataField>FailCount7DaysStatus</DataField>
-          <rd:TypeName>System.Int32</rd:TypeName>
-        </Field>
-        <Field Name="SucceedCount7Days">
-          <DataField>SucceedCount7Days</DataField>
           <rd:TypeName>System.Int32</rd:TypeName>
         </Field>
         <Field Name="JobStepFails7Days">
@@ -142,7 +130,7 @@
         </Field>
         <Field Name="IsLastFail">
           <DataField>IsLastFail</DataField>
-          <rd:TypeName>System.Boolean</rd:TypeName>
+          <rd:TypeName>System.Int32</rd:TypeName>
         </Field>
         <Field Name="TimeSinceLastFailureWarning">
           <DataField>TimeSinceLastFailureWarning</DataField>
@@ -491,14 +479,14 @@
                         <Textbox Name="textbox4">
                           <CanGrow>true</CanGrow>
                           <UserSort>
-                            <SortExpression>=Fields!LastFail.Value</SortExpression>
+                            <SortExpression>=Fields!LastFailed.Value</SortExpression>
                           </UserSort>
                           <KeepTogether>true</KeepTogether>
                           <Paragraphs>
                             <Paragraph>
                               <TextRuns>
                                 <TextRun>
-                                  <Value>Last Fail</Value>
+                                  <Value>Last Failed</Value>
                                   <Style>
                                     <FontFamily />
                                     <FontSize>11pt</FontSize>
@@ -533,7 +521,7 @@
                         <Textbox Name="textbox5">
                           <CanGrow>true</CanGrow>
                           <UserSort>
-                            <SortExpression>=Fields!TimeSinceLastFail.Value</SortExpression>
+                            <SortExpression>=Fields!TimeSinceLastFailed.Value</SortExpression>
                           </UserSort>
                           <KeepTogether>true</KeepTogether>
                           <Paragraphs>
@@ -578,14 +566,14 @@
                         <Textbox Name="textbox7">
                           <CanGrow>true</CanGrow>
                           <UserSort>
-                            <SortExpression>=Fields!LastSucceed.Value</SortExpression>
+                            <SortExpression>=Fields!LastSucceeded.Value</SortExpression>
                           </UserSort>
                           <KeepTogether>true</KeepTogether>
                           <Paragraphs>
                             <Paragraph>
                               <TextRuns>
                                 <TextRun>
-                                  <Value>Last Succeed</Value>
+                                  <Value>Last Succeeded</Value>
                                   <Style>
                                     <FontFamily />
                                     <FontSize>11pt</FontSize>
@@ -710,7 +698,7 @@
                         <Textbox Name="textbox13">
                           <CanGrow>true</CanGrow>
                           <UserSort>
-                            <SortExpression>=Fields!SucceedCount24Hrs.Value</SortExpression>
+                            <SortExpression>=Fields!SucceededCount24Hrs.Value</SortExpression>
                           </UserSort>
                           <KeepTogether>true</KeepTogether>
                           <Paragraphs>
@@ -800,7 +788,7 @@
                         <Textbox Name="textbox16">
                           <CanGrow>true</CanGrow>
                           <UserSort>
-                            <SortExpression>=Fields!SucceedCount7Days.Value</SortExpression>
+                            <SortExpression>=Fields!SucceededCount7Days.Value</SortExpression>
                           </UserSort>
                           <KeepTogether>true</KeepTogether>
                           <Paragraphs>
@@ -1817,7 +1805,7 @@ Fields!JobStatus.Value=4,"Green")</BackgroundColor>
                             <Paragraph>
                               <TextRuns>
                                 <TextRun>
-                                  <Value>=IIF(ISNOTHING(Fields!LastFailUTC.Value),"", Format(System.TimeZone.CurrentTimeZone.ToLocalTime(Fields!LastFailUTC.Value),Parameters!DateFormat.Value))</Value>
+                                  <Value>=IIF(ISNOTHING(Fields!LastFailed.Value),"", Format(System.TimeZone.CurrentTimeZone.ToLocalTime(Fields!LastFailed.Value),Parameters!DateFormat.Value))</Value>
                                   <Style>
                                     <FontFamily />
                                     <Format>=Parameters!DateFormat.Value</Format>
@@ -1829,7 +1817,6 @@ Fields!JobStatus.Value=4,"Green")</BackgroundColor>
                             </Paragraph>
                           </Paragraphs>
                           <rd:DefaultName>LastFail</rd:DefaultName>
-                          <ToolTip>="Local time on server:" &amp; FORMAT(Fields!LastFail.Value,Parameters!DateFormat.Value)</ToolTip>
                           <Style>
                             <Border>
                               <Color>LightGrey</Color>
@@ -1855,7 +1842,7 @@ Fields!JobStatus.Value=4,"Green")</BackgroundColor>
                             <Paragraph>
                               <TextRuns>
                                 <TextRun>
-                                  <Value>=Fields!TimeSinceLastFail.Value</Value>
+                                  <Value>=Fields!TimeSinceLastFailed.Value</Value>
                                   <Style>
                                     <FontFamily />
                                     <Color>#333333</Color>
@@ -1894,7 +1881,7 @@ Fields!TimeSinceLastFailureStatus.Value=4,"Green")</BackgroundColor>
                             <Paragraph>
                               <TextRuns>
                                 <TextRun>
-                                  <Value>=IIF(ISNOTHING(Fields!LastSucceedUTC.Value),"", Format(System.TimeZone.CurrentTimeZone.ToLocalTime(Fields!LastSucceedUTC.Value),Parameters!DateFormat.Value))</Value>
+                                  <Value>=IIF(ISNOTHING(Fields!LastSucceeded.Value),"", Format(System.TimeZone.CurrentTimeZone.ToLocalTime(Fields!LastSucceeded.Value),Parameters!DateFormat.Value))</Value>
                                   <Style>
                                     <FontFamily />
                                     <Format>=Parameters!DateFormat.Value</Format>
@@ -1906,7 +1893,6 @@ Fields!TimeSinceLastFailureStatus.Value=4,"Green")</BackgroundColor>
                             </Paragraph>
                           </Paragraphs>
                           <rd:DefaultName>LastSucceed</rd:DefaultName>
-                          <ToolTip>="Local time on server: " &amp; format(Fields!LastSucceed.Value,Parameters!DateFormat.Value)</ToolTip>
                           <Style>
                             <Border>
                               <Color>LightGrey</Color>
@@ -2010,7 +1996,7 @@ Fields!FailCount24HrsStatus.Value=4,"Green")</BackgroundColor>
                             <Paragraph>
                               <TextRuns>
                                 <TextRun>
-                                  <Value>=Fields!SucceedCount24Hrs.Value</Value>
+                                  <Value>=Fields!SucceededCount24Hrs.Value</Value>
                                   <Style>
                                     <FontFamily />
                                     <Color>#333333</Color>
@@ -2085,7 +2071,7 @@ Fields!JobStepFail7DaysStatus.Value=4,"Green")</BackgroundColor>
                             <Paragraph>
                               <TextRuns>
                                 <TextRun>
-                                  <Value>=Fields!SucceedCount7Days.Value</Value>
+                                  <Value>=Fields!SucceededCount7Days.Value</Value>
                                   <Style>
                                     <FontFamily />
                                     <Color>#333333</Color>
@@ -2933,7 +2919,7 @@ Fields!LastFailStatus.Value=4,"Green")</BackgroundColor>
                       <Direction>Descending</Direction>
                     </SortExpression>
                     <SortExpression>
-                      <Value>=Fields!LastFail.Value</Value>
+                      <Value>=Fields!LastFailed.Value</Value>
                       <Direction>Descending</Direction>
                     </SortExpression>
                   </SortExpressions>

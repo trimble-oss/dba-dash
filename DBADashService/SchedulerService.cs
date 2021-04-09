@@ -226,6 +226,7 @@ namespace DBADashService
                            .UsingJobData("Type", JsonConvert.SerializeObject(s.CollectionTypes))
                            .UsingJobData("Source", cfg.SourceConnection.ConnectionString)
                            .UsingJobData("CFG", cfgString)
+                           .UsingJobData("Job_instance_id",0)
                            .UsingJobData("SourceType", JsonConvert.SerializeObject(cfg.SourceConnection.Type))
                           .Build();
                     ITrigger trigger = TriggerBuilder.Create()

@@ -178,7 +178,6 @@ namespace DBADashGUI
                 agentJobsControl1.IncludeOK = n.Type != SQLTreeItem.TreeType.DBADashRoot;
                 agentJobsControl1.IncludeWarning = true;
                 agentJobsControl1.IncludeCritical = true;
-                agentJobsControl1.ConnectionString = connectionString;
                 agentJobsControl1.InstanceIDs = instanceIDs;
                 agentJobsControl1.RefreshData();
             }

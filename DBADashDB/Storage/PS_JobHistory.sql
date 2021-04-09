@@ -1,0 +1,3 @@
+﻿CREATE PARTITION SCHEME [PS_JobHistory]
+    AS PARTITION [PF_JobHistory]
+    ALL TO ([PRIMARY]);

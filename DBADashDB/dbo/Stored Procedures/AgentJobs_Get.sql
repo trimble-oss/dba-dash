@@ -49,21 +49,18 @@ SELECT J.Instance,
        J.InstanceID,
        J.job_id,
        J.name,
-       J.LastFail,
-	   J.LastFailUTC,
-       J.TimeSinceLastFail,
+       J.LastFailed,
+       J.TimeSinceLastFailed,
        J.TimeSinceLastFailureStatus,
-       J.LastSucceed,
-	   J.LastSucceedUTC,
+       J.LastSucceeded,
        J.TimeSinceLastSucceeded,
        J.TimeSinceLastSucceededStatus,
-       J.TimeSinceLastSucceed,
        J.FailCount24Hrs,
        J.FailCount24HrsStatus,
-       J.SucceedCount24Hrs,
+       J.SucceededCount24Hrs,
        J.FailCount7Days,
        J.FailCount7DaysStatus,
-       J.SucceedCount7Days,
+       J.SucceededCount7Days,
        J.JobStepFails7Days,
        J.JobStepFail7DaysStatus,
        J.JobStepFails24Hrs,
@@ -94,4 +91,4 @@ WHERE EXISTS(SELECT 1 FROM @Instances I WHERE I.InstanceID = J.InstanceID)
 AND J.enabled=@enabled
 AND (J.name LIKE @JobName OR @JobName IS NULL)
 AND EXISTS(SELECT 1 FROM Statuses s WHERE S.Status=J.JobStatus)
-ORDER BY J.IsLastFail DESC,J.LastFail DESC
+ORDER BY J.IsLastFail DESC,J.LastFailed DESC

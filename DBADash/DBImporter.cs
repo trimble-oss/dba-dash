@@ -23,6 +23,7 @@ namespace DBADash
         {
             this.data = data;
             this.connectionString = connectionString;
+           
             retryPolicy = Policy.Handle<Exception>()
                 .WaitAndRetry(new[]
                 {
@@ -40,6 +41,7 @@ namespace DBADash
             logError(errorSource, ex.ToString(), errorContext);
         }
 
+        // Adds error to Errors datatable to be imported into CollectionErrorLog table later.
         private void logError(string errorSource, string errorMessage, string errorContext = "Import")
         {
             DataTable dtErrors;
@@ -97,9 +99,10 @@ namespace DBADash
                 logError("Database", ex);
             }
 
+            // Generic handling for most tables
             foreach (DataTable dt in data.Tables)
             {
-                string[] tables = { "Drives", "ServerProperties", "Backups", "AgentJobs", "LogRestores", "DBFiles", "DBConfig", "Corruption", "DatabasesHADR", "SysConfig", "OSInfo", "TraceFlags", "CPU", "Drivers", "BlockingSnapshot", "IOStats", "Waits", "OSLoadedModules", "DBTuningOptions", "AzureDBResourceStats", "AzureDBServiceObjectives", "AzureDBElasticPoolResourceStats", "SlowQueries", "SlowQueriesStats", "LastGoodCheckDB", "Alerts", "ObjectExecutionStats", "ServerPrincipals", "ServerRoleMembers", "ServerPermissions", "DatabasePrincipals", "DatabaseRoleMembers", "DatabasePermissions", "CustomChecks", "PerformanceCounters", "VLF", "DatabaseMirroring", "Jobs" };
+                string[] tables = { "Drives", "ServerProperties", "Backups", "AgentJobs", "LogRestores", "DBFiles", "DBConfig", "Corruption", "DatabasesHADR", "SysConfig", "OSInfo", "TraceFlags", "CPU", "Drivers", "BlockingSnapshot", "IOStats", "Waits", "OSLoadedModules", "DBTuningOptions", "AzureDBResourceStats", "AzureDBServiceObjectives", "AzureDBElasticPoolResourceStats", "SlowQueries", "SlowQueriesStats", "LastGoodCheckDB", "Alerts", "ObjectExecutionStats", "ServerPrincipals", "ServerRoleMembers", "ServerPermissions", "DatabasePrincipals", "DatabaseRoleMembers", "DatabasePermissions", "CustomChecks", "PerformanceCounters", "VLF", "DatabaseMirroring", "Jobs", "JobHistory" };
 
                 if (tables.Contains(dt.TableName))
                 {
@@ -130,8 +133,6 @@ namespace DBADash
                     {
                         logError(dt.TableName, ex);
                     }
-
-
                 }
             }
             try
@@ -145,7 +146,7 @@ namespace DBADash
             {
                 logError("ServerExtraProperties", ex);
             }
-
+            // retry based on policy then let caller handle the exception
             retryPolicy.Execute(
             context => InsertErrors(),
                             new Context("InsertErrors")

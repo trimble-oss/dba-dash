@@ -24,9 +24,11 @@
     [has_server]              BIT              NULL,
     [has_step]                BIT              NULL,
     [DDLID]                   BIGINT           NULL,
-    [Isactive]                BIT              NOT NULL,
+    [IsActive]                BIT              NOT NULL,
     [SnapshotCreatedDate]     DATETIME2 (2)    NULL,
     [SnapshotUpdatedDate]     DATETIME2 (2)    NULL,
+    [LastSucceeded]           DATETIME2 (2)    NULL,
+    [LastFailed]              DATETIME2 (2)    NULL,
     CONSTRAINT [PK_Jobs] PRIMARY KEY CLUSTERED ([InstanceID] ASC, [job_id] ASC),
     CONSTRAINT [FK_Jobs_DDL] FOREIGN KEY ([DDLID]) REFERENCES [dbo].[DDL] ([DDLID]),
     CONSTRAINT [FK_Jobs_Instances] FOREIGN KEY ([InstanceID]) REFERENCES [dbo].[Instances] ([InstanceID])
