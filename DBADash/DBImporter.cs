@@ -313,6 +313,10 @@ namespace DBADash
                         cmd.Parameters.AddWithValue("OSLanguageVersion", rInstance["os_language_version"]);
                     }
                     cmd.Parameters.AddWithValue("EditionID", (long)rInstance["EditionID"]);
+                    if (rInstance.Table.Columns.Contains("UTCOffset"))
+                    {
+                        cmd.Parameters.AddWithValue("UTCOffset", (int)rInstance["UTCOffset"]);
+                    }
                     var pInstanceID = cmd.Parameters.Add("InstanceID", SqlDbType.Int);
                     pInstanceID.Direction = ParameterDirection.Output;
                     cmd.ExecuteNonQuery();

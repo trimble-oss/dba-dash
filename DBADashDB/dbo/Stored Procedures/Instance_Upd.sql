@@ -11,6 +11,7 @@
 	@HostServicePackLevel NVARCHAR(256)=NULL,
 	@HostSKU INT=NULL,
 	@OSLanguageVersion INT=NULL,
+	@UTCOffset INT=NULL,
 	@InstanceID INT OUT
 )
 AS
@@ -24,8 +25,8 @@ BEGIN
 	IF @InstanceID IS NULL
 	BEGIN
 		BEGIN TRAN
-		INSERT INTO dbo.Instances(Instance,ConnectionID,IsActive,AgentHostName,AgentVersion,EditionID)
-		VALUES(@Instance,@ConnectionID,CAST(1 as BIT),@AgentHostName,@AgentVersion,@EditionID)
+		INSERT INTO dbo.Instances(Instance,ConnectionID,IsActive,AgentHostName,AgentVersion,EditionID,UTCOffset)
+		VALUES(@Instance,@ConnectionID,CAST(1 as BIT),@AgentHostName,@AgentVersion,@EditionID,@UTCOffset)
 		SELECT @InstanceID = SCOPE_IDENTITY();
 
 		EXEC dbo.CollectionDates_Upd @InstanceID = @InstanceID,  
@@ -46,7 +47,8 @@ BEGIN
 			host_release = @HostRelease,
 			host_service_pack_level = @HostServicePackLevel,
 			host_sku = @HostSKU,
-			os_language_version = @OSLanguageVersion
+			os_language_version = @OSLanguageVersion,
+			UTCOffset = ISNULL(@UTCOffset,UTCOffset)
 		WHERE InstanceID = @InstanceID
 		AND EXISTS(SELECT Instance,
 						AgentHostName,
@@ -57,7 +59,8 @@ BEGIN
 						host_release,
 						host_service_pack_level,
 						host_sku,
-						os_language_version
+						os_language_version,
+						UTCOffset
 					EXCEPT
 					SELECT @Instance,
 							@AgentHostName,
@@ -68,7 +71,8 @@ BEGIN
 							@HostRelease,
 							@HostServicePackLevel,
 							@HostSKU,
-							@OSLanguageVersion
+							@OSLanguageVersion,
+							ISNULL(@UTCOffset,UTCOffset)
 					)
 		AND @HostPlatform IS NOT NULL -- for older agent version
 
