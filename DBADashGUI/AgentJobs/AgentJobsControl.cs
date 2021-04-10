@@ -14,6 +14,11 @@ namespace DBADashGUI.AgentJobs
     public partial class AgentJobsControl : UserControl
     {
         public List<Int32> InstanceIDs;
+        public Guid JobID;
+
+        private int? instance_id = null;
+        private int instanceId;
+        private Guid jobID;
 
         public bool IncludeCritical
         {
@@ -71,6 +76,10 @@ namespace DBADashGUI.AgentJobs
             dgvJobs.AutoGenerateColumns = false;
             dgvJobs.DataSource = new DataView(dt);           
             configureInstanceThresholdsToolStripMenuItem.Enabled = InstanceIDs.Count == 1;
+            if (JobID != Guid.Empty && dt.Rows.Count==1)
+            {           
+                showHistory(dt.Rows[0]);
+            }
         }
 
         private DataTable GetJobs()
@@ -84,6 +93,10 @@ namespace DBADashGUI.AgentJobs
                 cmd.Parameters.AddWithValue("IncludeWarning", IncludeWarning);
                 cmd.Parameters.AddWithValue("IncludeNA", IncludeNA);
                 cmd.Parameters.AddWithValue("IncludeOK", IncludeOK);
+                if(JobID!= Guid.Empty)
+                {
+                    cmd.Parameters.AddWithValue("JobID", JobID);
+                }
                 cmd.CommandType = CommandType.StoredProcedure;
                 DataTable dt = new DataTable();
                 da.Fill(dt);
@@ -134,27 +147,29 @@ namespace DBADashGUI.AgentJobs
                     
                     configureThresholds((Int32)row["InstanceID"], (Guid)row["job_id"]);
                 }
-                if(dgvJobs.Columns[e.ColumnIndex] == colHistory)
+                if (dgvJobs.Columns[e.ColumnIndex] == colHistory)
                 {
-                    if (row["job_id"] != DBNull.Value)
-                    {
-                        instanceId = (Int32)row["InstanceID"];
-                        jobID = (Guid)row["job_id"];
-                        tsJobName.Text = (string)row["Instance"] + " | " + (string)row["name"];
-                        instance_id = null;
-                        showHistory();
-                    }
-                    else
-                    {
-                        MessageBox.Show("job_id IS NULL", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    }
+                    showHistory(row.Row);
                 }
             }
         }
 
-        private int? instance_id = null;
-        private int instanceId;
-        private Guid jobID;
+        private void showHistory(DataRow row)
+        {
+
+            if (row["job_id"] != DBNull.Value)
+            {
+                instanceId = (Int32)row["InstanceID"];
+                jobID = (Guid)row["job_id"];
+                tsJobName.Text = (string)row["Instance"] + " | " + (string)row["name"];
+                instance_id = null;
+                showHistory();
+            }
+            else
+            {
+                MessageBox.Show("job_id IS NULL", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
 
         private void showHistory()
         {

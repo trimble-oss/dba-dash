@@ -144,7 +144,7 @@
             this.dgvJobs.RowHeadersVisible = false;
             this.dgvJobs.RowHeadersWidth = 51;
             this.dgvJobs.RowTemplate.Height = 24;
-            this.dgvJobs.Size = new System.Drawing.Size(2197, 172);
+            this.dgvJobs.Size = new System.Drawing.Size(2197, 173);
             this.dgvJobs.TabIndex = 0;
             this.dgvJobs.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgvJobs_CellContentClick);
             this.dgvJobs.RowsAdded += new System.Windows.Forms.DataGridViewRowsAddedEventHandler(this.dgvJobs_RowsAdded);
@@ -325,7 +325,7 @@
             this.tsConfigure});
             this.toolStrip1.Location = new System.Drawing.Point(0, 0);
             this.toolStrip1.Name = "toolStrip1";
-            this.toolStrip1.Size = new System.Drawing.Size(2197, 31);
+            this.toolStrip1.Size = new System.Drawing.Size(2197, 27);
             this.toolStrip1.TabIndex = 3;
             this.toolStrip1.Text = "toolStrip1";
             // 
@@ -367,7 +367,7 @@
             // 
             this.criticalToolStripMenuItem.CheckOnClick = true;
             this.criticalToolStripMenuItem.Name = "criticalToolStripMenuItem";
-            this.criticalToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            this.criticalToolStripMenuItem.Size = new System.Drawing.Size(161, 26);
             this.criticalToolStripMenuItem.Text = "Critical";
             this.criticalToolStripMenuItem.Click += new System.EventHandler(this.criticalToolStripMenuItem_Click);
             // 
@@ -375,7 +375,7 @@
             // 
             this.warningToolStripMenuItem.CheckOnClick = true;
             this.warningToolStripMenuItem.Name = "warningToolStripMenuItem";
-            this.warningToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            this.warningToolStripMenuItem.Size = new System.Drawing.Size(161, 26);
             this.warningToolStripMenuItem.Text = "Warning";
             this.warningToolStripMenuItem.Click += new System.EventHandler(this.warningToolStripMenuItem_Click);
             // 
@@ -383,7 +383,7 @@
             // 
             this.undefinedToolStripMenuItem.CheckOnClick = true;
             this.undefinedToolStripMenuItem.Name = "undefinedToolStripMenuItem";
-            this.undefinedToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            this.undefinedToolStripMenuItem.Size = new System.Drawing.Size(161, 26);
             this.undefinedToolStripMenuItem.Text = "Undefined";
             this.undefinedToolStripMenuItem.Click += new System.EventHandler(this.undefinedToolStripMenuItem_Click);
             // 
@@ -391,7 +391,7 @@
             // 
             this.OKToolStripMenuItem.CheckOnClick = true;
             this.OKToolStripMenuItem.Name = "OKToolStripMenuItem";
-            this.OKToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            this.OKToolStripMenuItem.Size = new System.Drawing.Size(161, 26);
             this.OKToolStripMenuItem.Text = "OK";
             this.OKToolStripMenuItem.Click += new System.EventHandler(this.OKToolStripMenuItem_Click);
             // 
@@ -438,13 +438,13 @@
             this.colRetries,
             this.colViewSteps});
             this.dgvJobHistory.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.dgvJobHistory.Location = new System.Drawing.Point(0, 31);
+            this.dgvJobHistory.Location = new System.Drawing.Point(0, 27);
             this.dgvJobHistory.Name = "dgvJobHistory";
             this.dgvJobHistory.ReadOnly = true;
             this.dgvJobHistory.RowHeadersVisible = false;
             this.dgvJobHistory.RowHeadersWidth = 51;
             this.dgvJobHistory.RowTemplate.Height = 24;
-            this.dgvJobHistory.Size = new System.Drawing.Size(2197, 142);
+            this.dgvJobHistory.Size = new System.Drawing.Size(2197, 149);
             this.dgvJobHistory.TabIndex = 4;
             this.dgvJobHistory.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgvJobHistory_CellContentClick);
             // 
@@ -542,7 +542,7 @@
             // splitContainer1
             // 
             this.splitContainer1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.splitContainer1.Location = new System.Drawing.Point(0, 31);
+            this.splitContainer1.Location = new System.Drawing.Point(0, 27);
             this.splitContainer1.Name = "splitContainer1";
             this.splitContainer1.Orientation = System.Windows.Forms.Orientation.Horizontal;
             // 
@@ -554,8 +554,8 @@
             // 
             this.splitContainer1.Panel2.Controls.Add(this.dgvJobHistory);
             this.splitContainer1.Panel2.Controls.Add(this.toolStrip2);
-            this.splitContainer1.Size = new System.Drawing.Size(2197, 349);
-            this.splitContainer1.SplitterDistance = 172;
+            this.splitContainer1.Size = new System.Drawing.Size(2197, 353);
+            this.splitContainer1.SplitterDistance = 173;
             this.splitContainer1.TabIndex = 5;
             // 
             // toolStrip2
@@ -569,7 +569,7 @@
             this.tsJobName});
             this.toolStrip2.Location = new System.Drawing.Point(0, 0);
             this.toolStrip2.Name = "toolStrip2";
-            this.toolStrip2.Size = new System.Drawing.Size(2197, 31);
+            this.toolStrip2.Size = new System.Drawing.Size(2197, 27);
             this.toolStrip2.TabIndex = 5;
             this.toolStrip2.Text = "toolStrip2";
             // 
@@ -608,7 +608,7 @@
             // 
             this.showJobStepsToolStripMenuItem.CheckOnClick = true;
             this.showJobStepsToolStripMenuItem.Name = "showJobStepsToolStripMenuItem";
-            this.showJobStepsToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            this.showJobStepsToolStripMenuItem.Size = new System.Drawing.Size(195, 26);
             this.showJobStepsToolStripMenuItem.Text = "Show Job Steps";
             this.showJobStepsToolStripMenuItem.Click += new System.EventHandler(this.showJobStepsToolStripMenuItem_Click);
             // 

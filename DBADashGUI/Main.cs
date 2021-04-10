@@ -174,6 +174,14 @@ namespace DBADashGUI
             }
             else if(tabs.SelectedTab== tabJobs)
             {
+                if (n.Type == SQLTreeItem.TreeType.AgentJob)
+                {
+                    agentJobsControl1.JobID = (Guid)n.Tag;
+                }
+                else
+                {
+                    agentJobsControl1.JobID = Guid.Empty;
+                }
                 agentJobsControl1.IncludeNA = n.Type != SQLTreeItem.TreeType.DBADashRoot;
                 agentJobsControl1.IncludeOK = n.Type != SQLTreeItem.TreeType.DBADashRoot;
                 agentJobsControl1.IncludeWarning = true;
@@ -717,6 +725,7 @@ namespace DBADashGUI
                 allowedTabs.Add(tabJobs);
             }
             else if(n.Type== SQLTreeItem.TreeType.AgentJob) {
+                allowedTabs.Add(tabJobs);
                 allowedTabs.Add(tabJobDDL);
             }
             if (n.ObjectID > 0)
