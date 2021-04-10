@@ -184,6 +184,10 @@ namespace DBADashGUI.AgentJobs
                 {
                     cmd.Parameters.AddWithValue("StepID", StepID);
                 }
+                else
+                {
+                    cmd.Parameters.AddWithValue("StepID", DBNull.Value);
+                }
                 if (instance_id != null)
                 {
                     cmd.Parameters.AddWithValue("instance_id", instance_id);
