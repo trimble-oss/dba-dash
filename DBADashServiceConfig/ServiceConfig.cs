@@ -605,6 +605,10 @@ namespace DBADashServiceConfig
             {
                 frm.ConnectionString = cn.ConnectionString;
             }
+            else
+            {
+                frm.ConnectionString = "Initial Catalog=DBADashDB;Integrated Security=SSPI;Data Source=" + Environment.MachineName;
+            }
             frm.ShowDialog();
             if (frm.DialogResult == DialogResult.OK)
             {
@@ -636,6 +640,7 @@ namespace DBADashServiceConfig
             {
                 frm.ConnectionString = cn.ConnectionString;
             }
+            frm.ValidateInitialCatalog = true;
             frm.ShowDialog();
             if (frm.DialogResult == DialogResult.OK)
             {

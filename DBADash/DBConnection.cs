@@ -13,6 +13,7 @@ namespace DBADash
         }
 
         string connectionString;
+        public bool ValidateInitialCatalog = false;
 
         public string ConnectionString
         {
@@ -84,20 +85,20 @@ namespace DBADash
             try
             {
                 this.Cursor = Cursors.WaitCursor;
-                testConnection(ConnectionString);
-            }
-            catch (Exception ex)
-            {          
-                try
+                if (ValidateInitialCatalog)
+                {
+                    testConnection(ConnectionString);
+                }
+                else
                 {
                     testConnection(ConnectionStringWithoutInitialCatalog); // Try without initial catalog as DB might not have been created yet
                 }
-                catch 
-                {
-                    this.Cursor = Cursors.Default;
-                    MessageBox.Show("Error connecting to data source:" + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    return;
-                }
+            }
+            catch (Exception ex)
+            {          
+                this.Cursor = Cursors.Default;
+                MessageBox.Show("Error connecting to data source:" + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
             }
             finally
             {
