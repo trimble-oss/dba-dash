@@ -1,6 +1,7 @@
 ﻿using DBADash;
 using Newtonsoft.Json;
 using System;
+using System.Collections.Generic;
 using System.Data;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
@@ -13,6 +14,7 @@ namespace DBADashService
 
         public static void WriteAllDestinations(DataSet ds,DBADashSource src,string fileName)
         {
+            List<Exception> exceptions = new List<Exception>();
             foreach (var d in SchedulerServiceConfig.Config.AllDestinations)
             {
                 try
@@ -22,8 +24,13 @@ namespace DBADashService
                 }
                 catch(Exception ex)
                 {
-                    DBADashService.ScheduleService.ErrorLogger(ex, "Error writing to destination:" + d.ConnectionForPrint + " from " + src.SourceConnection.ConnectionForPrint);
+                    exceptions.Add(ex);
+                    DBADashService.ScheduleService.ErrorLogger(ex,"Error writing to destination:" + d.ConnectionForPrint + " from " + src.SourceConnection.ConnectionForPrint);
                 }
+            }
+            if (exceptions.Count > 0)
+            {
+                throw new AggregateException(exceptions);
             }
         }
 

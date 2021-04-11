@@ -78,6 +78,7 @@ namespace DBADash
 
         public void Update()
         {
+            List<Exception> exceptions = new List<Exception>();
             var rInstance = data.Tables["DBADash"].Rows[0];
             snapshotDate = (DateTime)rInstance["SnapshotDateUTC"];
 
@@ -97,6 +98,7 @@ namespace DBADash
             catch(Exception ex)
             {
                 logError("Database", ex);
+                exceptions.Add(ex);
             }
 
             // Generic handling for most tables
@@ -116,6 +118,7 @@ namespace DBADash
                     catch(Exception ex)
                     {
                         logError(dt.TableName, ex);
+                        exceptions.Add(ex);
                     }
                 }
                 string snapshotPrefix = "Snapshot_";
@@ -132,6 +135,7 @@ namespace DBADash
                     catch(Exception ex)
                     {
                         logError(dt.TableName, ex);
+                        exceptions.Add(ex);
                     }
                 }
             }
@@ -145,12 +149,17 @@ namespace DBADash
             catch(Exception ex)
             {
                 logError("ServerExtraProperties", ex);
+                exceptions.Add(ex);
             }
             // retry based on policy then let caller handle the exception
             retryPolicy.Execute(
             context => InsertErrors(),
                             new Context("InsertErrors")
                 );
+            if (exceptions.Count > 0)
+            {
+                throw new AggregateException(exceptions);
+            }
         }
 
         private void updateSnapshot(string tableName, string databaseName)
