@@ -22,11 +22,15 @@ FROM dbo.BlockingSnapshot BSS
 OUTER APPLY dbo.BlockingSnapshotRecursiveStats(BSS.BlockingSnapshotID,BSS.session_id,BSS.SnapshotDateUTC) stat
 WHERE BSS.BlockingSnapshotID = @BlockingSnapshotID
 AND (BSS.blocking_session_id=@blocking_session_id
-	OR (@blocking_session_id=0
+		OR (@blocking_session_id=0
+			/* 
+			Session is not blocked by another sessionid in this snapshot. 
+			(Either root blocker with blocking_session_id = 0, or we did not capture the root blocker)
+			*/
 			AND NOT EXISTS(SELECT 1 
 						FROM dbo.BlockingSnapshot BSS2 
 						WHERE BSS2.BlockingSnapshotID=BSS.BlockingSnapshotID
-						AND blocking_session_id=0
-						AND @blocking_session_id=0)
+						AND BSS2.session_id=BSS.blocking_session_id
+						)
 			)
 	)

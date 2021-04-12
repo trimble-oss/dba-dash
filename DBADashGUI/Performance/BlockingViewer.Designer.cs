@@ -28,22 +28,11 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle3 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle3 = new System.Windows.Forms.DataGridViewCellStyle();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(BlockingViewer));
             this.gvBlocking = new System.Windows.Forms.DataGridView();
-            this.SessionID = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.BlockedSessions = new System.Windows.Forms.DataGridViewLinkColumn();
-            this.BlockedWaitTimeRecursive = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.StartTime = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.Database = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.HostName = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.LoginName = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.Status = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.WaitResource = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.WaitTime = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.Txt = new System.Windows.Forms.DataGridViewLinkColumn();
             this.panel1 = new System.Windows.Forms.Panel();
             this.bttnBack = new System.Windows.Forms.Button();
             this.lblPath = new System.Windows.Forms.Label();
@@ -62,6 +51,18 @@
             this.dataGridViewTextBoxColumn7 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dataGridViewTextBoxColumn8 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dataGridViewTextBoxColumn9 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.SessionID = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colBlockedBy = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.BlockedSessions = new System.Windows.Forms.DataGridViewLinkColumn();
+            this.BlockedWaitTimeRecursive = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.StartTime = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.Database = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.HostName = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.LoginName = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.Status = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.WaitResource = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.WaitTime = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.Txt = new System.Windows.Forms.DataGridViewLinkColumn();
             ((System.ComponentModel.ISupportInitialize)(this.gvBlocking)).BeginInit();
             this.panel1.SuspendLayout();
             this.SuspendLayout();
@@ -74,6 +75,7 @@
             this.gvBlocking.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.gvBlocking.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
             this.SessionID,
+            this.colBlockedBy,
             this.BlockedSessions,
             this.BlockedWaitTimeRecursive,
             this.StartTime,
@@ -96,113 +98,6 @@
             this.gvBlocking.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.gvBlocking_CellContentClick);
             this.gvBlocking.ColumnHeaderMouseClick += new System.Windows.Forms.DataGridViewCellMouseEventHandler(this.gvBlocking_ColumnHeaderMouseClick);
             this.gvBlocking.RowsAdded += new System.Windows.Forms.DataGridViewRowsAddedEventHandler(this.gvBlocking_RowsAdded);
-            // 
-            // SessionID
-            // 
-            this.SessionID.DataPropertyName = "session_id";
-            this.SessionID.HeaderText = "Session ID";
-            this.SessionID.MinimumWidth = 6;
-            this.SessionID.Name = "SessionID";
-            this.SessionID.ReadOnly = true;
-            this.SessionID.Width = 96;
-            // 
-            // BlockedSessions
-            // 
-            this.BlockedSessions.DataPropertyName = "BlockCountRecursive";
-            this.BlockedSessions.HeaderText = "Blocked Sessions";
-            this.BlockedSessions.MinimumWidth = 6;
-            this.BlockedSessions.Name = "BlockedSessions";
-            this.BlockedSessions.ReadOnly = true;
-            this.BlockedSessions.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
-            this.BlockedSessions.Width = 136;
-            // 
-            // BlockedWaitTimeRecursive
-            // 
-            dataGridViewCellStyle1.Format = "N0";
-            dataGridViewCellStyle1.NullValue = null;
-            this.BlockedWaitTimeRecursive.DefaultCellStyle = dataGridViewCellStyle1;
-            this.BlockedWaitTimeRecursive.HeaderText = "Blocked Sessions Wait Time (ms)";
-            this.BlockedWaitTimeRecursive.MinimumWidth = 6;
-            this.BlockedWaitTimeRecursive.Name = "BlockedWaitTimeRecursive";
-            this.BlockedWaitTimeRecursive.ReadOnly = true;
-            this.BlockedWaitTimeRecursive.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Programmatic;
-            this.BlockedWaitTimeRecursive.Width = 168;
-            // 
-            // StartTime
-            // 
-            this.StartTime.DataPropertyName = "start_time_utc";
-            this.StartTime.HeaderText = "Start Time";
-            this.StartTime.MinimumWidth = 6;
-            this.StartTime.Name = "StartTime";
-            this.StartTime.ReadOnly = true;
-            this.StartTime.Width = 94;
-            // 
-            // Database
-            // 
-            this.Database.DataPropertyName = "database_name";
-            this.Database.HeaderText = "Database";
-            this.Database.MinimumWidth = 6;
-            this.Database.Name = "Database";
-            this.Database.ReadOnly = true;
-            this.Database.Width = 98;
-            // 
-            // HostName
-            // 
-            this.HostName.DataPropertyName = "host_name";
-            this.HostName.HeaderText = "Host";
-            this.HostName.MinimumWidth = 6;
-            this.HostName.Name = "HostName";
-            this.HostName.ReadOnly = true;
-            this.HostName.Width = 66;
-            // 
-            // LoginName
-            // 
-            this.LoginName.DataPropertyName = "login_name";
-            this.LoginName.HeaderText = "Login";
-            this.LoginName.MinimumWidth = 6;
-            this.LoginName.Name = "LoginName";
-            this.LoginName.ReadOnly = true;
-            this.LoginName.Width = 72;
-            // 
-            // Status
-            // 
-            this.Status.DataPropertyName = "Status";
-            this.Status.HeaderText = "Status";
-            this.Status.MinimumWidth = 6;
-            this.Status.Name = "Status";
-            this.Status.ReadOnly = true;
-            this.Status.Width = 77;
-            // 
-            // WaitResource
-            // 
-            this.WaitResource.DataPropertyName = "wait_resource";
-            this.WaitResource.HeaderText = "Wait Resource";
-            this.WaitResource.MinimumWidth = 6;
-            this.WaitResource.Name = "WaitResource";
-            this.WaitResource.ReadOnly = true;
-            this.WaitResource.Width = 119;
-            // 
-            // WaitTime
-            // 
-            this.WaitTime.HeaderText = "Wait Time (ms)";
-            this.WaitTime.MinimumWidth = 6;
-            this.WaitTime.Name = "WaitTime";
-            this.WaitTime.ReadOnly = true;
-            this.WaitTime.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Programmatic;
-            this.WaitTime.Width = 121;
-            // 
-            // Txt
-            // 
-            this.Txt.DataPropertyName = "Txt";
-            dataGridViewCellStyle2.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
-            this.Txt.DefaultCellStyle = dataGridViewCellStyle2;
-            this.Txt.HeaderText = "Txt";
-            this.Txt.MinimumWidth = 6;
-            this.Txt.Name = "Txt";
-            this.Txt.ReadOnly = true;
-            this.Txt.Resizable = System.Windows.Forms.DataGridViewTriState.True;
-            this.Txt.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
-            this.Txt.Width = 56;
             // 
             // panel1
             // 
@@ -374,6 +269,122 @@
             this.dataGridViewTextBoxColumn9.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Programmatic;
             this.dataGridViewTextBoxColumn9.Width = 121;
             // 
+            // SessionID
+            // 
+            this.SessionID.DataPropertyName = "session_id";
+            this.SessionID.HeaderText = "Session ID";
+            this.SessionID.MinimumWidth = 6;
+            this.SessionID.Name = "SessionID";
+            this.SessionID.ReadOnly = true;
+            this.SessionID.Width = 104;
+            // 
+            // colBlockedBy
+            // 
+            this.colBlockedBy.DataPropertyName = "blocking_session_id";
+            this.colBlockedBy.HeaderText = "Blocked By Session";
+            this.colBlockedBy.MinimumWidth = 6;
+            this.colBlockedBy.Name = "colBlockedBy";
+            this.colBlockedBy.ReadOnly = true;
+            this.colBlockedBy.Width = 147;
+            // 
+            // BlockedSessions
+            // 
+            this.BlockedSessions.DataPropertyName = "BlockCountRecursive";
+            this.BlockedSessions.HeaderText = "Blocked Sessions";
+            this.BlockedSessions.MinimumWidth = 6;
+            this.BlockedSessions.Name = "BlockedSessions";
+            this.BlockedSessions.ReadOnly = true;
+            this.BlockedSessions.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
+            this.BlockedSessions.Width = 136;
+            // 
+            // BlockedWaitTimeRecursive
+            // 
+            dataGridViewCellStyle1.Format = "N0";
+            dataGridViewCellStyle1.NullValue = null;
+            this.BlockedWaitTimeRecursive.DefaultCellStyle = dataGridViewCellStyle1;
+            this.BlockedWaitTimeRecursive.HeaderText = "Blocked Sessions Wait Time (ms)";
+            this.BlockedWaitTimeRecursive.MinimumWidth = 6;
+            this.BlockedWaitTimeRecursive.Name = "BlockedWaitTimeRecursive";
+            this.BlockedWaitTimeRecursive.ReadOnly = true;
+            this.BlockedWaitTimeRecursive.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Programmatic;
+            this.BlockedWaitTimeRecursive.Width = 168;
+            // 
+            // StartTime
+            // 
+            this.StartTime.DataPropertyName = "start_time_utc";
+            this.StartTime.HeaderText = "Start Time";
+            this.StartTime.MinimumWidth = 6;
+            this.StartTime.Name = "StartTime";
+            this.StartTime.ReadOnly = true;
+            this.StartTime.Width = 94;
+            // 
+            // Database
+            // 
+            this.Database.DataPropertyName = "database_name";
+            this.Database.HeaderText = "Database";
+            this.Database.MinimumWidth = 6;
+            this.Database.Name = "Database";
+            this.Database.ReadOnly = true;
+            this.Database.Width = 98;
+            // 
+            // HostName
+            // 
+            this.HostName.DataPropertyName = "host_name";
+            this.HostName.HeaderText = "Host";
+            this.HostName.MinimumWidth = 6;
+            this.HostName.Name = "HostName";
+            this.HostName.ReadOnly = true;
+            this.HostName.Width = 66;
+            // 
+            // LoginName
+            // 
+            this.LoginName.DataPropertyName = "login_name";
+            this.LoginName.HeaderText = "Login";
+            this.LoginName.MinimumWidth = 6;
+            this.LoginName.Name = "LoginName";
+            this.LoginName.ReadOnly = true;
+            this.LoginName.Width = 72;
+            // 
+            // Status
+            // 
+            this.Status.DataPropertyName = "Status";
+            this.Status.HeaderText = "Status";
+            this.Status.MinimumWidth = 6;
+            this.Status.Name = "Status";
+            this.Status.ReadOnly = true;
+            this.Status.Width = 77;
+            // 
+            // WaitResource
+            // 
+            this.WaitResource.DataPropertyName = "wait_resource";
+            this.WaitResource.HeaderText = "Wait Resource";
+            this.WaitResource.MinimumWidth = 6;
+            this.WaitResource.Name = "WaitResource";
+            this.WaitResource.ReadOnly = true;
+            this.WaitResource.Width = 119;
+            // 
+            // WaitTime
+            // 
+            this.WaitTime.HeaderText = "Wait Time (ms)";
+            this.WaitTime.MinimumWidth = 6;
+            this.WaitTime.Name = "WaitTime";
+            this.WaitTime.ReadOnly = true;
+            this.WaitTime.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Programmatic;
+            this.WaitTime.Width = 121;
+            // 
+            // Txt
+            // 
+            this.Txt.DataPropertyName = "Txt";
+            dataGridViewCellStyle2.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
+            this.Txt.DefaultCellStyle = dataGridViewCellStyle2;
+            this.Txt.HeaderText = "Txt";
+            this.Txt.MinimumWidth = 6;
+            this.Txt.Name = "Txt";
+            this.Txt.ReadOnly = true;
+            this.Txt.Resizable = System.Windows.Forms.DataGridViewTriState.True;
+            this.Txt.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
+            this.Txt.Width = 56;
+            // 
             // BlockingViewer
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
@@ -405,7 +416,17 @@
         private System.Windows.Forms.Label lblInstance;
         private System.Windows.Forms.Label lblPath;
         private System.Windows.Forms.Button bttnBack;
+        private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn1;
+        private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn2;
+        private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn3;
+        private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn4;
+        private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn5;
+        private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn6;
+        private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn7;
+        private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn8;
+        private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn9;
         private System.Windows.Forms.DataGridViewTextBoxColumn SessionID;
+        private System.Windows.Forms.DataGridViewTextBoxColumn colBlockedBy;
         private System.Windows.Forms.DataGridViewLinkColumn BlockedSessions;
         private System.Windows.Forms.DataGridViewTextBoxColumn BlockedWaitTimeRecursive;
         private System.Windows.Forms.DataGridViewTextBoxColumn StartTime;
@@ -416,14 +437,5 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn WaitResource;
         private System.Windows.Forms.DataGridViewTextBoxColumn WaitTime;
         private System.Windows.Forms.DataGridViewLinkColumn Txt;
-        private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn1;
-        private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn2;
-        private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn3;
-        private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn4;
-        private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn5;
-        private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn6;
-        private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn7;
-        private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn8;
-        private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn9;
     }
 }

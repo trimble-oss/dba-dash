@@ -30,7 +30,7 @@ SET @SQL =N'
 		OUTER APPLY sys.dm_exec_sql_text(R.sql_handle) AS Rtxt
 		OUTER APPLY sys.dm_exec_sql_text(C.most_recent_sql_handle) AS Ctxt
 		WHERE S.session_id>0
-		AND R.command<>''BRKR TASK''
+		AND (R.command<>''BRKR TASK'' OR R.command IS NULL)
 		AND S.is_user_process=1
 	)
 	SELECT *
