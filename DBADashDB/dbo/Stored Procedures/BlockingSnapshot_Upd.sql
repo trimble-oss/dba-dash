@@ -1,4 +1,8 @@
-﻿CREATE PROC [dbo].[BlockingSnapshot_Upd](@BlockingSnapshot dbo.BlockingSnapshot READONLY,@InstanceID INT,@SnapshotDate DATETIME2(2))
+﻿CREATE PROC [dbo].[BlockingSnapshot_Upd](
+	@BlockingSnapshot dbo.BlockingSnapshot READONLY,
+	@InstanceID INT,
+	@SnapshotDate DATETIME2(2)
+)
 AS
 DECLARE @BlockingSnapshotDeDupe TABLE(
 	[session_id] [smallint] NOT NULL,
@@ -15,7 +19,9 @@ DECLARE @BlockingSnapshotDeDupe TABLE(
 	[wait_resource] [nvarchar](256) NULL,
 	[Status] [nvarchar](30) NULL,
 	[wait_type] [nvarchar](60) NULL,
-	UTCOffset [int] NOT NULL
+	UTCOffset [int] NOT NULL,
+	[session_status] NVARCHAR(30) NULL,
+    [transaction_isolation_level] SMALLINT NULL
 );
 WITH T AS (
 			SELECT session_id,
@@ -33,6 +39,8 @@ WITH T AS (
 			   Status,
 			   wait_type,
 			   UTCOffset,
+			   session_status,
+			   transaction_isolation_level,
 			   ROW_NUMBER() OVER(PARTITION BY t.session_id ORDER BY t.wait_time DESC) rnum
 		FROM @BlockingSnapshot t
 )
@@ -51,7 +59,9 @@ INSERT INTO @BlockingSnapshotDeDupe(
 		wait_resource,
 		Status,
 		wait_type,
-		UTCOffset)
+		UTCOffset,
+		session_status,
+	    transaction_isolation_level)
 SELECT 	session_id,
 		blocking_session_id,
 		Txt,
@@ -66,16 +76,23 @@ SELECT 	session_id,
 		wait_resource,
 		Status,
 		wait_type,
-		UTCOffset
+		UTCOffset,
+		session_status,
+		transaction_isolation_level
 FROM T
 WHERE rnum=1
 
 DECLARE @SnapshotID INT
+
 INSERT INTO dbo.BlockingSnapshotSummary(InstanceID,SnapshotDateUTC,BlockedSessionCount,BlockedWaitTime,UTCOffset)
 SELECT @InstanceID,@SnapshotDate, COUNT(*),SUM(wait_time),MAX(T.UTCOffset)
 FROM @BlockingSnapshotDeDupe T
 WHERE blocking_session_id>0
-AND NOT EXISTS(SELECT 1 FROM dbo.BlockingSnapshotSummary SS WHERE SS.InstanceID=@InstanceID AND SS.SnapshotDateUTC = @SnapshotDate)
+AND NOT EXISTS(SELECT 1 
+				FROM dbo.BlockingSnapshotSummary SS 
+				WHERE SS.InstanceID=@InstanceID 
+				AND SS.SnapshotDateUTC = @SnapshotDate
+				)
 HAVING(COUNT(*)>0)
 
 SET @SnapshotID = SCOPE_IDENTITY();
@@ -97,7 +114,9 @@ BEGIN;
 		   login_name,
 		   wait_resource,
 		   Status,
-		   wait_type)
+		   wait_type,
+		   session_status,
+		   transaction_isolation_level)
 	SELECT @SnapshotID,
 		   @SnapshotDate,
 		   session_id,
@@ -113,7 +132,9 @@ BEGIN;
 		   login_name,
 		   wait_resource,
 		   Status,
-		   wait_type
+		   wait_type,
+		    session_status,
+		    transaction_isolation_level
 	FROM @BlockingSnapshotDeDupe
 END
 

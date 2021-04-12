@@ -60,6 +60,8 @@
             this.HostName = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.LoginName = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Status = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colSessionStatus = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.ColIsolationLevel = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.WaitResource = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.WaitTime = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Txt = new System.Windows.Forms.DataGridViewLinkColumn();
@@ -83,6 +85,8 @@
             this.HostName,
             this.LoginName,
             this.Status,
+            this.colSessionStatus,
+            this.ColIsolationLevel,
             this.WaitResource,
             this.WaitTime,
             this.Txt});
@@ -354,6 +358,24 @@
             this.Status.ReadOnly = true;
             this.Status.Width = 77;
             // 
+            // colSessionStatus
+            // 
+            this.colSessionStatus.DataPropertyName = "session_status";
+            this.colSessionStatus.HeaderText = "Session Status";
+            this.colSessionStatus.MinimumWidth = 6;
+            this.colSessionStatus.Name = "colSessionStatus";
+            this.colSessionStatus.ReadOnly = true;
+            this.colSessionStatus.Width = 120;
+            // 
+            // ColIsolationLevel
+            // 
+            this.ColIsolationLevel.DataPropertyName = "transaction_isolation_level";
+            this.ColIsolationLevel.HeaderText = "Isolation Level";
+            this.ColIsolationLevel.MinimumWidth = 6;
+            this.ColIsolationLevel.Name = "ColIsolationLevel";
+            this.ColIsolationLevel.ReadOnly = true;
+            this.ColIsolationLevel.Width = 117;
+            // 
             // WaitResource
             // 
             this.WaitResource.DataPropertyName = "wait_resource";
@@ -434,6 +456,8 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn HostName;
         private System.Windows.Forms.DataGridViewTextBoxColumn LoginName;
         private System.Windows.Forms.DataGridViewTextBoxColumn Status;
+        private System.Windows.Forms.DataGridViewTextBoxColumn colSessionStatus;
+        private System.Windows.Forms.DataGridViewTextBoxColumn ColIsolationLevel;
         private System.Windows.Forms.DataGridViewTextBoxColumn WaitResource;
         private System.Windows.Forms.DataGridViewTextBoxColumn WaitTime;
         private System.Windows.Forms.DataGridViewLinkColumn Txt;

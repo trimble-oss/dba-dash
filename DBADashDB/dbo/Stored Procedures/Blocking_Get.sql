@@ -17,7 +17,9 @@ SELECT
 	   stat.BlockCountRecursive,
        stat.WaitTimeRecursive,
        stat.BlockCount,
-       stat.BlockWaitTime
+       stat.BlockWaitTime,
+       BSS.session_status,
+	   CASE BSS.transaction_isolation_level WHEN 0 THEN 'Unspecified' WHEN 1 THEN 'ReadUncommitted' WHEN 2 THEN 'ReadCommitted' WHEN 3 THEN 'RepeatableRead' WHEN 4 THEN 'Serializable' WHEN 5 THEN 'Snapshot' ELSE '?' END AS transaction_isolation_level
 FROM dbo.BlockingSnapshot BSS
 OUTER APPLY dbo.BlockingSnapshotRecursiveStats(BSS.BlockingSnapshotID,BSS.session_id,BSS.SnapshotDateUTC) stat
 WHERE BSS.BlockingSnapshotID = @BlockingSnapshotID

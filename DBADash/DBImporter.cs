@@ -22,6 +22,7 @@ namespace DBADash
         public DBImporter(DataSet data, string connectionString)
         {
             this.data = data;
+            upgradeDS();
             this.connectionString = connectionString;
            
             retryPolicy = Policy.Handle<Exception>()
@@ -74,6 +75,23 @@ namespace DBADash
             rError["ErrorMessage"] = errorMessage;
             rError["ErrorContext"] = errorContext;
             dtErrors.Rows.Add(rError);
+        }
+
+        // handle schema changes between agent versions
+        private void upgradeDS()
+        {
+            if (data.Tables.Contains("BlockingSnapshot"))
+            {
+                var bss = data.Tables["BlockingSnapshot"];
+                if (!bss.Columns.Contains("session_status"))
+                {
+                    bss.Columns.Add("session_status");
+                }
+                if (!bss.Columns.Contains("transaction_isolation_level"))
+                {
+                    bss.Columns.Add("transaction_isolation_level", typeof(Int16));
+                }
+            }
         }
 
         public void Update()
