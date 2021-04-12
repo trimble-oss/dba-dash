@@ -86,6 +86,7 @@ WITH L AS (
 			MAX(CASE WHEN run_status=0 THEN RunDateTime ELSE NULL END) as LastFailed,
 			MAX(CASE WHEN run_status=1 THEN RunDateTime ELSE NULL END) as LastSucceeded
 	FROM @InsertedJobHistory
+	WHERE step_id=0
 	GROUP BY job_id
 )
 UPDATE J 

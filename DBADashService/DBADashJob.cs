@@ -166,7 +166,8 @@ namespace DBADashService
 
                         try
                         {
-                            DestinationHandling.WriteAllDestinations(collector.Data, cfg, cfg.GenerateFileName(SchedulerServiceConfig.Config.BinarySerialization, cfg.SourceConnection.ConnectionForFileName));
+                            bool binarySerialization = collector.Data.Tables.Contains("Jobs") ? true : SchedulerServiceConfig.Config.BinarySerialization;
+                            DestinationHandling.WriteAllDestinations(collector.Data, cfg, cfg.GenerateFileName(binarySerialization, cfg.SourceConnection.ConnectionForFileName));
                             dataMap.Put("Job_instance_id", collector.Job_instance_id);
                         }
                         catch (Exception ex)
