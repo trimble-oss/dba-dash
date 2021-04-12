@@ -74,7 +74,8 @@ namespace DBADashGUI.AgentJobs
             dgvJobHistory.DataSource = null;
             var dt = GetJobs();
             dgvJobs.AutoGenerateColumns = false;
-            dgvJobs.DataSource = new DataView(dt);           
+            dgvJobs.DataSource = new DataView(dt);
+            dgvJobs.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
             configureInstanceThresholdsToolStripMenuItem.Enabled = InstanceIDs.Count == 1;
             if (JobID != Guid.Empty && dt.Rows.Count==1)
             {           

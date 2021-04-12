@@ -22,8 +22,8 @@ DECLARE @InsertedJobHistory TABLE(
 	retries_attempted INT NOT NULL
 )
 
-INSERT INTO dbo.Jobs(InstanceID,job_id,name,IsActive)
-SELECT @InstanceID,job_id,CAST(job_id as NVARCHAR(128)),CAST(1 as BIT)
+INSERT INTO dbo.Jobs(InstanceID,job_id,name,description,enabled,IsActive)
+SELECT @InstanceID,job_id,'!!NEW!! ' + CAST(job_id as NVARCHAR(128)),'{Job metadata hasn''t been populated for this job yet}',CAST(1 AS BIT),CAST(1 as BIT)
 FROM @JobHistory T 
 WHERE NOT EXISTS(SELECT 1 FROM dbo.Jobs J WHERE J.job_id = T.job_id AND J.InstanceID = @InstanceID)
 GROUP BY job_id

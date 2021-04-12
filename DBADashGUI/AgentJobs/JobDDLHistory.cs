@@ -39,6 +39,8 @@ namespace DBADashGUI.Changes
 
         public void RefreshData()
         {
+            diffControl1.OldText = "";
+            diffControl1.NewText = "";
             dgv.AutoGenerateColumns = false;
             dgv.DataSource = GetDDLHistory();
             dgv.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
