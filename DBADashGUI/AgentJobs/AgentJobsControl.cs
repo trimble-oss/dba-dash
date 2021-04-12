@@ -70,6 +70,7 @@ namespace DBADashGUI.AgentJobs
 
         public void RefreshData()
         {
+            failedOnlyToolStripMenuItem.Checked = false;
             splitContainer1.Panel2Collapsed = true;
             dgvJobHistory.DataSource = null;
             var dt = GetJobs();
@@ -150,6 +151,7 @@ namespace DBADashGUI.AgentJobs
                 }
                 if (dgvJobs.Columns[e.ColumnIndex] == colHistory)
                 {
+                    failedOnlyToolStripMenuItem.Checked = false;
                     showHistory(row.Row);
                 }
             }
@@ -183,11 +185,11 @@ namespace DBADashGUI.AgentJobs
             tsBack.Visible = instance_id != null;
             splitContainer1.Panel2Collapsed = false;
             dgvJobHistory.AutoGenerateColumns = false;
-            dgvJobHistory.DataSource = GetJobHistory(instanceId, jobID,stepID,instance_id);
+            dgvJobHistory.DataSource = GetJobHistory(instanceId, jobID,stepID,instance_id, failedOnlyToolStripMenuItem.Checked);
             dgvJobHistory.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
         }
 
-        private DataTable GetJobHistory(int InstanceID,Guid JobID, int? StepID=0,int? instance_id=null)
+        private DataTable GetJobHistory(int InstanceID,Guid JobID, int? StepID=0,int? instance_id=null,bool failedOnly=false)
         {
             using (var cn = new SqlConnection(Common.ConnectionString))         
             using (SqlCommand cmd = new SqlCommand("dbo.JobHistory_Get", cn) { CommandType = CommandType.StoredProcedure })
@@ -208,6 +210,7 @@ namespace DBADashGUI.AgentJobs
                 {
                     cmd.Parameters.AddWithValue("instance_id", instance_id);
                 }
+                cmd.Parameters.AddWithValue("FailedOnly", failedOnly);
                 da.Fill(dt);
                 Common.ConvertUTCToLocal(ref dt);
                 return dt;
@@ -315,6 +318,11 @@ namespace DBADashGUI.AgentJobs
         }
 
         private void tsRefreshHistory_Click(object sender, EventArgs e)
+        {
+            showHistory();
+        }
+
+        private void failedOnlyToolStripMenuItem_Click(object sender, EventArgs e)
         {
             showHistory();
         }
