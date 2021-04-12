@@ -27,7 +27,7 @@ LEFT JOIN dbo.JobStats_60MIN JS ON J.job_id = JS.job_id AND J.InstanceID = JS.In
 									AND JS.RunDateTime >= DATEADD(d,-7,GETUTCDATE())
 GROUP BY I.InstanceID,
 	I.Instance,
-	JS.job_id,
+	J.job_id,
 	J.LastSucceeded,
 	J.LastFailed,
 	J.name,
