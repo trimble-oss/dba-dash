@@ -83,7 +83,7 @@ WHERE NOT EXISTS(
 
 WITH L AS (
 	SELECT job_id,
-			MAX(CASE WHEN run_status=0 THEN RunDateTime ELSE NULL END) as LastFailed,
+			MAX(CASE WHEN run_status IN(0,3) THEN RunDateTime ELSE NULL END) as LastFailed,
 			MAX(CASE WHEN run_status=1 THEN RunDateTime ELSE NULL END) as LastSucceeded
 	FROM @InsertedJobHistory
 	WHERE step_id=0
@@ -101,7 +101,7 @@ SELECT InstanceID,
 	job_id,
 	step_id,
 	DG.DateGroup as RunDateTime,
-	SUM(CASE WHEN run_status=0 THEN 1 ELSE 0 END) as FailedCount,
+	SUM(CASE WHEN run_status IN(0,3) THEN 1 ELSE 0 END) as FailedCount,
 	SUM(CASE WHEN run_status=1 THEN 1 ELSE 0 END) as SucceededCount,
 	ISNULL(SUM(retries_attempted),0) as RetryCount,
 	ISNULL(SUM(RunDurationSec),0) as RunDurationSec,

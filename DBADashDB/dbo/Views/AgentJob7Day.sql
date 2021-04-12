@@ -19,7 +19,7 @@ SELECT I.InstanceID,
 	SUM(CASE WHEN JS.RunDateTime >= DATEADD(d,-7,GETUTCDATE()) THEN JS.RetryCount ELSE 0 END) AS RetryCount24Hrs,
 	CASE WHEN J.LastFailed > ISNULL(J.LastSucceeded,'19000101') THEN 1 ELSE 0 END AS IsLastFail,
 	MAX(CASE WHEN JS.step_id=0 THEN JS.MaxRunDurationSec ELSE NULL END) AS MaxDurationSec,
-	AVG(CASE WHEN JS.step_id=0 THEN JS.RunDurationSec / (FailedCount+SucceededCount) ELSE NULL END) AS AvgDurationSec,
+	AVG(CASE WHEN JS.step_id=0 THEN JS.RunDurationSec / NULLIF((JS.FailedCount+JS.SucceededCount),0) ELSE NULL END) AS AvgDurationSec,
 	J.enabled
 FROM dbo.Instances I 
 JOIN  dbo.Jobs J ON I.InstanceID = J.InstanceID
