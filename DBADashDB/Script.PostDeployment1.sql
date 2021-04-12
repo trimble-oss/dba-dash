@@ -332,7 +332,6 @@ FROM
 (-1,'ServerProperties',125,180),
 (-1,'LogRestores',125,180),
 (-1,'DatabaseHADR',125,180),
-(-1,'AgentJobs',125,180),
 (-1,'LastGoodCheckDB',125,180),
 (-1,'Alerts',125,180),
 (-1,'DBTuningOptions',125,180),
@@ -361,8 +360,16 @@ FROM
 (-1,'DatabasePermissions',1445,2880),
 (-1,'ServerRoleMembers',1445,2880),
 (-1,'DatabaseRoleMembers',1445,2880),
-(-1,'DatabaseMirroring',125,180)) T(InstanceID,Reference,WarningThreshold,CriticalThreshold)
+(-1,'DatabaseMirroring',125,180),
+(-1,'Jobs',1445,2880),
+(-1,'JobHistory',5,10),
+(-1,'VLF',1445,2880),
+(-1,'CustomChecks',125,180),
+(-1,'PerformanceCounters',5,10)
+) T(InstanceID,Reference,WarningThreshold,CriticalThreshold)
 WHERE NOT EXISTS(SELECT 1 FROM dbo.CollectionDatesThresholds CDT WHERE CDT.InstanceID = T.InstanceID AND CDT.Reference = T.Reference)
+
+DELETE dbo.CollectionDatesThresholds WHERE Reference = 'AgentJobs'
 
 --replace old defaults
 UPDATE CollectionDatesThresholds
