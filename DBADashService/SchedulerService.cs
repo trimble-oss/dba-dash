@@ -56,7 +56,7 @@ namespace DBADashService
             Console.WriteLine(DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + " " + context + ": " + ex.Message);
             try
             {
-                EventLog.WriteEntry("DBADashService", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + " " + context + ": " + ex.Message, EventLogEntryType.Error);
+                EventLog.WriteEntry("DBADashService", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + " " + context + ": " + ex.ToString(), EventLogEntryType.Error);
             }
             catch(Exception ex2)
             {
