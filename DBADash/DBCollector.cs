@@ -87,6 +87,7 @@ namespace DBADash
         public Int32 RetryCount=1;
         public Int32 RetryInterval = 30;
         private HostPlatform platform;
+        public DateTime JobLastModified=DateTime.MinValue;
 
         public int Job_instance_id {
             get
@@ -106,6 +107,24 @@ namespace DBADash
             }
         }
         int job_instance_id = 0;
+
+        public DateTime GetJobLastModified()
+        {
+            using (SqlConnection cn = new SqlConnection(_connectionString))
+            using (SqlCommand cmd = new SqlCommand("SELECT MAX(date_modified) FROM msdb.dbo.sysjobs", cn))
+            {
+                cn.Open();
+                var result = cmd.ExecuteScalar();
+                if (result == DBNull.Value)
+                {
+                    return DateTime.MinValue;
+                }
+                else
+                {
+                    return (DateTime)result;
+                }
+            }
+        }
 
 
         public bool IsXESupported()
@@ -307,6 +326,7 @@ namespace DBADash
                 Collect(CollectionType.Alerts);
                 Collect(CollectionType.CustomChecks);
                 Collect(CollectionType.DatabaseMirroring);
+                Collect(CollectionType.Jobs);
             }
             else if (collectionType == CollectionType.Performance)
             {
@@ -319,7 +339,7 @@ namespace DBADash
                 Collect(CollectionType.AzureDBElasticPoolResourceStats);
                 Collect(CollectionType.SlowQueries);
                 Collect(CollectionType.PerformanceCounters);
-                Collect(CollectionType.JobHistory);
+                Collect(CollectionType.JobHistory);              
             }
             else if(collectionType == CollectionType.Infrequent)
             {
@@ -332,7 +352,7 @@ namespace DBADash
                 Collect(CollectionType.VLF);
                 Collect(CollectionType.DriversWMI);
                 Collect(CollectionType.OSLoadedModules);
-                Collect(CollectionType.Jobs);
+                
             }
             else if (collectionType == CollectionType.Drives)
             {
@@ -454,8 +474,14 @@ namespace DBADash
                 {
                     if (!Data.Tables.Contains(collectionTypeString))
                     {
-                        var ss = new SchemaSnapshotDB(_connectionString, new SchemaSnapshotDBOptions());
-                        Data.Tables.Add(ss.SnapshotJobs());
+                        var currentJobModified = GetJobLastModified();
+                        if (currentJobModified > JobLastModified)
+                        {
+                            var ss = new SchemaSnapshotDB(_connectionString, new SchemaSnapshotDBOptions());
+                            Data.Tables.Add(ss.SnapshotJobs());
+                            JobLastModified = currentJobModified;
+                        }
+                        
                     }
                  }
                 catch(Exception ex)

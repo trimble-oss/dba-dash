@@ -151,6 +151,15 @@ namespace DBADashService
                         var collector = new DBCollector(cfg.GetSource(), cfg.NoWMI);
                         collector.Job_instance_id = dataMap.GetInt("Job_instance_id");
                         
+                        var jobLastCollected = dataMap.GetDateTime("JobCollectDate");
+
+                        // Setting the JobLastModified means we will only collect job data if jobs have been updated since the last collection.
+                        // This won't detect all changes - like changes to schedules.  Skip setting JobLastModified if we haven't collected in 1 day to ensure we collect at least once per day
+                        if (DateTime.UtcNow.Subtract(jobLastCollected).TotalMinutes < 1440)
+                        {
+                            collector.JobLastModified = dataMap.GetDateTime("JobLastModified");
+                        }
+                        
                         if (context.PreviousFireTimeUtc.HasValue)
                         {
                             collector.PerformanceCollectionPeriodMins = (Int32)DateTime.UtcNow.Subtract(context.PreviousFireTimeUtc.Value.UtcDateTime).TotalMinutes + 5;
@@ -166,9 +175,17 @@ namespace DBADashService
 
                         try
                         {
-                            bool binarySerialization = collector.Data.Tables.Contains("Jobs") ? true : SchedulerServiceConfig.Config.BinarySerialization;
+                            bool containsJobs = collector.Data.Tables.Contains("Jobs");
+                            bool binarySerialization = containsJobs ? true : SchedulerServiceConfig.Config.BinarySerialization;
                             DestinationHandling.WriteAllDestinations(collector.Data, cfg, cfg.GenerateFileName(binarySerialization, cfg.SourceConnection.ConnectionForFileName));
-                            dataMap.Put("Job_instance_id", collector.Job_instance_id);
+                            dataMap.Put("Job_instance_id", collector.Job_instance_id); // Store instance_id so we can get new history only on next run
+                            if (containsJobs)
+                            {
+                                // We have collected jobs data - Store JobLastModified and time we have collected the jobs.
+                                // Used on next run to determine if we need to refresh this data.
+                                dataMap.Put("JobLastModified", collector.JobLastModified); 
+                                dataMap.Put("JobCollectDate", DateTime.UtcNow); 
+                            }
                         }
                         catch (Exception ex)
                         {
