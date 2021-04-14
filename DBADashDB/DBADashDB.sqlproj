@@ -528,6 +528,7 @@
     <Build Include="dbo\Stored Procedures\JobHistory_Get.sql" />
     <Build Include="Switch\Tables\JobHistory.sql" />
     <Build Include="Switch\Tables\JobStats_60MIN.sql" />
+    <Build Include="dbo\Functions\Histogram_CPU.sql" />
   </ItemGroup>
   <ItemGroup>
     <PostDeploy Include="Script.PostDeployment1.sql" />
