@@ -25,6 +25,8 @@ FROM dbo.Instances I
 JOIN  dbo.Jobs J ON I.InstanceID = J.InstanceID
 LEFT JOIN dbo.JobStats_60MIN JS ON J.job_id = JS.job_id AND J.InstanceID = JS.InstanceID
 									AND JS.RunDateTime >= DATEADD(d,-7,GETUTCDATE())
+WHERE I.IsActive=1
+AND J.IsActive=1
 GROUP BY I.InstanceID,
 	I.Instance,
 	J.job_id,
