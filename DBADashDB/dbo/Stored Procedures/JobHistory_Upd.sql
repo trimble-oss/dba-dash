@@ -124,7 +124,7 @@ SET J.FailedCount += T.FailedCount,
 	J.MaxRunDurationSec = (SELECT MAX(c) FROM (VALUES (T.MaxRunDurationSec),(J.MaxRunDurationSec)) T(c)),
 	J.MinRunDurationSec = (SELECT MIN(c) FROM (VALUES (T.MinRunDurationSec),(J.MinRunDurationSec)) T(c))
 FROM dbo.JobStats_60MIN J
-JOIN #60 T ON J.job_id = T.job_id AND J.step_id = T.step_id 
+JOIN #60 T ON J.job_id = T.job_id AND J.step_id = T.step_id AND J.RunDateTime = T.RunDateTime
 WHERE J.InstanceID = @InstanceID
 
 INSERT INTO dbo.JobStats_60MIN(
