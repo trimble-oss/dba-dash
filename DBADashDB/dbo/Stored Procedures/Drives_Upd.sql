@@ -1,14 +1,16 @@
 ﻿CREATE PROC [dbo].[Drives_Upd](@Drives Drives READONLY,@InstanceID INT,@SnapshotDate DATETIME2(2))
 AS
 DECLARE @Ref VARCHAR(30)='Drives'
-IF NOT EXISTS(SELECT 1 FROM dbo.CollectionDates WHERE SnapshotDate=@SnapshotDate AND InstanceID = @InstanceID AND Reference=@Ref)
-BEGIN
-	INSERT INTO dbo.DriveSnapshot(DriveID,Capacity,FreeSpace, SnapshotDate)
-	SELECT D.DriveID,T.Capacity,T.FreeSpace,@SnapshotDate
-	FROM @Drives T
-	JOIN dbo.Drives D ON T.Name = D.Name AND D.InstanceID = @InstanceID
+INSERT INTO dbo.DriveSnapshot(DriveID,Capacity,FreeSpace, SnapshotDate)
+SELECT D.DriveID,T.Capacity,T.FreeSpace,@SnapshotDate
+FROM @Drives T
+JOIN dbo.Drives D ON T.Name = D.Name AND D.InstanceID = @InstanceID
+WHERE NOT EXISTS(SELECT 1 
+				FROM dbo.DriveSnapshot DSS 
+				WHERE DSS.DriveID = D.DriveID 
+				AND DSS.SnapshotDate = @SnapshotDate
+				)
 
-END
 IF NOT EXISTS(SELECT 1 FROM dbo.CollectionDates WHERE SnapshotDate>=@SnapshotDate AND InstanceID = @InstanceID AND Reference=@Ref)
 BEGIN
 	WITH  T AS (
