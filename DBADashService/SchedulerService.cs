@@ -1,5 +1,6 @@
 ﻿using DBADash;
 using Newtonsoft.Json;
+using Polly;
 using Quartz;
 using Quartz.Impl;
 using System;
@@ -56,7 +57,7 @@ namespace DBADashService
             Console.WriteLine(DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + " " + context + ": " + ex.Message);
             try
             {
-                EventLog.WriteEntry("DBADashService", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + " " + context + ": " + ex.ToString(), EventLogEntryType.Error);
+                EventLog.WriteEntry(SchedulerServiceConfig.Config.ServiceName, DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + " " + context + ": " + ex.ToString(), EventLogEntryType.Error);
             }
             catch(Exception ex2)
             {
@@ -110,7 +111,19 @@ namespace DBADashService
             foreach (var d in config.AllDestinations.Where(dest => dest.Type == ConnectionType.SQL))
             {
                 ScheduleService.InfoLogger("Version check " + d.ConnectionForPrint);
-                var status = DBValidations.VersionStatus(d.ConnectionString);
+                DBValidations.DBVersionStatus status = null;
+                Policy.Handle<Exception>()
+                  .WaitAndRetry(new[]
+                  {
+                    TimeSpan.FromSeconds(1),
+                    TimeSpan.FromSeconds(5),
+                    TimeSpan.FromSeconds(20),
+                    TimeSpan.FromSeconds(60)
+                  }, (exception, timeSpan, context) =>
+                  {
+                      ErrorLogger(exception, "Version check for repository database");
+                  }).Execute(() => status = DBValidations.VersionStatus(d.ConnectionString));
+
                 if (status.VersionStatus == DBValidations.DBVersionStatusEnum.AppUpgradeRequired)
                 {
                     ErrorLogger(new Exception("Warning: This version of the app is older than the repository DB and should be upgraded"), "DB Version Check");

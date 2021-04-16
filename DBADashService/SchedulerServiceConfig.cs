@@ -1,19 +1,29 @@
 ﻿using DBADash;
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
+using System.IO;
 namespace DBADashService
 {
     class SchedulerServiceConfig
     {
         public static readonly CollectionConfig Config;
+        public static readonly string FailedMessageFolder;
 
         static SchedulerServiceConfig()
         {
+            FailedMessageFolder = Path.Combine(AppContext.BaseDirectory, "Failed");
+            try
+            {
+                if (!Directory.Exists(FailedMessageFolder)){
+                    Directory.CreateDirectory(FailedMessageFolder);
+                }
+            }
+            catch
+            {
+                Console.WriteLine($"Error creating failed message folder: { FailedMessageFolder }");
+                FailedMessageFolder = String.Empty;
+            }
+            
             Config = GetConfig();
         }
 

@@ -27,7 +27,7 @@ namespace DBADashService
         {
 
             JobDataMap dataMap = context.JobDetail.JobDataMap;
-
+            
             var cfg = JsonConvert.DeserializeObject<DBADashSource>(dataMap.GetString("CFG"));
             var types = JsonConvert.DeserializeObject<CollectionType[]>(dataMap.GetString("Type"));
             try
@@ -65,9 +65,24 @@ namespace DBADashService
                                 }
                                 lock (Program.Locker.GetLock(GetID(ds)))
                                 {
-                                    DestinationHandling.WriteAllDestinations(ds, cfg, Path.GetFileName(f));
+                                    string fileName = Path.GetFileName(f);
+                                    try
+                                    {
+                                        DestinationHandling.WriteAllDestinations(ds, cfg, fileName);
+                                    }
+                                    catch(Exception ex)
+                                    {
+                                        DBADashService.ScheduleService.ErrorLogger(ex, "Import from folder");
+                                        Console.WriteLine($"Writing to failed message folder: { SchedulerServiceConfig.FailedMessageFolder }");
+                                        DestinationHandling.WriteFolder(ds, SchedulerServiceConfig.FailedMessageFolder, fileName);
+                                        
+                                    }
+                                    finally
+                                    {
+                                        System.IO.File.Delete(f);
+                                    }
                                 }
-                                System.IO.File.Delete(f);
+                                
                             });
                         }
                         catch (Exception ex)
@@ -116,9 +131,23 @@ namespace DBADashService
                                             }
                                             lock (Program.Locker.GetLock(GetID(ds)))
                                             {
-                                                DestinationHandling.WriteAllDestinations(ds, cfg, Path.GetFileName(f.Key));
+                                                string fileName = Path.GetFileName(f.Key);
+                                                try
+                                                {
+                                                    DestinationHandling.WriteAllDestinations(ds, cfg, fileName);
+                                                }
+                                                catch(Exception ex)
+                                                {
+                                                    DBADashService.ScheduleService.ErrorLogger(ex, "Import from S3");
+                                                    Console.WriteLine($"Writing to failed message folder: { SchedulerServiceConfig.FailedMessageFolder }");
+                                                    DestinationHandling.WriteFolder(ds, SchedulerServiceConfig.FailedMessageFolder, fileName);
+                                                }
+                                                finally
+                                                {
+                                                    s3Cli.DeleteObject(f.BucketName, f.Key);
+                                                }
                                             }
-                                            s3Cli.DeleteObject(f.BucketName, f.Key);
+                                                                                      
                                             ScheduleService.InfoLogger("Imported:" + f.Key);
                                         }
                                     }
@@ -148,14 +177,16 @@ namespace DBADashService
                     ScheduleService.InfoLogger(collectDescription);
                     try
                     {
-                        var collector = new DBCollector(cfg.GetSource(), cfg.NoWMI);
-                        collector.Job_instance_id = dataMap.GetInt("Job_instance_id");
-                        
+                        var collector = new DBCollector(cfg.GetSource(), cfg.NoWMI)
+                        {
+                            Job_instance_id = dataMap.GetInt("Job_instance_id")
+                        };
+
                         var jobLastCollected = dataMap.GetDateTime("JobCollectDate");
 
                         // Setting the JobLastModified means we will only collect job data if jobs have been updated since the last collection.
                         // This won't detect all changes - like changes to schedules.  Skip setting JobLastModified if we haven't collected in 1 day to ensure we collect at least once per day
-                        if (DateTime.UtcNow.Subtract(jobLastCollected).TotalMinutes < 1440)
+                        if (DateTime.UtcNow.Subtract(jobLastCollected).TotalMinutes < 1430) // Allow 10min
                         {
                             collector.JobLastModified = dataMap.GetDateTime("JobLastModified");
                         }
@@ -172,12 +203,12 @@ namespace DBADashService
                         collector.SlowQueryMaxMemoryKB = cfg.SlowQuerySessionMaxMemoryKB;
                         collector.UseDualEventSession = cfg.UseDualEventSession;
                         collector.Collect(types);
-
+                        bool containsJobs = collector.Data.Tables.Contains("Jobs");
+                        bool binarySerialization = containsJobs || SchedulerServiceConfig.Config.BinarySerialization;
+                        string fileName = cfg.GenerateFileName(binarySerialization, cfg.SourceConnection.ConnectionForFileName);
                         try
-                        {
-                            bool containsJobs = collector.Data.Tables.Contains("Jobs");
-                            bool binarySerialization = containsJobs ? true : SchedulerServiceConfig.Config.BinarySerialization;
-                            DestinationHandling.WriteAllDestinations(collector.Data, cfg, cfg.GenerateFileName(binarySerialization, cfg.SourceConnection.ConnectionForFileName));
+                        {        
+                            DestinationHandling.WriteAllDestinations(collector.Data, cfg, fileName);
                             dataMap.Put("Job_instance_id", collector.Job_instance_id); // Store instance_id so we can get new history only on next run
                             if (containsJobs)
                             {
@@ -189,6 +220,7 @@ namespace DBADashService
                         }
                         catch (Exception ex)
                         {
+                            DestinationHandling.WriteFolder(collector.Data, SchedulerServiceConfig.FailedMessageFolder, fileName);
                             DBADashService.ScheduleService.ErrorLogger(ex, "Write to destination");
                         }
                         

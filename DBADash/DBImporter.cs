@@ -24,7 +24,7 @@ namespace DBADash
             this.data = data;
             upgradeDS();
             this.connectionString = connectionString;
-           
+
             retryPolicy = Policy.Handle<Exception>()
                 .WaitAndRetry(new[]
                 {
@@ -35,6 +35,14 @@ namespace DBADash
                 {
                     logError((string)context.OperationKey, exception, "Import[Retry]");
                 });
+        }
+
+        public void TestConnection()
+        {
+            using (var cn = new SqlConnection(connectionString))
+            {
+                cn.Open();
+            }            
         }
 
         private void logError(string errorSource, Exception ex, string errorContext = "Import")

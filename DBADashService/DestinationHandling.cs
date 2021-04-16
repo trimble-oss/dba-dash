@@ -1,5 +1,6 @@
 ﻿using DBADash;
 using Newtonsoft.Json;
+using Polly;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -108,6 +109,17 @@ namespace DBADashService
         public static void WriteDB(DataSet ds, string destination)
         {
             var importer = new DBImporter(ds, destination);
+            // Wait until we can connect to the repository DB.  If it's down, wait for it to become available.
+            Policy.Handle<Exception>()
+              .WaitAndRetryForever(retryAttempt =>
+                TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)),
+                    (exception, timespan) =>
+                    {
+                        ScheduleService.ErrorLogger(exception, "Connect to repository DB");
+                    }
+                    )
+              .Execute(() => importer.TestConnection());
+           
             importer.Update();
         }
     }
