@@ -360,8 +360,10 @@ namespace DBADashGUI.Performance
 
         private void tsPerformanceCounters_Click(object sender, EventArgs e)
         {
-            var frm = new SelectPerformanceCounters();
-            frm.SelectedCounters = SelectedPerformanceCounters;
+            var frm = new SelectPerformanceCounters
+            {
+                SelectedCounters = SelectedPerformanceCounters
+            };
             frm.ShowDialog();
             if (frm.DialogResult == DialogResult.OK)
             {

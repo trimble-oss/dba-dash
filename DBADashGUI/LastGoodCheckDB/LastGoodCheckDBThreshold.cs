@@ -18,10 +18,12 @@ namespace DBADashGUI.LastGoodCheckDB
 
         public static LastGoodCheckDBThreshold GetLastGoodCheckDBThreshold(string connectionString,Int32 InstanceID,Int32 DatabaseID)
         {
-            var threshold = new LastGoodCheckDBThreshold();
-            threshold.InstanceID = InstanceID;
-            threshold.DatabaseID = DatabaseID;
-            threshold.ConnectionString = connectionString;
+            var threshold = new LastGoodCheckDBThreshold
+            {
+                InstanceID = InstanceID,
+                DatabaseID = DatabaseID,
+                ConnectionString = connectionString
+            };
             SqlConnection cn = new SqlConnection(connectionString);
             using (cn)
             {

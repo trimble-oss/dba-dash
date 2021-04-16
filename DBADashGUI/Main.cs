@@ -37,7 +37,7 @@ namespace DBADashGUI
         }
 
         string connectionString = "";
-        string jsonPath = Common.JsonConfigPath;
+        readonly string jsonPath = Common.JsonConfigPath;
 
 
         private Int64 currentObjectID;

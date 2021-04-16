@@ -51,8 +51,10 @@ namespace DBADashGUI
                         return;
                     }
 
-                    cfg = new BasicConfig();
-                    cfg.Destination = frm.ConnectionString;
+                    cfg = new BasicConfig
+                    {
+                        Destination = frm.ConnectionString
+                    };
 
                     if (File.Exists(Common.JsonConfigPath))
                     {

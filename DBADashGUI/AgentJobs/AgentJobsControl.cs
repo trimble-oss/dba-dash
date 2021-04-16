@@ -128,10 +128,12 @@ namespace DBADashGUI.AgentJobs
 
         private void configureThresholds(Int32 InstanceID,Guid jobID)
         {
-            var frm = new AgentJobThresholdsConfig();
-            frm.InstanceID = InstanceID;
-            frm.JobID = jobID;
-            frm.connectionString = Common.ConnectionString;
+            var frm = new AgentJobThresholdsConfig
+            {
+                InstanceID = InstanceID,
+                JobID = jobID,
+                connectionString = Common.ConnectionString
+            };
             frm.ShowDialog();
             if(frm.DialogResult== DialogResult.OK)
             {
@@ -176,8 +178,7 @@ namespace DBADashGUI.AgentJobs
 
         private void showHistory()
         {
-            int? stepID = 0;
-            stepID = showJobStepsToolStripMenuItem.Checked ? (int?)null : 0;
+            int? stepID = showJobStepsToolStripMenuItem.Checked ? (int?)null : 0;
             stepID = instance_id == null ? stepID : null;
             colStepName.Visible = stepID !=0;
             colStepID.Visible = stepID != 0;

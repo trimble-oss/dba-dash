@@ -36,8 +36,10 @@ namespace DBADashServiceConfig
 
         public string ConnectionString { 
             get {
-                SqlConnectionStringBuilder builder = new SqlConnectionStringBuilder(_connectionString);
-                builder.InitialCatalog = cboDatabase.Text;
+                SqlConnectionStringBuilder builder = new SqlConnectionStringBuilder(_connectionString)
+                {
+                    InitialCatalog = cboDatabase.Text
+                };
                 return builder.ConnectionString;
             }
             set {
@@ -64,9 +66,11 @@ namespace DBADashServiceConfig
         {
             get
             {
-                SqlConnectionStringBuilder builder = new SqlConnectionStringBuilder(ConnectionString);
-                builder.ConnectTimeout = 3;
-                builder.InitialCatalog = "";
+                SqlConnectionStringBuilder builder = new SqlConnectionStringBuilder(ConnectionString)
+                {
+                    ConnectTimeout = 3,
+                    InitialCatalog = ""
+                };
                 return builder.ConnectionString;
             }
         }
@@ -159,7 +163,7 @@ AND database_id > 4 ", cn);
                 }
                 else
                 {
-                    lblNotice.Text = lblNotice.Text + ".";
+                    lblNotice.Text += ".";
                 }
                 Application.DoEvents();
                 if (isCancel)
@@ -210,7 +214,7 @@ AND database_id > 4 ", cn);
                 }
                 else
                 {
-                    lblNotice.Text = lblNotice.Text + ".";
+                    lblNotice.Text += ".";
                 }
                 Application.DoEvents();
                 if (isCancel)
