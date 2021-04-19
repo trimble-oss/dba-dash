@@ -88,6 +88,7 @@ namespace DBADash
         public Int32 RetryInterval = 30;
         private HostPlatform platform;
         public DateTime JobLastModified=DateTime.MinValue;
+        private bool IsHadrEnabled=false;
 
         public int Job_instance_id {
             get
@@ -270,6 +271,8 @@ namespace DBADash
             {
                 dt.Rows[0]["ConnectionID"] = connectionID;
             }
+            IsHadrEnabled = dt.Rows[0]["IsHadrEnabled"] == DBNull.Value ? false : Convert.ToBoolean(dt.Rows[0]["IsHadrEnabled"]);
+
             Data.Tables.Add(dt);
 
 
@@ -308,8 +311,7 @@ namespace DBADash
             else if (collectionType == CollectionType.General)
             {
                 Collect(CollectionType.ServerProperties);
-                Collect(CollectionType.Databases);
-                Collect(CollectionType.DatabasesHADR);
+                Collect(CollectionType.Databases);              
                 Collect(CollectionType.SysConfig);
                 Collect(CollectionType.Drives);
                 Collect(CollectionType.DBFiles);
@@ -339,7 +341,11 @@ namespace DBADash
                 Collect(CollectionType.AzureDBElasticPoolResourceStats);
                 Collect(CollectionType.SlowQueries);
                 Collect(CollectionType.PerformanceCounters);
-                Collect(CollectionType.JobHistory);              
+                Collect(CollectionType.JobHistory);
+                if (IsHadrEnabled)
+                {
+                    Collect(CollectionType.DatabasesHADR);
+                }
             }
             else if(collectionType == CollectionType.Infrequent)
             {

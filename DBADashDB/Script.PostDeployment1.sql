@@ -331,7 +331,7 @@ FROM
 (-1,'TraceFlags',125,180),
 (-1,'ServerProperties',125,180),
 (-1,'LogRestores',125,180),
-(-1,'DatabaseHADR',125,180),
+(-1,'DatabaseHADR',5,10),
 (-1,'LastGoodCheckDB',125,180),
 (-1,'Alerts',125,180),
 (-1,'DBTuningOptions',125,180),
@@ -378,6 +378,14 @@ SET WarningThreshold=1445,
 WHERE Reference IN('Drivers','OSLoadedModules')
 AND WarningThreshold=125
 AND CriticalThreshold=180
+
+DELETE CD 
+FROM dbo.CollectionDates CD
+WHERE Reference='DatabaseHADR'
+AND NOT EXISTS(SELECT 1 
+		FROM dbo.DatabasesHADR HA
+		JOIN dbo.Databases D ON D.DatabaseID = HA.DatabaseID
+		WHERE D.InstanceID = CD.InstanceID)
 
 INSERT INTO dbo.InstanceUptimeThresholds
 (
@@ -554,3 +562,4 @@ BEGIN
 	INSERT INTO dbo.AgentJobThresholds(InstanceId,job_id,TimeSinceLastFailureCritical,TimeSinceLastFailureWarning,LastFailIsCritical,LastFailIsWarning)
 	SELECT -1,'00000000-0000-0000-0000-000000000000',60,10080,1,0
 END
+

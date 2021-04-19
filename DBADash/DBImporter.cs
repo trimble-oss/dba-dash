@@ -100,6 +100,23 @@ namespace DBADash
                     bss.Columns.Add("transaction_isolation_level", typeof(Int16));
                 }
             }
+            if (data.Tables.Contains("DatabasesHADR"))
+            {
+                var dtDatabasesHADR = data.Tables["DatabasesHADR"];
+                if (dtDatabasesHADR.Rows.Count == 0)
+                {
+                    data.Tables.Remove("DatabasesHADR");
+                }
+                else if (!dtDatabasesHADR.Columns.Contains("replica_id"))
+                {
+                    dtDatabasesHADR.Columns.Add("replica_id", typeof(Guid));
+                    dtDatabasesHADR.Columns.Add("group_id", typeof(Guid));
+                    dtDatabasesHADR.Columns.Add("is_commit_participant", typeof(bool));
+                    dtDatabasesHADR.Columns.Add("database_state", typeof(Int16));
+                    dtDatabasesHADR.Columns.Add("is_local", typeof(bool));
+                    dtDatabasesHADR.Columns.Add("secondary_lag_seconds", typeof(long));
+                }
+            }
         }
 
         public void Update()

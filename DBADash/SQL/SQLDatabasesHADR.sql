@@ -8,8 +8,13 @@ BEGIN
            synchronization_state,
            synchronization_health,
            is_suspended,
-           suspend_reason
-    FROM sys.dm_hadr_database_replica_states
-    WHERE is_local = 1;'
+           suspend_reason,
+		   replica_id,
+		   group_id,
+		   is_commit_participant,
+		   database_state,
+		   is_local,
+		   ' + CASE WHEN @@VERSION LIKE '%SQL Server 2012%' OR @@VERSION LIKE '%SQL Server 2014%' THEN 'CAST(NULL as BIGINT) AS secondary_lag_seconds' ELSE 'secondary_lag_seconds' END + '
+    FROM sys.dm_hadr_database_replica_states;'
 	EXEC sp_executesql @SQL
 END;
