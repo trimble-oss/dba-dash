@@ -55,7 +55,9 @@ namespace DBADash
         VLF,
         DatabaseMirroring,
         Jobs,
-        JobHistory
+        JobHistory,
+        AvailabilityReplicas,
+        AvailabilityGroups
     }
 
     public enum HostPlatform
@@ -329,6 +331,11 @@ namespace DBADash
                 Collect(CollectionType.CustomChecks);
                 Collect(CollectionType.DatabaseMirroring);
                 Collect(CollectionType.Jobs);
+                if (IsHadrEnabled)
+                {
+                    Collect(CollectionType.AvailabilityReplicas);
+                    Collect(CollectionType.AvailabilityGroups);
+                }
             }
             else if (collectionType == CollectionType.Performance)
             {

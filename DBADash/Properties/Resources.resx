@@ -124,6 +124,12 @@
   <data name="SQLAlerts" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\SQL\SQLAlerts.sql;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
   </data>
+  <data name="SQLAvailabilityGroups" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\SQL\SQLAvailabilityGroups.sql;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
+  </data>
+  <data name="SQLAvailabilityReplicas" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\SQL\SQLAvailabilityReplicas.sql;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
+  </data>
   <data name="SQLAzureDBElasticPoolResourceStats" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\SQL\SQLAzureDBElasticPoolResourceStats.sql;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
   </data>

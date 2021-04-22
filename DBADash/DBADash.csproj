@@ -260,6 +260,8 @@
     </Content>
     <Content Include="SQL\SQLAgentJobs.sql" />
     <Content Include="SQL\SQLAlerts.sql" />
+    <Content Include="SQL\SQLAvailabilityGroups.sql" />
+    <Content Include="SQL\SQLAvailabilityReplicas.sql" />
     <Content Include="SQL\SQLAzureDBElasticPoolResourceStats.sql" />
     <Content Include="SQL\SQLAzureDBResourceStats.sql" />
     <Content Include="SQL\SQLAzureDBServiceObjectives.sql" />

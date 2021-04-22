@@ -103,6 +103,57 @@ namespace DBADash.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to SELECT group_id,
+        ///       name,
+        ///       resource_id,
+        ///       resource_group_id,
+        ///       failure_condition_level,
+        ///       health_check_timeout,
+        ///       automated_backup_preference,
+        ///       version,
+        ///       basic_features,
+        ///       dtc_support,
+        ///       db_failover,
+        ///       is_distributed,
+        ///       cluster_type,
+        ///       required_synchronized_secondaries_to_commit,
+        ///       sequence_number,
+        ///       is_contained
+        ///FROM sys.availability_groups;.
+        /// </summary>
+        internal static string SQLAvailabilityGroups {
+            get {
+                return ResourceManager.GetString("SQLAvailabilityGroups", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to DECLARE @SQL NVARCHAR(MAX)
+        ///SET @SQL = N&apos;
+        ///SELECT replica_id,
+        ///       group_id,
+        ///       replica_metadata_id,
+        ///       replica_server_name,
+        ///       endpoint_url,
+        ///       availability_mode,
+        ///       failover_mode,
+        ///       session_timeout,
+        ///       primary_role_allow_connections,
+        ///       secondary_role_allow_connections,
+        ///       create_date,
+        ///       modify_date,
+        ///       backup_priority,
+        ///       read_only_routing_url,
+        ///       seeding_mode,
+        ///       &apos; + CASE WHEN COLUMNPROPERTY(OBJECT_ID(&apos;sys.availability_replicas&apos;) [rest of string was truncated]&quot;;.
+        /// </summary>
+        internal static string SQLAvailabilityReplicas {
+            get {
+                return ResourceManager.GetString("SQLAvailabilityReplicas", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to SELECT start_time,
         ///       end_time,
         ///       elastic_pool_name,
@@ -177,18 +228,12 @@ namespace DBADash.Properties {
         /// <summary>
         ///   Looks up a localized string similar to DECLARE @MinWaitTimeMs INT 
         ///SET @MinWaitTimeMs= 1000
-        ///
         ///DECLARE @DBIDTable NVARCHAR(MAX)
         ///DECLARE @SQL NVARCHAR(MAX)
-        ///SELECT @DBIDTable= CASE WHEN COLUMNPROPERTY(OBJECT_ID(&apos;sys.dm_exec_sessions&apos;),&apos;database_id&apos;,&apos;ColumnId&apos;) IS NULL THEN &apos;R.&apos; ELSE &apos;S.&apos; END 
-        ///SET @SQL =N&apos;
-        ///	DECLARE @UTCOffset INT 
-        ///	SELECT @UTCOffset= DATEDIFF(mi,GETDATE(),GETUTCDATE());
-        ///	WITH R AS (
-        ///		SELECT GETUTCDATE() SnapshotDateUTC,
-        ///			@UTCOffset AS UTCOffset,
-        ///			S.session_id,
-        ///			ISNULL(R.blocking_session_id,0) AS blocking_session_i [rest of string was truncated]&quot;;.
+        ///DECLARE @OpenTransactionFilter NVARCHAR(MAX)
+        ///SELECT @DBIDTable= CASE WHEN COLUMNPROPERTY(OBJECT_ID(&apos;sys.dm_exec_sessions&apos;),&apos;database_id&apos;,&apos;ColumnId&apos;) IS NULL THEN &apos;R.&apos; ELSE &apos;S.&apos; END,
+        ///		-- Improves performance for instances with a large number of connections.  2012+.  To be blocked or causing blocking there should be an open transaction.
+        ///		@OpenTransactionFilter = CASE WHEN COLUMNPROPERTY(OB [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string SQLBlockingSnapshot {
             get {
@@ -406,10 +451,11 @@ namespace DBADash.Properties {
         ///           synchronization_state,
         ///           synchronization_health,
         ///           is_suspended,
-        ///           suspend_reason
-        ///    FROM sys.dm_hadr_database_replica_states
-        ///    WHERE is_local = 1;&apos;
-        /// [rest of string was truncated]&quot;;.
+        ///           suspend_reason,
+        ///		   replica_id,
+        ///		   group_id,
+        ///		   is_commit_participant,
+        ///		   dat [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string SQLDatabasesHADR {
             get {
@@ -531,8 +577,9 @@ namespace DBADash.Properties {
         ///		GETUTCDATE() As SnapshotDateUTC,
         ///		CAST(SERVERPROPERTY(&apos;EditionID&apos;) as bigint) as EditionID,
         ///		ISNULL(CAST(SERVERPROPERTY(&apos;ComputerNamePhysicalNetBIOS&apos;) as nvarchar(128)),&apos;&apos;) as ComputerNamePhysicalNetBIOS,
-        ///		DB_NAME() as DBName,SERVERPROPERTY (&apos;productversion&apos;) as ProductVersion
-        ///	FROM sys.dm_os_ [rest of string was truncated]&quot;;.
+        ///		DB_NAME() as DBName,
+        ///		SERVERPROPERTY (&apos;productversion&apos;) as ProductVersion,
+        ///		DATEDIFF( [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string SQLInstance {
             get {
@@ -588,7 +635,8 @@ namespace DBADash.Properties {
         ///		retries_attempted,
         ///		server
         ///FROM msdb.dbo.sysjobhistory
-        ///WHERE instance_id&gt; @instance_id.
+        ///WHERE instance_id&gt; @instance_id
+        ///AND run_date &gt; @run_date.
         /// </summary>
         internal static string SQLJobHistory {
             get {

@@ -1,0 +1,17 @@
+﻿SELECT group_id,
+       name,
+       resource_id,
+       resource_group_id,
+       failure_condition_level,
+       health_check_timeout,
+       automated_backup_preference,
+       version,
+       basic_features,
+       dtc_support,
+       db_failover,
+       is_distributed,
+       cluster_type,
+       required_synchronized_secondaries_to_commit,
+       sequence_number,
+       is_contained
+FROM sys.availability_groups;
