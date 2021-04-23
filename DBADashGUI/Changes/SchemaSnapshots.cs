@@ -49,7 +49,7 @@ namespace DBADashGUI.Changes
 
                         gvSnapshotsDetail.AutoGenerateColumns = false;
                         gvSnapshotsDetail.DataSource = ds.Tables[0];
-
+                        gvSnapshotsDetail.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
                     }
                 }
             }
@@ -106,6 +106,7 @@ namespace DBADashGUI.Changes
                     da.Fill(dt);
                     Common.ConvertUTCToLocal(ref dt);
                     dgvInstanceSummary.DataSource = dt;
+                    dgvInstanceSummary.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
                 }
             }
         }
@@ -132,6 +133,7 @@ namespace DBADashGUI.Changes
                     Common.ConvertUTCToLocal(ref dt);
                     gvSnapshots.AutoGenerateColumns = false;
                     gvSnapshots.DataSource = dt;
+                    gvSnapshots.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
 
                     tsSummaryPageNum.Text = "Page " + pageNum;
                     tsSummaryBack.Enabled = (pageNum > 1);

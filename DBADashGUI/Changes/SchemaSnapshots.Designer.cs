@@ -28,22 +28,14 @@
         /// </summary>
         private void InitializeComponent()
         {
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle3 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle6 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle7 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle8 = new System.Windows.Forms.DataGridViewCellStyle();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(SchemaSnapshots));
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle4 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle5 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle9 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle10 = new System.Windows.Forms.DataGridViewCellStyle();
             this.splitSnapshotSummary = new System.Windows.Forms.SplitContainer();
             this.gvSnapshots = new System.Windows.Forms.DataGridView();
-            this.colDB = new System.Windows.Forms.DataGridViewLinkColumn();
-            this.SnapshotDate = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.ValidatedDate = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.ValidForDays = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.DaysSinceValidation = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colCreated = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.Modified = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.Dropped = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.toolStrip2 = new System.Windows.Forms.ToolStrip();
             this.tsSummaryBack = new System.Windows.Forms.ToolStripButton();
             this.tsSummaryPageNum = new System.Windows.Forms.ToolStripLabel();
@@ -51,15 +43,8 @@
             this.toolStripLabel3 = new System.Windows.Forms.ToolStripLabel();
             this.tsSummaryPageSize = new System.Windows.Forms.ToolStripComboBox();
             this.gvSnapshotsDetail = new System.Windows.Forms.DataGridView();
-            this.colObjectName = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colSchemaName = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colAction = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colView = new System.Windows.Forms.DataGridViewLinkColumn();
-            this.colDiff = new System.Windows.Forms.DataGridViewLinkColumn();
             this.dgvInstanceSummary = new System.Windows.Forms.DataGridView();
             this.colInstance = new System.Windows.Forms.DataGridViewLinkColumn();
-            this.colLastUpdated = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colLastValidated = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
             this.tsRefresh = new System.Windows.Forms.ToolStripButton();
             this.tsBack = new System.Windows.Forms.ToolStripButton();
@@ -75,7 +60,22 @@
             this.dataGridViewTextBoxColumn10 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dataGridViewTextBoxColumn11 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dataGridViewTextBoxColumn12 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colLastUpdated = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colLastValidated = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dataGridViewTextBoxColumn13 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colObjectName = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colSchemaName = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colAction = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colView = new System.Windows.Forms.DataGridViewLinkColumn();
+            this.colDiff = new System.Windows.Forms.DataGridViewLinkColumn();
+            this.colDB = new System.Windows.Forms.DataGridViewLinkColumn();
+            this.SnapshotDate = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.ValidatedDate = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.ValidForDays = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.DaysSinceValidation = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colCreated = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.Modified = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.Dropped = new System.Windows.Forms.DataGridViewTextBoxColumn();
             ((System.ComponentModel.ISupportInitialize)(this.splitSnapshotSummary)).BeginInit();
             this.splitSnapshotSummary.Panel1.SuspendLayout();
             this.splitSnapshotSummary.Panel2.SuspendLayout();
@@ -110,15 +110,15 @@
             // 
             this.gvSnapshots.AllowUserToAddRows = false;
             this.gvSnapshots.AllowUserToDeleteRows = false;
-            dataGridViewCellStyle1.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle1.BackColor = System.Drawing.SystemColors.Control;
-            dataGridViewCellStyle1.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            dataGridViewCellStyle1.ForeColor = System.Drawing.SystemColors.WindowText;
-            dataGridViewCellStyle1.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-            dataGridViewCellStyle1.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-            dataGridViewCellStyle1.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
-            this.gvSnapshots.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle1;
-            this.gvSnapshots.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            dataGridViewCellStyle6.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle6.BackColor = System.Drawing.SystemColors.Control;
+            dataGridViewCellStyle6.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            dataGridViewCellStyle6.ForeColor = System.Drawing.SystemColors.WindowText;
+            dataGridViewCellStyle6.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle6.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle6.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
+            this.gvSnapshots.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle6;
+            this.gvSnapshots.ColumnHeadersHeight = 29;
             this.gvSnapshots.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
             this.colDB,
             this.SnapshotDate,
@@ -128,26 +128,26 @@
             this.colCreated,
             this.Modified,
             this.Dropped});
-            dataGridViewCellStyle2.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle2.BackColor = System.Drawing.SystemColors.Window;
-            dataGridViewCellStyle2.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            dataGridViewCellStyle2.ForeColor = System.Drawing.SystemColors.ControlText;
-            dataGridViewCellStyle2.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-            dataGridViewCellStyle2.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-            dataGridViewCellStyle2.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
-            this.gvSnapshots.DefaultCellStyle = dataGridViewCellStyle2;
+            dataGridViewCellStyle7.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle7.BackColor = System.Drawing.SystemColors.Window;
+            dataGridViewCellStyle7.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            dataGridViewCellStyle7.ForeColor = System.Drawing.SystemColors.ControlText;
+            dataGridViewCellStyle7.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle7.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle7.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
+            this.gvSnapshots.DefaultCellStyle = dataGridViewCellStyle7;
             this.gvSnapshots.Dock = System.Windows.Forms.DockStyle.Fill;
             this.gvSnapshots.Location = new System.Drawing.Point(0, 0);
             this.gvSnapshots.Name = "gvSnapshots";
             this.gvSnapshots.ReadOnly = true;
-            dataGridViewCellStyle3.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle3.BackColor = System.Drawing.SystemColors.Control;
-            dataGridViewCellStyle3.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            dataGridViewCellStyle3.ForeColor = System.Drawing.SystemColors.WindowText;
-            dataGridViewCellStyle3.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-            dataGridViewCellStyle3.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-            dataGridViewCellStyle3.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
-            this.gvSnapshots.RowHeadersDefaultCellStyle = dataGridViewCellStyle3;
+            dataGridViewCellStyle8.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle8.BackColor = System.Drawing.SystemColors.Control;
+            dataGridViewCellStyle8.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            dataGridViewCellStyle8.ForeColor = System.Drawing.SystemColors.WindowText;
+            dataGridViewCellStyle8.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle8.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle8.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
+            this.gvSnapshots.RowHeadersDefaultCellStyle = dataGridViewCellStyle8;
             this.gvSnapshots.RowHeadersVisible = false;
             this.gvSnapshots.RowHeadersWidth = 51;
             this.gvSnapshots.RowTemplate.Height = 24;
@@ -156,86 +156,6 @@
             this.gvSnapshots.TabIndex = 0;
             this.gvSnapshots.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.gvSnapshots_CellContentClick);
             this.gvSnapshots.SelectionChanged += new System.EventHandler(this.gvSnapshots_SelectionChanged);
-            // 
-            // colDB
-            // 
-            this.colDB.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.DisplayedCells;
-            this.colDB.DataPropertyName = "DB";
-            this.colDB.HeaderText = "DB";
-            this.colDB.MinimumWidth = 6;
-            this.colDB.Name = "colDB";
-            this.colDB.ReadOnly = true;
-            this.colDB.Resizable = System.Windows.Forms.DataGridViewTriState.True;
-            this.colDB.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
-            this.colDB.Width = 56;
-            // 
-            // SnapshotDate
-            // 
-            this.SnapshotDate.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.ColumnHeader;
-            this.SnapshotDate.DataPropertyName = "SnapshotDate";
-            this.SnapshotDate.HeaderText = "Snapshot Date";
-            this.SnapshotDate.MinimumWidth = 6;
-            this.SnapshotDate.Name = "SnapshotDate";
-            this.SnapshotDate.ReadOnly = true;
-            this.SnapshotDate.Width = 120;
-            // 
-            // ValidatedDate
-            // 
-            this.ValidatedDate.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.ColumnHeader;
-            this.ValidatedDate.DataPropertyName = "ValidatedDate";
-            this.ValidatedDate.HeaderText = "Validated Date";
-            this.ValidatedDate.MinimumWidth = 6;
-            this.ValidatedDate.Name = "ValidatedDate";
-            this.ValidatedDate.ReadOnly = true;
-            this.ValidatedDate.Width = 119;
-            // 
-            // ValidForDays
-            // 
-            this.ValidForDays.DataPropertyName = "ValidForDays";
-            this.ValidForDays.HeaderText = "Valid For (Days)";
-            this.ValidForDays.MinimumWidth = 6;
-            this.ValidForDays.Name = "ValidForDays";
-            this.ValidForDays.ReadOnly = true;
-            this.ValidForDays.Width = 125;
-            // 
-            // DaysSinceValidation
-            // 
-            this.DaysSinceValidation.DataPropertyName = "DaysSinceValidation";
-            this.DaysSinceValidation.HeaderText = "Days Since Validation";
-            this.DaysSinceValidation.MinimumWidth = 6;
-            this.DaysSinceValidation.Name = "DaysSinceValidation";
-            this.DaysSinceValidation.ReadOnly = true;
-            this.DaysSinceValidation.Width = 125;
-            // 
-            // colCreated
-            // 
-            this.colCreated.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.ColumnHeader;
-            this.colCreated.DataPropertyName = "Created";
-            this.colCreated.HeaderText = "Created";
-            this.colCreated.MinimumWidth = 6;
-            this.colCreated.Name = "colCreated";
-            this.colCreated.ReadOnly = true;
-            this.colCreated.Width = 87;
-            // 
-            // Modified
-            // 
-            this.Modified.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.ColumnHeader;
-            this.Modified.DataPropertyName = "Modified";
-            this.Modified.HeaderText = "Modified";
-            this.Modified.MinimumWidth = 6;
-            this.Modified.Name = "Modified";
-            this.Modified.ReadOnly = true;
-            this.Modified.Width = 90;
-            // 
-            // Dropped
-            // 
-            this.Dropped.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.ColumnHeader;
-            this.Dropped.DataPropertyName = "Dropped";
-            this.Dropped.HeaderText = "Dropped";
-            this.Dropped.MinimumWidth = 6;
-            this.Dropped.Name = "Dropped";
-            this.Dropped.ReadOnly = true;
-            this.Dropped.Width = 92;
             // 
             // toolStrip2
             // 
@@ -302,29 +222,29 @@
             // 
             this.gvSnapshotsDetail.AllowUserToAddRows = false;
             this.gvSnapshotsDetail.AllowUserToDeleteRows = false;
-            dataGridViewCellStyle4.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle4.BackColor = System.Drawing.SystemColors.Control;
-            dataGridViewCellStyle4.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            dataGridViewCellStyle4.ForeColor = System.Drawing.SystemColors.WindowText;
-            dataGridViewCellStyle4.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-            dataGridViewCellStyle4.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-            dataGridViewCellStyle4.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
-            this.gvSnapshotsDetail.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle4;
-            this.gvSnapshotsDetail.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            dataGridViewCellStyle9.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle9.BackColor = System.Drawing.SystemColors.Control;
+            dataGridViewCellStyle9.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            dataGridViewCellStyle9.ForeColor = System.Drawing.SystemColors.WindowText;
+            dataGridViewCellStyle9.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle9.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle9.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
+            this.gvSnapshotsDetail.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle9;
+            this.gvSnapshotsDetail.ColumnHeadersHeight = 29;
             this.gvSnapshotsDetail.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
             this.colObjectName,
             this.colSchemaName,
             this.colAction,
             this.colView,
             this.colDiff});
-            dataGridViewCellStyle5.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle5.BackColor = System.Drawing.SystemColors.Window;
-            dataGridViewCellStyle5.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            dataGridViewCellStyle5.ForeColor = System.Drawing.SystemColors.ControlText;
-            dataGridViewCellStyle5.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-            dataGridViewCellStyle5.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-            dataGridViewCellStyle5.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
-            this.gvSnapshotsDetail.DefaultCellStyle = dataGridViewCellStyle5;
+            dataGridViewCellStyle10.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle10.BackColor = System.Drawing.SystemColors.Window;
+            dataGridViewCellStyle10.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            dataGridViewCellStyle10.ForeColor = System.Drawing.SystemColors.ControlText;
+            dataGridViewCellStyle10.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle10.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle10.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
+            this.gvSnapshotsDetail.DefaultCellStyle = dataGridViewCellStyle10;
             this.gvSnapshotsDetail.Dock = System.Windows.Forms.DockStyle.Fill;
             this.gvSnapshotsDetail.Location = new System.Drawing.Point(0, 0);
             this.gvSnapshotsDetail.Name = "gvSnapshotsDetail";
@@ -337,65 +257,11 @@
             this.gvSnapshotsDetail.TabIndex = 0;
             this.gvSnapshotsDetail.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.gvSnapshotsDetail_CellContentClick);
             // 
-            // colObjectName
-            // 
-            this.colObjectName.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.DisplayedCells;
-            this.colObjectName.DataPropertyName = "ObjectName";
-            this.colObjectName.HeaderText = "Object Name";
-            this.colObjectName.MinimumWidth = 6;
-            this.colObjectName.Name = "colObjectName";
-            this.colObjectName.ReadOnly = true;
-            this.colObjectName.Width = 119;
-            // 
-            // colSchemaName
-            // 
-            this.colSchemaName.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.DisplayedCells;
-            this.colSchemaName.DataPropertyName = "SchemaName";
-            this.colSchemaName.HeaderText = "Schema Name";
-            this.colSchemaName.MinimumWidth = 6;
-            this.colSchemaName.Name = "colSchemaName";
-            this.colSchemaName.ReadOnly = true;
-            this.colSchemaName.Width = 129;
-            // 
-            // colAction
-            // 
-            this.colAction.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.ColumnHeader;
-            this.colAction.DataPropertyName = "Action";
-            this.colAction.HeaderText = "Action";
-            this.colAction.MinimumWidth = 6;
-            this.colAction.Name = "colAction";
-            this.colAction.ReadOnly = true;
-            this.colAction.Width = 76;
-            // 
-            // colView
-            // 
-            this.colView.DataPropertyName = "newDDLID";
-            this.colView.HeaderText = "View";
-            this.colView.MinimumWidth = 6;
-            this.colView.Name = "colView";
-            this.colView.ReadOnly = true;
-            this.colView.Text = "View";
-            this.colView.UseColumnTextForLinkValue = true;
-            this.colView.Width = 125;
-            // 
-            // colDiff
-            // 
-            this.colDiff.DataPropertyName = "OldDDLID";
-            this.colDiff.HeaderText = "Diff";
-            this.colDiff.MinimumWidth = 6;
-            this.colDiff.Name = "colDiff";
-            this.colDiff.ReadOnly = true;
-            this.colDiff.Resizable = System.Windows.Forms.DataGridViewTriState.True;
-            this.colDiff.Text = "Diff";
-            this.colDiff.UseColumnTextForLinkValue = true;
-            this.colDiff.Width = 125;
-            // 
             // dgvInstanceSummary
             // 
             this.dgvInstanceSummary.AllowUserToAddRows = false;
             this.dgvInstanceSummary.AllowUserToDeleteRows = false;
-            this.dgvInstanceSummary.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.DisplayedCells;
-            this.dgvInstanceSummary.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.dgvInstanceSummary.ColumnHeadersHeight = 29;
             this.dgvInstanceSummary.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
             this.colInstance,
             this.colLastUpdated,
@@ -421,24 +287,6 @@
             this.colInstance.Resizable = System.Windows.Forms.DataGridViewTriState.True;
             this.colInstance.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
             this.colInstance.Width = 90;
-            // 
-            // colLastUpdated
-            // 
-            this.colLastUpdated.DataPropertyName = "LastUpdated";
-            this.colLastUpdated.HeaderText = "Last Updated";
-            this.colLastUpdated.MinimumWidth = 6;
-            this.colLastUpdated.Name = "colLastUpdated";
-            this.colLastUpdated.ReadOnly = true;
-            this.colLastUpdated.Width = 122;
-            // 
-            // colLastValidated
-            // 
-            this.colLastValidated.DataPropertyName = "LastValidated";
-            this.colLastValidated.HeaderText = "Last Validated";
-            this.colLastValidated.MinimumWidth = 6;
-            this.colLastValidated.Name = "colLastValidated";
-            this.colLastValidated.ReadOnly = true;
-            this.colLastValidated.Width = 127;
             // 
             // toolStrip1
             // 
@@ -480,7 +328,7 @@
             this.dataGridViewTextBoxColumn1.MinimumWidth = 6;
             this.dataGridViewTextBoxColumn1.Name = "dataGridViewTextBoxColumn1";
             this.dataGridViewTextBoxColumn1.ReadOnly = true;
-            this.dataGridViewTextBoxColumn1.Width = 125;
+            this.dataGridViewTextBoxColumn1.Width = 131;
             // 
             // dataGridViewTextBoxColumn2
             // 
@@ -490,7 +338,7 @@
             this.dataGridViewTextBoxColumn2.MinimumWidth = 6;
             this.dataGridViewTextBoxColumn2.Name = "dataGridViewTextBoxColumn2";
             this.dataGridViewTextBoxColumn2.ReadOnly = true;
-            this.dataGridViewTextBoxColumn2.Width = 125;
+            this.dataGridViewTextBoxColumn2.Width = 130;
             // 
             // dataGridViewTextBoxColumn3
             // 
@@ -520,7 +368,7 @@
             this.dataGridViewTextBoxColumn5.MinimumWidth = 6;
             this.dataGridViewTextBoxColumn5.Name = "dataGridViewTextBoxColumn5";
             this.dataGridViewTextBoxColumn5.ReadOnly = true;
-            this.dataGridViewTextBoxColumn5.Width = 125;
+            this.dataGridViewTextBoxColumn5.Width = 87;
             // 
             // dataGridViewTextBoxColumn6
             // 
@@ -530,7 +378,7 @@
             this.dataGridViewTextBoxColumn6.MinimumWidth = 6;
             this.dataGridViewTextBoxColumn6.Name = "dataGridViewTextBoxColumn6";
             this.dataGridViewTextBoxColumn6.ReadOnly = true;
-            this.dataGridViewTextBoxColumn6.Width = 125;
+            this.dataGridViewTextBoxColumn6.Width = 90;
             // 
             // dataGridViewTextBoxColumn7
             // 
@@ -540,7 +388,7 @@
             this.dataGridViewTextBoxColumn7.MinimumWidth = 6;
             this.dataGridViewTextBoxColumn7.Name = "dataGridViewTextBoxColumn7";
             this.dataGridViewTextBoxColumn7.ReadOnly = true;
-            this.dataGridViewTextBoxColumn7.Width = 125;
+            this.dataGridViewTextBoxColumn7.Width = 92;
             // 
             // dataGridViewTextBoxColumn8
             // 
@@ -550,7 +398,7 @@
             this.dataGridViewTextBoxColumn8.MinimumWidth = 6;
             this.dataGridViewTextBoxColumn8.Name = "dataGridViewTextBoxColumn8";
             this.dataGridViewTextBoxColumn8.ReadOnly = true;
-            this.dataGridViewTextBoxColumn8.Width = 125;
+            this.dataGridViewTextBoxColumn8.Width = 119;
             // 
             // dataGridViewTextBoxColumn9
             // 
@@ -560,7 +408,7 @@
             this.dataGridViewTextBoxColumn9.MinimumWidth = 6;
             this.dataGridViewTextBoxColumn9.Name = "dataGridViewTextBoxColumn9";
             this.dataGridViewTextBoxColumn9.ReadOnly = true;
-            this.dataGridViewTextBoxColumn9.Width = 125;
+            this.dataGridViewTextBoxColumn9.Width = 129;
             // 
             // dataGridViewTextBoxColumn10
             // 
@@ -570,7 +418,7 @@
             this.dataGridViewTextBoxColumn10.MinimumWidth = 6;
             this.dataGridViewTextBoxColumn10.Name = "dataGridViewTextBoxColumn10";
             this.dataGridViewTextBoxColumn10.ReadOnly = true;
-            this.dataGridViewTextBoxColumn10.Width = 125;
+            this.dataGridViewTextBoxColumn10.Width = 76;
             // 
             // dataGridViewTextBoxColumn11
             // 
@@ -580,7 +428,7 @@
             this.dataGridViewTextBoxColumn11.MinimumWidth = 6;
             this.dataGridViewTextBoxColumn11.Name = "dataGridViewTextBoxColumn11";
             this.dataGridViewTextBoxColumn11.ReadOnly = true;
-            this.dataGridViewTextBoxColumn11.Width = 125;
+            this.dataGridViewTextBoxColumn11.Width = 122;
             // 
             // dataGridViewTextBoxColumn12
             // 
@@ -590,7 +438,25 @@
             this.dataGridViewTextBoxColumn12.MinimumWidth = 6;
             this.dataGridViewTextBoxColumn12.Name = "dataGridViewTextBoxColumn12";
             this.dataGridViewTextBoxColumn12.ReadOnly = true;
-            this.dataGridViewTextBoxColumn12.Width = 125;
+            this.dataGridViewTextBoxColumn12.Width = 127;
+            // 
+            // colLastUpdated
+            // 
+            this.colLastUpdated.DataPropertyName = "LastUpdated";
+            this.colLastUpdated.HeaderText = "Last Updated";
+            this.colLastUpdated.MinimumWidth = 6;
+            this.colLastUpdated.Name = "colLastUpdated";
+            this.colLastUpdated.ReadOnly = true;
+            this.colLastUpdated.Width = 122;
+            // 
+            // colLastValidated
+            // 
+            this.colLastValidated.DataPropertyName = "LastValidated";
+            this.colLastValidated.HeaderText = "Last Validated";
+            this.colLastValidated.MinimumWidth = 6;
+            this.colLastValidated.Name = "colLastValidated";
+            this.colLastValidated.ReadOnly = true;
+            this.colLastValidated.Width = 127;
             // 
             // dataGridViewTextBoxColumn13
             // 
@@ -601,6 +467,130 @@
             this.dataGridViewTextBoxColumn13.Name = "dataGridViewTextBoxColumn13";
             this.dataGridViewTextBoxColumn13.ReadOnly = true;
             this.dataGridViewTextBoxColumn13.Width = 125;
+            // 
+            // colObjectName
+            // 
+            this.colObjectName.DataPropertyName = "ObjectName";
+            this.colObjectName.HeaderText = "Object Name";
+            this.colObjectName.MinimumWidth = 6;
+            this.colObjectName.Name = "colObjectName";
+            this.colObjectName.ReadOnly = true;
+            this.colObjectName.Width = 119;
+            // 
+            // colSchemaName
+            // 
+            this.colSchemaName.DataPropertyName = "SchemaName";
+            this.colSchemaName.HeaderText = "Schema Name";
+            this.colSchemaName.MinimumWidth = 6;
+            this.colSchemaName.Name = "colSchemaName";
+            this.colSchemaName.ReadOnly = true;
+            this.colSchemaName.Width = 129;
+            // 
+            // colAction
+            // 
+            this.colAction.DataPropertyName = "Action";
+            this.colAction.HeaderText = "Action";
+            this.colAction.MinimumWidth = 6;
+            this.colAction.Name = "colAction";
+            this.colAction.ReadOnly = true;
+            this.colAction.Width = 76;
+            // 
+            // colView
+            // 
+            this.colView.DataPropertyName = "newDDLID";
+            this.colView.HeaderText = "View";
+            this.colView.MinimumWidth = 6;
+            this.colView.Name = "colView";
+            this.colView.ReadOnly = true;
+            this.colView.Text = "View";
+            this.colView.UseColumnTextForLinkValue = true;
+            this.colView.Width = 125;
+            // 
+            // colDiff
+            // 
+            this.colDiff.DataPropertyName = "OldDDLID";
+            this.colDiff.HeaderText = "Diff";
+            this.colDiff.MinimumWidth = 6;
+            this.colDiff.Name = "colDiff";
+            this.colDiff.ReadOnly = true;
+            this.colDiff.Resizable = System.Windows.Forms.DataGridViewTriState.True;
+            this.colDiff.Text = "Diff";
+            this.colDiff.UseColumnTextForLinkValue = true;
+            this.colDiff.Width = 125;
+            // 
+            // colDB
+            // 
+            this.colDB.DataPropertyName = "DB";
+            this.colDB.HeaderText = "DB";
+            this.colDB.MinimumWidth = 6;
+            this.colDB.Name = "colDB";
+            this.colDB.ReadOnly = true;
+            this.colDB.Resizable = System.Windows.Forms.DataGridViewTriState.True;
+            this.colDB.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
+            this.colDB.Width = 56;
+            // 
+            // SnapshotDate
+            // 
+            this.SnapshotDate.DataPropertyName = "SnapshotDate";
+            this.SnapshotDate.HeaderText = "Snapshot Date";
+            this.SnapshotDate.MinimumWidth = 6;
+            this.SnapshotDate.Name = "SnapshotDate";
+            this.SnapshotDate.ReadOnly = true;
+            this.SnapshotDate.Width = 131;
+            // 
+            // ValidatedDate
+            // 
+            this.ValidatedDate.DataPropertyName = "ValidatedDate";
+            this.ValidatedDate.HeaderText = "Validated Date";
+            this.ValidatedDate.MinimumWidth = 6;
+            this.ValidatedDate.Name = "ValidatedDate";
+            this.ValidatedDate.ReadOnly = true;
+            this.ValidatedDate.Width = 130;
+            // 
+            // ValidForDays
+            // 
+            this.ValidForDays.DataPropertyName = "ValidForDays";
+            this.ValidForDays.HeaderText = "Valid For (Days)";
+            this.ValidForDays.MinimumWidth = 6;
+            this.ValidForDays.Name = "ValidForDays";
+            this.ValidForDays.ReadOnly = true;
+            this.ValidForDays.Width = 125;
+            // 
+            // DaysSinceValidation
+            // 
+            this.DaysSinceValidation.DataPropertyName = "DaysSinceValidation";
+            this.DaysSinceValidation.HeaderText = "Days Since Validation";
+            this.DaysSinceValidation.MinimumWidth = 6;
+            this.DaysSinceValidation.Name = "DaysSinceValidation";
+            this.DaysSinceValidation.ReadOnly = true;
+            this.DaysSinceValidation.Width = 125;
+            // 
+            // colCreated
+            // 
+            this.colCreated.DataPropertyName = "Created";
+            this.colCreated.HeaderText = "Created";
+            this.colCreated.MinimumWidth = 6;
+            this.colCreated.Name = "colCreated";
+            this.colCreated.ReadOnly = true;
+            this.colCreated.Width = 87;
+            // 
+            // Modified
+            // 
+            this.Modified.DataPropertyName = "Modified";
+            this.Modified.HeaderText = "Modified";
+            this.Modified.MinimumWidth = 6;
+            this.Modified.Name = "Modified";
+            this.Modified.ReadOnly = true;
+            this.Modified.Width = 90;
+            // 
+            // Dropped
+            // 
+            this.Dropped.DataPropertyName = "Dropped";
+            this.Dropped.HeaderText = "Dropped";
+            this.Dropped.MinimumWidth = 6;
+            this.Dropped.Name = "Dropped";
+            this.Dropped.ReadOnly = true;
+            this.Dropped.Width = 92;
             // 
             // SchemaSnapshots
             // 
@@ -657,6 +647,9 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn colLastValidated;
         private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn12;
         private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn13;
+        private System.Windows.Forms.ToolStrip toolStrip1;
+        private System.Windows.Forms.ToolStripButton tsRefresh;
+        private System.Windows.Forms.ToolStripButton tsBack;
         private System.Windows.Forms.DataGridViewLinkColumn colDB;
         private System.Windows.Forms.DataGridViewTextBoxColumn SnapshotDate;
         private System.Windows.Forms.DataGridViewTextBoxColumn ValidatedDate;
@@ -665,9 +658,6 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn colCreated;
         private System.Windows.Forms.DataGridViewTextBoxColumn Modified;
         private System.Windows.Forms.DataGridViewTextBoxColumn Dropped;
-        private System.Windows.Forms.ToolStrip toolStrip1;
-        private System.Windows.Forms.ToolStripButton tsRefresh;
-        private System.Windows.Forms.ToolStripButton tsBack;
         private System.Windows.Forms.DataGridViewTextBoxColumn colObjectName;
         private System.Windows.Forms.DataGridViewTextBoxColumn colSchemaName;
         private System.Windows.Forms.DataGridViewTextBoxColumn colAction;
