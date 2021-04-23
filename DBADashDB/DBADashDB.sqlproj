@@ -535,6 +535,8 @@
     <Build Include="dbo\Tables\AvailabilityGroups.sql" />
     <Build Include="dbo\User Defined Types\AvailabilityGroups.sql" />
     <Build Include="dbo\Stored Procedures\AvailabilityGroups_Upd.sql" />
+    <Build Include="dbo\Stored Procedures\AvailabilityGroup_Get.sql" />
+    <Build Include="dbo\Stored Procedures\AvailabilityGroupSummary_Get.sql" />
   </ItemGroup>
   <ItemGroup>
     <PostDeploy Include="Script.PostDeployment1.sql" />
