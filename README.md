@@ -5,14 +5,15 @@
 ## Project Summary
 DBA Dash is a tool for SQL Server DBAs to assist with daily checks, performance monitoring and change tracking.
 
- - Backups, Log Shipping, Agent Jobs, DBCC, Corruption, Drive space, AGs
- - IO Performance, CPU, Waits, Blocking
+ - Backups Agent Jobs, DBCC, Corruption, Drive space
+ - Availability Groups, Log Shipping, Mirroring
  - [OS Performance Counters + Custom Metrics](Docs/OSPerformanceCounters.md)
  - Stored Procedure/Function/Trigger execution stats
  - Capture slow queries (Extended Event trace)
  - Azure DB monitoring
  - Track changes to configuration, SQL Patching, drivers etc.
- - Schema change tracking
+ - Schema change tracking. 
+ - Agent Job change tracking
  - Option to monitor instances in isolated environments via S3 bucket.
  - [Custom Checks](Docs/CustomChecks.md)
 
@@ -53,7 +54,7 @@ Note: It's possible to run as a console app under your own user account for test
 More advanced service configuration is possible.  e.g. A remote agent can be configured to write to a S3 bucket and another agent that connects to your repository database can use the S3 bucket as a source instead of a SQL connection string.  
 
 ## AzureDB
-You can monitor Azure SQL Server databases with DBA Dash and the application includes some Azure specific dashboards that can help with performance/cost optimization.  Azure DB isn't supported for the repository database due to some deployment issues. The process for adding azure DB connections is similar to normal SQL instances but each database is considered a separate instance that we need a connection to.  You can manually add the connections for each database you want to monitor.  Alternatively you can just a connection to the **master** dastabase.
+You can monitor Azure SQL Server databases with DBA Dash and the application includes some Azure specific dashboards that can help with performance/cost optimization. The process for adding azure DB connections is similar to normal SQL instances but each database is considered a separate instance that we need a connection to.  You can manually add the connections for each database you want to monitor.  Alternatively you can just a connection to the **master** dastabase.
 
 If you have a connection to the master database, there are some options you can use on the "AzureDB" tab to add your other database connections:
 - Check the "Scan for AzureDBs on service start" option.  As the name suggests database connections will be added from the master connnection on service start.  
@@ -69,7 +70,7 @@ Amazon RDS (SQL Server only) can be used for source connections and for the repo
 
  - Stop the DBA Dash agent.  Use `net stop dbadashservice` from the commandline or use the DBADashServiceConfigTool.exe tool (Service Tab) to stop the service.
  - Close any running instances of the GUI or DBA Dash Service Config tool.
- - Replace all the app binaries with the ones from the new release (copy/paste).  All the configuration information for the agent is stored in the ServiceConfig.json file so this file must be kept. 
+ - Replace all the app binaries with the ones from the new release (copy/paste).  All the configuration information for the agent is stored in the ServiceConfig.json file so this file must be kept. You might want to keep backups of this file - particually before making configuration changes or installing new versions.
  - If the "auto upgrade repository DB on service start" option is enabled you can run `net start dbadashservice` to complete the installation.  Any database schema changes will be deployed automatically when the service starts. 
 
 ** Alternatively:  **

@@ -40,7 +40,7 @@ namespace DBADashGUI.Changes
                     {
                         cn.Open();
                         cmd.Parameters.AddWithValue("DatabaseID", DatabaseID);
-                        var p = cmd.Parameters.AddWithValue("SnapshotDate", SnapshotDate);
+                        var p = cmd.Parameters.AddWithValue("SnapshotDate", SnapshotDate.ToUniversalTime());
                         p.DbType = DbType.DateTime2;
 
                         SqlDataAdapter da = new SqlDataAdapter(cmd);
