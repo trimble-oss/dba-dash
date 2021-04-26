@@ -33,7 +33,7 @@ namespace DBADash
                     TimeSpan.FromSeconds(15)
                 }, (exception, timeSpan, retryCount, context) =>
                 {
-                    logError((string)context.OperationKey, exception, "Import[Retry]");
+                    logError((string)context.OperationKey, exception, "Import[Retrying]");
                 });
         }
 
