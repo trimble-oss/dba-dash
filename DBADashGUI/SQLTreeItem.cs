@@ -51,7 +51,9 @@ namespace DBADashGUI
             AzureDatabase,
             AgentJobs,
             AgentJob,
-            HADR
+            HADR,
+            DBAChecks,
+            Tags
         }
 
         private List<Int32> _childInstanceIDs;
@@ -344,6 +346,12 @@ namespace DBADashGUI
                     break;
                 case TreeType.HADR:
                     ImageIndex = 3;
+                    break;
+                case TreeType.DBAChecks:
+                    ImageIndex = 10;
+                    break;
+                case TreeType.Tags:
+                    ImageIndex = 11;
                     break;
                 default:
                     ImageIndex = 5;

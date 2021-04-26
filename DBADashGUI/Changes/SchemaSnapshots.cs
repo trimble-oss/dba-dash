@@ -79,7 +79,7 @@ namespace DBADashGUI.Changes
  
         public void RefreshData()
         {
-            if (InstanceID >0 || InstanceName.Length> 0)
+            if (InstanceID >0 || (InstanceName !=null && InstanceName.Length> 0))
             {
                 loadSnapshots();
                 tsBack.Enabled = true;

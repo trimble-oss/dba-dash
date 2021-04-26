@@ -51,7 +51,7 @@ namespace DBADashGUI
                     {
                         cmd.Parameters.AddWithValue("@DatabaseID", DatabaseID);
                     }
-                    if (Instance.Length > 0)
+                    if (Instance!=null && Instance.Length > 0)
                     {
                         cmd.Parameters.AddWithValue("@Instance", Instance);
                     }

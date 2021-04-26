@@ -151,6 +151,8 @@
             this.mirroring1 = new DBADashGUI.HA.Mirroring();
             this.tabJobDDL = new System.Windows.Forms.TabPage();
             this.jobDDLHistory1 = new DBADashGUI.Changes.JobDDLHistory();
+            this.tabAG = new System.Windows.Forms.TabPage();
+            this.ag1 = new DBADashGUI.HA.AG();
             this.dataGridViewTextBoxColumn1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dataGridViewTextBoxColumn2 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dataGridViewTextBoxColumn3 = new System.Windows.Forms.DataGridViewTextBoxColumn();
@@ -174,8 +176,6 @@
             this.dataGridViewTextBoxColumn21 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dataGridViewTextBoxColumn22 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dataGridViewTextBoxColumn23 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.tabAG = new System.Windows.Forms.TabPage();
-            this.ag1 = new DBADashGUI.HA.AG();
             this.menuStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitMain)).BeginInit();
             this.splitMain.Panel1.SuspendLayout();
@@ -241,6 +241,8 @@
             this.TreeViewImageList.Images.SetKeyName(7, "DatabaseProperty_16x.png");
             this.TreeViewImageList.Images.SetKeyName(8, "Cloud_blue_whiteHalo_16x.png");
             this.TreeViewImageList.Images.SetKeyName(9, "CloudDatabase_16x.png");
+            this.TreeViewImageList.Images.SetKeyName(10, "Checklist_16x.png");
+            this.TreeViewImageList.Images.SetKeyName(11, "Tag_16x.png");
             // 
             // menuStrip1
             // 
@@ -1530,6 +1532,25 @@
             this.jobDDLHistory1.Size = new System.Drawing.Size(1625, 1240);
             this.jobDDLHistory1.TabIndex = 0;
             // 
+            // tabAG
+            // 
+            this.tabAG.Controls.Add(this.ag1);
+            this.tabAG.Location = new System.Drawing.Point(4, 25);
+            this.tabAG.Name = "tabAG";
+            this.tabAG.Padding = new System.Windows.Forms.Padding(3);
+            this.tabAG.Size = new System.Drawing.Size(1631, 1246);
+            this.tabAG.TabIndex = 35;
+            this.tabAG.Text = "Availability Groups";
+            this.tabAG.UseVisualStyleBackColor = true;
+            // 
+            // ag1
+            // 
+            this.ag1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.ag1.Location = new System.Drawing.Point(3, 3);
+            this.ag1.Name = "ag1";
+            this.ag1.Size = new System.Drawing.Size(1625, 1240);
+            this.ag1.TabIndex = 0;
+            // 
             // dataGridViewTextBoxColumn1
             // 
             this.dataGridViewTextBoxColumn1.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.DisplayedCells;
@@ -1753,25 +1774,6 @@
             this.dataGridViewTextBoxColumn23.Name = "dataGridViewTextBoxColumn23";
             this.dataGridViewTextBoxColumn23.ReadOnly = true;
             this.dataGridViewTextBoxColumn23.Width = 94;
-            // 
-            // tabAG
-            // 
-            this.tabAG.Controls.Add(this.ag1);
-            this.tabAG.Location = new System.Drawing.Point(4, 25);
-            this.tabAG.Name = "tabAG";
-            this.tabAG.Padding = new System.Windows.Forms.Padding(3);
-            this.tabAG.Size = new System.Drawing.Size(1631, 1246);
-            this.tabAG.TabIndex = 35;
-            this.tabAG.Text = "Availability Groups";
-            this.tabAG.UseVisualStyleBackColor = true;
-            // 
-            // ag1
-            // 
-            this.ag1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.ag1.Location = new System.Drawing.Point(3, 3);
-            this.ag1.Name = "ag1";
-            this.ag1.Size = new System.Drawing.Size(1625, 1240);
-            this.ag1.TabIndex = 0;
             // 
             // Main
             // 

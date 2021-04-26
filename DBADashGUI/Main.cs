@@ -128,7 +128,7 @@ namespace DBADashGUI
                 {
                     instanceIDs = n.ChildInstanceIDs;
                 }
-                else if(n.Type == SQLTreeItem.TreeType.Configuration && parent.Type == SQLTreeItem.TreeType.AzureInstance)
+                else if(parent!=null && parent.Type == SQLTreeItem.TreeType.AzureInstance && n.Type != SQLTreeItem.TreeType.AzureInstance)
                 {
                     instanceIDs = parent.ChildInstanceIDs;
                 }
@@ -250,7 +250,7 @@ namespace DBADashGUI
                 collectionErrors1.InstanceID = n.InstanceID;
                 collectionErrors1.InstanceName = n.InstanceName;
                 collectionErrors1.Days = 1;
-                collectionErrors1.AckErrors =  SelectedTags().Count == 0 && n.Type == SQLTreeItem.TreeType.DBADashRoot;
+                collectionErrors1.AckErrors =  SelectedTags().Count == 0 && parent.Type == SQLTreeItem.TreeType.DBADashRoot;
                 collectionErrors1.RefreshData();
             }
             else if(tabs.SelectedTab== tabCollectionDates)
@@ -446,9 +446,11 @@ namespace DBADashGUI
             var root = new SQLTreeItem("DBA Dash", SQLTreeItem.TreeType.DBADashRoot);
             var changes = new SQLTreeItem("Configuration", SQLTreeItem.TreeType.Configuration);
             var hadr = new SQLTreeItem("HA/DR", SQLTreeItem.TreeType.HADR);
-            root.Nodes.Add(changes);
+            var checks = new SQLTreeItem("Checks", SQLTreeItem.TreeType.DBAChecks);
+            root.Nodes.Add(changes);         
+            root.Nodes.Add(checks);
             root.Nodes.Add(hadr);
-            
+
             var tags = String.Join(",", SelectedTags());
 
             var dtInstances = CommonData.GetInstances(tags);
@@ -465,14 +467,17 @@ namespace DBADashGUI
                     {
                         AzureNode = new SQLTreeItem(instance, SQLTreeItem.TreeType.AzureInstance);
                         root.Nodes.Add(AzureNode);
-                        var cfgNode = new SQLTreeItem("Configuration", SQLTreeItem.TreeType.Configuration);
-                        AzureNode.Nodes.Add(cfgNode);
+                        AzureNode.Nodes.Add(new SQLTreeItem("Configuration", SQLTreeItem.TreeType.Configuration));
+                        AzureNode.Nodes.Add(new SQLTreeItem("Checks", SQLTreeItem.TreeType.DBAChecks));
+                        AzureNode.Nodes.Add(new SQLTreeItem("Tags", SQLTreeItem.TreeType.Tags));
                     }
                     var azureDBNode = new SQLTreeItem(db, SQLTreeItem.TreeType.AzureDatabase)
                     {
                         DatabaseID = (Int32)row["AzureDatabaseID"],
                         InstanceID = instanceID
                     };
+                    azureDBNode.Nodes.Add(new SQLTreeItem("Configuration", SQLTreeItem.TreeType.Configuration));
+                    azureDBNode.Nodes.Add(new SQLTreeItem("Checks", SQLTreeItem.TreeType.DBAChecks));
                     azureDBNode.AddDatabaseFolders();
                     AzureNode.Nodes.Add(azureDBNode);
                     AzureInstanceIDs.Add(instanceID);
@@ -537,8 +542,10 @@ namespace DBADashGUI
                     {
                         InstanceID = instanceNode.InstanceID
                     };
-                    instanceNode.Nodes.Add(changesNode);
+                    instanceNode.Nodes.Add(changesNode);                  
+                    instanceNode.Nodes.Add(new SQLTreeItem("Checks", SQLTreeItem.TreeType.DBAChecks));
                     instanceNode.Nodes.Add(new SQLTreeItem("HA/DR", SQLTreeItem.TreeType.HADR));
+                    instanceNode.Nodes.Add(new SQLTreeItem("Tags", SQLTreeItem.TreeType.Tags));
 
                     cmd.Parameters.AddWithValue("Instance", instanceNode.ObjectName);
                     var systemNode = new SQLTreeItem("System Databases", SQLTreeItem.TreeType.Folder);
@@ -620,18 +627,7 @@ namespace DBADashGUI
                     allowedTabs.Add(tabAzureSummary);
                 }
                 allowedTabs.Add(tabSlowQueries);
-                if (!isAzureOnly)
-                {
-                    allowedTabs.Add(tabDrives);
-                    allowedTabs.Add(tabJobs);
-                    allowedTabs.Add(tabLastGood);
-                }    
-                allowedTabs.Add(tabSnapshotsSummary);
-                allowedTabs.Add(tabFiles);           
-                allowedTabs.Add(tabDBADashErrorLog);
-                allowedTabs.Add(tabCollectionDates);                
-                allowedTabs.Add(tabDBSpace);
-                allowedTabs.Add(tabCustomChecks);
+        
             }
             else if(n.Type== SQLTreeItem.TreeType.Database)
             {
@@ -655,16 +651,6 @@ namespace DBADashGUI
                 allowedTabs.Add(tabSlowQueries);
                 allowedTabs.Add(tabObjectExecutionSummary);
                 allowedTabs.Add(tabWaits);
-
-                allowedTabs.Add(tabDBADashErrorLog);
-                allowedTabs.Add(tabFiles);
-                allowedTabs.Add(tabSnapshotsSummary);             
-                allowedTabs.Add(tabDBSpace);
-                allowedTabs.Add(tabServiceObjectives);
-                allowedTabs.Add(tabDBConfiguration);
-                allowedTabs.Add(tabDBOptions);
-                allowedTabs.Add(tabCustomChecks);
-     
             }
             else if (n.Type == SQLTreeItem.TreeType.Instance)
             {
@@ -673,39 +659,22 @@ namespace DBADashGUI
                 allowedTabs.Add(tabPC);
                 allowedTabs.Add(tabObjectExecutionSummary);
                 allowedTabs.Add(tabSlowQueries);
-                allowedTabs.Add(tabWaits);
-
-                allowedTabs.Add(tabSummary);
-                allowedTabs.Add(tabDrives);              
-                allowedTabs.Add(tabLogShipping);
-                allowedTabs.Add(tabLastGood);
-                allowedTabs.Add(tabDBADashErrorLog);
-                allowedTabs.Add(tabInfo);                                  
-                allowedTabs.Add(tabFiles);
-                allowedTabs.Add(tabTags);
-                allowedTabs.Add(tabCollectionDates);
-                allowedTabs.Add(tabDBSpace);
-                allowedTabs.Add(tabCustomChecks);
-                allowedTabs.Add(tabSnapshotsSummary);
+                allowedTabs.Add(tabWaits);                                
             }
             else if(n.Type == SQLTreeItem.TreeType.AzureInstance)
             {
                 allowedTabs.Add(tabPerformanceSummary);         
                 allowedTabs.Add(tabAzureSummary);              
                 allowedTabs.Add(tabSlowQueries);
-                allowedTabs.Add(tabObjectExecutionSummary);
-
-                allowedTabs.Add(tabFiles);
-                allowedTabs.Add(tabTags);
-                allowedTabs.Add(tabCollectionDates);
-                allowedTabs.Add(tabDBSpace);
-                allowedTabs.Add(tabCustomChecks);
-                allowedTabs.Add(tabDBADashErrorLog);              
-                allowedTabs.Add(tabSnapshotsSummary);
-            }
+                allowedTabs.Add(tabObjectExecutionSummary);               
+           }
             else if (n.Type == SQLTreeItem.TreeType.Configuration)
             {
-                if(parent.Type != SQLTreeItem.TreeType.AzureDatabase && parent.Type != SQLTreeItem.TreeType.AzureInstance && !isAzureOnly)
+                if (parent.Type == SQLTreeItem.TreeType.Instance)
+                {
+                    allowedTabs.Add(tabInfo);
+                }
+                if (parent.Type != SQLTreeItem.TreeType.AzureDatabase && parent.Type != SQLTreeItem.TreeType.AzureInstance && !isAzureOnly)
                 {
                     allowedTabs.Add(tabInstanceConfig);
                     allowedTabs.Add(tabTraceFlags);
@@ -737,6 +706,27 @@ namespace DBADashGUI
                 allowedTabs.Add(tabMirroring);
                 allowedTabs.Add(tabAG);
             }
+            else if (n.Type == SQLTreeItem.TreeType.DBAChecks)
+            {
+                allowedTabs.Add(tabSummary);
+                if (!isAzureOnly && parent.Type!= SQLTreeItem.TreeType.AzureInstance)
+                {
+                    allowedTabs.Add(tabDrives);
+                    allowedTabs.Add(tabJobs);
+                    allowedTabs.Add(tabLastGood);
+                }
+                allowedTabs.Add(tabFiles);
+                allowedTabs.Add(tabDBADashErrorLog);
+                allowedTabs.Add(tabCollectionDates);
+                allowedTabs.Add(tabDBSpace);
+                allowedTabs.Add(tabCustomChecks);
+                allowedTabs.Add(tabSnapshotsSummary);
+            }
+            else if(n.Type== SQLTreeItem.TreeType.Tags)
+            {
+                allowedTabs.Add(tabTags);
+            }
+
             if (n.ObjectID > 0)
             {
                 if (n.Type == SQLTreeItem.TreeType.StoredProcedure || n.Type == SQLTreeItem.TreeType.CLRProcedure || n.Type == SQLTreeItem.TreeType.ScalarFunction || n.Type == SQLTreeItem.TreeType.CLRScalarFunction || n.Type == SQLTreeItem.TreeType.Trigger || n.Type == SQLTreeItem.TreeType.CLRTrigger)
@@ -943,7 +933,7 @@ namespace DBADashGUI
                     else
                     {
                         mnuTags.DropDownItems.Add(mTagName);
-                        cboTagName.Items.Add(tag);
+                        cboTagName.Items.Add(tag.TagName);
                     }
 
                     currentTag = tag.TagName;
@@ -1160,16 +1150,21 @@ namespace DBADashGUI
                     else if(e.Tab=="tabMirroring" || e.Tab== "tabLogShipping" || e.Tab=="tabBackups" || e.Tab=="tabAG")
                     {
                         child.Expand();
-                        tv1.SelectedNode = child.Nodes[1];
+                        tv1.SelectedNode = child.Nodes[2];
                     }
                     else if (e.Tab == "tabJobs")
                     {
                         child.Expand();
                         tv1.SelectedNode = child.LastNode;
                     }
-                    else
+                    else if(e.Tab == "tabAzureSummary")
                     {
                         tv1.SelectedNode = child;
+                    }
+                    else
+                    {
+                        child.Expand();
+                        tv1.SelectedNode = child.Nodes[1];
                     }
                     break;
                 }
