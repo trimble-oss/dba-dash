@@ -156,16 +156,16 @@ namespace DBADashGUI
             {
                 backupsControl1.InstanceIDs = instanceIDs;
                 backupsControl1.ConnectionString = connectionString;          
-                backupsControl1.IncludeNA = (n.Type != SQLTreeItem.TreeType.DBADashRoot);
-                backupsControl1.IncludeOK = (n.Type != SQLTreeItem.TreeType.DBADashRoot);
+                backupsControl1.IncludeNA = instanceIDs.Count==1;
+                backupsControl1.IncludeOK = instanceIDs.Count == 1;
                 backupsControl1.IncludeWarning = true;
                 backupsControl1.IncludeCritical = true;
                 backupsControl1.RefreshBackups();
             }
             else if(tabs.SelectedTab== tabLogShipping)
             {
-                logShippingControl1.IncludeNA = n.Type != SQLTreeItem.TreeType.DBADashRoot;
-                logShippingControl1.IncludeOK = n.Type != SQLTreeItem.TreeType.DBADashRoot;
+                logShippingControl1.IncludeNA = instanceIDs.Count==1;
+                logShippingControl1.IncludeOK = instanceIDs.Count==1;
                 logShippingControl1.IncludeWarning = true;
                 logShippingControl1.IncludeCritical = true;
                 logShippingControl1.InstanceIDs = instanceIDs;
@@ -420,6 +420,11 @@ namespace DBADashGUI
                 jobDDLHistory1.JobID = (Guid)n.Tag;
                 jobDDLHistory1.RefreshData();
             }
+            if(tabs.SelectedTab== tabAG)
+            {
+                ag1.InstanceIDs = instanceIDs;
+                ag1.RefreshData();
+            }
             tsTime.Visible = globalTimeisVisible;
         }
 
@@ -440,7 +445,9 @@ namespace DBADashGUI
             AllInstanceIDs.Clear();
             var root = new SQLTreeItem("DBA Dash", SQLTreeItem.TreeType.DBADashRoot);
             var changes = new SQLTreeItem("Configuration", SQLTreeItem.TreeType.Configuration);
+            var hadr = new SQLTreeItem("HA/DR", SQLTreeItem.TreeType.HADR);
             root.Nodes.Add(changes);
+            root.Nodes.Add(hadr);
             
             var tags = String.Join(",", SelectedTags());
 
@@ -531,6 +538,7 @@ namespace DBADashGUI
                         InstanceID = instanceNode.InstanceID
                     };
                     instanceNode.Nodes.Add(changesNode);
+                    instanceNode.Nodes.Add(new SQLTreeItem("HA/DR", SQLTreeItem.TreeType.HADR));
 
                     cmd.Parameters.AddWithValue("Instance", instanceNode.ObjectName);
                     var systemNode = new SQLTreeItem("System Databases", SQLTreeItem.TreeType.Folder);
@@ -614,10 +622,7 @@ namespace DBADashGUI
                 allowedTabs.Add(tabSlowQueries);
                 if (!isAzureOnly)
                 {
-                    allowedTabs.Add(tabBackups);
                     allowedTabs.Add(tabDrives);
-                    allowedTabs.Add(tabLogShipping);
-                    allowedTabs.Add(tabMirroring);
                     allowedTabs.Add(tabJobs);
                     allowedTabs.Add(tabLastGood);
                 }    
@@ -671,11 +676,8 @@ namespace DBADashGUI
                 allowedTabs.Add(tabWaits);
 
                 allowedTabs.Add(tabSummary);
-                allowedTabs.Add(tabBackups);
                 allowedTabs.Add(tabDrives);              
                 allowedTabs.Add(tabLogShipping);
-                allowedTabs.Add(tabMirroring);
-                allowedTabs.Add(tabJobs);
                 allowedTabs.Add(tabLastGood);
                 allowedTabs.Add(tabDBADashErrorLog);
                 allowedTabs.Add(tabInfo);                                  
@@ -727,6 +729,13 @@ namespace DBADashGUI
             else if(n.Type== SQLTreeItem.TreeType.AgentJob) {
                 allowedTabs.Add(tabJobs);
                 allowedTabs.Add(tabJobDDL);
+            }
+            else if (n.Type== SQLTreeItem.TreeType.HADR)
+            {
+                allowedTabs.Add(tabBackups);
+                allowedTabs.Add(tabLogShipping);
+                allowedTabs.Add(tabMirroring);
+                allowedTabs.Add(tabAG);
             }
             if (n.ObjectID > 0)
             {
@@ -1147,6 +1156,16 @@ namespace DBADashGUI
                     {
                         child.Expand();
                         tv1.SelectedNode = child.Nodes[0];
+                    }
+                    else if(e.Tab=="tabMirroring" || e.Tab== "tabLogShipping" || e.Tab=="tabBackups" || e.Tab=="tabAG")
+                    {
+                        child.Expand();
+                        tv1.SelectedNode = child.Nodes[1];
+                    }
+                    else if (e.Tab == "tabJobs")
+                    {
+                        child.Expand();
+                        tv1.SelectedNode = child.LastNode;
                     }
                     else
                     {

@@ -50,7 +50,8 @@ namespace DBADashGUI
             AzureInstance,
             AzureDatabase,
             AgentJobs,
-            AgentJob
+            AgentJob,
+            HADR
         }
 
         private List<Int32> _childInstanceIDs;
@@ -339,6 +340,9 @@ namespace DBADashGUI
                     ImageIndex = 9;
                     break;
                 case TreeType.AgentJobs:
+                    ImageIndex = 3;
+                    break;
+                case TreeType.HADR:
                     ImageIndex = 3;
                     break;
                 default:

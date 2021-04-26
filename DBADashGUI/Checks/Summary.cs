@@ -90,6 +90,7 @@ namespace DBADashGUI
                 dgvSummary.Rows[idx].Cells["DriveStatus"].Value = isAzure ? "" : "View";
                 dgvSummary.Rows[idx].Cells["JobStatus"].Value = isAzure ? "" : "View";
                 dgvSummary.Rows[idx].Cells["LogShippingStatus"].Value = isAzure ? "" : "View";
+                dgvSummary.Rows[idx].Cells["AGStatus"].Value = (int)row["AGStatus"]==3 ? "" : "View";
                 if (row["IsAgentRunning"]!=DBNull.Value && (bool)row["IsAgentRunning"] == false)
                 {
                     dgvSummary.Rows[idx].Cells["JobStatus"].Style.BackColor = Color.Black;
@@ -370,6 +371,10 @@ namespace DBADashGUI
                 else if(e.ColumnIndex == ElasticPoolStorageStatus.Index)
                 {
                     Instance_Selected(this, new InstanceSelectedEventArgs() { Instance = (string)row["Instance"], Tab = "tabAzureSummary" });
+                }
+                else if(e.ColumnIndex== AGStatus.Index)
+                {
+                    Instance_Selected(this, new InstanceSelectedEventArgs() { Instance = (string)row["Instance"], Tab = "tabAG" });
                 }
             }
         }

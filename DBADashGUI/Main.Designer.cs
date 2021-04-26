@@ -36,6 +36,7 @@
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.mnuTags = new System.Windows.Forms.ToolStripMenuItem();
             this.dBDiffToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.tsJobDiff = new System.Windows.Forms.ToolStripMenuItem();
             this.optionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.dataRetentionToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.manageInstancesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -173,7 +174,8 @@
             this.dataGridViewTextBoxColumn21 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dataGridViewTextBoxColumn22 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dataGridViewTextBoxColumn23 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.tsJobDiff = new System.Windows.Forms.ToolStripMenuItem();
+            this.tabAG = new System.Windows.Forms.TabPage();
+            this.ag1 = new DBADashGUI.HA.AG();
             this.menuStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitMain)).BeginInit();
             this.splitMain.Panel1.SuspendLayout();
@@ -222,6 +224,7 @@
             this.tabWaits.SuspendLayout();
             this.tabMirroring.SuspendLayout();
             this.tabJobDDL.SuspendLayout();
+            this.tabAG.SuspendLayout();
             this.SuspendLayout();
             // 
             // TreeViewImageList
@@ -267,6 +270,13 @@
             this.dBDiffToolStripMenuItem.Size = new System.Drawing.Size(72, 30);
             this.dBDiffToolStripMenuItem.Text = "DB Diff";
             this.dBDiffToolStripMenuItem.Click += new System.EventHandler(this.dBDiffToolStripMenuItem_Click);
+            // 
+            // tsJobDiff
+            // 
+            this.tsJobDiff.Name = "tsJobDiff";
+            this.tsJobDiff.Size = new System.Drawing.Size(75, 30);
+            this.tsJobDiff.Text = "Job Diff";
+            this.tsJobDiff.Click += new System.EventHandler(this.tsJobDiff_Click);
             // 
             // optionsToolStripMenuItem
             // 
@@ -514,6 +524,7 @@
             this.tabs.Controls.Add(this.tabWaits);
             this.tabs.Controls.Add(this.tabMirroring);
             this.tabs.Controls.Add(this.tabJobDDL);
+            this.tabs.Controls.Add(this.tabAG);
             this.tabs.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tabs.Location = new System.Drawing.Point(0, 0);
             this.tabs.Name = "tabs";
@@ -1743,12 +1754,24 @@
             this.dataGridViewTextBoxColumn23.ReadOnly = true;
             this.dataGridViewTextBoxColumn23.Width = 94;
             // 
-            // tsJobDiff
+            // tabAG
             // 
-            this.tsJobDiff.Name = "tsJobDiff";
-            this.tsJobDiff.Size = new System.Drawing.Size(75, 30);
-            this.tsJobDiff.Text = "Job Diff";
-            this.tsJobDiff.Click += new System.EventHandler(this.tsJobDiff_Click);
+            this.tabAG.Controls.Add(this.ag1);
+            this.tabAG.Location = new System.Drawing.Point(4, 25);
+            this.tabAG.Name = "tabAG";
+            this.tabAG.Padding = new System.Windows.Forms.Padding(3);
+            this.tabAG.Size = new System.Drawing.Size(1631, 1246);
+            this.tabAG.TabIndex = 35;
+            this.tabAG.Text = "Availability Groups";
+            this.tabAG.UseVisualStyleBackColor = true;
+            // 
+            // ag1
+            // 
+            this.ag1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.ag1.Location = new System.Drawing.Point(3, 3);
+            this.ag1.Name = "ag1";
+            this.ag1.Size = new System.Drawing.Size(1625, 1240);
+            this.ag1.TabIndex = 0;
             // 
             // Main
             // 
@@ -1817,6 +1840,7 @@
             this.tabWaits.ResumeLayout(false);
             this.tabMirroring.ResumeLayout(false);
             this.tabJobDDL.ResumeLayout(false);
+            this.tabAG.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
@@ -1965,5 +1989,7 @@
         private System.Windows.Forms.TabPage tabJobDDL;
         private Changes.JobDDLHistory jobDDLHistory1;
         private System.Windows.Forms.ToolStripMenuItem tsJobDiff;
+        private System.Windows.Forms.TabPage tabAG;
+        private HA.AG ag1;
     }
 }

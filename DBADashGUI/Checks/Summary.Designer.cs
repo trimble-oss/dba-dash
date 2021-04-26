@@ -70,7 +70,7 @@
             this.JobStatus = new System.Windows.Forms.DataGridViewLinkColumn();
             this.LogShippingStatus = new System.Windows.Forms.DataGridViewLinkColumn();
             this.MirroringStatus = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.AGStatus = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.AGStatus = new System.Windows.Forms.DataGridViewLinkColumn();
             this.FileFreeSpaceStatus = new System.Windows.Forms.DataGridViewLinkColumn();
             this.PctMaxSizeStatus = new System.Windows.Forms.DataGridViewLinkColumn();
             this.ElasticPoolStorageStatus = new System.Windows.Forms.DataGridViewLinkColumn();
@@ -126,13 +126,13 @@
             dataGridViewCellStyle6.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
             this.dgvSummary.DefaultCellStyle = dataGridViewCellStyle6;
             this.dgvSummary.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.dgvSummary.Location = new System.Drawing.Point(0, 27);
+            this.dgvSummary.Location = new System.Drawing.Point(0, 31);
             this.dgvSummary.Name = "dgvSummary";
             this.dgvSummary.ReadOnly = true;
             this.dgvSummary.RowHeadersVisible = false;
             this.dgvSummary.RowHeadersWidth = 51;
             this.dgvSummary.RowTemplate.Height = 24;
-            this.dgvSummary.Size = new System.Drawing.Size(1800, 186);
+            this.dgvSummary.Size = new System.Drawing.Size(1800, 182);
             this.dgvSummary.TabIndex = 0;
             this.dgvSummary.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgvSummary_CellContentClick);
             this.dgvSummary.ColumnHeaderMouseClick += new System.Windows.Forms.DataGridViewCellMouseEventHandler(this.dgvSummary_ColumnHeaderMouseClick);
@@ -146,7 +146,7 @@
             this.tsCopy});
             this.toolStrip1.Location = new System.Drawing.Point(0, 0);
             this.toolStrip1.Name = "toolStrip1";
-            this.toolStrip1.Size = new System.Drawing.Size(1800, 27);
+            this.toolStrip1.Size = new System.Drawing.Size(1800, 31);
             this.toolStrip1.TabIndex = 1;
             this.toolStrip1.Text = "toolStrip1";
             // 
@@ -156,7 +156,7 @@
             this.tsRefresh.Image = global::DBADashGUI.Properties.Resources._112_RefreshArrow_Green_16x16_72;
             this.tsRefresh.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsRefresh.Name = "tsRefresh";
-            this.tsRefresh.Size = new System.Drawing.Size(29, 24);
+            this.tsRefresh.Size = new System.Drawing.Size(29, 28);
             this.tsRefresh.Text = "Refresh";
             this.tsRefresh.Click += new System.EventHandler(this.tsRefresh_Click);
             // 
@@ -166,7 +166,7 @@
             this.tsCopy.Image = global::DBADashGUI.Properties.Resources.ASX_Copy_blue_16x;
             this.tsCopy.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsCopy.Name = "tsCopy";
-            this.tsCopy.Size = new System.Drawing.Size(29, 24);
+            this.tsCopy.Size = new System.Drawing.Size(29, 28);
             this.tsCopy.Text = "Copy";
             this.tsCopy.Click += new System.EventHandler(this.tsCopy_Click);
             // 
@@ -438,9 +438,13 @@
             // AGStatus
             // 
             this.AGStatus.HeaderText = "Availability Groups";
+            this.AGStatus.LinkColor = System.Drawing.Color.Black;
             this.AGStatus.MinimumWidth = 6;
             this.AGStatus.Name = "AGStatus";
             this.AGStatus.ReadOnly = true;
+            this.AGStatus.Resizable = System.Windows.Forms.DataGridViewTriState.True;
+            this.AGStatus.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
+            this.AGStatus.Text = "";
             this.AGStatus.Width = 141;
             // 
             // FileFreeSpaceStatus
@@ -578,7 +582,7 @@
         private System.Windows.Forms.DataGridViewLinkColumn JobStatus;
         private System.Windows.Forms.DataGridViewLinkColumn LogShippingStatus;
         private System.Windows.Forms.DataGridViewTextBoxColumn MirroringStatus;
-        private System.Windows.Forms.DataGridViewTextBoxColumn AGStatus;
+        private System.Windows.Forms.DataGridViewLinkColumn AGStatus;
         private System.Windows.Forms.DataGridViewLinkColumn FileFreeSpaceStatus;
         private System.Windows.Forms.DataGridViewLinkColumn PctMaxSizeStatus;
         private System.Windows.Forms.DataGridViewLinkColumn ElasticPoolStorageStatus;

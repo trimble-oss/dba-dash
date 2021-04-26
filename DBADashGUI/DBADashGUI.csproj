@@ -225,6 +225,12 @@
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="CustomProgressControl.cs" />
+    <Compile Include="HA\AG.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="HA\AG.Designer.cs">
+      <DependentUpon>AG.cs</DependentUpon>
+    </Compile>
     <Compile Include="Options Menu\DataRetention.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -572,6 +578,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="ConnectionOptions.resx">
       <DependentUpon>ConnectionOptions.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="HA\AG.resx">
+      <DependentUpon>AG.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Options Menu\DataRetention.resx">
       <DependentUpon>DataRetention.cs</DependentUpon>

@@ -16,7 +16,10 @@ SELECT I.InstanceID,
        SUM(CASE WHEN HADR.synchronization_state = 2 AND HADR.is_local = 0 THEN 1 ELSE 0 END) AS [Replica Synchronized],
        SUM(CASE WHEN HADR.synchronization_state = 3 AND HADR.is_local = 0 THEN 1 ELSE 0 END) AS [Replica Reverting],
        SUM(CASE WHEN HADR.synchronization_state = 4 AND HADR.is_local = 0 THEN 1 ELSE 0 END) AS [Replica Initializing],
-       CASE MIN(HADR.synchronization_health)WHEN 0 THEN 'NOT_HEALTHY' WHEN 1 THEN 'PARTIALLY_HEALTHY' WHEN 2 THEN 'HEALTHY' ELSE NULL END AS [Sync Health]
+       CASE MIN(HADR.synchronization_health)WHEN 0 THEN 'NOT_HEALTHY' WHEN 1 THEN 'PARTIALLY_HEALTHY' WHEN 2 THEN 'HEALTHY' ELSE NULL END AS [Sync Health],
+       MAX(CD.SnapshotDate) as [Snapshot Date],
+       MAX(CD.Status) as [Snapshot Status],
+       MAX(CD.SnapshotAge) as [Snapshot Age]
 FROM dbo.DatabasesHADR HADR
 JOIN dbo.Databases D ON D.DatabaseID = HADR.DatabaseID
 JOIN dbo.Instances I ON D.InstanceID = I.InstanceID
@@ -24,6 +27,7 @@ LEFT JOIN dbo.AvailabilityReplicas AR ON D.InstanceID = AR.InstanceID
                                          AND AR.replica_id = HADR.replica_id
 LEFT JOIN dbo.AvailabilityGroups AG ON HADR.group_id = AG.group_id
                                        AND D.InstanceID = AG.InstanceID
+LEFT JOIN dbo.CollectionDatesStatus CD ON D.InstanceID = CD.InstanceID AND CD.Reference='DatabaseHADR'
 WHERE EXISTS(SELECT 1 FROM STRING_SPLIT(@InstanceIDs,',') ss WHERE ss.value = I.InstanceID
 		UNION ALL
 		SELECT 1 WHERE @InstanceIDs IS NULL)
