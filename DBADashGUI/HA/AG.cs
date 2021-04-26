@@ -124,13 +124,13 @@ namespace DBADashGUI.HA
                     else
                     {
                         dgv.Rows[idx].Cells["Not Synchronizing"].Style.BackColor =(int)row["Not Synchronizing"] >0 ? DBADashStatus.GetStatusColour(DBADashStatus.DBADashStatusEnum.Critical) : Color.White;
-                        dgv.Rows[idx].Cells["Replica Not Synchronizing"].Style.BackColor = (int)row["Replica Not Synchronizing"] > 0 ? DBADashStatus.GetStatusColour(DBADashStatus.DBADashStatusEnum.Critical) : Color.White;
+                        dgv.Rows[idx].Cells["Remote Not Synchronizing"].Style.BackColor = (int)row["Remote Not Synchronizing"] > 0 ? DBADashStatus.GetStatusColour(DBADashStatus.DBADashStatusEnum.Critical) : Color.White;
                         dgv.Rows[idx].Cells["Synchronized"].Style.BackColor = (int)row["Synchronized"] > 0 ? DBADashStatus.GetStatusColour(DBADashStatus.DBADashStatusEnum.OK) : Color.White;
-                        dgv.Rows[idx].Cells["Replica Synchronized"].Style.BackColor = (int)row["Replica Synchronized"] > 0 ? DBADashStatus.GetStatusColour(DBADashStatus.DBADashStatusEnum.OK) : Color.White;
+                        dgv.Rows[idx].Cells["Remote Synchronized"].Style.BackColor = (int)row["Remote Synchronized"] > 0 ? DBADashStatus.GetStatusColour(DBADashStatus.DBADashStatusEnum.OK) : Color.White;
                         dgv.Rows[idx].Cells["Reverting"].Style.BackColor = (int)row["Reverting"] > 0 ? DBADashStatus.GetStatusColour(DBADashStatus.DBADashStatusEnum.Warning) : Color.White;
-                        dgv.Rows[idx].Cells["Replica Reverting"].Style.BackColor = (int)row["Replica Reverting"] > 0 ? DBADashStatus.GetStatusColour(DBADashStatus.DBADashStatusEnum.Warning) : Color.White;
+                        dgv.Rows[idx].Cells["Remote Reverting"].Style.BackColor = (int)row["Remote Reverting"] > 0 ? DBADashStatus.GetStatusColour(DBADashStatus.DBADashStatusEnum.Warning) : Color.White;
                         dgv.Rows[idx].Cells["Initializing"].Style.BackColor = (int)row["Initializing"] > 0 ? DBADashStatus.GetStatusColour(DBADashStatus.DBADashStatusEnum.Warning) : Color.White;
-                        dgv.Rows[idx].Cells["Replica Initializing"].Style.BackColor = (int)row["Replica Initializing"] > 0 ? DBADashStatus.GetStatusColour(DBADashStatus.DBADashStatusEnum.Warning) : Color.White;
+                        dgv.Rows[idx].Cells["Remote Initializing"].Style.BackColor = (int)row["Remote Initializing"] > 0 ? DBADashStatus.GetStatusColour(DBADashStatus.DBADashStatusEnum.Warning) : Color.White;
 
                     }
                     dgv.Rows[idx].Cells["Sync Health"].Style.BackColor = (string)row["Sync Health"] == "HEALTHY" ? DBADashStatus.GetStatusColour(DBADashStatus.DBADashStatusEnum.OK) :

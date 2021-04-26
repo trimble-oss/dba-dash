@@ -11,6 +11,8 @@ SELECT D.name AS [Database],
        AR.availability_mode_desc AS [Availability Mode],
        AR.failover_mode_desc AS [Failover Mode],
 	   HADR.is_primary_replica [Is Primary],
+	   AR.primary_role_allow_connections_desc [Primary Connections],
+	   AR.secondary_role_allow_connections_desc [Seconadary Connections],	  
        CD.SnapshotDate as [Snapshot Date],
        CD.Status as [Snapshot Status],
        CD.SnapshotAge as [Snapshot Age]
