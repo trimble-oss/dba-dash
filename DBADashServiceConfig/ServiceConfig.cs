@@ -719,6 +719,7 @@ namespace DBADashServiceConfig
                 if (fbd.ShowDialog() == DialogResult.OK)
                 {
                     txtDestination.Text = fbd.SelectedPath;
+                    destinationChanged();
                 }
             }
         }
@@ -749,6 +750,7 @@ namespace DBADashServiceConfig
                 if(frm.DialogResult== DialogResult.OK)
                 {
                     txtDestination.Text = frm.AWSURL;
+                    destinationChanged();
                 }
             }
         }
