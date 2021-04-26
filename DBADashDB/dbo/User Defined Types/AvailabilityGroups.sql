@@ -11,8 +11,8 @@
        dtc_support BIT NOT NULL, 
        db_failover BIT NOT NULL,
        is_distributed BIT NOT NULL,
-       cluster_type TINYINT NOT NULL,
-       required_synchronized_secondaries_to_commit INT NOT NULL,
-       sequence_number BIGINT NOT NULL,
-       is_contained BIT NOT NULL
+       cluster_type TINYINT NULL,
+       required_synchronized_secondaries_to_commit INT NULL,
+       sequence_number BIGINT NULL,
+       is_contained BIT NULL
 )
