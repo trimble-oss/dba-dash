@@ -433,7 +433,8 @@ namespace DBADashGUI
         private readonly List<Int32> InstanceIDs = new List<Int32>();
         private readonly List<Int32> AllInstanceIDs=new List<Int32>();
         private readonly List<Int32> AzureInstanceIDs= new List<Int32>();
-    
+
+        private bool IsAzureOnly;
 
         #region Tree
 
@@ -447,16 +448,16 @@ namespace DBADashGUI
             var changes = new SQLTreeItem("Configuration", SQLTreeItem.TreeType.Configuration);
             var hadr = new SQLTreeItem("HA/DR", SQLTreeItem.TreeType.HADR);
             var checks = new SQLTreeItem("Checks", SQLTreeItem.TreeType.DBAChecks);
-            root.Nodes.Add(changes);         
+            root.Nodes.Add(changes);
             root.Nodes.Add(checks);
             root.Nodes.Add(hadr);
 
             var tags = String.Join(",", SelectedTags());
 
             var dtInstances = CommonData.GetInstances(tags);
-        
+
             SQLTreeItem AzureNode = null;
-            foreach(DataRow row in dtInstances.Rows)
+            foreach (DataRow row in dtInstances.Rows)
             {
                 string instance = (string)row["Instance"];
                 Int32 instanceID = (Int32)row["InstanceID"];
@@ -493,6 +494,11 @@ namespace DBADashGUI
                     InstanceIDs.Add(instanceID);
                 }
                 AllInstanceIDs.Add(instanceID);
+            }
+            IsAzureOnly=AllInstanceIDs.Count() == AzureInstanceIDs.Count();
+            if (IsAzureOnly)
+            {
+                root.Nodes.Remove(hadr);
             }
   
             tv1.Nodes.Add(root);
@@ -614,7 +620,6 @@ namespace DBADashGUI
 
             List<TabPage> allowedTabs = new List<TabPage>();         
             bool hasAzureDBs = AzureInstanceIDs.Count > 0;
-            bool isAzureOnly = AllInstanceIDs.Count() == AzureInstanceIDs.Count();
             var suppress = suppressLoadTab;
             suppressLoadTab = true;
 
@@ -674,7 +679,7 @@ namespace DBADashGUI
                 {
                     allowedTabs.Add(tabInfo);
                 }
-                if (parent.Type != SQLTreeItem.TreeType.AzureDatabase && parent.Type != SQLTreeItem.TreeType.AzureInstance && !isAzureOnly)
+                if (parent.Type != SQLTreeItem.TreeType.AzureDatabase && parent.Type != SQLTreeItem.TreeType.AzureInstance && !IsAzureOnly)
                 {
                     allowedTabs.Add(tabInstanceConfig);
                     allowedTabs.Add(tabTraceFlags);
@@ -709,7 +714,7 @@ namespace DBADashGUI
             else if (n.Type == SQLTreeItem.TreeType.DBAChecks)
             {
                 allowedTabs.Add(tabSummary);
-                if (!isAzureOnly && parent.Type!= SQLTreeItem.TreeType.AzureInstance)
+                if (!IsAzureOnly && parent.Type!= SQLTreeItem.TreeType.AzureInstance)
                 {
                     allowedTabs.Add(tabDrives);
                     allowedTabs.Add(tabJobs);
