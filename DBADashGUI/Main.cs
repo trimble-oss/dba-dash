@@ -146,8 +146,8 @@ namespace DBADashGUI
             {
                 drivesControl1.ConnectionString = connectionString;
                 drivesControl1.InstanceIDs = instanceIDs;
-                drivesControl1.IncludeNA = (n.Type != SQLTreeItem.TreeType.DBADashRoot);
-                drivesControl1.IncludeOK = (n.Type != SQLTreeItem.TreeType.DBADashRoot);
+                drivesControl1.IncludeNA = instanceIDs.Count == 1;
+                drivesControl1.IncludeOK = instanceIDs.Count == 1;
                 drivesControl1.IncludeWarning = true;
                 drivesControl1.IncludeCritical = true;
                 drivesControl1.RefreshData();
@@ -182,8 +182,8 @@ namespace DBADashGUI
                 {
                     agentJobsControl1.JobID = Guid.Empty;
                 }
-                agentJobsControl1.IncludeNA = n.Type != SQLTreeItem.TreeType.DBADashRoot;
-                agentJobsControl1.IncludeOK = n.Type != SQLTreeItem.TreeType.DBADashRoot;
+                agentJobsControl1.IncludeNA = instanceIDs.Count == 1;
+                agentJobsControl1.IncludeOK = instanceIDs.Count == 1;
                 agentJobsControl1.IncludeWarning = true;
                 agentJobsControl1.IncludeCritical = true;
                 agentJobsControl1.InstanceIDs = instanceIDs;
