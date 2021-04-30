@@ -203,7 +203,6 @@ namespace DBADashService
                         collector.SlowQueryMaxMemoryKB = cfg.SlowQuerySessionMaxMemoryKB;
                         collector.UseDualEventSession = cfg.UseDualEventSession;
                         collector.Collect(types);
-                        collector.SetDateTimeKind(); // Required for binary dataset serialization to prevent timezone conversion
                         bool containsJobs = collector.Data.Tables.Contains("Jobs");
                         bool binarySerialization = containsJobs || SchedulerServiceConfig.Config.BinarySerialization;
                         string fileName = cfg.GenerateFileName(binarySerialization, cfg.SourceConnection.ConnectionForFileName);

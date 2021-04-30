@@ -129,20 +129,6 @@ namespace DBADash
             }
         }
 
-        public void SetDateTimeKind() // Required for binary serialization to prevent dates captured in UTC from being converted to local timezone on deserialization
-        {
-            foreach (DataTable dt in Data.Tables)
-            {
-                foreach (DataColumn col in dt.Columns)
-                {
-                    if (col.DataType == typeof(DateTime))
-                    {
-                        col.DateTimeMode = DataSetDateTime.Unspecified;
-                    }
-                }
-            }
-        }
-
 
         public bool IsXESupported()
         {

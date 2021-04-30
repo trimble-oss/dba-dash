@@ -61,7 +61,7 @@ namespace DBADashService
 
             if (System.IO.Path.GetExtension(fileName) == ".bin")
             {
-
+                DataSetSerialization.SetDateTimeKind(ds); // Required for binary dataset serialization to prevent timezone conversion
                 ds.RemotingFormat = SerializationFormat.Binary;
                 BinaryFormatter fmt = new BinaryFormatter();
                 MemoryStream ms = new MemoryStream();
@@ -87,6 +87,7 @@ namespace DBADashService
                 string filePath = Path.Combine(destination, fileName);
                 if (System.IO.Path.GetExtension(fileName) == ".bin")
                 {
+                    DataSetSerialization.SetDateTimeKind(ds); // Required for binary dataset serialization to prevent timezone conversion
                     ds.RemotingFormat = SerializationFormat.Binary;
                     BinaryFormatter fmt = new BinaryFormatter();
                     using (FileStream fs = new FileStream(filePath, FileMode.Create, FileAccess.Write))

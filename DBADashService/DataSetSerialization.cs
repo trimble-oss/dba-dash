@@ -10,6 +10,20 @@ namespace DBADashService
 {
     class DataSetSerialization
     {
+        public static void SetDateTimeKind(DataSet ds) // Required for binary serialization to prevent dates captured in UTC from being converted to local timezone on deserialization
+        {
+            foreach (DataTable dt in ds.Tables)
+            {
+                foreach (DataColumn col in dt.Columns)
+                {
+                    if (col.DataType == typeof(DateTime))
+                    {
+                        col.DateTimeMode = DataSetDateTime.Unspecified;
+                    }
+                }
+            }
+        }
+
 
         private static readonly string binaryPrefix = "###BINARY###";
         public static string SerializeDS(DataSet ds)

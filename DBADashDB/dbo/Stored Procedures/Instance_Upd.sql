@@ -19,6 +19,17 @@ SELECT @InstanceID = InstanceID
 FROM dbo.Instances 
 WHERE ConnectionID = @ConnectionID
 
+IF @SnapshotDate > DATEADD(mi,5,GETUTCDATE())
+BEGIN
+	DECLARE @ErrorMsg NVARCHAR(2048)
+	SET @ErrorMsg=CONCAT('Error SnapshotDate {',@SnapshotDate,'} is greater than current UTC datetime {',GETUTCDATE(),'}') ;
+
+	INSERT INTO dbo.CollectionErrorLog(ErrorDate,InstanceID,ErrorSource,ErrorMessage,ErrorContext)
+	VALUES(GETUTCDATE(),@InstanceID,'Instance',@ErrorMsg,'Import');
+
+	THROW 50000,@ErrorMsg,1;
+END
+
 DECLARE @Ref VARCHAR(30)='Instance'
 IF NOT EXISTS(SELECT 1 FROM dbo.CollectionDates WHERE SnapshotDate>=@SnapshotDate AND InstanceID = @InstanceID AND Reference=@Ref)
 BEGIN
