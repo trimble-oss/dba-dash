@@ -1162,7 +1162,7 @@ namespace DBADashGUI
                         child.Expand();
                         tv1.SelectedNode = child.LastNode;
                     }
-                    else if(e.Tab == "tabAzureSummary")
+                    else if(e.Tab == "tabAzureSummary" || e.Tab=="tabPerformance")
                     {
                         tv1.SelectedNode = child;
                     }
