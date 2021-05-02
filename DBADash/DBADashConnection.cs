@@ -4,7 +4,7 @@ using System;
 using System.Data.SqlClient;
 using System.IO;
 using System.Text.RegularExpressions;
-
+using Serilog;
 namespace DBADash
 {
     public class DBADashConnection
@@ -117,7 +117,7 @@ namespace DBADash
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine(ex.Message);
+                    Log.Error(ex, "SQL Version check fail");
                 }
             }
             return productVersion;            
@@ -161,7 +161,7 @@ namespace DBADash
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine(ex.Message);
+                    Log.Error(ex, "IsAzureDB SQL Edition check fail");
                     if (connectionString.Contains(".database.windows.net"))
                     {
                         return true;

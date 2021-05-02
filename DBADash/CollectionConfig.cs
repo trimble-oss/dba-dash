@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Data.SqlClient;
 using static DBADash.DBADashConnection;
 using System.Linq;
+using Serilog;
 namespace DBADash
 {
 
@@ -261,7 +262,7 @@ namespace DBADash
                     }
                     catch(Exception ex)
                     {
-                        Console.WriteLine(string.Format("Error getting AzureDB connections from master '{0}': {1}", cfg.SourceConnection.ConnectionForPrint, ex.Message));
+                        Log.Error(ex, "Error getting azure Error getting Azure DB connections from master {connection}", cfg.SourceConnection.ConnectionForPrint);
                     }
                 }
             }
@@ -298,7 +299,7 @@ namespace DBADash
                     if (!SourceExists(dbCn.SourceConnection.ConnectionString,true))
                     {
                         newConnections.Add(dbCn);
-                        Console.WriteLine("Adding AzureDB Connection:" + builder.DataSource + "|" + builder.InitialCatalog);
+                        Log.Information("Add Azure DB connection {DataSource}|{DB}", builder.DataSource, builder.InitialCatalog);
                     }
                 }
             }
@@ -309,12 +310,12 @@ namespace DBADash
         {
             try
             {
-                Console.WriteLine("Add azure DBs from " + masterConnection.SourceConnection.ConnectionForPrint);
+                Log.Information("Add azure DBs from {connection}", masterConnection.SourceConnection.ConnectionForPrint);
                 SourceConnections.AddRange(GetNewAzureDBConnections(masterConnection));
             }
             catch(Exception ex)
             {
-                Console.WriteLine(string.Format("Error getting AzureDB connections from master '{0}': {1}", masterConnection.SourceConnection.ConnectionForPrint, ex.Message));
+                Log.Error(ex,"Error adding azure DBs from {connection}", masterConnection.SourceConnection.ConnectionForPrint);
             }
 
         }

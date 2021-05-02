@@ -10,7 +10,7 @@ using System.Linq;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Threading.Tasks;
 using static DBADash.DBADashConnection;
-
+using Serilog;
 namespace DBADashService
 {
     [DisallowConcurrentExecution, PersistJobDataAfterExecution]
@@ -35,7 +35,7 @@ namespace DBADashService
                 if (cfg.SourceConnection.Type == ConnectionType.Directory)
                 {
                     string folder = cfg.GetSource();
-                    ScheduleService.InfoLogger("Import from folder:" + folder);
+                    Log.Logger.Information("Import from folder {folder}", folder);
                     if (System.IO.Directory.Exists(folder))
                     {
                         try
@@ -72,8 +72,7 @@ namespace DBADashService
                                     }
                                     catch(Exception ex)
                                     {
-                                        DBADashService.ScheduleService.ErrorLogger(ex, "Import from folder");
-                                        Console.WriteLine($"Writing to failed message folder: { SchedulerServiceConfig.FailedMessageFolder }");
+                                        Log.Error(ex, "Error importing from {filename}.  File will be copied to {failedmessagefolder}", fileName, SchedulerServiceConfig.FailedMessageFolder);
                                         DestinationHandling.WriteFolder(ds, SchedulerServiceConfig.FailedMessageFolder, fileName);
                                         
                                     }
@@ -87,17 +86,17 @@ namespace DBADashService
                         }
                         catch (Exception ex)
                         {
-                            DBADashService.ScheduleService.ErrorLogger(ex, "Import from folder");
+                            Log.Error(ex,"Import from folder {folder}",folder);
                         }
                     }
                     else
                     {
-                        DBADashService.ScheduleService.ErrorLogger(new Exception("Source directory doesn't exist: " + folder), "Import from Folder");
+                        Log.Error("Source directory doesn't exist {folder}", folder);
                     }
                 }
                 else if (cfg.SourceConnection.Type == ConnectionType.AWSS3)
                 {
-                    ScheduleService.InfoLogger("Import from S3: " + cfg.ConnectionString);
+                    Log.Information("Import from S3 {connection}",cfg.ConnectionString);
                     try
                     {
                         var uri = new Amazon.S3.Util.AmazonS3Uri(cfg.ConnectionString);
@@ -138,8 +137,7 @@ namespace DBADashService
                                                 }
                                                 catch(Exception ex)
                                                 {
-                                                    DBADashService.ScheduleService.ErrorLogger(ex, "Import from S3");
-                                                    Console.WriteLine($"Writing to failed message folder: { SchedulerServiceConfig.FailedMessageFolder }");
+                                                    Log.Error(ex, "Error importing file {filename}.  Writing file to failed message folder {folder}",fileName, SchedulerServiceConfig.FailedMessageFolder);
                                                     DestinationHandling.WriteFolder(ds, SchedulerServiceConfig.FailedMessageFolder, fileName);
                                                 }
                                                 finally
@@ -147,8 +145,7 @@ namespace DBADashService
                                                     s3Cli.DeleteObject(f.BucketName, f.Key);
                                                 }
                                             }
-                                                                                      
-                                            ScheduleService.InfoLogger("Imported:" + f.Key);
+                                            Log.Information("Imported {file}", f.Key);                                          
                                         }
                                     }
                                 });
@@ -166,7 +163,7 @@ namespace DBADashService
                     }
                     catch (Exception ex)
                     {
-                        DBADashService.ScheduleService.ErrorLogger(ex, "Import from S3");
+                        Log.Error(ex, "Error importing files from S3");
                     }
 
                 }
@@ -174,7 +171,7 @@ namespace DBADashService
                 {
 
                     string collectDescription = "Collect " + string.Join(", ", types.Select(s => s.ToString()).ToArray()) + " from Instance:" + cfg.SourceConnection.ConnectionForPrint;
-                    ScheduleService.InfoLogger(collectDescription);
+                    Log.Information(collectDescription);
                     try
                     {
                         var collector = new DBCollector(cfg.GetSource(), cfg.NoWMI)
@@ -220,21 +217,21 @@ namespace DBADashService
                         }
                         catch (Exception ex)
                         {
+                            Log.Error(ex, "Error writing {filename} to destination.  File will be copied to {folder}", fileName, SchedulerServiceConfig.FailedMessageFolder);
                             DestinationHandling.WriteFolder(collector.Data, SchedulerServiceConfig.FailedMessageFolder, fileName);
-                            DBADashService.ScheduleService.ErrorLogger(ex, "Write to destination");
                         }
                         
                     }
                     catch (Exception ex)
                     {
-                        DBADashService.ScheduleService.ErrorLogger(ex, collectDescription);
+                        Log.Logger.Error(ex, collectDescription);
                     }
 
                 }
             }
             catch (Exception ex)
             {
-                DBADashService.ScheduleService.ErrorLogger(ex, "JobExecute");
+                Log.Error(ex, "JobExecute");
             }
 
             return Task.CompletedTask;

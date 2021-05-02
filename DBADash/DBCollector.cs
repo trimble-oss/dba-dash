@@ -7,7 +7,7 @@ using System.Data.SqlClient;
 using System.Linq;
 using System.Management;
 using System.Reflection;
-
+using Serilog;
 namespace DBADash
 {
     [JsonConverter(typeof(StringEnumConverter))]
@@ -141,9 +141,14 @@ namespace DBADash
             startup(connectionString, null);
         }
 
-        private void logError(string errorSource, string errorMessage, string errorContext = "Collect")
+        private void logError(Exception ex,string errorSource, string errorContext = "Collect")
         {
-            Console.WriteLine("Error: " + instanceName + "{" + dbName + "} - " + errorContext + " - " + errorSource + " : " + errorMessage);
+            Log.Error(ex,"{ErrorContext} {ErrorSource}" ,errorContext,errorSource);
+            logDBError(errorSource, ex.ToString(), errorContext);
+        }
+
+        private void logDBError(string errorSource, string errorMessage, string errorContext = "Collect")
+        {
             var rError = dtErrors.NewRow();
             rError["ErrorSource"] = errorSource;
             rError["ErrorMessage"] = errorMessage;
@@ -166,9 +171,8 @@ namespace DBADash
         }
 
         public DBCollector(string connectionString, string connectionID)
-        {
+        {           
             startup(connectionString, connectionID);
-
         }
 
         public void RemoveEventSessions()
@@ -236,7 +240,8 @@ namespace DBADash
             string hostPlatform = (string)dt.Rows[0]["host_platform"];
             if (!Enum.TryParse(hostPlatform, out platform))
             {
-                logError("Instance", "host_platform parse error");
+                Log.Error("GetInstance: host_platform parse error");
+                logDBError("Instance", "host_platform parse error");
                 platform = HostPlatform.Windows;
             }
             if(platform == HostPlatform.Linux)
@@ -391,7 +396,7 @@ namespace DBADash
                 }
                 catch (Exception ex)
                 {
-                    logError(collectionTypeString, ex.Message);
+                    logError(ex,collectionTypeString);
                 }
             }
             else if (collectionType == CollectionType.AzureDBResourceStats || collectionType == CollectionType.AzureDBServiceObjectives)
@@ -405,7 +410,7 @@ namespace DBADash
                     }
                     catch (Exception ex)
                     {
-                        logError(collectionTypeString, ex.Message);
+                        logError(ex,collectionTypeString);
                     }
                 }
             }
@@ -420,7 +425,7 @@ namespace DBADash
                     }
                     catch (Exception ex)
                     {
-                        logError(collectionTypeString, ex.Message);
+                        logError(ex, collectionTypeString);
                     }
                 }
             }
@@ -442,12 +447,12 @@ namespace DBADash
                             retry += 1;
                             if (retry > RetryCount)
                             {
-                                logError(collectionTypeString, ex.Message);
+                                logError(ex, collectionTypeString);
                                 completed = true;
                             }
                             else
                             {
-                                logError(collectionTypeString, ex.Message + Environment.NewLine + "Retry in " + RetryInterval.ToString() + "seconds", "Collect[Retrying]");
+                                logError(ex,collectionTypeString, "Collect[Retrying]");
                                 System.Threading.Thread.Sleep(RetryInterval * 1000);
                             }
                         }
@@ -470,12 +475,12 @@ namespace DBADash
                         retry += 1;
                         if (retry > RetryCount)
                         {
-                            logError(collectionTypeString, ex.Message);
+                            logError(ex, collectionTypeString);
                             completed = true;
                         }
                         else
                         {
-                            logError(collectionTypeString, ex.Message + Environment.NewLine + "Retry in " + RetryInterval.ToString() + "seconds", "Collect[Retrying]");
+                            logError(ex,collectionTypeString, "Collect[Retrying]");
                             System.Threading.Thread.Sleep(RetryInterval * 1000);
                         }
                     }
@@ -499,7 +504,7 @@ namespace DBADash
                  }
                 catch(Exception ex)
                 {
-                    logError(collectionTypeString, ex.ToString());
+                    logError(ex,collectionTypeString);
                 }
             }
             else
@@ -518,12 +523,12 @@ namespace DBADash
                         retry += 1;
                         if (retry > RetryCount)
                         {
-                            logError(collectionTypeString, ex.Message);
+                            logError(ex, collectionTypeString);
                             completed = true;
                         }
                         else
                         {
-                            logError(collectionTypeString, ex.Message + Environment.NewLine + "Retry in " + RetryInterval.ToString() + "seconds","Collect[Retrying]");
+                            logError(ex,collectionTypeString,"Collect[Retrying]");
                             System.Threading.Thread.Sleep(RetryInterval * 1000);
                         }
                     }
@@ -578,12 +583,12 @@ namespace DBADash
                                 }
                                 catch (Exception ex)
                                 {
-                                    logError("PerformanceCounters", ex.Message);
+                                    logError(ex,"PerformanceCounters");
                                 }
                             }
                             else
                             {
-                                logError("PerformanceCounters", String.Format("Invalid schema for custom metrics. Expected {0} columns instead of {1}.", dt.Columns.Count, userDT.Columns.Count));
+                                throw new Exception($"Invalid schema for custom metrics. Expected {dt.Columns.Count} columns instead of {userDT.Columns.Count}.");
                             }
                         }
                         ds.Tables.Remove(dt);
@@ -627,7 +632,7 @@ namespace DBADash
                         var result = cmd.ExecuteScalar();
                         if (result == DBNull.Value)
                         {
-                            logError("SlowQueries", "Result IS NULL");
+                            throw new Exception("Result is NULL");
                             return;
                         }
                         string ringBuffer = (string)result;
@@ -674,7 +679,7 @@ namespace DBADash
             }
             catch (Exception ex)
             {
-                logError("ServerExtraProperties", ex.Message);
+                logError(ex,"ServerExtraProperties");
             }
         }
 
@@ -726,7 +731,7 @@ namespace DBADash
             }
             catch (Exception ex)
             {
-                logError("Drives", ex.Message);
+                logError(ex,"Drives");
             }
         }
 
@@ -745,7 +750,8 @@ namespace DBADash
                 }
                 catch (Exception ex)
                 {
-                    logError("Drives", "Error collecting drives via WMI.  Drive info will be collected from SQL, but might be incomplete.  Use --nowmi switch to collect through SQL as default." + Environment.NewLine + ex.Message, "Collect:WMI");
+                    logDBError("Drives", "Error collecting drives via WMI.  Drive info will be collected from SQL, but might be incomplete.  Use --nowmi switch to collect through SQL as default." + Environment.NewLine + ex.Message, "Collect:WMI");
+                    Log.Warning(ex, "Error collecting drives via WMI.Drive info will be collected from SQL, but might be incomplete.Use--nowmi switch to collect through SQL as default.");
                     collectDrivesSQL();
                 }
             }
@@ -788,7 +794,7 @@ namespace DBADash
                 }
                 catch (Exception ex)
                 {
-                    logError("ServerExtraProperties", ex.Message, "Collect:Win32_OperatingSystem WMI");
+                    logError(ex,"ServerExtraProperties","Collect:Win32_OperatingSystem WMI");
                 }
             }
         }
@@ -824,7 +830,7 @@ namespace DBADash
                 }
                 catch (Exception ex)
                 {
-                    logError("ServerExtraProperties", ex.Message, "Collect:Win32_ComputerSystem WMI");
+                    logError(ex,"ServerExtraProperties", "Collect:Win32_ComputerSystem WMI");
                 }
             }
         }
@@ -877,7 +883,7 @@ namespace DBADash
                 }
                 catch (Exception ex)
                 {
-                    logError("ServerExtraProperties", ex.Message, "Collect:Win32_PowerPlan WMI");
+                    logError(ex,"ServerExtraProperties", "Collect:Win32_PowerPlan WMI");
                 }
             }
         }
@@ -938,7 +944,7 @@ namespace DBADash
                                                 }
                                                 catch (Exception ex)
                                                 {
-                                                    logError("Drivers", p + ": " + ex.Message);
+                                                    logError(ex,"Drivers");
                                                 }
                                             }
 
@@ -950,7 +956,7 @@ namespace DBADash
                                                 }
                                                 catch (Exception ex)
                                                 {
-                                                    logError("Drivers", p + ": " + ex.Message);
+                                                    logError(ex,"Drivers");
                                                 }
 
                                             }
@@ -965,7 +971,7 @@ namespace DBADash
                                                 }
                                                 catch (Exception ex)
                                                 {
-                                                    logError("Drivers", p + ": " + ex.Message);
+                                                    logError(ex,"Drivers");
                                                 }
 
                                             }
@@ -992,7 +998,7 @@ namespace DBADash
                         }
                         catch (Exception ex)
                         {
-                            logError("Drivers", ex.Message,"Collect:AWSPVDriver");
+                            logError(ex,"Drivers", "Collect:AWSPVDriver");
                         }
                         Data.Tables.Add(dtDrivers);
                     }
@@ -1000,7 +1006,7 @@ namespace DBADash
                 }
                 catch (Exception ex)
                 {
-                    logError("Drivers", ex.Message, "Collect:WMI");
+                    logError(ex,"Drivers","Collect:WMI");
                 }
             }
         }
@@ -1053,7 +1059,7 @@ namespace DBADash
             }
             catch (Exception ex)
             {
-                logError("Drives", ex.Message, "Collect:WMI");
+                logError(ex,"Drives", "Collect:WMI");
             }
         }
 

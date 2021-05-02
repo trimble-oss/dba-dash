@@ -3,6 +3,9 @@ using System;
 using System.Diagnostics;
 using System.Reflection;
 using Topshelf;
+using Serilog;
+using System.IO;
+using Microsoft.Extensions.Configuration;
 
 namespace DBADashService
 {
@@ -12,6 +15,18 @@ namespace DBADashService
 
         static void Main(string[] args)
         {
+            Directory.SetCurrentDirectory(AppContext.BaseDirectory); //  for Logs folder
+            // https://swimburger.net/blog/dotnet/changing-serilog-minimum-level-without-application-restart-on-dotnet-framework-and-core
+            var configuration = new ConfigurationBuilder()
+                .SetBasePath(AppContext.BaseDirectory)
+                  // reloadOnChange will allow you to auto reload the minimum level and level switches
+                  .AddJsonFile(path: "serilog.json", optional: false, reloadOnChange: true)
+                  .Build();
+
+            Log.Logger = new LoggerConfiguration()
+               .ReadFrom.Configuration(configuration)
+               .CreateLogger();
+
             Console.WriteLine(Properties.Resources.LogoText);
             var cfg = SchedulerServiceConfig.Config;
             var rc = HostFactory.Run(x =>
@@ -29,7 +44,7 @@ namespace DBADashService
                 });
 
                 x.SetDescription("DBADash Service - SQL Server monitoring tool");
-                Console.WriteLine("Service Name:" + cfg.ServiceName);
+                Log.Logger.Information("Service Name {ServiceName}", cfg.ServiceName);
                 x.SetDisplayName(cfg.ServiceName);
                 x.SetServiceName(cfg.ServiceName);
             });

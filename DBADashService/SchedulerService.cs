@@ -13,7 +13,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Timers;
 using static DBADash.DBADashConnection;
-
+using Serilog;
 namespace DBADashService
 {
 
@@ -32,11 +32,11 @@ namespace DBADashService
             if (threads < 1)
             {
                 threads = 10;
-                ScheduleService.InfoLogger("Threads:" + threads + " (default)");
+                Log.Logger.Information("Threads {threadcount} (default)", threads);
             }
             else
             {
-                ScheduleService.InfoLogger("Threads:" + threads + "(user)");
+                Log.Logger.Information("Threads {threadcount} (user)", threads);
             }
             
             NameValueCollection props = new NameValueCollection
@@ -52,24 +52,6 @@ namespace DBADashService
             scheduler = factory.GetScheduler().ConfigureAwait(false).GetAwaiter().GetResult();
         }
 
-        public static void ErrorLogger(Exception ex, string context)
-        {
-            Console.WriteLine(DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + " " + context + ": " + ex.Message);
-            try
-            {
-                EventLog.WriteEntry(SchedulerServiceConfig.Config.ServiceName, DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + " " + context + ": " + ex.ToString(), EventLogEntryType.Error);
-            }
-            catch(Exception ex2)
-            {
-                Console.WriteLine(DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + " " +  "Unable to write error to eventlog: " + ex2.Message + Environment.NewLine + ex.Message);
-            }
-        }
-
-        public static void InfoLogger(string message)
-        {
-            Console.WriteLine(DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + " " + message);
-        }
-
 
         private void removeEventSessions(CollectionConfig config)
         {   
@@ -83,18 +65,18 @@ namespace DBADashService
                             var collector = new DBCollector(cfg.GetSource(), cfg.NoWMI);
                             if (cfg.PersistXESessions)
                             {
-                                ScheduleService.InfoLogger("Stop DBADash event sessions: " + cfg.SourceConnection.ConnectionForPrint);
+                                Log.Logger.Information("Stop DBADash event sessions for {connection}", cfg.SourceConnection.ConnectionForPrint);
                                 collector.StopEventSessions();
                             }
                             else
                             {
-                                ScheduleService.InfoLogger("Remove DBADash event sessions: " + cfg.SourceConnection.ConnectionForPrint);
+                                Log.Logger.Information("Remove DBADash event sessions for {connection}", cfg.SourceConnection.ConnectionForPrint);
                                 collector.RemoveEventSessions();
                             }
                         }
                         catch(Exception ex)
                         {
-                            ErrorLogger(ex, "Stop/Remove DBADash Event Sessions:" + cfg.SourceConnection.ConnectionForPrint);
+                            Log.Logger.Error("Error Stop/Remove DBADash event sessions for {connection}", cfg.SourceConnection.ConnectionForPrint);
                         }
 
                     }
@@ -102,7 +84,7 @@ namespace DBADashService
             }
             catch (Exception ex)
             {
-                ErrorLogger(ex, "Remove Event Sessions");
+                Log.Logger.Error("Error removing event sessions");
             }
         }
 
@@ -110,7 +92,7 @@ namespace DBADashService
         {
             foreach (var d in config.AllDestinations.Where(dest => dest.Type == ConnectionType.SQL))
             {
-                ScheduleService.InfoLogger("Version check " + d.ConnectionForPrint);
+                Log.Logger.Information("Version check for repository database {connection}", d.ConnectionForPrint);
                 DBValidations.DBVersionStatus status = null;
                 Policy.Handle<Exception>()
                   .WaitAndRetry(new[]
@@ -121,20 +103,20 @@ namespace DBADashService
                     TimeSpan.FromSeconds(60)
                   }, (exception, timeSpan, context) =>
                   {
-                      ErrorLogger(exception, "Version check for repository database");
+                      Log.Error(exception,"Version check for repository database failed");
                   }).Execute(() => status = DBValidations.VersionStatus(d.ConnectionString));
 
                 if (status.VersionStatus == DBValidations.DBVersionStatusEnum.AppUpgradeRequired)
                 {
-                    ErrorLogger(new Exception("Warning: This version of the app is older than the repository DB and should be upgraded"), "DB Version Check");
+                    Log.Warning("This version of the app is older than the repository database and should be upgraded. DB {dbversion}.  App {appversion}", status.DACVersion, status.DBVersion);
                 }
                 else if (status.VersionStatus == DBValidations.DBVersionStatusEnum.CreateDB)
                 {
                     if (config.AutoUpdateDatabase)
                     {
-                        ScheduleService.InfoLogger("Create repository DB...");
+                        Log.Information("Create repository database");
                         DBValidations.UpgradeDBAsync(d.ConnectionString).Wait();
-                        Console.WriteLine("Repository DB created");
+                        Log.Information("Repository database created");
                     }
                     else
                     {
@@ -145,12 +127,12 @@ namespace DBADashService
                 {
                     if (config.AutoUpdateDatabase)
                     {
-                        ScheduleService.InfoLogger(string.Format("Upgrade DB from {0} to {1}", status.DBVersion.ToString(), status.DACVersion.ToString()));
+                        Log.Information("Upgrade DB from {oldversion} to {newversion}", status.DBVersion.ToString(), status.DACVersion.ToString());
                         DBValidations.UpgradeDBAsync(d.ConnectionString).Wait();
                         status = DBValidations.VersionStatus(d.ConnectionString);
                         if (status.VersionStatus == DBValidations.DBVersionStatusEnum.OK)
                         {
-                            ScheduleService.InfoLogger("Upgrade completed");
+                            Log.Information("Repository DB upgrade completed");
                         }
                         else
                         {
@@ -164,7 +146,7 @@ namespace DBADashService
                 }
                 else if (status.VersionStatus == DBValidations.DBVersionStatusEnum.OK)
                 {
-                    ScheduleService.InfoLogger("Version check passed: " + status.DBVersion.ToString());
+                    Log.Information("Repository database version check OK {version}", status.DBVersion.ToString());
                 }
 
             }
@@ -183,8 +165,7 @@ namespace DBADashService
 
         public void ScheduleJobs()
         {
-            ScheduleService.InfoLogger("Agent Version:" + Assembly.GetEntryAssembly().GetName().Version);
-
+            Log.Information("Agent Version {version}", Assembly.GetEntryAssembly().GetName().Version);
             if (config.ScanForAzureDBs)
             {
                 config.AddAzureDBs();
@@ -215,7 +196,7 @@ namespace DBADashService
 
             if (config.ScanForAzureDBsInterval > 0)
             {
-                ScheduleService.InfoLogger($"Scan for new Azure DBS every {config.ScanForAzureDBsInterval} seconds");
+                Log.Information("Scan for new Azure DBS every {scaninterval} seconds", config.ScanForAzureDBsInterval);
                 azureScanForNewDBsTimer = new System.Timers.Timer
                 {
                     Enabled = true,
@@ -230,7 +211,7 @@ namespace DBADashService
         {       
             foreach (DBADashSource cfg in sourceConnections)
             {
-                ScheduleService.InfoLogger("Schedule collections for: " + cfg.SourceConnection.ConnectionForPrint);
+                Log.Information("Schedule collections for {connection}", cfg.SourceConnection.ConnectionForPrint);
                 string cfgString = JsonConvert.SerializeObject(cfg);
 
                 foreach (var s in cfg.GetSchedule())
@@ -279,7 +260,7 @@ namespace DBADashService
 
         private void ScanForAzureDBs()
         {
-            ScheduleService.InfoLogger("Scan for AzureDBs...");
+            Log.Information("Scan for new azure DBs");
             scheduleSourceCollection(config.AddAzureDBs());
         }
 

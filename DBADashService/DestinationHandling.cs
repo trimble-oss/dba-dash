@@ -7,7 +7,7 @@ using System.Data;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
 using static DBADash.DBADashConnection;
-
+using Serilog;
 namespace DBADashService
 {
     public class DestinationHandling
@@ -20,13 +20,13 @@ namespace DBADashService
             {
                 try
                 {
-                    ScheduleService.InfoLogger("Write to destination:" + d.ConnectionForPrint + " from " + src.SourceConnection.ConnectionForPrint);
+                    Log.Information("Write to destination {destination} from {source}", d.ConnectionForPrint, src.SourceConnection.ConnectionForPrint);
                     Write(ds, d, fileName);
                 }
                 catch(Exception ex)
                 {
+                    Log.Error(ex, "Error writing to destination {destination} from {source}", d.ConnectionForPrint, src.SourceConnection.ConnectionForPrint);
                     exceptions.Add(ex);
-                    DBADashService.ScheduleService.ErrorLogger(ex,"Error writing to destination:" + d.ConnectionForPrint + " from " + src.SourceConnection.ConnectionForPrint);
                 }
             }
             if (exceptions.Count > 0)
@@ -103,7 +103,7 @@ namespace DBADashService
             }
             else
             {
-                ScheduleService.InfoLogger("Destination Folder doesn't exist");
+               Log.Error("Destination Folder doesn't exist {folder}",destination);
             }
         }
 
@@ -116,7 +116,7 @@ namespace DBADashService
                 TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)),
                     (exception, timespan) =>
                     {
-                        ScheduleService.ErrorLogger(exception, "Connect to repository DB");
+                        Log.Error(exception, "Error connecting to repository database");
                     }
                     )
               .Execute(() => importer.TestConnection());

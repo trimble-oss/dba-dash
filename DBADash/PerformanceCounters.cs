@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.IO;
-
+using Serilog;
 namespace DBADash
 {
     static class PerformanceCounters
@@ -25,25 +25,24 @@ namespace DBADash
 
                         if (File.Exists(userFileName))
                         {
-                            Console.WriteLine("Read Performance Counters XML:" + userFileName);
-
+                            Log.Information("Read performance counters from {filename} (user)", userFileName);
                             countersXML = File.ReadAllText(userFileName);
                         }
                         else if (File.Exists(defaultFileName))
                         {
-                            Console.WriteLine("Read Performance Counters XML:" + defaultFileName);
+                            Log.Information("Read performance counters from {filename} (default)", defaultFileName);
                             countersXML = File.ReadAllText(defaultFileName);
                         }
                         else
                         {
-                            Console.WriteLine("Warning: File not found:" + defaultFileName + Environment.NewLine + "Performance counter collection disabled");
+                            Log.Warning("Performance counters file '{filename}' not found.  Performance counter collection disabled", defaultFileName);
                             countersXML = "";
                             return countersXML;
                         }
                     }
                     catch(Exception ex)
                     {
-                        Console.WriteLine("Error reading performance counters XML file:" + ex.Message);
+                        Log.Error("Error reading performance counters file '{filename}'.  Performance counter collection disabled", defaultFileName);
                         countersXML = "";
                     }
                     

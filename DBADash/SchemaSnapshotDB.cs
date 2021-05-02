@@ -11,7 +11,7 @@ using System.IO.Compression;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
-
+using Serilog;
 namespace DBADash
 {
     [JsonConverter(typeof(StringEnumConverter))]
@@ -218,101 +218,99 @@ namespace DBADash
                     }
                     if (options.ObjectTypes.Contains(SchemaSnapshotDBObjectTypes.Aggregate))
                     {
-                        Console.WriteLine(DateTime.Now.ToString("HH:mm:ss") + " SchemaSnapshot: " + DBName + ": Aggregate");
+                        Log.Information("Schema snapshot {DBame}: {Object}", DBName, "Aggregate");
                         addAggregate(db, dtSchema);
                     }
                     if (options.ObjectTypes.Contains(SchemaSnapshotDBObjectTypes.Assembly))
                     {
-                        Console.WriteLine(DateTime.Now.ToString("HH:mm:ss") + " SchemaSnapshot: " + DBName + ": Assembly");
+                        Log.Information("Schema snapshot {DBame}: {Object}", DBName, "Assembly");
                         addAssembly(db, dtSchema);
                     }
                     if (options.ObjectTypes.Contains(SchemaSnapshotDBObjectTypes.UserDefinedType))
                     {
-                        Console.WriteLine(DateTime.Now.ToString("HH:mm:ss") + " SchemaSnapshot: " + DBName + ": UserDefinedType");
+                        Log.Information("Schema snapshot {DBame}: {Object}", DBName, "UserDefinedType");
                         addUserDefinedType(db, dtSchema);
                     }
                     if (options.ObjectTypes.Contains(SchemaSnapshotDBObjectTypes.XMLSchema))
                     {
-                        Console.WriteLine(DateTime.Now.ToString("HH:mm:ss") + " SchemaSnapshot: " + DBName + ": XMLSchema");
+                        Log.Information("Schema snapshot {DBame}: {Object}", DBName, "XMLSchema");
                         addXMLSchema(db, dtSchema);
                     }
                     if (options.ObjectTypes.Contains(SchemaSnapshotDBObjectTypes.Schema))
                     {
-                        Console.WriteLine(DateTime.Now.ToString("HH:mm:ss") + " SchemaSnapshot: " + DBName + ": Schema");
+                        Log.Information("Schema snapshot {DBame}: {Object}", DBName, "Schema");
                         addSchema(db, dtSchema);
                     }
                     if (options.ObjectTypes.Contains(SchemaSnapshotDBObjectTypes.Tables))
                     {
-                        Console.WriteLine(DateTime.Now.ToString("HH:mm:ss") + " SchemaSnapshot: " + DBName + ": Tables");
+                        Log.Information("Schema snapshot {DBame}: {Object}", DBName, "Tables");
                         addTables(db, dtSchema);
                     }
                     if (options.ObjectTypes.Contains(SchemaSnapshotDBObjectTypes.StoredProcedures))
                     {
-                        Console.WriteLine(DateTime.Now.ToString("HH:mm:ss") + " SchemaSnapshot: " + DBName + ": StoredProcedures");
+                        Log.Information("Schema snapshot {DBame}: {Object}", DBName, "StoredProcedures");
                         addSPs(db, dtSchema);
                     }
                     if (options.ObjectTypes.Contains(SchemaSnapshotDBObjectTypes.UserDefinedFunction))
                     {
-                        Console.WriteLine(DateTime.Now.ToString("HH:mm:ss") + " SchemaSnapshot: " + DBName + ": UserDefinedFunctions");
+                        Log.Information("Schema snapshot {DBame}: {Object}", DBName, "UserDefinedFunctions");
                         addUDFs(db, dtSchema);
                     }
                     if (options.ObjectTypes.Contains(SchemaSnapshotDBObjectTypes.View))
                     {
-                        Console.WriteLine(DateTime.Now.ToString("HH:mm:ss") + " SchemaSnapshot: " + DBName + ": Views");
+                        Log.Information("Schema snapshot {DBame}: {Object}", DBName, "Views");
                         addViews(db, dtSchema);
                     }
                     if (options.ObjectTypes.Contains(SchemaSnapshotDBObjectTypes.UserDefinedTableType))
                     {
-                        Console.WriteLine(DateTime.Now.ToString("HH:mm:ss") + " SchemaSnapshot: " + DBName + ": UserDefinedTableTypes");
+                        Log.Information("Schema snapshot {DBame}: {Object}", DBName, "UserDefinedTableTypes");
                         addUserDefinedTableType(db, dtSchema);
                     }
                     if (options.ObjectTypes.Contains(SchemaSnapshotDBObjectTypes.UserDefinedDataType))
                     {
-                        Console.WriteLine(DateTime.Now.ToString("HH:mm:ss") + " SchemaSnapshot: " + DBName + ": UserDefinedDataTypes");
+                        Log.Information("Schema snapshot {DBame}: {Object}", DBName, "UserDefinedDataTypes");
                         addUserDefinedDataType(db, dtSchema);
                     }
                     if (options.ObjectTypes.Contains(SchemaSnapshotDBObjectTypes.DDLTrigger))
                     {
-                        Console.WriteLine(DateTime.Now.ToString("HH:mm:ss") + " SchemaSnapshot: " + DBName + ": DDLTriggers");
+                        Log.Information("Schema snapshot {DBame}: {Object}", DBName, "DDLTriggers");
                         addDDLTriggers(db, dtSchema);
                     }
                     if (options.ObjectTypes.Contains(SchemaSnapshotDBObjectTypes.Synonym))
                     {
-                        Console.WriteLine(DateTime.Now.ToString("HH:mm:ss") + " SchemaSnapshot: " + DBName + ": Synonyms");
+                        Log.Information("Schema snapshot {DBame}: {Object}", DBName, "Synonyms");
                         addSynonyms(db, dtSchema);
                     }
                     if (options.ObjectTypes.Contains(SchemaSnapshotDBObjectTypes.Roles))
                     {
-                        Console.WriteLine(DateTime.Now.ToString("HH:mm:ss") + " SchemaSnapshot: " + DBName + ": Roles");
+                        Log.Information("Schema snapshot {DBame}: {Object}", DBName, "Roles");
                         addRoles(db, dtSchema);
                     }
                     if (options.ObjectTypes.Contains(SchemaSnapshotDBObjectTypes.Users))
                     {
-                        Console.WriteLine(DateTime.Now.ToString("HH:mm:ss") + " SchemaSnapshot: " + DBName + ": Users");
+                        Log.Information("Schema snapshot {DBame}: {Object}", DBName, "Users");
                         addUsers(db, dtSchema);
                     }
                     if (options.ObjectTypes.Contains(SchemaSnapshotDBObjectTypes.ApplicationRole))
                     {
-                        Console.WriteLine(DateTime.Now.ToString("HH:mm:ss") + " SchemaSnapshot: " + DBName + ": ApplicationRoles");
+                        Log.Information("Schema snapshot {DBame}: {Object}", DBName, "ApplicationRoles");
                         addAppRole(db, dtSchema);
                     }
                     if (options.ObjectTypes.Contains(SchemaSnapshotDBObjectTypes.Sequence))
                     {
-                        Console.WriteLine(DateTime.Now.ToString("HH:mm:ss") + " SchemaSnapshot: " + DBName + ": Sequences");
+                        Log.Information("Schema snapshot {DBame}: {Object}", DBName, "Sequences");
                         addSeq(db, dtSchema);
                     }
                     if (options.ObjectTypes.Contains(SchemaSnapshotDBObjectTypes.ServiceBroker))
                     {
                         if (instance.ServerType != Microsoft.SqlServer.Management.Common.DatabaseEngineType.SqlAzureDatabase)
                         {
-                            Console.WriteLine(DateTime.Now.ToString("HH:mm:ss") + " SchemaSnapshot: " + DBName + ": ServiceBroker");
+                            Log.Information("Schema snapshot {DBame}: {Object}", DBName, "ServiceBroker");
                             addServiceBroker(db, dtSchema);
                         }
 
                     }
-
-                    Console.WriteLine(DateTime.Now.ToString("HH:mm:ss") + " SchemaSnapshot: " + DBName + ": Complete");
-                    // break;
+                    Log.Information("Schema snapshot {DBame} Complete", DBName);
                 }
                 return dtSchema;
             }

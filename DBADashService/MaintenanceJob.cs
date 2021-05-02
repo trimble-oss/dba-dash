@@ -6,7 +6,7 @@ using System.Data.SqlClient;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-
+using Serilog;
 namespace DBADashService
 {
     public class MaintenanceJob : IJob
@@ -21,7 +21,7 @@ namespace DBADashService
             }
             catch(Exception ex)
             {
-                logError(connectionString, "AddPartitions", ex.Message);
+                logError(ex,connectionString, "AddPartitions", ex.Message);
             }
             try
             {
@@ -29,7 +29,7 @@ namespace DBADashService
             }
             catch(Exception ex)
             {
-                logError(connectionString, "PurgeData", ex.Message);
+                logError(ex,connectionString, "PurgeData", ex.Message);
             }
             return Task.CompletedTask;
         }
@@ -41,7 +41,7 @@ namespace DBADashService
             {
                 using (var cmd = new SqlCommand("dbo.Partitions_Add", cn) { CommandType = CommandType.StoredProcedure }) {
                     cn.Open();
-                    ScheduleService.InfoLogger("Maintenance: Creating partitions");
+                    Log.Information("Maintenance: Creating partitions");
                     cmd.ExecuteNonQuery();
                 }
             }
@@ -54,16 +54,16 @@ namespace DBADashService
                 using (var cmd = new SqlCommand("dbo.PurgeData", cn) { CommandType = CommandType.StoredProcedure })
                 {
                     cn.Open();
-                    ScheduleService.InfoLogger("Maintenance: PurgeData");
+                    Log.Information("Maintenance : PurgeData");
                     cmd.ExecuteNonQuery();
                 }
             }
         }
 
 
-        private void logError(string connectionString, string errorSource, string errorMessage, string errorContext = "Maintenance")
+        private void logError(Exception ex,string connectionString, string errorSource, string errorMessage, string errorContext = "Maintenance")
         {
-            ScheduleService.InfoLogger("Error: " + errorContext + " - " + errorSource + " : " + errorMessage);
+            Log.Error(ex, "{errorcontext} | {errorsource}", errorContext, errorSource);
             try
             {
                 var dtErrors = new DataTable("Errors");
@@ -79,9 +79,9 @@ namespace DBADashService
                 ds.Tables.Add(dtErrors);
                 DBADash.DBImporter.InsertErrors(connectionString, null, DateTime.UtcNow, ds);
             }
-            catch(Exception ex)
+            catch(Exception ex2)
             {
-                ScheduleService.InfoLogger("Error logging errors from MaintenanceJob: " + ex.Message);
+                Log.Error(ex2,"Write errors to database from {errorcontext} | {errorsource}", errorContext,errorSource);
             }
         }
         

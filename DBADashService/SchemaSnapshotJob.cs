@@ -7,7 +7,7 @@ using System.Data;
 using System.Data.SqlClient;
 using System.Threading.Tasks;
 using static DBADash.DBADashConnection;
-
+using Serilog;
 namespace DBADashService
 {
     public class SchemaSnapshotJob : IJob
@@ -33,7 +33,7 @@ namespace DBADashService
             {
                 return Task.CompletedTask;
             }
-            ScheduleService.InfoLogger("DB Snapshots " + " from Instance:" + builder.DataSource);
+            Log.Information("DB Snapshots from instance {source}", builder.DataSource);
             foreach (Database db in instance.Databases)
             {
                 bool include = false;
@@ -56,7 +56,7 @@ namespace DBADashService
                     }
                     if (include)
                     {
-                        ScheduleService.InfoLogger("DB Snapshot {" + db.Name + "} from Instance:" + builder.DataSource);
+                        Log.Information("DB Snapshot {db} from instance {instance}", db.Name, builder.DataSource);
                         DateTime StartTime = DateTime.UtcNow;
                         try
                         {
@@ -74,7 +74,7 @@ namespace DBADashService
                         }
                         catch(Exception ex)
                         {
-                            ScheduleService.InfoLogger("Snapshot error:" + ex.Message);
+                            Log.Error(ex,"Error creating schema snapshot {db}", db.Name);
                         }
 
                     }

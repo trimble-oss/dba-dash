@@ -2,6 +2,7 @@
 using System;
 using System.Diagnostics;
 using System.IO;
+using Serilog;
 namespace DBADashService
 {
     class SchedulerServiceConfig
@@ -20,7 +21,7 @@ namespace DBADashService
             }
             catch
             {
-                Console.WriteLine($"Error creating failed message folder: { FailedMessageFolder }");
+                Log.Error("Error creating failed message folder {FailedMessageFolder}", FailedMessageFolder);
                 FailedMessageFolder = String.Empty;
             }
             
@@ -32,14 +33,14 @@ namespace DBADashService
             string jsonConfigPath = System.IO.Path.Combine(AppContext.BaseDirectory, "ServiceConfig.json");
             if (!(System.IO.File.Exists(jsonConfigPath)))
             {
-                EventLog.WriteEntry("DBADashService", "ServiceConfig.json file is missing.  Please create.", EventLogEntryType.Error);
-                throw new Exception("ServiceConfig.json file is missing.Please create.");
+                Log.Fatal("ServiceConfig.json file is missing.  Use service config tool to create.");
+                throw new Exception("ServiceConfig.json file is missing.  Use service config tool to create.");
             }
             string jsonConfig = System.IO.File.ReadAllText(jsonConfigPath);
             var conf = CollectionConfig.Deserialize(jsonConfig);
             if (conf.WasEncrypted())
             {
-                ScheduleService.InfoLogger("Saving ServiceConfig.json with encrypted password");
+                Log.Information("Saving ServiceConfig.json with encrypted password");
 
                 string confString = conf.Serialize();
                 System.IO.File.WriteAllText(jsonConfigPath, confString);

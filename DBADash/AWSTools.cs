@@ -3,7 +3,7 @@ using Amazon.Runtime;
 using Amazon.Runtime.CredentialManagement;
 using Amazon.S3;
 using System;
-
+using Serilog;
 namespace DBADash
 {
     public class AWSTools
@@ -32,7 +32,7 @@ namespace DBADash
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine(ex.Message);
+                    Log.Error(ex, "Error getting AWS creds from profile {profile}", profile);
                     throw;
                 }
             }

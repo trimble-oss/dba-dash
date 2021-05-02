@@ -6,7 +6,7 @@ using System.Data.SqlClient;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Threading.Tasks;
-
+using Serilog;
 namespace DBADash
 {
     public class DBImporter
@@ -45,14 +45,10 @@ namespace DBADash
             }            
         }
 
+        // Adds error to Errors datatable to be imported into CollectionErrorLog table later.
         private void logError(string errorSource, Exception ex, string errorContext = "Import")
         {
-            logError(errorSource, ex.ToString(), errorContext);
-        }
-
-        // Adds error to Errors datatable to be imported into CollectionErrorLog table later.
-        private void logError(string errorSource, string errorMessage, string errorContext = "Import")
-        {
+            
             DataTable dtErrors;
             if (data.Tables.Contains("Errors"))
             {
@@ -77,13 +73,15 @@ namespace DBADash
                 data.Tables.Add(dtErrors);
             }
 
-            Console.WriteLine(errorSource + " : " + errorMessage);
+            Log.Error(ex,"Error from {ErrorContext} {ErrorSource}", errorContext, errorSource);
             var rError = dtErrors.NewRow();
             rError["ErrorSource"] = errorSource;
-            rError["ErrorMessage"] = errorMessage;
+            rError["ErrorMessage"] = ex.ToString();
             rError["ErrorContext"] = errorContext;
             dtErrors.Rows.Add(rError);
         }
+
+        
 
         // handle schema changes between agent versions
         private void upgradeDS()
@@ -241,7 +239,7 @@ namespace DBADash
             }
             catch (System.Data.SqlClient.SqlException ex) when (ex.Number == 2627)
             {
-                logError("DDLSnapshot:" + databaseName, "Primary key violation.  This can occur if you have a case sensitive database collation that contains tables, SPs or other database objects with names that are no longer unique with a case insensitive comparison." + Environment.NewLine + ex.Message);
+                throw new Exception($"DDLSnapshot:{ databaseName}. Primary key violation.  This can occur if you have a case sensitive database collation that contains tables, SPs or other database objects with names that are no longer unique with a case insensitive comparison.", ex);
             }
 
         }
