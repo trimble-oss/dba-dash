@@ -15,20 +15,24 @@ namespace DBADashService
 
         static void Main(string[] args)
         {
+            Console.WriteLine(Properties.Resources.LogoText);
+            var cfg = SchedulerServiceConfig.Config;
+
             Directory.SetCurrentDirectory(AppContext.BaseDirectory); //  for Logs folder
             // https://swimburger.net/blog/dotnet/changing-serilog-minimum-level-without-application-restart-on-dotnet-framework-and-core
             var configuration = new ConfigurationBuilder()
                 .SetBasePath(AppContext.BaseDirectory)
                   // reloadOnChange will allow you to auto reload the minimum level and level switches
-                  .AddJsonFile(path: "serilog.json", optional: false, reloadOnChange: true)
+                  .AddJsonFile(path: "serilog.json", optional: false, reloadOnChange: true)                  
                   .Build();
 
             Log.Logger = new LoggerConfiguration()
                .ReadFrom.Configuration(configuration)
+               .Enrich.WithProperty("ApplicationName", "DBADash")
+               .Enrich.WithProperty("ServiceName", cfg.ServiceName)
+               .Enrich.WithProperty("MachineName", Environment.MachineName)
                .CreateLogger();
-
-            Console.WriteLine(Properties.Resources.LogoText);
-            var cfg = SchedulerServiceConfig.Config;
+  
             var rc = HostFactory.Run(x =>
             {
                 x.Service<ScheduleService>(s =>
