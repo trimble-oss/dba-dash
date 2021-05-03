@@ -11,6 +11,8 @@ using System.Runtime.Serialization.Formatters.Binary;
 using System.Threading.Tasks;
 using static DBADash.DBADashConnection;
 using Serilog;
+using SerilogTimings;
+
 namespace DBADashService
 {
     [DisallowConcurrentExecution, PersistJobDataAfterExecution]
@@ -170,14 +172,12 @@ namespace DBADashService
                 else
                 {
 
-                    string collectDescription = "Collect " + string.Join(", ", types.Select(s => s.ToString()).ToArray()) + " from Instance:" + cfg.SourceConnection.ConnectionForPrint;
-                    Log.Information(collectDescription);
                     try
                     {
                         var collector = new DBCollector(cfg.GetSource(), cfg.NoWMI)
                         {
                             Job_instance_id = dataMap.GetInt("Job_instance_id")
-                        };
+                        };              
 
                         var jobLastCollected = dataMap.GetDateTime("JobCollectDate");
 
@@ -187,7 +187,7 @@ namespace DBADashService
                         {
                             collector.JobLastModified = dataMap.GetDateTime("JobLastModified");
                         }
-                        
+
                         if (context.PreviousFireTimeUtc.HasValue)
                         {
                             collector.PerformanceCollectionPeriodMins = (Int32)DateTime.UtcNow.Subtract(context.PreviousFireTimeUtc.Value.UtcDateTime).TotalMinutes + 5;
@@ -199,20 +199,24 @@ namespace DBADashService
                         collector.SlowQueryThresholdMs = cfg.SlowQueryThresholdMs;
                         collector.SlowQueryMaxMemoryKB = cfg.SlowQuerySessionMaxMemoryKB;
                         collector.UseDualEventSession = cfg.UseDualEventSession;
-                        collector.Collect(types);
+                        using (var op = Operation.Begin("Collect {types} from instance {instance}", string.Join(", ", types.Select(s => s.ToString()).ToArray()), cfg.SourceConnection.ConnectionForPrint))
+                        {
+                            collector.Collect(types);
+                            op.Complete();
+                        }
                         bool containsJobs = collector.Data.Tables.Contains("Jobs");
                         bool binarySerialization = containsJobs || SchedulerServiceConfig.Config.BinarySerialization;
                         string fileName = cfg.GenerateFileName(binarySerialization, cfg.SourceConnection.ConnectionForFileName);
                         try
-                        {        
+                        {
                             DestinationHandling.WriteAllDestinations(collector.Data, cfg, fileName);
                             dataMap.Put("Job_instance_id", collector.Job_instance_id); // Store instance_id so we can get new history only on next run
                             if (containsJobs)
                             {
                                 // We have collected jobs data - Store JobLastModified and time we have collected the jobs.
                                 // Used on next run to determine if we need to refresh this data.
-                                dataMap.Put("JobLastModified", collector.JobLastModified); 
-                                dataMap.Put("JobCollectDate", DateTime.UtcNow); 
+                                dataMap.Put("JobLastModified", collector.JobLastModified);
+                                dataMap.Put("JobCollectDate", DateTime.UtcNow);
                             }
                         }
                         catch (Exception ex)
@@ -220,11 +224,11 @@ namespace DBADashService
                             Log.Error(ex, "Error writing {filename} to destination.  File will be copied to {folder}", fileName, SchedulerServiceConfig.FailedMessageFolder);
                             DestinationHandling.WriteFolder(collector.Data, SchedulerServiceConfig.FailedMessageFolder, fileName);
                         }
-                        
+                                                
                     }
                     catch (Exception ex)
                     {
-                        Log.Logger.Error(ex, collectDescription);
+                        Log.Logger.Error(ex, "Error collecting types {types} from instance {instance}", string.Join(", ", types.Select(s => s.ToString()).ToArray()), cfg.SourceConnection.ConnectionForPrint);
                     }
 
                 }

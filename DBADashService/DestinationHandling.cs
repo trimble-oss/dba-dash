@@ -8,6 +8,8 @@ using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
 using static DBADash.DBADashConnection;
 using Serilog;
+using SerilogTimings;
+
 namespace DBADashService
 {
     public class DestinationHandling
@@ -20,8 +22,11 @@ namespace DBADashService
             {
                 try
                 {
-                    Log.Information("Write to destination {destination} from {source}", d.ConnectionForPrint, src.SourceConnection.ConnectionForPrint);
-                    Write(ds, d, fileName);
+                    using (var op = Operation.Begin("Write to destination {destination} from {source}", d.ConnectionForPrint, src.SourceConnection.ConnectionForPrint))
+                    {
+                        Write(ds, d, fileName);
+                        op.Complete();
+                    }
                 }
                 catch(Exception ex)
                 {

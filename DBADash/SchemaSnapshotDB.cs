@@ -12,6 +12,8 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using Serilog;
+using SerilogTimings;
+
 namespace DBADash
 {
     [JsonConverter(typeof(StringEnumConverter))]
@@ -181,8 +183,8 @@ namespace DBADash
         {
 
             using (var cn = new Microsoft.Data.SqlClient.SqlConnection(_connectionString))
+            using (var opSS = Operation.Begin("Schema snapshot {DBame}", DBName))
             {
-
                 DataTable dtSchema = new DataTable("Schema_" + DBName);
                 dtSchema.Columns.Add("ObjectName");
                 dtSchema.Columns.Add("SchemaName");
@@ -218,103 +220,157 @@ namespace DBADash
                     }
                     if (options.ObjectTypes.Contains(SchemaSnapshotDBObjectTypes.Aggregate))
                     {
-                        Log.Information("Schema snapshot {DBame}: {Object}", DBName, "Aggregate");
-                        addAggregate(db, dtSchema);
+                        using (var op = Operation.Begin("Schema snapshot {DBame}: {Object}", DBName, "Aggregate"))
+                        {
+                            addAggregate(db, dtSchema);
+                            op.Complete();
+                        }
                     }
                     if (options.ObjectTypes.Contains(SchemaSnapshotDBObjectTypes.Assembly))
                     {
-                        Log.Information("Schema snapshot {DBame}: {Object}", DBName, "Assembly");
-                        addAssembly(db, dtSchema);
+                        using (var op = Operation.Begin("Schema snapshot {DBame}: {Object}", DBName, "Assembly"))
+                        {
+                            addAssembly(db, dtSchema);
+                            op.Complete();
+                        }
                     }
                     if (options.ObjectTypes.Contains(SchemaSnapshotDBObjectTypes.UserDefinedType))
                     {
-                        Log.Information("Schema snapshot {DBame}: {Object}", DBName, "UserDefinedType");
-                        addUserDefinedType(db, dtSchema);
+                        using (var op = Operation.Begin("Schema snapshot {DBame}: {Object}", DBName, "UserDefinedType"))
+                        {
+                            addUserDefinedType(db, dtSchema); ;
+                            op.Complete();
+                        }
                     }
                     if (options.ObjectTypes.Contains(SchemaSnapshotDBObjectTypes.XMLSchema))
                     {
-                        Log.Information("Schema snapshot {DBame}: {Object}", DBName, "XMLSchema");
-                        addXMLSchema(db, dtSchema);
+                        using (var op = Operation.Begin("Schema snapshot {DBame}: {Object}", DBName, "XMLSchema"))
+                        {
+                            addXMLSchema(db, dtSchema);
+                            op.Complete();
+                        }
                     }
                     if (options.ObjectTypes.Contains(SchemaSnapshotDBObjectTypes.Schema))
                     {
-                        Log.Information("Schema snapshot {DBame}: {Object}", DBName, "Schema");
-                        addSchema(db, dtSchema);
+                        using (var op = Operation.Begin("Schema snapshot {DBame}: {Object}", DBName, "Schema"))
+                        {
+                            addSchema(db, dtSchema);
+                            op.Complete();
+                        }
                     }
                     if (options.ObjectTypes.Contains(SchemaSnapshotDBObjectTypes.Tables))
                     {
-                        Log.Information("Schema snapshot {DBame}: {Object}", DBName, "Tables");
-                        addTables(db, dtSchema);
+                        using (var op = Operation.Begin("Schema snapshot {DBame}: {Object}", DBName, "Tables"))
+                        {
+                            addTables(db, dtSchema);
+                            op.Complete();
+                        }
                     }
                     if (options.ObjectTypes.Contains(SchemaSnapshotDBObjectTypes.StoredProcedures))
                     {
-                        Log.Information("Schema snapshot {DBame}: {Object}", DBName, "StoredProcedures");
-                        addSPs(db, dtSchema);
+                        using (var op = Operation.Begin("Schema snapshot {DBame}: {Object}", DBName, "StoredProcedures"))
+                        {
+                            addSPs(db, dtSchema);
+                            op.Complete();
+                        }
                     }
                     if (options.ObjectTypes.Contains(SchemaSnapshotDBObjectTypes.UserDefinedFunction))
                     {
-                        Log.Information("Schema snapshot {DBame}: {Object}", DBName, "UserDefinedFunctions");
-                        addUDFs(db, dtSchema);
+                        using (var op = Operation.Begin("Schema snapshot {DBame}: {Object}", DBName, "UserDefinedFunctions"))
+                        {
+                            addUDFs(db, dtSchema);
+                            op.Complete();
+                        }
                     }
                     if (options.ObjectTypes.Contains(SchemaSnapshotDBObjectTypes.View))
                     {
-                        Log.Information("Schema snapshot {DBame}: {Object}", DBName, "Views");
-                        addViews(db, dtSchema);
+                        using (var op = Operation.Begin("Schema snapshot {DBame}: {Object}", DBName, "Views"))
+                        {
+                            addViews(db, dtSchema);
+                            op.Complete();
+                        }
                     }
                     if (options.ObjectTypes.Contains(SchemaSnapshotDBObjectTypes.UserDefinedTableType))
                     {
-                        Log.Information("Schema snapshot {DBame}: {Object}", DBName, "UserDefinedTableTypes");
-                        addUserDefinedTableType(db, dtSchema);
+                        using (var op = Operation.Begin("Schema snapshot {DBame}: {Object}", DBName, "UserDefinedTableTypes"))
+                        {
+                            addUserDefinedTableType(db, dtSchema);
+                            op.Complete();
+                        }
                     }
                     if (options.ObjectTypes.Contains(SchemaSnapshotDBObjectTypes.UserDefinedDataType))
                     {
-                        Log.Information("Schema snapshot {DBame}: {Object}", DBName, "UserDefinedDataTypes");
-                        addUserDefinedDataType(db, dtSchema);
+                        using (var op = Operation.Begin("Schema snapshot {DBame}: {Object}", DBName, "UserDefinedDataTypes"))
+                        {
+                            addUserDefinedDataType(db, dtSchema);
+                            op.Complete();
+                        }
                     }
                     if (options.ObjectTypes.Contains(SchemaSnapshotDBObjectTypes.DDLTrigger))
                     {
-                        Log.Information("Schema snapshot {DBame}: {Object}", DBName, "DDLTriggers");
-                        addDDLTriggers(db, dtSchema);
+                        using (var op = Operation.Begin("Schema snapshot {DBame}: {Object}", DBName, "DDLTriggers"))
+                        {
+                            addDDLTriggers(db, dtSchema);
+                            op.Complete();
+                        }
                     }
                     if (options.ObjectTypes.Contains(SchemaSnapshotDBObjectTypes.Synonym))
                     {
-                        Log.Information("Schema snapshot {DBame}: {Object}", DBName, "Synonyms");
-                        addSynonyms(db, dtSchema);
+                        using (var op = Operation.Begin("Schema snapshot {DBame}: {Object}", DBName, "Synonyms"))
+                        {
+                            addSynonyms(db, dtSchema);
+                            op.Complete();
+                        }
                     }
                     if (options.ObjectTypes.Contains(SchemaSnapshotDBObjectTypes.Roles))
                     {
-                        Log.Information("Schema snapshot {DBame}: {Object}", DBName, "Roles");
-                        addRoles(db, dtSchema);
+                        using (var op = Operation.Begin("Schema snapshot {DBame}: {Object}", DBName, "Roles"))
+                        {
+                            addRoles(db, dtSchema);
+                            op.Complete();
+                        }
                     }
                     if (options.ObjectTypes.Contains(SchemaSnapshotDBObjectTypes.Users))
                     {
-                        Log.Information("Schema snapshot {DBame}: {Object}", DBName, "Users");
-                        addUsers(db, dtSchema);
+                        using (var op = Operation.Begin("Schema snapshot {DBame}: {Object}", DBName, "Users"))
+                        {
+                            addUsers(db, dtSchema);
+                            op.Complete();
+                        }
                     }
                     if (options.ObjectTypes.Contains(SchemaSnapshotDBObjectTypes.ApplicationRole))
                     {
-                        Log.Information("Schema snapshot {DBame}: {Object}", DBName, "ApplicationRoles");
-                        addAppRole(db, dtSchema);
+                        using (var op = Operation.Begin("Schema snapshot {DBame}: {Object}", DBName, "ApplicationRoles"))
+                        {
+                            addAppRole(db, dtSchema);
+                            op.Complete();
+                        }
                     }
                     if (options.ObjectTypes.Contains(SchemaSnapshotDBObjectTypes.Sequence))
                     {
-                        Log.Information("Schema snapshot {DBame}: {Object}", DBName, "Sequences");
-                        addSeq(db, dtSchema);
+                        using (var op = Operation.Begin("Schema snapshot {DBame}: {Object}", DBName, "Sequences"))
+                        {
+                            addSeq(db, dtSchema);
+                            op.Complete();
+                        }
                     }
                     if (options.ObjectTypes.Contains(SchemaSnapshotDBObjectTypes.ServiceBroker))
                     {
                         if (instance.ServerType != Microsoft.SqlServer.Management.Common.DatabaseEngineType.SqlAzureDatabase)
                         {
-                            Log.Information("Schema snapshot {DBame}: {Object}", DBName, "ServiceBroker");
-                            addServiceBroker(db, dtSchema);
+                            using (var op = Operation.Begin("Schema snapshot {DBame}: {Object}", DBName, "ServiceBroker"))
+                            {
+                                addServiceBroker(db, dtSchema);
+                                op.Complete();
+                            }
                         }
 
                     }
-                    Log.Information("Schema snapshot {DBame} Complete", DBName);
                 }
+                opSS.Complete();
                 return dtSchema;
+
             }
-            
         }
 
         private void addServiceBroker(Database db, DataTable dtSchema)
