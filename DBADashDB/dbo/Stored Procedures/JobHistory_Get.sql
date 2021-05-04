@@ -18,6 +18,8 @@ BEGIN
 	AND step_id=0
 	AND instance_id<@instance_id
 	ORDER BY instance_id DESC
+
+	SET @instance_id_from = ISNULL(@instance_id_from,0)
 END
 
 SET @SQL = N'
