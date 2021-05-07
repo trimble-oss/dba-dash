@@ -41,6 +41,7 @@
             this.optMB = new System.Windows.Forms.RadioButton();
             this.optPercent = new System.Windows.Forms.RadioButton();
             this.grpFreespace = new System.Windows.Forms.GroupBox();
+            this.chkZeroAutogrowthOnly = new System.Windows.Forms.CheckBox();
             this.chkInherit = new System.Windows.Forms.CheckBox();
             this.grpMaxSize = new System.Windows.Forms.GroupBox();
             this.chkMaxSizeDisable = new System.Windows.Forms.CheckBox();
@@ -51,7 +52,6 @@
             this.numMaxSizeWarning = new System.Windows.Forms.NumericUpDown();
             this.label4 = new System.Windows.Forms.Label();
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
-            this.chkZeroAutogrowthOnly = new System.Windows.Forms.CheckBox();
             ((System.ComponentModel.ISupportInitialize)(this.numWarning)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.numCritical)).BeginInit();
             this.grpFreespace.SuspendLayout();
@@ -68,6 +68,7 @@
             this.bttnCancel.TabIndex = 41;
             this.bttnCancel.Text = "Cancel";
             this.bttnCancel.UseVisualStyleBackColor = true;
+            this.bttnCancel.Click += new System.EventHandler(this.bttnCancel_Click);
             // 
             // bttnUpdate
             // 
@@ -206,6 +207,16 @@
             this.toolTip1.SetToolTip(this.grpFreespace, "Use this to set thresholds for the amount of free space in your database filegrou" +
         "ps (for manually growing files).  e.g. Warn when there is less than 20% free.");
             // 
+            // chkZeroAutogrowthOnly
+            // 
+            this.chkZeroAutogrowthOnly.CheckAlign = System.Drawing.ContentAlignment.MiddleRight;
+            this.chkZeroAutogrowthOnly.Location = new System.Drawing.Point(10, 103);
+            this.chkZeroAutogrowthOnly.Name = "chkZeroAutogrowthOnly";
+            this.chkZeroAutogrowthOnly.Size = new System.Drawing.Size(229, 24);
+            this.chkZeroAutogrowthOnly.TabIndex = 38;
+            this.chkZeroAutogrowthOnly.Text = "Zero autogrowth only";
+            this.chkZeroAutogrowthOnly.UseVisualStyleBackColor = true;
+            // 
             // chkInherit
             // 
             this.chkInherit.AutoSize = true;
@@ -313,16 +324,6 @@
             this.label4.Size = new System.Drawing.Size(20, 17);
             this.label4.TabIndex = 24;
             this.label4.Text = "%";
-            // 
-            // chkZeroAutogrowthOnly
-            // 
-            this.chkZeroAutogrowthOnly.CheckAlign = System.Drawing.ContentAlignment.MiddleRight;
-            this.chkZeroAutogrowthOnly.Location = new System.Drawing.Point(10, 103);
-            this.chkZeroAutogrowthOnly.Name = "chkZeroAutogrowthOnly";
-            this.chkZeroAutogrowthOnly.Size = new System.Drawing.Size(229, 24);
-            this.chkZeroAutogrowthOnly.TabIndex = 38;
-            this.chkZeroAutogrowthOnly.Text = "Zero autogrowth only";
-            this.chkZeroAutogrowthOnly.UseVisualStyleBackColor = true;
             // 
             // FileThresholdConfig
             // 
