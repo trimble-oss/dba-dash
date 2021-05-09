@@ -30,7 +30,7 @@
     <QueryStoreStaleQueryThreshold>15</QueryStoreStaleQueryThreshold>
     <QueryStoreMaxStorageSize>512</QueryStoreMaxStorageSize>
     <QueryStoreMaxPlansPerQuery>50</QueryStoreMaxPlansPerQuery>
-    <DacVersion>2.0.3.25</DacVersion>
+    <DacVersion>2.0.3.26</DacVersion>
     <ReadCommittedSnapshot>True</ReadCommittedSnapshot>
     <AllowSnapshotIsolation>True</AllowSnapshotIsolation>
     <CompatibilityMode>130</CompatibilityMode>
@@ -537,6 +537,11 @@
     <Build Include="dbo\Stored Procedures\AvailabilityGroups_Upd.sql" />
     <Build Include="dbo\Stored Procedures\AvailabilityGroup_Get.sql" />
     <Build Include="dbo\Stored Procedures\AvailabilityGroupSummary_Get.sql" />
+    <Build Include="dbo\User Defined Types\JobSteps.sql" />
+    <Build Include="dbo\Tables\JobSteps.sql" />
+    <Build Include="dbo\Stored Procedures\JobSteps_Upd.sql" />
+    <Build Include="dbo\Stored Procedures\JobSteps_Get.sql" />
+    <Build Include="dbo\Stored Procedures\JobStep_Get.sql" />
   </ItemGroup>
   <ItemGroup>
     <PostDeploy Include="Script.PostDeployment1.sql" />

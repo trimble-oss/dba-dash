@@ -139,5 +139,20 @@ namespace DBADashGUI
                 }
             }
         }
+
+        public static DataTable GetJobSteps(Int32 InstanceID,Guid JobID)
+        {
+            using(var cn = new SqlConnection(Common.ConnectionString))
+            using (var cmd = new SqlCommand("dbo.JobSteps_Get", cn) { CommandType = CommandType.StoredProcedure })
+            using (SqlDataAdapter da = new SqlDataAdapter(cmd))
+            {
+                cmd.Parameters.AddWithValue("InstanceID", InstanceID);
+                cmd.Parameters.AddWithValue("JobID", JobID);
+                var dt = new DataTable();
+                da.Fill(dt);
+                return dt;
+            }
+        }
+
     }
 }

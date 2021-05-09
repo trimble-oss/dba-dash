@@ -107,6 +107,12 @@
     <Compile Include="AgentJobs\JobDiff.Designer.cs">
       <DependentUpon>JobDiff.cs</DependentUpon>
     </Compile>
+    <Compile Include="AgentJobs\JobStep.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="AgentJobs\JobStep.Designer.cs">
+      <DependentUpon>JobStep.cs</DependentUpon>
+    </Compile>
     <Compile Include="AppSyntaxModeProvider.cs" />
     <Compile Include="Bak\BackupsControl.cs">
       <SubType>UserControl</SubType>
@@ -525,6 +531,9 @@
     <EmbeddedResource Include="AgentJobs\JobDiff.resx">
       <DependentUpon>JobDiff.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="AgentJobs\JobStep.resx">
+      <DependentUpon>JobStep.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Bak\BackupsControl.resx">
       <DependentUpon>BackupsControl.cs</DependentUpon>
     </EmbeddedResource>
@@ -737,6 +746,9 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
+    <None Include="Resources\PowerShell-Mode.xshd">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Include="Resources\SQL-Mode.xshd">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

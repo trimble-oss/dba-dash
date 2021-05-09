@@ -19,6 +19,7 @@ namespace DBADashGUI.AgentJobs
         private int? instance_id = null;
         private int instanceId;
         private Guid jobID;
+        public int StepID=-1;
 
         public bool IncludeCritical
         {
@@ -73,15 +74,36 @@ namespace DBADashGUI.AgentJobs
             failedOnlyToolStripMenuItem.Checked = false;
             splitContainer1.Panel2Collapsed = true;
             dgvJobHistory.DataSource = null;
-            var dt = GetJobs();
-            dgvJobs.AutoGenerateColumns = false;
-            dgvJobs.DataSource = new DataView(dt);
-            dgvJobs.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
-            configureInstanceThresholdsToolStripMenuItem.Enabled = InstanceIDs.Count == 1;
-            if (JobID != Guid.Empty && dt.Rows.Count==1)
-            {           
-                showHistory(dt.Rows[0]);
+            if (StepID > 0 && InstanceIDs.Count==1)
+            {
+                tsJobs.Visible = false;
+                dgvJobs.Visible = false;
+                jobStep1.Visible = true;
+                jobStep1.JobID = JobID;
+                jobID = JobID;
+                instanceId = InstanceIDs[0];
+                jobStep1.InstanceID = InstanceIDs[0];
+                jobStep1.StepID = StepID;
+                jobStep1.RefreshData();
+                showHistory();
             }
+            else
+            {
+                tsJobs.Visible = true;
+                dgvJobs.Visible = true;
+                jobStep1.Visible = false;
+                var dt = GetJobs();
+                dgvJobs.AutoGenerateColumns = false;
+                dgvJobs.DataSource = new DataView(dt);
+                dgvJobs.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
+                configureInstanceThresholdsToolStripMenuItem.Enabled = InstanceIDs.Count == 1;
+                if (JobID != Guid.Empty && dt.Rows.Count == 1)
+                {
+                    showHistory(dt.Rows[0]);
+                }
+            }
+          
+      
         }
 
         private DataTable GetJobs()
@@ -178,7 +200,11 @@ namespace DBADashGUI.AgentJobs
 
         private void showHistory()
         {
-            int? stepID = showJobStepsToolStripMenuItem.Checked ? (int?)null : 0;
+            int? stepID = StepID;
+            if (StepID < 0)
+            {
+                stepID = showJobStepsToolStripMenuItem.Checked ? (int?)null : 0;
+            }
             stepID = instance_id == null ? stepID : null;
             colStepName.Visible = stepID !=0;
             colStepID.Visible = stepID != 0;

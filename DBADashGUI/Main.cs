@@ -174,9 +174,15 @@ namespace DBADashGUI
             }
             else if(tabs.SelectedTab== tabJobs)
             {
+                agentJobsControl1.StepID = -1;
                 if (n.Type == SQLTreeItem.TreeType.AgentJob)
                 {
                     agentJobsControl1.JobID = (Guid)n.Tag;
+                }
+                else if(n.IsAgentJobStepType)
+                {
+                    agentJobsControl1.JobID = (Guid)n.Parent.Tag;
+                    agentJobsControl1.StepID = (int)n.Tag;
                 }
                 else
                 {
@@ -512,6 +518,7 @@ namespace DBADashGUI
             foreach(var job in jobs)
             {
                 var jobItem = new SQLTreeItem(job.Value, SQLTreeItem.TreeType.AgentJob) { InstanceID = jobsNode.InstanceID,Tag=job.Key };
+                jobItem.AddDummyNode();
                 jobsNode.Nodes.Add(jobItem);
             }
         }
@@ -731,6 +738,10 @@ namespace DBADashGUI
             {
                 allowedTabs.Add(tabTags);
             }
+            else if(n.IsAgentJobStepType)
+            {
+                allowedTabs.Add(tabJobs);
+            }
 
             if (n.ObjectID > 0)
             {
@@ -786,11 +797,48 @@ namespace DBADashGUI
                 {
                     expandJobs(n);
                 }
+                else if(n.Type == SQLTreeItem.TreeType.AgentJob)
+                {
+                    expandJobSteps(n);
+                }
                 else
                 {
                     ExpandObjects(n);
                 }
 
+            }
+        }
+
+        private void expandJobSteps(SQLTreeItem n)
+        {
+            var dtSteps = CommonData.GetJobSteps(n.InstanceID,(Guid)n.Tag);
+            foreach(DataRow r in dtSteps.Rows)
+            {
+                var stepID = (int)r["step_id"];
+                var stepName = (string)r["step_name"];
+                var subsystem = (string)r["subsystem"];
+                SQLTreeItem.TreeType type;
+                if (subsystem== "CmdExec")
+                {
+                    type = SQLTreeItem.TreeType.AgentJobStep_Cmd;
+                }
+                else if(subsystem== "PowerShell")
+                {
+                    type = SQLTreeItem.TreeType.AgentJobStep_PS;
+                }
+                else if(subsystem == "Ssis")
+                {
+                    type = SQLTreeItem.TreeType.AgentJobStep_SSIS;
+                }
+                else if(subsystem== "AnalysisQuery")
+                {
+                    type = SQLTreeItem.TreeType.AgentJobStep_SSAS;
+                }
+                else
+                {
+                    type = SQLTreeItem.TreeType.AgentJobStep_TSQL;
+                }
+                n.Nodes.Add(new SQLTreeItem(stepName, type) { InstanceID = n.InstanceID, Tag=stepID });
             }
         }
 

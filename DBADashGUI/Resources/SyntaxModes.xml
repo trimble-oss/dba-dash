@@ -2,4 +2,7 @@
 	<Mode file       = "SQL-Mode.xshd"
 	      name       = "SQL"
 	      extensions = ".sql"/>
+  <Mode file       = "PowerShell-Mode.xshd"
+      name       = "PowerShell"
+      extensions = ".ps1"/>
 </SyntaxModes>

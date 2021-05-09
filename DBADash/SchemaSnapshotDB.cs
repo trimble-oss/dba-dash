@@ -109,7 +109,8 @@ namespace DBADash
             return sb.ToString();
         }
 
-        public DataTable SnapshotJobs()
+
+        private DataTable JobDataTableSchema()
         {
             DataTable dtSchema = new DataTable("Jobs");
             dtSchema.Columns.Add("job_id", typeof(Guid));
@@ -119,7 +120,7 @@ namespace DBADash
             dtSchema.Columns.Add("description");
             dtSchema.Columns.Add("start_step_id", typeof(int));
             dtSchema.Columns.Add("category_id", typeof(int));
-            dtSchema.Columns.Add("category");          
+            dtSchema.Columns.Add("category");
             dtSchema.Columns.Add("owner");
             dtSchema.Columns.Add("notify_level_eventlog", typeof(int));
             dtSchema.Columns.Add("notify_level_email", typeof(int));
@@ -135,17 +136,38 @@ namespace DBADash
             dtSchema.Columns.Add("has_schedule", typeof(bool));
             dtSchema.Columns.Add("has_server", typeof(bool));
             dtSchema.Columns.Add("has_step", typeof(bool));
-
             dtSchema.Columns.Add("DDLHash", typeof(byte[]));
             dtSchema.Columns.Add("DDL", typeof(byte[]));
-       
-          
+            return dtSchema;
+        }
+
+        public void SnapshotJobs(ref DataSet ds)
+        {
+            var jobDT = JobDataTableSchema();
+            var jobStepDT = new DataTable("JobSteps");
+            jobStepDT.Columns.Add("job_id", typeof(Guid));
+            jobStepDT.Columns.Add("step_id", typeof(int));
+            jobStepDT.Columns.Add("step_name");
+            jobStepDT.Columns.Add("subsystem");
+            jobStepDT.Columns.Add("command");
+            jobStepDT.Columns.Add("cmdexec_success_code",typeof(int));
+            jobStepDT.Columns.Add("on_success_action", typeof(short));
+            jobStepDT.Columns.Add("on_success_step_id", typeof(int));
+            jobStepDT.Columns.Add("on_fail_action", typeof(short));
+            jobStepDT.Columns.Add("on_fail_step_id", typeof(int));
+            jobStepDT.Columns.Add("database_name");
+            jobStepDT.Columns.Add("database_user_name");
+            jobStepDT.Columns.Add("retry_attempts", typeof(int));
+            jobStepDT.Columns.Add("retry_interval", typeof(int)); 
+            jobStepDT.Columns.Add("output_file_name");
+            jobStepDT.Columns.Add("proxy_name");
+
             using (var cn = new Microsoft.Data.SqlClient.SqlConnection(_connectionString))
             {
                 var instance = new Microsoft.SqlServer.Management.Smo.Server(new Microsoft.SqlServer.Management.Common.ServerConnection(cn));
                 foreach(Microsoft.SqlServer.Management.Smo.Agent.Job job in instance.JobServer.Jobs)
                 {
-                    DataRow r = dtSchema.NewRow();
+                    DataRow r = jobDT.NewRow();
                     var sDDL = stringCollectionToString(job.Script(ScriptingOptions));
                    
                     var bDDL = Zip(sDDL);
@@ -173,10 +195,35 @@ namespace DBADash
                     r["has_schedule"] = job.HasSchedule;
                     r["has_server"] = job.HasServer;
                     r["has_step"] = job.HasSchedule;
-                    dtSchema.Rows.Add(r);
+                    jobDT.Rows.Add(r);
+
+                    foreach(Microsoft.SqlServer.Management.Smo.Agent.JobStep step in job.JobSteps)
+                    {
+                        var stepR = jobStepDT.NewRow();
+                        stepR["job_id"] = job.JobID;
+                        stepR["step_name"] = step.Name;
+                        stepR["database_name"] = step.DatabaseName;
+                        stepR["step_id"] = step.ID;
+                        stepR["subsystem"] = step.SubSystem;
+                        stepR["command"] = step.Command;
+                        stepR["cmdexec_success_code"] = step.CommandExecutionSuccessCode;
+                        stepR["on_success_action"] = step.OnSuccessAction;
+                        stepR["on_success_step_id"] = step.OnSuccessStep;
+                        stepR["on_fail_action"] = step.OnFailAction;
+                        stepR["on_fail_step_id"] = step.OnFailStep;
+                        stepR["database_user_name"] = step.DatabaseUserName;
+                        stepR["retry_attempts"] = step.RetryAttempts;
+                        stepR["retry_interval"] = step.RetryInterval;
+                        stepR["output_file_name"] = step.OutputFileName;
+                        stepR["proxy_name"] = step.ProxyName;
+
+                        jobStepDT.Rows.Add(stepR);
+
+                    }
                 }
             }
-            return dtSchema;
+            ds.Tables.Add(jobDT);
+            ds.Tables.Add(jobStepDT);
         }
 
         public DataTable SnapshotDB(string DBName)
@@ -496,20 +543,23 @@ namespace DBADash
 
         private void addSeq(Database db, DataTable dtSchema)
         {
-            foreach (Sequence s in db.Sequences)
+            if (db.ServerVersion.Major > 11) // 2012+
             {
-                var r = dtSchema.NewRow();
-                var sDDL = stringCollectionToString(s.Script(ScriptingOptions));
-                var bDDL = Zip(sDDL);
-                r["ObjectName"] = s.Name;
-                r["SchemaName"] = s.Schema;
-                r["ObjectType"] = "SO";
-                r["object_id"] = s.ID;
-                r["DDL"] = bDDL;
-                r["DDLHash"] = crypt.ComputeHash(bDDL);
-                r["ObjectDateCreated"] = s.CreateDate;
-                r["ObjectDateModified"] = s.DateLastModified;
-                dtSchema.Rows.Add(r);
+                foreach (Sequence s in db.Sequences)
+                {
+                    var r = dtSchema.NewRow();
+                    var sDDL = stringCollectionToString(s.Script(ScriptingOptions));
+                    var bDDL = Zip(sDDL);
+                    r["ObjectName"] = s.Name;
+                    r["SchemaName"] = s.Schema;
+                    r["ObjectType"] = "SO";
+                    r["object_id"] = s.ID;
+                    r["DDL"] = bDDL;
+                    r["DDLHash"] = crypt.ComputeHash(bDDL);
+                    r["ObjectDateCreated"] = s.CreateDate;
+                    r["ObjectDateModified"] = s.DateLastModified;
+                    dtSchema.Rows.Add(r);
+                }
             }
         }
 

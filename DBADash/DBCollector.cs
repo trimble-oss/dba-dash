@@ -496,7 +496,7 @@ namespace DBADash
                         if (currentJobModified > JobLastModified)
                         {
                             var ss = new SchemaSnapshotDB(_connectionString, new SchemaSnapshotDBOptions());
-                            Data.Tables.Add(ss.SnapshotJobs());
+                            ss.SnapshotJobs(ref Data);
                             JobLastModified = currentJobModified;
                         }
                         

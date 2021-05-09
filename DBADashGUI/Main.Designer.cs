@@ -243,6 +243,11 @@
             this.TreeViewImageList.Images.SetKeyName(9, "CloudDatabase_16x.png");
             this.TreeViewImageList.Images.SetKeyName(10, "Checklist_16x.png");
             this.TreeViewImageList.Images.SetKeyName(11, "Tag_16x.png");
+            this.TreeViewImageList.Images.SetKeyName(12, "BatchFile_16x.png");
+            this.TreeViewImageList.Images.SetKeyName(13, "Cube_16x.png");
+            this.TreeViewImageList.Images.SetKeyName(14, "DataSourceTarget_16x.png");
+            this.TreeViewImageList.Images.SetKeyName(15, "PowerShellFile_16x.png");
+            this.TreeViewImageList.Images.SetKeyName(16, "SQLFile_16x.png");
             // 
             // menuStrip1
             // 

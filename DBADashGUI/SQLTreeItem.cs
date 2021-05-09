@@ -53,7 +53,21 @@ namespace DBADashGUI
             AgentJob,
             HADR,
             DBAChecks,
-            Tags
+            Tags,
+            AgentJobStep_PS,
+            AgentJobStep_TSQL,
+            AgentJobStep_Cmd,
+            AgentJobStep_SSIS,
+            AgentJobStep_SSAS
+            
+        }
+
+        public bool IsAgentJobStepType
+        {
+            get
+            {
+                return Type == SQLTreeItem.TreeType.AgentJobStep_Cmd || Type == SQLTreeItem.TreeType.AgentJobStep_PS || Type == SQLTreeItem.TreeType.AgentJobStep_SSAS || Type == SQLTreeItem.TreeType.AgentJobStep_SSIS || Type == SQLTreeItem.TreeType.AgentJobStep_TSQL;
+            }
         }
 
         private List<Int32> _childInstanceIDs;
@@ -352,6 +366,21 @@ namespace DBADashGUI
                     break;
                 case TreeType.Tags:
                     ImageIndex = 11;
+                    break;
+                case TreeType.AgentJobStep_Cmd:
+                    ImageIndex = 12;
+                    break;
+                case TreeType.AgentJobStep_SSAS:
+                    ImageIndex = 13;
+                    break;
+                case TreeType.AgentJobStep_SSIS:
+                    ImageIndex = 14;
+                    break;
+                case TreeType.AgentJobStep_PS:
+                    ImageIndex = 15;
+                    break;
+                case TreeType.AgentJobStep_TSQL:
+                    ImageIndex = 16;
                     break;
                 default:
                     ImageIndex = 5;
