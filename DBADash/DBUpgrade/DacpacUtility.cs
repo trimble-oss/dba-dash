@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Microsoft.SqlServer.Dac;
-
+using Serilog;
 namespace DacpacUtility
 {
     public class DacpacService
@@ -33,11 +33,10 @@ namespace DacpacUtility
             };
                    }
 
-        public bool ProcessDacPac(string connectionString,
+        public void ProcessDacPac(string connectionString,
                                     string databaseName,
                                     string dacpacName)
         {
-            bool success = true;
 
             MessageList.Add("*** Start of processing for " +
                              databaseName);
@@ -45,11 +44,16 @@ namespace DacpacUtility
 
             var dacServiceInstance = new DacServices(connectionString);
             dacServiceInstance.ProgressChanged +=
-              new EventHandler<DacProgressEventArgs>((s, e) =>
-                            MessageList.Add(e.Message));
+              new EventHandler<DacProgressEventArgs>((s, e) => {
+                  MessageList.Add(e.Message);
+                  Log.Information(e.Message);
+              });
             dacServiceInstance.Message +=
               new EventHandler<DacMessageEventArgs>((s, e) =>
-                            MessageList.Add(e.Message.Message));
+              {
+                  MessageList.Add(e.Message.Message);
+                  Log.Information(e.Message.Message);
+              });
 
             try
             {
@@ -64,15 +68,13 @@ namespace DacpacUtility
                                             upgradeExisting: true,
                                             options: _dacDeployOptions);
                 }
-
             }
             catch (Exception ex)
             {
-                success = false;
+                Log.Error(ex, "Error processing dacpac");
                 MessageList.Add(ex.Message);
+                throw;
             }
-
-            return success;
         }
 
         DacDeployOptions _dacDeployOptions;

@@ -227,7 +227,7 @@ AND database_id > 4 ", cn);
             bttnGenerate.Enabled= false;
             if (t.IsCompleted)
             {
-                if(t.Result == true)
+                if(!t.IsFaulted)
                 {
                     MessageBox.Show("Deploy succeeded", "Deploy", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     this.DialogResult = DialogResult.OK;
