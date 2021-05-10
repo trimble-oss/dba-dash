@@ -248,6 +248,7 @@
             this.TreeViewImageList.Images.SetKeyName(14, "DataSourceTarget_16x.png");
             this.TreeViewImageList.Images.SetKeyName(15, "PowerShellFile_16x.png");
             this.TreeViewImageList.Images.SetKeyName(16, "SQLFile_16x.png");
+            this.TreeViewImageList.Images.SetKeyName(17, "ProcedureMissing_16x.png");
             // 
             // menuStrip1
             // 

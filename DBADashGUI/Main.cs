@@ -179,7 +179,7 @@ namespace DBADashGUI
                 {
                     agentJobsControl1.JobID = (Guid)n.Tag;
                 }
-                else if(n.IsAgentJobStepType)
+                else if(n.Type == SQLTreeItem.TreeType.AgentJobStep)
                 {
                     agentJobsControl1.JobID = (Guid)n.Parent.Tag;
                     agentJobsControl1.StepID = (int)n.Tag;
@@ -514,33 +514,20 @@ namespace DBADashGUI
 
         private void expandJobs(SQLTreeItem jobsNode)
         {
-            var jobs = GetJobs(jobsNode.InstanceID);
-            foreach(var job in jobs)
+            var jobs = CommonData.GetJobs(jobsNode.InstanceID);
+            foreach(DataRow job in jobs.Rows)
             {
-                var jobItem = new SQLTreeItem(job.Value, SQLTreeItem.TreeType.AgentJob) { InstanceID = jobsNode.InstanceID,Tag=job.Key };
+                var attributes = new Dictionary<string, object>
+                {
+                    { "enabled", Convert.ToBoolean(job["enabled"]) }
+                };
+                var jobItem = new SQLTreeItem((string)job["name"], SQLTreeItem.TreeType.AgentJob, attributes) { InstanceID = jobsNode.InstanceID,Tag=(Guid)job["job_id"]};               
                 jobItem.AddDummyNode();
                 jobsNode.Nodes.Add(jobItem);
             }
         }
 
-        private Dictionary<Guid, String> GetJobs(int instanceId)
-        {
-            var jobs = new Dictionary<Guid,String>();
-            using(var cn = new SqlConnection(Common.ConnectionString))
-            using(var cmd = new SqlCommand("dbo.Jobs_Get", cn) {  CommandType = CommandType.StoredProcedure})
-            {
-                cmd.Parameters.AddWithValue("InstanceID", instanceId);
-                cn.Open();
-                using(var rdr = cmd.ExecuteReader())
-                {
-                    while (rdr.Read())
-                    {
-                        jobs.Add((Guid)rdr[0], (string)rdr[1]);
-                    }
-                }
-            }
-            return jobs;
-        }
+
 
         private void addDatabases(SQLTreeItem instanceNode)
         {
@@ -738,7 +725,7 @@ namespace DBADashGUI
             {
                 allowedTabs.Add(tabTags);
             }
-            else if(n.IsAgentJobStepType)
+            else if(n.Type == SQLTreeItem.TreeType.AgentJobStep)
             {
                 allowedTabs.Add(tabJobs);
             }
@@ -817,28 +804,12 @@ namespace DBADashGUI
                 var stepID = (int)r["step_id"];
                 var stepName = (string)r["step_name"];
                 var subsystem = (string)r["subsystem"];
-                SQLTreeItem.TreeType type;
-                if (subsystem== "CmdExec")
+                var attributes = new Dictionary<string, object>
                 {
-                    type = SQLTreeItem.TreeType.AgentJobStep_Cmd;
-                }
-                else if(subsystem== "PowerShell")
-                {
-                    type = SQLTreeItem.TreeType.AgentJobStep_PS;
-                }
-                else if(subsystem == "Ssis")
-                {
-                    type = SQLTreeItem.TreeType.AgentJobStep_SSIS;
-                }
-                else if(subsystem== "AnalysisQuery")
-                {
-                    type = SQLTreeItem.TreeType.AgentJobStep_SSAS;
-                }
-                else
-                {
-                    type = SQLTreeItem.TreeType.AgentJobStep_TSQL;
-                }
-                n.Nodes.Add(new SQLTreeItem(stepName, type) { InstanceID = n.InstanceID, Tag=stepID });
+                    { "subsystem", subsystem }
+                };
+
+                n.Nodes.Add(new SQLTreeItem(stepName, SQLTreeItem.TreeType.AgentJobStep, attributes) { InstanceID = n.InstanceID, Tag=stepID });
             }
         }
 

@@ -1,6 +1,6 @@
 ﻿CREATE PROC [dbo].[AgentJobs_Get](
 	@InstanceIDs VARCHAR(MAX) = NULL,
-	@enabled TINYINT=1,
+	@enabled TINYINT=NULL,
 	@IncludeCritical BIT=1,
 	@IncludeWarning BIT=1,
 	@IncludeNA BIT=0,
@@ -68,7 +68,7 @@ SELECT J.Instance,
 	   J.JobStatus
 FROM dbo.AgentJobStatus J
 WHERE J.JobStatus IN(' + @StatusesString + ')
-AND J.enabled=@enabled
+' + CASE WHEN @enabled IS NULL THEN '' ELSE 'AND J.enabled=@enabled' END + '
 ' + CASE WHEN @InstanceIDs IS NULL THEN '' ELSE 'AND EXISTS(SELECT 1 FROM @Instances I WHERE I.ID = J.InstanceID)' END + '
 ' + CASE WHEN @JobName IS NULL THEN '' ELSE 'AND J.name LIKE @JobName' END + '
 ' + CASE WHEN @JobID IS NULL THEN '' ELSE 'AND J.job_id = @JobID' END + ' 

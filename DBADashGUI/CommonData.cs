@@ -154,5 +154,19 @@ namespace DBADashGUI
             }
         }
 
+        public static DataTable GetJobs(int InstanceId)
+        {
+            var jobs = new Dictionary<Guid, String>();
+            using (var cn = new SqlConnection(Common.ConnectionString))
+            using (var cmd = new SqlCommand("dbo.Jobs_Get", cn) { CommandType = CommandType.StoredProcedure })
+            using (var da = new SqlDataAdapter(cmd))
+            {
+                cmd.Parameters.AddWithValue("InstanceID", InstanceId);
+                var dt = new DataTable();
+                da.Fill(dt);
+                return dt;
+            }
+        }
+
     }
 }

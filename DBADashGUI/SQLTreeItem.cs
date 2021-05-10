@@ -10,6 +10,15 @@ namespace DBADashGUI
     public class SQLTreeItem : TreeNode
     {
 
+        private readonly Dictionary<string, object> _attributes;
+        public Dictionary<string, object> Attributes
+        {
+            get
+            {
+                return _attributes;
+            }
+        }
+
         public enum TreeType
         {
             DummyNode,
@@ -54,20 +63,8 @@ namespace DBADashGUI
             HADR,
             DBAChecks,
             Tags,
-            AgentJobStep_PS,
-            AgentJobStep_TSQL,
-            AgentJobStep_Cmd,
-            AgentJobStep_SSIS,
-            AgentJobStep_SSAS
-            
-        }
-
-        public bool IsAgentJobStepType
-        {
-            get
-            {
-                return Type == SQLTreeItem.TreeType.AgentJobStep_Cmd || Type == SQLTreeItem.TreeType.AgentJobStep_PS || Type == SQLTreeItem.TreeType.AgentJobStep_SSAS || Type == SQLTreeItem.TreeType.AgentJobStep_SSIS || Type == SQLTreeItem.TreeType.AgentJobStep_TSQL;
-            }
+            AgentJobStep
+          
         }
 
         private List<Int32> _childInstanceIDs;
@@ -119,6 +116,15 @@ namespace DBADashGUI
             _objectName = objectName;
             Text = objectName;
             this.Type = type;
+            setIcon();
+        }
+
+        public SQLTreeItem(string objectName, TreeType type, Dictionary<string,object> attributes) : base()
+        {
+            _objectName = objectName;
+            Text = objectName;
+            this.Type = type;
+            _attributes = attributes;
             setIcon();
         }
 
@@ -367,20 +373,38 @@ namespace DBADashGUI
                 case TreeType.Tags:
                     ImageIndex = 11;
                     break;
-                case TreeType.AgentJobStep_Cmd:
-                    ImageIndex = 12;
+                case TreeType.AgentJobStep:
+                    string subsystem = (string)_attributes["subsystem"];
+                    if (subsystem == "CmdExec")
+                    {
+                        ImageIndex = 12;
+                    }
+                    else if (subsystem == "PowerShell")
+                    {
+                        ImageIndex = 15;
+                    }
+                    else if (subsystem == "Ssis")
+                    {
+                        ImageIndex = 14;
+                    }
+                    else if (subsystem == "AnalysisQuery")
+                    {
+                        ImageIndex = 13;
+                    }
+                    else
+                    {
+                        ImageIndex = 16;
+                    }
                     break;
-                case TreeType.AgentJobStep_SSAS:
-                    ImageIndex = 13;
-                    break;
-                case TreeType.AgentJobStep_SSIS:
-                    ImageIndex = 14;
-                    break;
-                case TreeType.AgentJobStep_PS:
-                    ImageIndex = 15;
-                    break;
-                case TreeType.AgentJobStep_TSQL:
-                    ImageIndex = 16;
+                case TreeType.AgentJob:
+                    if (Attributes.Count >0 && (bool)Attributes["enabled"])
+                    {
+                        ImageIndex = 5;
+                    }
+                    else
+                    {
+                        ImageIndex = 17;
+                    }
                     break;
                 default:
                     ImageIndex = 5;
