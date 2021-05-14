@@ -6,9 +6,6 @@
 	@UTCOffset INT=0
 )
 AS
-SELECT @FromDate= DATEADD(mi, -@UTCOffset, @FromDate),
-	@ToDate = DATEADD(mi, -@UTCOffset, @ToDate) 
-
 DECLARE @DateTimeCol VARCHAR(MAX) ='DATEADD(mi, @UTCOffset, RS.end_time)' 
 DECLARE @SQL NVARCHAR(MAX)
 DECLARE @DateGroupingSQL NVARCHAR(MAX)

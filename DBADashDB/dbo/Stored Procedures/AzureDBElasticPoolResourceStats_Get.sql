@@ -10,8 +10,6 @@
 AS
 SELECT @InstanceID =MasterInstanceID 
 FROM dbo.AzureDBMasterInstance(@InstanceID)
-SELECT @FromDate= DATEADD(mi, -@UTCOffset, @FromDate),
-	@ToDate = DATEADD(mi, -@UTCOffset, @ToDate) 
 
 IF @Use60MIN IS NULL
 BEGIN
