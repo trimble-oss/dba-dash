@@ -279,6 +279,7 @@
     <Content Include="SQL\SQLDatabaseMirroring.sql" />
     <Content Include="SQL\SQLDatabasePermissions.sql" />
     <Content Include="SQL\SQLDatabasePrincipals.sql" />
+    <Content Include="SQL\SQLDatabaseQueryStoreOptions.sql" />
     <Content Include="SQL\SQLDatabaseRoleMembers.sql" />
     <Content Include="SQL\SQLDatabases.sql" />
     <Content Include="SQL\SQLDatabasesHADR.sql" />
