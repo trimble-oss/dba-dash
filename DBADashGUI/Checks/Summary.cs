@@ -33,7 +33,7 @@ namespace DBADashGUI
            statusColumns= new Dictionary<string, bool> { { "FullBackupStatus", false }, { "LogShippingStatus", false }, { "DiffBackupStatus", false }, { "LogBackupStatus", false }, { "DriveStatus", false },
                                                             { "JobStatus", false }, { "CollectionErrorStatus", false }, { "AGStatus", false }, {"LastGoodCheckDBStatus",false}, {"SnapshotAgeStatus",false },
                                                             {"MemoryDumpStatus",false }, {"UptimeStatus",false }, {"CorruptionStatus",false }, {"AlertStatus",false }, {"FileFreeSpaceStatus",false },
-                                                            {"CustomCheckStatus",false }, {"MirroringStatus",false },{"ElasticPoolStorageStatus",false},{"PctMaxSizeStatus",false} };
+                                                            {"CustomCheckStatus",false }, {"MirroringStatus",false },{"ElasticPoolStorageStatus",false},{"PctMaxSizeStatus",false}, {"QueryStoreStatus",false } };
         }
 
         public void RefreshData()
@@ -91,6 +91,7 @@ namespace DBADashGUI
                 dgvSummary.Rows[idx].Cells["JobStatus"].Value = isAzure ? "" : "View";
                 dgvSummary.Rows[idx].Cells["LogShippingStatus"].Value = isAzure ? "" : "View";
                 dgvSummary.Rows[idx].Cells["AGStatus"].Value = (int)row["AGStatus"]==3 ? "" : "View";
+                dgvSummary.Rows[idx].Cells["QueryStoreStatus"].Value = (int)row["QueryStoreStatus"] == 3 ? "" : "View";
                 if (row["IsAgentRunning"]!=DBNull.Value && (bool)row["IsAgentRunning"] == false)
                 {
                     dgvSummary.Rows[idx].Cells["JobStatus"].Style.BackColor = Color.Black;
@@ -375,6 +376,10 @@ namespace DBADashGUI
                 else if(e.ColumnIndex== AGStatus.Index)
                 {
                     Instance_Selected(this, new InstanceSelectedEventArgs() { Instance = (string)row["Instance"], Tab = "tabAG" });
+                }
+                else if ( e.ColumnIndex == QueryStoreStatus.Index)
+                {
+                    Instance_Selected(this,new InstanceSelectedEventArgs() { Instance = (string)row["Instance"], Tab = "tabQS" });
                 }
             }
         }

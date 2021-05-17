@@ -1,6 +1,6 @@
-﻿
-
-CREATE PROC [dbo].[Summary_Get](@InstanceIDs VARCHAR(MAX)=NULL)
+﻿CREATE PROC dbo.Summary_Get(
+	@InstanceIDs VARCHAR(MAX)=NULL
+)
 AS
 DECLARE @Instances TABLE(
 	InstanceID INT PRIMARY KEY
@@ -60,20 +60,23 @@ WITH LS AS (
 	GROUP BY InstanceID
 ),
 J AS (
-	SELECT InstanceID,MIN(JobStatus) AS JobStatus
+	SELECT InstanceID,
+		MIN(JobStatus) AS JobStatus
 	FROM dbo.AgentJobStatus
 	WHERE JobStatus<>3
 	AND enabled=1
 	GROUP BY InstanceID
 )
 ,ag AS (
-	SELECT D.InstanceID, MIN(hadr.synchronization_health) AS synchronization_health
+	SELECT D.InstanceID, 
+		MIN(hadr.synchronization_health) AS synchronization_health
 	FROM dbo.DatabasesHADR hadr
 	JOIN dbo.Databases D ON D.DatabaseID = hadr.DatabaseID
 	GROUP BY D.InstanceID
 ),
 dc AS (
-	SELECT I.InstanceID,MAX(c.UpdateDate) AS DetectedCorruptionDate
+	SELECT I.InstanceID,
+		MAX(c.UpdateDate) AS DetectedCorruptionDate
 	FROM dbo.Instances I
 	JOIN dbo.Databases D ON D.InstanceID = I.InstanceID
 	JOIN dbo.Corruption c ON D.DatabaseID = c.DatabaseID
@@ -82,14 +85,19 @@ dc AS (
 	GROUP BY I.InstanceID
 ),
 err AS (
-	SELECT InstanceID,ErrorSource,COUNT(*) cnt,MAX(ErrorDate) AS LastError
+	SELECT InstanceID,
+		ErrorSource,
+		COUNT(*) cnt,
+		MAX(ErrorDate) AS LastError
 	FROM dbo.CollectionErrorLog
 	WHERE ErrorDate>=@ErrorsFrom
 	AND ErrorContext NOT LIKE '%[[]Retrying]'
 	GROUP BY InstanceID,ErrorSource
 ),
 errSummary AS(
-	SELECT err.InstanceID, SUM(err.cnt) CollectionErrorCount,MIN(x.SucceedAfterErrorCount) AS SucceedAfterErrorCount
+	SELECT err.InstanceID, 
+		SUM(err.cnt) CollectionErrorCount,
+		MIN(x.SucceedAfterErrorCount) AS SucceedAfterErrorCount
 	FROM err
 	CROSS APPLY(SELECT COUNT(*) SucceedAfterErrorCount
 				FROM dbo.CollectionDates CD 
@@ -130,7 +138,8 @@ a AS(
 	GROUP BY InstanceID
 )
 ,cus AS (
-	SELECT cc.InstanceID, MIN(cc.Status) AS Status
+	SELECT cc.InstanceID, 
+		MIN(cc.Status) AS Status
 	FROM dbo.CustomChecks cc
 	WHERE Status <> 3
 	GROUP BY cc.InstanceID
@@ -140,6 +149,16 @@ a AS(
 		MIN(CASE WHEN DM.mirroring_state IN(4,6) AND DM.mirroring_witness_state IN(0,1) THEN 4 WHEN DM.mirroring_state IN(2,4,6) THEN 2 ELSE 1 END) AS MirroringStatus
 	FROM dbo.DatabaseMirroring DM 
 	GROUP BY DM.InstanceID
+),
+QS AS (
+	SELECT D.InstanceID,
+		MIN(CASE WHEN QS.actual_state=3 THEN 1 
+				WHEN QS.readonly_reason NOT IN(0,1,8) THEN 2
+				WHEN QS.actual_state=2 THEN 4
+				ELSE NULL END) AS QueryStoreStatus
+	FROM dbo.DatabaseQueryStoreOptions QS
+	JOIN dbo.Databases D ON QS.DatabaseID = D.DatabaseID
+	GROUP BY D.InstanceID
 )
 SELECT I.InstanceID,
 	I.Instance,
@@ -200,7 +219,8 @@ SELECT I.InstanceID,
 	ISNULL(cus.Status,3) AS CustomCheckStatus,
 	ISNULL(dbm.MirroringStatus,3) AS MirroringStatus,
 	3 AS ElasticPoolStorageStatus,
-	ISNULL(F.PctMaxSizeStatus,3) AS PctMaxSizeStatus
+	ISNULL(F.PctMaxSizeStatus,3) AS PctMaxSizeStatus,
+	ISNULL(QS.QueryStoreStatus,3) AS QueryStoreStatus
 FROM dbo.Instances I 
 LEFT JOIN LS ON I.InstanceID = LS.InstanceID
 LEFT JOIN B ON I.InstanceID = B.InstanceID
@@ -223,6 +243,7 @@ OUTER APPLY(SELECT TOP(1) IUT.WarningThreshold AS UptimeWarningThreshold,
 			ORDER BY IUT.InstanceID DESC) UTT		
 LEFT JOIN cus ON cus.InstanceID = I.InstanceID
 LEFT JOIN dbm ON dbm.InstanceID = I.InstanceID
+LEFT JOIN QS ON QS.InstanceID = I.InstanceID
 WHERE EXISTS(SELECT 1 FROM @Instances t WHERE I.InstanceID = t.InstanceID)
 AND I.IsActive=1
 AND I.EngineEdition<> 5 -- not azure
@@ -273,13 +294,15 @@ SELECT NULL AS InstanceID,
 	ISNULL(MIN(cus.Status),3) AS CustomCheckStatus,
 	3 AS MirroringStatus,
 	ISNULL(MIN(NULLIF(EPS.ElasticPoolStorageStatus,3)),3) AS ElasticPoolStorageStatus,
-	ISNULL(MIN(NULLIF(F.PctMaxSizeStatus,3)),3) AS PctMaxSizeStatus
+	ISNULL(MIN(NULLIF(F.PctMaxSizeStatus,3)),3) AS PctMaxSizeStatus,
+	ISNULL(MIN(QS.QueryStoreStatus),3) AS QueryStoreStatus
 FROM dbo.Instances I
 LEFT JOIN errSummary  ON I.InstanceID = errSummary.InstanceID
 LEFT JOIN F ON I.InstanceID = F.InstanceID
 LEFT JOIN SSD ON I.InstanceID = SSD.InstanceID
 LEFT JOIN cus ON cus.InstanceID = I.InstanceID
 LEFT JOIN dbo.AzureDBElasticPoolStorageStatus EPS ON I.InstanceID = EPS.InstanceID
+LEFT JOIN QS ON QS.InstanceID = I.InstanceID
 WHERE I.EngineEdition=5 -- azure
 AND EXISTS(SELECT 1 FROM @Instances t WHERE I.InstanceID = t.InstanceID)
 AND I.IsActive=1

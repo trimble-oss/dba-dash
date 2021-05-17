@@ -400,7 +400,7 @@ namespace DBADashGUI
                 performanceCounterSummary1.InstanceID = n.InstanceID;
                 performanceCounterSummary1.RefreshData();
             }
-            if(tabs.SelectedTab== tabObjectExecutionSummary)
+            else if(tabs.SelectedTab== tabObjectExecutionSummary)
             {
                 globalTimeisVisible = true;
                 objectExecutionSummary1.Instance = n.InstanceName;
@@ -409,27 +409,33 @@ namespace DBADashGUI
                 objectExecutionSummary1.ObjectID = (n.Type == SQLTreeItem.TreeType.Database || n.Type == SQLTreeItem.TreeType.AzureDatabase) ? -1 :  n.ObjectID;
                 objectExecutionSummary1.RefreshData();
             }
-            if(tabs.SelectedTab == tabWaits)
+            else if(tabs.SelectedTab == tabWaits)
             {
                 globalTimeisVisible = true;
                 waitsSummary1.InstanceID = n.InstanceID;
                 waitsSummary1.RefreshData();
             }
-            if(tabs.SelectedTab == tabMirroring)
+            else if(tabs.SelectedTab == tabMirroring)
             {
                 mirroring1.InstanceIDs = instanceIDs;
                 mirroring1.RefreshData();
             }
-            if(tabs.SelectedTab == tabJobDDL)
+            else if(tabs.SelectedTab == tabJobDDL)
             {
                 jobDDLHistory1.InstanceID = n.InstanceID;
                 jobDDLHistory1.JobID = (Guid)n.Tag;
                 jobDDLHistory1.RefreshData();
             }
-            if(tabs.SelectedTab== tabAG)
+           else  if(tabs.SelectedTab== tabAG)
             {
                 ag1.InstanceIDs = instanceIDs;
                 ag1.RefreshData();
+            }
+            else if(tabs.SelectedTab == tabQS)
+            {
+                queryStore1.InstanceIDs = AllInstanceIDs;
+                queryStore1.Instance = n.InstanceName;
+                queryStore1.RefreshData();
             }
             tsTime.Visible = globalTimeisVisible;
         }
@@ -689,6 +695,7 @@ namespace DBADashGUI
                 }
                 allowedTabs.Add(tabDBConfiguration);
                 allowedTabs.Add(tabDBOptions);
+                allowedTabs.Add(tabQS);
             }
             else if(n.Type == SQLTreeItem.TreeType.AgentJobs)
             {
@@ -1166,7 +1173,7 @@ namespace DBADashGUI
             {
                 if((child.InstanceID  == e.InstanceID && e.InstanceID>0 ) || (child.InstanceName == e.Instance && e.Instance!=null))
                 {
-                    if (e.Tab == "tabAlerts") // Configuration Node
+                    if (e.Tab == "tabAlerts" || e.Tab == "tabQS") // Configuration Node
                     {
                         child.Expand();
                         tv1.SelectedNode = child.Nodes[0];

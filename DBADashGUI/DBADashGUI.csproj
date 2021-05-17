@@ -169,6 +169,12 @@
     <Compile Include="AgentJobs\JobDDLHistory.Designer.cs">
       <DependentUpon>JobDDLHistory.cs</DependentUpon>
     </Compile>
+    <Compile Include="Changes\QueryStore.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Changes\QueryStore.Designer.cs">
+      <DependentUpon>QueryStore.cs</DependentUpon>
+    </Compile>
     <Compile Include="Changes\SchemaSnapshots.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -560,6 +566,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="AgentJobs\JobDDLHistory.resx">
       <DependentUpon>JobDDLHistory.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Changes\QueryStore.resx">
+      <DependentUpon>QueryStore.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Changes\SchemaSnapshots.resx">
       <DependentUpon>SchemaSnapshots.cs</DependentUpon>
