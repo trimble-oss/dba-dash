@@ -58,6 +58,10 @@
             this.label8 = new System.Windows.Forms.Label();
             this.chkObjectType = new System.Windows.Forms.CheckedListBox();
             this.label7 = new System.Windows.Forms.Label();
+            this.dataGridViewTextBoxColumn1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.dataGridViewTextBoxColumn2 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.dataGridViewTextBoxColumn3 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.dataGridViewTextBoxColumn4 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             ((System.ComponentModel.ISupportInitialize)(this.gvDiff)).BeginInit();
             this.panel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
@@ -145,9 +149,9 @@
             // 
             // bttnCompare
             // 
-            this.bttnCompare.Location = new System.Drawing.Point(870, 74);
+            this.bttnCompare.Location = new System.Drawing.Point(870, 69);
             this.bttnCompare.Name = "bttnCompare";
-            this.bttnCompare.Size = new System.Drawing.Size(75, 23);
+            this.bttnCompare.Size = new System.Drawing.Size(148, 27);
             this.bttnCompare.TabIndex = 8;
             this.bttnCompare.Text = "Compare";
             this.bttnCompare.UseVisualStyleBackColor = true;
@@ -312,7 +316,6 @@
             this.cboDate_A.Name = "cboDate_A";
             this.cboDate_A.Size = new System.Drawing.Size(181, 24);
             this.cboDate_A.TabIndex = 10;
-            this.cboDate_A.SelectedIndexChanged += new System.EventHandler(this.cboDate_A_SelectedIndexChanged);
             // 
             // splitContainer1
             // 
@@ -353,7 +356,6 @@
             this.chkDiffType.Name = "chkDiffType";
             this.chkDiffType.Size = new System.Drawing.Size(937, 32);
             this.chkDiffType.TabIndex = 17;
-            this.chkDiffType.SelectedIndexChanged += new System.EventHandler(this.chkDiffType_SelectedIndexChanged_1);
             this.chkDiffType.SelectedValueChanged += new System.EventHandler(this.chkDiffType_SelectedValueChanged);
             // 
             // label8
@@ -367,6 +369,7 @@
             // 
             // chkObjectType
             // 
+            this.chkObjectType.CheckOnClick = true;
             this.chkObjectType.Dock = System.Windows.Forms.DockStyle.Left;
             this.chkObjectType.FormattingEnabled = true;
             this.chkObjectType.Location = new System.Drawing.Point(0, 0);
@@ -384,6 +387,43 @@
             this.label7.TabIndex = 0;
             this.label7.Text = "Diff (Loaded programatically due to designer issue)";
             this.label7.Visible = false;
+            // 
+            // dataGridViewTextBoxColumn1
+            // 
+            this.dataGridViewTextBoxColumn1.DataPropertyName = "ObjectName";
+            this.dataGridViewTextBoxColumn1.HeaderText = "Object Name";
+            this.dataGridViewTextBoxColumn1.MinimumWidth = 6;
+            this.dataGridViewTextBoxColumn1.Name = "dataGridViewTextBoxColumn1";
+            this.dataGridViewTextBoxColumn1.ReadOnly = true;
+            this.dataGridViewTextBoxColumn1.Width = 125;
+            // 
+            // dataGridViewTextBoxColumn2
+            // 
+            this.dataGridViewTextBoxColumn2.DataPropertyName = "SchemaName";
+            this.dataGridViewTextBoxColumn2.HeaderText = "Schema";
+            this.dataGridViewTextBoxColumn2.MinimumWidth = 6;
+            this.dataGridViewTextBoxColumn2.Name = "dataGridViewTextBoxColumn2";
+            this.dataGridViewTextBoxColumn2.ReadOnly = true;
+            this.dataGridViewTextBoxColumn2.Width = 125;
+            // 
+            // dataGridViewTextBoxColumn3
+            // 
+            this.dataGridViewTextBoxColumn3.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.DisplayedCells;
+            this.dataGridViewTextBoxColumn3.DataPropertyName = "TypeDescription";
+            this.dataGridViewTextBoxColumn3.HeaderText = "Object Type";
+            this.dataGridViewTextBoxColumn3.MinimumWidth = 6;
+            this.dataGridViewTextBoxColumn3.Name = "dataGridViewTextBoxColumn3";
+            this.dataGridViewTextBoxColumn3.ReadOnly = true;
+            this.dataGridViewTextBoxColumn3.Width = 125;
+            // 
+            // dataGridViewTextBoxColumn4
+            // 
+            this.dataGridViewTextBoxColumn4.DataPropertyName = "DiffType";
+            this.dataGridViewTextBoxColumn4.HeaderText = "Diff Type";
+            this.dataGridViewTextBoxColumn4.MinimumWidth = 6;
+            this.dataGridViewTextBoxColumn4.Name = "dataGridViewTextBoxColumn4";
+            this.dataGridViewTextBoxColumn4.ReadOnly = true;
+            this.dataGridViewTextBoxColumn4.Width = 125;
             // 
             // DBDiff
             // 
@@ -442,5 +482,9 @@
         private System.Windows.Forms.Button bttnCopyB;
         private System.Windows.Forms.Button bttnCopyA;
         private System.Windows.Forms.CheckBox chkIgnoreWhiteSpace;
+        private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn1;
+        private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn2;
+        private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn3;
+        private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn4;
     }
 }

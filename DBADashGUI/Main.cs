@@ -825,8 +825,8 @@ namespace DBADashGUI
         #region SchemaSnapshots
         private void loadDDL(Int64 DDLID, Int64 DDLIDOld)
         {
-            string newText = Common.DDL(DDLID, connectionString);
-            string oldText = Common.DDL(DDLIDOld, connectionString);
+            string newText = Common.DDL(DDLID);
+            string oldText = Common.DDL(DDLIDOld);
             diffSchemaSnapshot.OldText = oldText;
             diffSchemaSnapshot.NewText = newText;
         }
@@ -921,10 +921,8 @@ namespace DBADashGUI
 
         private void dBDiffToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            var frm = new DBDiff
-            {
-                ConnectionString = connectionString
-            };
+            var frm = new DBDiff();
+            frm.SelectedTags = SelectedTags();
             var n = (SQLTreeItem)tv1.SelectedNode;
             frm.SelectedInstanceA = n.InstanceName;
             frm.SelectedDatabaseA = new DBDiff.DatabaseItem() { DatabaseID = n.DatabaseID, DatabaseName = n.DatabaseName };

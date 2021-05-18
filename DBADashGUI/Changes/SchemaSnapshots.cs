@@ -63,12 +63,12 @@ namespace DBADashGUI.Changes
                 string ddl = "";
                 if (row["NewDDLID"] != DBNull.Value)
                 {
-                    ddl = Common.DDL((Int64)row["NewDDLID"], Common.ConnectionString);
+                    ddl = Common.DDL((Int64)row["NewDDLID"]);
                 }
                 string ddlOld = "";
                 if (row["OldDDLID"] != DBNull.Value)
                 {
-                    ddlOld = Common.DDL((Int64)row["OldDDLID"], Common.ConnectionString);
+                    ddlOld = Common.DDL((Int64)row["OldDDLID"]);
                 }
                 ViewMode mode = e.ColumnIndex == colDiff.Index ? ViewMode.Diff : ViewMode.Code;
                 var frm = new Diff();

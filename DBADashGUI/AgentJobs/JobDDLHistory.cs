@@ -54,8 +54,8 @@ namespace DBADashGUI.Changes
                 long DDLID = (long)row["DDLID"];
                 long DDLIDold = row["PreviousDDLID"] == DBNull.Value ? -1 : (long)row["PreviousDDLID"];
 
-                string newText = Common.DDL(DDLID, Common.ConnectionString);
-                string oldText = DDLIDold > 0 ? Common.DDL(DDLIDold, Common.ConnectionString) : "";
+                string newText = Common.DDL(DDLID);
+                string oldText = DDLIDold > 0 ? Common.DDL(DDLIDold) : "";
 
                 diffControl1.OldText = oldText;
                 diffControl1.NewText = newText;

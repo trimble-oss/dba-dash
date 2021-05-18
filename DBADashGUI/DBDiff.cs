@@ -49,7 +49,8 @@ namespace DBADashGUI
 
         }
 
-        public string ConnectionString;
+        public List<Int16> SelectedTags;
+
         private string selectedInstance_A;
         private DatabaseItem selectedDB_A;
         public DBDiff()
@@ -96,29 +97,23 @@ namespace DBADashGUI
 
         private void getInstances()
         {
-            SqlConnection cn = new SqlConnection(ConnectionString);
-            using (cn)
+            using (var cn = new SqlConnection(Common.ConnectionString))
+            using (var cmd = new SqlCommand("dbo.InstancesWithDDLSnapshot_Get", cn) { CommandType = CommandType.StoredProcedure })
             {
                 cn.Open();
-                SqlCommand cmd = new SqlCommand(@"SELECT Instance
-FROM dbo.Instances I
-WHERE I.IsActive=1
-AND EXISTS(SELECT 1
-			FROM dbo.Databases D 
-			JOIN dbo.DDLSnapshots SS ON SS.DatabaseID = D.DatabaseID
-			WHERE D.InstanceID = I.InstanceID
-			)
-GROUP BY Instance
-ORDER BY Instance
-", cn);
-
-                var rdr = cmd.ExecuteReader();
-                while (rdr.Read())
+                if (SelectedTags.Count > 0)
                 {
-                    string instance = (string)rdr[0];
-                    cboInstanceA.Items.Add(instance);
-                    cboInstanceB.Items.Add(instance);
-                    cboInstanceA.SelectedItem = selectedInstance_A;
+                    cmd.Parameters.AddWithValue("TagIDs", string.Join(",", SelectedTags));
+                }
+                using (var rdr = cmd.ExecuteReader())
+                {
+                    while (rdr.Read())
+                    {
+                        string instance = (string)rdr[0];
+                        cboInstanceA.Items.Add(instance);
+                        cboInstanceB.Items.Add(instance);
+                        cboInstanceA.SelectedItem = selectedInstance_A;
+                    }
                 }
             }
         }
@@ -126,29 +121,17 @@ ORDER BY Instance
         private void getDatabases(ComboBox cbo, string instance)
         {
             cbo.Items.Clear();
-            SqlConnection cn = new SqlConnection(ConnectionString);
-            using (cn)
+            using (var cn = new SqlConnection(Common.ConnectionString))
+            using (var cmd = new SqlCommand("dbo.DatabasesWithDDLSnapshot_Get", cn) { CommandType = CommandType.StoredProcedure })
             {
                 cn.Open();
-                SqlCommand cmd = new SqlCommand(@"SELECT D.DatabaseID,D.name
-FROM dbo.Databases D
-JOIN dbo.Instances I ON I.InstanceID = D.InstanceID
-WHERE I.IsActive=1
-AND D.IsActive=1
-AND I.Instance = @Instance
-AND EXISTS(SELECT 1
-			FROM dbo.DDLSnapshots SS 
-			WHERE SS.DatabaseID = D.DatabaseID
-			)
-ORDER BY D.Name
-", cn);
-                //    cmd.CommandType = CommandType.StoredProcedure;
-
                 cmd.Parameters.AddWithValue("Instance", instance);
-                var rdr = cmd.ExecuteReader();
-                while (rdr.Read())
+                using (var rdr = cmd.ExecuteReader())
                 {
-                    cbo.Items.Add(new DatabaseItem() { DatabaseID = (Int32)rdr[0], DatabaseName = (string)rdr[1]});
+                    while (rdr.Read())
+                    {
+                        cbo.Items.Add(new DatabaseItem() { DatabaseID = (Int32)rdr[0], DatabaseName = (string)rdr[1] });
+                    }
                 }
             }
         }
@@ -156,8 +139,6 @@ ORDER BY D.Name
         private void cboInstanceB_SelectedIndexChanged(object sender, EventArgs e)
         {
             getDatabases(cboDatabaseB, cboInstanceB.Text);
-            //cboDatabaseB.SelectedItem = selectedDB_B;
-
         }
 
         private void cboInstanceA_SelectedIndexChanged(object sender, EventArgs e)
@@ -184,24 +165,100 @@ ORDER BY D.Name
 
         private void getObjectTypes()
         {
-            SqlConnection cn = new SqlConnection(ConnectionString);
-            using (cn)
+            using (var cn = new SqlConnection(Common.ConnectionString))
+            using(var cmd = new SqlCommand("dbo.ObjectType_Get",cn) {  CommandType = CommandType.StoredProcedure})
             {
                 cn.Open();
-                SqlCommand cmd = new SqlCommand(@"
-SELECT ObjectType,TypeDescription
-FROM dbo.ObjectType
-ORDER BY TypeDescription
-", cn);
-
-                var rdr = cmd.ExecuteReader();
-                chkObjectType.Items.Add("{all}", true);
-                while (rdr.Read())
+                using (var rdr = cmd.ExecuteReader())
                 {
-                    chkObjectType.Items.Add(rdr[1], true);
+                    chkObjectType.Items.Add("{all}", true);
+                    while (rdr.Read())
+                    {
+                        chkObjectType.Items.Add(rdr[1], true);
+                    }
+                }
+            }        
+        }
+
+
+        private static DataTable DBCompare(int DBID_A, int DBID_B,DateTime Date_A,DateTime Date_B)
+        {
+            using (var cn = new SqlConnection(Common.ConnectionString))
+            using (var cmd = new SqlCommand("dbo.DatabaseDDLCompare_Get", cn) { CommandType = CommandType.StoredProcedure })
+            {
+                cn.Open();
+                cmd.Parameters.AddWithValue("DBID_A", DBID_A);
+                cmd.Parameters.AddWithValue("DBID_B", DBID_B);
+                if (Date_A > DateTime.MinValue)
+                {
+                    var p = cmd.Parameters.AddWithValue("Date_A", Date_A);
+                    p.SqlDbType = SqlDbType.DateTime2;
+                }
+                else
+                {
+                    cmd.Parameters.AddWithValue("Date_A", DBNull.Value);
+                }
+
+                if (Date_B > DateTime.MinValue)
+                {
+                    var p = cmd.Parameters.AddWithValue("Date_B", Date_B);
+                    p.SqlDbType = SqlDbType.DateTime2;
+                }
+                else
+                {
+                    cmd.Parameters.AddWithValue("Date_B", DBNull.Value);
+                }
+
+                SqlDataAdapter da = new SqlDataAdapter(cmd);
+                DataTable dt = new DataTable();
+                da.Fill(dt);
+                return dt;
+            }
+        }
+
+        private int DBID_A
+        {
+            get
+            {
+                return ((DatabaseItem)cboDatabaseA.SelectedItem).DatabaseID;
+            }
+        }
+
+        private int DBID_B
+        {
+            get
+            {
+                return ((DatabaseItem)cboDatabaseB.SelectedItem).DatabaseID;
+            }
+        }
+
+        private DateTime Date_A
+        {
+            get
+            {
+                if (cboDate_A.SelectedIndex > 0)
+                {
+                    return (DateTime)cboDate_A.SelectedItem;
+                }
+                else
+                {
+                    return DateTime.MinValue;
                 }
             }
-        
+        }
+        private DateTime Date_B
+        {
+            get
+            {
+                if (cboDate_B.SelectedIndex > 0)
+                {
+                    return (DateTime)cboDate_B.SelectedItem;
+                }
+                else
+                {
+                    return DateTime.MinValue;
+                }
+            }
         }
 
         private void bttnCompare_Click(object sender, EventArgs e)
@@ -209,80 +266,15 @@ ORDER BY TypeDescription
             chkIgnoreWhiteSpace.Checked = false;
             if (cboDatabaseA.SelectedItem != null && cboDatabaseB.SelectedItem != null)
             {
-                SqlConnection cn = new SqlConnection(ConnectionString);
-                using (cn)
-                {
-                    cn.Open();
-                    SqlCommand cmd = new SqlCommand(@"WITH A AS (
-	SELECT s.ObjectID,
-           s.DDLID,
-           s.ObjectType,
-           s.ObjectName,
-           s.SchemaName,
-           s.SnapshotDate,
-           OT.TypeDescription 
-	FROM dbo.DBSchemaAtDate(@DBID_A,@Date_A) s
-	JOIN dbo.ObjectType OT ON S.ObjectType = OT.ObjectType
-)
-,B AS(
-	SELECT s.ObjectID,
-           s.DDLID,
-           s.ObjectType,
-           s.ObjectName,
-           s.SchemaName,
-           s.SnapshotDate,
-           OT.TypeDescription 
-	FROM dbo.DBSchemaAtDate(@DBID_B,@Date_B) s
-	JOIN dbo.ObjectType OT ON S.ObjectType = OT.ObjectType
-)
-SELECT ISNULL(A.ObjectName,B.ObjectName) AS ObjectName,
-		ISNULL(A.SchemaName,B.SchemaName) SchemaName,
-		ISNULL(A.ObjectType,B.ObjectType) ObjectType,
-        ISNULL(A.TypeDescription,B.TypeDescription) TypeDescription,
-		CASE WHEN A.ObjectID IS NULL THEN 'B Only' WHEN B.ObjectID IS NULL THEN 'A Only' WHEN A.DDLID=B.DDLID THEN 'Equal' ELSE 'Diff' END AS DiffType,
-		A.DDLID AS DDLID_A,
-		B.DDLID AS DDLID_B
-FROM A
-FULL JOIN B ON A.ObjectName = B.ObjectName AND A.SchemaName = B.SchemaName AND A.ObjectType = B.ObjectType
---WHERE (A.DDLID<> B.DDLID OR A.DDLID IS NULL OR B.DDLID IS NULL)
-
-", cn);
-                    //    cmd.CommandType = CommandType.StoredProcedure;
-
-
-                    cmd.Parameters.AddWithValue("DBID_A", ((DatabaseItem)cboDatabaseA.SelectedItem).DatabaseID);
-                    cmd.Parameters.AddWithValue("DBID_B", ((DatabaseItem)cboDatabaseB.SelectedItem).DatabaseID);
-                    if (cboDate_A.SelectedIndex > 0)
-                    {
-                        var p = cmd.Parameters.AddWithValue("Date_A", cboDate_A.SelectedItem);
-                        p.SqlDbType = SqlDbType.DateTime2;
-                    }
-                    else
-                    {
-                        cmd.Parameters.AddWithValue("Date_A", DBNull.Value);
-                    }
-             
-                    if (cboDate_B.SelectedIndex > 0)
-                    {
-                        var p = cmd.Parameters.AddWithValue("Date_B", cboDate_B.SelectedItem);
-                        p.SqlDbType = SqlDbType.DateTime2;
-                    }
-                    else
-                    {
-                        cmd.Parameters.AddWithValue("Date_B", DBNull.Value);
-                    }
-                   // cmd.Parameters.AddWithValue("Date_B");
-                    SqlDataAdapter da = new SqlDataAdapter(cmd);
-                    DataTable dt = new DataTable();
-                    da.Fill(dt);
-                    dt.Columns.Add("A_Text");
-                    dt.Columns.Add("B_Text");
-                    dt.Columns.Add("WhitespaceDiff", typeof(bool));
-                    gvDiff.AutoGenerateColumns = false;
-                    string rowFilter = getRowFilter();
-                    dvDiff = new DataView(dt, rowFilter ,"", DataViewRowState.CurrentRows);
-                    gvDiff.DataSource = dvDiff;
-                }
+                DataTable dt = DBCompare(DBID_A, DBID_B, Date_A, Date_B);
+                dt.Columns.Add("A_Text");
+                dt.Columns.Add("B_Text");
+                dt.Columns.Add("WhitespaceDiff", typeof(bool));
+                gvDiff.AutoGenerateColumns = false;
+                string rowFilter = getRowFilter();
+                dvDiff = new DataView(dt, rowFilter ,"", DataViewRowState.CurrentRows);
+                gvDiff.DataSource = dvDiff;
+                gvDiff.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
             }
             else
             {
@@ -311,11 +303,11 @@ FULL JOIN B ON A.ObjectName = B.ObjectName AND A.SchemaName = B.SchemaName AND A
             {
                 if (row["DDLID_A"] != DBNull.Value)
                 {
-                    a = Common.DDL((Int64)row["DDLID_A"], ConnectionString);
+                    a = Common.DDL((Int64)row["DDLID_A"]);
                 }
                 if (row["DDLID_B"] != DBNull.Value)
                 {
-                    b = Common.DDL((Int64)row["DDLID_B"], ConnectionString);
+                    b = Common.DDL((Int64)row["DDLID_B"]);
                 }
                 if ((string)row["DiffType"] == "Diff" && a.Trim() == b.Trim())
                 {
@@ -391,17 +383,16 @@ FULL JOIN B ON A.ObjectName = B.ObjectName AND A.SchemaName = B.SchemaName AND A
 
         private void chkObjectType_SelectedValueChanged(object sender, EventArgs e)
         {
+            if (chkObjectType.CheckedItems.Contains("{all}") && CheckAllState == false)
+            {
+                toggleCheck(true);
+            }
+            if (!chkObjectType.CheckedItems.Contains("{all}") && CheckAllState)
+            {
+                toggleCheck(false);
+            }
             if (gvDiff.DataSource != null)
             {
-                if (chkObjectType.CheckedItems.Contains("{all}") && CheckAllState == false)
-                {
-                    toggleCheck(true);
-                }
-                if (!chkObjectType.CheckedItems.Contains("{all}") && CheckAllState)
-                {
-                    toggleCheck(false);
-                }
-
                 dvDiff.RowFilter = getRowFilter();
             }
         }
@@ -414,21 +405,17 @@ FULL JOIN B ON A.ObjectName = B.ObjectName AND A.SchemaName = B.SchemaName AND A
         private void getSnapshotDates(ComboBox cbo, Int32 DatabaseID)
         {
             cbo.Items.Clear();
-            SqlConnection cn = new SqlConnection(ConnectionString);
-            using (cn)
+            using (var cn = new SqlConnection(Common.ConnectionString))
+            using (var cmd = new SqlCommand("dbo.DDLSnapshotDates_Get", cn) { CommandType = CommandType.StoredProcedure })
             {
                 cn.Open();
-                SqlCommand cmd = new SqlCommand(@"
-            SELECT TOP(100) SnapshotDate,ValidatedDate
-FROM dbo.DDLSnapshots
-WHERE DatabaseID = @DatabaseID
-ORDER BY ValidatedDate DESC
-", cn);
                 cmd.Parameters.AddWithValue("DatabaseID", DatabaseID);
-                var rdr = cmd.ExecuteReader();
-                while (rdr.Read())
+                using (var rdr = cmd.ExecuteReader())
                 {
-                    cbo.Items.Add((DateTime)rdr[0]);
+                    while (rdr.Read())
+                    {
+                        cbo.Items.Add((DateTime)rdr[0]);
+                    }
                 }
             }
         }
@@ -438,15 +425,6 @@ ORDER BY ValidatedDate DESC
             getSnapshotDates(cboDate_B, ((DatabaseItem)cboDatabaseB.SelectedItem).DatabaseID);
         }
 
-        private void cboDate_A_SelectedIndexChanged(object sender, EventArgs e)
-        {
-           
-        }
-
-        private void chkDiffType_SelectedIndexChanged(object sender, EventArgs e)
-        {
-
-        }
 
         private void chkDiffType_SelectedValueChanged(object sender, EventArgs e)
         {
@@ -494,25 +472,27 @@ ORDER BY ValidatedDate DESC
 
         private void ignoreWhitespace()
         {
-            foreach (DataRow r in dvDiff.Table.Rows)
+            try
             {
-                if ((string)r["DiffType"] == "Diff" && r["WhitespaceDiff"] == DBNull.Value)
+                this.Cursor = Cursors.WaitCursor;
+                foreach (DataRow r in dvDiff.Table.Rows)
                 {
-                    getTextForRow(r, out _, out _);
-                }
-                if (r["WhitespaceDiff"] != DBNull.Value && (bool)r["WhitespaceDiff"] == true)
-                {
-                    r["DiffType"] = chkIgnoreWhiteSpace.Checked ? "Equal (Whitespace)" : "Diff";
+                    if ((string)r["DiffType"] == "Diff" && r["WhitespaceDiff"] == DBNull.Value)
+                    {
+                        getTextForRow(r, out _, out _);
+                    }
+                    if (r["WhitespaceDiff"] != DBNull.Value && (bool)r["WhitespaceDiff"] == true)
+                    {
+                        r["DiffType"] = chkIgnoreWhiteSpace.Checked ? "Equal (Whitespace)" : "Diff";
 
+                    }
                 }
             }
-         
-
+            finally
+            {
+                this.Cursor = Cursors.Default;
+            }
         }
 
-        private void chkDiffType_SelectedIndexChanged_1(object sender, EventArgs e)
-        {
-
-        }
     }
 }

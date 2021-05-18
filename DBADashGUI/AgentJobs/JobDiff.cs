@@ -91,8 +91,8 @@ namespace DBADashGUI
                 long DDLID_A = row["DDLID_A"] == DBNull.Value ? -1 : (long)row["DDLID_A"];
                 long DDLID_B = row["DDLID_B"] == DBNull.Value ? -1 : (long)row["DDLID_B"];
 
-                string A = DDLID_A > 0 ? Common.DDL(DDLID_A, Common.ConnectionString) : "";
-                string B = DDLID_B > 0 ? Common.DDL(DDLID_B, Common.ConnectionString) : "";
+                string A = DDLID_A > 0 ? Common.DDL(DDLID_A) : "";
+                string B = DDLID_B > 0 ? Common.DDL(DDLID_B) : "";
 
                 diffControl1.OldText = A;
                 diffControl1.NewText = B;

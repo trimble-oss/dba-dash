@@ -80,9 +80,9 @@ namespace DBADashGUI
             return lastMins;
         }
 
-        public static string DDL(Int64 DDLID, string connectionString)
+        public static string DDL(Int64 DDLID)
         {
-            using (var cn = new SqlConnection(connectionString))
+            using (var cn = new SqlConnection(Common.ConnectionString))
             {
                 using (var cmd = new SqlCommand("dbo.DDL_Get", cn) { CommandType = CommandType.StoredProcedure })
                 {
