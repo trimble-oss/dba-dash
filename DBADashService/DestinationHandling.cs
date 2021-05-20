@@ -62,17 +62,16 @@ namespace DBADashService
             var s3Cli = AWSTools.GetAWSClient(SchedulerServiceConfig.Config.AWSProfile, SchedulerServiceConfig.Config.AccessKey, SchedulerServiceConfig.Config.GetSecretKey(), uri);
             var r = new Amazon.S3.Model.PutObjectRequest();
             string extension = System.IO.Path.GetExtension(fileName);
-            if(extension == ".xml")
+            if (extension != ".xml")
             {
-                DataSetSerialization.SetDateTimeKind(ds); // Required to prevent timezone conversion
-                MemoryStream ms = new MemoryStream();
-                ds.WriteXml(ms, XmlWriteMode.WriteSchema);
-                r.InputStream = ms;
+                fileName += ".xml";
             }
-            else
-            {
-                throw new Exception("Invalid extension");
-            }
+
+            DataSetSerialization.SetDateTimeKind(ds); // Required to prevent timezone conversion
+            MemoryStream ms = new MemoryStream();
+            ds.WriteXml(ms, XmlWriteMode.WriteSchema);
+            r.InputStream = ms;
+
             r.BucketName = uri.Bucket;
             r.Key = (uri.Key + "/" + fileName).Replace("//", "/");
             s3Cli.PutObject(r);
