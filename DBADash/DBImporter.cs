@@ -216,8 +216,23 @@ namespace DBADash
                     using (var cmd = new SqlCommand("DDLSnapshot_Add", cn) { CommandType = CommandType.StoredProcedure, CommandTimeout = commandTimeout })
                     {
                         cn.Open();
-                        DateTime StartTime = (DateTime)dtSS.ExtendedProperties["StartTime"];
-                        DateTime EndTime = (DateTime)dtSS.ExtendedProperties["EndTime"];
+                        DateTime StartTime;
+                        DateTime EndTime;
+                        if (dtSS.ExtendedProperties.ContainsKey("StartTime"))
+                        {
+                            // legacy
+                            StartTime = Convert.ToDateTime(dtSS.ExtendedProperties["StartTime"]);
+                            EndTime = Convert.ToDateTime(dtSS.ExtendedProperties["EndTime"]);
+                        }
+                        else if (dtSS.ExtendedProperties.Contains("StartTimeBin"))
+                        {
+                            StartTime = DateTime.FromBinary(long.Parse((string)dtSS.ExtendedProperties["StartTimeBin"]));
+                            EndTime = DateTime.FromBinary(long.Parse((string)dtSS.ExtendedProperties["EndTimeBin"]));
+                        }
+                        else
+                        {
+                            throw new Exception("Extended properies missing from schema snapshot");
+                        }
                         string snapshotOptions = (string)dtSS.ExtendedProperties["SnapshotOptions"];
                         byte[] snapshptOptionsHash;
                         using (var crypt = new SHA256Managed())

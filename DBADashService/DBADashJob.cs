@@ -4,7 +4,6 @@ using Newtonsoft.Json;
 using Quartz;
 using System;
 using System.Data;
-using System.Data.SqlClient;
 using System.IO;
 using System.Linq;
 using System.Runtime.Serialization.Formatters.Binary;
@@ -25,6 +24,7 @@ namespace DBADashService
             return ds.Tables["DBADash"].Rows[0]["Instance"] + "_" + ds.Tables["DBADash"].Rows[0]["DBName"];
         }
 
+  
         public Task Execute(IJobExecutionContext context)
         {
 
@@ -42,48 +42,29 @@ namespace DBADashService
                     {
                         try
                         {
-                            var files = System.IO.Directory.GetFiles(folder, "DBADash_*.json");
+                            var files = System.IO.Directory.EnumerateFiles(folder, "DBADash_*", SearchOption.TopDirectoryOnly).Where(f=> f.EndsWith(".json") || f.EndsWith(".bin") || f.EndsWith(".xml"));
 
                             Parallel.ForEach(files, f =>
                             {
-                                string json = System.IO.File.ReadAllText(f);
-                                DataSet ds = DataSetSerialization.DeserializeDS(json);
-                                lock (Program.Locker.GetLock(GetID(ds)))
+                                string fileName = Path.GetFileName(f);
+                                try
                                 {
-                                    DestinationHandling.WriteAllDestinations(ds, cfg, Path.GetFileName(f));
-                                }
-                                System.IO.File.Delete(f);
-                            }
-                            );
-                            files = System.IO.Directory.GetFiles(folder, "DBADash_*.bin");
-                            Parallel.ForEach(files, f =>
-                            {
-
-                                BinaryFormatter fmt = new BinaryFormatter();
-                                DataSet ds;
-                                using (FileStream fs = new FileStream(f, FileMode.Open, FileAccess.Read))
-                                {
-                                    ds = (DataSet)fmt.Deserialize(fs);
-                                }
-                                lock (Program.Locker.GetLock(GetID(ds)))
-                                {
-                                    string fileName = Path.GetFileName(f);
-                                    try
+                                    var ds = DataSetSerialization.DeserializeFromFile(f);
+                                    lock (Program.Locker.GetLock(GetID(ds)))
                                     {
-                                        DestinationHandling.WriteAllDestinations(ds, cfg, fileName);
-                                    }
-                                    catch(Exception ex)
-                                    {
-                                        Log.Error(ex, "Error importing from {filename}.  File will be copied to {failedmessagefolder}", fileName, SchedulerServiceConfig.FailedMessageFolder);
-                                        DestinationHandling.WriteFolder(ds, SchedulerServiceConfig.FailedMessageFolder, fileName);
-                                        
-                                    }
-                                    finally
-                                    {
-                                        System.IO.File.Delete(f);
+                                                                         
+                                        DestinationHandling.WriteAllDestinations(ds, cfg, fileName);                    
                                     }
                                 }
-                                
+                                catch (Exception ex)
+                                {
+                                    Log.Error(ex, "Error importing from {filename}.  File will be copied to {failedmessagefolder}", fileName, SchedulerServiceConfig.FailedMessageFolder);
+                                    File.Copy(f, Path.Combine(SchedulerServiceConfig.FailedMessageFolder, f));
+                                }
+                                finally
+                                {
+                                    System.IO.File.Delete(f);
+                                }
                             });
                         }
                         catch (Exception ex)
@@ -107,7 +88,7 @@ namespace DBADashService
                         do
                         {
                             ListObjectsResponse resp = s3Cli.ListObjects(request);
-                            Parallel.ForEach(resp.S3Objects.Where(f => f.Key.EndsWith(".json") || f.Key.EndsWith(".bin")), f =>
+                            Parallel.ForEach(resp.S3Objects.Where(f => f.Key.EndsWith(".json") || f.Key.EndsWith(".bin") || f.Key.EndsWith(".xml")), f =>
                                 {
                                     lock (Program.Locker.GetLock(f.Key))
                                     {
@@ -117,10 +98,16 @@ namespace DBADashService
                                             DataSet ds;
                                             if (f.Key.EndsWith(".bin"))
                                             {
+                                                // obsolete - to be removed
                                                 BinaryFormatter fmt = new BinaryFormatter();
                                                 ds = (DataSet)fmt.Deserialize(responseStream);
                                             }
-                                            else
+                                            else if (f.Key.EndsWith(".xml"))
+                                            {
+                                                    ds = new DataSet();
+                                                    ds.ReadXml(responseStream);  
+                                            }
+                                            else if (f.Key.EndsWith(".json"))
                                             {
                                                 using (StreamReader reader = new StreamReader(responseStream))
                                                 {
@@ -129,6 +116,10 @@ namespace DBADashService
                                                     ds = DataSetSerialization.DeserializeDS(json);
 
                                                 }
+                                            }
+                                            else
+                                            {
+                                                throw new Exception("Invalid extension");
                                             }
                                             lock (Program.Locker.GetLock(GetID(ds)))
                                             {
@@ -205,8 +196,7 @@ namespace DBADashService
                             op.Complete();
                         }
                         bool containsJobs = collector.Data.Tables.Contains("Jobs");
-                        bool binarySerialization = containsJobs || SchedulerServiceConfig.Config.BinarySerialization;
-                        string fileName = cfg.GenerateFileName(binarySerialization, cfg.SourceConnection.ConnectionForFileName);
+                        string fileName = cfg.GenerateFileName(cfg.SourceConnection.ConnectionForFileName);
                         try
                         {
                             DestinationHandling.WriteAllDestinations(collector.Data, cfg, fileName);

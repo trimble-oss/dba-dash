@@ -65,9 +65,9 @@ namespace DBADash
             }
         }
 
-        public string GenerateFileName(bool binarySerialization, string connection)
+        public string GenerateFileName(string connection)
         {
-            return "DBADash_" + DateTime.UtcNow.ToString("yyyyMMdd_HHmm_ss") + "_" + connection + "_" + Convert.ToBase64String(Guid.NewGuid().ToByteArray()).Replace("=", "").Replace("/","-") + (binarySerialization ? ".bin" : ".json");
+            return "DBADash_" + DateTime.UtcNow.ToString("yyyyMMdd_HHmm_ss") + "_" + connection + "_" + Convert.ToBase64String(Guid.NewGuid().ToByteArray()).Replace("=", "").Replace("/","-") + ".xml";
         }
 
         [DefaultValue(false)]
