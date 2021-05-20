@@ -12,4 +12,4 @@ AND EXISTS(SELECT 1
 			FROM dbo.DDLSnapshots SS 
 			WHERE SS.DatabaseID = D.DatabaseID
 			)
-ORDER BY D.Name
+ORDER BY D.name
