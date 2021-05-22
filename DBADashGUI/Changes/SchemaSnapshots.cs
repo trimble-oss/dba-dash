@@ -9,6 +9,8 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Data.SqlClient;
 using static DBADashGUI.DiffControl;
+using System.IO;
+using System.Globalization;
 
 namespace DBADashGUI.Changes
 {
@@ -191,6 +193,66 @@ namespace DBADashGUI.Changes
                 var row = (DataRowView)gvSnapshots.Rows[e.RowIndex].DataBoundItem;
                 DatabaseID = (Int32)row["DatabaseID"];
                 RefreshData();
+            }
+            else if(e.RowIndex>=0 && e.ColumnIndex == colExport.Index)
+            {
+                var row = (DataRowView)gvSnapshots.Rows[e.RowIndex].DataBoundItem;
+                var dbid = (Int32)row["DatabaseID"];
+                var db = (string)row["DB"];
+                var snapshotDate = (DateTime)row["SnapshotDate"];
+                using (var ofd = new FolderBrowserDialog() { Description = "Select a folder" }) {
+                    if (ofd.ShowDialog() == DialogResult.OK)
+                    {
+                        string folder = System.IO.Path.Combine(ofd.SelectedPath, InstanceName + "_" + db + "_" + snapshotDate.ToString("yyyyMMdd_HHmmss"));
+                        Directory.CreateDirectory(folder);
+                        try
+                        {
+                            ExportSchema(folder, dbid, snapshotDate);
+                            MessageBox.Show("Export Completed","Export", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                            System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo() {
+                                FileName = folder,
+                                UseShellExecute = true,
+                                Verb = "open"
+                            });
+                        }
+                        catch(Exception ex)
+                        {
+                            MessageBox.Show(ex.Message, "Export", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        }
+                        
+                    }
+                }
+            }
+        }
+
+        private void ExportSchema(string folder,int DBID, DateTime SnapshotDate)
+        {
+            using (var cn = new SqlConnection(Common.ConnectionString))
+            using(var cmd = new SqlCommand("dbo.DBSchemaAtDate_Get",cn) {  CommandType = CommandType.StoredProcedure, CommandTimeout = 300})
+            {
+                cn.Open();
+                cmd.Parameters.AddWithValue("DBID", DBID);
+                var pSnapshotDate = cmd.Parameters.AddWithValue("SnapshotDate", SnapshotDate);
+                pSnapshotDate.SqlDbType = SqlDbType.DateTime2;
+                using (var rdr = cmd.ExecuteReader())
+                {
+                    while (rdr.Read())
+                    {
+                        string schema =(string)rdr["SchemaName"];
+                        string name = (string)rdr["ObjectName"];
+                        string objType = (string)rdr["TypeDescription"];
+                        string subFolder = Path.Combine(Path.Combine(folder, Common.StripInvalidFileNameChars(schema)), objType);
+                        string filePath = Path.Combine(subFolder, Common.StripInvalidFileNameChars(name) + ".sql");
+                        if (!Directory.Exists(subFolder))
+                        {
+                            Directory.CreateDirectory(subFolder);
+                        }
+                        var bDDL = (byte[])rdr["DDL"];
+                        string sql = DBADash.SchemaSnapshotDB.Unzip(bDDL);
+                        File.WriteAllText(filePath, sql);                       
+                    }
+                }
+
             }
         }
 

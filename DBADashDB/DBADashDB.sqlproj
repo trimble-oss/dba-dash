@@ -30,7 +30,7 @@
     <QueryStoreStaleQueryThreshold>15</QueryStoreStaleQueryThreshold>
     <QueryStoreMaxStorageSize>512</QueryStoreMaxStorageSize>
     <QueryStoreMaxPlansPerQuery>50</QueryStoreMaxPlansPerQuery>
-    <DacVersion>2.0.3.31</DacVersion>
+    <DacVersion>2.0.3.32</DacVersion>
     <ReadCommittedSnapshot>True</ReadCommittedSnapshot>
     <AllowSnapshotIsolation>True</AllowSnapshotIsolation>
     <CompatibilityMode>130</CompatibilityMode>
@@ -552,6 +552,7 @@
     <Build Include="dbo\Stored Procedures\ObjectType_Get.sql" />
     <Build Include="dbo\Stored Procedures\DatabaseDDLCompare_Get.sql" />
     <Build Include="dbo\Stored Procedures\DDLSnapshotDates_Get.sql" />
+    <Build Include="dbo\Stored Procedures\DBSchemaAtDate_Get.sql" />
   </ItemGroup>
   <ItemGroup>
     <PostDeploy Include="Script.PostDeployment1.sql" />

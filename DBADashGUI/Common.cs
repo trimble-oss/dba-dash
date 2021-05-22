@@ -275,6 +275,9 @@ namespace DBADashGUI
             return hex.ToString();
         }
 
- 
+        public static string StripInvalidFileNameChars(string path)
+        {
+            return string.Join("_", path.Split(Path.GetInvalidFileNameChars()));
+        }
     }
 }
