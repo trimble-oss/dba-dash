@@ -588,30 +588,17 @@ namespace DBADashGUI
 
         private void ExpandObjects(SQLTreeItem n)
         {
-            SqlConnection cn = new SqlConnection(connectionString);
-            using (cn)
+            DataTable dbobj = CommonData.GetDBObjects(n.DatabaseID, (string)n.Tag);
+            foreach(DataRow r in dbobj.Rows)
             {
-                using (SqlCommand cmd = new SqlCommand("dbo.DBObjects_Get", cn) { CommandType = CommandType.StoredProcedure })
+                string type = ((string)r[1]).Trim();
+                var objN = new SQLTreeItem((string)r[3], (string)r[2], type)
                 {
-                    cn.Open();
-                    cmd.Parameters.AddWithValue("DatabaseID", n.DatabaseID);
-                    cmd.Parameters.AddWithValue("Types", n.Tag);
-                    var rdr = cmd.ExecuteReader();
-
-                    while (rdr.Read())
-                    {
-                        string type = ((string)rdr[1]).Trim();
-                        var objN = new SQLTreeItem((string)rdr[3], (string)rdr[2], type)
-                        {
-                            ObjectID = (Int64)rdr[0]
-                        };
-                        n.Nodes.Add(objN);
-                    }
-                }
+                    ObjectID = (Int64)r[0]
+                };
+                n.Nodes.Add(objN);
             }
-
-        }
-
+         }
  
         private void tv1_AfterSelect(object sender, TreeViewEventArgs e)
         {
@@ -836,31 +823,17 @@ namespace DBADashGUI
             diffSchemaSnapshot.OldText = "";
             diffSchemaSnapshot.NewText = "";
             currentPageSize = Int32.Parse(tsPageSize.Text);
-            SqlConnection cn = new SqlConnection(connectionString);
-            using (cn)
-            {
-                using (var cmd = new SqlCommand("dbo.DDLHistoryForObject_Get", cn) { CommandType = CommandType.StoredProcedure }) {
-                    cn.Open();
-                    cmd.Parameters.AddWithValue("ObjectID", ObjectID);
-                    cmd.Parameters.AddWithValue("PageSize", currentPageSize);
-                    cmd.Parameters.AddWithValue("PageNumber", PageNum);
-                    SqlDataAdapter da = new SqlDataAdapter(cmd);
-                    DataSet ds = new DataSet();
-                    da.Fill(ds);
-                    gvHistory.AutoGenerateColumns = false;
-                    gvHistory.DataSource = ds.Tables[0];
-                    currentObjectID = ObjectID;
-                    currentPage = PageNum;
-                    tsPageNum.Text = "Page " + PageNum;
-
-                    tsPrevious.Enabled = (PageNum > 1);
-                    tsNext.Enabled = ds.Tables[0].Rows.Count == currentPageSize;
-
-                }
-            }
+            DataTable dt = CommonData.GetDDLHistoryForObject(ObjectID, PageNum, currentPageSize);
+            
+            gvHistory.AutoGenerateColumns = false;
+            gvHistory.DataSource = dt;
+            currentObjectID = ObjectID;
+            currentPage = PageNum;
+            tsPageNum.Text = "Page " + PageNum;
+            tsPrevious.Enabled = (PageNum > 1);
+            tsNext.Enabled = dt.Rows.Count == currentPageSize;
+            
         }
-
-
 
         private void gvHistory_SelectionChanged(object sender, EventArgs e)
         {
@@ -925,7 +898,7 @@ namespace DBADashGUI
             frm.SelectedTags = SelectedTags();
             var n = (SQLTreeItem)tv1.SelectedNode;
             frm.SelectedInstanceA = n.InstanceName;
-            frm.SelectedDatabaseA = new DBDiff.DatabaseItem() { DatabaseID = n.DatabaseID, DatabaseName = n.DatabaseName };
+            frm.SelectedDatabaseA = new DatabaseItem() { DatabaseID = n.DatabaseID, DatabaseName = n.DatabaseName };
             frm.ShowDialog();
         }
 
@@ -1318,6 +1291,18 @@ namespace DBADashGUI
             {
                 var selected = (SQLTreeItem)tv1.SelectedNode;
                 frm.InstanceID_A = selected.InstanceID;
+                frm.ShowDialog();
+            }
+        }
+
+        private void gvHistory_CellContentClick(object sender, DataGridViewCellEventArgs e)
+        {
+            var node = (SQLTreeItem)tv1.SelectedNode;
+            if (e.RowIndex>=0 && e.ColumnIndex == colCompare.Index)
+            {
+                var row = (DataRowView)gvHistory.Rows[e.RowIndex].DataBoundItem;
+                var frm = new DDLCompareTo() { Instance_A = node.InstanceName, DatabaseID_A = node.DatabaseID, ObjectType_A = (string)row["ObjectType"], ObjectID_A = node.ObjectID, SnapshotDate_A = (DateTime)row["SnapshotValidFrom"] } ;   
+                frm.SelectedTags = SelectedTags();
                 frm.ShowDialog();
             }
         }

@@ -30,7 +30,7 @@
     <QueryStoreStaleQueryThreshold>15</QueryStoreStaleQueryThreshold>
     <QueryStoreMaxStorageSize>512</QueryStoreMaxStorageSize>
     <QueryStoreMaxPlansPerQuery>50</QueryStoreMaxPlansPerQuery>
-    <DacVersion>2.0.3.32</DacVersion>
+    <DacVersion>2.0.3.33</DacVersion>
     <ReadCommittedSnapshot>True</ReadCommittedSnapshot>
     <AllowSnapshotIsolation>True</AllowSnapshotIsolation>
     <CompatibilityMode>130</CompatibilityMode>
@@ -566,7 +566,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="DBADashDB.publish.xml" />
-    <None Include="Schema_Compare.scmp" />
     <None Include="Scripts\DBIOStatsMigration_60MIN.sql" />
     <None Include="Scripts\CPU_60MIN Population.sql" />
   </ItemGroup>

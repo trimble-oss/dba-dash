@@ -113,7 +113,7 @@
     <Compile Include="AgentJobs\JobStep.Designer.cs">
       <DependentUpon>JobStep.cs</DependentUpon>
     </Compile>
-    <Compile Include="AppSyntaxModeProvider.cs" />
+    <Compile Include="SchemaCompare\AppSyntaxModeProvider.cs" />
     <Compile Include="Bak\BackupsControl.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -193,10 +193,10 @@
     <Compile Include="Checks\CustomChecks.Designer.cs">
       <DependentUpon>CustomChecks.cs</DependentUpon>
     </Compile>
-    <Compile Include="CodeViewer.cs">
+    <Compile Include="SchemaCompare\CodeViewer.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="CodeViewer.Designer.cs">
+    <Compile Include="SchemaCompare\CodeViewer.Designer.cs">
       <DependentUpon>CodeViewer.cs</DependentUpon>
     </Compile>
     <Compile Include="CollectionDates\CollectionDates.cs">
@@ -237,6 +237,13 @@
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="CustomProgressControl.cs" />
+    <Compile Include="DatabaseItem.cs" />
+    <Compile Include="SchemaCompare\DDLCompareTo.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="SchemaCompare\DDLCompareTo.Designer.cs">
+      <DependentUpon>DDLCompareTo.cs</DependentUpon>
+    </Compile>
     <Compile Include="HA\AG.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -250,10 +257,10 @@
       <DependentUpon>DataRetention.cs</DependentUpon>
     </Compile>
     <Compile Include="DBAChecksStatus.cs" />
-    <Compile Include="DBDiff.cs">
+    <Compile Include="SchemaCompare\DBDiff.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="DBDiff.Designer.cs">
+    <Compile Include="SchemaCompare\DBDiff.Designer.cs">
       <DependentUpon>DBDiff.cs</DependentUpon>
     </Compile>
     <Compile Include="DBFiles\DBFilesControl.cs">
@@ -287,16 +294,16 @@
     <Compile Include="DBFiles\TempDBConfig.Designer.cs">
       <DependentUpon>TempDBConfig.cs</DependentUpon>
     </Compile>
-    <Compile Include="Diff.cs">
+    <Compile Include="SchemaCompare\Diff.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Diff.Designer.cs">
+    <Compile Include="SchemaCompare\Diff.Designer.cs">
       <DependentUpon>Diff.cs</DependentUpon>
     </Compile>
-    <Compile Include="DiffControl.cs">
+    <Compile Include="SchemaCompare\DiffControl.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="DiffControl.Designer.cs">
+    <Compile Include="SchemaCompare\DiffControl.Designer.cs">
       <DependentUpon>DiffControl.cs</DependentUpon>
     </Compile>
     <Compile Include="Drives\DriveControl.cs">
@@ -579,7 +586,7 @@
     <EmbeddedResource Include="Checks\CustomChecks.resx">
       <DependentUpon>CustomChecks.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="CodeViewer.resx">
+    <EmbeddedResource Include="SchemaCompare\CodeViewer.resx">
       <DependentUpon>CodeViewer.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="CollectionDates\CollectionDates.resx">
@@ -597,13 +604,16 @@
     <EmbeddedResource Include="ConnectionOptions.resx">
       <DependentUpon>ConnectionOptions.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="SchemaCompare\DDLCompareTo.resx">
+      <DependentUpon>DDLCompareTo.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="HA\AG.resx">
       <DependentUpon>AG.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Options Menu\DataRetention.resx">
       <DependentUpon>DataRetention.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="DBDiff.resx">
+    <EmbeddedResource Include="SchemaCompare\DBDiff.resx">
       <DependentUpon>DBDiff.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="DBFiles\DBFilesControl.resx">
@@ -621,10 +631,10 @@
     <EmbeddedResource Include="DBFiles\TempDBConfig.resx">
       <DependentUpon>TempDBConfig.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Diff.resx">
+    <EmbeddedResource Include="SchemaCompare\Diff.resx">
       <DependentUpon>Diff.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="DiffControl.resx">
+    <EmbeddedResource Include="SchemaCompare\DiffControl.resx">
       <DependentUpon>DiffControl.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Drives\DriveControl.resx">

@@ -14,40 +14,7 @@ namespace DBADashGUI
 
     public partial class DBDiff : Form
     {
-        public class DatabaseItem
-        {
-            public Int32 DatabaseID { get; set; }
-            public string DatabaseName { get; set; }
-
-            public override string ToString()
-            {
-                return DatabaseName;
-            }
-
-            public override bool Equals(object obj)
-            {
-                if (Object.ReferenceEquals(this, obj))
-                {
-                    return true;
-                }
-                if (obj is null)
-                {
-                    return false;
-                }
-                if (this.GetType() != obj.GetType())
-                {
-                    return false;
-                }
-                return ((DatabaseItem)obj).DatabaseID == this.DatabaseID && ((DatabaseItem)obj).DatabaseName == this.DatabaseName;
-            }
-
-            public override int GetHashCode()
-            {
-                return DatabaseName.GetHashCode();
-            }
-
-
-        }
+  
 
         public List<Int16> SelectedTags;
 
@@ -97,43 +64,20 @@ namespace DBADashGUI
 
         private void getInstances()
         {
-            using (var cn = new SqlConnection(Common.ConnectionString))
-            using (var cmd = new SqlCommand("dbo.InstancesWithDDLSnapshot_Get", cn) { CommandType = CommandType.StoredProcedure })
-            {
-                cn.Open();
-                if (SelectedTags.Count > 0)
-                {
-                    cmd.Parameters.AddWithValue("TagIDs", string.Join(",", SelectedTags));
-                }
-                using (var rdr = cmd.ExecuteReader())
-                {
-                    while (rdr.Read())
-                    {
-                        string instance = (string)rdr[0];
-                        cboInstanceA.Items.Add(instance);
-                        cboInstanceB.Items.Add(instance);
-                        cboInstanceA.SelectedItem = selectedInstance_A;
-                    }
-                }
-            }
+            var instances = CommonData.GetInstancesWithDDLSnapshot(SelectedTags);
+            cboInstanceA.DataSource = instances;
+            cboInstanceB.DataSource = instances;
+            cboInstanceA.SelectedItem = selectedInstance_A;
+
         }
+
+
 
         private void getDatabases(ComboBox cbo, string instance)
         {
-            cbo.Items.Clear();
-            using (var cn = new SqlConnection(Common.ConnectionString))
-            using (var cmd = new SqlCommand("dbo.DatabasesWithDDLSnapshot_Get", cn) { CommandType = CommandType.StoredProcedure })
-            {
-                cn.Open();
-                cmd.Parameters.AddWithValue("Instance", instance);
-                using (var rdr = cmd.ExecuteReader())
-                {
-                    while (rdr.Read())
-                    {
-                        cbo.Items.Add(new DatabaseItem() { DatabaseID = (Int32)rdr[0], DatabaseName = (string)rdr[1] });
-                    }
-                }
-            }
+            var databases = CommonData.GetDatabasesWithDDLSnapshot(instance);
+            cbo.DataSource = databases;
+           
         }
 
         private void cboInstanceB_SelectedIndexChanged(object sender, EventArgs e)
@@ -165,21 +109,13 @@ namespace DBADashGUI
 
         private void getObjectTypes()
         {
-            using (var cn = new SqlConnection(Common.ConnectionString))
-            using(var cmd = new SqlCommand("dbo.ObjectType_Get",cn) {  CommandType = CommandType.StoredProcedure})
+            var objtypes = CommonData.GetObjectTypes();
+            chkObjectType.Items.Add("{all}", true);
+            foreach (string t in objtypes.Values)
             {
-                cn.Open();
-                using (var rdr = cmd.ExecuteReader())
-                {
-                    chkObjectType.Items.Add("{all}", true);
-                    while (rdr.Read())
-                    {
-                        chkObjectType.Items.Add(rdr[1], true);
-                    }
-                }
-            }        
+                chkObjectType.Items.Add(t, true);
+            }       
         }
-
 
         private static DataTable DBCompare(int DBID_A, int DBID_B,DateTime Date_A,DateTime Date_B)
         {
