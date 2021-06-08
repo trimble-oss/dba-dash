@@ -65,8 +65,8 @@ namespace DBADashGUI
         private void getInstances()
         {
             var instances = CommonData.GetInstancesWithDDLSnapshot(SelectedTags);
-            cboInstanceA.DataSource = instances;
-            cboInstanceB.DataSource = instances;
+            cboInstanceA.DataSource = new BindingSource(instances,null);
+            cboInstanceB.DataSource = new BindingSource(instances,null);
             cboInstanceA.SelectedItem = selectedInstance_A;
 
         }
