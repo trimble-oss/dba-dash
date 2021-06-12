@@ -80,9 +80,9 @@ namespace DBADashGUI
             return lastMins;
         }
 
-        public static string DDL(Int64 DDLID, string connectionString)
+        public static string DDL(Int64 DDLID)
         {
-            using (var cn = new SqlConnection(connectionString))
+            using (var cn = new SqlConnection(Common.ConnectionString))
             {
                 using (var cmd = new SqlCommand("dbo.DDL_Get", cn) { CommandType = CommandType.StoredProcedure })
                 {
@@ -275,6 +275,9 @@ namespace DBADashGUI
             return hex.ToString();
         }
 
- 
+        public static string StripInvalidFileNameChars(string path)
+        {
+            return string.Join("_", path.Split(Path.GetInvalidFileNameChars()));
+        }
     }
 }

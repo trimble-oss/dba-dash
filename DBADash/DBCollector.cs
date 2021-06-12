@@ -62,6 +62,7 @@ namespace DBADash
         AvailabilityReplicas,
         AvailabilityGroups,
         ResourceGovernorConfiguration
+        DatabaseQueryStoreOptions
     }
 
     public enum HostPlatform
@@ -80,7 +81,7 @@ namespace DBADash
         public Int32 PerformanceCollectionPeriodMins = 60;
         string computerName;
         Int64 editionId;
-        readonly CollectionType[] azureCollectionTypes = new CollectionType[] { CollectionType.SlowQueries, CollectionType.AzureDBElasticPoolResourceStats, CollectionType.AzureDBServiceObjectives, CollectionType.AzureDBResourceStats, CollectionType.CPU, CollectionType.DBFiles, CollectionType.General, CollectionType.Performance, CollectionType.Databases, CollectionType.DBConfig, CollectionType.TraceFlags, CollectionType.ObjectExecutionStats, CollectionType.BlockingSnapshot, CollectionType.IOStats, CollectionType.Waits, CollectionType.ServerProperties, CollectionType.DBTuningOptions, CollectionType.SysConfig, CollectionType.DatabasePrincipals, CollectionType.DatabaseRoleMembers, CollectionType.DatabasePermissions, CollectionType.Infrequent, CollectionType.OSInfo,CollectionType.CustomChecks,CollectionType.PerformanceCounters,CollectionType.VLF };
+        readonly CollectionType[] azureCollectionTypes = new CollectionType[] { CollectionType.SlowQueries, CollectionType.AzureDBElasticPoolResourceStats, CollectionType.AzureDBServiceObjectives, CollectionType.AzureDBResourceStats, CollectionType.CPU, CollectionType.DBFiles, CollectionType.General, CollectionType.Performance, CollectionType.Databases, CollectionType.DBConfig, CollectionType.TraceFlags, CollectionType.ObjectExecutionStats, CollectionType.BlockingSnapshot, CollectionType.IOStats, CollectionType.Waits, CollectionType.ServerProperties, CollectionType.DBTuningOptions, CollectionType.SysConfig, CollectionType.DatabasePrincipals, CollectionType.DatabaseRoleMembers, CollectionType.DatabasePermissions, CollectionType.Infrequent, CollectionType.OSInfo,CollectionType.CustomChecks,CollectionType.PerformanceCounters,CollectionType.VLF, CollectionType.DatabaseQueryStoreOptions};
         public Int64 SlowQueryThresholdMs = -1;
         public Int32 SlowQueryMaxMemoryKB { get; set; } = 4096;
         public bool UseDualEventSession { get; set; } = true;
@@ -139,6 +140,25 @@ namespace DBADash
         public bool IsXESupported()
         {
             return DBADashConnection.IsXESupported(productVersion);
+        }
+
+        public bool IsQueryStoreSupported()
+        {
+            if (IsAzure)
+            {
+                return true;
+            }
+            else
+            {
+                if (productVersion.StartsWith("8.") || productVersion.StartsWith("9.") || productVersion.StartsWith("10.") || productVersion.StartsWith("11.") || productVersion.StartsWith("12."))
+                {
+                    return false;
+                }
+                else
+                {
+                    return true;
+                }
+            }
         }
 
         public DBCollector(string connectionString, bool noWMI)
@@ -323,7 +343,10 @@ namespace DBADash
             {
                 param =new SqlParameter[] { new SqlParameter { DbType = DbType.Int32, Value = Job_instance_id, ParameterName = "instance_id" }, new SqlParameter { DbType = DbType.Int32, ParameterName="run_date", Value = Convert.ToInt32(DateTime.Now.AddDays(-7).ToString("yyyyMMdd"))} };
             }
-
+            if(collectionType == CollectionType.DatabaseQueryStoreOptions && !IsQueryStoreSupported())
+            {
+                return;
+            }
             if (Data.Tables.Contains(collectionTypeString))
             {
                 // Already collected
@@ -389,6 +412,7 @@ namespace DBADash
                 Collect(CollectionType.DriversWMI);
                 Collect(CollectionType.OSLoadedModules);
                 Collect(CollectionType.ResourceGovernorConfiguration);
+                Collect(CollectionType.DatabaseQueryStoreOptions);
                 
             }
             else if (collectionType == CollectionType.Drives)

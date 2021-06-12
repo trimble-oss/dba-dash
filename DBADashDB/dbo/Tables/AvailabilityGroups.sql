@@ -16,7 +16,7 @@
        required_synchronized_secondaries_to_commit INT NULL,
        sequence_number BIGINT NULL,
        is_contained BIT NULL,
-       automated_backup_preference_desc AS CASE automated_backup_preference WHEN 0 THEN N'PRIMARY' WHEN 1 THEN N'SECONDARY_ONLY' WHEN 2 THEN N'SECONDARY' WHEN 3 THEN N'NONE' ELSE CAST(automated_backup_preference AS NVARCHAR(60)) END,
+       automated_backup_preference_desc  AS (CASE automated_backup_preference WHEN (0) THEN N'PRIMARY' WHEN (1) THEN N'SECONDARY_ONLY' WHEN (2) THEN N'SECONDARY' WHEN (3) THEN N'NONE' ELSE CONVERT(NVARCHAR(60),automated_backup_preference) END),
        CONSTRAINT FK_AvailabilityGroups_Instances FOREIGN KEY(InstanceID) REFERENCES dbo.Instances(InstanceID),
        CONSTRAINT PK_AvailabilityGroups PRIMARY KEY(InstanceID,group_id)
 )

@@ -163,6 +163,9 @@
   <data name="SQLDatabasePrincipals" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\SQL\SQLDatabasePrincipals.sql;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
   </data>
+  <data name="SQLDatabaseQueryStoreOptions" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\SQL\SQLDatabaseQueryStoreOptions.sql;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
+  </data>
   <data name="SQLDatabaseRoleMembers" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\SQL\SQLDatabaseRoleMembers.sql;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
   </data>

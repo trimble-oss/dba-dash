@@ -74,6 +74,7 @@
             this.FileFreeSpaceStatus = new System.Windows.Forms.DataGridViewLinkColumn();
             this.PctMaxSizeStatus = new System.Windows.Forms.DataGridViewLinkColumn();
             this.ElasticPoolStorageStatus = new System.Windows.Forms.DataGridViewLinkColumn();
+            this.QueryStoreStatus = new System.Windows.Forms.DataGridViewLinkColumn();
             this.CustomCheckStatus = new System.Windows.Forms.DataGridViewLinkColumn();
             this.CollectionErrorStatus = new System.Windows.Forms.DataGridViewLinkColumn();
             this.SnapshotAgeStatus = new System.Windows.Forms.DataGridViewLinkColumn();
@@ -113,6 +114,7 @@
             this.FileFreeSpaceStatus,
             this.PctMaxSizeStatus,
             this.ElasticPoolStorageStatus,
+            this.QueryStoreStatus,
             this.CustomCheckStatus,
             this.CollectionErrorStatus,
             this.SnapshotAgeStatus,
@@ -485,6 +487,20 @@
             this.ElasticPoolStorageStatus.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
             this.ElasticPoolStorageStatus.Width = 150;
             // 
+            // QueryStoreStatus
+            // 
+            this.QueryStoreStatus.HeaderText = "QS";
+            this.QueryStoreStatus.LinkColor = System.Drawing.Color.Black;
+            this.QueryStoreStatus.MinimumWidth = 6;
+            this.QueryStoreStatus.Name = "QueryStoreStatus";
+            this.QueryStoreStatus.ReadOnly = true;
+            this.QueryStoreStatus.Resizable = System.Windows.Forms.DataGridViewTriState.True;
+            this.QueryStoreStatus.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
+            this.QueryStoreStatus.Text = "View";
+            this.QueryStoreStatus.ToolTipText = "Query Store";
+            this.QueryStoreStatus.UseColumnTextForLinkValue = true;
+            this.QueryStoreStatus.Width = 57;
+            // 
             // CustomCheckStatus
             // 
             dataGridViewCellStyle4.NullValue = "View";
@@ -586,6 +602,7 @@
         private System.Windows.Forms.DataGridViewLinkColumn FileFreeSpaceStatus;
         private System.Windows.Forms.DataGridViewLinkColumn PctMaxSizeStatus;
         private System.Windows.Forms.DataGridViewLinkColumn ElasticPoolStorageStatus;
+        private System.Windows.Forms.DataGridViewLinkColumn QueryStoreStatus;
         private System.Windows.Forms.DataGridViewLinkColumn CustomCheckStatus;
         private System.Windows.Forms.DataGridViewLinkColumn CollectionErrorStatus;
         private System.Windows.Forms.DataGridViewLinkColumn SnapshotAgeStatus;

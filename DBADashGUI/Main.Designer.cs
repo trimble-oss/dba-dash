@@ -78,6 +78,7 @@
             this.SnapshotValidTo = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.ObjectDateCreated = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.ObjectDateModified = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colCompare = new System.Windows.Forms.DataGridViewLinkColumn();
             this.label1 = new System.Windows.Forms.Label();
             this.tabTags = new System.Windows.Forms.TabPage();
             this.chkTags = new System.Windows.Forms.CheckedListBox();
@@ -153,6 +154,8 @@
             this.jobDDLHistory1 = new DBADashGUI.Changes.JobDDLHistory();
             this.tabAG = new System.Windows.Forms.TabPage();
             this.ag1 = new DBADashGUI.HA.AG();
+            this.tabQS = new System.Windows.Forms.TabPage();
+            this.queryStore1 = new DBADashGUI.Changes.QueryStore();
             this.dataGridViewTextBoxColumn1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dataGridViewTextBoxColumn2 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dataGridViewTextBoxColumn3 = new System.Windows.Forms.DataGridViewTextBoxColumn();
@@ -225,6 +228,7 @@
             this.tabMirroring.SuspendLayout();
             this.tabJobDDL.SuspendLayout();
             this.tabAG.SuspendLayout();
+            this.tabQS.SuspendLayout();
             this.SuspendLayout();
             // 
             // TreeViewImageList
@@ -533,6 +537,7 @@
             this.tabs.Controls.Add(this.tabMirroring);
             this.tabs.Controls.Add(this.tabJobDDL);
             this.tabs.Controls.Add(this.tabAG);
+            this.tabs.Controls.Add(this.tabQS);
             this.tabs.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tabs.Location = new System.Drawing.Point(0, 0);
             this.tabs.Name = "tabs";
@@ -612,9 +617,9 @@
             this.tsNext,
             this.toolStripLabel1,
             this.tsPageSize});
-            this.toolStrip1.Location = new System.Drawing.Point(0, 642);
+            this.toolStrip1.Location = new System.Drawing.Point(0, 639);
             this.toolStrip1.Name = "toolStrip1";
-            this.toolStrip1.Size = new System.Drawing.Size(1625, 28);
+            this.toolStrip1.Size = new System.Drawing.Size(1625, 31);
             this.toolStrip1.TabIndex = 1;
             this.toolStrip1.Text = "toolStrip1";
             // 
@@ -624,14 +629,14 @@
             this.tsPrevious.Image = ((System.Drawing.Image)(resources.GetObject("tsPrevious.Image")));
             this.tsPrevious.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsPrevious.Name = "tsPrevious";
-            this.tsPrevious.Size = new System.Drawing.Size(29, 25);
+            this.tsPrevious.Size = new System.Drawing.Size(29, 28);
             this.tsPrevious.Text = "Previous";
             this.tsPrevious.Click += new System.EventHandler(this.tsPrevious_Click);
             // 
             // tsPageNum
             // 
             this.tsPageNum.Name = "tsPageNum";
-            this.tsPageNum.Size = new System.Drawing.Size(53, 25);
+            this.tsPageNum.Size = new System.Drawing.Size(53, 28);
             this.tsPageNum.Text = "Page 1";
             // 
             // tsNext
@@ -640,14 +645,14 @@
             this.tsNext.Image = ((System.Drawing.Image)(resources.GetObject("tsNext.Image")));
             this.tsNext.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsNext.Name = "tsNext";
-            this.tsNext.Size = new System.Drawing.Size(29, 25);
+            this.tsNext.Size = new System.Drawing.Size(29, 28);
             this.tsNext.Text = "Next";
             this.tsNext.Click += new System.EventHandler(this.tsNext_Click);
             // 
             // toolStripLabel1
             // 
             this.toolStripLabel1.Name = "toolStripLabel1";
-            this.toolStripLabel1.Size = new System.Drawing.Size(75, 25);
+            this.toolStripLabel1.Size = new System.Drawing.Size(75, 28);
             this.toolStripLabel1.Text = "Page Size:";
             // 
             // tsPageSize
@@ -659,7 +664,7 @@
             "1000",
             "5000"});
             this.tsPageSize.Name = "tsPageSize";
-            this.tsPageSize.Size = new System.Drawing.Size(121, 28);
+            this.tsPageSize.Size = new System.Drawing.Size(121, 31);
             this.tsPageSize.Text = "100";
             this.tsPageSize.Validating += new System.ComponentModel.CancelEventHandler(this.tsPageSize_Validating);
             this.tsPageSize.Validated += new System.EventHandler(this.tsPageSize_Validated);
@@ -685,7 +690,8 @@
             this.SnapshotValidFrom,
             this.SnapshotValidTo,
             this.ObjectDateCreated,
-            this.ObjectDateModified});
+            this.ObjectDateModified,
+            this.colCompare});
             dataGridViewCellStyle2.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
             dataGridViewCellStyle2.BackColor = System.Drawing.SystemColors.Window;
             dataGridViewCellStyle2.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
@@ -704,6 +710,7 @@
             this.gvHistory.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
             this.gvHistory.Size = new System.Drawing.Size(1625, 645);
             this.gvHistory.TabIndex = 0;
+            this.gvHistory.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.gvHistory_CellContentClick);
             this.gvHistory.SelectionChanged += new System.EventHandler(this.gvHistory_SelectionChanged);
             // 
             // ObjectName
@@ -774,6 +781,16 @@
             this.ObjectDateModified.Name = "ObjectDateModified";
             this.ObjectDateModified.ReadOnly = true;
             this.ObjectDateModified.Width = 114;
+            // 
+            // colCompare
+            // 
+            this.colCompare.HeaderText = "Compare";
+            this.colCompare.MinimumWidth = 6;
+            this.colCompare.Name = "colCompare";
+            this.colCompare.ReadOnly = true;
+            this.colCompare.Text = "Compare";
+            this.colCompare.UseColumnTextForLinkValue = true;
+            this.colCompare.Width = 125;
             // 
             // label1
             // 
@@ -1557,6 +1574,25 @@
             this.ag1.Size = new System.Drawing.Size(1625, 1240);
             this.ag1.TabIndex = 0;
             // 
+            // tabQS
+            // 
+            this.tabQS.Controls.Add(this.queryStore1);
+            this.tabQS.Location = new System.Drawing.Point(4, 25);
+            this.tabQS.Name = "tabQS";
+            this.tabQS.Padding = new System.Windows.Forms.Padding(3);
+            this.tabQS.Size = new System.Drawing.Size(1631, 1246);
+            this.tabQS.TabIndex = 36;
+            this.tabQS.Text = "QS";
+            this.tabQS.UseVisualStyleBackColor = true;
+            // 
+            // queryStore1
+            // 
+            this.queryStore1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.queryStore1.Location = new System.Drawing.Point(3, 3);
+            this.queryStore1.Name = "queryStore1";
+            this.queryStore1.Size = new System.Drawing.Size(1625, 1240);
+            this.queryStore1.TabIndex = 0;
+            // 
             // dataGridViewTextBoxColumn1
             // 
             this.dataGridViewTextBoxColumn1.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.DisplayedCells;
@@ -1849,6 +1885,7 @@
             this.tabMirroring.ResumeLayout(false);
             this.tabJobDDL.ResumeLayout(false);
             this.tabAG.ResumeLayout(false);
+            this.tabQS.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
@@ -1871,13 +1908,6 @@
         private System.Windows.Forms.ToolStripLabel toolStripLabel1;
         private System.Windows.Forms.ToolStripComboBox tsPageSize;
         private System.Windows.Forms.Label label1;
-        private System.Windows.Forms.DataGridViewTextBoxColumn ObjectName;
-        private System.Windows.Forms.DataGridViewTextBoxColumn SchemaName;
-        private System.Windows.Forms.DataGridViewTextBoxColumn ObjectType;
-        private System.Windows.Forms.DataGridViewTextBoxColumn SnapshotValidFrom;
-        private System.Windows.Forms.DataGridViewTextBoxColumn SnapshotValidTo;
-        private System.Windows.Forms.DataGridViewTextBoxColumn ObjectDateCreated;
-        private System.Windows.Forms.DataGridViewTextBoxColumn ObjectDateModified;
         private System.Windows.Forms.ToolStripMenuItem dBDiffToolStripMenuItem;
         private System.Windows.Forms.Label label7;
         private System.Windows.Forms.TabPage tabTags;
@@ -1999,5 +2029,15 @@
         private System.Windows.Forms.ToolStripMenuItem tsJobDiff;
         private System.Windows.Forms.TabPage tabAG;
         private HA.AG ag1;
+        private System.Windows.Forms.TabPage tabQS;
+        private Changes.QueryStore queryStore1;
+        private System.Windows.Forms.DataGridViewTextBoxColumn ObjectName;
+        private System.Windows.Forms.DataGridViewTextBoxColumn SchemaName;
+        private System.Windows.Forms.DataGridViewTextBoxColumn ObjectType;
+        private System.Windows.Forms.DataGridViewTextBoxColumn SnapshotValidFrom;
+        private System.Windows.Forms.DataGridViewTextBoxColumn SnapshotValidTo;
+        private System.Windows.Forms.DataGridViewTextBoxColumn ObjectDateCreated;
+        private System.Windows.Forms.DataGridViewTextBoxColumn ObjectDateModified;
+        private System.Windows.Forms.DataGridViewLinkColumn colCompare;
     }
 }

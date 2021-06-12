@@ -103,7 +103,9 @@ namespace DBADash.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to SELECT group_id,
+        ///   Looks up a localized string similar to DECLARE @SQL NVARCHAR(MAX)
+        ///SET @SQL = N&apos;
+        ///SELECT group_id,
         ///       name,
         ///       resource_id,
         ///       resource_group_id,
@@ -115,11 +117,7 @@ namespace DBADash.Properties {
         ///       dtc_support,
         ///       db_failover,
         ///       is_distributed,
-        ///       cluster_type,
-        ///       required_synchronized_secondaries_to_commit,
-        ///       sequence_number,
-        ///       is_contained
-        ///FROM sys.availability_groups;.
+        ///       &apos; + CASE WHEN COLUMNPROPERTY(OBJECT_ID(&apos;sys.availability_groups&apos;),&apos;cluster_type&apos;,&apos;ColumnID&apos;) IS NULL THEN &apos; CAST(NULL as BIGINT) AS cluster_type,&apos; ELSE &apos;cluster_type,&apos; END + &apos; [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string SQLAvailabilityGroups {
             get {
@@ -377,6 +375,28 @@ namespace DBADash.Properties {
         internal static string SQLDatabasePrincipals {
             get {
                 return ResourceManager.GetString("SQLDatabasePrincipals", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to SET NOCOUNT ON
+        ///DECLARE @DBName SYSNAME
+        ///DECLARE @SQL NVARCHAR(MAX)
+        ///CREATE TABLE #querystore (
+        ///	database_id INT NOT NULL PRIMARY KEY,
+        ///    [desired_state] SMALLINT NOT NULL,
+        ///    [actual_state] SMALLINT NOT NULL,
+        ///    [readonly_reason] INT  NOT NULL,
+        ///    [current_storage_size_mb] BIGINT NOT NULL,
+        ///    [flush_interval_seconds] BIGINT NOT NULL,
+        ///    [interval_length_minutes] BIGINT NOT NULL,
+        ///    [max_storage_size_mb] BIGINT NOT NULL,
+        ///    [stale_query_threshold_days] BIGINT NOT NULL,
+        ///    [max_plans_per_q [rest of string was truncated]&quot;;.
+        /// </summary>
+        internal static string SQLDatabaseQueryStoreOptions {
+            get {
+                return ResourceManager.GetString("SQLDatabaseQueryStoreOptions", resourceCulture);
             }
         }
         

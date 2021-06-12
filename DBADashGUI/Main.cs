@@ -400,7 +400,7 @@ namespace DBADashGUI
                 performanceCounterSummary1.InstanceID = n.InstanceID;
                 performanceCounterSummary1.RefreshData();
             }
-            if(tabs.SelectedTab== tabObjectExecutionSummary)
+            else if(tabs.SelectedTab== tabObjectExecutionSummary)
             {
                 globalTimeisVisible = true;
                 objectExecutionSummary1.Instance = n.InstanceName;
@@ -409,27 +409,33 @@ namespace DBADashGUI
                 objectExecutionSummary1.ObjectID = (n.Type == SQLTreeItem.TreeType.Database || n.Type == SQLTreeItem.TreeType.AzureDatabase) ? -1 :  n.ObjectID;
                 objectExecutionSummary1.RefreshData();
             }
-            if(tabs.SelectedTab == tabWaits)
+            else if(tabs.SelectedTab == tabWaits)
             {
                 globalTimeisVisible = true;
                 waitsSummary1.InstanceID = n.InstanceID;
                 waitsSummary1.RefreshData();
             }
-            if(tabs.SelectedTab == tabMirroring)
+            else if(tabs.SelectedTab == tabMirroring)
             {
                 mirroring1.InstanceIDs = instanceIDs;
                 mirroring1.RefreshData();
             }
-            if(tabs.SelectedTab == tabJobDDL)
+            else if(tabs.SelectedTab == tabJobDDL)
             {
                 jobDDLHistory1.InstanceID = n.InstanceID;
                 jobDDLHistory1.JobID = (Guid)n.Tag;
                 jobDDLHistory1.RefreshData();
             }
-            if(tabs.SelectedTab== tabAG)
+           else  if(tabs.SelectedTab== tabAG)
             {
                 ag1.InstanceIDs = instanceIDs;
                 ag1.RefreshData();
+            }
+            else if(tabs.SelectedTab == tabQS)
+            {
+                queryStore1.InstanceIDs = AllInstanceIDs;
+                queryStore1.Instance = n.InstanceName;
+                queryStore1.RefreshData();
             }
             tsTime.Visible = globalTimeisVisible;
         }
@@ -582,30 +588,17 @@ namespace DBADashGUI
 
         private void ExpandObjects(SQLTreeItem n)
         {
-            SqlConnection cn = new SqlConnection(connectionString);
-            using (cn)
+            DataTable dbobj = CommonData.GetDBObjects(n.DatabaseID, (string)n.Tag);
+            foreach(DataRow r in dbobj.Rows)
             {
-                using (SqlCommand cmd = new SqlCommand("dbo.DBObjects_Get", cn) { CommandType = CommandType.StoredProcedure })
+                string type = ((string)r[1]).Trim();
+                var objN = new SQLTreeItem((string)r[3], (string)r[2], type)
                 {
-                    cn.Open();
-                    cmd.Parameters.AddWithValue("DatabaseID", n.DatabaseID);
-                    cmd.Parameters.AddWithValue("Types", n.Tag);
-                    var rdr = cmd.ExecuteReader();
-
-                    while (rdr.Read())
-                    {
-                        string type = ((string)rdr[1]).Trim();
-                        var objN = new SQLTreeItem((string)rdr[3], (string)rdr[2], type)
-                        {
-                            ObjectID = (Int64)rdr[0]
-                        };
-                        n.Nodes.Add(objN);
-                    }
-                }
+                    ObjectID = (Int64)r[0]
+                };
+                n.Nodes.Add(objN);
             }
-
-        }
-
+         }
  
         private void tv1_AfterSelect(object sender, TreeViewEventArgs e)
         {
@@ -689,6 +682,7 @@ namespace DBADashGUI
                 }
                 allowedTabs.Add(tabDBConfiguration);
                 allowedTabs.Add(tabDBOptions);
+                allowedTabs.Add(tabQS);
             }
             else if(n.Type == SQLTreeItem.TreeType.AgentJobs)
             {
@@ -818,8 +812,8 @@ namespace DBADashGUI
         #region SchemaSnapshots
         private void loadDDL(Int64 DDLID, Int64 DDLIDOld)
         {
-            string newText = Common.DDL(DDLID, connectionString);
-            string oldText = Common.DDL(DDLIDOld, connectionString);
+            string newText = Common.DDL(DDLID);
+            string oldText = Common.DDL(DDLIDOld);
             diffSchemaSnapshot.OldText = oldText;
             diffSchemaSnapshot.NewText = newText;
         }
@@ -829,31 +823,17 @@ namespace DBADashGUI
             diffSchemaSnapshot.OldText = "";
             diffSchemaSnapshot.NewText = "";
             currentPageSize = Int32.Parse(tsPageSize.Text);
-            SqlConnection cn = new SqlConnection(connectionString);
-            using (cn)
-            {
-                using (var cmd = new SqlCommand("dbo.DDLHistoryForObject_Get", cn) { CommandType = CommandType.StoredProcedure }) {
-                    cn.Open();
-                    cmd.Parameters.AddWithValue("ObjectID", ObjectID);
-                    cmd.Parameters.AddWithValue("PageSize", currentPageSize);
-                    cmd.Parameters.AddWithValue("PageNumber", PageNum);
-                    SqlDataAdapter da = new SqlDataAdapter(cmd);
-                    DataSet ds = new DataSet();
-                    da.Fill(ds);
-                    gvHistory.AutoGenerateColumns = false;
-                    gvHistory.DataSource = ds.Tables[0];
-                    currentObjectID = ObjectID;
-                    currentPage = PageNum;
-                    tsPageNum.Text = "Page " + PageNum;
-
-                    tsPrevious.Enabled = (PageNum > 1);
-                    tsNext.Enabled = ds.Tables[0].Rows.Count == currentPageSize;
-
-                }
-            }
+            DataTable dt = CommonData.GetDDLHistoryForObject(ObjectID, PageNum, currentPageSize);
+            
+            gvHistory.AutoGenerateColumns = false;
+            gvHistory.DataSource = dt;
+            currentObjectID = ObjectID;
+            currentPage = PageNum;
+            tsPageNum.Text = "Page " + PageNum;
+            tsPrevious.Enabled = (PageNum > 1);
+            tsNext.Enabled = dt.Rows.Count == currentPageSize;
+            
         }
-
-
 
         private void gvHistory_SelectionChanged(object sender, EventArgs e)
         {
@@ -914,13 +894,11 @@ namespace DBADashGUI
 
         private void dBDiffToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            var frm = new DBDiff
-            {
-                ConnectionString = connectionString
-            };
+            var frm = new DBDiff();
+            frm.SelectedTags = SelectedTags();
             var n = (SQLTreeItem)tv1.SelectedNode;
             frm.SelectedInstanceA = n.InstanceName;
-            frm.SelectedDatabaseA = new DBDiff.DatabaseItem() { DatabaseID = n.DatabaseID, DatabaseName = n.DatabaseName };
+            frm.SelectedDatabaseA = new DatabaseItem() { DatabaseID = n.DatabaseID, DatabaseName = n.DatabaseName };
             frm.ShowDialog();
         }
 
@@ -1166,7 +1144,7 @@ namespace DBADashGUI
             {
                 if((child.InstanceID  == e.InstanceID && e.InstanceID>0 ) || (child.InstanceName == e.Instance && e.Instance!=null))
                 {
-                    if (e.Tab == "tabAlerts") // Configuration Node
+                    if (e.Tab == "tabAlerts" || e.Tab == "tabQS") // Configuration Node
                     {
                         child.Expand();
                         tv1.SelectedNode = child.Nodes[0];
@@ -1313,6 +1291,18 @@ namespace DBADashGUI
             {
                 var selected = (SQLTreeItem)tv1.SelectedNode;
                 frm.InstanceID_A = selected.InstanceID;
+                frm.ShowDialog();
+            }
+        }
+
+        private void gvHistory_CellContentClick(object sender, DataGridViewCellEventArgs e)
+        {
+            var node = (SQLTreeItem)tv1.SelectedNode;
+            if (e.RowIndex>=0 && e.ColumnIndex == colCompare.Index)
+            {
+                var row = (DataRowView)gvHistory.Rows[e.RowIndex].DataBoundItem;
+                var frm = new DDLCompareTo() { Instance_A = node.InstanceName, DatabaseID_A = node.DatabaseID, ObjectType_A = (string)row["ObjectType"], ObjectID_A = node.ObjectID, SnapshotDate_A = (DateTime)row["SnapshotValidFrom"] } ;   
+                frm.SelectedTags = SelectedTags();
                 frm.ShowDialog();
             }
         }

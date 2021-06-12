@@ -3,11 +3,10 @@ using Microsoft.SqlServer.Management.Smo;
 using Newtonsoft.Json;
 using Quartz;
 using System;
-using System.Data;
 using System.Data.SqlClient;
 using System.Threading.Tasks;
-using static DBADash.DBADashConnection;
 using Serilog;
+
 namespace DBADashService
 {
     public class SchemaSnapshotJob : IJob
@@ -63,12 +62,12 @@ namespace DBADashService
                            var  dt = ss.SnapshotDB(db.Name);
                             DateTime EndTime = DateTime.UtcNow;
                             dt.TableName = "Snapshot_" + db.Name;
-                            dt.ExtendedProperties.Add("StartTime", StartTime);
-                            dt.ExtendedProperties.Add("EndTime", EndTime);
+                            dt.ExtendedProperties.Add("StartTimeBin",StartTime.ToBinary().ToString());
+                            dt.ExtendedProperties.Add("EndTimeBin", EndTime.ToBinary().ToString());
                             dt.ExtendedProperties.Add("SnapshotOptions", JsonConvert.SerializeObject(SchedulerServiceConfig.Config.SchemaSnapshotOptions));
                             dsSnapshot.Tables.Add(dt);
 
-                            string fileName = cfg.GenerateFileName(true,cfg.SourceConnection.ConnectionForFileName);
+                            string fileName = cfg.GenerateFileName(cfg.SourceConnection.ConnectionForFileName);
                             DestinationHandling.WriteAllDestinations(dsSnapshot, cfg,fileName);
                             dsSnapshot.Tables.Remove(dt);
                         }

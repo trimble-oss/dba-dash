@@ -16,11 +16,11 @@
        read_only_routing_url NVARCHAR(256) NULL,
        seeding_mode TINYINT NOT NULL,
        read_write_routing_url NVARCHAR(256) NULL,
-       availability_mode_desc AS CASE availability_mode WHEN 0 THEN N'ASYNCHRONOUS_COMMIT' WHEN 1 THEN N'SYNCHRONOUS_COMMIT' WHEN 4 THEN N'CONFIGURATION_ONLY' ELSE CAST(availability_mode AS NVARCHAR(60)) END,
-       failover_mode_desc AS CASE failover_mode WHEN 0 THEN N'AUTOMATIC' WHEN 1 THEN N'MANUAL' ELSE CAST(failover_mode as NVARCHAR(60)) END,
-       primary_role_allow_connections_desc AS CASE primary_role_allow_connections WHEN 2 THEN N'ALL' WHEN 3 THEN N'READ_WRITE' ELSE CAST(primary_role_allow_connections as NVARCHAR(60)) END,
-       secondary_role_allow_connections_desc AS CASE secondary_role_allow_connections WHEN 0 THEN N'NO' WHEN 1 THEN N'READ_ONLY' WHEN 2 THEN N'ALL' ELSE CAST(secondary_role_allow_connections AS NVARCHAR(60)) END,
-       seeding_mode_desc AS CASE seeding_mode WHEN 0 THEN N'AUTOMATIC' WHEN 1 THEN N'MANUAL' ELSE CAST(seeding_mode as NVARCHAR(60)) END,
+       availability_mode_desc AS (CASE availability_mode WHEN 0 THEN N'ASYNCHRONOUS_COMMIT' WHEN 1 THEN N'SYNCHRONOUS_COMMIT' WHEN 4 THEN N'CONFIGURATION_ONLY' ELSE CONVERT(NVARCHAR(60),availability_mode) END),
+       failover_mode_desc AS (CASE failover_mode WHEN 0 THEN N'AUTOMATIC' WHEN 1 THEN N'MANUAL' ELSE CONVERT(NVARCHAR(60),failover_mode) END),
+       primary_role_allow_connections_desc AS (CASE primary_role_allow_connections WHEN 2 THEN N'ALL' WHEN 3 THEN N'READ_WRITE' ELSE CONVERT(NVARCHAR(60),primary_role_allow_connections) END),
+       secondary_role_allow_connections_desc AS (CASE secondary_role_allow_connections WHEN 0 THEN N'NO' WHEN 1 THEN N'READ_ONLY' WHEN 2 THEN N'ALL' ELSE CONVERT(NVARCHAR(60),secondary_role_allow_connections) END),
+       seeding_mode_desc AS (CASE seeding_mode WHEN 0 THEN N'AUTOMATIC' WHEN 1 THEN N'MANUAL' ELSE CONVERT(NVARCHAR(60),seeding_mode) END),
 	   CONSTRAINT FK_AvailabilityReplicas_Instances FOREIGN KEY(InstanceID) REFERENCES dbo.Instances(InstanceID),
 	   CONSTRAINT PK_AvailabilityReplicas PRIMARY KEY(InstanceID,replica_id)
 )

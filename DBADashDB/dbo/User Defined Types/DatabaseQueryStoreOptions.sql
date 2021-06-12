@@ -1,0 +1,20 @@
+﻿CREATE TYPE dbo.DatabaseQueryStoreOptions AS TABLE(
+	database_id INT NOT NULL PRIMARY KEY,
+    desired_state SMALLINT NOT NULL,
+    actual_state SMALLINT NOT NULL,
+    readonly_reason INT  NOT NULL,
+    current_storage_size_mb BIGINT NOT NULL,
+    flush_interval_seconds BIGINT NOT NULL,
+    interval_length_minutes BIGINT NOT NULL,
+    max_storage_size_mb BIGINT NOT NULL,
+    stale_query_threshold_days BIGINT NOT NULL,
+    max_plans_per_query BIGINT NOT NULL,
+    query_capture_mode SMALLINT NOT NULL,
+    size_based_cleanup_mode SMALLINT NOT NULL,
+    actual_state_additional_info NVARCHAR(4000) NOT NULL,
+    wait_stats_capture_mode SMALLINT NULL,
+    capture_policy_execution_count INT NULL,
+    capture_policy_total_compile_cpu_time_ms BIGINT NULL,
+    capture_policy_total_execution_cpu_time_ms BIGINT NULL,
+    capture_policy_stale_threshold_hours INT NULL
+)

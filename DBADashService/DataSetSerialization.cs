@@ -1,10 +1,8 @@
 ﻿using Newtonsoft.Json;
 using System;
-using System.Collections.Generic;
 using System.Data;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.IO;
+using System.Runtime.Serialization.Formatters.Binary;
 
 namespace DBADashService
 {
@@ -26,32 +24,8 @@ namespace DBADashService
 
 
         private static readonly string binaryPrefix = "###BINARY###";
-        public static string SerializeDS(DataSet ds)
-        {
-            foreach(DataTable dt in ds.Tables)
-            {
-                foreach(DataColumn col in dt.Columns)
-                {
-                    if (col.DataType == typeof(byte[]))
-                    {
-                        col.ColumnName = binaryPrefix + col.ColumnName;
-                    }
-                }
-            }
-            string json = JsonConvert.SerializeObject(ds, Formatting.None);
-            foreach (DataTable dt in ds.Tables)
-            {
-                foreach (DataColumn col in dt.Columns)
-                {
-                    if (col.DataType == typeof(byte[]))
-                    {
-                        col.ColumnName = col.ColumnName.Replace(binaryPrefix, "");
-                    }
-                }
-            }
-            return json;
-        }
 
+        [ObsoleteAttribute("To be removed. Json serialization replaced with XML serialization", false)]
         public static DataSet  DeserializeDS(string json)
         {
             var ds = JsonConvert.DeserializeObject<DataSet>(json);
@@ -77,6 +51,52 @@ namespace DBADashService
                 }
             }
             return ds;
+        }
+
+        [ObsoleteAttribute("To be removed - BinaryFormatter is obsolete", false)]
+        public static DataSet DeserializeFromBinaryFile(string filePath)
+        {
+            BinaryFormatter fmt = new BinaryFormatter();
+            DataSet ds;
+            using (FileStream fs = new FileStream(filePath, FileMode.Open, FileAccess.Read))
+            {
+                ds = (DataSet)fmt.Deserialize(fs);
+            }
+            return ds;
+        }
+
+
+        public static DataSet DeserializeFromXmlFile(string filePath)
+        {
+            using (FileStream fs = new FileStream(filePath, FileMode.OpenOrCreate, FileAccess.Read))
+            {
+                var ds = new DataSet();
+                ds.ReadXml(fs);
+                return ds;
+            }
+        }
+
+        public static DataSet DeserializeFromFile(string filePath)
+        {
+            if (filePath.EndsWith(".bin"))
+            {
+                // Legacy to be removed. https://docs.microsoft.com/en-gb/dotnet/standard/serialization/binaryformatter-security-guide
+                return DeserializeFromBinaryFile(filePath);
+            }
+            else if (filePath.EndsWith(".json"))
+            {
+                // Legacy to be removed.  Has issues with binary data and doesn't handle data types correctly
+                string json = System.IO.File.ReadAllText(filePath);
+                return DataSetSerialization.DeserializeDS(json);
+            }
+            else if (filePath.EndsWith(".xml"))
+            {
+                return DeserializeFromXmlFile(filePath);
+            }
+            else
+            {
+                throw new Exception($"Invalid file extention { filePath } expected: .json|.bin|.xml");
+            }
         }
     }
 }

@@ -1,0 +1,28 @@
+﻿CREATE TABLE dbo.DatabaseQueryStoreOptions(
+    DatabaseID INT NOT NULL CONSTRAINT PK_DatabaseQueryStoreOptions PRIMARY KEY(DatabaseID),
+    desired_state SMALLINT NOT NULL,
+    actual_state SMALLINT NOT NULL,
+    readonly_reason INT  NOT NULL,
+    current_storage_size_mb BIGINT NOT NULL,
+    flush_interval_seconds BIGINT NOT NULL,
+    interval_length_minutes BIGINT NOT NULL,
+    max_storage_size_mb BIGINT NOT NULL,
+    stale_query_threshold_days BIGINT NOT NULL,
+    max_plans_per_query BIGINT NOT NULL,
+    query_capture_mode SMALLINT NOT NULL,
+    size_based_cleanup_mode SMALLINT NOT NULL,
+    actual_state_additional_info NVARCHAR(4000) NOT NULL,
+    wait_stats_capture_mode SMALLINT NULL,
+    capture_policy_execution_count INT NULL,
+    capture_policy_total_compile_cpu_time_ms BIGINT NULL,
+    capture_policy_total_execution_cpu_time_ms BIGINT NULL,
+    capture_policy_stale_threshold_hours INT NULL ,
+    desired_state_desc AS (CASE desired_state WHEN 0 THEN N'OFF' WHEN 1 THEN N'READ_ONLY' WHEN 2 THEN N'READ_WRITE' ELSE CONVERT(NVARCHAR(60),desired_state) END),
+    actual_state_desc AS (CASE actual_state WHEN 0 THEN N'OFF' WHEN 1 THEN N'READ_ONLY' WHEN 2 THEN N'READ_WRITE' WHEN 3 THEN N'ERROR' ELSE CONVERT(NVARCHAR(60),actual_state) END),
+    -- readonly_reason_desc = custom
+    readonly_reason_desc AS (CASE readonly_reason WHEN 0 THEN '' WHEN 1 THEN N'DB_READONLY' WHEN 2 THEN N'DB_SINGLE_USER' WHEN 4 THEN N'DB_EMERGENCY' WHEN 8 THEN N'DB_SECONDARY_REPLICA' WHEN 65536 THEN N'QS_SIZE_LIMIT' WHEN 131072 THEN N'QS_STATEMENT_MEM_LIMIT' WHEN 262144 THEN N'QS_PERSIST_MEM_LIMIT' WHEN 524288 THEN N'DB_SIZE_LIMIT' ELSE CONVERT(NVARCHAR(60),readonly_reason) END),
+    query_capture_mode_desc AS (CASE query_capture_mode WHEN 1 THEN N'ALL' WHEN 2 THEN N'AUTO' WHEN 3 THEN N'NONE' WHEN 4 THEN N'CUSTOM' ELSE CONVERT(NVARCHAR(60),query_capture_mode) END),
+    size_based_cleanup_mode_desc AS (CASE size_based_cleanup_mode WHEN 0 THEN N'OFF' WHEN 1 THEN 'AUTO' ELSE CONVERT(NVARCHAR(60),size_based_cleanup_mode) END),
+    wait_stats_capture_mode_desc AS (CASE wait_stats_capture_mode WHEN 0 THEN N'OFF' WHEN 1 THEN 'ON' ELSE CONVERT(NVARCHAR(60),wait_stats_capture_mode) END),
+    CONSTRAINT FK_DatabaseQueryStoreOptions_Databases FOREIGN KEY(DatabaseID) REFERENCES dbo.Databases(DatabaseID)
+)

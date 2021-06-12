@@ -1,11 +1,9 @@
 ﻿using DBADash;
-using Newtonsoft.Json;
 using Polly;
 using System;
 using System.Collections.Generic;
 using System.Data;
 using System.IO;
-using System.Runtime.Serialization.Formatters.Binary;
 using static DBADash.DBADashConnection;
 using Serilog;
 using SerilogTimings;
@@ -63,22 +61,17 @@ namespace DBADashService
             var uri = new Amazon.S3.Util.AmazonS3Uri(destination);
             var s3Cli = AWSTools.GetAWSClient(SchedulerServiceConfig.Config.AWSProfile, SchedulerServiceConfig.Config.AccessKey, SchedulerServiceConfig.Config.GetSecretKey(), uri);
             var r = new Amazon.S3.Model.PutObjectRequest();
+            string extension = System.IO.Path.GetExtension(fileName);
+            if (extension != ".xml")
+            {
+                fileName += ".xml";
+            }
 
-            if (System.IO.Path.GetExtension(fileName) == ".bin")
-            {
-                DataSetSerialization.SetDateTimeKind(ds); // Required for binary dataset serialization to prevent timezone conversion
-                ds.RemotingFormat = SerializationFormat.Binary;
-                BinaryFormatter fmt = new BinaryFormatter();
-                MemoryStream ms = new MemoryStream();
-                fmt.Serialize(ms, ds);
-                r.InputStream = ms;
-            }
-            else
-            {
-                string json = DataSetSerialization.SerializeDS(ds);
-                r.ContentBody = json;
-                r.BucketName = uri.Bucket;
-            }
+            DataSetSerialization.SetDateTimeKind(ds); // Required to prevent timezone conversion
+            MemoryStream ms = new MemoryStream();
+            ds.WriteXml(ms, XmlWriteMode.WriteSchema);
+            r.InputStream = ms;
+
             r.BucketName = uri.Bucket;
             r.Key = (uri.Key + "/" + fileName).Replace("//", "/");
             s3Cli.PutObject(r);
@@ -90,20 +83,18 @@ namespace DBADashService
             if (System.IO.Directory.Exists(destination))
             {
                 string filePath = Path.Combine(destination, fileName);
-                if (System.IO.Path.GetExtension(fileName) == ".bin")
+                string extension = System.IO.Path.GetExtension(fileName);
+                if (extension == ".xml")
                 {
-                    DataSetSerialization.SetDateTimeKind(ds); // Required for binary dataset serialization to prevent timezone conversion
-                    ds.RemotingFormat = SerializationFormat.Binary;
-                    BinaryFormatter fmt = new BinaryFormatter();
-                    using (FileStream fs = new FileStream(filePath, FileMode.Create, FileAccess.Write))
+                    using (FileStream fs = new FileStream(filePath, FileMode.OpenOrCreate, FileAccess.ReadWrite))
                     {
-                        fmt.Serialize(fs, ds);
+                        DataSetSerialization.SetDateTimeKind(ds); // Required to prevent timezone conversion
+                        ds.WriteXml(fs, XmlWriteMode.WriteSchema);
                     }
                 }
                 else
                 {
-                    string json = DataSetSerialization.SerializeDS(ds);
-                    File.WriteAllText(filePath, json);
+                    throw new Exception("Invalid extension");
                 }
             }
             else

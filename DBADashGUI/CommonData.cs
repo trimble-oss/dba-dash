@@ -168,5 +168,97 @@ namespace DBADashGUI
             }
         }
 
+        public static List<string> GetInstancesWithDDLSnapshot(List<short> tags)
+        {
+            List<string> instances = new List<string>();
+            using (var cn = new SqlConnection(Common.ConnectionString))
+            using (var cmd = new SqlCommand("dbo.InstancesWithDDLSnapshot_Get", cn) { CommandType = CommandType.StoredProcedure })
+            {
+                cn.Open();
+                if (tags.Count > 0)
+                {
+                    cmd.Parameters.AddWithValue("TagIDs", string.Join(",", tags));
+                }
+                using (var rdr = cmd.ExecuteReader())
+                {
+                    while (rdr.Read())
+                    {
+                        instances.Add((string)rdr[0]);
+                    }
+                }
+            }
+            return instances;
+        }
+
+        public static List<DatabaseItem> GetDatabasesWithDDLSnapshot(string instance)
+        {
+            List<DatabaseItem> databases = new List<DatabaseItem>();
+            using (var cn = new SqlConnection(Common.ConnectionString))
+            using (var cmd = new SqlCommand("dbo.DatabasesWithDDLSnapshot_Get", cn) { CommandType = CommandType.StoredProcedure })
+            {
+                cn.Open();
+                cmd.Parameters.AddWithValue("Instance", instance);
+                using (var rdr = cmd.ExecuteReader())
+                {
+                    while (rdr.Read())
+                    {
+                        databases.Add(new DatabaseItem() { DatabaseID = (Int32)rdr[0], DatabaseName = (string)rdr[1] });
+                    }
+                }
+            }
+            return databases;
+        }
+
+        public static Dictionary<string, string> GetObjectTypes()
+        {
+            Dictionary<string, string> objtypes = new Dictionary<string, string>();
+            using (var cn = new SqlConnection(Common.ConnectionString))
+            using (var cmd = new SqlCommand("dbo.ObjectType_Get", cn) { CommandType = CommandType.StoredProcedure })
+            {
+                cn.Open();
+                using (var rdr = cmd.ExecuteReader())
+                {
+                    while (rdr.Read())
+                    {
+                        objtypes.Add(((string)rdr[0]).TrimEnd(), (string)rdr[1]);
+                    }
+                }
+            }
+            return objtypes;
+        }
+
+        public static DataTable GetDBObjects(int DatabaseID, string types)
+        {
+            var dt = new DataTable();
+            using (var cn = new SqlConnection(Common.ConnectionString))
+            using (SqlCommand cmd = new SqlCommand("dbo.DBObjects_Get", cn) { CommandType = CommandType.StoredProcedure })
+            using (SqlDataAdapter da = new SqlDataAdapter(cmd))
+            {
+                cn.Open();
+                cmd.Parameters.AddWithValue("DatabaseID", DatabaseID);
+                cmd.Parameters.AddWithValue("Types", types);
+                da.Fill(dt);
+            }
+            return dt;
+        }
+
+        public static DataTable GetDDLHistoryForObject(Int64 ObjectId, int PageNum, int PageSize)
+        {
+            using (var cn = new SqlConnection(Common.ConnectionString))
+            {
+                using (var cmd = new SqlCommand("dbo.DDLHistoryForObject_Get", cn) { CommandType = CommandType.StoredProcedure })
+                {
+                    cn.Open();
+                    cmd.Parameters.AddWithValue("ObjectID", ObjectId);
+                    cmd.Parameters.AddWithValue("PageSize", PageSize);
+                    cmd.Parameters.AddWithValue("PageNumber", PageNum);
+                    SqlDataAdapter da = new SqlDataAdapter(cmd);
+                    var dt = new DataTable();
+                    da.Fill(dt);
+                    return dt;
+                }
+            }
+        }
+
     }
 }
