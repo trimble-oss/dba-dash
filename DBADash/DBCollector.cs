@@ -61,7 +61,7 @@ namespace DBADash
         JobHistory,
         AvailabilityReplicas,
         AvailabilityGroups,
-        ResourceGovernorConfiguration
+        ResourceGovernorConfiguration,
         DatabaseQueryStoreOptions
     }
 
