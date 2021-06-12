@@ -10,9 +10,10 @@ BEGIN
 		CAST(SERVERPROPERTY('EditionID') as bigint) as EditionID,
 		ISNULL(CAST(SERVERPROPERTY('ComputerNamePhysicalNetBIOS') as nvarchar(128)),'') as ComputerNamePhysicalNetBIOS,
 		DB_NAME() as DBName,
-		SERVERPROPERTY ('productversion') as ProductVersion,
+		SERVERPROPERTY ('ProductVersion') as ProductVersion,
 		DATEDIFF(mi,GETDATE(),GETUTCDATE()) AS UTCOffset,
-		SERVERPROPERTY('IsHadrEnabled') IsHadrEnabled
+		SERVERPROPERTY('IsHadrEnabled') IsHadrEnabled,
+		SERVERPROPERTY('EngineEdition') EngineEdition
 	FROM sys.dm_os_host_info
 END
 ELSE IF OBJECT_ID('sys.dm_os_windows_info') IS NOT NULL
@@ -28,9 +29,10 @@ BEGIN
 		CAST(SERVERPROPERTY('EditionID') as bigint) as EditionID,
 		ISNULL(CAST(SERVERPROPERTY('ComputerNamePhysicalNetBIOS') as nvarchar(128)),'') as ComputerNamePhysicalNetBIOS,
 		DB_NAME() as DBName,
-		SERVERPROPERTY ('productversion') as ProductVersion,
+		SERVERPROPERTY ('ProductVersion') as ProductVersion,
 		DATEDIFF(mi,GETDATE(),GETUTCDATE()) AS UTCOffset,
-		SERVERPROPERTY('IsHadrEnabled') IsHadrEnabled
+		SERVERPROPERTY('IsHadrEnabled') IsHadrEnabled,
+		SERVERPROPERTY('EngineEdition') EngineEdition
 	FROM sys.dm_os_windows_info
 END
 ELSE
@@ -45,7 +47,8 @@ BEGIN
 		CAST(SERVERPROPERTY('EditionID') as bigint) as EditionID,
 		ISNULL(CAST(SERVERPROPERTY('ComputerNamePhysicalNetBIOS') as nvarchar(128)),'') as ComputerNamePhysicalNetBIOS,
 		DB_NAME() as DBName,
-		SERVERPROPERTY ('productversion') as ProductVersion,
+		SERVERPROPERTY ('ProductVersion') as ProductVersion,
 		DATEDIFF(mi,GETDATE(),GETUTCDATE()) AS UTCOffset,
-		SERVERPROPERTY('IsHadrEnabled') IsHadrEnabled
+		SERVERPROPERTY('IsHadrEnabled') IsHadrEnabled,
+		SERVERPROPERTY('EngineEdition') EngineEdition
 END

@@ -89,11 +89,29 @@ namespace DBADash
         private readonly SHA256Managed crypt = new SHA256Managed();
         private readonly SchemaSnapshotDBOptions options;
         private readonly ScriptingOptions ScriptingOptions;
-
+        private string masterConnectionString
+        {
+            get
+            {
+                var builder = new SqlConnectionStringBuilder(_connectionString)
+                {
+                    InitialCatalog = "master"
+                };
+                return builder.ConnectionString;
+            }
+        }
+       
         public SchemaSnapshotDB(string connectionString,SchemaSnapshotDBOptions options)
         {
             _connectionString = connectionString;
             this.options = options;
+            this.ScriptingOptions = options.ScriptOptions();
+        }
+
+        public SchemaSnapshotDB(string connectionString)
+        {
+            _connectionString = connectionString;
+            this.options = new SchemaSnapshotDBOptions();
             this.ScriptingOptions = options.ScriptOptions();
         }
 
@@ -141,16 +159,15 @@ namespace DBADash
             return dtSchema;
         }
 
-        public void SnapshotJobs(ref DataSet ds)
+        private DataTable JobStepTableSchema()
         {
-            var jobDT = JobDataTableSchema();
             var jobStepDT = new DataTable("JobSteps");
             jobStepDT.Columns.Add("job_id", typeof(Guid));
             jobStepDT.Columns.Add("step_id", typeof(int));
             jobStepDT.Columns.Add("step_name");
             jobStepDT.Columns.Add("subsystem");
             jobStepDT.Columns.Add("command");
-            jobStepDT.Columns.Add("cmdexec_success_code",typeof(int));
+            jobStepDT.Columns.Add("cmdexec_success_code", typeof(int));
             jobStepDT.Columns.Add("on_success_action", typeof(short));
             jobStepDT.Columns.Add("on_success_step_id", typeof(int));
             jobStepDT.Columns.Add("on_fail_action", typeof(short));
@@ -158,9 +175,16 @@ namespace DBADash
             jobStepDT.Columns.Add("database_name");
             jobStepDT.Columns.Add("database_user_name");
             jobStepDT.Columns.Add("retry_attempts", typeof(int));
-            jobStepDT.Columns.Add("retry_interval", typeof(int)); 
+            jobStepDT.Columns.Add("retry_interval", typeof(int));
             jobStepDT.Columns.Add("output_file_name");
             jobStepDT.Columns.Add("proxy_name");
+            return jobStepDT;
+        }
+
+        public void SnapshotJobs(ref DataSet ds)
+        {
+            var jobDT = JobDataTableSchema();
+            var jobStepDT = JobStepTableSchema();
 
             using (var cn = new Microsoft.Data.SqlClient.SqlConnection(_connectionString))
             {
@@ -224,6 +248,97 @@ namespace DBADash
             }
             ds.Tables.Add(jobDT);
             ds.Tables.Add(jobStepDT);
+        }
+
+        private DataTable rgDTSchema()
+        {
+            DataTable dtRG = new DataTable
+            {
+                TableName = "ResourceGovernorConfiguration"
+            };
+            dtRG.Columns.Add("is_enabled", typeof(bool));
+            dtRG.Columns.Add("classifier_function", typeof(string));          
+            dtRG.Columns.Add("reconfiguration_error", typeof(bool));
+            dtRG.Columns.Add("reconfiguration_pending", typeof(bool));
+            dtRG.Columns.Add("max_outstanding_io_per_volume",typeof(int));
+            dtRG.Columns.Add("script", typeof(string));
+            return dtRG;
+        }
+
+        public DataTable ResourceGovernorConfiguration()
+        {
+            DataTable dtRG = rgDTSchema();
+            bool reconfigError = false;
+            using (var cn = new Microsoft.Data.SqlClient.SqlConnection(masterConnectionString))
+            {
+                var instance = new Microsoft.SqlServer.Management.Smo.Server(new Microsoft.SqlServer.Management.Common.ServerConnection(cn));
+                if (instance.EngineEdition == Edition.EnterpriseOrDeveloper) //  RG is an enterprise only edition feature
+                {
+                    var rg = instance.ResourceGovernor;
+                    // Script RG configuration
+                    var sc = rg.Script();
+                    // Add classifier function script
+                    sc.Add(ObjectDDL(masterConnectionString, rg.ClassifierFunction));
+
+                    // Script out resource pool configuration and workload groups
+                    foreach (ResourcePool pool in rg.ResourcePools)
+                    {
+                        if (!(pool.IsSystemObject && pool.ID == 1)) // Ignore internal pool which can't be configured
+                        {
+                            try
+                            {
+                                var poolSc = pool.Script();
+                                sc.AppendCollection(poolSc);
+                                foreach (WorkloadGroup wg in pool.WorkloadGroups)
+                                {
+                                    sc.AppendCollection(wg.Script());
+                                }
+                            }
+                            catch (Exception ex)
+                            {
+                                if (ex.InnerException.Message == "The resource governor resource pool information is not complete. This can happen if a pool was created but the resource governor is not reconfigured.")
+                                {
+                                    // Might have an issue scripting if a pool is created without running ALTER RESOURCE GOVERNOR RECONFIGURE.  Ignore this error and add a comment to the script
+                                    sc.Add($"/* Unable to script pool {pool.Name} until resource governor is reconfigured */");
+                                    reconfigError = true;
+                                }
+                                else
+                                {
+                                    throw;
+                                }
+                            }
+                        }
+                    }
+
+                    foreach (ExternalResourcePool pool in rg.ExternalResourcePools)
+                    {
+                        var poolSc = pool.Script();
+                        sc.AppendCollection(poolSc);
+                    }
+                    var row = dtRG.NewRow();
+                    row["is_enabled"] = rg.Enabled;
+                    row["classifier_function"] = rg.ClassifierFunction;
+                    row["reconfiguration_error"] = reconfigError;
+                    row["reconfiguration_pending"] = rg.ReconfigurePending;
+                    row["max_outstanding_io_per_volume"] = rg.MaxOutstandingIOPerVolume;
+                    row["script"] = stringCollectionToString(sc);
+                    dtRG.Rows.Add(row);
+                    
+                }
+
+            }
+            return dtRG;
+        }
+
+        public static string ObjectDDL(string connectionString, string objectName)
+        {
+            using (var cn = new SqlConnection(connectionString))
+            using (var cmd = new SqlCommand("SELECT OBJECT_DEFINITION(OBJECT_ID(@ObjectName)) as DDL", cn))
+            {
+                cn.Open();
+                cmd.Parameters.AddWithValue("@ObjectName", objectName);
+                return Convert.ToString(cmd.ExecuteScalar());
+            }
         }
 
         public DataTable SnapshotDB(string DBName)

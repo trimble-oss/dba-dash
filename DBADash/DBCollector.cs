@@ -8,6 +8,9 @@ using System.Linq;
 using System.Management;
 using System.Reflection;
 using Serilog;
+using Polly;
+using Microsoft.SqlServer.Management.Common;
+
 namespace DBADash
 {
     [JsonConverter(typeof(StringEnumConverter))]
@@ -57,7 +60,8 @@ namespace DBADash
         Jobs,
         JobHistory,
         AvailabilityReplicas,
-        AvailabilityGroups
+        AvailabilityGroups,
+        ResourceGovernorConfiguration
     }
 
     public enum HostPlatform
@@ -91,6 +95,8 @@ namespace DBADash
         private HostPlatform platform;
         public DateTime JobLastModified=DateTime.MinValue;
         private bool IsHadrEnabled=false;
+        private Policy retryPolicy;
+        private DatabaseEngineEdition engineEdition;       
 
         public int Job_instance_id {
             get
@@ -158,7 +164,17 @@ namespace DBADash
 
 
         private void startup(string connectionString, string connectionID)
-        {
+        {    
+            retryPolicy = Policy.Handle<Exception>()
+                .WaitAndRetry(new[]
+                {
+                                TimeSpan.FromSeconds(2),
+                                TimeSpan.FromSeconds(5),
+                                TimeSpan.FromSeconds(10)
+                }, (exception, timeSpan, retryCount, context) =>
+                {
+                    logError(exception,(string)context.OperationKey, "Collect[Retrying]");
+                });
             _connectionString = connectionString;
             Data = new DataSet("DBADash");
             dtErrors = new DataTable("Errors");
@@ -238,6 +254,8 @@ namespace DBADash
             instanceName = (string)dt.Rows[0]["Instance"];
             productVersion = (string)dt.Rows[0]["ProductVersion"];
             string hostPlatform = (string)dt.Rows[0]["host_platform"];
+            engineEdition = (DatabaseEngineEdition)Convert.ToInt32(dt.Rows[0]["EngineEdition"]);
+
             if (!Enum.TryParse(hostPlatform, out platform))
             {
                 Log.Error("GetInstance: host_platform parse error");
@@ -370,6 +388,7 @@ namespace DBADash
                 Collect(CollectionType.VLF);
                 Collect(CollectionType.DriversWMI);
                 Collect(CollectionType.OSLoadedModules);
+                Collect(CollectionType.ResourceGovernorConfiguration);
                 
             }
             else if (collectionType == CollectionType.Drives)
@@ -507,6 +526,23 @@ namespace DBADash
                     logError(ex,collectionTypeString);
                 }
             }
+            else if(collectionType == CollectionType.ResourceGovernorConfiguration)
+            {
+                if (engineEdition == DatabaseEngineEdition.Enterprise && !IsAzure)
+                {
+                    try
+                    {
+                        retryPolicy.Execute(
+                          context => collectResourceGovernor(),
+                          new Context(collectionTypeString)
+                        );
+                    }
+                    catch (Exception ex)
+                    {
+                        logError(ex, collectionTypeString);
+                    }
+                }
+            }
             else
             {
                 var completed = false;
@@ -535,6 +571,13 @@ namespace DBADash
                 }
 
             }
+        }
+
+        private void collectResourceGovernor()
+        {
+            var ss = new SchemaSnapshotDB(_connectionString);
+            var dtRG = ss.ResourceGovernorConfiguration();
+            Data.Tables.Add(dtRG);
         }
 
         private void collectPerformanceCounters()
@@ -633,7 +676,6 @@ namespace DBADash
                         if (result == DBNull.Value)
                         {
                             throw new Exception("Result is NULL");
-                            return;
                         }
                         string ringBuffer = (string)result;
                         if (ringBuffer.Length > 0)
