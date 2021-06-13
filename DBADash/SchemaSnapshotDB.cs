@@ -309,18 +309,20 @@ namespace DBADash
                             }
                         }
                     }
-
-                    foreach (ExternalResourcePool pool in rg.ExternalResourcePools)
+                    if (rg.ServerVersion.Major >= 13) // Supported 2016 and later
                     {
-                        var poolSc = pool.Script();
-                        sc.AppendCollection(poolSc);
+                        foreach (ExternalResourcePool pool in rg.ExternalResourcePools)
+                        {
+                            var poolSc = pool.Script();
+                            sc.AppendCollection(poolSc);
+                        }
                     }
                     var row = dtRG.NewRow();
                     row["is_enabled"] = rg.Enabled;
                     row["classifier_function"] = rg.ClassifierFunction;
                     row["reconfiguration_error"] = reconfigError;
                     row["reconfiguration_pending"] = rg.ReconfigurePending;
-                    row["max_outstanding_io_per_volume"] = rg.MaxOutstandingIOPerVolume;
+                    row["max_outstanding_io_per_volume"] =rg.ServerVersion.Major >=12 ? rg.MaxOutstandingIOPerVolume : 0; // Supported 2014 and later
                     row["script"] = stringCollectionToString(sc);
                     dtRG.Rows.Add(row);
                     
