@@ -113,6 +113,12 @@
     <Compile Include="AgentJobs\JobStep.Designer.cs">
       <DependentUpon>JobStep.cs</DependentUpon>
     </Compile>
+    <Compile Include="Changes\ResourceGovernor.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Changes\ResourceGovernor.Designer.cs">
+      <DependentUpon>ResourceGovernor.cs</DependentUpon>
+    </Compile>
     <Compile Include="SchemaCompare\AppSyntaxModeProvider.cs" />
     <Compile Include="Bak\BackupsControl.cs">
       <SubType>UserControl</SubType>
@@ -576,6 +582,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Changes\QueryStore.resx">
       <DependentUpon>QueryStore.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Changes\ResourceGovernor.resx">
+      <DependentUpon>ResourceGovernor.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Changes\SchemaSnapshots.resx">
       <DependentUpon>SchemaSnapshots.cs</DependentUpon>

@@ -437,6 +437,11 @@ namespace DBADashGUI
                 queryStore1.Instance = n.InstanceName;
                 queryStore1.RefreshData();
             }
+            else if(tabs.SelectedTab== tabRG)
+            {
+                resourceGovernor1.InstanceIDs = instanceIDs;
+                resourceGovernor1.RefreshData();
+            }
             tsTime.Visible = globalTimeisVisible;
         }
 
@@ -651,7 +656,7 @@ namespace DBADashGUI
                 allowedTabs.Add(tabPC);
                 allowedTabs.Add(tabObjectExecutionSummary);
                 allowedTabs.Add(tabSlowQueries);
-                allowedTabs.Add(tabWaits);                                
+                allowedTabs.Add(tabWaits);
             }
             else if(n.Type == SQLTreeItem.TreeType.AzureInstance)
             {
@@ -675,6 +680,7 @@ namespace DBADashGUI
                     allowedTabs.Add(tabAlerts);
                     allowedTabs.Add(tabDrivers);
                     allowedTabs.Add(tabTempDB);
+                    allowedTabs.Add(tabRG);
                 }
                 if (parent.Type != SQLTreeItem.TreeType.Instance && hasAzureDBs)
                 {

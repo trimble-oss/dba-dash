@@ -557,6 +557,8 @@
     <Build Include="dbo\Stored Procedures\DatabaseDDLCompare_Get.sql" />
     <Build Include="dbo\Stored Procedures\DDLSnapshotDates_Get.sql" />
     <Build Include="dbo\Stored Procedures\DBSchemaAtDate_Get.sql" />
+    <Build Include="dbo\Stored Procedures\ResourceGovernorConfiguration_Get.sql" />
+    <Build Include="dbo\Stored Procedures\ResourceGovernorConfigurationHistory_Get.sql" />
   </ItemGroup>
   <ItemGroup>
     <PostDeploy Include="Script.PostDeployment1.sql" />
