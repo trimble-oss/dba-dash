@@ -42,6 +42,7 @@ namespace DBADashGUI.Changes
             {
                 dt = GetResourceGovernorConfiguration(InstanceIDs);
             }
+            Common.ConvertUTCToLocal(ref dt);
             colLinkInstance.Visible = !historyMode;
             colInstance.Visible = historyMode;
             colValidTo.Visible = historyMode;

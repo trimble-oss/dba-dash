@@ -45,10 +45,10 @@ namespace DBADashGUI.Changes
             this.dataGridViewTextBoxColumn9 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.colInstance = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.colLinkInstance = new System.Windows.Forms.DataGridViewLinkColumn();
-            this.colEnabled = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colEnabled = new System.Windows.Forms.DataGridViewCheckBoxColumn();
             this.colClassifierFunction = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colReconfigurationPending = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colReconfigurationError = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colReconfigurationPending = new System.Windows.Forms.DataGridViewCheckBoxColumn();
+            this.colReconfigurationError = new System.Windows.Forms.DataGridViewCheckBoxColumn();
             this.colMaxOutstandingIO = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.colValidFrom = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.colValidTo = new System.Windows.Forms.DataGridViewTextBoxColumn();
@@ -238,6 +238,8 @@ namespace DBADashGUI.Changes
             this.colEnabled.MinimumWidth = 6;
             this.colEnabled.Name = "colEnabled";
             this.colEnabled.ReadOnly = true;
+            this.colEnabled.Resizable = System.Windows.Forms.DataGridViewTriState.True;
+            this.colEnabled.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
             this.colEnabled.Width = 125;
             // 
             // colClassifierFunction
@@ -256,6 +258,8 @@ namespace DBADashGUI.Changes
             this.colReconfigurationPending.MinimumWidth = 6;
             this.colReconfigurationPending.Name = "colReconfigurationPending";
             this.colReconfigurationPending.ReadOnly = true;
+            this.colReconfigurationPending.Resizable = System.Windows.Forms.DataGridViewTriState.True;
+            this.colReconfigurationPending.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
             this.colReconfigurationPending.Width = 125;
             // 
             // colReconfigurationError
@@ -265,6 +269,8 @@ namespace DBADashGUI.Changes
             this.colReconfigurationError.MinimumWidth = 6;
             this.colReconfigurationError.Name = "colReconfigurationError";
             this.colReconfigurationError.ReadOnly = true;
+            this.colReconfigurationError.Resizable = System.Windows.Forms.DataGridViewTriState.True;
+            this.colReconfigurationError.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
             this.colReconfigurationError.ToolTipText = "Indicates that there was an error generating the script due to pending reconfigur" +
     "ation";
             this.colReconfigurationError.Width = 125;
@@ -359,10 +365,10 @@ namespace DBADashGUI.Changes
         private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn9;
         private System.Windows.Forms.DataGridViewTextBoxColumn colInstance;
         private System.Windows.Forms.DataGridViewLinkColumn colLinkInstance;
-        private System.Windows.Forms.DataGridViewTextBoxColumn colEnabled;
+        private System.Windows.Forms.DataGridViewCheckBoxColumn colEnabled;
         private System.Windows.Forms.DataGridViewTextBoxColumn colClassifierFunction;
-        private System.Windows.Forms.DataGridViewTextBoxColumn colReconfigurationPending;
-        private System.Windows.Forms.DataGridViewTextBoxColumn colReconfigurationError;
+        private System.Windows.Forms.DataGridViewCheckBoxColumn colReconfigurationPending;
+        private System.Windows.Forms.DataGridViewCheckBoxColumn colReconfigurationError;
         private System.Windows.Forms.DataGridViewTextBoxColumn colMaxOutstandingIO;
         private System.Windows.Forms.DataGridViewTextBoxColumn colValidFrom;
         private System.Windows.Forms.DataGridViewTextBoxColumn colValidTo;
