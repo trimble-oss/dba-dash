@@ -278,7 +278,7 @@ namespace DBADash
                     // Script RG configuration
                     var sc = rg.Script();
                     // Add classifier function script
-                    sc.Add(ObjectDDL(masterConnectionString, rg.ClassifierFunction));
+                    sc.Insert(0,ObjectDDL(masterConnectionString, rg.ClassifierFunction));
 
                     // Script out resource pool configuration and workload groups
                     foreach (ResourcePool pool in rg.ResourcePools)
