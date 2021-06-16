@@ -124,5 +124,24 @@ namespace DBADashGUI.Changes
         {
             Common.CopyDataGridViewToClipboard(dgv);
         }
+
+        private void dgv_SelectionChanged(object sender, EventArgs e)
+        {
+            tsCompare.Enabled = dgv.SelectedRows.Count == 2;
+        }
+
+        private void tsCompare_Click(object sender, EventArgs e)
+        {
+            if (dgv.SelectedRows.Count == 2)
+            {
+                DataRowView row1 = (DataRowView)dgv.SelectedRows[0].DataBoundItem;
+                DataRowView row2 = (DataRowView)dgv.SelectedRows[1].DataBoundItem;
+                string script1 = "/* " + (string)row1["Instance"] + " (" + ((DateTime)row1["ValidFrom"]).ToString("yyyy-MM-dd hh:mm") + ")" + " */" + Environment.NewLine + (string)row1["script"] ;
+                string script2 = "/* " + (string)row2["Instance"] + " (" + ((DateTime)row2["ValidFrom"]).ToString("yyyy-MM-dd hh:mm") + ")" + " */" + Environment.NewLine + (string)row2["script"] ;
+                var frm = new Diff();
+                frm.setText(script1, script2);
+                frm.ShowDialog();
+            }
+        }
     }
 }
