@@ -36,3 +36,4 @@ AND (BSS.blocking_session_id=@blocking_session_id
 						)
 			)
 	)
+ORDER BY stat.WaitTimeRecursive DESC
