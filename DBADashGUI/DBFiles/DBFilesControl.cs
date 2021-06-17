@@ -68,8 +68,25 @@ namespace DBADashGUI.DBFiles
             }
         }
 
+        public List<short> FileTypes
+        {
+            get
+            {
+                var selected = new List<short>();
+                foreach (ToolStripMenuItem itm in tsType.DropDownItems)
+                {
+                    if (itm.Checked)
+                    {
+                       selected.Add(Convert.ToInt16(itm.Tag));
+                    }
+                }
+                return selected;
+            }
+        }
+
         public void RefreshData()
         {
+            var selectedTypes = FileTypes;
             using (var cn = new SqlConnection(ConnectionString))
             {
                 using (SqlCommand cmd = new SqlCommand("dbo.DBFiles_Get", cn) { CommandType = CommandType.StoredProcedure })
@@ -82,6 +99,11 @@ namespace DBADashGUI.DBFiles
                     cmd.Parameters.AddWithValue("IncludeWarning", IncludeWarning);
                     cmd.Parameters.AddWithValue("IncludeCritical", IncludeCritical);
                     cmd.Parameters.AddWithValue("FilegroupLevel", tsFilegroup.Checked);
+                    if(selectedTypes.Count>0 && selectedTypes.Count < 4)
+                    {
+                        cmd.Parameters.AddWithValue("Types", string.Join(",",selectedTypes));
+                    }
+                    
                     SqlDataAdapter da = new SqlDataAdapter(cmd);
                     DataTable dt = new DataTable();
                     da.Fill(dt);
@@ -141,10 +163,11 @@ namespace DBADashGUI.DBFiles
 
         public void ConfigureThresholds(Int32 InstanceID, Int32 DatabaseID,Int32 DataSpaceID)
         {
-            var threshold = FileThreshold.GetFileThreshold(InstanceID, DatabaseID, DataSpaceID, ConnectionString);
             var frm = new FileThresholdConfig
             {
-                FileThreshold = threshold
+                InstanceID=InstanceID,
+                DataSpaceID = DataSpaceID,
+                DatabaseID = DatabaseID
             };
             frm.ShowDialog();
             if (frm.DialogResult == DialogResult.OK)
@@ -178,6 +201,10 @@ namespace DBADashGUI.DBFiles
                 }
 
                 if (row["ConfiguredLevel"]!=DBNull.Value && (string)row["ConfiguredLevel"] == "FG")
+                {
+                    dgvFiles.Rows[idx].Cells["Configure"].Style.Font = new Font(dgvFiles.Font, FontStyle.Bold);
+                }
+                else if (row["ConfiguredLevel"] != DBNull.Value && (string)row["ConfiguredLevel"] == "DB" && (int)row["data_space_id"]==0)
                 {
                     dgvFiles.Rows[idx].Cells["Configure"].Style.Font = new Font(dgvFiles.Font, FontStyle.Bold);
                 }
@@ -244,6 +271,31 @@ namespace DBADashGUI.DBFiles
                     col.Visible = isFileLevel;
                 }
             }
+        }
+
+        private void tsTypes_Click(object sender, EventArgs e)
+        {
+            var selectedTypes = FileTypes;
+            if(selectedTypes.Count>0 && selectedTypes.Count < 4)
+            {
+                tsType.Font = new Font(tsType.Font, FontStyle.Bold);
+            }
+            else
+            {
+                tsType.Font = new Font(tsType.Font, FontStyle.Regular);
+            }
+            foreach (ToolStripMenuItem itm in tsType.DropDownItems)
+            {
+                if (itm.Checked)
+                {
+                    itm.Font = new Font(itm.Font, FontStyle.Bold);
+                }
+                else
+                {
+                    itm.Font = new Font(itm.Font, FontStyle.Regular);
+                }
+            }
+            RefreshData();
         }
     }
 }

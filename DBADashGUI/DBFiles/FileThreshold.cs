@@ -20,8 +20,6 @@ namespace DBADashGUI.DBFiles
 
         public bool ZeroAuthgrowthOnly { get; set; }
 
-        public string ConnectionString { get; set; }
-
         public FileCheckTypeEnum FileCheckType { get; set; }
 
         public decimal PctMaxSizeWarningThreshold { get; set; }
@@ -82,10 +80,10 @@ namespace DBADashGUI.DBFiles
             {
                 return this;
             }
-            Int32 _DataSpaceID = -1;
-            Int32 _DatabaseID = this.DataSpaceID == -1 ? -1 : this.DatabaseID;
+            Int32 _DataSpaceID = DataSpaceID==0 ? 0 : -1;
+            Int32 _DatabaseID = this.DataSpaceID == -1 || this.DataSpaceID==0 ? -1 : this.DatabaseID;
             Int32 _InstanceID = this.DatabaseID ==-1 ? -1 : this.InstanceID;
-            var threshold = GetFileThreshold(_InstanceID, _DatabaseID, _DataSpaceID, ConnectionString);
+            var threshold = GetFileThreshold(_InstanceID, _DatabaseID, _DataSpaceID);
             if (threshold.Inherited && InstanceID!=-1)
             {
                 return threshold.GetInheritedThreshold();
@@ -96,16 +94,15 @@ namespace DBADashGUI.DBFiles
             }
         }
 
-        public static FileThreshold GetFileThreshold(Int32 InstanceID, Int32 DatabaseID, Int32 DataSpaceID, string connectionString)
+        public static FileThreshold GetFileThreshold(Int32 InstanceID, Int32 DatabaseID, Int32 DataSpaceID)
         {
             FileThreshold threshold = new FileThreshold
             {
                 InstanceID = InstanceID,
                 DatabaseID = DatabaseID,
                 DataSpaceID = DataSpaceID,
-                ConnectionString = connectionString
             };
-            using (var cn = new SqlConnection(connectionString))
+            using (var cn = new SqlConnection(Common.ConnectionString))
             {
                 using (SqlCommand cmd = new SqlCommand("dbo.DBFileThresholds_Get", cn) { CommandType = CommandType.StoredProcedure })
                 {
@@ -142,7 +139,7 @@ namespace DBADashGUI.DBFiles
                     }
                     else
                     {
-                        threshold.Inherited = true;
+                        threshold.Inherited = InstanceID!=-1;
                     }
                 }
         }
@@ -151,7 +148,7 @@ namespace DBADashGUI.DBFiles
 
         public void UpdateThresholds()
         {
-            using (var cn = new SqlConnection(ConnectionString))
+            using (var cn = new SqlConnection(Common.ConnectionString))
             {
                 using (var cmd = new SqlCommand("dbo.DBFileThresholds_Upd", cn) { CommandType = CommandType.StoredProcedure }) {
                     cn.Open();

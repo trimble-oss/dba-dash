@@ -502,8 +502,9 @@ BEGIN
 	)
 	VALUES(-1,0.8,0.9)
 END
-IF NOT EXISTS(SELECT 1 FROM dbo.DBFileThresholds)
+IF NOT EXISTS(SELECT 1 FROM dbo.DBFileThresholds WHERE InstanceID =-1 AND DatabaseID = -1 AND data_space_id=-1)
 BEGIN
+	-- Data file threshold root level default
 	INSERT INTO dbo.DBFileThresholds
 	(
 		InstanceID,
@@ -526,6 +527,33 @@ BEGIN
 		0.8, 
 		0.9, 
 		1 
+		)
+END
+IF NOT EXISTS(SELECT 1 FROM dbo.DBFileThresholds WHERE InstanceID =-1 AND DatabaseID = -1 AND data_space_id=0)
+BEGIN
+	-- Log file threshold root level default
+	INSERT INTO dbo.DBFileThresholds
+	(
+		InstanceID,
+		DatabaseID,
+		data_space_id,
+		FreeSpaceWarningThreshold,
+		FreeSpaceCriticalThreshold,
+		FreeSpaceCheckType,
+		PctMaxSizeWarningThreshold,
+		PctMaxSizeCriticalThreshold,
+		FreeSpaceCheckZeroAutogrowthOnly
+	)
+	VALUES
+	(   -1,
+		-1,
+		0,
+		0.2,
+		0.1,
+		'%',  
+		0.8, 
+		0.9, 
+		0
 		)
 END
 

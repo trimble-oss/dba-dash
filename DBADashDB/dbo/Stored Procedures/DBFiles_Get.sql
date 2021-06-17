@@ -5,7 +5,8 @@
 	@IncludeWarning BIT=1,
 	@IncludeNA BIT=0,
 	@IncludeOK BIT=0,
-	@FilegroupLevel BIT=1
+	@FilegroupLevel BIT=1,
+    @Types VARCHAR(50)=NULL
 )
 AS
 DECLARE @StatusSQL NVARCHAR(MAX)
@@ -60,7 +61,9 @@ SELECT FileID,
 	   PctMaxSizeStatus,
 	   MaxSizeExcludedReason,
 	   FilegroupAutogrowFileCount,
-	   FilegroupAutogrowStatus' 
+	   FilegroupAutogrowStatus,
+       type,
+       type_desc' 
 	   + CASE WHEN @FilegroupLevel=0 THEN ',
 	   max_size,
 	   MaxSizeMB,
@@ -74,8 +77,12 @@ WHERE 1=1
 			FROM STRING_SPLIT(@InstanceIDs,'','') ss
 			WHERE ss.value = F.InstanceID
 			)' END + '
+' + CASE WHEN @Types IS NULL THEN '' ELSE 'AND EXISTS (SELECT 1
+			FROM STRING_SPLIT(@Types,'','') ss
+			WHERE CAST(ss.value as TINYINT) = F.type
+			)' END + '
 ' + @StatusSQL + '
 ' + CASE WHEN @DatabaseID IS NULL THEN '' ELSE 'AND F.DatabaseID = @DatabaseID' END 
 
 PRINT @SQL
-EXEC sp_executesql @SQL,N'@InstanceIDs VARCHAR(MAX),@DatabaseID INT',@InstanceIDs,@DatabaseID
+EXEC sp_executesql @SQL,N'@InstanceIDs VARCHAR(MAX), @DatabaseID INT, @Types VARCHAR(50)', @InstanceIDs, @DatabaseID, @Types

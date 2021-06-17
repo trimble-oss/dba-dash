@@ -119,6 +119,12 @@
     <Compile Include="Changes\ResourceGovernor.Designer.cs">
       <DependentUpon>ResourceGovernor.cs</DependentUpon>
     </Compile>
+    <Compile Include="DBFiles\FileThresholdConfigControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="DBFiles\FileThresholdConfigControl.Designer.cs">
+      <DependentUpon>FileThresholdConfigControl.cs</DependentUpon>
+    </Compile>
     <Compile Include="SchemaCompare\AppSyntaxModeProvider.cs" />
     <Compile Include="Bak\BackupsControl.cs">
       <SubType>UserControl</SubType>
@@ -594,6 +600,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Checks\CustomChecks.resx">
       <DependentUpon>CustomChecks.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="DBFiles\FileThresholdConfigControl.resx">
+      <DependentUpon>FileThresholdConfigControl.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="SchemaCompare\CodeViewer.resx">
       <DependentUpon>CodeViewer.cs</DependentUpon>

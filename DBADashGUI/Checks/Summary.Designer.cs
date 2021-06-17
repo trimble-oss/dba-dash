@@ -71,6 +71,7 @@
             this.LogShippingStatus = new System.Windows.Forms.DataGridViewLinkColumn();
             this.MirroringStatus = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.AGStatus = new System.Windows.Forms.DataGridViewLinkColumn();
+            this.LogFreeSpaceStatus = new System.Windows.Forms.DataGridViewLinkColumn();
             this.FileFreeSpaceStatus = new System.Windows.Forms.DataGridViewLinkColumn();
             this.PctMaxSizeStatus = new System.Windows.Forms.DataGridViewLinkColumn();
             this.ElasticPoolStorageStatus = new System.Windows.Forms.DataGridViewLinkColumn();
@@ -111,6 +112,7 @@
             this.LogShippingStatus,
             this.MirroringStatus,
             this.AGStatus,
+            this.LogFreeSpaceStatus,
             this.FileFreeSpaceStatus,
             this.PctMaxSizeStatus,
             this.ElasticPoolStorageStatus,
@@ -128,13 +130,13 @@
             dataGridViewCellStyle6.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
             this.dgvSummary.DefaultCellStyle = dataGridViewCellStyle6;
             this.dgvSummary.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.dgvSummary.Location = new System.Drawing.Point(0, 31);
+            this.dgvSummary.Location = new System.Drawing.Point(0, 27);
             this.dgvSummary.Name = "dgvSummary";
             this.dgvSummary.ReadOnly = true;
             this.dgvSummary.RowHeadersVisible = false;
             this.dgvSummary.RowHeadersWidth = 51;
             this.dgvSummary.RowTemplate.Height = 24;
-            this.dgvSummary.Size = new System.Drawing.Size(1800, 182);
+            this.dgvSummary.Size = new System.Drawing.Size(1800, 186);
             this.dgvSummary.TabIndex = 0;
             this.dgvSummary.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgvSummary_CellContentClick);
             this.dgvSummary.ColumnHeaderMouseClick += new System.Windows.Forms.DataGridViewCellMouseEventHandler(this.dgvSummary_ColumnHeaderMouseClick);
@@ -148,7 +150,7 @@
             this.tsCopy});
             this.toolStrip1.Location = new System.Drawing.Point(0, 0);
             this.toolStrip1.Name = "toolStrip1";
-            this.toolStrip1.Size = new System.Drawing.Size(1800, 31);
+            this.toolStrip1.Size = new System.Drawing.Size(1800, 27);
             this.toolStrip1.TabIndex = 1;
             this.toolStrip1.Text = "toolStrip1";
             // 
@@ -158,7 +160,7 @@
             this.tsRefresh.Image = global::DBADashGUI.Properties.Resources._112_RefreshArrow_Green_16x16_72;
             this.tsRefresh.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsRefresh.Name = "tsRefresh";
-            this.tsRefresh.Size = new System.Drawing.Size(29, 28);
+            this.tsRefresh.Size = new System.Drawing.Size(29, 24);
             this.tsRefresh.Text = "Refresh";
             this.tsRefresh.Click += new System.EventHandler(this.tsRefresh_Click);
             // 
@@ -168,7 +170,7 @@
             this.tsCopy.Image = global::DBADashGUI.Properties.Resources.ASX_Copy_blue_16x;
             this.tsCopy.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsCopy.Name = "tsCopy";
-            this.tsCopy.Size = new System.Drawing.Size(29, 28);
+            this.tsCopy.Size = new System.Drawing.Size(29, 24);
             this.tsCopy.Text = "Copy";
             this.tsCopy.Click += new System.EventHandler(this.tsCopy_Click);
             // 
@@ -449,6 +451,18 @@
             this.AGStatus.Text = "";
             this.AGStatus.Width = 141;
             // 
+            // LogFreeSpaceStatus
+            // 
+            this.LogFreeSpaceStatus.HeaderText = "Log Space";
+            this.LogFreeSpaceStatus.LinkColor = System.Drawing.Color.Black;
+            this.LogFreeSpaceStatus.MinimumWidth = 6;
+            this.LogFreeSpaceStatus.Name = "LogFreeSpaceStatus";
+            this.LogFreeSpaceStatus.ReadOnly = true;
+            this.LogFreeSpaceStatus.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
+            this.LogFreeSpaceStatus.Text = "View";
+            this.LogFreeSpaceStatus.UseColumnTextForLinkValue = true;
+            this.LogFreeSpaceStatus.Width = 97;
+            // 
             // FileFreeSpaceStatus
             // 
             dataGridViewCellStyle2.NullValue = "View";
@@ -599,6 +613,7 @@
         private System.Windows.Forms.DataGridViewLinkColumn LogShippingStatus;
         private System.Windows.Forms.DataGridViewTextBoxColumn MirroringStatus;
         private System.Windows.Forms.DataGridViewLinkColumn AGStatus;
+        private System.Windows.Forms.DataGridViewLinkColumn LogFreeSpaceStatus;
         private System.Windows.Forms.DataGridViewLinkColumn FileFreeSpaceStatus;
         private System.Windows.Forms.DataGridViewLinkColumn PctMaxSizeStatus;
         private System.Windows.Forms.DataGridViewLinkColumn ElasticPoolStorageStatus;

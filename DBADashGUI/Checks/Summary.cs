@@ -33,7 +33,7 @@ namespace DBADashGUI
            statusColumns= new Dictionary<string, bool> { { "FullBackupStatus", false }, { "LogShippingStatus", false }, { "DiffBackupStatus", false }, { "LogBackupStatus", false }, { "DriveStatus", false },
                                                             { "JobStatus", false }, { "CollectionErrorStatus", false }, { "AGStatus", false }, {"LastGoodCheckDBStatus",false}, {"SnapshotAgeStatus",false },
                                                             {"MemoryDumpStatus",false }, {"UptimeStatus",false }, {"CorruptionStatus",false }, {"AlertStatus",false }, {"FileFreeSpaceStatus",false },
-                                                            {"CustomCheckStatus",false }, {"MirroringStatus",false },{"ElasticPoolStorageStatus",false},{"PctMaxSizeStatus",false}, {"QueryStoreStatus",false } };
+                                                            {"CustomCheckStatus",false }, {"MirroringStatus",false },{"ElasticPoolStorageStatus",false},{"PctMaxSizeStatus",false}, {"QueryStoreStatus",false },{"LogFreeSpaceStatus",false } };
         }
 
         public void RefreshData()
@@ -263,6 +263,10 @@ namespace DBADashGUI
             {
                 sortCol = "FileFreeSpaceStatus";
             }
+            if (dgvSummary.Columns[e.ColumnIndex] == LogFreeSpaceStatus)
+            {
+                sortCol = "LogFreeSpaceStatus";
+            }
             if (dgvSummary.Columns[e.ColumnIndex] == CollectionErrorStatus)
             {
                 sortCol = "CollectionErrorStatus";
@@ -339,7 +343,7 @@ namespace DBADashGUI
                         Instance_Selected(this, new InstanceSelectedEventArgs() { InstanceID = (Int32)row["InstanceID"], Tab = "tabJobs" });
                     }
                 }
-                else if (e.ColumnIndex == FileFreeSpaceStatus.Index || e.ColumnIndex == PctMaxSizeStatus.Index)
+                else if (e.ColumnIndex == FileFreeSpaceStatus.Index || e.ColumnIndex == PctMaxSizeStatus.Index || e.ColumnIndex == LogFreeSpaceStatus.Index)
                 {
                      Instance_Selected(this, new InstanceSelectedEventArgs() { Instance = (string)row["Instance"], Tab = "tabFiles" });
                 }

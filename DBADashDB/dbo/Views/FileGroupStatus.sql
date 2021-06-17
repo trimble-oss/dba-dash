@@ -40,6 +40,8 @@ SELECT InstanceID,
 	   MaxSizeExcludedReason,
 	   FilegroupAutogrowFileCount,
 	   FilegroupAutogrowStatus,
+       type,
+       type_desc,
 	   ROW_NUMBER() OVER(PARTITION BY DatabaseID,data_space_id ORDER BY FileID) rnum
 FROM dbo.FileStatus
 ) 
@@ -82,6 +84,8 @@ SELECT NULL AS FileID,
 	   F.PctMaxSizeStatus,
 	   F.MaxSizeExcludedReason,
 	   F.FilegroupAutogrowFileCount,
-	   FilegroupAutogrowStatus
+	   FilegroupAutogrowStatus,
+       type,
+       type_desc
 FROM F 
 WHERE rnum=1

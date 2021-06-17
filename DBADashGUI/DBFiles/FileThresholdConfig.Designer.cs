@@ -29,40 +29,27 @@
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
+            DBADashGUI.DBFiles.FileThreshold fileThreshold3 = new DBADashGUI.DBFiles.FileThreshold();
+            DBADashGUI.DBFiles.FileThreshold fileThreshold4 = new DBADashGUI.DBFiles.FileThreshold();
             this.bttnCancel = new System.Windows.Forms.Button();
             this.bttnUpdate = new System.Windows.Forms.Button();
-            this.label6 = new System.Windows.Forms.Label();
-            this.lblDriveCritical = new System.Windows.Forms.Label();
-            this.label5 = new System.Windows.Forms.Label();
-            this.lblDriveWarning = new System.Windows.Forms.Label();
-            this.numWarning = new System.Windows.Forms.NumericUpDown();
-            this.numCritical = new System.Windows.Forms.NumericUpDown();
-            this.OptDisabled = new System.Windows.Forms.RadioButton();
-            this.optMB = new System.Windows.Forms.RadioButton();
-            this.optPercent = new System.Windows.Forms.RadioButton();
-            this.grpFreespace = new System.Windows.Forms.GroupBox();
-            this.chkZeroAutogrowthOnly = new System.Windows.Forms.CheckBox();
-            this.chkInherit = new System.Windows.Forms.CheckBox();
-            this.grpMaxSize = new System.Windows.Forms.GroupBox();
-            this.chkMaxSizeDisable = new System.Windows.Forms.CheckBox();
-            this.label1 = new System.Windows.Forms.Label();
-            this.label2 = new System.Windows.Forms.Label();
-            this.label3 = new System.Windows.Forms.Label();
-            this.numMaxSizeCritical = new System.Windows.Forms.NumericUpDown();
-            this.numMaxSizeWarning = new System.Windows.Forms.NumericUpDown();
-            this.label4 = new System.Windows.Forms.Label();
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
-            ((System.ComponentModel.ISupportInitialize)(this.numWarning)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.numCritical)).BeginInit();
-            this.grpFreespace.SuspendLayout();
-            this.grpMaxSize.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.numMaxSizeCritical)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.numMaxSizeWarning)).BeginInit();
+            this.tab1 = new System.Windows.Forms.TabControl();
+            this.tabData = new System.Windows.Forms.TabPage();
+            this.dataConfig = new DBADashGUI.DBFiles.FileThresholdConfigControl();
+            this.tabLog = new System.Windows.Forms.TabPage();
+            this.logConfig = new DBADashGUI.DBFiles.FileThresholdConfigControl();
+            this.cboLevel = new System.Windows.Forms.ComboBox();
+            this.label1 = new System.Windows.Forms.Label();
+            this.tab1.SuspendLayout();
+            this.tabData.SuspendLayout();
+            this.tabLog.SuspendLayout();
             this.SuspendLayout();
             // 
             // bttnCancel
             // 
-            this.bttnCancel.Location = new System.Drawing.Point(263, 325);
+            this.bttnCancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.bttnCancel.Location = new System.Drawing.Point(310, 425);
             this.bttnCancel.Name = "bttnCancel";
             this.bttnCancel.Size = new System.Drawing.Size(91, 23);
             this.bttnCancel.TabIndex = 41;
@@ -72,7 +59,8 @@
             // 
             // bttnUpdate
             // 
-            this.bttnUpdate.Location = new System.Drawing.Point(370, 325);
+            this.bttnUpdate.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.bttnUpdate.Location = new System.Drawing.Point(421, 425);
             this.bttnUpdate.Name = "bttnUpdate";
             this.bttnUpdate.Size = new System.Drawing.Size(91, 23);
             this.bttnUpdate.TabIndex = 40;
@@ -80,273 +68,149 @@
             this.bttnUpdate.UseVisualStyleBackColor = true;
             this.bttnUpdate.Click += new System.EventHandler(this.bttnUpdate_Click);
             // 
-            // label6
+            // tab1
             // 
-            this.label6.AutoSize = true;
-            this.label6.Location = new System.Drawing.Point(7, 69);
-            this.label6.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
-            this.label6.Name = "label6";
-            this.label6.Size = new System.Drawing.Size(54, 17);
-            this.label6.TabIndex = 20;
-            this.label6.Text = "Critical:";
+            this.tab1.Controls.Add(this.tabData);
+            this.tab1.Controls.Add(this.tabLog);
+            this.tab1.Location = new System.Drawing.Point(12, 12);
+            this.tab1.Name = "tab1";
+            this.tab1.SelectedIndex = 0;
+            this.tab1.Size = new System.Drawing.Size(503, 390);
+            this.tab1.TabIndex = 42;
             // 
-            // lblDriveCritical
+            // tabData
             // 
-            this.lblDriveCritical.AutoSize = true;
-            this.lblDriveCritical.Location = new System.Drawing.Point(247, 67);
-            this.lblDriveCritical.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
-            this.lblDriveCritical.Name = "lblDriveCritical";
-            this.lblDriveCritical.Size = new System.Drawing.Size(20, 17);
-            this.lblDriveCritical.TabIndex = 25;
-            this.lblDriveCritical.Text = "%";
+            this.tabData.Controls.Add(this.dataConfig);
+            this.tabData.Location = new System.Drawing.Point(4, 25);
+            this.tabData.Name = "tabData";
+            this.tabData.Padding = new System.Windows.Forms.Padding(3);
+            this.tabData.Size = new System.Drawing.Size(495, 361);
+            this.tabData.TabIndex = 0;
+            this.tabData.Text = "Data";
+            this.tabData.UseVisualStyleBackColor = true;
             // 
-            // label5
+            // dataConfig
             // 
-            this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(7, 33);
-            this.label5.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
-            this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(65, 17);
-            this.label5.TabIndex = 19;
-            this.label5.Text = "Warning:";
-            // 
-            // lblDriveWarning
-            // 
-            this.lblDriveWarning.AutoSize = true;
-            this.lblDriveWarning.Location = new System.Drawing.Point(247, 35);
-            this.lblDriveWarning.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
-            this.lblDriveWarning.Name = "lblDriveWarning";
-            this.lblDriveWarning.Size = new System.Drawing.Size(20, 17);
-            this.lblDriveWarning.TabIndex = 24;
-            this.lblDriveWarning.Text = "%";
-            // 
-            // numWarning
-            // 
-            this.numWarning.DecimalPlaces = 1;
-            this.numWarning.Location = new System.Drawing.Point(79, 33);
-            this.numWarning.Margin = new System.Windows.Forms.Padding(4);
-            this.numWarning.Name = "numWarning";
-            this.numWarning.Size = new System.Drawing.Size(160, 22);
-            this.numWarning.TabIndex = 22;
-            this.numWarning.Value = new decimal(new int[] {
-            20,
+            this.dataConfig.Dock = System.Windows.Forms.DockStyle.Fill;
+            fileThreshold3.CriticalThreshold = new decimal(new int[] {
+            1,
             0,
             0,
-            0});
-            // 
-            // numCritical
-            // 
-            this.numCritical.DecimalPlaces = 1;
-            this.numCritical.Location = new System.Drawing.Point(79, 68);
-            this.numCritical.Margin = new System.Windows.Forms.Padding(4);
-            this.numCritical.Name = "numCritical";
-            this.numCritical.Size = new System.Drawing.Size(160, 22);
-            this.numCritical.TabIndex = 23;
-            this.numCritical.Value = new decimal(new int[] {
-            10,
+            65536});
+            fileThreshold3.DatabaseID = 0;
+            fileThreshold3.DataSpaceID = 0;
+            fileThreshold3.FileCheckType = DBADashGUI.DBFiles.FileThreshold.FileCheckTypeEnum.Percent;
+            fileThreshold3.FileCheckTypeChar = '%';
+            fileThreshold3.Inherited = false;
+            fileThreshold3.InstanceID = 0;
+            fileThreshold3.PctMaxCheckEnabled = true;
+            fileThreshold3.PctMaxSizeCriticalThreshold = new decimal(new int[] {
+            9,
             0,
             0,
-            0});
+            65536});
+            fileThreshold3.PctMaxSizeWarningThreshold = new decimal(new int[] {
+            8,
+            0,
+            0,
+            65536});
+            fileThreshold3.WarningThreshold = new decimal(new int[] {
+            2,
+            0,
+            0,
+            65536});
+            fileThreshold3.ZeroAuthgrowthOnly = false;
+            this.dataConfig.FileThreshold = fileThreshold3;
+            this.dataConfig.Location = new System.Drawing.Point(3, 3);
+            this.dataConfig.Name = "dataConfig";
+            this.dataConfig.Size = new System.Drawing.Size(489, 355);
+            this.dataConfig.TabIndex = 0;
             // 
-            // OptDisabled
+            // tabLog
             // 
-            this.OptDisabled.AutoSize = true;
-            this.OptDisabled.Location = new System.Drawing.Point(337, 103);
-            this.OptDisabled.Margin = new System.Windows.Forms.Padding(4);
-            this.OptDisabled.Name = "OptDisabled";
-            this.OptDisabled.Size = new System.Drawing.Size(84, 21);
-            this.OptDisabled.TabIndex = 37;
-            this.OptDisabled.Text = "Disabled";
-            this.OptDisabled.UseVisualStyleBackColor = true;
-            this.OptDisabled.CheckedChanged += new System.EventHandler(this.OptDisabled_CheckedChanged);
+            this.tabLog.Controls.Add(this.logConfig);
+            this.tabLog.Location = new System.Drawing.Point(4, 25);
+            this.tabLog.Name = "tabLog";
+            this.tabLog.Padding = new System.Windows.Forms.Padding(3);
+            this.tabLog.Size = new System.Drawing.Size(495, 361);
+            this.tabLog.TabIndex = 1;
+            this.tabLog.Text = "Log";
+            this.tabLog.UseVisualStyleBackColor = true;
             // 
-            // optMB
+            // logConfig
             // 
-            this.optMB.AutoSize = true;
-            this.optMB.Location = new System.Drawing.Point(337, 68);
-            this.optMB.Margin = new System.Windows.Forms.Padding(4);
-            this.optMB.Name = "optMB";
-            this.optMB.Size = new System.Drawing.Size(49, 21);
-            this.optMB.TabIndex = 36;
-            this.optMB.Text = "MB";
-            this.optMB.UseVisualStyleBackColor = true;
-            this.optMB.CheckedChanged += new System.EventHandler(this.optMB_CheckedChanged);
+            this.logConfig.Dock = System.Windows.Forms.DockStyle.Fill;
+            fileThreshold4.CriticalThreshold = new decimal(new int[] {
+            1,
+            0,
+            0,
+            65536});
+            fileThreshold4.DatabaseID = 0;
+            fileThreshold4.DataSpaceID = 0;
+            fileThreshold4.FileCheckType = DBADashGUI.DBFiles.FileThreshold.FileCheckTypeEnum.Percent;
+            fileThreshold4.FileCheckTypeChar = '%';
+            fileThreshold4.Inherited = false;
+            fileThreshold4.InstanceID = 0;
+            fileThreshold4.PctMaxCheckEnabled = true;
+            fileThreshold4.PctMaxSizeCriticalThreshold = new decimal(new int[] {
+            9,
+            0,
+            0,
+            65536});
+            fileThreshold4.PctMaxSizeWarningThreshold = new decimal(new int[] {
+            8,
+            0,
+            0,
+            65536});
+            fileThreshold4.WarningThreshold = new decimal(new int[] {
+            2,
+            0,
+            0,
+            65536});
+            fileThreshold4.ZeroAuthgrowthOnly = false;
+            this.logConfig.FileThreshold = fileThreshold4;
+            this.logConfig.Location = new System.Drawing.Point(3, 3);
+            this.logConfig.Name = "logConfig";
+            this.logConfig.Size = new System.Drawing.Size(489, 355);
+            this.logConfig.TabIndex = 0;
             // 
-            // optPercent
+            // cboLevel
             // 
-            this.optPercent.AutoSize = true;
-            this.optPercent.Checked = true;
-            this.optPercent.Location = new System.Drawing.Point(337, 33);
-            this.optPercent.Margin = new System.Windows.Forms.Padding(4);
-            this.optPercent.Name = "optPercent";
-            this.optPercent.Size = new System.Drawing.Size(94, 21);
-            this.optPercent.TabIndex = 35;
-            this.optPercent.TabStop = true;
-            this.optPercent.Text = "Percent %";
-            this.optPercent.UseVisualStyleBackColor = true;
-            this.optPercent.CheckedChanged += new System.EventHandler(this.optPercent_CheckedChanged);
-            // 
-            // grpFreespace
-            // 
-            this.grpFreespace.Controls.Add(this.chkZeroAutogrowthOnly);
-            this.grpFreespace.Controls.Add(this.label6);
-            this.grpFreespace.Controls.Add(this.label5);
-            this.grpFreespace.Controls.Add(this.lblDriveCritical);
-            this.grpFreespace.Controls.Add(this.numCritical);
-            this.grpFreespace.Controls.Add(this.OptDisabled);
-            this.grpFreespace.Controls.Add(this.numWarning);
-            this.grpFreespace.Controls.Add(this.optMB);
-            this.grpFreespace.Controls.Add(this.lblDriveWarning);
-            this.grpFreespace.Controls.Add(this.optPercent);
-            this.grpFreespace.Location = new System.Drawing.Point(13, 39);
-            this.grpFreespace.Name = "grpFreespace";
-            this.grpFreespace.Size = new System.Drawing.Size(448, 144);
-            this.grpFreespace.TabIndex = 42;
-            this.grpFreespace.TabStop = false;
-            this.grpFreespace.Text = "File Freespace";
-            this.toolTip1.SetToolTip(this.grpFreespace, "Use this to set thresholds for the amount of free space in your database filegrou" +
-        "ps (for manually growing files).  e.g. Warn when there is less than 20% free.");
-            // 
-            // chkZeroAutogrowthOnly
-            // 
-            this.chkZeroAutogrowthOnly.CheckAlign = System.Drawing.ContentAlignment.MiddleRight;
-            this.chkZeroAutogrowthOnly.Location = new System.Drawing.Point(10, 103);
-            this.chkZeroAutogrowthOnly.Name = "chkZeroAutogrowthOnly";
-            this.chkZeroAutogrowthOnly.Size = new System.Drawing.Size(229, 24);
-            this.chkZeroAutogrowthOnly.TabIndex = 38;
-            this.chkZeroAutogrowthOnly.Text = "Zero autogrowth only";
-            this.chkZeroAutogrowthOnly.UseVisualStyleBackColor = true;
-            // 
-            // chkInherit
-            // 
-            this.chkInherit.AutoSize = true;
-            this.chkInherit.Location = new System.Drawing.Point(23, 12);
-            this.chkInherit.Name = "chkInherit";
-            this.chkInherit.Size = new System.Drawing.Size(69, 21);
-            this.chkInherit.TabIndex = 43;
-            this.chkInherit.Text = "Inherit";
-            this.chkInherit.UseVisualStyleBackColor = true;
-            this.chkInherit.CheckedChanged += new System.EventHandler(this.chkInherit_CheckedChanged);
-            // 
-            // grpMaxSize
-            // 
-            this.grpMaxSize.Controls.Add(this.chkMaxSizeDisable);
-            this.grpMaxSize.Controls.Add(this.label1);
-            this.grpMaxSize.Controls.Add(this.label2);
-            this.grpMaxSize.Controls.Add(this.label3);
-            this.grpMaxSize.Controls.Add(this.numMaxSizeCritical);
-            this.grpMaxSize.Controls.Add(this.numMaxSizeWarning);
-            this.grpMaxSize.Controls.Add(this.label4);
-            this.grpMaxSize.Location = new System.Drawing.Point(13, 189);
-            this.grpMaxSize.Name = "grpMaxSize";
-            this.grpMaxSize.Size = new System.Drawing.Size(448, 121);
-            this.grpMaxSize.TabIndex = 44;
-            this.grpMaxSize.TabStop = false;
-            this.grpMaxSize.Text = "% Max Size";
-            this.toolTip1.SetToolTip(this.grpMaxSize, "Use this to set a threshold that will alert you when filegroups are approaching t" +
-        "heir max size. e.g. Warn when we are at 80% of the configured max file size.");
-            // 
-            // chkMaxSizeDisable
-            // 
-            this.chkMaxSizeDisable.AutoSize = true;
-            this.chkMaxSizeDisable.Location = new System.Drawing.Point(337, 32);
-            this.chkMaxSizeDisable.Name = "chkMaxSizeDisable";
-            this.chkMaxSizeDisable.Size = new System.Drawing.Size(85, 21);
-            this.chkMaxSizeDisable.TabIndex = 26;
-            this.chkMaxSizeDisable.Text = "Disabled";
-            this.chkMaxSizeDisable.UseVisualStyleBackColor = true;
-            this.chkMaxSizeDisable.CheckedChanged += new System.EventHandler(this.chkMaxSizeDisable_CheckedChanged);
+            this.cboLevel.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cboLevel.FormattingEnabled = true;
+            this.cboLevel.Location = new System.Drawing.Point(86, 425);
+            this.cboLevel.Name = "cboLevel";
+            this.cboLevel.Size = new System.Drawing.Size(121, 24);
+            this.cboLevel.TabIndex = 43;
+            this.cboLevel.SelectedIndexChanged += new System.EventHandler(this.cboLevel_SelectedIndexChanged);
             // 
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(7, 69);
-            this.label1.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label1.Location = new System.Drawing.Point(16, 425);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(54, 17);
-            this.label1.TabIndex = 20;
-            this.label1.Text = "Critical:";
-            // 
-            // label2
-            // 
-            this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(7, 33);
-            this.label2.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
-            this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(65, 17);
-            this.label2.TabIndex = 19;
-            this.label2.Text = "Warning:";
-            // 
-            // label3
-            // 
-            this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(247, 67);
-            this.label3.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
-            this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(20, 17);
-            this.label3.TabIndex = 25;
-            this.label3.Text = "%";
-            // 
-            // numMaxSizeCritical
-            // 
-            this.numMaxSizeCritical.DecimalPlaces = 1;
-            this.numMaxSizeCritical.Location = new System.Drawing.Point(79, 65);
-            this.numMaxSizeCritical.Margin = new System.Windows.Forms.Padding(4);
-            this.numMaxSizeCritical.Name = "numMaxSizeCritical";
-            this.numMaxSizeCritical.Size = new System.Drawing.Size(160, 22);
-            this.numMaxSizeCritical.TabIndex = 23;
-            this.numMaxSizeCritical.Value = new decimal(new int[] {
-            90,
-            0,
-            0,
-            0});
-            // 
-            // numMaxSizeWarning
-            // 
-            this.numMaxSizeWarning.DecimalPlaces = 1;
-            this.numMaxSizeWarning.Location = new System.Drawing.Point(79, 33);
-            this.numMaxSizeWarning.Margin = new System.Windows.Forms.Padding(4);
-            this.numMaxSizeWarning.Name = "numMaxSizeWarning";
-            this.numMaxSizeWarning.Size = new System.Drawing.Size(160, 22);
-            this.numMaxSizeWarning.TabIndex = 22;
-            this.numMaxSizeWarning.Value = new decimal(new int[] {
-            80,
-            0,
-            0,
-            0});
-            // 
-            // label4
-            // 
-            this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(247, 35);
-            this.label4.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
-            this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(20, 17);
-            this.label4.TabIndex = 24;
-            this.label4.Text = "%";
+            this.label1.Size = new System.Drawing.Size(46, 17);
+            this.label1.TabIndex = 44;
+            this.label1.Text = "Level:";
             // 
             // FileThresholdConfig
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(473, 360);
-            this.Controls.Add(this.grpMaxSize);
-            this.Controls.Add(this.chkInherit);
-            this.Controls.Add(this.grpFreespace);
+            this.ClientSize = new System.Drawing.Size(524, 460);
+            this.Controls.Add(this.label1);
+            this.Controls.Add(this.cboLevel);
+            this.Controls.Add(this.tab1);
             this.Controls.Add(this.bttnCancel);
             this.Controls.Add(this.bttnUpdate);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedToolWindow;
             this.Name = "FileThresholdConfig";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "File Threshold Config";
-            ((System.ComponentModel.ISupportInitialize)(this.numWarning)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.numCritical)).EndInit();
-            this.grpFreespace.ResumeLayout(false);
-            this.grpFreespace.PerformLayout();
-            this.grpMaxSize.ResumeLayout(false);
-            this.grpMaxSize.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.numMaxSizeCritical)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.numMaxSizeWarning)).EndInit();
+            this.Load += new System.EventHandler(this.FileThresholdConfig_Load);
+            this.tab1.ResumeLayout(false);
+            this.tabData.ResumeLayout(false);
+            this.tabLog.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -356,26 +220,13 @@
 
         private System.Windows.Forms.Button bttnCancel;
         private System.Windows.Forms.Button bttnUpdate;
-        private System.Windows.Forms.Label label6;
-        private System.Windows.Forms.Label lblDriveCritical;
-        private System.Windows.Forms.Label label5;
-        private System.Windows.Forms.Label lblDriveWarning;
-        private System.Windows.Forms.NumericUpDown numWarning;
-        private System.Windows.Forms.NumericUpDown numCritical;
-        private System.Windows.Forms.RadioButton OptDisabled;
-        private System.Windows.Forms.RadioButton optMB;
-        private System.Windows.Forms.RadioButton optPercent;
-        private System.Windows.Forms.GroupBox grpFreespace;
-        private System.Windows.Forms.CheckBox chkInherit;
-        private System.Windows.Forms.GroupBox grpMaxSize;
-        private System.Windows.Forms.CheckBox chkMaxSizeDisable;
-        private System.Windows.Forms.Label label1;
-        private System.Windows.Forms.Label label2;
-        private System.Windows.Forms.Label label3;
-        private System.Windows.Forms.NumericUpDown numMaxSizeCritical;
-        private System.Windows.Forms.NumericUpDown numMaxSizeWarning;
-        private System.Windows.Forms.Label label4;
         private System.Windows.Forms.ToolTip toolTip1;
-        private System.Windows.Forms.CheckBox chkZeroAutogrowthOnly;
+        private System.Windows.Forms.TabControl tab1;
+        private System.Windows.Forms.TabPage tabData;
+        private FileThresholdConfigControl dataConfig;
+        private System.Windows.Forms.TabPage tabLog;
+        private FileThresholdConfigControl logConfig;
+        private System.Windows.Forms.ComboBox cboLevel;
+        private System.Windows.Forms.Label label1;
     }
 }

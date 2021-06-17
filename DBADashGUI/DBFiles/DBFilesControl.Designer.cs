@@ -28,37 +28,39 @@
         /// </summary>
         private void InitializeComponent()
         {
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle15 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle16 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle33 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle47 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle48 = new System.Windows.Forms.DataGridViewCellStyle();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(DBFilesControl));
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle17 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle18 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle19 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle20 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle21 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle22 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle23 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle24 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle25 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle26 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle27 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle28 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle29 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle30 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle3 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle4 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle5 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle6 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle7 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle8 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle9 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle10 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle11 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle12 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle13 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle14 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle49 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle50 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle51 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle52 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle53 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle54 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle55 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle56 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle57 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle58 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle59 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle60 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle61 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle62 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle63 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle64 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle34 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle35 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle36 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle37 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle38 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle39 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle40 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle41 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle42 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle43 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle44 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle45 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle46 = new System.Windows.Forms.DataGridViewCellStyle();
             this.dgvFiles = new System.Windows.Forms.DataGridView();
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
             this.tsRefresh = new System.Windows.Forms.ToolStripButton();
@@ -75,6 +77,13 @@
             this.tsLevel = new System.Windows.Forms.ToolStripDropDownButton();
             this.tsFilegroup = new System.Windows.Forms.ToolStripMenuItem();
             this.tsFile = new System.Windows.Forms.ToolStripMenuItem();
+            this.tsType = new System.Windows.Forms.ToolStripDropDownButton();
+            this.rOWSToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.lOGToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.fILESTREAMToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.fULLTEXTToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.History = new System.Windows.Forms.DataGridViewLinkColumn();
+            this.Configure = new System.Windows.Forms.DataGridViewLinkColumn();
             this.dataGridViewTextBoxColumn1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dataGridViewTextBoxColumn2 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dataGridViewTextBoxColumn3 = new System.Windows.Forms.DataGridViewTextBoxColumn();
@@ -103,9 +112,12 @@
             this.dataGridViewTextBoxColumn26 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dataGridViewTextBoxColumn27 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dataGridViewTextBoxColumn28 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.dataGridViewTextBoxColumn29 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.dataGridViewTextBoxColumn30 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Instance = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Database = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.FileLevel_FileName = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colType = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.FileLevel_PhysicalName = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.FileLevel_FileSizeMB = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.FileLevel_FileUsedMB = new System.Windows.Forms.DataGridViewTextBoxColumn();
@@ -132,8 +144,6 @@
             this.State = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.ConfiguredLevel = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.FileSnapshotAge = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.History = new System.Windows.Forms.DataGridViewLinkColumn();
-            this.Configure = new System.Windows.Forms.DataGridViewLinkColumn();
             ((System.ComponentModel.ISupportInitialize)(this.dgvFiles)).BeginInit();
             this.toolStrip1.SuspendLayout();
             this.SuspendLayout();
@@ -144,19 +154,20 @@
             this.dgvFiles.AllowUserToDeleteRows = false;
             this.dgvFiles.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.DisplayedCells;
             this.dgvFiles.ClipboardCopyMode = System.Windows.Forms.DataGridViewClipboardCopyMode.EnableAlwaysIncludeHeaderText;
-            dataGridViewCellStyle1.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle1.BackColor = System.Drawing.SystemColors.Control;
-            dataGridViewCellStyle1.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            dataGridViewCellStyle1.ForeColor = System.Drawing.SystemColors.WindowText;
-            dataGridViewCellStyle1.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-            dataGridViewCellStyle1.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-            dataGridViewCellStyle1.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
-            this.dgvFiles.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle1;
+            dataGridViewCellStyle33.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle33.BackColor = System.Drawing.SystemColors.Control;
+            dataGridViewCellStyle33.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            dataGridViewCellStyle33.ForeColor = System.Drawing.SystemColors.WindowText;
+            dataGridViewCellStyle33.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle33.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle33.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
+            this.dgvFiles.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle33;
             this.dgvFiles.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.dgvFiles.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
             this.Instance,
             this.Database,
             this.FileLevel_FileName,
+            this.colType,
             this.FileLevel_PhysicalName,
             this.FileLevel_FileSizeMB,
             this.FileLevel_FileUsedMB,
@@ -185,26 +196,26 @@
             this.FileSnapshotAge,
             this.History,
             this.Configure});
-            dataGridViewCellStyle15.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle15.BackColor = System.Drawing.SystemColors.Window;
-            dataGridViewCellStyle15.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            dataGridViewCellStyle15.ForeColor = System.Drawing.SystemColors.ControlText;
-            dataGridViewCellStyle15.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-            dataGridViewCellStyle15.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-            dataGridViewCellStyle15.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
-            this.dgvFiles.DefaultCellStyle = dataGridViewCellStyle15;
+            dataGridViewCellStyle47.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle47.BackColor = System.Drawing.SystemColors.Window;
+            dataGridViewCellStyle47.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            dataGridViewCellStyle47.ForeColor = System.Drawing.SystemColors.ControlText;
+            dataGridViewCellStyle47.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle47.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle47.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
+            this.dgvFiles.DefaultCellStyle = dataGridViewCellStyle47;
             this.dgvFiles.Dock = System.Windows.Forms.DockStyle.Fill;
             this.dgvFiles.Location = new System.Drawing.Point(0, 27);
             this.dgvFiles.Name = "dgvFiles";
             this.dgvFiles.ReadOnly = true;
-            dataGridViewCellStyle16.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle16.BackColor = System.Drawing.SystemColors.Control;
-            dataGridViewCellStyle16.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            dataGridViewCellStyle16.ForeColor = System.Drawing.SystemColors.WindowText;
-            dataGridViewCellStyle16.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-            dataGridViewCellStyle16.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-            dataGridViewCellStyle16.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
-            this.dgvFiles.RowHeadersDefaultCellStyle = dataGridViewCellStyle16;
+            dataGridViewCellStyle48.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle48.BackColor = System.Drawing.SystemColors.Control;
+            dataGridViewCellStyle48.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            dataGridViewCellStyle48.ForeColor = System.Drawing.SystemColors.WindowText;
+            dataGridViewCellStyle48.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle48.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle48.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
+            this.dgvFiles.RowHeadersDefaultCellStyle = dataGridViewCellStyle48;
             this.dgvFiles.RowHeadersVisible = false;
             this.dgvFiles.RowHeadersWidth = 51;
             this.dgvFiles.RowTemplate.Height = 24;
@@ -221,7 +232,8 @@
             this.tsCopy,
             this.toolStripFilter,
             this.tsConfigure,
-            this.tsLevel});
+            this.tsLevel,
+            this.tsType});
             this.toolStrip1.Location = new System.Drawing.Point(0, 0);
             this.toolStrip1.Name = "toolStrip1";
             this.toolStrip1.Size = new System.Drawing.Size(1616, 27);
@@ -357,6 +369,86 @@
             this.tsFile.Text = "File";
             this.tsFile.Click += new System.EventHandler(this.tsFile_Click);
             // 
+            // tsType
+            // 
+            this.tsType.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.tsType.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.rOWSToolStripMenuItem,
+            this.lOGToolStripMenuItem,
+            this.fILESTREAMToolStripMenuItem,
+            this.fULLTEXTToolStripMenuItem});
+            this.tsType.Image = ((System.Drawing.Image)(resources.GetObject("tsType.Image")));
+            this.tsType.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tsType.Name = "tsType";
+            this.tsType.Size = new System.Drawing.Size(54, 24);
+            this.tsType.Text = "Type";
+            // 
+            // rOWSToolStripMenuItem
+            // 
+            this.rOWSToolStripMenuItem.Checked = true;
+            this.rOWSToolStripMenuItem.CheckOnClick = true;
+            this.rOWSToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.rOWSToolStripMenuItem.Name = "rOWSToolStripMenuItem";
+            this.rOWSToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            this.rOWSToolStripMenuItem.Tag = "0";
+            this.rOWSToolStripMenuItem.Text = "ROWS";
+            this.rOWSToolStripMenuItem.CheckedChanged += new System.EventHandler(this.tsTypes_Click);
+            // 
+            // lOGToolStripMenuItem
+            // 
+            this.lOGToolStripMenuItem.Checked = true;
+            this.lOGToolStripMenuItem.CheckOnClick = true;
+            this.lOGToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.lOGToolStripMenuItem.Name = "lOGToolStripMenuItem";
+            this.lOGToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            this.lOGToolStripMenuItem.Tag = "1";
+            this.lOGToolStripMenuItem.Text = "LOG";
+            this.lOGToolStripMenuItem.CheckedChanged += new System.EventHandler(this.tsTypes_Click);
+            // 
+            // fILESTREAMToolStripMenuItem
+            // 
+            this.fILESTREAMToolStripMenuItem.Checked = true;
+            this.fILESTREAMToolStripMenuItem.CheckOnClick = true;
+            this.fILESTREAMToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.fILESTREAMToolStripMenuItem.Name = "fILESTREAMToolStripMenuItem";
+            this.fILESTREAMToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            this.fILESTREAMToolStripMenuItem.Tag = "2";
+            this.fILESTREAMToolStripMenuItem.Text = "FILESTREAM";
+            this.fILESTREAMToolStripMenuItem.CheckedChanged += new System.EventHandler(this.tsTypes_Click);
+            // 
+            // fULLTEXTToolStripMenuItem
+            // 
+            this.fULLTEXTToolStripMenuItem.Checked = true;
+            this.fULLTEXTToolStripMenuItem.CheckOnClick = true;
+            this.fULLTEXTToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.fULLTEXTToolStripMenuItem.Name = "fULLTEXTToolStripMenuItem";
+            this.fULLTEXTToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            this.fULLTEXTToolStripMenuItem.Tag = "4";
+            this.fULLTEXTToolStripMenuItem.Text = "FULLTEXT";
+            this.fULLTEXTToolStripMenuItem.CheckedChanged += new System.EventHandler(this.tsTypes_Click);
+            // 
+            // History
+            // 
+            this.History.HeaderText = "History";
+            this.History.MinimumWidth = 6;
+            this.History.Name = "History";
+            this.History.ReadOnly = true;
+            this.History.Text = "History";
+            this.History.UseColumnTextForLinkValue = true;
+            this.History.Width = 58;
+            // 
+            // Configure
+            // 
+            this.Configure.HeaderText = "Configure";
+            this.Configure.MinimumWidth = 6;
+            this.Configure.Name = "Configure";
+            this.Configure.ReadOnly = true;
+            this.Configure.Resizable = System.Windows.Forms.DataGridViewTriState.True;
+            this.Configure.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
+            this.Configure.Text = "Configure";
+            this.Configure.UseColumnTextForLinkValue = true;
+            this.Configure.Width = 98;
+            // 
             // dataGridViewTextBoxColumn1
             // 
             this.dataGridViewTextBoxColumn1.DataPropertyName = "Instance";
@@ -398,8 +490,8 @@
             // dataGridViewTextBoxColumn5
             // 
             this.dataGridViewTextBoxColumn5.DataPropertyName = "FileSizeMB";
-            dataGridViewCellStyle17.Format = "N1";
-            this.dataGridViewTextBoxColumn5.DefaultCellStyle = dataGridViewCellStyle17;
+            dataGridViewCellStyle49.Format = "N1";
+            this.dataGridViewTextBoxColumn5.DefaultCellStyle = dataGridViewCellStyle49;
             this.dataGridViewTextBoxColumn5.HeaderText = "File Size (MB)";
             this.dataGridViewTextBoxColumn5.MinimumWidth = 6;
             this.dataGridViewTextBoxColumn5.Name = "dataGridViewTextBoxColumn5";
@@ -410,8 +502,8 @@
             // dataGridViewTextBoxColumn6
             // 
             this.dataGridViewTextBoxColumn6.DataPropertyName = "FileUsedMB";
-            dataGridViewCellStyle18.Format = "N1";
-            this.dataGridViewTextBoxColumn6.DefaultCellStyle = dataGridViewCellStyle18;
+            dataGridViewCellStyle50.Format = "N1";
+            this.dataGridViewTextBoxColumn6.DefaultCellStyle = dataGridViewCellStyle50;
             this.dataGridViewTextBoxColumn6.HeaderText = "File Used (MB)";
             this.dataGridViewTextBoxColumn6.MinimumWidth = 6;
             this.dataGridViewTextBoxColumn6.Name = "dataGridViewTextBoxColumn6";
@@ -422,8 +514,8 @@
             // dataGridViewTextBoxColumn7
             // 
             this.dataGridViewTextBoxColumn7.DataPropertyName = "FileFreeMB";
-            dataGridViewCellStyle19.Format = "N1";
-            this.dataGridViewTextBoxColumn7.DefaultCellStyle = dataGridViewCellStyle19;
+            dataGridViewCellStyle51.Format = "N1";
+            this.dataGridViewTextBoxColumn7.DefaultCellStyle = dataGridViewCellStyle51;
             this.dataGridViewTextBoxColumn7.HeaderText = "File Free (MB)";
             this.dataGridViewTextBoxColumn7.MinimumWidth = 6;
             this.dataGridViewTextBoxColumn7.Name = "dataGridViewTextBoxColumn7";
@@ -434,8 +526,8 @@
             // dataGridViewTextBoxColumn8
             // 
             this.dataGridViewTextBoxColumn8.DataPropertyName = "FilePctFree";
-            dataGridViewCellStyle20.Format = "P1";
-            this.dataGridViewTextBoxColumn8.DefaultCellStyle = dataGridViewCellStyle20;
+            dataGridViewCellStyle52.Format = "P1";
+            this.dataGridViewTextBoxColumn8.DefaultCellStyle = dataGridViewCellStyle52;
             this.dataGridViewTextBoxColumn8.HeaderText = "File Free %";
             this.dataGridViewTextBoxColumn8.MinimumWidth = 6;
             this.dataGridViewTextBoxColumn8.Name = "dataGridViewTextBoxColumn8";
@@ -446,8 +538,8 @@
             // dataGridViewTextBoxColumn9
             // 
             this.dataGridViewTextBoxColumn9.DataPropertyName = "GrowthMB";
-            dataGridViewCellStyle21.Format = "#,##0.#";
-            this.dataGridViewTextBoxColumn9.DefaultCellStyle = dataGridViewCellStyle21;
+            dataGridViewCellStyle53.Format = "#,##0.#";
+            this.dataGridViewTextBoxColumn9.DefaultCellStyle = dataGridViewCellStyle53;
             this.dataGridViewTextBoxColumn9.HeaderText = "Growth (MB)";
             this.dataGridViewTextBoxColumn9.MinimumWidth = 6;
             this.dataGridViewTextBoxColumn9.Name = "dataGridViewTextBoxColumn9";
@@ -458,6 +550,8 @@
             // dataGridViewTextBoxColumn10
             // 
             this.dataGridViewTextBoxColumn10.DataPropertyName = "MaxSizeMB";
+            dataGridViewCellStyle54.Format = "#,##0.#";
+            this.dataGridViewTextBoxColumn10.DefaultCellStyle = dataGridViewCellStyle54;
             this.dataGridViewTextBoxColumn10.HeaderText = "Max Size (MB)";
             this.dataGridViewTextBoxColumn10.MinimumWidth = 6;
             this.dataGridViewTextBoxColumn10.Name = "dataGridViewTextBoxColumn10";
@@ -468,8 +562,8 @@
             // dataGridViewTextBoxColumn11
             // 
             this.dataGridViewTextBoxColumn11.DataPropertyName = "filegroup_name";
-            dataGridViewCellStyle22.Format = "#,##0.#";
-            this.dataGridViewTextBoxColumn11.DefaultCellStyle = dataGridViewCellStyle22;
+            dataGridViewCellStyle55.Format = "#,##0.#";
+            this.dataGridViewTextBoxColumn11.DefaultCellStyle = dataGridViewCellStyle55;
             this.dataGridViewTextBoxColumn11.HeaderText = "Filegroup";
             this.dataGridViewTextBoxColumn11.MinimumWidth = 6;
             this.dataGridViewTextBoxColumn11.Name = "dataGridViewTextBoxColumn11";
@@ -480,20 +574,21 @@
             // dataGridViewTextBoxColumn12
             // 
             this.dataGridViewTextBoxColumn12.DataPropertyName = "FilegroupSizeMB";
-            dataGridViewCellStyle23.Format = "N1";
-            this.dataGridViewTextBoxColumn12.DefaultCellStyle = dataGridViewCellStyle23;
+            dataGridViewCellStyle56.Format = "N1";
+            this.dataGridViewTextBoxColumn12.DefaultCellStyle = dataGridViewCellStyle56;
             this.dataGridViewTextBoxColumn12.HeaderText = "Filegroup Size (MB)";
             this.dataGridViewTextBoxColumn12.MinimumWidth = 6;
             this.dataGridViewTextBoxColumn12.Name = "dataGridViewTextBoxColumn12";
             this.dataGridViewTextBoxColumn12.ReadOnly = true;
+            this.dataGridViewTextBoxColumn12.Visible = false;
             this.dataGridViewTextBoxColumn12.Width = 120;
             // 
             // dataGridViewTextBoxColumn13
             // 
             this.dataGridViewTextBoxColumn13.DataPropertyName = "FilegroupUsedMB";
-            dataGridViewCellStyle24.Format = "N1";
-            dataGridViewCellStyle24.NullValue = null;
-            this.dataGridViewTextBoxColumn13.DefaultCellStyle = dataGridViewCellStyle24;
+            dataGridViewCellStyle57.Format = "N1";
+            dataGridViewCellStyle57.NullValue = null;
+            this.dataGridViewTextBoxColumn13.DefaultCellStyle = dataGridViewCellStyle57;
             this.dataGridViewTextBoxColumn13.HeaderText = "Filegroup Used (MB)";
             this.dataGridViewTextBoxColumn13.MinimumWidth = 6;
             this.dataGridViewTextBoxColumn13.Name = "dataGridViewTextBoxColumn13";
@@ -503,8 +598,8 @@
             // dataGridViewTextBoxColumn14
             // 
             this.dataGridViewTextBoxColumn14.DataPropertyName = "FilegroupFreeMB";
-            dataGridViewCellStyle25.Format = "N1";
-            this.dataGridViewTextBoxColumn14.DefaultCellStyle = dataGridViewCellStyle25;
+            dataGridViewCellStyle58.Format = "N1";
+            this.dataGridViewTextBoxColumn14.DefaultCellStyle = dataGridViewCellStyle58;
             this.dataGridViewTextBoxColumn14.HeaderText = "Filegroup Free (MB)";
             this.dataGridViewTextBoxColumn14.MinimumWidth = 6;
             this.dataGridViewTextBoxColumn14.Name = "dataGridViewTextBoxColumn14";
@@ -514,9 +609,9 @@
             // dataGridViewTextBoxColumn15
             // 
             this.dataGridViewTextBoxColumn15.DataPropertyName = "FilegroupPctFree";
-            dataGridViewCellStyle26.Format = "P1";
-            dataGridViewCellStyle26.NullValue = null;
-            this.dataGridViewTextBoxColumn15.DefaultCellStyle = dataGridViewCellStyle26;
+            dataGridViewCellStyle59.Format = "P1";
+            dataGridViewCellStyle59.NullValue = null;
+            this.dataGridViewTextBoxColumn15.DefaultCellStyle = dataGridViewCellStyle59;
             this.dataGridViewTextBoxColumn15.HeaderText = "Filegroup Free %";
             this.dataGridViewTextBoxColumn15.MinimumWidth = 6;
             this.dataGridViewTextBoxColumn15.Name = "dataGridViewTextBoxColumn15";
@@ -526,9 +621,9 @@
             // dataGridViewTextBoxColumn16
             // 
             this.dataGridViewTextBoxColumn16.DataPropertyName = "FilegroupNumberOfFiles";
-            dataGridViewCellStyle27.Format = "P1";
-            dataGridViewCellStyle27.NullValue = null;
-            this.dataGridViewTextBoxColumn16.DefaultCellStyle = dataGridViewCellStyle27;
+            dataGridViewCellStyle60.Format = "P1";
+            dataGridViewCellStyle60.NullValue = null;
+            this.dataGridViewTextBoxColumn16.DefaultCellStyle = dataGridViewCellStyle60;
             this.dataGridViewTextBoxColumn16.HeaderText = "Filegroup Number of Files";
             this.dataGridViewTextBoxColumn16.MinimumWidth = 6;
             this.dataGridViewTextBoxColumn16.Name = "dataGridViewTextBoxColumn16";
@@ -538,8 +633,8 @@
             // dataGridViewTextBoxColumn17
             // 
             this.dataGridViewTextBoxColumn17.DataPropertyName = "ExcludedReason";
-            dataGridViewCellStyle28.Format = "N0";
-            this.dataGridViewTextBoxColumn17.DefaultCellStyle = dataGridViewCellStyle28;
+            dataGridViewCellStyle61.Format = "N0";
+            this.dataGridViewTextBoxColumn17.DefaultCellStyle = dataGridViewCellStyle61;
             this.dataGridViewTextBoxColumn17.HeaderText = "Excluded Reason";
             this.dataGridViewTextBoxColumn17.MinimumWidth = 6;
             this.dataGridViewTextBoxColumn17.Name = "dataGridViewTextBoxColumn17";
@@ -549,8 +644,8 @@
             // dataGridViewTextBoxColumn18
             // 
             this.dataGridViewTextBoxColumn18.DataPropertyName = "is_read_only";
-            dataGridViewCellStyle29.Format = "P1";
-            this.dataGridViewTextBoxColumn18.DefaultCellStyle = dataGridViewCellStyle29;
+            dataGridViewCellStyle62.Format = "P1";
+            this.dataGridViewTextBoxColumn18.DefaultCellStyle = dataGridViewCellStyle62;
             this.dataGridViewTextBoxColumn18.HeaderText = "Read Only";
             this.dataGridViewTextBoxColumn18.MinimumWidth = 6;
             this.dataGridViewTextBoxColumn18.Name = "dataGridViewTextBoxColumn18";
@@ -560,8 +655,8 @@
             // dataGridViewTextBoxColumn19
             // 
             this.dataGridViewTextBoxColumn19.DataPropertyName = "is_db_read_only";
-            dataGridViewCellStyle30.Format = "P1";
-            this.dataGridViewTextBoxColumn19.DefaultCellStyle = dataGridViewCellStyle30;
+            dataGridViewCellStyle63.Format = "P1";
+            this.dataGridViewTextBoxColumn19.DefaultCellStyle = dataGridViewCellStyle63;
             this.dataGridViewTextBoxColumn19.HeaderText = "DB ReadOnly";
             this.dataGridViewTextBoxColumn19.MinimumWidth = 6;
             this.dataGridViewTextBoxColumn19.Name = "dataGridViewTextBoxColumn19";
@@ -571,6 +666,8 @@
             // dataGridViewTextBoxColumn20
             // 
             this.dataGridViewTextBoxColumn20.DataPropertyName = "is_in_standby";
+            dataGridViewCellStyle64.Format = "P1";
+            this.dataGridViewTextBoxColumn20.DefaultCellStyle = dataGridViewCellStyle64;
             this.dataGridViewTextBoxColumn20.HeaderText = "Standby";
             this.dataGridViewTextBoxColumn20.MinimumWidth = 6;
             this.dataGridViewTextBoxColumn20.Name = "dataGridViewTextBoxColumn20";
@@ -645,6 +742,22 @@
             this.dataGridViewTextBoxColumn28.Name = "dataGridViewTextBoxColumn28";
             this.dataGridViewTextBoxColumn28.Width = 139;
             // 
+            // dataGridViewTextBoxColumn29
+            // 
+            this.dataGridViewTextBoxColumn29.DataPropertyName = "ConfiguredLevel";
+            this.dataGridViewTextBoxColumn29.HeaderText = "Configured Level";
+            this.dataGridViewTextBoxColumn29.MinimumWidth = 6;
+            this.dataGridViewTextBoxColumn29.Name = "dataGridViewTextBoxColumn29";
+            this.dataGridViewTextBoxColumn29.Width = 132;
+            // 
+            // dataGridViewTextBoxColumn30
+            // 
+            this.dataGridViewTextBoxColumn30.DataPropertyName = "FileSnapshotAge";
+            this.dataGridViewTextBoxColumn30.HeaderText = "File Snapshot Age";
+            this.dataGridViewTextBoxColumn30.MinimumWidth = 6;
+            this.dataGridViewTextBoxColumn30.Name = "dataGridViewTextBoxColumn30";
+            this.dataGridViewTextBoxColumn30.Width = 139;
+            // 
             // Instance
             // 
             this.Instance.DataPropertyName = "Instance";
@@ -672,6 +785,15 @@
             this.FileLevel_FileName.ReadOnly = true;
             this.FileLevel_FileName.Visible = false;
             // 
+            // colType
+            // 
+            this.colType.DataPropertyName = "type_desc";
+            this.colType.HeaderText = "Type";
+            this.colType.MinimumWidth = 6;
+            this.colType.Name = "colType";
+            this.colType.ReadOnly = true;
+            this.colType.Width = 69;
+            // 
             // FileLevel_PhysicalName
             // 
             this.FileLevel_PhysicalName.DataPropertyName = "physical_name";
@@ -685,8 +807,8 @@
             // FileLevel_FileSizeMB
             // 
             this.FileLevel_FileSizeMB.DataPropertyName = "FileSizeMB";
-            dataGridViewCellStyle2.Format = "N1";
-            this.FileLevel_FileSizeMB.DefaultCellStyle = dataGridViewCellStyle2;
+            dataGridViewCellStyle34.Format = "N1";
+            this.FileLevel_FileSizeMB.DefaultCellStyle = dataGridViewCellStyle34;
             this.FileLevel_FileSizeMB.HeaderText = "File Size (MB)";
             this.FileLevel_FileSizeMB.MinimumWidth = 6;
             this.FileLevel_FileSizeMB.Name = "FileLevel_FileSizeMB";
@@ -697,8 +819,8 @@
             // FileLevel_FileUsedMB
             // 
             this.FileLevel_FileUsedMB.DataPropertyName = "FileUsedMB";
-            dataGridViewCellStyle3.Format = "N1";
-            this.FileLevel_FileUsedMB.DefaultCellStyle = dataGridViewCellStyle3;
+            dataGridViewCellStyle35.Format = "N1";
+            this.FileLevel_FileUsedMB.DefaultCellStyle = dataGridViewCellStyle35;
             this.FileLevel_FileUsedMB.HeaderText = "File Used (MB)";
             this.FileLevel_FileUsedMB.MinimumWidth = 6;
             this.FileLevel_FileUsedMB.Name = "FileLevel_FileUsedMB";
@@ -709,8 +831,8 @@
             // FileLevel_FileFreeMB
             // 
             this.FileLevel_FileFreeMB.DataPropertyName = "FileFreeMB";
-            dataGridViewCellStyle4.Format = "N1";
-            this.FileLevel_FileFreeMB.DefaultCellStyle = dataGridViewCellStyle4;
+            dataGridViewCellStyle36.Format = "N1";
+            this.FileLevel_FileFreeMB.DefaultCellStyle = dataGridViewCellStyle36;
             this.FileLevel_FileFreeMB.HeaderText = "File Free (MB)";
             this.FileLevel_FileFreeMB.MinimumWidth = 6;
             this.FileLevel_FileFreeMB.Name = "FileLevel_FileFreeMB";
@@ -721,8 +843,8 @@
             // FileLevel_FilePctFree
             // 
             this.FileLevel_FilePctFree.DataPropertyName = "FilePctFree";
-            dataGridViewCellStyle5.Format = "P1";
-            this.FileLevel_FilePctFree.DefaultCellStyle = dataGridViewCellStyle5;
+            dataGridViewCellStyle37.Format = "P1";
+            this.FileLevel_FilePctFree.DefaultCellStyle = dataGridViewCellStyle37;
             this.FileLevel_FilePctFree.HeaderText = "File Free %";
             this.FileLevel_FilePctFree.MinimumWidth = 6;
             this.FileLevel_FilePctFree.Name = "FileLevel_FilePctFree";
@@ -733,8 +855,8 @@
             // FileLevel_Growth
             // 
             this.FileLevel_Growth.DataPropertyName = "GrowthMB";
-            dataGridViewCellStyle6.Format = "#,##0.#";
-            this.FileLevel_Growth.DefaultCellStyle = dataGridViewCellStyle6;
+            dataGridViewCellStyle38.Format = "#,##0.#";
+            this.FileLevel_Growth.DefaultCellStyle = dataGridViewCellStyle38;
             this.FileLevel_Growth.HeaderText = "Growth (MB)";
             this.FileLevel_Growth.MinimumWidth = 6;
             this.FileLevel_Growth.Name = "FileLevel_Growth";
@@ -755,8 +877,8 @@
             // FileLevel_MaxSizeMB
             // 
             this.FileLevel_MaxSizeMB.DataPropertyName = "MaxSizeMB";
-            dataGridViewCellStyle7.Format = "#,##0.#";
-            this.FileLevel_MaxSizeMB.DefaultCellStyle = dataGridViewCellStyle7;
+            dataGridViewCellStyle39.Format = "#,##0.#";
+            this.FileLevel_MaxSizeMB.DefaultCellStyle = dataGridViewCellStyle39;
             this.FileLevel_MaxSizeMB.HeaderText = "Max Size (MB)";
             this.FileLevel_MaxSizeMB.MinimumWidth = 6;
             this.FileLevel_MaxSizeMB.Name = "FileLevel_MaxSizeMB";
@@ -776,8 +898,8 @@
             // SizeMB
             // 
             this.SizeMB.DataPropertyName = "FilegroupSizeMB";
-            dataGridViewCellStyle8.Format = "N1";
-            this.SizeMB.DefaultCellStyle = dataGridViewCellStyle8;
+            dataGridViewCellStyle40.Format = "N1";
+            this.SizeMB.DefaultCellStyle = dataGridViewCellStyle40;
             this.SizeMB.HeaderText = "Filegroup Size (MB)";
             this.SizeMB.MinimumWidth = 6;
             this.SizeMB.Name = "SizeMB";
@@ -787,9 +909,9 @@
             // FilegroupUsedMB
             // 
             this.FilegroupUsedMB.DataPropertyName = "FilegroupUsedMB";
-            dataGridViewCellStyle9.Format = "N1";
-            dataGridViewCellStyle9.NullValue = null;
-            this.FilegroupUsedMB.DefaultCellStyle = dataGridViewCellStyle9;
+            dataGridViewCellStyle41.Format = "N1";
+            dataGridViewCellStyle41.NullValue = null;
+            this.FilegroupUsedMB.DefaultCellStyle = dataGridViewCellStyle41;
             this.FilegroupUsedMB.HeaderText = "Filegroup Used (MB)";
             this.FilegroupUsedMB.MinimumWidth = 6;
             this.FilegroupUsedMB.Name = "FilegroupUsedMB";
@@ -799,8 +921,8 @@
             // FilegroupFreeMB
             // 
             this.FilegroupFreeMB.DataPropertyName = "FilegroupFreeMB";
-            dataGridViewCellStyle10.Format = "N1";
-            this.FilegroupFreeMB.DefaultCellStyle = dataGridViewCellStyle10;
+            dataGridViewCellStyle42.Format = "N1";
+            this.FilegroupFreeMB.DefaultCellStyle = dataGridViewCellStyle42;
             this.FilegroupFreeMB.HeaderText = "Filegroup Free (MB)";
             this.FilegroupFreeMB.MinimumWidth = 6;
             this.FilegroupFreeMB.Name = "FilegroupFreeMB";
@@ -810,9 +932,9 @@
             // FilegroupPctFree
             // 
             this.FilegroupPctFree.DataPropertyName = "FilegroupPctFree";
-            dataGridViewCellStyle11.Format = "P1";
-            dataGridViewCellStyle11.NullValue = null;
-            this.FilegroupPctFree.DefaultCellStyle = dataGridViewCellStyle11;
+            dataGridViewCellStyle43.Format = "P1";
+            dataGridViewCellStyle43.NullValue = null;
+            this.FilegroupPctFree.DefaultCellStyle = dataGridViewCellStyle43;
             this.FilegroupPctFree.HeaderText = "Filegroup Free %";
             this.FilegroupPctFree.MinimumWidth = 6;
             this.FilegroupPctFree.Name = "FilegroupPctFree";
@@ -822,8 +944,8 @@
             // FilegroupMaxSize
             // 
             this.FilegroupMaxSize.DataPropertyName = "FilegroupMaxSizeMB";
-            dataGridViewCellStyle12.Format = "N0";
-            this.FilegroupMaxSize.DefaultCellStyle = dataGridViewCellStyle12;
+            dataGridViewCellStyle44.Format = "N0";
+            this.FilegroupMaxSize.DefaultCellStyle = dataGridViewCellStyle44;
             this.FilegroupMaxSize.HeaderText = "Filegroup Max Size (MB)";
             this.FilegroupMaxSize.MinimumWidth = 6;
             this.FilegroupMaxSize.Name = "FilegroupMaxSize";
@@ -833,8 +955,8 @@
             // FilegroupPctMaxSize
             // 
             this.FilegroupPctMaxSize.DataPropertyName = "FilegroupPctOfMaxSize";
-            dataGridViewCellStyle13.Format = "P1";
-            this.FilegroupPctMaxSize.DefaultCellStyle = dataGridViewCellStyle13;
+            dataGridViewCellStyle45.Format = "P1";
+            this.FilegroupPctMaxSize.DefaultCellStyle = dataGridViewCellStyle45;
             this.FilegroupPctMaxSize.HeaderText = "Filegroup % Of Max Size";
             this.FilegroupPctMaxSize.MinimumWidth = 6;
             this.FilegroupPctMaxSize.Name = "FilegroupPctMaxSize";
@@ -844,8 +966,8 @@
             // FilegroupUsedPctMaxSize
             // 
             this.FilegroupUsedPctMaxSize.DataPropertyName = "FilegroupUsedPctOfMaxSize";
-            dataGridViewCellStyle14.Format = "P1";
-            this.FilegroupUsedPctMaxSize.DefaultCellStyle = dataGridViewCellStyle14;
+            dataGridViewCellStyle46.Format = "P1";
+            this.FilegroupUsedPctMaxSize.DefaultCellStyle = dataGridViewCellStyle46;
             this.FilegroupUsedPctMaxSize.HeaderText = "Filegroup Used % Max Size";
             this.FilegroupUsedPctMaxSize.MinimumWidth = 6;
             this.FilegroupUsedPctMaxSize.Name = "FilegroupUsedPctMaxSize";
@@ -942,28 +1064,6 @@
             this.FileSnapshotAge.ReadOnly = true;
             this.FileSnapshotAge.Width = 139;
             // 
-            // History
-            // 
-            this.History.HeaderText = "History";
-            this.History.MinimumWidth = 6;
-            this.History.Name = "History";
-            this.History.ReadOnly = true;
-            this.History.Text = "History";
-            this.History.UseColumnTextForLinkValue = true;
-            this.History.Width = 58;
-            // 
-            // Configure
-            // 
-            this.Configure.HeaderText = "Configure";
-            this.Configure.MinimumWidth = 6;
-            this.Configure.Name = "Configure";
-            this.Configure.ReadOnly = true;
-            this.Configure.Resizable = System.Windows.Forms.DataGridViewTriState.True;
-            this.Configure.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
-            this.Configure.Text = "Configure";
-            this.Configure.UseColumnTextForLinkValue = true;
-            this.Configure.Width = 98;
-            // 
             // DBFilesControl
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
@@ -1026,9 +1126,15 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn26;
         private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn27;
         private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn28;
+        private System.Windows.Forms.ToolStripDropDownButton tsType;
+        private System.Windows.Forms.ToolStripMenuItem rOWSToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem lOGToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem fILESTREAMToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem fULLTEXTToolStripMenuItem;
         private System.Windows.Forms.DataGridViewTextBoxColumn Instance;
         private System.Windows.Forms.DataGridViewTextBoxColumn Database;
         private System.Windows.Forms.DataGridViewTextBoxColumn FileLevel_FileName;
+        private System.Windows.Forms.DataGridViewTextBoxColumn colType;
         private System.Windows.Forms.DataGridViewTextBoxColumn FileLevel_PhysicalName;
         private System.Windows.Forms.DataGridViewTextBoxColumn FileLevel_FileSizeMB;
         private System.Windows.Forms.DataGridViewTextBoxColumn FileLevel_FileUsedMB;
@@ -1057,5 +1163,7 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn FileSnapshotAge;
         private System.Windows.Forms.DataGridViewLinkColumn History;
         private System.Windows.Forms.DataGridViewLinkColumn Configure;
+        private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn29;
+        private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn30;
     }
 }

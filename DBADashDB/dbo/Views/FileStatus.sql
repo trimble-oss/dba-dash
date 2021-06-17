@@ -119,12 +119,14 @@ SELECT F.FileID,
 			WHEN F.type=2 THEN 'Filestream' 
 			WHEN cfg.PctMaxSizeWarningThreshold IS NULL AND cfg.PctMaxSizeCriticalThreshold IS NULL THEN 'No Threshold'
 			ELSE NULL END AS MaxSizeExcludedReason,
-	  CASE WHEN F.is_db_read_only=0 AND F.state=0 AND F.is_read_only=0 AND F.is_in_standby=0 AND F.FilegroupAutogrowFileCount=0 THEN 2 WHEN F.FilegroupAutogrowFileCount=0 THEN 3 ELSE 4 END AS FilegroupAutogrowStatus
+	  CASE WHEN F.is_db_read_only=0 AND F.state=0 AND F.is_read_only=0 AND F.is_in_standby=0 AND F.FilegroupAutogrowFileCount=0 THEN 2 WHEN F.FilegroupAutogrowFileCount=0 THEN 3 ELSE 4 END AS FilegroupAutogrowStatus,
+	  F.type,
+	  CASE WHEN F.type =0 THEN N'ROWS' WHEN F.type = 1 THEN N'LOG' WHEN F.type=2 THEN N'FILESTREAM' WHEN F.type = 4 THEN N'FULLTEXT' ELSE CAST(f.type as NVARCHAR(60)) END as type_desc
 FROM F
 OUTER APPLY(SELECT TOP(1) T.FreeSpaceWarningThreshold,
                     T.FreeSpaceCriticalThreshold,
                     T.FreeSpaceCheckType,
-					CASE WHEN T.data_space_id <> -1 THEN 'FG'
+					CASE WHEN T.data_space_id NOT IN(0,-1) THEN 'FG'
 					WHEN T.DatabaseID <>-1 THEN 'DB'
 					WHEN T.InstanceID<>-1 THEN 'Instance'
 					WHEN T.InstanceID=-1 THEN 'Root'
@@ -135,7 +137,7 @@ OUTER APPLY(SELECT TOP(1) T.FreeSpaceWarningThreshold,
 			FROM dbo.DBFileThresholds T 
 			WHERE (T.InstanceID = F.InstanceID OR T.InstanceID=-1)
 			AND (T.DatabaseID = F.DatabaseID OR T.DatabaseID=-1)
-			AND (T.data_space_id = F.data_space_id OR T.data_space_id=-1)
+			AND (T.data_space_id = F.data_space_id OR (T.data_space_id=-1 AND F.type=0))
 			ORDER BY T.InstanceID DESC,T.DatabaseID DESC,T.data_space_id DESC
 			) cfg
 OUTER APPLY(SELECT TOP(1) t.WarningThreshold,

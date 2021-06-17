@@ -16,69 +16,24 @@ namespace DBADashGUI.DBFiles
         {
             InitializeComponent();
         }
-        private FileThreshold fileThres;
-        public FileThreshold FileThreshold
+
+        public int InstanceID;
+        public int DatabaseID;
+        public int DataSpaceID;
+
+        public bool IsDataConfig
         {
             get
             {
-                fileThres.Inherited = chkInherit.Checked;
-                if (optPercent.Checked)
-                {
-                    fileThres.WarningThreshold = numWarning.Value / 100;
-                    fileThres.CriticalThreshold = numCritical.Value / 100;
-                    fileThres.FileCheckType = FileThreshold.FileCheckTypeEnum.Percent;
-                }
-                if (optMB.Checked)
-                {
-                    fileThres.WarningThreshold = numWarning.Value;
-                    fileThres.CriticalThreshold = numCritical.Value;
-                    fileThres.FileCheckType =    FileThreshold.FileCheckTypeEnum.MB;
-                }
-                if (OptDisabled.Checked)
-                {
-                    fileThres.FileCheckType = FileThreshold.FileCheckTypeEnum.None;
-                }
-                fileThres.PctMaxCheckEnabled = !chkMaxSizeDisable.Checked;
-                fileThres.PctMaxSizeCriticalThreshold = numMaxSizeCritical.Value/100;
-                fileThres.PctMaxSizeWarningThreshold = numMaxSizeWarning.Value/100;
-                fileThres.ZeroAuthgrowthOnly = chkZeroAutogrowthOnly.Checked;
-                return fileThres;
+                return DataSpaceID == -1 || DataSpaceID > 0;
             }
-            set
-            {
-                fileThres = value;
-                var setValueByThres = fileThres;
-                if (fileThres.InstanceID == -1)
-                {
-                    chkInherit.Enabled = false;
-                    fileThres.Inherited = false;
-                }
-                if (fileThres.Inherited)
-                {
-                    chkInherit.Checked = true;
-                    var inherited = fileThres.GetInheritedThreshold();
-                    setValueByThres = inherited;
-                }
-                else
-                {
-                    chkInherit.Checked = false;
-                }
+        }
 
-  
-                optMB.Checked = setValueByThres.FileCheckType == FileThreshold.FileCheckTypeEnum.MB;
-                optPercent.Checked = setValueByThres.FileCheckType==  FileThreshold.FileCheckTypeEnum.Percent;
-                OptDisabled.Checked = setValueByThres.FileCheckType ==  FileThreshold.FileCheckTypeEnum.None;      
-                numWarning.Value = setValueByThres.WarningThreshold;
-                numCritical.Value = setValueByThres.CriticalThreshold;
-                numMaxSizeCritical.Value = setValueByThres.PctMaxSizeCriticalThreshold>1 ? 100 : setValueByThres.PctMaxSizeCriticalThreshold * 100;
-                numMaxSizeWarning.Value = setValueByThres.PctMaxSizeWarningThreshold>1 ? 100 : setValueByThres.PctMaxSizeWarningThreshold * 100;
-                chkMaxSizeDisable.Checked = !setValueByThres.PctMaxCheckEnabled;
-                chkZeroAutogrowthOnly.Checked = setValueByThres.ZeroAuthgrowthOnly;
-                if (fileThres.FileCheckType ==  FileThreshold.FileCheckTypeEnum.Percent)
-                {
-                    numWarning.Value *= 100;
-                    numCritical.Value *= 100;
-                }
+        public bool IsLogConfig
+        {
+            get
+            {
+                return cboLevel.Text != "Filegroup";
             }
         }
 
@@ -88,65 +43,69 @@ namespace DBADashGUI.DBFiles
             this.Close();
         }
 
-
-
-        private void OptDisabled_CheckedChanged(object sender, EventArgs e)
-        {
-            numWarning.Enabled = !OptDisabled.Checked;
-            numCritical.Enabled= !OptDisabled.Checked;
-            chkZeroAutogrowthOnly.Enabled = !OptDisabled.Checked;
-        }
-
-        private void optMB_CheckedChanged(object sender, EventArgs e)
-        {
-            setThresholdType();
-        }
-
-        private void setThresholdType()
-        {
-            if (optMB.Checked)
-            {
-                lblDriveCritical.Text = "MB";
-                lblDriveWarning.Text = "MB";
-                numCritical.Maximum = Int32.MaxValue;
-                numWarning.Maximum = Int32.MaxValue;
-            }
-            else
-            {
-                lblDriveCritical.Text = "%";
-                lblDriveWarning.Text = "%";
-                numCritical.Maximum = 100;
-                numWarning.Maximum = 100;
-            }
-        }
-
-        private void optPercent_CheckedChanged(object sender, EventArgs e)
-        {
-            setThresholdType();
-        }
-
         private void bttnUpdate_Click(object sender, EventArgs e)
         {
-            FileThreshold.UpdateThresholds();
+            if (IsDataConfig)
+            {
+                dataConfig.FileThreshold.UpdateThresholds();
+            }
+            if (IsLogConfig)
+            {
+                logConfig.FileThreshold.UpdateThresholds();
+            }
             this.DialogResult = DialogResult.OK;
             this.Close();
         }
 
-        private void chkInherit_CheckedChanged(object sender, EventArgs e)
-        {
-            grpMaxSize.Enabled = !chkInherit.Checked;
-            grpFreespace.Enabled = !chkInherit.Checked;
+        private void FileThresholdConfig_Load(object sender, EventArgs e)
+        {          
+            cboLevel.Items.Add("Root");
+            cboLevel.SelectedIndex = 0;
+            if (InstanceID != -1)
+            {
+                cboLevel.Items.Add("Instance");
+                cboLevel.SelectedIndex = 1;
+            }
+            if (DatabaseID != -1)
+            {
+                cboLevel.Items.Add("Database");
+                cboLevel.SelectedIndex = 2;
+            }
+            if (DataSpaceID > 0)
+            {
+                cboLevel.Items.Add("Filegroup");
+                cboLevel.SelectedIndex = 3;
+            }
+            if (DataSpaceID == 0)
+            {
+                tab1.SelectedTab = tabLog;
+            }
+            loadThresholds();
         }
 
-        private void chkMaxSizeDisable_CheckedChanged(object sender, EventArgs e)
+        private void loadThresholds()
         {
-            numMaxSizeCritical.Enabled = !chkMaxSizeDisable.Checked;
-            numMaxSizeWarning.Enabled = !chkMaxSizeDisable.Checked;
-            if(!chkMaxSizeDisable.Checked && numMaxSizeWarning.Value==0 && numMaxSizeCritical.Value == 0)
+            tab1.TabPages.Clear();
+            int _instanceID = cboLevel.Text == "Root" ? -1 : InstanceID;
+            int _databaseID = cboLevel.Text == "Root" || cboLevel.Text == "Instance" ? -1 : DatabaseID;
+            int _dataSpaceID = cboLevel.Text == "Root" || cboLevel.Text == "Instance" || cboLevel.Text=="Database" ? -1 : DatabaseID;
+            int _dataDataSpaceID = _dataSpaceID == 0 ? -1 : _dataSpaceID;
+
+            tab1.TabPages.Add(tabData);
+            var dataThreshold = FileThreshold.GetFileThreshold(_instanceID,_databaseID,_dataSpaceID);
+            dataConfig.FileThreshold = dataThreshold;
+            
+            if (IsLogConfig)
             {
-                numMaxSizeCritical.Value = 90;
-                numMaxSizeWarning.Value = 80;
+                var logThreshold = FileThreshold.GetFileThreshold(_instanceID, _databaseID, 0);
+                logConfig.FileThreshold = logThreshold;
+                tab1.TabPages.Add(tabLog);
             }
+        }
+
+        private void cboLevel_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            loadThresholds();
         }
     }
 }

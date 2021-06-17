@@ -54,7 +54,8 @@ WITH LS AS (
 ),
  F AS (
 	SELECT InstanceID,
-		MIN(NULLIF(FreeSpaceStatus,3)) AS FileFreeSpaceStatus,
+		MIN(CASE WHEN data_space_id <> 0 THEN NULLIF(FreeSpaceStatus,3) ELSE NULL END) AS FileFreeSpaceStatus,
+		MIN(CASE WHEN data_space_id = 0 THEN NULLIF(FreeSpaceStatus,3) ELSE NULL END) AS LogFreeSpaceStatus,
 		MIN(NULLIF(PctMaxSizeStatus,3)) AS PctMaxSizeStatus
 	FROM dbo.FilegroupStatus
 	GROUP BY InstanceID
@@ -168,6 +169,7 @@ SELECT I.InstanceID,
 	ISNULL(B.DiffBackupStatus,3) AS DiffBackupStatus,
 	ISNULL(D.DriveStatus,3) AS DriveStatus,
 	ISNULL(F.FileFreeSpaceStatus,3) AS FileFreeSpaceStatus,
+	ISNULL(F.LogFreeSpaceStatus,3) AS LogFreeSpaceStatus,
 	ISNULL(J.JobStatus,3) AS JobStatus,
 	CASE ag.synchronization_health WHEN 0 THEN 1 WHEN 1 THEN 2 WHEN 2 THEN 4 ELSE 3 END AS AGStatus,
 	dc.DetectedCorruptionDate,
@@ -256,6 +258,7 @@ SELECT NULL AS InstanceID,
 	3 AS DiffBackupStatus,
 	3 AS DriveStatus,
 	ISNULL(MIN(NULLIF(F.FileFreeSpaceStatus,3)),3) AS FileFreeSpaceStatus,
+	ISNULL(MIN(NULLIF(F.LogFreeSpaceStatus,3)),3) AS LogFreeSpaceStatus,
 	3 AS JobStatus,
 	3 AS AGStatus,
 	NULL AS DetectedCorruptionDate,
