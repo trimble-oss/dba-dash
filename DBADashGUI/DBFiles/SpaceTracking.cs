@@ -107,7 +107,7 @@ namespace DBADashGUI
                 var selectedGroupValue = row["Grp"] == DBNull.Value ? "" : (string)row["Grp"];
                 if (dgv.Columns[e.ColumnIndex] == Grp)
                 {        
-                    if (InstanceIDs.Count>1 && Instance.Length == 0)
+                    if (InstanceIDs.Count>1 && string.IsNullOrEmpty(Instance))
                     {
                         Instance = selectedGroupValue;
                     }
@@ -132,7 +132,7 @@ namespace DBADashGUI
                         Instance = Instance,
                         DBName = DBName
                     };
-                    if (InstanceIDs.Count > 1 && Instance.Length == 0)
+                    if (InstanceIDs.Count > 1 &&  string.IsNullOrEmpty(Instance))
                     {
                         frm.Instance = selectedGroupValue;
                     }
