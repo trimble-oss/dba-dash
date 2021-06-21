@@ -1,4 +1,4 @@
-﻿CREATE VIEW [dbo].[FileStatus]
+﻿CREATE VIEW dbo.FileStatus
 AS
 WITH F AS (
 	SELECT F.FileID,
@@ -37,7 +37,8 @@ WITH F AS (
 				   CASE WHEN F.is_percent_growth=1 THEN (F.growth*0.01*F.size)/128.0 ELSE F.growth/128.0 END AS GrowthMB,
 				   F.growth,
 				   CASE WHEN F.is_percent_growth=1 THEN F.growth ELSE NULL END AS GrowthPct,
-				   F.is_percent_growth
+				   F.is_percent_growth,
+				   CASE WHEN I.EditionID=1674378470 THEN CAST(1 as BIT) ELSE CAST(0 as BIT) END as IsAzure
 		FROM dbo.DBFiles F
 			JOIN dbo.Databases D ON D.DatabaseID = F.DatabaseID
 			JOIN dbo.Instances I ON I.InstanceID = D.InstanceID
@@ -79,8 +80,9 @@ SELECT F.FileID,
 			WHEN cfg.FreeSpaceWarningThreshold IS NULL AND cfg.FreeSpaceCriticalThreshold IS NULL THEN 'No Threshold'
 			WHEN F.FilegroupUsedMB IS NULL THEN 'UsedMB is NULL'
 			WHEN cfg.FreeSpaceCheckZeroAutogrowthOnly=1 AND F.FilegroupAutogrowFileCount>0 THEN 'Autogrow enabled'
+			WHEN F.IsAzure = 1 THEN 'AzureDB'
 			ELSE NULL END AS ExcludedReason, 
-	   CASE WHEN F.is_in_standby=1 OR F.is_read_only=1 OR F.is_db_read_only=1 OR F.state<>0 OR F.type=2 THEN 3 
+	   CASE WHEN F.is_in_standby=1 OR F.is_read_only=1 OR F.is_db_read_only=1 OR F.state<>0 OR F.type=2 OR F.IsAzure=1 THEN 3 
 			WHEN F.FilegroupUsedMB IS NULL THEN 3
 			WHEN cfg.FreeSpaceCheckZeroAutogrowthOnly=1 AND F.FilegroupAutogrowFileCount>0 THEN 3
 			WHEN cfg.FreeSpaceCheckType='%' AND F.FilegroupPctFree<= cfg.FreeSpaceCriticalThreshold THEN 1 
