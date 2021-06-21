@@ -175,6 +175,37 @@ namespace DBADash.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to SELECT database_id,
+        ///       logical_database_guid,
+        ///       physical_database_guid,
+        ///       server_name,
+        ///       database_name,
+        ///       slo_name,
+        ///       dtu_limit,
+        ///       cpu_limit,
+        ///       min_cpu,
+        ///       max_cpu,
+        ///       cap_cpu,
+        ///       min_cores,
+        ///       max_dop,
+        ///       min_memory,
+        ///       max_memory,
+        ///       max_sessions,
+        ///       max_memory_grant,
+        ///       max_db_memory,
+        ///       govern_background_io,
+        ///       min_db_max_size_in_mb,
+        ///       max_db_max_size_in_mb,
+        ///       default_db_max_size_in_mb,
+        ///    [rest of string was truncated]&quot;;.
+        /// </summary>
+        internal static string SQLAzureDBResourceGovernance {
+            get {
+                return ResourceManager.GetString("SQLAzureDBResourceGovernance", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to SELECT end_time,
         ///       avg_cpu_percent,
         ///       avg_data_io_percent,
@@ -598,7 +629,7 @@ namespace DBADash.Properties {
         ///		CAST(SERVERPROPERTY(&apos;EditionID&apos;) as bigint) as EditionID,
         ///		ISNULL(CAST(SERVERPROPERTY(&apos;ComputerNamePhysicalNetBIOS&apos;) as nvarchar(128)),&apos;&apos;) as ComputerNamePhysicalNetBIOS,
         ///		DB_NAME() as DBName,
-        ///		SERVERPROPERTY (&apos;productversion&apos;) as ProductVersion,
+        ///		SERVERPROPERTY (&apos;ProductVersion&apos;) as ProductVersion,
         ///		DATEDIFF( [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string SQLInstance {

@@ -265,6 +265,7 @@
     <Content Include="PerformanceCounters.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="SQL\SQLAzureDBResourceGovernance.sql" />
     <Content Include="SQL\SQLAgentJobs.sql" />
     <Content Include="SQL\SQLAlerts.sql" />
     <Content Include="SQL\SQLAvailabilityGroups.sql" />

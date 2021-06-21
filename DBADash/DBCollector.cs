@@ -62,7 +62,8 @@ namespace DBADash
         AvailabilityReplicas,
         AvailabilityGroups,
         ResourceGovernorConfiguration,
-        DatabaseQueryStoreOptions
+        DatabaseQueryStoreOptions,
+        AzureDBResourceGovernance
     }
 
     public enum HostPlatform
@@ -81,7 +82,10 @@ namespace DBADash
         public Int32 PerformanceCollectionPeriodMins = 60;
         string computerName;
         Int64 editionId;
-        readonly CollectionType[] azureCollectionTypes = new CollectionType[] { CollectionType.SlowQueries, CollectionType.AzureDBElasticPoolResourceStats, CollectionType.AzureDBServiceObjectives, CollectionType.AzureDBResourceStats, CollectionType.CPU, CollectionType.DBFiles, CollectionType.General, CollectionType.Performance, CollectionType.Databases, CollectionType.DBConfig, CollectionType.TraceFlags, CollectionType.ObjectExecutionStats, CollectionType.BlockingSnapshot, CollectionType.IOStats, CollectionType.Waits, CollectionType.ServerProperties, CollectionType.DBTuningOptions, CollectionType.SysConfig, CollectionType.DatabasePrincipals, CollectionType.DatabaseRoleMembers, CollectionType.DatabasePermissions, CollectionType.Infrequent, CollectionType.OSInfo,CollectionType.CustomChecks,CollectionType.PerformanceCounters,CollectionType.VLF, CollectionType.DatabaseQueryStoreOptions};
+        readonly CollectionType[] azureCollectionTypes = new CollectionType[] { CollectionType.SlowQueries, CollectionType.AzureDBElasticPoolResourceStats, CollectionType.AzureDBServiceObjectives, CollectionType.AzureDBResourceStats, CollectionType.CPU, CollectionType.DBFiles, CollectionType.General, CollectionType.Performance, CollectionType.Databases, CollectionType.DBConfig, CollectionType.TraceFlags, CollectionType.ObjectExecutionStats, CollectionType.BlockingSnapshot, CollectionType.IOStats, CollectionType.Waits, CollectionType.ServerProperties, CollectionType.DBTuningOptions, CollectionType.SysConfig, CollectionType.DatabasePrincipals, CollectionType.DatabaseRoleMembers, CollectionType.DatabasePermissions, CollectionType.Infrequent, CollectionType.OSInfo,CollectionType.CustomChecks,CollectionType.PerformanceCounters,CollectionType.VLF, CollectionType.DatabaseQueryStoreOptions, CollectionType.AzureDBResourceGovernance};
+        readonly CollectionType[] azureOnlyCollectionTypes = new CollectionType[] { CollectionType.AzureDBElasticPoolResourceStats, CollectionType.AzureDBResourceStats, CollectionType.AzureDBServiceObjectives, CollectionType.AzureDBResourceGovernance };
+        readonly CollectionType[] azureMasterOnlyCollectionTypes = new CollectionType[] { CollectionType.AzureDBElasticPoolResourceStats };
+
         public Int64 SlowQueryThresholdMs = -1;
         public Int32 SlowQueryMaxMemoryKB { get; set; } = 4096;
         public bool UseDualEventSession { get; set; } = true;
@@ -335,28 +339,64 @@ namespace DBADash
             return Enum.GetName(en.GetType(), en);
         }
 
-        public void Collect(CollectionType collectionType)
+        private bool collectionTypeIsApplicable(CollectionType collectionType)
         {
             var collectionTypeString = enumToString(collectionType);
+            if (collectionType == CollectionType.DatabaseQueryStoreOptions && !IsQueryStoreSupported())
+            {
+                // Query store not supported on this instance
+                return false;
+            }
+            else if (Data.Tables.Contains(collectionTypeString))
+            {
+                // Already collected
+                return false;
+            }
+            else if (IsAzure && (!azureCollectionTypes.Contains(collectionType)))
+            {
+                // Collection Type doesn't apply to AzureDB
+                return false;
+            }
+            else if (!IsAzure && azureOnlyCollectionTypes.Contains(collectionType))
+            {
+                // Collection Type doesn't apply to normal standalone instance
+                return false;
+            }
+            else if (azureMasterOnlyCollectionTypes.Contains(collectionType) && !isAzureMasterDB)
+            {
+                // Collection type only applies to Azure master db
+                return false;
+            }
+            else
+            {
+                return true;
+            }
+        }
+
+        public void Collect(CollectionType collectionType)
+        {
+            if (!collectionTypeIsApplicable(collectionType))
+            {
+                return;
+            }
+
+            var collectionTypeString = enumToString(collectionType);
+            // Add params where required
             SqlParameter[] param=null;
             if(collectionType == CollectionType.JobHistory)
             {
                 param =new SqlParameter[] { new SqlParameter { DbType = DbType.Int32, Value = Job_instance_id, ParameterName = "instance_id" }, new SqlParameter { DbType = DbType.Int32, ParameterName="run_date", Value = Convert.ToInt32(DateTime.Now.AddDays(-7).ToString("yyyyMMdd"))} };
             }
-            if(collectionType == CollectionType.DatabaseQueryStoreOptions && !IsQueryStoreSupported())
+            else if(collectionType == CollectionType.AzureDBResourceStats || collectionType == CollectionType.AzureDBElasticPoolResourceStats)
             {
-                return;
+                param = new SqlParameter[] { new SqlParameter("Date", DateTime.UtcNow.AddMinutes(-PerformanceCollectionPeriodMins)) };
             }
-            if (Data.Tables.Contains(collectionTypeString))
+            else if( collectionType == CollectionType.CPU)
             {
-                // Already collected
-                return;
+                param = new SqlParameter[] { new SqlParameter("TOP", PerformanceCollectionPeriodMins) };
             }
-            else if (IsAzure && (!azureCollectionTypes.Contains(collectionType)))
-            {
-                return;
-            }
-            else if (collectionType == CollectionType.General)
+          
+            if (collectionType == CollectionType.General)
             {
                 Collect(CollectionType.ServerProperties);
                 Collect(CollectionType.Databases);              
@@ -377,6 +417,7 @@ namespace DBADash
                 Collect(CollectionType.CustomChecks);
                 Collect(CollectionType.DatabaseMirroring);
                 Collect(CollectionType.Jobs);
+                Collect(CollectionType.AzureDBResourceGovernance);
                 if (IsHadrEnabled)
                 {
                     Collect(CollectionType.AvailabilityReplicas);
@@ -429,49 +470,7 @@ namespace DBADash
             else if (collectionType == CollectionType.DriversWMI)
             {
                 collectDriversWMI();
-            }
-            else if (collectionType == CollectionType.CPU)
-            {
-                SqlParameter pTop = new SqlParameter("TOP", PerformanceCollectionPeriodMins);
-                try
-                {
-                    addDT(enumToString(collectionType), Properties.Resources.SQLCPU, new SqlParameter[] { pTop });
-                }
-                catch (Exception ex)
-                {
-                    logError(ex,collectionTypeString);
-                }
-            }
-            else if (collectionType == CollectionType.AzureDBResourceStats || collectionType == CollectionType.AzureDBServiceObjectives)
-            {
-                if (IsAzure)
-                {
-                    SqlParameter pDate = new SqlParameter("Date", DateTime.UtcNow.AddMinutes(-PerformanceCollectionPeriodMins));
-                    try
-                    {
-                        addDT(collectionTypeString, Properties.Resources.ResourceManager.GetString("SQL" + collectionTypeString, Properties.Resources.Culture), new SqlParameter[] { pDate });
-                    }
-                    catch (Exception ex)
-                    {
-                        logError(ex,collectionTypeString);
-                    }
-                }
-            }
-            else if (collectionType == CollectionType.AzureDBElasticPoolResourceStats)
-            {
-                if (IsAzure && isAzureMasterDB)
-                {
-                    SqlParameter pDate = new SqlParameter("Date", DateTime.UtcNow.AddMinutes(-PerformanceCollectionPeriodMins));
-                    try
-                    {
-                        addDT(collectionTypeString, Properties.Resources.ResourceManager.GetString("SQL" + collectionTypeString, Properties.Resources.Culture), new SqlParameter[] { pDate });
-                    }
-                    catch (Exception ex)
-                    {
-                        logError(ex, collectionTypeString);
-                    }
-                }
-            }
+            }          
             else if (collectionType == CollectionType.SlowQueries)
             {
                 if (SlowQueryThresholdMs >= 0 && (!(IsAzure && isAzureMasterDB)))
@@ -533,16 +532,12 @@ namespace DBADash
             {
                 try
                 {
-                    if (!Data.Tables.Contains(collectionTypeString))
+                    var currentJobModified = GetJobLastModified();
+                    if (currentJobModified > JobLastModified)
                     {
-                        var currentJobModified = GetJobLastModified();
-                        if (currentJobModified > JobLastModified)
-                        {
-                            var ss = new SchemaSnapshotDB(_connectionString, new SchemaSnapshotDBOptions());
-                            ss.SnapshotJobs(ref Data);
-                            JobLastModified = currentJobModified;
-                        }
-                        
+                        var ss = new SchemaSnapshotDB(_connectionString, new SchemaSnapshotDBOptions());
+                        ss.SnapshotJobs(ref Data);
+                        JobLastModified = currentJobModified;
                     }
                  }
                 catch(Exception ex)
