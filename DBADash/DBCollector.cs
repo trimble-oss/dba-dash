@@ -207,7 +207,12 @@ namespace DBADash
             dtErrors.Columns.Add("ErrorContext");
 
             Data.Tables.Add(dtErrors);
-            GetInstance(connectionID);
+
+            retryPolicy.Execute(
+                context => GetInstance(connectionID),
+                new Context("Instance")
+              );
+            
         }
 
         public DBCollector(string connectionString, string connectionID)
@@ -375,27 +380,14 @@ namespace DBADash
 
         public void Collect(CollectionType collectionType)
         {
+            var collectionTypeString = enumToString(collectionType);
+
             if (!collectionTypeIsApplicable(collectionType))
             {
                 return;
             }
-
-            var collectionTypeString = enumToString(collectionType);
-            // Add params where required
-            SqlParameter[] param=null;
-            if(collectionType == CollectionType.JobHistory)
-            {
-                param =new SqlParameter[] { new SqlParameter { DbType = DbType.Int32, Value = Job_instance_id, ParameterName = "instance_id" }, new SqlParameter { DbType = DbType.Int32, ParameterName="run_date", Value = Convert.ToInt32(DateTime.Now.AddDays(-7).ToString("yyyyMMdd"))} };
-            }
-            else if(collectionType == CollectionType.AzureDBResourceStats || collectionType == CollectionType.AzureDBElasticPoolResourceStats)
-            {
-                param = new SqlParameter[] { new SqlParameter("Date", DateTime.UtcNow.AddMinutes(-PerformanceCollectionPeriodMins)) };
-            }
-            else if( collectionType == CollectionType.CPU)
-            {
-                param = new SqlParameter[] { new SqlParameter("TOP", PerformanceCollectionPeriodMins) };
-            }
           
+            // Group collection types
             if (collectionType == CollectionType.General)
             {
                 Collect(CollectionType.ServerProperties);
@@ -423,6 +415,7 @@ namespace DBADash
                     Collect(CollectionType.AvailabilityReplicas);
                     Collect(CollectionType.AvailabilityGroups);
                 }
+                return;
             }
             else if (collectionType == CollectionType.Performance)
             {
@@ -440,6 +433,7 @@ namespace DBADash
                 {
                     Collect(CollectionType.DatabasesHADR);
                 }
+                return;
             }
             else if(collectionType == CollectionType.Infrequent)
             {
@@ -454,9 +448,44 @@ namespace DBADash
                 Collect(CollectionType.OSLoadedModules);
                 Collect(CollectionType.ResourceGovernorConfiguration);
                 Collect(CollectionType.DatabaseQueryStoreOptions);
+                return;
                 
             }
-            else if (collectionType == CollectionType.Drives)
+
+            try
+            {
+                retryPolicy.Execute(
+                  context => collect(collectionType),
+                  new Context(collectionTypeString)
+                );
+            }
+            catch (Exception ex)
+            {
+                logError(ex, collectionTypeString);
+            }
+            
+          
+        }
+
+        private void collect(CollectionType collectionType)
+        {
+            var collectionTypeString = enumToString(collectionType);
+            // Add params where required
+            SqlParameter[] param = null;
+            if (collectionType == CollectionType.JobHistory)
+            {
+                param = new SqlParameter[] { new SqlParameter { DbType = DbType.Int32, Value = Job_instance_id, ParameterName = "instance_id" }, new SqlParameter { DbType = DbType.Int32, ParameterName = "run_date", Value = Convert.ToInt32(DateTime.Now.AddDays(-7).ToString("yyyyMMdd")) } };
+            }
+            else if (collectionType == CollectionType.AzureDBResourceStats || collectionType == CollectionType.AzureDBElasticPoolResourceStats)
+            {
+                param = new SqlParameter[] { new SqlParameter("Date", DateTime.UtcNow.AddMinutes(-PerformanceCollectionPeriodMins)) };
+            }
+            else if (collectionType == CollectionType.CPU)
+            {
+                param = new SqlParameter[] { new SqlParameter("TOP", PerformanceCollectionPeriodMins) };
+            }
+
+            if (collectionType == CollectionType.Drives)
             {
                 if (platform == HostPlatform.Windows) // drive collection not supported on linux
                 {
@@ -470,125 +499,38 @@ namespace DBADash
             else if (collectionType == CollectionType.DriversWMI)
             {
                 collectDriversWMI();
-            }          
+            }
             else if (collectionType == CollectionType.SlowQueries)
             {
                 if (SlowQueryThresholdMs >= 0 && (!(IsAzure && isAzureMasterDB)))
                 {
-                    var completed = false;
-                    var retry = 0;
-                    while (!completed)
-                    {
-                        try
-                        {
-                            collectSlowQueries();
-                            completed = true;
-                        }
-                        catch (Exception ex)
-                        {
-                            retry += 1;
-                            if (retry > RetryCount)
-                            {
-                                logError(ex, collectionTypeString);
-                                completed = true;
-                            }
-                            else
-                            {
-                                logError(ex,collectionTypeString, "Collect[Retrying]");
-                                System.Threading.Thread.Sleep(RetryInterval * 1000);
-                            }
-                        }
-                    }
+                     collectSlowQueries();
                 }
             }
-            else if(collectionType == CollectionType.PerformanceCounters)
+            else if (collectionType == CollectionType.PerformanceCounters)
             {
-                var completed = false;
-                var retry = 0;
-                while (!completed)
-                {
-                    try
-                    {
-                        collectPerformanceCounters();
-                        completed = true;
-                    }
-                    catch (Exception ex)
-                    {
-                        retry += 1;
-                        if (retry > RetryCount)
-                        {
-                            logError(ex, collectionTypeString);
-                            completed = true;
-                        }
-                        else
-                        {
-                            logError(ex,collectionTypeString, "Collect[Retrying]");
-                            System.Threading.Thread.Sleep(RetryInterval * 1000);
-                        }
-                    }
-                }
+                collectPerformanceCounters();
             }
-            else if(collectionType == CollectionType.Jobs)
+            else if (collectionType == CollectionType.Jobs)
             {
-                try
+                var currentJobModified = GetJobLastModified();
+                if (currentJobModified > JobLastModified)
                 {
-                    var currentJobModified = GetJobLastModified();
-                    if (currentJobModified > JobLastModified)
-                    {
-                        var ss = new SchemaSnapshotDB(_connectionString, new SchemaSnapshotDBOptions());
-                        ss.SnapshotJobs(ref Data);
-                        JobLastModified = currentJobModified;
-                    }
-                 }
-                catch(Exception ex)
-                {
-                    logError(ex,collectionTypeString);
+                    var ss = new SchemaSnapshotDB(_connectionString, new SchemaSnapshotDBOptions());
+                    ss.SnapshotJobs(ref Data);
+                    JobLastModified = currentJobModified;
                 }
             }
-            else if(collectionType == CollectionType.ResourceGovernorConfiguration)
+            else if (collectionType == CollectionType.ResourceGovernorConfiguration)
             {
                 if (engineEdition == DatabaseEngineEdition.Enterprise && !IsAzure)
                 {
-                    try
-                    {
-                        retryPolicy.Execute(
-                          context => collectResourceGovernor(),
-                          new Context(collectionTypeString)
-                        );
-                    }
-                    catch (Exception ex)
-                    {
-                        logError(ex, collectionTypeString);
-                    }
+                    collectResourceGovernor();                  
                 }
             }
             else
             {
-                var completed = false;
-                var retry = 0;
-                while (!completed)
-                {
-                    try
-                    {
-                        addDT(collectionTypeString, Properties.Resources.ResourceManager.GetString("SQL" + collectionTypeString, Properties.Resources.Culture),param);
-                        completed = true;
-                    }
-                    catch (Exception ex)
-                    {
-                        retry += 1;
-                        if (retry > RetryCount)
-                        {
-                            logError(ex, collectionTypeString);
-                            completed = true;
-                        }
-                        else
-                        {
-                            logError(ex,collectionTypeString,"Collect[Retrying]");
-                            System.Threading.Thread.Sleep(RetryInterval * 1000);
-                        }
-                    }
-                }
-
+                addDT(collectionTypeString, Properties.Resources.ResourceManager.GetString("SQL" + collectionTypeString, Properties.Resources.Culture), param);
             }
         }
 
@@ -715,35 +657,26 @@ namespace DBADash
 
         private void collectServerExtraProperties()
         {
-            try
+            if (!this.IsAzure)
             {
-
-                if (!this.IsAzure)
+                if (!noWMI)
                 {
-                    if (!noWMI)
-                    {
-                        collectComputerSystemWMI();
-                        collectOperatingSystemWMI();
-                    }
-                    addDT("ServerExtraProperties", DBADash.Properties.Resources.SQLServerExtraProperties);
-                    Data.Tables["ServerExtraProperties"].Columns.Add("WindowsCaption");
-                    if (manufacturer != "") { Data.Tables["ServerExtraProperties"].Rows[0]["SystemManufacturer"] = manufacturer; }
-                    if (model != "") { Data.Tables["ServerExtraProperties"].Rows[0]["SystemProductName"] = model; }
-                    Data.Tables["ServerExtraProperties"].Rows[0]["WindowsCaption"] = WindowsCaption;
-                    if (Data.Tables["ServerExtraProperties"].Rows[0]["ActivePowerPlanGUID"] == DBNull.Value && noWMI == false)
-                    {
-                        collectPowerPlanWMI();
-                        Data.Tables["ServerExtraProperties"].Rows[0]["ActivePowerPlanGUID"] = activePowerPlanGUID;
-                        Data.Tables["ServerExtraProperties"].Rows[0]["ActivePowerPlan"] = activePowerPlan;
-                    }
+                    collectComputerSystemWMI();
+                    collectOperatingSystemWMI();
+                }
+                addDT("ServerExtraProperties", DBADash.Properties.Resources.SQLServerExtraProperties);
+                Data.Tables["ServerExtraProperties"].Columns.Add("WindowsCaption");
+                if (manufacturer != "") { Data.Tables["ServerExtraProperties"].Rows[0]["SystemManufacturer"] = manufacturer; }
+                if (model != "") { Data.Tables["ServerExtraProperties"].Rows[0]["SystemProductName"] = model; }
+                Data.Tables["ServerExtraProperties"].Rows[0]["WindowsCaption"] = WindowsCaption;
+                if (Data.Tables["ServerExtraProperties"].Rows[0]["ActivePowerPlanGUID"] == DBNull.Value && noWMI == false)
+                {
+                    collectPowerPlanWMI();
+                    Data.Tables["ServerExtraProperties"].Rows[0]["ActivePowerPlanGUID"] = activePowerPlanGUID;
+                    Data.Tables["ServerExtraProperties"].Rows[0]["ActivePowerPlan"] = activePowerPlan;
                 }
             }
-            catch (Exception ex)
-            {
-                logError(ex,"ServerExtraProperties");
-            }
         }
-
 
         public DataTable getDT(string tableName, string SQL, SqlParameter[] param = null)
         {
