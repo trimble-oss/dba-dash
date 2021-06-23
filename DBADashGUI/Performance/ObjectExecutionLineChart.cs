@@ -71,7 +71,7 @@ namespace DBADashGUI.Performance
             chart1.DefaultFill = System.Windows.Media.Brushes.Transparent;
 
 
-            chart1.AddDataTable(dt, columns, "SnapshotDate");
+            chart1.AddDataTable(dt, columns, "SnapshotDate",false);
             chart1.AxisY.Clear();
 
             chart1.AxisY.Add(new Axis
