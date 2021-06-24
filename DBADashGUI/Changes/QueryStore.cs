@@ -20,6 +20,7 @@ namespace DBADashGUI.Changes
 
         public string Instance = string.Empty;
         public List<Int32> InstanceIDs;
+        public int DatabaseID=-1;
 
         public void RefreshData()
         {
@@ -29,8 +30,9 @@ namespace DBADashGUI.Changes
             if (Instance!= string.Empty && Instance != null)
             {
                 tsBack.Enabled = true;             
-                dt = GetDatabaseQueryStoreOptions();
+                dt = GetDatabaseQueryStoreOptions();         
                 setCols();
+                
             }
             else
             {
@@ -41,13 +43,18 @@ namespace DBADashGUI.Changes
             Common.ConvertUTCToLocal(ref dt);
             dgv.AutoGenerateColumns = false;
             dgv.DataSource = dt;
-            dgv.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
+            if (dt.Rows.Count == 1 && DatabaseID > 0)
+            {
+                pivotDGV(ref dgv);
+
+            }
+             dgv.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
         }
 
         private void setCols()
         {
             dgv.Columns.Clear();
-            dgv.Columns.Add(new DataGridViewTextBoxColumn() { HeaderText="DB", DataPropertyName = "name" });
+            dgv.Columns.Add(new DataGridViewLinkColumn() { Name="colDB", HeaderText="DB", DataPropertyName = "name" });
             dgv.Columns.Add(new DataGridViewTextBoxColumn() { HeaderText="Desired State", DataPropertyName = "desired_state_desc" });
             dgv.Columns.Add(new DataGridViewTextBoxColumn() { HeaderText = "Actual State", DataPropertyName = "actual_state_desc" });
             dgv.Columns.Add(new DataGridViewTextBoxColumn() { Name = "col_ReadOnlyReason", HeaderText = "Read Only Reason", DataPropertyName = "readonly_reason_desc" }) ;
@@ -70,7 +77,7 @@ namespace DBADashGUI.Changes
         private void setSummaryCols()
         {
             dgv.Columns.Clear();
-            dgv.Columns.Add(new DataGridViewLinkColumn { HeaderText = "Instance", DataPropertyName = "Instance" });
+            dgv.Columns.Add(new DataGridViewLinkColumn { Name="colInstance", HeaderText = "Instance", DataPropertyName = "Instance" });
             dgv.Columns.Add(new DataGridViewTextBoxColumn() { HeaderText = "OFF", DataPropertyName = "QS_OFF" });
             dgv.Columns.Add(new DataGridViewTextBoxColumn() { Name ="col_READ_ONLY", HeaderText = "READ_ONLY", DataPropertyName = "QS_READ_ONLY" });
             dgv.Columns.Add(new DataGridViewTextBoxColumn() { HeaderText = "READ_WRITE", DataPropertyName = "QS_READ_WRITE" });
@@ -83,6 +90,30 @@ namespace DBADashGUI.Changes
             dgv.Columns.Add(new DataGridViewTextBoxColumn() { Name = "col_SnapshotDate", HeaderText = "Snapshot Date", DataPropertyName = "SnapshotDate" });
         }
 
+        private static void pivotDGV(ref DataGridView dgv)
+        {
+            var dtPivot = new DataTable();
+            dtPivot.Columns.Add("Attribute");
+            dtPivot.Columns.Add("Value");
+            if (dgv.Rows.Count == 1)
+            {
+                foreach(DataGridViewColumn col in dgv.Columns)
+                {
+                    var row= dtPivot.NewRow();
+                    row["Attribute"] = col.HeaderText;
+                    row["Value"] = dgv.Rows[0].Cells[col.Index].Value;
+                    dtPivot.Rows.Add(row);
+                }
+                dgv.Columns.Clear();
+                dgv.AutoGenerateColumns = true;
+                dgv.DataSource = dtPivot;
+            }
+            else
+            {
+                throw new Exception("Expected 1 row for pivot operation");
+            }
+        }
+
         private DataTable GetDatabaseQueryStoreOptions()
         {
             using(var cn = new SqlConnection(Common.ConnectionString))
@@ -90,6 +121,10 @@ namespace DBADashGUI.Changes
             using (var da = new SqlDataAdapter(cmd))
             {
                 cmd.Parameters.AddWithValue("Instance", Instance);
+                if (DatabaseID > 0)
+                {
+                    cmd.Parameters.AddWithValue("DatabaseID", DatabaseID);
+                }
                 var dt = new DataTable();
                 da.Fill(dt);
                 return dt;
@@ -111,16 +146,29 @@ namespace DBADashGUI.Changes
 
         private void dgv_CellContent_Click(object sender, DataGridViewCellEventArgs e)
         {
-            if(e.ColumnIndex==0 && e.RowIndex >= 0)
+            if (dgv.Columns[e.ColumnIndex].Name == "colInstance" && e.RowIndex >= 0)
             {
                 Instance = (string)dgv.Rows[e.RowIndex].Cells[e.ColumnIndex].Value;
+                RefreshData();
+            }
+            else if (dgv.Columns[e.ColumnIndex].Name == "colDB" && e.RowIndex >= 0)
+            {
+                var row = (DataRowView)dgv.Rows[e.RowIndex].DataBoundItem;
+                DatabaseID = (int)row["DatabaseID"];
                 RefreshData();
             }
         }
 
         private void tsBack_Click(object sender, EventArgs e)
         {
-            Instance = String.Empty;
+            if (DatabaseID > 0)
+            {
+                DatabaseID = -1;
+            }
+            else
+            {
+                Instance = String.Empty;
+            }
             RefreshData();
         }
 
@@ -137,6 +185,7 @@ namespace DBADashGUI.Changes
         private void dgv_RowsAdded(object sender, DataGridViewRowsAddedEventArgs e)
         {
             bool summaryMode = dgv.Columns.Contains("col_READ_ONLY");
+            bool dbsMode = dgv.Columns.Contains("colDB)");
             for (Int32 idx = e.RowIndex; idx < e.RowIndex + e.RowCount; idx += 1)
             {
                 var row = (DataRowView)dgv.Rows[idx].DataBoundItem;
@@ -161,7 +210,7 @@ namespace DBADashGUI.Changes
                         dgv.Rows[idx].Cells["col_ERROR"].Style.BackColor = Color.White;
                     }
                 }
-                else
+                else if (dbsMode)
                 {
                     var readOnlyErrorState = (bool)row["IsReadOnlyErrorState"];
                     if (readOnlyErrorState)
@@ -173,8 +222,11 @@ namespace DBADashGUI.Changes
                         dgv.Rows[idx].Cells["col_ReadOnlyReason"].Style.BackColor = Color.White;
                     }
                 }
-                var snapshotStatus = (int)row["CollectionDateStatus"];
-                dgv.Rows[idx].Cells["col_SnapshotDate"].Style.BackColor = DBADashStatus.GetStatusColour((DBADashStatus.DBADashStatusEnum)snapshotStatus);
+                if (dbsMode || summaryMode)
+                {
+                    var snapshotStatus = (int)row["CollectionDateStatus"];
+                    dgv.Rows[idx].Cells["col_SnapshotDate"].Style.BackColor = DBADashStatus.GetStatusColour((DBADashStatus.DBADashStatusEnum)snapshotStatus);
+                }
             }
         }
 
