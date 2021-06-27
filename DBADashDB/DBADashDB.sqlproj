@@ -563,6 +563,7 @@
     <Build Include="dbo\Tables\AzureDBResourceGovernance.sql" />
     <Build Include="dbo\Stored Procedures\AzureDBResourceGovernance_Upd.sql" />
     <Build Include="dbo\Views\AzureDBResourceGovernance.sql" />
+    <Build Include="dbo\Stored Procedures\AzureDBResourceGovernance_Get.sql" />
   </ItemGroup>
   <ItemGroup>
     <PostDeploy Include="Script.PostDeployment1.sql" />

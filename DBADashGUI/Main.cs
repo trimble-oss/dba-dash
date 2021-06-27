@@ -368,6 +368,11 @@ namespace DBADashGUI
                 azureServiceObjectivesHistory1.InstanceIDs = ((SQLTreeItem)n.Parent).Type == SQLTreeItem.TreeType.DBADashRoot ? AzureInstanceIDs : instanceIDs;
                 azureServiceObjectivesHistory1.RefreshData();
             }
+            else if (tabs.SelectedTab == tabAzureDBesourceGovernance)
+            {
+                azureDBResourceGovernance1.InstanceIDs = ((SQLTreeItem)n.Parent).Type == SQLTreeItem.TreeType.DBADashRoot ? AzureInstanceIDs : instanceIDs;
+                azureDBResourceGovernance1.RefreshData();
+            }
             else if (tabs.SelectedTab == tabDBConfiguration)
             {
                 dbConfiguration1.InstanceIDs = ((SQLTreeItem)n.Parent).Type == SQLTreeItem.TreeType.DBADashRoot ? AllInstanceIDs : instanceIDs;
@@ -685,6 +690,7 @@ namespace DBADashGUI
                 if (parent.Type != SQLTreeItem.TreeType.Instance && hasAzureDBs)
                 {
                     allowedTabs.Add(tabServiceObjectives);
+                    allowedTabs.Add(tabAzureDBesourceGovernance);
                 }
                 allowedTabs.Add(tabDBConfiguration);
                 allowedTabs.Add(tabDBOptions);
