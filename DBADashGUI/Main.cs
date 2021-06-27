@@ -440,6 +440,7 @@ namespace DBADashGUI
             {
                 queryStore1.InstanceIDs = AllInstanceIDs;
                 queryStore1.Instance = n.InstanceName;
+                queryStore1.DatabaseID = n.DatabaseID;
                 queryStore1.RefreshData();
             }
             else if(tabs.SelectedTab== tabRG)
