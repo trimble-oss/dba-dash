@@ -156,5 +156,10 @@ namespace DBADashGUI.HA
                 
             }
         }
+
+        private void tsExcel_Click(object sender, EventArgs e)
+        {
+            Common.PromptSaveDataGridView(ref dgv);
+        }
     }
 }

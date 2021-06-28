@@ -67,5 +67,10 @@ namespace DBADashGUI.DBFiles
                 dgvTempDB.Rows[idx].Cells[colNumberOfLogFiles.Index].Style.BackColor = (Int32)row["NumberOfLogFiles"] > 1 ? Color.Yellow : Color.Green;
             }
         }
+
+        private void tsExcel_Click(object sender, EventArgs e)
+        {
+            Common.PromptSaveDataGridView(ref dgvTempDB);
+        }
     }
 }

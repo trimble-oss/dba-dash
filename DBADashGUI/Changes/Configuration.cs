@@ -88,5 +88,10 @@ namespace DBADashGUI.Changes
         {
             Common.CopyDataGridViewToClipboard(dgvConfig);
         }
+
+        private void tsExcel_Click(object sender, EventArgs e)
+        {
+            Common.PromptSaveDataGridView(ref dgvConfig);
+        }
     }
 }

@@ -9,6 +9,8 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Data.SqlClient;
 using static DBADashGUI.Main;
+using System.IO;
+using System.Diagnostics;
 
 namespace DBADashGUI
 {
@@ -386,6 +388,11 @@ namespace DBADashGUI
                     Instance_Selected(this,new InstanceSelectedEventArgs() { Instance = (string)row["Instance"], Tab = "tabQS" });
                 }
             }
+        }
+
+        private void tsExcel_Click(object sender, EventArgs e)
+        {
+            Common.PromptSaveDataGridView(ref dgvSummary);
         }
     }
 }

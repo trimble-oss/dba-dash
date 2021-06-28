@@ -185,5 +185,12 @@ namespace DBADashGUI.LogShipping
         {
             RefreshData();
         }
+
+        private void tsExcel_Click(object sender, EventArgs e)
+        {
+            Configure.Visible = false;
+            Common.PromptSaveDataGridView(ref dgvLogShipping);
+            Configure.Visible = true;
+        }
     }
 }

@@ -132,5 +132,15 @@ namespace DBADashGUI.Changes
         {
             Common.CopyDataGridViewToClipboard(dgvConfigHistory);
         }
+
+        private void tsExcel_Click(object sender, EventArgs e)
+        {
+            Common.PromptSaveDataGridView(ref dgvConfig);
+        }
+
+        private void tsExcelHistory_Click(object sender, EventArgs e)
+        {
+            Common.PromptSaveDataGridView(ref dgvConfigHistory);
+        }
     }
 }

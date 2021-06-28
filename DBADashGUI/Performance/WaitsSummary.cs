@@ -161,5 +161,10 @@ namespace DBADashGUI.Performance
             var ts = (ToolStripMenuItem)sender;
             WaitChart1.SetPointSize(Convert.ToInt32(ts.Tag));
         }
+
+        private void tsExcel_Click(object sender, EventArgs e)
+        {
+            Common.PromptSaveDataGridView(ref dgv);
+        }
     }
 }

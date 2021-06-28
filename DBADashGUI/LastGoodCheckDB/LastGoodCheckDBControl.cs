@@ -178,6 +178,13 @@ namespace DBADashGUI.LastGoodCheckDB
             Common.CopyDataGridViewToClipboard(dgvLastGoodCheckDB);
             Configure.Visible = true;
         }
+
+        private void tsExcel_Click(object sender, EventArgs e)
+        {
+            Configure.Visible = false;
+            Common.PromptSaveDataGridView(ref dgvLastGoodCheckDB);
+            Configure.Visible = true;
+        }
     }
 
 

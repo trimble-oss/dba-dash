@@ -55,6 +55,8 @@
             this.dataGridViewTextBoxColumn4 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dataGridViewTextBoxColumn5 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dataGridViewTextBoxColumn6 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.tsExcel = new System.Windows.Forms.ToolStripButton();
+            this.tsExcelHistory = new System.Windows.Forms.ToolStripButton();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
             this.splitContainer1.Panel2.SuspendLayout();
@@ -93,13 +95,13 @@
             this.dgv.BackgroundColor = System.Drawing.Color.White;
             this.dgv.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.dgv.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.dgv.Location = new System.Drawing.Point(0, 31);
+            this.dgv.Location = new System.Drawing.Point(0, 27);
             this.dgv.Name = "dgv";
             this.dgv.ReadOnly = true;
             this.dgv.RowHeadersVisible = false;
             this.dgv.RowHeadersWidth = 51;
             this.dgv.RowTemplate.Height = 24;
-            this.dgv.Size = new System.Drawing.Size(839, 248);
+            this.dgv.Size = new System.Drawing.Size(839, 252);
             this.dgv.TabIndex = 0;
             this.dgv.RowsAdded += new System.Windows.Forms.DataGridViewRowsAddedEventHandler(this.dgv_RowsAdded);
             // 
@@ -110,11 +112,12 @@
             this.toolStripLabel2,
             this.tsRefreshInfo,
             this.tsCopyInfo,
+            this.tsExcel,
             this.tsSummary,
             this.tsDetail});
             this.toolStrip2.Location = new System.Drawing.Point(0, 0);
             this.toolStrip2.Name = "toolStrip2";
-            this.toolStrip2.Size = new System.Drawing.Size(839, 31);
+            this.toolStrip2.Size = new System.Drawing.Size(839, 27);
             this.toolStrip2.TabIndex = 1;
             this.toolStrip2.Text = "toolStrip2";
             // 
@@ -123,7 +126,7 @@
             this.toolStripLabel2.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
             this.toolStripLabel2.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
             this.toolStripLabel2.Name = "toolStripLabel2";
-            this.toolStripLabel2.Size = new System.Drawing.Size(107, 28);
+            this.toolStripLabel2.Size = new System.Drawing.Size(107, 24);
             this.toolStripLabel2.Text = "Database Info";
             // 
             // tsRefreshInfo
@@ -132,7 +135,7 @@
             this.tsRefreshInfo.Image = global::DBADashGUI.Properties.Resources._112_RefreshArrow_Green_16x16_72;
             this.tsRefreshInfo.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsRefreshInfo.Name = "tsRefreshInfo";
-            this.tsRefreshInfo.Size = new System.Drawing.Size(29, 28);
+            this.tsRefreshInfo.Size = new System.Drawing.Size(29, 24);
             this.tsRefreshInfo.Text = "Refresh";
             this.tsRefreshInfo.Click += new System.EventHandler(this.tsRefreshInfo_Click);
             // 
@@ -142,7 +145,7 @@
             this.tsCopyInfo.Image = global::DBADashGUI.Properties.Resources.ASX_Copy_blue_16x;
             this.tsCopyInfo.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsCopyInfo.Name = "tsCopyInfo";
-            this.tsCopyInfo.Size = new System.Drawing.Size(29, 28);
+            this.tsCopyInfo.Size = new System.Drawing.Size(29, 24);
             this.tsCopyInfo.Text = "Copy";
             this.tsCopyInfo.Click += new System.EventHandler(this.tsCopyInfo_Click);
             // 
@@ -161,7 +164,7 @@
             this.tsDetail.Image = global::DBADashGUI.Properties.Resources.Table_16x;
             this.tsDetail.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsDetail.Name = "tsDetail";
-            this.tsDetail.Size = new System.Drawing.Size(73, 28);
+            this.tsDetail.Size = new System.Drawing.Size(73, 24);
             this.tsDetail.Text = "Detail";
             this.tsDetail.Click += new System.EventHandler(this.tsDetail_Click);
             // 
@@ -180,13 +183,13 @@
             this.colHValueNew,
             this.colHChangeDate});
             this.dgvHistory.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.dgvHistory.Location = new System.Drawing.Point(0, 31);
+            this.dgvHistory.Location = new System.Drawing.Point(0, 27);
             this.dgvHistory.Name = "dgvHistory";
             this.dgvHistory.ReadOnly = true;
             this.dgvHistory.RowHeadersVisible = false;
             this.dgvHistory.RowHeadersWidth = 51;
             this.dgvHistory.RowTemplate.Height = 24;
-            this.dgvHistory.Size = new System.Drawing.Size(839, 170);
+            this.dgvHistory.Size = new System.Drawing.Size(839, 174);
             this.dgvHistory.TabIndex = 0;
             // 
             // colHInstance
@@ -250,10 +253,11 @@
             this.toolStripLabel1,
             this.tsRefreshHistory,
             this.tsCopyHistory,
+            this.tsExcelHistory,
             this.tsFilter});
             this.toolStrip1.Location = new System.Drawing.Point(0, 0);
             this.toolStrip1.Name = "toolStrip1";
-            this.toolStrip1.Size = new System.Drawing.Size(839, 31);
+            this.toolStrip1.Size = new System.Drawing.Size(839, 27);
             this.toolStrip1.TabIndex = 1;
             this.toolStrip1.Text = "toolStrip1";
             // 
@@ -262,7 +266,7 @@
             this.toolStripLabel1.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
             this.toolStripLabel1.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
             this.toolStripLabel1.Name = "toolStripLabel1";
-            this.toolStripLabel1.Size = new System.Drawing.Size(61, 28);
+            this.toolStripLabel1.Size = new System.Drawing.Size(61, 24);
             this.toolStripLabel1.Text = "History";
             // 
             // tsRefreshHistory
@@ -271,7 +275,7 @@
             this.tsRefreshHistory.Image = global::DBADashGUI.Properties.Resources._112_RefreshArrow_Green_16x16_72;
             this.tsRefreshHistory.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsRefreshHistory.Name = "tsRefreshHistory";
-            this.tsRefreshHistory.Size = new System.Drawing.Size(29, 28);
+            this.tsRefreshHistory.Size = new System.Drawing.Size(29, 24);
             this.tsRefreshHistory.Text = "Refresh";
             this.tsRefreshHistory.Click += new System.EventHandler(this.tsRefreshHistory_Click);
             // 
@@ -281,7 +285,7 @@
             this.tsCopyHistory.Image = global::DBADashGUI.Properties.Resources.ASX_Copy_blue_16x;
             this.tsCopyHistory.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsCopyHistory.Name = "tsCopyHistory";
-            this.tsCopyHistory.Size = new System.Drawing.Size(29, 28);
+            this.tsCopyHistory.Size = new System.Drawing.Size(29, 24);
             this.tsCopyHistory.Text = "Copy";
             this.tsCopyHistory.Click += new System.EventHandler(this.tsCopyHistory_Click);
             // 
@@ -293,7 +297,7 @@
             this.tsFilter.Image = global::DBADashGUI.Properties.Resources.FilterDropdown_16x;
             this.tsFilter.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsFilter.Name = "tsFilter";
-            this.tsFilter.Size = new System.Drawing.Size(34, 28);
+            this.tsFilter.Size = new System.Drawing.Size(34, 24);
             this.tsFilter.Text = "Filter";
             // 
             // excludeStateChangesToolStripMenuItem
@@ -360,6 +364,26 @@
             this.dataGridViewTextBoxColumn6.ReadOnly = true;
             this.dataGridViewTextBoxColumn6.Width = 120;
             // 
+            // tsExcel
+            // 
+            this.tsExcel.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.tsExcel.Image = global::DBADashGUI.Properties.Resources.excel16x16;
+            this.tsExcel.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tsExcel.Name = "tsExcel";
+            this.tsExcel.Size = new System.Drawing.Size(29, 24);
+            this.tsExcel.Text = "Export Excel";
+            this.tsExcel.Click += new System.EventHandler(this.tsExcel_Click);
+            // 
+            // tsExcelHistory
+            // 
+            this.tsExcelHistory.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.tsExcelHistory.Image = global::DBADashGUI.Properties.Resources.excel16x16;
+            this.tsExcelHistory.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tsExcelHistory.Name = "tsExcelHistory";
+            this.tsExcelHistory.Size = new System.Drawing.Size(29, 24);
+            this.tsExcelHistory.Text = "Export Excel";
+            this.tsExcelHistory.Click += new System.EventHandler(this.tsExcelHistory_Click);
+            // 
             // DBOptions
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
@@ -413,5 +437,7 @@
         private System.Windows.Forms.ToolStripMenuItem excludeStateChangesToolStripMenuItem;
         private System.Windows.Forms.ToolStripButton tsSummary;
         private System.Windows.Forms.ToolStripButton tsDetail;
+        private System.Windows.Forms.ToolStripButton tsExcel;
+        private System.Windows.Forms.ToolStripButton tsExcelHistory;
     }
 }

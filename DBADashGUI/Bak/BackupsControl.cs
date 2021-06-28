@@ -210,5 +210,12 @@ namespace DBADashGUI.Backups
             Common.CopyDataGridViewToClipboard(dgvBackups);
             Configure.Visible = true;
         }
+
+        private void tsExcel_Click(object sender, EventArgs e)
+        {
+            Configure.Visible = false;
+            Common.PromptSaveDataGridView(ref dgvBackups);
+            Configure.Visible = true;
+        }
     }
 }

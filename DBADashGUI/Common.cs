@@ -1,7 +1,9 @@
-﻿using System;
+﻿using SpreadsheetLight;
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
+using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
@@ -216,6 +218,102 @@ namespace DBADashGUI
             }
             html.Append("</table>");
             CopyHtmlToClipBoard(html.ToString());
+        }
+
+        public static void PromptSaveDataGridView(ref DataGridView dgv)
+        {
+            string defaultFileName = "DBADash_" + DateTime.Now.ToString("yyyyMMdd_HHmmss") + ".xlsx";
+            using (var ofd = new SaveFileDialog() { FileName=defaultFileName,  AddExtension = true, DefaultExt = ".xlsx" })
+            {
+                if (ofd.ShowDialog() == DialogResult.OK)
+                {
+        
+                    if (File.Exists(ofd.FileName))
+                    {
+                        if (MessageBox.Show(string.Format("Are you sure you want to replace the existing file: {0}", ofd.FileName), "Confirm Replace", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) == DialogResult.Yes)
+                        {
+                            File.Delete(ofd.FileName);
+                        }
+                        else
+                        {
+                            return;
+                        }
+                    }             
+                    Common.SaveDataGridViewToXLSX(ref dgv, ofd.FileName);
+                    Process.Start(ofd.FileName);                    
+                }
+            }
+        }
+
+        public static void SaveDataGridViewToXLSX(ref DataGridView dgv,string path, SLTableStyleTypeValues tableStyle= SLTableStyleTypeValues.Light8)
+        {
+            SLDocument sl = new SLDocument();
+            Int32 colIndex = 1;
+            Int32 rowIndex = 1;
+            foreach (DataGridViewColumn col in dgv.Columns)
+            {
+                if (col.Visible)
+                {
+                    sl.SetCellValue(1, colIndex, col.HeaderText);
+                    colIndex++;
+                }
+            }
+
+            foreach (DataGridViewRow row in dgv.Rows)
+            {
+                colIndex = 0;
+                rowIndex += 1;
+                foreach (DataGridViewCell cell in row.Cells)
+                {                   
+                    if (cell.Visible)
+                    {
+                        colIndex += 1;
+                        SLStyle style = sl.CreateStyle();
+                        string format = string.IsNullOrEmpty(cell.Style.Format) ? cell.InheritedStyle.Format : cell.Style.Format;
+                        switch (format)
+                        {
+                            case "P1":
+                               format = "0.0%";
+                                break;
+                            case "P:":
+                            case "P2":
+                                format = "0.00%";
+                                break;
+                            default:
+                                format = "";
+                                break;
+                        }
+                        if (!cell.Style.ForeColor.IsEmpty || !cell.Style.BackColor.IsEmpty || !string.IsNullOrEmpty(format))
+                        {                            
+                            style.Fill.SetPattern(DocumentFormat.OpenXml.Spreadsheet.PatternValues.Solid, cell.Style.BackColor.IsEmpty ? Color.Transparent : cell.Style.BackColor, cell.Style.ForeColor);                          
+                            style.FormatCode = format;
+                            sl.SetCellStyle(rowIndex, colIndex, style);
+                        }
+                        var cellType = cell.Value==null ? typeof(System.String) : cell.Value.GetType();
+                        if (cellType == typeof(decimal) || cellType == typeof(float))
+                        {
+                            sl.SetCellValue(rowIndex, colIndex, Convert.ToDecimal(cell.Value));
+                        }
+                        else if(cellType == typeof(int) || cellType== typeof(long) || cellType == typeof(short) || cellType == typeof(uint) || cellType == typeof(ulong) || cellType == typeof(ushort))
+                        {
+                            sl.SetCellValue(rowIndex, colIndex, Convert.ToInt64(cell.Value));
+                        }
+                        else
+                        {
+                            sl.SetCellValue(rowIndex, colIndex, Convert.ToString(cell.Value));
+                        }
+                       
+                    }
+                }
+            }
+            if (rowIndex > 1)
+            {
+                var tbl = sl.CreateTable(1, 1, rowIndex, colIndex);
+                tbl.SetTableStyle(tableStyle);
+                sl.InsertTable(tbl);
+            }
+            sl.AutoFitColumn(1, colIndex, 300);
+            sl.SaveAs(path);
         }
 
         public static DialogResult ShowInputDialog(ref string input, string title)

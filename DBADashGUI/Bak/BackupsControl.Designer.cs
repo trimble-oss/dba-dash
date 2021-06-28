@@ -32,17 +32,6 @@
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle3 = new System.Windows.Forms.DataGridViewCellStyle();
             this.dgvBackups = new System.Windows.Forms.DataGridView();
-            this.toolStrip1 = new System.Windows.Forms.ToolStrip();
-            this.tsRefresh = new System.Windows.Forms.ToolStripButton();
-            this.tsCopy = new System.Windows.Forms.ToolStripButton();
-            this.toolStripFilter = new System.Windows.Forms.ToolStripDropDownButton();
-            this.criticalToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.warningToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.undefinedToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.OKToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.tsConfigure = new System.Windows.Forms.ToolStripDropDownButton();
-            this.configureInstanceThresholdsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.configureRootThresholdsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.Instance = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Database = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.RecoveryModel = new System.Windows.Forms.DataGridViewTextBoxColumn();
@@ -62,6 +51,18 @@
             this.LogWarningThreshold = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.ThresholdsConfiguredLevel = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Configure = new System.Windows.Forms.DataGridViewLinkColumn();
+            this.toolStrip1 = new System.Windows.Forms.ToolStrip();
+            this.tsRefresh = new System.Windows.Forms.ToolStripButton();
+            this.tsCopy = new System.Windows.Forms.ToolStripButton();
+            this.toolStripFilter = new System.Windows.Forms.ToolStripDropDownButton();
+            this.criticalToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.warningToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.undefinedToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.OKToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.tsConfigure = new System.Windows.Forms.ToolStripDropDownButton();
+            this.configureInstanceThresholdsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.configureRootThresholdsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.tsExcel = new System.Windows.Forms.ToolStripButton();
             ((System.ComponentModel.ISupportInitialize)(this.dgvBackups)).BeginInit();
             this.toolStrip1.SuspendLayout();
             this.SuspendLayout();
@@ -128,12 +129,200 @@
             this.dgvBackups.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgvBackups_CellContentClick);
             this.dgvBackups.RowsAdded += new System.Windows.Forms.DataGridViewRowsAddedEventHandler(this.dgvBackups_RowsAdded);
             // 
+            // Instance
+            // 
+            this.Instance.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.DisplayedCells;
+            this.Instance.DataPropertyName = "Instance";
+            this.Instance.HeaderText = "Instance";
+            this.Instance.MinimumWidth = 6;
+            this.Instance.Name = "Instance";
+            this.Instance.ReadOnly = true;
+            this.Instance.Width = 90;
+            // 
+            // Database
+            // 
+            this.Database.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.DisplayedCells;
+            this.Database.DataPropertyName = "name";
+            this.Database.HeaderText = "Database";
+            this.Database.MinimumWidth = 6;
+            this.Database.Name = "Database";
+            this.Database.ReadOnly = true;
+            this.Database.Width = 98;
+            // 
+            // RecoveryModel
+            // 
+            this.RecoveryModel.DataPropertyName = "recovery_model_desc";
+            this.RecoveryModel.HeaderText = "Recovery Model";
+            this.RecoveryModel.MinimumWidth = 6;
+            this.RecoveryModel.Name = "RecoveryModel";
+            this.RecoveryModel.ReadOnly = true;
+            this.RecoveryModel.Width = 127;
+            // 
+            // LastFull
+            // 
+            this.LastFull.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.DisplayedCells;
+            this.LastFull.DataPropertyName = "LastFull";
+            this.LastFull.HeaderText = "Last Full";
+            this.LastFull.MinimumWidth = 6;
+            this.LastFull.Name = "LastFull";
+            this.LastFull.ReadOnly = true;
+            this.LastFull.Width = 64;
+            // 
+            // LastDiff
+            // 
+            this.LastDiff.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.DisplayedCells;
+            this.LastDiff.DataPropertyName = "LastDiff";
+            this.LastDiff.HeaderText = "Last Diff";
+            this.LastDiff.MinimumWidth = 6;
+            this.LastDiff.Name = "LastDiff";
+            this.LastDiff.ReadOnly = true;
+            this.LastDiff.Width = 64;
+            // 
+            // LastLog
+            // 
+            this.LastLog.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.DisplayedCells;
+            this.LastLog.DataPropertyName = "LastLog";
+            this.LastLog.HeaderText = "Last Log";
+            this.LastLog.MinimumWidth = 6;
+            this.LastLog.Name = "LastLog";
+            this.LastLog.ReadOnly = true;
+            this.LastLog.Width = 64;
+            // 
+            // LastFG
+            // 
+            this.LastFG.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
+            this.LastFG.DataPropertyName = "LastFG";
+            this.LastFG.HeaderText = "Last Filegroup Backup";
+            this.LastFG.MinimumWidth = 6;
+            this.LastFG.Name = "LastFG";
+            this.LastFG.ReadOnly = true;
+            this.LastFG.Width = 125;
+            // 
+            // LastFGDiff
+            // 
+            this.LastFGDiff.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
+            this.LastFGDiff.DataPropertyName = "LastFGDiff";
+            this.LastFGDiff.HeaderText = "Last Filegroup Diff Backup";
+            this.LastFGDiff.MinimumWidth = 6;
+            this.LastFGDiff.Name = "LastFGDiff";
+            this.LastFGDiff.ReadOnly = true;
+            this.LastFGDiff.Width = 125;
+            // 
+            // LastPartial
+            // 
+            this.LastPartial.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
+            this.LastPartial.DataPropertyName = "LastPartial";
+            this.LastPartial.HeaderText = "Last Partial Backup";
+            this.LastPartial.MinimumWidth = 6;
+            this.LastPartial.Name = "LastPartial";
+            this.LastPartial.ReadOnly = true;
+            this.LastPartial.Width = 125;
+            // 
+            // LastPartialDiff
+            // 
+            this.LastPartialDiff.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
+            this.LastPartialDiff.DataPropertyName = "LastPartialDiff";
+            this.LastPartialDiff.HeaderText = "Last Partial Diff Backup";
+            this.LastPartialDiff.MinimumWidth = 6;
+            this.LastPartialDiff.Name = "LastPartialDiff";
+            this.LastPartialDiff.ReadOnly = true;
+            this.LastPartialDiff.Width = 125;
+            // 
+            // SnapshotAge
+            // 
+            this.SnapshotAge.DataPropertyName = "SnapshotAge";
+            this.SnapshotAge.HeaderText = "Snapshot Age (mins)";
+            this.SnapshotAge.MinimumWidth = 6;
+            this.SnapshotAge.Name = "SnapshotAge";
+            this.SnapshotAge.ReadOnly = true;
+            this.SnapshotAge.Width = 119;
+            // 
+            // FullCriticalThreshold
+            // 
+            this.FullCriticalThreshold.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
+            this.FullCriticalThreshold.DataPropertyName = "FullBackupCriticalThreshold";
+            this.FullCriticalThreshold.HeaderText = "Full Critical Threshold";
+            this.FullCriticalThreshold.MinimumWidth = 6;
+            this.FullCriticalThreshold.Name = "FullCriticalThreshold";
+            this.FullCriticalThreshold.ReadOnly = true;
+            this.FullCriticalThreshold.Width = 80;
+            // 
+            // FullWarningThreshold
+            // 
+            this.FullWarningThreshold.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
+            this.FullWarningThreshold.DataPropertyName = "FullBackupWarningThreshold";
+            this.FullWarningThreshold.HeaderText = "Full Warning Threshold";
+            this.FullWarningThreshold.MinimumWidth = 6;
+            this.FullWarningThreshold.Name = "FullWarningThreshold";
+            this.FullWarningThreshold.ReadOnly = true;
+            this.FullWarningThreshold.Width = 80;
+            // 
+            // DiffCriticalThreshold
+            // 
+            this.DiffCriticalThreshold.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
+            this.DiffCriticalThreshold.DataPropertyName = "DiffBackupCriticalThreshold";
+            this.DiffCriticalThreshold.HeaderText = "Diff Critical Threshold";
+            this.DiffCriticalThreshold.MinimumWidth = 6;
+            this.DiffCriticalThreshold.Name = "DiffCriticalThreshold";
+            this.DiffCriticalThreshold.ReadOnly = true;
+            this.DiffCriticalThreshold.Width = 80;
+            // 
+            // DiffWarningThreshold
+            // 
+            this.DiffWarningThreshold.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
+            this.DiffWarningThreshold.DataPropertyName = "DiffBackupWarningThreshold";
+            this.DiffWarningThreshold.HeaderText = "Diff Warning Threshold";
+            this.DiffWarningThreshold.MinimumWidth = 6;
+            this.DiffWarningThreshold.Name = "DiffWarningThreshold";
+            this.DiffWarningThreshold.ReadOnly = true;
+            this.DiffWarningThreshold.Width = 80;
+            // 
+            // LogCriticalThreshold
+            // 
+            this.LogCriticalThreshold.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
+            this.LogCriticalThreshold.DataPropertyName = "LogBackupCriticalThreshold";
+            this.LogCriticalThreshold.HeaderText = "Log Critical Threshold";
+            this.LogCriticalThreshold.MinimumWidth = 6;
+            this.LogCriticalThreshold.Name = "LogCriticalThreshold";
+            this.LogCriticalThreshold.ReadOnly = true;
+            this.LogCriticalThreshold.Width = 80;
+            // 
+            // LogWarningThreshold
+            // 
+            this.LogWarningThreshold.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
+            this.LogWarningThreshold.DataPropertyName = "LogBackupWarningThreshold";
+            this.LogWarningThreshold.HeaderText = "Log Warning Threshold";
+            this.LogWarningThreshold.MinimumWidth = 6;
+            this.LogWarningThreshold.Name = "LogWarningThreshold";
+            this.LogWarningThreshold.ReadOnly = true;
+            this.LogWarningThreshold.Width = 80;
+            // 
+            // ThresholdsConfiguredLevel
+            // 
+            this.ThresholdsConfiguredLevel.DataPropertyName = "ThresholdsConfiguredLevel";
+            this.ThresholdsConfiguredLevel.HeaderText = "Thresholds Configured Level";
+            this.ThresholdsConfiguredLevel.MinimumWidth = 6;
+            this.ThresholdsConfiguredLevel.Name = "ThresholdsConfiguredLevel";
+            this.ThresholdsConfiguredLevel.ReadOnly = true;
+            this.ThresholdsConfiguredLevel.Width = 169;
+            // 
+            // Configure
+            // 
+            this.Configure.HeaderText = "Configure";
+            this.Configure.MinimumWidth = 6;
+            this.Configure.Name = "Configure";
+            this.Configure.ReadOnly = true;
+            this.Configure.Text = "Configure";
+            this.Configure.UseColumnTextForLinkValue = true;
+            this.Configure.Width = 75;
+            // 
             // toolStrip1
             // 
             this.toolStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
             this.toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.tsRefresh,
             this.tsCopy,
+            this.tsExcel,
             this.toolStripFilter,
             this.tsConfigure});
             this.toolStrip1.Location = new System.Drawing.Point(0, 0);
@@ -234,188 +423,15 @@
             this.configureRootThresholdsToolStripMenuItem.Text = "Configure Root Thresholds";
             this.configureRootThresholdsToolStripMenuItem.Click += new System.EventHandler(this.configureRootThresholdsToolStripMenuItem_Click);
             // 
-            // Instance
+            // tsExcel
             // 
-            this.Instance.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.DisplayedCells;
-            this.Instance.DataPropertyName = "Instance";
-            this.Instance.HeaderText = "Instance";
-            this.Instance.MinimumWidth = 6;
-            this.Instance.Name = "Instance";
-            this.Instance.ReadOnly = true;
-            this.Instance.Width = 90;
-            // 
-            // Database
-            // 
-            this.Database.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.DisplayedCells;
-            this.Database.DataPropertyName = "name";
-            this.Database.HeaderText = "Database";
-            this.Database.MinimumWidth = 6;
-            this.Database.Name = "Database";
-            this.Database.ReadOnly = true;
-            this.Database.Width = 98;
-            // 
-            // RecoveryModel
-            // 
-            this.RecoveryModel.DataPropertyName = "recovery_model_desc";
-            this.RecoveryModel.HeaderText = "Recovery Model";
-            this.RecoveryModel.MinimumWidth = 6;
-            this.RecoveryModel.Name = "RecoveryModel";
-            this.RecoveryModel.ReadOnly = true;
-            this.RecoveryModel.Width = 127;
-            // 
-            // LastFull
-            // 
-            this.LastFull.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.DisplayedCells;
-            this.LastFull.DataPropertyName = "LastFull";
-            this.LastFull.HeaderText = "Last Full";
-            this.LastFull.MinimumWidth = 6;
-            this.LastFull.Name = "LastFull";
-            this.LastFull.ReadOnly = true;
-            this.LastFull.Width = 64;
-            // 
-            // LastDiff
-            // 
-            this.LastDiff.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.DisplayedCells;
-            this.LastDiff.DataPropertyName = "LastDiff";
-            this.LastDiff.HeaderText = "Last Diff";
-            this.LastDiff.MinimumWidth = 6;
-            this.LastDiff.Name = "LastDiff";
-            this.LastDiff.ReadOnly = true;
-            this.LastDiff.Width = 64;
-            // 
-            // LastLog
-            // 
-            this.LastLog.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.DisplayedCells;
-            this.LastLog.DataPropertyName = "LastLog";
-            this.LastLog.HeaderText = "Last Log";
-            this.LastLog.MinimumWidth = 6;
-            this.LastLog.Name = "LastLog";
-            this.LastLog.ReadOnly = true;
-            this.LastLog.Width = 64;
-            // 
-            // LastFG
-            // 
-            this.LastFG.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
-            this.LastFG.DataPropertyName = "LastFG";
-            this.LastFG.HeaderText = "Last Filegroup Backup";
-            this.LastFG.MinimumWidth = 6;
-            this.LastFG.Name = "LastFG";
-            this.LastFG.ReadOnly = true;
-            // 
-            // LastFGDiff
-            // 
-            this.LastFGDiff.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
-            this.LastFGDiff.DataPropertyName = "LastFGDiff";
-            this.LastFGDiff.HeaderText = "Last Filegroup Diff Backup";
-            this.LastFGDiff.MinimumWidth = 6;
-            this.LastFGDiff.Name = "LastFGDiff";
-            this.LastFGDiff.ReadOnly = true;
-            // 
-            // LastPartial
-            // 
-            this.LastPartial.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
-            this.LastPartial.DataPropertyName = "LastPartial";
-            this.LastPartial.HeaderText = "Last Partial Backup";
-            this.LastPartial.MinimumWidth = 6;
-            this.LastPartial.Name = "LastPartial";
-            this.LastPartial.ReadOnly = true;
-            // 
-            // LastPartialDiff
-            // 
-            this.LastPartialDiff.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
-            this.LastPartialDiff.DataPropertyName = "LastPartialDiff";
-            this.LastPartialDiff.HeaderText = "Last Partial Diff Backup";
-            this.LastPartialDiff.MinimumWidth = 6;
-            this.LastPartialDiff.Name = "LastPartialDiff";
-            this.LastPartialDiff.ReadOnly = true;
-            // 
-            // SnapshotAge
-            // 
-            this.SnapshotAge.DataPropertyName = "SnapshotAge";
-            this.SnapshotAge.HeaderText = "Snapshot Age (mins)";
-            this.SnapshotAge.MinimumWidth = 6;
-            this.SnapshotAge.Name = "SnapshotAge";
-            this.SnapshotAge.ReadOnly = true;
-            this.SnapshotAge.Width = 97;
-            // 
-            // FullCriticalThreshold
-            // 
-            this.FullCriticalThreshold.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
-            this.FullCriticalThreshold.DataPropertyName = "FullBackupCriticalThreshold";
-            this.FullCriticalThreshold.HeaderText = "Full Critical Threshold";
-            this.FullCriticalThreshold.MinimumWidth = 6;
-            this.FullCriticalThreshold.Name = "FullCriticalThreshold";
-            this.FullCriticalThreshold.ReadOnly = true;
-            this.FullCriticalThreshold.Width = 80;
-            // 
-            // FullWarningThreshold
-            // 
-            this.FullWarningThreshold.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
-            this.FullWarningThreshold.DataPropertyName = "FullBackupWarningThreshold";
-            this.FullWarningThreshold.HeaderText = "Full Warning Threshold";
-            this.FullWarningThreshold.MinimumWidth = 6;
-            this.FullWarningThreshold.Name = "FullWarningThreshold";
-            this.FullWarningThreshold.ReadOnly = true;
-            this.FullWarningThreshold.Width = 80;
-            // 
-            // DiffCriticalThreshold
-            // 
-            this.DiffCriticalThreshold.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
-            this.DiffCriticalThreshold.DataPropertyName = "DiffBackupCriticalThreshold";
-            this.DiffCriticalThreshold.HeaderText = "Diff Critical Threshold";
-            this.DiffCriticalThreshold.MinimumWidth = 6;
-            this.DiffCriticalThreshold.Name = "DiffCriticalThreshold";
-            this.DiffCriticalThreshold.ReadOnly = true;
-            this.DiffCriticalThreshold.Width = 80;
-            // 
-            // DiffWarningThreshold
-            // 
-            this.DiffWarningThreshold.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
-            this.DiffWarningThreshold.DataPropertyName = "DiffBackupWarningThreshold";
-            this.DiffWarningThreshold.HeaderText = "Diff Warning Threshold";
-            this.DiffWarningThreshold.MinimumWidth = 6;
-            this.DiffWarningThreshold.Name = "DiffWarningThreshold";
-            this.DiffWarningThreshold.ReadOnly = true;
-            this.DiffWarningThreshold.Width = 80;
-            // 
-            // LogCriticalThreshold
-            // 
-            this.LogCriticalThreshold.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
-            this.LogCriticalThreshold.DataPropertyName = "LogBackupCriticalThreshold";
-            this.LogCriticalThreshold.HeaderText = "Log Critical Threshold";
-            this.LogCriticalThreshold.MinimumWidth = 6;
-            this.LogCriticalThreshold.Name = "LogCriticalThreshold";
-            this.LogCriticalThreshold.ReadOnly = true;
-            this.LogCriticalThreshold.Width = 80;
-            // 
-            // LogWarningThreshold
-            // 
-            this.LogWarningThreshold.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
-            this.LogWarningThreshold.DataPropertyName = "LogBackupWarningThreshold";
-            this.LogWarningThreshold.HeaderText = "Log Warning Threshold";
-            this.LogWarningThreshold.MinimumWidth = 6;
-            this.LogWarningThreshold.Name = "LogWarningThreshold";
-            this.LogWarningThreshold.ReadOnly = true;
-            this.LogWarningThreshold.Width = 80;
-            // 
-            // ThresholdsConfiguredLevel
-            // 
-            this.ThresholdsConfiguredLevel.DataPropertyName = "ThresholdsConfiguredLevel";
-            this.ThresholdsConfiguredLevel.HeaderText = "Thresholds Configured Level";
-            this.ThresholdsConfiguredLevel.MinimumWidth = 6;
-            this.ThresholdsConfiguredLevel.Name = "ThresholdsConfiguredLevel";
-            this.ThresholdsConfiguredLevel.ReadOnly = true;
-            this.ThresholdsConfiguredLevel.Width = 132;
-            // 
-            // Configure
-            // 
-            this.Configure.HeaderText = "Configure";
-            this.Configure.MinimumWidth = 6;
-            this.Configure.Name = "Configure";
-            this.Configure.ReadOnly = true;
-            this.Configure.Text = "Configure";
-            this.Configure.UseColumnTextForLinkValue = true;
-            this.Configure.Width = 75;
+            this.tsExcel.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.tsExcel.Image = global::DBADashGUI.Properties.Resources.excel16x16;
+            this.tsExcel.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tsExcel.Name = "tsExcel";
+            this.tsExcel.Size = new System.Drawing.Size(29, 24);
+            this.tsExcel.Text = "Export Excel";
+            this.tsExcel.Click += new System.EventHandler(this.tsExcel_Click);
             // 
             // BackupsControl
             // 
@@ -466,5 +482,6 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn LogWarningThreshold;
         private System.Windows.Forms.DataGridViewTextBoxColumn ThresholdsConfiguredLevel;
         private System.Windows.Forms.DataGridViewLinkColumn Configure;
+        private System.Windows.Forms.ToolStripButton tsExcel;
     }
 }

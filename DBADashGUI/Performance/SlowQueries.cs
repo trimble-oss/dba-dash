@@ -518,5 +518,15 @@ namespace DBADashGUI
             tsTop.Tag = ts.Tag;
             RefreshData();
         }
+
+        private void tsExcel_Click(object sender, EventArgs e)
+        {
+            Common.PromptSaveDataGridView(ref dgvSummary);
+        }
+
+        private void tsExcelDetail_Click(object sender, EventArgs e)
+        {
+            Common.PromptSaveDataGridView(ref dgvSlow);
+        }
     }
 }

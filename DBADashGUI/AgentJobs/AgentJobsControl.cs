@@ -353,6 +353,22 @@ namespace DBADashGUI.AgentJobs
         {
             showHistory();
         }
+
+        private void tsExcel_Click(object sender, EventArgs e)
+        {
+            Configure.Visible = false;
+            colHistory.Visible = false;
+            Common.PromptSaveDataGridView(ref dgvJobs);
+            Configure.Visible = true;
+            colHistory.Visible = true;
+        }
+
+        private void tsExcelHistory_Click(object sender, EventArgs e)
+        {
+            colViewSteps.Visible = false;
+            Common.PromptSaveDataGridView(ref dgvJobHistory);
+            colViewSteps.Visible = true;
+        }
     }
     }
 

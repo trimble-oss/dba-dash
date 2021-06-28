@@ -29,7 +29,15 @@
         private void InitializeComponent()
         {
             this.dgvCustom = new System.Windows.Forms.DataGridView();
+            this.colInstance = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colTest = new System.Windows.Forms.DataGridViewLinkColumn();
+            this.colContext = new System.Windows.Forms.DataGridViewLinkColumn();
+            this.colStatus = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colInfo = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colSSDate = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.History = new System.Windows.Forms.DataGridViewLinkColumn();
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
+            this.tsBack = new System.Windows.Forms.ToolStripButton();
             this.tsRefresh = new System.Windows.Forms.ToolStripButton();
             this.tsCopy = new System.Windows.Forms.ToolStripButton();
             this.tsFilter = new System.Windows.Forms.ToolStripDropDownButton();
@@ -41,20 +49,13 @@
             this.testToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.contextToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.tsClear = new System.Windows.Forms.ToolStripButton();
-            this.colTest = new System.Windows.Forms.DataGridViewLinkColumn();
-            this.colContext = new System.Windows.Forms.DataGridViewLinkColumn();
-            this.History = new System.Windows.Forms.DataGridViewLinkColumn();
-            this.tsBack = new System.Windows.Forms.ToolStripButton();
             this.dataGridViewTextBoxColumn1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dataGridViewTextBoxColumn2 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dataGridViewTextBoxColumn3 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dataGridViewTextBoxColumn4 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colInstance = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colStatus = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colInfo = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colSSDate = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dataGridViewTextBoxColumn5 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dataGridViewTextBoxColumn6 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.tsExcel = new System.Windows.Forms.ToolStripButton();
             ((System.ComponentModel.ISupportInitialize)(this.dgvCustom)).BeginInit();
             this.toolStrip1.SuspendLayout();
             this.SuspendLayout();
@@ -85,6 +86,74 @@
             this.dgvCustom.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgvCustom_CellContentClick);
             this.dgvCustom.RowsAdded += new System.Windows.Forms.DataGridViewRowsAddedEventHandler(this.dgvCustom_RowsAdded);
             // 
+            // colInstance
+            // 
+            this.colInstance.DataPropertyName = "ConnectionID";
+            this.colInstance.HeaderText = "Instance";
+            this.colInstance.MinimumWidth = 6;
+            this.colInstance.Name = "colInstance";
+            this.colInstance.ReadOnly = true;
+            this.colInstance.Width = 90;
+            // 
+            // colTest
+            // 
+            this.colTest.DataPropertyName = "Test";
+            this.colTest.HeaderText = "Test";
+            this.colTest.MinimumWidth = 6;
+            this.colTest.Name = "colTest";
+            this.colTest.ReadOnly = true;
+            this.colTest.Resizable = System.Windows.Forms.DataGridViewTriState.True;
+            this.colTest.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
+            this.colTest.Width = 65;
+            // 
+            // colContext
+            // 
+            this.colContext.DataPropertyName = "Context";
+            this.colContext.HeaderText = "Context";
+            this.colContext.MinimumWidth = 6;
+            this.colContext.Name = "colContext";
+            this.colContext.ReadOnly = true;
+            this.colContext.Resizable = System.Windows.Forms.DataGridViewTriState.True;
+            this.colContext.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
+            this.colContext.Width = 84;
+            // 
+            // colStatus
+            // 
+            this.colStatus.DataPropertyName = "Status";
+            this.colStatus.HeaderText = "Status";
+            this.colStatus.MinimumWidth = 6;
+            this.colStatus.Name = "colStatus";
+            this.colStatus.ReadOnly = true;
+            this.colStatus.Width = 77;
+            // 
+            // colInfo
+            // 
+            this.colInfo.DataPropertyName = "Info";
+            this.colInfo.HeaderText = "Info";
+            this.colInfo.MinimumWidth = 6;
+            this.colInfo.Name = "colInfo";
+            this.colInfo.ReadOnly = true;
+            this.colInfo.Width = 60;
+            // 
+            // colSSDate
+            // 
+            this.colSSDate.DataPropertyName = "SnapshotDate";
+            this.colSSDate.HeaderText = "Snapshot Date";
+            this.colSSDate.MinimumWidth = 6;
+            this.colSSDate.Name = "colSSDate";
+            this.colSSDate.ReadOnly = true;
+            this.colSSDate.Width = 120;
+            // 
+            // History
+            // 
+            this.History.HeaderText = "History";
+            this.History.MinimumWidth = 6;
+            this.History.Name = "History";
+            this.History.ReadOnly = true;
+            this.History.Text = "History";
+            this.History.UseColumnTextForLinkValue = true;
+            this.History.Width = 58;
+            // 
             // toolStrip1
             // 
             this.toolStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
@@ -92,6 +161,7 @@
             this.tsBack,
             this.tsRefresh,
             this.tsCopy,
+            this.tsExcel,
             this.tsFilter,
             this.tsClear});
             this.toolStrip1.Location = new System.Drawing.Point(0, 0);
@@ -99,6 +169,17 @@
             this.toolStrip1.Size = new System.Drawing.Size(801, 27);
             this.toolStrip1.TabIndex = 4;
             this.toolStrip1.Text = "toolStrip1";
+            // 
+            // tsBack
+            // 
+            this.tsBack.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.tsBack.Image = global::DBADashGUI.Properties.Resources.Previous_grey_16x;
+            this.tsBack.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tsBack.Name = "tsBack";
+            this.tsBack.Size = new System.Drawing.Size(29, 24);
+            this.tsBack.Text = "Back";
+            this.tsBack.Visible = false;
+            this.tsBack.Click += new System.EventHandler(this.tsBack_Click);
             // 
             // tsRefresh
             // 
@@ -200,49 +281,6 @@
             this.tsClear.Text = "Clear Filters";
             this.tsClear.Click += new System.EventHandler(this.tsClear_Click);
             // 
-            // colTest
-            // 
-            this.colTest.DataPropertyName = "Test";
-            this.colTest.HeaderText = "Test";
-            this.colTest.MinimumWidth = 6;
-            this.colTest.Name = "colTest";
-            this.colTest.ReadOnly = true;
-            this.colTest.Resizable = System.Windows.Forms.DataGridViewTriState.True;
-            this.colTest.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
-            this.colTest.Width = 65;
-            // 
-            // colContext
-            // 
-            this.colContext.DataPropertyName = "Context";
-            this.colContext.HeaderText = "Context";
-            this.colContext.MinimumWidth = 6;
-            this.colContext.Name = "colContext";
-            this.colContext.ReadOnly = true;
-            this.colContext.Resizable = System.Windows.Forms.DataGridViewTriState.True;
-            this.colContext.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
-            this.colContext.Width = 84;
-            // 
-            // History
-            // 
-            this.History.HeaderText = "History";
-            this.History.MinimumWidth = 6;
-            this.History.Name = "History";
-            this.History.ReadOnly = true;
-            this.History.Text = "History";
-            this.History.UseColumnTextForLinkValue = true;
-            this.History.Width = 58;
-            // 
-            // tsBack
-            // 
-            this.tsBack.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.tsBack.Image = global::DBADashGUI.Properties.Resources.Previous_grey_16x;
-            this.tsBack.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsBack.Name = "tsBack";
-            this.tsBack.Size = new System.Drawing.Size(29, 24);
-            this.tsBack.Text = "Back";
-            this.tsBack.Visible = false;
-            this.tsBack.Click += new System.EventHandler(this.tsBack_Click);
-            // 
             // dataGridViewTextBoxColumn1
             // 
             this.dataGridViewTextBoxColumn1.DataPropertyName = "ConnectionID";
@@ -279,42 +317,6 @@
             this.dataGridViewTextBoxColumn4.ReadOnly = true;
             this.dataGridViewTextBoxColumn4.Width = 77;
             // 
-            // colInstance
-            // 
-            this.colInstance.DataPropertyName = "ConnectionID";
-            this.colInstance.HeaderText = "Instance";
-            this.colInstance.MinimumWidth = 6;
-            this.colInstance.Name = "colInstance";
-            this.colInstance.ReadOnly = true;
-            this.colInstance.Width = 90;
-            // 
-            // colStatus
-            // 
-            this.colStatus.DataPropertyName = "Status";
-            this.colStatus.HeaderText = "Status";
-            this.colStatus.MinimumWidth = 6;
-            this.colStatus.Name = "colStatus";
-            this.colStatus.ReadOnly = true;
-            this.colStatus.Width = 77;
-            // 
-            // colInfo
-            // 
-            this.colInfo.DataPropertyName = "Info";
-            this.colInfo.HeaderText = "Info";
-            this.colInfo.MinimumWidth = 6;
-            this.colInfo.Name = "colInfo";
-            this.colInfo.ReadOnly = true;
-            this.colInfo.Width = 60;
-            // 
-            // colSSDate
-            // 
-            this.colSSDate.DataPropertyName = "SnapshotDate";
-            this.colSSDate.HeaderText = "Snapshot Date";
-            this.colSSDate.MinimumWidth = 6;
-            this.colSSDate.Name = "colSSDate";
-            this.colSSDate.ReadOnly = true;
-            this.colSSDate.Width = 120;
-            // 
             // dataGridViewTextBoxColumn5
             // 
             this.dataGridViewTextBoxColumn5.DataPropertyName = "Info";
@@ -332,6 +334,16 @@
             this.dataGridViewTextBoxColumn6.Name = "dataGridViewTextBoxColumn6";
             this.dataGridViewTextBoxColumn6.ReadOnly = true;
             this.dataGridViewTextBoxColumn6.Width = 120;
+            // 
+            // tsExcel
+            // 
+            this.tsExcel.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.tsExcel.Image = global::DBADashGUI.Properties.Resources.excel16x16;
+            this.tsExcel.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tsExcel.Name = "tsExcel";
+            this.tsExcel.Size = new System.Drawing.Size(29, 24);
+            this.tsExcel.Text = "Export Excel";
+            this.tsExcel.Click += new System.EventHandler(this.tsExcel_Click);
             // 
             // CustomChecks
             // 
@@ -379,5 +391,6 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn colSSDate;
         private System.Windows.Forms.DataGridViewLinkColumn History;
         private System.Windows.Forms.ToolStripButton tsBack;
+        private System.Windows.Forms.ToolStripButton tsExcel;
     }
 }

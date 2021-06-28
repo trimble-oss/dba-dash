@@ -421,6 +421,11 @@ namespace DBADashGUI.Checks
         {
             refreshCustomChecks();
         }
+
+        private void tsExcel_Click(object sender, EventArgs e)
+        {
+            Common.PromptSaveDataGridView(ref dgvCustom);
+        }
     }
 
 

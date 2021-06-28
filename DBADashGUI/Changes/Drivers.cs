@@ -170,5 +170,10 @@ namespace DBADashGUI.Changes
         {
             Common.CopyDataGridViewToClipboard(dgvDrivers);
         }
+
+        private void tsExcel_Click(object sender, EventArgs e)
+        {
+            Common.PromptSaveDataGridView(ref dgvDrivers);
+        }
     }
 }

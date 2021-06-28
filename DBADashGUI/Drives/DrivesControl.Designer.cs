@@ -29,6 +29,7 @@
         private void InitializeComponent()
         {
             this.pnlDrives = new System.Windows.Forms.Panel();
+            this.driveControl1 = new DBADashGUI.DriveControl();
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
             this.tsRefresh = new System.Windows.Forms.ToolStripButton();
             this.tsCopy = new System.Windows.Forms.ToolStripButton();
@@ -45,7 +46,7 @@
             this.tsColumns = new System.Windows.Forms.ToolStripDropDownButton();
             this.includeAllMetricsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.pnlSpacing = new System.Windows.Forms.Panel();
-            this.driveControl1 = new DBADashGUI.DriveControl();
+            this.tsExcel = new System.Windows.Forms.ToolStripButton();
             this.pnlDrives.SuspendLayout();
             this.toolStrip1.SuspendLayout();
             this.SuspendLayout();
@@ -60,12 +61,53 @@
             this.pnlDrives.Size = new System.Drawing.Size(735, 214);
             this.pnlDrives.TabIndex = 3;
             // 
+            // driveControl1
+            // 
+            this.driveControl1.DisplayInstanceName = false;
+            this.driveControl1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.driveControl1.Drive.ConnectionString = null;
+            this.driveControl1.Drive.CriticalThreshold = new decimal(new int[] {
+            0,
+            0,
+            0,
+            0});
+            this.driveControl1.Drive.DriveCapacity = ((long)(0));
+            this.driveControl1.Drive.DriveCapacityGB = new decimal(new int[] {
+            0,
+            0,
+            0,
+            0});
+            this.driveControl1.Drive.DriveCheckType = DBADashGUI.DriveThreshold.DriveCheckTypeEnum.None;
+            this.driveControl1.Drive.DriveCheckTypeChar = '-';
+            this.driveControl1.Drive.DriveID = 0;
+            this.driveControl1.Drive.DriveLabel = null;
+            this.driveControl1.Drive.DriveLetter = null;
+            this.driveControl1.Drive.FreeSpace = ((long)(0));
+            this.driveControl1.Drive.FreeSpaceGB = new decimal(new int[] {
+            0,
+            0,
+            0,
+            0});
+            this.driveControl1.Drive.Inherited = false;
+            this.driveControl1.Drive.InstanceID = 0;
+            this.driveControl1.Drive.SnapshotDate = new System.DateTime(((long)(0)));
+            this.driveControl1.Drive.WarningThreshold = new decimal(new int[] {
+            0,
+            0,
+            0,
+            0});
+            this.driveControl1.Location = new System.Drawing.Point(0, 0);
+            this.driveControl1.Name = "driveControl1";
+            this.driveControl1.Size = new System.Drawing.Size(735, 214);
+            this.driveControl1.TabIndex = 0;
+            // 
             // toolStrip1
             // 
             this.toolStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
             this.toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.tsRefresh,
             this.tsCopy,
+            this.tsExcel,
             this.toolStripFilter,
             this.tsConfigure,
             this.tsGridView,
@@ -216,44 +258,15 @@
             this.pnlSpacing.Size = new System.Drawing.Size(735, 16);
             this.pnlSpacing.TabIndex = 8;
             // 
-            // driveControl1
+            // tsExcel
             // 
-            this.driveControl1.DisplayInstanceName = false;
-            this.driveControl1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.driveControl1.Drive.ConnectionString = null;
-            this.driveControl1.Drive.CriticalThreshold = new decimal(new int[] {
-            0,
-            0,
-            0,
-            0});
-            this.driveControl1.Drive.DriveCapacity = ((long)(0));
-            this.driveControl1.Drive.DriveCapacityGB = new decimal(new int[] {
-            0,
-            0,
-            0,
-            0});
-            this.driveControl1.Drive.DriveCheckType = DBADashGUI.DriveThreshold.DriveCheckTypeEnum.None;
-            this.driveControl1.Drive.DriveCheckTypeChar = '-';
-            this.driveControl1.Drive.DriveID = 0;
-            this.driveControl1.Drive.DriveLabel = null;
-            this.driveControl1.Drive.DriveLetter = null;
-            this.driveControl1.Drive.FreeSpace = ((long)(0));
-            this.driveControl1.Drive.FreeSpaceGB = new decimal(new int[] {
-            0,
-            0,
-            0,
-            0});
-            this.driveControl1.Drive.Inherited = false;
-            this.driveControl1.Drive.InstanceID = 0;
-            this.driveControl1.Drive.WarningThreshold = new decimal(new int[] {
-            0,
-            0,
-            0,
-            0});
-            this.driveControl1.Location = new System.Drawing.Point(0, 0);
-            this.driveControl1.Name = "driveControl1";
-            this.driveControl1.Size = new System.Drawing.Size(735, 214);
-            this.driveControl1.TabIndex = 0;
+            this.tsExcel.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.tsExcel.Image = global::DBADashGUI.Properties.Resources.excel16x16;
+            this.tsExcel.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tsExcel.Name = "tsExcel";
+            this.tsExcel.Size = new System.Drawing.Size(29, 24);
+            this.tsExcel.Text = "Export Excel";
+            this.tsExcel.Click += new System.EventHandler(this.tsExcel_Click);
             // 
             // DrivesControl
             // 
@@ -291,5 +304,6 @@
         private System.Windows.Forms.ToolStripButton tsCopy;
         private System.Windows.Forms.ToolStripDropDownButton tsColumns;
         private System.Windows.Forms.ToolStripMenuItem includeAllMetricsToolStripMenuItem;
+        private System.Windows.Forms.ToolStripButton tsExcel;
     }
 }

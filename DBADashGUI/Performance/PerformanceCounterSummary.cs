@@ -125,5 +125,10 @@ namespace DBADashGUI.Performance
                 refreshSummary();
             }
         }
+
+        private void tsExcel_Click(object sender, EventArgs e)
+        {
+            Common.PromptSaveDataGridView(ref dgv);
+        }
     }
 }

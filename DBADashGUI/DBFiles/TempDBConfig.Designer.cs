@@ -78,6 +78,7 @@
             this.dataGridViewTextBoxColumn17 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dataGridViewTextBoxColumn18 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dataGridViewTextBoxColumn19 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.tsExcel = new System.Windows.Forms.ToolStripButton();
             ((System.ComponentModel.ISupportInitialize)(this.dgvTempDB)).BeginInit();
             this.toolStrip1.SuspendLayout();
             this.SuspendLayout();
@@ -111,13 +112,13 @@
             this.colIsTraceFlagRequired,
             this.colTempDBMemoryOpt});
             this.dgvTempDB.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.dgvTempDB.Location = new System.Drawing.Point(0, 31);
+            this.dgvTempDB.Location = new System.Drawing.Point(0, 27);
             this.dgvTempDB.Name = "dgvTempDB";
             this.dgvTempDB.ReadOnly = true;
             this.dgvTempDB.RowHeadersVisible = false;
             this.dgvTempDB.RowHeadersWidth = 51;
             this.dgvTempDB.RowTemplate.Height = 24;
-            this.dgvTempDB.Size = new System.Drawing.Size(959, 430);
+            this.dgvTempDB.Size = new System.Drawing.Size(959, 434);
             this.dgvTempDB.TabIndex = 0;
             this.dgvTempDB.RowsAdded += new System.Windows.Forms.DataGridViewRowsAddedEventHandler(this.dgvTempDB_RowsAdded);
             // 
@@ -325,10 +326,11 @@
             this.toolStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
             this.toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.tsRefresh,
-            this.tsCopy});
+            this.tsCopy,
+            this.tsExcel});
             this.toolStrip1.Location = new System.Drawing.Point(0, 0);
             this.toolStrip1.Name = "toolStrip1";
-            this.toolStrip1.Size = new System.Drawing.Size(959, 31);
+            this.toolStrip1.Size = new System.Drawing.Size(959, 27);
             this.toolStrip1.TabIndex = 1;
             this.toolStrip1.Text = "toolStrip1";
             // 
@@ -338,7 +340,7 @@
             this.tsRefresh.Image = global::DBADashGUI.Properties.Resources._112_RefreshArrow_Green_16x16_72;
             this.tsRefresh.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsRefresh.Name = "tsRefresh";
-            this.tsRefresh.Size = new System.Drawing.Size(29, 28);
+            this.tsRefresh.Size = new System.Drawing.Size(29, 24);
             this.tsRefresh.Text = "Refresh";
             this.tsRefresh.Click += new System.EventHandler(this.tsRefresh_Click);
             // 
@@ -348,7 +350,7 @@
             this.tsCopy.Image = global::DBADashGUI.Properties.Resources.ASX_Copy_blue_16x;
             this.tsCopy.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsCopy.Name = "tsCopy";
-            this.tsCopy.Size = new System.Drawing.Size(29, 28);
+            this.tsCopy.Size = new System.Drawing.Size(29, 24);
             this.tsCopy.Text = "Copy";
             this.tsCopy.Click += new System.EventHandler(this.tsCopy_Click);
             // 
@@ -525,6 +527,16 @@
             this.dataGridViewTextBoxColumn19.ReadOnly = true;
             this.dataGridViewTextBoxColumn19.Width = 201;
             // 
+            // tsExcel
+            // 
+            this.tsExcel.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.tsExcel.Image = global::DBADashGUI.Properties.Resources.excel16x16;
+            this.tsExcel.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tsExcel.Name = "tsExcel";
+            this.tsExcel.Size = new System.Drawing.Size(29, 24);
+            this.tsExcel.Text = "Export Excel";
+            this.tsExcel.Click += new System.EventHandler(this.tsExcel_Click);
+            // 
             // TempDBConfig
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
@@ -586,5 +598,6 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn colT1118;
         private System.Windows.Forms.DataGridViewTextBoxColumn colIsTraceFlagRequired;
         private System.Windows.Forms.DataGridViewTextBoxColumn colTempDBMemoryOpt;
+        private System.Windows.Forms.ToolStripButton tsExcel;
     }
 }

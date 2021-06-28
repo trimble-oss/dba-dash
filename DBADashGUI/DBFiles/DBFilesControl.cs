@@ -297,5 +297,10 @@ namespace DBADashGUI.DBFiles
             }
             RefreshData();
         }
+
+        private void tsExcel_Click(object sender, EventArgs e)
+        {
+            Common.PromptSaveDataGridView(ref dgvFiles);
+        }
     }
 }

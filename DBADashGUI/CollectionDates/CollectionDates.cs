@@ -199,5 +199,10 @@ namespace DBADashGUI.CollectionDates
             Configure.Visible = true;
             ConfigureRoot.Visible = true;
         }
+
+        private void tsExcel_Click(object sender, EventArgs e)
+        {
+            Common.PromptSaveDataGridView(ref dgvCollectionDates);
+        }
     }
 }

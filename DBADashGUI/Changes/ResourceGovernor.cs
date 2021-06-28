@@ -121,8 +121,13 @@ namespace DBADashGUI.Changes
         }
 
         private void tsCopy_Click(object sender, EventArgs e)
-        {
+        {          
+            bool diffVisible = colDiff.Visible;
+            colDiff.Visible = false;
+            colScript.Visible = false;
             Common.CopyDataGridViewToClipboard(dgv);
+            colScript.Visible = true;
+            colDiff.Visible = diffVisible;
         }
 
         private void dgv_SelectionChanged(object sender, EventArgs e)
@@ -142,6 +147,16 @@ namespace DBADashGUI.Changes
                 frm.setText(script1, script2);
                 frm.ShowDialog();
             }
+        }
+
+        private void tsExcel_Click(object sender, EventArgs e)
+        {
+            bool diffVisible = colDiff.Visible;
+            colDiff.Visible = false;
+            colScript.Visible = false;
+            Common.PromptSaveDataGridView(ref dgv);
+            colScript.Visible = true;
+            colDiff.Visible = diffVisible;
         }
     }
 }

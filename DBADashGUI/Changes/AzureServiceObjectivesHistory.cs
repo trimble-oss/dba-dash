@@ -79,5 +79,15 @@ namespace DBADashGUI.Changes
         {
             Common.CopyDataGridViewToClipboard(dgvPool);
         }
+
+        private void tsExcel_Click(object sender, EventArgs e)
+        {
+            Common.PromptSaveDataGridView(ref dgv);
+        }
+
+        private void tsPoolExcel_Click(object sender, EventArgs e)
+        {
+            Common.PromptSaveDataGridView(ref dgvPool);
+        }
     }
 }

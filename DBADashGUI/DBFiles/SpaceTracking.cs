@@ -124,7 +124,7 @@ namespace DBADashGUI
                     tsBack.Enabled = true;
                     refreshData();
                 }
-                else if(dgv.Columns[e.ColumnIndex] == History)
+                else if(dgv.Columns[e.ColumnIndex] == colHistory)
                 {
                     var frm = new DBSpaceHistoryView
                     {
@@ -171,7 +171,9 @@ namespace DBADashGUI
 
         private void tsCopy_Click(object sender, EventArgs e)
         {
+            colHistory.Visible = false;
             Common.CopyDataGridViewToClipboard(dgv);
+            colHistory.Visible = true;
         }
 
         private void tsRefresh_Click(object sender, EventArgs e)
@@ -207,6 +209,13 @@ namespace DBADashGUI
                 frm.DatabaseID = CommonData.GetDatabaseID(frm.Instance, frm.DBName);
             }
             frm.Show();
+        }
+
+        private void tsExcel_Click(object sender, EventArgs e)
+        {
+            colHistory.Visible = false;
+            Common.PromptSaveDataGridView(ref dgv);
+            colHistory.Visible = true;
         }
     }
 }

@@ -108,5 +108,10 @@ namespace DBADashGUI.CollectionDates
                 }
             }
         }
+
+        private void tsExcel_Click(object sender, EventArgs e)
+        {
+            Common.PromptSaveDataGridView(ref dgvDBADashErrors);
+        }
     }
 }

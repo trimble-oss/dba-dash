@@ -347,5 +347,18 @@ namespace DBADashGUI.Properties
             RefreshData();
           
         }
+
+        private void tsExcel_Click(object sender, EventArgs e)
+        {
+            if (!gridview)
+            {
+                ShowGridView();
+            }
+            dgv.Columns["Configure"].Visible = false;
+            dgv.Columns["History"].Visible = false;
+            Common.PromptSaveDataGridView(ref dgv);
+            dgv.Columns["Configure"].Visible = true;
+            dgv.Columns["History"].Visible = true;
+        }
     }
 }

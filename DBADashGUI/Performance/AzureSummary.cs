@@ -318,50 +318,12 @@ namespace DBADashGUI.Performance
 
         private void tsCopy_Click(object sender, EventArgs e)
         {
-            var visibleCols = (new DataGridViewColumn[] { colCPUHistogram, colDataHistogram, colDTUHistogram, colLogHistogram }).Where(col => col.Visible == true).ToList();
-            
-            foreach(var c in visibleCols)
-            {
-                c.Visible = false;
-                for(int i = 10; i <= 100; i += 10)
-                {
-                    dgv.Columns[c.Name + "_" + i.ToString()].Visible = true;
-                }
-            }
-            Common.CopyDataGridViewToClipboard(dgv);
-            foreach (var c in visibleCols)
-            {
-                c.Visible = true;
-                for (int i = 10; i <= 100; i += 10)
-                {
-                    dgv.Columns[c.Name + "_" + i.ToString()].Visible = false;
-                }
-            }
-
+            exportDGV(ExportTarget.Clipboard);
         }
 
         private void tsCopyPool_Click(object sender, EventArgs e)
         {
-            var visibleCols = (new DataGridViewColumn[] { colPoolCPUHistogram, colPoolDataHistogram, colPoolDTUHistogram, colPoolLogHistogram }).Where(col => col.Visible == true).ToList();
-
-            foreach (var c in visibleCols)
-            {
-                c.Visible = false;
-                for (int i = 10; i <= 100; i += 10)
-                {
-                    dgvPool.Columns[c.Name + "_" + i.ToString()].Visible = true;
-                }
-            }
-            Common.CopyDataGridViewToClipboard(dgvPool);
-            foreach (var c in visibleCols)
-            {
-                c.Visible = true;
-                for (int i = 10; i <= 100; i += 10)
-                {
-                    dgvPool.Columns[c.Name + "_" + i.ToString()].Visible = false;
-                }
-            }
-
+            exportDGVPool(ExportTarget.Clipboard);
         }
 
         private void tsRefreshPool_Click(object sender, EventArgs e)
@@ -438,5 +400,84 @@ namespace DBADashGUI.Performance
                 dgvPool.Rows[idx].Cells[colAllocatedStoragePct.Index].Style.BackColor = DBADashStatus.GetStatusColour(poolStorageStatus);
             }
         }
+
+        private void tsExcel_Click(object sender, EventArgs e)
+        {
+            exportDGV(ExportTarget.Excel);
+        }
+
+        private void tsExcelPool_Click(object sender, EventArgs e)
+        {
+            exportDGVPool(ExportTarget.Excel);
+        }
+
+        private enum ExportTarget
+        {
+            Clipboard,
+            Excel
+        }
+
+        private void exportDGV(ExportTarget target)
+        {
+            var visibleCols = (new DataGridViewColumn[] { colCPUHistogram, colDataHistogram, colDTUHistogram, colLogHistogram }).Where(col => col.Visible == true).ToList();
+
+            foreach (var c in visibleCols)
+            {
+                c.Visible = false;
+                for (int i = 10; i <= 100; i += 10)
+                {
+                    dgv.Columns[c.Name + "_" + i.ToString()].Visible = true;
+                }
+            }
+            if (target == ExportTarget.Clipboard)
+            {
+                Common.CopyDataGridViewToClipboard(dgv);
+            }
+            else if (target == ExportTarget.Excel)
+            {
+                Common.PromptSaveDataGridView(ref dgv);
+            }
+            foreach (var c in visibleCols)
+            {
+                c.Visible = true;
+                for (int i = 10; i <= 100; i += 10)
+                {
+                    dgv.Columns[c.Name + "_" + i.ToString()].Visible = false;
+                }
+            }
+        }
+
+        private void exportDGVPool(ExportTarget target)
+        {
+            var visibleCols = (new DataGridViewColumn[] { colPoolCPUHistogram, colPoolDataHistogram, colPoolDTUHistogram, colPoolLogHistogram }).Where(col => col.Visible == true).ToList();
+
+            foreach (var c in visibleCols)
+            {
+                c.Visible = false;
+                for (int i = 10; i <= 100; i += 10)
+                {
+                    dgvPool.Columns[c.Name + "_" + i.ToString()].Visible = true;
+                }
+            }
+            if (target == ExportTarget.Clipboard)
+            {
+                Common.CopyDataGridViewToClipboard(dgvPool);
+            }
+            else if (target == ExportTarget.Excel)
+            {
+                Common.PromptSaveDataGridView(ref dgvPool);
+            }
+            foreach (var c in visibleCols)
+            {
+                c.Visible = true;
+                for (int i = 10; i <= 100; i += 10)
+                {
+                    dgvPool.Columns[c.Name + "_" + i.ToString()].Visible = false;
+                }
+            }
+
+        }
+
+
     }
 }
