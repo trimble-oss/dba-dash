@@ -377,5 +377,29 @@ namespace DBADashGUI
         {
             return string.Join("_", path.Split(Path.GetInvalidFileNameChars()));
         }
+
+        public static void PivotDGV(ref DataGridView dgv)
+        {
+            var dtPivot = new DataTable();
+            dtPivot.Columns.Add("Attribute");
+            dtPivot.Columns.Add("Value");
+            if (dgv.Rows.Count == 1)
+            {
+                foreach (DataGridViewColumn col in dgv.Columns)
+                {
+                    var row = dtPivot.NewRow();
+                    row["Attribute"] = col.HeaderText;
+                    row["Value"] = dgv.Rows[0].Cells[col.Index].Value;
+                    dtPivot.Rows.Add(row);
+                }
+                dgv.Columns.Clear();
+                dgv.AutoGenerateColumns = true;
+                dgv.DataSource = dtPivot;
+            }
+            else
+            {
+                throw new Exception("Expected 1 row for pivot operation");
+            }
+        }
     }
 }

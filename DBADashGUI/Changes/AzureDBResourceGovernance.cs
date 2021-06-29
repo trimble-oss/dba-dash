@@ -30,6 +30,10 @@ namespace DBADashGUI.Changes
             {
                 col.HeaderText = col.HeaderText.Titleize();
             }
+            if (InstanceIDs.Count==1 & dgv.Rows.Count==1)
+            {
+                Common.PivotDGV(ref dgv);
+            }
             dgv.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
         }
 
