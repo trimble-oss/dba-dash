@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Data.SqlClient;
+using DBADashGUI.Changes;
 
 namespace DBADashGUI.Performance
 {
@@ -367,6 +368,12 @@ namespace DBADashGUI.Performance
                     frm.Text = instance + " | " + db;
                 }
      
+                frm.Show();
+            }
+            else if(e.RowIndex>=0 && col == colServiceObjective)
+            {
+                DataRowView row = (DataRowView)dgv.Rows[e.RowIndex].DataBoundItem;
+                var frm = new ResourceGovernanceViewer() { InstanceID = (Int32)row["InstanceID"], DatabaseName= (string)row["DB"] };
                 frm.Show();
             }
             

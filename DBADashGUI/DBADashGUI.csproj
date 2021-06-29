@@ -139,6 +139,12 @@
     <Compile Include="Changes\AzureDBResourceGovernance.Designer.cs">
       <DependentUpon>AzureDBResourceGovernance.cs</DependentUpon>
     </Compile>
+    <Compile Include="Changes\ResourceGovernanceViewer.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Changes\ResourceGovernanceViewer.Designer.cs">
+      <DependentUpon>ResourceGovernanceViewer.cs</DependentUpon>
+    </Compile>
     <Compile Include="Changes\ResourceGovernor.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -617,6 +623,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Changes\QueryStore.resx">
       <DependentUpon>QueryStore.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Changes\ResourceGovernanceViewer.resx">
+      <DependentUpon>ResourceGovernanceViewer.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Changes\ResourceGovernor.resx">
       <DependentUpon>ResourceGovernor.cs</DependentUpon>
