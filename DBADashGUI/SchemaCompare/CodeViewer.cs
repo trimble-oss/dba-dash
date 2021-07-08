@@ -15,6 +15,7 @@ namespace DBADashGUI
         public CodeViewer()
         {
             InitializeComponent();
+            codeEditor1.ShowLineNumbers = true;
         }
 
         public string SQL
@@ -32,6 +33,11 @@ namespace DBADashGUI
         private void bttnCopy_Click(object sender, EventArgs e)
         {
             Clipboard.SetText(codeEditor1.Text);
+        }
+
+        private void tsLineNumbers_Click(object sender, EventArgs e)
+        {
+            codeEditor1.ShowLineNumbers = !codeEditor1.ShowLineNumbers;
         }
     }
 }

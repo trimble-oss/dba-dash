@@ -15,6 +15,7 @@ namespace DBADashGUI
         public DiffControl()
         {
             InitializeComponent();
+            codeEditor1.ShowLineNumbers = true;
         }
 
         private string oldText;

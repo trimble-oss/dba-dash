@@ -34,6 +34,18 @@ namespace DBADashGUI.SchemaCompare
             }
         }
 
+        public bool ShowLineNumbers
+        {
+            get
+            {
+                return txtCode.ShowLineNumbers;
+            }
+            set
+            {
+                txtCode.ShowLineNumbers = value;
+            }
+        }
+
         public CodeEditorModes Mode
         {
             get

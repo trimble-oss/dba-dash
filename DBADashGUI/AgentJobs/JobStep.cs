@@ -16,6 +16,7 @@ namespace DBADashGUI.AgentJobs
         public JobStep()
         {
             InitializeComponent();
+            txtJobStep.ShowLineNumbers = true;
         }
 
         public int InstanceID;
@@ -59,6 +60,11 @@ namespace DBADashGUI.AgentJobs
                     txtJobStep.Mode= SchemaCompare.CodeEditor.CodeEditorModes.None;
                 }
             }
+        }
+
+        private void tsLineNumbers_Click(object sender, EventArgs e)
+        {
+            txtJobStep.ShowLineNumbers = !txtJobStep.ShowLineNumbers;
         }
     }
 }

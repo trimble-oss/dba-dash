@@ -34,6 +34,7 @@ namespace DBADashGUI.AgentJobs
             this.lblJobStep = new System.Windows.Forms.ToolStripLabel();
             this.elementHost1 = new System.Windows.Forms.Integration.ElementHost();
             this.txtJobStep = new DBADashGUI.SchemaCompare.CodeEditor();
+            this.tsLineNumbers = new System.Windows.Forms.ToolStripButton();
             this.toolStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -42,7 +43,8 @@ namespace DBADashGUI.AgentJobs
             this.toolStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
             this.toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.tsCopy,
-            this.lblJobStep});
+            this.lblJobStep,
+            this.tsLineNumbers});
             this.toolStrip1.Location = new System.Drawing.Point(0, 0);
             this.toolStrip1.Name = "toolStrip1";
             this.toolStrip1.Size = new System.Drawing.Size(968, 27);
@@ -55,14 +57,14 @@ namespace DBADashGUI.AgentJobs
             this.tsCopy.Image = global::DBADashGUI.Properties.Resources.ASX_Copy_blue_16x;
             this.tsCopy.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsCopy.Name = "tsCopy";
-            this.tsCopy.Size = new System.Drawing.Size(29, 24);
+            this.tsCopy.Size = new System.Drawing.Size(29, 28);
             // 
             // lblJobStep
             // 
             this.lblJobStep.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
             this.lblJobStep.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
             this.lblJobStep.Name = "lblJobStep";
-            this.lblJobStep.Size = new System.Drawing.Size(78, 24);
+            this.lblJobStep.Size = new System.Drawing.Size(78, 28);
             this.lblJobStep.Text = "Job | Step";
             // 
             // elementHost1
@@ -74,6 +76,16 @@ namespace DBADashGUI.AgentJobs
             this.elementHost1.TabIndex = 2;
             this.elementHost1.Text = "elementHost1";
             this.elementHost1.Child = this.txtJobStep;
+            // 
+            // tsLineNumbers
+            // 
+            this.tsLineNumbers.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.tsLineNumbers.Image = global::DBADashGUI.Properties.Resources.List_NumberedHS;
+            this.tsLineNumbers.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tsLineNumbers.Name = "tsLineNumbers";
+            this.tsLineNumbers.Size = new System.Drawing.Size(29, 28);
+            this.tsLineNumbers.Text = "Toggle Line Numbers";
+            this.tsLineNumbers.Click += new System.EventHandler(this.tsLineNumbers_Click);
             // 
             // JobStep
             // 
@@ -97,5 +109,6 @@ namespace DBADashGUI.AgentJobs
         private System.Windows.Forms.ToolStripLabel lblJobStep;
         private System.Windows.Forms.Integration.ElementHost elementHost1;
         private SchemaCompare.CodeEditor txtJobStep;
+        private System.Windows.Forms.ToolStripButton tsLineNumbers;
     }
 }

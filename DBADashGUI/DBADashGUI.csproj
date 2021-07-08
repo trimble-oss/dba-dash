@@ -830,6 +830,7 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Resources\List_NumberedHS.png" />
     <None Include="Resources\excel16x16.png" />
     <None Include="Resources\Time_16x.png" />
     <None Include="Resources\StartTime_16x.png" />
