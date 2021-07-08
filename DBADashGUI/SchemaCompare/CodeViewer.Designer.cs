@@ -29,21 +29,12 @@
         private void InitializeComponent()
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(CodeViewer));
-            this.txtCode = new ICSharpCode.TextEditor.TextEditorControl();
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
             this.bttnCopy = new System.Windows.Forms.ToolStripButton();
+            this.elementHost1 = new System.Windows.Forms.Integration.ElementHost();
+            this.codeEditor1 = new DBADashGUI.SchemaCompare.CodeEditor();
             this.toolStrip1.SuspendLayout();
             this.SuspendLayout();
-            // 
-            // txtCode
-            // 
-            this.txtCode.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.txtCode.IsReadOnly = false;
-            this.txtCode.Location = new System.Drawing.Point(0, 27);
-            this.txtCode.Name = "txtCode";
-            this.txtCode.ShowVRuler = false;
-            this.txtCode.Size = new System.Drawing.Size(800, 423);
-            this.txtCode.TabIndex = 0;
             // 
             // toolStrip1
             // 
@@ -66,18 +57,27 @@
             this.bttnCopy.Text = "Copy";
             this.bttnCopy.Click += new System.EventHandler(this.bttnCopy_Click);
             // 
+            // elementHost1
+            // 
+            this.elementHost1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.elementHost1.Location = new System.Drawing.Point(0, 27);
+            this.elementHost1.Name = "elementHost1";
+            this.elementHost1.Size = new System.Drawing.Size(800, 423);
+            this.elementHost1.TabIndex = 2;
+            this.elementHost1.Text = "elementHost1";
+            this.elementHost1.Child = this.codeEditor1;
+            // 
             // CodeViewer
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(800, 450);
-            this.Controls.Add(this.txtCode);
+            this.Controls.Add(this.elementHost1);
             this.Controls.Add(this.toolStrip1);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "CodeViewer";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "Code Viewer";
-            this.Load += new System.EventHandler(this.CodeViewer_Load);
             this.toolStrip1.ResumeLayout(false);
             this.toolStrip1.PerformLayout();
             this.ResumeLayout(false);
@@ -86,9 +86,9 @@
         }
 
         #endregion
-
-        private ICSharpCode.TextEditor.TextEditorControl txtCode;
         private System.Windows.Forms.ToolStrip toolStrip1;
         private System.Windows.Forms.ToolStripButton bttnCopy;
+        private System.Windows.Forms.Integration.ElementHost elementHost1;
+        private SchemaCompare.CodeEditor codeEditor1;
     }
 }

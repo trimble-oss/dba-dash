@@ -29,22 +29,13 @@ namespace DBADashGUI.AgentJobs
         /// </summary>
         private void InitializeComponent()
         {
-            this.txtJobStep = new ICSharpCode.TextEditor.TextEditorControl();
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
             this.tsCopy = new System.Windows.Forms.ToolStripButton();
             this.lblJobStep = new System.Windows.Forms.ToolStripLabel();
+            this.elementHost1 = new System.Windows.Forms.Integration.ElementHost();
+            this.txtJobStep = new DBADashGUI.SchemaCompare.CodeEditor();
             this.toolStrip1.SuspendLayout();
             this.SuspendLayout();
-            // 
-            // txtJobStep
-            // 
-            this.txtJobStep.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.txtJobStep.IsReadOnly = false;
-            this.txtJobStep.Location = new System.Drawing.Point(0, 27);
-            this.txtJobStep.Name = "txtJobStep";
-            this.txtJobStep.ShowVRuler = false;
-            this.txtJobStep.Size = new System.Drawing.Size(968, 522);
-            this.txtJobStep.TabIndex = 0;
             // 
             // toolStrip1
             // 
@@ -64,25 +55,34 @@ namespace DBADashGUI.AgentJobs
             this.tsCopy.Image = global::DBADashGUI.Properties.Resources.ASX_Copy_blue_16x;
             this.tsCopy.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsCopy.Name = "tsCopy";
-            this.tsCopy.Size = new System.Drawing.Size(29, 28);
+            this.tsCopy.Size = new System.Drawing.Size(29, 24);
             // 
             // lblJobStep
             // 
             this.lblJobStep.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
             this.lblJobStep.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
             this.lblJobStep.Name = "lblJobStep";
-            this.lblJobStep.Size = new System.Drawing.Size(78, 28);
+            this.lblJobStep.Size = new System.Drawing.Size(78, 24);
             this.lblJobStep.Text = "Job | Step";
+            // 
+            // elementHost1
+            // 
+            this.elementHost1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.elementHost1.Location = new System.Drawing.Point(0, 27);
+            this.elementHost1.Name = "elementHost1";
+            this.elementHost1.Size = new System.Drawing.Size(968, 522);
+            this.elementHost1.TabIndex = 2;
+            this.elementHost1.Text = "elementHost1";
+            this.elementHost1.Child = this.txtJobStep;
             // 
             // JobStep
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.Controls.Add(this.txtJobStep);
+            this.Controls.Add(this.elementHost1);
             this.Controls.Add(this.toolStrip1);
             this.Name = "JobStep";
             this.Size = new System.Drawing.Size(968, 549);
-            this.Load += new System.EventHandler(this.JobStep_Load);
             this.toolStrip1.ResumeLayout(false);
             this.toolStrip1.PerformLayout();
             this.ResumeLayout(false);
@@ -92,9 +92,10 @@ namespace DBADashGUI.AgentJobs
 
         #endregion
 
-        private ICSharpCode.TextEditor.TextEditorControl txtJobStep;
         private System.Windows.Forms.ToolStrip toolStrip1;
         private System.Windows.Forms.ToolStripButton tsCopy;
         private System.Windows.Forms.ToolStripLabel lblJobStep;
+        private System.Windows.Forms.Integration.ElementHost elementHost1;
+        private SchemaCompare.CodeEditor txtJobStep;
     }
 }

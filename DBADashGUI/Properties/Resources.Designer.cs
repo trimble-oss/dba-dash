@@ -221,6 +221,16 @@ namespace DBADashGUI.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
+        internal static byte[] PowerShell_Mode {
+            get {
+                object obj = ResourceManager.GetObject("PowerShell_Mode", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
         internal static System.Drawing.Bitmap Previous_grey_16x {
@@ -326,23 +336,6 @@ namespace DBADashGUI.Properties {
             get {
                 object obj = ResourceManager.GetObject("SwitchSourceOrTarget_16x", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to &lt;SyntaxModes version=&quot;1.0&quot;&gt;
-        ///	&lt;Mode file       = &quot;SQL-Mode.xshd&quot;
-        ///	      name       = &quot;SQL&quot;
-        ///	      extensions = &quot;.sql&quot;/&gt;
-        ///  &lt;Mode file       = &quot;PowerShell-Mode.xshd&quot;
-        ///      name       = &quot;PowerShell&quot;
-        ///      extensions = &quot;.ps1&quot;/&gt;
-        ///&lt;/SyntaxModes&gt;
-        ///.
-        /// </summary>
-        internal static string SyntaxModes {
-            get {
-                return ResourceManager.GetString("SyntaxModes", resourceCulture);
             }
         }
         

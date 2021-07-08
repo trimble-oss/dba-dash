@@ -142,9 +142,6 @@
   <data name="Next_grey_16x" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\Next_grey_16x.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="SQL_Mode" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\SQL-Mode.xshd;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
   <data name="Time_16x" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\Time_16x.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
@@ -184,9 +181,6 @@
   <data name="ASX_Copy_grey_16x" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\ASX_Copy_grey_16x.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="SyntaxModes" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\SyntaxModes.xml;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;Windows-1252</value>
-  </data>
   <data name="StopTime_16x" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\StopTime_16x.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
@@ -207,5 +201,11 @@
   </data>
   <data name="excel16x16" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\excel16x16.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="PowerShell_Mode" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\PowerShell-Mode.xshd;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="SQL_Mode" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\SQL-Mode.xshd;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
 </root>

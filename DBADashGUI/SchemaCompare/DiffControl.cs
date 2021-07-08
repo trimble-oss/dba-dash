@@ -7,7 +7,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using ICSharpCode.TextEditor.Document;
 
 namespace DBADashGUI
 {
@@ -45,8 +44,8 @@ namespace DBADashGUI
 
         private void setMode()
         {
-            txtCode.Visible = (mode == ViewMode.Code);
-            elementHost1.Visible = (mode != ViewMode.Code);
+            elCodeEditor.Visible = (mode == ViewMode.Code);
+            elDiffViewer.Visible = (mode != ViewMode.Code);
             if (mode == ViewMode.Diff)
             {
                 diffViewer1.ShowSideBySide();
@@ -81,7 +80,7 @@ namespace DBADashGUI
             set
             {
                 newText = value;
-                txtCode.Text = value;
+                codeEditor1.Text = value;
                 diffViewer1.NewText = value;
                 copyRightToolStripMenuItem.Enabled =value!=null && value.Length > 0;
             }
@@ -119,12 +118,6 @@ namespace DBADashGUI
         private void tsDiff_Click(object sender, EventArgs e)
         {
             Mode = ViewMode.Diff;
-        }
-
-        private void DiffControl_Load(object sender, EventArgs e)
-        {
-            HighlightingManager.Manager.AddSyntaxModeFileProvider(new AppSyntaxModeProvider());
-            txtCode.SetHighlighting("SQL");
         }
     }
 }

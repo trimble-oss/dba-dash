@@ -1,5 +1,4 @@
-﻿using ICSharpCode.TextEditor.Document;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -49,22 +48,17 @@ namespace DBADashGUI.AgentJobs
                 lblJobStep.Text = (string)r["name"] + " | " + r["step_name"];
                 if (subsystem == "TransactSql")
                 {
-                    txtJobStep.SetHighlighting("SQL");
+                    txtJobStep.Mode= SchemaCompare.CodeEditor.CodeEditorModes.SQL;
                 }
                 else if (subsystem == "PowerShell")
                 {
-                    txtJobStep.SetHighlighting("PowerShell");
+                    txtJobStep.Mode = SchemaCompare.CodeEditor.CodeEditorModes.PowerShell;
                 }
                 else
                 {
-                    txtJobStep.SetHighlighting("");
+                    txtJobStep.Mode= SchemaCompare.CodeEditor.CodeEditorModes.None;
                 }
             }
-        }
-
-        private void JobStep_Load(object sender, EventArgs e)
-        {
-            HighlightingManager.Manager.AddSyntaxModeFileProvider(new AppSyntaxModeProvider());
         }
     }
 }

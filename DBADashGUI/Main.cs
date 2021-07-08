@@ -1,5 +1,4 @@
 ﻿using DBADash;
-using ICSharpCode.TextEditor.Document;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;

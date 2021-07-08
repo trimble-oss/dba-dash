@@ -62,8 +62,8 @@
     <Reference Include="Humanizer, Version=2.11.0.0, Culture=neutral, PublicKeyToken=979442b78dfc278e, processorArchitecture=MSIL">
       <HintPath>..\packages\Humanizer.Core.2.11.10\lib\netstandard2.0\Humanizer.dll</HintPath>
     </Reference>
-    <Reference Include="ICSharpCode.TextEditor, Version=3.2.1.6466, Culture=neutral, PublicKeyToken=4d61825e8dd49f1a, processorArchitecture=MSIL">
-      <HintPath>..\packages\ICSharpCode.TextEditor.3.2.1.6466\lib\Net20\ICSharpCode.TextEditor.dll</HintPath>
+    <Reference Include="ICSharpCode.AvalonEdit, Version=6.1.2.30, Culture=neutral, PublicKeyToken=9cc39be672370310, processorArchitecture=MSIL">
+      <HintPath>..\packages\AvalonEdit.6.1.2.30\lib\net45\ICSharpCode.AvalonEdit.dll</HintPath>
     </Reference>
     <Reference Include="LiveCharts, Version=0.9.7.0, Culture=neutral, PublicKeyToken=0bc1f845d1ebb8df, processorArchitecture=MSIL">
       <HintPath>..\packages\LiveCharts.0.9.7\lib\net45\LiveCharts.dll</HintPath>
@@ -157,7 +157,6 @@
     <Compile Include="DBFiles\FileThresholdConfigControl.Designer.cs">
       <DependentUpon>FileThresholdConfigControl.cs</DependentUpon>
     </Compile>
-    <Compile Include="SchemaCompare\AppSyntaxModeProvider.cs" />
     <Compile Include="Bak\BackupsControl.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -236,6 +235,14 @@
     </Compile>
     <Compile Include="Checks\CustomChecks.Designer.cs">
       <DependentUpon>CustomChecks.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="SchemaCompare\CodeEditor.xaml.cs">
+      <DependentUpon>CodeEditor.xaml</DependentUpon>
     </Compile>
     <Compile Include="SchemaCompare\CodeViewer.cs">
       <SubType>Form</SubType>
@@ -791,14 +798,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
       <SubType>Designer</SubType>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
-    <Compile Include="Properties\Resources.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DependentUpon>Resources.resx</DependentUpon>
-      <DesignTime>True</DesignTime>
-    </Compile>
     <EmbeddedResource Include="Performance\SlowQueries.resx">
       <DependentUpon>SlowQueries.cs</DependentUpon>
     </EmbeddedResource>
@@ -821,12 +823,8 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
-    <None Include="Resources\PowerShell-Mode.xshd">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Include="Resources\SQL-Mode.xshd">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
+    <EmbeddedResource Include="Resources\PowerShell-Mode.xshd" />
+    <EmbeddedResource Include="Resources\SQL-Mode.xshd" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
@@ -842,9 +840,6 @@
     <None Include="Resources\112_RefreshArrow_Green_16x16_72.png" />
     <None Include="Resources\Column_16x.png" />
     <None Include="Resources\Eraser_16x.png" />
-    <None Include="Resources\SyntaxModes.xml">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
     <None Include="Resources\ASX_Copy_grey_16x.png" />
     <None Include="Resources\ASX_Copy_blue_16x.png" />
     <None Include="Resources\Inline_16x.png" />
@@ -869,6 +864,12 @@
       <Project>{176c91f1-d5f4-4695-b1ed-2c021249b88f}</Project>
       <Name>DBADash</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Page Include="SchemaCompare\CodeEditor.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

@@ -14,7 +14,6 @@ using LiveCharts.Defaults;
 using LiveCharts;
 using static DBADashGUI.Performance.Performance;
 using System.Xml.Schema;
-using ICSharpCode.TextEditor.Actions;
 
 namespace DBADashGUI.Performance
 {

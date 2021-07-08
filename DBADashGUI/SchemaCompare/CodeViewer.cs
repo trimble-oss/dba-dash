@@ -1,5 +1,4 @@
-﻿using ICSharpCode.TextEditor.Document;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -22,23 +21,17 @@ namespace DBADashGUI
         {
             get
             {
-                return txtCode.Text;
+                return codeEditor1.Text;
             }
             set
             {
-                txtCode.Text = value;
+                codeEditor1.Text = value;
             }
-        }
-
-        private void CodeViewer_Load(object sender, EventArgs e)
-        {
-            HighlightingManager.Manager.AddSyntaxModeFileProvider(new AppSyntaxModeProvider());
-            txtCode.SetHighlighting("SQL");
         }
 
         private void bttnCopy_Click(object sender, EventArgs e)
         {
-            Clipboard.SetText(txtCode.Text);
+            Clipboard.SetText(codeEditor1.Text);
         }
     }
 }
