@@ -17,6 +17,8 @@ DBA Dash is a tool for SQL Server DBAs to assist with daily checks, performance 
  - Option to monitor instances in isolated environments via S3 bucket.
  - [Custom Checks](Docs/CustomChecks.md)
 
+ [What DBA Dash collects and when](Docs/Collection.md)
+
 ## Requirements
  
  - SQL Server 2016 SP1 or later required for DBADashDB repository database.  RDS & Azure DB is supported.  
