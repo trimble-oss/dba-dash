@@ -14,6 +14,8 @@ using System.Threading.Tasks;
 using System.Timers;
 using static DBADash.DBADashConnection;
 using Serilog;
+using System.IO;
+
 namespace DBADashService
 {
 
@@ -22,7 +24,7 @@ namespace DBADashService
         private readonly IScheduler scheduler;
         public readonly CollectionConfig config;
         System.Timers.Timer azureScanForNewDBsTimer;
-
+        System.Timers.Timer folderCleanupTimer;
 
         public  ScheduleService()
         {
@@ -161,8 +163,6 @@ namespace DBADashService
         }
 
 
-
-
         public void ScheduleJobs()
         {
             Log.Information("Agent Version {version}", Assembly.GetEntryAssembly().GetName().Version);
@@ -204,7 +204,13 @@ namespace DBADashService
                 };
                 azureScanForNewDBsTimer.Elapsed += new System.Timers.ElapsedEventHandler(ScanForAzureDBs);
             }
-
+            FolderCleanup();
+            folderCleanupTimer = new System.Timers.Timer
+            {
+                Enabled = true,
+                Interval = 14400000 // 4hrs
+            };
+            folderCleanupTimer.Elapsed += new System.Timers.ElapsedEventHandler(FolderCleanup);
         }
 
         private void scheduleSourceCollection(List<DBADashSource> sourceConnections)
@@ -273,6 +279,33 @@ namespace DBADashService
         {
             removeEventSessions(config);
             scheduler.Shutdown().ConfigureAwait(false).GetAwaiter().GetResult();
+        }
+
+        public static void FolderCleanup(object sender, ElapsedEventArgs e)
+        {
+            FolderCleanup();
+        }
+
+        public static void FolderCleanup()
+        {
+            try
+            {
+                if (Directory.Exists(SchedulerServiceConfig.FailedMessageFolder))
+                {
+                    Log.Information("Maintenance: Failed Message Folder cleanup");
+                    (from f in new DirectoryInfo(SchedulerServiceConfig.FailedMessageFolder).GetFiles()
+                     where f.LastWriteTime < DateTime.Now.Subtract(TimeSpan.FromDays(7))
+                     && (f.Extension.ToLower() == ".xml" || f.Extension.ToLower() == ".json" || f.Extension.ToLower() == ".bin")
+                     && f.Name.ToLower().StartsWith("dbadash")
+                     select f
+                    ).ToList()
+                        .ForEach(f => f.Delete());
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Maintenance: FailedMessageFolderCleanup");
+            }
         }
     }
 }
