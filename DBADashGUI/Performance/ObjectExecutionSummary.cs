@@ -52,6 +52,7 @@ namespace DBADashGUI.Performance
 
         private DateTime _compareTo=DateTime.MinValue;
         private DateTime _compareFrom=DateTime.MinValue;
+        private DataTable dt;
 
         private DateTime compareTo
         {
@@ -238,7 +239,7 @@ namespace DBADashGUI.Performance
                     cmd.CommandTimeout = Properties.Settings.Default.CommandTimeout;
 
                     SqlDataAdapter da = new SqlDataAdapter(cmd);
-                    DataTable dt = new DataTable();
+                    dt = new DataTable();
                     da.Fill(dt);
                     if (dt.Rows.Count == 1)
                     {
@@ -247,12 +248,11 @@ namespace DBADashGUI.Performance
                     dgv.Columns.Clear();
                     dgv.AutoGenerateColumns = false;
 
-
+                    setDataSourceWithFilter();
                     dgv.Columns.AddRange(Columns.ToArray());
                     setColVisibility();
 
-                    dgv.DataSource = new DataView(dt, null, "total_duration_sec DESC", DataViewRowState.CurrentRows);
-                    dgv.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.DisplayedCells;
+            
                     if (splitContainer1.Panel1Collapsed == false)
                     {
                         refreshChart();
@@ -261,7 +261,28 @@ namespace DBADashGUI.Performance
             }
         }
 
-
+        private void setDataSourceWithFilter()
+        {
+            if (string.IsNullOrEmpty(txtSearch.Text.Trim()))
+            {
+                dgv.DataSource = new DataView(dt, null, "total_duration_sec DESC", DataViewRowState.CurrentRows);
+                lblSearch.Font= new Font(lblSearch.Font, FontStyle.Regular);
+            }
+            else
+            {
+                lblSearch.Font = new Font(lblSearch.Font, FontStyle.Bold);
+                try
+                {
+                    dgv.DataSource = new DataView(dt, string.Format("SchemaName LIKE '%{0}%' OR ObjectName LIKE '%{0}%'", txtSearch.Text.Replace("'", "''")), "total_duration_sec DESC", DataViewRowState.CurrentRows);
+                }
+                catch(Exception ex)
+                {
+                    MessageBox.Show(ex.Message, "Filter Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    dgv.DataSource = new DataView(dt, null, "total_duration_sec DESC", DataViewRowState.CurrentRows);
+                }
+            }
+            dgv.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.DisplayedCells;
+        }
 
 
         private void tsRefresh_Click(object sender, EventArgs e)
@@ -420,6 +441,20 @@ namespace DBADashGUI.Performance
         private void tsExcel_Click(object sender, EventArgs e)
         {
             Common.PromptSaveDataGridView(ref dgv);
+        }
+
+  
+        private void txtSearch_TextChanged(object sender, EventArgs e)
+        {
+            tmrSearch.Enabled = true;
+            tmrSearch.Stop();
+            tmrSearch.Start();
+        }
+
+        private void tmrSearch_Tick(object sender, EventArgs e)
+        {
+            setDataSourceWithFilter();
+            tmrSearch.Enabled = false;
         }
     }
 }

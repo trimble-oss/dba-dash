@@ -28,10 +28,12 @@
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             this.dgv = new System.Windows.Forms.DataGridView();
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
             this.tsRefresh = new System.Windows.Forms.ToolStripButton();
             this.tsCopy = new System.Windows.Forms.ToolStripButton();
+            this.tsExcel = new System.Windows.Forms.ToolStripButton();
             this.tsCompare = new System.Windows.Forms.ToolStripDropDownButton();
             this.tsTimeOffset = new System.Windows.Forms.ToolStripMenuItem();
             this.ts24Hrs = new System.Windows.Forms.ToolStripMenuItem();
@@ -47,11 +49,14 @@
             this.cLRTriggerToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.scalarFunctionToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.extendedStoredProcedureToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.objectExecutionLineChart1 = new DBADashGUI.Performance.ObjectExecutionLineChart();
+            this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
+            this.lblSearch = new System.Windows.Forms.ToolStripLabel();
+            this.txtSearch = new System.Windows.Forms.ToolStripTextBox();
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
             this.splitChart = new System.Windows.Forms.SplitContainer();
+            this.objectExecutionLineChart1 = new DBADashGUI.Performance.ObjectExecutionLineChart();
             this.compareObjectExecutionLineChart = new DBADashGUI.Performance.ObjectExecutionLineChart();
-            this.tsExcel = new System.Windows.Forms.ToolStripButton();
+            this.tmrSearch = new System.Windows.Forms.Timer(this.components);
             ((System.ComponentModel.ISupportInitialize)(this.dgv)).BeginInit();
             this.toolStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
@@ -76,7 +81,7 @@
             this.dgv.RowHeadersVisible = false;
             this.dgv.RowHeadersWidth = 51;
             this.dgv.RowTemplate.Height = 24;
-            this.dgv.Size = new System.Drawing.Size(1262, 255);
+            this.dgv.Size = new System.Drawing.Size(1262, 256);
             this.dgv.TabIndex = 0;
             this.dgv.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgv_CellContentClick);
             this.dgv.RowsAdded += new System.Windows.Forms.DataGridViewRowsAddedEventHandler(this.dgv_RowsAdded);
@@ -90,7 +95,10 @@
             this.tsExcel,
             this.tsCompare,
             this.tsColumns,
-            this.tsType});
+            this.tsType,
+            this.toolStripSeparator1,
+            this.lblSearch,
+            this.txtSearch});
             this.toolStrip1.Location = new System.Drawing.Point(0, 0);
             this.toolStrip1.Name = "toolStrip1";
             this.toolStrip1.Size = new System.Drawing.Size(1262, 27);
@@ -116,6 +124,16 @@
             this.tsCopy.Size = new System.Drawing.Size(29, 24);
             this.tsCopy.Text = "Copy";
             this.tsCopy.Click += new System.EventHandler(this.tsCopy_Click);
+            // 
+            // tsExcel
+            // 
+            this.tsExcel.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.tsExcel.Image = global::DBADashGUI.Properties.Resources.excel16x16;
+            this.tsExcel.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tsExcel.Name = "tsExcel";
+            this.tsExcel.Size = new System.Drawing.Size(29, 24);
+            this.tsExcel.Text = "Export Excel";
+            this.tsExcel.Click += new System.EventHandler(this.tsExcel_Click);
             // 
             // tsCompare
             // 
@@ -257,14 +275,24 @@
             this.extendedStoredProcedureToolStripMenuItem.Text = "Extended Stored Procedure";
             this.extendedStoredProcedureToolStripMenuItem.Click += new System.EventHandler(this.tsType_Click);
             // 
-            // objectExecutionLineChart1
+            // toolStripSeparator1
             // 
-            this.objectExecutionLineChart1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.objectExecutionLineChart1.Location = new System.Drawing.Point(0, 0);
-            this.objectExecutionLineChart1.Name = "objectExecutionLineChart1";
-            this.objectExecutionLineChart1.Size = new System.Drawing.Size(1262, 314);
-            this.objectExecutionLineChart1.TabIndex = 5;
-            this.objectExecutionLineChart1.Title = "abc";
+            this.toolStripSeparator1.Margin = new System.Windows.Forms.Padding(10, 0, 10, 0);
+            this.toolStripSeparator1.Name = "toolStripSeparator1";
+            this.toolStripSeparator1.Size = new System.Drawing.Size(6, 27);
+            // 
+            // lblSearch
+            // 
+            this.lblSearch.Name = "lblSearch";
+            this.lblSearch.Size = new System.Drawing.Size(56, 24);
+            this.lblSearch.Text = "Search:";
+            // 
+            // txtSearch
+            // 
+            this.txtSearch.Font = new System.Drawing.Font("Segoe UI", 9F);
+            this.txtSearch.Name = "txtSearch";
+            this.txtSearch.Size = new System.Drawing.Size(200, 27);
+            this.txtSearch.TextChanged += new System.EventHandler(this.txtSearch_TextChanged);
             // 
             // splitContainer1
             // 
@@ -281,7 +309,7 @@
             // 
             this.splitContainer1.Panel2.Controls.Add(this.dgv);
             this.splitContainer1.Size = new System.Drawing.Size(1262, 888);
-            this.splitContainer1.SplitterDistance = 629;
+            this.splitContainer1.SplitterDistance = 628;
             this.splitContainer1.TabIndex = 6;
             // 
             // splitChart
@@ -298,28 +326,32 @@
             // splitChart.Panel2
             // 
             this.splitChart.Panel2.Controls.Add(this.compareObjectExecutionLineChart);
-            this.splitChart.Size = new System.Drawing.Size(1262, 629);
-            this.splitChart.SplitterDistance = 314;
+            this.splitChart.Size = new System.Drawing.Size(1262, 628);
+            this.splitChart.SplitterDistance = 312;
             this.splitChart.TabIndex = 7;
+            // 
+            // objectExecutionLineChart1
+            // 
+            this.objectExecutionLineChart1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.objectExecutionLineChart1.Location = new System.Drawing.Point(0, 0);
+            this.objectExecutionLineChart1.Name = "objectExecutionLineChart1";
+            this.objectExecutionLineChart1.Size = new System.Drawing.Size(1262, 312);
+            this.objectExecutionLineChart1.TabIndex = 5;
+            this.objectExecutionLineChart1.Title = "abc";
             // 
             // compareObjectExecutionLineChart
             // 
             this.compareObjectExecutionLineChart.Dock = System.Windows.Forms.DockStyle.Fill;
             this.compareObjectExecutionLineChart.Location = new System.Drawing.Point(0, 0);
             this.compareObjectExecutionLineChart.Name = "compareObjectExecutionLineChart";
-            this.compareObjectExecutionLineChart.Size = new System.Drawing.Size(1262, 311);
+            this.compareObjectExecutionLineChart.Size = new System.Drawing.Size(1262, 312);
             this.compareObjectExecutionLineChart.TabIndex = 6;
             this.compareObjectExecutionLineChart.Title = "abc";
             // 
-            // tsExcel
+            // tmrSearch
             // 
-            this.tsExcel.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.tsExcel.Image = global::DBADashGUI.Properties.Resources.excel16x16;
-            this.tsExcel.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsExcel.Name = "tsExcel";
-            this.tsExcel.Size = new System.Drawing.Size(29, 24);
-            this.tsExcel.Text = "Export Excel";
-            this.tsExcel.Click += new System.EventHandler(this.tsExcel_Click);
+            this.tmrSearch.Interval = 1000;
+            this.tmrSearch.Tick += new System.EventHandler(this.tmrSearch_Tick);
             // 
             // ObjectExecutionSummary
             // 
@@ -372,5 +404,9 @@
         private System.Windows.Forms.SplitContainer splitChart;
         private ObjectExecutionLineChart compareObjectExecutionLineChart;
         private System.Windows.Forms.ToolStripButton tsExcel;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
+        private System.Windows.Forms.ToolStripLabel lblSearch;
+        private System.Windows.Forms.ToolStripTextBox txtSearch;
+        private System.Windows.Forms.Timer tmrSearch;
     }
 }
