@@ -36,6 +36,7 @@ namespace DBADashGUI
             var dt = CommonData.GetInstances(Tags, null);
             dgv.AutoGenerateColumns = false;
             dgv.DataSource = dt;
+
         }
 
         private void dgv_RowsAdded(object sender, DataGridViewRowsAddedEventArgs e)
