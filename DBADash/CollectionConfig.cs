@@ -112,7 +112,7 @@ namespace DBADash
 
         }
 
-        private readonly string defaultMaintenanceCron = " 0 0 0 ? * * *";
+        private readonly string defaultMaintenanceCron = "0 0 0/12 1/1 * ? *";
 
         public string MaintenanceScheduleCron { get; set; }
 

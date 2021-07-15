@@ -39,7 +39,7 @@ namespace DBADashService
             var cn = new SqlConnection(connectionString);
             using (cn)
             {
-                using (var cmd = new SqlCommand("dbo.Partitions_Add", cn) { CommandType = CommandType.StoredProcedure }) {
+                using (var cmd = new SqlCommand("dbo.Partitions_Add", cn) { CommandType = CommandType.StoredProcedure, CommandTimeout=120 }) {
                     cn.Open();
                     Log.Information("Maintenance: Creating partitions");
                     cmd.ExecuteNonQuery();
@@ -51,7 +51,7 @@ namespace DBADashService
             var cn = new SqlConnection(connectionString);
             using (cn)
             {
-                using (var cmd = new SqlCommand("dbo.PurgeData", cn) { CommandType = CommandType.StoredProcedure })
+                using (var cmd = new SqlCommand("dbo.PurgeData", cn) { CommandType = CommandType.StoredProcedure, CommandTimeout = 120 })
                 {
                     cn.Open();
                     Log.Information("Maintenance : PurgeData");

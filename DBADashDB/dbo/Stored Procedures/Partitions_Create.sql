@@ -1,5 +1,16 @@
-﻿CREATE PROC [dbo].[MonthlyPartitions_Add](@TableName SYSNAME,@MonthsInFuture INT=1)
+﻿CREATE PROC dbo.Partitions_Create(
+	@TableName SYSNAME,
+	@PeriodCount INT,
+	/* Valid values : m (Month)
+					  d (Day)
+	*/
+	@PeriodType CHAR(1)
+)
 AS
+/* 
+	Generic proc to handle adding new partitions to the partitioned tables.
+	Creates daily or monthly partitions a specified number of periods into the future.
+*/
 DECLARE @PartitionFunction SYSNAME
 DECLARE @PartitionScheme SYSNAME
 
@@ -15,6 +26,11 @@ BEGIN
 	RAISERROR('Invalid table %s',11,1,@TableName)
 	RETURN
 END
+IF @PeriodType NOT IN('d','m') OR @PeriodType IS NULL
+BEGIN
+	RAISERROR('Invalid parameter value for @PeriodType.  Valid Values: d (Day), m (Month)',11,1)
+	RETURN
+END
 
 DECLARE @SQL NVARCHAR(MAX)
 SET @SQL = N'
@@ -22,12 +38,16 @@ DECLARE @Boundary DATETIME2(3)
 SELECT TOP(1) @Boundary= lb 
 FROM dbo.PartitionBoundaryHelper(@PartitionFunction,@TableName)
 ORDER BY partition_number DESC
-SELECT @Boundary = ISNULL(@Boundary,DATEADD(m, DATEDIFF(m, 0, GETUTCDATE())-1, 0))
--- Repeat until we are @MonthsInFuture in the future
-WHILE DATEDIFF(m, GETUTCDATE(), @Boundary) < @MonthsInFuture
+
+SELECT @Boundary = CASE WHEN @Boundary IS NULL THEN DATEADD(' + @PeriodType + ', DATEDIFF(' + @PeriodType + ', 0, GETUTCDATE())-1, 0) 
+					WHEN @Boundary < GETUTCDATE() THEN DATEADD(' + @PeriodType + ', DATEDIFF(' + @PeriodType + ', 0, GETUTCDATE()), 0) 
+					ELSE @Boundary END
+
+-- Repeat until we are specified periods in the future
+WHILE DATEDIFF(' + @PeriodType + ', GETUTCDATE(), @Boundary) < @PeriodCount
 BEGIN;
-   -- Increase by 1 month and split partition
-   SET @Boundary = DATEADD(m, 1, @Boundary);
+   -- Increase by 1 period and split partition
+   SET @Boundary = DATEADD(' + @PeriodType + ', 1, @Boundary);
 
    ALTER PARTITION SCHEME ' + QUOTENAME(@PartitionScheme) + '
    NEXT USED [PRIMARY]
@@ -36,9 +56,8 @@ BEGIN;
          SPLIT RANGE (@Boundary);
 END;'
 
-
-PRINT @SQL
 DECLARE @applock INT
+
 SET XACT_ABORT ON
 BEGIN TRAN
 EXEC @applock = sp_getapplock @Resource = 'Partitioning',
@@ -46,11 +65,11 @@ EXEC @applock = sp_getapplock @Resource = 'Partitioning',
                                  @LockOwner = 'Transaction',
                                  @LockTimeout = 5000;
 IF NOT @applock IN(0,1)
-BEGIN
+BEGIN;
 	THROW 50000,'sp_getapplock error',1;
 	RETURN;
 END
 
-EXEC sp_executesql @SQL,N'@PartitionFunction SYSNAME,@TableName SYSNAME,@MonthsInFuture INT',@PartitionFunction,@TableName,@MonthsInFuture
+EXEC sp_executesql @SQL,N'@PartitionFunction SYSNAME,@TableName SYSNAME,@PeriodCount INT',@PartitionFunction,@TableName,@PeriodCount
 
 COMMIT

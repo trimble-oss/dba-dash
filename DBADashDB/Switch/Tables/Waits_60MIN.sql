@@ -10,9 +10,3 @@
     CONSTRAINT [FK_Waits_60MIN_Instance] FOREIGN KEY ([InstanceID]) REFERENCES [dbo].[Instances] ([InstanceID]),
     CONSTRAINT [FK_Waits_60MIN_WaitType] FOREIGN KEY ([WaitTypeID]) REFERENCES [dbo].[WaitType] ([WaitTypeID])
 );
-
-
-GO
-CREATE COLUMNSTORE INDEX [CI_Waits_60MIN]
-    ON [Switch].[Waits_60MIN]([InstanceID], [SnapshotDate], [WaitTypeID], [waiting_tasks_count], [wait_time_ms], [signal_wait_time_ms], [sample_ms_diff]);
-
