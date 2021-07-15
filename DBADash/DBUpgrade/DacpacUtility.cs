@@ -43,7 +43,7 @@ namespace DacpacUtility
 
             MessageList.Add("*** Start of processing for " +
                              databaseName);
-
+            // For an existing DB we want to skip this option.  Some users might prefer to use SIMPLE recovery model and this option would set it back to FULL each time the dacpac is deployed
             _dacDeployOptions.ScriptDatabaseOptions = status == DBVersionStatusEnum.CreateDB;
             if (!_dacDeployOptions.ScriptDatabaseOptions)
             {
