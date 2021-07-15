@@ -22,8 +22,3 @@
     CONSTRAINT [PK_CPU_60MIN] PRIMARY KEY CLUSTERED ([InstanceID] ASC, [EventTime] ASC) WITH (DATA_COMPRESSION = PAGE)
 );
 
-
-GO
-CREATE COLUMNSTORE INDEX [CI_CPU_60MIN]
-    ON [Switch].[CPU_60MIN]([InstanceID], [EventTime], [SumSQLProcessCPU], [SumSystemIdleCPU], [SampleCount], [MaxSQLProcessCPU], [MaxOtherProcessCPU], [MaxTotalCPU]);
-

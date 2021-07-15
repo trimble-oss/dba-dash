@@ -16,11 +16,5 @@
     CONSTRAINT [FK_CPU_Instances] FOREIGN KEY ([InstanceID]) REFERENCES [dbo].[Instances] ([InstanceID])
 ) ON [PS_CPU] ([EventTime]);
 
-GO
-CREATE COLUMNSTORE INDEX [CI_CPU]
-    ON [dbo].[CPU]([InstanceID], [EventTime], [SQLProcessCPU], [SystemIdleCPU])
-    ON [PS_CPU] ([EventTime]);
-GO
-
 
 

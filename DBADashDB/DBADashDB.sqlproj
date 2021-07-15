@@ -30,7 +30,7 @@
     <QueryStoreStaleQueryThreshold>15</QueryStoreStaleQueryThreshold>
     <QueryStoreMaxStorageSize>512</QueryStoreMaxStorageSize>
     <QueryStoreMaxPlansPerQuery>50</QueryStoreMaxPlansPerQuery>
-    <DacVersion>2.0.3.36</DacVersion>
+    <DacVersion>2.0.3.37</DacVersion>
     <ReadCommittedSnapshot>True</ReadCommittedSnapshot>
     <AllowSnapshotIsolation>True</AllowSnapshotIsolation>
     <CompatibilityMode>130</CompatibilityMode>
@@ -241,7 +241,6 @@
     <Build Include="dbo\Functions\PartitionBoundaryHelper.sql" />
     <Build Include="dbo\Stored Procedures\PartitionTable_Cleanup.sql" />
     <Build Include="dbo\Stored Procedures\Partitions_Add.sql" />
-    <Build Include="dbo\Stored Procedures\DailyPartitions_Add.sql" />
     <Build Include="Security\Switch.sql" />
     <Build Include="Switch\Tables\Waits.sql" />
     <Build Include="Switch\Tables\CPU.sql" />
@@ -454,7 +453,6 @@
     <Build Include="dbo\Stored Procedures\CustomChecksHistory_Get.sql" />
     <Build Include="Storage\PF_AzureDBElasticPoolResourceStats_60MIN.sql" />
     <Build Include="Storage\PS_AzureDBElasticPoolResourceStats_60MIN.sql" />
-    <Build Include="dbo\Stored Procedures\MonthlyPartitions_Add.sql" />
     <Build Include="Storage\PF_AzureDBResourceStats_60MIN.sql" />
     <Build Include="Storage\PS_AzureDBResourceStats_60MIN.sql" />
     <Build Include="Storage\PF_Waits_60MIN.sql" />
@@ -564,6 +562,7 @@
     <Build Include="dbo\Stored Procedures\AzureDBResourceGovernance_Upd.sql" />
     <Build Include="dbo\Views\AzureDBResourceGovernance.sql" />
     <Build Include="dbo\Stored Procedures\AzureDBResourceGovernance_Get.sql" />
+    <Build Include="dbo\Stored Procedures\Partitions_Create.sql" />
   </ItemGroup>
   <ItemGroup>
     <PostDeploy Include="Script.PostDeployment1.sql" />
