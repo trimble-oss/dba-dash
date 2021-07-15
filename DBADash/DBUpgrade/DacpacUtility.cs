@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using Microsoft.SqlServer.Dac;
 using Serilog;
+using static DBADash.DBValidations;
+
 namespace DacpacUtility
 {
     public class DacpacService
@@ -31,16 +33,22 @@ namespace DacpacUtility
                     ObjectType.Permissions
                 }
             };
-                   }
+        }
 
         public void ProcessDacPac(string connectionString,
                                     string databaseName,
-                                    string dacpacName)
+                                    string dacpacName,
+                                    DBVersionStatusEnum status)
         {
 
             MessageList.Add("*** Start of processing for " +
                              databaseName);
 
+            _dacDeployOptions.ScriptDatabaseOptions = status == DBVersionStatusEnum.CreateDB;
+            if (!_dacDeployOptions.ScriptDatabaseOptions)
+            {
+                MessageList.Add("Skipping deployment of Database Options for existing database");
+            }
 
             var dacServiceInstance = new DacServices(connectionString);
             dacServiceInstance.ProgressChanged +=

@@ -133,7 +133,7 @@ END
             var status = VersionStatus(connectionString);
             if (status.VersionStatus == DBVersionStatusEnum.UpgradeRequired || status.VersionStatus == DBVersionStatusEnum.CreateDB)
             {
-                return Task.Run(() => dac.ProcessDacPac(connectionString, db, DACPackFile));
+                return Task.Run(() => dac.ProcessDacPac(connectionString, db, DACPackFile,status.VersionStatus));
             }
             else
             {

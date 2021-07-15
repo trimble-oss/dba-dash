@@ -62,6 +62,8 @@ namespace DBADashServiceConfig
             } 
         }
 
+        DBValidations.DBVersionStatus dbVersionStatus;
+
         public string ConnectionStringWithoutInitialCatalog
         {
             get
@@ -202,7 +204,7 @@ AND database_id > 4 ", cn);
             DacpacUtility.DacpacService dac = new DacpacUtility.DacpacService();
             string _db = DB;
             string _connectionString = ConnectionString;
-            var t = Task.Run(() => dac.ProcessDacPac(_connectionString, _db, DBValidations.DACPackFile));
+            var t = Task.Run(() => dac.ProcessDacPac(_connectionString, _db, DBValidations.DACPackFile, dbVersionStatus.VersionStatus));
             lblNotice.Visible = true;
             bttnGenerate.Enabled = false;
             bttnDeploy.Enabled = false;
@@ -308,29 +310,29 @@ AND database_id > 4 ", cn);
         {
             try
             {
-                var status = DBValidations.VersionStatus(ConnectionString);
+                dbVersionStatus = DBValidations.VersionStatus(ConnectionString);
                 bttnGenerate.Enabled = true;
                 bttnDeploy.Enabled = true;
-                if (status.VersionStatus == DBValidations.DBVersionStatusEnum.CreateDB)
+                if (dbVersionStatus.VersionStatus == DBValidations.DBVersionStatusEnum.CreateDB)
                 {
                     lblVersionInfo.Text = "Create Database";
                     lblVersionInfo.ForeColor = System.Drawing.Color.Blue;
                 }
-                else if (status.VersionStatus == DBValidations.DBVersionStatusEnum.OK)
+                else if (dbVersionStatus.VersionStatus == DBValidations.DBVersionStatusEnum.OK)
                 {
-                    lblVersionInfo.Text = status.DBVersion.ToString() + " (OK)";
+                    lblVersionInfo.Text = dbVersionStatus.DBVersion.ToString() + " (OK)";
                     lblVersionInfo.ForeColor = System.Drawing.Color.Green;
                     bttnGenerate.Enabled = true;
                 }
-                else if(status.VersionStatus == DBValidations.DBVersionStatusEnum.UpgradeRequired)
+                else if(dbVersionStatus.VersionStatus == DBValidations.DBVersionStatusEnum.UpgradeRequired)
                 {
-                    lblVersionInfo.Text = status.DBVersion.ToString() + " Upgrade to " + status.DACVersion.ToString();
+                    lblVersionInfo.Text = dbVersionStatus.DBVersion.ToString() + " Upgrade to " + dbVersionStatus.DACVersion.ToString();
                     lblVersionInfo.ForeColor = System.Drawing.Color.Red;
                     bttnGenerate.Enabled = true;
                 }
-                else if(status.VersionStatus== DBValidations.DBVersionStatusEnum.AppUpgradeRequired)
+                else if(dbVersionStatus.VersionStatus== DBValidations.DBVersionStatusEnum.AppUpgradeRequired)
                 {
-                    lblVersionInfo.Text = status.DBVersion.ToString() + "Newer than app:" + status.DACVersion.ToString() + ". Upgrade app";
+                    lblVersionInfo.Text = dbVersionStatus.DBVersion.ToString() + "Newer than app:" + dbVersionStatus.DACVersion.ToString() + ". Upgrade app";
                     lblVersionInfo.ForeColor = System.Drawing.Color.Red;
                     bttnGenerate.Enabled = false;
                     bttnDeploy.Enabled = false;
