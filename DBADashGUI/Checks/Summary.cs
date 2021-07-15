@@ -97,8 +97,12 @@ namespace DBADashGUI
                 if (row["IsAgentRunning"]!=DBNull.Value && (bool)row["IsAgentRunning"] == false)
                 {
                     dgvSummary.Rows[idx].Cells["JobStatus"].Style.BackColor = Color.Black;
-                    dgvSummary.Rows[idx].Cells["JobStatus"].Style.ForeColor= Color.White;
+                    ((DataGridViewLinkCell)dgvSummary.Rows[idx].Cells["JobStatus"]).LinkColor  = Color.White;
                     dgvSummary.Rows[idx].Cells["JobStatus"].Value = "Not Running";
+                }
+                else
+                {
+                    ((DataGridViewLinkCell)dgvSummary.Rows[idx].Cells["JobStatus"]).LinkColor = Color.Black;
                 }
 
                 string uptimeString;
