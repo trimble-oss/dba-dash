@@ -30,8 +30,8 @@
         {
             this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Main));
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle3 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle4 = new System.Windows.Forms.DataGridViewCellStyle();
             this.TreeViewImageList = new System.Windows.Forms.ImageList(this.components);
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.mnuTags = new System.Windows.Forms.ToolStripMenuItem();
@@ -158,6 +158,8 @@
             this.queryStore1 = new DBADashGUI.Changes.QueryStore();
             this.tabRG = new System.Windows.Forms.TabPage();
             this.resourceGovernor1 = new DBADashGUI.Changes.ResourceGovernor();
+            this.tabAzureDBesourceGovernance = new System.Windows.Forms.TabPage();
+            this.azureDBResourceGovernance1 = new DBADashGUI.Changes.AzureDBResourceGovernance();
             this.dataGridViewTextBoxColumn1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dataGridViewTextBoxColumn2 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dataGridViewTextBoxColumn3 = new System.Windows.Forms.DataGridViewTextBoxColumn();
@@ -181,8 +183,8 @@
             this.dataGridViewTextBoxColumn21 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dataGridViewTextBoxColumn22 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dataGridViewTextBoxColumn23 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.tabAzureDBesourceGovernance = new System.Windows.Forms.TabPage();
-            this.azureDBResourceGovernance1 = new DBADashGUI.Changes.AzureDBResourceGovernance();
+            this.daysToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.daysToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitMain)).BeginInit();
             this.splitMain.Panel1.SuspendLayout();
@@ -333,6 +335,8 @@
             this.ts6Hr,
             this.ts12Hr,
             this.dayToolStripMenuItem,
+            this.daysToolStripMenuItem,
+            this.daysToolStripMenuItem1,
             this.days7ToolStripMenuItem,
             this.days14toolStripMenuItem,
             this.days28ToolStripMenuItem,
@@ -349,7 +353,7 @@
             // 
             this.minsToolStripMenuItem2.CheckOnClick = true;
             this.minsToolStripMenuItem2.Name = "minsToolStripMenuItem2";
-            this.minsToolStripMenuItem2.Size = new System.Drawing.Size(153, 28);
+            this.minsToolStripMenuItem2.Size = new System.Drawing.Size(224, 28);
             this.minsToolStripMenuItem2.Tag = "5";
             this.minsToolStripMenuItem2.Text = "5 Mins";
             this.minsToolStripMenuItem2.Click += new System.EventHandler(this.tsTime_Click);
@@ -358,7 +362,7 @@
             // 
             this.minsToolStripMenuItem1.CheckOnClick = true;
             this.minsToolStripMenuItem1.Name = "minsToolStripMenuItem1";
-            this.minsToolStripMenuItem1.Size = new System.Drawing.Size(153, 28);
+            this.minsToolStripMenuItem1.Size = new System.Drawing.Size(224, 28);
             this.minsToolStripMenuItem1.Tag = "10";
             this.minsToolStripMenuItem1.Text = "10 Mins";
             this.minsToolStripMenuItem1.Click += new System.EventHandler(this.tsTime_Click);
@@ -367,7 +371,7 @@
             // 
             this.minsToolStripMenuItem.CheckOnClick = true;
             this.minsToolStripMenuItem.Name = "minsToolStripMenuItem";
-            this.minsToolStripMenuItem.Size = new System.Drawing.Size(153, 28);
+            this.minsToolStripMenuItem.Size = new System.Drawing.Size(224, 28);
             this.minsToolStripMenuItem.Tag = "15";
             this.minsToolStripMenuItem.Text = "15 Mins";
             this.minsToolStripMenuItem.Click += new System.EventHandler(this.tsTime_Click);
@@ -376,7 +380,7 @@
             // 
             this.ts30Min.CheckOnClick = true;
             this.ts30Min.Name = "ts30Min";
-            this.ts30Min.Size = new System.Drawing.Size(153, 28);
+            this.ts30Min.Size = new System.Drawing.Size(224, 28);
             this.ts30Min.Tag = "30";
             this.ts30Min.Text = "30 Mins";
             this.ts30Min.Click += new System.EventHandler(this.tsTime_Click);
@@ -386,7 +390,7 @@
             this.ts1Hr.Checked = true;
             this.ts1Hr.CheckState = System.Windows.Forms.CheckState.Checked;
             this.ts1Hr.Name = "ts1Hr";
-            this.ts1Hr.Size = new System.Drawing.Size(153, 28);
+            this.ts1Hr.Size = new System.Drawing.Size(224, 28);
             this.ts1Hr.Tag = "60";
             this.ts1Hr.Text = "1Hr";
             this.ts1Hr.Click += new System.EventHandler(this.tsTime_Click);
@@ -395,7 +399,7 @@
             // 
             this.ts2Hr.CheckOnClick = true;
             this.ts2Hr.Name = "ts2Hr";
-            this.ts2Hr.Size = new System.Drawing.Size(153, 28);
+            this.ts2Hr.Size = new System.Drawing.Size(224, 28);
             this.ts2Hr.Tag = "120";
             this.ts2Hr.Text = "2Hr";
             this.ts2Hr.Click += new System.EventHandler(this.tsTime_Click);
@@ -404,7 +408,7 @@
             // 
             this.ts3Hr.CheckOnClick = true;
             this.ts3Hr.Name = "ts3Hr";
-            this.ts3Hr.Size = new System.Drawing.Size(153, 28);
+            this.ts3Hr.Size = new System.Drawing.Size(224, 28);
             this.ts3Hr.Tag = "180";
             this.ts3Hr.Text = "3Hr";
             this.ts3Hr.Click += new System.EventHandler(this.tsTime_Click);
@@ -413,7 +417,7 @@
             // 
             this.ts6Hr.CheckOnClick = true;
             this.ts6Hr.Name = "ts6Hr";
-            this.ts6Hr.Size = new System.Drawing.Size(153, 28);
+            this.ts6Hr.Size = new System.Drawing.Size(224, 28);
             this.ts6Hr.Tag = "360";
             this.ts6Hr.Text = "6Hr";
             this.ts6Hr.Click += new System.EventHandler(this.tsTime_Click);
@@ -422,7 +426,7 @@
             // 
             this.ts12Hr.CheckOnClick = true;
             this.ts12Hr.Name = "ts12Hr";
-            this.ts12Hr.Size = new System.Drawing.Size(153, 28);
+            this.ts12Hr.Size = new System.Drawing.Size(224, 28);
             this.ts12Hr.Tag = "720";
             this.ts12Hr.Text = "12Hr";
             this.ts12Hr.Click += new System.EventHandler(this.tsTime_Click);
@@ -430,7 +434,7 @@
             // dayToolStripMenuItem
             // 
             this.dayToolStripMenuItem.Name = "dayToolStripMenuItem";
-            this.dayToolStripMenuItem.Size = new System.Drawing.Size(153, 28);
+            this.dayToolStripMenuItem.Size = new System.Drawing.Size(224, 28);
             this.dayToolStripMenuItem.Tag = "1440";
             this.dayToolStripMenuItem.Text = "1 Day";
             this.dayToolStripMenuItem.Click += new System.EventHandler(this.tsTime_Click);
@@ -438,7 +442,7 @@
             // days7ToolStripMenuItem
             // 
             this.days7ToolStripMenuItem.Name = "days7ToolStripMenuItem";
-            this.days7ToolStripMenuItem.Size = new System.Drawing.Size(153, 28);
+            this.days7ToolStripMenuItem.Size = new System.Drawing.Size(224, 28);
             this.days7ToolStripMenuItem.Tag = "10080";
             this.days7ToolStripMenuItem.Text = "7 Days";
             this.days7ToolStripMenuItem.Click += new System.EventHandler(this.tsTime_Click);
@@ -446,7 +450,7 @@
             // days14toolStripMenuItem
             // 
             this.days14toolStripMenuItem.Name = "days14toolStripMenuItem";
-            this.days14toolStripMenuItem.Size = new System.Drawing.Size(153, 28);
+            this.days14toolStripMenuItem.Size = new System.Drawing.Size(224, 28);
             this.days14toolStripMenuItem.Tag = "20160";
             this.days14toolStripMenuItem.Text = "14 Days";
             this.days14toolStripMenuItem.Click += new System.EventHandler(this.tsTime_Click);
@@ -454,7 +458,7 @@
             // days28ToolStripMenuItem
             // 
             this.days28ToolStripMenuItem.Name = "days28ToolStripMenuItem";
-            this.days28ToolStripMenuItem.Size = new System.Drawing.Size(153, 28);
+            this.days28ToolStripMenuItem.Size = new System.Drawing.Size(224, 28);
             this.days28ToolStripMenuItem.Tag = "40320";
             this.days28ToolStripMenuItem.Text = "28 Days";
             this.days28ToolStripMenuItem.Click += new System.EventHandler(this.tsTime_Click);
@@ -462,12 +466,12 @@
             // toolStripSeparator1
             // 
             this.toolStripSeparator1.Name = "toolStripSeparator1";
-            this.toolStripSeparator1.Size = new System.Drawing.Size(150, 6);
+            this.toolStripSeparator1.Size = new System.Drawing.Size(221, 6);
             // 
             // tsCustom
             // 
             this.tsCustom.Name = "tsCustom";
-            this.tsCustom.Size = new System.Drawing.Size(153, 28);
+            this.tsCustom.Size = new System.Drawing.Size(224, 28);
             this.tsCustom.Tag = "-1";
             this.tsCustom.Text = "Custom";
             this.tsCustom.Click += new System.EventHandler(this.tsCustomTime_Click);
@@ -682,14 +686,14 @@
             this.gvHistory.AllowUserToAddRows = false;
             this.gvHistory.AllowUserToDeleteRows = false;
             this.gvHistory.AllowUserToOrderColumns = true;
-            dataGridViewCellStyle1.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle1.BackColor = System.Drawing.SystemColors.Control;
-            dataGridViewCellStyle1.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            dataGridViewCellStyle1.ForeColor = System.Drawing.SystemColors.WindowText;
-            dataGridViewCellStyle1.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-            dataGridViewCellStyle1.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-            dataGridViewCellStyle1.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
-            this.gvHistory.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle1;
+            dataGridViewCellStyle3.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle3.BackColor = System.Drawing.SystemColors.Control;
+            dataGridViewCellStyle3.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            dataGridViewCellStyle3.ForeColor = System.Drawing.SystemColors.WindowText;
+            dataGridViewCellStyle3.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle3.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle3.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
+            this.gvHistory.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle3;
             this.gvHistory.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.gvHistory.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
             this.ObjectName,
@@ -700,14 +704,14 @@
             this.ObjectDateCreated,
             this.ObjectDateModified,
             this.colCompare});
-            dataGridViewCellStyle2.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle2.BackColor = System.Drawing.SystemColors.Window;
-            dataGridViewCellStyle2.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            dataGridViewCellStyle2.ForeColor = System.Drawing.SystemColors.ControlText;
-            dataGridViewCellStyle2.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-            dataGridViewCellStyle2.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-            dataGridViewCellStyle2.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
-            this.gvHistory.DefaultCellStyle = dataGridViewCellStyle2;
+            dataGridViewCellStyle4.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle4.BackColor = System.Drawing.SystemColors.Window;
+            dataGridViewCellStyle4.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            dataGridViewCellStyle4.ForeColor = System.Drawing.SystemColors.ControlText;
+            dataGridViewCellStyle4.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle4.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle4.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
+            this.gvHistory.DefaultCellStyle = dataGridViewCellStyle4;
             this.gvHistory.Dock = System.Windows.Forms.DockStyle.Fill;
             this.gvHistory.Location = new System.Drawing.Point(0, 25);
             this.gvHistory.MultiSelect = false;
@@ -1620,6 +1624,25 @@
             this.resourceGovernor1.Size = new System.Drawing.Size(1625, 1240);
             this.resourceGovernor1.TabIndex = 0;
             // 
+            // tabAzureDBesourceGovernance
+            // 
+            this.tabAzureDBesourceGovernance.Controls.Add(this.azureDBResourceGovernance1);
+            this.tabAzureDBesourceGovernance.Location = new System.Drawing.Point(4, 25);
+            this.tabAzureDBesourceGovernance.Name = "tabAzureDBesourceGovernance";
+            this.tabAzureDBesourceGovernance.Padding = new System.Windows.Forms.Padding(3);
+            this.tabAzureDBesourceGovernance.Size = new System.Drawing.Size(1631, 1246);
+            this.tabAzureDBesourceGovernance.TabIndex = 38;
+            this.tabAzureDBesourceGovernance.Text = "Azure Resource Governance";
+            this.tabAzureDBesourceGovernance.UseVisualStyleBackColor = true;
+            // 
+            // azureDBResourceGovernance1
+            // 
+            this.azureDBResourceGovernance1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.azureDBResourceGovernance1.Location = new System.Drawing.Point(3, 3);
+            this.azureDBResourceGovernance1.Name = "azureDBResourceGovernance1";
+            this.azureDBResourceGovernance1.Size = new System.Drawing.Size(1625, 1240);
+            this.azureDBResourceGovernance1.TabIndex = 0;
+            // 
             // dataGridViewTextBoxColumn1
             // 
             this.dataGridViewTextBoxColumn1.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.DisplayedCells;
@@ -1844,24 +1867,21 @@
             this.dataGridViewTextBoxColumn23.ReadOnly = true;
             this.dataGridViewTextBoxColumn23.Width = 94;
             // 
-            // tabAzureDBesourceGovernance
+            // daysToolStripMenuItem
             // 
-            this.tabAzureDBesourceGovernance.Controls.Add(this.azureDBResourceGovernance1);
-            this.tabAzureDBesourceGovernance.Location = new System.Drawing.Point(4, 25);
-            this.tabAzureDBesourceGovernance.Name = "tabAzureDBesourceGovernance";
-            this.tabAzureDBesourceGovernance.Padding = new System.Windows.Forms.Padding(3);
-            this.tabAzureDBesourceGovernance.Size = new System.Drawing.Size(1631, 1246);
-            this.tabAzureDBesourceGovernance.TabIndex = 38;
-            this.tabAzureDBesourceGovernance.Text = "Azure Resource Governance";
-            this.tabAzureDBesourceGovernance.UseVisualStyleBackColor = true;
+            this.daysToolStripMenuItem.Name = "daysToolStripMenuItem";
+            this.daysToolStripMenuItem.Size = new System.Drawing.Size(224, 28);
+            this.daysToolStripMenuItem.Tag = "2880";
+            this.daysToolStripMenuItem.Text = "2 Days";
+            this.daysToolStripMenuItem.Click += new System.EventHandler(this.tsTime_Click);
             // 
-            // azureDBResourceGovernance1
+            // daysToolStripMenuItem1
             // 
-            this.azureDBResourceGovernance1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.azureDBResourceGovernance1.Location = new System.Drawing.Point(3, 3);
-            this.azureDBResourceGovernance1.Name = "azureDBResourceGovernance1";
-            this.azureDBResourceGovernance1.Size = new System.Drawing.Size(1625, 1240);
-            this.azureDBResourceGovernance1.TabIndex = 0;
+            this.daysToolStripMenuItem1.Name = "daysToolStripMenuItem1";
+            this.daysToolStripMenuItem1.Size = new System.Drawing.Size(224, 28);
+            this.daysToolStripMenuItem1.Tag = "4320";
+            this.daysToolStripMenuItem1.Text = "3 Days";
+            this.daysToolStripMenuItem1.Click += new System.EventHandler(this.tsTime_Click);
             // 
             // Main
             // 
@@ -2091,5 +2111,7 @@
         private Changes.ResourceGovernor resourceGovernor1;
         private System.Windows.Forms.TabPage tabAzureDBesourceGovernance;
         private Changes.AzureDBResourceGovernance azureDBResourceGovernance1;
+        private System.Windows.Forms.ToolStripMenuItem daysToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem daysToolStripMenuItem1;
     }
 }
