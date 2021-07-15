@@ -54,22 +54,18 @@
             this.cboServiceCredentials = new System.Windows.Forms.ComboBox();
             this.lblServiceCredentials = new System.Windows.Forms.Label();
             this.bttnCancel = new System.Windows.Forms.Button();
-            this.tabControl1 = new System.Windows.Forms.TabControl();
-            this.tabPage3 = new System.Windows.Forms.TabPage();
-            this.bttnS3 = new System.Windows.Forms.Button();
-            this.bttnDestFolder = new System.Windows.Forms.Button();
+            this.tab1 = new System.Windows.Forms.TabControl();
+            this.tabDest = new System.Windows.Forms.TabPage();
+            this.lnkSourceConnections = new System.Windows.Forms.LinkLabel();
+            this.lnkServiceStatus = new System.Windows.Forms.LinkLabel();
             this.chkAutoUpgradeRepoDB = new System.Windows.Forms.CheckBox();
-            this.bttnConnect = new System.Windows.Forms.Button();
             this.lblVersionInfo = new System.Windows.Forms.Label();
             this.bttnDeployDatabase = new System.Windows.Forms.Button();
-            this.chkCustomizeMaintenanceCron = new System.Windows.Forms.CheckBox();
             this.label7 = new System.Windows.Forms.Label();
             this.txtDestination = new System.Windows.Forms.TextBox();
-            this.tabPage1 = new System.Windows.Forms.TabPage();
-            this.tabSchemaSnapshots = new System.Windows.Forms.TabControl();
+            this.tabSource = new System.Windows.Forms.TabPage();
+            this.tabSrcOptions = new System.Windows.Forms.TabControl();
             this.tabGeneral = new System.Windows.Forms.TabPage();
-            this.bttnSrcFolder = new System.Windows.Forms.Button();
-            this.bttnConnectSource = new System.Windows.Forms.Button();
             this.tabExtendedEvents = new System.Windows.Forms.TabPage();
             this.chkDualSession = new System.Windows.Forms.CheckBox();
             this.label9 = new System.Windows.Forms.Label();
@@ -77,7 +73,7 @@
             this.chkPersistXESession = new System.Windows.Forms.CheckBox();
             this.lblSlow = new System.Windows.Forms.Label();
             this.numSlowQueryThreshold = new System.Windows.Forms.NumericUpDown();
-            this.tabPage7 = new System.Windows.Forms.TabPage();
+            this.tabSchemaSnapshots = new System.Windows.Forms.TabPage();
             this.lnkCronBuilder = new System.Windows.Forms.LinkLabel();
             this.chkSchemaSnapshotOnStart = new System.Windows.Forms.CheckBox();
             this.label8 = new System.Windows.Forms.Label();
@@ -85,7 +81,7 @@
             this.label2 = new System.Windows.Forms.Label();
             this.txtSnapshotDBs = new System.Windows.Forms.TextBox();
             this.bttnRemove = new System.Windows.Forms.Button();
-            this.tabPage2 = new System.Windows.Forms.TabPage();
+            this.tabAWSCreds = new System.Windows.Forms.TabPage();
             this.tabAzureDB = new System.Windows.Forms.TabPage();
             this.lblHHmm = new System.Windows.Forms.Label();
             this.numAzureScanInterval = new System.Windows.Forms.NumericUpDown();
@@ -94,23 +90,39 @@
             this.label10 = new System.Windows.Forms.Label();
             this.bttnScanNow = new System.Windows.Forms.Button();
             this.chkScanAzureDB = new System.Windows.Forms.CheckBox();
-            this.tabPage4 = new System.Windows.Forms.TabPage();
+            this.tabService = new System.Windows.Forms.TabPage();
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
             this.button1 = new System.Windows.Forms.Button();
+            this.lblSourceConnections = new System.Windows.Forms.Label();
+            this.textBox1 = new System.Windows.Forms.TextBox();
+            this.lnkPermissions = new System.Windows.Forms.LinkLabel();
+            this.bttnS3 = new System.Windows.Forms.Button();
+            this.bttnDestFolder = new System.Windows.Forms.Button();
+            this.bttnConnect = new System.Windows.Forms.Button();
             this.bttnS3Src = new System.Windows.Forms.Button();
+            this.bttnSrcFolder = new System.Windows.Forms.Button();
+            this.bttnConnectSource = new System.Windows.Forms.Button();
+            this.pictureBox1 = new System.Windows.Forms.PictureBox();
+            this.label12 = new System.Windows.Forms.Label();
+            this.pnlExtendedEvents = new System.Windows.Forms.Panel();
+            this.pnlSchemaSnapshots = new System.Windows.Forms.Panel();
+            this.cboCron = new System.Windows.Forms.ComboBox();
             ((System.ComponentModel.ISupportInitialize)(this.errorProvider1)).BeginInit();
-            this.tabControl1.SuspendLayout();
-            this.tabPage3.SuspendLayout();
-            this.tabPage1.SuspendLayout();
-            this.tabSchemaSnapshots.SuspendLayout();
+            this.tab1.SuspendLayout();
+            this.tabDest.SuspendLayout();
+            this.tabSource.SuspendLayout();
+            this.tabSrcOptions.SuspendLayout();
             this.tabGeneral.SuspendLayout();
             this.tabExtendedEvents.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.numSlowQueryThreshold)).BeginInit();
-            this.tabPage7.SuspendLayout();
-            this.tabPage2.SuspendLayout();
+            this.tabSchemaSnapshots.SuspendLayout();
+            this.tabAWSCreds.SuspendLayout();
             this.tabAzureDB.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.numAzureScanInterval)).BeginInit();
-            this.tabPage4.SuspendLayout();
+            this.tabService.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
+            this.pnlExtendedEvents.SuspendLayout();
+            this.pnlSchemaSnapshots.SuspendLayout();
             this.SuspendLayout();
             // 
             // cboSource
@@ -121,8 +133,10 @@
             this.cboSource.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.cboSource.Name = "cboSource";
             this.cboSource.Size = new System.Drawing.Size(617, 24);
+            this.cboSource.Sorted = true;
             this.cboSource.TabIndex = 0;
             this.cboSource.SelectedIndexChanged += new System.EventHandler(this.cboSource_SelectedIndexChanged);
+            this.cboSource.Validated += new System.EventHandler(this.cboSource_Validated);
             // 
             // label1
             // 
@@ -364,68 +378,72 @@
             this.bttnCancel.UseVisualStyleBackColor = true;
             this.bttnCancel.Click += new System.EventHandler(this.bttnCancel_Click);
             // 
-            // tabControl1
+            // tab1
             // 
-            this.tabControl1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            this.tab1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.tabControl1.Controls.Add(this.tabPage3);
-            this.tabControl1.Controls.Add(this.tabPage1);
-            this.tabControl1.Controls.Add(this.tabPage2);
-            this.tabControl1.Controls.Add(this.tabAzureDB);
-            this.tabControl1.Controls.Add(this.tabPage4);
-            this.tabControl1.Location = new System.Drawing.Point(12, 25);
-            this.tabControl1.Name = "tabControl1";
-            this.tabControl1.SelectedIndex = 0;
-            this.tabControl1.Size = new System.Drawing.Size(791, 310);
-            this.tabControl1.TabIndex = 22;
+            this.tab1.Controls.Add(this.tabDest);
+            this.tab1.Controls.Add(this.tabSource);
+            this.tab1.Controls.Add(this.tabAWSCreds);
+            this.tab1.Controls.Add(this.tabAzureDB);
+            this.tab1.Controls.Add(this.tabService);
+            this.tab1.Location = new System.Drawing.Point(12, 25);
+            this.tab1.Name = "tab1";
+            this.tab1.SelectedIndex = 0;
+            this.tab1.Size = new System.Drawing.Size(791, 310);
+            this.tab1.TabIndex = 22;
             // 
-            // tabPage3
+            // tabDest
             // 
-            this.tabPage3.Controls.Add(this.bttnS3);
-            this.tabPage3.Controls.Add(this.bttnDestFolder);
-            this.tabPage3.Controls.Add(this.chkAutoUpgradeRepoDB);
-            this.tabPage3.Controls.Add(this.bttnConnect);
-            this.tabPage3.Controls.Add(this.lblVersionInfo);
-            this.tabPage3.Controls.Add(this.bttnDeployDatabase);
-            this.tabPage3.Controls.Add(this.chkCustomizeMaintenanceCron);
-            this.tabPage3.Controls.Add(this.label7);
-            this.tabPage3.Controls.Add(this.txtDestination);
-            this.tabPage3.Location = new System.Drawing.Point(4, 25);
-            this.tabPage3.Name = "tabPage3";
-            this.tabPage3.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage3.Size = new System.Drawing.Size(783, 281);
-            this.tabPage3.TabIndex = 2;
-            this.tabPage3.Text = "Destination:";
-            this.tabPage3.UseVisualStyleBackColor = true;
+            this.tabDest.Controls.Add(this.lnkSourceConnections);
+            this.tabDest.Controls.Add(this.lnkServiceStatus);
+            this.tabDest.Controls.Add(this.bttnS3);
+            this.tabDest.Controls.Add(this.bttnDestFolder);
+            this.tabDest.Controls.Add(this.chkAutoUpgradeRepoDB);
+            this.tabDest.Controls.Add(this.bttnConnect);
+            this.tabDest.Controls.Add(this.lblVersionInfo);
+            this.tabDest.Controls.Add(this.bttnDeployDatabase);
+            this.tabDest.Controls.Add(this.label7);
+            this.tabDest.Controls.Add(this.txtDestination);
+            this.tabDest.Location = new System.Drawing.Point(4, 25);
+            this.tabDest.Name = "tabDest";
+            this.tabDest.Padding = new System.Windows.Forms.Padding(3);
+            this.tabDest.Size = new System.Drawing.Size(783, 281);
+            this.tabDest.TabIndex = 2;
+            this.tabDest.Text = "Destination:";
+            this.tabDest.UseVisualStyleBackColor = true;
             // 
-            // bttnS3
+            // lnkSourceConnections
             // 
-            this.bttnS3.Image = global::DBADashServiceConfig.Properties.Resources.Arch_Amazon_Simple_Storage_Service_16;
-            this.bttnS3.Location = new System.Drawing.Point(727, 19);
-            this.bttnS3.Name = "bttnS3";
-            this.bttnS3.Size = new System.Drawing.Size(28, 23);
-            this.bttnS3.TabIndex = 10;
-            this.toolTip1.SetToolTip(this.bttnS3, "Choose a S3 bucket destination");
-            this.bttnS3.UseVisualStyleBackColor = true;
-            this.bttnS3.Click += new System.EventHandler(this.bttnS3_Click);
+            this.lnkSourceConnections.AutoSize = true;
+            this.lnkSourceConnections.Font = new System.Drawing.Font("Arial", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lnkSourceConnections.LinkColor = System.Drawing.Color.Black;
+            this.lnkSourceConnections.Location = new System.Drawing.Point(6, 190);
+            this.lnkSourceConnections.Name = "lnkSourceConnections";
+            this.lnkSourceConnections.Size = new System.Drawing.Size(140, 16);
+            this.lnkSourceConnections.TabIndex = 18;
+            this.lnkSourceConnections.TabStop = true;
+            this.lnkSourceConnections.Text = "Source Connections:";
+            this.lnkSourceConnections.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.lnkSourceConnections_LinkClicked);
             // 
-            // bttnDestFolder
+            // lnkServiceStatus
             // 
-            this.bttnDestFolder.Image = global::DBADashServiceConfig.Properties.Resources.FolderOpened_16x;
-            this.bttnDestFolder.Location = new System.Drawing.Point(693, 20);
-            this.bttnDestFolder.Name = "bttnDestFolder";
-            this.bttnDestFolder.Size = new System.Drawing.Size(28, 23);
-            this.bttnDestFolder.TabIndex = 9;
-            this.toolTip1.SetToolTip(this.bttnDestFolder, "Choose a folder destination path");
-            this.bttnDestFolder.UseVisualStyleBackColor = true;
-            this.bttnDestFolder.Click += new System.EventHandler(this.bttnDestFolder_Click);
+            this.lnkServiceStatus.AutoSize = true;
+            this.lnkServiceStatus.Font = new System.Drawing.Font("Arial", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lnkServiceStatus.Location = new System.Drawing.Point(6, 161);
+            this.lnkServiceStatus.Name = "lnkServiceStatus";
+            this.lnkServiceStatus.Size = new System.Drawing.Size(103, 16);
+            this.lnkServiceStatus.TabIndex = 16;
+            this.lnkServiceStatus.TabStop = true;
+            this.lnkServiceStatus.Text = "Service Status:";
+            this.lnkServiceStatus.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.lnkServiceStatus_LinkClicked);
             // 
             // chkAutoUpgradeRepoDB
             // 
             this.chkAutoUpgradeRepoDB.AutoSize = true;
             this.chkAutoUpgradeRepoDB.Checked = true;
             this.chkAutoUpgradeRepoDB.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.chkAutoUpgradeRepoDB.Location = new System.Drawing.Point(103, 76);
+            this.chkAutoUpgradeRepoDB.Location = new System.Drawing.Point(103, 48);
             this.chkAutoUpgradeRepoDB.Name = "chkAutoUpgradeRepoDB";
             this.chkAutoUpgradeRepoDB.Size = new System.Drawing.Size(307, 21);
             this.chkAutoUpgradeRepoDB.TabIndex = 8;
@@ -433,29 +451,19 @@
             this.chkAutoUpgradeRepoDB.UseVisualStyleBackColor = true;
             this.chkAutoUpgradeRepoDB.CheckedChanged += new System.EventHandler(this.chkAutoUpgradeRepoDB_CheckedChanged);
             // 
-            // bttnConnect
-            // 
-            this.bttnConnect.Image = global::DBADashServiceConfig.Properties.Resources.Connect_16x;
-            this.bttnConnect.Location = new System.Drawing.Point(659, 20);
-            this.bttnConnect.Name = "bttnConnect";
-            this.bttnConnect.Size = new System.Drawing.Size(28, 23);
-            this.bttnConnect.TabIndex = 7;
-            this.toolTip1.SetToolTip(this.bttnConnect, "Connect to a SQL Instance that will store your DBA Dash repository database");
-            this.bttnConnect.UseVisualStyleBackColor = true;
-            this.bttnConnect.Click += new System.EventHandler(this.bttnConnect_Click);
-            // 
             // lblVersionInfo
             // 
             this.lblVersionInfo.AutoSize = true;
-            this.lblVersionInfo.Location = new System.Drawing.Point(103, 150);
+            this.lblVersionInfo.Font = new System.Drawing.Font("Arial", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblVersionInfo.Location = new System.Drawing.Point(6, 131);
             this.lblVersionInfo.Name = "lblVersionInfo";
-            this.lblVersionInfo.Size = new System.Drawing.Size(93, 17);
+            this.lblVersionInfo.Size = new System.Drawing.Size(93, 16);
             this.lblVersionInfo.TabIndex = 6;
             this.lblVersionInfo.Text = "version info...";
             // 
             // bttnDeployDatabase
             // 
-            this.bttnDeployDatabase.Location = new System.Drawing.Point(103, 111);
+            this.bttnDeployDatabase.Location = new System.Drawing.Point(103, 75);
             this.bttnDeployDatabase.Name = "bttnDeployDatabase";
             this.bttnDeployDatabase.Size = new System.Drawing.Size(214, 32);
             this.bttnDeployDatabase.TabIndex = 5;
@@ -463,17 +471,6 @@
             this.toolTip1.SetToolTip(this.bttnDeployDatabase, "Click to create/upgrade your DBA Dash repository database");
             this.bttnDeployDatabase.UseVisualStyleBackColor = true;
             this.bttnDeployDatabase.Click += new System.EventHandler(this.bttnDeployDatabase_Click);
-            // 
-            // chkCustomizeMaintenanceCron
-            // 
-            this.chkCustomizeMaintenanceCron.AutoSize = true;
-            this.chkCustomizeMaintenanceCron.Location = new System.Drawing.Point(103, 49);
-            this.chkCustomizeMaintenanceCron.Name = "chkCustomizeMaintenanceCron";
-            this.chkCustomizeMaintenanceCron.Size = new System.Drawing.Size(214, 21);
-            this.chkCustomizeMaintenanceCron.TabIndex = 4;
-            this.chkCustomizeMaintenanceCron.Text = "Customize Maintenance Cron";
-            this.chkCustomizeMaintenanceCron.UseVisualStyleBackColor = true;
-            this.chkCustomizeMaintenanceCron.CheckedChanged += new System.EventHandler(this.chkCustomizeMaintenanceCron_CheckedChanged);
             // 
             // label7
             // 
@@ -492,30 +489,31 @@
             this.txtDestination.TabIndex = 1;
             this.txtDestination.Validated += new System.EventHandler(this.txtDestination_Validated);
             // 
-            // tabPage1
+            // tabSource
             // 
-            this.tabPage1.Controls.Add(this.tabSchemaSnapshots);
-            this.tabPage1.Controls.Add(this.bttnRemove);
-            this.tabPage1.Controls.Add(this.bttnAdd);
-            this.tabPage1.Location = new System.Drawing.Point(4, 25);
-            this.tabPage1.Name = "tabPage1";
-            this.tabPage1.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage1.Size = new System.Drawing.Size(783, 281);
-            this.tabPage1.TabIndex = 0;
-            this.tabPage1.Text = "Source";
-            this.tabPage1.UseVisualStyleBackColor = true;
+            this.tabSource.Controls.Add(this.lblSourceConnections);
+            this.tabSource.Controls.Add(this.tabSrcOptions);
+            this.tabSource.Controls.Add(this.bttnRemove);
+            this.tabSource.Controls.Add(this.bttnAdd);
+            this.tabSource.Location = new System.Drawing.Point(4, 25);
+            this.tabSource.Name = "tabSource";
+            this.tabSource.Padding = new System.Windows.Forms.Padding(3);
+            this.tabSource.Size = new System.Drawing.Size(783, 281);
+            this.tabSource.TabIndex = 0;
+            this.tabSource.Text = "Source";
+            this.tabSource.UseVisualStyleBackColor = true;
             // 
-            // tabSchemaSnapshots
+            // tabSrcOptions
             // 
-            this.tabSchemaSnapshots.Controls.Add(this.tabGeneral);
-            this.tabSchemaSnapshots.Controls.Add(this.tabExtendedEvents);
-            this.tabSchemaSnapshots.Controls.Add(this.tabPage7);
-            this.tabSchemaSnapshots.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.tabSchemaSnapshots.Location = new System.Drawing.Point(6, 16);
-            this.tabSchemaSnapshots.Name = "tabSchemaSnapshots";
-            this.tabSchemaSnapshots.SelectedIndex = 0;
-            this.tabSchemaSnapshots.Size = new System.Drawing.Size(743, 177);
-            this.tabSchemaSnapshots.TabIndex = 21;
+            this.tabSrcOptions.Controls.Add(this.tabGeneral);
+            this.tabSrcOptions.Controls.Add(this.tabExtendedEvents);
+            this.tabSrcOptions.Controls.Add(this.tabSchemaSnapshots);
+            this.tabSrcOptions.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.tabSrcOptions.Location = new System.Drawing.Point(6, 16);
+            this.tabSrcOptions.Name = "tabSrcOptions";
+            this.tabSrcOptions.SelectedIndex = 0;
+            this.tabSrcOptions.Size = new System.Drawing.Size(743, 177);
+            this.tabSrcOptions.TabIndex = 21;
             // 
             // tabGeneral
             // 
@@ -534,36 +532,9 @@
             this.tabGeneral.Text = "General";
             this.tabGeneral.UseVisualStyleBackColor = true;
             // 
-            // bttnSrcFolder
-            // 
-            this.bttnSrcFolder.Image = global::DBADashServiceConfig.Properties.Resources.FolderOpened_16x;
-            this.bttnSrcFolder.Location = new System.Drawing.Point(663, 27);
-            this.bttnSrcFolder.Name = "bttnSrcFolder";
-            this.bttnSrcFolder.Size = new System.Drawing.Size(28, 23);
-            this.bttnSrcFolder.TabIndex = 10;
-            this.toolTip1.SetToolTip(this.bttnSrcFolder, "Choose a folder source path");
-            this.bttnSrcFolder.UseVisualStyleBackColor = true;
-            this.bttnSrcFolder.Click += new System.EventHandler(this.bttnSrcFolder_Click_1);
-            // 
-            // bttnConnectSource
-            // 
-            this.bttnConnectSource.Image = global::DBADashServiceConfig.Properties.Resources.Connect_16x;
-            this.bttnConnectSource.Location = new System.Drawing.Point(629, 27);
-            this.bttnConnectSource.Name = "bttnConnectSource";
-            this.bttnConnectSource.Size = new System.Drawing.Size(28, 23);
-            this.bttnConnectSource.TabIndex = 8;
-            this.toolTip1.SetToolTip(this.bttnConnectSource, "Connect to a SQL Instance to monitor with DBA Dash");
-            this.bttnConnectSource.UseVisualStyleBackColor = true;
-            this.bttnConnectSource.Click += new System.EventHandler(this.bttnConnectSource_Click);
-            // 
             // tabExtendedEvents
             // 
-            this.tabExtendedEvents.Controls.Add(this.chkDualSession);
-            this.tabExtendedEvents.Controls.Add(this.label9);
-            this.tabExtendedEvents.Controls.Add(this.chkSlowQueryThreshold);
-            this.tabExtendedEvents.Controls.Add(this.chkPersistXESession);
-            this.tabExtendedEvents.Controls.Add(this.lblSlow);
-            this.tabExtendedEvents.Controls.Add(this.numSlowQueryThreshold);
+            this.tabExtendedEvents.Controls.Add(this.pnlExtendedEvents);
             this.tabExtendedEvents.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.tabExtendedEvents.Location = new System.Drawing.Point(4, 25);
             this.tabExtendedEvents.Name = "tabExtendedEvents";
@@ -576,10 +547,8 @@
             // chkDualSession
             // 
             this.chkDualSession.AutoSize = true;
-            this.chkDualSession.Checked = true;
-            this.chkDualSession.CheckState = System.Windows.Forms.CheckState.Checked;
             this.chkDualSession.Enabled = false;
-            this.chkDualSession.Location = new System.Drawing.Point(6, 60);
+            this.chkDualSession.Location = new System.Drawing.Point(6, 57);
             this.chkDualSession.Name = "chkDualSession";
             this.chkDualSession.Size = new System.Drawing.Size(138, 21);
             this.chkDualSession.TabIndex = 17;
@@ -591,7 +560,7 @@
             // label9
             // 
             this.label9.AutoSize = true;
-            this.label9.Location = new System.Drawing.Point(6, 91);
+            this.label9.Location = new System.Drawing.Point(6, 88);
             this.label9.Name = "label9";
             this.label9.Size = new System.Drawing.Size(108, 17);
             this.label9.TabIndex = 16;
@@ -600,7 +569,7 @@
             // chkSlowQueryThreshold
             // 
             this.chkSlowQueryThreshold.AutoSize = true;
-            this.chkSlowQueryThreshold.Location = new System.Drawing.Point(6, 6);
+            this.chkSlowQueryThreshold.Location = new System.Drawing.Point(6, 3);
             this.chkSlowQueryThreshold.Name = "chkSlowQueryThreshold";
             this.chkSlowQueryThreshold.Size = new System.Drawing.Size(280, 21);
             this.chkSlowQueryThreshold.TabIndex = 13;
@@ -612,7 +581,7 @@
             // 
             this.chkPersistXESession.AutoSize = true;
             this.chkPersistXESession.Enabled = false;
-            this.chkPersistXESession.Location = new System.Drawing.Point(6, 33);
+            this.chkPersistXESession.Location = new System.Drawing.Point(6, 30);
             this.chkPersistXESession.Name = "chkPersistXESession";
             this.chkPersistXESession.Size = new System.Drawing.Size(372, 21);
             this.chkPersistXESession.TabIndex = 15;
@@ -622,7 +591,7 @@
             // lblSlow
             // 
             this.lblSlow.AutoSize = true;
-            this.lblSlow.Location = new System.Drawing.Point(6, 119);
+            this.lblSlow.Location = new System.Drawing.Point(6, 116);
             this.lblSlow.Name = "lblSlow";
             this.lblSlow.Size = new System.Drawing.Size(557, 17);
             this.lblSlow.TabIndex = 14;
@@ -637,7 +606,7 @@
             0,
             0,
             0});
-            this.numSlowQueryThreshold.Location = new System.Drawing.Point(117, 89);
+            this.numSlowQueryThreshold.Location = new System.Drawing.Point(117, 86);
             this.numSlowQueryThreshold.Maximum = new decimal(new int[] {
             604800000,
             0,
@@ -657,26 +626,21 @@
             0,
             -2147483648});
             // 
-            // tabPage7
+            // tabSchemaSnapshots
             // 
-            this.tabPage7.Controls.Add(this.lnkCronBuilder);
-            this.tabPage7.Controls.Add(this.chkSchemaSnapshotOnStart);
-            this.tabPage7.Controls.Add(this.label8);
-            this.tabPage7.Controls.Add(this.txtSnapshotCron);
-            this.tabPage7.Controls.Add(this.label2);
-            this.tabPage7.Controls.Add(this.txtSnapshotDBs);
-            this.tabPage7.Location = new System.Drawing.Point(4, 25);
-            this.tabPage7.Name = "tabPage7";
-            this.tabPage7.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage7.Size = new System.Drawing.Size(735, 148);
-            this.tabPage7.TabIndex = 2;
-            this.tabPage7.Text = "Schema Snapshots";
-            this.tabPage7.UseVisualStyleBackColor = true;
+            this.tabSchemaSnapshots.Controls.Add(this.pnlSchemaSnapshots);
+            this.tabSchemaSnapshots.Location = new System.Drawing.Point(4, 25);
+            this.tabSchemaSnapshots.Name = "tabSchemaSnapshots";
+            this.tabSchemaSnapshots.Padding = new System.Windows.Forms.Padding(3);
+            this.tabSchemaSnapshots.Size = new System.Drawing.Size(735, 148);
+            this.tabSchemaSnapshots.TabIndex = 2;
+            this.tabSchemaSnapshots.Text = "Schema Snapshots";
+            this.tabSchemaSnapshots.UseVisualStyleBackColor = true;
             // 
             // lnkCronBuilder
             // 
             this.lnkCronBuilder.AutoSize = true;
-            this.lnkCronBuilder.Location = new System.Drawing.Point(197, 83);
+            this.lnkCronBuilder.Location = new System.Drawing.Point(299, 85);
             this.lnkCronBuilder.Name = "lnkCronBuilder";
             this.lnkCronBuilder.Size = new System.Drawing.Size(136, 17);
             this.lnkCronBuilder.TabIndex = 22;
@@ -688,7 +652,7 @@
             // chkSchemaSnapshotOnStart
             // 
             this.chkSchemaSnapshotOnStart.AutoSize = true;
-            this.chkSchemaSnapshotOnStart.Location = new System.Drawing.Point(6, 107);
+            this.chkSchemaSnapshotOnStart.Location = new System.Drawing.Point(11, 111);
             this.chkSchemaSnapshotOnStart.Name = "chkSchemaSnapshotOnStart";
             this.chkSchemaSnapshotOnStart.Size = new System.Drawing.Size(272, 21);
             this.chkSchemaSnapshotOnStart.TabIndex = 21;
@@ -698,7 +662,7 @@
             // label8
             // 
             this.label8.AutoSize = true;
-            this.label8.Location = new System.Drawing.Point(3, 5);
+            this.label8.Location = new System.Drawing.Point(8, 9);
             this.label8.Name = "label8";
             this.label8.Size = new System.Drawing.Size(199, 17);
             this.label8.TabIndex = 20;
@@ -706,16 +670,17 @@
             // 
             // txtSnapshotCron
             // 
-            this.txtSnapshotCron.Location = new System.Drawing.Point(6, 78);
+            this.txtSnapshotCron.Location = new System.Drawing.Point(11, 82);
             this.txtSnapshotCron.Name = "txtSnapshotCron";
             this.txtSnapshotCron.Size = new System.Drawing.Size(172, 22);
             this.txtSnapshotCron.TabIndex = 19;
             this.txtSnapshotCron.Text = "0 0 0 1/1 * ? *";
+            this.txtSnapshotCron.TextChanged += new System.EventHandler(this.txtSnapshotCron_TextChanged);
             // 
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(4, 58);
+            this.label2.Location = new System.Drawing.Point(9, 62);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(161, 17);
             this.label2.TabIndex = 18;
@@ -723,7 +688,7 @@
             // 
             // txtSnapshotDBs
             // 
-            this.txtSnapshotDBs.Location = new System.Drawing.Point(6, 25);
+            this.txtSnapshotDBs.Location = new System.Drawing.Point(11, 29);
             this.txtSnapshotDBs.Name = "txtSnapshotDBs";
             this.txtSnapshotDBs.Size = new System.Drawing.Size(557, 22);
             this.txtSnapshotDBs.TabIndex = 17;
@@ -739,21 +704,22 @@
             this.bttnRemove.UseVisualStyleBackColor = true;
             this.bttnRemove.Click += new System.EventHandler(this.bttnRemove_Click);
             // 
-            // tabPage2
+            // tabAWSCreds
             // 
-            this.tabPage2.Controls.Add(this.label4);
-            this.tabPage2.Controls.Add(this.label6);
-            this.tabPage2.Controls.Add(this.txtAWSProfile);
-            this.tabPage2.Controls.Add(this.txtAccessKey);
-            this.tabPage2.Controls.Add(this.label3);
-            this.tabPage2.Controls.Add(this.txtSecretKey);
-            this.tabPage2.Location = new System.Drawing.Point(4, 25);
-            this.tabPage2.Name = "tabPage2";
-            this.tabPage2.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage2.Size = new System.Drawing.Size(783, 281);
-            this.tabPage2.TabIndex = 1;
-            this.tabPage2.Text = "AWS Credentials";
-            this.tabPage2.UseVisualStyleBackColor = true;
+            this.tabAWSCreds.Controls.Add(this.label12);
+            this.tabAWSCreds.Controls.Add(this.label4);
+            this.tabAWSCreds.Controls.Add(this.label6);
+            this.tabAWSCreds.Controls.Add(this.txtAWSProfile);
+            this.tabAWSCreds.Controls.Add(this.txtAccessKey);
+            this.tabAWSCreds.Controls.Add(this.label3);
+            this.tabAWSCreds.Controls.Add(this.txtSecretKey);
+            this.tabAWSCreds.Location = new System.Drawing.Point(4, 25);
+            this.tabAWSCreds.Name = "tabAWSCreds";
+            this.tabAWSCreds.Padding = new System.Windows.Forms.Padding(3);
+            this.tabAWSCreds.Size = new System.Drawing.Size(783, 281);
+            this.tabAWSCreds.TabIndex = 1;
+            this.tabAWSCreds.Text = "AWS Credentials";
+            this.tabAWSCreds.UseVisualStyleBackColor = true;
             // 
             // tabAzureDB
             // 
@@ -857,23 +823,26 @@
             this.chkScanAzureDB.UseVisualStyleBackColor = true;
             this.chkScanAzureDB.CheckedChanged += new System.EventHandler(this.chkScanAzureDB_CheckedChanged);
             // 
-            // tabPage4
+            // tabService
             // 
-            this.tabPage4.Controls.Add(this.cboServiceCredentials);
-            this.tabPage4.Controls.Add(this.lblServiceCredentials);
-            this.tabPage4.Controls.Add(this.lblServiceStatus);
-            this.tabPage4.Controls.Add(this.bttnRefresh);
-            this.tabPage4.Controls.Add(this.bttnUninstall);
-            this.tabPage4.Controls.Add(this.bttnStart);
-            this.tabPage4.Controls.Add(this.bttnInstall);
-            this.tabPage4.Controls.Add(this.bttnStop);
-            this.tabPage4.Location = new System.Drawing.Point(4, 25);
-            this.tabPage4.Name = "tabPage4";
-            this.tabPage4.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage4.Size = new System.Drawing.Size(783, 281);
-            this.tabPage4.TabIndex = 3;
-            this.tabPage4.Text = "Service";
-            this.tabPage4.UseVisualStyleBackColor = true;
+            this.tabService.Controls.Add(this.pictureBox1);
+            this.tabService.Controls.Add(this.lnkPermissions);
+            this.tabService.Controls.Add(this.textBox1);
+            this.tabService.Controls.Add(this.cboServiceCredentials);
+            this.tabService.Controls.Add(this.lblServiceCredentials);
+            this.tabService.Controls.Add(this.lblServiceStatus);
+            this.tabService.Controls.Add(this.bttnRefresh);
+            this.tabService.Controls.Add(this.bttnUninstall);
+            this.tabService.Controls.Add(this.bttnStart);
+            this.tabService.Controls.Add(this.bttnInstall);
+            this.tabService.Controls.Add(this.bttnStop);
+            this.tabService.Location = new System.Drawing.Point(4, 25);
+            this.tabService.Name = "tabService";
+            this.tabService.Padding = new System.Windows.Forms.Padding(3);
+            this.tabService.Size = new System.Drawing.Size(783, 281);
+            this.tabService.TabIndex = 3;
+            this.tabService.Text = "Service";
+            this.tabService.UseVisualStyleBackColor = true;
             // 
             // button1
             // 
@@ -883,6 +852,70 @@
             this.button1.TabIndex = 10;
             this.toolTip1.SetToolTip(this.button1, "Choose a folder destination path");
             this.button1.UseVisualStyleBackColor = true;
+            // 
+            // lblSourceConnections
+            // 
+            this.lblSourceConnections.AutoSize = true;
+            this.lblSourceConnections.Location = new System.Drawing.Point(16, 227);
+            this.lblSourceConnections.Name = "lblSourceConnections";
+            this.lblSourceConnections.Size = new System.Drawing.Size(139, 17);
+            this.lblSourceConnections.TabIndex = 22;
+            this.lblSourceConnections.Text = "Source Connections:";
+            // 
+            // textBox1
+            // 
+            this.textBox1.BackColor = System.Drawing.Color.Gainsboro;
+            this.textBox1.Location = new System.Drawing.Point(10, 119);
+            this.textBox1.Multiline = true;
+            this.textBox1.Name = "textBox1";
+            this.textBox1.ReadOnly = true;
+            this.textBox1.Size = new System.Drawing.Size(756, 104);
+            this.textBox1.TabIndex = 24;
+            this.textBox1.Text = resources.GetString("textBox1.Text");
+            // 
+            // lnkPermissions
+            // 
+            this.lnkPermissions.AutoSize = true;
+            this.lnkPermissions.Location = new System.Drawing.Point(32, 230);
+            this.lnkPermissions.Name = "lnkPermissions";
+            this.lnkPermissions.Size = new System.Drawing.Size(243, 17);
+            this.lnkPermissions.TabIndex = 25;
+            this.lnkPermissions.TabStop = true;
+            this.lnkPermissions.Text = "Permissions required for service user";
+            this.lnkPermissions.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.lnkPermissions_LinkClicked);
+            // 
+            // bttnS3
+            // 
+            this.bttnS3.Image = global::DBADashServiceConfig.Properties.Resources.Arch_Amazon_Simple_Storage_Service_16;
+            this.bttnS3.Location = new System.Drawing.Point(727, 19);
+            this.bttnS3.Name = "bttnS3";
+            this.bttnS3.Size = new System.Drawing.Size(28, 23);
+            this.bttnS3.TabIndex = 10;
+            this.toolTip1.SetToolTip(this.bttnS3, "Choose a S3 bucket destination");
+            this.bttnS3.UseVisualStyleBackColor = true;
+            this.bttnS3.Click += new System.EventHandler(this.bttnS3_Click);
+            // 
+            // bttnDestFolder
+            // 
+            this.bttnDestFolder.Image = global::DBADashServiceConfig.Properties.Resources.FolderOpened_16x;
+            this.bttnDestFolder.Location = new System.Drawing.Point(693, 20);
+            this.bttnDestFolder.Name = "bttnDestFolder";
+            this.bttnDestFolder.Size = new System.Drawing.Size(28, 23);
+            this.bttnDestFolder.TabIndex = 9;
+            this.toolTip1.SetToolTip(this.bttnDestFolder, "Choose a folder destination path");
+            this.bttnDestFolder.UseVisualStyleBackColor = true;
+            this.bttnDestFolder.Click += new System.EventHandler(this.bttnDestFolder_Click);
+            // 
+            // bttnConnect
+            // 
+            this.bttnConnect.Image = global::DBADashServiceConfig.Properties.Resources.Connect_16x;
+            this.bttnConnect.Location = new System.Drawing.Point(659, 20);
+            this.bttnConnect.Name = "bttnConnect";
+            this.bttnConnect.Size = new System.Drawing.Size(28, 23);
+            this.bttnConnect.TabIndex = 7;
+            this.toolTip1.SetToolTip(this.bttnConnect, "Connect to a SQL Instance that will store your DBA Dash repository database");
+            this.bttnConnect.UseVisualStyleBackColor = true;
+            this.bttnConnect.Click += new System.EventHandler(this.bttnConnect_Click);
             // 
             // bttnS3Src
             // 
@@ -895,12 +928,91 @@
             this.bttnS3Src.UseVisualStyleBackColor = true;
             this.bttnS3Src.Click += new System.EventHandler(this.bttnS3Src_Click);
             // 
+            // bttnSrcFolder
+            // 
+            this.bttnSrcFolder.Image = global::DBADashServiceConfig.Properties.Resources.FolderOpened_16x;
+            this.bttnSrcFolder.Location = new System.Drawing.Point(663, 27);
+            this.bttnSrcFolder.Name = "bttnSrcFolder";
+            this.bttnSrcFolder.Size = new System.Drawing.Size(28, 23);
+            this.bttnSrcFolder.TabIndex = 10;
+            this.toolTip1.SetToolTip(this.bttnSrcFolder, "Choose a folder source path");
+            this.bttnSrcFolder.UseVisualStyleBackColor = true;
+            this.bttnSrcFolder.Click += new System.EventHandler(this.bttnSrcFolder_Click_1);
+            // 
+            // bttnConnectSource
+            // 
+            this.bttnConnectSource.Image = global::DBADashServiceConfig.Properties.Resources.Connect_16x;
+            this.bttnConnectSource.Location = new System.Drawing.Point(629, 27);
+            this.bttnConnectSource.Name = "bttnConnectSource";
+            this.bttnConnectSource.Size = new System.Drawing.Size(28, 23);
+            this.bttnConnectSource.TabIndex = 8;
+            this.toolTip1.SetToolTip(this.bttnConnectSource, "Connect to a SQL Instance to monitor with DBA Dash");
+            this.bttnConnectSource.UseVisualStyleBackColor = true;
+            this.bttnConnectSource.Click += new System.EventHandler(this.bttnConnectSource_Click);
+            // 
+            // pictureBox1
+            // 
+            this.pictureBox1.Image = global::DBADashServiceConfig.Properties.Resources.Information_blue_6227_16x16_cyan;
+            this.pictureBox1.Location = new System.Drawing.Point(10, 230);
+            this.pictureBox1.Name = "pictureBox1";
+            this.pictureBox1.Size = new System.Drawing.Size(16, 16);
+            this.pictureBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.AutoSize;
+            this.pictureBox1.TabIndex = 26;
+            this.pictureBox1.TabStop = false;
+            // 
+            // label12
+            // 
+            this.label12.Location = new System.Drawing.Point(20, 128);
+            this.label12.Name = "label12";
+            this.label12.Size = new System.Drawing.Size(739, 138);
+            this.label12.TabIndex = 15;
+            this.label12.Text = resources.GetString("label12.Text");
+            // 
+            // pnlExtendedEvents
+            // 
+            this.pnlExtendedEvents.Controls.Add(this.chkSlowQueryThreshold);
+            this.pnlExtendedEvents.Controls.Add(this.chkDualSession);
+            this.pnlExtendedEvents.Controls.Add(this.numSlowQueryThreshold);
+            this.pnlExtendedEvents.Controls.Add(this.label9);
+            this.pnlExtendedEvents.Controls.Add(this.lblSlow);
+            this.pnlExtendedEvents.Controls.Add(this.chkPersistXESession);
+            this.pnlExtendedEvents.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.pnlExtendedEvents.Location = new System.Drawing.Point(3, 3);
+            this.pnlExtendedEvents.Name = "pnlExtendedEvents";
+            this.pnlExtendedEvents.Size = new System.Drawing.Size(729, 142);
+            this.pnlExtendedEvents.TabIndex = 18;
+            // 
+            // pnlSchemaSnapshots
+            // 
+            this.pnlSchemaSnapshots.Controls.Add(this.cboCron);
+            this.pnlSchemaSnapshots.Controls.Add(this.label8);
+            this.pnlSchemaSnapshots.Controls.Add(this.lnkCronBuilder);
+            this.pnlSchemaSnapshots.Controls.Add(this.txtSnapshotDBs);
+            this.pnlSchemaSnapshots.Controls.Add(this.chkSchemaSnapshotOnStart);
+            this.pnlSchemaSnapshots.Controls.Add(this.label2);
+            this.pnlSchemaSnapshots.Controls.Add(this.txtSnapshotCron);
+            this.pnlSchemaSnapshots.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.pnlSchemaSnapshots.Location = new System.Drawing.Point(3, 3);
+            this.pnlSchemaSnapshots.Name = "pnlSchemaSnapshots";
+            this.pnlSchemaSnapshots.Size = new System.Drawing.Size(729, 142);
+            this.pnlSchemaSnapshots.TabIndex = 23;
+            // 
+            // cboCron
+            // 
+            this.cboCron.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cboCron.FormattingEnabled = true;
+            this.cboCron.Location = new System.Drawing.Point(189, 82);
+            this.cboCron.Name = "cboCron";
+            this.cboCron.Size = new System.Drawing.Size(94, 24);
+            this.cboCron.TabIndex = 24;
+            this.cboCron.SelectedIndexChanged += new System.EventHandler(this.cboCron_SelectedIndexChanged);
+            // 
             // ServiceConfig
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(824, 657);
-            this.Controls.Add(this.tabControl1);
+            this.Controls.Add(this.tab1);
             this.Controls.Add(this.bttnCancel);
             this.Controls.Add(this.label5);
             this.Controls.Add(this.bttnSave);
@@ -909,29 +1021,33 @@
             this.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.MinimumSize = new System.Drawing.Size(842, 704);
             this.Name = "ServiceConfig";
-            this.Text = "DBADash Service Config";
+            this.Text = "DBA Dash Service Config";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.ServiceConfig_FromClosing);
             this.Load += new System.EventHandler(this.ServiceConfig_Load);
             ((System.ComponentModel.ISupportInitialize)(this.errorProvider1)).EndInit();
-            this.tabControl1.ResumeLayout(false);
-            this.tabPage3.ResumeLayout(false);
-            this.tabPage3.PerformLayout();
-            this.tabPage1.ResumeLayout(false);
-            this.tabSchemaSnapshots.ResumeLayout(false);
+            this.tab1.ResumeLayout(false);
+            this.tabDest.ResumeLayout(false);
+            this.tabDest.PerformLayout();
+            this.tabSource.ResumeLayout(false);
+            this.tabSource.PerformLayout();
+            this.tabSrcOptions.ResumeLayout(false);
             this.tabGeneral.ResumeLayout(false);
             this.tabGeneral.PerformLayout();
             this.tabExtendedEvents.ResumeLayout(false);
-            this.tabExtendedEvents.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.numSlowQueryThreshold)).EndInit();
-            this.tabPage7.ResumeLayout(false);
-            this.tabPage7.PerformLayout();
-            this.tabPage2.ResumeLayout(false);
-            this.tabPage2.PerformLayout();
+            this.tabSchemaSnapshots.ResumeLayout(false);
+            this.tabAWSCreds.ResumeLayout(false);
+            this.tabAWSCreds.PerformLayout();
             this.tabAzureDB.ResumeLayout(false);
             this.tabAzureDB.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.numAzureScanInterval)).EndInit();
-            this.tabPage4.ResumeLayout(false);
-            this.tabPage4.PerformLayout();
+            this.tabService.ResumeLayout(false);
+            this.tabService.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
+            this.pnlExtendedEvents.ResumeLayout(false);
+            this.pnlExtendedEvents.PerformLayout();
+            this.pnlSchemaSnapshots.ResumeLayout(false);
+            this.pnlSchemaSnapshots.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -963,15 +1079,14 @@
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.TextBox txtSecretKey;
         private System.Windows.Forms.TextBox txtAccessKey;
-        private System.Windows.Forms.TabControl tabControl1;
-        private System.Windows.Forms.TabPage tabPage3;
+        private System.Windows.Forms.TabControl tab1;
+        private System.Windows.Forms.TabPage tabDest;
         private System.Windows.Forms.Label label7;
         private System.Windows.Forms.TextBox txtDestination;
-        private System.Windows.Forms.TabPage tabPage1;
-        private System.Windows.Forms.TabPage tabPage2;
-        private System.Windows.Forms.TabPage tabPage4;
+        private System.Windows.Forms.TabPage tabSource;
+        private System.Windows.Forms.TabPage tabAWSCreds;
+        private System.Windows.Forms.TabPage tabService;
         private System.Windows.Forms.Button bttnRemove;
-        private System.Windows.Forms.CheckBox chkCustomizeMaintenanceCron;
         private System.Windows.Forms.NumericUpDown numSlowQueryThreshold;
         private System.Windows.Forms.CheckBox chkSlowQueryThreshold;
         private System.Windows.Forms.Label lblSlow;
@@ -980,11 +1095,11 @@
         private System.Windows.Forms.TextBox txtSnapshotCron;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.TextBox txtSnapshotDBs;
-        private System.Windows.Forms.TabControl tabSchemaSnapshots;
+        private System.Windows.Forms.TabControl tabSrcOptions;
         private System.Windows.Forms.TabPage tabGeneral;
         private System.Windows.Forms.TabPage tabExtendedEvents;
         private System.Windows.Forms.Label label9;
-        private System.Windows.Forms.TabPage tabPage7;
+        private System.Windows.Forms.TabPage tabSchemaSnapshots;
         private System.Windows.Forms.Button bttnDeployDatabase;
         private System.Windows.Forms.Label lblVersionInfo;
         private System.Windows.Forms.CheckBox chkSchemaSnapshotOnStart;
@@ -1007,6 +1122,16 @@
         private System.Windows.Forms.Button bttnS3;
         private System.Windows.Forms.Button button1;
         private System.Windows.Forms.Button bttnS3Src;
+        private System.Windows.Forms.LinkLabel lnkServiceStatus;
+        private System.Windows.Forms.LinkLabel lnkSourceConnections;
+        private System.Windows.Forms.Label lblSourceConnections;
+        private System.Windows.Forms.TextBox textBox1;
+        private System.Windows.Forms.LinkLabel lnkPermissions;
+        private System.Windows.Forms.PictureBox pictureBox1;
+        private System.Windows.Forms.Label label12;
+        private System.Windows.Forms.Panel pnlExtendedEvents;
+        private System.Windows.Forms.Panel pnlSchemaSnapshots;
+        private System.Windows.Forms.ComboBox cboCron;
     }
 }
 

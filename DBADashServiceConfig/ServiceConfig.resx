@@ -123,6 +123,26 @@
   <metadata name="toolTip1.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
     <value>172, 17</value>
   </metadata>
+  <data name="label12.Text" xml:space="preserve">
+    <value>For normal deployments this section isn't required
+
+Setting the destination connection to a S3 bucket allows you to send data to a repository database that you don't have direct connectivity to.
+Setting the source connection to a S3 bucket allows you to pull data from those remote sources.
+By default the instance profile credentials are used to connect to S3 buckets - if this isn't available you will need to specify a profile to use or the access/secret keys.</value>
+  </data>
+  <data name="label10.Text" xml:space="preserve">
+    <value>Connections are required to each AzureDB to capture data for monitoring.  Alternativley, add a connection to the master database and check the option to scan for AzureDBs on service start and/or check the option to scan for new Azure DBs every 'X' seconds.
+
+You can also click "Scan Now" to persist any new connections to the config file. </value>
+  </data>
+  <data name="textBox1.Text" xml:space="preserve">
+    <value>When installing the service, enter the username in domain\username format
+
+Command line install:
+DBADashService install -username "MyDomain\DBADashServiceUser" -password "*****"
+
+http://docs.topshelf-project.com/en/latest/overview/commandline.html</value>
+  </data>
   <assembly alias="System.Drawing" name="System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
   <data name="$this.Icon" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
     <value>
@@ -175,10 +195,5 @@
         AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD///39yf/9/cH//f0Af/39AH8yMgB/
         Mv0AE/39AAP9/cAALlbAAPX9/gD9/f4A/f3+ADYy/4MyVv+D/f3///39
 </value>
-  </data>
-  <data name="label10.Text" xml:space="preserve">
-    <value>Connections are required to each AzureDB to capture data for monitoring.  Alternativley, add a connection to the master database and check the option to scan for AzureDBs on service start and/or check the option to scan for new Azure DBs every 'X' seconds.
-
-You can also click "Scan Now" to persist any new connections to the config file. </value>
   </data>
 </root>

@@ -331,6 +331,7 @@
     <None Include="Resources\Connect_16x.png" />
     <None Include="Resources\FolderOpened_16x.png" />
     <None Include="Resources\Arch_Amazon-Simple-Storage-Service_16.png" />
+    <None Include="Resources\Information_blue_6227_16x16_cyan.png" />
     <Content Include="services.ico" />
   </ItemGroup>
   <ItemGroup>

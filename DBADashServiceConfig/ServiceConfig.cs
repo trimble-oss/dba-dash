@@ -110,6 +110,7 @@ namespace DBADashServiceConfig
                 collectionConfig.SourceConnections.Add(src);
                 txtJson.Text = collectionConfig.Serialize();
                 populateDropDowns();
+                setConnectionCount();
             }
         }
 
@@ -151,8 +152,12 @@ namespace DBADashServiceConfig
             DBADashConnection dest = new DBADashConnection(txtDestination.Text);
             lblVersionInfo.ForeColor = Color.Black;
             lblVersionInfo.Text = "";
+            lblVersionInfo.Font = new Font(lblVersionInfo.Font, FontStyle.Regular);
             if (txtDestination.Text == "")
             {
+                lblVersionInfo.Text = "Please start by setting the destination connection for your DBA Dash repository database.";
+                lblVersionInfo.ForeColor = Color.Brown;
+                lblVersionInfo.Font = new Font(lblVersionInfo.Font, FontStyle.Bold);
                 return false;
             }
 
@@ -235,8 +240,27 @@ namespace DBADashServiceConfig
                     MessageBox.Show("Error reading ServiceConfig.json: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
+            setConnectionCount();
             refreshServiceStatus();
             validateDestination();
+            buildCron();
+        }
+
+        private void setConnectionCount()
+        {
+            int cnt = collectionConfig.SourceConnections.Count;
+            lnkSourceConnections.Text = "Source Connections: " + cnt.ToString();
+            if (cnt == 0)
+            {
+                lnkSourceConnections.Text += ".  (Add source connections to monitor)";
+                lnkSourceConnections.LinkColor = Color.Brown;
+            }
+            else
+            {
+                lnkSourceConnections.LinkColor = Color.Green;
+            }
+            lblSourceConnections.ForeColor = lnkSourceConnections.LinkColor;
+            lblSourceConnections.Text = lnkSourceConnections.Text;
         }
 
         private void setFromJson(string json)
@@ -250,7 +274,6 @@ namespace DBADashServiceConfig
             chkScanAzureDB.Checked = collectionConfig.ScanForAzureDBs;
             chkScanEvery.Checked = collectionConfig.ScanForAzureDBsInterval > 0;
             numAzureScanInterval.Value = collectionConfig.ScanForAzureDBsInterval;
-            chkCustomizeMaintenanceCron.Checked = (collectionConfig.MaintenanceScheduleCron != null);
             chkAutoUpgradeRepoDB.Checked = collectionConfig.AutoUpdateDatabase;
             updateScanInterval();
 
@@ -264,7 +287,7 @@ namespace DBADashServiceConfig
             if (svcCtrl == null)
             {
                 lblServiceStatus.Text = "Service Status: Not Installed";
-                lblServiceStatus.ForeColor = Color.Red;
+                lblServiceStatus.ForeColor = Color.Brown;
                 bttnStart.Enabled = false;
                 bttnStop.Enabled = false;
                 bttnInstall.Enabled = true;
@@ -273,7 +296,7 @@ namespace DBADashServiceConfig
             }
             else
             {
-                lblServiceStatus.Text = Enum.GetName(typeof(ServiceControllerStatus), svcCtrl.Status);
+                lblServiceStatus.Text ="Service Status: " +  Enum.GetName(typeof(ServiceControllerStatus), svcCtrl.Status);
                 if(svcCtrl.Status == ServiceControllerStatus.Running)
                 {
                     lblServiceStatus.ForeColor = Color.Green;
@@ -291,6 +314,8 @@ namespace DBADashServiceConfig
                 bttnInstall.Enabled = false;
                 bttnUninstall.Enabled = true;
             }
+            lnkServiceStatus.Text = lblServiceStatus.Text;
+            lnkServiceStatus.LinkColor = lblServiceStatus.ForeColor;
         }
 
         private void txtJson_Validating(object sender, CancelEventArgs e)
@@ -345,6 +370,7 @@ namespace DBADashServiceConfig
             }
 
             refreshServiceStatus();
+            validateDestination();
         }
 
         private void bttnStop_Click(object sender, EventArgs e)
@@ -368,6 +394,7 @@ namespace DBADashServiceConfig
         private void bttnRefresh_Click(object sender, EventArgs e)
         {
             refreshServiceStatus();
+            validateDestination();
         }
 
         private void bttnInstall_Click(object sender, EventArgs e)
@@ -480,6 +507,7 @@ namespace DBADashServiceConfig
                 MessageBox.Show("Connection not found", "Remove", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
             }
             txtJson.Text = collectionConfig.Serialize();
+            setConnectionCount();
         }
 
         private void txtAccessKey_Validating(object sender, CancelEventArgs e)
@@ -497,19 +525,6 @@ namespace DBADashServiceConfig
         private void txtAWSProfile_Validating(object sender, CancelEventArgs e)
         {
             collectionConfig.AWSProfile = (txtAWSProfile.Text == "" ? null : txtAWSProfile.Text);
-            txtJson.Text = collectionConfig.Serialize();
-        }
-
-        private void chkCustomizeMaintenanceCron_CheckedChanged(object sender, EventArgs e)
-        {
-            if (chkCustomizeMaintenanceCron.Checked)
-            {
-                collectionConfig.MaintenanceScheduleCron = collectionConfig.GetMaintenanceCron();
-            }
-            else
-            {
-                collectionConfig.MaintenanceScheduleCron = null;
-            }
             txtJson.Text = collectionConfig.Serialize();
         }
 
@@ -556,6 +571,7 @@ namespace DBADashServiceConfig
                 chkSchemaSnapshotOnStart.Checked = src.SchemaSnapshotOnServiceStart;
                 chkDualSession.Checked = src.UseDualEventSession;
             }
+            setAvailableOptionsForSource();
         }
 
         private void bttnDeployDatabase_Click(object sender, EventArgs e)
@@ -647,6 +663,7 @@ namespace DBADashServiceConfig
                 cn = new DBADashConnection(frm.ConnectionString);
                 cboSource.Text = cn.EncryptedConnectionString;
             }
+            setAvailableOptionsForSource();
         }
 
         private void bttnScanNow_Click(object sender, EventArgs e)
@@ -733,6 +750,7 @@ namespace DBADashServiceConfig
                     cboSource.Text  = fbd.SelectedPath;
                 }
             }
+            setAvailableOptionsForSource();
         }
 
         private void bttnS3_Click(object sender, EventArgs e)
@@ -771,6 +789,86 @@ namespace DBADashServiceConfig
                    cboSource.Text= frm.AWSURL;
                 }
             }
+            setAvailableOptionsForSource();
         }
+
+        private void lnkServiceStatus_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            tab1.SelectedTab = tabService;
+        }
+
+        private void lnkSourceConnections_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            tab1.SelectedTab = tabSource;
+        }
+
+        private void lnkPermissions_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            var psi = new ProcessStartInfo("https://github.com/DavidWiseman/DBADash/blob/develop/Docs/Security.md");
+            Process.Start(psi);
+        }
+
+        private void cboSource_Validated(object sender, EventArgs e)
+        {
+            setAvailableOptionsForSource();
+        }
+
+        private void setAvailableOptionsForSource()
+        {
+            var src = new DBADashSource(cboSource.Text);
+            bool isSql = src.SourceConnection.Type == ConnectionType.SQL;
+
+            pnlExtendedEvents.Enabled = isSql;
+            pnlSchemaSnapshots.Enabled = isSql;
+            chkNoWMI.Enabled = isSql;
+            chkCustomizeSchedule.Enabled = isSql;
+        }
+
+        private void buildCron()
+        {
+            cboCron.Items.Add(new CronSelection() { DisplayValue = "", CronExpression = "" });
+            for (int i = 0; i < 24; i++){
+                var cron = new CronSelection() { CronExpression = string.Format("0 0 {0} 1/1 * ? *", i), DisplayValue = i.ToString("00") + ":00" };
+                cboCron.Items.Add(cron);
+            }
+            cboCron.SelectedIndex = 1;
+        }
+
+        private void cboCron_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (cboCron.Text != "")
+            {
+                var cron = (CronSelection)cboCron.SelectedItem;
+                txtSnapshotCron.Text = cron.CronExpression;
+            }
+        }
+
+        private void txtSnapshotCron_TextChanged(object sender, EventArgs e)
+        {
+            var cron = (CronSelection)cboCron.SelectedItem;
+            if(cron.CronExpression != txtSnapshotCron.Text)
+            {
+                foreach(CronSelection itm in cboCron.Items)
+                {
+                    if(txtSnapshotCron.Text == itm.CronExpression)
+                    {
+                        cboCron.SelectedItem = itm;
+                        return;
+                    }
+                }
+                cboCron.SelectedIndex = 0;
+            }
+        }
+    }
+}
+
+public struct CronSelection
+{
+    public string CronExpression { get; set; }
+    public string DisplayValue { get; set; }
+
+    public override string ToString()
+    {
+        return DisplayValue.ToString();
     }
 }
