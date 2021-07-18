@@ -1,4 +1,8 @@
-# DBA Dash
+# DBA Dash - SQL Server Monitoring Tool
+
+![DBA Dash Performance](Docs/DBADash_Performance_small.png)
+
+## Download
 
 [Download](https://github.com/DavidWiseman/DBADash/releases)
 
@@ -12,7 +16,7 @@ DBA Dash is a tool for SQL Server DBAs to assist with daily checks, performance 
  - Capture slow queries (Extended Event trace)
  - Azure DB monitoring
  - Track changes to configuration, SQL Patching, drivers etc.
- - Schema change tracking. 
+ - [Schema change tracking](Docs/SchemaSnapshots.md). 
  - Agent Job change tracking
  - Option to monitor instances in isolated environments via S3 bucket.
  - [Custom Checks](Docs/CustomChecks.md)
@@ -32,20 +36,23 @@ DBA Dash is a tool for SQL Server DBAs to assist with daily checks, performance 
 Note: It's possible to run as a console app under your own user account for testing purposes.
 
 ## Installation
+
+![Installation gif](Docs/DBADash_Installation.gif)
+
  - Extract the application binaries on the server where you want to run the agent. Run on a server separate to your production SQL instance if possible.
  - The first thing we need to do is create the database that will be used as the central repository for your SQL instances.  Run the DBADashServiceConfigTool.exe tool.  Click the "Deploy/Update Database" button.  
  - A connection dialog is shown - use this to connect to the SQL Instance that you want to deploy the central repository database to.
  - The DB Deploy dialog is shown. The default database name is DBADashDB - click deploy to create the database.
  - It might take a few moments to create the database.  Click "OK" when you see the "Deploy succeeded" dialog.
  - The next step is to add databases that we want to monitor.  Click the "Source" tab.
- - Click the button to the right of the "Source" to connect to the SQL Instance you want to monitor.  Alternatively, the connection string can be entered manually.  
-	 *Note: Connection strings are encrypted to avoid storing them in plain text but it is recommended to use Windows authentication*
+ - Click the button to the right of the "Source" textbox to connect to the SQL Instance you want to monitor.  Alternatively, the connection string can be entered manually.  
+	 *Note: Connection strings are encrypted to avoid storing them in plain text but it is recommended to use Windows authentication - the encryption should be considered as obfuscation. *
  - Click "Add/Update" to add the connection.  Repeat as necessary to add the other SQL Instances you want to monitor.
- *Note: Additional options are available for your source connections.  Capture slow queries, take schema snapshots and customize schedules.*
+ *Note: Additional options are available for your source connections.  Capture slow queries, take [schema snapshots](Docs/SchemaSnapshots.md) and customize schedules.*
  - Click "Save".  A "ServiceConfig.json" file is created in the application folder that stores the configuration details for this agent.
  - At this stage you might want to run "DBADashService.exe".  This runs the agent as a console application and you can monitor what the application is doing. 
   *On startup and every 1hr on the hour it will collect "General" information from your SQL instances.  e.g. Backups, Drive space, Agent jobs etc.*
-  *Every 1min it will collect performance data.  e.g. CPU, IO, Waits etc.*
+  *Every 1min it will collect performance data.  e.g. CPU, IO, Waits etc.*  More info on what is collected and when [here](Docs/Collection.md)
  - You will most likely want to install the agent as a Windows service.  Close the DBADashService.exe application and go back to the DBADashServiceConfigTool.exe application.  Click the service tab.
  - Click "Install".  Enter the credentials you want to use to run the service as and click "OK".  The credentials should be entered in "domain\username" format.
  - Close the command window.
