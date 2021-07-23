@@ -1,4 +1,4 @@
-﻿CREATE PROC [dbo].[Instances_Get](	
+CREATE PROC [dbo].[Instances_Get](	
 	@TagIDs VARCHAR(MAX)=NULL,
 	@IsActive BIT=1,
 	@IsAzure BIT=NULL
@@ -15,7 +15,7 @@ SELECT  I.InstanceID,
 	I.IsActive
 FROM dbo.InstancesMatchingTags(@TagIDs) I
 LEFT JOIN dbo.Databases D ON D.InstanceID = I.InstanceID AND I.EditionID = 1674378470 AND D.IsActive=1
-WHERE 1=1
+WHERE (D.InstanceID IS NOT NULL OR I.EditionID <> 1674378470)
 ' + CASE WHEN @IsActive IS NULL THEN '' ELSE 'AND I.IsActive=@IsActive' END + '
 ' + CASE WHEN @IsAzure=1 THEN 'AND I.EditionID = 1674378470' WHEN @IsAzure=0 THEN 'AND I.EditionID <> 1674378470' ELSE '' END + '
 ORDER BY I.Instance,D.name'
