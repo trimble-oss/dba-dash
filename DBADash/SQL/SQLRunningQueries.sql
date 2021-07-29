@@ -4,7 +4,7 @@ SELECT SYSUTCDATETIME() as SnapshotDateUTC,
 	s.session_id,
 	r.statement_start_offset,
 	r.statement_end_offset,
-	R.command,
+	r.command,
 	s.status,
 	r.wait_time,
 	r.wait_type,
@@ -16,7 +16,7 @@ SELECT SYSUTCDATETIME() as SnapshotDateUTC,
 	ISNULL(r.writes,s.writes) writes,
 	r.granted_query_memory,
 	r.percent_complete,
-	s.open_transaction_count,
+	' + CASE WHEN COLUMNPROPERTY(OBJECT_ID('sys.dm_exec_sessions'),'open_transaction_count','ColumnId') IS NULL THEN 'r.open_transaction_count,' ELSE 's.open_transaction_count,' END + '
 	s.transaction_isolation_level,
 	s.login_name,
 	s.host_name,
@@ -30,12 +30,19 @@ SELECT SYSUTCDATETIME() as SnapshotDateUTC,
 	r.query_hash,
 	r.query_plan_hash
 FROM sys.dm_exec_sessions s
-INNER JOIN sys.dm_exec_connections C ON C.session_id= S.session_id
+INNER JOIN sys.dm_exec_connections c ON c.session_id= s.session_id
 LEFT JOIN sys.dm_exec_requests r on s.session_id = r.session_id
 WHERE s.is_user_process=1
-' +CASE WHEN COLUMNPROPERTY(OBJECT_ID('sys.dm_exec_sessions'),'open_transaction_count','ColumnId') IS NULL THEN '' ELSE 'AND (s.open_transaction_count > 0 OR r.session_id IS NOT NULL)' END + /* 2012+ */ '
+' +CASE WHEN COLUMNPROPERTY(OBJECT_ID('sys.dm_exec_sessions'),'open_transaction_count','ColumnId') IS NULL 
+		-- For older instances
+		THEN 'AND (r.session_id IS NOT NULL 
+						OR EXISTS(SELECT 1 FROM sys.dm_tran_session_transactions t WHERE t.session_id = s.session_id)
+				)' 
+		-- For 2012+
+		ELSE 'AND (s.open_transaction_count > 0 OR r.session_id IS NOT NULL)' END + '
 AND s.session_id <> @@SPID
 AND s.session_id > 0'
 + CASE WHEN SERVERPROPERTY('EditionID') = 1674378470 THEN 'AND s.database_id = DB_ID()' /* DB filter for Azure */ ELSE '' END 
 
 EXEC sp_executesql @SQL
+
