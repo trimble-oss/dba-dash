@@ -34,14 +34,14 @@
             this.label9 = new System.Windows.Forms.Label();
             this.numWarning = new System.Windows.Forms.NumericUpDown();
             this.numCritical = new System.Windows.Forms.NumericUpDown();
-            this.txtReference = new System.Windows.Forms.TextBox();
-            this.label1 = new System.Windows.Forms.Label();
             this.bttnCancel = new System.Windows.Forms.Button();
             this.bttnUpdate = new System.Windows.Forms.Button();
             this.optInherit = new System.Windows.Forms.RadioButton();
             this.OptDisabled = new System.Windows.Forms.RadioButton();
             this.optEnabled = new System.Windows.Forms.RadioButton();
             this.pnlThresholds = new System.Windows.Forms.Panel();
+            this.chkReferences = new System.Windows.Forms.CheckedListBox();
+            this.chkCheckAll = new System.Windows.Forms.CheckBox();
             ((System.ComponentModel.ISupportInitialize)(this.numWarning)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.numCritical)).BeginInit();
             this.pnlThresholds.SuspendLayout();
@@ -111,26 +111,10 @@
             this.numCritical.Size = new System.Drawing.Size(100, 22);
             this.numCritical.TabIndex = 49;
             // 
-            // txtReference
-            // 
-            this.txtReference.Location = new System.Drawing.Point(145, 64);
-            this.txtReference.Name = "txtReference";
-            this.txtReference.ReadOnly = true;
-            this.txtReference.Size = new System.Drawing.Size(274, 22);
-            this.txtReference.TabIndex = 53;
-            // 
-            // label1
-            // 
-            this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(35, 64);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(78, 17);
-            this.label1.TabIndex = 54;
-            this.label1.Text = "Reference:";
-            // 
             // bttnCancel
             // 
-            this.bttnCancel.Location = new System.Drawing.Point(261, 194);
+            this.bttnCancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.bttnCancel.Location = new System.Drawing.Point(290, 467);
             this.bttnCancel.Name = "bttnCancel";
             this.bttnCancel.Size = new System.Drawing.Size(75, 23);
             this.bttnCancel.TabIndex = 56;
@@ -140,7 +124,8 @@
             // 
             // bttnUpdate
             // 
-            this.bttnUpdate.Location = new System.Drawing.Point(342, 194);
+            this.bttnUpdate.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.bttnUpdate.Location = new System.Drawing.Point(371, 467);
             this.bttnUpdate.Name = "bttnUpdate";
             this.bttnUpdate.Size = new System.Drawing.Size(75, 23);
             this.bttnUpdate.TabIndex = 55;
@@ -150,8 +135,9 @@
             // 
             // optInherit
             // 
+            this.optInherit.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.optInherit.AutoSize = true;
-            this.optInherit.Location = new System.Drawing.Point(268, 13);
+            this.optInherit.Location = new System.Drawing.Point(209, 329);
             this.optInherit.Margin = new System.Windows.Forms.Padding(4);
             this.optInherit.Name = "optInherit";
             this.optInherit.Size = new System.Drawing.Size(68, 21);
@@ -162,8 +148,9 @@
             // 
             // OptDisabled
             // 
+            this.OptDisabled.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.OptDisabled.AutoSize = true;
-            this.OptDisabled.Location = new System.Drawing.Point(145, 13);
+            this.OptDisabled.Location = new System.Drawing.Point(102, 329);
             this.OptDisabled.Margin = new System.Windows.Forms.Padding(4);
             this.OptDisabled.Name = "OptDisabled";
             this.OptDisabled.Size = new System.Drawing.Size(84, 21);
@@ -174,9 +161,10 @@
             // 
             // optEnabled
             // 
+            this.optEnabled.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.optEnabled.AutoSize = true;
             this.optEnabled.Checked = true;
-            this.optEnabled.Location = new System.Drawing.Point(38, 13);
+            this.optEnabled.Location = new System.Drawing.Point(13, 329);
             this.optEnabled.Margin = new System.Windows.Forms.Padding(4);
             this.optEnabled.Name = "optEnabled";
             this.optEnabled.Size = new System.Drawing.Size(81, 21);
@@ -188,30 +176,54 @@
             // 
             // pnlThresholds
             // 
+            this.pnlThresholds.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.pnlThresholds.Controls.Add(this.label9);
             this.pnlThresholds.Controls.Add(this.numCritical);
             this.pnlThresholds.Controls.Add(this.numWarning);
             this.pnlThresholds.Controls.Add(this.label7);
             this.pnlThresholds.Controls.Add(this.label8);
             this.pnlThresholds.Controls.Add(this.label10);
-            this.pnlThresholds.Location = new System.Drawing.Point(31, 92);
+            this.pnlThresholds.Location = new System.Drawing.Point(12, 357);
             this.pnlThresholds.Name = "pnlThresholds";
             this.pnlThresholds.Size = new System.Drawing.Size(386, 85);
             this.pnlThresholds.TabIndex = 60;
+            // 
+            // chkReferences
+            // 
+            this.chkReferences.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.chkReferences.CheckOnClick = true;
+            this.chkReferences.FormattingEnabled = true;
+            this.chkReferences.Location = new System.Drawing.Point(12, 46);
+            this.chkReferences.Name = "chkReferences";
+            this.chkReferences.Size = new System.Drawing.Size(434, 276);
+            this.chkReferences.TabIndex = 61;
+            // 
+            // chkCheckAll
+            // 
+            this.chkCheckAll.AutoSize = true;
+            this.chkCheckAll.Location = new System.Drawing.Point(13, 12);
+            this.chkCheckAll.Name = "chkCheckAll";
+            this.chkCheckAll.Size = new System.Drawing.Size(88, 21);
+            this.chkCheckAll.TabIndex = 62;
+            this.chkCheckAll.Text = "Check All";
+            this.chkCheckAll.UseVisualStyleBackColor = true;
+            this.chkCheckAll.CheckedChanged += new System.EventHandler(this.chkCheckAll_CheckedChanged);
             // 
             // CollectionDatesThresholds
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(458, 246);
+            this.ClientSize = new System.Drawing.Size(458, 503);
+            this.Controls.Add(this.chkCheckAll);
+            this.Controls.Add(this.chkReferences);
             this.Controls.Add(this.pnlThresholds);
             this.Controls.Add(this.optInherit);
             this.Controls.Add(this.OptDisabled);
-            this.Controls.Add(this.optEnabled);
             this.Controls.Add(this.bttnCancel);
             this.Controls.Add(this.bttnUpdate);
-            this.Controls.Add(this.label1);
-            this.Controls.Add(this.txtReference);
+            this.Controls.Add(this.optEnabled);
             this.Name = "CollectionDatesThresholds";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "Collection Dates Thresholds";
@@ -233,13 +245,13 @@
         private System.Windows.Forms.Label label9;
         private System.Windows.Forms.NumericUpDown numWarning;
         private System.Windows.Forms.NumericUpDown numCritical;
-        private System.Windows.Forms.TextBox txtReference;
-        private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Button bttnCancel;
         private System.Windows.Forms.Button bttnUpdate;
         private System.Windows.Forms.RadioButton optInherit;
         private System.Windows.Forms.RadioButton OptDisabled;
         private System.Windows.Forms.RadioButton optEnabled;
         private System.Windows.Forms.Panel pnlThresholds;
+        private System.Windows.Forms.CheckedListBox chkReferences;
+        private System.Windows.Forms.CheckBox chkCheckAll;
     }
 }

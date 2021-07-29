@@ -124,16 +124,23 @@ namespace DBADashGUI
                     }
                     dgvSummary.Rows[idx].Cells["UptimeStatus"].Value = uptimeString;
                 }
-               
-                Int32 snapshotAgeMin = (Int32)row["SnapshotAgeMin"];
-                Int32 snapshotAgeMax= (Int32)row["SnapshotAgeMax"];
-                if (snapshotAgeMax == snapshotAgeMin)
+
+                if (row["SnapshotAgeMin"] == DBNull.Value || row["SnapshotAgeMax"] == DBNull.Value)
                 {
-                    dgvSummary.Rows[idx].Cells["SnapshotAgeStatus"].Value = snapshotAgeMax + "mins";
+                    dgvSummary.Rows[idx].Cells["SnapshotAgeStatus"].Value = "N/A";
                 }
                 else
                 {
-                    dgvSummary.Rows[idx].Cells["SnapshotAgeStatus"].Value =snapshotAgeMin.ToString() + " to " + snapshotAgeMax.ToString() + "mins";
+                    Int32 snapshotAgeMin = (Int32)row["SnapshotAgeMin"];
+                    Int32 snapshotAgeMax = (Int32)row["SnapshotAgeMax"];
+                    if (snapshotAgeMax == snapshotAgeMin)
+                    {
+                        dgvSummary.Rows[idx].Cells["SnapshotAgeStatus"].Value = snapshotAgeMax + "mins";
+                    }
+                    else
+                    {
+                        dgvSummary.Rows[idx].Cells["SnapshotAgeStatus"].Value = snapshotAgeMin.ToString() + " to " + snapshotAgeMax.ToString() + "mins";
+                    }
                 }
                 if (row["DaysSinceLastGoodCheckDB"] != DBNull.Value)
                 {

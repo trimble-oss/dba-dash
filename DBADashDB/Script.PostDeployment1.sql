@@ -367,7 +367,8 @@ FROM
 (-1,'CustomChecks',125,180),
 (-1,'PerformanceCounters',5,10),
 (-1,'DatabaseQueryStoreOptions',1445,2880),
-(-1,'AzureDBResourceGovernance',125,180)
+(-1,'AzureDBResourceGovernance',125,180),
+(-1,'ResourceGovernorConfiguration',1445,2880)
 ) T(InstanceID,Reference,WarningThreshold,CriticalThreshold)
 WHERE NOT EXISTS(SELECT 1 FROM dbo.CollectionDatesThresholds CDT WHERE CDT.InstanceID = T.InstanceID AND CDT.Reference = T.Reference)
 

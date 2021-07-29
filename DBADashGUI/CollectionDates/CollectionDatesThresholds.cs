@@ -20,7 +20,9 @@ namespace DBADashGUI.CollectionDates
 
 
         public Int32 InstanceID { get; set; }
-        public string Reference { get { return txtReference.Text; } set { txtReference.Text = value; } }
+
+        private string _reference;
+        public string Reference { get { return _reference; } set { _reference = value; } }
 
         public bool Inherit
         {
@@ -76,30 +78,36 @@ namespace DBADashGUI.CollectionDates
                 using (SqlCommand cmd = new SqlCommand("CollectionDatesThresholds_Get", cn) { CommandType = CommandType.StoredProcedure }) {
                     cn.Open();
                     cmd.Parameters.AddWithValue("InstanceID", InstanceID);
-                    cmd.Parameters.AddWithValue("Reference", Reference);
                     var rdr = cmd.ExecuteReader();
-                    if (rdr.Read())
+                    while (rdr.Read())
                     {
-                        if (rdr["WarningThreshold"] != DBNull.Value && rdr["CriticalThreshold"] != DBNull.Value)
+                        string reference = Convert.ToString(rdr["Reference"]);
+
+                        if (reference == _reference)
                         {
-                            WarningThreshold = (Int32)rdr["WarningThreshold"];
-                            CriticalThreshold = (Int32)rdr["CriticalThreshold"];
-                            optEnabled.Checked = true;
+                            chkReferences.Items.Add(reference, CheckState.Checked);
+                            if (rdr["WarningThreshold"] != DBNull.Value && rdr["CriticalThreshold"] != DBNull.Value)
+                            {
+                                WarningThreshold = (Int32)rdr["WarningThreshold"];
+                                CriticalThreshold = (Int32)rdr["CriticalThreshold"];
+                                optEnabled.Checked = true;
+                            }
+                            else
+                            {
+                                OptDisabled.Checked = true;
+                            }
+                            if (Convert.ToBoolean(rdr["Inherited"]))
+                            {
+                                optInherit.Checked = true;
+                            }
                         }
                         else
                         {
-                            OptDisabled.Checked = true;
-                        }
-                        if ((Int32)rdr["InstanceID"] != InstanceID)
-                        {
-                            optInherit.Checked = true;
+                            chkReferences.Items.Add(reference, CheckState.Unchecked);
                         }
 
-                    }
-                    else
-                    {
-                        OptDisabled.Checked = true;
-                    }
+                    } 
+
                     optInherit.Enabled = InstanceID > 0;
                 }
             }
@@ -112,6 +120,14 @@ namespace DBADashGUI.CollectionDates
 
         private void bttnUpdate_Click(object sender, EventArgs e)
         {
+            foreach(string itm in chkReferences.CheckedItems)
+            {
+                update(itm);
+            }
+        }
+
+        private void update(string reference)
+        {
             using (var cn = new SqlConnection(ConnectionString))
             {
                 using (SqlCommand cmd = new SqlCommand("CollectionDatesThresholds_Upd", cn) { CommandType = CommandType.StoredProcedure })
@@ -119,7 +135,7 @@ namespace DBADashGUI.CollectionDates
                     cn.Open();
 
                     cmd.Parameters.AddWithValue("InstanceID", InstanceID);
-                    cmd.Parameters.AddWithValue("Reference", Reference);
+                    cmd.Parameters.AddWithValue("Reference", reference);
                     if (OptDisabled.Checked)
                     {
                         cmd.Parameters.AddWithValue("WarningThreshold", DBNull.Value);
@@ -139,16 +155,16 @@ namespace DBADashGUI.CollectionDates
 
         private void CollectionDatesThresholds_Load(object sender, EventArgs e)
         {
+            chkCheckAll.Enabled = InstanceID!=-1;
             if (InstanceID == -1)
             {
-                this.Text += " (Root)";
-                getThreshold();
-
+                this.Text += " (Root)";              
             }
             else
             {
                 this.Text += " (Instance)";
             }
+            getThreshold();
         }
 
         private void optInherit_CheckedChanged(object sender, EventArgs e)
@@ -169,6 +185,14 @@ namespace DBADashGUI.CollectionDates
         private void bttnCancel_Click(object sender, EventArgs e)
         {
             this.DialogResult = DialogResult.Cancel;
+        }
+
+        private void chkCheckAll_CheckedChanged(object sender, EventArgs e)
+        {
+            for(int i =0;i<chkReferences.Items.Count;i++)
+            {
+                chkReferences.SetItemChecked(i, chkCheckAll.Checked);
+            }
         }
     }
 }
