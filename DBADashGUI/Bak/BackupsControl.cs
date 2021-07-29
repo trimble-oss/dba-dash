@@ -119,10 +119,20 @@ namespace DBADashGUI.Backups
                     dgvBackups.Rows[idx].Cells["LastPartial"].Style.BackColor = dgvBackups.Rows[idx].Cells["LastFull"].Style.BackColor;
                     dgvBackups.Rows[idx].Cells["LastPartialDiff"].Style.BackColor = dgvBackups.Rows[idx].Cells["LastDiff"].Style.BackColor;
                 }
+                else
+                {
+                    dgvBackups.Rows[idx].Cells["LastPartial"].Style.BackColor = Color.White;
+                    dgvBackups.Rows[idx].Cells["LastPartialDiff"].Style.BackColor = Color.White;
+                }
                 if ((bool)row["ConsiderFGBackups"])
                 {
                     dgvBackups.Rows[idx].Cells["LastFG"].Style.BackColor = dgvBackups.Rows[idx].Cells["LastFull"].Style.BackColor;
                     dgvBackups.Rows[idx].Cells["LastFGDiff"].Style.BackColor = dgvBackups.Rows[idx].Cells["LastDiff"].Style.BackColor;
+                }
+                else
+                {
+                    dgvBackups.Rows[idx].Cells["LastFG"].Style.BackColor = Color.White;
+                    dgvBackups.Rows[idx].Cells["LastFGDiff"].Style.BackColor = Color.White;
                 }
                 dgvBackups.Rows[idx].Cells["SnapshotAge"].Style.BackColor = DBADashStatus.GetStatusColour(snapshotStatus);
                 if ((string)row["ThresholdsConfiguredLevel"] == "Database")
