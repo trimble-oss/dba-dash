@@ -24,6 +24,7 @@ LEFT JOIN dbo.AvailabilityGroups AG ON HADR.group_id = AG.group_id
                                        AND D.InstanceID = AG.InstanceID
 LEFT JOIN dbo.CollectionDatesStatus CD ON D.InstanceID = CD.InstanceID AND CD.Reference='DatabaseHADR'
 WHERE D.InstanceID = @InstanceID
+AND D.IsActive=1
 ORDER BY HADR.is_local DESC,
          AG.name,
          D.name;

@@ -45,7 +45,8 @@ IF NOT EXISTS(SELECT 1 FROM dbo.CollectionDates WHERE SnapshotDate>=@SnapshotDat
 		   hadr.secondary_lag_seconds
 	FROM @DatabasesHADR hadr
 		JOIN dbo.Databases d ON hadr.database_id = d.database_id
-	WHERE d.InstanceID = @InstanceID;
+	WHERE d.InstanceID = @InstanceID
+	AND d.IsActive=1;
 
 	EXEC dbo.CollectionDates_Upd @InstanceID = @InstanceID,  
 										 @Reference = @Ref,

@@ -34,4 +34,5 @@ LEFT JOIN dbo.CollectionDatesStatus CD ON D.InstanceID = CD.InstanceID AND CD.Re
 WHERE EXISTS(SELECT 1 FROM STRING_SPLIT(@InstanceIDs,',') ss WHERE ss.value = I.InstanceID
 		UNION ALL
 		SELECT 1 WHERE @InstanceIDs IS NULL)
+AND D.IsActive=1
 GROUP BY I.Instance,I.InstanceID;
