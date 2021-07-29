@@ -345,7 +345,7 @@ FROM
 (-1,'Backups',125,180),
 (-1,'AzureDBServiceObjectives',125,180),
 (-1,'Corruption',125,180),
-(-1,'BlockingSnapshot',5,10),
+(-1,'RunningQueries',5,10),
 (-1,'CPU',5,10),
 (-1,'IOStats',5,10),
 (-1,'ObjectExecutionStats',5,10),
@@ -372,7 +372,8 @@ FROM
 ) T(InstanceID,Reference,WarningThreshold,CriticalThreshold)
 WHERE NOT EXISTS(SELECT 1 FROM dbo.CollectionDatesThresholds CDT WHERE CDT.InstanceID = T.InstanceID AND CDT.Reference = T.Reference)
 
-DELETE dbo.CollectionDatesThresholds WHERE Reference = 'AgentJobs'
+-- Delete thresholds for legacy collections
+DELETE dbo.CollectionDatesThresholds WHERE Reference IN('AgentJobs','BlockingSnapshot')
 
 --replace old defaults
 UPDATE CollectionDatesThresholds

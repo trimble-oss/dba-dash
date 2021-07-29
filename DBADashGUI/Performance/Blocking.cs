@@ -201,7 +201,6 @@ namespace DBADashGUI.Performance
             var blockPoint = (BlockingPoint)chartPoint.Instance;
             BlockingViewer frm = new BlockingViewer
             {
-                ConnectionString = connectionString,
                 BlockingSnapshotID = blockPoint.SnapshotID
             };
             frm.Show();

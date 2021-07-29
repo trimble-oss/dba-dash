@@ -875,6 +875,39 @@ namespace DBADash.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to /* 2012+ !!!! */
+        ///SELECT SYSUTCDATETIME() as SnapshotDateUTC,
+        ///	s.session_id,
+        ///	r.statement_start_offset,
+        ///	r.statement_end_offset,
+        ///	R.command,
+        ///	s.status,
+        ///	r.wait_time,
+        ///	r.wait_type,
+        ///	r.wait_resource,
+        ///	r.blocking_session_id,
+        ///	r.cpu_time,
+        ///	r.logical_reads,
+        ///	r.reads,
+        ///	r.writes,
+        ///	r.granted_query_memory,
+        ///	r.percent_complete,
+        ///	s.open_transaction_count,
+        ///	s.transaction_isolation_level,
+        ///	s.login_name,
+        ///	s.host_name,
+        ///	s.database_id, --2012+
+        ///	s.program_name,
+        ///	s.client_interface_name,
+        ///	DATEADD(mi,DA [rest of string was truncated]&quot;;.
+        /// </summary>
+        internal static string SQLRunningQueries {
+            get {
+                return ResourceManager.GetString("SQLRunningQueries", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to SET NOCOUNT ON
         ///DECLARE @ProcessorNameString NVARCHAR(512)
         ///DECLARE @SystemManufacturer NVARCHAR(512)

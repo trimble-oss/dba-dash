@@ -12,6 +12,8 @@ namespace DBADash
 
         public CollectionConfigSchedule[] Schedules { get; set; }
 
+        public PlanCollectionThreshold RunningQueryPlanThreshold;
+
         public CollectionConfigSchedule[] GetSchedule()
         {
             if (Schedules == null)

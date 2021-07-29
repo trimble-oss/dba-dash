@@ -563,6 +563,21 @@
     <Build Include="dbo\Views\AzureDBResourceGovernance.sql" />
     <Build Include="dbo\Stored Procedures\AzureDBResourceGovernance_Get.sql" />
     <Build Include="dbo\Stored Procedures\Partitions_Create.sql" />
+    <Build Include="dbo\Stored Procedures\QueryPlans_Upd.sql" />
+    <Build Include="dbo\Stored Procedures\QueryText_Upd.sql" />
+    <Build Include="dbo\Stored Procedures\RunningQueries_Get.sql" />
+    <Build Include="dbo\Stored Procedures\RunningQueries_Upd.sql" />
+    <Build Include="dbo\Stored Procedures\RunningQueriesServerSummary_Get.sql" />
+    <Build Include="dbo\Stored Procedures\RunningQueriesSummary_Get.sql" />
+    <Build Include="dbo\Tables\QueryPlans.sql" />
+    <Build Include="dbo\Tables\QueryText.sql" />
+    <Build Include="dbo\Tables\RunningQueries.sql" />
+    <Build Include="dbo\Tables\RunningQueriesSummary.sql" />
+    <Build Include="dbo\Functions\SecondsToHumanDuration.sql" />
+    <Build Include="dbo\User Defined Types\QueryPlans.sql" />
+    <Build Include="dbo\User Defined Types\QueryText.sql" />
+    <Build Include="dbo\User Defined Types\RunningQueries.sql" />
+    <Build Include="dbo\Functions\RunningQueriesBlockingRecursiveStats.sql" />
   </ItemGroup>
   <ItemGroup>
     <PostDeploy Include="Script.PostDeployment1.sql" />

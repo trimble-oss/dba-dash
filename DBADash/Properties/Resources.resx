@@ -223,6 +223,9 @@
   <data name="SQLRemoveEventSessionsAzure" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\SQL\SQLRemoveEventSessionsAzure.sql;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
   </data>
+  <data name="SQLRunningQueries" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\SQL\SQLRunningQueries.sql;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
+  </data>
   <data name="SQLServerExtraProperties" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\SQL\SQLServerExtraProperties.sql;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
   </data>

@@ -447,6 +447,13 @@ namespace DBADashGUI
                 resourceGovernor1.InstanceIDs = instanceIDs;
                 resourceGovernor1.RefreshData();
             }
+            else if (tabs.SelectedTab == tabRunningQueries)
+            {
+                globalTimeisVisible = true;
+                runningQueries1.InstanceIDs = instanceIDs;
+                runningQueries1.InstanceID = n.InstanceID;
+                runningQueries1.RefreshData();
+            }
             tsTime.Visible = globalTimeisVisible;
         }
 
@@ -629,6 +636,7 @@ namespace DBADashGUI
                     allowedTabs.Add(tabAzureSummary);
                 }
                 allowedTabs.Add(tabSlowQueries);
+                allowedTabs.Add(tabRunningQueries);
         
             }
             else if(n.Type== SQLTreeItem.TreeType.Database)
@@ -653,6 +661,7 @@ namespace DBADashGUI
                 allowedTabs.Add(tabSlowQueries);
                 allowedTabs.Add(tabObjectExecutionSummary);
                 allowedTabs.Add(tabWaits);
+                allowedTabs.Add(tabRunningQueries);
             }
             else if (n.Type == SQLTreeItem.TreeType.Instance)
             {
@@ -662,14 +671,16 @@ namespace DBADashGUI
                 allowedTabs.Add(tabObjectExecutionSummary);
                 allowedTabs.Add(tabSlowQueries);
                 allowedTabs.Add(tabWaits);
+                allowedTabs.Add(tabRunningQueries);
             }
             else if(n.Type == SQLTreeItem.TreeType.AzureInstance)
             {
                 allowedTabs.Add(tabPerformanceSummary);         
                 allowedTabs.Add(tabAzureSummary);              
                 allowedTabs.Add(tabSlowQueries);
-                allowedTabs.Add(tabObjectExecutionSummary);               
-           }
+                allowedTabs.Add(tabObjectExecutionSummary);
+                allowedTabs.Add(tabRunningQueries);
+            }
             else if (n.Type == SQLTreeItem.TreeType.Configuration)
             {
                 if (parent.Type == SQLTreeItem.TreeType.Instance)
@@ -1269,6 +1280,10 @@ namespace DBADashGUI
             else if (tabs.SelectedTab == tabWaits)
             {
                 waitsSummary1.RefreshData();
+            }
+            else if(tabs.SelectedTab== tabRunningQueries)
+            {
+                runningQueries1.RefreshData();
             }
         }
 

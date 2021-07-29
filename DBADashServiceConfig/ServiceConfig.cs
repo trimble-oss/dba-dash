@@ -41,6 +41,10 @@ namespace DBADashServiceConfig
             {
                 src.Schedules = src.GetSchedule();
             }
+            if (chkCollectPlans.Checked)
+            {
+                src.RunningQueryPlanThreshold = new PlanCollectionThreshold() { CPUThreshold = 1000, DurationThreshold = 10000, MemoryGrantThreshold = 6400 };
+            }
             src.UseDualEventSession = chkDualSession.Checked;
             src.SchemaSnapshotOnServiceStart = chkSchemaSnapshotOnStart.Checked;
             if (txtSnapshotDBs.Text.Trim().Length > 0)

@@ -14,9 +14,10 @@ namespace DBADashGUI.Performance
     public partial class BlockingViewer : Form
     {
 
-        public string ConnectionString { get; set; }
-        public Int32 BlockingSnapshotID { get; set; }
+        public Int32 BlockingSnapshotID { get; set; } = int.MinValue;
         public Int16 BlockingSessionID { get; set; } = 0;
+        public int InstanceID { get; set; } = int.MinValue;
+        public DateTime SnapshotDate { get; set; } = DateTime.MinValue;
 
         readonly List<Int16> BlockingNavigation = new List<Int16>();
 
@@ -33,23 +34,30 @@ namespace DBADashGUI.Performance
 
         private void getSummary()
         {
-            SqlConnection cn = new SqlConnection(ConnectionString);
-            using (cn)
+            using (var cn = new SqlConnection(Common.ConnectionString))         
+            using (SqlCommand cmd = new SqlCommand("dbo.BlockingSummary_Get", cn) { CommandType = CommandType.StoredProcedure })
             {
-                using (SqlCommand cmd = new SqlCommand("dbo.BlockingSummary_Get", cn) { CommandType = CommandType.StoredProcedure })
+                cn.Open();
+                if (InstanceID > int.MinValue && SnapshotDate> DateTime.MinValue)
                 {
-                    cn.Open();
+                    cmd.Parameters.AddWithValue("@InstanceID", InstanceID);
+                    var pSnapshotDate= cmd.Parameters.AddWithValue("@SnapshotDate", SnapshotDate) ;
+                    pSnapshotDate.SqlDbType = SqlDbType.DateTime2;
+                }
+                else
+                {
                     cmd.Parameters.AddWithValue("@BlockingsnapshotID", BlockingSnapshotID);
-                    var rdr = cmd.ExecuteReader();
-                    if (rdr.Read())
-                    {
-                        lblInstance.Text = "Instance:" + (string)rdr["ConnectionID"];
-                        lblSnapshotDate.Text = "Snapshot Date:" + ((DateTime)rdr["SnapshotDateUTC"]).ToLocalTime().ToString("yyyy-MM-dd HH:mm:ss");
-                        lblBlockedSessions.Text = "Blocked Sessions: " + (Int32)rdr["BlockedSessionCount"];
-                        lblBlockedWaitTime.Text = "Blocked Wait Time: " + MillisecondsToReadableDuration((Int64)rdr["BlockedWaitTime"]);
-                    }
+                }
+                var rdr = cmd.ExecuteReader();
+                if (rdr.Read())
+                {
+                    lblInstance.Text = "Instance:" + (string)rdr["ConnectionID"];
+                    lblSnapshotDate.Text = "Snapshot Date:" + ((DateTime)rdr["SnapshotDateUTC"]).ToLocalTime().ToString("yyyy-MM-dd HH:mm:ss");
+                    lblBlockedSessions.Text = "Blocked Sessions: " + (Int32)rdr["BlockedSessionCount"];
+                    lblBlockedWaitTime.Text = "Blocked Wait Time: " + MillisecondsToReadableDuration((Int64)rdr["BlockedWaitTime"]);
                 }
             }
+            
         }
 
         string MillisecondsToReadableDuration(Int64 ms)
@@ -64,30 +72,38 @@ namespace DBADashGUI.Performance
 
         private void loadData()
         {
-            SqlConnection cn = new SqlConnection(ConnectionString);
-            using (cn)
+
+            using (var cn = new SqlConnection(Common.ConnectionString))          
+            using (SqlCommand cmd = new SqlCommand("dbo.Blocking_Get", cn) { CommandType = CommandType.StoredProcedure })
             {
-                using (SqlCommand cmd = new SqlCommand("dbo.Blocking_Get", cn) { CommandType = CommandType.StoredProcedure })
+                cn.Open();
+                cmd.Parameters.AddWithValue("blocking_session_id", BlockingSessionID);
+                if (InstanceID > int.MinValue && SnapshotDate > DateTime.MinValue)
                 {
-                    cn.Open();
-                    cmd.Parameters.AddWithValue("BlockingSnapshotID", BlockingSnapshotID);
-                    cmd.Parameters.AddWithValue("blocking_session_id", BlockingSessionID);
-                    SqlDataAdapter da = new SqlDataAdapter(cmd);
-                    DataTable dt = new DataTable();
-                    da.Fill(dt);
-                    gvBlocking.AutoGenerateColumns = false;
-                    gvBlocking.DataSource = new DataView(dt);
-                    lblBlockers.Text = BlockingSessionID == 0 ? "Root Blockers" : "Blocked By Session " + BlockingSessionID;
-                    bttnRootBlockers.Enabled = BlockingSessionID != 0;
-                    if (BlockingSessionID == 0)
-                    {
-                        BlockingNavigation.Clear();
-                    }
-                    BlockingNavigation.Add(BlockingSessionID);
-                    bttnBack.Enabled = BlockingNavigation.Count > 1;
-                    updatePath();
+                    cmd.Parameters.AddWithValue("@InstanceID", InstanceID);
+                    var pSnapshotDate = cmd.Parameters.AddWithValue("@SnapshotDate", SnapshotDate);
+                    pSnapshotDate.SqlDbType = SqlDbType.DateTime2;
                 }
+                else
+                {
+                    cmd.Parameters.AddWithValue("@BlockingsnapshotID", BlockingSnapshotID);
+                }
+                SqlDataAdapter da = new SqlDataAdapter(cmd);
+                DataTable dt = new DataTable();
+                da.Fill(dt);
+                gvBlocking.AutoGenerateColumns = false;
+                gvBlocking.DataSource = new DataView(dt);
+                lblBlockers.Text = BlockingSessionID == 0 ? "Root Blockers" : "Blocked By Session " + BlockingSessionID;
+                bttnRootBlockers.Enabled = BlockingSessionID != 0;
+                if (BlockingSessionID == 0)
+                {
+                    BlockingNavigation.Clear();
+                }
+                BlockingNavigation.Add(BlockingSessionID);
+                bttnBack.Enabled = BlockingNavigation.Count > 1;
+                updatePath();
             }
+            
         }
 
         private void gvBlocking_CellContentClick(object sender, DataGridViewCellEventArgs e)
@@ -98,7 +114,12 @@ namespace DBADashGUI.Performance
                 if (e.ColumnIndex == BlockedSessions.Index)
                 {
                     BlockingSessionID = (Int16)row["session_id"];
-                    loadData();
+                    int blockedCount = Convert.ToInt32(row["BlockCountRecursive"]);
+                    if (blockedCount > 0)
+                    {
+                        loadData();
+                    }
+                    
                 }
                 if (e.ColumnIndex == Txt.Index && e.RowIndex >= 0)
                 {

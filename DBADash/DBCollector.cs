@@ -1,16 +1,20 @@
-﻿using Microsoft.Win32;
+﻿using Microsoft.SqlServer.Management.Common;
+using Microsoft.Win32;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
+using Polly;
+using Serilog;
 using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
+using System.IO;
 using System.Linq;
 using System.Management;
 using System.Reflection;
-using Serilog;
-using Polly;
-using Microsoft.SqlServer.Management.Common;
-
+using System.Runtime.Caching;
+using System.Text;
+using System.Xml;
 namespace DBADash
 {
     [JsonConverter(typeof(StringEnumConverter))]
@@ -63,7 +67,8 @@ namespace DBADash
         AvailabilityGroups,
         ResourceGovernorConfiguration,
         DatabaseQueryStoreOptions,
-        AzureDBResourceGovernance
+        AzureDBResourceGovernance,
+        RunningQueries
     }
 
     public enum HostPlatform
@@ -89,6 +94,8 @@ namespace DBADash
         public Int64 SlowQueryThresholdMs = -1;
         public Int32 SlowQueryMaxMemoryKB { get; set; } = 4096;
         public bool UseDualEventSession { get; set; } = true;
+        public PlanCollectionThreshold PlanThreshold = PlanCollectionThreshold.PlanCollectionDisabledThreshold;
+
 
         private bool IsAzure = false;
         private bool isAzureMasterDB = false;
@@ -101,7 +108,12 @@ namespace DBADash
         public DateTime JobLastModified=DateTime.MinValue;
         private bool IsHadrEnabled=false;
         private Policy retryPolicy;
-        private DatabaseEngineEdition engineEdition;       
+        private DatabaseEngineEdition engineEdition;
+        CacheItemPolicy policy = new CacheItemPolicy
+        {
+            SlidingExpiration = TimeSpan.FromMinutes(60)
+        };
+        MemoryCache cache = MemoryCache.Default;
 
         public int Job_instance_id {
             get
@@ -421,7 +433,7 @@ namespace DBADash
             {
                 Collect(CollectionType.ObjectExecutionStats);
                 Collect(CollectionType.CPU);
-                Collect(CollectionType.BlockingSnapshot);
+                //Collect(CollectionType.BlockingSnapshot);
                 Collect(CollectionType.IOStats);
                 Collect(CollectionType.Waits);
                 Collect(CollectionType.AzureDBResourceStats);
@@ -429,6 +441,7 @@ namespace DBADash
                 Collect(CollectionType.SlowQueries);
                 Collect(CollectionType.PerformanceCounters);
                 Collect(CollectionType.JobHistory);
+                Collect(CollectionType.RunningQueries);
                 if (IsHadrEnabled)
                 {
                     Collect(CollectionType.DatabasesHADR);
@@ -463,8 +476,288 @@ namespace DBADash
             {
                 logError(ex, collectionTypeString);
             }
-            
+            if(collectionType == CollectionType.RunningQueries)
+            {
+                collectText();
+                collectPlans();
+            }
           
+        }
+
+        static string ByteArrayToHexString(byte[] bytes)
+        {
+            string hex = BitConverter.ToString(bytes);
+            return hex.Replace("-", "");
+        }
+
+        private void collectPlans()
+        {
+            if (Data.Tables.Contains("RunningQueries") && PlanThreshold.PlanCollectionEnabled)
+            {
+                var plansSQL = getPlansSQL();
+                if (!String.IsNullOrEmpty(plansSQL))
+                {
+                    using (var cn = new SqlConnection(_connectionString))
+                    using (var da = new SqlDataAdapter(plansSQL, cn))
+                    {
+                        var dt = new DataTable("QueryPlans");                      
+                        da.Fill(dt);
+                        if (dt.Rows.Count > 0)
+                        {
+                            dt.Columns.Add("query_plan_hash", typeof(byte[]));
+                            dt.Columns.Add("query_plan_compressed", typeof(byte[]));
+                            foreach (DataRow r in dt.Rows){                         
+                                try
+                                {
+                                    string strPlan = r["query_plan"] == DBNull.Value ? string.Empty : (string)r["query_plan"];
+                                    r["query_plan_compressed"] = SchemaSnapshotDB.Zip(strPlan);
+                                    var hash = GetPlanHash(strPlan);
+                                    r["query_plan_hash"] = hash;
+                                }
+                                catch(Exception ex)
+                                {
+                                    Log.Error(ex, "Error processing query plans");
+                                }
+                            }
+                            dt.Columns.Remove("query_plan");
+
+                            Data.Tables.Add(dt);
+                        }
+                    }
+                }
+            }
+        }
+
+
+        ///<summary>
+        ///Get the query plan hash from a  string of the plan XML
+        ///</summary>
+        public static byte[] GetPlanHash(string strPlan)
+        {
+            using (var ms = new MemoryStream(System.Text.Encoding.UTF8.GetBytes(strPlan)))
+            {
+                ms.Position = 0;
+                using (var xr = new XmlTextReader(ms))
+                {
+                    while (xr.Read())
+                    {
+                        if (xr.Name== "StmtSimple")
+                        {
+                            string strHash= xr.GetAttribute("QueryPlanHash");
+                            return StringToByteArray(strHash);
+                        }                        
+                    }
+                }
+            }
+            return new byte[0];
+        }
+
+
+        public static byte[] StringToByteArray(string hex)
+        {
+            if (hex.StartsWith("0x"))
+            {
+                hex = hex.Remove(0, 2);
+            }
+            return Enumerable.Range(0, hex.Length)
+                             .Where(x => x % 2 == 0)
+                             .Select(x => Convert.ToByte(hex.Substring(x, 2), 16))
+                             .ToArray();
+        }
+
+
+        ///<summary>
+        ///Generate a SQL query to get the query plan text for running queries. Captured plan handles get cached with a call to CacheCollectedPlans later <br/>
+        ///Limits the cost associated with plan capture - less plans to capture, send and process<br/>
+        ///Note: Caching takes query_plan_hash into account as a statement can get recompiled without the plan handle changing.
+        ///</summary>
+        public string getPlansSQL()
+        {
+            var plans = getPlansList();
+            Int32 cnt = 0;
+            Int32 cacheCount = 0;
+            var sb = new StringBuilder();
+            sb.Append(@"DECLARE @plans TABLE(plan_handle VARBINARY(64),statement_start_offset int,statement_end_offset int)
+INSERT INTO @plans(plan_handle,statement_start_offset,statement_end_offset)
+VALUES");
+            foreach (Plan p in plans)
+            {
+                if (!cache.Contains(p.Key))
+                {
+                    cnt += 1;
+                    sb.AppendLine();
+                    sb.AppendFormat("(0x{0},{1},{2}),", ByteArrayToHexString(p.PlanHandle), p.StartOffset, p.EndOffset); 
+                }
+                else
+                {
+                    cacheCount += 1;
+                }
+            }
+            if ((cnt + cacheCount) > 0)
+            {
+                Log.Information("Plans {0} cached, {1} to collect", cacheCount, cnt);
+            }
+            if (cnt == 0)
+            {
+                return string.Empty;
+            }
+            else
+            {
+                sb.Remove(sb.Length - 1, 1);
+                sb.AppendLine();
+                sb.Append(@"SELECT t.plan_handle,
+        t.statement_start_offset,
+        t.statement_end_offset,
+        pln.dbid,
+        pln.objectid,
+        pln.encrypted,
+        pln.query_plan
+FROM @plans t 
+CROSS APPLY sys.dm_exec_text_query_plan(t.plan_handle,t.statement_start_offset,t.statement_end_offset) pln");
+                return sb.ToString();
+            }
+        }
+
+        ///<summary>
+        ///Get a list of plan handles from RunningQueries including statement start/end offsets as we want to capture plans at the statement level. Query plan hash is used to detect changes in the plan for caching purposes <br/>
+        ///Capture a distinct list so we collect the plan for each statement once even if there are multiple instances of statements running with the same plan.<br/>
+        ///Filter for plans matching the specified threshold to limit the plans captured to the ones that are likely to be of interest<br/>
+        ///</summary>
+        private List<Plan> getPlansList()
+        {
+            if (Data.Tables.Contains("RunningQueries"))
+            {
+                DataTable dt = Data.Tables["RunningQueries"];
+                var plans = (from r in dt.AsEnumerable()
+                             where r["plan_handle"] != DBNull.Value && r["query_plan_hash"] != DBNull.Value && r["statement_start_offset"] != DBNull.Value && r["statement_end_offset"] != DBNull.Value
+                             group r by new Plan((byte[])r["plan_handle"], (byte[])r["query_plan_hash"], (int)r["statement_start_offset"], (int)r["statement_end_offset"]) into g
+                             where g.Sum(r => Convert.ToInt32(r["cpu_time"])) >= PlanThreshold.CPUThreshold || g.Sum(r => Convert.ToInt32(r["granted_query_memory"])) >= PlanThreshold.MemoryGrantThreshold || g.Count() >= PlanThreshold.CountThreshold || g.Max(r=> ((DateTime)r["SnapshotDateUTC"]).Subtract((DateTime)r["last_request_start_time_utc"])).TotalMilliseconds >= PlanThreshold.DurationThreshold 
+                             select g.Key).Distinct().ToList();
+                return plans;
+            }
+            else
+            {
+                return new List<Plan>();
+            }
+        }
+
+        ///<summary>
+        ///Collect query text associated with captured running queries
+        ///</summary>
+        private void collectText()
+        {
+            if (Data.Tables.Contains("RunningQueries"))
+            {
+                var handlesSQL = getTextFromHandlesSQL();
+                if (!String.IsNullOrEmpty(handlesSQL))
+                {
+                    using (var cn = new SqlConnection(_connectionString))
+                    using (var da = new SqlDataAdapter(handlesSQL, cn))
+                    {
+                        var dt = new DataTable("QueryText");
+                        da.Fill(dt);
+                        if (dt.Rows.Count > 0)
+                        {
+                            Data.Tables.Add(dt);
+                        }
+                    }                   
+                }
+            }
+        }
+
+        ///<summary>
+        ///Once written to the destination, call this function to cache the plan handles and query plan hash. If the plan is cached it won't be collected in future.<br/>
+        ///Note: We are just caching the plan handle and hash with the statement offsets.
+        ///</summary>
+        public void CacheCollectedPlans()
+        {
+            if (Data.Tables.Contains("QueryPlans"))
+            {
+                var dt = Data.Tables["QueryPlans"];
+                foreach (DataRow r in dt.Rows)
+                {
+                    if (r["query_plan_hash"] != DBNull.Value)
+                    {
+                        var plan = new Plan((byte[])r["plan_handle"], (byte[])r["query_plan_hash"], (int)r["statement_start_offset"], (int)r["statement_end_offset"]);
+                        cache.Add(plan.Key, "", policy);
+                    }
+                }
+            }
+        }
+
+        ///<summary>
+        ///Once written to the destination, call this function to cache the sql_handles for captured query text. If the handle is cached it won't be collected in future.<br/>
+        ///Note: We capture text at the batch level and can use the statement offsets to get the statement text.
+        ///</summary>
+        public void CacheCollectedText()
+        {
+            if (Data.Tables.Contains("QueryText"))
+            {
+                var dt = Data.Tables["QueryText"];
+                foreach(DataRow r in dt.Rows)
+                {
+                    cache.Add(ByteArrayToHexString((byte[])r["sql_handle"]), "",policy);
+                }
+            }
+        }
+
+        ///<summary>
+        ///Generate a SQL query to get the query text associated with the plan handles for running queries
+        ///</summary>
+        private string getTextFromHandlesSQL()
+        {
+            var handles = runningQueriesHandles();
+            Int32 cnt = 0;
+            Int32 cacheCount = 0;
+            var sb = new StringBuilder();
+            sb.Append(@"DECLARE @handles TABLE(sql_handle VARBINARY(64))
+INSERT INTO @handles(sql_handle)
+VALUES
+");
+            foreach (string strHandle in handles)
+            {
+                if (!cache.Contains(strHandle))
+                {
+                    cnt += 1;
+                    sb.Append(string.Format("(0x{0}),", strHandle));
+                }
+                else
+                {
+                    cacheCount += 1;
+                }
+            }
+            if ((cnt + cacheCount) > 0)
+            {
+                Log.Information("QueryText: {0} from cache, {1} to collect", cacheCount, cnt);
+            }
+            if (cnt == 0)
+            {
+                return string.Empty;
+            }
+            else
+            {
+                sb.Remove(sb.Length - 1, 1);
+                sb.AppendLine();
+                sb.Append(@"SELECT H.sql_handle,
+    txt.dbid,
+    txt.objectid as object_id,
+    txt.encrypted,
+    txt.text
+FROM @handles H 
+CROSS APPLY sys.dm_exec_sql_text(H.sql_handle) txt");
+                return sb.ToString();
+            }
+        }
+
+        ///<summary>
+        ///Get a distinct list of sql_handle for running queries.  The handles are later used to capture query text
+        ///</summary>
+        private List<string> runningQueriesHandles()
+        {
+            var handles = (from r in Data.Tables["RunningQueries"].AsEnumerable()
+                           where r["sql_handle"] != DBNull.Value
+                           select ByteArrayToHexString((byte[])r["sql_handle"])).Distinct().ToList();
+            return handles;
         }
 
         private void collect(CollectionType collectionType)

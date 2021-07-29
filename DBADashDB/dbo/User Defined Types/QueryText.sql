@@ -1,0 +1,7 @@
+﻿CREATE TYPE dbo.QueryText AS TABLE(
+	sql_handle VARBINARY(64) NOT NULL PRIMARY KEY,
+	dbid SMALLINT NULL,
+	object_id INT NULL,
+	encrypted BIT NULL,
+	text NVARCHAR(MAX) NULL
+)

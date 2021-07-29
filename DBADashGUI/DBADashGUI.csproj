@@ -236,6 +236,13 @@
     <Compile Include="Checks\CustomChecks.Designer.cs">
       <DependentUpon>CustomChecks.cs</DependentUpon>
     </Compile>
+    <Compile Include="ExtensionMethods.cs" />
+    <Compile Include="Performance\RunningQueries.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Performance\RunningQueries.Designer.cs">
+      <DependentUpon>RunningQueries.cs</DependentUpon>
+    </Compile>
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -648,6 +655,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="DBFiles\FileThresholdConfigControl.resx">
       <DependentUpon>FileThresholdConfigControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Performance\RunningQueries.resx">
+      <DependentUpon>RunningQueries.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="SchemaCompare\CodeViewer.resx">
       <DependentUpon>CodeViewer.cs</DependentUpon>

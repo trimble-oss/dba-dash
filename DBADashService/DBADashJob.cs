@@ -190,6 +190,7 @@ namespace DBADashService
                         collector.SlowQueryThresholdMs = cfg.SlowQueryThresholdMs;
                         collector.SlowQueryMaxMemoryKB = cfg.SlowQuerySessionMaxMemoryKB;
                         collector.UseDualEventSession = cfg.UseDualEventSession;
+                        collector.PlanThreshold = cfg.RunningQueryPlanThreshold == null ? PlanCollectionThreshold.PlanCollectionDisabledThreshold : cfg.RunningQueryPlanThreshold;
                         using (var op = Operation.Begin("Collect {types} from instance {instance}", string.Join(", ", types.Select(s => s.ToString()).ToArray()), cfg.SourceConnection.ConnectionForPrint))
                         {
                             collector.Collect(types);
@@ -208,6 +209,8 @@ namespace DBADashService
                                 dataMap.Put("JobLastModified", collector.JobLastModified);
                                 dataMap.Put("JobCollectDate", DateTime.UtcNow);
                             }
+                            collector.CacheCollectedText();
+                            collector.CacheCollectedPlans();
                         }
                         catch (Exception ex)
                         {

@@ -243,6 +243,7 @@
     <Reference Include="System.Numerics.Vectors, Version=4.1.4.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <HintPath>..\packages\System.Numerics.Vectors.4.5.0\lib\net46\System.Numerics.Vectors.dll</HintPath>
     </Reference>
+    <Reference Include="System.Runtime.Caching" />
     <Reference Include="System.Runtime.CompilerServices.Unsafe, Version=5.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <HintPath>..\packages\System.Runtime.CompilerServices.Unsafe.5.0.0\lib\net45\System.Runtime.CompilerServices.Unsafe.dll</HintPath>
     </Reference>
@@ -301,6 +302,8 @@
     <Compile Include="Encrypt.cs" />
     <Compile Include="ExtensionMethods.cs" />
     <Compile Include="PerformanceCounters.cs" />
+    <Compile Include="Plan.cs" />
+    <Compile Include="PlanCollectionThreshold.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
@@ -362,6 +365,7 @@
     <Content Include="SQL\SQLPerformanceCounters.sql" />
     <Content Include="SQL\SQLRemoveEventSessions.sql" />
     <Content Include="SQL\SQLRemoveEventSessionsAzure.sql" />
+    <Content Include="SQL\SQLRunningQueries.sql" />
     <Content Include="SQL\SQLServerExtraProperties.sql" />
     <Content Include="SQL\SQLServerPermissions.sql" />
     <Content Include="SQL\SQLServerPrincipals.sql" />
