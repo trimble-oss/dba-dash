@@ -20,6 +20,7 @@ namespace DBADashGUI.DBFiles
         public int InstanceID;
         public int DatabaseID;
         public int DataSpaceID;
+        private bool isLoaded = false;
 
         public bool IsDataConfig
         {
@@ -81,6 +82,7 @@ namespace DBADashGUI.DBFiles
                 tab1.SelectedTab = tabLog;
             }
             loadThresholds();
+            isLoaded = true;
         }
 
         private void loadThresholds()
@@ -88,7 +90,7 @@ namespace DBADashGUI.DBFiles
             tab1.TabPages.Clear();
             int _instanceID = cboLevel.Text == "Root" ? -1 : InstanceID;
             int _databaseID = cboLevel.Text == "Root" || cboLevel.Text == "Instance" ? -1 : DatabaseID;
-            int _dataSpaceID = cboLevel.Text == "Root" || cboLevel.Text == "Instance" || cboLevel.Text=="Database" ? -1 : DatabaseID;
+            int _dataSpaceID = cboLevel.Text == "Root" || cboLevel.Text == "Instance" || cboLevel.Text=="Database" ? -1 : DataSpaceID;
             int _dataDataSpaceID = _dataSpaceID == 0 ? -1 : _dataSpaceID;
 
             tab1.TabPages.Add(tabData);
@@ -105,7 +107,10 @@ namespace DBADashGUI.DBFiles
 
         private void cboLevel_SelectedIndexChanged(object sender, EventArgs e)
         {
-            loadThresholds();
+            if (isLoaded)
+            {
+                loadThresholds();
+            }
         }
     }
 }
