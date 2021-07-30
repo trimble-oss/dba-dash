@@ -11,8 +11,8 @@ Data collection runs on a schedule by the agent which is listed below. Collectio
 *Captures object execution stats from sys.dm_exec_procedure_stats, sys.dm_exec_function_stats & sys.dm_exec_trigger_stats*
 - [CPU](../DBADash/SQL/SQLCPU.sql)
 *Capture CPU utilization from sys.dm_os_ring_buffers or sys.dm_db_resource_stats (Azure).*
-- [BlockingSnapshot](../DBADash/SQL/SQLBlockingSnapshot.sql)
-*Captures a snapshot of any blocking/blocked queries currently running if the total wait time is more than 1second.* 
+- [RunningQueries](../DBADash/SQL/RunningQueries.sql)
+*Captures a snapshot of queries currently executing. Captures blocking chains so replaces blocking snapshot. Also captures query text and optionally captures query plans*
 - [IOStats](../DBADash/SQL/SQLIOStats.sql)
 *Collects data from sys.dm_io_virtual_file_stats*
 - [Waits](../DBADash/SQL/SQLWaits.sql)
@@ -25,6 +25,9 @@ Data collection runs on a schedule by the agent which is listed below. Collectio
 *Collects job execution data from msdb.dbo.sysjobhistory (just what's new since the last collection)*
 - [DatabasesHADR](../DBADash/SQL/SQLJobHistory.sql)
 *Collects data from dm_hadr_database_replica_states if your SQL instance is using Always On Availability Groups.*
+- ~~-[BlockingSnapshot](../DBADash/SQL/SQLBlockingSnapshot.sql)
+*Captures a snapshot of any blocking/blocked queries currently running if the total wait time is more than 1second.
+Replaced with RunningQueries*~~
 #### Azure DB Only:
 - [AzureDBElasticPoolResourceStats](../DBADash/SQL/SQLAzureDBElasticPoolResourceStats.sql)
 *Collects data from sys.elastic_pool_resource_stats*
