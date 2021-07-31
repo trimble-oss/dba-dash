@@ -11,7 +11,7 @@ Data collection runs on a schedule by the agent which is listed below. Collectio
 *Captures object execution stats from sys.dm_exec_procedure_stats, sys.dm_exec_function_stats & sys.dm_exec_trigger_stats*
 - [CPU](../DBADash/SQL/SQLCPU.sql)
 *Capture CPU utilization from sys.dm_os_ring_buffers or sys.dm_db_resource_stats (Azure).*
-- [RunningQueries](../DBADash/SQL/RunningQueries.sql)
+- [RunningQueries](RunningQueries.md)
 *Captures a snapshot of queries currently executing. Captures blocking chains so replaces blocking snapshot. Also captures query text and optionally captures query plans*
 - [IOStats](../DBADash/SQL/SQLIOStats.sql)
 *Collects data from sys.dm_io_virtual_file_stats*
