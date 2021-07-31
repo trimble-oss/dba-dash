@@ -172,7 +172,8 @@ FROM (VALUES('ObjectExecutionStats',120),
 				('PerformanceCounters', 180),
 				('PerformanceCounters_60MIN',730),
 				('JobStats_60MIN',730),
-				('JobHistory',8)
+				('JobHistory',8),
+				('RunningQueries',14)
 				) AS t(TableName,RetentionDays)
 WHERE NOT EXISTS(SELECT 1 FROM dbo.DataRetention DR WHERE DR.TableName = T.TableName)
 
