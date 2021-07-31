@@ -2,6 +2,23 @@
 
 [RunningQueries](../DBADash/SQL/RunningQueries.sql) captures queries that are currently executing.  This takes inspiration from the likes of [sp_whoisactive](http://whoisactive.com/) and [sp_BlitzWho](https://github.com/BrentOzarULTD/SQL-Server-First-Responder-Kit/blob/dev/sp_BlitzWho.sql)- both of which are great tools.  It captures queries that are currently executing as well as sleeping sessions with open transactions.  This point in time snapshot might not be representitive of your SQL Server load but it provides a piece of the puzzle that can help diagnose performance issues.  For example, the data captured is useful to diagnose blocking issues, tempdb contention and memory grant issues.
 
+## Enable Plan capture
+Query plan capture is disabled by default.  To capture query plans, check the open in the DBA Dash Service Config tool:
+
+![Capture plans](Docs/CapturePlans.PNG)
+
+The following json will be added to your source connection to enable the plan collection.  The thresholds can be modified by editing the json if required.  
+```
+"RunningQueryPlanThreshold": {
+"CPUThreshold": 1000,
+"MemoryGrantThreshold": 6400,
+"DurationThreshold": 10000,
+"CountThreshold": 2,
+"PlanCollectionEnabled": true
+},
+```
+There is some extra overhead in capturing query plans but it can be useful to have this data available.  
+
 ## Efficient capture
 DBA Dash focuses on providing lightweight collection of running queries to a central repository. In the [query](../DBADash/SQL/RunningQueries.sql) used to capture running queries, there is no call to sys.dm_exec_sql_text to capture query text or sys.dm_exec_text_query_plan/sys.dm_exec_query_plan to capture query plans.  Instead the query returns the sql_handle and query_plan_handle which can later be used to get the query text and plans.  
 
@@ -16,18 +33,3 @@ Additionally thresholds are used for plan capture to reduce the overhead of coll
  1,000ms CPU, 10,000ms Duration, 6400 pages (50MB) memory grant, query count: 2
 
 Plans will be collected for queries that exceed **any** of the specified thresholds.  The thresholds can be configured in the ServiceConfig.json file.
-
-## Enable Plan capture
-To capture query plans, check the open in the DBA Dash Service Config tool:
-![Capture plans](Docs/CapturePlans.png)
-
-The following json will be added to your source connection to enable the plan collection.  The thresholds can be modified by editing the json if required.
-```
-"RunningQueryPlanThreshold": {
-"CPUThreshold": 1000,
-"MemoryGrantThreshold": 6400,
-"DurationThreshold": 10000,
-"CountThreshold": 2,
-"PlanCollectionEnabled": true
-},
-```
