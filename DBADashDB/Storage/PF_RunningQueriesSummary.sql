@@ -1,0 +1,3 @@
+﻿CREATE PARTITION FUNCTION [PF_RunningQueriesSummary](DATETIME2 (7))
+    AS RANGE RIGHT
+    FOR VALUES ()

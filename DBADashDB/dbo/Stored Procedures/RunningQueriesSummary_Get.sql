@@ -12,11 +12,14 @@ SELECT TOP(@MaxRows) I.InstanceID,
        S.BlockedQueries,
        S.BlockedQueriesWaitMs,
        S.MaxMemoryGrant*8 as MaxMemoryGrantKB,
-       S.LongestRunningQueryMs,
+       HD.HumanDuration as LongestRunningQuery,
        S.CriticalWaitCount,
-       S.CriticalWaitTime 
+       S.CriticalWaitTime,
+       S.TempDBWaitCount,
+       S.TempDBWaitTimeMs
 FROM dbo.RunningQueriesSummary S
 JOIN dbo.Instances I ON I.InstanceID = S.InstanceID
+CROSS APPLY dbo.MillisecondsToHumanDuration (S.LongestRunningQueryMs) HD
 WHERE S.InstanceID = @InstanceID
 AND S.SnapshotDateUTC >=@FromDate
 AND S.SnapshotDateUTC < @ToDate

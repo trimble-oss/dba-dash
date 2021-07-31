@@ -43,7 +43,7 @@ namespace DBADashServiceConfig
             }
             if (chkCollectPlans.Checked)
             {
-                src.RunningQueryPlanThreshold = new PlanCollectionThreshold() { CPUThreshold = 1000, DurationThreshold = 10000, MemoryGrantThreshold = 6400 };
+                src.RunningQueryPlanThreshold = new PlanCollectionThreshold() { CPUThreshold = 1000, DurationThreshold = 10000, MemoryGrantThreshold = 6400, CountThreshold=2 };
             }
             src.UseDualEventSession = chkDualSession.Checked;
             src.SchemaSnapshotOnServiceStart = chkSchemaSnapshotOnStart.Checked;

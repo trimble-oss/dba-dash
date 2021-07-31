@@ -450,7 +450,7 @@ namespace DBADashGUI
             else if (tabs.SelectedTab == tabRunningQueries)
             {
                 globalTimeisVisible = true;
-                runningQueries1.InstanceIDs = instanceIDs;
+                runningQueries1.InstanceIDs = n.Type == SQLTreeItem.TreeType.DBADashRoot ? AllInstanceIDs : instanceIDs;
                 runningQueries1.InstanceID = n.InstanceID;
                 runningQueries1.RefreshData();
             }
@@ -917,8 +917,10 @@ namespace DBADashGUI
 
         private void dBDiffToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            var frm = new DBDiff();
-            frm.SelectedTags = SelectedTags();
+            var frm = new DBDiff
+            {
+                SelectedTags = SelectedTags()
+            };
             var n = (SQLTreeItem)tv1.SelectedNode;
             frm.SelectedInstanceA = n.InstanceName;
             frm.SelectedDatabaseA = new DatabaseItem() { DatabaseID = n.DatabaseID, DatabaseName = n.DatabaseName };

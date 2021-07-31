@@ -578,6 +578,14 @@
     <Build Include="dbo\User Defined Types\QueryText.sql" />
     <Build Include="dbo\User Defined Types\RunningQueries.sql" />
     <Build Include="dbo\Functions\RunningQueriesBlockingRecursiveStats.sql" />
+    <Build Include="dbo\Functions\SplitWaitResource.sql" />
+    <Build Include="dbo\Functions\MillisecondsToHumanDuration.sql" />
+    <Build Include="Storage\PF_RunningQueries.sql" />
+    <Build Include="Storage\PS_RunningQueries.sql" />
+    <Build Include="Storage\PF_RunningQueriesSummary.sql" />
+    <Build Include="Storage\PS_RunningQueriesSummary.sql" />
+    <Build Include="Switch\Tables\RunningQueries.sql" />
+    <Build Include="Switch\Tables\RunningQueriesSummary.sql" />
   </ItemGroup>
   <ItemGroup>
     <PostDeploy Include="Script.PostDeployment1.sql" />

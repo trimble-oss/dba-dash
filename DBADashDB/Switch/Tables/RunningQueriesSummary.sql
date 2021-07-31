@@ -1,4 +1,4 @@
-﻿CREATE TABLE dbo.RunningQueriesSummary(
+﻿CREATE TABLE Switch.RunningQueriesSummary(
 	InstanceID INT NOT NULL,
 	SnapshotDateUTC DATETIME2(7) NOT NULL,
 	RunningQueries SMALLINT NOT NULL,
@@ -10,5 +10,5 @@
 	CriticalWaitTime BIGINT NOT NULL,
 	TempDBWaitCount INT NOT NULL,
 	TempDBWaitTimeMs BIGINT NOT NULL,
-	CONSTRAINT PK_RunningQueriesSummary PRIMARY KEY(InstanceID,SnapshotDateUTC) WITH (DATA_COMPRESSION = PAGE) ON PS_RunningQueriesSummary(SnapshotDateUTC)
-) ON PS_RunningQueriesSummary(SnapshotDateUTC)
+	CONSTRAINT PK_RunningQueriesSummary PRIMARY KEY(InstanceID,SnapshotDateUTC) WITH (DATA_COMPRESSION = PAGE) 
+) 

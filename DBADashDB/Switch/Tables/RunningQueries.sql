@@ -1,4 +1,4 @@
-﻿CREATE TABLE dbo.RunningQueries(
+﻿CREATE TABLE Switch.RunningQueries(
     InstanceID INT NOT NULL,
     SnapshotDateUTC DATETIME2(7) NOT NULL,
     session_id SMALLINT NOT NULL,
@@ -29,5 +29,5 @@
     plan_handle VARBINARY(64) NULL,
     query_hash BINARY(8) NULL,
     query_plan_hash BINARY(8) NULL,
-    CONSTRAINT PK_RunningQueries PRIMARY KEY(InstanceID,SnapshotDateUTC,session_id) WITH (DATA_COMPRESSION = PAGE) ON PS_RunningQueries(SnapshotDateUTC)
-) ON PS_RunningQueries(SnapshotDateUTC);
+    CONSTRAINT PK_RunningQueries PRIMARY KEY(InstanceID,SnapshotDateUTC,session_id) WITH (DATA_COMPRESSION = PAGE)
+);

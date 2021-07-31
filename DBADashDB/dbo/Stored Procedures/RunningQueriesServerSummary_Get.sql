@@ -32,12 +32,15 @@ WITH T AS (
 		   S.BlockedQueries,
 		   S.BlockedQueriesWaitMs,
 		   S.MaxMemoryGrant*8 as MaxMemoryGrantKB,
-		   S.LongestRunningQueryMs,
+		   HD.HumanDuration as LongestRunningQuery,
 		   S.CriticalWaitCount,
 		   S.CriticalWaitTime,
+		   S.TempDBWaitCount,
+		   S.TempDBWaitTimeMs,
 		   ROW_NUMBER() OVER(PARTITION BY S.InstanceID ORDER BY S.SnapshotDateUTC DESC) rnum
 	FROM dbo.RunningQueriesSummary S 
 	JOIN dbo.Instances I ON I.InstanceID = S.InstanceID
+	CROSS APPLY dbo.MillisecondsToHumanDuration (S.LongestRunningQueryMs) HD
 	WHERE EXISTS(SELECT 1 FROM @Instances t WHERE t.InstanceID = I.InstanceID)
 	AND S.SnapshotDateUTC>=DATEADD(mi,-15,GETUTCDATE())
 	AND S.SnapshotDateUTC< DATEADD(mi,1,GETUTCDATE())
@@ -49,8 +52,10 @@ SELECT T.InstanceID,
        T.BlockedQueries,
        T.BlockedQueriesWaitMs,
        T.MaxMemoryGrantKB,
-       T.LongestRunningQueryMs,
+       T.LongestRunningQuery,
        T.CriticalWaitCount,
-       T.CriticalWaitTime
+       T.CriticalWaitTime,
+	   T.TempDBWaitCount,
+	   T.TempDBWaitTimeMs
 FROM T 
 WHERE T.rnum = 1

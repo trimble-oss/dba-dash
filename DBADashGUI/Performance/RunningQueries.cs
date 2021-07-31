@@ -56,7 +56,7 @@ namespace DBADashGUI.Performance
                 col.HeaderText = col.HeaderText.Titleize();
                 if(dt.Columns[col.DataPropertyName].DataType.IsNumeric())
                 {
-                    col.DefaultCellStyle.Format = "#,###.###";
+                    col.DefaultCellStyle.Format = "#,##0.###";
                 }               
             }
             dgv.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
@@ -135,9 +135,9 @@ namespace DBADashGUI.Performance
             foreach (DataGridViewColumn col in dgv.Columns)
             {
                 col.HeaderText = col.HeaderText.Titleize();
-                if (dt.Columns[col.DataPropertyName].DataType.IsNumeric())
+                if (dt.Columns[col.DataPropertyName].DataType.IsNumeric() && !col.DataPropertyName.EndsWith("id"))
                 {
-                    col.DefaultCellStyle.Format = "#,###.###";
+                    col.DefaultCellStyle.Format = "#,##0.###";
                 }
             }
             dgv.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);

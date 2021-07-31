@@ -23,7 +23,9 @@ BEGIN
         MaxMemoryGrant,
         LongestRunningQueryMs,
         CriticalWaitCount,
-        CriticalWaitTime
+        CriticalWaitTime,
+        TempDBWaitCount,
+        TempDBWaitTimeMs
     )
     SELECT @InstanceID as InstanceID,
             R.SnapshotDateUTC,
@@ -33,9 +35,18 @@ BEGIN
 		    ISNULL(MAX(R.granted_query_memory),0) AS MaxMemoryGrant,
 		    ISNULL(MAX(calc.Duration),0) AS LongestRunningQueryMs,
 		    SUM(CASE WHEN WT.IsCriticalWait=1 THEN 1 ELSE 0 END) CriticalWaitCount,
-		    SUM(CASE WHEN WT.IsCriticalWait=1 THEN CAST(ISNULL(R.wait_time,0) AS BIGINT) ELSE 0 END) CriticalWaitTime
+		    SUM(CASE WHEN WT.IsCriticalWait=1 THEN CAST(ISNULL(R.wait_time,0) AS BIGINT) ELSE 0 END) CriticalWaitTime,
+            SUM(calc.IsTempDB) as TempDBWaitCount,
+            SUM(CASE WHEN calc.IsTempDB=1 THEN calc.Duration ELSE 0 END) AS TempDBWaitTimeMs
     FROM @RunningQueries R 
-    CROSS APPLY(SELECT DATEDIFF_BIG(ms,ISNULL(start_time_utc,last_request_start_time_utc),R.SnapshotDateUTC) AS Duration) calc
+    CROSS APPLY(SELECT DATEDIFF_BIG(ms,ISNULL(start_time_utc,last_request_start_time_utc),R.SnapshotDateUTC) AS Duration,
+                        CASE WHEN wait_resource LIKE '2:%' 
+			                    OR wait_resource LIKE 'PAGE 2:%'
+			                    OR wait_resource LIKE 'OBJECT: 2:%'
+			                    OR wait_resource LIKE 'RID: 2%'
+			                    OR wait_resource LIKE 'RID: 2:%'
+			                    THEN 1 ELSE 0 END AS IsTempDB
+                ) calc
     LEFT JOIN dbo.WaitType WT ON R.wait_type  = WT.WaitType
     GROUP BY R.SnapshotDateUTC
 
@@ -51,9 +62,11 @@ BEGIN
 			MaxMemoryGrant,
 			LongestRunningQueryMs,
 			CriticalWaitCount,
-			CriticalWaitTime
+			CriticalWaitTime,
+            TempDBWaitCount,
+            TempDBWaitTimeMs
 		)
-		VALUES(@InstanceID,@SnapshotDate,0,0,0,0,0,0,0)
+		VALUES(@InstanceID,@SnapshotDate,0,0,0,0,0,0,0,0,0)
 	END
     /* Running Queries replaces legacy blocking snapshot collection */
     INSERT INTO dbo.BlockingSnapshotSummary(
