@@ -16,3 +16,18 @@ Additionally thresholds are used for plan capture to reduce the overhead of coll
  1,000ms CPU, 10,000ms Duration, 6400 pages (50MB) memory grant, query count: 2
 
 Plans will be collected for queries that exceed **any** of the specified thresholds.  The thresholds can be configured in the ServiceConfig.json file.
+
+## Enable Plan capture
+To capture query plans, check the open in the DBA Dash Service Config tool:
+![Capture plans](Docs/CapturePlans.png)
+
+The following json will be added to your source connection to enable the plan collection.  The thresholds can be modified by editing the json if required.
+```
+"RunningQueryPlanThreshold": {
+"CPUThreshold": 1000,
+"MemoryGrantThreshold": 6400,
+"DurationThreshold": 10000,
+"CountThreshold": 2,
+"PlanCollectionEnabled": true
+},
+```
