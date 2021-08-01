@@ -164,7 +164,7 @@ namespace DBADashGUI.Performance
                 {
                     gvBlocking.Rows[idx].Cells["BlockedSessions"].ToolTipText = blocked + " (" + blockedRecursive + " recursive)";
                 }
-                var txt = (string)gvBlocking.Rows[idx].Cells["Txt"].Value;
+                var txt = Convert.ToString(gvBlocking.Rows[idx].Cells["Txt"].Value);
                 gvBlocking.Rows[idx].Cells["Txt"].Value = txt.Trim();
                 gvBlocking.Rows[idx].Cells["BlockedWaitTimeRecursive"].Value = MillisecondsToReadableDuration((Int32)row["WaitTimeRecursive"]);
                 if(row["wait_time"]!=DBNull.Value){ gvBlocking.Rows[idx].Cells["WaitTime"].Value = MillisecondsToReadableDuration((Int32)row["Wait_Time"]); }
