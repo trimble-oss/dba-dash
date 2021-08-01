@@ -13,7 +13,7 @@ END
 
 SELECT HD.HumanDuration as [Duration],
     QT.text AS batch_text,
-	SUBSTRING(QT.text,ISNULL((NULLIF(Q.statement_start_offset,-1)/2)+1,0),ISNULL((NULLIF(Q.statement_end_offset,-1) - NULLIF(Q.statement_start_offset,-1))/2+1,2147483647)) AS text,
+	SUBSTRING(QT.text,ISNULL((NULLIF(Q.statement_start_offset,-1)/2)+1,0),ISNULL((NULLIF(NULLIF(Q.statement_end_offset,-1),0) - NULLIF(Q.statement_start_offset,-1))/2+1,2147483647)) AS text,
 	CAST(DECOMPRESS(QP.query_plan_compresed) AS XML) query_plan,
 	ISNULL(QT.object_id,QP.object_id) AS object_id,
 	O.SchemaName + '.' +  O.ObjectName AS object_name,
