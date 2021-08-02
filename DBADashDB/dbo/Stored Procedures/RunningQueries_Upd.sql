@@ -12,6 +12,107 @@ BEGIN
     SELECT TOP(1) @SnapshotDate = SnapshotDateUTC 
     FROM @RunningQueries
 
+	DECLARE @RunningQueriesDD dbo.RunningQueries;
+
+	/* 
+		Sometimes a duplicate row for the same session id will appear in the results - de-duplicate by session_id before we import the data.
+	*/
+	WITH deDupe AS (SELECT t.SnapshotDateUTC,
+						   t.session_id,
+						   t.statement_start_offset,
+						   t.statement_end_offset,
+						   t.command,
+						   t.status,
+						   t.wait_time,
+						   t.wait_type,
+						   t.wait_resource,
+						   t.blocking_session_id,
+						   t.cpu_time,
+						   t.logical_reads,
+						   t.reads,
+						   t.writes,
+						   t.granted_query_memory,
+						   t.percent_complete,
+						   t.open_transaction_count,
+						   t.transaction_isolation_level,
+						   t.login_name,
+						   t.host_name,
+						   t.database_id,
+						   t.program_name,
+						   t.client_interface_name,
+						   t.start_time_utc,
+						   t.last_request_start_time_utc,
+						   t.sql_handle,
+						   t.plan_handle,
+						   t.query_hash,
+						   t.query_plan_hash,
+						ROW_NUMBER() OVER(PARTITION BY t.session_id ORDER BY t.cpu_time DESC) rnum
+					FROM  @RunningQueries t
+	)
+	INSERT INTO @RunningQueriesDD
+	(
+	    SnapshotDateUTC,
+	    session_id,
+	    statement_start_offset,
+	    statement_end_offset,
+	    command,
+	    status,
+	    wait_time,
+	    wait_type,
+	    wait_resource,
+	    blocking_session_id,
+	    cpu_time,
+	    logical_reads,
+	    reads,
+	    writes,
+	    granted_query_memory,
+	    percent_complete,
+	    open_transaction_count,
+	    transaction_isolation_level,
+	    login_name,
+	    host_name,
+	    database_id,
+	    program_name,
+	    client_interface_name,
+	    start_time_utc,
+	    last_request_start_time_utc,
+	    sql_handle,
+	    plan_handle,
+	    query_hash,
+	    query_plan_hash
+	)
+	SELECT  SnapshotDateUTC,
+	    session_id,
+	    statement_start_offset,
+	    statement_end_offset,
+	    command,
+	    status,
+	    wait_time,
+	    wait_type,
+	    wait_resource,
+	    blocking_session_id,
+	    cpu_time,
+	    logical_reads,
+	    reads,
+	    writes,
+	    granted_query_memory,
+	    percent_complete,
+	    open_transaction_count,
+	    transaction_isolation_level,
+	    login_name,
+	    host_name,
+	    database_id,
+	    program_name,
+	    client_interface_name,
+	    start_time_utc,
+	    last_request_start_time_utc,
+	    sql_handle,
+	    plan_handle,
+	    query_hash,
+	    query_plan_hash
+	FROM deDupe
+	WHERE deDupe.rnum=1
+
     BEGIN TRAN
     INSERT INTO dbo.RunningQueriesSummary
     (
@@ -33,12 +134,12 @@ BEGIN
 		    SUM(CASE WHEN R.blocking_session_id>0 THEN 1 ELSE 0 END) AS BlockedQueries,
 		    ISNULL(SUM(CASE WHEN R.blocking_session_id>0 THEN CAST(R.wait_time AS BIGINT) ELSE 0 END),0) AS BlockedWaitTime,
 		    ISNULL(MAX(R.granted_query_memory),0) AS MaxMemoryGrant,
-		    ISNULL(MAX(calc.Duration),0) AS LongestRunningQueryMs,
+		    ISNULL(MAX(CASE WHEN R.wait_type='SP_SERVER_DIAGNOSTICS_SLEEP' THEN 0 ELSE calc.Duration END),0) AS LongestRunningQueryMs,
 		    SUM(CASE WHEN WT.IsCriticalWait=1 THEN 1 ELSE 0 END) CriticalWaitCount,
 		    SUM(CASE WHEN WT.IsCriticalWait=1 THEN CAST(ISNULL(R.wait_time,0) AS BIGINT) ELSE 0 END) CriticalWaitTime,
             SUM(calc.IsTempDB) as TempDBWaitCount,
             SUM(CASE WHEN calc.IsTempDB=1 THEN calc.Duration ELSE 0 END) AS TempDBWaitTimeMs
-    FROM @RunningQueries R 
+    FROM @RunningQueriesDD R 
     CROSS APPLY(SELECT DATEDIFF_BIG(ms,ISNULL(start_time_utc,last_request_start_time_utc),R.SnapshotDateUTC) AS Duration,
                         CASE WHEN wait_resource LIKE '2:%' 
 			                    OR wait_resource LIKE 'PAGE 2:%'
@@ -150,7 +251,7 @@ BEGIN
         plan_handle,
         query_hash,
         query_plan_hash
-    FROM @RunningQueries;
+    FROM @RunningQueriesDD;
 
 	EXEC dbo.CollectionDates_Upd @InstanceID = @InstanceID,  
 										 @Reference = @Ref,

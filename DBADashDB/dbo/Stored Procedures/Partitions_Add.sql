@@ -23,6 +23,7 @@ VALUES -- Daily Partitions
 	('CustomChecksHistory','d',14),
 	('PerformanceCounters','d',14),
 	('JobHistory','d',14),
+	('RunningQueries','d',14),
 	-- Monthly Partitions
 	('AzureDBElasticPoolResourceStats_60MIN','m',3),
 	('AzureDBResourceStats_60MIN','m',3),

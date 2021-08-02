@@ -83,7 +83,7 @@ namespace DBADashGUI.Performance
             this.tsRefresh.Image = global::DBADashGUI.Properties.Resources._112_RefreshArrow_Green_16x16_72;
             this.tsRefresh.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsRefresh.Name = "tsRefresh";
-            this.tsRefresh.Size = new System.Drawing.Size(29, 24);
+            this.tsRefresh.Size = new System.Drawing.Size(29, 28);
             this.tsRefresh.Text = "Refresh";
             this.tsRefresh.Click += new System.EventHandler(this.tsRefresh_Click);
             // 
@@ -93,7 +93,7 @@ namespace DBADashGUI.Performance
             this.tsCopy.Image = global::DBADashGUI.Properties.Resources.ASX_Copy_blue_16x;
             this.tsCopy.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsCopy.Name = "tsCopy";
-            this.tsCopy.Size = new System.Drawing.Size(29, 24);
+            this.tsCopy.Size = new System.Drawing.Size(29, 28);
             this.tsCopy.Text = "Copy";
             this.tsCopy.Click += new System.EventHandler(this.tsCopy_Click);
             // 
@@ -103,7 +103,7 @@ namespace DBADashGUI.Performance
             this.tsExcel.Image = global::DBADashGUI.Properties.Resources.excel16x16;
             this.tsExcel.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsExcel.Name = "tsExcel";
-            this.tsExcel.Size = new System.Drawing.Size(29, 24);
+            this.tsExcel.Size = new System.Drawing.Size(29, 28);
             this.tsExcel.Text = "Export to Excel";
             this.tsExcel.Click += new System.EventHandler(this.tsExcel_Click);
             // 
@@ -113,7 +113,7 @@ namespace DBADashGUI.Performance
             this.tsBack.Image = global::DBADashGUI.Properties.Resources.Previous_grey_16x;
             this.tsBack.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsBack.Name = "tsBack";
-            this.tsBack.Size = new System.Drawing.Size(29, 24);
+            this.tsBack.Size = new System.Drawing.Size(29, 28);
             this.tsBack.Text = "Back";
             this.tsBack.Click += new System.EventHandler(this.tsBack_Click);
             // 
@@ -123,7 +123,7 @@ namespace DBADashGUI.Performance
             this.tsGetLatest.Image = global::DBADashGUI.Properties.Resources._112_RefreshArrow_Green_16x16_72;
             this.tsGetLatest.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsGetLatest.Name = "tsGetLatest";
-            this.tsGetLatest.Size = new System.Drawing.Size(99, 24);
+            this.tsGetLatest.Size = new System.Drawing.Size(99, 28);
             this.tsGetLatest.Text = "Get Latest";
             this.tsGetLatest.Click += new System.EventHandler(this.tsGetLatest_Click);
             // 
@@ -141,7 +141,7 @@ namespace DBADashGUI.Performance
             this.tsBlocking.Image = global::DBADashGUI.Properties.Resources.Table_16x;
             this.tsBlocking.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsBlocking.Name = "tsBlocking";
-            this.tsBlocking.Size = new System.Drawing.Size(130, 24);
+            this.tsBlocking.Size = new System.Drawing.Size(130, 28);
             this.tsBlocking.Text = "Show Blocking";
             this.tsBlocking.Click += new System.EventHandler(this.tsBlocking_Click);
             // 

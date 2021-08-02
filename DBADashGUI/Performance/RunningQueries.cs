@@ -33,23 +33,28 @@ namespace DBADashGUI.Performance
             {
                 InstanceID = InstanceIDs[0];
             }
+            dgv.Columns.Clear();
+            dgv.Columns.Add(new DataGridViewLinkColumn() { HeaderText = "Snapshot Date", DataPropertyName = "SnapshotDate", Name = "colSnapshotDate" });
+            dgv.Columns.Add(new DataGridViewLinkColumn() { HeaderText = "InstanceID", DataPropertyName = "InstanceID", Name = "colInstanceID", Visible = false });
             DataTable dt;
+
             if (InstanceID > 0)
             {
                 dt = runningQueriesSummary();
                 tsGetLatest.Visible = true;
                 tsBack.Visible = InstanceIDs != null && InstanceIDs.Count>1;
+                dgv.Columns.Add(new DataGridViewTextBoxColumn { HeaderText = "Instance", DataPropertyName = "Instance", Name = "colInstance" });
             }
             else
             {
                 dt = runningQueriesServerSummary();
                 tsGetLatest.Visible = false;
                 tsBack.Visible = false;
+                dgv.Columns.Add(new DataGridViewLinkColumn() { HeaderText = "Instance", DataPropertyName = "Instance", Name = "colInstance" });
             }
             
-            dgv.Columns.Clear();
-            dgv.Columns.Add(new DataGridViewLinkColumn() { HeaderText = "Snapshot Date", DataPropertyName = "SnapshotDate", Name = "colSnapshotDate" });
-            dgv.Columns.Add(new DataGridViewLinkColumn() { HeaderText = "InstanceID", DataPropertyName = "InstanceID", Name = "colInstanceID", Visible = false });
+       
+           
             dgv.DataSource = dt;
             foreach (DataGridViewColumn col in dgv.Columns)
             {
@@ -163,6 +168,11 @@ namespace DBADashGUI.Performance
                     var snapshotDate = ((DateTime)row["SnapshotDate"]).ToUniversalTime();
                     InstanceID = (int)row["InstanceID"];
                     loadSnapshot(snapshotDate);
+                }
+                else if (dgv.Columns[e.ColumnIndex].Name == "colInstance")
+                {
+                    InstanceID = (int)row["InstanceID"];
+                    RefreshData();
                 }
                 else if (dgv.Columns[e.ColumnIndex].Name == "colBatchText")
                 {

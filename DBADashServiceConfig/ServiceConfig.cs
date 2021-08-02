@@ -26,7 +26,7 @@ namespace DBADashServiceConfig
         CollectionConfig collectionConfig = new CollectionConfig();
         readonly string jsonPath = System.IO.Path.Combine(Application.StartupPath, "ServiceConfig.json");
         ServiceController svcCtrl;
-
+        private PlanCollectionThreshold planCollectionThreshold;
         private void bttnAdd_Click(object sender, EventArgs e)
         {
             var src = new DBADashSource(cboSource.Text)
@@ -43,7 +43,14 @@ namespace DBADashServiceConfig
             }
             if (chkCollectPlans.Checked)
             {
-                src.RunningQueryPlanThreshold = new PlanCollectionThreshold() { CPUThreshold = 1000, DurationThreshold = 10000, MemoryGrantThreshold = 6400, CountThreshold=2 };
+                if (planCollectionThreshold != null && planCollectionThreshold.PlanCollectionEnabled)
+                {
+                    src.RunningQueryPlanThreshold = planCollectionThreshold;
+                }
+                else
+                {
+                    src.RunningQueryPlanThreshold = new PlanCollectionThreshold() { CPUThreshold = 1000, DurationThreshold = 10000, MemoryGrantThreshold = 6400, CountThreshold = 2 };
+                }
             }
             src.UseDualEventSession = chkDualSession.Checked;
             src.SchemaSnapshotOnServiceStart = chkSchemaSnapshotOnStart.Checked;
@@ -574,6 +581,12 @@ namespace DBADashServiceConfig
                 txtSnapshotDBs.Text = src.SchemaSnapshotDBs;
                 chkSchemaSnapshotOnStart.Checked = src.SchemaSnapshotOnServiceStart;
                 chkDualSession.Checked = src.UseDualEventSession;
+                chkCollectPlans.Checked =src.RunningQueryPlanThreshold==null ? false : src.RunningQueryPlanThreshold.PlanCollectionEnabled;
+                planCollectionThreshold = src.RunningQueryPlanThreshold;
+            }
+            else
+            {
+                src.RunningQueryPlanThreshold = null;
             }
             setAvailableOptionsForSource();
         }
