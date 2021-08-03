@@ -587,6 +587,8 @@
     <Build Include="Switch\Tables\RunningQueries.sql" />
     <Build Include="Switch\Tables\RunningQueriesSummary.sql" />
     <Build Include="dbo\Stored Procedures\PurgeCollectionErrorLog.sql" />
+    <Build Include="dbo\Stored Procedures\PurgeQueryPlans.sql" />
+    <Build Include="dbo\Stored Procedures\PurgeQueryText.sql" />
   </ItemGroup>
   <ItemGroup>
     <PostDeploy Include="Script.PostDeployment1.sql" />

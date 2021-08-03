@@ -1,12 +1,11 @@
-﻿
-CREATE PROC dbo.DataRetention_Get(@AllTables BIT=0)
+﻿CREATE PROC dbo.DataRetention_Get(@AllTables BIT=0)
 AS
 WITH A AS (
 	SELECT 'dbo' as [SchemaName], DR.TableName,DR.RetentionDays, DATEDIFF(d,MIN(ub),GETUTCDATE()) ActualRetention,MIN(ub) DataFrom
 	FROM dbo.DataRetention DR
-	CROSS APPLY dbo.PartitionFunctionName(DR.TableName) PF
-	CROSS APPLY[dbo].[PartitionBoundaryHelper](PF.PartitionFunctionName,DR.TableName) PB
-	WHERE PB.partition_number=1
+	OUTER APPLY dbo.PartitionFunctionName(DR.TableName) PF
+	OUTER APPLY[dbo].[PartitionBoundaryHelper](PF.PartitionFunctionName,DR.TableName) PB
+	WHERE (PB.partition_number=1 OR PB.partition_number IS NULL)
 	GROUP BY DR.TableName,DR.RetentionDays
 )
 , B AS (

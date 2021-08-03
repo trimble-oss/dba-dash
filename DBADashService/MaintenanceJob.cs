@@ -51,7 +51,7 @@ namespace DBADashService
             var cn = new SqlConnection(connectionString);
             using (cn)
             {
-                using (var cmd = new SqlCommand("dbo.PurgeData", cn) { CommandType = CommandType.StoredProcedure, CommandTimeout = 120 })
+                using (var cmd = new SqlCommand("dbo.PurgeData", cn) { CommandType = CommandType.StoredProcedure, CommandTimeout = 600 })
                 {
                     cn.Open();
                     Log.Information("Maintenance : PurgeData");

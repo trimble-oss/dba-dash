@@ -20,13 +20,44 @@ END
 CLOSE cTables
 DEALLOCATE cTables
 
-/* Run once per day */
+/* Remove old data from CollectionErrorLog table.  Run once per day */
 UPDATE dbo.Settings
 	SET SettingValue = GETUTCDATE()
-WHERE SettingName = 'PurgeCollectionErrorLogDate'
+WHERE SettingName = 'PurgeCollectionErrorLog_StartDate'
 AND SettingValue < DATEADD(d,-1,GETUTCDATE())
 
 IF @@ROWCOUNT =1
 BEGIN
 	EXEC dbo.PurgeCollectionErrorLog
+	UPDATE dbo.Settings
+		SET SettingValue = GETUTCDATE()
+	WHERE SettingName = 'PurgeCollectionErrorLog_CompletedDate'
+END
+
+/* Remove old data from QueryPlans table.  Run once per day */
+UPDATE dbo.Settings
+	SET SettingValue = GETUTCDATE()
+WHERE SettingName = 'PurgeQueryPlans_StartDate'
+AND SettingValue < DATEADD(d,-1,GETUTCDATE())
+
+IF @@ROWCOUNT =1
+BEGIN
+	EXEC dbo.PurgeQueryPlans
+	UPDATE dbo.Settings
+		SET SettingValue = GETUTCDATE()
+	WHERE SettingName = 'PurgeQueryPlans_CompletedDate'
+END
+
+/* Remove old data from QueryText table.  Run once per day */
+UPDATE dbo.Settings
+	SET SettingValue = GETUTCDATE()
+WHERE SettingName = 'PurgeQueryText_StartDate'
+AND SettingValue < DATEADD(d,-1,GETUTCDATE())
+
+IF @@ROWCOUNT =1
+BEGIN
+	EXEC dbo.PurgeQueryText
+	UPDATE dbo.Settings
+		SET SettingValue = GETUTCDATE()
+	WHERE SettingName = 'PurgeQueryText_CompletedDate'
 END

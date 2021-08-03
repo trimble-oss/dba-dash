@@ -598,5 +598,14 @@ BEGIN
 END
 
 INSERT INTO dbo.Settings(SettingName,SettingValue)
-SELECT 'PurgeCollectionErrorLogDate',CAST('19000101' AS DATETIME)
-WHERE NOT EXISTS(SELECT 1 FROM dbo.Settings WHERE SettingName='PurgeCollectionErrorLogDate')
+SELECT SettingName,CAST('19000101' AS DATETIME) 
+FROM (VALUES('PurgeCollectionErrorLog_StartDate'),
+			('PurgeCollectionErrorLog_CompletedDate'),
+			('PurgeQueryText_StartDate'),
+			('PurgeQueryText_CompletedDate'),
+			('PurgeQueryPlans_StartDate'),
+			('PurgeQueryPlans_CompletedDate')
+	  ) T(SettingName)
+WHERE NOT EXISTS(SELECT 1 
+				FROM dbo.Settings S
+				WHERE S.SettingName=T.SettingName)
