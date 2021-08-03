@@ -136,9 +136,9 @@ BEGIN
 		    ISNULL(MAX(R.granted_query_memory),0) AS MaxMemoryGrant,
 		    ISNULL(MAX(CASE WHEN R.wait_type='SP_SERVER_DIAGNOSTICS_SLEEP' THEN 0 ELSE calc.Duration END),0) AS LongestRunningQueryMs,
 		    SUM(CASE WHEN WT.IsCriticalWait=1 THEN 1 ELSE 0 END) CriticalWaitCount,
-		    SUM(CASE WHEN WT.IsCriticalWait=1 THEN CAST(ISNULL(R.wait_time,0) AS BIGINT) ELSE 0 END) CriticalWaitTime,
+		    SUM(CASE WHEN WT.IsCriticalWait=1 THEN CAST(R.wait_time AS BIGINT) ELSE 0 END) CriticalWaitTime,
             SUM(calc.IsTempDB) as TempDBWaitCount,
-            SUM(CASE WHEN calc.IsTempDB=1 THEN calc.Duration ELSE 0 END) AS TempDBWaitTimeMs
+            SUM(CASE WHEN calc.IsTempDB=1 THEN CAST(R.wait_time AS BIGINT) ELSE 0 END) AS TempDBWaitTimeMs
     FROM @RunningQueriesDD R 
     CROSS APPLY(SELECT DATEDIFF_BIG(ms,ISNULL(start_time_utc,last_request_start_time_utc),R.SnapshotDateUTC) AS Duration,
                         CASE WHEN wait_resource LIKE '2:%' 
