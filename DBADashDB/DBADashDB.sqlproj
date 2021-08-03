@@ -586,6 +586,7 @@
     <Build Include="Storage\PS_RunningQueriesSummary.sql" />
     <Build Include="Switch\Tables\RunningQueries.sql" />
     <Build Include="Switch\Tables\RunningQueriesSummary.sql" />
+    <Build Include="dbo\Stored Procedures\PurgeCollectionErrorLog.sql" />
   </ItemGroup>
   <ItemGroup>
     <PostDeploy Include="Script.PostDeployment1.sql" />

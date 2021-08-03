@@ -173,7 +173,8 @@ FROM (VALUES('ObjectExecutionStats',120),
 				('PerformanceCounters_60MIN',730),
 				('JobStats_60MIN',730),
 				('JobHistory',8),
-				('RunningQueries',14)
+				('RunningQueries',14),
+				('CollectionErrorLog',14)
 				) AS t(TableName,RetentionDays)
 WHERE NOT EXISTS(SELECT 1 FROM dbo.DataRetention DR WHERE DR.TableName = T.TableName)
 
@@ -596,3 +597,6 @@ BEGIN
 	SELECT -1,'00000000-0000-0000-0000-000000000000',60,10080,1,0
 END
 
+INSERT INTO dbo.Settings(SettingName,SettingValue)
+SELECT 'PurgeCollectionErrorLogDate',CAST('19000101' AS DATETIME)
+WHERE NOT EXISTS(SELECT 1 FROM dbo.Settings WHERE SettingName='PurgeCollectionErrorLogDate')
