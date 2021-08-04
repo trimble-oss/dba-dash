@@ -10,5 +10,6 @@
 	CriticalWaitTime BIGINT NOT NULL,
 	TempDBWaitCount INT NOT NULL,
 	TempDBWaitTimeMs BIGINT NOT NULL,
+	SumMemoryGrant BIGINT NULL,
 	CONSTRAINT PK_RunningQueriesSummary PRIMARY KEY(InstanceID,SnapshotDateUTC) WITH (DATA_COMPRESSION = PAGE) ON PS_RunningQueriesSummary(SnapshotDateUTC)
 ) ON PS_RunningQueriesSummary(SnapshotDateUTC)

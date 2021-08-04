@@ -66,13 +66,13 @@ namespace DBADashGUI.Performance
             this.dgv.BackgroundColor = System.Drawing.Color.White;
             this.dgv.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.dgv.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.dgv.Location = new System.Drawing.Point(0, 27);
+            this.dgv.Location = new System.Drawing.Point(0, 31);
             this.dgv.Name = "dgv";
             this.dgv.ReadOnly = true;
             this.dgv.RowHeadersVisible = false;
             this.dgv.RowHeadersWidth = 51;
             this.dgv.RowTemplate.Height = 24;
-            this.dgv.Size = new System.Drawing.Size(717, 335);
+            this.dgv.Size = new System.Drawing.Size(717, 331);
             this.dgv.TabIndex = 0;
             this.dgv.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgv_CellContentClick);
             this.dgv.CellFormatting += new System.Windows.Forms.DataGridViewCellFormattingEventHandler(this.dgv_CellFormatting);
@@ -91,7 +91,7 @@ namespace DBADashGUI.Performance
             this.tsGroupBy});
             this.toolStrip1.Location = new System.Drawing.Point(0, 0);
             this.toolStrip1.Name = "toolStrip1";
-            this.toolStrip1.Size = new System.Drawing.Size(717, 27);
+            this.toolStrip1.Size = new System.Drawing.Size(717, 31);
             this.toolStrip1.TabIndex = 1;
             this.toolStrip1.Text = "Group By";
             // 
@@ -186,7 +186,7 @@ namespace DBADashGUI.Performance
             this.tsGroupBy.Image = ((System.Drawing.Image)(resources.GetObject("tsGroupBy.Image")));
             this.tsGroupBy.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsGroupBy.Name = "tsGroupBy";
-            this.tsGroupBy.Size = new System.Drawing.Size(84, 24);
+            this.tsGroupBy.Size = new System.Drawing.Size(84, 28);
             this.tsGroupBy.Text = "Group By";
             // 
             // toolStripMenuItem1

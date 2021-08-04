@@ -32,11 +32,12 @@ WITH T AS (
 		   S.BlockedQueries,
 		   S.BlockedQueriesWaitMs,
 		   S.MaxMemoryGrant*8 as MaxMemoryGrantKB,
+		   S.SumMemoryGrant*8 as SumMemoryGrantKB,
 		   HD.HumanDuration as LongestRunningQuery,
 		   S.CriticalWaitCount,
 		   S.CriticalWaitTime,
 		   S.TempDBWaitCount,
-		   S.TempDBWaitTimeMs,
+		   S.TempDBWaitTimeMs,		   
 		   ROW_NUMBER() OVER(PARTITION BY S.InstanceID ORDER BY S.SnapshotDateUTC DESC) rnum
 	FROM dbo.RunningQueriesSummary S 
 	JOIN dbo.Instances I ON I.InstanceID = S.InstanceID
@@ -52,6 +53,7 @@ SELECT T.InstanceID,
        T.BlockedQueries,
        T.BlockedQueriesWaitMs,
        T.MaxMemoryGrantKB,
+	   T.SumMemoryGrantKB,
        T.LongestRunningQuery,
        T.CriticalWaitCount,
        T.CriticalWaitTime,

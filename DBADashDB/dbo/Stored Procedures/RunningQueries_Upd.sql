@@ -126,7 +126,8 @@ BEGIN
         CriticalWaitCount,
         CriticalWaitTime,
         TempDBWaitCount,
-        TempDBWaitTimeMs
+        TempDBWaitTimeMs,
+		SumMemoryGrant
     )
     SELECT @InstanceID as InstanceID,
             R.SnapshotDateUTC,
@@ -138,7 +139,8 @@ BEGIN
 		    SUM(CASE WHEN WT.IsCriticalWait=1 THEN 1 ELSE 0 END) CriticalWaitCount,
 		    SUM(CASE WHEN WT.IsCriticalWait=1 THEN CAST(R.wait_time AS BIGINT) ELSE 0 END) CriticalWaitTime,
             SUM(calc.IsTempDB) as TempDBWaitCount,
-            SUM(CASE WHEN calc.IsTempDB=1 THEN CAST(R.wait_time AS BIGINT) ELSE 0 END) AS TempDBWaitTimeMs
+            SUM(CASE WHEN calc.IsTempDB=1 THEN CAST(R.wait_time AS BIGINT) ELSE 0 END) AS TempDBWaitTimeMs,
+			ISNULL(SUM(R.granted_query_memory),0) AS SumMemoryGrant
     FROM @RunningQueriesDD R 
     CROSS APPLY(SELECT DATEDIFF_BIG(ms,ISNULL(start_time_utc,last_request_start_time_utc),R.SnapshotDateUTC) AS Duration,
                         CASE WHEN wait_resource LIKE '2:%' 

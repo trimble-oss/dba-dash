@@ -325,7 +325,7 @@ namespace DBADashGUI.Performance
                         col.DefaultCellStyle.Format = "#,##0.###";
                     }
                 }
-
+                dgv.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
             }
         }
 
