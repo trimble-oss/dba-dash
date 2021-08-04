@@ -23,18 +23,20 @@ namespace DBADashGUI.Performance
         public int InstanceID;
         public List<Int32> InstanceIDs;
         private DateTime currentSnapshotDate;
-
+        private DataTable snapshotDT;
         public void RefreshData()
         {
+            snapshotDT = null;
             tsBlocking.Visible = false;
             dgv.DataSource = null;
+            tsGroupBy.Enabled = false;
             lblSnapshotDate.Visible = false;
             if (InstanceIDs!=null && InstanceIDs.Count == 1)
             {
                 InstanceID = InstanceIDs[0];
             }
             dgv.Columns.Clear();
-            dgv.Columns.Add(new DataGridViewLinkColumn() { HeaderText = "Snapshot Date", DataPropertyName = "SnapshotDate", Name = "colSnapshotDate" });
+            dgv.Columns.Add(new DataGridViewLinkColumn() { HeaderText = "Snapshot Date", DataPropertyName = "SnapshotDate", Name = "colSnapshotDate", SortMode = DataGridViewColumnSortMode.Automatic });
             dgv.Columns.Add(new DataGridViewLinkColumn() { HeaderText = "InstanceID", DataPropertyName = "InstanceID", Name = "colInstanceID", Visible = false });
             DataTable dt;
 
@@ -50,12 +52,11 @@ namespace DBADashGUI.Performance
                 dt = runningQueriesServerSummary();
                 tsGetLatest.Visible = false;
                 tsBack.Visible = false;
-                dgv.Columns.Add(new DataGridViewLinkColumn() { HeaderText = "Instance", DataPropertyName = "Instance", Name = "colInstance" });
+                dgv.Columns.Add(new DataGridViewLinkColumn() { HeaderText = "Instance", DataPropertyName = "Instance", Name = "colInstance", SortMode= DataGridViewColumnSortMode.Automatic });
             }
-            
-       
+                
            
-            dgv.DataSource = dt;
+            dgv.DataSource = new DataView(dt);
             foreach (DataGridViewColumn col in dgv.Columns)
             {
                 col.HeaderText = col.HeaderText.Titleize();
@@ -127,20 +128,32 @@ namespace DBADashGUI.Performance
 
         private void loadSnapshot(DateTime snapshotDate)
         {           
-            var dt = runningQueriesSnapshot(ref snapshotDate);
-            lblSnapshotDate.Visible = true;
+            snapshotDT = runningQueriesSnapshot(ref snapshotDate);
             lblSnapshotDate.Text = "Snapshot Date: " + snapshotDate.ToString("yyyy-MM-dd HH:mm:ss");
+            loadSnapshot(new DataView(snapshotDT));
+            lblSnapshotDate.Visible = true;
             tsGetLatest.Visible = true;
+            int blockedCount = snapshotDT.AsEnumerable().Where(r => Convert.ToInt16(r["blocking_session_id"]) != 0).Count();
+            tsBlocking.Visible = true;
+            tsBlocking.Enabled = blockedCount > 0;
+            tsBlocking.Text = string.Format("Show Blocking ({0})", blockedCount);
+            currentSnapshotDate = snapshotDate;
+            tsBack.Visible = true;
+        }
+
+        private void loadSnapshot(object source)
+        {
+
             dgv.DataSource = null;
             dgv.Columns.Clear();
-            dgv.Columns.Add(new DataGridViewLinkColumn() { HeaderText = "Batch Text", DataPropertyName = "batch_text", Name = "colBatchText",  AutoSizeMode = DataGridViewAutoSizeColumnMode.None, Width=50, SortMode = DataGridViewColumnSortMode.Automatic });
-            dgv.Columns.Add(new DataGridViewLinkColumn() { HeaderText = "Text", DataPropertyName = "text", Name = "colText", AutoSizeMode = DataGridViewAutoSizeColumnMode.None, Width=50, SortMode = DataGridViewColumnSortMode.Automatic });
-            dgv.Columns.Add(new DataGridViewLinkColumn() { HeaderText = "Plan", DataPropertyName = "query_plan", Name = "colQueryPlan", AutoSizeMode = DataGridViewAutoSizeColumnMode.None, Width = 50, SortMode = DataGridViewColumnSortMode.NotSortable });           
-            dgv.DataSource = new DataView(dt);
+            dgv.Columns.Add(new DataGridViewLinkColumn() { HeaderText = "Batch Text", DataPropertyName = "batch_text", Name = "colBatchText", AutoSizeMode = DataGridViewAutoSizeColumnMode.None, Width = 50, SortMode = DataGridViewColumnSortMode.Automatic });
+            dgv.Columns.Add(new DataGridViewLinkColumn() { HeaderText = "Text", DataPropertyName = "text", Name = "colText", AutoSizeMode = DataGridViewAutoSizeColumnMode.None, Width = 50, SortMode = DataGridViewColumnSortMode.Automatic });
+            dgv.Columns.Add(new DataGridViewLinkColumn() { HeaderText = "Plan", DataPropertyName = "query_plan", Name = "colQueryPlan", AutoSizeMode = DataGridViewAutoSizeColumnMode.None, Width = 50, SortMode = DataGridViewColumnSortMode.NotSortable });
+            dgv.DataSource = source;
             foreach (DataGridViewColumn col in dgv.Columns)
             {
                 col.HeaderText = col.HeaderText.Titleize();
-                if (dt.Columns[col.DataPropertyName].DataType.IsNumeric() && !col.DataPropertyName.EndsWith("id"))
+                if (snapshotDT.Columns[col.DataPropertyName].DataType.IsNumeric() && !col.DataPropertyName.EndsWith("id"))
                 {
                     col.DefaultCellStyle.Format = "#,##0.###";
                 }
@@ -149,13 +162,8 @@ namespace DBADashGUI.Performance
             dgv.Columns["colBatchText"].Width = 200;
             dgv.Columns["colText"].Width = 200;
             dgv.Columns["colQueryPlan"].Width = 90;
-            tsBack.Visible = true;
-
-            int blockedCount = dt.AsEnumerable().Where(r => Convert.ToInt16(r["blocking_session_id"]) != 0).Count();
-            tsBlocking.Visible = true;
-            tsBlocking.Enabled = blockedCount > 0;
-            tsBlocking.Text = string.Format("Show Blocking ({0})", blockedCount);
-            currentSnapshotDate = snapshotDate;
+            tsGroupBy.Enabled = dgv.Rows.Count>1;
+            
         }
 
         private void dgv_CellContentClick(object sender, DataGridViewCellEventArgs e)
@@ -191,6 +199,21 @@ namespace DBADashGUI.Performance
                     System.IO.File.WriteAllText(path, plan);
                     Process.Start(path);
                 }
+                else if(dgv.Columns[e.ColumnIndex].Name == "colGroup")
+                {
+                    string filter = dgv.Columns[e.ColumnIndex].DataPropertyName + "='" + Convert.ToString(row[dgv.Columns[e.ColumnIndex].DataPropertyName]).Replace("'","''") + "'";
+                    DataView dv;
+                    try
+                    {
+                        dv = new DataView(snapshotDT, filter, "", DataViewRowState.CurrentRows);
+                    }
+                    catch(Exception ex)
+                    {
+                        MessageBox.Show("Filter error: " + filter + Environment.NewLine + ex.Message);
+                        return;
+                    }
+                    loadSnapshot(dv);
+                }
             }
         }
 
@@ -206,11 +229,24 @@ namespace DBADashGUI.Performance
 
         private void tsBack_Click(object sender, EventArgs e)
         {
-            if (dgv.Columns.Contains("colSnapshotDate"))
+            string rowFilter = String.Empty;
+            if(dgv.DataSource.GetType() == typeof(DataView))
+            {
+               rowFilter= ((DataView)dgv.DataSource).RowFilter;
+            }
+            if (dgv.Columns.Contains("colGroup") ||  !string.IsNullOrEmpty(rowFilter) )
+            {
+                loadSnapshot(new DataView(snapshotDT));
+            }
+            else if (dgv.Columns.Contains("colSnapshotDate"))
             {
                 InstanceID = -1;
+                RefreshData();
             }
-            RefreshData();
+            else
+            {
+                RefreshData();
+            }         
         }
 
         private void tsGetLatest_Click(object sender, EventArgs e)
@@ -244,6 +280,67 @@ namespace DBADashGUI.Performance
             {
                 frm.ShowDialog();
             }
+        }
+
+        private void toolStripButton1_Click(object sender, EventArgs e)
+        {
+            groupSnapshot("database_name");
+        }
+
+        private void groupSnapshot(string group)
+        {
+            if (snapshotDT != null && snapshotDT.Rows.Count>0)
+            {
+                DataTable groupedDT = new DataTable();
+                groupedDT.Columns.Add(group);
+                groupedDT.Columns.Add("execution_count", typeof(long));
+                groupedDT.Columns.Add("sum_cpu_time", typeof(long));
+                groupedDT.Columns.Add("sum_reads", typeof(long));
+                groupedDT.Columns.Add("sum_logical_reads", typeof(long));
+                groupedDT.Columns.Add("sum_writes", typeof(long));
+                groupedDT.Columns.Add("sum_granted_query_memory_kb", typeof(long));
+                groupedDT = snapshotDT.AsEnumerable()
+                      .GroupBy(r => r.Field<string>(group))
+                      .Select(g =>
+                      {
+                          var row = groupedDT.NewRow();
+                          row[group] = g.Key;
+                          row["execution_count"] = g.Count();
+                          row["sum_reads"] = g.Sum(r => r["reads"] == DBNull.Value ? 0 : r.Field<long>("reads"));
+                          row["sum_logical_reads"] = g.Sum(r => r["logical_reads"] == DBNull.Value ? 0 : r.Field<long>("logical_reads"));
+                          row["sum_writes"] = g.Sum(r => r["writes"] == DBNull.Value ? 0 : r.Field<long>("writes"));
+                          row["sum_cpu_time"] = g.Sum(r => r["cpu_time"] == DBNull.Value ? 0 : r.Field<int>("cpu_time"));
+                          row["sum_granted_query_memory_kb"] = g.Sum(r => r["granted_query_memory_kb"]==DBNull.Value? 0 : Convert.ToInt64(r["granted_query_memory_kb"]));
+                          return row;
+                      }).CopyToDataTable();
+
+                dgv.Columns.Clear();
+                dgv.Columns.Add(new DataGridViewLinkColumn() { DataPropertyName = group, HeaderText = group,Name = "colGroup" });
+                dgv.DataSource = new DataView(groupedDT);
+                foreach (DataGridViewColumn col in dgv.Columns)
+                {
+                    col.HeaderText = col.HeaderText.Titleize();
+                    if (groupedDT.Columns[col.DataPropertyName].DataType.IsNumeric() && !col.DataPropertyName.EndsWith("id"))
+                    {
+                        col.DefaultCellStyle.Format = "#,##0.###";
+                    }
+                }
+
+            }
+        }
+
+        private void tsGroupBy_Click(object sender, EventArgs e)
+        {
+            var ts = (ToolStripMenuItem)sender;
+            if(ts.Tag== null)
+            {
+                loadSnapshot(new DataView(snapshotDT));
+            }
+            else
+            {
+                groupSnapshot((string)ts.Tag);
+            }
+            
         }
     }
 }
