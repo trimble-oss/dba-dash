@@ -4,6 +4,8 @@
 	@SnapshotDate DATETIME2(2)
 )
 AS
+DECLARE @Ref VARCHAR(30)='QueryPlans'
+
 INSERT INTO dbo.QueryPlans
 (
     plan_handle,
@@ -33,3 +35,7 @@ WHERE NOT EXISTS(SELECT 1
 			AND QP.statement_start_offset= t.statement_start_offset 
 			AND QP.statement_end_offset = t.statement_end_offset
 			)
+
+EXEC dbo.CollectionDates_Upd @InstanceID = @InstanceID,  
+										@Reference = @Ref,
+										@SnapshotDate = @SnapshotDate;

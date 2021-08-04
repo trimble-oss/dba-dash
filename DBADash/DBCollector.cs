@@ -574,30 +574,23 @@ namespace DBADash
         public string getPlansSQL()
         {
             var plans = getPlansList();
-            Int32 cnt = 0;
-            Int32 cacheCount = 0;
             var sb = new StringBuilder();
             sb.Append(@"DECLARE @plans TABLE(plan_handle VARBINARY(64),statement_start_offset int,statement_end_offset int)
 INSERT INTO @plans(plan_handle,statement_start_offset,statement_end_offset)
 VALUES");
-            foreach (Plan p in plans)
-            {
-                if (!cache.Contains(p.Key))
-                {
-                    cnt += 1;
-                    sb.AppendLine();
-                    sb.AppendFormat("(0x{0},{1},{2}),", ByteArrayToHexString(p.PlanHandle), p.StartOffset, p.EndOffset); 
-                }
-                else
-                {
-                    cacheCount += 1;
-                }
-            }
-            if ((cnt + cacheCount) > 0)
-            {
-                Log.Information("Plans {0} cached, {1} to collect", cacheCount, cnt);
-            }
-            if (cnt == 0)
+
+            // Already have a distinct list by plan handle, hash and offsets.  
+            // Filter this list by plans not already colllected and get a distinct list by handle and offsets (excluding the hash as this can cause duplicates in rare cases)
+            var collectList =  plans.Where(p => !cache.Contains(p.Key))
+                .GroupBy(p => new { p.PlanHandle, p.StartOffset, p.EndOffset })
+                .Select(p => p.First())
+                .ToList();
+
+            collectList.ForEach(p =>sb.AppendFormat("{3}(0x{0},{1},{2}),", ByteArrayToHexString(p.PlanHandle), p.StartOffset, p.EndOffset,Environment.NewLine));
+
+            Log.Information("Plans {0}, {1} to collect from {2}", plans.Count, collectList.Count,instanceName);
+            
+            if (collectList.Count == 0)
             {
                 return string.Empty;
             }
@@ -728,7 +721,7 @@ VALUES
             }
             if ((cnt + cacheCount) > 0)
             {
-                Log.Information("QueryText: {0} from cache, {1} to collect", cacheCount, cnt);
+                Log.Information("QueryText: {0} from cache, {1} to collect from {2}", cacheCount, cnt, instanceName);
             }
             if (cnt == 0)
             {
