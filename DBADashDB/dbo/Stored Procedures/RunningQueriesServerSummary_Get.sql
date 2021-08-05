@@ -61,3 +61,4 @@ SELECT T.InstanceID,
 	   T.TempDBWaitTimeMs
 FROM T 
 WHERE T.rnum = 1
+ORDER BY T.RunningQueries DESC

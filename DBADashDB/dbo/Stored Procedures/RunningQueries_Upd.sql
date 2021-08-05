@@ -167,9 +167,10 @@ BEGIN
 			CriticalWaitCount,
 			CriticalWaitTime,
             TempDBWaitCount,
-            TempDBWaitTimeMs
+            TempDBWaitTimeMs,
+			SumMemoryGrant
 		)
-		VALUES(@InstanceID,@SnapshotDate,0,0,0,0,0,0,0,0,0)
+		VALUES(@InstanceID,@SnapshotDate,0,0,0,0,0,0,0,0,0,0)
 	END
     /* Running Queries replaces legacy blocking snapshot collection */
     INSERT INTO dbo.BlockingSnapshotSummary(
