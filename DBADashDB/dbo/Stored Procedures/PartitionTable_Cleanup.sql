@@ -63,20 +63,4 @@ BEGIN;
 	END
 END;'
 
-DECLARE @applock INT
-
-SET XACT_ABORT ON
-BEGIN TRAN
-EXEC @applock = sp_getapplock @Resource = 'Partitioning',
-                                 @LockMode = 'Exclusive',
-                                 @LockOwner = 'Transaction',
-                                 @LockTimeout = 5000;
-IF NOT @applock IN(0,1)
-BEGIN
-	THROW 50000,'sp_getapplock error',1;
-	RETURN;
-END
-
 EXEC sp_executesql @SQL,N'@PartitionFunction SYSNAME,@PartitionedTable SYSNAME,@DaysToKeep INT',@PartitionFunction,@PartitionedTable,@DaysToKeep
-
-COMMIT

@@ -604,7 +604,9 @@ FROM (VALUES('PurgeCollectionErrorLog_StartDate'),
 			('PurgeQueryText_StartDate'),
 			('PurgeQueryText_CompletedDate'),
 			('PurgeQueryPlans_StartDate'),
-			('PurgeQueryPlans_CompletedDate')
+			('PurgeQueryPlans_CompletedDate'),
+			('PurgePartitions_StartDate'),
+			('PurgePartitions_CompletedDate')
 	  ) T(SettingName)
 WHERE NOT EXISTS(SELECT 1 
 				FROM dbo.Settings S
