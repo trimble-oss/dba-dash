@@ -45,19 +45,22 @@ ELSE
 BEGIN
 	PRINT 'Enable xp_cmdshell to check power plan'
 END
-IF OBJECT_ID('sys.dm_server_services') IS NOT NULL
-BEGIN
-	SELECT @IsAgentRunning = CASE WHEN status=4 THEN 1 ELSE 0 END
-	FROM   sys.dm_server_services dss
-	WHERE  dss.[servicename] LIKE N'SQL Server Agent (%'
 
-	IF COL_LENGTH('sys.dm_server_services','instant_file_initialization_enabled') IS NOT NULL
-	BEGIN
-		SELECT @InstantFileInitializationEnabled=CASE WHEN instant_file_initialization_enabled='Y' THEN 1 ELSE 0 END
-		FROM   sys.dm_server_services dss
-		WHERE  dss.[servicename] LIKE N'SQL Server (%';
-	END
+IF COL_LENGTH('sys.dm_server_services','instant_file_initialization_enabled') IS NOT NULL
+BEGIN
+	SELECT @InstantFileInitializationEnabled=CASE WHEN instant_file_initialization_enabled='Y' THEN 1 ELSE 0 END
+	FROM   sys.dm_server_services dss
+	WHERE  dss.[servicename] LIKE N'SQL Server (%';
 END
+
+SELECT @IsAgentRunning = CASE WHEN EXISTS(SELECT * 
+											FROM sys.dm_exec_sessions
+											WHERE program_name = 'SQLAgent - Generic Refresher'
+										)
+							THEN CAST(1 AS BIT)
+							ELSE CAST(0 AS BIT)
+							END
+
 DECLARE @OfflineSchedulers INT
 DECLARE @ResourceGovernorEnabled BIT
 SELECT @OfflineSchedulers=COUNT(*)
