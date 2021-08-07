@@ -20,7 +20,17 @@
     desired_state_desc AS (CASE desired_state WHEN 0 THEN N'OFF' WHEN 1 THEN N'READ_ONLY' WHEN 2 THEN N'READ_WRITE' ELSE CONVERT(NVARCHAR(60),desired_state) END),
     actual_state_desc AS (CASE actual_state WHEN 0 THEN N'OFF' WHEN 1 THEN N'READ_ONLY' WHEN 2 THEN N'READ_WRITE' WHEN 3 THEN N'ERROR' ELSE CONVERT(NVARCHAR(60),actual_state) END),
     -- readonly_reason_desc = custom
-    readonly_reason_desc AS (CASE readonly_reason WHEN 0 THEN '' WHEN 1 THEN N'DB_READONLY' WHEN 2 THEN N'DB_SINGLE_USER' WHEN 4 THEN N'DB_EMERGENCY' WHEN 8 THEN N'DB_SECONDARY_REPLICA' WHEN 65536 THEN N'QS_SIZE_LIMIT' WHEN 131072 THEN N'QS_STATEMENT_MEM_LIMIT' WHEN 262144 THEN N'QS_PERSIST_MEM_LIMIT' WHEN 524288 THEN N'DB_SIZE_LIMIT' ELSE CONVERT(NVARCHAR(60),readonly_reason) END),
+    readonly_reason_desc AS (STUFF(CONCAT(CASE WHEN readonly_reason & 1 = 1 THEN N', DB_READONLY' ELSE '' END,
+			                CASE WHEN readonly_reason & 2 = 2 THEN N', DB_SINGLE_USER' ELSE '' END,
+			                CASE WHEN readonly_reason & 4 = 4 THEN N', DB_EMERGENCY' ELSE '' END,
+			                CASE WHEN readonly_reason & 8 = 8 THEN N', DB_SECONDARY_REPLICA' ELSE '' END,
+			                CASE WHEN readonly_reason & 65536 = 65536 THEN N', QS_SIZE_LIMIT' ELSE '' END,
+			                CASE WHEN readonly_reason & 131072 = 131072 THEN N', QS_STATEMENT_MEM_LIMIT' ELSE '' END,
+			                CASE WHEN readonly_reason & 262144 = 262144 THEN N', QS_PERSIST_MEM_LIMIT' ELSE '' END,
+			                CASE WHEN readonly_reason & 524288 = 524288 THEN N', DB_SIZE_LIMIT' ELSE '' END,
+			                -- just in case we have a bitmask we are not expecting (983055 = sum of known bitmask 1+2+4+8+65536+131072+262144+524288)
+			                CASE WHEN (readonly_reason | 983055) - 983055 > 0 THEN N', ' + CONVERT(NVARCHAR(60),(readonly_reason | 983055) - 983055) ELSE '' END
+			                ),1,2,'')),
     query_capture_mode_desc AS (CASE query_capture_mode WHEN 1 THEN N'ALL' WHEN 2 THEN N'AUTO' WHEN 3 THEN N'NONE' WHEN 4 THEN N'CUSTOM' ELSE CONVERT(NVARCHAR(60),query_capture_mode) END),
     size_based_cleanup_mode_desc AS (CASE size_based_cleanup_mode WHEN 0 THEN N'OFF' WHEN 1 THEN 'AUTO' ELSE CONVERT(NVARCHAR(60),size_based_cleanup_mode) END),
     wait_stats_capture_mode_desc AS (CASE wait_stats_capture_mode WHEN 0 THEN N'OFF' WHEN 1 THEN 'ON' ELSE CONVERT(NVARCHAR(60),wait_stats_capture_mode) END),
