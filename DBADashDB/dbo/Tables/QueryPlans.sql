@@ -7,6 +7,7 @@
 	encrypted BIT NULL,
 	query_plan_hash BINARY(8) NOT NULL,
 	query_plan_compresed VARBINARY(MAX) NULL,
-	SnapshotDate DATETIME2(2)
+	SnapshotDate DATETIME2(2),
+	CollectInstanceID INT NULL,
 	CONSTRAINT PK_QueryPlan PRIMARY KEY(query_plan_hash,plan_handle,statement_start_offset,statement_end_offset)
 )

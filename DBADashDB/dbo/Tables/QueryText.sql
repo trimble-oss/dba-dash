@@ -4,6 +4,7 @@
 	object_id INT NULL,
 	encrypted BIT NULL,
 	text NVARCHAR(MAX) NULL,
-	SnapshotDate DATETIME2(2)
+	SnapshotDate DATETIME2(2),
+	CollectInstanceID INT NULL,
 	CONSTRAINT PK_QueryText PRIMARY KEY(sql_handle)
 )

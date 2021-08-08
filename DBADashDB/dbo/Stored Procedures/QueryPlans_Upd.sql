@@ -16,7 +16,8 @@ INSERT INTO dbo.QueryPlans
     encrypted,
     query_plan_hash,
     query_plan_compresed,
-    SnapshotDate
+    SnapshotDate,
+    CollectInstanceID
 )
 SELECT  plan_handle,
     statement_start_offset,
@@ -26,7 +27,8 @@ SELECT  plan_handle,
     encrypted,
     query_plan_hash,
     query_plan_compresed,
-	@SnapshotDate
+	@SnapshotDate,
+    @InstanceID
 FROM @QueryPlans t 
 WHERE NOT EXISTS(SELECT 1 
 			FROM dbo.QueryPlans QP 

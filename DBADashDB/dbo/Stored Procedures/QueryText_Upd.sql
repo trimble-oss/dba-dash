@@ -13,14 +13,16 @@ INSERT INTO dbo.QueryText
     object_id,
     encrypted,
     text,
-    SnapshotDate
+    SnapshotDate,
+    CollectInstanceID
 )
 SELECT sql_handle,
     dbid,
     object_id,
     encrypted,
     text,
-    @SnapshotDate
+    @SnapshotDate,
+    @InstanceID
 FROM @QueryText t
 WHERE NOT EXISTS(SELECT 1 
 			FROM dbo.QueryText QT
