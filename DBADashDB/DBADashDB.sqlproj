@@ -589,6 +589,7 @@
     <Build Include="dbo\Stored Procedures\PurgeCollectionErrorLog.sql" />
     <Build Include="dbo\Stored Procedures\PurgeQueryPlans.sql" />
     <Build Include="dbo\Stored Procedures\PurgeQueryText.sql" />
+    <Build Include="dbo\Stored Procedures\InternalPerformanceCounters_Upd.sql" />
   </ItemGroup>
   <ItemGroup>
     <PostDeploy Include="Script.PostDeployment1.sql" />

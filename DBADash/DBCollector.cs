@@ -83,6 +83,8 @@ namespace DBADash
         public DataSet Data;
         string _connectionString;
         private DataTable dtErrors;
+        public bool LogInternalPerformanceCounters=false;
+        private DataTable dtInternalPerfCounters;
         private bool noWMI;
         public Int32 PerformanceCollectionPeriodMins = 60;
         string computerName;
@@ -198,6 +200,31 @@ namespace DBADash
             dtErrors.Rows.Add(rError);
         }
 
+        private void logInternalPerformanceCounter(string objectName, string counterName,string instanceName, decimal counterValue)
+        {
+            if (LogInternalPerformanceCounters)
+            {
+                if (dtInternalPerfCounters == null)
+                {
+                    dtInternalPerfCounters = new DataTable("InternalPerformanceCounters");
+                    dtInternalPerfCounters.Columns.Add("SnapshotDate");
+                    dtInternalPerfCounters.Columns.Add("object_name");
+                    dtInternalPerfCounters.Columns.Add("counter_name");
+                    dtInternalPerfCounters.Columns.Add("instance_name");
+                    dtInternalPerfCounters.Columns.Add("cntr_value", typeof(decimal));
+                    dtInternalPerfCounters.Columns.Add("cntr_type", typeof(int));
+                    Data.Tables.Add(dtInternalPerfCounters);
+                }
+                var row = dtInternalPerfCounters.NewRow();
+                row["SnapshotDate"] = DateTime.UtcNow;
+                row["object_name"] = objectName;
+                row["counter_name"] = counterName;
+                row["instance_name"] = instanceName;
+                row["cntr_value"] = counterValue;
+                row["cntr_type"] = 65792;
+                dtInternalPerfCounters.Rows.Add(row);
+            }
+        }
 
         private void startup(string connectionString, string connectionID)
         {    
@@ -523,6 +550,7 @@ namespace DBADash
 
                             Data.Tables.Add(dt);
                         }
+                        logInternalPerformanceCounter("DBADash", "Count of plans collected", "", dt.Rows.Count); // Count of plans actually collected - might be less than the list of plans we wanted to collect
                     }
                 }
             }
@@ -589,7 +617,11 @@ VALUES");
             collectList.ForEach(p =>sb.AppendFormat("{3}(0x{0},{1},{2}),", ByteArrayToHexString(p.PlanHandle), p.StartOffset, p.EndOffset,Environment.NewLine));
 
             Log.Information("Plans {0}, {1} to collect from {2}", plans.Count, collectList.Count,instanceName);
-            
+
+            logInternalPerformanceCounter("DBADash", "Count of plans meeting threshold for collection", "", plans.Count); // Total number of plans that meet the threshold for collection
+            logInternalPerformanceCounter("DBADash", "Count of plans to collect", "", collectList.Count); // Total number of plans we want to collect (plans that meet the threshold that are not cached)
+            logInternalPerformanceCounter("DBADash", "Count of plans from cache", "", plans.Count- collectList.Count); // Plan count we didn't collect because they have been collected previously and we cached the handles/hashes.
+
             if (collectList.Count == 0)
             {
                 return string.Empty;
@@ -653,6 +685,8 @@ CROSS APPLY sys.dm_exec_text_query_plan(t.plan_handle,t.statement_start_offset,t
                         {
                             Data.Tables.Add(dt);
                         }
+                        logInternalPerformanceCounter("DBADash", "Count of text collected", "", dt.Rows.Count); // Count of text collected from sql_handles
+                        logInternalPerformanceCounter("DBADash", "Count of running queries", "", Data.Tables["RunningQueries"].Rows.Count); // Total number of running queries
                     }                   
                 }
             }
@@ -719,6 +753,11 @@ VALUES
                     cacheCount += 1;
                 }
             }
+
+            logInternalPerformanceCounter("DBADash", "Distinct count of text (sql_handle)", "", handles.Count); // Total number of distinct sql_handles
+            logInternalPerformanceCounter("DBADash", "Count of text (sql_handle) to collect", "", cnt); // Count of sql_handles we need to collect
+            logInternalPerformanceCounter("DBADash", "Count of text (sql_handle) from cache", "", handles.Count - cnt); // Count of sql_handles we didn't need to collect becasue they were collected previously and we cached the sql_handle.
+
             if ((cnt + cacheCount) > 0)
             {
                 Log.Information("QueryText: {0} from cache, {1} to collect from {2}", cacheCount, cnt, instanceName);

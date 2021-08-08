@@ -63,6 +63,7 @@ namespace DBADash
         public string ServiceName { get; set; } = "DBADashService";
 
         public bool AutoUpdateDatabase { get; set; } = true;
+        public bool LogInternalPerformanceCounters = false;
 
         public List<DBADashSource> SourceConnections = new List<DBADashSource>();
 

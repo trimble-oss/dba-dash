@@ -1,4 +1,9 @@
-﻿CREATE   PROC [dbo].[PerformanceCounters_Upd](@InstanceID INT,@SnapshotDate DATETIME2(7),@PerformanceCounters dbo.PerformanceCounters READONLY)
+﻿CREATE   PROC dbo.PerformanceCounters_Upd(
+	@InstanceID INT,
+	@SnapshotDate DATETIME2(7),
+	@PerformanceCounters dbo.PerformanceCounters READONLY,
+	@Internal BIT=0
+)
 AS
 SET XACT_ABORT ON
 DECLARE @Ref NVARCHAR(128)='PerformanceCounters'
@@ -152,28 +157,33 @@ GROUP BY PC.InstanceID,
 		PC.CounterID,
 		PC.SnapshotDate60
 
-DELETE Staging.PerformanceCounters WHERE InstanceID = @InstanceID
-INSERT INTO Staging.PerformanceCounters(
-	   InstanceID,
-	   SnapshotDate,
-	   object_name,
-       counter_name,
-       instance_name,
-       cntr_value,
-       cntr_type
-	   )
-SELECT @InstanceID,
-	   SnapshotDate,
-	   object_name,
-       counter_name,
-       instance_name,
-       cntr_value,
-       cntr_type
-FROM @PerformanceCounters
-WHERE (cntr_type <> 65792 OR object_name='Batch Resp Statistics')
+IF @Internal=0
+BEGIN
+	DELETE Staging.PerformanceCounters WHERE InstanceID = @InstanceID
+	INSERT INTO Staging.PerformanceCounters(
+		   InstanceID,
+		   SnapshotDate,
+		   object_name,
+		   counter_name,
+		   instance_name,
+		   cntr_value,
+		   cntr_type
+		   )
+	SELECT @InstanceID,
+		   SnapshotDate,
+		   object_name,
+		   counter_name,
+		   instance_name,
+		   cntr_value,
+		   cntr_type
+	FROM @PerformanceCounters
+	WHERE (cntr_type <> 65792 OR object_name='Batch Resp Statistics')
+END
 
 COMMIT
-
-EXEC dbo.CollectionDates_Upd @InstanceID = @InstanceID,
-                             @Reference = @Ref,
-                             @SnapshotDate = @SnapshotDate
+IF @Internal=0
+BEGIN
+	EXEC dbo.CollectionDates_Upd @InstanceID = @InstanceID,
+								 @Reference = @Ref,
+								 @SnapshotDate = @SnapshotDate
+END
