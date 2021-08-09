@@ -80,6 +80,25 @@ BEGIN
 	select @LastMemoryDump=MAX(creation_time),@DumpCount=COUNT(*) 
 	from sys.dm_server_memory_dumps
 END
+
+DECLARE @DBMailStatus NVARCHAR(500)
+DECLARE @SysMailHelpStatus TABLE(
+	Status NVARCHAR(7) NULL
+)
+BEGIN TRY
+	INSERT INTO @SysMailHelpStatus
+	(
+		Status
+	)
+	EXEC msdb.dbo.sysmail_help_status_sp
+
+	SELECT @DBMailStatus = Status  
+	FROM @SysMailHelpStatus
+END TRY
+BEGIN CATCH
+	SET @DBMailStatus =CAST(ERROR_NUMBER() AS NVARCHAR(MAX)) + '|' + ERROR_MESSAGE()
+END CATCH
+
 SELECT @ActivePowerPlan ActivePowerPlanGUID,
        CASE
            WHEN @ActivePowerPlan = @HighPerformance THEN
@@ -99,4 +118,5 @@ SELECT @ActivePowerPlan ActivePowerPlanGUID,
        @OfflineSchedulers OfflineSchedulers,
        @ResourceGovernorEnabled AS ResourceGovernorEnabled,
        @LastMemoryDump LastMemoryDump,
-       @DumpCount AS MemoryDumpCount;
+       @DumpCount AS MemoryDumpCount,
+	   @DBMailStatus AS DBMailStatus;

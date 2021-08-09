@@ -290,6 +290,10 @@ namespace DBADash
                         cmd.Parameters.AddWithValue("LastMemoryDump", r["LastMemoryDump"]);
                         cmd.Parameters.AddWithValue("MemoryDumpCount", r["MemoryDumpCount"]);
                         cmd.Parameters.AddWithValue("WindowsCaption", r["WindowsCaption"]);
+                        if (r.Table.Columns.Contains("DBMailStatus")) // Backward compatibility with older agent versions
+                        {
+                            cmd.Parameters.AddWithValue("DBMailStatus", r["DBMailStatus"]);
+                        }
                         cmd.ExecuteNonQuery();
                     }
                 }

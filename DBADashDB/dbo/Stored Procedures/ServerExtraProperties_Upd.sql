@@ -19,7 +19,8 @@
 	-----------------------------------
 	@LastMemoryDump DATETIME=NULL,
 	@MemoryDumpCount INT= NULL,
-	@WindowsCaption NVARCHAR(256)= NULL
+	@WindowsCaption NVARCHAR(256)= NULL,
+	@DBMailStatus NVARCHAR(500) = NULL
 )
 AS
 DECLARE @Ref VARCHAR(30)='ServerExtraProperties'
@@ -68,7 +69,8 @@ BEGIN
 		host_sku =ISNULL(@WindowsSKU,host_sku),
 		LastMemoryDump =@LastMemoryDump,
 		MemoryDumpCount=@MemoryDumpCount,
-		WindowsCaption =@WindowsCaption
+		WindowsCaption =@WindowsCaption,
+		DBMailStatus = @DBMailStatus
 	WHERE InstanceID = @InstanceID;
 
 	EXEC dbo.CollectionDates_Upd @InstanceID = @InstanceID,  

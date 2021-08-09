@@ -35,7 +35,8 @@ namespace DBADashGUI
            statusColumns= new Dictionary<string, bool> { { "FullBackupStatus", false }, { "LogShippingStatus", false }, { "DiffBackupStatus", false }, { "LogBackupStatus", false }, { "DriveStatus", false },
                                                             { "JobStatus", false }, { "CollectionErrorStatus", false }, { "AGStatus", false }, {"LastGoodCheckDBStatus",false}, {"SnapshotAgeStatus",false },
                                                             {"MemoryDumpStatus",false }, {"UptimeStatus",false }, {"CorruptionStatus",false }, {"AlertStatus",false }, {"FileFreeSpaceStatus",false },
-                                                            {"CustomCheckStatus",false }, {"MirroringStatus",false },{"ElasticPoolStorageStatus",false},{"PctMaxSizeStatus",false}, {"QueryStoreStatus",false },{"LogFreeSpaceStatus",false } };
+                                                            {"CustomCheckStatus",false }, {"MirroringStatus",false },{"ElasticPoolStorageStatus",false},{"PctMaxSizeStatus",false}, {"QueryStoreStatus",false },
+                                                            {"LogFreeSpaceStatus",false },{"DBMailStatus",false } };
         }
 
         public void RefreshData()
@@ -60,7 +61,7 @@ namespace DBADashGUI
                     {
                         foreach (string col in cols)
                         {
-                            var status = (DBADashStatus.DBADashStatusEnum)Convert.ToInt32(row[col]);
+                            var status = (DBADashStatus.DBADashStatusEnum)Convert.ToInt32(row[col]== DBNull.Value ? 3 : row[col]);
                             statusColumns[col] = statusColumns[col] || status != DBADashStatus.DBADashStatusEnum.NA;
                         }
                     }
@@ -83,9 +84,12 @@ namespace DBADashGUI
                 var cols = (statusColumns.Keys).ToList<string>();
                 foreach (var col in cols)
                 {
-                    var status = (DBADashStatus.DBADashStatusEnum)Convert.ToInt32(row[col]);
+                    var status = (DBADashStatus.DBADashStatusEnum)Convert.ToInt32(row[col] == DBNull.Value ? 3 : row[col]);
                     dgvSummary.Rows[idx].Cells[col].Style.BackColor = DBADashStatus.GetStatusColour(status);                    
                 }
+                string DBMailStatus = Convert.ToString(row["DBMailStatusDescription"]);
+                dgvSummary.Rows[idx].Cells["DBMailStatus"].ToolTipText = DBMailStatus;
+
                 dgvSummary.Rows[idx].Cells["FullBackupStatus"].Value = isAzure ? "" : "View";
                 dgvSummary.Rows[idx].Cells["DiffBackupStatus"].Value = isAzure ? "" : "View";
                 dgvSummary.Rows[idx].Cells["LogBackupStatus"].Value = isAzure ? "" : "View";

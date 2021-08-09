@@ -223,7 +223,9 @@ SELECT I.InstanceID,
 	ISNULL(dbm.MirroringStatus,3) AS MirroringStatus,
 	3 AS ElasticPoolStorageStatus,
 	ISNULL(F.PctMaxSizeStatus,3) AS PctMaxSizeStatus,
-	ISNULL(QS.QueryStoreStatus,3) AS QueryStoreStatus
+	ISNULL(QS.QueryStoreStatus,3) AS QueryStoreStatus,
+	CASE I.DBMailStatus WHEN 'STARTED' THEN 4 WHEN 'STOPPED' THEN 1 ELSE 3 END AS DBMailStatus,
+	I.DBMailStatus as DBMailStatusDescription
 FROM dbo.Instances I 
 LEFT JOIN LS ON I.InstanceID = LS.InstanceID
 LEFT JOIN B ON I.InstanceID = B.InstanceID
@@ -299,7 +301,9 @@ SELECT NULL AS InstanceID,
 	3 AS MirroringStatus,
 	ISNULL(MIN(NULLIF(EPS.ElasticPoolStorageStatus,3)),3) AS ElasticPoolStorageStatus,
 	ISNULL(MIN(NULLIF(F.PctMaxSizeStatus,3)),3) AS PctMaxSizeStatus,
-	ISNULL(MIN(QS.QueryStoreStatus),3) AS QueryStoreStatus
+	ISNULL(MIN(QS.QueryStoreStatus),3) AS QueryStoreStatus,
+	3 AS DBMailStatus,
+	NULL AS DBMailStatusDescription
 FROM dbo.Instances I
 LEFT JOIN errSummary  ON I.InstanceID = errSummary.InstanceID
 LEFT JOIN F ON I.InstanceID = F.InstanceID
