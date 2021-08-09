@@ -286,6 +286,7 @@ namespace DBADashServiceConfig
             chkScanEvery.Checked = collectionConfig.ScanForAzureDBsInterval > 0;
             numAzureScanInterval.Value = collectionConfig.ScanForAzureDBsInterval;
             chkAutoUpgradeRepoDB.Checked = collectionConfig.AutoUpdateDatabase;
+            chkLogInternalPerfCounters.Checked = collectionConfig.LogInternalPerformanceCounters;
             updateScanInterval();
 
         }
@@ -875,6 +876,12 @@ namespace DBADashServiceConfig
                 }
                 cboCron.SelectedIndex = 0;
             }
+        }
+
+        private void chkLogInternalPerfCounters_CheckedChanged(object sender, EventArgs e)
+        {
+            collectionConfig.LogInternalPerformanceCounters = chkLogInternalPerfCounters.Checked;
+            txtJson.Text = collectionConfig.Serialize();
         }
     }
 }
