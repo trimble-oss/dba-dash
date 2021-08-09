@@ -553,6 +553,10 @@ namespace DBADash
                         logInternalPerformanceCounter("DBADash", "Count of plans collected", "", dt.Rows.Count); // Count of plans actually collected - might be less than the list of plans we wanted to collect
                     }
                 }
+                else
+                {
+                    logInternalPerformanceCounter("DBADash", "Count of plans collected", "", 0); // Count of plans actually collected - might be less than the list of plans we wanted to collect
+                }
             }
         }
 
