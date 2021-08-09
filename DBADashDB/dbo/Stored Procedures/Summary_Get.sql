@@ -2,12 +2,12 @@
 	@InstanceIDs VARCHAR(MAX)=NULL
 )
 AS
-DECLARE @Instances TABLE(
+CREATE TABLE #Instances(
 	InstanceID INT PRIMARY KEY
 )
 IF @InstanceIDs IS NULL
 BEGIN
-	INSERT INTO @Instances
+	INSERT INTO #Instances
 	(
 	    InstanceID
 	)
@@ -17,7 +17,7 @@ BEGIN
 END 
 ELSE 
 BEGIN
-	INSERT INTO @Instances
+	INSERT INTO #Instances
 	(
 		InstanceID
 	)
@@ -134,7 +134,8 @@ a AS(
 	SELECT InstanceID,
 		MAX(last_occurrence_utc) AS LastAlert,
 		SUM(occurrence_count) AS TotalAlerts,
-		MAX(CASE WHEN IsCriticalAlert=1 THEN last_occurrence_utc ELSE NULL END) AS LastCritical
+		MAX(CASE WHEN IsCriticalAlert=1 THEN last_occurrence_utc ELSE NULL END) AS LastCritical,
+		COUNT(*) ConfiguredAlertCount
 	FROM dbo.SysAlerts
 	GROUP BY InstanceID
 )
@@ -212,7 +213,7 @@ SELECT I.InstanceID,
 	a.LastAlert,
 	a.LastCritical,
 	a.TotalAlerts,
-	CASE WHEN a.LastAlert IS NULL THEN 3
+	CASE WHEN a.ConfiguredAlertCount=0 THEN 3
 		WHEN DATEDIFF(hh,a.LastCritical,GETUTCDATE())<168 THEN 1
 		WHEN DATEDIFF(hh,a.LastAlert,GETUTCDATE())<72 THEN 2
 		ELSE 4 END AS AlertStatus,
@@ -246,7 +247,7 @@ OUTER APPLY(SELECT TOP(1) IUT.WarningThreshold AS UptimeWarningThreshold,
 LEFT JOIN cus ON cus.InstanceID = I.InstanceID
 LEFT JOIN dbm ON dbm.InstanceID = I.InstanceID
 LEFT JOIN QS ON QS.InstanceID = I.InstanceID
-WHERE EXISTS(SELECT 1 FROM @Instances t WHERE I.InstanceID = t.InstanceID)
+WHERE EXISTS(SELECT 1 FROM #Instances t WHERE I.InstanceID = t.InstanceID)
 AND I.IsActive=1
 AND I.EngineEdition<> 5 -- not azure
 UNION ALL
@@ -307,6 +308,6 @@ LEFT JOIN cus ON cus.InstanceID = I.InstanceID
 LEFT JOIN dbo.AzureDBElasticPoolStorageStatus EPS ON I.InstanceID = EPS.InstanceID
 LEFT JOIN QS ON QS.InstanceID = I.InstanceID
 WHERE I.EngineEdition=5 -- azure
-AND EXISTS(SELECT 1 FROM @Instances t WHERE I.InstanceID = t.InstanceID)
+AND EXISTS(SELECT 1 FROM #Instances t WHERE I.InstanceID = t.InstanceID)
 AND I.IsActive=1
 GROUP BY I.Instance
