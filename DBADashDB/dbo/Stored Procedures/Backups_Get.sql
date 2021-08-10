@@ -1,4 +1,4 @@
-﻿CREATE PROC [dbo].[Backups_Get](
+﻿CREATE PROC dbo.Backups_Get(
 		@InstanceIDs VARCHAR(MAX)=NULL,
 		@IncludeCritical BIT=1,
 		@IncludeWarning BIT=1,
@@ -69,7 +69,8 @@ SELECT InstanceID,
 	   SnapshotDate,
 	   SnapshotAge,
 	   ThresholdsConfiguredLevel,
-	   CASE WHEN SnapshotAge>1440 THEN 1 WHEN BS.SnapshotAge>120 THEN 2 WHEN BS.SnapshotAge<60 THEN 4 ELSE 3 END AS SnapshotAgeStatus
+	   CASE WHEN SnapshotAge>1440 THEN 1 WHEN BS.SnapshotAge>120 THEN 2 WHEN BS.SnapshotAge<60 THEN 4 ELSE 3 END AS SnapshotAgeStatus,
+	   create_date_utc
 FROM dbo.BackupStatus BS
 WHERE EXISTS(SELECT 1 FROM @Instances I WHERE I.InstanceID = BS.InstanceID)
 AND EXISTS(SELECT 1 FROM BackupStatuses s WHERE BS.BackupStatus=s.BackupStatus)

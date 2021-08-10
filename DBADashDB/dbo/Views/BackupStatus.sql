@@ -1,4 +1,4 @@
-﻿CREATE VIEW [dbo].[BackupStatus]
+﻿CREATE VIEW dbo.BackupStatus
 AS
 WITH hadr AS (
 	SELECT D.DatabaseID,partnr.DatabaseID BackupDatabaseID
@@ -56,7 +56,10 @@ SELECT I.InstanceID,
 	CASE WHEN cfg.InstanceID = D.InstanceID AND cfg.DatabaseID = D.DatabaseID THEN 'Database' WHEN cfg.InstanceID=D.InstanceID THEN 'Instance' ELSE 'Root' END AS ThresholdsConfiguredLevel,
 	SSD.SnapshotDate,
 	DATEDIFF(mi,SSD.SnapshotDate,GETUTCDATE()) AS SnapshotAge,
-	CASE WHEN hadr.DatabaseID IS NULL THEN CAST(0 AS BIT) ELSE CAST(1 AS BIT) END AS IsHADRReplica
+	CASE WHEN hadr.DatabaseID IS NULL THEN CAST(0 AS BIT) ELSE CAST(1 AS BIT) END AS IsHADRReplica,
+ 	d.create_date,
+	DATEADD(mi,I.UTCOffset,d.create_date) AS create_date_utc,
+	I.UTCOffset
 FROM dbo.Databases d 
 LEFT JOIN dbo.DatabasesHADR hadr ON d.DatabaseID = hadr.DatabaseID
 JOIN dbo.Instances I ON d.InstanceID = I.InstanceID
