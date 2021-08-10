@@ -29,6 +29,8 @@ namespace DBADashGUI
 
         Dictionary<string, bool> statusColumns;
 
+        private bool focusedView = false;
+
 
         private void resetStatusCols()
         {
@@ -54,22 +56,41 @@ namespace DBADashGUI
                     DataTable dt = new DataTable();
                     da.Fill(dt);
                     dgvSummary.AutoGenerateColumns = false;
-                    dv = new DataView(dt);
-                    dgvSummary.DataSource = dv;
+
                     var cols = (statusColumns.Keys).ToList<string>();
+                    dt.Columns.Add("IsFocusedRow", typeof(bool));
                     foreach (DataRow row in dt.Rows)
                     {
+                        bool isFocusedRow = false;
                         foreach (string col in cols)
                         {
-                            var status = (DBADashStatus.DBADashStatusEnum)Convert.ToInt32(row[col]== DBNull.Value ? 3 : row[col]);
-                            statusColumns[col] = statusColumns[col] || status != DBADashStatus.DBADashStatusEnum.NA;
+                            var status = (DBADashStatus.DBADashStatusEnum)Convert.ToInt32(row[col] == DBNull.Value ? 3 : row[col]);
+                            if (!(status == DBADashStatus.DBADashStatusEnum.NA || (status == DBADashStatus.DBADashStatusEnum.OK && focusedView)))
+                            {
+                                statusColumns[col] = true;
+                                isFocusedRow = true;
+                            }                         
                         }
+                        
+                        if (row["IsAgentRunning"] != DBNull.Value && (bool)row["IsAgentRunning"] == false)
+                        {
+                            isFocusedRow = true;
+                            statusColumns["JobStatus"] = true;
+                        }
+                        row["IsFocusedRow"] = isFocusedRow;
                     }
                     // hide columns that all have status N/A
                     foreach (var col in statusColumns)
                     {
                         dgvSummary.Columns[col.Key].Visible = col.Value;
                     }
+                    string rowFilter = "";
+                    if (focusedView)
+                    {
+                        rowFilter = "IsFocusedRow=1";
+                    }
+                    dv = new DataView(dt,rowFilter,"Instance", DataViewRowState.CurrentRows);
+                    dgvSummary.DataSource = dv;
                 }
             }
         }
@@ -408,6 +429,12 @@ namespace DBADashGUI
         private void tsExcel_Click(object sender, EventArgs e)
         {
             Common.PromptSaveDataGridView(ref dgvSummary);
+        }
+
+        private void focusedViewToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            focusedView = focusedViewToolStripMenuItem.Checked;
+            RefreshData();
         }
     }
 }
