@@ -449,11 +449,6 @@ namespace DBADash
                 Collect(CollectionType.DatabaseMirroring);
                 Collect(CollectionType.Jobs);
                 Collect(CollectionType.AzureDBResourceGovernance);
-                if (IsHadrEnabled)
-                {
-                    Collect(CollectionType.AvailabilityReplicas);
-                    Collect(CollectionType.AvailabilityGroups);
-                }
                 return;
             }
             else if (collectionType == CollectionType.Performance)
@@ -472,6 +467,8 @@ namespace DBADash
                 if (IsHadrEnabled)
                 {
                     Collect(CollectionType.DatabasesHADR);
+                    Collect(CollectionType.AvailabilityReplicas);
+                    Collect(CollectionType.AvailabilityGroups);
                 }
                 return;
             }
