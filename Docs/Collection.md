@@ -23,8 +23,12 @@ Data collection runs on a schedule by the agent which is listed below. Collectio
 *Captures queries that take longer than 1second (or custom) to run using extended events*
 - [JobHistory](../DBADash/SQL/SQLJobHistory.sql)
 *Collects job execution data from msdb.dbo.sysjobhistory (just what's new since the last collection)*
-- [DatabasesHADR](../DBADash/SQL/SQLJobHistory.sql)
+- [DatabasesHADR](../DBADash/SQL/SQLDatabasesHADR.sql)
 *Collects data from dm_hadr_database_replica_states if your SQL instance is using Always On Availability Groups.*
+- [AvailabilityReplicas](../DBADash/SQL/SQLAvailabilityReplicas.sql)
+*Collects data from sys.availability_replicas*
+- [AvailabilityGroups](../DBADash/SQL/SQLAvailabilityGroups.sql)
+*Collects data from sys.availability_groups*
 - ~~-[BlockingSnapshot](../DBADash/SQL/SQLBlockingSnapshot.sql)
 *Captures a snapshot of any blocking/blocked queries currently running if the total wait time is more than 1second.
 Replaced with RunningQueries*~~
@@ -70,10 +74,6 @@ Add [your own](CustomChecks.md) checks to DBA Dash.
 *Collect data from sys.database_mirroring*
 - [Jobs](../DBADash/SchemaSnapshotDB.cs)
 *Collects metadata for SQL Agent jobs including a DDL snapshot using SMO. A lightweight check is run every hour to see if any jobs have been modified since the last collection. If any jobs have been modified, the collection will run.  The lightweight check won't detect some changes like changes to job schedules.  After 24hrs, the collection is run even if no modification to jobs is detected.*  
-- [AvailabilityReplicas](../DBADash/SQL/SQLAvailabilityReplicas.sql)
-*Collects data from sys.availability_replicas*
-- [AvailabilityGroups](../DBADash/SQL/SQLAvailabilityGroups.sql)
-*Collects data from sys.availability_groups*
 - ~~- [AgentJobs](../DBADash/SQL/AgentJobs.sql)~~
  *Replaced with Jobs/JobHistory*
  
