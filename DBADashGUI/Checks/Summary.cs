@@ -19,6 +19,7 @@ namespace DBADashGUI
 
         public List<Int32> InstanceIDs;
         public string ConnectionString;
+        DateTime lastRefresh;
 
         public Summary()
         {
@@ -91,6 +92,10 @@ namespace DBADashGUI
                     }
                     dv = new DataView(dt,rowFilter,"Instance", DataViewRowState.CurrentRows);
                     dgvSummary.DataSource = dv;
+                    lastRefresh = DateTime.Now;
+                    lblRefreshTime.Text = "Refresh Time: " + lastRefresh.ToString();
+                    lblRefreshTime.ForeColor = Color.Blue;
+                    timer1.Enabled = true;
                 }
             }
         }
@@ -435,6 +440,18 @@ namespace DBADashGUI
         {
             focusedView = focusedViewToolStripMenuItem.Checked;
             RefreshData();
+        }
+
+        private void timer1_Tick(object sender, EventArgs e)
+        {
+            if (DateTime.Now.Subtract(lastRefresh).TotalMinutes > 60){
+                lblRefreshTime.ForeColor = Color.Red;
+                timer1.Enabled = false;
+            }
+            else if(DateTime.Now.Subtract(lastRefresh).TotalMinutes>10)
+            {
+                lblRefreshTime.ForeColor = Color.OrangeRed;
+            }
         }
     }
 }
