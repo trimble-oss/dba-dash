@@ -611,7 +611,7 @@ VALUES");
             // Already have a distinct list by plan handle, hash and offsets.  
             // Filter this list by plans not already colllected and get a distinct list by handle and offsets (excluding the hash as this can cause duplicates in rare cases)
             var collectList =  plans.Where(p => !cache.Contains(p.Key))
-                .GroupBy(p => new { p.PlanHandle, p.StartOffset, p.EndOffset })
+                .GroupBy(p => Convert.ToBase64String(p.PlanHandle.Concat(BitConverter.GetBytes(p.StartOffset)).Concat(BitConverter.GetBytes(p.EndOffset)).ToArray()))
                 .Select(p => p.First())
                 .ToList();
 
