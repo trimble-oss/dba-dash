@@ -340,7 +340,7 @@ FROM
 (-1,'DBConfig',125,180),
 (-1,'OSInfo',125,180),
 (-1,'Drives',125,180),
-(-1,'Database',125,180),
+(-1,'Databases',125,180),
 (-1,'Instance',125,180),
 (-1,'Drivers',1445,2880),
 (-1,'SysConfig',125,180),
@@ -375,7 +375,7 @@ FROM
 WHERE NOT EXISTS(SELECT 1 FROM dbo.CollectionDatesThresholds CDT WHERE CDT.InstanceID = T.InstanceID AND CDT.Reference = T.Reference)
 
 -- Delete thresholds for legacy collections
-DELETE dbo.CollectionDatesThresholds WHERE Reference IN('AgentJobs','BlockingSnapshot')
+DELETE dbo.CollectionDatesThresholds WHERE Reference IN('AgentJobs','BlockingSnapshot','Database')
 
 --replace old defaults
 UPDATE CollectionDatesThresholds

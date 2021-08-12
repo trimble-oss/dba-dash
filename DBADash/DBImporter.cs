@@ -115,6 +115,22 @@ namespace DBADash
                     dtDatabasesHADR.Columns.Add("secondary_lag_seconds", typeof(long));
                 }
             }
+            if (data.Tables.Contains("Databases"))
+            {
+                var dtDB = data.Tables["Databases"];
+                if (dtDB.Columns["owner_sid"].DataType == typeof(string))
+                {
+                    Int32 pos = dtDB.Columns["owner_sid"].Ordinal;
+                    dtDB.Columns["owner_sid"].ColumnName = "owner_sid_string";
+                    var newCol = dtDB.Columns.Add("owner_sid", typeof(byte[]));
+                    foreach (DataRow r in dtDB.Rows)
+                    {
+                        r["owner_sid"] = Convert.FromBase64String((string)r["owner_sid_string"]);
+                    }
+                    dtDB.Columns.Remove("owner_sid_string");
+                    newCol.SetOrdinal(pos);
+                }
+            }
         }
 
         public void Update()
@@ -129,59 +145,48 @@ namespace DBADash
               new Context("Instance")
             );
 
-            try
-            {
-                retryPolicy.Execute(
-                  context => updateDB(),
-                  new Context("Database")
-                );
-            }
-            catch(Exception ex)
-            {
-                logError("Database", ex);
-                exceptions.Add(ex);
-            }
-
-            // Generic handling for most tables
-            foreach (DataTable dt in data.Tables)
-            {
-                string[] tables = { "Drives", "ServerProperties", "Backups", "AgentJobs", "LogRestores", "DBFiles", "DBConfig", "Corruption", "DatabasesHADR", "SysConfig", "OSInfo", "TraceFlags", "CPU", "Drivers", 
+            string[] tables = { "Databases","Drives", "ServerProperties", "Backups", "AgentJobs", "LogRestores", "DBFiles", "DBConfig", "Corruption", "DatabasesHADR", "SysConfig", "OSInfo", "TraceFlags", "CPU", "Drivers",
                                     "BlockingSnapshot", "IOStats", "Waits", "OSLoadedModules", "DBTuningOptions", "AzureDBResourceStats", "AzureDBServiceObjectives", "AzureDBElasticPoolResourceStats", "SlowQueries",
-                                    "SlowQueriesStats", "LastGoodCheckDB", "Alerts", "ObjectExecutionStats", "ServerPrincipals", "ServerRoleMembers", "ServerPermissions", "DatabasePrincipals", "DatabaseRoleMembers", 
-                                    "DatabasePermissions", "CustomChecks", "PerformanceCounters", "VLF", "DatabaseMirroring", "Jobs", "JobHistory","AvailabilityReplicas","AvailabilityGroups","JobSteps", 
+                                    "SlowQueriesStats", "LastGoodCheckDB", "Alerts", "ObjectExecutionStats", "ServerPrincipals", "ServerRoleMembers", "ServerPermissions", "DatabasePrincipals", "DatabaseRoleMembers",
+                                    "DatabasePermissions", "CustomChecks", "PerformanceCounters", "VLF", "DatabaseMirroring", "Jobs", "JobHistory","AvailabilityReplicas","AvailabilityGroups","JobSteps",
                                     "DatabaseQueryStoreOptions", "ResourceGovernorConfiguration","AzureDBResourceGovernance","RunningQueries","QueryText","QueryPlans","InternalPerformanceCounters" };
 
-                if (tables.Contains(dt.TableName))
+            var tablesInDataSet = data.Tables
+                 .Cast<DataTable>()
+                 .Select(dt => dt.TableName);
+
+            // Process standard tables in list order. Process Databases first as some collections will need the list of databases to be populated.
+            foreach (string tableName in tables.Where(t => tablesInDataSet.Contains(t)))
+            {
+                try
                 {
-                    try
-                    {
-                        retryPolicy.Execute(
-                              context => update(dt.TableName),
-                              new Context(dt.TableName)
-                          );
-                    }
-                    catch(Exception ex)
-                    {
-                        logError(dt.TableName, ex);
-                        exceptions.Add(ex);
-                    }
+                    retryPolicy.Execute(
+                          context => update(tableName),
+                          new Context(tableName)
+                      );
                 }
-                string snapshotPrefix = "Snapshot_";
-                if (dt.TableName.StartsWith(snapshotPrefix))
+                catch (Exception ex)
                 {
-                    string databaseName = dt.TableName.Substring(snapshotPrefix.Length);
-                    try
-                    {
-                        retryPolicy.Execute(
-                              context => updateSnapshot(dt.TableName, databaseName),
-                              new Context(dt.TableName)
-                          );
-                    }
-                    catch(Exception ex)
-                    {
-                        logError(dt.TableName, ex);
-                        exceptions.Add(ex);
-                    }
+                    logError(tableName, ex);
+                    exceptions.Add(ex);
+                }
+            }
+            // Process tables that are database schema snapshots
+            string snapshotPrefix = "Snapshot_";
+            foreach (string tableName in tablesInDataSet.Where(t=> t.StartsWith(snapshotPrefix)))
+            {
+                string databaseName = tableName.Substring(snapshotPrefix.Length);
+                try
+                {
+                    retryPolicy.Execute(
+                          context => updateSnapshot(tableName, databaseName),
+                          new Context(tableName)
+                      );
+                }
+                catch (Exception ex)
+                {
+                    logError(tableName, ex);
+                    exceptions.Add(ex);
                 }
             }
             try
@@ -398,40 +403,7 @@ namespace DBADash
             }
         }
 
-        private void updateDB()
-        {
-            if (data.Tables.Contains("Databases") && data.Tables["Databases"].Rows.Count > 0)
-            {
-                 using (var cn = new SqlConnection(connectionString))
-                {
-                    cn.Open();
-                    using (SqlCommand cmd = new SqlCommand("Database_Upd", cn) { CommandType = CommandType.StoredProcedure, CommandTimeout = commandTimeout })
-                    {
-                        var dtDB = data.Tables["Databases"];
-                        if (dtDB.Columns["owner_sid"].DataType == typeof(string))
-                        {
-                            Int32 pos = dtDB.Columns["owner_sid"].Ordinal;
-                            dtDB.Columns["owner_sid"].ColumnName = "owner_sid_string";
 
-                            var newCol = dtDB.Columns.Add("owner_sid", typeof(byte[]));
-
-                            foreach (DataRow r in dtDB.Rows)
-                            {
-                                r["owner_sid"] = Convert.FromBase64String((string)r["owner_sid_string"]);
-                            }
-                            dtDB.Columns.Remove("owner_sid_string");
-                            newCol.SetOrdinal(pos);
-
-                        }
-
-                        cmd.Parameters.AddWithValue("DB", data.Tables["Databases"]);
-                        cmd.Parameters.AddWithValue("InstanceID", instanceID);
-                        cmd.Parameters.AddWithValue("SnapshotDate", snapshotDate);
-                        cmd.ExecuteNonQuery();
-                    }
-                }
-            }
-        }
 
 
     }
