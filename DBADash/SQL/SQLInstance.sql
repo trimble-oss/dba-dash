@@ -11,7 +11,7 @@ BEGIN
 		ISNULL(CAST(SERVERPROPERTY('ComputerNamePhysicalNetBIOS') as nvarchar(128)),'') as ComputerNamePhysicalNetBIOS,
 		DB_NAME() as DBName,
 		SERVERPROPERTY ('ProductVersion') as ProductVersion,
-		DATEDIFF(mi,GETDATE(),GETUTCDATE()) AS UTCOffset,
+		CAST(ROUND(DATEDIFF(s,GETDATE(),GETUTCDATE())/60.0,0) AS INT) AS UTCOffset,
 		SERVERPROPERTY('IsHadrEnabled') IsHadrEnabled,
 		SERVERPROPERTY('EngineEdition') EngineEdition
 	FROM sys.dm_os_host_info
@@ -30,7 +30,7 @@ BEGIN
 		ISNULL(CAST(SERVERPROPERTY('ComputerNamePhysicalNetBIOS') as nvarchar(128)),'') as ComputerNamePhysicalNetBIOS,
 		DB_NAME() as DBName,
 		SERVERPROPERTY ('ProductVersion') as ProductVersion,
-		DATEDIFF(mi,GETDATE(),GETUTCDATE()) AS UTCOffset,
+		CAST(ROUND(DATEDIFF(s,GETDATE(),GETUTCDATE())/60.0,0) AS INT) AS UTCOffset,
 		SERVERPROPERTY('IsHadrEnabled') IsHadrEnabled,
 		SERVERPROPERTY('EngineEdition') EngineEdition
 	FROM sys.dm_os_windows_info
@@ -48,7 +48,7 @@ BEGIN
 		ISNULL(CAST(SERVERPROPERTY('ComputerNamePhysicalNetBIOS') as nvarchar(128)),'') as ComputerNamePhysicalNetBIOS,
 		DB_NAME() as DBName,
 		SERVERPROPERTY ('ProductVersion') as ProductVersion,
-		DATEDIFF(mi,GETDATE(),GETUTCDATE()) AS UTCOffset,
+		CAST(ROUND(DATEDIFF(s,GETDATE(),GETUTCDATE())/60.0,0) AS INT) AS UTCOffset,
 		SERVERPROPERTY('IsHadrEnabled') IsHadrEnabled,
 		SERVERPROPERTY('EngineEdition') EngineEdition
 END
