@@ -10,8 +10,7 @@
     <ProjectGuid>{dde14068-5c6e-4e82-bf2f-7ed7681dbbc4}</ProjectGuid>
     <DSP>Microsoft.Data.Tools.Schema.Sql.SqlAzureV12DatabaseSchemaProvider</DSP>
     <OutputType>Database</OutputType>
-    <RootPath>
-    </RootPath>
+    <RootPath />
     <RootNamespace>DBADashDB</RootNamespace>
     <AssemblyName>DBADashDB</AssemblyName>
     <ModelCollation>1033,CI</ModelCollation>
@@ -30,7 +29,7 @@
     <QueryStoreStaleQueryThreshold>15</QueryStoreStaleQueryThreshold>
     <QueryStoreMaxStorageSize>512</QueryStoreMaxStorageSize>
     <QueryStoreMaxPlansPerQuery>50</QueryStoreMaxPlansPerQuery>
-    <DacVersion>2.0.3.39</DacVersion>
+    <DacVersion>2.0.3.40</DacVersion>
     <ReadCommittedSnapshot>True</ReadCommittedSnapshot>
     <AllowSnapshotIsolation>True</AllowSnapshotIsolation>
     <CompatibilityMode>130</CompatibilityMode>
@@ -60,7 +59,6 @@
   </PropertyGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">11.0</VisualStudioVersion>
-    <!-- Default to the v11.0 targets path if the targets file for the current VS version is not found -->
     <SSDTExists Condition="Exists('$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v$(VisualStudioVersion)\SSDT\Microsoft.Data.Tools.Schema.SqlTasks.targets')">True</SSDTExists>
     <VisualStudioVersion Condition="'$(SSDTExists)' == ''">11.0</VisualStudioVersion>
   </PropertyGroup>
@@ -591,6 +589,9 @@
     <Build Include="dbo\Stored Procedures\PurgeQueryText.sql" />
     <Build Include="dbo\Stored Procedures\InternalPerformanceCounters_Upd.sql" />
     <Build Include="dbo\Stored Procedures\Databases_Upd.sql" />
+    <Build Include="dbo\Stored Procedures\InstanceUptimeThresholds_Get.sql" />
+    <Build Include="dbo\Stored Procedures\InstanceUptimeThresholds_Upd.sql" />
+    <Build Include="dbo\Stored Procedures\InstanceUptimeAck.sql" />
   </ItemGroup>
   <ItemGroup>
     <PostDeploy Include="Script.PostDeployment1.sql" />
@@ -609,8 +610,7 @@
   </ItemGroup>
   <ItemGroup>
     <SqlCmdVariable Include="VersionNumber">
-      <DefaultValue>
-      </DefaultValue>
+      <DefaultValue />
       <Value>$(SqlCmdVar__1)</Value>
     </SqlCmdVariable>
   </ItemGroup>

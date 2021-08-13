@@ -80,6 +80,7 @@
     os_language_version INT NULL,
     host_platform NVARCHAR(256) NULL,
     DBMailStatus NVARCHAR(500) NULL,
+    UptimeAckDate DATETIME NULL,
     CONSTRAINT PK_Instances PRIMARY KEY CLUSTERED (InstanceID ASC)
 );
 

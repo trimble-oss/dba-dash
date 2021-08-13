@@ -151,6 +151,12 @@
     <Compile Include="Changes\ResourceGovernor.Designer.cs">
       <DependentUpon>ResourceGovernor.cs</DependentUpon>
     </Compile>
+    <Compile Include="Checks\UptimeThresholdConfig.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Checks\UptimeThresholdConfig.Designer.cs">
+      <DependentUpon>UptimeThresholdConfig.cs</DependentUpon>
+    </Compile>
     <Compile Include="DBFiles\FileThresholdConfigControl.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -652,6 +658,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Checks\CustomChecks.resx">
       <DependentUpon>CustomChecks.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Checks\UptimeThresholdConfig.resx">
+      <DependentUpon>UptimeThresholdConfig.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="DBFiles\FileThresholdConfigControl.resx">
       <DependentUpon>FileThresholdConfigControl.cs</DependentUpon>

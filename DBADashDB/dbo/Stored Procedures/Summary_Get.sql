@@ -186,9 +186,10 @@ SELECT I.InstanceID,
 	DATEADD(mi,I.UTCOffset,I.sqlserver_start_time) AS sqlserver_start_time_utc,
 	I.UTCOffset,
 	DATEDIFF(mi,DATEADD(mi,I.UTCOffset,I.sqlserver_start_time),OSInfoCD.SnapshotDate) AS sqlserver_uptime,
-	CASE WHEN DATEDIFF(mi,DATEADD(mi,I.UTCOffset,I.sqlserver_start_time),OSInfoCD.SnapshotDate)<UTT.UptimeCriticalThreshold THEN 1
-		WHEN DATEDIFF(mi,DATEADD(mi,I.UTCOffset,I.sqlserver_start_time),OSInfoCD.SnapshotDate)<UTT.UptimeWarningThreshold THEN 2
-		WHEN UTT.UptimeWarningThreshold IS NULL AND UTT.UptimeCriticalThreshold IS NULL THEN 3
+	CASE WHEN UTT.UptimeWarningThreshold IS NULL AND UTT.UptimeCriticalThreshold IS NULL THEN 3
+		WHEN I.UptimeAckDate > DATEADD(mi,I.UTCOffset,I.sqlserver_start_time) THEN 4
+		WHEN DATEDIFF(mi,DATEADD(mi,I.UTCOffset,I.sqlserver_start_time),OSInfoCD.SnapshotDate)<UTT.UptimeCriticalThreshold THEN 1
+		WHEN DATEDIFF(mi,DATEADD(mi,I.UTCOffset,I.sqlserver_start_time),OSInfoCD.SnapshotDate)<UTT.UptimeWarningThreshold THEN 2		
 		ELSE 4 END AS UptimeStatus,
 	UTT.UptimeWarningThreshold,
 	UTT.UptimeCriticalThreshold,

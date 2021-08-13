@@ -11,7 +11,7 @@ using System.Data.SqlClient;
 using static DBADashGUI.Main;
 using System.IO;
 using System.Diagnostics;
-
+using DBADashGUI.Checks;
 namespace DBADashGUI
 {
     public partial class Summary : UserControl
@@ -427,6 +427,15 @@ namespace DBADashGUI
                 else if ( e.ColumnIndex == QueryStoreStatus.Index)
                 {
                     Instance_Selected(this,new InstanceSelectedEventArgs() { Instance = (string)row["Instance"], Tab = "tabQS" });
+                }
+                else if (e.ColumnIndex== UptimeStatus.Index)
+                {
+                    var frm = new UptimeThresholdConfig() { InstanceID = (Int32)row["InstanceID"] };
+                    frm.ShowDialog();
+                    if(frm.DialogResult == DialogResult.OK)
+                    {
+                        RefreshData();
+                    }
                 }
             }
         }
