@@ -850,6 +850,7 @@ namespace DBADashGUI
             
             gvHistory.AutoGenerateColumns = false;
             gvHistory.DataSource = dt;
+            gvHistory.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
             currentObjectID = ObjectID;
             currentPage = PageNum;
             tsPageNum.Text = "Page " + PageNum;
