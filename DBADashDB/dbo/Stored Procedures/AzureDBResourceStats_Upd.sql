@@ -191,7 +191,7 @@ BEGIN
 	WHERE RS.InstanceID=@InstanceID
 	AND RS.end_time>=@60MINFrom
 	GROUP BY RS.InstanceID,DG.DateGroup
-
+	OPTION(OPTIMIZE FOR(@60MINFrom='9999-12-31'))
 END;
 
 WITH t AS (
