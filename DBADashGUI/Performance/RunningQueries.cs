@@ -26,6 +26,7 @@ namespace DBADashGUI.Performance
         private DataTable snapshotDT;
         public void RefreshData()
         {
+            lblJobCount.Visible = false;
             snapshotDT = null;
             tsBlocking.Visible = false;
             dgv.DataSource = null;
@@ -129,6 +130,18 @@ namespace DBADashGUI.Performance
         private void loadSnapshot(DateTime snapshotDate)
         {           
             snapshotDT = runningQueriesSnapshot(ref snapshotDate);
+            int runningJobCount = snapshotDT.AsEnumerable().Where(r => r["job_id"] != DBNull.Value).Count();
+            if (runningJobCount == 0)
+            {
+                snapshotDT.Columns.Remove("job_id");
+                snapshotDT.Columns.Remove("job_name");
+                lblJobCount.Visible = false;
+            }
+            else {
+                lblJobCount.Visible = true;
+                lblJobCount.Text = string.Format("Running Jobs: {0}", runningJobCount);
+            }
+
             lblSnapshotDate.Text = "Snapshot Date: " + snapshotDate.ToString("yyyy-MM-dd HH:mm:ss");
             loadSnapshot(new DataView(snapshotDT));
             lblSnapshotDate.Visible = true;

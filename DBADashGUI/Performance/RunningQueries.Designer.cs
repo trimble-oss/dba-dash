@@ -45,16 +45,17 @@ namespace DBADashGUI.Performance
             this.hostNameToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.loginNameToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.objectNameToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.planHandleToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.programToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.queryHashToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.queryPlanHashToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.sQLHandleToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.statusToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.waitResourceToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.waitTypeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.noneToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.planHandleToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.sQLHandleToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.lblJobCount = new System.Windows.Forms.ToolStripLabel();
             ((System.ComponentModel.ISupportInitialize)(this.dgv)).BeginInit();
             this.toolStrip1.SuspendLayout();
             this.SuspendLayout();
@@ -66,13 +67,13 @@ namespace DBADashGUI.Performance
             this.dgv.BackgroundColor = System.Drawing.Color.White;
             this.dgv.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.dgv.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.dgv.Location = new System.Drawing.Point(0, 31);
+            this.dgv.Location = new System.Drawing.Point(0, 27);
             this.dgv.Name = "dgv";
             this.dgv.ReadOnly = true;
             this.dgv.RowHeadersVisible = false;
             this.dgv.RowHeadersWidth = 51;
             this.dgv.RowTemplate.Height = 24;
-            this.dgv.Size = new System.Drawing.Size(717, 331);
+            this.dgv.Size = new System.Drawing.Size(717, 335);
             this.dgv.TabIndex = 0;
             this.dgv.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgv_CellContentClick);
             this.dgv.CellFormatting += new System.Windows.Forms.DataGridViewCellFormattingEventHandler(this.dgv_CellFormatting);
@@ -88,10 +89,11 @@ namespace DBADashGUI.Performance
             this.tsGetLatest,
             this.lblSnapshotDate,
             this.tsBlocking,
-            this.tsGroupBy});
+            this.tsGroupBy,
+            this.lblJobCount});
             this.toolStrip1.Location = new System.Drawing.Point(0, 0);
             this.toolStrip1.Name = "toolStrip1";
-            this.toolStrip1.Size = new System.Drawing.Size(717, 31);
+            this.toolStrip1.Size = new System.Drawing.Size(717, 27);
             this.toolStrip1.TabIndex = 1;
             this.toolStrip1.Text = "Group By";
             // 
@@ -186,7 +188,7 @@ namespace DBADashGUI.Performance
             this.tsGroupBy.Image = ((System.Drawing.Image)(resources.GetObject("tsGroupBy.Image")));
             this.tsGroupBy.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsGroupBy.Name = "tsGroupBy";
-            this.tsGroupBy.Size = new System.Drawing.Size(84, 28);
+            this.tsGroupBy.Size = new System.Drawing.Size(84, 24);
             this.tsGroupBy.Text = "Group By";
             // 
             // toolStripMenuItem1
@@ -229,6 +231,14 @@ namespace DBADashGUI.Performance
             this.objectNameToolStripMenuItem.Text = "Object Name";
             this.objectNameToolStripMenuItem.Click += new System.EventHandler(this.tsGroupBy_Click);
             // 
+            // planHandleToolStripMenuItem
+            // 
+            this.planHandleToolStripMenuItem.Name = "planHandleToolStripMenuItem";
+            this.planHandleToolStripMenuItem.Size = new System.Drawing.Size(236, 26);
+            this.planHandleToolStripMenuItem.Tag = "plan_handle";
+            this.planHandleToolStripMenuItem.Text = "Plan Handle";
+            this.planHandleToolStripMenuItem.Click += new System.EventHandler(this.tsGroupBy_Click);
+            // 
             // programToolStripMenuItem
             // 
             this.programToolStripMenuItem.Name = "programToolStripMenuItem";
@@ -252,6 +262,14 @@ namespace DBADashGUI.Performance
             this.queryPlanHashToolStripMenuItem.Tag = "query_plan_hash";
             this.queryPlanHashToolStripMenuItem.Text = "Query Plan Hash";
             this.queryPlanHashToolStripMenuItem.Click += new System.EventHandler(this.tsGroupBy_Click);
+            // 
+            // sQLHandleToolStripMenuItem
+            // 
+            this.sQLHandleToolStripMenuItem.Name = "sQLHandleToolStripMenuItem";
+            this.sQLHandleToolStripMenuItem.Size = new System.Drawing.Size(236, 26);
+            this.sQLHandleToolStripMenuItem.Tag = "sql_handle";
+            this.sQLHandleToolStripMenuItem.Text = "SQL Handle";
+            this.sQLHandleToolStripMenuItem.Click += new System.EventHandler(this.tsGroupBy_Click);
             // 
             // statusToolStripMenuItem
             // 
@@ -289,21 +307,14 @@ namespace DBADashGUI.Performance
             this.noneToolStripMenuItem.Text = "None";
             this.noneToolStripMenuItem.Click += new System.EventHandler(this.tsGroupBy_Click);
             // 
-            // planHandleToolStripMenuItem
+            // lblJobCount
             // 
-            this.planHandleToolStripMenuItem.Name = "planHandleToolStripMenuItem";
-            this.planHandleToolStripMenuItem.Size = new System.Drawing.Size(236, 26);
-            this.planHandleToolStripMenuItem.Tag = "plan_handle";
-            this.planHandleToolStripMenuItem.Text = "Plan Handle";
-            this.planHandleToolStripMenuItem.Click += new System.EventHandler(this.tsGroupBy_Click);
-            // 
-            // sQLHandleToolStripMenuItem
-            // 
-            this.sQLHandleToolStripMenuItem.Name = "sQLHandleToolStripMenuItem";
-            this.sQLHandleToolStripMenuItem.Size = new System.Drawing.Size(236, 26);
-            this.sQLHandleToolStripMenuItem.Tag = "sql_handle";
-            this.sQLHandleToolStripMenuItem.Text = "SQL Handle";
-            this.sQLHandleToolStripMenuItem.Click += new System.EventHandler(this.tsGroupBy_Click);
+            this.lblJobCount.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Italic);
+            this.lblJobCount.ForeColor = System.Drawing.Color.DarkSlateBlue;
+            this.lblJobCount.Name = "lblJobCount";
+            this.lblJobCount.Size = new System.Drawing.Size(118, 24);
+            this.lblJobCount.Text = "Jobs Running: {0}";
+            this.lblJobCount.Visible = false;
             // 
             // RunningQueries
             // 
@@ -348,5 +359,6 @@ namespace DBADashGUI.Performance
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
         private System.Windows.Forms.ToolStripMenuItem planHandleToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem sQLHandleToolStripMenuItem;
+        private System.Windows.Forms.ToolStripLabel lblJobCount;
     }
 }

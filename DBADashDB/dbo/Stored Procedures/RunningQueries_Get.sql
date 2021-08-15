@@ -43,6 +43,8 @@ SELECT HD.HumanDuration as [Duration],
     Q.database_id,
 	CONCAT(D.name,', ' + NULLIF(objD.name,D.name))  AS database_name,
     Q.program_name,
+    jid.job_id,
+	J.name as job_name,
     Q.client_interface_name,
     Q.start_time_utc,
     Q.last_request_start_time_utc,
@@ -78,6 +80,8 @@ LEFT JOIN dbo.DBObjects O ON objD.DatabaseID = O.DatabaseID AND O.object_id = IS
 LEFT JOIN dbo.Databases waitD ON waitD.InstanceID = Q.InstanceID AND waitR.wait_database_id = waitD.database_id AND waitD.IsActive=1
 LEFT JOIN dbo.DBObjects waitO ON waitR.wait_object_id = waitO.object_id AND waitO.DatabaseID = waitD.DatabaseID 
 LEFT JOIN dbo.DBFiles waitF ON waitF.DatabaseID = waitD.DatabaseID AND waitF.file_id = waitR.wait_file_id
+OUTER APPLY (SELECT CASE WHEN program_name LIKE 'SQLAgent - TSQL JobStep (Job 0x%' THEN TRY_CAST(TRY_CONVERT(BINARY(16),SUBSTRING(program_name, 30,34),1) AS UNIQUEIDENTIFIER)  ELSE NULL END AS job_id) jid
+LEFT JOIN dbo.Jobs J ON J.job_id = jid.job_id AND J.InstanceID = Q.InstanceID
 WHERE Q.SnapshotDateUTC = @SnapshotDate
 AND Q.InstanceID = @InstanceID
 ORDER BY calc.Duration DESC
