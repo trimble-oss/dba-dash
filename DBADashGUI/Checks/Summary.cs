@@ -92,6 +92,7 @@ namespace DBADashGUI
                     }
                     dv = new DataView(dt,rowFilter,"Instance", DataViewRowState.CurrentRows);
                     dgvSummary.DataSource = dv;
+                    dgvSummary.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
                     lastRefresh = DateTime.Now;
                     lblRefreshTime.Text = "Refresh Time: " + lastRefresh.ToString();
                     lblRefreshTime.ForeColor = Color.Blue;

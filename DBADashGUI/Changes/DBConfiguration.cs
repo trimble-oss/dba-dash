@@ -79,8 +79,8 @@ namespace DBADashGUI.Changes
                         }
                         lastDB = dbid;
                     }
-                    dgvConfig.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.DisplayedCells;
                     dgvConfig.Rows.AddRange(rows.ToArray());
+                    dgvConfig.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
                 }
             }
         }
@@ -104,6 +104,7 @@ namespace DBADashGUI.Changes
                     dgvConfigHistory.AutoGenerateColumns = false;
                     Common.ConvertUTCToLocal(ref dt);
                     dgvConfigHistory.DataSource = dt;
+                    dgvConfigHistory.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
                 }
             }
         }

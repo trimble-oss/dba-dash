@@ -56,6 +56,7 @@ namespace DBADashGUI.Performance
                     dgv.AutoGenerateColumns = false;
                     dgv.DataSource = new DataView(dt);
                     generateHistogram(dgv);
+                    dgv.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
                 }
             }
         }
@@ -87,6 +88,7 @@ namespace DBADashGUI.Performance
                     dgvPool.AutoGenerateColumns = false;
                     dgvPool.DataSource = new DataView(dt);
                     generateHistogram(dgvPool, "colPool");
+                    dgvPool.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
                 }
             }
 

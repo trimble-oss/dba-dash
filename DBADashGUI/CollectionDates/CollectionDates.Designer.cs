@@ -31,6 +31,7 @@
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
             this.tsRefresh = new System.Windows.Forms.ToolStripButton();
             this.tsCopy = new System.Windows.Forms.ToolStripButton();
+            this.tsExcel = new System.Windows.Forms.ToolStripButton();
             this.toolStripFilter = new System.Windows.Forms.ToolStripDropDownButton();
             this.criticalToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.warningToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -46,7 +47,6 @@
             this.ConfiguredLevel = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Configure = new System.Windows.Forms.DataGridViewLinkColumn();
             this.ConfigureRoot = new System.Windows.Forms.DataGridViewLinkColumn();
-            this.tsExcel = new System.Windows.Forms.ToolStripButton();
             this.toolStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dgvCollectionDates)).BeginInit();
             this.SuspendLayout();
@@ -84,6 +84,16 @@
             this.tsCopy.Size = new System.Drawing.Size(29, 24);
             this.tsCopy.Text = "Copy";
             this.tsCopy.Click += new System.EventHandler(this.tsCopy_Click);
+            // 
+            // tsExcel
+            // 
+            this.tsExcel.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.tsExcel.Image = global::DBADashGUI.Properties.Resources.excel16x16;
+            this.tsExcel.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tsExcel.Name = "tsExcel";
+            this.tsExcel.Size = new System.Drawing.Size(29, 24);
+            this.tsExcel.Text = "Export Excel";
+            this.tsExcel.Click += new System.EventHandler(this.tsExcel_Click);
             // 
             // toolStripFilter
             // 
@@ -135,7 +145,6 @@
             // 
             this.dgvCollectionDates.AllowUserToAddRows = false;
             this.dgvCollectionDates.AllowUserToDeleteRows = false;
-            this.dgvCollectionDates.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.DisplayedCells;
             this.dgvCollectionDates.ClipboardCopyMode = System.Windows.Forms.DataGridViewClipboardCopyMode.EnableAlwaysIncludeHeaderText;
             this.dgvCollectionDates.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.dgvCollectionDates.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
@@ -243,16 +252,6 @@
             this.ConfigureRoot.Text = "Configure Root";
             this.ConfigureRoot.UseColumnTextForLinkValue = true;
             this.ConfigureRoot.Width = 98;
-            // 
-            // tsExcel
-            // 
-            this.tsExcel.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.tsExcel.Image = global::DBADashGUI.Properties.Resources.excel16x16;
-            this.tsExcel.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsExcel.Name = "tsExcel";
-            this.tsExcel.Size = new System.Drawing.Size(29, 24);
-            this.tsExcel.Text = "Export Excel";
-            this.tsExcel.Click += new System.EventHandler(this.tsExcel_Click);
             // 
             // CollectionDates
             // 

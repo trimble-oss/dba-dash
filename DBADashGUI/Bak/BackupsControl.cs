@@ -88,6 +88,7 @@ namespace DBADashGUI.Backups
                         Common.ConvertUTCToLocal(ref dtBackups);
                         dgvBackups.AutoGenerateColumns = false;
                         dgvBackups.DataSource = new DataView(dtBackups);
+                        dgvBackups.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
                     }
                 }
                 

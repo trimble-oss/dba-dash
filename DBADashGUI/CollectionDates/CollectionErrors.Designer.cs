@@ -40,6 +40,7 @@
             this.toolStrip3 = new System.Windows.Forms.ToolStrip();
             this.tsRefreshErrors = new System.Windows.Forms.ToolStripButton();
             this.tsCopyErrors = new System.Windows.Forms.ToolStripButton();
+            this.tsExcel = new System.Windows.Forms.ToolStripButton();
             this.tsErrorDays = new System.Windows.Forms.ToolStripDropDownButton();
             this.tsErrors1Day = new System.Windows.Forms.ToolStripMenuItem();
             this.tsErrors2Days = new System.Windows.Forms.ToolStripMenuItem();
@@ -53,7 +54,6 @@
             this.dataGridViewTextBoxColumn3 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dataGridViewTextBoxColumn4 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dataGridViewTextBoxColumn5 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.tsExcel = new System.Windows.Forms.ToolStripButton();
             ((System.ComponentModel.ISupportInitialize)(this.dgvDBADashErrors)).BeginInit();
             this.toolStrip3.SuspendLayout();
             this.SuspendLayout();
@@ -62,7 +62,6 @@
             // 
             this.dgvDBADashErrors.AllowUserToAddRows = false;
             this.dgvDBADashErrors.AllowUserToDeleteRows = false;
-            this.dgvDBADashErrors.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.DisplayedCells;
             this.dgvDBADashErrors.ClipboardCopyMode = System.Windows.Forms.DataGridViewClipboardCopyMode.EnableAlwaysIncludeHeaderText;
             dataGridViewCellStyle1.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
             dataGridViewCellStyle1.BackColor = System.Drawing.SystemColors.Control;
@@ -176,6 +175,16 @@
             this.tsCopyErrors.Size = new System.Drawing.Size(29, 24);
             this.tsCopyErrors.Text = "Copy";
             this.tsCopyErrors.Click += new System.EventHandler(this.tsCopyErrors_Click);
+            // 
+            // tsExcel
+            // 
+            this.tsExcel.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.tsExcel.Image = global::DBADashGUI.Properties.Resources.excel16x16;
+            this.tsExcel.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tsExcel.Name = "tsExcel";
+            this.tsExcel.Size = new System.Drawing.Size(29, 24);
+            this.tsExcel.Text = "Export Excel";
+            this.tsExcel.Click += new System.EventHandler(this.tsExcel_Click);
             // 
             // tsErrorDays
             // 
@@ -296,16 +305,6 @@
             this.dataGridViewTextBoxColumn5.Name = "dataGridViewTextBoxColumn5";
             this.dataGridViewTextBoxColumn5.ReadOnly = true;
             this.dataGridViewTextBoxColumn5.Width = 94;
-            // 
-            // tsExcel
-            // 
-            this.tsExcel.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.tsExcel.Image = global::DBADashGUI.Properties.Resources.excel16x16;
-            this.tsExcel.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsExcel.Name = "tsExcel";
-            this.tsExcel.Size = new System.Drawing.Size(29, 24);
-            this.tsExcel.Text = "Export Excel";
-            this.tsExcel.Click += new System.EventHandler(this.tsExcel_Click);
             // 
             // CollectionErrors
             // 

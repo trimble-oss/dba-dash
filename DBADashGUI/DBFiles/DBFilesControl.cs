@@ -109,6 +109,7 @@ namespace DBADashGUI.DBFiles
                     da.Fill(dt);
                     dgvFiles.AutoGenerateColumns = false;
                     dgvFiles.DataSource = new DataView(dt);
+                    dgvFiles.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
                 }
             }
 

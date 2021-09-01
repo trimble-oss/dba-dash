@@ -73,6 +73,14 @@
             this.toolStripLabel1 = new System.Windows.Forms.ToolStripLabel();
             this.tsPageSize = new System.Windows.Forms.ToolStripComboBox();
             this.gvHistory = new System.Windows.Forms.DataGridView();
+            this.ObjectName = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.SchemaName = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.ObjectType = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.SnapshotValidFrom = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.SnapshotValidTo = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.ObjectDateCreated = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.ObjectDateModified = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colCompare = new System.Windows.Forms.DataGridViewLinkColumn();
             this.label1 = new System.Windows.Forms.Label();
             this.tabTags = new System.Windows.Forms.TabPage();
             this.chkTags = new System.Windows.Forms.CheckedListBox();
@@ -179,14 +187,6 @@
             this.dataGridViewTextBoxColumn21 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dataGridViewTextBoxColumn22 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dataGridViewTextBoxColumn23 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.ObjectName = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.SchemaName = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.ObjectType = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.SnapshotValidFrom = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.SnapshotValidTo = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.ObjectDateCreated = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.ObjectDateModified = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colCompare = new System.Windows.Forms.DataGridViewLinkColumn();
             this.menuStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitMain)).BeginInit();
             this.splitMain.Panel1.SuspendLayout();
@@ -737,7 +737,6 @@
             this.gvHistory.Location = new System.Drawing.Point(0, 25);
             this.gvHistory.MultiSelect = false;
             this.gvHistory.Name = "gvHistory";
-            this.gvHistory.ReadOnly = true;
             this.gvHistory.RowHeadersVisible = false;
             this.gvHistory.RowHeadersWidth = 51;
             this.gvHistory.RowTemplate.Height = 24;
@@ -746,6 +745,70 @@
             this.gvHistory.TabIndex = 0;
             this.gvHistory.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.gvHistory_CellContentClick);
             this.gvHistory.SelectionChanged += new System.EventHandler(this.gvHistory_SelectionChanged);
+            // 
+            // ObjectName
+            // 
+            this.ObjectName.DataPropertyName = "ObjectName";
+            this.ObjectName.HeaderText = "Object Name";
+            this.ObjectName.MinimumWidth = 6;
+            this.ObjectName.Name = "ObjectName";
+            this.ObjectName.Width = 119;
+            // 
+            // SchemaName
+            // 
+            this.SchemaName.DataPropertyName = "SchemaName";
+            this.SchemaName.HeaderText = "Schema Name";
+            this.SchemaName.MinimumWidth = 6;
+            this.SchemaName.Name = "SchemaName";
+            this.SchemaName.Width = 129;
+            // 
+            // ObjectType
+            // 
+            this.ObjectType.HeaderText = "Object Type";
+            this.ObjectType.MinimumWidth = 6;
+            this.ObjectType.Name = "ObjectType";
+            this.ObjectType.Width = 114;
+            // 
+            // SnapshotValidFrom
+            // 
+            this.SnapshotValidFrom.DataPropertyName = "SnapshotValidFrom";
+            this.SnapshotValidFrom.HeaderText = "Snapshot Valid From";
+            this.SnapshotValidFrom.MinimumWidth = 6;
+            this.SnapshotValidFrom.Name = "SnapshotValidFrom";
+            this.SnapshotValidFrom.Width = 168;
+            // 
+            // SnapshotValidTo
+            // 
+            this.SnapshotValidTo.DataPropertyName = "SnapshotValidTo";
+            this.SnapshotValidTo.HeaderText = "Snapshot Valid To";
+            this.SnapshotValidTo.MinimumWidth = 6;
+            this.SnapshotValidTo.Name = "SnapshotValidTo";
+            this.SnapshotValidTo.Width = 153;
+            // 
+            // ObjectDateCreated
+            // 
+            this.ObjectDateCreated.DataPropertyName = "ObjectDateCreated";
+            this.ObjectDateCreated.HeaderText = "Date Created";
+            this.ObjectDateCreated.MinimumWidth = 6;
+            this.ObjectDateCreated.Name = "ObjectDateCreated";
+            this.ObjectDateCreated.Width = 121;
+            // 
+            // ObjectDateModified
+            // 
+            this.ObjectDateModified.DataPropertyName = "ObjectDateModified";
+            this.ObjectDateModified.HeaderText = "Date Modified";
+            this.ObjectDateModified.MinimumWidth = 6;
+            this.ObjectDateModified.Name = "ObjectDateModified";
+            this.ObjectDateModified.Width = 124;
+            // 
+            // colCompare
+            // 
+            this.colCompare.HeaderText = "Compare";
+            this.colCompare.MinimumWidth = 6;
+            this.colCompare.Name = "colCompare";
+            this.colCompare.Text = "Compare";
+            this.colCompare.UseColumnTextForLinkValue = true;
+            this.colCompare.Width = 125;
             // 
             // label1
             // 
@@ -1831,78 +1894,6 @@
             this.dataGridViewTextBoxColumn23.Name = "dataGridViewTextBoxColumn23";
             this.dataGridViewTextBoxColumn23.ReadOnly = true;
             this.dataGridViewTextBoxColumn23.Width = 94;
-            // 
-            // ObjectName
-            // 
-            this.ObjectName.DataPropertyName = "ObjectName";
-            this.ObjectName.HeaderText = "Object Name";
-            this.ObjectName.MinimumWidth = 6;
-            this.ObjectName.Name = "ObjectName";
-            this.ObjectName.ReadOnly = true;
-            this.ObjectName.Width = 119;
-            // 
-            // SchemaName
-            // 
-            this.SchemaName.DataPropertyName = "SchemaName";
-            this.SchemaName.HeaderText = "Schema Name";
-            this.SchemaName.MinimumWidth = 6;
-            this.SchemaName.Name = "SchemaName";
-            this.SchemaName.ReadOnly = true;
-            this.SchemaName.Width = 129;
-            // 
-            // ObjectType
-            // 
-            this.ObjectType.HeaderText = "Object Type";
-            this.ObjectType.MinimumWidth = 6;
-            this.ObjectType.Name = "ObjectType";
-            this.ObjectType.ReadOnly = true;
-            this.ObjectType.Width = 114;
-            // 
-            // SnapshotValidFrom
-            // 
-            this.SnapshotValidFrom.DataPropertyName = "SnapshotValidFrom";
-            this.SnapshotValidFrom.HeaderText = "Snapshot Valid From";
-            this.SnapshotValidFrom.MinimumWidth = 6;
-            this.SnapshotValidFrom.Name = "SnapshotValidFrom";
-            this.SnapshotValidFrom.ReadOnly = true;
-            this.SnapshotValidFrom.Width = 168;
-            // 
-            // SnapshotValidTo
-            // 
-            this.SnapshotValidTo.DataPropertyName = "SnapshotValidTo";
-            this.SnapshotValidTo.HeaderText = "Snapshot Valid To";
-            this.SnapshotValidTo.MinimumWidth = 6;
-            this.SnapshotValidTo.Name = "SnapshotValidTo";
-            this.SnapshotValidTo.ReadOnly = true;
-            this.SnapshotValidTo.Width = 153;
-            // 
-            // ObjectDateCreated
-            // 
-            this.ObjectDateCreated.DataPropertyName = "ObjectDateCreated";
-            this.ObjectDateCreated.HeaderText = "Date Created";
-            this.ObjectDateCreated.MinimumWidth = 6;
-            this.ObjectDateCreated.Name = "ObjectDateCreated";
-            this.ObjectDateCreated.ReadOnly = true;
-            this.ObjectDateCreated.Width = 121;
-            // 
-            // ObjectDateModified
-            // 
-            this.ObjectDateModified.DataPropertyName = "ObjectDateModified";
-            this.ObjectDateModified.HeaderText = "Date Modified";
-            this.ObjectDateModified.MinimumWidth = 6;
-            this.ObjectDateModified.Name = "ObjectDateModified";
-            this.ObjectDateModified.ReadOnly = true;
-            this.ObjectDateModified.Width = 124;
-            // 
-            // colCompare
-            // 
-            this.colCompare.HeaderText = "Compare";
-            this.colCompare.MinimumWidth = 6;
-            this.colCompare.Name = "colCompare";
-            this.colCompare.ReadOnly = true;
-            this.colCompare.Text = "Compare";
-            this.colCompare.UseColumnTextForLinkValue = true;
-            this.colCompare.Width = 125;
             // 
             // Main
             // 

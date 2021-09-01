@@ -39,11 +39,11 @@
             this.toolStripLabel1 = new System.Windows.Forms.ToolStripLabel();
             this.tsRefresh = new System.Windows.Forms.ToolStripButton();
             this.tsCopy = new System.Windows.Forms.ToolStripButton();
+            this.tsExcel = new System.Windows.Forms.ToolStripButton();
             this.toolStrip2 = new System.Windows.Forms.ToolStrip();
             this.toolStripLabel2 = new System.Windows.Forms.ToolStripLabel();
             this.tsRefreshHistory = new System.Windows.Forms.ToolStripButton();
             this.tsCopyHistory = new System.Windows.Forms.ToolStripButton();
-            this.tsExcel = new System.Windows.Forms.ToolStripButton();
             this.tsExcelHistory = new System.Windows.Forms.ToolStripButton();
             ((System.ComponentModel.ISupportInitialize)(this.dgv)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
@@ -59,7 +59,6 @@
             // 
             this.dgv.AllowUserToAddRows = false;
             this.dgv.AllowUserToDeleteRows = false;
-            this.dgv.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.DisplayedCells;
             this.dgv.BackgroundColor = System.Drawing.Color.White;
             this.dgv.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.dgv.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
@@ -136,7 +135,6 @@
             // 
             this.dgvFlags.AllowUserToAddRows = false;
             this.dgvFlags.AllowUserToDeleteRows = false;
-            this.dgvFlags.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.DisplayedCells;
             this.dgvFlags.BackgroundColor = System.Drawing.Color.White;
             this.dgvFlags.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.dgvFlags.Dock = System.Windows.Forms.DockStyle.Fill;
@@ -191,6 +189,16 @@
             this.tsCopy.Text = "Copy";
             this.tsCopy.Click += new System.EventHandler(this.tsCopy_Click);
             // 
+            // tsExcel
+            // 
+            this.tsExcel.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.tsExcel.Image = global::DBADashGUI.Properties.Resources.excel16x16;
+            this.tsExcel.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tsExcel.Name = "tsExcel";
+            this.tsExcel.Size = new System.Drawing.Size(29, 24);
+            this.tsExcel.Text = "Export Excel";
+            this.tsExcel.Click += new System.EventHandler(this.tsExcel_Click);
+            // 
             // toolStrip2
             // 
             this.toolStrip2.ImageScalingSize = new System.Drawing.Size(20, 20);
@@ -232,16 +240,6 @@
             this.tsCopyHistory.Size = new System.Drawing.Size(29, 24);
             this.tsCopyHistory.Text = "Copy";
             this.tsCopyHistory.Click += new System.EventHandler(this.tsCopyHistory_Click);
-            // 
-            // tsExcel
-            // 
-            this.tsExcel.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.tsExcel.Image = global::DBADashGUI.Properties.Resources.excel16x16;
-            this.tsExcel.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsExcel.Name = "tsExcel";
-            this.tsExcel.Size = new System.Drawing.Size(29, 24);
-            this.tsExcel.Text = "Export Excel";
-            this.tsExcel.Click += new System.EventHandler(this.tsExcel_Click);
             // 
             // tsExcelHistory
             // 

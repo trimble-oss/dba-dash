@@ -54,6 +54,7 @@ namespace DBADashGUI.HA
                 dgv.Columns.Add(new DataGridViewTextBoxColumn() { HeaderText = "Snapshot Age (min)", DataPropertyName = "SnapshotAge" , Name="SnapshotAge"});
                 dgv.AutoGenerateColumns = false;
                 dgv.DataSource = dt;
+                dgv.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
             }
             else
             {
@@ -63,6 +64,7 @@ namespace DBADashGUI.HA
                 dgv.AutoGenerateColumns = true;
                 dgv.DataSource = dt;
                 dgv.Columns.Remove("CollectionDateStatus");
+                dgv.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
             }
         }
 

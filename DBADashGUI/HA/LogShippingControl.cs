@@ -82,6 +82,7 @@ namespace DBADashGUI.LogShipping
                         da.Fill(dt);
                         dgvLogShipping.AutoGenerateColumns = false;
                         dgvLogShipping.DataSource = new DataView(dt);
+                        dgvLogShipping.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
                     }
                 }
             }

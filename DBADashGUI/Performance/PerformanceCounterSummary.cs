@@ -45,6 +45,7 @@ namespace DBADashGUI.Performance
                     da.Fill(dt);
                     dgv.AutoGenerateColumns = false;
                     dgv.DataSource = dt;
+                    dgv.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
                 }
             }
         }

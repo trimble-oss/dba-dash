@@ -89,6 +89,7 @@ namespace DBADashGUI.CollectionDates
                         Common.ConvertUTCToLocal(ref dt);
                         dgvCollectionDates.AutoGenerateColumns = false;
                         dgvCollectionDates.DataSource = new DataView(dt);
+                        dgvCollectionDates.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
                     }
                 }
 

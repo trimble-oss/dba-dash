@@ -65,9 +65,9 @@ namespace DBADashGUI.Changes
                             row.Cells[idx].Style.Font = new Font(dgvConfig.Font, FontStyle.Bold);
                         }
                         lastInstance = instance;
-                    }
-                    dgvConfig.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.DisplayedCells;
+                    }                   
                     dgvConfig.Rows.AddRange(rows.ToArray());
+                    dgvConfig.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
                 }
             }
         }

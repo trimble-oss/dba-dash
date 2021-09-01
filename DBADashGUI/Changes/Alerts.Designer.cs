@@ -34,6 +34,7 @@
             this.toolStripLabel1 = new System.Windows.Forms.ToolStripLabel();
             this.tsRefresh = new System.Windows.Forms.ToolStripButton();
             this.tsCopy = new System.Windows.Forms.ToolStripButton();
+            this.tsExcel = new System.Windows.Forms.ToolStripButton();
             this.toolStripDropDownButton1 = new System.Windows.Forms.ToolStripDropDownButton();
             this.pivotByAlertNameToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.dgvAlerts = new System.Windows.Forms.DataGridView();
@@ -41,7 +42,6 @@
             this.toolStripLabel2 = new System.Windows.Forms.ToolStripLabel();
             this.tsRefreshAlerts = new System.Windows.Forms.ToolStripButton();
             this.tsCopyAlerts = new System.Windows.Forms.ToolStripButton();
-            this.tsExcel = new System.Windows.Forms.ToolStripButton();
             this.tsExcelAlerts = new System.Windows.Forms.ToolStripButton();
             ((System.ComponentModel.ISupportInitialize)(this.dgvAlertsConfig)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
@@ -57,17 +57,16 @@
             // 
             this.dgvAlertsConfig.AllowUserToAddRows = false;
             this.dgvAlertsConfig.AllowUserToDeleteRows = false;
-            this.dgvAlertsConfig.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.DisplayedCells;
             this.dgvAlertsConfig.BackgroundColor = System.Drawing.Color.White;
             this.dgvAlertsConfig.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.dgvAlertsConfig.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.dgvAlertsConfig.Location = new System.Drawing.Point(0, 31);
+            this.dgvAlertsConfig.Location = new System.Drawing.Point(0, 27);
             this.dgvAlertsConfig.Name = "dgvAlertsConfig";
             this.dgvAlertsConfig.ReadOnly = true;
             this.dgvAlertsConfig.RowHeadersVisible = false;
             this.dgvAlertsConfig.RowHeadersWidth = 51;
             this.dgvAlertsConfig.RowTemplate.Height = 24;
-            this.dgvAlertsConfig.Size = new System.Drawing.Size(667, 262);
+            this.dgvAlertsConfig.Size = new System.Drawing.Size(667, 266);
             this.dgvAlertsConfig.TabIndex = 0;
             // 
             // splitContainer1
@@ -101,7 +100,7 @@
             this.toolStripDropDownButton1});
             this.toolStrip1.Location = new System.Drawing.Point(0, 0);
             this.toolStrip1.Name = "toolStrip1";
-            this.toolStrip1.Size = new System.Drawing.Size(667, 31);
+            this.toolStrip1.Size = new System.Drawing.Size(667, 27);
             this.toolStrip1.TabIndex = 1;
             this.toolStrip1.Text = "toolStrip1";
             // 
@@ -133,6 +132,16 @@
             this.tsCopy.Text = "Copy";
             this.tsCopy.Click += new System.EventHandler(this.tsCopy_Click);
             // 
+            // tsExcel
+            // 
+            this.tsExcel.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.tsExcel.Image = global::DBADashGUI.Properties.Resources.excel16x16;
+            this.tsExcel.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tsExcel.Name = "tsExcel";
+            this.tsExcel.Size = new System.Drawing.Size(29, 24);
+            this.tsExcel.Text = "Export Excel";
+            this.tsExcel.Click += new System.EventHandler(this.tsExcel_Click);
+            // 
             // toolStripDropDownButton1
             // 
             this.toolStripDropDownButton1.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
@@ -156,17 +165,16 @@
             // 
             this.dgvAlerts.AllowUserToAddRows = false;
             this.dgvAlerts.AllowUserToDeleteRows = false;
-            this.dgvAlerts.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.DisplayedCells;
             this.dgvAlerts.BackgroundColor = System.Drawing.Color.White;
             this.dgvAlerts.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.dgvAlerts.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.dgvAlerts.Location = new System.Drawing.Point(0, 31);
+            this.dgvAlerts.Location = new System.Drawing.Point(0, 27);
             this.dgvAlerts.Name = "dgvAlerts";
             this.dgvAlerts.ReadOnly = true;
             this.dgvAlerts.RowHeadersVisible = false;
             this.dgvAlerts.RowHeadersWidth = 51;
             this.dgvAlerts.RowTemplate.Height = 24;
-            this.dgvAlerts.Size = new System.Drawing.Size(667, 259);
+            this.dgvAlerts.Size = new System.Drawing.Size(667, 263);
             this.dgvAlerts.TabIndex = 0;
             // 
             // toolStrip2
@@ -179,7 +187,7 @@
             this.tsExcelAlerts});
             this.toolStrip2.Location = new System.Drawing.Point(0, 0);
             this.toolStrip2.Name = "toolStrip2";
-            this.toolStrip2.Size = new System.Drawing.Size(667, 31);
+            this.toolStrip2.Size = new System.Drawing.Size(667, 27);
             this.toolStrip2.TabIndex = 1;
             this.toolStrip2.Text = "toolStrip2";
             // 
@@ -210,16 +218,6 @@
             this.tsCopyAlerts.Size = new System.Drawing.Size(29, 24);
             this.tsCopyAlerts.Text = "Copy";
             this.tsCopyAlerts.Click += new System.EventHandler(this.tsCopyAlerts_Click);
-            // 
-            // tsExcel
-            // 
-            this.tsExcel.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.tsExcel.Image = global::DBADashGUI.Properties.Resources.excel16x16;
-            this.tsExcel.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsExcel.Name = "tsExcel";
-            this.tsExcel.Size = new System.Drawing.Size(29, 24);
-            this.tsExcel.Text = "Export Excel";
-            this.tsExcel.Click += new System.EventHandler(this.tsExcel_Click);
             // 
             // tsExcelAlerts
             // 

@@ -309,6 +309,7 @@ namespace DBADashGUI.Checks
                     dgvCustom.AutoGenerateColumns = false;
                     dgvCustom.DataSource = dt;
                     HistoryView(false);
+                    dgvCustom.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
                 }
             }
         }

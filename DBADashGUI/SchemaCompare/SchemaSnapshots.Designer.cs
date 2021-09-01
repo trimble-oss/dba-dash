@@ -36,6 +36,15 @@
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle5 = new System.Windows.Forms.DataGridViewCellStyle();
             this.splitSnapshotSummary = new System.Windows.Forms.SplitContainer();
             this.gvSnapshots = new System.Windows.Forms.DataGridView();
+            this.colDB = new System.Windows.Forms.DataGridViewLinkColumn();
+            this.SnapshotDate = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.ValidatedDate = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.ValidForDays = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.DaysSinceValidation = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colCreated = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.Modified = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.Dropped = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colExport = new System.Windows.Forms.DataGridViewLinkColumn();
             this.toolStrip2 = new System.Windows.Forms.ToolStrip();
             this.tsSummaryBack = new System.Windows.Forms.ToolStripButton();
             this.tsSummaryPageNum = new System.Windows.Forms.ToolStripLabel();
@@ -43,10 +52,15 @@
             this.toolStripLabel3 = new System.Windows.Forms.ToolStripLabel();
             this.tsSummaryPageSize = new System.Windows.Forms.ToolStripComboBox();
             this.gvSnapshotsDetail = new System.Windows.Forms.DataGridView();
+            this.colObjectName = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colSchemaName = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colAction = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.colView = new System.Windows.Forms.DataGridViewLinkColumn();
             this.colDiff = new System.Windows.Forms.DataGridViewLinkColumn();
             this.dgvInstanceSummary = new System.Windows.Forms.DataGridView();
             this.colInstance = new System.Windows.Forms.DataGridViewLinkColumn();
+            this.colLastUpdated = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colLastValidated = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
             this.tsRefresh = new System.Windows.Forms.ToolStripButton();
             this.tsBack = new System.Windows.Forms.ToolStripButton();
@@ -62,21 +76,7 @@
             this.dataGridViewTextBoxColumn10 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dataGridViewTextBoxColumn11 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dataGridViewTextBoxColumn12 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colLastUpdated = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colLastValidated = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colObjectName = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colSchemaName = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colAction = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dataGridViewTextBoxColumn13 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colDB = new System.Windows.Forms.DataGridViewLinkColumn();
-            this.SnapshotDate = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.ValidatedDate = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.ValidForDays = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.DaysSinceValidation = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colCreated = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.Modified = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.Dropped = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colExport = new System.Windows.Forms.DataGridViewLinkColumn();
             ((System.ComponentModel.ISupportInitialize)(this.splitSnapshotSummary)).BeginInit();
             this.splitSnapshotSummary.Panel1.SuspendLayout();
             this.splitSnapshotSummary.Panel2.SuspendLayout();
@@ -158,6 +158,91 @@
             this.gvSnapshots.TabIndex = 0;
             this.gvSnapshots.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.gvSnapshots_CellContentClick);
             this.gvSnapshots.SelectionChanged += new System.EventHandler(this.gvSnapshots_SelectionChanged);
+            // 
+            // colDB
+            // 
+            this.colDB.DataPropertyName = "DB";
+            this.colDB.HeaderText = "DB";
+            this.colDB.MinimumWidth = 6;
+            this.colDB.Name = "colDB";
+            this.colDB.ReadOnly = true;
+            this.colDB.Resizable = System.Windows.Forms.DataGridViewTriState.True;
+            this.colDB.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
+            this.colDB.Width = 56;
+            // 
+            // SnapshotDate
+            // 
+            this.SnapshotDate.DataPropertyName = "SnapshotDate";
+            this.SnapshotDate.HeaderText = "Snapshot Date";
+            this.SnapshotDate.MinimumWidth = 6;
+            this.SnapshotDate.Name = "SnapshotDate";
+            this.SnapshotDate.ReadOnly = true;
+            this.SnapshotDate.Width = 131;
+            // 
+            // ValidatedDate
+            // 
+            this.ValidatedDate.DataPropertyName = "ValidatedDate";
+            this.ValidatedDate.HeaderText = "Validated Date";
+            this.ValidatedDate.MinimumWidth = 6;
+            this.ValidatedDate.Name = "ValidatedDate";
+            this.ValidatedDate.ReadOnly = true;
+            this.ValidatedDate.Width = 130;
+            // 
+            // ValidForDays
+            // 
+            this.ValidForDays.DataPropertyName = "ValidForDays";
+            this.ValidForDays.HeaderText = "Valid For (Days)";
+            this.ValidForDays.MinimumWidth = 6;
+            this.ValidForDays.Name = "ValidForDays";
+            this.ValidForDays.ReadOnly = true;
+            this.ValidForDays.Width = 125;
+            // 
+            // DaysSinceValidation
+            // 
+            this.DaysSinceValidation.DataPropertyName = "DaysSinceValidation";
+            this.DaysSinceValidation.HeaderText = "Days Since Validation";
+            this.DaysSinceValidation.MinimumWidth = 6;
+            this.DaysSinceValidation.Name = "DaysSinceValidation";
+            this.DaysSinceValidation.ReadOnly = true;
+            this.DaysSinceValidation.Width = 125;
+            // 
+            // colCreated
+            // 
+            this.colCreated.DataPropertyName = "Created";
+            this.colCreated.HeaderText = "Created";
+            this.colCreated.MinimumWidth = 6;
+            this.colCreated.Name = "colCreated";
+            this.colCreated.ReadOnly = true;
+            this.colCreated.Width = 87;
+            // 
+            // Modified
+            // 
+            this.Modified.DataPropertyName = "Modified";
+            this.Modified.HeaderText = "Modified";
+            this.Modified.MinimumWidth = 6;
+            this.Modified.Name = "Modified";
+            this.Modified.ReadOnly = true;
+            this.Modified.Width = 90;
+            // 
+            // Dropped
+            // 
+            this.Dropped.DataPropertyName = "Dropped";
+            this.Dropped.HeaderText = "Dropped";
+            this.Dropped.MinimumWidth = 6;
+            this.Dropped.Name = "Dropped";
+            this.Dropped.ReadOnly = true;
+            this.Dropped.Width = 92;
+            // 
+            // colExport
+            // 
+            this.colExport.HeaderText = "Export";
+            this.colExport.MinimumWidth = 6;
+            this.colExport.Name = "colExport";
+            this.colExport.ReadOnly = true;
+            this.colExport.Text = "Export";
+            this.colExport.ToolTipText = "Export DB Schema to disk";
+            this.colExport.UseColumnTextForLinkValue = true;
+            this.colExport.Width = 125;
             // 
             // toolStrip2
             // 
@@ -259,6 +344,33 @@
             this.gvSnapshotsDetail.TabIndex = 0;
             this.gvSnapshotsDetail.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.gvSnapshotsDetail_CellContentClick);
             // 
+            // colObjectName
+            // 
+            this.colObjectName.DataPropertyName = "ObjectName";
+            this.colObjectName.HeaderText = "Object Name";
+            this.colObjectName.MinimumWidth = 6;
+            this.colObjectName.Name = "colObjectName";
+            this.colObjectName.ReadOnly = true;
+            this.colObjectName.Width = 119;
+            // 
+            // colSchemaName
+            // 
+            this.colSchemaName.DataPropertyName = "SchemaName";
+            this.colSchemaName.HeaderText = "Schema Name";
+            this.colSchemaName.MinimumWidth = 6;
+            this.colSchemaName.Name = "colSchemaName";
+            this.colSchemaName.ReadOnly = true;
+            this.colSchemaName.Width = 129;
+            // 
+            // colAction
+            // 
+            this.colAction.DataPropertyName = "Action";
+            this.colAction.HeaderText = "Action";
+            this.colAction.MinimumWidth = 6;
+            this.colAction.Name = "colAction";
+            this.colAction.ReadOnly = true;
+            this.colAction.Width = 76;
+            // 
             // colView
             // 
             this.colView.DataPropertyName = "newDDLID";
@@ -313,6 +425,24 @@
             this.colInstance.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
             this.colInstance.Width = 90;
             // 
+            // colLastUpdated
+            // 
+            this.colLastUpdated.DataPropertyName = "LastUpdated";
+            this.colLastUpdated.HeaderText = "Last Updated";
+            this.colLastUpdated.MinimumWidth = 6;
+            this.colLastUpdated.Name = "colLastUpdated";
+            this.colLastUpdated.ReadOnly = true;
+            this.colLastUpdated.Width = 122;
+            // 
+            // colLastValidated
+            // 
+            this.colLastValidated.DataPropertyName = "LastValidated";
+            this.colLastValidated.HeaderText = "Last Validated";
+            this.colLastValidated.MinimumWidth = 6;
+            this.colLastValidated.Name = "colLastValidated";
+            this.colLastValidated.ReadOnly = true;
+            this.colLastValidated.Width = 127;
+            // 
             // toolStrip1
             // 
             this.toolStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
@@ -353,7 +483,7 @@
             this.dataGridViewTextBoxColumn1.MinimumWidth = 6;
             this.dataGridViewTextBoxColumn1.Name = "dataGridViewTextBoxColumn1";
             this.dataGridViewTextBoxColumn1.ReadOnly = true;
-            this.dataGridViewTextBoxColumn1.Width = 131;
+            this.dataGridViewTextBoxColumn1.Width = 125;
             // 
             // dataGridViewTextBoxColumn2
             // 
@@ -363,7 +493,7 @@
             this.dataGridViewTextBoxColumn2.MinimumWidth = 6;
             this.dataGridViewTextBoxColumn2.Name = "dataGridViewTextBoxColumn2";
             this.dataGridViewTextBoxColumn2.ReadOnly = true;
-            this.dataGridViewTextBoxColumn2.Width = 130;
+            this.dataGridViewTextBoxColumn2.Width = 125;
             // 
             // dataGridViewTextBoxColumn3
             // 
@@ -393,7 +523,7 @@
             this.dataGridViewTextBoxColumn5.MinimumWidth = 6;
             this.dataGridViewTextBoxColumn5.Name = "dataGridViewTextBoxColumn5";
             this.dataGridViewTextBoxColumn5.ReadOnly = true;
-            this.dataGridViewTextBoxColumn5.Width = 87;
+            this.dataGridViewTextBoxColumn5.Width = 125;
             // 
             // dataGridViewTextBoxColumn6
             // 
@@ -403,7 +533,7 @@
             this.dataGridViewTextBoxColumn6.MinimumWidth = 6;
             this.dataGridViewTextBoxColumn6.Name = "dataGridViewTextBoxColumn6";
             this.dataGridViewTextBoxColumn6.ReadOnly = true;
-            this.dataGridViewTextBoxColumn6.Width = 90;
+            this.dataGridViewTextBoxColumn6.Width = 125;
             // 
             // dataGridViewTextBoxColumn7
             // 
@@ -413,7 +543,7 @@
             this.dataGridViewTextBoxColumn7.MinimumWidth = 6;
             this.dataGridViewTextBoxColumn7.Name = "dataGridViewTextBoxColumn7";
             this.dataGridViewTextBoxColumn7.ReadOnly = true;
-            this.dataGridViewTextBoxColumn7.Width = 92;
+            this.dataGridViewTextBoxColumn7.Width = 125;
             // 
             // dataGridViewTextBoxColumn8
             // 
@@ -423,7 +553,7 @@
             this.dataGridViewTextBoxColumn8.MinimumWidth = 6;
             this.dataGridViewTextBoxColumn8.Name = "dataGridViewTextBoxColumn8";
             this.dataGridViewTextBoxColumn8.ReadOnly = true;
-            this.dataGridViewTextBoxColumn8.Width = 119;
+            this.dataGridViewTextBoxColumn8.Width = 125;
             // 
             // dataGridViewTextBoxColumn9
             // 
@@ -433,7 +563,7 @@
             this.dataGridViewTextBoxColumn9.MinimumWidth = 6;
             this.dataGridViewTextBoxColumn9.Name = "dataGridViewTextBoxColumn9";
             this.dataGridViewTextBoxColumn9.ReadOnly = true;
-            this.dataGridViewTextBoxColumn9.Width = 129;
+            this.dataGridViewTextBoxColumn9.Width = 125;
             // 
             // dataGridViewTextBoxColumn10
             // 
@@ -443,7 +573,7 @@
             this.dataGridViewTextBoxColumn10.MinimumWidth = 6;
             this.dataGridViewTextBoxColumn10.Name = "dataGridViewTextBoxColumn10";
             this.dataGridViewTextBoxColumn10.ReadOnly = true;
-            this.dataGridViewTextBoxColumn10.Width = 76;
+            this.dataGridViewTextBoxColumn10.Width = 125;
             // 
             // dataGridViewTextBoxColumn11
             // 
@@ -453,7 +583,7 @@
             this.dataGridViewTextBoxColumn11.MinimumWidth = 6;
             this.dataGridViewTextBoxColumn11.Name = "dataGridViewTextBoxColumn11";
             this.dataGridViewTextBoxColumn11.ReadOnly = true;
-            this.dataGridViewTextBoxColumn11.Width = 122;
+            this.dataGridViewTextBoxColumn11.Width = 125;
             // 
             // dataGridViewTextBoxColumn12
             // 
@@ -463,52 +593,7 @@
             this.dataGridViewTextBoxColumn12.MinimumWidth = 6;
             this.dataGridViewTextBoxColumn12.Name = "dataGridViewTextBoxColumn12";
             this.dataGridViewTextBoxColumn12.ReadOnly = true;
-            this.dataGridViewTextBoxColumn12.Width = 127;
-            // 
-            // colLastUpdated
-            // 
-            this.colLastUpdated.DataPropertyName = "LastUpdated";
-            this.colLastUpdated.HeaderText = "Last Updated";
-            this.colLastUpdated.MinimumWidth = 6;
-            this.colLastUpdated.Name = "colLastUpdated";
-            this.colLastUpdated.ReadOnly = true;
-            this.colLastUpdated.Width = 122;
-            // 
-            // colLastValidated
-            // 
-            this.colLastValidated.DataPropertyName = "LastValidated";
-            this.colLastValidated.HeaderText = "Last Validated";
-            this.colLastValidated.MinimumWidth = 6;
-            this.colLastValidated.Name = "colLastValidated";
-            this.colLastValidated.ReadOnly = true;
-            this.colLastValidated.Width = 127;
-            // 
-            // colObjectName
-            // 
-            this.colObjectName.DataPropertyName = "ObjectName";
-            this.colObjectName.HeaderText = "Object Name";
-            this.colObjectName.MinimumWidth = 6;
-            this.colObjectName.Name = "colObjectName";
-            this.colObjectName.ReadOnly = true;
-            this.colObjectName.Width = 119;
-            // 
-            // colSchemaName
-            // 
-            this.colSchemaName.DataPropertyName = "SchemaName";
-            this.colSchemaName.HeaderText = "Schema Name";
-            this.colSchemaName.MinimumWidth = 6;
-            this.colSchemaName.Name = "colSchemaName";
-            this.colSchemaName.ReadOnly = true;
-            this.colSchemaName.Width = 129;
-            // 
-            // colAction
-            // 
-            this.colAction.DataPropertyName = "Action";
-            this.colAction.HeaderText = "Action";
-            this.colAction.MinimumWidth = 6;
-            this.colAction.Name = "colAction";
-            this.colAction.ReadOnly = true;
-            this.colAction.Width = 76;
+            this.dataGridViewTextBoxColumn12.Width = 125;
             // 
             // dataGridViewTextBoxColumn13
             // 
@@ -519,91 +604,6 @@
             this.dataGridViewTextBoxColumn13.Name = "dataGridViewTextBoxColumn13";
             this.dataGridViewTextBoxColumn13.ReadOnly = true;
             this.dataGridViewTextBoxColumn13.Width = 125;
-            // 
-            // colDB
-            // 
-            this.colDB.DataPropertyName = "DB";
-            this.colDB.HeaderText = "DB";
-            this.colDB.MinimumWidth = 6;
-            this.colDB.Name = "colDB";
-            this.colDB.ReadOnly = true;
-            this.colDB.Resizable = System.Windows.Forms.DataGridViewTriState.True;
-            this.colDB.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
-            this.colDB.Width = 56;
-            // 
-            // SnapshotDate
-            // 
-            this.SnapshotDate.DataPropertyName = "SnapshotDate";
-            this.SnapshotDate.HeaderText = "Snapshot Date";
-            this.SnapshotDate.MinimumWidth = 6;
-            this.SnapshotDate.Name = "SnapshotDate";
-            this.SnapshotDate.ReadOnly = true;
-            this.SnapshotDate.Width = 131;
-            // 
-            // ValidatedDate
-            // 
-            this.ValidatedDate.DataPropertyName = "ValidatedDate";
-            this.ValidatedDate.HeaderText = "Validated Date";
-            this.ValidatedDate.MinimumWidth = 6;
-            this.ValidatedDate.Name = "ValidatedDate";
-            this.ValidatedDate.ReadOnly = true;
-            this.ValidatedDate.Width = 130;
-            // 
-            // ValidForDays
-            // 
-            this.ValidForDays.DataPropertyName = "ValidForDays";
-            this.ValidForDays.HeaderText = "Valid For (Days)";
-            this.ValidForDays.MinimumWidth = 6;
-            this.ValidForDays.Name = "ValidForDays";
-            this.ValidForDays.ReadOnly = true;
-            this.ValidForDays.Width = 125;
-            // 
-            // DaysSinceValidation
-            // 
-            this.DaysSinceValidation.DataPropertyName = "DaysSinceValidation";
-            this.DaysSinceValidation.HeaderText = "Days Since Validation";
-            this.DaysSinceValidation.MinimumWidth = 6;
-            this.DaysSinceValidation.Name = "DaysSinceValidation";
-            this.DaysSinceValidation.ReadOnly = true;
-            this.DaysSinceValidation.Width = 125;
-            // 
-            // colCreated
-            // 
-            this.colCreated.DataPropertyName = "Created";
-            this.colCreated.HeaderText = "Created";
-            this.colCreated.MinimumWidth = 6;
-            this.colCreated.Name = "colCreated";
-            this.colCreated.ReadOnly = true;
-            this.colCreated.Width = 87;
-            // 
-            // Modified
-            // 
-            this.Modified.DataPropertyName = "Modified";
-            this.Modified.HeaderText = "Modified";
-            this.Modified.MinimumWidth = 6;
-            this.Modified.Name = "Modified";
-            this.Modified.ReadOnly = true;
-            this.Modified.Width = 90;
-            // 
-            // Dropped
-            // 
-            this.Dropped.DataPropertyName = "Dropped";
-            this.Dropped.HeaderText = "Dropped";
-            this.Dropped.MinimumWidth = 6;
-            this.Dropped.Name = "Dropped";
-            this.Dropped.ReadOnly = true;
-            this.Dropped.Width = 92;
-            // 
-            // colExport
-            // 
-            this.colExport.HeaderText = "Export";
-            this.colExport.MinimumWidth = 6;
-            this.colExport.Name = "colExport";
-            this.colExport.ReadOnly = true;
-            this.colExport.Text = "Export";
-            this.colExport.ToolTipText = "Export DB Schema to disk";
-            this.colExport.UseColumnTextForLinkValue = true;
-            this.colExport.Width = 125;
             // 
             // SchemaSnapshots
             // 

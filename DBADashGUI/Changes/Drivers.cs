@@ -106,8 +106,8 @@ namespace DBADashGUI.Changes
                         lastProvider = provider;
                         previousVersion = version;
                     }
-                    dgvDrivers.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.DisplayedCells;
                     dgvDrivers.Rows.AddRange(rows.ToArray());
+                    dgvDrivers.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
                 }
             }
         }

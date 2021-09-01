@@ -118,7 +118,7 @@ namespace DBADashGUI
                 da.Fill(dt);
                 dgvSummary.AutoGenerateColumns = false;
                 dgvSummary.DataSource = dt;
-
+                dgvSummary.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
             }
 
         }

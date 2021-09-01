@@ -41,6 +41,7 @@ namespace DBADashGUI
                     Common.ConvertUTCToLocal(ref dt);
                     dgv.AutoGenerateColumns = false;
                     dgv.DataSource = dt;
+                    dgv.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
                 }
             }
         }
@@ -57,6 +58,7 @@ namespace DBADashGUI
                     da.Fill(dt);
                     dgvHardware.AutoGenerateColumns = false;
                     dgvHardware.DataSource = dt;
+                    dgvHardware.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
                 }
             }
         }

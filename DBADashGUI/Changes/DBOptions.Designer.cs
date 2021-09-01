@@ -34,6 +34,7 @@
             this.toolStripLabel2 = new System.Windows.Forms.ToolStripLabel();
             this.tsRefreshInfo = new System.Windows.Forms.ToolStripButton();
             this.tsCopyInfo = new System.Windows.Forms.ToolStripButton();
+            this.tsExcel = new System.Windows.Forms.ToolStripButton();
             this.tsSummary = new System.Windows.Forms.ToolStripButton();
             this.tsDetail = new System.Windows.Forms.ToolStripButton();
             this.dgvHistory = new System.Windows.Forms.DataGridView();
@@ -47,6 +48,7 @@
             this.toolStripLabel1 = new System.Windows.Forms.ToolStripLabel();
             this.tsRefreshHistory = new System.Windows.Forms.ToolStripButton();
             this.tsCopyHistory = new System.Windows.Forms.ToolStripButton();
+            this.tsExcelHistory = new System.Windows.Forms.ToolStripButton();
             this.tsFilter = new System.Windows.Forms.ToolStripDropDownButton();
             this.excludeStateChangesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.dataGridViewTextBoxColumn1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
@@ -55,8 +57,6 @@
             this.dataGridViewTextBoxColumn4 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dataGridViewTextBoxColumn5 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dataGridViewTextBoxColumn6 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.tsExcel = new System.Windows.Forms.ToolStripButton();
-            this.tsExcelHistory = new System.Windows.Forms.ToolStripButton();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
             this.splitContainer1.Panel2.SuspendLayout();
@@ -91,7 +91,6 @@
             // 
             this.dgv.AllowUserToAddRows = false;
             this.dgv.AllowUserToDeleteRows = false;
-            this.dgv.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.DisplayedCells;
             this.dgv.BackgroundColor = System.Drawing.Color.White;
             this.dgv.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.dgv.Dock = System.Windows.Forms.DockStyle.Fill;
@@ -149,6 +148,16 @@
             this.tsCopyInfo.Text = "Copy";
             this.tsCopyInfo.Click += new System.EventHandler(this.tsCopyInfo_Click);
             // 
+            // tsExcel
+            // 
+            this.tsExcel.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.tsExcel.Image = global::DBADashGUI.Properties.Resources.excel16x16;
+            this.tsExcel.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tsExcel.Name = "tsExcel";
+            this.tsExcel.Size = new System.Drawing.Size(29, 24);
+            this.tsExcel.Text = "Export Excel";
+            this.tsExcel.Click += new System.EventHandler(this.tsExcel_Click);
+            // 
             // tsSummary
             // 
             this.tsSummary.Image = global::DBADashGUI.Properties.Resources.Table_16x;
@@ -172,7 +181,6 @@
             // 
             this.dgvHistory.AllowUserToAddRows = false;
             this.dgvHistory.AllowUserToDeleteRows = false;
-            this.dgvHistory.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.DisplayedCells;
             this.dgvHistory.BackgroundColor = System.Drawing.Color.White;
             this.dgvHistory.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.dgvHistory.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
@@ -289,6 +297,16 @@
             this.tsCopyHistory.Text = "Copy";
             this.tsCopyHistory.Click += new System.EventHandler(this.tsCopyHistory_Click);
             // 
+            // tsExcelHistory
+            // 
+            this.tsExcelHistory.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.tsExcelHistory.Image = global::DBADashGUI.Properties.Resources.excel16x16;
+            this.tsExcelHistory.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tsExcelHistory.Name = "tsExcelHistory";
+            this.tsExcelHistory.Size = new System.Drawing.Size(29, 24);
+            this.tsExcelHistory.Text = "Export Excel";
+            this.tsExcelHistory.Click += new System.EventHandler(this.tsExcelHistory_Click);
+            // 
             // tsFilter
             // 
             this.tsFilter.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
@@ -363,26 +381,6 @@
             this.dataGridViewTextBoxColumn6.Name = "dataGridViewTextBoxColumn6";
             this.dataGridViewTextBoxColumn6.ReadOnly = true;
             this.dataGridViewTextBoxColumn6.Width = 120;
-            // 
-            // tsExcel
-            // 
-            this.tsExcel.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.tsExcel.Image = global::DBADashGUI.Properties.Resources.excel16x16;
-            this.tsExcel.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsExcel.Name = "tsExcel";
-            this.tsExcel.Size = new System.Drawing.Size(29, 24);
-            this.tsExcel.Text = "Export Excel";
-            this.tsExcel.Click += new System.EventHandler(this.tsExcel_Click);
-            // 
-            // tsExcelHistory
-            // 
-            this.tsExcelHistory.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.tsExcelHistory.Image = global::DBADashGUI.Properties.Resources.excel16x16;
-            this.tsExcelHistory.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsExcelHistory.Name = "tsExcelHistory";
-            this.tsExcelHistory.Size = new System.Drawing.Size(29, 24);
-            this.tsExcelHistory.Text = "Export Excel";
-            this.tsExcelHistory.Click += new System.EventHandler(this.tsExcelHistory_Click);
             // 
             // DBOptions
             // 

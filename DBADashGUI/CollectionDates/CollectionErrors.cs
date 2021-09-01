@@ -70,6 +70,7 @@ namespace DBADashGUI.CollectionDates
                     Common.ConvertUTCToLocal(ref dt);
                     dgvDBADashErrors.AutoGenerateColumns = false;
                     dgvDBADashErrors.DataSource = dt;
+                    dgvDBADashErrors.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
                 }
             }
 

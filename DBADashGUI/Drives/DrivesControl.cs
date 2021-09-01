@@ -127,8 +127,7 @@ namespace DBADashGUI.Properties
                 ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize,
                 DataSource = dvDrives,
                 Dock = DockStyle.Fill,
-                ClipboardCopyMode = DataGridViewClipboardCopyMode.EnableAlwaysIncludeHeaderText,
-                AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.DisplayedCells
+                ClipboardCopyMode = DataGridViewClipboardCopyMode.EnableAlwaysIncludeHeaderText
             };
             dgv.Columns.Add(new DataGridViewTextBoxColumn() { Name = "Instance", DataPropertyName = "Instance", HeaderText = "Instance" });
             dgv.Columns.Add(new DataGridViewTextBoxColumn() { Name = "Name", DataPropertyName = "Name", HeaderText = "Name" });
@@ -157,8 +156,8 @@ namespace DBADashGUI.Properties
             dgv.Columns.Add(new DataGridViewLinkColumn() { Name = "Configure", HeaderText = "Configure", UseColumnTextForLinkValue = true, Text = "Configure" });
             dgv.CellContentClick += Dgv_CellContentClick;
             dgv.RowsAdded += Dgv_RowsAdded;
-
             pnlDrives.Controls.Add(dgv);
+            dgv.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
             tsGridView.Enabled = false;
             tsDrivesView.Enabled = dvDrives.Table.Rows.Count<= DrivesViewMaxRows;
         }

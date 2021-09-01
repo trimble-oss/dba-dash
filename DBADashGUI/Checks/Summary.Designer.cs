@@ -95,7 +95,6 @@
             // 
             this.dgvSummary.AllowUserToAddRows = false;
             this.dgvSummary.AllowUserToDeleteRows = false;
-            this.dgvSummary.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.DisplayedCells;
             dataGridViewCellStyle1.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
             dataGridViewCellStyle1.BackColor = System.Drawing.SystemColors.Control;
             dataGridViewCellStyle1.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
@@ -138,13 +137,13 @@
             dataGridViewCellStyle6.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
             this.dgvSummary.DefaultCellStyle = dataGridViewCellStyle6;
             this.dgvSummary.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.dgvSummary.Location = new System.Drawing.Point(0, 31);
+            this.dgvSummary.Location = new System.Drawing.Point(0, 27);
             this.dgvSummary.Name = "dgvSummary";
             this.dgvSummary.ReadOnly = true;
             this.dgvSummary.RowHeadersVisible = false;
             this.dgvSummary.RowHeadersWidth = 51;
             this.dgvSummary.RowTemplate.Height = 24;
-            this.dgvSummary.Size = new System.Drawing.Size(1800, 182);
+            this.dgvSummary.Size = new System.Drawing.Size(1800, 186);
             this.dgvSummary.TabIndex = 0;
             this.dgvSummary.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgvSummary_CellContentClick);
             this.dgvSummary.ColumnHeaderMouseClick += new System.Windows.Forms.DataGridViewCellMouseEventHandler(this.dgvSummary_ColumnHeaderMouseClick);
@@ -218,6 +217,7 @@
             this.DiffBackupStatus.ReadOnly = true;
             this.DiffBackupStatus.Resizable = System.Windows.Forms.DataGridViewTriState.True;
             this.DiffBackupStatus.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
+            this.DiffBackupStatus.Width = 125;
             // 
             // LogBackupStatus
             // 
@@ -250,6 +250,7 @@
             this.JobStatus.ReadOnly = true;
             this.JobStatus.Resizable = System.Windows.Forms.DataGridViewTriState.True;
             this.JobStatus.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
+            this.JobStatus.Width = 125;
             // 
             // LogShippingStatus
             // 
@@ -320,6 +321,7 @@
             this.PctMaxSizeStatus.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
             this.PctMaxSizeStatus.Text = "View";
             this.PctMaxSizeStatus.UseColumnTextForLinkValue = true;
+            this.PctMaxSizeStatus.Width = 125;
             // 
             // ElasticPoolStorageStatus
             // 
@@ -414,7 +416,7 @@
             this.lblRefreshTime});
             this.toolStrip1.Location = new System.Drawing.Point(0, 0);
             this.toolStrip1.Name = "toolStrip1";
-            this.toolStrip1.Size = new System.Drawing.Size(1800, 31);
+            this.toolStrip1.Size = new System.Drawing.Size(1800, 27);
             this.toolStrip1.TabIndex = 1;
             this.toolStrip1.Text = "toolStrip1";
             // 
@@ -424,7 +426,7 @@
             this.tsRefresh.Image = global::DBADashGUI.Properties.Resources._112_RefreshArrow_Green_16x16_72;
             this.tsRefresh.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsRefresh.Name = "tsRefresh";
-            this.tsRefresh.Size = new System.Drawing.Size(29, 28);
+            this.tsRefresh.Size = new System.Drawing.Size(29, 24);
             this.tsRefresh.Text = "Refresh";
             this.tsRefresh.Click += new System.EventHandler(this.tsRefresh_Click);
             // 
@@ -434,7 +436,7 @@
             this.tsCopy.Image = global::DBADashGUI.Properties.Resources.ASX_Copy_blue_16x;
             this.tsCopy.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsCopy.Name = "tsCopy";
-            this.tsCopy.Size = new System.Drawing.Size(29, 28);
+            this.tsCopy.Size = new System.Drawing.Size(29, 24);
             this.tsCopy.Text = "Copy";
             this.tsCopy.Click += new System.EventHandler(this.tsCopy_Click);
             // 
@@ -444,7 +446,7 @@
             this.tsExcel.Image = global::DBADashGUI.Properties.Resources.excel16x16;
             this.tsExcel.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsExcel.Name = "tsExcel";
-            this.tsExcel.Size = new System.Drawing.Size(29, 28);
+            this.tsExcel.Size = new System.Drawing.Size(29, 24);
             this.tsExcel.Text = "Export Excel";
             this.tsExcel.Click += new System.EventHandler(this.tsExcel_Click);
             // 
@@ -456,7 +458,7 @@
             this.tsOptions.Image = global::DBADashGUI.Properties.Resources.SettingsOutline_16x;
             this.tsOptions.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsOptions.Name = "tsOptions";
-            this.tsOptions.Size = new System.Drawing.Size(34, 28);
+            this.tsOptions.Size = new System.Drawing.Size(34, 24);
             this.tsOptions.Text = "Options";
             // 
             // focusedViewToolStripMenuItem
@@ -472,7 +474,7 @@
             // 
             this.lblRefreshTime.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
             this.lblRefreshTime.Name = "lblRefreshTime";
-            this.lblRefreshTime.Size = new System.Drawing.Size(98, 28);
+            this.lblRefreshTime.Size = new System.Drawing.Size(98, 24);
             this.lblRefreshTime.Text = "Refresh Time:";
             // 
             // dataGridViewTextBoxColumn1

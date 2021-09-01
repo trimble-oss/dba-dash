@@ -96,8 +96,8 @@ namespace DBADashGUI.Changes
                         }
                         lastInstance = instance;
                     }
-                    dgvAlertsConfig.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.DisplayedCells;
                     dgvAlertsConfig.Rows.AddRange(rows.ToArray());
+                    dgvAlertsConfig.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
                 }
             }
         }
@@ -115,6 +115,7 @@ namespace DBADashGUI.Changes
                     da.Fill(dt);
                     Common.ConvertUTCToLocal(ref dt);
                     dgvAlerts.DataSource = dt;
+                    dgvAlerts.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
                 }
             }
         }

@@ -74,6 +74,7 @@ namespace DBADashGUI.Changes
                 }
             }
             dgv.DataSource = pivotDT;
+            dgv.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
         }
 
         private void refreshDBSummary()
@@ -87,6 +88,7 @@ namespace DBADashGUI.Changes
                     DataTable dt = new DataTable();
                     da.Fill(dt);
                     dgv.DataSource = dt;
+                    dgv.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
                 }
             }
         }
@@ -114,6 +116,7 @@ namespace DBADashGUI.Changes
                         dgv.DataSource = dt;
                         dgv.Columns["InstanceID"].Visible = false;
                         dgv.Columns["DatabaseID"].Visible = false;
+                        dgv.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
                     }
                 }
             }
@@ -148,6 +151,7 @@ namespace DBADashGUI.Changes
                     }
                     dgvHistory.AutoGenerateColumns = false;
                     dgvHistory.DataSource = dt;
+                    dgvHistory.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
                 }
             }
         }

@@ -64,7 +64,7 @@ namespace DBADashGUI
                     da.Fill(dt);
                     dgv.AutoGenerateColumns = false;
                     dgv.DataSource = dt;
-
+                    dgv.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
                     pieChart1.Series.Clear();
                     string labelPoint(ChartPoint chartPoint) =>
                    string.Format("{0} ({1:P})", chartPoint.SeriesView.Title, chartPoint.Participation);

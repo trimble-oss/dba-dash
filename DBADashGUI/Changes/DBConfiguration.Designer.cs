@@ -28,8 +28,8 @@
         /// </summary>
         private void InitializeComponent()
         {
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle3 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle4 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
             this.dgvConfig = new System.Windows.Forms.DataGridView();
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
             this.tsRefresh = new System.Windows.Forms.ToolStripButton();
@@ -37,20 +37,9 @@
             this.tsFilter = new System.Windows.Forms.ToolStripDropDownButton();
             this.configuredOnlyToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripLabel1 = new System.Windows.Forms.ToolStripLabel();
+            this.tsExcel = new System.Windows.Forms.ToolStripButton();
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
             this.dgvConfigHistory = new System.Windows.Forms.DataGridView();
-            this.toolStrip2 = new System.Windows.Forms.ToolStrip();
-            this.tsRefreshHistory = new System.Windows.Forms.ToolStripButton();
-            this.tsCopyHistory = new System.Windows.Forms.ToolStripButton();
-            this.toolStripLabel2 = new System.Windows.Forms.ToolStripLabel();
-            this.dataGridViewTextBoxColumn1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.dataGridViewTextBoxColumn2 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.dataGridViewTextBoxColumn3 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.dataGridViewTextBoxColumn4 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.dataGridViewTextBoxColumn5 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.dataGridViewTextBoxColumn6 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.dataGridViewTextBoxColumn7 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.dataGridViewTextBoxColumn8 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.colHInstance = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.colHDB = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.colHName = new System.Windows.Forms.DataGridViewTextBoxColumn();
@@ -59,8 +48,19 @@
             this.colHValueForSecondary = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.colHValueForSecondaryNew = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.colHValidTo = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.tsExcel = new System.Windows.Forms.ToolStripButton();
+            this.toolStrip2 = new System.Windows.Forms.ToolStrip();
+            this.tsRefreshHistory = new System.Windows.Forms.ToolStripButton();
+            this.tsCopyHistory = new System.Windows.Forms.ToolStripButton();
+            this.toolStripLabel2 = new System.Windows.Forms.ToolStripLabel();
             this.tsExcelHistory = new System.Windows.Forms.ToolStripButton();
+            this.dataGridViewTextBoxColumn1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.dataGridViewTextBoxColumn2 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.dataGridViewTextBoxColumn3 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.dataGridViewTextBoxColumn4 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.dataGridViewTextBoxColumn5 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.dataGridViewTextBoxColumn6 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.dataGridViewTextBoxColumn7 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.dataGridViewTextBoxColumn8 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             ((System.ComponentModel.ISupportInitialize)(this.dgvConfig)).BeginInit();
             this.toolStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
@@ -75,7 +75,6 @@
             // 
             this.dgvConfig.AllowUserToAddRows = false;
             this.dgvConfig.AllowUserToDeleteRows = false;
-            this.dgvConfig.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.DisplayedCells;
             this.dgvConfig.BackgroundColor = System.Drawing.Color.White;
             this.dgvConfig.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.dgvConfig.Dock = System.Windows.Forms.DockStyle.Fill;
@@ -152,6 +151,16 @@
             this.toolStripLabel1.Size = new System.Drawing.Size(185, 24);
             this.toolStripLabel1.Text = "DB Scoped Configuration";
             // 
+            // tsExcel
+            // 
+            this.tsExcel.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.tsExcel.Image = global::DBADashGUI.Properties.Resources.excel16x16;
+            this.tsExcel.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tsExcel.Name = "tsExcel";
+            this.tsExcel.Size = new System.Drawing.Size(29, 24);
+            this.tsExcel.Text = "Export Excel";
+            this.tsExcel.Click += new System.EventHandler(this.tsExcel_Click);
+            // 
             // splitContainer1
             // 
             this.splitContainer1.Dock = System.Windows.Forms.DockStyle.Fill;
@@ -176,16 +185,15 @@
             // 
             this.dgvConfigHistory.AllowUserToAddRows = false;
             this.dgvConfigHistory.AllowUserToDeleteRows = false;
-            this.dgvConfigHistory.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.DisplayedCells;
             this.dgvConfigHistory.BackgroundColor = System.Drawing.Color.White;
-            dataGridViewCellStyle3.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle3.BackColor = System.Drawing.SystemColors.Control;
-            dataGridViewCellStyle3.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            dataGridViewCellStyle3.ForeColor = System.Drawing.SystemColors.WindowText;
-            dataGridViewCellStyle3.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-            dataGridViewCellStyle3.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-            dataGridViewCellStyle3.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
-            this.dgvConfigHistory.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle3;
+            dataGridViewCellStyle1.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle1.BackColor = System.Drawing.SystemColors.Control;
+            dataGridViewCellStyle1.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            dataGridViewCellStyle1.ForeColor = System.Drawing.SystemColors.WindowText;
+            dataGridViewCellStyle1.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle1.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle1.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
+            this.dgvConfigHistory.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle1;
             this.dgvConfigHistory.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.dgvConfigHistory.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
             this.colHInstance,
@@ -196,14 +204,14 @@
             this.colHValueForSecondary,
             this.colHValueForSecondaryNew,
             this.colHValidTo});
-            dataGridViewCellStyle4.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle4.BackColor = System.Drawing.SystemColors.Window;
-            dataGridViewCellStyle4.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            dataGridViewCellStyle4.ForeColor = System.Drawing.SystemColors.ControlText;
-            dataGridViewCellStyle4.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-            dataGridViewCellStyle4.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-            dataGridViewCellStyle4.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
-            this.dgvConfigHistory.DefaultCellStyle = dataGridViewCellStyle4;
+            dataGridViewCellStyle2.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle2.BackColor = System.Drawing.SystemColors.Window;
+            dataGridViewCellStyle2.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            dataGridViewCellStyle2.ForeColor = System.Drawing.SystemColors.ControlText;
+            dataGridViewCellStyle2.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle2.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle2.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
+            this.dgvConfigHistory.DefaultCellStyle = dataGridViewCellStyle2;
             this.dgvConfigHistory.Dock = System.Windows.Forms.DockStyle.Fill;
             this.dgvConfigHistory.Location = new System.Drawing.Point(0, 27);
             this.dgvConfigHistory.Name = "dgvConfigHistory";
@@ -213,6 +221,78 @@
             this.dgvConfigHistory.RowTemplate.Height = 24;
             this.dgvConfigHistory.Size = new System.Drawing.Size(994, 223);
             this.dgvConfigHistory.TabIndex = 1;
+            // 
+            // colHInstance
+            // 
+            this.colHInstance.DataPropertyName = "Instance";
+            this.colHInstance.HeaderText = "Instance";
+            this.colHInstance.MinimumWidth = 6;
+            this.colHInstance.Name = "colHInstance";
+            this.colHInstance.ReadOnly = true;
+            this.colHInstance.Width = 90;
+            // 
+            // colHDB
+            // 
+            this.colHDB.DataPropertyName = "DB";
+            this.colHDB.HeaderText = "DB";
+            this.colHDB.MinimumWidth = 6;
+            this.colHDB.Name = "colHDB";
+            this.colHDB.ReadOnly = true;
+            this.colHDB.Width = 56;
+            // 
+            // colHName
+            // 
+            this.colHName.DataPropertyName = "name";
+            this.colHName.HeaderText = "Name";
+            this.colHName.MinimumWidth = 6;
+            this.colHName.Name = "colHName";
+            this.colHName.ReadOnly = true;
+            this.colHName.Width = 74;
+            // 
+            // colHValue
+            // 
+            this.colHValue.DataPropertyName = "value";
+            this.colHValue.HeaderText = "Value (Old)";
+            this.colHValue.MinimumWidth = 6;
+            this.colHValue.Name = "colHValue";
+            this.colHValue.ReadOnly = true;
+            this.colHValue.Width = 125;
+            // 
+            // colHNewValue
+            // 
+            this.colHNewValue.DataPropertyName = "new_value";
+            this.colHNewValue.HeaderText = "Value (New)";
+            this.colHNewValue.MinimumWidth = 6;
+            this.colHNewValue.Name = "colHNewValue";
+            this.colHNewValue.ReadOnly = true;
+            this.colHNewValue.Width = 105;
+            // 
+            // colHValueForSecondary
+            // 
+            this.colHValueForSecondary.DataPropertyName = "value_for_secondary";
+            this.colHValueForSecondary.HeaderText = "Value for Secondary (Old)";
+            this.colHValueForSecondary.MinimumWidth = 6;
+            this.colHValueForSecondary.Name = "colHValueForSecondary";
+            this.colHValueForSecondary.ReadOnly = true;
+            this.colHValueForSecondary.Width = 155;
+            // 
+            // colHValueForSecondaryNew
+            // 
+            this.colHValueForSecondaryNew.DataPropertyName = "new_value_for_secondary";
+            this.colHValueForSecondaryNew.HeaderText = "Value for secondary (New)";
+            this.colHValueForSecondaryNew.MinimumWidth = 6;
+            this.colHValueForSecondaryNew.Name = "colHValueForSecondaryNew";
+            this.colHValueForSecondaryNew.ReadOnly = true;
+            this.colHValueForSecondaryNew.Width = 154;
+            // 
+            // colHValidTo
+            // 
+            this.colHValidTo.DataPropertyName = "ValidTo";
+            this.colHValidTo.HeaderText = "Change Date";
+            this.colHValidTo.MinimumWidth = 6;
+            this.colHValidTo.Name = "colHValidTo";
+            this.colHValidTo.ReadOnly = true;
+            this.colHValidTo.Width = 110;
             // 
             // toolStrip2
             // 
@@ -256,6 +336,16 @@
             this.toolStripLabel2.Size = new System.Drawing.Size(61, 24);
             this.toolStripLabel2.Text = "History";
             // 
+            // tsExcelHistory
+            // 
+            this.tsExcelHistory.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.tsExcelHistory.Image = global::DBADashGUI.Properties.Resources.excel16x16;
+            this.tsExcelHistory.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tsExcelHistory.Name = "tsExcelHistory";
+            this.tsExcelHistory.Size = new System.Drawing.Size(29, 24);
+            this.tsExcelHistory.Text = "Export Excel";
+            this.tsExcelHistory.Click += new System.EventHandler(this.tsExcelHistory_Click);
+            // 
             // dataGridViewTextBoxColumn1
             // 
             this.dataGridViewTextBoxColumn1.DataPropertyName = "Instance";
@@ -290,6 +380,7 @@
             this.dataGridViewTextBoxColumn4.MinimumWidth = 6;
             this.dataGridViewTextBoxColumn4.Name = "dataGridViewTextBoxColumn4";
             this.dataGridViewTextBoxColumn4.ReadOnly = true;
+            this.dataGridViewTextBoxColumn4.Width = 125;
             // 
             // dataGridViewTextBoxColumn5
             // 
@@ -326,97 +417,6 @@
             this.dataGridViewTextBoxColumn8.Name = "dataGridViewTextBoxColumn8";
             this.dataGridViewTextBoxColumn8.ReadOnly = true;
             this.dataGridViewTextBoxColumn8.Width = 110;
-            // 
-            // colHInstance
-            // 
-            this.colHInstance.DataPropertyName = "Instance";
-            this.colHInstance.HeaderText = "Instance";
-            this.colHInstance.MinimumWidth = 6;
-            this.colHInstance.Name = "colHInstance";
-            this.colHInstance.ReadOnly = true;
-            this.colHInstance.Width = 90;
-            // 
-            // colHDB
-            // 
-            this.colHDB.DataPropertyName = "DB";
-            this.colHDB.HeaderText = "DB";
-            this.colHDB.MinimumWidth = 6;
-            this.colHDB.Name = "colHDB";
-            this.colHDB.ReadOnly = true;
-            this.colHDB.Width = 56;
-            // 
-            // colHName
-            // 
-            this.colHName.DataPropertyName = "name";
-            this.colHName.HeaderText = "Name";
-            this.colHName.MinimumWidth = 6;
-            this.colHName.Name = "colHName";
-            this.colHName.ReadOnly = true;
-            this.colHName.Width = 74;
-            // 
-            // colHValue
-            // 
-            this.colHValue.DataPropertyName = "value";
-            this.colHValue.HeaderText = "Value (Old)";
-            this.colHValue.MinimumWidth = 6;
-            this.colHValue.Name = "colHValue";
-            this.colHValue.ReadOnly = true;
-            // 
-            // colHNewValue
-            // 
-            this.colHNewValue.DataPropertyName = "new_value";
-            this.colHNewValue.HeaderText = "Value (New)";
-            this.colHNewValue.MinimumWidth = 6;
-            this.colHNewValue.Name = "colHNewValue";
-            this.colHNewValue.ReadOnly = true;
-            this.colHNewValue.Width = 105;
-            // 
-            // colHValueForSecondary
-            // 
-            this.colHValueForSecondary.DataPropertyName = "value_for_secondary";
-            this.colHValueForSecondary.HeaderText = "Value for Secondary (Old)";
-            this.colHValueForSecondary.MinimumWidth = 6;
-            this.colHValueForSecondary.Name = "colHValueForSecondary";
-            this.colHValueForSecondary.ReadOnly = true;
-            this.colHValueForSecondary.Width = 155;
-            // 
-            // colHValueForSecondaryNew
-            // 
-            this.colHValueForSecondaryNew.DataPropertyName = "new_value_for_secondary";
-            this.colHValueForSecondaryNew.HeaderText = "Value for secondary (New)";
-            this.colHValueForSecondaryNew.MinimumWidth = 6;
-            this.colHValueForSecondaryNew.Name = "colHValueForSecondaryNew";
-            this.colHValueForSecondaryNew.ReadOnly = true;
-            this.colHValueForSecondaryNew.Width = 154;
-            // 
-            // colHValidTo
-            // 
-            this.colHValidTo.DataPropertyName = "ValidTo";
-            this.colHValidTo.HeaderText = "Change Date";
-            this.colHValidTo.MinimumWidth = 6;
-            this.colHValidTo.Name = "colHValidTo";
-            this.colHValidTo.ReadOnly = true;
-            this.colHValidTo.Width = 110;
-            // 
-            // tsExcel
-            // 
-            this.tsExcel.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.tsExcel.Image = global::DBADashGUI.Properties.Resources.excel16x16;
-            this.tsExcel.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsExcel.Name = "tsExcel";
-            this.tsExcel.Size = new System.Drawing.Size(29, 24);
-            this.tsExcel.Text = "Export Excel";
-            this.tsExcel.Click += new System.EventHandler(this.tsExcel_Click);
-            // 
-            // tsExcelHistory
-            // 
-            this.tsExcelHistory.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.tsExcelHistory.Image = global::DBADashGUI.Properties.Resources.excel16x16;
-            this.tsExcelHistory.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsExcelHistory.Name = "tsExcelHistory";
-            this.tsExcelHistory.Size = new System.Drawing.Size(29, 24);
-            this.tsExcelHistory.Text = "Export Excel";
-            this.tsExcelHistory.Click += new System.EventHandler(this.tsExcelHistory_Click);
             // 
             // DBConfiguration
             // 

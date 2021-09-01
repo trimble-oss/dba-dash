@@ -32,8 +32,8 @@
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
             this.tsRefresh = new System.Windows.Forms.ToolStripButton();
             this.tsCopy = new System.Windows.Forms.ToolStripButton();
-            this.tsDetailSummary = new System.Windows.Forms.ToolStripButton();
             this.tsExcel = new System.Windows.Forms.ToolStripButton();
+            this.tsDetailSummary = new System.Windows.Forms.ToolStripButton();
             ((System.ComponentModel.ISupportInitialize)(this.dgv)).BeginInit();
             this.toolStrip1.SuspendLayout();
             this.SuspendLayout();
@@ -42,7 +42,6 @@
             // 
             this.dgv.AllowUserToAddRows = false;
             this.dgv.AllowUserToDeleteRows = false;
-            this.dgv.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.DisplayedCells;
             this.dgv.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.dgv.Dock = System.Windows.Forms.DockStyle.Fill;
             this.dgv.Location = new System.Drawing.Point(0, 27);
@@ -89,15 +88,6 @@
             this.tsCopy.Text = "Copy";
             this.tsCopy.Click += new System.EventHandler(this.tsCopy_Click);
             // 
-            // tsDetailSummary
-            // 
-            this.tsDetailSummary.Image = global::DBADashGUI.Properties.Resources.Table_16x;
-            this.tsDetailSummary.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsDetailSummary.Name = "tsDetailSummary";
-            this.tsDetailSummary.Size = new System.Drawing.Size(73, 24);
-            this.tsDetailSummary.Text = "Detail";
-            this.tsDetailSummary.Click += new System.EventHandler(this.tsDetailSummary_Click);
-            // 
             // tsExcel
             // 
             this.tsExcel.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
@@ -107,6 +97,15 @@
             this.tsExcel.Size = new System.Drawing.Size(29, 24);
             this.tsExcel.Text = "Export Excel";
             this.tsExcel.Click += new System.EventHandler(this.tsExcel_Click);
+            // 
+            // tsDetailSummary
+            // 
+            this.tsDetailSummary.Image = global::DBADashGUI.Properties.Resources.Table_16x;
+            this.tsDetailSummary.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tsDetailSummary.Name = "tsDetailSummary";
+            this.tsDetailSummary.Size = new System.Drawing.Size(73, 24);
+            this.tsDetailSummary.Text = "Detail";
+            this.tsDetailSummary.Click += new System.EventHandler(this.tsDetailSummary_Click);
             // 
             // Mirroring
             // 

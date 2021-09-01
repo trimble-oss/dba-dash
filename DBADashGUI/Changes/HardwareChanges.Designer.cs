@@ -28,18 +28,18 @@
         /// </summary>
         private void InitializeComponent()
         {
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle13 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle14 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle15 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle16 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle17 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle18 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle19 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle20 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle21 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle22 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle23 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle24 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle3 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle4 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle5 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle6 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle7 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle8 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle9 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle10 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle11 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle12 = new System.Windows.Forms.DataGridViewCellStyle();
             this.dgv = new System.Windows.Forms.DataGridView();
             this.Instance = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.ChangeDate = new System.Windows.Forms.DataGridViewTextBoxColumn();
@@ -89,10 +89,12 @@
             this.toolStripLabel1 = new System.Windows.Forms.ToolStripLabel();
             this.tsRefreshHardware = new System.Windows.Forms.ToolStripButton();
             this.tsCopy = new System.Windows.Forms.ToolStripButton();
+            this.tsExcel = new System.Windows.Forms.ToolStripButton();
             this.toolStrip2 = new System.Windows.Forms.ToolStrip();
             this.toolStripLabel2 = new System.Windows.Forms.ToolStripLabel();
             this.tsRefreshHistory = new System.Windows.Forms.ToolStripButton();
             this.tsCopyHistory = new System.Windows.Forms.ToolStripButton();
+            this.tsExcelHistory = new System.Windows.Forms.ToolStripButton();
             this.dataGridViewTextBoxColumn1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dataGridViewTextBoxColumn2 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dataGridViewTextBoxColumn3 = new System.Windows.Forms.DataGridViewTextBoxColumn();
@@ -133,8 +135,6 @@
             this.dataGridViewTextBoxColumn38 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dataGridViewTextBoxColumn39 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dataGridViewTextBoxColumn40 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.tsExcel = new System.Windows.Forms.ToolStripButton();
-            this.tsExcelHistory = new System.Windows.Forms.ToolStripButton();
             ((System.ComponentModel.ISupportInitialize)(this.dgv)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
@@ -149,7 +149,6 @@
             // 
             this.dgv.AllowUserToAddRows = false;
             this.dgv.AllowUserToDeleteRows = false;
-            this.dgv.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.DisplayedCells;
             this.dgv.BackgroundColor = System.Drawing.Color.White;
             this.dgv.ClipboardCopyMode = System.Windows.Forms.DataGridViewClipboardCopyMode.EnableAlwaysIncludeHeaderText;
             this.dgv.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
@@ -261,6 +260,7 @@
             this.cpu_count_old.MinimumWidth = 6;
             this.cpu_count_old.Name = "cpu_count_old";
             this.cpu_count_old.ReadOnly = true;
+            this.cpu_count_old.Width = 125;
             // 
             // cpu_count_new
             // 
@@ -328,8 +328,8 @@
             // physical_memory_gb_old
             // 
             this.physical_memory_gb_old.DataPropertyName = "physical_memory_gb_old";
-            dataGridViewCellStyle13.Format = "N1";
-            this.physical_memory_gb_old.DefaultCellStyle = dataGridViewCellStyle13;
+            dataGridViewCellStyle1.Format = "N1";
+            this.physical_memory_gb_old.DefaultCellStyle = dataGridViewCellStyle1;
             this.physical_memory_gb_old.HeaderText = "Physical Memory (Old)";
             this.physical_memory_gb_old.MinimumWidth = 6;
             this.physical_memory_gb_old.Name = "physical_memory_gb_old";
@@ -339,8 +339,8 @@
             // physical_memory_gb_new
             // 
             this.physical_memory_gb_new.DataPropertyName = "physical_memory_gb_new";
-            dataGridViewCellStyle14.Format = "N1";
-            this.physical_memory_gb_new.DefaultCellStyle = dataGridViewCellStyle14;
+            dataGridViewCellStyle2.Format = "N1";
+            this.physical_memory_gb_new.DefaultCellStyle = dataGridViewCellStyle2;
             this.physical_memory_gb_new.HeaderText = "Physical Memory (New)";
             this.physical_memory_gb_new.MinimumWidth = 6;
             this.physical_memory_gb_new.Name = "physical_memory_gb_new";
@@ -371,7 +371,6 @@
             // 
             this.dgvHardware.AllowUserToAddRows = false;
             this.dgvHardware.AllowUserToDeleteRows = false;
-            this.dgvHardware.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.DisplayedCells;
             this.dgvHardware.BackgroundColor = System.Drawing.Color.White;
             this.dgvHardware.ClipboardCopyMode = System.Windows.Forms.DataGridViewClipboardCopyMode.EnableAlwaysIncludeHeaderText;
             this.dgvHardware.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
@@ -532,8 +531,8 @@
             // colPhysicalMemory
             // 
             this.colPhysicalMemory.DataPropertyName = "PhysicalMemoryGB";
-            dataGridViewCellStyle15.Format = "N1";
-            this.colPhysicalMemory.DefaultCellStyle = dataGridViewCellStyle15;
+            dataGridViewCellStyle3.Format = "N1";
+            this.colPhysicalMemory.DefaultCellStyle = dataGridViewCellStyle3;
             this.colPhysicalMemory.HeaderText = "Physical Memory (GB)";
             this.colPhysicalMemory.MinimumWidth = 6;
             this.colPhysicalMemory.Name = "colPhysicalMemory";
@@ -543,8 +542,8 @@
             // colBufferPool
             // 
             this.colBufferPool.DataPropertyName = "BufferPoolMB";
-            dataGridViewCellStyle16.Format = "N0";
-            this.colBufferPool.DefaultCellStyle = dataGridViewCellStyle16;
+            dataGridViewCellStyle4.Format = "N0";
+            this.colBufferPool.DefaultCellStyle = dataGridViewCellStyle4;
             this.colBufferPool.HeaderText = "Buffer Pool (MB)";
             this.colBufferPool.MinimumWidth = 6;
             this.colBufferPool.Name = "colBufferPool";
@@ -554,8 +553,8 @@
             // colPctMemoryBufferPool
             // 
             this.colPctMemoryBufferPool.DataPropertyName = "PctMemoryAllocatedToBufferPool";
-            dataGridViewCellStyle17.Format = "P1";
-            this.colPctMemoryBufferPool.DefaultCellStyle = dataGridViewCellStyle17;
+            dataGridViewCellStyle5.Format = "P1";
+            this.colPctMemoryBufferPool.DefaultCellStyle = dataGridViewCellStyle5;
             this.colPctMemoryBufferPool.HeaderText = "% Memory allocated to buffer pool";
             this.colPctMemoryBufferPool.MinimumWidth = 6;
             this.colPctMemoryBufferPool.Name = "colPctMemoryBufferPool";
@@ -565,8 +564,8 @@
             // colMemNotAllocated
             // 
             this.colMemNotAllocated.DataPropertyName = "MemoryNotAllocatedToBufferPoolGB";
-            dataGridViewCellStyle18.Format = "N1";
-            this.colMemNotAllocated.DefaultCellStyle = dataGridViewCellStyle18;
+            dataGridViewCellStyle6.Format = "N1";
+            this.colMemNotAllocated.DefaultCellStyle = dataGridViewCellStyle6;
             this.colMemNotAllocated.HeaderText = "Memory not allocated to buffer pool (GB)";
             this.colMemNotAllocated.MinimumWidth = 6;
             this.colMemNotAllocated.Name = "colMemNotAllocated";
@@ -625,6 +624,7 @@
             this.colPowerPlan.MinimumWidth = 6;
             this.colPowerPlan.Name = "colPowerPlan";
             this.colPowerPlan.ReadOnly = true;
+            this.colPowerPlan.Width = 125;
             // 
             // colInstantFileInitialization
             // 
@@ -677,6 +677,16 @@
             this.tsCopy.Text = "Copy";
             this.tsCopy.Click += new System.EventHandler(this.tsCopy_Click);
             // 
+            // tsExcel
+            // 
+            this.tsExcel.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.tsExcel.Image = global::DBADashGUI.Properties.Resources.excel16x16;
+            this.tsExcel.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tsExcel.Name = "tsExcel";
+            this.tsExcel.Size = new System.Drawing.Size(29, 24);
+            this.tsExcel.Text = "Export Excel";
+            this.tsExcel.Click += new System.EventHandler(this.tsExcel_Click);
+            // 
             // toolStrip2
             // 
             this.toolStrip2.ImageScalingSize = new System.Drawing.Size(20, 20);
@@ -718,6 +728,16 @@
             this.tsCopyHistory.Size = new System.Drawing.Size(29, 24);
             this.tsCopyHistory.Text = "Copy";
             this.tsCopyHistory.Click += new System.EventHandler(this.tsCopyHistory_Click);
+            // 
+            // tsExcelHistory
+            // 
+            this.tsExcelHistory.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.tsExcelHistory.Image = global::DBADashGUI.Properties.Resources.excel16x16;
+            this.tsExcelHistory.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tsExcelHistory.Name = "tsExcelHistory";
+            this.tsExcelHistory.Size = new System.Drawing.Size(29, 24);
+            this.tsExcelHistory.Text = "Export Excel";
+            this.tsExcelHistory.Click += new System.EventHandler(this.tsExcelHistory_Click);
             // 
             // dataGridViewTextBoxColumn1
             // 
@@ -840,8 +860,8 @@
             // dataGridViewTextBoxColumn14
             // 
             this.dataGridViewTextBoxColumn14.DataPropertyName = "PhysicalMemoryGB";
-            dataGridViewCellStyle19.Format = "N1";
-            this.dataGridViewTextBoxColumn14.DefaultCellStyle = dataGridViewCellStyle19;
+            dataGridViewCellStyle7.Format = "N1";
+            this.dataGridViewTextBoxColumn14.DefaultCellStyle = dataGridViewCellStyle7;
             this.dataGridViewTextBoxColumn14.HeaderText = "Physical Memory (GB)";
             this.dataGridViewTextBoxColumn14.MinimumWidth = 6;
             this.dataGridViewTextBoxColumn14.Name = "dataGridViewTextBoxColumn14";
@@ -851,8 +871,8 @@
             // dataGridViewTextBoxColumn15
             // 
             this.dataGridViewTextBoxColumn15.DataPropertyName = "BufferPoolMB";
-            dataGridViewCellStyle20.Format = "N0";
-            this.dataGridViewTextBoxColumn15.DefaultCellStyle = dataGridViewCellStyle20;
+            dataGridViewCellStyle8.Format = "N0";
+            this.dataGridViewTextBoxColumn15.DefaultCellStyle = dataGridViewCellStyle8;
             this.dataGridViewTextBoxColumn15.HeaderText = "Buffer Pool (MB)";
             this.dataGridViewTextBoxColumn15.MinimumWidth = 6;
             this.dataGridViewTextBoxColumn15.Name = "dataGridViewTextBoxColumn15";
@@ -862,8 +882,8 @@
             // dataGridViewTextBoxColumn16
             // 
             this.dataGridViewTextBoxColumn16.DataPropertyName = "PctMemoryAllocatedToBufferPool";
-            dataGridViewCellStyle21.Format = "P1";
-            this.dataGridViewTextBoxColumn16.DefaultCellStyle = dataGridViewCellStyle21;
+            dataGridViewCellStyle9.Format = "P1";
+            this.dataGridViewTextBoxColumn16.DefaultCellStyle = dataGridViewCellStyle9;
             this.dataGridViewTextBoxColumn16.HeaderText = "% Memory allocated to buffer pool";
             this.dataGridViewTextBoxColumn16.MinimumWidth = 6;
             this.dataGridViewTextBoxColumn16.Name = "dataGridViewTextBoxColumn16";
@@ -873,8 +893,8 @@
             // dataGridViewTextBoxColumn17
             // 
             this.dataGridViewTextBoxColumn17.DataPropertyName = "MemoryNotAllocatedToBufferPoolGB";
-            dataGridViewCellStyle22.Format = "N1";
-            this.dataGridViewTextBoxColumn17.DefaultCellStyle = dataGridViewCellStyle22;
+            dataGridViewCellStyle10.Format = "N1";
+            this.dataGridViewTextBoxColumn17.DefaultCellStyle = dataGridViewCellStyle10;
             this.dataGridViewTextBoxColumn17.HeaderText = "Memory not allocated to buffer pool (GB)";
             this.dataGridViewTextBoxColumn17.MinimumWidth = 6;
             this.dataGridViewTextBoxColumn17.Name = "dataGridViewTextBoxColumn17";
@@ -1073,8 +1093,8 @@
             // dataGridViewTextBoxColumn39
             // 
             this.dataGridViewTextBoxColumn39.DataPropertyName = "physical_memory_gb_old";
-            dataGridViewCellStyle23.Format = "N1";
-            this.dataGridViewTextBoxColumn39.DefaultCellStyle = dataGridViewCellStyle23;
+            dataGridViewCellStyle11.Format = "N1";
+            this.dataGridViewTextBoxColumn39.DefaultCellStyle = dataGridViewCellStyle11;
             this.dataGridViewTextBoxColumn39.HeaderText = "Physical Memory (Old)";
             this.dataGridViewTextBoxColumn39.MinimumWidth = 6;
             this.dataGridViewTextBoxColumn39.Name = "dataGridViewTextBoxColumn39";
@@ -1084,33 +1104,13 @@
             // dataGridViewTextBoxColumn40
             // 
             this.dataGridViewTextBoxColumn40.DataPropertyName = "physical_memory_gb_new";
-            dataGridViewCellStyle24.Format = "N1";
-            this.dataGridViewTextBoxColumn40.DefaultCellStyle = dataGridViewCellStyle24;
+            dataGridViewCellStyle12.Format = "N1";
+            this.dataGridViewTextBoxColumn40.DefaultCellStyle = dataGridViewCellStyle12;
             this.dataGridViewTextBoxColumn40.HeaderText = "Physical Memory (New)";
             this.dataGridViewTextBoxColumn40.MinimumWidth = 6;
             this.dataGridViewTextBoxColumn40.Name = "dataGridViewTextBoxColumn40";
             this.dataGridViewTextBoxColumn40.ReadOnly = true;
             this.dataGridViewTextBoxColumn40.Width = 135;
-            // 
-            // tsExcel
-            // 
-            this.tsExcel.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.tsExcel.Image = global::DBADashGUI.Properties.Resources.excel16x16;
-            this.tsExcel.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsExcel.Name = "tsExcel";
-            this.tsExcel.Size = new System.Drawing.Size(29, 24);
-            this.tsExcel.Text = "Export Excel";
-            this.tsExcel.Click += new System.EventHandler(this.tsExcel_Click);
-            // 
-            // tsExcelHistory
-            // 
-            this.tsExcelHistory.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.tsExcelHistory.Image = global::DBADashGUI.Properties.Resources.excel16x16;
-            this.tsExcelHistory.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsExcelHistory.Name = "tsExcelHistory";
-            this.tsExcelHistory.Size = new System.Drawing.Size(29, 24);
-            this.tsExcelHistory.Text = "Export Excel";
-            this.tsExcelHistory.Click += new System.EventHandler(this.tsExcelHistory_Click);
             // 
             // HardwareChanges
             // 

@@ -37,7 +37,7 @@ namespace DBADashGUI.Performance
             {
                 dgv.DataSource = new DataView(dt);
             }
-            
+            dgv.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
         }
 
         void addPerformanceCounters(ref DataTable dt)

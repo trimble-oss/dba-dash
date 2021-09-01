@@ -31,6 +31,7 @@ namespace DBADashGUI.DBFiles
                     da.Fill(dt);
                     dgvTempDB.AutoGenerateColumns = false;
                     dgvTempDB.DataSource = dt;
+                    dgvTempDB.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
                 }
             }
         }

@@ -36,6 +36,7 @@ namespace DBADashGUI
         {
             var dt = getDataRetention(showAllTablesToolStripMenuItem.Checked);
             dgv.DataSource = dt;
+            dgv.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
         }
 
         private DataTable getDataRetention(bool allTables)

@@ -224,10 +224,10 @@
     <Compile Include="Changes\QueryStore.Designer.cs">
       <DependentUpon>QueryStore.cs</DependentUpon>
     </Compile>
-    <Compile Include="Changes\SchemaSnapshots.cs">
+    <Compile Include="SchemaCompare\SchemaSnapshots.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="Changes\SchemaSnapshots.Designer.cs">
+    <Compile Include="SchemaCompare\SchemaSnapshots.Designer.cs">
       <DependentUpon>SchemaSnapshots.cs</DependentUpon>
     </Compile>
     <Compile Include="Changes\TraceFlagHistory.cs">
@@ -650,7 +650,7 @@
     <EmbeddedResource Include="Changes\ResourceGovernor.resx">
       <DependentUpon>ResourceGovernor.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Changes\SchemaSnapshots.resx">
+    <EmbeddedResource Include="SchemaCompare\SchemaSnapshots.resx">
       <DependentUpon>SchemaSnapshots.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Changes\TraceFlagHistory.resx">
