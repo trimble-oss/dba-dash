@@ -295,11 +295,6 @@ namespace DBADashGUI.Performance
             }
         }
 
-        private void toolStripButton1_Click(object sender, EventArgs e)
-        {
-            groupSnapshot("database_name");
-        }
-
         private void groupSnapshot(string group)
         {
             if (snapshotDT != null && snapshotDT.Rows.Count>0)
@@ -328,7 +323,7 @@ namespace DBADashGUI.Performance
                       }).CopyToDataTable();
 
                 dgv.Columns.Clear();
-                dgv.Columns.Add(new DataGridViewLinkColumn() { DataPropertyName = group, HeaderText = group,Name = "colGroup" });
+                dgv.Columns.Add(new DataGridViewLinkColumn() { DataPropertyName = group, HeaderText = group,Name = "colGroup", SortMode = DataGridViewColumnSortMode.Automatic });
                 dgv.DataSource = new DataView(groupedDT);
                 foreach (DataGridViewColumn col in dgv.Columns)
                 {
