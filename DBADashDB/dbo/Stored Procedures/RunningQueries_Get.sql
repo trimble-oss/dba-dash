@@ -69,7 +69,7 @@ SELECT HD.HumanDuration as [Duration],
 	waitO.SchemaName + '.' + waitO.ObjectName AS wait_object,
 	waitF.filegroup_name + ' | ' + waitF.name AS wait_file
 FROM dbo.RunningQueries Q 
-CROSS APPLY(SELECT CASE WHEN start_time_utc < Q.SnapshotDateUTC THEN DATEDIFF_BIG(ms,ISNULL(start_time_utc,last_request_start_time_utc),Q.SnapshotDateUTC) ELSE 0 END AS Duration) calc
+CROSS APPLY(SELECT CASE WHEN Q.start_time_utc < Q.SnapshotDateUTC OR Q.start_time_utc IS NULL  THEN DATEDIFF_BIG(ms,ISNULL(Q.start_time_utc,Q.last_request_start_time_utc),Q.SnapshotDateUTC) ELSE 0 END AS Duration) calc
 CROSS APPLY dbo.MillisecondsToHumanDuration (calc.Duration) HD
 CROSS APPLY dbo.SplitWaitResource(Q.wait_resource) waitR
 LEFT JOIN dbo.QueryText QT ON QT.sql_handle = Q.sql_handle
