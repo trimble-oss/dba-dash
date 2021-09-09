@@ -140,6 +140,7 @@ namespace DBADashGUI
             if (tabs.SelectedTab == tabTags)
             {
                 tags1.InstanceName = n.InstanceName;
+                tags1.InstanceIDs = AllInstanceIDs;
                 tags1.RefreshData();
             }
             else if (tabs.SelectedTab == tabDrives)
@@ -569,7 +570,7 @@ namespace DBADashGUI
                     instanceNode.Nodes.Add(changesNode);                  
                     instanceNode.Nodes.Add(new SQLTreeItem("Checks", SQLTreeItem.TreeType.DBAChecks));
                     instanceNode.Nodes.Add(new SQLTreeItem("HA/DR", SQLTreeItem.TreeType.HADR));
-                    instanceNode.Nodes.Add(new SQLTreeItem("Tags", SQLTreeItem.TreeType.Tags));
+                    // instanceNode.Nodes.Add(new SQLTreeItem("Tags", SQLTreeItem.TreeType.Tags));
 
                     cmd.Parameters.AddWithValue("Instance", instanceNode.ObjectName);
                     var systemNode = new SQLTreeItem("System Databases", SQLTreeItem.TreeType.Folder);
@@ -698,6 +699,7 @@ namespace DBADashGUI
                     allowedTabs.Add(tabDrivers);
                     allowedTabs.Add(tabTempDB);
                     allowedTabs.Add(tabRG);
+                    allowedTabs.Add(tabTags);
                 }
                 if (parent.Type != SQLTreeItem.TreeType.Instance && hasAzureDBs)
                 {

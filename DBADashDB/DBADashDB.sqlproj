@@ -29,7 +29,7 @@
     <QueryStoreStaleQueryThreshold>15</QueryStoreStaleQueryThreshold>
     <QueryStoreMaxStorageSize>512</QueryStoreMaxStorageSize>
     <QueryStoreMaxPlansPerQuery>50</QueryStoreMaxPlansPerQuery>
-    <DacVersion>2.0.3.40</DacVersion>
+    <DacVersion>2.0.3.42</DacVersion>
     <ReadCommittedSnapshot>True</ReadCommittedSnapshot>
     <AllowSnapshotIsolation>True</AllowSnapshotIsolation>
     <CompatibilityMode>130</CompatibilityMode>
@@ -592,6 +592,7 @@
     <Build Include="dbo\Stored Procedures\InstanceUptimeThresholds_Get.sql" />
     <Build Include="dbo\Stored Procedures\InstanceUptimeThresholds_Upd.sql" />
     <Build Include="dbo\Stored Procedures\InstanceUptimeAck.sql" />
+    <Build Include="dbo\Stored Procedures\TagReport_Get.sql" />
   </ItemGroup>
   <ItemGroup>
     <PostDeploy Include="Script.PostDeployment1.sql" />
