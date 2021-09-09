@@ -599,6 +599,12 @@
     </Compile>
     <Compile Include="Tagging\InstanceTag.cs" />
     <Compile Include="Tagging\Tag.cs" />
+    <Compile Include="Tagging\Tags.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Tagging\Tags.Designer.cs">
+      <DependentUpon>Tags.cs</DependentUpon>
+    </Compile>
     <EmbeddedResource Include="AgentJobs\AgentJobsControl.resx">
       <DependentUpon>AgentJobsControl.cs</DependentUpon>
     </EmbeddedResource>
@@ -831,6 +837,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Checks\Summary.resx">
       <DependentUpon>Summary.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Tagging\Tags.resx">
+      <DependentUpon>Tags.cs</DependentUpon>
     </EmbeddedResource>
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">

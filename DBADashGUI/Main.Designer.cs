@@ -83,13 +83,7 @@
             this.colCompare = new System.Windows.Forms.DataGridViewLinkColumn();
             this.label1 = new System.Windows.Forms.Label();
             this.tabTags = new System.Windows.Forms.TabPage();
-            this.chkTags = new System.Windows.Forms.CheckedListBox();
-            this.panel1 = new System.Windows.Forms.Panel();
-            this.label2 = new System.Windows.Forms.Label();
-            this.bttnAdd = new System.Windows.Forms.Button();
-            this.cboTagName = new System.Windows.Forms.ComboBox();
-            this.label3 = new System.Windows.Forms.Label();
-            this.cboTagValue = new System.Windows.Forms.ComboBox();
+            this.tags1 = new DBADashGUI.Tagging.Tags();
             this.tabDrives = new System.Windows.Forms.TabPage();
             this.drivesControl1 = new DBADashGUI.Properties.DrivesControl();
             this.tabBackups = new System.Windows.Forms.TabPage();
@@ -202,7 +196,6 @@
             this.toolStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.gvHistory)).BeginInit();
             this.tabTags.SuspendLayout();
-            this.panel1.SuspendLayout();
             this.tabDrives.SuspendLayout();
             this.tabBackups.SuspendLayout();
             this.tabLogShipping.SuspendLayout();
@@ -649,9 +642,9 @@
             this.tsNext,
             this.toolStripLabel1,
             this.tsPageSize});
-            this.toolStrip1.Location = new System.Drawing.Point(0, 639);
+            this.toolStrip1.Location = new System.Drawing.Point(0, 642);
             this.toolStrip1.Name = "toolStrip1";
-            this.toolStrip1.Size = new System.Drawing.Size(1625, 31);
+            this.toolStrip1.Size = new System.Drawing.Size(1625, 28);
             this.toolStrip1.TabIndex = 1;
             this.toolStrip1.Text = "toolStrip1";
             // 
@@ -661,14 +654,14 @@
             this.tsPrevious.Image = ((System.Drawing.Image)(resources.GetObject("tsPrevious.Image")));
             this.tsPrevious.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsPrevious.Name = "tsPrevious";
-            this.tsPrevious.Size = new System.Drawing.Size(29, 28);
+            this.tsPrevious.Size = new System.Drawing.Size(29, 25);
             this.tsPrevious.Text = "Previous";
             this.tsPrevious.Click += new System.EventHandler(this.tsPrevious_Click);
             // 
             // tsPageNum
             // 
             this.tsPageNum.Name = "tsPageNum";
-            this.tsPageNum.Size = new System.Drawing.Size(53, 28);
+            this.tsPageNum.Size = new System.Drawing.Size(53, 25);
             this.tsPageNum.Text = "Page 1";
             // 
             // tsNext
@@ -677,14 +670,14 @@
             this.tsNext.Image = ((System.Drawing.Image)(resources.GetObject("tsNext.Image")));
             this.tsNext.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsNext.Name = "tsNext";
-            this.tsNext.Size = new System.Drawing.Size(29, 28);
+            this.tsNext.Size = new System.Drawing.Size(29, 25);
             this.tsNext.Text = "Next";
             this.tsNext.Click += new System.EventHandler(this.tsNext_Click);
             // 
             // toolStripLabel1
             // 
             this.toolStripLabel1.Name = "toolStripLabel1";
-            this.toolStripLabel1.Size = new System.Drawing.Size(75, 28);
+            this.toolStripLabel1.Size = new System.Drawing.Size(75, 25);
             this.toolStripLabel1.Text = "Page Size:";
             // 
             // tsPageSize
@@ -696,7 +689,7 @@
             "1000",
             "5000"});
             this.tsPageSize.Name = "tsPageSize";
-            this.tsPageSize.Size = new System.Drawing.Size(121, 31);
+            this.tsPageSize.Size = new System.Drawing.Size(121, 28);
             this.tsPageSize.Text = "100";
             this.tsPageSize.Validating += new System.ComponentModel.CancelEventHandler(this.tsPageSize_Validating);
             this.tsPageSize.Validated += new System.EventHandler(this.tsPageSize_Validated);
@@ -825,8 +818,7 @@
             // 
             // tabTags
             // 
-            this.tabTags.Controls.Add(this.chkTags);
-            this.tabTags.Controls.Add(this.panel1);
+            this.tabTags.Controls.Add(this.tags1);
             this.tabTags.Location = new System.Drawing.Point(4, 25);
             this.tabTags.Name = "tabTags";
             this.tabTags.Padding = new System.Windows.Forms.Padding(3);
@@ -835,73 +827,16 @@
             this.tabTags.Text = "Tags";
             this.tabTags.UseVisualStyleBackColor = true;
             // 
-            // chkTags
+            // tags1
             // 
-            this.chkTags.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.chkTags.FormattingEnabled = true;
-            this.chkTags.Location = new System.Drawing.Point(3, 136);
-            this.chkTags.Name = "chkTags";
-            this.chkTags.Size = new System.Drawing.Size(1625, 1107);
-            this.chkTags.TabIndex = 0;
-            this.chkTags.ItemCheck += new System.Windows.Forms.ItemCheckEventHandler(this.chkTags_ItemCheck);
-            // 
-            // panel1
-            // 
-            this.panel1.Controls.Add(this.label2);
-            this.panel1.Controls.Add(this.bttnAdd);
-            this.panel1.Controls.Add(this.cboTagName);
-            this.panel1.Controls.Add(this.label3);
-            this.panel1.Controls.Add(this.cboTagValue);
-            this.panel1.Dock = System.Windows.Forms.DockStyle.Top;
-            this.panel1.Location = new System.Drawing.Point(3, 3);
-            this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(1625, 133);
-            this.panel1.TabIndex = 6;
-            // 
-            // label2
-            // 
-            this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(3, 20);
-            this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(78, 17);
-            this.label2.TabIndex = 2;
-            this.label2.Text = "Tag Name:";
-            // 
-            // bttnAdd
-            // 
-            this.bttnAdd.Location = new System.Drawing.Point(640, 17);
-            this.bttnAdd.Name = "bttnAdd";
-            this.bttnAdd.Size = new System.Drawing.Size(75, 23);
-            this.bttnAdd.TabIndex = 5;
-            this.bttnAdd.Text = "Add";
-            this.bttnAdd.UseVisualStyleBackColor = true;
-            this.bttnAdd.Click += new System.EventHandler(this.bttnAdd_Click);
-            // 
-            // cboTagName
-            // 
-            this.cboTagName.FormattingEnabled = true;
-            this.cboTagName.Location = new System.Drawing.Point(102, 17);
-            this.cboTagName.Name = "cboTagName";
-            this.cboTagName.Size = new System.Drawing.Size(177, 24);
-            this.cboTagName.TabIndex = 1;
-            this.cboTagName.SelectedValueChanged += new System.EventHandler(this.cboTagName_SelectedValueChanged);
-            // 
-            // label3
-            // 
-            this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(311, 20);
-            this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(77, 17);
-            this.label3.TabIndex = 4;
-            this.label3.Text = "Tag Value:";
-            // 
-            // cboTagValue
-            // 
-            this.cboTagValue.FormattingEnabled = true;
-            this.cboTagValue.Location = new System.Drawing.Point(408, 17);
-            this.cboTagValue.Name = "cboTagValue";
-            this.cboTagValue.Size = new System.Drawing.Size(178, 24);
-            this.cboTagValue.TabIndex = 3;
+            this.tags1.AllTags = null;
+            this.tags1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.tags1.InstanceName = null;
+            this.tags1.Location = new System.Drawing.Point(3, 3);
+            this.tags1.Name = "tags1";
+            this.tags1.Size = new System.Drawing.Size(1625, 1240);
+            this.tags1.TabIndex = 0;
+            this.tags1.TagsChanged += new System.EventHandler(this.tags1_TagsChanged);
             // 
             // tabDrives
             // 
@@ -1928,8 +1863,6 @@
             this.toolStrip1.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.gvHistory)).EndInit();
             this.tabTags.ResumeLayout(false);
-            this.panel1.ResumeLayout(false);
-            this.panel1.PerformLayout();
             this.tabDrives.ResumeLayout(false);
             this.tabBackups.ResumeLayout(false);
             this.tabLogShipping.ResumeLayout(false);
@@ -1992,14 +1925,7 @@
         private System.Windows.Forms.ToolStripMenuItem dBDiffToolStripMenuItem;
         private System.Windows.Forms.Label label7;
         private System.Windows.Forms.TabPage tabTags;
-        private System.Windows.Forms.CheckedListBox chkTags;
         private System.Windows.Forms.ToolStripMenuItem mnuTags;
-        private System.Windows.Forms.Button bttnAdd;
-        private System.Windows.Forms.Label label3;
-        private System.Windows.Forms.ComboBox cboTagValue;
-        private System.Windows.Forms.Label label2;
-        private System.Windows.Forms.ComboBox cboTagName;
-        private System.Windows.Forms.Panel panel1;
         private System.Windows.Forms.TabPage tabDrives;
         private Properties.DrivesControl drivesControl1;
         private System.Windows.Forms.TabPage tabBackups;
@@ -2128,5 +2054,6 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn ObjectDateCreated;
         private System.Windows.Forms.DataGridViewTextBoxColumn ObjectDateModified;
         private System.Windows.Forms.DataGridViewLinkColumn colCompare;
+        private Tagging.Tags tags1;
     }
 }

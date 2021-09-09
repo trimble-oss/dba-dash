@@ -139,7 +139,8 @@ namespace DBADashGUI
             }
             if (tabs.SelectedTab == tabTags)
             {
-                getTags();
+                tags1.InstanceName = n.InstanceName;
+                tags1.RefreshData();
             }
             else if (tabs.SelectedTab == tabDrives)
             {
@@ -914,8 +915,6 @@ namespace DBADashGUI
         }
 
 
-
-
         private void dBDiffToolStripMenuItem_Click(object sender, EventArgs e)
         {
             var frm = new DBDiff
@@ -939,7 +938,6 @@ namespace DBADashGUI
         private void buildTagMenu(List<Int16> selected = null)
         {
             mnuTags.DropDownItems.Clear();
-            cboTagName.Items.Clear();
 
 
             string currentTag = String.Empty;
@@ -947,6 +945,7 @@ namespace DBADashGUI
             ToolStripMenuItem mSystemTags = new ToolStripMenuItem("System Tags");
             mSystemTags.Font = new Font(mSystemTags.Font, FontStyle.Italic);
             var tags = DBADashTag.GetTags();
+            tags1.AllTags = tags;
             foreach (var tag in tags)
             {
 
@@ -961,7 +960,6 @@ namespace DBADashGUI
                     else
                     {
                         mnuTags.DropDownItems.Add(mTagName);
-                        cboTagName.Items.Add(tag.TagName);
                     }
 
                     currentTag = tag.TagName;
@@ -1027,63 +1025,6 @@ namespace DBADashGUI
         }
 
 
-        private void getTags()
-        {
-            isTagPopulation = true;
-            SQLTreeItem n = (SQLTreeItem)tv1.SelectedNode;
-            chkTags.Items.Clear();
-            var tags = InstanceTag.GetInstanceTags(connectionString, n.InstanceName);
-            foreach (var t in tags)
-            {
-                if (!t.TagName.StartsWith("{")) { chkTags.Items.Add(t, t.IsTagged); }
-            }
-            isTagPopulation = false;
-        }
-
-
-        private void chkTags_ItemCheck(object sender, ItemCheckEventArgs e)
-        {
-            if (!isTagPopulation)
-            {
-                var InstanceTag = (InstanceTag)chkTags.Items[e.Index];
-                if (e.NewValue == CheckState.Checked)
-                {
-                    InstanceTag.Save(connectionString);
-                }
-                else
-                {
-                    InstanceTag.Delete(connectionString);
-                }
-            }
-        }
-
-        private void bttnAdd_Click(object sender, EventArgs e)
-        {
-            if (cboTagName.Text.StartsWith("{")){
-                MessageBox.Show("Invalid TagName.  TagNames starting with { are system reserved.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
-                return;
-            }
-            SQLTreeItem n = (SQLTreeItem)tv1.SelectedNode;
-            InstanceTag newTag = new InstanceTag() { Instance = n.InstanceName, TagName = cboTagName.Text, TagValue = cboTagValue.Text };
-            newTag.Save(connectionString);
-            getTags();
-            buildTagMenu(SelectedTags());
-        }
-
-        private void cboTagName_SelectedValueChanged(object sender, EventArgs e)
-        {
-            cboTagValue.Items.Clear();
-            foreach(ToolStripMenuItem mnuName in mnuTags.DropDownItems)
-            {
-                if(mnuName.Text == cboTagName.Text)
-                {
-                    foreach (ToolStripMenuItem mnuValue in mnuName.DropDownItems) {
-                        cboTagValue.Items.Add(mnuValue.Text);
-                    }
-                    break;
-                }
-            }
-        }
 
         private List<Int16> SelectedTags(ToolStripMenuItem mnu = null)
         {
@@ -1335,6 +1276,11 @@ namespace DBADashGUI
                 frm.SelectedTags = SelectedTags();
                 frm.ShowDialog();
             }
+        }
+
+        private void tags1_TagsChanged(object sender, EventArgs e)
+        {
+            buildTagMenu(SelectedTags());
         }
     }
 }
