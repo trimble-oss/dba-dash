@@ -10,7 +10,7 @@ namespace DBADashGUI
 {
     public class DBADashTag
     {
-        public Int16 TagID { get; set; }
+        public int TagID { get; set; }
         public string TagName { get; set; }
         public string TagValue { get; set; }
 
@@ -30,7 +30,7 @@ namespace DBADashGUI
                     var rdr = cmd.ExecuteReader();
                     while (rdr.Read())
                     {
-                        tags.Add(new DBADashTag { TagID = (Int16)rdr[0], TagName = (string)rdr[1], TagValue = (string)rdr[2]});
+                        tags.Add(new DBADashTag { TagID = (int)rdr[0], TagName = (string)rdr[1], TagValue = (string)rdr[2]});
                     }   
                 }         
             }

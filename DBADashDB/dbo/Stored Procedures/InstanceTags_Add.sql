@@ -1,9 +1,15 @@
-﻿CREATE PROC InstanceTags_Add(@Instance SYSNAME,@TagName VARCHAR(50),@TagValue VARCHAR(50),@TagID SMALLINT OUT)
+﻿CREATE PROC InstanceTags_Add(
+	@Instance SYSNAME,
+	@TagName VARCHAR(50),
+	@TagValue VARCHAR(128),
+	@TagID INT OUT
+)
 AS
 SELECT @TagID = TagID
 FROM dbo.Tags
 WHERE TagName = @TagName
 AND TagValue =@TagValue
+
 IF @TagID IS NULL 
 BEGIN
 	INSERT INTO dbo.Tags

@@ -1,8 +1,11 @@
-﻿CREATE PROC [dbo].[SystemTags_Upd](@InstanceID INT)
+﻿CREATE PROC dbo.SystemTags_Upd(
+	@InstanceID INT
+)
 AS
 DECLARE @Tags TABLE(
-	TagName NVARCHAR(50),
-	TagValue NVARCHAR(50)
+	TagID INT NULL,
+	TagName NVARCHAR(50) NOT NULL,
+	TagValue NVARCHAR(128) NOT NULL
 );
 DECLARE @Instance SYSNAME
 DECLARE @IsAzure BIT
@@ -11,14 +14,15 @@ FROM dbo.Instances
 WHERE InstanceID = @InstanceID;
 
 WITH T AS (
-	SELECT CAST(v.SQLVersionName as NVARCHAR(50)) as [Version], 
-			CAST(I.Edition as NVARCHAR(50)) as Edition,
-			CAST(v.SQLVersionName + ' ' + I.ProductLevel + ISNULL(' ' + I.ProductUpdateLevel,'') as NVARCHAR(50)) as PatchLevel,
-			CAST(I.Collation as NVARCHAR(50)) Collation,
-			CAST(I.SystemManufacturer as NVARCHAR(50)) as SystemManufacturer,
-			CAST(I.SystemProductName as NVARCHAR(50)) as SystemProductName,
-			CASE WHEN @IsAzure=1 THEN '    -' ELSE CAST(RIGHT(REPLICATE(' ',5) +  CAST(I.cpu_count as NVARCHAR(50)),5) as NVARCHAR(50)) END as CPUCount,
-			CAST(I.AgentHostName + ' {' + I.AgentVersion + '}' as NVARCHAR(50)) DBADashAgent
+	SELECT CAST(v.SQLVersionName AS NVARCHAR(128)) AS [Version], 
+			CAST(I.Edition AS NVARCHAR(128)) AS Edition,
+			CAST(v.SQLVersionName + ' ' + I.ProductLevel + ISNULL(' ' + I.ProductUpdateLevel,'') AS NVARCHAR(128)) AS PatchLevel,
+			CAST(I.Collation AS NVARCHAR(128)) Collation,
+			CAST(I.SystemManufacturer AS NVARCHAR(128)) AS SystemManufacturer,
+			CAST(I.SystemProductName AS NVARCHAR(128)) AS SystemProductName,
+			CASE WHEN @IsAzure=1 THEN '    -' ELSE CAST(RIGHT(REPLICATE(' ',5) +  CAST(I.cpu_count as NVARCHAR(50)),5) AS NVARCHAR(128)) END AS CPUCount,
+			CAST(I.AgentHostName AS NVARCHAR(128)) DBADashAgent,
+			CAST(I.AgentVersion AS NVARCHAR(128)) AS DBADashAgentVersion
 	FROM dbo.Instances I
 	CROSS APPLY dbo.SQLVersionName(I.EditionID,I.ProductVersion) v
 	WHERE I.InstanceID=@InstanceID
@@ -29,48 +33,54 @@ INSERT INTO @Tags
     TagValue
 )
 SELECT 	'{' + TagName + '}' as TagName,
-		TagValue 
+		ISNULL(TagValue,'')
 FROM T
-UNPIVOT(TagValue FOR TagName IN(PatchLevel, [Version], Edition, Collation, SystemManufacturer, SystemProductName, CPUCount, DBADashAgent)) upvt
-
+UNPIVOT(TagValue FOR TagName IN(PatchLevel, [Version], Edition, Collation, SystemManufacturer, SystemProductName, CPUCount, DBADashAgent,DBADashAgentVersion)) upvt
 
 INSERT INTO dbo.Tags
 (
     TagName,
     TagValue
 )
-SELECT TagName,TagValue
-FROM @Tags t
+SELECT T.TagName,T.TagValue
+FROM @Tags T
 WHERE NOT EXISTS(SELECT 1 
-			FROM dbo.Tags tg
-			WHERE tg.TagName = t.TagName 
-			AND tg.TagValue = t.TagValue
+			FROM dbo.Tags TG
+			WHERE TG.TagName = t.TagName 
+			AND TG.TagValue = t.TagValue
 			)
+
+UPDATE T 
+	SET T.TagID = TG.TagID
+FROM @Tags T 
+JOIN dbo.Tags TG ON T.TagName = TG.TagName AND T.TagValue = TG.TagValue
 
 DELETE IT 
 FROM dbo.InstanceTags IT
+JOIN dbo.Tags T ON IT.TagID = T.TagID 
 WHERE IT.Instance = @Instance
-AND  EXISTS(SELECT 1 
-			FROM @Tags t
-			JOIN dbo.Tags tg ON t.TagName = tg.TagName AND t.TagValue <> tg.TagValue
-			WHERE tg.TagID = IT.TagID
+AND T.TagName LIKE '{%'
+AND NOT EXISTS(SELECT 1 
+			FROM @Tags tmp
+			WHERE T.TagID = tmp.TagID
 			)
-
 
 INSERT INTO dbo.InstanceTags
 (
     Instance,
     TagID
 )
-SELECT @Instance,tg.TagID
+SELECT @Instance,T.TagID
 FROM @Tags T 
-JOIN dbo.Tags tg ON tg.TagName = T.TagName AND tg.TagValue = T.TagValue
 WHERE NOT EXISTS(SELECT 1 
 			FROM dbo.InstanceTags IT 
 			WHERE IT.Instance = @Instance 
-			AND IT.TagID = tg.TagID)
+			AND IT.TagID = T.TagID)
 
 
 DELETE T 
 FROM dbo.Tags T
-WHERE NOT EXISTS(SELECT 1 FROM dbo.InstanceTags IT WHERE IT.TagID=T.TagID)
+WHERE NOT EXISTS(SELECT 1 
+				FROM dbo.InstanceTags IT 
+				WHERE IT.TagID=T.TagID
+				)

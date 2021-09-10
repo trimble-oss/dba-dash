@@ -15,7 +15,7 @@ namespace DBADashGUI
 
         readonly DiffControl diffControl = new DiffControl();
 
-        public List<Int16> SelectedTags;
+        public List<int> SelectedTags;
 
         public int DatabaseID_A;
         public string Instance_A;

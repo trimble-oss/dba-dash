@@ -168,7 +168,7 @@ namespace DBADashGUI
             }
         }
 
-        public static List<string> GetInstancesWithDDLSnapshot(List<short> tags)
+        public static List<string> GetInstancesWithDDLSnapshot(List<int> tags)
         {
             List<string> instances = new List<string>();
             using (var cn = new SqlConnection(Common.ConnectionString))

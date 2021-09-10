@@ -27,7 +27,7 @@ namespace DBADashGUI
         }
 
         private readonly CommandLineOptions commandLine;
-        private readonly List<Int16> commandLineTags = new List<Int16>();
+        private readonly List<int> commandLineTags = new List<int>();
 
         public Main(CommandLineOptions opts)
         {
@@ -698,8 +698,7 @@ namespace DBADashGUI
                     allowedTabs.Add(tabAlerts);
                     allowedTabs.Add(tabDrivers);
                     allowedTabs.Add(tabTempDB);
-                    allowedTabs.Add(tabRG);
-                    allowedTabs.Add(tabTags);
+                    allowedTabs.Add(tabRG);                 
                 }
                 if (parent.Type != SQLTreeItem.TreeType.Instance && hasAzureDBs)
                 {
@@ -709,6 +708,7 @@ namespace DBADashGUI
                 allowedTabs.Add(tabDBConfiguration);
                 allowedTabs.Add(tabDBOptions);
                 allowedTabs.Add(tabQS);
+                allowedTabs.Add(tabTags);
             }
             else if(n.Type == SQLTreeItem.TreeType.AgentJobs)
             {
@@ -937,7 +937,7 @@ namespace DBADashGUI
         bool isClearTags = false;
 
 
-        private void buildTagMenu(List<Int16> selected = null)
+        private void buildTagMenu(List<int> selected = null)
         {
             mnuTags.DropDownItems.Clear();
 
@@ -1028,21 +1028,21 @@ namespace DBADashGUI
 
 
 
-        private List<Int16> SelectedTags(ToolStripMenuItem mnu = null)
+        private List<int> SelectedTags(ToolStripMenuItem mnu = null)
         {
             if (mnu == null)
             {
                 mnu = mnuTags;
                 
             }
-            var selected = new List<Int16>();
+            var selected = new List<int>();
             foreach (ToolStripItem mnuTag in mnu.DropDownItems)
             {
                 if (mnuTag.GetType() == typeof(ToolStripMenuItem))
                 {
                     if (((ToolStripMenuItem)mnuTag).Checked)
                     {
-                        selected.Add((Int16)mnuTag.Tag);                 
+                        selected.Add((int)mnuTag.Tag);                 
                     }
                     if (((ToolStripMenuItem)mnuTag).DropDownItems.Count > 0)
                     {

@@ -1,6 +1,11 @@
-﻿CREATE PROC [dbo].[InstanceTags_Del](@Instance SYSNAME,@TagName VARCHAR(50),@TagValue VARCHAR(50))
+﻿CREATE PROC dbo.InstanceTags_Del(
+	@Instance SYSNAME,
+	@TagName VARCHAR(50),
+	@TagValue VARCHAR(50)
+)
 AS
-DECLARE @TagID SMALLINT 
+DECLARE @TagID INT 
+
 SELECT @TagID = TagID
 FROM dbo.Tags
 WHERE TagName = @TagName

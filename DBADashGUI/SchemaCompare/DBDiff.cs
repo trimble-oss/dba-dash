@@ -16,7 +16,7 @@ namespace DBADashGUI
     {
   
 
-        public List<Int16> SelectedTags;
+        public List<int> SelectedTags;
 
         private string selectedInstance_A;
         private DatabaseItem selectedDB_A;
