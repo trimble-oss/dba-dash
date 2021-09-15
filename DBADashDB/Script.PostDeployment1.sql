@@ -245,10 +245,11 @@ BEGIN
 		LatencyWarningThreshold,
 		LatencyCriticalThreshold,
 		TimeSinceLastWarningThreshold,
-		TimeSinceLastCriticalThreshold
+		TimeSinceLastCriticalThreshold,
+		NewDatabaseExcludePeriodMin
 	)
 	VALUES
-	( -1, -1, 1440, 2880, 1440, 2880 )
+	( -1, -1, 1440, 2880, 1440, 2880, 1440 )
 END
 IF NOT EXISTS(SELECT 1 FROM dbo.BackupThresholds)
 BEGIN

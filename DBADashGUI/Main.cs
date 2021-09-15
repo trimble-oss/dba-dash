@@ -170,7 +170,6 @@ namespace DBADashGUI
                 logShippingControl1.IncludeWarning = true;
                 logShippingControl1.IncludeCritical = true;
                 logShippingControl1.InstanceIDs = instanceIDs;
-                logShippingControl1.ConnectionString = connectionString;
                 logShippingControl1.RefreshData();
             }
             else if(tabs.SelectedTab== tabJobs)

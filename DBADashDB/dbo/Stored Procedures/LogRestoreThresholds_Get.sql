@@ -1,4 +1,7 @@
-﻿CREATE PROC [dbo].[LogRestoreThresholds_Get](@InstanceID INT=NULL,@DatabaseID INT=NULL)
+﻿CREATE PROC dbo.LogRestoreThresholds_Get(
+    @InstanceID INT=NULL,
+    @DatabaseID INT=NULL
+)
 AS
 SELECT T.InstanceID,
        T.DatabaseID,
@@ -7,7 +10,8 @@ SELECT T.InstanceID,
        T.LatencyCriticalThreshold,
        T.LatencyWarningThreshold,
        T.TimeSinceLastCriticalThreshold,
-	   T.TimeSinceLastWarningThreshold
+	   T.TimeSinceLastWarningThreshold,
+       T.NewDatabaseExcludePeriodMin
 FROM dbo.LogRestoreThresholds T
 LEFT JOIN dbo.Instances I ON I.InstanceID = T.InstanceID
 LEFT JOIN dbo.Databases D ON D.DatabaseID = T.DatabaseID

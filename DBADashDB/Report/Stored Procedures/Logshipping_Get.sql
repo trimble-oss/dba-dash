@@ -33,7 +33,6 @@ SELECT InstanceID,
        LatencyOfLast,
        TotalTimeBehind,
        SnapshotAge,
-       LogRestoresDate,
        Status,
        StatusDescription,
 	   f.FileName AS last_file

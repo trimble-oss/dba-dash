@@ -1,10 +1,27 @@
-﻿CREATE TABLE [dbo].[Backups] (
-    [DatabaseID] INT           NOT NULL,
-    [type]       CHAR (1)      NOT NULL,
-    [LastBackup] DATETIME2 (1) NOT NULL,
-    CONSTRAINT [PK_Backups] PRIMARY KEY CLUSTERED ([DatabaseID] ASC, [type] ASC),
-    CONSTRAINT [FK_Backups_Databases] FOREIGN KEY ([DatabaseID]) REFERENCES [dbo].[Databases] ([DatabaseID])
+﻿CREATE TABLE dbo.Backups(
+    DatabaseID INT NOT NULL,
+    type CHAR(1) NOT NULL,
+    backup_start_date DATETIME2(3) NOT NULL,
+    backup_finish_date DATETIME2(3) NULL,
+    backup_set_id INT NULL,
+    time_zone SMALLINT NULL,
+    backup_size DECIMAL(20, 0) NULL,
+    is_password_protected BIT NULL,
+    recovery_model NVARCHAR(60) NULL,
+    has_bulk_logged_data BIT NULL,
+    is_snapshot BIT NULL,
+    is_readonly BIT NULL,
+    is_single_user BIT NULL,
+    has_backup_checksums BIT NULL,
+    is_damaged BIT NULL,
+    has_incomplete_metadata BIT NULL,
+    is_force_offline BIT NULL,
+    is_copy_only BIT NULL,
+    database_guid UNIQUEIDENTIFIER NULL,
+    family_guid UNIQUEIDENTIFIER NULL,
+    compressed_backup_size DECIMAL(20, 0) NULL,
+    key_algorithm NVARCHAR(32) NULL,
+    encryptor_type NVARCHAR(32) NULL,
+    CONSTRAINT PK_Backups PRIMARY KEY CLUSTERED (DatabaseID ASC, type ASC),
+    CONSTRAINT FK_Backups_Databases FOREIGN KEY (DatabaseID) REFERENCES dbo.Databases (DatabaseID)
 );
-
-
-

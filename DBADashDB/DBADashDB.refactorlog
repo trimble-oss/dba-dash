@@ -21,4 +21,11 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="host_sku" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="ad1ccccc-06b8-4203-a299-bb6fa51e0748" ChangeDateTime="09/15/2021 07:01:08">
+    <Property Name="ElementName" Value="[dbo].[Backups].[LastBackup]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[Backups]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="backup_start_date" />
+  </Operation>
 </Operations>

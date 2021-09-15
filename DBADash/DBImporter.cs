@@ -131,6 +131,42 @@ namespace DBADash
                     newCol.SetOrdinal(pos);
                 }
             }
+            if (data.Tables.Contains("Backups"))
+            {
+                var dtBackups = data.Tables["Backups"];
+                if (dtBackups.Columns.Contains("LastBackup"))
+                {
+                    dtBackups.Columns["LastBackup"].ColumnName = "backup_start_date";
+                    dtBackups.Columns.Add("backup_finish_date", typeof(DateTime));
+                    dtBackups.Columns.Add("backup_set_id", typeof(int));
+                    dtBackups.Columns.Add("time_zone", typeof(short));
+                    dtBackups.Columns.Add("backup_size", typeof(decimal));
+                    dtBackups.Columns.Add("is_password_protected", typeof(bool));
+                    dtBackups.Columns.Add("recovery_model", typeof(string));
+                    dtBackups.Columns.Add("has_bulk_logged_data", typeof(bool));
+                    dtBackups.Columns.Add("is_snapshot", typeof(bool));
+                    dtBackups.Columns.Add("is_readonly", typeof(bool));
+                    dtBackups.Columns.Add("is_single_uiser", typeof(bool));
+                    dtBackups.Columns.Add("has_backup_checksums", typeof(bool));
+                    dtBackups.Columns.Add("is_damaged", typeof(bool));
+                    dtBackups.Columns.Add("has_incomplete_metadata", typeof(bool));
+                    dtBackups.Columns.Add("is_force_offline", typeof(bool));
+                    dtBackups.Columns.Add("is_copy_only", typeof(bool));
+                    dtBackups.Columns.Add("database_guid", typeof(Guid));
+                    dtBackups.Columns.Add("family_guid", typeof(Guid));
+                    dtBackups.Columns.Add("compressed_backup_size", typeof(decimal));
+                    dtBackups.Columns.Add("key_algorithm", typeof(string));
+                    dtBackups.Columns.Add("encryptor_type", typeof(string));
+                }
+            }
+            if (data.Tables.Contains("LogRestores"))
+            {
+                var dtLR = data.Tables["LogRestores"];
+                if (!dtLR.Columns.Contains("backup_time_zone"))
+                {
+                    dtLR.Columns.Add("backup_time_zone", typeof(short));
+                }
+            }
         }
 
         public void Update()

@@ -19,7 +19,6 @@ namespace DBADashGUI.LogShipping
 
         public Int32 InstanceID;
         public Int32 DatabaseID;
-        public string ConnectionString;
 
         private void chkLRLatency_CheckedChanged(object sender, EventArgs e)
         {
@@ -40,7 +39,7 @@ namespace DBADashGUI.LogShipping
 
         private void LogShippingThresholdsConfig_Load(object sender, EventArgs e)
         {
-            var threshold =  LogShippingThreshold.GetLogShippingThreshold(InstanceID, DatabaseID, ConnectionString);
+            var threshold =  LogShippingThreshold.GetLogShippingThreshold(InstanceID, DatabaseID);
             Threshold = threshold;
         }
 
@@ -52,7 +51,8 @@ namespace DBADashGUI.LogShipping
                 {
                     InstanceID = InstanceID,
                     DatabaseID = DatabaseID,
-                    Inherited = chkLRInherit.Checked
+                    Inherited = chkLRInherit.Checked,
+                    NewDatabaseExcludePeriod = Convert.ToInt32(numExcludePeriod.Value)
                 };
                 if (chkLRLatency.Checked & !chkLRInherit.Checked)
                 {
@@ -70,6 +70,8 @@ namespace DBADashGUI.LogShipping
             {
                 chkLRInherit.Checked = value.Inherited;
                 chkLRTimeSinceLast.Checked = value.TimeSinceLastCriticalThreshold != null && value.TimeSinceLastWarningThreshold != null;
+                chkExcludePeriod.Checked = value.NewDatabaseExcludePeriod > 0;
+                numExcludePeriod.Value = value.NewDatabaseExcludePeriod;
                 if (chkLRTimeSinceLast.Checked)
                 {
                     numLRTimeSinceLastCritical.Value = (Int32)value.TimeSinceLastCriticalThreshold;
@@ -91,8 +93,21 @@ namespace DBADashGUI.LogShipping
 
         private void bttnUpdate_Click(object sender, EventArgs e)
         {
-            Threshold.Save(ConnectionString);
+            Threshold.Save();
             this.DialogResult = DialogResult.OK;
+        }
+
+        private void chkExcludePeriod_CheckedChanged(object sender, EventArgs e)
+        {
+            if (chkExcludePeriod.Checked && numExcludePeriod.Value == 0 || !chkExcludePeriod.Checked && numExcludePeriod.Value > 0)
+            {
+                numExcludePeriod.Value = chkExcludePeriod.Checked ? 1440 : 0;
+            }
+        }
+
+        private void numExcludePeriod_Validated(object sender, EventArgs e)
+        {
+            chkExcludePeriod.Checked = numExcludePeriod.Value > 0;
         }
     }
 }

@@ -1,12 +1,12 @@
-﻿
-CREATE PROC [dbo].[LogRestoreThresholds_Upd](
+﻿CREATE PROC dbo.LogRestoreThresholds_Upd(
 	@InstanceID INT,
 	@DatabaseID INT,
 	@LatencyWarning INT=NULL,
 	@LatencyCritical INT=NULL,
 	@TimeSinceLastWarning INT=NULL,
 	@TimeSinceLastCritical INT=NULL,
-	@Inherit BIT=0
+	@Inherit BIT=0,
+	@NewDatabaseExcludePeriodMin INT=1440
 )
 AS
 SET XACT_ABORT ON
@@ -23,15 +23,17 @@ INSERT INTO dbo.LogRestoreThresholds
     TimeSinceLastWarningThreshold,
     TimeSinceLastCriticalThreshold,
     LatencyWarningThreshold,
-	LatencyCriticalThreshold
+	LatencyCriticalThreshold,
+	NewDatabaseExcludePeriodMin
 )
 VALUES
-(   @InstanceID,
+(  @InstanceID,
    @DatabaseID,
    @TimeSinceLastWarning,
    @TimeSinceLastCritical,
    @LatencyWarning,
-   @LatencyCritical
+   @LatencyCritical,
+   @NewDatabaseExcludePeriodMin
     )
 END
 COMMIT

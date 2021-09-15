@@ -11,13 +11,13 @@ WITH hadr AS (
 ),
 B AS(
 	SELECT hadr.DatabaseID,
-			MAX(CASE WHEN B.type='D' THEN DATEADD(mi,I.UTCOffset,B.LastBackup) ELSE NULL END) AS LastFull,
-			MAX(CASE WHEN B.type='I' THEN DATEADD(mi,I.UTCOffset,B.LastBackup) ELSE NULL END) AS LastDiff,
-			MAX(CASE WHEN B.type='L' THEN DATEADD(mi,I.UTCOffset,B.LastBackup) ELSE NULL END) AS LastLog,
-			MAX(CASE WHEN B.type='F' THEN DATEADD(mi,I.UTCOffset,B.LastBackup) ELSE NULL END) AS LastFG,
-			MAX(CASE WHEN B.type='G' THEN DATEADD(mi,I.UTCOffset,B.LastBackup) ELSE NULL END) AS LastFGDiff,
-			MAX(CASE WHEN B.type='P' THEN DATEADD(mi,I.UTCOffset,B.LastBackup) ELSE NULL END) AS LastPartial,
-			MAX(CASE WHEN B.type='Q' THEN DATEADD(mi,I.UTCOffset,B.LastBackup) ELSE NULL END) AS LastPartialDiff,
+			MAX(CASE WHEN B.type='D' THEN DATEADD(mi,ISNULL(NULLIF(-B.time_zone,127)*15,I.UTCOffset),B.backup_start_date) ELSE NULL END) AS LastFull,
+			MAX(CASE WHEN B.type='I' THEN DATEADD(mi,ISNULL(NULLIF(-B.time_zone,127)*15,I.UTCOffset),B.backup_start_date) ELSE NULL END) AS LastDiff,
+			MAX(CASE WHEN B.type='L' THEN DATEADD(mi,ISNULL(NULLIF(-B.time_zone,127)*15,I.UTCOffset),B.backup_start_date) ELSE NULL END) AS LastLog,
+			MAX(CASE WHEN B.type='F' THEN DATEADD(mi,ISNULL(NULLIF(-B.time_zone,127)*15,I.UTCOffset),B.backup_start_date) ELSE NULL END) AS LastFG,
+			MAX(CASE WHEN B.type='G' THEN DATEADD(mi,ISNULL(NULLIF(-B.time_zone,127)*15,I.UTCOffset),B.backup_start_date) ELSE NULL END) AS LastFGDiff,
+			MAX(CASE WHEN B.type='P' THEN DATEADD(mi,ISNULL(NULLIF(-B.time_zone,127)*15,I.UTCOffset),B.backup_start_date) ELSE NULL END) AS LastPartial,
+			MAX(CASE WHEN B.type='Q' THEN DATEADD(mi,ISNULL(NULLIF(-B.time_zone,127)*15,I.UTCOffset),B.backup_start_date) ELSE NULL END) AS LastPartialDiff,
 			MAX(CASE WHEN hadr.DatabaseID<>hadr.BackupDatabaseID THEN 1 ELSE 0 END) AS AGPartnerBackupsConsidered
 	FROM dbo.Backups B
 	JOIN hadr ON hadr.BackupDatabaseID = B.DatabaseID

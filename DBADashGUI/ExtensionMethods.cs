@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -27,5 +28,21 @@ namespace DBADashGUI
         {
             return NumericTypes.Contains(Nullable.GetUnderlyingType(myType) ?? myType);
         }
+
+        public static DataTable AsDataTable(this List<int> list)
+        {
+            var dt = new DataTable();
+            dt.Columns.Add("ID", typeof(int));
+            foreach(int i in list)
+            {
+               var r =  dt.NewRow();
+                r["ID"] = i;
+                dt.Rows.Add(r);
+            }
+
+            return dt;
+        }
+
+
     }
 }
