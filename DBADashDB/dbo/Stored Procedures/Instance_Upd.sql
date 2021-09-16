@@ -100,7 +100,6 @@ BEGIN
 							@CollectAgentID,
 							@ImportAgentID
 					)
-		AND @HostPlatform IS NOT NULL -- for older agent version
 
 		EXEC dbo.CollectionDates_Upd @InstanceID = @InstanceID,  
 										 @Reference = @Ref,

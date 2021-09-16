@@ -90,7 +90,6 @@ namespace DBADashGUI
             // 
             this.dgvJobs.AllowUserToAddRows = false;
             this.dgvJobs.AllowUserToDeleteRows = false;
-            this.dgvJobs.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.DisplayedCells;
             this.dgvJobs.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.dgvJobs.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
             this.colDiff,

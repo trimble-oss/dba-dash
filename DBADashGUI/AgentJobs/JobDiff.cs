@@ -76,6 +76,7 @@ namespace DBADashGUI
             var diff = GetJobDiff();
             dgvJobs.AutoGenerateColumns = false;
             dgvJobs.DataSource = diff;
+            dgvJobs.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
         }
 
         private void cboB_SelectedIndexChanged(object sender, EventArgs e)

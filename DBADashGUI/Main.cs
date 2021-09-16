@@ -57,8 +57,14 @@ namespace DBADashGUI
                 var cfg= BasicConfig.Deserialize(jsonConfig);
                 if(cfg.DestinationConnection.Type == DBADashConnection.ConnectionType.SQL)
                 {
-                    connectionString = cfg.DestinationConnection.ConnectionString;                }
-           
+                    connectionString = cfg.DestinationConnection.ConnectionString;                
+                }
+                else
+                {
+                    MessageBox.Show("This GUI client needs a connection to the repository database.  The destination connection type is " + cfg.DestinationConnection.Type.ToString() + ".  To configure the service, please use DBADashServiceConfigTool.exe or edit the ServiceConfig.json file.","DBADashGUI", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    Application.Exit();
+                    return;
+                }        
             }
             else 
             {
