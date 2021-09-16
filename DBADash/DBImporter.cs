@@ -7,6 +7,7 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Threading.Tasks;
 using Serilog;
+
 namespace DBADash
 {
     public class DBImporter
@@ -18,9 +19,11 @@ namespace DBADash
         private int? instanceID;
         private DateTime snapshotDate;
         private static readonly int commandTimeout = 60;
+        private DBADashAgent importAgent;
 
-        public DBImporter(DataSet data, string connectionString)
+        public DBImporter(DataSet data, string connectionString,DBADashAgent importAgent)
         {
+            this.importAgent = importAgent;
             this.data = data;
             upgradeDS();
             this.connectionString = connectionString;
@@ -412,11 +415,26 @@ namespace DBADash
                     cmd.Parameters.AddWithValue("Instance", (string)rInstance["Instance"]);
                     cmd.Parameters.AddWithValue("SnapshotDate", (DateTime)rInstance["SnapshotDateUTC"]);
 
-                    cmd.Parameters.AddWithValue("AgentHostName", (string)rInstance["AgentHostName"]);
-                    if (rInstance.Table.Columns.Contains("AgentVersion"))
+                    var importAgentID = importAgent.GetDBADashAgentID(connectionString);
+                    int collectAgentID;
+                    var collectAgent = new DBADashAgent()
                     {
-                        cmd.Parameters.AddWithValue("AgentVersion", (string)rInstance["AgentVersion"]);
+                        AgentHostName = (string)rInstance["AgentHostName"],
+                        AgentVersion = (string)rInstance["AgentVersion"],
+                        AgentPath = rInstance.Table.Columns.Contains("AgentPath") ?  (string)rInstance["AgentPath"] : "",
+                        AgentServiceName = rInstance.Table.Columns.Contains("AgentServiceName") ? (string)rInstance["AgentServiceName"] : "{DBADashService}",
+                    };
+                    if (collectAgent.Equals(importAgent))
+                    {
+                        collectAgentID = importAgentID;
                     }
+                    else
+                    {
+                        collectAgentID = collectAgent.GetDBADashAgentID(connectionString);
+                    }
+
+                    cmd.Parameters.AddWithValue("CollectAgentID", collectAgentID);
+                    cmd.Parameters.AddWithValue("ImportAgentID", importAgentID);
                     if (rInstance.Table.Columns.Contains("host_platform"))
                     {
                         cmd.Parameters.AddWithValue("HostPlatform", rInstance["host_platform"]);

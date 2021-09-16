@@ -26,7 +26,7 @@ END
 SELECT I.Instance,
 	i.ConnectionID,
 	SSD.Reference,
-	I.AgentHostName,
+	A.AgentHostName,
 	SSD.SnapshotDate,
 	SSD.SnapshotAge,
 	SSD.Status,
@@ -34,6 +34,7 @@ SELECT I.Instance,
 	SSD.CriticalThreshold,
 	SSD.ConfiguredLevel
 FROM dbo.Instances I 
+LEFT JOIN dbo.DBADashAgent A ON I.CollectAgentID = A.DBADashAgentID
 JOIN dbo.CollectionDatesStatus SSD ON SSD.InstanceID = I.InstanceID
 WHERE I.IsActive=1
 AND EXISTS(SELECT 1 FROM @Instances t WHERE I.InstanceID = t.InstanceID)

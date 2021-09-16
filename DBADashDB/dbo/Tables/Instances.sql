@@ -51,7 +51,6 @@
     SystemProductName NVARCHAR(512) NULL,
     IsAgentRunning BIT NULL,
     InstantFileInitializationEnabled BIT NULL,
-    AgentHostName NVARCHAR(16) NULL,
     OfflineSchedulers INT NULL,
     affinity_type INT NULL,
     cores_per_socket INT NULL,
@@ -75,13 +74,16 @@
     LastMemoryDump DATETIME NULL,
     MemoryDumpCount INT NULL,
     WindowsCaption NVARCHAR(256) NULL,
-    AgentVersion VARCHAR(30) NULL,
     host_distribution NVARCHAR(256) NULL,
     os_language_version INT NULL,
     host_platform NVARCHAR(256) NULL,
     DBMailStatus NVARCHAR(500) NULL,
     UptimeAckDate DATETIME NULL,
-    CONSTRAINT PK_Instances PRIMARY KEY CLUSTERED (InstanceID ASC)
+    CollectAgentID INT NULL,
+    ImportAgentID INT NULL,
+    CONSTRAINT PK_Instances PRIMARY KEY CLUSTERED (InstanceID ASC),
+    CONSTRAINT FK_Instances_CollectAgent FOREIGN KEY(CollectAgentID) REFERENCES dbo.DBADashAgent(DBADashAgentID),
+    CONSTRAINT FK_Instances_ImportAgent FOREIGN KEY(ImportAgentID) REFERENCES dbo.DBADashAgent(DBADashAgentID)
 );
 
 GO

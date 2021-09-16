@@ -287,6 +287,7 @@
     <Compile Include="AWSTools.cs" />
     <Compile Include="CollectionConfig.cs" />
     <Compile Include="CollectionConfigSchedule.cs" />
+    <Compile Include="DBADashAgent.cs" />
     <Compile Include="DBConnection.cs">
       <SubType>Form</SubType>
     </Compile>

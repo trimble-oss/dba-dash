@@ -105,7 +105,8 @@ namespace DBADashService
 
         public static void WriteDB(DataSet ds, string destination)
         {
-            var importer = new DBImporter(ds, destination);
+            var importAgent = DBADashAgent.GetCurrent(SchedulerServiceConfig.Config.ServiceName);
+            var importer = new DBImporter(ds, destination, importAgent);
             // Wait until we can connect to the repository DB.  If it's down, wait for it to become available.
             Policy.Handle<Exception>()
               .WaitAndRetryForever(retryAttempt =>

@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
@@ -29,7 +29,7 @@
     <QueryStoreStaleQueryThreshold>15</QueryStoreStaleQueryThreshold>
     <QueryStoreMaxStorageSize>512</QueryStoreMaxStorageSize>
     <QueryStoreMaxPlansPerQuery>50</QueryStoreMaxPlansPerQuery>
-    <DacVersion>2.0.3.44</DacVersion>
+    <DacVersion>2.0.3.45</DacVersion>
     <ReadCommittedSnapshot>True</ReadCommittedSnapshot>
     <AllowSnapshotIsolation>True</AllowSnapshotIsolation>
     <CompatibilityMode>130</CompatibilityMode>
@@ -593,7 +593,9 @@
     <Build Include="dbo\Stored Procedures\InstanceUptimeThresholds_Upd.sql" />
     <Build Include="dbo\Stored Procedures\InstanceUptimeAck.sql" />
     <Build Include="dbo\Stored Procedures\TagReport_Get.sql" />
+    <Build Include="dbo\Tables\DBADashAgent.sql" />
     <Build Include="dbo\Stored Procedures\LogShippingSummary_Get.sql" />
+    <Build Include="dbo\Stored Procedures\DBADashAgent_Upd.sql" />
   </ItemGroup>
   <ItemGroup>
     <PostDeploy Include="Script.PostDeployment1.sql" />

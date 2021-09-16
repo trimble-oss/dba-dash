@@ -42,7 +42,6 @@ namespace DBADashGUI
         private Int64 currentObjectID;
         private Int32 currentPage = 1;
         private Int32 currentPageSize = 100;
-        bool isTagPopulation = false;
         private readonly DiffControl diffSchemaSnapshot = new DiffControl();
         private bool suppressLoadTab=false;
 

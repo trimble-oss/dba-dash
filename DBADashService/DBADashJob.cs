@@ -165,7 +165,7 @@ namespace DBADashService
 
                     try
                     {
-                        var collector = new DBCollector(cfg.GetSource(), cfg.NoWMI)
+                        var collector = new DBCollector(cfg.GetSource(), cfg.NoWMI,config.ServiceName)
                         {
                             Job_instance_id = dataMap.GetInt("Job_instance_id")
                         };              

@@ -21,9 +21,17 @@ WITH T AS (
 			CAST(I.SystemManufacturer AS NVARCHAR(128)) AS SystemManufacturer,
 			CAST(I.SystemProductName AS NVARCHAR(128)) AS SystemProductName,
 			CASE WHEN @IsAzure=1 THEN '    -' ELSE CAST(RIGHT(REPLICATE(' ',5) +  CAST(I.cpu_count as NVARCHAR(50)),5) AS NVARCHAR(128)) END AS CPUCount,
-			CAST(I.AgentHostName AS NVARCHAR(128)) DBADashAgent,
-			CAST(I.AgentVersion AS NVARCHAR(128)) AS DBADashAgentVersion
+			CAST(Cagt.AgentHostName AS NVARCHAR(128)) CollectAgent,
+			CAST(Cagt.AgentServiceName AS NVARCHAR(128)) CollectAgentServiceName,
+			CAST(Cagt.AgentVersion AS NVARCHAR(128)) AS CollectAgentVersion,
+			CAST(Cagt.AgentPath AS NVARCHAR(128)) AS CollectAgentPath,
+			CAST(Iagt.AgentHostName AS NVARCHAR(128)) ImportAgent,
+			CAST(Iagt.AgentServiceName AS NVARCHAR(128)) ImportAgentServiceName,
+			CAST(Iagt.AgentVersion AS NVARCHAR(128)) AS ImportAgentVersion,
+			CAST(Iagt.AgentPath AS NVARCHAR(128)) AS ImportAgentPath
 	FROM dbo.Instances I
+	JOIN dbo.DBADashAgent Cagt ON I.CollectAgentID = Cagt.DBADashAgentID
+	JOIN dbo.DBADashAgent Iagt ON I.ImportAgentID = Iagt.DBADashAgentID
 	CROSS APPLY dbo.SQLVersionName(I.EditionID,I.ProductVersion) v
 	WHERE I.InstanceID=@InstanceID
 )
@@ -35,7 +43,23 @@ INSERT INTO @Tags
 SELECT 	'{' + TagName + '}' as TagName,
 		ISNULL(TagValue,'')
 FROM T
-UNPIVOT(TagValue FOR TagName IN(PatchLevel, [Version], Edition, Collation, SystemManufacturer, SystemProductName, CPUCount, DBADashAgent,DBADashAgentVersion)) upvt
+UNPIVOT(TagValue FOR TagName IN(PatchLevel, 
+								[Version],
+								Edition, 
+								Collation, 
+								SystemManufacturer, 
+								SystemProductName, 
+								CPUCount, 
+								ImportAgent,
+								ImportAgentVersion,
+								ImportAgentServiceName,
+								ImportAgentPath,
+								CollectAgent,
+								CollectAgentVersion,
+								CollectAgentServiceName,
+								CollectAgentPath
+								)
+		) upvt
 
 INSERT INTO dbo.Tags
 (

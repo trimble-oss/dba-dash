@@ -111,6 +111,7 @@ namespace DBADash
         private bool IsHadrEnabled=false;
         private Policy retryPolicy;
         private DatabaseEngineEdition engineEdition;
+        private DBADashAgent dashAgent;
         CacheItemPolicy policy = new CacheItemPolicy
         {
             SlidingExpiration = TimeSpan.FromMinutes(60)
@@ -179,10 +180,10 @@ namespace DBADash
             }
         }
 
-        public DBCollector(string connectionString, bool noWMI)
+        public DBCollector(string connectionString, bool noWMI,string serviceName)
         {
             this.noWMI = noWMI;
-            startup(connectionString, null);
+            startup(connectionString, null,serviceName);
         }
 
         private void logError(Exception ex,string errorSource, string errorContext = "Collect")
@@ -207,7 +208,7 @@ namespace DBADash
                 if (dtInternalPerfCounters == null)
                 {
                     dtInternalPerfCounters = new DataTable("InternalPerformanceCounters");
-                    dtInternalPerfCounters.Columns.Add("SnapshotDate");
+                    dtInternalPerfCounters.Columns.Add("SnapshotDate",typeof(DateTime));
                     dtInternalPerfCounters.Columns.Add("object_name");
                     dtInternalPerfCounters.Columns.Add("counter_name");
                     dtInternalPerfCounters.Columns.Add("instance_name");
@@ -226,8 +227,9 @@ namespace DBADash
             }
         }
 
-        private void startup(string connectionString, string connectionID)
-        {    
+        private void startup(string connectionString, string connectionID,string serviceName)
+        {
+            dashAgent = DBADashAgent.GetCurrent(serviceName);
             retryPolicy = Policy.Handle<Exception>()
                 .WaitAndRetry(new[]
                 {
@@ -254,9 +256,9 @@ namespace DBADash
             
         }
 
-        public DBCollector(string connectionString, string connectionID)
+        public DBCollector(string connectionString, string connectionID,string serviceName)
         {           
-            startup(connectionString, connectionID);
+            startup(connectionString, connectionID,serviceName);
         }
 
         public void RemoveEventSessions()
@@ -313,8 +315,12 @@ namespace DBADash
             dt.Columns.Add("AgentVersion", typeof(string));
             dt.Columns.Add("ConnectionID", typeof(string));
             dt.Columns.Add("AgentHostName", typeof(string));
-            dt.Rows[0]["AgentVersion"] = Assembly.GetEntryAssembly().GetName().Version;
-            dt.Rows[0]["AgentHostName"] = Environment.MachineName;
+            dt.Columns.Add("AgentServiceName", typeof(string));
+            dt.Columns.Add("AgentPath", typeof(string));
+            dt.Rows[0]["AgentVersion"] = dashAgent.AgentVersion;
+            dt.Rows[0]["AgentHostName"] = dashAgent.AgentHostName;
+            dt.Rows[0]["AgentServiceName"] = dashAgent.AgentServiceName;
+            dt.Rows[0]["AgentPath"] = dashAgent.AgentPath;
 
             editionId = (Int64)dt.Rows[0]["EditionId"];
             computerName = (string)dt.Rows[0]["ComputerNamePhysicalNetBIOS"];

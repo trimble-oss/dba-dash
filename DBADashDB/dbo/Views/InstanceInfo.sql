@@ -81,7 +81,7 @@ SELECT I.InstanceID,
     I.IsXTPSupported,
     I.IsAgentRunning,
     I.InstantFileInitializationEnabled,
-    I.AgentHostName,
+    A.AgentHostName,
 	I.WindowsCaption,
 	I.host_platform,
 	I.host_distribution,
@@ -97,6 +97,7 @@ SELECT I.InstanceID,
 	CASE WHEN tDB.value_in_use=1 AND tDB.value=1 THEN CAST(1 AS BIT) WHEN tDB.configuration_id=1589 THEN CAST(0 AS BIT) ELSE NULL END AS IsTempDBMetadataMemoryOptimized,
 	CASE WHEN I.EditionID=1674378470 THEN 150 ELSE TRY_CAST(I.ProductMajorVersion AS INT)*10 END AS MaxSupportedCompatibilityLevel
 FROM dbo.Instances I
+LEFT JOIN dbo.DBADashAgent A ON I.CollectAgentID = A.DBADashAgentID
 CROSS APPLY dbo.SQLVersionName(I.EditionID,I.ProductVersion) v
 JOIN dbo.SysConfig maxmem ON maxmem.InstanceID = I.InstanceID AND maxmem.configuration_id=1544 
 LEFT JOIN dbo.CollectionDates os ON os.InstanceID = I.InstanceID AND os.Reference='OSInfo'
