@@ -4,7 +4,9 @@
 )
 AS
 SELECT  WarningThresholdHrs,
-       CriticalThresholdHrs 
+       CriticalThresholdHrs,
+	   MinimumAge,
+	   ExcludedDatabases
 FROM  dbo.LastGoodCheckDBThresholds
 WHERE InstanceID = @InstanceID
 AND DatabaseID = @DatabaseID

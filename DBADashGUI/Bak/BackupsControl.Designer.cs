@@ -32,20 +32,33 @@
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle3 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle4 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle5 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle6 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle7 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle8 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle9 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle10 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle11 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle12 = new System.Windows.Forms.DataGridViewCellStyle();
             this.dgvBackups = new System.Windows.Forms.DataGridView();
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
             this.tsRefresh = new System.Windows.Forms.ToolStripButton();
             this.tsCopy = new System.Windows.Forms.ToolStripButton();
             this.tsExcel = new System.Windows.Forms.ToolStripButton();
-            this.toolStripFilter = new System.Windows.Forms.ToolStripDropDownButton();
+            this.tsConfigure = new System.Windows.Forms.ToolStripDropDownButton();
+            this.configureInstanceThresholdsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.configureRootThresholdsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.tsBack = new System.Windows.Forms.ToolStripButton();
+            this.splitContainer1 = new System.Windows.Forms.SplitContainer();
+            this.dgvSummary = new System.Windows.Forms.DataGridView();
+            this.toolStrip2 = new System.Windows.Forms.ToolStrip();
+            this.tsCopyDetail = new System.Windows.Forms.ToolStripButton();
+            this.tsExcelDetail = new System.Windows.Forms.ToolStripButton();
+            this.tsFilter = new System.Windows.Forms.ToolStripDropDownButton();
             this.criticalToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.warningToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.undefinedToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.OKToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.tsConfigure = new System.Windows.Forms.ToolStripDropDownButton();
-            this.configureInstanceThresholdsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.configureRootThresholdsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.Configure = new System.Windows.Forms.DataGridViewLinkColumn();
             this.dataGridViewTextBoxColumn1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dataGridViewTextBoxColumn2 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dataGridViewTextBoxColumn3 = new System.Windows.Forms.DataGridViewTextBoxColumn();
@@ -65,27 +78,23 @@
             this.dataGridViewTextBoxColumn17 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dataGridViewTextBoxColumn18 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dataGridViewTextBoxColumn19 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.Instance = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.Database = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.CreatedDate = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.RecoveryModel = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.LastFull = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.LastDiff = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.LastLog = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.LastFG = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.LastFGDiff = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.LastPartial = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.LastPartialDiff = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.SnapshotAge = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.FullCriticalThreshold = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.FullWarningThreshold = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.DiffCriticalThreshold = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.DiffWarningThreshold = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.LogCriticalThreshold = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.LogWarningThreshold = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.ThresholdsConfiguredLevel = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.dataGridViewTextBoxColumn20 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.dataGridViewTextBoxColumn21 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.dataGridViewTextBoxColumn22 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.dataGridViewTextBoxColumn23 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.dataGridViewTextBoxColumn24 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.dataGridViewTextBoxColumn25 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.dataGridViewTextBoxColumn26 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.dataGridViewTextBoxColumn27 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.dataGridViewTextBoxColumn28 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             ((System.ComponentModel.ISupportInitialize)(this.dgvBackups)).BeginInit();
             this.toolStrip1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
+            this.splitContainer1.Panel1.SuspendLayout();
+            this.splitContainer1.Panel2.SuspendLayout();
+            this.splitContainer1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.dgvSummary)).BeginInit();
+            this.toolStrip2.SuspendLayout();
             this.SuspendLayout();
             // 
             // dgvBackups
@@ -102,27 +111,6 @@
             dataGridViewCellStyle1.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
             this.dgvBackups.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle1;
             this.dgvBackups.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.dgvBackups.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
-            this.Instance,
-            this.Database,
-            this.CreatedDate,
-            this.RecoveryModel,
-            this.LastFull,
-            this.LastDiff,
-            this.LastLog,
-            this.LastFG,
-            this.LastFGDiff,
-            this.LastPartial,
-            this.LastPartialDiff,
-            this.SnapshotAge,
-            this.FullCriticalThreshold,
-            this.FullWarningThreshold,
-            this.DiffCriticalThreshold,
-            this.DiffWarningThreshold,
-            this.LogCriticalThreshold,
-            this.LogWarningThreshold,
-            this.ThresholdsConfiguredLevel,
-            this.Configure});
             dataGridViewCellStyle2.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
             dataGridViewCellStyle2.BackColor = System.Drawing.SystemColors.Window;
             dataGridViewCellStyle2.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
@@ -132,7 +120,7 @@
             dataGridViewCellStyle2.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
             this.dgvBackups.DefaultCellStyle = dataGridViewCellStyle2;
             this.dgvBackups.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.dgvBackups.Location = new System.Drawing.Point(0, 49);
+            this.dgvBackups.Location = new System.Drawing.Point(0, 27);
             this.dgvBackups.Name = "dgvBackups";
             this.dgvBackups.ReadOnly = true;
             dataGridViewCellStyle3.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
@@ -145,7 +133,7 @@
             this.dgvBackups.RowHeadersDefaultCellStyle = dataGridViewCellStyle3;
             this.dgvBackups.RowHeadersVisible = false;
             this.dgvBackups.RowHeadersWidth = 51;
-            this.dgvBackups.Size = new System.Drawing.Size(2434, 764);
+            this.dgvBackups.Size = new System.Drawing.Size(1947, 377);
             this.dgvBackups.TabIndex = 0;
             this.dgvBackups.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgvBackups_CellContentClick);
             this.dgvBackups.RowsAdded += new System.Windows.Forms.DataGridViewRowsAddedEventHandler(this.dgvBackups_RowsAdded);
@@ -157,11 +145,11 @@
             this.tsRefresh,
             this.tsCopy,
             this.tsExcel,
-            this.toolStripFilter,
-            this.tsConfigure});
+            this.tsConfigure,
+            this.tsBack});
             this.toolStrip1.Location = new System.Drawing.Point(0, 0);
             this.toolStrip1.Name = "toolStrip1";
-            this.toolStrip1.Size = new System.Drawing.Size(2434, 39);
+            this.toolStrip1.Size = new System.Drawing.Size(1947, 27);
             this.toolStrip1.TabIndex = 1;
             this.toolStrip1.Text = "toolStrip1";
             // 
@@ -171,7 +159,7 @@
             this.tsRefresh.Image = global::DBADashGUI.Properties.Resources._112_RefreshArrow_Green_16x16_72;
             this.tsRefresh.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsRefresh.Name = "tsRefresh";
-            this.tsRefresh.Size = new System.Drawing.Size(29, 36);
+            this.tsRefresh.Size = new System.Drawing.Size(29, 24);
             this.tsRefresh.Text = "Refresh";
             this.tsRefresh.Click += new System.EventHandler(this.tsRefresh_Click);
             // 
@@ -181,7 +169,7 @@
             this.tsCopy.Image = global::DBADashGUI.Properties.Resources.ASX_Copy_blue_16x;
             this.tsCopy.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsCopy.Name = "tsCopy";
-            this.tsCopy.Size = new System.Drawing.Size(29, 36);
+            this.tsCopy.Size = new System.Drawing.Size(29, 24);
             this.tsCopy.Text = "Copy";
             this.tsCopy.Click += new System.EventHandler(this.tsCopy_Click);
             // 
@@ -191,55 +179,9 @@
             this.tsExcel.Image = global::DBADashGUI.Properties.Resources.excel16x16;
             this.tsExcel.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsExcel.Name = "tsExcel";
-            this.tsExcel.Size = new System.Drawing.Size(29, 36);
+            this.tsExcel.Size = new System.Drawing.Size(29, 24);
             this.tsExcel.Text = "Export Excel";
             this.tsExcel.Click += new System.EventHandler(this.tsExcel_Click);
-            // 
-            // toolStripFilter
-            // 
-            this.toolStripFilter.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.toolStripFilter.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.criticalToolStripMenuItem,
-            this.warningToolStripMenuItem,
-            this.undefinedToolStripMenuItem,
-            this.OKToolStripMenuItem});
-            this.toolStripFilter.Image = global::DBADashGUI.Properties.Resources.FilterDropdown_16x;
-            this.toolStripFilter.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.toolStripFilter.Name = "toolStripFilter";
-            this.toolStripFilter.Size = new System.Drawing.Size(34, 36);
-            this.toolStripFilter.Text = "Filter";
-            // 
-            // criticalToolStripMenuItem
-            // 
-            this.criticalToolStripMenuItem.CheckOnClick = true;
-            this.criticalToolStripMenuItem.Name = "criticalToolStripMenuItem";
-            this.criticalToolStripMenuItem.Size = new System.Drawing.Size(161, 26);
-            this.criticalToolStripMenuItem.Text = "Critical";
-            this.criticalToolStripMenuItem.Click += new System.EventHandler(this.criticalToolStripMenuItem_Click);
-            // 
-            // warningToolStripMenuItem
-            // 
-            this.warningToolStripMenuItem.CheckOnClick = true;
-            this.warningToolStripMenuItem.Name = "warningToolStripMenuItem";
-            this.warningToolStripMenuItem.Size = new System.Drawing.Size(161, 26);
-            this.warningToolStripMenuItem.Text = "Warning";
-            this.warningToolStripMenuItem.Click += new System.EventHandler(this.warningToolStripMenuItem_Click);
-            // 
-            // undefinedToolStripMenuItem
-            // 
-            this.undefinedToolStripMenuItem.CheckOnClick = true;
-            this.undefinedToolStripMenuItem.Name = "undefinedToolStripMenuItem";
-            this.undefinedToolStripMenuItem.Size = new System.Drawing.Size(161, 26);
-            this.undefinedToolStripMenuItem.Text = "Undefined";
-            this.undefinedToolStripMenuItem.Click += new System.EventHandler(this.undefinedToolStripMenuItem_Click);
-            // 
-            // OKToolStripMenuItem
-            // 
-            this.OKToolStripMenuItem.CheckOnClick = true;
-            this.OKToolStripMenuItem.Name = "OKToolStripMenuItem";
-            this.OKToolStripMenuItem.Size = new System.Drawing.Size(161, 26);
-            this.OKToolStripMenuItem.Text = "OK";
-            this.OKToolStripMenuItem.Click += new System.EventHandler(this.OKToolStripMenuItem_Click);
             // 
             // tsConfigure
             // 
@@ -250,7 +192,7 @@
             this.tsConfigure.Image = global::DBADashGUI.Properties.Resources.SettingsOutline_16x;
             this.tsConfigure.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsConfigure.Name = "tsConfigure";
-            this.tsConfigure.Size = new System.Drawing.Size(34, 36);
+            this.tsConfigure.Size = new System.Drawing.Size(34, 24);
             this.tsConfigure.Text = "Configure";
             // 
             // configureInstanceThresholdsToolStripMenuItem
@@ -267,15 +209,130 @@
             this.configureRootThresholdsToolStripMenuItem.Text = "Configure Root Thresholds";
             this.configureRootThresholdsToolStripMenuItem.Click += new System.EventHandler(this.configureRootThresholdsToolStripMenuItem_Click);
             // 
-            // Configure
+            // tsBack
             // 
-            this.Configure.HeaderText = "Configure";
-            this.Configure.MinimumWidth = 6;
-            this.Configure.Name = "Configure";
-            this.Configure.ReadOnly = true;
-            this.Configure.Text = "Configure";
-            this.Configure.UseColumnTextForLinkValue = true;
-            this.Configure.Width = 75;
+            this.tsBack.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.tsBack.Image = global::DBADashGUI.Properties.Resources.Previous_grey_16x;
+            this.tsBack.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tsBack.Name = "tsBack";
+            this.tsBack.Size = new System.Drawing.Size(29, 24);
+            this.tsBack.Text = "Back";
+            this.tsBack.Click += new System.EventHandler(this.tsBack_Click);
+            // 
+            // splitContainer1
+            // 
+            this.splitContainer1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.splitContainer1.Location = new System.Drawing.Point(0, 27);
+            this.splitContainer1.Name = "splitContainer1";
+            this.splitContainer1.Orientation = System.Windows.Forms.Orientation.Horizontal;
+            // 
+            // splitContainer1.Panel1
+            // 
+            this.splitContainer1.Panel1.Controls.Add(this.dgvSummary);
+            // 
+            // splitContainer1.Panel2
+            // 
+            this.splitContainer1.Panel2.Controls.Add(this.dgvBackups);
+            this.splitContainer1.Panel2.Controls.Add(this.toolStrip2);
+            this.splitContainer1.Size = new System.Drawing.Size(1947, 623);
+            this.splitContainer1.SplitterDistance = 215;
+            this.splitContainer1.TabIndex = 2;
+            // 
+            // dgvSummary
+            // 
+            this.dgvSummary.AllowUserToAddRows = false;
+            this.dgvSummary.AllowUserToDeleteRows = false;
+            this.dgvSummary.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.dgvSummary.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.dgvSummary.Location = new System.Drawing.Point(0, 0);
+            this.dgvSummary.Name = "dgvSummary";
+            this.dgvSummary.ReadOnly = true;
+            this.dgvSummary.RowHeadersVisible = false;
+            this.dgvSummary.RowHeadersWidth = 51;
+            this.dgvSummary.RowTemplate.Height = 24;
+            this.dgvSummary.Size = new System.Drawing.Size(1947, 215);
+            this.dgvSummary.TabIndex = 0;
+            this.dgvSummary.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgvSummary_CellContentClick);
+            this.dgvSummary.RowsAdded += new System.Windows.Forms.DataGridViewRowsAddedEventHandler(this.dgvSummary_RowsAdded);
+            // 
+            // toolStrip2
+            // 
+            this.toolStrip2.ImageScalingSize = new System.Drawing.Size(20, 20);
+            this.toolStrip2.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.tsCopyDetail,
+            this.tsExcelDetail,
+            this.tsFilter});
+            this.toolStrip2.Location = new System.Drawing.Point(0, 0);
+            this.toolStrip2.Name = "toolStrip2";
+            this.toolStrip2.Size = new System.Drawing.Size(1947, 27);
+            this.toolStrip2.TabIndex = 1;
+            this.toolStrip2.Text = "toolStrip2";
+            // 
+            // tsCopyDetail
+            // 
+            this.tsCopyDetail.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.tsCopyDetail.Image = global::DBADashGUI.Properties.Resources.ASX_Copy_blue_16x;
+            this.tsCopyDetail.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tsCopyDetail.Name = "tsCopyDetail";
+            this.tsCopyDetail.Size = new System.Drawing.Size(29, 24);
+            this.tsCopyDetail.Text = "Copy";
+            this.tsCopyDetail.Click += new System.EventHandler(this.tsCopyDetail_Click);
+            // 
+            // tsExcelDetail
+            // 
+            this.tsExcelDetail.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.tsExcelDetail.Image = global::DBADashGUI.Properties.Resources.excel16x16;
+            this.tsExcelDetail.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tsExcelDetail.Name = "tsExcelDetail";
+            this.tsExcelDetail.Size = new System.Drawing.Size(29, 24);
+            this.tsExcelDetail.Text = "Excel";
+            this.tsExcelDetail.Click += new System.EventHandler(this.tsExcelDetail_Click);
+            // 
+            // tsFilter
+            // 
+            this.tsFilter.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.tsFilter.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.criticalToolStripMenuItem,
+            this.warningToolStripMenuItem,
+            this.undefinedToolStripMenuItem,
+            this.OKToolStripMenuItem});
+            this.tsFilter.Image = global::DBADashGUI.Properties.Resources.FilterDropdown_16x;
+            this.tsFilter.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tsFilter.Name = "tsFilter";
+            this.tsFilter.Size = new System.Drawing.Size(34, 24);
+            this.tsFilter.Text = "Filter";
+            // 
+            // criticalToolStripMenuItem
+            // 
+            this.criticalToolStripMenuItem.CheckOnClick = true;
+            this.criticalToolStripMenuItem.Name = "criticalToolStripMenuItem";
+            this.criticalToolStripMenuItem.Size = new System.Drawing.Size(161, 26);
+            this.criticalToolStripMenuItem.Text = "Critical";
+            this.criticalToolStripMenuItem.Click += new System.EventHandler(this.tsFilter_Click);
+            // 
+            // warningToolStripMenuItem
+            // 
+            this.warningToolStripMenuItem.CheckOnClick = true;
+            this.warningToolStripMenuItem.Name = "warningToolStripMenuItem";
+            this.warningToolStripMenuItem.Size = new System.Drawing.Size(161, 26);
+            this.warningToolStripMenuItem.Text = "Warning";
+            this.warningToolStripMenuItem.Click += new System.EventHandler(this.tsFilter_Click);
+            // 
+            // undefinedToolStripMenuItem
+            // 
+            this.undefinedToolStripMenuItem.CheckOnClick = true;
+            this.undefinedToolStripMenuItem.Name = "undefinedToolStripMenuItem";
+            this.undefinedToolStripMenuItem.Size = new System.Drawing.Size(161, 26);
+            this.undefinedToolStripMenuItem.Text = "Undefined";
+            this.undefinedToolStripMenuItem.Click += new System.EventHandler(this.tsFilter_Click);
+            // 
+            // OKToolStripMenuItem
+            // 
+            this.OKToolStripMenuItem.CheckOnClick = true;
+            this.OKToolStripMenuItem.Name = "OKToolStripMenuItem";
+            this.OKToolStripMenuItem.Size = new System.Drawing.Size(161, 26);
+            this.OKToolStripMenuItem.Text = "OK";
+            this.OKToolStripMenuItem.Click += new System.EventHandler(this.tsFilter_Click);
             // 
             // dataGridViewTextBoxColumn1
             // 
@@ -285,7 +342,7 @@
             this.dataGridViewTextBoxColumn1.MinimumWidth = 6;
             this.dataGridViewTextBoxColumn1.Name = "dataGridViewTextBoxColumn1";
             this.dataGridViewTextBoxColumn1.ReadOnly = true;
-            this.dataGridViewTextBoxColumn1.Width = 90;
+            this.dataGridViewTextBoxColumn1.Width = 125;
             // 
             // dataGridViewTextBoxColumn2
             // 
@@ -295,7 +352,7 @@
             this.dataGridViewTextBoxColumn2.MinimumWidth = 6;
             this.dataGridViewTextBoxColumn2.Name = "dataGridViewTextBoxColumn2";
             this.dataGridViewTextBoxColumn2.ReadOnly = true;
-            this.dataGridViewTextBoxColumn2.Width = 98;
+            this.dataGridViewTextBoxColumn2.Width = 125;
             // 
             // dataGridViewTextBoxColumn3
             // 
@@ -325,7 +382,7 @@
             this.dataGridViewTextBoxColumn5.MinimumWidth = 6;
             this.dataGridViewTextBoxColumn5.Name = "dataGridViewTextBoxColumn5";
             this.dataGridViewTextBoxColumn5.ReadOnly = true;
-            this.dataGridViewTextBoxColumn5.Width = 64;
+            this.dataGridViewTextBoxColumn5.Width = 125;
             // 
             // dataGridViewTextBoxColumn6
             // 
@@ -335,7 +392,7 @@
             this.dataGridViewTextBoxColumn6.MinimumWidth = 6;
             this.dataGridViewTextBoxColumn6.Name = "dataGridViewTextBoxColumn6";
             this.dataGridViewTextBoxColumn6.ReadOnly = true;
-            this.dataGridViewTextBoxColumn6.Width = 64;
+            this.dataGridViewTextBoxColumn6.Width = 125;
             // 
             // dataGridViewTextBoxColumn7
             // 
@@ -345,7 +402,7 @@
             this.dataGridViewTextBoxColumn7.MinimumWidth = 6;
             this.dataGridViewTextBoxColumn7.Name = "dataGridViewTextBoxColumn7";
             this.dataGridViewTextBoxColumn7.ReadOnly = true;
-            this.dataGridViewTextBoxColumn7.Width = 64;
+            this.dataGridViewTextBoxColumn7.Width = 125;
             // 
             // dataGridViewTextBoxColumn8
             // 
@@ -465,201 +522,122 @@
             this.dataGridViewTextBoxColumn19.ReadOnly = true;
             this.dataGridViewTextBoxColumn19.Width = 132;
             // 
-            // Instance
+            // dataGridViewTextBoxColumn20
             // 
-            this.Instance.DataPropertyName = "Instance";
-            this.Instance.HeaderText = "Instance";
-            this.Instance.MinimumWidth = 6;
-            this.Instance.Name = "Instance";
-            this.Instance.ReadOnly = true;
-            this.Instance.Width = 90;
+            this.dataGridViewTextBoxColumn20.DataPropertyName = "Full Backup MB/sec";
+            dataGridViewCellStyle5.Format = "N3";
+            this.dataGridViewTextBoxColumn20.DefaultCellStyle = dataGridViewCellStyle5;
+            this.dataGridViewTextBoxColumn20.HeaderText = "Full Backup MB/sec";
+            this.dataGridViewTextBoxColumn20.MinimumWidth = 6;
+            this.dataGridViewTextBoxColumn20.Name = "dataGridViewTextBoxColumn20";
+            this.dataGridViewTextBoxColumn20.ReadOnly = true;
+            this.dataGridViewTextBoxColumn20.Width = 125;
             // 
-            // Database
+            // dataGridViewTextBoxColumn21
             // 
-            this.Database.DataPropertyName = "name";
-            this.Database.HeaderText = "Database";
-            this.Database.MinimumWidth = 6;
-            this.Database.Name = "Database";
-            this.Database.ReadOnly = true;
-            this.Database.Width = 98;
+            this.dataGridViewTextBoxColumn21.DataPropertyName = "Full Backup Write MB/sec";
+            dataGridViewCellStyle6.Format = "N3";
+            this.dataGridViewTextBoxColumn21.DefaultCellStyle = dataGridViewCellStyle6;
+            this.dataGridViewTextBoxColumn21.HeaderText = "Full Backup Write MB/sec";
+            this.dataGridViewTextBoxColumn21.MinimumWidth = 6;
+            this.dataGridViewTextBoxColumn21.Name = "dataGridViewTextBoxColumn21";
+            this.dataGridViewTextBoxColumn21.ReadOnly = true;
+            this.dataGridViewTextBoxColumn21.Width = 125;
             // 
-            // CreatedDate
+            // dataGridViewTextBoxColumn22
             // 
-            this.CreatedDate.DataPropertyName = "create_date_utc";
-            this.CreatedDate.HeaderText = "Created";
-            this.CreatedDate.MinimumWidth = 6;
-            this.CreatedDate.Name = "CreatedDate";
-            this.CreatedDate.ReadOnly = true;
-            this.CreatedDate.Width = 87;
+            this.dataGridViewTextBoxColumn22.DataPropertyName = "Full Backup Size GB";
+            dataGridViewCellStyle7.Format = "N3";
+            this.dataGridViewTextBoxColumn22.DefaultCellStyle = dataGridViewCellStyle7;
+            this.dataGridViewTextBoxColumn22.HeaderText = "FullBackupSizeGB";
+            this.dataGridViewTextBoxColumn22.MinimumWidth = 6;
+            this.dataGridViewTextBoxColumn22.Name = "dataGridViewTextBoxColumn22";
+            this.dataGridViewTextBoxColumn22.ReadOnly = true;
+            this.dataGridViewTextBoxColumn22.Width = 125;
             // 
-            // RecoveryModel
+            // dataGridViewTextBoxColumn23
             // 
-            this.RecoveryModel.DataPropertyName = "recovery_model_desc";
-            this.RecoveryModel.HeaderText = "Recovery Model";
-            this.RecoveryModel.MinimumWidth = 6;
-            this.RecoveryModel.Name = "RecoveryModel";
-            this.RecoveryModel.ReadOnly = true;
-            this.RecoveryModel.Width = 127;
+            this.dataGridViewTextBoxColumn23.DataPropertyName = "Full Backup Size (Compressed) GB";
+            dataGridViewCellStyle8.Format = "N3";
+            this.dataGridViewTextBoxColumn23.DefaultCellStyle = dataGridViewCellStyle8;
+            this.dataGridViewTextBoxColumn23.HeaderText = "Full Backup Size (Compressed) GB";
+            this.dataGridViewTextBoxColumn23.MinimumWidth = 6;
+            this.dataGridViewTextBoxColumn23.Name = "dataGridViewTextBoxColumn23";
+            this.dataGridViewTextBoxColumn23.ReadOnly = true;
+            this.dataGridViewTextBoxColumn23.Width = 125;
             // 
-            // LastFull
+            // dataGridViewTextBoxColumn24
             // 
-            this.LastFull.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.DisplayedCells;
-            this.LastFull.DataPropertyName = "LastFull";
-            this.LastFull.HeaderText = "Last Full";
-            this.LastFull.MinimumWidth = 6;
-            this.LastFull.Name = "LastFull";
-            this.LastFull.ReadOnly = true;
-            this.LastFull.Width = 64;
+            this.dataGridViewTextBoxColumn24.DataPropertyName = "Full Compression Saving %";
+            dataGridViewCellStyle9.Format = "P2";
+            this.dataGridViewTextBoxColumn24.DefaultCellStyle = dataGridViewCellStyle9;
+            this.dataGridViewTextBoxColumn24.HeaderText = "Full Compression Saving %";
+            this.dataGridViewTextBoxColumn24.MinimumWidth = 6;
+            this.dataGridViewTextBoxColumn24.Name = "dataGridViewTextBoxColumn24";
+            this.dataGridViewTextBoxColumn24.ReadOnly = true;
+            this.dataGridViewTextBoxColumn24.Width = 125;
             // 
-            // LastDiff
+            // dataGridViewTextBoxColumn25
             // 
-            this.LastDiff.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.DisplayedCells;
-            this.LastDiff.DataPropertyName = "LastDiff";
-            this.LastDiff.HeaderText = "Last Diff";
-            this.LastDiff.MinimumWidth = 6;
-            this.LastDiff.Name = "LastDiff";
-            this.LastDiff.ReadOnly = true;
-            this.LastDiff.Width = 64;
+            this.dataGridViewTextBoxColumn25.DataPropertyName = "Full Compression Saving %";
+            dataGridViewCellStyle10.Format = "P2";
+            this.dataGridViewTextBoxColumn25.DefaultCellStyle = dataGridViewCellStyle10;
+            this.dataGridViewTextBoxColumn25.HeaderText = "Full Compression Saving %";
+            this.dataGridViewTextBoxColumn25.MinimumWidth = 6;
+            this.dataGridViewTextBoxColumn25.Name = "dataGridViewTextBoxColumn25";
+            this.dataGridViewTextBoxColumn25.ReadOnly = true;
+            this.dataGridViewTextBoxColumn25.Width = 125;
             // 
-            // LastLog
+            // dataGridViewTextBoxColumn26
             // 
-            this.LastLog.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.DisplayedCells;
-            this.LastLog.DataPropertyName = "LastLog";
-            this.LastLog.HeaderText = "Last Log";
-            this.LastLog.MinimumWidth = 6;
-            this.LastLog.Name = "LastLog";
-            this.LastLog.ReadOnly = true;
-            this.LastLog.Width = 64;
+            this.dataGridViewTextBoxColumn26.DataPropertyName = "LastFullDuration";
+            this.dataGridViewTextBoxColumn26.HeaderText = "LastDiffDuration";
+            this.dataGridViewTextBoxColumn26.MinimumWidth = 6;
+            this.dataGridViewTextBoxColumn26.Name = "dataGridViewTextBoxColumn26";
+            this.dataGridViewTextBoxColumn26.ReadOnly = true;
+            this.dataGridViewTextBoxColumn26.Width = 125;
             // 
-            // LastFG
+            // dataGridViewTextBoxColumn27
             // 
-            this.LastFG.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
-            this.LastFG.DataPropertyName = "LastFG";
-            this.LastFG.HeaderText = "Last Filegroup Backup";
-            this.LastFG.MinimumWidth = 6;
-            this.LastFG.Name = "LastFG";
-            this.LastFG.ReadOnly = true;
-            this.LastFG.Width = 125;
+            this.dataGridViewTextBoxColumn27.DataPropertyName = "Diff Backup MB/sec";
+            dataGridViewCellStyle11.Format = "N1";
+            this.dataGridViewTextBoxColumn27.DefaultCellStyle = dataGridViewCellStyle11;
+            this.dataGridViewTextBoxColumn27.HeaderText = "Diff Backup MB/sec";
+            this.dataGridViewTextBoxColumn27.MinimumWidth = 6;
+            this.dataGridViewTextBoxColumn27.Name = "dataGridViewTextBoxColumn27";
+            this.dataGridViewTextBoxColumn27.ReadOnly = true;
+            this.dataGridViewTextBoxColumn27.Width = 125;
             // 
-            // LastFGDiff
+            // dataGridViewTextBoxColumn28
             // 
-            this.LastFGDiff.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
-            this.LastFGDiff.DataPropertyName = "LastFGDiff";
-            this.LastFGDiff.HeaderText = "Last Filegroup Diff Backup";
-            this.LastFGDiff.MinimumWidth = 6;
-            this.LastFGDiff.Name = "LastFGDiff";
-            this.LastFGDiff.ReadOnly = true;
-            this.LastFGDiff.Width = 125;
-            // 
-            // LastPartial
-            // 
-            this.LastPartial.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
-            this.LastPartial.DataPropertyName = "LastPartial";
-            this.LastPartial.HeaderText = "Last Partial Backup";
-            this.LastPartial.MinimumWidth = 6;
-            this.LastPartial.Name = "LastPartial";
-            this.LastPartial.ReadOnly = true;
-            this.LastPartial.Width = 125;
-            // 
-            // LastPartialDiff
-            // 
-            this.LastPartialDiff.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
-            this.LastPartialDiff.DataPropertyName = "LastPartialDiff";
-            this.LastPartialDiff.HeaderText = "Last Partial Diff Backup";
-            this.LastPartialDiff.MinimumWidth = 6;
-            this.LastPartialDiff.Name = "LastPartialDiff";
-            this.LastPartialDiff.ReadOnly = true;
-            this.LastPartialDiff.Width = 125;
-            // 
-            // SnapshotAge
-            // 
-            this.SnapshotAge.DataPropertyName = "SnapshotAge";
-            this.SnapshotAge.HeaderText = "Snapshot Age (mins)";
-            this.SnapshotAge.MinimumWidth = 6;
-            this.SnapshotAge.Name = "SnapshotAge";
-            this.SnapshotAge.ReadOnly = true;
-            this.SnapshotAge.Width = 119;
-            // 
-            // FullCriticalThreshold
-            // 
-            this.FullCriticalThreshold.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
-            this.FullCriticalThreshold.DataPropertyName = "FullBackupCriticalThreshold";
-            this.FullCriticalThreshold.HeaderText = "Full Critical Threshold";
-            this.FullCriticalThreshold.MinimumWidth = 6;
-            this.FullCriticalThreshold.Name = "FullCriticalThreshold";
-            this.FullCriticalThreshold.ReadOnly = true;
-            this.FullCriticalThreshold.Width = 80;
-            // 
-            // FullWarningThreshold
-            // 
-            this.FullWarningThreshold.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
-            this.FullWarningThreshold.DataPropertyName = "FullBackupWarningThreshold";
-            this.FullWarningThreshold.HeaderText = "Full Warning Threshold";
-            this.FullWarningThreshold.MinimumWidth = 6;
-            this.FullWarningThreshold.Name = "FullWarningThreshold";
-            this.FullWarningThreshold.ReadOnly = true;
-            this.FullWarningThreshold.Width = 80;
-            // 
-            // DiffCriticalThreshold
-            // 
-            this.DiffCriticalThreshold.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
-            this.DiffCriticalThreshold.DataPropertyName = "DiffBackupCriticalThreshold";
-            this.DiffCriticalThreshold.HeaderText = "Diff Critical Threshold";
-            this.DiffCriticalThreshold.MinimumWidth = 6;
-            this.DiffCriticalThreshold.Name = "DiffCriticalThreshold";
-            this.DiffCriticalThreshold.ReadOnly = true;
-            this.DiffCriticalThreshold.Width = 80;
-            // 
-            // DiffWarningThreshold
-            // 
-            this.DiffWarningThreshold.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
-            this.DiffWarningThreshold.DataPropertyName = "DiffBackupWarningThreshold";
-            this.DiffWarningThreshold.HeaderText = "Diff Warning Threshold";
-            this.DiffWarningThreshold.MinimumWidth = 6;
-            this.DiffWarningThreshold.Name = "DiffWarningThreshold";
-            this.DiffWarningThreshold.ReadOnly = true;
-            this.DiffWarningThreshold.Width = 80;
-            // 
-            // LogCriticalThreshold
-            // 
-            this.LogCriticalThreshold.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
-            this.LogCriticalThreshold.DataPropertyName = "LogBackupCriticalThreshold";
-            this.LogCriticalThreshold.HeaderText = "Log Critical Threshold";
-            this.LogCriticalThreshold.MinimumWidth = 6;
-            this.LogCriticalThreshold.Name = "LogCriticalThreshold";
-            this.LogCriticalThreshold.ReadOnly = true;
-            this.LogCriticalThreshold.Width = 80;
-            // 
-            // LogWarningThreshold
-            // 
-            this.LogWarningThreshold.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.None;
-            this.LogWarningThreshold.DataPropertyName = "LogBackupWarningThreshold";
-            this.LogWarningThreshold.HeaderText = "Log Warning Threshold";
-            this.LogWarningThreshold.MinimumWidth = 6;
-            this.LogWarningThreshold.Name = "LogWarningThreshold";
-            this.LogWarningThreshold.ReadOnly = true;
-            this.LogWarningThreshold.Width = 80;
-            // 
-            // ThresholdsConfiguredLevel
-            // 
-            this.ThresholdsConfiguredLevel.DataPropertyName = "ThresholdsConfiguredLevel";
-            this.ThresholdsConfiguredLevel.HeaderText = "Thresholds Configured Level";
-            this.ThresholdsConfiguredLevel.MinimumWidth = 6;
-            this.ThresholdsConfiguredLevel.Name = "ThresholdsConfiguredLevel";
-            this.ThresholdsConfiguredLevel.ReadOnly = true;
-            this.ThresholdsConfiguredLevel.Width = 132;
+            this.dataGridViewTextBoxColumn28.DataPropertyName = "Diff Backup Write MB/sec";
+            dataGridViewCellStyle12.Format = "N1";
+            this.dataGridViewTextBoxColumn28.DefaultCellStyle = dataGridViewCellStyle12;
+            this.dataGridViewTextBoxColumn28.HeaderText = "Diff Backup Write MB/sec";
+            this.dataGridViewTextBoxColumn28.MinimumWidth = 6;
+            this.dataGridViewTextBoxColumn28.Name = "dataGridViewTextBoxColumn28";
+            this.dataGridViewTextBoxColumn28.ReadOnly = true;
+            this.dataGridViewTextBoxColumn28.Width = 125;
             // 
             // BackupsControl
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.Controls.Add(this.dgvBackups);
+            this.Controls.Add(this.splitContainer1);
             this.Controls.Add(this.toolStrip1);
             this.Name = "BackupsControl";
             this.Size = new System.Drawing.Size(1947, 650);
             ((System.ComponentModel.ISupportInitialize)(this.dgvBackups)).EndInit();
             this.toolStrip1.ResumeLayout(false);
             this.toolStrip1.PerformLayout();
+            this.splitContainer1.Panel1.ResumeLayout(false);
+            this.splitContainer1.Panel2.ResumeLayout(false);
+            this.splitContainer1.Panel2.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).EndInit();
+            this.splitContainer1.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.dgvSummary)).EndInit();
+            this.toolStrip2.ResumeLayout(false);
+            this.toolStrip2.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -672,11 +650,6 @@
         private System.Windows.Forms.ToolStripDropDownButton tsConfigure;
         private System.Windows.Forms.ToolStripMenuItem configureInstanceThresholdsToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem configureRootThresholdsToolStripMenuItem;
-        private System.Windows.Forms.ToolStripDropDownButton toolStripFilter;
-        private System.Windows.Forms.ToolStripMenuItem criticalToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem warningToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem undefinedToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem OKToolStripMenuItem;
         private System.Windows.Forms.ToolStripButton tsRefresh;
         private System.Windows.Forms.ToolStripButton tsCopy;
         private System.Windows.Forms.ToolStripButton tsExcel;
@@ -699,25 +672,25 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn17;
         private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn18;
         private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn19;
-        private System.Windows.Forms.DataGridViewTextBoxColumn Instance;
-        private System.Windows.Forms.DataGridViewTextBoxColumn Database;
-        private System.Windows.Forms.DataGridViewTextBoxColumn CreatedDate;
-        private System.Windows.Forms.DataGridViewTextBoxColumn RecoveryModel;
-        private System.Windows.Forms.DataGridViewTextBoxColumn LastFull;
-        private System.Windows.Forms.DataGridViewTextBoxColumn LastDiff;
-        private System.Windows.Forms.DataGridViewTextBoxColumn LastLog;
-        private System.Windows.Forms.DataGridViewTextBoxColumn LastFG;
-        private System.Windows.Forms.DataGridViewTextBoxColumn LastFGDiff;
-        private System.Windows.Forms.DataGridViewTextBoxColumn LastPartial;
-        private System.Windows.Forms.DataGridViewTextBoxColumn LastPartialDiff;
-        private System.Windows.Forms.DataGridViewTextBoxColumn SnapshotAge;
-        private System.Windows.Forms.DataGridViewTextBoxColumn FullCriticalThreshold;
-        private System.Windows.Forms.DataGridViewTextBoxColumn FullWarningThreshold;
-        private System.Windows.Forms.DataGridViewTextBoxColumn DiffCriticalThreshold;
-        private System.Windows.Forms.DataGridViewTextBoxColumn DiffWarningThreshold;
-        private System.Windows.Forms.DataGridViewTextBoxColumn LogCriticalThreshold;
-        private System.Windows.Forms.DataGridViewTextBoxColumn LogWarningThreshold;
-        private System.Windows.Forms.DataGridViewTextBoxColumn ThresholdsConfiguredLevel;
-        private System.Windows.Forms.DataGridViewLinkColumn Configure;
+        private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn20;
+        private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn21;
+        private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn22;
+        private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn23;
+        private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn24;
+        private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn25;
+        private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn26;
+        private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn27;
+        private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn28;
+        private System.Windows.Forms.SplitContainer splitContainer1;
+        private System.Windows.Forms.DataGridView dgvSummary;
+        private System.Windows.Forms.ToolStripButton tsBack;
+        private System.Windows.Forms.ToolStrip toolStrip2;
+        private System.Windows.Forms.ToolStripButton tsCopyDetail;
+        private System.Windows.Forms.ToolStripButton tsExcelDetail;
+        private System.Windows.Forms.ToolStripDropDownButton tsFilter;
+        private System.Windows.Forms.ToolStripMenuItem criticalToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem warningToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem undefinedToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem OKToolStripMenuItem;
     }
 }

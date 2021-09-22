@@ -1,9 +1,11 @@
-﻿CREATE PROC LastGoodCheckDBThresholds_Upd(
+﻿CREATE PROC dbo.LastGoodCheckDBThresholds_Upd(
 	@InstanceID INT,
 	@DatabaseID INT,
 	@WarningThreshold INT=NULL,
 	@CriticalThreshold INT=NULL,
-	@Inherit BIT=0
+	@Inherit BIT=0,
+	@MinimumAge INT=NULL,
+	@ExcludedDatabases NVARCHAR(MAX)=NULL
 )
 AS
 SET XACT_ABORT ON
@@ -20,13 +22,17 @@ BEGIN
 	    InstanceID,
 	    DatabaseID,
 	    WarningThresholdHrs,
-	    CriticalThresholdHrs
+	    CriticalThresholdHrs,
+		MinimumAge,
+		ExcludedDatabases
 	)
 	VALUES
 	(   @InstanceID,
 	    @DatabaseID,
 	    @WarningThreshold,
-	    @CriticalThreshold
+	    @CriticalThreshold,
+		@MinimumAge,
+		@ExcludedDatabases
 	    )
 
 END

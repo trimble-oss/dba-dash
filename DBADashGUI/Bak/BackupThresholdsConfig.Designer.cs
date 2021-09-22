@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             this.chkUseFG = new System.Windows.Forms.CheckBox();
             this.chkUsePartial = new System.Windows.Forms.CheckBox();
             this.chkBackupInherit = new System.Windows.Forms.CheckBox();
@@ -50,6 +51,12 @@
             this.numFullWarning = new System.Windows.Forms.NumericUpDown();
             this.numFullCritical = new System.Windows.Forms.NumericUpDown();
             this.bttnUpdate = new System.Windows.Forms.Button();
+            this.txtExcluded = new System.Windows.Forms.TextBox();
+            this.label1 = new System.Windows.Forms.Label();
+            this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
+            this.label2 = new System.Windows.Forms.Label();
+            this.numMinimumAge = new System.Windows.Forms.NumericUpDown();
+            this.label3 = new System.Windows.Forms.Label();
             this.pnlBackupThresholds.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.numLogWarning)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.numLogCritical)).BeginInit();
@@ -57,12 +64,13 @@
             ((System.ComponentModel.ISupportInitialize)(this.numDiffCritical)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.numFullWarning)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.numFullCritical)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.numMinimumAge)).BeginInit();
             this.SuspendLayout();
             // 
             // chkUseFG
             // 
             this.chkUseFG.AutoSize = true;
-            this.chkUseFG.Location = new System.Drawing.Point(296, 147);
+            this.chkUseFG.Location = new System.Drawing.Point(278, 240);
             this.chkUseFG.Name = "chkUseFG";
             this.chkUseFG.Size = new System.Drawing.Size(176, 21);
             this.chkUseFG.TabIndex = 44;
@@ -72,7 +80,7 @@
             // chkUsePartial
             // 
             this.chkUsePartial.AutoSize = true;
-            this.chkUsePartial.Location = new System.Drawing.Point(122, 147);
+            this.chkUsePartial.Location = new System.Drawing.Point(278, 213);
             this.chkUsePartial.Name = "chkUsePartial";
             this.chkUsePartial.Size = new System.Drawing.Size(157, 21);
             this.chkUsePartial.TabIndex = 43;
@@ -82,7 +90,7 @@
             // chkBackupInherit
             // 
             this.chkBackupInherit.AutoSize = true;
-            this.chkBackupInherit.Location = new System.Drawing.Point(24, 14);
+            this.chkBackupInherit.Location = new System.Drawing.Point(30, 14);
             this.chkBackupInherit.Name = "chkBackupInherit";
             this.chkBackupInherit.Size = new System.Drawing.Size(69, 21);
             this.chkBackupInherit.TabIndex = 42;
@@ -92,6 +100,11 @@
             // 
             // pnlBackupThresholds
             // 
+            this.pnlBackupThresholds.Controls.Add(this.label3);
+            this.pnlBackupThresholds.Controls.Add(this.label2);
+            this.pnlBackupThresholds.Controls.Add(this.numMinimumAge);
+            this.pnlBackupThresholds.Controls.Add(this.label1);
+            this.pnlBackupThresholds.Controls.Add(this.txtExcluded);
             this.pnlBackupThresholds.Controls.Add(this.label15);
             this.pnlBackupThresholds.Controls.Add(this.chkUseFG);
             this.pnlBackupThresholds.Controls.Add(this.label16);
@@ -114,13 +127,13 @@
             this.pnlBackupThresholds.Location = new System.Drawing.Point(13, 42);
             this.pnlBackupThresholds.Margin = new System.Windows.Forms.Padding(4);
             this.pnlBackupThresholds.Name = "pnlBackupThresholds";
-            this.pnlBackupThresholds.Size = new System.Drawing.Size(509, 193);
+            this.pnlBackupThresholds.Size = new System.Drawing.Size(633, 322);
             this.pnlBackupThresholds.TabIndex = 41;
             // 
             // label15
             // 
             this.label15.AutoSize = true;
-            this.label15.Location = new System.Drawing.Point(229, 101);
+            this.label15.Location = new System.Drawing.Point(385, 104);
             this.label15.Name = "label15";
             this.label15.Size = new System.Drawing.Size(37, 17);
             this.label15.TabIndex = 53;
@@ -129,7 +142,7 @@
             // label16
             // 
             this.label16.AutoSize = true;
-            this.label16.Location = new System.Drawing.Point(404, 101);
+            this.label16.Location = new System.Drawing.Point(560, 104);
             this.label16.Name = "label16";
             this.label16.Size = new System.Drawing.Size(37, 17);
             this.label16.TabIndex = 52;
@@ -137,7 +150,7 @@
             // 
             // numLogWarning
             // 
-            this.numLogWarning.Location = new System.Drawing.Point(122, 100);
+            this.numLogWarning.Location = new System.Drawing.Point(278, 103);
             this.numLogWarning.Margin = new System.Windows.Forms.Padding(4);
             this.numLogWarning.Maximum = new decimal(new int[] {
             2147483647,
@@ -155,7 +168,7 @@
             // 
             // numLogCritical
             // 
-            this.numLogCritical.Location = new System.Drawing.Point(296, 100);
+            this.numLogCritical.Location = new System.Drawing.Point(452, 103);
             this.numLogCritical.Margin = new System.Windows.Forms.Padding(4);
             this.numLogCritical.Maximum = new decimal(new int[] {
             2147483647,
@@ -174,7 +187,7 @@
             // label13
             // 
             this.label13.AutoSize = true;
-            this.label13.Location = new System.Drawing.Point(229, 71);
+            this.label13.Location = new System.Drawing.Point(385, 74);
             this.label13.Name = "label13";
             this.label13.Size = new System.Drawing.Size(37, 17);
             this.label13.TabIndex = 49;
@@ -183,7 +196,7 @@
             // label14
             // 
             this.label14.AutoSize = true;
-            this.label14.Location = new System.Drawing.Point(404, 71);
+            this.label14.Location = new System.Drawing.Point(560, 74);
             this.label14.Name = "label14";
             this.label14.Size = new System.Drawing.Size(37, 17);
             this.label14.TabIndex = 48;
@@ -192,7 +205,7 @@
             // numDiffWarning
             // 
             this.numDiffWarning.Enabled = false;
-            this.numDiffWarning.Location = new System.Drawing.Point(122, 70);
+            this.numDiffWarning.Location = new System.Drawing.Point(278, 73);
             this.numDiffWarning.Margin = new System.Windows.Forms.Padding(4);
             this.numDiffWarning.Maximum = new decimal(new int[] {
             2147483647,
@@ -211,7 +224,7 @@
             // numDiffCritical
             // 
             this.numDiffCritical.Enabled = false;
-            this.numDiffCritical.Location = new System.Drawing.Point(296, 70);
+            this.numDiffCritical.Location = new System.Drawing.Point(452, 73);
             this.numDiffCritical.Margin = new System.Windows.Forms.Padding(4);
             this.numDiffCritical.Maximum = new decimal(new int[] {
             2147483647,
@@ -230,7 +243,7 @@
             // label10
             // 
             this.label10.AutoSize = true;
-            this.label10.Location = new System.Drawing.Point(229, 41);
+            this.label10.Location = new System.Drawing.Point(385, 44);
             this.label10.Name = "label10";
             this.label10.Size = new System.Drawing.Size(37, 17);
             this.label10.TabIndex = 45;
@@ -239,7 +252,7 @@
             // label8
             // 
             this.label8.AutoSize = true;
-            this.label8.Location = new System.Drawing.Point(404, 41);
+            this.label8.Location = new System.Drawing.Point(560, 44);
             this.label8.Name = "label8";
             this.label8.Size = new System.Drawing.Size(37, 17);
             this.label8.TabIndex = 44;
@@ -250,7 +263,7 @@
             this.chkLog.AutoSize = true;
             this.chkLog.Checked = true;
             this.chkLog.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.chkLog.Location = new System.Drawing.Point(14, 101);
+            this.chkLog.Location = new System.Drawing.Point(17, 103);
             this.chkLog.Name = "chkLog";
             this.chkLog.Size = new System.Drawing.Size(54, 21);
             this.chkLog.TabIndex = 43;
@@ -261,7 +274,7 @@
             // chkDiff
             // 
             this.chkDiff.AutoSize = true;
-            this.chkDiff.Location = new System.Drawing.Point(13, 71);
+            this.chkDiff.Location = new System.Drawing.Point(17, 74);
             this.chkDiff.Name = "chkDiff";
             this.chkDiff.Size = new System.Drawing.Size(51, 21);
             this.chkDiff.TabIndex = 42;
@@ -274,7 +287,7 @@
             this.chkFull.AutoSize = true;
             this.chkFull.Checked = true;
             this.chkFull.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.chkFull.Location = new System.Drawing.Point(13, 41);
+            this.chkFull.Location = new System.Drawing.Point(17, 44);
             this.chkFull.Name = "chkFull";
             this.chkFull.Size = new System.Drawing.Size(52, 21);
             this.chkFull.TabIndex = 41;
@@ -285,7 +298,7 @@
             // label7
             // 
             this.label7.AutoSize = true;
-            this.label7.Location = new System.Drawing.Point(293, 10);
+            this.label7.Location = new System.Drawing.Point(449, 13);
             this.label7.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label7.Name = "label7";
             this.label7.Size = new System.Drawing.Size(54, 17);
@@ -295,7 +308,7 @@
             // label9
             // 
             this.label9.AutoSize = true;
-            this.label9.Location = new System.Drawing.Point(119, 10);
+            this.label9.Location = new System.Drawing.Point(275, 13);
             this.label9.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label9.Name = "label9";
             this.label9.Size = new System.Drawing.Size(65, 17);
@@ -304,7 +317,7 @@
             // 
             // numFullWarning
             // 
-            this.numFullWarning.Location = new System.Drawing.Point(122, 40);
+            this.numFullWarning.Location = new System.Drawing.Point(278, 43);
             this.numFullWarning.Margin = new System.Windows.Forms.Padding(4);
             this.numFullWarning.Maximum = new decimal(new int[] {
             2147483647,
@@ -322,7 +335,7 @@
             // 
             // numFullCritical
             // 
-            this.numFullCritical.Location = new System.Drawing.Point(296, 40);
+            this.numFullCritical.Location = new System.Drawing.Point(452, 43);
             this.numFullCritical.Margin = new System.Windows.Forms.Padding(4);
             this.numFullCritical.Maximum = new decimal(new int[] {
             2147483647,
@@ -340,7 +353,7 @@
             // 
             // bttnUpdate
             // 
-            this.bttnUpdate.Location = new System.Drawing.Point(447, 242);
+            this.bttnUpdate.Location = new System.Drawing.Point(555, 371);
             this.bttnUpdate.Name = "bttnUpdate";
             this.bttnUpdate.Size = new System.Drawing.Size(75, 23);
             this.bttnUpdate.TabIndex = 45;
@@ -348,11 +361,62 @@
             this.bttnUpdate.UseVisualStyleBackColor = true;
             this.bttnUpdate.Click += new System.EventHandler(this.bttnUpdate_Click);
             // 
+            // txtExcluded
+            // 
+            this.txtExcluded.Location = new System.Drawing.Point(278, 144);
+            this.txtExcluded.Name = "txtExcluded";
+            this.txtExcluded.Size = new System.Drawing.Size(339, 22);
+            this.txtExcluded.TabIndex = 54;
+            // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Location = new System.Drawing.Point(12, 147);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(99, 17);
+            this.label1.TabIndex = 55;
+            this.label1.Text = "Excluded DBs:";
+            this.toolTip1.SetToolTip(this.label1, "Comma-separated list of database names to exclude from backup check.  LIKE operat" +
+        "or wildcards supported");
+            // 
+            // label2
+            // 
+            this.label2.AutoSize = true;
+            this.label2.Location = new System.Drawing.Point(386, 184);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(37, 17);
+            this.label2.TabIndex = 57;
+            this.label2.Text = "mins";
+            // 
+            // numMinimumAge
+            // 
+            this.numMinimumAge.Location = new System.Drawing.Point(278, 184);
+            this.numMinimumAge.Margin = new System.Windows.Forms.Padding(4);
+            this.numMinimumAge.Maximum = new decimal(new int[] {
+            2147483647,
+            0,
+            0,
+            0});
+            this.numMinimumAge.Name = "numMinimumAge";
+            this.numMinimumAge.Size = new System.Drawing.Size(100, 22);
+            this.numMinimumAge.TabIndex = 56;
+            // 
+            // label3
+            // 
+            this.label3.AutoSize = true;
+            this.label3.Location = new System.Drawing.Point(12, 186);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(208, 17);
+            this.label3.TabIndex = 58;
+            this.label3.Text = "New Database Exclusion Period";
+            this.toolTip1.SetToolTip(this.label3, "This option allows you to exclude recently created databases from the backup chec" +
+        "k.");
+            // 
             // BackupThresholdsConfig
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(554, 275);
+            this.ClientSize = new System.Drawing.Size(661, 406);
             this.Controls.Add(this.bttnUpdate);
             this.Controls.Add(this.chkBackupInherit);
             this.Controls.Add(this.pnlBackupThresholds);
@@ -369,6 +433,7 @@
             ((System.ComponentModel.ISupportInitialize)(this.numDiffCritical)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.numFullWarning)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.numFullCritical)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.numMinimumAge)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -398,5 +463,11 @@
         private System.Windows.Forms.NumericUpDown numFullWarning;
         private System.Windows.Forms.NumericUpDown numFullCritical;
         private System.Windows.Forms.Button bttnUpdate;
+        private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.TextBox txtExcluded;
+        private System.Windows.Forms.ToolTip toolTip1;
+        private System.Windows.Forms.Label label3;
+        private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.NumericUpDown numMinimumAge;
     }
 }

@@ -876,7 +876,6 @@
             // 
             // backupsControl1
             // 
-            this.backupsControl1.DatabaseID = null;
             this.backupsControl1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.backupsControl1.IncludeCritical = false;
             this.backupsControl1.IncludeNA = false;

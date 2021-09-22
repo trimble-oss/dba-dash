@@ -160,8 +160,7 @@ namespace DBADashGUI
             }
             else if(tabs.SelectedTab == tabBackups)
             {
-                backupsControl1.InstanceIDs = instanceIDs;
-                backupsControl1.ConnectionString = connectionString;          
+                backupsControl1.InstanceIDs = instanceIDs;    
                 backupsControl1.IncludeNA = instanceIDs.Count==1;
                 backupsControl1.IncludeOK = instanceIDs.Count == 1;
                 backupsControl1.IncludeWarning = true;

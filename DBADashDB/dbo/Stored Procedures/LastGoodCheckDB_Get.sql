@@ -1,4 +1,4 @@
-﻿CREATE PROC [dbo].[LastGoodCheckDB_Get](
+﻿CREATE PROC dbo.LastGoodCheckDB_Get(
 		@InstanceIDs VARCHAR(MAX)=NULL,
 		@IncludeCritical BIT=1,
 		@IncludeWarning BIT=1,
@@ -24,15 +24,16 @@ SELECT InstanceID,
        state,
        state_desc,
        is_in_standby,
-       LastGoodCheckDbTime,
-       ExcludedFromCheck,
+       LastGoodCheckDbTimeUTC,
        HrsSinceLastGoodCheckDB,
        DaysSinceLastGoodCheckDB,
        Status,
        StatusDescription,
        ConfiguredLevel,
        WarningThresholdHrs,
-       CriticalThresholdHrs
+       CriticalThresholdHrs,
+       LastGoodCheckDBExcludedReason,
+       create_date_utc
 FROM dbo.LastGoodCheckDB LG
 WHERE 1=1' + 
 CASE WHEN @InstanceIDs IS NULL THEN '' ELSE 'AND EXISTS (SELECT 1

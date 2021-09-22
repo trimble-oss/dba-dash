@@ -449,7 +449,7 @@ WHEN NOT MATCHED BY TARGET THEN
 
 IF NOT EXISTS(SELECT 1 FROM dbo.LastGoodCheckDBThresholds WHERE InstanceID=-1 AND DatabaseID=-1)
 BEGIN
-	INSERT INTO dbo.LastGoodCheckDBThresholds
+	INSERT INTO dbo.LastGoodCheckDBThresholds(InstanceID,DatabaseID,WarningThresholdHrs,CriticalThresholdHrs)
 	VALUES(-1,-1,192,360)
 END
 

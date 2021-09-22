@@ -9,7 +9,9 @@
 	@LogCritical INT=NULL,
 	@UseFG BIT=0,
 	@UsePartial BIT=0,
-	@Inherit BIT=0
+	@Inherit BIT=0,
+	@ExcludedDatabases NVARCHAR(MAX)=NULL,
+	@MinimumAge INT=NULL
 )
 AS
 SET XACT_ABORT ON
@@ -30,7 +32,9 @@ INSERT INTO dbo.BackupThresholds
     DiffBackupWarningThreshold,
     DiffBackupCriticalThreshold,
     ConsiderPartialBackups,
-    ConsiderFGBackups
+    ConsiderFGBackups,
+	ExcludedDatabases,
+	MinimumAge
 )
 VALUES
 (   @InstanceID,
@@ -42,7 +46,9 @@ VALUES
    @DiffWarning,
    @DiffCritical,
    @UsePartial,
-   @UseFG
+   @UseFG,
+   @ExcludedDatabases,
+   @MinimumAge
     )
 END
 COMMIT

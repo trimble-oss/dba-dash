@@ -142,7 +142,7 @@ namespace DBADashGUI.Performance
                 lblJobCount.Text = string.Format("Running Jobs: {0}", runningJobCount);
             }
 
-            lblSnapshotDate.Text = "Snapshot Date: " + snapshotDate.ToString("yyyy-MM-dd HH:mm:ss");
+            lblSnapshotDate.Text = "Snapshot Date: " + snapshotDate.ToLocalTime().ToString();
             loadSnapshot(new DataView(snapshotDT));
             lblSnapshotDate.Visible = true;
             tsGetLatest.Visible = true;

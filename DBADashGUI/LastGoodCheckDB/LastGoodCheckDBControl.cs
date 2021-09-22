@@ -81,8 +81,10 @@ namespace DBADashGUI.LastGoodCheckDB
                     SqlDataAdapter da = new SqlDataAdapter(cmd);
                     DataTable dt = new DataTable();
                     da.Fill(dt);
+                    Common.ConvertUTCToLocal(ref dt);
                     dgvLastGoodCheckDB.AutoGenerateColumns = false;
                     dgvLastGoodCheckDB.DataSource = new DataView(dt);
+                    dgvLastGoodCheckDB.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
                 }
             }
             configureInstanceThresholdsToolStripMenuItem.Enabled = InstanceIDs.Count == 1;
@@ -143,7 +145,7 @@ namespace DBADashGUI.LastGoodCheckDB
         public void ConfigureThresholds(Int32 InstanceID,Int32 DatabaseID)
         {
             var frm = new LastGoodCheckDBConfig();
-            var threshold = LastGoodCheckDBThreshold.GetLastGoodCheckDBThreshold(connectionString, InstanceID, DatabaseID);
+            var threshold = LastGoodCheckDBThreshold.GetLastGoodCheckDBThreshold(InstanceID, DatabaseID);
             frm.Threshold = threshold;
             frm.ShowDialog();
 

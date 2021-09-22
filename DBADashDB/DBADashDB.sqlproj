@@ -29,7 +29,7 @@
     <QueryStoreStaleQueryThreshold>15</QueryStoreStaleQueryThreshold>
     <QueryStoreMaxStorageSize>512</QueryStoreMaxStorageSize>
     <QueryStoreMaxPlansPerQuery>50</QueryStoreMaxPlansPerQuery>
-    <DacVersion>2.0.3.45</DacVersion>
+    <DacVersion>2.0.3.46</DacVersion>
     <ReadCommittedSnapshot>True</ReadCommittedSnapshot>
     <AllowSnapshotIsolation>True</AllowSnapshotIsolation>
     <CompatibilityMode>130</CompatibilityMode>
@@ -596,6 +596,11 @@
     <Build Include="dbo\Tables\DBADashAgent.sql" />
     <Build Include="dbo\Stored Procedures\LogShippingSummary_Get.sql" />
     <Build Include="dbo\Stored Procedures\DBADashAgent_Upd.sql" />
+    <Build Include="dbo\Views\BackupStats.sql" />
+    <Build Include="dbo\Views\LastBackup.sql" />
+    <Build Include="dbo\Views\BackupSummary.sql" />
+    <Build Include="dbo\Stored Procedures\BackupSummary_Get.sql" />
+    <Build Include="dbo\Stored Procedures\LastBackup_Get.sql" />
   </ItemGroup>
   <ItemGroup>
     <PostDeploy Include="Script.PostDeployment1.sql" />

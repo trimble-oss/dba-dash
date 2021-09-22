@@ -49,7 +49,7 @@ namespace DBADashGUI.HA
                 dt = GetAvailabilityGroupSummary(InstanceIDs);
                 dgv.Columns.Add(new DataGridViewLinkColumn() { HeaderText = "Instance", DataPropertyName = "Instance", Name = "colInstance" });
             }
-
+            Common.ConvertUTCToLocal(ref dt);
             dgv.DataSource = dt;
 
             dgv.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);

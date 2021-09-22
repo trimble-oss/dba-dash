@@ -12,19 +12,19 @@ namespace DBADashGUI.LastGoodCheckDB
         public Int32 DatabaseID { get; set; }
         public Int32? WarningThreshold { get; set; }
         public Int32? CriticalThreshold { get; set; }
+        public Int32 MinimumAge { get; set; }
         public bool Inherit { get; set; }
 
-        public string ConnectionString { get; set; }
+        public string ExcludedDatabases { get; set; }
 
-        public static LastGoodCheckDBThreshold GetLastGoodCheckDBThreshold(string connectionString,Int32 InstanceID,Int32 DatabaseID)
+        public static LastGoodCheckDBThreshold GetLastGoodCheckDBThreshold(Int32 InstanceID,Int32 DatabaseID)
         {
             var threshold = new LastGoodCheckDBThreshold
             {
                 InstanceID = InstanceID,
                 DatabaseID = DatabaseID,
-                ConnectionString = connectionString
             };
-            SqlConnection cn = new SqlConnection(connectionString);
+            SqlConnection cn = new SqlConnection(Common.ConnectionString);
             using (cn)
             {
                 cn.Open();
@@ -37,6 +37,8 @@ namespace DBADashGUI.LastGoodCheckDB
                 {
                     threshold.WarningThreshold = rdr["WarningThresholdHrs"] == DBNull.Value ? null : (Int32?)rdr["WarningThresholdHrs"];
                     threshold.CriticalThreshold = rdr["CriticalThresholdHrs"] == DBNull.Value ? null : (Int32?)rdr["CriticalThresholdHrs"];
+                    threshold.MinimumAge = rdr["MinimumAge"] == DBNull.Value ? 0 : (Int32)rdr["MinimumAge"];
+                    threshold.ExcludedDatabases = rdr["ExcludedDatabases"] == DBNull.Value ? string.Empty : (string)rdr["ExcludedDatabases"];
                     threshold.Inherit = false;
                 }
                 else
@@ -49,7 +51,7 @@ namespace DBADashGUI.LastGoodCheckDB
 
         public void Save()
         {
-            SqlConnection cn = new SqlConnection(ConnectionString);
+            SqlConnection cn = new SqlConnection(Common.ConnectionString);
             using (cn)
             {
                 cn.Open();
@@ -59,6 +61,14 @@ namespace DBADashGUI.LastGoodCheckDB
                 cmd.Parameters.AddWithValue("WarningThreshold", WarningThreshold);
                 cmd.Parameters.AddWithValue("CriticalThreshold", CriticalThreshold);
                 cmd.Parameters.AddWithValue("Inherit", Inherit);
+                if (ExcludedDatabases.Trim() != string.Empty)
+                {
+                    cmd.Parameters.AddWithValue("ExcludedDatabases", ExcludedDatabases);
+                }
+                if (MinimumAge >= 0)
+                {
+                    cmd.Parameters.AddWithValue("MinimumAge", MinimumAge);
+                }
                 cmd.CommandType = System.Data.CommandType.StoredProcedure;
                 cmd.ExecuteNonQuery();
             }

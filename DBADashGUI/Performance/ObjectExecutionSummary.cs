@@ -251,7 +251,7 @@ namespace DBADashGUI.Performance
                     setDataSourceWithFilter();
                     dgv.Columns.AddRange(Columns.ToArray());
                     setColVisibility();
-
+                    dgv.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
             
                     if (splitContainer1.Panel1Collapsed == false)
                     {

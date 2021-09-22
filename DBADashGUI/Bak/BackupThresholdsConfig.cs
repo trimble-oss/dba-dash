@@ -16,8 +16,6 @@ namespace DBADashGUI.Backups
 
         public Int32 InstanceID = -1;
         public Int32 DatabaseID = -1;
-        public string ConnectionString;
-
 
         public BackupThresholdsConfig()
         {
@@ -26,7 +24,7 @@ namespace DBADashGUI.Backups
 
         private void getThresholds()
         {
-            var thresholds = BackupThresholds.GetThresholds(InstanceID, DatabaseID, ConnectionString);
+            var thresholds = BackupThresholds.GetThresholds(InstanceID, DatabaseID);
             if (thresholds.FullCritical!=null && thresholds.FullWarning !=null)
             {
                 chkFull.Checked = true;
@@ -64,6 +62,8 @@ namespace DBADashGUI.Backups
             chkBackupInherit.Checked = thresholds.Inherit;
             chkUsePartial.Checked = thresholds.UsePartial;
             chkUseFG.Checked = thresholds.UseFG;
+            txtExcluded.Text = thresholds.ExcludedDBs;
+            numMinimumAge.Value = thresholds.MinimumAge;
             if (InstanceID == -1)
             {
                 chkBackupInherit.Checked = false;
@@ -86,7 +86,9 @@ namespace DBADashGUI.Backups
                     InstanceID = InstanceID,
                     Inherit = chkBackupInherit.Checked,
                     UseFG = chkUseFG.Checked,
-                    UsePartial = chkUsePartial.Checked
+                    UsePartial = chkUsePartial.Checked,
+                    ExcludedDBs = txtExcluded.Text.Trim(),
+                    MinimumAge=Convert.ToInt32(numMinimumAge.Value)
                 };
                 if (chkFull.Checked) { thresholds.FullCritical = (Int32?)numFullCritical.Value; }
                 if (chkFull.Checked) { thresholds.FullWarning = (Int32?)numFullWarning.Value; }
@@ -111,7 +113,7 @@ namespace DBADashGUI.Backups
 
         private void bttnUpdate_Click(object sender, EventArgs e)
         {
-            BackupThreshold.Save(ConnectionString);
+            BackupThreshold.Save();
             this.DialogResult = DialogResult.OK;
 
         }

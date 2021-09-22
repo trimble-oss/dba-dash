@@ -34,7 +34,7 @@ SELECT D.InstanceID,
        D.ConfiguredLevel,
        D.WarningThresholdHrs,
        D.CriticalThresholdHrs,
-	   D.ExcludedFromCheck,
+	   CASE WHEN D.LastGoodCheckDBExcludedReason IS NULL THEN CAST(1 as BIT) ELSE CAST(0 AS BIT) END AS ExcludedFromCheck,
 	   D.state_desc,
 	   D.is_in_standby
 FROM dbo.LastGoodCheckDB D
