@@ -1,4 +1,4 @@
-﻿CREATE PROC [dbo].[SlowQueriesSummary_Get](
+﻿CREATE PROC dbo.SlowQueriesSummary_Get(
 	@FromDate DATETIME2(3)=NULL,
 	@ToDate DATETIME2(3)=NULL,
 	@ObjectName SYSNAME=NULL,
@@ -13,7 +13,8 @@
 	@DatabaseName SYSNAME=NULL,
 	@UserName SYSNAME=NULL,
 	@Result SYSNAME=NULL,
-	@Top INT=20
+	@Top INT=20,
+	@SessionID INT=NULL
 )
 AS
 DECLARE @DurationFromUS BIGINT 
@@ -43,6 +44,7 @@ DECLARE @GroupSQL NVARCHAR(MAX) = CASE @GroupBy WHEN 'ConnectionID' THEN 'I.Conn
 												WHEN 'DatabaseName' THEN 'D.name'
 												WHEN 'Result' THEN 'SQ.Result'
 												WHEN 'text' THEN 'LEFT(SQ.text,1000)'
+												WHEN 'session_id' THEN 'SQ.session_id'
 												ELSE 'ConnectionID' END
 IF @Top<=0
 BEGIN
@@ -82,12 +84,13 @@ AND timestamp< @ToDate
 ' + CASE WHEN @DatabaseName IS NULL THEN '' ELSE 'AND D.name = @DatabaseName' END + '
 ' + CASE WHEN @UserName IS NULL THEN '' ELSE 'AND SQ.username = @UserName' END + '
 ' + CASE WHEN @Result IS NULL THEN '' ELSE 'AND SQ.Result = @Result' END + '
+' + CASE WHEN @SessionID IS NULL THEN '' ELSE 'AND SQ.session_id = @SessionID' END + '
 GROUP BY ' + @GroupSQL +'
 ORDER BY SUM(Duration) DESC'
 
 EXEC sp_executesql @SQL,N'@Instances IDs READONLY,@ObjectName SYSNAME,@ClientHostName SYSNAME,
 						@ConnectionID SYSNAME,@ClientAppName SYSNAME,@DurationFrom BIGINT,
 						@DurationTo BIGINT,@Text NVARCHAR(MAX),@DatabaseName SYSNAME,
-						@FromDate DATETIME2(3),@ToDate DATETIME2(3),@UserName SYSNAME,@Result SYSNAME,@Top INT',
+						@FromDate DATETIME2(3),@ToDate DATETIME2(3),@UserName SYSNAME,@Result SYSNAME,@Top INT,@SessionID INT',
 						@Instances,@ObjectName,@ClientHostName,@ConnectionID,@ClientAppName,
-						@DurationFromUS,@DurationToUS,@Text,@DatabaseName,@FromDate,@ToDate,@UserName,@Result,@Top
+						@DurationFromUS,@DurationToUS,@Text,@DatabaseName,@FromDate,@ToDate,@UserName,@Result,@Top,@SessionID

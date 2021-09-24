@@ -170,6 +170,14 @@ namespace DBADash
                     dtLR.Columns.Add("backup_time_zone", typeof(short));
                 }
             }
+            if (data.Tables.Contains("SlowQueries"))
+            {
+                var dtSlowQueries = data.Tables["SlowQueries"];
+                if (!dtSlowQueries.Columns.Contains("session_id"))
+                {
+                    dtSlowQueries.Columns.Add("session_id", typeof(int));
+                }
+            }
         }
 
         public void Update()

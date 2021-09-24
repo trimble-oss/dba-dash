@@ -1,6 +1,8 @@
-﻿
-
-CREATE PROC [dbo].[SlowQueries_Upd](@SlowQueries dbo.SlowQueries READONLY,@InstanceID INT,@SnapshotDate DATETIME2(3))
+﻿CREATE PROC dbo.SlowQueries_Upd(
+		@SlowQueries dbo.SlowQueries READONLY,
+		@InstanceID INT,
+		@SnapshotDate DATETIME2(3)
+)
 AS
 DECLARE @MinDate DATETIME2(3)
 SELECT @MinDate =MIN(timestamp) 
@@ -30,7 +32,8 @@ INSERT INTO dbo.SlowQueries
 	client_hostname,
 	client_app_name,
 	result,
-	Uniqueifier
+	Uniqueifier,
+	session_id
 )
 SELECT @InstanceID,
 		D.DatabaseID,
@@ -47,7 +50,8 @@ SELECT @InstanceID,
 		client_hostname,
 		client_app_name,
 		result,
-		ROW_NUMBER() OVER(PARTITION BY timestamp ORDER BY timestamp) -- just to ensure uniqueness in key
+		ROW_NUMBER() OVER(PARTITION BY timestamp ORDER BY timestamp), -- just to ensure uniqueness in key
+		session_id
 FROM @SlowQueries SQ
 LEFT JOIN dbo.Databases D ON D.database_id = SQ.database_id AND D.InstanceID = @InstanceID AND D.IsActive=1
 WHERE timestamp > @MaxDate

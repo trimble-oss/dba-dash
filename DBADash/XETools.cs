@@ -55,6 +55,7 @@ namespace DBADash
             dt.Columns.Add("client_hostname", typeof(string));
             dt.Columns.Add("client_app_name", typeof(string));
             dt.Columns.Add("result", typeof(string));
+            dt.Columns.Add("session_id", typeof(int));
             string name;
             var el = XElement.Parse(xe);
             ringBufferAtt = new RingBufferTargetAttributes();

@@ -1,5 +1,4 @@
-﻿
-CREATE PROC [dbo].[SlowQueriesDetail_Get](
+﻿CREATE PROC dbo.SlowQueriesDetail_Get(
 	@FromDate DATETIME2(3)=NULL,
 	@ToDate DATETIME2(3)=NULL,
 	@ObjectName SYSNAME=NULL,
@@ -13,7 +12,8 @@ CREATE PROC [dbo].[SlowQueriesDetail_Get](
 	@DatabaseName SYSNAME=NULL,
 	@UserName SYSNAME=NULL,
 	@Result SYSNAME=NULL,
-	@Top INT = 30
+	@Top INT = 30,
+	@SessionID INT =NULL
 )
 AS
 DECLARE @DurationFromUS BIGINT 
@@ -54,7 +54,8 @@ N'SELECT TOP(@Top) SQ.InstanceID,
        SQ.client_hostname,
        SQ.client_app_name,
        SQ.result,
-       SQ.Uniqueifier
+       SQ.Uniqueifier,
+	   SQ.session_id
 FROM dbo.SlowQueries SQ
 JOIN dbo.Instances I ON I.InstanceID = SQ.InstanceID
 LEFT JOIN dbo.Databases D ON D.DatabaseID = SQ.DatabaseID
@@ -71,11 +72,12 @@ AND timestamp< @ToDate
 ' + CASE WHEN @DatabaseName IS NULL THEN '' ELSE 'AND D.name = @DatabaseName' END + '
 ' + CASE WHEN @UserName IS NULL THEN '' ELSE 'AND SQ.username = @UserName' END + '
 ' + CASE WHEN @Result IS NULL THEN '' ELSE 'AND SQ.Result = @Result' END + '
+' + CASE WHEN @SessionID IS NULL THEN '' ELSE 'AND SQ.session_id = @SessionID' END + '
 ORDER BY SQ.Duration DESC'
 
 EXEC sp_executesql @SQL,N'@Instances IDs READONLY,@ObjectName SYSNAME,@ClientHostName SYSNAME,
 							@ConnectionID SYSNAME,@ClientAppName SYSNAME,@DurationFrom BIGINT,
 							@DurationTo BIGINT,@Top INT,@Text NVARCHAR(MAX),@DatabaseName SYSNAME,
-							@FromDate DATETIME2(3),@ToDate DATETIME2(3),@UserName SYSNAME,@Result SYSNAME',
+							@FromDate DATETIME2(3),@ToDate DATETIME2(3),@UserName SYSNAME,@Result SYSNAME,@SessionID INT',
 							@Instances,@ObjectName,@ClientHostName,@ConnectionID,@ClientAppName,
-							@DurationFromUS,@DurationToUS,@Top,@Text,@DatabaseName,@FromDate,@ToDate,@UserName,@Result
+							@DurationFromUS,@DurationToUS,@Top,@Text,@DatabaseName,@FromDate,@ToDate,@UserName,@Result,@SessionID

@@ -49,6 +49,7 @@ namespace DBADashGUI
             txtUser.Text = "";
             txtApp.Text = "";
             txtResult.Text = "";
+            txtSessionID.Text = "";
             if(_db.Length > 0){
                 groupBy = "object_name";
             }
@@ -111,6 +112,19 @@ namespace DBADashGUI
                 {
                     cmd.Parameters.AddWithValue("Result", txtResult.Text);
                 }
+                if (txtSessionID.Text.Length > 0)
+                {
+                    int sessionID;
+                    if (int.TryParse(txtSessionID.Text, out sessionID))
+                    {
+                        cmd.Parameters.AddWithValue("SessionID", txtSessionID.Text);
+                    }
+                    else
+                    {
+                        MessageBox.Show("Invalid SessionID filter.  Please enter an integer.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                        return;
+                    }
+                }
                 cmd.Parameters.AddWithValue("Top", top);
                 cmd.CommandType = CommandType.StoredProcedure;
                 SqlDataAdapter da = new SqlDataAdapter(cmd);
@@ -152,7 +166,7 @@ namespace DBADashGUI
             if (e.RowIndex >= 0)
             {
                 var row = (DataRowView)dgvSummary.Rows[e.RowIndex].DataBoundItem;
-                selectedGroupValue = row["Grp"] == DBNull.Value ? "" : (string)row["Grp"];
+                selectedGroupValue = row["Grp"] == DBNull.Value ? "" : Convert.ToString(row["Grp"]);
                 if (dgvSummary.Columns[e.ColumnIndex] == Grp)
                 {
 
@@ -187,6 +201,10 @@ namespace DBADashGUI
                     else if (groupBy == "text")
                     {
                         txtText.Text = selectedGroupValue;
+                    }
+                    else if(groupBy== "session_id")
+                    {
+                        txtSessionID.Text = selectedGroupValue;
                     }
                     else
                     {
@@ -335,6 +353,21 @@ namespace DBADashGUI
             setFilterHighlight(txtResult, lblResult);
         }
 
+        private void txtSessionID_TextChanged(object sender, EventArgs e)
+        {
+            int sessionID;
+            if (!int.TryParse(txtSessionID.Text, out sessionID) && !string.IsNullOrEmpty(txtSessionID.Text))
+            {
+                txtSessionID.BackColor = Color.Red;
+            }
+            else
+            {
+                txtSessionID.BackColor = Color.AliceBlue;
+            }
+
+            setFilterHighlight(txtSessionID, lblSessionID);
+        }
+
         private void loadSlowQueriesDetail(Int32 durationFrom=-1,Int32 durationTo=-1)
         {
         
@@ -356,7 +389,7 @@ namespace DBADashGUI
                 string app = txtApp.Text;
                 string result = txtResult.Text;
                 string text = txtText.Text;
-                
+                string sessionid = txtSessionID.Text;
                 if (groupBy == "ConnectionID")
                 {
                     connectionID = selectedGroupValue;
@@ -388,6 +421,10 @@ namespace DBADashGUI
                 else if (groupBy == "text")
                 {
                     text = selectedGroupValue;
+                }
+                else if (groupBy == "session_id")
+                {
+                    sessionid = selectedGroupValue;
                 }
                 else
                 {
@@ -433,6 +470,10 @@ namespace DBADashGUI
                 if (result.Length > 0)
                 {
                     cmd.Parameters.AddWithValue("Result", result);
+                }
+                if (sessionid.Length > 0)
+                {
+                    cmd.Parameters.AddWithValue("SessionID", sessionid);
                 }
                 cmd.CommandType = CommandType.StoredProcedure;
                 SqlDataAdapter da = new SqlDataAdapter(cmd);
@@ -528,5 +569,7 @@ namespace DBADashGUI
         {
             Common.PromptSaveDataGridView(ref dgvSlow);
         }
+
+
     }
 }

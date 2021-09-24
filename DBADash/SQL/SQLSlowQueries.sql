@@ -2,10 +2,10 @@
 DECLARE @SQL NVARCHAR(MAX)
 DECLARE @EventSessionTemplate NVARCHAR(MAX) = N'CREATE EVENT SESSION [{EventSessionName}] ON SERVER
 	ADD EVENT sqlserver.rpc_completed(
-		ACTION(sqlserver.client_app_name,sqlserver.client_hostname,sqlserver.database_id,sqlserver.username)
+		ACTION(sqlserver.client_app_name,sqlserver.client_hostname,sqlserver.database_id,sqlserver.username,sqlserver.session_id)
 		WHERE ([duration]>(' + CAST(@SlowQueryThreshold AS NVARCHAR(MAX)) + ') AND ([sqlserver].[client_app_name]<>N''DBADashXE'' AND [object_name]<>N''sp_readrequest''))),
 	ADD EVENT sqlserver.sql_batch_completed(
-		ACTION(sqlserver.client_app_name,sqlserver.client_hostname,sqlserver.database_id,sqlserver.username)
+		ACTION(sqlserver.client_app_name,sqlserver.client_hostname,sqlserver.database_id,sqlserver.username,sqlserver.session_id)
 		WHERE ([duration]>(' + CAST(@SlowQueryThreshold AS NVARCHAR(MAX)) + ') AND ([sqlserver].[client_app_name]<>N''DBADashXE'')))
 	ADD TARGET package0.ring_buffer
 	WITH (MAX_MEMORY=' + CAST(@MaxMemory AS NVARCHAR(MAX)) + ' KB,EVENT_RETENTION_MODE=ALLOW_MULTIPLE_EVENT_LOSS,MAX_DISPATCH_LATENCY=2 SECONDS,MAX_EVENT_SIZE=0 KB,MEMORY_PARTITION_MODE=NONE,TRACK_CAUSALITY=OFF,STARTUP_STATE=OFF)'
