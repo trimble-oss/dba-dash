@@ -32,4 +32,6 @@
   <Counter object_name="Resource Pool Stats" counter_name="Memory grants/sec" />
   <Counter object_name="Resource Pool Stats" counter_name="Pending memory grants count" />
   <Counter object_name="Wait Statistics" counter_name="Memory grant queue waits" />
+  <Counter object_name="Plan Cache" counter_name="Cache Object Counts" />
+  <Counter object_name="Plan Cache" counter_name="Cache Pages" />
 </Counters>
