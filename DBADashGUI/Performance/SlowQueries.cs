@@ -9,6 +9,8 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Data.SqlClient;
 using DBADashGUI.Performance;
+using Humanizer;
+using System.Diagnostics;
 
 namespace DBADashGUI
 {
@@ -69,6 +71,8 @@ namespace DBADashGUI
         {
             dgvSlow.DataSource = null;
             lblPageSize.Visible = false;
+            toggleSummary(true);
+            
             int top = Convert.ToInt32(tsTop.Tag);
             SqlConnection cn = new SqlConnection(ConnectionString);
             using (cn)
@@ -516,18 +520,34 @@ namespace DBADashGUI
 
         private void dgvSlow_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
-            if (e.RowIndex >= 0 && dgvSlow.Columns[e.ColumnIndex] == colText)
+            if (e.RowIndex >= 0)
             {
                 var row = (DataRowView)dgvSlow.Rows[e.RowIndex].DataBoundItem;
-                var frm = new CodeViewer
+                if(dgvSlow.Columns[e.ColumnIndex] == colText){
+                    var frm = new CodeViewer
+                    {
+                        SQL = (string)row["Text"]
+                    };
+                    frm.ShowDialog();
+                }
+                else if(dgvSlow.Columns[e.ColumnIndex] == colSessionID)
                 {
-                    SQL = (string)row["Text"]
-                };
-                frm.ShowDialog();
-            }
+                    int sessionID = Convert.ToInt32(row["session_id"]);
+                    DateTime toDate = Convert.ToDateTime(row["timestamp"]).ToUniversalTime();
+                    DateTime fromDate = Convert.ToDateTime(row["start_time"]).ToUniversalTime();
+                    int instanceID = Convert.ToInt32(row["InstanceID"]);
+                    toggleSummary(false);
+                    runningQueries1.SessionID = sessionID;
+                    runningQueries1.SnapshotDateFrom = fromDate;
+                    runningQueries1.SnapshotDateTo = toDate;
+                    runningQueries1.InstanceID = instanceID;
+                    runningQueries1.RefreshData();
+
+                }
+            }       
         }
 
-        private void Filter_KeyPress(object sender, KeyPressEventArgs e)
+           private void Filter_KeyPress(object sender, KeyPressEventArgs e)
         {
             if (e.KeyChar == (char)13)
             {
@@ -537,7 +557,8 @@ namespace DBADashGUI
 
         private void tsCopySummary_Click(object sender, EventArgs e)
         {
-            Common.CopyDataGridViewToClipboard(dgvSummary);
+
+           Common.CopyDataGridViewToClipboard(dgvSummary);
         }
 
         private void tsCopyDetail_Click(object sender, EventArgs e)
@@ -562,7 +583,7 @@ namespace DBADashGUI
 
         private void tsExcel_Click(object sender, EventArgs e)
         {
-            Common.PromptSaveDataGridView(ref dgvSummary);
+           Common.PromptSaveDataGridView(ref dgvSummary);    
         }
 
         private void tsExcelDetail_Click(object sender, EventArgs e)
@@ -570,6 +591,17 @@ namespace DBADashGUI
             Common.PromptSaveDataGridView(ref dgvSlow);
         }
 
+        private void toggleSummary(bool isSummary)
+        {
+            tsRunning.Visible = !isSummary;
+            tsSummary.Visible = isSummary;
+            dgvSummary.Visible = isSummary;
+            runningQueries1.Visible = !isSummary;
+        }
 
+        private void tsRunningBack_Click(object sender, EventArgs e)
+        {
+            toggleSummary(true);
+        }
     }
 }

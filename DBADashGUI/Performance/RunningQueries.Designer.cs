@@ -56,6 +56,8 @@ namespace DBADashGUI.Performance
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.noneToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.lblJobCount = new System.Windows.Forms.ToolStripLabel();
+            this.tsPrevious = new System.Windows.Forms.ToolStripButton();
+            this.tsNext = new System.Windows.Forms.ToolStripButton();
             ((System.ComponentModel.ISupportInitialize)(this.dgv)).BeginInit();
             this.toolStrip1.SuspendLayout();
             this.SuspendLayout();
@@ -73,7 +75,7 @@ namespace DBADashGUI.Performance
             this.dgv.RowHeadersVisible = false;
             this.dgv.RowHeadersWidth = 51;
             this.dgv.RowTemplate.Height = 24;
-            this.dgv.Size = new System.Drawing.Size(717, 335);
+            this.dgv.Size = new System.Drawing.Size(1090, 449);
             this.dgv.TabIndex = 0;
             this.dgv.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgv_CellContentClick);
             this.dgv.CellFormatting += new System.Windows.Forms.DataGridViewCellFormattingEventHandler(this.dgv_CellFormatting);
@@ -87,13 +89,15 @@ namespace DBADashGUI.Performance
             this.tsExcel,
             this.tsBack,
             this.tsGetLatest,
+            this.tsNext,
             this.lblSnapshotDate,
             this.tsBlocking,
             this.tsGroupBy,
-            this.lblJobCount});
+            this.lblJobCount,
+            this.tsPrevious});
             this.toolStrip1.Location = new System.Drawing.Point(0, 0);
             this.toolStrip1.Name = "toolStrip1";
-            this.toolStrip1.Size = new System.Drawing.Size(717, 27);
+            this.toolStrip1.Size = new System.Drawing.Size(1090, 27);
             this.toolStrip1.TabIndex = 1;
             this.toolStrip1.Text = "Group By";
             // 
@@ -103,7 +107,7 @@ namespace DBADashGUI.Performance
             this.tsRefresh.Image = global::DBADashGUI.Properties.Resources._112_RefreshArrow_Green_16x16_72;
             this.tsRefresh.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsRefresh.Name = "tsRefresh";
-            this.tsRefresh.Size = new System.Drawing.Size(29, 24);
+            this.tsRefresh.Size = new System.Drawing.Size(29, 28);
             this.tsRefresh.Text = "Refresh";
             this.tsRefresh.Click += new System.EventHandler(this.tsRefresh_Click);
             // 
@@ -113,7 +117,7 @@ namespace DBADashGUI.Performance
             this.tsCopy.Image = global::DBADashGUI.Properties.Resources.ASX_Copy_blue_16x;
             this.tsCopy.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsCopy.Name = "tsCopy";
-            this.tsCopy.Size = new System.Drawing.Size(29, 24);
+            this.tsCopy.Size = new System.Drawing.Size(29, 28);
             this.tsCopy.Text = "Copy";
             this.tsCopy.Click += new System.EventHandler(this.tsCopy_Click);
             // 
@@ -123,17 +127,18 @@ namespace DBADashGUI.Performance
             this.tsExcel.Image = global::DBADashGUI.Properties.Resources.excel16x16;
             this.tsExcel.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsExcel.Name = "tsExcel";
-            this.tsExcel.Size = new System.Drawing.Size(29, 24);
+            this.tsExcel.Size = new System.Drawing.Size(29, 28);
             this.tsExcel.Text = "Export to Excel";
             this.tsExcel.Click += new System.EventHandler(this.tsExcel_Click);
             // 
             // tsBack
             // 
             this.tsBack.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.tsBack.Enabled = false;
             this.tsBack.Image = global::DBADashGUI.Properties.Resources.Previous_grey_16x;
             this.tsBack.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsBack.Name = "tsBack";
-            this.tsBack.Size = new System.Drawing.Size(29, 24);
+            this.tsBack.Size = new System.Drawing.Size(29, 28);
             this.tsBack.Text = "Back";
             this.tsBack.Click += new System.EventHandler(this.tsBack_Click);
             // 
@@ -143,7 +148,7 @@ namespace DBADashGUI.Performance
             this.tsGetLatest.Image = global::DBADashGUI.Properties.Resources._112_RefreshArrow_Green_16x16_72;
             this.tsGetLatest.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsGetLatest.Name = "tsGetLatest";
-            this.tsGetLatest.Size = new System.Drawing.Size(99, 24);
+            this.tsGetLatest.Size = new System.Drawing.Size(99, 28);
             this.tsGetLatest.Text = "Get Latest";
             this.tsGetLatest.Click += new System.EventHandler(this.tsGetLatest_Click);
             // 
@@ -152,7 +157,7 @@ namespace DBADashGUI.Performance
             this.lblSnapshotDate.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
             this.lblSnapshotDate.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
             this.lblSnapshotDate.Name = "lblSnapshotDate";
-            this.lblSnapshotDate.Size = new System.Drawing.Size(115, 24);
+            this.lblSnapshotDate.Size = new System.Drawing.Size(115, 28);
             this.lblSnapshotDate.Text = "Snapshot Date:";
             this.lblSnapshotDate.Visible = false;
             // 
@@ -161,7 +166,7 @@ namespace DBADashGUI.Performance
             this.tsBlocking.Image = global::DBADashGUI.Properties.Resources.Table_16x;
             this.tsBlocking.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsBlocking.Name = "tsBlocking";
-            this.tsBlocking.Size = new System.Drawing.Size(130, 24);
+            this.tsBlocking.Size = new System.Drawing.Size(130, 28);
             this.tsBlocking.Text = "Show Blocking";
             this.tsBlocking.Click += new System.EventHandler(this.tsBlocking_Click);
             // 
@@ -312,9 +317,31 @@ namespace DBADashGUI.Performance
             this.lblJobCount.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Italic);
             this.lblJobCount.ForeColor = System.Drawing.Color.DarkSlateBlue;
             this.lblJobCount.Name = "lblJobCount";
-            this.lblJobCount.Size = new System.Drawing.Size(118, 24);
+            this.lblJobCount.Size = new System.Drawing.Size(118, 28);
             this.lblJobCount.Text = "Jobs Running: {0}";
             this.lblJobCount.Visible = false;
+            // 
+            // tsPrevious
+            // 
+            this.tsPrevious.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
+            this.tsPrevious.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.tsPrevious.Image = global::DBADashGUI.Properties.Resources.arrow_back_16xLG;
+            this.tsPrevious.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tsPrevious.Name = "tsPrevious";
+            this.tsPrevious.Size = new System.Drawing.Size(29, 24);
+            this.tsPrevious.Text = "Previous Snapshot";
+            this.tsPrevious.Click += new System.EventHandler(this.tsPrevious_Click);
+            // 
+            // tsNext
+            // 
+            this.tsNext.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
+            this.tsNext.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.tsNext.Image = global::DBADashGUI.Properties.Resources.arrow_Forward_16xLG;
+            this.tsNext.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tsNext.Name = "tsNext";
+            this.tsNext.Size = new System.Drawing.Size(29, 24);
+            this.tsNext.Text = "Next Snapshot";
+            this.tsNext.Click += new System.EventHandler(this.tsNext_Click);
             // 
             // RunningQueries
             // 
@@ -323,7 +350,7 @@ namespace DBADashGUI.Performance
             this.Controls.Add(this.dgv);
             this.Controls.Add(this.toolStrip1);
             this.Name = "RunningQueries";
-            this.Size = new System.Drawing.Size(717, 362);
+            this.Size = new System.Drawing.Size(1090, 476);
             ((System.ComponentModel.ISupportInitialize)(this.dgv)).EndInit();
             this.toolStrip1.ResumeLayout(false);
             this.toolStrip1.PerformLayout();
@@ -360,5 +387,7 @@ namespace DBADashGUI.Performance
         private System.Windows.Forms.ToolStripMenuItem planHandleToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem sQLHandleToolStripMenuItem;
         private System.Windows.Forms.ToolStripLabel lblJobCount;
+        private System.Windows.Forms.ToolStripButton tsPrevious;
+        private System.Windows.Forms.ToolStripButton tsNext;
     }
 }

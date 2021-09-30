@@ -24,14 +24,22 @@ namespace DBADashGUI.Performance
         public List<Int32> InstanceIDs;
         private DateTime currentSnapshotDate;
         private DataTable snapshotDT;
+        public DateTime SnapshotDateFrom;
+        public DateTime SnapshotDateTo;
+        public int SessionID=0;
+   
         public void RefreshData()
         {
             lblJobCount.Visible = false;
             snapshotDT = null;
+            tsBack.Enabled = false;
             tsBlocking.Visible = false;
             dgv.DataSource = null;
             tsGroupBy.Enabled = false;
             lblSnapshotDate.Visible = false;
+            tsPrevious.Visible = false;
+            tsNext.Visible = false;
+            tsGetLatest.Visible = true;
             if (InstanceIDs!=null && InstanceIDs.Count == 1)
             {
                 InstanceID = InstanceIDs[0];
@@ -41,18 +49,25 @@ namespace DBADashGUI.Performance
             dgv.Columns.Add(new DataGridViewLinkColumn() { HeaderText = "InstanceID", DataPropertyName = "InstanceID", Name = "colInstanceID", Visible = false });
             DataTable dt;
 
-            if (InstanceID > 0)
+            if (SessionID != 0)
             {
+                tsGetLatest.Visible = false;
+                snapshotDT = runningQueriesForSession(SessionID, SnapshotDateFrom, SnapshotDateTo, InstanceID);
+                loadSnapshot(new DataView(snapshotDT));
+                return;
+            }
+            else if (InstanceID > 0)
+            {
+                
                 dt = runningQueriesSummary();
                 tsGetLatest.Visible = true;
-                tsBack.Visible = InstanceIDs != null && InstanceIDs.Count>1;
+                tsBack.Enabled = InstanceIDs != null && InstanceIDs.Count>1;
                 dgv.Columns.Add(new DataGridViewTextBoxColumn { HeaderText = "Instance", DataPropertyName = "Instance", Name = "colInstance" });
             }
             else
             {
                 dt = runningQueriesServerSummary();
                 tsGetLatest.Visible = false;
-                tsBack.Visible = false;
                 dgv.Columns.Add(new DataGridViewLinkColumn() { HeaderText = "Instance", DataPropertyName = "Instance", Name = "colInstance", SortMode= DataGridViewColumnSortMode.Automatic });
             }
                 
@@ -68,6 +83,24 @@ namespace DBADashGUI.Performance
             }
             dgv.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
            
+        }
+
+        private DataTable runningQueriesForSession(int sessionID, DateTime fromDate, DateTime toDate, int instanceID)
+        {
+            using (var cn = new SqlConnection(Common.ConnectionString))
+            using (var cmd = new SqlCommand("RunningQueriesForSession_Get", cn) { CommandType = CommandType.StoredProcedure })
+            using (var da = new SqlDataAdapter(cmd))
+            {
+                cmd.Parameters.AddWithValue("SessionID", sessionID);
+                cmd.Parameters.Add(new SqlParameter("SnapshotDateFrom", fromDate) { DbType = DbType.DateTime2 });
+                cmd.Parameters.Add(new SqlParameter("SnapshotDateTo", toDate) { DbType = DbType.DateTime2 });
+                cmd.Parameters.AddWithValue("InstanceID", instanceID);
+                DataTable dt = new DataTable();               
+                da.Fill(dt);
+                Common.ConvertUTCToLocal(ref dt);
+                dt.Columns["SnapshotDateUTC"].ColumnName = "SnapshotDate";
+                return dt;
+            }
         }
 
         private DataTable runningQueriesServerSummary()
@@ -102,7 +135,7 @@ namespace DBADashGUI.Performance
             }
         }
 
-        private DataTable runningQueriesSnapshot(ref DateTime snapshotDate)
+        private DataTable runningQueriesSnapshot(ref DateTime snapshotDate,int skip=0)
         {
             using (var cn = new SqlConnection(Common.ConnectionString))
             using (var cmd = new SqlCommand("dbo.RunningQueries_Get", cn) { CommandType = CommandType.StoredProcedure })
@@ -111,6 +144,7 @@ namespace DBADashGUI.Performance
                 var dt = new DataTable();
                 cmd.Parameters.AddWithValue("InstanceID", InstanceID);
                 var pSnapshotDate = cmd.Parameters.AddWithValue("SnapshotDate", snapshotDate);
+                cmd.Parameters.AddWithValue("Skip", skip);
                 pSnapshotDate.SqlDbType = SqlDbType.DateTime2;
                 pSnapshotDate.Direction = ParameterDirection.InputOutput;
                 if (snapshotDate ==  DateTime.MaxValue)
@@ -127,9 +161,9 @@ namespace DBADashGUI.Performance
             }
         }
 
-        private void loadSnapshot(DateTime snapshotDate)
+        private void loadSnapshot(DateTime snapshotDate,int skip=0)
         {           
-            snapshotDT = runningQueriesSnapshot(ref snapshotDate);
+            snapshotDT = runningQueriesSnapshot(ref snapshotDate,skip);
             int runningJobCount = snapshotDT.AsEnumerable().Where(r => r["job_id"] != DBNull.Value).Count();
             if (runningJobCount == 0)
             {
@@ -146,15 +180,17 @@ namespace DBADashGUI.Performance
             loadSnapshot(new DataView(snapshotDT));
             lblSnapshotDate.Visible = true;
             tsGetLatest.Visible = true;
+            tsPrevious.Visible = true;
+            tsNext.Visible = true;
             int blockedCount = snapshotDT.AsEnumerable().Where(r => Convert.ToInt16(r["blocking_session_id"]) != 0).Count();
             tsBlocking.Visible = true;
             tsBlocking.Enabled = blockedCount > 0;
             tsBlocking.Text = string.Format("Show Blocking ({0})", blockedCount);
             currentSnapshotDate = snapshotDate;
-            tsBack.Visible = true;
+            tsBack.Enabled = true;
         }
 
-        private void loadSnapshot(object source)
+        private void loadSnapshot(DataView source)
         {
 
             dgv.DataSource = null;
@@ -162,11 +198,12 @@ namespace DBADashGUI.Performance
             dgv.Columns.Add(new DataGridViewLinkColumn() { HeaderText = "Batch Text", DataPropertyName = "batch_text", Name = "colBatchText", AutoSizeMode = DataGridViewAutoSizeColumnMode.None, Width = 50, SortMode = DataGridViewColumnSortMode.Automatic });
             dgv.Columns.Add(new DataGridViewLinkColumn() { HeaderText = "Text", DataPropertyName = "text", Name = "colText", AutoSizeMode = DataGridViewAutoSizeColumnMode.None, Width = 50, SortMode = DataGridViewColumnSortMode.Automatic });
             dgv.Columns.Add(new DataGridViewLinkColumn() { HeaderText = "Plan", DataPropertyName = "query_plan", Name = "colQueryPlan", AutoSizeMode = DataGridViewAutoSizeColumnMode.None, Width = 50, SortMode = DataGridViewColumnSortMode.NotSortable });
+            dgv.Columns.Add(new DataGridViewLinkColumn() { HeaderText = "Session ID", DataPropertyName = "session_id", Name = "colSessionID", SortMode = DataGridViewColumnSortMode.Automatic });
             dgv.DataSource = source;
             foreach (DataGridViewColumn col in dgv.Columns)
             {
                 col.HeaderText = col.HeaderText.Titleize();
-                if (snapshotDT.Columns[col.DataPropertyName].DataType.IsNumeric() && !col.DataPropertyName.EndsWith("id"))
+                if (source.Table.Columns[col.DataPropertyName].DataType.IsNumeric() && !col.DataPropertyName.EndsWith("id"))
                 {
                     col.DefaultCellStyle.Format = "#,##0.###";
                 }
@@ -189,6 +226,7 @@ namespace DBADashGUI.Performance
                     var snapshotDate = ((DateTime)row["SnapshotDate"]).ToUniversalTime();
                     InstanceID = (int)row["InstanceID"];
                     loadSnapshot(snapshotDate);
+                    tsBack.Enabled = true;
                 }
                 else if (dgv.Columns[e.ColumnIndex].Name == "colInstance")
                 {
@@ -202,30 +240,43 @@ namespace DBADashGUI.Performance
                 }
                 else if (dgv.Columns[e.ColumnIndex].Name == "colText")
                 {
-                    var frm = new CodeViewer() { SQL = (string)row["text"] };                   
+                    var frm = new CodeViewer() { SQL = (string)row["text"] };
                     frm.Show();
                 }
                 else if (dgv.Columns[e.ColumnIndex].Name == "colQueryPlan")
                 {
-                    var plan =  (string)row["query_plan"];
+                    var plan = (string)row["query_plan"];
                     string path = System.IO.Path.GetTempFileName() + ".sqlplan";
                     System.IO.File.WriteAllText(path, plan);
                     Process.Start(path);
                 }
-                else if(dgv.Columns[e.ColumnIndex].Name == "colGroup")
+                else if (dgv.Columns[e.ColumnIndex].Name == "colGroup")
                 {
-                    string filter = dgv.Columns[e.ColumnIndex].DataPropertyName + "='" + Convert.ToString(row[dgv.Columns[e.ColumnIndex].DataPropertyName]).Replace("'","''") + "'";
+                    string filter = dgv.Columns[e.ColumnIndex].DataPropertyName + "='" + Convert.ToString(row[dgv.Columns[e.ColumnIndex].DataPropertyName]).Replace("'", "''") + "'";
                     DataView dv;
                     try
                     {
                         dv = new DataView(snapshotDT, filter, "", DataViewRowState.CurrentRows);
                     }
-                    catch(Exception ex)
+                    catch (Exception ex)
                     {
                         MessageBox.Show("Filter error: " + filter + Environment.NewLine + ex.Message);
                         return;
                     }
                     loadSnapshot(dv);
+                    tsBack.Enabled = true;
+                }
+                else if (dgv.Columns[e.ColumnIndex].Name == "colSessionID")
+                {
+                    var frm = new CompletedRPCBatchEvent()
+                    {
+                        SessionID = Convert.ToInt32(row["session_id"]),
+                        InstanceID = Convert.ToInt32(row["InstanceID"]),
+                        SnapshotDateUTC = Convert.ToDateTime(row["SnapshotDate"]).ToUniversalTime(),
+                        StartTimeUTC = row["start_time"] == DBNull.Value ? Convert.ToDateTime(row["last_request_start_time"]).ToUniversalTime() : Convert.ToDateTime(row["start_time"]).ToUniversalTime(),
+                        IsSleeping = Convert.ToString(row["status"]) == "sleeping"
+                    };
+                    frm.ShowDialog();
                 }
             }
         }
@@ -250,6 +301,7 @@ namespace DBADashGUI.Performance
             if (dgv.Columns.Contains("colGroup") ||  !string.IsNullOrEmpty(rowFilter) )
             {
                 loadSnapshot(new DataView(snapshotDT));
+                tsBack.Enabled = false;
             }
             else if (dgv.Columns.Contains("colSnapshotDate"))
             {
@@ -274,19 +326,18 @@ namespace DBADashGUI.Performance
 
         private void dgv_CellFormatting(object sender, DataGridViewCellFormattingEventArgs e)
         {
-            if(e.ColumnIndex==1 || e.ColumnIndex==2 || e.ColumnIndex == 3)
+       
+            if (dgv.Columns[e.ColumnIndex].Name =="colQueryPlan")
             {
-                if (e.ColumnIndex == 3 && dgv.Columns[e.ColumnIndex].Name =="colQueryPlan")
-                {
-                    e.Value = e.Value == DBNull.Value ? "" : "View Plan";
-                }
-                else if (Convert.ToString(e.Value).Length > 1000)
-                {
-                    e.Value = Convert.ToString(e.Value).Truncate(997) + "...";
-                }
+                e.Value = e.Value == DBNull.Value ? "" : "View Plan";
             }
-        }
+            else if (Convert.ToString(e.Value).Length > 1000)
+            {
+                e.Value = Convert.ToString(e.Value).Truncate(997) + "...";
+            }
+      
 
+        }
         private void tsBlocking_Click(object sender, EventArgs e)
         {
             using (var frm = new BlockingViewer() {InstanceID = InstanceID, SnapshotDate = currentSnapshotDate })
@@ -347,8 +398,19 @@ namespace DBADashGUI.Performance
             else
             {
                 groupSnapshot((string)ts.Tag);
+                tsBack.Enabled = true;
             }
             
+        }
+
+        private void tsPrevious_Click(object sender, EventArgs e)
+        {
+            loadSnapshot(currentSnapshotDate, -1);
+        }
+
+        private void tsNext_Click(object sender, EventArgs e)
+        {
+            loadSnapshot(currentSnapshotDate, 1);
         }
     }
 }

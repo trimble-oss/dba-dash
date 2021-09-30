@@ -224,6 +224,12 @@
     <Compile Include="Changes\QueryStore.Designer.cs">
       <DependentUpon>QueryStore.cs</DependentUpon>
     </Compile>
+    <Compile Include="Performance\CompletedRPCBatchEvent.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Performance\CompletedRPCBatchEvent.Designer.cs">
+      <DependentUpon>CompletedRPCBatchEvent.cs</DependentUpon>
+    </Compile>
     <Compile Include="SchemaCompare\SchemaSnapshots.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -656,6 +662,9 @@
     <EmbeddedResource Include="Changes\ResourceGovernor.resx">
       <DependentUpon>ResourceGovernor.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="Performance\CompletedRPCBatchEvent.resx">
+      <DependentUpon>CompletedRPCBatchEvent.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="SchemaCompare\SchemaSnapshots.resx">
       <DependentUpon>SchemaSnapshots.cs</DependentUpon>
     </EmbeddedResource>
@@ -858,6 +867,8 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Resources\arrow_Forward_16xLG.png" />
+    <None Include="Resources\arrow_back_16xLG.png" />
     <None Include="Resources\List_NumberedHS.png" />
     <None Include="Resources\excel16x16.png" />
     <None Include="Resources\Time_16x.png" />

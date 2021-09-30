@@ -1,39 +1,10 @@
-﻿CREATE PROC dbo.RunningQueries_Get(
+﻿CREATE PROC dbo.RunningQueriesForSession_Get(
 	@InstanceID INT,
-	@SnapshotDate DATETIME2=NULL OUT, /* If NULL the latest snapshot will be returned */
-	@Skip INT=0 /* Option to return the next or previous snapshot. 1= next, -1 = previous, 0 = Snapshot at @SnapshotDate (default) */
+	@SnapshotDateFrom DATETIME2(7),
+    @SnapshotDateTo DATETIME2(7),
+    @SessionID INT
 )
 AS
-IF @SnapshotDate IS NULL
-BEGIN
-    SELECT TOP(1) @SnapshotDate=SnapshotDateUTC
-    FROM dbo.RunningQueriesSummary
-    WHERE InstanceID = @InstanceID
-    ORDER BY SnapshotDateUTC DESC
-END
-IF @Skip NOT IN(0,1,-1)
-BEGIN;
-	THROW 50000,'Invalid value for parameter @Skip.  Valid options: 0,1,-1',1;
-END
-IF @Skip=1
-BEGIN
-	/* Get the next snapshot */
-	SELECT TOP(1) @SnapshotDate=SnapshotDateUTC
-    FROM dbo.RunningQueriesSummary
-    WHERE InstanceID = @InstanceID
-	AND SnapshotDateUTC > @SnapshotDate
-    ORDER BY SnapshotDateUTC
-END
-ELSE IF @Skip=-1
-BEGIN
-	/* Get the previous snapshot */
-	SELECT TOP(1) @SnapshotDate=SnapshotDateUTC
-    FROM dbo.RunningQueriesSummary
-    WHERE InstanceID = @InstanceID
-	AND SnapshotDateUTC < @SnapshotDate
-    ORDER BY SnapshotDateUTC DESC
-END 
-
 SELECT InstanceID,
        Duration,
        batch_text,
@@ -87,6 +58,7 @@ SELECT InstanceID,
        wait_object,
        wait_file 
 FROM dbo.RunningQueriesInfo Q
-WHERE Q.SnapshotDateUTC = @SnapshotDate
+WHERE Q.SnapshotDateUTC >= @SnapshotDateFrom 
+AND Q.SnapshotDateUTC < @SnapshotDateTo
 AND Q.InstanceID = @InstanceID
-ORDER BY Q.Duration DESC
+AND Q.session_id = @SessionID

@@ -13,7 +13,9 @@
 	@UserName SYSNAME=NULL,
 	@Result SYSNAME=NULL,
 	@Top INT = 30,
-	@SessionID INT =NULL
+	@SessionID INT =NULL,
+	@Sort VARCHAR(50)='Duration',
+	@SortDesc BIT = 1
 )
 AS
 DECLARE @DurationFromUS BIGINT 
@@ -35,6 +37,15 @@ BEGIN
 END;
 SET @Text = REPLACE(REPLACE(REPLACE(@Text,'[','[[]'),'_','[_]'),'%','[%]') -- Like encode input
 
+DECLARE @SortSQL NVARCHAR(MAX)
+SET @SortSQL = 'ORDER BY ' + CASE WHEN @Sort = 'Duration' THEN 'SQ.Duration' WHEN @Sort='timestamp' THEN 'SQ.timestamp' ELSE NULL END
+			+ CASE WHEN @SortDesc=1 THEN ' DESC' ELSE ' ASC' END
+
+IF @SortSQL IS NULL
+BEGIN;
+	THROW 50000,'Invalid sort specified',1;
+END
+
 DECLARE @SQL NVARCHAR(MAX)
 SET @SQL = 
 N'SELECT TOP(@Top) SQ.InstanceID,
@@ -44,8 +55,8 @@ N'SELECT TOP(@Top) SQ.InstanceID,
        SQ.event_type,
        SQ.object_name,
        SQ.timestamp,
-       SQ.duration,
-       SQ.cpu_time,
+       SQ.duration/1000000.0 as DurationSec,
+       SQ.cpu_time/1000000.0 as CPUTimeSec,
        SQ.logical_reads,
        SQ.physical_reads,
        SQ.writes,
@@ -55,9 +66,12 @@ N'SELECT TOP(@Top) SQ.InstanceID,
        SQ.client_app_name,
        SQ.result,
        SQ.Uniqueifier,
-	   SQ.session_id
+	   SQ.session_id,
+	   DATEADD(ms,-duration/1000,timestamp) AS start_time,
+	   HD.HumanDuration AS Duration
 FROM dbo.SlowQueries SQ
 JOIN dbo.Instances I ON I.InstanceID = SQ.InstanceID
+CROSS APPLY dbo.MillisecondsToHumanDuration(SQ.Duration/1000) HD
 LEFT JOIN dbo.Databases D ON D.DatabaseID = SQ.DatabaseID
 WHERE timestamp>= @FromDate
 AND timestamp< @ToDate
@@ -73,7 +87,7 @@ AND timestamp< @ToDate
 ' + CASE WHEN @UserName IS NULL THEN '' ELSE 'AND SQ.username = @UserName' END + '
 ' + CASE WHEN @Result IS NULL THEN '' ELSE 'AND SQ.Result = @Result' END + '
 ' + CASE WHEN @SessionID IS NULL THEN '' ELSE 'AND SQ.session_id = @SessionID' END + '
-ORDER BY SQ.Duration DESC'
+' + @SortSQL
 
 EXEC sp_executesql @SQL,N'@Instances IDs READONLY,@ObjectName SYSNAME,@ClientHostName SYSNAME,
 							@ConnectionID SYSNAME,@ClientAppName SYSNAME,@DurationFrom BIGINT,
