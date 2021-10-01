@@ -26,6 +26,7 @@
   <Counter object_name="Memory Manager" counter_name="Granted Workspace Memory (KB)" />
   <Counter object_name="Memory Manager" counter_name="Total Server Memory (KB)" />
   <Counter object_name="Memory Manager" counter_name="Target Server Memory (KB)" />
+  <Counter object_name="Memory Manager" counter_name="Stolen Server Memory (KB)" />
   <Counter object_name="Resource Pool Stats" counter_name="Active memory grant amount (KB)" />
   <Counter object_name="Resource Pool Stats" counter_name="Active memory grants count" />
   <Counter object_name="Resource Pool Stats" counter_name="Memory grant timeouts/sec" />
@@ -34,4 +35,6 @@
   <Counter object_name="Wait Statistics" counter_name="Memory grant queue waits" />
   <Counter object_name="Plan Cache" counter_name="Cache Object Counts" />
   <Counter object_name="Plan Cache" counter_name="Cache Pages" />
+  <Counter object_name="sys.dm_os_sys_memory" counter_name="*"/>
+  <Counter object_name="sys.dm_os_nodes" counter_name="*" />
 </Counters>
