@@ -1,0 +1,3 @@
+﻿CREATE PARTITION SCHEME PS_MemoryUsage
+    AS PARTITION PF_MemoryUsage
+    ALL TO ([PRIMARY])

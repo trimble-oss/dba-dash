@@ -205,6 +205,9 @@
   <data name="SQLLogRestores" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\SQL\SQLLogRestores.sql;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
   </data>
+  <data name="SQLMemoryUsage" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\SQL\SQLMemoryUsage.sql;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
+  </data>
   <data name="SQLObjectExecutionStats" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\SQL\SQLObjectExecutionStats.sql;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
   </data>

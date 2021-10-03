@@ -230,6 +230,12 @@
     <Compile Include="Performance\CompletedRPCBatchEvent.Designer.cs">
       <DependentUpon>CompletedRPCBatchEvent.cs</DependentUpon>
     </Compile>
+    <Compile Include="Performance\MemoryUsage.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Performance\MemoryUsage.Designer.cs">
+      <DependentUpon>MemoryUsage.cs</DependentUpon>
+    </Compile>
     <Compile Include="SchemaCompare\SchemaSnapshots.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -664,6 +670,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Performance\CompletedRPCBatchEvent.resx">
       <DependentUpon>CompletedRPCBatchEvent.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Performance\MemoryUsage.resx">
+      <DependentUpon>MemoryUsage.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="SchemaCompare\SchemaSnapshots.resx">
       <DependentUpon>SchemaSnapshots.cs</DependentUpon>

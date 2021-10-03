@@ -459,6 +459,12 @@ namespace DBADashGUI
                 runningQueries1.InstanceID = n.InstanceID;
                 runningQueries1.RefreshData();
             }
+            else if(tabs.SelectedTab == tabMemory)
+            {
+                globalTimeisVisible = true;
+                memoryUsage1.InstanceID = n.InstanceID;
+                memoryUsage1.RefreshData();
+            }
             tsTime.Visible = globalTimeisVisible;
         }
 
@@ -677,6 +683,7 @@ namespace DBADashGUI
                 allowedTabs.Add(tabSlowQueries);
                 allowedTabs.Add(tabWaits);
                 allowedTabs.Add(tabRunningQueries);
+                allowedTabs.Add(tabMemory);
             }
             else if(n.Type == SQLTreeItem.TreeType.AzureInstance)
             {
@@ -1234,6 +1241,11 @@ namespace DBADashGUI
             {
                 runningQueries1.RefreshData();
             }
+            else if(tabs.SelectedTab== tabMemory)
+            {
+                memoryUsage1.RefreshData();
+            }
+
         }
 
         private void tsCustomTime_Click(object sender, EventArgs e)

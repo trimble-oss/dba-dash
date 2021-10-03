@@ -360,6 +360,7 @@
     <Content Include="SQL\SQLJobHistory.sql" />
     <Content Include="SQL\SQLLastGoodCheckDB.sql" />
     <Content Include="SQL\SQLLogRestores.sql" />
+    <Content Include="SQL\SQLMemoryUsage.sql" />
     <Content Include="SQL\SQLObjectExecutionStats.sql" />
     <Content Include="SQL\SQLOSInfo.sql" />
     <Content Include="SQL\SQLOSLoadedModules.sql" />

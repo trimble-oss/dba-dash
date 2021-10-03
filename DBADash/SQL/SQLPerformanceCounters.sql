@@ -12,7 +12,7 @@ DECLARE @MemoryHighSignalState DECIMAL(28,9)
 DECLARE @MemoryLowSignalState DECIMAL(28,9)
 DECLARE @CountOfNodesWithThreadResourcesLow DECIMAL(28,9)
 
-IF EXISTS(SELECT * FROM @counters WHERE object_name='sys.dm_os_sys_memory')
+IF OBJECT_ID('sys.dm_os_sys_memory') IS NOT NULL AND EXISTS(SELECT * FROM @counters WHERE object_name='sys.dm_os_sys_memory')
 BEGIN
 	SELECT @AvailablePhysicalMemory= available_physical_memory_kb,
 		@MemoryHighSignalState= system_high_memory_signal_state,

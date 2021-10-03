@@ -196,7 +196,7 @@ namespace DBADash
                                     "BlockingSnapshot", "IOStats", "Waits", "OSLoadedModules", "DBTuningOptions", "AzureDBResourceStats", "AzureDBServiceObjectives", "AzureDBElasticPoolResourceStats", "SlowQueries",
                                     "SlowQueriesStats", "LastGoodCheckDB", "Alerts", "ObjectExecutionStats", "ServerPrincipals", "ServerRoleMembers", "ServerPermissions", "DatabasePrincipals", "DatabaseRoleMembers",
                                     "DatabasePermissions", "CustomChecks", "PerformanceCounters", "VLF", "DatabaseMirroring", "Jobs", "JobHistory","AvailabilityReplicas","AvailabilityGroups","JobSteps",
-                                    "DatabaseQueryStoreOptions", "ResourceGovernorConfiguration","AzureDBResourceGovernance","RunningQueries","QueryText","QueryPlans","InternalPerformanceCounters" };
+                                    "DatabaseQueryStoreOptions", "ResourceGovernorConfiguration","AzureDBResourceGovernance","RunningQueries","QueryText","QueryPlans","InternalPerformanceCounters","MemoryUsage" };
 
             var tablesInDataSet = data.Tables
                  .Cast<DataTable>()

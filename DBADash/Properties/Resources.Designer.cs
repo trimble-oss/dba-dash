@@ -242,11 +242,30 @@ namespace DBADash.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to select database_name,type, MAX(backup_start_date) LastBackup
-        ///from msdb.dbo.backupset
-        ///where server_name=@@SERVERNAME
-        ///AND backup_finish_date&gt;=DATEADD(d,-10,GETUTCDATE())
-        ///group by database_name, type.
+        ///   Looks up a localized string similar to DECLARE @SQL NVARCHAR(MAX)
+        ///SET @SQL = N&apos;
+        ///WITH T AS (
+        ///	SELECT database_name,
+        ///	type,
+        ///	backup_start_date,
+        ///	backup_finish_date,
+        ///	backup_set_id,
+        ///	time_zone,
+        ///	backup_size,
+        ///	is_password_protected,
+        ///	recovery_model,
+        ///	has_bulk_logged_data,
+        ///	is_snapshot,
+        ///	is_readonly,
+        ///	is_single_user,
+        ///	has_backup_checksums,
+        ///	is_damaged,
+        ///	has_incomplete_metadata,
+        ///	is_force_offline,
+        ///	is_copy_only,
+        ///	database_guid,
+        ///	family_guid,
+        ///	&apos; + CASE WHEN NOT EXISTS(SELECT 1 FROM msdb.sys.columns WHERE object_id = OBJECT_ID(&apos;ms [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string SQLBackups {
             get {
@@ -630,7 +649,7 @@ namespace DBADash.Properties {
         ///		ISNULL(CAST(SERVERPROPERTY(&apos;ComputerNamePhysicalNetBIOS&apos;) as nvarchar(128)),&apos;&apos;) as ComputerNamePhysicalNetBIOS,
         ///		DB_NAME() as DBName,
         ///		SERVERPROPERTY (&apos;ProductVersion&apos;) as ProductVersion,
-        ///		DATEDIFF( [rest of string was truncated]&quot;;.
+        ///		CAST(ROUN [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string SQLInstance {
             get {
@@ -727,16 +746,34 @@ namespace DBADash.Properties {
         ///           rsh.restore_date,
         ///           bs.backup_start_date,
         ///           bmf.physical_device_name AS last_file,
+        ///		   bs.time_zone AS backup_time_zone,
         ///           ROW_NUMBER() OVER (PARTITION BY rsh.destination_database_name
         ///                              ORDER BY rsh.restore_date DESC
         ///                             ) rnum
         ///    FROM msdb.dbo.restorehistory rsh
-        ///        INNER JOIN msdb.dbo.backupset bs ON rsh.backup_set_id = bs.backup_set_id
-        ///        INNER JOIN msdb.dbo.restoref [rest of string was truncated]&quot;;.
+        ///        INNER JOIN msdb.dbo.backupset bs ON rsh.backup_set_id = bs.backup_set_ [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string SQLLogRestores {
             get {
                 return ResourceManager.GetString("SQLLogRestores", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to SET TRAN ISOLATION LEVEL READ UNCOMMITTED
+        ///DECLARE @Threshold BIGINT=1024
+        ///DECLARE @PagesKB VARCHAR(MAX) = CASE WHEN COLUMNPROPERTY(OBJECT_ID(&apos;sys.dm_os_memory_clerks&apos;),&apos;pages_kb&apos;,&apos;ColumnId&apos;) IS NOT NULL THEN &apos;c.pages_kb&apos; ELSE &apos;c.single_pages_kb + c.multi_pages_kb&apos; END
+        ///DECLARE @SQL NVARCHAR(MAX) 
+        ///SET @SQL = &apos;
+        ///SELECT type,
+        ///	SUM(&apos; + @PagesKB + &apos;) pages_kb,
+        ///	SUM(virtual_memory_reserved_kb) AS virtual_memory_reserved_kb,
+        ///	SUM(virtual_memory_committed_kb) AS virtual_memory_committed_kb,
+        ///	SUM(awe_allocated [rest of string was truncated]&quot;;.
+        /// </summary>
+        internal static string SQLMemoryUsage {
+            get {
+                return ResourceManager.GetString("SQLMemoryUsage", resourceCulture);
             }
         }
         
@@ -820,9 +857,9 @@ namespace DBADash.Properties {
         ///SELECT ctrs.c.value(&apos;@object_name&apos;,&apos;NCHAR(128)&apos;),ctrs.c.value(&apos;@counter_name&apos;,&apos;NCHAR(128)&apos;) ,ctrs.c.value(&apos;@instance_name&apos;,&apos;NCHAR(128)&apos;) 
         ///FROM @CountersXML.nodes(&apos;Counters/Counter&apos;) ctrs(c)
         ///
-        ///SELECT SYSUTCDATETIME() AS SnapshotDate,
-        ///		STUFF(pc.object_name,1,CHARINDEX(&apos;:&apos;,pc.object_name),&apos;&apos;) AS object_name,
-        ///   [rest of string was truncated]&quot;;.
+        ///DECLARE @AvailablePhysicalMemory DECIMAL(28,9)
+        ///DECLARE @MemoryHighSignalState DECIMAL(28,9)
+        ///DECLARE @MemoryLowSignalSt [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string SQLPerformanceCounters {
             get {
@@ -875,31 +912,25 @@ namespace DBADash.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to /* 2012+ !!!! */
+        ///   Looks up a localized string similar to DECLARE @SQL NVARCHAR(MAX) 
+        ///SET @SQL = N&apos;
         ///SELECT SYSUTCDATETIME() as SnapshotDateUTC,
         ///	s.session_id,
         ///	r.statement_start_offset,
         ///	r.statement_end_offset,
-        ///	R.command,
+        ///	r.command,
         ///	s.status,
         ///	r.wait_time,
         ///	r.wait_type,
         ///	r.wait_resource,
-        ///	r.blocking_session_id,
-        ///	r.cpu_time,
-        ///	r.logical_reads,
-        ///	r.reads,
-        ///	r.writes,
+        ///	ISNULL(r.blocking_session_id,0) as blocking_session_id,
+        ///	ISNULL(r.cpu_time,s.cpu_time) cpu_time,
+        ///	ISNULL(r.logical_reads,s.logical_reads) logical_reads,
+        ///	ISNULL(r.reads,s.reads) reads,
+        ///	ISNULL(r.writes,s.writes) writes,
         ///	r.granted_query_memory,
         ///	r.percent_complete,
-        ///	s.open_transaction_count,
-        ///	s.transaction_isolation_level,
-        ///	s.login_name,
-        ///	s.host_name,
-        ///	s.database_id, --2012+
-        ///	s.program_name,
-        ///	s.client_interface_name,
-        ///	DATEADD(mi,DA [rest of string was truncated]&quot;;.
+        ///	&apos; +  [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string SQLRunningQueries {
             get {
@@ -999,9 +1030,8 @@ namespace DBADash.Properties {
         ///DECLARE @SQL NVARCHAR(MAX)
         ///DECLARE @EventSessionTemplate NVARCHAR(MAX) = N&apos;CREATE EVENT SESSION [{EventSessionName}] ON SERVER
         ///	ADD EVENT sqlserver.rpc_completed(
-        ///		ACTION(sqlserver.client_app_name,sqlserver.client_hostname,sqlserver.database_id,sqlserver.username)
-        ///		WHERE ([duration]&gt;(&apos; + CAST(@SlowQueryThreshold AS NVARCHAR(MAX)) + &apos;) AND ([sqlserver].[client_app_name]&lt;&gt;N&apos;&apos;DBADashXE&apos;&apos; AND [object_name]&lt;&gt;N&apos;&apos;sp_readrequest&apos;&apos;))),
-        ///	ADD EVENT sqlser [rest of string was truncated]&quot;;.
+        ///		ACTION(sqlserver.client_app_name,sqlserver.client_hostname,sqlserver.database_id,sqlserver.username,sqlserver.session_id)
+        ///		WHERE ([duration]&gt;(&apos; + CAST(@SlowQueryThreshold AS NVARCHAR(MAX)) + &apos;) AND ([sqlserver].[client_app_name]&lt;&gt;N&apos;&apos;DBADashXE&apos;&apos; AND [object_name]&lt;&gt;N&apos;&apos;sp_readrequest&apos;&apos;)) [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string SQLSlowQueries {
             get {
@@ -1014,9 +1044,8 @@ namespace DBADash.Properties {
         ///DECLARE @SQL NVARCHAR(MAX)
         ///DECLARE @EventSessionTemplate NVARCHAR(MAX) = N&apos;CREATE EVENT SESSION [{EventSessionName}] ON DATABASE
         ///	ADD EVENT sqlserver.rpc_completed(
-        ///		ACTION(sqlserver.client_app_name,sqlserver.client_hostname,sqlserver.database_id,sqlserver.username)
-        ///		WHERE ([duration]&gt;(&apos; + CAST(@SlowQueryThreshold AS NVARCHAR(MAX)) + &apos;) AND ([sqlserver].[client_app_name]&lt;&gt;N&apos;&apos;DBADashXE&apos;&apos; AND [object_name]&lt;&gt;N&apos;&apos;sp_readrequest&apos;&apos;))),
-        ///	ADD EVENT sqls [rest of string was truncated]&quot;;.
+        ///		ACTION(sqlserver.client_app_name,sqlserver.client_hostname,sqlserver.database_id,sqlserver.username,sqlserver.session_id)
+        ///		WHERE ([duration]&gt;(&apos; + CAST(@SlowQueryThreshold AS NVARCHAR(MAX)) + &apos;) AND ([sqlserver].[client_app_name]&lt;&gt;N&apos;&apos;DBADashXE&apos;&apos; AND [object_name]&lt;&gt;N&apos;&apos;sp_readrequest&apos;&apos; [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string SQLSlowQueriesAzure {
             get {

@@ -29,7 +29,7 @@
     <QueryStoreStaleQueryThreshold>15</QueryStoreStaleQueryThreshold>
     <QueryStoreMaxStorageSize>512</QueryStoreMaxStorageSize>
     <QueryStoreMaxPlansPerQuery>50</QueryStoreMaxPlansPerQuery>
-    <DacVersion>2.0.3.47</DacVersion>
+    <DacVersion>2.0.3.49</DacVersion>
     <ReadCommittedSnapshot>True</ReadCommittedSnapshot>
     <AllowSnapshotIsolation>True</AllowSnapshotIsolation>
     <CompatibilityMode>130</CompatibilityMode>
@@ -603,6 +603,17 @@
     <Build Include="dbo\Stored Procedures\LastBackup_Get.sql" />
     <Build Include="dbo\Views\RunningQueriesInfo.sql" />
     <Build Include="dbo\Stored Procedures\RunningQueriesForSession_Get.sql" />
+    <Build Include="dbo\User Defined Types\MemoryUsage.sql" />
+    <Build Include="dbo\Tables\MemoryUsage.sql" />
+    <Build Include="dbo\Tables\MemoryClerkType.sql" />
+    <Build Include="Switch\Tables\MemoryUsage.sql" />
+    <Build Include="Storage\PF_MemoryUsage.sql" />
+    <Build Include="Storage\PS_MemoryUsage.sql" />
+    <Build Include="dbo\Stored Procedures\MemoryUsage_Upd.sql" />
+    <Build Include="dbo\Stored Procedures\MemoryUsage_Get.sql" />
+    <Build Include="dbo\Stored Procedures\MemoryClerkUsage_Get.sql" />
+    <Build Include="dbo\Stored Procedures\MemoryConfig_Get.sql" />
+    <Build Include="dbo\Stored Procedures\MemoryCounters_Get.sql" />
   </ItemGroup>
   <ItemGroup>
     <PostDeploy Include="Script.PostDeployment1.sql" />

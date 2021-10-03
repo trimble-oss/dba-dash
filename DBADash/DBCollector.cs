@@ -68,7 +68,8 @@ namespace DBADash
         ResourceGovernorConfiguration,
         DatabaseQueryStoreOptions,
         AzureDBResourceGovernance,
-        RunningQueries
+        RunningQueries,
+        MemoryUsage
     }
 
     public enum HostPlatform
@@ -476,6 +477,7 @@ namespace DBADash
                     Collect(CollectionType.AvailabilityReplicas);
                     Collect(CollectionType.AvailabilityGroups);
                 }
+                Collect(CollectionType.MemoryUsage);
                 return;
             }
             else if(collectionType == CollectionType.Infrequent)

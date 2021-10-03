@@ -6,7 +6,7 @@
 AS
 SET XACT_ABORT ON
 DECLARE @Ref VARCHAR(30)='RunningQueries'
-IF NOT EXISTS(SELECT 1 FROM dbo.CollectionDates WHERE SnapshotDate>=@SnapshotDate AND InstanceID = @InstanceID AND Reference=@Ref)
+IF NOT EXISTS(SELECT 1 FROM dbo.CollectionDates WHERE SnapshotDate>=CAST(@SnapshotDate AS DATETIME2(2)) AND InstanceID = @InstanceID AND Reference=@Ref)
 BEGIN
     /* Get exact time snapshot was run from table which might be slightly different from input param */
     SELECT TOP(1) @SnapshotDate = SnapshotDateUTC 

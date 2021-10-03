@@ -173,8 +173,9 @@ FROM (VALUES('ObjectExecutionStats',120),
 				('PerformanceCounters_60MIN',730),
 				('JobStats_60MIN',730),
 				('JobHistory',8),
-				('RunningQueries',14),
-				('CollectionErrorLog',14)
+				('RunningQueries',30),
+				('CollectionErrorLog',14),
+				('MemoryUsage',30)
 				) AS t(TableName,RetentionDays)
 WHERE NOT EXISTS(SELECT 1 FROM dbo.DataRetention DR WHERE DR.TableName = T.TableName)
 
@@ -371,7 +372,8 @@ FROM
 (-1,'PerformanceCounters',5,10),
 (-1,'DatabaseQueryStoreOptions',1445,2880),
 (-1,'AzureDBResourceGovernance',125,180),
-(-1,'ResourceGovernorConfiguration',1445,2880)
+(-1,'ResourceGovernorConfiguration',1445,2880),
+(-1,'MemoryUsage',5,10)
 ) T(InstanceID,Reference,WarningThreshold,CriticalThreshold)
 WHERE NOT EXISTS(SELECT 1 FROM dbo.CollectionDatesThresholds CDT WHERE CDT.InstanceID = T.InstanceID AND CDT.Reference = T.Reference)
 
@@ -611,4 +613,117 @@ FROM (VALUES('PurgeCollectionErrorLog_StartDate'),
 	  ) T(SettingName)
 WHERE NOT EXISTS(SELECT 1 
 				FROM dbo.Settings S
-				WHERE S.SettingName=T.SettingName)
+				WHERE S.SettingName=T.SettingName);
+
+/* From: https://docs.microsoft.com/en-us/sql/relational-databases/system-dynamic-management-views/sys-dm-os-memory-clerks-transact-sql?view=sql-server-ver15 */
+MERGE INTO dbo.MemoryClerkType AS T
+USING (VALUES
+('CACHESTORE_BROKERDSH','This cache store is used to store allocations by Service Broker Dialog Security Header Cache'),
+('CACHESTORE_BROKERKEK','This cache store is used to store allocations by Service Broker Key Exchange Key Cache'),
+('CACHESTORE_BROKERREADONLY','This cache store is used to store allocations by Service Broker Read Only Cache'),
+('CACHESTORE_BROKERRSB','This cache store is used to store allocations by Service Broker Remote Service Binding Cache.'),
+('CACHESTORE_BROKERTBLACS','This cache store is used to store allocations by Service Broker for security access structures.'),
+('CACHESTORE_BROKERTO','This cache store is used to store allocations by Service Broker Transmission Object Cache'),
+('CACHESTORE_BROKERUSERCERTLOOKUP','This cache store is used to store allocations by Service Broker user certificates lookup cache'),
+('CACHESTORE_COLUMNSTOREOBJECTPOOL','This cache store is used for allocations by Columnstore Indexes for segments and dictionaries'),
+('CACHESTORE_CONVPRI','This cache store is used to store allocations by Service Broker to keep track of Conversations priorities'),
+('CACHESTORE_EVENTS','This cache store is used to store allocations by Service Broker Event Notifications'),
+('CACHESTORE_FULLTEXTSTOPLIST','This memory clerk is used for allocations by Full-Text engine for stoplist functionality.'),
+('CACHESTORE_NOTIF','This cache store is used for allocations by Query Notification functionality'),
+('CACHESTORE_OBJCP','This cache store is used for caching objects with compiled plans (CP): stored procedures, functions, triggers. To illustrate, after a query plan for a stored procedure is created, its plan is stored in this cache.'),
+('CACHESTORE_PHDR','This cache store is used for temporary memory caching during parsing for views, constraints, and defaults algebrizer trees during compilation of a query. Once query is parsed, the memory should be released. Some examples include: many statements in one batch - thousands of inserts or updates into one batch, a T-SQL batch that contains a large dynamically generated query, a large number of values in an IN clause.'),
+('CACHESTORE_QDSRUNTIMESTATS','This cache store is used to cache Query Store runtime statistics'),
+('CACHESTORE_SEARCHPROPERTYLIST','This cache store is used for allocations by Full-Text engine for Property List Cache'),
+('CACHESTORE_SEHOBTCOLUMNATTRIBUTE','This cache store is used by storage engine for caching Heap or B-Tree (HoBT) column metadata structures.'),
+('CACHESTORE_SQLCP','This cache store is used for caching ad hoc queries, prepared statements, and server-side cursors in plan cache. Ad hoc queries are commonly language-event T-SQL statements submitted to the server without explicit parameterization. Prepared statements also use this cache store - they are submitted by the application using API calls like SQLPrepare()/ SQLExecute (ODBC) or SqlCommand.Prepare/SqlCommand.ExecuteNonQuery (ADO.NET) and will appear on the server as sp_prepare/sp_execute or sp_prepexec system procedure executions. Also, server-side cursors would consume from this cache store (sp_cursoropen, sp_cursorfetch, sp_cursorclose).'),
+('CACHESTORE_STACKFRAMES','This cache store is used for allocations of internal SQL OS structures related to stack frames.'),
+('CACHESTORE_SYSTEMROWSET','This cache store is used for allocations of internal structures related to transaction logging and recovery.'),
+('CACHESTORE_TEMPTABLES','This cache store is used for allocations related to temporary tables and table variables caching - part of plan cache.'),
+('CACHESTORE_VIEWDEFINITIONS','This cache store is used for caching view definitions as part of query optimization.'),
+('CACHESTORE_XML_SELECTIVE_DG','This cache store is used to cache XML structures for XML processing.'),
+('CACHESTORE_XMLDBATTRIBUTE','This cache store is used to cache XML attribute structures for XML activity like XQuery.'),
+('CACHESTORE_XMLDBELEMENT','This cache store is used to cache XML element structures for XML activity like XQuery.'),
+('CACHESTORE_XMLDBTYPE','This cache store is used to cache XML structures for XML activity like XQuery.'),
+('CACHESTORE_XPROC','This cache store is used for caching structures for Extended Stored procedures (Xprocs) in plan cache.'),
+('MEMORYCLERK_BACKUP','This memory clerk is used for various allocations by Backup functionality'),
+('MEMORYCLERK_BHF','This memory clerk is used for allocations for binary large objects (BLOB) management during query execution (Blob Handle support)'),
+('MEMORYCLERK_BITMAP','This memory clerk is used for allocations by SQL OS functionality for bitmap filtering'),
+('MEMORYCLERK_CSILOBCOMPRESSION','This memory clerk is used for allocations by Columnstore Index binary large objects (BLOB) Compression'),
+('MEMORYCLERK_DRTLHEAP','This memory clerk is used for allocations by SQL OS functionality'),
+('MEMORYCLERK_EXPOOL','This memory clerk is used for allocations by SQL OS functionality'),
+('MEMORYCLERK_EXTERNAL_EXTRACTORS','This memory clerk is used for allocations by query execution engine for batch mode operations'),
+('MEMORYCLERK_FILETABLE','This memory clerk is used for various allocations by FileTables functionality.'),
+('MEMORYCLERK_FSAGENT','This memory clerk is used for various allocations by FILESTREAM functionality.'),
+('MEMORYCLERK_FSCHUNKER','This memory clerk is used for various allocations by FILESTREAM functionality for creating filestream chunks.'),
+('MEMORYCLERK_FULLTEXT','This memory clerk is used for allocations by Full-Text engine structures.'),
+('MEMORYCLERK_FULLTEXT_SHMEM','This memory clerk is used for allocations by Full-Text engine structures related to Shared memory connectivity with the Full Text Daemon process.'),
+('MEMORYCLERK_HADR','This memory clerk is used for memory allocations by AlwaysOn functionality'),
+('MEMORYCLERK_HOST','This memory clerk is used for allocations by SQL OS functionality.'),
+('MEMORYCLERK_LANGSVC','This memory clerk is used for allocations by SQL T-SQL statements and commands (parser, algebrizer, etc.)'),
+('MEMORYCLERK_LWC','This memory clerk is used for allocations by Full-Text Semantic Search engine'),
+('MEMORYCLERK_POLYBASE','This memory clerk keeps track of memory allocations for Polybase functionality inside SQL Server.'),
+('MEMORYCLERK_QSRANGEPREFETCH','This memory clerk is used for allocations during query execution for query scan range prefetch.'),
+('MEMORYCLERK_QUERYDISKSTORE','This memory clerk is used by Query Store memory allocations inside SQL Server.'),
+('MEMORYCLERK_QUERYDISKSTORE_HASHMAP','This memory clerk is used by Query Store memory allocations inside SQL Server.'),
+('MEMORYCLERK_QUERYDISKSTORE_STATS','This memory clerk is used by Query Store memory allocations inside SQL Server.'),
+('MEMORYCLERK_QUERYPROFILE','This memory clerk is used for during server startup to enable query profiling'),
+('MEMORYCLERK_RTLHEAP','This memory clerk is used for allocations by SQL OS functionality.'),
+('MEMORYCLERK_SECURITYAPI','This memory clerk is used for allocations by SQL OS functionality.'),
+('MEMORYCLERK_SERIALIZATION','Internal use only'),
+('MEMORYCLERK_SLOG','This memory clerk is used for allocations by sLog (secondary in-memory log stream) in Accelerated Database Recovery'),
+('MEMORYCLERK_SNI','This memory clerk allocates memory for the Server Network Interface (SNI) components. SNI manages connectivity and TDS packets for SQL Server'),
+('MEMORYCLERK_SOSMEMMANAGER','This memory clerk allocates structures for SQLOS (SOS) thread scheduling and memory and I/O management..'),
+('MEMORYCLERK_SOSNODE','This memory clerk allocates structures for SQLOS (SOS) thread scheduling and memory and I/O management.'),
+('MEMORYCLERK_SOSOS','This memory clerk allocates structures for SQLOS (SOS) thread scheduling and memory and I/O management..'),
+('MEMORYCLERK_SPATIAL','This memory clerk is used by Spatial Data components for memory allocations.'),
+('MEMORYCLERK_SQLBUFFERPOOL','This memory clerk keeps track of commonly the largest memory consumer inside SQL Server - data and index pages. Buffer Pool or data cache keeps data and index pages loaded in memory to provide fast access to data.'),
+('MEMORYCLERK_SQLCLR','This memory clerk is used for allocations by SQLCLR .'),
+('MEMORYCLERK_SQLCLRASSEMBLY','This memory clerk is used for allocations for SQLCLR assemblies.'),
+('MEMORYCLERK_SQLCONNECTIONPOOL','This memory clerk caches information on the server that the client application may need the server to keep track of. One example is an application that creates prepare handles via sp_prepexecrpc. The application should properly unprepare (close) those handles after execution.'),
+('MEMORYCLERK_SQLEXTENSIBILITY','This memory clerk is used for allocations by the Extensibility Framework for running external Python or R scripts on SQL Server.'),
+('MEMORYCLERK_SQLGENERAL','This memory clerk could be used by multiple consumers inside SQL engine. Examples include replication memory, internal debugging/diagnostics, some SQL Server startup functionality, some SQL parser functionality, building system indexes, initialize global memory objects, Create OLEDB connection inside the server and Linked Server queries, Server-side Profiler tracing, creating showplan data, some security functionality, compilation of computed columns, memory for Parallelism structures, memory for some XML functionality'),
+('MEMORYCLERK_SQLHTTP','Deprecated'),
+('MEMORYCLERK_SQLLOGPOOL','This memory clerk is used by SQL Server Log Pool. Log Pool is a cache used to improve performance when reading the transaction log. Specifically it improves log cache utilization during multiple log reads, reduces disk I/O log reads and allows sharing of log scans. Primary consumers of log pool are AlwaysOn (Change Capture and Send), Redo Manager, Database Recovery - Analysis/Redo/Undo, Transaction Runtime Rollback, Replication/CDC, Backup/Restore.'),
+('MEMORYCLERK_SQLOPTIMIZER','This memory clerk is used for memory allocations during different phases of compiling a query. Some uses include query optimization, index statistics manager, view definitions compilation, histogram generation.'),
+('MEMORYCLERK_SQLQERESERVATIONS','This memory clerk is used for Memory Grant allocations, that is memory allocated to queries to perform sort and hash operations during query execution.'),
+('MEMORYCLERK_SQLQUERYCOMPILE','This memory clerk is used by Query optimizer for allocating memory during query compiling.'),
+('MEMORYCLERK_SQLQUERYEXEC','This memory clerk is used for allocations in the following areas: Batch mode processing, Parallel query execution, query execution context, spatial index tessellation, sort and hash operations (sort tables, hash tables), some DVM processing, update statistics execution'),
+('MEMORYCLERK_SQLQUERYPLAN','This memory clerk is used for allocations by Heap page management, DBCC CHECKTABLE allocations, and sp_cursor* stored procedure allocations'),
+('MEMORYCLERK_SQLSERVICEBROKER','This memory clerk is used by SQL Server Service Broker memory allocations.'),
+('MEMORYCLERK_SQLSERVICEBROKERTRANSPORT','This memory clerk is used by SQL Server Service Broker transport memory allocations.'),
+('MEMORYCLERK_SQLSLO_OPERATIONS','This memory clerk is used to gather performance statistics'),
+('MEMORYCLERK_SQLSOAP','Deprecated'),
+('MEMORYCLERK_SQLSOAPSESSIONSTORE','Deprecated'),
+('MEMORYCLERK_SQLSTORENG','This memory clerk is used for allocations by multiple storage engine components. Examples of components include structures for database files, database snapshot replica file manager, deadlock monitor, DBTABLE structures, Log manager structures, some tempdb versioning structures, some server startup functionality, execution context for child threads in parallel queries.'),
+('MEMORYCLERK_SQLTRACE','This memory clerk is used for server-side SQL Trace memory allocations.'),
+('MEMORYCLERK_SQLUTILITIES','This memory clerk can be used by multiple allocators inside SQL Server. Examples include Backup and Restore, Log Shipping, Database Mirroring, DBCC commands, BCP code on the server side, some query parallelism work, Log Scan buffers.'),
+('MEMORYCLERK_SQLXML','This memory clerk is used for memory allocations when performing XML operations.'),
+('MEMORYCLERK_SQLXP','This memory clerk is used for memory allocations when calling SQL Server Extended Stored procedures.'),
+('MEMORYCLERK_SVL','This memory clerk is used used for allocations of internal SQL OS structures'),
+('MEMORYCLERK_TEST','Internal use only'),
+('MEMORYCLERK_UNITTEST','Internal use only'),
+('MEMORYCLERK_WRITEPAGERECORDER','This memory clerk is used for allocations by Write Page Recorder.'),
+('MEMORYCLERK_XE','This memory clerk is used for Extended Events memory allocations'),
+('MEMORYCLERK_XE_BUFFER','This memory clerk is used for Extended Events memory allocations'),
+('MEMORYCLERK_XLOG_SERVER','This memory clerk is used for allocations by Xlog used for log file management in SQL Azure Database'),
+('MEMORYCLERK_XTP','This memory clerk is used for In-Memory OLTP memory allocations.'),
+('OBJECTSTORE_LBSS','This object store is used to allocate temporary LOBs - variables, parameters, and intermediate results for expressions. An example that uses this store is table-valued parameters (TVP) . See the KB article 4468102 and KB article 4051359 for more information on fixes in this space.'),
+('OBJECTSTORE_LOCK_MANAGER','This memory clerk keeps track of allocations made by the Lock Manager in SQL Server.'),
+('OBJECTSTORE_SECAUDIT_EVENT_BUFFER','This object store is used for SQL Server Audit memory allocations.'),
+('OBJECTSTORE_SERVICE_BROKER','This object store is used by Service Broker'),
+('OBJECTSTORE_SNI_PACKET','This object store is used by Server Network Interface (SNI) components which manage connectivity'),
+('OBJECTSTORE_XACT_CACHE','This object store is used to cache transactions information'),
+('USERSTORE_DBMETADATA','This object store is used for metadata structures'),
+('USERSTORE_OBJPERM','This store is used for structures keeping track of object security/permission'),
+('USERSTORE_QDSSTMT','This cache store is used to cache Query Store statements'),
+('USERSTORE_SCHEMAMGR','Schema manager cache stores different types of metadata information about the database objects in memory (e.g tables). A common user of this store could be the tempdb database with objects like tables, temp procedures, table variables, table-valued parameters, worktables, workfiles, version store.'),
+('USERSTORE_SXC','This user store is used for allocations to store all RPC parameters.'),
+('USERSTORE_TOKENPERM','TokenAndPermUserStore is a single SOS user store that keeps track of security entries for security context, login, user, permission, and audit. Multiple hash tables are allocated to store these objects.')
+) AS S(MemoryClerkType,MemoryClerkDescription)
+ON S.MemoryClerkType = T.MemoryClerkType
+WHEN MATCHED AND (NULLIF(S.MemoryClerkDescription,T.MemoryClerkDescription) IS NOT NULL OR NULLIF(T.MemoryClerkDescription,S.MemoryClerkDescription) IS NOT NULL) THEN 
+UPDATE SET 
+T.MemoryClerkDescription = S.MemoryClerkDescription
+WHEN NOT MATCHED BY TARGET THEN
+INSERT(MemoryClerkType,MemoryClerkDescription)
+VALUES(S.MemoryClerkType,S.MemoryClerkDescription);

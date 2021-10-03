@@ -110,7 +110,7 @@
             this.dgv.RowHeadersVisible = false;
             this.dgv.RowHeadersWidth = 51;
             this.dgv.RowTemplate.Height = 24;
-            this.dgv.Size = new System.Drawing.Size(708, 260);
+            this.dgv.Size = new System.Drawing.Size(708, 258);
             this.dgv.TabIndex = 0;
             this.dgv.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgv_CellContentClick);
             // 
@@ -221,7 +221,7 @@
             this.tsRefresh});
             this.toolStrip1.Location = new System.Drawing.Point(0, 0);
             this.toolStrip1.Name = "toolStrip1";
-            this.toolStrip1.Size = new System.Drawing.Size(708, 27);
+            this.toolStrip1.Size = new System.Drawing.Size(708, 31);
             this.toolStrip1.TabIndex = 1;
             this.toolStrip1.Text = "toolStrip1";
             // 
@@ -231,7 +231,7 @@
             this.tsCopy.Image = global::DBADashGUI.Properties.Resources.ASX_Copy_blue_16x;
             this.tsCopy.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsCopy.Name = "tsCopy";
-            this.tsCopy.Size = new System.Drawing.Size(29, 24);
+            this.tsCopy.Size = new System.Drawing.Size(29, 28);
             this.tsCopy.Text = "Copy";
             this.tsCopy.Click += new System.EventHandler(this.tsCopy_Click);
             // 
@@ -241,7 +241,7 @@
             this.tsExcel.Image = global::DBADashGUI.Properties.Resources.excel16x16;
             this.tsExcel.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsExcel.Name = "tsExcel";
-            this.tsExcel.Size = new System.Drawing.Size(29, 24);
+            this.tsExcel.Size = new System.Drawing.Size(29, 28);
             this.tsExcel.Text = "Export Excel";
             this.tsExcel.Click += new System.EventHandler(this.tsExcel_Click);
             // 
@@ -251,14 +251,14 @@
             this.tsRefresh.Image = global::DBADashGUI.Properties.Resources._112_RefreshArrow_Green_16x16_72;
             this.tsRefresh.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsRefresh.Name = "tsRefresh";
-            this.tsRefresh.Size = new System.Drawing.Size(29, 24);
+            this.tsRefresh.Size = new System.Drawing.Size(29, 28);
             this.tsRefresh.Text = "Refresh";
             this.tsRefresh.Click += new System.EventHandler(this.tsRefresh_Click);
             // 
             // splitContainer1
             // 
             this.splitContainer1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.splitContainer1.Location = new System.Drawing.Point(0, 27);
+            this.splitContainer1.Location = new System.Drawing.Point(0, 31);
             this.splitContainer1.Name = "splitContainer1";
             this.splitContainer1.Orientation = System.Windows.Forms.Orientation.Horizontal;
             // 
@@ -270,8 +270,8 @@
             // splitContainer1.Panel2
             // 
             this.splitContainer1.Panel2.Controls.Add(this.dgv);
-            this.splitContainer1.Size = new System.Drawing.Size(708, 498);
-            this.splitContainer1.SplitterDistance = 234;
+            this.splitContainer1.Size = new System.Drawing.Size(708, 494);
+            this.splitContainer1.SplitterDistance = 232;
             this.splitContainer1.TabIndex = 2;
             // 
             // WaitChart1
@@ -280,7 +280,7 @@
             this.WaitChart1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.WaitChart1.Location = new System.Drawing.Point(0, 27);
             this.WaitChart1.Name = "WaitChart1";
-            this.WaitChart1.Size = new System.Drawing.Size(708, 207);
+            this.WaitChart1.Size = new System.Drawing.Size(708, 205);
             this.WaitChart1.TabIndex = 0;
             this.WaitChart1.Text = "cartesianChartWithDataTable1";
             // 
