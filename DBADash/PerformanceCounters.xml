@@ -21,16 +21,14 @@
   <Counter object_name="Locks" counter_name="Average Wait Time Base" instance_name="_Total" />
   <Counter object_name="Access Methods" counter_name="Page Splits/sec" instance_name="" />
   <Counter object_name="Access Methods" counter_name="Forwarded Records/sec" instance_name="" />
-  <Counter object_name="Memory Manager" counter_name="Memory Grants Outstanding" />
   <Counter object_name="Memory Manager" counter_name="Memory Grants Pending" />
   <Counter object_name="Memory Manager" counter_name="Granted Workspace Memory (KB)" />
   <Counter object_name="Memory Manager" counter_name="Total Server Memory (KB)" />
+  <Counter object_name="Memory Manager" counter_name="Free Memory (KB)" />
   <Counter object_name="Memory Manager" counter_name="Target Server Memory (KB)" />
   <Counter object_name="Memory Manager" counter_name="Stolen Server Memory (KB)" />
   <Counter object_name="Resource Pool Stats" counter_name="Active memory grant amount (KB)" />
-  <Counter object_name="Resource Pool Stats" counter_name="Active memory grants count" />
   <Counter object_name="Resource Pool Stats" counter_name="Memory grant timeouts/sec" />
-  <Counter object_name="Resource Pool Stats" counter_name="Memory grants/sec" />
   <Counter object_name="Resource Pool Stats" counter_name="Pending memory grants count" />
   <Counter object_name="Wait Statistics" counter_name="Memory grant queue waits" />
   <Counter object_name="Plan Cache" counter_name="Cache Object Counts" />
