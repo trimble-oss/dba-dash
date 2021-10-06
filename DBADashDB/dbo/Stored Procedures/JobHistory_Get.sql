@@ -37,9 +37,11 @@ SELECT TOP(@Top)
 	JH.run_status,
 	CASE WHEN JH.run_status=0 THEN ''Failed'' WHEN JH.run_status=1 THEN ''Succeeded'' WHEN JH.run_status=2 THEN ''Retry'' WHEN JH.run_status=3 THEN ''Cancelled'' WHEN JH.run_status=4 THEN ''In Progress'' ELSE FORMAT(JH.run_status,''N0'') END as run_status_description,
 	JH.RunDurationSec,
+	HD.HumanDuration as RunDuration,
 	JH.retries_attempted
 FROM dbo.JobHistory JH
 JOIN dbo.Jobs J ON JH.job_id = J.job_id AND J.InstanceID = JH.InstanceID
+CROSS APPLY dbo.SecondsToHumanDuration(JH.RunDurationSec) AS HD
 WHERE JH.InstanceID = @InstanceID
 AND JH.job_id = @JobID
 ' + CASE WHEN @StepID IS NULL THEN '' ELSE 'AND JH.step_id = @StepID' END + ' 

@@ -23,7 +23,9 @@ SELECT J.Instance,
 	st.JobStepFail24HrsStatus,
     J.enabled,
     J.MaxDurationSec,
+	MaxD.HumanDuration AS MaxDuration,
     J.AvgDurationSec,
+	AvgD.HumanDuration AS AvgDuration,
 	st.LastFailStatus,
     J.IsLastFail,
 	cfg.TimeSinceLastFailureWarning,
@@ -53,6 +55,8 @@ SELECT J.Instance,
 				OR st.FailCount7DaysStatus=4 OR st.JobStepFail7DaysStatus=4 OR st.JobStepFail24HrsStatus=4 OR st.LastFailStatus=4 THEN 4
 		ELSE 3 END AS JobStatus 
 FROM dbo.AgentJob7Day J
+CROSS APPLY dbo.SecondsToHumanDuration(J.MaxDurationSec) AS MaxD
+CROSS APPLY dbo.SecondsToHumanDuration(J.AvgDurationSec) AS AvgD
 OUTER APPLY(SELECT TOP(1) * 
 			FROM dbo.AgentJobThresholds T 
 			WHERE (T.InstanceId = J.InstanceID OR T.InstanceId =-1) 
