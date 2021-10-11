@@ -70,6 +70,12 @@
     <Reference Include="Common.Logging.Core, Version=3.4.1.0, Culture=neutral, PublicKeyToken=af08829b84f0328e, processorArchitecture=MSIL">
       <HintPath>..\packages\Common.Logging.Core.3.4.1\lib\net40\Common.Logging.Core.dll</HintPath>
     </Reference>
+    <Reference Include="CronExpressionDescriptor, Version=2.16.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\CronExpressionDescriptor.2.16.0\lib\netstandard2.0\CronExpressionDescriptor.dll</HintPath>
+    </Reference>
+    <Reference Include="Humanizer, Version=2.11.0.0, Culture=neutral, PublicKeyToken=979442b78dfc278e, processorArchitecture=MSIL">
+      <HintPath>..\packages\Humanizer.Core.2.11.10\lib\netstandard2.0\Humanizer.dll</HintPath>
+    </Reference>
     <Reference Include="Microsoft.Bcl.AsyncInterfaces, Version=5.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.Bcl.AsyncInterfaces.5.0.0\lib\net461\Microsoft.Bcl.AsyncInterfaces.dll</HintPath>
     </Reference>
@@ -281,6 +287,12 @@
     <Compile Include="S3Browser.Designer.cs">
       <DependentUpon>S3Browser.cs</DependentUpon>
     </Compile>
+    <Compile Include="ScheduleConfig.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ScheduleConfig.Designer.cs">
+      <DependentUpon>ScheduleConfig.cs</DependentUpon>
+    </Compile>
     <Compile Include="ServiceConfig.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -294,6 +306,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="S3Browser.resx">
       <DependentUpon>S3Browser.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ScheduleConfig.resx">
+      <DependentUpon>ScheduleConfig.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="ServiceConfig.resx">
       <DependentUpon>ServiceConfig.cs</DependentUpon>
@@ -329,6 +344,7 @@
     <None Include="Resources\FolderOpened_16x.png" />
     <None Include="Resources\Arch_Amazon-Simple-Storage-Service_16.png" />
     <None Include="Resources\Information_blue_6227_16x16_cyan.png" />
+    <None Include="Resources\Warning_yellow_7231_16x16.png" />
     <Content Include="services.ico" />
   </ItemGroup>
   <ItemGroup>

@@ -20,9 +20,6 @@ namespace DBADash
     [JsonConverter(typeof(StringEnumConverter))]
     public enum CollectionType
     {
-        General,
-        Performance,
-        Infrequent,
         AgentJobs,
         Databases,
         DatabasesHADR,
@@ -69,7 +66,8 @@ namespace DBADash
         DatabaseQueryStoreOptions,
         AzureDBResourceGovernance,
         RunningQueries,
-        MemoryUsage
+        MemoryUsage,
+        SchemaSnapshot
     }
 
     public enum HostPlatform
@@ -90,7 +88,7 @@ namespace DBADash
         public Int32 PerformanceCollectionPeriodMins = 60;
         string computerName;
         Int64 editionId;
-        readonly CollectionType[] azureCollectionTypes = new CollectionType[] { CollectionType.SlowQueries, CollectionType.AzureDBElasticPoolResourceStats, CollectionType.AzureDBServiceObjectives, CollectionType.AzureDBResourceStats, CollectionType.CPU, CollectionType.DBFiles, CollectionType.General, CollectionType.Performance, CollectionType.Databases, CollectionType.DBConfig, CollectionType.TraceFlags, CollectionType.ObjectExecutionStats, CollectionType.BlockingSnapshot, CollectionType.IOStats, CollectionType.Waits, CollectionType.ServerProperties, CollectionType.DBTuningOptions, CollectionType.SysConfig, CollectionType.DatabasePrincipals, CollectionType.DatabaseRoleMembers, CollectionType.DatabasePermissions, CollectionType.Infrequent, CollectionType.OSInfo,CollectionType.CustomChecks,CollectionType.PerformanceCounters,CollectionType.VLF, CollectionType.DatabaseQueryStoreOptions, CollectionType.AzureDBResourceGovernance, CollectionType.RunningQueries};
+        readonly CollectionType[] azureCollectionTypes = new CollectionType[] { CollectionType.SlowQueries, CollectionType.AzureDBElasticPoolResourceStats, CollectionType.AzureDBServiceObjectives, CollectionType.AzureDBResourceStats, CollectionType.CPU, CollectionType.DBFiles, CollectionType.Databases, CollectionType.DBConfig, CollectionType.TraceFlags, CollectionType.ObjectExecutionStats, CollectionType.BlockingSnapshot, CollectionType.IOStats, CollectionType.Waits, CollectionType.ServerProperties, CollectionType.DBTuningOptions, CollectionType.SysConfig, CollectionType.DatabasePrincipals, CollectionType.DatabaseRoleMembers, CollectionType.DatabasePermissions, CollectionType.OSInfo,CollectionType.CustomChecks,CollectionType.PerformanceCounters,CollectionType.VLF, CollectionType.DatabaseQueryStoreOptions, CollectionType.AzureDBResourceGovernance, CollectionType.RunningQueries};
         readonly CollectionType[] azureOnlyCollectionTypes = new CollectionType[] { CollectionType.AzureDBElasticPoolResourceStats, CollectionType.AzureDBResourceStats, CollectionType.AzureDBServiceObjectives, CollectionType.AzureDBResourceGovernance };
         readonly CollectionType[] azureMasterOnlyCollectionTypes = new CollectionType[] { CollectionType.AzureDBElasticPoolResourceStats };
 
@@ -360,7 +358,6 @@ namespace DBADash
                 {
                     dt.Rows[0]["ConnectionID"] = instanceName + "|" + dbName;
                     noWMI = true;
-                    // dt.Rows[0]["Instance"] = instanceName + "|" + dbName;
                 }
                 else
                 {
@@ -371,7 +368,7 @@ namespace DBADash
             {
                 dt.Rows[0]["ConnectionID"] = connectionID;
             }
-            IsHadrEnabled = dt.Rows[0]["IsHadrEnabled"] == DBNull.Value ? false : Convert.ToBoolean(dt.Rows[0]["IsHadrEnabled"]);
+            IsHadrEnabled = dt.Rows[0]["IsHadrEnabled"] != DBNull.Value && Convert.ToBoolean(dt.Rows[0]["IsHadrEnabled"]);
 
             Data.Tables.Add(dt);
 
@@ -389,6 +386,7 @@ namespace DBADash
         {
             return Enum.GetName(en.GetType(), en);
         }
+
 
         private bool collectionTypeIsApplicable(CollectionType collectionType)
         {
@@ -418,6 +416,16 @@ namespace DBADash
                 // Collection type only applies to Azure master db
                 return false;
             }
+            else if(!IsHadrEnabled & (collectionType == CollectionType.AvailabilityGroups || collectionType == CollectionType.AvailabilityReplicas || collectionType == CollectionType.DatabasesHADR)) 
+            {
+                // Availability group collection and Hadr isn't enabled.
+                return false;
+            }
+            if(collectionType == CollectionType.SchemaSnapshot)
+            {
+                //Schema snapshots are not handled via DBCollector
+                return false;
+            }
             else
             {
                 return true;
@@ -433,70 +441,6 @@ namespace DBADash
                 return;
             }
           
-            // Group collection types
-            if (collectionType == CollectionType.General)
-            {
-                Collect(CollectionType.ServerProperties);
-                Collect(CollectionType.Databases);              
-                Collect(CollectionType.SysConfig);
-                Collect(CollectionType.Drives);
-                Collect(CollectionType.DBFiles);
-                Collect(CollectionType.Backups);
-                Collect(CollectionType.LogRestores);
-                Collect(CollectionType.ServerExtraProperties);
-                Collect(CollectionType.DBConfig);
-                Collect(CollectionType.Corruption);
-                Collect(CollectionType.OSInfo);
-                Collect(CollectionType.TraceFlags);                              
-                Collect(CollectionType.DBTuningOptions);
-                Collect(CollectionType.AzureDBServiceObjectives);
-                Collect(CollectionType.LastGoodCheckDB);
-                Collect(CollectionType.Alerts);
-                Collect(CollectionType.CustomChecks);
-                Collect(CollectionType.DatabaseMirroring);
-                Collect(CollectionType.Jobs);
-                Collect(CollectionType.AzureDBResourceGovernance);
-                return;
-            }
-            else if (collectionType == CollectionType.Performance)
-            {
-                Collect(CollectionType.ObjectExecutionStats);
-                Collect(CollectionType.CPU);
-                //Collect(CollectionType.BlockingSnapshot);
-                Collect(CollectionType.IOStats);
-                Collect(CollectionType.Waits);
-                Collect(CollectionType.AzureDBResourceStats);
-                Collect(CollectionType.AzureDBElasticPoolResourceStats);
-                Collect(CollectionType.SlowQueries);
-                Collect(CollectionType.PerformanceCounters);
-                Collect(CollectionType.JobHistory);
-                Collect(CollectionType.RunningQueries);
-                if (IsHadrEnabled)
-                {
-                    Collect(CollectionType.DatabasesHADR);
-                    Collect(CollectionType.AvailabilityReplicas);
-                    Collect(CollectionType.AvailabilityGroups);
-                }
-                Collect(CollectionType.MemoryUsage);
-                return;
-            }
-            else if(collectionType == CollectionType.Infrequent)
-            {
-                Collect(CollectionType.ServerPrincipals);
-                Collect(CollectionType.ServerRoleMembers);
-                Collect(CollectionType.ServerPermissions);
-                Collect(CollectionType.DatabasePrincipals);
-                Collect(CollectionType.DatabaseRoleMembers);
-                Collect(CollectionType.DatabasePermissions);
-                Collect(CollectionType.VLF);
-                Collect(CollectionType.DriversWMI);
-                Collect(CollectionType.OSLoadedModules);
-                Collect(CollectionType.ResourceGovernorConfiguration);
-                Collect(CollectionType.DatabaseQueryStoreOptions);
-                return;
-                
-            }
-
             try
             {
                 retryPolicy.Execute(

@@ -190,7 +190,7 @@
             // WarningThreshold
             // 
             this.WarningThreshold.DataPropertyName = "WarningThreshold";
-            this.WarningThreshold.HeaderText = "WarningThreshold";
+            this.WarningThreshold.HeaderText = "Warning Threshold";
             this.WarningThreshold.MinimumWidth = 6;
             this.WarningThreshold.Name = "WarningThreshold";
             this.WarningThreshold.ReadOnly = true;
@@ -207,8 +207,8 @@
             // 
             // SnapshotAge
             // 
-            this.SnapshotAge.DataPropertyName = "SnapshotAge";
-            this.SnapshotAge.HeaderText = "SnapshotAge";
+            this.SnapshotAge.DataPropertyName = "HumanSnapshotAge";
+            this.SnapshotAge.HeaderText = "Snapshot Age";
             this.SnapshotAge.MinimumWidth = 6;
             this.SnapshotAge.Name = "SnapshotAge";
             this.SnapshotAge.ReadOnly = true;
@@ -278,6 +278,9 @@
         private System.Windows.Forms.ToolStripMenuItem undefinedToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem OKToolStripMenuItem;
         private System.Windows.Forms.DataGridView dgvCollectionDates;
+        private System.Windows.Forms.ToolStripButton tsRefresh;
+        private System.Windows.Forms.ToolStripButton tsCopy;
+        private System.Windows.Forms.ToolStripButton tsExcel;
         private System.Windows.Forms.DataGridViewTextBoxColumn Instance;
         private System.Windows.Forms.DataGridViewTextBoxColumn Reference;
         private System.Windows.Forms.DataGridViewTextBoxColumn WarningThreshold;
@@ -287,8 +290,5 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn ConfiguredLevel;
         private System.Windows.Forms.DataGridViewLinkColumn Configure;
         private System.Windows.Forms.DataGridViewLinkColumn ConfigureRoot;
-        private System.Windows.Forms.ToolStripButton tsRefresh;
-        private System.Windows.Forms.ToolStripButton tsCopy;
-        private System.Windows.Forms.ToolStripButton tsExcel;
     }
 }

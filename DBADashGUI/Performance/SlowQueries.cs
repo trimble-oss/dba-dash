@@ -118,10 +118,9 @@ namespace DBADashGUI
                 }
                 if (txtSessionID.Text.Length > 0)
                 {
-                    int sessionID;
-                    if (int.TryParse(txtSessionID.Text, out sessionID))
+                    if (int.TryParse(txtSessionID.Text, out int sessionID))
                     {
-                        cmd.Parameters.AddWithValue("SessionID", txtSessionID.Text);
+                        cmd.Parameters.AddWithValue("SessionID", sessionID);
                     }
                     else
                     {
@@ -359,8 +358,7 @@ namespace DBADashGUI
 
         private void txtSessionID_TextChanged(object sender, EventArgs e)
         {
-            int sessionID;
-            if (!int.TryParse(txtSessionID.Text, out sessionID) && !string.IsNullOrEmpty(txtSessionID.Text))
+            if (!int.TryParse(txtSessionID.Text, out _) && !string.IsNullOrEmpty(txtSessionID.Text))
             {
                 txtSessionID.BackColor = Color.Red;
             }

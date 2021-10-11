@@ -88,7 +88,7 @@ namespace DBADashGUI.Performance
             {
                 var pages = Convert.ToDouble(r["pages_kb"]);
                 var pct = Convert.ToDouble(r["Pct"]);
-                dataLabels = pct > 0.05 ? true : false;
+                dataLabels = pct > 0.05;
                 if (pct > 0.02)
                 {
                     var s = new PieSeries() { Title = (string)r["MemoryClerkType"], Values = new ChartValues<double> { pages }, LabelPoint = labelPoint, DataLabels = dataLabels, ToolTip = true};
@@ -102,7 +102,7 @@ namespace DBADashGUI.Performance
             }
             if (other > 0)
             {
-                dataLabels = otherPct > 0.05 ? true : false;
+                dataLabels = otherPct > 0.05;
                 var s = new PieSeries() { Title = "{Other}", Values = new ChartValues<double> { other }, LabelPoint = labelPoint, DataLabels = true, ToolTip = true};
                 sc.Add(s);
             }

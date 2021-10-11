@@ -1,5 +1,4 @@
 ﻿using DBADashService;
-using Microsoft.SqlServer.Management.Smo;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -7,6 +6,7 @@ using System.Data.SqlClient;
 using static DBADash.DBADashConnection;
 using System.Linq;
 using Serilog;
+
 namespace DBADash
 {
 
@@ -64,6 +64,19 @@ namespace DBADash
 
         public bool AutoUpdateDatabase { get; set; } = true;
         public bool LogInternalPerformanceCounters = false;
+        public CollectionSchedules CollectionSchedules;
+
+        public CollectionSchedules GetSchedules()
+        {
+            if (CollectionSchedules == null)
+            {
+                return CollectionSchedules.DefaultSchedules;
+            }
+            else
+            {
+                return CollectionSchedules.CombineWithDefault();
+            }
+        }
 
         public List<DBADashSource> SourceConnections = new List<DBADashSource>();
 
@@ -198,9 +211,9 @@ namespace DBADash
 
                 if (s.SourceConnection.Type == findConnection.Type)
                 {
-                    if (s.SourceConnection.Type == ConnectionType.SQL && s.SourceConnection.DataSource() == findConnection.DataSource()) {
+                    if (s.SourceConnection.Type == ConnectionType.SQL && s.SourceConnection.DataSource().ToLower() == findConnection.DataSource().ToLower()) {
                         // normally we can treat as same connection if we just vary by initial catalog.  For AzureDB, a different DB is a different instance
-                        if (s.SourceConnection.InitialCatalog() == findConnection.InitialCatalog()) {
+                        if (s.SourceConnection.InitialCatalog().ToLower() == findConnection.InitialCatalog().ToLower()) {
                             return s;
                         }
                         else
@@ -285,7 +298,7 @@ namespace DBADash
                     builder.InitialCatalog = rdr.GetString(0);
                     DBADashSource dbCn = new DBADashSource(builder.ConnectionString)
                     {
-                        Schedules = masterConnection.Schedules,
+                        CollectionSchedules = masterConnection.CollectionSchedules,
                         SlowQueryThresholdMs = masterConnection.SlowQueryThresholdMs,
                         SlowQuerySessionMaxMemoryKB = masterConnection.SlowQuerySessionMaxMemoryKB,
                         UseDualEventSession = masterConnection.UseDualEventSession,
@@ -294,8 +307,6 @@ namespace DBADash
                     if (masterConnection.SchemaSnapshotDBs == "*")
                     {
                         dbCn.SchemaSnapshotDBs = masterConnection.SchemaSnapshotDBs;
-                        dbCn.SchemaSnapshotCron = masterConnection.SchemaSnapshotCron;
-                        dbCn.SchemaSnapshotOnServiceStart = masterConnection.SchemaSnapshotOnServiceStart;
                     }
                     if (!SourceExists(dbCn.SourceConnection.ConnectionString,true))
                     {

@@ -23,13 +23,14 @@ WITH Statuses AS(
 )
 SELECT CD.InstanceID,
 	   I.ConnectionID,
-       Reference,
-       Status,
-       WarningThreshold,
-       CriticalThreshold,
-       SnapshotAge,
-       SnapshotDate,
-       ConfiguredLevel
+       CD.Reference,
+       CD.Status,
+       CD.WarningThreshold,
+       CD.CriticalThreshold,
+       CD.SnapshotAge,
+	   CD.HumanSnapshotAge,
+       CD.SnapshotDate,
+       CD.ConfiguredLevel
 FROM dbo.CollectionDatesStatus CD
 JOIN dbo.Instances I ON I.InstanceID = CD.InstanceID
 WHERE EXISTS(SELECT 1 FROM Statuses s WHERE CD.Status=s.Status)
