@@ -12,6 +12,8 @@ using System.Text;
 using System.Windows.Forms;
 using static DBADash.DBADashConnection;
 using System.Drawing;
+using System.Collections.Generic;
+using System.Data;
 
 namespace DBADashServiceConfig
 {
@@ -26,129 +28,146 @@ namespace DBADashServiceConfig
         CollectionConfig collectionConfig = new CollectionConfig();
         readonly string jsonPath = System.IO.Path.Combine(Application.StartupPath, "ServiceConfig.json");
         ServiceController svcCtrl;
-        private PlanCollectionThreshold planCollectionThreshold;
+
         private void bttnAdd_Click(object sender, EventArgs e)
         {
-            var src = new DBADashSource(cboSource.Text)
+            if (string.IsNullOrEmpty(txtSource.Text))
             {
-                NoWMI = chkNoWMI.Checked
-            };
-            if (chkSlowQueryThreshold.Checked)
-            {
-                src.SlowQueryThresholdMs = (Int32)numSlowQueryThreshold.Value;
+                MessageBox.Show("Please click the connect button or enter a list of connection strings for the SQL instances you want to monitor", "Enter Source", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
             }
-            if (chkCustomizeSchedule.Checked)
-            {
-                src.Schedules = src.GetSchedule();
-            }
-            if (chkCollectPlans.Checked)
-            {
-                if (planCollectionThreshold != null && planCollectionThreshold.PlanCollectionEnabled)
-                {
-                    src.RunningQueryPlanThreshold = planCollectionThreshold;
-                }
-                else
-                {
-                    src.RunningQueryPlanThreshold = new PlanCollectionThreshold() { CPUThreshold = 1000, DurationThreshold = 10000, MemoryGrantThreshold = 6400, CountThreshold = 2 };
-                }
-            }
-            src.UseDualEventSession = chkDualSession.Checked;
-            src.SchemaSnapshotOnServiceStart = chkSchemaSnapshotOnStart.Checked;
-            if (txtSnapshotDBs.Text.Trim().Length > 0)
-            {
-                if (!CronExpression.IsValidExpression(txtSnapshotCron.Text))
-                {
-                    MessageBox.Show("Invalid cron expression", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    return;
-                }
-                src.SchemaSnapshotDBs = txtSnapshotDBs.Text;
-                src.SchemaSnapshotCron = txtSnapshotCron.Text;
-                if (collectionConfig.SchemaSnapshotOptions == null)
-                {
-                    collectionConfig.SchemaSnapshotOptions=  new SchemaSnapshotDBOptions();
-                }
-            }
-            src.PersistXESessions = chkPersistXESession.Checked;
-            bool validated = validateSource();
 
-            if (validated)
+            string schemaSnapshotDBs = txtSnapshotDBs.Text.Trim();
+            if (!string.IsNullOrEmpty(schemaSnapshotDBs) && collectionConfig.SchemaSnapshotOptions == null)
             {
-                if (!(src.SourceConnection.Type == ConnectionType.SQL || collectionConfig.DestinationConnection.Type == ConnectionType.SQL))
+                collectionConfig.SchemaSnapshotOptions = new SchemaSnapshotDBOptions();
+            }
+            bool hasUpdateApproval = false;
+            bool warnXENotSupported = false;
+            bool addUnvalidated = false;
+            bool doNotAddUnvalidated = false;
+            bool doesNotHaveUpdateApproval = false;
+            foreach (string splitSource in txtSource.Text.Split(new[] { "\r\n", "\r", "\n" },StringSplitOptions.None))
+            {
+                string sourceString = splitSource.Trim();
+                if (string.IsNullOrEmpty(splitSource))
                 {
-                    MessageBox.Show("Error: Invalid source and destination connection combination.  One of these should be a SQL connection string", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    return;
+                    continue;
                 }
+                if (!sourceString.Contains(";") && !sourceString.Contains(":") && !sourceString.StartsWith("\\\\") && !sourceString.StartsWith("//"))
+                {
+                    // Providing the name of the SQL instances - build the connection string automatically
+                    var builder = new SqlConnectionStringBuilder
+                    {
+                        DataSource = sourceString,
+                        IntegratedSecurity = true,
+                        ApplicationName = "DBADash"
+                    };
+                    sourceString = builder.ConnectionString;
+                }
+                var src = new DBADashSource(sourceString)
+                {
+                    NoWMI = chkNoWMI.Checked,
+                    UseDualEventSession = chkDualSession.Checked,
+                    PersistXESessions = chkPersistXESession.Checked,
+                    SlowQueryThresholdMs = chkSlowQueryThreshold.Checked ? (Int32)numSlowQueryThreshold.Value : -1,
+                    RunningQueryPlanThreshold = chkCollectPlans.Checked ? new PlanCollectionThreshold() { CountThreshold = int.Parse(txtCountThreshold.Text), CPUThreshold = int.Parse(txtCPUThreshold.Text), DurationThreshold = int.Parse(txtDurationThreshold.Text), MemoryGrantThreshold = int.Parse(txtGrantThreshold.Text) } : null,
+                    SchemaSnapshotDBs = schemaSnapshotDBs
+                };
+                bool validated = validateSource(sourceString);
 
-                if (collectionConfig == null)
+                if (validated)
                 {
-                    collectionConfig = new CollectionConfig();
-                }
-                System.Windows.Forms.Cursor.Current = System.Windows.Forms.Cursors.WaitCursor;
-                validated = src.SourceConnection.Validate();
-                System.Windows.Forms.Cursor.Current = System.Windows.Forms.Cursors.Default;
-                if (validated == false)
-                {
-                    if (MessageBox.Show("Error connecting to data source.  Are you sure you want to add this to the configuration?", "Error", MessageBoxButtons.YesNo, MessageBoxIcon.Exclamation) == DialogResult.No)
+                    if (!(src.SourceConnection.Type == ConnectionType.SQL || collectionConfig.DestinationConnection.Type == ConnectionType.SQL))
                     {
-                        return;
-                    }
-                }
-                else if(!src.SourceConnection.IsXESupported() && src.SlowQueryThresholdMs >= 0)
-                {
-                    MessageBox.Show("Warning: Slow query capture is supported for SQL 2012 and later and is not available for this SQL instance", "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                    src.SlowQueryThresholdMs = -1;
-                    src.PersistXESessions = false;
-                }
-
-                var existingConnection = collectionConfig.GetSourceFromConnectionString(cboSource.Text);
-                if (existingConnection != null)
-                {
-                    if (chkCustomizeSchedule.Checked && existingConnection.Schedules != null)
-                    {
-                        src.Schedules = existingConnection.Schedules;
-                    }
-                    if (MessageBox.Show("Update existing connection?", "Update", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
-                    {
-                        collectionConfig.SourceConnections.Remove(existingConnection);
-                    }
-                    else
-                    {
+                        MessageBox.Show("Error: Invalid source and destination connection combination.  One of these should be a SQL connection string", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                         return;
                     }
 
+                    if (collectionConfig == null)
+                    {
+                        collectionConfig = new CollectionConfig();
+                    }
+                    if (!addUnvalidated)
+                    {
+                        System.Windows.Forms.Cursor.Current = System.Windows.Forms.Cursors.WaitCursor;
+                        validated = src.SourceConnection.Validate();
+                        System.Windows.Forms.Cursor.Current = System.Windows.Forms.Cursors.Default;
+                    }
+                    if (!addUnvalidated  && !validated)
+                    {
+                        if(doNotAddUnvalidated)
+                        {
+                            continue;
+                        }
+                        else if (MessageBox.Show("Error connecting to data source.  Do you wish to add anyway?", "Error", MessageBoxButtons.YesNo, MessageBoxIcon.Exclamation) == DialogResult.No)
+                        {
+                            doNotAddUnvalidated=true;
+                            continue;
+                        }
+                        else
+                        {
+                            addUnvalidated = true;
+                        }
+                    }
+                    else if (!addUnvalidated && !src.SourceConnection.IsXESupported() && src.SlowQueryThresholdMs >= 0)
+                    {
+                        warnXENotSupported=true;
+                        src.SlowQueryThresholdMs = -1;
+                        src.PersistXESessions = false;
+                    }
+
+                    var existingConnection = collectionConfig.GetSourceFromConnectionString(sourceString);
+                    if (existingConnection != null)
+                    {
+
+                        src.CollectionSchedules = existingConnection.CollectionSchedules;
+                        if (doesNotHaveUpdateApproval)
+                        {
+                            continue;
+                        }
+                        else if (hasUpdateApproval || MessageBox.Show("Update existing connection(s)?", "Update", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+                        {
+                            collectionConfig.SourceConnections.Remove(existingConnection);
+                            hasUpdateApproval = true;
+                        }
+                        else
+                        {
+                            doesNotHaveUpdateApproval = true;
+                            continue;
+                        }
+
+                    }
+
+                    collectionConfig.SourceConnections.Add(src);
+
                 }
 
-                collectionConfig.SourceConnections.Add(src);
-                txtJson.Text = collectionConfig.Serialize();
-                populateDropDowns();
-                setConnectionCount();
+            }
+
+            txtJson.Text = collectionConfig.Serialize();
+            setConnectionCount();
+            setDgv();
+            if (warnXENotSupported)
+            {
+                MessageBox.Show("Warning: Slow query capture is supported for SQL 2012 and later only", "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
         }
 
 
-        private void populateDropDowns()
-        {
-            foreach (var _cfg in collectionConfig.SourceConnections)
-            {
-                if (!(cboSource.Items.Contains(_cfg.ConnectionString)))
-                {
-                    cboSource.Items.Add(_cfg.ConnectionString);
-                }
-            }
-        }
 
-        private bool validateSource()
+        private bool validateSource(string sourceString)
         {
-            errorProvider1.SetError(cboSource, null);
-            DBADashConnection source = new DBADashConnection(cboSource.Text);
-            if (cboSource.Text == "")
+            errorProvider1.SetError(txtSource, null);
+            DBADashConnection source = new DBADashConnection(sourceString);
+            if (string.IsNullOrEmpty(sourceString))
             {
                 return false;
             }
 
             if (source.Type == ConnectionType.Invalid)
             {
-                errorProvider1.SetError(cboSource, "Invalid connection string, directory or S3 path");
+                errorProvider1.SetError(txtSource, "Invalid connection string, directory or S3 path");
                 return false;
             }
             else
@@ -229,13 +248,36 @@ namespace DBADashServiceConfig
         private void saveChanges()
         {
             txtJson.Text = collectionConfig.Serialize();
+            if (File.Exists(jsonPath))
+            {
+                File.Move(jsonPath, jsonPath + ".backup_" + DateTime.Now.ToString("yyyyMMddHHmmss"));
+            }
             System.IO.File.WriteAllText(jsonPath, txtJson.Text);
             originalJson = txtJson.Text;
+            updateSaveButton();
             MessageBox.Show("Config saved.  Restart service to apply changes.", "Save", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 
         private void ServiceConfig_Load(object sender, EventArgs e)
         {
+            dgvConnections.AutoGenerateColumns = false;
+            dgvConnections.Columns.Add(new DataGridViewTextBoxColumn() { Name = "ConnectionString", DataPropertyName = "ConnectionString", HeaderText = "Connection String", Width = 300 });
+            dgvConnections.Columns.Add(new DataGridViewCheckBoxColumn() { DataPropertyName = "NoWMI", HeaderText = "No WMI" });
+            dgvConnections.Columns.Add(new DataGridViewTextBoxColumn() { DataPropertyName = "SlowQueryThresholdMs", HeaderText = "Slow Query Threshold (ms)" });
+            dgvConnections.Columns.Add(new DataGridViewCheckBoxColumn() { DataPropertyName = "UseDualEventSession", HeaderText = "Use Dual Event Session" });
+            dgvConnections.Columns.Add(new DataGridViewCheckBoxColumn() { DataPropertyName = "PersistXESessions", HeaderText = "Persist XE Sessions" });
+            dgvConnections.Columns.Add(new DataGridViewTextBoxColumn() { DataPropertyName = "SchemaSnapshotDBs", HeaderText = "Schema Snapshot DBs" });
+            dgvConnections.Columns.Add(new DataGridViewTextBoxColumn() { DataPropertyName = "SlowQuerySessionMaxMemoryKB", HeaderText = "Slow Query Session Max Memory (KB)" });
+            dgvConnections.Columns.Add(new DataGridViewCheckBoxColumn() { DataPropertyName = "PlanCollectionEnabled", HeaderText = "Running Query Plan Collection" });
+            dgvConnections.Columns.Add(new DataGridViewTextBoxColumn() { DataPropertyName = "PlanCollectionCPUThreshold", HeaderText = "Plan Collection CPU Threshold" });
+            dgvConnections.Columns.Add(new DataGridViewTextBoxColumn() { DataPropertyName = "PlanCollectionDurationThreshold", HeaderText = "Plan Collection Duration Threshold" });
+            dgvConnections.Columns.Add(new DataGridViewTextBoxColumn() { DataPropertyName = "PlanCollectionCountThreshold", HeaderText = "Plan Collection Count Threshold" });
+            dgvConnections.Columns.Add(new DataGridViewTextBoxColumn() { DataPropertyName = "PlanCollectionMemoryGrantThreshold", HeaderText = "Plan Collection Memory Grant Threshold" });
+            dgvConnections.Columns.Add(new DataGridViewCheckBoxColumn() { DataPropertyName = "HasCustomSchedule", HeaderText = "Custom Schedule" });
+            dgvConnections.Columns.Add(new DataGridViewLinkColumn() { Name = "Schedule", HeaderText = "Schedule", Text = "Schedule", UseColumnTextForLinkValue = true });
+            dgvConnections.Columns.Add(new DataGridViewLinkColumn() { Name = "Edit", HeaderText = "Edit", Text = "Edit", UseColumnTextForLinkValue = true });
+            dgvConnections.Columns.Add(new DataGridViewLinkColumn() { Name = "Delete", HeaderText = "Delete", Text = "Delete", UseColumnTextForLinkValue = true });
+
             txtJson.MaxLength = 0;
             cboServiceCredentials.SelectedIndex = 3;
             if (File.Exists(jsonPath))
@@ -254,9 +296,10 @@ namespace DBADashServiceConfig
             setConnectionCount();
             refreshServiceStatus();
             validateDestination();
-            buildCron();
+    
         }
 
+      
         private void setConnectionCount()
         {
             int cnt = collectionConfig.SourceConnections.Count;
@@ -277,7 +320,6 @@ namespace DBADashServiceConfig
         private void setFromJson(string json)
         {
             collectionConfig = CollectionConfig.Deserialize(json);
-            populateDropDowns();
             txtDestination.Text = collectionConfig.DestinationConnection.EncryptedConnectionString;
             txtAWSProfile.Text = collectionConfig.AWSProfile;
             txtAccessKey.Text = collectionConfig.AccessKey;
@@ -288,7 +330,13 @@ namespace DBADashServiceConfig
             chkAutoUpgradeRepoDB.Checked = collectionConfig.AutoUpdateDatabase;
             chkLogInternalPerfCounters.Checked = collectionConfig.LogInternalPerformanceCounters;
             updateScanInterval();
+            setDgv();
 
+        }
+
+        private void setDgv()
+        {
+            dgvConnections.DataSource = new BindingSource() { DataSource = collectionConfig.SourceConnections };
         }
 
         private void refreshServiceStatus()
@@ -504,24 +552,6 @@ namespace DBADashServiceConfig
         }
 
 
-        private void bttnRemove_Click(object sender, EventArgs e)
-        {
-            DBADashSource src;
-
-            src = collectionConfig.GetSourceFromConnectionString(cboSource.Text);
-            if (src != null)
-            {
-                collectionConfig.SourceConnections.Remove(src);
-                MessageBox.Show("Connection removed", "Remove", MessageBoxButtons.OK, MessageBoxIcon.Information);
-            }
-            else
-            {
-                MessageBox.Show("Connection not found", "Remove", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
-            }
-            txtJson.Text = collectionConfig.Serialize();
-            setConnectionCount();
-        }
-
         private void txtAccessKey_Validating(object sender, CancelEventArgs e)
         {
             collectionConfig.AccessKey = (txtAccessKey.Text == "" ? null : txtAccessKey.Text);
@@ -558,13 +588,11 @@ namespace DBADashServiceConfig
 
         }
 
-        private void cboSource_SelectedIndexChanged(object sender, EventArgs e)
+        private void loadConnectionForEdit(DBADashSource src)
         {
-            DBADashSource src;
-
-            src = collectionConfig.GetSourceFromConnectionString(cboSource.Text);
             if (src != null)
             {
+                txtSource.Text = src.ConnectionString;
                 chkNoWMI.Checked = src.NoWMI;
                 chkPersistXESession.Checked = src.PersistXESessions;
                 chkSlowQueryThreshold.Checked = (src.SlowQueryThresholdMs != -1);
@@ -577,13 +605,21 @@ namespace DBADashServiceConfig
                     numSlowQueryThreshold.Value = 0;
                 }
 
-                chkCustomizeSchedule.Checked = src.Schedules != null;
-                txtSnapshotCron.Text = src.SchemaSnapshotCron;
                 txtSnapshotDBs.Text = src.SchemaSnapshotDBs;
-                chkSchemaSnapshotOnStart.Checked = src.SchemaSnapshotOnServiceStart;
                 chkDualSession.Checked = src.UseDualEventSession;
-                chkCollectPlans.Checked =src.RunningQueryPlanThreshold==null ? false : src.RunningQueryPlanThreshold.PlanCollectionEnabled;
-                planCollectionThreshold = src.RunningQueryPlanThreshold;
+                if (src.RunningQueryPlanThreshold != null)
+                {
+                    txtCountThreshold.Text = src.RunningQueryPlanThreshold.CountThreshold.ToString();
+                    txtDurationThreshold.Text = src.RunningQueryPlanThreshold.DurationThreshold.ToString();
+                    txtGrantThreshold.Text = src.RunningQueryPlanThreshold.MemoryGrantThreshold.ToString();
+                    txtCPUThreshold.Text = src.RunningQueryPlanThreshold.CPUThreshold.ToString();
+                    chkCollectPlans.Checked = src.RunningQueryPlanThreshold.PlanCollectionEnabled;
+                }
+                else
+                {
+                    chkCollectPlans.Checked = false;
+                }
+                
             }
             else
             {
@@ -669,7 +705,7 @@ namespace DBADashServiceConfig
         private void bttnConnectSource_Click(object sender, EventArgs e)
         {
             var frm = new DBConnection();
-            var cn = new DBADashConnection(cboSource.Text);
+            var cn = new DBADashConnection(txtSource.Text);
             if (cn.Type == ConnectionType.SQL)
             {
                 frm.ConnectionString = cn.ConnectionString;
@@ -679,7 +715,7 @@ namespace DBADashServiceConfig
             if (frm.DialogResult == DialogResult.OK)
             {
                 cn = new DBADashConnection(frm.ConnectionString);
-                cboSource.Text = cn.EncryptedConnectionString;
+                txtSource.Text = cn.EncryptedConnectionString;
             }
             setAvailableOptionsForSource();
         }
@@ -765,7 +801,7 @@ namespace DBADashServiceConfig
             {
                 if (fbd.ShowDialog() == DialogResult.OK)
                 {
-                    cboSource.Text  = fbd.SelectedPath;
+                    txtSource.Text  = fbd.SelectedPath;
                 }
             }
             setAvailableOptionsForSource();
@@ -804,7 +840,7 @@ namespace DBADashServiceConfig
                 frm.ShowDialog();
                 if (frm.DialogResult == DialogResult.OK)
                 {
-                   cboSource.Text= frm.AWSURL;
+                   txtSource.Text= frm.AWSURL;
                 }
             }
             setAvailableOptionsForSource();
@@ -833,55 +869,172 @@ namespace DBADashServiceConfig
 
         private void setAvailableOptionsForSource()
         {
-            var src = new DBADashSource(cboSource.Text);
+            var src = new DBADashSource(txtSource.Text);
             bool isSql = src.SourceConnection.Type == ConnectionType.SQL;
 
             pnlExtendedEvents.Enabled = isSql;
-            pnlSchemaSnapshots.Enabled = isSql;
+            chkCollectPlans.Enabled = isSql;
+            grpRunningQueryThreshold.Enabled = isSql && chkCollectPlans.Checked;
             chkNoWMI.Enabled = isSql;
-            chkCustomizeSchedule.Enabled = isSql;
         }
 
-        private void buildCron()
-        {
-            cboCron.Items.Add(new CronSelection() { DisplayValue = "", CronExpression = "" });
-            for (int i = 0; i < 24; i++){
-                var cron = new CronSelection() { CronExpression = string.Format("0 0 {0} 1/1 * ? *", i), DisplayValue = i.ToString("00") + ":00" };
-                cboCron.Items.Add(cron);
-            }
-            cboCron.SelectedIndex = 1;
-        }
-
-        private void cboCron_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            if (cboCron.Text != "")
-            {
-                var cron = (CronSelection)cboCron.SelectedItem;
-                txtSnapshotCron.Text = cron.CronExpression;
-            }
-        }
-
-        private void txtSnapshotCron_TextChanged(object sender, EventArgs e)
-        {
-            var cron = (CronSelection)cboCron.SelectedItem;
-            if(cron.CronExpression != txtSnapshotCron.Text)
-            {
-                foreach(CronSelection itm in cboCron.Items)
-                {
-                    if(txtSnapshotCron.Text == itm.CronExpression)
-                    {
-                        cboCron.SelectedItem = itm;
-                        return;
-                    }
-                }
-                cboCron.SelectedIndex = 0;
-            }
-        }
 
         private void chkLogInternalPerfCounters_CheckedChanged(object sender, EventArgs e)
         {
             collectionConfig.LogInternalPerformanceCounters = chkLogInternalPerfCounters.Checked;
             txtJson.Text = collectionConfig.Serialize();
+        }
+
+        private void bttnSchedule_Click(object sender, EventArgs e)
+        {
+            var frm = new ScheduleConfig()
+            {
+                ConfiguredSchedule = collectionConfig.CollectionSchedules
+            };
+
+            frm.ShowDialog();
+            if (frm.DialogResult == DialogResult.OK)
+            {
+                collectionConfig.CollectionSchedules = frm.ConfiguredSchedule;
+                txtJson.Text = collectionConfig.Serialize();
+            }
+        }
+
+   
+        private void dgv_RowValidated(object sender, DataGridViewCellEventArgs e)
+        {
+            updateFromGrid();
+        }
+
+        private void updateFromGrid()
+        { 
+            collectionConfig.SourceConnections = (List<DBADashSource>)((BindingSource)dgvConnections.DataSource).DataSource;
+            txtJson.Text = collectionConfig.Serialize();
+            setConnectionCount();
+
+        }
+
+        private void dgvConnections_CellContentClick(object sender, DataGridViewCellEventArgs e)
+        {
+            if (e.RowIndex >= 0 && e.ColumnIndex == dgvConnections.Columns["Delete"].Index)
+            {
+                dgvConnections.Rows.RemoveAt(e.RowIndex);
+            }
+            else if (e.RowIndex >= 0 && e.ColumnIndex == dgvConnections.Columns["Edit"].Index)
+            {
+                var src = (DBADashSource)dgvConnections.Rows[e.RowIndex].DataBoundItem;
+                loadConnectionForEdit(src);
+            }
+            else if (e.RowIndex >= 0 && dgvConnections.Columns[e.ColumnIndex].CellType == typeof(DataGridViewCheckBoxCell))
+            {
+                dgvConnections.EndEdit();
+            }
+            else if (e.RowIndex >= 0 && e.ColumnIndex == dgvConnections.Columns["Schedule"].Index)
+            {
+                var src = (DBADashSource)dgvConnections.Rows[e.RowIndex].DataBoundItem;
+                if (src.SourceConnection.Type == ConnectionType.SQL)
+                {
+                    var frm = new ScheduleConfig()
+                    {
+                        ConfiguredSchedule = src.CollectionSchedules,
+                        BaseSchedule = collectionConfig.GetSchedules()
+                    };
+                    frm.ShowDialog();
+                    if (frm.DialogResult == DialogResult.OK)
+                    {
+                        src.CollectionSchedules = frm.ConfiguredSchedule;
+                        dgvConnections.Refresh();
+                    }
+                }
+                else
+                {
+                    MessageBox.Show("Custom schedule configuration is only available for SQL connections","Schedule", MessageBoxButtons.OK,MessageBoxIcon.Warning);
+                }
+            }
+            updateFromGrid();
+        }
+
+        private void dgv_UserDeletedRow(object sender, DataGridViewRowEventArgs e)
+        {
+            updateFromGrid();
+        }
+
+        private void txtSearch_TextChanged(object sender, EventArgs e)
+        {
+            applySearch();
+        }
+
+        private void applySearch()
+        {
+            CurrencyManager currencyManager1 = (CurrencyManager)BindingContext[dgvConnections.DataSource];
+            currencyManager1.SuspendBinding();
+            foreach (DataGridViewRow row in dgvConnections.Rows)
+            {
+                if (string.IsNullOrEmpty(txtSearch.Text) || row.Cells["ConnectionString"].Value.ToString().ToLower().Contains(txtSearch.Text.ToLower()))
+                {
+                    row.Visible = true;
+                }
+                else
+                {
+                    row.Visible = false;
+                }
+            }
+            currencyManager1.ResumeBinding();
+        }
+
+        private void chkCollectPlans_CheckedChanged(object sender, EventArgs e)
+        {
+            grpRunningQueryThreshold.Enabled = chkCollectPlans.Checked;
+            if (chkCollectPlans.Checked)
+            {
+                var defaultThreshold = PlanCollectionThreshold.DefaultThreshold;
+                txtCPUThreshold.Text = defaultThreshold.CPUThreshold.ToString();
+                txtCountThreshold.Text = defaultThreshold.CountThreshold.ToString();
+                txtDurationThreshold.Text = defaultThreshold.DurationThreshold.ToString();
+                txtGrantThreshold.Text = defaultThreshold.MemoryGrantThreshold.ToString();
+            }
+        }
+
+        private void lnkALL_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            txtSnapshotDBs.Text = "*";
+        }
+
+        private void lnkNone_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            txtSnapshotDBs.Text = string.Empty;
+        }
+
+        private void lnkExample_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            txtSnapshotDBs.Text = "Database1,Database2,Databsase3";
+        }
+
+        private void dgv_RowsAdded(object sender, DataGridViewRowsAddedEventArgs e)
+        {
+            for(int i =e.RowIndex;i<e.RowIndex + e.RowCount; i++)
+            {
+                var src = (DBADashSource)dgvConnections.Rows[i].DataBoundItem;
+                dgvConnections.Rows[i].ReadOnly = src.SourceConnection.Type != ConnectionType.SQL;
+                dgvConnections.Rows[i].DefaultCellStyle.BackColor = src.SourceConnection.Type == ConnectionType.SQL ? Color.White : Color.Silver;
+            }
+        }
+
+        private void txtJson_TextChanged(object sender, EventArgs e)
+        {
+            updateSaveButton();
+        }
+
+        private void updateSaveButton()
+        {
+            if (txtJson.Text != originalJson)
+            {
+                bttnSave.Font = new Font(bttnSave.Font, FontStyle.Bold);
+            }
+            else
+            {
+                bttnSave.Font = new Font(bttnSave.Font, FontStyle.Regular);
+            }
         }
     }
 }

@@ -191,7 +191,7 @@ namespace DBADashService
                         collector.SlowQueryMaxMemoryKB = cfg.SlowQuerySessionMaxMemoryKB;
                         collector.UseDualEventSession = cfg.UseDualEventSession;
                         collector.LogInternalPerformanceCounters = SchedulerServiceConfig.Config.LogInternalPerformanceCounters;
-                        collector.PlanThreshold = cfg.RunningQueryPlanThreshold == null ? PlanCollectionThreshold.PlanCollectionDisabledThreshold : cfg.RunningQueryPlanThreshold;
+                        collector.PlanThreshold = cfg.RunningQueryPlanThreshold ?? PlanCollectionThreshold.PlanCollectionDisabledThreshold;
                         using (var op = Operation.Begin("Collect {types} from instance {instance}", string.Join(", ", types.Select(s => s.ToString()).ToArray()), cfg.SourceConnection.ConnectionForPrint))
                         {
                             collector.Collect(types);

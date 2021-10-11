@@ -1,4 +1,3 @@
- 
 # Data Collection
 ## Notes
 Data collection runs on a schedule by the agent which is listed below. Collections will also run on service start.  If you need to refresh data prior to the scheduled collection, the only only way to do this is to restart the DBA Dash service. 
@@ -107,44 +106,30 @@ Add [your own](CustomChecks.md) checks to DBA Dash.
 - [DatabaseQueryStoreOptions](../DBADash/SQL/SQLDatabaseQueryStoreOptions.sql)
 *Collects data from sys.database_query_store_options for each database*
 
-### Other
+### Daily @ 11pm
 - [Database Schema Snapshots](../DBADash/SchemaSnapshotDB.cs) (Not enabled by default)
-*Creates a schema snapshot of databases using SMO.  This isn't enabled by default and you can choose what databases to snapshot and when.  Schema snapshots can be very useful for automatically keeping track of schema changes. It can also be a slow process depending how many objects you have in your database and how many databases you are capturing schema snapshots for.  I would recommend creating daily snapshots and set the schedule to run outside of peak instance usage.*
+*Creates a schema snapshot of databases using SMO. This only runs for the databases listed in SchemaSnapshotDBs - schema snapshots won't run unless this option has been set.  See [here](SchemaSnapshots.md) for more info.*
 
 ## Schedule Customization
-It's recommended to leave the default schedule but support was added to allow you to customize what data is collected and at what frequency. If you click "Customize Schedule" when adding a connection using the DBA Dash Service Config tool, it will add some extra json to the config that you can customize.  It will look like this:
 
-      "Schedules": [
-        {
-          "CronSchedule": "0 0 * ? * *",
-          "RunOnServiceStart": true,
-          "CollectionTypes": [
-            "General"
-          ]
-        },
-        {
-          "CronSchedule": "0 * * ? * *",
-          "RunOnServiceStart": true,
-          "CollectionTypes": [
-            "Performance"
-          ]
-        },
-        {
-          "CronSchedule": "0 0 0 1/1 * ? *",
-          "RunOnServiceStart": true,
-          "CollectionTypes": [
-            "Infrequent"
-          ]
-        }
-      ],
-You can generate a custom cron schedule using [cronmaker.com](http://www.cronmaker.com). 
+The application has a default schedule listed above which aims to provide a good balance for most instances. If you increase the frequency of data collection, you will increase the monitoring impact and it could also increase the size of your DBA Dash repository database.  Less frequent collection could mean that the data is stale or doesn't provide enough granularity for performance troubleshooting.
+If you need to adjust the default schedule to better meet your needs, this can be done using the DBA Dash Service Config tool.  In the Options tab click "Configure Schedule".
 
-The collection type "General" refers to the hourly collections, "Performance" to the 1min collections and "Infrequent" to the daily collections.  
-You can specify the individual collections like this:
+If you want to override the default schedule, uncheck "Default" and enter a string with your own schedule.  The string can either be a cron expression or a duration specified in seconds.  Cron expressions provide a lot of flexibility and there are a number of online tools like [cronmaker](http://www.cronmaker.com/) that can be used to generate cron expressions.
 
-      "CollectionTypes": [
-        "CPU", "Waits", "IOStats"
-      ]
+There is also the option to configure the collection to run on service start.  Restarting the service is an option if you need to manually refresh data before the scheduled collection runs.
+
+![Schedule](Schedule.PNG)
+
+If you configure the schedule in the options tab it will apply to all the monitored SQL instances for that agent.  If you want to adjust the schedule for a specific instance, click the "Source" tab.  In the "Existing Connections" grid, click the "Schedule" link to edit the schedule for a specific instance.  Any collections you don't override the schedule for will be inherited from the agent level configuration described earlier or from the built in application default values.  
+
 Note:
- - This feature might change in future 
- - You might not automatically get new collection types as you upgrade the application in future.
+_Collections that share the same schedule will be collected together.  For example, CPU, performance counters, waits etc might all share the same 1min collection schedule.  Every 1min, a job will be triggered to collect this data (serially) rather than separate triggers firing at the same time for each collection.  A separate job is used for each monitored SQL instance and each schedule._
+
+The schedule data is saved in the ServiceConfig.json for any collections that you have overridden from the default values. The application defaults are configured in [this source file](../DBADash/CollectionSchedule.cs).
+
+
+
+
+
+

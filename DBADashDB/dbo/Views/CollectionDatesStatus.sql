@@ -1,4 +1,4 @@
-﻿CREATE VIEW [dbo].[CollectionDatesStatus]
+﻿CREATE VIEW dbo.CollectionDatesStatus
 AS
 SELECT CD.InstanceID,
 	  CD.Reference, 
@@ -9,9 +9,11 @@ SELECT CD.InstanceID,
 	T.WarningThreshold,
 	T.CriticalThreshold,
 	DATEDIFF(mi,CD.SnapshotDate,GETUTCDATE()) AS SnapshotAge,
+	HD.HumanDuration AS HumanSnapshotAge,
 	CD.SnapshotDate,
 	CASE WHEN T.InstanceID >0 THEN 'Instance' ELSE 'Root' END AS ConfiguredLevel
 FROM dbo.CollectionDates CD 
+CROSS APPLY dbo.SecondsToHumanDuration(DATEDIFF(s,CD.SnapshotDate,GETUTCDATE())) HD
 OUTER APPLY(SELECT TOP(1) CDT.WarningThreshold,
 				CDT.CriticalThreshold,
 				CDT.InstanceID

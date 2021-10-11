@@ -10,33 +10,198 @@ namespace DBADash
     {
         private Int32 slowQueryThresholdMs = -1;
 
-        public CollectionConfigSchedule[] Schedules { get; set; }
+        private CollectionSchedules collectionSchedules;
+        private PlanCollectionThreshold runningQueryPlanThreshold;
+        private string schemaSnapshotDBs;
+        private bool noWMI;
+        private Int32 slowQuerySessionMaxMemoryKB = 4096;
+        private bool persistXESessions = false;
+        private bool useDualXESesion = true;
 
-        public PlanCollectionThreshold RunningQueryPlanThreshold;
-
-        public CollectionConfigSchedule[] GetSchedule()
-        {
-            if (Schedules == null)
+        public  CollectionSchedules CollectionSchedules {
+            get
             {
-                if (SourceConnection.Type == ConnectionType.AWSS3 || SourceConnection.Type == ConnectionType.Directory)
+                if (SourceConnection != null && SourceConnection.Type == ConnectionType.SQL)
                 {
-                    return CollectionConfigSchedule.DefaultImportSchedule();
+                    return collectionSchedules;
                 }
                 else
                 {
-                    return CollectionConfigSchedule.DefaultSchedules();
+                    return null;
                 }
             }
-            else
-            {
-                return Schedules;
+            set {
+                 collectionSchedules = value;
             }
         }
 
-        public string SchemaSnapshotCron;
-        public string SchemaSnapshotDBs;
-        public bool SchemaSnapshotOnServiceStart = true;
+        public PlanCollectionThreshold RunningQueryPlanThreshold {
+            get {
+                if (SourceConnection != null && SourceConnection.Type == ConnectionType.SQL)
+                {
+                    return runningQueryPlanThreshold;
+                }
+                else
+                {
+                    return null;
+                }
+            }
+            set {
+              
+                    runningQueryPlanThreshold = value;
+            }
+        }
 
+        public string SchemaSnapshotDBs { 
+            get {
+                if (SourceConnection != null && SourceConnection.Type == ConnectionType.SQL)
+                {
+                    return schemaSnapshotDBs;
+                }
+                else
+                {
+                    return string.Empty;
+                }
+            } 
+            set {
+                    schemaSnapshotDBs = value;
+            } 
+        }
+
+        [JsonIgnore]
+        public bool HasCustomSchedule
+        {
+            get
+            {
+                return !(CollectionSchedules == null || CollectionSchedules.Count == 0);
+            }
+        }
+        #region "Plan Collection Threshold Properties"
+        // Added plan collection properties to allow them to be visible/editable in the grid
+
+        [JsonIgnore]
+        public bool PlanCollectionEnabled
+        {
+            get
+            {
+                if (RunningQueryPlanThreshold == null)
+                {
+                    return false;
+                }
+                else
+                {
+                    return RunningQueryPlanThreshold.PlanCollectionEnabled;
+                }
+            }
+            set
+            {
+                if (value)
+                {
+                    RunningQueryPlanThreshold = PlanCollectionThreshold.DefaultThreshold;
+                }
+                else
+                {
+                    RunningQueryPlanThreshold = null;
+                }
+            }
+        }
+
+        [JsonIgnore]
+        public int PlanCollectionCPUThreshold
+        {
+            get
+            {
+                if (RunningQueryPlanThreshold == null || SourceConnection.Type != ConnectionType.SQL)
+                {
+                    return Int32.MaxValue;
+                }
+                else
+                {
+                    return RunningQueryPlanThreshold.CPUThreshold;
+                }
+            }
+            set
+            {
+                if (RunningQueryPlanThreshold == null)
+                {
+                    RunningQueryPlanThreshold = PlanCollectionThreshold.PlanCollectionDisabledThreshold;
+                }
+                RunningQueryPlanThreshold.CPUThreshold = value;
+            }
+        }
+        [JsonIgnore]
+        public int PlanCollectionMemoryGrantThreshold
+        {
+            get
+            {
+                if (RunningQueryPlanThreshold == null || SourceConnection.Type != ConnectionType.SQL)
+                {
+                    return Int32.MaxValue;
+                }
+                else
+                {
+                    return RunningQueryPlanThreshold.MemoryGrantThreshold;
+                }
+            }
+            set
+            {
+                if (RunningQueryPlanThreshold == null)
+                {
+                    RunningQueryPlanThreshold = PlanCollectionThreshold.PlanCollectionDisabledThreshold;
+                }
+                RunningQueryPlanThreshold.MemoryGrantThreshold = value;
+                
+            }
+        }
+        [JsonIgnore]
+        public int PlanCollectionDurationThreshold
+        {
+            get
+            {
+                if (RunningQueryPlanThreshold == null || SourceConnection.Type != ConnectionType.SQL)
+                {
+                    return Int32.MaxValue;
+                }
+                else
+                {
+                    return RunningQueryPlanThreshold.DurationThreshold;
+                }
+            }
+            set
+            {
+                if (RunningQueryPlanThreshold == null)
+                {
+                    RunningQueryPlanThreshold = PlanCollectionThreshold.PlanCollectionDisabledThreshold;
+                }
+                RunningQueryPlanThreshold.DurationThreshold = value;                
+            }
+        }
+
+        [JsonIgnore]
+        public int PlanCollectionCountThreshold
+        {
+            get
+            {
+                if (RunningQueryPlanThreshold == null || SourceConnection.Type == ConnectionType.SQL)
+                {
+                    return Int32.MaxValue;
+                }
+                else
+                {
+                    return RunningQueryPlanThreshold.CountThreshold;
+                }
+            }
+            set
+            {
+                if (RunningQueryPlanThreshold == null)
+                {
+                    RunningQueryPlanThreshold = PlanCollectionThreshold.PlanCollectionDisabledThreshold;
+                }
+                RunningQueryPlanThreshold.CountThreshold = value;             
+            }
+        }
+
+        #endregion
 
         [JsonIgnore]
         public DBADashConnection SourceConnection { get; set; }
@@ -73,21 +238,97 @@ namespace DBADash
         }
 
         [DefaultValue(false)]
-        public bool NoWMI { get; set; }
+        public bool NoWMI { 
+            get {
+                if (SourceConnection != null && SourceConnection.Type == ConnectionType.SQL)
+                {
+                    return noWMI;
+                }
+                else
+                {
+                    return false;
+                }
+            } 
+            set {
+             
+                    noWMI = value;
+            } 
+        }
 
-        public Int32 SlowQuerySessionMaxMemoryKB { get; set; } = 4096;
+
+        public Int32 SlowQuerySessionMaxMemoryKB { 
+            get {
+                if (SourceConnection != null && SourceConnection.Type == ConnectionType.SQL)
+                {
+                    return slowQuerySessionMaxMemoryKB;
+                }
+                else
+                {
+                    return 0;
+                }
+            } 
+            set {            
+                    slowQuerySessionMaxMemoryKB = value;
+            } 
+        }
 
         [DefaultValue(true)]
-        public bool UseDualEventSession { get; set; } = true;
+        public bool UseDualEventSession {
+            get {
+                if (SourceConnection != null && SourceConnection.Type == ConnectionType.SQL)
+                {
+                    return useDualXESesion;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+            set
+            {
+                    useDualXESesion = value;
+            }
+        }
+       
 
         [DefaultValue(-1)]
         public Int32 SlowQueryThresholdMs
         {
-            get { return slowQueryThresholdMs; }
-            set { slowQueryThresholdMs = value; }
+            get
+            {
+                if (SourceConnection != null && SourceConnection.Type == ConnectionType.SQL)
+                {
+                    return slowQueryThresholdMs;
+                }
+                else
+                {
+                    return -1;
+                }
+                
+             }
+            set {           
+                    slowQueryThresholdMs = value;             
+            }
         }
         [DefaultValue(false)]
-        public bool PersistXESessions { get; set; }
+        public bool PersistXESessions { 
+            get
+            {
+                if (SourceConnection != null && SourceConnection.Type == ConnectionType.SQL)
+                {
+                    return persistXESessions;
+                }
+                else
+                {
+                    return false;
+                }
+                
+            }
+            set {
+              
+                    persistXESessions = value;
+            }
+        }
 
         public DBADashSource(string source)
         {

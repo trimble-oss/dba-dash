@@ -25,10 +25,16 @@ namespace DBADashService
         public readonly CollectionConfig config;
         System.Timers.Timer azureScanForNewDBsTimer;
         System.Timers.Timer folderCleanupTimer;
+        CollectionSchedules schedules;
 
         public  ScheduleService()
         {
             config = SchedulerServiceConfig.Config;
+            schedules = config.GetSchedules();
+            if (config.CollectionSchedules != null)
+            {
+                Log.Information("Custom schedules set at agent level");
+            }
 
             Int32 threads = config.ServiceThreads;
             if (threads < 1)
@@ -214,54 +220,98 @@ namespace DBADashService
             folderCleanupTimer.Elapsed += new System.Timers.ElapsedEventHandler(FolderCleanup);
         }
 
-        private void scheduleSourceCollection(List<DBADashSource> sourceConnections)
-        {       
-            foreach (DBADashSource cfg in sourceConnections)
-            {
-                Log.Information("Schedule collections for {connection}", cfg.SourceConnection.ConnectionForPrint);
-                string cfgString = JsonConvert.SerializeObject(cfg);
 
-                foreach (var s in cfg.GetSchedule())
-                {
-                    IJobDetail job = JobBuilder.Create<DBADashJob>()
-                           .UsingJobData("Type", JsonConvert.SerializeObject(s.CollectionTypes))
-                           .UsingJobData("Source", cfg.SourceConnection.ConnectionString)
-                           .UsingJobData("CFG", cfgString)
-                           .UsingJobData("Job_instance_id",0)
-                           .UsingJobData("SourceType", JsonConvert.SerializeObject(cfg.SourceConnection.Type))
-                          .Build();
-                    ITrigger trigger = TriggerBuilder.Create()
-                    .StartNow()
-                    .WithCronSchedule(s.CronSchedule)
+        private IJobDetail GetJob(CollectionType[]types,DBADashSource src,string cfgString)
+        {
+            return JobBuilder.Create<DBADashJob>()
+                     .UsingJobData("Type", JsonConvert.SerializeObject(types))
+                     .UsingJobData("Source", src.ConnectionString)
+                     .UsingJobData("CFG", cfgString)
+                     .UsingJobData("Job_instance_id", 0)
+                     .UsingJobData("SourceType", JsonConvert.SerializeObject(src.SourceConnection.Type))
+                     .StoreDurably(true)
                     .Build();
+        }
 
-                    scheduler.ScheduleJob(job, trigger).ConfigureAwait(false).GetAwaiter().GetResult();
-                    if (s.RunOnServiceStart)
-                    {
-                        scheduler.TriggerJob(job.Key);
-                    }
+        private void ScheduleJob(string schedule, IJobDetail job)
+        {
+            ITrigger trigger;
+            if (int.TryParse(schedule, out int seconds)) // If it's an int, schedule is interval in seconds, otherwise use cron trigger
+            {
+                trigger = TriggerBuilder.Create()
+                 .StartNow()
+                 .WithSimpleSchedule(x =>
+                     x.WithIntervalInSeconds(seconds)
+                    .RepeatForever()
+                    )
+                 .Build();
+            }
+            else
+            {
+                trigger = TriggerBuilder.Create()
+                 .StartNow()
+                 .WithCronSchedule(schedule)
+                 .Build();
+            }
+            scheduler.ScheduleJob(job, trigger).ConfigureAwait(false).GetAwaiter().GetResult();
+        }
 
-                }
-                if (cfg.SchemaSnapshotDBs != null && cfg.SchemaSnapshotDBs.Length > 0)
+        private void scheduleSourceCollection(List<DBADashSource> connections)
+        {          
+            foreach (DBADashSource src in connections)
+            {
+                string cfgString = JsonConvert.SerializeObject(src);
+                CollectionSchedules srcSchedule;
+                if(src.CollectionSchedules!=null && src.CollectionSchedules.Count > 0)
                 {
-                    IJobDetail job = JobBuilder.Create<SchemaSnapshotJob>()
-                          .UsingJobData("Source", cfg.SourceConnection.ConnectionString)
-                          .UsingJobData("CFG", cfgString)
-                          .UsingJobData("SchemaSnapshotDBs", cfg.SchemaSnapshotDBs)
-                             .Build();
-                    ITrigger trigger = TriggerBuilder.Create()
-                      .StartNow()
-                      .WithCronSchedule(cfg.SchemaSnapshotCron)
-                      .Build();
-
-
-                    scheduler.ScheduleJob(job, trigger).ConfigureAwait(false).GetAwaiter().GetResult();
-                    if (cfg.SchemaSnapshotOnServiceStart)
-                    {
-                        scheduler.TriggerJob(job.Key);
-                    }
-
+                    srcSchedule = CollectionSchedules.Combine(schedules, src.CollectionSchedules);
+                    Log.Information("Custom schedule defined for instance: {instance}", src.SourceConnection.ConnectionForPrint);
                 }
+                else
+                {
+                    srcSchedule = schedules;
+                }
+
+                IJobDetail serviceStartJob = GetJob(CollectionSchedules.DefaultSchedules.OnServiceStartCollection, src, cfgString);
+                scheduler.AddJob(serviceStartJob,true).ConfigureAwait(false).GetAwaiter().GetResult();
+                scheduler.TriggerJob(serviceStartJob.Key);
+                if (src.SourceConnection.Type == ConnectionType.SQL)
+                {
+                    foreach (var s in srcSchedule.GroupedBySchedule)
+                    {
+                        IJobDetail job = GetJob(s.Value, src, cfgString);                 
+                        Log.Information("Add schedule for {source} to collect {collection} on schedule {schedule}", src.SourceConnection.ConnectionForPrint, s.Value, s.Key);
+                        ScheduleJob(s.Key,job);
+                    }
+                    if (src.SchemaSnapshotDBs != null && src.SchemaSnapshotDBs.Length > 0)
+                    {
+                        var snapshotSchedule = srcSchedule[CollectionType.SchemaSnapshot];
+                        if (!string.IsNullOrEmpty(snapshotSchedule.Schedule))
+                        {
+                            Log.Information("Add schedule for {source} to collect Schema Snapshots on schedule {schedule}", src.SourceConnection.ConnectionForPrint, snapshotSchedule.Schedule);
+                            IJobDetail job = JobBuilder.Create<SchemaSnapshotJob>()
+                                  .UsingJobData("Source", src.SourceConnection.ConnectionString)
+                                  .UsingJobData("CFG", cfgString)
+                                  .UsingJobData("SchemaSnapshotDBs", src.SchemaSnapshotDBs)
+                                     .Build();
+
+                            ScheduleJob(snapshotSchedule.Schedule, job);
+
+                            if (snapshotSchedule.RunOnServiceStart)
+                            {
+                                scheduler.TriggerJob(job.Key);
+                            }
+                        }
+                    }
+                }
+                else if(src.SourceConnection.Type== ConnectionType.Directory || src.SourceConnection.Type == ConnectionType.AWSS3)
+                {
+                    IJobDetail job = GetJob(null, src, cfgString);
+                    Log.Information("Add schedule for {source} to import on schedule {schedule}", src.SourceConnection.ConnectionForPrint, CollectionSchedule.DefaultImportSchedule);
+                    ScheduleJob(CollectionSchedule.DefaultImportSchedule.Schedule, job);
+                }
+
+               
             }
         }
 

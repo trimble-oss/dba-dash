@@ -34,6 +34,13 @@ namespace DBADash
             }
         }
 
+        public static PlanCollectionThreshold DefaultThreshold 
+            {
+                get{
+                    return new PlanCollectionThreshold() { CPUThreshold = 1000, DurationThreshold = 10000, MemoryGrantThreshold = 6400, CountThreshold = 2 };
+                }
+            } 
+
         public static PlanCollectionThreshold PlanCollectionDisabledThreshold
         {
             get

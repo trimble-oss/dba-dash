@@ -6,16 +6,14 @@ Schema snapshots use [SMO](https://en.wikipedia.org/wiki/SQL_Server_Management_O
 ## Before you enable schema snapshots
 Creating schema snapshots of your SQL Server databases might take some time depending on the schema of your databases and the number of databases on your SQL Server instances. This is potentially a heavier operation than some of the other data collections - though it currently runs single threaded and is unlikely to cause performance issues.  
 
-My recommendation is to schedule this to run daily during a quiet time for your SQL instance. If you have hundreds or thousands of databases on your SQL instance the snapshot process could take a considerable amount of time.  Also, if you have a single database that has ***millions*** of objects it might not be suitable for schema snapshots and should be excluded. You should also exclude any databases that have a very volatile database schema. For normal use cases this feature should work very well and could be something you find very useful.
+The default schedule for schema snapshots is daily at 11pm but you can [configure](Collection.md) this to run on a schedule that works best for your instance. If you have hundreds or thousands of databases on your SQL instance the snapshot process could take a considerable amount of time.  Also, if you have a single database that has ***millions*** of objects it might not be suitable for schema snapshots and should be excluded. You should also exclude any databases that have a very volatile database schema. For normal use cases this feature should work very well and could be something you find very useful.
 ## Setup
 ![DBA Dash Schema Snapshot Setup](/Docs/DBADash_SchemaSnapshotSetup.PNG)
 
-Schema snapshots are configured for your SQL instances using the DBA Dash Service Config Tool.  When adding or updating an instance in the "Source" tab, select the "Schema Snapshots" sub-tab to configure schema snapshots.
+Schema snapshots are configured for your SQL instances using the DBA Dash Service Config Tool.  When adding or updating an instance in the "Source" tab, select the "Other" sub-tab to configure schema snapshots.
  - Enter a comma-separated list of databases you want to snapshot.  Or use "*" for all databases. Databases can be excluded with "-".
  e.g.   **DB1,DB2,DB3** = *DB1, DB2 & DB3 only*
  ***,-ExcludedDB** = *All Databases except ExcludedDB*
-* Enter a cron expression that specifies the schedule you want to use for the schema snapshots.  Not familiar with cron expressions?  Just pick a time from the drop down to the right or use [cronmaker.com](www.cronmaker.com).
-* Check if you want the schema snapshot process to run on service start.
 * Click Add/Update to add or update the connection to the config.
 * Click "Save" to save the new config.
 * Restart the service to pick up the change.

@@ -8,7 +8,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using System.Data.SqlClient;
 namespace DBADashGUI.Tagging
 {
     public partial class Tags : UserControl
@@ -19,14 +18,13 @@ namespace DBADashGUI.Tagging
         }
 
         public event EventHandler TagsChanged;
-        private bool isTagPopulation=false;
         private List<DBADashTag> _allTags;
         public List<DBADashTag> AllTags { 
             get {
                 return _allTags;
             } 
             set {
-                _allTags = value == null ? new List<DBADashTag>() : value;
+                _allTags = value ?? new List<DBADashTag>();
                 cboTagName.Items.Clear();
                 cboTagName.Items.AddRange(
                     _allTags.Where(t=>!t.TagName.StartsWith("{"))
@@ -81,7 +79,6 @@ namespace DBADashGUI.Tagging
 
         private void refreshEdit()
         {
-            isTagPopulation = true;
             dgv.Rows.Clear();
             dgvTags.Rows.Clear();
             var tags = InstanceTag.GetInstanceTags(Common.ConnectionString, InstanceName);
@@ -99,7 +96,6 @@ namespace DBADashGUI.Tagging
             }
             dgvTags.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
             dgv.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
-            isTagPopulation = false;
         }
 
         private void refreshReport()
