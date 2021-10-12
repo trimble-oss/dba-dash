@@ -42,9 +42,9 @@
             // chartIO
             // 
             this.chartIO.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.chartIO.Location = new System.Drawing.Point(0, 49);
+            this.chartIO.Location = new System.Drawing.Point(0, 27);
             this.chartIO.Name = "chartIO";
-            this.chartIO.Size = new System.Drawing.Size(966, 319);
+            this.chartIO.Size = new System.Drawing.Size(773, 267);
             this.chartIO.TabIndex = 4;
             this.chartIO.Text = "cartesianChart1";
             // 
@@ -59,7 +59,7 @@
             this.tsFileGroup});
             this.toolStrip1.Location = new System.Drawing.Point(0, 0);
             this.toolStrip1.Name = "toolStrip1";
-            this.toolStrip1.Size = new System.Drawing.Size(966, 39);
+            this.toolStrip1.Size = new System.Drawing.Size(773, 27);
             this.toolStrip1.TabIndex = 5;
             this.toolStrip1.Text = "toolStrip1";
             // 
@@ -69,7 +69,7 @@
             this.tsMeasures.Image = global::DBADashGUI.Properties.Resources.AddComputedField_16x;
             this.tsMeasures.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsMeasures.Name = "tsMeasures";
-            this.tsMeasures.Size = new System.Drawing.Size(34, 36);
+            this.tsMeasures.Size = new System.Drawing.Size(34, 24);
             this.tsMeasures.Text = "Measures";
             // 
             // lblIOPerformance
@@ -77,7 +77,7 @@
             this.lblIOPerformance.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
             this.lblIOPerformance.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
             this.lblIOPerformance.Name = "lblIOPerformance";
-            this.lblIOPerformance.Size = new System.Drawing.Size(119, 36);
+            this.lblIOPerformance.Size = new System.Drawing.Size(119, 24);
             this.lblIOPerformance.Text = "IO Performance";
             // 
             // tsDateGroup
@@ -86,7 +86,7 @@
             this.tsDateGroup.Image = ((System.Drawing.Image)(resources.GetObject("tsDateGroup.Image")));
             this.tsDateGroup.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsDateGroup.Name = "tsDateGroup";
-            this.tsDateGroup.Size = new System.Drawing.Size(56, 36);
+            this.tsDateGroup.Size = new System.Drawing.Size(56, 24);
             this.tsDateGroup.Text = "1min";
             // 
             // tsDrives
@@ -94,7 +94,7 @@
             this.tsDrives.Image = global::DBADashGUI.Properties.Resources.Hard_Drive;
             this.tsDrives.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsDrives.Name = "tsDrives";
-            this.tsDrives.Size = new System.Drawing.Size(34, 36);
+            this.tsDrives.Size = new System.Drawing.Size(34, 24);
             // 
             // tsFileGroup
             // 

@@ -465,6 +465,27 @@ namespace DBADashGUI
                 memoryUsage1.InstanceID = n.InstanceID;
                 memoryUsage1.RefreshData();
             }
+            else if (tabs.SelectedTab == tabJobStats)
+            {
+                globalTimeisVisible = true;
+                jobStats1.InstanceID = n.InstanceID;
+                if (n.Type == SQLTreeItem.TreeType.AgentJob)
+                {
+                   jobStats1.JobID = (Guid)n.Tag;
+                   jobStats1.StepID = 0;
+                }
+                else if (n.Type == SQLTreeItem.TreeType.AgentJobStep)
+                {
+                    jobStats1.JobID = (Guid)n.Parent.Tag;
+                    jobStats1.StepID = (int)n.Tag;
+                }
+                else if(n.Type == SQLTreeItem.TreeType.AgentJobs)
+                {
+                    jobStats1.JobID = Guid.Empty;
+                    jobStats1.StepID = 0;
+                }
+                jobStats1.RefreshData();
+            }
             tsTime.Visible = globalTimeisVisible;
         }
 
@@ -723,10 +744,12 @@ namespace DBADashGUI
             else if(n.Type == SQLTreeItem.TreeType.AgentJobs)
             {
                 allowedTabs.Add(tabJobs);
+                allowedTabs.Add(tabJobStats);
             }
             else if(n.Type== SQLTreeItem.TreeType.AgentJob) {
                 allowedTabs.Add(tabJobs);
                 allowedTabs.Add(tabJobDDL);
+                allowedTabs.Add(tabJobStats);
             }
             else if (n.Type== SQLTreeItem.TreeType.HADR)
             {
@@ -758,6 +781,7 @@ namespace DBADashGUI
             else if(n.Type == SQLTreeItem.TreeType.AgentJobStep)
             {
                 allowedTabs.Add(tabJobs);
+                allowedTabs.Add(tabJobStats);
             }
 
             if (n.ObjectID > 0)
@@ -1244,6 +1268,10 @@ namespace DBADashGUI
             else if(tabs.SelectedTab== tabMemory)
             {
                 memoryUsage1.RefreshData();
+            }
+            else if(tabs.SelectedTab == tabJobStats)
+            {
+                jobStats1.RefreshData();
             }
 
         }

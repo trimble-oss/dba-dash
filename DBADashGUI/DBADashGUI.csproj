@@ -121,6 +121,12 @@
     <Compile Include="AgentJobs\AgentJobThresholdsConfig.Designer.cs">
       <DependentUpon>AgentJobThresholdsConfig.cs</DependentUpon>
     </Compile>
+    <Compile Include="AgentJobs\JobStats.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="AgentJobs\JobStats.Designer.cs">
+      <DependentUpon>JobStats.cs</DependentUpon>
+    </Compile>
     <Compile Include="AgentJobs\JobDiff.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -622,6 +628,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="AgentJobs\AgentJobThresholdsConfig.resx">
       <DependentUpon>AgentJobThresholdsConfig.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="AgentJobs\JobStats.resx">
+      <DependentUpon>JobStats.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="AgentJobs\JobDiff.resx">
       <DependentUpon>JobDiff.cs</DependentUpon>
