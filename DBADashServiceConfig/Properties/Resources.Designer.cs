@@ -63,6 +63,16 @@ namespace DBADashServiceConfig.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap _112_RefreshArrow_Green_16x16_72 {
+            get {
+                object obj = ResourceManager.GetObject("_112_RefreshArrow_Green_16x16_72", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap Arch_Amazon_Simple_Storage_Service_16 {
             get {
                 object obj = ResourceManager.GetObject("Arch_Amazon-Simple-Storage-Service_16", resourceCulture);
@@ -106,6 +116,36 @@ namespace DBADashServiceConfig.Properties {
         internal static System.Drawing.Bitmap Information_blue_6227_16x16_cyan {
             get {
                 object obj = ResourceManager.GetObject("Information_blue_6227_16x16_cyan", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap install {
+            get {
+                object obj = ResourceManager.GetObject("install", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap StartWithoutDebug_16x {
+            get {
+                object obj = ResourceManager.GetObject("StartWithoutDebug_16x", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap Stop_16x {
+            get {
+                object obj = ResourceManager.GetObject("Stop_16x", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

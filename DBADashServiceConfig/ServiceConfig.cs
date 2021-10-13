@@ -28,6 +28,8 @@ namespace DBADashServiceConfig
         CollectionConfig collectionConfig = new CollectionConfig();
         readonly string jsonPath = System.IO.Path.Combine(Application.StartupPath, "ServiceConfig.json");
         ServiceController svcCtrl;
+        bool isInstalled = false;
+
 
         private void bttnAdd_Click(object sender, EventArgs e)
         {
@@ -279,7 +281,7 @@ namespace DBADashServiceConfig
             dgvConnections.Columns.Add(new DataGridViewLinkColumn() { Name = "Delete", HeaderText = "Delete", Text = "Delete", UseColumnTextForLinkValue = true });
 
             txtJson.MaxLength = 0;
-            cboServiceCredentials.SelectedIndex = 3;
+
             if (File.Exists(jsonPath))
             {
                 try
@@ -313,8 +315,6 @@ namespace DBADashServiceConfig
             {
                 lnkSourceConnections.LinkColor = Color.Green;
             }
-            lblSourceConnections.ForeColor = lnkSourceConnections.LinkColor;
-            lblSourceConnections.Text = lnkSourceConnections.Text;
         }
 
         private void setFromJson(string json)
@@ -346,16 +346,20 @@ namespace DBADashServiceConfig
 
             if (svcCtrl == null)
             {
+                isInstalled = false;
+                lnkStart.Enabled = false;
+                lnkStop.Enabled = false;
+                lnkInstall.Enabled = true;
+                lnkInstall.Font = new Font(lnkInstall.Font, FontStyle.Bold);
+                lnkInstall.Text = "Install as service";
+                toolTip1.SetToolTip(lnkInstall, "Install DBA Dash agent as a Windows service");
                 lblServiceStatus.Text = "Service Status: Not Installed";
                 lblServiceStatus.ForeColor = Color.Brown;
-                bttnStart.Enabled = false;
-                bttnStop.Enabled = false;
-                bttnInstall.Enabled = true;
-                bttnUninstall.Enabled = false;
 
             }
             else
             {
+                isInstalled = true;
                 lblServiceStatus.Text ="Service Status: " +  Enum.GetName(typeof(ServiceControllerStatus), svcCtrl.Status);
                 if(svcCtrl.Status == ServiceControllerStatus.Running)
                 {
@@ -369,13 +373,12 @@ namespace DBADashServiceConfig
                 {
                     lblServiceStatus.ForeColor = Color.Orange;
                 }
-                bttnStart.Enabled = (svcCtrl.Status == ServiceControllerStatus.Stopped);
-                bttnStop.Enabled = (svcCtrl.Status == ServiceControllerStatus.Running);
-                bttnInstall.Enabled = false;
-                bttnUninstall.Enabled = true;
+                lnkStart.Enabled = (svcCtrl.Status == ServiceControllerStatus.Stopped);
+                lnkStop.Enabled= (svcCtrl.Status == ServiceControllerStatus.Running);
+                lnkInstall.Font = new Font(lnkInstall.Font, FontStyle.Regular);
+                toolTip1.SetToolTip(lnkInstall, "Remove Windoes service for DBA Dash agent");
+                lnkInstall.Text = "Uninstall service";
             }
-            lnkServiceStatus.Text = lblServiceStatus.Text;
-            lnkServiceStatus.LinkColor = lblServiceStatus.ForeColor;
         }
 
         private void txtJson_Validating(object sender, CancelEventArgs e)
@@ -414,6 +417,11 @@ namespace DBADashServiceConfig
 
         private void bttnStart_Click(object sender, EventArgs e)
         {
+            startService();
+        }
+
+        private void startService()
+        {
             promptSaveChanges();
             svcCtrl.Refresh();
             if (svcCtrl.Status == ServiceControllerStatus.Stopped)
@@ -434,6 +442,11 @@ namespace DBADashServiceConfig
         }
 
         private void bttnStop_Click(object sender, EventArgs e)
+        {
+            stopService();
+        }
+
+        private void stopService()
         {
             svcCtrl.Refresh();
             if (svcCtrl.Status == ServiceControllerStatus.Running)
@@ -457,56 +470,27 @@ namespace DBADashServiceConfig
             validateDestination();
         }
 
-        private void bttnInstall_Click(object sender, EventArgs e)
-        {
-            promptSaveChanges();
-            if (!(File.Exists(jsonPath)))
-            {
-                MessageBox.Show("Save configuration file before installing service", "Error", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
-                return;
-            }
-            Process p = new Process();
-            var psi = new ProcessStartInfo()
-            {
-                FileName = "CMD.EXE"
-            };
-            string arg = "";
-            switch (cboServiceCredentials.SelectedIndex)
-            {
-                case 0:
-                    arg = "--localsystem";
-                    break;
-                case 1:
-                    arg = "--localservice";
-                    break;
-                case 2:
-                    arg = "--networkservice";
-                    break;
-                case 3:
-                    arg = "--interactive";
-                    break;
-
-            }
-            psi.Arguments = "/K DBADashService Install " + arg;
-            p.StartInfo = psi;
-            p.Start();
-            p.WaitForExit();
-            System.Threading.Thread.Sleep(500);
-            refreshServiceStatus();
-        }
-
         private void bttnUninstall_Click(object sender, EventArgs e)
         {
-            Process p = new Process();
-            ProcessStartInfo psi = new ProcessStartInfo() {
-                FileName = "CMD.EXE",
-                Arguments = "/K DBADashService UnInstall"
-            };
-            p.StartInfo = psi;
-            p.Start();
-            p.WaitForExit();
-            System.Threading.Thread.Sleep(500);
-            refreshServiceStatus();
+            uninstallService();
+        }
+
+        private void uninstallService()
+        {
+            if (MessageBox.Show("Are you sure you want to remove the DBA Dash Windows service?", "Uninstall", MessageBoxButtons.YesNo, MessageBoxIcon.Exclamation) == DialogResult.Yes)
+            {
+                Process p = new Process();
+                ProcessStartInfo psi = new ProcessStartInfo()
+                {
+                    FileName = "CMD.EXE",
+                    Arguments = "/c DBADashService UnInstall"
+                };
+                p.StartInfo = psi;
+                p.Start();
+                p.WaitForExit();
+                System.Threading.Thread.Sleep(500);
+                refreshServiceStatus();
+            }
         }
 
         private void bttnCancel_Click(object sender, EventArgs e)
@@ -846,10 +830,6 @@ namespace DBADashServiceConfig
             setAvailableOptionsForSource();
         }
 
-        private void lnkServiceStatus_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
-        {
-            tab1.SelectedTab = tabService;
-        }
 
         private void lnkSourceConnections_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
@@ -1034,6 +1014,42 @@ namespace DBADashServiceConfig
             else
             {
                 bttnSave.Font = new Font(bttnSave.Font, FontStyle.Regular);
+            }
+        }
+
+        private void lnkStart_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            startService();
+        }
+
+        private void lnkStop_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            stopService();
+        }
+
+        private void lnkRefresh_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            refreshServiceStatus();
+        }
+
+        private void lnkInstall_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            if (isInstalled)
+            {
+                uninstallService();
+            }
+            else { 
+                if(txtJson.Text!= originalJson)
+                {
+                    if(MessageBox.Show("Save changes to config", "Save", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+                    {
+                        saveChanges();
+                    }
+                }
+                var frm = new InstallService();
+                frm.ServiceName = collectionConfig.ServiceName;
+                frm.ShowDialog();
+                refreshServiceStatus();
             }
         }
     }

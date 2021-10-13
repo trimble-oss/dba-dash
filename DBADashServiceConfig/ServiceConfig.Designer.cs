@@ -41,19 +41,15 @@
             this.txtAWSProfile = new System.Windows.Forms.TextBox();
             this.bttnSave = new System.Windows.Forms.Button();
             this.label5 = new System.Windows.Forms.Label();
-            this.lblServiceStatus = new System.Windows.Forms.Label();
-            this.bttnStart = new System.Windows.Forms.Button();
-            this.bttnStop = new System.Windows.Forms.Button();
-            this.bttnRefresh = new System.Windows.Forms.Button();
-            this.bttnInstall = new System.Windows.Forms.Button();
-            this.bttnUninstall = new System.Windows.Forms.Button();
-            this.cboServiceCredentials = new System.Windows.Forms.ComboBox();
-            this.lblServiceCredentials = new System.Windows.Forms.Label();
             this.bttnCancel = new System.Windows.Forms.Button();
             this.tab1 = new System.Windows.Forms.TabControl();
             this.tabDest = new System.Windows.Forms.TabPage();
-            this.lnkSourceConnections = new System.Windows.Forms.LinkLabel();
-            this.lnkServiceStatus = new System.Windows.Forms.LinkLabel();
+            this.groupBox5 = new System.Windows.Forms.GroupBox();
+            this.lnkInstall = new System.Windows.Forms.LinkLabel();
+            this.lblServiceStatus = new System.Windows.Forms.Label();
+            this.lnkRefresh = new System.Windows.Forms.LinkLabel();
+            this.lnkStart = new System.Windows.Forms.LinkLabel();
+            this.lnkStop = new System.Windows.Forms.LinkLabel();
             this.bttnS3 = new System.Windows.Forms.Button();
             this.bttnDestFolder = new System.Windows.Forms.Button();
             this.chkAutoUpgradeRepoDB = new System.Windows.Forms.CheckBox();
@@ -101,12 +97,7 @@
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.dgvConnections = new System.Windows.Forms.DataGridView();
             this.label13 = new System.Windows.Forms.Label();
-            this.lblSourceConnections = new System.Windows.Forms.Label();
             this.txtSearch = new System.Windows.Forms.TextBox();
-            this.tabService = new System.Windows.Forms.TabPage();
-            this.pictureBox1 = new System.Windows.Forms.PictureBox();
-            this.lnkPermissions = new System.Windows.Forms.LinkLabel();
-            this.textBox1 = new System.Windows.Forms.TextBox();
             this.tabOther = new System.Windows.Forms.TabPage();
             this.groupBox4 = new System.Windows.Forms.GroupBox();
             this.chkScanAzureDB = new System.Windows.Forms.CheckBox();
@@ -121,11 +112,13 @@
             this.bttnSchedule = new System.Windows.Forms.Button();
             this.chkLogInternalPerfCounters = new System.Windows.Forms.CheckBox();
             this.tabJson = new System.Windows.Forms.TabPage();
+            this.lnkSourceConnections = new System.Windows.Forms.LinkLabel();
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
             this.button1 = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.errorProvider1)).BeginInit();
             this.tab1.SuspendLayout();
             this.tabDest.SuspendLayout();
+            this.groupBox5.SuspendLayout();
             this.tabSource.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.tabSrcOptions.SuspendLayout();
@@ -139,8 +132,6 @@
             this.grpRunningQueryThreshold.SuspendLayout();
             this.groupBox1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dgvConnections)).BeginInit();
-            this.tabService.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.tabOther.SuspendLayout();
             this.groupBox4.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.numAzureScanInterval)).BeginInit();
@@ -254,96 +245,6 @@
             this.label5.TabIndex = 12;
             this.label5.Text = "Json:";
             // 
-            // lblServiceStatus
-            // 
-            this.lblServiceStatus.AutoSize = true;
-            this.lblServiceStatus.Location = new System.Drawing.Point(6, 15);
-            this.lblServiceStatus.Name = "lblServiceStatus";
-            this.lblServiceStatus.Size = new System.Drawing.Size(103, 17);
-            this.lblServiceStatus.TabIndex = 14;
-            this.lblServiceStatus.Text = "Service Status:";
-            // 
-            // bttnStart
-            // 
-            this.bttnStart.Location = new System.Drawing.Point(562, 12);
-            this.bttnStart.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
-            this.bttnStart.Name = "bttnStart";
-            this.bttnStart.Size = new System.Drawing.Size(75, 23);
-            this.bttnStart.TabIndex = 2;
-            this.bttnStart.Text = "Start";
-            this.bttnStart.UseVisualStyleBackColor = true;
-            this.bttnStart.Click += new System.EventHandler(this.bttnStart_Click);
-            // 
-            // bttnStop
-            // 
-            this.bttnStop.Location = new System.Drawing.Point(562, 39);
-            this.bttnStop.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
-            this.bttnStop.Name = "bttnStop";
-            this.bttnStop.Size = new System.Drawing.Size(75, 23);
-            this.bttnStop.TabIndex = 3;
-            this.bttnStop.Text = "Stop";
-            this.bttnStop.UseVisualStyleBackColor = true;
-            this.bttnStop.Click += new System.EventHandler(this.bttnStop_Click);
-            // 
-            // bttnRefresh
-            // 
-            this.bttnRefresh.Location = new System.Drawing.Point(481, 12);
-            this.bttnRefresh.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
-            this.bttnRefresh.Name = "bttnRefresh";
-            this.bttnRefresh.Size = new System.Drawing.Size(75, 23);
-            this.bttnRefresh.TabIndex = 1;
-            this.bttnRefresh.Text = "Refresh";
-            this.bttnRefresh.UseVisualStyleBackColor = true;
-            this.bttnRefresh.Click += new System.EventHandler(this.bttnRefresh_Click);
-            // 
-            // bttnInstall
-            // 
-            this.bttnInstall.Location = new System.Drawing.Point(297, 38);
-            this.bttnInstall.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
-            this.bttnInstall.Name = "bttnInstall";
-            this.bttnInstall.Size = new System.Drawing.Size(75, 23);
-            this.bttnInstall.TabIndex = 5;
-            this.bttnInstall.Text = "Install";
-            this.bttnInstall.UseVisualStyleBackColor = true;
-            this.bttnInstall.Click += new System.EventHandler(this.bttnInstall_Click);
-            // 
-            // bttnUninstall
-            // 
-            this.bttnUninstall.Location = new System.Drawing.Point(297, 65);
-            this.bttnUninstall.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
-            this.bttnUninstall.Name = "bttnUninstall";
-            this.bttnUninstall.Size = new System.Drawing.Size(75, 23);
-            this.bttnUninstall.TabIndex = 6;
-            this.bttnUninstall.Text = "Uninstall";
-            this.bttnUninstall.UseVisualStyleBackColor = true;
-            this.bttnUninstall.Click += new System.EventHandler(this.bttnUninstall_Click);
-            // 
-            // cboServiceCredentials
-            // 
-            this.cboServiceCredentials.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.cboServiceCredentials.FormattingEnabled = true;
-            this.cboServiceCredentials.Items.AddRange(new object[] {
-            "LocalSystem",
-            "LocalService",
-            "NetworkService",
-            "User (prompt)"});
-            this.cboServiceCredentials.Location = new System.Drawing.Point(116, 38);
-            this.cboServiceCredentials.Margin = new System.Windows.Forms.Padding(4);
-            this.cboServiceCredentials.Name = "cboServiceCredentials";
-            this.cboServiceCredentials.Size = new System.Drawing.Size(160, 24);
-            this.cboServiceCredentials.TabIndex = 4;
-            this.cboServiceCredentials.UseWaitCursor = true;
-            // 
-            // lblServiceCredentials
-            // 
-            this.lblServiceCredentials.AutoSize = true;
-            this.lblServiceCredentials.Location = new System.Drawing.Point(7, 45);
-            this.lblServiceCredentials.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
-            this.lblServiceCredentials.Name = "lblServiceCredentials";
-            this.lblServiceCredentials.Size = new System.Drawing.Size(58, 17);
-            this.lblServiceCredentials.TabIndex = 22;
-            this.lblServiceCredentials.Text = "Run As:";
-            // 
             // bttnCancel
             // 
             this.bttnCancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
@@ -363,7 +264,6 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.tab1.Controls.Add(this.tabDest);
             this.tab1.Controls.Add(this.tabSource);
-            this.tab1.Controls.Add(this.tabService);
             this.tab1.Controls.Add(this.tabOther);
             this.tab1.Controls.Add(this.tabJson);
             this.tab1.Location = new System.Drawing.Point(12, 25);
@@ -374,8 +274,7 @@
             // 
             // tabDest
             // 
-            this.tabDest.Controls.Add(this.lnkSourceConnections);
-            this.tabDest.Controls.Add(this.lnkServiceStatus);
+            this.tabDest.Controls.Add(this.groupBox5);
             this.tabDest.Controls.Add(this.bttnS3);
             this.tabDest.Controls.Add(this.bttnDestFolder);
             this.tabDest.Controls.Add(this.chkAutoUpgradeRepoDB);
@@ -392,30 +291,88 @@
             this.tabDest.Text = "Destination:";
             this.tabDest.UseVisualStyleBackColor = true;
             // 
-            // lnkSourceConnections
+            // groupBox5
             // 
-            this.lnkSourceConnections.AutoSize = true;
-            this.lnkSourceConnections.Font = new System.Drawing.Font("Arial", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lnkSourceConnections.LinkColor = System.Drawing.Color.Black;
-            this.lnkSourceConnections.Location = new System.Drawing.Point(6, 190);
-            this.lnkSourceConnections.Name = "lnkSourceConnections";
-            this.lnkSourceConnections.Size = new System.Drawing.Size(140, 16);
-            this.lnkSourceConnections.TabIndex = 18;
-            this.lnkSourceConnections.TabStop = true;
-            this.lnkSourceConnections.Text = "Source Connections:";
-            this.lnkSourceConnections.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.lnkSourceConnections_LinkClicked);
+            this.groupBox5.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.groupBox5.Controls.Add(this.lnkInstall);
+            this.groupBox5.Controls.Add(this.lblServiceStatus);
+            this.groupBox5.Controls.Add(this.lnkRefresh);
+            this.groupBox5.Controls.Add(this.lnkStart);
+            this.groupBox5.Controls.Add(this.lnkStop);
+            this.groupBox5.Location = new System.Drawing.Point(9, 467);
+            this.groupBox5.Name = "groupBox5";
+            this.groupBox5.Size = new System.Drawing.Size(1058, 73);
+            this.groupBox5.TabIndex = 19;
+            this.groupBox5.TabStop = false;
+            this.groupBox5.Text = "Service";
             // 
-            // lnkServiceStatus
+            // lnkInstall
             // 
-            this.lnkServiceStatus.AutoSize = true;
-            this.lnkServiceStatus.Font = new System.Drawing.Font("Arial", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lnkServiceStatus.Location = new System.Drawing.Point(6, 161);
-            this.lnkServiceStatus.Name = "lnkServiceStatus";
-            this.lnkServiceStatus.Size = new System.Drawing.Size(103, 16);
-            this.lnkServiceStatus.TabIndex = 16;
-            this.lnkServiceStatus.TabStop = true;
-            this.lnkServiceStatus.Text = "Service Status:";
-            this.lnkServiceStatus.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.lnkServiceStatus_LinkClicked);
+            this.lnkInstall.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.lnkInstall.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lnkInstall.Image = global::DBADashServiceConfig.Properties.Resources.install;
+            this.lnkInstall.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.lnkInstall.Location = new System.Drawing.Point(892, 34);
+            this.lnkInstall.Name = "lnkInstall";
+            this.lnkInstall.Size = new System.Drawing.Size(160, 17);
+            this.lnkInstall.TabIndex = 22;
+            this.lnkInstall.TabStop = true;
+            this.lnkInstall.Text = "Install as service";
+            this.lnkInstall.TextAlign = System.Drawing.ContentAlignment.TopRight;
+            this.lnkInstall.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.lnkInstall_LinkClicked);
+            // 
+            // lblServiceStatus
+            // 
+            this.lblServiceStatus.AutoSize = true;
+            this.lblServiceStatus.Location = new System.Drawing.Point(15, 34);
+            this.lblServiceStatus.Name = "lblServiceStatus";
+            this.lblServiceStatus.Size = new System.Drawing.Size(99, 17);
+            this.lblServiceStatus.TabIndex = 23;
+            this.lblServiceStatus.Text = "Service Status";
+            // 
+            // lnkRefresh
+            // 
+            this.lnkRefresh.Image = global::DBADashServiceConfig.Properties.Resources._112_RefreshArrow_Green_16x16_72;
+            this.lnkRefresh.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.lnkRefresh.Location = new System.Drawing.Point(457, 34);
+            this.lnkRefresh.Name = "lnkRefresh";
+            this.lnkRefresh.Size = new System.Drawing.Size(80, 17);
+            this.lnkRefresh.TabIndex = 21;
+            this.lnkRefresh.TabStop = true;
+            this.lnkRefresh.Text = "Refresh";
+            this.lnkRefresh.TextAlign = System.Drawing.ContentAlignment.TopRight;
+            this.toolTip1.SetToolTip(this.lnkRefresh, "Refresh the status of the DBA Dash service");
+            this.lnkRefresh.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.lnkRefresh_LinkClicked);
+            // 
+            // lnkStart
+            // 
+            this.lnkStart.Image = global::DBADashServiceConfig.Properties.Resources.StartWithoutDebug_16x;
+            this.lnkStart.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.lnkStart.Location = new System.Drawing.Point(270, 34);
+            this.lnkStart.Name = "lnkStart";
+            this.lnkStart.Size = new System.Drawing.Size(69, 17);
+            this.lnkStart.TabIndex = 19;
+            this.lnkStart.TabStop = true;
+            this.lnkStart.Text = "Start";
+            this.lnkStart.TextAlign = System.Drawing.ContentAlignment.TopRight;
+            this.toolTip1.SetToolTip(this.lnkStart, "Start the DBA Dash service");
+            this.lnkStart.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.lnkStart_LinkClicked);
+            // 
+            // lnkStop
+            // 
+            this.lnkStop.Image = global::DBADashServiceConfig.Properties.Resources.Stop_16x;
+            this.lnkStop.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.lnkStop.Location = new System.Drawing.Point(367, 34);
+            this.lnkStop.Name = "lnkStop";
+            this.lnkStop.Size = new System.Drawing.Size(62, 17);
+            this.lnkStop.TabIndex = 20;
+            this.lnkStop.TabStop = true;
+            this.lnkStop.Text = "Stop";
+            this.lnkStop.TextAlign = System.Drawing.ContentAlignment.TopRight;
+            this.toolTip1.SetToolTip(this.lnkStop, "Stop the DBA Dash service");
+            this.lnkStop.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.lnkStop_LinkClicked);
             // 
             // bttnS3
             // 
@@ -470,7 +427,7 @@
             // 
             this.lblVersionInfo.AutoSize = true;
             this.lblVersionInfo.Font = new System.Drawing.Font("Arial", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblVersionInfo.Location = new System.Drawing.Point(6, 131);
+            this.lblVersionInfo.Location = new System.Drawing.Point(100, 121);
             this.lblVersionInfo.Name = "lblVersionInfo";
             this.lblVersionInfo.Size = new System.Drawing.Size(93, 16);
             this.lblVersionInfo.TabIndex = 6;
@@ -929,7 +886,6 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.groupBox1.Controls.Add(this.dgvConnections);
             this.groupBox1.Controls.Add(this.label13);
-            this.groupBox1.Controls.Add(this.lblSourceConnections);
             this.groupBox1.Controls.Add(this.txtSearch);
             this.groupBox1.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.groupBox1.Location = new System.Drawing.Point(10, 261);
@@ -968,17 +924,6 @@
             this.label13.TabIndex = 25;
             this.label13.Text = "Search:";
             // 
-            // lblSourceConnections
-            // 
-            this.lblSourceConnections.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.lblSourceConnections.AutoSize = true;
-            this.lblSourceConnections.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblSourceConnections.Location = new System.Drawing.Point(16, 267);
-            this.lblSourceConnections.Name = "lblSourceConnections";
-            this.lblSourceConnections.Size = new System.Drawing.Size(139, 17);
-            this.lblSourceConnections.TabIndex = 22;
-            this.lblSourceConnections.Text = "Source Connections:";
-            // 
             // txtSearch
             // 
             this.txtSearch.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
@@ -987,59 +932,6 @@
             this.txtSearch.Size = new System.Drawing.Size(191, 22);
             this.txtSearch.TabIndex = 24;
             this.txtSearch.TextChanged += new System.EventHandler(this.txtSearch_TextChanged);
-            // 
-            // tabService
-            // 
-            this.tabService.Controls.Add(this.pictureBox1);
-            this.tabService.Controls.Add(this.lnkPermissions);
-            this.tabService.Controls.Add(this.textBox1);
-            this.tabService.Controls.Add(this.cboServiceCredentials);
-            this.tabService.Controls.Add(this.lblServiceCredentials);
-            this.tabService.Controls.Add(this.lblServiceStatus);
-            this.tabService.Controls.Add(this.bttnRefresh);
-            this.tabService.Controls.Add(this.bttnUninstall);
-            this.tabService.Controls.Add(this.bttnStart);
-            this.tabService.Controls.Add(this.bttnInstall);
-            this.tabService.Controls.Add(this.bttnStop);
-            this.tabService.Location = new System.Drawing.Point(4, 25);
-            this.tabService.Name = "tabService";
-            this.tabService.Padding = new System.Windows.Forms.Padding(3);
-            this.tabService.Size = new System.Drawing.Size(1096, 559);
-            this.tabService.TabIndex = 3;
-            this.tabService.Text = "Service";
-            this.tabService.UseVisualStyleBackColor = true;
-            // 
-            // pictureBox1
-            // 
-            this.pictureBox1.Image = global::DBADashServiceConfig.Properties.Resources.Information_blue_6227_16x16_cyan;
-            this.pictureBox1.Location = new System.Drawing.Point(10, 230);
-            this.pictureBox1.Name = "pictureBox1";
-            this.pictureBox1.Size = new System.Drawing.Size(16, 16);
-            this.pictureBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.AutoSize;
-            this.pictureBox1.TabIndex = 26;
-            this.pictureBox1.TabStop = false;
-            // 
-            // lnkPermissions
-            // 
-            this.lnkPermissions.AutoSize = true;
-            this.lnkPermissions.Location = new System.Drawing.Point(32, 230);
-            this.lnkPermissions.Name = "lnkPermissions";
-            this.lnkPermissions.Size = new System.Drawing.Size(243, 17);
-            this.lnkPermissions.TabIndex = 25;
-            this.lnkPermissions.TabStop = true;
-            this.lnkPermissions.Text = "Permissions required for service user";
-            this.lnkPermissions.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.lnkPermissions_LinkClicked);
-            // 
-            // textBox1
-            // 
-            this.textBox1.BackColor = System.Drawing.Color.Gainsboro;
-            this.textBox1.Location = new System.Drawing.Point(10, 119);
-            this.textBox1.Multiline = true;
-            this.textBox1.Name = "textBox1";
-            this.textBox1.ReadOnly = true;
-            this.textBox1.Size = new System.Drawing.Size(756, 104);
-            this.textBox1.TabIndex = 24;
-            this.textBox1.Text = resources.GetString("textBox1.Text");
             // 
             // tabOther
             // 
@@ -1213,6 +1105,19 @@
             this.tabJson.Text = "Json";
             this.tabJson.UseVisualStyleBackColor = true;
             // 
+            // lnkSourceConnections
+            // 
+            this.lnkSourceConnections.AutoSize = true;
+            this.lnkSourceConnections.Font = new System.Drawing.Font("Arial", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lnkSourceConnections.LinkColor = System.Drawing.Color.Black;
+            this.lnkSourceConnections.Location = new System.Drawing.Point(12, 626);
+            this.lnkSourceConnections.Name = "lnkSourceConnections";
+            this.lnkSourceConnections.Size = new System.Drawing.Size(140, 16);
+            this.lnkSourceConnections.TabIndex = 18;
+            this.lnkSourceConnections.TabStop = true;
+            this.lnkSourceConnections.Text = "Source Connections:";
+            this.lnkSourceConnections.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.lnkSourceConnections_LinkClicked);
+            // 
             // button1
             // 
             this.button1.Location = new System.Drawing.Point(727, 19);
@@ -1228,6 +1133,7 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1137, 657);
             this.Controls.Add(this.tab1);
+            this.Controls.Add(this.lnkSourceConnections);
             this.Controls.Add(this.bttnCancel);
             this.Controls.Add(this.label5);
             this.Controls.Add(this.bttnSave);
@@ -1242,6 +1148,8 @@
             this.tab1.ResumeLayout(false);
             this.tabDest.ResumeLayout(false);
             this.tabDest.PerformLayout();
+            this.groupBox5.ResumeLayout(false);
+            this.groupBox5.PerformLayout();
             this.tabSource.ResumeLayout(false);
             this.groupBox2.ResumeLayout(false);
             this.tabSrcOptions.ResumeLayout(false);
@@ -1260,9 +1168,6 @@
             this.groupBox1.ResumeLayout(false);
             this.groupBox1.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dgvConnections)).EndInit();
-            this.tabService.ResumeLayout(false);
-            this.tabService.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
             this.tabOther.ResumeLayout(false);
             this.tabOther.PerformLayout();
             this.groupBox4.ResumeLayout(false);
@@ -1285,14 +1190,6 @@
         private System.Windows.Forms.TextBox txtAWSProfile;
         private System.Windows.Forms.Button bttnSave;
         private System.Windows.Forms.Label label5;
-        private System.Windows.Forms.Label lblServiceStatus;
-        private System.Windows.Forms.Button bttnStop;
-        private System.Windows.Forms.Button bttnStart;
-        private System.Windows.Forms.Button bttnRefresh;
-        private System.Windows.Forms.Button bttnUninstall;
-        private System.Windows.Forms.Button bttnInstall;
-        private System.Windows.Forms.ComboBox cboServiceCredentials;
-        private System.Windows.Forms.Label lblServiceCredentials;
         private System.Windows.Forms.Button bttnCancel;
         private System.Windows.Forms.Label label6;
         private System.Windows.Forms.Label label3;
@@ -1303,7 +1200,6 @@
         private System.Windows.Forms.Label label7;
         private System.Windows.Forms.TextBox txtDestination;
         private System.Windows.Forms.TabPage tabSource;
-        private System.Windows.Forms.TabPage tabService;
         private System.Windows.Forms.Button bttnDeployDatabase;
         private System.Windows.Forms.Label lblVersionInfo;
         private System.Windows.Forms.Button bttnConnect;
@@ -1319,12 +1215,7 @@
         private System.Windows.Forms.Button bttnDestFolder;
         private System.Windows.Forms.Button bttnS3;
         private System.Windows.Forms.Button button1;
-        private System.Windows.Forms.LinkLabel lnkServiceStatus;
         private System.Windows.Forms.LinkLabel lnkSourceConnections;
-        private System.Windows.Forms.Label lblSourceConnections;
-        private System.Windows.Forms.TextBox textBox1;
-        private System.Windows.Forms.LinkLabel lnkPermissions;
-        private System.Windows.Forms.PictureBox pictureBox1;
         private System.Windows.Forms.Label label12;
         private System.Windows.Forms.TabControl tabSrcOptions;
         private System.Windows.Forms.TabPage tabGeneral;
@@ -1371,6 +1262,12 @@
         private System.Windows.Forms.LinkLabel lnkExample;
         private System.Windows.Forms.LinkLabel lnkNone;
         private System.Windows.Forms.PictureBox pictureBox3;
+        private System.Windows.Forms.LinkLabel lnkStop;
+        private System.Windows.Forms.LinkLabel lnkStart;
+        private System.Windows.Forms.LinkLabel lnkRefresh;
+        private System.Windows.Forms.LinkLabel lnkInstall;
+        private System.Windows.Forms.Label lblServiceStatus;
+        private System.Windows.Forms.GroupBox groupBox5;
     }
 }
 
