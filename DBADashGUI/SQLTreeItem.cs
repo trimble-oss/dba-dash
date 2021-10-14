@@ -293,7 +293,7 @@ namespace DBADashGUI
                 }
                 else if(Type== TreeType.Database || Type == TreeType.AzureDatabase)
                 {
-                    return this.ObjectName;
+                    return databaseName;
                 }
                 else if (databaseName != string.Empty && databaseName != null)
                 {

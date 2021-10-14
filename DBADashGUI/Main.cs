@@ -608,14 +608,19 @@ namespace DBADashGUI
                     var rdr = cmd.ExecuteReader();
                     while (rdr.Read())
                     {
-                        var n = new SQLTreeItem((string)rdr[1], SQLTreeItem.TreeType.Database)
+                        string db = (string)rdr["name"];
+                        string status = (string)rdr["Status"];
+                        string nodeName = string.IsNullOrEmpty(status) ? db : db + " (" + status + ")";
+
+                        var n = new SQLTreeItem(nodeName, SQLTreeItem.TreeType.Database)
                         {
-                            DatabaseID = (Int32)rdr[0],
-                            InstanceID = (Int32)rdr[3]
+                            DatabaseID = (Int32)rdr["DatabaseID"],
+                            InstanceID = (Int32)rdr["InstanceID"],
+                            DatabaseName = db
                         };
-                        if (!rdr.IsDBNull(2))
+                        if (rdr["ObjectID"] != DBNull.Value)
                         {
-                            n.ObjectID = (Int64)rdr[2];
+                            n.ObjectID = (Int64)rdr["ObjectID"];
                         }
                         n.AddDatabaseFolders();
                         if ((new string[] { "master", "model", "msdb", "tempdb" }).Contains((string)rdr[1]))
