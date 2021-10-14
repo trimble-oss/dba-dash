@@ -1030,6 +1030,7 @@ namespace DBADashServiceConfig
         private void lnkRefresh_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
             refreshServiceStatus();
+            validateDestination(); // DB could be upgraded on service start so refresh destination
         }
 
         private void lnkInstall_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
@@ -1050,6 +1051,7 @@ namespace DBADashServiceConfig
                 frm.ServiceName = collectionConfig.ServiceName;
                 frm.ShowDialog();
                 refreshServiceStatus();
+                validateDestination(); // DB could be upgraded on service start so refresh destination
             }
         }
     }
