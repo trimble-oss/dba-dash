@@ -115,7 +115,7 @@ Add [your own](CustomChecks.md) checks to DBA Dash.
 The application has a default schedule listed above which aims to provide a good balance for most instances. If you increase the frequency of data collection, you will increase the monitoring impact and it could also increase the size of your DBA Dash repository database.  Less frequent collection could mean that the data is stale or doesn't provide enough granularity for performance troubleshooting.
 If you need to adjust the default schedule to better meet your needs, this can be done using the DBA Dash Service Config tool.  In the Options tab click "Configure Schedule".
 
-If you want to override the default schedule, uncheck "Default" and enter a string with your own schedule.  The string can either be a cron expression or a duration specified in seconds.  Cron expressions provide a lot of flexibility and there are a number of online tools like [cronmaker](http://www.cronmaker.com/) that can be used to generate cron expressions.
+If you want to override the default schedule, uncheck "Default" and enter a string with your own schedule.  The string can either be a cron expression or a duration specified in seconds.  To disable a collection, use a blank string.  Cron expressions provide a lot of flexibility and there are a number of online tools like [cronmaker](http://www.cronmaker.com/) that can be used to generate cron expressions.
 
 There is also the option to configure the collection to run on service start.  Restarting the service is an option if you need to manually refresh data before the scheduled collection runs.
 

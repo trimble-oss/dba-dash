@@ -92,7 +92,7 @@ namespace DBADashService
         {
             get {
                 var groupedSchedule = new Dictionary<string, CollectionType[]>();
-                var schedules=  this.Where(s=>s.Key != CollectionType.SchemaSnapshot).Select(s => s.Value.Schedule).Distinct().ToArray();
+                var schedules=  this.Where(s=>s.Key != CollectionType.SchemaSnapshot && !string.IsNullOrEmpty(s.Value.Schedule)).Select(s => s.Value.Schedule).Distinct().ToArray();
                 foreach(var schedule in schedules)
                 {
                     groupedSchedule.Add(schedule, this.Where(s => s.Value.Schedule == schedule).Select(s=>s.Key).ToArray());

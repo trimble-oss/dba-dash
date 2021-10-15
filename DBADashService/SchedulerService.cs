@@ -165,7 +165,15 @@ namespace DBADashService
         {
             scheduler.Start().ConfigureAwait(false).GetAwaiter().GetResult();
             upgradeDB();
-            ScheduleJobs();
+            try
+            {
+                ScheduleJobs();
+            }
+            catch(Exception ex)
+            {
+                Log.Error(ex, "Error scheduling collections.  Please check configuration.");
+                throw;
+            }
         }
 
  
