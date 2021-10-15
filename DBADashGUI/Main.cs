@@ -499,13 +499,27 @@ namespace DBADashGUI
 
         #region Tree
 
+        private ContextMenu rootRefreshContextMenu()
+        {
+            var ctxMnu = new ContextMenu();
+            var mnuRootRefresh = new MenuItem("Refresh");
+            ctxMnu.MenuItems.Add(mnuRootRefresh);
+            mnuRootRefresh.Click += MnuRootRefresh_Click;
+            return ctxMnu;
+        }
+
+        private void MnuRootRefresh_Click(object sender, EventArgs e)
+        {
+            addInstanes();
+        }
+
         private void addInstanes()
         {
             tv1.Nodes.Clear();
             InstanceIDs.Clear();
             AzureInstanceIDs.Clear();
             AllInstanceIDs.Clear();
-            var root = new SQLTreeItem("DBA Dash", SQLTreeItem.TreeType.DBADashRoot);
+            var root = new SQLTreeItem("DBA Dash", SQLTreeItem.TreeType.DBADashRoot) { ContextMenu = rootRefreshContextMenu() };
             var changes = new SQLTreeItem("Configuration", SQLTreeItem.TreeType.Configuration);
             var hadr = new SQLTreeItem("HA/DR", SQLTreeItem.TreeType.HADR);
             var checks = new SQLTreeItem("Checks", SQLTreeItem.TreeType.DBAChecks);

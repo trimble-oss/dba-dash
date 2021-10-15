@@ -431,6 +431,7 @@ namespace DBADashGUI
         {
             SQLTreeItem dummyNode = new SQLTreeItem("", "", TreeType.DummyNode);
             this.Nodes.Add(dummyNode);
+            addRefreshContextMenu(this);
         }
 
         public void AddDatabaseFolders()
@@ -488,6 +489,30 @@ namespace DBADashGUI
             this.Nodes.Add(nTypes);
             this.Nodes.Add(nSeq);
  
+        }
+
+        private void addRefreshContextMenu(SQLTreeItem n)
+        {
+            var ctxMnu = new ContextMenu();
+
+            var mnuRefresh = new MenuItem("Refresh");                
+            ctxMnu.MenuItems.Add(mnuRefresh);
+            mnuRefresh.Click += MnuRefresh_Click;
+            mnuRefresh.Tag = n;
+            n.ContextMenu = ctxMnu;
+        }
+
+        private void MnuRefresh_Click(object sender, EventArgs e)
+        {
+            var itm = (SQLTreeItem)((MenuItem)sender).Tag;
+            var isExpanded = itm.IsExpanded;
+            itm.Nodes.Clear();
+            itm.AddDummyNode();          
+            itm.Collapse();
+            if (isExpanded)
+            {
+                itm.Expand();
+            }
         }
 
         private void addContextMenu(SQLTreeItem n)
