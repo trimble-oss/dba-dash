@@ -376,7 +376,7 @@ namespace DBADashServiceConfig
                 lnkStart.Enabled = (svcCtrl.Status == ServiceControllerStatus.Stopped);
                 lnkStop.Enabled= (svcCtrl.Status == ServiceControllerStatus.Running);
                 lnkInstall.Font = new Font(lnkInstall.Font, FontStyle.Regular);
-                toolTip1.SetToolTip(lnkInstall, "Remove Windoes service for DBA Dash agent");
+                toolTip1.SetToolTip(lnkInstall, "Remove Windows service for DBA Dash agent");
                 lnkInstall.Text = "Uninstall service";
             }
         }

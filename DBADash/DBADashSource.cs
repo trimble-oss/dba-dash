@@ -182,7 +182,7 @@ namespace DBADash
         {
             get
             {
-                if (RunningQueryPlanThreshold == null || SourceConnection.Type == ConnectionType.SQL)
+                if (RunningQueryPlanThreshold == null || SourceConnection.Type != ConnectionType.SQL)
                 {
                     return Int32.MaxValue;
                 }
