@@ -380,6 +380,10 @@ WHERE NOT EXISTS(SELECT 1 FROM dbo.CollectionDatesThresholds CDT WHERE CDT.Insta
 -- Delete thresholds for legacy collections
 DELETE dbo.CollectionDatesThresholds WHERE Reference IN('AgentJobs','BlockingSnapshot','Database')
 
+-- Delete collection history for legacy collections
+DELETE dbo.CollectionDates
+WHERE Reference IN('AgentJobs','BlockingSnapshot','Database')
+
 --replace old defaults
 UPDATE CollectionDatesThresholds
 SET WarningThreshold=1445,
