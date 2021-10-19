@@ -1,4 +1,6 @@
-﻿CREATE PROC [dbo].[Hardware_Get](@InstanceIDs VARCHAR(MAX)=NULL)
+﻿CREATE PROC dbo.Hardware_Get(
+	@InstanceIDs VARCHAR(MAX)=NULL
+)
 AS
 DECLARE @Instances TABLE(
 	InstanceID INT PRIMARY KEY
@@ -26,6 +28,7 @@ SELECT ConnectionID,
 	SystemManufacturer,
 	SystemProductName,
 	ProcessorNameString,
+	SQLVersion,
 	cores_per_socket,
 	socket_count,
 	cpu_count,
