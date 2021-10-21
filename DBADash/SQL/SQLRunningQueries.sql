@@ -1,6 +1,10 @@
-﻿DECLARE @SQL NVARCHAR(MAX) 
+﻿DECLARE @UTCOffset INT 
+DECLARE @SnapshotDateUTC DATETIME2(7)
+SET @UTCOffset = CAST(ROUND(DATEDIFF(s,GETDATE(),GETUTCDATE())/60.0,0) AS INT)
+SET @SnapshotDateUTC = SYSUTCDATETIME() 
+DECLARE @SQL NVARCHAR(MAX) 
 SET @SQL = N'
-SELECT SYSUTCDATETIME() as SnapshotDateUTC,
+SELECT @SnapshotDateUTC as SnapshotDateUTC,
 	s.session_id,
 	r.statement_start_offset,
 	r.statement_end_offset,
@@ -23,12 +27,13 @@ SELECT SYSUTCDATETIME() as SnapshotDateUTC,
 	' + CASE WHEN COLUMNPROPERTY(OBJECT_ID('sys.dm_exec_sessions'),'database_id','ColumnID') IS NULL THEN 'r.database_id,' ELSE 's.database_id,' /* 2012+ */ END + ' 
 	s.program_name,
 	s.client_interface_name,
-	DATEADD(mi,DATEDIFF(minute, GETDATE(),GETUTCDATE()), r.start_time) AS start_time_utc,
-	DATEADD(mi,DATEDIFF(minute, GETDATE(),GETUTCDATE()), s.last_request_start_time) AS last_request_start_time_utc,
+	DATEADD(mi,@UTCOffset, r.start_time) AS start_time_utc,
+	DATEADD(mi,@UTCOffset, s.last_request_start_time) AS last_request_start_time_utc,
 	ISNULL(r.sql_handle,c.most_recent_sql_handle) as sql_handle,
 	r.plan_handle,
 	r.query_hash,
-	r.query_plan_hash
+	r.query_plan_hash,
+	DATEADD(mi,@UTCOffset, s.login_time) AS login_time_utc
 FROM sys.dm_exec_sessions s
 INNER JOIN sys.dm_exec_connections c ON c.session_id= s.session_id
 LEFT JOIN sys.dm_exec_requests r on s.session_id = r.session_id
@@ -44,5 +49,25 @@ AND s.session_id <> @@SPID
 AND s.session_id > 0'
 + CASE WHEN SERVERPROPERTY('EditionID') = 1674378470 THEN 'AND s.database_id = DB_ID()' /* DB filter for Azure */ ELSE '' END 
 
-EXEC sp_executesql @SQL
+EXEC sp_executesql @SQL,N'@UTCOffset INT,@SnapshotDateUTC DATETIME2(7)',@UTCOffset,@SnapshotDateUTC
 
+IF @CollectSessionWaits=1 AND OBJECT_ID('sys.dm_exec_session_wait_stats') IS NOT NULL
+BEGIN
+	SELECT @SnapshotDateUTC AS SnapshotDateUTC,
+			sws.session_id,
+			sws.wait_type,
+			sws.waiting_tasks_count,
+			sws.wait_time_ms,
+			sws.max_wait_time_ms,
+			sws.signal_wait_time_ms,
+			DATEADD(mi,@UTCOffset,s.login_time) login_time_utc
+	FROM sys.dm_exec_session_wait_stats sws
+	JOIN sys.dm_exec_sessions s ON sws.session_id = s.session_id 
+	WHERE (s.open_transaction_count>0
+			OR s.last_request_end_time>=DATEADD(s,-2,GETUTCDATE())
+			OR EXISTS(SELECT 1 
+					 FROM sys.dm_exec_requests r 
+					 WHERE r.session_id = s.session_id
+					 )
+		  )
+END

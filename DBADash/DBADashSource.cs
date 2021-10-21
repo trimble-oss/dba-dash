@@ -330,6 +330,27 @@ namespace DBADash
             }
         }
 
+        private bool _collectSessionWaits = true;
+
+        public bool CollectSessionWaits
+        {
+            get
+            {
+                if(SourceConnection!=null && SourceConnection.Type == ConnectionType.SQL)
+                {
+                    return _collectSessionWaits;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+            set
+            {
+                _collectSessionWaits = value;
+            }
+        }
+
         public DBADashSource(string source)
         {
             this.ConnectionString = source;

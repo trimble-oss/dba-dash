@@ -29,7 +29,7 @@
     <QueryStoreStaleQueryThreshold>15</QueryStoreStaleQueryThreshold>
     <QueryStoreMaxStorageSize>512</QueryStoreMaxStorageSize>
     <QueryStoreMaxPlansPerQuery>50</QueryStoreMaxPlansPerQuery>
-    <DacVersion>2.0.3.54</DacVersion>
+    <DacVersion>2.0.3.55</DacVersion>
     <ReadCommittedSnapshot>True</ReadCommittedSnapshot>
     <AllowSnapshotIsolation>True</AllowSnapshotIsolation>
     <CompatibilityMode>130</CompatibilityMode>
@@ -617,6 +617,14 @@
     <Build Include="dbo\Stored Procedures\JobStats_Get.sql" />
     <Build Include="dbo\Views\JobStats_RAW.sql" />
     <Build Include="dbo\Stored Procedures\JobStatsSummary_Get.sql" />
+    <Build Include="Storage\PF_SessionWaits.sql" />
+    <Build Include="Storage\PS_SessionWaits.sql" />
+    <Build Include="dbo\Tables\SessionWaits.sql" />
+    <Build Include="dbo\User Defined Types\SessionWaits.sql" />
+    <Build Include="dbo\Stored Procedures\SessionWaits_Upd.sql" />
+    <Build Include="Switch\Tables\SessionWaits.sql" />
+    <Build Include="dbo\Stored Procedures\SessionWaits_Get.sql" />
+    <Build Include="dbo\Stored Procedures\SessionWaitsSummary_Get.sql" />
   </ItemGroup>
   <ItemGroup>
     <PostDeploy Include="Script.PostDeployment1.sql" />

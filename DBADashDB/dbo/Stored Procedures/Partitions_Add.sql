@@ -25,6 +25,7 @@ VALUES -- Daily Partitions
 	('JobHistory','d',14),
 	('RunningQueries','d',14),
 	('MemoryUsage','d',14),
+	('SessionWaits','d',14),
 	-- Monthly Partitions
 	('AzureDBElasticPoolResourceStats_60MIN','m',3),
 	('AzureDBResourceStats_60MIN','m',3),

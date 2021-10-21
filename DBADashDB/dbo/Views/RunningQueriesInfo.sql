@@ -13,6 +13,7 @@ SELECT Q.InstanceID,
     Q.status,
     Q.wait_time,
     Q.wait_type,
+    sessionW.TopSessionWaits,
     Q.blocking_session_id,
     Q.cpu_time,
     Q.logical_reads,
@@ -57,7 +58,8 @@ SELECT Q.InstanceID,
     waitR.page_type,
 	CASE WHEN waitR.wait_database_id=2 THEN 'tempdb' ELSE waitD.name END AS wait_db,
 	waitO.SchemaName + '.' + waitO.ObjectName AS wait_object,
-	waitF.filegroup_name + ' | ' + waitF.name AS wait_file
+	waitF.filegroup_name + ' | ' + waitF.name AS wait_file,
+    Q.login_time_utc
 FROM dbo.RunningQueries Q 
 CROSS APPLY(SELECT CASE WHEN Q.start_time_utc < Q.SnapshotDateUTC OR Q.start_time_utc IS NULL  THEN DATEDIFF_BIG(ms,ISNULL(Q.start_time_utc,Q.last_request_start_time_utc),Q.SnapshotDateUTC) ELSE 0 END AS Duration) calc
 CROSS APPLY dbo.MillisecondsToHumanDuration (calc.Duration) HD
@@ -81,3 +83,13 @@ OUTER APPLY(SELECT TOP(1) *
 LEFT JOIN dbo.DBFiles waitF ON waitF.DatabaseID = waitD.DatabaseID AND waitF.file_id = waitR.wait_file_id
 OUTER APPLY (SELECT CASE WHEN program_name LIKE 'SQLAgent - TSQL JobStep (Job 0x%' THEN TRY_CAST(TRY_CONVERT(BINARY(16),SUBSTRING(program_name, 30,34),1) AS UNIQUEIDENTIFIER)  ELSE NULL END AS job_id) jid
 LEFT JOIN dbo.Jobs J ON J.job_id = jid.job_id AND J.InstanceID = Q.InstanceID
+OUTER APPLY(SELECT STUFF((SELECT TOP(3) ', ' + WT.WaitType + ' (' + CAST(SW.wait_time_ms AS VARCHAR(MAX)) +'ms)'
+		FROM dbo.SessionWaits SW 
+		JOIN dbo.WaitType WT ON SW.WaitTypeID = WT.WaitTypeID
+		WHERE SW.InstanceID = Q.InstanceID 
+		AND SW.SnapshotDateUTC = Q.SnapshotDateUTC 
+		AND SW.session_id = Q.session_id 
+		AND SW.login_time_utc = Q.login_time_utc
+		ORDER BY SW.wait_time_ms DESC
+		FOR XML PATH('')),1,1,'') AS TopSessionWaits
+		) sessionW

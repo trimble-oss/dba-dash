@@ -29,9 +29,9 @@ namespace DBADashGUI.Performance
         /// </summary>
         private void InitializeComponent()
         {
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle3 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle16 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle17 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle18 = new System.Windows.Forms.DataGridViewCellStyle();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(RunningQueries));
             this.dgv = new System.Windows.Forms.DataGridView();
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
@@ -61,8 +61,24 @@ namespace DBADashGUI.Performance
             this.noneToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.lblJobCount = new System.Windows.Forms.ToolStripLabel();
             this.tsPrevious = new System.Windows.Forms.ToolStripButton();
+            this.splitContainer1 = new System.Windows.Forms.SplitContainer();
+            this.dgvSessionWaits = new System.Windows.Forms.DataGridView();
+            this.toolStrip2 = new System.Windows.Forms.ToolStrip();
+            this.lblWaitsForSession = new System.Windows.Forms.ToolStripLabel();
+            this.tsSessionWaitCopy = new System.Windows.Forms.ToolStripButton();
+            this.tsSessionWaitExcel = new System.Windows.Forms.ToolStripButton();
+            this.toolStripDropDownButton1 = new System.Windows.Forms.ToolStripDropDownButton();
+            this.allSessionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.summaryViewToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.sessionToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             ((System.ComponentModel.ISupportInitialize)(this.dgv)).BeginInit();
             this.toolStrip1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
+            this.splitContainer1.Panel1.SuspendLayout();
+            this.splitContainer1.Panel2.SuspendLayout();
+            this.splitContainer1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.dgvSessionWaits)).BeginInit();
+            this.toolStrip2.SuspendLayout();
             this.SuspendLayout();
             // 
             // dgv
@@ -70,39 +86,39 @@ namespace DBADashGUI.Performance
             this.dgv.AllowUserToAddRows = false;
             this.dgv.AllowUserToDeleteRows = false;
             this.dgv.BackgroundColor = System.Drawing.Color.White;
-            dataGridViewCellStyle1.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle1.BackColor = System.Drawing.SystemColors.Control;
-            dataGridViewCellStyle1.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            dataGridViewCellStyle1.ForeColor = System.Drawing.SystemColors.WindowText;
-            dataGridViewCellStyle1.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-            dataGridViewCellStyle1.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-            dataGridViewCellStyle1.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
-            this.dgv.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle1;
+            dataGridViewCellStyle16.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle16.BackColor = System.Drawing.SystemColors.Control;
+            dataGridViewCellStyle16.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            dataGridViewCellStyle16.ForeColor = System.Drawing.SystemColors.WindowText;
+            dataGridViewCellStyle16.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle16.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle16.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
+            this.dgv.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle16;
             this.dgv.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            dataGridViewCellStyle2.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle2.BackColor = System.Drawing.SystemColors.Window;
-            dataGridViewCellStyle2.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            dataGridViewCellStyle2.ForeColor = System.Drawing.SystemColors.ControlText;
-            dataGridViewCellStyle2.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-            dataGridViewCellStyle2.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-            dataGridViewCellStyle2.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
-            this.dgv.DefaultCellStyle = dataGridViewCellStyle2;
+            dataGridViewCellStyle17.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle17.BackColor = System.Drawing.SystemColors.Window;
+            dataGridViewCellStyle17.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            dataGridViewCellStyle17.ForeColor = System.Drawing.SystemColors.ControlText;
+            dataGridViewCellStyle17.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle17.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle17.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
+            this.dgv.DefaultCellStyle = dataGridViewCellStyle17;
             this.dgv.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.dgv.Location = new System.Drawing.Point(0, 31);
+            this.dgv.Location = new System.Drawing.Point(0, 0);
             this.dgv.Name = "dgv";
             this.dgv.ReadOnly = true;
-            dataGridViewCellStyle3.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle3.BackColor = System.Drawing.SystemColors.Control;
-            dataGridViewCellStyle3.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            dataGridViewCellStyle3.ForeColor = System.Drawing.SystemColors.WindowText;
-            dataGridViewCellStyle3.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-            dataGridViewCellStyle3.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-            dataGridViewCellStyle3.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
-            this.dgv.RowHeadersDefaultCellStyle = dataGridViewCellStyle3;
+            dataGridViewCellStyle18.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle18.BackColor = System.Drawing.SystemColors.Control;
+            dataGridViewCellStyle18.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            dataGridViewCellStyle18.ForeColor = System.Drawing.SystemColors.WindowText;
+            dataGridViewCellStyle18.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle18.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle18.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
+            this.dgv.RowHeadersDefaultCellStyle = dataGridViewCellStyle18;
             this.dgv.RowHeadersVisible = false;
             this.dgv.RowHeadersWidth = 51;
             this.dgv.RowTemplate.Height = 24;
-            this.dgv.Size = new System.Drawing.Size(1090, 445);
+            this.dgv.Size = new System.Drawing.Size(1090, 315);
             this.dgv.TabIndex = 0;
             this.dgv.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgv_CellContentClick);
             this.dgv.CellFormatting += new System.Windows.Forms.DataGridViewCellFormattingEventHandler(this.dgv_CellFormatting);
@@ -370,17 +386,137 @@ namespace DBADashGUI.Performance
             this.tsPrevious.Text = "Previous Snapshot";
             this.tsPrevious.Click += new System.EventHandler(this.tsPrevious_Click);
             // 
+            // splitContainer1
+            // 
+            this.splitContainer1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.splitContainer1.Location = new System.Drawing.Point(0, 31);
+            this.splitContainer1.Name = "splitContainer1";
+            this.splitContainer1.Orientation = System.Windows.Forms.Orientation.Horizontal;
+            // 
+            // splitContainer1.Panel1
+            // 
+            this.splitContainer1.Panel1.Controls.Add(this.dgv);
+            // 
+            // splitContainer1.Panel2
+            // 
+            this.splitContainer1.Panel2.Controls.Add(this.dgvSessionWaits);
+            this.splitContainer1.Panel2.Controls.Add(this.toolStrip2);
+            this.splitContainer1.Size = new System.Drawing.Size(1090, 445);
+            this.splitContainer1.SplitterDistance = 315;
+            this.splitContainer1.TabIndex = 2;
+            // 
+            // dgvSessionWaits
+            // 
+            this.dgvSessionWaits.AllowUserToAddRows = false;
+            this.dgvSessionWaits.AllowUserToDeleteRows = false;
+            this.dgvSessionWaits.BackgroundColor = System.Drawing.Color.AliceBlue;
+            this.dgvSessionWaits.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.dgvSessionWaits.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.dgvSessionWaits.Location = new System.Drawing.Point(0, 27);
+            this.dgvSessionWaits.Name = "dgvSessionWaits";
+            this.dgvSessionWaits.ReadOnly = true;
+            this.dgvSessionWaits.RowHeadersVisible = false;
+            this.dgvSessionWaits.RowHeadersWidth = 51;
+            this.dgvSessionWaits.RowTemplate.Height = 24;
+            this.dgvSessionWaits.Size = new System.Drawing.Size(1090, 99);
+            this.dgvSessionWaits.TabIndex = 0;
+            this.dgvSessionWaits.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgvSessionWaits_CellContentClick);
+            // 
+            // toolStrip2
+            // 
+            this.toolStrip2.ImageScalingSize = new System.Drawing.Size(20, 20);
+            this.toolStrip2.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.lblWaitsForSession,
+            this.tsSessionWaitCopy,
+            this.tsSessionWaitExcel,
+            this.toolStripDropDownButton1});
+            this.toolStrip2.Location = new System.Drawing.Point(0, 0);
+            this.toolStrip2.Name = "toolStrip2";
+            this.toolStrip2.Size = new System.Drawing.Size(1090, 27);
+            this.toolStrip2.TabIndex = 1;
+            this.toolStrip2.Text = "toolStrip2";
+            // 
+            // lblWaitsForSession
+            // 
+            this.lblWaitsForSession.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
+            this.lblWaitsForSession.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
+            this.lblWaitsForSession.Name = "lblWaitsForSession";
+            this.lblWaitsForSession.Size = new System.Drawing.Size(159, 28);
+            this.lblWaitsForSession.Text = "Waits For Session ID: ";
+            // 
+            // tsSessionWaitCopy
+            // 
+            this.tsSessionWaitCopy.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.tsSessionWaitCopy.Image = global::DBADashGUI.Properties.Resources.ASX_Copy_blue_16x;
+            this.tsSessionWaitCopy.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tsSessionWaitCopy.Name = "tsSessionWaitCopy";
+            this.tsSessionWaitCopy.Size = new System.Drawing.Size(29, 28);
+            this.tsSessionWaitCopy.Text = "Copy";
+            this.tsSessionWaitCopy.Click += new System.EventHandler(this.tsSessionWaitCopy_Click);
+            // 
+            // tsSessionWaitExcel
+            // 
+            this.tsSessionWaitExcel.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.tsSessionWaitExcel.Image = global::DBADashGUI.Properties.Resources.excel16x16;
+            this.tsSessionWaitExcel.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tsSessionWaitExcel.Name = "tsSessionWaitExcel";
+            this.tsSessionWaitExcel.Size = new System.Drawing.Size(29, 28);
+            this.tsSessionWaitExcel.Text = "Excel";
+            this.tsSessionWaitExcel.Click += new System.EventHandler(this.tsSessionWaitExcel_Click);
+            // 
+            // toolStripDropDownButton1
+            // 
+            this.toolStripDropDownButton1.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.toolStripDropDownButton1.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.allSessionsToolStripMenuItem,
+            this.summaryViewToolStripMenuItem,
+            this.sessionToolStripMenuItem});
+            this.toolStripDropDownButton1.Image = global::DBADashGUI.Properties.Resources.FilterDropdown_16x;
+            this.toolStripDropDownButton1.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolStripDropDownButton1.Name = "toolStripDropDownButton1";
+            this.toolStripDropDownButton1.Size = new System.Drawing.Size(34, 24);
+            this.toolStripDropDownButton1.Text = "toolStripDropDownButton1";
+            // 
+            // allSessionsToolStripMenuItem
+            // 
+            this.allSessionsToolStripMenuItem.Name = "allSessionsToolStripMenuItem";
+            this.allSessionsToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            this.allSessionsToolStripMenuItem.Text = "All Sessions";
+            this.allSessionsToolStripMenuItem.Click += new System.EventHandler(this.allSessionsToolStripMenuItem_Click);
+            // 
+            // summaryViewToolStripMenuItem
+            // 
+            this.summaryViewToolStripMenuItem.Name = "summaryViewToolStripMenuItem";
+            this.summaryViewToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            this.summaryViewToolStripMenuItem.Text = "Summary View";
+            this.summaryViewToolStripMenuItem.Click += new System.EventHandler(this.summaryViewToolStripMenuItem_Click);
+            // 
+            // sessionToolStripMenuItem
+            // 
+            this.sessionToolStripMenuItem.Name = "sessionToolStripMenuItem";
+            this.sessionToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            this.sessionToolStripMenuItem.Text = "Session ";
+            this.sessionToolStripMenuItem.Click += new System.EventHandler(this.sessionToolStripMenuItem_Click);
+            // 
             // RunningQueries
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.Controls.Add(this.dgv);
+            this.Controls.Add(this.splitContainer1);
             this.Controls.Add(this.toolStrip1);
             this.Name = "RunningQueries";
             this.Size = new System.Drawing.Size(1090, 476);
             ((System.ComponentModel.ISupportInitialize)(this.dgv)).EndInit();
             this.toolStrip1.ResumeLayout(false);
             this.toolStrip1.PerformLayout();
+            this.splitContainer1.Panel1.ResumeLayout(false);
+            this.splitContainer1.Panel2.ResumeLayout(false);
+            this.splitContainer1.Panel2.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).EndInit();
+            this.splitContainer1.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.dgvSessionWaits)).EndInit();
+            this.toolStrip2.ResumeLayout(false);
+            this.toolStrip2.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -416,5 +552,15 @@ namespace DBADashGUI.Performance
         private System.Windows.Forms.ToolStripLabel lblJobCount;
         private System.Windows.Forms.ToolStripButton tsPrevious;
         private System.Windows.Forms.ToolStripButton tsNext;
+        private System.Windows.Forms.SplitContainer splitContainer1;
+        private System.Windows.Forms.DataGridView dgvSessionWaits;
+        private System.Windows.Forms.ToolStrip toolStrip2;
+        private System.Windows.Forms.ToolStripLabel lblWaitsForSession;
+        private System.Windows.Forms.ToolStripButton tsSessionWaitCopy;
+        private System.Windows.Forms.ToolStripButton tsSessionWaitExcel;
+        private System.Windows.Forms.ToolStripDropDownButton toolStripDropDownButton1;
+        private System.Windows.Forms.ToolStripMenuItem allSessionsToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem summaryViewToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem sessionToolStripMenuItem;
     }
 }

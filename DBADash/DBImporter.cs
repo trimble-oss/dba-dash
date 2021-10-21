@@ -178,6 +178,14 @@ namespace DBADash
                     dtSlowQueries.Columns.Add("session_id", typeof(int));
                 }
             }
+            if (data.Tables.Contains("RunningQueries"))
+            {
+                var dtRunningQueries = data.Tables["RunningQueries"];
+                if (!dtRunningQueries.Columns.Contains("login_time_utc"))
+                {
+                    dtRunningQueries.Columns.Add("login_time_utc", typeof(DateTime));
+                }
+            }
         }
 
         public void Update()
@@ -196,7 +204,7 @@ namespace DBADash
                                     "BlockingSnapshot", "IOStats", "Waits", "OSLoadedModules", "DBTuningOptions", "AzureDBResourceStats", "AzureDBServiceObjectives", "AzureDBElasticPoolResourceStats", "SlowQueries",
                                     "SlowQueriesStats", "LastGoodCheckDB", "Alerts", "ObjectExecutionStats", "ServerPrincipals", "ServerRoleMembers", "ServerPermissions", "DatabasePrincipals", "DatabaseRoleMembers",
                                     "DatabasePermissions", "CustomChecks", "PerformanceCounters", "VLF", "DatabaseMirroring", "Jobs", "JobHistory","AvailabilityReplicas","AvailabilityGroups","JobSteps",
-                                    "DatabaseQueryStoreOptions", "ResourceGovernorConfiguration","AzureDBResourceGovernance","RunningQueries","QueryText","QueryPlans","InternalPerformanceCounters","MemoryUsage" };
+                                    "DatabaseQueryStoreOptions", "ResourceGovernorConfiguration","AzureDBResourceGovernance","RunningQueries","QueryText","QueryPlans","InternalPerformanceCounters","MemoryUsage","SessionWaits" };
 
             var tablesInDataSet = data.Tables
                  .Cast<DataTable>()

@@ -70,7 +70,7 @@ namespace DBADashService
                     {
                         try
                         {
-                            var collector = new DBCollector(cfg.GetSource(), cfg.NoWMI,config.ServiceName);
+                            var collector = new DBCollector(cfg, config.ServiceName);
                             if (cfg.PersistXESessions)
                             {
                                 Log.Logger.Information("Stop DBADash event sessions for {connection}", cfg.SourceConnection.ConnectionForPrint);

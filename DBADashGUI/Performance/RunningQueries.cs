@@ -30,6 +30,8 @@ namespace DBADashGUI.Performance
    
         public void RefreshData()
         {
+            splitContainer1.Panel2Collapsed = true;
+            dgvSessionWaits.DataSource = null;
             lblJobCount.Visible = false;
             snapshotDT = null;
             tsBack.Enabled = false;
@@ -99,6 +101,9 @@ namespace DBADashGUI.Performance
                 da.Fill(dt);
                 Common.ConvertUTCToLocal(ref dt);
                 dt.Columns["SnapshotDateUTC"].ColumnName = "SnapshotDate";
+                dt.Columns["start_time_utc"].ColumnName = "start_time";
+                dt.Columns["last_request_start_time_utc"].ColumnName = "last_request_start_time";
+                dt.Columns["login_time_utc"].ColumnName = "login_time";
                 return dt;
             }
         }
@@ -157,6 +162,7 @@ namespace DBADashGUI.Performance
                 dt.Columns["SnapshotDateUTC"].ColumnName = "SnapshotDate";
                 dt.Columns["start_time_utc"].ColumnName = "start_time";
                 dt.Columns["last_request_start_time_utc"].ColumnName = "last_request_start_time";
+                dt.Columns["login_time_utc"].ColumnName = "login_time";
                 return dt;
             }
         }
@@ -195,10 +201,12 @@ namespace DBADashGUI.Performance
 
             dgv.DataSource = null;
             dgv.Columns.Clear();
+            dgv.Columns.Add(new DataGridViewTextBoxColumn { HeaderText = "InstanceID", DataPropertyName = "InstanceID", Name = "colInstanceID", Visible=false});
             dgv.Columns.Add(new DataGridViewLinkColumn() { HeaderText = "Batch Text", DataPropertyName = "batch_text", Name = "colBatchText", AutoSizeMode = DataGridViewAutoSizeColumnMode.None, Width = 50, SortMode = DataGridViewColumnSortMode.Automatic });
             dgv.Columns.Add(new DataGridViewLinkColumn() { HeaderText = "Text", DataPropertyName = "text", Name = "colText", AutoSizeMode = DataGridViewAutoSizeColumnMode.None, Width = 50, SortMode = DataGridViewColumnSortMode.Automatic });
             dgv.Columns.Add(new DataGridViewLinkColumn() { HeaderText = "Plan", DataPropertyName = "query_plan", Name = "colQueryPlan", AutoSizeMode = DataGridViewAutoSizeColumnMode.None, Width = 50, SortMode = DataGridViewColumnSortMode.NotSortable });
             dgv.Columns.Add(new DataGridViewLinkColumn() { HeaderText = "Session ID", DataPropertyName = "session_id", Name = "colSessionID", SortMode = DataGridViewColumnSortMode.Automatic });
+            dgv.Columns.Add(new DataGridViewLinkColumn() { HeaderText = "Top Session Waits", DataPropertyName = "TopSessionWaits", Name = "colTopSessionWaits", SortMode = DataGridViewColumnSortMode.Automatic });
             dgv.DataSource = source;
             foreach (DataGridViewColumn col in dgv.Columns)
             {
@@ -277,6 +285,29 @@ namespace DBADashGUI.Performance
                         IsSleeping = Convert.ToString(row["status"]) == "sleeping"
                     };
                     frm.ShowDialog();
+                }
+                else if(dgv.Columns[e.ColumnIndex].Name == "colTopSessionWaits")
+                {
+                    splitContainer1.Panel2Collapsed = false;
+                    if (dgvSessionWaits.Columns.Count == 0)
+                    {
+                        dgvSessionWaits.AutoGenerateColumns = false;
+                        dgvSessionWaits.Columns.Add(new DataGridViewTextBoxColumn() { HeaderText = "Session ID", DataPropertyName = "session_id", Name="colSessionID" });
+                        dgvSessionWaits.Columns.Add(new DataGridViewTextBoxColumn() { HeaderText = "Wait Type", DataPropertyName = "WaitType", Name = "colWaitType" });
+                        dgvSessionWaits.Columns.Add(new DataGridViewTextBoxColumn() { HeaderText = "Waiting Tasks Count", DataPropertyName = "waiting_tasks_count" });
+                        dgvSessionWaits.Columns.Add(new DataGridViewTextBoxColumn() { HeaderText = "Wait Time (ms)", DataPropertyName = "wait_time_ms",DefaultCellStyle = new DataGridViewCellStyle() { Format = "N0" } });
+                        dgvSessionWaits.Columns.Add(new DataGridViewTextBoxColumn() { HeaderText = "Wait Time %", DataPropertyName = "wait_pct", DefaultCellStyle = new DataGridViewCellStyle() { Format = "P1" } });
+                        dgvSessionWaits.Columns.Add(new DataGridViewTextBoxColumn() { HeaderText = "Max Wait Time (ms)", DataPropertyName = "max_wait_time_ms", DefaultCellStyle = new DataGridViewCellStyle() { Format = "N0" } });
+                        dgvSessionWaits.Columns.Add(new DataGridViewTextBoxColumn() { HeaderText = "Signal Wait Time (ms)", DataPropertyName = "signal_wait_time_ms", DefaultCellStyle = new DataGridViewCellStyle() { Format = "N0" } });
+                        dgvSessionWaits.Columns.Add(new DataGridViewTextBoxColumn() { HeaderText = "Signal Wait %", DataPropertyName = "signal_wait_pct", DefaultCellStyle = new DataGridViewCellStyle() { Format = "P1" } });
+                        dgvSessionWaits.Columns.Add(new DataGridViewLinkColumn() { HeaderText = "Help", Text="help", UseColumnTextForLinkValue=true, Name="colHelp" });
+                    }
+                    dgvSessionWaits.Columns["colSessionID"].Visible = false;
+                    var sessionid = (short)row["session_id"];
+                    dgvSessionWaits.DataSource= GetSessionWaits(InstanceID,sessionid , Convert.ToDateTime(row["SnapshotDate"]).ToUniversalTime(), Convert.ToDateTime(row["login_time"]).ToUniversalTime());
+                    dgvSessionWaits.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
+                    sessionToolStripMenuItem.Tag = sessionid;
+                    lblWaitsForSession.Text = "Waits For Session ID: " + sessionid.ToString();
                 }
             }
         }
@@ -411,6 +442,77 @@ namespace DBADashGUI.Performance
         private void tsNext_Click(object sender, EventArgs e)
         {
             loadSnapshot(currentSnapshotDate, 1);
+        }
+
+        private DataTable GetSessionWaits(int InstanceID,short? SessionID, DateTime? SnapshotDateUTC,DateTime? LoginTimeUTC)
+        {
+            using(var cn = new SqlConnection(Common.ConnectionString))
+            using (var cmd = new SqlCommand("dbo.SessionWaits_Get", cn) { CommandType = CommandType.StoredProcedure })
+            using(var da = new SqlDataAdapter(cmd))
+            {
+                cmd.Parameters.AddWithValue("InstanceID", InstanceID);
+                cmd.Parameters.AddWithValue("SessionID", SessionID);         
+                cmd.Parameters.Add(new SqlParameter("SnapshotDateUTC", SnapshotDateUTC) { DbType = DbType.DateTime2 });
+                cmd.Parameters.AddWithValue("LoginTimeUTC", LoginTimeUTC);
+                var dt = new DataTable();
+                da.Fill(dt);
+                return dt;
+            }
+        }
+
+        private DataTable GetSessionWaitSummary(int InstanceID, DateTime? SnapshotDateUTC)
+        {
+            using (var cn = new SqlConnection(Common.ConnectionString))
+            using (var cmd = new SqlCommand("dbo.SessionWaits_Get", cn) { CommandType = CommandType.StoredProcedure })
+            using (var da = new SqlDataAdapter(cmd))
+            {
+                cmd.Parameters.AddWithValue("InstanceID", InstanceID);
+                cmd.Parameters.Add(new SqlParameter("SnapshotDateUTC", SnapshotDateUTC) { DbType = DbType.DateTime2 });
+                var dt = new DataTable();
+                da.Fill(dt);
+                return dt;
+            }
+        }
+
+        private void tsSessionWaitCopy_Click(object sender, EventArgs e)
+        {
+            Common.CopyDataGridViewToClipboard(dgvSessionWaits);
+        }
+
+        private void tsSessionWaitExcel_Click(object sender, EventArgs e)
+        {
+            Common.PromptSaveDataGridView(ref dgvSessionWaits);
+        }
+
+        private void allSessionsToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            dgvSessionWaits.Columns["colSessionID"].Visible = true;
+            dgvSessionWaits.DataSource = GetSessionWaits(InstanceID, null, currentSnapshotDate, null);
+            lblWaitsForSession.Text = "All Sessions";
+        }
+
+        private void summaryViewToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            dgvSessionWaits.Columns["colSessionID"].Visible = false;
+            dgvSessionWaits.DataSource = GetSessionWaitSummary(InstanceID,currentSnapshotDate);
+            lblWaitsForSession.Text = "Session Wait Summary";
+        }
+
+        private void sessionToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            dgvSessionWaits.Columns["colSessionID"].Visible = false;
+            var sessionid = (short)sessionToolStripMenuItem.Tag;
+            dgvSessionWaits.DataSource = GetSessionWaits(InstanceID, sessionid, currentSnapshotDate, null);
+            lblWaitsForSession.Text = "Waits For Session ID: " + sessionid.ToString();
+        }
+
+        private void dgvSessionWaits_CellContentClick(object sender, DataGridViewCellEventArgs e)
+        {
+            if (e.RowIndex >= 0 && dgvSessionWaits.Columns[e.ColumnIndex].Name == "colHelp")
+            {
+                string wait = (string)dgvSessionWaits.Rows[e.RowIndex].Cells["colWaitType"].Value;
+                System.Diagnostics.Process.Start("https://www.sqlskills.com/help/waits/" + wait.ToLower() + "/");
+            }
         }
     }
 }

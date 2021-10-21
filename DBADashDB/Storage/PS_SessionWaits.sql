@@ -1,0 +1,3 @@
+﻿CREATE PARTITION SCHEME PS_SessionWaits
+    AS PARTITION [PF_SessionWaits]
+    ALL TO ([PRIMARY])
