@@ -165,7 +165,7 @@ namespace DBADashService
 
                     try
                     {
-                        var collector = new DBCollector(cfg.GetSource(), cfg.NoWMI,config.ServiceName)
+                        var collector = new DBCollector(cfg, config.ServiceName)
                         {
                             Job_instance_id = dataMap.GetInt("Job_instance_id")
                         };              
@@ -187,11 +187,7 @@ namespace DBADashService
                         {
                             collector.PerformanceCollectionPeriodMins = 30;
                         }
-                        collector.SlowQueryThresholdMs = cfg.SlowQueryThresholdMs;
-                        collector.SlowQueryMaxMemoryKB = cfg.SlowQuerySessionMaxMemoryKB;
-                        collector.UseDualEventSession = cfg.UseDualEventSession;
                         collector.LogInternalPerformanceCounters = SchedulerServiceConfig.Config.LogInternalPerformanceCounters;
-                        collector.PlanThreshold = cfg.RunningQueryPlanThreshold ?? PlanCollectionThreshold.PlanCollectionDisabledThreshold;
                         using (var op = Operation.Begin("Collect {types} from instance {instance}", string.Join(", ", types.Select(s => s.ToString()).ToArray()), cfg.SourceConnection.ConnectionForPrint))
                         {
                             collector.Collect(types);

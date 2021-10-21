@@ -18,6 +18,7 @@ SELECT InstanceID,
        status,
        wait_time,
        wait_type,
+       TopSessionWaits,
        blocking_session_id,
        cpu_time,
        logical_reads,
@@ -56,7 +57,8 @@ SELECT InstanceID,
        page_type,
        wait_db,
        wait_object,
-       wait_file 
+       wait_file,
+       login_time_utc
 FROM dbo.RunningQueriesInfo Q
 WHERE Q.SnapshotDateUTC >= @SnapshotDateFrom 
 AND Q.SnapshotDateUTC < @SnapshotDateTo

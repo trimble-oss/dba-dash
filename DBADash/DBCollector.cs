@@ -80,24 +80,22 @@ namespace DBADash
     public class DBCollector
     {
         public DataSet Data;
-        string _connectionString;
+        string _connectionString {
+            get {
+                return Source.GetSource();
+            }
+        }
         private DataTable dtErrors;
         public bool LogInternalPerformanceCounters=false;
         private DataTable dtInternalPerfCounters;
-        private bool noWMI;
         public Int32 PerformanceCollectionPeriodMins = 60;
         string computerName;
         Int64 editionId;
         readonly CollectionType[] azureCollectionTypes = new CollectionType[] { CollectionType.SlowQueries, CollectionType.AzureDBElasticPoolResourceStats, CollectionType.AzureDBServiceObjectives, CollectionType.AzureDBResourceStats, CollectionType.CPU, CollectionType.DBFiles, CollectionType.Databases, CollectionType.DBConfig, CollectionType.TraceFlags, CollectionType.ObjectExecutionStats, CollectionType.BlockingSnapshot, CollectionType.IOStats, CollectionType.Waits, CollectionType.ServerProperties, CollectionType.DBTuningOptions, CollectionType.SysConfig, CollectionType.DatabasePrincipals, CollectionType.DatabaseRoleMembers, CollectionType.DatabasePermissions, CollectionType.OSInfo,CollectionType.CustomChecks,CollectionType.PerformanceCounters,CollectionType.VLF, CollectionType.DatabaseQueryStoreOptions, CollectionType.AzureDBResourceGovernance, CollectionType.RunningQueries};
         readonly CollectionType[] azureOnlyCollectionTypes = new CollectionType[] { CollectionType.AzureDBElasticPoolResourceStats, CollectionType.AzureDBResourceStats, CollectionType.AzureDBServiceObjectives, CollectionType.AzureDBResourceGovernance };
         readonly CollectionType[] azureMasterOnlyCollectionTypes = new CollectionType[] { CollectionType.AzureDBElasticPoolResourceStats };
-
-        public Int64 SlowQueryThresholdMs = -1;
-        public Int32 SlowQueryMaxMemoryKB { get; set; } = 4096;
-        public bool UseDualEventSession { get; set; } = true;
-        public PlanCollectionThreshold PlanThreshold = PlanCollectionThreshold.PlanCollectionDisabledThreshold;
-
-
+        public DBADashSource Source;
+        private bool noWMI;
         private bool IsAzure = false;
         private bool isAzureMasterDB = false;
         private string instanceName;
@@ -179,10 +177,10 @@ namespace DBADash
             }
         }
 
-        public DBCollector(string connectionString, bool noWMI,string serviceName)
+        public DBCollector(DBADashSource source,string serviceName)
         {
-            this.noWMI = noWMI;
-            startup(connectionString, null,serviceName);
+            Source = source;
+            startup(null,serviceName);
         }
 
         private void logError(Exception ex,string errorSource, string errorContext = "Collect")
@@ -226,8 +224,9 @@ namespace DBADash
             }
         }
 
-        private void startup(string connectionString, string connectionID,string serviceName)
+        private void startup(string connectionID,string serviceName)
         {
+            noWMI = Source.NoWMI;
             dashAgent = DBADashAgent.GetCurrent(serviceName);
             retryPolicy = Policy.Handle<Exception>()
                 .WaitAndRetry(new[]
@@ -239,7 +238,7 @@ namespace DBADash
                 {
                     logError(exception,(string)context.OperationKey, "Collect[Retrying]");
                 });
-            _connectionString = connectionString;
+
             Data = new DataSet("DBADash");
             dtErrors = new DataTable("Errors");
             dtErrors.Columns.Add("ErrorSource");
@@ -255,9 +254,10 @@ namespace DBADash
             
         }
 
-        public DBCollector(string connectionString, string connectionID,string serviceName)
-        {           
-            startup(connectionString, connectionID,serviceName);
+        public DBCollector(DBADashSource source, string connectionID,string serviceName)
+        {
+            Source = source;
+            startup(connectionID,serviceName);
         }
 
         public void RemoveEventSessions()
@@ -468,7 +468,7 @@ namespace DBADash
 
         private void collectPlans()
         {
-            if (Data.Tables.Contains("RunningQueries") && PlanThreshold.PlanCollectionEnabled)
+            if (Data.Tables.Contains("RunningQueries") && Source.PlanCollectionEnabled)
             {
                 var plansSQL = getPlansSQL();
                 if (!String.IsNullOrEmpty(plansSQL))
@@ -621,7 +621,7 @@ CROSS APPLY sys.dm_exec_text_query_plan(t.plan_handle,t.statement_start_offset,t
                 var plans = (from r in dt.AsEnumerable()
                              where r["plan_handle"] != DBNull.Value && r["query_plan_hash"] != DBNull.Value && r["statement_start_offset"] != DBNull.Value && r["statement_end_offset"] != DBNull.Value
                              group r by new Plan((byte[])r["plan_handle"], (byte[])r["query_plan_hash"], (int)r["statement_start_offset"], (int)r["statement_end_offset"]) into g
-                             where g.Sum(r => Convert.ToInt32(r["cpu_time"])) >= PlanThreshold.CPUThreshold || g.Sum(r => Convert.ToInt32(r["granted_query_memory"])) >= PlanThreshold.MemoryGrantThreshold || g.Count() >= PlanThreshold.CountThreshold || g.Max(r=> ((DateTime)r["SnapshotDateUTC"]).Subtract((DateTime)r["last_request_start_time_utc"])).TotalMilliseconds >= PlanThreshold.DurationThreshold 
+                             where g.Sum(r => Convert.ToInt32(r["cpu_time"])) >= Source.PlanCollectionCPUThreshold || g.Sum(r => Convert.ToInt32(r["granted_query_memory"])) >= Source.PlanCollectionMemoryGrantThreshold || g.Count() >= Source.PlanCollectionCountThreshold || g.Max(r=> ((DateTime)r["SnapshotDateUTC"]).Subtract((DateTime)r["last_request_start_time_utc"])).TotalMilliseconds >= Source.PlanCollectionDurationThreshold
                              select g.Key).Distinct().ToList();
                 return plans;
             }
@@ -792,7 +792,7 @@ CROSS APPLY sys.dm_exec_sql_text(H.sql_handle) txt");
             }
             else if (collectionType == CollectionType.SlowQueries)
             {
-                if (SlowQueryThresholdMs >= 0 && (!(IsAzure && isAzureMasterDB)))
+                if (Source.SlowQueryThresholdMs >= 0 && (!(IsAzure && isAzureMasterDB)))
                 {
                      collectSlowQueries();
                 }
@@ -818,9 +818,38 @@ CROSS APPLY sys.dm_exec_sql_text(H.sql_handle) txt");
                     collectResourceGovernor();                  
                 }
             }
+            else if(collectionType == CollectionType.RunningQueries)
+            {
+                collectRunningQueries();
+            }
             else
             {
                 addDT(collectionTypeString, Properties.Resources.ResourceManager.GetString("SQL" + collectionTypeString, Properties.Resources.Culture), param);
+            }
+        }
+
+        private void collectRunningQueries()
+        {
+            using(var cn = new SqlConnection(_connectionString))
+            using (var cmd = new SqlCommand(Properties.Resources.SQLRunningQueries, cn))
+            using (var da = new SqlDataAdapter(cmd))
+            {
+                cmd.Parameters.AddWithValue("CollectSessionWaits", Source.CollectSessionWaits);
+                var ds = new DataSet();
+                da.Fill(ds);
+                var dtRunningQueries = ds.Tables[0];
+                dtRunningQueries.TableName = "RunningQueries";
+                ds.Tables.Remove(dtRunningQueries);
+                Data.Tables.Add(dtRunningQueries);
+                // We might have a second table if we are collecting session waits
+                if (ds.Tables.Count == 1)
+                {
+                    var dtSessionWaits = ds.Tables[0];
+                    dtSessionWaits.TableName = "SessionWaits";
+                    ds.Tables.Remove(dtSessionWaits);
+                    Data.Tables.Add(dtSessionWaits);
+                }
+
             }
         }
 
@@ -920,9 +949,9 @@ CROSS APPLY sys.dm_exec_sql_text(H.sql_handle) txt");
                     {
                         cn.Open();
 
-                        cmd.Parameters.AddWithValue("SlowQueryThreshold", SlowQueryThresholdMs * 1000);
-                        cmd.Parameters.AddWithValue("MaxMemory", SlowQueryMaxMemoryKB);
-                        cmd.Parameters.AddWithValue("UseDualSession", UseDualEventSession);
+                        cmd.Parameters.AddWithValue("SlowQueryThreshold", Source.SlowQueryThresholdMs * 1000);
+                        cmd.Parameters.AddWithValue("MaxMemory",Source.SlowQuerySessionMaxMemoryKB);
+                        cmd.Parameters.AddWithValue("UseDualSession", Source.UseDualEventSession);
                         var result = cmd.ExecuteScalar();
                         if (result == DBNull.Value)
                         {

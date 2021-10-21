@@ -74,7 +74,8 @@ namespace DBADashServiceConfig
                     PersistXESessions = chkPersistXESession.Checked,
                     SlowQueryThresholdMs = chkSlowQueryThreshold.Checked ? (Int32)numSlowQueryThreshold.Value : -1,
                     RunningQueryPlanThreshold = chkCollectPlans.Checked ? new PlanCollectionThreshold() { CountThreshold = int.Parse(txtCountThreshold.Text), CPUThreshold = int.Parse(txtCPUThreshold.Text), DurationThreshold = int.Parse(txtDurationThreshold.Text), MemoryGrantThreshold = int.Parse(txtGrantThreshold.Text) } : null,
-                    SchemaSnapshotDBs = schemaSnapshotDBs
+                    SchemaSnapshotDBs = schemaSnapshotDBs,
+                    CollectSessionWaits = chkCollectSessionWaits.Checked
                 };
                 bool validated = validateSource(sourceString);
 
@@ -270,6 +271,7 @@ namespace DBADashServiceConfig
             dgvConnections.Columns.Add(new DataGridViewCheckBoxColumn() { DataPropertyName = "PersistXESessions", HeaderText = "Persist XE Sessions" });
             dgvConnections.Columns.Add(new DataGridViewTextBoxColumn() { DataPropertyName = "SchemaSnapshotDBs", HeaderText = "Schema Snapshot DBs" });
             dgvConnections.Columns.Add(new DataGridViewTextBoxColumn() { DataPropertyName = "SlowQuerySessionMaxMemoryKB", HeaderText = "Slow Query Session Max Memory (KB)" });
+            dgvConnections.Columns.Add(new DataGridViewCheckBoxColumn() { DataPropertyName = "CollectSessionWaits", HeaderText = "Collect Session Waits", ToolTipText = "Collect Session Waits for Running Queries" });
             dgvConnections.Columns.Add(new DataGridViewCheckBoxColumn() { DataPropertyName = "PlanCollectionEnabled", HeaderText = "Running Query Plan Collection" });
             dgvConnections.Columns.Add(new DataGridViewTextBoxColumn() { DataPropertyName = "PlanCollectionCPUThreshold", HeaderText = "Plan Collection CPU Threshold" });
             dgvConnections.Columns.Add(new DataGridViewTextBoxColumn() { DataPropertyName = "PlanCollectionDurationThreshold", HeaderText = "Plan Collection Duration Threshold" });

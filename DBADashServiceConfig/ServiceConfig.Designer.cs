@@ -115,6 +115,7 @@
             this.lnkSourceConnections = new System.Windows.Forms.LinkLabel();
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
             this.button1 = new System.Windows.Forms.Button();
+            this.chkCollectSessionWaits = new System.Windows.Forms.CheckBox();
             ((System.ComponentModel.ISupportInitialize)(this.errorProvider1)).BeginInit();
             this.tab1.SuspendLayout();
             this.tabDest.SuspendLayout();
@@ -695,6 +696,7 @@
             // 
             // tabAddConnectionOther
             // 
+            this.tabAddConnectionOther.Controls.Add(this.chkCollectSessionWaits);
             this.tabAddConnectionOther.Controls.Add(this.pictureBox3);
             this.tabAddConnectionOther.Controls.Add(this.lnkExample);
             this.tabAddConnectionOther.Controls.Add(this.lnkNone);
@@ -1126,6 +1128,19 @@
             this.toolTip1.SetToolTip(this.button1, "Choose a folder destination path");
             this.button1.UseVisualStyleBackColor = true;
             // 
+            // chkCollectSessionWaits
+            // 
+            this.chkCollectSessionWaits.AutoSize = true;
+            this.chkCollectSessionWaits.Checked = true;
+            this.chkCollectSessionWaits.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.chkCollectSessionWaits.Location = new System.Drawing.Point(302, 45);
+            this.chkCollectSessionWaits.Name = "chkCollectSessionWaits";
+            this.chkCollectSessionWaits.Size = new System.Drawing.Size(165, 21);
+            this.chkCollectSessionWaits.TabIndex = 27;
+            this.chkCollectSessionWaits.Text = "Collect Session Waits";
+            this.toolTip1.SetToolTip(this.chkCollectSessionWaits, "Collect Session Waits for Running Queries");
+            this.chkCollectSessionWaits.UseVisualStyleBackColor = true;
+            // 
             // ServiceConfig
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
@@ -1267,6 +1282,7 @@
         private System.Windows.Forms.LinkLabel lnkInstall;
         private System.Windows.Forms.Label lblServiceStatus;
         private System.Windows.Forms.GroupBox groupBox5;
+        private System.Windows.Forms.CheckBox chkCollectSessionWaits;
     }
 }
 

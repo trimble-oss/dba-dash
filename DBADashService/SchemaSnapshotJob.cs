@@ -21,7 +21,7 @@ namespace DBADashService
             string connectionString = cfg.GetSource();
             SqlConnectionStringBuilder builder = new SqlConnectionStringBuilder(connectionString);
 
-            var collector = new DBCollector(connectionString, true,SchedulerServiceConfig.Config.ServiceName);
+            var collector = new DBCollector(cfg,SchedulerServiceConfig.Config.ServiceName);
             var dsSnapshot = collector.Data;
             var dbs = schemaSnapshotDBs.Split(',');
 

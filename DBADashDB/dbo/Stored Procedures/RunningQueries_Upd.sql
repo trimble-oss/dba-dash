@@ -46,6 +46,7 @@ BEGIN
 						   t.plan_handle,
 						   t.query_hash,
 						   t.query_plan_hash,
+						   t.login_time_utc,
 						ROW_NUMBER() OVER(PARTITION BY t.session_id ORDER BY t.cpu_time DESC) rnum
 					FROM  @RunningQueries t
 	)
@@ -79,7 +80,8 @@ BEGIN
 	    sql_handle,
 	    plan_handle,
 	    query_hash,
-	    query_plan_hash
+	    query_plan_hash,
+		login_time_utc
 	)
 	SELECT  SnapshotDateUTC,
 	    session_id,
@@ -109,7 +111,8 @@ BEGIN
 	    sql_handle,
 	    plan_handle,
 	    query_hash,
-	    query_plan_hash
+	    query_plan_hash,
+		login_time_utc
 	FROM deDupe
 	WHERE deDupe.rnum=1
 
@@ -222,7 +225,8 @@ BEGIN
         sql_handle,
         plan_handle,
         query_hash,
-        query_plan_hash
+        query_plan_hash,
+		login_time_utc
     )
     SELECT @InstanceID as InstanceID,
         SnapshotDateUTC,
@@ -253,7 +257,8 @@ BEGIN
         sql_handle,
         plan_handle,
         query_hash,
-        query_plan_hash
+        query_plan_hash,
+		login_time_utc
     FROM @RunningQueriesDD;
 
 	EXEC dbo.CollectionDates_Upd @InstanceID = @InstanceID,  

@@ -28,27 +28,21 @@
         /// </summary>
         private void InitializeComponent()
         {
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle3 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle4 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle5 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle6 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle7 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle8 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle9 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle10 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle11 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle12 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle3 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle4 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle5 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle6 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle13 = new System.Windows.Forms.DataGridViewCellStyle();
             this.dgv = new System.Windows.Forms.DataGridView();
             this.colWaitType = new System.Windows.Forms.DataGridViewLinkColumn();
-            this.colTotalWait = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colSignalWait = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colSignalWaitPct = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colWaitTimeMsPerSec = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colWaitTimeMsPerSecPerCore = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colSampleDuration = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.colCriticalWait = new System.Windows.Forms.DataGridViewCheckBoxColumn();
             this.colHelp = new System.Windows.Forms.DataGridViewLinkColumn();
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
@@ -56,7 +50,6 @@
             this.tsExcel = new System.Windows.Forms.ToolStripButton();
             this.tsRefresh = new System.Windows.Forms.ToolStripButton();
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
-            this.WaitChart1 = new DBADashGUI.Performance.CartesianChartWithDataTable();
             this.toolStrip2 = new System.Windows.Forms.ToolStrip();
             this.tsWaitType = new System.Windows.Forms.ToolStripLabel();
             this.tsOptions = new System.Windows.Forms.ToolStripDropDownButton();
@@ -78,6 +71,13 @@
             this.dataGridViewTextBoxColumn4 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dataGridViewTextBoxColumn5 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dataGridViewTextBoxColumn6 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.WaitChart1 = new DBADashGUI.Performance.CartesianChartWithDataTable();
+            this.colTotalWait = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colSignalWait = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colSignalWaitPct = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colWaitTimeMsPerSec = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colWaitTimeMsPerSecPerCore = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colSampleDuration = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dataGridViewTextBoxColumn7 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             ((System.ComponentModel.ISupportInitialize)(this.dgv)).BeginInit();
             this.toolStrip1.SuspendLayout();
@@ -110,7 +110,7 @@
             this.dgv.RowHeadersVisible = false;
             this.dgv.RowHeadersWidth = 51;
             this.dgv.RowTemplate.Height = 24;
-            this.dgv.Size = new System.Drawing.Size(708, 258);
+            this.dgv.Size = new System.Drawing.Size(885, 319);
             this.dgv.TabIndex = 0;
             this.dgv.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgv_CellContentClick);
             // 
@@ -124,73 +124,6 @@
             this.colWaitType.Resizable = System.Windows.Forms.DataGridViewTriState.True;
             this.colWaitType.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
             this.colWaitType.Width = 93;
-            // 
-            // colTotalWait
-            // 
-            this.colTotalWait.DataPropertyName = "TotalWaitSec";
-            dataGridViewCellStyle1.Format = "N3";
-            dataGridViewCellStyle1.NullValue = null;
-            this.colTotalWait.DefaultCellStyle = dataGridViewCellStyle1;
-            this.colTotalWait.HeaderText = "Total Wait (sec)";
-            this.colTotalWait.MinimumWidth = 6;
-            this.colTotalWait.Name = "colTotalWait";
-            this.colTotalWait.ReadOnly = true;
-            this.colTotalWait.Width = 126;
-            // 
-            // colSignalWait
-            // 
-            this.colSignalWait.DataPropertyName = "SignalWaitSec";
-            dataGridViewCellStyle2.Format = "N3";
-            this.colSignalWait.DefaultCellStyle = dataGridViewCellStyle2;
-            this.colSignalWait.HeaderText = "Signal Wait (sec)";
-            this.colSignalWait.MinimumWidth = 6;
-            this.colSignalWait.Name = "colSignalWait";
-            this.colSignalWait.ReadOnly = true;
-            this.colSignalWait.Width = 103;
-            // 
-            // colSignalWaitPct
-            // 
-            this.colSignalWaitPct.DataPropertyName = "SignalWaitPct";
-            dataGridViewCellStyle3.Format = "P1";
-            this.colSignalWaitPct.DefaultCellStyle = dataGridViewCellStyle3;
-            this.colSignalWaitPct.HeaderText = "Signal Wait %";
-            this.colSignalWaitPct.MinimumWidth = 6;
-            this.colSignalWaitPct.Name = "colSignalWaitPct";
-            this.colSignalWaitPct.ReadOnly = true;
-            this.colSignalWaitPct.Width = 103;
-            // 
-            // colWaitTimeMsPerSec
-            // 
-            this.colWaitTimeMsPerSec.DataPropertyName = "WaitTimeMsPerSec";
-            dataGridViewCellStyle4.Format = "N2";
-            this.colWaitTimeMsPerSec.DefaultCellStyle = dataGridViewCellStyle4;
-            this.colWaitTimeMsPerSec.HeaderText = "Wait Time (ms/sec)";
-            this.colWaitTimeMsPerSec.MinimumWidth = 6;
-            this.colWaitTimeMsPerSec.Name = "colWaitTimeMsPerSec";
-            this.colWaitTimeMsPerSec.ReadOnly = true;
-            this.colWaitTimeMsPerSec.Width = 145;
-            // 
-            // colWaitTimeMsPerSecPerCore
-            // 
-            this.colWaitTimeMsPerSecPerCore.DataPropertyName = "WaitTimeMsPerCorePerSec";
-            dataGridViewCellStyle5.Format = "N2";
-            this.colWaitTimeMsPerSecPerCore.DefaultCellStyle = dataGridViewCellStyle5;
-            this.colWaitTimeMsPerSecPerCore.HeaderText = "Wait Time (ms/sec/core)";
-            this.colWaitTimeMsPerSecPerCore.MinimumWidth = 6;
-            this.colWaitTimeMsPerSecPerCore.Name = "colWaitTimeMsPerSecPerCore";
-            this.colWaitTimeMsPerSecPerCore.ReadOnly = true;
-            this.colWaitTimeMsPerSecPerCore.Width = 173;
-            // 
-            // colSampleDuration
-            // 
-            this.colSampleDuration.DataPropertyName = "SampleDurationSec";
-            dataGridViewCellStyle6.Format = "N0";
-            this.colSampleDuration.DefaultCellStyle = dataGridViewCellStyle6;
-            this.colSampleDuration.HeaderText = "Sample Duration (sec)";
-            this.colSampleDuration.MinimumWidth = 6;
-            this.colSampleDuration.Name = "colSampleDuration";
-            this.colSampleDuration.ReadOnly = true;
-            this.colSampleDuration.Width = 134;
             // 
             // colCriticalWait
             // 
@@ -221,7 +154,7 @@
             this.tsRefresh});
             this.toolStrip1.Location = new System.Drawing.Point(0, 0);
             this.toolStrip1.Name = "toolStrip1";
-            this.toolStrip1.Size = new System.Drawing.Size(708, 31);
+            this.toolStrip1.Size = new System.Drawing.Size(885, 39);
             this.toolStrip1.TabIndex = 1;
             this.toolStrip1.Text = "toolStrip1";
             // 
@@ -231,7 +164,7 @@
             this.tsCopy.Image = global::DBADashGUI.Properties.Resources.ASX_Copy_blue_16x;
             this.tsCopy.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsCopy.Name = "tsCopy";
-            this.tsCopy.Size = new System.Drawing.Size(29, 28);
+            this.tsCopy.Size = new System.Drawing.Size(29, 36);
             this.tsCopy.Text = "Copy";
             this.tsCopy.Click += new System.EventHandler(this.tsCopy_Click);
             // 
@@ -241,7 +174,7 @@
             this.tsExcel.Image = global::DBADashGUI.Properties.Resources.excel16x16;
             this.tsExcel.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsExcel.Name = "tsExcel";
-            this.tsExcel.Size = new System.Drawing.Size(29, 28);
+            this.tsExcel.Size = new System.Drawing.Size(29, 36);
             this.tsExcel.Text = "Export Excel";
             this.tsExcel.Click += new System.EventHandler(this.tsExcel_Click);
             // 
@@ -251,14 +184,14 @@
             this.tsRefresh.Image = global::DBADashGUI.Properties.Resources._112_RefreshArrow_Green_16x16_72;
             this.tsRefresh.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsRefresh.Name = "tsRefresh";
-            this.tsRefresh.Size = new System.Drawing.Size(29, 28);
+            this.tsRefresh.Size = new System.Drawing.Size(29, 36);
             this.tsRefresh.Text = "Refresh";
             this.tsRefresh.Click += new System.EventHandler(this.tsRefresh_Click);
             // 
             // splitContainer1
             // 
             this.splitContainer1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.splitContainer1.Location = new System.Drawing.Point(0, 31);
+            this.splitContainer1.Location = new System.Drawing.Point(0, 49);
             this.splitContainer1.Name = "splitContainer1";
             this.splitContainer1.Orientation = System.Windows.Forms.Orientation.Horizontal;
             // 
@@ -270,19 +203,9 @@
             // splitContainer1.Panel2
             // 
             this.splitContainer1.Panel2.Controls.Add(this.dgv);
-            this.splitContainer1.Size = new System.Drawing.Size(708, 494);
-            this.splitContainer1.SplitterDistance = 232;
+            this.splitContainer1.Size = new System.Drawing.Size(885, 608);
+            this.splitContainer1.SplitterDistance = 285;
             this.splitContainer1.TabIndex = 2;
-            // 
-            // WaitChart1
-            // 
-            this.WaitChart1.DefaultLineSmoothness = 0.5D;
-            this.WaitChart1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.WaitChart1.Location = new System.Drawing.Point(0, 27);
-            this.WaitChart1.Name = "WaitChart1";
-            this.WaitChart1.Size = new System.Drawing.Size(708, 205);
-            this.WaitChart1.TabIndex = 0;
-            this.WaitChart1.Text = "cartesianChartWithDataTable1";
             // 
             // toolStrip2
             // 
@@ -293,7 +216,7 @@
             this.tsDateGroup});
             this.toolStrip2.Location = new System.Drawing.Point(0, 0);
             this.toolStrip2.Name = "toolStrip2";
-            this.toolStrip2.Size = new System.Drawing.Size(708, 27);
+            this.toolStrip2.Size = new System.Drawing.Size(1106, 39);
             this.toolStrip2.TabIndex = 1;
             this.toolStrip2.Text = "toolStrip2";
             // 
@@ -302,7 +225,7 @@
             this.tsWaitType.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
             this.tsWaitType.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
             this.tsWaitType.Name = "tsWaitType";
-            this.tsWaitType.Size = new System.Drawing.Size(89, 24);
+            this.tsWaitType.Size = new System.Drawing.Size(89, 36);
             this.tsWaitType.Text = "WAIT_TYPE";
             // 
             // tsOptions
@@ -314,7 +237,7 @@
             this.tsOptions.Image = global::DBADashGUI.Properties.Resources.SettingsOutline_16x;
             this.tsOptions.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsOptions.Name = "tsOptions";
-            this.tsOptions.Size = new System.Drawing.Size(34, 24);
+            this.tsOptions.Size = new System.Drawing.Size(34, 36);
             this.tsOptions.Text = "Options";
             // 
             // lineSmoothnesToolStripMenuItem
@@ -417,7 +340,7 @@
             this.tsDateGroup.Image = global::DBADashGUI.Properties.Resources.Time_16x;
             this.tsDateGroup.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsDateGroup.Name = "tsDateGroup";
-            this.tsDateGroup.Size = new System.Drawing.Size(76, 24);
+            this.tsDateGroup.Size = new System.Drawing.Size(76, 36);
             this.tsDateGroup.Tag = "1";
             this.tsDateGroup.Text = "1Min";
             this.tsDateGroup.ToolTipText = "Date Group";
@@ -489,6 +412,83 @@
             this.dataGridViewTextBoxColumn6.Name = "dataGridViewTextBoxColumn6";
             this.dataGridViewTextBoxColumn6.ReadOnly = true;
             this.dataGridViewTextBoxColumn6.Width = 173;
+            // 
+            // WaitChart1
+            // 
+            this.WaitChart1.DefaultLineSmoothness = 0.5D;
+            this.WaitChart1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.WaitChart1.Location = new System.Drawing.Point(0, 49);
+            this.WaitChart1.Name = "WaitChart1";
+            this.WaitChart1.Size = new System.Drawing.Size(1106, 308);
+            this.WaitChart1.TabIndex = 0;
+            this.WaitChart1.Text = "cartesianChartWithDataTable1";
+            // 
+            // colTotalWait
+            // 
+            this.colTotalWait.DataPropertyName = "TotalWaitSec";
+            dataGridViewCellStyle1.Format = "N3";
+            dataGridViewCellStyle1.NullValue = null;
+            this.colTotalWait.DefaultCellStyle = dataGridViewCellStyle1;
+            this.colTotalWait.HeaderText = "Total Wait (sec)";
+            this.colTotalWait.MinimumWidth = 6;
+            this.colTotalWait.Name = "colTotalWait";
+            this.colTotalWait.ReadOnly = true;
+            this.colTotalWait.Width = 126;
+            // 
+            // colSignalWait
+            // 
+            this.colSignalWait.DataPropertyName = "SignalWaitSec";
+            dataGridViewCellStyle2.Format = "N3";
+            this.colSignalWait.DefaultCellStyle = dataGridViewCellStyle2;
+            this.colSignalWait.HeaderText = "Signal Wait (sec)";
+            this.colSignalWait.MinimumWidth = 6;
+            this.colSignalWait.Name = "colSignalWait";
+            this.colSignalWait.ReadOnly = true;
+            this.colSignalWait.Width = 103;
+            // 
+            // colSignalWaitPct
+            // 
+            this.colSignalWaitPct.DataPropertyName = "SignalWaitPct";
+            dataGridViewCellStyle3.Format = "P1";
+            this.colSignalWaitPct.DefaultCellStyle = dataGridViewCellStyle3;
+            this.colSignalWaitPct.HeaderText = "Signal Wait %";
+            this.colSignalWaitPct.MinimumWidth = 6;
+            this.colSignalWaitPct.Name = "colSignalWaitPct";
+            this.colSignalWaitPct.ReadOnly = true;
+            this.colSignalWaitPct.Width = 103;
+            // 
+            // colWaitTimeMsPerSec
+            // 
+            this.colWaitTimeMsPerSec.DataPropertyName = "WaitTimeMsPerSec";
+            dataGridViewCellStyle4.Format = "N2";
+            this.colWaitTimeMsPerSec.DefaultCellStyle = dataGridViewCellStyle4;
+            this.colWaitTimeMsPerSec.HeaderText = "Wait Time (ms/sec)";
+            this.colWaitTimeMsPerSec.MinimumWidth = 6;
+            this.colWaitTimeMsPerSec.Name = "colWaitTimeMsPerSec";
+            this.colWaitTimeMsPerSec.ReadOnly = true;
+            this.colWaitTimeMsPerSec.Width = 145;
+            // 
+            // colWaitTimeMsPerSecPerCore
+            // 
+            this.colWaitTimeMsPerSecPerCore.DataPropertyName = "WaitTimeMsPerCorePerSec";
+            dataGridViewCellStyle5.Format = "N2";
+            this.colWaitTimeMsPerSecPerCore.DefaultCellStyle = dataGridViewCellStyle5;
+            this.colWaitTimeMsPerSecPerCore.HeaderText = "Wait Time (ms/sec/core)";
+            this.colWaitTimeMsPerSecPerCore.MinimumWidth = 6;
+            this.colWaitTimeMsPerSecPerCore.Name = "colWaitTimeMsPerSecPerCore";
+            this.colWaitTimeMsPerSecPerCore.ReadOnly = true;
+            this.colWaitTimeMsPerSecPerCore.Width = 173;
+            // 
+            // colSampleDuration
+            // 
+            this.colSampleDuration.DataPropertyName = "SampleDurationSec";
+            dataGridViewCellStyle6.Format = "N0";
+            this.colSampleDuration.DefaultCellStyle = dataGridViewCellStyle6;
+            this.colSampleDuration.HeaderText = "Sample Duration (sec)";
+            this.colSampleDuration.MinimumWidth = 6;
+            this.colSampleDuration.Name = "colSampleDuration";
+            this.colSampleDuration.ReadOnly = true;
+            this.colSampleDuration.Width = 134;
             // 
             // dataGridViewTextBoxColumn7
             // 

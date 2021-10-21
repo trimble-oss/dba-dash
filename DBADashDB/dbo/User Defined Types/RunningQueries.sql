@@ -27,5 +27,6 @@
     sql_handle VARBINARY(64) NULL,
     plan_handle VARBINARY(64) NULL,
     query_hash BINARY(8) NULL,
-    query_plan_hash BINARY(8) NULL
+    query_plan_hash BINARY(8) NULL,
+    login_time_utc DATETIME NULL
 );

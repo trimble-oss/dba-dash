@@ -49,8 +49,8 @@ Param(
     [switch]$SkipValidation,
     [bool]$BackupConfig=$true,
     [switch]$Replace,
-    [switch]$RestartService
-
+    [switch]$RestartService,
+    [bool]$CollectSessionWaits=$true
 )
 $configPath = [System.IO.Path]::Combine((Get-Location),"ServiceConfig.json")
 # Load DLLs to help us work with the config file
@@ -92,6 +92,7 @@ $connection.NoWMI = $NoWMI.IsPresent
 $connection.SlowQueryThresholdMs=$SlowQueryThresholdMs
 $connection.SlowQuerySessionMaxMemoryKB = $SlowQuerySessionMaxMemoryKB
 $connection.SchemaSnapshotDBs = $SchemaSnapshotDBs
+$connection.CollectSessionWaits=$CollectSessionWaits
 if($PlanCollectionEnabled.IsPresent){
     $connection.PlanCollectionCountThreshold = $PlanCollectionCountThreshold
     $connection.PlanCollectionCPUThreshold = $PlanCollectionCPUThreshold
