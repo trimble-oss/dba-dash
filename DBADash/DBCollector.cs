@@ -426,6 +426,10 @@ namespace DBADash
                 //Schema snapshots are not handled via DBCollector
                 return false;
             }
+            if(collectionType== CollectionType.ResourceGovernorConfiguration)
+            {
+                return !(productVersion.StartsWith("8.") || productVersion.StartsWith("9."));
+            }
             else
             {
                 return true;
@@ -868,6 +872,10 @@ CROSS APPLY sys.dm_exec_sql_text(H.sql_handle) txt");
             {
        
                 string sql = Properties.Resources.ResourceManager.GetString("SQLPerformanceCounters", Properties.Resources.Culture);
+                if(productVersion.StartsWith("8") || productVersion.StartsWith("9"))
+                {
+                    sql = sql.Replace("SYSUTCDATETIME()", "GETUTCDATE()");
+                }
                 using (var cn = new SqlConnection(_connectionString))
                 {
                     using (var da = new SqlDataAdapter(sql, cn))

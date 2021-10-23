@@ -19,7 +19,7 @@ BEGIN
 		@MemoryLowSignalState  = system_low_memory_signal_state
 	FROM    sys.dm_os_sys_memory
 END
-IF EXISTS(SELECT * FROM @counters WHERE object_name='sys.dm_os_nodes')
+IF OBJECT_ID('sys.dm_os_sys_nodes') IS NOT NULL AND EXISTS(SELECT * FROM @counters WHERE object_name='sys.dm_os_nodes')
 BEGIN
 	SELECT @CountOfNodesWithThreadResourcesLow=COUNT(*)   
 	FROM sys.dm_os_nodes

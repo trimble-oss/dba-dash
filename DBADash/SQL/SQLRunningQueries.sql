@@ -1,7 +1,7 @@
 ﻿DECLARE @UTCOffset INT 
-DECLARE @SnapshotDateUTC DATETIME2(7)
+DECLARE @SnapshotDateUTC DATETIME
 SET @UTCOffset = CAST(ROUND(DATEDIFF(s,GETDATE(),GETUTCDATE())/60.0,0) AS INT)
-SET @SnapshotDateUTC = SYSUTCDATETIME() 
+SET @SnapshotDateUTC = GETUTCDATE() 
 DECLARE @SQL NVARCHAR(MAX) 
 SET @SQL = N'
 SELECT @SnapshotDateUTC as SnapshotDateUTC,
@@ -31,8 +31,8 @@ SELECT @SnapshotDateUTC as SnapshotDateUTC,
 	DATEADD(mi,@UTCOffset, s.last_request_start_time) AS last_request_start_time_utc,
 	ISNULL(r.sql_handle,c.most_recent_sql_handle) as sql_handle,
 	r.plan_handle,
-	r.query_hash,
-	r.query_plan_hash,
+	' + CASE WHEN COLUMNPROPERTY(OBJECT_ID('sys.dm_exec_requests'),'query_hash','ColumnID') IS NULL THEN 'CAST(NULL AS BINARY(8)) AS query_hash,' ELSE 'r.query_hash,' END + '
+	' + CASE WHEN COLUMNPROPERTY(OBJECT_ID('sys.dm_exec_requests'),'query_plan_hash','ColumnID') IS NULL THEN 'CAST(NULL AS BINARY(8)) AS query_plan_hash,' ELSE 'r.query_plan_hash,' END + '
 	DATEADD(mi,@UTCOffset, s.login_time) AS login_time_utc
 FROM sys.dm_exec_sessions s
 INNER JOIN sys.dm_exec_connections c ON c.session_id= s.session_id
@@ -49,7 +49,7 @@ AND s.session_id <> @@SPID
 AND s.session_id > 0'
 + CASE WHEN SERVERPROPERTY('EditionID') = 1674378470 THEN 'AND s.database_id = DB_ID()' /* DB filter for Azure */ ELSE '' END 
 
-EXEC sp_executesql @SQL,N'@UTCOffset INT,@SnapshotDateUTC DATETIME2(7)',@UTCOffset,@SnapshotDateUTC
+EXEC sp_executesql @SQL,N'@UTCOffset INT,@SnapshotDateUTC DATETIME',@UTCOffset,@SnapshotDateUTC
 
 IF @CollectSessionWaits=1 AND OBJECT_ID('sys.dm_exec_session_wait_stats') IS NOT NULL
 BEGIN
