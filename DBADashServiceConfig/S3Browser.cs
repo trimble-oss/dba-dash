@@ -53,10 +53,14 @@ namespace DBADashServiceConfig
             var cred = DBADash.AWSTools.GetCredentials(AWSProfile, AccessKey, SecretKey);
             using (var s3 = new Amazon.S3.AmazonS3Client(cred))
             {
-
-                foreach (var b in s3.ListBuckets().Buckets)
+                using (var listBucketsTask = s3.ListBucketsAsync())
                 {
-                    cboBuckets.Items.Add(b.BucketName);
+                    listBucketsTask.Wait();
+
+                    foreach (var b in listBucketsTask.Result.Buckets)
+                    {
+                        cboBuckets.Items.Add(b.BucketName);
+                    }
                 }
             }
         }

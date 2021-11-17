@@ -3,7 +3,7 @@ using System.IO;
 using System.Security.Cryptography;
 using System.Text;
 
-namespace DBADashService
+namespace DBADash
 {
     public static class EncryptText
     {
@@ -17,37 +17,48 @@ namespace DBADashService
         {
             byte[] initVectorBytes = Encoding.UTF8.GetBytes(initVector);
             byte[] plainTextBytes = Encoding.UTF8.GetBytes(plainText);
-            PasswordDeriveBytes password = new PasswordDeriveBytes(passPhrase, null);
-            byte[] keyBytes = password.GetBytes(keysize / 8);
-            RijndaelManaged symmetricKey = new RijndaelManaged();
-            symmetricKey.Mode = CipherMode.CBC;
-            ICryptoTransform encryptor = symmetricKey.CreateEncryptor(keyBytes, initVectorBytes);
-            MemoryStream memoryStream = new MemoryStream();
-            CryptoStream cryptoStream = new CryptoStream(memoryStream, encryptor, CryptoStreamMode.Write);
-            cryptoStream.Write(plainTextBytes, 0, plainTextBytes.Length);
-            cryptoStream.FlushFinalBlock();
-            byte[] cipherTextBytes = memoryStream.ToArray();
-            memoryStream.Close();
-            cryptoStream.Close();
-            return Convert.ToBase64String(cipherTextBytes);
+            using (PasswordDeriveBytes password = new PasswordDeriveBytes(passPhrase, null))
+            {
+                byte[] keyBytes = password.GetBytes(keysize / 8);
+                using (var symmetricKey = Aes.Create())
+                {
+                    symmetricKey.Mode = CipherMode.CBC;
+                    using (ICryptoTransform encryptor = symmetricKey.CreateEncryptor(keyBytes, initVectorBytes))
+                    using (var memoryStream = new MemoryStream())
+                    using (var cryptoStream = new CryptoStream(memoryStream, encryptor, CryptoStreamMode.Write))
+                    {
+                        cryptoStream.Write(plainTextBytes, 0, plainTextBytes.Length);
+                        cryptoStream.FlushFinalBlock();
+                        byte[] cipherTextBytes = memoryStream.ToArray();
+                        return Convert.ToBase64String(cipherTextBytes);
+                    }
+                }
+            }
         }
+
         //Decrypt
         public static string DecryptString(string cipherText, string passPhrase)
         {
             byte[] initVectorBytes = Encoding.UTF8.GetBytes(initVector);
             byte[] cipherTextBytes = Convert.FromBase64String(cipherText);
-            PasswordDeriveBytes password = new PasswordDeriveBytes(passPhrase, null);
-            byte[] keyBytes = password.GetBytes(keysize / 8);
-            RijndaelManaged symmetricKey = new RijndaelManaged();
-            symmetricKey.Mode = CipherMode.CBC;
-            ICryptoTransform decryptor = symmetricKey.CreateDecryptor(keyBytes, initVectorBytes);
-            MemoryStream memoryStream = new MemoryStream(cipherTextBytes);
-            CryptoStream cryptoStream = new CryptoStream(memoryStream, decryptor, CryptoStreamMode.Read);
-            byte[] plainTextBytes = new byte[cipherTextBytes.Length];
-            int decryptedByteCount = cryptoStream.Read(plainTextBytes, 0, plainTextBytes.Length);
-            memoryStream.Close();
-            cryptoStream.Close();
-            return Encoding.UTF8.GetString(plainTextBytes, 0, decryptedByteCount);
+            using (PasswordDeriveBytes password = new PasswordDeriveBytes(passPhrase, null))
+            {
+                byte[] keyBytes = password.GetBytes(keysize / 8);
+                using (var symmetricKey = Aes.Create())
+                {
+                    symmetricKey.Mode = CipherMode.CBC;
+                    using (ICryptoTransform decryptor = symmetricKey.CreateDecryptor(keyBytes, initVectorBytes))
+                    using (MemoryStream memoryStream = new MemoryStream(cipherTextBytes))
+                    using (CryptoStream cryptoStream = new CryptoStream(memoryStream, decryptor, CryptoStreamMode.Read))
+                    using (StreamReader srDecrypt = new StreamReader(cryptoStream))
+                    {
+                        return srDecrypt.ReadToEnd();
+                    }
+                }
+            }
         }
+
+
     }
 }
+

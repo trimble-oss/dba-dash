@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
-using System.Data.SqlClient;
+using Microsoft.Data.SqlClient;
 using System.Drawing;
 using System.Linq;
 using System.Text;
@@ -499,11 +499,11 @@ namespace DBADashGUI
 
         #region Tree
 
-        private ContextMenu rootRefreshContextMenu()
+        private ContextMenuStrip rootRefreshContextMenu()
         {
-            var ctxMnu = new ContextMenu();
-            var mnuRootRefresh = new MenuItem("Refresh");
-            ctxMnu.MenuItems.Add(mnuRootRefresh);
+            var ctxMnu = new ContextMenuStrip();
+            var mnuRootRefresh = new ToolStripMenuItem("Refresh");
+            ctxMnu.Items.Add(mnuRootRefresh);
             mnuRootRefresh.Click += MnuRootRefresh_Click;
             return ctxMnu;
         }
@@ -519,7 +519,7 @@ namespace DBADashGUI
             InstanceIDs.Clear();
             AzureInstanceIDs.Clear();
             AllInstanceIDs.Clear();
-            var root = new SQLTreeItem("DBA Dash", SQLTreeItem.TreeType.DBADashRoot) { ContextMenu = rootRefreshContextMenu() };
+            var root = new SQLTreeItem("DBA Dash", SQLTreeItem.TreeType.DBADashRoot) {  ContextMenuStrip = rootRefreshContextMenu() };
             var changes = new SQLTreeItem("Configuration", SQLTreeItem.TreeType.Configuration);
             var hadr = new SQLTreeItem("HA/DR", SQLTreeItem.TreeType.HADR);
             var checks = new SQLTreeItem("Checks", SQLTreeItem.TreeType.DBAChecks);

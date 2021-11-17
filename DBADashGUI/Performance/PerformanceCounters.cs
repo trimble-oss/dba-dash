@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using System.Data.SqlClient;
+using Microsoft.Data.SqlClient;
 using static DBADashGUI.Performance.Performance;
 using LiveCharts;
 using LiveCharts.Defaults;

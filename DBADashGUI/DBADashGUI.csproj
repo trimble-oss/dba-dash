@@ -1,933 +1,274 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{C3356F62-9C3B-425C-8F23-4540D567A72A}</ProjectGuid>
     <OutputType>WinExe</OutputType>
-    <RootNamespace>DBADashGUI</RootNamespace>
     <AssemblyName>DBADash</AssemblyName>
-    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
-    <FileAlignment>512</FileAlignment>
-    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
-    <Deterministic>true</Deterministic>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <UseWindowsForms>true</UseWindowsForms>
+    <UseWPF>true</UseWPF>
+    <ImportWindowsDesktopTargets>true</ImportWindowsDesktopTargets>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
   </PropertyGroup>
   <PropertyGroup>
     <ApplicationIcon>DatabaseUnknown_16x.ico</ApplicationIcon>
+    <BaseOutputPath>..\DBADashBuild</BaseOutputPath>
+    <TargetFramework>net6.0-windows</TargetFramework>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug2|AnyCPU'">
     <DebugSymbols>true</DebugSymbols>
     <OutputPath>bin\Debug2\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <DebugType>full</DebugType>
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <LangVersion>7.3</LangVersion>
-    <ErrorReport>prompt</ErrorReport>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
-    <Prefer32Bit>true</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <NoWarn>1701;1702;CA1416</NoWarn>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <NoWarn>1701;1702;CA1416</NoWarn>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="CommandLine, Version=2.8.0.0, Culture=neutral, PublicKeyToken=5a870481e358d379, processorArchitecture=MSIL">
-      <HintPath>..\packages\CommandLineParser.2.8.0\lib\net461\CommandLine.dll</HintPath>
-    </Reference>
-    <Reference Include="DiffPlex, Version=1.7.0.0, Culture=neutral, PublicKeyToken=1d35e91d1bd7bc0f, processorArchitecture=MSIL">
-      <HintPath>..\packages\DiffPlex.1.7.0\lib\net40\DiffPlex.dll</HintPath>
-    </Reference>
-    <Reference Include="DiffPlex.Wpf, Version=1.3.1.0, Culture=neutral, PublicKeyToken=1d35e91d1bd7bc0f, processorArchitecture=MSIL">
-      <HintPath>..\packages\DiffPlex.Wpf.1.3.1\lib\net46\DiffPlex.Wpf.dll</HintPath>
-    </Reference>
-    <Reference Include="DocumentFormat.OpenXml, Version=2.13.1.0, Culture=neutral, PublicKeyToken=8fb06cb64d019a17, processorArchitecture=MSIL">
-      <HintPath>..\packages\DocumentFormat.OpenXml.2.13.1\lib\net46\DocumentFormat.OpenXml.dll</HintPath>
-    </Reference>
-    <Reference Include="Humanizer, Version=2.11.0.0, Culture=neutral, PublicKeyToken=979442b78dfc278e, processorArchitecture=MSIL">
-      <HintPath>..\packages\Humanizer.Core.2.11.10\lib\netstandard2.0\Humanizer.dll</HintPath>
-    </Reference>
-    <Reference Include="ICSharpCode.AvalonEdit, Version=6.1.2.30, Culture=neutral, PublicKeyToken=9cc39be672370310, processorArchitecture=MSIL">
-      <HintPath>..\packages\AvalonEdit.6.1.2.30\lib\net45\ICSharpCode.AvalonEdit.dll</HintPath>
-    </Reference>
-    <Reference Include="LiveCharts, Version=0.9.7.0, Culture=neutral, PublicKeyToken=0bc1f845d1ebb8df, processorArchitecture=MSIL">
-      <HintPath>..\packages\LiveCharts.0.9.7\lib\net45\LiveCharts.dll</HintPath>
-    </Reference>
-    <Reference Include="LiveCharts.WinForms, Version=0.9.7.1, Culture=neutral, PublicKeyToken=0bc1f845d1ebb8df, processorArchitecture=MSIL">
-      <HintPath>..\packages\LiveCharts.WinForms.0.9.7.1\lib\net45\LiveCharts.WinForms.dll</HintPath>
-    </Reference>
-    <Reference Include="LiveCharts.Wpf, Version=0.9.7.0, Culture=neutral, PublicKeyToken=0bc1f845d1ebb8df, processorArchitecture=MSIL">
-      <HintPath>..\packages\LiveCharts.Wpf.0.9.7\lib\net45\LiveCharts.Wpf.dll</HintPath>
-    </Reference>
-    <Reference Include="PresentationCore" />
-    <Reference Include="PresentationFramework" />
-    <Reference Include="SpreadsheetLight, Version=3.5.0.0, Culture=neutral, PublicKeyToken=32fbb46dc1730c57, processorArchitecture=MSIL">
-      <HintPath>..\packages\SpreadsheetLight.3.5.0\lib\netstandard2.0\SpreadsheetLight.dll</HintPath>
-    </Reference>
-    <Reference Include="System" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.Drawing.Common, Version=4.0.0.2, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
-      <HintPath>..\packages\System.Drawing.Common.5.0.2\lib\net461\System.Drawing.Common.dll</HintPath>
-    </Reference>
-    <Reference Include="System.IO.FileSystem.Primitives, Version=4.0.2.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-      <HintPath>..\packages\System.IO.FileSystem.Primitives.4.3.0\lib\net46\System.IO.FileSystem.Primitives.dll</HintPath>
-      <Private>True</Private>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="System.IO.Packaging, Version=5.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-      <HintPath>..\packages\System.IO.Packaging.5.0.0\lib\net46\System.IO.Packaging.dll</HintPath>
-    </Reference>
     <Reference Include="System.Windows.Forms.DataVisualization" />
-    <Reference Include="System.Xaml" />
-    <Reference Include="System.Xml.Linq" />
-    <Reference Include="System.Data.DataSetExtensions" />
-    <Reference Include="Microsoft.CSharp" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.Deployment" />
-    <Reference Include="System.Drawing" />
-    <Reference Include="System.Net.Http" />
-    <Reference Include="System.Windows.Forms" />
-    <Reference Include="System.Xml" />
-    <Reference Include="UIAutomationProvider" />
-    <Reference Include="WindowsBase" />
-    <Reference Include="WindowsFormsIntegration" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AgentJobs\AgentJobsControl.cs">
+    <Compile Update="AgentJobs\AgentJobsControl.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="AgentJobs\AgentJobsControl.Designer.cs">
-      <DependentUpon>AgentJobsControl.cs</DependentUpon>
-    </Compile>
-    <Compile Include="AgentJobs\AgentJobThreshold.cs" />
-    <Compile Include="AgentJobs\AgentJobThresholdsConfig.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="AgentJobs\AgentJobThresholdsConfig.Designer.cs">
-      <DependentUpon>AgentJobThresholdsConfig.cs</DependentUpon>
-    </Compile>
-    <Compile Include="AgentJobs\JobStats.cs">
+    <Compile Update="AgentJobs\JobStats.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="AgentJobs\JobStats.Designer.cs">
-      <DependentUpon>JobStats.cs</DependentUpon>
-    </Compile>
-    <Compile Include="AgentJobs\JobDiff.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="AgentJobs\JobDiff.Designer.cs">
-      <DependentUpon>JobDiff.cs</DependentUpon>
-    </Compile>
-    <Compile Include="AgentJobs\JobStep.cs">
+    <Compile Update="AgentJobs\JobStep.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="AgentJobs\JobStep.Designer.cs">
-      <DependentUpon>JobStep.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Changes\AzureDBResourceGovernance.cs">
+    <Compile Update="Changes\AzureDBResourceGovernance.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="Changes\AzureDBResourceGovernance.Designer.cs">
-      <DependentUpon>AzureDBResourceGovernance.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Changes\ResourceGovernanceViewer.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Changes\ResourceGovernanceViewer.Designer.cs">
-      <DependentUpon>ResourceGovernanceViewer.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Changes\ResourceGovernor.cs">
+    <Compile Update="Changes\ResourceGovernor.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="Changes\ResourceGovernor.Designer.cs">
-      <DependentUpon>ResourceGovernor.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Checks\UptimeThresholdConfig.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Checks\UptimeThresholdConfig.Designer.cs">
-      <DependentUpon>UptimeThresholdConfig.cs</DependentUpon>
-    </Compile>
-    <Compile Include="DBFiles\FileThresholdConfigControl.cs">
+    <Compile Update="DBFiles\FileThresholdConfigControl.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="DBFiles\FileThresholdConfigControl.Designer.cs">
-      <DependentUpon>FileThresholdConfigControl.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Bak\BackupsControl.cs">
+    <Compile Update="Bak\BackupsControl.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="Bak\BackupsControl.Designer.cs">
-      <DependentUpon>BackupsControl.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Bak\BackupThresholds.cs" />
-    <Compile Include="Bak\BackupThresholdsConfig.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Bak\BackupThresholdsConfig.Designer.cs">
-      <DependentUpon>BackupThresholdsConfig.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Changes\Alerts.cs">
+    <Compile Update="Changes\Alerts.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="Changes\Alerts.Designer.cs">
-      <DependentUpon>Alerts.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Changes\AzureServiceObjectivesHistory.cs">
+    <Compile Update="Changes\AzureServiceObjectivesHistory.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="Changes\AzureServiceObjectivesHistory.Designer.cs">
-      <DependentUpon>AzureServiceObjectivesHistory.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Changes\Configuration.cs">
+    <Compile Update="Changes\Configuration.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="Changes\Configuration.Designer.cs">
-      <DependentUpon>Configuration.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Changes\DBConfiguration.cs">
+    <Compile Update="Changes\DBConfiguration.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="Changes\DBConfiguration.Designer.cs">
-      <DependentUpon>DBConfiguration.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Changes\DBOptions.cs">
+    <Compile Update="Changes\DBOptions.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="Changes\DBOptions.Designer.cs">
-      <DependentUpon>DBOptions.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Changes\Drivers.cs">
+    <Compile Update="Changes\Drivers.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="Changes\Drivers.Designer.cs">
-      <DependentUpon>Drivers.cs</DependentUpon>
-    </Compile>
-    <Compile Include="AgentJobs\JobDDLHistory.cs">
+    <Compile Update="AgentJobs\JobDDLHistory.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="AgentJobs\JobDDLHistory.Designer.cs">
-      <DependentUpon>JobDDLHistory.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Changes\QueryStore.cs">
+    <Compile Update="Changes\QueryStore.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="Changes\QueryStore.Designer.cs">
-      <DependentUpon>QueryStore.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Performance\CompletedRPCBatchEvent.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Performance\CompletedRPCBatchEvent.Designer.cs">
-      <DependentUpon>CompletedRPCBatchEvent.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Performance\MemoryUsage.cs">
+    <Compile Update="Performance\MemoryUsage.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="Performance\MemoryUsage.Designer.cs">
-      <DependentUpon>MemoryUsage.cs</DependentUpon>
-    </Compile>
-    <Compile Include="SchemaCompare\SchemaSnapshots.cs">
+    <Compile Update="SchemaCompare\SchemaSnapshots.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="SchemaCompare\SchemaSnapshots.Designer.cs">
-      <DependentUpon>SchemaSnapshots.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Changes\TraceFlagHistory.cs">
+    <Compile Update="Changes\TraceFlagHistory.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="Changes\TraceFlagHistory.Designer.cs">
-      <DependentUpon>TraceFlagHistory.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Checks\CustomChecks.cs">
+    <Compile Update="Checks\CustomChecks.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="Checks\CustomChecks.Designer.cs">
-      <DependentUpon>CustomChecks.cs</DependentUpon>
-    </Compile>
-    <Compile Include="ExtensionMethods.cs" />
-    <Compile Include="Performance\RunningQueries.cs">
+    <Compile Update="Performance\RunningQueries.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="Performance\RunningQueries.Designer.cs">
-      <DependentUpon>RunningQueries.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Properties\Resources.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>Resources.resx</DependentUpon>
-    </Compile>
-    <Compile Include="SchemaCompare\CodeEditor.xaml.cs">
-      <DependentUpon>CodeEditor.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="SchemaCompare\CodeViewer.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="SchemaCompare\CodeViewer.Designer.cs">
-      <DependentUpon>CodeViewer.cs</DependentUpon>
-    </Compile>
-    <Compile Include="CollectionDates\CollectionDates.cs">
+    <Compile Update="CollectionDates\CollectionDates.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="CollectionDates\CollectionDates.Designer.cs">
-      <DependentUpon>CollectionDates.cs</DependentUpon>
-    </Compile>
-    <Compile Include="CollectionDates\CollectionDatesThresholds.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="CollectionDates\CollectionDatesThresholds.Designer.cs">
-      <DependentUpon>CollectionDatesThresholds.cs</DependentUpon>
-    </Compile>
-    <Compile Include="CollectionDates\CollectionErrors.cs">
+    <Compile Update="CollectionDates\CollectionErrors.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="CollectionDates\CollectionErrors.Designer.cs">
-      <DependentUpon>CollectionErrors.cs</DependentUpon>
-    </Compile>
-    <Compile Include="ColumnMetaData.cs" />
-    <Compile Include="CommandLineOptions.cs" />
-    <Compile Include="Common.cs" />
-    <Compile Include="Changes\ConfigurationHistory.cs">
+    <Compile Update="Changes\ConfigurationHistory.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="Changes\ConfigurationHistory.Designer.cs">
-      <DependentUpon>ConfigurationHistory.cs</DependentUpon>
-    </Compile>
-    <Compile Include="CommonData.cs" />
-    <Compile Include="ConnectionOptions.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="ConnectionOptions.Designer.cs">
-      <DependentUpon>ConnectionOptions.cs</DependentUpon>
-    </Compile>
-    <Compile Include="CustomProgressBar.cs">
+    <Compile Update="CustomProgressBar.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="CustomProgressControl.cs" />
-    <Compile Include="DatabaseItem.cs" />
-    <Compile Include="SchemaCompare\DDLCompareTo.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="SchemaCompare\DDLCompareTo.Designer.cs">
-      <DependentUpon>DDLCompareTo.cs</DependentUpon>
-    </Compile>
-    <Compile Include="HA\AG.cs">
+    <Compile Update="HA\AG.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="HA\AG.Designer.cs">
-      <DependentUpon>AG.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Options Menu\DataRetention.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Options Menu\DataRetention.Designer.cs">
-      <DependentUpon>DataRetention.cs</DependentUpon>
-    </Compile>
-    <Compile Include="DBAChecksStatus.cs" />
-    <Compile Include="SchemaCompare\DBDiff.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="SchemaCompare\DBDiff.Designer.cs">
-      <DependentUpon>DBDiff.cs</DependentUpon>
-    </Compile>
-    <Compile Include="DBFiles\DBFilesControl.cs">
+    <Compile Update="DBFiles\DBFilesControl.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="DBFiles\DBFilesControl.Designer.cs">
-      <DependentUpon>DBFilesControl.cs</DependentUpon>
-    </Compile>
-    <Compile Include="DBFiles\DBSpaceHistory.cs">
+    <Compile Update="DBFiles\DBSpaceHistory.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="DBFiles\DBSpaceHistory.Designer.cs">
-      <DependentUpon>DBSpaceHistory.cs</DependentUpon>
-    </Compile>
-    <Compile Include="DBFiles\DBSpaceHistoryView.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="DBFiles\DBSpaceHistoryView.Designer.cs">
-      <DependentUpon>DBSpaceHistoryView.cs</DependentUpon>
-    </Compile>
-    <Compile Include="DBFiles\FileThreshold.cs" />
-    <Compile Include="DBFiles\FileThresholdConfig.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="DBFiles\FileThresholdConfig.Designer.cs">
-      <DependentUpon>FileThresholdConfig.cs</DependentUpon>
-    </Compile>
-    <Compile Include="DBFiles\TempDBConfig.cs">
+    <Compile Update="DBFiles\TempDBConfig.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="DBFiles\TempDBConfig.Designer.cs">
-      <DependentUpon>TempDBConfig.cs</DependentUpon>
-    </Compile>
-    <Compile Include="SchemaCompare\Diff.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="SchemaCompare\Diff.Designer.cs">
-      <DependentUpon>Diff.cs</DependentUpon>
-    </Compile>
-    <Compile Include="SchemaCompare\DiffControl.cs">
+    <Compile Update="SchemaCompare\DiffControl.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="SchemaCompare\DiffControl.Designer.cs">
-      <DependentUpon>DiffControl.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Drives\DriveControl.cs">
+    <Compile Update="Drives\DriveControl.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="Drives\DriveControl.Designer.cs">
-      <DependentUpon>DriveControl.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Drives\Drive.cs" />
-    <Compile Include="Drives\DriveHistory.cs">
+    <Compile Update="Drives\DriveHistory.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="Drives\DriveHistory.Designer.cs">
-      <DependentUpon>DriveHistory.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Drives\DriveHistoryView.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Drives\DriveHistoryView.Designer.cs">
-      <DependentUpon>DriveHistoryView.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Drives\DriveThreshold.cs" />
-    <Compile Include="Drives\DriveThresholdConfig.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Drives\DriveThresholdConfig.Designer.cs">
-      <DependentUpon>DriveThresholdConfig.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Changes\HardwareChanges.cs">
+    <Compile Update="Changes\HardwareChanges.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="Changes\HardwareChanges.Designer.cs">
-      <DependentUpon>HardwareChanges.cs</DependentUpon>
-    </Compile>
-    <Compile Include="HA\Mirroring.cs">
+    <Compile Update="HA\Mirroring.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="HA\Mirroring.Designer.cs">
-      <DependentUpon>Mirroring.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Histogram.cs" />
-    <Compile Include="LastGoodCheckDB\LastGoodCheckDBConfig.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="LastGoodCheckDB\LastGoodCheckDBConfig.Designer.cs">
-      <DependentUpon>LastGoodCheckDBConfig.cs</DependentUpon>
-    </Compile>
-    <Compile Include="LastGoodCheckDB\LastGoodCheckDBControl.cs">
+    <Compile Update="LastGoodCheckDB\LastGoodCheckDBControl.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="LastGoodCheckDB\LastGoodCheckDBControl.Designer.cs">
-      <DependentUpon>LastGoodCheckDBControl.cs</DependentUpon>
-    </Compile>
-    <Compile Include="LastGoodCheckDB\LastGoodCheckDBThreshold.cs" />
-    <Compile Include="HA\LogShippingControl.cs">
+    <Compile Update="HA\LogShippingControl.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="HA\LogShippingControl.Designer.cs">
-      <DependentUpon>LogShippingControl.cs</DependentUpon>
-    </Compile>
-    <Compile Include="HA\LogShippingThreshold.cs" />
-    <Compile Include="HA\LogShippingThresholdsConfig.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="HA\LogShippingThresholdsConfig.Designer.cs">
-      <DependentUpon>LogShippingThresholdsConfig.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Main.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Main.Designer.cs">
-      <DependentUpon>Main.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Options Menu\ManageInstances.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Options Menu\ManageInstances.Designer.cs">
-      <DependentUpon>ManageInstances.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Performance\AzureDBResourceStats.cs">
+    <Compile Update="Performance\AzureDBResourceStats.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="Performance\AzureDBResourceStats.Designer.cs">
-      <DependentUpon>AzureDBResourceStats.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Performance\AzureDBResourceStatsView.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Performance\AzureDBResourceStatsView.Designer.cs">
-      <DependentUpon>AzureDBResourceStatsView.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Performance\AzureSummary.cs">
+    <Compile Update="Performance\AzureSummary.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="Performance\AzureSummary.Designer.cs">
-      <DependentUpon>AzureSummary.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Performance\Blocking.cs">
+    <Compile Update="Performance\Blocking.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="Performance\Blocking.Designer.cs">
-      <DependentUpon>Blocking.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Performance\BlockingViewer.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Performance\BlockingViewer.Designer.cs">
-      <DependentUpon>BlockingViewer.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Performance\Counter.cs" />
-    <Compile Include="Performance\CPU.cs">
+    <Compile Update="Performance\CPU.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="Performance\CPU.Designer.cs">
-      <DependentUpon>CPU.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Performance\CustomTimePicker.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Performance\CustomTimePicker.Designer.cs">
-      <DependentUpon>CustomTimePicker.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Performance\CartesianChartWithDataTable.cs" />
-    <Compile Include="Performance\DateRange.cs" />
-    <Compile Include="Performance\IOPerformance.cs">
+    <Compile Update="Performance\IOPerformance.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="Performance\IOPerformance.Designer.cs">
-      <DependentUpon>IOPerformance.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Performance\ObjectExecutionLineChart.cs">
+    <Compile Update="Performance\ObjectExecutionLineChart.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="Performance\ObjectExecutionLineChart.Designer.cs">
-      <DependentUpon>ObjectExecutionLineChart.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Performance\ObjectExecutionSummary.cs">
+    <Compile Update="Performance\ObjectExecutionSummary.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="Performance\ObjectExecutionSummary.Designer.cs">
-      <DependentUpon>ObjectExecutionSummary.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Performance\Performance.cs">
+    <Compile Update="Performance\Performance.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="Performance\Performance.Designer.cs">
-      <DependentUpon>Performance.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Performance\ObjectExecution.cs">
+    <Compile Update="Performance\ObjectExecution.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="Performance\ObjectExecution.Designer.cs">
-      <DependentUpon>ObjectExecution.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Performance\PerformanceCounters.cs">
+    <Compile Update="Performance\PerformanceCounters.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="Performance\PerformanceCounters.Designer.cs">
-      <DependentUpon>PerformanceCounters.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Performance\PerformanceCounterSummary.cs">
+    <Compile Update="Performance\PerformanceCounterSummary.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="Performance\PerformanceCounterSummary.Designer.cs">
-      <DependentUpon>PerformanceCounterSummary.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Performance\PerformanceSummary.cs">
+    <Compile Update="Performance\PerformanceSummary.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="Performance\PerformanceSummary.Designer.cs">
-      <DependentUpon>PerformanceSummary.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Performance\SelectPerformanceCounters.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Performance\SelectPerformanceCounters.Designer.cs">
-      <DependentUpon>SelectPerformanceCounters.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Performance\Waits.cs">
+    <Compile Update="Performance\Waits.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="Performance\Waits.Designer.cs">
-      <DependentUpon>Waits.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Performance\WaitsSummary.cs">
+    <Compile Update="Performance\WaitsSummary.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="Performance\WaitsSummary.Designer.cs">
-      <DependentUpon>WaitsSummary.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Program.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Drives\DrivesControl.cs">
+    <Compile Update="Drives\DrivesControl.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="Drives\DrivesControl.Designer.cs">
-      <DependentUpon>DrivesControl.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Info.cs">
+    <Compile Update="Info.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="Info.Designer.cs">
-      <DependentUpon>Info.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Performance\SlowQueries.cs">
+    <Compile Update="Performance\SlowQueries.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="Performance\SlowQueries.Designer.cs">
-      <DependentUpon>SlowQueries.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Changes\SQLPatching.cs">
+    <Compile Update="Changes\SQLPatching.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="Changes\SQLPatching.Designer.cs">
-      <DependentUpon>SQLPatching.cs</DependentUpon>
-    </Compile>
-    <Compile Include="DBFiles\SpaceTracking.cs">
+    <Compile Update="DBFiles\SpaceTracking.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="DBFiles\SpaceTracking.Designer.cs">
-      <DependentUpon>SpaceTracking.cs</DependentUpon>
-    </Compile>
-    <Compile Include="SQLTreeItem.cs" />
-    <Compile Include="Checks\Summary.cs">
+    <Compile Update="Checks\Summary.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="Checks\Summary.Designer.cs">
-      <DependentUpon>Summary.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Tagging\InstanceTag.cs" />
-    <Compile Include="Tagging\Tag.cs" />
-    <Compile Include="Tagging\Tags.cs">
+    <Compile Update="Tagging\Tags.cs">
       <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="Tagging\Tags.Designer.cs">
-      <DependentUpon>Tags.cs</DependentUpon>
-    </Compile>
-    <EmbeddedResource Include="AgentJobs\AgentJobsControl.resx">
-      <DependentUpon>AgentJobsControl.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="AgentJobs\AgentJobThresholdsConfig.resx">
-      <DependentUpon>AgentJobThresholdsConfig.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="AgentJobs\JobStats.resx">
-      <DependentUpon>JobStats.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="AgentJobs\JobDiff.resx">
-      <DependentUpon>JobDiff.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="AgentJobs\JobStep.resx">
-      <DependentUpon>JobStep.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Bak\BackupsControl.resx">
-      <DependentUpon>BackupsControl.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Bak\BackupThresholdsConfig.resx">
-      <DependentUpon>BackupThresholdsConfig.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Changes\Alerts.resx">
-      <DependentUpon>Alerts.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Changes\AzureDBResourceGovernance.resx">
-      <DependentUpon>AzureDBResourceGovernance.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Changes\AzureServiceObjectivesHistory.resx">
-      <DependentUpon>AzureServiceObjectivesHistory.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Changes\Configuration.resx">
-      <DependentUpon>Configuration.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Changes\DBConfiguration.resx">
-      <DependentUpon>DBConfiguration.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Changes\DBOptions.resx">
-      <DependentUpon>DBOptions.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Changes\Drivers.resx">
-      <DependentUpon>Drivers.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="AgentJobs\JobDDLHistory.resx">
-      <DependentUpon>JobDDLHistory.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Changes\QueryStore.resx">
-      <DependentUpon>QueryStore.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Changes\ResourceGovernanceViewer.resx">
-      <DependentUpon>ResourceGovernanceViewer.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Changes\ResourceGovernor.resx">
-      <DependentUpon>ResourceGovernor.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Performance\CompletedRPCBatchEvent.resx">
-      <DependentUpon>CompletedRPCBatchEvent.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Performance\MemoryUsage.resx">
-      <DependentUpon>MemoryUsage.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="SchemaCompare\SchemaSnapshots.resx">
-      <DependentUpon>SchemaSnapshots.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Changes\TraceFlagHistory.resx">
-      <DependentUpon>TraceFlagHistory.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Checks\CustomChecks.resx">
-      <DependentUpon>CustomChecks.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Checks\UptimeThresholdConfig.resx">
-      <DependentUpon>UptimeThresholdConfig.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="DBFiles\FileThresholdConfigControl.resx">
-      <DependentUpon>FileThresholdConfigControl.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Performance\RunningQueries.resx">
-      <DependentUpon>RunningQueries.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="SchemaCompare\CodeViewer.resx">
-      <DependentUpon>CodeViewer.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="CollectionDates\CollectionDates.resx">
-      <DependentUpon>CollectionDates.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="CollectionDates\CollectionDatesThresholds.resx">
-      <DependentUpon>CollectionDatesThresholds.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Changes\ConfigurationHistory.resx">
-      <DependentUpon>ConfigurationHistory.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="CollectionDates\CollectionErrors.resx">
-      <DependentUpon>CollectionErrors.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="ConnectionOptions.resx">
-      <DependentUpon>ConnectionOptions.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="SchemaCompare\DDLCompareTo.resx">
-      <DependentUpon>DDLCompareTo.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="HA\AG.resx">
-      <DependentUpon>AG.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Options Menu\DataRetention.resx">
-      <DependentUpon>DataRetention.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="SchemaCompare\DBDiff.resx">
-      <DependentUpon>DBDiff.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="DBFiles\DBFilesControl.resx">
-      <DependentUpon>DBFilesControl.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="DBFiles\DBSpaceHistory.resx">
-      <DependentUpon>DBSpaceHistory.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="DBFiles\DBSpaceHistoryView.resx">
-      <DependentUpon>DBSpaceHistoryView.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="DBFiles\FileThresholdConfig.resx">
-      <DependentUpon>FileThresholdConfig.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="DBFiles\TempDBConfig.resx">
-      <DependentUpon>TempDBConfig.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="SchemaCompare\Diff.resx">
-      <DependentUpon>Diff.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="SchemaCompare\DiffControl.resx">
-      <DependentUpon>DiffControl.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Drives\DriveControl.resx">
-      <DependentUpon>DriveControl.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Drives\DriveHistory.resx">
-      <DependentUpon>DriveHistory.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Drives\DriveHistoryView.resx">
-      <DependentUpon>DriveHistoryView.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Drives\DriveThresholdConfig.resx">
-      <DependentUpon>DriveThresholdConfig.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Changes\HardwareChanges.resx">
-      <DependentUpon>HardwareChanges.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="HA\Mirroring.resx">
-      <DependentUpon>Mirroring.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Info.resx">
-      <DependentUpon>Info.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="LastGoodCheckDB\LastGoodCheckDBConfig.resx">
-      <DependentUpon>LastGoodCheckDBConfig.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="LastGoodCheckDB\LastGoodCheckDBControl.resx">
-      <DependentUpon>LastGoodCheckDBControl.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="HA\LogShippingControl.resx">
-      <DependentUpon>LogShippingControl.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="HA\LogShippingThresholdsConfig.resx">
-      <DependentUpon>LogShippingThresholdsConfig.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Main.resx">
-      <DependentUpon>Main.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Drives\DrivesControl.resx">
-      <DependentUpon>DrivesControl.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Options Menu\ManageInstances.resx">
-      <DependentUpon>ManageInstances.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Performance\AzureDBResourceStats.resx">
-      <DependentUpon>AzureDBResourceStats.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Performance\AzureDBResourceStatsView.resx">
-      <DependentUpon>AzureDBResourceStatsView.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Performance\AzureSummary.resx">
-      <DependentUpon>AzureSummary.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Performance\Blocking.resx">
-      <DependentUpon>Blocking.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Performance\BlockingViewer.resx">
-      <DependentUpon>BlockingViewer.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Performance\CPU.resx">
-      <DependentUpon>CPU.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Performance\CustomTimePicker.resx">
-      <DependentUpon>CustomTimePicker.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Performance\IOPerformance.resx">
-      <DependentUpon>IOPerformance.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Performance\ObjectExecutionLineChart.resx">
-      <DependentUpon>ObjectExecutionLineChart.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Performance\ObjectExecutionSummary.resx">
-      <DependentUpon>ObjectExecutionSummary.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Performance\Performance.resx">
-      <DependentUpon>Performance.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Performance\ObjectExecution.resx">
-      <DependentUpon>ObjectExecution.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Performance\PerformanceCounters.resx">
-      <DependentUpon>PerformanceCounters.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Performance\PerformanceSummary.resx">
-      <DependentUpon>PerformanceSummary.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Performance\PerformanceCounterSummary.resx">
-      <DependentUpon>PerformanceCounterSummary.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Performance\SelectPerformanceCounters.resx">
-      <DependentUpon>SelectPerformanceCounters.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Performance\Waits.resx">
-      <DependentUpon>Waits.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Performance\WaitsSummary.resx">
-      <DependentUpon>WaitsSummary.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Properties\Resources.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <SubType>Designer</SubType>
-      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Performance\SlowQueries.resx">
-      <DependentUpon>SlowQueries.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Changes\SQLPatching.resx">
-      <DependentUpon>SQLPatching.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="DBFiles\SpaceTracking.resx">
-      <DependentUpon>SpaceTracking.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Checks\Summary.resx">
-      <DependentUpon>Summary.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Tagging\Tags.resx">
-      <DependentUpon>Tags.cs</DependentUpon>
-    </EmbeddedResource>
-    <None Include="packages.config" />
-    <None Include="Properties\Settings.settings">
-      <Generator>SettingsSingleFileGenerator</Generator>
-      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
-    </None>
-    <Compile Include="Properties\Settings.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DependentUpon>Settings.settings</DependentUpon>
-      <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
     <EmbeddedResource Include="Resources\PowerShell-Mode.xshd" />
     <EmbeddedResource Include="Resources\SQL-Mode.xshd" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="App.config" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\arrow_Forward_16xLG.png" />
-    <None Include="Resources\arrow_back_16xLG.png" />
-    <None Include="Resources\List_NumberedHS.png" />
-    <None Include="Resources\excel16x16.png" />
-    <None Include="Resources\Time_16x.png" />
-    <None Include="Resources\StartTime_16x.png" />
-    <None Include="Resources\StopTime_16x.png" />
-    <None Include="Resources\AddComputedField_16x.png" />
-    <None Include="Resources\AutoSum_16x.png" />
-    <None Include="Resources\LineChart_16x.png" />
-    <None Include="Resources\112_RefreshArrow_Green_16x16_72.png" />
-    <None Include="Resources\Column_16x.png" />
-    <None Include="Resources\Eraser_16x.png" />
-    <None Include="Resources\ASX_Copy_grey_16x.png" />
-    <None Include="Resources\ASX_Copy_blue_16x.png" />
-    <None Include="Resources\Inline_16x.png" />
-    <None Include="Resources\Inline_16x1.png" />
-    <None Include="Resources\Diff_16x.png" />
-    <None Include="Resources\Code_16x.png" />
     <Content Include="DatabaseUnknown_16x.ico" />
-    <None Include="Resources\SwitchSourceOrTarget_16x.png" />
-    <None Include="Resources\Previous_grey_16x.png" />
-    <None Include="Resources\Next_grey_16x.png" />
-    <None Include="Resources\Hard_Drive.png" />
-    <None Include="Resources\StatusAnnotations_Warning_16xLG_color.png" />
-    <None Include="Resources\StatusAnnotations_Warning_32xLG_color.png" />
-    <None Include="Resources\SettingsOutline_16x.png" />
-    <None Include="Resources\FilterDropdown_16x.png" />
-    <None Include="Resources\StatusCriticalError_16x.png" />
-    <None Include="Resources\StatusOK_16x.png" />
-    <None Include="Resources\Table_16x.png" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\DBADash\DBADash.csproj">
-      <Project>{176c91f1-d5f4-4695-b1ed-2c021249b88f}</Project>
-      <Name>DBADash</Name>
-    </ProjectReference>
+    <ProjectReference Include="..\DBADash\DBADash.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <Page Include="SchemaCompare\CodeEditor.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
+    <PackageReference Include="AvalonEdit" Version="6.1.2.30" />
+    <PackageReference Include="CommandLineParser" Version="2.8.0" />
+    <PackageReference Include="DiffPlex" Version="1.7.0" />
+    <PackageReference Include="DiffPlex.Wpf" Version="1.3.1" />
+    <PackageReference Include="DocumentFormat.OpenXml" Version="2.14.0" />
+    <PackageReference Include="Humanizer" Version="2.11.10" />
+    <PackageReference Include="Humanizer.Core" Version="2.11.10" />
+    <PackageReference Include="Humanizer.Core.af" Version="2.11.10" />
+    <PackageReference Include="Humanizer.Core.ar" Version="2.11.10" />
+    <PackageReference Include="Humanizer.Core.az" Version="2.11.10" />
+    <PackageReference Include="Humanizer.Core.bg" Version="2.11.10" />
+    <PackageReference Include="Humanizer.Core.bn-BD" Version="2.11.10" />
+    <PackageReference Include="Humanizer.Core.cs" Version="2.11.10" />
+    <PackageReference Include="Humanizer.Core.da" Version="2.11.10" />
+    <PackageReference Include="Humanizer.Core.de" Version="2.11.10" />
+    <PackageReference Include="Humanizer.Core.el" Version="2.11.10" />
+    <PackageReference Include="Humanizer.Core.es" Version="2.11.10" />
+    <PackageReference Include="Humanizer.Core.fa" Version="2.11.10" />
+    <PackageReference Include="Humanizer.Core.fi-FI" Version="2.11.10" />
+    <PackageReference Include="Humanizer.Core.fr" Version="2.11.10" />
+    <PackageReference Include="Humanizer.Core.fr-BE" Version="2.11.10" />
+    <PackageReference Include="Humanizer.Core.he" Version="2.11.10" />
+    <PackageReference Include="Humanizer.Core.hr" Version="2.11.10" />
+    <PackageReference Include="Humanizer.Core.hu" Version="2.11.10" />
+    <PackageReference Include="Humanizer.Core.hy" Version="2.11.10" />
+    <PackageReference Include="Humanizer.Core.id" Version="2.11.10" />
+    <PackageReference Include="Humanizer.Core.it" Version="2.11.10" />
+    <PackageReference Include="Humanizer.Core.ja" Version="2.11.10" />
+    <PackageReference Include="Humanizer.Core.ko-KR" Version="2.11.10" />
+    <PackageReference Include="Humanizer.Core.ku" Version="2.11.10" />
+    <PackageReference Include="Humanizer.Core.lv" Version="2.11.10" />
+    <PackageReference Include="Humanizer.Core.ms-MY" Version="2.11.10" />
+    <PackageReference Include="Humanizer.Core.mt" Version="2.11.10" />
+    <PackageReference Include="Humanizer.Core.nb" Version="2.11.10" />
+    <PackageReference Include="Humanizer.Core.nb-NO" Version="2.11.10" />
+    <PackageReference Include="Humanizer.Core.nl" Version="2.11.10" />
+    <PackageReference Include="Humanizer.Core.pl" Version="2.11.10" />
+    <PackageReference Include="Humanizer.Core.pt" Version="2.11.10" />
+    <PackageReference Include="Humanizer.Core.ro" Version="2.11.10" />
+    <PackageReference Include="Humanizer.Core.ru" Version="2.11.10" />
+    <PackageReference Include="Humanizer.Core.sk" Version="2.11.10" />
+    <PackageReference Include="Humanizer.Core.sl" Version="2.11.10" />
+    <PackageReference Include="Humanizer.Core.sr" Version="2.11.10" />
+    <PackageReference Include="Humanizer.Core.sr-Latn" Version="2.11.10" />
+    <PackageReference Include="Humanizer.Core.sv" Version="2.11.10" />
+    <PackageReference Include="Humanizer.Core.th-TH" Version="2.11.10" />
+    <PackageReference Include="Humanizer.Core.tr" Version="2.11.10" />
+    <PackageReference Include="Humanizer.Core.uk" Version="2.11.10" />
+    <PackageReference Include="Humanizer.Core.uz-Cyrl-UZ" Version="2.11.10" />
+    <PackageReference Include="Humanizer.Core.uz-Latn-UZ" Version="2.11.10" />
+    <PackageReference Include="Humanizer.Core.vi" Version="2.11.10" />
+    <PackageReference Include="Humanizer.Core.zh-CN" Version="2.11.10" />
+    <PackageReference Include="Humanizer.Core.zh-Hans" Version="2.11.10" />
+    <PackageReference Include="Humanizer.Core.zh-Hant" Version="2.11.10" />
+    <PackageReference Include="LiveCharts" Version="0.9.7" />
+    <PackageReference Include="LiveCharts.WinForms" Version="0.9.7.1" />
+    <PackageReference Include="LiveCharts.Wpf" Version="0.9.7" />
+    <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
+    <PackageReference Include="SpreadsheetLight" Version="3.5.0" />
+    <PackageReference Include="System.Data.DataSetExtensions" Version="4.5.0" />
+    <PackageReference Include="System.Drawing.Common" Version="6.0.0" />
+    <PackageReference Include="System.IO.FileSystem.Primitives" Version="4.3.0" />
+    <PackageReference Include="System.IO.Packaging" Version="6.0.0" />
+    <PackageReference Include="System.Windows.Forms.DataVisualization" Version="1.0.0-prerelease.20110.1" />
   </ItemGroup>
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

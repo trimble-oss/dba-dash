@@ -24,12 +24,12 @@ namespace DBADashService
             return ds.Tables["DBADash"].Rows[0]["Instance"] + "_" + ds.Tables["DBADash"].Rows[0]["DBName"];
         }
 
-  
+
         public Task Execute(IJobExecutionContext context)
         {
 
             JobDataMap dataMap = context.JobDetail.JobDataMap;
-            
+
             var cfg = JsonConvert.DeserializeObject<DBADashSource>(dataMap.GetString("CFG"));
             var types = JsonConvert.DeserializeObject<CollectionType[]>(dataMap.GetString("Type"));
             try
@@ -42,7 +42,7 @@ namespace DBADashService
                     {
                         try
                         {
-                            var files = System.IO.Directory.EnumerateFiles(folder, "DBADash_*", SearchOption.TopDirectoryOnly).Where(f=> f.EndsWith(".json") || f.EndsWith(".bin") || f.EndsWith(".xml"));
+                            var files = System.IO.Directory.EnumerateFiles(folder, "DBADash_*", SearchOption.TopDirectoryOnly).Where(f => f.EndsWith(".json") || f.EndsWith(".bin") || f.EndsWith(".xml"));
 
                             Parallel.ForEach(files, f =>
                             {
@@ -52,8 +52,7 @@ namespace DBADashService
                                     var ds = DataSetSerialization.DeserializeFromFile(f);
                                     lock (Program.Locker.GetLock(GetID(ds)))
                                     {
-                                                                         
-                                        DestinationHandling.WriteAllDestinations(ds, cfg, fileName);                    
+                                        DestinationHandling.WriteAllDestinations(ds, cfg, fileName).Wait();
                                     }
                                 }
                                 catch (Exception ex)
@@ -69,7 +68,7 @@ namespace DBADashService
                         }
                         catch (Exception ex)
                         {
-                            Log.Error(ex,"Import from folder {folder}",folder);
+                            Log.Error(ex, "Import from folder {folder}", folder);
                         }
                     }
                     else
@@ -79,7 +78,7 @@ namespace DBADashService
                 }
                 else if (cfg.SourceConnection.Type == ConnectionType.AWSS3)
                 {
-                    Log.Information("Import from S3 {connection}",cfg.ConnectionString);
+                    Log.Information("Import from S3 {connection}", cfg.ConnectionString);
                     try
                     {
                         var uri = new Amazon.S3.Util.AmazonS3Uri(cfg.ConnectionString);
@@ -87,58 +86,77 @@ namespace DBADashService
                         ListObjectsRequest request = new ListObjectsRequest() { BucketName = uri.Bucket, Prefix = (uri.Key + "/DBADash_").Replace("//", "/") };
                         do
                         {
-                            ListObjectsResponse resp = s3Cli.ListObjects(request);
+                            ListObjectsResponse resp;
+                            using (var listObjectsTask = s3Cli.ListObjectsAsync(request))
+                            {
+                                listObjectsTask.Wait();
+                                resp = listObjectsTask.Result;
+                            }
                             Parallel.ForEach(resp.S3Objects.Where(f => f.Key.EndsWith(".json") || f.Key.EndsWith(".bin") || f.Key.EndsWith(".xml")), f =>
                                 {
                                     lock (Program.Locker.GetLock(f.Key))
                                     {
-                                        using (GetObjectResponse response = s3Cli.GetObject(f.BucketName, f.Key))
-                                        using (Stream responseStream = response.ResponseStream)
+
+                                        using (var getObjectTask = s3Cli.GetObjectAsync(f.BucketName, f.Key))
                                         {
-                                            DataSet ds;
-                                            if (f.Key.EndsWith(".bin"))
+                                            getObjectTask.Wait();
+
+
+
+                                            using (GetObjectResponse response = getObjectTask.Result)
+                                            using (Stream responseStream = response.ResponseStream)
                                             {
-                                                // obsolete - to be removed
-                                                BinaryFormatter fmt = new BinaryFormatter();
-                                                ds = (DataSet)fmt.Deserialize(responseStream);
-                                            }
-                                            else if (f.Key.EndsWith(".xml"))
-                                            {
+
+                                                DataSet ds;
+                                                if (f.Key.EndsWith(".bin"))
+                                                {
+                                                    // obsolete - to be removed
+                                                    BinaryFormatter fmt = new BinaryFormatter();
+                                                    ds = (DataSet)fmt.Deserialize(responseStream);
+                                                }
+                                                else if (f.Key.EndsWith(".xml"))
+                                                {
                                                     ds = new DataSet();
-                                                    ds.ReadXml(responseStream);  
-                                            }
-                                            else if (f.Key.EndsWith(".json"))
-                                            {
-                                                using (StreamReader reader = new StreamReader(responseStream))
+                                                    ds.ReadXml(responseStream);
+                                                }
+                                                else if (f.Key.EndsWith(".json"))
                                                 {
-                                                    string json = reader.ReadToEnd();
+                                                    using (StreamReader reader = new StreamReader(responseStream))
+                                                    {
+                                                        string json = reader.ReadToEnd();
 
-                                                    ds = DataSetSerialization.DeserializeDS(json);
+                                                        ds = DataSetSerialization.DeserializeDS(json);
 
+                                                    }
                                                 }
-                                            }
-                                            else
-                                            {
-                                                throw new Exception("Invalid extension");
-                                            }
-                                            lock (Program.Locker.GetLock(GetID(ds)))
-                                            {
-                                                string fileName = Path.GetFileName(f.Key);
-                                                try
+                                                else
                                                 {
-                                                    DestinationHandling.WriteAllDestinations(ds, cfg, fileName);
+                                                    throw new Exception("Invalid extension");
                                                 }
-                                                catch(Exception ex)
+                                                lock (Program.Locker.GetLock(GetID(ds)))
                                                 {
-                                                    Log.Error(ex, "Error importing file {filename}.  Writing file to failed message folder {folder}",fileName, SchedulerServiceConfig.FailedMessageFolder);
-                                                    DestinationHandling.WriteFolder(ds, SchedulerServiceConfig.FailedMessageFolder, fileName);
+                                                    string fileName = Path.GetFileName(f.Key);
+                                                    try
+                                                    {
+                                                        DestinationHandling.WriteAllDestinations(ds, cfg, fileName).Wait();
+                                                    }
+                                                    catch (Exception ex)
+                                                    {
+                                                        Log.Error(ex, "Error importing file {filename}.  Writing file to failed message folder {folder}", fileName, SchedulerServiceConfig.FailedMessageFolder);
+                                                        DestinationHandling.WriteFolder(ds, SchedulerServiceConfig.FailedMessageFolder, fileName);
+                                                    }
+                                                    finally
+                                                    {
+                                                        using (var deleteTask = s3Cli.DeleteObjectAsync(f.BucketName, f.Key))
+                                                        {
+                                                            deleteTask.Wait();
+
+                                                        }
+                                                       
+                                                    }
                                                 }
-                                                finally
-                                                {
-                                                    s3Cli.DeleteObject(f.BucketName, f.Key);
-                                                }
+                                                Log.Information("Imported {file}", f.Key);
                                             }
-                                            Log.Information("Imported {file}", f.Key);                                          
                                         }
                                     }
                                 });
@@ -168,7 +186,7 @@ namespace DBADashService
                         var collector = new DBCollector(cfg, config.ServiceName)
                         {
                             Job_instance_id = dataMap.GetInt("Job_instance_id")
-                        };              
+                        };
 
                         var jobLastCollected = dataMap.GetDateTime("JobCollectDate");
 
@@ -197,7 +215,7 @@ namespace DBADashService
                         string fileName = cfg.GenerateFileName(cfg.SourceConnection.ConnectionForFileName);
                         try
                         {
-                            DestinationHandling.WriteAllDestinations(collector.Data, cfg, fileName);
+                            DestinationHandling.WriteAllDestinations(collector.Data, cfg, fileName).Wait();
                             dataMap.Put("Job_instance_id", collector.Job_instance_id); // Store instance_id so we can get new history only on next run
                             if (containsJobs)
                             {
@@ -214,7 +232,7 @@ namespace DBADashService
                             Log.Error(ex, "Error writing {filename} to destination.  File will be copied to {folder}", fileName, SchedulerServiceConfig.FailedMessageFolder);
                             DestinationHandling.WriteFolder(collector.Data, SchedulerServiceConfig.FailedMessageFolder, fileName);
                         }
-                                                
+
                     }
                     catch (Exception ex)
                     {

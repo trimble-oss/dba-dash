@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using System.Data.SqlClient;
+using Microsoft.Data.SqlClient;
 using LiveCharts;
 using LiveCharts.Wpf;
 using DBADashGUI.DBFiles;
@@ -55,7 +55,7 @@ namespace DBADashGUI
                     {
                         cmd.Parameters.AddWithValue("@Instance", Instance);
                     }
-                    if (DBName.Length > 0)
+                    if (!string.IsNullOrEmpty(DBName))
                     {
                         cmd.Parameters.AddWithValue("@DBName", DBName);
                     }

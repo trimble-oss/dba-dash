@@ -2,7 +2,7 @@
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
-using System.Data.SqlClient;
+using Microsoft.Data.SqlClient;
 using static DBADash.DBADashConnection;
 using System.Linq;
 using Serilog;
@@ -201,6 +201,28 @@ namespace DBADash
                 }
             }
             return wasEncryptionPerformed;
+        }
+
+        public void ValidateDestination()
+        {   
+            if(DestinationConnection.Type == ConnectionType.Invalid){
+                throw new Exception("Invalid connection string");
+            }
+            else if (DestinationConnection.Type == DBADashConnection.ConnectionType.SQL)
+            {
+                if (string.IsNullOrEmpty(DestinationConnection.InitialCatalog()))
+                {
+                    throw new Exception("Provide a name for the DBADash repository database through the Initial Catalog property of the connection string");
+                }
+                // VersionStatus check will throw an error if there is an issue connecting to the DB or the DB isn't valid.
+                var status = DBValidations.VersionStatus(DestinationConnection.ConnectionString);
+                Log.Information("DB Version Status: {status}", status.VersionStatus);
+                
+            }
+            else
+            {
+                DestinationConnection.Validate();
+            }
         }
 
        public DBADashSource GetSourceFromConnectionString(string connectionString,bool? isAzure=null)

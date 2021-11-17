@@ -45,93 +45,52 @@ Param(
     [int]$PlanCollectionCPUThreshold=1000,
     [int]$PlanCollectionDurationThreshold=10000,
     [int]$PlanCollectionMemoryGrantThreshold=6400,
-    [string]$SchemaSnapshotDBs=$null,
+    [string]$SchemaSnapshotDBs="",
     [switch]$SkipValidation,
     [bool]$BackupConfig=$true,
     [switch]$Replace,
     [switch]$RestartService,
     [bool]$CollectSessionWaits=$true
 )
-$configPath = [System.IO.Path]::Combine((Get-Location),"ServiceConfig.json")
-# Load DLLs to help us work with the config file
-$dllsToLoad = "DBADashTools.dll","Microsoft.SqlServer.Smo.dll","Newtonsoft.Json.dll" 
-$dllsToLoad | ForEach-Object {
-    $path = [System.IO.Path]::Combine((Get-Location),$_)
-    [Reflection.Assembly]::LoadFile($path) | Out-Null
-}
-if((Test-Path -Path $configPath) -eq $false){
-    throw "ServiceConfig.json not found:" + $configPath
+if(!$SchemaSnapshotDBs){
+    $SchemaSnapshotDBs="<null>"
 }
 
-# Read the config file
-$configJson = Get-Content -Path $configPath
-
-# Convert json to CollectionConfig object
-$config = [DBADash.CollectionConfig]::Deserialize($configJson)
-
-"Current Connection Count: " + $config.SourceConnections.Count
-
-# Check if source connection already exists
-if($config.SourceExists($ConnectionString)){
-    if($Replace.IsPresent){
-        "Updating existing connection"
-        $connection = $config.GetSourceFromConnectionString($ConnectionString)
-        $config.SourceConnections.Remove($connection) | Out-Null
-    }
-    else{
-        "Source connection already exists"
-        return
-    }
+$command ="./DBADashConfig -a `"Add`" "
+$command+="-c `"$ConnectionString`" "
+$command+="--SlowQueryThresholdMs $SlowQueryThresholdMs "
+$command+="--SlowQuerySessionMaxMemoryKB $SlowQuerySessionMaxMemoryKB "
+$command+="--PlanCollectionCountThreshold $PlanCollectionCountThreshold "
+$command+="--PlanCollectionCPUThreshold $PlanCollectionCPUThreshold "
+$command+="--PlanCollectionDurationThreshold $PlanCollectionDurationThreshold "
+$command+="--PlanCollectionMemoryGrantThreshold $PlanCollectionMemoryGrantThreshold "
+$command+="--SchemaSnapshotDBs `"$SchemaSnapshotDBs`" "
+if ($PlanCollectionEnabled.IsPresent){
+    $command+="--PlanCollectionEnabled "
+}   
+if($SkipValidation.IsPresent){
+    $command+="--SkipValidation "
 }
-else{
-    # Create the new connection
-    $connection = New-Object DBADash.DBADashSource $ConnectionString
+if(!$CollectSessionWaits){
+    $command+="--NoCollectSessionWaits "
 }
-
-$connection.NoWMI = $NoWMI.IsPresent
-$connection.SlowQueryThresholdMs=$SlowQueryThresholdMs
-$connection.SlowQuerySessionMaxMemoryKB = $SlowQuerySessionMaxMemoryKB
-$connection.SchemaSnapshotDBs = $SchemaSnapshotDBs
-$connection.CollectSessionWaits=$CollectSessionWaits
-if($PlanCollectionEnabled.IsPresent){
-    $connection.PlanCollectionCountThreshold = $PlanCollectionCountThreshold
-    $connection.PlanCollectionCPUThreshold = $PlanCollectionCPUThreshold
-    $connection.PlanCollectionDurationThreshold = $PlanCollectionDurationThreshold
-    $connection.PlanCollectionMemoryGrantThreshold = $PlanCollectionMemoryGrantThreshold
+if(!$BackupConfig){
+    $command+="--NoBackupConfig "
+} 
+if($NoWMI.IsPresent){
+    $command+="--NoWMI "
 }
-else{
-    $connection.PlanCollectionEnabled=$false
-}
-    
-if($SkipValidation.IsPresent -eq $false){
-    # validation test
-    "Validating new connection..."
-    if(!$connection.SourceConnection.Validate()){
-        throw "Connection validation failed"
-    }
-    else{
-        "OK"
-    }
-}
+if($Replace.IsPresent){
+    $command+="--Replace "
 
-# Add connection to config
-$config.SourceConnections.Add($connection) 
-
-"New Connection Count: " + $config.SourceConnections.Count
-
-if($BackupConfig){
-    $backupPath = $configPath + ".backup_" + [DateTime]::Now.ToString("yyyyMMddHHmmssFFF")
-    "Saving old config to: " + $backupPath
-    [System.IO.File]::Move($configPath, $backupPath);
-}
-
-"Writing new config"
-$config.Serialize() | Out-File -FilePath $configPath  
+}               
+         
+Invoke-Expression $command
 
 if($RestartService.IsPresent){
-    "Restarting service..."
-    Restart-Service -Name $config.ServiceName
+    $ServiceName = ./DBADashConfig -a "GetServiceName"
+    "Restarting service $ServiceName..."
+    Restart-Service -Name $ServiceName
 }
 
-"Completed"
 

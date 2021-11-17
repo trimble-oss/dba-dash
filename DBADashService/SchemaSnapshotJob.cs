@@ -3,7 +3,7 @@ using Microsoft.SqlServer.Management.Smo;
 using Newtonsoft.Json;
 using Quartz;
 using System;
-using System.Data.SqlClient;
+using Microsoft.Data.SqlClient;
 using System.Threading.Tasks;
 using Serilog;
 
@@ -68,7 +68,7 @@ namespace DBADashService
                             dsSnapshot.Tables.Add(dt);
 
                             string fileName = cfg.GenerateFileName(cfg.SourceConnection.ConnectionForFileName);
-                            DestinationHandling.WriteAllDestinations(dsSnapshot, cfg,fileName);
+                            DestinationHandling.WriteAllDestinations(dsSnapshot, cfg,fileName).Wait();
                             dsSnapshot.Tables.Remove(dt);
                         }
                         catch(Exception ex)
