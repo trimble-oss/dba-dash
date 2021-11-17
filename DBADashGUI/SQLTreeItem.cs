@@ -493,18 +493,18 @@ namespace DBADashGUI
 
         private void addRefreshContextMenu(SQLTreeItem n)
         {
-            var ctxMnu = new ContextMenu();
+            var ctxMnu = new ContextMenuStrip();
 
-            var mnuRefresh = new MenuItem("Refresh");                
-            ctxMnu.MenuItems.Add(mnuRefresh);
+            var mnuRefresh = new ToolStripMenuItem("Refresh");                
+            ctxMnu.Items.Add(mnuRefresh);
             mnuRefresh.Click += MnuRefresh_Click;
             mnuRefresh.Tag = n;
-            n.ContextMenu = ctxMnu;
+            n.ContextMenuStrip = ctxMnu;
         }
 
         private void MnuRefresh_Click(object sender, EventArgs e)
         {
-            var itm = (SQLTreeItem)((MenuItem)sender).Tag;
+            var itm = (SQLTreeItem)((ToolStripMenuItem)sender).Tag;
             var isExpanded = itm.IsExpanded;
             itm.Nodes.Clear();
             itm.AddDummyNode();          
@@ -517,17 +517,17 @@ namespace DBADashGUI
 
         private void addContextMenu(SQLTreeItem n)
         {
-            var ctxMnu = new ContextMenu();
-            var mnuFilter = ctxMnu.MenuItems.Add("Filter");
+            var ctxMnu = new ContextMenuStrip();
+            var mnuFilter = ctxMnu.Items.Add("Filter");
             mnuFilter.Click += MnuFilter_Click;
             mnuFilter.Tag = n;
-            n.ContextMenu = ctxMnu;
+            n.ContextMenuStrip = ctxMnu;
         }
         public String FilterText = "";
     
         private void MnuFilter_Click(object sender, EventArgs e)
         {
-            var itm = (SQLTreeItem)((MenuItem)sender).Tag;
+            var itm = (SQLTreeItem)((ToolStripMenuItem)sender).Tag;
             string filter = itm.FilterText;
             if (Common.ShowInputDialog(ref filter,"Filter") == DialogResult.OK)
             {

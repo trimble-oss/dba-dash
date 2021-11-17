@@ -8,7 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using LiveCharts.Defaults;
-using System.Data.SqlClient;
+using Microsoft.Data.SqlClient;
 using LiveCharts.Wpf;
 using LiveCharts;
 using static DBADashGUI.Performance.Performance;

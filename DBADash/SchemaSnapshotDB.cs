@@ -5,7 +5,7 @@ using Newtonsoft.Json.Converters;
 using System;
 using System.Collections.Specialized;
 using System.Data;
-using System.Data.SqlClient;
+using  Microsoft.Data.SqlClient;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
@@ -86,7 +86,6 @@ namespace DBADash
     {
 
         private readonly string _connectionString;
-        private readonly SHA256Managed crypt = new SHA256Managed();
         private readonly SchemaSnapshotDBOptions options;
         private readonly ScriptingOptions ScriptingOptions;
         private string masterConnectionString
@@ -98,6 +97,14 @@ namespace DBADash
                     InitialCatalog = "master"
                 };
                 return builder.ConnectionString;
+            }
+        }
+
+        private byte[] computeHash(byte[] obj)
+        {
+            using(var crypt = SHA256.Create())
+            {
+                return crypt.ComputeHash(obj); 
             }
         }
        
@@ -199,7 +206,7 @@ namespace DBADash
                     r["job_id"] = job.JobID;
                     r["enabled"] = job.IsEnabled;
                     r["DDL"] = bDDL;
-                    r["DDLHash"] = crypt.ComputeHash(bDDL);
+                    r["DDLHash"] = computeHash(bDDL);
                     r["date_created"] = job.DateCreated;
                     r["date_modified"] = job.DateLastModified;
                     r["category"] = job.Category;
@@ -377,7 +384,7 @@ namespace DBADash
                         r["ObjectType"] = "DB";
                         r["object_id"] = 0;
                         r["DDL"] = bDDL;
-                        r["DDLHash"] = crypt.ComputeHash(bDDL);
+                        r["DDLHash"] = computeHash(bDDL);
                         r["ObjectDateCreated"] = db.CreateDate;
                         r["ObjectDateModified"] = DBNull.Value;
                         dtSchema.Rows.Add(r);
@@ -551,7 +558,7 @@ namespace DBADash
                     r["ObjectType"] = "SQ";
                     r["object_id"] = q.ID;
                     r["DDL"] = bDDL;
-                    r["DDLHash"] = crypt.ComputeHash(bDDL);
+                    r["DDLHash"] = computeHash(bDDL);
                     r["ObjectDateCreated"] = q.CreateDate;
                     r["ObjectDateModified"] = q.DateLastModified;
                     dtSchema.Rows.Add(r);
@@ -567,7 +574,7 @@ namespace DBADash
                 r["ObjectType"] = "SBR";
                 r["object_id"] = rt.ID;
                 r["DDL"] = bDDL;
-                r["DDLHash"] = crypt.ComputeHash(bDDL);
+                r["DDLHash"] = computeHash(bDDL);
                 r["ObjectDateCreated"] = "1900-01-01";
                 r["ObjectDateModified"] = "1900-01-01";
                 dtSchema.Rows.Add(r);
@@ -584,7 +591,7 @@ namespace DBADash
                     r["ObjectType"] = "SBM";
                     r["object_id"] = m.ID;
                     r["DDL"] = bDDL;
-                    r["DDLHash"] = crypt.ComputeHash(bDDL);
+                    r["DDLHash"] = computeHash(bDDL);
                     r["ObjectDateCreated"] = "1900-01-01";
                     r["ObjectDateModified"] = "1900-01-01";
                     dtSchema.Rows.Add(r);
@@ -602,7 +609,7 @@ namespace DBADash
                     r["ObjectType"] = "SBS";
                     r["object_id"] = s.ID;
                     r["DDL"] = bDDL;
-                    r["DDLHash"] = crypt.ComputeHash(bDDL);
+                    r["DDLHash"] = computeHash(bDDL);
                     r["ObjectDateCreated"] = "1900-01-01";
                     r["ObjectDateModified"] = "1900-01-01";
                     dtSchema.Rows.Add(r);
@@ -620,7 +627,7 @@ namespace DBADash
                     r["ObjectType"] = "SBC";
                     r["object_id"] = c.ID;
                     r["DDL"] = bDDL;
-                    r["DDLHash"] = crypt.ComputeHash(bDDL);
+                    r["DDLHash"] = computeHash(bDDL);
                     r["ObjectDateCreated"] = "1900-01-01";
                     r["ObjectDateModified"] = "1900-01-01";
                     dtSchema.Rows.Add(r);
@@ -636,7 +643,7 @@ namespace DBADash
                 r["ObjectType"] = "SBB";
                 r["object_id"] = b.ID;
                 r["DDL"] = bDDL;
-                r["DDLHash"] = crypt.ComputeHash(bDDL);
+                r["DDLHash"] = computeHash(bDDL);
                 r["ObjectDateCreated"] = "1900-01-01";
                 r["ObjectDateModified"] = "1900-01-01";
                 dtSchema.Rows.Add(r);
@@ -651,7 +658,7 @@ namespace DBADash
                 r["ObjectType"] = "SBP";
                 r["object_id"] = p.ID;
                 r["DDL"] = bDDL;
-                r["DDLHash"] = crypt.ComputeHash(bDDL);
+                r["DDLHash"] = computeHash(bDDL);
                 r["ObjectDateCreated"] = "1900-01-01";
                 r["ObjectDateModified"] = "1900-01-01";
                 dtSchema.Rows.Add(r);
@@ -672,7 +679,7 @@ namespace DBADash
                     r["ObjectType"] = "SO";
                     r["object_id"] = s.ID;
                     r["DDL"] = bDDL;
-                    r["DDLHash"] = crypt.ComputeHash(bDDL);
+                    r["DDLHash"] = computeHash(bDDL);
                     r["ObjectDateCreated"] = s.CreateDate;
                     r["ObjectDateModified"] = s.DateLastModified;
                     dtSchema.Rows.Add(r);
@@ -693,7 +700,7 @@ namespace DBADash
                 r["ObjectType"] = "ARO";
                 r["object_id"] = ar.ID;
                 r["DDL"] = bDDL;
-                r["DDLHash"] = crypt.ComputeHash(bDDL);
+                r["DDLHash"] = computeHash(bDDL);
                 r["ObjectDateCreated"] = ar.CreateDate;
                 r["ObjectDateModified"] = ar.DateLastModified;
                 dtSchema.Rows.Add(r);
@@ -714,7 +721,7 @@ namespace DBADash
                     r["ObjectType"] = "USR";
                     r["object_id"] = u.ID;
                     r["DDL"] = bDDL;
-                    r["DDLHash"] = crypt.ComputeHash(bDDL);
+                    r["DDLHash"] = computeHash(bDDL);
                     r["ObjectDateCreated"] = u.CreateDate;
                     r["ObjectDateModified"] = u.DateLastModified;
                     dtSchema.Rows.Add(r);
@@ -736,7 +743,7 @@ namespace DBADash
                     r["ObjectType"] = "ROL";
                     r["object_id"] = dbr.ID;
                     r["DDL"] = bDDL;
-                    r["DDLHash"] = crypt.ComputeHash(bDDL);
+                    r["DDLHash"] = computeHash(bDDL);
                     r["ObjectDateCreated"] = dbr.CreateDate;
                     r["ObjectDateModified"] = dbr.DateLastModified;
                     dtSchema.Rows.Add(r);
@@ -756,7 +763,7 @@ namespace DBADash
                 r["ObjectType"] = "AF";
                 r["object_id"] = a.ID;
                 r["DDL"] = bDDL;
-                r["DDLHash"] = crypt.ComputeHash(bDDL);
+                r["DDLHash"] = computeHash(bDDL);
                 r["ObjectDateCreated"] = a.CreateDate;
                 r["ObjectDateModified"] = a.DateLastModified;
                 dtSchema.Rows.Add(r);
@@ -777,7 +784,7 @@ namespace DBADash
                     r["ObjectType"] = "CLR";
                     r["object_id"] = a.ID;
                     r["DDL"] = bDDL;
-                    r["DDLHash"] = crypt.ComputeHash(bDDL);
+                    r["DDLHash"] = computeHash(bDDL);
                     r["ObjectDateCreated"] = a.CreateDate;
                     r["ObjectDateModified"] = DBNull.Value;
                     dtSchema.Rows.Add(r);
@@ -797,7 +804,7 @@ namespace DBADash
                 r["ObjectType"] = "XSC";
                 r["object_id"] = x.ID;
                 r["DDL"] = bDDL;
-                r["DDLHash"] = crypt.ComputeHash(bDDL);
+                r["DDLHash"] = computeHash(bDDL);
                 r["ObjectDateCreated"] = x.CreateDate;
                 r["ObjectDateModified"] = x.DateLastModified;
                 dtSchema.Rows.Add(r);
@@ -818,7 +825,7 @@ namespace DBADash
                     r["ObjectType"] = "SCH";
                     r["object_id"] = s.ID;
                     r["DDL"] = bDDL;
-                    r["DDLHash"] = crypt.ComputeHash(bDDL);
+                    r["DDLHash"] = computeHash(bDDL);
                     r["ObjectDateCreated"] = DBNull.Value;
                     r["ObjectDateModified"] = DBNull.Value;
                     dtSchema.Rows.Add(r);
@@ -839,7 +846,7 @@ namespace DBADash
                 r["ObjectType"] = "SN";
                 r["object_id"] = s.ID;
                 r["DDL"] = bDDL;
-                r["DDLHash"] = crypt.ComputeHash(bDDL);
+                r["DDLHash"] = computeHash(bDDL);
                 r["ObjectDateCreated"] = s.CreateDate;
                 r["ObjectDateModified"] = s.DateLastModified;
                 dtSchema.Rows.Add(r);
@@ -859,7 +866,7 @@ namespace DBADash
                 r["ObjectType"] = "DTR";
                 r["object_id"] = t.ID;
                 r["DDL"] = bDDL;
-                r["DDLHash"] = crypt.ComputeHash(bDDL);
+                r["DDLHash"] = computeHash(bDDL);
                 r["ObjectDateCreated"] = t.CreateDate;
                 r["ObjectDateModified"] = t.DateLastModified;
                 dtSchema.Rows.Add(r);
@@ -880,7 +887,7 @@ namespace DBADash
                 r["ObjectType"] = "TT";
                 r["object_id"] = t.ID;
                 r["DDL"] = bDDL;
-                r["DDLHash"] = crypt.ComputeHash(bDDL);
+                r["DDLHash"] = computeHash(bDDL);
                 r["ObjectDateCreated"] = t.CreateDate;
                 r["ObjectDateModified"] = t.DateLastModified;
                 dtSchema.Rows.Add(r);
@@ -899,7 +906,7 @@ namespace DBADash
                 r["ObjectType"] = "UTY";
                 r["object_id"] = t.ID;
                 r["DDL"] = bDDL;
-                r["DDLHash"] = crypt.ComputeHash(bDDL);
+                r["DDLHash"] = computeHash(bDDL);
                 r["ObjectDateCreated"] = DBNull.Value;
                 r["ObjectDateModified"] = DBNull.Value;
                 dtSchema.Rows.Add(r);
@@ -919,7 +926,7 @@ namespace DBADash
                 r["ObjectType"] = "TYP";
                 r["object_id"] = t.ID;
                 r["DDL"] = bDDL;
-                r["DDLHash"] = crypt.ComputeHash(bDDL);
+                r["DDLHash"] = computeHash(bDDL);
                 r["ObjectDateCreated"] = DBNull.Value;
                 r["ObjectDateModified"] = DBNull.Value;
                 dtSchema.Rows.Add(r);
@@ -970,7 +977,7 @@ namespace DBADash
 
                     r["object_id"] = f.ID;
                     r["DDL"] = bDDL;
-                    r["DDLHash"] = crypt.ComputeHash(bDDL);
+                    r["DDLHash"] = computeHash(bDDL);
                     r["ObjectDateCreated"] = f.CreateDate;
                     r["ObjectDateModified"] = f.DateLastModified;
                     dtSchema.Rows.Add(r);
@@ -993,7 +1000,7 @@ namespace DBADash
                     r["ObjectType"] = "V";
                     r["object_id"] = v.ID;
                     r["DDL"] = bDDL;
-                    r["DDLHash"] = crypt.ComputeHash(bDDL);
+                    r["DDLHash"] = computeHash(bDDL);
                     r["ObjectDateCreated"] = v.CreateDate;
                     r["ObjectDateModified"] = v.DateLastModified;
                     dtSchema.Rows.Add(r);
@@ -1028,7 +1035,7 @@ namespace DBADash
                     r["SchemaName"] = sp.Schema;
                     r["object_id"] = sp.ID;
                     r["DDL"] = bDDL;
-                    r["DDLHash"] = crypt.ComputeHash(bDDL);
+                    r["DDLHash"] = computeHash(bDDL);
                     r["ObjectDateCreated"] = sp.CreateDate;
                     r["ObjectDateModified"] = sp.DateLastModified;
                     dtSchema.Rows.Add(r);
@@ -1051,7 +1058,7 @@ namespace DBADash
                     r["ObjectType"] = "U";
                     r["object_id"] = t.ID;
                     r["DDL"] = bDDL;
-                    r["DDLHash"] = crypt.ComputeHash(bDDL);
+                    r["DDLHash"] = computeHash(bDDL);
                     r["ObjectDateCreated"] = t.CreateDate;
                     r["ObjectDateModified"] = t.DateLastModified;
                     dtSchema.Rows.Add(r);
@@ -1077,7 +1084,7 @@ namespace DBADash
                         r["ObjectType"] = t.ImplementationType == ImplementationType.SqlClr ? "TA" : "TR";
                         r["object_id"] = t.ID;
                         r["DDL"] = bDDL;
-                        r["DDLHash"] = crypt.ComputeHash(bDDL);
+                        r["DDLHash"] = computeHash(bDDL);
                         r["ObjectDateCreated"] = t.CreateDate;
                         r["ObjectDateModified"] = t.DateLastModified;
                         dtSchema.Rows.Add(r);

@@ -1,19 +1,23 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.29728.190
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31825.309
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{00D1A9C2-B5F0-4AF3-8072-F6C62B433612}") = "DBADashDB", "DBADashDB\DBADashDB.sqlproj", "{DDE14068-5C6E-4E82-BF2F-7ED7681DBBC4}"
 EndProject
 Project("{F14B399A-7131-4C87-9E4B-1186C45EF12D}") = "DBADashReports", "DBADashReports\DBADashReports.rptproj", "{B6B06D8A-3AAB-4C5B-A7FA-2ED4ED98A111}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DBADashService", "DBADashService\DBADashService.csproj", "{751B17F5-62EB-4338-AF23-AA9DE5926813}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DBADashService", "DBADashService\DBADashService.csproj", "{751B17F5-62EB-4338-AF23-AA9DE5926813}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DBADash", "DBADash\DBADash.csproj", "{176C91F1-D5F4-4695-B1ED-2C021249B88F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DBADash", "DBADash\DBADash.csproj", "{176C91F1-D5F4-4695-B1ED-2C021249B88F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ServiceConfigTool", "DBADashServiceConfig\ServiceConfigTool.csproj", "{799E3EC5-E66D-4953-9182-38E7471770A0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ServiceConfigTool", "DBADashServiceConfig\ServiceConfigTool.csproj", "{799E3EC5-E66D-4953-9182-38E7471770A0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DBADashGUI", "DBADashGUI\DBADashGUI.csproj", "{C3356F62-9C3B-425C-8F23-4540D567A72A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DBADashGUI", "DBADashGUI\DBADashGUI.csproj", "{C3356F62-9C3B-425C-8F23-4540D567A72A}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DBADashConfig", "DBADashConfig\DBADashConfig.csproj", "{193E5F64-E678-434E-983B-71A06EB87477}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DBADash.Test", "DBADash.Test\DBADash.Test.csproj", "{EF27ED83-107C-4C04-AE1E-6568C6520003}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -78,6 +82,22 @@ Global
 		{C3356F62-9C3B-425C-8F23-4540D567A72A}.DebugLocal|Any CPU.Build.0 = Debug|Any CPU
 		{C3356F62-9C3B-425C-8F23-4540D567A72A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C3356F62-9C3B-425C-8F23-4540D567A72A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{193E5F64-E678-434E-983B-71A06EB87477}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{193E5F64-E678-434E-983B-71A06EB87477}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{193E5F64-E678-434E-983B-71A06EB87477}.Debug2|Any CPU.ActiveCfg = Debug|Any CPU
+		{193E5F64-E678-434E-983B-71A06EB87477}.Debug2|Any CPU.Build.0 = Debug|Any CPU
+		{193E5F64-E678-434E-983B-71A06EB87477}.DebugLocal|Any CPU.ActiveCfg = Debug|Any CPU
+		{193E5F64-E678-434E-983B-71A06EB87477}.DebugLocal|Any CPU.Build.0 = Debug|Any CPU
+		{193E5F64-E678-434E-983B-71A06EB87477}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{193E5F64-E678-434E-983B-71A06EB87477}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EF27ED83-107C-4C04-AE1E-6568C6520003}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EF27ED83-107C-4C04-AE1E-6568C6520003}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EF27ED83-107C-4C04-AE1E-6568C6520003}.Debug2|Any CPU.ActiveCfg = Debug|Any CPU
+		{EF27ED83-107C-4C04-AE1E-6568C6520003}.Debug2|Any CPU.Build.0 = Debug|Any CPU
+		{EF27ED83-107C-4C04-AE1E-6568C6520003}.DebugLocal|Any CPU.ActiveCfg = Debug|Any CPU
+		{EF27ED83-107C-4C04-AE1E-6568C6520003}.DebugLocal|Any CPU.Build.0 = Debug|Any CPU
+		{EF27ED83-107C-4C04-AE1E-6568C6520003}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EF27ED83-107C-4C04-AE1E-6568C6520003}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

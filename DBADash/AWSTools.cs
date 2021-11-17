@@ -46,9 +46,10 @@ namespace DBADash
         public static Amazon.S3.AmazonS3Client GetAWSClient(string profile, string accessKey, string secretKey, Amazon.S3.Util.AmazonS3Uri uri)
         {
             AWSCredentials cred = GetCredentials(profile, accessKey, secretKey);
-            
+
             using (Amazon.S3.AmazonS3Client cli = new AmazonS3Client(cred, RegionEndpoint.EUWest2))
             {
+
                 RegionEndpoint AWSRegion;
                 if (uri.Region != null)
                 {
@@ -56,11 +57,10 @@ namespace DBADash
                 }
                 else
                 {
-                    AWSRegion = RegionEndpoint.GetBySystemName(cli.GetBucketLocation(uri.Bucket).Location);
+                    AWSRegion = RegionEndpoint.GetBySystemName(cli.GetBucketLocationAsync(uri.Bucket).Result.Location);
                 }
                 var s3Cli = new AmazonS3Client(cred, AWSRegion);
                 return s3Cli;
-
             }
 
         }

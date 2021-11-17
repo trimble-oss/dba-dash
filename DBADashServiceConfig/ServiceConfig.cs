@@ -3,7 +3,7 @@ using Newtonsoft.Json;
 using Quartz;
 using System;
 using System.ComponentModel;
-using System.Data.SqlClient;
+using Microsoft.Data.SqlClient;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -79,6 +79,7 @@ namespace DBADashServiceConfig
                 };
                 bool validated = validateSource(sourceString);
 
+                string validationError = "";
                 if (validated)
                 {
                     if (!(src.SourceConnection.Type == ConnectionType.SQL || collectionConfig.DestinationConnection.Type == ConnectionType.SQL))
@@ -94,7 +95,16 @@ namespace DBADashServiceConfig
                     if (!addUnvalidated)
                     {
                         System.Windows.Forms.Cursor.Current = System.Windows.Forms.Cursors.WaitCursor;
-                        validated = src.SourceConnection.Validate();
+                        try
+                        {
+                            src.SourceConnection.Validate();
+                            validated= true;
+                        }
+                        catch (Exception ex)
+                        {
+                            validated= false;
+                            validationError = ex.Message;
+                        }
                         System.Windows.Forms.Cursor.Current = System.Windows.Forms.Cursors.Default;
                     }
                     if (!addUnvalidated  && !validated)
@@ -103,7 +113,7 @@ namespace DBADashServiceConfig
                         {
                             continue;
                         }
-                        else if (MessageBox.Show("Error connecting to data source.  Do you wish to add anyway?", "Error", MessageBoxButtons.YesNo, MessageBoxIcon.Exclamation) == DialogResult.No)
+                        else if (MessageBox.Show("Error connecting to data source.  Do you wish to add anyway?" + Environment.NewLine + Environment.NewLine + validationError, "Error", MessageBoxButtons.YesNo, MessageBoxIcon.Exclamation) == DialogResult.No)
                         {
                             doNotAddUnvalidated=true;
                             continue;

@@ -32,4 +32,4 @@ WHERE I.IsActive=1
 AND D.IsActive=1
 AND D.source_database_id IS NULL
 AND I.Instance = @Instance
-ORDER BY D.Name
+ORDER BY D.name

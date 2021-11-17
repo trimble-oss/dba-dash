@@ -84,7 +84,7 @@ namespace DBADashService
                         }
                         catch(Exception ex)
                         {
-                            Log.Logger.Error("Error Stop/Remove DBADash event sessions for {connection}", cfg.SourceConnection.ConnectionForPrint);
+                            Log.Logger.Error(ex,"Error Stop/Remove DBADash event sessions for {connection}", cfg.SourceConnection.ConnectionForPrint);
                         }
 
                     }
@@ -92,7 +92,7 @@ namespace DBADashService
             }
             catch (Exception ex)
             {
-                Log.Logger.Error("Error removing event sessions");
+                Log.Logger.Error(ex,"Error removing event sessions");
             }
         }
 

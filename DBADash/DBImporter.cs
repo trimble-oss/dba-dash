@@ -2,7 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Data.SqlClient;
+using Microsoft.Data.SqlClient;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Threading.Tasks;
@@ -296,9 +296,8 @@ namespace DBADash
                         }
                         string snapshotOptions = (string)dtSS.ExtendedProperties["SnapshotOptions"];
                         byte[] snapshptOptionsHash;
-                        using (var crypt = new SHA256Managed())
+                        using (var crypt = SHA256.Create())
                         {
-
                             snapshptOptionsHash = crypt.ComputeHash(System.Text.Encoding.ASCII.GetBytes(snapshotOptions));
                         }
                         cmd.Parameters.AddWithValue("ss", dtSS);
@@ -313,7 +312,7 @@ namespace DBADash
                     }
                 }
             }
-            catch (System.Data.SqlClient.SqlException ex) when (ex.Number == 2627)
+            catch (SqlException ex) when (ex.Number == 2627)
             {
                 throw new Exception($"DDLSnapshot:{ databaseName}. Primary key violation.  This can occur if you have a case sensitive database collation that contains tables, SPs or other database objects with names that are no longer unique with a case insensitive comparison.", ex);
             }

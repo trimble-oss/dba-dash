@@ -7,13 +7,14 @@ using System.IO;
 using static DBADash.DBADashConnection;
 using Serilog;
 using SerilogTimings;
+using System.Threading.Tasks;
 
 namespace DBADashService
 {
     public class DestinationHandling
     {
 
-        public static void WriteAllDestinations(DataSet ds,DBADashSource src,string fileName)
+        public static async Task WriteAllDestinations(DataSet ds,DBADashSource src,string fileName)
         {
             List<Exception> exceptions = new List<Exception>();
             foreach (var d in SchedulerServiceConfig.Config.AllDestinations)
@@ -22,7 +23,7 @@ namespace DBADashService
                 {
                     using (var op = Operation.Begin("Write to destination {destination} from {source}", d.ConnectionForPrint, src.SourceConnection.ConnectionForPrint))
                     {
-                        Write(ds, d, fileName);
+                        await Write(ds, d, fileName);
                         op.Complete();
                     }
                 }
@@ -38,12 +39,12 @@ namespace DBADashService
             }
         }
 
-        public static void Write(DataSet ds, DBADashConnection d,string fileName)
+        public static async Task Write(DataSet ds, DBADashConnection d,string fileName)
         {
             switch (d.Type)
             {
                 case ConnectionType.AWSS3:
-                    WriteS3(ds, d.ConnectionString, fileName);
+                    await WriteS3(ds, d.ConnectionString, fileName);
                     break;
                 case ConnectionType.Directory:
                     WriteFolder(ds, d.ConnectionString, fileName);
@@ -56,25 +57,33 @@ namespace DBADashService
         }
 
   
-        public static void WriteS3(DataSet ds, string destination, string fileName)
+        public static async Task WriteS3(DataSet ds, string destination, string fileName)
         {
-            var uri = new Amazon.S3.Util.AmazonS3Uri(destination);
-            var s3Cli = AWSTools.GetAWSClient(SchedulerServiceConfig.Config.AWSProfile, SchedulerServiceConfig.Config.AccessKey, SchedulerServiceConfig.Config.GetSecretKey(), uri);
-            var r = new Amazon.S3.Model.PutObjectRequest();
             string extension = System.IO.Path.GetExtension(fileName);
             if (extension != ".xml")
             {
                 fileName += ".xml";
             }
-
             DataSetSerialization.SetDateTimeKind(ds); // Required to prevent timezone conversion
-            MemoryStream ms = new MemoryStream();
-            ds.WriteXml(ms, XmlWriteMode.WriteSchema);
-            r.InputStream = ms;
 
-            r.BucketName = uri.Bucket;
-            r.Key = (uri.Key + "/" + fileName).Replace("//", "/");
-            s3Cli.PutObject(r);
+            var uri = new Amazon.S3.Util.AmazonS3Uri(destination);
+            string key = SchedulerServiceConfig.Config.GetSecretKey();
+            using (var s3Cli = AWSTools.GetAWSClient(SchedulerServiceConfig.Config.AWSProfile, SchedulerServiceConfig.Config.AccessKey, SchedulerServiceConfig.Config.GetSecretKey(), uri))
+            {
+
+                var r = new Amazon.S3.Model.PutObjectRequest()
+                {
+                    BucketName = uri.Bucket,
+                    Key = (uri.Key + "/" + fileName).Replace("//", "/")
+                };
+            
+                using (var ms = new MemoryStream())
+                {
+                    ds.WriteXml(ms, XmlWriteMode.WriteSchema);
+                    r.InputStream = ms;
+                    await s3Cli.PutObjectAsync(r);
+                }
+            }
 
         }
 

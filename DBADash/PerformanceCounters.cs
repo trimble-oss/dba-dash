@@ -42,7 +42,7 @@ namespace DBADash
                     }
                     catch(Exception ex)
                     {
-                        Log.Error("Error reading performance counters file '{filename}'.  Performance counter collection disabled", defaultFileName);
+                        Log.Error(ex,"Error reading performance counters file '{filename}'.  Performance counter collection disabled", defaultFileName);
                         countersXML = "";
                     }
                     

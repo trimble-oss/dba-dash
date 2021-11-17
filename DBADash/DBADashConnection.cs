@@ -1,7 +1,7 @@
 ﻿using DBADashService;
 using Newtonsoft.Json;
 using System;
-using System.Data.SqlClient;
+using Microsoft.Data.SqlClient;
 using System.IO;
 using System.Text.RegularExpressions;
 using Serilog;
@@ -84,24 +84,20 @@ namespace DBADash
 
 
 
-        public bool Validate()
+        public void Validate()
         {
 
             if (connectionType == ConnectionType.Directory)
             {
                 if (System.IO.Directory.Exists(connectionString) == false)
                 {
-                    return false;
+                    throw new Exception("Directory does not exist");
                 }
             }
-            if (connectionType == ConnectionType.SQL)
+           else if (connectionType == ConnectionType.SQL)
             {
-                if (validateSQLConnection(connectionString) == false)
-                {
-                    return false;
-                }
+                validateSQLConnection(connectionString); // Open a connection to the DB
             }
-            return true;
         }
 
         public string ProductVersion()
@@ -179,17 +175,11 @@ namespace DBADash
         }
 
 
-        private bool validateSQLConnection(string connectionString)
+        private void validateSQLConnection(string connectionString)
         {
-            SqlConnection cn = new SqlConnection(connectionString);
-            try
+            using (var cn = new SqlConnection(connectionString))
             {
                 cn.Open();
-                return true;
-            }
-            catch
-            {
-                return false;
             }
         }
 

@@ -7,7 +7,7 @@ using Serilog;
 using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Data.SqlClient;
+using Microsoft.Data.SqlClient;
 using System.IO;
 using System.Linq;
 using System.Management;
@@ -1088,7 +1088,7 @@ CROSS APPLY sys.dm_exec_sql_text(H.sql_handle) txt");
 
         private void collectOperatingSystemWMI()
         {
-            if (!noWMI)
+            if (!noWMI && OperatingSystem.IsWindows())
             {
                 try
                 {
@@ -1122,7 +1122,7 @@ CROSS APPLY sys.dm_exec_sql_text(H.sql_handle) txt");
 
         private void collectComputerSystemWMI()
         {
-            if (!noWMI)
+            if (!noWMI && OperatingSystem.IsWindows())
             {
                 try
                 {
@@ -1159,12 +1159,15 @@ CROSS APPLY sys.dm_exec_sql_text(H.sql_handle) txt");
         private string getMOStringValue(ManagementObject mo, string propertyName, Int32 truncateLength = 0)
         {
             string value = "";
-            if (mo.GetPropertyValue(propertyName) != null)
+            if (OperatingSystem.IsWindows())
             {
-                value = mo.GetPropertyValue(propertyName).ToString();
-                if (truncateLength > 0 && value.Length > truncateLength)
+                if (mo.GetPropertyValue(propertyName) != null)
                 {
-                    value = value.Substring(0, 200);
+                    value = mo.GetPropertyValue(propertyName).ToString();
+                    if (truncateLength > 0 && value.Length > truncateLength)
+                    {
+                        value = value.Substring(0, 200);
+                    }
                 }
             }
             return value;
@@ -1172,7 +1175,7 @@ CROSS APPLY sys.dm_exec_sql_text(H.sql_handle) txt");
 
         private void collectPowerPlanWMI()
         {
-            if (!noWMI)
+            if (!noWMI && OperatingSystem.IsWindows())
             {
                 try
                 {
@@ -1211,7 +1214,7 @@ CROSS APPLY sys.dm_exec_sql_text(H.sql_handle) txt");
 
         private void collectDriversWMI()
         {
-            if (!noWMI)
+            if (!noWMI && OperatingSystem.IsWindows())
             {
                 try
                 {
@@ -1336,7 +1339,7 @@ CROSS APPLY sys.dm_exec_sql_text(H.sql_handle) txt");
         {
             try
             {
-                if (!Data.Tables.Contains("Drives"))
+                if (!Data.Tables.Contains("Drives") && OperatingSystem.IsWindows())
                 {
                     DataTable drives = new DataTable("Drives");
                     drives.Columns.Add("Name", typeof(string));
