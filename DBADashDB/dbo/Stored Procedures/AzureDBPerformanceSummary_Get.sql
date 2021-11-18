@@ -1,4 +1,4 @@
-﻿CREATE PROC [dbo].[AzureDBPerformanceSummary_Get](
+﻿CREATE PROC dbo.AzureDBPerformanceSummary_Get(
 	@FromDate DATETIME2(3)=NULL,
 	@ToDate DATETIME2(3)=NULL,
 	@InstanceIDs VARCHAR(MAX)=NULL,
@@ -24,7 +24,7 @@ BEGIN
 	SELECT DISTINCT InstanceID
 	FROM dbo.Instances 
 	WHERE IsActive=1
-	AND EditionID=1674378470
+	AND EngineEdition=5 --AzureDB
 END 
 ELSE 
 BEGIN

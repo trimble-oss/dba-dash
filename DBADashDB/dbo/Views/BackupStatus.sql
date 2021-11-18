@@ -181,3 +181,4 @@ OUTER APPLY(SELECT CASE WHEN f.FullBackupExcludedReason IS NOT NULL THEN 3
 			) AS chk
 WHERE d.IsActive=1
 AND I.IsActive=1
+AND I.EngineEdition NOT IN(5,8) -- Exclude AzureDB and Azure MI

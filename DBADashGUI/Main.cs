@@ -12,6 +12,7 @@ using System.Windows.Forms;
 using static DBADashGUI.DiffControl;
 using System.Diagnostics;
 using System.IO;
+using Microsoft.SqlServer.Management.Common;
 
 namespace DBADashGUI
 {
@@ -536,12 +537,22 @@ namespace DBADashGUI
             {
                 string instance = (string)row["Instance"];
                 Int32 instanceID = (Int32)row["InstanceID"];
+                DatabaseEngineEdition edition;
+                try
+                {
+                    edition = (DatabaseEngineEdition)Convert.ToInt32(row["EngineEdition"]);
+                }
+                catch
+                {
+                    edition = DatabaseEngineEdition.Unknown;
+                }
                 if ((bool)row["IsAzure"])
                 {
                     string db = (string)row["AzureDBName"];
                     if (AzureNode == null || AzureNode.InstanceName != instance)
-                    {
+                    {                        
                         AzureNode = new SQLTreeItem(instance, SQLTreeItem.TreeType.AzureInstance);
+                        AzureNode.EngineEdition = edition;
                         root.Nodes.Add(AzureNode);
                         AzureNode.Nodes.Add(new SQLTreeItem("Configuration", SQLTreeItem.TreeType.Configuration));
                         AzureNode.Nodes.Add(new SQLTreeItem("Checks", SQLTreeItem.TreeType.DBAChecks));
@@ -555,6 +566,7 @@ namespace DBADashGUI
                     azureDBNode.Nodes.Add(new SQLTreeItem("Configuration", SQLTreeItem.TreeType.Configuration));
                     azureDBNode.Nodes.Add(new SQLTreeItem("Checks", SQLTreeItem.TreeType.DBAChecks));
                     azureDBNode.AddDatabaseFolders();
+                    azureDBNode.EngineEdition = edition;
                     AzureNode.Nodes.Add(azureDBNode);
                     AzureInstanceIDs.Add(instanceID);
                 }
@@ -562,7 +574,8 @@ namespace DBADashGUI
                 {
                     var n = new SQLTreeItem(instance, SQLTreeItem.TreeType.Instance)
                     {
-                        InstanceID = instanceID
+                        InstanceID = instanceID,
+                        EngineEdition = edition
                     };
                     n.AddDummyNode();
                     root.Nodes.Add(n);

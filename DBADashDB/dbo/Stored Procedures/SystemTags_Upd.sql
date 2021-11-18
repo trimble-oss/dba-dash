@@ -8,8 +8,8 @@ DECLARE @Tags TABLE(
 	TagValue NVARCHAR(128) NOT NULL
 );
 DECLARE @Instance SYSNAME
-DECLARE @IsAzure BIT
-SELECT @Instance = Instance, @IsAzure=CASE WHEN EditionID = 1674378470 THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END
+DECLARE @IsAzureDB BIT
+SELECT @Instance = Instance, @IsAzureDB=CASE WHEN EngineEdition = 5 THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END
 FROM dbo.Instances
 WHERE InstanceID = @InstanceID;
 
@@ -20,7 +20,7 @@ WITH T AS (
 			CAST(I.Collation AS NVARCHAR(128)) Collation,
 			CAST(I.SystemManufacturer AS NVARCHAR(128)) AS SystemManufacturer,
 			CAST(I.SystemProductName AS NVARCHAR(128)) AS SystemProductName,
-			CASE WHEN @IsAzure=1 THEN '    -' ELSE CAST(RIGHT(REPLICATE(' ',5) +  CAST(I.cpu_count as NVARCHAR(50)),5) AS NVARCHAR(128)) END AS CPUCount,
+			CASE WHEN @IsAzureDB=1 THEN '    -' ELSE CAST(RIGHT(REPLICATE(' ',5) +  CAST(I.cpu_count as NVARCHAR(50)),5) AS NVARCHAR(128)) END AS CPUCount,
 			CAST(Cagt.AgentHostName AS NVARCHAR(128)) CollectAgent,
 			CAST(Cagt.AgentServiceName AS NVARCHAR(128)) CollectAgentServiceName,
 			CAST(Cagt.AgentVersion AS NVARCHAR(128)) AS CollectAgentVersion,
@@ -74,10 +74,10 @@ WHERE NOT EXISTS(SELECT 1
 			AND TG.TagValue = t.TagValue
 			)
 
-UPDATE T 
-	SET T.TagID = TG.TagID
-FROM @Tags T 
-JOIN dbo.Tags TG ON T.TagName = TG.TagName AND T.TagValue = TG.TagValue
+UPDATE TMP
+	SET TMP.TagID = TG.TagID
+FROM @Tags TMP
+JOIN dbo.Tags TG ON TMP.TagName = TG.TagName AND TMP.TagValue = TG.TagValue
 
 DELETE IT 
 FROM dbo.InstanceTags IT

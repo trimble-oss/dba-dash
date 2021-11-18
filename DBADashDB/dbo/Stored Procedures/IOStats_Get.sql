@@ -1,4 +1,4 @@
-﻿CREATE PROC [dbo].[IOStats_Get](
+﻿CREATE PROC dbo.IOStats_Get(
 	@InstanceID INT,
 	@FromDate DATETIME2(2)=NULL, 
 	@ToDate DATETIME2(2)=NULL,
@@ -20,7 +20,7 @@ SELECT @DatabaseID=ISNULL(@DatabaseID,-1),@Drive=ISNULL(@Drive,'*')
 IF EXISTS(SELECT 1 
 		FROM dbo.Databases d 
 		JOIN dbo.Instances I ON d.InstanceID = I.InstanceID 
-		WHERE I.EditionID=1674378470 --azure
+		WHERE I.EngineEdition=5 -- Azure DB
 		AND d.DatabaseID = @DatabaseID
 		)
 BEGIN

@@ -1,4 +1,4 @@
-﻿IF SERVERPROPERTY('EditionID')=1674378470
+﻿IF SERVERPROPERTY('EngineEdition')=5 -- Azure SQL Database
 BEGIN
 	SELECT GETUTCDATE() AS SnapshotDate,
 		   [database_id],

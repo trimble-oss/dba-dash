@@ -5,10 +5,15 @@ using Microsoft.Data.SqlClient;
 using System.IO;
 using System.Text.RegularExpressions;
 using Serilog;
+using System.Collections.Generic;
+
 namespace DBADash
 {
     public class DBADashConnection
     {
+
+        private List<int> supportedEngineEditions = new List<int> { 1, 2, 3, 4, 5, 8 }; // Personal, Standard, Enterprise, Express, Azure DB, Azure MI
+        private List<int> supportedProductVersions = new List<int> { 9, 10, 11, 12, 13, 14, 15 }; // SQL 2005 to 2019 & Azure
 
         public enum ConnectionType
         {
@@ -144,9 +149,9 @@ namespace DBADash
                 try
                 {
                     cn.Open();
-                    SqlCommand cmd = new SqlCommand("SELECT CAST(SERVERPROPERTY('EditionID') AS BIGINT)", cn);
-                    Int64 editionID = (Int64)cmd.ExecuteScalar();
-                    if (editionID == 1674378470)
+                    SqlCommand cmd = new SqlCommand("SELECT CAST(SERVERPROPERTY('EngineEdition') AS INT)", cn);
+                    int engineEdition = (int)cmd.ExecuteScalar();
+                    if (engineEdition == 5)
                     {
                         return true;
                     }
@@ -158,14 +163,7 @@ namespace DBADash
                 catch (Exception ex)
                 {
                     Log.Error(ex, "IsAzureDB SQL Edition check fail");
-                    if (connectionString.Contains(".database.windows.net"))
-                    {
-                        return true;
-                    }
-                    else
-                    {
-                        return false;
-                    }
+                    throw;
                 }
             }
             else
@@ -178,8 +176,23 @@ namespace DBADash
         private void validateSQLConnection(string connectionString)
         {
             using (var cn = new SqlConnection(connectionString))
+            using (var cmd = new SqlCommand("SELECT SERVERPROPERTY('EngineEdition'),SERVERPROPERTY('ProductVersion')", cn))
             {
                 cn.Open();
+                using (var rdr = cmd.ExecuteReader())
+                {
+                    rdr.Read();
+                    int engineEdition = rdr.GetInt32(0);
+                    string productVersion = rdr.GetString(1);
+                    var majorVersion = productVersion.Substring(0, productVersion.IndexOf('.'));
+                    if (!supportedProductVersions.Contains(Convert.ToInt32(majorVersion))){
+                        throw new Exception(string.Format("SQL Server Version {0} isn't supported by DBA Dash.  For testing purposes, it's possible to skip this validation check.",majorVersion));
+                    }
+                    if(!supportedEngineEditions.Contains(engineEdition)){
+                        throw new Exception(string.Format("SQL Server Engine Edition {0} isn't supported by DBA Dash.  For testing purposes, it's possible to skip this validation check.", engineEdition));
+                    }
+                }
+
             }
         }
 
