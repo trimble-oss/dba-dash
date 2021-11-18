@@ -53,5 +53,5 @@ SELECT ConnectionID,
 	I.max_workers_count,
 	I.os_priority_class
 FROM dbo.InstanceInfo I
-WHERE EditionID<>'1674378470'
+WHERE EngineEdition<>5 -- AzureDB
 AND EXISTS(SELECT 1 FROM @Instances t WHERE t.InstanceID = I.InstanceID)

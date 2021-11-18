@@ -14,7 +14,7 @@ BEGIN
 	SELECT InstanceID 
 	FROM dbo.Instances 
 	WHERE IsActive=1
-	AND EditionID = 1674378470 -- AzureDB 
+	AND EngineEdition = 5 -- AzureDB 
 END 
 ELSE 
 BEGIN

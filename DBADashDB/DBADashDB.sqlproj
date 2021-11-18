@@ -29,7 +29,7 @@
     <QueryStoreStaleQueryThreshold>15</QueryStoreStaleQueryThreshold>
     <QueryStoreMaxStorageSize>512</QueryStoreMaxStorageSize>
     <QueryStoreMaxPlansPerQuery>50</QueryStoreMaxPlansPerQuery>
-    <DacVersion>2.0.3.55</DacVersion>
+    <DacVersion>2.0.3.56</DacVersion>
     <ReadCommittedSnapshot>True</ReadCommittedSnapshot>
     <AllowSnapshotIsolation>True</AllowSnapshotIsolation>
     <CompatibilityMode>130</CompatibilityMode>
@@ -93,7 +93,6 @@
     <Folder Include="Switch\" />
     <Folder Include="Switch\Tables\" />
     <Folder Include="Storage\" />
-    <Folder Include="Scripts" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="dbo\Tables\LogRestoreThresholds.sql" />
@@ -400,7 +399,6 @@
     <Build Include="Switch\Tables\DBIOStats.sql" />
     <Build Include="Storage\PF_DBIOStats.sql" />
     <Build Include="Storage\PS_DBIOStats.sql" />
-    <None Include="Scripts\DBIOStats_Migration.sql" />
     <Build Include="dbo\Tables\CPU_60MIN.sql" />
     <Build Include="dbo\Stored Procedures\DBSpace_Get.sql" />
     <Build Include="Switch\Tables\SlowQueries.sql" />
@@ -639,8 +637,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="DBADashDB.publish.xml" />
-    <None Include="Scripts\DBIOStatsMigration_60MIN.sql" />
-    <None Include="Scripts\CPU_60MIN Population.sql" />
   </ItemGroup>
   <ItemGroup>
     <SqlCmdVariable Include="VersionNumber">

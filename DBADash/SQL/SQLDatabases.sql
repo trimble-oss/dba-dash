@@ -85,12 +85,12 @@ FROM (
 	) T
 FOR XML PATH(''),TYPE).value('.','NVARCHAR(MAX)'),1,1,'')
 
-DECLARE @EditionID BIGINT
-SELECT @EditionID = CAST(SERVERPROPERTY('EditionID') as bigint) 
+DECLARE @IsAzureDB BIT
+SELECT @IsAzureDB = CASE WHEN CAST(SERVERPROPERTY('EngineEdition') AS INT) =5 THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END
 
 SELECT @SQL = 'INSERT INTO #sysdb(' + @cols + ')
 		SELECT ' + @cols + ' FROM sys.databases 
-		' + CASE WHEN @EditionID = 1674378470 THEN ' WHERE name = DB_NAME()' ELSE '' END -- current DB only for azure
+		' + CASE WHEN @IsAzureDB=CAST(1 AS BIT) THEN ' WHERE name = DB_NAME()' ELSE '' END -- current DB only for azure
 
 EXEC sp_executesql @SQL
 

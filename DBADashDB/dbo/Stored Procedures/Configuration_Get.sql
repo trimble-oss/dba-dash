@@ -1,4 +1,4 @@
-﻿CREATE PROC [dbo].[Configuration_Get](
+﻿CREATE PROC dbo.Configuration_Get(
 	@InstanceIDs VARCHAR(MAX)=NULL,
 	@ConfiguredOnly BIT=0
 )
@@ -39,7 +39,7 @@ FROM dbo.SysConfig SC
 JOIN dbo.Instances I ON SC.InstanceID=I.InstanceID
 JOIN dbo.SysConfigOptions SCO ON SC.configuration_id = SCO.configuration_id
 WHERE EXISTS(SELECT 1 FROM @Instances t WHERE I.InstanceID = t.InstanceID)
-AND I.EditionID<> 1674378470 --exclude azure
+AND I.EngineEdition<> 5 --exclude Azure DB
 AND I.IsActive=1
 )
 SELECT T.Instance,

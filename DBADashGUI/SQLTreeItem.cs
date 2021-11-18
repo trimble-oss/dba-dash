@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.SqlServer.Management.Common;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -66,6 +67,25 @@ namespace DBADashGUI
             AgentJobStep
           
         }
+
+        private DatabaseEngineEdition _engineEdition = DatabaseEngineEdition.Unknown;
+        public DatabaseEngineEdition EngineEdition
+        {
+            get
+            {
+                if (_engineEdition == DatabaseEngineEdition.Unknown && this.Type != TreeType.DBADashRoot && this.Parent != null)
+                {
+                        _engineEdition= ((SQLTreeItem)this.Parent).EngineEdition;
+                }
+                return _engineEdition;
+            }           
+            set
+            {
+                _engineEdition = value;
+                setIcon();
+            }
+        }
+
 
         private List<Int32> _childInstanceIDs;
 
@@ -320,7 +340,14 @@ namespace DBADashGUI
                     ImageIndex = 0;
                     break;
                 case TreeType.Instance:
-                    ImageIndex = 1;
+                    if (EngineEdition == DatabaseEngineEdition.SqlManagedInstance)
+                    {
+                        ImageIndex = 18;
+                    }
+                    else
+                    {
+                        ImageIndex = 1;
+                    }
                     break;
                 case TreeType.Database:
                     ImageIndex = 2;

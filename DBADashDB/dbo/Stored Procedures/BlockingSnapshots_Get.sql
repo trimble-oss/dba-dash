@@ -11,7 +11,7 @@ IF EXISTS(
 	SELECT 1
 	FROM dbo.InstanceInfo
 	WHERE InstanceID=@InstanceID 
-	AND EditionID=1674378470
+	AND EngineEdition=5
 )
 BEGIN
 	SET @DatabaseID=NULL

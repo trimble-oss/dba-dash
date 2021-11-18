@@ -1,52 +1,38 @@
-﻿CREATE PROC [dbo].[IOStats_Upd](@IOStats dbo.IOStats READONLY,@InstanceID INT,@SnapshotDate DATETIME2(2))
+﻿CREATE PROC dbo.IOStats_Upd(
+		@IOStats dbo.IOStats READONLY,
+		@InstanceID INT,
+		@SnapshotDate DATETIME2(2)
+)
 AS
 SET XACT_ABORT ON
 DECLARE @Ref VARCHAR(30)='IOStats'
-DECLARE @EditionID INT 
-SELECT @EditionID = EditionID 
+DECLARE @EngineEdition INT 
+SELECT @EngineEdition = EngineEdition
 FROM dbo.Instances 
 WHERE InstanceID = @InstanceID
 
-
 CREATE TABLE #DBIOStatsTemp(
-	[InstanceID] [int] NOT NULL,
-	[DatabaseID] [int] NOT NULL,
-	[Drive] [char](1) COLLATE DATABASE_DEFAULT NOT NULL ,
-	[FileID] [int] NOT NULL,
-	[SnapshotDate] [datetime2](2) NOT NULL,
-	[num_of_reads] [bigint] NOT NULL,
-	[num_of_writes] [bigint] NOT NULL,
-	[num_of_bytes_read] [bigint] NOT NULL,
-	[num_of_bytes_written] [bigint] NOT NULL,
-	[io_stall_read_ms] [bigint] NOT NULL,
-	[io_stall_write_ms] [bigint] NOT NULL,
-	[sample_ms_diff] [bigint] NOT NULL,
-	[size_on_disk_bytes] [bigint] NOT NULL,
-	PRIMARY KEY([InstanceID],[DatabaseID],[Drive],[FileID],	[SnapshotDate])
+	InstanceID INT NOT NULL,
+	DatabaseID INT NOT NULL,
+	Drive CHAR(1) COLLATE DATABASE_DEFAULT NOT NULL ,
+	FileID INT NOT NULL,
+	SnapshotDate DATETIME2(2) NOT NULL,
+	num_of_reads BIGINT NOT NULL,
+	num_of_writes BIGINT NOT NULL,
+	num_of_bytes_read BIGINT NOT NULL,
+	num_of_bytes_written BIGINT NOT NULL,
+	io_stall_read_ms BIGINT NOT NULL,
+	io_stall_write_ms BIGINT NOT NULL,
+	sample_ms_diff BIGINT NOT NULL,
+	size_on_disk_bytes BIGINT NOT NULL,
+	PRIMARY KEY(InstanceID,DatabaseID,Drive,FileID,	SnapshotDate)
 )
 
-IF @EditionID=1674378470
-BEGIN
-	INSERT INTO #DBIOStatsTemp
-	(
-		InstanceID,
-		SnapshotDate,
-		DatabaseID,
-		Drive,
-		FileID,
-		sample_ms_diff,
-		num_of_reads,
-		num_of_bytes_read,
-		io_stall_read_ms,
-		num_of_writes,
-		num_of_bytes_written,
-		io_stall_write_ms,
-		size_on_disk_bytes
-	)
-	SELECT @InstanceID,
+DECLARE @SQL NVARCHAR(MAX)
+SET @SQL = N'SELECT @InstanceID,
 			A.SnapshotDate,
 			ISNULL(x.DatabaseID,-1) AS DatabaseID,
-			ISNULL(x.Drive,'*') AS Drive,
+			ISNULL(x.Drive,''*'') AS Drive,
 			ISNULL(x.FileID,-1) AS FileID,
 			MAX(A.sample_ms-B.sample_ms) AS sample_ms_diff,
 			SUM(A.num_of_reads-B.num_of_reads),
@@ -56,84 +42,49 @@ BEGIN
 			SUM(A.num_of_bytes_written-B.num_of_bytes_written),
 			SUM(A.io_stall_write_ms-B.io_stall_write_ms),
 			SUM(A.size_on_disk_bytes)
-	FROM @IOStats a
-	JOIN Staging.IOStats b ON b.database_id = a.database_id AND b.file_id = a.file_id AND b.InstanceID=@InstanceID
-	LEFT JOIN dbo.Databases D ON D.database_id = a.database_id AND d.InstanceID=@InstanceID AND D.IsActive=1
-	LEFT JOIN dbo.DBFiles F ON F.file_id = a.file_id AND F.DatabaseID = D.DatabaseID AND F.IsActive=1 
-	CROSS APPLY(SELECT ISNULL(F.DatabaseID,-999) AS DatabaseID,
-						ISNULL(F.FileID,-999) AS FileID,
-						'?' AS Drive,
-						@InstanceID AS InstanceID
-						) x
-	WHERE A.sample_ms > b.sample_ms
-				AND A.SnapshotDate > B.SnapshotDate
-				AND A.num_of_bytes_read>=B.num_of_bytes_read
-				AND A.num_of_reads>=B.num_of_reads
-				AND A.num_of_writes>=B.num_of_writes
-				AND A.num_of_bytes_written>= B.num_of_bytes_written
-				AND NOT (A.num_of_reads=B.num_of_reads AND A.num_of_writes=B.num_of_writes)
-	GROUP BY GROUPING SETS(
-				(x.InstanceID),
-				(x.DatabaseID,x.FileID,x.Drive)
-				)
-	,a.SnapshotDate
-END 
-ELSE
-BEGIN
-	INSERT INTO #DBIOStatsTemp
-	(
-		InstanceID,
-		SnapshotDate,
-		DatabaseID,
-		Drive,
-		FileID,
-		sample_ms_diff,
-		num_of_reads,
-		num_of_bytes_read,
-		io_stall_read_ms,
-		num_of_writes,
-		num_of_bytes_written,
-		io_stall_write_ms,
-		size_on_disk_bytes
-	)
-	SELECT @InstanceID,
-			A.SnapshotDate,
-			ISNULL(x.DatabaseID,-1) AS DatabaseID,
-			ISNULL(x.Drive,'*') AS Drive,
-			ISNULL(x.FileID,-1) AS FileID,
-			MAX(A.sample_ms-B.sample_ms) AS sample_ms_diff,
-			SUM(A.num_of_reads-B.num_of_reads),
-			SUM(A.num_of_bytes_read-B.num_of_bytes_read),
-			SUM(A.io_stall_read_ms-B.io_stall_read_ms),
-			SUM(A.num_of_writes-B.num_of_writes),
-			SUM(A.num_of_bytes_written-B.num_of_bytes_written),
-			SUM(A.io_stall_write_ms-B.io_stall_write_ms),
-			SUM(A.size_on_disk_bytes)
-	FROM @IOStats a
-	JOIN Staging.IOStats b ON b.database_id = a.database_id AND b.file_id = a.file_id AND b.InstanceID=@InstanceID
-	LEFT JOIN dbo.Databases D ON D.database_id = a.database_id AND d.InstanceID=@InstanceID AND D.IsActive=1
-	LEFT JOIN dbo.DBFiles F ON F.file_id = a.file_id AND F.DatabaseID = D.DatabaseID AND F.IsActive=1 
-	CROSS APPLY(SELECT ISNULL(F.DatabaseID,-999) AS DatabaseID,
-						ISNULL(F.FileID,-999) AS FileID,
-						CASE WHEN F.physical_name LIKE '_:\%' THEN LEFT(F.physical_name,1) ELSE '?' END AS Drive,
-						@InstanceID AS InstanceID
-						) x
-	WHERE A.sample_ms > b.sample_ms
-				AND A.SnapshotDate > B.SnapshotDate
-				AND A.num_of_bytes_read>=B.num_of_bytes_read
-				AND A.num_of_reads>=B.num_of_reads
-				AND A.num_of_writes>=B.num_of_writes
-				AND A.num_of_bytes_written>= B.num_of_bytes_written
-				AND NOT (A.num_of_reads=B.num_of_reads AND A.num_of_writes=B.num_of_writes)
-	GROUP BY GROUPING SETS(
-				(x.InstanceID),
-				(x.DatabaseID),
-				(x.DatabaseID,x.Drive),
-				(x.DatabaseID,x.FileID,x.Drive),
-				(x.Drive)
-				)
-	,a.SnapshotDate
-END
+FROM @IOStats a
+JOIN Staging.IOStats b ON b.database_id = a.database_id AND b.file_id = a.file_id AND b.InstanceID=@InstanceID
+LEFT JOIN dbo.Databases D ON D.database_id = a.database_id AND d.InstanceID=@InstanceID AND D.IsActive=1
+LEFT JOIN dbo.DBFiles F ON F.file_id = a.file_id AND F.DatabaseID = D.DatabaseID AND F.IsActive=1 
+CROSS APPLY(SELECT ISNULL(F.DatabaseID,-999) AS DatabaseID,
+					ISNULL(F.FileID,-999) AS FileID,
+					CASE WHEN F.physical_name LIKE ''_:\%'' THEN LEFT(F.physical_name,1) ELSE ''?'' END AS Drive,
+					@InstanceID AS InstanceID
+					) x
+WHERE A.sample_ms > b.sample_ms
+			AND A.SnapshotDate > B.SnapshotDate
+			AND A.num_of_bytes_read>=B.num_of_bytes_read
+			AND A.num_of_reads>=B.num_of_reads
+			AND A.num_of_writes>=B.num_of_writes
+			AND A.num_of_bytes_written>= B.num_of_bytes_written
+			AND NOT (A.num_of_reads=B.num_of_reads AND A.num_of_writes=B.num_of_writes)
+GROUP BY GROUPING SETS(
+			(x.InstanceID),
+			(x.DatabaseID,x.FileID,x.Drive)' + CASE WHEN @EngineEdition IN(1,2,3,4) THEN ',
+			(x.DatabaseID),
+			(x.DatabaseID,x.Drive),			
+			(x.Drive)' ELSE '' END + '
+			)
+,a.SnapshotDate'
+
+
+INSERT INTO #DBIOStatsTemp
+(
+	InstanceID,
+	SnapshotDate,
+	DatabaseID,
+	Drive,
+	FileID,
+	sample_ms_diff,
+	num_of_reads,
+	num_of_bytes_read,
+	io_stall_read_ms,
+	num_of_writes,
+	num_of_bytes_written,
+	io_stall_write_ms,
+	size_on_disk_bytes
+)
+EXEC sp_executesql @SQL,N'@IOStats IOStats READONLY,@InstanceID INT',@IOStats,@InstanceID
 
 BEGIN TRAN
 

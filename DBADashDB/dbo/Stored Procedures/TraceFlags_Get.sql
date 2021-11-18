@@ -1,4 +1,4 @@
-﻿CREATE PROC [dbo].[TraceFlags_Get](@InstanceIDs VARCHAR(MAX)=NULL)
+﻿CREATE PROC dbo.TraceFlags_Get(@InstanceIDs VARCHAR(MAX)=NULL)
 AS
 DECLARE @Instances TABLE(
 	InstanceID INT PRIMARY KEY
@@ -30,6 +30,6 @@ SELECT I.Instance,
 FROM dbo.Instances I 
 LEFT JOIN dbo.TraceFlags tf ON tf.InstanceID=I.InstanceID
 WHERE EXISTS(SELECT 1 FROM @Instances t WHERE I.InstanceID = t.InstanceID)
-AND I.EditionID<> 1674378470 --exclude azure
+AND I.EngineEdition IN(1,2,3,4) -- Exclude Azure & Azure Managed Instance
 AND I.IsActive=1
 ORDER BY I.ConnectionID,tf.TraceFlag

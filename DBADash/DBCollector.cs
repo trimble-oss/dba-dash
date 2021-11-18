@@ -96,7 +96,7 @@ namespace DBADash
         readonly CollectionType[] azureMasterOnlyCollectionTypes = new CollectionType[] { CollectionType.AzureDBElasticPoolResourceStats };
         public DBADashSource Source;
         private bool noWMI;
-        private bool IsAzure = false;
+        private bool IsAzureDB = false;
         private bool isAzureMasterDB = false;
         private string instanceName;
         string dbName;
@@ -160,7 +160,7 @@ namespace DBADash
 
         public bool IsQueryStoreSupported()
         {
-            if (IsAzure)
+            if (IsAzureDB)
             {
                 return true;
             }
@@ -265,13 +265,13 @@ namespace DBADash
             if (IsXESupported())
             {
                 string removeSQL;
-                if (IsAzure)
+                if (IsAzureDB)
                 {
-                    removeSQL = Properties.Resources.SQLRemoveEventSessionsAzure;
+                    removeSQL = SqlStrings.RemoveEventSessionsAzure;
                 }
                 else
                 {
-                    removeSQL = Properties.Resources.SQLRemoveEventSessions;
+                    removeSQL = SqlStrings.RemoveEventSessions;
                 }  
                 using (var cn = new SqlConnection(_connectionString))
                 {
@@ -289,13 +289,13 @@ namespace DBADash
             if (IsXESupported())
             {
                 string removeSQL;
-                if (IsAzure)
+                if (IsAzureDB)
                 {
-                    removeSQL = Properties.Resources.SQLStopEventSessionsAzure;
+                    removeSQL = SqlStrings.StopEventSessionsAzure;
                 }
                 else
                 {
-                    removeSQL = Properties.Resources.SQLStopEventSessions;
+                    removeSQL = SqlStrings.StopEventSessions;
                 }
                 using (var cn = new SqlConnection(_connectionString))
                 {
@@ -310,7 +310,7 @@ namespace DBADash
 
         public void GetInstance(string connectionID)
         {
-            var dt = getDT("DBADash", Properties.Resources.SQLInstance);
+            var dt = getDT("DBADash", SqlStrings.Instance);
             dt.Columns.Add("AgentVersion", typeof(string));
             dt.Columns.Add("ConnectionID", typeof(string));
             dt.Columns.Add("AgentHostName", typeof(string));
@@ -339,9 +339,9 @@ namespace DBADash
             {
                 noWMI = true;
             }
-            if (editionId == 1674378470)
+            if (engineEdition == DatabaseEngineEdition.SqlDatabase)
             {
-                IsAzure = true;
+                IsAzureDB = true;
                 if (dbName == "master")
                 {
                     isAzureMasterDB = true;
@@ -354,7 +354,7 @@ namespace DBADash
             }
             if (connectionID == null)
             {
-                if (IsAzure)
+                if (IsAzureDB)
                 {
                     dt.Rows[0]["ConnectionID"] = instanceName + "|" + dbName;
                     noWMI = true;
@@ -401,12 +401,12 @@ namespace DBADash
                 // Already collected
                 return false;
             }
-            else if (IsAzure && (!azureCollectionTypes.Contains(collectionType)))
+            else if (IsAzureDB && (!azureCollectionTypes.Contains(collectionType)))
             {
                 // Collection Type doesn't apply to AzureDB
                 return false;
             }
-            else if (!IsAzure && azureOnlyCollectionTypes.Contains(collectionType))
+            else if (!IsAzureDB && azureOnlyCollectionTypes.Contains(collectionType))
             {
                 // Collection Type doesn't apply to normal standalone instance
                 return false;
@@ -421,14 +421,20 @@ namespace DBADash
                 // Availability group collection and Hadr isn't enabled.
                 return false;
             }
-            if(collectionType == CollectionType.SchemaSnapshot)
+            else if(collectionType == CollectionType.SchemaSnapshot)
             {
                 //Schema snapshots are not handled via DBCollector
                 return false;
             }
-            if(collectionType== CollectionType.ResourceGovernorConfiguration)
+            else if(collectionType== CollectionType.ResourceGovernorConfiguration)
             {
                 return !(productVersion.StartsWith("8.") || productVersion.StartsWith("9."));
+            }
+            else if( (new CollectionType[] { CollectionType.Backups, CollectionType.DatabaseMirroring, CollectionType.LogRestores, CollectionType.AvailabilityGroups, CollectionType.AvailabilityReplicas, CollectionType.DatabasesHADR }).Contains(collectionType) 
+                        && engineEdition== DatabaseEngineEdition.SqlManagedInstance)
+            {
+                // Don't need to collect these types for Azure MI
+                return false;
             }
             else
             {
@@ -796,7 +802,7 @@ CROSS APPLY sys.dm_exec_sql_text(H.sql_handle) txt");
             }
             else if (collectionType == CollectionType.SlowQueries)
             {
-                if (Source.SlowQueryThresholdMs >= 0 && (!(IsAzure && isAzureMasterDB)))
+                if (Source.SlowQueryThresholdMs >= 0 && (!(IsAzureDB && isAzureMasterDB)))
                 {
                      collectSlowQueries();
                 }
@@ -817,7 +823,7 @@ CROSS APPLY sys.dm_exec_sql_text(H.sql_handle) txt");
             }
             else if (collectionType == CollectionType.ResourceGovernorConfiguration)
             {
-                if (engineEdition == DatabaseEngineEdition.Enterprise && !IsAzure)
+                if (engineEdition == DatabaseEngineEdition.Enterprise && !IsAzureDB)
                 {
                     collectResourceGovernor();                  
                 }
@@ -828,14 +834,14 @@ CROSS APPLY sys.dm_exec_sql_text(H.sql_handle) txt");
             }
             else
             {
-                addDT(collectionTypeString, Properties.Resources.ResourceManager.GetString("SQL" + collectionTypeString, Properties.Resources.Culture), param);
+                addDT(collectionTypeString, SqlStrings.GetSqlString(collectionType), param);
             }
         }
 
         private void collectRunningQueries()
         {
             using(var cn = new SqlConnection(_connectionString))
-            using (var cmd = new SqlCommand(Properties.Resources.SQLRunningQueries, cn))
+            using (var cmd = new SqlCommand(SqlStrings.RunningQueries, cn))
             using (var da = new SqlDataAdapter(cmd))
             {
                 cmd.Parameters.AddWithValue("CollectSessionWaits", Source.CollectSessionWaits);
@@ -871,7 +877,7 @@ CROSS APPLY sys.dm_exec_sql_text(H.sql_handle) txt");
             if (xml.Length > 0)
             {
        
-                string sql = Properties.Resources.ResourceManager.GetString("SQLPerformanceCounters", Properties.Resources.Culture);
+                string sql = SqlStrings.PerformanceCounters;
                 if(productVersion.StartsWith("8") || productVersion.StartsWith("9"))
                 {
                     sql = sql.Replace("SYSUTCDATETIME()", "GETUTCDATE()");
@@ -943,13 +949,13 @@ CROSS APPLY sys.dm_exec_sql_text(H.sql_handle) txt");
                     ApplicationName = "DBADashXE"
                 };
                 string slowQueriesSQL;
-                if (IsAzure)
+                if (IsAzureDB)
                 {
-                    slowQueriesSQL = Properties.Resources.SQLSlowQueriesAzure;
+                    slowQueriesSQL = SqlStrings.SlowQueriesAzure;
                 }
                 else
                 {
-                    slowQueriesSQL = Properties.Resources.SQLSlowQueries;
+                    slowQueriesSQL = SqlStrings.SlowQueries;
                 }
                 using (var cn = new SqlConnection(builder.ConnectionString))
                 {
@@ -984,14 +990,14 @@ CROSS APPLY sys.dm_exec_sql_text(H.sql_handle) txt");
 
         private void collectServerExtraProperties()
         {
-            if (!this.IsAzure)
+            if (!this.IsAzureDB)
             {
                 if (!noWMI)
                 {
                     collectComputerSystemWMI();
                     collectOperatingSystemWMI();
                 }
-                addDT("ServerExtraProperties", DBADash.Properties.Resources.SQLServerExtraProperties);
+                addDT("ServerExtraProperties", SqlStrings.ServerExtraProperties);
                 Data.Tables["ServerExtraProperties"].Columns.Add("WindowsCaption");
                 if (manufacturer != "") { Data.Tables["ServerExtraProperties"].Rows[0]["SystemManufacturer"] = manufacturer; }
                 if (model != "") { Data.Tables["ServerExtraProperties"].Rows[0]["SystemProductName"] = model; }
@@ -1048,7 +1054,7 @@ CROSS APPLY sys.dm_exec_sql_text(H.sql_handle) txt");
         {
             try
             {
-                addDT("Drives", Properties.Resources.SQLDrives);
+                addDT("Drives", SqlStrings.Drives);
             }
             catch (Exception ex)
             {
