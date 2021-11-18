@@ -256,7 +256,8 @@ namespace DBADashGUI.Performance
                     var plan = (string)row["query_plan"];
                     string path = System.IO.Path.GetTempFileName() + ".sqlplan";
                     System.IO.File.WriteAllText(path, plan);
-                    Process.Start(path);
+                    var psi = new ProcessStartInfo(path) { UseShellExecute = true };
+                    Process.Start(psi);
                 }
                 else if (dgv.Columns[e.ColumnIndex].Name == "colGroup")
                 {
@@ -511,7 +512,8 @@ namespace DBADashGUI.Performance
             if (e.RowIndex >= 0 && dgvSessionWaits.Columns[e.ColumnIndex].Name == "colHelp")
             {
                 string wait = (string)dgvSessionWaits.Rows[e.RowIndex].Cells["colWaitType"].Value;
-                System.Diagnostics.Process.Start("https://www.sqlskills.com/help/waits/" + wait.ToLower() + "/");
+                var psi = new ProcessStartInfo("https://www.sqlskills.com/help/waits/" + wait.ToLower() + "/") { UseShellExecute = true };
+                Process.Start(psi);
             }
         }
     }

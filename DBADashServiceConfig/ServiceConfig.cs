@@ -776,7 +776,8 @@ namespace DBADashServiceConfig
 
         private void lnkCronBuilder_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            Process.Start("http://www.cronmaker.com/");
+            var psi = new ProcessStartInfo("http://www.cronmaker.com/") { UseShellExecute = true };
+            Process.Start(psi);
         }
 
         private void bttnDestFolder_Click(object sender, EventArgs e)
@@ -850,7 +851,7 @@ namespace DBADashServiceConfig
 
         private void lnkPermissions_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            var psi = new ProcessStartInfo("https://github.com/DavidWiseman/DBADash/blob/develop/Docs/Security.md");
+            var psi = new ProcessStartInfo("https://github.com/DavidWiseman/DBADash/blob/develop/Docs/Security.md") { UseShellExecute=true};
             Process.Start(psi);
         }
 

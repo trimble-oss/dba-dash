@@ -240,7 +240,8 @@ namespace DBADashGUI
                         }
                     }             
                     Common.SaveDataGridViewToXLSX(ref dgv, ofd.FileName);
-                    Process.Start(ofd.FileName);                    
+                    var psi = new ProcessStartInfo(ofd.FileName) { UseShellExecute = true };
+                    Process.Start(psi);                    
                 }
             }
         }

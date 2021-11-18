@@ -73,7 +73,8 @@ namespace DBADashGUI
 
         private void configureService()
         {
-            Process.Start(Properties.Resources.ServiceConfigToolName);
+            var psi = new ProcessStartInfo(Properties.Resources.ServiceConfigToolName) { UseShellExecute = true };
+            Process.Start(psi);
             Application.Exit();
         }
         
