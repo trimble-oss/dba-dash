@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using Microsoft.Data.SqlClient;
+using System.Diagnostics;
 
 namespace DBADashGUI.Performance
 {
@@ -93,7 +94,8 @@ namespace DBADashGUI.Performance
             if(e.RowIndex>=0 && e.ColumnIndex == colHelp.Index)
             {
                 string wait = (string)dgv[colWaitType.Index, e.RowIndex].Value;
-                System.Diagnostics.Process.Start("https://www.sqlskills.com/help/waits/" + wait.ToLower() + "/");
+                var psi = new ProcessStartInfo("https://www.sqlskills.com/help/waits/" + wait.ToLower() + "/") { UseShellExecute = true };
+                Process.Start(psi);
             }
             else if(e.RowIndex>=0 && e.ColumnIndex == colWaitType.Index)
             {
