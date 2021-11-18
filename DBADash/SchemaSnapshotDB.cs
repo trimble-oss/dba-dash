@@ -111,6 +111,7 @@ namespace DBADash
         public SchemaSnapshotDB(string connectionString,SchemaSnapshotDBOptions options)
         {
             _connectionString = connectionString;
+            options = options == null ? new SchemaSnapshotDBOptions() : options;
             this.options = options;
             this.ScriptingOptions = options.ScriptOptions();
         }
