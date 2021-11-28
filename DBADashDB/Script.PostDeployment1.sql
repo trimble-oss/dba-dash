@@ -614,11 +614,22 @@ FROM (VALUES('PurgeCollectionErrorLog_StartDate'),
 			('PurgeQueryPlans_StartDate'),
 			('PurgeQueryPlans_CompletedDate'),
 			('PurgePartitions_StartDate'),
-			('PurgePartitions_CompletedDate')
+			('PurgePartitions_CompletedDate'),
+			('MemoryDumpAckDate')
 	  ) T(SettingName)
 WHERE NOT EXISTS(SELECT 1 
 				FROM dbo.Settings S
 				WHERE S.SettingName=T.SettingName);
+
+INSERT INTO dbo.Settings(SettingName,SettingValue)
+SELECT SettingName,SettingValue 
+FROM (VALUES('MemoryDumpCriticalThresholdHrs',48),
+		('MemoryDumpWarningThresholdHrs',168)) T(SettingName,SettingValue)
+WHERE NOT EXISTS(
+	SELECT 1 
+	FROM dbo.Settings S 
+	WHERE S.SettingName = T.SettingName
+	)
 
 /* From: https://docs.microsoft.com/en-us/sql/relational-databases/system-dynamic-management-views/sys-dm-os-memory-clerks-transact-sql?view=sql-server-ver15 */
 MERGE INTO dbo.MemoryClerkType AS T

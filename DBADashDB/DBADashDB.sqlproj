@@ -624,6 +624,9 @@
     <Build Include="Switch\Tables\SessionWaits.sql" />
     <Build Include="dbo\Stored Procedures\SessionWaits_Get.sql" />
     <Build Include="dbo\Stored Procedures\SessionWaitsSummary_Get.sql" />
+    <Build Include="dbo\Stored Procedures\AcknowledgeMemoryDumps.sql" />
+    <Build Include="dbo\Stored Procedures\MemoryDumpThresholds_Upd.sql" />
+    <Build Include="dbo\Stored Procedures\MemoryDumpThresholds_Get.sql" />
   </ItemGroup>
   <ItemGroup>
     <PostDeploy Include="Script.PostDeployment1.sql" />
