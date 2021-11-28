@@ -26,9 +26,17 @@ BEGIN
 END;
 
 DECLARE @ErrorsFrom DATETIME
+DECLARE @MemoryDumpWarningThresholdHrs INT 
+DECLARE @MemoryDumpCriticalThresholdHrs INT
+DECLARE @MemoryDumpAckDate DATETIME
+
 SELECT @ErrorsFrom=CONVERT(DATETIME,SettingValue)
 FROM dbo.Settings 
 WHERE SettingName = 'ErrorAckDate';
+
+EXEC dbo.MemoryDumpThresholds_Get @MemoryDumpWarningThresholdHrs=@MemoryDumpWarningThresholdHrs OUT,
+									@MemoryDumpCriticalThresholdHrs =@MemoryDumpCriticalThresholdHrs OUT,
+									@MemoryDumpAckDate=@MemoryDumpAckDate OUT
 
 SET @ErrorsFrom = CASE WHEN @ErrorsFrom > DATEADD(d,-1,GETUTCDATE()) THEN @ErrorsFrom ELSE DATEADD(d,-1,GETUTCDATE())  END;
 
@@ -201,8 +209,9 @@ SELECT I.InstanceID,
 	I.LastMemoryDump,
 	CASE WHEN I.MemoryDumpCount=0 THEN 4 
 		WHEN I.MemoryDumpCount IS NULL THEN 3 
-		WHEN DATEDIFF(d,I.LastMemoryDump,GETUTCDATE()) < 2 THEN 1 
-		WHEN DATEDIFF(d,I.LastMemoryDump,GETUTCDATE()) < 14 THEN 2
+		WHEN I.LastMemoryDump < @MemoryDumpAckDate THEN 4
+		WHEN DATEDIFF(hh,I.LastMemoryDump,GETUTCDATE()) < @MemoryDumpCriticalThresholdHrs THEN 1 
+		WHEN DATEDIFF(hh,I.LastMemoryDump,GETUTCDATE()) < @MemoryDumpWarningThresholdHrs THEN 2
 		ELSE 4 END AS MemoryDumpStatus,
     ISNULL(dbc.LastGoodCheckDBStatus,3) LastGoodCheckDBStatus,
     dbc.LastGoodCheckDBCriticalCount,

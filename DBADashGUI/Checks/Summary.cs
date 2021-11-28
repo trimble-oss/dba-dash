@@ -463,5 +463,24 @@ namespace DBADashGUI
                 lblRefreshTime.ForeColor = Color.OrangeRed;
             }
         }
+
+        private void configureThresholdsToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            using(var frm = new MemoryDumpThresholdsConfig())
+            {
+                frm.ShowDialog(this);
+                if(frm.DialogResult == DialogResult.OK)
+                {
+                    RefreshData();
+                }
+            }
+        }
+
+        private void acknowledgeDumpsToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            MemoryDumpThresholds.Acknowledge();
+            MessageBox.Show("Memory dump acknowledge date updated", "Info", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            RefreshData();
+        }
     }
 }
