@@ -1,9 +1,10 @@
-﻿CREATE PROC [dbo].[PerformanceSummary_Get](
+﻿CREATE PROC dbo.PerformanceSummary_Get(
 	@InstanceIDs VARCHAR(MAX)=NULL,
 	@FromDate DATETIME2(3)=NULL,
 	@ToDate DATETIME2(3)=NULL,
 	@TagIDs VARCHAR(MAX)=NULL,
-	@Use60MIN BIT=NULL
+	@Use60MIN BIT=NULL,
+	@Debug BIT=0
 )
 AS
 IF @FromDate IS NULL
@@ -123,9 +124,9 @@ SELECT i.InstanceID,
 		i.ConnectionID,
        i.Instance,
 	   cpuAgg.AvgCPU,
-	   CASE WHEN cpuAgg.AvgCPU>90 THEN 1 WHEN cpuAgg.AvgCPU >75 THEN 2 WHEN cpuAgg.AvgCPU<50 THEN 4 ELSE 3 END AS AvgCPUStatus,
+	   CASE WHEN cpuAgg.AvgCPU > thres.CPUCriticalThreshold THEN 1 WHEN cpuAgg.AvgCPU > thres.CPUWarningThreshold THEN 2 WHEN cpuAgg.AvgCPU < thres.CPULowThreshold THEN 4 ELSE 3 END AS AvgCPUStatus,
 	   cpuAgg.MaxCPU,
-	   CASE WHEN cpuAgg.MaxCPU>90 THEN 1 WHEN cpuAgg.MaxCPU >75 THEN 2 WHEN cpuAgg.MaxCPU<50 THEN 4 ELSE 3 END AS MaxCPUStatus,
+	   CASE WHEN cpuAgg.MaxCPU > thres.CPUCriticalThreshold  THEN 1 WHEN cpuAgg.MaxCPU > thres.CPUWarningThreshold THEN 2 WHEN cpuAgg.MaxCPU < thres.CPULowThreshold THEN 4 ELSE 3 END AS MaxCPUStatus,
        dbio.ReadIOPs,
        dbio.WriteIOPs,
 	   dbio.IOPs,
@@ -133,9 +134,9 @@ SELECT i.InstanceID,
        dbio.WriteMBsec,
 	   dbio.MBsec,
        dbio.ReadLatency,
-	   CASE WHEN dbio.ReadLatency>50 THEN 1 WHEN dbio.ReadLatency>10 THEN 2 WHEN dbio.ReadLatency<=10 THEN 4 ELSE 3 END AS ReadLatencyStatus,
+	   CASE WHEN dbio.ReadIOPs < thres.MinIOPsThreshold THEN 3 WHEN dbio.ReadLatency > thres.ReadLatencyCriticalThreshold THEN 1 WHEN dbio.ReadLatency > thres.ReadLatencyWarningThreshold THEN 2 WHEN dbio.ReadLatency <= thres.ReadLatencyGoodThreshold THEN 4 ELSE 3 END AS ReadLatencyStatus,
        dbio.WriteLatency,
-	   CASE WHEN dbio.WriteLatency>50 THEN 1 WHEN dbio.WriteLatency>10 THEN 2 WHEN dbio.WriteLatency<=10 THEN 4 ELSE 3 END AS WriteLatencyStatus,
+	   CASE WHEN dbio.WriteIOPs < thres.MinIOPsThreshold THEN 3 WHEN dbio.WriteLatency > thres.ReadLatencyCriticalThreshold THEN 1 WHEN dbio.WriteLatency > thres.ReadLatencyWarningThreshold THEN 2 WHEN dbio.WriteLatency <= thres.ReadLatencyGoodThreshold THEN 4 ELSE 3 END AS WriteLatencyStatus,
        dbio.Latency,
        dbio.MaxReadIOPs,
        dbio.MaxWriteIOPs,
@@ -144,7 +145,7 @@ SELECT i.InstanceID,
        dbio.MaxWriteMBsec,
        dbio.MaxMBsec,
        wait.CriticalWaitMsPerSec,
-	   CASE WHEN wait.CriticalWaitMsPerSec=0 THEN 4 WHEN wait.CriticalWaitMsPerSec>1000 THEN 1 WHEN wait.CriticalWaitMsPerSec>1 THEN 2 ELSE 3 END AS CriticalWaitStatus, 
+	   CASE WHEN wait.CriticalWaitMsPerSec=0 THEN 4 WHEN wait.CriticalWaitMsPerSec> thres.CriticalWaitCriticalThreshold THEN 1 WHEN wait.CriticalWaitMsPerSec> thres.CriticalWaitWarningThreshold THEN 2 ELSE 3 END AS CriticalWaitStatus, 
        wait.LatchWaitMsPerSec,
        wait.LockWaitMsPerSec,
        wait.IOWaitMsPerSec,
@@ -164,10 +165,16 @@ FROM dbo.Instances I
 LEFT JOIN dbio ON I.InstanceID = dbio.InstanceID
 LEFT JOIN cpuAgg ON I.InstanceID = cpuAgg.InstanceID
 LEFT JOIN wait ON I.InstanceID = wait.InstanceID
+CROSS JOIN dbo.PerformanceThresholds thres
 WHERE EXISTS(SELECT 1 FROM #Instances t WHERE I.InstanceID = t.InstanceID)
 AND I.IsActive=1
-ORDER BY CASE WHEN wait.CriticalWaitMsPerSec> 1 THEN wait.CriticalWaitMsPerSec ELSE 0 END DESC, cpuAgg.AvgCPU DESC
+ORDER BY CASE WHEN wait.CriticalWaitMsPerSec > thres.CriticalWaitWarningThreshold THEN wait.CriticalWaitMsPerSec ELSE 0 END DESC, cpuAgg.AvgCPU DESC
 OPTION(RECOMPILE)'
 
+IF @Debug=1
+BEGIN
+	EXEC dbo.PrintMax @SQL 
+END
 
 EXEC sp_executesql @SQL,N'@FromDate DATETIME2(3),@ToDate DATETIME2(3)',@FromDate,@ToDate
+

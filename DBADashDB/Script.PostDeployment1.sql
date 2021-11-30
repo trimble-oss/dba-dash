@@ -624,7 +624,20 @@ WHERE NOT EXISTS(SELECT 1
 INSERT INTO dbo.Settings(SettingName,SettingValue)
 SELECT SettingName,SettingValue 
 FROM (VALUES('MemoryDumpCriticalThresholdHrs',48),
-		('MemoryDumpWarningThresholdHrs',168)) T(SettingName,SettingValue)
+		('MemoryDumpWarningThresholdHrs',168),
+		('CPUCriticalThreshold',90),
+		('CPUWarningThreshold',75),
+		('CPULowThreshold',50),
+		('ReadLatencyCriticalThreshold',50),
+		('ReadLatencyWarningThreshold',10),
+		('ReadLatencyGoodThreshold',10),
+		('WriteLatencyCriticalThreshold',50),
+		('WriteLatencyWarningThreshold',10),
+		('WriteLatencyGoodThreshold',10),
+		('MinIOPsThreshold',100),
+		('CriticalWaitCriticalThreshold',1000),
+		('CriticalWaitWarningThreshold',10)
+		) T(SettingName,SettingValue)
 WHERE NOT EXISTS(
 	SELECT 1 
 	FROM dbo.Settings S 
