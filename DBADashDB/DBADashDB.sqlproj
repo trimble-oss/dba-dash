@@ -627,6 +627,8 @@
     <Build Include="dbo\Stored Procedures\AcknowledgeMemoryDumps.sql" />
     <Build Include="dbo\Stored Procedures\MemoryDumpThresholds_Upd.sql" />
     <Build Include="dbo\Stored Procedures\MemoryDumpThresholds_Get.sql" />
+    <Build Include="dbo\Views\PerformanceThresholds.sql" />
+    <Build Include="dbo\Stored Procedures\PrintMax.sql" />
   </ItemGroup>
   <ItemGroup>
     <PostDeploy Include="Script.PostDeployment1.sql" />
