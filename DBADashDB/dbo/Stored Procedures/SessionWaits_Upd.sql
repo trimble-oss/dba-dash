@@ -23,7 +23,7 @@ BEGIN
 	   FROM @SessionWaits
 	   EXCEPT
 	   SELECT WaitType 
-	   FROM dbo.WaitType
+	   FROM dbo.WaitType WITH(UPDLOCK,HOLDLOCK)
    END
 
    INSERT INTO dbo.SessionWaits
