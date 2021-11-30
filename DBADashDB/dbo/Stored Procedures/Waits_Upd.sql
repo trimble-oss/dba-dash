@@ -1,11 +1,23 @@
-﻿CREATE PROC [dbo].[Waits_Upd](@Waits dbo.Waits READONLY,@InstanceID INT,@SnapshotDate DATETIME2(2))
+﻿CREATE PROC dbo.Waits_Upd(
+    @Waits dbo.Waits READONLY,
+    @InstanceID INT,
+    @SnapshotDate DATETIME2(2)
+)
 AS
-INSERT INTO dbo.WaitType(WaitType)
-SELECT wait_type 
-FROM @Waits
-EXCEPT 
-SELECT WaitType 
-FROM dbo.WaitType
+IF EXISTS(SELECT wait_type 
+        FROM @Waits
+        EXCEPT 
+        SELECT WaitType 
+        FROM dbo.WaitType
+        )
+BEGIN
+    INSERT INTO dbo.WaitType(WaitType)
+    SELECT wait_type 
+    FROM @Waits
+    EXCEPT 
+    SELECT WaitType 
+    FROM dbo.WaitType WITH(UPDLOCK,HOLDLOCK)
+END
 
 INSERT INTO dbo.Waits(InstanceID,SnapshotDate,WaitTypeID,waiting_tasks_count,wait_time_ms,signal_wait_time_ms,sample_ms_diff)
 SELECT @InstanceID,
