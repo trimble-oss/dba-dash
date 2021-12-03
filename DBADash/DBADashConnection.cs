@@ -87,7 +87,20 @@ namespace DBADash
             }
         }
 
+        private ConnectionInfo _connectionInfo;
 
+        [JsonIgnore]
+        public ConnectionInfo ConnectionInfo
+        {
+            get
+            {
+                if (_connectionInfo == null && connectionType == ConnectionType.SQL)
+                {
+                    _connectionInfo = ConnectionInfo.GetConnectionInfo(connectionString);
+                }
+                return _connectionInfo;
+            }
+        }
 
         public void Validate()
         {
@@ -101,99 +114,35 @@ namespace DBADash
             }
            else if (connectionType == ConnectionType.SQL)
             {
-                validateSQLConnection(connectionString); // Open a connection to the DB
+                validateSQLConnection(); // Open a connection to the DB
             }
         }
 
-        public string ProductVersion()
-        {
-            if (connectionType == ConnectionType.SQL && productVersion.Length==0)
-            {
-                SqlConnection cn = new SqlConnection(connectionString);
-                try
-                {
-                    cn.Open();
-                    SqlCommand cmd = new SqlCommand("SELECT SERVERPROPERTY('ProductVersion')", cn);
-                    productVersion =(string)cmd.ExecuteScalar();
-                }
-                catch (Exception ex)
-                {
-                    Log.Error(ex, "SQL Version check fail");
-                }
-            }
-            return productVersion;            
-        }
 
         public bool IsXESupported()
         {
-            return IsXESupported(ProductVersion());
+            return ConnectionInfo.IsXESupported;
         }
 
         public static bool IsXESupported(string productVersion)
         {
-            if (productVersion.StartsWith("8.") || productVersion.StartsWith("9.") || productVersion.StartsWith("10.")) // Note: Extended events added in SQL 2008 (10.*).  Batch completed not supported in this version & there are other differences like recording durations in ms instead of microseconds
-            {
-                return false;
-            }
-            else
-            {
-                return true;
-            }
+           return ConnectionInfo.GetXESupported(productVersion);
         }
 
         public bool IsAzureDB()
         {
-            if (connectionType == ConnectionType.SQL)
-            {
-                SqlConnection cn = new SqlConnection(connectionString);
-                try
-                {
-                    cn.Open();
-                    SqlCommand cmd = new SqlCommand("SELECT CAST(SERVERPROPERTY('EngineEdition') AS INT)", cn);
-                    int engineEdition = (int)cmd.ExecuteScalar();
-                    if (engineEdition == 5)
-                    {
-                        return true;
-                    }
-                    else
-                    {
-                        return false;
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Log.Error(ex, "IsAzureDB SQL Edition check fail");
-                    throw;
-                }
-            }
-            else
-            {
-                return false;
-            }
+            return ConnectionInfo.IsAzureDB;
         }
 
 
-        private void validateSQLConnection(string connectionString)
-        {
-            using (var cn = new SqlConnection(connectionString))
-            using (var cmd = new SqlCommand("SELECT SERVERPROPERTY('EngineEdition'),SERVERPROPERTY('ProductVersion')", cn))
-            {
-                cn.Open();
-                using (var rdr = cmd.ExecuteReader())
-                {
-                    rdr.Read();
-                    int engineEdition = rdr.GetInt32(0);
-                    string productVersion = rdr.GetString(1);
-                    var majorVersion = productVersion.Substring(0, productVersion.IndexOf('.'));
-                    if (!supportedProductVersions.Contains(Convert.ToInt32(majorVersion))){
-                        throw new Exception(string.Format("SQL Server Version {0} isn't supported by DBA Dash.  For testing purposes, it's possible to skip this validation check.",majorVersion));
-                    }
-                    if(!supportedEngineEditions.Contains(engineEdition)){
-                        throw new Exception(string.Format("SQL Server Engine Edition {0} isn't supported by DBA Dash.  For testing purposes, it's possible to skip this validation check.", engineEdition));
-                    }
-                }
-
+        private void validateSQLConnection()
+        {         
+            if (!supportedProductVersions.Contains(ConnectionInfo.MajorVersion)){
+                throw new Exception(string.Format("SQL Server Version {0} isn't supported by DBA Dash.  For testing purposes, it's possible to skip this validation check.",ConnectionInfo.MajorVersion));
             }
+            if(!supportedEngineEditions.Contains(ConnectionInfo.EngineEditionValue)){
+                throw new Exception(string.Format("SQL Server Engine Edition {0} isn't supported by DBA Dash.  For testing purposes, it's possible to skip this validation check.", ConnectionInfo.EngineEditionValue));
+            }       
         }
 
         public ConnectionType Type
