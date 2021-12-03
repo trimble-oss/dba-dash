@@ -16,8 +16,14 @@ AND AgentServiceName = @AgentServiceName
 
 IF @DBADashAgentID IS NULL
 BEGIN
+
 	INSERT INTO dbo.DBADashAgent(AgentHostName,AgentServiceName,AgentVersion,AgentPath)
-	VALUES(@AgentHostName,@AgentServiceName,@AgentVersion,@AgentPath)
+	SELECT @AgentHostName,@AgentServiceName,@AgentVersion,@AgentPath
+	WHERE NOT EXISTS(SELECT 1 
+				FROM dbo.DBADashAgent WITH(UPDLOCK,HOLDLOCK) 
+				WHERE AgentHostName = @AgentHostName 
+				AND AgentServiceName = @AgentServiceName
+				)
 
 	SET @DBADashAgentID = SCOPE_IDENTITY();
 END

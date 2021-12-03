@@ -89,18 +89,26 @@ AND NOT EXISTS(SELECT 1
 			WHERE T.TagID = tmp.TagID
 			)
 
-INSERT INTO dbo.InstanceTags
-(
-    Instance,
-    TagID
-)
-SELECT @Instance,T.TagID
-FROM @Tags T 
-WHERE NOT EXISTS(SELECT 1 
-			FROM dbo.InstanceTags IT 
-			WHERE IT.Instance = @Instance 
-			AND IT.TagID = T.TagID)
-
+IF EXISTS(SELECT 1
+		FROM @Tags T 
+		WHERE NOT EXISTS(SELECT 1 
+				FROM dbo.InstanceTags IT 
+				WHERE IT.Instance = @Instance 
+				AND IT.TagID = T.TagID)
+		)
+BEGIN
+	INSERT INTO dbo.InstanceTags
+	(
+		Instance,
+		TagID
+	)
+	SELECT @Instance,T.TagID
+	FROM @Tags T 
+	WHERE NOT EXISTS(SELECT 1 
+				FROM dbo.InstanceTags IT WITH(UPDLOCK,HOLDLOCK)
+				WHERE IT.Instance = @Instance 
+				AND IT.TagID = T.TagID)
+END
 
 DELETE T 
 FROM dbo.Tags T
