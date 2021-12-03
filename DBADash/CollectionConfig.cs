@@ -230,12 +230,16 @@ namespace DBADash
             var findConnection = new DBADashConnection(connectionString);
             foreach (var s in SourceConnections)
             {
-
                 if (s.SourceConnection.Type == findConnection.Type)
                 {
                     if (s.SourceConnection.Type == ConnectionType.SQL && s.SourceConnection.DataSource().ToLower() == findConnection.DataSource().ToLower()) {
                         // normally we can treat as same connection if we just vary by initial catalog.  For AzureDB, a different DB is a different instance
                         if (s.SourceConnection.InitialCatalog().ToLower() == findConnection.InitialCatalog().ToLower()) {
+                            return s;
+                        }
+                        else if ((new string[] { "master", String.Empty }).Contains(s.SourceConnection.InitialCatalog().ToLower())
+                            && (new string[] { "master", String.Empty }).Contains(findConnection.InitialCatalog().ToLower()))
+                        {
                             return s;
                         }
                         else
@@ -289,7 +293,7 @@ namespace DBADash
             var newConnections = new List<DBADashSource>();
             foreach (var cfg in SourceConnections)
             {
-                if (cfg.SourceConnection.InitialCatalog() == "master" && cfg.SourceConnection.IsAzureDB())
+                if ((new string[] {"master", String.Empty}).Contains(cfg.SourceConnection.InitialCatalog()) && cfg.SourceConnection.IsAzureDB())
                 {
                     try
                     {
@@ -311,7 +315,7 @@ namespace DBADash
             using (cn)
             {
                 cn.Open();
-                SqlCommand cmd = new SqlCommand("SELECT name from sys.databases", cn);
+                SqlCommand cmd = new SqlCommand("SELECT name from sys.databases WHERE name <> 'master'", cn);
                 var rdr = cmd.ExecuteReader();
                 var builder = new SqlConnectionStringBuilder(masterConnection.SourceConnection.ConnectionString);
                 
