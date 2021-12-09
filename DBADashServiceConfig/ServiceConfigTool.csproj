@@ -90,6 +90,7 @@
     <PackageReference Include="Humanizer.Core.zh-CN" Version="2.11.10" />
     <PackageReference Include="Humanizer.Core.zh-Hans" Version="2.11.10" />
     <PackageReference Include="Humanizer.Core.zh-Hant" Version="2.11.10" />
+    <PackageReference Include="Meziantou.Framework.Win32.CredentialManager" Version="1.4.2" />
     <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" Version="6.0.0" />
     <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
     <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />

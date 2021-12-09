@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Meziantou.Framework.Win32;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -41,7 +42,33 @@ namespace DBADashServiceConfig
                     arg = "--networkservice";
                     break;
                 case 3:
-                    arg = "--interactive";
+                    // Note: --interactive doesn't work on .NET 6 without a target OS.  Prompt user and pass as commandline arguments.
+                    var creds = CredentialManager.PromptForCredentials(
+                    captionText: ServiceName,
+                    messageText: "Please enter the credentials to run the DBA Dash service.\nNote: Check the security requirements for the service account in the applicaton documentation.\nEnter username in domain\\username format",
+                    saveCredential: CredentialSaveOption.Hidden
+                    );
+                    string domain = creds.Domain;
+                    if (String.IsNullOrEmpty(domain))
+                    {
+                        var input = MessageBox.Show(String.Format("Warning domain hasn't been specified.  Is this a local user account?\n\nSelect Yes to use {0} (local) \nSelect No to use {1} (domain)", Environment.MachineName, Environment.UserDomainName),"",MessageBoxButtons.YesNoCancel, MessageBoxIcon.Warning);
+                        if(input== DialogResult.Yes)
+                        {
+                            domain = Environment.MachineName;
+                        }
+                        else if(input== DialogResult.No)
+                        {
+                            domain = Environment.UserDomainName;
+                        }
+                        else
+                        {
+                            return;
+                        }
+                    }
+
+                    string username = domain + "\\" + creds.UserName;
+                    arg = "-username \"" + username + "\" -password \"" + creds.Password.Replace("\"","\"\"") + "\"";
+
                     break;
 
             }
