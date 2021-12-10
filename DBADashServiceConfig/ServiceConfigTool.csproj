@@ -34,75 +34,27 @@
     <ProjectReference Include="..\DBADash\DBADash.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="AWSSDK.Core" Version="3.7.3.33" />
-    <PackageReference Include="AWSSDK.S3" Version="3.7.4" />
+    <PackageReference Include="AWSSDK.Core" Version="3.7.5.5" />
+    <PackageReference Include="AWSSDK.S3" Version="3.7.7.2" />
     <PackageReference Include="Azure.Core" Version="1.21.0" />
     <PackageReference Include="Azure.Identity" Version="1.5.0" />
     <PackageReference Include="Common.Logging" Version="3.4.1" />
     <PackageReference Include="Common.Logging.Core" Version="3.4.1" />
     <PackageReference Include="CronExpressionDescriptor" Version="2.16.0" />
-    <PackageReference Include="Humanizer" Version="2.11.10" />
-    <PackageReference Include="Humanizer.Core" Version="2.11.10" />
-    <PackageReference Include="Humanizer.Core.af" Version="2.11.10" />
-    <PackageReference Include="Humanizer.Core.ar" Version="2.11.10" />
-    <PackageReference Include="Humanizer.Core.az" Version="2.11.10" />
-    <PackageReference Include="Humanizer.Core.bg" Version="2.11.10" />
-    <PackageReference Include="Humanizer.Core.bn-BD" Version="2.11.10" />
-    <PackageReference Include="Humanizer.Core.cs" Version="2.11.10" />
-    <PackageReference Include="Humanizer.Core.da" Version="2.11.10" />
-    <PackageReference Include="Humanizer.Core.de" Version="2.11.10" />
-    <PackageReference Include="Humanizer.Core.el" Version="2.11.10" />
-    <PackageReference Include="Humanizer.Core.es" Version="2.11.10" />
-    <PackageReference Include="Humanizer.Core.fa" Version="2.11.10" />
-    <PackageReference Include="Humanizer.Core.fi-FI" Version="2.11.10" />
-    <PackageReference Include="Humanizer.Core.fr" Version="2.11.10" />
-    <PackageReference Include="Humanizer.Core.fr-BE" Version="2.11.10" />
-    <PackageReference Include="Humanizer.Core.he" Version="2.11.10" />
-    <PackageReference Include="Humanizer.Core.hr" Version="2.11.10" />
-    <PackageReference Include="Humanizer.Core.hu" Version="2.11.10" />
-    <PackageReference Include="Humanizer.Core.hy" Version="2.11.10" />
-    <PackageReference Include="Humanizer.Core.id" Version="2.11.10" />
-    <PackageReference Include="Humanizer.Core.it" Version="2.11.10" />
-    <PackageReference Include="Humanizer.Core.ja" Version="2.11.10" />
-    <PackageReference Include="Humanizer.Core.ko-KR" Version="2.11.10" />
-    <PackageReference Include="Humanizer.Core.ku" Version="2.11.10" />
-    <PackageReference Include="Humanizer.Core.lv" Version="2.11.10" />
-    <PackageReference Include="Humanizer.Core.ms-MY" Version="2.11.10" />
-    <PackageReference Include="Humanizer.Core.mt" Version="2.11.10" />
-    <PackageReference Include="Humanizer.Core.nb" Version="2.11.10" />
-    <PackageReference Include="Humanizer.Core.nb-NO" Version="2.11.10" />
-    <PackageReference Include="Humanizer.Core.nl" Version="2.11.10" />
-    <PackageReference Include="Humanizer.Core.pl" Version="2.11.10" />
-    <PackageReference Include="Humanizer.Core.pt" Version="2.11.10" />
-    <PackageReference Include="Humanizer.Core.ro" Version="2.11.10" />
-    <PackageReference Include="Humanizer.Core.ru" Version="2.11.10" />
-    <PackageReference Include="Humanizer.Core.sk" Version="2.11.10" />
-    <PackageReference Include="Humanizer.Core.sl" Version="2.11.10" />
-    <PackageReference Include="Humanizer.Core.sr" Version="2.11.10" />
-    <PackageReference Include="Humanizer.Core.sr-Latn" Version="2.11.10" />
-    <PackageReference Include="Humanizer.Core.sv" Version="2.11.10" />
-    <PackageReference Include="Humanizer.Core.th-TH" Version="2.11.10" />
-    <PackageReference Include="Humanizer.Core.tr" Version="2.11.10" />
-    <PackageReference Include="Humanizer.Core.uk" Version="2.11.10" />
-    <PackageReference Include="Humanizer.Core.uz-Cyrl-UZ" Version="2.11.10" />
-    <PackageReference Include="Humanizer.Core.uz-Latn-UZ" Version="2.11.10" />
-    <PackageReference Include="Humanizer.Core.vi" Version="2.11.10" />
-    <PackageReference Include="Humanizer.Core.zh-CN" Version="2.11.10" />
-    <PackageReference Include="Humanizer.Core.zh-Hans" Version="2.11.10" />
-    <PackageReference Include="Humanizer.Core.zh-Hant" Version="2.11.10" />
+    <PackageReference Include="Humanizer.Core" Version="2.13.14" />
     <PackageReference Include="Meziantou.Framework.Win32.CredentialManager" Version="1.4.2" />
     <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" Version="6.0.0" />
     <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
     <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
-    <PackageReference Include="Microsoft.Data.SqlClient" Version="3.0.1" />
+    <PackageReference Include="Microsoft.Data.SqlClient" Version="4.0.0" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="6.0.0" />
-    <PackageReference Include="Microsoft.Identity.Client" Version="4.37.0" />
-    <PackageReference Include="Microsoft.Identity.Client.Extensions.Msal" Version="2.19.2" />
-    <PackageReference Include="Microsoft.IdentityModel.JsonWebTokens" Version="6.14.1" />
-    <PackageReference Include="Microsoft.IdentityModel.Logging" Version="6.14.1" />
-    <PackageReference Include="Microsoft.IdentityModel.Protocols" Version="6.14.1" />
-    <PackageReference Include="Microsoft.IdentityModel.Protocols.OpenIdConnect" Version="6.14.1" />
-    <PackageReference Include="Microsoft.IdentityModel.Tokens" Version="6.14.1" />
+    <PackageReference Include="Microsoft.Identity.Client" Version="4.39.0" />
+    <PackageReference Include="Microsoft.Identity.Client.Extensions.Msal" Version="2.19.3" />
+    <PackageReference Include="Microsoft.IdentityModel.JsonWebTokens" Version="6.15.0" />
+    <PackageReference Include="Microsoft.IdentityModel.Logging" Version="6.15.0" />
+    <PackageReference Include="Microsoft.IdentityModel.Protocols" Version="6.15.0" />
+    <PackageReference Include="Microsoft.IdentityModel.Protocols.OpenIdConnect" Version="6.15.0" />
+    <PackageReference Include="Microsoft.IdentityModel.Tokens" Version="6.15.0" />
     <PackageReference Include="Microsoft.SqlServer.Assessment" Version="1.0.305" />
     <PackageReference Include="Microsoft.SqlServer.Assessment.Authoring" Version="1.0.282" />
     <PackageReference Include="Microsoft.SqlServer.Management.SqlParser" Version="160.21292.55" />
@@ -114,7 +66,7 @@
     <PackageReference Include="System.Data.Common" Version="4.3.0" />
     <PackageReference Include="System.Data.DataSetExtensions" Version="4.5.0" />
     <PackageReference Include="System.Diagnostics.DiagnosticSource" Version="6.0.0" />
-    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="6.14.1" />
+    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="6.15.0" />
     <PackageReference Include="System.Memory" Version="4.5.4" />
     <PackageReference Include="System.Memory.Data" Version="6.0.0" />
     <PackageReference Include="System.Numerics.Vectors" Version="4.5.0" />

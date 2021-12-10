@@ -72,20 +72,20 @@
 	<EmbeddedResource Include="SQL\SQLWaits.sql" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="AWSSDK.Core" Version="3.7.3.33" />
-    <PackageReference Include="AWSSDK.S3" Version="3.7.4" />
+    <PackageReference Include="AWSSDK.Core" Version="3.7.5.5" />
+    <PackageReference Include="AWSSDK.S3" Version="3.7.7.2" />
     <PackageReference Include="Azure.Core" Version="1.21.0" />
     <PackageReference Include="Azure.Identity" Version="1.5.0" />
     <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" Version="6.0.0" />
     <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
-    <PackageReference Include="Microsoft.Data.SqlClient" Version="3.0.1" />
-    <PackageReference Include="Microsoft.Identity.Client" Version="4.37.0" />
-    <PackageReference Include="Microsoft.Identity.Client.Extensions.Msal" Version="2.19.2" />
-    <PackageReference Include="Microsoft.IdentityModel.JsonWebTokens" Version="6.14.1" />
-    <PackageReference Include="Microsoft.IdentityModel.Logging" Version="6.14.1" />
-    <PackageReference Include="Microsoft.IdentityModel.Protocols" Version="6.14.1" />
-    <PackageReference Include="Microsoft.IdentityModel.Protocols.OpenIdConnect" Version="6.14.1" />
-    <PackageReference Include="Microsoft.IdentityModel.Tokens" Version="6.14.1" />
+    <PackageReference Include="Microsoft.Data.SqlClient" Version="4.0.0" />
+    <PackageReference Include="Microsoft.Identity.Client" Version="4.39.0" />
+    <PackageReference Include="Microsoft.Identity.Client.Extensions.Msal" Version="2.19.3" />
+    <PackageReference Include="Microsoft.IdentityModel.JsonWebTokens" Version="6.15.0" />
+    <PackageReference Include="Microsoft.IdentityModel.Logging" Version="6.15.0" />
+    <PackageReference Include="Microsoft.IdentityModel.Protocols" Version="6.15.0" />
+    <PackageReference Include="Microsoft.IdentityModel.Protocols.OpenIdConnect" Version="6.15.0" />
+    <PackageReference Include="Microsoft.IdentityModel.Tokens" Version="6.15.0" />
     <PackageReference Include="Microsoft.SqlServer.Assessment" Version="1.0.305" />
     <PackageReference Include="Microsoft.SqlServer.Assessment.Authoring" Version="1.0.282" />
     <PackageReference Include="Microsoft.SqlServer.DacFx" Version="160.5323.3-preview" />
@@ -100,7 +100,7 @@
     <PackageReference Include="System.Data.Common" Version="4.3.0" />
     <PackageReference Include="System.Data.DataSetExtensions" Version="4.5.0" />
     <PackageReference Include="System.Diagnostics.DiagnosticSource" Version="6.0.0" />
-    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="6.14.1" />
+    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="6.15.0" />
     <PackageReference Include="System.Management" Version="6.0.0" />
     <PackageReference Include="System.Memory" Version="4.5.4" />
     <PackageReference Include="System.Memory.Data" Version="6.0.0" />
