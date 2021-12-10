@@ -9,7 +9,7 @@ namespace DBADashConfig
 {
     public class Options
     {
-        [Option('c', "connection", Required = false, HelpText = "The connection string for the SQL Instance you want to monitor.  e.g. \"Data Source = MYSERVER;Integrated Security = SSPI;\"")]
+        [Option('c', "connection", Required = false, HelpText = "The connection string for the SQL Instance you want to monitor.  e.g. \"Data Source = MYSERVER;Integrated Security=True;Encrypt=True;Trust Server Certificate=True\"")]
         public string ConnectionString { get; set; } = "";
 
         [Option('a', "action", Required = true, HelpText = "Action : Add, Remove, SetDestination, List, Count")]

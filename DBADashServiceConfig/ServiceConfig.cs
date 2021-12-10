@@ -63,6 +63,8 @@ namespace DBADashServiceConfig
                     {
                         DataSource = sourceString,
                         IntegratedSecurity = true,
+                        TrustServerCertificate = true,
+                        Encrypt=true,
                         ApplicationName = "DBADash"
                     };
                     sourceString = builder.ConnectionString;
@@ -301,6 +303,14 @@ namespace DBADashServiceConfig
                     originalJson = System.IO.File.ReadAllText(jsonPath);
                     txtJson.Text = originalJson;
                     setFromJson(originalJson);
+                    if (!originalJson.Like("%Trust%Server%Certificate%") && collectionConfig.SourceConnections.Count>0)
+                    {
+                        if (MessageBox.Show("Encryption is applied by default to your SQL Server connections with Microsoft.Data.SqlClient 4.0.  Connections might fail if the server certificate is not trusted.  Apply Trust Server Certificate?", "Trust Server Certificate", MessageBoxButtons.YesNo, MessageBoxIcon.Question)== DialogResult.Yes)
+                        {
+                            applyTrustServerCertificate();
+                            saveChanges();
+                        }
+                    }
                 }
                 catch(Exception ex)
                 {
@@ -311,6 +321,24 @@ namespace DBADashServiceConfig
             refreshServiceStatus();
             validateDestination();
     
+        }
+
+        private void applyTrustServerCertificate()
+        {
+            collectionConfig.DestinationConnection.EncryptedConnectionString = addTrustServerCertificate(collectionConfig.DestinationConnection.EncryptedConnectionString);
+            txtDestination.Text = collectionConfig.DestinationConnection.EncryptedConnectionString;
+            foreach(var src in collectionConfig.SourceConnections)
+            {
+                src.SourceConnection.EncryptedConnectionString = addTrustServerCertificate(src.SourceConnection.EncryptedConnectionString);
+            }
+        }
+
+        private string addTrustServerCertificate(string connectionString)
+        {
+            var builder = new SqlConnectionStringBuilder(connectionString);
+            builder.TrustServerCertificate = true;
+            builder.Encrypt = true;
+            return builder.ConnectionString;
         }
 
       
