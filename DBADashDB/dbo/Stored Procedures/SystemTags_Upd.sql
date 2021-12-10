@@ -61,18 +61,29 @@ UNPIVOT(TagValue FOR TagName IN(PatchLevel,
 								)
 		) upvt
 
-INSERT INTO dbo.Tags
-(
-    TagName,
-    TagValue
-)
-SELECT T.TagName,T.TagValue
-FROM @Tags T
-WHERE NOT EXISTS(SELECT 1 
-			FROM dbo.Tags TG
-			WHERE TG.TagName = t.TagName 
-			AND TG.TagValue = t.TagValue
+
+IF EXISTS(SELECT 1 
+			FROM @Tags T
+			WHERE NOT EXISTS(SELECT 1 
+						FROM dbo.Tags TG
+						WHERE TG.TagName = t.TagName 
+						AND TG.TagValue = t.TagValue
+						)
 			)
+BEGIN
+	INSERT INTO dbo.Tags
+	(
+		TagName,
+		TagValue
+	)
+	SELECT T.TagName,T.TagValue
+	FROM @Tags T
+	WHERE NOT EXISTS(SELECT 1 
+				FROM dbo.Tags TG WITH(UPDLOCK,HOLDLOCK)
+				WHERE TG.TagName = t.TagName 
+				AND TG.TagValue = t.TagValue
+				)
+END
 
 UPDATE TMP
 	SET TMP.TagID = TG.TagID
