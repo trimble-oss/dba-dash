@@ -5,7 +5,7 @@
     Add a new connection string to the ServiceConfig.json file.  
     Note: Changes to the config file require a service restart
 .PARAMETER ConnectionString
-    The connection string for the SQL Instance you want to monitor.  e.g. "Data Source=MYSERVER;Integrated Security=SSPI;"
+    The connection string for the SQL Instance you want to monitor.  e.g. "Data Source=MYSERVER;Integrated Security=True;Encrypt=True;Trust Server Certificate=True"
 .PARAMETER NoWMI
     Don't collect any data via Windows Management Instruction (WMI). All data is collected via SQL queries. (WMI allows us to collect data for ALL drives and some other info we might not be able to get via SQL.  Service account needs permissions for WMI though)
 .PARAMETER SlowQueryThresholdMs
@@ -29,9 +29,9 @@
 .PARAMETER Replace
     Option to replace the existing connection if it already exists
 .EXAMPLE
-    ./Add-DBADashSource -ConnectionString "Data Source=MYSERVER;Integrated Security=SSPI;"
+    ./Add-DBADashSource -ConnectionString "Data Source=MYSERVER;Integrated Security=True;Encrypt=True;Trust Server Certificate=True"
 .EXAMPLE
-    ./Add-DBADashSource -ConnectionString "Data Source=MYSERVER;Integrated Security=SSPI;" -SlowQueryThresholdMs 1000 -PlanCollectionEnabled
+    ./Add-DBADashSource -ConnectionString "Data Source=MYSERVER;Integrated Security=True;Encrypt=True;Trust Server Certificate=True" -SlowQueryThresholdMs 1000 -PlanCollectionEnabled
 
 #>
 Param(
