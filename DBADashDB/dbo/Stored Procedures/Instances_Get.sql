@@ -16,7 +16,7 @@ SELECT  I.InstanceID,
 	I.EngineEdition
 FROM dbo.InstancesMatchingTags(@TagIDs) I
 LEFT JOIN dbo.Databases D ON D.InstanceID = I.InstanceID AND I.EngineEdition = 5 AND D.IsActive=1
-WHERE (D.InstanceID IS NOT NULL OR I.EngineEdition <> 5)
+WHERE (D.InstanceID IS NOT NULL OR I.EngineEdition <> 5 OR I.EngineEdition IS NULL)
 ' + CASE WHEN @IsActive IS NULL THEN '' ELSE 'AND I.IsActive=@IsActive' END + '
 ' + CASE WHEN @IsAzure=1 THEN 'AND I.EngineEdition = 5' WHEN @IsAzure=0 THEN 'AND I.EngineEdition <> 5' ELSE '' END + '
 ORDER BY I.Instance,D.name'
