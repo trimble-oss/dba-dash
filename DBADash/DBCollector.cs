@@ -15,6 +15,8 @@ using System.Reflection;
 using System.Runtime.Caching;
 using System.Text;
 using System.Xml;
+using System.Threading.Tasks;
+
 namespace DBADash
 {
     [JsonConverter(typeof(StringEnumConverter))]
@@ -184,8 +186,8 @@ namespace DBADash
         }
 
         private void logError(Exception ex,string errorSource, string errorContext = "Collect")
-        {
-            Log.Error(ex,"{ErrorContext} {ErrorSource}" ,errorContext,errorSource);
+        {           
+            Log.Error(ex,"{ErrorContext} {ErrorSource} {Connection}" ,errorContext,errorSource, Source.SourceConnection.ConnectionForPrint);
             logDBError(errorSource, ex.ToString(), errorContext);
         }
 
@@ -260,7 +262,7 @@ namespace DBADash
             startup(connectionID,serviceName);
         }
 
-        public void RemoveEventSessions()
+        public async Task RemoveEventSessionsAsync()
         {
             if (IsXESupported())
             {
@@ -272,19 +274,17 @@ namespace DBADash
                 else
                 {
                     removeSQL = SqlStrings.RemoveEventSessions;
-                }  
+                }
                 using (var cn = new SqlConnection(_connectionString))
+                using (var cmd = new SqlCommand(removeSQL, cn))
                 {
-                    using (var cmd = new SqlCommand(removeSQL, cn))
-                    {
-                        cn.Open();
-                        cmd.ExecuteScalar();
-                    }
+                    await cn.OpenAsync();
+                    await cmd.ExecuteNonQueryAsync();
                 }
             }
         }
 
-        public void StopEventSessions()
+        public async Task StopEventSessionsAsync()
         {
             if (IsXESupported())
             {
@@ -297,14 +297,13 @@ namespace DBADash
                 {
                     removeSQL = SqlStrings.StopEventSessions;
                 }
-                using (var cn = new SqlConnection(_connectionString))
+                using (var cn = new SqlConnection(_connectionString))  
+                using (var cmd = new SqlCommand(removeSQL, cn))
                 {
-                    using (var cmd = new SqlCommand(removeSQL, cn))
-                    {
-                        cn.Open();
-                        cmd.ExecuteScalar();
-                    }
+                    await cn.OpenAsync();
+                    await cmd.ExecuteNonQueryAsync();
                 }
+                
             }
         }
 

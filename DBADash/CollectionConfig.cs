@@ -284,25 +284,37 @@ namespace DBADash
         public List<DBADashSource> AddAzureDBs()
         {
             var newConnections = GetNewAzureDBConnections();
+            lock (SourceConnections)
+            {
+                SourceConnections.AddRange(newConnections);
+            }
+            return newConnections;
+        }
+
+        public List<DBADashSource> AddAzureDBs(DBADashSource masterConnection)
+        {
+            var newConnections = GetNewAzureDBConnections(masterConnection);
             SourceConnections.AddRange(newConnections);
             return newConnections;
         }
 
+  
         public List<DBADashSource> GetNewAzureDBConnections()
         {
             var newConnections = new List<DBADashSource>();
             foreach (var cfg in SourceConnections)
             {
-                if ((new string[] {"master", String.Empty}).Contains(cfg.SourceConnection.InitialCatalog()) && cfg.SourceConnection.IsAzureDB())
+                try
                 {
-                    try
-                    {
+                    if ((new string[] {"master", String.Empty}).Contains(cfg.SourceConnection.InitialCatalog()) && cfg.SourceConnection.ConnectionInfo.IsAzureMasterDB)
+                    {             
                         newConnections.AddRange(GetNewAzureDBConnections(cfg));
                     }
-                    catch(Exception ex)
-                    {
-                        Log.Error(ex, "Error getting azure Error getting Azure DB connections from master {connection}", cfg.SourceConnection.ConnectionForPrint);
-                    }
+ 
+                }
+                catch (Exception ex)
+                {
+                    Log.Error(ex, "Error getting Azure DB connections from master {connection}", cfg.SourceConnection.ConnectionForPrint);
                 }
             }
             return newConnections;
@@ -344,18 +356,6 @@ namespace DBADash
             return newConnections;
         }
 
-        public void AddAzureDBs(DBADashSource masterConnection)
-        {
-            try
-            {
-                Log.Information("Add azure DBs from {connection}", masterConnection.SourceConnection.ConnectionForPrint);
-                SourceConnections.AddRange(GetNewAzureDBConnections(masterConnection));
-            }
-            catch(Exception ex)
-            {
-                Log.Error(ex,"Error adding azure DBs from {connection}", masterConnection.SourceConnection.ConnectionForPrint);
-            }
 
-        }
     }
 }
