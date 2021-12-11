@@ -325,9 +325,17 @@ namespace DBADashServiceConfig
 
         private void applyTrustServerCertificate()
         {
-            collectionConfig.DestinationConnection.EncryptedConnectionString = addTrustServerCertificate(collectionConfig.DestinationConnection.EncryptedConnectionString);
-            txtDestination.Text = collectionConfig.DestinationConnection.EncryptedConnectionString;
-            foreach(var src in collectionConfig.SourceConnections)
+            if (collectionConfig.DestinationConnection.Type == ConnectionType.SQL)
+            {
+                collectionConfig.DestinationConnection.EncryptedConnectionString = addTrustServerCertificate(collectionConfig.DestinationConnection.EncryptedConnectionString);
+                txtDestination.Text = collectionConfig.DestinationConnection.EncryptedConnectionString;
+            }
+            foreach(var dest in collectionConfig.SecondaryDestinationConnections.Where(dest=> dest.Type == ConnectionType.SQL))
+            {
+                dest.EncryptedConnectionString = addTrustServerCertificate(dest.EncryptedConnectionString);
+            }
+                        
+            foreach(var src in collectionConfig.SourceConnections.Where(src => src.SourceConnection.Type == ConnectionType.SQL))
             {
                 src.SourceConnection.EncryptedConnectionString = addTrustServerCertificate(src.SourceConnection.EncryptedConnectionString);
             }
