@@ -32,12 +32,11 @@ DBA Dash is a tool for SQL Server DBAs to assist with daily checks, performance 
 ## Prerequisites 
 
  - Account to use for agent.  Review the [security doc](Docs/Security.md) for required permissions. 
+ - [.NET Desktop Runtime 6](https://dotnet.microsoft.com/en-us/download/dotnet/6.0) is used by DBA Dash.  You will be prompted to install the .NET runtime version 6 if it's not already installed.
 
 Note: It's possible to run as a console app under your own user account for testing purposes.
 
 ## Installation
-
-![Installation gif](Docs/DBADash_Installation.gif)
 
  - Extract the application binaries on the server where you want to run the agent. Run on a server separate to your production SQL instance if possible.
  - The first thing we need to do is create the database that will be used as the central repository for your SQL instances.  Run the DBADashServiceConfigTool.exe tool.  Click the "Deploy/Update Database" button.  

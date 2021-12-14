@@ -88,10 +88,36 @@ namespace DBADashGUI
             connectionString = builder.ConnectionString;
             Common.ConnectionString = connectionString;
             mnuTags.Visible = !commandLine.NoTagMenu;
+            checkVersion();
             getCommandLineTags();
             buildTagMenu(commandLineTags);
             addInstanes();
             loadSelectedTab();
+            
+        }
+
+        private void checkVersion()
+        {
+            var dbVersion = DBValidations.GetDBVersion(connectionString);
+            var appVersion = System.Reflection.Assembly.GetEntryAssembly().GetName().Version;
+            var compare = (new Version(appVersion.Major, appVersion.Minor)).CompareTo(new Version(dbVersion.Major, dbVersion.Minor));
+
+            if (compare < 0)
+            {
+                if (MessageBox.Show(String.Format("The version of this GUI app ({0}.{1}) is OLDER than the repository database. Please upgrade to version {2}.{3}", appVersion.Major, appVersion.Minor, dbVersion.Major, dbVersion.Minor), "Upgrade GUI", MessageBoxButtons.OKCancel, MessageBoxIcon.Warning) == DialogResult.OK)
+                {
+                    Application.Exit();
+                    throw new Exception("Version check");
+               }         
+            }
+            else if ( compare>0)
+            {
+                if(MessageBox.Show(String.Format("The version of this GUI app ({0}.{1}) is NEWER than the repository database ({2}.{3}). Please upgrade the repository database.", appVersion.Major, appVersion.Minor, dbVersion.Major, dbVersion.Minor), "Upgrade Agent", MessageBoxButtons.OKCancel, MessageBoxIcon.Warning) == DialogResult.OK)
+                {
+                    Application.Exit();
+                    throw new Exception("Version check");
+                }
+            }
             
         }
 
@@ -1358,6 +1384,14 @@ namespace DBADashGUI
         private void tags1_TagsChanged(object sender, EventArgs e)
         {
             buildTagMenu(SelectedTags());
+        }
+
+        private void aboutToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            using(var frm = new About())
+            {
+                frm.ShowDialog(this);
+            }
         }
     }
 }
