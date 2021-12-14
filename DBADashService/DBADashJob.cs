@@ -96,7 +96,6 @@ namespace DBADashService
                                 {
                                     lock (Program.Locker.GetLock(f.Key))
                                     {
-
                                         using (var getObjectTask = s3Cli.GetObjectAsync(f.BucketName, f.Key))
                                         {
                                             getObjectTask.Wait();
@@ -159,6 +158,7 @@ namespace DBADashService
                                             }
                                         }
                                     }
+                                    Program.Locker.RemoveLock(f.Key);
                                 });
                             if (resp.IsTruncated)
                             {
