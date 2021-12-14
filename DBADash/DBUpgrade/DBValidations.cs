@@ -33,12 +33,11 @@ namespace DBADash
             var db = builder.InitialCatalog;
             builder.InitialCatalog = "";
             connectionString = builder.ConnectionString;
-            SqlConnection cn = new SqlConnection(connectionString);
 
-            using (cn)
+            using (var cn= new SqlConnection(connectionString))
+            using(var cmd = new SqlCommand("SELECT CASE WHEN EXISTS(SELECT 1 FROM sys.databases WHERE name = @db) THEN CAST(1 as  BIT) ELSE CAST(0 as BIT) END as DBExists", cn))
             {
                 cn.Open();
-                SqlCommand cmd = new SqlCommand("SELECT CASE WHEN EXISTS(SELECT 1 FROM sys.databases WHERE name = @db) THEN CAST(1 as  BIT) ELSE CAST(0 as BIT) END as DBExists", cn);
                 cmd.Parameters.AddWithValue("@db", db);
                 return (bool)cmd.ExecuteScalar();
             }
@@ -47,11 +46,7 @@ namespace DBADash
 
         public static System.Version GetDBVersion(string connectionString)
         {
-            SqlConnection cn = new SqlConnection(connectionString);
-            using (cn)
-            {
-                cn.Open();
-                SqlCommand cmd = new SqlCommand(@"IF EXISTS(
+            string sql = @"IF EXISTS(
 	SELECT * FROM sys.extended_properties
 	WHERE major_id=OBJECT_ID('DBVersionHistory')
 	AND name = 'AppID'
@@ -74,7 +69,11 @@ ELSE
 BEGIN 
 	RAISERROR('Invalid database',11,1)
 END
-", cn);
+";
+            using (var cn = new SqlConnection(connectionString))
+            using(var cmd = new SqlCommand(sql, cn))
+            {
+                cn.Open();
                 string version = (string)cmd.ExecuteScalar();
                 if (version == null)
                 {
