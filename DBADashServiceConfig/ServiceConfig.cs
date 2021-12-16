@@ -709,12 +709,20 @@ namespace DBADashServiceConfig
             }
             else
             {
-                frm.ConnectionString = "Initial Catalog=DBADashDB;Integrated Security=SSPI;Data Source=" + Environment.MachineName;
+                var builder = new SqlConnectionStringBuilder()
+                {
+                    DataSource = Environment.MachineName,
+                    InitialCatalog = "DBADashDB",
+                    IntegratedSecurity = true,
+                    TrustServerCertificate = true,
+                    Encrypt = true,
+                };               
+                
+                frm.ConnectionString =builder.ConnectionString;
             }
             frm.ShowDialog();
             if (frm.DialogResult == DialogResult.OK)
             {
-
                 var builder = new SqlConnectionStringBuilder(frm.ConnectionString);
                 if(builder.InitialCatalog==null || builder.InitialCatalog.Length == 0)
                 {

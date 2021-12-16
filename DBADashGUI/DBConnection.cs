@@ -35,6 +35,8 @@ namespace DBADash
                 builder.IntegratedSecurity = chkIntegratedSecurity.Checked;
                 builder.DataSource= txtServerName.Text;
                 builder.InitialCatalog = cboDatabase.Text;
+                builder.Encrypt = chkEncrypt.Checked;
+                builder.TrustServerCertificate = chkTrustServerCert.Checked;
                 return builder.ConnectionString;
             }
             set
@@ -46,7 +48,8 @@ namespace DBADash
                 txtUserName.Text = builder.UserID;
                 txtPassword.Text = builder.Password;
                 txtServerName.Text = builder.DataSource;
-            
+                chkTrustServerCert.Checked = builder.TrustServerCertificate;
+                chkEncrypt.Checked = builder.Encrypt;
             }
         }
 
