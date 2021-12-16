@@ -639,26 +639,24 @@ namespace DBADashGUI
 
         private void addDatabases(SQLTreeItem instanceNode)
         {
-            SqlConnection cn = new SqlConnection(connectionString);
-            using (cn)
+            using (var cn = new SqlConnection(connectionString))
+            using (SqlCommand cmd = new SqlCommand("dbo.DatabasesByInstance_Get", cn) { CommandType = CommandType.StoredProcedure })
             {
-                using (SqlCommand cmd = new SqlCommand("dbo.DatabasesByInstance_Get", cn) { CommandType = CommandType.StoredProcedure })
+                cn.Open();
+
+                var changesNode = new SQLTreeItem("Configuration", SQLTreeItem.TreeType.Configuration)
                 {
-                    cn.Open();
+                    InstanceID = instanceNode.InstanceID
+                };
+                instanceNode.Nodes.Add(changesNode);
+                instanceNode.Nodes.Add(new SQLTreeItem("Checks", SQLTreeItem.TreeType.DBAChecks));
+                instanceNode.Nodes.Add(new SQLTreeItem("HA/DR", SQLTreeItem.TreeType.HADR));
 
-                    var changesNode = new SQLTreeItem("Configuration", SQLTreeItem.TreeType.Configuration)
-                    {
-                        InstanceID = instanceNode.InstanceID
-                    };
-                    instanceNode.Nodes.Add(changesNode);                  
-                    instanceNode.Nodes.Add(new SQLTreeItem("Checks", SQLTreeItem.TreeType.DBAChecks));
-                    instanceNode.Nodes.Add(new SQLTreeItem("HA/DR", SQLTreeItem.TreeType.HADR));
-                    // instanceNode.Nodes.Add(new SQLTreeItem("Tags", SQLTreeItem.TreeType.Tags));
-
-                    cmd.Parameters.AddWithValue("Instance", instanceNode.ObjectName);
-                    var systemNode = new SQLTreeItem("System Databases", SQLTreeItem.TreeType.Folder);
-                    instanceNode.Nodes.Add(systemNode);
-                    var rdr = cmd.ExecuteReader();
+                cmd.Parameters.AddWithValue("InstanceID", instanceNode.InstanceID);
+                var systemNode = new SQLTreeItem("System Databases", SQLTreeItem.TreeType.Folder);
+                instanceNode.Nodes.Add(systemNode);
+                using (var rdr = cmd.ExecuteReader())
+                {
                     while (rdr.Read())
                     {
                         string db = (string)rdr["name"];
@@ -685,10 +683,10 @@ namespace DBADashGUI
                             instanceNode.Nodes.Add(n);
                         }
                     }
-                    var jobs = new SQLTreeItem("Jobs", SQLTreeItem.TreeType.AgentJobs) { InstanceID = instanceNode.InstanceID };
-                    jobs.AddDummyNode();
-                    instanceNode.Nodes.Add(jobs);
                 }
+                var jobs = new SQLTreeItem("Jobs", SQLTreeItem.TreeType.AgentJobs) { InstanceID = instanceNode.InstanceID };
+                jobs.AddDummyNode();
+                instanceNode.Nodes.Add(jobs);
             }
         }
 
