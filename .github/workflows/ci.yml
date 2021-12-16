@@ -1,0 +1,12 @@
+name: DBA Dash Continuous Integration
+
+on:
+  workflow_dispatch:
+
+jobs:
+
+  placeholder:
+    
+    steps:
+      
+      - name: placeholder
