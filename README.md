@@ -4,7 +4,7 @@
 
 ## Download
 
-[Download](https://github.com/DavidWiseman/DBADash/releases)
+[Download](https://github.com/trimble-oss/dba-dash/releases)
 
 ## Project Summary
 DBA Dash is a tool for SQL Server DBAs to assist with daily checks, performance monitoring and change tracking.
