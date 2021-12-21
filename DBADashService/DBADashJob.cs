@@ -92,7 +92,7 @@ namespace DBADashService
                                 listObjectsTask.Wait();
                                 resp = listObjectsTask.Result;
                             }
-                            Parallel.ForEach(resp.S3Objects.Where(f => f.Key.EndsWith(".json") || f.Key.EndsWith(".bin") || f.Key.EndsWith(".xml")), f =>
+                            Parallel.ForEach(resp.S3Objects.Where(f =>  f.Key.EndsWith(".xml")), f =>
                                 {
                                     lock (Program.Locker.GetLock(f.Key))
                                     {
@@ -100,38 +100,14 @@ namespace DBADashService
                                         {
                                             getObjectTask.Wait();
 
-
-
                                             using (GetObjectResponse response = getObjectTask.Result)
                                             using (Stream responseStream = response.ResponseStream)
                                             {
-
                                                 DataSet ds;
-                                                if (f.Key.EndsWith(".bin"))
-                                                {
-                                                    // obsolete - to be removed
-                                                    BinaryFormatter fmt = new BinaryFormatter();
-                                                    ds = (DataSet)fmt.Deserialize(responseStream);
-                                                }
-                                                else if (f.Key.EndsWith(".xml"))
-                                                {
-                                                    ds = new DataSet();
-                                                    ds.ReadXml(responseStream);
-                                                }
-                                                else if (f.Key.EndsWith(".json"))
-                                                {
-                                                    using (StreamReader reader = new StreamReader(responseStream))
-                                                    {
-                                                        string json = reader.ReadToEnd();
-
-                                                        ds = DataSetSerialization.DeserializeDS(json);
-
-                                                    }
-                                                }
-                                                else
-                                                {
-                                                    throw new Exception("Invalid extension");
-                                                }
+                                            
+                                                ds = new DataSet();
+                                                ds.ReadXml(responseStream);                                             
+                                  
                                                 lock (Program.Locker.GetLock(GetID(ds)))
                                                 {
                                                     string fileName = Path.GetFileName(f.Key);
