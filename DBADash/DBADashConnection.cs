@@ -28,7 +28,6 @@ namespace DBADash
         private string encryptedConnectionString = "";
         private string connectionString = "";
         private ConnectionType connectionType;
-        private string productVersion = "";
 
         public bool WasEncrypted
         {

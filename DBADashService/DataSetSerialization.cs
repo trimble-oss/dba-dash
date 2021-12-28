@@ -78,24 +78,13 @@ namespace DBADashService
 
         public static DataSet DeserializeFromFile(string filePath)
         {
-            if (filePath.EndsWith(".bin"))
-            {
-                // Legacy to be removed. https://docs.microsoft.com/en-gb/dotnet/standard/serialization/binaryformatter-security-guide
-                return DeserializeFromBinaryFile(filePath);
-            }
-            else if (filePath.EndsWith(".json"))
-            {
-                // Legacy to be removed.  Has issues with binary data and doesn't handle data types correctly
-                string json = System.IO.File.ReadAllText(filePath);
-                return DataSetSerialization.DeserializeDS(json);
-            }
-            else if (filePath.EndsWith(".xml"))
+            if (filePath.EndsWith(".xml"))
             {
                 return DeserializeFromXmlFile(filePath);
             }
             else
             {
-                throw new Exception($"Invalid file extention { filePath } expected: .json|.bin|.xml");
+                throw new Exception($"Invalid file extention { filePath } expected: .xml");
             }
         }
     }
