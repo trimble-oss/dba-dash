@@ -86,6 +86,8 @@ namespace DBADashService
                 {
                     if (config.AutoUpdateDatabase)
                     {
+                        Log.Information("Validating destination");
+                        CollectionConfig.ValidateDestination(d);
                         Log.Information("Create repository database");
                         DBValidations.UpgradeDBAsync(d.ConnectionString).Wait();
                         Log.Information("Repository database created");
@@ -99,6 +101,8 @@ namespace DBADashService
                 {
                     if (config.AutoUpdateDatabase)
                     {
+                        Log.Information("Validating destination");
+                        CollectionConfig.ValidateDestination(d);
                         Log.Information("Upgrade DB from {oldversion} to {newversion}", status.DBVersion.ToString(), status.DACVersion.ToString());
                         DBValidations.UpgradeDBAsync(d.ConnectionString).Wait();
                         status = DBValidations.VersionStatus(d.ConnectionString);
@@ -127,7 +131,15 @@ namespace DBADashService
         public void Start()
         {
             scheduler.Start();
-            upgradeDB();
+            try
+            {
+                upgradeDB();
+            }
+            catch(Exception ex)
+            {
+                Log.Error(ex,"upgradeDB failed");
+                throw;
+            }
             try
             {
                 scheduleJobsAsync().Wait();

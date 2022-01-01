@@ -30,7 +30,6 @@ namespace DBADashServiceConfig
         ServiceController svcCtrl;
         bool isInstalled = false;
 
-
         private void bttnAdd_Click(object sender, EventArgs e)
         {
             if (string.IsNullOrEmpty(txtSource.Text))
@@ -211,6 +210,15 @@ namespace DBADashServiceConfig
                 errorProvider1.SetError(txtDestination, "Invalid connection string, directory or S3 path");
                 return false;
             }
+            try
+            {
+                CollectionConfig.ValidateDestination(dest);
+            }
+            catch (Exception ex)
+            {
+                errorProvider1.SetError(txtDestination, ex.Message);
+                return false;
+            }
             if(dest.Type == ConnectionType.SQL)
             {
                 try
@@ -257,7 +265,16 @@ namespace DBADashServiceConfig
 
         private void bttnSave_Click(object sender, EventArgs e)
         {
-            saveChanges();
+            try
+            {
+                collectionConfig.ValidateDestination();
+                saveChanges();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+           
         }
 
         private void saveChanges()
@@ -571,14 +588,14 @@ namespace DBADashServiceConfig
             destinationChanged();
         }
 
+
         private void destinationChanged()
         {
             if(collectionConfig.Destination!= txtDestination.Text)
             {
-                validateDestination();
-
                 collectionConfig.Destination = txtDestination.Text;
                 txtJson.Text = collectionConfig.Serialize();
+                validateDestination();
             }
 
         }
