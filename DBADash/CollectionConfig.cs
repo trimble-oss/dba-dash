@@ -204,24 +204,48 @@ namespace DBADash
         }
 
         public void ValidateDestination()
-        {   
-            if(DestinationConnection.Type == ConnectionType.Invalid){
+        {
+            ValidateDestination(DestinationConnection);
+        }
+
+        public static void ValidateDestination(DBADashConnection destination)
+        {
+            if (destination.Type == ConnectionType.Invalid)
+            {
                 throw new Exception("Invalid connection string");
             }
-            else if (DestinationConnection.Type == DBADashConnection.ConnectionType.SQL)
+            else if (destination.Type == DBADashConnection.ConnectionType.SQL)
             {
-                if (string.IsNullOrEmpty(DestinationConnection.InitialCatalog()))
+                if (string.IsNullOrEmpty(destination.InitialCatalog()))
                 {
                     throw new Exception("Provide a name for the DBADash repository database through the Initial Catalog property of the connection string");
                 }
                 // VersionStatus check will throw an error if there is an issue connecting to the DB or the DB isn't valid.
-                var status = DBValidations.VersionStatus(DestinationConnection.ConnectionString);
+                var status = DBValidations.VersionStatus(destination.ConnectionString);
+                if(status.VersionStatus == DBValidations.DBVersionStatusEnum.CreateDB)
+                {
+                    validateDestinationVersion(destination);
+                }
                 Log.Information("DB Version Status: {status}", status.VersionStatus);
-                
             }
             else
             {
-                DestinationConnection.Validate();
+                destination.Validate();
+            }
+        }
+
+        private static void validateDestinationVersion(DBADashConnection destination)
+        {
+            var master = destination.MasterConnection();
+            var cinfo = master.ConnectionInfo;
+
+            if (cinfo.MajorVersion < 13 && cinfo.EngineEdition != Microsoft.SqlServer.Management.Common.DatabaseEngineEdition.SqlDatabase && cinfo.EngineEdition != Microsoft.SqlServer.Management.Common.DatabaseEngineEdition.SqlManagedInstance) // 13=2016, 12 might be Azure DB which is OK
+            {
+                throw new Exception("DBA Dash repository database requires SQL 2016 SP1 or later");
+            }
+            else if (cinfo.MajorVersion == 13 && (new Version(cinfo.ProductVersion)).CompareTo(new Version("13.0.4001.0")) < 0 && cinfo.EngineEdition != Microsoft.SqlServer.Management.Common.DatabaseEngineEdition.Enterprise)
+            { // Check if we are running SP1 for SQL 2016
+                throw new Exception("DBA Dash repository database requires SQL 2016 SP1 or later.  Please upgrade to SP1 or later.");
             }
         }
 

@@ -123,7 +123,16 @@ AND database_id > 4 ", cn);
 
         private void DBDeploy_Load(object sender, EventArgs e)
         {
-
+            try 
+            { 
+            
+                CollectionConfig.ValidateDestination(new DBADashConnection(ConnectionString));
+            }
+            catch(Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                this.DialogResult = DialogResult.Abort;
+            }
             dbChanged();
         }
 

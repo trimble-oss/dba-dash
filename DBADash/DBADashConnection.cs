@@ -74,6 +74,22 @@ namespace DBADash
             }
         }
 
+        [JsonIgnore]
+        public string MasterConnectionString
+        {
+            get
+            {
+                var builder = new SqlConnectionStringBuilder(ConnectionString);
+                builder.InitialCatalog = "master";
+                return builder.ToString();
+            }
+        }
+
+        public DBADashConnection MasterConnection()
+        {
+            return new DBADashConnection(MasterConnectionString);
+        }
+
         public string EncryptedConnectionString
         {
             get
