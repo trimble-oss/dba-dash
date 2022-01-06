@@ -145,6 +145,23 @@ namespace DBADashGUI.Performance
         private void WaitsSummary_Load(object sender, EventArgs e)
         {
             Common.AddDateGroups(tsDateGroup, tsDateGroups_Click);
+            addColumnsToMenu();
+        }
+
+        private void addColumnsToMenu()
+        {
+            foreach(DataGridViewColumn col in dgv.Columns)
+            {
+                var mnuCol = new ToolStripMenuItem { Text = col.HeaderText, Tag = col.Name,Checked =col.Visible, CheckOnClick=true };
+                mnuCol.Click += MnuCol_Click;
+                tsColumns.DropDownItems.Add(mnuCol);
+            }
+        }
+
+        private void MnuCol_Click(object sender, EventArgs e)
+        {
+            var col = (ToolStripMenuItem)sender;
+            dgv.Columns[(string)col.Tag].Visible = col.Checked;
         }
 
         private void tsDateGroups_Click(object sender, EventArgs e)
@@ -169,5 +186,7 @@ namespace DBADashGUI.Performance
         {
             Common.PromptSaveDataGridView(ref dgv);
         }
+
+   
     }
 }

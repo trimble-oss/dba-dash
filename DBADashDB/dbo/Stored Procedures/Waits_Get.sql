@@ -1,4 +1,4 @@
-﻿CREATE   PROC [dbo].[Waits_Get](
+﻿CREATE PROC dbo.Waits_Get(
 	@InstanceID INT,
 	@FromDate DATETIME2(2)=NULL, 
 	@ToDate DATETIME2(2)=NULL,
@@ -51,6 +51,7 @@ WHERE W.SnapshotDate>= @FromDate
 AND W.SnapshotDate <= @ToDate
 AND WT.WaitType NOT IN(N''PVS_PREALLOCATE'',N''REDO_THREAD_PENDING_WORK'')
 AND W.InstanceID=@InstanceID
+AND WT.IsExcluded = 0
 ' + CASE WHEN @CriticalWaitsOnly=1 THEN 'AND WT.IsCriticalWait=1' ELSE '' END + '
 ' + CASE WHEN @WaitType IS NULL THEN '' ELSE 'AND WT.WaitType LIKE @WaitType' END + '
 GROUP BY W.WaitTypeID, ' + @DateGroupingSQL + ' 
