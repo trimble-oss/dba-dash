@@ -25,7 +25,7 @@ SELECT  WT.WaitType,
 		SUM(W.wait_time_ms)/NULLIF(MAX(SUM(W.sample_ms_diff/1000.0)) OVER(),0) WaitTimeMsPerSec,
 		SUM(W.wait_time_ms)/I.scheduler_count/NULLIF(MAX(SUM(W.sample_ms_diff/1000.0)) OVER(),0) WaitTimeMsPerCorePerSec,
 		SUM(W.waiting_tasks_count) as WaitingTasksCount,
-		SUM(W.wait_time_ms)*1.0/SUM(W.waiting_tasks_count) AS AvgWaitTimeMs,
+		SUM(W.wait_time_ms)/ISNULL(NULLIF(SUM(W.waiting_tasks_count),0.0),1.0) AS AvgWaitTimeMs,
 		MAX(SUM(CAST(W.sample_ms_diff AS BIGINT))/1000) OVER() SampleDurationSec,
 		MAX(CAST(WT.IsCriticalWait AS INT)) CriticalWait,
 		I.scheduler_count
