@@ -67,9 +67,9 @@ SELECT SYSUTCDATETIME() AS SnapshotDate,
 FROM sys.dm_os_performance_counters pc
 WHERE EXISTS(SELECT 1 
 FROM @counters c
-WHERE c.object_name = STUFF(pc.object_name,1,CHARINDEX(':',pc.object_name),'')
-AND c.counter_name = pc.counter_name
-AND (c.instance_name = pc.instance_name OR c.instance_name IS NULL)
+WHERE c.object_name COLLATE SQL_Latin1_General_CP1_CI_AS = STUFF(pc.object_name,1,CHARINDEX(':',pc.object_name),'') COLLATE SQL_Latin1_General_CP1_CI_AS
+AND c.counter_name COLLATE SQL_Latin1_General_CP1_CI_AS = pc.counter_name COLLATE SQL_Latin1_General_CP1_CI_AS
+AND (c.instance_name COLLATE SQL_Latin1_General_CP1_CI_AS = pc.instance_name COLLATE SQL_Latin1_General_CP1_CI_AS OR c.instance_name IS NULL)
 )
 AND pc.instance_name NOT IN('AuditingGroup',
 'AutoShrinkLogGroup',

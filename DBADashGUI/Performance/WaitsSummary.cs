@@ -107,8 +107,34 @@ namespace DBADashGUI.Performance
 
         readonly Dictionary<string, columnMetaData> columns = new Dictionary<string, columnMetaData>
             {
-                {"WaitTimeMsPerSec", new columnMetaData{Alias="Wait Time (ms/sec)",isVisible=true } }
+                {"AvgWaitTimeMs", new columnMetaData{Alias="Avg Wait Time (ms)",isVisible=false } },
+                {"SampleDurationSec", new columnMetaData{Alias="Sample Duration (sec)",isVisible=false } },
+                {"SignalWaitPct", new columnMetaData{Alias="Signal Wait %",isVisible=false } },
+                {"SignalWaitMsPerSec", new columnMetaData{Alias="Signal Wait (ms/sec)",isVisible=true } },
+                {"SignalWaitMsPerCorePerSec", new columnMetaData{Alias="Signal Wait Time (ms/sec/core)",isVisible=false } },
+                {"SignalWaitSec", new columnMetaData{Alias="Signal Wait (sec)",isVisible=false } },
+                {"TotalWaitSec", new columnMetaData{Alias="Total Wait (sec)",isVisible=false } },
+                {"WaitTimeMsPerSec", new columnMetaData{Alias="Wait Time (ms/sec)",isVisible=true } },           
+                {"WaitTimeMsPerCorePerSec", new columnMetaData{Alias="Wait Time (ms/sec/core)",isVisible=false } },
+                {"WaitingTasksCount", new columnMetaData{Alias="Waiting Tasks Count",isVisible=false } }
             };
+
+        private void populateMetricsMenu()
+        {
+            foreach (var itm in columns)
+            {
+                tsMetrics.DropDownItems.Add(new ToolStripMenuItem(itm.Value.Alias, null, tsMetrics_Click) { Tag = itm.Key, Checked = itm.Value.isVisible, CheckOnClick = true });
+            }
+        }
+
+        private void tsMetrics_Click(object sender, EventArgs e)
+        {
+            var ts = (ToolStripMenuItem)sender;
+            columns[(string)ts.Tag].isVisible = ts.Checked;
+            WaitChart1.UpdateColumnVisibility(columns);
+        }
+    
+
 
         private void refreshChart()
         {
@@ -121,11 +147,15 @@ namespace DBADashGUI.Performance
                 tsWaitType.Text = selectedWaitType;
                 splitContainer1.Panel1Collapsed = false;
                 var dt = GetWaitsDT(selectedWaitType);
+                WaitChart1.LegendLocation = LiveCharts.LegendLocation.Bottom;
                 WaitChart1.Series.Clear();
                 WaitChart1.AddDataTable(dt, columns, "time", true);
                 WaitChart1.AxisX[0].MinValue = DateRange.FromUTC.ToLocalTime().Ticks;
                 WaitChart1.AxisX[0].MaxValue = DateRange.ToUTC.ToLocalTime().Ticks;
-                WaitChart1.AxisY[0].MinValue = 0;
+                if (WaitChart1.AxisY.Count == 1)
+                {
+                    WaitChart1.AxisY[0].MinValue = 0;
+                }
             }
 
         }
@@ -145,10 +175,11 @@ namespace DBADashGUI.Performance
         private void WaitsSummary_Load(object sender, EventArgs e)
         {
             Common.AddDateGroups(tsDateGroup, tsDateGroups_Click);
-            addColumnsToMenu();
+            populateColumnsMenu();
+            populateMetricsMenu();
         }
 
-        private void addColumnsToMenu()
+        private void populateColumnsMenu()
         {
             foreach(DataGridViewColumn col in dgv.Columns)
             {

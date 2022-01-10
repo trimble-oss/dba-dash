@@ -735,6 +735,7 @@ USING (VALUES
  ,(N'PRINT_ROLLBACK_PROGRESS',0,N'Used to wait while user processes are ended in a database that has been transitioned by using the ALTER DATABASE termination clause. For more information, see ALTER DATABASE (Transact-SQL).')
  ,(N'PRU_ROLLBACK_DEFERRED',0,N'Internal use only.     Applies to : SQL Server 2012 (11.x) and later.')
  ,(N'PWAIT_ALL_COMPONENTS_INITIALIZED',0,N'Internal use only.     Applies to : SQL Server 2012 (11.x) and later.')
+ ,(N'PVS_PREALLOCATE',0,'Wiat for background task that is sleeping between prealocating space in the persistent version store (for databases with ADR enabled).  Applies to : SQL Server 2019 (15.x) and later.')
  ,(N'PWAIT_COOP_SCAN',0,N'Internal use only.     Applies to : SQL Server 2012 (11.x) and later.')
  ,(N'PWAIT_DIRECTLOGCONSUMER_GETNEXT',0,N'Internal use only.     Applies to : SQL Server 2016 (13.x) and later.')
  ,(N'PWAIT_EVENT_SESSION_INIT_MUTEX',0,N'Internal use only.     Applies to : SQL Server 2012 (11.x) and later.')
