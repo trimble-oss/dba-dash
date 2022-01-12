@@ -29,7 +29,7 @@
     <QueryStoreStaleQueryThreshold>15</QueryStoreStaleQueryThreshold>
     <QueryStoreMaxStorageSize>512</QueryStoreMaxStorageSize>
     <QueryStoreMaxPlansPerQuery>50</QueryStoreMaxPlansPerQuery>
-    <DacVersion>2.11.0.3</DacVersion>
+    <DacVersion>2.11.0.4</DacVersion>
     <ReadCommittedSnapshot>True</ReadCommittedSnapshot>
     <AllowSnapshotIsolation>True</AllowSnapshotIsolation>
     <CompatibilityMode>130</CompatibilityMode>
@@ -629,6 +629,7 @@
     <Build Include="dbo\Stored Procedures\MemoryDumpThresholds_Get.sql" />
     <Build Include="dbo\Views\PerformanceThresholds.sql" />
     <Build Include="dbo\Stored Procedures\PrintMax.sql" />
+    <Build Include="dbo\Functions\RunningQueriesBlockingHierarchy.sql" />
   </ItemGroup>
   <ItemGroup>
     <PostDeploy Include="Script.PostDeployment1.sql" />
