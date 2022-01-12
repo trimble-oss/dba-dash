@@ -34,9 +34,9 @@ BEGIN
 		Q.wait_resource,
 		Q.status,
 		stat.BlockCountRecursive,
-		stat.WaitTimeRecursive,
+		stat.BlockWaitTimeRecursiveMs AS WaitTimeRecursive,
 		stat.BlockCount,
-		stat.BlockWaitTime,
+		stat.BlockWaitTimeMs as BlockWaitTime,
 		Q.status AS session_status,
 		CASE Q.transaction_isolation_level WHEN 0 THEN 'Unspecified'
 			WHEN 1 THEN 'ReadUncomitted'
@@ -53,7 +53,7 @@ BEGIN
 	AND Q.SnapshotDateUTC = @SnapshotDate
 	AND Q.blocking_session_id = @blocking_session_id
 	AND (stat.BlockCount >0 OR @blocking_session_id <> 0)
-	ORDER BY stat.WaitTimeRecursive DESC
+	ORDER BY stat.BlockWaitTimeRecursiveMs DESC
 END
 ELSE
 BEGIN
@@ -73,7 +73,7 @@ BEGIN
 		   BSS.wait_resource,
 		   BSS.Status,
 		   stat.BlockCountRecursive,
-		   stat.WaitTimeRecursive,
+		   stat.BlockWaitTimeRecursive AS WaitTimeRecursive,
 		   stat.BlockCount,
 		   stat.BlockWaitTime,
 		   BSS.session_status,
@@ -94,5 +94,5 @@ BEGIN
 							)
 				)
 		)
-	ORDER BY stat.WaitTimeRecursive DESC
+	ORDER BY stat.BlockWaitTimeRecursive DESC
 END

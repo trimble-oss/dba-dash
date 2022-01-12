@@ -402,5 +402,8 @@ namespace DBADashGUI
                 throw new Exception("Expected 1 row for pivot operation");
             }
         }
+
+        public static DataGridViewCellStyle DataGridViewNumericCellStyle = new DataGridViewCellStyle() { Format = "#,##0.###" };
+                    
     }
 }

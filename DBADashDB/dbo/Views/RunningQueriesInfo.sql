@@ -15,6 +15,14 @@ SELECT Q.InstanceID,
     Q.wait_type,
     sessionW.TopSessionWaits,
     Q.blocking_session_id,
+    H.BlockingHierarchy,
+    RQBRS.BlockCountRecursive, 
+	RQBRS.BlockWaitTimeRecursiveMs,
+    BlockWaitTimeRecursive.HumanDuration AS BlockWaitTimeRecursive,
+	RQBRS.BlockCount,
+    CASE WHEN RQBRS.BlockCount>0 AND blocking_session_id=0 THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END AS IsRootBlocker,
+	RQBRS.BlockWaitTimeMs,
+    BlockWaitTime.HumanDuration AS BlockWaitTime,
     Q.cpu_time,
     Q.logical_reads,
     Q.reads,
@@ -93,3 +101,7 @@ OUTER APPLY(SELECT STUFF((SELECT TOP(3) ', ' + WT.WaitType + ' (' + CAST(SW.wait
 		ORDER BY SW.wait_time_ms DESC
 		FOR XML PATH('')),1,1,'') AS TopSessionWaits
 		) sessionW
+OUTER APPLY dbo.RunningQueriesBlockingRecursiveStats(Q.InstanceID,Q.SnapshotDateUTC,Q.session_id) AS RQBRS
+OUTER APPLY dbo.RunningQueriesBlockingHierarchy(Q.InstanceID,Q.SnapshotDateUTC,Q.blocking_session_id) AS H
+CROSS APPLY dbo.MillisecondsToHumanDuration (RQBRS.BlockWaitTimeMs) AS BlockWaitTime
+CROSS APPLY dbo.MillisecondsToHumanDuration (RQBRS.BlockWaitTimeRecursiveMs) AS BlockWaitTimeRecursive

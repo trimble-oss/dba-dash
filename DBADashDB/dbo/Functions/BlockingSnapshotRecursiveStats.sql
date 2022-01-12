@@ -1,4 +1,8 @@
-﻿CREATE FUNCTION [dbo].[BlockingSnapshotRecursiveStats](@BlockingSnapshotID INT,@session_id SMALLINT,@SnapshotDateUTC DATETIME2(2))
+﻿CREATE FUNCTION dbo.BlockingSnapshotRecursiveStats(
+	@BlockingSnapshotID INT,
+	@session_id SMALLINT,
+	@SnapshotDateUTC DATETIME2(2)
+)
 RETURNS TABLE 
 AS
 RETURN
@@ -17,7 +21,7 @@ WITH R AS (
 	AND BSS.SnapshotDateUTC=@SnapshotDateUTC
 )
 SELECT COUNT(*) BlockCountRecursive, 
-	ISNULL(SUM(R.wait_time),0) WaitTimeRecursive,
+	ISNULL(SUM(R.wait_time),0) BlockWaitTimeRecursive,
 	ISNULL(SUM(IsDirect),0) AS BlockCount,
 	ISNULL(SUM(CASE WHEN R.IsDirect=1 THEN R.wait_time ELSE 0 END),0) AS BlockWaitTime
 FROM R

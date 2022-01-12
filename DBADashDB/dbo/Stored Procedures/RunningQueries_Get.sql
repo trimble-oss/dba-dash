@@ -49,6 +49,14 @@ SELECT InstanceID,
        wait_type,
        TopSessionWaits,
        blocking_session_id,
+       BlockingHierarchy,
+       BlockCountRecursive, 
+	   BlockWaitTimeRecursiveMs,
+       BlockWaitTimeRecursive,
+	   BlockCount,
+       IsRootBlocker,
+	   BlockWaitTimeMs,
+       BlockWaitTime,
        cpu_time,
        logical_reads,
        reads,
@@ -87,7 +95,7 @@ SELECT InstanceID,
        wait_db,
        wait_object,
        wait_file,
-       login_time_utc
+       login_time_utc     
 FROM dbo.RunningQueriesInfo Q
 WHERE Q.SnapshotDateUTC = @SnapshotDate
 AND Q.InstanceID = @InstanceID

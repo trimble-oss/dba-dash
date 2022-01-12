@@ -199,11 +199,14 @@ namespace DBADashGUI.Performance
         private void ChartBlocking_DataClick(object sender, ChartPoint chartPoint)
         {
             var blockPoint = (BlockingPoint)chartPoint.Instance;
-            BlockingViewer frm = new BlockingViewer
+            RunningQueriesViewer frm = new RunningQueriesViewer
             {
-                BlockingSnapshotID = blockPoint.SnapshotID
+                SnapshotDateFrom = blockPoint.SnapshotDate.ToUniversalTime(),
+                SnapshotDateTo = blockPoint.SnapshotDate.ToUniversalTime(),
+                InstanceID = InstanceID,
+                ShowRootBlockers= true,
             };
-            frm.Show();
+            frm.Show(this);
             
         }
 

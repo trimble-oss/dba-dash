@@ -138,7 +138,7 @@ BEGIN
 		    SUM(CASE WHEN R.blocking_session_id>0 THEN 1 ELSE 0 END) AS BlockedQueries,
 		    ISNULL(SUM(CASE WHEN R.blocking_session_id>0 THEN CAST(R.wait_time AS BIGINT) ELSE 0 END),0) AS BlockedWaitTime,
 		    ISNULL(MAX(R.granted_query_memory),0) AS MaxMemoryGrant,
-		    ISNULL(MAX(CASE WHEN R.wait_type='SP_SERVER_DIAGNOSTICS_SLEEP' THEN 0 ELSE calc.Duration END),0) AS LongestRunningQueryMs,
+		    ISNULL(MAX(CASE WHEN R.wait_type='SP_SERVER_DIAGNOSTICS_SLEEP' OR calc.Duration<0 THEN 0 ELSE calc.Duration END),0) AS LongestRunningQueryMs,
 		    SUM(CASE WHEN WT.IsCriticalWait=1 THEN 1 ELSE 0 END) CriticalWaitCount,
 		    SUM(CASE WHEN WT.IsCriticalWait=1 THEN CAST(R.wait_time AS BIGINT) ELSE 0 END) CriticalWaitTime,
             SUM(calc.IsTempDB) as TempDBWaitCount,
