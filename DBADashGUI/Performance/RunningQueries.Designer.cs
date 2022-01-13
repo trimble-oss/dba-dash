@@ -29,9 +29,9 @@ namespace DBADashGUI.Performance
         /// </summary>
         private void InitializeComponent()
         {
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle3 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle4 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle5 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle6 = new System.Windows.Forms.DataGridViewCellStyle();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(RunningQueries));
             this.dgv = new System.Windows.Forms.DataGridView();
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
@@ -62,6 +62,7 @@ namespace DBADashGUI.Performance
             this.tsBlockingFilter = new System.Windows.Forms.ToolStripDropDownButton();
             this.showRootBlockersToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.clearBlockingFilterToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.tsGroupByFilter = new System.Windows.Forms.ToolStripLabel();
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
             this.tsStatus = new System.Windows.Forms.ToolStripStatusLabel();
@@ -70,11 +71,10 @@ namespace DBADashGUI.Performance
             this.lblWaitsForSession = new System.Windows.Forms.ToolStripLabel();
             this.tsSessionWaitCopy = new System.Windows.Forms.ToolStripButton();
             this.tsSessionWaitExcel = new System.Windows.Forms.ToolStripButton();
-            this.toolStripDropDownButton1 = new System.Windows.Forms.ToolStripDropDownButton();
+            this.tsWaitsFilter = new System.Windows.Forms.ToolStripDropDownButton();
             this.allSessionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.summaryViewToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.sessionToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.tsGroupByFilter = new System.Windows.Forms.ToolStripLabel();
             ((System.ComponentModel.ISupportInitialize)(this.dgv)).BeginInit();
             this.toolStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
@@ -91,36 +91,36 @@ namespace DBADashGUI.Performance
             this.dgv.AllowUserToAddRows = false;
             this.dgv.AllowUserToDeleteRows = false;
             this.dgv.BackgroundColor = System.Drawing.Color.White;
-            dataGridViewCellStyle1.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle1.BackColor = System.Drawing.SystemColors.Control;
-            dataGridViewCellStyle1.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            dataGridViewCellStyle1.ForeColor = System.Drawing.SystemColors.WindowText;
-            dataGridViewCellStyle1.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-            dataGridViewCellStyle1.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-            dataGridViewCellStyle1.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
-            this.dgv.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle1;
+            dataGridViewCellStyle4.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle4.BackColor = System.Drawing.SystemColors.Control;
+            dataGridViewCellStyle4.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            dataGridViewCellStyle4.ForeColor = System.Drawing.SystemColors.WindowText;
+            dataGridViewCellStyle4.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle4.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle4.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
+            this.dgv.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle4;
             this.dgv.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            dataGridViewCellStyle2.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle2.BackColor = System.Drawing.SystemColors.Window;
-            dataGridViewCellStyle2.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            dataGridViewCellStyle2.ForeColor = System.Drawing.SystemColors.ControlText;
-            dataGridViewCellStyle2.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-            dataGridViewCellStyle2.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-            dataGridViewCellStyle2.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
-            this.dgv.DefaultCellStyle = dataGridViewCellStyle2;
+            dataGridViewCellStyle5.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle5.BackColor = System.Drawing.SystemColors.Window;
+            dataGridViewCellStyle5.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            dataGridViewCellStyle5.ForeColor = System.Drawing.SystemColors.ControlText;
+            dataGridViewCellStyle5.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle5.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle5.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
+            this.dgv.DefaultCellStyle = dataGridViewCellStyle5;
             this.dgv.Dock = System.Windows.Forms.DockStyle.Fill;
             this.dgv.Location = new System.Drawing.Point(0, 0);
             this.dgv.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.dgv.Name = "dgv";
             this.dgv.ReadOnly = true;
-            dataGridViewCellStyle3.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle3.BackColor = System.Drawing.SystemColors.Control;
-            dataGridViewCellStyle3.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            dataGridViewCellStyle3.ForeColor = System.Drawing.SystemColors.WindowText;
-            dataGridViewCellStyle3.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-            dataGridViewCellStyle3.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-            dataGridViewCellStyle3.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
-            this.dgv.RowHeadersDefaultCellStyle = dataGridViewCellStyle3;
+            dataGridViewCellStyle6.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle6.BackColor = System.Drawing.SystemColors.Control;
+            dataGridViewCellStyle6.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            dataGridViewCellStyle6.ForeColor = System.Drawing.SystemColors.WindowText;
+            dataGridViewCellStyle6.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle6.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle6.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
+            this.dgv.RowHeadersDefaultCellStyle = dataGridViewCellStyle6;
             this.dgv.RowHeadersVisible = false;
             this.dgv.RowHeadersWidth = 51;
             this.dgv.RowTemplate.Height = 24;
@@ -401,6 +401,14 @@ namespace DBADashGUI.Performance
             this.clearBlockingFilterToolStripMenuItem.Text = "Clear Blocking Filter";
             this.clearBlockingFilterToolStripMenuItem.Click += new System.EventHandler(this.clearBlockingFilterToolStripMenuItem_Click);
             // 
+            // tsGroupByFilter
+            // 
+            this.tsGroupByFilter.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            this.tsGroupByFilter.Name = "tsGroupByFilter";
+            this.tsGroupByFilter.Size = new System.Drawing.Size(127, 24);
+            this.tsGroupByFilter.Text = "{Group By Filter}";
+            this.tsGroupByFilter.Visible = false;
+            // 
             // splitContainer1
             // 
             this.splitContainer1.Cursor = System.Windows.Forms.Cursors.HSplit;
@@ -465,7 +473,7 @@ namespace DBADashGUI.Performance
             this.lblWaitsForSession,
             this.tsSessionWaitCopy,
             this.tsSessionWaitExcel,
-            this.toolStripDropDownButton1});
+            this.tsWaitsFilter});
             this.toolStrip2.Location = new System.Drawing.Point(0, 0);
             this.toolStrip2.Name = "toolStrip2";
             this.toolStrip2.Size = new System.Drawing.Size(1090, 27);
@@ -500,47 +508,39 @@ namespace DBADashGUI.Performance
             this.tsSessionWaitExcel.Text = "Excel";
             this.tsSessionWaitExcel.Click += new System.EventHandler(this.tsSessionWaitExcel_Click);
             // 
-            // toolStripDropDownButton1
+            // tsWaitsFilter
             // 
-            this.toolStripDropDownButton1.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.toolStripDropDownButton1.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.tsWaitsFilter.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.tsWaitsFilter.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.allSessionsToolStripMenuItem,
             this.summaryViewToolStripMenuItem,
             this.sessionToolStripMenuItem});
-            this.toolStripDropDownButton1.Image = global::DBADashGUI.Properties.Resources.FilterDropdown_16x;
-            this.toolStripDropDownButton1.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.toolStripDropDownButton1.Name = "toolStripDropDownButton1";
-            this.toolStripDropDownButton1.Size = new System.Drawing.Size(34, 24);
-            this.toolStripDropDownButton1.Text = "toolStripDropDownButton1";
+            this.tsWaitsFilter.Image = global::DBADashGUI.Properties.Resources.FilterDropdown_16x;
+            this.tsWaitsFilter.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tsWaitsFilter.Name = "tsWaitsFilter";
+            this.tsWaitsFilter.Size = new System.Drawing.Size(34, 24);
+            this.tsWaitsFilter.Text = "Filter";
             // 
             // allSessionsToolStripMenuItem
             // 
             this.allSessionsToolStripMenuItem.Name = "allSessionsToolStripMenuItem";
-            this.allSessionsToolStripMenuItem.Size = new System.Drawing.Size(190, 26);
+            this.allSessionsToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
             this.allSessionsToolStripMenuItem.Text = "All Sessions";
             this.allSessionsToolStripMenuItem.Click += new System.EventHandler(this.allSessionsToolStripMenuItem_Click);
             // 
             // summaryViewToolStripMenuItem
             // 
             this.summaryViewToolStripMenuItem.Name = "summaryViewToolStripMenuItem";
-            this.summaryViewToolStripMenuItem.Size = new System.Drawing.Size(190, 26);
+            this.summaryViewToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
             this.summaryViewToolStripMenuItem.Text = "Summary View";
             this.summaryViewToolStripMenuItem.Click += new System.EventHandler(this.summaryViewToolStripMenuItem_Click);
             // 
             // sessionToolStripMenuItem
             // 
             this.sessionToolStripMenuItem.Name = "sessionToolStripMenuItem";
-            this.sessionToolStripMenuItem.Size = new System.Drawing.Size(190, 26);
+            this.sessionToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
             this.sessionToolStripMenuItem.Text = "Session ";
             this.sessionToolStripMenuItem.Click += new System.EventHandler(this.sessionToolStripMenuItem_Click);
-            // 
-            // tsGroupByFilter
-            // 
-            this.tsGroupByFilter.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            this.tsGroupByFilter.Name = "tsGroupByFilter";
-            this.tsGroupByFilter.Size = new System.Drawing.Size(127, 24);
-            this.tsGroupByFilter.Text = "{Group By Filter}";
-            this.tsGroupByFilter.Visible = false;
             // 
             // RunningQueries
             // 
@@ -604,7 +604,7 @@ namespace DBADashGUI.Performance
         private System.Windows.Forms.ToolStripLabel lblWaitsForSession;
         private System.Windows.Forms.ToolStripButton tsSessionWaitCopy;
         private System.Windows.Forms.ToolStripButton tsSessionWaitExcel;
-        private System.Windows.Forms.ToolStripDropDownButton toolStripDropDownButton1;
+        private System.Windows.Forms.ToolStripDropDownButton tsWaitsFilter;
         private System.Windows.Forms.ToolStripMenuItem allSessionsToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem summaryViewToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem sessionToolStripMenuItem;
