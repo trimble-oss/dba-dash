@@ -99,7 +99,7 @@ namespace DBADashGUI.Performance
             }
         }
             
-        private static readonly DataGridViewColumn[] sessionWaitColumns = new DataGridViewColumn[]  {
+        private readonly DataGridViewColumn[] sessionWaitColumns = new DataGridViewColumn[]  {
                 new DataGridViewTextBoxColumn() { HeaderText = "Session ID", DataPropertyName = "session_id", Name = "colSessionID", Visible=false },
                 new DataGridViewTextBoxColumn() { HeaderText = "Wait Type", DataPropertyName = "WaitType", Name = "colWaitType" },
                 new DataGridViewTextBoxColumn() { HeaderText = "Waiting Tasks Count", DataPropertyName = "waiting_tasks_count" },
@@ -113,6 +113,7 @@ namespace DBADashGUI.Performance
 
         public void RefreshData()
         {
+            tsWaitsFilter.Enabled = SessionID == 0;
             tsGroupByFilter.Visible = false;
             splitContainer1.Panel2Collapsed = true;
             dgvSessionWaits.DataSource = null;
@@ -134,6 +135,7 @@ namespace DBADashGUI.Performance
             {
                 tsGetLatest.Visible = false;
                 snapshotDT = runningQueriesForSession(SessionID, SnapshotDateFrom, SnapshotDateTo, InstanceID);
+                getCounts();
                 loadSnapshot(new DataView(snapshotDT));
             }
             else if (SnapshotDateFrom== SnapshotDateTo && InstanceID>0 && SnapshotDateFrom> DateTime.MinValue) // Show a specific blocking snapshot (e.g. Blocking chart drill down)
@@ -330,7 +332,7 @@ namespace DBADashGUI.Performance
 
             tsBlockingFilter.Text = string.Format("Blocking ({0} Blocked)", blockedCount);
             tsBlockingFilter.Enabled = blockedCount > 0;
-            tsStatus.Visible = true;
+            tsStatus.Visible = SessionID==0;
             tsStatus.Text = string.Format("Blocked Sessions: {0}, Blocked Wait Time: {1:dd\\ hh\\:mm\\:ss}, Running Jobs {2}", blockedCount, TimeSpan.FromMilliseconds(blockedWait), runningJobCount);
             tsStatus.Font = blockedCount > 0 ? new Font(tsStatus.Font, FontStyle.Bold) : new Font(tsStatus.Font, FontStyle.Regular);
             tsStatus.ForeColor = blockedCount > 0 ? Color.Red : Color.Black;
