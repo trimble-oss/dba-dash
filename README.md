@@ -22,6 +22,10 @@ DBA Dash is a tool for SQL Server DBAs to assist with daily checks, performance 
  - [Custom Checks](Docs/CustomChecks.md)
 
  [What DBA Dash collects and when](Docs/Collection.md)
+ 
+## Video Overview
+
+[![DBA Dash Overview](https://img.youtube.com/vi/X7e4zElOQ3c/0.jpg)](https://www.youtube.com/watch?v=X7e4zElOQ3c)
 
 ## Requirements
  
@@ -61,6 +65,10 @@ Note: It's possible to run as a console app under your own user account for test
 **Note:**
 More advanced service configuration is possible.  e.g. A remote agent can be configured to write to a S3 bucket and another agent that connects to your repository database can use the S3 bucket as a source instead of a SQL connection string.  
 There are PowerShell scripts available to assist with automating the config file.  Set-DBADashDestination,Add-DBADashSource,Remove-DBADashSource
+
+## Installation Video
+
+[![DBA Dash Setup Video](https://img.youtube.com/vi/GY_4L049dVU/0.jpg)](https://www.youtube.com/watch?v=GY_4L049dVU)
 
 ## AzureDB
 You can monitor Azure SQL Server databases with DBA Dash and the application includes some Azure specific dashboards that can help with performance/cost optimization. The process for adding azure DB connections is similar to normal SQL instances but each database is considered a separate instance that we need a connection to.  You can manually add the connections for each database you want to monitor.  Alternatively you can just a connection to the **master** dastabase.
