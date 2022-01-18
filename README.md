@@ -7,6 +7,7 @@
 [Download](https://github.com/trimble-oss/dba-dash/releases)
 
 ## Project Summary
+
 DBA Dash is a tool for SQL Server DBAs to assist with daily checks, performance monitoring and change tracking.
 
  - Backups Agent Jobs, DBCC, Corruption, Drive space
@@ -71,7 +72,8 @@ There are PowerShell scripts available to assist with automating the config file
 [![DBA Dash Setup Video](https://img.youtube.com/vi/GY_4L049dVU/0.jpg)](https://www.youtube.com/watch?v=GY_4L049dVU)
 
 ## AzureDB
-You can monitor Azure SQL Server databases with DBA Dash and the application includes some Azure specific dashboards that can help with performance/cost optimization. The process for adding azure DB connections is similar to normal SQL instances but each database is considered a separate instance that we need a connection to.  You can manually add the connections for each database you want to monitor.  Alternatively you can just a connection to the **master** dastabase.
+
+You can monitor Azure SQL Server databases with DBA Dash and the application includes some Azure specific dashboards that can help with performance/cost optimization. The process for adding Azure DB connections is similar to normal SQL instances but each database is considered a separate instance that we need a connection to.  You can manually add the connections for each database you want to monitor.  Alternatively you can just a connection to the **master** database.
 
 If you have a connection to the master database, there are some options you can use on the "AzureDB" tab to add your other database connections:
 - Check the "Scan for AzureDBs on service start" option.  As the name suggests database connections will be added from the master connnection on service start.  
@@ -81,6 +83,7 @@ If you have a connection to the master database, there are some options you can 
 Any database connections created from master will inherit the settings from the master connection for slow query capture etc.
 
 # Amazon RDS 
+
 Amazon RDS (SQL Server only) can be used for source connections and for the repository database.  
 
 ## Upgrade Process
@@ -90,7 +93,7 @@ Amazon RDS (SQL Server only) can be used for source connections and for the repo
  - Replace all the app binaries with the ones from the new release (copy/paste).  All the configuration information for the agent is stored in the ServiceConfig.json file so this file must be kept. You might want to keep backups of this file - particually before making configuration changes or installing new versions.
  - If the "auto upgrade repository DB on service start" option is enabled you can run `net start dbadashservice` to complete the installation.  Any database schema changes will be deployed automatically when the service starts. 
 
-** Alternatively:  **
+**Alternatively:**
 
  - Run DBADashServiceConfigTool.exe.  On the destination tab you should be notified if there are database schema changes that need to be deployed.  If necessary click Deploy/Update Database. Either click the "Deploy" button to apply the schema changes or click "Generate Script" if you want to review the changes/deploy manually. Note: The script must be run in sqlcmd mode.
  **Ensure you have a backup prior to deploying changes.**
@@ -99,6 +102,7 @@ Amazon RDS (SQL Server only) can be used for source connections and for the repo
 *Note: If you are running multiple agents you should stop all the agents then run the upgrade process for each agent.  The schema changes for the DB would get deployed for the first agent only.*  
 
 ## Monitoring "Remote"  Instances
+
 It's possible to monitor instances where there isn't direct connectivity between the instance and your monitoring server. The destination you set in the DBA Dash Service config tool can be a folder path or point to a AWS S3 bucket.  You setup an agent in the remote environment to push data to the S3 Bucket location.  You then use that same location as a source connection on an agent where the destination is pointing to your DBADashDB central repository database.  The "AWS Credentials" tab can be used to specify credentials if required.  
 If you chose to use a local folder instead of an S3 bucket then you would need to find a way to move files from that folder to a folder that can be accessed by the other agent connecting to your DBDashDB database.  An S3 bucket is the easiest option but you could use a local folder and sync via a different cloud storage provider.
 
