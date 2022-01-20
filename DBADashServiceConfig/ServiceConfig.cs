@@ -1141,6 +1141,14 @@ namespace DBADashServiceConfig
                 validateDestination(); // DB could be upgraded on service start so refresh destination
             }
         }
+
+        private void bttnViewServiceLog_Click(object sender, EventArgs e)
+        {
+            using (var frm = new ServiceLog())
+            {
+                frm.ShowDialog(this);
+            }
+        }
     }
 }
 
