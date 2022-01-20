@@ -22,7 +22,7 @@ namespace DBADashServiceConfig
 
         public string ServiceName { get; set; }
 
-        private void installService()
+        private bool installService()
         {
             Process p = new Process();
             var psi = new ProcessStartInfo()
@@ -48,6 +48,10 @@ namespace DBADashServiceConfig
                     messageText: "Please enter the credentials to run the DBA Dash service.\nNote: Check the security requirements for the service account in the applicaton documentation.\nEnter username in domain\\username format",
                     saveCredential: CredentialSaveOption.Hidden
                     );
+                    if (creds == null)
+                    {
+                        return false;
+                    }
                     string domain = creds.Domain;
                     if (String.IsNullOrEmpty(domain))
                     {
@@ -62,7 +66,7 @@ namespace DBADashServiceConfig
                         }
                         else
                         {
-                            return;
+                            return false;
                         }
                     }
 
@@ -84,6 +88,7 @@ namespace DBADashServiceConfig
             p.BeginOutputReadLine();
             p.WaitForExit();
             System.Threading.Thread.Sleep(500);
+            return true;
         }
 
         private void bttnInstall_Click(object sender, EventArgs e)
@@ -91,9 +96,21 @@ namespace DBADashServiceConfig
             txtOutput.BackColor = Color.Black;
             txtOutput.ForeColor = Color.White;
 
-            installService();
+            if (installService())
+            {
+                checkServiceInstalledAndClose();
+            }
+            else
+            {
+                txtOutput.BackColor = Color.White;
+                txtOutput.ForeColor = Color.Black;
+            }
+        }
+
+        private void checkServiceInstalledAndClose()
+        {
             var svcCtrl = ServiceController.GetServices()
-                            .FirstOrDefault(s => s.ServiceName == ServiceName);
+                    .FirstOrDefault(s => s.ServiceName == ServiceName);
 
             if (svcCtrl == null)
             {
@@ -105,7 +122,6 @@ namespace DBADashServiceConfig
                 this.DialogResult = DialogResult.OK;
                 this.Close();
             }
-
         }
 
         private void InstallService_Load(object sender, EventArgs e)
