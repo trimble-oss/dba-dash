@@ -76,7 +76,7 @@ There are PowerShell scripts available to assist with automating the config file
 You can monitor Azure SQL Server databases with DBA Dash and the application includes some Azure specific dashboards that can help with performance/cost optimization. The process for adding Azure DB connections is similar to normal SQL instances but each database is considered a separate instance that we need a connection to.  You can manually add the connections for each database you want to monitor.  Alternatively you can just a connection to the **master** database.
 
 If you have a connection to the master database, there are some options you can use on the "AzureDB" tab to add your other database connections:
-- Check the "Scan for AzureDBs on service start" option.  As the name suggests database connections will be added from the master connnection on service start.  
+- Check the "Scan for AzureDBs on service start" option.  As the name suggests database connections will be added from the master connection on service start.  
 - Check the "scan for new Azure DBs every 'x' seconds" option.  This is useful to pick up new AzureDBs.  Also if for some reason it fails to get the connections to your user databases on service start it would re-detect them on this interval.
 - Click the "Scan Now" option.  Use this option to add the individual database connections to the config file.
 
@@ -90,7 +90,7 @@ Amazon RDS (SQL Server only) can be used for source connections and for the repo
 
  - Stop the DBA Dash agent.  Use `net stop dbadashservice` from the commandline or use the DBADashServiceConfigTool.exe tool (Service Tab) to stop the service.
  - Close any running instances of the GUI or DBA Dash Service Config tool.
- - Replace all the app binaries with the ones from the new release (copy/paste).  All the configuration information for the agent is stored in the ServiceConfig.json file so this file must be kept. You might want to keep backups of this file - particually before making configuration changes or installing new versions.
+ - Replace all the app binaries with the ones from the new release (copy/paste).  All the configuration information for the agent is stored in the ServiceConfig.json file so this file must be kept. You might want to keep backups of this file - particularly before making configuration changes or installing new versions.
  - If the "auto upgrade repository DB on service start" option is enabled you can run `net start dbadashservice` to complete the installation.  Any database schema changes will be deployed automatically when the service starts. 
 
 **Alternatively:**
