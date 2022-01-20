@@ -498,12 +498,25 @@ namespace DBADashServiceConfig
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    promptError(ex);
                 }
             }
 
             refreshServiceStatus();
             validateDestination();
+        }
+
+        private void promptError(Exception ex)
+        {
+            var sbError = new StringBuilder();
+            sbError.Append(ex.Message);
+            if (ex.InnerException != null)
+            {
+                sbError.AppendLine();
+                sbError.AppendLine();
+                sbError.Append(ex.InnerException.Message);
+            }
+            MessageBox.Show(sbError.ToString(), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
 
         private void bttnStop_Click(object sender, EventArgs e)
@@ -523,7 +536,7 @@ namespace DBADashServiceConfig
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    promptError(ex);
                 }
             }
             refreshServiceStatus();
