@@ -404,6 +404,12 @@ namespace DBADashGUI
         }
 
         public static DataGridViewCellStyle DataGridViewNumericCellStyle = new DataGridViewCellStyle() { Format = "#,##0.###" };
+
+        public static void OpenURL(string url)
+        {
+            var psi = new ProcessStartInfo(url) { UseShellExecute = true };
+            Process.Start(psi);
+        }
                     
     }
 }
