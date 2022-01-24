@@ -226,7 +226,7 @@ namespace DBADashService
 
         private async Task scanForAzureDBsAsync(DBADashSource src)
         {
-            if (config.ScanForAzureDBs)
+            if (config.ScanForAzureDBs && src.SourceConnection.Type == ConnectionType.SQL)
             {
                 bool isAzureDBMaster = false;
 
@@ -345,8 +345,10 @@ namespace DBADashService
             await Parallel.ForEachAsync(connections, options, async (src, ct) =>
             {
                 await removeEventSessionAsync(src);
-                await scheduleSourceAsync(src);
-                await scanForAzureDBsAsync(src);
+                await Task.WhenAll(
+                    scheduleSourceAsync(src),
+                    scanForAzureDBsAsync(src)
+                    );
             });
 
         }
