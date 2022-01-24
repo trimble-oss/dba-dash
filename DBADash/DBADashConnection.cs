@@ -136,7 +136,14 @@ namespace DBADash
 
         public bool IsXESupported()
         {
-            return ConnectionInfo.IsXESupported;
+            if (connectionType == ConnectionType.SQL)
+            {
+                return ConnectionInfo.IsXESupported;
+            }
+            else
+            {
+                return false;   
+            }
         }
 
         public static bool IsXESupported(string productVersion)

@@ -326,7 +326,7 @@ namespace DBADash
         public List<DBADashSource> GetNewAzureDBConnections()
         {
             var newConnections = new List<DBADashSource>();
-            foreach (var cfg in SourceConnections)
+            foreach (var cfg in SourceConnections.Where(src=>src.SourceConnection.Type == ConnectionType.SQL))
             {
                 try
                 {
