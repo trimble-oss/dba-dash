@@ -31,10 +31,20 @@ jobs:
       - name: Setup .NET Core
         uses: actions/setup-dotnet@v1
         with:
-          dotnet-version: ${{ env.DOTNET_VERSION }}
+          dotnet-version: 6.0.x
+          include-prerelease: true
 
       - name: Build
-        run: dotnet build
+        run: dotnet build -c CLI
+
+      - name: Add msbuild to PATH
+        uses: microsoft/setup-msbuild@v1.1
+        with:
+          dotnet-version: 6.0.x
+          vs-prerelease: true
+
+      - name: Build
+        run: msbuild dbadashdb -property:Configuration=CLI
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v1
