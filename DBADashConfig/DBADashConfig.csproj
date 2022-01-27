@@ -8,6 +8,7 @@
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
     <BaseOutputPath>..\DBADashBuild</BaseOutputPath>
     <ApplicationIcon>cmd.ico</ApplicationIcon>
+    <Configurations>Debug;Release;CLI</Configurations>
   </PropertyGroup>
 
   <ItemGroup>
