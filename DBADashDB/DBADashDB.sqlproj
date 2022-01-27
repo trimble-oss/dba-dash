@@ -29,7 +29,7 @@
     <QueryStoreStaleQueryThreshold>15</QueryStoreStaleQueryThreshold>
     <QueryStoreMaxStorageSize>512</QueryStoreMaxStorageSize>
     <QueryStoreMaxPlansPerQuery>50</QueryStoreMaxPlansPerQuery>
-    <DacVersion>2.11.0.4</DacVersion>
+    <DacVersion>0.0.0.0</DacVersion>
     <ReadCommittedSnapshot>True</ReadCommittedSnapshot>
     <AllowSnapshotIsolation>True</AllowSnapshotIsolation>
     <CompatibilityMode>130</CompatibilityMode>
@@ -683,4 +683,22 @@
       <DatabaseVariableLiteralValue>master</DatabaseVariableLiteralValue>
     </ArtifactReference>
   </ItemGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="..\GlobalAssemblyInfo.cs">
+      <Link>Properties\GlobalAssemblyInfo.cs</Link>
+    </Compile>
+  </ItemGroup>
+  <Target Name="SetDacVersionToAssemblyVersion" AfterTargets="CoreCompile">
+    <GetAssemblyIdentity AssemblyFiles="$(IntermediateTargetFullFileName)">
+      <Output TaskParameter="Assemblies" PropertyName="IntermediateTargetAssembly" />
+    </GetAssemblyIdentity>
+    <PropertyGroup>
+      <DacVersion>$(IntermediateTargetAssembly.Split(',')[1].Split('=')[1])
+            </DacVersion>
+    </PropertyGroup>
+    <Message Text="DacVersion set to $(DacVersion)" Importance="high" />
+  </Target>
 </Project>
