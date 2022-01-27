@@ -1,8 +1,7 @@
-name: DBA Dash Continuous Integration
+# Run workflow to create a release+tag based on version of app set in GlobalAssemblyInfo.cs
+name: Tag and Create Release
 
-on: 
-    push:
-    workflow_dispatch:
+on: workflow_dispatch
 
 jobs:
   build:
@@ -52,3 +51,14 @@ jobs:
           Compress-Archive -Path "DBADashBuild\CLI\*" -DestinationPath $zipPath
           $guiZipPath = "DBADash_GUI_Only_${{steps.GetVersion.outputs.BUILD_NUMBER}}.zip"
           Compress-Archive -Path "DBADashBuild\DBADashGUIOnly\*" -DestinationPath $guiZipPath
+     
+      - name: Publish
+        uses: softprops/action-gh-release@v1
+        with:
+          files: "DBADash*.zip"
+          tag_name: ${{steps.GetVersion.outputs.BUILD_NUMBER}}
+          generate_release_notes: true,
+          draft: true
+          fail_on_unmatched_files: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

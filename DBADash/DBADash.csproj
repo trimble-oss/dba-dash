@@ -4,7 +4,7 @@
     <OutputType>Library</OutputType>
     <AssemblyName>DBADashTools</AssemblyName>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
-    <Deterministic>false</Deterministic>
+    <Deterministic>True</Deterministic>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <UseWindowsForms>false</UseWindowsForms>
     <Configurations>Debug;Release;CLI</Configurations>
