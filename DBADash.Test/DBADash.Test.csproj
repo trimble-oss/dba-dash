@@ -7,6 +7,8 @@
     <IsPackable>false</IsPackable>
 
     <StartupObject></StartupObject>
+
+    <Configurations>Debug;Release;CLI</Configurations>
   </PropertyGroup>
 
   <ItemGroup>
@@ -19,7 +21,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\DBADashConfig\DBADashConfig.csproj" />
-    <ProjectReference Include="..\DBADashDB\DBADashDB.sqlproj" />
   </ItemGroup>
 
 </Project>
