@@ -59,7 +59,7 @@ namespace DBADashGUI.Performance
             mins = (Int32)to.Subtract(from).TotalMinutes;
             if (this.from!=from | this.to != to)
             {
-                dateGrouping = Common.DateGrouping(mins, 65);
+                dateGrouping = Common.DateGrouping(mins, 35);
                 if (dateGrouping < 1)
                 {
                     dateGrouping = 1;
