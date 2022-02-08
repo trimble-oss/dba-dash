@@ -431,5 +431,17 @@ namespace DBADashGUI.Performance
             tsDateGroup.Text = Common.DateGroupString(dateGrouping);
             refreshData(false);
         }
+
+        private void tsIOSummary_Click(object sender, EventArgs e)
+        {
+            var frm = new IOSummaryForm()
+            {
+                InstanceID = instanceID,
+                DatabaseID = databaseid,
+                FromDate = DateRange.FromUTC,
+                ToDate= DateRange.ToUTC
+            };
+            frm.ShowDialog(this);
+        }
     }
 }
