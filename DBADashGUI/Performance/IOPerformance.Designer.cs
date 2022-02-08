@@ -36,6 +36,7 @@
             this.tsDateGroup = new System.Windows.Forms.ToolStripDropDownButton();
             this.tsDrives = new System.Windows.Forms.ToolStripDropDownButton();
             this.tsFileGroup = new System.Windows.Forms.ToolStripDropDownButton();
+            this.tsIOSummary = new System.Windows.Forms.ToolStripButton();
             this.toolStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -43,8 +44,9 @@
             // 
             this.chartIO.Dock = System.Windows.Forms.DockStyle.Fill;
             this.chartIO.Location = new System.Drawing.Point(0, 27);
+            this.chartIO.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.chartIO.Name = "chartIO";
-            this.chartIO.Size = new System.Drawing.Size(773, 267);
+            this.chartIO.Size = new System.Drawing.Size(773, 341);
             this.chartIO.TabIndex = 4;
             this.chartIO.Text = "cartesianChart1";
             // 
@@ -56,7 +58,8 @@
             this.lblIOPerformance,
             this.tsDateGroup,
             this.tsDrives,
-            this.tsFileGroup});
+            this.tsFileGroup,
+            this.tsIOSummary});
             this.toolStrip1.Location = new System.Drawing.Point(0, 0);
             this.toolStrip1.Name = "toolStrip1";
             this.toolStrip1.Size = new System.Drawing.Size(773, 27);
@@ -75,7 +78,7 @@
             // lblIOPerformance
             // 
             this.lblIOPerformance.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
-            this.lblIOPerformance.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
+            this.lblIOPerformance.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
             this.lblIOPerformance.Name = "lblIOPerformance";
             this.lblIOPerformance.Size = new System.Drawing.Size(119, 24);
             this.lblIOPerformance.Text = "IO Performance";
@@ -105,14 +108,25 @@
             this.tsFileGroup.Text = "Filegroup";
             this.tsFileGroup.Visible = false;
             // 
+            // tsIOSummary
+            // 
+            this.tsIOSummary.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.tsIOSummary.Image = global::DBADashGUI.Properties.Resources.Table_16x;
+            this.tsIOSummary.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tsIOSummary.Name = "tsIOSummary";
+            this.tsIOSummary.Size = new System.Drawing.Size(29, 24);
+            this.tsIOSummary.Text = "View Table Summary";
+            this.tsIOSummary.Click += new System.EventHandler(this.tsIOSummary_Click);
+            // 
             // IOPerformance
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.Controls.Add(this.chartIO);
             this.Controls.Add(this.toolStrip1);
+            this.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.Name = "IOPerformance";
-            this.Size = new System.Drawing.Size(773, 294);
+            this.Size = new System.Drawing.Size(773, 368);
             this.Load += new System.EventHandler(this.IOPerformance_Load);
             this.toolStrip1.ResumeLayout(false);
             this.toolStrip1.PerformLayout();
@@ -130,5 +144,6 @@
         private System.Windows.Forms.ToolStripDropDownButton tsDrives;
         private System.Windows.Forms.ToolStripDropDownButton tsDateGroup;
         private System.Windows.Forms.ToolStripDropDownButton tsFileGroup;
+        private System.Windows.Forms.ToolStripButton tsIOSummary;
     }
 }
