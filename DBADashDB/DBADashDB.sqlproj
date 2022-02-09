@@ -643,6 +643,7 @@
     <Build Include="dbo\Stored Procedures\PrintMax.sql" />
     <Build Include="dbo\Functions\RunningQueriesBlockingHierarchy.sql" />
     <Build Include="dbo\Stored Procedures\IOSummary_Get.sql" />
+    <Build Include="dbo\Views\AzureDBInfo.sql" />
   </ItemGroup>
   <ItemGroup>
     <PostDeploy Include="Script.PostDeployment1.sql" />
