@@ -38,6 +38,7 @@ namespace DBADashGUI.Performance
                 dgv.DataSource = new DataView(dt);
             }
             dgv.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
+            dgv.Columns["colCPUHistogram"].Width = 200;
         }
 
         void addPerformanceCounters(ref DataTable dt)
