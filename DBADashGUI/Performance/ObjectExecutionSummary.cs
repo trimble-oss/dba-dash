@@ -47,9 +47,6 @@ namespace DBADashGUI.Performance
         }
 
         private Int32 compareOffset = 0;
-
-
-
         private DateTime _compareTo=DateTime.MinValue;
         private DateTime _compareFrom=DateTime.MinValue;
         private DataTable dt;
@@ -108,14 +105,6 @@ namespace DBADashGUI.Performance
 
         };
 
-        public void addColumns()
-        {
-            tsColumns.DropDownItems.Clear();
-            foreach(DataGridViewColumn col in Cols)
-            {
-                tsColumns.DropDownItems.Add(new ToolStripMenuItem(col.Name,null,tsColumn_Click ) { Checked = col.Visible, CheckOnClick=true });
-            }
-        }
 
         private void tsColumn_Click(object sender, EventArgs e)
         {
@@ -130,8 +119,6 @@ namespace DBADashGUI.Performance
                 }
             }
         }
-
-
 
 
         public List<DataGridViewColumn> Columns
@@ -169,26 +156,6 @@ namespace DBADashGUI.Performance
             }
         }
 
-        private void setColVisibility()
-        {
-            foreach (var ts in tsColumns.DropDownItems)
-            {
-                if (ts.GetType() == typeof(ToolStripMenuItem))
-                {
-                    var mnu = (ToolStripMenuItem)ts;
-                    foreach (string name in new string[] { mnu.Text, "Compare " + mnu.Text })
-                    {
-                        if (dgv.Columns.Contains(name))
-                        {
-                            dgv.Columns[name].Visible = mnu.Checked;
-                        }
-                    }
-                }
-            }
-        }
-
-
-
         public void RefreshData()
         {
             splitContainer1.Panel1Collapsed = true;
@@ -198,66 +165,69 @@ namespace DBADashGUI.Performance
         private void refreshData()
         {
             dgv.DataSource = null;
-            SqlConnection cn = new SqlConnection(Common.ConnectionString);
-            using (cn)
+
+            var dt = getObjectExecutionStatsSummary();
+            if (dt.Rows.Count == 1)
             {
-                using (SqlCommand cmd = new SqlCommand("dbo.ObjectExecutionStatsSummary_Get", cn) { CommandType = CommandType.StoredProcedure })
+                refreshChart((Int64)dt.Rows[0]["ObjectID"], (string)dt.Rows[0]["ObjectName"]);
+            }
+            dgv.Columns.Clear();
+            dgv.AutoGenerateColumns = false;
+
+            setDataSourceWithFilter();
+            dgv.Columns.AddRange(Columns.ToArray());
+            dgv.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
+
+            if (splitContainer1.Panel1Collapsed == false)
+            {
+                refreshChart();
+            }
+           
+        }
+
+        private DataTable getObjectExecutionStatsSummary()
+        {
+            using(var cn = new SqlConnection(Common.ConnectionString))
+            using(var cmd = new SqlCommand("dbo.ObjectExecutionStatsSummary_Get", cn) { CommandType = CommandType.StoredProcedure, CommandTimeout = Properties.Settings.Default.CommandTimeout })
+            using(var da = new SqlDataAdapter(cmd))
+            {
+                cn.Open();
+                if (InstanceID > 0)
                 {
-                    cn.Open();
-                    if (InstanceID > 0)
-                    {
-                        cmd.Parameters.AddWithValue("InstanceID", InstanceID);
-                    }
-                    else if (Instance != null && Instance.Length > 0)
-                    {
-                        cmd.Parameters.AddWithValue("Instance", Instance);
-                    }
-                    else
-                    {
-                        throw new Exception("Instance not provided to Object Execution Summary");
-                    }
-                    if (ObjectID > 0)
-                    {
-                        cmd.Parameters.AddWithValue("ObjectID", ObjectID);
-                    }
-                    if (DatabaseID > 0)
-                    {
-                        cmd.Parameters.AddWithValue("DatabaseID", DatabaseID);
-                    }
-                    if (compareFrom != DateTime.MinValue && compareFrom != DateTime.MaxValue && compareTo != DateTime.MinValue && compareTo != DateTime.MaxValue)
-                    {
-                        cmd.Parameters.AddWithValue("CompareFrom", compareFrom);
-                        cmd.Parameters.AddWithValue("CompareTo", compareTo);
-                    }
-                    if (Types.Length > 0)
-                    {
-                        cmd.Parameters.AddWithValue("Types", Types);
-                    }
-
-                    cmd.Parameters.AddWithValue("FromDate", DateRange.FromUTC);
-                    cmd.Parameters.AddWithValue("ToDate", DateRange.ToUTC);
-                    cmd.CommandTimeout = Properties.Settings.Default.CommandTimeout;
-
-                    SqlDataAdapter da = new SqlDataAdapter(cmd);
-                    dt = new DataTable();
-                    da.Fill(dt);
-                    if (dt.Rows.Count == 1)
-                    {
-                        refreshChart((Int64)dt.Rows[0]["ObjectID"], (string)dt.Rows[0]["ObjectName"]);
-                    }
-                    dgv.Columns.Clear();
-                    dgv.AutoGenerateColumns = false;
-
-                    setDataSourceWithFilter();
-                    dgv.Columns.AddRange(Columns.ToArray());
-                    setColVisibility();
-                    dgv.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
-            
-                    if (splitContainer1.Panel1Collapsed == false)
-                    {
-                        refreshChart();
-                    }
+                    cmd.Parameters.AddWithValue("InstanceID", InstanceID);
                 }
+                else if (Instance != null && Instance.Length > 0)
+                {
+                    cmd.Parameters.AddWithValue("Instance", Instance);
+                }
+                else
+                {
+                    throw new Exception("Instance not provided to Object Execution Summary");
+                }
+                if (ObjectID > 0)
+                {
+                    cmd.Parameters.AddWithValue("ObjectID", ObjectID);
+                }
+                if (DatabaseID > 0)
+                {
+                    cmd.Parameters.AddWithValue("DatabaseID", DatabaseID);
+                }
+                if (compareFrom != DateTime.MinValue && compareFrom != DateTime.MaxValue && compareTo != DateTime.MinValue && compareTo != DateTime.MaxValue)
+                {
+                    cmd.Parameters.AddWithValue("CompareFrom", compareFrom);
+                    cmd.Parameters.AddWithValue("CompareTo", compareTo);
+                }
+                if (Types.Length > 0)
+                {
+                    cmd.Parameters.AddWithValue("Types", Types);
+                }
+
+                cmd.Parameters.AddWithValue("FromDate", DateRange.FromUTC);
+                cmd.Parameters.AddWithValue("ToDate", DateRange.ToUTC);
+
+                dt = new DataTable();
+                da.Fill(dt);
+                return dt;
             }
         }
 
@@ -323,7 +293,6 @@ namespace DBADashGUI.Performance
         private void ObjectExecutionSummary_Load(object sender, EventArgs e)
         {
             splitContainer1.Panel1Collapsed = true;
-            addColumns();
         }
 
         private void tsCustomCompare_Click(object sender, EventArgs e)
@@ -352,7 +321,6 @@ namespace DBADashGUI.Performance
 
         private void dgv_RowsAdded(object sender, DataGridViewRowsAddedEventArgs e)
         {
-
             if (dgv.Columns.Contains("Diff Avg Duration (%)")){
                 for (Int32 idx = e.RowIndex; idx < e.RowIndex + e.RowCount; idx += 1)
                 {
@@ -455,6 +423,26 @@ namespace DBADashGUI.Performance
         {
             setDataSourceWithFilter();
             tmrSearch.Enabled = false;
+        }
+
+        private void tsCols_Click(object sender, EventArgs e)
+        {
+            promptColumnSelection(ref dgv);
+        }
+
+        private void promptColumnSelection(ref DataGridView gv)
+        {
+            using (var frm = new SelectColumns())
+            {
+                frm.Columns = gv.Columns;
+                frm.ShowDialog(this);
+                if (frm.DialogResult == DialogResult.OK)
+                {
+                    var dt = ((DataView)dgv.DataSource).Table;
+                    gv.AutoResizeColumns();
+                    gv.AutoResizeRows();
+                }
+            }
         }
     }
 }

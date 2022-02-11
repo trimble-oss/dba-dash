@@ -111,62 +111,54 @@ namespace DBADashGUI.Performance
 
         DataTable getPerformanceCounters()
         {
-            SqlConnection cn = new SqlConnection(Common.ConnectionString);
-            using (cn)
+            using (var cn = new SqlConnection(Common.ConnectionString))
+            using (var cmd = new SqlCommand("dbo.PerformanceCounterSummary_Get", cn) { CommandType = CommandType.StoredProcedure, CommandTimeout = Properties.Settings.Default.CommandTimeout })
             {
-                using (SqlCommand cmd = new SqlCommand("dbo.PerformanceCounterSummary_Get", cn) { CommandType = CommandType.StoredProcedure })
+                cn.Open();
+                if (InstanceIDs.Count > 0)
                 {
-                    cn.Open();
-                    if (InstanceIDs.Count > 0)
-                    {
-                        cmd.Parameters.AddWithValue("InstanceIDs", string.Join(",", InstanceIDs));
-                    }
-                    else
-                    {
-                        cmd.Parameters.AddWithValue("TagIDs", TagIDs);
-                    }
-                    var counters =String.Join(",", SelectedPerformanceCounters.Values.Select(pc => pc.CounterID));
-                    cmd.Parameters.AddWithValue("Counters", counters);
-                    cmd.Parameters.AddWithValue("FromDate", DateRange.FromUTC);
-                    cmd.Parameters.AddWithValue("ToDate", DateRange.ToUTC);
-                    cmd.CommandTimeout = Properties.Settings.Default.CommandTimeout;
-                    SqlDataAdapter da = new SqlDataAdapter(cmd);
-                    DataTable dt = new DataTable();
-                    da.Fill(dt);
-                    return dt;
+                    cmd.Parameters.AddWithValue("InstanceIDs", string.Join(",", InstanceIDs));
                 }
-            }
+                else
+                {
+                    cmd.Parameters.AddWithValue("TagIDs", TagIDs);
+                }
+                var counters = String.Join(",", SelectedPerformanceCounters.Values.Select(pc => pc.CounterID));
+                cmd.Parameters.AddWithValue("Counters", counters);
+                cmd.Parameters.AddWithValue("FromDate", DateRange.FromUTC);
+                cmd.Parameters.AddWithValue("ToDate", DateRange.ToUTC);
+                SqlDataAdapter da = new SqlDataAdapter(cmd);
+                DataTable dt = new DataTable();
+                da.Fill(dt);
+                return dt;
+            }           
         }
 
 
         DataTable getPerformanceSummary()
         {
-            SqlConnection cn = new SqlConnection(Common.ConnectionString);
-            using (cn)
+            using (var cn = new SqlConnection(Common.ConnectionString))
+            using (SqlCommand cmd = new SqlCommand("dbo.PerformanceSummary_Get", cn) { CommandType = CommandType.StoredProcedure, CommandTimeout = Properties.Settings.Default.CommandTimeout })
             {
-                using (SqlCommand cmd = new SqlCommand("dbo.PerformanceSummary_Get", cn) { CommandType = CommandType.StoredProcedure })
+                cn.Open();
+                if (InstanceIDs.Count > 0)
                 {
-                    cn.Open();
-                    if (InstanceIDs.Count > 0)
-                    {
-                        cmd.Parameters.AddWithValue("InstanceIDs", string.Join(",", InstanceIDs));
-                    }
-                    else
-                    {
-                        cmd.Parameters.AddWithValue("TagIDs", TagIDs);
-                    }
-                    cmd.Parameters.AddWithValue("FromDate", DateRange.FromUTC);
-                    cmd.Parameters.AddWithValue("ToDate", DateRange.ToUTC);
-                    cmd.CommandTimeout = Properties.Settings.Default.CommandTimeout;
-                    SqlDataAdapter da = new SqlDataAdapter(cmd);
-                    DataTable dt = new DataTable();
-                    var pkCols = new DataColumn[1];
-                    pkCols[0] =  dt.Columns.Add("InstanceID", typeof(int));
-                    dt.PrimaryKey = pkCols;
-                    da.Fill(dt);
-                    return dt;
+                    cmd.Parameters.AddWithValue("InstanceIDs", string.Join(",", InstanceIDs));
                 }
-            }
+                else
+                {
+                    cmd.Parameters.AddWithValue("TagIDs", TagIDs);
+                }
+                cmd.Parameters.AddWithValue("FromDate", DateRange.FromUTC);
+                cmd.Parameters.AddWithValue("ToDate", DateRange.ToUTC);
+                SqlDataAdapter da = new SqlDataAdapter(cmd);
+                DataTable dt = new DataTable();
+                var pkCols = new DataColumn[1];
+                pkCols[0] =  dt.Columns.Add("InstanceID", typeof(int));
+                dt.PrimaryKey = pkCols;
+                da.Fill(dt);
+                return dt;
+            }          
         }
     
 
@@ -203,71 +195,8 @@ namespace DBADashGUI.Performance
             }
         }
 
-
-        private void addColumnsMenu()
-        {
-            foreach(DataGridViewColumn col in dgv.Columns)
-            {
-                ToolStripMenuItem mnu = new ToolStripMenuItem(col.HeaderText)
-                {
-                    Name = col.Name,
-                };
-                mnu.Click += ColumnMenu_Click;
-                mnu.Checked = col.Visible;
-                mnu.CheckOnClick = true;
-                tsColumns.DropDownItems.Add(mnu);
-            }
-            tsColumns.DropDownItems.Add(new ToolStripSeparator());
-            ToolStripMenuItem mnuCheckAll = new ToolStripMenuItem("Check All");
-            mnuCheckAll.Click += MnuCheckAll_Click;
-            tsColumns.DropDownItems.Add(mnuCheckAll);
-            ToolStripMenuItem mnuUnCheckAll = new ToolStripMenuItem("Uncheck All");
-            mnuUnCheckAll.Click += MnuUnCheckAll_Click;
-            tsColumns.DropDownItems.Add(mnuUnCheckAll);
-        }
-
-        private void MnuUnCheckAll_Click(object sender, EventArgs e)
-        {
-            checkAll(false);
-        }
-
-        private void checkAll(bool isChecked)
-        {
-            foreach (ToolStripItem itm in tsColumns.DropDownItems)
-            {
-                if (itm.GetType() == typeof(ToolStripMenuItem))
-                {
-                    var mnu = (ToolStripMenuItem)itm;
-                    if (mnu.CheckOnClick)
-                    {
-                        mnu.Checked = isChecked;
-                        dgv.Columns[mnu.Name].Visible = isChecked;
-                    }
-                }
-            }
-        }
-
-        private void MnuCheckAll_Click(object sender, EventArgs e)
-        {
-            checkAll(true);
-            var dt = ((DataView)dgv.DataSource).Table;
-            generateHistogram(ref dt);
-        }
-
-        private void ColumnMenu_Click(object sender, EventArgs e)
-        {
-            var mnu = (ToolStripMenuItem)sender;
-            dgv.Columns[mnu.Name].Visible = mnu.Checked;
-            if (mnu.Name == "colCPUHistogram" && mnu.Checked)
-            {
-                var dt = ((DataView)dgv.DataSource).Table;
-                generateHistogram(ref dt);
-            }
-        }
-
         private void PerformanceSummary_Load(object sender, EventArgs e)
         {
-            addColumnsMenu();
             addHistCols(dgv, "col");
         }
 
@@ -289,7 +218,6 @@ namespace DBADashGUI.Performance
             
 
         }
-
 
 
         private void tsRefresh_Click(object sender, EventArgs e)
@@ -376,6 +304,27 @@ namespace DBADashGUI.Performance
         private void tsExcel_Click(object sender, EventArgs e)
         {
             Common.PromptSaveDataGridView(ref dgv);
+        }
+
+        private void tsCols_Click(object sender, EventArgs e)
+        {
+            promptColumnSelection(ref dgv);
+        }
+
+        private void promptColumnSelection(ref DataGridView gv)
+        {
+            using (var frm = new SelectColumns())
+            {
+                frm.Columns = gv.Columns;
+                frm.ShowDialog(this);
+                if (frm.DialogResult == DialogResult.OK)
+                {
+                    var dt = ((DataView)dgv.DataSource).Table;
+                    generateHistogram(ref dt);
+                    gv.AutoResizeColumns();
+                    gv.AutoResizeRows();
+                }
+            }
         }
     }
 }

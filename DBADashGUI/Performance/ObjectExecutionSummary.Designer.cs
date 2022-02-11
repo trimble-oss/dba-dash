@@ -41,7 +41,6 @@
             this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
             this.tsCustomCompare = new System.Windows.Forms.ToolStripMenuItem();
             this.tsNoCompare = new System.Windows.Forms.ToolStripMenuItem();
-            this.tsColumns = new System.Windows.Forms.ToolStripDropDownButton();
             this.tsType = new System.Windows.Forms.ToolStripDropDownButton();
             this.procedureToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.triggerToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -52,6 +51,7 @@
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.lblSearch = new System.Windows.Forms.ToolStripLabel();
             this.txtSearch = new System.Windows.Forms.ToolStripTextBox();
+            this.tsCols = new System.Windows.Forms.ToolStripButton();
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
             this.splitChart = new System.Windows.Forms.SplitContainer();
             this.objectExecutionLineChart1 = new DBADashGUI.Performance.ObjectExecutionLineChart();
@@ -76,12 +76,13 @@
             this.dgv.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.dgv.Dock = System.Windows.Forms.DockStyle.Fill;
             this.dgv.Location = new System.Drawing.Point(0, 0);
+            this.dgv.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.dgv.Name = "dgv";
             this.dgv.ReadOnly = true;
             this.dgv.RowHeadersVisible = false;
             this.dgv.RowHeadersWidth = 51;
             this.dgv.RowTemplate.Height = 24;
-            this.dgv.Size = new System.Drawing.Size(1262, 256);
+            this.dgv.Size = new System.Drawing.Size(1262, 323);
             this.dgv.TabIndex = 0;
             this.dgv.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgv_CellContentClick);
             this.dgv.RowsAdded += new System.Windows.Forms.DataGridViewRowsAddedEventHandler(this.dgv_RowsAdded);
@@ -94,7 +95,7 @@
             this.tsCopy,
             this.tsExcel,
             this.tsCompare,
-            this.tsColumns,
+            this.tsCols,
             this.tsType,
             this.toolStripSeparator1,
             this.lblSearch,
@@ -197,15 +198,6 @@
             this.tsNoCompare.Text = "None";
             this.tsNoCompare.Click += new System.EventHandler(this.tsSetOffset_Click);
             // 
-            // tsColumns
-            // 
-            this.tsColumns.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.tsColumns.Image = global::DBADashGUI.Properties.Resources.Column_16x;
-            this.tsColumns.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsColumns.Name = "tsColumns";
-            this.tsColumns.Size = new System.Drawing.Size(34, 24);
-            this.tsColumns.Text = "Columns";
-            // 
             // tsType
             // 
             this.tsType.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
@@ -289,15 +281,25 @@
             // 
             // txtSearch
             // 
-            this.txtSearch.Font = new System.Drawing.Font("Segoe UI", 9F);
             this.txtSearch.Name = "txtSearch";
             this.txtSearch.Size = new System.Drawing.Size(200, 27);
             this.txtSearch.TextChanged += new System.EventHandler(this.txtSearch_TextChanged);
+            // 
+            // tsCols
+            // 
+            this.tsCols.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.tsCols.Image = global::DBADashGUI.Properties.Resources.Column_16x;
+            this.tsCols.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tsCols.Name = "tsCols";
+            this.tsCols.Size = new System.Drawing.Size(29, 24);
+            this.tsCols.Text = "Columns";
+            this.tsCols.Click += new System.EventHandler(this.tsCols_Click);
             // 
             // splitContainer1
             // 
             this.splitContainer1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.splitContainer1.Location = new System.Drawing.Point(0, 27);
+            this.splitContainer1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.splitContainer1.Name = "splitContainer1";
             this.splitContainer1.Orientation = System.Windows.Forms.Orientation.Horizontal;
             // 
@@ -308,14 +310,16 @@
             // splitContainer1.Panel2
             // 
             this.splitContainer1.Panel2.Controls.Add(this.dgv);
-            this.splitContainer1.Size = new System.Drawing.Size(1262, 888);
-            this.splitContainer1.SplitterDistance = 628;
+            this.splitContainer1.Size = new System.Drawing.Size(1262, 1117);
+            this.splitContainer1.SplitterDistance = 789;
+            this.splitContainer1.SplitterWidth = 5;
             this.splitContainer1.TabIndex = 6;
             // 
             // splitChart
             // 
             this.splitChart.Dock = System.Windows.Forms.DockStyle.Fill;
             this.splitChart.Location = new System.Drawing.Point(0, 0);
+            this.splitChart.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.splitChart.Name = "splitChart";
             this.splitChart.Orientation = System.Windows.Forms.Orientation.Horizontal;
             // 
@@ -326,16 +330,18 @@
             // splitChart.Panel2
             // 
             this.splitChart.Panel2.Controls.Add(this.compareObjectExecutionLineChart);
-            this.splitChart.Size = new System.Drawing.Size(1262, 628);
-            this.splitChart.SplitterDistance = 312;
+            this.splitChart.Size = new System.Drawing.Size(1262, 789);
+            this.splitChart.SplitterDistance = 391;
+            this.splitChart.SplitterWidth = 5;
             this.splitChart.TabIndex = 7;
             // 
             // objectExecutionLineChart1
             // 
             this.objectExecutionLineChart1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.objectExecutionLineChart1.Location = new System.Drawing.Point(0, 0);
+            this.objectExecutionLineChart1.Margin = new System.Windows.Forms.Padding(3, 5, 3, 5);
             this.objectExecutionLineChart1.Name = "objectExecutionLineChart1";
-            this.objectExecutionLineChart1.Size = new System.Drawing.Size(1262, 312);
+            this.objectExecutionLineChart1.Size = new System.Drawing.Size(1262, 391);
             this.objectExecutionLineChart1.TabIndex = 5;
             this.objectExecutionLineChart1.Title = "abc";
             // 
@@ -343,8 +349,9 @@
             // 
             this.compareObjectExecutionLineChart.Dock = System.Windows.Forms.DockStyle.Fill;
             this.compareObjectExecutionLineChart.Location = new System.Drawing.Point(0, 0);
+            this.compareObjectExecutionLineChart.Margin = new System.Windows.Forms.Padding(3, 5, 3, 5);
             this.compareObjectExecutionLineChart.Name = "compareObjectExecutionLineChart";
-            this.compareObjectExecutionLineChart.Size = new System.Drawing.Size(1262, 312);
+            this.compareObjectExecutionLineChart.Size = new System.Drawing.Size(1262, 393);
             this.compareObjectExecutionLineChart.TabIndex = 6;
             this.compareObjectExecutionLineChart.Title = "abc";
             // 
@@ -355,12 +362,13 @@
             // 
             // ObjectExecutionSummary
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.Controls.Add(this.splitContainer1);
             this.Controls.Add(this.toolStrip1);
+            this.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.Name = "ObjectExecutionSummary";
-            this.Size = new System.Drawing.Size(1262, 915);
+            this.Size = new System.Drawing.Size(1262, 1144);
             this.Load += new System.EventHandler(this.ObjectExecutionSummary_Load);
             ((System.ComponentModel.ISupportInitialize)(this.dgv)).EndInit();
             this.toolStrip1.ResumeLayout(false);
@@ -389,7 +397,6 @@
         private System.Windows.Forms.ToolStripMenuItem ts7Days;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator2;
         private System.Windows.Forms.ToolStripMenuItem tsCustomCompare;
-        private System.Windows.Forms.ToolStripDropDownButton tsColumns;
         private System.Windows.Forms.ToolStripMenuItem tsNoCompare;
         private System.Windows.Forms.ToolStripMenuItem tsTimeOffset;
         private System.Windows.Forms.ToolStripDropDownButton tsType;
@@ -408,5 +415,6 @@
         private System.Windows.Forms.ToolStripLabel lblSearch;
         private System.Windows.Forms.ToolStripTextBox txtSearch;
         private System.Windows.Forms.Timer tmrSearch;
+        private System.Windows.Forms.ToolStripButton tsCols;
     }
 }

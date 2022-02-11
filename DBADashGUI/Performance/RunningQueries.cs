@@ -702,5 +702,23 @@ namespace DBADashGUI.Performance
         {
             clearBlocking();
         }
+
+        private void tsCols_Click(object sender, EventArgs e)
+        {
+            promptColumnSelection(ref dgv);
+        }
+
+        private void promptColumnSelection(ref DataGridView gv)
+        {
+            using (var frm = new SelectColumns())
+            {
+                frm.Columns = gv.Columns;
+                frm.ShowDialog(this);
+                if (frm.DialogResult == DialogResult.OK)
+                {
+                    var dt = ((DataView)dgv.DataSource).Table;
+                }
+            }
+        }
     }
 }

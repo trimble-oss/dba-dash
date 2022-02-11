@@ -99,7 +99,7 @@
             this.tsRefresh = new System.Windows.Forms.ToolStripButton();
             this.tsCopy = new System.Windows.Forms.ToolStripButton();
             this.tsExcel = new System.Windows.Forms.ToolStripButton();
-            this.tsColumns = new System.Windows.Forms.ToolStripDropDownButton();
+            this.tsCols = new System.Windows.Forms.ToolStripButton();
             this.tsPerformanceCounters = new System.Windows.Forms.ToolStripButton();
             this.dataGridViewTextBoxColumn1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dataGridViewProgressBarColumn1 = new CustomProgressControl.DataGridViewProgressBarColumn();
@@ -130,9 +130,10 @@
             // 
             this.dgv.AllowUserToAddRows = false;
             this.dgv.AllowUserToDeleteRows = false;
+            this.dgv.AllowUserToOrderColumns = true;
             dataGridViewCellStyle1.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
             dataGridViewCellStyle1.BackColor = System.Drawing.SystemColors.Control;
-            dataGridViewCellStyle1.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            dataGridViewCellStyle1.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             dataGridViewCellStyle1.ForeColor = System.Drawing.SystemColors.WindowText;
             dataGridViewCellStyle1.SelectionBackColor = System.Drawing.SystemColors.Highlight;
             dataGridViewCellStyle1.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
@@ -165,7 +166,7 @@
             this.MaxIOPs});
             dataGridViewCellStyle23.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
             dataGridViewCellStyle23.BackColor = System.Drawing.SystemColors.Window;
-            dataGridViewCellStyle23.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            dataGridViewCellStyle23.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             dataGridViewCellStyle23.ForeColor = System.Drawing.SystemColors.ControlText;
             dataGridViewCellStyle23.SelectionBackColor = System.Drawing.SystemColors.Highlight;
             dataGridViewCellStyle23.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
@@ -173,11 +174,12 @@
             this.dgv.DefaultCellStyle = dataGridViewCellStyle23;
             this.dgv.Dock = System.Windows.Forms.DockStyle.Fill;
             this.dgv.Location = new System.Drawing.Point(0, 27);
+            this.dgv.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.dgv.Name = "dgv";
             this.dgv.ReadOnly = true;
             this.dgv.RowHeadersVisible = false;
             this.dgv.RowHeadersWidth = 51;
-            this.dgv.Size = new System.Drawing.Size(1048, 626);
+            this.dgv.Size = new System.Drawing.Size(1048, 789);
             this.dgv.TabIndex = 0;
             this.dgv.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgv_CellContentClick);
             this.dgv.RowsAdded += new System.Windows.Forms.DataGridViewRowsAddedEventHandler(this.dgv_RowsAdded);
@@ -458,7 +460,7 @@
             this.tsRefresh,
             this.tsCopy,
             this.tsExcel,
-            this.tsColumns,
+            this.tsCols,
             this.tsPerformanceCounters});
             this.toolStrip1.Location = new System.Drawing.Point(0, 0);
             this.toolStrip1.Name = "toolStrip1";
@@ -496,14 +498,15 @@
             this.tsExcel.Text = "Export Excel";
             this.tsExcel.Click += new System.EventHandler(this.tsExcel_Click);
             // 
-            // tsColumns
+            // tsCols
             // 
-            this.tsColumns.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.tsColumns.Image = global::DBADashGUI.Properties.Resources.Column_16x;
-            this.tsColumns.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsColumns.Name = "tsColumns";
-            this.tsColumns.Size = new System.Drawing.Size(34, 24);
-            this.tsColumns.Text = "Columns";
+            this.tsCols.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.tsCols.Image = global::DBADashGUI.Properties.Resources.Column_16x;
+            this.tsCols.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tsCols.Name = "tsCols";
+            this.tsCols.Size = new System.Drawing.Size(29, 24);
+            this.tsCols.Text = "Columns";
+            this.tsCols.Click += new System.EventHandler(this.tsCols_Click);
             // 
             // tsPerformanceCounters
             // 
@@ -739,12 +742,13 @@
             // 
             // PerformanceSummary
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.Controls.Add(this.dgv);
             this.Controls.Add(this.toolStrip1);
+            this.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.Name = "PerformanceSummary";
-            this.Size = new System.Drawing.Size(1048, 653);
+            this.Size = new System.Drawing.Size(1048, 816);
             this.Load += new System.EventHandler(this.PerformanceSummary_Load);
             ((System.ComponentModel.ISupportInitialize)(this.dgv)).EndInit();
             this.toolStrip1.ResumeLayout(false);
@@ -759,7 +763,6 @@
         private System.Windows.Forms.DataGridView dgv;
         private System.Windows.Forms.ToolStrip toolStrip1;
         private System.Windows.Forms.ToolStripButton tsRefresh;
-        private System.Windows.Forms.ToolStripDropDownButton tsColumns;
         private System.Windows.Forms.ToolStripButton tsCopy;
         private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn1;
         private CustomProgressControl.DataGridViewProgressBarColumn dataGridViewProgressBarColumn1;
@@ -807,5 +810,6 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn MaxIOPs;
         private System.Windows.Forms.ToolStripButton tsPerformanceCounters;
         private System.Windows.Forms.ToolStripButton tsExcel;
+        private System.Windows.Forms.ToolStripButton tsCols;
     }
 }
