@@ -31,8 +31,8 @@
     <ProjectReference Include="..\DBADash\DBADash.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="AWSSDK.Core" Version="3.7.6.4" />
-    <PackageReference Include="AWSSDK.S3" Version="3.7.7.19" />
+    <PackageReference Include="AWSSDK.Core" Version="3.7.7" />
+    <PackageReference Include="AWSSDK.S3" Version="3.7.7.21" />
     <PackageReference Include="Azure.Core" Version="1.22.0" />
     <PackageReference Include="Azure.Identity" Version="1.5.0" />
     <PackageReference Include="Common.Logging" Version="3.4.1" />
@@ -65,7 +65,7 @@
     <PackageReference Include="Microsoft.IdentityModel.Tokens" Version="6.15.1" />
     <PackageReference Include="Microsoft.SqlServer.Assessment" Version="1.1.0" />
     <PackageReference Include="Microsoft.SqlServer.Assessment.Authoring" Version="1.1.0" />
-    <PackageReference Include="Microsoft.SqlServer.Management.SqlParser" Version="160.22503.0" />
+    <PackageReference Include="Microsoft.SqlServer.Management.SqlParser" Version="160.21292.55" />
     <PackageReference Include="Microsoft.SqlServer.SqlManagementObjects" Version="161.46521.71" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
     <PackageReference Include="Polly" Version="7.2.3" />
