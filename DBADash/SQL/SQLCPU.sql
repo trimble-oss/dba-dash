@@ -15,9 +15,9 @@ BEGIN
 					SQLProcessUtilization AS [SQLProcessCPU], 
 				   SystemIdle AS [SystemIdleProcess] 
 	FROM (SELECT record.value('(./Record/@id)[1]', 'int') AS record_id, 
-				record.value('(./Record/SchedulerMonitorEvent/SystemHealth/SystemIdle)[1]', 'int') 
+				record.value('(./Record//SystemHealth/SystemIdle)[1]', 'int') 
 				AS [SystemIdle], 
-				record.value('(./Record/SchedulerMonitorEvent/SystemHealth/ProcessUtilization)[1]', 'int') 
+				record.value('(./Record//SystemHealth/ProcessUtilization)[1]', 'int') 
 				AS [SQLProcessUtilization], [timestamp] 
 		  FROM (SELECT [timestamp], CONVERT(xml, record) AS [record] 
 				FROM sys.dm_os_ring_buffers WITH (NOLOCK)
