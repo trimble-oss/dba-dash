@@ -149,7 +149,7 @@ namespace DBADashGUI.AgentJobs
         {
             Common.AddDateGroups(tsDateGroup, TsDateGroup_Click);
             dgv.AutoGenerateColumns = false;
-            dgv.Columns.Add(new DataGridViewLinkColumn() {Name="colJob", HeaderText = "Job", DataPropertyName = "JobName", SortMode= DataGridViewColumnSortMode.Automatic });
+            dgv.Columns.Add(new DataGridViewLinkColumn() {Name="colJob", HeaderText = "Job", DataPropertyName = "JobName", SortMode= DataGridViewColumnSortMode.Automatic, LinkColor = DashColors.LinkColor});
             dgv.Columns.Add(new DataGridViewTextBoxColumn() {HeaderText = "Step", DataPropertyName = "JobStep" });
             dgv.Columns.Add(new DataGridViewTextBoxColumn() { HeaderText = "Step ID", DataPropertyName = "step_id" });
             dgv.Columns.Add(new DataGridViewTextBoxColumn() { HeaderText = "Failed", DataPropertyName = "FailedCount" });
@@ -163,7 +163,7 @@ namespace DBADashGUI.AgentJobs
             dgv.Columns.Add(new DataGridViewTextBoxColumn() { HeaderText = "Max Duration", DataPropertyName = "MaxDuration" });
             dgv.Columns.Add(new DataGridViewTextBoxColumn() { HeaderText = "Min Duration", DataPropertyName = "MinDuration" });
             dgv.Columns.Add(new DataGridViewTextBoxColumn() { HeaderText = "Total Duration", DataPropertyName = "TotalDuration" });
-            dgv.Columns.Add(new DataGridViewLinkColumn() { Name = "colView", HeaderText = "View", Text = "View", UseColumnTextForLinkValue=true });
+            dgv.Columns.Add(new DataGridViewLinkColumn() { Name = "colView", HeaderText = "View", Text = "View", UseColumnTextForLinkValue=true, LinkColor = DashColors.LinkColor});
             foreach (var c in columns)
             {
                 var dd = new ToolStripMenuItem(c.Value.Alias)

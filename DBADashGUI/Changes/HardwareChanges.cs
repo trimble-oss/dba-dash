@@ -30,37 +30,35 @@ namespace DBADashGUI
         private void refreshHistory()
         {
             using (var cn = new SqlConnection(ConnectionString))
+            using (var cmd = new SqlCommand("dbo.HostUpgradeHistory_Get", cn) { CommandType = CommandType.StoredProcedure }) 
+            using (var da = new SqlDataAdapter(cmd))
             {
-                using (var cmd = new SqlCommand("dbo.HostUpgradeHistory_Get", cn) { CommandType = CommandType.StoredProcedure }) {
-                    cn.Open();
-
-                    cmd.Parameters.AddWithValue("@InstanceIDs", string.Join(",", InstanceIDs));
-                    SqlDataAdapter da = new SqlDataAdapter(cmd);
-                    DataTable dt = new DataTable();
-                    da.Fill(dt);
-                    Common.ConvertUTCToLocal(ref dt);
-                    dgv.AutoGenerateColumns = false;
-                    dgv.DataSource = dt;
-                    dgv.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
-                }
+                cn.Open();
+                cmd.Parameters.AddWithValue("@InstanceIDs", string.Join(",", InstanceIDs));                
+                DataTable dt = new DataTable();
+                da.Fill(dt);
+                Common.ConvertUTCToLocal(ref dt);
+                dgv.AutoGenerateColumns = false;
+                dgv.DataSource = dt;
+                dgv.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
             }
+            
         }
 
         private void refreshHardware()
         {
             using (var cn = new SqlConnection(ConnectionString))
+            using (var cmd = new SqlCommand("dbo.Hardware_Get", cn) { CommandType = CommandType.StoredProcedure }) 
+            using(var da = new SqlDataAdapter(cmd))
             {
-                using (var cmd = new SqlCommand("dbo.Hardware_Get", cn) { CommandType = CommandType.StoredProcedure }) {
-                    cn.Open();
-                    cmd.Parameters.AddWithValue("@InstanceIDs", string.Join(",", InstanceIDs));
-                    SqlDataAdapter da = new SqlDataAdapter(cmd);
-                    DataTable dt = new DataTable();
-                    da.Fill(dt);
-                    dgvHardware.AutoGenerateColumns = false;
-                    dgvHardware.DataSource = dt;
-                    dgvHardware.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
-                }
-            }
+                cn.Open();
+                cmd.Parameters.AddWithValue("@InstanceIDs", string.Join(",", InstanceIDs));
+                DataTable dt = new DataTable();
+                da.Fill(dt);
+                dgvHardware.AutoGenerateColumns = false;
+                dgvHardware.DataSource = dt;
+                dgvHardware.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
+            }            
         }
 
         private void tsCopy_Click(object sender, EventArgs e)
@@ -95,11 +93,11 @@ namespace DBADashGUI
                 var priorityStatus = row["os_priority_class"] == DBNull.Value ? DBADashStatus.DBADashStatusEnum.NA: ((Int32)row["os_priority_class"] == 32 ? DBADashStatus.DBADashStatusEnum.OK : DBADashStatus.DBADashStatusEnum.Warning);
                 var affinityStatus = row["affinity_type_desc"] == DBNull.Value ? DBADashStatus.DBADashStatusEnum.NA : ((string)row["affinity_type_desc"] == "AUTO" ? DBADashStatus.DBADashStatusEnum.OK : DBADashStatus.DBADashStatusEnum.Warning);
 
-                r.Cells[colAffinity.Index].Style.BackColor = DBADashStatus.GetStatusColour(affinityStatus);
-                r.Cells[colPriority.Index].Style.BackColor = DBADashStatus.GetStatusColour(priorityStatus);
-                r.Cells[colOfflineSchedulers.Index].Style.BackColor = DBADashStatus.GetStatusColour(offlineSchedulerStatus);
-                r.Cells[colPowerPlan.Index].Style.BackColor = DBADashStatus.GetStatusColour(ppStatus);
-                r.Cells[colInstantFileInitialization.Index].Style.BackColor = DBADashStatus.GetStatusColour(ifiStatus);
+                r.Cells[colAffinity.Index].SetStatusColor(affinityStatus);
+                r.Cells[colPriority.Index].SetStatusColor(priorityStatus);
+                r.Cells[colOfflineSchedulers.Index].SetStatusColor(offlineSchedulerStatus);
+                r.Cells[colPowerPlan.Index].SetStatusColor(ppStatus);
+                r.Cells[colInstantFileInitialization.Index].SetStatusColor(ifiStatus);
             }
 
         }
@@ -112,6 +110,14 @@ namespace DBADashGUI
         private void tsExcel_Click(object sender, EventArgs e)
         {
             Common.PromptSaveDataGridView(ref dgvHardware);
+        }
+
+        private void tsCols_Click(object sender, EventArgs e)
+        {
+            using (var frm = new SelectColumns() { Columns = dgvHardware.Columns })
+            {
+                frm.ShowDialog(this);
+            }
         }
     }
 }

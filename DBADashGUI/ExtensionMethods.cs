@@ -1,9 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Forms;
+using static DBADashGUI.DBADashStatus;
 
 namespace DBADashGUI
 {
@@ -43,6 +46,28 @@ namespace DBADashGUI
             return dt;
         }
 
+        public static Color GetColor(this DBADashStatusEnum value)
+        {
+            return DBADashStatus.GetStatusColour(value);
+        }
 
+        public static Color ContrastColor(this Color value)
+        {
+                return ((value.R * 0.299) + (value.G * 0.587) + (value.B * 0.114)) > 186 ? Color.Black : Color.White;           
+        }
+
+        public static void SetStatusColor(this DataGridViewCell cell, Color StatusColor)
+        {
+            cell.Style.BackColor = StatusColor;
+            cell.Style.ForeColor = StatusColor.ContrastColor();
+            if(cell.GetType()== typeof(DataGridViewLinkCell))
+            {
+                ((DataGridViewLinkCell)cell).LinkColor = StatusColor.ContrastColor();
+            }
+        }
+        public static void SetStatusColor(this DataGridViewCell cell, DBADashStatusEnum Status)
+        {
+            cell.SetStatusColor(Status.GetColor());
+        }
     }
 }

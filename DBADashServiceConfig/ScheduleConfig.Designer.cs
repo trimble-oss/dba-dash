@@ -46,12 +46,13 @@ namespace DBADashServiceConfig
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.dgv.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.dgv.Location = new System.Drawing.Point(12, 12);
+            this.dgv.Location = new System.Drawing.Point(12, 15);
+            this.dgv.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.dgv.Name = "dgv";
             this.dgv.RowHeadersVisible = false;
             this.dgv.RowHeadersWidth = 51;
             this.dgv.RowTemplate.Height = 24;
-            this.dgv.Size = new System.Drawing.Size(705, 563);
+            this.dgv.Size = new System.Drawing.Size(705, 704);
             this.dgv.TabIndex = 0;
             this.dgv.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgv_CellContentClick);
             this.dgv.CellValidated += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgv_CellValidated);
@@ -62,9 +63,10 @@ namespace DBADashServiceConfig
             // bttnOK
             // 
             this.bttnOK.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.bttnOK.Location = new System.Drawing.Point(642, 598);
+            this.bttnOK.Location = new System.Drawing.Point(642, 748);
+            this.bttnOK.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.bttnOK.Name = "bttnOK";
-            this.bttnOK.Size = new System.Drawing.Size(75, 23);
+            this.bttnOK.Size = new System.Drawing.Size(75, 29);
             this.bttnOK.TabIndex = 2;
             this.bttnOK.Text = "OK";
             this.bttnOK.UseVisualStyleBackColor = true;
@@ -74,9 +76,10 @@ namespace DBADashServiceConfig
             // 
             this.bttnCancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.bttnCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.bttnCancel.Location = new System.Drawing.Point(552, 598);
+            this.bttnCancel.Location = new System.Drawing.Point(552, 748);
+            this.bttnCancel.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.bttnCancel.Name = "bttnCancel";
-            this.bttnCancel.Size = new System.Drawing.Size(75, 23);
+            this.bttnCancel.Size = new System.Drawing.Size(75, 29);
             this.bttnCancel.TabIndex = 3;
             this.bttnCancel.Text = "Cancel";
             this.bttnCancel.UseVisualStyleBackColor = true;
@@ -86,9 +89,9 @@ namespace DBADashServiceConfig
             // 
             this.label1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(13, 582);
+            this.label1.Location = new System.Drawing.Point(13, 728);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(434, 17);
+            this.label1.Size = new System.Drawing.Size(449, 20);
             this.label1.TabIndex = 4;
             this.label1.Text = "Schedule can be a period defined in seconds or a cron expression. ";
             // 
@@ -96,9 +99,10 @@ namespace DBADashServiceConfig
             // 
             this.lnkCron.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.lnkCron.AutoSize = true;
-            this.lnkCron.Location = new System.Drawing.Point(12, 607);
+            this.lnkCron.LinkColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(79)))), ((int)(((byte)(131)))));
+            this.lnkCron.Location = new System.Drawing.Point(12, 759);
             this.lnkCron.Name = "lnkCron";
-            this.lnkCron.Size = new System.Drawing.Size(136, 17);
+            this.lnkCron.Size = new System.Drawing.Size(147, 20);
             this.lnkCron.TabIndex = 5;
             this.lnkCron.TabStop = true;
             this.lnkCron.Text = "www.cronmaker.com";
@@ -107,16 +111,17 @@ namespace DBADashServiceConfig
             // ScheduleConfig
             // 
             this.AcceptButton = this.bttnOK;
-            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.CancelButton = this.bttnCancel;
-            this.ClientSize = new System.Drawing.Size(729, 633);
+            this.ClientSize = new System.Drawing.Size(729, 791);
             this.Controls.Add(this.lnkCron);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.bttnCancel);
             this.Controls.Add(this.bttnOK);
             this.Controls.Add(this.dgv);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
+            this.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.Name = "ScheduleConfig";
             this.Text = "Schedule";
             this.Load += new System.EventHandler(this.ScheduleConfig_Load);

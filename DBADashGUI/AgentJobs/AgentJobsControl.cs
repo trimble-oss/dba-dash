@@ -258,15 +258,15 @@ namespace DBADashGUI.AgentJobs
                 var failCount7DaysStatus = (DBADashStatus.DBADashStatusEnum)row["FailCount7DaysStatus"];
                 var stepFailCount24HrsStatus = (DBADashStatus.DBADashStatusEnum)row["JobStepFail24HrsStatus"];
                 var stepFailCount7DaysStatus = (DBADashStatus.DBADashStatusEnum)row["JobStepFail7DaysStatus"];
-                dgvJobs.Rows[idx].Cells["name"].Style.BackColor = DBADashStatus.GetStatusColour(jobStatus);
-                dgvJobs.Rows[idx].Cells["IsLastFail"].Style.BackColor = DBADashStatus.GetStatusColour(lastFailStatus);
-                dgvJobs.Rows[idx].Cells["LastFail"].Style.BackColor = DBADashStatus.GetStatusColour(lastFailStatus);
-                dgvJobs.Rows[idx].Cells["TimeSinceLastFail"].Style.BackColor = DBADashStatus.GetStatusColour(timeSinceLastStatus);
-                dgvJobs.Rows[idx].Cells["TimeSinceLastSucceeded"].Style.BackColor = DBADashStatus.GetStatusColour(timeSinceLastSucceededStatus);
-                dgvJobs.Rows[idx].Cells["FailCount24Hrs"].Style.BackColor = DBADashStatus.GetStatusColour(failCount24HrsStatus);
-                dgvJobs.Rows[idx].Cells["FailCount7Days"].Style.BackColor = DBADashStatus.GetStatusColour(failCount7DaysStatus);
-                dgvJobs.Rows[idx].Cells["JobStepFails24Hrs"].Style.BackColor = DBADashStatus.GetStatusColour(stepFailCount24HrsStatus);
-                dgvJobs.Rows[idx].Cells["JobStepFails7Days"].Style.BackColor = DBADashStatus.GetStatusColour(stepFailCount7DaysStatus);
+                dgvJobs.Rows[idx].Cells["name"].SetStatusColor(jobStatus);
+                dgvJobs.Rows[idx].Cells["IsLastFail"].SetStatusColor(lastFailStatus);
+                dgvJobs.Rows[idx].Cells["LastFail"].SetStatusColor(lastFailStatus);
+                dgvJobs.Rows[idx].Cells["TimeSinceLastFail"].SetStatusColor(timeSinceLastStatus);
+                dgvJobs.Rows[idx].Cells["TimeSinceLastSucceeded"].SetStatusColor(timeSinceLastSucceededStatus);
+                dgvJobs.Rows[idx].Cells["FailCount24Hrs"].SetStatusColor(failCount24HrsStatus);
+                dgvJobs.Rows[idx].Cells["FailCount7Days"].SetStatusColor(failCount7DaysStatus);
+                dgvJobs.Rows[idx].Cells["JobStepFails24Hrs"].SetStatusColor(stepFailCount24HrsStatus);
+                dgvJobs.Rows[idx].Cells["JobStepFails7Days"].SetStatusColor(stepFailCount7DaysStatus);
                 if ((string)row["ConfiguredLevel"] == "Job")
                 {
                         dgvJobs.Rows[idx].Cells["Configure"].Style.Font = new Font(dgvJobs.Font, FontStyle.Bold);
@@ -368,6 +368,12 @@ namespace DBADashGUI.AgentJobs
             colViewSteps.Visible = false;
             Common.PromptSaveDataGridView(ref dgvJobHistory);
             colViewSteps.Visible = true;
+        }
+
+        private void AgentJobsControl_Load(object sender, EventArgs e)
+        {
+            Common.StyleGrid(ref dgvJobHistory);
+            Common.StyleGrid(ref dgvJobs);
         }
     }
     }

@@ -28,26 +28,24 @@ namespace DBADashGUI.Performance
 
         private void refreshSummary()
         {
-            var cn = new SqlConnection(Common.ConnectionString);
-            using (cn)
+            using (var cn = new SqlConnection(Common.ConnectionString))
+            using (var cmd = new SqlCommand("dbo.PerformanceCounterSummary_Get", cn) { CommandType = CommandType.StoredProcedure }) 
+            using (var da = new SqlDataAdapter(cmd))
             {
-                using (SqlCommand cmd = new SqlCommand("dbo.PerformanceCounterSummary_Get", cn) { CommandType = CommandType.StoredProcedure }) {
-                    cn.Open();
-                    cmd.Parameters.AddWithValue("InstanceID", InstanceID);
-                    cmd.Parameters.AddWithValue("FromDate", DateRange.FromUTC);
-                    cmd.Parameters.AddWithValue("ToDate", DateRange.ToUTC);
-                    if (txtSearch.Text.Length > 0)
-                    {
-                        cmd.Parameters.AddWithValue("Search", "%" + txtSearch.Text + "%");
-                    }                   
-                    SqlDataAdapter da = new SqlDataAdapter(cmd);
-                    DataTable dt = new DataTable();                   
-                    da.Fill(dt);
-                    dgv.AutoGenerateColumns = false;
-                    dgv.DataSource = dt;
-                    dgv.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
-                }
-            }
+                cn.Open();
+                cmd.Parameters.AddWithValue("InstanceID", InstanceID);
+                cmd.Parameters.AddWithValue("FromDate", DateRange.FromUTC);
+                cmd.Parameters.AddWithValue("ToDate", DateRange.ToUTC);
+                if (txtSearch.Text.Length > 0)
+                {
+                    cmd.Parameters.AddWithValue("Search", "%" + txtSearch.Text + "%");
+                }                   
+                DataTable dt = new DataTable();                   
+                da.Fill(dt);
+                dgv.AutoGenerateColumns = false;
+                dgv.DataSource = dt;
+                dgv.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
+            }         
         }
 
 
@@ -110,6 +108,7 @@ namespace DBADashGUI.Performance
       
         private void PerformanceCounterSummary_Load(object sender, EventArgs e)
         {
+            Common.StyleGrid(ref dgv);
             splitContainer1.Panel1Collapsed = true;
         }
 

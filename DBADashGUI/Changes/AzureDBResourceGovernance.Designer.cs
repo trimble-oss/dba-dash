@@ -34,6 +34,7 @@ namespace DBADashGUI.Changes
             this.tsRefresh = new System.Windows.Forms.ToolStripButton();
             this.tsCopy = new System.Windows.Forms.ToolStripButton();
             this.tsExcel = new System.Windows.Forms.ToolStripButton();
+            this.tsCols = new System.Windows.Forms.ToolStripButton();
             ((System.ComponentModel.ISupportInitialize)(this.dgv)).BeginInit();
             this.toolStrip1.SuspendLayout();
             this.SuspendLayout();
@@ -45,13 +46,14 @@ namespace DBADashGUI.Changes
             this.dgv.BackgroundColor = System.Drawing.Color.White;
             this.dgv.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.dgv.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.dgv.Location = new System.Drawing.Point(0, 31);
+            this.dgv.Location = new System.Drawing.Point(0, 27);
+            this.dgv.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.dgv.Name = "dgv";
             this.dgv.ReadOnly = true;
             this.dgv.RowHeadersVisible = false;
             this.dgv.RowHeadersWidth = 51;
             this.dgv.RowTemplate.Height = 24;
-            this.dgv.Size = new System.Drawing.Size(897, 519);
+            this.dgv.Size = new System.Drawing.Size(897, 661);
             this.dgv.TabIndex = 0;
             // 
             // toolStrip1
@@ -60,10 +62,11 @@ namespace DBADashGUI.Changes
             this.toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.tsRefresh,
             this.tsCopy,
-            this.tsExcel});
+            this.tsExcel,
+            this.tsCols});
             this.toolStrip1.Location = new System.Drawing.Point(0, 0);
             this.toolStrip1.Name = "toolStrip1";
-            this.toolStrip1.Size = new System.Drawing.Size(897, 31);
+            this.toolStrip1.Size = new System.Drawing.Size(897, 27);
             this.toolStrip1.TabIndex = 1;
             this.toolStrip1.Text = "toolStrip1";
             // 
@@ -97,14 +100,25 @@ namespace DBADashGUI.Changes
             this.tsExcel.Text = "Export Excel";
             this.tsExcel.Click += new System.EventHandler(this.tsExcel_Click);
             // 
+            // tsCols
+            // 
+            this.tsCols.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.tsCols.Image = global::DBADashGUI.Properties.Resources.Column_16x;
+            this.tsCols.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tsCols.Name = "tsCols";
+            this.tsCols.Size = new System.Drawing.Size(29, 24);
+            this.tsCols.Text = "Columns";
+            this.tsCols.Click += new System.EventHandler(this.tsCols_Click);
+            // 
             // AzureDBResourceGovernance
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.Controls.Add(this.dgv);
             this.Controls.Add(this.toolStrip1);
+            this.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.Name = "AzureDBResourceGovernance";
-            this.Size = new System.Drawing.Size(897, 550);
+            this.Size = new System.Drawing.Size(897, 688);
             ((System.ComponentModel.ISupportInitialize)(this.dgv)).EndInit();
             this.toolStrip1.ResumeLayout(false);
             this.toolStrip1.PerformLayout();
@@ -120,5 +134,6 @@ namespace DBADashGUI.Changes
         private System.Windows.Forms.ToolStripButton tsRefresh;
         private System.Windows.Forms.ToolStripButton tsCopy;
         private System.Windows.Forms.ToolStripButton tsExcel;
+        private System.Windows.Forms.ToolStripButton tsCols;
     }
 }

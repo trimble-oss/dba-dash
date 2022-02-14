@@ -113,6 +113,7 @@ namespace DBADashGUI.Performance
         {
             using (var cn = new SqlConnection(Common.ConnectionString))
             using (var cmd = new SqlCommand("dbo.PerformanceCounterSummary_Get", cn) { CommandType = CommandType.StoredProcedure, CommandTimeout = Properties.Settings.Default.CommandTimeout })
+            using (var da = new SqlDataAdapter(cmd))
             {
                 cn.Open();
                 if (InstanceIDs.Count > 0)
@@ -127,7 +128,7 @@ namespace DBADashGUI.Performance
                 cmd.Parameters.AddWithValue("Counters", counters);
                 cmd.Parameters.AddWithValue("FromDate", DateRange.FromUTC);
                 cmd.Parameters.AddWithValue("ToDate", DateRange.ToUTC);
-                SqlDataAdapter da = new SqlDataAdapter(cmd);
+                
                 DataTable dt = new DataTable();
                 da.Fill(dt);
                 return dt;
@@ -197,6 +198,7 @@ namespace DBADashGUI.Performance
 
         private void PerformanceSummary_Load(object sender, EventArgs e)
         {
+            Common.StyleGrid(ref dgv);
             addHistCols(dgv, "col");
         }
 
@@ -241,9 +243,9 @@ namespace DBADashGUI.Performance
                 DBADashStatus.SetProgressBarColor(avgCPUstatus,ref pAvgCPU);
                 DBADashStatus.SetProgressBarColor(maxCPUstatus, ref pMaxCPU);
 
-                r.Cells["ReadLatency"].Style.BackColor = DBADashStatus.GetStatusColour((DBADashStatus.DBADashStatusEnum)row["ReadLatencyStatus"]);
-                r.Cells["WriteLatency"].Style.BackColor = DBADashStatus.GetStatusColour((DBADashStatus.DBADashStatusEnum)row["WriteLatencyStatus"]);
-                r.Cells["CriticalWaitMsPerSec"].Style.BackColor = DBADashStatus.GetStatusColour((DBADashStatus.DBADashStatusEnum)row["CriticalWaitStatus"]);
+                r.Cells["ReadLatency"].SetStatusColor((DBADashStatus.DBADashStatusEnum)row["ReadLatencyStatus"]);
+                r.Cells["WriteLatency"].SetStatusColor((DBADashStatus.DBADashStatusEnum)row["WriteLatencyStatus"]);
+                r.Cells["CriticalWaitMsPerSec"].SetStatusColor((DBADashStatus.DBADashStatusEnum)row["CriticalWaitStatus"]);
                 if (histogram)
                 {
                      r.Height = 100;

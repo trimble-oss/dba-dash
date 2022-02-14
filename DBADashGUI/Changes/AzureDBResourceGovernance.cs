@@ -64,5 +64,13 @@ namespace DBADashGUI.Changes
         {
             Common.PromptSaveDataGridView(ref dgv);
         }
+
+        private void tsCols_Click(object sender, EventArgs e)
+        {
+            using (var frm = new SelectColumns() { Columns = dgv.Columns })
+            {
+                frm.ShowDialog(this);
+            }
+        }
     }
 }

@@ -167,6 +167,8 @@ namespace DBADashGUI.Performance
 
         private void AzureSummary_Load(object sender, EventArgs e)
         {
+            Common.StyleGrid(ref dgv);
+            Common.StyleGrid(ref dgvPool);
             addHistCols(dgv);
             addHistCols(dgvPool);
         }
@@ -285,7 +287,8 @@ namespace DBADashGUI.Performance
             {
                 var row = (DataRowView)dgvPool.Rows[idx].DataBoundItem;
                 var poolStorageStatus = (DBADashStatus.DBADashStatusEnum)row["ElasticPoolStorageStatus"];
-                dgvPool.Rows[idx].Cells[colAllocatedStoragePct.Index].Style.BackColor = DBADashStatus.GetStatusColour(poolStorageStatus);
+                var statusColor = poolStorageStatus.GetColor();
+                dgvPool.Rows[idx].Cells[colAllocatedStoragePct.Index].SetStatusColor(statusColor);
             }
         }
 
@@ -353,18 +356,18 @@ namespace DBADashGUI.Performance
         private Color getStatusColour(object value)
         {
             var status = (DBADashStatus.DBADashStatusEnum)Convert.ToInt32(value == DBNull.Value ? 3 : value);
-            return DBADashStatus.GetStatusColour(status);
+            return status.GetColor();
         }
 
         private void dgv_RowsAdded(object sender, DataGridViewRowsAddedEventArgs e)
         {
             for (Int32 idx = e.RowIndex; idx < e.RowIndex + e.RowCount; idx += 1)
             {
-                var row = (DataRowView)dgv.Rows[idx].DataBoundItem;        
-
-                dgv.Rows[idx].Cells["colAlocatedPctMax"].Style.BackColor = getStatusColour(row["PctMaxSizeStatus"]);
-                dgv.Rows[idx].Cells["colFileSnapshotAge"].Style.BackColor = getStatusColour(row["FileSnapshotStatus"]);
-
+                var row = (DataRowView)dgv.Rows[idx].DataBoundItem;
+                var pctMaxSizeStatusColor = getStatusColour(row["PctMaxSizeStatus"]);
+                var snapshotStatusColor = getStatusColour(row["FileSnapshotStatus"]);
+                dgv.Rows[idx].Cells["colAlocatedPctMax"].SetStatusColor(pctMaxSizeStatusColor);
+                dgv.Rows[idx].Cells["colFileSnapshotAge"].SetStatusColor(snapshotStatusColor);
             }
         }
 

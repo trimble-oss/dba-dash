@@ -145,6 +145,7 @@
             // 
             this.dgvCollectionDates.AllowUserToAddRows = false;
             this.dgvCollectionDates.AllowUserToDeleteRows = false;
+            this.dgvCollectionDates.BackgroundColor = System.Drawing.Color.White;
             this.dgvCollectionDates.ClipboardCopyMode = System.Windows.Forms.DataGridViewClipboardCopyMode.EnableAlwaysIncludeHeaderText;
             this.dgvCollectionDates.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.dgvCollectionDates.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
@@ -159,12 +160,13 @@
             this.ConfigureRoot});
             this.dgvCollectionDates.Dock = System.Windows.Forms.DockStyle.Fill;
             this.dgvCollectionDates.Location = new System.Drawing.Point(0, 27);
+            this.dgvCollectionDates.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.dgvCollectionDates.Name = "dgvCollectionDates";
             this.dgvCollectionDates.ReadOnly = true;
             this.dgvCollectionDates.RowHeadersVisible = false;
             this.dgvCollectionDates.RowHeadersWidth = 51;
             this.dgvCollectionDates.RowTemplate.Height = 24;
-            this.dgvCollectionDates.Size = new System.Drawing.Size(882, 278);
+            this.dgvCollectionDates.Size = new System.Drawing.Size(882, 354);
             this.dgvCollectionDates.TabIndex = 3;
             this.dgvCollectionDates.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgv_CellContentClick);
             this.dgvCollectionDates.RowsAdded += new System.Windows.Forms.DataGridViewRowsAddedEventHandler(this.dgv_RowsAdded);
@@ -255,12 +257,13 @@
             // 
             // CollectionDates
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.Controls.Add(this.dgvCollectionDates);
             this.Controls.Add(this.toolStrip1);
+            this.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.Name = "CollectionDates";
-            this.Size = new System.Drawing.Size(882, 305);
+            this.Size = new System.Drawing.Size(882, 381);
             this.toolStrip1.ResumeLayout(false);
             this.toolStrip1.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dgvCollectionDates)).EndInit();

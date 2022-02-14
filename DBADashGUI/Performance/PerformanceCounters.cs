@@ -112,26 +112,24 @@ namespace DBADashGUI.Performance
         }
 
         private DataTable GetPerformanceCounter()
-        {
-            var cn = new SqlConnection(Common.ConnectionString);
-            using (cn)
+        {           
+            using (var cn = new SqlConnection(Common.ConnectionString))
+            using (var cmd = new SqlCommand("dbo.PerformanceCounter_Get", cn) {  CommandType = CommandType.StoredProcedure })
+            using(var da = new SqlDataAdapter(cmd))
             {
-                using (SqlCommand cmd = new SqlCommand("dbo.PerformanceCounter_Get", cn) {  CommandType = CommandType.StoredProcedure })
-                {
-                    cn.Open();
+                cn.Open();
 
-                    cmd.Parameters.AddWithValue("InstanceID", InstanceID);
-                    cmd.Parameters.AddWithValue("FromDate", FromDate);
-                    cmd.Parameters.AddWithValue("ToDate", ToDate);
-                    cmd.Parameters.AddWithValue("CounterID", CounterID);
-                    cmd.Parameters.AddWithValue("DateGroupingMin", DateGrouping);
-                    SqlDataAdapter da = new SqlDataAdapter(cmd);
-                    DataTable dt = new DataTable();
-                    da.Fill(dt);
-                    Common.ConvertUTCToLocal(ref dt);
-                    return dt;
-                }
-            }
+                cmd.Parameters.AddWithValue("InstanceID", InstanceID);
+                cmd.Parameters.AddWithValue("FromDate", FromDate);
+                cmd.Parameters.AddWithValue("ToDate", ToDate);
+                cmd.Parameters.AddWithValue("CounterID", CounterID);
+                cmd.Parameters.AddWithValue("DateGroupingMin", DateGrouping);
+                
+                DataTable dt = new DataTable();
+                da.Fill(dt);
+                Common.ConvertUTCToLocal(ref dt);
+                return dt;
+            }           
         }
 
         private void PerformanceCounters_Load(object sender, EventArgs e)

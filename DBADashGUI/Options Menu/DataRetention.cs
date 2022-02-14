@@ -21,6 +21,7 @@ namespace DBADashGUI
 
         private void DataRetention_Load(object sender, EventArgs e)
         {
+            Common.StyleGrid(ref dgv);
             try
             {
                 refreshData();
@@ -41,17 +42,15 @@ namespace DBADashGUI
 
         private DataTable getDataRetention(bool allTables)
         {
-            var cn = new SqlConnection(ConnectionString);
-            using (cn)
+            using (var cn = new SqlConnection(ConnectionString))
+            using (var cmd = new SqlCommand("dbo.DataRetention_Get", cn) { CommandType = CommandType.StoredProcedure })
+            using (var da = new SqlDataAdapter(cmd))
             {
-                using (SqlCommand cmd = new SqlCommand("dbo.DataRetention_Get", cn) { CommandType = CommandType.StoredProcedure }) {
                     cn.Open();
-                    cmd.Parameters.AddWithValue("AllTables", allTables);
-                    SqlDataAdapter da = new SqlDataAdapter(cmd);
+                    cmd.Parameters.AddWithValue("AllTables", allTables);                   
                     DataTable dt = new DataTable();
                     da.Fill(dt);
-                    return dt;
-                }
+                    return dt;               
             }          
       }
 
@@ -96,16 +95,13 @@ namespace DBADashGUI
 
         private void updateRetention(string table, int days)
         {
-            SqlConnection cn = new SqlConnection(ConnectionString);
-            using (cn)
-            {
-                using (SqlCommand cmd = new SqlCommand("dbo.DataRetention_Upd", cn) { CommandType = CommandType.StoredProcedure }) {
-                    cn.Open();
-                    cmd.Parameters.AddWithValue("TableName", table);
-                    cmd.Parameters.AddWithValue("RetentionDays", days);
-                    cmd.ExecuteNonQuery();
-                }
-            }
+            using (var cn = new SqlConnection(ConnectionString))
+            using (SqlCommand cmd = new SqlCommand("dbo.DataRetention_Upd", cn) { CommandType = CommandType.StoredProcedure }) {
+                cn.Open();
+                cmd.Parameters.AddWithValue("TableName", table);
+                cmd.Parameters.AddWithValue("RetentionDays", days);
+                cmd.ExecuteNonQuery();
+            }          
         }
 
         private void tsRefresh_Click(object sender, EventArgs e)

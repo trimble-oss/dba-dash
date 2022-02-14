@@ -158,5 +158,10 @@ namespace DBADashGUI.Changes
             colScript.Visible = true;
             colDiff.Visible = diffVisible;
         }
+
+        private void ResourceGovernor_Load(object sender, EventArgs e)
+        {
+            Common.StyleGrid(ref dgv);
+        }
     }
 }

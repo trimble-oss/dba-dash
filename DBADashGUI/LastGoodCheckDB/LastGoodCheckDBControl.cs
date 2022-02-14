@@ -69,23 +69,23 @@ namespace DBADashGUI.LastGoodCheckDB
         public void RefreshData()
         {
             using (var cn = new SqlConnection(connectionString))
+            using (var cmd = new SqlCommand("dbo.LastGoodCheckDB_Get", cn) { CommandType = CommandType.StoredProcedure })
+            using (var da = new SqlDataAdapter(cmd))
             {
-                using (SqlCommand cmd = new SqlCommand("dbo.LastGoodCheckDB_Get", cn) { CommandType = CommandType.StoredProcedure })
-                {
-                    cn.Open();
-                    cmd.Parameters.AddWithValue("InstanceIDs", string.Join(",", InstanceIDs));
-                    cmd.Parameters.AddWithValue("IncludeCritical", IncludeCritical);
-                    cmd.Parameters.AddWithValue("IncludeWarning", IncludeWarning);
-                    cmd.Parameters.AddWithValue("IncludeOK", IncludeOK);
-                    cmd.Parameters.AddWithValue("IncludeNA", IncludeNA);
-                    SqlDataAdapter da = new SqlDataAdapter(cmd);
-                    DataTable dt = new DataTable();
-                    da.Fill(dt);
-                    Common.ConvertUTCToLocal(ref dt);
-                    dgvLastGoodCheckDB.AutoGenerateColumns = false;
-                    dgvLastGoodCheckDB.DataSource = new DataView(dt);
-                    dgvLastGoodCheckDB.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
-                }
+                cn.Open();
+                cmd.Parameters.AddWithValue("InstanceIDs", string.Join(",", InstanceIDs));
+                cmd.Parameters.AddWithValue("IncludeCritical", IncludeCritical);
+                cmd.Parameters.AddWithValue("IncludeWarning", IncludeWarning);
+                cmd.Parameters.AddWithValue("IncludeOK", IncludeOK);
+                cmd.Parameters.AddWithValue("IncludeNA", IncludeNA);
+                
+                DataTable dt = new DataTable();
+                da.Fill(dt);
+                Common.ConvertUTCToLocal(ref dt);
+                dgvLastGoodCheckDB.AutoGenerateColumns = false;
+                dgvLastGoodCheckDB.DataSource = new DataView(dt);
+                dgvLastGoodCheckDB.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
+                
             }
             configureInstanceThresholdsToolStripMenuItem.Enabled = InstanceIDs.Count == 1;
         }
@@ -116,16 +116,17 @@ namespace DBADashGUI.LastGoodCheckDB
             {
                 var row = (DataRowView)dgvLastGoodCheckDB.Rows[idx].DataBoundItem;
                 var Status = (DBADashStatus.DBADashStatusEnum)row["Status"];
-                var statusC = DBADashStatus.GetStatusColour(Status);
-                dgvLastGoodCheckDB.Rows[idx].Cells["LastGoodCheckDBTime"].Style.BackColor = statusC;
-                dgvLastGoodCheckDB.Rows[idx].Cells["DaysSinceLastGoodCheckDB"].Style.BackColor = statusC;
+                var statusC = Status.GetColor();
+                var r = dgvLastGoodCheckDB.Rows[idx];
+                r.Cells["LastGoodCheckDBTime"].SetStatusColor(statusC);
+                r.Cells["DaysSinceLastGoodCheckDB"].SetStatusColor(statusC);
                 if ((string)row["ConfiguredLevel"]== "Database")
                 {
-                    dgvLastGoodCheckDB.Rows[idx].Cells["Configure"].Style.Font = new Font(dgvLastGoodCheckDB.Font, FontStyle.Bold);
+                    r.Cells["Configure"].Style.Font = new Font(dgvLastGoodCheckDB.Font, FontStyle.Bold);
                 }
                 else
                 {
-                    dgvLastGoodCheckDB.Rows[idx].Cells["Configure"].Style.Font = new Font(dgvLastGoodCheckDB.Font, FontStyle.Regular);
+                    r.Cells["Configure"].Style.Font = new Font(dgvLastGoodCheckDB.Font, FontStyle.Regular);
                 }
             }
          }
@@ -186,6 +187,11 @@ namespace DBADashGUI.LastGoodCheckDB
             Configure.Visible = false;
             Common.PromptSaveDataGridView(ref dgvLastGoodCheckDB);
             Configure.Visible = true;
+        }
+
+        private void LastGoodCheckDB_Load(object sender, EventArgs e)
+        {
+            Common.StyleGrid(ref dgvLastGoodCheckDB);
         }
     }
 

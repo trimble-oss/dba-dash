@@ -48,6 +48,7 @@ namespace DBADashGUI
 
         private void Main_Load(object sender, EventArgs e)
         {
+            Common.StyleGrid(ref gvHistory);
             dbOptions1.SummaryMode = true;
             splitSchemaSnapshot.Panel1.Controls.Add(diffSchemaSnapshot);
             diffSchemaSnapshot.Dock = DockStyle.Fill;
@@ -293,7 +294,6 @@ namespace DBADashGUI
             else if(tabs.SelectedTab== tabCollectionDates)
             {
                 collectionDates1.InstanceIDs =  n.Type == SQLTreeItem.TreeType.DBADashRoot ? AllInstanceIDs : instanceIDs;
-                collectionDates1.ConnectionString = connectionString;
                 collectionDates1.IncludeCritical = true;
                 collectionDates1.IncludeWarning = true;
                 collectionDates1.IncludeNA = n.InstanceID > 0;
@@ -1012,19 +1012,6 @@ namespace DBADashGUI
         }
 
 
-        private void dBDiffToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            var frm = new DBDiff
-            {
-                SelectedTags = SelectedTags()
-            };
-            var n = (SQLTreeItem)tv1.SelectedNode;
-            frm.SelectedInstanceA = n.InstanceName;
-            frm.SelectedDatabaseA = new DatabaseItem() { DatabaseID = n.DatabaseID, DatabaseName = n.DatabaseName };
-            frm.ShowDialog();
-        }
-
-
         #endregion
 
         #region Tagging
@@ -1362,15 +1349,6 @@ namespace DBADashGUI
             }
         }
 
-        private void tsJobDiff_Click(object sender, EventArgs e)
-        {
-           using(var frm = new JobDiff())
-            {
-                var selected = (SQLTreeItem)tv1.SelectedNode;
-                frm.InstanceID_A = selected.InstanceID;
-                frm.ShowDialog();
-            }
-        }
 
         private void gvHistory_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
@@ -1400,6 +1378,35 @@ namespace DBADashGUI
         private void bttnSearch_Click(object sender, EventArgs e)
         {
             addInstanes();        
+        }
+
+        private void databaseSchemaDiffToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            using (var frm = new DBDiff { SelectedTags = SelectedTags() })
+            {
+                var n = (SQLTreeItem)tv1.SelectedNode;
+                frm.SelectedInstanceA = n.InstanceName;
+                frm.SelectedDatabaseA = new DatabaseItem() { DatabaseID = n.DatabaseID, DatabaseName = n.DatabaseName };
+                frm.ShowDialog(this);
+            }
+        }
+
+        private void agentJobDiffToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            using (var frm = new JobDiff())
+            {
+                var selected = (SQLTreeItem)tv1.SelectedNode;
+                frm.InstanceID_A = selected.InstanceID;
+                frm.ShowDialog(this);
+            }
+        }
+
+        private void txtSearch_KeyUp(object sender, KeyEventArgs e)
+        {
+            if(e.KeyCode == Keys.Enter)
+            {
+                addInstanes();
+            }
         }
     }
 }

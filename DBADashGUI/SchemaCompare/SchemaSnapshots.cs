@@ -28,32 +28,36 @@ namespace DBADashGUI.Changes
         public List<Int32> InstanceIDs;
 
 
+        private DataSet ddlSnapshotDiff(DateTime snapshotDate, int databaseID)
+        {
+            using (var cn = new SqlConnection(Common.ConnectionString))
+            using (var cmd = new SqlCommand("dbo.DDLSnapshotDiff_Get", cn) { CommandType = CommandType.StoredProcedure })
+            using (var da = new SqlDataAdapter(cmd))
+            {
+                cn.Open();
+                cmd.Parameters.AddWithValue("DatabaseID", databaseID);
+                var p = cmd.Parameters.AddWithValue("SnapshotDate", snapshotDate);
+                p.DbType = DbType.DateTime2;     
+                DataSet ds = new DataSet();
+                da.Fill(ds);
+
+                return ds;
+            }           
+        }
+
         private void gvSnapshots_SelectionChanged(object sender, EventArgs e)
         {
             if (gvSnapshots.SelectedRows.Count == 1)
             {
                 var row = (DataRowView)gvSnapshots.SelectedRows[0].DataBoundItem;
-                DateTime SnapshotDate = (DateTime)row["SnapshotDate"];
-                Int32 DatabaseID = (Int32)row["DatabaseID"];
-                SqlConnection cn = new SqlConnection(Common.ConnectionString);
-                using (cn)
-                {
-                    using (SqlCommand cmd = new SqlCommand("dbo.DDLSnapshotDiff_Get", cn) { CommandType = CommandType.StoredProcedure })
-                    {
-                        cn.Open();
-                        cmd.Parameters.AddWithValue("DatabaseID", DatabaseID);
-                        var p = cmd.Parameters.AddWithValue("SnapshotDate", SnapshotDate.ToUniversalTime());
-                        p.DbType = DbType.DateTime2;
-
-                        SqlDataAdapter da = new SqlDataAdapter(cmd);
-                        DataSet ds = new DataSet();
-                        da.Fill(ds);
-
-                        gvSnapshotsDetail.AutoGenerateColumns = false;
-                        gvSnapshotsDetail.DataSource = ds.Tables[0];
-                        gvSnapshotsDetail.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
-                    }
-                }
+                DateTime snapshotDate = (DateTime)row["SnapshotDate"];
+                Int32 databaseID = (Int32)row["DatabaseID"];
+          
+                DataSet ds = ddlSnapshotDiff(snapshotDate,databaseID);                     
+                gvSnapshotsDetail.AutoGenerateColumns = false;
+                gvSnapshotsDetail.DataSource = ds.Tables[0];
+                gvSnapshotsDetail.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);                    
+                
             }
         }
 
@@ -92,58 +96,64 @@ namespace DBADashGUI.Changes
             }
         }
 
+        private DataTable ddlSnapshotInstanceSummary()
+        {
+            using (var cn = new SqlConnection(Common.ConnectionString))
+            using (var cmd = new SqlCommand("dbo.DDLSnapshotInstanceSummary_Get", cn) { CommandType = CommandType.StoredProcedure })
+            using (var da = new SqlDataAdapter(cmd))
+            {
+                cn.Open();
+                cmd.Parameters.AddWithValue("InstanceIDs", string.Join(",", InstanceIDs));
+                
+                var dt = new DataTable();
+                da.Fill(dt);
+                Common.ConvertUTCToLocal(ref dt);
+                return dt;
+            }         
+        }
+
         private void loadInstanceSummary()
         {
             splitSnapshotSummary.Visible = false;
             dgvInstanceSummary.Visible = true;
-            SqlConnection cn = new SqlConnection(Common.ConnectionString);
-            using (cn)
-            {
-                using (SqlCommand cmd = new SqlCommand("dbo.DDLSnapshotInstanceSummary_Get", cn) { CommandType = CommandType.StoredProcedure })
-                {
-                    cn.Open();
-                    cmd.Parameters.AddWithValue("InstanceIDs",string.Join(",",InstanceIDs));
-                    SqlDataAdapter da = new SqlDataAdapter(cmd);
-                    var dt = new DataTable();
-                    da.Fill(dt);
-                    Common.ConvertUTCToLocal(ref dt);
-                    dgvInstanceSummary.DataSource = dt;
-                    dgvInstanceSummary.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
-                }
-            }
+            var dt = ddlSnapshotInstanceSummary();
+            dgvInstanceSummary.DataSource = dt;
+            dgvInstanceSummary.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);       
         }
 
-        private void loadSnapshots(Int32 pageNum = 1)
+        private DataTable getDDLSnapshots(int pageNum)
+        {
+            using (var cn = new SqlConnection(Common.ConnectionString))
+            using (var cmd = new SqlCommand("dbo.DDLSnapshots_Get", cn) { CommandType = CommandType.StoredProcedure })
+            using (var da = new SqlDataAdapter(cmd))
+            {
+                cn.Open();
+                cmd.Parameters.AddWithValue("DatabaseID", DatabaseID);
+                cmd.Parameters.AddWithValue("Instance", InstanceName);
+                cmd.Parameters.AddWithValue("PageSize", currentSummaryPage);
+                cmd.Parameters.AddWithValue("PageNumber", pageNum);
+                
+                var dt = new DataTable();
+                da.Fill(dt);
+                Common.ConvertUTCToLocal(ref dt);
+                return dt;
+            }           
+        }
+
+        private void loadSnapshots(int pageNum = 1)
         {
             splitSnapshotSummary.Visible = true;
             dgvInstanceSummary.Visible = false;
             gvSnapshotsDetail.DataSource = null;
-            currentSummaryPage = Int32.Parse(tsSummaryPageSize.Text);
-            SqlConnection cn = new SqlConnection(Common.ConnectionString);
-            using (cn)
-            {
-                using (SqlCommand cmd = new SqlCommand("dbo.DDLSnapshots_Get", cn) { CommandType = CommandType.StoredProcedure })
-                {
-                    cn.Open();
-                    cmd.Parameters.AddWithValue("DatabaseID", DatabaseID);
-                    cmd.Parameters.AddWithValue("Instance", InstanceName);
-                    cmd.Parameters.AddWithValue("PageSize", currentSummaryPage);
-                    cmd.Parameters.AddWithValue("PageNumber", pageNum);
-                    SqlDataAdapter da = new SqlDataAdapter(cmd);
-                    var dt = new DataTable();
-                    da.Fill(dt);
-                    Common.ConvertUTCToLocal(ref dt);
-                    gvSnapshots.AutoGenerateColumns = false;
-                    gvSnapshots.DataSource = dt;
-                    gvSnapshots.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
-
-                    tsSummaryPageNum.Text = "Page " + pageNum;
-                    tsSummaryBack.Enabled = (pageNum > 1);
-                    tsSummaryNext.Enabled = dt.Rows.Count == currentSummaryPage;
-                    currentSummaryPage = pageNum;
-                }
-            }
-
+            currentSummaryPage = Int32.Parse(tsSummaryPageSize.Text);    
+            var dt = getDDLSnapshots(pageNum);         
+            gvSnapshots.AutoGenerateColumns = false;
+            gvSnapshots.DataSource = dt;
+            gvSnapshots.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
+            tsSummaryPageNum.Text = "Page " + pageNum;
+            tsSummaryBack.Enabled = (pageNum > 1);
+            tsSummaryNext.Enabled = dt.Rows.Count == currentSummaryPage;
+            currentSummaryPage = pageNum;
         }
         private void tsSummaryBack_Click(object sender, EventArgs e)
         {
@@ -183,6 +193,9 @@ namespace DBADashGUI.Changes
 
         private void SchemaSnapshots_Load(object sender, EventArgs e)
         {
+            Common.StyleGrid(ref gvSnapshots);
+            Common.StyleGrid(ref gvSnapshotsDetail);
+            Common.StyleGrid(ref dgvInstanceSummary);
             splitSnapshotSummary.Dock = DockStyle.Fill;
         }
 
@@ -197,30 +210,37 @@ namespace DBADashGUI.Changes
             else if(e.RowIndex>=0 && e.ColumnIndex == colExport.Index)
             {
                 var row = (DataRowView)gvSnapshots.Rows[e.RowIndex].DataBoundItem;
-                var dbid = (Int32)row["DatabaseID"];
-                var db = (string)row["DB"];
-                var snapshotDate = (DateTime)row["SnapshotDate"];
-                using (var ofd = new FolderBrowserDialog() { Description = "Select a folder" }) {
-                    if (ofd.ShowDialog() == DialogResult.OK)
+                export(row);
+            }
+        }
+
+        private void export(DataRowView row)
+        {
+            var dbid = (Int32)row["DatabaseID"];
+            var db = (string)row["DB"];
+            var snapshotDate = (DateTime)row["SnapshotDate"];
+            using (var ofd = new FolderBrowserDialog() { Description = "Select a folder" })
+            {
+                if (ofd.ShowDialog() == DialogResult.OK)
+                {
+                    string folder = System.IO.Path.Combine(ofd.SelectedPath, InstanceName + "_" + db + "_" + snapshotDate.ToString("yyyyMMdd_HHmmss"));
+                    Directory.CreateDirectory(folder);
+                    try
                     {
-                        string folder = System.IO.Path.Combine(ofd.SelectedPath, InstanceName + "_" + db + "_" + snapshotDate.ToString("yyyyMMdd_HHmmss"));
-                        Directory.CreateDirectory(folder);
-                        try
+                        ExportSchema(folder, dbid, snapshotDate);
+                        MessageBox.Show("Export Completed", "Export", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo()
                         {
-                            ExportSchema(folder, dbid, snapshotDate);
-                            MessageBox.Show("Export Completed","Export", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                            System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo() {
-                                FileName = folder,
-                                UseShellExecute = true,
-                                Verb = "open"
-                            });
-                        }
-                        catch(Exception ex)
-                        {
-                            MessageBox.Show(ex.Message, "Export", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                        }
-                        
+                            FileName = folder,
+                            UseShellExecute = true,
+                            Verb = "open"
+                        });
                     }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show(ex.Message, "Export", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+
                 }
             }
         }

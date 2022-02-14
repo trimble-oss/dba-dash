@@ -42,9 +42,10 @@
             // cboDatabase
             // 
             this.cboDatabase.FormattingEnabled = true;
-            this.cboDatabase.Location = new System.Drawing.Point(16, 32);
+            this.cboDatabase.Location = new System.Drawing.Point(16, 40);
+            this.cboDatabase.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.cboDatabase.Name = "cboDatabase";
-            this.cboDatabase.Size = new System.Drawing.Size(536, 24);
+            this.cboDatabase.Size = new System.Drawing.Size(536, 28);
             this.cboDatabase.TabIndex = 2;
             this.cboDatabase.Text = "DBADashDB";
             this.cboDatabase.DropDown += new System.EventHandler(this.cboDatabase_DropDown);
@@ -54,17 +55,18 @@
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(13, 12);
+            this.label1.Location = new System.Drawing.Point(13, 15);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(73, 17);
+            this.label1.Size = new System.Drawing.Size(75, 20);
             this.label1.TabIndex = 3;
             this.label1.Text = "Database:";
             // 
             // bttnGenerate
             // 
-            this.bttnGenerate.Location = new System.Drawing.Point(404, 102);
+            this.bttnGenerate.Location = new System.Drawing.Point(404, 128);
+            this.bttnGenerate.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.bttnGenerate.Name = "bttnGenerate";
-            this.bttnGenerate.Size = new System.Drawing.Size(148, 23);
+            this.bttnGenerate.Size = new System.Drawing.Size(148, 29);
             this.bttnGenerate.TabIndex = 4;
             this.bttnGenerate.Text = "Generate Script";
             this.bttnGenerate.UseVisualStyleBackColor = true;
@@ -75,12 +77,13 @@
             this.txtDeployScript.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.txtDeployScript.Location = new System.Drawing.Point(23, 164);
+            this.txtDeployScript.Location = new System.Drawing.Point(23, 205);
+            this.txtDeployScript.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.txtDeployScript.Multiline = true;
             this.txtDeployScript.Name = "txtDeployScript";
             this.txtDeployScript.ReadOnly = true;
             this.txtDeployScript.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.txtDeployScript.Size = new System.Drawing.Size(536, 451);
+            this.txtDeployScript.Size = new System.Drawing.Size(536, 563);
             this.txtDeployScript.TabIndex = 5;
             this.txtDeployScript.TextChanged += new System.EventHandler(this.txtDeployScript_TextChanged);
             this.txtDeployScript.Validated += new System.EventHandler(this.txtDeployScript_Validated);
@@ -88,19 +91,20 @@
             // lblNotice
             // 
             this.lblNotice.AutoSize = true;
-            this.lblNotice.ForeColor = System.Drawing.Color.Blue;
-            this.lblNotice.Location = new System.Drawing.Point(58, 141);
+            this.lblNotice.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(79)))), ((int)(((byte)(131)))));
+            this.lblNotice.Location = new System.Drawing.Point(58, 176);
             this.lblNotice.Name = "lblNotice";
-            this.lblNotice.Size = new System.Drawing.Size(91, 17);
+            this.lblNotice.Size = new System.Drawing.Size(92, 20);
             this.lblNotice.TabIndex = 6;
             this.lblNotice.Text = "Please wait...";
             this.lblNotice.Visible = false;
             // 
             // bttnCancel
             // 
-            this.bttnCancel.Location = new System.Drawing.Point(404, 102);
+            this.bttnCancel.Location = new System.Drawing.Point(404, 128);
+            this.bttnCancel.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.bttnCancel.Name = "bttnCancel";
-            this.bttnCancel.Size = new System.Drawing.Size(148, 23);
+            this.bttnCancel.Size = new System.Drawing.Size(148, 29);
             this.bttnCancel.TabIndex = 7;
             this.bttnCancel.Text = "Cancel";
             this.bttnCancel.UseVisualStyleBackColor = true;
@@ -109,9 +113,9 @@
             // 
             // lblVersionInfo
             // 
-            this.lblVersionInfo.Location = new System.Drawing.Point(16, 59);
+            this.lblVersionInfo.Location = new System.Drawing.Point(16, 74);
             this.lblVersionInfo.Name = "lblVersionInfo";
-            this.lblVersionInfo.Size = new System.Drawing.Size(536, 16);
+            this.lblVersionInfo.Size = new System.Drawing.Size(536, 20);
             this.lblVersionInfo.TabIndex = 9;
             this.lblVersionInfo.Text = "Version...";
             this.lblVersionInfo.TextAlign = System.Drawing.ContentAlignment.TopRight;
@@ -120,18 +124,20 @@
             // 
             this.bttnCopy.Enabled = false;
             this.bttnCopy.Image = global::DBADashServiceConfig.Properties.Resources.ASX_Copy_blue_16x;
-            this.bttnCopy.Location = new System.Drawing.Point(16, 130);
+            this.bttnCopy.Location = new System.Drawing.Point(16, 162);
+            this.bttnCopy.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.bttnCopy.Name = "bttnCopy";
-            this.bttnCopy.Size = new System.Drawing.Size(36, 28);
+            this.bttnCopy.Size = new System.Drawing.Size(36, 35);
             this.bttnCopy.TabIndex = 8;
             this.bttnCopy.UseVisualStyleBackColor = true;
             this.bttnCopy.Click += new System.EventHandler(this.bttnCopy_Click);
             // 
             // bttnDeploy
             // 
-            this.bttnDeploy.Location = new System.Drawing.Point(262, 102);
+            this.bttnDeploy.Location = new System.Drawing.Point(262, 128);
+            this.bttnDeploy.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.bttnDeploy.Name = "bttnDeploy";
-            this.bttnDeploy.Size = new System.Drawing.Size(112, 23);
+            this.bttnDeploy.Size = new System.Drawing.Size(112, 29);
             this.bttnDeploy.TabIndex = 10;
             this.bttnDeploy.Text = "Deploy";
             this.bttnDeploy.UseVisualStyleBackColor = true;
@@ -139,9 +145,9 @@
             // 
             // DBDeploy
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(571, 649);
+            this.ClientSize = new System.Drawing.Size(571, 811);
             this.Controls.Add(this.bttnDeploy);
             this.Controls.Add(this.lblVersionInfo);
             this.Controls.Add(this.bttnCopy);
@@ -151,6 +157,7 @@
             this.Controls.Add(this.label1);
             this.Controls.Add(this.cboDatabase);
             this.Controls.Add(this.bttnCancel);
+            this.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.Name = "DBDeploy";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "DB Deploy";

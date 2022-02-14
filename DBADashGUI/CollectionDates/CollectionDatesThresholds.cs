@@ -73,50 +73,44 @@ namespace DBADashGUI.CollectionDates
 
         private void getThreshold()
         {
-            using (var cn = new SqlConnection(ConnectionString))
+            using var cn = new SqlConnection(Common.ConnectionString);
+            using var cmd = new SqlCommand("CollectionDatesThresholds_Get", cn) { CommandType = CommandType.StoredProcedure };
+            
+            cn.Open();
+            cmd.Parameters.AddWithValue("InstanceID", InstanceID);
+            using var rdr = cmd.ExecuteReader();
+            while (rdr.Read())
             {
-                using (SqlCommand cmd = new SqlCommand("CollectionDatesThresholds_Get", cn) { CommandType = CommandType.StoredProcedure }) {
-                    cn.Open();
-                    cmd.Parameters.AddWithValue("InstanceID", InstanceID);
-                    var rdr = cmd.ExecuteReader();
-                    while (rdr.Read())
+                string reference = Convert.ToString(rdr["Reference"]);
+
+                if (reference == _reference)
+                {
+                    chkReferences.Items.Add(reference, CheckState.Checked);
+                    if (rdr["WarningThreshold"] != DBNull.Value && rdr["CriticalThreshold"] != DBNull.Value)
                     {
-                        string reference = Convert.ToString(rdr["Reference"]);
-
-                        if (reference == _reference)
-                        {
-                            chkReferences.Items.Add(reference, CheckState.Checked);
-                            if (rdr["WarningThreshold"] != DBNull.Value && rdr["CriticalThreshold"] != DBNull.Value)
-                            {
-                                WarningThreshold = (Int32)rdr["WarningThreshold"];
-                                CriticalThreshold = (Int32)rdr["CriticalThreshold"];
-                                optEnabled.Checked = true;
-                            }
-                            else
-                            {
-                                OptDisabled.Checked = true;
-                            }
-                            if (Convert.ToBoolean(rdr["Inherited"]))
-                            {
-                                optInherit.Checked = true;
-                            }
-                        }
-                        else
-                        {
-                            chkReferences.Items.Add(reference, CheckState.Unchecked);
-                        }
-
-                    } 
-
-                    optInherit.Enabled = InstanceID > 0;
+                        WarningThreshold = (Int32)rdr["WarningThreshold"];
+                        CriticalThreshold = (Int32)rdr["CriticalThreshold"];
+                        optEnabled.Checked = true;
+                    }
+                    else
+                    {
+                        OptDisabled.Checked = true;
+                    }
+                    if (Convert.ToBoolean(rdr["Inherited"]))
+                    {
+                        optInherit.Checked = true;
+                    }
                 }
-            }
+                else
+                {
+                    chkReferences.Items.Add(reference, CheckState.Unchecked);
+                }
 
+            } 
+
+            optInherit.Enabled = InstanceID > 0;
+                       
         }
-
-
-
-        public string ConnectionString { get; set; }
 
         private void bttnUpdate_Click(object sender, EventArgs e)
         {
@@ -128,29 +122,27 @@ namespace DBADashGUI.CollectionDates
 
         private void update(string reference)
         {
-            using (var cn = new SqlConnection(ConnectionString))
+            using (var cn = new SqlConnection(Common.ConnectionString))
+            using (var cmd = new SqlCommand("CollectionDatesThresholds_Upd", cn) { CommandType = CommandType.StoredProcedure })
             {
-                using (SqlCommand cmd = new SqlCommand("CollectionDatesThresholds_Upd", cn) { CommandType = CommandType.StoredProcedure })
-                {
-                    cn.Open();
+                cn.Open();
 
-                    cmd.Parameters.AddWithValue("InstanceID", InstanceID);
-                    cmd.Parameters.AddWithValue("Reference", reference);
-                    if (OptDisabled.Checked)
-                    {
-                        cmd.Parameters.AddWithValue("WarningThreshold", DBNull.Value);
-                        cmd.Parameters.AddWithValue("CriticalThreshold", DBNull.Value);
-                    }
-                    else
-                    {
-                        cmd.Parameters.AddWithValue("WarningThreshold", WarningThreshold);
-                        cmd.Parameters.AddWithValue("CriticalThreshold", CriticalThreshold);
-                    }
-                    cmd.Parameters.AddWithValue("Inherit", Inherit);
-                    cmd.ExecuteNonQuery();
-                    this.DialogResult = DialogResult.OK;
+                cmd.Parameters.AddWithValue("InstanceID", InstanceID);
+                cmd.Parameters.AddWithValue("Reference", reference);
+                if (OptDisabled.Checked)
+                {
+                    cmd.Parameters.AddWithValue("WarningThreshold", DBNull.Value);
+                    cmd.Parameters.AddWithValue("CriticalThreshold", DBNull.Value);
                 }
-            }
+                else
+                {
+                    cmd.Parameters.AddWithValue("WarningThreshold", WarningThreshold);
+                    cmd.Parameters.AddWithValue("CriticalThreshold", CriticalThreshold);
+                }
+                cmd.Parameters.AddWithValue("Inherit", Inherit);
+                cmd.ExecuteNonQuery();
+                this.DialogResult = DialogResult.OK;
+            }           
         }
 
         private void CollectionDatesThresholds_Load(object sender, EventArgs e)

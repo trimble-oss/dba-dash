@@ -35,8 +35,9 @@
             this.TreeViewImageList = new System.Windows.Forms.ImageList(this.components);
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.mnuTags = new System.Windows.Forms.ToolStripMenuItem();
-            this.dBDiffToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.tsJobDiff = new System.Windows.Forms.ToolStripMenuItem();
+            this.diffToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.databaseSchemaDiffToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.agentJobDiffToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.optionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.dataRetentionToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.manageInstancesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -278,8 +279,7 @@
             this.menuStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
             this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.mnuTags,
-            this.dBDiffToolStripMenuItem,
-            this.tsJobDiff,
+            this.diffToolStripMenuItem,
             this.optionsToolStripMenuItem,
             this.tsTime,
             this.helpToolStripMenuItem});
@@ -291,31 +291,43 @@
             // 
             // mnuTags
             // 
+            this.mnuTags.Image = global::DBADashGUI.Properties.Resources.FilterDropdown_16x;
             this.mnuTags.Name = "mnuTags";
-            this.mnuTags.Size = new System.Drawing.Size(52, 30);
+            this.mnuTags.Size = new System.Drawing.Size(72, 30);
             this.mnuTags.Text = "Tags";
             // 
-            // dBDiffToolStripMenuItem
+            // diffToolStripMenuItem
             // 
-            this.dBDiffToolStripMenuItem.Name = "dBDiffToolStripMenuItem";
-            this.dBDiffToolStripMenuItem.Size = new System.Drawing.Size(72, 30);
-            this.dBDiffToolStripMenuItem.Text = "DB Diff";
-            this.dBDiffToolStripMenuItem.Click += new System.EventHandler(this.dBDiffToolStripMenuItem_Click);
+            this.diffToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.databaseSchemaDiffToolStripMenuItem,
+            this.agentJobDiffToolStripMenuItem});
+            this.diffToolStripMenuItem.Image = global::DBADashGUI.Properties.Resources.Diff_16x;
+            this.diffToolStripMenuItem.Name = "diffToolStripMenuItem";
+            this.diffToolStripMenuItem.Size = new System.Drawing.Size(68, 30);
+            this.diffToolStripMenuItem.Text = "Diff";
             // 
-            // tsJobDiff
+            // databaseSchemaDiffToolStripMenuItem
             // 
-            this.tsJobDiff.Name = "tsJobDiff";
-            this.tsJobDiff.Size = new System.Drawing.Size(75, 30);
-            this.tsJobDiff.Text = "Job Diff";
-            this.tsJobDiff.Click += new System.EventHandler(this.tsJobDiff_Click);
+            this.databaseSchemaDiffToolStripMenuItem.Name = "databaseSchemaDiffToolStripMenuItem";
+            this.databaseSchemaDiffToolStripMenuItem.Size = new System.Drawing.Size(240, 26);
+            this.databaseSchemaDiffToolStripMenuItem.Text = "Database Schema Diff";
+            this.databaseSchemaDiffToolStripMenuItem.Click += new System.EventHandler(this.databaseSchemaDiffToolStripMenuItem_Click);
+            // 
+            // agentJobDiffToolStripMenuItem
+            // 
+            this.agentJobDiffToolStripMenuItem.Name = "agentJobDiffToolStripMenuItem";
+            this.agentJobDiffToolStripMenuItem.Size = new System.Drawing.Size(240, 26);
+            this.agentJobDiffToolStripMenuItem.Text = "Agent Job Diff";
+            this.agentJobDiffToolStripMenuItem.Click += new System.EventHandler(this.agentJobDiffToolStripMenuItem_Click);
             // 
             // optionsToolStripMenuItem
             // 
             this.optionsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.dataRetentionToolStripMenuItem,
             this.manageInstancesToolStripMenuItem});
+            this.optionsToolStripMenuItem.Image = global::DBADashGUI.Properties.Resources.SettingsOutline_16x;
             this.optionsToolStripMenuItem.Name = "optionsToolStripMenuItem";
-            this.optionsToolStripMenuItem.Size = new System.Drawing.Size(75, 30);
+            this.optionsToolStripMenuItem.Size = new System.Drawing.Size(95, 30);
             this.optionsToolStripMenuItem.Text = "Options";
             // 
             // dataRetentionToolStripMenuItem
@@ -507,8 +519,9 @@
             // 
             this.helpToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.aboutToolStripMenuItem});
+            this.helpToolStripMenuItem.Image = global::DBADashGUI.Properties.Resources.Information_blue_6227_16x16;
             this.helpToolStripMenuItem.Name = "helpToolStripMenuItem";
-            this.helpToolStripMenuItem.Size = new System.Drawing.Size(55, 30);
+            this.helpToolStripMenuItem.Size = new System.Drawing.Size(75, 30);
             this.helpToolStripMenuItem.Text = "Help";
             // 
             // aboutToolStripMenuItem
@@ -555,7 +568,7 @@
             // 
             // pnlSearch
             // 
-            this.pnlSearch.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(37)))), ((int)(((byte)(42)))), ((int)(((byte)(46)))));
+            this.pnlSearch.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(99)))), ((int)(((byte)(163)))));
             this.pnlSearch.Controls.Add(this.bttnSearch);
             this.pnlSearch.Controls.Add(this.txtSearch);
             this.pnlSearch.Dock = System.Windows.Forms.DockStyle.Bottom;
@@ -583,6 +596,7 @@
             this.txtSearch.Name = "txtSearch";
             this.txtSearch.Size = new System.Drawing.Size(214, 22);
             this.txtSearch.TabIndex = 0;
+            this.txtSearch.KeyUp += new System.Windows.Forms.KeyEventHandler(this.txtSearch_KeyUp);
             // 
             // tabs
             // 
@@ -652,6 +666,7 @@
             // 
             this.schemaSnapshots1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.schemaSnapshots1.Location = new System.Drawing.Point(3, 3);
+            this.schemaSnapshots1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.schemaSnapshots1.Name = "schemaSnapshots1";
             this.schemaSnapshots1.Size = new System.Drawing.Size(1625, 1240);
             this.schemaSnapshots1.TabIndex = 0;
@@ -662,7 +677,7 @@
             this.tabSchema.Location = new System.Drawing.Point(4, 29);
             this.tabSchema.Name = "tabSchema";
             this.tabSchema.Padding = new System.Windows.Forms.Padding(3);
-            this.tabSchema.Size = new System.Drawing.Size(1631, 1242);
+            this.tabSchema.Size = new System.Drawing.Size(192, 67);
             this.tabSchema.TabIndex = 0;
             this.tabSchema.Text = "Schema Snapshot";
             this.tabSchema.UseVisualStyleBackColor = true;
@@ -683,8 +698,8 @@
             this.splitSchemaSnapshot.Panel2.Controls.Add(this.toolStrip1);
             this.splitSchemaSnapshot.Panel2.Controls.Add(this.gvHistory);
             this.splitSchemaSnapshot.Panel2.Controls.Add(this.label1);
-            this.splitSchemaSnapshot.Size = new System.Drawing.Size(1625, 1236);
-            this.splitSchemaSnapshot.SplitterDistance = 564;
+            this.splitSchemaSnapshot.Size = new System.Drawing.Size(186, 61);
+            this.splitSchemaSnapshot.SplitterDistance = 27;
             this.splitSchemaSnapshot.TabIndex = 1;
             // 
             // label7
@@ -707,9 +722,9 @@
             this.tsNext,
             this.toolStripLabel1,
             this.tsPageSize});
-            this.toolStrip1.Location = new System.Drawing.Point(0, 640);
+            this.toolStrip1.Location = new System.Drawing.Point(0, -2);
             this.toolStrip1.Name = "toolStrip1";
-            this.toolStrip1.Size = new System.Drawing.Size(1625, 28);
+            this.toolStrip1.Size = new System.Drawing.Size(186, 32);
             this.toolStrip1.TabIndex = 1;
             this.toolStrip1.Text = "toolStrip1";
             // 
@@ -719,14 +734,14 @@
             this.tsPrevious.Image = ((System.Drawing.Image)(resources.GetObject("tsPrevious.Image")));
             this.tsPrevious.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsPrevious.Name = "tsPrevious";
-            this.tsPrevious.Size = new System.Drawing.Size(29, 25);
+            this.tsPrevious.Size = new System.Drawing.Size(29, 29);
             this.tsPrevious.Text = "Previous";
             this.tsPrevious.Click += new System.EventHandler(this.tsPrevious_Click);
             // 
             // tsPageNum
             // 
             this.tsPageNum.Name = "tsPageNum";
-            this.tsPageNum.Size = new System.Drawing.Size(53, 25);
+            this.tsPageNum.Size = new System.Drawing.Size(53, 29);
             this.tsPageNum.Text = "Page 1";
             // 
             // tsNext
@@ -735,14 +750,14 @@
             this.tsNext.Image = ((System.Drawing.Image)(resources.GetObject("tsNext.Image")));
             this.tsNext.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsNext.Name = "tsNext";
-            this.tsNext.Size = new System.Drawing.Size(29, 25);
+            this.tsNext.Size = new System.Drawing.Size(29, 29);
             this.tsNext.Text = "Next";
             this.tsNext.Click += new System.EventHandler(this.tsNext_Click);
             // 
             // toolStripLabel1
             // 
             this.toolStripLabel1.Name = "toolStripLabel1";
-            this.toolStripLabel1.Size = new System.Drawing.Size(75, 25);
+            this.toolStripLabel1.Size = new System.Drawing.Size(75, 20);
             this.toolStripLabel1.Text = "Page Size:";
             // 
             // tsPageSize
@@ -799,7 +814,7 @@
             this.gvHistory.RowHeadersWidth = 51;
             this.gvHistory.RowTemplate.Height = 24;
             this.gvHistory.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-            this.gvHistory.Size = new System.Drawing.Size(1625, 643);
+            this.gvHistory.Size = new System.Drawing.Size(186, 5);
             this.gvHistory.TabIndex = 0;
             this.gvHistory.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.gvHistory_CellContentClick);
             this.gvHistory.SelectionChanged += new System.EventHandler(this.gvHistory_SelectionChanged);
@@ -870,13 +885,13 @@
             // 
             // label1
             // 
-            this.label1.BackColor = System.Drawing.Color.DimGray;
+            this.label1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(99)))), ((int)(((byte)(163)))));
             this.label1.Dock = System.Windows.Forms.DockStyle.Top;
             this.label1.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
             this.label1.ForeColor = System.Drawing.Color.White;
             this.label1.Location = new System.Drawing.Point(0, 0);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(1625, 25);
+            this.label1.Size = new System.Drawing.Size(186, 25);
             this.label1.TabIndex = 2;
             this.label1.Text = "Snapshot History";
             this.label1.TextAlign = System.Drawing.ContentAlignment.TopCenter;
@@ -887,7 +902,7 @@
             this.tabTags.Location = new System.Drawing.Point(4, 29);
             this.tabTags.Name = "tabTags";
             this.tabTags.Padding = new System.Windows.Forms.Padding(3);
-            this.tabTags.Size = new System.Drawing.Size(1631, 1242);
+            this.tabTags.Size = new System.Drawing.Size(192, 67);
             this.tabTags.TabIndex = 2;
             this.tabTags.Text = "Tags";
             this.tabTags.UseVisualStyleBackColor = true;
@@ -899,8 +914,9 @@
             this.tags1.InstanceIDs = null;
             this.tags1.InstanceName = null;
             this.tags1.Location = new System.Drawing.Point(3, 3);
+            this.tags1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.tags1.Name = "tags1";
-            this.tags1.Size = new System.Drawing.Size(1625, 1236);
+            this.tags1.Size = new System.Drawing.Size(186, 61);
             this.tags1.TabIndex = 0;
             this.tags1.TagsChanged += new System.EventHandler(this.tags1_TagsChanged);
             // 
@@ -911,7 +927,7 @@
             this.tabDrives.Location = new System.Drawing.Point(4, 29);
             this.tabDrives.Name = "tabDrives";
             this.tabDrives.Padding = new System.Windows.Forms.Padding(3);
-            this.tabDrives.Size = new System.Drawing.Size(1631, 1242);
+            this.tabDrives.Size = new System.Drawing.Size(192, 67);
             this.tabDrives.TabIndex = 3;
             this.tabDrives.Text = "Drives";
             this.tabDrives.UseVisualStyleBackColor = true;
@@ -924,8 +940,9 @@
             this.drivesControl1.IncludeOK = false;
             this.drivesControl1.IncludeWarning = false;
             this.drivesControl1.Location = new System.Drawing.Point(3, 3);
+            this.drivesControl1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.drivesControl1.Name = "drivesControl1";
-            this.drivesControl1.Size = new System.Drawing.Size(1625, 1236);
+            this.drivesControl1.Size = new System.Drawing.Size(186, 61);
             this.drivesControl1.TabIndex = 0;
             // 
             // tabBackups
@@ -934,7 +951,7 @@
             this.tabBackups.Location = new System.Drawing.Point(4, 29);
             this.tabBackups.Name = "tabBackups";
             this.tabBackups.Padding = new System.Windows.Forms.Padding(3);
-            this.tabBackups.Size = new System.Drawing.Size(1631, 1242);
+            this.tabBackups.Size = new System.Drawing.Size(192, 67);
             this.tabBackups.TabIndex = 4;
             this.tabBackups.Tag = "1";
             this.tabBackups.Text = "Backups";
@@ -949,8 +966,9 @@
             this.backupsControl1.IncludeWarning = false;
             this.backupsControl1.InstanceIDs = null;
             this.backupsControl1.Location = new System.Drawing.Point(3, 3);
+            this.backupsControl1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.backupsControl1.Name = "backupsControl1";
-            this.backupsControl1.Size = new System.Drawing.Size(1625, 1236);
+            this.backupsControl1.Size = new System.Drawing.Size(186, 61);
             this.backupsControl1.TabIndex = 0;
             // 
             // tabLogShipping
@@ -959,7 +977,7 @@
             this.tabLogShipping.Location = new System.Drawing.Point(4, 29);
             this.tabLogShipping.Name = "tabLogShipping";
             this.tabLogShipping.Padding = new System.Windows.Forms.Padding(3);
-            this.tabLogShipping.Size = new System.Drawing.Size(1631, 1242);
+            this.tabLogShipping.Size = new System.Drawing.Size(192, 67);
             this.tabLogShipping.TabIndex = 5;
             this.tabLogShipping.Text = "Log Shipping";
             this.tabLogShipping.UseVisualStyleBackColor = true;
@@ -973,8 +991,9 @@
             this.logShippingControl1.IncludeWarning = false;
             this.logShippingControl1.InstanceIDs = null;
             this.logShippingControl1.Location = new System.Drawing.Point(3, 3);
+            this.logShippingControl1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.logShippingControl1.Name = "logShippingControl1";
-            this.logShippingControl1.Size = new System.Drawing.Size(1625, 1236);
+            this.logShippingControl1.Size = new System.Drawing.Size(186, 61);
             this.logShippingControl1.TabIndex = 0;
             // 
             // tabJobs
@@ -983,7 +1002,7 @@
             this.tabJobs.Location = new System.Drawing.Point(4, 29);
             this.tabJobs.Name = "tabJobs";
             this.tabJobs.Padding = new System.Windows.Forms.Padding(3);
-            this.tabJobs.Size = new System.Drawing.Size(1631, 1242);
+            this.tabJobs.Size = new System.Drawing.Size(192, 67);
             this.tabJobs.TabIndex = 6;
             this.tabJobs.Text = "Agent Jobs";
             this.tabJobs.UseVisualStyleBackColor = true;
@@ -996,8 +1015,9 @@
             this.agentJobsControl1.IncludeOK = false;
             this.agentJobsControl1.IncludeWarning = false;
             this.agentJobsControl1.Location = new System.Drawing.Point(3, 3);
+            this.agentJobsControl1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.agentJobsControl1.Name = "agentJobsControl1";
-            this.agentJobsControl1.Size = new System.Drawing.Size(1625, 1236);
+            this.agentJobsControl1.Size = new System.Drawing.Size(186, 61);
             this.agentJobsControl1.TabIndex = 0;
             // 
             // tabSummary
@@ -1006,7 +1026,7 @@
             this.tabSummary.Location = new System.Drawing.Point(4, 29);
             this.tabSummary.Name = "tabSummary";
             this.tabSummary.Padding = new System.Windows.Forms.Padding(3);
-            this.tabSummary.Size = new System.Drawing.Size(1631, 1242);
+            this.tabSummary.Size = new System.Drawing.Size(192, 67);
             this.tabSummary.TabIndex = 7;
             this.tabSummary.Text = "Summary";
             this.tabSummary.UseVisualStyleBackColor = true;
@@ -1015,8 +1035,9 @@
             // 
             this.summary1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.summary1.Location = new System.Drawing.Point(3, 3);
+            this.summary1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.summary1.Name = "summary1";
-            this.summary1.Size = new System.Drawing.Size(1625, 1236);
+            this.summary1.Size = new System.Drawing.Size(186, 61);
             this.summary1.TabIndex = 0;
             this.summary1.Instance_Selected += new System.EventHandler<DBADashGUI.Main.InstanceSelectedEventArgs>(this.Instance_Selected);
             // 
@@ -1026,7 +1047,7 @@
             this.tabFiles.Location = new System.Drawing.Point(4, 29);
             this.tabFiles.Name = "tabFiles";
             this.tabFiles.Padding = new System.Windows.Forms.Padding(3);
-            this.tabFiles.Size = new System.Drawing.Size(1631, 1242);
+            this.tabFiles.Size = new System.Drawing.Size(192, 67);
             this.tabFiles.TabIndex = 8;
             this.tabFiles.Text = "Files";
             this.tabFiles.UseVisualStyleBackColor = true;
@@ -1039,8 +1060,9 @@
             this.dbFilesControl1.IncludeOK = false;
             this.dbFilesControl1.IncludeWarning = false;
             this.dbFilesControl1.Location = new System.Drawing.Point(3, 3);
+            this.dbFilesControl1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.dbFilesControl1.Name = "dbFilesControl1";
-            this.dbFilesControl1.Size = new System.Drawing.Size(1625, 1236);
+            this.dbFilesControl1.Size = new System.Drawing.Size(186, 61);
             this.dbFilesControl1.TabIndex = 0;
             // 
             // tabLastGood
@@ -1049,7 +1071,7 @@
             this.tabLastGood.Location = new System.Drawing.Point(4, 29);
             this.tabLastGood.Name = "tabLastGood";
             this.tabLastGood.Padding = new System.Windows.Forms.Padding(3);
-            this.tabLastGood.Size = new System.Drawing.Size(1631, 1242);
+            this.tabLastGood.Size = new System.Drawing.Size(192, 67);
             this.tabLastGood.TabIndex = 9;
             this.tabLastGood.Text = "Last Good CheckDB";
             this.tabLastGood.UseVisualStyleBackColor = true;
@@ -1062,8 +1084,9 @@
             this.lastGoodCheckDBControl1.IncludeOK = false;
             this.lastGoodCheckDBControl1.IncludeWarning = false;
             this.lastGoodCheckDBControl1.Location = new System.Drawing.Point(3, 3);
+            this.lastGoodCheckDBControl1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.lastGoodCheckDBControl1.Name = "lastGoodCheckDBControl1";
-            this.lastGoodCheckDBControl1.Size = new System.Drawing.Size(1625, 1236);
+            this.lastGoodCheckDBControl1.Size = new System.Drawing.Size(186, 61);
             this.lastGoodCheckDBControl1.TabIndex = 0;
             // 
             // tabPerformance
@@ -1072,7 +1095,7 @@
             this.tabPerformance.Location = new System.Drawing.Point(4, 29);
             this.tabPerformance.Name = "tabPerformance";
             this.tabPerformance.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPerformance.Size = new System.Drawing.Size(1631, 1242);
+            this.tabPerformance.Size = new System.Drawing.Size(192, 67);
             this.tabPerformance.TabIndex = 10;
             this.tabPerformance.Text = "Performance";
             this.tabPerformance.UseVisualStyleBackColor = true;
@@ -1084,9 +1107,10 @@
             this.performance1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.performance1.InstanceID = 0;
             this.performance1.Location = new System.Drawing.Point(3, 3);
+            this.performance1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.performance1.Name = "performance1";
             this.performance1.ObjectID = ((long)(0));
-            this.performance1.Size = new System.Drawing.Size(1625, 1236);
+            this.performance1.Size = new System.Drawing.Size(186, 61);
             this.performance1.TabIndex = 0;
             // 
             // tabDBADashErrorLog
@@ -1095,7 +1119,7 @@
             this.tabDBADashErrorLog.Location = new System.Drawing.Point(4, 29);
             this.tabDBADashErrorLog.Name = "tabDBADashErrorLog";
             this.tabDBADashErrorLog.Padding = new System.Windows.Forms.Padding(3);
-            this.tabDBADashErrorLog.Size = new System.Drawing.Size(1631, 1242);
+            this.tabDBADashErrorLog.Size = new System.Drawing.Size(192, 67);
             this.tabDBADashErrorLog.TabIndex = 11;
             this.tabDBADashErrorLog.Text = "DBA Dash ErrorLog";
             this.tabDBADashErrorLog.UseVisualStyleBackColor = true;
@@ -1108,8 +1132,9 @@
             this.collectionErrors1.InstanceID = 0;
             this.collectionErrors1.InstanceName = null;
             this.collectionErrors1.Location = new System.Drawing.Point(3, 3);
+            this.collectionErrors1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.collectionErrors1.Name = "collectionErrors1";
-            this.collectionErrors1.Size = new System.Drawing.Size(1625, 1236);
+            this.collectionErrors1.Size = new System.Drawing.Size(186, 61);
             this.collectionErrors1.TabIndex = 0;
             // 
             // tabCollectionDates
@@ -1118,14 +1143,13 @@
             this.tabCollectionDates.Location = new System.Drawing.Point(4, 29);
             this.tabCollectionDates.Name = "tabCollectionDates";
             this.tabCollectionDates.Padding = new System.Windows.Forms.Padding(3);
-            this.tabCollectionDates.Size = new System.Drawing.Size(1631, 1242);
+            this.tabCollectionDates.Size = new System.Drawing.Size(192, 67);
             this.tabCollectionDates.TabIndex = 12;
             this.tabCollectionDates.Text = "Collection Dates";
             this.tabCollectionDates.UseVisualStyleBackColor = true;
             // 
             // collectionDates1
             // 
-            this.collectionDates1.ConnectionString = null;
             this.collectionDates1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.collectionDates1.IncludeCritical = false;
             this.collectionDates1.IncludeNA = false;
@@ -1133,8 +1157,9 @@
             this.collectionDates1.IncludeWarning = false;
             this.collectionDates1.InstanceIDs = null;
             this.collectionDates1.Location = new System.Drawing.Point(3, 3);
+            this.collectionDates1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.collectionDates1.Name = "collectionDates1";
-            this.collectionDates1.Size = new System.Drawing.Size(1625, 1236);
+            this.collectionDates1.Size = new System.Drawing.Size(186, 61);
             this.collectionDates1.TabIndex = 0;
             // 
             // tabPerformanceSummary
@@ -1143,7 +1168,7 @@
             this.tabPerformanceSummary.Location = new System.Drawing.Point(4, 29);
             this.tabPerformanceSummary.Name = "tabPerformanceSummary";
             this.tabPerformanceSummary.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPerformanceSummary.Size = new System.Drawing.Size(1631, 1242);
+            this.tabPerformanceSummary.Size = new System.Drawing.Size(192, 67);
             this.tabPerformanceSummary.TabIndex = 13;
             this.tabPerformanceSummary.Text = "Performance Summary";
             this.tabPerformanceSummary.UseVisualStyleBackColor = true;
@@ -1152,8 +1177,9 @@
             // 
             this.performanceSummary1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.performanceSummary1.Location = new System.Drawing.Point(3, 3);
+            this.performanceSummary1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.performanceSummary1.Name = "performanceSummary1";
-            this.performanceSummary1.Size = new System.Drawing.Size(1625, 1236);
+            this.performanceSummary1.Size = new System.Drawing.Size(186, 61);
             this.performanceSummary1.TabIndex = 0;
             this.performanceSummary1.Instance_Selected += new System.EventHandler<DBADashGUI.Main.InstanceSelectedEventArgs>(this.Instance_Selected);
             // 
@@ -1163,7 +1189,7 @@
             this.tabInfo.Location = new System.Drawing.Point(4, 29);
             this.tabInfo.Name = "tabInfo";
             this.tabInfo.Padding = new System.Windows.Forms.Padding(3);
-            this.tabInfo.Size = new System.Drawing.Size(1631, 1242);
+            this.tabInfo.Size = new System.Drawing.Size(192, 67);
             this.tabInfo.TabIndex = 14;
             this.tabInfo.Text = "Info";
             this.tabInfo.UseVisualStyleBackColor = true;
@@ -1172,8 +1198,9 @@
             // 
             this.info1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.info1.Location = new System.Drawing.Point(3, 3);
+            this.info1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.info1.Name = "info1";
-            this.info1.Size = new System.Drawing.Size(1625, 1236);
+            this.info1.Size = new System.Drawing.Size(186, 61);
             this.info1.TabIndex = 0;
             // 
             // tabHardware
@@ -1182,7 +1209,7 @@
             this.tabHardware.Location = new System.Drawing.Point(4, 29);
             this.tabHardware.Name = "tabHardware";
             this.tabHardware.Padding = new System.Windows.Forms.Padding(3);
-            this.tabHardware.Size = new System.Drawing.Size(1631, 1242);
+            this.tabHardware.Size = new System.Drawing.Size(192, 67);
             this.tabHardware.TabIndex = 15;
             this.tabHardware.Text = "Hardware";
             this.tabHardware.UseVisualStyleBackColor = true;
@@ -1191,8 +1218,9 @@
             // 
             this.hardwareChanges1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.hardwareChanges1.Location = new System.Drawing.Point(3, 3);
+            this.hardwareChanges1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.hardwareChanges1.Name = "hardwareChanges1";
-            this.hardwareChanges1.Size = new System.Drawing.Size(1625, 1236);
+            this.hardwareChanges1.Size = new System.Drawing.Size(186, 61);
             this.hardwareChanges1.TabIndex = 0;
             // 
             // tabSQLPatching
@@ -1201,7 +1229,7 @@
             this.tabSQLPatching.Location = new System.Drawing.Point(4, 29);
             this.tabSQLPatching.Name = "tabSQLPatching";
             this.tabSQLPatching.Padding = new System.Windows.Forms.Padding(3);
-            this.tabSQLPatching.Size = new System.Drawing.Size(1631, 1242);
+            this.tabSQLPatching.Size = new System.Drawing.Size(192, 67);
             this.tabSQLPatching.TabIndex = 16;
             this.tabSQLPatching.Text = "SQL Patching";
             this.tabSQLPatching.UseVisualStyleBackColor = true;
@@ -1210,8 +1238,9 @@
             // 
             this.sqlPatching1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.sqlPatching1.Location = new System.Drawing.Point(3, 3);
+            this.sqlPatching1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.sqlPatching1.Name = "sqlPatching1";
-            this.sqlPatching1.Size = new System.Drawing.Size(1625, 1236);
+            this.sqlPatching1.Size = new System.Drawing.Size(186, 61);
             this.sqlPatching1.TabIndex = 0;
             // 
             // tabInstanceConfig
@@ -1220,7 +1249,7 @@
             this.tabInstanceConfig.Location = new System.Drawing.Point(4, 29);
             this.tabInstanceConfig.Name = "tabInstanceConfig";
             this.tabInstanceConfig.Padding = new System.Windows.Forms.Padding(3);
-            this.tabInstanceConfig.Size = new System.Drawing.Size(1631, 1242);
+            this.tabInstanceConfig.Size = new System.Drawing.Size(192, 67);
             this.tabInstanceConfig.TabIndex = 17;
             this.tabInstanceConfig.Text = "Configuration";
             this.tabInstanceConfig.UseVisualStyleBackColor = true;
@@ -1229,8 +1258,9 @@
             // 
             this.configurationHistory1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.configurationHistory1.Location = new System.Drawing.Point(3, 3);
+            this.configurationHistory1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.configurationHistory1.Name = "configurationHistory1";
-            this.configurationHistory1.Size = new System.Drawing.Size(1625, 1236);
+            this.configurationHistory1.Size = new System.Drawing.Size(186, 61);
             this.configurationHistory1.TabIndex = 0;
             // 
             // tabSlowQueries
@@ -1239,7 +1269,7 @@
             this.tabSlowQueries.Location = new System.Drawing.Point(4, 29);
             this.tabSlowQueries.Name = "tabSlowQueries";
             this.tabSlowQueries.Padding = new System.Windows.Forms.Padding(3);
-            this.tabSlowQueries.Size = new System.Drawing.Size(1631, 1242);
+            this.tabSlowQueries.Size = new System.Drawing.Size(192, 67);
             this.tabSlowQueries.TabIndex = 18;
             this.tabSlowQueries.Text = "Slow Queries";
             this.tabSlowQueries.UseVisualStyleBackColor = true;
@@ -1249,8 +1279,9 @@
             this.slowQueries1.DBName = "";
             this.slowQueries1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.slowQueries1.Location = new System.Drawing.Point(3, 3);
+            this.slowQueries1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.slowQueries1.Name = "slowQueries1";
-            this.slowQueries1.Size = new System.Drawing.Size(1625, 1236);
+            this.slowQueries1.Size = new System.Drawing.Size(186, 61);
             this.slowQueries1.TabIndex = 0;
             // 
             // tabTraceFlags
@@ -1259,7 +1290,7 @@
             this.tabTraceFlags.Location = new System.Drawing.Point(4, 29);
             this.tabTraceFlags.Name = "tabTraceFlags";
             this.tabTraceFlags.Padding = new System.Windows.Forms.Padding(3);
-            this.tabTraceFlags.Size = new System.Drawing.Size(1631, 1242);
+            this.tabTraceFlags.Size = new System.Drawing.Size(192, 67);
             this.tabTraceFlags.TabIndex = 19;
             this.tabTraceFlags.Text = "Trace Flags";
             this.tabTraceFlags.UseVisualStyleBackColor = true;
@@ -1268,8 +1299,9 @@
             // 
             this.traceFlagHistory1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.traceFlagHistory1.Location = new System.Drawing.Point(3, 3);
+            this.traceFlagHistory1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.traceFlagHistory1.Name = "traceFlagHistory1";
-            this.traceFlagHistory1.Size = new System.Drawing.Size(1625, 1236);
+            this.traceFlagHistory1.Size = new System.Drawing.Size(186, 61);
             this.traceFlagHistory1.TabIndex = 0;
             // 
             // tabAlerts
@@ -1278,7 +1310,7 @@
             this.tabAlerts.Location = new System.Drawing.Point(4, 29);
             this.tabAlerts.Name = "tabAlerts";
             this.tabAlerts.Padding = new System.Windows.Forms.Padding(3);
-            this.tabAlerts.Size = new System.Drawing.Size(1631, 1242);
+            this.tabAlerts.Size = new System.Drawing.Size(192, 67);
             this.tabAlerts.TabIndex = 20;
             this.tabAlerts.Text = "Alerts";
             this.tabAlerts.UseVisualStyleBackColor = true;
@@ -1287,8 +1319,9 @@
             // 
             this.alerts1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.alerts1.Location = new System.Drawing.Point(3, 3);
+            this.alerts1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.alerts1.Name = "alerts1";
-            this.alerts1.Size = new System.Drawing.Size(1625, 1236);
+            this.alerts1.Size = new System.Drawing.Size(186, 61);
             this.alerts1.TabIndex = 0;
             this.alerts1.UseAlertName = false;
             // 
@@ -1298,7 +1331,7 @@
             this.tabDrivers.Location = new System.Drawing.Point(4, 29);
             this.tabDrivers.Name = "tabDrivers";
             this.tabDrivers.Padding = new System.Windows.Forms.Padding(3);
-            this.tabDrivers.Size = new System.Drawing.Size(1631, 1242);
+            this.tabDrivers.Size = new System.Drawing.Size(192, 67);
             this.tabDrivers.TabIndex = 21;
             this.tabDrivers.Text = "Drivers";
             this.tabDrivers.UseVisualStyleBackColor = true;
@@ -1307,8 +1340,9 @@
             // 
             this.drivers1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.drivers1.Location = new System.Drawing.Point(3, 3);
+            this.drivers1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.drivers1.Name = "drivers1";
-            this.drivers1.Size = new System.Drawing.Size(1625, 1236);
+            this.drivers1.Size = new System.Drawing.Size(186, 61);
             this.drivers1.TabIndex = 0;
             // 
             // tabDBSpace
@@ -1317,7 +1351,7 @@
             this.tabDBSpace.Location = new System.Drawing.Point(4, 29);
             this.tabDBSpace.Name = "tabDBSpace";
             this.tabDBSpace.Padding = new System.Windows.Forms.Padding(3);
-            this.tabDBSpace.Size = new System.Drawing.Size(1631, 1242);
+            this.tabDBSpace.Size = new System.Drawing.Size(192, 67);
             this.tabDBSpace.TabIndex = 22;
             this.tabDBSpace.Text = "DB Space";
             this.tabDBSpace.UseVisualStyleBackColor = true;
@@ -1326,8 +1360,9 @@
             // 
             this.spaceTracking1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.spaceTracking1.Location = new System.Drawing.Point(3, 3);
+            this.spaceTracking1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.spaceTracking1.Name = "spaceTracking1";
-            this.spaceTracking1.Size = new System.Drawing.Size(1625, 1236);
+            this.spaceTracking1.Size = new System.Drawing.Size(186, 61);
             this.spaceTracking1.TabIndex = 0;
             // 
             // tabAzureSummary
@@ -1336,7 +1371,7 @@
             this.tabAzureSummary.Location = new System.Drawing.Point(4, 29);
             this.tabAzureSummary.Name = "tabAzureSummary";
             this.tabAzureSummary.Padding = new System.Windows.Forms.Padding(3);
-            this.tabAzureSummary.Size = new System.Drawing.Size(1631, 1242);
+            this.tabAzureSummary.Size = new System.Drawing.Size(192, 67);
             this.tabAzureSummary.TabIndex = 23;
             this.tabAzureSummary.Text = "Azure Summary";
             this.tabAzureSummary.UseVisualStyleBackColor = true;
@@ -1345,8 +1380,9 @@
             // 
             this.azureSummary1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.azureSummary1.Location = new System.Drawing.Point(3, 3);
+            this.azureSummary1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.azureSummary1.Name = "azureSummary1";
-            this.azureSummary1.Size = new System.Drawing.Size(1625, 1236);
+            this.azureSummary1.Size = new System.Drawing.Size(186, 61);
             this.azureSummary1.TabIndex = 0;
             // 
             // tabAzureDB
@@ -1355,7 +1391,7 @@
             this.tabAzureDB.Location = new System.Drawing.Point(4, 29);
             this.tabAzureDB.Name = "tabAzureDB";
             this.tabAzureDB.Padding = new System.Windows.Forms.Padding(3);
-            this.tabAzureDB.Size = new System.Drawing.Size(1631, 1242);
+            this.tabAzureDB.Size = new System.Drawing.Size(192, 67);
             this.tabAzureDB.TabIndex = 24;
             this.tabAzureDB.Text = "Azure DB";
             this.tabAzureDB.UseVisualStyleBackColor = true;
@@ -1365,8 +1401,9 @@
             this.azureDBResourceStats1.DateGrouping = 0;
             this.azureDBResourceStats1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.azureDBResourceStats1.Location = new System.Drawing.Point(3, 3);
+            this.azureDBResourceStats1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.azureDBResourceStats1.Name = "azureDBResourceStats1";
-            this.azureDBResourceStats1.Size = new System.Drawing.Size(1625, 1236);
+            this.azureDBResourceStats1.Size = new System.Drawing.Size(186, 61);
             this.azureDBResourceStats1.TabIndex = 0;
             // 
             // tabServiceObjectives
@@ -1375,7 +1412,7 @@
             this.tabServiceObjectives.Location = new System.Drawing.Point(4, 29);
             this.tabServiceObjectives.Name = "tabServiceObjectives";
             this.tabServiceObjectives.Padding = new System.Windows.Forms.Padding(3);
-            this.tabServiceObjectives.Size = new System.Drawing.Size(1631, 1242);
+            this.tabServiceObjectives.Size = new System.Drawing.Size(192, 67);
             this.tabServiceObjectives.TabIndex = 25;
             this.tabServiceObjectives.Text = "Azure Service Objectives";
             this.tabServiceObjectives.UseVisualStyleBackColor = true;
@@ -1384,8 +1421,9 @@
             // 
             this.azureServiceObjectivesHistory1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.azureServiceObjectivesHistory1.Location = new System.Drawing.Point(3, 3);
+            this.azureServiceObjectivesHistory1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.azureServiceObjectivesHistory1.Name = "azureServiceObjectivesHistory1";
-            this.azureServiceObjectivesHistory1.Size = new System.Drawing.Size(1625, 1236);
+            this.azureServiceObjectivesHistory1.Size = new System.Drawing.Size(186, 61);
             this.azureServiceObjectivesHistory1.TabIndex = 0;
             // 
             // tabDBConfiguration
@@ -1394,7 +1432,7 @@
             this.tabDBConfiguration.Location = new System.Drawing.Point(4, 29);
             this.tabDBConfiguration.Name = "tabDBConfiguration";
             this.tabDBConfiguration.Padding = new System.Windows.Forms.Padding(3);
-            this.tabDBConfiguration.Size = new System.Drawing.Size(1631, 1242);
+            this.tabDBConfiguration.Size = new System.Drawing.Size(192, 67);
             this.tabDBConfiguration.TabIndex = 26;
             this.tabDBConfiguration.Text = "DB Configuration";
             this.tabDBConfiguration.UseVisualStyleBackColor = true;
@@ -1403,8 +1441,9 @@
             // 
             this.dbConfiguration1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.dbConfiguration1.Location = new System.Drawing.Point(3, 3);
+            this.dbConfiguration1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.dbConfiguration1.Name = "dbConfiguration1";
-            this.dbConfiguration1.Size = new System.Drawing.Size(1625, 1236);
+            this.dbConfiguration1.Size = new System.Drawing.Size(186, 61);
             this.dbConfiguration1.TabIndex = 0;
             // 
             // tabDBOptions
@@ -1413,7 +1452,7 @@
             this.tabDBOptions.Location = new System.Drawing.Point(4, 29);
             this.tabDBOptions.Name = "tabDBOptions";
             this.tabDBOptions.Padding = new System.Windows.Forms.Padding(3);
-            this.tabDBOptions.Size = new System.Drawing.Size(1631, 1242);
+            this.tabDBOptions.Size = new System.Drawing.Size(192, 67);
             this.tabDBOptions.TabIndex = 27;
             this.tabDBOptions.Text = "DB Options";
             this.tabDBOptions.UseVisualStyleBackColor = true;
@@ -1422,8 +1461,9 @@
             // 
             this.dbOptions1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.dbOptions1.Location = new System.Drawing.Point(3, 3);
+            this.dbOptions1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.dbOptions1.Name = "dbOptions1";
-            this.dbOptions1.Size = new System.Drawing.Size(1625, 1236);
+            this.dbOptions1.Size = new System.Drawing.Size(186, 61);
             this.dbOptions1.SummaryMode = false;
             this.dbOptions1.TabIndex = 0;
             // 
@@ -1433,7 +1473,7 @@
             this.tabTempDB.Location = new System.Drawing.Point(4, 29);
             this.tabTempDB.Name = "tabTempDB";
             this.tabTempDB.Padding = new System.Windows.Forms.Padding(3);
-            this.tabTempDB.Size = new System.Drawing.Size(1631, 1242);
+            this.tabTempDB.Size = new System.Drawing.Size(192, 67);
             this.tabTempDB.TabIndex = 28;
             this.tabTempDB.Text = "TempDB";
             this.tabTempDB.UseVisualStyleBackColor = true;
@@ -1442,8 +1482,9 @@
             // 
             this.tempDBConfig1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tempDBConfig1.Location = new System.Drawing.Point(3, 3);
+            this.tempDBConfig1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.tempDBConfig1.Name = "tempDBConfig1";
-            this.tempDBConfig1.Size = new System.Drawing.Size(1625, 1236);
+            this.tempDBConfig1.Size = new System.Drawing.Size(186, 61);
             this.tempDBConfig1.TabIndex = 0;
             // 
             // tabCustomChecks
@@ -1452,7 +1493,7 @@
             this.tabCustomChecks.Location = new System.Drawing.Point(4, 29);
             this.tabCustomChecks.Name = "tabCustomChecks";
             this.tabCustomChecks.Padding = new System.Windows.Forms.Padding(3);
-            this.tabCustomChecks.Size = new System.Drawing.Size(1631, 1242);
+            this.tabCustomChecks.Size = new System.Drawing.Size(192, 67);
             this.tabCustomChecks.TabIndex = 29;
             this.tabCustomChecks.Text = "Custom";
             this.tabCustomChecks.UseVisualStyleBackColor = true;
@@ -1466,8 +1507,9 @@
             this.customChecks1.IncludeOK = false;
             this.customChecks1.IncludeWarning = true;
             this.customChecks1.Location = new System.Drawing.Point(3, 3);
+            this.customChecks1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.customChecks1.Name = "customChecks1";
-            this.customChecks1.Size = new System.Drawing.Size(1625, 1236);
+            this.customChecks1.Size = new System.Drawing.Size(186, 61);
             this.customChecks1.TabIndex = 0;
             this.customChecks1.Test = null;
             // 
@@ -1477,7 +1519,7 @@
             this.tabPC.Location = new System.Drawing.Point(4, 29);
             this.tabPC.Name = "tabPC";
             this.tabPC.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPC.Size = new System.Drawing.Size(1631, 1242);
+            this.tabPC.Size = new System.Drawing.Size(192, 67);
             this.tabPC.TabIndex = 30;
             this.tabPC.Text = "Metrics";
             this.tabPC.UseVisualStyleBackColor = true;
@@ -1487,8 +1529,9 @@
             this.performanceCounterSummary1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.performanceCounterSummary1.InstanceID = 0;
             this.performanceCounterSummary1.Location = new System.Drawing.Point(3, 3);
+            this.performanceCounterSummary1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.performanceCounterSummary1.Name = "performanceCounterSummary1";
-            this.performanceCounterSummary1.Size = new System.Drawing.Size(1625, 1236);
+            this.performanceCounterSummary1.Size = new System.Drawing.Size(186, 61);
             this.performanceCounterSummary1.TabIndex = 0;
             // 
             // tabObjectExecutionSummary
@@ -1497,7 +1540,7 @@
             this.tabObjectExecutionSummary.Location = new System.Drawing.Point(4, 29);
             this.tabObjectExecutionSummary.Name = "tabObjectExecutionSummary";
             this.tabObjectExecutionSummary.Padding = new System.Windows.Forms.Padding(3);
-            this.tabObjectExecutionSummary.Size = new System.Drawing.Size(1631, 1242);
+            this.tabObjectExecutionSummary.Size = new System.Drawing.Size(192, 67);
             this.tabObjectExecutionSummary.TabIndex = 31;
             this.tabObjectExecutionSummary.Text = "Object Execution";
             this.tabObjectExecutionSummary.UseVisualStyleBackColor = true;
@@ -1509,9 +1552,10 @@
             this.objectExecutionSummary1.Instance = null;
             this.objectExecutionSummary1.InstanceID = 0;
             this.objectExecutionSummary1.Location = new System.Drawing.Point(3, 3);
+            this.objectExecutionSummary1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.objectExecutionSummary1.Name = "objectExecutionSummary1";
             this.objectExecutionSummary1.ObjectID = ((long)(0));
-            this.objectExecutionSummary1.Size = new System.Drawing.Size(1625, 1236);
+            this.objectExecutionSummary1.Size = new System.Drawing.Size(186, 61);
             this.objectExecutionSummary1.TabIndex = 0;
             this.objectExecutionSummary1.Types = "";
             // 
@@ -1521,7 +1565,7 @@
             this.tabWaits.Location = new System.Drawing.Point(4, 29);
             this.tabWaits.Name = "tabWaits";
             this.tabWaits.Padding = new System.Windows.Forms.Padding(3);
-            this.tabWaits.Size = new System.Drawing.Size(1631, 1242);
+            this.tabWaits.Size = new System.Drawing.Size(192, 67);
             this.tabWaits.TabIndex = 32;
             this.tabWaits.Text = "Waits";
             this.tabWaits.UseVisualStyleBackColor = true;
@@ -1532,8 +1576,9 @@
             this.waitsSummary1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.waitsSummary1.InstanceID = 0;
             this.waitsSummary1.Location = new System.Drawing.Point(3, 3);
+            this.waitsSummary1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.waitsSummary1.Name = "waitsSummary1";
-            this.waitsSummary1.Size = new System.Drawing.Size(1625, 1236);
+            this.waitsSummary1.Size = new System.Drawing.Size(186, 61);
             this.waitsSummary1.TabIndex = 0;
             // 
             // tabMirroring
@@ -1542,7 +1587,7 @@
             this.tabMirroring.Location = new System.Drawing.Point(4, 29);
             this.tabMirroring.Name = "tabMirroring";
             this.tabMirroring.Padding = new System.Windows.Forms.Padding(3);
-            this.tabMirroring.Size = new System.Drawing.Size(1631, 1242);
+            this.tabMirroring.Size = new System.Drawing.Size(192, 67);
             this.tabMirroring.TabIndex = 33;
             this.tabMirroring.Text = "Mirroring";
             this.tabMirroring.UseVisualStyleBackColor = true;
@@ -1551,8 +1596,9 @@
             // 
             this.mirroring1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.mirroring1.Location = new System.Drawing.Point(3, 3);
+            this.mirroring1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.mirroring1.Name = "mirroring1";
-            this.mirroring1.Size = new System.Drawing.Size(1625, 1236);
+            this.mirroring1.Size = new System.Drawing.Size(186, 61);
             this.mirroring1.SummaryMode = true;
             this.mirroring1.TabIndex = 0;
             // 
@@ -1562,7 +1608,7 @@
             this.tabJobDDL.Location = new System.Drawing.Point(4, 29);
             this.tabJobDDL.Name = "tabJobDDL";
             this.tabJobDDL.Padding = new System.Windows.Forms.Padding(3);
-            this.tabJobDDL.Size = new System.Drawing.Size(1631, 1242);
+            this.tabJobDDL.Size = new System.Drawing.Size(192, 67);
             this.tabJobDDL.TabIndex = 34;
             this.tabJobDDL.Text = "Job DDL";
             this.tabJobDDL.UseVisualStyleBackColor = true;
@@ -1573,8 +1619,9 @@
             this.jobDDLHistory1.InstanceID = 0;
             this.jobDDLHistory1.JobID = new System.Guid("00000000-0000-0000-0000-000000000000");
             this.jobDDLHistory1.Location = new System.Drawing.Point(3, 3);
+            this.jobDDLHistory1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.jobDDLHistory1.Name = "jobDDLHistory1";
-            this.jobDDLHistory1.Size = new System.Drawing.Size(1625, 1236);
+            this.jobDDLHistory1.Size = new System.Drawing.Size(186, 61);
             this.jobDDLHistory1.TabIndex = 0;
             // 
             // tabAG
@@ -1583,7 +1630,7 @@
             this.tabAG.Location = new System.Drawing.Point(4, 29);
             this.tabAG.Name = "tabAG";
             this.tabAG.Padding = new System.Windows.Forms.Padding(3);
-            this.tabAG.Size = new System.Drawing.Size(1631, 1242);
+            this.tabAG.Size = new System.Drawing.Size(192, 67);
             this.tabAG.TabIndex = 35;
             this.tabAG.Text = "Availability Groups";
             this.tabAG.UseVisualStyleBackColor = true;
@@ -1592,8 +1639,9 @@
             // 
             this.ag1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.ag1.Location = new System.Drawing.Point(3, 3);
+            this.ag1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.ag1.Name = "ag1";
-            this.ag1.Size = new System.Drawing.Size(1625, 1236);
+            this.ag1.Size = new System.Drawing.Size(186, 61);
             this.ag1.TabIndex = 0;
             // 
             // tabQS
@@ -1602,7 +1650,7 @@
             this.tabQS.Location = new System.Drawing.Point(4, 29);
             this.tabQS.Name = "tabQS";
             this.tabQS.Padding = new System.Windows.Forms.Padding(3);
-            this.tabQS.Size = new System.Drawing.Size(1631, 1242);
+            this.tabQS.Size = new System.Drawing.Size(192, 67);
             this.tabQS.TabIndex = 36;
             this.tabQS.Text = "QS";
             this.tabQS.UseVisualStyleBackColor = true;
@@ -1611,8 +1659,9 @@
             // 
             this.queryStore1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.queryStore1.Location = new System.Drawing.Point(3, 3);
+            this.queryStore1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.queryStore1.Name = "queryStore1";
-            this.queryStore1.Size = new System.Drawing.Size(1625, 1236);
+            this.queryStore1.Size = new System.Drawing.Size(186, 61);
             this.queryStore1.TabIndex = 0;
             // 
             // tabRG
@@ -1621,7 +1670,7 @@
             this.tabRG.Location = new System.Drawing.Point(4, 29);
             this.tabRG.Name = "tabRG";
             this.tabRG.Padding = new System.Windows.Forms.Padding(3);
-            this.tabRG.Size = new System.Drawing.Size(1631, 1242);
+            this.tabRG.Size = new System.Drawing.Size(192, 67);
             this.tabRG.TabIndex = 37;
             this.tabRG.Text = "Resource Governor";
             this.tabRG.UseVisualStyleBackColor = true;
@@ -1630,8 +1679,9 @@
             // 
             this.resourceGovernor1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.resourceGovernor1.Location = new System.Drawing.Point(3, 3);
+            this.resourceGovernor1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.resourceGovernor1.Name = "resourceGovernor1";
-            this.resourceGovernor1.Size = new System.Drawing.Size(1625, 1236);
+            this.resourceGovernor1.Size = new System.Drawing.Size(186, 61);
             this.resourceGovernor1.TabIndex = 0;
             // 
             // tabAzureDBesourceGovernance
@@ -1640,7 +1690,7 @@
             this.tabAzureDBesourceGovernance.Location = new System.Drawing.Point(4, 29);
             this.tabAzureDBesourceGovernance.Name = "tabAzureDBesourceGovernance";
             this.tabAzureDBesourceGovernance.Padding = new System.Windows.Forms.Padding(3);
-            this.tabAzureDBesourceGovernance.Size = new System.Drawing.Size(1631, 1242);
+            this.tabAzureDBesourceGovernance.Size = new System.Drawing.Size(192, 67);
             this.tabAzureDBesourceGovernance.TabIndex = 38;
             this.tabAzureDBesourceGovernance.Text = "Azure Resource Governance";
             this.tabAzureDBesourceGovernance.UseVisualStyleBackColor = true;
@@ -1649,8 +1699,9 @@
             // 
             this.azureDBResourceGovernance1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.azureDBResourceGovernance1.Location = new System.Drawing.Point(3, 3);
+            this.azureDBResourceGovernance1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.azureDBResourceGovernance1.Name = "azureDBResourceGovernance1";
-            this.azureDBResourceGovernance1.Size = new System.Drawing.Size(1625, 1236);
+            this.azureDBResourceGovernance1.Size = new System.Drawing.Size(186, 61);
             this.azureDBResourceGovernance1.TabIndex = 0;
             // 
             // tabRunningQueries
@@ -1659,7 +1710,7 @@
             this.tabRunningQueries.Location = new System.Drawing.Point(4, 29);
             this.tabRunningQueries.Name = "tabRunningQueries";
             this.tabRunningQueries.Padding = new System.Windows.Forms.Padding(3);
-            this.tabRunningQueries.Size = new System.Drawing.Size(1631, 1242);
+            this.tabRunningQueries.Size = new System.Drawing.Size(192, 67);
             this.tabRunningQueries.TabIndex = 39;
             this.tabRunningQueries.Text = "Running Queries";
             this.tabRunningQueries.UseVisualStyleBackColor = true;
@@ -1668,8 +1719,9 @@
             // 
             this.runningQueries1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.runningQueries1.Location = new System.Drawing.Point(3, 3);
+            this.runningQueries1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.runningQueries1.Name = "runningQueries1";
-            this.runningQueries1.Size = new System.Drawing.Size(1625, 1236);
+            this.runningQueries1.Size = new System.Drawing.Size(186, 61);
             this.runningQueries1.TabIndex = 0;
             // 
             // tabMemory
@@ -1678,7 +1730,7 @@
             this.tabMemory.Location = new System.Drawing.Point(4, 29);
             this.tabMemory.Name = "tabMemory";
             this.tabMemory.Padding = new System.Windows.Forms.Padding(3);
-            this.tabMemory.Size = new System.Drawing.Size(1631, 1242);
+            this.tabMemory.Size = new System.Drawing.Size(192, 67);
             this.tabMemory.TabIndex = 40;
             this.tabMemory.Text = "Memory";
             this.tabMemory.UseVisualStyleBackColor = true;
@@ -1687,8 +1739,9 @@
             // 
             this.memoryUsage1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.memoryUsage1.Location = new System.Drawing.Point(3, 3);
+            this.memoryUsage1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.memoryUsage1.Name = "memoryUsage1";
-            this.memoryUsage1.Size = new System.Drawing.Size(1625, 1236);
+            this.memoryUsage1.Size = new System.Drawing.Size(186, 61);
             this.memoryUsage1.TabIndex = 0;
             // 
             // tabJobStats
@@ -1697,7 +1750,7 @@
             this.tabJobStats.Location = new System.Drawing.Point(4, 29);
             this.tabJobStats.Name = "tabJobStats";
             this.tabJobStats.Padding = new System.Windows.Forms.Padding(3);
-            this.tabJobStats.Size = new System.Drawing.Size(1631, 1242);
+            this.tabJobStats.Size = new System.Drawing.Size(192, 67);
             this.tabJobStats.TabIndex = 41;
             this.tabJobStats.Text = "Job Stats";
             this.tabJobStats.UseVisualStyleBackColor = true;
@@ -1708,8 +1761,9 @@
             this.jobStats1.InstanceID = 0;
             this.jobStats1.JobID = new System.Guid("00000000-0000-0000-0000-000000000000");
             this.jobStats1.Location = new System.Drawing.Point(3, 3);
+            this.jobStats1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.jobStats1.Name = "jobStats1";
-            this.jobStats1.Size = new System.Drawing.Size(1625, 1236);
+            this.jobStats1.Size = new System.Drawing.Size(186, 61);
             this.jobStats1.StepID = 0;
             this.jobStats1.TabIndex = 0;
             // 
@@ -2033,7 +2087,6 @@
         private System.Windows.Forms.ToolStripLabel toolStripLabel1;
         private System.Windows.Forms.ToolStripComboBox tsPageSize;
         private System.Windows.Forms.Label label1;
-        private System.Windows.Forms.ToolStripMenuItem dBDiffToolStripMenuItem;
         private System.Windows.Forms.Label label7;
         private System.Windows.Forms.TabPage tabTags;
         private System.Windows.Forms.ToolStripMenuItem mnuTags;
@@ -2144,7 +2197,6 @@
         private System.Windows.Forms.ToolStripMenuItem manageInstancesToolStripMenuItem;
         private System.Windows.Forms.TabPage tabJobDDL;
         private Changes.JobDDLHistory jobDDLHistory1;
-        private System.Windows.Forms.ToolStripMenuItem tsJobDiff;
         private System.Windows.Forms.TabPage tabAG;
         private HA.AG ag1;
         private System.Windows.Forms.TabPage tabQS;
@@ -2175,5 +2227,8 @@
         private System.Windows.Forms.Panel pnlSearch;
         private System.Windows.Forms.Button bttnSearch;
         private System.Windows.Forms.TextBox txtSearch;
+        private System.Windows.Forms.ToolStripMenuItem diffToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem databaseSchemaDiffToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem agentJobDiffToolStripMenuItem;
     }
 }

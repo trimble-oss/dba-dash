@@ -71,33 +71,26 @@ namespace DBADashGUI.HA
         DataTable GetMirroringSummary()
         {
             using(var cn = new SqlConnection(Common.ConnectionString))
+            using (var cmd = new SqlCommand("dbo.DatabaseMirroringSummary_Get", cn) { CommandType = CommandType.StoredProcedure })
+            using (SqlDataAdapter da = new SqlDataAdapter(cmd))
             {
-                using (var cmd = new SqlCommand("dbo.DatabaseMirroringSummary_Get", cn) { CommandType = CommandType.StoredProcedure })
-                {
-                    cmd.Parameters.AddWithValue("InstanceIDs", string.Join(",", InstanceIDs));
-                    using (SqlDataAdapter da = new SqlDataAdapter(cmd))
-                    {
-                        var dt = new DataTable();
-                        da.Fill(dt);
-                        return dt;
-                    }
-                }
+                cmd.Parameters.AddWithValue("InstanceIDs", string.Join(",", InstanceIDs));               
+                var dt = new DataTable();
+                da.Fill(dt);
+                return dt;             
             }
+            
         }
         DataTable GetMirroringDetail()
         {
             using (var cn = new SqlConnection(Common.ConnectionString))
+            using (var cmd = new SqlCommand("dbo.DatabaseMirroring_Get", cn) { CommandType = CommandType.StoredProcedure })
+            using (var da = new SqlDataAdapter(cmd))
             {
-                using (var cmd = new SqlCommand("dbo.DatabaseMirroring_Get", cn) { CommandType = CommandType.StoredProcedure })
-                {
-                    cmd.Parameters.AddWithValue("InstanceIDs", string.Join(",", InstanceIDs));
-                    using (SqlDataAdapter da = new SqlDataAdapter(cmd))
-                    {
-                        var dt = new DataTable();
-                        da.Fill(dt);
-                        return dt;
-                    }
-                }
+                cmd.Parameters.AddWithValue("InstanceIDs", string.Join(",", InstanceIDs));                                 
+                var dt = new DataTable();
+                da.Fill(dt);
+                return dt;             
             }
         }
 
@@ -124,36 +117,36 @@ namespace DBADashGUI.HA
             {
                 var row = (DataRowView)dgv.Rows[idx].DataBoundItem;
                 var snapshotStatus = (DBADashStatus.DBADashStatusEnum)row["CollectionDateStatus"];
-                dgv.Rows[idx].Cells["SnapshotAge"].Style.BackColor = DBADashStatus.GetStatusColour(snapshotStatus);
+                dgv.Rows[idx].Cells["SnapshotAge"].SetStatusColor(snapshotStatus);
                 if (isSummary)
                 {
                     var mirroringStatus =  (DBADashStatus.DBADashStatusEnum)(row["MirroringStatus"] == DBNull.Value ? 3 : Convert.ToInt16(row["MirroringStatus"]));
-                    dgv.Rows[idx].Cells["SynchronizedCount"].Style.BackColor = DBADashStatus.GetStatusColour(mirroringStatus);
+                    dgv.Rows[idx].Cells["SynchronizedCount"].SetStatusColor(mirroringStatus);
                 }
                 else
                 {
                     var mirroringState = row["mirroring_state"] == DBNull.Value ? Int16.MinValue : Convert.ToInt16(row["mirroring_state"]);
                     var witnessState = row["mirroring_witness_state"] == DBNull.Value ? Int16.MinValue : Convert.ToInt16(row["mirroring_witness_state"]);
-                    var colour = DBADashStatus.GetStatusColour(DBADashStatus.DBADashStatusEnum.Critical);
+                    var colour = DashColors.Fail;
                     if (mirroringState==4|| mirroringState == 6)
                     {
-                        colour = DBADashStatus.GetStatusColour(DBADashStatus.DBADashStatusEnum.OK);
+                        colour = DashColors.Success;
                     }
                     else if (mirroringState == 2)
                     {
-                        colour = DBADashStatus.GetStatusColour(DBADashStatus.DBADashStatusEnum.Warning);
+                        colour = DashColors.Warning;
                     }
-                    var witnessColour = DBADashStatus.GetStatusColour(DBADashStatus.DBADashStatusEnum.NA);
+                    var witnessColour = DashColors.NotApplicable;
                     if (witnessState == 1)
                     {
-                        witnessColour = DBADashStatus.GetStatusColour(DBADashStatus.DBADashStatusEnum.OK);
+                        witnessColour = DashColors.Success;
                     }
                     else if (witnessState == 2)
                     {
-                        witnessColour= DBADashStatus.GetStatusColour(DBADashStatus.DBADashStatusEnum.Critical);
+                        witnessColour= DashColors.Fail;
                     }
-                    dgv.Rows[idx].Cells["mirroring_witness_state"].Style.BackColor = witnessColour;
-                    dgv.Rows[idx].Cells["mirroring_state"].Style.BackColor = colour;
+                    dgv.Rows[idx].Cells["mirroring_witness_state"].SetStatusColor(witnessColour);
+                    dgv.Rows[idx].Cells["mirroring_state"].SetStatusColor(colour);
                 }
                 
             }

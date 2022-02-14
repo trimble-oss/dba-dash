@@ -56,26 +56,24 @@ namespace DBADashGUI.Performance
 
         private DataTable getDT()
         {
-            SqlConnection cn = new SqlConnection(connectionString);
-            using (cn)
+            using (var cn = new SqlConnection(connectionString))
+            using (var cmd = new SqlCommand("dbo.BlockingSnapshots_Get", cn) { CommandType = CommandType.StoredProcedure })
+            using (var da = new SqlDataAdapter(cmd))
             {
-                using (SqlCommand cmd = new SqlCommand("dbo.BlockingSnapshots_Get", cn) { CommandType = CommandType.StoredProcedure })
+                cn.Open();
+                cmd.Parameters.AddWithValue("@InstanceID", InstanceID);
+                cmd.Parameters.AddWithValue("@FromDate", fromDate);
+                cmd.Parameters.AddWithValue("@ToDate", toDate);
+                if (databaseID > 0)
                 {
-                    cn.Open();
-                    cmd.Parameters.AddWithValue("@InstanceID", InstanceID);
-                    cmd.Parameters.AddWithValue("@FromDate", fromDate);
-                    cmd.Parameters.AddWithValue("@ToDate", toDate);
-                    if (databaseID > 0)
-                    {
-                        cmd.Parameters.AddWithValue("@DatabaseID", databaseID);
-                    }
-                    cmd.CommandTimeout = Properties.Settings.Default.CommandTimeout;
-                    SqlDataAdapter da = new SqlDataAdapter(cmd);
-                    DataTable dt = new DataTable();
-                    da.Fill(dt);
-                    return dt;
+                    cmd.Parameters.AddWithValue("@DatabaseID", databaseID);
                 }
-            }
+                cmd.CommandTimeout = Properties.Settings.Default.CommandTimeout;
+                
+                DataTable dt = new DataTable();
+                da.Fill(dt);
+                return dt;
+            }           
         }
 
         double MaxPointShapeDiameter

@@ -47,7 +47,7 @@ namespace DBADashGUI.HA
             else
             {
                 dt = GetAvailabilityGroupSummary(InstanceIDs);
-                dgv.Columns.Add(new DataGridViewLinkColumn() { HeaderText = "Instance", DataPropertyName = "Instance", Name = "colInstance" });
+                dgv.Columns.Add(new DataGridViewLinkColumn() { HeaderText = "Instance", DataPropertyName = "Instance", Name = "colInstance", LinkColor=DashColors.LinkColor});
             }
             Common.ConvertUTCToLocal(ref dt);
             dgv.DataSource = dt;
@@ -113,28 +113,31 @@ namespace DBADashGUI.HA
                 for (Int32 idx = e.RowIndex; idx < e.RowIndex + e.RowCount; idx += 1)
                 {
                     var row = (DataRowView)dgv.Rows[idx].DataBoundItem;
+                    var r = dgv.Rows[idx];
                     var snapshotStatus = (DBADashStatus.DBADashStatusEnum)row["Snapshot Status"];
-                    dgv.Rows[idx].Cells["Snapshot Date"].Style.BackColor = DBADashStatus.GetStatusColour(snapshotStatus);
-                    dgv.Rows[idx].Cells["Snapshot Age"].Style.BackColor = DBADashStatus.GetStatusColour(snapshotStatus);
+                    r.Cells["Snapshot Date"].SetStatusColor(snapshotStatus);
+                    r.Cells["Snapshot Age"].SetStatusColor(snapshotStatus);
                     if (instanceId > 0)
                     {
-                        dgv.Rows[idx].Cells["Sync State"].Style.BackColor = (string)row["Sync Health"] == "HEALTHY" ? DBADashStatus.GetStatusColour(DBADashStatus.DBADashStatusEnum.OK) :
-                                 (string)row["Sync Health"] == "PARTIALLY_HEALTHY" ? DBADashStatus.GetStatusColour(DBADashStatus.DBADashStatusEnum.Warning) : DBADashStatus.GetStatusColour(DBADashStatus.DBADashStatusEnum.Critical);
+                        var syncStateStatus = (string)row["Sync Health"] == "HEALTHY" ? DashColors.Success :
+                                 (string)row["Sync Health"] == "PARTIALLY_HEALTHY" ? DashColors.Warning : DashColors.Fail;
+                        r.Cells["Sync State"].SetStatusColor(syncStateStatus);
                     }
                     else
                     {
-                        dgv.Rows[idx].Cells["Not Synchronizing"].Style.BackColor =(int)row["Not Synchronizing"] >0 ? DBADashStatus.GetStatusColour(DBADashStatus.DBADashStatusEnum.Critical) : Color.White;
-                        dgv.Rows[idx].Cells["Remote Not Synchronizing"].Style.BackColor = (int)row["Remote Not Synchronizing"] > 0 ? DBADashStatus.GetStatusColour(DBADashStatus.DBADashStatusEnum.Critical) : Color.White;
-                        dgv.Rows[idx].Cells["Synchronized"].Style.BackColor = (int)row["Synchronized"] > 0 ? DBADashStatus.GetStatusColour(DBADashStatus.DBADashStatusEnum.OK) : Color.White;
-                        dgv.Rows[idx].Cells["Remote Synchronized"].Style.BackColor = (int)row["Remote Synchronized"] > 0 ? DBADashStatus.GetStatusColour(DBADashStatus.DBADashStatusEnum.OK) : Color.White;
-                        dgv.Rows[idx].Cells["Reverting"].Style.BackColor = (int)row["Reverting"] > 0 ? DBADashStatus.GetStatusColour(DBADashStatus.DBADashStatusEnum.Warning) : Color.White;
-                        dgv.Rows[idx].Cells["Remote Reverting"].Style.BackColor = (int)row["Remote Reverting"] > 0 ? DBADashStatus.GetStatusColour(DBADashStatus.DBADashStatusEnum.Warning) : Color.White;
-                        dgv.Rows[idx].Cells["Initializing"].Style.BackColor = (int)row["Initializing"] > 0 ? DBADashStatus.GetStatusColour(DBADashStatus.DBADashStatusEnum.Warning) : Color.White;
-                        dgv.Rows[idx].Cells["Remote Initializing"].Style.BackColor = (int)row["Remote Initializing"] > 0 ? DBADashStatus.GetStatusColour(DBADashStatus.DBADashStatusEnum.Warning) : Color.White;
+                        r.Cells["Not Synchronizing"].SetStatusColor((int)row["Not Synchronizing"] >0 ? DashColors.Fail: Color.White);
+                        r.Cells["Remote Not Synchronizing"].SetStatusColor((int)row["Remote Not Synchronizing"] > 0 ? DashColors.Fail : Color.White);
+                        r.Cells["Synchronized"].SetStatusColor((int)row["Synchronized"] > 0 ? DashColors.Success : Color.White);
+                        r.Cells["Remote Synchronized"].SetStatusColor((int)row["Remote Synchronized"] > 0 ? DashColors.Success : Color.White);
+                        r.Cells["Reverting"].SetStatusColor((int)row["Reverting"] > 0 ? DashColors.Warning : Color.White);
+                        r.Cells["Remote Reverting"].SetStatusColor((int)row["Remote Reverting"] > 0 ? DashColors.Warning : Color.White);
+                        r.Cells["Initializing"].SetStatusColor((int)row["Initializing"] > 0 ? DashColors.Warning : Color.White);
+                        r.Cells["Remote Initializing"].SetStatusColor((int)row["Remote Initializing"] > 0 ? DashColors.Warning : Color.White);
 
                     }
-                    dgv.Rows[idx].Cells["Sync Health"].Style.BackColor = (string)row["Sync Health"] == "HEALTHY" ? DBADashStatus.GetStatusColour(DBADashStatus.DBADashStatusEnum.OK) :
-                                                     (string)row["Sync Health"] == "PARTIALLY_HEALTHY" ? DBADashStatus.GetStatusColour(DBADashStatus.DBADashStatusEnum.Warning) : DBADashStatus.GetStatusColour(DBADashStatus.DBADashStatusEnum.Critical);
+                    var syncHealthStatus = (string)row["Sync Health"] == "HEALTHY" ? DashColors.Success :
+                                                     (string)row["Sync Health"] == "PARTIALLY_HEALTHY" ? DashColors.Warning : DashColors.Fail;
+                    dgv.Rows[idx].Cells["Sync Health"].SetStatusColor(syncHealthStatus); 
                 }
             }
         }

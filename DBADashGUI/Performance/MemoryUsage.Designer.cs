@@ -31,7 +31,9 @@ namespace DBADashGUI.Performance
         {
             this.dgv = new System.Windows.Forms.DataGridView();
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
+            this.performanceCounters1 = new DBADashGUI.Performance.PerformanceCounters();
             this.pieChart1 = new LiveCharts.WinForms.PieChart();
+            this.chartHistory = new DBADashGUI.Performance.CartesianChartWithDataTable();
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
             this.tsRefresh = new System.Windows.Forms.ToolStripButton();
             this.tsCopy = new System.Windows.Forms.ToolStripButton();
@@ -42,8 +44,6 @@ namespace DBADashGUI.Performance
             this.dgvConfig = new System.Windows.Forms.DataGridView();
             this.tabCounters = new System.Windows.Forms.TabPage();
             this.dgvCounters = new System.Windows.Forms.DataGridView();
-            this.performanceCounters1 = new DBADashGUI.Performance.PerformanceCounters();
-            this.chartHistory = new DBADashGUI.Performance.CartesianChartWithDataTable();
             ((System.ComponentModel.ISupportInitialize)(this.dgv)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
@@ -65,14 +65,15 @@ namespace DBADashGUI.Performance
             this.dgv.BackgroundColor = System.Drawing.Color.White;
             this.dgv.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.dgv.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.dgv.Location = new System.Drawing.Point(3, 3);
+            this.dgv.Location = new System.Drawing.Point(3, 4);
+            this.dgv.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.dgv.Name = "dgv";
             this.dgv.ReadOnly = true;
             this.dgv.RowHeadersVisible = false;
             this.dgv.RowHeadersWidth = 51;
             this.dgv.RowTemplate.Height = 24;
             this.dgv.ShowCellToolTips = false;
-            this.dgv.Size = new System.Drawing.Size(870, 319);
+            this.dgv.Size = new System.Drawing.Size(870, 402);
             this.dgv.TabIndex = 0;
             this.dgv.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgv_CellContentClick);
             this.dgv.CellMouseEnter += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgv_CellMouseEnter);
@@ -81,6 +82,7 @@ namespace DBADashGUI.Performance
             // 
             this.splitContainer1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.splitContainer1.Location = new System.Drawing.Point(0, 0);
+            this.splitContainer1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.splitContainer1.Name = "splitContainer1";
             this.splitContainer1.Orientation = System.Windows.Forms.Orientation.Horizontal;
             // 
@@ -94,18 +96,47 @@ namespace DBADashGUI.Performance
             // splitContainer1.Panel2
             // 
             this.splitContainer1.Panel2.Controls.Add(this.tab1);
-            this.splitContainer1.Size = new System.Drawing.Size(884, 716);
-            this.splitContainer1.SplitterDistance = 358;
+            this.splitContainer1.Size = new System.Drawing.Size(884, 895);
+            this.splitContainer1.SplitterDistance = 447;
+            this.splitContainer1.SplitterWidth = 5;
             this.splitContainer1.TabIndex = 1;
+            // 
+            // performanceCounters1
+            // 
+            this.performanceCounters1.CounterID = 0;
+            this.performanceCounters1.CounterName = null;
+            this.performanceCounters1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.performanceCounters1.FromDate = new System.DateTime(((long)(0)));
+            this.performanceCounters1.InstanceID = 0;
+            this.performanceCounters1.Location = new System.Drawing.Point(0, 27);
+            this.performanceCounters1.Margin = new System.Windows.Forms.Padding(3, 5, 3, 5);
+            this.performanceCounters1.Name = "performanceCounters1";
+            this.performanceCounters1.Size = new System.Drawing.Size(884, 420);
+            this.performanceCounters1.TabIndex = 3;
+            this.performanceCounters1.ToDate = new System.DateTime(((long)(0)));
+            this.performanceCounters1.Visible = false;
             // 
             // pieChart1
             // 
             this.pieChart1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.pieChart1.Location = new System.Drawing.Point(0, 31);
+            this.pieChart1.Location = new System.Drawing.Point(0, 27);
+            this.pieChart1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.pieChart1.Name = "pieChart1";
-            this.pieChart1.Size = new System.Drawing.Size(884, 327);
+            this.pieChart1.Size = new System.Drawing.Size(884, 420);
             this.pieChart1.TabIndex = 0;
             this.pieChart1.Text = "pieChart1";
+            // 
+            // chartHistory
+            // 
+            this.chartHistory.DefaultLineSmoothness = 0.5D;
+            this.chartHistory.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.chartHistory.Location = new System.Drawing.Point(0, 27);
+            this.chartHistory.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            this.chartHistory.Name = "chartHistory";
+            this.chartHistory.Size = new System.Drawing.Size(884, 420);
+            this.chartHistory.TabIndex = 1;
+            this.chartHistory.Text = "cartesianChartWithDataTable1";
+            this.chartHistory.Visible = false;
             // 
             // toolStrip1
             // 
@@ -116,7 +147,7 @@ namespace DBADashGUI.Performance
             this.tsExcel});
             this.toolStrip1.Location = new System.Drawing.Point(0, 0);
             this.toolStrip1.Name = "toolStrip1";
-            this.toolStrip1.Size = new System.Drawing.Size(884, 31);
+            this.toolStrip1.Size = new System.Drawing.Size(884, 27);
             this.toolStrip1.TabIndex = 2;
             this.toolStrip1.Text = "toolStrip1";
             // 
@@ -126,7 +157,7 @@ namespace DBADashGUI.Performance
             this.tsRefresh.Image = global::DBADashGUI.Properties.Resources._112_RefreshArrow_Green_16x16_72;
             this.tsRefresh.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsRefresh.Name = "tsRefresh";
-            this.tsRefresh.Size = new System.Drawing.Size(29, 28);
+            this.tsRefresh.Size = new System.Drawing.Size(29, 24);
             this.tsRefresh.Text = "Refresh";
             this.tsRefresh.Click += new System.EventHandler(this.tsRefresh_Click);
             // 
@@ -136,7 +167,7 @@ namespace DBADashGUI.Performance
             this.tsCopy.Image = global::DBADashGUI.Properties.Resources.ASX_Copy_blue_16x;
             this.tsCopy.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsCopy.Name = "tsCopy";
-            this.tsCopy.Size = new System.Drawing.Size(29, 28);
+            this.tsCopy.Size = new System.Drawing.Size(29, 24);
             this.tsCopy.Text = "Copy";
             this.tsCopy.Click += new System.EventHandler(this.tsCopy_Click);
             // 
@@ -146,7 +177,7 @@ namespace DBADashGUI.Performance
             this.tsExcel.Image = global::DBADashGUI.Properties.Resources.excel16x16;
             this.tsExcel.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsExcel.Name = "tsExcel";
-            this.tsExcel.Size = new System.Drawing.Size(29, 28);
+            this.tsExcel.Size = new System.Drawing.Size(29, 24);
             this.tsExcel.Text = "Excel";
             this.tsExcel.Click += new System.EventHandler(this.tsExcel_Click);
             // 
@@ -157,19 +188,21 @@ namespace DBADashGUI.Performance
             this.tab1.Controls.Add(this.tabCounters);
             this.tab1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tab1.Location = new System.Drawing.Point(0, 0);
+            this.tab1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.tab1.Name = "tab1";
             this.tab1.SelectedIndex = 0;
-            this.tab1.Size = new System.Drawing.Size(884, 354);
+            this.tab1.Size = new System.Drawing.Size(884, 443);
             this.tab1.TabIndex = 1;
             this.tab1.SelectedIndexChanged += new System.EventHandler(this.tab1_SelectedIndexChanged);
             // 
             // tabClerks
             // 
             this.tabClerks.Controls.Add(this.dgv);
-            this.tabClerks.Location = new System.Drawing.Point(4, 25);
+            this.tabClerks.Location = new System.Drawing.Point(4, 29);
+            this.tabClerks.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.tabClerks.Name = "tabClerks";
-            this.tabClerks.Padding = new System.Windows.Forms.Padding(3);
-            this.tabClerks.Size = new System.Drawing.Size(876, 325);
+            this.tabClerks.Padding = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            this.tabClerks.Size = new System.Drawing.Size(876, 410);
             this.tabClerks.TabIndex = 0;
             this.tabClerks.Text = "Memory Clerks";
             this.tabClerks.UseVisualStyleBackColor = true;
@@ -177,10 +210,11 @@ namespace DBADashGUI.Performance
             // tabConfig
             // 
             this.tabConfig.Controls.Add(this.dgvConfig);
-            this.tabConfig.Location = new System.Drawing.Point(4, 25);
+            this.tabConfig.Location = new System.Drawing.Point(4, 29);
+            this.tabConfig.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.tabConfig.Name = "tabConfig";
-            this.tabConfig.Padding = new System.Windows.Forms.Padding(3);
-            this.tabConfig.Size = new System.Drawing.Size(876, 325);
+            this.tabConfig.Padding = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            this.tabConfig.Size = new System.Drawing.Size(876, 410);
             this.tabConfig.TabIndex = 1;
             this.tabConfig.Text = "Config";
             this.tabConfig.UseVisualStyleBackColor = true;
@@ -192,22 +226,24 @@ namespace DBADashGUI.Performance
             this.dgvConfig.BackgroundColor = System.Drawing.Color.White;
             this.dgvConfig.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.dgvConfig.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.dgvConfig.Location = new System.Drawing.Point(3, 3);
+            this.dgvConfig.Location = new System.Drawing.Point(3, 4);
+            this.dgvConfig.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.dgvConfig.Name = "dgvConfig";
             this.dgvConfig.ReadOnly = true;
             this.dgvConfig.RowHeadersVisible = false;
             this.dgvConfig.RowHeadersWidth = 51;
             this.dgvConfig.RowTemplate.Height = 24;
-            this.dgvConfig.Size = new System.Drawing.Size(870, 319);
+            this.dgvConfig.Size = new System.Drawing.Size(870, 402);
             this.dgvConfig.TabIndex = 0;
             // 
             // tabCounters
             // 
             this.tabCounters.Controls.Add(this.dgvCounters);
-            this.tabCounters.Location = new System.Drawing.Point(4, 25);
+            this.tabCounters.Location = new System.Drawing.Point(4, 29);
+            this.tabCounters.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.tabCounters.Name = "tabCounters";
-            this.tabCounters.Padding = new System.Windows.Forms.Padding(3);
-            this.tabCounters.Size = new System.Drawing.Size(876, 325);
+            this.tabCounters.Padding = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            this.tabCounters.Size = new System.Drawing.Size(876, 410);
             this.tabCounters.TabIndex = 2;
             this.tabCounters.Text = "Memory Performance Counters";
             this.tabCounters.UseVisualStyleBackColor = true;
@@ -219,48 +255,26 @@ namespace DBADashGUI.Performance
             this.dgvCounters.BackgroundColor = System.Drawing.Color.White;
             this.dgvCounters.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.dgvCounters.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.dgvCounters.Location = new System.Drawing.Point(3, 3);
+            this.dgvCounters.Location = new System.Drawing.Point(3, 4);
+            this.dgvCounters.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.dgvCounters.Name = "dgvCounters";
             this.dgvCounters.ReadOnly = true;
             this.dgvCounters.RowHeadersVisible = false;
             this.dgvCounters.RowHeadersWidth = 51;
             this.dgvCounters.RowTemplate.Height = 24;
-            this.dgvCounters.Size = new System.Drawing.Size(870, 319);
+            this.dgvCounters.Size = new System.Drawing.Size(870, 402);
             this.dgvCounters.TabIndex = 0;
             this.dgvCounters.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgvCounters_CellContentClick);
             // 
-            // performanceCounters1
-            // 
-            this.performanceCounters1.CounterID = 0;
-            this.performanceCounters1.CounterName = null;
-            this.performanceCounters1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.performanceCounters1.FromDate = new System.DateTime(((long)(0)));
-            this.performanceCounters1.InstanceID = 0;
-            this.performanceCounters1.Location = new System.Drawing.Point(0, 31);
-            this.performanceCounters1.Name = "performanceCounters1";
-            this.performanceCounters1.Size = new System.Drawing.Size(884, 327);
-            this.performanceCounters1.TabIndex = 3;
-            this.performanceCounters1.ToDate = new System.DateTime(((long)(0)));
-            this.performanceCounters1.Visible = false;
-            // 
-            // chartHistory
-            // 
-            this.chartHistory.DefaultLineSmoothness = 0.5D;
-            this.chartHistory.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.chartHistory.Location = new System.Drawing.Point(0, 31);
-            this.chartHistory.Name = "chartHistory";
-            this.chartHistory.Size = new System.Drawing.Size(884, 327);
-            this.chartHistory.TabIndex = 1;
-            this.chartHistory.Text = "cartesianChartWithDataTable1";
-            this.chartHistory.Visible = false;
-            // 
             // MemoryUsage
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.Controls.Add(this.splitContainer1);
+            this.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.Name = "MemoryUsage";
-            this.Size = new System.Drawing.Size(884, 716);
+            this.Size = new System.Drawing.Size(884, 895);
+            this.Load += new System.EventHandler(this.MemoryUsage_Load);
             ((System.ComponentModel.ISupportInitialize)(this.dgv)).EndInit();
             this.splitContainer1.Panel1.ResumeLayout(false);
             this.splitContainer1.Panel1.PerformLayout();

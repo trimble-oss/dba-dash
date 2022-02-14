@@ -6,6 +6,7 @@ using Microsoft.Data.SqlClient;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static DBADashGUI.DBADashStatus;
 
 namespace DBADashGUI
 {
@@ -28,16 +29,8 @@ namespace DBADashGUI
     {
         const Int64 bytesPerGB = 1073741824;
 
-        public enum StatusEnum
-        {
-            OK=4,
-            Warning=2,
-            Critical=1,
-            NA=3
-        }
-
         public string InstanceName;
-        public StatusEnum DriveStatus;
+        public DBADashStatusEnum DriveStatus;
 
         public void RefreshDriveStatus()
         {
@@ -45,35 +38,35 @@ namespace DBADashGUI
             {
                 if (FreeSpaceGB <= CriticalThreshold)
                 {
-                    DriveStatus = StatusEnum.Critical;
+                    DriveStatus = DBADashStatusEnum.Critical;
                 }
                 else if (FreeSpaceGB <= WarningThreshold)
                 {
-                    DriveStatus = StatusEnum.Warning;
+                    DriveStatus = DBADashStatusEnum.Warning;
                 }
                 else
                 {
-                    DriveStatus = StatusEnum.OK;
+                    DriveStatus = DBADashStatusEnum.OK;
                 }
             }
             else if(DriveCheckType == DriveCheckTypeEnum.Percent)
             {
                 if(PercentFreeSpace<= ((double)CriticalThreshold*100))
                 {
-                    DriveStatus = StatusEnum.Critical;
+                    DriveStatus = DBADashStatusEnum.Critical;
                 }
                 else if(PercentFreeSpace<= ((double)WarningThreshold*100))
                 {
-                    DriveStatus = StatusEnum.Warning;
+                    DriveStatus = DBADashStatusEnum.Warning;
                 }
                 else
                 {
-                    DriveStatus = StatusEnum.OK;
+                    DriveStatus = DBADashStatusEnum.OK;
                 }
             }
             else
             {
-                DriveStatus = StatusEnum.NA;
+                DriveStatus = DBADashStatusEnum.NA;
             }
         }
 
@@ -84,7 +77,7 @@ namespace DBADashGUI
 
         public DateTime SnapshotDate { get; set; }
 
-        public StatusEnum SnapshotStatus { get; set; }
+        public DBADashStatusEnum SnapshotStatus { get; set; }
         
        public  decimal FreeSpaceGB
         {

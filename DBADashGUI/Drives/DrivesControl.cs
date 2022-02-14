@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using Microsoft.Data.SqlClient;
 using DBADashGUI.Drives;
+using static DBADashGUI.DBADashStatus;
 
 namespace DBADashGUI.Properties
 {
@@ -75,38 +76,42 @@ namespace DBADashGUI.Properties
 
         DataView dvDrives;
 
+        private DataTable getDrives()
+        {
+            using (var cn = new SqlConnection(ConnectionString))
+            using (var cmd = new SqlCommand("dbo.Drives_Get", cn) { CommandType = CommandType.StoredProcedure })
+            using (var da = new SqlDataAdapter(cmd))
+            {
+                cn.Open();
+                cmd.Parameters.AddWithValue("InstanceIDs", String.Join(",", InstanceIDs));
+                cmd.Parameters.AddWithValue("IncludeCritical", IncludeCritical);
+                cmd.Parameters.AddWithValue("IncludeWarning", IncludeWarning);
+                cmd.Parameters.AddWithValue("IncludeNA", IncludeNA);
+                cmd.Parameters.AddWithValue("IncludeOK", IncludeOK);
+                cmd.Parameters.AddWithValue("IncludeMetrics", includeAllMetricsToolStripMenuItem.Checked);
+                
+                DataTable dt = new DataTable();
+                da.Fill(dt);
+                Common.ConvertUTCToLocal(ref dt);
+                return dt;
+            }
+        }
+
         public void RefreshData()
         {
-            pnlDrives.Controls.Clear();
+            pnlDrives.Controls.Clear();     
+            DataTable dt = getDrives();
+            dvDrives = new DataView(dt);
 
-            SqlConnection cn = new SqlConnection(ConnectionString);
-            using (cn)
+            if (dt.Rows.Count > DrivesViewMaxRows || gridview)
             {
-                using (SqlCommand cmd = new SqlCommand("dbo.Drives_Get", cn) { CommandType = CommandType.StoredProcedure }) {
-                    cn.Open();
-                    cmd.Parameters.AddWithValue("InstanceIDs", String.Join(",", InstanceIDs));
-                    cmd.Parameters.AddWithValue("IncludeCritical", IncludeCritical);
-                    cmd.Parameters.AddWithValue("IncludeWarning", IncludeWarning);
-                    cmd.Parameters.AddWithValue("IncludeNA", IncludeNA);
-                    cmd.Parameters.AddWithValue("IncludeOK", IncludeOK);
-                    cmd.Parameters.AddWithValue("IncludeMetrics", includeAllMetricsToolStripMenuItem.Checked);
-                    SqlDataAdapter da = new SqlDataAdapter(cmd);
-                    DataTable dt = new DataTable();
-                    da.Fill(dt);
-                    Common.ConvertUTCToLocal(ref dt);
-                    dvDrives = new DataView(dt);
-
-                    if (dt.Rows.Count > DrivesViewMaxRows || gridview)
-                    {
-                        ShowGridView();
-                    }
-                    else
-                    {
-                        ShowDrivesView();
-                    }
-
-                }
+                ShowGridView();
             }
+            else
+            {
+                ShowDrivesView();
+            }
+        
             configureInstanceThresholdsToolStripMenuItem.Enabled = InstanceIDs.Count == 1;
         }
 
@@ -152,8 +157,8 @@ namespace DBADashGUI.Properties
                 dgv.Columns.Add(new DataGridViewTextBoxColumn() { Name = "ChangedDriveSize30Days", DataPropertyName = "ChangeDriveSize30Days", HeaderText = "Drive Size 30 Days Change (GB+-)",Width = 100, AutoSizeMode = DataGridViewAutoSizeColumnMode.None, DefaultCellStyle = new DataGridViewCellStyle() { Format = "+#,##0.0GB;-#,##0.0GB;-" } });
                 dgv.Columns.Add(new DataGridViewTextBoxColumn() { Name = "ChangedDriveSize90Days", DataPropertyName = "ChangeDriveSize90Days", HeaderText = "Drive Size 90 Days Change (GB+-)", Width = 100, AutoSizeMode = DataGridViewAutoSizeColumnMode.None, DefaultCellStyle = new DataGridViewCellStyle() { Format = "+#,##0.0GB;-#,##0.0GB;-" } });
             }
-            dgv.Columns.Add(new DataGridViewLinkColumn() { Name = "History", HeaderText = "History", UseColumnTextForLinkValue = true, Text = "History" });
-            dgv.Columns.Add(new DataGridViewLinkColumn() { Name = "Configure", HeaderText = "Configure", UseColumnTextForLinkValue = true, Text = "Configure" });
+            dgv.Columns.Add(new DataGridViewLinkColumn() { Name = "History", HeaderText = "History", UseColumnTextForLinkValue = true, Text = "History", LinkColor=DashColors.LinkColor});
+            dgv.Columns.Add(new DataGridViewLinkColumn() { Name = "Configure", HeaderText = "Configure", UseColumnTextForLinkValue = true, Text = "Configure", LinkColor = DashColors.LinkColor});
             dgv.CellContentClick += Dgv_CellContentClick;
             dgv.RowsAdded += Dgv_RowsAdded;
             pnlDrives.Controls.Add(dgv);
@@ -169,18 +174,18 @@ namespace DBADashGUI.Properties
                 var row = (DataRowView)dgv.Rows[idx].DataBoundItem;
                 var Status = (DBADashStatus.DBADashStatusEnum)row["Status"];
                 var SnapshotStatus = (DBADashStatus.DBADashStatusEnum)row["SnapshotStatus"];
-                dgv.Rows[idx].Cells["SnapshotAge"].Style.BackColor = DBADashStatus.GetStatusColour(SnapshotStatus);
+                dgv.Rows[idx].Cells["SnapshotAge"].SetStatusColor(SnapshotStatus);
                 if (row["DriveCheckType"]!=DBNull.Value && (string)row["DriveCheckType"]== "G")
                 {
-                    dgv.Rows[idx].Cells["FreeGB"].Style.BackColor = DBADashStatus.GetStatusColour(Status);
-                    dgv.Rows[idx].Cells["PctFreeSpace"].Style.BackColor = Color.White;
+                    dgv.Rows[idx].Cells["FreeGB"].SetStatusColor(Status);
+                    dgv.Rows[idx].Cells["PctFreeSpace"].SetStatusColor(Color.White);
                     dgv.Rows[idx].Cells["Warning"].Style.Format = "0.0 GB";
                     dgv.Rows[idx].Cells["Critical"].Style.Format = "0.0 GB";
                 }
                 else
                 {
-                    dgv.Rows[idx].Cells["PctFreeSpace"].Style.BackColor = DBADashStatus.GetStatusColour(Status);
-                    dgv.Rows[idx].Cells["FreeGB"].Style.BackColor = Color.White;
+                    dgv.Rows[idx].Cells["PctFreeSpace"].SetStatusColor(Status);
+                    dgv.Rows[idx].Cells["FreeGB"].SetStatusColor(Color.White);
                     dgv.Rows[idx].Cells["Warning"].Style.Format = "P2";
                     dgv.Rows[idx].Cells["Critical"].Style.Format = "P2";
                 }
@@ -236,13 +241,13 @@ namespace DBADashGUI.Properties
                 drv.Drive.DriveLetter = (string)r["Name"];
                 drv.Drive.DriveCapacityGB = (decimal)r["TotalGB"];
                 drv.Drive.FreeSpaceGB = (decimal)r["FreeGB"];
-                drv.Drive.DriveStatus = (Drive.StatusEnum)r["Status"];
+                drv.Drive.DriveStatus = (DBADashStatusEnum)r["Status"];
                 drv.Drive.Inherited = (bool)r["IsInheritedThreshold"];
                 drv.Drive.InstanceID = (Int32)r["InstanceID"];
                 drv.Drive.DriveID = (Int32)r["DriveID"];
                 drv.Drive.DriveCheckTypeChar = char.Parse((string)r["DriveCheckType"]);
                 drv.Drive.SnapshotDate = (DateTime)r["SnapshotDate"];
-                drv.Drive.SnapshotStatus= (Drive.StatusEnum)r["SnapshotStatus"];
+                drv.Drive.SnapshotStatus= (DBADashStatusEnum)r["SnapshotStatus"];
                 drv.DisplayInstanceName = InstanceIDs.Count > 1;
                 drv.Drive.ConnectionString = ConnectionString;
                 drv.Dock = DockStyle.Top;
