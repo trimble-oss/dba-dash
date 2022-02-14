@@ -555,8 +555,13 @@ namespace DBADashGUI
             root.Nodes.Add(hadr);
 
             var tags = String.Join(",", SelectedTags());
+            string searchString="";
+            if (txtSearch.Text.Trim().Length > 0)
+            {
+                searchString = "%" + txtSearch.Text.Trim() + "%";
+            }
 
-            var dtInstances = CommonData.GetInstances(tags);
+            var dtInstances = CommonData.GetInstances(tagIDs:tags, searchString:searchString);
 
             SQLTreeItem AzureNode = null;
             foreach (DataRow row in dtInstances.Rows)
@@ -1390,6 +1395,11 @@ namespace DBADashGUI
             {
                 frm.ShowDialog(this);
             }
+        }
+
+        private void bttnSearch_Click(object sender, EventArgs e)
+        {
+            addInstanes();        
         }
     }
 }
