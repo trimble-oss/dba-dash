@@ -60,11 +60,11 @@ namespace DBADashGUI.Performance
             if (dgv.Columns.Count == 0)
             {
                 dgv.Columns.Add(new DataGridViewTextBoxColumn() {Name="colMemoryClerkType", HeaderText = "Memory Clerk Type", DataPropertyName = "MemoryClerkType" });
-                dgv.Columns.Add(new DataGridViewLinkColumn() { Name = "colPages", HeaderText = "Pages KB", DataPropertyName = "pages_kb", DefaultCellStyle = new DataGridViewCellStyle() { Format = "N0" } });
-                dgv.Columns.Add(new DataGridViewLinkColumn() { Name = "colVirtualMemoryCommitted", HeaderText = "Virtual Memory Committed KB", DataPropertyName = "virtual_memory_committed_kb", DefaultCellStyle = new DataGridViewCellStyle() { Format = "N0" } });
-                dgv.Columns.Add(new DataGridViewLinkColumn() { Name = "colAWEAllocated", HeaderText = "AWE Allocated KB", DataPropertyName = "awe_allocated_kb", DefaultCellStyle = new DataGridViewCellStyle() { Format = "N0" } });
-                dgv.Columns.Add(new DataGridViewLinkColumn() { Name = "colSharedMemoryReserved", HeaderText = "Shared Memory Reserved KB", DataPropertyName = "shared_memory_reserved_kb", DefaultCellStyle = new DataGridViewCellStyle() { Format = "N0" } });
-                dgv.Columns.Add(new DataGridViewLinkColumn() { Name = "colSharedMemoryCommitted", HeaderText = "Shared Memory Committed KB", DataPropertyName = "shared_memory_committed_kb", DefaultCellStyle = new DataGridViewCellStyle() { Format = "N0" } });
+                dgv.Columns.Add(new DataGridViewLinkColumn() { Name = "colPages", HeaderText = "Pages KB", DataPropertyName = "pages_kb", DefaultCellStyle = Common.DataGridViewNumericCellStyleNoDigits, LinkColor= DashColors.LinkColor});
+                dgv.Columns.Add(new DataGridViewLinkColumn() { Name = "colVirtualMemoryCommitted", HeaderText = "Virtual Memory Committed KB", DataPropertyName = "virtual_memory_committed_kb", DefaultCellStyle = Common.DataGridViewNumericCellStyleNoDigits, LinkColor = DashColors.LinkColor});
+                dgv.Columns.Add(new DataGridViewLinkColumn() { Name = "colAWEAllocated", HeaderText = "AWE Allocated KB", DataPropertyName = "awe_allocated_kb", DefaultCellStyle = Common.DataGridViewNumericCellStyleNoDigits, LinkColor = DashColors.LinkColor});
+                dgv.Columns.Add(new DataGridViewLinkColumn() { Name = "colSharedMemoryReserved", HeaderText = "Shared Memory Reserved KB", DataPropertyName = "shared_memory_reserved_kb", DefaultCellStyle = Common.DataGridViewNumericCellStyleNoDigits, LinkColor = DashColors.LinkColor});
+                dgv.Columns.Add(new DataGridViewLinkColumn() { Name = "colSharedMemoryCommitted", HeaderText = "Shared Memory Committed KB", DataPropertyName = "shared_memory_committed_kb", DefaultCellStyle = Common.DataGridViewNumericCellStyleNoDigits,LinkColor = DashColors.LinkColor});
                 dgv.Columns.Add(new DataGridViewTextBoxColumn() { HeaderText = "Snapshot Date", DataPropertyName = "SnapshotDate" });
                 dgv.Columns.Add(new DataGridViewTextBoxColumn() { Name = "colPagesPct", HeaderText = "Pages %", DataPropertyName = "Pct", DefaultCellStyle = new DataGridViewCellStyle() { Format = "P1" } });             
             }
@@ -238,7 +238,7 @@ namespace DBADashGUI.Performance
                 dgvCounters.Columns.Add(new DataGridViewTextBoxColumn() { Name = "colTotal", DataPropertyName = "Total", HeaderText = "Total", DefaultCellStyle = new DataGridViewCellStyle() { Format = "#,##0.########" } });
                 dgvCounters.Columns.Add(new DataGridViewTextBoxColumn() { Name = "colSampleCount", DataPropertyName = "SampleCount", HeaderText = "Sample Count", DefaultCellStyle = new DataGridViewCellStyle() { Format = "#,##0.########" } });
                 dgvCounters.Columns.Add(new DataGridViewTextBoxColumn() { Name = "colCurrentValue", DataPropertyName = "CurrentValue", HeaderText = "Current Value", DefaultCellStyle = new DataGridViewCellStyle() { Format = "#,##0.########" } });
-                dgvCounters.Columns.Add(new DataGridViewLinkColumn() { Name = "colView", HeaderText = "View", UseColumnTextForLinkValue = true, Text = "View", });
+                dgvCounters.Columns.Add(new DataGridViewLinkColumn() { Name = "colView", HeaderText = "View", UseColumnTextForLinkValue = true, Text = "View", LinkColor = DashColors.LinkColor});
             }
             dgvCounters.DataSource = dt;
             dgvCounters.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.AllCells);
@@ -316,6 +316,11 @@ namespace DBADashGUI.Performance
                 string toolTip = (string)((DataRowView)dgv.Rows[e.RowIndex].DataBoundItem)["MemoryClerkDescription"];
                 dgvToolTip.SetToolTip(dgv, toolTip);
             }
+        }
+
+        private void MemoryUsage_Load(object sender, EventArgs e)
+        {
+
         }
     }
 }

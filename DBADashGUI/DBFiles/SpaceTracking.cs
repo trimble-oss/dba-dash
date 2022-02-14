@@ -37,66 +37,67 @@ namespace DBADashGUI
             refreshData();
         }
 
+        private DataTable getDBSpace()
+        {
+            using (var cn = new SqlConnection(Common.ConnectionString))
+            using (var cmd = new SqlCommand("dbo.DBSpace_Get", cn) { CommandType = CommandType.StoredProcedure, CommandTimeout = Properties.Settings.Default.CommandTimeout })
+            using (var da = new SqlDataAdapter(cmd))
+            {
+                cn.Open();
+                cmd.Parameters.AddWithValue("@InstanceIDs", string.Join(",", InstanceIDs));
+                if (DatabaseID > 0)
+                {
+                    cmd.Parameters.AddWithValue("@DatabaseID", DatabaseID);
+                }
+                if (Instance != null && Instance.Length > 0)
+                {
+                    cmd.Parameters.AddWithValue("@Instance", Instance);
+                }
+                if (!string.IsNullOrEmpty(DBName))
+                {
+                    cmd.Parameters.AddWithValue("@DBName", DBName);
+                }
+                DataTable dt = new DataTable();
+                da.Fill(dt);
+                return dt;
+            }
+         }
+
         private void refreshData()
         {
-            SqlConnection cn = new SqlConnection(Common.ConnectionString);
-            using (cn)
+            var dt = getDBSpace();
+            dgv.AutoGenerateColumns = false;
+            dgv.DataSource = dt;
+            dgv.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
+            pieChart1.Series.Clear();
+            string labelPoint(ChartPoint chartPoint) =>
+            string.Format("{0} ({1:P})", chartPoint.SeriesView.Title, chartPoint.Participation);
+            SeriesCollection sc = new SeriesCollection();
+            var other = (double)0;
+            foreach (DataRow r in dt.Rows)
             {
-                using (SqlCommand cmd = new SqlCommand("dbo.DBSpace_Get", cn) { CommandType = CommandType.StoredProcedure })
+                var pct = (double)(decimal)r["Pct"];
+                var allocated = (double)(decimal)r["AllocatedGB"];
+                if (pct > 0.02)
                 {
-                    cn.Open();
-                    cmd.CommandTimeout = Properties.Settings.Default.CommandTimeout;
-                    cmd.Parameters.AddWithValue("@InstanceIDs", string.Join(",", InstanceIDs));
-                    if (DatabaseID > 0)
-                    {
-                        cmd.Parameters.AddWithValue("@DatabaseID", DatabaseID);
-                    }
-                    if (Instance!=null && Instance.Length > 0)
-                    {
-                        cmd.Parameters.AddWithValue("@Instance", Instance);
-                    }
-                    if (!string.IsNullOrEmpty(DBName))
-                    {
-                        cmd.Parameters.AddWithValue("@DBName", DBName);
-                    }
-                    SqlDataAdapter da = new SqlDataAdapter(cmd);
-                    DataTable dt = new DataTable();
-                    da.Fill(dt);
-                    dgv.AutoGenerateColumns = false;
-                    dgv.DataSource = dt;
-                    dgv.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
-                    pieChart1.Series.Clear();
-                    string labelPoint(ChartPoint chartPoint) =>
-                   string.Format("{0} ({1:P})", chartPoint.SeriesView.Title, chartPoint.Participation);
-                    SeriesCollection sc = new SeriesCollection();
-                    var other = (double)0;
-                    foreach (DataRow r in dt.Rows)
-                    {
-                        var pct = (double)(decimal)r["Pct"];
-                        var allocated = (double)(decimal)r["AllocatedGB"];
-                        if (pct > 0.02)
-                        {
-                            var s = new PieSeries() { Title = (string)r["Grp"], Values = new ChartValues<double> { allocated }, LabelPoint = labelPoint, DataLabels = true, ToolTip = false };
-                            sc.Add(s);
-                        }
-                        else
-                        {
-                            other += allocated;
-                        }
-                    }
-                    if (other > 0)
-                    {
-                        var s = new PieSeries() { Title = "{Other}", Values = new ChartValues<double> { other }, LabelPoint = labelPoint, DataLabels = true, ToolTip = false };
-                        sc.Add(s);
-                    }
-
-                    pieChart1.Series = sc;
-                    pieChart1.LegendLocation = LegendLocation.Bottom;
+                    var s = new PieSeries() { Title = (string)r["Grp"], Values = new ChartValues<double> { allocated }, LabelPoint = labelPoint, DataLabels = true, ToolTip = false };
+                    sc.Add(s);
+                }
+                else
+                {
+                    other += allocated;
                 }
             }
+            if (other > 0)
+            {
+                var s = new PieSeries() { Title = "{Other}", Values = new ChartValues<double> { other }, LabelPoint = labelPoint, DataLabels = true, ToolTip = false };
+                sc.Add(s);
+            }
+
+            pieChart1.Series = sc;
+            pieChart1.LegendLocation = LegendLocation.Bottom;
+                      
         }
-
-
 
         private void dgv_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
@@ -163,8 +164,8 @@ namespace DBADashGUI
             }
             else
             {
-                Grp.LinkColor = Color.Blue;
-                Grp.ActiveLinkColor = Color.Blue;
+                Grp.LinkColor = DashColors.LinkColor;
+                Grp.ActiveLinkColor = DashColors.LinkColor;
                 Grp.LinkBehavior = LinkBehavior.AlwaysUnderline;
             }
         }
@@ -216,6 +217,11 @@ namespace DBADashGUI
             colHistory.Visible = false;
             Common.PromptSaveDataGridView(ref dgv);
             colHistory.Visible = true;
+        }
+
+        private void SpaceTracking_Load(object sender, EventArgs e)
+        {
+            Common.StyleGrid(ref dgv);
         }
     }
 }

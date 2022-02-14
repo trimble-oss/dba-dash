@@ -62,10 +62,11 @@
             // 
             this.dgvDBADashErrors.AllowUserToAddRows = false;
             this.dgvDBADashErrors.AllowUserToDeleteRows = false;
+            this.dgvDBADashErrors.BackgroundColor = System.Drawing.Color.White;
             this.dgvDBADashErrors.ClipboardCopyMode = System.Windows.Forms.DataGridViewClipboardCopyMode.EnableAlwaysIncludeHeaderText;
             dataGridViewCellStyle1.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
             dataGridViewCellStyle1.BackColor = System.Drawing.SystemColors.Control;
-            dataGridViewCellStyle1.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            dataGridViewCellStyle1.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             dataGridViewCellStyle1.ForeColor = System.Drawing.SystemColors.WindowText;
             dataGridViewCellStyle1.SelectionBackColor = System.Drawing.SystemColors.Highlight;
             dataGridViewCellStyle1.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
@@ -80,7 +81,7 @@
             this.ErrorMessage});
             dataGridViewCellStyle2.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
             dataGridViewCellStyle2.BackColor = System.Drawing.SystemColors.Window;
-            dataGridViewCellStyle2.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            dataGridViewCellStyle2.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             dataGridViewCellStyle2.ForeColor = System.Drawing.SystemColors.ControlText;
             dataGridViewCellStyle2.SelectionBackColor = System.Drawing.SystemColors.Highlight;
             dataGridViewCellStyle2.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
@@ -88,12 +89,13 @@
             this.dgvDBADashErrors.DefaultCellStyle = dataGridViewCellStyle2;
             this.dgvDBADashErrors.Dock = System.Windows.Forms.DockStyle.Fill;
             this.dgvDBADashErrors.Location = new System.Drawing.Point(0, 27);
+            this.dgvDBADashErrors.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.dgvDBADashErrors.Name = "dgvDBADashErrors";
             this.dgvDBADashErrors.ReadOnly = true;
             this.dgvDBADashErrors.RowHeadersVisible = false;
             this.dgvDBADashErrors.RowHeadersWidth = 51;
             this.dgvDBADashErrors.RowTemplate.Height = 24;
-            this.dgvDBADashErrors.Size = new System.Drawing.Size(829, 411);
+            this.dgvDBADashErrors.Size = new System.Drawing.Size(829, 521);
             this.dgvDBADashErrors.TabIndex = 2;
             // 
             // Instance
@@ -308,12 +310,13 @@
             // 
             // CollectionErrors
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.Controls.Add(this.dgvDBADashErrors);
             this.Controls.Add(this.toolStrip3);
+            this.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.Name = "CollectionErrors";
-            this.Size = new System.Drawing.Size(829, 438);
+            this.Size = new System.Drawing.Size(829, 548);
             ((System.ComponentModel.ISupportInitialize)(this.dgvDBADashErrors)).EndInit();
             this.toolStrip3.ResumeLayout(false);
             this.toolStrip3.PerformLayout();

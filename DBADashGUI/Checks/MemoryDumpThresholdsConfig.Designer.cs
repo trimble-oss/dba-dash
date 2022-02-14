@@ -136,6 +136,7 @@
             // 
             // lnkClear
             // 
+            this.lnkClear.LinkColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(79)))), ((int)(((byte)(131)))));
             this.lnkClear.Location = new System.Drawing.Point(356, 97);
             this.lnkClear.Name = "lnkClear";
             this.lnkClear.Size = new System.Drawing.Size(53, 20);
@@ -147,6 +148,7 @@
             // lnkAcknowledge
             // 
             this.lnkAcknowledge.AutoSize = true;
+            this.lnkAcknowledge.LinkColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(79)))), ((int)(((byte)(131)))));
             this.lnkAcknowledge.Location = new System.Drawing.Point(12, 97);
             this.lnkAcknowledge.Name = "lnkAcknowledge";
             this.lnkAcknowledge.Size = new System.Drawing.Size(99, 20);

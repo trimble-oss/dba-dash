@@ -71,6 +71,7 @@
             this.tsRefreshHistory = new System.Windows.Forms.ToolStripButton();
             this.tsCopyHistory = new System.Windows.Forms.ToolStripButton();
             this.tsExcelHistory = new System.Windows.Forms.ToolStripButton();
+            this.tsCols = new System.Windows.Forms.ToolStripButton();
             ((System.ComponentModel.ISupportInitialize)(this.dgv)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
@@ -101,11 +102,12 @@
             this.NewEdition});
             this.dgv.Dock = System.Windows.Forms.DockStyle.Fill;
             this.dgv.Location = new System.Drawing.Point(0, 27);
+            this.dgv.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.dgv.Name = "dgv";
             this.dgv.ReadOnly = true;
             this.dgv.RowHeadersVisible = false;
             this.dgv.RowHeadersWidth = 51;
-            this.dgv.Size = new System.Drawing.Size(1204, 317);
+            this.dgv.Size = new System.Drawing.Size(1204, 403);
             this.dgv.TabIndex = 0;
             // 
             // Instance
@@ -202,6 +204,7 @@
             // 
             this.splitContainer1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.splitContainer1.Location = new System.Drawing.Point(0, 0);
+            this.splitContainer1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.splitContainer1.Name = "splitContainer1";
             this.splitContainer1.Orientation = System.Windows.Forms.Orientation.Horizontal;
             // 
@@ -214,8 +217,9 @@
             // 
             this.splitContainer1.Panel2.Controls.Add(this.dgv);
             this.splitContainer1.Panel2.Controls.Add(this.toolStrip1);
-            this.splitContainer1.Size = new System.Drawing.Size(1204, 696);
-            this.splitContainer1.SplitterDistance = 348;
+            this.splitContainer1.Size = new System.Drawing.Size(1204, 870);
+            this.splitContainer1.SplitterDistance = 435;
+            this.splitContainer1.SplitterWidth = 5;
             this.splitContainer1.TabIndex = 1;
             // 
             // dgvVersion
@@ -248,12 +252,13 @@
             this.colWindowsSKU});
             this.dgvVersion.Dock = System.Windows.Forms.DockStyle.Fill;
             this.dgvVersion.Location = new System.Drawing.Point(0, 27);
+            this.dgvVersion.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.dgvVersion.Name = "dgvVersion";
             this.dgvVersion.ReadOnly = true;
             this.dgvVersion.RowHeadersVisible = false;
             this.dgvVersion.RowHeadersWidth = 51;
             this.dgvVersion.RowTemplate.Height = 24;
-            this.dgvVersion.Size = new System.Drawing.Size(1204, 321);
+            this.dgvVersion.Size = new System.Drawing.Size(1204, 408);
             this.dgvVersion.TabIndex = 0;
             // 
             // colInstance
@@ -443,7 +448,8 @@
             this.toolStripLabel2,
             this.tsRefreshVersion,
             this.tsCopyVersion,
-            this.tsExcel});
+            this.tsExcel,
+            this.tsCols});
             this.toolStrip2.Location = new System.Drawing.Point(0, 0);
             this.toolStrip2.Name = "toolStrip2";
             this.toolStrip2.Size = new System.Drawing.Size(1204, 27);
@@ -453,7 +459,7 @@
             // toolStripLabel2
             // 
             this.toolStripLabel2.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
-            this.toolStripLabel2.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
+            this.toolStripLabel2.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
             this.toolStripLabel2.Name = "toolStripLabel2";
             this.toolStripLabel2.Size = new System.Drawing.Size(94, 24);
             this.toolStripLabel2.Text = "Version Info";
@@ -505,7 +511,7 @@
             // toolStripLabel1
             // 
             this.toolStripLabel1.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
-            this.toolStripLabel1.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
+            this.toolStripLabel1.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
             this.toolStripLabel1.Name = "toolStripLabel1";
             this.toolStripLabel1.Size = new System.Drawing.Size(61, 24);
             this.toolStripLabel1.Text = "History";
@@ -540,13 +546,24 @@
             this.tsExcelHistory.Text = "Export Excel";
             this.tsExcelHistory.Click += new System.EventHandler(this.tsExcelHistory_Click);
             // 
+            // tsCols
+            // 
+            this.tsCols.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.tsCols.Image = global::DBADashGUI.Properties.Resources.Column_16x;
+            this.tsCols.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tsCols.Name = "tsCols";
+            this.tsCols.Size = new System.Drawing.Size(29, 24);
+            this.tsCols.Text = "Columns";
+            this.tsCols.Click += new System.EventHandler(this.tsCols_Click);
+            // 
             // SQLPatching
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.Controls.Add(this.splitContainer1);
+            this.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.Name = "SQLPatching";
-            this.Size = new System.Drawing.Size(1204, 696);
+            this.Size = new System.Drawing.Size(1204, 870);
             ((System.ComponentModel.ISupportInitialize)(this.dgv)).EndInit();
             this.splitContainer1.Panel1.ResumeLayout(false);
             this.splitContainer1.Panel1.PerformLayout();
@@ -608,5 +625,6 @@
         private System.Windows.Forms.ToolStripButton tsCopyHistory;
         private System.Windows.Forms.ToolStripButton tsExcel;
         private System.Windows.Forms.ToolStripButton tsExcelHistory;
+        private System.Windows.Forms.ToolStripButton tsCols;
     }
 }

@@ -296,6 +296,8 @@ namespace DBADashGUI
 
         private void SlowQueries_Load(object sender, EventArgs e)
         {
+            Common.StyleGrid(ref dgvSummary);
+            Common.StyleGrid(ref dgvSlow);
             selectGroupBy();
         }
 

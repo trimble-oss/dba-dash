@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using Microsoft.Data.SqlClient;
+using static DBADashGUI.DBADashStatus;
 
 namespace DBADashGUI.Backups
 {
@@ -166,7 +167,7 @@ namespace DBADashGUI.Backups
                 dgvBackups.DataSource = null;
                 dgvBackups.Columns.Clear();
                 dgvBackups.Columns.Add(new DataGridViewTextBoxColumn() { HeaderText = "Instance", DataPropertyName = "Instance", Name = "Instance" });
-                dgvBackups.Columns.Add(new DataGridViewLinkColumn { HeaderText = "Database", DataPropertyName = "name",SortMode= DataGridViewColumnSortMode.Automatic });
+                dgvBackups.Columns.Add(new DataGridViewLinkColumn { HeaderText = "Database", DataPropertyName = "name",SortMode= DataGridViewColumnSortMode.Automatic, LinkColor = DashColors.LinkColor});
                 dgvBackups.Columns.Add(new DataGridViewTextBoxColumn() { HeaderText = "Created", DataPropertyName = "create_date_utc" });
                 dgvBackups.Columns.Add(new DataGridViewTextBoxColumn() { HeaderText = "Recovery Model", DataPropertyName = "recovery_model_desc" });
                 dgvBackups.Columns.Add(new DataGridViewTextBoxColumn() { HeaderText = "Last Full", DataPropertyName = "LastFull", Name = "LastFull" });
@@ -210,7 +211,7 @@ namespace DBADashGUI.Backups
                 dgvBackups.Columns.Add(new DataGridViewTextBoxColumn() { HeaderText = "Password Protected", DataPropertyName = "PasswordProtected" });
                 dgvBackups.Columns.Add(new DataGridViewTextBoxColumn() { HeaderText = "Encrypted", DataPropertyName = "IsEncrypted" });
                 dgvBackups.Columns.Add(new DataGridViewTextBoxColumn() { HeaderText = "Snapshot Backup", DataPropertyName = "SnapshotBackups" });
-                dgvBackups.Columns.Add(new DataGridViewLinkColumn() { HeaderText = "Configure", Text = "Configure", UseColumnTextForLinkValue = true, SortMode = DataGridViewColumnSortMode.NotSortable, Name = "Configure" });
+                dgvBackups.Columns.Add(new DataGridViewLinkColumn() { HeaderText = "Configure", Text = "Configure", UseColumnTextForLinkValue = true, SortMode = DataGridViewColumnSortMode.NotSortable, Name = "Configure", LinkColor= DashColors.LinkColor});
                 
                 dgvBackups.DataSource = new DataView(dtBackups);
                 dgvBackups.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
@@ -234,7 +235,7 @@ namespace DBADashGUI.Backups
                 dgvSummary.AutoGenerateColumns = false;
                 if (dgvSummary.Columns.Count == 0)
                 {
-                    dgvSummary.Columns.Add(new DataGridViewLinkColumn() { HeaderText = "Instance", DataPropertyName = "Instance", SortMode = DataGridViewColumnSortMode.Automatic, Name = "Instance" });
+                    dgvSummary.Columns.Add(new DataGridViewLinkColumn() { HeaderText = "Instance", DataPropertyName = "Instance", SortMode = DataGridViewColumnSortMode.Automatic, Name = "Instance", LinkColor = DashColors.LinkColor});
                     dgvSummary.Columns.Add(new DataGridViewTextBoxColumn() { HeaderText = "Database Count", DataPropertyName = "DatabaseCount" });
                     dgvSummary.Columns.Add(new DataGridViewTextBoxColumn() { HeaderText = "Full Backup OK", DataPropertyName = "FullOK", Name = "FullOK" });
                     dgvSummary.Columns.Add(new DataGridViewTextBoxColumn() { HeaderText = "Full Backup N/A", DataPropertyName = "FullNA", Name = "FullNA" });
@@ -281,7 +282,7 @@ namespace DBADashGUI.Backups
                     dgvSummary.Columns.Add(new DataGridViewTextBoxColumn() { HeaderText = "Log Encrypted", DataPropertyName = "LogEncrypted" });
                     dgvSummary.Columns.Add(new DataGridViewTextBoxColumn() { HeaderText = "Snapshot Backups", DataPropertyName = "SnapshotBackups" });                   
                     dgvSummary.Columns.Add(new DataGridViewTextBoxColumn() { HeaderText = "DB Level Threshold Config", DataPropertyName = "DBThresholdConfiguration" });
-                    dgvSummary.Columns.Add(new DataGridViewLinkColumn() { HeaderText = "Configure", Text = "Configure", UseColumnTextForLinkValue = true, SortMode = DataGridViewColumnSortMode.NotSortable, Name = "Configure" });
+                    dgvSummary.Columns.Add(new DataGridViewLinkColumn() { HeaderText = "Configure", Text = "Configure", UseColumnTextForLinkValue = true, SortMode = DataGridViewColumnSortMode.NotSortable, Name = "Configure", LinkColor=DashColors.LinkColor});
                 }
                 dgvSummary.DataSource = new DataView(dt);               
                 splitContainer1.SplitterDistance = (dgvSummary.Rows.Count * 24) + dgvSummary.ColumnHeadersHeight+24; // Set size based on row count, header size and scrollbar
@@ -308,30 +309,30 @@ namespace DBADashGUI.Backups
                     var diffBackupStatus = (DBADashStatus.DBADashStatusEnum)row["DiffBackupStatus"];
                     var logBackupStatus = (DBADashStatus.DBADashStatusEnum)row["LogBackupStatus"];
                     var snapshotStatus = (DBADashStatus.DBADashStatusEnum)row["SnapshotAgeStatus"];
-                    dgvBackups.Rows[idx].Cells["LastFull"].Style.BackColor = DBADashStatus.GetStatusColour(fullBackupStatus);
-                    dgvBackups.Rows[idx].Cells["LastDiff"].Style.BackColor = DBADashStatus.GetStatusColour(diffBackupStatus);
-                    dgvBackups.Rows[idx].Cells["LastLog"].Style.BackColor = DBADashStatus.GetStatusColour(logBackupStatus);
+                    dgvBackups.Rows[idx].Cells["LastFull"].SetStatusColor(fullBackupStatus);
+                    dgvBackups.Rows[idx].Cells["LastDiff"].SetStatusColor(diffBackupStatus);
+                    dgvBackups.Rows[idx].Cells["LastLog"].SetStatusColor(logBackupStatus);
                     if ((bool)row["ConsiderPartialBackups"])
                     {
-                        dgvBackups.Rows[idx].Cells["LastPartial"].Style.BackColor = dgvBackups.Rows[idx].Cells["LastFull"].Style.BackColor;
-                        dgvBackups.Rows[idx].Cells["LastPartialDiff"].Style.BackColor = dgvBackups.Rows[idx].Cells["LastDiff"].Style.BackColor;
+                        dgvBackups.Rows[idx].Cells["LastPartial"].SetStatusColor(fullBackupStatus);
+                        dgvBackups.Rows[idx].Cells["LastPartialDiff"].SetStatusColor(diffBackupStatus);
                     }
                     else
                     {
-                        dgvBackups.Rows[idx].Cells["LastPartial"].Style.BackColor = Color.White;
-                        dgvBackups.Rows[idx].Cells["LastPartialDiff"].Style.BackColor = Color.White;
+                        dgvBackups.Rows[idx].Cells["LastPartial"].SetStatusColor(DBADashStatusEnum.NA);
+                        dgvBackups.Rows[idx].Cells["LastPartialDiff"].SetStatusColor(DBADashStatusEnum.NA);
                     }
                     if ((bool)row["ConsiderFGBackups"])
                     {
-                        dgvBackups.Rows[idx].Cells["LastFG"].Style.BackColor = dgvBackups.Rows[idx].Cells["LastFull"].Style.BackColor;
-                        dgvBackups.Rows[idx].Cells["LastFGDiff"].Style.BackColor = dgvBackups.Rows[idx].Cells["LastDiff"].Style.BackColor;
+                        dgvBackups.Rows[idx].Cells["LastFG"].SetStatusColor(fullBackupStatus);
+                        dgvBackups.Rows[idx].Cells["LastFGDiff"].SetStatusColor(diffBackupStatus);
                     }
                     else
                     {
-                        dgvBackups.Rows[idx].Cells["LastFG"].Style.BackColor = Color.White;
-                        dgvBackups.Rows[idx].Cells["LastFGDiff"].Style.BackColor = Color.White;
+                        dgvBackups.Rows[idx].Cells["LastFG"].SetStatusColor(DBADashStatusEnum.NA);
+                        dgvBackups.Rows[idx].Cells["LastFGDiff"].SetStatusColor(DBADashStatusEnum.NA);
                     }
-                    dgvBackups.Rows[idx].Cells["SnapshotAge"].Style.BackColor = DBADashStatus.GetStatusColour(snapshotStatus);
+                    dgvBackups.Rows[idx].Cells["SnapshotAge"].SetStatusColor(snapshotStatus);
                     if ((string)row["ThresholdsConfiguredLevel"] == "Database")
                     {
                         dgvBackups.Rows[idx].Cells["Configure"].Style.Font = new Font(dgvBackups.Font, FontStyle.Bold);
@@ -430,25 +431,25 @@ namespace DBADashGUI.Backups
                 var row = (DataRowView)dgvSummary.Rows[idx].DataBoundItem;
                 var snapshotStatus = (DBADashStatus.DBADashStatusEnum)row["SnapshotAgeStatus"];
 
-                dgvSummary.Rows[idx].Cells["SnapshotAge"].Style.BackColor = DBADashStatus.GetStatusColour(snapshotStatus);
+                dgvSummary.Rows[idx].Cells["SnapshotAge"].SetStatusColor(snapshotStatus);
 
                 var okCols = new string[] { "FullOK", "DiffOK", "LogOK" };
                 foreach (string col in okCols)
                 {
                     int value = Convert.ToInt32(dgvSummary.Rows[idx].Cells[col].Value);
-                    dgvSummary.Rows[idx].Cells[col].Style.BackColor = value > 0 ? Color.Green : Color.White;
+                    dgvSummary.Rows[idx].Cells[col].SetStatusColor(value > 0 ? DBADashStatusEnum.OK : DBADashStatusEnum.NA);
                 }
                 var warningCols = new string[] { "FullWarning", "DiffWarning", "LogWarning" };
                 foreach (string col in warningCols)
                 {
                     int value = Convert.ToInt32(dgvSummary.Rows[idx].Cells[col].Value);
-                    dgvSummary.Rows[idx].Cells[col].Style.BackColor = value > 0 ? Color.Yellow : Color.White;
+                    dgvSummary.Rows[idx].Cells[col].SetStatusColor(value > 0 ? DBADashStatusEnum.Warning : DBADashStatusEnum.NA);
                 }
                 var criticalCols = new string[] { "FullCritical", "DiffCritical", "LogCritical" };
                 foreach (string col in criticalCols)
                 {
                     int value = Convert.ToInt32(dgvSummary.Rows[idx].Cells[col].Value);
-                    dgvSummary.Rows[idx].Cells[col].Style.BackColor = value > 0 ? Color.Red : Color.White;
+                    dgvSummary.Rows[idx].Cells[col].SetStatusColor(value > 0 ? DBADashStatusEnum.Critical : DBADashStatusEnum.NA);
                 }
                 dgvSummary.Rows[idx].Cells["Configure"].Style.Font = Convert.ToBoolean(row["InstanceThresholdConfiguration"]) ? new Font(dgvSummary.Font, FontStyle.Bold) : new Font(dgvSummary.Font, FontStyle.Regular);
                 
@@ -513,6 +514,22 @@ namespace DBADashGUI.Backups
             dgvBackups.Columns["Configure"].Visible = false;
             Common.CopyDataGridViewToClipboard(dgvBackups);
             dgvBackups.Columns["Configure"].Visible = true;
+        }
+
+        private void tsCols_Click(object sender, EventArgs e)
+        {
+            using (var frm = new SelectColumns() { Columns = dgvSummary.Columns })
+            {
+                frm.ShowDialog(this);
+            }
+        }
+
+        private void tsDetailCols_Click(object sender, EventArgs e)
+        {
+            using (var frm = new SelectColumns() { Columns = dgvBackups.Columns })
+            {
+                frm.ShowDialog(this);
+            }
         }
     }
 }

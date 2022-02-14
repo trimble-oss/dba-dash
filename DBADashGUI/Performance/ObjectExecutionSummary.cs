@@ -82,7 +82,7 @@ namespace DBADashGUI.Performance
 
         readonly List<DataGridViewColumn> StandardCols = new List<DataGridViewColumn> {new DataGridViewTextBoxColumn() { Name = "DB", DataPropertyName = "DB",DisplayIndex=0 },
                                                                         new DataGridViewTextBoxColumn() { Name = "Schema", DataPropertyName = "SchemaName",DisplayIndex=1},
-                                                                        new DataGridViewLinkColumn { Name = "Name", DataPropertyName = "ObjectName",DisplayIndex=2, SortMode = DataGridViewColumnSortMode.Automatic},
+                                                                        new DataGridViewLinkColumn { Name = "Name", DataPropertyName = "ObjectName",DisplayIndex=2, SortMode = DataGridViewColumnSortMode.Automatic, LinkColor = DashColors.LinkColor},
                                                                         new DataGridViewTextBoxColumn() { Name = "Type", DataPropertyName = "TypeDescription",DisplayIndex=3}
 
         };
@@ -328,8 +328,8 @@ namespace DBADashGUI.Performance
                     var row = (DataRowView)r.DataBoundItem;
                     double diffAvgDurationPct = row["diff_avg_duration_pct"] == DBNull.Value ? 0d : Convert.ToDouble(row["diff_avg_duration_pct"]);
                     double diffAvgCPUPct = row["diff_avg_cpu_pct"] == DBNull.Value ? 0d : Convert.ToDouble(row["diff_avg_cpu_pct"]);
-                    r.Cells["Diff Avg Duration (%)"].Style.BackColor = diffColourFromDouble(diffAvgDurationPct);
-                    r.Cells["Diff Avg CPU (%)"].Style.BackColor = diffColourFromDouble(diffAvgCPUPct);
+                    r.Cells["Diff Avg Duration (%)"].SetStatusColor(diffColourFromDouble(diffAvgDurationPct));
+                    r.Cells["Diff Avg CPU (%)"].SetStatusColor(diffColourFromDouble(diffAvgCPUPct));
                 }
             }
         }
@@ -338,22 +338,22 @@ namespace DBADashGUI.Performance
         {
             if (value > 0.5)
             {
-                return Color.Red;
+                return DashColors.Red;
             }
             else if (value>0.3){
-                return Color.FromArgb(242, 215, 213);
+                return DashColors.RedLight;
             }
             else if (value < -0.5)
             {
-                return Color.Green;
+                return DashColors.Success;
             }
             else if (value<-0.3)
             {
-                return Color.FromArgb(171, 235, 198);
+                return DashColors.GreenLight;
             }
             else
             {
-                return Color.AliceBlue;
+                return DashColors.BlueLight;
             }
         }
 

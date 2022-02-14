@@ -32,6 +32,30 @@ namespace DBADashGUI.Changes
             refreshDrivers();
         }
 
+        private DataTable getDrivers()
+        {
+            using (var cn = new SqlConnection(ConnectionString))
+            using (var cmd = new SqlCommand("dbo.Drivers_Get", cn) { CommandType = CommandType.StoredProcedure })
+            using (var da = new SqlDataAdapter(cmd))
+            {
+                cn.Open();
+                cmd.Parameters.AddWithValue("@InstanceIDs", string.Join(",", InstanceIDs));
+                if (provider != "")
+                {
+                    cmd.Parameters.AddWithValue("Provider", provider);
+                }
+                if (searchText != "")
+                {
+                    cmd.Parameters.AddWithValue("DriverSearch", searchText);
+                }
+             
+                DataTable dt = new DataTable();
+                da.Fill(dt);
+                return dt;
+            }
+            
+        }
+
         private void refreshDrivers()
         {
             dgvDrivers.Columns.Clear();
@@ -40,76 +64,60 @@ namespace DBADashGUI.Changes
             dgvDrivers.Columns.Add(new DataGridViewTextBoxColumn() { Name = "DriverProviderName", HeaderText = "Provider" });
             dgvDrivers.Columns.Add(new DataGridViewTextBoxColumn() { Name = "DeviceName", HeaderText = "Device" });
 
-            using (var cn = new SqlConnection(ConnectionString))
+      
+            DataTable dt = getDrivers();
+                    
+            string pivotCol = "Instance";
+            if (tsProvider.DropDownItems.Count == 0)
             {
-                using (SqlCommand cmd = new SqlCommand("dbo.Drivers_Get", cn) { CommandType = CommandType.StoredProcedure })
+                addFilters(dt);
+            }
+            foreach (DataRow r in dt.DefaultView.ToTable(true, pivotCol).Select("", pivotCol))
+            {
+                if (r[pivotCol] != DBNull.Value)
                 {
-                    cn.Open();
-                    cmd.Parameters.AddWithValue("@InstanceIDs", string.Join(",", InstanceIDs));
-                    if (provider != "")
-                    {
-                        cmd.Parameters.AddWithValue("Provider", provider);
-                    }
-                    if (searchText != "")
-                    {
-                        cmd.Parameters.AddWithValue("DriverSearch", searchText);
-                    }
-
-                    SqlDataAdapter da = new SqlDataAdapter(cmd);
-                    DataTable dt = new DataTable();
-                    da.Fill(dt);
-                    string pivotCol = "Instance";
-                    if (tsProvider.DropDownItems.Count == 0)
-                    {
-                        addFilters(dt);
-                    }
-                    foreach (DataRow r in dt.DefaultView.ToTable(true, pivotCol).Select("", pivotCol))
-                    {
-                        if (r[pivotCol] != DBNull.Value)
-                        {
-                            DataGridViewTextBoxColumn col = new DataGridViewTextBoxColumn() { HeaderText = (string)r[pivotCol], Name = (string)r[pivotCol] };
-                            dgvDrivers.Columns.Add(col);
-                        }
-                    }
-                    string lastDevice = "";
-                    string lastProvider = "";
-                    string previousVersion = "";
-                    List<DataGridViewRow> rows = new List<DataGridViewRow>();
-                    DataGridViewRow row = null;
-                    foreach (DataRow r in dt.Select("", "DriverProviderName,DeviceName"))
-                    {
-                        string device = r["DeviceName"] == DBNull.Value ? "" : (string)r["DeviceName"];
-                        string provider = r["DriverProviderName"] == DBNull.Value ? "" : (string)r["DriverProviderName"];
-                        if (lastDevice != device | lastProvider != provider)
-                        {
-                            row = new DataGridViewRow();
-                            row.CreateCells(dgvDrivers);
-                            row.Cells[0].Value = provider;
-                            row.Cells[1].Value = device;
-                            rows.Add(row);
-                            previousVersion = "";
-                        }
-
-                        string instance = (string)r[pivotCol];
-                        string version = r["DriverVersion"] == DBNull.Value ? "" : (string)r["DriverVersion"];
-                        DateTime validFrom = (DateTime)r["ValidFrom"];
-                        var idx = dgvDrivers.Columns[instance].Index;
-
-                        row.Cells[idx].Value = version;
-                        row.Cells[idx].ToolTipText = "Valid From: " + validFrom.ToLocalTime().ToString("yyyy-MM-dd");
-                        if (previousVersion != version && previousVersion != "")
-                        {
-                            row.DefaultCellStyle.BackColor = Color.Yellow;
-                        }
-
-                        lastDevice = device;
-                        lastProvider = provider;
-                        previousVersion = version;
-                    }
-                    dgvDrivers.Rows.AddRange(rows.ToArray());
-                    dgvDrivers.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
+                    DataGridViewTextBoxColumn col = new DataGridViewTextBoxColumn() { HeaderText = (string)r[pivotCol], Name = (string)r[pivotCol] };
+                    dgvDrivers.Columns.Add(col);
                 }
             }
+            string lastDevice = "";
+            string lastProvider = "";
+            string previousVersion = "";
+            List<DataGridViewRow> rows = new List<DataGridViewRow>();
+            DataGridViewRow row = null;
+            foreach (DataRow r in dt.Select("", "DriverProviderName,DeviceName"))
+            {
+                string device = r["DeviceName"] == DBNull.Value ? "" : (string)r["DeviceName"];
+                string provider = r["DriverProviderName"] == DBNull.Value ? "" : (string)r["DriverProviderName"];
+                if (lastDevice != device | lastProvider != provider)
+                {
+                    row = new DataGridViewRow();
+                    row.CreateCells(dgvDrivers);
+                    row.Cells[0].Value = provider;
+                    row.Cells[1].Value = device;
+                    rows.Add(row);
+                    previousVersion = "";
+                }
+
+                string instance = (string)r[pivotCol];
+                string version = r["DriverVersion"] == DBNull.Value ? "" : (string)r["DriverVersion"];
+                DateTime validFrom = (DateTime)r["ValidFrom"];
+                var idx = dgvDrivers.Columns[instance].Index;
+
+                row.Cells[idx].Value = version;
+                row.Cells[idx].ToolTipText = "Valid From: " + validFrom.ToLocalTime().ToString("yyyy-MM-dd");
+                if (previousVersion != version && previousVersion != "")
+                {
+                    row.DefaultCellStyle.BackColor = DashColors.YellowPale ;
+                }
+
+                lastDevice = device;
+                lastProvider = provider;
+                previousVersion = version;
+            }
+            dgvDrivers.Rows.AddRange(rows.ToArray());
+            dgvDrivers.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
+           
         }
 
         private void addFilters(DataTable dt)

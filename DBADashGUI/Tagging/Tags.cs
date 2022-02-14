@@ -100,18 +100,16 @@ namespace DBADashGUI.Tagging
 
         private void refreshReport()
         {
-            using(var cn = new SqlConnection(Common.ConnectionString))
-            using (var cmd = new SqlCommand("dbo.TagReport_Get", cn) { CommandType = CommandType.StoredProcedure })
-            using(var da = new SqlDataAdapter(cmd))
-            {
-                var dt = new DataTable();
-                cmd.Parameters.AddWithValue("InstanceIDs", string.Join(",", InstanceIDs));
-                da.Fill(dt);
-                dgvReport.Columns.Clear();
-                dgvReport.Columns.Add(new DataGridViewLinkColumn() {  HeaderText = "Instance", DataPropertyName = "Instance", SortMode = DataGridViewColumnSortMode.Automatic });
-                dgvReport.DataSource = dt;
-                dgvReport.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
-            }
+            using var cn = new SqlConnection(Common.ConnectionString);
+            using var cmd = new SqlCommand("dbo.TagReport_Get", cn) { CommandType = CommandType.StoredProcedure };
+            using var da = new SqlDataAdapter(cmd);
+            var dt = new DataTable();
+            cmd.Parameters.AddWithValue("InstanceIDs", string.Join(",", InstanceIDs));
+            da.Fill(dt);
+            dgvReport.Columns.Clear();
+            dgvReport.Columns.Add(new DataGridViewLinkColumn() { HeaderText = "Instance", DataPropertyName = "Instance", SortMode = DataGridViewColumnSortMode.Automatic, LinkColor = DashColors.LinkColor });
+            dgvReport.DataSource = dt;
+            dgvReport.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
         }
 
 

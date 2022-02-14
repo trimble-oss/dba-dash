@@ -28,6 +28,7 @@ namespace DBADashGUI
 
         private void ManageInstances_Load(object sender, EventArgs e)
         {
+            Common.StyleGrid(ref dgv);
             refreshData();
         }
 
@@ -57,16 +58,14 @@ namespace DBADashGUI
 
         void MarkInstanceDeleted(int InstanceID, bool IsActive)
         {
-            using (SqlConnection cn = new SqlConnection(Common.ConnectionString))
+            using (var cn = new SqlConnection(Common.ConnectionString))
+            using (var cmd = new SqlCommand("dbo.Instance_Del", cn) { CommandType= CommandType.StoredProcedure })
             {
-                using(SqlCommand cmd = new SqlCommand("dbo.Instance_Del", cn) { CommandType= CommandType.StoredProcedure })
-                {
-                    cn.Open();
-                    cmd.Parameters.AddWithValue("InstanceID", InstanceID);
-                    cmd.Parameters.AddWithValue("IsActive", IsActive);
-                    cmd.ExecuteNonQuery();
-                }
-            }
+                cn.Open();
+                cmd.Parameters.AddWithValue("InstanceID", InstanceID);
+                cmd.Parameters.AddWithValue("IsActive", IsActive);
+                cmd.ExecuteNonQuery();
+            }            
         }
 
         private void dgv_CellContentClick(object sender, DataGridViewCellEventArgs e)

@@ -271,19 +271,12 @@ namespace DBADashGUI
                         colIndex += 1;
                         SLStyle style = sl.CreateStyle();
                         string format = string.IsNullOrEmpty(cell.Style.Format) ? cell.InheritedStyle.Format : cell.Style.Format;
-                        switch (format)
+                        format = format switch
                         {
-                            case "P1":
-                               format = "0.0%";
-                                break;
-                            case "P:":
-                            case "P2":
-                                format = "0.00%";
-                                break;
-                            default:
-                                format = "";
-                                break;
-                        }
+                            "P1" => "0.0%",
+                            "P:" or "P2" => "0.00%",
+                            _ => "",
+                        };
                         if (!cell.Style.ForeColor.IsEmpty || !cell.Style.BackColor.IsEmpty || !string.IsNullOrEmpty(format))
                         {                            
                             style.Fill.SetPattern(DocumentFormat.OpenXml.Spreadsheet.PatternValues.Solid, cell.Style.BackColor.IsEmpty ? Color.Transparent : cell.Style.BackColor, cell.Style.ForeColor);                          
@@ -411,6 +404,20 @@ namespace DBADashGUI
             var psi = new ProcessStartInfo(url) { UseShellExecute = true };
             Process.Start(psi);
         }
+       
+
+        public static void StyleGrid(ref DataGridView dgv)
+        {
+            foreach(DataGridViewColumn col in dgv.Columns)
+            {
+                if(col.GetType() == typeof(DataGridViewLinkColumn))
+                {
+                    var linkCol = (DataGridViewLinkColumn)col;
+                    linkCol.LinkColor = DashColors.LinkColor;
+                }
+            }
+        }
+    
                     
     }
 }

@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace DBADashGUI
 {
-    class DBADashStatus
+    public class DBADashStatus
     {
         public enum DBADashStatusEnum
         {
@@ -21,44 +21,44 @@ namespace DBADashGUI
         {
             if (status == DBADashStatusEnum.Critical)
             {
-                return Color.Red;
+                return DashColors.Fail; 
             }
-            if (status == DBADashStatusEnum.Warning)
+            else if (status == DBADashStatusEnum.Warning)
             {
-                return Color.Yellow;
+                return DashColors.Warning; 
             }
-            if (status == DBADashStatusEnum.NA)
+            else if (status == DBADashStatusEnum.NA)
             {
-                return Color.LightGray;
+                return DashColors.GrayLight; 
             }
-            if (status == DBADashStatusEnum.OK)
+            else if (status == DBADashStatusEnum.OK)
             {
-                return Color.Green;
+                return DashColors.Success; 
             }
-            return Color.Pink;
+            return DashColors.RedPale; 
         }
 
         public static void SetProgressBarColor(DBADashStatusEnum status, ref CustomProgressControl.DataGridViewProgressBarCell pCell )
         {
             if (status == DBADashStatus.DBADashStatusEnum.OK)
             {
-                pCell.ProgressBarColorFrom = Color.MintCream;
-                pCell.ProgressBarColorTo = Color.Green;
+                pCell.ProgressBarColorFrom = DashColors.GreenPale;
+                pCell.ProgressBarColorTo = DashColors.Green;
             }
             else if (status == DBADashStatus.DBADashStatusEnum.Warning)
             {
-                pCell.ProgressBarColorFrom = Color.LightYellow;
-                pCell.ProgressBarColorTo = Color.Yellow;
+                pCell.ProgressBarColorFrom = DashColors.YellowPale;
+                pCell.ProgressBarColorTo = DashColors.YellowDark;
             }
             else if (status == DBADashStatus.DBADashStatusEnum.Critical)
             {
-                pCell.ProgressBarColorFrom = Color.LightSalmon;
-                pCell.ProgressBarColorTo = Color.Red;
+                pCell.ProgressBarColorFrom = DashColors.RedPale;
+                pCell.ProgressBarColorTo = DashColors.RedDark;
             }
             else
             {
-                pCell.ProgressBarColorFrom = Color.Azure;
-                pCell.ProgressBarColorTo = Color.LightSkyBlue;
+                pCell.ProgressBarColorFrom = DashColors.ProgressBarFrom;
+                pCell.ProgressBarColorTo = DashColors.ProgressBarTo;
             }
         }
     }

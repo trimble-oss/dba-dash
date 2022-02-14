@@ -57,36 +57,32 @@ namespace DBADashGUI.Performance
         public DataTable GetWaitsSummaryDT()
         {
             using (SqlConnection cn = new SqlConnection(Common.ConnectionString))
+            using (SqlDataAdapter da = new SqlDataAdapter(new SqlCommand("dbo.WaitsSummary_Get", cn) { CommandType = CommandType.StoredProcedure }))
             {
-                using (SqlDataAdapter da = new SqlDataAdapter(new SqlCommand("dbo.WaitsSummary_Get", cn) { CommandType = CommandType.StoredProcedure }))
-                {
-                    da.SelectCommand.Parameters.AddWithValue("InstanceID", InstanceID);
-                    da.SelectCommand.Parameters.AddWithValue("FromDate", DateRange.FromUTC);
-                    da.SelectCommand.Parameters.AddWithValue("ToDate", DateRange.ToUTC);
-                    var dt = new DataTable();
-                    da.Fill(dt);
-                    return dt;
-                }
-            }
+                da.SelectCommand.Parameters.AddWithValue("InstanceID", InstanceID);
+                da.SelectCommand.Parameters.AddWithValue("FromDate", DateRange.FromUTC);
+                da.SelectCommand.Parameters.AddWithValue("ToDate", DateRange.ToUTC);
+                var dt = new DataTable();
+                da.Fill(dt);
+                return dt;
+            }           
         }
 
 
         public DataTable GetWaitsDT(string waitType)
         {
             using (SqlConnection cn = new SqlConnection(Common.ConnectionString))
+            using (SqlDataAdapter da = new SqlDataAdapter(new SqlCommand("dbo.Waits_Get", cn) { CommandType = CommandType.StoredProcedure }))
             {
-                using (SqlDataAdapter da = new SqlDataAdapter(new SqlCommand("dbo.Waits_Get", cn) { CommandType = CommandType.StoredProcedure }))
-                {
-                    da.SelectCommand.Parameters.AddWithValue("InstanceID", InstanceID);
-                    da.SelectCommand.Parameters.AddWithValue("FromDate", DateRange.FromUTC);
-                    da.SelectCommand.Parameters.AddWithValue("ToDate", DateRange.ToUTC);
-                    da.SelectCommand.Parameters.AddWithValue("WaitType", waitType);
-                    da.SelectCommand.Parameters.AddWithValue("DateGroupingMin", DateGrouping);
-                    var dt = new DataTable();
-                    da.Fill(dt);
-                    return dt;
-                }
-            }
+                da.SelectCommand.Parameters.AddWithValue("InstanceID", InstanceID);
+                da.SelectCommand.Parameters.AddWithValue("FromDate", DateRange.FromUTC);
+                da.SelectCommand.Parameters.AddWithValue("ToDate", DateRange.ToUTC);
+                da.SelectCommand.Parameters.AddWithValue("WaitType", waitType);
+                da.SelectCommand.Parameters.AddWithValue("DateGroupingMin", DateGrouping);
+                var dt = new DataTable();
+                da.Fill(dt);
+                return dt;
+            }            
         }
 
         private void dgv_CellContentClick(object sender, DataGridViewCellEventArgs e)
@@ -174,6 +170,7 @@ namespace DBADashGUI.Performance
 
         private void WaitsSummary_Load(object sender, EventArgs e)
         {
+            Common.StyleGrid(ref dgv);
             Common.AddDateGroups(tsDateGroup, tsDateGroups_Click);
             populateColumnsMenu();
             populateMetricsMenu();

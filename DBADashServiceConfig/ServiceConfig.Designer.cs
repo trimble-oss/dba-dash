@@ -45,6 +45,7 @@
             this.tab1 = new System.Windows.Forms.TabControl();
             this.tabDest = new System.Windows.Forms.TabPage();
             this.groupBox5 = new System.Windows.Forms.GroupBox();
+            this.bttnViewServiceLog = new System.Windows.Forms.Button();
             this.lnkInstall = new System.Windows.Forms.LinkLabel();
             this.lblServiceStatus = new System.Windows.Forms.Label();
             this.lnkRefresh = new System.Windows.Forms.LinkLabel();
@@ -116,7 +117,6 @@
             this.lnkSourceConnections = new System.Windows.Forms.LinkLabel();
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
             this.button1 = new System.Windows.Forms.Button();
-            this.bttnViewServiceLog = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.errorProvider1)).BeginInit();
             this.tab1.SuspendLayout();
             this.tabDest.SuspendLayout();
@@ -316,12 +316,23 @@
             this.groupBox5.TabStop = false;
             this.groupBox5.Text = "Service";
             // 
+            // bttnViewServiceLog
+            // 
+            this.bttnViewServiceLog.Location = new System.Drawing.Point(15, 88);
+            this.bttnViewServiceLog.Name = "bttnViewServiceLog";
+            this.bttnViewServiceLog.Size = new System.Drawing.Size(187, 29);
+            this.bttnViewServiceLog.TabIndex = 20;
+            this.bttnViewServiceLog.Text = "View Service Log";
+            this.bttnViewServiceLog.UseVisualStyleBackColor = true;
+            this.bttnViewServiceLog.Click += new System.EventHandler(this.bttnViewServiceLog_Click);
+            // 
             // lnkInstall
             // 
             this.lnkInstall.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.lnkInstall.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
             this.lnkInstall.Image = global::DBADashServiceConfig.Properties.Resources.install;
             this.lnkInstall.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.lnkInstall.LinkColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(79)))), ((int)(((byte)(131)))));
             this.lnkInstall.Location = new System.Drawing.Point(892, 42);
             this.lnkInstall.Name = "lnkInstall";
             this.lnkInstall.Size = new System.Drawing.Size(160, 21);
@@ -344,6 +355,7 @@
             // 
             this.lnkRefresh.Image = global::DBADashServiceConfig.Properties.Resources._112_RefreshArrow_Green_16x16_72;
             this.lnkRefresh.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.lnkRefresh.LinkColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(79)))), ((int)(((byte)(131)))));
             this.lnkRefresh.Location = new System.Drawing.Point(457, 42);
             this.lnkRefresh.Name = "lnkRefresh";
             this.lnkRefresh.Size = new System.Drawing.Size(80, 21);
@@ -358,6 +370,7 @@
             // 
             this.lnkStart.Image = global::DBADashServiceConfig.Properties.Resources.StartWithoutDebug_16x;
             this.lnkStart.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.lnkStart.LinkColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(79)))), ((int)(((byte)(131)))));
             this.lnkStart.Location = new System.Drawing.Point(270, 42);
             this.lnkStart.Name = "lnkStart";
             this.lnkStart.Size = new System.Drawing.Size(69, 21);
@@ -372,6 +385,7 @@
             // 
             this.lnkStop.Image = global::DBADashServiceConfig.Properties.Resources.Stop_16x;
             this.lnkStop.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.lnkStop.LinkColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(79)))), ((int)(((byte)(131)))));
             this.lnkStop.Location = new System.Drawing.Point(367, 42);
             this.lnkStop.Name = "lnkStop";
             this.lnkStop.Size = new System.Drawing.Size(62, 21);
@@ -775,6 +789,7 @@
             // lnkExample
             // 
             this.lnkExample.AutoSize = true;
+            this.lnkExample.LinkColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(79)))), ((int)(((byte)(131)))));
             this.lnkExample.Location = new System.Drawing.Point(93, 149);
             this.lnkExample.Name = "lnkExample";
             this.lnkExample.Size = new System.Drawing.Size(60, 16);
@@ -786,6 +801,7 @@
             // lnkNone
             // 
             this.lnkNone.AutoSize = true;
+            this.lnkNone.LinkColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(79)))), ((int)(((byte)(131)))));
             this.lnkNone.Location = new System.Drawing.Point(44, 149);
             this.lnkNone.Name = "lnkNone";
             this.lnkNone.Size = new System.Drawing.Size(40, 16);
@@ -797,6 +813,7 @@
             // lnkALL
             // 
             this.lnkALL.AutoSize = true;
+            this.lnkALL.LinkColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(79)))), ((int)(((byte)(131)))));
             this.lnkALL.Location = new System.Drawing.Point(15, 149);
             this.lnkALL.Name = "lnkALL";
             this.lnkALL.Size = new System.Drawing.Size(22, 16);
@@ -1197,16 +1214,6 @@
             this.button1.TabIndex = 10;
             this.toolTip1.SetToolTip(this.button1, "Choose a folder destination path");
             this.button1.UseVisualStyleBackColor = true;
-            // 
-            // bttnViewServiceLog
-            // 
-            this.bttnViewServiceLog.Location = new System.Drawing.Point(15, 88);
-            this.bttnViewServiceLog.Name = "bttnViewServiceLog";
-            this.bttnViewServiceLog.Size = new System.Drawing.Size(187, 29);
-            this.bttnViewServiceLog.TabIndex = 20;
-            this.bttnViewServiceLog.Text = "View Service Log";
-            this.bttnViewServiceLog.UseVisualStyleBackColor = true;
-            this.bttnViewServiceLog.Click += new System.EventHandler(this.bttnViewServiceLog_Click);
             // 
             // ServiceConfig
             // 

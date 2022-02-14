@@ -54,7 +54,7 @@ namespace DBADashGUI.Changes
         private void setCols()
         {
             dgv.Columns.Clear();
-            dgv.Columns.Add(new DataGridViewLinkColumn() { Name="colDB", HeaderText="DB", DataPropertyName = "name" });
+            dgv.Columns.Add(new DataGridViewLinkColumn() { Name="colDB", HeaderText="DB", DataPropertyName = "name", LinkColor= DashColors.LinkColor});
             dgv.Columns.Add(new DataGridViewTextBoxColumn() { HeaderText="Desired State", DataPropertyName = "desired_state_desc" });
             dgv.Columns.Add(new DataGridViewTextBoxColumn() { HeaderText = "Actual State", DataPropertyName = "actual_state_desc" });
             dgv.Columns.Add(new DataGridViewTextBoxColumn() { Name = "col_ReadOnlyReason", HeaderText = "Read Only Reason", DataPropertyName = "readonly_reason_desc" }) ;
@@ -77,7 +77,7 @@ namespace DBADashGUI.Changes
         private void setSummaryCols()
         {
             dgv.Columns.Clear();
-            dgv.Columns.Add(new DataGridViewLinkColumn { Name="colInstance", HeaderText = "Instance", DataPropertyName = "Instance" });
+            dgv.Columns.Add(new DataGridViewLinkColumn { Name="colInstance", HeaderText = "Instance", DataPropertyName = "Instance", LinkColor = DashColors.LinkColor});
             dgv.Columns.Add(new DataGridViewTextBoxColumn() { HeaderText = "OFF", DataPropertyName = "QS_OFF" });
             dgv.Columns.Add(new DataGridViewTextBoxColumn() { Name ="col_READ_ONLY", HeaderText = "READ_ONLY", DataPropertyName = "QS_READ_ONLY" });
             dgv.Columns.Add(new DataGridViewTextBoxColumn() { HeaderText = "READ_WRITE", DataPropertyName = "QS_READ_WRITE" });
@@ -167,41 +167,21 @@ namespace DBADashGUI.Changes
                 var row = (DataRowView)dgv.Rows[idx].DataBoundItem;
                 if (summaryMode)
                 {
-                    var readOnlyAttention = (int)row["QS_READ_ONLY_ATT"];
-                    if (readOnlyAttention > 0)
-                    {
-                        dgv.Rows[idx].Cells["col_READ_ONLY"].Style.BackColor = DBADashStatus.GetStatusColour(DBADashStatus.DBADashStatusEnum.Warning);
-                    }
-                    else
-                    {
-                        dgv.Rows[idx].Cells["col_READ_ONLY"].Style.BackColor = Color.White;
-                    }
-                    var qsErrorCount = (int)row["QS_ERROR"];
-                    if (qsErrorCount > 0)
-                    {
-                        dgv.Rows[idx].Cells["col_ERROR"].Style.BackColor = DBADashStatus.GetStatusColour(DBADashStatus.DBADashStatusEnum.Critical);
-                    }
-                    else
-                    {
-                        dgv.Rows[idx].Cells["col_ERROR"].Style.BackColor = Color.White;
-                    }
+                    var readOnlyAttention = (int)row["QS_READ_ONLY_ATT"];               
+                    dgv.Rows[idx].Cells["col_READ_ONLY"].SetStatusColor(readOnlyAttention > 0 ? DashColors.Warning : Color.White);
+                  
+                    var qsErrorCount = (int)row["QS_ERROR"];                
+                    dgv.Rows[idx].Cells["col_ERROR"].SetStatusColor(qsErrorCount > 0 ? DashColors.Fail : Color.White);               
                 }
                 else if (dbsMode)
                 {
-                    var readOnlyErrorState = (bool)row["IsReadOnlyErrorState"];
-                    if (readOnlyErrorState)
-                    {
-                        dgv.Rows[idx].Cells["col_ReadOnlyReason"].Style.BackColor = DBADashStatus.GetStatusColour(DBADashStatus.DBADashStatusEnum.Warning);
-                    }
-                    else
-                    {
-                        dgv.Rows[idx].Cells["col_ReadOnlyReason"].Style.BackColor = Color.White;
-                    }
+                    var readOnlyErrorState = (bool)row["IsReadOnlyErrorState"];                
+                    dgv.Rows[idx].Cells["col_ReadOnlyReason"].SetStatusColor(readOnlyErrorState ? DashColors.Warning : Color.White);          
                 }
                 if (dbsMode || summaryMode)
                 {
                     var snapshotStatus = (int)row["CollectionDateStatus"];
-                    dgv.Rows[idx].Cells["col_SnapshotDate"].Style.BackColor = DBADashStatus.GetStatusColour((DBADashStatus.DBADashStatusEnum)snapshotStatus);
+                    dgv.Rows[idx].Cells["col_SnapshotDate"].SetStatusColor((DBADashStatus.DBADashStatusEnum)snapshotStatus);
                 }
             }
         }

@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Runtime.InteropServices;
 using DBADashGUI.Drives;
+using static DBADashGUI.DBADashStatus;
 
 namespace DBADashGUI
 {
@@ -57,56 +58,42 @@ namespace DBADashGUI
                 lblThresholds.Text = "Disabled";
             }
             lblThresholds.Font = drive.Inherited ? new Font(lblThresholds.Font, FontStyle.Italic) : new Font(lblThresholds.Font, FontStyle.Bold);
-            if (drive.DriveStatus == Drive.StatusEnum.Critical)
+            pbSpace.BackColor = drive.DriveStatus.GetColor();
+            pbSpace.ForeColor = Color.White;
+            if (drive.DriveStatus == DBADashStatusEnum.Critical)
             {
                 picStatus.Image = imageList1.Images[0];
-
-                pbSpace.ForeColor = Color.FromArgb(255, 192, 192);
-                pbSpace.BackColor = Color.Red;
             }
-            if (drive.DriveStatus == Drive.StatusEnum.Warning)
+            else if (drive.DriveStatus == DBADashStatusEnum.Warning)
             {
-                pbSpace.ForeColor = Color.White;
-                pbSpace.BackColor = Color.Yellow;
                 picStatus.Image = imageList1.Images[1];
-
             }
-            if (drive.DriveStatus == Drive.StatusEnum.OK)
+            else if (drive.DriveStatus == DBADashStatusEnum.OK)
             {
                 picStatus.Image = imageList1.Images[2];
-                pbSpace.ForeColor = Color.LightGreen;
-                pbSpace.BackColor = Color.Green;
 
             }
-            if (drive.DriveStatus == Drive.StatusEnum.NA)
+            else if (drive.DriveStatus == DBADashStatusEnum.NA)
             {
-                pbSpace.ForeColor = Color.LightBlue;
-                pbSpace.BackColor = Color.RoyalBlue;
+                pbSpace.ForeColor = Color.White;
+                pbSpace.BackColor = DashColors.TrimbleBlue;
             }
-            picStatus.Visible = (drive.DriveStatus != Drive.StatusEnum.NA);
+            picStatus.Visible = (drive.DriveStatus != DBADashStatusEnum.NA);
 
             lblUpdated.Text = "Updated " + drive.SnapshotDate.ToString("yyyy-MM-dd HH:mm") + " (" + DateTime.Now.Subtract(drive.SnapshotDate).TotalMinutes.ToString("N0") + "min ago)";
-            if (drive.SnapshotStatus == Drive.StatusEnum.Critical)
-            {
-                lblUpdated.ForeColor = Color.Red;
-            }
-            else if (drive.SnapshotStatus == Drive.StatusEnum.Warning)
-            {
-                lblUpdated.ForeColor = Color.Orange;
-            }
-            else if(drive.SnapshotStatus == Drive.StatusEnum.NA)
+            
+            lblUpdated.ForeColor = drive.SnapshotStatus.GetColor();
+            if (drive.SnapshotStatus == DBADashStatusEnum.NA)
             {
                 lblUpdated.ForeColor = Color.Black;
-            }
-            else
-            {
-                lblUpdated.ForeColor = Color.Green;
             }
         }
 
 
         private void DriveControl_Load(object sender, EventArgs e)
         {
+            lnkThreshold.LinkColor = DashColors.LinkColor;
+            lnkHistory.LinkColor = DashColors.LinkColor;
             setDrive();
         }
 

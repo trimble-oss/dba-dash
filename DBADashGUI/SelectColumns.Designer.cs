@@ -108,6 +108,7 @@
             // lnkAll
             // 
             this.lnkAll.AutoSize = true;
+            this.lnkAll.LinkColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(79)))), ((int)(((byte)(131)))));
             this.lnkAll.Location = new System.Drawing.Point(12, 9);
             this.lnkAll.Name = "lnkAll";
             this.lnkAll.Size = new System.Drawing.Size(27, 20);
@@ -120,6 +121,7 @@
             // lnkNone
             // 
             this.lnkNone.AutoSize = true;
+            this.lnkNone.LinkColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(79)))), ((int)(((byte)(131)))));
             this.lnkNone.Location = new System.Drawing.Point(57, 10);
             this.lnkNone.Name = "lnkNone";
             this.lnkNone.Size = new System.Drawing.Size(45, 20);
@@ -133,6 +135,7 @@
             // 
             this.lnkSelected.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.lnkSelected.AutoSize = true;
+            this.lnkSelected.LinkColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(79)))), ((int)(((byte)(131)))));
             this.lnkSelected.Location = new System.Drawing.Point(259, 9);
             this.lnkSelected.Name = "lnkSelected";
             this.lnkSelected.Size = new System.Drawing.Size(116, 20);

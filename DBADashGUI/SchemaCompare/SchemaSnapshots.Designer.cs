@@ -91,7 +91,8 @@
             // splitSnapshotSummary
             // 
             this.splitSnapshotSummary.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.splitSnapshotSummary.Location = new System.Drawing.Point(0, 204);
+            this.splitSnapshotSummary.Location = new System.Drawing.Point(0, 255);
+            this.splitSnapshotSummary.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.splitSnapshotSummary.Name = "splitSnapshotSummary";
             this.splitSnapshotSummary.Orientation = System.Windows.Forms.Orientation.Horizontal;
             // 
@@ -103,17 +104,19 @@
             // splitSnapshotSummary.Panel2
             // 
             this.splitSnapshotSummary.Panel2.Controls.Add(this.gvSnapshotsDetail);
-            this.splitSnapshotSummary.Size = new System.Drawing.Size(2019, 1017);
-            this.splitSnapshotSummary.SplitterDistance = 621;
+            this.splitSnapshotSummary.Size = new System.Drawing.Size(2019, 1271);
+            this.splitSnapshotSummary.SplitterDistance = 776;
+            this.splitSnapshotSummary.SplitterWidth = 5;
             this.splitSnapshotSummary.TabIndex = 1;
             // 
             // gvSnapshots
             // 
             this.gvSnapshots.AllowUserToAddRows = false;
             this.gvSnapshots.AllowUserToDeleteRows = false;
+            this.gvSnapshots.BackgroundColor = System.Drawing.Color.White;
             dataGridViewCellStyle1.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
             dataGridViewCellStyle1.BackColor = System.Drawing.SystemColors.Control;
-            dataGridViewCellStyle1.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            dataGridViewCellStyle1.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             dataGridViewCellStyle1.ForeColor = System.Drawing.SystemColors.WindowText;
             dataGridViewCellStyle1.SelectionBackColor = System.Drawing.SystemColors.Highlight;
             dataGridViewCellStyle1.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
@@ -132,7 +135,7 @@
             this.colExport});
             dataGridViewCellStyle2.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
             dataGridViewCellStyle2.BackColor = System.Drawing.SystemColors.Window;
-            dataGridViewCellStyle2.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            dataGridViewCellStyle2.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             dataGridViewCellStyle2.ForeColor = System.Drawing.SystemColors.ControlText;
             dataGridViewCellStyle2.SelectionBackColor = System.Drawing.SystemColors.Highlight;
             dataGridViewCellStyle2.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
@@ -140,11 +143,12 @@
             this.gvSnapshots.DefaultCellStyle = dataGridViewCellStyle2;
             this.gvSnapshots.Dock = System.Windows.Forms.DockStyle.Fill;
             this.gvSnapshots.Location = new System.Drawing.Point(0, 0);
+            this.gvSnapshots.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.gvSnapshots.Name = "gvSnapshots";
             this.gvSnapshots.ReadOnly = true;
             dataGridViewCellStyle3.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
             dataGridViewCellStyle3.BackColor = System.Drawing.SystemColors.Control;
-            dataGridViewCellStyle3.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            dataGridViewCellStyle3.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             dataGridViewCellStyle3.ForeColor = System.Drawing.SystemColors.WindowText;
             dataGridViewCellStyle3.SelectionBackColor = System.Drawing.SystemColors.Highlight;
             dataGridViewCellStyle3.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
@@ -154,7 +158,7 @@
             this.gvSnapshots.RowHeadersWidth = 51;
             this.gvSnapshots.RowTemplate.Height = 24;
             this.gvSnapshots.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-            this.gvSnapshots.Size = new System.Drawing.Size(2019, 590);
+            this.gvSnapshots.Size = new System.Drawing.Size(2019, 748);
             this.gvSnapshots.TabIndex = 0;
             this.gvSnapshots.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.gvSnapshots_CellContentClick);
             this.gvSnapshots.SelectionChanged += new System.EventHandler(this.gvSnapshots_SelectionChanged);
@@ -254,9 +258,9 @@
             this.tsSummaryNext,
             this.toolStripLabel3,
             this.tsSummaryPageSize});
-            this.toolStrip2.Location = new System.Drawing.Point(0, 590);
+            this.toolStrip2.Location = new System.Drawing.Point(0, 748);
             this.toolStrip2.Name = "toolStrip2";
-            this.toolStrip2.Size = new System.Drawing.Size(2019, 31);
+            this.toolStrip2.Size = new System.Drawing.Size(2019, 28);
             this.toolStrip2.TabIndex = 2;
             this.toolStrip2.Text = "toolStrip2";
             // 
@@ -266,14 +270,14 @@
             this.tsSummaryBack.Image = ((System.Drawing.Image)(resources.GetObject("tsSummaryBack.Image")));
             this.tsSummaryBack.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsSummaryBack.Name = "tsSummaryBack";
-            this.tsSummaryBack.Size = new System.Drawing.Size(29, 28);
+            this.tsSummaryBack.Size = new System.Drawing.Size(29, 25);
             this.tsSummaryBack.Text = "Previous";
             this.tsSummaryBack.Click += new System.EventHandler(this.tsSummaryBack_Click);
             // 
             // tsSummaryPageNum
             // 
             this.tsSummaryPageNum.Name = "tsSummaryPageNum";
-            this.tsSummaryPageNum.Size = new System.Drawing.Size(53, 28);
+            this.tsSummaryPageNum.Size = new System.Drawing.Size(53, 25);
             this.tsSummaryPageNum.Text = "Page 1";
             // 
             // tsSummaryNext
@@ -282,14 +286,14 @@
             this.tsSummaryNext.Image = ((System.Drawing.Image)(resources.GetObject("tsSummaryNext.Image")));
             this.tsSummaryNext.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsSummaryNext.Name = "tsSummaryNext";
-            this.tsSummaryNext.Size = new System.Drawing.Size(29, 28);
+            this.tsSummaryNext.Size = new System.Drawing.Size(29, 25);
             this.tsSummaryNext.Text = "Next";
             this.tsSummaryNext.Click += new System.EventHandler(this.tsSummaryNext_Click);
             // 
             // toolStripLabel3
             // 
             this.toolStripLabel3.Name = "toolStripLabel3";
-            this.toolStripLabel3.Size = new System.Drawing.Size(75, 28);
+            this.toolStripLabel3.Size = new System.Drawing.Size(75, 25);
             this.toolStripLabel3.Text = "Page Size:";
             // 
             // tsSummaryPageSize
@@ -301,7 +305,7 @@
             "1000",
             "5000"});
             this.tsSummaryPageSize.Name = "tsSummaryPageSize";
-            this.tsSummaryPageSize.Size = new System.Drawing.Size(121, 31);
+            this.tsSummaryPageSize.Size = new System.Drawing.Size(121, 28);
             this.tsSummaryPageSize.Text = "100";
             this.tsSummaryPageSize.Validated += new System.EventHandler(this.tsSummaryPageSize_Validated);
             // 
@@ -309,9 +313,10 @@
             // 
             this.gvSnapshotsDetail.AllowUserToAddRows = false;
             this.gvSnapshotsDetail.AllowUserToDeleteRows = false;
+            this.gvSnapshotsDetail.BackgroundColor = System.Drawing.Color.White;
             dataGridViewCellStyle4.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
             dataGridViewCellStyle4.BackColor = System.Drawing.SystemColors.Control;
-            dataGridViewCellStyle4.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            dataGridViewCellStyle4.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             dataGridViewCellStyle4.ForeColor = System.Drawing.SystemColors.WindowText;
             dataGridViewCellStyle4.SelectionBackColor = System.Drawing.SystemColors.Highlight;
             dataGridViewCellStyle4.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
@@ -326,7 +331,7 @@
             this.colDiff});
             dataGridViewCellStyle5.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
             dataGridViewCellStyle5.BackColor = System.Drawing.SystemColors.Window;
-            dataGridViewCellStyle5.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            dataGridViewCellStyle5.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             dataGridViewCellStyle5.ForeColor = System.Drawing.SystemColors.ControlText;
             dataGridViewCellStyle5.SelectionBackColor = System.Drawing.SystemColors.Highlight;
             dataGridViewCellStyle5.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
@@ -334,13 +339,14 @@
             this.gvSnapshotsDetail.DefaultCellStyle = dataGridViewCellStyle5;
             this.gvSnapshotsDetail.Dock = System.Windows.Forms.DockStyle.Fill;
             this.gvSnapshotsDetail.Location = new System.Drawing.Point(0, 0);
+            this.gvSnapshotsDetail.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.gvSnapshotsDetail.Name = "gvSnapshotsDetail";
             this.gvSnapshotsDetail.ReadOnly = true;
             this.gvSnapshotsDetail.RowHeadersVisible = false;
             this.gvSnapshotsDetail.RowHeadersWidth = 51;
             this.gvSnapshotsDetail.RowTemplate.Height = 24;
             this.gvSnapshotsDetail.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.CellSelect;
-            this.gvSnapshotsDetail.Size = new System.Drawing.Size(2019, 392);
+            this.gvSnapshotsDetail.Size = new System.Drawing.Size(2019, 490);
             this.gvSnapshotsDetail.TabIndex = 0;
             this.gvSnapshotsDetail.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.gvSnapshotsDetail_CellContentClick);
             // 
@@ -398,19 +404,21 @@
             // 
             this.dgvInstanceSummary.AllowUserToAddRows = false;
             this.dgvInstanceSummary.AllowUserToDeleteRows = false;
+            this.dgvInstanceSummary.BackgroundColor = System.Drawing.Color.White;
             this.dgvInstanceSummary.ColumnHeadersHeight = 29;
             this.dgvInstanceSummary.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
             this.colInstance,
             this.colLastUpdated,
             this.colLastValidated});
             this.dgvInstanceSummary.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.dgvInstanceSummary.Location = new System.Drawing.Point(0, 31);
+            this.dgvInstanceSummary.Location = new System.Drawing.Point(0, 27);
+            this.dgvInstanceSummary.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.dgvInstanceSummary.Name = "dgvInstanceSummary";
             this.dgvInstanceSummary.ReadOnly = true;
             this.dgvInstanceSummary.RowHeadersVisible = false;
             this.dgvInstanceSummary.RowHeadersWidth = 51;
             this.dgvInstanceSummary.RowTemplate.Height = 24;
-            this.dgvInstanceSummary.Size = new System.Drawing.Size(2019, 173);
+            this.dgvInstanceSummary.Size = new System.Drawing.Size(2019, 228);
             this.dgvInstanceSummary.TabIndex = 3;
             this.dgvInstanceSummary.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgvInstanceSummary_CellContentClick);
             // 
@@ -451,7 +459,7 @@
             this.tsBack});
             this.toolStrip1.Location = new System.Drawing.Point(0, 0);
             this.toolStrip1.Name = "toolStrip1";
-            this.toolStrip1.Size = new System.Drawing.Size(2019, 31);
+            this.toolStrip1.Size = new System.Drawing.Size(2019, 27);
             this.toolStrip1.TabIndex = 4;
             this.toolStrip1.Text = "toolStrip1";
             // 
@@ -461,7 +469,7 @@
             this.tsRefresh.Image = global::DBADashGUI.Properties.Resources._112_RefreshArrow_Green_16x16_72;
             this.tsRefresh.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsRefresh.Name = "tsRefresh";
-            this.tsRefresh.Size = new System.Drawing.Size(29, 28);
+            this.tsRefresh.Size = new System.Drawing.Size(29, 24);
             this.tsRefresh.Text = "Refresh";
             this.tsRefresh.Click += new System.EventHandler(this.tsRefresh_Click);
             // 
@@ -471,7 +479,7 @@
             this.tsBack.Image = global::DBADashGUI.Properties.Resources.Previous_grey_16x;
             this.tsBack.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsBack.Name = "tsBack";
-            this.tsBack.Size = new System.Drawing.Size(29, 28);
+            this.tsBack.Size = new System.Drawing.Size(29, 24);
             this.tsBack.Text = "Up level";
             this.tsBack.Click += new System.EventHandler(this.tsBack_Click);
             // 
@@ -607,13 +615,14 @@
             // 
             // SchemaSnapshots
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.Controls.Add(this.dgvInstanceSummary);
             this.Controls.Add(this.splitSnapshotSummary);
             this.Controls.Add(this.toolStrip1);
+            this.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.Name = "SchemaSnapshots";
-            this.Size = new System.Drawing.Size(2019, 1221);
+            this.Size = new System.Drawing.Size(2019, 1526);
             this.Load += new System.EventHandler(this.SchemaSnapshots_Load);
             this.splitSnapshotSummary.Panel1.ResumeLayout(false);
             this.splitSnapshotSummary.Panel1.PerformLayout();

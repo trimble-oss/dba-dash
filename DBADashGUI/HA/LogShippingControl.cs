@@ -77,18 +77,19 @@ namespace DBADashGUI.LogShipping
         private void refreshSummary()
         {
             using (var cn = new SqlConnection(Common.ConnectionString))
-            using (SqlCommand cmd = new SqlCommand("dbo.LogShippingSummary_Get", cn) { CommandType = CommandType.StoredProcedure })
+            using (var cmd = new SqlCommand("dbo.LogShippingSummary_Get", cn) { CommandType = CommandType.StoredProcedure })
+            using (var da = new SqlDataAdapter(cmd))
             {
                 cn.Open();
                 cmd.Parameters.AddWithValue("InstanceIDs",InstanceIDs.AsDataTable());
-                SqlDataAdapter da = new SqlDataAdapter(cmd);
+                
                 DataTable dt = new DataTable();
                 da.Fill(dt);
                 Common.ConvertUTCToLocal(ref dt);
                 dgvSummary.AutoGenerateColumns = false;
                 if (dgvSummary.Columns.Count == 0)
                 {
-                    dgvSummary.Columns.Add(new DataGridViewLinkColumn() { HeaderText = "Instance", DataPropertyName = "Instance", SortMode= DataGridViewColumnSortMode.Automatic });
+                    dgvSummary.Columns.Add(new DataGridViewLinkColumn() { HeaderText = "Instance", DataPropertyName = "Instance", SortMode= DataGridViewColumnSortMode.Automatic,LinkColor=DashColors.LinkColor});
                     dgvSummary.Columns.Add(new DataGridViewTextBoxColumn {Name="Status", HeaderText = "Status", DataPropertyName = "StatusDescription" });
                     dgvSummary.Columns.Add(new DataGridViewTextBoxColumn { HeaderText = "Log Shipped DBs", DataPropertyName = "LogshippedDBCount" });
                     dgvSummary.Columns.Add(new DataGridViewTextBoxColumn { HeaderText = "Warning", DataPropertyName = "WarningCount" });
@@ -99,7 +100,7 @@ namespace DBADashGUI.LogShipping
                     dgvSummary.Columns.Add(new DataGridViewTextBoxColumn { Name="SnapshotAge",HeaderText = "Snapshot Age", DataPropertyName = "SnapshotAge" });
                     dgvSummary.Columns.Add(new DataGridViewTextBoxColumn { HeaderText = "Backup Date of Oldest File", DataPropertyName = "MinDateOfLastBackupRestored" });
                     dgvSummary.Columns.Add(new DataGridViewTextBoxColumn { HeaderText = "Restore Date of Oldest File", DataPropertyName = "MinLastRestoreCompleted" });
-                    dgvSummary.Columns.Add(new DataGridViewLinkColumn() {Name="Configure", HeaderText = "Configure",  Text="Configure", UseColumnTextForLinkValue=true});
+                    dgvSummary.Columns.Add(new DataGridViewLinkColumn() {Name="Configure", HeaderText = "Configure",  Text="Configure", UseColumnTextForLinkValue=true, LinkColor = DashColors.LinkColor});
                 }
                 dgvSummary.DataSource = new DataView(dt);
                 dgvSummary.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
@@ -111,7 +112,8 @@ namespace DBADashGUI.LogShipping
             tsBack.Enabled = (cachedInstanceIDs.Count > 1 && instanceIDs.Count == 1);
             refreshSummary();
             using (var cn = new SqlConnection(Common.ConnectionString))
-            using (SqlCommand cmd = new SqlCommand("dbo.LogShipping_Get", cn) { CommandType = CommandType.StoredProcedure })
+            using (var cmd = new SqlCommand("dbo.LogShipping_Get", cn) { CommandType = CommandType.StoredProcedure })
+            using (var da = new SqlDataAdapter(cmd))
             {
                 cn.Open();
                 cmd.Parameters.AddWithValue("InstanceIDs", string.Join(",", InstanceIDs));
@@ -119,7 +121,7 @@ namespace DBADashGUI.LogShipping
                 cmd.Parameters.AddWithValue("IncludeWarning", IncludeWarning);
                 cmd.Parameters.AddWithValue("IncludeNA", IncludeNA);
                 cmd.Parameters.AddWithValue("IncludeOK", IncludeOK);
-                SqlDataAdapter da = new SqlDataAdapter(cmd);
+                
                 DataTable dt = new DataTable();
                 da.Fill(dt);
 				Common.ConvertUTCToLocal(ref dt);
@@ -137,6 +139,7 @@ namespace DBADashGUI.LogShipping
         public LogShippingControl()
         {
             InitializeComponent();
+            Common.StyleGrid(ref dgvLogShipping);
         }
 
         private void tsFilter_Click(object sender, EventArgs e)
@@ -191,8 +194,8 @@ namespace DBADashGUI.LogShipping
                 var row = (DataRowView)dgvLogShipping.Rows[idx].DataBoundItem;
                 var Status = (DBADashStatus.DBADashStatusEnum)row["Status"];
                 var snapshotStatus = (DBADashStatus.DBADashStatusEnum)row["SnapshotAgeStatus"];
-                dgvLogShipping.Rows[idx].Cells["SnapshotAge"].Style.BackColor = DBADashStatus.GetStatusColour(snapshotStatus);
-                dgvLogShipping.Rows[idx].Cells["Status"].Style.BackColor = DBADashStatus.GetStatusColour(Status);
+                dgvLogShipping.Rows[idx].Cells["SnapshotAge"].SetStatusColor(snapshotStatus);
+                dgvLogShipping.Rows[idx].Cells["Status"].SetStatusColor(Status);
                 if ((string)row["ThresholdConfiguredLevel"] == "Database")
                 {
                     dgvLogShipping.Rows[idx].Cells["Configure"].Style.Font = new Font(dgvLogShipping.Font, FontStyle.Bold);
@@ -262,8 +265,8 @@ namespace DBADashGUI.LogShipping
                 var row = (DataRowView)dgvSummary.Rows[idx].DataBoundItem;
                 var Status = (DBADashStatus.DBADashStatusEnum)row["Status"];
                 var snapshotStatus = (DBADashStatus.DBADashStatusEnum)row["SnapshotAgeStatus"];
-                dgvSummary.Rows[idx].Cells["SnapshotAge"].Style.BackColor = DBADashStatus.GetStatusColour(snapshotStatus);
-                dgvSummary.Rows[idx].Cells["Status"].Style.BackColor = DBADashStatus.GetStatusColour(Status);
+                dgvSummary.Rows[idx].Cells["SnapshotAge"].SetStatusColor(snapshotStatus);
+                dgvSummary.Rows[idx].Cells["Status"].SetStatusColor(Status);
                 if ((bool)row["InstanceLevelThreshold"])
                 {
                     dgvSummary.Rows[idx].Cells["Configure"].Style.Font = new Font(dgvSummary.Font, FontStyle.Bold);

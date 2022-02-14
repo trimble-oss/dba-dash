@@ -1,4 +1,5 @@
-﻿using System;
+﻿using DBADashGUI;
+using System;
 using System.ComponentModel;
 using System.Drawing;
 using System.Drawing.Drawing2D;
@@ -57,8 +58,8 @@ namespace CustomProgressControl
             this.ValueType = typeof(int);
         }
 
-        public Color ProgressBarColorFrom { get; set; } = Color.Azure;
-        public Color ProgressBarColorTo { get; set; } = Color.LightSkyBlue;
+        public Color ProgressBarColorFrom { get; set; } = DashColors.ProgressBarFrom;
+        public Color ProgressBarColorTo { get; set; } = DashColors.ProgressBarTo;
 
         /// <summary>
         /// Paints the content of the cell

@@ -12,6 +12,8 @@ using static DBADashGUI.Main;
 using System.IO;
 using System.Diagnostics;
 using DBADashGUI.Checks;
+using static DBADashGUI.DBADashStatus;
+
 namespace DBADashGUI
 {
     public partial class Summary : UserControl
@@ -42,63 +44,69 @@ namespace DBADashGUI
                                                             {"LogFreeSpaceStatus",false },{"DBMailStatus",false } };
         }
 
+
+        private DataTable getSummary()
+        {
+            using (var cn = new SqlConnection(ConnectionString))
+            using (var cmd = new SqlCommand("dbo.Summary_Get", cn) { CommandType = CommandType.StoredProcedure })
+            {
+                cn.Open();
+
+                cmd.Parameters.AddWithValue("InstanceIDs", string.Join(",", InstanceIDs));
+                SqlDataAdapter da = new SqlDataAdapter(cmd);
+                DataTable dt = new DataTable();
+                da.Fill(dt);
+                return dt;
+            }
+        }
+        
         public void RefreshData()
         {
             resetStatusCols();
-            SqlConnection cn = new SqlConnection(ConnectionString);
-            using (cn)
+
+            DataTable dt = getSummary();
+            dgvSummary.AutoGenerateColumns = false;
+
+            var cols = (statusColumns.Keys).ToList<string>();
+            dt.Columns.Add("IsFocusedRow", typeof(bool));
+            foreach (DataRow row in dt.Rows)
             {
-                using (SqlCommand cmd = new SqlCommand("dbo.Summary_Get", cn){ CommandType = CommandType.StoredProcedure })
+                bool isFocusedRow = false;
+                foreach (string col in cols)
                 {
-                    cn.Open();
-
-                    cmd.Parameters.AddWithValue("InstanceIDs", string.Join(",", InstanceIDs));
-                    SqlDataAdapter da = new SqlDataAdapter(cmd);
-                    DataTable dt = new DataTable();
-                    da.Fill(dt);
-                    dgvSummary.AutoGenerateColumns = false;
-
-                    var cols = (statusColumns.Keys).ToList<string>();
-                    dt.Columns.Add("IsFocusedRow", typeof(bool));
-                    foreach (DataRow row in dt.Rows)
+                    var status = (DBADashStatus.DBADashStatusEnum)Convert.ToInt32(row[col] == DBNull.Value ? 3 : row[col]);
+                    if (!(status == DBADashStatus.DBADashStatusEnum.NA || (status == DBADashStatus.DBADashStatusEnum.OK && focusedView)))
                     {
-                        bool isFocusedRow = false;
-                        foreach (string col in cols)
-                        {
-                            var status = (DBADashStatus.DBADashStatusEnum)Convert.ToInt32(row[col] == DBNull.Value ? 3 : row[col]);
-                            if (!(status == DBADashStatus.DBADashStatusEnum.NA || (status == DBADashStatus.DBADashStatusEnum.OK && focusedView)))
-                            {
-                                statusColumns[col] = true;
-                                isFocusedRow = true;
-                            }                         
-                        }
-                        
-                        if (row["IsAgentRunning"] != DBNull.Value && (bool)row["IsAgentRunning"] == false)
-                        {
-                            isFocusedRow = true;
-                            statusColumns["JobStatus"] = true;
-                        }
-                        row["IsFocusedRow"] = isFocusedRow;
-                    }
-                    // hide columns that all have status N/A
-                    foreach (var col in statusColumns)
-                    {
-                        dgvSummary.Columns[col.Key].Visible = col.Value;
-                    }
-                    string rowFilter = "";
-                    if (focusedView)
-                    {
-                        rowFilter = "IsFocusedRow=1";
-                    }
-                    dv = new DataView(dt,rowFilter,"Instance", DataViewRowState.CurrentRows);
-                    dgvSummary.DataSource = dv;
-                    dgvSummary.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
-                    lastRefresh = DateTime.Now;
-                    lblRefreshTime.Text = "Refresh Time: " + lastRefresh.ToString();
-                    lblRefreshTime.ForeColor = Color.Blue;
-                    timer1.Enabled = true;
+                        statusColumns[col] = true;
+                        isFocusedRow = true;
+                    }                         
                 }
+                        
+                if (row["IsAgentRunning"] != DBNull.Value && (bool)row["IsAgentRunning"] == false)
+                {
+                    isFocusedRow = true;
+                    statusColumns["JobStatus"] = true;
+                }
+                row["IsFocusedRow"] = isFocusedRow;
             }
+            // hide columns that all have status N/A
+            foreach (var col in statusColumns)
+            {
+                dgvSummary.Columns[col.Key].Visible = col.Value;
+            }
+            string rowFilter = "";
+            if (focusedView)
+            {
+                rowFilter = "IsFocusedRow=1";
+            }
+            dv = new DataView(dt,rowFilter,"Instance", DataViewRowState.CurrentRows);
+            dgvSummary.DataSource = dv;
+            dgvSummary.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
+            lastRefresh = DateTime.Now;
+            lblRefreshTime.Text = "Refresh Time: " + lastRefresh.ToString();
+            lblRefreshTime.ForeColor = DBADashStatusEnum.OK.GetColor();
+            timer1.Enabled = true;
+                        
         }
 
         private void dgvSummary_RowAdded(object sender, DataGridViewRowsAddedEventArgs e)
@@ -112,7 +120,7 @@ namespace DBADashGUI
                 foreach (var col in cols)
                 {
                     var status = (DBADashStatus.DBADashStatusEnum)Convert.ToInt32(row[col] == DBNull.Value ? 3 : row[col]);
-                    dgvSummary.Rows[idx].Cells[col].Style.BackColor = DBADashStatus.GetStatusColour(status);                    
+                    dgvSummary.Rows[idx].Cells[col].SetStatusColor(status);                    
                 }
                 string DBMailStatus = Convert.ToString(row["DBMailStatusDescription"]);
                 dgvSummary.Rows[idx].Cells["DBMailStatus"].ToolTipText = DBMailStatus;
@@ -127,14 +135,9 @@ namespace DBADashGUI
                 dgvSummary.Rows[idx].Cells["QueryStoreStatus"].Value = (int)row["QueryStoreStatus"] == 3 ? "" : "View";
                 if (row["IsAgentRunning"]!=DBNull.Value && (bool)row["IsAgentRunning"] == false)
                 {
-                    dgvSummary.Rows[idx].Cells["JobStatus"].Style.BackColor = Color.Black;
-                    ((DataGridViewLinkCell)dgvSummary.Rows[idx].Cells["JobStatus"]).LinkColor  = Color.White;
+                    dgvSummary.Rows[idx].Cells["JobStatus"].SetStatusColor(Color.Black);
                     dgvSummary.Rows[idx].Cells["JobStatus"].Value = "Not Running";
-                }
-                else
-                {
-                    ((DataGridViewLinkCell)dgvSummary.Rows[idx].Cells["JobStatus"]).LinkColor = Color.Black;
-                }
+                }              
 
                 string uptimeString;
                 if (row["sqlserver_uptime"] != DBNull.Value)
@@ -455,12 +458,12 @@ namespace DBADashGUI
         private void timer1_Tick(object sender, EventArgs e)
         {
             if (DateTime.Now.Subtract(lastRefresh).TotalMinutes > 60){
-                lblRefreshTime.ForeColor = Color.Red;
+                lblRefreshTime.ForeColor = DBADashStatusEnum.Critical.GetColor();
                 timer1.Enabled = false;
             }
             else if(DateTime.Now.Subtract(lastRefresh).TotalMinutes>10)
             {
-                lblRefreshTime.ForeColor = Color.OrangeRed;
+                lblRefreshTime.ForeColor = DBADashStatusEnum.Warning.GetColor();
             }
         }
 

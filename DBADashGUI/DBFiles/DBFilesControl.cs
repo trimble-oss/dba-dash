@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using Microsoft.Data.SqlClient;
+using static DBADashGUI.DBADashStatus;
 
 namespace DBADashGUI.DBFiles
 {
@@ -84,35 +85,40 @@ namespace DBADashGUI.DBFiles
             }
         }
 
-        public void RefreshData()
+        private DataTable getDBFiles()
         {
             var selectedTypes = FileTypes;
             using (var cn = new SqlConnection(ConnectionString))
+            using (var cmd = new SqlCommand("dbo.DBFiles_Get", cn) { CommandType = CommandType.StoredProcedure })
+            using (var da = new SqlDataAdapter(cmd))
             {
-                using (SqlCommand cmd = new SqlCommand("dbo.DBFiles_Get", cn) { CommandType = CommandType.StoredProcedure })
+                cn.Open();
+                cmd.Parameters.AddWithValue("InstanceIDs", string.Join(",", InstanceIDs));
+                if (DatabaseID != null) { cmd.Parameters.AddWithValue("DatabaseID", DatabaseID); }
+                cmd.Parameters.AddWithValue("IncludeNA", IncludeNA);
+                cmd.Parameters.AddWithValue("IncludeOK", IncludeOK);
+                cmd.Parameters.AddWithValue("IncludeWarning", IncludeWarning);
+                cmd.Parameters.AddWithValue("IncludeCritical", IncludeCritical);
+                cmd.Parameters.AddWithValue("FilegroupLevel", tsFilegroup.Checked);
+                if (selectedTypes.Count > 0 && selectedTypes.Count < 4)
                 {
-                    cn.Open();
-                    cmd.Parameters.AddWithValue("InstanceIDs", string.Join(",", InstanceIDs));
-                    if (DatabaseID != null) { cmd.Parameters.AddWithValue("DatabaseID", DatabaseID); }
-                    cmd.Parameters.AddWithValue("IncludeNA", IncludeNA);
-                    cmd.Parameters.AddWithValue("IncludeOK", IncludeOK);
-                    cmd.Parameters.AddWithValue("IncludeWarning", IncludeWarning);
-                    cmd.Parameters.AddWithValue("IncludeCritical", IncludeCritical);
-                    cmd.Parameters.AddWithValue("FilegroupLevel", tsFilegroup.Checked);
-                    if(selectedTypes.Count>0 && selectedTypes.Count < 4)
-                    {
-                        cmd.Parameters.AddWithValue("Types", string.Join(",",selectedTypes));
-                    }
-                    
-                    SqlDataAdapter da = new SqlDataAdapter(cmd);
-                    DataTable dt = new DataTable();
-                    da.Fill(dt);
-                    dgvFiles.AutoGenerateColumns = false;
-                    dgvFiles.DataSource = new DataView(dt);
-                    dgvFiles.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
+                    cmd.Parameters.AddWithValue("Types", string.Join(",", selectedTypes));
                 }
-            }
 
+                DataTable dt = new DataTable();
+                da.Fill(dt);
+                return dt;
+            }
+        }
+
+        public void RefreshData()
+        {
+
+            var dt = getDBFiles();
+            dgvFiles.AutoGenerateColumns = false;
+            dgvFiles.DataSource = new DataView(dt);
+            dgvFiles.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);               
+           
             configureInstanceThresholdsToolStripMenuItem.Enabled = InstanceIDs.Count == 1;
             configureDatabaseThresholdsToolStripMenuItem.Enabled = InstanceIDs.Count == 1 && DatabaseID > 0;
    
@@ -187,20 +193,12 @@ namespace DBADashGUI.DBFiles
                 var maxSizeStatus = (DBADashStatus.DBADashStatusEnum)row["PctMaxSizeStatus"];
                 var fgAutogrowStatus = (DBADashStatus.DBADashStatusEnum)row["FilegroupAutogrowStatus"];
                 string checkType = row["FreeSpaceCheckType"] == DBNull.Value ? "-" : (string)row["FreeSpaceCheckType"];
-                dgvFiles.Rows[idx].Cells["FileSnapshotAge"].Style.BackColor = DBADashStatus.GetStatusColour(snapshotStatus);
-                dgvFiles.Rows[idx].Cells["FilegroupPctFree"].Style.BackColor = Color.White;
-                dgvFiles.Rows[idx].Cells["FilegroupFreeMB"].Style.BackColor = Color.White;
-                dgvFiles.Rows[idx].Cells["FilegroupPctMaxSize"].Style.BackColor = DBADashStatus.GetStatusColour(maxSizeStatus);
-                dgvFiles.Rows[idx].Cells["FilegroupAutogrow"].Style.BackColor = DBADashStatus.GetStatusColour(fgAutogrowStatus);
-                if (checkType != "M")
-                {
-                    dgvFiles.Rows[idx].Cells["FilegroupPctFree"].Style.BackColor = DBADashStatus.GetStatusColour(Status);
-                }
-                if (checkType != "%")
-                {
-                    dgvFiles.Rows[idx].Cells["FilegroupFreeMB"].Style.BackColor = DBADashStatus.GetStatusColour(Status);
-                }
-
+                dgvFiles.Rows[idx].Cells["FileSnapshotAge"].SetStatusColor(snapshotStatus);           
+                dgvFiles.Rows[idx].Cells["FilegroupPctMaxSize"].SetStatusColor(maxSizeStatus);
+                dgvFiles.Rows[idx].Cells["FilegroupAutogrow"].SetStatusColor(fgAutogrowStatus);        
+                dgvFiles.Rows[idx].Cells["FilegroupPctFree"].SetStatusColor(checkType == "%" ? Status : DBADashStatusEnum.NA);
+                dgvFiles.Rows[idx].Cells["FilegroupFreeMB"].SetStatusColor(checkType=="M"  ? Status : DBADashStatusEnum.NA);                   
+            
                 if (row["ConfiguredLevel"]!=DBNull.Value && (string)row["ConfiguredLevel"] == "FG")
                 {
                     dgvFiles.Rows[idx].Cells["Configure"].Style.Font = new Font(dgvFiles.Font, FontStyle.Bold);
@@ -302,6 +300,11 @@ namespace DBADashGUI.DBFiles
         private void tsExcel_Click(object sender, EventArgs e)
         {
             Common.PromptSaveDataGridView(ref dgvFiles);
+        }
+
+        private void DBFilesControl_Load(object sender, EventArgs e)
+        {
+            Common.StyleGrid(ref dgvFiles);
         }
     }
 }

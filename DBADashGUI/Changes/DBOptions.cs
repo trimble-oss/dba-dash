@@ -80,80 +80,78 @@ namespace DBADashGUI.Changes
         private void refreshDBSummary()
         {
             using (var cn = new SqlConnection(Common.ConnectionString))
+            using (var cmd = new SqlCommand("dbo.DBSummary_Get", cn) { CommandType = CommandType.StoredProcedure })
+            using (var da = new SqlDataAdapter(cmd))
             {
-                using (SqlCommand cmd = new SqlCommand("dbo.DBSummary_Get", cn) { CommandType = CommandType.StoredProcedure })
-                {
-                    cmd.Parameters.AddWithValue("InstanceIDs", String.Join(",", InstanceIDs));
-                    SqlDataAdapter da = new SqlDataAdapter(cmd);
-                    DataTable dt = new DataTable();
-                    da.Fill(dt);
-                    dgv.DataSource = dt;
-                    dgv.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
-                }
+                cmd.Parameters.AddWithValue("InstanceIDs", String.Join(",", InstanceIDs));               
+                DataTable dt = new DataTable();
+                da.Fill(dt);
+                dgv.DataSource = dt;
+                dgv.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
             }
+            
         }
 
         private void refreshDBInfo()
         {
             using (var cn = new SqlConnection(Common.ConnectionString))
+            using (var cmd = new SqlCommand("dbo.DatabasesAllInfo_Get", cn) { CommandType = CommandType.StoredProcedure })
+            using (var da = new SqlDataAdapter(cmd))
             {
-                using (SqlCommand cmd = new SqlCommand("dbo.DatabasesAllInfo_Get", cn) { CommandType = CommandType.StoredProcedure })
+                cmd.Parameters.AddWithValue("InstanceIDs", String.Join(",", InstanceIDs));
+                if (DatabaseID > 0)
                 {
-                    cmd.Parameters.AddWithValue("InstanceIDs", String.Join(",", InstanceIDs));
-                    if (DatabaseID > 0)
-                    {
-                        cmd.Parameters.AddWithValue("DatabaseID", DatabaseID);
-                    }
-                    SqlDataAdapter da = new SqlDataAdapter(cmd);
-                    DataTable dt = new DataTable();
-                    da.Fill(dt);
-                    if (dt.Rows.Count == 1)
-                    {
-                        pivot(ref dt);
-                    }
-                    else
-                    {
-                        dgv.DataSource = dt;
-                        dgv.Columns["InstanceID"].Visible = false;
-                        dgv.Columns["DatabaseID"].Visible = false;
-                        dgv.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
-                    }
+                    cmd.Parameters.AddWithValue("DatabaseID", DatabaseID);
+                }
+                ;
+                DataTable dt = new DataTable();
+                da.Fill(dt);
+                if (dt.Rows.Count == 1)
+                {
+                    pivot(ref dt);
+                }
+                else
+                {
+                    dgv.DataSource = dt;
+                    dgv.Columns["InstanceID"].Visible = false;
+                    dgv.Columns["DatabaseID"].Visible = false;
+                    dgv.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
                 }
             }
+            
         }
 
         private void refreshHistory()
         {
             using (var cn = new SqlConnection(Common.ConnectionString))
+            using (var cmd = new SqlCommand("dbo.DBOptionsHistory_Get", cn) { CommandType = CommandType.StoredProcedure })
+            using (var da = new SqlDataAdapter(cmd))
             {
-                using (SqlCommand cmd = new SqlCommand("dbo.DBOptionsHistory_Get", cn) { CommandType = CommandType.StoredProcedure })
+                cmd.Parameters.AddWithValue("InstanceIDs", String.Join(",", InstanceIDs));
+                if (DatabaseID > 0)
                 {
-                    cmd.Parameters.AddWithValue("InstanceIDs", String.Join(",", InstanceIDs));
-                    if (DatabaseID > 0)
-                    {
-                        cmd.Parameters.AddWithValue("DatabaseID", DatabaseID);
-                    }
-                    cmd.Parameters.AddWithValue("ExcludeStateChanges", excludeStateChangesToolStripMenuItem.Checked);
-                    SqlDataAdapter da = new SqlDataAdapter(cmd);
-                    DataTable dt = new DataTable();
-                    da.Fill(dt);
-                    Common.ConvertUTCToLocal(ref dt);
-                    foreach (DataRow r in dt.Rows)
-                    {
-                        if (r["OldValue"].GetType() == typeof(byte[]))
-                        {
-                            r["OldValue"] = Common.ByteArrayToString((byte[])r["OldValue"]);
-                        }
-                        if (r["NewValue"].GetType() == typeof(byte[]))
-                        {
-                            r["NewValue"] = Common.ByteArrayToString((byte[])r["NewValue"]);
-                        }
-                    }
-                    dgvHistory.AutoGenerateColumns = false;
-                    dgvHistory.DataSource = dt;
-                    dgvHistory.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
+                    cmd.Parameters.AddWithValue("DatabaseID", DatabaseID);
                 }
-            }
+                cmd.Parameters.AddWithValue("ExcludeStateChanges", excludeStateChangesToolStripMenuItem.Checked);
+                
+                DataTable dt = new DataTable();
+                da.Fill(dt);
+                Common.ConvertUTCToLocal(ref dt);
+                foreach (DataRow r in dt.Rows)
+                {
+                    if (r["OldValue"].GetType() == typeof(byte[]))
+                    {
+                        r["OldValue"] = Common.ByteArrayToString((byte[])r["OldValue"]);
+                    }
+                    if (r["NewValue"].GetType() == typeof(byte[]))
+                    {
+                        r["NewValue"] = Common.ByteArrayToString((byte[])r["NewValue"]);
+                    }
+                }
+                dgvHistory.AutoGenerateColumns = false;
+                dgvHistory.DataSource = dt;
+                dgvHistory.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
+            }          
         }
 
         private void tsCopyHistory_Click(object sender, EventArgs e)
@@ -220,20 +218,20 @@ namespace DBADashGUI.Changes
                     var r = dgv.Rows[idx];
                     foreach (var col in warningCols)
                     {
-                        r.Cells[col].Style.BackColor = (Int32)r.Cells[col].Value > 0 ? Color.Yellow : Color.White;
+                        r.Cells[col].SetStatusColor((Int32)r.Cells[col].Value > 0 ? DashColors.Warning : Color.White);
                     }
                     foreach (var col in criticalCols)
                     {
-                        r.Cells[col].Style.BackColor = (Int32)r.Cells[col].Value > 0 ? Color.Red : Color.White;
+                        r.Cells[col].SetStatusColor((Int32)r.Cells[col].Value > 0 ? DashColors.Fail  : Color.White);
                     }
-                    if (r.Cells["Max VLF Count"].Value == DBNull.Value)
+                    Color vlfStatusColor = DashColors.NotApplicable;
+                    if (r.Cells["Max VLF Count"].Value != DBNull.Value)
                     {
-                        r.Cells["Max VLF Count"].Style.BackColor = Color.LightGray;
+                        vlfStatusColor = (Int32)r.Cells["Max VLF Count"].Value > 10000 ? DashColors.Fail : ((Int32)r.Cells["Max VLF Count"].Value > 1000 ? DashColors.Warning : Color.White);
                     }
-                    else
-                    {
-                        r.Cells["Max VLF Count"].Style.BackColor = (Int32)r.Cells["Max VLF Count"].Value > 10000 ? Color.Red : ((Int32)r.Cells["Max VLF Count"].Value > 1000 ? Color.Yellow : Color.White);
-                    }
+
+                    r.Cells["Max VLF Count"].SetStatusColor(vlfStatusColor);
+                    
                 }
             }
         }
@@ -246,6 +244,14 @@ namespace DBADashGUI.Changes
         private void tsExcelHistory_Click(object sender, EventArgs e)
         {
             Common.PromptSaveDataGridView(ref dgvHistory);
+        }
+
+        private void tsCols_Click(object sender, EventArgs e)
+        {
+            using(var frm = new SelectColumns() { Columns = dgv.Columns } )
+            {
+                frm.ShowDialog(this);
+            }
         }
     }
 }

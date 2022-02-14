@@ -44,9 +44,10 @@ namespace DBADashServiceConfig
             // 
             this.lnkPermissions.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.lnkPermissions.AutoSize = true;
-            this.lnkPermissions.Location = new System.Drawing.Point(34, 354);
+            this.lnkPermissions.LinkColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(79)))), ((int)(((byte)(131)))));
+            this.lnkPermissions.Location = new System.Drawing.Point(34, 442);
             this.lnkPermissions.Name = "lnkPermissions";
-            this.lnkPermissions.Size = new System.Drawing.Size(243, 17);
+            this.lnkPermissions.Size = new System.Drawing.Size(248, 20);
             this.lnkPermissions.TabIndex = 32;
             this.lnkPermissions.TabStop = true;
             this.lnkPermissions.Text = "Permissions required for service user";
@@ -61,29 +62,29 @@ namespace DBADashServiceConfig
             "LocalService",
             "NetworkService",
             "User (prompt)"});
-            this.cboServiceCredentials.Location = new System.Drawing.Point(118, 18);
-            this.cboServiceCredentials.Margin = new System.Windows.Forms.Padding(4);
+            this.cboServiceCredentials.Location = new System.Drawing.Point(118, 22);
+            this.cboServiceCredentials.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.cboServiceCredentials.Name = "cboServiceCredentials";
-            this.cboServiceCredentials.Size = new System.Drawing.Size(160, 24);
+            this.cboServiceCredentials.Size = new System.Drawing.Size(160, 28);
             this.cboServiceCredentials.TabIndex = 27;
             // 
             // lblServiceCredentials
             // 
             this.lblServiceCredentials.AutoSize = true;
-            this.lblServiceCredentials.Location = new System.Drawing.Point(9, 25);
+            this.lblServiceCredentials.Location = new System.Drawing.Point(9, 31);
             this.lblServiceCredentials.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.lblServiceCredentials.Name = "lblServiceCredentials";
-            this.lblServiceCredentials.Size = new System.Drawing.Size(58, 17);
+            this.lblServiceCredentials.Size = new System.Drawing.Size(57, 20);
             this.lblServiceCredentials.TabIndex = 30;
             this.lblServiceCredentials.Text = "Run As:";
             // 
             // bttnInstall
             // 
             this.bttnInstall.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.bttnInstall.Location = new System.Drawing.Point(800, 354);
+            this.bttnInstall.Location = new System.Drawing.Point(800, 442);
             this.bttnInstall.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.bttnInstall.Name = "bttnInstall";
-            this.bttnInstall.Size = new System.Drawing.Size(104, 35);
+            this.bttnInstall.Size = new System.Drawing.Size(104, 44);
             this.bttnInstall.TabIndex = 28;
             this.bttnInstall.Text = "Install";
             this.bttnInstall.UseVisualStyleBackColor = true;
@@ -93,9 +94,10 @@ namespace DBADashServiceConfig
             // 
             this.bttnCancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.bttnCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.bttnCancel.Location = new System.Drawing.Point(677, 354);
+            this.bttnCancel.Location = new System.Drawing.Point(677, 442);
+            this.bttnCancel.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.bttnCancel.Name = "bttnCancel";
-            this.bttnCancel.Size = new System.Drawing.Size(104, 34);
+            this.bttnCancel.Size = new System.Drawing.Size(104, 42);
             this.bttnCancel.TabIndex = 34;
             this.bttnCancel.Text = "Cancel";
             this.bttnCancel.UseVisualStyleBackColor = true;
@@ -105,12 +107,13 @@ namespace DBADashServiceConfig
             this.txtOutput.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.txtOutput.Font = new System.Drawing.Font("Courier New", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.txtOutput.Location = new System.Drawing.Point(12, 54);
+            this.txtOutput.Font = new System.Drawing.Font("Courier New", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.txtOutput.Location = new System.Drawing.Point(12, 68);
+            this.txtOutput.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.txtOutput.Multiline = true;
             this.txtOutput.Name = "txtOutput";
             this.txtOutput.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.txtOutput.Size = new System.Drawing.Size(892, 284);
+            this.txtOutput.Size = new System.Drawing.Size(892, 354);
             this.txtOutput.TabIndex = 35;
             this.txtOutput.Text = resources.GetString("txtOutput.Text");
             // 
@@ -118,7 +121,8 @@ namespace DBADashServiceConfig
             // 
             this.pictureBox1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.pictureBox1.Image = global::DBADashServiceConfig.Properties.Resources.Information_blue_6227_16x16_cyan;
-            this.pictureBox1.Location = new System.Drawing.Point(12, 354);
+            this.pictureBox1.Location = new System.Drawing.Point(12, 442);
+            this.pictureBox1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.pictureBox1.Name = "pictureBox1";
             this.pictureBox1.Size = new System.Drawing.Size(16, 16);
             this.pictureBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.AutoSize;
@@ -128,10 +132,10 @@ namespace DBADashServiceConfig
             // InstallService
             // 
             this.AcceptButton = this.bttnInstall;
-            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.CancelButton = this.bttnCancel;
-            this.ClientSize = new System.Drawing.Size(916, 400);
+            this.ClientSize = new System.Drawing.Size(916, 500);
             this.Controls.Add(this.txtOutput);
             this.Controls.Add(this.bttnCancel);
             this.Controls.Add(this.pictureBox1);
@@ -140,6 +144,7 @@ namespace DBADashServiceConfig
             this.Controls.Add(this.lblServiceCredentials);
             this.Controls.Add(this.bttnInstall);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
+            this.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.Name = "InstallService";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "Install Service";

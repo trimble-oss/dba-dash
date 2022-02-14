@@ -30,11 +30,11 @@
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(ManageInstances));
             this.dgv = new System.Windows.Forms.DataGridView();
-            this.colDeleteRestore = new System.Windows.Forms.DataGridViewLinkColumn();
             this.dataGridViewTextBoxColumn1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dataGridViewTextBoxColumn2 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.colInstance = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.colIsAzure = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colDeleteRestore = new System.Windows.Forms.DataGridViewLinkColumn();
             ((System.ComponentModel.ISupportInitialize)(this.dgv)).BeginInit();
             this.SuspendLayout();
             // 
@@ -50,23 +50,16 @@
             this.colDeleteRestore});
             this.dgv.Dock = System.Windows.Forms.DockStyle.Fill;
             this.dgv.Location = new System.Drawing.Point(0, 0);
+            this.dgv.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.dgv.Name = "dgv";
             this.dgv.ReadOnly = true;
             this.dgv.RowHeadersVisible = false;
             this.dgv.RowHeadersWidth = 51;
             this.dgv.RowTemplate.Height = 24;
-            this.dgv.Size = new System.Drawing.Size(621, 688);
+            this.dgv.Size = new System.Drawing.Size(621, 860);
             this.dgv.TabIndex = 0;
             this.dgv.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgv_CellContentClick);
             this.dgv.RowsAdded += new System.Windows.Forms.DataGridViewRowsAddedEventHandler(this.dgv_RowsAdded);
-            // 
-            // colDeleteRestore
-            // 
-            this.colDeleteRestore.HeaderText = "Delete/Restore";
-            this.colDeleteRestore.MinimumWidth = 6;
-            this.colDeleteRestore.Name = "colDeleteRestore";
-            this.colDeleteRestore.ReadOnly = true;
-            this.colDeleteRestore.Width = 109;
             // 
             // dataGridViewTextBoxColumn1
             // 
@@ -88,12 +81,12 @@
             // 
             // colInstance
             // 
+            this.colInstance.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
             this.colInstance.DataPropertyName = "ConnectionID";
             this.colInstance.HeaderText = "Instance";
             this.colInstance.MinimumWidth = 6;
             this.colInstance.Name = "colInstance";
             this.colInstance.ReadOnly = true;
-            this.colInstance.Width = 400;
             // 
             // colIsAzure
             // 
@@ -104,13 +97,22 @@
             this.colIsAzure.ReadOnly = true;
             this.colIsAzure.Width = 80;
             // 
+            // colDeleteRestore
+            // 
+            this.colDeleteRestore.HeaderText = "Delete/Restore";
+            this.colDeleteRestore.MinimumWidth = 6;
+            this.colDeleteRestore.Name = "colDeleteRestore";
+            this.colDeleteRestore.ReadOnly = true;
+            this.colDeleteRestore.Width = 109;
+            // 
             // ManageInstances
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(621, 688);
+            this.ClientSize = new System.Drawing.Size(621, 860);
             this.Controls.Add(this.dgv);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
+            this.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.Name = "ManageInstances";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "Manage Instances";

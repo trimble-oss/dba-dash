@@ -29,33 +29,33 @@ namespace DBADashGUI.Changes
         /// </summary>
         private void InitializeComponent()
         {
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle3 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle4 = new System.Windows.Forms.DataGridViewCellStyle();
             this.dgv = new System.Windows.Forms.DataGridView();
+            this.colInstance = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.colLinkInstance = new System.Windows.Forms.DataGridViewLinkColumn();
             this.colEnabled = new System.Windows.Forms.DataGridViewCheckBoxColumn();
+            this.colClassifierFunction = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.colReconfigurationPending = new System.Windows.Forms.DataGridViewCheckBoxColumn();
             this.colReconfigurationError = new System.Windows.Forms.DataGridViewCheckBoxColumn();
+            this.colMaxOutstandingIO = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colValidFrom = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colValidTo = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colSnapshotDate = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.colScript = new System.Windows.Forms.DataGridViewLinkColumn();
             this.colDiff = new System.Windows.Forms.DataGridViewLinkColumn();
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
             this.tsRefresh = new System.Windows.Forms.ToolStripButton();
             this.tsCopy = new System.Windows.Forms.ToolStripButton();
+            this.tsExcel = new System.Windows.Forms.ToolStripButton();
             this.tsBack = new System.Windows.Forms.ToolStripButton();
             this.tsCompare = new System.Windows.Forms.ToolStripButton();
-            this.tsExcel = new System.Windows.Forms.ToolStripButton();
             this.dataGridViewTextBoxColumn1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dataGridViewTextBoxColumn2 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dataGridViewTextBoxColumn3 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dataGridViewTextBoxColumn4 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dataGridViewTextBoxColumn5 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dataGridViewTextBoxColumn6 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colInstance = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colClassifierFunction = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colMaxOutstandingIO = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colValidFrom = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colValidTo = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colSnapshotDate = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dataGridViewTextBoxColumn7 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dataGridViewTextBoxColumn8 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dataGridViewTextBoxColumn9 = new System.Windows.Forms.DataGridViewTextBoxColumn();
@@ -67,14 +67,15 @@ namespace DBADashGUI.Changes
             // 
             this.dgv.AllowUserToAddRows = false;
             this.dgv.AllowUserToDeleteRows = false;
-            dataGridViewCellStyle1.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle1.BackColor = System.Drawing.SystemColors.Control;
-            dataGridViewCellStyle1.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            dataGridViewCellStyle1.ForeColor = System.Drawing.SystemColors.WindowText;
-            dataGridViewCellStyle1.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-            dataGridViewCellStyle1.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-            dataGridViewCellStyle1.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
-            this.dgv.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle1;
+            this.dgv.BackgroundColor = System.Drawing.Color.White;
+            dataGridViewCellStyle3.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle3.BackColor = System.Drawing.SystemColors.Control;
+            dataGridViewCellStyle3.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            dataGridViewCellStyle3.ForeColor = System.Drawing.SystemColors.WindowText;
+            dataGridViewCellStyle3.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle3.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle3.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
+            this.dgv.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle3;
             this.dgv.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.dgv.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
             this.colInstance,
@@ -89,24 +90,35 @@ namespace DBADashGUI.Changes
             this.colSnapshotDate,
             this.colScript,
             this.colDiff});
-            dataGridViewCellStyle2.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle2.BackColor = System.Drawing.SystemColors.Window;
-            dataGridViewCellStyle2.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            dataGridViewCellStyle2.ForeColor = System.Drawing.SystemColors.ControlText;
-            dataGridViewCellStyle2.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-            dataGridViewCellStyle2.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-            dataGridViewCellStyle2.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
-            this.dgv.DefaultCellStyle = dataGridViewCellStyle2;
+            dataGridViewCellStyle4.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle4.BackColor = System.Drawing.SystemColors.Window;
+            dataGridViewCellStyle4.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            dataGridViewCellStyle4.ForeColor = System.Drawing.SystemColors.ControlText;
+            dataGridViewCellStyle4.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle4.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle4.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
+            this.dgv.DefaultCellStyle = dataGridViewCellStyle4;
             this.dgv.Dock = System.Windows.Forms.DockStyle.Fill;
             this.dgv.Location = new System.Drawing.Point(0, 27);
+            this.dgv.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.dgv.Name = "dgv";
             this.dgv.ReadOnly = true;
+            this.dgv.RowHeadersVisible = false;
             this.dgv.RowHeadersWidth = 51;
             this.dgv.RowTemplate.Height = 24;
-            this.dgv.Size = new System.Drawing.Size(895, 356);
+            this.dgv.Size = new System.Drawing.Size(895, 452);
             this.dgv.TabIndex = 0;
             this.dgv.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgv_CellContentClick);
             this.dgv.SelectionChanged += new System.EventHandler(this.dgv_SelectionChanged);
+            // 
+            // colInstance
+            // 
+            this.colInstance.DataPropertyName = "Instance";
+            this.colInstance.HeaderText = "Instance";
+            this.colInstance.MinimumWidth = 6;
+            this.colInstance.Name = "colInstance";
+            this.colInstance.ReadOnly = true;
+            this.colInstance.Width = 125;
             // 
             // colLinkInstance
             // 
@@ -127,6 +139,15 @@ namespace DBADashGUI.Changes
             this.colEnabled.Resizable = System.Windows.Forms.DataGridViewTriState.True;
             this.colEnabled.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
             this.colEnabled.Width = 125;
+            // 
+            // colClassifierFunction
+            // 
+            this.colClassifierFunction.DataPropertyName = "classifier_function";
+            this.colClassifierFunction.HeaderText = "Classifier Function";
+            this.colClassifierFunction.MinimumWidth = 6;
+            this.colClassifierFunction.Name = "colClassifierFunction";
+            this.colClassifierFunction.ReadOnly = true;
+            this.colClassifierFunction.Width = 125;
             // 
             // colReconfigurationPending
             // 
@@ -151,6 +172,42 @@ namespace DBADashGUI.Changes
             this.colReconfigurationError.ToolTipText = "Indicates that there was an error generating the script due to pending reconfigur" +
     "ation";
             this.colReconfigurationError.Width = 125;
+            // 
+            // colMaxOutstandingIO
+            // 
+            this.colMaxOutstandingIO.DataPropertyName = "max_outstanding_io_per_volume";
+            this.colMaxOutstandingIO.HeaderText = "Max Outstanding IO Per Volume";
+            this.colMaxOutstandingIO.MinimumWidth = 6;
+            this.colMaxOutstandingIO.Name = "colMaxOutstandingIO";
+            this.colMaxOutstandingIO.ReadOnly = true;
+            this.colMaxOutstandingIO.Width = 125;
+            // 
+            // colValidFrom
+            // 
+            this.colValidFrom.DataPropertyName = "ValidFrom";
+            this.colValidFrom.HeaderText = "Valid From";
+            this.colValidFrom.MinimumWidth = 6;
+            this.colValidFrom.Name = "colValidFrom";
+            this.colValidFrom.ReadOnly = true;
+            this.colValidFrom.Width = 125;
+            // 
+            // colValidTo
+            // 
+            this.colValidTo.DataPropertyName = "ValidTo";
+            this.colValidTo.HeaderText = "Valid To";
+            this.colValidTo.MinimumWidth = 6;
+            this.colValidTo.Name = "colValidTo";
+            this.colValidTo.ReadOnly = true;
+            this.colValidTo.Width = 125;
+            // 
+            // colSnapshotDate
+            // 
+            this.colSnapshotDate.DataPropertyName = "SnapshotDate";
+            this.colSnapshotDate.HeaderText = "Validated Date";
+            this.colSnapshotDate.MinimumWidth = 6;
+            this.colSnapshotDate.Name = "colSnapshotDate";
+            this.colSnapshotDate.ReadOnly = true;
+            this.colSnapshotDate.Width = 125;
             // 
             // colScript
             // 
@@ -207,6 +264,16 @@ namespace DBADashGUI.Changes
             this.tsCopy.Text = "Copy";
             this.tsCopy.Click += new System.EventHandler(this.tsCopy_Click);
             // 
+            // tsExcel
+            // 
+            this.tsExcel.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.tsExcel.Image = global::DBADashGUI.Properties.Resources.excel16x16;
+            this.tsExcel.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tsExcel.Name = "tsExcel";
+            this.tsExcel.Size = new System.Drawing.Size(29, 24);
+            this.tsExcel.Text = "Export Excel";
+            this.tsExcel.Click += new System.EventHandler(this.tsExcel_Click);
+            // 
             // tsBack
             // 
             this.tsBack.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
@@ -228,16 +295,6 @@ namespace DBADashGUI.Changes
             this.tsCompare.Text = "Compare";
             this.tsCompare.ToolTipText = "Select two rows to enable compare";
             this.tsCompare.Click += new System.EventHandler(this.tsCompare_Click);
-            // 
-            // tsExcel
-            // 
-            this.tsExcel.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.tsExcel.Image = global::DBADashGUI.Properties.Resources.excel16x16;
-            this.tsExcel.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsExcel.Name = "tsExcel";
-            this.tsExcel.Size = new System.Drawing.Size(29, 24);
-            this.tsExcel.Text = "Export Excel";
-            this.tsExcel.Click += new System.EventHandler(this.tsExcel_Click);
             // 
             // dataGridViewTextBoxColumn1
             // 
@@ -295,60 +352,6 @@ namespace DBADashGUI.Changes
             this.dataGridViewTextBoxColumn6.ReadOnly = true;
             this.dataGridViewTextBoxColumn6.Width = 125;
             // 
-            // colInstance
-            // 
-            this.colInstance.DataPropertyName = "Instance";
-            this.colInstance.HeaderText = "Instance";
-            this.colInstance.MinimumWidth = 6;
-            this.colInstance.Name = "colInstance";
-            this.colInstance.ReadOnly = true;
-            this.colInstance.Width = 125;
-            // 
-            // colClassifierFunction
-            // 
-            this.colClassifierFunction.DataPropertyName = "classifier_function";
-            this.colClassifierFunction.HeaderText = "Classifier Function";
-            this.colClassifierFunction.MinimumWidth = 6;
-            this.colClassifierFunction.Name = "colClassifierFunction";
-            this.colClassifierFunction.ReadOnly = true;
-            this.colClassifierFunction.Width = 125;
-            // 
-            // colMaxOutstandingIO
-            // 
-            this.colMaxOutstandingIO.DataPropertyName = "max_outstanding_io_per_volume";
-            this.colMaxOutstandingIO.HeaderText = "Max Outstanding IO Per Volume";
-            this.colMaxOutstandingIO.MinimumWidth = 6;
-            this.colMaxOutstandingIO.Name = "colMaxOutstandingIO";
-            this.colMaxOutstandingIO.ReadOnly = true;
-            this.colMaxOutstandingIO.Width = 125;
-            // 
-            // colValidFrom
-            // 
-            this.colValidFrom.DataPropertyName = "ValidFrom";
-            this.colValidFrom.HeaderText = "Valid From";
-            this.colValidFrom.MinimumWidth = 6;
-            this.colValidFrom.Name = "colValidFrom";
-            this.colValidFrom.ReadOnly = true;
-            this.colValidFrom.Width = 125;
-            // 
-            // colValidTo
-            // 
-            this.colValidTo.DataPropertyName = "ValidTo";
-            this.colValidTo.HeaderText = "Valid To";
-            this.colValidTo.MinimumWidth = 6;
-            this.colValidTo.Name = "colValidTo";
-            this.colValidTo.ReadOnly = true;
-            this.colValidTo.Width = 125;
-            // 
-            // colSnapshotDate
-            // 
-            this.colSnapshotDate.DataPropertyName = "SnapshotDate";
-            this.colSnapshotDate.HeaderText = "Validated Date";
-            this.colSnapshotDate.MinimumWidth = 6;
-            this.colSnapshotDate.Name = "colSnapshotDate";
-            this.colSnapshotDate.ReadOnly = true;
-            this.colSnapshotDate.Width = 125;
-            // 
             // dataGridViewTextBoxColumn7
             // 
             this.dataGridViewTextBoxColumn7.DataPropertyName = "ValidTo";
@@ -377,12 +380,14 @@ namespace DBADashGUI.Changes
             // 
             // ResourceGovernor
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.Controls.Add(this.dgv);
             this.Controls.Add(this.toolStrip1);
+            this.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.Name = "ResourceGovernor";
-            this.Size = new System.Drawing.Size(895, 383);
+            this.Size = new System.Drawing.Size(895, 479);
+            this.Load += new System.EventHandler(this.ResourceGovernor_Load);
             ((System.ComponentModel.ISupportInitialize)(this.dgv)).EndInit();
             this.toolStrip1.ResumeLayout(false);
             this.toolStrip1.PerformLayout();

@@ -29,15 +29,15 @@
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle10 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle15 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle11 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle12 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle13 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle14 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle16 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle17 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle18 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle6 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle3 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle4 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle5 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle7 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle8 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle9 = new System.Windows.Forms.DataGridViewCellStyle();
             this.dgvSummary = new System.Windows.Forms.DataGridView();
             this.Instance = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.MemoryDumpStatus = new System.Windows.Forms.DataGridViewTextBoxColumn();
@@ -68,6 +68,9 @@
             this.tsExcel = new System.Windows.Forms.ToolStripButton();
             this.tsOptions = new System.Windows.Forms.ToolStripDropDownButton();
             this.focusedViewToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.memoryDumpsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.acknowledgeDumpsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.configureThresholdsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.lblRefreshTime = new System.Windows.Forms.ToolStripLabel();
             this.dataGridViewTextBoxColumn1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dataGridViewTextBoxColumn2 = new System.Windows.Forms.DataGridViewTextBoxColumn();
@@ -87,9 +90,6 @@
             this.dataGridViewTextBoxColumn16 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dataGridViewTextBoxColumn17 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.timer1 = new System.Windows.Forms.Timer(this.components);
-            this.memoryDumpsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.acknowledgeDumpsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.configureThresholdsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             ((System.ComponentModel.ISupportInitialize)(this.dgvSummary)).BeginInit();
             this.toolStrip1.SuspendLayout();
             this.SuspendLayout();
@@ -98,14 +98,15 @@
             // 
             this.dgvSummary.AllowUserToAddRows = false;
             this.dgvSummary.AllowUserToDeleteRows = false;
-            dataGridViewCellStyle10.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle10.BackColor = System.Drawing.SystemColors.Control;
-            dataGridViewCellStyle10.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            dataGridViewCellStyle10.ForeColor = System.Drawing.SystemColors.WindowText;
-            dataGridViewCellStyle10.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-            dataGridViewCellStyle10.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-            dataGridViewCellStyle10.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
-            this.dgvSummary.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle10;
+            this.dgvSummary.BackgroundColor = System.Drawing.Color.White;
+            dataGridViewCellStyle1.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle1.BackColor = System.Drawing.SystemColors.Control;
+            dataGridViewCellStyle1.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            dataGridViewCellStyle1.ForeColor = System.Drawing.SystemColors.WindowText;
+            dataGridViewCellStyle1.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle1.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle1.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
+            this.dgvSummary.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle1;
             this.dgvSummary.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.dgvSummary.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
             this.Instance,
@@ -131,14 +132,14 @@
             this.SnapshotAgeStatus,
             this.DBMailStatus,
             this.UptimeStatus});
-            dataGridViewCellStyle15.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle15.BackColor = System.Drawing.SystemColors.Window;
-            dataGridViewCellStyle15.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            dataGridViewCellStyle15.ForeColor = System.Drawing.SystemColors.ControlText;
-            dataGridViewCellStyle15.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-            dataGridViewCellStyle15.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-            dataGridViewCellStyle15.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
-            this.dgvSummary.DefaultCellStyle = dataGridViewCellStyle15;
+            dataGridViewCellStyle6.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle6.BackColor = System.Drawing.SystemColors.Window;
+            dataGridViewCellStyle6.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            dataGridViewCellStyle6.ForeColor = System.Drawing.SystemColors.ControlText;
+            dataGridViewCellStyle6.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle6.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle6.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
+            this.dgvSummary.DefaultCellStyle = dataGridViewCellStyle6;
             this.dgvSummary.Dock = System.Windows.Forms.DockStyle.Fill;
             this.dgvSummary.Location = new System.Drawing.Point(0, 27);
             this.dgvSummary.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
@@ -301,8 +302,8 @@
             // 
             // FileFreeSpaceStatus
             // 
-            dataGridViewCellStyle11.NullValue = "View";
-            this.FileFreeSpaceStatus.DefaultCellStyle = dataGridViewCellStyle11;
+            dataGridViewCellStyle2.NullValue = "View";
+            this.FileFreeSpaceStatus.DefaultCellStyle = dataGridViewCellStyle2;
             this.FileFreeSpaceStatus.HeaderText = "File Space";
             this.FileFreeSpaceStatus.LinkColor = System.Drawing.Color.Black;
             this.FileFreeSpaceStatus.MinimumWidth = 6;
@@ -314,8 +315,8 @@
             // 
             // PctMaxSizeStatus
             // 
-            dataGridViewCellStyle12.Format = "P1";
-            this.PctMaxSizeStatus.DefaultCellStyle = dataGridViewCellStyle12;
+            dataGridViewCellStyle3.Format = "P1";
+            this.PctMaxSizeStatus.DefaultCellStyle = dataGridViewCellStyle3;
             this.PctMaxSizeStatus.HeaderText = "% Max Size";
             this.PctMaxSizeStatus.LinkColor = System.Drawing.Color.Black;
             this.PctMaxSizeStatus.MinimumWidth = 6;
@@ -354,8 +355,8 @@
             // 
             // CustomCheckStatus
             // 
-            dataGridViewCellStyle13.NullValue = "View";
-            this.CustomCheckStatus.DefaultCellStyle = dataGridViewCellStyle13;
+            dataGridViewCellStyle4.NullValue = "View";
+            this.CustomCheckStatus.DefaultCellStyle = dataGridViewCellStyle4;
             this.CustomCheckStatus.HeaderText = "Custom Checks";
             this.CustomCheckStatus.LinkColor = System.Drawing.Color.Black;
             this.CustomCheckStatus.MinimumWidth = 6;
@@ -368,8 +369,8 @@
             // CollectionErrorStatus
             // 
             this.CollectionErrorStatus.DataPropertyName = "CollectionErrorCount";
-            dataGridViewCellStyle14.NullValue = "View";
-            this.CollectionErrorStatus.DefaultCellStyle = dataGridViewCellStyle14;
+            dataGridViewCellStyle5.NullValue = "View";
+            this.CollectionErrorStatus.DefaultCellStyle = dataGridViewCellStyle5;
             this.CollectionErrorStatus.HeaderText = "DBA Dash Errors (24hrs)";
             this.CollectionErrorStatus.LinkColor = System.Drawing.Color.Black;
             this.CollectionErrorStatus.MinimumWidth = 6;
@@ -470,10 +471,33 @@
             // 
             this.focusedViewToolStripMenuItem.CheckOnClick = true;
             this.focusedViewToolStripMenuItem.Name = "focusedViewToolStripMenuItem";
-            this.focusedViewToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            this.focusedViewToolStripMenuItem.Size = new System.Drawing.Size(198, 26);
             this.focusedViewToolStripMenuItem.Text = "Focused View";
             this.focusedViewToolStripMenuItem.ToolTipText = "Show only instances and checks that are warning or critical status";
             this.focusedViewToolStripMenuItem.Click += new System.EventHandler(this.focusedViewToolStripMenuItem_Click);
+            // 
+            // memoryDumpsToolStripMenuItem
+            // 
+            this.memoryDumpsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.acknowledgeDumpsToolStripMenuItem,
+            this.configureThresholdsToolStripMenuItem});
+            this.memoryDumpsToolStripMenuItem.Name = "memoryDumpsToolStripMenuItem";
+            this.memoryDumpsToolStripMenuItem.Size = new System.Drawing.Size(198, 26);
+            this.memoryDumpsToolStripMenuItem.Text = "Memory Dumps";
+            // 
+            // acknowledgeDumpsToolStripMenuItem
+            // 
+            this.acknowledgeDumpsToolStripMenuItem.Name = "acknowledgeDumpsToolStripMenuItem";
+            this.acknowledgeDumpsToolStripMenuItem.Size = new System.Drawing.Size(233, 26);
+            this.acknowledgeDumpsToolStripMenuItem.Text = "Acknowledge Dumps";
+            this.acknowledgeDumpsToolStripMenuItem.Click += new System.EventHandler(this.acknowledgeDumpsToolStripMenuItem_Click);
+            // 
+            // configureThresholdsToolStripMenuItem
+            // 
+            this.configureThresholdsToolStripMenuItem.Name = "configureThresholdsToolStripMenuItem";
+            this.configureThresholdsToolStripMenuItem.Size = new System.Drawing.Size(233, 26);
+            this.configureThresholdsToolStripMenuItem.Text = "Configure Thresholds";
+            this.configureThresholdsToolStripMenuItem.Click += new System.EventHandler(this.configureThresholdsToolStripMenuItem_Click);
             // 
             // lblRefreshTime
             // 
@@ -518,8 +542,8 @@
             // 
             // dataGridViewTextBoxColumn5
             // 
-            dataGridViewCellStyle16.NullValue = "View";
-            this.dataGridViewTextBoxColumn5.DefaultCellStyle = dataGridViewCellStyle16;
+            dataGridViewCellStyle7.NullValue = "View";
+            this.dataGridViewTextBoxColumn5.DefaultCellStyle = dataGridViewCellStyle7;
             this.dataGridViewTextBoxColumn5.HeaderText = "Alerts";
             this.dataGridViewTextBoxColumn5.MinimumWidth = 6;
             this.dataGridViewTextBoxColumn5.Name = "dataGridViewTextBoxColumn5";
@@ -529,8 +553,8 @@
             // 
             // dataGridViewTextBoxColumn6
             // 
-            dataGridViewCellStyle17.NullValue = "View";
-            this.dataGridViewTextBoxColumn6.DefaultCellStyle = dataGridViewCellStyle17;
+            dataGridViewCellStyle8.NullValue = "View";
+            this.dataGridViewTextBoxColumn6.DefaultCellStyle = dataGridViewCellStyle8;
             this.dataGridViewTextBoxColumn6.HeaderText = "Full Backup";
             this.dataGridViewTextBoxColumn6.MinimumWidth = 6;
             this.dataGridViewTextBoxColumn6.Name = "dataGridViewTextBoxColumn6";
@@ -540,8 +564,8 @@
             // 
             // dataGridViewTextBoxColumn7
             // 
-            dataGridViewCellStyle18.NullValue = "View";
-            this.dataGridViewTextBoxColumn7.DefaultCellStyle = dataGridViewCellStyle18;
+            dataGridViewCellStyle9.NullValue = "View";
+            this.dataGridViewTextBoxColumn7.DefaultCellStyle = dataGridViewCellStyle9;
             this.dataGridViewTextBoxColumn7.HeaderText = "Diff Backup";
             this.dataGridViewTextBoxColumn7.MinimumWidth = 6;
             this.dataGridViewTextBoxColumn7.Name = "dataGridViewTextBoxColumn7";
@@ -632,29 +656,6 @@
             this.timer1.Enabled = true;
             this.timer1.Interval = 10000;
             this.timer1.Tick += new System.EventHandler(this.timer1_Tick);
-            // 
-            // memoryDumpsToolStripMenuItem
-            // 
-            this.memoryDumpsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.acknowledgeDumpsToolStripMenuItem,
-            this.configureThresholdsToolStripMenuItem});
-            this.memoryDumpsToolStripMenuItem.Name = "memoryDumpsToolStripMenuItem";
-            this.memoryDumpsToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
-            this.memoryDumpsToolStripMenuItem.Text = "Memory Dumps";
-            // 
-            // acknowledgeDumpsToolStripMenuItem
-            // 
-            this.acknowledgeDumpsToolStripMenuItem.Name = "acknowledgeDumpsToolStripMenuItem";
-            this.acknowledgeDumpsToolStripMenuItem.Size = new System.Drawing.Size(233, 26);
-            this.acknowledgeDumpsToolStripMenuItem.Text = "Acknowledge Dumps";
-            this.acknowledgeDumpsToolStripMenuItem.Click += new System.EventHandler(this.acknowledgeDumpsToolStripMenuItem_Click);
-            // 
-            // configureThresholdsToolStripMenuItem
-            // 
-            this.configureThresholdsToolStripMenuItem.Name = "configureThresholdsToolStripMenuItem";
-            this.configureThresholdsToolStripMenuItem.Size = new System.Drawing.Size(233, 26);
-            this.configureThresholdsToolStripMenuItem.Text = "Configure Thresholds";
-            this.configureThresholdsToolStripMenuItem.Click += new System.EventHandler(this.configureThresholdsToolStripMenuItem_Click);
             // 
             // Summary
             // 

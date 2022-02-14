@@ -50,9 +50,10 @@ namespace DBADashGUI.Checks
             // 
             // bttnUpdate
             // 
-            this.bttnUpdate.Location = new System.Drawing.Point(466, 197);
+            this.bttnUpdate.Location = new System.Drawing.Point(466, 246);
+            this.bttnUpdate.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.bttnUpdate.Name = "bttnUpdate";
-            this.bttnUpdate.Size = new System.Drawing.Size(87, 23);
+            this.bttnUpdate.Size = new System.Drawing.Size(87, 29);
             this.bttnUpdate.TabIndex = 46;
             this.bttnUpdate.Text = "Update";
             this.bttnUpdate.UseVisualStyleBackColor = true;
@@ -67,27 +68,27 @@ namespace DBADashGUI.Checks
             this.pnlThresholds.Controls.Add(this.label26);
             this.pnlThresholds.Controls.Add(this.numWarning);
             this.pnlThresholds.Controls.Add(this.numCritical);
-            this.pnlThresholds.Location = new System.Drawing.Point(15, 40);
-            this.pnlThresholds.Margin = new System.Windows.Forms.Padding(4);
+            this.pnlThresholds.Location = new System.Drawing.Point(15, 50);
+            this.pnlThresholds.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.pnlThresholds.Name = "pnlThresholds";
-            this.pnlThresholds.Size = new System.Drawing.Size(538, 84);
+            this.pnlThresholds.Size = new System.Drawing.Size(538, 105);
             this.pnlThresholds.TabIndex = 45;
             // 
             // label23
             // 
             this.label23.AutoSize = true;
-            this.label23.Location = new System.Drawing.Point(288, 41);
+            this.label23.Location = new System.Drawing.Point(288, 51);
             this.label23.Name = "label23";
-            this.label23.Size = new System.Drawing.Size(37, 17);
+            this.label23.Size = new System.Drawing.Size(40, 20);
             this.label23.TabIndex = 45;
             this.label23.Text = "mins";
             // 
             // label24
             // 
             this.label24.AutoSize = true;
-            this.label24.Location = new System.Drawing.Point(463, 41);
+            this.label24.Location = new System.Drawing.Point(463, 51);
             this.label24.Name = "label24";
-            this.label24.Size = new System.Drawing.Size(37, 17);
+            this.label24.Size = new System.Drawing.Size(40, 20);
             this.label24.TabIndex = 44;
             this.label24.Text = "mins";
             // 
@@ -96,9 +97,10 @@ namespace DBADashGUI.Checks
             this.chkEnabled.AutoSize = true;
             this.chkEnabled.Checked = true;
             this.chkEnabled.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.chkEnabled.Location = new System.Drawing.Point(13, 41);
+            this.chkEnabled.Location = new System.Drawing.Point(13, 51);
+            this.chkEnabled.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.chkEnabled.Name = "chkEnabled";
-            this.chkEnabled.Size = new System.Drawing.Size(82, 21);
+            this.chkEnabled.Size = new System.Drawing.Size(85, 24);
             this.chkEnabled.TabIndex = 41;
             this.chkEnabled.Text = "Enabled";
             this.chkEnabled.UseVisualStyleBackColor = true;
@@ -107,34 +109,34 @@ namespace DBADashGUI.Checks
             // label25
             // 
             this.label25.AutoSize = true;
-            this.label25.Location = new System.Drawing.Point(354, 9);
+            this.label25.Location = new System.Drawing.Point(354, 11);
             this.label25.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label25.Name = "label25";
-            this.label25.Size = new System.Drawing.Size(54, 17);
+            this.label25.Size = new System.Drawing.Size(58, 20);
             this.label25.TabIndex = 20;
             this.label25.Text = "Critical:";
             // 
             // label26
             // 
             this.label26.AutoSize = true;
-            this.label26.Location = new System.Drawing.Point(178, 10);
+            this.label26.Location = new System.Drawing.Point(178, 12);
             this.label26.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label26.Name = "label26";
-            this.label26.Size = new System.Drawing.Size(65, 17);
+            this.label26.Size = new System.Drawing.Size(67, 20);
             this.label26.TabIndex = 19;
             this.label26.Text = "Warning:";
             // 
             // numWarning
             // 
-            this.numWarning.Location = new System.Drawing.Point(181, 40);
-            this.numWarning.Margin = new System.Windows.Forms.Padding(4);
+            this.numWarning.Location = new System.Drawing.Point(181, 50);
+            this.numWarning.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.numWarning.Maximum = new decimal(new int[] {
             2147483647,
             0,
             0,
             0});
             this.numWarning.Name = "numWarning";
-            this.numWarning.Size = new System.Drawing.Size(100, 22);
+            this.numWarning.Size = new System.Drawing.Size(100, 27);
             this.numWarning.TabIndex = 22;
             this.numWarning.Value = new decimal(new int[] {
             2880,
@@ -144,15 +146,15 @@ namespace DBADashGUI.Checks
             // 
             // numCritical
             // 
-            this.numCritical.Location = new System.Drawing.Point(355, 40);
-            this.numCritical.Margin = new System.Windows.Forms.Padding(4);
+            this.numCritical.Location = new System.Drawing.Point(355, 50);
+            this.numCritical.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.numCritical.Maximum = new decimal(new int[] {
             2147483647,
             0,
             0,
             0});
             this.numCritical.Name = "numCritical";
-            this.numCritical.Size = new System.Drawing.Size(100, 22);
+            this.numCritical.Size = new System.Drawing.Size(100, 27);
             this.numCritical.TabIndex = 23;
             this.numCritical.Value = new decimal(new int[] {
             720,
@@ -163,9 +165,10 @@ namespace DBADashGUI.Checks
             // chkInherit
             // 
             this.chkInherit.AutoSize = true;
-            this.chkInherit.Location = new System.Drawing.Point(15, 12);
+            this.chkInherit.Location = new System.Drawing.Point(15, 15);
+            this.chkInherit.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.chkInherit.Name = "chkInherit";
-            this.chkInherit.Size = new System.Drawing.Size(69, 21);
+            this.chkInherit.Size = new System.Drawing.Size(73, 24);
             this.chkInherit.TabIndex = 44;
             this.chkInherit.Text = "Inherit";
             this.chkInherit.UseVisualStyleBackColor = true;
@@ -174,9 +177,10 @@ namespace DBADashGUI.Checks
             // lnkConfigureRoot
             // 
             this.lnkConfigureRoot.AutoSize = true;
-            this.lnkConfigureRoot.Location = new System.Drawing.Point(403, 12);
+            this.lnkConfigureRoot.LinkColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(79)))), ((int)(((byte)(131)))));
+            this.lnkConfigureRoot.Location = new System.Drawing.Point(403, 15);
             this.lnkConfigureRoot.Name = "lnkConfigureRoot";
-            this.lnkConfigureRoot.Size = new System.Drawing.Size(150, 17);
+            this.lnkConfigureRoot.Size = new System.Drawing.Size(158, 20);
             this.lnkConfigureRoot.TabIndex = 47;
             this.lnkConfigureRoot.TabStop = true;
             this.lnkConfigureRoot.Text = "Root Threshold Config";
@@ -184,9 +188,10 @@ namespace DBADashGUI.Checks
             // 
             // bttnClearAlert
             // 
-            this.bttnClearAlert.Location = new System.Drawing.Point(15, 197);
+            this.bttnClearAlert.Location = new System.Drawing.Point(15, 246);
+            this.bttnClearAlert.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.bttnClearAlert.Name = "bttnClearAlert";
-            this.bttnClearAlert.Size = new System.Drawing.Size(140, 23);
+            this.bttnClearAlert.Size = new System.Drawing.Size(140, 29);
             this.bttnClearAlert.TabIndex = 48;
             this.bttnClearAlert.Text = "Clear Alert";
             this.bttnClearAlert.UseVisualStyleBackColor = true;
@@ -195,28 +200,28 @@ namespace DBADashGUI.Checks
             // lblUptime
             // 
             this.lblUptime.AutoSize = true;
-            this.lblUptime.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Italic, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblUptime.Location = new System.Drawing.Point(12, 134);
+            this.lblUptime.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Italic, System.Drawing.GraphicsUnit.Point);
+            this.lblUptime.Location = new System.Drawing.Point(12, 168);
             this.lblUptime.Name = "lblUptime";
-            this.lblUptime.Size = new System.Drawing.Size(107, 17);
+            this.lblUptime.Size = new System.Drawing.Size(98, 16);
             this.lblUptime.TabIndex = 49;
             this.lblUptime.Text = "Current Uptime:";
             // 
             // lblStartTime
             // 
             this.lblStartTime.AutoSize = true;
-            this.lblStartTime.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Italic, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblStartTime.Location = new System.Drawing.Point(12, 161);
+            this.lblStartTime.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Italic, System.Drawing.GraphicsUnit.Point);
+            this.lblStartTime.Location = new System.Drawing.Point(12, 201);
             this.lblStartTime.Name = "lblStartTime";
-            this.lblStartTime.Size = new System.Drawing.Size(77, 17);
+            this.lblStartTime.Size = new System.Drawing.Size(71, 16);
             this.lblStartTime.TabIndex = 50;
             this.lblStartTime.Text = "Start Time:";
             // 
             // UptimeThresholdConfig
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(577, 248);
+            this.ClientSize = new System.Drawing.Size(577, 310);
             this.Controls.Add(this.lblStartTime);
             this.Controls.Add(this.lblUptime);
             this.Controls.Add(this.bttnClearAlert);
@@ -225,6 +230,7 @@ namespace DBADashGUI.Checks
             this.Controls.Add(this.pnlThresholds);
             this.Controls.Add(this.chkInherit);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
+            this.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.MaximizeBox = false;
             this.MinimizeBox = false;
             this.Name = "UptimeThresholdConfig";

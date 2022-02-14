@@ -39,85 +39,97 @@ namespace DBADashGUI.Changes
             refreshAlerts();
         }
 
+        private DataTable getAlertsConfig()
+        {
+            using (var cn = new SqlConnection(ConnectionString))
+            using (var cmd = new SqlCommand("dbo.AlertsConfig_Get", cn) { CommandType = CommandType.StoredProcedure })
+            using (var da = new SqlDataAdapter(cmd))
+            {
+                cn.Open();
+                cmd.Parameters.AddWithValue("@InstanceIDs", string.Join(",", InstanceIDs));
+
+                DataTable dt = new DataTable();
+                da.Fill(dt);
+                return dt;
+            }
+         }
+
         private void refreshAlertConfig()
         {
             dgvAlertsConfig.Columns.Clear();
-
             dgvAlertsConfig.Columns.Add(new DataGridViewTextBoxColumn() { Name = "Instance", HeaderText = "Instance" });
 
-            using (var cn = new SqlConnection(ConnectionString))
+            DataTable dt = getAlertsConfig();
+               
+            string pivotCol = UseAlertName ? "name" : "Alert";
+
+            foreach (DataRow r in dt.DefaultView.ToTable(true, pivotCol).Select("", pivotCol))
             {
-                using (SqlCommand cmd = new SqlCommand("dbo.AlertsConfig_Get", cn) { CommandType = CommandType.StoredProcedure })
+                if (r[pivotCol] != DBNull.Value)
                 {
-                    cn.Open();
-                    cmd.Parameters.AddWithValue("@InstanceIDs", string.Join(",", InstanceIDs));
-
-                    SqlDataAdapter da = new SqlDataAdapter(cmd);
-                    DataTable dt = new DataTable();
-                    da.Fill(dt);
-                    string pivotCol = UseAlertName ? "name" : "Alert";
-
-                    foreach (DataRow r in dt.DefaultView.ToTable(true, pivotCol).Select("", pivotCol))
-                    {
-                        if (r[pivotCol] != DBNull.Value)
-                        {
-                            DataGridViewTextBoxColumn col = new DataGridViewTextBoxColumn() { HeaderText = (string)r[pivotCol], Name = (string)r[pivotCol] };
-                            dgvAlertsConfig.Columns.Add(col);
-                        }
-                    }
-                    string lastInstance = "";
-                    List<DataGridViewRow> rows = new List<DataGridViewRow>();
-                    DataGridViewRow row = null;
-                    foreach (DataRow r in dt.Rows)
-                    {
-                        string instance = (string)r["Instance"];
-                        if (instance != lastInstance)
-                        {
-                            row = new DataGridViewRow();
-                            row.CreateCells(dgvAlertsConfig);
-                            row.Cells[0].Value = instance;
-                            rows.Add(row);
-                        }
-                        if (r[pivotCol] != DBNull.Value)
-                        {
-                            string alertName = (string)r[pivotCol];
-                            var idx = dgvAlertsConfig.Columns[alertName].Index;
-
-                            bool enabled = (Byte)r["enabled"] == 0x1;
-                            bool notification = (Int32)r["has_notification"] > 0;
-
-                            row.Cells[idx].Value = enabled ? "Y" + (notification ? "" : "**") : "N";
-                            if (enabled && !notification)
-                            {
-                                row.Cells[idx].ToolTipText = "Alert configured without notification";
-                            }
-
-                            row.Cells[idx].Style.BackColor = enabled ? (notification ? Color.Green : Color.Yellow) : Color.Red;
-                        }
-                        lastInstance = instance;
-                    }
-                    dgvAlertsConfig.Rows.AddRange(rows.ToArray());
-                    dgvAlertsConfig.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
+                    DataGridViewTextBoxColumn col = new DataGridViewTextBoxColumn() { HeaderText = (string)r[pivotCol], Name = (string)r[pivotCol] };
+                    dgvAlertsConfig.Columns.Add(col);
                 }
             }
+            string lastInstance = "";
+            List<DataGridViewRow> rows = new List<DataGridViewRow>();
+            DataGridViewRow row = null;
+            foreach (DataRow r in dt.Rows)
+            {
+                string instance = (string)r["Instance"];
+                if (instance != lastInstance)
+                {
+                    row = new DataGridViewRow();
+                    row.CreateCells(dgvAlertsConfig);
+                    row.Cells[0].Value = instance;
+                    rows.Add(row);
+                }
+                if (r[pivotCol] != DBNull.Value)
+                {
+                    string alertName = (string)r[pivotCol];
+                    var idx = dgvAlertsConfig.Columns[alertName].Index;
+
+                    bool enabled = (Byte)r["enabled"] == 0x1;
+                    bool notification = (Int32)r["has_notification"] > 0;
+
+                    row.Cells[idx].Value = enabled ? "Y" + (notification ? "" : "**") : "N";
+                    if (enabled && !notification)
+                    {
+                        row.Cells[idx].ToolTipText = "Alert configured without notification";
+                    }
+
+                    row.Cells[idx].SetStatusColor(enabled ? (notification ? DashColors.Success : DashColors.Warning) : DashColors.Fail);
+                }
+                lastInstance = instance;
+            }
+            dgvAlertsConfig.Rows.AddRange(rows.ToArray());
+            dgvAlertsConfig.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
+            
         }
 
 
-        private void refreshAlerts()
+        private DataTable getAlerts()
         {
             using (var cn = new SqlConnection(ConnectionString))
+            using (var cmd = new SqlCommand("dbo.Alerts_Get", cn) { CommandType = CommandType.StoredProcedure })
+            using (var da = new SqlDataAdapter(cmd))
             {
-                using (SqlCommand cmd = new SqlCommand("dbo.Alerts_Get", cn) { CommandType = CommandType.StoredProcedure })
-                {
-                    cmd.Parameters.AddWithValue("@InstanceIDs", string.Join(",", InstanceIDs));
-                    SqlDataAdapter da = new SqlDataAdapter(cmd);
-                    DataTable dt = new DataTable();
-                    da.Fill(dt);
-                    Common.ConvertUTCToLocal(ref dt);
-                    dgvAlerts.DataSource = dt;
-                    dgvAlerts.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
-                }
-            }
+                cmd.Parameters.AddWithValue("@InstanceIDs", string.Join(",", InstanceIDs));
+                
+                DataTable dt = new DataTable();
+                da.Fill(dt);
+                Common.ConvertUTCToLocal(ref dt);
+                return dt;
+            }          
+        }
+
+        private void refreshAlerts()
+        {
+        
+            DataTable dt = getAlerts();            
+            dgvAlerts.DataSource = dt;
+            dgvAlerts.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
+                           
         }
 
         private void pivotByAlertNameToolStripMenuItem_Click(object sender, EventArgs e)

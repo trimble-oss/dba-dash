@@ -16,10 +16,10 @@ namespace DBADashGUI.CollectionDates
         public CollectionDates()
         {
             InitializeComponent();
+            Common.StyleGrid(ref dgvCollectionDates);
         }
 
         public List<Int32> InstanceIDs { get; set; }
-        public string ConnectionString { get; set; }
 
         public bool IncludeCritical
         {
@@ -68,32 +68,32 @@ namespace DBADashGUI.CollectionDates
         }
 
 
+        private DataTable getCollectionDates()
+        {
+            using (var cn = new SqlConnection(Common.ConnectionString))
+            using (var cmd = new SqlCommand("dbo.CollectionDates_Get", cn) { CommandType = CommandType.StoredProcedure })
+            using (var da = new SqlDataAdapter(cmd))
+            {
+                cn.Open();
+                cmd.Parameters.AddWithValue("InstanceIDs", string.Join(",", InstanceIDs));
+                cmd.Parameters.AddWithValue("IncludeCritical", IncludeCritical);
+                cmd.Parameters.AddWithValue("IncludeWarning", IncludeWarning);
+                cmd.Parameters.AddWithValue("IncludeNA", IncludeNA);
+                cmd.Parameters.AddWithValue("IncludeOK", IncludeOK);
+
+                DataTable dt = new DataTable();
+                da.Fill(dt);
+                Common.ConvertUTCToLocal(ref dt);
+                return dt;
+            }
+        }
         public void RefreshData()
         {
             UseWaitCursor = true;
-            if (ConnectionString != null)
-            {
-                using (var cn = new SqlConnection(ConnectionString))
-                {
-                    using (SqlCommand cmd = new SqlCommand("dbo.CollectionDates_Get", cn) { CommandType = CommandType.StoredProcedure })
-                    {
-                        cn.Open();
-                        cmd.Parameters.AddWithValue("InstanceIDs", string.Join(",", InstanceIDs));
-                        cmd.Parameters.AddWithValue("IncludeCritical", IncludeCritical);
-                        cmd.Parameters.AddWithValue("IncludeWarning", IncludeWarning);
-                        cmd.Parameters.AddWithValue("IncludeNA", IncludeNA);
-                        cmd.Parameters.AddWithValue("IncludeOK", IncludeOK);
-                        SqlDataAdapter da = new SqlDataAdapter(cmd);
-                        DataTable dt = new DataTable();
-                        da.Fill(dt);
-                        Common.ConvertUTCToLocal(ref dt);
-                        dgvCollectionDates.AutoGenerateColumns = false;
-                        dgvCollectionDates.DataSource = new DataView(dt);
-                        dgvCollectionDates.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
-                    }
-                }
-
-            }
+            DataTable dt = getCollectionDates();
+            dgvCollectionDates.AutoGenerateColumns = false;
+            dgvCollectionDates.DataSource = new DataView(dt);
+            dgvCollectionDates.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);        
             UseWaitCursor = false;
         }
 
@@ -119,8 +119,7 @@ namespace DBADashGUI.CollectionDates
 
         private void ConfigureThresholds(Int32 InstanceID, DataRowView row)
         {
-
-            var frm = new CollectionDatesThresholds
+            using var frm = new CollectionDatesThresholds
             {
                 InstanceID = InstanceID
             };
@@ -138,7 +137,6 @@ namespace DBADashGUI.CollectionDates
                 frm.Inherit = true;
             }
             frm.Reference = (string)row["Reference"];
-            frm.ConnectionString = ConnectionString;
             frm.ShowDialog();
             if (frm.DialogResult == DialogResult.OK)
             {
@@ -173,7 +171,7 @@ namespace DBADashGUI.CollectionDates
                 {
                     var Status = (DBADashStatus.DBADashStatusEnum)row["Status"];
 
-                    dgvCollectionDates.Rows[idx].Cells["SnapshotAge"].Style.BackColor = DBADashStatus.GetStatusColour(Status);
+                    dgvCollectionDates.Rows[idx].Cells["SnapshotAge"].SetStatusColor(Status);
 
                     if ((string)row["ConfiguredLevel"] == "Instance")
                     {
