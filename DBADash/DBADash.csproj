@@ -98,7 +98,7 @@
     <PackageReference Include="Microsoft.SqlServer.Assessment" Version="1.1.0" />
     <PackageReference Include="Microsoft.SqlServer.Assessment.Authoring" Version="1.1.0" />
     <PackageReference Include="Microsoft.SqlServer.DacFx" Version="160.5400.1" />
-    <PackageReference Include="Microsoft.SqlServer.Management.SqlParser" Version="160.21292.55" />
+    <PackageReference Include="Microsoft.SqlServer.Management.SqlParser" Version="160.22504.0" />
     <PackageReference Include="Microsoft.SqlServer.SqlManagementObjects" Version="161.46521.71" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
     <PackageReference Include="Polly" Version="7.2.3" />
