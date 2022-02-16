@@ -56,6 +56,13 @@ namespace DBADash
 
         private void setConnectionString(string value)
         {
+            if (getConnectionType(value) == ConnectionType.SQL){
+                var builder = new SqlConnectionStringBuilder(value)
+                {
+                    ApplicationName = "DBADash"
+                };
+                value = builder.ToString();
+            }
             encryptedConnectionString = getConnectionStringWithEncryptedPassword(value);
             connectionString = getDecryptedConnectionString(value);
             connectionType = getConnectionType(value);
