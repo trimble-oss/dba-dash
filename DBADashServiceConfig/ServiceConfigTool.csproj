@@ -41,6 +41,7 @@
     <Content Include="services.ico" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\DBADashSharedGUI\DBADashSharedGUI.csproj" />
     <ProjectReference Include="..\DBADash\DBADash.csproj" />
   </ItemGroup>
   <ItemGroup>

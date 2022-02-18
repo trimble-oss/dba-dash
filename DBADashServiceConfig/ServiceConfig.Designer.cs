@@ -44,6 +44,7 @@
             this.bttnCancel = new System.Windows.Forms.Button();
             this.tab1 = new System.Windows.Forms.TabControl();
             this.tabDest = new System.Windows.Forms.TabPage();
+            this.bttnAbout = new System.Windows.Forms.Button();
             this.groupBox5 = new System.Windows.Forms.GroupBox();
             this.bttnViewServiceLog = new System.Windows.Forms.Button();
             this.lnkInstall = new System.Windows.Forms.LinkLabel();
@@ -279,6 +280,7 @@
             // 
             // tabDest
             // 
+            this.tabDest.Controls.Add(this.bttnAbout);
             this.tabDest.Controls.Add(this.groupBox5);
             this.tabDest.Controls.Add(this.bttnS3);
             this.tabDest.Controls.Add(this.bttnDestFolder);
@@ -296,6 +298,16 @@
             this.tabDest.TabIndex = 2;
             this.tabDest.Text = "Destination:";
             this.tabDest.UseVisualStyleBackColor = true;
+            // 
+            // bttnAbout
+            // 
+            this.bttnAbout.Location = new System.Drawing.Point(103, 168);
+            this.bttnAbout.Name = "bttnAbout";
+            this.bttnAbout.Size = new System.Drawing.Size(214, 29);
+            this.bttnAbout.TabIndex = 20;
+            this.bttnAbout.Text = "Check for Updates";
+            this.bttnAbout.UseVisualStyleBackColor = true;
+            this.bttnAbout.Click += new System.EventHandler(this.bttnAbout_Click);
             // 
             // groupBox5
             // 
@@ -453,7 +465,7 @@
             // 
             this.lblVersionInfo.AutoSize = true;
             this.lblVersionInfo.Font = new System.Drawing.Font("Arial", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.lblVersionInfo.Location = new System.Drawing.Point(100, 151);
+            this.lblVersionInfo.Location = new System.Drawing.Point(103, 149);
             this.lblVersionInfo.Name = "lblVersionInfo";
             this.lblVersionInfo.Size = new System.Drawing.Size(83, 16);
             this.lblVersionInfo.TabIndex = 6;
@@ -464,7 +476,7 @@
             this.bttnDeployDatabase.Location = new System.Drawing.Point(103, 94);
             this.bttnDeployDatabase.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.bttnDeployDatabase.Name = "bttnDeployDatabase";
-            this.bttnDeployDatabase.Size = new System.Drawing.Size(214, 40);
+            this.bttnDeployDatabase.Size = new System.Drawing.Size(214, 29);
             this.bttnDeployDatabase.TabIndex = 5;
             this.bttnDeployDatabase.Text = "Deploy/Update Database";
             this.toolTip1.SetToolTip(this.bttnDeployDatabase, "Click to create/upgrade your DBA Dash repository database");
@@ -1358,6 +1370,7 @@
         private System.Windows.Forms.GroupBox groupBox5;
         private System.Windows.Forms.CheckBox chkCollectSessionWaits;
         private System.Windows.Forms.Button bttnViewServiceLog;
+        private System.Windows.Forms.Button bttnAbout;
     }
 }
 

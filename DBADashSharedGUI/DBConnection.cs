@@ -12,7 +12,7 @@ namespace DBADash
             InitializeComponent();
         }
 
-        string connectionString;
+        string connectionString=String.Empty;
         public bool ValidateInitialCatalog = false;
 
         public string ConnectionString

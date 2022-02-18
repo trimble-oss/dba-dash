@@ -1,5 +1,8 @@
-﻿namespace DBADashGUI
+﻿using System.Runtime.Versioning;
+
+namespace DBADashGUI
 {
+    [SupportedOSPlatform("windows")]
     partial class About
     {
         /// <summary>
@@ -38,6 +41,8 @@
             this.lnkLatestRelease = new System.Windows.Forms.LinkLabel();
             this.lblLatest = new System.Windows.Forms.Label();
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
+            this.lblDeploymentType = new System.Windows.Forms.Label();
+            this.label8 = new System.Windows.Forms.Label();
             this.label3 = new System.Windows.Forms.Label();
             this.label4 = new System.Windows.Forms.Label();
             this.label5 = new System.Windows.Forms.Label();
@@ -47,6 +52,7 @@
             this.label7 = new System.Windows.Forms.Label();
             this.lnkLicense = new System.Windows.Forms.LinkLabel();
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
+            this.bttnUpgrade = new System.Windows.Forms.Button();
             this.tableLayoutPanel1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -86,14 +92,15 @@
             // bttnOK
             // 
             this.bttnOK.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.bttnOK.BackColor = System.Drawing.SystemColors.ButtonFace;
             this.bttnOK.DialogResult = System.Windows.Forms.DialogResult.OK;
             this.bttnOK.ForeColor = System.Drawing.Color.Black;
-            this.bttnOK.Location = new System.Drawing.Point(525, 272);
+            this.bttnOK.Location = new System.Drawing.Point(525, 306);
             this.bttnOK.Name = "bttnOK";
             this.bttnOK.Size = new System.Drawing.Size(115, 36);
             this.bttnOK.TabIndex = 24;
             this.bttnOK.Text = "OK";
-            this.bttnOK.UseVisualStyleBackColor = true;
+            this.bttnOK.UseVisualStyleBackColor = false;
             // 
             // lnkDBADash
             // 
@@ -156,6 +163,8 @@
             this.tableLayoutPanel1.ColumnCount = 2;
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 47.3384F));
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 52.6616F));
+            this.tableLayoutPanel1.Controls.Add(this.lblDeploymentType, 1, 6);
+            this.tableLayoutPanel1.Controls.Add(this.label8, 0, 6);
             this.tableLayoutPanel1.Controls.Add(this.lnkLatestRelease, 1, 1);
             this.tableLayoutPanel1.Controls.Add(this.lblLatest, 0, 1);
             this.tableLayoutPanel1.Controls.Add(this.labelCompanyName, 1, 4);
@@ -168,11 +177,11 @@
             this.tableLayoutPanel1.Controls.Add(this.label6, 0, 3);
             this.tableLayoutPanel1.Controls.Add(this.label2, 0, 5);
             this.tableLayoutPanel1.Controls.Add(this.lnkAuthor, 1, 5);
-            this.tableLayoutPanel1.Controls.Add(this.label7, 0, 6);
-            this.tableLayoutPanel1.Controls.Add(this.lnkLicense, 1, 6);
+            this.tableLayoutPanel1.Controls.Add(this.label7, 0, 7);
+            this.tableLayoutPanel1.Controls.Add(this.lnkLicense, 1, 7);
             this.tableLayoutPanel1.Location = new System.Drawing.Point(23, 79);
             this.tableLayoutPanel1.Name = "tableLayoutPanel1";
-            this.tableLayoutPanel1.RowCount = 7;
+            this.tableLayoutPanel1.RowCount = 8;
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 26F));
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 26F));
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 26F));
@@ -180,8 +189,29 @@
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 26F));
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 26F));
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 26F));
-            this.tableLayoutPanel1.Size = new System.Drawing.Size(617, 187);
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 26F));
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
+            this.tableLayoutPanel1.Size = new System.Drawing.Size(617, 204);
             this.tableLayoutPanel1.TabIndex = 30;
+            // 
+            // lblDeploymentType
+            // 
+            this.lblDeploymentType.AutoSize = true;
+            this.lblDeploymentType.Location = new System.Drawing.Point(295, 156);
+            this.lblDeploymentType.Name = "lblDeploymentType";
+            this.lblDeploymentType.Size = new System.Drawing.Size(132, 20);
+            this.lblDeploymentType.TabIndex = 35;
+            this.lblDeploymentType.Text = "{DeploymentType}";
+            // 
+            // label8
+            // 
+            this.label8.AutoSize = true;
+            this.label8.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.label8.Location = new System.Drawing.Point(3, 156);
+            this.label8.Name = "label8";
+            this.label8.Size = new System.Drawing.Size(286, 26);
+            this.label8.TabIndex = 35;
+            this.label8.Text = "Deployment Type:";
             // 
             // label3
             // 
@@ -245,7 +275,7 @@
             // label7
             // 
             this.label7.AutoSize = true;
-            this.label7.Location = new System.Drawing.Point(3, 156);
+            this.label7.Location = new System.Drawing.Point(3, 182);
             this.label7.Name = "label7";
             this.label7.Size = new System.Drawing.Size(60, 20);
             this.label7.TabIndex = 36;
@@ -255,7 +285,7 @@
             // 
             this.lnkLicense.AutoSize = true;
             this.lnkLicense.LinkColor = System.Drawing.Color.White;
-            this.lnkLicense.Location = new System.Drawing.Point(295, 156);
+            this.lnkLicense.Location = new System.Drawing.Point(295, 182);
             this.lnkLicense.Name = "lnkLicense";
             this.lnkLicense.Size = new System.Drawing.Size(86, 20);
             this.lnkLicense.TabIndex = 37;
@@ -263,12 +293,30 @@
             this.lnkLicense.Text = "MIT License";
             this.lnkLicense.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.lnkLicense_LinkClicked);
             // 
+            // toolTip1
+            // 
+            this.toolTip1.ShowAlways = true;
+            // 
+            // bttnUpgrade
+            // 
+            this.bttnUpgrade.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.bttnUpgrade.BackColor = System.Drawing.SystemColors.ButtonFace;
+            this.bttnUpgrade.ForeColor = System.Drawing.Color.Black;
+            this.bttnUpgrade.Location = new System.Drawing.Point(23, 306);
+            this.bttnUpgrade.Name = "bttnUpgrade";
+            this.bttnUpgrade.Size = new System.Drawing.Size(115, 36);
+            this.bttnUpgrade.TabIndex = 31;
+            this.bttnUpgrade.Text = "Upgrade";
+            this.bttnUpgrade.UseVisualStyleBackColor = false;
+            this.bttnUpgrade.Click += new System.EventHandler(this.bttnUpgrade_Click);
+            // 
             // About
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(99)))), ((int)(((byte)(163)))));
-            this.ClientSize = new System.Drawing.Size(659, 325);
+            this.ClientSize = new System.Drawing.Size(659, 359);
+            this.Controls.Add(this.bttnUpgrade);
             this.Controls.Add(this.tableLayoutPanel1);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.lnkDBADash);
@@ -312,5 +360,8 @@
         private System.Windows.Forms.LinkLabel lnkAuthor;
         private System.Windows.Forms.Label label7;
         private System.Windows.Forms.LinkLabel lnkLicense;
+        private System.Windows.Forms.Button bttnUpgrade;
+        private System.Windows.Forms.Label lblDeploymentType;
+        private System.Windows.Forms.Label label8;
     }
 }
