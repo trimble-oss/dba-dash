@@ -12,7 +12,7 @@ namespace DBADashConfig
         [Option('c', "connection", Required = false, HelpText = "The connection string for the SQL Instance you want to monitor.  e.g. \"Data Source = MYSERVER;Integrated Security=True;Encrypt=True;Trust Server Certificate=True\"")]
         public string ConnectionString { get; set; } = "";
 
-        [Option('a', "action", Required = true, HelpText = "Action : Add, Remove, SetDestination, List, Count")]
+        [Option('a', "action", Required = true, HelpText = "Action : Add, Remove, SetDestination, List, Count, GetServiceName, CheckForUpdates, Update")]
         public CommandLineActionOption Option { get; set; }
 
         [Option('r', "Replace", Required = false, HelpText = "Option to replace the existing connection if it already exists", Default = false)]
@@ -62,7 +62,9 @@ namespace DBADashConfig
             GetDestination,
             List,
             Count,
-            GetServiceName
+            GetServiceName,
+            CheckForUpdates,
+            Update
         }
     }
 

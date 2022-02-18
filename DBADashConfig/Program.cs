@@ -133,6 +133,35 @@ try
                       Log.Information("Validated");
                   }
               }
+              else if(o.Option == CommandLineActionOption.CheckForUpdates)
+              {
+                  var latest =  Upgrade.GetLatestVersionAsync().GetAwaiter().GetResult();
+                  Log.Information("Upgrade Available: : {0}", Upgrade.IsUpgradeAvailable(latest));
+                  Log.Information("Current Version: {0}", Upgrade.CurrentVersion().ToString());
+                  Log.Information("Latest Version: {0}", latest.TagName);
+                  Log.Information("Release Date: {0}", latest.PublishedAt.ToString());
+                  Log.Information("URL: {0}", latest.Url);
+                  Console.WriteLine(latest.Body);
+                  return;
+              }
+              else if(o.Option== CommandLineActionOption.Update)
+              {
+                  try
+                  {
+                      Upgrade.UpgradeDBADashAsync().Wait();
+                      return;
+                  }
+                  catch (AggregateException ex) when(ex.InnerException!=null && ex.InnerException.GetType() == typeof(Octokit.NotFoundException))
+                  {
+                      Log.Error("Upgrade script is not available.  Please check the upgrade instructions on the GitHub page");
+                      return;
+                  }
+                  catch (Exception ex)
+                  {
+                      Log.Error(ex,"Error running upgrade");
+                      throw;
+                  }
+              }
               // Save a copy of the old config before writing changes
               if (File.Exists(jsonConfigPath) && !o.NoBackupConfig)
               {

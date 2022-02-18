@@ -8,25 +8,21 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Diagnostics;
 using Octokit;
+using DBADash;
+using DBADashSharedGUI;
+using System.Runtime.Versioning;
 
 namespace DBADashGUI
 {
-    partial class About : Form
+    public partial class About : Form
     {
+        [SupportedOSPlatform("windows")]
         public About()
         {
             InitializeComponent();
-            this.Text = String.Format("About {0}", AssemblyTitle);
             this.labelVersion.Text =  AssemblyVersion;
             this.labelCopyright.Text = AssemblyCopyright;
             this.labelCompanyName.Text = AssemblyCompany;
-        }
-
-        /// <summary>Get latest release from github</summary> 
-        private async Task<Release> getLatestVersionAsync()
-        {
-            var client = new GitHubClient(new ProductHeaderValue("dba-dash"));
-            return await client.Repository.Release.GetLatest("trimble-oss","dba-dash");         
         }
 
         #region Assembly Attribute Accessors
@@ -52,7 +48,8 @@ namespace DBADashGUI
         {
             get
             {
-                return Assembly.GetExecutingAssembly().GetName().Version.ToString();
+                var version = Assembly.GetExecutingAssembly().GetName().Version;
+                return version==null ? "???" : version.ToString();
             }
         }
 
@@ -110,40 +107,33 @@ namespace DBADashGUI
 
         #endregion
 
+        public Version DBVersion=new Version();
+        public bool upgradeAvailable=false;
+        public string upgradeMessage=String.Empty;
+
         private void lnkDBADash_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            Common.OpenURL("http://dbadash.com");
+            CommonShared.OpenURL(Upgrade.AppURL);
         }
 
 
         private async void About_Load(object sender, EventArgs e)
         {
-            setDBVersion();
+            lblDeploymentType.Text = Upgrade.DeploymentType.ToString();
+            lblRepoVersion.Text = DBVersion.ToString();
             await setLatestVersionAsync(); // Display the latest version from github       
         }
 
-        /// <summary>Get version information from the database</summary> 
-        private void setDBVersion()
-        {
-            try
-            {
-                var dbVersion = DBADash.DBValidations.GetDBVersion(Common.ConnectionString);
-                lblRepoVersion.Text = dbVersion.ToString();
-            }
-            catch (Exception ex)
-            {
-                lblRepoVersion.Text = String.Format("DB Repository Version {0}", ex.Message);
-            }
-        }
 
         /// <summary>Update about box with latest version info</summary> 
         private async Task setLatestVersionAsync()
         {
-            string latest;
+            Release release;
+            Version releaseVersion;
             try
             {
-                var release = await getLatestVersionAsync();
-                latest = release.TagName;
+                release = await Upgrade.GetLatestVersionAsync();
+                releaseVersion = new Version(release.TagName);
             }
             catch(Exception ex)
             {
@@ -151,38 +141,77 @@ namespace DBADashGUI
                 toolTip1.SetToolTip(lnkLatestRelease, ex.Message);
                 return;
             }
-            lnkLatestRelease.Text = latest;
+            lnkLatestRelease.Text = release.TagName;
             try
             {
-                var latestVersion = new Version(latest);
-                var currentVersion = new Version(AssemblyVersion);
-                if (currentVersion.CompareTo(latestVersion) < 0)
+                if (Upgrade.IsUpgradeAvailable(release))
                 {
-                    lnkLatestRelease.Font = new Font(lnkLatestRelease.Font, FontStyle.Bold);
-                    lblLatest.Font = new Font(lblLatest.Font, FontStyle.Bold);
-                    lblLatest.Text = "Latest Version (Upgrade Available):";
+                    if (Upgrade.DeploymentType == Upgrade.DeploymentTypes.GUI && (DBVersion.Major != releaseVersion.Major || DBVersion.Minor != releaseVersion.Minor || DBVersion.Build != releaseVersion.Build))
+                    {
+                        upgradeMessage = "An upgrade is available.  Please upgrade the DBA Dash agent first.";
+                    }
+                    else
+                    {
+                        upgradeAvailable = true;
+                        lnkLatestRelease.Font = new Font(lnkLatestRelease.Font, FontStyle.Bold);
+                        lblLatest.Font = new Font(lblLatest.Font, FontStyle.Bold);
+                        lblLatest.Text = "Latest Version (Upgrade Available):";
+                        bttnUpgrade.Enabled = true;
+                    }
+                }
+                else
+                {
+                    upgradeMessage= "No upgrades are available at this time";
                 }
             }
             catch
             {
                 lblLatest.Text = "Latest Version (Unable to Compare):";
+                upgradeMessage = "Error comparing versions.  Upgrade is not available at this time.";
             }
 
         }
 
         private void lnkLatestRelease_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            Common.OpenURL("https://github.com/trimble-oss/dba-dash/releases/latest");
+            CommonShared.OpenURL(Upgrade.LatestVersionLink);
         }
 
         private void lnkAuthor_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            Common.OpenURL("https://github.com/DavidWiseman");
+            CommonShared.OpenURL(Upgrade.AuthorURL);
         }
 
         private void lnkLicense_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
             Process.Start("notepad.exe", "LICENSE");
         }
+
+        private async void bttnUpgrade_Click(object sender, EventArgs e)
+        {
+            if (!upgradeAvailable)
+            {
+                MessageBox.Show(upgradeMessage,"Warning", MessageBoxButtons.OK,MessageBoxIcon.Warning);
+                return;
+            }
+            if(MessageBox.Show("Run script to upgrade to latest version of DBA Dash?","Upgrade",MessageBoxButtons.YesNo,MessageBoxIcon.Question) != DialogResult.Yes)
+            {
+                return;
+            }
+            try
+            {
+                await Upgrade.UpgradeDBADashAsync(startGUI:true);
+            }
+            catch(Octokit.NotFoundException)
+            {
+                MessageBox.Show("Upgrade script is not available.  Please check the upgrade instructions on the GitHub page", "Not Available", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                CommonShared.OpenURL(Upgrade.LatestVersionLink);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error running upgrade" + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+            }
+        }
+
     }
 }

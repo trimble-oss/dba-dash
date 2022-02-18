@@ -13,6 +13,7 @@ using static DBADashGUI.DiffControl;
 using System.Diagnostics;
 using System.IO;
 using Microsoft.SqlServer.Management.Common;
+using DBADashSharedGUI;
 
 namespace DBADashGUI
 {
@@ -46,7 +47,7 @@ namespace DBADashGUI
         private readonly DiffControl diffSchemaSnapshot = new DiffControl();
         private bool suppressLoadTab=false;
 
-        private void Main_Load(object sender, EventArgs e)
+        private async void Main_Load(object sender, EventArgs e)
         {
             Common.StyleGrid(ref gvHistory);
             dbOptions1.SummaryMode = true;
@@ -89,7 +90,7 @@ namespace DBADashGUI
             connectionString = builder.ConnectionString;
             Common.ConnectionString = connectionString;
             mnuTags.Visible = !commandLine.NoTagMenu;
-            checkVersion();
+            await checkVersion();
             getCommandLineTags();
             buildTagMenu(commandLineTags);
             addInstanes();
@@ -97,7 +98,7 @@ namespace DBADashGUI
             
         }
 
-        private void checkVersion()
+        private async Task checkVersion()
         {
             var dbVersion = DBValidations.GetDBVersion(connectionString);
             var appVersion = System.Reflection.Assembly.GetEntryAssembly().GetName().Version;
@@ -105,11 +106,22 @@ namespace DBADashGUI
 
             if (compare < 0)
             {
-                if (MessageBox.Show(String.Format("The version of this GUI app ({0}.{1}) is OLDER than the repository database. Please upgrade to version {2}.{3}", appVersion.Major, appVersion.Minor, dbVersion.Major, dbVersion.Minor), "Upgrade GUI", MessageBoxButtons.OKCancel, MessageBoxIcon.Warning) == DialogResult.OK)
+                var promptUpgrade = MessageBox.Show(String.Format("The version of this GUI app ({0}.{1}) is OLDER than the repository database. Please upgrade to version {2}.{3}{4}Would you like to run the upgrade script now?", appVersion.Major, appVersion.Minor, dbVersion.Major, dbVersion.Minor, Environment.NewLine), "Upgrade GUI", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Warning);
+                if (promptUpgrade  == DialogResult.Yes)
+                {
+                    string tag =  dbVersion.ToString(3);
+                    await Upgrade.UpgradeDBADashAsync(tag,true);
+                    Application.Exit();
+                }      
+                else if( promptUpgrade== DialogResult.No)
                 {
                     Application.Exit();
                     throw new Exception("Version check");
-               }         
+                }
+                else
+                {
+                    MessageBox.Show("The GUI might be unstable as it's not designed to run against this version of the repository database.","WARNING", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                }
             }
             else if ( compare>0)
             {
@@ -1369,10 +1381,7 @@ namespace DBADashGUI
 
         private void aboutToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            using(var frm = new About())
-            {
-                frm.ShowDialog(this);
-            }
+            CommonShared.ShowAbout(Common.ConnectionString, this);
         }
 
         private void bttnSearch_Click(object sender, EventArgs e)

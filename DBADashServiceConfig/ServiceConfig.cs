@@ -14,6 +14,7 @@ using static DBADash.DBADashConnection;
 using System.Drawing;
 using System.Collections.Generic;
 using System.Data;
+using DBADashSharedGUI;
 
 namespace DBADashServiceConfig
 {
@@ -1147,6 +1148,18 @@ namespace DBADashServiceConfig
             using (var frm = new ServiceLog())
             {
                 frm.ShowDialog(this);
+            }
+        }
+
+        private void bttnAbout_Click(object sender, EventArgs e)
+        {
+            if (collectionConfig.DestinationConnection.Type == ConnectionType.SQL)
+            {
+                CommonShared.ShowAbout(collectionConfig.DestinationConnection.ConnectionString, this);
+            }
+            else
+            {
+                CommonShared.ShowAbout(this);
             }
         }
     }
