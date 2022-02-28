@@ -42,6 +42,9 @@ Param(
 $ErrorActionPreference = "Stop"
 $upgradeFile = "DBADash.Upgrade"
 
+# Set security protocol to avoid 'Could not create SSL/TLS secure channel' error.
+[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+
 # Check if the configuration file exists - if not the current path isn't valid.  Exit.
 if (!(Test-Path -Path "ServiceConfig.json")){
     throw "Invalid Folder"
