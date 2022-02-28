@@ -146,7 +146,7 @@ if ($versionCompare -eq -1 -or $ForceUpgrade){
     # Take service offline for install if it exists
     if($serviceExists){
         Write-Host "Stopping Service: $serviceName"
-        Stop-Service -Name $serviceName -ErrorAction Ignore
+        Stop-Service -Name $serviceName -ErrorAction Stop
     }
     # Stop the GUI if running - we don't want locks on any files
     Write-Host "Stop processes"
