@@ -43,24 +43,51 @@ Note: It's possible to run as a console app under your own user account for test
 
 ## Installation
 
- - Extract the application binaries on the server where you want to run the agent. Run on a server separate to your production SQL instance if possible.
- - The first thing we need to do is create the database that will be used as the central repository for your SQL instances.  Run the DBADashServiceConfigTool.exe tool.  Click the "Deploy/Update Database" button.  
- - A connection dialog is shown - use this to connect to the SQL Instance that you want to deploy the central repository database to.
- - The DB Deploy dialog is shown. The default database name is DBADashDB - click deploy to create the database.
- - It might take a few moments to create the database.  Click "OK" when you see the "Deploy succeeded" dialog.
- - The next step is to add databases that we want to monitor.  Click the "Source" tab.
- - Click the button to the right of the "Source" textbox to connect to the SQL Instance you want to monitor.  Alternatively, the connection string can be entered manually.  
-	 *Note: Connection strings are encrypted to avoid storing them in plain text but it is recommended to use Windows authentication - the encryption should be considered as obfuscation.*
+ - [Download](https://github.com/trimble-oss/dba-dash/releases) the latest version of DBA Dash.  Extract the files to a folder on your server and start the DBADashServiceConfigTool.exe tool.  The script below can be used to automate this:
+
+````Powershell
+$InstallPath = "C:\DBADash"
+
+$Repo = "trimble-oss/dba-dash"
+
+[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+$Tag = (Invoke-WebRequest "https://api.github.com/repos/$Repo/releases/latest" | ConvertFrom-Json).tag_name
+
+if (!(Test-Path -Path $InstallPath)){
+    New-Item -Path $InstallPath -ItemType Directory
+}
+
+if ((Get-ChildItem -Path $InstallPath | Measure-Object).Count -gt 0){
+    throw "Destination folder is not empty" 
+}
+
+cd $InstallPath
+$zip = "DBADash_$Tag.zip"
+
+$download = "https://github.com/$Repo/releases/download/$Tag/$zip"
+Invoke-WebRequest $download -Out $zip
+
+Expand-Archive -Path $zip -DestinationPath $InstallPath -Force -ErrorAction Stop
+
+Start-Process DBADashServiceConfigTool.exe
+````
+
+ - Use the configuration tool to set a destination connection.  (Where to create the DBA Dash repository database).  
+ *Enter a connection string or click the connect icon to the right of the textbox to prompt for a connection.  The repository database will be created with the name specified as the initial catalog.* 
+ - Click the "Source" tab.
+ - Click the button to the right of the "Source" textbox to connect to the SQL Instance you want to monitor.  
+ *Alternatively, the connection string can be entered manually.* 
+ *Note: Connection strings are encrypted to avoid storing them in plain text but it is recommended to use Windows authentication - the encryption should be considered as obfuscation.*
  - Review the "Extended Events" and "Other" tab for additional source configuration options.
  - Click "Add/Update" to add the connection.  Repeat as necessary to add the other SQL Instances you want to monitor.  
  *Tip: You can add a connection string (Or server name list) per line in the source textbox to bulk add connections.*
  - Click "Save".  A "ServiceConfig.json" file is created in the application folder that stores the configuration details for this agent.
- - At this stage you might want to run "DBADashService.exe".  This runs the agent as a console application and you can monitor what the application is doing. 
-  * See [here](Docs/Collection.md) for information on what DBA Dash collects and when.
- - You will most likely want to install the agent as a Windows service.  Close the DBADashService.exe application and go back to the DBADashServiceConfigTool.exe application.  Click the service tab.
- - Click "Install".  Enter the credentials you want to use to run the service as and click "OK".  The credentials should be entered in "domain\username" format.
+ - Click the "Destination" tab.
+ - Click "Install as a service".  Enter the credentials you want to use to run the service as and click "OK".  The credentials should be entered in "domain\username" format.
+ *You can also run "DBADashService.exe" without installing as a service.  This runs the agent as a console application* 
  - Close the command window.
  - The service should now be installed and you can click the "Start" button to start the service.
+ *Use the "View Service Log* button to see what the service is doing.  Click the "Refresh" button to update. * 
  - Installation is now complete.  You can run the "DBADash.exe" application to get started using DBA Dash.  
 
 **Note:**
@@ -81,7 +108,7 @@ The release also has a GUI Only option which you can use to distribute the front
 ### Upgrade
 
 #### All versions
-You can upgrade DBA Dash with these lines of PowerShell (run from the context of the DBA Dash folder):
+Run the following script from an elevated powershell prompt. Ensure the current directory is set to the DBA Dash installation folder:
 ```powershell
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 Invoke-WebRequest -Uri https://raw.githubusercontent.com/trimble-oss/dba-dash/main/Scripts/UpgradeDBADash.ps1 -OutFile UpgradeDBADash.ps1
