@@ -81,11 +81,16 @@ The release also has a GUI Only option which you can use to distribute the front
 ### Upgrade
 
 #### All versions
-You can upgrade DBA Dash with these two lines of PowerShell (run from the context of the DBA Dash folder):
+You can upgrade DBA Dash with these lines of PowerShell (run from the context of the DBA Dash folder):
 ```powershell
+[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 Invoke-WebRequest -Uri https://raw.githubusercontent.com/trimble-oss/dba-dash/main/Scripts/UpgradeDBADash.ps1 -OutFile UpgradeDBADash.ps1
 ./UpgradeDBADash.ps1
 ````
+Upgrade to a specific version by specifying the tag:
+
+`./UpgradeDBADash.ps1 -Tag 2.13.0`
+
 The upgrade process checks if an upgrade is available and downloads the latest version.  The service is stopped along with any instances of the GUI.  The new files are extracted and the service is started up again.  You can perform these steps manually if you prefer.
 
 #### Version 2.13 and later
