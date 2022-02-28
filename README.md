@@ -65,11 +65,36 @@ Note: It's possible to run as a console app under your own user account for test
 
 **Note:**
 More advanced service configuration is possible.  e.g. A remote agent can be configured to write to a S3 bucket and another agent that connects to your repository database can use the S3 bucket as a source instead of a SQL connection string.  
-There are PowerShell scripts available to assist with automating the config file.  Set-DBADashDestination,Add-DBADashSource,Remove-DBADashSource
+There are PowerShell scripts available to assist with automating the config file.  `Set-DBADashDestination,Add-DBADashSource,Remove-DBADashSource`
+The release also has a GUI Only option which you can use to distribute the front-end to users of DBA Dash.  The front-end can also be run from a network share.
 
-## Installation Video
+### Installation Video
 
 [![DBA Dash Setup Video](https://img.youtube.com/vi/GY_4L049dVU/0.jpg)](https://www.youtube.com/watch?v=GY_4L049dVU)
+
+## Upgrade Process
+
+### Before upgrade
+* Ensure you have a backup of the DBA Dash repository database
+* Keep a backup of the ServiceConfig.json file.
+
+### Upgrade
+
+#### All versions
+You can upgrade DBA Dash with these two lines of PowerShell (run from the context of the DBA Dash folder):
+```powershell
+Invoke-WebRequest -Uri https://raw.githubusercontent.com/trimble-oss/dba-dash/main/Scripts/UpgradeDBADash.ps1 -OutFile UpgradeDBADash.ps1
+./UpgradeDBADash.ps1
+````
+The upgrade process checks if an upgrade is available and downloads the latest version.  The service is stopped along with any instances of the GUI.  The new files are extracted and the service is started up again.  You can perform these steps manually if you prefer.
+
+#### Version 2.13 and later
+From version 2.13 there is an "Upgrade" button on the About box to perform the upgrade process.  
+You can also run:
+
+`dbadashconfig -a Update`
+
+Once the service is upgraded any GUI deployments running older versions will be prompted to upgrade.
 
 ## AzureDB
 
@@ -85,21 +110,6 @@ Any database connections created from master will inherit the settings from the 
 # Amazon RDS 
 
 Amazon RDS (SQL Server only) can be used for source connections and for the repository database.  
-
-## Upgrade Process
-
- - Stop the DBA Dash agent.  Use `net stop dbadashservice` from the commandline or use the DBADashServiceConfigTool.exe tool (Service Tab) to stop the service.
- - Close any running instances of the GUI or DBA Dash Service Config tool.
- - Replace all the app binaries with the ones from the new release (copy/paste).  All the configuration information for the agent is stored in the ServiceConfig.json file so this file must be kept. You might want to keep backups of this file - particularly before making configuration changes or installing new versions.
- - If the "auto upgrade repository DB on service start" option is enabled you can run `net start dbadashservice` to complete the installation.  Any database schema changes will be deployed automatically when the service starts. 
-
-**Alternatively:**
-
- - Run DBADashServiceConfigTool.exe.  On the destination tab you should be notified if there are database schema changes that need to be deployed.  If necessary click Deploy/Update Database. Either click the "Deploy" button to apply the schema changes or click "Generate Script" if you want to review the changes/deploy manually. Note: The script must be run in sqlcmd mode.
- **Ensure you have a backup prior to deploying changes.**
- - Click the service tab and click "Start" to start the service.
-
-*Note: If you are running multiple agents you should stop all the agents then run the upgrade process for each agent.  The schema changes for the DB would get deployed for the first agent only.*  
 
 ## Monitoring "Remote"  Instances
 
