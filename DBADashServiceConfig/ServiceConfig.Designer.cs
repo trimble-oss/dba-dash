@@ -465,7 +465,7 @@
             // 
             this.lblVersionInfo.AutoSize = true;
             this.lblVersionInfo.Font = new System.Drawing.Font("Arial", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.lblVersionInfo.Location = new System.Drawing.Point(103, 149);
+            this.lblVersionInfo.Location = new System.Drawing.Point(103, 127);
             this.lblVersionInfo.Name = "lblVersionInfo";
             this.lblVersionInfo.Size = new System.Drawing.Size(83, 16);
             this.lblVersionInfo.TabIndex = 6;
