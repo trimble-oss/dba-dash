@@ -154,6 +154,9 @@ if ($versionCompare -eq -1 -or $ForceUpgrade){
     Get-Process -Name DBADashServiceConfigTool -ErrorAction Ignore | Where-Object { $_.Path -like (Get-Location).Path + "*" } | Stop-Process
     Get-Process -Name DBADashConfig -ErrorAction Ignore | Where-Object { $_.Path -like (Get-Location).Path + "*" } | Stop-Process
     
+    # Wait for file locks to be released
+    Start-Sleep -Seconds 2
+
     # If clean option is used, remove existing files from the installation folder.
     if($Clean){
         Write-Host "Clean folder"
@@ -161,7 +164,7 @@ if ($versionCompare -eq -1 -or $ForceUpgrade){
     }
     Write-Host "Extract Files from: $zip"
     "Upgrade Started " + (Get-Date).ToString() | Out-File $upgradeFile
-    Expand-Archive -Path $zip -DestinationPath (Get-Location) -Force
+    Expand-Archive -Path $zip -DestinationPath (Get-Location) -Force -ErrorAction Stop
     Remove-Item $upgradeFile
 
     # If service exists, start it back up
