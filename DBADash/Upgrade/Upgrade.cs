@@ -55,17 +55,22 @@ namespace DBADash
             var upgradeScript = await client.Repository.Content.GetRawContentByRef(GITHUB_OWNER,GITHUB_REPO, GITHUB_SCRIPTPATH + GITHUB_UPGRADESCRIPT, GITHUB_BRANCH);
 
             System.IO.File.WriteAllBytes(GITHUB_UPGRADESCRIPT, upgradeScript);
+            // Note: Setting working directory via ProcessStartInfo doesn't work when using "runas" verb. 
             var psi = new ProcessStartInfo()
             {
-
                 FileName = "PowerShell.exe",
-                Arguments = $"-NoProfile -NoExit -ExecutionPolicy ByPass -File {GITHUB_UPGRADESCRIPT}" +
-                            (tag == String.Empty ? string.Empty : " -Tag " + tag)
-                            + (startGUI ? " -StartGUI" : string.Empty)
-                            + (startConfig ? " -StartConfig" : string.Empty
-                            + $" -Repo \"{GITHUB_OWNER}/{GITHUB_REPO}\""),
-                UseShellExecute = true
+                Arguments = "-NoProfile -NoExit -ExecutionPolicy ByPass -Command &{" +
+                               $"Set-Location -Path '{ApplicationPath}'; " +
+                               $"./{GITHUB_UPGRADESCRIPT}" +
+                                            (tag == String.Empty ? string.Empty : " -Tag " + tag)
+                                            + (startGUI ? " -StartGUI" : string.Empty)
+                                            + (startConfig ? " -StartConfig" : string.Empty
+                                            + $" -Repo \"{GITHUB_OWNER}/{GITHUB_REPO}\"")
+                                            + "}",
+                UseShellExecute = true,
+                Verb = "runas"
             };
+
             Process.Start(psi);
         }
 
