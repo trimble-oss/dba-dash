@@ -241,9 +241,8 @@ namespace DBADashGUI
             }
             else if(tabs.SelectedTab == tabSummary)
             {
-                summary1.ConnectionString = connectionString;
                 summary1.InstanceIDs = n.Type == SQLTreeItem.TreeType.DBADashRoot ? AllInstanceIDs : instanceIDs;
-                summary1.RefreshData();
+                summary1.RefreshDataIfStale();
             }
             else if(tabs.SelectedTab == tabFiles)
             {
