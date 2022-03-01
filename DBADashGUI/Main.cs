@@ -355,7 +355,6 @@ namespace DBADashGUI
             {
                 globalTimeisVisible = true;
                 slowQueries1.InstanceIDs = n.Type == SQLTreeItem.TreeType.DBADashRoot ? AllInstanceIDs : instanceIDs;
-                slowQueries1.ConnectionString = connectionString;
                 if(n.Type== SQLTreeItem.TreeType.Database)
                 {
                     slowQueries1.DBName = n.DatabaseName;

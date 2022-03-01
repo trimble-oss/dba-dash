@@ -22,7 +22,6 @@ namespace DBADashGUI
         }
 
         public List<Int32> InstanceIDs;
-        public string ConnectionString;
         string groupBy = "ConnectionID";
         string _db="";
         public string DBName {
@@ -67,79 +66,108 @@ namespace DBADashGUI
         }
 
 
+        private Task<DataTable> getSlowQueriesSummary(int? sessionID)
+        {
+            return Task<DataTable>.Factory.StartNew(() =>
+            {
+                using (var cn = new SqlConnection(Common.ConnectionString))
+                using (var cmd = new SqlCommand("dbo.SlowQueriesSummary_Get", cn) { CommandType = CommandType.StoredProcedure, CommandTimeout = Properties.Settings.Default.CommandTimeout })
+                using (var da = new SqlDataAdapter(cmd))
+                {
+                    cn.Open();
+
+                    cmd.Parameters.AddWithValue("InstanceIDs", string.Join(",", InstanceIDs));
+                    cmd.Parameters.AddWithValue("FromDate", DateRange.FromUTC);
+                    cmd.Parameters.AddWithValue("ToDate", DateRange.ToUTC);
+                    cmd.Parameters.AddWithValue("GroupBy", groupBy);
+                    string db = DBName.Length > 0 ? DBName : txtDatabase.Text;
+                    if (txtClient.Text.Length > 0)
+                    {
+                        cmd.Parameters.AddWithValue("ClientHostName", txtClient.Text);
+                    }
+                    if (txtInstance.Text.Length > 0)
+                    {
+                        cmd.Parameters.AddWithValue("ConnectionID", txtInstance.Text);
+                    }
+                    if (txtApp.Text.Length > 0)
+                    {
+                        cmd.Parameters.AddWithValue("ClientAppName", txtApp.Text);
+                    }
+                    if (db.Length > 0)
+                    {
+                        cmd.Parameters.AddWithValue("DatabaseName", db);
+                    }
+                    if (txtObject.Text.Length > 0)
+                    {
+                        cmd.Parameters.AddWithValue("ObjectName", txtObject.Text);
+                    }
+                    if (txtUser.Text.Length > 0)
+                    {
+                        cmd.Parameters.AddWithValue("UserName", txtUser.Text);
+                    }
+                    if (txtText.Text.Length > 0)
+                    {
+                        cmd.Parameters.AddWithValue("Text", txtText.Text);
+                    }
+                    if (txtResult.Text.Length > 0)
+                    {
+                        cmd.Parameters.AddWithValue("Result", txtResult.Text);
+                    }
+                    if (sessionID!=null)
+                    {                  
+                       cmd.Parameters.AddWithValue("SessionID", sessionID);                       
+                    }
+                    int top = Convert.ToInt32(tsTop.Tag);
+                    cmd.Parameters.AddWithValue("Top", top);
+                   
+                    var dt = new DataTable();
+                    da.Fill(dt);
+                    return dt;
+                }
+            });
+        }
+
         public void RefreshData()
         {
             dgvSlow.DataSource = null;
             lblPageSize.Visible = false;
             toggleSummary(true);
-            
-            int top = Convert.ToInt32(tsTop.Tag);
-            SqlConnection cn = new SqlConnection(ConnectionString);
-            using (cn)
+
+            int? sessionID=null;
+            if (txtSessionID.Text.Length > 0)
             {
-                cn.Open();
-                SqlCommand cmd = new SqlCommand("dbo.SlowQueriesSummary_Get", cn);
-                cmd.Parameters.AddWithValue("InstanceIDs", string.Join(",", InstanceIDs));
-                cmd.Parameters.AddWithValue("FromDate", DateRange.FromUTC);
-                cmd.Parameters.AddWithValue("ToDate", DateRange.ToUTC);
-                cmd.Parameters.AddWithValue("GroupBy", groupBy);
-                string db = DBName.Length > 0 ? DBName : txtDatabase.Text;
-                if (txtClient.Text.Length > 0)
+                try
                 {
-                    cmd.Parameters.AddWithValue("ClientHostName", txtClient.Text);
+                    sessionID = int.Parse(txtSessionID.Text);
                 }
-                if (txtInstance.Text.Length > 0)
+                catch(Exception ex)
                 {
-                    cmd.Parameters.AddWithValue("ConnectionID", txtInstance.Text);
+                    MessageBox.Show("Invalid SessionID filter.  Please enter an integer.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                    return;
                 }
-                if (txtApp.Text.Length > 0)
-                {
-                    cmd.Parameters.AddWithValue("ClientAppName", txtApp.Text);
-                }
-                if (db.Length > 0)
-                {
-                    cmd.Parameters.AddWithValue("DatabaseName", db);
-                }
-                if (txtObject.Text.Length > 0)
-                {
-                    cmd.Parameters.AddWithValue("ObjectName", txtObject.Text);
-                }
-                if (txtUser.Text.Length > 0)
-                {
-                    cmd.Parameters.AddWithValue("UserName", txtUser.Text);
-                }
-                if (txtText.Text.Length > 0)
-                {
-                    cmd.Parameters.AddWithValue("Text", txtText.Text);
-                }
-                if (txtResult.Text.Length > 0)
-                {
-                    cmd.Parameters.AddWithValue("Result", txtResult.Text);
-                }
-                if (txtSessionID.Text.Length > 0)
-                {
-                    if (int.TryParse(txtSessionID.Text, out int sessionID))
-                    {
-                        cmd.Parameters.AddWithValue("SessionID", sessionID);
-                    }
-                    else
-                    {
-                        MessageBox.Show("Invalid SessionID filter.  Please enter an integer.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
-                        return;
-                    }
-                }
-                cmd.Parameters.AddWithValue("Top", top);
-                cmd.CommandType = CommandType.StoredProcedure;
-                SqlDataAdapter da = new SqlDataAdapter(cmd);
-                var dt = new DataTable();
-                da.Fill(dt);
-                dgvSummary.AutoGenerateColumns = false;
-                dgvSummary.DataSource = dt;
-                dgvSummary.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
             }
-
+            dgvSummary.Visible = false;
+            refresh1.Show();
+            getSlowQueriesSummary(sessionID).ContinueWith(task =>
+            {
+                try
+                {
+                    var dt = task.Result;
+                    refresh1.Invoke(() => refresh1.Visible = false);
+                    dgvSummary.Invoke(() =>
+                    {
+                        dgvSummary.AutoGenerateColumns = false;
+                        dgvSummary.DataSource = dt;
+                        dgvSummary.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
+                        dgvSummary.Visible = true;
+                    });
+                }
+                catch(Exception ex)
+                {
+                    refresh1.Invoke(() => refresh1.SetFailed(ex.Message));
+                }
+            });                
         }
-
 
         private void GroupBy_Click(object sender, EventArgs e)
         {
@@ -372,14 +400,14 @@ namespace DBADashGUI
             setFilterHighlight(txtSessionID, lblSessionID);
         }
 
-        private void loadSlowQueriesDetail(Int32 durationFrom=-1,Int32 durationTo=-1)
+
+        private DataTable getSlowQueriesDetail(Int32 durationFrom = -1, Int32 durationTo = -1)
         {
-        
-            SqlConnection cn = new SqlConnection(ConnectionString);
-            using (cn)
+            using (var cn = new SqlConnection(Common.ConnectionString))
+            using (var cmd = new SqlCommand("dbo.SlowQueriesDetail_Get", cn) { CommandType = CommandType.StoredProcedure })
+            using (var da = new SqlDataAdapter(cmd))
             {
                 cn.Open();
-                SqlCommand cmd = new SqlCommand("dbo.SlowQueriesDetail_Get", cn);
                 cmd.Parameters.AddWithValue("InstanceIDs", string.Join(",", InstanceIDs));
                 cmd.Parameters.AddWithValue("FromDate", DateRange.FromUTC);
                 cmd.Parameters.AddWithValue("ToDate", DateRange.ToUTC);
@@ -388,7 +416,7 @@ namespace DBADashGUI
                 string connectionID = txtInstance.Text;
                 string client = txtClient.Text;
                 string user = txtUser.Text;
-                string db = DBName.Length>0 ?  DBName : txtDatabase.Text;
+                string db = DBName.Length > 0 ? DBName : txtDatabase.Text;
                 string objectname = txtObject.Text;
                 string app = txtApp.Text;
                 string result = txtResult.Text;
@@ -404,7 +432,7 @@ namespace DBADashGUI
                 }
                 else if (groupBy == "client_app_name")
                 {
-                    app= selectedGroupValue;
+                    app = selectedGroupValue;
                 }
                 else if (groupBy == "DatabaseName")
                 {
@@ -416,7 +444,7 @@ namespace DBADashGUI
                 }
                 else if (groupBy == "username")
                 {
-                   user= selectedGroupValue;
+                    user = selectedGroupValue;
                 }
                 else if (groupBy == "Result")
                 {
@@ -479,38 +507,42 @@ namespace DBADashGUI
                 {
                     cmd.Parameters.AddWithValue("SessionID", sessionid);
                 }
-                cmd.CommandType = CommandType.StoredProcedure;
-                SqlDataAdapter da = new SqlDataAdapter(cmd);
+
                 var dt = new DataTable();
                 da.Fill(dt);
-                dt.Columns.Add("text_trunc",typeof(string));
-                foreach(DataRow r in dt.Rows)
-                {
-                    if (r["text"] != DBNull.Value)
-                    {
-                        var txt = ((string)r["text"]);
-                        r["text_trunc"] = txt.Length > 10000 ? txt.Substring(0, 10000) : txt;
-                    }
-                }
-                Common.ConvertUTCToLocal(ref dt);
-                if(dt.Rows.Count== pageSize)
-                {
-                    lblPageSize.Text = string.Format("Top {0} rows", pageSize);
-                    lblPageSize.Visible = true;
-                }
-                else
-                {
-                    lblPageSize.Visible = false;
-                }
-               dgvSlow.AutoGenerateColumns = false;
-          
-                dgvSlow.DataSource = dt;
-                colText.AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
-                dgvSlow.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
-                colText.AutoSizeMode = DataGridViewAutoSizeColumnMode.None;
-                dgvSlow.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.None;
-
+                return dt;
             }
+        }
+
+        private void loadSlowQueriesDetail(Int32 durationFrom=-1,Int32 durationTo=-1)
+        {
+           var dt = getSlowQueriesDetail(durationFrom,durationTo);
+            dt.Columns.Add("text_trunc",typeof(string));
+            foreach(DataRow r in dt.Rows)
+            {
+                if (r["text"] != DBNull.Value)
+                {
+                    var txt = ((string)r["text"]);
+                    r["text_trunc"] = txt.Length > 10000 ? txt.Substring(0, 10000) : txt;
+                }
+            }
+            Common.ConvertUTCToLocal(ref dt);
+            if(dt.Rows.Count== pageSize)
+            {
+                lblPageSize.Text = string.Format("Top {0} rows", pageSize);
+                lblPageSize.Visible = true;
+            }
+            else
+            {
+                lblPageSize.Visible = false;
+            }
+            dgvSlow.AutoGenerateColumns = false;
+          
+            dgvSlow.DataSource = dt;
+            colText.AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
+            dgvSlow.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
+            colText.AutoSizeMode = DataGridViewAutoSizeColumnMode.None;
+            dgvSlow.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.None;            
         }
 
         private void tsRefresh_Click(object sender, EventArgs e)
