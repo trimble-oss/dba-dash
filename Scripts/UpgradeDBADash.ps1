@@ -62,13 +62,11 @@ else{
 }
 
 # Convert tag string to Sytem.Version.  Pad out to 0.0.0.0 format
-# Note: running in a separate context to avoid holding lock on DBADash.dll
 $newVersion = [System.Version]::Parse($Tag + ".0" * (4-($Tag.Split(".")).Count))
 
-$existingVersion = powershell -Command {
-    $path = [System.IO.Path]::Combine((Get-Location),"DBADash.dll")
-    [System.Reflection.Assembly]::LoadFrom($path).GetName().Version
- }
+# Get existing version
+$path = [System.IO.Path]::Combine((Get-Location),"DBADash.dll")
+$existingVersion=[System.Version](Get-Item $path).VersionInfo.ProductVersion
 
 # Create object from the config file.
 $config = Get-Content -Raw -Path "ServiceConfig.json" | ConvertFrom-Json
