@@ -15,8 +15,17 @@ namespace DBADashGUI
         public Refresh()
         {
             InitializeComponent();
+            SetStyle(ControlStyles.UserPaint, true);
+            SetStyle(ControlStyles.AllPaintingInWmPaint, true);
+            SetStyle(ControlStyles.DoubleBuffer, true);
+        }
+
+        private void reset()
+        {
             this.BackColor = DashColors.TrimbleBlue;
             this.ForeColor = Color.White;
+            lblRefresh.Text = baseText;
+            timer1.Enabled = this.Visible;
         }
 
         private string baseText = "Refresh in progress";
@@ -34,10 +43,22 @@ namespace DBADashGUI
             }
         }
 
+        public void SetFailed(string message)
+        {
+            SetMessage(message, DashColors.Fail, Color.White);
+        }
+
+        public void SetMessage(string message,Color backColor,Color foreColor)
+        {
+            this.BackColor = backColor;
+            this.ForeColor= foreColor;  
+            lblRefresh.Text=message;
+            timer1.Enabled = false;
+        }
+
         private void Refresh_VisibilityChanged(object sender, EventArgs e)
         {
-             lblRefresh.Text = baseText;
-             timer1.Enabled = this.Visible;            
+            reset();                       
         }
     }
 }

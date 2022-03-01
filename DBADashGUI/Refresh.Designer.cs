@@ -37,8 +37,9 @@
             // 
             this.lblRefresh.Dock = System.Windows.Forms.DockStyle.Fill;
             this.lblRefresh.Location = new System.Drawing.Point(0, 0);
+            this.lblRefresh.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.lblRefresh.Name = "lblRefresh";
-            this.lblRefresh.Size = new System.Drawing.Size(150, 150);
+            this.lblRefresh.Size = new System.Drawing.Size(188, 188);
             this.lblRefresh.TabIndex = 0;
             this.lblRefresh.Text = "Refresh in progress";
             this.lblRefresh.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
@@ -50,10 +51,13 @@
             // 
             // Refresh
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(10F, 25F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.Controls.Add(this.lblRefresh);
+            this.Font = new System.Drawing.Font("Segoe UI", 11F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.Name = "Refresh";
+            this.Size = new System.Drawing.Size(188, 188);
             this.VisibleChanged += new System.EventHandler(this.Refresh_VisibilityChanged);
             this.ResumeLayout(false);
 
