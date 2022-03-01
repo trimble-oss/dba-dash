@@ -20,7 +20,8 @@ namespace DBADashGUI
     {
 
         public List<Int32> InstanceIDs;
-        public string ConnectionString;
+        private List<Int32> refreshInstanceIDs;
+
         DateTime lastRefresh;
 
         public Summary()
@@ -45,67 +46,100 @@ namespace DBADashGUI
         }
 
 
-        private DataTable getSummary()
+        private Task<DataTable> getSummaryAsync()
         {
-            using (var cn = new SqlConnection(ConnectionString))
-            using (var cmd = new SqlCommand("dbo.Summary_Get", cn) { CommandType = CommandType.StoredProcedure })
+            return Task<DataTable>.Factory.StartNew(() =>
             {
-                cn.Open();
+                using (var cn = new SqlConnection(Common.ConnectionString))
+                using (var cmd = new SqlCommand("dbo.Summary_Get", cn) { CommandType = CommandType.StoredProcedure })
+                {
+                    cn.Open();
 
-                cmd.Parameters.AddWithValue("InstanceIDs", string.Join(",", InstanceIDs));
-                SqlDataAdapter da = new SqlDataAdapter(cmd);
-                DataTable dt = new DataTable();
-                da.Fill(dt);
-                return dt;
+                    cmd.Parameters.AddWithValue("InstanceIDs", string.Join(",", InstanceIDs));
+
+                    SqlDataAdapter da = new SqlDataAdapter(cmd);
+                    DataTable dt = new DataTable();
+                    da.Fill(dt);
+                    return dt;
+                }
+            });
+        }
+
+        public void RefreshDataIfStale()
+        {
+            if (DateTime.Now.Subtract(lastRefresh).TotalMinutes > 5 || instanceIDsChanged())
+            {
+                RefreshData();
             }
+        }
+
+        private bool instanceIDsChanged()
+        {
+            return !(InstanceIDs.Count == refreshInstanceIDs.Count() && refreshInstanceIDs.All(InstanceIDs.Contains));
         }
         
         public void RefreshData()
         {
             resetStatusCols();
-
-            DataTable dt = getSummary();
-            dgvSummary.AutoGenerateColumns = false;
-
-            var cols = (statusColumns.Keys).ToList<string>();
-            dt.Columns.Add("IsFocusedRow", typeof(bool));
-            foreach (DataRow row in dt.Rows)
+            refresh1.Visible = true;
+            dgvSummary.Visible = false;
+            refreshInstanceIDs = new List<int>(InstanceIDs);
+            getSummaryAsync().ContinueWith(task =>
             {
-                bool isFocusedRow = false;
-                foreach (string col in cols)
+                DataTable dt = task.Result;
+                dgvSummary.AutoGenerateColumns = false;
+
+                var cols = (statusColumns.Keys).ToList<string>();
+                dt.Columns.Add("IsFocusedRow", typeof(bool));
+                foreach (DataRow row in dt.Rows)
                 {
-                    var status = (DBADashStatus.DBADashStatusEnum)Convert.ToInt32(row[col] == DBNull.Value ? 3 : row[col]);
-                    if (!(status == DBADashStatus.DBADashStatusEnum.NA || (status == DBADashStatus.DBADashStatusEnum.OK && focusedView)))
+                    bool isFocusedRow = false;
+                    foreach (string col in cols)
                     {
-                        statusColumns[col] = true;
+                        var status = (DBADashStatus.DBADashStatusEnum)Convert.ToInt32(row[col] == DBNull.Value ? 3 : row[col]);
+                        if (!(status == DBADashStatus.DBADashStatusEnum.NA || (status == DBADashStatus.DBADashStatusEnum.OK && focusedView)))
+                        {
+                            statusColumns[col] = true;
+                            isFocusedRow = true;
+                        }
+                    }
+
+                    if (row["IsAgentRunning"] != DBNull.Value && (bool)row["IsAgentRunning"] == false)
+                    {
                         isFocusedRow = true;
-                    }                         
+                        statusColumns["JobStatus"] = true;
+                    }
+                    row["IsFocusedRow"] = isFocusedRow;
                 }
-                        
-                if (row["IsAgentRunning"] != DBNull.Value && (bool)row["IsAgentRunning"] == false)
+                // hide columns that all have status N/A
+                foreach (var col in statusColumns)
                 {
-                    isFocusedRow = true;
-                    statusColumns["JobStatus"] = true;
+                    dgvSummary.Invoke((Action)(() => dgvSummary.Columns[col.Key].Visible = col.Value));
                 }
-                row["IsFocusedRow"] = isFocusedRow;
-            }
-            // hide columns that all have status N/A
-            foreach (var col in statusColumns)
-            {
-                dgvSummary.Columns[col.Key].Visible = col.Value;
-            }
-            string rowFilter = "";
-            if (focusedView)
-            {
-                rowFilter = "IsFocusedRow=1";
-            }
-            dv = new DataView(dt,rowFilter,"Instance", DataViewRowState.CurrentRows);
-            dgvSummary.DataSource = dv;
-            dgvSummary.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
-            lastRefresh = DateTime.Now;
-            lblRefreshTime.Text = "Refresh Time: " + lastRefresh.ToString();
-            lblRefreshTime.ForeColor = DBADashStatusEnum.OK.GetColor();
-            timer1.Enabled = true;
+                string rowFilter = "";
+                if (focusedView)
+                {
+                    rowFilter = "IsFocusedRow=1";
+                }
+                dv = new DataView(dt, rowFilter, "Instance", DataViewRowState.CurrentRows);
+                dgvSummary.Invoke((Action)(() =>
+                {
+                    dgvSummary.DataSource = dv;
+                    dgvSummary.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
+                }
+                ));
+                lastRefresh = DateTime.Now;
+                toolStrip1.Invoke((Action)(() =>
+                {
+                    lblRefreshTime.Text = "Refresh Time: " + lastRefresh.ToString();
+                    lblRefreshTime.ForeColor = DBADashStatusEnum.OK.GetColor();
+                }
+                ));
+                refresh1.Invoke((Action)(() => refresh1.Visible = false));
+                dgvSummary.Invoke((Action)(() => dgvSummary.Visible = true));
+                timer1.Enabled = true;
+                
+            });
                         
         }
 

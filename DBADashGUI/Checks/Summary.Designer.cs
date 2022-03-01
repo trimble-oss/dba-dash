@@ -90,6 +90,7 @@
             this.dataGridViewTextBoxColumn16 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dataGridViewTextBoxColumn17 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.timer1 = new System.Windows.Forms.Timer(this.components);
+            this.refresh1 = new DBADashGUI.Refresh();
             ((System.ComponentModel.ISupportInitialize)(this.dgvSummary)).BeginInit();
             this.toolStrip1.SuspendLayout();
             this.SuspendLayout();
@@ -657,12 +658,21 @@
             this.timer1.Interval = 10000;
             this.timer1.Tick += new System.EventHandler(this.timer1_Tick);
             // 
+            // refresh1
+            // 
+            this.refresh1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.refresh1.Location = new System.Drawing.Point(0, 0);
+            this.refresh1.Name = "refresh1";
+            this.refresh1.Size = new System.Drawing.Size(1800, 266);
+            this.refresh1.TabIndex = 2;
+            // 
             // Summary
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.Controls.Add(this.dgvSummary);
             this.Controls.Add(this.toolStrip1);
+            this.Controls.Add(this.refresh1);
             this.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.Name = "Summary";
             this.Size = new System.Drawing.Size(1800, 266);
@@ -728,5 +738,6 @@
         private System.Windows.Forms.ToolStripMenuItem memoryDumpsToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem acknowledgeDumpsToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem configureThresholdsToolStripMenuItem;
+        private Refresh refresh1;
     }
 }
