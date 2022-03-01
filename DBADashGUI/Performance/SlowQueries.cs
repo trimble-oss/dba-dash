@@ -140,7 +140,7 @@ namespace DBADashGUI
                 {
                     sessionID = int.Parse(txtSessionID.Text);
                 }
-                catch(Exception ex)
+                catch
                 {
                     MessageBox.Show("Invalid SessionID filter.  Please enter an integer.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
                     return;
