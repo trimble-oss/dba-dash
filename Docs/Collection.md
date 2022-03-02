@@ -28,6 +28,8 @@ Data collection runs on a schedule by the agent which is listed below. Collectio
 *Collects data from sys.availability_replicas*
 - [AvailabilityGroups](../DBADash/SQL/SQLAvailabilityGroups.sql)
 *Collects data from sys.availability_groups*
+- [MemoryUsage](../DBADash/SQL/SQLMemoryUsage.sql)
+*Collects data from sys.dm_os_memory_clerks*
 - ~~-[BlockingSnapshot](../DBADash/SQL/SQLBlockingSnapshot.sql)
 *Captures a snapshot of any blocking/blocked queries currently running if the total wait time is more than 1second.
 Replaced with RunningQueries*~~
