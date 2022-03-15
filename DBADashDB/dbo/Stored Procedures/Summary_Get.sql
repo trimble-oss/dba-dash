@@ -228,7 +228,7 @@ SELECT I.InstanceID,
 		WHEN DATEDIFF(hh,a.LastAlert,GETUTCDATE())<72 THEN 2
 		ELSE 4 END AS AlertStatus,
 	AlertCD.SnapshotDate AS AlertSnapshotDate,
-	I.IsAgentRunning,
+	CASE WHEN I.EngineEdition = 4 THEN NULL ELSE I.IsAgentRunning END AS IsAgentRunning,
 	ISNULL(cus.Status,3) AS CustomCheckStatus,
 	ISNULL(dbm.MirroringStatus,3) AS MirroringStatus,
 	3 AS ElasticPoolStorageStatus,
