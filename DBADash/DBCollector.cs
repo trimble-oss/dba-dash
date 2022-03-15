@@ -435,6 +435,11 @@ namespace DBADash
                 // Don't need to collect these types for Azure MI
                 return false;
             }
+            else if((new CollectionType[] { CollectionType.JobHistory, CollectionType.AgentJobs, CollectionType.Jobs }).Contains(collectionType)  && engineEdition == DatabaseEngineEdition.Express)
+            {
+                // SQL Agent not supported on express
+                return false;
+            }
             else
             {
                 return true;
