@@ -816,8 +816,15 @@ CROSS APPLY sys.dm_exec_sql_text(H.sql_handle) txt");
                 if (currentJobModified > JobLastModified)
                 {
                     var ss = new SchemaSnapshotDB(_connectionString, new SchemaSnapshotDBOptions());
-                    ss.SnapshotJobs(ref Data);
-                    JobLastModified = currentJobModified;
+                    try
+                    {
+                        ss.SnapshotJobs(ref Data);
+                        JobLastModified = currentJobModified;
+                    }
+                    catch (Microsoft.SqlServer.Management.Smo.UnsupportedFeatureException ex)
+                    {
+                        Log.Warning("SnapshotJobs not supported: {0}. From {1}", ex.Message, Source.SourceConnection.ConnectionForPrint);
+                    }
                 }
             }
             else if (collectionType == CollectionType.ResourceGovernorConfiguration)
