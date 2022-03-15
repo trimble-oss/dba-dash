@@ -48,9 +48,12 @@ END
 
 IF COL_LENGTH('sys.dm_server_services','instant_file_initialization_enabled') IS NOT NULL
 BEGIN
-	SELECT @InstantFileInitializationEnabled=CASE WHEN instant_file_initialization_enabled='Y' THEN 1 ELSE 0 END
+	DECLARE @SQL NVARCHAR(MAX)
+	SET @SQL = N'
+	SELECT @InstantFileInitializationEnabled=CASE WHEN instant_file_initialization_enabled=''Y'' THEN 1 ELSE 0 END
 	FROM   sys.dm_server_services dss
-	WHERE  dss.[servicename] LIKE N'SQL Server (%';
+	WHERE  dss.[servicename] LIKE N''SQL Server (%'';';
+	EXEC sp_executesql @SQL,N'@InstantFileInitializationEnabled BIT OUT',@InstantFileInitializationEnabled OUT
 END
 
 SELECT @IsAgentRunning = CASE WHEN EXISTS(SELECT * 
