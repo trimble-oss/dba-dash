@@ -1,4 +1,5 @@
-﻿using System;
+﻿global using DBADashSharedGUI;
+using System;
 using System.Windows.Forms;
 
 namespace DBADashServiceConfig

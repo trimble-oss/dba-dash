@@ -118,6 +118,7 @@
             this.lnkSourceConnections = new System.Windows.Forms.LinkLabel();
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
             this.button1 = new System.Windows.Forms.Button();
+            this.panel1 = new System.Windows.Forms.Panel();
             ((System.ComponentModel.ISupportInitialize)(this.errorProvider1)).BeginInit();
             this.tab1.SuspendLayout();
             this.tabDest.SuspendLayout();
@@ -140,6 +141,7 @@
             ((System.ComponentModel.ISupportInitialize)(this.numAzureScanInterval)).BeginInit();
             this.groupBox3.SuspendLayout();
             this.tabJson.SuspendLayout();
+            this.panel1.SuspendLayout();
             this.SuspendLayout();
             // 
             // txtJson
@@ -150,7 +152,7 @@
             this.txtJson.Multiline = true;
             this.txtJson.Name = "txtJson";
             this.txtJson.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.txtJson.Size = new System.Drawing.Size(1090, 694);
+            this.txtJson.Size = new System.Drawing.Size(1123, 716);
             this.txtJson.TabIndex = 13;
             this.txtJson.TextChanged += new System.EventHandler(this.txtJson_TextChanged);
             this.txtJson.Validating += new System.ComponentModel.CancelEventHandler(this.txtJson_Validating);
@@ -158,7 +160,7 @@
             // bttnAdd
             // 
             this.bttnAdd.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.bttnAdd.Location = new System.Drawing.Point(948, 254);
+            this.bttnAdd.Location = new System.Drawing.Point(981, 254);
             this.bttnAdd.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.bttnAdd.Name = "bttnAdd";
             this.bttnAdd.Size = new System.Drawing.Size(103, 38);
@@ -232,7 +234,7 @@
             // 
             this.bttnSave.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.bttnSave.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.bttnSave.Location = new System.Drawing.Point(900, 775);
+            this.bttnSave.Location = new System.Drawing.Point(909, 16);
             this.bttnSave.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.bttnSave.Name = "bttnSave";
             this.bttnSave.Size = new System.Drawing.Size(100, 35);
@@ -253,7 +255,7 @@
             // bttnCancel
             // 
             this.bttnCancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.bttnCancel.Location = new System.Drawing.Point(1006, 775);
+            this.bttnCancel.Location = new System.Drawing.Point(1016, 15);
             this.bttnCancel.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.bttnCancel.Name = "bttnCancel";
             this.bttnCancel.Size = new System.Drawing.Size(100, 35);
@@ -264,18 +266,16 @@
             // 
             // tab1
             // 
-            this.tab1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
             this.tab1.Controls.Add(this.tabDest);
             this.tab1.Controls.Add(this.tabSource);
             this.tab1.Controls.Add(this.tabOther);
             this.tab1.Controls.Add(this.tabJson);
-            this.tab1.Location = new System.Drawing.Point(12, 31);
+            this.tab1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.tab1.Location = new System.Drawing.Point(0, 0);
             this.tab1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.tab1.Name = "tab1";
             this.tab1.SelectedIndex = 0;
-            this.tab1.Size = new System.Drawing.Size(1104, 735);
+            this.tab1.Size = new System.Drawing.Size(1137, 757);
             this.tab1.TabIndex = 22;
             // 
             // tabDest
@@ -294,7 +294,7 @@
             this.tabDest.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.tabDest.Name = "tabDest";
             this.tabDest.Padding = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.tabDest.Size = new System.Drawing.Size(1096, 702);
+            this.tabDest.Size = new System.Drawing.Size(1129, 724);
             this.tabDest.TabIndex = 2;
             this.tabDest.Text = "Destination:";
             this.tabDest.UseVisualStyleBackColor = true;
@@ -319,11 +319,11 @@
             this.groupBox5.Controls.Add(this.lnkRefresh);
             this.groupBox5.Controls.Add(this.lnkStart);
             this.groupBox5.Controls.Add(this.lnkStop);
-            this.groupBox5.Location = new System.Drawing.Point(9, 554);
+            this.groupBox5.Location = new System.Drawing.Point(9, 542);
             this.groupBox5.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.groupBox5.Name = "groupBox5";
             this.groupBox5.Padding = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.groupBox5.Size = new System.Drawing.Size(1058, 140);
+            this.groupBox5.Size = new System.Drawing.Size(1103, 140);
             this.groupBox5.TabIndex = 19;
             this.groupBox5.TabStop = false;
             this.groupBox5.Text = "Service";
@@ -345,7 +345,7 @@
             this.lnkInstall.Image = global::DBADashServiceConfig.Properties.Resources.install;
             this.lnkInstall.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
             this.lnkInstall.LinkColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(79)))), ((int)(((byte)(131)))));
-            this.lnkInstall.Location = new System.Drawing.Point(892, 42);
+            this.lnkInstall.Location = new System.Drawing.Point(937, 42);
             this.lnkInstall.Name = "lnkInstall";
             this.lnkInstall.Size = new System.Drawing.Size(160, 21);
             this.lnkInstall.TabIndex = 22;
@@ -412,7 +412,7 @@
             // 
             this.bttnS3.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.bttnS3.Image = global::DBADashServiceConfig.Properties.Resources.Arch_Amazon_Simple_Storage_Service_16;
-            this.bttnS3.Location = new System.Drawing.Point(1039, 24);
+            this.bttnS3.Location = new System.Drawing.Point(1082, 25);
             this.bttnS3.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.bttnS3.Name = "bttnS3";
             this.bttnS3.Size = new System.Drawing.Size(28, 30);
@@ -425,7 +425,7 @@
             // 
             this.bttnDestFolder.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.bttnDestFolder.Image = global::DBADashServiceConfig.Properties.Resources.FolderOpened_16x;
-            this.bttnDestFolder.Location = new System.Drawing.Point(1005, 25);
+            this.bttnDestFolder.Location = new System.Drawing.Point(1047, 25);
             this.bttnDestFolder.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.bttnDestFolder.Name = "bttnDestFolder";
             this.bttnDestFolder.Size = new System.Drawing.Size(28, 29);
@@ -452,7 +452,7 @@
             // 
             this.bttnConnect.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.bttnConnect.Image = global::DBADashServiceConfig.Properties.Resources.Connect_16x;
-            this.bttnConnect.Location = new System.Drawing.Point(971, 25);
+            this.bttnConnect.Location = new System.Drawing.Point(1012, 25);
             this.bttnConnect.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.bttnConnect.Name = "bttnConnect";
             this.bttnConnect.Size = new System.Drawing.Size(28, 29);
@@ -499,7 +499,7 @@
             this.txtDestination.Location = new System.Drawing.Point(103, 25);
             this.txtDestination.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.txtDestination.Name = "txtDestination";
-            this.txtDestination.Size = new System.Drawing.Size(862, 27);
+            this.txtDestination.Size = new System.Drawing.Size(903, 27);
             this.txtDestination.TabIndex = 1;
             this.txtDestination.Validated += new System.EventHandler(this.txtDestination_Validated);
             // 
@@ -511,7 +511,7 @@
             this.tabSource.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.tabSource.Name = "tabSource";
             this.tabSource.Padding = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.tabSource.Size = new System.Drawing.Size(1096, 702);
+            this.tabSource.Size = new System.Drawing.Size(1129, 724);
             this.tabSource.TabIndex = 0;
             this.tabSource.Text = "Source";
             this.tabSource.UseVisualStyleBackColor = true;
@@ -527,7 +527,7 @@
             this.groupBox2.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.groupBox2.Name = "groupBox2";
             this.groupBox2.Padding = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.groupBox2.Size = new System.Drawing.Size(1069, 311);
+            this.groupBox2.Size = new System.Drawing.Size(1102, 311);
             this.groupBox2.TabIndex = 27;
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "Add New Connection";
@@ -544,7 +544,7 @@
             this.tabSrcOptions.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.tabSrcOptions.Name = "tabSrcOptions";
             this.tabSrcOptions.SelectedIndex = 0;
-            this.tabSrcOptions.Size = new System.Drawing.Size(1035, 221);
+            this.tabSrcOptions.Size = new System.Drawing.Size(1068, 221);
             this.tabSrcOptions.TabIndex = 21;
             // 
             // tabGeneral
@@ -559,7 +559,7 @@
             this.tabGeneral.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.tabGeneral.Name = "tabGeneral";
             this.tabGeneral.Padding = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.tabGeneral.Size = new System.Drawing.Size(1027, 192);
+            this.tabGeneral.Size = new System.Drawing.Size(1060, 192);
             this.tabGeneral.TabIndex = 0;
             this.tabGeneral.Text = "General";
             this.tabGeneral.UseVisualStyleBackColor = true;
@@ -585,14 +585,14 @@
             this.txtSource.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.txtSource.Multiline = true;
             this.txtSource.Name = "txtSource";
-            this.txtSource.Size = new System.Drawing.Size(912, 128);
+            this.txtSource.Size = new System.Drawing.Size(945, 128);
             this.txtSource.TabIndex = 13;
             // 
             // bttnS3Src
             // 
             this.bttnS3Src.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.bttnS3Src.Image = global::DBADashServiceConfig.Properties.Resources.Arch_Amazon_Simple_Storage_Service_16;
-            this.bttnS3Src.Location = new System.Drawing.Point(991, 36);
+            this.bttnS3Src.Location = new System.Drawing.Point(1024, 36);
             this.bttnS3Src.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.bttnS3Src.Name = "bttnS3Src";
             this.bttnS3Src.Size = new System.Drawing.Size(28, 29);
@@ -605,7 +605,7 @@
             // 
             this.bttnSrcFolder.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.bttnSrcFolder.Image = global::DBADashServiceConfig.Properties.Resources.FolderOpened_16x;
-            this.bttnSrcFolder.Location = new System.Drawing.Point(958, 35);
+            this.bttnSrcFolder.Location = new System.Drawing.Point(991, 35);
             this.bttnSrcFolder.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.bttnSrcFolder.Name = "bttnSrcFolder";
             this.bttnSrcFolder.Size = new System.Drawing.Size(28, 29);
@@ -618,7 +618,7 @@
             // 
             this.bttnConnectSource.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.bttnConnectSource.Image = global::DBADashServiceConfig.Properties.Resources.Connect_16x;
-            this.bttnConnectSource.Location = new System.Drawing.Point(924, 35);
+            this.bttnConnectSource.Location = new System.Drawing.Point(957, 35);
             this.bttnConnectSource.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.bttnConnectSource.Name = "bttnConnectSource";
             this.bttnConnectSource.Size = new System.Drawing.Size(28, 29);
@@ -644,7 +644,7 @@
             this.tabExtendedEvents.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.tabExtendedEvents.Name = "tabExtendedEvents";
             this.tabExtendedEvents.Padding = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.tabExtendedEvents.Size = new System.Drawing.Size(1027, 192);
+            this.tabExtendedEvents.Size = new System.Drawing.Size(1060, 192);
             this.tabExtendedEvents.TabIndex = 1;
             this.tabExtendedEvents.Text = "Extended Events";
             this.tabExtendedEvents.UseVisualStyleBackColor = true;
@@ -661,7 +661,7 @@
             this.pnlExtendedEvents.Location = new System.Drawing.Point(3, 4);
             this.pnlExtendedEvents.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.pnlExtendedEvents.Name = "pnlExtendedEvents";
-            this.pnlExtendedEvents.Size = new System.Drawing.Size(1021, 184);
+            this.pnlExtendedEvents.Size = new System.Drawing.Size(1054, 184);
             this.pnlExtendedEvents.TabIndex = 18;
             // 
             // chkSlowQueryThreshold
@@ -766,7 +766,7 @@
             this.tabAddConnectionOther.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.tabAddConnectionOther.Name = "tabAddConnectionOther";
             this.tabAddConnectionOther.Padding = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.tabAddConnectionOther.Size = new System.Drawing.Size(1027, 192);
+            this.tabAddConnectionOther.Size = new System.Drawing.Size(1060, 192);
             this.tabAddConnectionOther.TabIndex = 3;
             this.tabAddConnectionOther.Text = "Other";
             this.tabAddConnectionOther.UseVisualStyleBackColor = true;
@@ -880,7 +880,7 @@
             this.grpRunningQueryThreshold.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.grpRunningQueryThreshold.Name = "grpRunningQueryThreshold";
             this.grpRunningQueryThreshold.Padding = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.grpRunningQueryThreshold.Size = new System.Drawing.Size(508, 159);
+            this.grpRunningQueryThreshold.Size = new System.Drawing.Size(541, 159);
             this.grpRunningQueryThreshold.TabIndex = 22;
             this.grpRunningQueryThreshold.TabStop = false;
             this.grpRunningQueryThreshold.Text = "Running Queries Plan Collection Thresholds";
@@ -976,7 +976,7 @@
             this.groupBox1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.groupBox1.Name = "groupBox1";
             this.groupBox1.Padding = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.groupBox1.Size = new System.Drawing.Size(1069, 365);
+            this.groupBox1.Size = new System.Drawing.Size(1102, 376);
             this.groupBox1.TabIndex = 26;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Existing Connections";
@@ -987,13 +987,14 @@
             this.dgvConnections.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+            this.dgvConnections.BackgroundColor = System.Drawing.Color.White;
             this.dgvConnections.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.dgvConnections.Location = new System.Drawing.Point(16, 26);
             this.dgvConnections.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.dgvConnections.Name = "dgvConnections";
             this.dgvConnections.RowHeadersWidth = 51;
             this.dgvConnections.RowTemplate.Height = 24;
-            this.dgvConnections.Size = new System.Drawing.Size(1035, 296);
+            this.dgvConnections.Size = new System.Drawing.Size(1068, 307);
             this.dgvConnections.TabIndex = 23;
             this.dgvConnections.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgvConnections_CellContentClick);
             this.dgvConnections.RowsAdded += new System.Windows.Forms.DataGridViewRowsAddedEventHandler(this.dgv_RowsAdded);
@@ -1005,7 +1006,7 @@
             this.label13.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.label13.AutoSize = true;
             this.label13.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.label13.Location = new System.Drawing.Point(797, 334);
+            this.label13.Location = new System.Drawing.Point(830, 345);
             this.label13.Name = "label13";
             this.label13.Size = new System.Drawing.Size(53, 16);
             this.label13.TabIndex = 25;
@@ -1014,7 +1015,7 @@
             // txtSearch
             // 
             this.txtSearch.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.txtSearch.Location = new System.Drawing.Point(860, 330);
+            this.txtSearch.Location = new System.Drawing.Point(893, 341);
             this.txtSearch.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.txtSearch.Name = "txtSearch";
             this.txtSearch.Size = new System.Drawing.Size(191, 22);
@@ -1031,13 +1032,15 @@
             this.tabOther.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.tabOther.Name = "tabOther";
             this.tabOther.Padding = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.tabOther.Size = new System.Drawing.Size(1096, 702);
+            this.tabOther.Size = new System.Drawing.Size(1129, 724);
             this.tabOther.TabIndex = 5;
             this.tabOther.Text = "Options";
             this.tabOther.UseVisualStyleBackColor = true;
             // 
             // groupBox4
             // 
+            this.groupBox4.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.groupBox4.Controls.Add(this.chkScanAzureDB);
             this.groupBox4.Controls.Add(this.lblHHmm);
             this.groupBox4.Controls.Add(this.bttnScanNow);
@@ -1049,7 +1052,7 @@
             this.groupBox4.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.groupBox4.Name = "groupBox4";
             this.groupBox4.Padding = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.groupBox4.Size = new System.Drawing.Size(1055, 260);
+            this.groupBox4.Size = new System.Drawing.Size(1088, 260);
             this.groupBox4.TabIndex = 30;
             this.groupBox4.TabStop = false;
             this.groupBox4.Text = "Azure DB";
@@ -1145,6 +1148,8 @@
             // 
             // groupBox3
             // 
+            this.groupBox3.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.groupBox3.Controls.Add(this.label4);
             this.groupBox3.Controls.Add(this.label12);
             this.groupBox3.Controls.Add(this.txtSecretKey);
@@ -1156,7 +1161,7 @@
             this.groupBox3.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.groupBox3.Name = "groupBox3";
             this.groupBox3.Padding = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.groupBox3.Size = new System.Drawing.Size(1055, 308);
+            this.groupBox3.Size = new System.Drawing.Size(1088, 308);
             this.groupBox3.TabIndex = 16;
             this.groupBox3.TabStop = false;
             this.groupBox3.Text = "AWS Credentials";
@@ -1184,7 +1189,7 @@
             // 
             this.chkLogInternalPerfCounters.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.chkLogInternalPerfCounters.AutoSize = true;
-            this.chkLogInternalPerfCounters.Location = new System.Drawing.Point(820, 29);
+            this.chkLogInternalPerfCounters.Location = new System.Drawing.Point(853, 29);
             this.chkLogInternalPerfCounters.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.chkLogInternalPerfCounters.Name = "chkLogInternalPerfCounters";
             this.chkLogInternalPerfCounters.Size = new System.Drawing.Size(259, 24);
@@ -1200,7 +1205,7 @@
             this.tabJson.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.tabJson.Name = "tabJson";
             this.tabJson.Padding = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.tabJson.Size = new System.Drawing.Size(1096, 702);
+            this.tabJson.Size = new System.Drawing.Size(1129, 724);
             this.tabJson.TabIndex = 6;
             this.tabJson.Text = "Json";
             this.tabJson.UseVisualStyleBackColor = true;
@@ -1210,7 +1215,7 @@
             this.lnkSourceConnections.AutoSize = true;
             this.lnkSourceConnections.Font = new System.Drawing.Font("Arial", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.lnkSourceConnections.LinkColor = System.Drawing.Color.Black;
-            this.lnkSourceConnections.Location = new System.Drawing.Point(12, 782);
+            this.lnkSourceConnections.Location = new System.Drawing.Point(28, 25);
             this.lnkSourceConnections.Name = "lnkSourceConnections";
             this.lnkSourceConnections.Size = new System.Drawing.Size(128, 16);
             this.lnkSourceConnections.TabIndex = 18;
@@ -1227,16 +1232,25 @@
             this.toolTip1.SetToolTip(this.button1, "Choose a folder destination path");
             this.button1.UseVisualStyleBackColor = true;
             // 
+            // panel1
+            // 
+            this.panel1.Controls.Add(this.bttnSave);
+            this.panel1.Controls.Add(this.bttnCancel);
+            this.panel1.Controls.Add(this.lnkSourceConnections);
+            this.panel1.Dock = System.Windows.Forms.DockStyle.Bottom;
+            this.panel1.Location = new System.Drawing.Point(0, 757);
+            this.panel1.Name = "panel1";
+            this.panel1.Size = new System.Drawing.Size(1137, 64);
+            this.panel1.TabIndex = 23;
+            // 
             // ServiceConfig
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1137, 821);
             this.Controls.Add(this.tab1);
-            this.Controls.Add(this.lnkSourceConnections);
-            this.Controls.Add(this.bttnCancel);
             this.Controls.Add(this.label5);
-            this.Controls.Add(this.bttnSave);
+            this.Controls.Add(this.panel1);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.MinimumSize = new System.Drawing.Size(842, 868);
@@ -1277,6 +1291,8 @@
             this.groupBox3.PerformLayout();
             this.tabJson.ResumeLayout(false);
             this.tabJson.PerformLayout();
+            this.panel1.ResumeLayout(false);
+            this.panel1.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -1371,6 +1387,7 @@
         private System.Windows.Forms.CheckBox chkCollectSessionWaits;
         private System.Windows.Forms.Button bttnViewServiceLog;
         private System.Windows.Forms.Button bttnAbout;
+        private System.Windows.Forms.Panel panel1;
     }
 }
 

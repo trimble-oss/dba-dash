@@ -14,7 +14,6 @@ using static DBADash.DBADashConnection;
 using System.Drawing;
 using System.Collections.Generic;
 using System.Data;
-using DBADashSharedGUI;
 
 namespace DBADashServiceConfig
 {
@@ -227,26 +226,26 @@ namespace DBADashServiceConfig
                     var status = DBValidations.VersionStatus(dest.ConnectionString);
                     if (status.VersionStatus == DBValidations.DBVersionStatusEnum.CreateDB)
                     {
-                        lblVersionInfo.Text = "Run Deploy to create database.";
-                        lblVersionInfo.ForeColor = Color.Red;
+                        lblVersionInfo.Text = "Start service to create repository database or click Deploy to create manually.";
+                        lblVersionInfo.ForeColor = DashColors.Fail;
                         return true;
                     }
                     if (status.VersionStatus == DBValidations.DBVersionStatusEnum.OK)
                     {
-                        lblVersionInfo.Text = "DB upgrade not required. DacVersion/DB Version: " + status.DACVersion.ToString();
-                        lblVersionInfo.ForeColor = Color.Green;
+                        lblVersionInfo.Text = "Repository database upgrade not required. DacVersion/DB Version: " + status.DACVersion.ToString();
+                        lblVersionInfo.ForeColor = DashColors.Success;
                         bttnDeployDatabase.Enabled = true;
                     }
                     else if (status.VersionStatus == DBValidations.DBVersionStatusEnum.AppUpgradeRequired)
                     {
-                        lblVersionInfo.Text = "DB version " + status.DBVersion.ToString() + " is newer. Please update the app";
-                        lblVersionInfo.ForeColor = Color.Red;
+                        lblVersionInfo.Text = String.Format("Repository database version {0} is newer than dac version {1}.  Please update this app.", status.DBVersion.ToString(), status.DACVersion.ToString());
+                        lblVersionInfo.ForeColor = DashColors.Fail;
                         bttnDeployDatabase.Enabled = false;
                     }
                     else
                     {
-                        lblVersionInfo.Text = "DB version " + status.DBVersion.ToString() + " requires upgrade to " + status.DACVersion.ToString();
-                        lblVersionInfo.ForeColor = Color.Red;
+                        lblVersionInfo.Text = String.Format("Repository database version {0}  requires upgrade to {1}.  Database will be upgraded on service start.", status.DBVersion.ToString(), status.DACVersion.ToString());
+                        lblVersionInfo.ForeColor = DashColors.Fail;
                         bttnDeployDatabase.Enabled = true;
                     }
                     return true;
@@ -308,9 +307,9 @@ namespace DBADashServiceConfig
             dgvConnections.Columns.Add(new DataGridViewTextBoxColumn() { DataPropertyName = "PlanCollectionCountThreshold", HeaderText = "Plan Collection Count Threshold" });
             dgvConnections.Columns.Add(new DataGridViewTextBoxColumn() { DataPropertyName = "PlanCollectionMemoryGrantThreshold", HeaderText = "Plan Collection Memory Grant Threshold" });
             dgvConnections.Columns.Add(new DataGridViewCheckBoxColumn() { DataPropertyName = "HasCustomSchedule", HeaderText = "Custom Schedule" });
-            dgvConnections.Columns.Add(new DataGridViewLinkColumn() { Name = "Schedule", HeaderText = "Schedule", Text = "Schedule", UseColumnTextForLinkValue = true });
-            dgvConnections.Columns.Add(new DataGridViewLinkColumn() { Name = "Edit", HeaderText = "Edit", Text = "Edit", UseColumnTextForLinkValue = true });
-            dgvConnections.Columns.Add(new DataGridViewLinkColumn() { Name = "Delete", HeaderText = "Delete", Text = "Delete", UseColumnTextForLinkValue = true });
+            dgvConnections.Columns.Add(new DataGridViewLinkColumn() { Name = "Schedule", HeaderText = "Schedule", Text = "Schedule", UseColumnTextForLinkValue = true, LinkColor = DashColors.LinkColor });
+            dgvConnections.Columns.Add(new DataGridViewLinkColumn() { Name = "Edit", HeaderText = "Edit", Text = "Edit", UseColumnTextForLinkValue = true, LinkColor = DashColors.LinkColor });
+            dgvConnections.Columns.Add(new DataGridViewLinkColumn() { Name = "Delete", HeaderText = "Delete", Text = "Delete", UseColumnTextForLinkValue = true, LinkColor = DashColors.LinkColor });
 
             txtJson.MaxLength = 0;
 
@@ -375,11 +374,11 @@ namespace DBADashServiceConfig
             if (cnt == 0)
             {
                 lnkSourceConnections.Text += ".  (Add source connections to monitor)";
-                lnkSourceConnections.LinkColor = Color.Brown;
+                lnkSourceConnections.LinkColor = DashColors.Warning;
             }
             else
             {
-                lnkSourceConnections.LinkColor = Color.Green;
+                lnkSourceConnections.LinkColor = DashColors.Success;
             }
         }
 
@@ -804,6 +803,8 @@ namespace DBADashServiceConfig
                 {
                     collectionConfig.AddConnections(newConnections);
                     txtJson.Text = collectionConfig.Serialize();
+                    setConnectionCount();
+                    setDgv();
                 }
             }
         }

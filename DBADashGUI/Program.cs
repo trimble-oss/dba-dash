@@ -1,9 +1,11 @@
-﻿using System;
+﻿global using DBADashSharedGUI;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using CommandLine;
+
 namespace DBADashGUI
 {
     static class Program

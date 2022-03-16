@@ -330,19 +330,19 @@ AND database_id > 4 ", cn);
                 else if (dbVersionStatus.VersionStatus == DBValidations.DBVersionStatusEnum.OK)
                 {
                     lblVersionInfo.Text = dbVersionStatus.DBVersion.ToString() + " (OK)";
-                    lblVersionInfo.ForeColor = System.Drawing.Color.Green;
+                    lblVersionInfo.ForeColor = DashColors.Success;
                     bttnGenerate.Enabled = true;
                 }
                 else if(dbVersionStatus.VersionStatus == DBValidations.DBVersionStatusEnum.UpgradeRequired)
                 {
                     lblVersionInfo.Text = dbVersionStatus.DBVersion.ToString() + " Upgrade to " + dbVersionStatus.DACVersion.ToString();
-                    lblVersionInfo.ForeColor = System.Drawing.Color.Red;
+                    lblVersionInfo.ForeColor = DashColors.Fail;
                     bttnGenerate.Enabled = true;
                 }
                 else if(dbVersionStatus.VersionStatus== DBValidations.DBVersionStatusEnum.AppUpgradeRequired)
                 {
                     lblVersionInfo.Text = dbVersionStatus.DBVersion.ToString() + "Newer than app:" + dbVersionStatus.DACVersion.ToString() + ". Upgrade app";
-                    lblVersionInfo.ForeColor = System.Drawing.Color.Red;
+                    lblVersionInfo.ForeColor = DashColors.Fail;
                     bttnGenerate.Enabled = false;
                     bttnDeploy.Enabled = false;
                 }
