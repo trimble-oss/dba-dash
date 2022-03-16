@@ -46,5 +46,18 @@ namespace DBADashSharedGUI
                 frm.ShowDialog(owner);
             }
         }
+
+        public static void StyleGrid(ref DataGridView dgv)
+        {
+            foreach (DataGridViewColumn col in dgv.Columns)
+            {
+                if (col.GetType() == typeof(DataGridViewLinkColumn))
+                {
+                    var linkCol = (DataGridViewLinkColumn)col;
+                    linkCol.LinkColor = DashColors.LinkColor;
+                }
+            }
+        }
+
     }
 }

@@ -14,7 +14,7 @@ using System.Windows.Forms;
 
 namespace DBADashGUI
 {
-    static class Common
+    public class Common : CommonShared
     {
         public static string ConnectionString;
         public static readonly string JsonConfigPath = System.IO.Path.Combine(Application.StartupPath, "ServiceConfig.json");
@@ -399,18 +399,7 @@ namespace DBADashGUI
         public static DataGridViewCellStyle DataGridViewNumericCellStyle = new DataGridViewCellStyle() { Format = "#,##0.###" };
         public static DataGridViewCellStyle DataGridViewNumericCellStyleNoDigits = new DataGridViewCellStyle() { Format = "#,##0" };       
 
-        public static void StyleGrid(ref DataGridView dgv)
-        {
-            foreach(DataGridViewColumn col in dgv.Columns)
-            {
-                if(col.GetType() == typeof(DataGridViewLinkColumn))
-                {
-                    var linkCol = (DataGridViewLinkColumn)col;
-                    linkCol.LinkColor = DashColors.LinkColor;
-                }
-            }
-        }
-    
+       
                     
     }
 }

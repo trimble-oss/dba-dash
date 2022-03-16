@@ -8,7 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace DBADashGUI
+namespace DBADashSharedGUI
 {
     //https://modus.trimble.com/foundations/color-palette/
     public static class DashColors 
