@@ -534,7 +534,6 @@
             // splitMain
             // 
             this.splitMain.AccessibleRole = System.Windows.Forms.AccessibleRole.ScrollBar;
-            this.splitMain.Cursor = System.Windows.Forms.Cursors.VSplit;
             this.splitMain.Dock = System.Windows.Forms.DockStyle.Fill;
             this.splitMain.Location = new System.Drawing.Point(0, 34);
             this.splitMain.Name = "splitMain";
