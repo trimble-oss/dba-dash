@@ -31,6 +31,8 @@
             this.chart1 = new LiveCharts.WinForms.CartesianChart();
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
             this.tsTime = new System.Windows.Forms.ToolStripDropDownButton();
+            this.dayToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.daysToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.days7ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.days30ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.days90ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -72,8 +74,10 @@
             // 
             // tsTime
             // 
-            this.tsTime.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.tsTime.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
             this.tsTime.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.dayToolStripMenuItem,
+            this.daysToolStripMenuItem,
             this.days7ToolStripMenuItem,
             this.days30ToolStripMenuItem,
             this.days90ToolStripMenuItem,
@@ -84,13 +88,31 @@
             this.tsTime.Image = global::DBADashGUI.Properties.Resources.Time_16x;
             this.tsTime.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsTime.Name = "tsTime";
-            this.tsTime.Size = new System.Drawing.Size(34, 24);
-            this.tsTime.Text = "Time";
+            this.tsTime.Size = new System.Drawing.Size(97, 24);
+            this.tsTime.Text = "{0} Days";
+            // 
+            // dayToolStripMenuItem
+            // 
+            this.dayToolStripMenuItem.Name = "dayToolStripMenuItem";
+            this.dayToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            this.dayToolStripMenuItem.Tag = "1";
+            this.dayToolStripMenuItem.Text = "1 Day";
+            this.dayToolStripMenuItem.Click += new System.EventHandler(this.Days_Click);
+            // 
+            // daysToolStripMenuItem
+            // 
+            this.daysToolStripMenuItem.Name = "daysToolStripMenuItem";
+            this.daysToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            this.daysToolStripMenuItem.Tag = "2";
+            this.daysToolStripMenuItem.Text = "2 Days";
+            this.daysToolStripMenuItem.Click += new System.EventHandler(this.Days_Click);
             // 
             // days7ToolStripMenuItem
             // 
+            this.days7ToolStripMenuItem.Checked = true;
+            this.days7ToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
             this.days7ToolStripMenuItem.Name = "days7ToolStripMenuItem";
-            this.days7ToolStripMenuItem.Size = new System.Drawing.Size(152, 26);
+            this.days7ToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
             this.days7ToolStripMenuItem.Tag = "7";
             this.days7ToolStripMenuItem.Text = "7 Days";
             this.days7ToolStripMenuItem.Click += new System.EventHandler(this.Days_Click);
@@ -98,17 +120,15 @@
             // days30ToolStripMenuItem
             // 
             this.days30ToolStripMenuItem.Name = "days30ToolStripMenuItem";
-            this.days30ToolStripMenuItem.Size = new System.Drawing.Size(152, 26);
+            this.days30ToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
             this.days30ToolStripMenuItem.Tag = "30";
             this.days30ToolStripMenuItem.Text = "30 Days";
             this.days30ToolStripMenuItem.Click += new System.EventHandler(this.Days_Click);
             // 
             // days90ToolStripMenuItem
             // 
-            this.days90ToolStripMenuItem.Checked = true;
-            this.days90ToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
             this.days90ToolStripMenuItem.Name = "days90ToolStripMenuItem";
-            this.days90ToolStripMenuItem.Size = new System.Drawing.Size(152, 26);
+            this.days90ToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
             this.days90ToolStripMenuItem.Tag = "90";
             this.days90ToolStripMenuItem.Text = "90 Days";
             this.days90ToolStripMenuItem.Click += new System.EventHandler(this.Days_Click);
@@ -116,7 +136,7 @@
             // days180ToolStripMenuItem
             // 
             this.days180ToolStripMenuItem.Name = "days180ToolStripMenuItem";
-            this.days180ToolStripMenuItem.Size = new System.Drawing.Size(152, 26);
+            this.days180ToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
             this.days180ToolStripMenuItem.Tag = "180";
             this.days180ToolStripMenuItem.Text = "180 Days";
             this.days180ToolStripMenuItem.Click += new System.EventHandler(this.Days_Click);
@@ -124,7 +144,7 @@
             // yearToolStripMenuItem
             // 
             this.yearToolStripMenuItem.Name = "yearToolStripMenuItem";
-            this.yearToolStripMenuItem.Size = new System.Drawing.Size(152, 26);
+            this.yearToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
             this.yearToolStripMenuItem.Tag = "365";
             this.yearToolStripMenuItem.Text = "1 Year";
             this.yearToolStripMenuItem.Click += new System.EventHandler(this.Days_Click);
@@ -132,12 +152,12 @@
             // toolStripSeparator1
             // 
             this.toolStripSeparator1.Name = "toolStripSeparator1";
-            this.toolStripSeparator1.Size = new System.Drawing.Size(149, 6);
+            this.toolStripSeparator1.Size = new System.Drawing.Size(221, 6);
             // 
             // tsCustom
             // 
             this.tsCustom.Name = "tsCustom";
-            this.tsCustom.Size = new System.Drawing.Size(152, 26);
+            this.tsCustom.Size = new System.Drawing.Size(224, 26);
             this.tsCustom.Tag = "-1";
             this.tsCustom.Text = "Custom";
             this.tsCustom.Click += new System.EventHandler(this.Custom_Click);
@@ -166,9 +186,7 @@
             // 
             // pointsToolStripMenuItem
             // 
-            this.pointsToolStripMenuItem.Checked = true;
             this.pointsToolStripMenuItem.CheckOnClick = true;
-            this.pointsToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
             this.pointsToolStripMenuItem.Name = "pointsToolStripMenuItem";
             this.pointsToolStripMenuItem.Size = new System.Drawing.Size(181, 26);
             this.pointsToolStripMenuItem.Text = "Points";
@@ -230,5 +248,7 @@
         private System.Windows.Forms.ToolStripButton tsRefresh;
         private System.Windows.Forms.ToolStripMenuItem pointsToolStripMenuItem;
         private System.Windows.Forms.Label lblInsufficientData;
+        private System.Windows.Forms.ToolStripMenuItem dayToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem daysToolStripMenuItem;
     }
 }
