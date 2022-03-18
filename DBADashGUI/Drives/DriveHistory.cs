@@ -20,6 +20,8 @@ namespace DBADashGUI.Drives
         public DriveHistory()
         {
             InitializeComponent();
+            lblInsufficientData.BackColor = DashColors.Warning;
+            lblInsufficientData.ForeColor = Color.White;
         }
 
         readonly string connectionString = Common.ConnectionString;
@@ -88,10 +90,23 @@ namespace DBADashGUI.Drives
             }
         }
 
+        private void displayInsufficientData()
+        {
+            lblInsufficientData.Visible = true;
+            chart1.Visible = false;
+        }
+
         public void RefreshData()
         {
+            lblInsufficientData.Visible = false;
+            chart1.Visible = true;
             var dt = DriveSnapshot();
             var cnt =dt.Rows.Count;
+            if (cnt < 2)
+            {
+                displayInsufficientData();
+                return;
+            }
             var columns = new Dictionary<string, columnMetaData>
             {
                 {"SizeGB", new columnMetaData{Alias="Size (GB)",isVisible=true } },
