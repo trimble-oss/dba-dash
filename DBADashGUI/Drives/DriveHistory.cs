@@ -22,6 +22,7 @@ namespace DBADashGUI.Drives
             InitializeComponent();
             lblInsufficientData.BackColor = DashColors.Warning;
             lblInsufficientData.ForeColor = Color.White;
+            setTimeChecked();
         }
 
         readonly string connectionString = Common.ConnectionString;
@@ -38,9 +39,21 @@ namespace DBADashGUI.Drives
             }
         }
 
-        public string DateFormat = "yyyy-MM-dd";
+        public string DateFormat
+        {
+            get
+            {
+                if (DateGroupingMins < 1440) {
+                    return "yyyy-MM-dd HH:mm";
+                }
+                else
+                {
+                    return "yyyy-MM-dd";
+                }
+            }
+        }
 
-        Int32 Days = 90;
+        Int32 Days = 7;
 
         DateTime customFrom;
         DateTime customTo;
@@ -51,7 +64,7 @@ namespace DBADashGUI.Drives
             {
                 if (Days > 0)
                 {
-                    return DateTime.UtcNow.Date.AddDays(-Days);
+                    return new DateTime(DateTime.UtcNow.Year,DateTime.UtcNow.Month,DateTime.UtcNow.Day,DateTime.UtcNow.Hour,0,0).AddDays(-Days);
                 }
                 else
                 {
@@ -66,7 +79,7 @@ namespace DBADashGUI.Drives
             {
                 if (Days > 0)
                 {
-                    return DateTime.UtcNow.Date.AddDays(1);
+                    return new DateTime(DateTime.UtcNow.Year, DateTime.UtcNow.Month, DateTime.UtcNow.Day, DateTime.UtcNow.Hour,0,0).AddHours(1);
                 }
                 else
                 {
@@ -88,6 +101,14 @@ namespace DBADashGUI.Drives
                     return 0;
                 }
             }
+        }
+
+        Int32 DateGroupingMins { 
+            get
+            {
+                var mins = Convert.ToInt32(To.Subtract(From).TotalMinutes);
+                return Common.DateGrouping(mins, 400);
+            } 
         }
 
         private void displayInsufficientData()
@@ -169,18 +190,19 @@ namespace DBADashGUI.Drives
         public DataTable DriveSnapshot()
         {
             using (var cn = new SqlConnection(connectionString))
+            using (var cmd = new SqlCommand("dbo.DriveSnapshot_Get", cn) { CommandType = CommandType.StoredProcedure }) 
+            using (var da = new SqlDataAdapter(cmd))
             {
-                using (SqlCommand cmd = new SqlCommand("dbo.DriveSnapshot_Get", cn) { CommandType = CommandType.StoredProcedure }) {
                     cn.Open();
                     cmd.Parameters.AddWithValue("FromDate", From);
                     cmd.Parameters.AddWithValue("ToDate", To);
                     cmd.Parameters.AddWithValue("DriveID", DriveID);
-                    SqlDataAdapter da = new SqlDataAdapter(cmd);
+                    cmd.Parameters.AddWithValue("DateGroupingMins", DateGroupingMins);                  
                     DataTable dt = new DataTable();
                     da.Fill(dt);
                     return dt;
-                }
-            }
+             }
+            
         }
 
         private void Days_Click(object sender, EventArgs e)
@@ -198,6 +220,10 @@ namespace DBADashGUI.Drives
                 {
                     var itm = (ToolStripMenuItem)ts;
                     itm.Checked = (string)itm.Tag == Days.ToString();
+                    if (itm.Checked)
+                    {
+                        tsTime.Text = itm.Text;
+                    }
                 }
                 
             }
@@ -210,7 +236,7 @@ namespace DBADashGUI.Drives
                 FromDate = From,
                 ToDate = To
             };
-            frm.ShowDialog();
+            frm.ShowDialog(this);
             if (frm.DialogResult == DialogResult.OK)
             {
                 customFrom = frm.FromDate;
