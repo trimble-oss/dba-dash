@@ -40,8 +40,9 @@
             this.tsCustom = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripDropDownButton1 = new System.Windows.Forms.ToolStripDropDownButton();
             this.smoothLinesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.tsRefresh = new System.Windows.Forms.ToolStripButton();
             this.pointsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.tsRefresh = new System.Windows.Forms.ToolStripButton();
+            this.lblInsufficientData = new System.Windows.Forms.Label();
             this.toolStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -49,9 +50,10 @@
             // 
             this.chart1.BackColor = System.Drawing.Color.White;
             this.chart1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.chart1.Location = new System.Drawing.Point(0, 0);
+            this.chart1.Location = new System.Drawing.Point(0, 27);
+            this.chart1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.chart1.Name = "chart1";
-            this.chart1.Size = new System.Drawing.Size(1134, 438);
+            this.chart1.Size = new System.Drawing.Size(1134, 521);
             this.chart1.TabIndex = 0;
             this.chart1.Text = "cartesianChart1";
             // 
@@ -158,9 +160,19 @@
             this.smoothLinesToolStripMenuItem.CheckOnClick = true;
             this.smoothLinesToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
             this.smoothLinesToolStripMenuItem.Name = "smoothLinesToolStripMenuItem";
-            this.smoothLinesToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            this.smoothLinesToolStripMenuItem.Size = new System.Drawing.Size(181, 26);
             this.smoothLinesToolStripMenuItem.Text = "Smooth Lines";
             this.smoothLinesToolStripMenuItem.Click += new System.EventHandler(this.smoothLinesToolStripMenuItem_Click);
+            // 
+            // pointsToolStripMenuItem
+            // 
+            this.pointsToolStripMenuItem.Checked = true;
+            this.pointsToolStripMenuItem.CheckOnClick = true;
+            this.pointsToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.pointsToolStripMenuItem.Name = "pointsToolStripMenuItem";
+            this.pointsToolStripMenuItem.Size = new System.Drawing.Size(181, 26);
+            this.pointsToolStripMenuItem.Text = "Points";
+            this.pointsToolStripMenuItem.Click += new System.EventHandler(this.pointsToolStripMenuItem_Click);
             // 
             // tsRefresh
             // 
@@ -172,24 +184,28 @@
             this.tsRefresh.Text = "Refresh";
             this.tsRefresh.Click += new System.EventHandler(this.tsRefresh_Click);
             // 
-            // pointsToolStripMenuItem
+            // lblInsufficientData
             // 
-            this.pointsToolStripMenuItem.Checked = true;
-            this.pointsToolStripMenuItem.CheckOnClick = true;
-            this.pointsToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.pointsToolStripMenuItem.Name = "pointsToolStripMenuItem";
-            this.pointsToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
-            this.pointsToolStripMenuItem.Text = "Points";
-            this.pointsToolStripMenuItem.Click += new System.EventHandler(this.pointsToolStripMenuItem_Click);
+            this.lblInsufficientData.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.lblInsufficientData.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.lblInsufficientData.Location = new System.Drawing.Point(0, 0);
+            this.lblInsufficientData.Name = "lblInsufficientData";
+            this.lblInsufficientData.Size = new System.Drawing.Size(1134, 548);
+            this.lblInsufficientData.TabIndex = 4;
+            this.lblInsufficientData.Text = "Please wait for more data to be collected...";
+            this.lblInsufficientData.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.lblInsufficientData.Visible = false;
             // 
             // DriveHistory
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.Controls.Add(this.toolStrip1);
             this.Controls.Add(this.chart1);
+            this.Controls.Add(this.toolStrip1);
+            this.Controls.Add(this.lblInsufficientData);
+            this.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.Name = "DriveHistory";
-            this.Size = new System.Drawing.Size(1134, 438);
+            this.Size = new System.Drawing.Size(1134, 548);
             this.toolStrip1.ResumeLayout(false);
             this.toolStrip1.PerformLayout();
             this.ResumeLayout(false);
@@ -213,5 +229,6 @@
         private System.Windows.Forms.ToolStripMenuItem smoothLinesToolStripMenuItem;
         private System.Windows.Forms.ToolStripButton tsRefresh;
         private System.Windows.Forms.ToolStripMenuItem pointsToolStripMenuItem;
+        private System.Windows.Forms.Label lblInsufficientData;
     }
 }
