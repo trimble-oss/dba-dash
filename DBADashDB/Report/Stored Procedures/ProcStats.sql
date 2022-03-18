@@ -1,4 +1,4 @@
-﻿CREATE  PROC [Report].[ProcStats](
+﻿CREATE  PROC Report.ProcStats(
 	@Instance SYSNAME=NULL,
 	@DatabaseID INT=NULL,
 	@Proc SYSNAME=NULL,
@@ -10,7 +10,6 @@
 	@UTCOffset INT=0,
 	@InstanceID INT=NULL
 )
-WITH EXECUTE AS OWNER
 AS
 SELECT @FromDate= DATEADD(mi, -@UTCOffset, @FromDate),
 	@ToDate = DATEADD(mi, -@UTCOffset, @ToDate) 
@@ -74,11 +73,11 @@ ORDER BY DatabaseName, object_name'
 PRINT @SQL
 IF @SQL IS NOT NULL
 BEGIN
-EXEC sp_executesql @SQL,N'@Instance SYSNAME,@DatabaseID INT,@FromDate DATETIME,@ToDate DATETIME,@Proc SYSNAME,@UTCOffset INT,@InstanceID INT',
-	@Instance,@DatabaseID,@FromDate,@ToDate,@Proc,@UTCOffset,@InstanceID
+	EXEC sp_executesql @SQL,N'@Instance SYSNAME,@DatabaseID INT,@FromDate DATETIME,@ToDate DATETIME,@Proc SYSNAME,@UTCOffset INT,@InstanceID INT',
+		@Instance,@DatabaseID,@FromDate,@ToDate,@Proc,@UTCOffset,@InstanceID
 END 
 ELSE
 BEGIN
-DECLARE  @results TABLE( [SnapshotDate] DATETIME, [DatabaseName] NVARCHAR(128),[DatabaseID] INT, [object_name] NVARCHAR(128), [TotalCPU] DECIMAL(29,9), [AvgCPU] DECIMAL(29,9), [ExecutionCount] BIGINT, [ExecutionsPerMin] DECIMAL(38,9), [TotalDuration] DECIMAL(29,9), [AvgDuration] DECIMAL(29,9), [TotalLogicalReads] BIGINT, [AvgLogicalReads] BIGINT, [TotalPhysicalReads] BIGINT, [AvgPhysicalReads] BIGINT, [TotalWrites] BIGINT, [AvgWrites] BIGINT, [Measure] DECIMAL(29,9), [ProcRank] BIGINT )
-SELECT * FROM @results
+	DECLARE  @results TABLE( [SnapshotDate] DATETIME, [DatabaseName] NVARCHAR(128),[DatabaseID] INT, [object_name] NVARCHAR(128), [TotalCPU] DECIMAL(29,9), [AvgCPU] DECIMAL(29,9), [ExecutionCount] BIGINT, [ExecutionsPerMin] DECIMAL(38,9), [TotalDuration] DECIMAL(29,9), [AvgDuration] DECIMAL(29,9), [TotalLogicalReads] BIGINT, [AvgLogicalReads] BIGINT, [TotalPhysicalReads] BIGINT, [AvgPhysicalReads] BIGINT, [TotalWrites] BIGINT, [AvgWrites] BIGINT, [Measure] DECIMAL(29,9), [ProcRank] BIGINT )
+	SELECT * FROM @results
 END
