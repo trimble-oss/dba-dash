@@ -396,10 +396,14 @@ namespace DBADashGUI
             }
         }
 
-        public static DataGridViewCellStyle DataGridViewNumericCellStyle = new DataGridViewCellStyle() { Format = "#,##0.###" };
-        public static DataGridViewCellStyle DataGridViewNumericCellStyleNoDigits = new DataGridViewCellStyle() { Format = "#,##0" };       
+        public static DataGridViewCellStyle DataGridViewNumericCellStyle = DataGridViewCellStyle("#,##0.###");
+        public static DataGridViewCellStyle DataGridViewNumericCellStyleNoDigits = DataGridViewCellStyle("#,##0");
+        public static DataGridViewCellStyle DataGridViewPercentCellStyle = DataGridViewCellStyle("P1"); 
 
-       
-                    
+        public static DataGridViewCellStyle DataGridViewCellStyle(string format)
+        {
+            return new DataGridViewCellStyle() { Format = format };
+        }
+
     }
 }

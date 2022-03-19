@@ -23,6 +23,16 @@ namespace DBADashGUI.Drives
             lblInsufficientData.BackColor = DashColors.Warning;
             lblInsufficientData.ForeColor = Color.White;
             setTimeChecked();
+            dgv.Columns.Clear();
+            var cols = new DataGridViewColumn[] {
+                    new DataGridViewTextBoxColumn { HeaderText = "Date", DataPropertyName = "SnapshotDate" },
+                    new DataGridViewTextBoxColumn { HeaderText = "Size (GB)", DataPropertyName = "SizeGB", DefaultCellStyle = Common.DataGridViewNumericCellStyle  },
+                    new DataGridViewTextBoxColumn { HeaderText = "Used (GB)", DataPropertyName = "UsedGB", DefaultCellStyle = Common.DataGridViewNumericCellStyle  },
+                    new DataGridViewTextBoxColumn { HeaderText = "Free (GB)", DataPropertyName = "FreeGB", DefaultCellStyle = Common.DataGridViewNumericCellStyle  },
+                    new DataGridViewTextBoxColumn { HeaderText = "Free (%)", DataPropertyName = "FreePct", DefaultCellStyle = Common.DataGridViewPercentCellStyle }
+            };
+            dgv.Columns.AddRange(cols);
+            dgv.AutoGenerateColumns = false;
         }
 
         readonly string connectionString = Common.ConnectionString;
@@ -111,18 +121,21 @@ namespace DBADashGUI.Drives
             } 
         }
 
+        private DataTable driveSnapshotDT;
+
         private void displayInsufficientData()
         {
             lblInsufficientData.Visible = true;
             chart1.Visible = false;
+            dgv.Visible= false;
         }
 
         public void RefreshData()
         {
-            lblInsufficientData.Visible = false;
-            chart1.Visible = true;
-            var dt = DriveSnapshot();
-            var cnt =dt.Rows.Count;
+            toggleGrid(false);
+            driveSnapshotDT = DriveSnapshot();
+            dgv.DataSource=driveSnapshotDT;
+            var cnt = driveSnapshotDT.Rows.Count;
             if (cnt < 2)
             {
                 displayInsufficientData();
@@ -141,13 +154,13 @@ namespace DBADashGUI.Drives
             }
 
             Int32 i = 0;
-            foreach (DataRow r in dt.Rows)
+            foreach (DataRow r in driveSnapshotDT.Rows)
             {
                 foreach (string s in columns.Keys)
                 {
                     var v = r[s] == DBNull.Value ? 0 : (double)(decimal)r[s];
                     var ssDate = (DateTime)r["SnapshotDate"];
-                    columns[s].Points[i] = new DateTimePoint(ssDate.ToLocalTime(), v);
+                    columns[s].Points[i] = new DateTimePoint(ssDate, v);
                 }
                 i++;
             }
@@ -193,16 +206,16 @@ namespace DBADashGUI.Drives
             using (var cmd = new SqlCommand("dbo.DriveSnapshot_Get", cn) { CommandType = CommandType.StoredProcedure }) 
             using (var da = new SqlDataAdapter(cmd))
             {
-                    cn.Open();
-                    cmd.Parameters.AddWithValue("FromDate", From);
-                    cmd.Parameters.AddWithValue("ToDate", To);
-                    cmd.Parameters.AddWithValue("DriveID", DriveID);
-                    cmd.Parameters.AddWithValue("DateGroupingMins", DateGroupingMins);                  
-                    DataTable dt = new DataTable();
-                    da.Fill(dt);
-                    return dt;
-             }
-            
+                cn.Open();
+                cmd.Parameters.AddWithValue("FromDate", From);
+                cmd.Parameters.AddWithValue("ToDate", To);
+                cmd.Parameters.AddWithValue("DriveID", DriveID);
+                cmd.Parameters.AddWithValue("DateGroupingMins", DateGroupingMins);                  
+                DataTable dt = new DataTable();
+                da.Fill(dt);
+                Common.ConvertUTCToLocal(ref dt);
+                return dt;
+             }            
         }
 
         private void Days_Click(object sender, EventArgs e)
@@ -267,6 +280,35 @@ namespace DBADashGUI.Drives
             {
                 s.PointGeometrySize = pointSize;
             }
+        }
+
+        private void tsChart_Click(object sender, EventArgs e)
+        {
+            toggleGrid(false);
+        }
+
+        private void toggleGrid(bool gridVisible)
+        {
+            lblInsufficientData.Visible = false;
+            chart1.Visible = !gridVisible;
+            dgv.Visible = gridVisible;
+            tsChart.Visible = gridVisible;
+            tsGrid.Visible = !gridVisible;
+        }
+
+        private void tsGrid_Click(object sender, EventArgs e)
+        {
+            toggleGrid(true);
+        }
+
+        private void tsExcel_Click(object sender, EventArgs e)
+        {
+            Common.PromptSaveDataGridView(ref dgv);
+        }
+
+        private void tsCopy_Click(object sender, EventArgs e)
+        {
+            Common.CopyDataGridViewToClipboard(dgv);
         }
     }
 }
