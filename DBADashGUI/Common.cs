@@ -180,8 +180,12 @@ namespace DBADashGUI
             Clipboard.SetDataObject(obj, true);
         }
 
+        public static void CopyDataGridViewToClipboard(DataGridView dgv)
+        {
+            CopyDataGridViewToClipboard(dgv, DashColors.TrimbleBlue, Color.White);
+        }
 
-        public static void CopyDataGridViewToClipboard(DataGridView dgv, string headerBGcolor = "#696969", string headerColor = "#FFFFFF")
+        public static void CopyDataGridViewToClipboard(DataGridView dgv, Color headerBGcolor, Color headerColor)
         {
 
             var DataGridView1Counts = dgv.Rows.Count;
@@ -197,7 +201,7 @@ namespace DBADashGUI
                 {
                     if (col.Visible)
                     {
-                        html.Append(string.Format("<th style=\"background-color:{1};color:{2};\">{0}</th>", col.HeaderText, headerBGcolor, headerColor));
+                        html.Append(string.Format("<th style=\"background-color:{1};color:{2};\">{0}</th>", col.HeaderText, headerBGcolor.ToHexString(), headerColor.ToHexString()));
                     }
                 }
                 html.Append("</tr>");
@@ -246,7 +250,7 @@ namespace DBADashGUI
             }
         }
 
-        public static void SaveDataGridViewToXLSX(ref DataGridView dgv,string path, SLTableStyleTypeValues tableStyle= SLTableStyleTypeValues.Light8)
+        public static void SaveDataGridViewToXLSX(ref DataGridView dgv,string path)
         {
             SLDocument sl = new SLDocument();
             Int32 colIndex = 1;
@@ -278,8 +282,10 @@ namespace DBADashGUI
                             _ => "",
                         };
                         if (!cell.Style.ForeColor.IsEmpty || !cell.Style.BackColor.IsEmpty || !string.IsNullOrEmpty(format))
-                        {                            
-                            style.Fill.SetPattern(DocumentFormat.OpenXml.Spreadsheet.PatternValues.Solid, cell.Style.BackColor.IsEmpty ? Color.Transparent : cell.Style.BackColor, cell.Style.ForeColor);                          
+                        {
+                            var backColor = cell.Style.BackColor.IsEmpty ? Color.Transparent : cell.Style.BackColor;
+                            style.Fill.SetPattern(DocumentFormat.OpenXml.Spreadsheet.PatternValues.Solid, backColor, backColor);
+                            style.SetFontColor(cell.Style.ForeColor);
                             style.FormatCode = format;
                             sl.SetCellStyle(rowIndex, colIndex, style);
                         }
@@ -302,9 +308,13 @@ namespace DBADashGUI
             }
             if (rowIndex > 1)
             {
-                var tbl = sl.CreateTable(1, 1, rowIndex, colIndex);
-                tbl.SetTableStyle(tableStyle);
+                var tbl = sl.CreateTable(1, 1, rowIndex, colIndex);        
                 sl.InsertTable(tbl);
+                SLStyle headerStyle = sl.CreateStyle();
+                headerStyle.Fill.SetPattern(DocumentFormat.OpenXml.Spreadsheet.PatternValues.Solid, DashColors.TrimbleBlue, DashColors.TrimbleBlue);
+                headerStyle.SetFontColor(Color.White);
+                headerStyle.SetFontBold(true);
+                sl.SetCellStyle(1, 1, 1, colIndex, headerStyle);
             }
             sl.AutoFitColumn(1, colIndex, 300);
             sl.SaveAs(path);
