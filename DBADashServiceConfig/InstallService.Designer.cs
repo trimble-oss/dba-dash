@@ -51,10 +51,10 @@ namespace DBADashServiceConfig
             this.lnkPermissions.TabIndex = 32;
             this.lnkPermissions.TabStop = true;
             this.lnkPermissions.Text = "Permissions required for service user";
+            this.lnkPermissions.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.lnkPermissions_LinkClicked);
             // 
             // cboServiceCredentials
             // 
-            this.cboServiceCredentials.Cursor = System.Windows.Forms.Cursors.Default;
             this.cboServiceCredentials.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.cboServiceCredentials.FormattingEnabled = true;
             this.cboServiceCredentials.Items.AddRange(new object[] {

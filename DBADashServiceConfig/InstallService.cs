@@ -128,5 +128,10 @@ namespace DBADashServiceConfig
         {
             cboServiceCredentials.SelectedIndex = 3;
         }
+
+        private void lnkPermissions_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            DBADashSharedGUI.CommonShared.OpenURL("https://github.com/trimble-oss/dba-dash/blob/main/Docs/Security.md");
+        }
     }
 }
