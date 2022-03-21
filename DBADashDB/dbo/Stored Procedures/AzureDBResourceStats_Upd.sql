@@ -191,7 +191,7 @@ BEGIN
 	WHERE RS.InstanceID=@InstanceID
 	AND RS.end_time>=@60MINFrom
 	GROUP BY RS.InstanceID,DG.DateGroup
-	OPTION(OPTIMIZE FOR(@60MINFrom='9999-12-31'))
+	OPTION(OPTIMIZE FOR(@60MINFrom='99991231'))
 END;
 
 WITH t AS (
@@ -210,7 +210,7 @@ SELECT t.InstanceID,
        t.dtu_limit_previous
 FROM T 
 WHERE t.dtu_limit<> t.dtu_limit_previous
-OPTION(OPTIMIZE FOR(@MaxDate='9999-12-31'))
+OPTION(OPTIMIZE FOR(@MaxDate='99991231'))
 
 COMMIT
 
