@@ -92,7 +92,7 @@ AND SnapshotDate >= @MaxDate
 GROUP BY InstanceID,
 	CONVERT(DATETIME,SUBSTRING(CONVERT(VARCHAR,SnapshotDate,120),0,14) + ':00',120),
 	WaitTypeID
- OPTION(OPTIMIZE FOR(@MaxDate='9999-12-31'))
+ OPTION(OPTIMIZE FOR(@MaxDate='99991231'))
 COMMIT
 /* **************** */
 
