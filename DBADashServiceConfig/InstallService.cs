@@ -53,7 +53,8 @@ namespace DBADashServiceConfig
                         return false;
                     }
                     string domain = creds.Domain;
-                    if (String.IsNullOrEmpty(domain))
+
+                    if (String.IsNullOrEmpty(domain) && !creds.UserName.StartsWith(".\\"))
                     {
                         var input = MessageBox.Show(String.Format("Warning domain hasn't been specified.  Is this a local user account?\n\nSelect Yes to use {0} (local) \nSelect No to use {1} (domain)", Environment.MachineName, Environment.UserDomainName),"",MessageBoxButtons.YesNoCancel, MessageBoxIcon.Warning);
                         if(input== DialogResult.Yes)
@@ -69,8 +70,12 @@ namespace DBADashServiceConfig
                             return false;
                         }
                     }
-
                     string username = domain + "\\" + creds.UserName;
+                    if (String.IsNullOrEmpty(domain)) // UserName specified as .\User
+                    {
+                        username = creds.UserName;
+                    }
+
                     arg = "-username \"" + username + "\" -password \"" + creds.Password.Replace("\"","\"\"") + "\"";
 
                     break;
