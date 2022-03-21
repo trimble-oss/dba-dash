@@ -177,6 +177,8 @@ namespace DBADashGUI
             obj.SetData(DataFormats.Html, new MemoryStream(
               enc.GetBytes(html_total)));
 
+            obj.SetData(DataFormats.Text, html);
+            
             Clipboard.SetDataObject(obj, true);
         }
 
