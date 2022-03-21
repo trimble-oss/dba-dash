@@ -462,7 +462,7 @@ namespace DBADash
                             op.Complete();
                         }
                     }
-                    if (options.ObjectTypes.Contains(SchemaSnapshotDBObjectTypes.UserDefinedTableType))
+                    if (options.ObjectTypes.Contains(SchemaSnapshotDBObjectTypes.UserDefinedTableType) && instance.VersionMajor>=10) // Support for User Defined Table Types added in SQL 2008
                     {
                         using (var op = Operation.Begin("Schema snapshot {DBame}: {Object}", DBName, "UserDefinedTableTypes"))
                         {
@@ -649,20 +649,23 @@ namespace DBADash
                 r["ObjectDateModified"] = "1900-01-01";
                 dtSchema.Rows.Add(r);
             }
-            foreach (BrokerPriority p in db.ServiceBroker.Priorities)
+            if (db.Parent.VersionMajor >= 10) // Broker priorities supported on SQL 2008 
             {
-                var r = dtSchema.NewRow();
-                var sDDL = stringCollectionToString(p.Script(ScriptingOptions));
-                var bDDL = Zip(sDDL);
-                r["ObjectName"] = p.Name;
-                r["SchemaName"] = "";
-                r["ObjectType"] = "SBP";
-                r["object_id"] = p.ID;
-                r["DDL"] = bDDL;
-                r["DDLHash"] = computeHash(bDDL);
-                r["ObjectDateCreated"] = "1900-01-01";
-                r["ObjectDateModified"] = "1900-01-01";
-                dtSchema.Rows.Add(r);
+                foreach (BrokerPriority p in db.ServiceBroker.Priorities)
+                {
+                    var r = dtSchema.NewRow();
+                    var sDDL = stringCollectionToString(p.Script(ScriptingOptions));
+                    var bDDL = Zip(sDDL);
+                    r["ObjectName"] = p.Name;
+                    r["SchemaName"] = "";
+                    r["ObjectType"] = "SBP";
+                    r["object_id"] = p.ID;
+                    r["DDL"] = bDDL;
+                    r["DDLHash"] = computeHash(bDDL);
+                    r["ObjectDateCreated"] = "1900-01-01";
+                    r["ObjectDateModified"] = "1900-01-01";
+                    dtSchema.Rows.Add(r);
+                }
             }
         }
 
