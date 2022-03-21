@@ -1136,6 +1136,11 @@ namespace DBADashServiceConfig
                         saveChanges();
                     }
                 }
+                if (!File.Exists(jsonPath))
+                {
+                    MessageBox.Show("Please configure the service and save changes before installing as a service.", "Warning", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                    return;
+                }
                 var frm = new InstallService();
                 frm.ServiceName = collectionConfig.ServiceName;
                 frm.ShowDialog();
