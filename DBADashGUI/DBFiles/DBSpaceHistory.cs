@@ -42,7 +42,7 @@ namespace DBADashGUI.DBFiles
             }
         }
 
-        public string Instance { get; set; }
+        public string InstanceGroupName { get; set; }
         public string DBName { get; set; }
         private string _fileName;
         public string FileName { get { return _fileName; } set { _fileName = value; setFileChecked(); } }
@@ -203,9 +203,9 @@ namespace DBADashGUI.DBFiles
                     {
                         cmd.Parameters.AddWithValue("DatabaseID", DatabaseID);
                     }
-                    if (Instance != null && Instance.Length > 0)
+                    if (InstanceGroupName != null && InstanceGroupName.Length > 0)
                     {
-                        cmd.Parameters.AddWithValue("Instance", Instance);
+                        cmd.Parameters.AddWithValue("InstanceGroupName", InstanceGroupName);
                     }
                     if (DBName != null && DBName.Length > 0)
                     {

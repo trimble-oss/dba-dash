@@ -1,4 +1,6 @@
-﻿CREATE PROC [dbo].[SQLPatching_Get](@InstanceIDs VARCHAR(MAX)=NULL)
+﻿CREATE PROC dbo.SQLPatching_Get(
+	@InstanceIDs VARCHAR(MAX)=NULL
+)
 AS
 DECLARE @Instances TABLE(
 	InstanceID INT PRIMARY KEY
@@ -23,7 +25,8 @@ BEGIN
 	FROM STRING_SPLIT(@InstanceIDs,',')
 END;
 
-SELECT I.Instance,
+SELECT	I.Instance,
+		I.InstanceDisplayName,
 		P.ChangedDate,
 		P.OldVersion,
 		NULLIF(P.NewVersion,P.OldVersion) NewVersion,

@@ -1,4 +1,6 @@
-﻿CREATE PROC HostUpgradeHistory_Get(@InstanceIDs VARCHAR(MAX)=NULL)
+﻿CREATE PROC dbo.HostUpgradeHistory_Get(
+	@InstanceIDs VARCHAR(MAX)=NULL
+)
 AS
 DECLARE @Instances TABLE(
 	InstanceID INT PRIMARY KEY
@@ -23,6 +25,7 @@ BEGIN
 	FROM STRING_SPLIT(@InstanceIDs,',')
 END;
 SELECT I.Instance,
+	   I.InstanceDisplayName,
 	   HUH.ChangeDate,
        HUH.SystemManufacturerOld,
        HUH.SystemManufacturerNew,

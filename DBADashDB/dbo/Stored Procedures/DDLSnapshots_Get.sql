@@ -1,5 +1,5 @@
 ﻿CREATE PROC dbo.DDLSnapshots_Get(
-	@Instance SYSNAME,
+	@InstanceDisplayName NVARCHAR(128),
 	@DatabaseID INT=-1,
 	@PageSize INT=100,
 	@PageNumber INT=1
@@ -19,7 +19,7 @@ FROM dbo.DDLSnapshots ss
 JOIN dbo.Databases D ON ss.DatabaseID = D.DatabaseID
 JOIN dbo.Instances I ON D.InstanceID = I.InstanceID
 WHERE (d.DatabaseID=@DatabaseID OR @DatabaseID =-1)
-AND I.Instance = @Instance
+AND I.InstanceDisplayName = @InstanceDisplayName
 ORDER BY ss.SnapshotDate DESC
 OFFSET @PageSize* (@PageNumber-1) ROWS
 FETCH NEXT @PageSize ROWS ONLY

@@ -45,6 +45,7 @@ WITH BackupStatuses AS(
 SELECT	BS.InstanceID,
 		BS.DatabaseID,
 		BS.Instance,
+		BS.InstanceDisplayName,
 		BS.name,
 		BS.recovery_model,
 		BS.recovery_model_desc,

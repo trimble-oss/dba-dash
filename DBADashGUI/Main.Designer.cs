@@ -41,6 +41,7 @@
             this.optionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.dataRetentionToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.manageInstancesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.configureDisplayNameToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.tsTime = new System.Windows.Forms.ToolStripDropDownButton();
             this.minsToolStripMenuItem2 = new System.Windows.Forms.ToolStripMenuItem();
             this.minsToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
@@ -323,6 +324,7 @@
             // optionsToolStripMenuItem
             // 
             this.optionsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.configureDisplayNameToolStripMenuItem,
             this.dataRetentionToolStripMenuItem,
             this.manageInstancesToolStripMenuItem});
             this.optionsToolStripMenuItem.Image = global::DBADashGUI.Properties.Resources.SettingsOutline_16x;
@@ -333,16 +335,23 @@
             // dataRetentionToolStripMenuItem
             // 
             this.dataRetentionToolStripMenuItem.Name = "dataRetentionToolStripMenuItem";
-            this.dataRetentionToolStripMenuItem.Size = new System.Drawing.Size(210, 26);
+            this.dataRetentionToolStripMenuItem.Size = new System.Drawing.Size(254, 26);
             this.dataRetentionToolStripMenuItem.Text = "Data Retention";
             this.dataRetentionToolStripMenuItem.Click += new System.EventHandler(this.DataRetentionToolStripMenuItem_Click);
             // 
             // manageInstancesToolStripMenuItem
             // 
             this.manageInstancesToolStripMenuItem.Name = "manageInstancesToolStripMenuItem";
-            this.manageInstancesToolStripMenuItem.Size = new System.Drawing.Size(210, 26);
+            this.manageInstancesToolStripMenuItem.Size = new System.Drawing.Size(254, 26);
             this.manageInstancesToolStripMenuItem.Text = "Manage Instances";
             this.manageInstancesToolStripMenuItem.Click += new System.EventHandler(this.manageInstancesToolStripMenuItem_Click);
+            // 
+            // configureDisplayNameToolStripMenuItem
+            // 
+            this.configureDisplayNameToolStripMenuItem.Name = "configureDisplayNameToolStripMenuItem";
+            this.configureDisplayNameToolStripMenuItem.Size = new System.Drawing.Size(254, 26);
+            this.configureDisplayNameToolStripMenuItem.Text = "Configure Display Name";
+            this.configureDisplayNameToolStripMenuItem.Click += new System.EventHandler(this.configureDisplayNameToolStripMenuItem_Click);
             // 
             // tsTime
             // 
@@ -910,6 +919,7 @@
             // 
             this.tags1.AllTags = null;
             this.tags1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.tags1.InstanceID = 0;
             this.tags1.InstanceIDs = null;
             this.tags1.InstanceName = null;
             this.tags1.Location = new System.Drawing.Point(3, 3);
@@ -2229,5 +2239,6 @@
         private System.Windows.Forms.ToolStripMenuItem diffToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem databaseSchemaDiffToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem agentJobDiffToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem configureDisplayNameToolStripMenuItem;
     }
 }

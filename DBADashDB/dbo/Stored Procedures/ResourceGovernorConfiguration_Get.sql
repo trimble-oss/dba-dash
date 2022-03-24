@@ -26,6 +26,7 @@ BEGIN
 END;
 SELECT RG.InstanceID,
 	I.Instance, 
+	I.InstanceDisplayName,
 	RG.is_enabled,
 	RG.classifier_function,
 	RG.reconfiguration_error,

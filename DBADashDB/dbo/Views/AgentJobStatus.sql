@@ -1,6 +1,7 @@
-﻿CREATE VIEW [dbo].[AgentJobStatus]
+﻿CREATE VIEW dbo.AgentJobStatus
 AS
 SELECT J.Instance, 
+	J.InstanceDisplayName,
 	J.InstanceID,
     J.job_id,
     J.name,

@@ -25,40 +25,40 @@ SELECT @DateAggString = CASE WHEN @DateGroupingMin IS NULL OR @DateGroupingMin =
 DECLARE @SQL NVARCHAR(MAX)
 SET @SQL = N'
 WITH agg AS (
-SELECT ' + @DateAggString + N' as SnapshotDate,
-       D.name AS DatabaseName,
-	   D.DatabaseID,
-	   O.ObjectID,
-       O.SchemaName + ''.'' + O.objectname as object_name,
-	   SUM(PS.total_worker_time)/1000000.0 as TotalCPU,
-	   SUM(PS.total_worker_time)/NULLIF(SUM(PS.execution_count),0)/1000000.0 as AvgCPU,
-	   SUM(total_worker_time)/1000.0 / MAX(SUM(PeriodTime)/1000000.0) OVER() cpu_ms_per_sec,
-	   SUM(PS.execution_count) as ExecutionCount,
-	   SUM(PS.execution_count)/(NULLIF(SUM(PeriodTime),0)/60000000.0) as ExecutionsPerMin,
-	   SUM(PS.total_elapsed_time)/1000000.0 AS TotalDuration,
-	   SUM(PS.total_elapsed_time)/NULLIF(SUM(PS.execution_count),0)/1000000.0 AS AvgDuration,
-	   SUM(total_elapsed_time)/1000.0 / MAX(SUM(PeriodTime)/1000000.0) OVER() duration_ms_per_sec,
-	   SUM(PS.total_logical_reads) as TotalLogicalReads,
-	   SUM(PS.total_logical_reads)/NULLIF(SUM(PS.execution_count),0) as AvgLogicalReads,
-	   SUM(PS.total_physical_reads) as TotalPhysicalReads,
-	   SUM(PS.total_physical_reads)/NULLIF(SUM(PS.execution_count),0) as AvgPhysicalReads,
-	   SUM(PS.total_logical_writes) as TotalWrites,
-	   SUM(PS.total_logical_writes)/NULLIF(SUM(PS.execution_count),0) as AvgWrites,
-	   MAX(MaxExecutionsPerMin) as MaxExecutionsPerMin
-FROM dbo.ObjectExecutionStats' + CASE WHEN @DateGroupingMin>=60 THEN N'_60MIN' ELSE N'' END + N' PS
-	' + CASE WHEN @DateGroupingMin IS NULL OR @DateGroupingMin =0 THEN '' ELSE 'CROSS APPLY dbo.DateGroupingMins(DATEADD(mi, @UTCOffset, PS.SnapshotDate),@DateGroupingMin) DG' END + '
-    JOIN dbo.DBObjects O ON PS.ObjectID = O.ObjectID
-    JOIN dbo.Databases D ON D.DatabaseID = O.DatabaseID
-	JOIN dbo.Instances I ON D.InstanceID = I.InstanceID AND PS.InstanceID = I.InstanceID
-WHERE D.IsActive=1
-' + CASE WHEN @Instance IS NOT NULL THEN N'AND I.Instance = @Instance' ELSE '' END + N'
-' + CASE WHEN @InstanceID IS NOT NULL THEN N'AND I.InstanceID = @InstanceID' ELSE '' END + N'
-AND PS.SnapshotDate >= @FromDate 
-AND PS.SnapshotDate< @ToDate
-' + CASE WHEN @DatabaseID IS NULL THEN N'' ELSE N'AND D.DatabaseID=@DatabaseID' END + N'
-' + CASE WHEN @ObjectName IS NULL THEN N'' ELSE N'AND O.objectname=@ObjectName' END + N'
-' + CASE WHEN @ObjectID IS NULL THEN N'' ELSE N'AND PS.ObjectID = @ObjectID' END + N'
-GROUP BY ' + @DateAggString + N',D.Name,O.objectname,D.DatabaseID,O.SchemaName,O.ObjectID
+	SELECT ' + @DateAggString + N' as SnapshotDate,
+		   D.name AS DatabaseName,
+		   D.DatabaseID,
+		   O.ObjectID,
+		   O.SchemaName + ''.'' + O.objectname as object_name,
+		   SUM(PS.total_worker_time)/1000000.0 as TotalCPU,
+		   SUM(PS.total_worker_time)/NULLIF(SUM(PS.execution_count),0)/1000000.0 as AvgCPU,
+		   SUM(total_worker_time)/1000.0 / MAX(SUM(PeriodTime)/1000000.0) OVER() cpu_ms_per_sec,
+		   SUM(PS.execution_count) as ExecutionCount,
+		   SUM(PS.execution_count)/(NULLIF(SUM(PeriodTime),0)/60000000.0) as ExecutionsPerMin,
+		   SUM(PS.total_elapsed_time)/1000000.0 AS TotalDuration,
+		   SUM(PS.total_elapsed_time)/NULLIF(SUM(PS.execution_count),0)/1000000.0 AS AvgDuration,
+		   SUM(total_elapsed_time)/1000.0 / MAX(SUM(PeriodTime)/1000000.0) OVER() duration_ms_per_sec,
+		   SUM(PS.total_logical_reads) as TotalLogicalReads,
+		   SUM(PS.total_logical_reads)/NULLIF(SUM(PS.execution_count),0) as AvgLogicalReads,
+		   SUM(PS.total_physical_reads) as TotalPhysicalReads,
+		   SUM(PS.total_physical_reads)/NULLIF(SUM(PS.execution_count),0) as AvgPhysicalReads,
+		   SUM(PS.total_logical_writes) as TotalWrites,
+		   SUM(PS.total_logical_writes)/NULLIF(SUM(PS.execution_count),0) as AvgWrites,
+		   MAX(MaxExecutionsPerMin) as MaxExecutionsPerMin
+	FROM dbo.ObjectExecutionStats' + CASE WHEN @DateGroupingMin>=60 THEN N'_60MIN' ELSE N'' END + N' PS
+		' + CASE WHEN @DateGroupingMin IS NULL OR @DateGroupingMin =0 THEN '' ELSE 'CROSS APPLY dbo.DateGroupingMins(DATEADD(mi, @UTCOffset, PS.SnapshotDate),@DateGroupingMin) DG' END + '
+		JOIN dbo.DBObjects O ON PS.ObjectID = O.ObjectID
+		JOIN dbo.Databases D ON D.DatabaseID = O.DatabaseID
+		JOIN dbo.Instances I ON D.InstanceID = I.InstanceID AND PS.InstanceID = I.InstanceID
+	WHERE D.IsActive=1
+	' + CASE WHEN @Instance IS NOT NULL THEN N'AND I.Instance = @Instance' ELSE '' END + N'
+	' + CASE WHEN @InstanceID IS NOT NULL THEN N'AND I.InstanceID = @InstanceID' ELSE '' END + N'
+	AND PS.SnapshotDate >= @FromDate 
+	AND PS.SnapshotDate< @ToDate
+	' + CASE WHEN @DatabaseID IS NULL THEN N'' ELSE N'AND D.DatabaseID=@DatabaseID' END + N'
+	' + CASE WHEN @ObjectName IS NULL THEN N'' ELSE N'AND O.objectname=@ObjectName' END + N'
+	' + CASE WHEN @ObjectID IS NULL THEN N'' ELSE N'AND PS.ObjectID = @ObjectID' END + N'
+	GROUP BY ' + @DateAggString + N',D.Name,O.objectname,D.DatabaseID,O.SchemaName,O.ObjectID
 )
 , T AS (
 	SELECT agg.*,

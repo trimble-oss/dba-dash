@@ -81,6 +81,9 @@
     UptimeAckDate DATETIME NULL,
     CollectAgentID INT NULL,
     ImportAgentID INT NULL,
+    Alias NVARCHAR(128) NULL,
+    InstanceDisplayName AS ISNULL(Alias,ConnectionID),
+    InstanceGroupName AS CASE WHEN EngineEdition=5 THEN Instance ELSE ISNULL(Alias,ConnectionID) END,
     CONSTRAINT PK_Instances PRIMARY KEY CLUSTERED (InstanceID ASC),
     CONSTRAINT FK_Instances_CollectAgent FOREIGN KEY(CollectAgentID) REFERENCES dbo.DBADashAgent(DBADashAgentID),
     CONSTRAINT FK_Instances_ImportAgent FOREIGN KEY(ImportAgentID) REFERENCES dbo.DBADashAgent(DBADashAgentID)
@@ -91,6 +94,4 @@ CREATE UNIQUE NONCLUSTERED INDEX IX_Instances_ConnectionID
     ON dbo.Instances([ConnectionID] ASC);
 
 GO
-CREATE UNIQUE NONCLUSTERED INDEX [FIX_Instances_Instance]
-    ON dbo.Instances(Instance ASC) WHERE (EngineEdition<>5);
-
+CREATE UNIQUE NONCLUSTERED INDEX IX_Instances_InstanceDisplayName ON dbo.Instances(InstanceDisplayName)

@@ -1,4 +1,4 @@
-﻿CREATE PROC [dbo].[DBConfigurationHistory_Get](
+﻿CREATE PROC dbo.DBConfigurationHistory_Get(
 	@InstanceIDs VARCHAR(MAX)=NULL,
 	@ConfiguredOnly BIT=0,
 	@DatabaseID INT=NULL
@@ -26,7 +26,15 @@ BEGIN
 	SELECT value
 	FROM STRING_SPLIT(@InstanceIDs,',')
 END;
-SELECT I.Instance,D.name AS DB, H.configuration_id, CO.name,H.value,H.new_value,H.value_for_secondary,H.new_value_for_secondary,H.ValidFrom,H.ValidTo
+SELECT	I.InstanceGroupName,
+		D.name AS DB, 
+		H.configuration_id, 
+		CO.name,H.value,
+		H.new_value,
+		H.value_for_secondary,
+		H.new_value_for_secondary,
+		H.ValidFrom,
+		H.ValidTo
 FROM dbo.DBConfigHistory H 
 JOIN dbo.DBConfigOptions CO ON H.configuration_id = CO.configuration_id
 JOIN dbo.Databases D ON D.DatabaseID = H.DatabaseID

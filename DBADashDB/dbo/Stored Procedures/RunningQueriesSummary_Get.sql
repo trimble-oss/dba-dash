@@ -7,6 +7,7 @@
 AS
 SELECT TOP(@MaxRows) I.InstanceID,
 	   I.ConnectionID AS Instance,
+       I.InstanceDisplayName,
 	   S.SnapshotDateUTC,
        S.RunningQueries,
        S.BlockedQueries,

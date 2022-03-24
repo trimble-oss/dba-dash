@@ -29,21 +29,9 @@ namespace DBADashGUI.Changes
         /// </summary>
         private void InitializeComponent()
         {
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle3 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle4 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
             this.dgv = new System.Windows.Forms.DataGridView();
-            this.colInstance = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colLinkInstance = new System.Windows.Forms.DataGridViewLinkColumn();
-            this.colEnabled = new System.Windows.Forms.DataGridViewCheckBoxColumn();
-            this.colClassifierFunction = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colReconfigurationPending = new System.Windows.Forms.DataGridViewCheckBoxColumn();
-            this.colReconfigurationError = new System.Windows.Forms.DataGridViewCheckBoxColumn();
-            this.colMaxOutstandingIO = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colValidFrom = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colValidTo = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colSnapshotDate = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colScript = new System.Windows.Forms.DataGridViewLinkColumn();
-            this.colDiff = new System.Windows.Forms.DataGridViewLinkColumn();
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
             this.tsRefresh = new System.Windows.Forms.ToolStripButton();
             this.tsCopy = new System.Windows.Forms.ToolStripButton();
@@ -59,6 +47,18 @@ namespace DBADashGUI.Changes
             this.dataGridViewTextBoxColumn7 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dataGridViewTextBoxColumn8 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dataGridViewTextBoxColumn9 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colInstance = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colLinkInstance = new System.Windows.Forms.DataGridViewLinkColumn();
+            this.colEnabled = new System.Windows.Forms.DataGridViewCheckBoxColumn();
+            this.colClassifierFunction = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colReconfigurationPending = new System.Windows.Forms.DataGridViewCheckBoxColumn();
+            this.colReconfigurationError = new System.Windows.Forms.DataGridViewCheckBoxColumn();
+            this.colMaxOutstandingIO = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colValidFrom = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colValidTo = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colSnapshotDate = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colScript = new System.Windows.Forms.DataGridViewLinkColumn();
+            this.colDiff = new System.Windows.Forms.DataGridViewLinkColumn();
             ((System.ComponentModel.ISupportInitialize)(this.dgv)).BeginInit();
             this.toolStrip1.SuspendLayout();
             this.SuspendLayout();
@@ -68,14 +68,14 @@ namespace DBADashGUI.Changes
             this.dgv.AllowUserToAddRows = false;
             this.dgv.AllowUserToDeleteRows = false;
             this.dgv.BackgroundColor = System.Drawing.Color.White;
-            dataGridViewCellStyle3.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle3.BackColor = System.Drawing.SystemColors.Control;
-            dataGridViewCellStyle3.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            dataGridViewCellStyle3.ForeColor = System.Drawing.SystemColors.WindowText;
-            dataGridViewCellStyle3.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-            dataGridViewCellStyle3.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-            dataGridViewCellStyle3.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
-            this.dgv.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle3;
+            dataGridViewCellStyle1.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle1.BackColor = System.Drawing.SystemColors.Control;
+            dataGridViewCellStyle1.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            dataGridViewCellStyle1.ForeColor = System.Drawing.SystemColors.WindowText;
+            dataGridViewCellStyle1.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle1.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle1.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
+            this.dgv.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle1;
             this.dgv.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.dgv.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
             this.colInstance,
@@ -90,14 +90,14 @@ namespace DBADashGUI.Changes
             this.colSnapshotDate,
             this.colScript,
             this.colDiff});
-            dataGridViewCellStyle4.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle4.BackColor = System.Drawing.SystemColors.Window;
-            dataGridViewCellStyle4.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            dataGridViewCellStyle4.ForeColor = System.Drawing.SystemColors.ControlText;
-            dataGridViewCellStyle4.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-            dataGridViewCellStyle4.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-            dataGridViewCellStyle4.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
-            this.dgv.DefaultCellStyle = dataGridViewCellStyle4;
+            dataGridViewCellStyle2.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle2.BackColor = System.Drawing.SystemColors.Window;
+            dataGridViewCellStyle2.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            dataGridViewCellStyle2.ForeColor = System.Drawing.SystemColors.ControlText;
+            dataGridViewCellStyle2.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle2.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle2.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
+            this.dgv.DefaultCellStyle = dataGridViewCellStyle2;
             this.dgv.Dock = System.Windows.Forms.DockStyle.Fill;
             this.dgv.Location = new System.Drawing.Point(0, 27);
             this.dgv.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
@@ -110,124 +110,6 @@ namespace DBADashGUI.Changes
             this.dgv.TabIndex = 0;
             this.dgv.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgv_CellContentClick);
             this.dgv.SelectionChanged += new System.EventHandler(this.dgv_SelectionChanged);
-            // 
-            // colInstance
-            // 
-            this.colInstance.DataPropertyName = "Instance";
-            this.colInstance.HeaderText = "Instance";
-            this.colInstance.MinimumWidth = 6;
-            this.colInstance.Name = "colInstance";
-            this.colInstance.ReadOnly = true;
-            this.colInstance.Width = 125;
-            // 
-            // colLinkInstance
-            // 
-            this.colLinkInstance.DataPropertyName = "Instance";
-            this.colLinkInstance.HeaderText = "Instance";
-            this.colLinkInstance.MinimumWidth = 6;
-            this.colLinkInstance.Name = "colLinkInstance";
-            this.colLinkInstance.ReadOnly = true;
-            this.colLinkInstance.Width = 125;
-            // 
-            // colEnabled
-            // 
-            this.colEnabled.DataPropertyName = "is_enabled";
-            this.colEnabled.HeaderText = "Enabled";
-            this.colEnabled.MinimumWidth = 6;
-            this.colEnabled.Name = "colEnabled";
-            this.colEnabled.ReadOnly = true;
-            this.colEnabled.Resizable = System.Windows.Forms.DataGridViewTriState.True;
-            this.colEnabled.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
-            this.colEnabled.Width = 125;
-            // 
-            // colClassifierFunction
-            // 
-            this.colClassifierFunction.DataPropertyName = "classifier_function";
-            this.colClassifierFunction.HeaderText = "Classifier Function";
-            this.colClassifierFunction.MinimumWidth = 6;
-            this.colClassifierFunction.Name = "colClassifierFunction";
-            this.colClassifierFunction.ReadOnly = true;
-            this.colClassifierFunction.Width = 125;
-            // 
-            // colReconfigurationPending
-            // 
-            this.colReconfigurationPending.DataPropertyName = "reconfiguration_pending";
-            this.colReconfigurationPending.HeaderText = "Reconfiguration Pending";
-            this.colReconfigurationPending.MinimumWidth = 6;
-            this.colReconfigurationPending.Name = "colReconfigurationPending";
-            this.colReconfigurationPending.ReadOnly = true;
-            this.colReconfigurationPending.Resizable = System.Windows.Forms.DataGridViewTriState.True;
-            this.colReconfigurationPending.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
-            this.colReconfigurationPending.Width = 125;
-            // 
-            // colReconfigurationError
-            // 
-            this.colReconfigurationError.DataPropertyName = "reconfiguration_error";
-            this.colReconfigurationError.HeaderText = "Reconfiguration Error";
-            this.colReconfigurationError.MinimumWidth = 6;
-            this.colReconfigurationError.Name = "colReconfigurationError";
-            this.colReconfigurationError.ReadOnly = true;
-            this.colReconfigurationError.Resizable = System.Windows.Forms.DataGridViewTriState.True;
-            this.colReconfigurationError.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
-            this.colReconfigurationError.ToolTipText = "Indicates that there was an error generating the script due to pending reconfigur" +
-    "ation";
-            this.colReconfigurationError.Width = 125;
-            // 
-            // colMaxOutstandingIO
-            // 
-            this.colMaxOutstandingIO.DataPropertyName = "max_outstanding_io_per_volume";
-            this.colMaxOutstandingIO.HeaderText = "Max Outstanding IO Per Volume";
-            this.colMaxOutstandingIO.MinimumWidth = 6;
-            this.colMaxOutstandingIO.Name = "colMaxOutstandingIO";
-            this.colMaxOutstandingIO.ReadOnly = true;
-            this.colMaxOutstandingIO.Width = 125;
-            // 
-            // colValidFrom
-            // 
-            this.colValidFrom.DataPropertyName = "ValidFrom";
-            this.colValidFrom.HeaderText = "Valid From";
-            this.colValidFrom.MinimumWidth = 6;
-            this.colValidFrom.Name = "colValidFrom";
-            this.colValidFrom.ReadOnly = true;
-            this.colValidFrom.Width = 125;
-            // 
-            // colValidTo
-            // 
-            this.colValidTo.DataPropertyName = "ValidTo";
-            this.colValidTo.HeaderText = "Valid To";
-            this.colValidTo.MinimumWidth = 6;
-            this.colValidTo.Name = "colValidTo";
-            this.colValidTo.ReadOnly = true;
-            this.colValidTo.Width = 125;
-            // 
-            // colSnapshotDate
-            // 
-            this.colSnapshotDate.DataPropertyName = "SnapshotDate";
-            this.colSnapshotDate.HeaderText = "Validated Date";
-            this.colSnapshotDate.MinimumWidth = 6;
-            this.colSnapshotDate.Name = "colSnapshotDate";
-            this.colSnapshotDate.ReadOnly = true;
-            this.colSnapshotDate.Width = 125;
-            // 
-            // colScript
-            // 
-            this.colScript.HeaderText = "View Script";
-            this.colScript.MinimumWidth = 6;
-            this.colScript.Name = "colScript";
-            this.colScript.ReadOnly = true;
-            this.colScript.Text = "View Script";
-            this.colScript.UseColumnTextForLinkValue = true;
-            this.colScript.Width = 125;
-            // 
-            // colDiff
-            // 
-            this.colDiff.HeaderText = "Diff";
-            this.colDiff.MinimumWidth = 6;
-            this.colDiff.Name = "colDiff";
-            this.colDiff.ReadOnly = true;
-            this.colDiff.Text = "Diff Previous";
-            this.colDiff.UseColumnTextForLinkValue = true;
-            this.colDiff.Width = 125;
             // 
             // toolStrip1
             // 
@@ -378,6 +260,124 @@ namespace DBADashGUI.Changes
             this.dataGridViewTextBoxColumn9.Name = "dataGridViewTextBoxColumn9";
             this.dataGridViewTextBoxColumn9.Width = 125;
             // 
+            // colInstance
+            // 
+            this.colInstance.DataPropertyName = "InstanceDisplayName";
+            this.colInstance.HeaderText = "Instance";
+            this.colInstance.MinimumWidth = 6;
+            this.colInstance.Name = "colInstance";
+            this.colInstance.ReadOnly = true;
+            this.colInstance.Width = 125;
+            // 
+            // colLinkInstance
+            // 
+            this.colLinkInstance.DataPropertyName = "InstanceDisplayName";
+            this.colLinkInstance.HeaderText = "Instance";
+            this.colLinkInstance.MinimumWidth = 6;
+            this.colLinkInstance.Name = "colLinkInstance";
+            this.colLinkInstance.ReadOnly = true;
+            this.colLinkInstance.Width = 125;
+            // 
+            // colEnabled
+            // 
+            this.colEnabled.DataPropertyName = "is_enabled";
+            this.colEnabled.HeaderText = "Enabled";
+            this.colEnabled.MinimumWidth = 6;
+            this.colEnabled.Name = "colEnabled";
+            this.colEnabled.ReadOnly = true;
+            this.colEnabled.Resizable = System.Windows.Forms.DataGridViewTriState.True;
+            this.colEnabled.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
+            this.colEnabled.Width = 125;
+            // 
+            // colClassifierFunction
+            // 
+            this.colClassifierFunction.DataPropertyName = "classifier_function";
+            this.colClassifierFunction.HeaderText = "Classifier Function";
+            this.colClassifierFunction.MinimumWidth = 6;
+            this.colClassifierFunction.Name = "colClassifierFunction";
+            this.colClassifierFunction.ReadOnly = true;
+            this.colClassifierFunction.Width = 125;
+            // 
+            // colReconfigurationPending
+            // 
+            this.colReconfigurationPending.DataPropertyName = "reconfiguration_pending";
+            this.colReconfigurationPending.HeaderText = "Reconfiguration Pending";
+            this.colReconfigurationPending.MinimumWidth = 6;
+            this.colReconfigurationPending.Name = "colReconfigurationPending";
+            this.colReconfigurationPending.ReadOnly = true;
+            this.colReconfigurationPending.Resizable = System.Windows.Forms.DataGridViewTriState.True;
+            this.colReconfigurationPending.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
+            this.colReconfigurationPending.Width = 125;
+            // 
+            // colReconfigurationError
+            // 
+            this.colReconfigurationError.DataPropertyName = "reconfiguration_error";
+            this.colReconfigurationError.HeaderText = "Reconfiguration Error";
+            this.colReconfigurationError.MinimumWidth = 6;
+            this.colReconfigurationError.Name = "colReconfigurationError";
+            this.colReconfigurationError.ReadOnly = true;
+            this.colReconfigurationError.Resizable = System.Windows.Forms.DataGridViewTriState.True;
+            this.colReconfigurationError.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
+            this.colReconfigurationError.ToolTipText = "Indicates that there was an error generating the script due to pending reconfigur" +
+    "ation";
+            this.colReconfigurationError.Width = 125;
+            // 
+            // colMaxOutstandingIO
+            // 
+            this.colMaxOutstandingIO.DataPropertyName = "max_outstanding_io_per_volume";
+            this.colMaxOutstandingIO.HeaderText = "Max Outstanding IO Per Volume";
+            this.colMaxOutstandingIO.MinimumWidth = 6;
+            this.colMaxOutstandingIO.Name = "colMaxOutstandingIO";
+            this.colMaxOutstandingIO.ReadOnly = true;
+            this.colMaxOutstandingIO.Width = 125;
+            // 
+            // colValidFrom
+            // 
+            this.colValidFrom.DataPropertyName = "ValidFrom";
+            this.colValidFrom.HeaderText = "Valid From";
+            this.colValidFrom.MinimumWidth = 6;
+            this.colValidFrom.Name = "colValidFrom";
+            this.colValidFrom.ReadOnly = true;
+            this.colValidFrom.Width = 125;
+            // 
+            // colValidTo
+            // 
+            this.colValidTo.DataPropertyName = "ValidTo";
+            this.colValidTo.HeaderText = "Valid To";
+            this.colValidTo.MinimumWidth = 6;
+            this.colValidTo.Name = "colValidTo";
+            this.colValidTo.ReadOnly = true;
+            this.colValidTo.Width = 125;
+            // 
+            // colSnapshotDate
+            // 
+            this.colSnapshotDate.DataPropertyName = "SnapshotDate";
+            this.colSnapshotDate.HeaderText = "Validated Date";
+            this.colSnapshotDate.MinimumWidth = 6;
+            this.colSnapshotDate.Name = "colSnapshotDate";
+            this.colSnapshotDate.ReadOnly = true;
+            this.colSnapshotDate.Width = 125;
+            // 
+            // colScript
+            // 
+            this.colScript.HeaderText = "View Script";
+            this.colScript.MinimumWidth = 6;
+            this.colScript.Name = "colScript";
+            this.colScript.ReadOnly = true;
+            this.colScript.Text = "View Script";
+            this.colScript.UseColumnTextForLinkValue = true;
+            this.colScript.Width = 125;
+            // 
+            // colDiff
+            // 
+            this.colDiff.HeaderText = "Diff";
+            this.colDiff.MinimumWidth = 6;
+            this.colDiff.Name = "colDiff";
+            this.colDiff.ReadOnly = true;
+            this.colDiff.Text = "Diff Previous";
+            this.colDiff.UseColumnTextForLinkValue = true;
+            this.colDiff.Width = 125;
+            // 
             // ResourceGovernor
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
@@ -412,6 +412,8 @@ namespace DBADashGUI.Changes
         private System.Windows.Forms.ToolStripButton tsCopy;
         private System.Windows.Forms.ToolStripButton tsBack;
         private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn9;
+        private System.Windows.Forms.ToolStripButton tsCompare;
+        private System.Windows.Forms.ToolStripButton tsExcel;
         private System.Windows.Forms.DataGridViewTextBoxColumn colInstance;
         private System.Windows.Forms.DataGridViewLinkColumn colLinkInstance;
         private System.Windows.Forms.DataGridViewCheckBoxColumn colEnabled;
@@ -424,7 +426,5 @@ namespace DBADashGUI.Changes
         private System.Windows.Forms.DataGridViewTextBoxColumn colSnapshotDate;
         private System.Windows.Forms.DataGridViewLinkColumn colScript;
         private System.Windows.Forms.DataGridViewLinkColumn colDiff;
-        private System.Windows.Forms.ToolStripButton tsCompare;
-        private System.Windows.Forms.ToolStripButton tsExcel;
     }
 }

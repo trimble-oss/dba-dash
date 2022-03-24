@@ -2,7 +2,7 @@
 		@InstanceIDs VARCHAR(MAX)=NULL
 )
 AS
-SELECT I.ConnectionID as Instance,
+SELECT I.InstanceDisplayName as Instance,
 	D.name as DB,
 	DM.mirroring_state,
 	DM.mirroring_state_desc,

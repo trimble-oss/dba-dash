@@ -19,7 +19,7 @@ namespace DBADashGUI.DBFiles
 
         public Int32 DatabaseID { get; set; }
         public Int32? DataSpaceID { get; set; } = null;
-        public string Instance { get; set; }
+        public string InstanceGroupName { get; set; }
         public string DBName { get; set; }
         public string FileName { get; set; }
 
@@ -27,10 +27,10 @@ namespace DBADashGUI.DBFiles
         {
             dbSpaceHistory1.DatabaseID = DatabaseID;
             dbSpaceHistory1.DataSpaceID = DataSpaceID;
-            dbSpaceHistory1.Instance = Instance;
+            dbSpaceHistory1.InstanceGroupName = InstanceGroupName;
             dbSpaceHistory1.DBName = DBName;
             dbSpaceHistory1.FileName = FileName;
-            this.Text = Instance;
+            this.Text = InstanceGroupName;
             if(DBName!=null && DBName.Length > 0)
             {
                 this.Text += " | " + DBName;

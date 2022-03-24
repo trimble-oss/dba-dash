@@ -77,7 +77,7 @@ namespace DBADashGUI.Changes
         private void setSummaryCols()
         {
             dgv.Columns.Clear();
-            dgv.Columns.Add(new DataGridViewLinkColumn { Name="colInstance", HeaderText = "Instance", DataPropertyName = "Instance", LinkColor = DashColors.LinkColor});
+            dgv.Columns.Add(new DataGridViewLinkColumn { Name="colInstance", HeaderText = "Instance", DataPropertyName = "InstanceGroupName", LinkColor = DashColors.LinkColor});
             dgv.Columns.Add(new DataGridViewTextBoxColumn() { HeaderText = "OFF", DataPropertyName = "QS_OFF" });
             dgv.Columns.Add(new DataGridViewTextBoxColumn() { Name ="col_READ_ONLY", HeaderText = "READ_ONLY", DataPropertyName = "QS_READ_ONLY" });
             dgv.Columns.Add(new DataGridViewTextBoxColumn() { HeaderText = "READ_WRITE", DataPropertyName = "QS_READ_WRITE" });
@@ -96,7 +96,7 @@ namespace DBADashGUI.Changes
             using (var cmd = new SqlCommand("dbo.DatabaseQueryStoreOptions_Get", cn) { CommandType = CommandType.StoredProcedure })
             using (var da = new SqlDataAdapter(cmd))
             {
-                cmd.Parameters.AddWithValue("Instance", Instance);
+                cmd.Parameters.AddWithValue("InstanceDisplayName", Instance);
                 if (DatabaseID > 0)
                 {
                     cmd.Parameters.AddWithValue("DatabaseID", DatabaseID);

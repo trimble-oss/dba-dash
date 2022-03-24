@@ -189,7 +189,7 @@
     <Build Include="dbo\User Defined Types\Corruption.sql" />
     <Build Include="dbo\User Defined Types\CollectionError.sql" />
     <Build Include="dbo\Stored Procedures\ServerExtraProperties_Upd.sql" />
-    <Build Include="dbo\Views\vwTempDBConfiguration.sql" />
+    <Build Include="dbo\Views\TempDBConfiguration.sql" />
     <Build Include="dbo\Tables\CollectionDates.sql" />
     <Build Include="dbo\Stored Procedures\OSInfo_Upd.sql" />
     <Build Include="dbo\Stored Procedures\CollectionDates_Upd.sql" />
@@ -644,6 +644,8 @@
     <Build Include="dbo\Functions\RunningQueriesBlockingHierarchy.sql" />
     <Build Include="dbo\Stored Procedures\IOSummary_Get.sql" />
     <Build Include="dbo\Views\AzureDBInfo.sql" />
+    <Build Include="dbo\Tables\InstanceIDsTags.sql" />
+    <Build Include="dbo\Stored Procedures\InstanceAlias_Upd.sql" />
   </ItemGroup>
   <ItemGroup>
     <PostDeploy Include="Script.PostDeployment1.sql" />

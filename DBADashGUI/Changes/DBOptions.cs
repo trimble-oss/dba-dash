@@ -8,7 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using Microsoft.Data.SqlClient;
-
+using Humanizer;
 namespace DBADashGUI.Changes
 {
     public partial class DBOptions : UserControl
@@ -115,6 +115,10 @@ namespace DBADashGUI.Changes
                     dgv.DataSource = dt;
                     dgv.Columns["InstanceID"].Visible = false;
                     dgv.Columns["DatabaseID"].Visible = false;
+                    foreach (DataGridViewColumn col in dgv.Columns)
+                    {
+                        col.HeaderText = col.HeaderText.Titleize();
+                    }
                     dgv.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
                 }
             }

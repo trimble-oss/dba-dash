@@ -3,6 +3,7 @@ AS
 SELECT I.InstanceID,
 	D.DatabaseID,
 	I.Instance,
+	I.InstanceDisplayName,
 	D.name,
 	LR.restore_date,
 	utc.restore_date_utc,

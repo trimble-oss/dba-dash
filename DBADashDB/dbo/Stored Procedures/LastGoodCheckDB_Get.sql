@@ -20,6 +20,7 @@ SET @SQL = N'
 SELECT InstanceID,
 		DatabaseID,
        Instance,
+       InstanceDisplayName,
        Name,
        state,
        state_desc,

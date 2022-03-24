@@ -32,13 +32,6 @@
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle3 = new System.Windows.Forms.DataGridViewCellStyle();
             this.dgvLastGoodCheckDB = new System.Windows.Forms.DataGridView();
-            this.Instance = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.Database = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.LastGoodCheckDbTime = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.DaysSinceLastGoodCheckDB = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colCreateDate = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.ExcludedFromCheck = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.Configure = new System.Windows.Forms.DataGridViewLinkColumn();
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
             this.tsRefresh = new System.Windows.Forms.ToolStripButton();
             this.tsCopy = new System.Windows.Forms.ToolStripButton();
@@ -51,6 +44,13 @@
             this.tsConfigure = new System.Windows.Forms.ToolStripDropDownButton();
             this.configureInstanceThresholdsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.configureRootThresholdsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.Instance = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.Database = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.LastGoodCheckDbTime = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.DaysSinceLastGoodCheckDB = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colCreateDate = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.ExcludedFromCheck = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.Configure = new System.Windows.Forms.DataGridViewLinkColumn();
             ((System.ComponentModel.ISupportInitialize)(this.dgvLastGoodCheckDB)).BeginInit();
             this.toolStrip1.SuspendLayout();
             this.SuspendLayout();
@@ -105,70 +105,6 @@
             this.dgvLastGoodCheckDB.TabIndex = 0;
             this.dgvLastGoodCheckDB.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgvLastGoodCheckDB_CellContentClick);
             this.dgvLastGoodCheckDB.RowsAdded += new System.Windows.Forms.DataGridViewRowsAddedEventHandler(this.dgvLastGoodCheckDB_RowsAdded);
-            // 
-            // Instance
-            // 
-            this.Instance.DataPropertyName = "Instance";
-            this.Instance.HeaderText = "Instance";
-            this.Instance.MinimumWidth = 6;
-            this.Instance.Name = "Instance";
-            this.Instance.ReadOnly = true;
-            this.Instance.Width = 125;
-            // 
-            // Database
-            // 
-            this.Database.DataPropertyName = "Name";
-            this.Database.HeaderText = "Database";
-            this.Database.MinimumWidth = 6;
-            this.Database.Name = "Database";
-            this.Database.ReadOnly = true;
-            this.Database.Width = 125;
-            // 
-            // LastGoodCheckDbTime
-            // 
-            this.LastGoodCheckDbTime.DataPropertyName = "LastGoodCheckDbTimeUTC";
-            this.LastGoodCheckDbTime.HeaderText = "Last Good Check DB";
-            this.LastGoodCheckDbTime.MinimumWidth = 6;
-            this.LastGoodCheckDbTime.Name = "LastGoodCheckDbTime";
-            this.LastGoodCheckDbTime.ReadOnly = true;
-            this.LastGoodCheckDbTime.Width = 125;
-            // 
-            // DaysSinceLastGoodCheckDB
-            // 
-            this.DaysSinceLastGoodCheckDB.DataPropertyName = "DaysSinceLastGoodCheckDB";
-            this.DaysSinceLastGoodCheckDB.HeaderText = "Days Since Last Good CheckDB";
-            this.DaysSinceLastGoodCheckDB.MinimumWidth = 6;
-            this.DaysSinceLastGoodCheckDB.Name = "DaysSinceLastGoodCheckDB";
-            this.DaysSinceLastGoodCheckDB.ReadOnly = true;
-            this.DaysSinceLastGoodCheckDB.Width = 125;
-            // 
-            // colCreateDate
-            // 
-            this.colCreateDate.DataPropertyName = "create_date_utc";
-            this.colCreateDate.HeaderText = "Create Date";
-            this.colCreateDate.MinimumWidth = 6;
-            this.colCreateDate.Name = "colCreateDate";
-            this.colCreateDate.ReadOnly = true;
-            this.colCreateDate.Width = 125;
-            // 
-            // ExcludedFromCheck
-            // 
-            this.ExcludedFromCheck.DataPropertyName = "LastGoodCheckDBExcludedReason";
-            this.ExcludedFromCheck.HeaderText = "Excluded Reason";
-            this.ExcludedFromCheck.MinimumWidth = 6;
-            this.ExcludedFromCheck.Name = "ExcludedFromCheck";
-            this.ExcludedFromCheck.ReadOnly = true;
-            this.ExcludedFromCheck.Width = 125;
-            // 
-            // Configure
-            // 
-            this.Configure.HeaderText = "Configure";
-            this.Configure.MinimumWidth = 6;
-            this.Configure.Name = "Configure";
-            this.Configure.ReadOnly = true;
-            this.Configure.Text = "Configure";
-            this.Configure.UseColumnTextForLinkValue = true;
-            this.Configure.Width = 125;
             // 
             // toolStrip1
             // 
@@ -286,6 +222,70 @@
             this.configureRootThresholdsToolStripMenuItem.Size = new System.Drawing.Size(290, 26);
             this.configureRootThresholdsToolStripMenuItem.Text = "Configure Root Thresholds";
             this.configureRootThresholdsToolStripMenuItem.Click += new System.EventHandler(this.configureRootThresholdsToolStripMenuItem_Click);
+            // 
+            // Instance
+            // 
+            this.Instance.DataPropertyName = "InstanceDisplayName";
+            this.Instance.HeaderText = "Instance";
+            this.Instance.MinimumWidth = 6;
+            this.Instance.Name = "Instance";
+            this.Instance.ReadOnly = true;
+            this.Instance.Width = 125;
+            // 
+            // Database
+            // 
+            this.Database.DataPropertyName = "Name";
+            this.Database.HeaderText = "Database";
+            this.Database.MinimumWidth = 6;
+            this.Database.Name = "Database";
+            this.Database.ReadOnly = true;
+            this.Database.Width = 125;
+            // 
+            // LastGoodCheckDbTime
+            // 
+            this.LastGoodCheckDbTime.DataPropertyName = "LastGoodCheckDbTimeUTC";
+            this.LastGoodCheckDbTime.HeaderText = "Last Good Check DB";
+            this.LastGoodCheckDbTime.MinimumWidth = 6;
+            this.LastGoodCheckDbTime.Name = "LastGoodCheckDbTime";
+            this.LastGoodCheckDbTime.ReadOnly = true;
+            this.LastGoodCheckDbTime.Width = 125;
+            // 
+            // DaysSinceLastGoodCheckDB
+            // 
+            this.DaysSinceLastGoodCheckDB.DataPropertyName = "DaysSinceLastGoodCheckDB";
+            this.DaysSinceLastGoodCheckDB.HeaderText = "Days Since Last Good CheckDB";
+            this.DaysSinceLastGoodCheckDB.MinimumWidth = 6;
+            this.DaysSinceLastGoodCheckDB.Name = "DaysSinceLastGoodCheckDB";
+            this.DaysSinceLastGoodCheckDB.ReadOnly = true;
+            this.DaysSinceLastGoodCheckDB.Width = 125;
+            // 
+            // colCreateDate
+            // 
+            this.colCreateDate.DataPropertyName = "create_date_utc";
+            this.colCreateDate.HeaderText = "Create Date";
+            this.colCreateDate.MinimumWidth = 6;
+            this.colCreateDate.Name = "colCreateDate";
+            this.colCreateDate.ReadOnly = true;
+            this.colCreateDate.Width = 125;
+            // 
+            // ExcludedFromCheck
+            // 
+            this.ExcludedFromCheck.DataPropertyName = "LastGoodCheckDBExcludedReason";
+            this.ExcludedFromCheck.HeaderText = "Excluded Reason";
+            this.ExcludedFromCheck.MinimumWidth = 6;
+            this.ExcludedFromCheck.Name = "ExcludedFromCheck";
+            this.ExcludedFromCheck.ReadOnly = true;
+            this.ExcludedFromCheck.Width = 125;
+            // 
+            // Configure
+            // 
+            this.Configure.HeaderText = "Configure";
+            this.Configure.MinimumWidth = 6;
+            this.Configure.Name = "Configure";
+            this.Configure.ReadOnly = true;
+            this.Configure.Text = "Configure";
+            this.Configure.UseColumnTextForLinkValue = true;
+            this.Configure.Width = 125;
             // 
             // LastGoodCheckDBControl
             // 

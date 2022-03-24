@@ -18,6 +18,8 @@ namespace DBADash
         private bool persistXESessions = false;
         private bool useDualXESesion = true;
 
+        public string ConnectionID { get; set; }
+
         public  CollectionSchedules CollectionSchedules {
             get
             {

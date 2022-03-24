@@ -1,6 +1,11 @@
-﻿CREATE PROC [dbo].[CollectionErrorLog_Get](@InstanceID INT=NULL,@Days INT=7,@Instance NVARCHAR(128)=NULL)
+﻿CREATE PROC dbo.CollectionErrorLog_Get(
+	@InstanceID INT=NULL,
+	@Days INT=7,
+	@Instance NVARCHAR(128)=NULL
+)
 AS
-SELECT I.ConnectionID AS Instance, 
+SELECT I.Instance,
+	I.InstanceDisplayName, 
 	E.ErrorDate,
 	E.InstanceID,
 	E.ErrorSource,

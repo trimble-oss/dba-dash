@@ -173,7 +173,7 @@
             // 
             // Instance
             // 
-            this.Instance.DataPropertyName = "ConnectionID";
+            this.Instance.DataPropertyName = "InstanceDisplayName";
             this.Instance.HeaderText = "Instance";
             this.Instance.MinimumWidth = 6;
             this.Instance.Name = "Instance";

@@ -1,4 +1,4 @@
-﻿CREATE PROC [dbo].[AgentJobs_Get](
+﻿CREATE PROC dbo.AgentJobs_Get(
 	@InstanceIDs VARCHAR(MAX) = NULL,
 	@enabled TINYINT=NULL,
 	@IncludeCritical BIT=1,
@@ -25,6 +25,7 @@ DECLARE @StatusesString NVARCHAR(MAX) = '0' + CASE WHEN @IncludeCritical=1 THEN 
 
 SET @SQL = N'
 SELECT J.Instance,
+       J.InstanceDisplayName,
        J.InstanceID,
        J.job_id,
        J.name,

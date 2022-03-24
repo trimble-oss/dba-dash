@@ -15,7 +15,8 @@
 	@Top INT = 30,
 	@SessionID INT =NULL,
 	@Sort VARCHAR(50)='Duration',
-	@SortDesc BIT = 1
+	@SortDesc BIT = 1,
+	@InstanceDisplayName NVARCHAR(128)=NULL
 )
 AS
 DECLARE @DurationFromUS BIGINT 
@@ -51,6 +52,7 @@ SET @SQL =
 N'SELECT TOP(@Top) SQ.InstanceID,
        SQ.DatabaseID,
 	   I.Instance,
+	   I.InstanceDisplayName,
 	   D.name as DatabaseName,
        SQ.event_type,
        SQ.object_name,
@@ -79,6 +81,7 @@ AND timestamp< @ToDate
 ' + CASE WHEN @ObjectName IS NULL THEN '' ELSE 'AND SQ.object_name = @ObjectName' END +'
 ' + CASE WHEN @ClientHostName IS NULL THEN '' ELSE 'AND SQ.client_hostname = @ClientHostName' END +'
 ' + CASE WHEN @ConnectionID IS NULL THEN '' ELSE 'AND I.ConnectionID = @ConnectionID' END + '
+' + CASE WHEN @InstanceDisplayName IS NULL THEN '' ELSE 'AND I.InstanceDisplayName = @InstanceDisplayName' END + '
 ' + CASE WHEN @ClientAppName IS NULL THEN '' ELSE 'AND SQ.client_app_name = @ClientAppName' END + '
 ' + CASE WHEN @DurationFromUS IS NULL THEN '' ELSE 'AND SQ.Duration >= @DurationFrom' END + '
 ' + CASE WHEN @DurationToUS IS NULL THEN '' ELSE 'AND SQ.Duration < @DurationTo' END + '
@@ -92,6 +95,8 @@ AND timestamp< @ToDate
 EXEC sp_executesql @SQL,N'@Instances IDs READONLY,@ObjectName SYSNAME,@ClientHostName SYSNAME,
 							@ConnectionID SYSNAME,@ClientAppName SYSNAME,@DurationFrom BIGINT,
 							@DurationTo BIGINT,@Top INT,@Text NVARCHAR(MAX),@DatabaseName SYSNAME,
-							@FromDate DATETIME2(3),@ToDate DATETIME2(3),@UserName SYSNAME,@Result SYSNAME,@SessionID INT',
+							@FromDate DATETIME2(3),@ToDate DATETIME2(3),@UserName SYSNAME,@Result SYSNAME,
+							@SessionID INT,@InstanceDisplayName NVARCHAR(128)',
 							@Instances,@ObjectName,@ClientHostName,@ConnectionID,@ClientAppName,
-							@DurationFromUS,@DurationToUS,@Top,@Text,@DatabaseName,@FromDate,@ToDate,@UserName,@Result,@SessionID
+							@DurationFromUS,@DurationToUS,@Top,@Text,@DatabaseName,@FromDate,
+							@ToDate,@UserName,@Result,@SessionID,@InstanceDisplayName

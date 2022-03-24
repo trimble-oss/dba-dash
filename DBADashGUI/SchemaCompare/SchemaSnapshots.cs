@@ -129,7 +129,7 @@ namespace DBADashGUI.Changes
             {
                 cn.Open();
                 cmd.Parameters.AddWithValue("DatabaseID", DatabaseID);
-                cmd.Parameters.AddWithValue("Instance", InstanceName);
+                cmd.Parameters.AddWithValue("InstanceDisplayName", InstanceName);
                 cmd.Parameters.AddWithValue("PageSize", currentSummaryPage);
                 cmd.Parameters.AddWithValue("PageNumber", pageNum);
                 

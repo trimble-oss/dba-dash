@@ -29,10 +29,6 @@
         private void InitializeComponent()
         {
             this.dgv = new System.Windows.Forms.DataGridView();
-            this.Instance = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.TraceFlag = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.ChangeDate = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.Change = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
             this.dgvFlags = new System.Windows.Forms.DataGridView();
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
@@ -45,6 +41,10 @@
             this.tsRefreshHistory = new System.Windows.Forms.ToolStripButton();
             this.tsCopyHistory = new System.Windows.Forms.ToolStripButton();
             this.tsExcelHistory = new System.Windows.Forms.ToolStripButton();
+            this.Instance = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.TraceFlag = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.ChangeDate = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.Change = new System.Windows.Forms.DataGridViewTextBoxColumn();
             ((System.ComponentModel.ISupportInitialize)(this.dgv)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
@@ -68,53 +68,19 @@
             this.Change});
             this.dgv.Dock = System.Windows.Forms.DockStyle.Fill;
             this.dgv.Location = new System.Drawing.Point(0, 27);
+            this.dgv.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.dgv.Name = "dgv";
             this.dgv.ReadOnly = true;
             this.dgv.RowHeadersVisible = false;
             this.dgv.RowHeadersWidth = 51;
-            this.dgv.Size = new System.Drawing.Size(676, 167);
+            this.dgv.Size = new System.Drawing.Size(676, 216);
             this.dgv.TabIndex = 0;
-            // 
-            // Instance
-            // 
-            this.Instance.DataPropertyName = "ConnectionID";
-            this.Instance.HeaderText = "Instance";
-            this.Instance.MinimumWidth = 6;
-            this.Instance.Name = "Instance";
-            this.Instance.ReadOnly = true;
-            this.Instance.Width = 90;
-            // 
-            // TraceFlag
-            // 
-            this.TraceFlag.DataPropertyName = "TraceFlag";
-            this.TraceFlag.HeaderText = "Trace Flag";
-            this.TraceFlag.MinimumWidth = 6;
-            this.TraceFlag.Name = "TraceFlag";
-            this.TraceFlag.ReadOnly = true;
-            this.TraceFlag.Width = 105;
-            // 
-            // ChangeDate
-            // 
-            this.ChangeDate.DataPropertyName = "ChangeDate";
-            this.ChangeDate.HeaderText = "Change Date";
-            this.ChangeDate.MinimumWidth = 6;
-            this.ChangeDate.Name = "ChangeDate";
-            this.ChangeDate.ReadOnly = true;
-            this.ChangeDate.Width = 120;
-            // 
-            // Change
-            // 
-            this.Change.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
-            this.Change.DataPropertyName = "Change";
-            this.Change.HeaderText = "Change";
-            this.Change.MinimumWidth = 6;
-            this.Change.Name = "Change";
-            this.Change.ReadOnly = true;
             // 
             // splitContainer1
             // 
             this.splitContainer1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.splitContainer1.Location = new System.Drawing.Point(0, 0);
+            this.splitContainer1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.splitContainer1.Name = "splitContainer1";
             this.splitContainer1.Orientation = System.Windows.Forms.Orientation.Horizontal;
             // 
@@ -127,8 +93,9 @@
             // 
             this.splitContainer1.Panel2.Controls.Add(this.dgv);
             this.splitContainer1.Panel2.Controls.Add(this.toolStrip2);
-            this.splitContainer1.Size = new System.Drawing.Size(676, 395);
-            this.splitContainer1.SplitterDistance = 197;
+            this.splitContainer1.Size = new System.Drawing.Size(676, 494);
+            this.splitContainer1.SplitterDistance = 246;
+            this.splitContainer1.SplitterWidth = 5;
             this.splitContainer1.TabIndex = 2;
             // 
             // dgvFlags
@@ -139,12 +106,13 @@
             this.dgvFlags.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.dgvFlags.Dock = System.Windows.Forms.DockStyle.Fill;
             this.dgvFlags.Location = new System.Drawing.Point(0, 27);
+            this.dgvFlags.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.dgvFlags.Name = "dgvFlags";
             this.dgvFlags.ReadOnly = true;
             this.dgvFlags.RowHeadersVisible = false;
             this.dgvFlags.RowHeadersWidth = 51;
             this.dgvFlags.RowTemplate.Height = 24;
-            this.dgvFlags.Size = new System.Drawing.Size(676, 170);
+            this.dgvFlags.Size = new System.Drawing.Size(676, 219);
             this.dgvFlags.TabIndex = 0;
             // 
             // toolStrip1
@@ -164,7 +132,7 @@
             // toolStripLabel1
             // 
             this.toolStripLabel1.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
-            this.toolStripLabel1.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
+            this.toolStripLabel1.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
             this.toolStripLabel1.Name = "toolStripLabel1";
             this.toolStripLabel1.Size = new System.Drawing.Size(86, 24);
             this.toolStripLabel1.Text = "Trace Flags";
@@ -216,7 +184,7 @@
             // toolStripLabel2
             // 
             this.toolStripLabel2.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
-            this.toolStripLabel2.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
+            this.toolStripLabel2.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
             this.toolStripLabel2.Name = "toolStripLabel2";
             this.toolStripLabel2.Size = new System.Drawing.Size(61, 24);
             this.toolStripLabel2.Text = "History";
@@ -251,13 +219,50 @@
             this.tsExcelHistory.Text = "Export Excel";
             this.tsExcelHistory.Click += new System.EventHandler(this.tsExcelHistory_Click);
             // 
+            // Instance
+            // 
+            this.Instance.DataPropertyName = "InstanceDisplayName";
+            this.Instance.HeaderText = "Instance";
+            this.Instance.MinimumWidth = 6;
+            this.Instance.Name = "Instance";
+            this.Instance.ReadOnly = true;
+            this.Instance.Width = 90;
+            // 
+            // TraceFlag
+            // 
+            this.TraceFlag.DataPropertyName = "TraceFlag";
+            this.TraceFlag.HeaderText = "Trace Flag";
+            this.TraceFlag.MinimumWidth = 6;
+            this.TraceFlag.Name = "TraceFlag";
+            this.TraceFlag.ReadOnly = true;
+            this.TraceFlag.Width = 105;
+            // 
+            // ChangeDate
+            // 
+            this.ChangeDate.DataPropertyName = "ChangeDate";
+            this.ChangeDate.HeaderText = "Change Date";
+            this.ChangeDate.MinimumWidth = 6;
+            this.ChangeDate.Name = "ChangeDate";
+            this.ChangeDate.ReadOnly = true;
+            this.ChangeDate.Width = 120;
+            // 
+            // Change
+            // 
+            this.Change.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
+            this.Change.DataPropertyName = "Change";
+            this.Change.HeaderText = "Change";
+            this.Change.MinimumWidth = 6;
+            this.Change.Name = "Change";
+            this.Change.ReadOnly = true;
+            // 
             // TraceFlagHistory
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.Controls.Add(this.splitContainer1);
+            this.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.Name = "TraceFlagHistory";
-            this.Size = new System.Drawing.Size(676, 395);
+            this.Size = new System.Drawing.Size(676, 494);
             ((System.ComponentModel.ISupportInitialize)(this.dgv)).EndInit();
             this.splitContainer1.Panel1.ResumeLayout(false);
             this.splitContainer1.Panel1.PerformLayout();
@@ -277,10 +282,6 @@
         #endregion
 
         private System.Windows.Forms.DataGridView dgv;
-        private System.Windows.Forms.DataGridViewTextBoxColumn Instance;
-        private System.Windows.Forms.DataGridViewTextBoxColumn TraceFlag;
-        private System.Windows.Forms.DataGridViewTextBoxColumn ChangeDate;
-        private System.Windows.Forms.DataGridViewTextBoxColumn Change;
         private System.Windows.Forms.SplitContainer splitContainer1;
         private System.Windows.Forms.DataGridView dgvFlags;
         private System.Windows.Forms.ToolStrip toolStrip1;
@@ -293,5 +294,9 @@
         private System.Windows.Forms.ToolStripButton tsCopyHistory;
         private System.Windows.Forms.ToolStripButton tsExcel;
         private System.Windows.Forms.ToolStripButton tsExcelHistory;
+        private System.Windows.Forms.DataGridViewTextBoxColumn Instance;
+        private System.Windows.Forms.DataGridViewTextBoxColumn TraceFlag;
+        private System.Windows.Forms.DataGridViewTextBoxColumn ChangeDate;
+        private System.Windows.Forms.DataGridViewTextBoxColumn Change;
     }
 }

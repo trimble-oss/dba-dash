@@ -3,6 +3,7 @@ AS
 SELECT I.InstanceID,
 	D.DatabaseID,
 	I.Instance,
+	I.InstanceDisplayName,
 	D.name,
 	D.state,
 	D.state_desc,

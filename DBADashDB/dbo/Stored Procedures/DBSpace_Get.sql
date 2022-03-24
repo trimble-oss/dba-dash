@@ -1,15 +1,15 @@
-﻿CREATE PROC [dbo].[DBSpace_Get](
+﻿CREATE PROC dbo.DBSpace_Get(
 	@InstanceIDs VARCHAR(MAX)=NULL,
 	@DatabaseID INT=NULL,
-	@Instance SYSNAME=NULL,
-	@DBName SYSNAME=NULL
+	@DBName SYSNAME=NULL,
+	@InstanceGroupName NVARCHAR(128)=NULL
 )
 AS
 DECLARE @SQL NVARCHAR(MAX)
 DECLARE @Grp NVARCHAR(MAX) 
 SET @Grp = CASE WHEN @DatabaseID IS NOT NULL OR @DBName IS NOT NULL THEN 'F.Name' 
-			WHEN @InstanceIDs NOT LIKE '%,%' OR @Instance IS NOT NULL THEN 'D.Name'
-			ELSE 'I.Instance' END 
+			WHEN @InstanceIDs NOT LIKE '%,%' OR @InstanceGroupName IS NOT NULL THEN 'D.Name'
+			ELSE 'I.InstanceGroupName' END 
 
 SET @SQL = N'
 SELECT ' + @Grp + ' as Grp,
@@ -28,10 +28,9 @@ AND D.source_database_id IS NULL
 			WHERE ss.value = I.InstanceID
 			)' END + '
 ' + CASE WHEN @DatabaseID IS NULL THEN '' ELSE 'AND F.DatabaseID = @DatabaseID' END + '
-' + CASE WHEN @Instance IS NULL THEN '' ELSE 'AND I.Instance = @Instance' END + '
+' + CASE WHEN @InstanceGroupName IS NULL THEN '' ELSE 'AND I.InstanceGroupName = @InstanceGroupName' END + '
 ' + CASE WHEN @DBName IS NULL THEN '' ELSE 'AND D.Name = @DBName' END + '
 GROUP BY ' + @Grp + '
 ORDER BY AllocatedGB DESC'
 
-
-EXEC sp_executesql @SQL,N'@InstanceIDs VARCHAR(MAX),@DatabaseID INT,@Instance SYSNAME,@DBName SYSNAME',@InstanceIDs,@DatabaseID,@Instance,@DBName
+EXEC sp_executesql @SQL,N'@InstanceIDs VARCHAR(MAX),@DatabaseID INT,@DBName SYSNAME,@InstanceGroupName NVARCHAR(128)',@InstanceIDs,@DatabaseID,@DBName,@InstanceGroupName

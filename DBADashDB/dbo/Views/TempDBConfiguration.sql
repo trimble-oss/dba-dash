@@ -1,7 +1,8 @@
-﻿CREATE VIEW [dbo].[vwTempDBConfiguration]
+﻿CREATE VIEW dbo.TempDBConfiguration
 AS
 SELECT i.InstanceID,
 		i.Instance,
+		i.InstanceDisplayName,
 		SUM(CASE WHEN f.type=0 THEN 1 ELSE 0 END) NumberOfDataFiles,
 	    calc.MinimumRecommendedFiles,
 		CASE WHEN SUM(CASE WHEN f.type=0 THEN 1 ELSE 0 END) < calc.MinimumRecommendedFiles THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END AS InsufficientFiles,
@@ -26,11 +27,23 @@ FROM dbo.InstanceInfo i
 JOIN dbo.Databases d ON d.InstanceID = i.InstanceID
 JOIN dbo.DBFiles f ON d.DatabaseID = f.DatabaseID
 OUTER APPLY(SELECT CASE WHEN ISNULL(i.cpu_core_count,i.cpu_count) >8 THEN 8 ELSE COALESCE(i.cpu_core_count,i.cpu_count,8) END AS MinimumRecommendedFiles) calc
-OUTER APPLY(SELECT MAX(CASE WHEN TF.TraceFlag=1117 THEN 1 ELSE 0 END) AS T1117, 
-			MAX(CASE WHEN TF.TraceFlag=1118 THEN 1 ELSE 0 END) T1118
+OUTER APPLY(SELECT	MAX(CASE WHEN TF.TraceFlag=1117 THEN 1 ELSE 0 END) AS T1117, 
+					MAX(CASE WHEN TF.TraceFlag=1118 THEN 1 ELSE 0 END) T1118
 			FROM dbo.TraceFlags TF 
-			WHERE TF.InstanceID = i.InstanceID AND TF.TraceFlag IN(1118,1117)) T
+			WHERE TF.InstanceID = i.InstanceID 
+			AND TF.TraceFlag IN(1118,1117)
+			) T
 WHERE d.name = 'tempdb'
 AND i.IsActive=1
 AND d.IsActive=1
-GROUP BY i.Instance,i.InstanceID,i.cpu_core_count,d.DatabaseID, T.T1118,T.T1117,I.ProductMajorVersion,calc.MinimumRecommendedFiles,I.IsTempDBMetadataMemoryOptimized,I.cpu_count
+GROUP BY	i.Instance,
+			i.InstanceID,
+			i.InstanceDisplayName,
+			i.cpu_core_count,
+			d.DatabaseID, 
+			T.T1118,
+			T.T1117,
+			I.ProductMajorVersion,
+			calc.MinimumRecommendedFiles,
+			I.IsTempDBMetadataMemoryOptimized,
+			I.cpu_count

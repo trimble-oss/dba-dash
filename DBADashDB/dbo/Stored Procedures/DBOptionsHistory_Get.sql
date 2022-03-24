@@ -1,4 +1,4 @@
-﻿CREATE PROC [dbo].[DBOptionsHistory_Get](
+﻿CREATE PROC dbo.DBOptionsHistory_Get(
 		@InstanceIDs VARCHAR(MAX)=NULL,
 		@DatabaseID INT=NULL,
 		@ExcludeStateChanges BIT=1
@@ -6,7 +6,8 @@
 AS
 DECLARE @SQL NVARCHAR(MAX) 
 SET @SQL = N'
-SELECT I.Instance AS Instance, 
+SELECT I.Instance, 
+		I.InstanceDisplayName,
 		D.name AS DB,
 		H.Setting,
 		H.OldValue,

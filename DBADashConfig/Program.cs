@@ -75,6 +75,10 @@ try
                       }
                   }
                   var source = new DBADashSource();
+                  if (o.ConnectionID != string.Empty)
+                  {
+                      source.ConnectionID=o.ConnectionID;
+                  }
                   source.ConnectionString = o.ConnectionString;
                   source.NoWMI = o.NoWMI;
                   source.CollectSessionWaits = !o.NoCollectSessionWaits;

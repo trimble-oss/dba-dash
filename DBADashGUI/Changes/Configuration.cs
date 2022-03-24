@@ -55,11 +55,12 @@ namespace DBADashGUI.Changes
             foreach (DataRow r in dt.Rows)
             {
                 string instance = (string)r["ConnectionID"];
+                string displayName = (string)r["InstanceDisplayName"];
                 if (instance != lastInstance)
                 {
                     row = new DataGridViewRow();
                     row.CreateCells(dgvConfig);
-                    row.Cells[0].Value = instance;
+                    row.Cells[0].Value = displayName;
                     rows.Add(row);
                 }
 
@@ -77,8 +78,6 @@ namespace DBADashGUI.Changes
             dgvConfig.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
                 
         }
-
-
 
         private void configuredOnlyToolStripMenuItem_Click(object sender, EventArgs e)
         {

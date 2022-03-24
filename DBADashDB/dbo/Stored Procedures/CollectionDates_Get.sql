@@ -23,6 +23,7 @@ WITH Statuses AS(
 )
 SELECT CD.InstanceID,
 	   I.ConnectionID,
+	   I.InstanceDisplayName,
        CD.Reference,
        CD.Status,
        CD.WarningThreshold,

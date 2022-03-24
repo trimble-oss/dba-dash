@@ -1,4 +1,4 @@
-﻿CREATE PROC [dbo].[DBFiles_Get](
+﻿CREATE PROC dbo.DBFiles_Get(
 	@InstanceIDs VARCHAR(MAX)=NULL,
 	@DatabaseID INT=NULL,
 	@IncludeCritical BIT=1,
@@ -27,6 +27,8 @@ SELECT FileID,
        DatabaseID,
        data_space_id,
        Instance,
+       InstanceDisplayName,
+       InstanceGroupName,
        ConnectionID,
        name,
        file_name,

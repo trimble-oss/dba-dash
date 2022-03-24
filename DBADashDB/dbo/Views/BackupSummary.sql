@@ -2,6 +2,7 @@
 AS
 SELECT BS.InstanceID, 
 	BS.Instance,
+	BS.InstanceDisplayName,
 	COUNT(*) AS DatabaseCount,
 	SUM(CASE WHEN BS.recovery_model=1 THEN 1 ELSE 0 END) AS FullRecoveryCount,
 	SUM(CASE WHEN BS.recovery_model=2 THEN 1 ELSE 0 END) AS BulkLoggedCount,
@@ -56,4 +57,5 @@ FROM dbo.BackupStatus BS
 LEFT JOIN dbo.BackupThresholds T ON BS.InstanceID = T.InstanceID AND T.DatabaseID = -1
 GROUP BY BS.InstanceID,
 	BS.Instance,
+	BS.InstanceDisplayName,
 	T.InstanceID

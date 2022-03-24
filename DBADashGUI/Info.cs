@@ -19,23 +19,20 @@ namespace DBADashGUI
         }
 
         public Int32 InstanceID;
-        public string ConnectionString;
 
         public void RefreshData()
         {
-            SqlConnection cn = new SqlConnection(ConnectionString);
-            using (cn)
+            using (var cn = new SqlConnection(Common.ConnectionString))
+            using (var cmd = new SqlCommand("dbo.InstanceInfo_Get", cn) { CommandType = CommandType.StoredProcedure })
+            using (var da = new SqlDataAdapter(cmd))
             {
-                using (SqlCommand cmd = new SqlCommand("dbo.InstanceInfo_Get", cn) {CommandType = CommandType.StoredProcedure}) {
-                    cn.Open();
-                  
-                    cmd.Parameters.AddWithValue("InstanceID", InstanceID);
-                    SqlDataAdapter da = new SqlDataAdapter(cmd);
-                    DataTable dt = new DataTable();
-                    da.Fill(dt);
-                    dgv.DataSource = dt;
-                }
+                cn.Open();
+                cmd.Parameters.AddWithValue("InstanceID", InstanceID);
+                DataTable dt = new DataTable();
+                da.Fill(dt);
+                dgv.DataSource = dt;
             }
         }
     }
 }
+

@@ -1,4 +1,4 @@
-﻿CREATE PROC [dbo].[Drivers_Get](
+﻿CREATE PROC dbo.Drivers_Get(
 	@InstanceIDs VARCHAR(MAX)=NULL,
 	@DriverSearch NVARCHAR(200)=NULL,
 	@Provider NVARCHAR(200)=NULL
@@ -30,6 +30,7 @@ END;
 SELECT I.InstanceID,
        I.Instance,
 	   I.ConnectionID,
+	   I.InstanceDisplayName,
        D.DeviceName,
        D.DriverProviderName,
        D.DriverVersion,
@@ -46,6 +47,7 @@ AND (D.DriverProviderName = @Provider OR @Provider IS NULL)
 GROUP BY I.InstanceID,
        I.Instance,
 	   I.ConnectionID,
+	   I.InstanceDisplayName,
        D.DeviceName,
        D.DriverProviderName,
        D.DriverVersion,

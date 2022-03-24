@@ -1,4 +1,4 @@
-﻿CREATE PROC [dbo].[CustomCheck_Get](
+﻿CREATE PROC dbo.CustomCheck_Get(
 	@InstanceIDs VARCHAR(MAX)=NULL,
 	@IncludeCritical BIT=1,
 	@IncludeWarning BIT=1,
@@ -21,7 +21,7 @@ SELECT @StatusSQL = CASE WHEN @StatusSQL='' THEN '1=2'
 DECLARE @SQL NVARCHAR(MAX) 
 SET @SQL = N'
 SELECT I.InstanceID,
-		I.ConnectionID,
+		I.InstanceDisplayName,
         cc.Test,
         cc.Context,
         cc.Status,

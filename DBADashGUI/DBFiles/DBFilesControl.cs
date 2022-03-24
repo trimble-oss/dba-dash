@@ -159,7 +159,7 @@ namespace DBADashGUI.DBFiles
                     {
                         DatabaseID = (Int32)row["DatabaseID"],
                         DataSpaceID = row["data_space_id"] == DBNull.Value ? null : (Int32?)row["data_space_id"],
-                        Instance = (string)row["Instance"],
+                        InstanceGroupName = (string)row["InstanceGroupName"],
                         DBName = (string)row["name"],
                         FileName = row["file_name"] == DBNull.Value ? null : (string)row["file_name"]
                     };

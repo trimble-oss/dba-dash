@@ -22,22 +22,24 @@ namespace DBADashGUI.Changes
         public List<Int32> InstanceIDs;
 
 
-        private void refreshFlags()
+        // Pivot data returned by TraceFlags_Get by trace flag
+        private DataTable getTraceFlags()
         {
+            var dt = new DataTable();
+            dt.Columns.Add("Instance");
             using (var cn = new SqlConnection(ConnectionString))
+            using (var cmd = new SqlCommand("dbo.TraceFlags_Get", cn) { CommandType = CommandType.StoredProcedure })
             {
-                using (var cmd = new SqlCommand("dbo.TraceFlags_Get", cn) { CommandType = CommandType.StoredProcedure }) {
-                    cn.Open();
-                    cmd.Parameters.AddWithValue("@InstanceIDs", string.Join(",", InstanceIDs));
-                    SqlDataReader rdr = cmd.ExecuteReader();
-                    var dt = new DataTable();
-                    dt.Columns.Add("Instance");
+                cn.Open();
+                cmd.Parameters.AddWithValue("@InstanceIDs", string.Join(",", InstanceIDs));
+                using (var rdr = cmd.ExecuteReader())
+                {
                     string instance = "";
                     string previousInstance = "";
                     DataRow r = null;
                     while (rdr.Read())
                     {
-                        instance = (string)rdr["ConnectionID"];
+                        instance = (string)rdr["InstanceDisplayName"];
                         if (instance != previousInstance)
                         {
                             r = dt.NewRow();
@@ -64,29 +66,38 @@ namespace DBADashGUI.Changes
                         }
                         previousInstance = instance;
                     }
-
-                    dgvFlags.DataSource = dt;
-                    dgvFlags.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
                 }
             }
+            return dt;
+        }
+
+        private void refreshFlags()
+        {
+            var dt = getTraceFlags();
+            dgvFlags.DataSource = dt;
+            dgvFlags.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
         }
 
         private void refreshHistory()
         {
+            var dt = getTraceFlagHistory();
+            dgv.AutoGenerateColumns = false;
+            dgv.DataSource = dt;
+            dgv.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
+        }
+
+        private DataTable getTraceFlagHistory()
+        {
             using (var cn = new SqlConnection(ConnectionString))
+            using (var cmd = new SqlCommand("dbo.TraceFlagHistory_Get", cn) { CommandType = CommandType.StoredProcedure })
+            using (var da = new SqlDataAdapter(cmd))
             {
-                using (var cmd = new SqlCommand("dbo.TraceFlagHistory_Get", cn) { CommandType = CommandType.StoredProcedure })
-                {
-                    cn.Open();
-                    cmd.Parameters.AddWithValue("@InstanceIDs", string.Join(",", InstanceIDs));
-                    SqlDataAdapter da = new SqlDataAdapter(cmd);
-                    DataTable dt = new DataTable();
-                    da.Fill(dt);
-                    Common.ConvertUTCToLocal(ref dt);
-                    dgv.AutoGenerateColumns = false;
-                    dgv.DataSource = dt;
-                    dgv.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
-                }
+                cn.Open();
+                cmd.Parameters.AddWithValue("@InstanceIDs", string.Join(",", InstanceIDs));
+                DataTable dt = new DataTable();
+                da.Fill(dt);
+                Common.ConvertUTCToLocal(ref dt);
+                return dt;
             }
         }
 

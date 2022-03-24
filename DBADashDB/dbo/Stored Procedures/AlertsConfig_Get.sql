@@ -27,6 +27,7 @@ END
 
 SELECT I.InstanceID,
 		I.Instance, 
+		I.InstanceDisplayName,
 		A.name,
 		CASE WHEN A.message_id<> 0 THEN 'MessageID:' + CAST(A.message_id AS VARCHAR(50)) WHEN A.severity<>0 THEN 'Severity:' + CAST(A.severity AS VARCHAR(MAX)) ELSE A.name END AS Alert,
 		A.enabled,

@@ -19,6 +19,7 @@ WITH agg AS (
 )
 SELECT I.InstanceID,
 	I.Instance,
+	I.InstanceDisplayName,
 	J.job_id,
 	J.name,
 	J.description,

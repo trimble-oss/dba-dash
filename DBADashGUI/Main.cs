@@ -47,6 +47,19 @@ namespace DBADashGUI
         private readonly DiffControl diffSchemaSnapshot = new DiffControl();
         private bool suppressLoadTab=false;
 
+        private string searchString
+        {
+            get
+            {
+                string searchString = String.Empty;
+                if (txtSearch.Text.Trim().Length > 0)
+                {
+                    searchString = "%" + txtSearch.Text.Trim() + "%";
+                }
+                return searchString;
+            }
+        }
+
         private async void Main_Load(object sender, EventArgs e)
         {
             Common.StyleGrid(ref gvHistory);
@@ -185,6 +198,7 @@ namespace DBADashGUI
             if (tabs.SelectedTab == tabTags)
             {
                 tags1.InstanceName = n.InstanceName;
+                tags1.InstanceID = n.InstanceID;
                 tags1.InstanceIDs = AllInstanceIDs;
                 tags1.RefreshData();
             }
@@ -241,7 +255,7 @@ namespace DBADashGUI
             }
             else if(tabs.SelectedTab == tabSummary)
             {
-                summary1.InstanceIDs = n.Type == SQLTreeItem.TreeType.DBADashRoot ? AllInstanceIDs : instanceIDs;
+                summary1.InstanceIDs = n.Type == SQLTreeItem.TreeType.DBADashRoot || parent.Type == SQLTreeItem.TreeType.DBADashRoot ? AllInstanceIDs : instanceIDs;
                 summary1.RefreshDataIfStale();
             }
             else if(tabs.SelectedTab == tabFiles)
@@ -330,7 +344,6 @@ namespace DBADashGUI
             else if(tabs.SelectedTab== tabInfo)
             {
                 info1.InstanceID = n.InstanceID;
-                info1.ConnectionString = connectionString;
                 info1.RefreshData();
             }
             else if(tabs.SelectedTab== tabHardware)
@@ -387,8 +400,8 @@ namespace DBADashGUI
             else if (tabs.SelectedTab == tabDBSpace)
             {
                 spaceTracking1.InstanceIDs = n.Type == SQLTreeItem.TreeType.DBADashRoot ? AllInstanceIDs : instanceIDs;
-                spaceTracking1.DatabaseID = n.DatabaseID;
-                spaceTracking1.Instance = n.InstanceName;
+                spaceTracking1.DatabaseID = n.DatabaseID;             
+                spaceTracking1.InstanceGroupName = n.InstanceName;              
                 spaceTracking1.DBName = n.DatabaseName;
                 spaceTracking1.RefreshData();
             }
@@ -406,17 +419,17 @@ namespace DBADashGUI
             }
             else if(tabs.SelectedTab == tabServiceObjectives)
             {
-                azureServiceObjectivesHistory1.InstanceIDs = ((SQLTreeItem)n.Parent).Type == SQLTreeItem.TreeType.DBADashRoot ? AzureInstanceIDs : instanceIDs;
+                azureServiceObjectivesHistory1.InstanceIDs = parent.Type == SQLTreeItem.TreeType.DBADashRoot ? AzureInstanceIDs : instanceIDs;
                 azureServiceObjectivesHistory1.RefreshData();
             }
             else if (tabs.SelectedTab == tabAzureDBesourceGovernance)
             {
-                azureDBResourceGovernance1.InstanceIDs = ((SQLTreeItem)n.Parent).Type == SQLTreeItem.TreeType.DBADashRoot ? AzureInstanceIDs : instanceIDs;
+                azureDBResourceGovernance1.InstanceIDs = parent.Type == SQLTreeItem.TreeType.DBADashRoot ? AzureInstanceIDs : instanceIDs;
                 azureDBResourceGovernance1.RefreshData();
             }
             else if (tabs.SelectedTab == tabDBConfiguration)
             {
-                dbConfiguration1.InstanceIDs = ((SQLTreeItem)n.Parent).Type == SQLTreeItem.TreeType.DBADashRoot ? AllInstanceIDs : instanceIDs;
+                dbConfiguration1.InstanceIDs = parent.Type == SQLTreeItem.TreeType.DBADashRoot ? AllInstanceIDs : instanceIDs;
                 dbConfiguration1.DatabaseID = n.DatabaseID;
                 dbConfiguration1.RefreshData();
             }
@@ -565,11 +578,6 @@ namespace DBADashGUI
             root.Nodes.Add(hadr);
 
             var tags = String.Join(",", SelectedTags());
-            string searchString="";
-            if (txtSearch.Text.Trim().Length > 0)
-            {
-                searchString = "%" + txtSearch.Text.Trim() + "%";
-            }
 
             var dtInstances = CommonData.GetInstances(tagIDs:tags, searchString:searchString);
 
@@ -577,6 +585,7 @@ namespace DBADashGUI
             foreach (DataRow row in dtInstances.Rows)
             {
                 string instance = (string)row["Instance"];
+                string displayName = (string)row["InstanceDisplayName"];
                 Int32 instanceID = (Int32)row["InstanceID"];
                 DatabaseEngineEdition edition;
                 try
@@ -613,7 +622,7 @@ namespace DBADashGUI
                 }
                 else
                 {
-                    var n = new SQLTreeItem(instance, SQLTreeItem.TreeType.Instance)
+                    var n = new SQLTreeItem(displayName, SQLTreeItem.TreeType.Instance)
                     {
                         InstanceID = instanceID,
                         EngineEdition = edition
@@ -1413,6 +1422,18 @@ namespace DBADashGUI
             if(e.KeyCode == Keys.Enter)
             {
                 addInstanes();
+            }
+        }
+
+        private void configureDisplayNameToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            using (var frm = new ConfigureDisplayName() { TagIDs = String.Join(",", SelectedTags()), SearchString = searchString })
+            {
+                frm.ShowDialog(this);
+                if (frm.EditCount > 0)
+                {
+                    addInstanes();
+                }
             }
         }
     }

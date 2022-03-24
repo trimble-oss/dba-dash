@@ -32,19 +32,6 @@
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle3 = new System.Windows.Forms.DataGridViewCellStyle();
             this.dgvLogShipping = new System.Windows.Forms.DataGridView();
-            this.Instance = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.Database = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.Status = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.RestoreDate = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.BackupStartDate = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.TimeSinceLast = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.LatencyOfLast = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.TotalTimeBehind = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.SnapshotAge = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.SnapshotDate = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.LastFile = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.ThresholdConfiguredLevel = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.Configure = new System.Windows.Forms.DataGridViewLinkColumn();
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
             this.tsRefresh = new System.Windows.Forms.ToolStripButton();
             this.tsCopy = new System.Windows.Forms.ToolStripButton();
@@ -75,6 +62,19 @@
             this.dataGridViewTextBoxColumn10 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dataGridViewTextBoxColumn11 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dataGridViewTextBoxColumn12 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.Instance = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.Database = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.Status = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.RestoreDate = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.BackupStartDate = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.TimeSinceLast = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.LatencyOfLast = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.TotalTimeBehind = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.SnapshotAge = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.SnapshotDate = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.LastFile = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.ThresholdConfiguredLevel = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.Configure = new System.Windows.Forms.DataGridViewLinkColumn();
             ((System.ComponentModel.ISupportInitialize)(this.dgvLogShipping)).BeginInit();
             this.toolStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dgvSummary)).BeginInit();
@@ -142,126 +142,6 @@
             this.dgvLogShipping.TabIndex = 0;
             this.dgvLogShipping.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgvLogShipping_CellContentClick);
             this.dgvLogShipping.RowsAdded += new System.Windows.Forms.DataGridViewRowsAddedEventHandler(this.dgvLogShipping_RowsAdded);
-            // 
-            // Instance
-            // 
-            this.Instance.DataPropertyName = "Instance";
-            this.Instance.HeaderText = "Instance";
-            this.Instance.MinimumWidth = 6;
-            this.Instance.Name = "Instance";
-            this.Instance.ReadOnly = true;
-            this.Instance.Width = 90;
-            // 
-            // Database
-            // 
-            this.Database.DataPropertyName = "name";
-            this.Database.HeaderText = "Database";
-            this.Database.MinimumWidth = 6;
-            this.Database.Name = "Database";
-            this.Database.ReadOnly = true;
-            this.Database.Width = 98;
-            // 
-            // Status
-            // 
-            this.Status.DataPropertyName = "StatusDescription";
-            this.Status.HeaderText = "Status";
-            this.Status.MinimumWidth = 6;
-            this.Status.Name = "Status";
-            this.Status.ReadOnly = true;
-            this.Status.Width = 77;
-            // 
-            // RestoreDate
-            // 
-            this.RestoreDate.DataPropertyName = "restore_date";
-            this.RestoreDate.HeaderText = "Restore Date";
-            this.RestoreDate.MinimumWidth = 6;
-            this.RestoreDate.Name = "RestoreDate";
-            this.RestoreDate.ReadOnly = true;
-            this.RestoreDate.Width = 111;
-            // 
-            // BackupStartDate
-            // 
-            this.BackupStartDate.DataPropertyName = "backup_start_date";
-            this.BackupStartDate.HeaderText = "Backup Start Date";
-            this.BackupStartDate.MinimumWidth = 6;
-            this.BackupStartDate.Name = "BackupStartDate";
-            this.BackupStartDate.ReadOnly = true;
-            this.BackupStartDate.Width = 112;
-            // 
-            // TimeSinceLast
-            // 
-            this.TimeSinceLast.DataPropertyName = "TimeSinceLast";
-            this.TimeSinceLast.HeaderText = "Time Since Last";
-            this.TimeSinceLast.MinimumWidth = 6;
-            this.TimeSinceLast.Name = "TimeSinceLast";
-            this.TimeSinceLast.ReadOnly = true;
-            this.TimeSinceLast.Width = 127;
-            // 
-            // LatencyOfLast
-            // 
-            this.LatencyOfLast.DataPropertyName = "LatencyOfLast";
-            this.LatencyOfLast.HeaderText = "Latency of Last";
-            this.LatencyOfLast.MinimumWidth = 6;
-            this.LatencyOfLast.Name = "LatencyOfLast";
-            this.LatencyOfLast.ReadOnly = true;
-            this.LatencyOfLast.Width = 99;
-            // 
-            // TotalTimeBehind
-            // 
-            this.TotalTimeBehind.DataPropertyName = "TotalTimeBehind";
-            this.TotalTimeBehind.HeaderText = "Total Time Behind";
-            this.TotalTimeBehind.MinimumWidth = 6;
-            this.TotalTimeBehind.Name = "TotalTimeBehind";
-            this.TotalTimeBehind.ReadOnly = true;
-            this.TotalTimeBehind.Width = 139;
-            // 
-            // SnapshotAge
-            // 
-            this.SnapshotAge.DataPropertyName = "SnapshotAge";
-            this.SnapshotAge.HeaderText = "Snapshot Age";
-            this.SnapshotAge.MinimumWidth = 6;
-            this.SnapshotAge.Name = "SnapshotAge";
-            this.SnapshotAge.ReadOnly = true;
-            this.SnapshotAge.Width = 116;
-            // 
-            // SnapshotDate
-            // 
-            this.SnapshotDate.DataPropertyName = "SnapshotDate";
-            this.SnapshotDate.HeaderText = "Snapshot Date";
-            this.SnapshotDate.MinimumWidth = 6;
-            this.SnapshotDate.Name = "SnapshotDate";
-            this.SnapshotDate.ReadOnly = true;
-            this.SnapshotDate.Width = 143;
-            // 
-            // LastFile
-            // 
-            this.LastFile.DataPropertyName = "last_file";
-            this.LastFile.HeaderText = "Last File";
-            this.LastFile.MinimumWidth = 6;
-            this.LastFile.Name = "LastFile";
-            this.LastFile.ReadOnly = true;
-            this.LastFile.Width = 64;
-            // 
-            // ThresholdConfiguredLevel
-            // 
-            this.ThresholdConfiguredLevel.DataPropertyName = "ThresholdConfiguredLevel";
-            this.ThresholdConfiguredLevel.HeaderText = "Threshold Configured Level";
-            this.ThresholdConfiguredLevel.MinimumWidth = 6;
-            this.ThresholdConfiguredLevel.Name = "ThresholdConfiguredLevel";
-            this.ThresholdConfiguredLevel.ReadOnly = true;
-            this.ThresholdConfiguredLevel.Width = 163;
-            // 
-            // Configure
-            // 
-            this.Configure.HeaderText = "Configure";
-            this.Configure.MinimumWidth = 6;
-            this.Configure.Name = "Configure";
-            this.Configure.ReadOnly = true;
-            this.Configure.Resizable = System.Windows.Forms.DataGridViewTriState.True;
-            this.Configure.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
-            this.Configure.Text = "Configure";
-            this.Configure.UseColumnTextForLinkValue = true;
-            this.Configure.Width = 98;
             // 
             // toolStrip1
             // 
@@ -559,6 +439,126 @@
             this.dataGridViewTextBoxColumn12.Name = "dataGridViewTextBoxColumn12";
             this.dataGridViewTextBoxColumn12.Width = 163;
             // 
+            // Instance
+            // 
+            this.Instance.DataPropertyName = "InstanceDisplayName";
+            this.Instance.HeaderText = "Instance";
+            this.Instance.MinimumWidth = 6;
+            this.Instance.Name = "Instance";
+            this.Instance.ReadOnly = true;
+            this.Instance.Width = 90;
+            // 
+            // Database
+            // 
+            this.Database.DataPropertyName = "name";
+            this.Database.HeaderText = "Database";
+            this.Database.MinimumWidth = 6;
+            this.Database.Name = "Database";
+            this.Database.ReadOnly = true;
+            this.Database.Width = 98;
+            // 
+            // Status
+            // 
+            this.Status.DataPropertyName = "StatusDescription";
+            this.Status.HeaderText = "Status";
+            this.Status.MinimumWidth = 6;
+            this.Status.Name = "Status";
+            this.Status.ReadOnly = true;
+            this.Status.Width = 77;
+            // 
+            // RestoreDate
+            // 
+            this.RestoreDate.DataPropertyName = "restore_date";
+            this.RestoreDate.HeaderText = "Restore Date";
+            this.RestoreDate.MinimumWidth = 6;
+            this.RestoreDate.Name = "RestoreDate";
+            this.RestoreDate.ReadOnly = true;
+            this.RestoreDate.Width = 111;
+            // 
+            // BackupStartDate
+            // 
+            this.BackupStartDate.DataPropertyName = "backup_start_date";
+            this.BackupStartDate.HeaderText = "Backup Start Date";
+            this.BackupStartDate.MinimumWidth = 6;
+            this.BackupStartDate.Name = "BackupStartDate";
+            this.BackupStartDate.ReadOnly = true;
+            this.BackupStartDate.Width = 112;
+            // 
+            // TimeSinceLast
+            // 
+            this.TimeSinceLast.DataPropertyName = "TimeSinceLast";
+            this.TimeSinceLast.HeaderText = "Time Since Last";
+            this.TimeSinceLast.MinimumWidth = 6;
+            this.TimeSinceLast.Name = "TimeSinceLast";
+            this.TimeSinceLast.ReadOnly = true;
+            this.TimeSinceLast.Width = 127;
+            // 
+            // LatencyOfLast
+            // 
+            this.LatencyOfLast.DataPropertyName = "LatencyOfLast";
+            this.LatencyOfLast.HeaderText = "Latency of Last";
+            this.LatencyOfLast.MinimumWidth = 6;
+            this.LatencyOfLast.Name = "LatencyOfLast";
+            this.LatencyOfLast.ReadOnly = true;
+            this.LatencyOfLast.Width = 99;
+            // 
+            // TotalTimeBehind
+            // 
+            this.TotalTimeBehind.DataPropertyName = "TotalTimeBehind";
+            this.TotalTimeBehind.HeaderText = "Total Time Behind";
+            this.TotalTimeBehind.MinimumWidth = 6;
+            this.TotalTimeBehind.Name = "TotalTimeBehind";
+            this.TotalTimeBehind.ReadOnly = true;
+            this.TotalTimeBehind.Width = 139;
+            // 
+            // SnapshotAge
+            // 
+            this.SnapshotAge.DataPropertyName = "SnapshotAge";
+            this.SnapshotAge.HeaderText = "Snapshot Age";
+            this.SnapshotAge.MinimumWidth = 6;
+            this.SnapshotAge.Name = "SnapshotAge";
+            this.SnapshotAge.ReadOnly = true;
+            this.SnapshotAge.Width = 116;
+            // 
+            // SnapshotDate
+            // 
+            this.SnapshotDate.DataPropertyName = "SnapshotDate";
+            this.SnapshotDate.HeaderText = "Snapshot Date";
+            this.SnapshotDate.MinimumWidth = 6;
+            this.SnapshotDate.Name = "SnapshotDate";
+            this.SnapshotDate.ReadOnly = true;
+            this.SnapshotDate.Width = 143;
+            // 
+            // LastFile
+            // 
+            this.LastFile.DataPropertyName = "last_file";
+            this.LastFile.HeaderText = "Last File";
+            this.LastFile.MinimumWidth = 6;
+            this.LastFile.Name = "LastFile";
+            this.LastFile.ReadOnly = true;
+            this.LastFile.Width = 64;
+            // 
+            // ThresholdConfiguredLevel
+            // 
+            this.ThresholdConfiguredLevel.DataPropertyName = "ThresholdConfiguredLevel";
+            this.ThresholdConfiguredLevel.HeaderText = "Threshold Configured Level";
+            this.ThresholdConfiguredLevel.MinimumWidth = 6;
+            this.ThresholdConfiguredLevel.Name = "ThresholdConfiguredLevel";
+            this.ThresholdConfiguredLevel.ReadOnly = true;
+            this.ThresholdConfiguredLevel.Width = 163;
+            // 
+            // Configure
+            // 
+            this.Configure.HeaderText = "Configure";
+            this.Configure.MinimumWidth = 6;
+            this.Configure.Name = "Configure";
+            this.Configure.ReadOnly = true;
+            this.Configure.Resizable = System.Windows.Forms.DataGridViewTriState.True;
+            this.Configure.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
+            this.Configure.Text = "Configure";
+            this.Configure.UseColumnTextForLinkValue = true;
+            this.Configure.Width = 98;
+            // 
             // LogShippingControl
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
@@ -609,6 +609,14 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn11;
         private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn12;
         private System.Windows.Forms.ToolStripButton tsBack;
+        private System.Windows.Forms.ToolStrip toolStrip2;
+        private System.Windows.Forms.ToolStripButton tsCopyDetail;
+        private System.Windows.Forms.ToolStripButton tsExportExcelDetail;
+        private System.Windows.Forms.ToolStripDropDownButton toolStripDropDownButton1;
+        private System.Windows.Forms.ToolStripMenuItem tsCritical;
+        private System.Windows.Forms.ToolStripMenuItem tsWarning;
+        private System.Windows.Forms.ToolStripMenuItem tsNA;
+        private System.Windows.Forms.ToolStripMenuItem tsOK;
         private System.Windows.Forms.DataGridViewTextBoxColumn Instance;
         private System.Windows.Forms.DataGridViewTextBoxColumn Database;
         private System.Windows.Forms.DataGridViewTextBoxColumn Status;
@@ -622,13 +630,5 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn LastFile;
         private System.Windows.Forms.DataGridViewTextBoxColumn ThresholdConfiguredLevel;
         private System.Windows.Forms.DataGridViewLinkColumn Configure;
-        private System.Windows.Forms.ToolStrip toolStrip2;
-        private System.Windows.Forms.ToolStripButton tsCopyDetail;
-        private System.Windows.Forms.ToolStripButton tsExportExcelDetail;
-        private System.Windows.Forms.ToolStripDropDownButton toolStripDropDownButton1;
-        private System.Windows.Forms.ToolStripMenuItem tsCritical;
-        private System.Windows.Forms.ToolStripMenuItem tsWarning;
-        private System.Windows.Forms.ToolStripMenuItem tsNA;
-        private System.Windows.Forms.ToolStripMenuItem tsOK;
     }
 }

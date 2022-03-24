@@ -1,7 +1,7 @@
 ﻿CREATE VIEW dbo.LogShippingStatusSummary 
 AS
 SELECT LSS.InstanceID,
-       LSS.Instance,
+       LSS.InstanceDisplayName,
 	   MIN(LSS.Status) AS Status,
 	   CASE MIN(LSS.Status) WHEN 1 THEN 'Critical' WHEN 2 THEN 'Warning' WHEN 3 THEN 'N/A' WHEN 4 THEN 'OK' ELSE 'N/A' END AS StatusDescription,
 	   COUNT(*) AS LogShippedDBCount,
@@ -19,4 +19,6 @@ SELECT LSS.InstanceID,
 FROM dbo.LogShippingStatus LSS
 LEFT JOIN dbo.LogRestoreThresholds T ON LSS.InstanceID = T.InstanceID AND T.DatabaseID=-1
 WHERE LSS.Status<> 3
-GROUP BY LSS.InstanceID,LSS.Instance,T.InstanceID
+GROUP BY LSS.InstanceID,
+		 LSS.InstanceDisplayName,
+		 T.InstanceID

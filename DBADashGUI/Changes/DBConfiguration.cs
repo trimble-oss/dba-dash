@@ -72,7 +72,7 @@ namespace DBADashGUI.Changes
                 {
                     row = new DataGridViewRow();
                     row.CreateCells(dgvConfig);
-                    row.Cells[0].Value = (string)r["Instance"];
+                    row.Cells[0].Value = (string)r["InstanceGroupName"];
                     row.Cells[1].Value = (string)r["DB"];
                     rows.Add(row);
                 }

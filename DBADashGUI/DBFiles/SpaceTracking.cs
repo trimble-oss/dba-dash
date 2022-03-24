@@ -27,7 +27,7 @@ namespace DBADashGUI
         public Int32 DatabaseID = -1;
 
         public string DBName="";
-        public string Instance="";
+        public string InstanceGroupName="";
 
         public void RefreshData()
         {
@@ -49,9 +49,9 @@ namespace DBADashGUI
                 {
                     cmd.Parameters.AddWithValue("@DatabaseID", DatabaseID);
                 }
-                if (Instance != null && Instance.Length > 0)
+                if (InstanceGroupName != null && InstanceGroupName.Length > 0)
                 {
-                    cmd.Parameters.AddWithValue("@Instance", Instance);
+                    cmd.Parameters.AddWithValue("@InstanceGroupName", InstanceGroupName);
                 }
                 if (!string.IsNullOrEmpty(DBName))
                 {
@@ -108,9 +108,9 @@ namespace DBADashGUI
                 var selectedGroupValue = row["Grp"] == DBNull.Value ? "" : (string)row["Grp"];
                 if (dgv.Columns[e.ColumnIndex] == Grp)
                 {        
-                    if (InstanceIDs.Count>1 && string.IsNullOrEmpty(Instance))
+                    if (InstanceIDs.Count>1 && string.IsNullOrEmpty(InstanceGroupName))
                     {
-                        Instance = selectedGroupValue;
+                        InstanceGroupName = selectedGroupValue;
                     }
                     else if (DBName.Length == 0)
                     {
@@ -130,12 +130,12 @@ namespace DBADashGUI
                     var frm = new DBSpaceHistoryView
                     {
                         DatabaseID = DatabaseID,
-                        Instance = Instance,
+                        InstanceGroupName = InstanceGroupName,
                         DBName = DBName
                     };
-                    if (InstanceIDs.Count > 1 &&  string.IsNullOrEmpty(Instance))
+                    if (InstanceIDs.Count > 1 &&  string.IsNullOrEmpty(InstanceGroupName))
                     {
-                        frm.Instance = selectedGroupValue;
+                        frm.InstanceGroupName = selectedGroupValue;
                     }
                     else if (DBName.Length == 0)
                     {
@@ -147,7 +147,7 @@ namespace DBADashGUI
                     }
                     if (frm.DatabaseID < 1)
                     {
-                        frm.DatabaseID  = CommonData.GetDatabaseID(frm.Instance, frm.DBName);
+                        frm.DatabaseID  = CommonData.GetDatabaseID(frm.InstanceGroupName, frm.DBName);
                     }
                     frm.Show();
                 }
@@ -190,7 +190,7 @@ namespace DBADashGUI
             }
             else
             {               
-                Instance = "";
+                InstanceGroupName = "";
                 tsBack.Enabled = false;
             }
             diableHyperLinks(false);
@@ -202,12 +202,12 @@ namespace DBADashGUI
             var frm = new DBSpaceHistoryView
             {
                 DatabaseID = DatabaseID,
-                Instance = Instance,
+                InstanceGroupName = InstanceGroupName,
                 DBName = DBName
             };
             if (frm.DatabaseID < 1)
             {
-                frm.DatabaseID = CommonData.GetDatabaseID(frm.Instance, frm.DBName);
+                frm.DatabaseID = CommonData.GetDatabaseID(frm.InstanceGroupName, frm.DBName);
             }
             frm.Show();
         }

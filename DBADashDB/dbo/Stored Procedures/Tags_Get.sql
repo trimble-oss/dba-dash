@@ -1,15 +1,23 @@
-﻿CREATE PROC [dbo].[Tags_Get](
+﻿CREATE PROC dbo.Tags_Get(
 	@TagFilters NVARCHAR(MAX)=NULL
 )
 AS
 
 DECLARE @SQL NVARCHAR(MAX)
 SET @SQL = N'
-SELECT TagID,TagName,TagValue 
+SELECT	TagID,
+		TagName,
+		TagValue 
 FROM dbo.Tags T 
 WHERE EXISTS(SELECT 1 
 			FROM dbo.InstanceTags IT 
 			JOIN dbo.Instances I ON IT.Instance = I.Instance
+			WHERE IT.TagID = T.TagID
+			AND I.IsActive=1
+			UNION ALL
+			SELECT 1 
+			FROM dbo.InstanceIDsTags IT 
+			JOIN dbo.Instances I ON IT.InstanceID = I.InstanceID
 			WHERE IT.TagID = T.TagID
 			AND I.IsActive=1
 			)

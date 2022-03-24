@@ -58,9 +58,6 @@
             this.colView = new System.Windows.Forms.DataGridViewLinkColumn();
             this.colDiff = new System.Windows.Forms.DataGridViewLinkColumn();
             this.dgvInstanceSummary = new System.Windows.Forms.DataGridView();
-            this.colInstance = new System.Windows.Forms.DataGridViewLinkColumn();
-            this.colLastUpdated = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colLastValidated = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
             this.tsRefresh = new System.Windows.Forms.ToolStripButton();
             this.tsBack = new System.Windows.Forms.ToolStripButton();
@@ -77,6 +74,9 @@
             this.dataGridViewTextBoxColumn11 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dataGridViewTextBoxColumn12 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dataGridViewTextBoxColumn13 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colInstance = new System.Windows.Forms.DataGridViewLinkColumn();
+            this.colLastUpdated = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colLastValidated = new System.Windows.Forms.DataGridViewTextBoxColumn();
             ((System.ComponentModel.ISupportInitialize)(this.splitSnapshotSummary)).BeginInit();
             this.splitSnapshotSummary.Panel1.SuspendLayout();
             this.splitSnapshotSummary.Panel2.SuspendLayout();
@@ -422,35 +422,6 @@
             this.dgvInstanceSummary.TabIndex = 3;
             this.dgvInstanceSummary.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgvInstanceSummary_CellContentClick);
             // 
-            // colInstance
-            // 
-            this.colInstance.DataPropertyName = "Instance";
-            this.colInstance.HeaderText = "Instance";
-            this.colInstance.MinimumWidth = 6;
-            this.colInstance.Name = "colInstance";
-            this.colInstance.ReadOnly = true;
-            this.colInstance.Resizable = System.Windows.Forms.DataGridViewTriState.True;
-            this.colInstance.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
-            this.colInstance.Width = 90;
-            // 
-            // colLastUpdated
-            // 
-            this.colLastUpdated.DataPropertyName = "LastUpdated";
-            this.colLastUpdated.HeaderText = "Last Updated";
-            this.colLastUpdated.MinimumWidth = 6;
-            this.colLastUpdated.Name = "colLastUpdated";
-            this.colLastUpdated.ReadOnly = true;
-            this.colLastUpdated.Width = 122;
-            // 
-            // colLastValidated
-            // 
-            this.colLastValidated.DataPropertyName = "LastValidated";
-            this.colLastValidated.HeaderText = "Last Validated";
-            this.colLastValidated.MinimumWidth = 6;
-            this.colLastValidated.Name = "colLastValidated";
-            this.colLastValidated.ReadOnly = true;
-            this.colLastValidated.Width = 127;
-            // 
             // toolStrip1
             // 
             this.toolStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
@@ -613,6 +584,35 @@
             this.dataGridViewTextBoxColumn13.ReadOnly = true;
             this.dataGridViewTextBoxColumn13.Width = 125;
             // 
+            // colInstance
+            // 
+            this.colInstance.DataPropertyName = "InstanceDisplayName";
+            this.colInstance.HeaderText = "Instance";
+            this.colInstance.MinimumWidth = 6;
+            this.colInstance.Name = "colInstance";
+            this.colInstance.ReadOnly = true;
+            this.colInstance.Resizable = System.Windows.Forms.DataGridViewTriState.True;
+            this.colInstance.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
+            this.colInstance.Width = 90;
+            // 
+            // colLastUpdated
+            // 
+            this.colLastUpdated.DataPropertyName = "LastUpdated";
+            this.colLastUpdated.HeaderText = "Last Updated";
+            this.colLastUpdated.MinimumWidth = 6;
+            this.colLastUpdated.Name = "colLastUpdated";
+            this.colLastUpdated.ReadOnly = true;
+            this.colLastUpdated.Width = 122;
+            // 
+            // colLastValidated
+            // 
+            this.colLastValidated.DataPropertyName = "LastValidated";
+            this.colLastValidated.HeaderText = "Last Validated";
+            this.colLastValidated.MinimumWidth = 6;
+            this.colLastValidated.Name = "colLastValidated";
+            this.colLastValidated.ReadOnly = true;
+            this.colLastValidated.Width = 127;
+            // 
             // SchemaSnapshots
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
@@ -664,9 +664,6 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn10;
         private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn11;
         private System.Windows.Forms.DataGridView dgvInstanceSummary;
-        private System.Windows.Forms.DataGridViewLinkColumn colInstance;
-        private System.Windows.Forms.DataGridViewTextBoxColumn colLastUpdated;
-        private System.Windows.Forms.DataGridViewTextBoxColumn colLastValidated;
         private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn12;
         private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn13;
         private System.Windows.Forms.ToolStrip toolStrip1;
@@ -686,5 +683,8 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn Modified;
         private System.Windows.Forms.DataGridViewTextBoxColumn Dropped;
         private System.Windows.Forms.DataGridViewLinkColumn colExport;
+        private System.Windows.Forms.DataGridViewLinkColumn colInstance;
+        private System.Windows.Forms.DataGridViewTextBoxColumn colLastUpdated;
+        private System.Windows.Forms.DataGridViewTextBoxColumn colLastValidated;
     }
 }

@@ -176,7 +176,7 @@
             // colInstance
             // 
             this.colInstance.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
-            this.colInstance.DataPropertyName = "ConnectionID";
+            this.colInstance.DataPropertyName = "InstanceDisplayName";
             this.colInstance.HeaderText = "Instance";
             this.colInstance.MinimumWidth = 6;
             this.colInstance.Name = "colInstance";

@@ -1,14 +1,14 @@
-﻿CREATE PROC [dbo].[DatabasesAllInfo_Get](
+﻿CREATE PROC dbo.DatabasesAllInfo_Get(
 		@InstanceIDs VARCHAR(MAX)=NULL,
 		@DatabaseID INT=NULL
 )
 AS
 DECLARE @SQL NVARCHAR(MAX) 
 SET @SQL = N'
-SELECT I.Instance,
+SELECT  I.InstanceGroupName AS Instance,
 		D.DatabaseID,
         D.InstanceID,
-        D.name,
+        D.name AS DatabaseName,
         D.database_id,
         D.source_database_id,
         CONVERT(VARCHAR(MAX),D.owner_sid,1) owner_sid,
