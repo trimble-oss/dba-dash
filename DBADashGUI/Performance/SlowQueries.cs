@@ -22,7 +22,7 @@ namespace DBADashGUI
         }
 
         public List<Int32> InstanceIDs;
-        string groupBy = "ConnectionID";
+        string groupBy = "InstanceDisplayName";
         string _db="";
         public string DBName {
             get {
@@ -60,7 +60,7 @@ namespace DBADashGUI
             }
             else
             {
-                groupBy = "ConnectionID";
+                groupBy = "InstanceDisplayName";
             }
             selectGroupBy();
         }
@@ -87,7 +87,7 @@ namespace DBADashGUI
                     }
                     if (txtInstance.Text.Length > 0)
                     {
-                        cmd.Parameters.AddWithValue("ConnectionID", txtInstance.Text);
+                        cmd.Parameters.AddWithValue("InstanceDisplayName", txtInstance.Text);
                     }
                     if (txtApp.Text.Length > 0)
                     {
@@ -201,7 +201,7 @@ namespace DBADashGUI
                 if (dgvSummary.Columns[e.ColumnIndex] == Grp)
                 {
 
-                    if (groupBy == "ConnectionID")
+                    if (groupBy == "InstanceDisplayName")
                     {
                         txtInstance.Text = selectedGroupValue;
                     }
@@ -413,7 +413,7 @@ namespace DBADashGUI
                 cmd.Parameters.AddWithValue("ToDate", DateRange.ToUTC);
                 cmd.Parameters.AddWithValue("Top", pageSize);
 
-                string connectionID = txtInstance.Text;
+                string displayName = txtInstance.Text;
                 string client = txtClient.Text;
                 string user = txtUser.Text;
                 string db = DBName.Length > 0 ? DBName : txtDatabase.Text;
@@ -422,9 +422,9 @@ namespace DBADashGUI
                 string result = txtResult.Text;
                 string text = txtText.Text;
                 string sessionid = txtSessionID.Text;
-                if (groupBy == "ConnectionID")
+                if (groupBy == "InstanceDisplayName")
                 {
-                    connectionID = selectedGroupValue;
+                    displayName = selectedGroupValue;
                 }
                 else if (groupBy == "client_hostname")
                 {
@@ -467,9 +467,9 @@ namespace DBADashGUI
                 {
                     cmd.Parameters.AddWithValue("ClientHostName", client);
                 }
-                if (connectionID.Length > 0)
+                if (displayName.Length > 0)
                 {
-                    cmd.Parameters.AddWithValue("ConnectionID", connectionID);
+                    cmd.Parameters.AddWithValue("InstanceDisplayName", displayName);
                 }
                 if (app.Length > 0)
                 {

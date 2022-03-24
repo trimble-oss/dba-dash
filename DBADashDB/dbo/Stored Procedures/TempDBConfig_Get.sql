@@ -1,10 +1,9 @@
-﻿
-
-CREATE PROC dbo.TempDBConfig_Get(
+﻿CREATE PROC dbo.TempDBConfig_Get(
 	@InstanceIDs VARCHAR(MAX)
 )
 AS
 SELECT InstanceID,
+       InstanceDisplayName,
        Instance,
        NumberOfDataFiles,
        MinimumRecommendedFiles,
@@ -25,5 +24,7 @@ SELECT InstanceID,
        T1118,
        IsTraceFlagRequired,
        IsTempDBMetadataMemoryOptimized
-FROM dbo.vwTempDBConfiguration T
-WHERE EXISTS(SELECT 1 FROM STRING_SPLIT(@InstanceIDs,',') ss WHERE ss.value = T.InstanceID)
+FROM dbo.TempDBConfiguration T
+WHERE EXISTS(SELECT 1 
+            FROM STRING_SPLIT(@InstanceIDs,',') ss 
+            WHERE ss.value = T.InstanceID)

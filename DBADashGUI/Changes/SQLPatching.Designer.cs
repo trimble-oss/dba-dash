@@ -29,18 +29,19 @@
         private void InitializeComponent()
         {
             this.dgv = new System.Windows.Forms.DataGridView();
-            this.Instance = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.ChangedDate = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.OldVersion = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.NewVersion = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.OldProductLevel = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.NewProductLevel = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.OldProductUpdateLevel = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.NewProductUpdateLevel = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.OldEdition = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.NewEdition = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
             this.dgvVersion = new System.Windows.Forms.DataGridView();
+            this.toolStrip2 = new System.Windows.Forms.ToolStrip();
+            this.toolStripLabel2 = new System.Windows.Forms.ToolStripLabel();
+            this.tsRefreshVersion = new System.Windows.Forms.ToolStripButton();
+            this.tsCopyVersion = new System.Windows.Forms.ToolStripButton();
+            this.tsExcel = new System.Windows.Forms.ToolStripButton();
+            this.tsCols = new System.Windows.Forms.ToolStripButton();
+            this.toolStrip1 = new System.Windows.Forms.ToolStrip();
+            this.toolStripLabel1 = new System.Windows.Forms.ToolStripLabel();
+            this.tsRefreshHistory = new System.Windows.Forms.ToolStripButton();
+            this.tsCopyHistory = new System.Windows.Forms.ToolStripButton();
+            this.tsExcelHistory = new System.Windows.Forms.ToolStripButton();
             this.colInstance = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.colSQLVersion = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.colPatchDate = new System.Windows.Forms.DataGridViewTextBoxColumn();
@@ -61,17 +62,16 @@
             this.colWindowsCaption = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.colWindowsRelease = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.colWindowsSKU = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.toolStrip2 = new System.Windows.Forms.ToolStrip();
-            this.toolStripLabel2 = new System.Windows.Forms.ToolStripLabel();
-            this.tsRefreshVersion = new System.Windows.Forms.ToolStripButton();
-            this.tsCopyVersion = new System.Windows.Forms.ToolStripButton();
-            this.tsExcel = new System.Windows.Forms.ToolStripButton();
-            this.toolStrip1 = new System.Windows.Forms.ToolStrip();
-            this.toolStripLabel1 = new System.Windows.Forms.ToolStripLabel();
-            this.tsRefreshHistory = new System.Windows.Forms.ToolStripButton();
-            this.tsCopyHistory = new System.Windows.Forms.ToolStripButton();
-            this.tsExcelHistory = new System.Windows.Forms.ToolStripButton();
-            this.tsCols = new System.Windows.Forms.ToolStripButton();
+            this.Instance = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.ChangedDate = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.OldVersion = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.NewVersion = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.OldProductLevel = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.NewProductLevel = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.OldProductUpdateLevel = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.NewProductUpdateLevel = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.OldEdition = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.NewEdition = new System.Windows.Forms.DataGridViewTextBoxColumn();
             ((System.ComponentModel.ISupportInitialize)(this.dgv)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
@@ -109,96 +109,6 @@
             this.dgv.RowHeadersWidth = 51;
             this.dgv.Size = new System.Drawing.Size(1204, 403);
             this.dgv.TabIndex = 0;
-            // 
-            // Instance
-            // 
-            this.Instance.DataPropertyName = "Instance";
-            this.Instance.HeaderText = "Instance";
-            this.Instance.MinimumWidth = 6;
-            this.Instance.Name = "Instance";
-            this.Instance.ReadOnly = true;
-            this.Instance.Width = 90;
-            // 
-            // ChangedDate
-            // 
-            this.ChangedDate.DataPropertyName = "ChangedDate";
-            this.ChangedDate.HeaderText = "Changed Date";
-            this.ChangedDate.MinimumWidth = 6;
-            this.ChangedDate.Name = "ChangedDate";
-            this.ChangedDate.ReadOnly = true;
-            this.ChangedDate.Width = 118;
-            // 
-            // OldVersion
-            // 
-            this.OldVersion.DataPropertyName = "OldVersion";
-            this.OldVersion.HeaderText = "Old Version";
-            this.OldVersion.MinimumWidth = 6;
-            this.OldVersion.Name = "OldVersion";
-            this.OldVersion.ReadOnly = true;
-            this.OldVersion.Width = 102;
-            // 
-            // NewVersion
-            // 
-            this.NewVersion.DataPropertyName = "NewVersion";
-            this.NewVersion.HeaderText = "New Version";
-            this.NewVersion.MinimumWidth = 6;
-            this.NewVersion.Name = "NewVersion";
-            this.NewVersion.ReadOnly = true;
-            this.NewVersion.Width = 107;
-            // 
-            // OldProductLevel
-            // 
-            this.OldProductLevel.DataPropertyName = "OldProductLevel";
-            this.OldProductLevel.HeaderText = "Old Product Level";
-            this.OldProductLevel.MinimumWidth = 6;
-            this.OldProductLevel.Name = "OldProductLevel";
-            this.OldProductLevel.ReadOnly = true;
-            this.OldProductLevel.Width = 137;
-            // 
-            // NewProductLevel
-            // 
-            this.NewProductLevel.DataPropertyName = "NewProductLevel";
-            this.NewProductLevel.HeaderText = "New Product Level";
-            this.NewProductLevel.MinimumWidth = 6;
-            this.NewProductLevel.Name = "NewProductLevel";
-            this.NewProductLevel.ReadOnly = true;
-            this.NewProductLevel.Width = 142;
-            // 
-            // OldProductUpdateLevel
-            // 
-            this.OldProductUpdateLevel.DataPropertyName = "OldProductUpdateLevel";
-            this.OldProductUpdateLevel.HeaderText = "Old Product Update Level";
-            this.OldProductUpdateLevel.MinimumWidth = 6;
-            this.OldProductUpdateLevel.Name = "OldProductUpdateLevel";
-            this.OldProductUpdateLevel.ReadOnly = true;
-            this.OldProductUpdateLevel.Width = 152;
-            // 
-            // NewProductUpdateLevel
-            // 
-            this.NewProductUpdateLevel.DataPropertyName = "NewProductUpdateLevel";
-            this.NewProductUpdateLevel.HeaderText = "New Product Update Level";
-            this.NewProductUpdateLevel.MinimumWidth = 6;
-            this.NewProductUpdateLevel.Name = "NewProductUpdateLevel";
-            this.NewProductUpdateLevel.ReadOnly = true;
-            this.NewProductUpdateLevel.Width = 156;
-            // 
-            // OldEdition
-            // 
-            this.OldEdition.DataPropertyName = "OldEdition";
-            this.OldEdition.HeaderText = "Old Edition";
-            this.OldEdition.MinimumWidth = 6;
-            this.OldEdition.Name = "OldEdition";
-            this.OldEdition.ReadOnly = true;
-            this.OldEdition.Width = 98;
-            // 
-            // NewEdition
-            // 
-            this.NewEdition.DataPropertyName = "NewEdition";
-            this.NewEdition.HeaderText = "New Edition";
-            this.NewEdition.MinimumWidth = 6;
-            this.NewEdition.Name = "NewEdition";
-            this.NewEdition.ReadOnly = true;
-            this.NewEdition.Width = 102;
             // 
             // splitContainer1
             // 
@@ -261,9 +171,124 @@
             this.dgvVersion.Size = new System.Drawing.Size(1204, 408);
             this.dgvVersion.TabIndex = 0;
             // 
+            // toolStrip2
+            // 
+            this.toolStrip2.ImageScalingSize = new System.Drawing.Size(20, 20);
+            this.toolStrip2.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.toolStripLabel2,
+            this.tsRefreshVersion,
+            this.tsCopyVersion,
+            this.tsExcel,
+            this.tsCols});
+            this.toolStrip2.Location = new System.Drawing.Point(0, 0);
+            this.toolStrip2.Name = "toolStrip2";
+            this.toolStrip2.Size = new System.Drawing.Size(1204, 27);
+            this.toolStrip2.TabIndex = 1;
+            this.toolStrip2.Text = "toolStrip2";
+            // 
+            // toolStripLabel2
+            // 
+            this.toolStripLabel2.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
+            this.toolStripLabel2.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            this.toolStripLabel2.Name = "toolStripLabel2";
+            this.toolStripLabel2.Size = new System.Drawing.Size(94, 24);
+            this.toolStripLabel2.Text = "Version Info";
+            // 
+            // tsRefreshVersion
+            // 
+            this.tsRefreshVersion.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.tsRefreshVersion.Image = global::DBADashGUI.Properties.Resources._112_RefreshArrow_Green_16x16_72;
+            this.tsRefreshVersion.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tsRefreshVersion.Name = "tsRefreshVersion";
+            this.tsRefreshVersion.Size = new System.Drawing.Size(29, 24);
+            this.tsRefreshVersion.Text = "Refresh";
+            this.tsRefreshVersion.Click += new System.EventHandler(this.tsRefreshVersion_Click);
+            // 
+            // tsCopyVersion
+            // 
+            this.tsCopyVersion.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.tsCopyVersion.Image = global::DBADashGUI.Properties.Resources.ASX_Copy_blue_16x;
+            this.tsCopyVersion.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tsCopyVersion.Name = "tsCopyVersion";
+            this.tsCopyVersion.Size = new System.Drawing.Size(29, 24);
+            this.tsCopyVersion.Text = "Copy";
+            this.tsCopyVersion.Click += new System.EventHandler(this.tsCopyVersion_Click);
+            // 
+            // tsExcel
+            // 
+            this.tsExcel.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.tsExcel.Image = global::DBADashGUI.Properties.Resources.excel16x16;
+            this.tsExcel.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tsExcel.Name = "tsExcel";
+            this.tsExcel.Size = new System.Drawing.Size(29, 24);
+            this.tsExcel.Text = "Export Excel";
+            this.tsExcel.Click += new System.EventHandler(this.tsExcel_Click);
+            // 
+            // tsCols
+            // 
+            this.tsCols.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.tsCols.Image = global::DBADashGUI.Properties.Resources.Column_16x;
+            this.tsCols.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tsCols.Name = "tsCols";
+            this.tsCols.Size = new System.Drawing.Size(29, 24);
+            this.tsCols.Text = "Columns";
+            this.tsCols.Click += new System.EventHandler(this.tsCols_Click);
+            // 
+            // toolStrip1
+            // 
+            this.toolStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
+            this.toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.toolStripLabel1,
+            this.tsRefreshHistory,
+            this.tsCopyHistory,
+            this.tsExcelHistory});
+            this.toolStrip1.Location = new System.Drawing.Point(0, 0);
+            this.toolStrip1.Name = "toolStrip1";
+            this.toolStrip1.Size = new System.Drawing.Size(1204, 27);
+            this.toolStrip1.TabIndex = 1;
+            this.toolStrip1.Text = "toolStrip1";
+            // 
+            // toolStripLabel1
+            // 
+            this.toolStripLabel1.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
+            this.toolStripLabel1.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            this.toolStripLabel1.Name = "toolStripLabel1";
+            this.toolStripLabel1.Size = new System.Drawing.Size(61, 24);
+            this.toolStripLabel1.Text = "History";
+            // 
+            // tsRefreshHistory
+            // 
+            this.tsRefreshHistory.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.tsRefreshHistory.Image = global::DBADashGUI.Properties.Resources._112_RefreshArrow_Green_16x16_72;
+            this.tsRefreshHistory.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tsRefreshHistory.Name = "tsRefreshHistory";
+            this.tsRefreshHistory.Size = new System.Drawing.Size(29, 24);
+            this.tsRefreshHistory.Text = "Refresh";
+            this.tsRefreshHistory.Click += new System.EventHandler(this.tsRefreshHistory_Click);
+            // 
+            // tsCopyHistory
+            // 
+            this.tsCopyHistory.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.tsCopyHistory.Image = global::DBADashGUI.Properties.Resources.ASX_Copy_blue_16x;
+            this.tsCopyHistory.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tsCopyHistory.Name = "tsCopyHistory";
+            this.tsCopyHistory.Size = new System.Drawing.Size(29, 24);
+            this.tsCopyHistory.Text = "Copy";
+            this.tsCopyHistory.Click += new System.EventHandler(this.tsCopyHistory_Click);
+            // 
+            // tsExcelHistory
+            // 
+            this.tsExcelHistory.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.tsExcelHistory.Image = global::DBADashGUI.Properties.Resources.excel16x16;
+            this.tsExcelHistory.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tsExcelHistory.Name = "tsExcelHistory";
+            this.tsExcelHistory.Size = new System.Drawing.Size(29, 24);
+            this.tsExcelHistory.Text = "Export Excel";
+            this.tsExcelHistory.Click += new System.EventHandler(this.tsExcelHistory_Click);
+            // 
             // colInstance
             // 
-            this.colInstance.DataPropertyName = "ConnectionID";
+            this.colInstance.DataPropertyName = "InstanceDisplayName";
             this.colInstance.HeaderText = "Instance";
             this.colInstance.MinimumWidth = 6;
             this.colInstance.Name = "colInstance";
@@ -441,120 +466,95 @@
             this.colWindowsSKU.ReadOnly = true;
             this.colWindowsSKU.Width = 115;
             // 
-            // toolStrip2
+            // Instance
             // 
-            this.toolStrip2.ImageScalingSize = new System.Drawing.Size(20, 20);
-            this.toolStrip2.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.toolStripLabel2,
-            this.tsRefreshVersion,
-            this.tsCopyVersion,
-            this.tsExcel,
-            this.tsCols});
-            this.toolStrip2.Location = new System.Drawing.Point(0, 0);
-            this.toolStrip2.Name = "toolStrip2";
-            this.toolStrip2.Size = new System.Drawing.Size(1204, 27);
-            this.toolStrip2.TabIndex = 1;
-            this.toolStrip2.Text = "toolStrip2";
+            this.Instance.DataPropertyName = "InstanceDisplayName";
+            this.Instance.HeaderText = "Instance";
+            this.Instance.MinimumWidth = 6;
+            this.Instance.Name = "Instance";
+            this.Instance.ReadOnly = true;
+            this.Instance.Width = 90;
             // 
-            // toolStripLabel2
+            // ChangedDate
             // 
-            this.toolStripLabel2.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
-            this.toolStripLabel2.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            this.toolStripLabel2.Name = "toolStripLabel2";
-            this.toolStripLabel2.Size = new System.Drawing.Size(94, 24);
-            this.toolStripLabel2.Text = "Version Info";
+            this.ChangedDate.DataPropertyName = "ChangedDate";
+            this.ChangedDate.HeaderText = "Changed Date";
+            this.ChangedDate.MinimumWidth = 6;
+            this.ChangedDate.Name = "ChangedDate";
+            this.ChangedDate.ReadOnly = true;
+            this.ChangedDate.Width = 118;
             // 
-            // tsRefreshVersion
+            // OldVersion
             // 
-            this.tsRefreshVersion.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.tsRefreshVersion.Image = global::DBADashGUI.Properties.Resources._112_RefreshArrow_Green_16x16_72;
-            this.tsRefreshVersion.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsRefreshVersion.Name = "tsRefreshVersion";
-            this.tsRefreshVersion.Size = new System.Drawing.Size(29, 24);
-            this.tsRefreshVersion.Text = "Refresh";
-            this.tsRefreshVersion.Click += new System.EventHandler(this.tsRefreshVersion_Click);
+            this.OldVersion.DataPropertyName = "OldVersion";
+            this.OldVersion.HeaderText = "Old Version";
+            this.OldVersion.MinimumWidth = 6;
+            this.OldVersion.Name = "OldVersion";
+            this.OldVersion.ReadOnly = true;
+            this.OldVersion.Width = 102;
             // 
-            // tsCopyVersion
+            // NewVersion
             // 
-            this.tsCopyVersion.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.tsCopyVersion.Image = global::DBADashGUI.Properties.Resources.ASX_Copy_blue_16x;
-            this.tsCopyVersion.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsCopyVersion.Name = "tsCopyVersion";
-            this.tsCopyVersion.Size = new System.Drawing.Size(29, 24);
-            this.tsCopyVersion.Text = "Copy";
-            this.tsCopyVersion.Click += new System.EventHandler(this.tsCopyVersion_Click);
+            this.NewVersion.DataPropertyName = "NewVersion";
+            this.NewVersion.HeaderText = "New Version";
+            this.NewVersion.MinimumWidth = 6;
+            this.NewVersion.Name = "NewVersion";
+            this.NewVersion.ReadOnly = true;
+            this.NewVersion.Width = 107;
             // 
-            // tsExcel
+            // OldProductLevel
             // 
-            this.tsExcel.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.tsExcel.Image = global::DBADashGUI.Properties.Resources.excel16x16;
-            this.tsExcel.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsExcel.Name = "tsExcel";
-            this.tsExcel.Size = new System.Drawing.Size(29, 24);
-            this.tsExcel.Text = "Export Excel";
-            this.tsExcel.Click += new System.EventHandler(this.tsExcel_Click);
+            this.OldProductLevel.DataPropertyName = "OldProductLevel";
+            this.OldProductLevel.HeaderText = "Old Product Level";
+            this.OldProductLevel.MinimumWidth = 6;
+            this.OldProductLevel.Name = "OldProductLevel";
+            this.OldProductLevel.ReadOnly = true;
+            this.OldProductLevel.Width = 137;
             // 
-            // toolStrip1
+            // NewProductLevel
             // 
-            this.toolStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
-            this.toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.toolStripLabel1,
-            this.tsRefreshHistory,
-            this.tsCopyHistory,
-            this.tsExcelHistory});
-            this.toolStrip1.Location = new System.Drawing.Point(0, 0);
-            this.toolStrip1.Name = "toolStrip1";
-            this.toolStrip1.Size = new System.Drawing.Size(1204, 27);
-            this.toolStrip1.TabIndex = 1;
-            this.toolStrip1.Text = "toolStrip1";
+            this.NewProductLevel.DataPropertyName = "NewProductLevel";
+            this.NewProductLevel.HeaderText = "New Product Level";
+            this.NewProductLevel.MinimumWidth = 6;
+            this.NewProductLevel.Name = "NewProductLevel";
+            this.NewProductLevel.ReadOnly = true;
+            this.NewProductLevel.Width = 142;
             // 
-            // toolStripLabel1
+            // OldProductUpdateLevel
             // 
-            this.toolStripLabel1.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
-            this.toolStripLabel1.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            this.toolStripLabel1.Name = "toolStripLabel1";
-            this.toolStripLabel1.Size = new System.Drawing.Size(61, 24);
-            this.toolStripLabel1.Text = "History";
+            this.OldProductUpdateLevel.DataPropertyName = "OldProductUpdateLevel";
+            this.OldProductUpdateLevel.HeaderText = "Old Product Update Level";
+            this.OldProductUpdateLevel.MinimumWidth = 6;
+            this.OldProductUpdateLevel.Name = "OldProductUpdateLevel";
+            this.OldProductUpdateLevel.ReadOnly = true;
+            this.OldProductUpdateLevel.Width = 152;
             // 
-            // tsRefreshHistory
+            // NewProductUpdateLevel
             // 
-            this.tsRefreshHistory.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.tsRefreshHistory.Image = global::DBADashGUI.Properties.Resources._112_RefreshArrow_Green_16x16_72;
-            this.tsRefreshHistory.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsRefreshHistory.Name = "tsRefreshHistory";
-            this.tsRefreshHistory.Size = new System.Drawing.Size(29, 24);
-            this.tsRefreshHistory.Text = "Refresh";
-            this.tsRefreshHistory.Click += new System.EventHandler(this.tsRefreshHistory_Click);
+            this.NewProductUpdateLevel.DataPropertyName = "NewProductUpdateLevel";
+            this.NewProductUpdateLevel.HeaderText = "New Product Update Level";
+            this.NewProductUpdateLevel.MinimumWidth = 6;
+            this.NewProductUpdateLevel.Name = "NewProductUpdateLevel";
+            this.NewProductUpdateLevel.ReadOnly = true;
+            this.NewProductUpdateLevel.Width = 156;
             // 
-            // tsCopyHistory
+            // OldEdition
             // 
-            this.tsCopyHistory.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.tsCopyHistory.Image = global::DBADashGUI.Properties.Resources.ASX_Copy_blue_16x;
-            this.tsCopyHistory.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsCopyHistory.Name = "tsCopyHistory";
-            this.tsCopyHistory.Size = new System.Drawing.Size(29, 24);
-            this.tsCopyHistory.Text = "Copy";
-            this.tsCopyHistory.Click += new System.EventHandler(this.tsCopyHistory_Click);
+            this.OldEdition.DataPropertyName = "OldEdition";
+            this.OldEdition.HeaderText = "Old Edition";
+            this.OldEdition.MinimumWidth = 6;
+            this.OldEdition.Name = "OldEdition";
+            this.OldEdition.ReadOnly = true;
+            this.OldEdition.Width = 98;
             // 
-            // tsExcelHistory
+            // NewEdition
             // 
-            this.tsExcelHistory.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.tsExcelHistory.Image = global::DBADashGUI.Properties.Resources.excel16x16;
-            this.tsExcelHistory.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsExcelHistory.Name = "tsExcelHistory";
-            this.tsExcelHistory.Size = new System.Drawing.Size(29, 24);
-            this.tsExcelHistory.Text = "Export Excel";
-            this.tsExcelHistory.Click += new System.EventHandler(this.tsExcelHistory_Click);
-            // 
-            // tsCols
-            // 
-            this.tsCols.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.tsCols.Image = global::DBADashGUI.Properties.Resources.Column_16x;
-            this.tsCols.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsCols.Name = "tsCols";
-            this.tsCols.Size = new System.Drawing.Size(29, 24);
-            this.tsCols.Text = "Columns";
-            this.tsCols.Click += new System.EventHandler(this.tsCols_Click);
+            this.NewEdition.DataPropertyName = "NewEdition";
+            this.NewEdition.HeaderText = "New Edition";
+            this.NewEdition.MinimumWidth = 6;
+            this.NewEdition.Name = "NewEdition";
+            this.NewEdition.ReadOnly = true;
+            this.NewEdition.Width = 102;
             // 
             // SQLPatching
             // 
@@ -583,6 +583,19 @@
         #endregion
 
         private System.Windows.Forms.DataGridView dgv;
+        private System.Windows.Forms.SplitContainer splitContainer1;
+        private System.Windows.Forms.DataGridView dgvVersion;
+        private System.Windows.Forms.ToolStrip toolStrip2;
+        private System.Windows.Forms.ToolStripLabel toolStripLabel2;
+        private System.Windows.Forms.ToolStripButton tsRefreshVersion;
+        private System.Windows.Forms.ToolStripButton tsCopyVersion;
+        private System.Windows.Forms.ToolStrip toolStrip1;
+        private System.Windows.Forms.ToolStripLabel toolStripLabel1;
+        private System.Windows.Forms.ToolStripButton tsRefreshHistory;
+        private System.Windows.Forms.ToolStripButton tsCopyHistory;
+        private System.Windows.Forms.ToolStripButton tsExcel;
+        private System.Windows.Forms.ToolStripButton tsExcelHistory;
+        private System.Windows.Forms.ToolStripButton tsCols;
         private System.Windows.Forms.DataGridViewTextBoxColumn Instance;
         private System.Windows.Forms.DataGridViewTextBoxColumn ChangedDate;
         private System.Windows.Forms.DataGridViewTextBoxColumn OldVersion;
@@ -593,8 +606,6 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn NewProductUpdateLevel;
         private System.Windows.Forms.DataGridViewTextBoxColumn OldEdition;
         private System.Windows.Forms.DataGridViewTextBoxColumn NewEdition;
-        private System.Windows.Forms.SplitContainer splitContainer1;
-        private System.Windows.Forms.DataGridView dgvVersion;
         private System.Windows.Forms.DataGridViewTextBoxColumn colInstance;
         private System.Windows.Forms.DataGridViewTextBoxColumn colSQLVersion;
         private System.Windows.Forms.DataGridViewTextBoxColumn colPatchDate;
@@ -615,16 +626,5 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn colWindowsCaption;
         private System.Windows.Forms.DataGridViewTextBoxColumn colWindowsRelease;
         private System.Windows.Forms.DataGridViewTextBoxColumn colWindowsSKU;
-        private System.Windows.Forms.ToolStrip toolStrip2;
-        private System.Windows.Forms.ToolStripLabel toolStripLabel2;
-        private System.Windows.Forms.ToolStripButton tsRefreshVersion;
-        private System.Windows.Forms.ToolStripButton tsCopyVersion;
-        private System.Windows.Forms.ToolStrip toolStrip1;
-        private System.Windows.Forms.ToolStripLabel toolStripLabel1;
-        private System.Windows.Forms.ToolStripButton tsRefreshHistory;
-        private System.Windows.Forms.ToolStripButton tsCopyHistory;
-        private System.Windows.Forms.ToolStripButton tsExcel;
-        private System.Windows.Forms.ToolStripButton tsExcelHistory;
-        private System.Windows.Forms.ToolStripButton tsCols;
     }
 }

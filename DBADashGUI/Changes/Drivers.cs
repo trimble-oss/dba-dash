@@ -67,7 +67,7 @@ namespace DBADashGUI.Changes
       
             DataTable dt = getDrivers();
                     
-            string pivotCol = "Instance";
+            string pivotCol = "InstanceDisplayName";
             if (tsProvider.DropDownItems.Count == 0)
             {
                 addFilters(dt);

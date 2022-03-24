@@ -26,7 +26,7 @@ BEGIN
 END;
 WITH T AS (
 	SELECT I.InstanceID,
-		   I.ConnectionID AS Instance,
+		   I.InstanceDisplayName,
 		   S.SnapshotDateUTC,
 		   S.RunningQueries,
 		   S.BlockedQueries,
@@ -46,7 +46,7 @@ WITH T AS (
 	AND S.SnapshotDateUTC< DATEADD(mi,1,GETUTCDATE())
 )
 SELECT T.InstanceID,
-       T.Instance,
+       T.InstanceDisplayName,
        T.SnapshotDateUTC,
        T.RunningQueries,
        T.BlockedQueries,

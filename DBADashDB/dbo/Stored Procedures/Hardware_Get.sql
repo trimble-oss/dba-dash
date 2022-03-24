@@ -25,6 +25,7 @@ BEGIN
 	FROM STRING_SPLIT(@InstanceIDs,',')
 END;
 SELECT ConnectionID,
+	InstanceDisplayName,
 	SystemManufacturer,
 	SystemProductName,
 	ProcessorNameString,
@@ -53,5 +54,4 @@ SELECT ConnectionID,
 	I.max_workers_count,
 	I.os_priority_class
 FROM dbo.InstanceInfo I
-WHERE EngineEdition<>5 -- AzureDB
-AND EXISTS(SELECT 1 FROM @Instances t WHERE t.InstanceID = I.InstanceID)
+WHERE EXISTS(SELECT 1 FROM @Instances t WHERE t.InstanceID = I.InstanceID)

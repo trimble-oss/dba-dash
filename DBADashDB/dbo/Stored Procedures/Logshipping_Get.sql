@@ -45,6 +45,7 @@ WITH Statuses AS(
 SELECT LSS.InstanceID,
 	   LSS.DatabaseID,
        LSS.Instance,
+	   LSS.InstanceDisplayName,
        LSS.name,
        LSS.restore_date_utc,
        LSS.backup_start_date_utc,

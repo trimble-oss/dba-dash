@@ -1,14 +1,9 @@
-﻿
-
-
-
-
-
-CREATE VIEW [dbo].[DriveStatus]
+﻿CREATE VIEW dbo.DriveStatus
 AS
 SELECT I.InstanceID,
 	D.DriveID,
 	I.Instance,
+	I.InstanceDisplayName,
 	I.ConnectionID,
 	D.Name,
 	D.Label,

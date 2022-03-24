@@ -3,7 +3,7 @@
 )
 AS
 SELECT I.InstanceID,
-		I.Instance,
+       I.InstanceDisplayName AS Instance,
        SUM(CASE WHEN HADR.is_primary_replica = 1 AND HADR.is_local=1 THEN 1 ELSE 0 END) AS [Primary Replicas],
 	   SUM(CASE WHEN HADR.is_primary_replica = 0 AND HADR.is_local=1 THEN 1 ELSE 0 END) AS [Secondary Replicas],
 	   SUM(CASE WHEN AR.secondary_role_allow_connections>0 AND HADR.is_local=1 THEN 1 ELSE 0 END) AS [Readable Secondaries],
@@ -35,4 +35,4 @@ WHERE EXISTS(SELECT 1 FROM STRING_SPLIT(@InstanceIDs,',') ss WHERE ss.value = I.
 		UNION ALL
 		SELECT 1 WHERE @InstanceIDs IS NULL)
 AND D.IsActive=1
-GROUP BY I.Instance,I.InstanceID;
+GROUP BY I.Instance,I.InstanceID,I.InstanceDisplayName;

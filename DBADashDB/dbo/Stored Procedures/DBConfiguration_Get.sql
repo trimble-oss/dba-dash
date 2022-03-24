@@ -1,4 +1,4 @@
-﻿CREATE PROC [dbo].[DBConfiguration_Get](
+﻿CREATE PROC dbo.DBConfiguration_Get(
 	@InstanceIDs VARCHAR(MAX)=NULL,
 	@ConfiguredOnly BIT=0,
 	@DatabaseID INT=NULL
@@ -28,7 +28,7 @@ BEGIN
 END;
 
 WITH T AS (
-	SELECT I.Instance, 
+	SELECT I.InstanceGroupName,
 		D.DatabaseID,
 		D.name AS DB,
 		C.configuration_id,
@@ -49,7 +49,7 @@ WITH T AS (
 				WHERE t.InstanceID = I.InstanceID)
 	AND (D.DatabaseID = @DatabaseID OR @DatabaseID IS NULL)
 )
-SELECT T.Instance,
+SELECT T.InstanceGroupName,
        T.DB,
 	   T.DatabaseID,
        T.configuration_id,
@@ -59,5 +59,11 @@ SELECT T.Instance,
 	   T.IsDefault,
        T.ValidFrom
 FROM T 
-WHERE ((T.HasDBScopedConfiguration=1 AND T.IsConfiguredForAnyDB=1) OR @ConfiguredOnly=0)
-ORDER BY T.Instance,T.DB,T.DatabaseID,T.name
+WHERE (
+		(T.HasDBScopedConfiguration=1 AND T.IsConfiguredForAnyDB=1) 
+		OR @ConfiguredOnly=0
+	  )
+ORDER BY T.InstanceGroupName,
+		T.DB,
+		T.DatabaseID,
+		T.name

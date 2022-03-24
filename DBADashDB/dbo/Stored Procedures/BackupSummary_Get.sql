@@ -4,6 +4,7 @@
 AS
 SELECT InstanceID,
        Instance,
+       InstanceDisplayName,
        DatabaseCount,
        FullRecoveryCount,
        BulkLoggedCount,

@@ -35,15 +35,10 @@
             this.tsRefreshInfo = new System.Windows.Forms.ToolStripButton();
             this.tsCopyInfo = new System.Windows.Forms.ToolStripButton();
             this.tsExcel = new System.Windows.Forms.ToolStripButton();
+            this.tsCols = new System.Windows.Forms.ToolStripButton();
             this.tsSummary = new System.Windows.Forms.ToolStripButton();
             this.tsDetail = new System.Windows.Forms.ToolStripButton();
             this.dgvHistory = new System.Windows.Forms.DataGridView();
-            this.colHInstance = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colHDB = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colHSetting = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colHOldValue = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colHValueNew = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colHChangeDate = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
             this.toolStripLabel1 = new System.Windows.Forms.ToolStripLabel();
             this.tsRefreshHistory = new System.Windows.Forms.ToolStripButton();
@@ -57,7 +52,12 @@
             this.dataGridViewTextBoxColumn4 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dataGridViewTextBoxColumn5 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dataGridViewTextBoxColumn6 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.tsCols = new System.Windows.Forms.ToolStripButton();
+            this.colHInstance = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colHDB = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colHSetting = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colHOldValue = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colHValueNew = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colHChangeDate = new System.Windows.Forms.DataGridViewTextBoxColumn();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
             this.splitContainer1.Panel2.SuspendLayout();
@@ -163,6 +163,16 @@
             this.tsExcel.Text = "Export Excel";
             this.tsExcel.Click += new System.EventHandler(this.tsExcel_Click);
             // 
+            // tsCols
+            // 
+            this.tsCols.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.tsCols.Image = global::DBADashGUI.Properties.Resources.Column_16x;
+            this.tsCols.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tsCols.Name = "tsCols";
+            this.tsCols.Size = new System.Drawing.Size(29, 24);
+            this.tsCols.Text = "Columns";
+            this.tsCols.Click += new System.EventHandler(this.tsCols_Click);
+            // 
             // tsSummary
             // 
             this.tsSummary.Image = global::DBADashGUI.Properties.Resources.Table_16x;
@@ -205,60 +215,6 @@
             this.dgvHistory.RowTemplate.Height = 24;
             this.dgvHistory.Size = new System.Drawing.Size(839, 225);
             this.dgvHistory.TabIndex = 0;
-            // 
-            // colHInstance
-            // 
-            this.colHInstance.DataPropertyName = "Instance";
-            this.colHInstance.HeaderText = "Instance";
-            this.colHInstance.MinimumWidth = 6;
-            this.colHInstance.Name = "colHInstance";
-            this.colHInstance.ReadOnly = true;
-            this.colHInstance.Width = 90;
-            // 
-            // colHDB
-            // 
-            this.colHDB.DataPropertyName = "DB";
-            this.colHDB.HeaderText = "DB";
-            this.colHDB.MinimumWidth = 6;
-            this.colHDB.Name = "colHDB";
-            this.colHDB.ReadOnly = true;
-            this.colHDB.Width = 56;
-            // 
-            // colHSetting
-            // 
-            this.colHSetting.DataPropertyName = "Setting";
-            this.colHSetting.HeaderText = "Setting";
-            this.colHSetting.MinimumWidth = 6;
-            this.colHSetting.Name = "colHSetting";
-            this.colHSetting.ReadOnly = true;
-            this.colHSetting.Width = 81;
-            // 
-            // colHOldValue
-            // 
-            this.colHOldValue.DataPropertyName = "OldValue";
-            this.colHOldValue.HeaderText = "Value (Old)";
-            this.colHOldValue.MinimumWidth = 6;
-            this.colHOldValue.Name = "colHOldValue";
-            this.colHOldValue.ReadOnly = true;
-            this.colHOldValue.Width = 109;
-            // 
-            // colHValueNew
-            // 
-            this.colHValueNew.DataPropertyName = "NewValue";
-            this.colHValueNew.HeaderText = "Value (New)";
-            this.colHValueNew.MinimumWidth = 6;
-            this.colHValueNew.Name = "colHValueNew";
-            this.colHValueNew.ReadOnly = true;
-            this.colHValueNew.Width = 114;
-            // 
-            // colHChangeDate
-            // 
-            this.colHChangeDate.DataPropertyName = "ChangeDate";
-            this.colHChangeDate.HeaderText = "Change Date";
-            this.colHChangeDate.MinimumWidth = 6;
-            this.colHChangeDate.Name = "colHChangeDate";
-            this.colHChangeDate.ReadOnly = true;
-            this.colHChangeDate.Width = 120;
             // 
             // toolStrip1
             // 
@@ -388,15 +344,59 @@
             this.dataGridViewTextBoxColumn6.ReadOnly = true;
             this.dataGridViewTextBoxColumn6.Width = 120;
             // 
-            // tsCols
+            // colHInstance
             // 
-            this.tsCols.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.tsCols.Image = global::DBADashGUI.Properties.Resources.Column_16x;
-            this.tsCols.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsCols.Name = "tsCols";
-            this.tsCols.Size = new System.Drawing.Size(29, 24);
-            this.tsCols.Text = "Columns";
-            this.tsCols.Click += new System.EventHandler(this.tsCols_Click);
+            this.colHInstance.DataPropertyName = "InstanceDisplayName";
+            this.colHInstance.HeaderText = "Instance";
+            this.colHInstance.MinimumWidth = 6;
+            this.colHInstance.Name = "colHInstance";
+            this.colHInstance.ReadOnly = true;
+            this.colHInstance.Width = 90;
+            // 
+            // colHDB
+            // 
+            this.colHDB.DataPropertyName = "DB";
+            this.colHDB.HeaderText = "DB";
+            this.colHDB.MinimumWidth = 6;
+            this.colHDB.Name = "colHDB";
+            this.colHDB.ReadOnly = true;
+            this.colHDB.Width = 56;
+            // 
+            // colHSetting
+            // 
+            this.colHSetting.DataPropertyName = "Setting";
+            this.colHSetting.HeaderText = "Setting";
+            this.colHSetting.MinimumWidth = 6;
+            this.colHSetting.Name = "colHSetting";
+            this.colHSetting.ReadOnly = true;
+            this.colHSetting.Width = 81;
+            // 
+            // colHOldValue
+            // 
+            this.colHOldValue.DataPropertyName = "OldValue";
+            this.colHOldValue.HeaderText = "Value (Old)";
+            this.colHOldValue.MinimumWidth = 6;
+            this.colHOldValue.Name = "colHOldValue";
+            this.colHOldValue.ReadOnly = true;
+            this.colHOldValue.Width = 109;
+            // 
+            // colHValueNew
+            // 
+            this.colHValueNew.DataPropertyName = "NewValue";
+            this.colHValueNew.HeaderText = "Value (New)";
+            this.colHValueNew.MinimumWidth = 6;
+            this.colHValueNew.Name = "colHValueNew";
+            this.colHValueNew.ReadOnly = true;
+            this.colHValueNew.Width = 114;
+            // 
+            // colHChangeDate
+            // 
+            this.colHChangeDate.DataPropertyName = "ChangeDate";
+            this.colHChangeDate.HeaderText = "Change Date";
+            this.colHChangeDate.MinimumWidth = 6;
+            this.colHChangeDate.Name = "colHChangeDate";
+            this.colHChangeDate.ReadOnly = true;
+            this.colHChangeDate.Width = 120;
             // 
             // DBOptions
             // 
@@ -427,12 +427,6 @@
 
         private System.Windows.Forms.SplitContainer splitContainer1;
         private System.Windows.Forms.DataGridView dgvHistory;
-        private System.Windows.Forms.DataGridViewTextBoxColumn colHInstance;
-        private System.Windows.Forms.DataGridViewTextBoxColumn colHDB;
-        private System.Windows.Forms.DataGridViewTextBoxColumn colHSetting;
-        private System.Windows.Forms.DataGridViewTextBoxColumn colHOldValue;
-        private System.Windows.Forms.DataGridViewTextBoxColumn colHValueNew;
-        private System.Windows.Forms.DataGridViewTextBoxColumn colHChangeDate;
         private System.Windows.Forms.ToolStrip toolStrip1;
         private System.Windows.Forms.ToolStripLabel toolStripLabel1;
         private System.Windows.Forms.ToolStripButton tsRefreshHistory;
@@ -455,5 +449,11 @@
         private System.Windows.Forms.ToolStripButton tsExcel;
         private System.Windows.Forms.ToolStripButton tsExcelHistory;
         private System.Windows.Forms.ToolStripButton tsCols;
+        private System.Windows.Forms.DataGridViewTextBoxColumn colHInstance;
+        private System.Windows.Forms.DataGridViewTextBoxColumn colHDB;
+        private System.Windows.Forms.DataGridViewTextBoxColumn colHSetting;
+        private System.Windows.Forms.DataGridViewTextBoxColumn colHOldValue;
+        private System.Windows.Forms.DataGridViewTextBoxColumn colHValueNew;
+        private System.Windows.Forms.DataGridViewTextBoxColumn colHChangeDate;
     }
 }

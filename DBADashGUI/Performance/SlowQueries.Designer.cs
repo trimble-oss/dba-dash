@@ -140,6 +140,7 @@
             this.runningQueries1 = new DBADashGUI.Performance.RunningQueries();
             this.tsRunning = new System.Windows.Forms.ToolStrip();
             this.tsRunningBack = new System.Windows.Forms.ToolStripButton();
+            this.refresh1 = new DBADashGUI.Refresh();
             this.toolStrip2 = new System.Windows.Forms.ToolStrip();
             this.tsCopyDetail = new System.Windows.Forms.ToolStripButton();
             this.tsExcelDetail = new System.Windows.Forms.ToolStripButton();
@@ -163,7 +164,6 @@
             this.dataGridViewTextBoxColumn17 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dataGridViewTextBoxColumn18 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dataGridViewTextBoxColumn19 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.refresh1 = new DBADashGUI.Refresh();
             ((System.ComponentModel.ISupportInitialize)(this.dgvSummary)).BeginInit();
             this.tsSummary.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dgvSlow)).BeginInit();
@@ -437,7 +437,7 @@
             // appToolStripMenuItem
             // 
             this.appToolStripMenuItem.Name = "appToolStripMenuItem";
-            this.appToolStripMenuItem.Size = new System.Drawing.Size(199, 26);
+            this.appToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
             this.appToolStripMenuItem.Tag = "client_app_name";
             this.appToolStripMenuItem.Text = "App";
             this.appToolStripMenuItem.Click += new System.EventHandler(this.GroupBy_Click);
@@ -445,7 +445,7 @@
             // clientToolStripMenuItem
             // 
             this.clientToolStripMenuItem.Name = "clientToolStripMenuItem";
-            this.clientToolStripMenuItem.Size = new System.Drawing.Size(199, 26);
+            this.clientToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
             this.clientToolStripMenuItem.Tag = "client_hostname";
             this.clientToolStripMenuItem.Text = "Client";
             this.clientToolStripMenuItem.Click += new System.EventHandler(this.GroupBy_Click);
@@ -453,7 +453,7 @@
             // databaseNameToolStripMenuItem
             // 
             this.databaseNameToolStripMenuItem.Name = "databaseNameToolStripMenuItem";
-            this.databaseNameToolStripMenuItem.Size = new System.Drawing.Size(199, 26);
+            this.databaseNameToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
             this.databaseNameToolStripMenuItem.Tag = "DatabaseName";
             this.databaseNameToolStripMenuItem.Text = "Database Name";
             this.databaseNameToolStripMenuItem.Click += new System.EventHandler(this.GroupBy_Click);
@@ -463,15 +463,15 @@
             this.instanceToolStripMenuItem.Checked = true;
             this.instanceToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
             this.instanceToolStripMenuItem.Name = "instanceToolStripMenuItem";
-            this.instanceToolStripMenuItem.Size = new System.Drawing.Size(199, 26);
-            this.instanceToolStripMenuItem.Tag = "ConnectionID";
+            this.instanceToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            this.instanceToolStripMenuItem.Tag = "InstanceDisplayName";
             this.instanceToolStripMenuItem.Text = "Instance";
             this.instanceToolStripMenuItem.Click += new System.EventHandler(this.GroupBy_Click);
             // 
             // objectNameToolStripMenuItem
             // 
             this.objectNameToolStripMenuItem.Name = "objectNameToolStripMenuItem";
-            this.objectNameToolStripMenuItem.Size = new System.Drawing.Size(199, 26);
+            this.objectNameToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
             this.objectNameToolStripMenuItem.Tag = "object_name";
             this.objectNameToolStripMenuItem.Text = "Object Name";
             this.objectNameToolStripMenuItem.Click += new System.EventHandler(this.GroupBy_Click);
@@ -479,7 +479,7 @@
             // resultToolStripMenuItem1
             // 
             this.resultToolStripMenuItem1.Name = "resultToolStripMenuItem1";
-            this.resultToolStripMenuItem1.Size = new System.Drawing.Size(199, 26);
+            this.resultToolStripMenuItem1.Size = new System.Drawing.Size(224, 26);
             this.resultToolStripMenuItem1.Tag = "Result";
             this.resultToolStripMenuItem1.Text = "Result";
             this.resultToolStripMenuItem1.Click += new System.EventHandler(this.GroupBy_Click);
@@ -487,7 +487,7 @@
             // sessionIDToolStripMenuItem
             // 
             this.sessionIDToolStripMenuItem.Name = "sessionIDToolStripMenuItem";
-            this.sessionIDToolStripMenuItem.Size = new System.Drawing.Size(199, 26);
+            this.sessionIDToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
             this.sessionIDToolStripMenuItem.Tag = "session_id";
             this.sessionIDToolStripMenuItem.Text = "Session ID";
             this.sessionIDToolStripMenuItem.Click += new System.EventHandler(this.GroupBy_Click);
@@ -495,7 +495,7 @@
             // textToolStripMenuItem
             // 
             this.textToolStripMenuItem.Name = "textToolStripMenuItem";
-            this.textToolStripMenuItem.Size = new System.Drawing.Size(199, 26);
+            this.textToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
             this.textToolStripMenuItem.Tag = "text";
             this.textToolStripMenuItem.Text = "Text";
             this.textToolStripMenuItem.Click += new System.EventHandler(this.GroupBy_Click);
@@ -503,7 +503,7 @@
             // usernameToolStripMenuItem
             // 
             this.usernameToolStripMenuItem.Name = "usernameToolStripMenuItem";
-            this.usernameToolStripMenuItem.Size = new System.Drawing.Size(199, 26);
+            this.usernameToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
             this.usernameToolStripMenuItem.Tag = "username";
             this.usernameToolStripMenuItem.Text = "Username";
             this.usernameToolStripMenuItem.Click += new System.EventHandler(this.GroupBy_Click);
@@ -818,7 +818,7 @@
             // 
             // Instance
             // 
-            this.Instance.DataPropertyName = "Instance";
+            this.Instance.DataPropertyName = "InstanceDisplayName";
             this.Instance.HeaderText = "Instance";
             this.Instance.MinimumWidth = 6;
             this.Instance.Name = "Instance";
@@ -993,10 +993,10 @@
             // 
             // splitContainer1.Panel1
             // 
-            this.splitContainer1.Panel1.Controls.Add(this.runningQueries1);
             this.splitContainer1.Panel1.Controls.Add(this.tsRunning);
-            this.splitContainer1.Panel1.Controls.Add(this.dgvSummary);
             this.splitContainer1.Panel1.Controls.Add(this.refresh1);
+            this.splitContainer1.Panel1.Controls.Add(this.runningQueries1);
+            this.splitContainer1.Panel1.Controls.Add(this.dgvSummary);
             // 
             // splitContainer1.Panel2
             // 
@@ -1011,10 +1011,10 @@
             // runningQueries1
             // 
             this.runningQueries1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.runningQueries1.Location = new System.Drawing.Point(0, 27);
+            this.runningQueries1.Location = new System.Drawing.Point(0, 0);
             this.runningQueries1.Margin = new System.Windows.Forms.Padding(3, 5, 3, 5);
             this.runningQueries1.Name = "runningQueries1";
-            this.runningQueries1.Size = new System.Drawing.Size(1829, 460);
+            this.runningQueries1.Size = new System.Drawing.Size(1829, 487);
             this.runningQueries1.TabIndex = 1;
             this.runningQueries1.Visible = false;
             // 
@@ -1038,6 +1038,18 @@
             this.tsRunningBack.Size = new System.Drawing.Size(29, 24);
             this.tsRunningBack.Text = "toolStripButton1";
             this.tsRunningBack.Click += new System.EventHandler(this.tsRunningBack_Click);
+            // 
+            // refresh1
+            // 
+            this.refresh1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(99)))), ((int)(((byte)(163)))));
+            this.refresh1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.refresh1.Font = new System.Drawing.Font("Segoe UI", 11F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.refresh1.ForeColor = System.Drawing.Color.White;
+            this.refresh1.Location = new System.Drawing.Point(0, 0);
+            this.refresh1.Margin = new System.Windows.Forms.Padding(4);
+            this.refresh1.Name = "refresh1";
+            this.refresh1.Size = new System.Drawing.Size(1829, 487);
+            this.refresh1.TabIndex = 3;
             // 
             // toolStrip2
             // 
@@ -1271,16 +1283,6 @@
             this.dataGridViewTextBoxColumn19.ReadOnly = true;
             this.dataGridViewTextBoxColumn19.Width = 125;
             // 
-            // refresh1
-            // 
-            this.refresh1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(99)))), ((int)(((byte)(163)))));
-            this.refresh1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.refresh1.ForeColor = System.Drawing.Color.White;
-            this.refresh1.Location = new System.Drawing.Point(0, 0);
-            this.refresh1.Name = "refresh1";
-            this.refresh1.Size = new System.Drawing.Size(1829, 487);
-            this.refresh1.TabIndex = 3;
-            // 
             // SlowQueries
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
@@ -1400,6 +1402,7 @@
         private Performance.RunningQueries runningQueries1;
         private System.Windows.Forms.ToolStrip tsRunning;
         private System.Windows.Forms.ToolStripButton tsRunningBack;
+        private Refresh refresh1;
         private System.Windows.Forms.DataGridViewTextBoxColumn Instance;
         private System.Windows.Forms.DataGridViewTextBoxColumn DatabaseName;
         private System.Windows.Forms.DataGridViewTextBoxColumn event_type;
@@ -1417,6 +1420,5 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn Result;
         private System.Windows.Forms.DataGridViewLinkColumn colSessionID;
         private System.Windows.Forms.DataGridViewLinkColumn colText;
-        private Refresh refresh1;
     }
 }

@@ -29,13 +29,6 @@
         private void InitializeComponent()
         {
             this.dgvCustom = new System.Windows.Forms.DataGridView();
-            this.colInstance = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colTest = new System.Windows.Forms.DataGridViewLinkColumn();
-            this.colContext = new System.Windows.Forms.DataGridViewLinkColumn();
-            this.colStatus = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colInfo = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colSSDate = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.History = new System.Windows.Forms.DataGridViewLinkColumn();
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
             this.tsBack = new System.Windows.Forms.ToolStripButton();
             this.tsRefresh = new System.Windows.Forms.ToolStripButton();
@@ -56,6 +49,13 @@
             this.dataGridViewTextBoxColumn4 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dataGridViewTextBoxColumn5 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dataGridViewTextBoxColumn6 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colInstance = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colTest = new System.Windows.Forms.DataGridViewLinkColumn();
+            this.colContext = new System.Windows.Forms.DataGridViewLinkColumn();
+            this.colStatus = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colInfo = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colSSDate = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.History = new System.Windows.Forms.DataGridViewLinkColumn();
             ((System.ComponentModel.ISupportInitialize)(this.dgvCustom)).BeginInit();
             this.toolStrip1.SuspendLayout();
             this.SuspendLayout();
@@ -86,74 +86,6 @@
             this.dgvCustom.TabIndex = 0;
             this.dgvCustom.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgvCustom_CellContentClick);
             this.dgvCustom.RowsAdded += new System.Windows.Forms.DataGridViewRowsAddedEventHandler(this.dgvCustom_RowsAdded);
-            // 
-            // colInstance
-            // 
-            this.colInstance.DataPropertyName = "ConnectionID";
-            this.colInstance.HeaderText = "Instance";
-            this.colInstance.MinimumWidth = 6;
-            this.colInstance.Name = "colInstance";
-            this.colInstance.ReadOnly = true;
-            this.colInstance.Width = 90;
-            // 
-            // colTest
-            // 
-            this.colTest.DataPropertyName = "Test";
-            this.colTest.HeaderText = "Test";
-            this.colTest.MinimumWidth = 6;
-            this.colTest.Name = "colTest";
-            this.colTest.ReadOnly = true;
-            this.colTest.Resizable = System.Windows.Forms.DataGridViewTriState.True;
-            this.colTest.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
-            this.colTest.Width = 65;
-            // 
-            // colContext
-            // 
-            this.colContext.DataPropertyName = "Context";
-            this.colContext.HeaderText = "Context";
-            this.colContext.MinimumWidth = 6;
-            this.colContext.Name = "colContext";
-            this.colContext.ReadOnly = true;
-            this.colContext.Resizable = System.Windows.Forms.DataGridViewTriState.True;
-            this.colContext.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
-            this.colContext.Width = 84;
-            // 
-            // colStatus
-            // 
-            this.colStatus.DataPropertyName = "Status";
-            this.colStatus.HeaderText = "Status";
-            this.colStatus.MinimumWidth = 6;
-            this.colStatus.Name = "colStatus";
-            this.colStatus.ReadOnly = true;
-            this.colStatus.Width = 77;
-            // 
-            // colInfo
-            // 
-            this.colInfo.DataPropertyName = "Info";
-            this.colInfo.HeaderText = "Info";
-            this.colInfo.MinimumWidth = 6;
-            this.colInfo.Name = "colInfo";
-            this.colInfo.ReadOnly = true;
-            this.colInfo.Width = 60;
-            // 
-            // colSSDate
-            // 
-            this.colSSDate.DataPropertyName = "SnapshotDate";
-            this.colSSDate.HeaderText = "Snapshot Date";
-            this.colSSDate.MinimumWidth = 6;
-            this.colSSDate.Name = "colSSDate";
-            this.colSSDate.ReadOnly = true;
-            this.colSSDate.Width = 120;
-            // 
-            // History
-            // 
-            this.History.HeaderText = "History";
-            this.History.MinimumWidth = 6;
-            this.History.Name = "History";
-            this.History.ReadOnly = true;
-            this.History.Text = "History";
-            this.History.UseColumnTextForLinkValue = true;
-            this.History.Width = 58;
             // 
             // toolStrip1
             // 
@@ -346,6 +278,74 @@
             this.dataGridViewTextBoxColumn6.ReadOnly = true;
             this.dataGridViewTextBoxColumn6.Width = 120;
             // 
+            // colInstance
+            // 
+            this.colInstance.DataPropertyName = "InstanceDisplayName";
+            this.colInstance.HeaderText = "Instance";
+            this.colInstance.MinimumWidth = 6;
+            this.colInstance.Name = "colInstance";
+            this.colInstance.ReadOnly = true;
+            this.colInstance.Width = 90;
+            // 
+            // colTest
+            // 
+            this.colTest.DataPropertyName = "Test";
+            this.colTest.HeaderText = "Test";
+            this.colTest.MinimumWidth = 6;
+            this.colTest.Name = "colTest";
+            this.colTest.ReadOnly = true;
+            this.colTest.Resizable = System.Windows.Forms.DataGridViewTriState.True;
+            this.colTest.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
+            this.colTest.Width = 65;
+            // 
+            // colContext
+            // 
+            this.colContext.DataPropertyName = "Context";
+            this.colContext.HeaderText = "Context";
+            this.colContext.MinimumWidth = 6;
+            this.colContext.Name = "colContext";
+            this.colContext.ReadOnly = true;
+            this.colContext.Resizable = System.Windows.Forms.DataGridViewTriState.True;
+            this.colContext.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
+            this.colContext.Width = 84;
+            // 
+            // colStatus
+            // 
+            this.colStatus.DataPropertyName = "Status";
+            this.colStatus.HeaderText = "Status";
+            this.colStatus.MinimumWidth = 6;
+            this.colStatus.Name = "colStatus";
+            this.colStatus.ReadOnly = true;
+            this.colStatus.Width = 77;
+            // 
+            // colInfo
+            // 
+            this.colInfo.DataPropertyName = "Info";
+            this.colInfo.HeaderText = "Info";
+            this.colInfo.MinimumWidth = 6;
+            this.colInfo.Name = "colInfo";
+            this.colInfo.ReadOnly = true;
+            this.colInfo.Width = 60;
+            // 
+            // colSSDate
+            // 
+            this.colSSDate.DataPropertyName = "SnapshotDate";
+            this.colSSDate.HeaderText = "Snapshot Date";
+            this.colSSDate.MinimumWidth = 6;
+            this.colSSDate.Name = "colSSDate";
+            this.colSSDate.ReadOnly = true;
+            this.colSSDate.Width = 120;
+            // 
+            // History
+            // 
+            this.History.HeaderText = "History";
+            this.History.MinimumWidth = 6;
+            this.History.Name = "History";
+            this.History.ReadOnly = true;
+            this.History.Text = "History";
+            this.History.UseColumnTextForLinkValue = true;
+            this.History.Width = 58;
+            // 
             // CustomChecks
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
@@ -385,6 +385,8 @@
         private System.Windows.Forms.ToolStripMenuItem testToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem contextToolStripMenuItem;
         private System.Windows.Forms.ToolStripButton tsClear;
+        private System.Windows.Forms.ToolStripButton tsBack;
+        private System.Windows.Forms.ToolStripButton tsExcel;
         private System.Windows.Forms.DataGridViewTextBoxColumn colInstance;
         private System.Windows.Forms.DataGridViewLinkColumn colTest;
         private System.Windows.Forms.DataGridViewLinkColumn colContext;
@@ -392,7 +394,5 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn colInfo;
         private System.Windows.Forms.DataGridViewTextBoxColumn colSSDate;
         private System.Windows.Forms.DataGridViewLinkColumn History;
-        private System.Windows.Forms.ToolStripButton tsBack;
-        private System.Windows.Forms.ToolStripButton tsExcel;
     }
 }

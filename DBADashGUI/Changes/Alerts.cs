@@ -76,7 +76,7 @@ namespace DBADashGUI.Changes
             DataGridViewRow row = null;
             foreach (DataRow r in dt.Rows)
             {
-                string instance = (string)r["Instance"];
+                string instance = (string)r["InstanceDisplayName"];
                 if (instance != lastInstance)
                 {
                     row = new DataGridViewRow();

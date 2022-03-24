@@ -120,9 +120,10 @@ WITH cpuAgg AS (
 	JOIN dbo.WaitType WT ON WT.WaitTypeID = W.WaitTypeID
 	GROUP BY w.InstanceID
 )
-SELECT i.InstanceID,
-		i.ConnectionID,
-       i.Instance,
+SELECT I.InstanceID,
+	   I.ConnectionID,
+       I.Instance,
+	   I.InstanceDisplayName,
 	   cpuAgg.AvgCPU,
 	   CASE WHEN cpuAgg.AvgCPU > thres.CPUCriticalThreshold THEN 1 WHEN cpuAgg.AvgCPU > thres.CPUWarningThreshold THEN 2 WHEN cpuAgg.AvgCPU < thres.CPULowThreshold THEN 4 ELSE 3 END AS AvgCPUStatus,
 	   cpuAgg.MaxCPU,

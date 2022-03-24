@@ -1,11 +1,9 @@
-﻿
-
-
-CREATE VIEW [dbo].[SysAlerts]
+﻿CREATE VIEW dbo.SysAlerts
 AS
 SELECT I.InstanceID,
 		I.Instance,
 		I.ConnectionID,
+        I.InstanceDisplayName,
         A.id,
         A.name,
         A.message_id,

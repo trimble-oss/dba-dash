@@ -7,11 +7,6 @@ DECLARE @Tags TABLE(
 	TagName NVARCHAR(50) NOT NULL,
 	TagValue NVARCHAR(128) NOT NULL
 );
-DECLARE @Instance SYSNAME
-DECLARE @IsAzureDB BIT
-SELECT @Instance = Instance, @IsAzureDB=CASE WHEN EngineEdition = 5 THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END
-FROM dbo.Instances
-WHERE InstanceID = @InstanceID;
 
 WITH T AS (
 	SELECT CAST(v.SQLVersionName AS NVARCHAR(128)) AS [Version], 
@@ -20,7 +15,7 @@ WITH T AS (
 			CAST(I.Collation AS NVARCHAR(128)) Collation,
 			CAST(I.SystemManufacturer AS NVARCHAR(128)) AS SystemManufacturer,
 			CAST(I.SystemProductName AS NVARCHAR(128)) AS SystemProductName,
-			CASE WHEN @IsAzureDB=1 THEN '    -' ELSE CAST(RIGHT(REPLICATE(' ',5) +  CAST(I.cpu_count as NVARCHAR(50)),5) AS NVARCHAR(128)) END AS CPUCount,
+			CAST(RIGHT(REPLICATE(' ',5) +  CAST(I.cpu_count as NVARCHAR(50)),5) AS NVARCHAR(128)) AS CPUCount,
 			CAST(Cagt.AgentHostName AS NVARCHAR(128)) CollectAgent,
 			CAST(Cagt.AgentServiceName AS NVARCHAR(128)) CollectAgentServiceName,
 			CAST(Cagt.AgentVersion AS NVARCHAR(128)) AS CollectAgentVersion,
@@ -91,9 +86,9 @@ FROM @Tags TMP
 JOIN dbo.Tags TG ON TMP.TagName = TG.TagName AND TMP.TagValue = TG.TagValue
 
 DELETE IT 
-FROM dbo.InstanceTags IT
+FROM dbo.InstanceIDsTags IT
 JOIN dbo.Tags T ON IT.TagID = T.TagID 
-WHERE IT.Instance = @Instance
+WHERE IT.InstanceID = @InstanceID
 AND T.TagName LIKE '{%'
 AND NOT EXISTS(SELECT 1 
 			FROM @Tags tmp
@@ -103,27 +98,45 @@ AND NOT EXISTS(SELECT 1
 IF EXISTS(SELECT 1
 		FROM @Tags T 
 		WHERE NOT EXISTS(SELECT 1 
-				FROM dbo.InstanceTags IT 
-				WHERE IT.Instance = @Instance 
+				FROM dbo.InstanceIDsTags IT 
+				WHERE IT.InstanceID = @InstanceID 
 				AND IT.TagID = T.TagID)
 		)
 BEGIN
-	INSERT INTO dbo.InstanceTags
+	INSERT INTO dbo.InstanceIDsTags
 	(
-		Instance,
+		InstanceID,
 		TagID
 	)
-	SELECT @Instance,T.TagID
+	SELECT	@InstanceID,
+			T.TagID
 	FROM @Tags T 
 	WHERE NOT EXISTS(SELECT 1 
-				FROM dbo.InstanceTags IT WITH(UPDLOCK,HOLDLOCK)
-				WHERE IT.Instance = @Instance 
+				FROM dbo.InstanceIDsTags IT WITH(UPDLOCK,HOLDLOCK)
+				WHERE IT.InstanceID = @InstanceID 
 				AND IT.TagID = T.TagID)
 END
 
-DELETE T 
-FROM dbo.Tags T
-WHERE NOT EXISTS(SELECT 1 
-				FROM dbo.InstanceTags IT 
-				WHERE IT.TagID=T.TagID
-				)
+IF EXISTS(SELECT 1	
+			FROM dbo.Tags T
+			WHERE NOT EXISTS(SELECT 1 
+							FROM dbo.InstanceIDsTags IT 
+							WHERE IT.TagID=T.TagID
+							UNION ALL 
+							SELECT 1 
+							FROM dbo.InstanceTags IT
+							WHERE IT.TagID = T.TagID
+							)
+			)
+BEGIN
+	DELETE T 
+	FROM dbo.Tags T
+	WHERE NOT EXISTS(SELECT 1 
+					FROM dbo.InstanceIDsTags IT 
+					WHERE IT.TagID=T.TagID
+					UNION ALL 
+					SELECT 1 
+					FROM dbo.InstanceTags IT
+					WHERE IT.TagID = T.TagID
+					)
+END

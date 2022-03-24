@@ -1,5 +1,5 @@
 ﻿CREATE PROC dbo.TagReport_Get(
-	@InstanceIDs VARCHAR(MAX)=NULL
+	@InstanceIDs IDs READONLY
 )
 AS
 /*
@@ -17,17 +17,19 @@ FOR XML PATH(''),TYPE).value('.','NVARCHAR(MAX)'),1,2,'');
 
 SET @SQL = N'
 WITH T AS (
-	SELECT IT.Instance,
-		T.TagName,
-		T.TagValue
+	SELECT DISTINCT I.InstanceGroupName AS Instance,
+					CASE WHEN I.EngineEdition=5 THEN -1 ELSE I.InstanceID END AS InstanceID,
+					T.TagName,
+					T.TagValue
 	FROM dbo.Tags T 
-	JOIN dbo.InstanceTags IT ON T.TagID = IT.TagID
-	WHERE EXISTS(SELECT 1 
-				FROM dbo.Instances I 
-				' + CASE WHEN @InstanceIDs IS NULL THEN '' ELSE 'JOIN STRING_SPLIT(@InstanceIDs,'','') ss ON ss.value = I.InstanceID' END + '
-				WHERE I.Instance = IT.Instance
-				AND I.IsActive=1
-				)
+	JOIN dbo.InstanceIDsTags IT ON T.TagID = IT.TagID
+	JOIN dbo.Instances I ON I.InstanceID = IT.InstanceID
+	WHERE I.IsActive=1
+	' + CASE WHEN EXISTS(SELECT 1 FROM @InstanceIDs) THEN 'AND EXISTS(SELECT 1 
+				FROM @InstanceIDs T 
+				WHERE T.ID = I.InstanceID
+				)' ELSE '' END + '
+	
 )
 /* 
 	We can have multiple tag values for a tag.  Get a distinct list of tags for each instance with a comma separated list of values
@@ -35,20 +37,21 @@ WITH T AS (
 */
 , V AS (
 	SELECT Instance,
+			InstanceID,
 			TagName,
-			STUFF((SELECT '', '' + T2.TagValue 
+			STUFF((SELECT '', '' + RTRIM(LTRIM(T2.TagValue))
 					FROM T T2 
 					WHERE T1.Instance = T2.Instance 
 					AND T1.TagName = T2.TagName 
 					ORDER BY T2.TagValue
 					FOR XML PATH(''''),TYPE).value(''.'',''NVARCHAR(MAX)''),1,2,'''') AS TagValues
 	FROM T T1
-	GROUP BY Instance,TagName
+	GROUP BY Instance,
+			 TagName,
+			 InstanceID
 )
 SELECT *
 FROM V 
 PIVOT( MAX(TagValues) FOR TagName IN(' + @ColList + ')) AS pvt'
 
-EXEC sp_executesql @SQL,N'@InstanceIDs VARCHAR(MAX)',@InstanceIDs
-
-
+EXEC sp_executesql @SQL,N'@InstanceIDs IDs READONLY',@InstanceIDs

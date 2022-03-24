@@ -89,7 +89,7 @@ namespace DBADashGUI.LogShipping
                 dgvSummary.AutoGenerateColumns = false;
                 if (dgvSummary.Columns.Count == 0)
                 {
-                    dgvSummary.Columns.Add(new DataGridViewLinkColumn() { HeaderText = "Instance", DataPropertyName = "Instance", SortMode= DataGridViewColumnSortMode.Automatic,LinkColor=DashColors.LinkColor});
+                    dgvSummary.Columns.Add(new DataGridViewLinkColumn() { HeaderText = "Instance", DataPropertyName = "InstanceDisplayName", SortMode= DataGridViewColumnSortMode.Automatic,LinkColor=DashColors.LinkColor});
                     dgvSummary.Columns.Add(new DataGridViewTextBoxColumn {Name="Status", HeaderText = "Status", DataPropertyName = "StatusDescription" });
                     dgvSummary.Columns.Add(new DataGridViewTextBoxColumn { HeaderText = "Log Shipped DBs", DataPropertyName = "LogshippedDBCount" });
                     dgvSummary.Columns.Add(new DataGridViewTextBoxColumn { HeaderText = "Warning", DataPropertyName = "WarningCount" });

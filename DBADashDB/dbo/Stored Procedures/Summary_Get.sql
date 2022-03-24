@@ -172,6 +172,7 @@ QS AS (
 )
 SELECT I.InstanceID,
 	I.Instance,
+	I.InstanceDisplayName,
 	ISNULL(LS.LogShippingStatus,3) AS LogShippingStatus,
 	ISNULL(B.FullBackupStatus,3) AS FullBackupStatus,
 	ISNULL(B.LogBackupStatus,3) AS LogBackupStatus,
@@ -265,6 +266,7 @@ AND I.EngineEdition<> 5 -- not azure
 UNION ALL
 SELECT NULL AS InstanceID,
 	I.Instance,
+	I.Instance AS InstanceDisplayName,
 	3 AS LogShippingStatus,
 	3 AS FullBackupStatus,
 	3 AS LogBackupStatus,

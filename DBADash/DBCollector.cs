@@ -184,7 +184,7 @@ namespace DBADash
         public DBCollector(DBADashSource source,string serviceName)
         {
             Source = source;
-            startup(null,serviceName);
+            startup(serviceName);
         }
 
         private void logError(Exception ex,string errorSource, string errorContext = "Collect")
@@ -228,7 +228,7 @@ namespace DBADash
             }
         }
 
-        private void startup(string connectionID,string serviceName)
+        private void startup(string serviceName)
         {
             noWMI = Source.NoWMI;
             dashAgent = DBADashAgent.GetCurrent(serviceName);
@@ -252,17 +252,12 @@ namespace DBADash
             Data.Tables.Add(dtErrors);
 
             retryPolicy.Execute(
-                context => GetInstance(connectionID),
+                context => GetInstance(),
                 new Context("Instance")
               );
             
         }
 
-        public DBCollector(DBADashSource source, string connectionID,string serviceName)
-        {
-            Source = source;
-            startup(connectionID,serviceName);
-        }
 
         public async Task RemoveEventSessionsAsync()
         {
@@ -309,7 +304,7 @@ namespace DBADash
             }
         }
 
-        public void GetInstance(string connectionID)
+        public void GetInstance()
         {
             var dt = getDT("DBADash", SqlStrings.Instance);
             dt.Columns.Add("AgentVersion", typeof(string));
@@ -359,7 +354,7 @@ namespace DBADash
             {
                 noWMI = true;
             }
-            if (connectionID == null)
+            if (String.IsNullOrEmpty(Source.ConnectionID))
             {
                 if (IsAzureDB)
                 {
@@ -373,7 +368,7 @@ namespace DBADash
             }
             else
             {
-                dt.Rows[0]["ConnectionID"] = connectionID;
+                dt.Rows[0]["ConnectionID"] = Source.ConnectionID;
             }
             IsHadrEnabled = dt.Rows[0]["IsHadrEnabled"] != DBNull.Value && Convert.ToBoolean(dt.Rows[0]["IsHadrEnabled"]);
 

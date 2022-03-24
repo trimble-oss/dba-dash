@@ -110,9 +110,9 @@ namespace DBADashGUI
         }
 
 
-        private void getDatabases(ComboBox cbo, string instance)
+        private void getDatabases(ComboBox cbo, string instanceGroupName)
         {
-            var databases = CommonData.GetDatabasesWithDDLSnapshot(instance);
+            var databases = CommonData.GetDatabasesWithDDLSnapshot(instanceGroupName);
             cbo.DataSource = databases;
             cbo.ValueMember = "DatabaseID";
             cbo.DisplayMember = "DatabaseName";

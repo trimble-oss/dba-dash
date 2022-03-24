@@ -1700,3 +1700,40 @@ T.MemoryClerkDescription = S.MemoryClerkDescription
 WHEN NOT MATCHED BY TARGET THEN
 INSERT(MemoryClerkType,MemoryClerkDescription)
 VALUES(S.MemoryClerkType,S.MemoryClerkDescription);
+
+
+IF NOT EXISTS(SELECT 1 
+			FROM dbo.Settings
+			WHERE SettingName = 'InstanceTagIDsMigratedDate'
+			)
+BEGIN
+	PRINT 'Migrating Tags'
+	/* 
+		Migrate tags from InstanceTags to InstanceIDsTags table
+		Excluding user tags on AzureDB
+	*/
+	INSERT INTO dbo.InstanceIDsTags(
+			InstanceID,
+			TagID
+	)
+	SELECT I.InstanceID,
+			IT.TagID
+	FROM dbo.InstanceTags IT 
+	JOIN dbo.Instances I ON IT.Instance = I.Instance 
+	JOIN dbo.Tags T ON IT.TagID = T.TagID
+	WHERE NOT (I.EngineEdition=5 AND T.TagName NOT LIKE '{%')
+	AND NOT EXISTS(SELECT 1 
+					FROM dbo.InstanceIDsTags IDT 
+					WHERE IT.TagID = IDT.TagID 
+					AND I.InstanceID = IDT.InstanceID
+					)
+
+	DELETE IT 
+	FROM dbo.InstanceTags IT 
+	JOIN dbo.Instances I ON IT.Instance = I.Instance 
+	JOIN dbo.Tags T ON IT.TagID = T.TagID
+	WHERE NOT (I.EngineEdition=5 AND T.TagName NOT LIKE '{%')
+
+	INSERT INTO dbo.Settings(SettingName,SettingValue)
+	VALUES('InstanceTagIDsMigratedDate',GETUTCDATE())
+END

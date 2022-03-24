@@ -95,7 +95,8 @@ SELECT I.InstanceID,
 	DATEDIFF(mi,DATEADD(mi,I.UTCOffset,I.sqlserver_start_time),os.SnapshotDate) AS sqlserver_uptime,
 	CASE WHEN tDB.value_in_use=1 AND tDB.value=1 THEN CAST(1 AS BIT) WHEN tDB.configuration_id=1589 THEN CAST(0 AS BIT) ELSE NULL END AS IsTempDBMetadataMemoryOptimized,
 	CASE WHEN I.EditionID=1674378470 -- AzureDB or Azure Managed Instance
-            THEN 150 ELSE TRY_CAST(I.ProductMajorVersion AS INT)*10 END AS MaxSupportedCompatibilityLevel
+            THEN 150 ELSE TRY_CAST(I.ProductMajorVersion AS INT)*10 END AS MaxSupportedCompatibilityLevel,
+    I.InstanceDisplayName
 FROM dbo.Instances I
 LEFT JOIN dbo.DBADashAgent A ON I.CollectAgentID = A.DBADashAgentID
 CROSS APPLY dbo.SQLVersionName(I.EditionID,I.ProductVersion) v

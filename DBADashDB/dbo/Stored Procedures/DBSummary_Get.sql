@@ -2,7 +2,7 @@
 	@InstanceIDs VARCHAR(MAX)=NULL
 )
 AS
-SELECT I.Instance, 
+SELECT I.InstanceGroupName AS Instance, 
 	SUM(CASE WHEN page_verify_option<>2 THEN 1 ELSE 0 END) as [Page Verify Not Optimal],
 	SUM(CASE WHEN D.is_auto_close_on =1 THEN 1 ELSE 0 END) as [Auto Close],
 	SUM(CASE WHEN D.is_auto_shrink_on =1 THEN 1 ELSE 0 END) as [Auto Shrink],
@@ -23,4 +23,4 @@ WHERE I.IsActive=1
 AND D.IsActive=1
 AND (EXISTS(SELECT 1 FROM STRING_SPLIT(@InstanceIDs,',') ss WHERE ss.value = I.InstanceID)
 		OR @InstanceIDs IS NULL)
-GROUP BY I.Instance
+GROUP BY I.InstanceGroupName

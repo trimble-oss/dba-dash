@@ -1,4 +1,4 @@
-﻿CREATE PROC [dbo].[Alerts_Get](
+﻿CREATE PROC dbo.Alerts_Get(
 	@InstanceIDs VARCHAR(MAX)=NULL,
 	@LastOccurrenceFrom DATETIME2(3)=NULL, 
 	@LastOccurrenceTo DATETIME2(3)=NULL, 
@@ -28,7 +28,7 @@ BEGIN
 	FROM STRING_SPLIT(@InstanceIDs,',')
 END
 
-SELECT A.Instance,
+SELECT A.InstanceDisplayName AS Instance,
        name AS [Alert Name],
        message_id AS [Message ID],
        severity AS [Severity],

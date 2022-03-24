@@ -32,11 +32,6 @@
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(CollectionErrors));
             this.dgvDBADashErrors = new System.Windows.Forms.DataGridView();
-            this.Instance = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.ErrorDate = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.ErrorSource = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.ErrorContext = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.ErrorMessage = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.toolStrip3 = new System.Windows.Forms.ToolStrip();
             this.tsRefreshErrors = new System.Windows.Forms.ToolStripButton();
             this.tsCopyErrors = new System.Windows.Forms.ToolStripButton();
@@ -54,6 +49,11 @@
             this.dataGridViewTextBoxColumn3 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dataGridViewTextBoxColumn4 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dataGridViewTextBoxColumn5 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.Instance = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.ErrorDate = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.ErrorSource = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.ErrorContext = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.ErrorMessage = new System.Windows.Forms.DataGridViewTextBoxColumn();
             ((System.ComponentModel.ISupportInitialize)(this.dgvDBADashErrors)).BeginInit();
             this.toolStrip3.SuspendLayout();
             this.SuspendLayout();
@@ -97,51 +97,6 @@
             this.dgvDBADashErrors.RowTemplate.Height = 24;
             this.dgvDBADashErrors.Size = new System.Drawing.Size(829, 521);
             this.dgvDBADashErrors.TabIndex = 2;
-            // 
-            // Instance
-            // 
-            this.Instance.DataPropertyName = "Instance";
-            this.Instance.HeaderText = "Instance";
-            this.Instance.MinimumWidth = 6;
-            this.Instance.Name = "Instance";
-            this.Instance.ReadOnly = true;
-            this.Instance.Width = 90;
-            // 
-            // ErrorDate
-            // 
-            this.ErrorDate.DataPropertyName = "ErrorDate";
-            this.ErrorDate.HeaderText = "Date";
-            this.ErrorDate.MinimumWidth = 6;
-            this.ErrorDate.Name = "ErrorDate";
-            this.ErrorDate.ReadOnly = true;
-            this.ErrorDate.Width = 67;
-            // 
-            // ErrorSource
-            // 
-            this.ErrorSource.DataPropertyName = "ErrorSource";
-            this.ErrorSource.HeaderText = "Source";
-            this.ErrorSource.MinimumWidth = 6;
-            this.ErrorSource.Name = "ErrorSource";
-            this.ErrorSource.ReadOnly = true;
-            this.ErrorSource.Width = 82;
-            // 
-            // ErrorContext
-            // 
-            this.ErrorContext.DataPropertyName = "ErrorContext";
-            this.ErrorContext.HeaderText = "Error Context";
-            this.ErrorContext.MinimumWidth = 6;
-            this.ErrorContext.Name = "ErrorContext";
-            this.ErrorContext.ReadOnly = true;
-            this.ErrorContext.Width = 120;
-            // 
-            // ErrorMessage
-            // 
-            this.ErrorMessage.DataPropertyName = "ErrorMessage";
-            this.ErrorMessage.HeaderText = "Message";
-            this.ErrorMessage.MinimumWidth = 6;
-            this.ErrorMessage.Name = "ErrorMessage";
-            this.ErrorMessage.ReadOnly = true;
-            this.ErrorMessage.Width = 94;
             // 
             // toolStrip3
             // 
@@ -308,6 +263,51 @@
             this.dataGridViewTextBoxColumn5.ReadOnly = true;
             this.dataGridViewTextBoxColumn5.Width = 94;
             // 
+            // Instance
+            // 
+            this.Instance.DataPropertyName = "InstanceDisplayName";
+            this.Instance.HeaderText = "Instance";
+            this.Instance.MinimumWidth = 6;
+            this.Instance.Name = "Instance";
+            this.Instance.ReadOnly = true;
+            this.Instance.Width = 90;
+            // 
+            // ErrorDate
+            // 
+            this.ErrorDate.DataPropertyName = "ErrorDate";
+            this.ErrorDate.HeaderText = "Date";
+            this.ErrorDate.MinimumWidth = 6;
+            this.ErrorDate.Name = "ErrorDate";
+            this.ErrorDate.ReadOnly = true;
+            this.ErrorDate.Width = 67;
+            // 
+            // ErrorSource
+            // 
+            this.ErrorSource.DataPropertyName = "ErrorSource";
+            this.ErrorSource.HeaderText = "Source";
+            this.ErrorSource.MinimumWidth = 6;
+            this.ErrorSource.Name = "ErrorSource";
+            this.ErrorSource.ReadOnly = true;
+            this.ErrorSource.Width = 82;
+            // 
+            // ErrorContext
+            // 
+            this.ErrorContext.DataPropertyName = "ErrorContext";
+            this.ErrorContext.HeaderText = "Error Context";
+            this.ErrorContext.MinimumWidth = 6;
+            this.ErrorContext.Name = "ErrorContext";
+            this.ErrorContext.ReadOnly = true;
+            this.ErrorContext.Width = 120;
+            // 
+            // ErrorMessage
+            // 
+            this.ErrorMessage.DataPropertyName = "ErrorMessage";
+            this.ErrorMessage.HeaderText = "Message";
+            this.ErrorMessage.MinimumWidth = 6;
+            this.ErrorMessage.Name = "ErrorMessage";
+            this.ErrorMessage.ReadOnly = true;
+            this.ErrorMessage.Width = 94;
+            // 
             // CollectionErrors
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
@@ -328,11 +328,6 @@
         #endregion
 
         private System.Windows.Forms.DataGridView dgvDBADashErrors;
-        private System.Windows.Forms.DataGridViewTextBoxColumn Instance;
-        private System.Windows.Forms.DataGridViewTextBoxColumn ErrorDate;
-        private System.Windows.Forms.DataGridViewTextBoxColumn ErrorSource;
-        private System.Windows.Forms.DataGridViewTextBoxColumn ErrorContext;
-        private System.Windows.Forms.DataGridViewTextBoxColumn ErrorMessage;
         private System.Windows.Forms.ToolStrip toolStrip3;
         private System.Windows.Forms.ToolStripButton tsRefreshErrors;
         private System.Windows.Forms.ToolStripButton tsCopyErrors;
@@ -350,5 +345,10 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn4;
         private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn5;
         private System.Windows.Forms.ToolStripButton tsExcel;
+        private System.Windows.Forms.DataGridViewTextBoxColumn Instance;
+        private System.Windows.Forms.DataGridViewTextBoxColumn ErrorDate;
+        private System.Windows.Forms.DataGridViewTextBoxColumn ErrorSource;
+        private System.Windows.Forms.DataGridViewTextBoxColumn ErrorContext;
+        private System.Windows.Forms.DataGridViewTextBoxColumn ErrorMessage;
     }
 }

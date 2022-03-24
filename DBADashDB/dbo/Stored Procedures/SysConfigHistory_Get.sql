@@ -1,4 +1,4 @@
-﻿CREATE PROC [dbo].[SysConfigHistory_Get](
+﻿CREATE PROC dbo.SysConfigHistory_Get(
 	@InstanceIDs VARCHAR(MAX)=NULL,
 	@FromDate DATETIME2=NULL,
 	@ToDate DATETIME2=NULL
@@ -28,6 +28,7 @@ BEGIN
 END
 SELECT I.Instance,
 	   I.ConnectionID,
+	   I.InstanceDisplayName,
        o.name,
        o.description,
        h.value,

@@ -38,16 +38,9 @@
             this.configuredOnlyToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripLabel1 = new System.Windows.Forms.ToolStripLabel();
             this.tsExcel = new System.Windows.Forms.ToolStripButton();
+            this.tsCols = new System.Windows.Forms.ToolStripButton();
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
             this.dgvConfigHistory = new System.Windows.Forms.DataGridView();
-            this.colHInstance = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colHDB = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colHName = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colHValue = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colHNewValue = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colHValueForSecondary = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colHValueForSecondaryNew = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colHValidTo = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.toolStrip2 = new System.Windows.Forms.ToolStrip();
             this.tsRefreshHistory = new System.Windows.Forms.ToolStripButton();
             this.tsCopyHistory = new System.Windows.Forms.ToolStripButton();
@@ -61,7 +54,14 @@
             this.dataGridViewTextBoxColumn6 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dataGridViewTextBoxColumn7 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dataGridViewTextBoxColumn8 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.tsCols = new System.Windows.Forms.ToolStripButton();
+            this.colHInstance = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colHDB = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colHName = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colHValue = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colHNewValue = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colHValueForSecondary = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colHValueForSecondaryNew = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colHValidTo = new System.Windows.Forms.DataGridViewTextBoxColumn();
             ((System.ComponentModel.ISupportInitialize)(this.dgvConfig)).BeginInit();
             this.toolStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
@@ -164,6 +164,16 @@
             this.tsExcel.Text = "Export Excel";
             this.tsExcel.Click += new System.EventHandler(this.tsExcel_Click);
             // 
+            // tsCols
+            // 
+            this.tsCols.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.tsCols.Image = global::DBADashGUI.Properties.Resources.Column_16x;
+            this.tsCols.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tsCols.Name = "tsCols";
+            this.tsCols.Size = new System.Drawing.Size(29, 24);
+            this.tsCols.Text = "Columns";
+            this.tsCols.Click += new System.EventHandler(this.tsCols_Click);
+            // 
             // splitContainer1
             // 
             this.splitContainer1.Dock = System.Windows.Forms.DockStyle.Fill;
@@ -227,78 +237,6 @@
             this.dgvConfigHistory.RowTemplate.Height = 24;
             this.dgvConfigHistory.Size = new System.Drawing.Size(994, 286);
             this.dgvConfigHistory.TabIndex = 1;
-            // 
-            // colHInstance
-            // 
-            this.colHInstance.DataPropertyName = "Instance";
-            this.colHInstance.HeaderText = "Instance";
-            this.colHInstance.MinimumWidth = 6;
-            this.colHInstance.Name = "colHInstance";
-            this.colHInstance.ReadOnly = true;
-            this.colHInstance.Width = 90;
-            // 
-            // colHDB
-            // 
-            this.colHDB.DataPropertyName = "DB";
-            this.colHDB.HeaderText = "DB";
-            this.colHDB.MinimumWidth = 6;
-            this.colHDB.Name = "colHDB";
-            this.colHDB.ReadOnly = true;
-            this.colHDB.Width = 56;
-            // 
-            // colHName
-            // 
-            this.colHName.DataPropertyName = "name";
-            this.colHName.HeaderText = "Name";
-            this.colHName.MinimumWidth = 6;
-            this.colHName.Name = "colHName";
-            this.colHName.ReadOnly = true;
-            this.colHName.Width = 74;
-            // 
-            // colHValue
-            // 
-            this.colHValue.DataPropertyName = "value";
-            this.colHValue.HeaderText = "Value (Old)";
-            this.colHValue.MinimumWidth = 6;
-            this.colHValue.Name = "colHValue";
-            this.colHValue.ReadOnly = true;
-            this.colHValue.Width = 125;
-            // 
-            // colHNewValue
-            // 
-            this.colHNewValue.DataPropertyName = "new_value";
-            this.colHNewValue.HeaderText = "Value (New)";
-            this.colHNewValue.MinimumWidth = 6;
-            this.colHNewValue.Name = "colHNewValue";
-            this.colHNewValue.ReadOnly = true;
-            this.colHNewValue.Width = 105;
-            // 
-            // colHValueForSecondary
-            // 
-            this.colHValueForSecondary.DataPropertyName = "value_for_secondary";
-            this.colHValueForSecondary.HeaderText = "Value for Secondary (Old)";
-            this.colHValueForSecondary.MinimumWidth = 6;
-            this.colHValueForSecondary.Name = "colHValueForSecondary";
-            this.colHValueForSecondary.ReadOnly = true;
-            this.colHValueForSecondary.Width = 155;
-            // 
-            // colHValueForSecondaryNew
-            // 
-            this.colHValueForSecondaryNew.DataPropertyName = "new_value_for_secondary";
-            this.colHValueForSecondaryNew.HeaderText = "Value for secondary (New)";
-            this.colHValueForSecondaryNew.MinimumWidth = 6;
-            this.colHValueForSecondaryNew.Name = "colHValueForSecondaryNew";
-            this.colHValueForSecondaryNew.ReadOnly = true;
-            this.colHValueForSecondaryNew.Width = 154;
-            // 
-            // colHValidTo
-            // 
-            this.colHValidTo.DataPropertyName = "ValidTo";
-            this.colHValidTo.HeaderText = "Change Date";
-            this.colHValidTo.MinimumWidth = 6;
-            this.colHValidTo.Name = "colHValidTo";
-            this.colHValidTo.ReadOnly = true;
-            this.colHValidTo.Width = 110;
             // 
             // toolStrip2
             // 
@@ -424,15 +362,77 @@
             this.dataGridViewTextBoxColumn8.ReadOnly = true;
             this.dataGridViewTextBoxColumn8.Width = 110;
             // 
-            // tsCols
+            // colHInstance
             // 
-            this.tsCols.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.tsCols.Image = global::DBADashGUI.Properties.Resources.Column_16x;
-            this.tsCols.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsCols.Name = "tsCols";
-            this.tsCols.Size = new System.Drawing.Size(29, 24);
-            this.tsCols.Text = "Columns";
-            this.tsCols.Click += new System.EventHandler(this.tsCols_Click);
+            this.colHInstance.DataPropertyName = "InstanceGroupName";
+            this.colHInstance.HeaderText = "Instance";
+            this.colHInstance.MinimumWidth = 6;
+            this.colHInstance.Name = "colHInstance";
+            this.colHInstance.ReadOnly = true;
+            this.colHInstance.Width = 90;
+            // 
+            // colHDB
+            // 
+            this.colHDB.DataPropertyName = "DB";
+            this.colHDB.HeaderText = "DB";
+            this.colHDB.MinimumWidth = 6;
+            this.colHDB.Name = "colHDB";
+            this.colHDB.ReadOnly = true;
+            this.colHDB.Width = 56;
+            // 
+            // colHName
+            // 
+            this.colHName.DataPropertyName = "name";
+            this.colHName.HeaderText = "Name";
+            this.colHName.MinimumWidth = 6;
+            this.colHName.Name = "colHName";
+            this.colHName.ReadOnly = true;
+            this.colHName.Width = 74;
+            // 
+            // colHValue
+            // 
+            this.colHValue.DataPropertyName = "value";
+            this.colHValue.HeaderText = "Value (Old)";
+            this.colHValue.MinimumWidth = 6;
+            this.colHValue.Name = "colHValue";
+            this.colHValue.ReadOnly = true;
+            this.colHValue.Width = 125;
+            // 
+            // colHNewValue
+            // 
+            this.colHNewValue.DataPropertyName = "new_value";
+            this.colHNewValue.HeaderText = "Value (New)";
+            this.colHNewValue.MinimumWidth = 6;
+            this.colHNewValue.Name = "colHNewValue";
+            this.colHNewValue.ReadOnly = true;
+            this.colHNewValue.Width = 105;
+            // 
+            // colHValueForSecondary
+            // 
+            this.colHValueForSecondary.DataPropertyName = "value_for_secondary";
+            this.colHValueForSecondary.HeaderText = "Value for Secondary (Old)";
+            this.colHValueForSecondary.MinimumWidth = 6;
+            this.colHValueForSecondary.Name = "colHValueForSecondary";
+            this.colHValueForSecondary.ReadOnly = true;
+            this.colHValueForSecondary.Width = 155;
+            // 
+            // colHValueForSecondaryNew
+            // 
+            this.colHValueForSecondaryNew.DataPropertyName = "new_value_for_secondary";
+            this.colHValueForSecondaryNew.HeaderText = "Value for secondary (New)";
+            this.colHValueForSecondaryNew.MinimumWidth = 6;
+            this.colHValueForSecondaryNew.Name = "colHValueForSecondaryNew";
+            this.colHValueForSecondaryNew.ReadOnly = true;
+            this.colHValueForSecondaryNew.Width = 154;
+            // 
+            // colHValidTo
+            // 
+            this.colHValidTo.DataPropertyName = "ValidTo";
+            this.colHValidTo.HeaderText = "Change Date";
+            this.colHValidTo.MinimumWidth = 6;
+            this.colHValidTo.Name = "colHValidTo";
+            this.colHValidTo.ReadOnly = true;
+            this.colHValidTo.Width = 110;
             // 
             // DBConfiguration
             // 
@@ -473,14 +473,6 @@
         private System.Windows.Forms.ToolStripButton tsRefreshHistory;
         private System.Windows.Forms.ToolStripButton tsCopyHistory;
         private System.Windows.Forms.ToolStripLabel toolStripLabel2;
-        private System.Windows.Forms.DataGridViewTextBoxColumn colHInstance;
-        private System.Windows.Forms.DataGridViewTextBoxColumn colHDB;
-        private System.Windows.Forms.DataGridViewTextBoxColumn colHName;
-        private System.Windows.Forms.DataGridViewTextBoxColumn colHValue;
-        private System.Windows.Forms.DataGridViewTextBoxColumn colHNewValue;
-        private System.Windows.Forms.DataGridViewTextBoxColumn colHValueForSecondary;
-        private System.Windows.Forms.DataGridViewTextBoxColumn colHValueForSecondaryNew;
-        private System.Windows.Forms.DataGridViewTextBoxColumn colHValidTo;
         private System.Windows.Forms.ToolStripButton tsExcel;
         private System.Windows.Forms.ToolStripButton tsExcelHistory;
         private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn1;
@@ -492,5 +484,13 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn7;
         private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn8;
         private System.Windows.Forms.ToolStripButton tsCols;
+        private System.Windows.Forms.DataGridViewTextBoxColumn colHInstance;
+        private System.Windows.Forms.DataGridViewTextBoxColumn colHDB;
+        private System.Windows.Forms.DataGridViewTextBoxColumn colHName;
+        private System.Windows.Forms.DataGridViewTextBoxColumn colHValue;
+        private System.Windows.Forms.DataGridViewTextBoxColumn colHNewValue;
+        private System.Windows.Forms.DataGridViewTextBoxColumn colHValueForSecondary;
+        private System.Windows.Forms.DataGridViewTextBoxColumn colHValueForSecondaryNew;
+        private System.Windows.Forms.DataGridViewTextBoxColumn colHValidTo;
     }
 }

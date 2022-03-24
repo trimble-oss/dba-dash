@@ -134,7 +134,7 @@ namespace DBADashGUI.Properties
                 Dock = DockStyle.Fill,
                 ClipboardCopyMode = DataGridViewClipboardCopyMode.EnableAlwaysIncludeHeaderText
             };
-            dgv.Columns.Add(new DataGridViewTextBoxColumn() { Name = "Instance", DataPropertyName = "Instance", HeaderText = "Instance" });
+            dgv.Columns.Add(new DataGridViewTextBoxColumn() { Name = "Instance", DataPropertyName = "InstanceDisplayName", HeaderText = "Instance" });
             dgv.Columns.Add(new DataGridViewTextBoxColumn() { Name = "Name", DataPropertyName = "Name", HeaderText = "Name" });
             dgv.Columns.Add(new DataGridViewTextBoxColumn() { Name = "Label", DataPropertyName = "Label", HeaderText = "Label" });
             dgv.Columns.Add(new DataGridViewTextBoxColumn() { Name = "TotalGB", DataPropertyName = "TotalGB", HeaderText = "Total GB", DefaultCellStyle = new DataGridViewCellStyle() { Format = "0.0" } });
@@ -237,7 +237,7 @@ namespace DBADashGUI.Properties
                 drv.Drive.CriticalThreshold = r["DriveCriticalThreshold"] == DBNull.Value ? 0 : (decimal)r["DriveCriticalThreshold"];
 
                 drv.Drive.DriveLabel = r["Label"] == DBNull.Value ? "" : (string)r["Label"];
-                drv.Drive.InstanceName = (string)r["Instance"];
+                drv.Drive.InstanceName = (string)r["InstanceDisplayName"];
                 drv.Drive.DriveLetter = (string)r["Name"];
                 drv.Drive.DriveCapacityGB = (decimal)r["TotalGB"];
                 drv.Drive.FreeSpaceGB = (decimal)r["FreeGB"];

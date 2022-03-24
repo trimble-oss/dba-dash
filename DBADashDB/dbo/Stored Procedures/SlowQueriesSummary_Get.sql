@@ -8,13 +8,14 @@
 	@InstanceIDs VARCHAR(MAX)=NULL,
 	@DurationFromSec BIGINT=NULL,
 	@DurationToSec BIGINT=NULL,
-	@GroupBy VARCHAR(50)='ConnectionID',
+	@GroupBy VARCHAR(50)='InstanceDisplayName',
 	@Text NVARCHAR(MAX)=NULL,
 	@DatabaseName SYSNAME=NULL,
 	@UserName SYSNAME=NULL,
 	@Result SYSNAME=NULL,
 	@Top INT=20,
-	@SessionID INT=NULL
+	@SessionID INT=NULL,
+	@InstanceDisplayName NVARCHAR(128)=NULL
 )
 AS
 DECLARE @DurationFromUS BIGINT 
@@ -45,7 +46,8 @@ DECLARE @GroupSQL NVARCHAR(MAX) = CASE @GroupBy WHEN 'ConnectionID' THEN 'I.Conn
 												WHEN 'Result' THEN 'SQ.Result'
 												WHEN 'text' THEN 'LEFT(SQ.text,1000)'
 												WHEN 'session_id' THEN 'SQ.session_id'
-												ELSE 'ConnectionID' END
+												WHEN 'InstanceDisplayName' THEN 'I.InstanceDisplayName' 
+												ELSE 'InstanceDisplayName' END
 IF @Top<=0
 BEGIN
 	SET @Top=NULL;
@@ -77,6 +79,7 @@ AND timestamp< @ToDate
 ' + CASE WHEN @ObjectName IS NULL THEN '' ELSE 'AND SQ.object_name = @ObjectName' END +'
 ' + CASE WHEN @ClientHostName IS NULL THEN '' ELSE 'AND SQ.client_hostname = @ClientHostName' END +'
 ' + CASE WHEN @ConnectionID IS NULL THEN '' ELSE 'AND I.ConnectionID = @ConnectionID' END + '
+' + CASE WHEN @InstanceDisplayName IS NULL THEN '' ELSE 'AND I.InstanceDisplayName = @InstanceDisplayName' END + '
 ' + CASE WHEN @ClientAppName IS NULL THEN '' ELSE 'AND SQ.client_app_name = @ClientAppName' END + '
 ' + CASE WHEN @DurationFromUS IS NULL THEN '' ELSE 'AND SQ.Duration >= @DurationFrom' END + '
 ' + CASE WHEN @DurationToUS IS NULL THEN '' ELSE 'AND SQ.Duration < @DurationTo' END + '
@@ -91,6 +94,7 @@ ORDER BY SUM(Duration) DESC'
 EXEC sp_executesql @SQL,N'@Instances IDs READONLY,@ObjectName SYSNAME,@ClientHostName SYSNAME,
 						@ConnectionID SYSNAME,@ClientAppName SYSNAME,@DurationFrom BIGINT,
 						@DurationTo BIGINT,@Text NVARCHAR(MAX),@DatabaseName SYSNAME,
-						@FromDate DATETIME2(3),@ToDate DATETIME2(3),@UserName SYSNAME,@Result SYSNAME,@Top INT,@SessionID INT',
+						@FromDate DATETIME2(3),@ToDate DATETIME2(3),@UserName SYSNAME,@Result SYSNAME,@Top INT,@SessionID INT,@InstanceDisplayName NVARCHAR(128)',
 						@Instances,@ObjectName,@ClientHostName,@ConnectionID,@ClientAppName,
-						@DurationFromUS,@DurationToUS,@Text,@DatabaseName,@FromDate,@ToDate,@UserName,@Result,@Top,@SessionID
+						@DurationFromUS,@DurationToUS,@Text,@DatabaseName,@FromDate,@ToDate,
+						@UserName,@Result,@Top,@SessionID,@InstanceDisplayName

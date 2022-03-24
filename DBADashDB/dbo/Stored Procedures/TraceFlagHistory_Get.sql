@@ -1,4 +1,6 @@
-﻿CREATE PROC dbo.TraceFlagHistory_Get(@InstanceIDs VARCHAR(MAX)=NULL)
+﻿CREATE PROC dbo.TraceFlagHistory_Get(
+	@InstanceIDs VARCHAR(MAX)=NULL
+)
 AS
 DECLARE @Instances TABLE(
 	InstanceID INT PRIMARY KEY
@@ -37,6 +39,7 @@ WITH T AS (
 )
 SELECT I.ConnectionID,
 	   T.InstanceID,
+	   I.InstanceDisplayName,
        T.TraceFlag,
        T.ChangeDate,
        T.Change

@@ -5,7 +5,7 @@ AS
 DECLARE @SQL NVARCHAR(MAX)
 SET @SQL =N'
 SELECT InstanceID,
-       Instance,
+       InstanceDisplayName,
        Status,
        StatusDescription,
        LogShippedDBCount,

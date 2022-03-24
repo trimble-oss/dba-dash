@@ -46,6 +46,7 @@ WITH B AS(
 SELECT I.InstanceID,
 	d.DatabaseID,
 	I.Instance,
+	I.InstanceDisplayName,
 	d.name,
 	D.recovery_model,
 	CASE D.recovery_model WHEN 1 THEN 'FULL' WHEN 2 THEN 'BULK_LOGGED' WHEN 3 THEN 'SIMPLE' ELSE '???' END AS recovery_model_desc,

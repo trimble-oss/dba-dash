@@ -36,6 +36,7 @@ namespace DBADashGUI.Tagging
         }
         public List<int> InstanceIDs { get; set; }
         public string InstanceName { get; set; }
+        public int InstanceID { get; set; }
 
         private void bttnAdd_Click(object sender, EventArgs e)
         {
@@ -45,7 +46,7 @@ namespace DBADashGUI.Tagging
                 return;
             }
 
-            InstanceTag newTag = new InstanceTag() { Instance = InstanceName, TagName = cboTagName.Text, TagValue = cboTagValue.Text };
+            InstanceTag newTag = new InstanceTag() { Instance = InstanceName, TagName = cboTagName.Text, TagValue = cboTagValue.Text, InstanceID = InstanceID };
             newTag.Save();
             RefreshData();
             TagsChanged.Invoke(this, null);
@@ -61,6 +62,10 @@ namespace DBADashGUI.Tagging
 
         public void RefreshData()
         {
+            if (InstanceIDs.Count == 1)
+            {
+                InstanceID = InstanceIDs[0];
+            }
             lblInstance.Text = InstanceName;
             if (string.IsNullOrEmpty(InstanceName))
             {
@@ -81,7 +86,7 @@ namespace DBADashGUI.Tagging
         {
             dgv.Rows.Clear();
             dgvTags.Rows.Clear();
-            var tags = InstanceTag.GetInstanceTags(Common.ConnectionString, InstanceName);
+            var tags = InstanceTag.GetInstanceTags(InstanceName,InstanceID);
 
             foreach (var t in tags)
             {
@@ -104,9 +109,11 @@ namespace DBADashGUI.Tagging
             using var cmd = new SqlCommand("dbo.TagReport_Get", cn) { CommandType = CommandType.StoredProcedure };
             using var da = new SqlDataAdapter(cmd);
             var dt = new DataTable();
-            cmd.Parameters.AddWithValue("InstanceIDs", string.Join(",", InstanceIDs));
+            cmd.Parameters.AddWithValue("InstanceIDs", InstanceIDs.AsDataTable());
             da.Fill(dt);
+            dgvReport.DataSource = null;
             dgvReport.Columns.Clear();
+            dgvReport.Columns.Add(new DataGridViewTextBoxColumn {Name ="colInstanceID", Visible=false, DataPropertyName = "InstanceID"});
             dgvReport.Columns.Add(new DataGridViewLinkColumn() { HeaderText = "Instance", DataPropertyName = "Instance", SortMode = DataGridViewColumnSortMode.Automatic, LinkColor = DashColors.LinkColor });
             dgvReport.DataSource = dt;
             dgvReport.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
@@ -118,6 +125,7 @@ namespace DBADashGUI.Tagging
             if(e.RowIndex>=0 && dgvReport.Columns[e.ColumnIndex].DataPropertyName=="Instance" )
             {
                 InstanceName = (string)dgvReport[e.ColumnIndex, e.RowIndex].Value;
+                InstanceID = Convert.ToInt32(dgvReport["colInstanceID", e.RowIndex].Value);
                 RefreshData();
             }
         }
@@ -140,6 +148,7 @@ namespace DBADashGUI.Tagging
         private void tsBack_Click(object sender, EventArgs e)
         {
             InstanceName = string.Empty;
+            InstanceID = -1;
             RefreshData();
         }
 
@@ -167,7 +176,7 @@ namespace DBADashGUI.Tagging
                 string tagName=(string)dgvTags.Rows[e.RowIndex].Cells[colTagName1.Index].Value;
                 string tagValue = (string)dgvTags.Rows[e.RowIndex].Cells[ColTagValue1.Index].Value;
                 bool isTagged = (bool)dgvTags.Rows[e.RowIndex].Cells[colCheck.Index].Value;
-                var tag = new InstanceTag() { Instance = InstanceName, TagID =tagid , TagName =tagName , TagValue = tagValue, IsTagged= isTagged};
+                var tag = new InstanceTag() { Instance = InstanceName, TagID =tagid , TagName =tagName , TagValue = tagValue, IsTagged= isTagged, InstanceID = InstanceID};
                 tag.Save();
            }
         }

@@ -2,7 +2,7 @@
 	@InstanceIDs VARCHAR(MAX)
 )
 AS
-SELECT I.Instance,
+SELECT	I.InstanceGroupName,
 		SUM(CASE WHEN QS.actual_state = 0 THEN 1 ELSE 0 END) as QS_OFF,
 		SUM(CASE WHEN QS.actual_state = 1 THEN 1 ELSE 0 END) as QS_READ_ONLY,
 		SUM(CASE WHEN QS.actual_state = 1 AND QS.readonly_reason NOT IN(0,1,8) THEN 1 ELSE 0 END) as QS_READ_ONLY_ATT,
@@ -21,4 +21,4 @@ JOIN dbo.Databases D ON QS.DatabaseID = D.DatabaseID
 JOIN dbo.Instances I ON I.InstanceID = D.InstanceID
 LEFT JOIN dbo.CollectionDatesStatus CDS ON CDS.InstanceID = I.InstanceID AND CDS.Reference = 'DatabaseQueryStoreOptions'
 WHERE EXISTS(SELECT 1 FROM STRING_SPLIT(@InstanceIDs,',') ss WHERE ss.value = I.InstanceID)
-GROUP BY  I.Instance
+GROUP BY I.InstanceGroupName

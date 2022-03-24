@@ -24,7 +24,7 @@ BEGIN
 END
 
 SELECT InstanceID,
-       Instance,
+       InstanceDisplayName AS Instance,
        Status,
        StatusDescription,
        LogShippedDBCount,

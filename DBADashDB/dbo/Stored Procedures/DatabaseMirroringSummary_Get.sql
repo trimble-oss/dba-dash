@@ -2,7 +2,7 @@
 		@InstanceIDs VARCHAR(MAX)=NULL
 )
 AS
-SELECT I.Instance, 
+SELECT I.InstanceDisplayName AS Instance, 
 		SUM(CASE WHEN DM.mirroring_role=1 THEN 1 ELSE 0 END) as PrincipalCount,
 		SUM(CASE WHEN DM.mirroring_role=2 THEN 1 ELSE 0 END) as MirrorCount,
 		SUM(CASE WHEN DM.mirroring_state IN(4,6) THEN 1 ELSE 0 END) as SynchronizedCount,
@@ -23,4 +23,6 @@ LEFT JOIN dbo.CollectionDatesStatus CD ON DM.InstanceID = CD.InstanceID AND CD.R
 WHERE EXISTS(SELECT 1 FROM STRING_SPLIT(@InstanceIDs,',') ss WHERE ss.value = I.InstanceID
 		UNION ALL
 		SELECT 1 WHERE @InstanceIDs IS NULL)
-GROUP BY I.Instance,CD.SnapshotAge,CD.Status
+GROUP BY I.InstanceDisplayName,
+		CD.SnapshotAge,
+		CD.Status

@@ -43,9 +43,9 @@ namespace DBADashGUI
             }
         }
 
-        public static Int32 GetDatabaseID(string instance, string dbName)
+        public static Int32 GetDatabaseID(string instanceGroupName, string dbName)
         {
-            if (instance == null || instance.Length == 0 || dbName == null || dbName.Length == 0)
+            if (instanceGroupName == null || instanceGroupName.Length == 0 || dbName == null || dbName.Length == 0)
             {
                 return -1;
             }
@@ -55,7 +55,7 @@ namespace DBADashGUI
                 using (var cmd = new SqlCommand("DatabaseID_Get", cn) { CommandType = CommandType.StoredProcedure })
                 {
                     cn.Open();
-                    cmd.Parameters.AddWithValue("Instance", instance);
+                    cmd.Parameters.AddWithValue("InstanceGroupName", instanceGroupName);
                     cmd.Parameters.AddWithValue("DBName", dbName);
                     return (Int32)cmd.ExecuteScalar();
                 }                
@@ -108,7 +108,7 @@ namespace DBADashGUI
                 {
                     cmd.Parameters.AddWithValue("InstanceID", instanceID);
                 }
-                if (instance != null && instance.Length > 0)
+                else if (instance != null && instance.Length > 0)
                 {
                     cmd.Parameters.AddWithValue("Instance", instance);
                 }
@@ -183,14 +183,14 @@ namespace DBADashGUI
             return instances;
         }
 
-        public static List<DatabaseItem> GetDatabasesWithDDLSnapshot(string instance)
+        public static List<DatabaseItem> GetDatabasesWithDDLSnapshot(string instanceGroupName)
         {
             List<DatabaseItem> databases = new List<DatabaseItem>();
             using (var cn = new SqlConnection(Common.ConnectionString))
             using (var cmd = new SqlCommand("dbo.DatabasesWithDDLSnapshot_Get", cn) { CommandType = CommandType.StoredProcedure })
             {
                 cn.Open();
-                cmd.Parameters.AddWithValue("Instance", instance);
+                cmd.Parameters.AddWithValue("InstanceGroupName", instanceGroupName);
                 using (var rdr = cmd.ExecuteReader())
                 {
                     while (rdr.Read())

@@ -54,6 +54,9 @@ namespace DBADashConfig
         [Option("SlowQuerySessionMaxMemoryKB", Default = 4096, Required = false, HelpText = "Max memory for extended events session")]
         public int SlowQuerySessionMaxMemoryKB { get; set; }
 
+        [Option("ConnectionID", Default = "", Required = false, HelpText = "The ConnectionID is used to uniquely identify the SQL Instance in the repository database.  The ConnectionID is automatically assigned to @@SERVERNAME but you can override this with a custom value.  If you change the ConnectionID for an existing server it will appear as a new instance in the repository database.")]
+        public string ConnectionID { get; set; } = "";
+
         public enum CommandLineActionOption
         {
             Add,

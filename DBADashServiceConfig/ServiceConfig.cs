@@ -143,6 +143,7 @@ namespace DBADashServiceConfig
                         else if (hasUpdateApproval || MessageBox.Show("Update existing connection(s)?", "Update", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
                         {
                             collectionConfig.SourceConnections.Remove(existingConnection);
+                            src.ConnectionID = existingConnection.ConnectionID;
                             hasUpdateApproval = true;
                         }
                         else
@@ -294,6 +295,7 @@ namespace DBADashServiceConfig
         {
             dgvConnections.AutoGenerateColumns = false;
             dgvConnections.Columns.Add(new DataGridViewTextBoxColumn() { Name = "ConnectionString", DataPropertyName = "ConnectionString", HeaderText = "Connection String", Width = 300 });
+            dgvConnections.Columns.Add(new DataGridViewTextBoxColumn() { Name = "ConnectionID", DataPropertyName = "ConnectionID", HeaderText = "Connection ID", ToolTipText="The ConnectionID is used to uniquely identify the SQL Instance in the repository database.  The ConnectionID is automatically assigned to @@SERVERNAME but you can override this with a custom value.  If you change the ConnectionID for an existing server it will appear as a new instance in the repository database." });
             dgvConnections.Columns.Add(new DataGridViewCheckBoxColumn() { DataPropertyName = "NoWMI", HeaderText = "No WMI" });
             dgvConnections.Columns.Add(new DataGridViewTextBoxColumn() { DataPropertyName = "SlowQueryThresholdMs", HeaderText = "Slow Query Threshold (ms)" });
             dgvConnections.Columns.Add(new DataGridViewCheckBoxColumn() { DataPropertyName = "UseDualEventSession", HeaderText = "Use Dual Event Session" });
