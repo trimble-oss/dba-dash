@@ -111,6 +111,8 @@ namespace DBADash
         private Policy retryPolicy;
         private DatabaseEngineEdition engineEdition;
         private DBADashAgent dashAgent;
+        public bool IsExtendedEventsNotSupportedException=false;
+
         CacheItemPolicy policy = new CacheItemPolicy
         {
             SlidingExpiration = TimeSpan.FromMinutes(60)
@@ -157,7 +159,7 @@ namespace DBADash
 
         public bool IsXESupported()
         {
-            return DBADashConnection.IsXESupported(productVersion);
+            return !IsExtendedEventsNotSupportedException && DBADashConnection.IsXESupported(productVersion);
         }
 
         public bool IsQueryStoreSupported()
@@ -814,7 +816,17 @@ CROSS APPLY sys.dm_exec_sql_text(H.sql_handle) txt");
             {
                 if (Source.SlowQueryThresholdMs >= 0 && (!(IsAzureDB && isAzureMasterDB)))
                 {
-                     collectSlowQueries();
+                    try
+                    {
+                        collectSlowQueries();
+                    }
+                    catch(SqlException ex) when (ex.Message.StartsWith("Unable to create/alter extended events session: RDS for SQL Server supports extended events")){
+                        // RDS instances only support extended events for Standard and Enterprise editions.  If we encounter an error because it's not supported, log the error and continue
+                        // Set IsExtendedEventsNotSupportedException which is used to disable the collection for future schedules
+                        Log.Warning("Slow query capture relies on extended events which is not supported for {0}: {1}",instanceName, ex.Message);
+                        logDBError(collectionTypeString, "Slow query capture relies on extended events which is not supported for this instance","Collect[Warning]");
+                        IsExtendedEventsNotSupportedException = true;
+                    }
                 }
             }
             else if (collectionType == CollectionType.PerformanceCounters)

@@ -159,9 +159,12 @@ namespace DBADashService
 
                     try
                     {
+                        // Value used to disable future collections of SlowQueries if we encounter a not supported error on a RDS instance not running Standard or Enterprise edition
+                        bool dataMapExtendedEventsNotSupported = dataMap.GetBooleanValue("IsExtendedEventsNotSupportedException");
                         var collector = new DBCollector(cfg, config.ServiceName)
                         {
-                            Job_instance_id = dataMap.GetInt("Job_instance_id")
+                            Job_instance_id = dataMap.GetInt("Job_instance_id"),
+                            IsExtendedEventsNotSupportedException=dataMapExtendedEventsNotSupported
                         };
 
                         var jobLastCollected = dataMap.GetDateTime("JobCollectDate");
@@ -185,6 +188,12 @@ namespace DBADashService
                         using (var op = Operation.Begin("Collect {types} from instance {instance}", string.Join(", ", types.Select(s => s.ToString()).ToArray()), cfg.SourceConnection.ConnectionForPrint))
                         {
                             collector.Collect(types);
+                            if (!dataMapExtendedEventsNotSupported && collector.IsExtendedEventsNotSupportedException)
+                            {
+                                // We encounterd an error setting up extended events on a RDS instance because it's only supported for Standard and Enterprise editions.  Disable the collection
+                                Log.Information("Disabling Extended events collection for {0}.  Instance type doesn't support extended events", cfg.SourceConnection.ConnectionForPrint);
+                                dataMap.Put("IsExtendedEventsNotSupportedException", true);
+                            }
                             op.Complete();
                         }
                         bool containsJobs = collector.Data.Tables.Contains("Jobs");

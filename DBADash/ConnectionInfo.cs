@@ -18,6 +18,8 @@ namespace DBADash
 
         public string DatabaseName { get; set; }
 
+        public string ServerName { get; set; }
+
         public int MajorVersion
         {
             get
@@ -42,8 +44,15 @@ namespace DBADash
 
         public bool IsXESupported
         {
-            get { 
-                return GetXESupported(MajorVersion);
+            get {
+                if (ServerName.StartsWith("EC2AMAZ-") && !(EngineEdition == DatabaseEngineEdition.Standard || EngineEdition == DatabaseEngineEdition.Enterprise)) // Extended events only supported on Standard and Enterprise editions for RDS
+                {
+                    return false;
+                }
+                else
+                {
+                    return GetXESupported(MajorVersion);
+                }
             }
         }
 
@@ -73,7 +82,7 @@ namespace DBADash
         {
             var connectionInfo = new ConnectionInfo();
             using (var cn = new SqlConnection(connectionString))
-            using (var cmd = new SqlCommand("SELECT SERVERPROPERTY('EngineEdition'),SERVERPROPERTY('ProductVersion'),DB_NAME()", cn))
+            using (var cmd = new SqlCommand("SELECT SERVERPROPERTY('EngineEdition'),SERVERPROPERTY('ProductVersion'),DB_NAME(),@@SERVERNAME", cn))
             {
                 cn.Open();
                 using (var rdr = cmd.ExecuteReader())
@@ -88,7 +97,8 @@ namespace DBADash
                         connectionInfo.EngineEdition = DatabaseEngineEdition.Unknown;
                     }
                     connectionInfo.ProductVersion = rdr.GetString(1);
-                    connectionInfo.DatabaseName = rdr.GetString(2);                  
+                    connectionInfo.DatabaseName = rdr.GetString(2);
+                    connectionInfo.ServerName = rdr.GetString(3);
                 }
             }
             return connectionInfo;
