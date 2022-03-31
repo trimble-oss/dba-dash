@@ -164,7 +164,7 @@ namespace DBADashServiceConfig
             setDgv();
             if (warnXENotSupported)
             {
-                MessageBox.Show("Warning: Slow query capture is supported for SQL 2012 and later only", "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("Warning: Slow query capture requires an extended event session which is not supported for one or more connections.\nRequirements:\nSQL 2012 or later.\nStandard or Enteprise Edition on Amazon RDS", "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
         }
 
