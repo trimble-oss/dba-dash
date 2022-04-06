@@ -361,7 +361,6 @@ namespace DBADashGUI
             else if(tabs.SelectedTab == tabInstanceConfig)
             {                
                 configurationHistory1.InstanceIDs = instanceIDs;
-                configurationHistory1.ConnectionString = connectionString;
                 configurationHistory1.RefreshData();
             }
             else if(tabs.SelectedTab== tabSlowQueries)

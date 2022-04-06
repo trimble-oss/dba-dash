@@ -18,30 +18,27 @@ namespace DBADashGUI
             InitializeComponent();
         }
 
-        public string ConnectionString;
         public List<Int32> InstanceIDs;
 
         public void RefreshData()
         {
-            configuration1.ConnectionString = this.ConnectionString;
             configuration1.InstanceIDs = this.InstanceIDs;
             configuration1.RefreshData();
-            using (var cn = new SqlConnection(ConnectionString))
+            using (var cn = new SqlConnection(Common.ConnectionString))
+            using (var cmd = new SqlCommand("dbo.SysConfigHistory_Get", cn){CommandType = CommandType.StoredProcedure })
+            using(var da = new SqlDataAdapter(cmd))
             {
-                using (SqlCommand cmd = new SqlCommand("dbo.SysConfigHistory_Get", cn){CommandType = CommandType.StoredProcedure })
-                {
-                    cn.Open();
-
-                    cmd.Parameters.AddWithValue("@InstanceIDs", string.Join(",", InstanceIDs));
-                    SqlDataAdapter da = new SqlDataAdapter(cmd);
-                    DataTable dt = new DataTable();
-                    da.Fill(dt);
-                    Common.ConvertUTCToLocal(ref dt);
-                    dgv.AutoGenerateColumns = false;
-                    dgv.DataSource = dt;
-                    dgv.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
-                }
+                cn.Open();
+                cmd.Parameters.AddWithValue("@InstanceIDs", string.Join(",", InstanceIDs));
+                
+                DataTable dt = new DataTable();
+                da.Fill(dt);
+                Common.ConvertUTCToLocal(ref dt);
+                dgv.AutoGenerateColumns = false;
+                dgv.DataSource = dt;
+                dgv.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
             }
+            
         }
 
         private void tsRefresh_Click(object sender, EventArgs e)
@@ -54,9 +51,9 @@ namespace DBADashGUI
             Common.CopyDataGridViewToClipboard(dgv);
         }
 
-        private void configuration1_Load(object sender, EventArgs e)
+        private void tsHistoryExcel_Click(object sender, EventArgs e)
         {
-
+            Common.PromptSaveDataGridView(ref dgv);
         }
     }
 }

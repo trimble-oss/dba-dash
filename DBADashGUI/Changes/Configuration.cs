@@ -18,12 +18,11 @@ namespace DBADashGUI.Changes
             InitializeComponent();
         }
 
-        public string ConnectionString;
         public List<Int32> InstanceIDs;
 
         private DataTable getConfiguration()
         {
-            using (var cn = new SqlConnection(ConnectionString))
+            using (var cn = new SqlConnection(Common.ConnectionString))
             using (var cmd = new SqlCommand("dbo.Configuration_Get", cn) { CommandType = CommandType.StoredProcedure })
             using (var da = new SqlDataAdapter(cmd))
             {
