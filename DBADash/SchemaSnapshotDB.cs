@@ -859,11 +859,18 @@ namespace DBADash
 
         private void addDDLTriggers(Database db, DataTable dtSchema)
         {
-
             foreach (DatabaseDdlTrigger t in db.Triggers)
             {
                 var r = dtSchema.NewRow();
-                var sDDL = stringCollectionToString(t.Script(ScriptingOptions));
+                string sDDL;
+                if (t.IsEncrypted)
+                {
+                    sDDL = "/* Encrypted DDL Trigger */";
+                }
+                else
+                {
+                    sDDL = stringCollectionToString(t.Script(ScriptingOptions));
+                }
                 var bDDL = Zip(sDDL);
                 r["ObjectName"] = t.Name;
                 r["SchemaName"] = "";
@@ -945,7 +952,16 @@ namespace DBADash
                 if (!f.IsSystemObject)
                 {
                     var r = dtSchema.NewRow();
-                    var sDDL = f.TextHeader + Environment.NewLine + f.TextBody;
+                    string sDDL;
+                    if (f.IsEncrypted)
+                    {
+                        sDDL = "/* Encrypted Function */"; 
+                    }
+                    else 
+                    {                         
+                        sDDL = f.TextHeader + Environment.NewLine + f.TextBody;
+                    }
+                    
                     var bDDL = Zip(sDDL);
                     r["ObjectName"] = f.Name;
                     r["SchemaName"] = f.Schema;
@@ -997,7 +1013,16 @@ namespace DBADash
                 if (!v.IsSystemObject)
                 {
                     var r = dtSchema.NewRow();
-                    var sDDL = stringCollectionToString(v.Script(ScriptingOptions));
+                    string sDDL;
+                    if (v.IsEncrypted)
+                    {
+                        sDDL = "/* Encrypted View */";
+                    }
+                    else
+                    {
+                        sDDL = stringCollectionToString(v.Script(ScriptingOptions));
+                    }
+                 
                     var bDDL = Zip(sDDL);
                     r["ObjectName"] = v.Name;
                     r["SchemaName"] = v.Schema;
@@ -1020,12 +1045,18 @@ namespace DBADash
 
             foreach (StoredProcedure sp in db.StoredProcedures)
             {
-
                 if (!sp.IsSystemObject)
                 {
-
                     var r = dtSchema.NewRow();
-                    var sDDL = sp.TextHeader + Environment.NewLine + sp.TextBody;
+                    string sDDL;
+                    if (sp.IsEncrypted)
+                    {
+                        sDDL = "/* Encrypted stored procedure */";
+                    }
+                    else 
+                    {
+                        sDDL = sp.TextHeader + Environment.NewLine + sp.TextBody;
+                    }
                     if (sp.ImplementationType == ImplementationType.SqlClr)
                     {
                         r["ObjectType"] = "PC";
@@ -1050,12 +1081,31 @@ namespace DBADash
         private void addTables(Database db, DataTable dtSchema)
         {
             db.PrefetchObjects(typeof(Table), ScriptingOptions);
+            bool includeTriggers = options.Triggers;
             foreach (Table t in db.Tables)
             {
                 if (!t.IsSystemObject)
                 {
                     var r = dtSchema.NewRow();
+                    bool hasEncryptedTriggers = false;
+                    // Don't script triggers if table contains encrypted triggers
+                    if (includeTriggers)
+                    {
+                        foreach (Trigger trigger in t.Triggers)
+                        {
+                            if (trigger.IsEncrypted)
+                            {
+                                hasEncryptedTriggers = true;
+                                ScriptingOptions.Triggers = false;
+                                break;
+                            }                      
+                        }                       
+                    }
                     var sDDL = stringCollectionToString(t.Script(ScriptingOptions));
+                    if (hasEncryptedTriggers)
+                    {
+                        sDDL += Environment.NewLine +  "/* Encrypted Triggers */";
+                    }
                     var bDDL = Zip(sDDL);
                     r["ObjectName"] = t.Name;
                     r["SchemaName"] = t.Schema;
@@ -1069,6 +1119,7 @@ namespace DBADash
 
                     addTriggers(t.Triggers, t.Schema, dtSchema);
                 }
+                ScriptingOptions.Triggers = includeTriggers;
             }
         }
 
@@ -1081,7 +1132,15 @@ namespace DBADash
                     if (!t.IsSystemObject)
                     {
                         var r = dtSchema.NewRow();
-                        var sDDL = stringCollectionToString(t.Script(ScriptingOptions));
+                        string sDDL;
+                        if (t.IsEncrypted)
+                        {
+                            sDDL = "/* Encrypted trigger */";
+                        }
+                        else
+                        {
+                            sDDL = stringCollectionToString(t.Script(ScriptingOptions));
+                        }
                         var bDDL = Zip(sDDL);
                         r["ObjectName"] = t.Name;
                         r["SchemaName"] = schema;
