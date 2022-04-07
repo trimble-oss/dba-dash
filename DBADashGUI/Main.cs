@@ -62,6 +62,9 @@ namespace DBADashGUI
 
         private async void Main_Load(object sender, EventArgs e)
         {
+            lblVersion.Text = "Version: " + System.Reflection.Assembly.GetEntryAssembly().GetName().Version;
+            tabs.TabPages.Clear();
+            tabs.TabPages.Add(tabDBADash);
             Common.StyleGrid(ref gvHistory);
             dbOptions1.SummaryMode = true;
             splitSchemaSnapshot.Panel1.Controls.Add(diffSchemaSnapshot);
@@ -173,6 +176,10 @@ namespace DBADashGUI
             bool globalTimeisVisible = false;
             List<Int32> instanceIDs;         
             var n = (SQLTreeItem) tv1.SelectedNode;
+            if(n == null)
+            {
+                return;
+            }
             var parent = (SQLTreeItem)n.Parent;
             if (n.InstanceID > 0)
             {
@@ -895,6 +902,10 @@ namespace DBADashGUI
                 foreach (TabPage t in allowedTabs)
                 {
                     tabs.TabPages.Add(t);
+                }
+                if (tabs.TabPages.Count == 0)
+                {
+                    tabs.TabPages.Add(tabDBADash);
                 }
             }
             suppressLoadTab = suppress;

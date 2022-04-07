@@ -39,9 +39,9 @@
             this.databaseSchemaDiffToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.agentJobDiffToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.optionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.configureDisplayNameToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.dataRetentionToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.manageInstancesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.configureDisplayNameToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.tsTime = new System.Windows.Forms.ToolStripDropDownButton();
             this.minsToolStripMenuItem2 = new System.Windows.Forms.ToolStripMenuItem();
             this.minsToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
@@ -169,6 +169,10 @@
             this.memoryUsage1 = new DBADashGUI.Performance.MemoryUsage();
             this.tabJobStats = new System.Windows.Forms.TabPage();
             this.jobStats1 = new DBADashGUI.AgentJobs.JobStats();
+            this.tabDBADash = new System.Windows.Forms.TabPage();
+            this.lblVersion = new System.Windows.Forms.Label();
+            this.lblSQLMonitoring = new System.Windows.Forms.Label();
+            this.lblDBADash = new System.Windows.Forms.Label();
             this.dataGridViewTextBoxColumn1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dataGridViewTextBoxColumn2 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dataGridViewTextBoxColumn3 = new System.Windows.Forms.DataGridViewTextBoxColumn();
@@ -247,6 +251,7 @@
             this.tabRunningQueries.SuspendLayout();
             this.tabMemory.SuspendLayout();
             this.tabJobStats.SuspendLayout();
+            this.tabDBADash.SuspendLayout();
             this.SuspendLayout();
             // 
             // TreeViewImageList
@@ -332,6 +337,13 @@
             this.optionsToolStripMenuItem.Size = new System.Drawing.Size(95, 30);
             this.optionsToolStripMenuItem.Text = "Options";
             // 
+            // configureDisplayNameToolStripMenuItem
+            // 
+            this.configureDisplayNameToolStripMenuItem.Name = "configureDisplayNameToolStripMenuItem";
+            this.configureDisplayNameToolStripMenuItem.Size = new System.Drawing.Size(254, 26);
+            this.configureDisplayNameToolStripMenuItem.Text = "Configure Display Name";
+            this.configureDisplayNameToolStripMenuItem.Click += new System.EventHandler(this.configureDisplayNameToolStripMenuItem_Click);
+            // 
             // dataRetentionToolStripMenuItem
             // 
             this.dataRetentionToolStripMenuItem.Name = "dataRetentionToolStripMenuItem";
@@ -345,13 +357,6 @@
             this.manageInstancesToolStripMenuItem.Size = new System.Drawing.Size(254, 26);
             this.manageInstancesToolStripMenuItem.Text = "Manage Instances";
             this.manageInstancesToolStripMenuItem.Click += new System.EventHandler(this.manageInstancesToolStripMenuItem_Click);
-            // 
-            // configureDisplayNameToolStripMenuItem
-            // 
-            this.configureDisplayNameToolStripMenuItem.Name = "configureDisplayNameToolStripMenuItem";
-            this.configureDisplayNameToolStripMenuItem.Size = new System.Drawing.Size(254, 26);
-            this.configureDisplayNameToolStripMenuItem.Text = "Configure Display Name";
-            this.configureDisplayNameToolStripMenuItem.Click += new System.EventHandler(this.configureDisplayNameToolStripMenuItem_Click);
             // 
             // tsTime
             // 
@@ -650,6 +655,7 @@
             this.tabs.Controls.Add(this.tabRunningQueries);
             this.tabs.Controls.Add(this.tabMemory);
             this.tabs.Controls.Add(this.tabJobStats);
+            this.tabs.Controls.Add(this.tabDBADash);
             this.tabs.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tabs.Location = new System.Drawing.Point(0, 0);
             this.tabs.Name = "tabs";
@@ -707,7 +713,7 @@
             this.splitSchemaSnapshot.Panel2.Controls.Add(this.gvHistory);
             this.splitSchemaSnapshot.Panel2.Controls.Add(this.label1);
             this.splitSchemaSnapshot.Size = new System.Drawing.Size(186, 61);
-            this.splitSchemaSnapshot.SplitterDistance = 27;
+            this.splitSchemaSnapshot.SplitterDistance = 26;
             this.splitSchemaSnapshot.TabIndex = 1;
             // 
             // label7
@@ -730,7 +736,7 @@
             this.tsNext,
             this.toolStripLabel1,
             this.tsPageSize});
-            this.toolStrip1.Location = new System.Drawing.Point(0, -2);
+            this.toolStrip1.Location = new System.Drawing.Point(0, -1);
             this.toolStrip1.Name = "toolStrip1";
             this.toolStrip1.Size = new System.Drawing.Size(186, 32);
             this.toolStrip1.TabIndex = 1;
@@ -822,7 +828,7 @@
             this.gvHistory.RowHeadersWidth = 51;
             this.gvHistory.RowTemplate.Height = 24;
             this.gvHistory.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-            this.gvHistory.Size = new System.Drawing.Size(186, 5);
+            this.gvHistory.Size = new System.Drawing.Size(186, 6);
             this.gvHistory.TabIndex = 0;
             this.gvHistory.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.gvHistory_CellContentClick);
             this.gvHistory.SelectionChanged += new System.EventHandler(this.gvHistory_SelectionChanged);
@@ -917,7 +923,6 @@
             // 
             // tags1
             // 
-            this.tags1.AllTags = null;
             this.tags1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tags1.InstanceID = 0;
             this.tags1.InstanceIDs = null;
@@ -1776,6 +1781,56 @@
             this.jobStats1.StepID = 0;
             this.jobStats1.TabIndex = 0;
             // 
+            // tabDBADash
+            // 
+            this.tabDBADash.Controls.Add(this.lblVersion);
+            this.tabDBADash.Controls.Add(this.lblSQLMonitoring);
+            this.tabDBADash.Controls.Add(this.lblDBADash);
+            this.tabDBADash.Location = new System.Drawing.Point(4, 25);
+            this.tabDBADash.Name = "tabDBADash";
+            this.tabDBADash.Padding = new System.Windows.Forms.Padding(3);
+            this.tabDBADash.Size = new System.Drawing.Size(1631, 1246);
+            this.tabDBADash.TabIndex = 42;
+            this.tabDBADash.UseVisualStyleBackColor = true;
+            // 
+            // lblVersion
+            // 
+            this.lblVersion.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(99)))), ((int)(((byte)(163)))));
+            this.lblVersion.Dock = System.Windows.Forms.DockStyle.Bottom;
+            this.lblVersion.Font = new System.Drawing.Font("Segoe UI", 14F, System.Drawing.FontStyle.Italic, System.Drawing.GraphicsUnit.Point);
+            this.lblVersion.ForeColor = System.Drawing.Color.White;
+            this.lblVersion.Location = new System.Drawing.Point(3, 1211);
+            this.lblVersion.Name = "lblVersion";
+            this.lblVersion.Size = new System.Drawing.Size(1625, 32);
+            this.lblVersion.TabIndex = 29;
+            this.lblVersion.Text = "{Version}";
+            // 
+            // lblSQLMonitoring
+            // 
+            this.lblSQLMonitoring.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(99)))), ((int)(((byte)(163)))));
+            this.lblSQLMonitoring.Dock = System.Windows.Forms.DockStyle.Top;
+            this.lblSQLMonitoring.Font = new System.Drawing.Font("Segoe UI", 14F, System.Drawing.FontStyle.Italic, System.Drawing.GraphicsUnit.Point);
+            this.lblSQLMonitoring.ForeColor = System.Drawing.Color.White;
+            this.lblSQLMonitoring.Location = new System.Drawing.Point(3, 3);
+            this.lblSQLMonitoring.Name = "lblSQLMonitoring";
+            this.lblSQLMonitoring.Size = new System.Drawing.Size(1625, 28);
+            this.lblSQLMonitoring.TabIndex = 28;
+            this.lblSQLMonitoring.Text = "SQL Server Monitoring";
+            this.lblSQLMonitoring.TextAlign = System.Drawing.ContentAlignment.TopRight;
+            // 
+            // lblDBADash
+            // 
+            this.lblDBADash.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(99)))), ((int)(((byte)(163)))));
+            this.lblDBADash.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.lblDBADash.Font = new System.Drawing.Font("Segoe UI", 26F, ((System.Drawing.FontStyle)((System.Drawing.FontStyle.Bold | System.Drawing.FontStyle.Italic))), System.Drawing.GraphicsUnit.Point);
+            this.lblDBADash.ForeColor = System.Drawing.Color.White;
+            this.lblDBADash.Location = new System.Drawing.Point(3, 3);
+            this.lblDBADash.Name = "lblDBADash";
+            this.lblDBADash.Size = new System.Drawing.Size(1625, 1240);
+            this.lblDBADash.TabIndex = 0;
+            this.lblDBADash.Text = "DBA Dash";
+            this.lblDBADash.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            // 
             // dataGridViewTextBoxColumn1
             // 
             this.dataGridViewTextBoxColumn1.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.DisplayedCells;
@@ -2074,6 +2129,7 @@
             this.tabRunningQueries.ResumeLayout(false);
             this.tabMemory.ResumeLayout(false);
             this.tabJobStats.ResumeLayout(false);
+            this.tabDBADash.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
@@ -2240,5 +2296,9 @@
         private System.Windows.Forms.ToolStripMenuItem databaseSchemaDiffToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem agentJobDiffToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem configureDisplayNameToolStripMenuItem;
+        private System.Windows.Forms.TabPage tabDBADash;
+        private System.Windows.Forms.Label lblDBADash;
+        private System.Windows.Forms.Label lblSQLMonitoring;
+        private System.Windows.Forms.Label lblVersion;
     }
 }
