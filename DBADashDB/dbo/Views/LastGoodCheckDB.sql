@@ -15,7 +15,7 @@ SELECT I.InstanceID,
 	S.Status,
 	CASE S.Status WHEN 1 THEN 'Critical' WHEN 2 THEN 'Warning' WHEN 3 THEN 'N/A' WHEN 4 THEN 'OK' ELSE NULL END AS StatusDescription,
 	CASE WHEN cfg.InstanceID IS NULL THEN 'None'
-	WHEN cfg.DatabaseID = -1 AND CFG.InstanceID =-1 THEN 'Root' 
+	WHEN cfg.DatabaseID = -1 AND cfg.InstanceID =-1 THEN 'Root' 
 	WHEN cfg.DatabaseID = -1 THEN 'Instance'
 	ELSE 'Database' END AS ConfiguredLevel,
 	cfg.WarningThresholdHrs,
@@ -33,7 +33,7 @@ OUTER APPLY(SELECT TOP(1) T.*
 			) cfg
 OUTER APPLY(SELECT STUFF(CONCAT(CASE WHEN D.state<>0 THEN ', ' + state_desc ELSE NULL END,
 					CASE WHEN D.is_in_standby=1 THEN ', STANDBY' ELSE NULL END,
-					CASE WHEN EXISTS(SELECT * FROM STRING_SPLIT(cfg.ExcludedDatabases,',') SS WHERE d.name LIKE SS.value) THEN ', name' ELSE NULL END,
+					CASE WHEN EXISTS(SELECT * FROM STRING_SPLIT(cfg.ExcludedDatabases,',') SS WHERE d.name LIKE RTRIM(LTRIM(SS.value))) THEN ', name' ELSE NULL END,
 					CASE WHEN D.LastGoodCheckDbTime IS NULL THEN ', Not captured' ELSE NULL END,
 					CASE WHEN DATEADD(mi,I.UTCOffset,D.create_date) > DATEADD(mi,-cfg.MinimumAge,GETUTCDATE())  THEN ', create_date' ELSE NULL END,
 					CASE WHEN cfg.WarningThresholdHrs IS NULL AND cfg.CriticalThresholdHrs IS NULL THEN ', No threshold' ELSE NULL END
