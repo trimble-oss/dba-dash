@@ -62,16 +62,22 @@ BEGIN
 END
 
 IF @DatabaseId IS NOT NULL
-BEGIN
-
+BEGIN;
+	WITH DeDupeDDL AS (
+		SELECT ss.DDLHash,
+			ss.DDL,
+			ROW_NUMBER() OVER(PARTITION BY ss.DDLHash ORDER BY ss.DDLHash) AS rnum
+		FROM @ss ss
+		WHERE NOT EXISTS(
+				SELECT 1 
+				FROM dbo.DDL 
+				WHERE ss.DDLHash = DDL.DDLHash
+				)
+	)
 	INSERT INTO dbo.DDL(DDLHash,DDL)
-	SELECT ss.DDLHash,ss.DDL
-	FROM @ss ss
-	WHERE NOT EXISTS(
-			SELECT 1 
-			FROM dbo.DDL 
-			WHERE ss.DDLHash = DDL.DDLHash
-			);
+	SELECT DDLHash,DDL
+	FROM DeDupeDDL
+	WHERE rnum = 1;
 
 	BEGIN TRAN;
 		WITH T AS (
