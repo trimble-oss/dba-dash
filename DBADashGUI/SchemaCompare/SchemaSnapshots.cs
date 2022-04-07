@@ -28,7 +28,7 @@ namespace DBADashGUI.Changes
         public List<Int32> InstanceIDs;
 
 
-        private DataSet ddlSnapshotDiff(DateTime snapshotDate, int databaseID)
+        private DataSet ddlSnapshotDiff(DateTime snapshotDateUTC, int databaseID)
         {
             using (var cn = new SqlConnection(Common.ConnectionString))
             using (var cmd = new SqlCommand("dbo.DDLSnapshotDiff_Get", cn) { CommandType = CommandType.StoredProcedure })
@@ -36,7 +36,7 @@ namespace DBADashGUI.Changes
             {
                 cn.Open();
                 cmd.Parameters.AddWithValue("DatabaseID", databaseID);
-                var p = cmd.Parameters.AddWithValue("SnapshotDate", snapshotDate);
+                var p = cmd.Parameters.AddWithValue("SnapshotDate", snapshotDateUTC);
                 p.DbType = DbType.DateTime2;     
                 DataSet ds = new DataSet();
                 da.Fill(ds);
@@ -50,10 +50,10 @@ namespace DBADashGUI.Changes
             if (gvSnapshots.SelectedRows.Count == 1)
             {
                 var row = (DataRowView)gvSnapshots.SelectedRows[0].DataBoundItem;
-                DateTime snapshotDate = (DateTime)row["SnapshotDate"];
+                DateTime snapshotDateUTC = ((DateTime)row["SnapshotDate"]).ToUniversalTime();
                 Int32 databaseID = (Int32)row["DatabaseID"];
           
-                DataSet ds = ddlSnapshotDiff(snapshotDate,databaseID);                     
+                DataSet ds = ddlSnapshotDiff(snapshotDateUTC,databaseID);                     
                 gvSnapshotsDetail.AutoGenerateColumns = false;
                 gvSnapshotsDetail.DataSource = ds.Tables[0];
                 gvSnapshotsDetail.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);                    
