@@ -61,8 +61,8 @@ namespace DBADashGUI.Changes
             dgvDrivers.Columns.Clear();
             searchText = txtSearch.Text;
 
-            dgvDrivers.Columns.Add(new DataGridViewTextBoxColumn() { Name = "DriverProviderName", HeaderText = "Provider" });
-            dgvDrivers.Columns.Add(new DataGridViewTextBoxColumn() { Name = "DeviceName", HeaderText = "Device" });
+            dgvDrivers.Columns.Add(new DataGridViewTextBoxColumn() { Name = "DriverProviderName", HeaderText = "Provider",Frozen=Common.FreezeKeyColumn });
+            dgvDrivers.Columns.Add(new DataGridViewTextBoxColumn() { Name = "DeviceName", HeaderText = "Device",Frozen = Common.FreezeKeyColumn });
 
       
             DataTable dt = getDrivers();

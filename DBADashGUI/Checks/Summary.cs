@@ -71,6 +71,10 @@ namespace DBADashGUI
             {
                 RefreshData();
             }
+            else
+            {
+                dgvSummary.Columns[0].Frozen = Common.FreezeKeyColumn;
+            }
         }
 
         private bool instanceIDsChanged()
@@ -80,6 +84,7 @@ namespace DBADashGUI
         
         public void RefreshData()
         {
+            dgvSummary.Columns[0].Frozen = Common.FreezeKeyColumn;
             resetStatusCols();
             refresh1.Visible = true;
             dgvSummary.Visible = false;

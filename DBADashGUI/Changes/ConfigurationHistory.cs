@@ -38,7 +38,7 @@ namespace DBADashGUI
                 dgv.DataSource = dt;
                 dgv.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
             }
-            
+            dgv.Columns[0].Frozen = Common.FreezeKeyColumn;
         }
 
         private void tsRefresh_Click(object sender, EventArgs e)

@@ -28,6 +28,7 @@ namespace DBADashGUI.Performance
    
         public void RefreshData()
         {
+            dgv.Columns[0].Frozen = Common.FreezeKeyColumn;
             dgv.DataSource = null;
             var dt = getPerformanceSummary();
             addPerformanceCounters(ref dt);

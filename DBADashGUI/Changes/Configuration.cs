@@ -39,7 +39,7 @@ namespace DBADashGUI.Changes
         public void RefreshData()
         {
             dgvConfig.Columns.Clear();
-            dgvConfig.Columns.Add(new DataGridViewTextBoxColumn() { Name = "Instance", HeaderText = "Instance"});
+            dgvConfig.Columns.Add(new DataGridViewTextBoxColumn() { Name = "Instance", HeaderText = "Instance", Frozen = Common.FreezeKeyColumn});
     
             DataTable dt = getConfiguration();
                     

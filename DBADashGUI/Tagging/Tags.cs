@@ -113,8 +113,8 @@ namespace DBADashGUI.Tagging
             da.Fill(dt);
             dgvReport.DataSource = null;
             dgvReport.Columns.Clear();
-            dgvReport.Columns.Add(new DataGridViewTextBoxColumn {Name ="colInstanceID", Visible=false, DataPropertyName = "InstanceID"});
-            dgvReport.Columns.Add(new DataGridViewLinkColumn() { HeaderText = "Instance", DataPropertyName = "Instance", SortMode = DataGridViewColumnSortMode.Automatic, LinkColor = DashColors.LinkColor });
+            dgvReport.Columns.Add(new DataGridViewTextBoxColumn {Name ="colInstanceID", Visible=false, DataPropertyName = "InstanceID", Frozen= Common.FreezeKeyColumn});
+            dgvReport.Columns.Add(new DataGridViewLinkColumn() { HeaderText = "Instance", DataPropertyName = "Instance", SortMode = DataGridViewColumnSortMode.Automatic, LinkColor = DashColors.LinkColor,Frozen = Common.FreezeKeyColumn });
             dgvReport.DataSource = dt;
             dgvReport.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
         }

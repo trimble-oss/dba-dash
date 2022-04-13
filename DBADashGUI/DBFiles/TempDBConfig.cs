@@ -20,6 +20,7 @@ namespace DBADashGUI.DBFiles
 
         public void RefreshData()
         {
+            dgvTempDB.Columns[0].Frozen = Common.FreezeKeyColumn;
             using (var cn = new SqlConnection(Common.ConnectionString))
             using (var cmd = new SqlCommand("dbo.TempDBConfig_Get", cn) { CommandType = CommandType.StoredProcedure })
             using(var da = new SqlDataAdapter(cmd))

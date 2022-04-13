@@ -38,16 +38,17 @@ namespace DBADashGUI.HA
             dgv.Columns.Clear();
             DataTable dt;
 
-            dgv.Columns.Add(new DataGridViewTextBoxColumn() { DataPropertyName = "InstanceID", Visible = false });
-            dgv.Columns.Add(new DataGridViewTextBoxColumn() { DataPropertyName = "Snapshot Status",Name="colSnapshotStatus", Visible = false });
+            dgv.Columns.Add(new DataGridViewTextBoxColumn() { DataPropertyName = "InstanceID", Visible = false, Name="colInstanceID",Frozen = Common.FreezeKeyColumn });
+            dgv.Columns.Add(new DataGridViewTextBoxColumn() { DataPropertyName = "Snapshot Status",Name="colSnapshotStatus", Visible = false, Frozen= Common.FreezeKeyColumn });
             if (instanceId > 0)
-            {
-                dt = GetAvailabilityGroup(instanceId);                
+            {                
+                dt = GetAvailabilityGroup(instanceId);
+                dgv.Columns.Add(new DataGridViewTextBoxColumn() { DataPropertyName = "Database", Name = "colDatabase", HeaderText ="Database", Frozen = Common.FreezeKeyColumn });
             }
             else
             {
                 dt = GetAvailabilityGroupSummary(InstanceIDs);
-                dgv.Columns.Add(new DataGridViewLinkColumn() { HeaderText = "Instance", DataPropertyName = "Instance", Name = "colInstance", LinkColor=DashColors.LinkColor});
+                dgv.Columns.Add(new DataGridViewLinkColumn() { HeaderText = "Instance", DataPropertyName = "Instance", Name = "colInstance", LinkColor=DashColors.LinkColor, Frozen = Common.FreezeKeyColumn });
             }
             Common.ConvertUTCToLocal(ref dt);
             dgv.DataSource = dt;

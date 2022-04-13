@@ -1446,5 +1446,11 @@ namespace DBADashGUI
                 }
             }
         }
+
+        private void freezeKeyColumnsToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Common.FreezeKeyColumn = freezeKeyColumnsToolStripMenuItem.Checked;
+            loadSelectedTab();
+        }
     }
 }

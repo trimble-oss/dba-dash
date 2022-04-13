@@ -23,6 +23,8 @@ namespace DBADashGUI
 
         public void RefreshData()
         {
+            dgvVersion.Columns[0].Frozen = Common.FreezeKeyColumn;
+            dgv.Columns[0].Frozen = Common.FreezeKeyColumn;
             refreshHistory();
             refreshVersion();
         }

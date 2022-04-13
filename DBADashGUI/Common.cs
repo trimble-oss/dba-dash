@@ -18,6 +18,7 @@ namespace DBADashGUI
     {
         public static string ConnectionString;
         public static readonly string JsonConfigPath = System.IO.Path.Combine(Application.StartupPath, "ServiceConfig.json");
+        public static bool FreezeKeyColumn = true;
 
         public static Dictionary<Int32, string> DateGroups = new Dictionary<Int32, string>() {
                 {0,"None" },
