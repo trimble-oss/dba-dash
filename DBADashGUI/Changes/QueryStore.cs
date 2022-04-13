@@ -54,7 +54,7 @@ namespace DBADashGUI.Changes
         private void setCols()
         {
             dgv.Columns.Clear();
-            dgv.Columns.Add(new DataGridViewLinkColumn() { Name="colDB", HeaderText="DB", DataPropertyName = "name", LinkColor= DashColors.LinkColor});
+            dgv.Columns.Add(new DataGridViewLinkColumn() { Name="colDB", HeaderText="DB", DataPropertyName = "name", LinkColor= DashColors.LinkColor, Frozen = Common.FreezeKeyColumn});
             dgv.Columns.Add(new DataGridViewTextBoxColumn() { HeaderText="Desired State", DataPropertyName = "desired_state_desc" });
             dgv.Columns.Add(new DataGridViewTextBoxColumn() { HeaderText = "Actual State", DataPropertyName = "actual_state_desc" });
             dgv.Columns.Add(new DataGridViewTextBoxColumn() { Name = "col_ReadOnlyReason", HeaderText = "Read Only Reason", DataPropertyName = "readonly_reason_desc" }) ;
@@ -77,7 +77,7 @@ namespace DBADashGUI.Changes
         private void setSummaryCols()
         {
             dgv.Columns.Clear();
-            dgv.Columns.Add(new DataGridViewLinkColumn { Name="colInstance", HeaderText = "Instance", DataPropertyName = "InstanceGroupName", LinkColor = DashColors.LinkColor});
+            dgv.Columns.Add(new DataGridViewLinkColumn { Name="colInstance", HeaderText = "Instance", DataPropertyName = "InstanceGroupName", LinkColor = DashColors.LinkColor, Frozen = Common.FreezeKeyColumn });
             dgv.Columns.Add(new DataGridViewTextBoxColumn() { HeaderText = "OFF", DataPropertyName = "QS_OFF" });
             dgv.Columns.Add(new DataGridViewTextBoxColumn() { Name ="col_READ_ONLY", HeaderText = "READ_ONLY", DataPropertyName = "QS_READ_ONLY" });
             dgv.Columns.Add(new DataGridViewTextBoxColumn() { HeaderText = "READ_WRITE", DataPropertyName = "QS_READ_WRITE" });

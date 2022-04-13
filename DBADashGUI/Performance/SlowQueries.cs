@@ -129,6 +129,7 @@ namespace DBADashGUI
 
         public void RefreshData()
         {
+            dgvSummary.Columns[0].Frozen = Common.FreezeKeyColumn;
             dgvSlow.DataSource = null;
             lblPageSize.Visible = false;
             toggleSummary(true);

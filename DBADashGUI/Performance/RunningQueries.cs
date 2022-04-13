@@ -35,11 +35,10 @@ namespace DBADashGUI.Performance
             get
             {
                 return new DataGridViewColumn[] {
-                    new DataGridViewTextBoxColumn { HeaderText = "InstanceID", DataPropertyName = "InstanceID", Name = "colInstanceID", Visible = false },
+                    new DataGridViewLinkColumn() { HeaderText = "Session ID", DataPropertyName = "session_id", Name = "colSessionID", SortMode = DataGridViewColumnSortMode.Automatic, MinimumWidth = 60, LinkColor = DashColors.LinkColor, Frozen = Common.FreezeKeyColumn },
                     new DataGridViewLinkColumn() { HeaderText = "Batch Text", DataPropertyName = "batch_text", Name = "colBatchText", SortMode = DataGridViewColumnSortMode.Automatic, LinkColor = DashColors.LinkColor},
                     new DataGridViewLinkColumn() { HeaderText = "Text", DataPropertyName = "text", Name = "colText", SortMode = DataGridViewColumnSortMode.Automatic, LinkColor = DashColors.LinkColor},
-                    new DataGridViewLinkColumn() { HeaderText = "Plan", DataPropertyName = "query_plan", Name = "colQueryPlan", SortMode = DataGridViewColumnSortMode.NotSortable, Visible = planCount > 0, LinkColor = DashColors.LinkColor },
-                    new DataGridViewLinkColumn() { HeaderText = "Session ID", DataPropertyName = "session_id", Name = "colSessionID", SortMode = DataGridViewColumnSortMode.Automatic, MinimumWidth = 60, LinkColor = DashColors.LinkColor },
+                    new DataGridViewLinkColumn() { HeaderText = "Plan", DataPropertyName = "query_plan", Name = "colQueryPlan", SortMode = DataGridViewColumnSortMode.NotSortable, Visible = planCount > 0, LinkColor = DashColors.LinkColor },                  
                     new DataGridViewTextBoxColumn() { HeaderText = "Blocking Session ID", DataPropertyName = "blocking_session_id", Name = "colBlockingSessionID", SortMode = DataGridViewColumnSortMode.Automatic, MinimumWidth = 60, ToolTipText = "ID of the session directly blocking the current query.  0 = Not blocked.", DefaultCellStyle = new DataGridViewCellStyle(){ ForeColor=Color.White } },
                     new DataGridViewTextBoxColumn() { HeaderText = "Blocking Hierarchy", DataPropertyName = "BlockingHierarchy", SortMode = DataGridViewColumnSortMode.Automatic, Visible = blockedCount > 0, MinimumWidth = 70, ToolTipText = "Identifies all the session IDs that are involved in the blocking chain for each query starting with the root blocker." },
                     new DataGridViewCheckBoxColumn { HeaderText = "Root Blocker", DataPropertyName = "IsRootBlocker", Name = "colIsRootBlocker", SortMode = DataGridViewColumnSortMode.Automatic, MinimumWidth = 60, Visible = blockedCount > 0, ToolTipText = "Root blocker is the query at the head of the blocking chain. This query is not blocked but it's holding locks that other queries are waiting for." },
@@ -95,12 +94,13 @@ namespace DBADashGUI.Performance
                     new DataGridViewTextBoxColumn() { HeaderText = "Plan Handle", DataPropertyName = "plan_handle", SortMode = DataGridViewColumnSortMode.Automatic, Name = "colPlanHandle" },
                     new DataGridViewTextBoxColumn() { HeaderText = "Query Hash", DataPropertyName = "query_hash", SortMode = DataGridViewColumnSortMode.Automatic, Name = "colQueryHash" },
                     new DataGridViewTextBoxColumn() { HeaderText = "Query Plan Hash", DataPropertyName = "query_plan_hash", SortMode = DataGridViewColumnSortMode.Automatic, Name = "colQueryPlanHash" },
+                    new DataGridViewTextBoxColumn { HeaderText = "InstanceID", DataPropertyName = "InstanceID", Name = "colInstanceID", Visible = false },
                 };
             }
         }
             
         private readonly DataGridViewColumn[] sessionWaitColumns = new DataGridViewColumn[]  {
-                new DataGridViewTextBoxColumn() { HeaderText = "Session ID", DataPropertyName = "session_id", Name = "colSessionID", Visible=false },
+                new DataGridViewTextBoxColumn() { HeaderText = "Session ID", DataPropertyName = "session_id", Name = "colSessionID", Visible=false, Frozen = Common.FreezeKeyColumn },
                 new DataGridViewTextBoxColumn() { HeaderText = "Wait Type", DataPropertyName = "WaitType", Name = "colWaitType" },
                 new DataGridViewTextBoxColumn() { HeaderText = "Waiting Tasks Count", DataPropertyName = "waiting_tasks_count" },
                 new DataGridViewTextBoxColumn() { HeaderText = "Wait Time (ms)", DataPropertyName = "wait_time_ms", DefaultCellStyle = Common.DataGridViewNumericCellStyle },
@@ -179,9 +179,9 @@ namespace DBADashGUI.Performance
             dgv.Columns.Clear();
             dgv.AutoGenerateColumns = false;
             dgv.Columns.AddRange(
-                new DataGridViewTextBoxColumn() { HeaderText = "InstanceID", DataPropertyName = "InstanceID", Name = "colInstanceID", Visible = false },
-                new DataGridViewLinkColumn() { HeaderText = "Instance", DataPropertyName = "InstanceDisplayName", Name = "colInstance", SortMode = DataGridViewColumnSortMode.Automatic, Visible= isServerLevelSummary, LinkColor=DashColors.LinkColor},
-                new DataGridViewTextBoxColumn() { HeaderText = "Instance", DataPropertyName = "InstanceDisplayName", SortMode = DataGridViewColumnSortMode.Automatic,Visible=!isServerLevelSummary },
+                new DataGridViewTextBoxColumn() { HeaderText = "InstanceID", DataPropertyName = "InstanceID", Name = "colInstanceID", Visible = false , Frozen = Common.FreezeKeyColumn },
+                new DataGridViewLinkColumn() { HeaderText = "Instance", DataPropertyName = "InstanceDisplayName", Name = "colInstance", SortMode = DataGridViewColumnSortMode.Automatic, Visible= isServerLevelSummary, LinkColor=DashColors.LinkColor, Frozen= Common.FreezeKeyColumn},
+                new DataGridViewTextBoxColumn() { HeaderText = "Instance", DataPropertyName = "InstanceDisplayName", SortMode = DataGridViewColumnSortMode.Automatic,Visible=!isServerLevelSummary, Frozen = Common.FreezeKeyColumn },
                 new DataGridViewLinkColumn() { HeaderText = "Snapshot Date", DataPropertyName = "SnapshotDate", Name = "colSnapshotDate", SortMode = DataGridViewColumnSortMode.Automatic, LinkColor = DashColors.LinkColor},
                 new DataGridViewTextBoxColumn() { HeaderText = "Running Queries", DataPropertyName = "RunningQueries", SortMode = DataGridViewColumnSortMode.Automatic, DefaultCellStyle = Common.DataGridViewNumericCellStyle },
                 new DataGridViewTextBoxColumn() { HeaderText = "Blocked Queries", DataPropertyName = "BlockedQueries", SortMode = DataGridViewColumnSortMode.Automatic, DefaultCellStyle = Common.DataGridViewNumericCellStyle },

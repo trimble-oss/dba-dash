@@ -39,7 +39,7 @@ namespace DBADashGUI.HA
                 var dt = GetMirroringSummary();
                 dgv.DataSource = null;
                 dgv.Columns.Clear();
-                dgv.Columns.Add(new DataGridViewTextBoxColumn() { HeaderText = "Instance", DataPropertyName = "Instance", Name="Instance" });
+                dgv.Columns.Add(new DataGridViewTextBoxColumn() { HeaderText = "Instance", DataPropertyName = "Instance", Name="Instance", Frozen = Common.FreezeKeyColumn });
                 dgv.Columns.Add(new DataGridViewTextBoxColumn() { HeaderText = "Principal Count", DataPropertyName = "PrincipalCount" });
                 dgv.Columns.Add(new DataGridViewTextBoxColumn() { HeaderText = "Mirror Count", DataPropertyName = "MirrorCount" });
                 dgv.Columns.Add(new DataGridViewTextBoxColumn() { HeaderText = "Synchronized Count", DataPropertyName = "SynchronizedCount", Name = "SynchronizedCount"});

@@ -71,6 +71,8 @@ namespace DBADashGUI.AgentJobs
 
         public void RefreshData()
         {
+            dgvJobs.Columns[0].Frozen = Common.FreezeKeyColumn;
+            dgvJobs.Columns[1].Frozen = Common.FreezeKeyColumn;
             failedOnlyToolStripMenuItem.Checked = false;
             splitContainer1.Panel2Collapsed = true;
             dgvJobHistory.DataSource = null;

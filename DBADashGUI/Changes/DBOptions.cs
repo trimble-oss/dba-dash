@@ -89,7 +89,7 @@ namespace DBADashGUI.Changes
                 dgv.DataSource = dt;
                 dgv.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
             }
-            
+            dgv.Columns[0].Frozen = Common.FreezeKeyColumn;
         }
 
         private void refreshDBInfo()
@@ -120,9 +120,12 @@ namespace DBADashGUI.Changes
                         col.HeaderText = col.HeaderText.Titleize();
                     }
                     dgv.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
+                    dgv.Columns[0].Frozen = Common.FreezeKeyColumn;
+                    dgv.Columns[1].Frozen = Common.FreezeKeyColumn; //hidden
+                    dgv.Columns[2].Frozen = Common.FreezeKeyColumn; //hidden
+                    dgv.Columns[3].Frozen = Common.FreezeKeyColumn;
                 }
             }
-            
         }
 
         private void refreshHistory()

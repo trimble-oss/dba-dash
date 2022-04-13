@@ -42,6 +42,7 @@
             this.configureDisplayNameToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.dataRetentionToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.manageInstancesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.freezeKeyColumnsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.tsTime = new System.Windows.Forms.ToolStripDropDownButton();
             this.minsToolStripMenuItem2 = new System.Windows.Forms.ToolStripMenuItem();
             this.minsToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
@@ -331,6 +332,7 @@
             this.optionsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.configureDisplayNameToolStripMenuItem,
             this.dataRetentionToolStripMenuItem,
+            this.freezeKeyColumnsToolStripMenuItem,
             this.manageInstancesToolStripMenuItem});
             this.optionsToolStripMenuItem.Image = global::DBADashGUI.Properties.Resources.SettingsOutline_16x;
             this.optionsToolStripMenuItem.Name = "optionsToolStripMenuItem";
@@ -357,6 +359,17 @@
             this.manageInstancesToolStripMenuItem.Size = new System.Drawing.Size(254, 26);
             this.manageInstancesToolStripMenuItem.Text = "Manage Instances";
             this.manageInstancesToolStripMenuItem.Click += new System.EventHandler(this.manageInstancesToolStripMenuItem_Click);
+            // 
+            // freezeKeyColumnsToolStripMenuItem
+            // 
+            this.freezeKeyColumnsToolStripMenuItem.Checked = true;
+            this.freezeKeyColumnsToolStripMenuItem.CheckOnClick = true;
+            this.freezeKeyColumnsToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.freezeKeyColumnsToolStripMenuItem.Name = "freezeKeyColumnsToolStripMenuItem";
+            this.freezeKeyColumnsToolStripMenuItem.Size = new System.Drawing.Size(254, 26);
+            this.freezeKeyColumnsToolStripMenuItem.Text = "Freeze Key Columns";
+            this.freezeKeyColumnsToolStripMenuItem.ToolTipText = "Keep the key column(s) in the grid visible as you scroll to the right";
+            this.freezeKeyColumnsToolStripMenuItem.Click += new System.EventHandler(this.freezeKeyColumnsToolStripMenuItem_Click);
             // 
             // tsTime
             // 
@@ -541,7 +554,7 @@
             // aboutToolStripMenuItem
             // 
             this.aboutToolStripMenuItem.Name = "aboutToolStripMenuItem";
-            this.aboutToolStripMenuItem.Size = new System.Drawing.Size(133, 26);
+            this.aboutToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
             this.aboutToolStripMenuItem.Text = "About";
             this.aboutToolStripMenuItem.Click += new System.EventHandler(this.aboutToolStripMenuItem_Click);
             // 
@@ -1786,10 +1799,10 @@
             this.tabDBADash.Controls.Add(this.lblVersion);
             this.tabDBADash.Controls.Add(this.lblSQLMonitoring);
             this.tabDBADash.Controls.Add(this.lblDBADash);
-            this.tabDBADash.Location = new System.Drawing.Point(4, 25);
+            this.tabDBADash.Location = new System.Drawing.Point(4, 29);
             this.tabDBADash.Name = "tabDBADash";
             this.tabDBADash.Padding = new System.Windows.Forms.Padding(3);
-            this.tabDBADash.Size = new System.Drawing.Size(1631, 1246);
+            this.tabDBADash.Size = new System.Drawing.Size(192, 67);
             this.tabDBADash.TabIndex = 42;
             this.tabDBADash.UseVisualStyleBackColor = true;
             // 
@@ -1799,9 +1812,9 @@
             this.lblVersion.Dock = System.Windows.Forms.DockStyle.Bottom;
             this.lblVersion.Font = new System.Drawing.Font("Segoe UI", 14F, System.Drawing.FontStyle.Italic, System.Drawing.GraphicsUnit.Point);
             this.lblVersion.ForeColor = System.Drawing.Color.White;
-            this.lblVersion.Location = new System.Drawing.Point(3, 1211);
+            this.lblVersion.Location = new System.Drawing.Point(3, 32);
             this.lblVersion.Name = "lblVersion";
-            this.lblVersion.Size = new System.Drawing.Size(1625, 32);
+            this.lblVersion.Size = new System.Drawing.Size(186, 32);
             this.lblVersion.TabIndex = 29;
             this.lblVersion.Text = "{Version}";
             // 
@@ -1813,7 +1826,7 @@
             this.lblSQLMonitoring.ForeColor = System.Drawing.Color.White;
             this.lblSQLMonitoring.Location = new System.Drawing.Point(3, 3);
             this.lblSQLMonitoring.Name = "lblSQLMonitoring";
-            this.lblSQLMonitoring.Size = new System.Drawing.Size(1625, 28);
+            this.lblSQLMonitoring.Size = new System.Drawing.Size(186, 28);
             this.lblSQLMonitoring.TabIndex = 28;
             this.lblSQLMonitoring.Text = "SQL Server Monitoring";
             this.lblSQLMonitoring.TextAlign = System.Drawing.ContentAlignment.TopRight;
@@ -1826,7 +1839,7 @@
             this.lblDBADash.ForeColor = System.Drawing.Color.White;
             this.lblDBADash.Location = new System.Drawing.Point(3, 3);
             this.lblDBADash.Name = "lblDBADash";
-            this.lblDBADash.Size = new System.Drawing.Size(1625, 1240);
+            this.lblDBADash.Size = new System.Drawing.Size(186, 61);
             this.lblDBADash.TabIndex = 0;
             this.lblDBADash.Text = "DBA Dash";
             this.lblDBADash.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
@@ -2300,5 +2313,6 @@
         private System.Windows.Forms.Label lblDBADash;
         private System.Windows.Forms.Label lblSQLMonitoring;
         private System.Windows.Forms.Label lblVersion;
+        private System.Windows.Forms.ToolStripMenuItem freezeKeyColumnsToolStripMenuItem;
     }
 }

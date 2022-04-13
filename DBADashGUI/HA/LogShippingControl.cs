@@ -89,7 +89,7 @@ namespace DBADashGUI.LogShipping
                 dgvSummary.AutoGenerateColumns = false;
                 if (dgvSummary.Columns.Count == 0)
                 {
-                    dgvSummary.Columns.Add(new DataGridViewLinkColumn() { HeaderText = "Instance", DataPropertyName = "InstanceDisplayName", SortMode= DataGridViewColumnSortMode.Automatic,LinkColor=DashColors.LinkColor});
+                    dgvSummary.Columns.Add(new DataGridViewLinkColumn() { HeaderText = "Instance", DataPropertyName = "InstanceDisplayName", SortMode= DataGridViewColumnSortMode.Automatic,LinkColor=DashColors.LinkColor, Frozen = Common.FreezeKeyColumn});
                     dgvSummary.Columns.Add(new DataGridViewTextBoxColumn {Name="Status", HeaderText = "Status", DataPropertyName = "StatusDescription" });
                     dgvSummary.Columns.Add(new DataGridViewTextBoxColumn { HeaderText = "Log Shipped DBs", DataPropertyName = "LogshippedDBCount" });
                     dgvSummary.Columns.Add(new DataGridViewTextBoxColumn { HeaderText = "Warning", DataPropertyName = "WarningCount" });
@@ -128,6 +128,7 @@ namespace DBADashGUI.LogShipping
                 dt.Columns["restore_date_utc"].ColumnName = "restore_date";
                 dt.Columns["backup_start_date_utc"].ColumnName = "backup_start_date";
                 dgvLogShipping.AutoGenerateColumns = false;
+                dgvLogShipping.Columns[0].Frozen = Common.FreezeKeyColumn;
                 dgvLogShipping.DataSource = new DataView(dt);
                 dgvLogShipping.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
             }

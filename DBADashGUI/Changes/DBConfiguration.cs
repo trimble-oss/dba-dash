@@ -52,8 +52,8 @@ namespace DBADashGUI.Changes
         {
             dgvConfig.Columns.Clear();
 
-            dgvConfig.Columns.Add(new DataGridViewTextBoxColumn() { Name = "Instance", HeaderText = "Instance" });
-            dgvConfig.Columns.Add(new DataGridViewTextBoxColumn() { Name = "DB", HeaderText = "Database" });
+            dgvConfig.Columns.Add(new DataGridViewTextBoxColumn() { Name = "Instance", HeaderText = "Instance",Frozen=Common.FreezeKeyColumn });
+            dgvConfig.Columns.Add(new DataGridViewTextBoxColumn() { Name = "DB", HeaderText = "Database", Frozen = Common.FreezeKeyColumn });
          
             DataTable dt =getDBConfiguration();
                    
