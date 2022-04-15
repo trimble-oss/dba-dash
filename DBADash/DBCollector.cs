@@ -1385,7 +1385,10 @@ CROSS APPLY sys.dm_exec_sql_text(H.sql_handle) txt");
                     ManagementScope scope = new ManagementScope(path);
                     //string condition = "DriveLetter = 'C:'";
                     string[] selectedProperties = new string[] { "FreeSpace", "Name", "Capacity", "Caption", "Label" };
-                    SelectQuery query = new SelectQuery("Win32_Volume", "DriveType=3 AND DriveLetter IS NOT NULL", selectedProperties);
+                    // Using @ to avoid doubling up the backslashes for C#.  The doubling up is for WQL which also uses backslashes as an escape character.
+                    // Drive Type 3 = Local Disk.  Not like \\?\ excludes system voume and recovery partition
+                    string condition = @"DriveType=3 AND NOT Name LIKE '\\\\?\\%'"; 
+                    SelectQuery query = new SelectQuery("Win32_Volume", condition, selectedProperties);
 
                     using (ManagementObjectSearcher searcher = new ManagementObjectSearcher(scope, query))
                     using (ManagementObjectCollection results = searcher.Get())
