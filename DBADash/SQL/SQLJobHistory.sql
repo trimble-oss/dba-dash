@@ -15,5 +15,6 @@
 		retries_attempted,
 		server
 FROM msdb.dbo.sysjobhistory
-WHERE instance_id> @instance_id
+WHERE instance_id> @instance_id -- Get history since last run
 AND run_date > @run_date
+AND run_status <> 4 -- Exclude 4 In Progress
