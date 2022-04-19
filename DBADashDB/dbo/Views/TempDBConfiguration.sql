@@ -36,6 +36,7 @@ OUTER APPLY(SELECT	MAX(CASE WHEN TF.TraceFlag=1117 THEN 1 ELSE 0 END) AS T1117,
 WHERE d.name = 'tempdb'
 AND i.IsActive=1
 AND d.IsActive=1
+AND f.IsActive=1
 GROUP BY	i.Instance,
 			i.InstanceID,
 			i.InstanceDisplayName,
