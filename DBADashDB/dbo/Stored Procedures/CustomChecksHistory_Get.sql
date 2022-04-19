@@ -15,6 +15,7 @@ DECLARE @SQL NVARCHAR(MAX)
 SET @SQL =
 'SELECT CCH.InstanceID,
 	   I.ConnectionID,
+	   I.InstanceDisplayName,
        CCH.Test,
        CCH.Context,
        CCH.Status,
