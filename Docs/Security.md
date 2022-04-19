@@ -8,7 +8,13 @@ This is required to run WMI queries (optional).  These are used to collect drive
 
 ### Why SysAdmin?
 
-If the tool doesn't run as sysadmin it won't be able to collect last good CHECKDB date as well as some other data from the registry like processor name, system manufacturer and model.  If you don't want to grant sysadmin access, you can assign the permissions listed below instead
+If the tool doesn't run as sysadmin it won't be able to collect last good CHECKDB date as well as some other data from the registry like processor name, system manufacturer and model.  Sysadmin can be granted using:
+
+````SQL
+ALTER SERVER ROLE [sysadmin] ADD MEMBER [{LoginName}]
+````
+
+If you **don't** want to grant sysadmin access, you can assign the permissions listed below instead
 
 **Server Level Permissions:**
 * View Server State
@@ -19,6 +25,38 @@ If the tool doesn't run as sysadmin it won't be able to collect last good CHECKD
 
 **MSDB Database:**
 * Add user to db_datareader role.
+
+This script can be used to provision the required permissions:
+````SQL
+/*
+	Use this script to configure permissions for the DBA Dash service account if you don't want to use the sysadmin server role.
+	DBA Dash can collect more data when running as sysadmin but most features and functionallity will work with a more limited account
+	See here for details: https://github.com/trimble-oss/dba-dash/edit/main/Docs/Security.md
+
+	On the destination connection the service will need to be a member of db_owner role on the repository database
+	To allow the service to create the repository database you can use:
+	GRANT CREATE ANY DATABASE TO {LoginName}
+*/
+DECLARE @LoginName SYSNAME = 'DBADashService' /* !!!! Replace with your own service login !!!! */
+DECLARE @SQL NVARCHAR(MAX)
+SET @SQL = N'
+GRANT VIEW SERVER STATE TO ' + QUOTENAME(@LoginName) + '
+GRANT VIEW ANY DATABASE TO ' + QUOTENAME(@LoginName) + '
+GRANT CONNECT ANY DATABASE TO ' + QUOTENAME(@LoginName) + '
+GRANT VIEW ANY DEFINITION TO ' + QUOTENAME(@LoginName) + '
+GRANT ALTER ANY EVENT SESSION TO ' + QUOTENAME(@LoginName) + ' /* Required if you want to use slow query capture */
+USE [msdb]
+IF NOT EXISTS(SELECT * 
+			FROM msdb.sys.database_principals
+			WHERE name = ' + QUOTENAME(@LoginName,'''') + ')
+BEGIN
+	CREATE USER ' + QUOTENAME(@LoginName) + ' FOR LOGIN ' + QUOTENAME(@LoginName) + '
+END
+ALTER ROLE [db_datareader] ADD MEMBER ' + QUOTENAME(@LoginName) + '
+'
+PRINT @SQL
+EXEC sp_executesql @SQL
+````
 
 ## Config file Security
 
