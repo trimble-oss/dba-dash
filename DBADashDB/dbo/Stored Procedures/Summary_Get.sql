@@ -172,7 +172,7 @@ QS AS (
 )
 SELECT I.InstanceID,
 	I.Instance,
-	I.InstanceDisplayName,
+	I.InstanceGroupName,
 	ISNULL(LS.LogShippingStatus,3) AS LogShippingStatus,
 	ISNULL(B.FullBackupStatus,3) AS FullBackupStatus,
 	ISNULL(B.LogBackupStatus,3) AS LogBackupStatus,
@@ -266,7 +266,7 @@ AND I.EngineEdition<> 5 -- not azure
 UNION ALL
 SELECT NULL AS InstanceID,
 	I.Instance,
-	I.Instance AS InstanceDisplayName,
+	I.InstanceGroupName,
 	3 AS LogShippingStatus,
 	3 AS FullBackupStatus,
 	3 AS LogBackupStatus,
@@ -326,4 +326,4 @@ LEFT JOIN QS ON QS.InstanceID = I.InstanceID
 WHERE I.EngineEdition=5 -- azure
 AND EXISTS(SELECT 1 FROM #Instances t WHERE I.InstanceID = t.InstanceID)
 AND I.IsActive=1
-GROUP BY I.Instance
+GROUP BY I.Instance,I.InstanceGroupName

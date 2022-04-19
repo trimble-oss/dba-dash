@@ -1157,7 +1157,7 @@
             this.collectionErrors1.Days = 0;
             this.collectionErrors1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.collectionErrors1.InstanceID = 0;
-            this.collectionErrors1.InstanceName = null;
+            this.collectionErrors1.InstanceGroupName = null;
             this.collectionErrors1.Location = new System.Drawing.Point(3, 3);
             this.collectionErrors1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.collectionErrors1.Name = "collectionErrors1";
