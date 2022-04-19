@@ -318,7 +318,7 @@ namespace DBADashGUI
             else if(tabs.SelectedTab== tabDBADashErrorLog)
             {
                 collectionErrors1.InstanceID = n.InstanceID;
-                collectionErrors1.InstanceName = n.InstanceName;
+                collectionErrors1.InstanceGroupName = n.InstanceName;
                 collectionErrors1.Days = 1;
                 collectionErrors1.AckErrors =  SelectedTags().Count == 0 && parent.Type == SQLTreeItem.TreeType.DBADashRoot;
                 collectionErrors1.RefreshData();

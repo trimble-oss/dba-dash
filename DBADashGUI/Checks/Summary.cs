@@ -431,11 +431,11 @@ namespace DBADashGUI
                 }
                 else if (e.ColumnIndex == FileFreeSpaceStatus.Index || e.ColumnIndex == PctMaxSizeStatus.Index || e.ColumnIndex == LogFreeSpaceStatus.Index)
                 {
-                     Instance_Selected(this, new InstanceSelectedEventArgs() { Instance = (string)row["Instance"], Tab = "tabFiles" });
+                     Instance_Selected(this, new InstanceSelectedEventArgs() { Instance = (string)row["InstanceGroupName"], Tab = "tabFiles" });
                 }
                 else if (e.ColumnIndex == CustomCheckStatus.Index)
                 {
-                       Instance_Selected(this, new InstanceSelectedEventArgs() { Instance = (string)row["Instance"], Tab = "tabCustomChecks" });
+                       Instance_Selected(this, new InstanceSelectedEventArgs() { Instance = (string)row["InstanceGroupName"], Tab = "tabCustomChecks" });
                 }
                 else if (e.ColumnIndex ==  CollectionErrorStatus.Index)
                 {
@@ -445,12 +445,12 @@ namespace DBADashGUI
                     }
                     else
                     {
-                        Instance_Selected(this, new InstanceSelectedEventArgs() { InstanceID=-1, Instance = (string)row["Instance"], Tab = "tabDBADashErrorLog" });
+                        Instance_Selected(this, new InstanceSelectedEventArgs() { InstanceID=-1, Instance = (string)row["InstanceGroupName"], Tab = "tabDBADashErrorLog" });
                     }
                 }
                 else if (e.ColumnIndex == SnapshotAgeStatus.Index)
                 {
-                    Instance_Selected(this, new InstanceSelectedEventArgs() { Instance = (string)row["Instance"], Tab = "tabCollectionDates" });                   
+                    Instance_Selected(this, new InstanceSelectedEventArgs() { Instance = (string)row["InstanceGroupName"], Tab = "tabCollectionDates" });                   
                 }
                 else if (e.ColumnIndex == AlertStatus.Index)
                 {
@@ -461,15 +461,15 @@ namespace DBADashGUI
                 }
                 else if(e.ColumnIndex == ElasticPoolStorageStatus.Index)
                 {
-                    Instance_Selected(this, new InstanceSelectedEventArgs() { Instance = (string)row["Instance"], Tab = "tabAzureSummary" });
+                    Instance_Selected(this, new InstanceSelectedEventArgs() { Instance = (string)row["InstanceGroupName"], Tab = "tabAzureSummary" });
                 }
                 else if(e.ColumnIndex== AGStatus.Index)
                 {
-                    Instance_Selected(this, new InstanceSelectedEventArgs() { Instance = (string)row["Instance"], Tab = "tabAG" });
+                    Instance_Selected(this, new InstanceSelectedEventArgs() { Instance = (string)row["InstanceGroupName"], Tab = "tabAG" });
                 }
                 else if ( e.ColumnIndex == QueryStoreStatus.Index)
                 {
-                    Instance_Selected(this,new InstanceSelectedEventArgs() { Instance = (string)row["Instance"], Tab = "tabQS" });
+                    Instance_Selected(this,new InstanceSelectedEventArgs() { Instance = (string)row["InstanceGroupName"], Tab = "tabQS" });
                 }
                 else if (e.ColumnIndex== UptimeStatus.Index)
                 {

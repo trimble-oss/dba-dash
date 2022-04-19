@@ -19,7 +19,7 @@ namespace DBADashGUI.CollectionDates
         }
 
         public Int32 InstanceID { get; set; }
-        public string InstanceName { get; set; }
+        public string InstanceGroupName { get; set; }
         private int _days;
         public Int32 Days
         {
@@ -52,28 +52,26 @@ namespace DBADashGUI.CollectionDates
         public void RefreshData()
         {
             using (var cn = new SqlConnection(Common.ConnectionString))
+            using (var cmd = new SqlCommand("dbo.CollectionErrorLog_Get", cn) { CommandType = CommandType.StoredProcedure })
+            using (var da = new SqlDataAdapter(cmd))
             {
-                using (SqlCommand cmd = new SqlCommand("dbo.CollectionErrorLog_Get", cn) { CommandType = CommandType.StoredProcedure })
-                {
                     if (InstanceID > 0)
                     {
                         cmd.Parameters.AddWithValue("InstanceID", InstanceID);
                     }
-                    if (InstanceName != "")
+                    if (!String.IsNullOrEmpty(InstanceGroupName))
                     {
-                        cmd.Parameters.AddWithValue("Instance", InstanceName);
+                        cmd.Parameters.AddWithValue("InstanceGroupName", InstanceGroupName);
                     }
                     cmd.Parameters.AddWithValue("Days", Days);
-                    SqlDataAdapter da = new SqlDataAdapter(cmd);
                     DataTable dt = new DataTable();
                     da.Fill(dt);
                     Common.ConvertUTCToLocal(ref dt);
                     dgvDBADashErrors.AutoGenerateColumns = false;
                     dgvDBADashErrors.DataSource = dt;
                     dgvDBADashErrors.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
-                }
+                
             }
-
         }
 
         private void tsErrorDays_Click(object sender, EventArgs e)

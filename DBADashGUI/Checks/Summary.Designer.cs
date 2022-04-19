@@ -416,7 +416,7 @@
             // 
             // Instance
             // 
-            this.Instance.DataPropertyName = "InstanceDisplayName";
+            this.Instance.DataPropertyName = "InstanceGroupName";
             this.Instance.HeaderText = "Instance";
             this.Instance.MinimumWidth = 6;
             this.Instance.Name = "Instance";
