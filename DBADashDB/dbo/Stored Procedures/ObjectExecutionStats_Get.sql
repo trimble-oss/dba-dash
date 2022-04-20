@@ -70,7 +70,7 @@ WITH agg AS (
 SELECT T.*
 FROM T
 WHERE ProcRank <=20
-ORDER BY TotalMeasure DESC,ObjectID'
+ORDER BY DatabaseName,object_name,SnapshotDate'
 PRINT @SQL
 IF @SQL IS NOT NULL
 BEGIN

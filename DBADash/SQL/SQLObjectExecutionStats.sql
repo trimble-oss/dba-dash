@@ -6,7 +6,7 @@ BEGIN
 	SET @SQL = N'
 			SELECT object_id,
 				   database_id,
-				   ISNULL(OBJECT_NAME(object_id, database_id),'''') object_name,
+				   ISNULL(OBJECT_NAME(object_id, database_id),''{object_id:'' + CAST(object_id AS SYSNAME) + ''}'') object_name,
 				   total_worker_time,
 				   total_elapsed_time,
 				   total_logical_reads,
@@ -26,7 +26,7 @@ BEGIN
 	SET @SQL = @SQL + 'UNION ALL
 		SELECT object_id,
 		   database_id,
-		   ISNULL(OBJECT_NAME(object_id, database_id),'''') object_name,
+		   ISNULL(OBJECT_NAME(object_id, database_id),''{object_id:'' + CAST(object_id AS SYSNAME) + ''}'') object_name,
 		   total_worker_time,
 		   total_elapsed_time,
 		   total_logical_reads,
@@ -46,7 +46,7 @@ BEGIN
 	SET @SQL = @SQL + 'UNION ALL
 		SELECT object_id,
 		   database_id,
-		   ISNULL(OBJECT_NAME(object_id, database_id),'''') object_name,
+		   ISNULL(OBJECT_NAME(object_id, database_id),''{object_id:'' + CAST(object_id AS SYSNAME) + ''}'') object_name,
 		   total_worker_time,
 		   total_elapsed_time,
 		   total_logical_reads,
@@ -61,5 +61,5 @@ BEGIN
 	WHERE database_id ' + CASE WHEN @IsAzure=1 THEN '= DB_ID()' ELSE '<> 32767' END + '
 	'
 END
-PRINT @SQL
+
 EXEC sp_executesql @SQL

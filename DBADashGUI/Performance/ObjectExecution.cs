@@ -97,17 +97,17 @@ namespace DBADashGUI.Performance
             ChartValues<DateTimePoint> values = new ChartValues<DateTimePoint>();
             foreach (DataRow r in dt.Rows)
             {
-                var waitType = (string)r["DatabaseName"] + " | " + (string)r["object_name"];
+                var objectName = (string)r["DatabaseName"] + " | " + (string)r["object_name"];
                 var time = (DateTime)r["SnapshotDate"];
                 if (time > chartMaxDate)
                 {
                     chartMaxDate = time;
                 }
-                if (current != waitType)
+                if (current != objectName)
                 {
                     if (values.Count > 0) { dPoints.Add(current, values); }
                     values = new ChartValues<DateTimePoint>();
-                    current = waitType;
+                    current = objectName;
                 }
                 values.Add(new DateTimePoint(((DateTime)r["SnapshotDate"]), Convert.ToDouble(r["Measure"])));
             }
