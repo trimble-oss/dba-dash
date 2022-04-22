@@ -212,6 +212,7 @@ namespace DBADashGUI.AgentJobs
             colStepID.Visible = stepID != 0;
             tsFilter.Visible = instance_id == null;
             tsBack.Visible = instance_id != null;
+            colViewSteps.Visible=instance_id== null && stepID==0;
             splitContainer1.Panel2Collapsed = false;
             dgvJobHistory.AutoGenerateColumns = false;
             dgvJobHistory.DataSource = GetJobHistory(instanceId, jobID,stepID,instance_id, failedOnlyToolStripMenuItem.Checked);
@@ -324,6 +325,11 @@ namespace DBADashGUI.AgentJobs
                 {
                     instance_id = (int)row["instance_id"];
                     showHistory();
+                }
+                if (e.ColumnIndex == colMessage.Index)
+                {
+                    string message = Convert.ToString(row["Message"]);
+                    NotepadHelper.ShowMessage(message, "DBA Dash Job History");                                     
                 }
             }
        }
