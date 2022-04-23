@@ -8,6 +8,7 @@
 * [How many instances can I monitor with DBA Dash?](#how-many-instances-can-i-monitor-with-dba-dash)
 * [I get a 'Operation will cause database event session memory to exceed allowed limit.' error on AzureDB](#i-get-a-operation-will-cause-database-event-session-memory-to-exceed-allowed-limit-error-on-azuredb)
 * [The stored procedure names are not showing](#the-stored-procedure-names-are-not-showing)
+* [How do I get notifications of new releases?](#how-do-i-get-notifications-of-new-releases)
 
 ## I Found a bug
 
@@ -51,3 +52,7 @@ You will typically run into this issue when using elastic pools.  You might need
 ## The stored procedure names are not showing
 
 Object names might display as {object_id:1234567}.  This can occur if the DBA Dash service account doesn't have permissions to collect the object name.  [Review the permissions](/Security.md) assgined to the service account.
+
+## How do I get notifications of new releases?
+
+Click the GitHub "Watch" button at the top of this page.  A drop down will appear.  Select "Custom".  Check "Releases" and click apply - this will only notify you when releases are published.  
