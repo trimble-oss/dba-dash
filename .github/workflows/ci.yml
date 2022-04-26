@@ -52,3 +52,85 @@ jobs:
           Compress-Archive -Path "DBADashBuild\CLI\*" -DestinationPath $zipPath
           $guiZipPath = "DBADash_GUI_Only_${{steps.GetVersion.outputs.BUILD_NUMBER}}.zip"
           Compress-Archive -Path "DBADashBuild\DBADashGUIOnly\*" -DestinationPath $guiZipPath
+
+      - name: Install SQL
+        uses: potatoqualitee/mssqlsuite@v1.3
+        with:
+          install: sqlengine
+          collation: Latin1_General_BIN
+
+      - name: Check SQL Install
+        run: | 
+          sqlcmd -S localhost -U sa -P dbatools.I0 -d tempdb -Q "SELECT @@version as Version;"
+          sqlcmd -S localhost -U sa -P dbatools.I0 -d tempdb -Q "SELECT SERVERPROPERTY('Collation') AS Collation;"
+
+      - name: Configure & Install DBA Dash as Service
+        shell: powershell
+        run: | 
+          $ErrorActionPreference = "Stop" 
+          $zipPath = "DBADash_${{steps.GetVersion.outputs.BUILD_NUMBER}}.zip"
+          $InstallPath = "C:\DBADashTest"
+          "Extract to $InstallPath"
+          Expand-Archive -Path $zipPath -DestinationPath $InstallPath -Force -ErrorAction Stop
+          cd $InstallPath
+          "Configure"
+          ./dbadashconfig -c "Data Source=localhost;UID=sa;pwd=dbatools.I0;Initial Catalog=DBADashDB_GitHubAction;Encrypt=True;TrustServerCertificate=True;" -a SetDestination
+          ./dbadashconfig -c "Data Source=localhost;UID=sa;pwd=dbatools.I0;Encrypt=True;TrustServerCertificate=True;" -a Add --PlanCollectionEnabled --SlowQueryThresholdMs 1000 --SchemaSnapshotDBs "*"
+          "Install Service"
+          ./DBADashService install --localsystem
+          "Start Service"
+          net start DBADashService
+          "Wait 60 sec"
+          Start-Sleep -s 60
+
+          "Get Logs"
+          $logsFolder = "$InstallPath\Logs"
+
+          Get-ChildItem -Path $logsFolder | Get-Content
+
+          exit 0
+
+      - name: Wait 5min
+        shell: powershell
+        run: | 
+          "Wait 5min"
+          Start-Sleep -s 300
+
+      - name: Output CollectionErrorLog
+        shell: powershell
+        run: | 
+          Invoke-Sqlcmd -ServerInstance $params.ServerInstance -Database "DBADashDB_GitHubAction" -Query "SELECT * FROM dbo.CollectionErrorLog" | Format-Table
+
+      - name: Output Table Counts
+        shell: powershell
+        run: | 
+          Invoke-Sqlcmd -ServerInstance "LOCALHOST" -Database "DBADashDB_GitHubAction" -Query `
+          "SELECT   S.name + '.' + O.name AS TableName
+                , SUM(P.Rows) AS CountOfRows
+          FROM sys.objects AS O 
+          JOIN sys.partitions AS P ON O.object_id = P.object_id
+          JOIN sys.schemas S ON O.schema_id = S.schema_id
+          WHERE O.type = 'U' AND O.is_ms_shipped = 0
+          AND index_id < 2 /* 0=Heap, 1=Clustered */
+          GROUP BY  S.name , O.name
+          ORDER BY [TableName]"
+
+      - name: Run Pester Tests
+        shell: powershell
+        run: |     
+          Install-Module Pester -Force
+          Import-Module Pester -PassThru
+          Invoke-Pester -Output Detailed Scripts\CI_Workflow.Tests.ps1
+      
+      - name: Output Log and Check for Errors
+        shell: powershell
+        run: | 
+          $InstallPath = "C:\DBADashTest"
+          $logsFolder = "$InstallPath\Logs"
+          $Log = Get-ChildItem -Path $logsFolder | Get-Content
+          $Log
+          $ErrorLog = $Log | Where-Object {$_ -like "*``[ERR]*"}
+
+          if($ErrorLog.Count -gt 0){
+              throw $ErrorLog
+          }
