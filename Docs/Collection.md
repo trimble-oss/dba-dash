@@ -117,7 +117,7 @@ Add [your own](CustomChecks.md) checks to DBA Dash.
 The application has a default schedule listed above which aims to provide a good balance for most instances. If you increase the frequency of data collection, you will increase the monitoring impact and it could also increase the size of your DBA Dash repository database.  Less frequent collection could mean that the data is stale or doesn't provide enough granularity for performance troubleshooting.
 If you need to adjust the default schedule to better meet your needs, this can be done using the DBA Dash Service Config tool.  In the Options tab click "Configure Schedule".
 
-If you want to override the default schedule, uncheck "Default" and enter a string with your own schedule.  The string can either be a cron expression or a duration specified in seconds.  To disable a collection, use a blank string.  Cron expressions provide a lot of flexibility and there are a number of online tools like [cronmaker](http://www.cronmaker.com/) that can be used to generate cron expressions.
+If you want to override the default schedule, uncheck "Default" and enter a string with your own schedule.  The string can either be a [cron expression](#cron-expressions) or a duration specified in seconds.  To disable a collection, use a blank string.  
 
 There is also the option to configure the collection to run on service start.  Restarting the service is an option if you need to manually refresh data before the scheduled collection runs.
 
@@ -130,7 +130,34 @@ _Collections that share the same schedule will be collected together.  For examp
 
 The schedule data is saved in the ServiceConfig.json for any collections that you have overridden from the default values. The application defaults are configured in [this source file](../DBADash/CollectionSchedule.cs).
 
+## Cron Expressions
 
+Schedules can be configured in DBA Dash using cron expressions or you can enter a value in seconds.  
+### Examples
+
+**Cron:**
+`0 * * ? * *` Every 1min
+`0 0/5 * ? * * *` Every 5min
+`0 0/10 * ? * * *` Every 10min
+`0 0/15 * ? * * *` Every 15min
+`0 0/30 * ? * * *` Every 30min
+`0 0 * ? * *` Every hour
+`0 0 0/2 ? * *` Every 2hrs
+`0 0 0 1/1 * ? *` 12am
+`0 0 23 1/1 * ? *` 11pm
+**Time in seconds:**
+`300` Every 5min (300 seconds)  
+`60` Every 1min (60 seconds)
+`30` Every 30 seconds
+*(Execution times will vary based off when the service is started.  Use a cron expression if you need more control over the actual execution time)*
+
+Cron expressions might seem cryptic but they provide a lot of flexibility for scheduling.  DBA Dash uses [Quartz.NET](https://www.quartz-scheduler.net/) for scheduling which provides some [good documentation](https://www.quartz-scheduler.net/documentation/quartz-3.x/tutorial/crontriggers.html#example-cron-expressions) on cron expressions.  The java version of Quartz also has a good [cron trigger tutorial](http://www.quartz-scheduler.org/documentation/quartz-2.3.0/tutorials/crontrigger.html). Or you can learn more on the [wiki page](https://en.wikipedia.org/wiki/Cron).  There are also some useful online cron expression generators if you need a complex schedule but don't have time to learn the syntax.
+
+Tip: DBA Dash has a "Schedule Description" column that you can use to validate your cron expression.
+### Cron Generators
+
+[freeformatter.com](https://www.freeformatter.com/cron-expression-generator-quartz.html#crongenerator)
+[crontab.cronhub.io](https://crontab.cronhub.io/)
 
 
 
