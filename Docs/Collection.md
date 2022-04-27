@@ -136,19 +136,22 @@ Schedules can be configured in DBA Dash using cron expressions or you can enter 
 ### Examples
 
 **Cron:**
-`0 * * ? * *` Every 1min
-`0 0/5 * ? * * *` Every 5min
-`0 0/10 * ? * * *` Every 10min
-`0 0/15 * ? * * *` Every 15min
-`0 0/30 * ? * * *` Every 30min
-`0 0 * ? * *` Every hour
-`0 0 0/2 ? * *` Every 2hrs
-`0 0 0 1/1 * ? *` 12am
-`0 0 23 1/1 * ? *` 11pm
+* `0 * * ? * *` Every 1min
+* `0 0/5 * ? * * *` Every 5min
+* `0 0/10 * ? * * *` Every 10min
+* `0 0/15 * ? * * *` Every 15min
+* `0 0/30 * ? * * *` Every 30min
+* `0 0 * ? * *` Every hour
+* `0 0 0/2 ? * *` Every 2hrs
+* `0 0 0 1/1 * ? *` 12am
+* `0 0 23 1/1 * ? *` 11pm
+
 **Time in seconds:**
-`300` Every 5min (300 seconds)  
-`60` Every 1min (60 seconds)
-`30` Every 30 seconds
+
+* `300` Every 5min (300 seconds)  
+* `60` Every 1min (60 seconds)
+* `30` Every 30 seconds
+
 *(Execution times will vary based off when the service is started.  Use a cron expression if you need more control over the actual execution time)*
 
 Cron expressions might seem cryptic but they provide a lot of flexibility for scheduling.  DBA Dash uses [Quartz.NET](https://www.quartz-scheduler.net/) for scheduling which provides some [good documentation](https://www.quartz-scheduler.net/documentation/quartz-3.x/tutorial/crontriggers.html#example-cron-expressions) on cron expressions.  The java version of Quartz also has a good [cron trigger tutorial](http://www.quartz-scheduler.org/documentation/quartz-2.3.0/tutorials/crontrigger.html). Or you can learn more on the [wiki page](https://en.wikipedia.org/wiki/Cron).  There are also some useful online cron expression generators if you need a complex schedule but don't have time to learn the syntax.
