@@ -156,8 +156,8 @@ Cron expressions might seem cryptic but they provide a lot of flexibility for sc
 Tip: DBA Dash has a "Schedule Description" column that you can use to validate your cron expression.
 ### Cron Generators
 
-[freeformatter.com](https://www.freeformatter.com/cron-expression-generator-quartz.html#crongenerator)
-[crontab.cronhub.io](https://crontab.cronhub.io/)
+* [freeformatter.com](https://www.freeformatter.com/cron-expression-generator-quartz.html#crongenerator)
+* [crontab.cronhub.io](https://crontab.cronhub.io/)
 
 
 

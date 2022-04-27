@@ -174,7 +174,7 @@ namespace DBADashServiceConfig
 
         private void lnkCron_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            var psi = new ProcessStartInfo("http://www.cronmaker.com/") { UseShellExecute = true };
+            var psi = new ProcessStartInfo("https://github.com/trimble-oss/dba-dash/blob/main/Docs/Collection.md#cron-expressions") { UseShellExecute = true };
             Process.Start(psi);
         }
     }

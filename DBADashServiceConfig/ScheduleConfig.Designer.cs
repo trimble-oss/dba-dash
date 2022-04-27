@@ -98,14 +98,16 @@ namespace DBADashServiceConfig
             // lnkCron
             // 
             this.lnkCron.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.lnkCron.AutoSize = true;
+            this.lnkCron.Image = global::DBADashServiceConfig.Properties.Resources.Information_blue_6227_16x16_cyan;
+            this.lnkCron.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
             this.lnkCron.LinkColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(79)))), ((int)(((byte)(131)))));
             this.lnkCron.Location = new System.Drawing.Point(12, 759);
             this.lnkCron.Name = "lnkCron";
-            this.lnkCron.Size = new System.Drawing.Size(147, 20);
+            this.lnkCron.Size = new System.Drawing.Size(68, 23);
             this.lnkCron.TabIndex = 5;
             this.lnkCron.TabStop = true;
-            this.lnkCron.Text = "www.cronmaker.com";
+            this.lnkCron.Text = "Help";
+            this.lnkCron.TextAlign = System.Drawing.ContentAlignment.TopRight;
             this.lnkCron.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.lnkCron_LinkClicked);
             // 
             // ScheduleConfig
