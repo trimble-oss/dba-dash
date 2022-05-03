@@ -13,6 +13,7 @@ If the tool doesn't run as sysadmin it won't be able to collect last good CHECKD
 ````SQL
 ALTER SERVER ROLE [sysadmin] ADD MEMBER [{LoginName}]
 ````
+## Running with Minimal Permissions
 
 If you **don't** want to grant sysadmin access, you can assign the permissions listed below instead
 
@@ -24,7 +25,8 @@ If you **don't** want to grant sysadmin access, you can assign the permissions l
 * View Any Definition
 
 **MSDB Database:**
-* Add user to db_datareader role.
+* Add user to the *db_datareader* role.
+* Add user to the *SQLAgentReaderRole* role
 
 This script can be used to provision the required permissions:
 ````SQL
@@ -53,7 +55,36 @@ BEGIN
 	CREATE USER ' + QUOTENAME(@LoginName) + ' FOR LOGIN ' + QUOTENAME(@LoginName) + '
 END
 ALTER ROLE [db_datareader] ADD MEMBER ' + QUOTENAME(@LoginName) + '
+ALTER ROLE [SQLAgentReaderRole] ADD MEMBER ' + QUOTENAME(@LoginName) + '
 '
+PRINT @SQL
+EXEC sp_executesql @SQL
+````
+
+### Repository Database Permissions
+The service will also need db_owner permissions to the repository database.  The repository database is created by clicking the "Deploy/Update Database" button in the service configuration tool, otherwise it's created when the service starts.  To allow the service account to create the repository database you can use:
+
+````SQL
+DECLARE @LoginName SYSNAME = 'DBADashService' /* !!!! Replace with your own service login !!!! */
+DECLARE @SQL NVARCHAR(MAX)
+SET @SQL = N'
+GRANT CREATE ANY DATABASE TO ' + QUOTENAME(@LoginName) 
+PRINT @SQL
+EXEC sp_executesql @SQL
+````
+
+Or to grant the permissions after creating the repository database:
+
+````SQL
+DECLARE @LoginName SYSNAME = 'DBADashService' /* !!!! Replace with your own service login !!!! */
+DECLARE @RepositoryName SYSNAME = 'DBADashDB' /* !!!! Replace with your own Repository Database Name (default:DBADashDB) !!!! */
+DECLARE @SQL NVARCHAR(MAX)
+SET @SQL = N'
+USE ' + QUOTENAME(@RepositoryName) + '
+GO
+CREATE USER ' + QUOTENAME(@LoginName) + ' FOR LOGIN ' + QUOTENAME(@LoginName) + '
+GO
+ALTER ROLE [db_owner] ADD MEMBER ' + QUOTENAME(@LoginName) 
 PRINT @SQL
 EXEC sp_executesql @SQL
 ````
