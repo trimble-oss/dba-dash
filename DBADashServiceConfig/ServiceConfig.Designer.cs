@@ -44,6 +44,7 @@
             this.bttnCancel = new System.Windows.Forms.Button();
             this.tab1 = new System.Windows.Forms.TabControl();
             this.tabDest = new System.Windows.Forms.TabPage();
+            this.lblServiceWarning = new System.Windows.Forms.Label();
             this.bttnAbout = new System.Windows.Forms.Button();
             this.groupBox5 = new System.Windows.Forms.GroupBox();
             this.bttnViewServiceLog = new System.Windows.Forms.Button();
@@ -280,6 +281,7 @@
             // 
             // tabDest
             // 
+            this.tabDest.Controls.Add(this.lblServiceWarning);
             this.tabDest.Controls.Add(this.bttnAbout);
             this.tabDest.Controls.Add(this.groupBox5);
             this.tabDest.Controls.Add(this.bttnS3);
@@ -298,6 +300,20 @@
             this.tabDest.TabIndex = 2;
             this.tabDest.Text = "Destination:";
             this.tabDest.UseVisualStyleBackColor = true;
+            // 
+            // lblServiceWarning
+            // 
+            this.lblServiceWarning.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.lblServiceWarning.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(228)))), ((int)(((byte)(147)))), ((int)(((byte)(37)))));
+            this.lblServiceWarning.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.lblServiceWarning.ForeColor = System.Drawing.Color.White;
+            this.lblServiceWarning.Location = new System.Drawing.Point(9, 490);
+            this.lblServiceWarning.Name = "lblServiceWarning";
+            this.lblServiceWarning.Size = new System.Drawing.Size(1103, 48);
+            this.lblServiceWarning.TabIndex = 24;
+            this.lblServiceWarning.Text = "Warning: ";
+            this.lblServiceWarning.Visible = false;
             // 
             // bttnAbout
             // 
@@ -1388,6 +1404,7 @@
         private System.Windows.Forms.Button bttnViewServiceLog;
         private System.Windows.Forms.Button bttnAbout;
         private System.Windows.Forms.Panel panel1;
+        private System.Windows.Forms.Label lblServiceWarning;
     }
 }
 
