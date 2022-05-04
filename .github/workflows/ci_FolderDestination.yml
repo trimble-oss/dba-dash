@@ -1,4 +1,4 @@
-name: DBA Dash Continuous Integration
+name: Folder Destination Test
 
 on: 
     push:
@@ -64,29 +64,70 @@ jobs:
           sqlcmd -S localhost -U sa -P dbatools.I0 -d tempdb -Q "SELECT @@version as Version;"
           sqlcmd -S localhost -U sa -P dbatools.I0 -d tempdb -Q "SELECT SERVERPROPERTY('Collation') AS Collation;"
 
-      - name: Configure & Install DBA Dash as Service
+
+      - name: Install Service to Read from Folder
         shell: powershell
         run: | 
           $ErrorActionPreference = "Stop" 
           $zipPath = "DBADash_${{steps.GetVersion.outputs.BUILD_NUMBER}}.zip"
-          $InstallPath = "C:\DBADashTest"
+         
+          $ServiceName = "DBADashReadFromFolder"
+          $InstallPath = "C:\$ServiceName"
+
+          $DBADashFolderDestination = "C:\Dump"
+          md $DBADashFolderDestination
+
           "Extract to $InstallPath"
           Expand-Archive -Path $zipPath -DestinationPath $InstallPath -Force -ErrorAction Stop
+
           Set-Location $InstallPath
-          "Configure"
-          ./dbadashconfig -c "Data Source=localhost;UID=sa;pwd=dbatools.I0;Initial Catalog=DBADashDB_GitHubAction;Encrypt=True;TrustServerCertificate=True;" -a SetDestination
-          ./dbadashconfig -c "Data Source=localhost;UID=sa;pwd=dbatools.I0;Encrypt=True;TrustServerCertificate=True;" -a Add --PlanCollectionEnabled --SlowQueryThresholdMs 1000 --SchemaSnapshotDBs "*"
+          ./dbadashconfig -a SetServiceName --ServiceName $ServiceName
+          ./dbadashconfig -c $DBADashFolderDestination -a Add
+          ./dbadashconfig -c "Data Source=localhost;UID=sa;pwd=dbatools.I0;Initial Catalog=DBADashDB_GitHubAction;Encrypt=True;TrustServerCertificate=True;" -a SetDestination      
           "Install Service"
           ./DBADashService install --localsystem
+
           "Start Service"
-          net start DBADashService
+          net start $ServiceName
+
           "Wait 60 sec"
           Start-Sleep -s 60
 
           "Get Logs"
-          $logsFolder = "$InstallPath\Logs"
+          Get-ChildItem -Path "$InstallPath\Logs" | Get-Content
 
-          Get-ChildItem -Path $logsFolder | Get-Content
+          exit 0
+  
+      - name: Install Service to Write to Folder
+        shell: powershell
+        run: | 
+          $ErrorActionPreference = "Stop" 
+          $zipPath = "DBADash_${{steps.GetVersion.outputs.BUILD_NUMBER}}.zip"        
+          
+          $ServiceName = "DBADashWriteToFolder"
+          $InstallPath = "C:\$ServiceName"
+          $DBADashFolderDestination = "C:\Dump"
+         
+          "Extract to $InstallPath"
+
+          Expand-Archive -Path $zipPath -DestinationPath $InstallPath -Force -ErrorAction Stop
+
+          Set-Location $InstallPath
+          "Configure"
+          ./dbadashconfig -a SetServiceName --ServiceName $ServiceName
+          ./dbadashconfig -c $DBADashFolderDestination -a SetDestination
+          ./dbadashconfig -c "Data Source=localhost;UID=sa;pwd=dbatools.I0;Encrypt=True;TrustServerCertificate=True;" -a Add --PlanCollectionEnabled --SlowQueryThresholdMs 1000 --SchemaSnapshotDBs "*"       
+          "Install Service"
+          ./DBADashService install --localsystem
+
+          "Start Service"
+          net start $ServiceName
+
+          "Wait 60 sec"
+          Start-Sleep -s 60
+
+          "Get Logs"
+          Get-ChildItem -Path "$InstallPath\Logs" | Get-Content
 
           exit 0
 
@@ -95,6 +136,16 @@ jobs:
         run: | 
           "Wait 5min"
           Start-Sleep -s 300
+
+      - name: Output Log (DBADashWriteToFolder)
+        shell: powershell
+        run: | 
+          ./Scripts/Get-LogContent -LogPath  "C:\DBADashWriteToFolder\Logs"
+
+      - name: Output Log (DBADashReadFromFolder)
+        shell: powershell
+        run: | 
+          ./Scripts/Get-LogContent -LogPath  "C:\DBADashReadFromFolder\Logs"
 
       - name: Output CollectionErrorLog
         shell: powershell
@@ -112,8 +163,13 @@ jobs:
           Install-Module Pester -Force
           Import-Module Pester -PassThru
           Invoke-Pester -Output Detailed Scripts\CI_Workflow.Tests.ps1
-      
-      - name: Output Log and Check for Errors
+
+      - name: Output Log and Check for Errors (DBADashWriteToFolder)
         shell: powershell
         run: | 
-          ./Scripts/Get-LogContent -LogPath  "C:\DBADashTest\Logs" -ThrowError
+          ./Scripts/Get-LogContent -LogPath  "C:\DBADashWriteToFolder\Logs" -ThrowError
+
+      - name: Output Log and Check for Errors (DBADashReadFromFolder)
+        shell: powershell
+        run: | 
+          ./Scripts/Get-LogContent -LogPath  "C:\DBADashReadFromFolder\Logs" -ThrowError
