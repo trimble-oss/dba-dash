@@ -411,6 +411,30 @@ namespace DBADashServiceConfig
             svcCtrl = ServiceController.GetServices()
     .FirstOrDefault(s => s.ServiceName == collectionConfig.ServiceName);
 
+            lblServiceWarning.Visible = false;
+            try
+            {
+                var nameOfServiceFromPath = DBADash.ServiceTools.GetServiceNameFromPath();
+                var pathOfService = ServiceTools.GetPathOfService(collectionConfig.ServiceName);
+
+                if (!pathOfService.Contains(ServiceTools.ServicePath) && pathOfService != String.Empty)
+                {
+                    lblServiceWarning.Text = $"Warning service with name {collectionConfig.ServiceName} is installed at a different location: {pathOfService}";
+                    lblServiceWarning.Visible = true;
+                }
+                else if (nameOfServiceFromPath != collectionConfig.ServiceName && nameOfServiceFromPath != string.Empty)
+                {
+                    lblServiceWarning.Text = $"Warning: Service name from path {nameOfServiceFromPath} does not match the service name {collectionConfig.ServiceName} in ServiceConfig.json.";
+                    lblServiceWarning.Visible = true;
+                }
+            }
+            catch (Exception ex)
+            {
+                lblServiceWarning.Text = $"Warning: Could not determine service name from path: {ex.Message}";
+                lblServiceWarning.Visible = true;
+            }
+
+
             if (svcCtrl == null)
             {
                 isInstalled = false;

@@ -2,6 +2,7 @@
 using DBADash;
 using DBADashConfig;
 using Serilog;
+using System.Runtime.InteropServices;
 using static DBADashConfig.Options;
 
 Log.Logger = new LoggerConfiguration()
@@ -30,6 +31,7 @@ try
     Parser.Default.ParseArguments<Options>(args)
           .WithParsed<Options>(o =>
           {
+              Log.Information("Action:" + o.Option.ToString());
               if (o.Option == CommandLineActionOption.GetServiceName) // Just return the name of the service
               {
                   Console.WriteLine(config.ServiceName);
@@ -165,6 +167,42 @@ try
                       Log.Error(ex,"Error running upgrade");
                       throw;
                   }
+              }
+              else if (o.Option == CommandLineActionOption.SetServiceName)
+              {
+                  if (string.IsNullOrEmpty(o.ServiceName))
+                  {
+                      Log.Error("ServiceName is required with SetServiceName action");
+                      return;
+                  }
+                  if (o.ServiceName == config.ServiceName)
+                  {
+                      Log.Information("ServiceName is already set to {ServiceName}", config.ServiceName);
+                      return;
+                  }
+                  if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                  {
+                      if (ServiceTools.IsServiceInstalledByName(o.ServiceName)) // Check if a service exists with the specified name
+                      {
+                          Log.Error("ServiceName is already in use");
+                          return;
+                      }
+                      if (DBADash.ServiceTools.IsServiceInstalledByPath()) // Check if the service is already installed by location on disk
+                      {
+                          Log.Error("Service is already installed.  Please uninstall before setting a new service name");
+                          return;
+                      }
+                      else
+                      {
+                          Log.Information("Setting service name to {ServiceName}", o.ServiceName);
+                          config.ServiceName = o.ServiceName;
+                      }
+                  }
+                  else
+                  {
+                      Log.Error("SetServiceName is only supported on Windows");
+                      return;
+                  }                  
               }
               // Save a copy of the old config before writing changes
               if (File.Exists(jsonConfigPath) && !o.NoBackupConfig)

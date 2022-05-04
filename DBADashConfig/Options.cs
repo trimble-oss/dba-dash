@@ -12,7 +12,7 @@ namespace DBADashConfig
         [Option('c', "connection", Required = false, HelpText = "The connection string for the SQL Instance you want to monitor.  e.g. \"Data Source = MYSERVER;Integrated Security=True;Encrypt=True;Trust Server Certificate=True\"")]
         public string ConnectionString { get; set; } = "";
 
-        [Option('a', "action", Required = true, HelpText = "Action : Add, Remove, SetDestination, List, Count, GetServiceName, CheckForUpdates, Update")]
+        [Option('a', "action", Required = true, HelpText = "Action : Add, Remove, SetDestination, List, Count, GetServiceName, CheckForUpdates, Update, SetServiceName")]
         public CommandLineActionOption Option { get; set; }
 
         [Option('r', "Replace", Required = false, HelpText = "Option to replace the existing connection if it already exists", Default = false)]
@@ -57,6 +57,9 @@ namespace DBADashConfig
         [Option("ConnectionID", Default = "", Required = false, HelpText = "The ConnectionID is used to uniquely identify the SQL Instance in the repository database.  The ConnectionID is automatically assigned to @@SERVERNAME but you can override this with a custom value.  If you change the ConnectionID for an existing server it will appear as a new instance in the repository database.")]
         public string ConnectionID { get; set; } = "";
 
+        [Option("ServiceName", Default = "", Required = false, HelpText = "Use with -a SetServiceName to set the service name for the DBA Dash service.")]
+        public string ServiceName { get; set; } = "";
+
         public enum CommandLineActionOption
         {
             Add,
@@ -67,7 +70,8 @@ namespace DBADashConfig
             Count,
             GetServiceName,
             CheckForUpdates,
-            Update
+            Update,
+            SetServiceName
         }
     }
 
