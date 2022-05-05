@@ -106,5 +106,13 @@ namespace DBADashServiceConfig
         {
             loadLog(cboLogs.Text);
         }
+
+        private void txtLogFilter_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Enter)
+            {
+                loadLog(cboLogs.Text);
+            }
+        }
     }
 }
