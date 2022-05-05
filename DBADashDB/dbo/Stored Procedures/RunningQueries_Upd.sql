@@ -138,7 +138,10 @@ BEGIN
 		    SUM(CASE WHEN R.blocking_session_id>0 THEN 1 ELSE 0 END) AS BlockedQueries,
 		    ISNULL(SUM(CASE WHEN R.blocking_session_id>0 THEN CAST(R.wait_time AS BIGINT) ELSE 0 END),0) AS BlockedWaitTime,
 		    ISNULL(MAX(R.granted_query_memory),0) AS MaxMemoryGrant,
-		    ISNULL(MAX(CASE WHEN R.wait_type='SP_SERVER_DIAGNOSTICS_SLEEP' OR calc.Duration<0 THEN 0 ELSE calc.Duration END),0) AS LongestRunningQueryMs,
+			/*	For longest running query, ignore TdService (threat detection services) for AzureDB.  Ignore sleeping sessions as these don't have a running query. 
+				Ignore queries with SP_SERVER_DIAGNOSTICS_SLEEP or XE_LIVE_TARGET_TVF wait types - we want to report on real user queries.
+			*/
+		    ISNULL(MAX(CASE WHEN R.wait_type IN('SP_SERVER_DIAGNOSTICS_SLEEP','XE_LIVE_TARGET_TVF') OR calc.Duration<0 OR R.status='sleeping' OR R.program_name = 'TdService' THEN 0 ELSE calc.Duration END),0) AS LongestRunningQueryMs,
 		    SUM(CASE WHEN WT.IsCriticalWait=1 THEN 1 ELSE 0 END) CriticalWaitCount,
 		    SUM(CASE WHEN WT.IsCriticalWait=1 THEN CAST(R.wait_time AS BIGINT) ELSE 0 END) CriticalWaitTime,
             SUM(calc.IsTempDB) as TempDBWaitCount,
