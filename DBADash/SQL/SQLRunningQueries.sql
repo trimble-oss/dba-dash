@@ -47,7 +47,7 @@ WHERE s.is_user_process=1
 		ELSE 'AND (s.open_transaction_count > 0 OR r.session_id IS NOT NULL)' END + '
 AND s.session_id <> @@SPID
 AND s.session_id > 0'
-+ CASE WHEN SERVERPROPERTY('EngineEditionID') = 5 THEN 'AND s.database_id = DB_ID()' /* DB filter for Azure */ ELSE '' END 
++ CASE WHEN SERVERPROPERTY('EngineEdition') = 5 THEN 'AND s.database_id = DB_ID()' /* DB filter for Azure */ ELSE '' END 
 
 EXEC sp_executesql @SQL,N'@UTCOffset INT,@SnapshotDateUTC DATETIME',@UTCOffset,@SnapshotDateUTC
 
