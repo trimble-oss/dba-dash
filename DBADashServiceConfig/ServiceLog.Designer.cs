@@ -46,6 +46,7 @@
             this.txtLogFilter.Name = "txtLogFilter";
             this.txtLogFilter.Size = new System.Drawing.Size(144, 27);
             this.txtLogFilter.TabIndex = 9;
+            this.txtLogFilter.KeyDown += new System.Windows.Forms.KeyEventHandler(this.txtLogFilter_KeyDown);
             // 
             // label2
             // 
