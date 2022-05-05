@@ -36,6 +36,7 @@
             this.txtLog = new System.Windows.Forms.TextBox();
             this.label1 = new System.Windows.Forms.Label();
             this.panel1 = new System.Windows.Forms.Panel();
+            this.bttnNotepad = new System.Windows.Forms.Button();
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
             this.panel1.SuspendLayout();
             this.SuspendLayout();
@@ -106,6 +107,7 @@
             // 
             // panel1
             // 
+            this.panel1.Controls.Add(this.bttnNotepad);
             this.panel1.Controls.Add(this.label2);
             this.panel1.Controls.Add(this.label1);
             this.panel1.Controls.Add(this.txtLogFilter);
@@ -116,6 +118,18 @@
             this.panel1.Name = "panel1";
             this.panel1.Size = new System.Drawing.Size(1083, 77);
             this.panel1.TabIndex = 11;
+            // 
+            // bttnNotepad
+            // 
+            this.bttnNotepad.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.bttnNotepad.Location = new System.Drawing.Point(689, 23);
+            this.bttnNotepad.Name = "bttnNotepad";
+            this.bttnNotepad.Size = new System.Drawing.Size(105, 29);
+            this.bttnNotepad.TabIndex = 11;
+            this.bttnNotepad.Text = "Notepad";
+            this.toolTip1.SetToolTip(this.bttnNotepad, "Open log in Notepad");
+            this.bttnNotepad.UseVisualStyleBackColor = true;
+            this.bttnNotepad.Click += new System.EventHandler(this.bttnNotepad_Click);
             // 
             // ServiceLog
             // 
@@ -144,5 +158,6 @@
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Panel panel1;
         private System.Windows.Forms.ToolTip toolTip1;
+        private System.Windows.Forms.Button bttnNotepad;
     }
 }

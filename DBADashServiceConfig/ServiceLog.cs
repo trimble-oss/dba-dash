@@ -114,5 +114,11 @@ namespace DBADashServiceConfig
                 loadLog(cboLogs.Text);
             }
         }
+
+        private void bttnNotepad_Click(object sender, EventArgs e)
+        {
+            string filePath = Path.Combine(logsFolder, cboLogs.Text);
+            System.Diagnostics.Process.Start("Notepad.exe", filePath);
+        }
     }
 }
