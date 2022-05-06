@@ -52,7 +52,6 @@ Describe 'CI Workflow checks' {
 		  @{TableName="dbo.DDLSnapshotOptions"}
 		  @{TableName="dbo.DDLSnapshots"}
 		  @{TableName="dbo.DDLSnapshotsLog"}
-		  @{TableName="dbo.Drivers"}
 	      @{TableName="dbo.Drives"}
 	      @{TableName="dbo.DriveThresholds"}
 	      @{TableName="dbo.InstanceCounters"}
@@ -93,5 +92,17 @@ Describe 'CI Workflow checks' {
              $results.cnt  | Should -BeGreaterThan 0
          
     }
+
+	$TableCountGreaterThanZeroTestCasesWMI = @(
+		@{TableName="dbo.Drivers"}
+	)
+	It 'Check WMI table counts for <TableName>' -TestCases $TableCountGreaterThanZeroTestCasesWMI -Skip:$NoWMI {
+		param($tableName)
+			
+			$results= Invoke-Sqlcmd -ServerInstance $params.ServerInstance -Database $params.Database  -Query "SELECT COUNT(*) cnt FROM $tableName"
+										
+			$results.cnt | Should -BeGreaterThan 0
+					
+	}
 
 }

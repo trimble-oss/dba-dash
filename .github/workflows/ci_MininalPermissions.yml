@@ -1,4 +1,4 @@
-name: DBA Dash CI with Folder Source/Destination
+name: DBA Dash CI with Minimal Permissions
 
 on: 
     push:
@@ -64,70 +64,48 @@ jobs:
           sqlcmd -S localhost -U sa -P dbatools.I0 -d tempdb -Q "SELECT @@version as Version;"
           sqlcmd -S localhost -U sa -P dbatools.I0 -d tempdb -Q "SELECT SERVERPROPERTY('Collation') AS Collation;"
 
+      - name: Add SQL Login for DBA Dash service with minimal permissions
+        run: | 
+          sqlcmd -S localhost -U sa -P dbatools.I0 -d master -Q "CREATE LOGIN [DBADashService] WITH PASSWORD=N'Use_A_Str0ng_Passw0rd', DEFAULT_DATABASE=[master], CHECK_EXPIRATION=OFF, CHECK_POLICY=OFF
+          GRANT CREATE ANY DATABASE TO [DBADashService] /* Only required to allow service account to create repository database */
+          GRANT VIEW SERVER STATE TO [DBADashService]
+          GRANT VIEW ANY DATABASE TO [DBADashService]
+          GRANT CONNECT ANY DATABASE TO [DBADashService]
+          GRANT VIEW ANY DEFINITION TO [DBADashService]
+          GRANT ALTER ANY EVENT SESSION TO [DBADashService] /* Required if you want to use slow query capture */
+          USE [msdb]
+          IF NOT EXISTS(SELECT * 
+                FROM msdb.sys.database_principals
+                WHERE name = 'DBADashService')
+          BEGIN
+            CREATE USER [DBADashService] FOR LOGIN [DBADashService]
+          END
+          ALTER ROLE [db_datareader] ADD MEMBER [DBADashService]
+          ALTER ROLE [SQLAgentReaderRole] ADD MEMBER [DBADashService]"
 
-      - name: Install Service to Read from Folder
+      - name: Configure & Install DBA Dash as Service
         shell: powershell
         run: | 
           $ErrorActionPreference = "Stop" 
           $zipPath = "DBADash_${{steps.GetVersion.outputs.BUILD_NUMBER}}.zip"
-         
-          $ServiceName = "DBADashReadFromFolder"
-          $InstallPath = "C:\$ServiceName"
-
-          $DBADashFolderDestination = "C:\Dump"
-          md $DBADashFolderDestination
-
+          $InstallPath = "C:\DBADashTest"
           "Extract to $InstallPath"
           Expand-Archive -Path $zipPath -DestinationPath $InstallPath -Force -ErrorAction Stop
-
-          Set-Location $InstallPath
-          ./dbadashconfig -a SetServiceName --ServiceName $ServiceName
-          ./dbadashconfig -c $DBADashFolderDestination -a Add
-          ./dbadashconfig -c "Data Source=localhost;UID=sa;pwd=dbatools.I0;Initial Catalog=DBADashDB_GitHubAction;Encrypt=True;TrustServerCertificate=True;" -a SetDestination      
-          "Install Service"
-          ./DBADashService install --localsystem
-
-          "Start Service"
-          net start $ServiceName
-
-          "Wait 60 sec"
-          Start-Sleep -s 60
-
-          "Get Logs"
-          Get-ChildItem -Path "$InstallPath\Logs" | Get-Content
-
-          exit 0
-  
-      - name: Install Service to Write to Folder
-        shell: powershell
-        run: | 
-          $ErrorActionPreference = "Stop" 
-          $zipPath = "DBADash_${{steps.GetVersion.outputs.BUILD_NUMBER}}.zip"        
-          
-          $ServiceName = "DBADashWriteToFolder"
-          $InstallPath = "C:\$ServiceName"
-          $DBADashFolderDestination = "C:\Dump"
-         
-          "Extract to $InstallPath"
-
-          Expand-Archive -Path $zipPath -DestinationPath $InstallPath -Force -ErrorAction Stop
-
           Set-Location $InstallPath
           "Configure"
-          ./dbadashconfig -a SetServiceName --ServiceName $ServiceName
-          ./dbadashconfig -c $DBADashFolderDestination -a SetDestination
-          ./dbadashconfig -c "Data Source=localhost;UID=sa;pwd=dbatools.I0;Encrypt=True;TrustServerCertificate=True;" -a Add --PlanCollectionEnabled --SlowQueryThresholdMs 1000 --SchemaSnapshotDBs "*"       
+          ./dbadashconfig -c "Data Source=localhost;UID=DBADashService;pwd=Use_A_Str0ng_Passw0rd;Initial Catalog=DBADashDB_GitHubAction;Encrypt=True;TrustServerCertificate=True;" -a SetDestination
+          ./dbadashconfig -c "Data Source=localhost;UID=DBADashService;pwd=Use_A_Str0ng_Passw0rd;Encrypt=True;TrustServerCertificate=True;" -a Add --PlanCollectionEnabled --SlowQueryThresholdMs 1000 --SchemaSnapshotDBs "*" --NoWMI
           "Install Service"
-          ./DBADashService install --localsystem
-
+          ./DBADashService install --localservice
           "Start Service"
-          net start $ServiceName
-
+          net start DBADashService
           "Wait 60 sec"
           Start-Sleep -s 60
 
           "Get Logs"
-          Get-ChildItem -Path "$InstallPath\Logs" | Get-Content
+          $logsFolder = "$InstallPath\Logs"
+
+          Get-ChildItem -Path $logsFolder | Get-Content
 
           exit 0
 
@@ -136,16 +114,6 @@ jobs:
         run: | 
           "Wait 5min"
           Start-Sleep -s 300
-
-      - name: Output Log (DBADashWriteToFolder)
-        shell: powershell
-        run: | 
-          ./Scripts/Get-LogContent -LogPath  "C:\DBADashWriteToFolder\Logs"
-
-      - name: Output Log (DBADashReadFromFolder)
-        shell: powershell
-        run: | 
-          ./Scripts/Get-LogContent -LogPath  "C:\DBADashReadFromFolder\Logs"
 
       - name: Output CollectionErrorLog
         shell: powershell
@@ -162,14 +130,10 @@ jobs:
         run: |     
           Install-Module Pester -Force
           Import-Module Pester -PassThru
+          $NoWMI=$true
           Invoke-Pester -Output Detailed Scripts\CI_Workflow.Tests.ps1
-
-      - name: Output Log and Check for Errors (DBADashWriteToFolder)
+      
+      - name: Output Log and Check for Errors
         shell: powershell
         run: | 
-          ./Scripts/Get-LogContent -LogPath  "C:\DBADashWriteToFolder\Logs" -ThrowError
-
-      - name: Output Log and Check for Errors (DBADashReadFromFolder)
-        shell: powershell
-        run: | 
-          ./Scripts/Get-LogContent -LogPath  "C:\DBADashReadFromFolder\Logs" -ThrowError
+          ./Scripts/Get-LogContent -LogPath  "C:\DBADashTest\Logs" -ThrowError
