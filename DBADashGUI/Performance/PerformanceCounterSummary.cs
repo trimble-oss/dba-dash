@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using Microsoft.Data.SqlClient;
+using static DBADashGUI.DBADashStatus;
 
 namespace DBADashGUI.Performance
 {
@@ -28,26 +29,11 @@ namespace DBADashGUI.Performance
 
         private void refreshSummary()
         {
-            using (var cn = new SqlConnection(Common.ConnectionString))
-            using (var cmd = new SqlCommand("dbo.PerformanceCounterSummary_Get", cn) { CommandType = CommandType.StoredProcedure }) 
-            using (var da = new SqlDataAdapter(cmd))
-            {
-                cn.Open();
-                cmd.Parameters.AddWithValue("InstanceID", InstanceID);
-                cmd.Parameters.AddWithValue("FromDate", DateRange.FromUTC);
-                cmd.Parameters.AddWithValue("ToDate", DateRange.ToUTC);
-                if (txtSearch.Text.Length > 0)
-                {
-                    cmd.Parameters.AddWithValue("Search", "%" + txtSearch.Text + "%");
-                }                   
-                DataTable dt = new DataTable();                   
-                da.Fill(dt);
-                dgv.AutoGenerateColumns = false;
-                dgv.DataSource = dt;
-                dgv.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
-            }         
+            performanceCounterSummaryGrid1.SearchText = txtSearch.Text;
+            performanceCounterSummaryGrid1.InstanceID = InstanceID;
+            performanceCounterSummaryGrid1.RefreshData();
         }
-
+        
 
         private void tsRefresh_Click(object sender, EventArgs e)
         {
@@ -57,7 +43,7 @@ namespace DBADashGUI.Performance
 
         private void tsCopy_Click(object sender, EventArgs e)
         {
-            Common.CopyDataGridViewToClipboard(dgv);
+            Common.CopyDataGridViewToClipboard(performanceCounterSummaryGrid1);
         }
 
         private void refreshChart()
@@ -72,44 +58,25 @@ namespace DBADashGUI.Performance
         }
 
 
-        private void dgv_CellContentClick(object sender, DataGridViewCellEventArgs e)
-        {
-            if(e.RowIndex>=0)
-            {
-                var row = (DataRowView)dgv.Rows[e.RowIndex].DataBoundItem;
-                var objectName = (string)row["object_name"];
-                var counterName = (string)row["counter_name"];
-                var instanceName = (string)row["instance_name"];
-
-                if (e.ColumnIndex == colView.Index) {
-                    performanceCounters1.CounterID = (Int32)row["CounterID"];
-                    performanceCounters1.CounterName = objectName + "\\" + counterName + (instanceName == "" ? "" : "\\" + instanceName);
-                    splitContainer1.Panel1Collapsed = false;
-                    refreshChart();
-                }
-                if (e.ColumnIndex == colCounter.Index)
-                {
-                    txtSearch.Text = counterName;
-                    refreshSummary();
-                }
-                if (e.ColumnIndex == colInstance.Index)
-                {
-                    txtSearch.Text = instanceName;
-                    refreshSummary();
-                }
-                if (e.ColumnIndex == colObject.Index)
-                {
-                    txtSearch.Text = objectName;
-                    refreshSummary();
-                }
-            }
-        }
-
-      
         private void PerformanceCounterSummary_Load(object sender, EventArgs e)
         {
-            Common.StyleGrid(ref dgv);
             splitContainer1.Panel1Collapsed = true;
+            performanceCounterSummaryGrid1.CounterSelected += PerformanceCounterSummaryGrid1_CounterSelected;
+            performanceCounterSummaryGrid1.TextSelected += PerformanceCounterSummaryGrid1_TextSelected;
+        }
+
+        private void PerformanceCounterSummaryGrid1_TextSelected(object sender, PerformanceCounterSummaryGrid.TextSelectedEventArgs e)
+        {
+            txtSearch.Text = e.Text;
+            refreshSummary(); 
+        }
+
+        private void PerformanceCounterSummaryGrid1_CounterSelected(object sender, PerformanceCounterSummaryGrid.CounterSelectedEventArgs e)
+        {
+            splitContainer1.Panel1Collapsed = false;
+            performanceCounters1.CounterID = e.CounterID;
+            performanceCounters1.CounterName = e.CounterName;
+            refreshChart();
         }
 
         private void tsClear_Click(object sender, EventArgs e)
@@ -120,7 +87,7 @@ namespace DBADashGUI.Performance
 
         private void txtSearch_KeyPress(object sender, KeyPressEventArgs e)
         {
-            if(e.KeyChar == (char)13)
+            if (e.KeyChar == (char)13)
             {
                 refreshSummary();
             }
@@ -128,7 +95,9 @@ namespace DBADashGUI.Performance
 
         private void tsExcel_Click(object sender, EventArgs e)
         {
-            Common.PromptSaveDataGridView(ref dgv);
+            Common.PromptSaveDataGridView(performanceCounterSummaryGrid1);
         }
+
+
     }
 }

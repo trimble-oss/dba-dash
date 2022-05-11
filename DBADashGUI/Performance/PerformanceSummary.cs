@@ -60,8 +60,10 @@ namespace DBADashGUI.Performance
             {
                 foreach(string agg in ctr.GetAggColumns())
                 {
-                    dt.Columns.Add(agg + "_" + ctr.CounterID, typeof(double));
-                    dgv.Columns.Add(new DataGridViewTextBoxColumn() { DataPropertyName = agg + "_" + ctr.CounterID, HeaderText = agg + " " + ctr.ToString(), Tag = "PC" });
+                    string name = agg + "_" + ctr.CounterID;
+                    dt.Columns.Add(name, typeof(double));
+                    dt.Columns.Add(name + "Status", typeof(int));                   
+                    dgv.Columns.Add(new DataGridViewTextBoxColumn() { Name=name, DataPropertyName = name, HeaderText = agg + " " + ctr.ToString(), Tag = "PC" });
                 }
             }
             if (SelectedPerformanceCounters.Count > 0)
@@ -84,10 +86,12 @@ namespace DBADashGUI.Performance
                         if (cntr.Avg)
                         {
                             mainRow[("Avg_" + (int)r["CounterID"]).ToString()] = r["AvgValue"];
+                            mainRow[("Avg_" + (int)r["CounterID"] + "Status").ToString()] = r["AvgValueStatus"];                            
                         }
                         if (cntr.Max)
                         {
                             mainRow[("Max_" + (int)r["CounterID"]).ToString()] = r["MaxValue"];
+                            mainRow[("Max_" + (int)r["CounterID"] + "Status").ToString()] = r["MaxValueStatus"];                            
                         }
                         if (cntr.Total)
                         {
@@ -96,10 +100,12 @@ namespace DBADashGUI.Performance
                         if (cntr.Current)
                         {
                             mainRow[("Current_" + (int)r["CounterID"]).ToString()] = r["CurrentValue"];
+                            mainRow[("Current_" + (int)r["CounterID"] + "Status").ToString()] = r["CurrentValueStatus"];
                         }
                         if (cntr.Min)
                         {
                             mainRow[("Min_" + (int)r["CounterID"]).ToString()] = r["MinValue"];
+                            mainRow[("Min_" + (int)r["CounterID"] + "Status").ToString()] = r["MinValueStatus"];
                         }
                         if (cntr.SampleCount)
                         {
@@ -201,6 +207,7 @@ namespace DBADashGUI.Performance
         {
             Common.StyleGrid(ref dgv);
             addHistCols(dgv, "col");
+            loadSavedView();
         }
 
         private void addHistCols(DataGridView dgv, string prefix)
@@ -232,6 +239,11 @@ namespace DBADashGUI.Performance
         private void dgv_RowsAdded(object sender, DataGridViewRowsAddedEventArgs e)
         {
             bool histogram = ((DataView)dgv.DataSource).Table.Columns.Contains("CPUHistogram");
+            var pcCols = dgv.Columns.Cast<DataGridViewColumn>().Where(col => Convert.ToString(col.Tag) == "PC" 
+                                                                && (col.DataPropertyName.StartsWith("Avg") || col.DataPropertyName.StartsWith("Max") || col.DataPropertyName.StartsWith("Min") || col.DataPropertyName.StartsWith("Current")) 
+                                                                )
+                                                                .Select(col => col.DataPropertyName)
+                                                                .ToList();
             for (Int32 idx = e.RowIndex; idx < e.RowIndex + e.RowCount; idx += 1)
             {
                 var r = dgv.Rows[idx];
@@ -243,6 +255,15 @@ namespace DBADashGUI.Performance
 
                 DBADashStatus.SetProgressBarColor(avgCPUstatus,ref pAvgCPU);
                 DBADashStatus.SetProgressBarColor(maxCPUstatus, ref pMaxCPU);
+              
+                foreach(var pcCol in pcCols)
+                {
+                    var status = row[pcCol + "Status"];
+                    if (status != DBNull.Value)
+                    {
+                        r.Cells[pcCol].SetStatusColor((DBADashStatus.DBADashStatusEnum)Convert.ToInt32(status));
+                    }
+                }
 
                 r.Cells["ReadLatency"].SetStatusColor((DBADashStatus.DBADashStatusEnum)row["ReadLatencyStatus"]);
                 r.Cells["WriteLatency"].SetStatusColor((DBADashStatus.DBADashStatusEnum)row["WriteLatencyStatus"]);
@@ -290,28 +311,9 @@ namespace DBADashGUI.Performance
             }
         }
 
-        private void tsPerformanceCounters_Click(object sender, EventArgs e)
-        {
-            var frm = new SelectPerformanceCounters
-            {
-                SelectedCounters = SelectedPerformanceCounters
-            };
-            frm.ShowDialog();
-            if (frm.DialogResult == DialogResult.OK)
-            {
-                SelectedPerformanceCounters = frm.SelectedCounters;
-                RefreshData();
-            }
-        }
-
         private void tsExcel_Click(object sender, EventArgs e)
         {
             Common.PromptSaveDataGridView(ref dgv);
-        }
-
-        private void tsCols_Click(object sender, EventArgs e)
-        {
-            promptColumnSelection(ref dgv);
         }
 
         private void promptColumnSelection(ref DataGridView gv)
@@ -327,6 +329,96 @@ namespace DBADashGUI.Performance
                     gv.AutoResizeColumns();
                     gv.AutoResizeRows();
                 }
+            }
+        }
+
+
+        private void saveLayout() 
+        {           
+            string jsonPC = Newtonsoft.Json.JsonConvert.SerializeObject(SelectedPerformanceCounters, Newtonsoft.Json.Formatting.Indented);
+            Properties.Settings.Default.PerformanceSummaryPerformanceCounters = jsonPC;
+
+
+            var selectedCols = dgv.Columns.Cast<DataGridViewColumn>()
+                .Select(c => new KeyValuePair<string, bool>(c.Name,c.Visible))
+                .ToList();
+            string jsonCols = Newtonsoft.Json.JsonConvert.SerializeObject(selectedCols, Newtonsoft.Json.Formatting.Indented);
+            Properties.Settings.Default.PerformanceSummaryCols = jsonCols;
+            
+            Properties.Settings.Default.Save();           
+        }
+
+
+        private void loadSavedView()
+        {
+            if (!string.IsNullOrEmpty(Properties.Settings.Default.PerformanceSummaryPerformanceCounters))
+            {
+                var json = Properties.Settings.Default.PerformanceSummaryPerformanceCounters;
+                try
+                {
+                    SelectedPerformanceCounters = Newtonsoft.Json.JsonConvert.DeserializeObject<Dictionary<int, Counter>>(json);
+                }
+                catch (Exception ex)
+                {
+                    Properties.Settings.Default.PerformanceSummaryPerformanceCounters = string.Empty;
+                    Properties.Settings.Default.Save();
+                    MessageBox.Show("Error loading saved view.  The view has been reset: \n" + ex.Message, "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                }
+            }
+            if (!string.IsNullOrEmpty(Properties.Settings.Default.PerformanceSummaryCols))
+            {
+                var jsonCols = Properties.Settings.Default.PerformanceSummaryCols;
+                try
+                {
+                    var savedCols = Newtonsoft.Json.JsonConvert.DeserializeObject<List<KeyValuePair<string,bool>>>(jsonCols);
+                    foreach(var col in savedCols)
+                    {
+                        if (dgv.Columns.Contains(col.Key))
+                        {
+                            dgv.Columns[col.Key].Visible = col.Value;
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Properties.Settings.Default.PerformanceSummaryCols = string.Empty;
+                    Properties.Settings.Default.Save();
+                    MessageBox.Show("Error loading saved view.  The view has been reset: \n" + ex.Message, "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                }
+            }
+        }
+
+        private void tsSaveLayout_Click(object sender, EventArgs e)
+        {
+            saveLayout();
+        }
+
+        private void resetLayoutToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (MessageBox.Show("Are you sure you want to reset the column selection back to the defaults?\nChanges will apply when the application is restarted.", "Reset Layout", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+            {
+                Properties.Settings.Default.PerformanceSummaryPerformanceCounters = string.Empty;
+                Properties.Settings.Default.PerformanceSummaryCols = string.Empty;
+                Properties.Settings.Default.Save();
+            }
+        }
+
+        private void standardColumnsToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            promptColumnSelection(ref dgv);
+        }
+
+        private void performanceCounterColumnsToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            var frm = new SelectPerformanceCounters
+            {
+                SelectedCounters = SelectedPerformanceCounters
+            };
+            frm.ShowDialog();
+            if (frm.DialogResult == DialogResult.OK)
+            {
+                SelectedPerformanceCounters = frm.SelectedCounters;
+                RefreshData();
             }
         }
     }

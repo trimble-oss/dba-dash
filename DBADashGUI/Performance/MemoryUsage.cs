@@ -25,6 +25,7 @@ namespace DBADashGUI.Performance
         private bool isClerksRefreshed = false;
         private bool isConfigRefreshed = false;
         private bool isCountersRefreshed = false;
+        private List<int> MemoryCounters;
 
         public void RefreshData()
         {
@@ -225,31 +226,12 @@ namespace DBADashGUI.Performance
 
         private void refreshCounters()
         {
-            var dt = GetMemoryCounters();
-            dgvCounters.AutoGenerateColumns = false;
-            if (dgvCounters.Columns.Count == 0)
-            {
-                dgvCounters.Columns.Add(new DataGridViewTextBoxColumn() { Name = "colObject", DataPropertyName = "object_name", HeaderText = "Object"});
-                dgvCounters.Columns.Add(new DataGridViewTextBoxColumn() { Name = "colCounter", DataPropertyName = "counter_name", HeaderText = "Counter" });
-                dgvCounters.Columns.Add(new DataGridViewTextBoxColumn() { Name = "colInstance", DataPropertyName = "instane_name", HeaderText = "Instance" });
-                dgvCounters.Columns.Add(new DataGridViewTextBoxColumn() { Name = "colMaxValue", DataPropertyName = "MaxValue", HeaderText = "Max Value", DefaultCellStyle = new DataGridViewCellStyle() { Format = "#,##0.########" } });
-                dgvCounters.Columns.Add(new DataGridViewTextBoxColumn() { Name = "colMinValue", DataPropertyName = "MinValue", HeaderText = "Min Value", DefaultCellStyle = new DataGridViewCellStyle() { Format = "#,##0.########" } });
-                dgvCounters.Columns.Add(new DataGridViewTextBoxColumn() { Name = "colAvgValue", DataPropertyName = "AvgValue", HeaderText = "Avg Value", DefaultCellStyle = new DataGridViewCellStyle() { Format = "#,##0.########" } });
-                dgvCounters.Columns.Add(new DataGridViewTextBoxColumn() { Name = "colTotal", DataPropertyName = "Total", HeaderText = "Total", DefaultCellStyle = new DataGridViewCellStyle() { Format = "#,##0.########" } });
-                dgvCounters.Columns.Add(new DataGridViewTextBoxColumn() { Name = "colSampleCount", DataPropertyName = "SampleCount", HeaderText = "Sample Count", DefaultCellStyle = new DataGridViewCellStyle() { Format = "#,##0.########" } });
-                dgvCounters.Columns.Add(new DataGridViewTextBoxColumn() { Name = "colCurrentValue", DataPropertyName = "CurrentValue", HeaderText = "Current Value", DefaultCellStyle = new DataGridViewCellStyle() { Format = "#,##0.########" } });
-                dgvCounters.Columns.Add(new DataGridViewLinkColumn() { Name = "colView", HeaderText = "View", UseColumnTextForLinkValue = true, Text = "View", LinkColor = DashColors.LinkColor});
+            if (MemoryCounters == null || MemoryCounters.Count == 0) { 
+                MemoryCounters = GetMemoryCounters();
             }
-            dgvCounters.DataSource = dt;
-            dgvCounters.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.AllCells);
-            if (performanceCounters1.Visible)
-            {
-                performanceCounters1.InstanceID = InstanceID;
-                performanceCounters1.FromDate = DateRange.FromUTC;
-                performanceCounters1.ToDate = DateRange.ToUTC;
-                performanceCounters1.RefreshData();
-            }
-            isCountersRefreshed = true;
+            performanceCounterSummaryGrid1.Counters = MemoryCounters;
+            performanceCounterSummaryGrid1.InstanceID = InstanceID;
+            performanceCounterSummaryGrid1.RefreshData();
         }
 
         private DataTable GetMemoryConfig()
@@ -265,19 +247,24 @@ namespace DBADashGUI.Performance
             }
         }
 
-        private DataTable GetMemoryCounters()
+        private List<int> GetMemoryCounters()
         {
+            var Counters = new List<int>();
             using (var cn = new SqlConnection(Common.ConnectionString))
             using (var cmd = new SqlCommand("dbo.MemoryCounters_Get", cn) { CommandType = CommandType.StoredProcedure })
             using (var da = new SqlDataAdapter(cmd))
             {
+                cn.Open();
                 cmd.Parameters.AddWithValue("InstanceID", InstanceID);
-                cmd.Parameters.AddWithValue("FromDate", DateRange.FromUTC);
-                cmd.Parameters.AddWithValue("ToDate", DateRange.ToUTC);
-                var dt = new DataTable();
-                da.Fill(dt);
-                return dt;
+                using (var rdr = cmd.ExecuteReader())
+                {
+                    while (rdr.Read())
+                    {
+                        Counters.Add(rdr.GetInt32(0));
+                    }
+                }
             }
+            return Counters;
         }
 
         private void tab1_SelectedIndexChanged(object sender, EventArgs e)
@@ -285,29 +272,6 @@ namespace DBADashGUI.Performance
             refreshCurrentTab();
         }
 
-        private void dgvCounters_CellContentClick(object sender, DataGridViewCellEventArgs e)
-        {
-            if (e.RowIndex >= 0)
-            {
-                var row = (DataRowView)dgvCounters.Rows[e.RowIndex].DataBoundItem;
-                if(e.ColumnIndex== dgvCounters.Columns["colView"].Index)
-                {
-                    var objectName = (string)row["object_name"];
-                    var counterName = (string)row["counter_name"];
-                    var instanceName = (string)row["instance_name"];
-                    performanceCounters1.CounterID = (int)row["CounterID"];
-                    performanceCounters1.FromDate = DateRange.FromUTC;
-                    performanceCounters1.ToDate = DateRange.ToUTC;
-                    performanceCounters1.InstanceID = InstanceID;
-                    performanceCounters1.Visible = true;
-                    performanceCounters1.CounterName = objectName + "\\" + counterName + (instanceName == "" ? "" : "\\" + instanceName);
-                    pieChart1.Visible = false;
-                    chartHistory.Visible = false;
-
-                    performanceCounters1.RefreshData();
-                }
-            }
-        }
 
         ToolTip dgvToolTip = new ToolTip() { AutomaticDelay = 100, AutoPopDelay =60000, ReshowDelay = 100 };
         private void dgv_CellMouseEnter(object sender, DataGridViewCellEventArgs e)
@@ -320,7 +284,24 @@ namespace DBADashGUI.Performance
 
         private void MemoryUsage_Load(object sender, EventArgs e)
         {
+            performanceCounterSummaryGrid1.ObjectLink = false;
+            performanceCounterSummaryGrid1.InstanceLink = false;
+            performanceCounterSummaryGrid1.CounterLink = false;
+            performanceCounterSummaryGrid1.CounterSelected += PerformanceCounterSummaryGrid1_CounterSelected;
+        }
 
+        private void PerformanceCounterSummaryGrid1_CounterSelected(object sender, PerformanceCounterSummaryGrid.CounterSelectedEventArgs e)
+        {
+            performanceCounters1.CounterID = e.CounterID;
+            performanceCounters1.FromDate = DateRange.FromUTC;
+            performanceCounters1.ToDate = DateRange.ToUTC;
+            performanceCounters1.InstanceID = InstanceID;
+            performanceCounters1.Visible = true;
+            performanceCounters1.CounterName = e.CounterName;
+            pieChart1.Visible = false;
+            chartHistory.Visible = false;
+
+            performanceCounters1.RefreshData();
         }
     }
 }
