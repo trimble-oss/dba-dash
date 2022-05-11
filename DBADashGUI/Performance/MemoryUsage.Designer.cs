@@ -43,7 +43,7 @@ namespace DBADashGUI.Performance
             this.tabConfig = new System.Windows.Forms.TabPage();
             this.dgvConfig = new System.Windows.Forms.DataGridView();
             this.tabCounters = new System.Windows.Forms.TabPage();
-            this.dgvCounters = new System.Windows.Forms.DataGridView();
+            this.performanceCounterSummaryGrid1 = new DBADashGUI.Performance.PerformanceCounterSummaryGrid();
             ((System.ComponentModel.ISupportInitialize)(this.dgv)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
@@ -55,7 +55,7 @@ namespace DBADashGUI.Performance
             this.tabConfig.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dgvConfig)).BeginInit();
             this.tabCounters.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.dgvCounters)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.performanceCounterSummaryGrid1)).BeginInit();
             this.SuspendLayout();
             // 
             // dgv
@@ -238,7 +238,7 @@ namespace DBADashGUI.Performance
             // 
             // tabCounters
             // 
-            this.tabCounters.Controls.Add(this.dgvCounters);
+            this.tabCounters.Controls.Add(this.performanceCounterSummaryGrid1);
             this.tabCounters.Location = new System.Drawing.Point(4, 29);
             this.tabCounters.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.tabCounters.Name = "tabCounters";
@@ -248,23 +248,24 @@ namespace DBADashGUI.Performance
             this.tabCounters.Text = "Memory Performance Counters";
             this.tabCounters.UseVisualStyleBackColor = true;
             // 
-            // dgvCounters
+            // performanceCounterSummaryGrid1
             // 
-            this.dgvCounters.AllowUserToAddRows = false;
-            this.dgvCounters.AllowUserToDeleteRows = false;
-            this.dgvCounters.BackgroundColor = System.Drawing.Color.White;
-            this.dgvCounters.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.dgvCounters.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.dgvCounters.Location = new System.Drawing.Point(3, 4);
-            this.dgvCounters.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.dgvCounters.Name = "dgvCounters";
-            this.dgvCounters.ReadOnly = true;
-            this.dgvCounters.RowHeadersVisible = false;
-            this.dgvCounters.RowHeadersWidth = 51;
-            this.dgvCounters.RowTemplate.Height = 24;
-            this.dgvCounters.Size = new System.Drawing.Size(870, 402);
-            this.dgvCounters.TabIndex = 0;
-            this.dgvCounters.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgvCounters_CellContentClick);
+            this.performanceCounterSummaryGrid1.AllowUserToAddRows = false;
+            this.performanceCounterSummaryGrid1.AllowUserToDeleteRows = false;
+            this.performanceCounterSummaryGrid1.BackgroundColor = System.Drawing.Color.White;
+            this.performanceCounterSummaryGrid1.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.performanceCounterSummaryGrid1.Counters = null;
+            this.performanceCounterSummaryGrid1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.performanceCounterSummaryGrid1.InstanceID = 0;
+            this.performanceCounterSummaryGrid1.Location = new System.Drawing.Point(3, 4);
+            this.performanceCounterSummaryGrid1.Name = "performanceCounterSummaryGrid1";
+            this.performanceCounterSummaryGrid1.ReadOnly = true;
+            this.performanceCounterSummaryGrid1.RowHeadersVisible = false;
+            this.performanceCounterSummaryGrid1.RowHeadersWidth = 51;
+            this.performanceCounterSummaryGrid1.RowTemplate.Height = 29;
+            this.performanceCounterSummaryGrid1.SearchText = null;
+            this.performanceCounterSummaryGrid1.Size = new System.Drawing.Size(870, 402);
+            this.performanceCounterSummaryGrid1.TabIndex = 0;
             // 
             // MemoryUsage
             // 
@@ -288,7 +289,7 @@ namespace DBADashGUI.Performance
             this.tabConfig.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.dgvConfig)).EndInit();
             this.tabCounters.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.dgvCounters)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.performanceCounterSummaryGrid1)).EndInit();
             this.ResumeLayout(false);
 
         }
@@ -308,7 +309,7 @@ namespace DBADashGUI.Performance
         private System.Windows.Forms.TabPage tabConfig;
         private System.Windows.Forms.DataGridView dgvConfig;
         private System.Windows.Forms.TabPage tabCounters;
-        private System.Windows.Forms.DataGridView dgvCounters;
         private PerformanceCounters performanceCounters1;
+        private PerformanceCounterSummaryGrid performanceCounterSummaryGrid1;
     }
 }
