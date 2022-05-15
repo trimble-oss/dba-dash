@@ -1745,19 +1745,20 @@ USING (VALUES
 	('sys.dm_os_sys_memory','Available Physical Memory (KB)','',0,262144,262144,524288,NULL,NULL),
 	('Memory Manager','Memory Grants Pending','',1.0,9999999999999999999.999999999,0.000000001,1.0,0,0),
 	('Locks','Number of Deadlocks/sec','_Total',1,9999999999999999999.999999999,0.000000001,1,0,0),
-	('Plan Cache','Cache Object Counts','_Total',0,500,500,1000,0,-1),
+	('Plan Cache','Cache Object Counts','_Total',0,500,500,1000,NULL,NULL),
 	('General Statistics','Processes blocked','',50,9999999999999999999.999999999,1,50,0,0)
 ) AS S (object_name,counter_name,instance_name,CriticalFrom,CriticalTo,WarningFrom,WarningTo,GoodFrom,GoodTo)
 ON T.object_name = S.object_name AND T.counter_name = S.counter_name AND T.instance_name = S.instance_name 
-WHEN MATCHED THEN 
+WHEN MATCHED AND T.CriticalFrom IS NULL AND T.CriticalTo IS NULL 
+							AND T.WarningFrom IS NULL AND T.WarningTo IS NULL
+							AND T.GoodFrom IS NULL AND T.GoodTo IS NULL THEN 
 UPDATE SET T.CriticalFrom = S.CriticalFrom,
 			T.CriticalTo = S.CriticalTo,
 			T.WarningFrom = S.Warningfrom,
 			T.WarningTo = S.WarningTo,
 			T.GoodFrom = S.GoodFrom,
 			T.GoodTo = S.GoodTo
-WHEN NOT MATCHED BY TARGET AND CriticalFrom IS NULL AND CriticalTo IS NULL 
-							AND WarningFrom IS NULL AND WarningTo IS NULL
-							AND GoodFrom IS NULL AND GoodTo IS NULL THEN 
+WHEN NOT MATCHED BY TARGET THEN
 INSERT(object_name,counter_name,instance_name,CriticalFrom,CriticalTo,WarningFrom,WarningTo,GoodFrom,GoodTo)
 VALUES(object_name,counter_name,instance_name,CriticalFrom,CriticalTo,WarningFrom,WarningTo,GoodFrom,GoodTo);
+
