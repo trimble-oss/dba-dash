@@ -55,7 +55,7 @@ namespace DBADashGUI.Performance
                     pcColNames.Add(name);
                     if (!dgv.Columns.Contains(name))
                     {
-                        dgv.Columns.Add(new DataGridViewTextBoxColumn() { Name = name, DataPropertyName = name, HeaderText = agg + " " + ctr.ToString().Replace("\\", " \\ "), Tag = "PC", Width = 70 });
+                        dgv.Columns.Add(new DataGridViewTextBoxColumn() { Name = name, DataPropertyName = name, HeaderText = agg + " " + ctr.ToString().Replace("\\", " \\ "), Tag = "PC", Width = 70, DefaultCellStyle = Common.DataGridViewNumericCellStyle });
                     }
                 }
             }
