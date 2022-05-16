@@ -276,10 +276,13 @@ namespace DBADashService
             {
                 srcSchedule = schedules;
             }
-
-            IJobDetail serviceStartJob = GetJob(CollectionSchedules.DefaultSchedules.OnServiceStartCollection, src, cfgString);
-            scheduler.AddJob(serviceStartJob, true).ConfigureAwait(false).GetAwaiter().GetResult();
-            await scheduler.TriggerJob(serviceStartJob.Key);
+            if (srcSchedule.OnServiceStartCollection.Count() > 0)
+            {
+                Log.Information("Trigger on startup collections for {source} to collect {collection}", src.SourceConnection.ConnectionForPrint, srcSchedule.OnServiceStartCollection);
+                IJobDetail serviceStartJob = GetJob(srcSchedule.OnServiceStartCollection, src, cfgString);
+                scheduler.AddJob(serviceStartJob, true).ConfigureAwait(false).GetAwaiter().GetResult();
+                await scheduler.TriggerJob(serviceStartJob.Key);
+            }
             if (src.SourceConnection.Type == ConnectionType.SQL)
             {
                 foreach (var s in srcSchedule.GroupedBySchedule)
