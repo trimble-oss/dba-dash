@@ -17,12 +17,14 @@ namespace DBADashGUI.Performance
 
         public List<Int32> InstanceIDs;
         public string TagIDs;
+        private List<KeyValuePair<string,PersistedColumnLayout>>standardLayout;
 
         public Dictionary<int,Counter> SelectedPerformanceCounters =  new Dictionary<int, Counter>();
 
         public PerformanceSummary()
         {
             InitializeComponent();
+            standardLayout = getColumnLayout();
         }
 
    
@@ -38,34 +40,49 @@ namespace DBADashGUI.Performance
             {
                 dgv.DataSource = new DataView(dt);
             }
-            dgv.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
+            dgv.AutoResizeColumnHeadersHeight();
             dgv.Columns["colCPUHistogram"].Width = 200;
+        }
+
+        private void addPerformanceCounterColsToGrid()
+        {
+            List<string> pcColNames = new List<string>();
+            foreach (var ctr in SelectedPerformanceCounters.Values)
+            {
+                foreach (string agg in ctr.GetAggColumns())
+                {
+                    string name = agg + "_" + ctr.CounterID;
+                    pcColNames.Add(name);
+                    if (!dgv.Columns.Contains(name))
+                    {
+                        dgv.Columns.Add(new DataGridViewTextBoxColumn() { Name = name, DataPropertyName = name, HeaderText = agg + " " + ctr.ToString().Replace("\\", " \\ "), Tag = "PC", Width = 70 });
+                    }
+                }
+            }
+            var colsToRemove = dgv.Columns.Cast<DataGridViewColumn>().Where(col => (string)col.Tag == "PC" && !pcColNames.Contains(col.Name)).ToList();
+            foreach (var col in colsToRemove)
+            {
+                dgv.Columns.Remove(col);
+            }
+        }
+
+        private void addPerformanceCounterColsToTable(ref DataTable dt)
+        {
+            foreach (var ctr in SelectedPerformanceCounters.Values)
+            {
+                foreach (string agg in ctr.GetAggColumns())
+                {
+                    string name = agg + "_" + ctr.CounterID;
+                    dt.Columns.Add(name, typeof(double));
+                    dt.Columns.Add(name + "Status", typeof(int));        
+                }
+            }
         }
 
         void addPerformanceCounters(ref DataTable dt)
         {
-            List<string> colsToRemove = new List<string>();
-
-            foreach(DataGridViewColumn col in dgv.Columns)
-            {
-                if ((string)col.Tag == "PC") {
-                    colsToRemove.Add(col.Name);
-              }
-            }
-            foreach(var col in colsToRemove)
-            {
-                dgv.Columns.Remove(col);
-            }          
-            foreach(var ctr in SelectedPerformanceCounters.Values)
-            {
-                foreach(string agg in ctr.GetAggColumns())
-                {
-                    string name = agg + "_" + ctr.CounterID;
-                    dt.Columns.Add(name, typeof(double));
-                    dt.Columns.Add(name + "Status", typeof(int));                   
-                    dgv.Columns.Add(new DataGridViewTextBoxColumn() { Name=name, DataPropertyName = name, HeaderText = agg + " " + ctr.ToString(), Tag = "PC" });
-                }
-            }
+            addPerformanceCounterColsToGrid();
+            addPerformanceCounterColsToTable(ref dt);
             if (SelectedPerformanceCounters.Count > 0)
             {
                 var pcDT = getPerformanceCounters();
@@ -263,6 +280,10 @@ namespace DBADashGUI.Performance
                     {
                         r.Cells[pcCol].SetStatusColor((DBADashStatus.DBADashStatusEnum)Convert.ToInt32(status));
                     }
+                    else
+                    {
+                        r.Cells[pcCol].SetStatusColor(Color.White);
+                    }
                 }
 
                 r.Cells["ReadLatency"].SetStatusColor((DBADashStatus.DBADashStatusEnum)row["ReadLatencyStatus"]);
@@ -326,8 +347,6 @@ namespace DBADashGUI.Performance
                 {
                     var dt = ((DataView)dgv.DataSource).Table;
                     generateHistogram(ref dt);
-                    gv.AutoResizeColumns();
-                    gv.AutoResizeRows();
                 }
             }
         }
@@ -337,15 +356,18 @@ namespace DBADashGUI.Performance
         {           
             string jsonPC = Newtonsoft.Json.JsonConvert.SerializeObject(SelectedPerformanceCounters, Newtonsoft.Json.Formatting.Indented);
             Properties.Settings.Default.PerformanceSummaryPerformanceCounters = jsonPC;
-
-
-            var selectedCols = dgv.Columns.Cast<DataGridViewColumn>()
-                .Select(c => new KeyValuePair<string, bool>(c.Name,c.Visible))
-                .ToList();
-            string jsonCols = Newtonsoft.Json.JsonConvert.SerializeObject(selectedCols, Newtonsoft.Json.Formatting.Indented);
+   
+            string jsonCols = Newtonsoft.Json.JsonConvert.SerializeObject(getColumnLayout(), Newtonsoft.Json.Formatting.Indented);
             Properties.Settings.Default.PerformanceSummaryCols = jsonCols;
             
             Properties.Settings.Default.Save();           
+        }
+
+        private List<KeyValuePair<string, PersistedColumnLayout>> getColumnLayout()
+        {
+           return dgv.Columns.Cast<DataGridViewColumn>()
+          .Select(c => new KeyValuePair<string, PersistedColumnLayout>(c.Name, new PersistedColumnLayout() { Visible = c.Visible, Width = c.Width, DisplayIndex = c.DisplayIndex }))
+          .ToList();
         }
 
 
@@ -357,6 +379,7 @@ namespace DBADashGUI.Performance
                 try
                 {
                     SelectedPerformanceCounters = Newtonsoft.Json.JsonConvert.DeserializeObject<Dictionary<int, Counter>>(json);
+                    addPerformanceCounterColsToGrid();
                 }
                 catch (Exception ex)
                 {
@@ -370,14 +393,8 @@ namespace DBADashGUI.Performance
                 var jsonCols = Properties.Settings.Default.PerformanceSummaryCols;
                 try
                 {
-                    var savedCols = Newtonsoft.Json.JsonConvert.DeserializeObject<List<KeyValuePair<string,bool>>>(jsonCols);
-                    foreach(var col in savedCols)
-                    {
-                        if (dgv.Columns.Contains(col.Key))
-                        {
-                            dgv.Columns[col.Key].Visible = col.Value;
-                        }
-                    }
+                    var savedCols = Newtonsoft.Json.JsonConvert.DeserializeObject<List<KeyValuePair<string,PersistedColumnLayout>>>(jsonCols);
+                    loadPersistedColumnLayout(savedCols);
                 }
                 catch (Exception ex)
                 {
@@ -388,15 +405,37 @@ namespace DBADashGUI.Performance
             }
         }
 
+        private void loadPersistedColumnLayout(List<KeyValuePair<string,PersistedColumnLayout>> savedCols)
+        {
+            foreach (var col in savedCols)
+            {
+                if (dgv.Columns.Contains(col.Key))
+                {
+                    dgv.Columns[col.Key].Visible = col.Value.Visible;
+                    dgv.Columns[col.Key].Width = col.Value.Width;
+                    if (col.Value.DisplayIndex >= 0)
+                    {
+                        dgv.Columns[col.Key].DisplayIndex = col.Value.DisplayIndex;
+                    }
+                }
+            }
+        }
+
         private void tsSaveLayout_Click(object sender, EventArgs e)
         {
-            saveLayout();
+            if (MessageBox.Show("Save layout?  Column selection, size and position will be saved.", "Save Layout", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+            {
+                saveLayout();
+            }
         }
 
         private void resetLayoutToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            if (MessageBox.Show("Are you sure you want to reset the column selection back to the defaults?\nChanges will apply when the application is restarted.", "Reset Layout", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+            if (MessageBox.Show("Are you sure you want to reset the column selection back to the defaults?", "Reset Layout", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
             {
+                SelectedPerformanceCounters.Clear();
+                addPerformanceCounterColsToGrid();
+                loadPersistedColumnLayout(standardLayout);
                 Properties.Settings.Default.PerformanceSummaryPerformanceCounters = string.Empty;
                 Properties.Settings.Default.PerformanceSummaryCols = string.Empty;
                 Properties.Settings.Default.Save();
