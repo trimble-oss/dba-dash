@@ -5,7 +5,7 @@
 ## Enable Plan capture
 Query plan capture is disabled by default.  To capture query plans, check the open in the DBA Dash Service Config tool:
 
-![Capture plans](Docs/CapturePlans.PNG)
+![Capture plans](CapturePlans.PNG)
 
 The following json will be added to your source connection to enable the plan collection.  The thresholds can be modified by editing the json if required.  
 ```
