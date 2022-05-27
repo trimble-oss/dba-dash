@@ -11,4 +11,5 @@ SELECT 	CASE WHEN @EditionID = 1674378470 AND @ProductVersion LIKE '%.%' THEN 'A
 			WHEN @ProductVersion LIKE '13.%' THEN 'SQL 2016'
 			WHEN @ProductVersion LIKE '14.%' THEN 'SQL 2017'
 			WHEN @ProductVersion LIKE '15.%' THEN 'SQL 2019'
+			WHEN @ProductVersion LIKE '16.%' THEN 'SQL 2022'
 			ELSE @ProductVersion END AS SQLVersionName
