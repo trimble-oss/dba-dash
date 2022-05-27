@@ -13,7 +13,7 @@ namespace DBADash
     {
 
         private List<int> supportedEngineEditions = new List<int> { 1, 2, 3, 4, 5, 8 }; // Personal, Standard, Enterprise, Express, Azure DB, Azure MI
-        private List<int> supportedProductVersions = new List<int> { 9, 10, 11, 12, 13, 14, 15 }; // SQL 2005 to 2019 & Azure
+        private List<int> supportedProductVersions = new List<int> { 9, 10, 11, 12, 13, 14, 15, 16 }; // SQL 2005 to 2022 & Azure
 
         public enum ConnectionType
         {
