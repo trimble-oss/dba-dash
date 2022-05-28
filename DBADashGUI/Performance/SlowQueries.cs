@@ -240,12 +240,12 @@ namespace DBADashGUI
                     }
                     else
                     {
-                        throw new Exception("Invalid group by");
+                        throw new Exception($"Invalid group by: {groupBy}");
                     }
 
                     if (txtInstance.Text.Length == 0 && _db.Length==0)
                     {
-                        groupBy = "ConnectionID";
+                        groupBy = "InstanceDisplayName";
                     }
                     else if (txtDatabase.Text.Length == 0 && _db.Length==0)
                     {
@@ -461,7 +461,7 @@ namespace DBADashGUI
                 }
                 else
                 {
-                    throw new Exception("Invalid group by");
+                    throw new Exception($"Invalid group by: {groupBy}");
                 }
 
                 if (client.Length > 0)
