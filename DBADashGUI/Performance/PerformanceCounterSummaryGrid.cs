@@ -106,13 +106,29 @@ namespace DBADashGUI.Performance
                 {
                     TextSelected?.Invoke(this, new TextSelectedEventArgs() { Text = counterName });
                 }
-                if (colName == "lnkInstance")
+                else if (colName == "lnkInstance")
                 {
                     TextSelected?.Invoke(this, new TextSelectedEventArgs() { Text = instanceName });
                 }
-                if (colName == "lnkObject")
+                else if (colName == "lnkObject")
                 {
                     TextSelected?.Invoke(this, new TextSelectedEventArgs() { Text = objectName });
+                }
+                else if(colName == "lnkThresholds")
+                {
+                    using (var frm = new PerformanceCounterThreshold() )
+                    {
+                        frm.CounterName = counterName;
+                        frm.CounterInstance = instanceName;
+                        frm.ObjectName = objectName;
+                        frm.InstanceID = InstanceID;
+                        frm.ShowDialog(this);
+                        if(frm.DialogResult == DialogResult.OK)
+                        {
+                            refreshSummary();
+                        }
+                    }
+
                 }
             }
         }
@@ -151,14 +167,15 @@ namespace DBADashGUI.Performance
                     new DataGridViewLinkColumn() { Name = "lnkInstance", HeaderText = "Instance", DataPropertyName = "instance_name", LinkColor = DashColors.LinkColor, Visible = InstanceLink, SortMode= DataGridViewColumnSortMode.Automatic },
                     new DataGridViewTextBoxColumn() { Name = "colObject", HeaderText = "Object", DataPropertyName = "object_name", Visible = !ObjectLink },
                     new DataGridViewTextBoxColumn() { Name = "colCounter", HeaderText = "Counter", DataPropertyName = "counter_name", Visible=!CounterLink },
-                    new DataGridViewTextBoxColumn() { Name = "colInstance", HeaderText = "Instance", DataPropertyName = "instance_name", Visible = !InstanceLink },
+                    new DataGridViewTextBoxColumn() { Name = "colInstance", HeaderText = "Instance", DataPropertyName = "instance_name", Visible = !InstanceLink },                  
                     new DataGridViewTextBoxColumn() { Name = "colMaxValue", HeaderText = "Max Value", DataPropertyName = "MaxValue", DefaultCellStyle = Common.DataGridViewNumericCellStyle },
                     new DataGridViewTextBoxColumn() { Name = "colMinValue", HeaderText = "Min Value", DataPropertyName = "MinValue", DefaultCellStyle = Common.DataGridViewNumericCellStyle },
                     new DataGridViewTextBoxColumn() { Name = "colAvgValue", HeaderText = "Avg Value", DataPropertyName = "AvgValue", DefaultCellStyle = Common.DataGridViewNumericCellStyle },
                     new DataGridViewTextBoxColumn() { Name = "colTotal", HeaderText = "Total", DataPropertyName = "TotalValue", DefaultCellStyle = Common.DataGridViewNumericCellStyle },
                     new DataGridViewTextBoxColumn() { Name = "colSampleCount", HeaderText = "Sample Count", DataPropertyName = "SampleCount", DefaultCellStyle = Common.DataGridViewNumericCellStyle },
                     new DataGridViewTextBoxColumn() { Name = "colCurrentValue", HeaderText = "Current Value", DataPropertyName = "CurrentValue", DefaultCellStyle = Common.DataGridViewNumericCellStyle },
-                    new DataGridViewLinkColumn() { Name = "lnkView", HeaderText = "", Text = "View", LinkColor = DashColors.LinkColor, UseColumnTextForLinkValue=true }
+                    new DataGridViewLinkColumn() { Name = "lnkThresholds", HeaderText = "Thresholds", Text = "Edit", LinkColor = DashColors.LinkColor, UseColumnTextForLinkValue = true },
+                    new DataGridViewLinkColumn() { Name = "lnkView", HeaderText = "Chart", Text = "View", LinkColor = DashColors.LinkColor, UseColumnTextForLinkValue=true }                 
                 );
             }
         }

@@ -10,6 +10,14 @@ namespace DBADashGUI
 {
     static class CommonData
     {
+
+        public static DataTable Instances;
+
+        public static void UpdateInstancesList(string tagIDs = "", bool? Active = true, bool? azureDB = null, string searchString = "")
+        {
+            Instances= GetInstances(tagIDs,Active,azureDB,searchString);
+        }
+
         public static DataTable GetInstances(string tagIDs="",bool? Active=true,bool? azureDB=null,string searchString="")
         {
 
@@ -250,6 +258,17 @@ namespace DBADashGUI
                     da.Fill(dt);
                     return dt;
                 }
+            }
+        }
+        public static DataTable GetCounters()
+        {
+            using (var cn = new SqlConnection(Common.ConnectionString))
+            using (SqlCommand cmd = new SqlCommand("dbo.Counters_Get", cn) { CommandType = CommandType.StoredProcedure })
+            using (SqlDataAdapter da = new SqlDataAdapter(cmd))
+            {
+                DataTable dt = new DataTable();
+                da.Fill(dt);
+                return dt;
             }
         }
 
