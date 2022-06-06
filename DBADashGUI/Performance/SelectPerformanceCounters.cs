@@ -43,26 +43,14 @@ namespace DBADashGUI.Performance
             }
         }
 
-        public DataTable GetCounters()
+        private void addAggSelectionColumns()
         {
-            using (var cn = new SqlConnection(Common.ConnectionString))
-            {
-                using (SqlCommand cmd = new SqlCommand("dbo.Counters_Get", cn) { CommandType = CommandType.StoredProcedure })
-                {
-                    using (SqlDataAdapter da = new SqlDataAdapter(cmd))
-                    {
-                        DataTable dt = new DataTable();
-                        da.Fill(dt);
-                        dt.Columns.Add(new DataColumn("Total", typeof(bool)) { DefaultValue = false }) ;
-                        dt.Columns.Add(new DataColumn("Avg", typeof(bool)) { DefaultValue = false });
-                        dt.Columns.Add(new DataColumn("Max", typeof(bool)) { DefaultValue = false });
-                        dt.Columns.Add(new DataColumn("Min", typeof(bool)) { DefaultValue = false });
-                        dt.Columns.Add(new DataColumn("Current", typeof(bool)) { DefaultValue = false });
-                        dt.Columns.Add(new DataColumn("SampleCount", typeof(bool)) { DefaultValue = false });
-                        return dt;
-                    }
-                }
-            }
+            Counters.Columns.Add(new DataColumn("Total", typeof(bool)) { DefaultValue = false });
+            Counters.Columns.Add(new DataColumn("Avg", typeof(bool)) { DefaultValue = false });
+            Counters.Columns.Add(new DataColumn("Max", typeof(bool)) { DefaultValue = false });
+            Counters.Columns.Add(new DataColumn("Min", typeof(bool)) { DefaultValue = false });
+            Counters.Columns.Add(new DataColumn("Current", typeof(bool)) { DefaultValue = false });
+            Counters.Columns.Add(new DataColumn("SampleCount", typeof(bool)) { DefaultValue = false });
         }
 
         private void SelectPerformanceCounters_Load(object sender, EventArgs e)
@@ -70,8 +58,9 @@ namespace DBADashGUI.Performance
             dgvCounters.CurrentCellDirtyStateChanged += dgvCounters_CurrentCellDirtyStateChanged;
             if (Counters == null || Counters.Rows.Count == 0)
             {
-                Counters = GetCounters();
-                if(selectedCounters!=null && selectedCounters.Count > 0)
+                Counters = CommonData.GetCounters();
+                addAggSelectionColumns();
+                if (selectedCounters!=null && selectedCounters.Count > 0)
                 {
                     foreach(DataRow row in Counters.Rows)
                     {

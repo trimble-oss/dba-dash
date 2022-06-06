@@ -14,6 +14,7 @@ using System.Diagnostics;
 using System.IO;
 using Microsoft.SqlServer.Management.Common;
 using DBADashSharedGUI;
+using DBADashGUI.Performance;
 
 namespace DBADashGUI
 {
@@ -111,7 +112,6 @@ namespace DBADashGUI
             buildTagMenu(commandLineTags);
             addInstanes();
             loadSelectedTab();
-            
         }
 
         private async Task checkVersion()
@@ -550,7 +550,6 @@ namespace DBADashGUI
         private readonly List<Int32> InstanceIDs = new List<Int32>();
         private readonly List<Int32> AllInstanceIDs=new List<Int32>();
         private readonly List<Int32> AzureInstanceIDs= new List<Int32>();
-
         private bool IsAzureOnly;
 
         #region Tree
@@ -585,10 +584,10 @@ namespace DBADashGUI
 
             var tags = String.Join(",", SelectedTags());
 
-            var dtInstances = CommonData.GetInstances(tagIDs:tags, searchString:searchString);
+            CommonData.UpdateInstancesList(tagIDs:tags, searchString:searchString);
 
             SQLTreeItem AzureNode = null;
-            foreach (DataRow row in dtInstances.Rows)
+            foreach (DataRow row in CommonData.Instances.Rows)
             {
                 string instance = (string)row["Instance"];
                 string displayName = (string)row["InstanceDisplayName"];

@@ -646,6 +646,8 @@
     <Build Include="dbo\Views\AzureDBInfo.sql" />
     <Build Include="dbo\Tables\InstanceIDsTags.sql" />
     <Build Include="dbo\Stored Procedures\InstanceAlias_Upd.sql" />
+    <Build Include="dbo\Stored Procedures\CounterThresholds_Upd.sql" />
+    <Build Include="dbo\Stored Procedures\CounterThresholds_Get.sql" />
   </ItemGroup>
   <ItemGroup>
     <PostDeploy Include="Script.PostDeployment1.sql" />
