@@ -31,13 +31,19 @@ namespace DBADashGUI.Performance
         {
             this.dgv = new System.Windows.Forms.DataGridView();
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
-            this.performanceCounters1 = new DBADashGUI.Performance.PerformanceCounters();
-            this.pieChart1 = new LiveCharts.WinForms.PieChart();
             this.chartHistory = new DBADashGUI.Performance.CartesianChartWithDataTable();
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
             this.tsRefresh = new System.Windows.Forms.ToolStripButton();
             this.tsCopy = new System.Windows.Forms.ToolStripButton();
             this.tsExcel = new System.Windows.Forms.ToolStripButton();
+            this.tsDateGroup = new System.Windows.Forms.ToolStripDropDownButton();
+            this.tsAgg = new System.Windows.Forms.ToolStripDropDownButton();
+            this.avgToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.minToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.maxToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.tsPieChart = new System.Windows.Forms.ToolStripButton();
+            this.performanceCounters1 = new DBADashGUI.Performance.PerformanceCounters();
+            this.pieChart1 = new LiveCharts.WinForms.PieChart();
             this.tab1 = new System.Windows.Forms.TabControl();
             this.tabClerks = new System.Windows.Forms.TabPage();
             this.tabConfig = new System.Windows.Forms.TabPage();
@@ -88,9 +94,9 @@ namespace DBADashGUI.Performance
             // 
             // splitContainer1.Panel1
             // 
+            this.splitContainer1.Panel1.Controls.Add(this.chartHistory);
             this.splitContainer1.Panel1.Controls.Add(this.performanceCounters1);
             this.splitContainer1.Panel1.Controls.Add(this.pieChart1);
-            this.splitContainer1.Panel1.Controls.Add(this.chartHistory);
             this.splitContainer1.Panel1.Controls.Add(this.toolStrip1);
             // 
             // splitContainer1.Panel2
@@ -100,31 +106,6 @@ namespace DBADashGUI.Performance
             this.splitContainer1.SplitterDistance = 447;
             this.splitContainer1.SplitterWidth = 5;
             this.splitContainer1.TabIndex = 1;
-            // 
-            // performanceCounters1
-            // 
-            this.performanceCounters1.CounterID = 0;
-            this.performanceCounters1.CounterName = null;
-            this.performanceCounters1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.performanceCounters1.FromDate = new System.DateTime(((long)(0)));
-            this.performanceCounters1.InstanceID = 0;
-            this.performanceCounters1.Location = new System.Drawing.Point(0, 27);
-            this.performanceCounters1.Margin = new System.Windows.Forms.Padding(3, 5, 3, 5);
-            this.performanceCounters1.Name = "performanceCounters1";
-            this.performanceCounters1.Size = new System.Drawing.Size(884, 420);
-            this.performanceCounters1.TabIndex = 3;
-            this.performanceCounters1.ToDate = new System.DateTime(((long)(0)));
-            this.performanceCounters1.Visible = false;
-            // 
-            // pieChart1
-            // 
-            this.pieChart1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.pieChart1.Location = new System.Drawing.Point(0, 27);
-            this.pieChart1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.pieChart1.Name = "pieChart1";
-            this.pieChart1.Size = new System.Drawing.Size(884, 420);
-            this.pieChart1.TabIndex = 0;
-            this.pieChart1.Text = "pieChart1";
             // 
             // chartHistory
             // 
@@ -144,7 +125,10 @@ namespace DBADashGUI.Performance
             this.toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.tsRefresh,
             this.tsCopy,
-            this.tsExcel});
+            this.tsExcel,
+            this.tsDateGroup,
+            this.tsAgg,
+            this.tsPieChart});
             this.toolStrip1.Location = new System.Drawing.Point(0, 0);
             this.toolStrip1.Name = "toolStrip1";
             this.toolStrip1.Size = new System.Drawing.Size(884, 27);
@@ -180,6 +164,86 @@ namespace DBADashGUI.Performance
             this.tsExcel.Size = new System.Drawing.Size(29, 24);
             this.tsExcel.Text = "Excel";
             this.tsExcel.Click += new System.EventHandler(this.tsExcel_Click);
+            // 
+            // tsDateGroup
+            // 
+            this.tsDateGroup.Image = global::DBADashGUI.Properties.Resources.Time_16x;
+            this.tsDateGroup.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tsDateGroup.Name = "tsDateGroup";
+            this.tsDateGroup.Size = new System.Drawing.Size(79, 24);
+            this.tsDateGroup.Text = "None";
+            this.tsDateGroup.ToolTipText = "Date Group";
+            // 
+            // tsAgg
+            // 
+            this.tsAgg.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.avgToolStripMenuItem,
+            this.minToolStripMenuItem,
+            this.maxToolStripMenuItem});
+            this.tsAgg.Image = global::DBADashGUI.Properties.Resources.AddComputedField_16x;
+            this.tsAgg.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tsAgg.Name = "tsAgg";
+            this.tsAgg.Size = new System.Drawing.Size(71, 24);
+            this.tsAgg.Text = "Max";
+            this.tsAgg.ToolTipText = "Aggregate Type";
+            // 
+            // avgToolStripMenuItem
+            // 
+            this.avgToolStripMenuItem.Name = "avgToolStripMenuItem";
+            this.avgToolStripMenuItem.Size = new System.Drawing.Size(120, 26);
+            this.avgToolStripMenuItem.Text = "Avg";
+            this.avgToolStripMenuItem.Click += new System.EventHandler(this.tsAGG_Click);
+            // 
+            // minToolStripMenuItem
+            // 
+            this.minToolStripMenuItem.Name = "minToolStripMenuItem";
+            this.minToolStripMenuItem.Size = new System.Drawing.Size(120, 26);
+            this.minToolStripMenuItem.Text = "Min";
+            this.minToolStripMenuItem.Click += new System.EventHandler(this.tsAGG_Click);
+            // 
+            // maxToolStripMenuItem
+            // 
+            this.maxToolStripMenuItem.Checked = true;
+            this.maxToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.maxToolStripMenuItem.Name = "maxToolStripMenuItem";
+            this.maxToolStripMenuItem.Size = new System.Drawing.Size(120, 26);
+            this.maxToolStripMenuItem.Text = "Max";
+            this.maxToolStripMenuItem.Click += new System.EventHandler(this.tsAGG_Click);
+            // 
+            // tsPieChart
+            // 
+            this.tsPieChart.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.tsPieChart.Image = global::DBADashGUI.Properties.Resources.PieChartHS;
+            this.tsPieChart.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tsPieChart.Name = "tsPieChart";
+            this.tsPieChart.Size = new System.Drawing.Size(29, 24);
+            this.tsPieChart.Text = "Pie Chart";
+            this.tsPieChart.Click += new System.EventHandler(this.tsPieChart_Click);
+            // 
+            // performanceCounters1
+            // 
+            this.performanceCounters1.CounterID = 0;
+            this.performanceCounters1.CounterName = null;
+            this.performanceCounters1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.performanceCounters1.FromDate = new System.DateTime(((long)(0)));
+            this.performanceCounters1.InstanceID = 0;
+            this.performanceCounters1.Location = new System.Drawing.Point(0, 27);
+            this.performanceCounters1.Margin = new System.Windows.Forms.Padding(3, 5, 3, 5);
+            this.performanceCounters1.Name = "performanceCounters1";
+            this.performanceCounters1.Size = new System.Drawing.Size(884, 420);
+            this.performanceCounters1.TabIndex = 3;
+            this.performanceCounters1.ToDate = new System.DateTime(((long)(0)));
+            this.performanceCounters1.Visible = false;
+            // 
+            // pieChart1
+            // 
+            this.pieChart1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.pieChart1.Location = new System.Drawing.Point(0, 27);
+            this.pieChart1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            this.pieChart1.Name = "pieChart1";
+            this.pieChart1.Size = new System.Drawing.Size(884, 420);
+            this.pieChart1.TabIndex = 0;
+            this.pieChart1.Text = "pieChart1";
             // 
             // tab1
             // 
@@ -311,5 +375,11 @@ namespace DBADashGUI.Performance
         private System.Windows.Forms.TabPage tabCounters;
         private PerformanceCounters performanceCounters1;
         private PerformanceCounterSummaryGrid performanceCounterSummaryGrid1;
+        private System.Windows.Forms.ToolStripDropDownButton tsDateGroup;
+        private System.Windows.Forms.ToolStripDropDownButton tsAgg;
+        private System.Windows.Forms.ToolStripMenuItem avgToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem minToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem maxToolStripMenuItem;
+        private System.Windows.Forms.ToolStripButton tsPieChart;
     }
 }

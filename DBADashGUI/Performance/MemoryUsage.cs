@@ -26,12 +26,20 @@ namespace DBADashGUI.Performance
         private bool isConfigRefreshed = false;
         private bool isCountersRefreshed = false;
         private List<int> MemoryCounters;
+        private int dateGrouping = 0;
+        private static readonly int MaxChartPoints = 1000;
+        private string selectedClerk;
+        private string selectedCounter;
+        private string selectedCounterAlias;
+        readonly ToolTip dgvToolTip = new() { AutomaticDelay = 100, AutoPopDelay = 60000, ReshowDelay = 100 };
 
         public void RefreshData()
         {
             isClerksRefreshed = false;
             isCountersRefreshed = false;
             isConfigRefreshed = false;
+            dateGrouping = Common.DateGrouping(DateRange.DurationMins,MaxChartPoints);
+            tsDateGroup.Text = Common.DateGroupString(dateGrouping);
             refreshCurrentTab();
         }
 
@@ -39,7 +47,14 @@ namespace DBADashGUI.Performance
         {
             if (tab1.SelectedTab == tabClerks && !isClerksRefreshed)
             {
-                refreshClerks();
+                if (pieChart1.Visible)
+                {
+                    refreshClerks();
+                }
+                else
+                {
+                    showMemoryUsageForClerk();
+                }
             }
             else if (tab1.SelectedTab == tabConfig && !isConfigRefreshed)
             {
@@ -54,6 +69,9 @@ namespace DBADashGUI.Performance
         private void refreshClerks()
         {
             var dt = GetMemoryUsage();
+            tsDateGroup.Visible =false;
+            tsAgg.Visible = false;
+            tsPieChart.Visible = false;
             chartHistory.Visible = false;
             pieChart1.Visible = true;
             performanceCounters1.Visible = false;
@@ -79,9 +97,10 @@ namespace DBADashGUI.Performance
         private void showPie(ref DataTable dt)
         {
             pieChart1.Series.Clear();
-            string labelPoint(ChartPoint chartPoint) =>
-           string.Format("{0} ({1:P})", chartPoint.SeriesView.Title, chartPoint.Participation);
-            SeriesCollection sc = new SeriesCollection();
+
+            static string labelPoint(ChartPoint chartPoint) =>
+            string.Format("{0} ({1:P})", chartPoint.SeriesView.Title, chartPoint.Participation);
+            SeriesCollection sc = new();
             Double other = 0;
             Double otherPct=0;
             bool dataLabels;
@@ -133,45 +152,54 @@ namespace DBADashGUI.Performance
             if (e.RowIndex >= 0)
             {
                 DataRowView row = (DataRowView)dgv.Rows[e.RowIndex].DataBoundItem;
+                selectedClerk = (string)row["MemoryClerkType"];
                 if (e.ColumnIndex == dgv.Columns["colPages"].Index)
                 {
-                    showMemoryUsageForClerk((string)row["MemoryClerkType"],"pages_kb","Pages KB");
+                    selectedCounter = "pages_kb";
+                    selectedCounterAlias = "Pages KB";
                 }
                 else if (e.ColumnIndex == dgv.Columns["colVirtualMemoryCommitted"].Index)
                 {
-                    showMemoryUsageForClerk((string)row["MemoryClerkType"], "virtual_memory_committed_kb", "Virtual Memory Committed KB");
+                    selectedCounter = "virtual_memory_committed_kb";
+                    selectedCounterAlias = "Virtual Memory Committed KB";
                 }
                 else if (e.ColumnIndex == dgv.Columns["colAWEAllocated"].Index)
                 {
-                    showMemoryUsageForClerk((string)row["MemoryClerkType"], "awe_allocated_kb", "AWE Allocated KB");
+                    selectedCounter = "awe_allocated_kb";
+                    selectedCounterAlias = "AWE Allocated KB";
                 }
                 else if(e.ColumnIndex== dgv.Columns["colSharedMemoryReserved"].Index)
                 {
-                    showMemoryUsageForClerk((string)row["MemoryClerkType"], "shared_memory_reserved_kb", "Shared Memory Reserved KB");
+                    selectedCounter = "shared_memory_reserved_kb";
+                    selectedCounterAlias="Shared Memory Reserved KB";
                 }
                 else if (e.ColumnIndex == dgv.Columns["colSharedMemoryCommitted"].Index)
                 {
-                    showMemoryUsageForClerk((string)row["MemoryClerkType"], "shared_memory_committed_kb", "Shared Memory Committed KB");
+                    selectedCounter = "shared_memory_committed_kb";
+                    selectedCounterAlias ="Shared Memory Committed KB";
                 }
+                showMemoryUsageForClerk();
             }
         }
 
-        private void showMemoryUsageForClerk(string clerk,string col,string alias,string format="N0")
+        private void showMemoryUsageForClerk(string format="N0")
         {
-            if (DateRange.DurationMins > 3000)
+            tsDateGroup.Visible = true;
+            tsAgg.Visible = true;
+            tsPieChart.Visible = true;
+            tsAgg.Enabled = dateGrouping > 0;
+            chartHistory.Series.Clear();
+            var dt = GetMemoryClerkUsage(selectedClerk,dateGrouping,tsAgg.Text,selectedCounter);
+            if (dt.Rows.Count > MaxChartPoints)
             {
-                MessageBox.Show("Please select a narrower date range", "Date Range", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                MessageBox.Show("Max Chart points exceeded.  Please select a narrower date range or increase the date grouping.","Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
-            chartHistory.Series.Clear();
-            var dt = GetMemoryClerkUsage(clerk);
             var columns = new Dictionary<string, columnMetaData>
             {
-                {col, new columnMetaData{Alias=alias,isVisible=true } }
+                {selectedCounter, new columnMetaData{Alias=selectedCounterAlias,isVisible=true } }
             };
             chartHistory.AddDataTable(dt,columns,"SnapshotDate",false);
-            chartHistory.AxisX[0].MinValue = DateRange.FromUTC.ToLocalTime().Ticks;
-            chartHistory.AxisX[0].MaxValue = DateRange.ToUTC.ToLocalTime().Ticks;
             chartHistory.AxisY.Clear();   
             chartHistory.AxisY.Add(new Axis() { 
                 MinValue = 0,
@@ -183,7 +211,7 @@ namespace DBADashGUI.Performance
 
         }
 
-        private DataTable GetMemoryClerkUsage(string clerk)
+        private DataTable GetMemoryClerkUsage(string clerk,int? dateGrouping,string agg,string measure)
         {
             using (var cn = new SqlConnection(Common.ConnectionString))
             using (var cmd = new SqlCommand("dbo.MemoryClerkUsage_Get", cn) { CommandType = CommandType.StoredProcedure })
@@ -193,6 +221,9 @@ namespace DBADashGUI.Performance
                 cmd.Parameters.AddWithValue("FromDate", DateRange.FromUTC);
                 cmd.Parameters.AddWithValue("ToDate", DateRange.ToUTC);
                 cmd.Parameters.AddWithValue("MemoryClerkType", clerk);
+                cmd.Parameters.AddWithValue("Mins",dateGrouping);
+                cmd.Parameters.AddWithValue("Agg", agg);
+                cmd.Parameters.AddWithValue("Measure", measure);
                 var dt = new DataTable();
                 da.Fill(dt);
                 Common.ConvertUTCToLocal(ref dt);
@@ -272,8 +303,7 @@ namespace DBADashGUI.Performance
             refreshCurrentTab();
         }
 
-
-        ToolTip dgvToolTip = new ToolTip() { AutomaticDelay = 100, AutoPopDelay =60000, ReshowDelay = 100 };
+     
         private void dgv_CellMouseEnter(object sender, DataGridViewCellEventArgs e)
         {
             if (e.RowIndex >= 0) {
@@ -288,6 +318,14 @@ namespace DBADashGUI.Performance
             performanceCounterSummaryGrid1.InstanceLink = false;
             performanceCounterSummaryGrid1.CounterLink = false;
             performanceCounterSummaryGrid1.CounterSelected += PerformanceCounterSummaryGrid1_CounterSelected;
+            Common.AddDateGroups(tsDateGroup,TsDateGroup_Click);
+        }
+        private void TsDateGroup_Click(object sender, EventArgs e)
+        {
+            var ts = (ToolStripMenuItem)sender;
+            dateGrouping = Convert.ToInt32(ts.Tag);
+            tsDateGroup.Text = Common.DateGroupString(dateGrouping);
+            showMemoryUsageForClerk();
         }
 
         private void PerformanceCounterSummaryGrid1_CounterSelected(object sender, PerformanceCounterSummaryGrid.CounterSelectedEventArgs e)
@@ -300,8 +338,30 @@ namespace DBADashGUI.Performance
             performanceCounters1.CounterName = e.CounterName;
             pieChart1.Visible = false;
             chartHistory.Visible = false;
-
+            tsDateGroup.Visible = false;
+            tsAgg.Visible = false;
+            tsPieChart.Visible = true;
             performanceCounters1.RefreshData();
+        }
+
+        private void tsAGG_Click(object sender, EventArgs e)
+        {
+            avgToolStripMenuItem.Checked = avgToolStripMenuItem == sender;
+            maxToolStripMenuItem.Checked = maxToolStripMenuItem == sender;
+            minToolStripMenuItem.Checked = minToolStripMenuItem == sender;
+            tsAgg.Text = ((ToolStripMenuItem)sender).Text;
+            showMemoryUsageForClerk();
+        }
+
+        private void tsPieChart_Click(object sender, EventArgs e)
+        {
+            chartHistory.Visible = false;
+            pieChart1.Visible = true;
+            performanceCounters1.Visible = false;
+            tsDateGroup.Visible = false;
+            tsAgg.Visible = false;
+            tsPieChart.Visible=false;
+            refreshCurrentTab();
         }
     }
 }
