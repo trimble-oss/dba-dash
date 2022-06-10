@@ -31,8 +31,8 @@
     <ProjectReference Include="..\DBADash\DBADash.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="AWSSDK.Core" Version="3.7.10.8" />
-    <PackageReference Include="AWSSDK.S3" Version="3.7.8.20" />
+    <PackageReference Include="AWSSDK.Core" Version="3.7.11.14" />
+    <PackageReference Include="AWSSDK.S3" Version="3.7.9.14" />
     <PackageReference Include="Azure.Core" Version="1.24.0" />
     <PackageReference Include="Azure.Identity" Version="1.6.0" />
     <PackageReference Include="Common.Logging" Version="3.4.1" />
@@ -56,21 +56,21 @@
     <PackageReference Include="Microsoft.Extensions.Options" Version="6.0.0" />
     <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="6.0.0" />
     <PackageReference Include="Microsoft.Extensions.Primitives" Version="6.0.0" />
-    <PackageReference Include="Microsoft.Identity.Client" Version="4.43.1" />
-    <PackageReference Include="Microsoft.Identity.Client.Extensions.Msal" Version="2.20.0" />
-    <PackageReference Include="Microsoft.IdentityModel.JsonWebTokens" Version="6.17.0" />
-    <PackageReference Include="Microsoft.IdentityModel.Logging" Version="6.17.0" />
-    <PackageReference Include="Microsoft.IdentityModel.Protocols" Version="6.17.0" />
-    <PackageReference Include="Microsoft.IdentityModel.Protocols.OpenIdConnect" Version="6.17.0" />
-    <PackageReference Include="Microsoft.IdentityModel.Tokens" Version="6.17.0" />
+    <PackageReference Include="Microsoft.Identity.Client" Version="4.44.0" />
+    <PackageReference Include="Microsoft.Identity.Client.Extensions.Msal" Version="2.21.0" />
+    <PackageReference Include="Microsoft.IdentityModel.JsonWebTokens" Version="6.19.0" />
+    <PackageReference Include="Microsoft.IdentityModel.Logging" Version="6.19.0" />
+    <PackageReference Include="Microsoft.IdentityModel.Protocols" Version="6.19.0" />
+    <PackageReference Include="Microsoft.IdentityModel.Protocols.OpenIdConnect" Version="6.19.0" />
+    <PackageReference Include="Microsoft.IdentityModel.Tokens" Version="6.19.0" />
     <PackageReference Include="Microsoft.SqlServer.Assessment" Version="1.1.5" />
     <PackageReference Include="Microsoft.SqlServer.Assessment.Authoring" Version="1.1.0" />
-    <PackageReference Include="Microsoft.SqlServer.Management.SqlParser" Version="160.22504.0" />
-    <PackageReference Include="Microsoft.SqlServer.SqlManagementObjects" Version="161.47008.0" />
+    <PackageReference Include="Microsoft.SqlServer.Management.SqlParser" Version="160.22506.0" />
+    <PackageReference Include="Microsoft.SqlServer.SqlManagementObjects" Version="161.47021.0" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
     <PackageReference Include="Polly" Version="7.2.3" />
     <PackageReference Include="Quartz" Version="3.4.0" />
-    <PackageReference Include="Serilog" Version="2.10.0" />
+    <PackageReference Include="Serilog" Version="2.11.0" />
     <PackageReference Include="Serilog.Enrichers.Thread" Version="3.1.0" />
     <PackageReference Include="Serilog.Formatting.Compact" Version="1.1.0" />
     <PackageReference Include="Serilog.Settings.Configuration" Version="3.3.0" />
@@ -85,9 +85,9 @@
     <PackageReference Include="System.Data.Common" Version="4.3.0" />
     <PackageReference Include="System.Data.DataSetExtensions" Version="4.5.0" />
     <PackageReference Include="System.Diagnostics.DiagnosticSource" Version="6.0.0" />
-    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="6.17.0" />
+    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="6.19.0" />
     <PackageReference Include="System.IO" Version="4.3.0" />
-    <PackageReference Include="System.Memory" Version="4.5.4" />
+    <PackageReference Include="System.Memory" Version="4.5.5" />
     <PackageReference Include="System.Memory.Data" Version="6.0.0" />
     <PackageReference Include="System.Numerics.Vectors" Version="4.5.0" />
     <PackageReference Include="System.Runtime" Version="4.3.1" />
@@ -101,7 +101,7 @@
     <PackageReference Include="System.Security.Permissions" Version="6.0.0" />
     <PackageReference Include="System.Security.Principal.Windows" Version="5.0.0" />
     <PackageReference Include="System.Text.Encodings.Web" Version="6.0.0" />
-    <PackageReference Include="System.Text.Json" Version="6.0.3" />
+    <PackageReference Include="System.Text.Json" Version="6.0.4" />
     <PackageReference Include="System.Threading.Tasks.Extensions" Version="4.5.4" />
     <PackageReference Include="Topshelf" Version="4.3.0" />
   </ItemGroup>
