@@ -63,6 +63,12 @@ namespace DBADashGUI
 
         private async void Main_Load(object sender, EventArgs e)
         {
+            if (Properties.Settings.Default.SettingsUpgradeRequired)
+            {
+                Properties.Settings.Default.Upgrade();
+                Properties.Settings.Default.SettingsUpgradeRequired = false;
+                Properties.Settings.Default.Save();
+            }
             lblVersion.Text = "Version: " + System.Reflection.Assembly.GetEntryAssembly().GetName().Version;
             tabs.TabPages.Clear();
             tabs.TabPages.Add(tabDBADash);
