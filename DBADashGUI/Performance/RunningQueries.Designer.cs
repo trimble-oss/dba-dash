@@ -67,6 +67,8 @@ namespace DBADashGUI.Performance
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
             this.tsStatus = new System.Windows.Forms.ToolStripStatusLabel();
+            this.lblRowLimit = new System.Windows.Forms.ToolStripStatusLabel();
+            this.tsEditLimit = new System.Windows.Forms.ToolStripStatusLabel();
             this.dgvSessionWaits = new System.Windows.Forms.DataGridView();
             this.toolStrip2 = new System.Windows.Forms.ToolStrip();
             this.lblWaitsForSession = new System.Windows.Forms.ToolStripLabel();
@@ -126,7 +128,7 @@ namespace DBADashGUI.Performance
             this.dgv.RowHeadersVisible = false;
             this.dgv.RowHeadersWidth = 51;
             this.dgv.RowTemplate.Height = 24;
-            this.dgv.Size = new System.Drawing.Size(1090, 380);
+            this.dgv.Size = new System.Drawing.Size(1090, 376);
             this.dgv.TabIndex = 0;
             this.dgv.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgv_CellContentClick);
             this.dgv.CellFormatting += new System.Windows.Forms.DataGridViewCellFormattingEventHandler(this.dgv_CellFormatting);
@@ -449,17 +451,36 @@ namespace DBADashGUI.Performance
             // 
             this.statusStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
             this.statusStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.tsStatus});
-            this.statusStrip1.Location = new System.Drawing.Point(0, 380);
+            this.tsStatus,
+            this.lblRowLimit,
+            this.tsEditLimit});
+            this.statusStrip1.Location = new System.Drawing.Point(0, 376);
             this.statusStrip1.Name = "statusStrip1";
-            this.statusStrip1.Size = new System.Drawing.Size(1090, 22);
+            this.statusStrip1.Size = new System.Drawing.Size(1090, 26);
             this.statusStrip1.TabIndex = 1;
             this.statusStrip1.Text = "statusStrip1";
             // 
             // tsStatus
             // 
             this.tsStatus.Name = "tsStatus";
-            this.tsStatus.Size = new System.Drawing.Size(0, 16);
+            this.tsStatus.Size = new System.Drawing.Size(0, 20);
+            // 
+            // lblRowLimit
+            // 
+            this.lblRowLimit.ForeColor = System.Drawing.Color.Red;
+            this.lblRowLimit.Name = "lblRowLimit";
+            this.lblRowLimit.Size = new System.Drawing.Size(590, 20);
+            this.lblRowLimit.Text = "Row Limit exceeded.  Select a narrower date range to view older snapshots or edit" +
+    " limit.";
+            this.lblRowLimit.Visible = false;
+            // 
+            // tsEditLimit
+            // 
+            this.tsEditLimit.IsLink = true;
+            this.tsEditLimit.Name = "tsEditLimit";
+            this.tsEditLimit.Size = new System.Drawing.Size(72, 20);
+            this.tsEditLimit.Text = "Edit Limit";
+            this.tsEditLimit.Click += new System.EventHandler(this.tsEditLimit_Click);
             // 
             // dgvSessionWaits
             // 
@@ -564,6 +585,7 @@ namespace DBADashGUI.Performance
             this.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.Name = "RunningQueries";
             this.Size = new System.Drawing.Size(1090, 595);
+            this.Load += new System.EventHandler(this.RunningQueries_Load);
             ((System.ComponentModel.ISupportInitialize)(this.dgv)).EndInit();
             this.toolStrip1.ResumeLayout(false);
             this.toolStrip1.PerformLayout();
@@ -628,5 +650,7 @@ namespace DBADashGUI.Performance
         private System.Windows.Forms.ToolStripStatusLabel tsStatus;
         private System.Windows.Forms.ToolStripLabel tsGroupByFilter;
         private System.Windows.Forms.ToolStripButton tsCols;
+        private System.Windows.Forms.ToolStripStatusLabel lblRowLimit;
+        private System.Windows.Forms.ToolStripStatusLabel tsEditLimit;
     }
 }

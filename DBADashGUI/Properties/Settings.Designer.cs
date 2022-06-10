@@ -67,5 +67,17 @@ namespace DBADashGUI.Properties {
                 this["SettingsUpgradeRequired"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("3000")]
+        public int RunningQueriesSummaryMaxRows {
+            get {
+                return ((int)(this["RunningQueriesSummaryMaxRows"]));
+            }
+            set {
+                this["RunningQueriesSummaryMaxRows"] = value;
+            }
+        }
     }
 }

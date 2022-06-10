@@ -113,6 +113,8 @@ namespace DBADashGUI.Performance
 
         public void RefreshData()
         {
+            tsEditLimit.Visible = false;
+            lblRowLimit.Visible = false;
             tsWaitsFilter.Enabled = SessionID == 0;
             tsGroupByFilter.Visible = false;
             splitContainer1.Panel2Collapsed = true;
@@ -174,7 +176,9 @@ namespace DBADashGUI.Performance
             else // Show the last snapshot for all instances
             {
                 dt = runningQueriesSummary();
-                tsBack.Enabled = InstanceIDs != null && InstanceIDs.Count > 1;     
+                tsBack.Enabled = InstanceIDs != null && InstanceIDs.Count > 1;
+                lblRowLimit.Visible = dt.Rows.Count == Properties.Settings.Default.RunningQueriesSummaryMaxRows;
+                tsEditLimit.Visible = true;
             }
             dgv.Columns.Clear();
             dgv.AutoGenerateColumns = false;
@@ -247,6 +251,7 @@ namespace DBADashGUI.Performance
                 cmd.Parameters.AddWithValue("InstanceID", InstanceID);
                 cmd.Parameters.AddWithValue("FromDate", DateRange.FromUTC);
                 cmd.Parameters.AddWithValue("ToDate", DateRange.ToUTC);
+                cmd.Parameters.AddWithValue("MaxRows", Properties.Settings.Default.RunningQueriesSummaryMaxRows);
                 da.Fill(dt);
                 Common.ConvertUTCToLocal(ref dt);
                 dt.Columns["SnapshotDateUTC"].ColumnName = "SnapshotDate";
@@ -285,6 +290,8 @@ namespace DBADashGUI.Performance
         /// <summary>Load a running queries snapshot for the specified date. skip parameter is used to return next snapshot (1) or previous snapshot (-1) </summary> 
         private void loadSnapshot(DateTime snapshotDate, int skip = 0)
         {
+            lblRowLimit.Visible = false;
+            tsEditLimit.Visible = false;
             tsGroupByFilter.Visible = false;
             snapshotDT = runningQueriesSnapshot(ref snapshotDate, skip);
             getCounts();
@@ -719,6 +726,43 @@ namespace DBADashGUI.Performance
                     var dt = ((DataView)dgv.DataSource).Table;
                 }
             }
+        }
+
+        private void tsEditLimit_Click(object sender, EventArgs e)
+        {
+            string limit = Properties.Settings.Default.RunningQueriesSummaryMaxRows.ToString();
+            if (Common.ShowInputDialog(ref limit , "Enter row limit") == DialogResult.OK)
+            {
+                int maxRows;
+                if( int.TryParse(limit,out maxRows) && maxRows >0)
+                {
+                    Properties.Settings.Default.RunningQueriesSummaryMaxRows = maxRows;
+                    Properties.Settings.Default.Save();
+                    updateRowLimit();
+                    loadSummaryData();
+                }
+                else
+                {
+                    MessageBox.Show("Invalid value", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }               
+            }
+        }
+
+        private void RunningQueries_Load(object sender, EventArgs e)
+        {
+            tsEditLimit.LinkColor = DashColors.LinkColor;
+            // Ensure max rows is set to a value greater than 0
+            if (Properties.Settings.Default.RunningQueriesSummaryMaxRows <= 0)
+            {
+                Properties.Settings.Default.RunningQueriesSummaryMaxRows = 100;
+                Properties.Settings.Default.Save();
+            }
+            updateRowLimit();
+        }
+
+        private void updateRowLimit()
+        {
+            tsEditLimit.Text = String.Format("Row Limit {0}", Properties.Settings.Default.RunningQueriesSummaryMaxRows);
         }
     }
 }
