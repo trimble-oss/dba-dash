@@ -12,7 +12,13 @@ BEGIN
 		C.WarningFrom,
 		C.WarningTo,
 		C.GoodFrom,
-		C.GoodTo
+		C.GoodTo,
+		C.SystemCriticalFrom,
+		C.SystemCriticalTo,
+		C.SystemWarningFrom,
+		C.SystemWarningTo,
+		C.SystemGoodFrom,
+		C.SystemGoodTo
 	FROM dbo.Counters C
 	WHERE C.object_name = @object_name
 	AND C.counter_name = @counter_name
@@ -24,7 +30,13 @@ BEGIN
 		IC.WarningFrom,
 		IC.WarningTo,
 		IC.GoodFrom,
-		IC.GoodTo
+		IC.GoodTo,
+		C.SystemCriticalFrom,
+		C.SystemCriticalTo,
+		C.SystemWarningFrom,
+		C.SystemWarningTo,
+		C.SystemGoodFrom,
+		C.SystemGoodTo
 	FROM dbo.Counters C
 	JOIN dbo.InstanceCounters IC ON IC.CounterID = C.CounterID
 	WHERE C.object_name = @object_name

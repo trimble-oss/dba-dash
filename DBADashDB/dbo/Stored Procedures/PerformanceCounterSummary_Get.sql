@@ -39,12 +39,12 @@ WITH T AS (
 			SUM(PC.Value) as TotalValue,
 			COUNT(*) as SampleCount,' END + '
 			(SELECT TOP(1) Value FROM dbo.PerformanceCounters LV WHERE LV.InstanceID = IC.InstanceID AND LV.CounterID = C.CounterID ORDER BY LV.SnapshotDate DESC) AS CurrentValue,
-			ISNULL(IC.CriticalFrom,C.CriticalFrom) AS CriticalFrom,
-			ISNULL(IC.CriticalTo,C.CriticalTo) AS CriticalTo,
-			ISNULL(IC.WarningFrom,C.WarningFrom) AS WarningFrom,
-			ISNULL(IC.WarningTo,C.WarningTo) AS WarningTo,
-			ISNULL(IC.GoodFrom,C.GoodFrom) AS GoodFrom,
-			ISNULL(IC.GoodTo,C.GoodTo) AS GoodTo
+			COALESCE(IC.CriticalFrom,C.CriticalFrom,C.SystemCriticalFrom) AS CriticalFrom,
+			COALESCE(IC.CriticalTo,C.CriticalTo,C.SystemCriticalTo) AS CriticalTo,
+			COALESCE(IC.WarningFrom,C.WarningFrom,C.SystemWarningFrom) AS WarningFrom,
+			COALESCE(IC.WarningTo,C.WarningTo,C.SystemWarningTo) AS WarningTo,
+			COALESCE(IC.GoodFrom,C.GoodFrom,C.SystemGoodFrom) AS GoodFrom,
+			COALESCE(IC.GoodTo,C.GoodTo,C.SystemGoodTo) AS GoodTo
 	FROM dbo.InstanceCounters IC
 	JOIN dbo.Counters C ON C.CounterID = IC.CounterID
 	JOIN dbo.PerformanceCounters' + CASE WHEN @Use60Min=1 THEN '_60MIN' ELSE '' END + ' PC ON PC.InstanceID = IC.InstanceID AND PC.CounterID = IC.CounterID
@@ -74,7 +74,13 @@ GROUP BY	C.CounterID,
 			IC.WarningFrom,
 			IC.WarningTo,
 			IC.GoodFrom,
-			IC.GoodTo
+			IC.GoodTo,
+			C.SystemCriticalFrom,
+			C.SystemCriticalTo,
+			C.SystemWarningFrom,
+			C.SystemWarningTo,
+			C.SystemGoodFrom,
+			C.SystemGoodTo
 )
 SELECT *,
 		CASE	WHEN MinValueStatus =1 OR MaxValueStatus =1 OR AvgValueStatus=1 OR CurrentValueStatus=1 THEN 1

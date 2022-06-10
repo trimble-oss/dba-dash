@@ -39,6 +39,11 @@ namespace DBADashGUI.Performance
             cboObject.Text = ObjectName;
             cboCounter.Text = CounterName;       
             cboCounterInstance.Text = CounterInstance;
+
+            foreach(var lnk in grpThresholds.Controls.OfType<LinkLabel>())
+            {
+                lnk.LinkColor = DashColors.LinkColor;
+            }
         }
 
         private void cboObject_SelectedValueChanged(object sender, EventArgs e)
@@ -55,7 +60,7 @@ namespace DBADashGUI.Performance
 
         private void getThresholds()
         {
-            chkCritical.Text = chkAllInstances.Checked ? "Disable" : "Inherit";
+            chkCritical.Text = chkAllInstances.Checked ? "System" : "Inherit";
             chkWarning.Text = chkCritical.Text;
             chkGood.Text = chkCritical.Text;
             threshold = CounterThreshold.GetCounterThreshold(cboObject.Text, cboCounter.Text, cboCounterInstance.Text, chkAllInstances.Checked ? null : Convert.ToInt32(cboInstances.SelectedValue));
@@ -67,16 +72,21 @@ namespace DBADashGUI.Performance
             else
             {
                 grpThresholds.Enabled = true;
-                numWarningFrom.Value = threshold.WarningFrom.GetValueOrDefault(inheritedThreshold.WarningFrom.GetValueOrDefault());
-                numWarningTo.Value = threshold.WarningTo.GetValueOrDefault(inheritedThreshold.WarningTo.GetValueOrDefault());
-                numCriticalFrom.Value = threshold.CritialFrom.GetValueOrDefault(inheritedThreshold.CritialFrom.GetValueOrDefault());
-                numCriticalTo.Value = threshold.CritialTo.GetValueOrDefault(inheritedThreshold.CritialTo.GetValueOrDefault());
-                numGoodFrom.Value = threshold.GoodFrom.GetValueOrDefault(inheritedThreshold.GoodFrom.GetValueOrDefault());
-                numGoodTo.Value = threshold.GoodTo.GetValueOrDefault(inheritedThreshold.CritialTo.GetValueOrDefault());
+                numWarningFrom.Value = coalesceDecimal(threshold.WarningFrom, inheritedThreshold.WarningFrom, inheritedThreshold.SystemWarningFrom);
+                numWarningTo.Value = coalesceDecimal(threshold.WarningTo,inheritedThreshold.WarningTo,inheritedThreshold.SystemWarningTo);
+                numCriticalFrom.Value = coalesceDecimal(threshold.CritialFrom,inheritedThreshold.CritialFrom,inheritedThreshold.SystemCritialFrom);
+                numCriticalTo.Value = coalesceDecimal(threshold.CritialTo,inheritedThreshold.CritialTo, inheritedThreshold.SystemCritialTo);
+                numGoodFrom.Value = coalesceDecimal(threshold.GoodFrom,inheritedThreshold.GoodFrom, inheritedThreshold.SystemGoodFrom);
+                numGoodTo.Value = coalesceDecimal(threshold.GoodTo,inheritedThreshold.CritialTo,inheritedThreshold.SystemGoodTo);
                 chkWarning.Checked = !(threshold.WarningFrom.HasValue && threshold.WarningTo.HasValue);
                 chkCritical.Checked = !(threshold.CritialFrom.HasValue && threshold.CritialTo.HasValue);
                 chkGood.Checked = !(threshold.GoodFrom.HasValue && threshold.GoodTo.HasValue);
             }
+        }
+
+        private decimal coalesceDecimal(decimal? value1,decimal? value2, decimal? value3)
+        {
+            return value1.GetValueOrDefault(value2.GetValueOrDefault(value3.GetValueOrDefault()));
         }
 
         private void lnkCriticalToMax_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
@@ -146,6 +156,24 @@ namespace DBADashGUI.Performance
         private void cboInstances_SelectedValueChanged(object sender, EventArgs e)
         {
             getThresholds();
+        }
+
+        private void lnkDisableCritical_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            numCriticalFrom.Value = 0;
+            numCriticalTo.Value = -1;
+        }
+
+        private void lnkDisableWarning_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            numWarningFrom.Value = 0;
+            numWarningTo.Value = -1;
+        }
+
+        private void lnkDisableGood_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            numGoodFrom.Value = 0;
+            numGoodTo.Value=-1;
         }
     }
 }
