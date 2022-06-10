@@ -42,6 +42,9 @@
             this.chkWarning = new System.Windows.Forms.CheckBox();
             this.chkGood = new System.Windows.Forms.CheckBox();
             this.grpThresholds = new System.Windows.Forms.GroupBox();
+            this.lnkDisableGood = new System.Windows.Forms.LinkLabel();
+            this.lnkDisableWarning = new System.Windows.Forms.LinkLabel();
+            this.lnkDisableCritical = new System.Windows.Forms.LinkLabel();
             this.numGoodTo = new System.Windows.Forms.NumericUpDown();
             this.numWarningTo = new System.Windows.Forms.NumericUpDown();
             this.numGoodFrom = new System.Windows.Forms.NumericUpDown();
@@ -205,6 +208,9 @@
             // 
             // grpThresholds
             // 
+            this.grpThresholds.Controls.Add(this.lnkDisableGood);
+            this.grpThresholds.Controls.Add(this.lnkDisableWarning);
+            this.grpThresholds.Controls.Add(this.lnkDisableCritical);
             this.grpThresholds.Controls.Add(this.numGoodTo);
             this.grpThresholds.Controls.Add(this.numWarningTo);
             this.grpThresholds.Controls.Add(this.numGoodFrom);
@@ -229,6 +235,42 @@
             this.grpThresholds.TabIndex = 26;
             this.grpThresholds.TabStop = false;
             this.grpThresholds.Text = "Thresholds";
+            // 
+            // lnkDisableGood
+            // 
+            this.lnkDisableGood.AutoSize = true;
+            this.lnkDisableGood.Location = new System.Drawing.Point(160, 179);
+            this.lnkDisableGood.Name = "lnkDisableGood";
+            this.lnkDisableGood.Size = new System.Drawing.Size(59, 20);
+            this.lnkDisableGood.TabIndex = 43;
+            this.lnkDisableGood.TabStop = true;
+            this.lnkDisableGood.Text = "Disable";
+            this.toolTip1.SetToolTip(this.lnkDisableGood, "Threshold is disabled when From > To");
+            this.lnkDisableGood.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.lnkDisableGood_LinkClicked);
+            // 
+            // lnkDisableWarning
+            // 
+            this.lnkDisableWarning.AutoSize = true;
+            this.lnkDisableWarning.Location = new System.Drawing.Point(160, 121);
+            this.lnkDisableWarning.Name = "lnkDisableWarning";
+            this.lnkDisableWarning.Size = new System.Drawing.Size(59, 20);
+            this.lnkDisableWarning.TabIndex = 42;
+            this.lnkDisableWarning.TabStop = true;
+            this.lnkDisableWarning.Text = "Disable";
+            this.toolTip1.SetToolTip(this.lnkDisableWarning, "Threshold is disabled when From > To");
+            this.lnkDisableWarning.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.lnkDisableWarning_LinkClicked);
+            // 
+            // lnkDisableCritical
+            // 
+            this.lnkDisableCritical.AutoSize = true;
+            this.lnkDisableCritical.Location = new System.Drawing.Point(160, 61);
+            this.lnkDisableCritical.Name = "lnkDisableCritical";
+            this.lnkDisableCritical.Size = new System.Drawing.Size(59, 20);
+            this.lnkDisableCritical.TabIndex = 41;
+            this.lnkDisableCritical.TabStop = true;
+            this.lnkDisableCritical.Text = "Disable";
+            this.toolTip1.SetToolTip(this.lnkDisableCritical, "Threshold is disabled when From > To");
+            this.lnkDisableCritical.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.lnkDisableCritical_LinkClicked);
             // 
             // numGoodTo
             // 
@@ -568,5 +610,8 @@
         private System.Windows.Forms.Button bttnUpdate;
         private System.Windows.Forms.Button bttnCancel;
         private System.Windows.Forms.ToolTip toolTip1;
+        private System.Windows.Forms.LinkLabel lnkDisableGood;
+        private System.Windows.Forms.LinkLabel lnkDisableWarning;
+        private System.Windows.Forms.LinkLabel lnkDisableCritical;
     }
 }

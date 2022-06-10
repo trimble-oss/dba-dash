@@ -1776,18 +1776,26 @@ USING (VALUES
 	('Locks','Number of Deadlocks/sec','_Total',1,9999999999999999999.999999999,0.000000001,1,0,0),
 	('Plan Cache','Cache Object Counts','_Total',0,200,200,1000,NULL,NULL),
 	('General Statistics','Processes blocked','',50,9999999999999999999.999999999,1,50,0,0)
-) AS S (object_name,counter_name,instance_name,CriticalFrom,CriticalTo,WarningFrom,WarningTo,GoodFrom,GoodTo)
+) AS S (object_name,counter_name,instance_name,SystemCriticalFrom,SystemCriticalTo,SystemWarningFrom,SystemWarningTo,SystemGoodFrom,SystemGoodTo)
 ON T.object_name = S.object_name AND T.counter_name = S.counter_name AND T.instance_name = S.instance_name 
-WHEN MATCHED AND T.CriticalFrom IS NULL AND T.CriticalTo IS NULL 
-							AND T.WarningFrom IS NULL AND T.WarningTo IS NULL
-							AND T.GoodFrom IS NULL AND T.GoodTo IS NULL THEN 
-UPDATE SET T.CriticalFrom = S.CriticalFrom,
-			T.CriticalTo = S.CriticalTo,
-			T.WarningFrom = S.Warningfrom,
-			T.WarningTo = S.WarningTo,
-			T.GoodFrom = S.GoodFrom,
-			T.GoodTo = S.GoodTo
+WHEN MATCHED THEN 
+UPDATE SET T.SystemCriticalFrom = S.SystemCriticalFrom,
+			T.SystemCriticalTo = S.SystemCriticalTo,
+			T.SystemWarningFrom = S.SystemWarningfrom,
+			T.SystemWarningTo = S.SystemWarningTo,
+			T.SystemGoodFrom = S.SystemGoodFrom,
+			T.SystemGoodTo = S.SystemGoodTo,
+			/* 
+				Set user values to NULL if they match system value and system value isn't set yet.  Handling upgrades before System columns were added 
+				System thresholds can always be updated now without impacting user preferences
+			*/
+			T.CriticalFrom = CASE WHEN T.CriticalFrom = S.SystemCriticalFrom AND T.SystemCriticalFrom IS NULL THEN NULL  ELSE T.CriticalFrom END,
+			T.CriticalTo = CASE WHEN T.CriticalTo = S.SystemCriticalTo AND T.SystemCriticalTo IS NULL THEN NULL  ELSE T.CriticalTo END,
+			T.WarningFrom = CASE WHEN T.WarningFrom = S.SystemWarningFrom AND T.SystemWarningFrom IS NULL THEN NULL  ELSE T.WarningFrom END,
+			T.WarningTo = CASE WHEN T.WarningTo = S.SystemWarningTo AND T.SystemWarningTo IS NULL THEN NULL  ELSE T.WarningTo END,
+			T.GoodFrom = CASE WHEN T.GoodFrom = S.SystemGoodFrom AND T.SystemGoodFrom IS NULL THEN NULL  ELSE T.GoodFrom END,
+			T.GoodTo = CASE WHEN T.GoodTo = S.SystemGoodTo AND T.SystemGoodTo IS NULL THEN NULL  ELSE T.GoodTo END
 WHEN NOT MATCHED BY TARGET THEN
-INSERT(object_name,counter_name,instance_name,CriticalFrom,CriticalTo,WarningFrom,WarningTo,GoodFrom,GoodTo)
-VALUES(object_name,counter_name,instance_name,CriticalFrom,CriticalTo,WarningFrom,WarningTo,GoodFrom,GoodTo);
+INSERT(object_name,counter_name,instance_name,SystemCriticalFrom,SystemCriticalTo,SystemWarningFrom,SystemWarningTo,SystemGoodFrom,SystemGoodTo)
+VALUES(object_name,counter_name,instance_name,SystemCriticalFrom,SystemCriticalTo,SystemWarningFrom,SystemWarningTo,SystemGoodFrom,SystemGoodTo);
 

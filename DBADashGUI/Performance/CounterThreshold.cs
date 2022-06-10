@@ -20,6 +20,12 @@ namespace DBADashGUI.Performance
         public decimal? CritialTo { get; set; }
         public decimal? GoodFrom { get; set; }
         public decimal? GoodTo { get; set; }
+        public decimal? SystemWarningFrom { get; set; }
+        public decimal? SystemWarningTo { get; set; }
+        public decimal? SystemCritialFrom { get; set; }
+        public decimal? SystemCritialTo { get; set; }
+        public decimal? SystemGoodFrom { get; set; }
+        public decimal? SystemGoodTo { get; set; }
 
         public void Update(bool updateAllInstances)
         {
@@ -77,6 +83,12 @@ namespace DBADashGUI.Performance
                         threshold.WarningTo = rdr["WarningTo"]==DBNull.Value ? null : (decimal)rdr["WarningTo"];
                         threshold.GoodFrom = rdr["GoodFrom"] == DBNull.Value ? null : (decimal)rdr["GoodFrom"];
                         threshold.GoodTo = rdr["GoodTo"] == DBNull.Value ? null : (decimal)rdr["GoodTo"];
+                        threshold.SystemCritialFrom = rdr["SystemCriticalFrom"] == DBNull.Value ? null : (decimal)rdr["SystemCriticalFrom"];
+                        threshold.SystemCritialTo = rdr["SystemCriticalTo"] == DBNull.Value ? null : (decimal)rdr["SystemCriticalTo"];
+                        threshold.SystemWarningFrom = rdr["SystemWarningFrom"] == DBNull.Value ? null : (decimal)rdr["SystemWarningFrom"];
+                        threshold.SystemWarningTo = rdr["SystemWarningTo"] == DBNull.Value ? null : (decimal)rdr["SystemWarningTo"];
+                        threshold.SystemGoodFrom = rdr["SystemGoodFrom"] == DBNull.Value ? null : (decimal)rdr["SystemGoodFrom"];
+                        threshold.SystemGoodTo = rdr["SystemGoodTo"] == DBNull.Value ? null : (decimal)rdr["SystemGoodTo"];
                         return threshold;
                     }
                     else { 

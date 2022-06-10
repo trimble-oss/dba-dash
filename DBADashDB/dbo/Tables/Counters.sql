@@ -9,6 +9,12 @@
 	WarningTo DECIMAL (28, 9)  NULL,
 	GoodFrom DECIMAL (28, 9)  NULL,
 	GoodTo DECIMAL (28, 9)  NULL,
+    SystemCriticalFrom DECIMAL (28, 9) NULL,
+    SystemCriticalTo DECIMAL (28, 9)  NULL,
+	SystemWarningFrom DECIMAL (28, 9) NULL,
+	SystemWarningTo DECIMAL (28, 9)  NULL,
+	SystemGoodFrom DECIMAL (28, 9)  NULL,
+	SystemGoodTo DECIMAL (28, 9)  NULL,
     CONSTRAINT [PK_Counters] PRIMARY KEY CLUSTERED (CounterID ASC)
 );
 
