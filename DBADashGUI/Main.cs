@@ -1457,5 +1457,29 @@ namespace DBADashGUI
             Common.FreezeKeyColumn = freezeKeyColumnsToolStripMenuItem.Checked;
             loadSelectedTab();
         }
+
+        private void dateToolStripMenuItem_Opening(object sender, EventArgs e)
+        {    
+            dateToolStripMenuItem.DropDownItems.Clear();
+            for (int i = 0; i <= 14; i++)
+            {
+                var date = DateTime.Now.AddDays(-i).Date;
+                var daysAgo = i == 0 ? "Today" : i == 1 ? "Yesterday" : i.ToString() + " days ago";
+                var humanDateString = date.ToShortDateString() + " (" + date.DayOfWeek.ToString().Substring(0, 3) + " - " + daysAgo + ")";
+                var dateItem = new ToolStripMenuItem(humanDateString) { Tag = date, Checked = DateRange.FromUTC == date.ToUniversalTime() && DateRange.ToUTC ==date.AddDays(1).ToUniversalTime() };
+                dateItem.Click += DateItem_Click;
+                dateToolStripMenuItem.DropDownItems.Add(dateItem);
+            }           
+        }
+
+        private void DateItem_Click(object sender, EventArgs e)
+        {
+            var dateItem = (ToolStripMenuItem)sender;
+            var selectedDate = (DateTime)dateItem.Tag;
+            DateRange.SetCustom(selectedDate.ToUniversalTime(), selectedDate.ToUniversalTime().AddDays(1));
+            checkTime("Date");
+            tsTime.Text = dateItem.Text;
+            DateRangeChanged();
+        }
     }
 }
