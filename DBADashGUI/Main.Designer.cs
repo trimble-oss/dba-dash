@@ -41,8 +41,8 @@
             this.optionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.configureDisplayNameToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.dataRetentionToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.manageInstancesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.freezeKeyColumnsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.manageInstancesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.tsTime = new System.Windows.Forms.ToolStripDropDownButton();
             this.minsToolStripMenuItem2 = new System.Windows.Forms.ToolStripMenuItem();
             this.minsToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
@@ -60,6 +60,8 @@
             this.days14toolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.days28ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
+            this.dateToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.dummyToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.tsCustom = new System.Windows.Forms.ToolStripMenuItem();
             this.helpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.aboutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -353,13 +355,6 @@
             this.dataRetentionToolStripMenuItem.Text = "Data Retention";
             this.dataRetentionToolStripMenuItem.Click += new System.EventHandler(this.DataRetentionToolStripMenuItem_Click);
             // 
-            // manageInstancesToolStripMenuItem
-            // 
-            this.manageInstancesToolStripMenuItem.Name = "manageInstancesToolStripMenuItem";
-            this.manageInstancesToolStripMenuItem.Size = new System.Drawing.Size(254, 26);
-            this.manageInstancesToolStripMenuItem.Text = "Manage Instances";
-            this.manageInstancesToolStripMenuItem.Click += new System.EventHandler(this.manageInstancesToolStripMenuItem_Click);
-            // 
             // freezeKeyColumnsToolStripMenuItem
             // 
             this.freezeKeyColumnsToolStripMenuItem.Checked = true;
@@ -370,6 +365,13 @@
             this.freezeKeyColumnsToolStripMenuItem.Text = "Freeze Key Columns";
             this.freezeKeyColumnsToolStripMenuItem.ToolTipText = "Keep the key column(s) in the grid visible as you scroll to the right";
             this.freezeKeyColumnsToolStripMenuItem.Click += new System.EventHandler(this.freezeKeyColumnsToolStripMenuItem_Click);
+            // 
+            // manageInstancesToolStripMenuItem
+            // 
+            this.manageInstancesToolStripMenuItem.Name = "manageInstancesToolStripMenuItem";
+            this.manageInstancesToolStripMenuItem.Size = new System.Drawing.Size(254, 26);
+            this.manageInstancesToolStripMenuItem.Text = "Manage Instances";
+            this.manageInstancesToolStripMenuItem.Click += new System.EventHandler(this.manageInstancesToolStripMenuItem_Click);
             // 
             // tsTime
             // 
@@ -391,6 +393,7 @@
             this.days14toolStripMenuItem,
             this.days28ToolStripMenuItem,
             this.toolStripSeparator1,
+            this.dateToolStripMenuItem,
             this.tsCustom});
             this.tsTime.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.tsTime.Image = global::DBADashGUI.Properties.Resources.Time_16x;
@@ -403,7 +406,7 @@
             // 
             this.minsToolStripMenuItem2.CheckOnClick = true;
             this.minsToolStripMenuItem2.Name = "minsToolStripMenuItem2";
-            this.minsToolStripMenuItem2.Size = new System.Drawing.Size(153, 28);
+            this.minsToolStripMenuItem2.Size = new System.Drawing.Size(224, 28);
             this.minsToolStripMenuItem2.Tag = "5";
             this.minsToolStripMenuItem2.Text = "5 Mins";
             this.minsToolStripMenuItem2.Click += new System.EventHandler(this.tsTime_Click);
@@ -412,7 +415,7 @@
             // 
             this.minsToolStripMenuItem1.CheckOnClick = true;
             this.minsToolStripMenuItem1.Name = "minsToolStripMenuItem1";
-            this.minsToolStripMenuItem1.Size = new System.Drawing.Size(153, 28);
+            this.minsToolStripMenuItem1.Size = new System.Drawing.Size(224, 28);
             this.minsToolStripMenuItem1.Tag = "10";
             this.minsToolStripMenuItem1.Text = "10 Mins";
             this.minsToolStripMenuItem1.Click += new System.EventHandler(this.tsTime_Click);
@@ -421,7 +424,7 @@
             // 
             this.minsToolStripMenuItem.CheckOnClick = true;
             this.minsToolStripMenuItem.Name = "minsToolStripMenuItem";
-            this.minsToolStripMenuItem.Size = new System.Drawing.Size(153, 28);
+            this.minsToolStripMenuItem.Size = new System.Drawing.Size(224, 28);
             this.minsToolStripMenuItem.Tag = "15";
             this.minsToolStripMenuItem.Text = "15 Mins";
             this.minsToolStripMenuItem.Click += new System.EventHandler(this.tsTime_Click);
@@ -430,7 +433,7 @@
             // 
             this.ts30Min.CheckOnClick = true;
             this.ts30Min.Name = "ts30Min";
-            this.ts30Min.Size = new System.Drawing.Size(153, 28);
+            this.ts30Min.Size = new System.Drawing.Size(224, 28);
             this.ts30Min.Tag = "30";
             this.ts30Min.Text = "30 Mins";
             this.ts30Min.Click += new System.EventHandler(this.tsTime_Click);
@@ -440,7 +443,7 @@
             this.ts1Hr.Checked = true;
             this.ts1Hr.CheckState = System.Windows.Forms.CheckState.Checked;
             this.ts1Hr.Name = "ts1Hr";
-            this.ts1Hr.Size = new System.Drawing.Size(153, 28);
+            this.ts1Hr.Size = new System.Drawing.Size(224, 28);
             this.ts1Hr.Tag = "60";
             this.ts1Hr.Text = "1Hr";
             this.ts1Hr.Click += new System.EventHandler(this.tsTime_Click);
@@ -449,7 +452,7 @@
             // 
             this.ts2Hr.CheckOnClick = true;
             this.ts2Hr.Name = "ts2Hr";
-            this.ts2Hr.Size = new System.Drawing.Size(153, 28);
+            this.ts2Hr.Size = new System.Drawing.Size(224, 28);
             this.ts2Hr.Tag = "120";
             this.ts2Hr.Text = "2Hr";
             this.ts2Hr.Click += new System.EventHandler(this.tsTime_Click);
@@ -458,7 +461,7 @@
             // 
             this.ts3Hr.CheckOnClick = true;
             this.ts3Hr.Name = "ts3Hr";
-            this.ts3Hr.Size = new System.Drawing.Size(153, 28);
+            this.ts3Hr.Size = new System.Drawing.Size(224, 28);
             this.ts3Hr.Tag = "180";
             this.ts3Hr.Text = "3Hr";
             this.ts3Hr.Click += new System.EventHandler(this.tsTime_Click);
@@ -467,7 +470,7 @@
             // 
             this.ts6Hr.CheckOnClick = true;
             this.ts6Hr.Name = "ts6Hr";
-            this.ts6Hr.Size = new System.Drawing.Size(153, 28);
+            this.ts6Hr.Size = new System.Drawing.Size(224, 28);
             this.ts6Hr.Tag = "360";
             this.ts6Hr.Text = "6Hr";
             this.ts6Hr.Click += new System.EventHandler(this.tsTime_Click);
@@ -476,7 +479,7 @@
             // 
             this.ts12Hr.CheckOnClick = true;
             this.ts12Hr.Name = "ts12Hr";
-            this.ts12Hr.Size = new System.Drawing.Size(153, 28);
+            this.ts12Hr.Size = new System.Drawing.Size(224, 28);
             this.ts12Hr.Tag = "720";
             this.ts12Hr.Text = "12Hr";
             this.ts12Hr.Click += new System.EventHandler(this.tsTime_Click);
@@ -484,7 +487,7 @@
             // dayToolStripMenuItem
             // 
             this.dayToolStripMenuItem.Name = "dayToolStripMenuItem";
-            this.dayToolStripMenuItem.Size = new System.Drawing.Size(153, 28);
+            this.dayToolStripMenuItem.Size = new System.Drawing.Size(224, 28);
             this.dayToolStripMenuItem.Tag = "1440";
             this.dayToolStripMenuItem.Text = "1 Day";
             this.dayToolStripMenuItem.Click += new System.EventHandler(this.tsTime_Click);
@@ -492,7 +495,7 @@
             // daysToolStripMenuItem
             // 
             this.daysToolStripMenuItem.Name = "daysToolStripMenuItem";
-            this.daysToolStripMenuItem.Size = new System.Drawing.Size(153, 28);
+            this.daysToolStripMenuItem.Size = new System.Drawing.Size(224, 28);
             this.daysToolStripMenuItem.Tag = "2880";
             this.daysToolStripMenuItem.Text = "2 Days";
             this.daysToolStripMenuItem.Click += new System.EventHandler(this.tsTime_Click);
@@ -500,7 +503,7 @@
             // daysToolStripMenuItem1
             // 
             this.daysToolStripMenuItem1.Name = "daysToolStripMenuItem1";
-            this.daysToolStripMenuItem1.Size = new System.Drawing.Size(153, 28);
+            this.daysToolStripMenuItem1.Size = new System.Drawing.Size(224, 28);
             this.daysToolStripMenuItem1.Tag = "4320";
             this.daysToolStripMenuItem1.Text = "3 Days";
             this.daysToolStripMenuItem1.Click += new System.EventHandler(this.tsTime_Click);
@@ -508,7 +511,7 @@
             // days7ToolStripMenuItem
             // 
             this.days7ToolStripMenuItem.Name = "days7ToolStripMenuItem";
-            this.days7ToolStripMenuItem.Size = new System.Drawing.Size(153, 28);
+            this.days7ToolStripMenuItem.Size = new System.Drawing.Size(224, 28);
             this.days7ToolStripMenuItem.Tag = "10080";
             this.days7ToolStripMenuItem.Text = "7 Days";
             this.days7ToolStripMenuItem.Click += new System.EventHandler(this.tsTime_Click);
@@ -516,7 +519,7 @@
             // days14toolStripMenuItem
             // 
             this.days14toolStripMenuItem.Name = "days14toolStripMenuItem";
-            this.days14toolStripMenuItem.Size = new System.Drawing.Size(153, 28);
+            this.days14toolStripMenuItem.Size = new System.Drawing.Size(224, 28);
             this.days14toolStripMenuItem.Tag = "20160";
             this.days14toolStripMenuItem.Text = "14 Days";
             this.days14toolStripMenuItem.Click += new System.EventHandler(this.tsTime_Click);
@@ -524,7 +527,7 @@
             // days28ToolStripMenuItem
             // 
             this.days28ToolStripMenuItem.Name = "days28ToolStripMenuItem";
-            this.days28ToolStripMenuItem.Size = new System.Drawing.Size(153, 28);
+            this.days28ToolStripMenuItem.Size = new System.Drawing.Size(224, 28);
             this.days28ToolStripMenuItem.Tag = "40320";
             this.days28ToolStripMenuItem.Text = "28 Days";
             this.days28ToolStripMenuItem.Click += new System.EventHandler(this.tsTime_Click);
@@ -532,12 +535,28 @@
             // toolStripSeparator1
             // 
             this.toolStripSeparator1.Name = "toolStripSeparator1";
-            this.toolStripSeparator1.Size = new System.Drawing.Size(150, 6);
+            this.toolStripSeparator1.Size = new System.Drawing.Size(221, 6);
+            // 
+            // dateToolStripMenuItem
+            // 
+            this.dateToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.dummyToolStripMenuItem});
+            this.dateToolStripMenuItem.Name = "dateToolStripMenuItem";
+            this.dateToolStripMenuItem.Size = new System.Drawing.Size(224, 28);
+            this.dateToolStripMenuItem.Tag = "Date";
+            this.dateToolStripMenuItem.Text = "Date";
+            this.dateToolStripMenuItem.DropDownOpening += new System.EventHandler(this.dateToolStripMenuItem_Opening);
+            // 
+            // dummyToolStripMenuItem
+            // 
+            this.dummyToolStripMenuItem.Name = "dummyToolStripMenuItem";
+            this.dummyToolStripMenuItem.Size = new System.Drawing.Size(224, 28);
+            this.dummyToolStripMenuItem.Text = "Dummy";
             // 
             // tsCustom
             // 
             this.tsCustom.Name = "tsCustom";
-            this.tsCustom.Size = new System.Drawing.Size(153, 28);
+            this.tsCustom.Size = new System.Drawing.Size(224, 28);
             this.tsCustom.Tag = "-1";
             this.tsCustom.Text = "Custom";
             this.tsCustom.Click += new System.EventHandler(this.tsCustomTime_Click);
@@ -554,7 +573,7 @@
             // aboutToolStripMenuItem
             // 
             this.aboutToolStripMenuItem.Name = "aboutToolStripMenuItem";
-            this.aboutToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            this.aboutToolStripMenuItem.Size = new System.Drawing.Size(133, 26);
             this.aboutToolStripMenuItem.Text = "About";
             this.aboutToolStripMenuItem.Click += new System.EventHandler(this.aboutToolStripMenuItem_Click);
             // 
@@ -1156,8 +1175,8 @@
             this.collectionErrors1.AckErrors = false;
             this.collectionErrors1.Days = 0;
             this.collectionErrors1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.collectionErrors1.InstanceID = 0;
             this.collectionErrors1.InstanceGroupName = null;
+            this.collectionErrors1.InstanceID = 0;
             this.collectionErrors1.Location = new System.Drawing.Point(3, 3);
             this.collectionErrors1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.collectionErrors1.Name = "collectionErrors1";
@@ -2314,5 +2333,7 @@
         private System.Windows.Forms.Label lblSQLMonitoring;
         private System.Windows.Forms.Label lblVersion;
         private System.Windows.Forms.ToolStripMenuItem freezeKeyColumnsToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem dateToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem dummyToolStripMenuItem;
     }
 }
