@@ -224,7 +224,14 @@ namespace DBADashGUI.Performance
         {
             Common.StyleGrid(ref dgv);
             addHistCols(dgv, "col");
-            loadSavedView();
+            try 
+            { 
+                loadSavedView();
+            }
+            catch (System.Configuration.SettingsPropertyNotFoundException)
+            {
+                // Design time error we can ignore
+            }
         }
 
         private void addHistCols(DataGridView dgv, string prefix)
