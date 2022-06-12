@@ -751,13 +751,20 @@ namespace DBADashGUI.Performance
         private void RunningQueries_Load(object sender, EventArgs e)
         {
             tsEditLimit.LinkColor = DashColors.LinkColor;
-            // Ensure max rows is set to a value greater than 0
-            if (Properties.Settings.Default.RunningQueriesSummaryMaxRows <= 0)
+            try
             {
-                Properties.Settings.Default.RunningQueriesSummaryMaxRows = 100;
-                Properties.Settings.Default.Save();
+                // Ensure max rows is set to a value greater than 0
+                if (Properties.Settings.Default.RunningQueriesSummaryMaxRows <= 0)
+                {
+                    Properties.Settings.Default.RunningQueriesSummaryMaxRows = 100;
+                    Properties.Settings.Default.Save();
+                }
+                updateRowLimit();
             }
-            updateRowLimit();
+            catch (System.Configuration.SettingsPropertyNotFoundException)
+            {
+                // Design time error we can ignore
+            }            
         }
 
         private void updateRowLimit()
