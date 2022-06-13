@@ -426,7 +426,6 @@ namespace DBADashGUI.Performance
             // 
             // splitContainer1
             // 
-            this.splitContainer1.Cursor = System.Windows.Forms.Cursors.HSplit;
             this.splitContainer1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.splitContainer1.Location = new System.Drawing.Point(0, 27);
             this.splitContainer1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
