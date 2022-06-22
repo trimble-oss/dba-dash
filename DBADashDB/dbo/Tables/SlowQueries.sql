@@ -17,7 +17,6 @@
     Uniqueifier SMALLINT NOT NULL,
     session_id INT NULL,
     CONSTRAINT PK_SlowQueries PRIMARY KEY CLUSTERED (InstanceID ASC, timestamp ASC, Uniqueifier ASC) ON PS_SlowQueries([timestamp]),
-    CONSTRAINT FK_SlowQueries_Databases FOREIGN KEY (DatabaseID) REFERENCES dbo.Databases (DatabaseID),
     CONSTRAINT FK_SlowQueries_Instances FOREIGN KEY (InstanceID) REFERENCES dbo.Instances (InstanceID)
 ) ON PS_SlowQueries (timestamp);
 

@@ -14,7 +14,6 @@ INSERT INTO @PartitionedTables
 VALUES -- Daily Partitions
 	('Waits','d',14),
 	('CPU','d',14),
-	('BlockingSnapshot','d',14),
 	('AzureDBResourceStats','d',14),
 	('AzureDBElasticPoolResourceStats','d',14),
 	('ObjectExecutionStats','d',14),

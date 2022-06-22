@@ -34,6 +34,7 @@
     <AllowSnapshotIsolation>True</AllowSnapshotIsolation>
     <CompatibilityMode>130</CompatibilityMode>
     <TargetFrameworkProfile />
+    <AutoUpdateStatisticsAsynchronously>True</AutoUpdateStatisticsAsynchronously>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <BuildScriptName>$(MSBuildProjectName).sql</BuildScriptName>
@@ -219,10 +220,6 @@
     <Build Include="Report\Stored Procedures\AWSDriver_Get.sql" />
     <Build Include="Report\Stored Procedures\Drivers_Get.sql" />
     <Build Include="dbo\Tables\BlockingSnapshotSummary.sql" />
-    <Build Include="dbo\Tables\BlockingSnapshot.sql" />
-    <Build Include="dbo\Stored Procedures\BlockingSnapshot_Upd.sql" />
-    <Build Include="dbo\User Defined Types\BlockingSnapshot.sql" />
-    <Build Include="dbo\Functions\BlockingSnapshotRecursiveStats.sql" />
     <Build Include="Report\Stored Procedures\BlockingSummary.sql" />
     <Build Include="Report\Stored Procedures\Blocking.sql" />
     <Build Include="Staging\Tables\IOStats.sql" />
@@ -254,14 +251,11 @@
     <Build Include="Security\Switch.sql" />
     <Build Include="Switch\Tables\Waits.sql" />
     <Build Include="Switch\Tables\CPU.sql" />
-    <Build Include="Switch\Tables\BlockingSnapshot.sql" />
     <Build Include="dbo\Tables\DataRetention.sql" />
     <Build Include="Storage\PF_Waits.sql" />
     <Build Include="Storage\PF_CPU.sql" />
-    <Build Include="Storage\PF_BlockingSnapshot.sql" />
     <Build Include="Storage\PS_Waits.sql" />
     <Build Include="Storage\PS_CPU.sql" />
-    <Build Include="Storage\PS_BlockingSnapshot.sql" />
     <Build Include="dbo\Stored Procedures\PurgeData.sql" />
     <Build Include="dbo\Tables\OSLoadedModules.sql" />
     <Build Include="dbo\Tables\DBTuningOptionsHistory.sql" />
@@ -648,6 +642,31 @@
     <Build Include="dbo\Stored Procedures\InstanceAlias_Upd.sql" />
     <Build Include="dbo\Stored Procedures\CounterThresholds_Upd.sql" />
     <Build Include="dbo\Stored Procedures\CounterThresholds_Get.sql" />
+    <Build Include="dbo\Stored Procedures\AzureDBElasticPoolResourceStats_Del.sql" />
+    <Build Include="dbo\Stored Procedures\AzureDBElasticPoolResourceStats_60MIN_Del.sql" />
+    <Build Include="dbo\Stored Procedures\AzureDBResourceStats_60MIN_Del.sql" />
+    <Build Include="dbo\Stored Procedures\AzureDBResourceStats_Del.sql" />
+    <Build Include="dbo\Stored Procedures\CPU_Del.sql" />
+    <Build Include="dbo\Stored Procedures\CPU_60MIN_Del.sql" />
+    <Build Include="dbo\Stored Procedures\DBIOStats_Del.sql" />
+    <Build Include="dbo\Stored Procedures\DBIOStats_60MIN_Del.sql" />
+    <Build Include="dbo\Stored Procedures\JobStats_60MIN_Del.sql" />
+    <Build Include="dbo\Stored Procedures\MemoryUsage_Del.sql" />
+    <Build Include="dbo\Stored Procedures\ObjectExecutionStats_Del.sql" />
+    <Build Include="dbo\Stored Procedures\ObjectExecutionStats_60MIN_Del.sql" />
+    <Build Include="dbo\Stored Procedures\PerformanceCounters_Del.sql" />
+    <Build Include="dbo\Stored Procedures\PerformanceCounters_60MIN_Del.sql" />
+    <Build Include="dbo\Stored Procedures\RunningQueries_Del.sql" />
+    <Build Include="dbo\Stored Procedures\RunningQueriesSummary_Del.sql" />
+    <Build Include="dbo\Stored Procedures\SessionWaits_Del.sql" />
+    <Build Include="dbo\Stored Procedures\SlowQueries_Del.sql" />
+    <Build Include="dbo\Stored Procedures\SlowQueriesStats_Del.sql" />
+    <Build Include="dbo\Stored Procedures\Waits_Del.sql" />
+    <Build Include="dbo\Stored Procedures\Waits_60MIN_Del.sql" />
+    <Build Include="dbo\Stored Procedures\DBFileSnapshot_Del.sql" />
+    <Build Include="dbo\Stored Procedures\DriveSnapshot_Del.sql" />
+    <Build Include="dbo\Stored Procedures\PurgeBlockingSnapshotSummary.sql" />
+    <Build Include="dbo\Stored Procedures\BlockingSnapshotSummary_Del.sql" />
   </ItemGroup>
   <ItemGroup>
     <PostDeploy Include="Script.PostDeployment1.sql" />

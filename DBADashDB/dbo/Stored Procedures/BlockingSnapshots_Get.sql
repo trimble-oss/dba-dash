@@ -28,13 +28,7 @@ WHERE SS.InstanceID = @InstanceID
 AND SS.SnapshotDateUTC>=@FromDate
 AND SS.SnapshotDateUTC<@ToDate
 ' + CASE WHEN @DatabaseID IS NULL THEN '' 
-	ELSE 'AND EXISTS(SELECT 1 
-					FROM dbo.BlockingSnapshot BSS
-					JOIN dbo.Databases D ON D.database_id = BSS.database_id
-					WHERE BSS.BlockingSnapshotID = SS.BlockingSnapshotID
-					AND D.DatabaseID = @DatabaseID
-					UNION All
-					SELECT 1
+	ELSE 'AND EXISTS(SELECT 1
 					FROM dbo.RunningQueries Q
 					JOIN dbo.Databases D ON Q.InstanceID = D.InstanceID AND D.database_id = Q.database_id
 					WHERE Q.InstanceID = @InstanceID

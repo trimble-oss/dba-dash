@@ -9,6 +9,7 @@
 * [I get a 'Operation will cause database event session memory to exceed allowed limit.' error on AzureDB](#i-get-a-operation-will-cause-database-event-session-memory-to-exceed-allowed-limit-error-on-azuredb)
 * [The stored procedure names are not showing](#the-stored-procedure-names-are-not-showing)
 * [How do I get notifications of new releases?](#how-do-i-get-notifications-of-new-releases)
+* [How do I remove an instance?](#how-do-i-remove-an-instance)
 
 ## I Found a bug
 
@@ -56,3 +57,35 @@ Object names might display as {object_id:1234567}.  This can occur if the DBA Da
 ## How do I get notifications of new releases?
 
 Click the GitHub "Watch" button at the top of this page.  A drop down will appear.  Select "Custom".  Check "Releases" and click apply - this will only notify you when releases are published.  
+
+## How do I remove an Instance?
+
+* First remove the instance from the service config tool to prevent data from been collected for the instance.
+* In the GUI, go to "Options\Manage Instances".  Find the instance and click "Mark Deleted".
+
+The mark deleted is a soft delete operation that will hide the instance from display.  It's possible to click "Restore" to undo this operation.  If you want to remove the instance completely, this is a more resource intensive operation. You can complete this operation in SSMS:
+
+Note: You must wait at least 24hrs after stopping the collection for an instance before you can perform a hard delete.
+
+```SQL
+/*  Find InstanceID:
+    SELECT InstanceID FROM dbo.Instances WHERE InstanceName ='' 
+*/
+EXEC dbo.Instance_Del @InstanceID = ???, @HardDelete = 1
+
+/* 
+    This script will provide the command to hard delete each instance marked deleted
+    This takes into account the 24hr waiting period since the last collection date.
+*/
+SELECT	I.InstanceDisplayName,
+		I.Instance, 
+		CONCAT('EXEC dbo.Instance_Del @InstanceID = ',InstanceID,', @HardDelete = 1') AS DeleteCommand
+FROM dbo.Instances I
+WHERE IsActive=0
+AND NOT EXISTS(SELECT 1 
+				FROM dbo.CollectionDates CD 
+				WHERE CD.InstanceID = I.InstanceID 
+				AND CD.SnapshotDate> DATEADD(d,-1,GETUTCDATE())
+				)
+```
+

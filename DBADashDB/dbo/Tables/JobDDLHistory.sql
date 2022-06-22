@@ -10,3 +10,5 @@
     CONSTRAINT [FK_JobDDLHistory_Instances] FOREIGN KEY ([InstanceID]) REFERENCES [dbo].[Instances] ([InstanceID])
 );
 
+GO
+CREATE NONCLUSTERED INDEX IX_JobDDLHistory_DDLID ON dbo.JobDDLHistory(DDLID)
