@@ -1125,7 +1125,6 @@ FROM (VALUES('ObjectExecutionStats',120),
 				('Waits',120),
 				('DBIOStats',120),
 				('CPU',365),
-				('BlockingSnapshot',120),
 				('SlowQueries',120),
 				('AzureDBElasticPoolResourceStats',120),
 				('AzureDBResourceStats',120),
@@ -1588,7 +1587,9 @@ FROM (VALUES('PurgeCollectionErrorLog_StartDate'),
 			('PurgeQueryPlans_CompletedDate'),
 			('PurgePartitions_StartDate'),
 			('PurgePartitions_CompletedDate'),
-			('MemoryDumpAckDate')
+			('MemoryDumpAckDate'),
+			('PurgeBlockingSnapshotSummary_CompletedDate'),
+			('PurgeBlockingSnapshotSummary_StartDate')
 	  ) T(SettingName)
 WHERE NOT EXISTS(SELECT 1 
 				FROM dbo.Settings S
@@ -1799,3 +1800,4 @@ WHEN NOT MATCHED BY TARGET THEN
 INSERT(object_name,counter_name,instance_name,SystemCriticalFrom,SystemCriticalTo,SystemWarningFrom,SystemWarningTo,SystemGoodFrom,SystemGoodTo)
 VALUES(object_name,counter_name,instance_name,SystemCriticalFrom,SystemCriticalTo,SystemWarningFrom,SystemWarningTo,SystemGoodFrom,SystemGoodTo);
 
+ALTER DATABASE [$(DatabaseName)] SET AUTO_UPDATE_STATISTICS_ASYNC ON WITH NO_WAIT

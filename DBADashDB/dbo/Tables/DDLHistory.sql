@@ -19,3 +19,7 @@ CREATE NONCLUSTERED INDEX [IX_DDLHistory_DatabaseID_SnapshotValidTo]
     ON [dbo].[DDLHistory]([DatabaseID] ASC, [SnapshotValidTo] ASC, [SnapshotValidFrom] ASC)
     INCLUDE([ObjectID], [DDLID]);
 
+GO
+CREATE NONCLUSTERED INDEX IX_DDLHistory_ObjectID ON dbo.DDLHistory(ObjectID)
+GO
+CREATE NONCLUSTERED INDEX IX_DDLHistory_DDLID ON dbo.DDLHistory(DDLID)

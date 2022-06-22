@@ -107,3 +107,22 @@ END
 BEGIN
 	PRINT 'Skipping QueryText (Ran withing last 24hrs)'
 END
+
+/* Remove old data from BlockingSnapshotSummary table.  Run once per day */
+UPDATE dbo.Settings
+	SET SettingValue = GETUTCDATE()
+WHERE SettingName = 'PurgeBlockingSnapshotSummary_StartDate'
+AND SettingValue < DATEADD(d,-1,GETUTCDATE())
+
+IF @@ROWCOUNT =1
+BEGIN
+	PRINT 'Cleanup QueryText'
+	EXEC dbo.PurgeBlockingSnapshotSummary
+
+	UPDATE dbo.Settings
+		SET SettingValue = GETUTCDATE()
+	WHERE SettingName = 'PurgeBlockingSnapshotSummary_CompletedDate'
+END
+BEGIN
+	PRINT 'Skipping BlockingSnapshotSummary (Ran withing last 24hrs)'
+END

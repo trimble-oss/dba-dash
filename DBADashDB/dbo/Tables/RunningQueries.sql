@@ -32,3 +32,7 @@
     login_time_utc DATETIME NULL,
     CONSTRAINT PK_RunningQueries PRIMARY KEY(InstanceID,SnapshotDateUTC,session_id) WITH (DATA_COMPRESSION = PAGE) ON PS_RunningQueries(SnapshotDateUTC)
 ) ON PS_RunningQueries(SnapshotDateUTC);
+GO
+CREATE NONCLUSTERED INDEX IX_RunningQueries_sql_handle ON dbo.RunningQueries(sql_handle)
+GO
+CREATE NONCLUSTERED INDEX IX_RunningQueries_query_plan_hash ON dbo.RunningQueries(query_plan_hash,plan_handle,statement_start_offset,statement_end_offset)

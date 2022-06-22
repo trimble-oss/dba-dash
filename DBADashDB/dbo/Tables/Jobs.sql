@@ -34,3 +34,5 @@
     CONSTRAINT [FK_Jobs_Instances] FOREIGN KEY ([InstanceID]) REFERENCES [dbo].[Instances] ([InstanceID])
 );
 
+GO
+CREATE NONCLUSTERED INDEX IX_Jobs_DDLID ON dbo.Jobs(DDLID)
