@@ -67,7 +67,8 @@ SELECT Q.InstanceID,
 	CASE WHEN waitR.wait_database_id=2 THEN 'tempdb' ELSE waitD.name END AS wait_db,
 	waitO.SchemaName + '.' + waitO.ObjectName AS wait_object,
 	waitF.filegroup_name + ' | ' + waitF.name AS wait_file,
-    Q.login_time_utc
+    Q.login_time_utc,
+    CASE WHEN QP.query_plan_compresed IS NULL THEN CAST(0 AS BIT) ELSE CAST(1 AS BIT) END AS has_plan
 FROM dbo.RunningQueries Q 
 CROSS APPLY(SELECT CASE WHEN Q.start_time_utc < Q.SnapshotDateUTC OR Q.start_time_utc IS NULL  THEN DATEDIFF_BIG(ms,ISNULL(Q.start_time_utc,Q.last_request_start_time_utc),Q.SnapshotDateUTC) ELSE 0 END AS Duration) calc
 CROSS APPLY dbo.MillisecondsToHumanDuration (calc.Duration) HD

@@ -95,7 +95,8 @@ SELECT InstanceID,
        wait_db,
        wait_object,
        wait_file,
-       login_time_utc     
+       login_time_utc,
+       has_plan
 FROM dbo.RunningQueriesInfo Q
 WHERE Q.SnapshotDateUTC = @SnapshotDate
 AND Q.InstanceID = @InstanceID
