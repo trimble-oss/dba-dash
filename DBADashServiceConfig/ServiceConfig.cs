@@ -301,7 +301,8 @@ namespace DBADashServiceConfig
             dgvConnections.Columns.Add(new DataGridViewCheckBoxColumn() { DataPropertyName = "UseDualEventSession", HeaderText = "Use Dual Event Session" });
             dgvConnections.Columns.Add(new DataGridViewCheckBoxColumn() { DataPropertyName = "PersistXESessions", HeaderText = "Persist XE Sessions" });
             dgvConnections.Columns.Add(new DataGridViewTextBoxColumn() { DataPropertyName = "SchemaSnapshotDBs", HeaderText = "Schema Snapshot DBs" });
-            dgvConnections.Columns.Add(new DataGridViewTextBoxColumn() { DataPropertyName = "SlowQuerySessionMaxMemoryKB", HeaderText = "Slow Query Session Max Memory (KB)" });
+            dgvConnections.Columns.Add(new DataGridViewTextBoxColumn() { DataPropertyName = "SlowQuerySessionMaxMemoryKB", HeaderText = "Slow Query Session Max Memory (KB)", ToolTipText= "Max amount of memory to allocate for event buffering." });
+            dgvConnections.Columns.Add(new DataGridViewTextBoxColumn() { DataPropertyName = "SlowQueryTargetMaxMemoryKB", HeaderText = "Slow Query Target Max Memory (KB)", ToolTipText="Max memory target parameter for ring_buffer" });
             dgvConnections.Columns.Add(new DataGridViewCheckBoxColumn() { DataPropertyName = "CollectSessionWaits", HeaderText = "Collect Session Waits", ToolTipText = "Collect Session Waits for Running Queries" });
             dgvConnections.Columns.Add(new DataGridViewCheckBoxColumn() { DataPropertyName = "PlanCollectionEnabled", HeaderText = "Running Query Plan Collection" });
             dgvConnections.Columns.Add(new DataGridViewTextBoxColumn() { DataPropertyName = "PlanCollectionCPUThreshold", HeaderText = "Plan Collection CPU Threshold" });

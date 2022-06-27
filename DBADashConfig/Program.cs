@@ -98,6 +98,7 @@ try
                   }
                   source.SlowQueryThresholdMs = o.SlowQueryThresholdMs;
                   source.SlowQuerySessionMaxMemoryKB = o.SlowQuerySessionMaxMemoryKB;
+                  source.SlowQueryTargetMaxMemoryKB = o.SlowQueryTargetMaxMemoryKB;
                   if (!o.SkipValidation)
                   {
                       Log.Information("Validating connection...");

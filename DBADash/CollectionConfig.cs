@@ -358,18 +358,10 @@ namespace DBADash
                 while (rdr.Read())
                 {
                     builder.InitialCatalog = rdr.GetString(0);
-                    DBADashSource dbCn = new DBADashSource(builder.ConnectionString)
-                    {
-                        CollectionSchedules = masterConnection.CollectionSchedules,
-                        SlowQueryThresholdMs = masterConnection.SlowQueryThresholdMs,
-                        SlowQuerySessionMaxMemoryKB = masterConnection.SlowQuerySessionMaxMemoryKB,
-                        UseDualEventSession = masterConnection.UseDualEventSession,
-                        RunningQueryPlanThreshold = masterConnection.RunningQueryPlanThreshold
-                    };
-                    if (masterConnection.SchemaSnapshotDBs == "*")
-                    {
-                        dbCn.SchemaSnapshotDBs = masterConnection.SchemaSnapshotDBs;
-                    }
+                    DBADashSource dbCn = masterConnection.DeepCopy();
+                    dbCn.SourceConnection.ConnectionString = builder.ConnectionString;
+                    dbCn.ConnectionID = string.Empty;
+
                     if (!SourceExists(dbCn.SourceConnection.ConnectionString,true))
                     {
                         newConnections.Add(dbCn);

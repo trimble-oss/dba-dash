@@ -15,6 +15,7 @@ namespace DBADash
         private string schemaSnapshotDBs;
         private bool noWMI;
         private Int32 slowQuerySessionMaxMemoryKB = 4096;
+        private Int32 slowQueryTargetMaxMemoryKB = -1;
         private bool persistXESessions = false;
         private bool useDualXESesion = true;
 
@@ -272,6 +273,25 @@ namespace DBADash
             set {            
                     slowQuerySessionMaxMemoryKB = value;
             } 
+        }
+
+        public Int32 SlowQueryTargetMaxMemoryKB
+        {
+            get
+            {
+                if (SourceConnection != null && SourceConnection.Type == ConnectionType.SQL)
+                {
+                    return slowQueryTargetMaxMemoryKB;
+                }
+                else
+                {
+                    return 0;
+                }
+            }
+            set
+            {
+                slowQueryTargetMaxMemoryKB = value;
+            }
         }
 
         [DefaultValue(true)]

@@ -990,6 +990,7 @@ CROSS APPLY sys.dm_exec_sql_text(H.sql_handle) txt");
                         cmd.Parameters.AddWithValue("SlowQueryThreshold", Source.SlowQueryThresholdMs * 1000);
                         cmd.Parameters.AddWithValue("MaxMemory",Source.SlowQuerySessionMaxMemoryKB);
                         cmd.Parameters.AddWithValue("UseDualSession", Source.UseDualEventSession);
+                        cmd.Parameters.AddWithValue("MaxTargetMemory", Source.SlowQueryTargetMaxMemoryKB);
                         var result = cmd.ExecuteScalar();
                         if (result == DBNull.Value)
                         {
