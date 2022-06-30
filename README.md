@@ -14,7 +14,7 @@ DBA Dash is a tool for SQL Server DBAs to assist with daily checks, performance 
 - Availability Groups, Log Shipping, Mirroring
 - [OS Performance Counters + Custom Metrics](Docs/OSPerformanceCounters.md)
 - Stored Procedure/Function/Trigger execution stats
-- Capture slow queries (Extended Event trace)
+- [Capture slow queries](Docs/SlowQueries.md) (Extended Event trace)
 - Azure DB monitoring
 - Track changes to configuration, SQL Patching, drivers etc.
 - [Schema change tracking](Docs/SchemaSnapshots.md). 
@@ -169,5 +169,6 @@ If you chose to use a local folder instead of an S3 bucket then you would need t
 - [FAQ](Docs/FAQ.md)
 - [OS Performance Counters](Docs/OSPerformanceCounters.md)
 - [Running Queries](Docs/RunningQueries.md)
+- [Slow Queries](Docs/SlowQueries.md)
 - [Schema Snapshots](Docs/SchemaSnapshots.md)
 - [Security](Docs/Security.md)
