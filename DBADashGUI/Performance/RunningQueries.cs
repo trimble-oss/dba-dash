@@ -60,7 +60,8 @@ namespace DBADashGUI.Performance
                     new DataGridViewLinkColumn() { HeaderText = "Top Session Waits", DataPropertyName = "TopSessionWaits", Name = "colTopSessionWaits", AutoSizeMode = DataGridViewAutoSizeColumnMode.None, Width = 50, SortMode = DataGridViewColumnSortMode.Automatic , LinkColor = DashColors.LinkColor},
                     new DataGridViewTextBoxColumn() { HeaderText = "Object ID", DataPropertyName = "object_id", SortMode = DataGridViewColumnSortMode.Automatic, MinimumWidth = 40 },
                     new DataGridViewTextBoxColumn() { HeaderText = "Object Name", DataPropertyName = "object_name", SortMode = DataGridViewColumnSortMode.Automatic, MinimumWidth = 40 },
-                    new DataGridViewTextBoxColumn() { HeaderText = "Snapshot Date", DataPropertyName = "SnapshotDate", SortMode = DataGridViewColumnSortMode.Automatic, MinimumWidth = 40 },
+                    new DataGridViewTextBoxColumn() { Name="colSnapshotDate", HeaderText = "Snapshot Date", DataPropertyName = "SnapshotDate", SortMode = DataGridViewColumnSortMode.Automatic, MinimumWidth = 40 },
+                    new DataGridViewLinkColumn { Name="colSnapshotDateLink", HeaderText = "Snapshot Date", DataPropertyName = "SnapshotDate", SortMode = DataGridViewColumnSortMode.Automatic, MinimumWidth = 40, Visible=false,LinkColor=DashColors.LinkColor },
                     new DataGridViewTextBoxColumn() { HeaderText = "% Complete", DataPropertyName = "percent_complete", SortMode = DataGridViewColumnSortMode.Automatic, DefaultCellStyle = Common.DataGridViewNumericCellStyle, MinimumWidth = 60 },
                     new DataGridViewTextBoxColumn() { HeaderText = "Open Transaction Count", DataPropertyName = "open_transaction_count", SortMode = DataGridViewColumnSortMode.Automatic, DefaultCellStyle = Common.DataGridViewNumericCellStyle, MinimumWidth = 60 },
                     new DataGridViewTextBoxColumn() { HeaderText = "Transaction Isolation Level", DataPropertyName = "transaction_isolation_level", SortMode = DataGridViewColumnSortMode.Automatic, MinimumWidth = 40  },
@@ -139,6 +140,8 @@ namespace DBADashGUI.Performance
                 snapshotDT = runningQueriesForSession(SessionID, SnapshotDateFrom, SnapshotDateTo, InstanceID);
                 getCounts();
                 loadSnapshot(new DataView(snapshotDT));
+                dgv.Columns["colSnapshotDate"].Visible = false;
+                dgv.Columns["colSnapshotDateLink"].Visible = true;
             }
             else if (SnapshotDateFrom== SnapshotDateTo && InstanceID>0 && SnapshotDateFrom> DateTime.MinValue) // Show a specific blocking snapshot (e.g. Blocking chart drill down)
             {
@@ -432,6 +435,16 @@ namespace DBADashGUI.Performance
                 {
                     showBlocking(Convert.ToInt16(dgv.Rows[e.RowIndex].Cells["colSessionID"].Value),true);
                 }
+                else if (dgv.Columns[e.ColumnIndex].Name == "colSnapshotDateLink")
+                {
+                    var frm = new RunningQueriesViewer()
+                    {
+                        InstanceID = InstanceID,
+                        SnapshotDateFrom = Convert.ToDateTime(row["SnapshotDate"]).ToUniversalTime(),
+                        SnapshotDateTo = Convert.ToDateTime(row["SnapshotDate"]).ToUniversalTime()
+                    };
+                    frm.Show(this);
+                }              
             }
         }
 
