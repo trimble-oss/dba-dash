@@ -19,6 +19,7 @@ namespace DBADashGUI
         public static string ConnectionString;
         public static readonly string JsonConfigPath = System.IO.Path.Combine(Application.StartupPath, "ServiceConfig.json");
         public static bool FreezeKeyColumn = true;
+        public static bool IsApplicationRunning = false; /* Set to true if App is running - used to detect design time mode */
 
         public static Dictionary<Int32, string> DateGroups = new Dictionary<Int32, string>() {
                 {0,"None" },

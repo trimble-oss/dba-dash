@@ -17,6 +17,7 @@ namespace DBADashGUI
         [STAThread]
         static void Main(string[] args)
         {
+            Common.IsApplicationRunning = true;
             Parser.Default.ParseArguments<CommandLineOptions>(args)
        .WithParsed<CommandLineOptions>(o =>
        {
