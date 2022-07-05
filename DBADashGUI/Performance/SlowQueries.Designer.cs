@@ -81,6 +81,7 @@
             this.appToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.clientToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.databaseNameToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.eventTypeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.instanceToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.objectNameToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.resultToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
@@ -89,23 +90,78 @@
             this.usernameToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.tsFilter = new System.Windows.Forms.ToolStripDropDownButton();
             this.lblApp = new System.Windows.Forms.ToolStripMenuItem();
+            this.lblIncludeApp = new System.Windows.Forms.ToolStripMenuItem();
             this.txtApp = new System.Windows.Forms.ToolStripTextBox();
+            this.lblExcludeApp = new System.Windows.Forms.ToolStripMenuItem();
+            this.txtExcludeApp = new System.Windows.Forms.ToolStripTextBox();
             this.lblClient = new System.Windows.Forms.ToolStripMenuItem();
+            this.lblIncludeClient = new System.Windows.Forms.ToolStripMenuItem();
             this.txtClient = new System.Windows.Forms.ToolStripTextBox();
+            this.lblExcludeClient = new System.Windows.Forms.ToolStripMenuItem();
+            this.txtExcludeClient = new System.Windows.Forms.ToolStripTextBox();
+            this.lblCPU = new System.Windows.Forms.ToolStripMenuItem();
+            this.lblCPUFrom = new System.Windows.Forms.ToolStripMenuItem();
+            this.txtCPUFrom = new System.Windows.Forms.ToolStripTextBox();
+            this.lblCPUTo = new System.Windows.Forms.ToolStripMenuItem();
+            this.txtCPUTo = new System.Windows.Forms.ToolStripTextBox();
             this.lblDatabase = new System.Windows.Forms.ToolStripMenuItem();
+            this.lblIncludeDatabase = new System.Windows.Forms.ToolStripMenuItem();
             this.txtDatabase = new System.Windows.Forms.ToolStripTextBox();
+            this.lblExcludeDatabase = new System.Windows.Forms.ToolStripMenuItem();
+            this.txtExcludeDatabase = new System.Windows.Forms.ToolStripTextBox();
+            this.lblDuration = new System.Windows.Forms.ToolStripMenuItem();
+            this.lblDurationFrom = new System.Windows.Forms.ToolStripMenuItem();
+            this.txtDurationFrom = new System.Windows.Forms.ToolStripTextBox();
+            this.lblDurationTo = new System.Windows.Forms.ToolStripMenuItem();
+            this.txtDurationTo = new System.Windows.Forms.ToolStripTextBox();
             this.lblInstance = new System.Windows.Forms.ToolStripMenuItem();
+            this.lblIncludeInstance = new System.Windows.Forms.ToolStripMenuItem();
             this.txtInstance = new System.Windows.Forms.ToolStripTextBox();
+            this.lblExcludeInstance = new System.Windows.Forms.ToolStripMenuItem();
+            this.txtExcludeInstance = new System.Windows.Forms.ToolStripTextBox();
+            this.lblLogicalReads = new System.Windows.Forms.ToolStripMenuItem();
+            this.lblLogicalReadsFrom = new System.Windows.Forms.ToolStripMenuItem();
+            this.txtLogicalReadsFrom = new System.Windows.Forms.ToolStripTextBox();
+            this.lblLogicalReadsTo = new System.Windows.Forms.ToolStripMenuItem();
+            this.txtLogicalReadsTo = new System.Windows.Forms.ToolStripTextBox();
             this.lblObject = new System.Windows.Forms.ToolStripMenuItem();
+            this.lblIncludeObject = new System.Windows.Forms.ToolStripMenuItem();
             this.txtObject = new System.Windows.Forms.ToolStripTextBox();
+            this.lblExcludeObject = new System.Windows.Forms.ToolStripMenuItem();
+            this.txtExcludeObject = new System.Windows.Forms.ToolStripTextBox();
+            this.lblPhysicalReads = new System.Windows.Forms.ToolStripMenuItem();
+            this.lblPhysicalReadsFrom = new System.Windows.Forms.ToolStripMenuItem();
+            this.txtPhysicalReadsFrom = new System.Windows.Forms.ToolStripTextBox();
+            this.lblPhysicalReadsTo = new System.Windows.Forms.ToolStripMenuItem();
+            this.txtPhysicalReadsTo = new System.Windows.Forms.ToolStripTextBox();
             this.lblResult = new System.Windows.Forms.ToolStripMenuItem();
+            this.lblIncludeResult = new System.Windows.Forms.ToolStripMenuItem();
             this.txtResult = new System.Windows.Forms.ToolStripTextBox();
+            this.lblExcludeResult = new System.Windows.Forms.ToolStripMenuItem();
+            this.txtExcludeResult = new System.Windows.Forms.ToolStripTextBox();
             this.lblSessionID = new System.Windows.Forms.ToolStripMenuItem();
+            this.lblIncludeSessionID = new System.Windows.Forms.ToolStripMenuItem();
             this.txtSessionID = new System.Windows.Forms.ToolStripTextBox();
+            this.lblExcludeSessionID = new System.Windows.Forms.ToolStripMenuItem();
+            this.txtExcludeSessionID = new System.Windows.Forms.ToolStripTextBox();
             this.lblText = new System.Windows.Forms.ToolStripMenuItem();
+            this.lblIncludeText = new System.Windows.Forms.ToolStripMenuItem();
             this.txtText = new System.Windows.Forms.ToolStripTextBox();
+            this.lblExcludeText = new System.Windows.Forms.ToolStripMenuItem();
+            this.txtExcludeText = new System.Windows.Forms.ToolStripTextBox();
             this.lblUser = new System.Windows.Forms.ToolStripMenuItem();
+            this.lblIncludeUser = new System.Windows.Forms.ToolStripMenuItem();
             this.txtUser = new System.Windows.Forms.ToolStripTextBox();
+            this.lblExcludeUser = new System.Windows.Forms.ToolStripMenuItem();
+            this.txtExcludeUser = new System.Windows.Forms.ToolStripTextBox();
+            this.lblWrites = new System.Windows.Forms.ToolStripMenuItem();
+            this.lblWritesFrom = new System.Windows.Forms.ToolStripMenuItem();
+            this.txtWritesFrom = new System.Windows.Forms.ToolStripTextBox();
+            this.lblWritesTo = new System.Windows.Forms.ToolStripMenuItem();
+            this.txtWritesTo = new System.Windows.Forms.ToolStripTextBox();
+            this.lblEventType = new System.Windows.Forms.ToolStripMenuItem();
+            this.rpccompletedToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.sqlbatchcompletedToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
             this.resetToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.tsTop = new System.Windows.Forms.ToolStripDropDownButton();
@@ -137,10 +193,10 @@
             this.colSessionID = new System.Windows.Forms.DataGridViewLinkColumn();
             this.colText = new System.Windows.Forms.DataGridViewLinkColumn();
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
-            this.runningQueries1 = new DBADashGUI.Performance.RunningQueries();
             this.tsRunning = new System.Windows.Forms.ToolStrip();
             this.tsRunningBack = new System.Windows.Forms.ToolStripButton();
             this.refresh1 = new DBADashGUI.Refresh();
+            this.runningQueries1 = new DBADashGUI.Performance.RunningQueries();
             this.toolStrip2 = new System.Windows.Forms.ToolStrip();
             this.tsCopyDetail = new System.Windows.Forms.ToolStripButton();
             this.tsExcelDetail = new System.Windows.Forms.ToolStripButton();
@@ -208,7 +264,7 @@
             this.dgvSummary.RowTemplate.Height = 24;
             this.dgvSummary.Size = new System.Drawing.Size(1829, 487);
             this.dgvSummary.TabIndex = 0;
-            this.dgvSummary.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgvSummary_CellContentClick);
+            this.dgvSummary.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.DgvSummary_CellContentClick);
             // 
             // Grp
             // 
@@ -413,7 +469,7 @@
             this.tsRefresh.Name = "tsRefresh";
             this.tsRefresh.Size = new System.Drawing.Size(29, 24);
             this.tsRefresh.Text = "Refresh";
-            this.tsRefresh.Click += new System.EventHandler(this.tsRefresh_Click);
+            this.tsRefresh.Click += new System.EventHandler(this.TsRefresh_Click);
             // 
             // tsGroup
             // 
@@ -422,6 +478,7 @@
             this.appToolStripMenuItem,
             this.clientToolStripMenuItem,
             this.databaseNameToolStripMenuItem,
+            this.eventTypeToolStripMenuItem,
             this.instanceToolStripMenuItem,
             this.objectNameToolStripMenuItem,
             this.resultToolStripMenuItem1,
@@ -437,7 +494,7 @@
             // appToolStripMenuItem
             // 
             this.appToolStripMenuItem.Name = "appToolStripMenuItem";
-            this.appToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            this.appToolStripMenuItem.Size = new System.Drawing.Size(199, 26);
             this.appToolStripMenuItem.Tag = "client_app_name";
             this.appToolStripMenuItem.Text = "App";
             this.appToolStripMenuItem.Click += new System.EventHandler(this.GroupBy_Click);
@@ -445,7 +502,7 @@
             // clientToolStripMenuItem
             // 
             this.clientToolStripMenuItem.Name = "clientToolStripMenuItem";
-            this.clientToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            this.clientToolStripMenuItem.Size = new System.Drawing.Size(199, 26);
             this.clientToolStripMenuItem.Tag = "client_hostname";
             this.clientToolStripMenuItem.Text = "Client";
             this.clientToolStripMenuItem.Click += new System.EventHandler(this.GroupBy_Click);
@@ -453,17 +510,25 @@
             // databaseNameToolStripMenuItem
             // 
             this.databaseNameToolStripMenuItem.Name = "databaseNameToolStripMenuItem";
-            this.databaseNameToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            this.databaseNameToolStripMenuItem.Size = new System.Drawing.Size(199, 26);
             this.databaseNameToolStripMenuItem.Tag = "DatabaseName";
             this.databaseNameToolStripMenuItem.Text = "Database Name";
             this.databaseNameToolStripMenuItem.Click += new System.EventHandler(this.GroupBy_Click);
+            // 
+            // eventTypeToolStripMenuItem
+            // 
+            this.eventTypeToolStripMenuItem.Name = "eventTypeToolStripMenuItem";
+            this.eventTypeToolStripMenuItem.Size = new System.Drawing.Size(199, 26);
+            this.eventTypeToolStripMenuItem.Tag = "EventType";
+            this.eventTypeToolStripMenuItem.Text = "Event Type";
+            this.eventTypeToolStripMenuItem.Click += new System.EventHandler(this.GroupBy_Click);
             // 
             // instanceToolStripMenuItem
             // 
             this.instanceToolStripMenuItem.Checked = true;
             this.instanceToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
             this.instanceToolStripMenuItem.Name = "instanceToolStripMenuItem";
-            this.instanceToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            this.instanceToolStripMenuItem.Size = new System.Drawing.Size(199, 26);
             this.instanceToolStripMenuItem.Tag = "InstanceDisplayName";
             this.instanceToolStripMenuItem.Text = "Instance";
             this.instanceToolStripMenuItem.Click += new System.EventHandler(this.GroupBy_Click);
@@ -471,7 +536,7 @@
             // objectNameToolStripMenuItem
             // 
             this.objectNameToolStripMenuItem.Name = "objectNameToolStripMenuItem";
-            this.objectNameToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            this.objectNameToolStripMenuItem.Size = new System.Drawing.Size(199, 26);
             this.objectNameToolStripMenuItem.Tag = "object_name";
             this.objectNameToolStripMenuItem.Text = "Object Name";
             this.objectNameToolStripMenuItem.Click += new System.EventHandler(this.GroupBy_Click);
@@ -479,7 +544,7 @@
             // resultToolStripMenuItem1
             // 
             this.resultToolStripMenuItem1.Name = "resultToolStripMenuItem1";
-            this.resultToolStripMenuItem1.Size = new System.Drawing.Size(224, 26);
+            this.resultToolStripMenuItem1.Size = new System.Drawing.Size(199, 26);
             this.resultToolStripMenuItem1.Tag = "Result";
             this.resultToolStripMenuItem1.Text = "Result";
             this.resultToolStripMenuItem1.Click += new System.EventHandler(this.GroupBy_Click);
@@ -487,7 +552,7 @@
             // sessionIDToolStripMenuItem
             // 
             this.sessionIDToolStripMenuItem.Name = "sessionIDToolStripMenuItem";
-            this.sessionIDToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            this.sessionIDToolStripMenuItem.Size = new System.Drawing.Size(199, 26);
             this.sessionIDToolStripMenuItem.Tag = "session_id";
             this.sessionIDToolStripMenuItem.Text = "Session ID";
             this.sessionIDToolStripMenuItem.Click += new System.EventHandler(this.GroupBy_Click);
@@ -495,7 +560,7 @@
             // textToolStripMenuItem
             // 
             this.textToolStripMenuItem.Name = "textToolStripMenuItem";
-            this.textToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            this.textToolStripMenuItem.Size = new System.Drawing.Size(199, 26);
             this.textToolStripMenuItem.Tag = "text";
             this.textToolStripMenuItem.Text = "Text";
             this.textToolStripMenuItem.Click += new System.EventHandler(this.GroupBy_Click);
@@ -503,187 +568,633 @@
             // usernameToolStripMenuItem
             // 
             this.usernameToolStripMenuItem.Name = "usernameToolStripMenuItem";
-            this.usernameToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            this.usernameToolStripMenuItem.Size = new System.Drawing.Size(199, 26);
             this.usernameToolStripMenuItem.Tag = "username";
             this.usernameToolStripMenuItem.Text = "Username";
             this.usernameToolStripMenuItem.Click += new System.EventHandler(this.GroupBy_Click);
             // 
             // tsFilter
             // 
-            this.tsFilter.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
             this.tsFilter.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.lblApp,
             this.lblClient,
+            this.lblCPU,
             this.lblDatabase,
+            this.lblDuration,
             this.lblInstance,
+            this.lblLogicalReads,
             this.lblObject,
+            this.lblPhysicalReads,
             this.lblResult,
             this.lblSessionID,
             this.lblText,
             this.lblUser,
+            this.lblWrites,
+            this.lblEventType,
             this.toolStripSeparator2,
             this.resetToolStripMenuItem});
             this.tsFilter.Image = global::DBADashGUI.Properties.Resources.FilterDropdown_16x;
             this.tsFilter.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsFilter.Name = "tsFilter";
-            this.tsFilter.Size = new System.Drawing.Size(34, 24);
+            this.tsFilter.Size = new System.Drawing.Size(76, 24);
             this.tsFilter.Text = "Filter";
             // 
             // lblApp
             // 
             this.lblApp.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.txtApp});
+            this.lblIncludeApp,
+            this.txtApp,
+            this.lblExcludeApp,
+            this.txtExcludeApp});
             this.lblApp.Name = "lblApp";
-            this.lblApp.Size = new System.Drawing.Size(160, 26);
+            this.lblApp.Size = new System.Drawing.Size(224, 26);
             this.lblApp.Text = "App";
+            this.lblApp.ToolTipText = "% Wildcard character supported";
+            // 
+            // lblIncludeApp
+            // 
+            this.lblIncludeApp.Name = "lblIncludeApp";
+            this.lblIncludeApp.Size = new System.Drawing.Size(274, 26);
+            this.lblIncludeApp.Text = "Include:";
             // 
             // txtApp
             // 
-            this.txtApp.BackColor = System.Drawing.Color.AliceBlue;
+            this.txtApp.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(224)))), ((int)(((byte)(236)))), ((int)(((byte)(207)))));
             this.txtApp.Name = "txtApp";
             this.txtApp.Size = new System.Drawing.Size(200, 27);
             this.txtApp.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.Filter_KeyPress);
-            this.txtApp.TextChanged += new System.EventHandler(this.txtApp_TextChanged);
+            this.txtApp.TextChanged += new System.EventHandler(this.Filter_TextChanged);
+            // 
+            // lblExcludeApp
+            // 
+            this.lblExcludeApp.Name = "lblExcludeApp";
+            this.lblExcludeApp.Size = new System.Drawing.Size(274, 26);
+            this.lblExcludeApp.Text = "Exclude:";
+            // 
+            // txtExcludeApp
+            // 
+            this.txtExcludeApp.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(251)))), ((int)(((byte)(212)))), ((int)(((byte)(215)))));
+            this.txtExcludeApp.Name = "txtExcludeApp";
+            this.txtExcludeApp.Size = new System.Drawing.Size(200, 27);
+            this.txtExcludeApp.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.Filter_KeyPress);
+            this.txtExcludeApp.TextChanged += new System.EventHandler(this.Filter_TextChanged);
             // 
             // lblClient
             // 
             this.lblClient.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.txtClient});
+            this.lblIncludeClient,
+            this.txtClient,
+            this.lblExcludeClient,
+            this.txtExcludeClient});
             this.lblClient.Name = "lblClient";
-            this.lblClient.Size = new System.Drawing.Size(160, 26);
+            this.lblClient.Size = new System.Drawing.Size(224, 26);
             this.lblClient.Text = "Client";
+            this.lblClient.ToolTipText = "% Wildcard character supported";
+            // 
+            // lblIncludeClient
+            // 
+            this.lblIncludeClient.Name = "lblIncludeClient";
+            this.lblIncludeClient.Size = new System.Drawing.Size(274, 26);
+            this.lblIncludeClient.Text = "Include:";
             // 
             // txtClient
             // 
-            this.txtClient.BackColor = System.Drawing.Color.AliceBlue;
+            this.txtClient.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(224)))), ((int)(((byte)(236)))), ((int)(((byte)(207)))));
             this.txtClient.Name = "txtClient";
             this.txtClient.Size = new System.Drawing.Size(200, 27);
             this.txtClient.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.Filter_KeyPress);
-            this.txtClient.TextChanged += new System.EventHandler(this.txtClient_TextChanged);
+            this.txtClient.TextChanged += new System.EventHandler(this.Filter_TextChanged);
+            // 
+            // lblExcludeClient
+            // 
+            this.lblExcludeClient.Name = "lblExcludeClient";
+            this.lblExcludeClient.Size = new System.Drawing.Size(274, 26);
+            this.lblExcludeClient.Text = "Exclude:";
+            // 
+            // txtExcludeClient
+            // 
+            this.txtExcludeClient.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(251)))), ((int)(((byte)(212)))), ((int)(((byte)(215)))));
+            this.txtExcludeClient.Name = "txtExcludeClient";
+            this.txtExcludeClient.Size = new System.Drawing.Size(200, 27);
+            this.txtExcludeClient.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.Filter_KeyPress);
+            this.txtExcludeClient.TextChanged += new System.EventHandler(this.Filter_TextChanged);
+            // 
+            // lblCPU
+            // 
+            this.lblCPU.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.lblCPUFrom,
+            this.txtCPUFrom,
+            this.lblCPUTo,
+            this.txtCPUTo});
+            this.lblCPU.Name = "lblCPU";
+            this.lblCPU.Size = new System.Drawing.Size(224, 26);
+            this.lblCPU.Text = "CPU";
+            // 
+            // lblCPUFrom
+            // 
+            this.lblCPUFrom.Name = "lblCPUFrom";
+            this.lblCPUFrom.Size = new System.Drawing.Size(274, 26);
+            this.lblCPUFrom.Text = "From (ms):";
+            // 
+            // txtCPUFrom
+            // 
+            this.txtCPUFrom.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(224)))), ((int)(((byte)(236)))), ((int)(((byte)(207)))));
+            this.txtCPUFrom.Name = "txtCPUFrom";
+            this.txtCPUFrom.Size = new System.Drawing.Size(200, 27);
+            this.txtCPUFrom.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.Filter_Numeric_KeyPress);
+            this.txtCPUFrom.TextChanged += new System.EventHandler(this.Filter_TextChanged);
+            // 
+            // lblCPUTo
+            // 
+            this.lblCPUTo.Name = "lblCPUTo";
+            this.lblCPUTo.Size = new System.Drawing.Size(274, 26);
+            this.lblCPUTo.Text = "To (ms):";
+            // 
+            // txtCPUTo
+            // 
+            this.txtCPUTo.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(224)))), ((int)(((byte)(236)))), ((int)(((byte)(207)))));
+            this.txtCPUTo.Name = "txtCPUTo";
+            this.txtCPUTo.Size = new System.Drawing.Size(200, 27);
+            this.txtCPUTo.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.Filter_Numeric_KeyPress);
+            this.txtCPUTo.TextChanged += new System.EventHandler(this.Filter_TextChanged);
             // 
             // lblDatabase
             // 
             this.lblDatabase.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.txtDatabase});
+            this.lblIncludeDatabase,
+            this.txtDatabase,
+            this.lblExcludeDatabase,
+            this.txtExcludeDatabase});
             this.lblDatabase.Name = "lblDatabase";
-            this.lblDatabase.Size = new System.Drawing.Size(160, 26);
+            this.lblDatabase.Size = new System.Drawing.Size(224, 26);
             this.lblDatabase.Text = "Database";
+            this.lblDatabase.ToolTipText = "% Wildcard character supported";
+            // 
+            // lblIncludeDatabase
+            // 
+            this.lblIncludeDatabase.Name = "lblIncludeDatabase";
+            this.lblIncludeDatabase.Size = new System.Drawing.Size(274, 26);
+            this.lblIncludeDatabase.Text = "Include:";
             // 
             // txtDatabase
             // 
-            this.txtDatabase.BackColor = System.Drawing.Color.AliceBlue;
+            this.txtDatabase.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(224)))), ((int)(((byte)(236)))), ((int)(((byte)(207)))));
             this.txtDatabase.Name = "txtDatabase";
             this.txtDatabase.Size = new System.Drawing.Size(200, 27);
             this.txtDatabase.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.Filter_KeyPress);
-            this.txtDatabase.TextChanged += new System.EventHandler(this.txtDatabase_TextChanged);
+            this.txtDatabase.TextChanged += new System.EventHandler(this.Filter_TextChanged);
+            // 
+            // lblExcludeDatabase
+            // 
+            this.lblExcludeDatabase.Name = "lblExcludeDatabase";
+            this.lblExcludeDatabase.Size = new System.Drawing.Size(274, 26);
+            this.lblExcludeDatabase.Text = "Exclude:";
+            // 
+            // txtExcludeDatabase
+            // 
+            this.txtExcludeDatabase.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(251)))), ((int)(((byte)(212)))), ((int)(((byte)(215)))));
+            this.txtExcludeDatabase.Name = "txtExcludeDatabase";
+            this.txtExcludeDatabase.Size = new System.Drawing.Size(200, 27);
+            this.txtExcludeDatabase.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.Filter_KeyPress);
+            this.txtExcludeDatabase.TextChanged += new System.EventHandler(this.Filter_TextChanged);
+            // 
+            // lblDuration
+            // 
+            this.lblDuration.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.lblDurationFrom,
+            this.txtDurationFrom,
+            this.lblDurationTo,
+            this.txtDurationTo});
+            this.lblDuration.Name = "lblDuration";
+            this.lblDuration.Size = new System.Drawing.Size(224, 26);
+            this.lblDuration.Text = "Duration";
+            // 
+            // lblDurationFrom
+            // 
+            this.lblDurationFrom.Name = "lblDurationFrom";
+            this.lblDurationFrom.Size = new System.Drawing.Size(274, 26);
+            this.lblDurationFrom.Text = "From (ms):";
+            // 
+            // txtDurationFrom
+            // 
+            this.txtDurationFrom.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(224)))), ((int)(((byte)(236)))), ((int)(((byte)(207)))));
+            this.txtDurationFrom.Name = "txtDurationFrom";
+            this.txtDurationFrom.Size = new System.Drawing.Size(200, 27);
+            this.txtDurationFrom.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.Filter_Numeric_KeyPress);
+            this.txtDurationFrom.TextChanged += new System.EventHandler(this.Filter_TextChanged);
+            // 
+            // lblDurationTo
+            // 
+            this.lblDurationTo.Name = "lblDurationTo";
+            this.lblDurationTo.Size = new System.Drawing.Size(274, 26);
+            this.lblDurationTo.Text = "To (ms):";
+            // 
+            // txtDurationTo
+            // 
+            this.txtDurationTo.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(224)))), ((int)(((byte)(236)))), ((int)(((byte)(207)))));
+            this.txtDurationTo.Name = "txtDurationTo";
+            this.txtDurationTo.Size = new System.Drawing.Size(200, 27);
+            this.txtDurationTo.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.Filter_Numeric_KeyPress);
+            this.txtDurationTo.TextChanged += new System.EventHandler(this.Filter_TextChanged);
             // 
             // lblInstance
             // 
             this.lblInstance.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.txtInstance});
+            this.lblIncludeInstance,
+            this.txtInstance,
+            this.lblExcludeInstance,
+            this.txtExcludeInstance});
             this.lblInstance.Name = "lblInstance";
-            this.lblInstance.Size = new System.Drawing.Size(160, 26);
+            this.lblInstance.Size = new System.Drawing.Size(224, 26);
             this.lblInstance.Text = "Instance";
+            this.lblInstance.ToolTipText = "% Wildcard character supported";
+            // 
+            // lblIncludeInstance
+            // 
+            this.lblIncludeInstance.Name = "lblIncludeInstance";
+            this.lblIncludeInstance.Size = new System.Drawing.Size(274, 26);
+            this.lblIncludeInstance.Text = "Include:";
             // 
             // txtInstance
             // 
-            this.txtInstance.BackColor = System.Drawing.Color.AliceBlue;
+            this.txtInstance.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(224)))), ((int)(((byte)(236)))), ((int)(((byte)(207)))));
             this.txtInstance.Name = "txtInstance";
             this.txtInstance.Size = new System.Drawing.Size(200, 27);
             this.txtInstance.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.Filter_KeyPress);
-            this.txtInstance.TextChanged += new System.EventHandler(this.txtInstance_TextChanged);
+            this.txtInstance.TextChanged += new System.EventHandler(this.Filter_TextChanged);
+            // 
+            // lblExcludeInstance
+            // 
+            this.lblExcludeInstance.Name = "lblExcludeInstance";
+            this.lblExcludeInstance.Size = new System.Drawing.Size(274, 26);
+            this.lblExcludeInstance.Text = "Exclude:";
+            // 
+            // txtExcludeInstance
+            // 
+            this.txtExcludeInstance.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(251)))), ((int)(((byte)(212)))), ((int)(((byte)(215)))));
+            this.txtExcludeInstance.Name = "txtExcludeInstance";
+            this.txtExcludeInstance.Size = new System.Drawing.Size(200, 27);
+            this.txtExcludeInstance.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.Filter_KeyPress);
+            this.txtExcludeInstance.TextChanged += new System.EventHandler(this.Filter_TextChanged);
+            // 
+            // lblLogicalReads
+            // 
+            this.lblLogicalReads.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.lblLogicalReadsFrom,
+            this.txtLogicalReadsFrom,
+            this.lblLogicalReadsTo,
+            this.txtLogicalReadsTo});
+            this.lblLogicalReads.Name = "lblLogicalReads";
+            this.lblLogicalReads.Size = new System.Drawing.Size(224, 26);
+            this.lblLogicalReads.Text = "Logical Reads";
+            // 
+            // lblLogicalReadsFrom
+            // 
+            this.lblLogicalReadsFrom.Name = "lblLogicalReadsFrom";
+            this.lblLogicalReadsFrom.Size = new System.Drawing.Size(274, 26);
+            this.lblLogicalReadsFrom.Text = "From:";
+            // 
+            // txtLogicalReadsFrom
+            // 
+            this.txtLogicalReadsFrom.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(224)))), ((int)(((byte)(236)))), ((int)(((byte)(207)))));
+            this.txtLogicalReadsFrom.Name = "txtLogicalReadsFrom";
+            this.txtLogicalReadsFrom.Size = new System.Drawing.Size(200, 27);
+            this.txtLogicalReadsFrom.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.Filter_Numeric_KeyPress);
+            this.txtLogicalReadsFrom.TextChanged += new System.EventHandler(this.Filter_TextChanged);
+            // 
+            // lblLogicalReadsTo
+            // 
+            this.lblLogicalReadsTo.Name = "lblLogicalReadsTo";
+            this.lblLogicalReadsTo.Size = new System.Drawing.Size(274, 26);
+            this.lblLogicalReadsTo.Text = "To:";
+            // 
+            // txtLogicalReadsTo
+            // 
+            this.txtLogicalReadsTo.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(224)))), ((int)(((byte)(236)))), ((int)(((byte)(207)))));
+            this.txtLogicalReadsTo.Name = "txtLogicalReadsTo";
+            this.txtLogicalReadsTo.Size = new System.Drawing.Size(200, 27);
+            this.txtLogicalReadsTo.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.Filter_Numeric_KeyPress);
+            this.txtLogicalReadsTo.TextChanged += new System.EventHandler(this.Filter_TextChanged);
             // 
             // lblObject
             // 
             this.lblObject.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.txtObject});
+            this.lblIncludeObject,
+            this.txtObject,
+            this.lblExcludeObject,
+            this.txtExcludeObject});
             this.lblObject.Name = "lblObject";
-            this.lblObject.Size = new System.Drawing.Size(160, 26);
+            this.lblObject.Size = new System.Drawing.Size(224, 26);
             this.lblObject.Text = "Object";
+            this.lblObject.ToolTipText = "% Wildcard character supported";
+            // 
+            // lblIncludeObject
+            // 
+            this.lblIncludeObject.Name = "lblIncludeObject";
+            this.lblIncludeObject.Size = new System.Drawing.Size(274, 26);
+            this.lblIncludeObject.Text = "Include:";
             // 
             // txtObject
             // 
-            this.txtObject.BackColor = System.Drawing.Color.AliceBlue;
+            this.txtObject.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(224)))), ((int)(((byte)(236)))), ((int)(((byte)(207)))));
             this.txtObject.Name = "txtObject";
             this.txtObject.Size = new System.Drawing.Size(200, 27);
             this.txtObject.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.Filter_KeyPress);
-            this.txtObject.TextChanged += new System.EventHandler(this.txtObject_TextChanged);
+            this.txtObject.TextChanged += new System.EventHandler(this.Filter_TextChanged);
+            // 
+            // lblExcludeObject
+            // 
+            this.lblExcludeObject.Name = "lblExcludeObject";
+            this.lblExcludeObject.Size = new System.Drawing.Size(274, 26);
+            this.lblExcludeObject.Text = "Exclude:";
+            // 
+            // txtExcludeObject
+            // 
+            this.txtExcludeObject.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(251)))), ((int)(((byte)(212)))), ((int)(((byte)(215)))));
+            this.txtExcludeObject.Name = "txtExcludeObject";
+            this.txtExcludeObject.Size = new System.Drawing.Size(200, 27);
+            this.txtExcludeObject.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.Filter_KeyPress);
+            this.txtExcludeObject.TextChanged += new System.EventHandler(this.Filter_TextChanged);
+            // 
+            // lblPhysicalReads
+            // 
+            this.lblPhysicalReads.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.lblPhysicalReadsFrom,
+            this.txtPhysicalReadsFrom,
+            this.lblPhysicalReadsTo,
+            this.txtPhysicalReadsTo});
+            this.lblPhysicalReads.Name = "lblPhysicalReads";
+            this.lblPhysicalReads.Size = new System.Drawing.Size(224, 26);
+            this.lblPhysicalReads.Text = "Physical Reads";
+            // 
+            // lblPhysicalReadsFrom
+            // 
+            this.lblPhysicalReadsFrom.Name = "lblPhysicalReadsFrom";
+            this.lblPhysicalReadsFrom.Size = new System.Drawing.Size(274, 26);
+            this.lblPhysicalReadsFrom.Text = "From:";
+            // 
+            // txtPhysicalReadsFrom
+            // 
+            this.txtPhysicalReadsFrom.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(224)))), ((int)(((byte)(236)))), ((int)(((byte)(207)))));
+            this.txtPhysicalReadsFrom.Name = "txtPhysicalReadsFrom";
+            this.txtPhysicalReadsFrom.Size = new System.Drawing.Size(200, 27);
+            this.txtPhysicalReadsFrom.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.Filter_Numeric_KeyPress);
+            this.txtPhysicalReadsFrom.TextChanged += new System.EventHandler(this.Filter_TextChanged);
+            // 
+            // lblPhysicalReadsTo
+            // 
+            this.lblPhysicalReadsTo.Name = "lblPhysicalReadsTo";
+            this.lblPhysicalReadsTo.Size = new System.Drawing.Size(274, 26);
+            this.lblPhysicalReadsTo.Text = "To:";
+            // 
+            // txtPhysicalReadsTo
+            // 
+            this.txtPhysicalReadsTo.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(224)))), ((int)(((byte)(236)))), ((int)(((byte)(207)))));
+            this.txtPhysicalReadsTo.Name = "txtPhysicalReadsTo";
+            this.txtPhysicalReadsTo.Size = new System.Drawing.Size(200, 27);
+            this.txtPhysicalReadsTo.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.Filter_Numeric_KeyPress);
+            this.txtPhysicalReadsTo.TextChanged += new System.EventHandler(this.Filter_TextChanged);
             // 
             // lblResult
             // 
             this.lblResult.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.txtResult});
+            this.lblIncludeResult,
+            this.txtResult,
+            this.lblExcludeResult,
+            this.txtExcludeResult});
             this.lblResult.Name = "lblResult";
-            this.lblResult.Size = new System.Drawing.Size(160, 26);
+            this.lblResult.Size = new System.Drawing.Size(224, 26);
             this.lblResult.Text = "Result";
+            this.lblResult.ToolTipText = "% Wildcard character supported";
+            // 
+            // lblIncludeResult
+            // 
+            this.lblIncludeResult.Name = "lblIncludeResult";
+            this.lblIncludeResult.Size = new System.Drawing.Size(274, 26);
+            this.lblIncludeResult.Text = "Include:";
             // 
             // txtResult
             // 
-            this.txtResult.BackColor = System.Drawing.Color.Azure;
+            this.txtResult.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(224)))), ((int)(((byte)(236)))), ((int)(((byte)(207)))));
             this.txtResult.Name = "txtResult";
             this.txtResult.Size = new System.Drawing.Size(200, 27);
             this.txtResult.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.Filter_KeyPress);
-            this.txtResult.TextChanged += new System.EventHandler(this.txtResult_TextChanged);
+            this.txtResult.TextChanged += new System.EventHandler(this.Filter_TextChanged);
+            // 
+            // lblExcludeResult
+            // 
+            this.lblExcludeResult.Name = "lblExcludeResult";
+            this.lblExcludeResult.Size = new System.Drawing.Size(274, 26);
+            this.lblExcludeResult.Text = "Exclude:";
+            // 
+            // txtExcludeResult
+            // 
+            this.txtExcludeResult.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(251)))), ((int)(((byte)(212)))), ((int)(((byte)(215)))));
+            this.txtExcludeResult.Name = "txtExcludeResult";
+            this.txtExcludeResult.Size = new System.Drawing.Size(200, 27);
+            this.txtExcludeResult.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.Filter_KeyPress);
+            this.txtExcludeResult.TextChanged += new System.EventHandler(this.Filter_TextChanged);
             // 
             // lblSessionID
             // 
             this.lblSessionID.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.txtSessionID});
+            this.lblIncludeSessionID,
+            this.txtSessionID,
+            this.lblExcludeSessionID,
+            this.txtExcludeSessionID});
             this.lblSessionID.Name = "lblSessionID";
-            this.lblSessionID.Size = new System.Drawing.Size(160, 26);
+            this.lblSessionID.Size = new System.Drawing.Size(224, 26);
             this.lblSessionID.Text = "Session ID";
+            this.lblSessionID.ToolTipText = "Comma separated list of IDs";
+            // 
+            // lblIncludeSessionID
+            // 
+            this.lblIncludeSessionID.Name = "lblIncludeSessionID";
+            this.lblIncludeSessionID.Size = new System.Drawing.Size(274, 26);
+            this.lblIncludeSessionID.Text = "Include:";
             // 
             // txtSessionID
             // 
-            this.txtSessionID.BackColor = System.Drawing.Color.AliceBlue;
+            this.txtSessionID.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(224)))), ((int)(((byte)(236)))), ((int)(((byte)(207)))));
             this.txtSessionID.Name = "txtSessionID";
             this.txtSessionID.Size = new System.Drawing.Size(200, 27);
-            this.txtSessionID.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.Filter_KeyPress);
-            this.txtSessionID.TextChanged += new System.EventHandler(this.txtSessionID_TextChanged);
+            this.txtSessionID.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.Filter_NumericPlusComma_KeyPress);
+            this.txtSessionID.TextChanged += new System.EventHandler(this.Filter_TextChanged);
+            // 
+            // lblExcludeSessionID
+            // 
+            this.lblExcludeSessionID.Name = "lblExcludeSessionID";
+            this.lblExcludeSessionID.Size = new System.Drawing.Size(274, 26);
+            this.lblExcludeSessionID.Text = "Exclude:";
+            // 
+            // txtExcludeSessionID
+            // 
+            this.txtExcludeSessionID.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(251)))), ((int)(((byte)(212)))), ((int)(((byte)(215)))));
+            this.txtExcludeSessionID.Name = "txtExcludeSessionID";
+            this.txtExcludeSessionID.Size = new System.Drawing.Size(200, 27);
+            this.txtExcludeSessionID.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.Filter_NumericPlusComma_KeyPress);
+            this.txtExcludeSessionID.TextChanged += new System.EventHandler(this.Filter_TextChanged);
             // 
             // lblText
             // 
             this.lblText.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.txtText});
+            this.lblIncludeText,
+            this.txtText,
+            this.lblExcludeText,
+            this.txtExcludeText});
             this.lblText.Name = "lblText";
-            this.lblText.Size = new System.Drawing.Size(160, 26);
+            this.lblText.Size = new System.Drawing.Size(224, 26);
             this.lblText.Text = "Text";
+            this.lblText.ToolTipText = "Matches anywhere in the string";
+            // 
+            // lblIncludeText
+            // 
+            this.lblIncludeText.Name = "lblIncludeText";
+            this.lblIncludeText.Size = new System.Drawing.Size(274, 26);
+            this.lblIncludeText.Text = "Include:";
             // 
             // txtText
             // 
-            this.txtText.BackColor = System.Drawing.Color.AliceBlue;
+            this.txtText.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(224)))), ((int)(((byte)(236)))), ((int)(((byte)(207)))));
             this.txtText.Name = "txtText";
             this.txtText.Size = new System.Drawing.Size(200, 27);
             this.txtText.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.Filter_KeyPress);
-            this.txtText.TextChanged += new System.EventHandler(this.txtText_TextChanged);
+            this.txtText.TextChanged += new System.EventHandler(this.Filter_TextChanged);
+            // 
+            // lblExcludeText
+            // 
+            this.lblExcludeText.Name = "lblExcludeText";
+            this.lblExcludeText.Size = new System.Drawing.Size(274, 26);
+            this.lblExcludeText.Text = "Exclude:";
+            // 
+            // txtExcludeText
+            // 
+            this.txtExcludeText.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(251)))), ((int)(((byte)(212)))), ((int)(((byte)(215)))));
+            this.txtExcludeText.Name = "txtExcludeText";
+            this.txtExcludeText.Size = new System.Drawing.Size(200, 27);
+            this.txtExcludeText.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.Filter_KeyPress);
+            this.txtExcludeText.TextChanged += new System.EventHandler(this.Filter_TextChanged);
             // 
             // lblUser
             // 
             this.lblUser.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.txtUser});
+            this.lblIncludeUser,
+            this.txtUser,
+            this.lblExcludeUser,
+            this.txtExcludeUser});
             this.lblUser.Name = "lblUser";
-            this.lblUser.Size = new System.Drawing.Size(160, 26);
+            this.lblUser.Size = new System.Drawing.Size(224, 26);
             this.lblUser.Text = "User";
+            this.lblUser.ToolTipText = "% Wildcard character supported";
+            // 
+            // lblIncludeUser
+            // 
+            this.lblIncludeUser.Name = "lblIncludeUser";
+            this.lblIncludeUser.Size = new System.Drawing.Size(274, 26);
+            this.lblIncludeUser.Text = "Include:";
             // 
             // txtUser
             // 
-            this.txtUser.BackColor = System.Drawing.Color.AliceBlue;
+            this.txtUser.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(224)))), ((int)(((byte)(236)))), ((int)(((byte)(207)))));
             this.txtUser.Name = "txtUser";
             this.txtUser.Size = new System.Drawing.Size(200, 27);
             this.txtUser.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.Filter_KeyPress);
-            this.txtUser.TextChanged += new System.EventHandler(this.txtUser_TextChanged);
+            this.txtUser.TextChanged += new System.EventHandler(this.Filter_TextChanged);
+            // 
+            // lblExcludeUser
+            // 
+            this.lblExcludeUser.Name = "lblExcludeUser";
+            this.lblExcludeUser.Size = new System.Drawing.Size(274, 26);
+            this.lblExcludeUser.Text = "Exclude:";
+            // 
+            // txtExcludeUser
+            // 
+            this.txtExcludeUser.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(251)))), ((int)(((byte)(212)))), ((int)(((byte)(215)))));
+            this.txtExcludeUser.Name = "txtExcludeUser";
+            this.txtExcludeUser.Size = new System.Drawing.Size(200, 27);
+            this.txtExcludeUser.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.Filter_KeyPress);
+            this.txtExcludeUser.TextChanged += new System.EventHandler(this.Filter_TextChanged);
+            // 
+            // lblWrites
+            // 
+            this.lblWrites.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.lblWritesFrom,
+            this.txtWritesFrom,
+            this.lblWritesTo,
+            this.txtWritesTo});
+            this.lblWrites.Name = "lblWrites";
+            this.lblWrites.Size = new System.Drawing.Size(224, 26);
+            this.lblWrites.Text = "Writes";
+            // 
+            // lblWritesFrom
+            // 
+            this.lblWritesFrom.Name = "lblWritesFrom";
+            this.lblWritesFrom.Size = new System.Drawing.Size(274, 26);
+            this.lblWritesFrom.Text = "From:";
+            // 
+            // txtWritesFrom
+            // 
+            this.txtWritesFrom.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(224)))), ((int)(((byte)(236)))), ((int)(((byte)(207)))));
+            this.txtWritesFrom.Name = "txtWritesFrom";
+            this.txtWritesFrom.Size = new System.Drawing.Size(200, 27);
+            this.txtWritesFrom.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.Filter_Numeric_KeyPress);
+            this.txtWritesFrom.TextChanged += new System.EventHandler(this.Filter_TextChanged);
+            // 
+            // lblWritesTo
+            // 
+            this.lblWritesTo.Name = "lblWritesTo";
+            this.lblWritesTo.Size = new System.Drawing.Size(274, 26);
+            this.lblWritesTo.Text = "To:";
+            // 
+            // txtWritesTo
+            // 
+            this.txtWritesTo.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(224)))), ((int)(((byte)(236)))), ((int)(((byte)(207)))));
+            this.txtWritesTo.Name = "txtWritesTo";
+            this.txtWritesTo.Size = new System.Drawing.Size(200, 27);
+            this.txtWritesTo.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.Filter_Numeric_KeyPress);
+            this.txtWritesTo.TextChanged += new System.EventHandler(this.Filter_TextChanged);
+            // 
+            // lblEventType
+            // 
+            this.lblEventType.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.rpccompletedToolStripMenuItem,
+            this.sqlbatchcompletedToolStripMenuItem});
+            this.lblEventType.Name = "lblEventType";
+            this.lblEventType.Size = new System.Drawing.Size(224, 26);
+            this.lblEventType.Text = "Event Type";
+            // 
+            // rpccompletedToolStripMenuItem
+            // 
+            this.rpccompletedToolStripMenuItem.Checked = true;
+            this.rpccompletedToolStripMenuItem.CheckOnClick = true;
+            this.rpccompletedToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.rpccompletedToolStripMenuItem.Name = "rpccompletedToolStripMenuItem";
+            this.rpccompletedToolStripMenuItem.Size = new System.Drawing.Size(232, 26);
+            this.rpccompletedToolStripMenuItem.Text = "rpc_completed";
+            this.rpccompletedToolStripMenuItem.CheckedChanged += new System.EventHandler(this.EventType_CheckedChanged);
+            this.rpccompletedToolStripMenuItem.Click += new System.EventHandler(this.EventType_Click);
+            // 
+            // sqlbatchcompletedToolStripMenuItem
+            // 
+            this.sqlbatchcompletedToolStripMenuItem.Checked = true;
+            this.sqlbatchcompletedToolStripMenuItem.CheckOnClick = true;
+            this.sqlbatchcompletedToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.sqlbatchcompletedToolStripMenuItem.Name = "sqlbatchcompletedToolStripMenuItem";
+            this.sqlbatchcompletedToolStripMenuItem.Size = new System.Drawing.Size(232, 26);
+            this.sqlbatchcompletedToolStripMenuItem.Text = "sql_batch_completed";
+            this.sqlbatchcompletedToolStripMenuItem.CheckedChanged += new System.EventHandler(this.EventType_CheckedChanged);
             // 
             // toolStripSeparator2
             // 
             this.toolStripSeparator2.Name = "toolStripSeparator2";
-            this.toolStripSeparator2.Size = new System.Drawing.Size(157, 6);
+            this.toolStripSeparator2.Size = new System.Drawing.Size(221, 6);
             // 
             // resetToolStripMenuItem
             // 
             this.resetToolStripMenuItem.Name = "resetToolStripMenuItem";
-            this.resetToolStripMenuItem.Size = new System.Drawing.Size(160, 26);
+            this.resetToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
             this.resetToolStripMenuItem.Text = "Reset";
-            this.resetToolStripMenuItem.Click += new System.EventHandler(this.resetToolStripMenuItem_Click);
+            this.resetToolStripMenuItem.Click += new System.EventHandler(this.ResetToolStripMenuItem_Click);
             // 
             // tsTop
             // 
@@ -709,7 +1220,7 @@
             this.tsTop10.Size = new System.Drawing.Size(124, 26);
             this.tsTop10.Tag = "10";
             this.tsTop10.Text = "10";
-            this.tsTop10.Click += new System.EventHandler(this.tsTop_Click);
+            this.tsTop10.Click += new System.EventHandler(this.TsTop_Click);
             // 
             // tsTop20
             // 
@@ -717,7 +1228,7 @@
             this.tsTop20.Size = new System.Drawing.Size(124, 26);
             this.tsTop20.Tag = "20";
             this.tsTop20.Text = "20";
-            this.tsTop20.Click += new System.EventHandler(this.tsTop_Click);
+            this.tsTop20.Click += new System.EventHandler(this.TsTop_Click);
             // 
             // tsTop50
             // 
@@ -725,7 +1236,7 @@
             this.tsTop50.Size = new System.Drawing.Size(124, 26);
             this.tsTop50.Tag = "50";
             this.tsTop50.Text = "50";
-            this.tsTop50.Click += new System.EventHandler(this.tsTop_Click);
+            this.tsTop50.Click += new System.EventHandler(this.TsTop_Click);
             // 
             // tsTop100
             // 
@@ -733,7 +1244,7 @@
             this.tsTop100.Size = new System.Drawing.Size(124, 26);
             this.tsTop100.Tag = "100";
             this.tsTop100.Text = "100";
-            this.tsTop100.Click += new System.EventHandler(this.tsTop_Click);
+            this.tsTop100.Click += new System.EventHandler(this.TsTop_Click);
             // 
             // tsTop500
             // 
@@ -741,7 +1252,7 @@
             this.tsTop500.Size = new System.Drawing.Size(124, 26);
             this.tsTop500.Tag = "500";
             this.tsTop500.Text = "500";
-            this.tsTop500.Click += new System.EventHandler(this.tsTop_Click);
+            this.tsTop500.Click += new System.EventHandler(this.TsTop_Click);
             // 
             // tsTop1000
             // 
@@ -749,7 +1260,7 @@
             this.tsTop1000.Size = new System.Drawing.Size(124, 26);
             this.tsTop1000.Tag = "1000";
             this.tsTop1000.Text = "1000";
-            this.tsTop1000.Click += new System.EventHandler(this.tsTop_Click);
+            this.tsTop1000.Click += new System.EventHandler(this.TsTop_Click);
             // 
             // tsTopAll
             // 
@@ -757,7 +1268,7 @@
             this.tsTopAll.Size = new System.Drawing.Size(124, 26);
             this.tsTopAll.Tag = "-1";
             this.tsTopAll.Text = "ALL";
-            this.tsTopAll.Click += new System.EventHandler(this.tsTop_Click);
+            this.tsTopAll.Click += new System.EventHandler(this.TsTop_Click);
             // 
             // tsCopySummary
             // 
@@ -767,7 +1278,7 @@
             this.tsCopySummary.Name = "tsCopySummary";
             this.tsCopySummary.Size = new System.Drawing.Size(29, 24);
             this.tsCopySummary.Text = "Copy";
-            this.tsCopySummary.Click += new System.EventHandler(this.tsCopySummary_Click);
+            this.tsCopySummary.Click += new System.EventHandler(this.TsCopySummary_Click);
             // 
             // tsExcel
             // 
@@ -777,7 +1288,7 @@
             this.tsExcel.Name = "tsExcel";
             this.tsExcel.Size = new System.Drawing.Size(29, 24);
             this.tsExcel.Text = "Export Excel";
-            this.tsExcel.Click += new System.EventHandler(this.tsExcel_Click);
+            this.tsExcel.Click += new System.EventHandler(this.TsExcel_Click);
             // 
             // dgvSlow
             // 
@@ -814,7 +1325,7 @@
             this.dgvSlow.RowTemplate.Height = 24;
             this.dgvSlow.Size = new System.Drawing.Size(1829, 805);
             this.dgvSlow.TabIndex = 4;
-            this.dgvSlow.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgvSlow_CellContentClick);
+            this.dgvSlow.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.DgvSlow_CellContentClick);
             // 
             // Instance
             // 
@@ -1008,16 +1519,6 @@
             this.splitContainer1.SplitterWidth = 5;
             this.splitContainer1.TabIndex = 5;
             // 
-            // runningQueries1
-            // 
-            this.runningQueries1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.runningQueries1.Location = new System.Drawing.Point(0, 0);
-            this.runningQueries1.Margin = new System.Windows.Forms.Padding(3, 5, 3, 5);
-            this.runningQueries1.Name = "runningQueries1";
-            this.runningQueries1.Size = new System.Drawing.Size(1829, 487);
-            this.runningQueries1.TabIndex = 1;
-            this.runningQueries1.Visible = false;
-            // 
             // tsRunning
             // 
             this.tsRunning.ImageScalingSize = new System.Drawing.Size(20, 20);
@@ -1037,7 +1538,7 @@
             this.tsRunningBack.Name = "tsRunningBack";
             this.tsRunningBack.Size = new System.Drawing.Size(29, 24);
             this.tsRunningBack.Text = "toolStripButton1";
-            this.tsRunningBack.Click += new System.EventHandler(this.tsRunningBack_Click);
+            this.tsRunningBack.Click += new System.EventHandler(this.TsRunningBack_Click);
             // 
             // refresh1
             // 
@@ -1050,6 +1551,17 @@
             this.refresh1.Name = "refresh1";
             this.refresh1.Size = new System.Drawing.Size(1829, 487);
             this.refresh1.TabIndex = 3;
+            this.refresh1.Visible = false;
+            // 
+            // runningQueries1
+            // 
+            this.runningQueries1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.runningQueries1.Location = new System.Drawing.Point(0, 0);
+            this.runningQueries1.Margin = new System.Windows.Forms.Padding(3, 5, 3, 5);
+            this.runningQueries1.Name = "runningQueries1";
+            this.runningQueries1.Size = new System.Drawing.Size(1829, 487);
+            this.runningQueries1.TabIndex = 1;
+            this.runningQueries1.Visible = false;
             // 
             // toolStrip2
             // 
@@ -1071,7 +1583,7 @@
             this.tsCopyDetail.Name = "tsCopyDetail";
             this.tsCopyDetail.Size = new System.Drawing.Size(29, 24);
             this.tsCopyDetail.Text = "Copy";
-            this.tsCopyDetail.Click += new System.EventHandler(this.tsCopyDetail_Click);
+            this.tsCopyDetail.Click += new System.EventHandler(this.TsCopyDetail_Click);
             // 
             // tsExcelDetail
             // 
@@ -1081,7 +1593,7 @@
             this.tsExcelDetail.Name = "tsExcelDetail";
             this.tsExcelDetail.Size = new System.Drawing.Size(29, 24);
             this.tsExcelDetail.Text = "Export Excel";
-            this.tsExcelDetail.Click += new System.EventHandler(this.tsExcelDetail_Click);
+            this.tsExcelDetail.Click += new System.EventHandler(this.TsExcelDetail_Click);
             // 
             // lblPageSize
             // 
@@ -1420,5 +1932,61 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn Result;
         private System.Windows.Forms.DataGridViewLinkColumn colSessionID;
         private System.Windows.Forms.DataGridViewLinkColumn colText;
+        private System.Windows.Forms.ToolStripMenuItem lblExcludeApp;
+        private System.Windows.Forms.ToolStripMenuItem lblIncludeApp;
+        private System.Windows.Forms.ToolStripTextBox txtExcludeApp;
+        private System.Windows.Forms.ToolStripMenuItem lblIncludeClient;
+        private System.Windows.Forms.ToolStripMenuItem lblExcludeClient;
+        private System.Windows.Forms.ToolStripTextBox txtExcludeClient;
+        private System.Windows.Forms.ToolStripMenuItem lblIncludeDatabase;
+        private System.Windows.Forms.ToolStripMenuItem lblExcludeDatabase;
+        private System.Windows.Forms.ToolStripTextBox txtExcludeDatabase;
+        private System.Windows.Forms.ToolStripMenuItem lblIncludeInstance;
+        private System.Windows.Forms.ToolStripMenuItem lblExcludeInstance;
+        private System.Windows.Forms.ToolStripTextBox txtExcludeInstance;
+        private System.Windows.Forms.ToolStripMenuItem lblIncludeObject;
+        private System.Windows.Forms.ToolStripMenuItem lblExcludeObject;
+        private System.Windows.Forms.ToolStripTextBox txtExcludeObject;
+        private System.Windows.Forms.ToolStripMenuItem lblIncludeResult;
+        private System.Windows.Forms.ToolStripMenuItem lblExcludeResult;
+        private System.Windows.Forms.ToolStripTextBox txtExcludeResult;
+        private System.Windows.Forms.ToolStripMenuItem lblIncludeSessionID;
+        private System.Windows.Forms.ToolStripMenuItem lblExcludeSessionID;
+        private System.Windows.Forms.ToolStripTextBox txtExcludeSessionID;
+        private System.Windows.Forms.ToolStripMenuItem lblIncludeText;
+        private System.Windows.Forms.ToolStripMenuItem lblExcludeText;
+        private System.Windows.Forms.ToolStripTextBox txtExcludeText;
+        private System.Windows.Forms.ToolStripMenuItem lblIncludeUser;
+        private System.Windows.Forms.ToolStripMenuItem lblExcludeUser;
+        private System.Windows.Forms.ToolStripTextBox txtExcludeUser;
+        private System.Windows.Forms.ToolStripMenuItem lblDuration;
+        private System.Windows.Forms.ToolStripMenuItem lblDurationFrom;
+        private System.Windows.Forms.ToolStripTextBox txtDurationFrom;
+        private System.Windows.Forms.ToolStripMenuItem lblDurationTo;
+        private System.Windows.Forms.ToolStripTextBox txtDurationTo;
+        private System.Windows.Forms.ToolStripMenuItem lblCPU;
+        private System.Windows.Forms.ToolStripMenuItem lblCPUFrom;
+        private System.Windows.Forms.ToolStripTextBox txtCPUFrom;
+        private System.Windows.Forms.ToolStripMenuItem lblCPUTo;
+        private System.Windows.Forms.ToolStripTextBox txtCPUTo;
+        private System.Windows.Forms.ToolStripMenuItem lblWrites;
+        private System.Windows.Forms.ToolStripMenuItem lblWritesFrom;
+        private System.Windows.Forms.ToolStripTextBox txtWritesFrom;
+        private System.Windows.Forms.ToolStripMenuItem lblWritesTo;
+        private System.Windows.Forms.ToolStripTextBox txtWritesTo;
+        private System.Windows.Forms.ToolStripMenuItem lblLogicalReads;
+        private System.Windows.Forms.ToolStripMenuItem lblLogicalReadsFrom;
+        private System.Windows.Forms.ToolStripTextBox txtLogicalReadsFrom;
+        private System.Windows.Forms.ToolStripMenuItem lblLogicalReadsTo;
+        private System.Windows.Forms.ToolStripTextBox txtLogicalReadsTo;
+        private System.Windows.Forms.ToolStripMenuItem lblPhysicalReads;
+        private System.Windows.Forms.ToolStripMenuItem lblPhysicalReadsFrom;
+        private System.Windows.Forms.ToolStripTextBox txtPhysicalReadsFrom;
+        private System.Windows.Forms.ToolStripMenuItem lblPhysicalReadsTo;
+        private System.Windows.Forms.ToolStripTextBox txtPhysicalReadsTo;
+        private System.Windows.Forms.ToolStripMenuItem eventTypeToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem lblEventType;
+        private System.Windows.Forms.ToolStripMenuItem rpccompletedToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem sqlbatchcompletedToolStripMenuItem;
     }
 }

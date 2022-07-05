@@ -25,10 +25,10 @@ namespace DBADashGUI
             this.BackColor = DashColors.TrimbleBlue;
             this.ForeColor = Color.White;
             lblRefresh.Text = baseText;
-            timer1.Enabled = this.Visible;
+            timer1.Enabled = this.Visible && Common.IsApplicationRunning;
         }
 
-        private string baseText = "Refresh in progress";
+        private readonly string baseText = "Refresh in progress";
 
         private void timer1_Tick(object sender, EventArgs e)
         {
