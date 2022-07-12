@@ -55,7 +55,7 @@
             this.dgv.RowHeadersVisible = false;
             this.dgv.RowHeadersWidth = 51;
             this.dgv.RowTemplate.Height = 29;
-            this.dgv.Size = new System.Drawing.Size(1024, 617);
+            this.dgv.Size = new System.Drawing.Size(1024, 591);
             this.dgv.TabIndex = 0;
             // 
             // toolStrip1
@@ -130,9 +130,9 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.Controls.Add(this.statusStrip1);
             this.Controls.Add(this.dgv);
             this.Controls.Add(this.toolStrip1);
+            this.Controls.Add(this.statusStrip1);
             this.Name = "IOSummary";
             this.Size = new System.Drawing.Size(1024, 644);
             this.Load += new System.EventHandler(this.IOSummary_Load);
