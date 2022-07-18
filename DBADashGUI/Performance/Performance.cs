@@ -33,7 +33,7 @@ namespace DBADashGUI.Performance
             }
         }
 
-        Int32 pointSize
+        Int32 PointSize
         {
             get
             {
@@ -83,14 +83,15 @@ namespace DBADashGUI.Performance
         }
 
 
-        public void RefreshData(DateTime from,DateTime to)
+        public void RefreshData()
         {
             if (ObjectID == 0)
             {
-                ioPerformance1.RefreshData(InstanceID, from, to, ConnectionString, DatabaseID);
-                cpu1.RefreshData(InstanceID, from, to, ConnectionString);
-                waits1.RefreshData(InstanceID, from, to, ConnectionString);
-                blocking1.RefreshData(InstanceID, from, to, ConnectionString,DatabaseID);
+                ioPerformance1.RefreshData(InstanceID, DatabaseID);
+                cpu1.InstanceID = InstanceID;
+                cpu1.RefreshData();
+                waits1.RefreshData(InstanceID);
+                blocking1.RefreshData(InstanceID,DatabaseID);
             }
             this.SuspendLayout();
             objectExecution1.SuspendLayout();
@@ -112,7 +113,7 @@ namespace DBADashGUI.Performance
     
             
         
-            objectExecution1.RefreshData(InstanceID, from, to, ConnectionString, ObjectID, DatabaseID);
+            objectExecution1.RefreshData(InstanceID, ObjectID, DatabaseID);
             this.ResumeLayout();
             objectExecution1.ResumeLayout();
             ioPerformance1.ResumeLayout();
@@ -121,22 +122,8 @@ namespace DBADashGUI.Performance
             waits1.ResumeLayout();
         }
 
-        public void RefreshData()
-        {
-            try
-            {
-              RefreshData(DateRange.FromUTC,DateRange.ToUTC);
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.ToString(), "Chart Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return;
-            }
-
-        }
-
-
-        private void timer1_Tick(object sender, EventArgs e)
+  
+        private void Timer1_Tick(object sender, EventArgs e)
         {
 
             ioPerformance1.RefreshData();
@@ -147,27 +134,27 @@ namespace DBADashGUI.Performance
         }
 
    
-        private void smoothLinesToolStripMenuItem_Click(object sender, EventArgs e)
+        private void SmoothLinesToolStripMenuItem_Click(object sender, EventArgs e)
         {
             ioPerformance1.SmoothLines = smoothLinesToolStripMenuItem.Checked;
             cpu1.SmoothLines = smoothLinesToolStripMenuItem.Checked;
         }
 
-        private void tsRefresh_Click(object sender, EventArgs e)
+        private void TsRefresh_Click(object sender, EventArgs e)
         {
             RefreshData();
         }
 
         private void Performance_Load(object sender, EventArgs e)
         {
-            cpu1.PointSize = pointSize;
-            ioPerformance1.PointSize = pointSize;
+            cpu1.PointSize = PointSize;
+            ioPerformance1.PointSize = PointSize;
         }
 
-        private void dataPointsToolStripMenuItem_Click(object sender, EventArgs e)
+        private void DataPointsToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            cpu1.PointSize = pointSize;
-            ioPerformance1.PointSize = pointSize;
+            cpu1.PointSize = PointSize;
+            ioPerformance1.PointSize = PointSize;
             RefreshData();
 
         }

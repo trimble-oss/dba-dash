@@ -1,15 +1,20 @@
 ﻿CREATE PROC dbo.IOSummary_Get(
 	@InstanceID INT,
-	@FromDate DATETIME2(2),
-	@ToDate DATETIME2(2),
+	@FromDate DATETIME2(2), /* UTC */
+	@ToDate DATETIME2(2), /* UTC */
 	@GroupBy VARCHAR(50)='Database',
 	@DatabaseID INT=NULL,
 	@Debug BIT =0,
 	@Use60MIN BIT=NULL,
 	@Instance NVARCHAR(128)=NULL OUT,
-	@DatabaseName NVARCHAR(128)=NULL OUT
+	@DatabaseName NVARCHAR(128)=NULL OUT,
+	@UTCOffset INT=0, /* Used for Hours filter */
+	@DaysOfWeek IDs READONLY, /* e.g. 1=Monday. exclude weekends:  1,2,3,4,5.  Filter applied in local timezone (@UTCOffset) */
+	@Hours IDs READONLY/* e.g. 9 to 5 :  9,10,11,12,13,14,15,16. Filter applied in local timezone (@UTCOffset)*/
 )
 AS
+SET DATEFIRST 1 /* Start week on Monday */
+SET NOCOUNT ON
 IF @DatabaseID=-1
 	SET @DatabaseID=NULL
 
@@ -49,6 +54,18 @@ BEGIN
 	RAISERROR('Invalid @GroupBy.  Valid values: Database,Filegroup,File,Drive',11,1)
 END
 
+/* Generate CSV list from list of integer values (safe from SQL injection compared to passing in a CSV string) */
+DECLARE @DaysOfWeekCsv NVARCHAR(MAX)
+SELECT @DaysOfWeekCsv =  STUFF((SELECT ',' + CAST(ID AS VARCHAR)
+FROM @DaysOfWeek
+FOR XML PATH(''),TYPE).value('.','NVARCHAR(MAX)'),1,1,'')
+
+/* Generate CSV list from list of integer values (safe from SQL injection compared to passing in a CSV string) */
+DECLARE @HoursCsv NVARCHAR(MAX)
+SELECT @HoursCsv =  STUFF((SELECT ',' + CAST(ID AS VARCHAR)
+FROM @Hours
+FOR XML PATH(''),TYPE).value('.','NVARCHAR(MAX)'),1,1,'')
+
 DECLARE @SQL NVARCHAR(MAX)
 SET @SQL =N'
 SELECT ' + @GroupBySQL + N' AS Grp,
@@ -81,12 +98,24 @@ AND IOS.SnapshotDate < @ToDate
 ' + CASE WHEN @GroupBy IN('Drive','Database') THEN 'AND IOS.FileID = -1' ELSE '' END + '
 ' + CASE WHEN @GroupBy ='Database' THEN 'AND IOS.Drive=''*''' ELSE '' END + '
 ' + CASE WHEN @GroupBy ='Drive' AND @DatabaseID IS NULL THEN 'AND IOS.DatabaseID = -1' ELSE '' END + '
+' + CASE WHEN @DaysOfWeekCsv IS NULL THEN N'' ELSE 'AND DATEPART(dw,DATEADD(mi, @UTCOffset, IOS.SnapshotDate)) IN (' + @DaysOfWeekCsv + ')' END + '
+' + CASE WHEN @HoursCsv IS NULL THEN N'' ELSE 'AND DATEPART(hh,DATEADD(mi, @UTCOffset, IOS.SnapshotDate)) IN(' + @HoursCsv + ')' END + '
 GROUP BY ' + @GroupBySQL + '
 ORDER BY Grp'
 
 IF @Debug=1
 	PRINT @SQL
 
-EXEC sp_executesql @SQL,N'@InstanceID INT,@FromDate DATETIME2(2),@ToDate DATETIME2(2),@DatabaseID INT',@InstanceID,@FromDate,@ToDate,@DatabaseID
+EXEC sp_executesql @SQL,
+					N'@InstanceID INT,
+					@FromDate DATETIME2(2),
+					@ToDate DATETIME2(2),
+					@DatabaseID INT,
+					@UTCOffset INT',
+					@InstanceID,
+					@FromDate,
+					@ToDate,
+					@DatabaseID,
+					@UTCOffset
 
 GO

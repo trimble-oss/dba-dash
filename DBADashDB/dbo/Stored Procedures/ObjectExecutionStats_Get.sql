@@ -14,10 +14,13 @@
 		ObjectExecutionCounts table doesn't store zero executions counts.  This option will generate zero rows where we have object execution data collected for the instance but not for the specified stored proc.
 	*/
 	@ZeroFill BIT=1,
-	@Debug BIT=0
+	@Debug BIT=0,
+	@DaysOfWeek IDs READONLY, /* e.g. 1=Monday. exclude weekends:  1,2,3,4,5.  Filter applied in local timezone (@UTCOffset) */
+	@Hours IDs READONLY/* e.g. 9 to 5 :  9,10,11,12,13,14,15,16. Filter applied in local timezone (@UTCOffset)*/
 )
 AS
 SET NOCOUNT ON
+SET DATEFIRST 1 /* Start week on Monday */
 CREATE TABLE #results(
     SnapshotDate DATETIME,
     DatabaseName NVARCHAR(128),
@@ -44,6 +47,12 @@ CREATE TABLE #results(
 	TotalMeasure DECIMAL(29, 9)
 );
 
+IF @Instance IS NULL AND @InstanceID IS NULL
+BEGIN
+	RAISERROR('Instance not specified',11,1);
+	RETURN;
+END
+
 IF @FromDateUTC IS NULL
 	SET @FromDateUTC = CONVERT(DATETIME,STUFF(CONVERT(VARCHAR,DATEADD(mi,-120,GETUTCDATE()),120),16,4,'0:00'),120) 
 IF @ToDateUTC IS NULL
@@ -52,9 +61,23 @@ IF @ToDateUTC IS NULL
 DECLARE @DateAggString NVARCHAR(MAX)
 DECLARE @MeasureString NVARCHAR(MAX) 
 SELECT @MeasureString = CASE WHEN @Measure IN('TotalCPU','AvgCPU','TotalDuration','AvgDuration','ExecutionCount','ExecutionsPerMin','AvgLogicalReads','AvgPhysicalReads','AvgWrites','TotalWrites','TotalLogicalReads','TotalPhysicalReads','MaxExecutionsPerMin','cpu_ms_per_sec','duration_ms_per_sec') THEN @Measure ELSE NULL END
-SELECT @DateAggString = CASE WHEN @DateGroupingMin IS NULL OR @DateGroupingMin =0 THEN 'DATEADD(mi, @UTCOffset, PS.SnapshotDate)'
+SELECT @DateAggString = CASE WHEN @DateGroupingMin IS NULL OR @DateGroupingMin =0 THEN 'DATEADD(mi, @UTCOffset, OES.SnapshotDate)'
 		 ELSE 'DG.DateGroup' END
 DECLARE @SQL NVARCHAR(MAX)
+
+/* Generate CSV list from list of integer values (safe from SQL injection compared to passing in a CSV string) */
+DECLARE @DaysOfWeekCsv NVARCHAR(MAX)
+SELECT @DaysOfWeekCsv =  STUFF((SELECT ',' + CAST(ID AS VARCHAR)
+FROM @DaysOfWeek
+FOR XML PATH(''),TYPE).value('.','NVARCHAR(MAX)'),1,1,'')
+
+/* Generate CSV list from list of integer values (safe from SQL injection compared to passing in a CSV string) */
+DECLARE @HoursCsv NVARCHAR(MAX)
+SELECT @HoursCsv =  STUFF((SELECT ',' + CAST(ID AS VARCHAR)
+FROM @Hours
+FOR XML PATH(''),TYPE).value('.','NVARCHAR(MAX)'),1,1,'')
+
+
 SET @SQL = N'
 WITH agg AS (
 	SELECT ' + @DateAggString + N' as SnapshotDate,
@@ -62,34 +85,36 @@ WITH agg AS (
 		   D.DatabaseID,
 		   O.ObjectID,
 		   O.SchemaName + ''.'' + O.objectname as object_name,
-		   SUM(PS.total_worker_time)/1000000.0 as TotalCPU,
-		   SUM(PS.total_worker_time)/NULLIF(SUM(PS.execution_count),0)/1000000.0 as AvgCPU,
-		   SUM(total_worker_time)/1000.0 / MAX(SUM(PeriodTime)/1000000.0) OVER() cpu_ms_per_sec,
-		   SUM(PS.execution_count) as ExecutionCount,
-		   SUM(PS.execution_count)/(NULLIF(SUM(PeriodTime),0)/60000000.0) as ExecutionsPerMin,
-		   SUM(PS.total_elapsed_time)/1000000.0 AS TotalDuration,
-		   SUM(PS.total_elapsed_time)/NULLIF(SUM(PS.execution_count),0)/1000000.0 AS AvgDuration,
-		   SUM(total_elapsed_time)/1000.0 / MAX(SUM(PeriodTime)/1000000.0) OVER() duration_ms_per_sec,
-		   SUM(PS.total_logical_reads) as TotalLogicalReads,
-		   SUM(PS.total_logical_reads)/NULLIF(SUM(PS.execution_count),0) as AvgLogicalReads,
-		   SUM(PS.total_physical_reads) as TotalPhysicalReads,
-		   SUM(PS.total_physical_reads)/NULLIF(SUM(PS.execution_count),0) as AvgPhysicalReads,
-		   SUM(PS.total_logical_writes) as TotalWrites,
-		   SUM(PS.total_logical_writes)/NULLIF(SUM(PS.execution_count),0) as AvgWrites,
+		   SUM(OES.total_worker_time)/1000000.0 as TotalCPU,
+		   SUM(OES.total_worker_time)/NULLIF(SUM(OES.execution_count),0)/1000000.0 as AvgCPU,
+		   SUM(total_worker_time)/1000.0 / MAX(SUM(OES.PeriodTime)/1000000.0) OVER() cpu_ms_per_sec,
+		   SUM(OES.execution_count) as ExecutionCount,
+		   SUM(OES.execution_count)/(NULLIF(SUM(OES.PeriodTime),0)/60000000.0) as ExecutionsPerMin,
+		   SUM(OES.total_elapsed_time)/1000000.0 AS TotalDuration,
+		   SUM(OES.total_elapsed_time)/NULLIF(SUM(OES.execution_count),0)/1000000.0 AS AvgDuration,
+		   SUM(OES.total_elapsed_time)/1000.0 / MAX(SUM(OES.PeriodTime)/1000000.0) OVER() duration_ms_per_sec,
+		   SUM(OES.total_logical_reads) as TotalLogicalReads,
+		   SUM(OES.total_logical_reads)/NULLIF(SUM(OES.execution_count),0) as AvgLogicalReads,
+		   SUM(OES.total_physical_reads) as TotalPhysicalReads,
+		   SUM(OES.total_physical_reads)/NULLIF(SUM(OES.execution_count),0) as AvgPhysicalReads,
+		   SUM(OES.total_logical_writes) as TotalWrites,
+		   SUM(OES.total_logical_writes)/NULLIF(SUM(OES.execution_count),0) as AvgWrites,
 		   MAX(MaxExecutionsPerMin) as MaxExecutionsPerMin
-	FROM dbo.ObjectExecutionStats' + CASE WHEN @DateGroupingMin>=60 THEN N'_60MIN' ELSE N'' END + N' PS
-		' + CASE WHEN @DateGroupingMin IS NULL OR @DateGroupingMin =0 THEN '' ELSE 'CROSS APPLY dbo.DateGroupingMins(DATEADD(mi, @UTCOffset, PS.SnapshotDate),@DateGroupingMin) DG' END + '
-		JOIN dbo.DBObjects O ON PS.ObjectID = O.ObjectID
+	FROM dbo.ObjectExecutionStats' + CASE WHEN @DateGroupingMin>=60 THEN N'_60MIN' ELSE N'' END + N' OES
+		' + CASE WHEN @DateGroupingMin IS NULL OR @DateGroupingMin =0 THEN '' ELSE 'CROSS APPLY dbo.DateGroupingMins(DATEADD(mi, @UTCOffset, OES.SnapshotDate),@DateGroupingMin) DG' END + '
+		JOIN dbo.DBObjects O ON OES.ObjectID = O.ObjectID
 		JOIN dbo.Databases D ON D.DatabaseID = O.DatabaseID
-		JOIN dbo.Instances I ON D.InstanceID = I.InstanceID AND PS.InstanceID = I.InstanceID
+		JOIN dbo.Instances I ON D.InstanceID = I.InstanceID AND OES.InstanceID = I.InstanceID
 	WHERE D.IsActive=1
 	' + CASE WHEN @Instance IS NOT NULL THEN N'AND I.Instance = @Instance' ELSE '' END + N'
 	' + CASE WHEN @InstanceID IS NOT NULL THEN N'AND I.InstanceID = @InstanceID' ELSE '' END + N'
-	AND PS.SnapshotDate >= @FromDate 
-	AND PS.SnapshotDate< @ToDate
+	AND OES.SnapshotDate >= @FromDate 
+	AND OES.SnapshotDate< @ToDate
 	' + CASE WHEN @DatabaseID IS NULL THEN N'' ELSE N'AND D.DatabaseID=@DatabaseID' END + N'
 	' + CASE WHEN @ObjectName IS NULL THEN N'' ELSE N'AND O.objectname=@ObjectName' END + N'
-	' + CASE WHEN @ObjectID IS NULL THEN N'' ELSE N'AND PS.ObjectID = @ObjectID' END + N'
+	' + CASE WHEN @ObjectID IS NULL THEN N'' ELSE N'AND OES.ObjectID = @ObjectID' END + N'
+	' + CASE WHEN @DaysOfWeekCsv IS NULL THEN N'' ELSE 'AND DATEPART(dw,DATEADD(mi, @UTCOffset, OES.SnapshotDate)) IN (' + @DaysOfWeekCsv + ')' END + '
+	' + CASE WHEN @HoursCsv IS NULL THEN N'' ELSE 'AND DATEPART(hh,DATEADD(mi, @UTCOffset, OES.SnapshotDate)) IN(' + @HoursCsv + ')' END + '
 	GROUP BY ' + @DateAggString + N',D.Name,O.objectname,D.DatabaseID,O.SchemaName,O.ObjectID
 )
 , T AS (
@@ -136,8 +161,26 @@ BEGIN
 	    ProcRank,
 	    TotalMeasure
 	)
-	EXEC sp_executesql @SQL,N'@Instance SYSNAME,@DatabaseID INT,@FromDate DATETIME2(3),@ToDate DATETIME2(3),@ObjectName SYSNAME,@SchemaName SYSNAME,@UTCOffset INT,@InstanceID INT,@ObjectID BIGINT,@DateGroupingMin INT',
-		@Instance,@DatabaseID,@FromDateUTC,@ToDateUTC,@ObjectName,@SchemaName,@UTCOffset,@InstanceID,@ObjectID,@DateGroupingMin
+	EXEC sp_executesql @SQL,N'@Instance SYSNAME,
+							@DatabaseID INT,
+							@FromDate DATETIME2(3),
+							@ToDate DATETIME2(3),
+							@ObjectName SYSNAME,
+							@SchemaName SYSNAME,
+							@UTCOffset INT,
+							@InstanceID INT,
+							@ObjectID BIGINT,
+							@DateGroupingMin INT',
+							@Instance,
+							@DatabaseID,
+							@FromDateUTC,
+							@ToDateUTC,
+							@ObjectName,
+							@SchemaName,
+							@UTCOffset,
+							@InstanceID,
+							@ObjectID,
+							@DateGroupingMin
 
 END 
 
@@ -156,9 +199,11 @@ BEGIN;
 	SELECT ' + CASE WHEN @DateGroupingMin >0 THEN 'DG.DateGroup' ELSE 'DATEADD(mi, @UTCOffset, OES.SnapshotDate)' END + '
 	FROM dbo.ObjectExecutionStats' + CASE WHEN @DateGroupingMin>=60 THEN N'_60MIN' ELSE N'' END + N' OES
 	' + CASE WHEN @DateGroupingMin >0 THEN 'CROSS APPLY dbo.DateGroupingMins(DATEADD(mi, @UTCOffset, OES.SnapshotDate),@DateGroupingMin) DG' ELSE '' END + '
-	WHERE SnapshotDate>=@FromDateUTC
-	AND SnapshotDate < @ToDateUTC
-	AND InstanceID = @InstanceID
+	WHERE OES.SnapshotDate>=@FromDateUTC
+	AND OES.SnapshotDate < @ToDateUTC
+	AND OES.InstanceID = @InstanceID
+	' + CASE WHEN @DaysOfWeekCsv IS NULL THEN N'' ELSE 'AND DATEPART(dw,DATEADD(mi, @UTCOffset, OES.SnapshotDate)) IN (' + @DaysOfWeekCsv + ')' END + '
+	' + CASE WHEN @HoursCsv IS NULL THEN N'' ELSE 'AND DATEPART(hh,DATEADD(mi, @UTCOffset, OES.SnapshotDate)) IN(' + @HoursCsv + ')' END + '
 	GROUP BY ' + CASE WHEN @DateGroupingMin >0 THEN 'DG.DateGroup' ELSE 'DATEADD(mi, @UTCOffset, OES.SnapshotDate)' END
 
 	IF @Debug=1
@@ -170,8 +215,27 @@ BEGIN;
 	(
 	    DateGroup
 	)
-	EXEC sp_executesql @DateGroupSQL,N'@Instance SYSNAME,@DatabaseID INT,@FromDateUTC DATETIME2(3),@ToDateUTC DATETIME2(3),@ObjectName SYSNAME,@SchemaName SYSNAME,@UTCOffset INT,@InstanceID INT,@ObjectID BIGINT,@DateGroupingMin INT',
-		@Instance,@DatabaseID,@FromDateUTC,@ToDateUTC,@ObjectName,@SchemaName,@UTCOffset,@InstanceID,@ObjectID,@DateGroupingMin
+	EXEC sp_executesql @DateGroupSQL,
+						N'@Instance SYSNAME,
+						@DatabaseID INT,
+						@FromDateUTC DATETIME2(3),
+						@ToDateUTC DATETIME2(3),
+						@ObjectName SYSNAME,
+						@SchemaName SYSNAME,
+						@UTCOffset INT,
+						@InstanceID INT,
+						@ObjectID BIGINT,
+						@DateGroupingMin INT',
+						@Instance,
+						@DatabaseID,
+						@FromDateUTC,
+						@ToDateUTC,
+						@ObjectName,
+						@SchemaName,
+						@UTCOffset,
+						@InstanceID,
+						@ObjectID,
+						@DateGroupingMin
 	
 	INSERT INTO #results
 	(

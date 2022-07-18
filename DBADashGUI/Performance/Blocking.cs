@@ -22,55 +22,45 @@ namespace DBADashGUI.Performance
         {
             InitializeComponent();
         }
-        DateTime eventTime = DateTime.MinValue;
-        Int32 mins;
-
-        string connectionString;
+  
         Int32 InstanceID;
-        DateTime fromDate;
-        DateTime toDate;
         double maxBlockedTime = 0;
         Int32 databaseID = 0;
 
-        public void RefreshData(Int32 InstanceID, DateTime fromDate, DateTime toDate, string connectionString, Int32 databaseID)
+        public void RefreshData(Int32 InstanceID, Int32 databaseID)
         {
-            eventTime = DateTime.MinValue;
-            mins = (Int32)toDate.Subtract(fromDate).TotalMinutes;
             this.InstanceID = InstanceID;
-            this.fromDate = fromDate;
-            this.toDate = toDate;
-            this.connectionString = connectionString;
             this.databaseID = databaseID;
-            refreshData(false);
+            RefreshData();
         }
 
-        public void RefreshData()
-        {
-            if (eventTime > DateTime.MinValue)
-            {
-                this.fromDate = eventTime.AddSeconds(1);
-                this.toDate = DateTime.UtcNow.AddMinutes(1);
-                refreshData(true);
-            }
-        }
 
-        private DataTable getDT()
+        private DataTable GetDT()
         {
-            using (var cn = new SqlConnection(connectionString))
+            using (var cn = new SqlConnection(Common.ConnectionString))
             using (var cmd = new SqlCommand("dbo.BlockingSnapshots_Get", cn) { CommandType = CommandType.StoredProcedure })
             using (var da = new SqlDataAdapter(cmd))
             {
                 cn.Open();
                 cmd.Parameters.AddWithValue("@InstanceID", InstanceID);
-                cmd.Parameters.AddWithValue("@FromDate", fromDate);
-                cmd.Parameters.AddWithValue("@ToDate", toDate);
+                cmd.Parameters.AddWithValue("@FromDate", DateRange.FromUTC);
+                cmd.Parameters.AddWithValue("@ToDate", DateRange.ToUTC);
                 if (databaseID > 0)
                 {
                     cmd.Parameters.AddWithValue("@DatabaseID", databaseID);
                 }
+                cmd.Parameters.AddWithValue("@UTCOffset", Common.UtcOffset);
+                if (DateRange.HasTimeOfDayFilter)
+                {
+                    cmd.Parameters.AddWithValue("Hours", DateRange.TimeOfDay.AsDataTable());
+                }
+                if (DateRange.HasDayOfWeekFilter)
+                {
+                    cmd.Parameters.AddWithValue("DaysOfWeek", DateRange.DayOfWeek.AsDataTable());
+                }
                 cmd.CommandTimeout = Properties.Settings.Default.CommandTimeout;
                 
-                DataTable dt = new DataTable();
+                DataTable dt = new();
                 da.Fill(dt);
                 return dt;
             }           
@@ -100,20 +90,17 @@ namespace DBADashGUI.Performance
             }
         }
 
-        private void refreshData(bool update)
+        public void RefreshData()
         {
-            var dt = getDT();
-            if(!update)
-            {
-                chartBlocking.AxisX.Clear();
-                chartBlocking.AxisY.Clear();
-                chartBlocking.Series.Clear();
-                eventTime = fromDate;
-                maxBlockedTime = 0;
-            }
+            var dt = GetDT();
+
+            chartBlocking.AxisX.Clear();
+            chartBlocking.AxisY.Clear();
+            chartBlocking.Series.Clear();
+            maxBlockedTime = 0;
 
             var points = new BlockingPoint[dt.Rows.Count];
-            Int32 i=0;
+            Int32 i = 0;
             double Ymax = 100;
 
             foreach (DataRow r in dt.Rows)
@@ -126,78 +113,54 @@ namespace DBADashGUI.Performance
                 {
                     maxBlockedTime = blockedTime;
                 }
-                if (eventTime < dtm)
-                {
-                    eventTime = dtm;
-                }
-                points[i] = new BlockingPoint(snapshotID,dtm.ToLocalTime(), blockedCnt, blockedTime);
+                points[i] = new BlockingPoint(snapshotID, dtm.ToLocalTime(), blockedCnt, blockedTime);
                 Ymax = blockedCnt > Ymax ? blockedCnt : Ymax;
                 i += 1;
             }
 
-            if (update)
-            {
-                ScatterSeries ss = (ScatterSeries)chartBlocking.Series[0];
-                ss.Values.AddRange(points);
-                if (ss.Values.Count > 0)
+            var mapper = Mappers.Weighted<BlockingPoint>()
+                .X(value => value.SnapshotDate.Ticks)
+                .Y(value => value.BlockedSessions)
+                .Weight(value => value.BlockedWaitTime);
+
+            SeriesCollection s1 = new(mapper)
                 {
-                    while (((BlockingPoint)ss.Values[0]).SnapshotDate < DateTime.UtcNow.AddMinutes(-mins))
+                    new ScatterSeries
                     {
-                        ss.Values.RemoveAt(0);
+                    Title= "Blocking Snapshot",
+                    Values = new ChartValues<BlockingPoint>(points),
+                    MinPointShapeDiameter = 5,
+                    MaxPointShapeDiameter = MaxPointShapeDiameter
+
                     }
-                }
-                Ymax = chartBlocking.AxisY[0].MaxValue > Ymax ? chartBlocking.AxisY[0].MaxValue : Ymax;
-                chartBlocking.AxisX[0].MinValue = DateTime.Now.AddMinutes(-mins).Ticks;
-                chartBlocking.AxisX[0].MaxValue = DateTime.Now.Ticks;
-                chartBlocking.AxisY[0].MaxValue = Ymax;
-                ss.MaxPointShapeDiameter = MaxPointShapeDiameter;
-            }
-            else
+
+                };
+
+            string format = DateRange.DurationMins < 1440 ? "HH:mm" : "yyyy-MM-dd HH:mm";
+            chartBlocking.AxisX.Add(new Axis
             {
-                var mapper = Mappers.Weighted<BlockingPoint>()
-                    .X(value => value.SnapshotDate.Ticks)
-                    .Y(value => value.BlockedSessions)
-                    .Weight(value => value.BlockedWaitTime);
+                LabelFormatter = val => new System.DateTime((long)val).ToString(format),
+                MinValue = DateRange.FromUTC.ToLocalTime().Ticks,
+                MaxValue = DateRange.ToUTC.ToLocalTime().Ticks
+            });
+            chartBlocking.AxisY.Add(new Axis
+            {
+                Title = "Blocked Sessions",
+                LabelFormatter = val => val.ToString(),
+                MinValue = 0,
+                MaxValue = Ymax
+            });
+            chartBlocking.Series = s1;
 
-                SeriesCollection s1 = new SeriesCollection(mapper)
-                    {
-                      new ScatterSeries
-                      {
-                        Title= "Blocking Snapshot",
-                        Values = new ChartValues<BlockingPoint>(points),
-                        MinPointShapeDiameter = 5,
-                        MaxPointShapeDiameter = MaxPointShapeDiameter 
-                   
-                      }
-
-                    };
-
-                string format = mins < 1440 ? "HH:mm" : "yyyy-MM-dd HH:mm";
-                chartBlocking.AxisX.Add(new Axis
-                {
-                    LabelFormatter = val => new System.DateTime((long)val).ToString(format),
-                    MinValue = fromDate.ToLocalTime().Ticks,
-                    MaxValue = toDate.ToLocalTime().Ticks
-                });
-                chartBlocking.AxisY.Add(new Axis
-                {
-                    Title="Blocked Sessions",
-                    LabelFormatter = val => val.ToString(),
-                    MinValue = 0,
-                    MaxValue = Ymax
-                });
-                chartBlocking.Series = s1;
-
-            }
             lblBlocking.Text = databaseID > 0 ? "Blocking: Database" : "Blocking: Instance";
 
         }
-      
+
 
         private void ChartBlocking_DataClick(object sender, ChartPoint chartPoint)
         {
             var blockPoint = (BlockingPoint)chartPoint.Instance;
-            RunningQueriesViewer frm = new RunningQueriesViewer
+            RunningQueriesViewer frm = new()
             {
                 SnapshotDateFrom = blockPoint.SnapshotDate.ToUniversalTime(),
                 SnapshotDateTo = blockPoint.SnapshotDate.ToUniversalTime(),

@@ -125,7 +125,7 @@
             this.dgv.RowTemplate.Height = 24;
             this.dgv.Size = new System.Drawing.Size(708, 318);
             this.dgv.TabIndex = 0;
-            this.dgv.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgv_CellContentClick);
+            this.dgv.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.Dgv_CellContentClick);
             // 
             // colWaitType
             // 
@@ -278,7 +278,7 @@
             this.tsCopy.Name = "tsCopy";
             this.tsCopy.Size = new System.Drawing.Size(29, 24);
             this.tsCopy.Text = "Copy";
-            this.tsCopy.Click += new System.EventHandler(this.tsCopy_Click);
+            this.tsCopy.Click += new System.EventHandler(this.TsCopy_Click);
             // 
             // tsExcel
             // 
@@ -288,7 +288,7 @@
             this.tsExcel.Name = "tsExcel";
             this.tsExcel.Size = new System.Drawing.Size(29, 24);
             this.tsExcel.Text = "Export Excel";
-            this.tsExcel.Click += new System.EventHandler(this.tsExcel_Click);
+            this.tsExcel.Click += new System.EventHandler(this.TsExcel_Click);
             // 
             // tsColumns
             // 
@@ -307,7 +307,7 @@
             this.tsRefresh.Name = "tsRefresh";
             this.tsRefresh.Size = new System.Drawing.Size(29, 24);
             this.tsRefresh.Text = "Refresh";
-            this.tsRefresh.Click += new System.EventHandler(this.tsRefresh_Click);
+            this.tsRefresh.Click += new System.EventHandler(this.TsRefresh_Click);
             // 
             // splitContainer1
             // 
@@ -394,7 +394,7 @@
             this.tsSmooth1.Size = new System.Drawing.Size(128, 26);
             this.tsSmooth1.Tag = "1.0";
             this.tsSmooth1.Text = "100%";
-            this.tsSmooth1.Click += new System.EventHandler(this.tsSmooth_Click);
+            this.tsSmooth1.Click += new System.EventHandler(this.TsSmooth_Click);
             // 
             // toolStripMenuItem3
             // 
@@ -402,7 +402,7 @@
             this.toolStripMenuItem3.Size = new System.Drawing.Size(128, 26);
             this.toolStripMenuItem3.Tag = "0.75";
             this.toolStripMenuItem3.Text = "75%";
-            this.toolStripMenuItem3.Click += new System.EventHandler(this.tsSmooth_Click);
+            this.toolStripMenuItem3.Click += new System.EventHandler(this.TsSmooth_Click);
             // 
             // tsSmoothPoint5
             // 
@@ -410,7 +410,7 @@
             this.tsSmoothPoint5.Size = new System.Drawing.Size(128, 26);
             this.tsSmoothPoint5.Tag = "0.5";
             this.tsSmoothPoint5.Text = "50%";
-            this.tsSmoothPoint5.Click += new System.EventHandler(this.tsSmooth_Click);
+            this.tsSmoothPoint5.Click += new System.EventHandler(this.TsSmooth_Click);
             // 
             // toolStripMenuItem2
             // 
@@ -418,7 +418,7 @@
             this.toolStripMenuItem2.Size = new System.Drawing.Size(128, 26);
             this.toolStripMenuItem2.Tag = "0.25";
             this.toolStripMenuItem2.Text = "25%";
-            this.toolStripMenuItem2.Click += new System.EventHandler(this.tsSmooth_Click);
+            this.toolStripMenuItem2.Click += new System.EventHandler(this.TsSmooth_Click);
             // 
             // tsSmooth0
             // 
@@ -426,7 +426,7 @@
             this.tsSmooth0.Size = new System.Drawing.Size(128, 26);
             this.tsSmooth0.Tag = "0";
             this.tsSmooth0.Text = "0%";
-            this.tsSmooth0.Click += new System.EventHandler(this.tsSmooth_Click);
+            this.tsSmooth0.Click += new System.EventHandler(this.TsSmooth_Click);
             // 
             // pointsToolStripMenuItem
             // 

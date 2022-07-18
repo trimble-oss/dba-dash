@@ -32,7 +32,7 @@ namespace DBADashGUI.Performance
         public DateTime FromDate { get; set; }
         public DateTime ToDate { get; set; }
 
-        private IOSummaryGroupByOptions defaultGroupBy =  IOSummaryGroupByOptions.Database;
+        private readonly IOSummaryGroupByOptions defaultGroupBy =  IOSummaryGroupByOptions.Database;
 
         public IOSummaryGroupByOptions GroupBy
         {
@@ -59,7 +59,7 @@ namespace DBADashGUI.Performance
         public DataTable GetIOSummary(out string InstanceName, out string DatabaseName)
         {
             using(var cn = new SqlConnection(Common.ConnectionString))
-            using( var cmd = new SqlCommand("dbo.IOSummary_Get",cn) {  CommandType = CommandType.StoredProcedure, CommandTimeout = Properties.Settings.Default.CommandTimeout })
+            using(var cmd = new SqlCommand("dbo.IOSummary_Get",cn) {  CommandType = CommandType.StoredProcedure, CommandTimeout = Properties.Settings.Default.CommandTimeout })
             using(var da = new SqlDataAdapter(cmd))
             {
                 var dt = new DataTable();
@@ -73,6 +73,16 @@ namespace DBADashGUI.Performance
                 {
                     cmd.Parameters.AddWithValue("DatabaseID", DatabaseID);
                 }
+
+                cmd.Parameters.AddWithValue("UTCOffset", Common.UtcOffset);
+                if (DateRange.HasTimeOfDayFilter)
+                {
+                    cmd.Parameters.AddWithValue("Hours", DateRange.TimeOfDay.AsDataTable());
+                }
+                if (DateRange.HasDayOfWeekFilter)
+                {
+                    cmd.Parameters.AddWithValue("DaysOfWeek", DateRange.DayOfWeek.AsDataTable());
+                }
                 da.Fill(dt);
                 DatabaseName = Convert.ToString(pDatabaseName.Value);
                 InstanceName = Convert.ToString(pInstance.Value);
@@ -80,22 +90,22 @@ namespace DBADashGUI.Performance
             }
         }
 
-        private void addGroupByOptions()
+        private void AddGroupByOptions()
         {
             foreach (IOSummaryGroupByOptions val in Enum.GetValues(typeof(IOSummaryGroupByOptions)))
             {
-                ToolStripMenuItem item = new ToolStripMenuItem()
+                ToolStripMenuItem item = new()
                 {
                     Text = val.ToString(),
                     Checked = val == defaultGroupBy
                 };
 
-                item.Click += tsGroupBy_Click;
+                item.Click += TsGroupBy_Click;
                 tsGroupBy.DropDownItems.Add(item);
             }
         }
 
-        private void addColsToDGV()
+        private void AddColsToDGV()
         {
             dgv.AutoGenerateColumns = false;
             dgv.Columns.Clear();
@@ -124,41 +134,35 @@ namespace DBADashGUI.Performance
 
         private void IOSummary_Load(object sender, EventArgs e)
         {
-            addGroupByOptions();
-            addColsToDGV();
+            AddGroupByOptions();
+            AddColsToDGV();
             
         }
 
         public void RefreshData()
         {
-            refreshData();
-        }
-
-        private void refreshData()
-        {
-            string instanceName,databaseName;
-            var dt = GetIOSummary(out instanceName,out databaseName);
+            DataTable dt = GetIOSummary(out string instanceName, out string databaseName);
             lblHeader.Text = instanceName + (string.IsNullOrEmpty(databaseName) ? "" : " | " + databaseName);
             dgv.DataSource = dt;
             dgv.Columns["colGroup"].HeaderText = GroupBy.ToString();
             dgv.Sort(dgv.Columns[1], ListSortDirection.Descending);
             dgv.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
             lblDateRange.Text = "Date Range : " + FromDate.ToLocalTime().ToString() + " to " + ToDate.ToLocalTime().ToString();
-            
+
         }
 
-        private void tsGroupBy_Click(object sender, EventArgs e)
+        private void TsGroupBy_Click(object sender, EventArgs e)
         {
             GroupBy = (IOSummaryGroupByOptions)Enum.Parse(typeof(IOSummaryGroupByOptions),((ToolStripMenuItem)sender).Text);
-            refreshData();
+            RefreshData();
         }
 
-        private void tsExcel_Click(object sender, EventArgs e)
+        private void TsExcel_Click(object sender, EventArgs e)
         {
             Common.PromptSaveDataGridView(ref dgv);
         }
 
-        private void tsCopy_Click(object sender, EventArgs e)
+        private void TsCopy_Click(object sender, EventArgs e)
         {
             Common.CopyDataGridViewToClipboard(dgv);
         }

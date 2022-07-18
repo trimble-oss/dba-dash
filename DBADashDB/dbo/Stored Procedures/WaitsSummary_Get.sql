@@ -1,10 +1,16 @@
 ﻿CREATE PROC dbo.WaitsSummary_Get(
 	@InstanceID INT,
-	@FromDate DATETIME2(2),
-	@ToDate DATETIME2(2),
-	@Use60MIN BIT=NULL
+	@FromDate DATETIME2(2), /* UTC */
+	@ToDate DATETIME2(2), /* UTC */
+	@Use60MIN BIT=NULL,
+	@UTCOffset INT=0, /* Used for Hours filter */
+	@DaysOfWeek IDs READONLY, /* e.g. 1=Monday. exclude weekends:  1,2,3,4,5.  Filter applied in local timezone (@UTCOffset) */
+	@Hours IDs READONLY/* e.g. 9 to 5 :  9,10,11,12,13,14,15,16. Filter applied in local timezone (@UTCOffset)*/
 )
 AS
+SET DATEFIRST 1 /* Start week on Monday */
+SET NOCOUNT ON
+
 IF @Use60MIN IS NULL
 BEGIN
 	SELECT @Use60MIN = CASE WHEN DATEDIFF(hh,@FromDate,@ToDate)>24 THEN 1
@@ -15,6 +21,19 @@ BEGIN
 						THEN 1
 						ELSE 0 END
 END
+
+/* Generate CSV list from list of integer values (safe from SQL injection compared to passing in a CSV string) */
+DECLARE @DaysOfWeekCsv NVARCHAR(MAX)
+SELECT @DaysOfWeekCsv =  STUFF((SELECT ',' + CAST(ID AS VARCHAR)
+FROM @DaysOfWeek
+FOR XML PATH(''),TYPE).value('.','NVARCHAR(MAX)'),1,1,'')
+
+/* Generate CSV list from list of integer values (safe from SQL injection compared to passing in a CSV string) */
+DECLARE @HoursCsv NVARCHAR(MAX)
+SELECT @HoursCsv =  STUFF((SELECT ',' + CAST(ID AS VARCHAR)
+FROM @Hours
+FOR XML PATH(''),TYPE).value('.','NVARCHAR(MAX)'),1,1,'')
+
 DECLARE @SQL NVARCHAR(MAX)
 SET @SQL = N'
 SELECT  WT.WaitType,
@@ -36,7 +55,19 @@ WHERE W.InstanceID=@InstanceID
 AND W.SnapshotDate>=@FromDate
 AND W.SnapshotDate<@ToDate
 AND WT.IsExcluded=0
-GROUP BY WT.WaitType,I.scheduler_count,WT.Description
+' + CASE WHEN @DaysOfWeekCsv IS NULL THEN N'' ELSE 'AND DATEPART(dw,DATEADD(mi, @UTCOffset, W.SnapshotDate)) IN (' + @DaysOfWeekCsv + ')' END + '
+' + CASE WHEN @HoursCsv IS NULL THEN N'' ELSE 'AND DATEPART(hh,DATEADD(mi, @UTCOffset, W.SnapshotDate)) IN(' + @HoursCsv + ')' END + '
+GROUP BY WT.WaitType,
+		I.scheduler_count,
+		WT.Description
 ORDER BY WaitTimeMsPerSec DESC'
 
-EXEC sp_executesql @SQL,N'@InstanceID INT,@FromDate DATETIME2(2),@ToDate DATETIME2(2)',@InstanceID,@FromDate,@ToDate
+EXEC sp_executesql @SQL,
+					N'@InstanceID INT,
+					@FromDate DATETIME2(2),
+					@ToDate DATETIME2(2),
+					@UTCOffset INT',
+					@InstanceID,
+					@FromDate,
+					@ToDate,
+					@UTCOffset

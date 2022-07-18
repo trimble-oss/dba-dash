@@ -7,9 +7,13 @@
 	@ToDate DATETIME2(2),
 	@Search NVARCHAR(128)=NULL,
 	@Use60Min BIT=NULL,
-	@Debug BIT=0
+	@Debug BIT=0,
+	@DaysOfWeek IDs READONLY, /* e.g. exclude weekends:  Monday,Tuesday,Wednesday,Thursday,Friday. Filter applied in local timezone (@UTCOffset) */
+	@Hours IDs READONLY, /* e.g. 9 to 5 :  9,10,11,12,13,14,15,16. Filter applied in local timezone (@UTCOffset)  */
+	@UTCOffset INT=0 /* Used for filtering on hours & weekday in current timezone */
 )
 AS
+SET DATEFIRST 1 /* Start week on Monday */
 IF @Use60Min IS NULL
 BEGIN
 	SELECT @Use60Min = CASE WHEN DATEDIFF(hh,@FromDate,@ToDate)>24 THEN 1
@@ -20,6 +24,17 @@ BEGIN
 						THEN 1
 						ELSE 0 END
 END
+
+DECLARE @DaysOfWeekCsv NVARCHAR(MAX)
+SELECT @DaysOfWeekCsv =  STUFF((SELECT ',' + CAST(ID AS VARCHAR)
+FROM @DaysOfWeek
+FOR XML PATH(''),TYPE).value('.','NVARCHAR(MAX)'),1,1,'')
+
+DECLARE @HoursCsv NVARCHAR(MAX)
+SELECT @HoursCsv =  STUFF((SELECT ',' + CAST(ID AS VARCHAR)
+FROM @Hours
+FOR XML PATH(''),TYPE).value('.','NVARCHAR(MAX)'),1,1,'')
+
 DECLARE @SQL NVARCHAR(MAX) =N'
 WITH T AS (
 	SELECT IC.InstanceID,
@@ -58,6 +73,8 @@ WITH T AS (
 		OR C.instance_name LIKE @Search
 		OR C.counter_name LIKE @Search
 		)' END + '
+	' + CASE WHEN @DaysOfWeekCsv IS NULL THEN N'' ELSE 'AND DATEPART(dw,DATEADD(mi, @UTCOffset, PC.SnapshotDate)) IN (' + @DaysOfWeekCsv + ')' END + '
+	' + CASE WHEN @HoursCsv IS NULL THEN N'' ELSE 'AND DATEPART(hh,DATEADD(mi, @UTCOffset, PC.SnapshotDate)) IN(' + @HoursCsv + ')' END + '
 GROUP BY	C.CounterID,
 			C.object_name,
 			C.counter_name,
@@ -124,4 +141,19 @@ BEGIN
 	PRINT @SQL
 END
 
-EXEC sp_executesql @SQL,N'@InstanceID INT,@FromDate DATETIME2(2),@ToDate DATETIME2(2),@Search NVARCHAR(128)=NULL,@InstanceIDs VARCHAR(MAX),@Counters VARCHAR(MAX),@TagIDs VARCHAR(MAX)',@InstanceID, @FromDate, @ToDate, @Search,@InstanceIDs,@Counters,@TagIDs
+EXEC sp_executesql @SQL,N'@InstanceID INT,
+						@FromDate DATETIME2(2),
+						@ToDate DATETIME2(2),
+						@Search NVARCHAR(128)=NULL,
+						@InstanceIDs VARCHAR(MAX),
+						@Counters VARCHAR(MAX),
+						@TagIDs VARCHAR(MAX),
+						@UTCOffset INT',
+						@InstanceID, 
+						@FromDate, 
+						@ToDate, 
+						@Search,
+						@InstanceIDs,
+						@Counters,
+						@TagIDs,
+						@UTCOffset

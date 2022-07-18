@@ -17,14 +17,14 @@ namespace DBADashGUI.Performance
 
         public List<Int32> InstanceIDs;
         public string TagIDs;
-        private List<KeyValuePair<string,PersistedColumnLayout>>standardLayout;
+        private readonly List<KeyValuePair<string, PersistedColumnLayout>> standardLayout;
 
-        public Dictionary<int,Counter> SelectedPerformanceCounters =  new Dictionary<int, Counter>();
+        public Dictionary<int,Counter> SelectedPerformanceCounters =  new();
 
         public PerformanceSummary()
         {
             InitializeComponent();
-            standardLayout = getColumnLayout();
+            standardLayout = GetColumnLayout();
         }
 
    
@@ -32,10 +32,10 @@ namespace DBADashGUI.Performance
         {
             dgv.Columns[0].Frozen = Common.FreezeKeyColumn;
             dgv.DataSource = null;
-            var dt = getPerformanceSummary();
-            addPerformanceCounters(ref dt);
+            var dt = GetPerformanceSummary();
+            AddPerformanceCounters(ref dt);
             dgv.AutoGenerateColumns = false;
-            generateHistogram(ref dt);
+            GenerateHistogram(ref dt);
             if (dgv.DataSource == null)
             {
                 dgv.DataSource = new DataView(dt);
@@ -44,9 +44,9 @@ namespace DBADashGUI.Performance
             dgv.Columns["colCPUHistogram"].Width = 200;
         }
 
-        private void addPerformanceCounterColsToGrid()
+        private void AddPerformanceCounterColsToGrid()
         {
-            List<string> pcColNames = new List<string>();
+            List<string> pcColNames = new();
             foreach (var ctr in SelectedPerformanceCounters.Values)
             {
                 foreach (string agg in ctr.GetAggColumns())
@@ -66,7 +66,7 @@ namespace DBADashGUI.Performance
             }
         }
 
-        private void addPerformanceCounterColsToTable(ref DataTable dt)
+        private void AddPerformanceCounterColsToTable(ref DataTable dt)
         {
             foreach (var ctr in SelectedPerformanceCounters.Values)
             {
@@ -79,13 +79,13 @@ namespace DBADashGUI.Performance
             }
         }
 
-        void addPerformanceCounters(ref DataTable dt)
+        void AddPerformanceCounters(ref DataTable dt)
         {
-            addPerformanceCounterColsToGrid();
-            addPerformanceCounterColsToTable(ref dt);
+            AddPerformanceCounterColsToGrid();
+            AddPerformanceCounterColsToTable(ref dt);
             if (SelectedPerformanceCounters.Count > 0)
             {
-                var pcDT = getPerformanceCounters();
+                var pcDT = GetPerformanceCounters();
                 DataRow mainRow = null;
                 int instanceIdMainRow = -1;
                 foreach (DataRow r in pcDT.Rows)
@@ -133,7 +133,7 @@ namespace DBADashGUI.Performance
             }
         }
 
-        DataTable getPerformanceCounters()
+        DataTable GetPerformanceCounters()
         {
             using (var cn = new SqlConnection(Common.ConnectionString))
             using (var cmd = new SqlCommand("dbo.PerformanceCounterSummary_Get", cn) { CommandType = CommandType.StoredProcedure, CommandTimeout = Properties.Settings.Default.CommandTimeout })
@@ -152,18 +152,27 @@ namespace DBADashGUI.Performance
                 cmd.Parameters.AddWithValue("Counters", counters);
                 cmd.Parameters.AddWithValue("FromDate", DateRange.FromUTC);
                 cmd.Parameters.AddWithValue("ToDate", DateRange.ToUTC);
-                
-                DataTable dt = new DataTable();
+                cmd.Parameters.AddWithValue("@UTCOffset", Common.UtcOffset);
+                if (DateRange.HasTimeOfDayFilter)
+                {
+                    cmd.Parameters.AddWithValue("Hours", DateRange.TimeOfDay.AsDataTable());
+                }
+                if (DateRange.HasDayOfWeekFilter)
+                {
+                    cmd.Parameters.AddWithValue("DaysOfWeek", DateRange.DayOfWeek.AsDataTable());
+                }
+                DataTable dt = new();
                 da.Fill(dt);
                 return dt;
             }           
         }
 
 
-        DataTable getPerformanceSummary()
+        DataTable GetPerformanceSummary()
         {
             using (var cn = new SqlConnection(Common.ConnectionString))
-            using (SqlCommand cmd = new SqlCommand("dbo.PerformanceSummary_Get", cn) { CommandType = CommandType.StoredProcedure, CommandTimeout = Properties.Settings.Default.CommandTimeout })
+            using (var cmd = new SqlCommand("dbo.PerformanceSummary_Get", cn) { CommandType = CommandType.StoredProcedure, CommandTimeout = Properties.Settings.Default.CommandTimeout })
+            using (var da = new SqlDataAdapter(cmd))
             {
                 cn.Open();
                 if (InstanceIDs.Count > 0)
@@ -176,10 +185,18 @@ namespace DBADashGUI.Performance
                 }
                 cmd.Parameters.AddWithValue("FromDate", DateRange.FromUTC);
                 cmd.Parameters.AddWithValue("ToDate", DateRange.ToUTC);
-                SqlDataAdapter da = new SqlDataAdapter(cmd);
-                DataTable dt = new DataTable();
+                cmd.Parameters.AddWithValue("@UTCOffset", Common.UtcOffset);
+                if (DateRange.HasTimeOfDayFilter)
+                {
+                    cmd.Parameters.AddWithValue("Hours", DateRange.TimeOfDay.AsDataTable());
+                }
+                if (DateRange.HasDayOfWeekFilter)
+                {
+                    cmd.Parameters.AddWithValue("DaysOfWeek", DateRange.DayOfWeek.AsDataTable());
+                }
+                DataTable dt = new();
                 var pkCols = new DataColumn[1];
-                pkCols[0] =  dt.Columns.Add("InstanceID", typeof(int));
+                pkCols[0] = dt.Columns.Add("InstanceID", typeof(int));
                 dt.PrimaryKey = pkCols;
                 da.Fill(dt);
                 return dt;
@@ -187,7 +204,7 @@ namespace DBADashGUI.Performance
         }
     
 
-        private void generateHistogram(ref DataTable dt)
+        private void GenerateHistogram(ref DataTable dt)
         {
             if (dt.Rows.Count > 0 && dgv.Columns["colCPUHistogram"].Visible && (!dt.Columns.Contains("CPUHistogram")) )
             {
@@ -199,7 +216,7 @@ namespace DBADashGUI.Performance
                     var hist = new List<double>();
                     if (row["CPU10"] != DBNull.Value)
                     {
-                        StringBuilder sbToolTip = new StringBuilder();
+                        StringBuilder sbToolTip = new();
                         for (Int32 i = 10; i <= 100; i += 10)
                         {
                             var v = Convert.ToDouble(row["CPU" + i.ToString()]);
@@ -223,10 +240,10 @@ namespace DBADashGUI.Performance
         private void PerformanceSummary_Load(object sender, EventArgs e)
         {
             Common.StyleGrid(ref dgv);
-            addHistCols(dgv, "col");
+            AddHistCols(dgv, "col");
             try 
             { 
-                loadSavedView();
+                LoadSavedView();
             }
             catch (System.Configuration.SettingsPropertyNotFoundException)
             {
@@ -234,7 +251,7 @@ namespace DBADashGUI.Performance
             }
         }
 
-        private void addHistCols(DataGridView dgv, string prefix)
+        private static void AddHistCols(DataGridView dgv, string prefix)
         {
             string histogram = "CPU";        
 
@@ -254,13 +271,13 @@ namespace DBADashGUI.Performance
         }
 
 
-        private void tsRefresh_Click(object sender, EventArgs e)
+        private void TsRefresh_Click(object sender, EventArgs e)
         {
             RefreshData();
         }
 
 
-        private void dgv_RowsAdded(object sender, DataGridViewRowsAddedEventArgs e)
+        private void Dgv_RowsAdded(object sender, DataGridViewRowsAddedEventArgs e)
         {
             bool histogram = ((DataView)dgv.DataSource).Table.Columns.Contains("CPUHistogram");
             var pcCols = dgv.Columns.Cast<DataGridViewColumn>().Where(col => Convert.ToString(col.Tag) == "PC" 
@@ -305,7 +322,7 @@ namespace DBADashGUI.Performance
              
         }
 
-        private void tsCopy_Click(object sender, EventArgs e)
+        private void TsCopy_Click(object sender, EventArgs e)
         {
             var cpuHistVisible = colCPUHistogram.Visible;
             if (cpuHistVisible)
@@ -330,7 +347,7 @@ namespace DBADashGUI.Performance
         public event EventHandler<InstanceSelectedEventArgs> Instance_Selected;
 
 
-        private void dgv_CellContentClick(object sender, DataGridViewCellEventArgs e)
+        private void Dgv_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
             if (e.RowIndex >= 0 && e.ColumnIndex == 0)
             {
@@ -339,12 +356,12 @@ namespace DBADashGUI.Performance
             }
         }
 
-        private void tsExcel_Click(object sender, EventArgs e)
+        private void TsExcel_Click(object sender, EventArgs e)
         {
             Common.PromptSaveDataGridView(ref dgv);
         }
 
-        private void promptColumnSelection(ref DataGridView gv)
+        private void PromptColumnSelection(ref DataGridView gv)
         {
             using (var frm = new SelectColumns())
             {
@@ -353,24 +370,24 @@ namespace DBADashGUI.Performance
                 if (frm.DialogResult == DialogResult.OK)
                 {
                     var dt = ((DataView)dgv.DataSource).Table;
-                    generateHistogram(ref dt);
+                    GenerateHistogram(ref dt);
                 }
             }
         }
 
 
-        private void saveLayout() 
+        private void SaveLayout() 
         {           
             string jsonPC = Newtonsoft.Json.JsonConvert.SerializeObject(SelectedPerformanceCounters, Newtonsoft.Json.Formatting.Indented);
             Properties.Settings.Default.PerformanceSummaryPerformanceCounters = jsonPC;
    
-            string jsonCols = Newtonsoft.Json.JsonConvert.SerializeObject(getColumnLayout(), Newtonsoft.Json.Formatting.Indented);
+            string jsonCols = Newtonsoft.Json.JsonConvert.SerializeObject(GetColumnLayout(), Newtonsoft.Json.Formatting.Indented);
             Properties.Settings.Default.PerformanceSummaryCols = jsonCols;
             
             Properties.Settings.Default.Save();           
         }
 
-        private List<KeyValuePair<string, PersistedColumnLayout>> getColumnLayout()
+        private List<KeyValuePair<string, PersistedColumnLayout>> GetColumnLayout()
         {
            return dgv.Columns.Cast<DataGridViewColumn>()
           .Select(c => new KeyValuePair<string, PersistedColumnLayout>(c.Name, new PersistedColumnLayout() { Visible = c.Visible, Width = c.Width, DisplayIndex = c.DisplayIndex }))
@@ -378,7 +395,7 @@ namespace DBADashGUI.Performance
         }
 
 
-        private void loadSavedView()
+        private void LoadSavedView()
         {
             if (!string.IsNullOrEmpty(Properties.Settings.Default.PerformanceSummaryPerformanceCounters))
             {
@@ -386,7 +403,7 @@ namespace DBADashGUI.Performance
                 try
                 {
                     SelectedPerformanceCounters = Newtonsoft.Json.JsonConvert.DeserializeObject<Dictionary<int, Counter>>(json);
-                    addPerformanceCounterColsToGrid();
+                    AddPerformanceCounterColsToGrid();
                 }
                 catch (Exception ex)
                 {
@@ -401,7 +418,7 @@ namespace DBADashGUI.Performance
                 try
                 {
                     var savedCols = Newtonsoft.Json.JsonConvert.DeserializeObject<List<KeyValuePair<string,PersistedColumnLayout>>>(jsonCols);
-                    loadPersistedColumnLayout(savedCols);
+                    LoadPersistedColumnLayout(savedCols);
                 }
                 catch (Exception ex)
                 {
@@ -412,7 +429,7 @@ namespace DBADashGUI.Performance
             }
         }
 
-        private void loadPersistedColumnLayout(List<KeyValuePair<string,PersistedColumnLayout>> savedCols)
+        private void LoadPersistedColumnLayout(List<KeyValuePair<string,PersistedColumnLayout>> savedCols)
         {
             foreach (var col in savedCols)
             {
@@ -428,33 +445,33 @@ namespace DBADashGUI.Performance
             }
         }
 
-        private void tsSaveLayout_Click(object sender, EventArgs e)
+        private void TsSaveLayout_Click(object sender, EventArgs e)
         {
             if (MessageBox.Show("Save layout?  Column selection, size and position will be saved.", "Save Layout", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
             {
-                saveLayout();
+                SaveLayout();
             }
         }
 
-        private void resetLayoutToolStripMenuItem_Click(object sender, EventArgs e)
+        private void ResetLayoutToolStripMenuItem_Click(object sender, EventArgs e)
         {
             if (MessageBox.Show("Are you sure you want to reset the column selection back to the defaults?", "Reset Layout", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
             {
                 SelectedPerformanceCounters.Clear();
-                addPerformanceCounterColsToGrid();
-                loadPersistedColumnLayout(standardLayout);
+                AddPerformanceCounterColsToGrid();
+                LoadPersistedColumnLayout(standardLayout);
                 Properties.Settings.Default.PerformanceSummaryPerformanceCounters = string.Empty;
                 Properties.Settings.Default.PerformanceSummaryCols = string.Empty;
                 Properties.Settings.Default.Save();
             }
         }
 
-        private void standardColumnsToolStripMenuItem_Click(object sender, EventArgs e)
+        private void StandardColumnsToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            promptColumnSelection(ref dgv);
+            PromptColumnSelection(ref dgv);
         }
 
-        private void performanceCounterColumnsToolStripMenuItem_Click(object sender, EventArgs e)
+        private void PerformanceCounterColumnsToolStripMenuItem_Click(object sender, EventArgs e)
         {
             var frm = new SelectPerformanceCounters
             {

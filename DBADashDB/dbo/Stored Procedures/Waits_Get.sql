@@ -1,15 +1,20 @@
 ﻿CREATE PROC dbo.Waits_Get(
 	@InstanceID INT,
-	@FromDate DATETIME2(2)=NULL, 
-	@ToDate DATETIME2(2)=NULL,
+	@FromDate DATETIME2(2)=NULL, /* UTC */
+	@ToDate DATETIME2(2)=NULL, /* UTC */
 	@DateGroupingMin INT=NULL,
 	@Top INT=10,
 	@WaitType NVARCHAR(60)=NULL,
 	@CriticalWaitsOnly BIT=0,
 	@Use60MIN BIT=NULL,
-	@WaitTypeID INT=NULL
+	@WaitTypeID INT=NULL,
+	@UTCOffset INT=0, /* Used for Hours filter */
+	@DaysOfWeek IDs READONLY, /* e.g. 1=Monday. exclude weekends:  1,2,3,4,5.  Filter applied in local timezone (@UTCOffset) */
+	@Hours IDs READONLY/* e.g. 9 to 5 :  9,10,11,12,13,14,15,16. Filter applied in local timezone (@UTCOffset)*/
 )
 AS
+SET DATEFIRST 1 /* Start week on Monday */
+SET NOCOUNT ON
 IF @FromDate IS NULL
 	SET @FromDate = DATEADD(mi,-60,GETUTCDATE())
 IF @ToDate IS NULL
@@ -49,6 +54,18 @@ BEGIN
 	SET @WaitType = NULL
 END
 
+/* Generate CSV list from list of integer values (safe from SQL injection compared to passing in a CSV string) */
+DECLARE @DaysOfWeekCsv NVARCHAR(MAX)
+SELECT @DaysOfWeekCsv =  STUFF((SELECT ',' + CAST(ID AS VARCHAR)
+FROM @DaysOfWeek
+FOR XML PATH(''),TYPE).value('.','NVARCHAR(MAX)'),1,1,'')
+
+/* Generate CSV list from list of integer values (safe from SQL injection compared to passing in a CSV string) */
+DECLARE @HoursCsv NVARCHAR(MAX)
+SELECT @HoursCsv =  STUFF((SELECT ',' + CAST(ID AS VARCHAR)
+FROM @Hours
+FOR XML PATH(''),TYPE).value('.','NVARCHAR(MAX)'),1,1,'')
+
 CREATE TABLE #WaitGrp(
 	[Time] DATETIME2(2) NOT NULL,
 	WaitTypeID SMALLINT NOT NULL,
@@ -70,6 +87,8 @@ WITH W AS (
 	FROM dbo.Waits' + CASE WHEN @Use60MIN =1 THEN '_60MIN' ELSE '' END + ' W 	
 	WHERE W.SnapshotDate>= @FromDate
 	AND W.SnapshotDate < @ToDate
+	' + CASE WHEN @DaysOfWeekCsv IS NULL THEN N'' ELSE 'AND DATEPART(dw,DATEADD(mi, @UTCOffset, W.SnapshotDate)) IN (' + @DaysOfWeekCsv + ')' END + '
+	' + CASE WHEN @HoursCsv IS NULL THEN N'' ELSE 'AND DATEPART(hh,DATEADD(mi, @UTCOffset, W.SnapshotDate)) IN(' + @HoursCsv + ')' END + '
 	AND W.InstanceID=@InstanceID
 	GROUP BY W.SnapshotDate
 )
@@ -84,7 +103,19 @@ INSERT INTO #Time
     Time,
     SampleDurationMs
 )
-EXEC sp_executesql @SQL,N'@FromDate DATETIME2(2),@ToDate DATETIME2(2),@InstanceID INT,@Top INT,@DateGroupingMin INT',@FromDate,@ToDate,@InstanceID,@Top,@DateGroupingMin;
+EXEC sp_executesql @SQL,
+				N'@FromDate DATETIME2(2),
+				@ToDate DATETIME2(2),
+				@InstanceID INT,
+				@Top INT,
+				@DateGroupingMin INT,
+				@UTCOffset INT',
+				@FromDate,
+				@ToDate,
+				@InstanceID,
+				@Top,
+				@DateGroupingMin,
+				@UTCOffset;
 
 
 SET @SQL = N'
@@ -102,11 +133,29 @@ AND W.InstanceID=@InstanceID
 ' + CASE WHEN @CriticalWaitsOnly=1 THEN 'AND WT.IsCriticalWait=1' ELSE '' END + '
 ' + CASE WHEN @WaitType IS NULL THEN '' ELSE 'AND WT.WaitType LIKE @WaitType' END + '
 ' + CASE WHEN @WaitTypeID IS NULL THEN '' ELSE 'AND WT.WaitTypeID = @WaitTypeID' END + '
+' + CASE WHEN @DaysOfWeekCsv IS NULL THEN N'' ELSE 'AND DATEPART(dw,DATEADD(mi, @UTCOffset, W.SnapshotDate)) IN (' + @DaysOfWeekCsv + ')' END + '
+' + CASE WHEN @HoursCsv IS NULL THEN N'' ELSE 'AND DATEPART(hh,DATEADD(mi, @UTCOffset, W.SnapshotDate)) IN(' + @HoursCsv + ')' END + '
 AND WT.IsExcluded = 0
 GROUP BY W.WaitTypeID, ' + @DateGroupingSQL 
 
 INSERT INTO #WaitGrp([Time],WaitTypeID,TotalWaitMs,SignalWaitMs,WaitingTasksCount)
-EXEC sp_executesql @SQL,N'@FromDate DATETIME2(2),@ToDate DATETIME2(2),@InstanceID INT,@Top INT,@DateGroupingMin INT,@WaitType NVARCHAR(60),@WaitTypeID INT',@FromDate,@ToDate,@InstanceID,@Top,@DateGroupingMin,@WaitType,@WaitTypeID;
+EXEC sp_executesql @SQL,
+					N'@FromDate DATETIME2(2),
+					@ToDate DATETIME2(2),
+					@InstanceID INT,
+					@Top INT,
+					@DateGroupingMin INT,
+					@WaitType NVARCHAR(60),
+					@WaitTypeID INT,
+					@UTCOffset INT',
+					@FromDate,
+					@ToDate,
+					@InstanceID,
+					@Top,
+					@DateGroupingMin,
+					@WaitType,
+					@WaitTypeID,
+					@UTCOffset;
 
 IF @WaitTypeID IS NOT NULL -- Filtering for a specific wait type
 BEGIN

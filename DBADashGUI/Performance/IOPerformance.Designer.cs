@@ -116,7 +116,7 @@
             this.tsIOSummary.Name = "tsIOSummary";
             this.tsIOSummary.Size = new System.Drawing.Size(29, 24);
             this.tsIOSummary.Text = "View Table Summary";
-            this.tsIOSummary.Click += new System.EventHandler(this.tsIOSummary_Click);
+            this.tsIOSummary.Click += new System.EventHandler(this.TsIOSummary_Click);
             // 
             // IOPerformance
             // 

@@ -186,8 +186,8 @@
             this.dgv.RowHeadersWidth = 51;
             this.dgv.Size = new System.Drawing.Size(1048, 789);
             this.dgv.TabIndex = 0;
-            this.dgv.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgv_CellContentClick);
-            this.dgv.RowsAdded += new System.Windows.Forms.DataGridViewRowsAddedEventHandler(this.dgv_RowsAdded);
+            this.dgv.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.Dgv_CellContentClick);
+            this.dgv.RowsAdded += new System.Windows.Forms.DataGridViewRowsAddedEventHandler(this.Dgv_RowsAdded);
             // 
             // ConnectionID
             // 
@@ -481,7 +481,7 @@
             this.tsRefresh.Name = "tsRefresh";
             this.tsRefresh.Size = new System.Drawing.Size(29, 24);
             this.tsRefresh.Text = "Refresh";
-            this.tsRefresh.Click += new System.EventHandler(this.tsRefresh_Click);
+            this.tsRefresh.Click += new System.EventHandler(this.TsRefresh_Click);
             // 
             // tsCopy
             // 
@@ -491,7 +491,7 @@
             this.tsCopy.Name = "tsCopy";
             this.tsCopy.Size = new System.Drawing.Size(29, 24);
             this.tsCopy.Text = "Copy";
-            this.tsCopy.Click += new System.EventHandler(this.tsCopy_Click);
+            this.tsCopy.Click += new System.EventHandler(this.TsCopy_Click);
             // 
             // tsExcel
             // 
@@ -501,7 +501,7 @@
             this.tsExcel.Name = "tsExcel";
             this.tsExcel.Size = new System.Drawing.Size(29, 24);
             this.tsExcel.Text = "Export Excel";
-            this.tsExcel.Click += new System.EventHandler(this.tsExcel_Click);
+            this.tsExcel.Click += new System.EventHandler(this.TsExcel_Click);
             // 
             // tsCols
             // 
@@ -522,7 +522,7 @@
             this.standardColumnsToolStripMenuItem.Size = new System.Drawing.Size(292, 26);
             this.standardColumnsToolStripMenuItem.Text = "Standard Columns";
             this.standardColumnsToolStripMenuItem.ToolTipText = "Select columns from the standard column selection";
-            this.standardColumnsToolStripMenuItem.Click += new System.EventHandler(this.standardColumnsToolStripMenuItem_Click);
+            this.standardColumnsToolStripMenuItem.Click += new System.EventHandler(this.StandardColumnsToolStripMenuItem_Click);
             // 
             // performanceCounterColumnsToolStripMenuItem
             // 
@@ -531,7 +531,7 @@
             this.performanceCounterColumnsToolStripMenuItem.Size = new System.Drawing.Size(292, 26);
             this.performanceCounterColumnsToolStripMenuItem.Text = "Performance Counter Columns";
             this.performanceCounterColumnsToolStripMenuItem.ToolTipText = "Select performance counter columns to add to the grid";
-            this.performanceCounterColumnsToolStripMenuItem.Click += new System.EventHandler(this.performanceCounterColumnsToolStripMenuItem_Click);
+            this.performanceCounterColumnsToolStripMenuItem.Click += new System.EventHandler(this.PerformanceCounterColumnsToolStripMenuItem_Click);
             // 
             // tsConfig
             // 
@@ -552,7 +552,7 @@
             this.tsSaveLayout.Size = new System.Drawing.Size(176, 26);
             this.tsSaveLayout.Text = "Save Layout";
             this.tsSaveLayout.ToolTipText = "Save selected columns, position and size";
-            this.tsSaveLayout.Click += new System.EventHandler(this.tsSaveLayout_Click);
+            this.tsSaveLayout.Click += new System.EventHandler(this.TsSaveLayout_Click);
             // 
             // resetLayoutToolStripMenuItem
             // 
@@ -561,7 +561,7 @@
             this.resetLayoutToolStripMenuItem.Size = new System.Drawing.Size(176, 26);
             this.resetLayoutToolStripMenuItem.Text = "Reset Layout";
             this.resetLayoutToolStripMenuItem.ToolTipText = "Reset column selection, position and size to defaults";
-            this.resetLayoutToolStripMenuItem.Click += new System.EventHandler(this.resetLayoutToolStripMenuItem_Click);
+            this.resetLayoutToolStripMenuItem.Click += new System.EventHandler(this.ResetLayoutToolStripMenuItem_Click);
             // 
             // dataGridViewTextBoxColumn1
             // 

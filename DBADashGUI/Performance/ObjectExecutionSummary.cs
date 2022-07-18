@@ -51,7 +51,7 @@ namespace DBADashGUI.Performance
         private DateTime _compareFrom=DateTime.MinValue;
         private DataTable dt;
 
-        private DateTime compareTo
+        private DateTime CompareTo
         {
             get {
                 var toDate = DateRange.ToUTC;
@@ -65,7 +65,7 @@ namespace DBADashGUI.Performance
                 }
             }
         }
-        private DateTime compareFrom
+        private DateTime CompareFrom
         {
             get
             {
@@ -80,13 +80,16 @@ namespace DBADashGUI.Performance
             }
         }
 
-        readonly List<DataGridViewColumn> StandardCols = new List<DataGridViewColumn> {new DataGridViewTextBoxColumn() { Name = "DB", DataPropertyName = "DB",DisplayIndex=0 },
+        readonly List<DataGridViewColumn> StandardCols = new()
+        {
+            new DataGridViewTextBoxColumn() { Name = "DB", DataPropertyName = "DB",DisplayIndex=0 },
                                                                         new DataGridViewTextBoxColumn() { Name = "Schema", DataPropertyName = "SchemaName",DisplayIndex=1},
                                                                         new DataGridViewLinkColumn { Name = "Name", DataPropertyName = "ObjectName",DisplayIndex=2, SortMode = DataGridViewColumnSortMode.Automatic, LinkColor = DashColors.LinkColor},
                                                                         new DataGridViewTextBoxColumn() { Name = "Type", DataPropertyName = "TypeDescription",DisplayIndex=3}
 
         };
-        readonly List<DataGridViewColumn> Cols = new List<DataGridViewColumn> { new DataGridViewTextBoxColumn()  { Name= "Total Duration (sec)",Visible=false, DataPropertyName = "total_duration_sec", DefaultCellStyle = new DataGridViewCellStyle() { Format = "#,##0.000" } },
+        readonly List<DataGridViewColumn> Cols = new()
+        { new DataGridViewTextBoxColumn()  { Name= "Total Duration (sec)",Visible=false, DataPropertyName = "total_duration_sec", DefaultCellStyle = new DataGridViewCellStyle() { Format = "#,##0.000" } },
                                                                         new DataGridViewTextBoxColumn()  { Name= "Total Duration (ms/sec)", DataPropertyName = "duration_ms_per_sec", DefaultCellStyle = new DataGridViewCellStyle() { Format = "#,##0.####" } },
                                                                         new DataGridViewTextBoxColumn()  { Name = "Avg Duration (sec)", DataPropertyName = "avg_duration_sec", DefaultCellStyle = new DataGridViewCellStyle() { Format = "#,##0.000" } },
                                                                         new DataGridViewTextBoxColumn()  { Name = "Executions", Visible=false, DataPropertyName = "execution_count" },
@@ -106,7 +109,7 @@ namespace DBADashGUI.Performance
         };
 
 
-        private void tsColumn_Click(object sender, EventArgs e)
+        private void TsColumn_Click(object sender, EventArgs e)
         {
             if (sender.GetType() == typeof(ToolStripMenuItem)) {
                 var mnu = (ToolStripMenuItem)sender;
@@ -134,10 +137,15 @@ namespace DBADashGUI.Performance
                     col.Visible = true;
                     _cols.Add(col);
                     displayIdx += 1;
-                    if (compareFrom > DateTime.MinValue)
+                    if (CompareFrom > DateTime.MinValue)
                     {
-                        var compareCol = new DataGridViewTextBoxColumn() { Name = "Compare " + col.Name, DataPropertyName = "compare_" + col.DataPropertyName, DisplayIndex= displayIdx };
-                        compareCol.DefaultCellStyle = col.DefaultCellStyle.Clone();
+                        var compareCol = new DataGridViewTextBoxColumn
+                        {
+                            Name = "Compare " + col.Name,
+                            DataPropertyName = "compare_" + col.DataPropertyName,
+                            DisplayIndex = displayIdx,
+                            DefaultCellStyle = col.DefaultCellStyle.Clone()
+                        };
                         compareCol.DefaultCellStyle.BackColor = Color.BlanchedAlmond;         
                         _cols.Add(compareCol);
                         displayIdx += 1;
@@ -156,36 +164,35 @@ namespace DBADashGUI.Performance
             }
         }
 
-        public void RefreshData()
-        {
-            splitContainer1.Panel1Collapsed = true;
-            refreshData();
-        }
 
-        private void refreshData()
+       public void RefreshData()
         {
+            if (objectExecutionLineChart1.InstanceID != InstanceID)
+            {
+                splitContainer1.Panel1Collapsed = true;
+            }
             dgv.DataSource = null;
 
-            var dt = getObjectExecutionStatsSummary();
+            var dt = GetObjectExecutionStatsSummary();
             if (dt.Rows.Count == 1)
             {
-                refreshChart((Int64)dt.Rows[0]["ObjectID"], (string)dt.Rows[0]["ObjectName"]);
+                RefreshChart((Int64)dt.Rows[0]["ObjectID"], (string)dt.Rows[0]["ObjectName"]);
             }
             dgv.Columns.Clear();
             dgv.AutoGenerateColumns = false;
 
-            setDataSourceWithFilter();
+            SetDataSourceWithFilter();
             dgv.Columns.AddRange(Columns.ToArray());
             dgv.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
 
             if (splitContainer1.Panel1Collapsed == false)
             {
-                refreshChart();
+                RefreshChart();
             }
            
         }
 
-        private DataTable getObjectExecutionStatsSummary()
+        private DataTable GetObjectExecutionStatsSummary()
         {
             using(var cn = new SqlConnection(Common.ConnectionString))
             using(var cmd = new SqlCommand("dbo.ObjectExecutionStatsSummary_Get", cn) { CommandType = CommandType.StoredProcedure, CommandTimeout = Properties.Settings.Default.CommandTimeout })
@@ -212,26 +219,34 @@ namespace DBADashGUI.Performance
                 {
                     cmd.Parameters.AddWithValue("DatabaseID", DatabaseID);
                 }
-                if (compareFrom != DateTime.MinValue && compareFrom != DateTime.MaxValue && compareTo != DateTime.MinValue && compareTo != DateTime.MaxValue)
+                if (CompareFrom != DateTime.MinValue && CompareFrom != DateTime.MaxValue && CompareTo != DateTime.MinValue && CompareTo != DateTime.MaxValue)
                 {
-                    cmd.Parameters.AddWithValue("CompareFrom", compareFrom);
-                    cmd.Parameters.AddWithValue("CompareTo", compareTo);
+                    cmd.Parameters.AddWithValue("CompareFrom", CompareFrom);
+                    cmd.Parameters.AddWithValue("CompareTo", CompareTo);
                 }
                 if (Types.Length > 0)
                 {
                     cmd.Parameters.AddWithValue("Types", Types);
                 }
+                if (DateRange.HasDayOfWeekFilter)
+                {
+                    cmd.Parameters.AddWithValue("DaysOfWeek", DateRange.DayOfWeek.AsDataTable());
+                }
+                if (DateRange.HasTimeOfDayFilter)
+                {
+                    cmd.Parameters.AddWithValue("Hours", DateRange.TimeOfDay.AsDataTable());
+                }
 
                 cmd.Parameters.AddWithValue("FromDate", DateRange.FromUTC);
                 cmd.Parameters.AddWithValue("ToDate", DateRange.ToUTC);
-
+                cmd.Parameters.AddWithValue("UTCOffset", Common.UtcOffset);
                 dt = new DataTable();
                 da.Fill(dt);
                 return dt;
             }
         }
 
-        private void setDataSourceWithFilter()
+        private void SetDataSourceWithFilter()
         {
             if (string.IsNullOrEmpty(txtSearch.Text.Trim()))
             {
@@ -255,25 +270,25 @@ namespace DBADashGUI.Performance
         }
 
 
-        private void tsRefresh_Click(object sender, EventArgs e)
+        private void TsRefresh_Click(object sender, EventArgs e)
         {
             RefreshData();
         }
 
-        private void tsCopy_Click(object sender, EventArgs e)
+        private void TsCopy_Click(object sender, EventArgs e)
         {
             Common.CopyDataGridViewToClipboard(dgv);
         }
 
 
-        private void tsSetOffset_Click(object sender, EventArgs e)
+        private void TsSetOffset_Click(object sender, EventArgs e)
         {
             compareOffset = Int32.Parse((string)((ToolStripMenuItem)sender).Tag);
-            checkOffset();
-            refreshData();
+            CheckOffset();
+            RefreshData();
         }
 
-        private void checkOffset()
+        private void CheckOffset()
         {
             tsNoCompare.Checked = compareOffset == 0;          
             foreach (ToolStripItem itm in tsCompare.DropDownItems)
@@ -295,12 +310,12 @@ namespace DBADashGUI.Performance
             splitContainer1.Panel1Collapsed = true;
         }
 
-        private void tsCustomCompare_Click(object sender, EventArgs e)
+        private void TsCustomCompare_Click(object sender, EventArgs e)
         {
             var frm = new CustomTimePicker
             {
-                FromDate = compareFrom > DateTime.MinValue && compareFrom<DateTime.MaxValue ? compareFrom.ToLocalTime() : DateRange.FromUTC.ToLocalTime(),
-                ToDate = compareTo > DateTime.MinValue && compareTo<DateTime.MaxValue ? compareTo.ToLocalTime() : DateRange.ToUTC.ToLocalTime()
+                FromDate = CompareFrom > DateTime.MinValue && CompareFrom<DateTime.MaxValue ? CompareFrom.ToLocalTime() : DateRange.FromUTC.ToLocalTime(),
+                ToDate = CompareTo > DateTime.MinValue && CompareTo<DateTime.MaxValue ? CompareTo.ToLocalTime() : DateRange.ToUTC.ToLocalTime()
             };
             frm.ShowDialog();
             if (frm.DialogResult == DialogResult.OK)
@@ -308,18 +323,28 @@ namespace DBADashGUI.Performance
                 _compareFrom = frm.FromDate.ToUniversalTime();
                 _compareTo = frm.ToDate.ToUniversalTime();
                 compareOffset = -1;
-                checkOffset();
-                refreshData();
+                CheckOffset();
+                RefreshData();
                 tsCustomCompare.Checked = true;
             }
         }
 
-        private void tsType_Click(object sender, EventArgs e)
+        private void TsType_Click(object sender, EventArgs e)
         {
-            refreshData();
+            int checkCount=0;
+            foreach(ToolStripMenuItem itm in tsType.DropDownItems)
+            {
+                itm.Font = new Font(itm.Font, itm.Checked ? FontStyle.Bold: FontStyle.Regular);
+                if (itm.Checked)
+                {
+                    checkCount++;
+                }
+            }
+            tsType.Font = new Font(tsType.Font, checkCount>0 ? FontStyle.Bold : FontStyle.Regular);
+            RefreshData();
         }
 
-        private void dgv_RowsAdded(object sender, DataGridViewRowsAddedEventArgs e)
+        private void Dgv_RowsAdded(object sender, DataGridViewRowsAddedEventArgs e)
         {
             if (dgv.Columns.Contains("Diff Avg Duration (%)")){
                 for (Int32 idx = e.RowIndex; idx < e.RowIndex + e.RowCount; idx += 1)
@@ -328,13 +353,13 @@ namespace DBADashGUI.Performance
                     var row = (DataRowView)r.DataBoundItem;
                     double diffAvgDurationPct = row["diff_avg_duration_pct"] == DBNull.Value ? 0d : Convert.ToDouble(row["diff_avg_duration_pct"]);
                     double diffAvgCPUPct = row["diff_avg_cpu_pct"] == DBNull.Value ? 0d : Convert.ToDouble(row["diff_avg_cpu_pct"]);
-                    r.Cells["Diff Avg Duration (%)"].SetStatusColor(diffColourFromDouble(diffAvgDurationPct));
-                    r.Cells["Diff Avg CPU (%)"].SetStatusColor(diffColourFromDouble(diffAvgCPUPct));
+                    r.Cells["Diff Avg Duration (%)"].SetStatusColor(DiffColourFromDouble(diffAvgDurationPct));
+                    r.Cells["Diff Avg CPU (%)"].SetStatusColor(DiffColourFromDouble(diffAvgCPUPct));
                 }
             }
         }
 
-        private Color diffColourFromDouble(Double value)
+        private static Color DiffColourFromDouble(Double value)
         {
             if (value > 0.5)
             {
@@ -357,15 +382,14 @@ namespace DBADashGUI.Performance
             }
         }
 
-        private void refreshChart()
+        private void RefreshChart()
         {
-            if (compareFrom > DateTime.MinValue)
+            if (CompareFrom > DateTime.MinValue)
             {
                 splitChart.Panel2Collapsed = false;
-                compareObjectExecutionLineChart.FromDate = compareFrom;
-                compareObjectExecutionLineChart.ToDate = compareTo;
+                compareObjectExecutionLineChart.FromDate = CompareFrom;
+                compareObjectExecutionLineChart.ToDate = CompareTo;
                 compareObjectExecutionLineChart.RefreshData();
-
             }
             else
             {
@@ -376,7 +400,7 @@ namespace DBADashGUI.Performance
             objectExecutionLineChart1.RefreshData();
         }
 
-        private void refreshChart(Int64 objectID,string title)
+        private void RefreshChart(Int64 objectID,string title)
         {
 
             splitContainer1.Panel1Collapsed = false;
@@ -385,52 +409,52 @@ namespace DBADashGUI.Performance
             compareObjectExecutionLineChart.Instance = Instance;
             compareObjectExecutionLineChart.ObjectID = objectID;
             compareObjectExecutionLineChart.Title = title + " (Compare)";
-       
+
             objectExecutionLineChart1.InstanceID = InstanceID;
             objectExecutionLineChart1.Instance = Instance;
             objectExecutionLineChart1.ObjectID = objectID;
             objectExecutionLineChart1.Title = title;
-            refreshChart();
+            RefreshChart();
         }
 
 
-        private void dgv_CellContentClick(object sender, DataGridViewCellEventArgs e)
+        private void Dgv_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
             if (e.RowIndex >= 0)
             {
                 if(dgv.Columns[e.ColumnIndex].Name == "Name")
                 {                 
                     var row = (DataRowView)dgv.Rows[e.RowIndex].DataBoundItem;
-                    refreshChart((Int64)row["ObjectID"], (string)row["ObjectName"]);               
+                    RefreshChart((Int64)row["ObjectID"], (string)row["ObjectName"]);               
                 }
             }
         }
 
-        private void tsExcel_Click(object sender, EventArgs e)
+        private void TsExcel_Click(object sender, EventArgs e)
         {
             Common.PromptSaveDataGridView(ref dgv);
         }
 
   
-        private void txtSearch_TextChanged(object sender, EventArgs e)
+        private void TxtSearch_TextChanged(object sender, EventArgs e)
         {
             tmrSearch.Enabled = true;
             tmrSearch.Stop();
             tmrSearch.Start();
         }
 
-        private void tmrSearch_Tick(object sender, EventArgs e)
+        private void TmrSearch_Tick(object sender, EventArgs e)
         {
-            setDataSourceWithFilter();
+            SetDataSourceWithFilter();
             tmrSearch.Enabled = false;
         }
 
-        private void tsCols_Click(object sender, EventArgs e)
+        private void TsCols_Click(object sender, EventArgs e)
         {
-            promptColumnSelection(ref dgv);
+            PromptColumnSelection(ref dgv);
         }
 
-        private void promptColumnSelection(ref DataGridView gv)
+        private void PromptColumnSelection(ref DataGridView gv)
         {
             using (var frm = new SelectColumns())
             {
@@ -438,7 +462,6 @@ namespace DBADashGUI.Performance
                 frm.ShowDialog(this);
                 if (frm.DialogResult == DialogResult.OK)
                 {
-                    var dt = ((DataView)dgv.DataSource).Table;
                     gv.AutoResizeColumns();
                     gv.AutoResizeRows();
                 }

@@ -23,6 +23,7 @@ namespace DBADashGUI.Performance
         string selectedWaitType;
 
         private int dateGrouping = 1;
+        private int mins;
         
         public int DateGrouping
         {
@@ -37,31 +38,40 @@ namespace DBADashGUI.Performance
             }
         }
 
-
-
         public void RefreshData()
         {
-            DateGrouping= Common.DateGrouping(DateRange.DurationMins, 300);
-            refreshData();
-        }
-
-        private void refreshData()
-        {
+            if (mins != DateRange.DurationMins)
+            {
+                DateGrouping = Common.DateGrouping(DateRange.DurationMins, 300);
+                mins = DateRange.DurationMins;
+            }
             var dt = GetWaitsSummaryDT();
             dgv.AutoGenerateColumns = false;
             dgv.DataSource = dt;
             dgv.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.AllCells);
-            refreshChart();
+            RefreshChart();
         }
 
         public DataTable GetWaitsSummaryDT()
         {
-            using (SqlConnection cn = new SqlConnection(Common.ConnectionString))
-            using (SqlDataAdapter da = new SqlDataAdapter(new SqlCommand("dbo.WaitsSummary_Get", cn) { CommandType = CommandType.StoredProcedure }))
+            using (var cn = new SqlConnection(Common.ConnectionString))
+            using (var cmd = new SqlCommand("dbo.WaitsSummary_Get", cn) { CommandType = CommandType.StoredProcedure })
+            using (var da = new SqlDataAdapter(cmd))
             {
-                da.SelectCommand.Parameters.AddWithValue("InstanceID", InstanceID);
-                da.SelectCommand.Parameters.AddWithValue("FromDate", DateRange.FromUTC);
-                da.SelectCommand.Parameters.AddWithValue("ToDate", DateRange.ToUTC);
+                cmd.Parameters.AddWithValue("InstanceID", InstanceID);
+                cmd.Parameters.AddWithValue("FromDate", DateRange.FromUTC);
+                cmd.Parameters.AddWithValue("ToDate", DateRange.ToUTC);
+
+                cmd.Parameters.AddWithValue("UTCOffset", Common.UtcOffset);
+            
+                if (DateRange.HasTimeOfDayFilter)
+                {
+                    cmd.Parameters.AddWithValue("Hours", DateRange.TimeOfDay.AsDataTable());
+                }
+                if (DateRange.HasDayOfWeekFilter)
+                {
+                    cmd.Parameters.AddWithValue("DaysOfWeek", DateRange.DayOfWeek.AsDataTable());
+                }
                 var dt = new DataTable();
                 da.Fill(dt);
                 return dt;
@@ -71,21 +81,31 @@ namespace DBADashGUI.Performance
 
         public DataTable GetWaitsDT(string waitType)
         {
-            using (SqlConnection cn = new SqlConnection(Common.ConnectionString))
-            using (SqlDataAdapter da = new SqlDataAdapter(new SqlCommand("dbo.Waits_Get", cn) { CommandType = CommandType.StoredProcedure }))
+            using (var cn = new SqlConnection(Common.ConnectionString))
+            using (var cmd = new SqlCommand("dbo.Waits_Get", cn) { CommandType = CommandType.StoredProcedure })
+            using (var da = new SqlDataAdapter(cmd))
             {
-                da.SelectCommand.Parameters.AddWithValue("InstanceID", InstanceID);
-                da.SelectCommand.Parameters.AddWithValue("FromDate", DateRange.FromUTC);
-                da.SelectCommand.Parameters.AddWithValue("ToDate", DateRange.ToUTC);
-                da.SelectCommand.Parameters.AddWithValue("WaitType", waitType);
-                da.SelectCommand.Parameters.AddWithValue("DateGroupingMin", DateGrouping);
+                cmd.Parameters.AddWithValue("InstanceID", InstanceID);
+                cmd.Parameters.AddWithValue("FromDate", DateRange.FromUTC);
+                cmd.Parameters.AddWithValue("ToDate", DateRange.ToUTC);
+                cmd.Parameters.AddWithValue("WaitType", waitType);
+                cmd.Parameters.AddWithValue("DateGroupingMin", DateGrouping);
+
+                if (DateRange.HasTimeOfDayFilter)
+                {
+                    cmd.Parameters.AddWithValue("Hours", DateRange.TimeOfDay.AsDataTable());
+                }
+                if (DateRange.HasDayOfWeekFilter)
+                {
+                    cmd.Parameters.AddWithValue("DaysOfWeek", DateRange.DayOfWeek.AsDataTable());
+                }
                 var dt = new DataTable();
                 da.Fill(dt);
                 return dt;
             }            
         }
 
-        private void dgv_CellContentClick(object sender, DataGridViewCellEventArgs e)
+        private void Dgv_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
             if(e.RowIndex>=0 && e.ColumnIndex == colHelp.Index)
             {
@@ -96,13 +116,13 @@ namespace DBADashGUI.Performance
             else if(e.RowIndex>=0 && e.ColumnIndex == colWaitType.Index)
             {
                 selectedWaitType = (string)dgv[colWaitType.Index, e.RowIndex].Value;
-                refreshChart();
+                RefreshChart();
 
             }
         }
 
-        readonly Dictionary<string, columnMetaData> columns = new Dictionary<string, columnMetaData>
-            {
+        readonly Dictionary<string, columnMetaData> columns = new()
+        {
                 {"AvgWaitTimeMs", new columnMetaData{Alias="Avg Wait Time (ms)",isVisible=false } },
                 {"SampleDurationSec", new columnMetaData{Alias="Sample Duration (sec)",isVisible=false } },
                 {"SignalWaitPct", new columnMetaData{Alias="Signal Wait %",isVisible=false } },
@@ -115,15 +135,15 @@ namespace DBADashGUI.Performance
                 {"WaitingTasksCount", new columnMetaData{Alias="Waiting Tasks Count",isVisible=false } }
             };
 
-        private void populateMetricsMenu()
+        private void PopulateMetricsMenu()
         {
             foreach (var itm in columns)
             {
-                tsMetrics.DropDownItems.Add(new ToolStripMenuItem(itm.Value.Alias, null, tsMetrics_Click) { Tag = itm.Key, Checked = itm.Value.isVisible, CheckOnClick = true });
+                tsMetrics.DropDownItems.Add(new ToolStripMenuItem(itm.Value.Alias, null, TsMetrics_Click) { Tag = itm.Key, Checked = itm.Value.isVisible, CheckOnClick = true });
             }
         }
 
-        private void tsMetrics_Click(object sender, EventArgs e)
+        private void TsMetrics_Click(object sender, EventArgs e)
         {
             var ts = (ToolStripMenuItem)sender;
             columns[(string)ts.Tag].isVisible = ts.Checked;
@@ -132,7 +152,7 @@ namespace DBADashGUI.Performance
     
 
 
-        private void refreshChart()
+        private void RefreshChart()
         {
             if (selectedWaitType == null || selectedWaitType == String.Empty)
             {
@@ -156,12 +176,12 @@ namespace DBADashGUI.Performance
 
         }
 
-        private void tsRefresh_Click(object sender, EventArgs e)
+        private void TsRefresh_Click(object sender, EventArgs e)
         {
-            refreshData();
+            RefreshData();
         }
 
-        private void tsCopy_Click(object sender, EventArgs e)
+        private void TsCopy_Click(object sender, EventArgs e)
         {
             colHelp.Visible = false;
             Common.CopyDataGridViewToClipboard(dgv);
@@ -171,12 +191,12 @@ namespace DBADashGUI.Performance
         private void WaitsSummary_Load(object sender, EventArgs e)
         {
             Common.StyleGrid(ref dgv);
-            Common.AddDateGroups(tsDateGroup, tsDateGroups_Click);
-            populateColumnsMenu();
-            populateMetricsMenu();
+            Common.AddDateGroups(tsDateGroup, TsDateGroups_Click);
+            PopulateColumnsMenu();
+            PopulateMetricsMenu();
         }
 
-        private void populateColumnsMenu()
+        private void PopulateColumnsMenu()
         {
             foreach(DataGridViewColumn col in dgv.Columns)
             {
@@ -192,14 +212,14 @@ namespace DBADashGUI.Performance
             dgv.Columns[(string)col.Tag].Visible = col.Checked;
         }
 
-        private void tsDateGroups_Click(object sender, EventArgs e)
+        private void TsDateGroups_Click(object sender, EventArgs e)
         {
             var ts = (ToolStripMenuItem)sender;
             DateGrouping = (int)ts.Tag;
-            refreshChart();
+            RefreshChart();
         }
 
-        private void tsSmooth_Click(object sender, EventArgs e)
+        private void TsSmooth_Click(object sender, EventArgs e)
         {
             WaitChart1.DefaultLineSmoothness = Convert.ToDouble(((ToolStripMenuItem)sender).Tag);
         }
@@ -210,7 +230,7 @@ namespace DBADashGUI.Performance
             WaitChart1.SetPointSize(Convert.ToInt32(ts.Tag));
         }
 
-        private void tsExcel_Click(object sender, EventArgs e)
+        private void TsExcel_Click(object sender, EventArgs e)
         {
             Common.PromptSaveDataGridView(ref dgv);
         }
