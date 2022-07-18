@@ -102,7 +102,7 @@ namespace DBADashGUI
         {
             get
             {
-                return (Int32)DateTime.Now.Subtract(DateTime.UtcNow).TotalMinutes;
+                return (int)Math.Ceiling(TimeZoneInfo.Local.GetUtcOffset(DateTime.UtcNow).TotalMinutes);
             }
         }
 

@@ -93,7 +93,7 @@
             this.tsSmooth1.Size = new System.Drawing.Size(128, 26);
             this.tsSmooth1.Tag = "1.0";
             this.tsSmooth1.Text = "100%";
-            this.tsSmooth1.Click += new System.EventHandler(this.tsLineSmoothness_Click);
+            this.tsSmooth1.Click += new System.EventHandler(this.TsLineSmoothness_Click);
             // 
             // toolStripMenuItem3
             // 
@@ -101,7 +101,7 @@
             this.toolStripMenuItem3.Size = new System.Drawing.Size(128, 26);
             this.toolStripMenuItem3.Tag = "0.75";
             this.toolStripMenuItem3.Text = "75%";
-            this.toolStripMenuItem3.Click += new System.EventHandler(this.tsLineSmoothness_Click);
+            this.toolStripMenuItem3.Click += new System.EventHandler(this.TsLineSmoothness_Click);
             // 
             // tsSmoothPoint5
             // 
@@ -109,7 +109,7 @@
             this.tsSmoothPoint5.Size = new System.Drawing.Size(128, 26);
             this.tsSmoothPoint5.Tag = "0.5";
             this.tsSmoothPoint5.Text = "50%";
-            this.tsSmoothPoint5.Click += new System.EventHandler(this.tsLineSmoothness_Click);
+            this.tsSmoothPoint5.Click += new System.EventHandler(this.TsLineSmoothness_Click);
             // 
             // toolStripMenuItem2
             // 
@@ -117,7 +117,7 @@
             this.toolStripMenuItem2.Size = new System.Drawing.Size(128, 26);
             this.toolStripMenuItem2.Tag = "0.25";
             this.toolStripMenuItem2.Text = "25%";
-            this.toolStripMenuItem2.Click += new System.EventHandler(this.tsLineSmoothness_Click);
+            this.toolStripMenuItem2.Click += new System.EventHandler(this.TsLineSmoothness_Click);
             // 
             // tsSmooth0
             // 
@@ -125,7 +125,7 @@
             this.tsSmooth0.Size = new System.Drawing.Size(128, 26);
             this.tsSmooth0.Tag = "0";
             this.tsSmooth0.Text = "0%";
-            this.tsSmooth0.Click += new System.EventHandler(this.tsLineSmoothness_Click);
+            this.tsSmooth0.Click += new System.EventHandler(this.TsLineSmoothness_Click);
             // 
             // pointSizeToolStripMenuItem
             // 
@@ -144,7 +144,7 @@
             this.noneToolStripMenuItem.Size = new System.Drawing.Size(147, 26);
             this.noneToolStripMenuItem.Tag = "0";
             this.noneToolStripMenuItem.Text = "None";
-            this.noneToolStripMenuItem.Click += new System.EventHandler(this.tsPointSize_Click);
+            this.noneToolStripMenuItem.Click += new System.EventHandler(this.TsPointSize_Click);
             // 
             // smallToolStripMenuItem
             // 
@@ -152,7 +152,7 @@
             this.smallToolStripMenuItem.Size = new System.Drawing.Size(147, 26);
             this.smallToolStripMenuItem.Tag = "5";
             this.smallToolStripMenuItem.Text = "Small";
-            this.smallToolStripMenuItem.Click += new System.EventHandler(this.tsPointSize_Click);
+            this.smallToolStripMenuItem.Click += new System.EventHandler(this.TsPointSize_Click);
             // 
             // mediumToolStripMenuItem
             // 
@@ -160,7 +160,7 @@
             this.mediumToolStripMenuItem.Size = new System.Drawing.Size(147, 26);
             this.mediumToolStripMenuItem.Tag = "10";
             this.mediumToolStripMenuItem.Text = "Medium";
-            this.mediumToolStripMenuItem.Click += new System.EventHandler(this.tsPointSize_Click);
+            this.mediumToolStripMenuItem.Click += new System.EventHandler(this.TsPointSize_Click);
             // 
             // largeToolStripMenuItem
             // 
@@ -168,7 +168,7 @@
             this.largeToolStripMenuItem.Size = new System.Drawing.Size(147, 26);
             this.largeToolStripMenuItem.Tag = "15";
             this.largeToolStripMenuItem.Text = "Large";
-            this.largeToolStripMenuItem.Click += new System.EventHandler(this.tsPointSize_Click);
+            this.largeToolStripMenuItem.Click += new System.EventHandler(this.TsPointSize_Click);
             // 
             // tsTitle
             // 

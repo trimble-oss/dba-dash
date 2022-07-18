@@ -22,9 +22,11 @@ namespace DBADashGUI.Performance
         public Int32 InstanceID;
         public string Instance;
         public Int64 ObjectID;
+        int dateGrouping;
+        int durationMins;
         public DateTime FromDate;
         public DateTime ToDate;
-        int dateGrouping;
+
         public string Title
         {
             get
@@ -37,8 +39,8 @@ namespace DBADashGUI.Performance
             }
         }
 
-        readonly Dictionary<string, columnMetaData>  columns = new Dictionary<string, columnMetaData>
-            {
+        readonly Dictionary<string, columnMetaData>  columns = new()
+        {
                 {"AvgCPU", new columnMetaData{Alias="Avg CPU (sec)",isVisible=true } },
                 {"TotalCPU", new columnMetaData{Alias="Total CPU (sec)",isVisible=false } },
                 {"cpu_ms_per_sec", new columnMetaData{Alias="CPU (ms/sec)",isVisible=false } },
@@ -56,17 +58,16 @@ namespace DBADashGUI.Performance
                 {"TotalWrites", new columnMetaData{Alias="Total Writes",isVisible=false,axis=2} },
             };
 
+  
         public void RefreshData()
         {
-            var mins = (Int32)ToDate.Subtract(FromDate).TotalMinutes;
-            dateGrouping = Common.DateGrouping(mins, 200);
-            tsGroup.Text = Common.DateGroupString(dateGrouping);
-            refreshData();
-        }
-
-        private void refreshData()
-        {
-            var dt = CommonData.ObjectExecutionStats(InstanceID, -1, FromDate, ToDate, ObjectID, dateGrouping, "AvgDuration", Instance);
+            if (DateRange.DurationMins != durationMins) // Update date grouping only if duration has changed
+            {
+                dateGrouping = Common.DateGrouping(DateRange.DurationMins, 200);
+                tsGroup.Text = Common.DateGroupString(dateGrouping);
+                durationMins = DateRange.DurationMins;
+            }
+            var dt = CommonData.ObjectExecutionStats(InstanceID, -1, ObjectID, dateGrouping, "AvgDuration",FromDate,ToDate, Instance);
             chart1.Series.Clear();
             chart1.DefaultFill = System.Windows.Media.Brushes.Transparent;
 
@@ -97,45 +98,43 @@ namespace DBADashGUI.Performance
             chart1.LegendLocation = LegendLocation.Bottom;
         }
 
-        private void tsLineSmoothness_Click(object sender, EventArgs e)
+        private void TsLineSmoothness_Click(object sender, EventArgs e)
         {
             chart1.DefaultLineSmoothness = Convert.ToDouble(((ToolStripMenuItem)sender).Tag);
         }
 
         private void ObjectExecutionLineChart_Load(object sender, EventArgs e)
         {
-            Common.AddDateGroups(tsGroup, tsGroup_Click);
-            loadMeasures();
+            Common.AddDateGroups(tsGroup, TsGroup_Click);
+            LoadMeasures();
         }
 
-        private void tsGroup_Click(object sender, EventArgs e)
+        private void TsGroup_Click(object sender, EventArgs e)
         {
             var ts = (ToolStripMenuItem)sender;
             dateGrouping = (Int32)ts.Tag;
             tsGroup.Text = Common.DateGroupString(dateGrouping);
-            refreshData();
+            RefreshData();
 
         }
 
-        private void loadMeasures()
+        private void LoadMeasures()
         {
             foreach(var k in columns.Keys)
             {
                 var m = columns[k];
-                tsMeasures.DropDownItems.Add(new ToolStripMenuItem(m.Alias,null, tsMeasure_Click) { Checked = m.isVisible, Tag = k, CheckOnClick=true });
+                tsMeasures.DropDownItems.Add(new ToolStripMenuItem(m.Alias,null, TsMeasure_Click) { Checked = m.isVisible, Tag = k, CheckOnClick=true });
             }
         }
 
-
-
-        private void tsMeasure_Click(object sender, EventArgs e)
+        private void TsMeasure_Click(object sender, EventArgs e)
         {
             var ts = (ToolStripMenuItem)sender;
             columns[(string)ts.Tag].isVisible = ts.Checked;
             chart1.UpdateColumnVisibility(columns);
         }
 
-        private void tsPointSize_Click(object sender, EventArgs e)
+        private void TsPointSize_Click(object sender, EventArgs e)
         {
             var ts = (ToolStripMenuItem)sender;
             chart1.SetPointSize(Convert.ToInt32(ts.Tag));

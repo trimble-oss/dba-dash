@@ -4,9 +4,13 @@
 	@ToDate DATETIME2(3)=NULL,
 	@TagIDs VARCHAR(MAX)=NULL,
 	@Use60MIN BIT=NULL,
-	@Debug BIT=0
+	@Debug BIT=0,
+	@DaysOfWeek IDs READONLY, /* e.g. exclude weekends:  Monday,Tuesday,Wednesday,Thursday,Friday. Filter applied in local timezone (@UTCOffset) */
+	@Hours IDs READONLY, /* e.g. 9 to 5 :  9,10,11,12,13,14,15,16. Filter applied in local timezone (@UTCOffset)  */
+	@UTCOffset INT=0 /* Used for filtering on hours & weekday in current timezone */
 )
 AS
+SET DATEFIRST 1 /* Start week on Monday */
 IF @FromDate IS NULL
 	SET @FromDate = DATEADD(mi,-15,GETUTCDATE())
 IF @ToDate IS NULL
@@ -46,6 +50,16 @@ BEGIN
 
 END;
 
+DECLARE @DaysOfWeekCsv NVARCHAR(MAX)
+SELECT @DaysOfWeekCsv =  STUFF((SELECT ',' + CAST(ID AS VARCHAR)
+FROM @DaysOfWeek
+FOR XML PATH(''),TYPE).value('.','NVARCHAR(MAX)'),1,1,'')
+
+DECLARE @HoursCsv NVARCHAR(MAX)
+SELECT @HoursCsv =  STUFF((SELECT ',' + CAST(ID AS VARCHAR)
+FROM @Hours
+FOR XML PATH(''),TYPE).value('.','NVARCHAR(MAX)'),1,1,'')
+
 DECLARE @SQL NVARCHAR(MAX) 
 SET @SQL = CAST(N'' AS NVARCHAR(MAX)) + N'
 WITH cpuAgg AS (
@@ -66,6 +80,8 @@ WITH cpuAgg AS (
 	FROM ' + CASE WHEN @Use60MIN=1 THEN 'dbo.CPU_60MIN' ELSE 'dbo.CPU_Histogram' END + ' as CPU
 	WHERE EventTime >=@FromDate
 	AND EventTime <@ToDate
+	' + CASE WHEN @DaysOfWeekCsv IS NULL THEN N'' ELSE 'AND DATEPART(dw,DATEADD(mi, @UTCOffset, EventTime)) IN (' + @DaysOfWeekCsv + ')' END + '
+	' + CASE WHEN @HoursCsv IS NULL THEN N'' ELSE 'AND DATEPART(hh,DATEADD(mi, @UTCOffset, EventTime)) IN(' + @HoursCsv + ')' END + '
 	AND EXISTS(SELECT 1 FROM #Instances t WHERE CPU.InstanceID = t.InstanceID)
 	GROUP BY InstanceID
 )
@@ -92,6 +108,8 @@ WITH cpuAgg AS (
 	AND IOS.FileID=-1
 	AND IOS.SnapshotDate>=CAST(@FromDate AS DATETIME2(2))
 	AND IOS.SnapshotDate<CAST(@ToDate AS DATETIME2(2))
+	' + CASE WHEN @DaysOfWeekCsv IS NULL THEN N'' ELSE 'AND DATEPART(dw,DATEADD(mi, @UTCOffset, IOS.SnapshotDate)) IN (' + @DaysOfWeekCsv + ')' END + '
+	' + CASE WHEN @HoursCsv IS NULL THEN N'' ELSE 'AND DATEPART(hh,DATEADD(mi, @UTCOffset, IOS.SnapshotDate)) IN(' + @HoursCsv + ')' END + '
 	AND EXISTS(SELECT 1 FROM #Instances t WHERE IOS.InstanceID = t.InstanceID)
 	GROUP BY IOS.InstanceID
 )
@@ -104,6 +122,8 @@ WITH cpuAgg AS (
 	FROM ' + CASE WHEN @Use60MIN=1 THEN 'dbo.Waits_60MIN' ELSE 'dbo.Waits' END + ' W 
 	WHERE W.SnapshotDate>= CAST(@FromDate AS DATETIME2(2))
 	AND W.SnapshotDate < CAST(@ToDate AS DATETIME2(2))
+	' + CASE WHEN @DaysOfWeekCsv IS NULL THEN N'' ELSE 'AND DATEPART(dw,DATEADD(mi, @UTCOffset, W.SnapshotDate)) IN (' + @DaysOfWeekCsv + ')' END + '
+	' + CASE WHEN @HoursCsv IS NULL THEN N'' ELSE 'AND DATEPART(hh,DATEADD(mi, @UTCOffset, W.SnapshotDate)) IN(' + @HoursCsv + ')' END + '
 	AND EXISTS(SELECT 1 FROM #Instances t WHERE W.InstanceID = t.InstanceID)
 	GROUP BY W.InstanceID,W.WaitTypeID
 
@@ -177,5 +197,11 @@ BEGIN
 	EXEC dbo.PrintMax @SQL 
 END
 
-EXEC sp_executesql @SQL,N'@FromDate DATETIME2(3),@ToDate DATETIME2(3)',@FromDate,@ToDate
+EXEC sp_executesql @SQL,
+					N'@FromDate DATETIME2(3),
+					@ToDate DATETIME2(3),
+					@UTCOffset INT',
+					@FromDate,
+					@ToDate,
+					@UTCOffset
 

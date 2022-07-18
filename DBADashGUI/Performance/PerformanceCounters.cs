@@ -31,6 +31,8 @@ namespace DBADashGUI.Performance
 
         public bool SmoothLines = false;
         public Int32 PointSize = 5;
+
+        private int durationMins;
         string agg = "Value_Avg";
 
         Int32 DateGrouping;
@@ -38,12 +40,20 @@ namespace DBADashGUI.Performance
 
         public void RefreshData()
         {
-            var mins = (Int32)ToDate.Subtract(FromDate).TotalMinutes;
             this.InstanceID = InstanceID;
-            DateGrouping = Common.DateGrouping(mins, 200);
-            tsDateGrouping.Text = Common.DateGroupString(DateGrouping);
+            setDateGroup(DateRange.DurationMins);
             dt = GetPerformanceCounter();
             refreshChart();
+        }
+
+        private void setDateGroup(int mins)
+        {
+            if (durationMins != mins) // Change dategroup only if date range has changed.
+            {
+                DateGrouping = Common.DateGrouping(mins, 200);
+                tsDateGrouping.Text = Common.DateGroupString(DateGrouping);
+                durationMins = mins;
+            }
         }
 
         private void refreshChart()
@@ -124,7 +134,15 @@ namespace DBADashGUI.Performance
                 cmd.Parameters.AddWithValue("ToDate", ToDate);
                 cmd.Parameters.AddWithValue("CounterID", CounterID);
                 cmd.Parameters.AddWithValue("DateGroupingMin", DateGrouping);
-                
+                cmd.Parameters.AddWithValue("UTCOffset", Common.UtcOffset);
+                if (DateRange.HasDayOfWeekFilter)
+                {
+                    cmd.Parameters.AddWithValue("DaysOfWeek", DateRange.DayOfWeek.AsDataTable());
+                }
+                if (DateRange.HasTimeOfDayFilter)
+                {
+                    cmd.Parameters.AddWithValue("Hours", DateRange.TimeOfDay.AsDataTable());
+                }
                 DataTable dt = new DataTable();
                 da.Fill(dt);
                 Common.ConvertUTCToLocal(ref dt);

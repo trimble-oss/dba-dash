@@ -20,33 +20,33 @@ namespace DBADashGUI.Performance
         }
 
         public Int32 InstanceID { get; set; }
-
+   
         public void RefreshData()
         {
-            refreshSummary();
-            refreshChart();
+            RefreshSummary();
+            RefreshChart();
         }
 
-        private void refreshSummary()
+        private void RefreshSummary()
         {
             performanceCounterSummaryGrid1.SearchText = txtSearch.Text;
             performanceCounterSummaryGrid1.InstanceID = InstanceID;
             performanceCounterSummaryGrid1.RefreshData();
         }
-        
 
-        private void tsRefresh_Click(object sender, EventArgs e)
+
+        private void TsRefresh_Click(object sender, EventArgs e)
         {
-            refreshSummary();
-            refreshChart();
+            RefreshSummary();
+            RefreshChart();
         }
 
-        private void tsCopy_Click(object sender, EventArgs e)
+        private void TsCopy_Click(object sender, EventArgs e)
         {
             Common.CopyDataGridViewToClipboard(performanceCounterSummaryGrid1);
         }
 
-        private void refreshChart()
+        private void RefreshChart()
         {
             if (!splitContainer1.Panel1Collapsed)
             {
@@ -68,7 +68,7 @@ namespace DBADashGUI.Performance
         private void PerformanceCounterSummaryGrid1_TextSelected(object sender, PerformanceCounterSummaryGrid.TextSelectedEventArgs e)
         {
             txtSearch.Text = e.Text;
-            refreshSummary(); 
+            RefreshSummary(); 
         }
 
         private void PerformanceCounterSummaryGrid1_CounterSelected(object sender, PerformanceCounterSummaryGrid.CounterSelectedEventArgs e)
@@ -76,28 +76,27 @@ namespace DBADashGUI.Performance
             splitContainer1.Panel1Collapsed = false;
             performanceCounters1.CounterID = e.CounterID;
             performanceCounters1.CounterName = e.CounterName;
-            refreshChart();
+            RefreshChart();
         }
 
-        private void tsClear_Click(object sender, EventArgs e)
+        private void TsClear_Click(object sender, EventArgs e)
         {
             txtSearch.Text = "";
-            refreshSummary();
+            RefreshSummary();
         }
 
-        private void txtSearch_KeyPress(object sender, KeyPressEventArgs e)
+        private void TxtSearch_KeyPress(object sender, KeyPressEventArgs e)
         {
             if (e.KeyChar == (char)13)
             {
-                refreshSummary();
+                RefreshSummary();
             }
         }
 
-        private void tsExcel_Click(object sender, EventArgs e)
+        private void TsExcel_Click(object sender, EventArgs e)
         {
             Common.PromptSaveDataGridView(performanceCounterSummaryGrid1);
         }
-
 
     }
 }

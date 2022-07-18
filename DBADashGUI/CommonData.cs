@@ -5,6 +5,7 @@ using Microsoft.Data.SqlClient;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using DBADashGUI.Performance;
 
 namespace DBADashGUI
 {
@@ -45,7 +46,7 @@ namespace DBADashGUI
                 {
                     cmd.Parameters.AddWithValue("SearchString",searchString);
                 }
-                DataTable dt = new DataTable();                      
+                DataTable dt = new();                      
                 da.Fill(dt);
                 return dt;                               
             }
@@ -84,7 +85,7 @@ namespace DBADashGUI
                 cmd.Parameters.AddWithValue("IncludeOK", true);
                 cmd.Parameters.AddWithValue("FileGroupLevel", 0);
                 
-                DataTable dt = new DataTable();
+                DataTable dt = new();
                 da.Fill(dt);
                 return dt;
             }           
@@ -98,14 +99,14 @@ namespace DBADashGUI
             {
                 cn.Open();
                 cmd.Parameters.AddWithValue("DatabaseID", DatabaseID);
-                DataTable dt = new DataTable();
+                DataTable dt = new();
                 da.Fill(dt);
                 return dt;
             }
             
         }
 
-        public static DataTable ObjectExecutionStats(Int32 instanceID, Int32 databaseID, DateTime from, DateTime to, Int64 objectID, Int32 dateGrouping, string measure, string instance = "")
+        public static DataTable ObjectExecutionStats(Int32 instanceID, Int32 databaseID, Int64 objectID, Int32 dateGrouping, string measure,DateTime FromDate,DateTime ToDate, string instance = "")
         {
             using (var cn = new SqlConnection(Common.ConnectionString))
             using (var cmd = new SqlCommand("dbo.ObjectExecutionStats_Get", cn) { CommandType = CommandType.StoredProcedure })
@@ -120,8 +121,8 @@ namespace DBADashGUI
                 {
                     cmd.Parameters.AddWithValue("Instance", instance);
                 }
-                cmd.Parameters.AddWithValue("FromDateUTC", from);
-                cmd.Parameters.AddWithValue("ToDateUTC", to);
+                cmd.Parameters.AddWithValue("FromDateUTC", FromDate);
+                cmd.Parameters.AddWithValue("ToDateUTC", ToDate);
                 cmd.Parameters.AddWithValue("UTCOffset", Common.UtcOffset);
                 if (objectID > 0)
                 {
@@ -133,8 +134,15 @@ namespace DBADashGUI
                 {
                     cmd.Parameters.AddWithValue("DatabaseID", databaseID);
                 }
-                
-                DataTable dt = new DataTable();
+                if (DateRange.HasTimeOfDayFilter)
+                {
+                    cmd.Parameters.AddWithValue("Hours", DateRange.TimeOfDay.AsDataTable());
+                }
+                if (DateRange.HasDayOfWeekFilter)
+                {
+                    cmd.Parameters.AddWithValue("DaysOfWeek",DateRange.DayOfWeek.AsDataTable());
+                }
+                DataTable dt = new();
                 da.Fill(dt);
                 return dt;
             }
@@ -145,7 +153,7 @@ namespace DBADashGUI
         {
             using(var cn = new SqlConnection(Common.ConnectionString))
             using (var cmd = new SqlCommand("dbo.JobSteps_Get", cn) { CommandType = CommandType.StoredProcedure })
-            using (SqlDataAdapter da = new SqlDataAdapter(cmd))
+            using (var da = new SqlDataAdapter(cmd))
             {
                 cmd.Parameters.AddWithValue("InstanceID", InstanceID);
                 cmd.Parameters.AddWithValue("JobID", JobID);
@@ -157,7 +165,6 @@ namespace DBADashGUI
 
         public static DataTable GetJobs(int InstanceId)
         {
-            var jobs = new Dictionary<Guid, String>();
             using (var cn = new SqlConnection(Common.ConnectionString))
             using (var cmd = new SqlCommand("dbo.Jobs_Get", cn) { CommandType = CommandType.StoredProcedure })
             using (var da = new SqlDataAdapter(cmd))
@@ -171,7 +178,7 @@ namespace DBADashGUI
 
         public static List<string> GetInstancesWithDDLSnapshot(List<int> tags)
         {
-            List<string> instances = new List<string>();
+            List<string> instances = new();
             using (var cn = new SqlConnection(Common.ConnectionString))
             using (var cmd = new SqlCommand("dbo.InstancesWithDDLSnapshot_Get", cn) { CommandType = CommandType.StoredProcedure })
             {
@@ -193,7 +200,7 @@ namespace DBADashGUI
 
         public static List<DatabaseItem> GetDatabasesWithDDLSnapshot(string instanceGroupName)
         {
-            List<DatabaseItem> databases = new List<DatabaseItem>();
+            List<DatabaseItem> databases = new();
             using (var cn = new SqlConnection(Common.ConnectionString))
             using (var cmd = new SqlCommand("dbo.DatabasesWithDDLSnapshot_Get", cn) { CommandType = CommandType.StoredProcedure })
             {
@@ -212,7 +219,7 @@ namespace DBADashGUI
 
         public static Dictionary<string, string> GetObjectTypes()
         {
-            Dictionary<string, string> objtypes = new Dictionary<string, string>();
+            Dictionary<string, string> objtypes = new();
             using (var cn = new SqlConnection(Common.ConnectionString))
             using (var cmd = new SqlCommand("dbo.ObjectType_Get", cn) { CommandType = CommandType.StoredProcedure })
             {
@@ -232,8 +239,8 @@ namespace DBADashGUI
         {
             var dt = new DataTable();
             using (var cn = new SqlConnection(Common.ConnectionString))
-            using (SqlCommand cmd = new SqlCommand("dbo.DBObjects_Get", cn) { CommandType = CommandType.StoredProcedure })
-            using (SqlDataAdapter da = new SqlDataAdapter(cmd))
+            using (var cmd = new SqlCommand("dbo.DBObjects_Get", cn) { CommandType = CommandType.StoredProcedure })
+            using (var da = new SqlDataAdapter(cmd))
             {
                 cn.Open();
                 cmd.Parameters.AddWithValue("DatabaseID", DatabaseID);
@@ -246,27 +253,26 @@ namespace DBADashGUI
         public static DataTable GetDDLHistoryForObject(Int64 ObjectId, int PageNum, int PageSize)
         {
             using (var cn = new SqlConnection(Common.ConnectionString))
+            using (var cmd = new SqlCommand("dbo.DDLHistoryForObject_Get", cn) { CommandType = CommandType.StoredProcedure })
+            using (var da = new SqlDataAdapter(cmd))
             {
-                using (var cmd = new SqlCommand("dbo.DDLHistoryForObject_Get", cn) { CommandType = CommandType.StoredProcedure })
-                {
-                    cn.Open();
-                    cmd.Parameters.AddWithValue("ObjectID", ObjectId);
-                    cmd.Parameters.AddWithValue("PageSize", PageSize);
-                    cmd.Parameters.AddWithValue("PageNumber", PageNum);
-                    SqlDataAdapter da = new SqlDataAdapter(cmd);
-                    var dt = new DataTable();
-                    da.Fill(dt);
-                    return dt;
-                }
-            }
+                cn.Open();
+                cmd.Parameters.AddWithValue("ObjectID", ObjectId);
+                cmd.Parameters.AddWithValue("PageSize", PageSize);
+                cmd.Parameters.AddWithValue("PageNumber", PageNum);
+                
+                var dt = new DataTable();
+                da.Fill(dt);
+                return dt;
+            }         
         }
         public static DataTable GetCounters()
         {
             using (var cn = new SqlConnection(Common.ConnectionString))
-            using (SqlCommand cmd = new SqlCommand("dbo.Counters_Get", cn) { CommandType = CommandType.StoredProcedure })
-            using (SqlDataAdapter da = new SqlDataAdapter(cmd))
+            using (var cmd = new SqlCommand("dbo.Counters_Get", cn) { CommandType = CommandType.StoredProcedure })
+            using (var da = new SqlDataAdapter(cmd))
             {
-                DataTable dt = new DataTable();
+                DataTable dt = new();
                 da.Fill(dt);
                 return dt;
             }

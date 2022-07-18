@@ -24,9 +24,6 @@ namespace DBADashGUI.Performance
 
         Int32 mins;
         DateTime ioTime = DateTime.MinValue;
-        DateTime from;
-        DateTime to;
-        string connectionString;
         Int32 instanceID;
         private Int32 dateGrouping;
         bool smoothLines = true;
@@ -89,7 +86,7 @@ namespace DBADashGUI.Performance
             }
         }
 
-        private void populateFileGroupFilter()
+        private void PopulateFileGroupFilter()
         {
             if (databaseid > 0)
             {
@@ -104,7 +101,7 @@ namespace DBADashGUI.Performance
                         Checked = fg == filegroup,
                         CheckOnClick = true
                     };
-                    mnu.Click += filegroup_Click; ;
+                    mnu.Click += Filegroup_Click; ;
                     tsFileGroup.DropDownItems.Add(mnu);
 
                 }
@@ -116,7 +113,7 @@ namespace DBADashGUI.Performance
             }
         }
 
-        private void filegroup_Click(object sender, EventArgs e)
+        private void Filegroup_Click(object sender, EventArgs e)
         {
             var mnu = (ToolStripMenuItem)sender;
             if (mnu.Checked)
@@ -127,32 +124,30 @@ namespace DBADashGUI.Performance
             {
                 FileGroup = "";
             }
-            refreshData();
+            RefreshData();
         }
 
-        private void getDrives()
+        private void GetDrives()
         {
             tsDrives.DropDownItems.Clear();
             drive = "";
             tsDrives.Text = drive;
-            SqlConnection cn = new SqlConnection(connectionString);
-            using (cn)
+            using (var cn = new SqlConnection(Common.ConnectionString))
+            using (var cmd = new SqlCommand("DriveLetters_Get", cn) { CommandType = CommandType.StoredProcedure })
             {
-                using (SqlCommand cmd = new SqlCommand("DriveLetters_Get", cn) { CommandType = CommandType.StoredProcedure })
+                cn.Open();
+                cmd.Parameters.AddWithValue("@InstanceID", instanceID);
+                using var rdr = cmd.ExecuteReader();
+                while (rdr.Read())
                 {
-                    cn.Open();
-                    cmd.Parameters.AddWithValue("@InstanceID", instanceID);
-                    var rdr = cmd.ExecuteReader();
-                    while (rdr.Read())
-                    {
-                        var name = (string)rdr["Name"];
-                        var label = rdr["Label"] == DBNull.Value ? "" : (string)rdr["Label"];
-                        var ddDrive = tsDrives.DropDownItems.Add(name + "     |     " + label);
-                        ddDrive.Tag = name;
-                        ddDrive.Click += DdDrive_Click;
-                    }
+                    var name = (string)rdr["Name"];
+                    var label = rdr["Label"] == DBNull.Value ? "" : (string)rdr["Label"];
+                    var ddDrive = tsDrives.DropDownItems.Add(name + "     |     " + label);
+                    ddDrive.Tag = name;
+                    ddDrive.Click += DdDrive_Click;
                 }
             }
+            
             var ddAll = tsDrives.DropDownItems.Add("{All}");
             ddAll.Tag = "";
             ddAll.Click += DdDrive_Click;
@@ -161,71 +156,75 @@ namespace DBADashGUI.Performance
         private void DdDrive_Click(object sender, EventArgs e)
         {
             Drive =  (string)((ToolStripDropDownItem)sender).Tag;
-            refreshData(false);    
+            RefreshData();    
         }
 
-        private DataTable IOStats(Int32 instanceid, DateTime from, DateTime to, string connectionString,Int32 DatabaseID,string drive)
+        private DataTable IOStats(Int32 instanceid, DateTime from, DateTime to,Int32 DatabaseID,string drive)
         {
             var dt = new DataTable();
-            SqlConnection cn = new SqlConnection(connectionString);
-            using (cn)
+
+            using (var cn = new SqlConnection(Common.ConnectionString))
+            using (var cmd = new SqlCommand(@"IOStats_Get", cn) { CommandType = CommandType.StoredProcedure })
             {
-                using (SqlCommand cmd = new SqlCommand(@"IOStats_Get", cn) { CommandType = CommandType.StoredProcedure })
+                cn.Open();
+
+                cmd.Parameters.AddWithValue("@InstanceID", instanceid);
+                cmd.Parameters.AddWithValue("@FromDate", from);
+                cmd.Parameters.AddWithValue("@ToDate", to);
+                if (filegroup.Length > 0)
                 {
-                    cn.Open();
-
-                    cmd.Parameters.AddWithValue("@InstanceID", instanceid);
-                    cmd.Parameters.AddWithValue("@FromDate", from);
-                    cmd.Parameters.AddWithValue("@ToDate", to);
-                    if (filegroup.Length > 0)
-                    {
-                        cmd.Parameters.AddWithValue("@FileGroup", filegroup);
-                    }
-                    cmd.Parameters.AddWithValue("DateGroupingMin", dateGrouping);
-                    if (drive != "")
-                    {
-                        cmd.Parameters.AddWithValue("Drive", drive);
-                    }
-                    if (DatabaseID > 0)
-                    {
-                        cmd.Parameters.AddWithValue("@DatabaseID", DatabaseID);
-                    }
-                    cmd.CommandTimeout = Properties.Settings.Default.CommandTimeout;
-                    var da = new SqlDataAdapter(cmd);
-                    da.Fill(dt);
+                    cmd.Parameters.AddWithValue("@FileGroup", filegroup);
                 }
-
+                cmd.Parameters.AddWithValue("DateGroupingMin", dateGrouping);
+                if (drive != "")
+                {
+                    cmd.Parameters.AddWithValue("Drive", drive);
+                }
+                if (DatabaseID > 0)
+                {
+                    cmd.Parameters.AddWithValue("@DatabaseID", DatabaseID);
+                }
+                cmd.Parameters.AddWithValue("@UTCOffset", Common.UtcOffset);
+                if (DateRange.HasTimeOfDayFilter)
+                {
+                    cmd.Parameters.AddWithValue("Hours", DateRange.TimeOfDay.AsDataTable());
+                }
+                if (DateRange.HasDayOfWeekFilter)
+                {
+                    cmd.Parameters.AddWithValue("DaysOfWeek", DateRange.DayOfWeek.AsDataTable());
+                }
+                cmd.CommandTimeout = Properties.Settings.Default.CommandTimeout;
+                var da = new SqlDataAdapter(cmd);
+                da.Fill(dt);
             }
             return dt;
         }
 
    
 
-        public void RefreshData(Int32 InstanceID, DateTime fromDate, DateTime toDate, string connectionString,Int32 databaseID)
+        public void RefreshData(Int32 InstanceID,Int32 databaseID)
         {
             
-             disableEnableDropdowns();
+             DisableEnableDropdowns();
             
             this.instanceID = InstanceID;
-            mins = (Int32)toDate.Subtract(fromDate).TotalMinutes;
-
-            if (this.from!=fromDate || this.to != toDate)
+            
+            if (mins!=DateRange.DurationMins)
             {
-                dateGrouping = Common.DateGrouping(mins, 200);
+                dateGrouping = Common.DateGrouping(DateRange.DurationMins, 200);
                 tsDateGroup.Text = Common.DateGroupString(dateGrouping);
+                mins = DateRange.DurationMins;
             }
-            this.from = fromDate;
-            this.to = toDate;
-            this.connectionString = connectionString;
+         
             this.databaseid  = databaseID;
             FileGroup = "";
-            populateFileGroupFilter();     
-            getDrives();
-            refreshData();
+            PopulateFileGroupFilter();     
+            GetDrives();
+            RefreshData();
             
         }
 
-        private void disableEnableDropdowns()
+        private void DisableEnableDropdowns()
         {
             foreach(ToolStripMenuItem ts in tsMeasures.DropDownItems)
             {
@@ -234,24 +233,9 @@ namespace DBADashGUI.Performance
             }
         }
 
-        public void RefreshData()
-        {
-           
-            if (DateTime.UtcNow.Subtract(ioTime).TotalMinutes > 30 || dateGrouping !=  1)
-            {
-                from = DateTime.UtcNow.AddMinutes(-mins);
-                to = DateTime.UtcNow.AddMinutes(1);
-                refreshData(false);
-            }
-            else
-            {
-                from = ioTime.AddSeconds(1);
-                to = DateTime.UtcNow.AddMinutes(1);
-                refreshData(true);
-            }
-        }
 
-        private void refreshData(bool update = false)
+
+        public void RefreshData()
         {
 
             string DateFormat = "HH:mm";
@@ -259,12 +243,8 @@ namespace DBADashGUI.Performance
             {
                 DateFormat = "yyyy-MM-dd HH:mm";
             }
-            var dt = IOStats(instanceID, from, to, connectionString,databaseid,drive);
+            var dt = IOStats(instanceID, DateRange.FromUTC, DateRange.ToUTC,databaseid,drive);
             var cnt = dt.Rows.Count;
-            if(cnt==0 && update)
-            {
-                return;
-            }
 
             var columns = new Dictionary<string, columnMetaData>
             {
@@ -310,63 +290,51 @@ namespace DBADashGUI.Performance
             }
 
             SeriesCollection sc;
-            if (!update)
+    
+            sc = new SeriesCollection();
+            chartIO.Series = sc;
+            foreach (string s in columns.Keys)
             {
-                sc = new SeriesCollection();
-                chartIO.Series = sc;
-                foreach (string s in columns.Keys)
+                sc.Add(new LineSeries
                 {
-                    sc.Add(new LineSeries
-                    {
-                        Title = columns[s].Alias,
-                        Tag = s,
-                        ScalesYAt = columns[s].axis,
-                        PointGeometrySize = cnt <= 100 ? PointSize : 0,
-                        LineSmoothness = SmoothLines ? 1 : 0
-                    }
-                    );
+                    Title = columns[s].Alias,
+                    Tag = s,
+                    ScalesYAt = columns[s].axis,
+                    PointGeometrySize = cnt <= 100 ? PointSize : 0,
+                    LineSmoothness = SmoothLines ? 1 : 0
                 }
-                chartIO.AxisX.Clear();
-                chartIO.AxisY.Clear();
-                chartIO.AxisX.Add(new Axis
-                {
-                    Title = "Time",
-                    LabelFormatter = val => new System.DateTime((long)val).ToString(DateFormat)
-
-                });
-                chartIO.AxisY.Add(new Axis
-                {
-                    Title = "MB/sec",
-                    LabelFormatter = val => val.ToString("0.0 MB"),
-                    MinValue=0
-                });
-                chartIO.AxisY.Add(new Axis
-                {
-                    Title = "IOPs",
-                    LabelFormatter = val => val.ToString("0.0 IOPs"),
-                    Position = AxisPosition.RightTop,
-                    MinValue=0
-                });
-                chartIO.AxisY.Add(new Axis
-                {
-                    Title = "Latency",
-                    LabelFormatter = val => val.ToString("0.0ms"),
-                    Position = AxisPosition.RightTop,
-                    MinValue=0,
-                    MaxValue=200
-                });
+                );
             }
-            else
+            chartIO.AxisX.Clear();
+            chartIO.AxisY.Clear();
+            chartIO.AxisX.Add(new Axis
             {
-                sc = chartIO.Series;
-                foreach(LineSeries s in sc)
-                {
-                    if(s.Values.Count>0 && DateTime.Now.Subtract(((DateTimePoint)s.Values[0]).DateTime).TotalMinutes > mins)
-                    {
-                        s.Values.RemoveAt(0);
-                    }
-                }
-            };
+                Title = "Time",
+                LabelFormatter = val => new System.DateTime((long)val).ToString(DateFormat)
+
+            });
+            chartIO.AxisY.Add(new Axis
+            {
+                Title = "MB/sec",
+                LabelFormatter = val => val.ToString("0.0 MB"),
+                MinValue=0
+            });
+            chartIO.AxisY.Add(new Axis
+            {
+                Title = "IOPs",
+                LabelFormatter = val => val.ToString("0.0 IOPs"),
+                Position = AxisPosition.RightTop,
+                MinValue=0
+            });
+            chartIO.AxisY.Add(new Axis
+            {
+                Title = "Latency",
+                LabelFormatter = val => val.ToString("0.0ms"),
+                Position = AxisPosition.RightTop,
+                MinValue=0,
+                MaxValue=200
+            });
+          
 
             bool addDropdowns = tsMeasures.DropDownItems.Count == 0;
         
@@ -395,7 +363,7 @@ namespace DBADashGUI.Performance
                     };
                     dd.Visible = (!(dd.Name.StartsWith("Max") && dateGrouping <=1));
                     dd.Checked = dd.Enabled && c.isVisible;
-                    dd.Click += measureDropDown_Click;
+                    dd.Click += MeasureDropDown_Click;
                     tsMeasures.DropDownItems.Add(dd);
                 }
             }
@@ -406,7 +374,7 @@ namespace DBADashGUI.Performance
             lblIOPerformance.Text = databaseid > 0 ? "IO Performance: Database" : "IO Performance: Instance";
         }
 
-        private void measureDropDown_Click(object sender, EventArgs e)
+        private void MeasureDropDown_Click(object sender, EventArgs e)
         {
             var dd = (ToolStripMenuItem)sender;
             foreach(LineSeries s in chartIO.Series)
@@ -429,10 +397,10 @@ namespace DBADashGUI.Performance
             var ts = (ToolStripMenuItem)sender;
             dateGrouping = Convert.ToInt32(ts.Tag);
             tsDateGroup.Text = Common.DateGroupString(dateGrouping);
-            refreshData(false);
+            RefreshData();
         }
 
-        private void tsIOSummary_Click(object sender, EventArgs e)
+        private void TsIOSummary_Click(object sender, EventArgs e)
         {
             var frm = new IOSummaryForm()
             {

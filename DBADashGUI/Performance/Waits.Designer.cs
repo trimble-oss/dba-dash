@@ -96,14 +96,14 @@
             this.criticalWaitsOnlyToolStripMenuItem.Text = "Critical Waits Only";
             this.criticalWaitsOnlyToolStripMenuItem.ToolTipText = "Wait types that can indicate serious performance problems. e.g. RESOURCE_SEMAPHOR" +
     "E, THREADPOOL";
-            this.criticalWaitsOnlyToolStripMenuItem.Click += new System.EventHandler(this.criticalWaitsOnlyToolStripMenuItem_Click);
+            this.criticalWaitsOnlyToolStripMenuItem.Click += new System.EventHandler(this.CriticalWaitsOnlyToolStripMenuItem_Click);
             // 
             // stringFilterToolStripMenuItem
             // 
             this.stringFilterToolStripMenuItem.Name = "stringFilterToolStripMenuItem";
             this.stringFilterToolStripMenuItem.Size = new System.Drawing.Size(212, 26);
             this.stringFilterToolStripMenuItem.Text = "String Filter";
-            this.stringFilterToolStripMenuItem.Click += new System.EventHandler(this.stringFilterToolStripMenuItem_Click);
+            this.stringFilterToolStripMenuItem.Click += new System.EventHandler(this.StringFilterToolStripMenuItem_Click);
             // 
             // Waits
             // 

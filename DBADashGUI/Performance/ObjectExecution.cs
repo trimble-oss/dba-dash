@@ -33,60 +33,45 @@ namespace DBADashGUI.Performance
         public DateTimePoint x;
         Int32 instanceID;
         DateTime chartMaxDate = DateTime.MinValue;
-        string connectionString;
-      
-        DateTime from;
-        DateTime to;
+     
+
         Int32 mins;
         private Int64 objectID;
         Int32 databaseid=0;
         private Int32 dateGrouping;
 
 
-        public void RefreshData()
-        {
-            if (chartMaxDate != DateTime.MinValue && dateGrouping == 1)
-            {
-                this.to = DateTime.UtcNow.AddMinutes(1);
-                this.from = chartMaxDate.AddMinutes(-Common.UtcOffset).AddSeconds(1);
-                refreshData(true);
-            }
-        }
-        public void RefreshData(Int32 instanceID, DateTime from, DateTime to, string connectionString, Int64 objectID, Int32 databaseID)
+    
+        public void RefreshData(Int32 instanceID, Int64 objectID, Int32 databaseID)
         {
             this.instanceID = instanceID;
-            this.connectionString = connectionString;
-            mins = (Int32)to.Subtract(from).TotalMinutes;
-            if (this.from!=from | this.to != to)
+            if (mins != DateRange.DurationMins)
             {
-                dateGrouping = Common.DateGrouping(mins, 35);
+                dateGrouping = Common.DateGrouping(DateRange.DurationMins, 35);
                 if (dateGrouping < 1)
                 {
                     dateGrouping = 1;
                 }
                 tsDateGroup.Text = Common.DateGroupString(dateGrouping);
-                this.from = from;
-                this.to = to;
+                mins = DateRange.DurationMins;
             }
             this.objectID = objectID;
     
             this.databaseid = databaseID;
-            refreshData(false);
+            RefreshData();
         }
 
 
-        private void refreshData(bool update)
+        public void RefreshData()
         {
+    
+            objectExecChart.Series.Clear();
+            objectExecChart.AxisX.Clear();
+            objectExecChart.AxisY.Clear();
+            chartMaxDate = DateTime.MinValue;
+            
 
-            if (!update)
-            {
-                objectExecChart.Series.Clear();
-                objectExecChart.AxisX.Clear();
-                objectExecChart.AxisY.Clear();
-                chartMaxDate = DateTime.MinValue;
-            }
-
-            var dt = CommonData.ObjectExecutionStats(instanceID, databaseid, from, to, objectID, dateGrouping, measure);
+            var dt = CommonData.ObjectExecutionStats(instanceID, databaseid, objectID, dateGrouping, measure,DateRange.FromUTC,DateRange.ToUTC, "");
 
             if (dt.Rows.Count == 0)
             {
@@ -94,7 +79,7 @@ namespace DBADashGUI.Performance
             }
             var dPoints = new Dictionary<string, ChartValues<DateTimePoint>>();
             string current = string.Empty;
-            ChartValues<DateTimePoint> values = new ChartValues<DateTimePoint>();
+            ChartValues<DateTimePoint> values = new();
             foreach (DataRow r in dt.Rows)
             {
                 var objectName = (string)r["DatabaseName"] + " | " + (string)r["object_name"];
@@ -117,76 +102,43 @@ namespace DBADashGUI.Performance
                 values = new ChartValues<DateTimePoint>();
             }
 
-            if (update)
-            {
-                List<string> existingTitles = new List<string>();
-                foreach (StackedColumnSeries s in objectExecChart.Series)
-                {
-                    existingTitles.Add(s.Title);
-                    if (dPoints.ContainsKey(s.Title))
-                    {
-                        values = dPoints[s.Title];
-                        s.Values.AddRange(values);
-                    }
-
-                    while (s.Values.Count > 0 && DateTime.Now.Subtract(((DateTimePoint)s.Values[0]).DateTime).TotalMinutes > mins)
-                    {
-                        s.Values.RemoveAt(0);
-                    }
-                }
-                foreach (var x in dPoints)
-                {
-                    if (!existingTitles.Contains(x.Key))
-                    {
-                        objectExecChart.Series.Add(new StackedColumnSeries
-                        {
-                            Title = x.Key,
-                            Values = x.Value
-                        });
-                    }
-                }
-            }
-            else
-            {
-                CartesianMapper<DateTimePoint> dayConfig = Mappers.Xy<DateTimePoint>()
+            CartesianMapper<DateTimePoint> dayConfig = Mappers.Xy<DateTimePoint>()
 .X(dateModel => dateModel.DateTime.Ticks / TimeSpan.FromMinutes(dateGrouping==0?1:dateGrouping).Ticks)
 .Y(dateModel => dateModel.Value);
 
 
-                SeriesCollection s1 = new SeriesCollection(dayConfig);
-                foreach (var x in dPoints)
+            SeriesCollection s1 = new(dayConfig);
+            foreach (var x in dPoints)
+            {
+                s1.Add(new StackedColumnSeries
                 {
-                    s1.Add(new StackedColumnSeries
-                    {
-                        Title = x.Key,
-                        Values = x.Value
-                    });
-                }
-                objectExecChart.Series = s1;
-
-                string format = "t";
-                if (dateGrouping >= 1440)
-                {
-                    format = "yyyy-MM-dd";
-                }
-                else if (mins >= 1440)
-                {
-                    format = "yyyy-MM-dd HH:mm";
-                }
-                objectExecChart.AxisX.Add(new Axis
-                {
-                    LabelFormatter = value => new DateTime((long)(value * TimeSpan.FromMinutes(dateGrouping==0?1:dateGrouping).Ticks)).ToString(format)
+                    Title = x.Key,
+                    Values = x.Value
                 });
-
-                objectExecChart.AxisY.Add(new Axis
-                {
-                    LabelFormatter = val => val.ToString(measures[measure].LabelFormat)
-
-                });
-
-
-
             }
+            objectExecChart.Series = s1;
+
+            string format = "t";
+            if (dateGrouping >= 1440)
+            {
+                format = "yyyy-MM-dd";
+            }
+            else if (mins >= 1440)
+            {
+                format = "yyyy-MM-dd HH:mm";
+            }
+            objectExecChart.AxisX.Add(new Axis
+            {
+                LabelFormatter = value => new DateTime((long)(value * TimeSpan.FromMinutes(dateGrouping==0?1:dateGrouping).Ticks)).ToString(format)
+            });
+
+            objectExecChart.AxisY.Add(new Axis
+            {
+                LabelFormatter = val => val.ToString(measures[measure].LabelFormat)
+
+            });
+
+            
             lblExecution.Text = databaseid > 0 ? "Excution Stats: Database" : "Execution Stats: Instance";
         }
 
@@ -209,7 +161,7 @@ namespace DBADashGUI.Performance
 
         }
 
-        private readonly Measures measures = new Measures()
+        private readonly Measures measures = new()
             {
                 {"TotalDuration", "Total Duration","#,##0.000 sec"},
                 {"AvgDuration", "Avg Duration","#,##0.000 sec"},
@@ -232,7 +184,7 @@ namespace DBADashGUI.Performance
             Common.AddDateGroups(tsDateGroup, TsDateGrouping_Click);
             foreach(var m in measures)
             {
-                ToolStripMenuItem itm = new ToolStripMenuItem(m.Value.DisplayName)
+                ToolStripMenuItem itm = new(m.Value.DisplayName)
                 {
                     Name = m.Key
                 };
@@ -251,7 +203,7 @@ namespace DBADashGUI.Performance
             var ts = (ToolStripMenuItem)sender;
             dateGrouping = Convert.ToInt32(ts.Tag);
             tsDateGroup.Text = Common.DateGroupString(dateGrouping);
-            refreshData(false);
+            RefreshData();
         }
 
         private void Itm_Click(object sender, EventArgs e)
@@ -266,7 +218,7 @@ namespace DBADashGUI.Performance
                 }
                 tsMeasures.Text = tsItm.Text;
             }
-            RefreshData(instanceID, to.AddMinutes(-mins), to, connectionString,objectID, databaseid);
+            RefreshData(instanceID,objectID, databaseid);
         }
     }
 }

@@ -77,7 +77,7 @@
             this.smoothLinesToolStripMenuItem.Name = "smoothLinesToolStripMenuItem";
             this.smoothLinesToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
             this.smoothLinesToolStripMenuItem.Text = "Smooth Lines";
-            this.smoothLinesToolStripMenuItem.Click += new System.EventHandler(this.smoothLinesToolStripMenuItem_Click);
+            this.smoothLinesToolStripMenuItem.Click += new System.EventHandler(this.SmoothLinesToolStripMenuItem_Click);
             // 
             // dataPointsToolStripMenuItem
             // 
@@ -87,7 +87,7 @@
             this.dataPointsToolStripMenuItem.Name = "dataPointsToolStripMenuItem";
             this.dataPointsToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
             this.dataPointsToolStripMenuItem.Text = "Data Points";
-            this.dataPointsToolStripMenuItem.Click += new System.EventHandler(this.dataPointsToolStripMenuItem_Click);
+            this.dataPointsToolStripMenuItem.Click += new System.EventHandler(this.DataPointsToolStripMenuItem_Click);
             // 
             // tsRefresh
             // 
@@ -97,12 +97,12 @@
             this.tsRefresh.Name = "tsRefresh";
             this.tsRefresh.Size = new System.Drawing.Size(29, 24);
             this.tsRefresh.Text = "Refresh";
-            this.tsRefresh.Click += new System.EventHandler(this.tsRefresh_Click);
+            this.tsRefresh.Click += new System.EventHandler(this.TsRefresh_Click);
             // 
             // timer1
             // 
             this.timer1.Interval = 10000;
-            this.timer1.Tick += new System.EventHandler(this.timer1_Tick);
+            this.timer1.Tick += new System.EventHandler(this.Timer1_Tick);
             // 
             // tableLayoutPanel1
             // 

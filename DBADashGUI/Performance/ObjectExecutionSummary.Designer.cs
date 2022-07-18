@@ -85,8 +85,8 @@
             this.dgv.RowTemplate.Height = 24;
             this.dgv.Size = new System.Drawing.Size(1262, 323);
             this.dgv.TabIndex = 0;
-            this.dgv.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgv_CellContentClick);
-            this.dgv.RowsAdded += new System.Windows.Forms.DataGridViewRowsAddedEventHandler(this.dgv_RowsAdded);
+            this.dgv.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.Dgv_CellContentClick);
+            this.dgv.RowsAdded += new System.Windows.Forms.DataGridViewRowsAddedEventHandler(this.Dgv_RowsAdded);
             // 
             // toolStrip1
             // 
@@ -115,7 +115,7 @@
             this.tsRefresh.Name = "tsRefresh";
             this.tsRefresh.Size = new System.Drawing.Size(29, 24);
             this.tsRefresh.Text = "Refresh";
-            this.tsRefresh.Click += new System.EventHandler(this.tsRefresh_Click);
+            this.tsRefresh.Click += new System.EventHandler(this.TsRefresh_Click);
             // 
             // tsCopy
             // 
@@ -125,7 +125,7 @@
             this.tsCopy.Name = "tsCopy";
             this.tsCopy.Size = new System.Drawing.Size(29, 24);
             this.tsCopy.Text = "Copy";
-            this.tsCopy.Click += new System.EventHandler(this.tsCopy_Click);
+            this.tsCopy.Click += new System.EventHandler(this.TsCopy_Click);
             // 
             // tsExcel
             // 
@@ -135,7 +135,7 @@
             this.tsExcel.Name = "tsExcel";
             this.tsExcel.Size = new System.Drawing.Size(29, 24);
             this.tsExcel.Text = "Export Excel";
-            this.tsExcel.Click += new System.EventHandler(this.tsExcel_Click);
+            this.tsExcel.Click += new System.EventHandler(this.TsExcel_Click);
             // 
             // tsCompare
             // 
@@ -158,7 +158,7 @@
             this.tsTimeOffset.Size = new System.Drawing.Size(193, 26);
             this.tsTimeOffset.Tag = "60";
             this.tsTimeOffset.Text = "Previous Period";
-            this.tsTimeOffset.Click += new System.EventHandler(this.tsSetOffset_Click);
+            this.tsTimeOffset.Click += new System.EventHandler(this.TsSetOffset_Click);
             // 
             // ts24Hrs
             // 
@@ -166,7 +166,7 @@
             this.ts24Hrs.Size = new System.Drawing.Size(193, 26);
             this.ts24Hrs.Tag = "1440";
             this.ts24Hrs.Text = "-24hrs offset";
-            this.ts24Hrs.Click += new System.EventHandler(this.tsSetOffset_Click);
+            this.ts24Hrs.Click += new System.EventHandler(this.TsSetOffset_Click);
             // 
             // ts7Days
             // 
@@ -174,7 +174,7 @@
             this.ts7Days.Size = new System.Drawing.Size(193, 26);
             this.ts7Days.Tag = "10080";
             this.ts7Days.Text = "-7 days offset";
-            this.ts7Days.Click += new System.EventHandler(this.tsSetOffset_Click);
+            this.ts7Days.Click += new System.EventHandler(this.TsSetOffset_Click);
             // 
             // toolStripSeparator2
             // 
@@ -187,7 +187,7 @@
             this.tsCustomCompare.Size = new System.Drawing.Size(193, 26);
             this.tsCustomCompare.Tag = "-1";
             this.tsCustomCompare.Text = "Custom";
-            this.tsCustomCompare.Click += new System.EventHandler(this.tsCustomCompare_Click);
+            this.tsCustomCompare.Click += new System.EventHandler(this.TsCustomCompare_Click);
             // 
             // tsNoCompare
             // 
@@ -197,7 +197,7 @@
             this.tsNoCompare.Size = new System.Drawing.Size(193, 26);
             this.tsNoCompare.Tag = "0";
             this.tsNoCompare.Text = "None";
-            this.tsNoCompare.Click += new System.EventHandler(this.tsSetOffset_Click);
+            this.tsNoCompare.Click += new System.EventHandler(this.TsSetOffset_Click);
             // 
             // tsCols
             // 
@@ -207,7 +207,7 @@
             this.tsCols.Name = "tsCols";
             this.tsCols.Size = new System.Drawing.Size(29, 24);
             this.tsCols.Text = "Columns";
-            this.tsCols.Click += new System.EventHandler(this.tsCols_Click);
+            this.tsCols.Click += new System.EventHandler(this.TsCols_Click);
             // 
             // tsType
             // 
@@ -231,7 +231,7 @@
             this.procedureToolStripMenuItem.Size = new System.Drawing.Size(273, 26);
             this.procedureToolStripMenuItem.Tag = "P";
             this.procedureToolStripMenuItem.Text = "Procedure";
-            this.procedureToolStripMenuItem.Click += new System.EventHandler(this.tsType_Click);
+            this.procedureToolStripMenuItem.Click += new System.EventHandler(this.TsType_Click);
             // 
             // triggerToolStripMenuItem
             // 
@@ -240,7 +240,7 @@
             this.triggerToolStripMenuItem.Size = new System.Drawing.Size(273, 26);
             this.triggerToolStripMenuItem.Tag = "TR";
             this.triggerToolStripMenuItem.Text = "Trigger";
-            this.triggerToolStripMenuItem.Click += new System.EventHandler(this.tsType_Click);
+            this.triggerToolStripMenuItem.Click += new System.EventHandler(this.TsType_Click);
             // 
             // cLRProcedureToolStripMenuItem
             // 
@@ -249,7 +249,7 @@
             this.cLRProcedureToolStripMenuItem.Size = new System.Drawing.Size(273, 26);
             this.cLRProcedureToolStripMenuItem.Tag = "PC";
             this.cLRProcedureToolStripMenuItem.Text = "CLR Procedure";
-            this.cLRProcedureToolStripMenuItem.Click += new System.EventHandler(this.tsType_Click);
+            this.cLRProcedureToolStripMenuItem.Click += new System.EventHandler(this.TsType_Click);
             // 
             // cLRTriggerToolStripMenuItem
             // 
@@ -258,7 +258,7 @@
             this.cLRTriggerToolStripMenuItem.Size = new System.Drawing.Size(273, 26);
             this.cLRTriggerToolStripMenuItem.Tag = "TA";
             this.cLRTriggerToolStripMenuItem.Text = "CLR Trigger";
-            this.cLRTriggerToolStripMenuItem.Click += new System.EventHandler(this.tsType_Click);
+            this.cLRTriggerToolStripMenuItem.Click += new System.EventHandler(this.TsType_Click);
             // 
             // scalarFunctionToolStripMenuItem
             // 
@@ -267,7 +267,7 @@
             this.scalarFunctionToolStripMenuItem.Size = new System.Drawing.Size(273, 26);
             this.scalarFunctionToolStripMenuItem.Tag = "FN";
             this.scalarFunctionToolStripMenuItem.Text = "Scalar Function";
-            this.scalarFunctionToolStripMenuItem.Click += new System.EventHandler(this.tsType_Click);
+            this.scalarFunctionToolStripMenuItem.Click += new System.EventHandler(this.TsType_Click);
             // 
             // extendedStoredProcedureToolStripMenuItem
             // 
@@ -276,7 +276,7 @@
             this.extendedStoredProcedureToolStripMenuItem.Size = new System.Drawing.Size(273, 26);
             this.extendedStoredProcedureToolStripMenuItem.Tag = "X";
             this.extendedStoredProcedureToolStripMenuItem.Text = "Extended Stored Procedure";
-            this.extendedStoredProcedureToolStripMenuItem.Click += new System.EventHandler(this.tsType_Click);
+            this.extendedStoredProcedureToolStripMenuItem.Click += new System.EventHandler(this.TsType_Click);
             // 
             // toolStripSeparator1
             // 
@@ -294,7 +294,7 @@
             // 
             this.txtSearch.Name = "txtSearch";
             this.txtSearch.Size = new System.Drawing.Size(200, 27);
-            this.txtSearch.TextChanged += new System.EventHandler(this.txtSearch_TextChanged);
+            this.txtSearch.TextChanged += new System.EventHandler(this.TxtSearch_TextChanged);
             // 
             // splitContainer1
             // 
@@ -359,7 +359,7 @@
             // tmrSearch
             // 
             this.tmrSearch.Interval = 1000;
-            this.tmrSearch.Tick += new System.EventHandler(this.tmrSearch_Tick);
+            this.tmrSearch.Tick += new System.EventHandler(this.TmrSearch_Tick);
             // 
             // ObjectExecutionSummary
             // 

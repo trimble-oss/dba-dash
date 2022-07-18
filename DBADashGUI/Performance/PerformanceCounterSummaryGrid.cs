@@ -73,10 +73,20 @@ namespace DBADashGUI.Performance
                 {
                     cmd.Parameters.AddWithValue("Counters", string.Join(",", Counters));
                 }
+                if (DateRange.HasDayOfWeekFilter)
+                {
+                    cmd.Parameters.AddWithValue("DaysOfWeek", DateRange.DayOfWeek.AsDataTable());
+                }
+                if (DateRange.HasTimeOfDayFilter)
+                {
+                    cmd.Parameters.AddWithValue("Hours", DateRange.TimeOfDay.AsDataTable());
+                }
+                cmd.Parameters.AddWithValue("UTCOffset", Common.UtcOffset);
                 DataTable dt = new DataTable();
                 da.Fill(dt);
                 AutoGenerateColumns = false;
                 DataSource = dt;
+
                 AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
             }
         }

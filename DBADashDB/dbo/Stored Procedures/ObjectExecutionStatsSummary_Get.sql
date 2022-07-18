@@ -1,4 +1,4 @@
-﻿CREATE   PROC [dbo].[ObjectExecutionStatsSummary_Get](
+﻿CREATE   PROC dbo.ObjectExecutionStatsSummary_Get(
 		@FromDate DATETIME2(3),
 		@ToDate DATETIME2(4),
 		@CompareFrom DATETIME2(3)=NULL,
@@ -10,9 +10,13 @@
 		@Use60MIN BIT=NULL,
 		@Use60MINCompare BIT=NULL,
 		@ObjectID BIGINT=NULL,
-		@Debug BIT=0
+		@Debug BIT=0,
+		@DaysOfWeek IDs READONLY, /* e.g. exclude weekends:  Monday,Tuesday,Wednesday,Thursday,Friday. Filter applied in local timezone (@UTCOffset) */
+		@Hours IDs READONLY, /* e.g. 9 to 5 :  9,10,11,12,13,14,15,16. Filter applied in local timezone (@UTCOffset)  */
+		@UTCOffset INT=0 /* Used for filtering on hours & weekday in current timezone */
 )
 AS
+SET DATEFIRST 1 /* Start week on Monday */
 IF @Use60MIN IS NULL
 BEGIN
 	SELECT @Use60MIN = CASE WHEN DATEDIFF(hh,@FromDate,@ToDate)>24 THEN 1
@@ -33,6 +37,18 @@ BEGIN
 						THEN 1
 						ELSE 0 END
 END
+
+DECLARE @DaysOfWeekCsv NVARCHAR(MAX)
+SELECT @DaysOfWeekCsv =  STUFF((SELECT ',' + CAST(ID AS VARCHAR)
+FROM @DaysOfWeek
+FOR XML PATH(''),TYPE).value('.','NVARCHAR(MAX)'),1,1,'')
+
+DECLARE @HoursCsv NVARCHAR(MAX)
+SELECT @HoursCsv =  STUFF((SELECT ',' + CAST(ID AS VARCHAR)
+FROM @Hours
+FOR XML PATH(''),TYPE).value('.','NVARCHAR(MAX)'),1,1,'')
+
+
 DECLARE @SQL NVARCHAR(MAX)
 SET @SQL = CAST('' AS NVARCHAR(MAX)) +  N'
 WITH base AS (
@@ -73,6 +89,8 @@ WITH base AS (
 	' + CASE WHEN @Types IS NULL THEN '' ELSE 'AND EXISTS(SELECT 1 FROM STRING_SPLIT(@Types,'','') ss WHERE ss.Value =  O.ObjectType)' END + '
 	' + CASE WHEN @DatabaseID IS NULL THEN '' ELSE 'AND D.DatabaseID = @DatabaseID' END + '
 	' + CASE WHEN @ObjectID IS NULL THEN '' ELSE 'AND OES.ObjectID = @ObjectID' END + '
+	' + CASE WHEN @DaysOfWeekCsv IS NULL THEN N'' ELSE 'AND DATEPART(dw,DATEADD(mi, @UTCOffset, OES.SnapshotDate)) IN (' + @DaysOfWeekCsv + ')' END + '
+	' + CASE WHEN @HoursCsv IS NULL THEN N'' ELSE 'AND DATEPART(hh,DATEADD(mi, @UTCOffset, OES.SnapshotDate)) IN(' + @HoursCsv + ')' END + '
 	GROUP BY OES.InstanceID,OES.ObjectID,I.ConnectionID,D.name,O.SchemaName,O.ObjectName,O.ObjectType,OT.TypeDescription
 ),
 compare as(
@@ -112,6 +130,8 @@ compare as(
 	' + CASE WHEN @Types IS NULL THEN '' ELSE 'AND EXISTS(SELECT 1 FROM STRING_SPLIT(@Types,'','') ss WHERE ss.Value =  O.ObjectType)' END + '
 	' + CASE WHEN @DatabaseID IS NULL THEN '' ELSE 'AND D.DatabaseID = @DatabaseID' END + '
 	' + CASE WHEN @ObjectID IS NULL THEN '' ELSE 'AND OES.ObjectID = @ObjectID' END + '
+	' + CASE WHEN @DaysOfWeekCsv IS NULL THEN N'' ELSE 'AND DATEPART(dw,DATEADD(mi, @UTCOffset, OES.SnapshotDate)) IN (' + @DaysOfWeekCsv + ')' END + '
+	' + CASE WHEN @HoursCsv IS NULL THEN N'' ELSE 'AND DATEPART(hh,DATEADD(mi, @UTCOffset, OES.SnapshotDate)) IN(' + @HoursCsv + ')' END + '
 	GROUP BY OES.InstanceID,OES.ObjectID,I.ConnectionID,D.name,O.SchemaName,O.ObjectName,O.ObjectType,OT.TypeDescription
 )
 SELECT ISNULL(base.InstanceID,compare.InstanceID) as InstanceID,
@@ -162,5 +182,24 @@ FULL JOIN compare on base.ObjectID = compare.ObjectID'
 IF @Debug=1
 	PRINT @SQL
 
-EXEC sp_executesql @SQL,N'@InstanceID INT,@Instance SYSNAME,@FromDate DATETIME2(3),@ToDate DATETIME2(3),@CompareFrom DATETIME2(3),@CompareTo DATETIME2(3),@Types VARCHAR(200),@DatabaseID INT,@ObjectID BIGINT',@InstanceID,@Instance,@FromDate,@ToDate,@CompareFrom,@CompareTo,@Types,@DatabaseID,@ObjectID
+EXEC sp_executesql @SQL,N'@InstanceID INT,
+						@Instance SYSNAME,
+						@FromDate DATETIME2(3),
+						@ToDate DATETIME2(3),
+						@CompareFrom DATETIME2(3),
+						@CompareTo DATETIME2(3),
+						@Types VARCHAR(200),
+						@DatabaseID INT,
+						@ObjectID BIGINT,
+						@UTCOffset INT',
+						@InstanceID,
+						@Instance,
+						@FromDate,
+						@ToDate,
+						@CompareFrom,
+						@CompareTo,
+						@Types,
+						@DatabaseID,
+						@ObjectID,
+						@UTCOffset
 ;
