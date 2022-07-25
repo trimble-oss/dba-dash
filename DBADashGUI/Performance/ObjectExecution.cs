@@ -16,7 +16,7 @@ using static DBADashGUI.Performance.Performance;
 
 namespace DBADashGUI.Performance
 {
-    public partial class ObjectExecution : UserControl
+    public partial class ObjectExecution : UserControl, IMetricChart
     {
         public ObjectExecution()
         {
@@ -39,9 +39,33 @@ namespace DBADashGUI.Performance
         private Int64 objectID;
         Int32 databaseid=0;
         private Int32 dateGrouping;
+        public event EventHandler<EventArgs> Close;
+        public event EventHandler<EventArgs> MoveUp;
 
+        public bool CloseVisible
+        {
+            get
+            {
+                return tsClose.Visible;
+            }
+            set
+            {
+                tsClose.Visible = value;
+            }
+        }
 
-    
+        public bool MoveUpVisible
+        {
+            get
+            {
+                return tsUp.Visible;
+            }
+            set
+            {
+                tsUp.Visible = value;
+            }
+        }
+
         public void RefreshData(Int32 instanceID, Int64 objectID, Int32 databaseID)
         {
             this.instanceID = instanceID;
@@ -61,6 +85,10 @@ namespace DBADashGUI.Performance
             RefreshData();
         }
 
+        public void RefreshData(int InstanceID)
+        {
+            RefreshData(InstanceID, -1, -1);
+        }
 
         public void RefreshData()
         {
@@ -220,5 +248,16 @@ namespace DBADashGUI.Performance
             }
             RefreshData(instanceID,objectID, databaseid);
         }
+
+        private void TsClose_Click(object sender, EventArgs e)
+        {
+            Close.Invoke(this, new EventArgs());
+        }
+
+        private void TsUp_Click(object sender, EventArgs e)
+        {
+            MoveUp.Invoke(this, new EventArgs());
+        }
+
     }
 }

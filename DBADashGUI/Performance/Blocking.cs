@@ -16,22 +16,41 @@ using LiveCharts.Configurations;
 
 namespace DBADashGUI.Performance
 {
-    public partial class Blocking : UserControl
+    public partial class Blocking : UserControl, IMetricChart
     {
         public Blocking()
         {
             InitializeComponent();
         }
-  
+
         Int32 InstanceID;
         double maxBlockedTime = 0;
         Int32 databaseID = 0;
+        public bool CloseVisible
+        {
+            get
+            {
+                return tsClose.Visible;
+            }
+            set
+            {
+                tsClose.Visible = value;
+            }
+        }
+
+        public event EventHandler<EventArgs> Close;
+        public event EventHandler<EventArgs> MoveUp;
 
         public void RefreshData(Int32 InstanceID, Int32 databaseID)
         {
             this.InstanceID = InstanceID;
             this.databaseID = databaseID;
             RefreshData();
+        }
+
+        public void RefreshData(int InstanceID)
+        {
+            RefreshData(InstanceID, -1);
         }
 
 
@@ -59,11 +78,11 @@ namespace DBADashGUI.Performance
                     cmd.Parameters.AddWithValue("DaysOfWeek", DateRange.DayOfWeek.AsDataTable());
                 }
                 cmd.CommandTimeout = Properties.Settings.Default.CommandTimeout;
-                
+
                 DataTable dt = new();
                 da.Fill(dt);
                 return dt;
-            }           
+            }
         }
 
         double MaxPointShapeDiameter
@@ -87,6 +106,18 @@ namespace DBADashGUI.Performance
                 {
                     return 5;
                 }
+            }
+        }
+
+        public bool MoveUpVisible
+        {
+            get
+            {
+                return tsUp.Visible;
+            }
+            set 
+            { 
+                tsUp.Visible = value; 
             }
         }
 
@@ -165,20 +196,30 @@ namespace DBADashGUI.Performance
                 SnapshotDateFrom = blockPoint.SnapshotDate.ToUniversalTime(),
                 SnapshotDateTo = blockPoint.SnapshotDate.ToUniversalTime(),
                 InstanceID = InstanceID,
-                ShowRootBlockers= true,
+                ShowRootBlockers = true,
             };
             frm.Show(this);
-            
+
         }
 
         private void Blocking_Load(object sender, EventArgs e)
         {
             chartBlocking.DataClick += ChartBlocking_DataClick;
         }
+
+        private void TsClose_Click(object sender, EventArgs e)
+        {
+            Close.Invoke(this, new EventArgs());
+        }
+
+        private void tsUp_Click(object sender, EventArgs e)
+        {
+            MoveUp.Invoke(this, new EventArgs());
+        }
     }
 }
 
-class BlockingPoint 
+class BlockingPoint
 {
     public Int32 SnapshotID { get; set; }
 
@@ -187,7 +228,7 @@ class BlockingPoint
     public Int32 BlockedSessions { get; set; }
 
     public Int64 BlockedWaitTime { get; set; }
-    public BlockingPoint(Int32 snapshotID, DateTime snapshotDate, Int32 blockedSessions, Int64 blockedWaitTime) 
+    public BlockingPoint(Int32 snapshotID, DateTime snapshotDate, Int32 blockedSessions, Int64 blockedWaitTime)
     {
         this.SnapshotID = snapshotID;
         this.BlockedSessions = blockedSessions;

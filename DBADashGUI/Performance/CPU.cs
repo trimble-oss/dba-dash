@@ -15,12 +15,27 @@ using static DBADashGUI.Performance.Performance;
 
 namespace DBADashGUI.Performance
 {
-    public partial class CPU : UserControl
+    public partial class CPU : UserControl, IMetricChart
     {
         public CPU()
         {
             InitializeComponent();
         }
+
+        public bool CloseVisible
+        {
+            get
+            {
+                return tsClose.Visible;
+            }
+            set
+            {
+                tsClose.Visible = value;
+            }
+        }
+
+        public event EventHandler<EventArgs> Close;
+        public event EventHandler<EventArgs> MoveUp;
 
         public Int32 InstanceID { get; set; }
         Int32 DateGrouping;
@@ -53,6 +68,20 @@ namespace DBADashGUI.Performance
             }
         }
 
+        public bool MoveUpVisible { 
+            get { 
+                return tsUp.Visible; 
+            } 
+            set { 
+                tsUp.Visible = value; 
+            } 
+        }
+
+        public void RefreshData(int InstanceID)
+        {
+            this.InstanceID = InstanceID;
+            RefreshData();
+        }
 
         public void RefreshData()
         {
@@ -141,7 +170,7 @@ namespace DBADashGUI.Performance
                     chartCPU.Series.Clear();
                 }
                 UpdateVisibility();
-                
+
             }
 
         }
@@ -182,5 +211,17 @@ namespace DBADashGUI.Performance
             RefreshData();
 
         }
+
+        private void tsClose_Click(object sender, EventArgs e)
+        {
+            Close.Invoke(this, new EventArgs());
+        }
+
+        private void tsUp_Click(object sender, EventArgs e)
+        {
+            MoveUp.Invoke(this, new EventArgs());
+        }
+
+
     }
 }

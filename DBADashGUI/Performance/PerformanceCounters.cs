@@ -15,11 +15,37 @@ using LiveCharts.Wpf;
 
 namespace DBADashGUI.Performance
 {
-    public partial class PerformanceCounters : UserControl
+    public partial class PerformanceCounters : UserControl, IMetricChart
     {
         public PerformanceCounters()
         {
             InitializeComponent();
+        }
+
+        public event EventHandler<EventArgs> Close;
+        public event EventHandler<EventArgs> MoveUp;
+
+        public bool CloseVisible
+        {
+            get
+            {
+                return tsClose.Visible;
+            }
+            set
+            {
+                tsClose.Visible = value;
+            }
+        }
+        public bool MoveUpVisible
+        {
+            get
+            {
+                return tsUp.Visible;
+            }
+            set
+            {
+                tsUp.Visible = value;
+            }
         }
 
         public Int32 InstanceID { get; set; }
@@ -40,13 +66,18 @@ namespace DBADashGUI.Performance
 
         public void RefreshData()
         {
-            this.InstanceID = InstanceID;
-            setDateGroup(DateRange.DurationMins);
+            SetDateGroup(DateRange.DurationMins);
             dt = GetPerformanceCounter();
-            refreshChart();
+            RefreshChart();
         }
 
-        private void setDateGroup(int mins)
+        public void RefreshData(int InstanceID)
+        {
+            this.InstanceID = InstanceID;
+            RefreshData();
+        }
+
+        private void SetDateGroup(int mins)
         {
             if (durationMins != mins) // Change dategroup only if date range has changed.
             {
@@ -56,7 +87,7 @@ namespace DBADashGUI.Performance
             }
         }
 
-        private void refreshChart()
+        private void RefreshChart()
         {
             chart1.AxisX.Clear();
             chart1.AxisY.Clear();
@@ -91,8 +122,8 @@ namespace DBADashGUI.Performance
             }
             maxValue *= 1.1;
             
-            SeriesCollection s1 = new SeriesCollection
-                    {
+            SeriesCollection s1 = new()
+            {
                         new LineSeries
                         {
                         Title = CounterName,
@@ -130,8 +161,8 @@ namespace DBADashGUI.Performance
                 cn.Open();
 
                 cmd.Parameters.AddWithValue("InstanceID", InstanceID);
-                cmd.Parameters.AddWithValue("FromDate", FromDate);
-                cmd.Parameters.AddWithValue("ToDate", ToDate);
+                cmd.Parameters.AddWithValue("FromDate", FromDate == DateTime.MinValue ? DateRange.FromUTC : FromDate);
+                cmd.Parameters.AddWithValue("ToDate", ToDate == DateTime.MinValue ? DateRange.ToUTC : ToDate);
                 cmd.Parameters.AddWithValue("CounterID", CounterID);
                 cmd.Parameters.AddWithValue("DateGroupingMin", DateGrouping);
                 cmd.Parameters.AddWithValue("UTCOffset", Common.UtcOffset);
@@ -143,7 +174,7 @@ namespace DBADashGUI.Performance
                 {
                     cmd.Parameters.AddWithValue("Hours", DateRange.TimeOfDay.AsDataTable());
                 }
-                DataTable dt = new DataTable();
+                DataTable dt = new();
                 da.Fill(dt);
                 Common.ConvertUTCToLocal(ref dt);
                 return dt;
@@ -152,19 +183,19 @@ namespace DBADashGUI.Performance
 
         private void PerformanceCounters_Load(object sender, EventArgs e)
         {
-            Common.AddDateGroups(tsDateGrouping, tsDateGrouping_Click);
+            Common.AddDateGroups(tsDateGrouping, TsDateGrouping_Click);
         }
 
-        private void tsDateGrouping_Click(object sender, EventArgs e)
+        private void TsDateGrouping_Click(object sender, EventArgs e)
         {
             var ts = (ToolStripMenuItem)sender;
             DateGrouping = Convert.ToInt32(ts.Tag);
             tsDateGrouping.Text = Common.DateGroupString(DateGrouping);
             dt = GetPerformanceCounter();
-            refreshChart();
+            RefreshChart();
         }
 
-        private void tsAgg_Click(object sender, EventArgs e)
+        private void TsAgg_Click(object sender, EventArgs e)
         {
             foreach(ToolStripMenuItem itm in tsAgg.DropDownItems)
             {
@@ -175,7 +206,17 @@ namespace DBADashGUI.Performance
                     tsAgg.Text = itm.Text;
                 }
             }
-            refreshChart();
+            RefreshChart();
+        }
+
+        private void TsClose_Click(object sender, EventArgs e)
+        {
+            Close.Invoke(this,new EventArgs());
+        }
+
+        private void TsUp_Click(object sender, EventArgs e)
+        {
+            MoveUp.Invoke(this, new EventArgs());
         }
     }
 }

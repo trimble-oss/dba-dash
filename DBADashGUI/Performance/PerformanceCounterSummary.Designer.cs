@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(PerformanceCounterSummary));
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
             this.tsRefresh = new System.Windows.Forms.ToolStripButton();
@@ -36,8 +37,14 @@
             this.toolStripLabel1 = new System.Windows.Forms.ToolStripLabel();
             this.txtSearch = new System.Windows.Forms.ToolStripTextBox();
             this.tsClear = new System.Windows.Forms.ToolStripButton();
+            this.toolStripDropDownButton1 = new System.Windows.Forms.ToolStripDropDownButton();
+            this.blockingToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.CPUToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.IOToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.ObjectExecutionToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.WaitsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
-            this.performanceCounters1 = new DBADashGUI.Performance.PerformanceCounters();
+            this.layout1 = new System.Windows.Forms.TableLayoutPanel();
             this.performanceCounterSummaryGrid1 = new DBADashGUI.Performance.PerformanceCounterSummaryGrid();
             this.dataGridViewTextBoxColumn8 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dataGridViewTextBoxColumn9 = new System.Windows.Forms.DataGridViewTextBoxColumn();
@@ -46,6 +53,7 @@
             this.dataGridViewTextBoxColumn12 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dataGridViewTextBoxColumn13 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dataGridViewTextBoxColumn7 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.tsToggleGrid = new System.Windows.Forms.ToolStripButton();
             this.toolStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
@@ -63,7 +71,9 @@
             this.tsExcel,
             this.toolStripLabel1,
             this.txtSearch,
-            this.tsClear});
+            this.tsClear,
+            this.toolStripDropDownButton1,
+            this.tsToggleGrid});
             this.toolStrip1.Location = new System.Drawing.Point(0, 0);
             this.toolStrip1.Name = "toolStrip1";
             this.toolStrip1.Size = new System.Drawing.Size(759, 27);
@@ -122,6 +132,56 @@
             this.tsClear.Text = "Clear";
             this.tsClear.Click += new System.EventHandler(this.TsClear_Click);
             // 
+            // toolStripDropDownButton1
+            // 
+            this.toolStripDropDownButton1.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
+            this.toolStripDropDownButton1.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.blockingToolStripMenuItem,
+            this.CPUToolStripMenuItem,
+            this.IOToolStripMenuItem,
+            this.ObjectExecutionToolStripMenuItem,
+            this.WaitsToolStripMenuItem});
+            this.toolStripDropDownButton1.Image = ((System.Drawing.Image)(resources.GetObject("toolStripDropDownButton1.Image")));
+            this.toolStripDropDownButton1.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolStripDropDownButton1.Name = "toolStripDropDownButton1";
+            this.toolStripDropDownButton1.Size = new System.Drawing.Size(151, 24);
+            this.toolStripDropDownButton1.Text = "Add Other Chart";
+            // 
+            // blockingToolStripMenuItem
+            // 
+            this.blockingToolStripMenuItem.Name = "blockingToolStripMenuItem";
+            this.blockingToolStripMenuItem.Size = new System.Drawing.Size(204, 26);
+            this.blockingToolStripMenuItem.Text = "Blocking";
+            this.blockingToolStripMenuItem.Click += new System.EventHandler(this.BlockingToolStripMenuItem_Click);
+            // 
+            // CPUToolStripMenuItem
+            // 
+            this.CPUToolStripMenuItem.Name = "CPUToolStripMenuItem";
+            this.CPUToolStripMenuItem.Size = new System.Drawing.Size(204, 26);
+            this.CPUToolStripMenuItem.Text = "CPU";
+            this.CPUToolStripMenuItem.Click += new System.EventHandler(this.CPUToolStripMenuItem_Click);
+            // 
+            // IOToolStripMenuItem
+            // 
+            this.IOToolStripMenuItem.Name = "IOToolStripMenuItem";
+            this.IOToolStripMenuItem.Size = new System.Drawing.Size(204, 26);
+            this.IOToolStripMenuItem.Text = "IO ";
+            this.IOToolStripMenuItem.Click += new System.EventHandler(this.IOToolStripMenuItem_Click);
+            // 
+            // ObjectExecutionToolStripMenuItem
+            // 
+            this.ObjectExecutionToolStripMenuItem.Name = "ObjectExecutionToolStripMenuItem";
+            this.ObjectExecutionToolStripMenuItem.Size = new System.Drawing.Size(204, 26);
+            this.ObjectExecutionToolStripMenuItem.Text = "Object Execution";
+            this.ObjectExecutionToolStripMenuItem.Click += new System.EventHandler(this.ObjectExecutionToolStripMenuItem_Click);
+            // 
+            // WaitsToolStripMenuItem
+            // 
+            this.WaitsToolStripMenuItem.Name = "WaitsToolStripMenuItem";
+            this.WaitsToolStripMenuItem.Size = new System.Drawing.Size(204, 26);
+            this.WaitsToolStripMenuItem.Text = "Waits";
+            this.WaitsToolStripMenuItem.Click += new System.EventHandler(this.WaitsToolStripMenuItem_Click);
+            // 
             // splitContainer1
             // 
             this.splitContainer1.Dock = System.Windows.Forms.DockStyle.Fill;
@@ -132,7 +192,7 @@
             // 
             // splitContainer1.Panel1
             // 
-            this.splitContainer1.Panel1.Controls.Add(this.performanceCounters1);
+            this.splitContainer1.Panel1.Controls.Add(this.layout1);
             // 
             // splitContainer1.Panel2
             // 
@@ -142,19 +202,19 @@
             this.splitContainer1.SplitterWidth = 5;
             this.splitContainer1.TabIndex = 6;
             // 
-            // performanceCounters1
+            // layout1
             // 
-            this.performanceCounters1.CounterID = 0;
-            this.performanceCounters1.CounterName = null;
-            this.performanceCounters1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.performanceCounters1.FromDate = new System.DateTime(((long)(0)));
-            this.performanceCounters1.InstanceID = 0;
-            this.performanceCounters1.Location = new System.Drawing.Point(0, 0);
-            this.performanceCounters1.Margin = new System.Windows.Forms.Padding(3, 5, 3, 5);
-            this.performanceCounters1.Name = "performanceCounters1";
-            this.performanceCounters1.Size = new System.Drawing.Size(759, 435);
-            this.performanceCounters1.TabIndex = 5;
-            this.performanceCounters1.ToDate = new System.DateTime(((long)(0)));
+            this.layout1.ColumnCount = 1;
+            this.layout1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
+            this.layout1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 20F));
+            this.layout1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.layout1.Location = new System.Drawing.Point(0, 0);
+            this.layout1.Name = "layout1";
+            this.layout1.RowCount = 1;
+            this.layout1.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.layout1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
+            this.layout1.Size = new System.Drawing.Size(759, 435);
+            this.layout1.TabIndex = 0;
             // 
             // performanceCounterSummaryGrid1
             // 
@@ -235,6 +295,15 @@
             this.dataGridViewTextBoxColumn7.ReadOnly = true;
             this.dataGridViewTextBoxColumn7.Width = 124;
             // 
+            // tsToggleGrid
+            // 
+            this.tsToggleGrid.Image = global::DBADashGUI.Properties.Resources.Table_16x;
+            this.tsToggleGrid.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tsToggleGrid.Name = "tsToggleGrid";
+            this.tsToggleGrid.Size = new System.Drawing.Size(97, 24);
+            this.tsToggleGrid.Text = "Hide Grid";
+            this.tsToggleGrid.Click += new System.EventHandler(this.tsToggleGrid_Click);
+            // 
             // PerformanceCounterSummary
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
@@ -262,7 +331,6 @@
         private System.Windows.Forms.ToolStrip toolStrip1;
         private System.Windows.Forms.ToolStripButton tsRefresh;
         private System.Windows.Forms.ToolStripButton tsCopy;
-        private PerformanceCounters performanceCounters1;
         private System.Windows.Forms.SplitContainer splitContainer1;
         private System.Windows.Forms.ToolStripLabel toolStripLabel1;
         private System.Windows.Forms.ToolStripTextBox txtSearch;
@@ -275,5 +343,13 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn12;
         private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn13;
         private PerformanceCounterSummaryGrid performanceCounterSummaryGrid1;
+        private System.Windows.Forms.TableLayoutPanel layout1;
+        private System.Windows.Forms.ToolStripDropDownButton toolStripDropDownButton1;
+        private System.Windows.Forms.ToolStripMenuItem CPUToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem IOToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem WaitsToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem ObjectExecutionToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem blockingToolStripMenuItem;
+        private System.Windows.Forms.ToolStripButton tsToggleGrid;
     }
 }
