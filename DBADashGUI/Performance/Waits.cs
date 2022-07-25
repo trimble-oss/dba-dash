@@ -17,7 +17,7 @@ using System.Xml.Schema;
 
 namespace DBADashGUI.Performance
 {
-    public partial class Waits : UserControl
+    public partial class Waits : UserControl, IMetricChart
     {
         public Waits()
         {
@@ -36,6 +36,20 @@ namespace DBADashGUI.Performance
         private Int32 dateGrouping;
         Int32 mins;
         string _waitType;
+        public event EventHandler<EventArgs> Close;
+        public event EventHandler<EventArgs> MoveUp;
+
+        public bool CloseVisible
+        {
+            get
+            {
+                return tsClose.Visible;
+            }
+            set
+            {
+                tsClose.Visible = value;
+            }
+        }
 
         public string WaitType
         {
@@ -50,6 +64,17 @@ namespace DBADashGUI.Performance
             }
         }
 
+        public bool MoveUpVisible
+        {
+            get
+            {
+                return tsUp.Visible;
+            }
+            set
+            {
+                tsUp.Visible = value;
+            }
+        }
 
         public void RefreshData(Int32 instanceID)
         {
@@ -220,6 +245,16 @@ namespace DBADashGUI.Performance
         {
             WaitType = "";
             RefreshData();
+        }
+
+        private void TsClose_Click(object sender, EventArgs e)
+        {
+            Close.Invoke(this, new EventArgs());
+        }
+
+        private void TsUp_Click(object sender, EventArgs e)
+        {
+            MoveUp.Invoke(this, new EventArgs());
         }
     }
 }

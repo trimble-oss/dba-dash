@@ -185,7 +185,7 @@ namespace DBADashGUI.Performance
                     new DataGridViewTextBoxColumn() { Name = "colSampleCount", HeaderText = "Sample Count", DataPropertyName = "SampleCount", DefaultCellStyle = Common.DataGridViewNumericCellStyle },
                     new DataGridViewTextBoxColumn() { Name = "colCurrentValue", HeaderText = "Current Value", DataPropertyName = "CurrentValue", DefaultCellStyle = Common.DataGridViewNumericCellStyle },
                     new DataGridViewLinkColumn() { Name = "lnkThresholds", HeaderText = "Thresholds", Text = "Edit", LinkColor = DashColors.LinkColor, UseColumnTextForLinkValue = true },
-                    new DataGridViewLinkColumn() { Name = "lnkView", HeaderText = "Chart", Text = "View", LinkColor = DashColors.LinkColor, UseColumnTextForLinkValue=true }                 
+                    new DataGridViewLinkColumn() { Name = "lnkView", HeaderText = "Chart", Text = "View", LinkColor = DashColors.LinkColor, UseColumnTextForLinkValue=true, ToolTipText="Click to view chart."}
                 );
             }
         }

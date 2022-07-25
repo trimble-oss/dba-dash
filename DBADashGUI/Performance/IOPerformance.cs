@@ -15,7 +15,7 @@ using static DBADashGUI.Performance.Performance;
 
 namespace DBADashGUI.Performance
 {
-    public partial class IOPerformance : UserControl
+    public partial class IOPerformance : UserControl, IMetricChart
     {
         public IOPerformance()
         {
@@ -31,6 +31,21 @@ namespace DBADashGUI.Performance
         string drive="";
         public Int32 PointSize;
         string filegroup="";
+
+        public event EventHandler<EventArgs> Close;
+        public event EventHandler<EventArgs> MoveUp;
+
+        public bool CloseVisible
+        {
+            get
+            {
+                return tsClose.Visible;
+            }
+            set
+            {
+                tsClose.Visible = value;
+            }
+        }
         public string FileGroup
         {
             get
@@ -83,6 +98,18 @@ namespace DBADashGUI.Performance
                 {
                     s.LineSmoothness = smoothLines ? 1 : 0;
                 }
+            }
+        }
+
+        public bool MoveUpVisible
+        {
+            get
+            {
+                return tsUp.Visible;
+            }
+            set
+            {
+                tsUp.Visible = value;
             }
         }
 
@@ -233,7 +260,11 @@ namespace DBADashGUI.Performance
             }
         }
 
-
+        public void RefreshData(int InstanceID)
+        {
+            this.instanceID = InstanceID;
+            RefreshData();
+        }
 
         public void RefreshData()
         {
@@ -411,5 +442,17 @@ namespace DBADashGUI.Performance
             };
             frm.ShowDialog(this);
         }
+
+        private void TsClose_Click(object sender, EventArgs e)
+        {
+            Close.Invoke(this, new EventArgs());
+        }
+
+        private void TsUp_Click(object sender, EventArgs e)
+        {
+            MoveUp.Invoke(this, new EventArgs());
+        }
+
+ 
     }
 }

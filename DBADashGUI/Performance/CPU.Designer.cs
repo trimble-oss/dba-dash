@@ -31,20 +31,23 @@
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(CPU));
             this.chartCPU = new LiveCharts.WinForms.CartesianChart();
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
+            this.tsClose = new System.Windows.Forms.ToolStripButton();
             this.lblCPU = new System.Windows.Forms.ToolStripLabel();
             this.tsAgg = new System.Windows.Forms.ToolStripDropDownButton();
             this.AVGToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.MAXToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.tsDateGrouping = new System.Windows.Forms.ToolStripDropDownButton();
+            this.tsUp = new System.Windows.Forms.ToolStripButton();
             this.toolStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
             // chartCPU
             // 
             this.chartCPU.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.chartCPU.Location = new System.Drawing.Point(0, 49);
+            this.chartCPU.Location = new System.Drawing.Point(0, 27);
+            this.chartCPU.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.chartCPU.Name = "chartCPU";
-            this.chartCPU.Size = new System.Drawing.Size(1098, 281);
+            this.chartCPU.Size = new System.Drawing.Size(878, 303);
             this.chartCPU.TabIndex = 1;
             this.chartCPU.Text = "CPU";
             // 
@@ -52,22 +55,37 @@
             // 
             this.toolStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
             this.toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.tsClose,
+            this.tsUp,
             this.lblCPU,
             this.tsAgg,
             this.tsDateGrouping});
             this.toolStrip1.Location = new System.Drawing.Point(0, 0);
             this.toolStrip1.Name = "toolStrip1";
-            this.toolStrip1.Size = new System.Drawing.Size(1098, 39);
+            this.toolStrip1.Size = new System.Drawing.Size(878, 27);
             this.toolStrip1.TabIndex = 2;
             this.toolStrip1.Text = "toolStrip1";
+            // 
+            // tsClose
+            // 
+            this.tsClose.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
+            this.tsClose.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.tsClose.Image = global::DBADashGUI.Properties.Resources.Close_red_16x;
+            this.tsClose.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tsClose.Name = "tsClose";
+            this.tsClose.Size = new System.Drawing.Size(29, 24);
+            this.tsClose.Text = "Close";
+            this.tsClose.Visible = false;
+            this.tsClose.Click += new System.EventHandler(this.tsClose_Click);
             // 
             // lblCPU
             // 
             this.lblCPU.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
-            this.lblCPU.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold);
+            this.lblCPU.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
             this.lblCPU.Name = "lblCPU";
-            this.lblCPU.Size = new System.Drawing.Size(105, 36);
+            this.lblCPU.Size = new System.Drawing.Size(105, 24);
             this.lblCPU.Text = "CPU: Instance";
+            this.lblCPU.Visible = false;
             // 
             // tsAgg
             // 
@@ -78,7 +96,7 @@
             this.tsAgg.Image = global::DBADashGUI.Properties.Resources.AutoSum_16x;
             this.tsAgg.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsAgg.Name = "tsAgg";
-            this.tsAgg.Size = new System.Drawing.Size(34, 36);
+            this.tsAgg.Size = new System.Drawing.Size(34, 24);
             this.tsAgg.Text = "Aggregation";
             // 
             // AVGToolStripMenuItem
@@ -105,17 +123,29 @@
             this.tsDateGrouping.Image = ((System.Drawing.Image)(resources.GetObject("tsDateGrouping.Image")));
             this.tsDateGrouping.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsDateGrouping.Name = "tsDateGrouping";
-            this.tsDateGrouping.Size = new System.Drawing.Size(56, 36);
+            this.tsDateGrouping.Size = new System.Drawing.Size(56, 24);
             this.tsDateGrouping.Text = "1min";
+            // 
+            // tsUp
+            // 
+            this.tsUp.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
+            this.tsUp.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.tsUp.Image = global::DBADashGUI.Properties.Resources.arrow_Up_16xLG;
+            this.tsUp.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tsUp.Name = "tsUp";
+            this.tsUp.Size = new System.Drawing.Size(29, 24);
+            this.tsUp.Text = "Move Up";
+            this.tsUp.Click += new System.EventHandler(this.tsUp_Click);
             // 
             // CPU
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.Controls.Add(this.chartCPU);
             this.Controls.Add(this.toolStrip1);
+            this.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.Name = "CPU";
-            this.Size = new System.Drawing.Size(878, 264);
+            this.Size = new System.Drawing.Size(878, 330);
             this.Load += new System.EventHandler(this.CPU_Load);
             this.toolStrip1.ResumeLayout(false);
             this.toolStrip1.PerformLayout();
@@ -133,5 +163,7 @@
         private System.Windows.Forms.ToolStripMenuItem AVGToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem MAXToolStripMenuItem;
         private System.Windows.Forms.ToolStripDropDownButton tsDateGrouping;
+        private System.Windows.Forms.ToolStripButton tsClose;
+        private System.Windows.Forms.ToolStripButton tsUp;
     }
 }
