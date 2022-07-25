@@ -35,4 +35,5 @@
   <Counter object_name="Plan Cache" counter_name="Cache Pages" />
   <Counter object_name="sys.dm_os_sys_memory" counter_name="*"/>
   <Counter object_name="sys.dm_os_nodes" counter_name="*" />
+  <Counter object_name="Databases" counter_name="Transactions/sec" instance_name="_Total" />
 </Counters>
