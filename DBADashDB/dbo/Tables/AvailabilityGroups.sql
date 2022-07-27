@@ -2,7 +2,7 @@
 	   InstanceID INT NOT NULL,
 	   group_id UNIQUEIDENTIFIER NOT NULL,
        name NVARCHAR(128) NOT NULL,
-       resource_id NVARCHAR(40) NOT NULL,
+       resource_id NVARCHAR(40) NULL,
        resource_group_id NVARCHAR(40) NOT NULL,
        failure_condition_level INT NOT NULL,
        health_check_timeout INT NOT NULL,
