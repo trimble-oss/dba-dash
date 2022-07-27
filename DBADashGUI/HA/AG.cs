@@ -120,8 +120,8 @@ namespace DBADashGUI.HA
                     r.Cells["Snapshot Age"].SetStatusColor(snapshotStatus);
                     if (instanceId > 0)
                     {
-                        var syncStateStatus = (string)row["Sync Health"] == "HEALTHY" ? DashColors.Success :
-                                 (string)row["Sync Health"] == "PARTIALLY_HEALTHY" ? DashColors.Warning : DashColors.Fail;
+                        var syncStateStatus = Convert.ToString(row["Sync Health"]) == "HEALTHY" ? DashColors.Success :
+                                 Convert.ToString(row["Sync Health"]) == "PARTIALLY_HEALTHY" ? DashColors.Warning : DashColors.Fail;
                         r.Cells["Sync State"].SetStatusColor(syncStateStatus);
                     }
                     else
@@ -136,8 +136,8 @@ namespace DBADashGUI.HA
                         r.Cells["Remote Initializing"].SetStatusColor((int)row["Remote Initializing"] > 0 ? DashColors.Warning : Color.White);
 
                     }
-                    var syncHealthStatus = (string)row["Sync Health"] == "HEALTHY" ? DashColors.Success :
-                                                     (string)row["Sync Health"] == "PARTIALLY_HEALTHY" ? DashColors.Warning : DashColors.Fail;
+                    var syncHealthStatus = Convert.ToString(row["Sync Health"]) == "HEALTHY" ? DashColors.Success :
+                                                     Convert.ToString(row["Sync Health"]) == "PARTIALLY_HEALTHY" ? DashColors.Warning : DashColors.Fail;
                     dgv.Rows[idx].Cells["Sync Health"].SetStatusColor(syncHealthStatus); 
                 }
             }
