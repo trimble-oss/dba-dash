@@ -16,10 +16,10 @@ namespace DBADashGUI
 
         public static void UpdateInstancesList(string tagIDs = "", bool? Active = true, bool? azureDB = null, string searchString = "")
         {
-            Instances= GetInstances(tagIDs,Active,azureDB,searchString);
+            Instances = GetInstances(tagIDs, Active, azureDB, searchString);
         }
 
-        public static DataTable GetInstances(string tagIDs="",bool? Active=true,bool? azureDB=null,string searchString="")
+        public static DataTable GetInstances(string tagIDs = "", bool? Active = true, bool? azureDB = null, string searchString = "")
         {
 
             using (var cn = new SqlConnection(Common.ConnectionString))
@@ -44,11 +44,11 @@ namespace DBADashGUI
                 }
                 if (!string.IsNullOrEmpty(searchString))
                 {
-                    cmd.Parameters.AddWithValue("SearchString",searchString);
+                    cmd.Parameters.AddWithValue("SearchString", searchString);
                 }
-                DataTable dt = new();                      
+                DataTable dt = new();
                 da.Fill(dt);
-                return dt;                               
+                return dt;
             }
         }
 
@@ -67,7 +67,7 @@ namespace DBADashGUI
                     cmd.Parameters.AddWithValue("InstanceGroupName", instanceGroupName);
                     cmd.Parameters.AddWithValue("DBName", dbName);
                     return (Int32)cmd.ExecuteScalar();
-                }                
+                }
             }
         }
 
@@ -84,11 +84,11 @@ namespace DBADashGUI
                 cmd.Parameters.AddWithValue("IncludeCritical", true);
                 cmd.Parameters.AddWithValue("IncludeOK", true);
                 cmd.Parameters.AddWithValue("FileGroupLevel", 0);
-                
+
                 DataTable dt = new();
                 da.Fill(dt);
                 return dt;
-            }           
+            }
         }
 
         public static DataTable GetFileGroups(Int32 DatabaseID)
@@ -103,10 +103,10 @@ namespace DBADashGUI
                 da.Fill(dt);
                 return dt;
             }
-            
+
         }
 
-        public static DataTable ObjectExecutionStats(Int32 instanceID, Int32 databaseID, Int64 objectID, Int32 dateGrouping, string measure,DateTime FromDate,DateTime ToDate, string instance = "")
+        public static DataTable ObjectExecutionStats(Int32 instanceID, Int32 databaseID, Int64 objectID, Int32 dateGrouping, string measure, DateTime FromDate, DateTime ToDate, string instance = "")
         {
             using (var cn = new SqlConnection(Common.ConnectionString))
             using (var cmd = new SqlCommand("dbo.ObjectExecutionStats_Get", cn) { CommandType = CommandType.StoredProcedure })
@@ -140,18 +140,18 @@ namespace DBADashGUI
                 }
                 if (DateRange.HasDayOfWeekFilter)
                 {
-                    cmd.Parameters.AddWithValue("DaysOfWeek",DateRange.DayOfWeek.AsDataTable());
+                    cmd.Parameters.AddWithValue("DaysOfWeek", DateRange.DayOfWeek.AsDataTable());
                 }
                 DataTable dt = new();
                 da.Fill(dt);
                 return dt;
             }
-            
+
         }
 
-        public static DataTable GetJobSteps(Int32 InstanceID,Guid JobID)
+        public static DataTable GetJobSteps(Int32 InstanceID, Guid JobID)
         {
-            using(var cn = new SqlConnection(Common.ConnectionString))
+            using (var cn = new SqlConnection(Common.ConnectionString))
             using (var cmd = new SqlCommand("dbo.JobSteps_Get", cn) { CommandType = CommandType.StoredProcedure })
             using (var da = new SqlDataAdapter(cmd))
             {
@@ -260,11 +260,11 @@ namespace DBADashGUI
                 cmd.Parameters.AddWithValue("ObjectID", ObjectId);
                 cmd.Parameters.AddWithValue("PageSize", PageSize);
                 cmd.Parameters.AddWithValue("PageNumber", PageNum);
-                
+
                 var dt = new DataTable();
                 da.Fill(dt);
                 return dt;
-            }         
+            }
         }
         public static DataTable GetCounters()
         {
@@ -277,6 +277,5 @@ namespace DBADashGUI
                 return dt;
             }
         }
-
     }
 }

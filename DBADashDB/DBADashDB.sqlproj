@@ -106,6 +106,9 @@
     <Folder Include="Switch\" />
     <Folder Include="Switch\Tables\" />
     <Folder Include="Storage\" />
+    <Folder Include="DBADash" />
+    <Folder Include="DBADash\Tables" />
+    <Folder Include="DBADash\Stored Procedures" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="dbo\Tables\LogRestoreThresholds.sql" />
@@ -667,6 +670,15 @@
     <Build Include="dbo\Stored Procedures\DriveSnapshot_Del.sql" />
     <Build Include="dbo\Stored Procedures\PurgeBlockingSnapshotSummary.sql" />
     <Build Include="dbo\Stored Procedures\BlockingSnapshotSummary_Del.sql" />
+    <Build Include="Security\DBADash.sql" />
+    <Build Include="DBADash\Tables\SavedViews.sql" />
+    <Build Include="DBADash\Tables\Users.sql" />
+    <Build Include="DBADash\Tables\ViewType.sql" />
+    <Build Include="DBADash\Stored Procedures\SavedViews_Upd.sql" />
+    <Build Include="DBADash\Stored Procedures\User_Get.sql" />
+    <Build Include="DBADash\Stored Procedures\SavedViews_Get.sql" />
+    <Build Include="DBADash\Stored Procedures\SavedViews_Del.sql" />
+    <Build Include="Security\ManageGlobalViews.sql" />
   </ItemGroup>
   <ItemGroup>
     <PostDeploy Include="Script.PostDeployment1.sql" />

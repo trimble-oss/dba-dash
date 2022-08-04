@@ -35,7 +35,6 @@ namespace DBADashGUI.Performance
         DateTime lastWait = DateTime.MinValue;
         private Int32 dateGrouping;
         Int32 mins;
-        string _waitType;
         public event EventHandler<EventArgs> Close;
         public event EventHandler<EventArgs> MoveUp;
 
@@ -55,12 +54,12 @@ namespace DBADashGUI.Performance
         {
             get
             {
-                return _waitType;
+                return Metric.WaitType;
             }
             set
             {
-                tsFilter.Text = value == "" ? (criticalWaitsOnlyToolStripMenuItem.Checked ? "*Critical Waits*":"") : value;
-                _waitType = value;
+                Metric.WaitType = value;
+                SetMetric();
             }
         }
 
@@ -75,6 +74,16 @@ namespace DBADashGUI.Performance
                 tsUp.Visible = value;
             }
         }
+        private WaitMetric _metric=new();
+        public WaitMetric Metric { get => _metric; set { _metric = value;SetMetric(); } }
+
+        private void SetMetric()
+        {
+            criticalWaitsOnlyToolStripMenuItem.Checked = Metric.CriticalWaitsOnly;
+            tsFilter.Text = Metric.WaitType == "" ? (criticalWaitsOnlyToolStripMenuItem.Checked ? "*Critical Waits*" : "") : Metric.WaitType;
+        }
+
+        IMetric IMetricChart.Metric { get => Metric; }
 
         public void RefreshData(Int32 instanceID)
         {
@@ -109,9 +118,9 @@ namespace DBADashGUI.Performance
                 cmd.Parameters.AddWithValue("ToDate", DateRange.ToUTC);
                 cmd.Parameters.AddWithValue("DateGroupingMin", dateGrouping);
                 cmd.Parameters.AddWithValue("CriticalWaitsOnly", criticalWaitsOnlyToolStripMenuItem.Checked);
-                if (_waitType != null && _waitType.Length > 0)
+                if (!String.IsNullOrEmpty(Metric.WaitType))
                 {
-                    cmd.Parameters.AddWithValue("WaitType", _waitType);
+                    cmd.Parameters.AddWithValue("WaitType", Metric.WaitType);
                 }
                 cmd.Parameters.AddWithValue("@UTCOffset", Common.UtcOffset);
                 if (DateRange.HasTimeOfDayFilter)
@@ -222,7 +231,7 @@ namespace DBADashGUI.Performance
 
         private void TsFilterWaitType_Click(object sender, EventArgs e)
         {
-            string wt = _waitType;
+            string wt = Metric.WaitType;
             if (Common.ShowInputDialog(ref wt,"Wait Type (LIKE):") == DialogResult.OK)
             {
                 WaitType = wt.EndsWith("%") || wt.Length==0 ? wt : wt+"%";
@@ -232,7 +241,7 @@ namespace DBADashGUI.Performance
 
         private void StringFilterToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            string wt = _waitType;
+            string wt = Metric.WaitType;
             if (Common.ShowInputDialog(ref wt, "Wait Type (LIKE):") == DialogResult.OK)
             {
                 WaitType = wt.EndsWith("%") || wt.Length == 0 ? wt : wt + "%";
@@ -243,7 +252,8 @@ namespace DBADashGUI.Performance
 
         private void CriticalWaitsOnlyToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            WaitType = "";
+            Metric.CriticalWaitsOnly = criticalWaitsOnlyToolStripMenuItem.Checked;
+            WaitType = "";      
             RefreshData();
         }
 

@@ -91,24 +91,24 @@
             // totalToolStripMenuItem
             // 
             this.totalToolStripMenuItem.Name = "totalToolStripMenuItem";
-            this.totalToolStripMenuItem.Size = new System.Drawing.Size(185, 26);
-            this.totalToolStripMenuItem.Tag = "Value_Total";
+            this.totalToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            this.totalToolStripMenuItem.Tag = "Total";
             this.totalToolStripMenuItem.Text = "Total";
             this.totalToolStripMenuItem.Click += new System.EventHandler(this.TsAgg_Click);
             // 
             // minToolStripMenuItem
             // 
             this.minToolStripMenuItem.Name = "minToolStripMenuItem";
-            this.minToolStripMenuItem.Size = new System.Drawing.Size(185, 26);
-            this.minToolStripMenuItem.Tag = "Value_Min";
+            this.minToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            this.minToolStripMenuItem.Tag = "Min";
             this.minToolStripMenuItem.Text = "Min";
             this.minToolStripMenuItem.Click += new System.EventHandler(this.TsAgg_Click);
             // 
             // maxToolStripMenuItem
             // 
             this.maxToolStripMenuItem.Name = "maxToolStripMenuItem";
-            this.maxToolStripMenuItem.Size = new System.Drawing.Size(185, 26);
-            this.maxToolStripMenuItem.Tag = "Value_Max";
+            this.maxToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            this.maxToolStripMenuItem.Tag = "Max";
             this.maxToolStripMenuItem.Text = "Max";
             this.maxToolStripMenuItem.Click += new System.EventHandler(this.TsAgg_Click);
             // 
@@ -117,15 +117,15 @@
             this.avgToolStripMenuItem.Checked = true;
             this.avgToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
             this.avgToolStripMenuItem.Name = "avgToolStripMenuItem";
-            this.avgToolStripMenuItem.Size = new System.Drawing.Size(185, 26);
-            this.avgToolStripMenuItem.Tag = "Value_Avg";
+            this.avgToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            this.avgToolStripMenuItem.Tag = "Avg";
             this.avgToolStripMenuItem.Text = "Avg";
             this.avgToolStripMenuItem.Click += new System.EventHandler(this.TsAgg_Click);
             // 
             // sampleCountToolStripMenuItem
             // 
             this.sampleCountToolStripMenuItem.Name = "sampleCountToolStripMenuItem";
-            this.sampleCountToolStripMenuItem.Size = new System.Drawing.Size(185, 26);
+            this.sampleCountToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
             this.sampleCountToolStripMenuItem.Tag = "SampleCount";
             this.sampleCountToolStripMenuItem.Text = "Sample Count";
             this.sampleCountToolStripMenuItem.Click += new System.EventHandler(this.TsAgg_Click);

@@ -76,6 +76,19 @@ namespace DBADashGUI.Performance
                 tsUp.Visible = value; 
             } 
         }
+        private CPUMetric _metric = new() { AggregateType = IMetric.AggregateTypes.Avg  };
+        public CPUMetric Metric { get=>_metric; set { _metric = value; SelectAggregate(); } } 
+
+        IMetric IMetricChart.Metric { get => Metric; }
+
+        private void SelectAggregate()
+        {
+            tsAgg.Text = Enum.GetName(Metric.AggregateType);
+            foreach (ToolStripMenuItem mnu in tsAgg.DropDownItems)
+            {
+                mnu.Checked = (string)mnu.Tag == Enum.GetName(Metric.AggregateType);
+            }
+        }
 
         public void RefreshData(int InstanceID)
         {
@@ -188,12 +201,16 @@ namespace DBADashGUI.Performance
         private void AVGToolStripMenuItem_Click(object sender, EventArgs e)
         {
             MAXToolStripMenuItem.Checked = (!AVGToolStripMenuItem.Checked);
+            Metric.AggregateType = AVGToolStripMenuItem.Checked ? IMetric.AggregateTypes.Avg : IMetric.AggregateTypes.Max;
+            tsAgg.Text = Enum.GetName(Metric.AggregateType);
             UpdateVisibility();
         }
 
         private void MAXToolStripMenuItem_Click(object sender, EventArgs e)
         {
             AVGToolStripMenuItem.Checked = (!MAXToolStripMenuItem.Checked);
+            Metric.AggregateType = AVGToolStripMenuItem.Checked ? IMetric.AggregateTypes.Avg : IMetric.AggregateTypes.Max;
+            tsAgg.Text = Enum.GetName(Metric.AggregateType);
             UpdateVisibility();
         }
 
@@ -212,12 +229,12 @@ namespace DBADashGUI.Performance
 
         }
 
-        private void tsClose_Click(object sender, EventArgs e)
+        private void TsClose_Click(object sender, EventArgs e)
         {
             Close.Invoke(this, new EventArgs());
         }
 
-        private void tsUp_Click(object sender, EventArgs e)
+        private void TsUp_Click(object sender, EventArgs e)
         {
             MoveUp.Invoke(this, new EventArgs());
         }

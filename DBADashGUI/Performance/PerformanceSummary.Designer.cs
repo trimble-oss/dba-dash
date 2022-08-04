@@ -51,6 +51,7 @@
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle20 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle21 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle22 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(PerformanceSummary));
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle24 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle25 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle26 = new System.Windows.Forms.DataGridViewCellStyle();
@@ -102,9 +103,9 @@
             this.tsCols = new System.Windows.Forms.ToolStripDropDownButton();
             this.standardColumnsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.performanceCounterColumnsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.tsConfig = new System.Windows.Forms.ToolStripDropDownButton();
-            this.tsSaveLayout = new System.Windows.Forms.ToolStripMenuItem();
-            this.resetLayoutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.tsSaveView = new System.Windows.Forms.ToolStripButton();
+            this.tsDeleteView = new System.Windows.Forms.ToolStripButton();
+            this.savedViewMenuItem1 = new DBADashGUI.SavedViewMenuItem();
             this.dataGridViewTextBoxColumn1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dataGridViewProgressBarColumn1 = new CustomProgressControl.DataGridViewProgressBarColumn();
             this.dataGridViewProgressBarColumn2 = new CustomProgressControl.DataGridViewProgressBarColumn();
@@ -466,7 +467,9 @@
             this.tsCopy,
             this.tsExcel,
             this.tsCols,
-            this.tsConfig});
+            this.tsSaveView,
+            this.tsDeleteView,
+            this.savedViewMenuItem1});
             this.toolStrip1.Location = new System.Drawing.Point(0, 0);
             this.toolStrip1.Name = "toolStrip1";
             this.toolStrip1.Size = new System.Drawing.Size(1048, 27);
@@ -533,35 +536,39 @@
             this.performanceCounterColumnsToolStripMenuItem.ToolTipText = "Select performance counter columns to add to the grid";
             this.performanceCounterColumnsToolStripMenuItem.Click += new System.EventHandler(this.PerformanceCounterColumnsToolStripMenuItem_Click);
             // 
-            // tsConfig
+            // tsSaveView
             // 
-            this.tsConfig.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.tsConfig.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.tsSaveLayout,
-            this.resetLayoutToolStripMenuItem});
-            this.tsConfig.Image = global::DBADashGUI.Properties.Resources.SettingsOutline_16x;
-            this.tsConfig.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsConfig.Name = "tsConfig";
-            this.tsConfig.Size = new System.Drawing.Size(34, 24);
-            this.tsConfig.Text = "Configuration";
+            this.tsSaveView.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
+            this.tsSaveView.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.tsSaveView.Image = global::DBADashGUI.Properties.Resources.Save_16x;
+            this.tsSaveView.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tsSaveView.Name = "tsSaveView";
+            this.tsSaveView.Size = new System.Drawing.Size(29, 24);
+            this.tsSaveView.Text = "Save Layout";
+            this.tsSaveView.Click += new System.EventHandler(this.TsSave_Click);
             // 
-            // tsSaveLayout
+            // tsDeleteView
             // 
-            this.tsSaveLayout.Image = global::DBADashGUI.Properties.Resources.Save_16x;
-            this.tsSaveLayout.Name = "tsSaveLayout";
-            this.tsSaveLayout.Size = new System.Drawing.Size(176, 26);
-            this.tsSaveLayout.Text = "Save Layout";
-            this.tsSaveLayout.ToolTipText = "Save selected columns, position and size";
-            this.tsSaveLayout.Click += new System.EventHandler(this.TsSaveLayout_Click);
+            this.tsDeleteView.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
+            this.tsDeleteView.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.tsDeleteView.Image = global::DBADashGUI.Properties.Resources.Close_red_16x;
+            this.tsDeleteView.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tsDeleteView.Name = "tsDeleteView";
+            this.tsDeleteView.Size = new System.Drawing.Size(29, 24);
+            this.tsDeleteView.Text = "Delete Layout";
+            this.tsDeleteView.Click += new System.EventHandler(this.TsDeleteView_Click);
             // 
-            // resetLayoutToolStripMenuItem
+            // savedViewMenuItem1
             // 
-            this.resetLayoutToolStripMenuItem.Image = global::DBADashGUI.Properties.Resources.Undo_grey_16x;
-            this.resetLayoutToolStripMenuItem.Name = "resetLayoutToolStripMenuItem";
-            this.resetLayoutToolStripMenuItem.Size = new System.Drawing.Size(176, 26);
-            this.resetLayoutToolStripMenuItem.Text = "Reset Layout";
-            this.resetLayoutToolStripMenuItem.ToolTipText = "Reset column selection, position and size to defaults";
-            this.resetLayoutToolStripMenuItem.Click += new System.EventHandler(this.ResetLayoutToolStripMenuItem_Click);
+            this.savedViewMenuItem1.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
+            this.savedViewMenuItem1.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.savedViewMenuItem1.Image = ((System.Drawing.Image)(resources.GetObject("savedViewMenuItem1.Image")));
+            this.savedViewMenuItem1.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.savedViewMenuItem1.Name = "savedViewMenuItem1";
+            this.savedViewMenuItem1.Size = new System.Drawing.Size(55, 24);
+            this.savedViewMenuItem1.Text = "View";
+            this.savedViewMenuItem1.Type = DBADashGUI.SavedView.ViewTypes.PerformanceSummary;
+            this.savedViewMenuItem1.SavedViewSelected += new System.EventHandler<DBADashGUI.SavedViewSelectedEventArgs>(this.SavedViewSelected);
             // 
             // dataGridViewTextBoxColumn1
             // 
@@ -831,9 +838,6 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn18;
         private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn19;
         private System.Windows.Forms.ToolStripButton tsExcel;
-        private System.Windows.Forms.ToolStripDropDownButton tsConfig;
-        private System.Windows.Forms.ToolStripMenuItem tsSaveLayout;
-        private System.Windows.Forms.ToolStripMenuItem resetLayoutToolStripMenuItem;
         private System.Windows.Forms.ToolStripDropDownButton tsCols;
         private System.Windows.Forms.ToolStripMenuItem standardColumnsToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem performanceCounterColumnsToolStripMenuItem;
@@ -860,5 +864,8 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn MaxReadIOPs;
         private System.Windows.Forms.DataGridViewTextBoxColumn MaxWriteIOPs;
         private System.Windows.Forms.DataGridViewTextBoxColumn MaxIOPs;
+        private System.Windows.Forms.ToolStripButton tsSaveView;
+        private System.Windows.Forms.ToolStripButton tsDeleteView;
+        private SavedViewMenuItem savedViewMenuItem1;
     }
 }

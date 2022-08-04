@@ -12,6 +12,7 @@ using static DBADashGUI.Performance.Performance;
 using LiveCharts;
 using LiveCharts.Defaults;
 using LiveCharts.Wpf;
+using static DBADashGUI.Performance.IMetric;
 
 namespace DBADashGUI.Performance
 {
@@ -52,17 +53,30 @@ namespace DBADashGUI.Performance
         public DateTime FromDate { get; set; }
         public DateTime ToDate { get; set; }
 
-        public Int32 CounterID { get; set; }
-        public string CounterName { get; set; }
+        public int CounterID { get => Metric.CounterID; set => Metric.CounterID = value; }
+        public string CounterName { get=>Metric.CounterName; set=>Metric.CounterName=value; }
+
+        private PerformanceCounterMetric _metric = new();
+        public PerformanceCounterMetric Metric { get=>_metric; set { _metric = value; SelectAggregate(); } } 
+        IMetric IMetricChart.Metric { get => Metric; }
 
         public bool SmoothLines = false;
         public Int32 PointSize = 5;
 
         private int durationMins;
-        string agg = "Value_Avg";
+       
 
         Int32 DateGrouping;
         DataTable dt;
+
+        private void SelectAggregate()
+        {
+            tsAgg.Text = Enum.GetName(Metric.AggregateType);
+            foreach (ToolStripMenuItem mnu in tsAgg.DropDownItems)
+            {
+                mnu.Checked = (string)mnu.Tag == Enum.GetName(Metric.AggregateType);
+            }
+        }
 
         public void RefreshData()
         {
@@ -102,7 +116,9 @@ namespace DBADashGUI.Performance
             }
             foreach (DataRow r in dt.Rows)
             {
-                var value = Convert.ToDouble(r[agg]);
+                string aggColName= "Value_" + Enum.GetName(Metric.AggregateType);
+                
+                var value = Convert.ToDouble(r[aggColName]);
                 maxValue = value > maxValue ? value : maxValue;
                 minValue = value < minValue ? value : minValue;
                 values.Add(new DateTimePoint((DateTime)r["SnapshotDate"],value ));
@@ -126,7 +142,7 @@ namespace DBADashGUI.Performance
             {
                         new LineSeries
                         {
-                        Title = CounterName,
+                        Title = Metric.CounterName,
                         Values =values,
                         LineSmoothness = SmoothLines ? 1 : 0,
                         PointGeometrySize = pointSize,
@@ -148,7 +164,7 @@ namespace DBADashGUI.Performance
             });
             chart1.Series = s1;
             chart1.LegendLocation = LegendLocation.Top;
-            chart1.Text = CounterName;
+            chart1.Text = Metric.CounterName;
 
         }
 
@@ -163,7 +179,7 @@ namespace DBADashGUI.Performance
                 cmd.Parameters.AddWithValue("InstanceID", InstanceID);
                 cmd.Parameters.AddWithValue("FromDate", FromDate == DateTime.MinValue ? DateRange.FromUTC : FromDate);
                 cmd.Parameters.AddWithValue("ToDate", ToDate == DateTime.MinValue ? DateRange.ToUTC : ToDate);
-                cmd.Parameters.AddWithValue("CounterID", CounterID);
+                cmd.Parameters.AddWithValue("CounterID", Metric.CounterID);
                 cmd.Parameters.AddWithValue("DateGroupingMin", DateGrouping);
                 cmd.Parameters.AddWithValue("UTCOffset", Common.UtcOffset);
                 if (DateRange.HasDayOfWeekFilter)
@@ -192,7 +208,7 @@ namespace DBADashGUI.Performance
             DateGrouping = Convert.ToInt32(ts.Tag);
             tsDateGrouping.Text = Common.DateGroupString(DateGrouping);
             dt = GetPerformanceCounter();
-            RefreshChart();
+            RefreshChart();           
         }
 
         private void TsAgg_Click(object sender, EventArgs e)
@@ -202,7 +218,7 @@ namespace DBADashGUI.Performance
                 itm.Checked = itm == sender;
                 if (itm.Checked)
                 {
-                    agg = (string)itm.Tag;
+                    Metric.AggregateType = Enum.Parse<AggregateTypes>((string)itm.Tag);
                     tsAgg.Text = itm.Text;
                 }
             }

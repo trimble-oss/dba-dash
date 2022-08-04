@@ -28,17 +28,16 @@
         /// </summary>
         private void InitializeComponent()
         {
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(IOPerformance));
             this.chartIO = new LiveCharts.WinForms.CartesianChart();
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
             this.tsMeasures = new System.Windows.Forms.ToolStripDropDownButton();
             this.tsClose = new System.Windows.Forms.ToolStripButton();
+            this.tsUp = new System.Windows.Forms.ToolStripButton();
             this.lblIOPerformance = new System.Windows.Forms.ToolStripLabel();
             this.tsDateGroup = new System.Windows.Forms.ToolStripDropDownButton();
             this.tsDrives = new System.Windows.Forms.ToolStripDropDownButton();
             this.tsFileGroup = new System.Windows.Forms.ToolStripDropDownButton();
             this.tsIOSummary = new System.Windows.Forms.ToolStripButton();
-            this.tsUp = new System.Windows.Forms.ToolStripButton();
             this.toolStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -56,11 +55,11 @@
             // 
             this.toolStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
             this.toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.tsDateGroup,
             this.tsMeasures,
             this.tsClose,
             this.tsUp,
             this.lblIOPerformance,
-            this.tsDateGroup,
             this.tsDrives,
             this.tsFileGroup,
             this.tsIOSummary});
@@ -91,6 +90,17 @@
             this.tsClose.Visible = false;
             this.tsClose.Click += new System.EventHandler(this.TsClose_Click);
             // 
+            // tsUp
+            // 
+            this.tsUp.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
+            this.tsUp.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.tsUp.Image = global::DBADashGUI.Properties.Resources.arrow_Up_16xLG;
+            this.tsUp.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tsUp.Name = "tsUp";
+            this.tsUp.Size = new System.Drawing.Size(29, 24);
+            this.tsUp.Text = "Move Up";
+            this.tsUp.Click += new System.EventHandler(this.TsUp_Click);
+            // 
             // lblIOPerformance
             // 
             this.lblIOPerformance.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
@@ -101,11 +111,10 @@
             // 
             // tsDateGroup
             // 
-            this.tsDateGroup.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
-            this.tsDateGroup.Image = ((System.Drawing.Image)(resources.GetObject("tsDateGroup.Image")));
+            this.tsDateGroup.Image = global::DBADashGUI.Properties.Resources.Time_16x;
             this.tsDateGroup.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsDateGroup.Name = "tsDateGroup";
-            this.tsDateGroup.Size = new System.Drawing.Size(56, 24);
+            this.tsDateGroup.Size = new System.Drawing.Size(76, 24);
             this.tsDateGroup.Text = "1min";
             // 
             // tsDrives
@@ -133,17 +142,6 @@
             this.tsIOSummary.Size = new System.Drawing.Size(29, 24);
             this.tsIOSummary.Text = "View Table Summary";
             this.tsIOSummary.Click += new System.EventHandler(this.TsIOSummary_Click);
-            // 
-            // tsUp
-            // 
-            this.tsUp.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
-            this.tsUp.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.tsUp.Image = global::DBADashGUI.Properties.Resources.arrow_Up_16xLG;
-            this.tsUp.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsUp.Name = "tsUp";
-            this.tsUp.Size = new System.Drawing.Size(29, 24);
-            this.tsUp.Text = "Move Up";
-            this.tsUp.Click += new System.EventHandler(this.TsUp_Click);
             // 
             // IOPerformance
             // 

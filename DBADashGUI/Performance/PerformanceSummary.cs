@@ -20,6 +20,7 @@ namespace DBADashGUI.Performance
         private readonly List<KeyValuePair<string, PersistedColumnLayout>> standardLayout;
 
         public Dictionary<int,Counter> SelectedPerformanceCounters =  new();
+        private PerformanceSummarySavedView selectedview;
 
         public PerformanceSummary()
         {
@@ -42,6 +43,10 @@ namespace DBADashGUI.Performance
             }
             dgv.AutoResizeColumnHeadersHeight();
             dgv.Columns["colCPUHistogram"].Width = 200;
+            if (selectedview != null)
+            {
+                LoadPersistedColumnLayout(selectedview.ColumnLayout);
+            }
         }
 
         private void AddPerformanceCounterColsToGrid()
@@ -241,13 +246,54 @@ namespace DBADashGUI.Performance
         {
             Common.StyleGrid(ref dgv);
             AddHistCols(dgv, "col");
-            try 
-            { 
-                LoadSavedView();
-            }
-            catch (System.Configuration.SettingsPropertyNotFoundException)
+            MigratePerformanceSummaryView();
+            savedViewMenuItem1.LoadItems();
+            savedViewMenuItem1.SelectDefault();
+        }
+
+        /// <summary>
+        /// Migrate legacy saved view from Properties.Settings.Default to database
+        /// </summary>
+        private static void MigratePerformanceSummaryView()
+        {
+            if (!Properties.Settings.Default.PerformanceSummaryMigrated)
             {
-                // Design time error we can ignore
+                try
+                {
+                    string viewName = "Default";
+                    if (PerformanceSummarySavedView.GetSavedViews(DBADashUser.UserID).ContainsKey("Default")) // Check if we already have a view called Default and ensure we give it a unique name
+                    {
+                        viewName += Guid.NewGuid().ToString();
+                    }
+                    PerformanceSummarySavedView view = new() { Name = viewName };
+                    bool save = false;
+                    string jsonCounters = Properties.Settings.Default.PerformanceSummaryPerformanceCounters;
+                    if (!String.IsNullOrEmpty(jsonCounters))
+                    {
+                        view.SelectedPerformanceCounters = Newtonsoft.Json.JsonConvert.DeserializeObject<Dictionary<int, Counter>>(jsonCounters);
+                        save = true;
+                    }
+                    string jsonLayout = Properties.Settings.Default.PerformanceSummaryCols;
+                    if (!String.IsNullOrEmpty(jsonLayout))
+                    {
+                        view.ColumnLayout = Newtonsoft.Json.JsonConvert.DeserializeObject<List<KeyValuePair<string, PersistedColumnLayout>>>(jsonLayout);
+                        save = true;
+                    }
+                    if (save)
+                    {
+                        view.Save();
+                    }
+                    Properties.Settings.Default.PerformanceSummaryCols = String.Empty;
+                    Properties.Settings.Default.PerformanceSummaryPerformanceCounters = String.Empty;
+                    Properties.Settings.Default.PerformanceSummaryMigrated = true;
+                    Properties.Settings.Default.Save();
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Error migrating saved view: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    Properties.Settings.Default.PerformanceSummaryMigrated = true;
+                    Properties.Settings.Default.Save();
+                }
             }
         }
 
@@ -371,21 +417,11 @@ namespace DBADashGUI.Performance
                 {
                     var dt = ((DataView)dgv.DataSource).Table;
                     GenerateHistogram(ref dt);
+                    DeSelectView();
                 }
             }
         }
 
-
-        private void SaveLayout() 
-        {           
-            string jsonPC = Newtonsoft.Json.JsonConvert.SerializeObject(SelectedPerformanceCounters, Newtonsoft.Json.Formatting.Indented);
-            Properties.Settings.Default.PerformanceSummaryPerformanceCounters = jsonPC;
-   
-            string jsonCols = Newtonsoft.Json.JsonConvert.SerializeObject(GetColumnLayout(), Newtonsoft.Json.Formatting.Indented);
-            Properties.Settings.Default.PerformanceSummaryCols = jsonCols;
-            
-            Properties.Settings.Default.Save();           
-        }
 
         private List<KeyValuePair<string, PersistedColumnLayout>> GetColumnLayout()
         {
@@ -394,76 +430,31 @@ namespace DBADashGUI.Performance
           .ToList();
         }
 
-
-        private void LoadSavedView()
-        {
-            if (!string.IsNullOrEmpty(Properties.Settings.Default.PerformanceSummaryPerformanceCounters))
-            {
-                var json = Properties.Settings.Default.PerformanceSummaryPerformanceCounters;
-                try
-                {
-                    SelectedPerformanceCounters = Newtonsoft.Json.JsonConvert.DeserializeObject<Dictionary<int, Counter>>(json);
-                    AddPerformanceCounterColsToGrid();
-                }
-                catch (Exception ex)
-                {
-                    Properties.Settings.Default.PerformanceSummaryPerformanceCounters = string.Empty;
-                    Properties.Settings.Default.Save();
-                    MessageBox.Show("Error loading saved view.  The view has been reset: \n" + ex.Message, "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                }
-            }
-            if (!string.IsNullOrEmpty(Properties.Settings.Default.PerformanceSummaryCols))
-            {
-                var jsonCols = Properties.Settings.Default.PerformanceSummaryCols;
-                try
-                {
-                    var savedCols = Newtonsoft.Json.JsonConvert.DeserializeObject<List<KeyValuePair<string,PersistedColumnLayout>>>(jsonCols);
-                    LoadPersistedColumnLayout(savedCols);
-                }
-                catch (Exception ex)
-                {
-                    Properties.Settings.Default.PerformanceSummaryCols = string.Empty;
-                    Properties.Settings.Default.Save();
-                    MessageBox.Show("Error loading saved view.  The view has been reset: \n" + ex.Message, "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                }
-            }
-        }
-
         private void LoadPersistedColumnLayout(List<KeyValuePair<string,PersistedColumnLayout>> savedCols)
         {
-            foreach (var col in savedCols)
+            foreach(DataGridViewColumn col in dgv.Columns)
             {
-                if (dgv.Columns.Contains(col.Key))
+                if (savedCols.Where(savedCol => savedCol.Key == col.Name).Count() == 1)
                 {
-                    dgv.Columns[col.Key].Visible = col.Value.Visible;
-                    dgv.Columns[col.Key].Width = col.Value.Width;
-                    if (col.Value.DisplayIndex >= 0)
+                    var savedCol = savedCols.Where(savedCol => savedCol.Key == col.Name).First();
+                    col.Visible = savedCol.Value.Visible;
+                    col.Width = savedCol.Value.Width;
+                    if (savedCol.Value.DisplayIndex >= 0)
                     {
-                        dgv.Columns[col.Key].DisplayIndex = col.Value.DisplayIndex;
+                        col.DisplayIndex = savedCol.Value.DisplayIndex;
                     }
                 }
+                else
+                {
+                    col.Visible = false;
+                }           
             }
-        }
-
-        private void TsSaveLayout_Click(object sender, EventArgs e)
-        {
-            if (MessageBox.Show("Save layout?  Column selection, size and position will be saved.", "Save Layout", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+            if (dgv.DataSource != null)
             {
-                SaveLayout();
+                var dt = ((DataView)dgv.DataSource).Table;
+                GenerateHistogram(ref dt);
             }
-        }
-
-        private void ResetLayoutToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            if (MessageBox.Show("Are you sure you want to reset the column selection back to the defaults?", "Reset Layout", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
-            {
-                SelectedPerformanceCounters.Clear();
-                AddPerformanceCounterColsToGrid();
-                LoadPersistedColumnLayout(standardLayout);
-                Properties.Settings.Default.PerformanceSummaryPerformanceCounters = string.Empty;
-                Properties.Settings.Default.PerformanceSummaryCols = string.Empty;
-                Properties.Settings.Default.Save();
-            }
+            dgv.AutoResizeRows();
         }
 
         private void StandardColumnsToolStripMenuItem_Click(object sender, EventArgs e)
@@ -481,7 +472,96 @@ namespace DBADashGUI.Performance
             if (frm.DialogResult == DialogResult.OK)
             {
                 SelectedPerformanceCounters = frm.SelectedCounters;
+                DeSelectView();
+                RefreshData();    
+            }
+        }
+
+        private void DeSelectView()
+        {
+            selectedview = null;
+            tsDeleteView.Visible = false;
+            savedViewMenuItem1.ClearSelectedItem();
+        }
+
+        private void TsSave_Click(object sender, EventArgs e)
+        {
+
+            using (SaveViewPrompt frm = new())
+            {
+                frm.ShowDialog();
+                if (frm.DialogResult == DialogResult.OK)
+                {
+                    string name = frm.ViewName;
+
+                    if ((savedViewMenuItem1.ContainsUserView(name) && !frm.IsGlobal) || (savedViewMenuItem1.ContainsGlobalView(name) && frm.IsGlobal))
+                    {
+                        if (MessageBox.Show("Replace existing view : " + name, "Replace View", MessageBoxButtons.YesNo, MessageBoxIcon.Question) != DialogResult.Yes)
+                        {
+                            return;
+                        }
+                    }
+                    var savedView = new PerformanceSummarySavedView
+                    {
+                        Name = name,
+                        SelectedPerformanceCounters = SelectedPerformanceCounters,
+                        UserID = frm.IsGlobal ? DBADashUser.SystemUserID : DBADashUser.UserID,
+                        ColumnLayout = GetColumnLayout()
+                    };
+
+                    savedView.Save();
+                    savedViewMenuItem1.LoadItems();
+                    savedViewMenuItem1.SelectItem(name, false);
+                    tsDeleteView.Visible = true;                    
+                }
+            }
+        }
+
+  
+        private void SavedViewSelected(object sender, SavedViewSelectedEventArgs e)
+        {
+            selectedview=null;
+            if (e.SerializedObject != String.Empty)
+            {
+                try
+                {
+                    selectedview = PerformanceSummarySavedView.Deserialize(e.SerializedObject);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Error loading the saved view " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }
+            if (selectedview == null)
+            {
+                SelectedPerformanceCounters.Clear();
+                AddPerformanceCounterColsToGrid();
+                LoadPersistedColumnLayout(standardLayout);
+                tsDeleteView.Visible = e.SerializedObject != String.Empty && (!e.IsGlobal || DBADashUser.HasManageGlobalViews); // Don't show for "None" but allow user to delete a view that failed to deserialize
+            }
+            else
+            {
+                SelectedPerformanceCounters = selectedview.SelectedPerformanceCounters;
+                LoadPersistedColumnLayout(selectedview.ColumnLayout);
+                tsDeleteView.Visible = !e.IsGlobal || DBADashUser.HasManageGlobalViews;
+            }
+            if (InstanceIDs != null)
+            {
                 RefreshData();
+            }
+        }
+
+        private void TsDeleteView_Click(object sender, EventArgs e)
+        {
+            if (!savedViewMenuItem1.SelectedSavedViewIsGlobal || DBADashUser.HasManageGlobalViews)
+            {
+                if (MessageBox.Show("Delete " + savedViewMenuItem1.SelectedSavedView, "Delete View", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+                {
+                    var view = new PerformanceSummarySavedView() { Name = savedViewMenuItem1.SelectedSavedView, UserID = savedViewMenuItem1.SelectedSavedViewIsGlobal ? DBADashUser.SystemUserID : DBADashUser.UserID };
+                    view.Delete();
+                    savedViewMenuItem1.LoadItems();
+                    tsDeleteView.Visible = false;
+                }
             }
         }
     }

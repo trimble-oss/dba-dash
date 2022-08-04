@@ -121,6 +121,10 @@ namespace DBADashGUI.Performance
             }
         }
 
+        public BlockingMetric Metric { get; set; } = new ();
+
+        IMetric IMetricChart.Metric { get => Metric; }
+
         public void RefreshData()
         {
             var dt = GetDT();

@@ -28,14 +28,13 @@
         /// </summary>
         private void InitializeComponent()
         {
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(ObjectExecution));
             this.objectExecChart = new LiveCharts.WinForms.CartesianChart();
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
             this.tsClose = new System.Windows.Forms.ToolStripButton();
+            this.tsUp = new System.Windows.Forms.ToolStripButton();
             this.lblExecution = new System.Windows.Forms.ToolStripLabel();
             this.tsMeasures = new System.Windows.Forms.ToolStripDropDownButton();
             this.tsDateGroup = new System.Windows.Forms.ToolStripDropDownButton();
-            this.tsUp = new System.Windows.Forms.ToolStripButton();
             this.toolStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -56,8 +55,8 @@
             this.tsClose,
             this.tsUp,
             this.lblExecution,
-            this.tsMeasures,
-            this.tsDateGroup});
+            this.tsDateGroup,
+            this.tsMeasures});
             this.toolStrip1.Location = new System.Drawing.Point(0, 0);
             this.toolStrip1.Name = "toolStrip1";
             this.toolStrip1.Size = new System.Drawing.Size(492, 27);
@@ -75,6 +74,17 @@
             this.tsClose.Text = "Close";
             this.tsClose.Visible = false;
             this.tsClose.Click += new System.EventHandler(this.TsClose_Click);
+            // 
+            // tsUp
+            // 
+            this.tsUp.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
+            this.tsUp.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.tsUp.Image = global::DBADashGUI.Properties.Resources.arrow_Up_16xLG;
+            this.tsUp.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tsUp.Name = "tsUp";
+            this.tsUp.Size = new System.Drawing.Size(29, 24);
+            this.tsUp.Text = "Move Up";
+            this.tsUp.Click += new System.EventHandler(this.TsUp_Click);
             // 
             // lblExecution
             // 
@@ -94,23 +104,11 @@
             // 
             // tsDateGroup
             // 
-            this.tsDateGroup.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
-            this.tsDateGroup.Image = ((System.Drawing.Image)(resources.GetObject("tsDateGroup.Image")));
+            this.tsDateGroup.Image = global::DBADashGUI.Properties.Resources.Time_16x;
             this.tsDateGroup.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsDateGroup.Name = "tsDateGroup";
-            this.tsDateGroup.Size = new System.Drawing.Size(56, 24);
+            this.tsDateGroup.Size = new System.Drawing.Size(76, 24);
             this.tsDateGroup.Text = "1min";
-            // 
-            // tsUp
-            // 
-            this.tsUp.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
-            this.tsUp.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.tsUp.Image = global::DBADashGUI.Properties.Resources.arrow_Up_16xLG;
-            this.tsUp.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsUp.Name = "tsUp";
-            this.tsUp.Size = new System.Drawing.Size(29, 24);
-            this.tsUp.Text = "Move Up";
-            this.tsUp.Click += new System.EventHandler(this.TsUp_Click);
             // 
             // ObjectExecution
             // 
