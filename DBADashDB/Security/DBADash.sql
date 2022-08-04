@@ -1,0 +1,2 @@
+﻿CREATE SCHEMA DBADash
+    AUTHORIZATION [dbo];

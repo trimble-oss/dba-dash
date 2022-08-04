@@ -28,16 +28,15 @@
         /// </summary>
         private void InitializeComponent()
         {
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(CPU));
             this.chartCPU = new LiveCharts.WinForms.CartesianChart();
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
             this.tsClose = new System.Windows.Forms.ToolStripButton();
+            this.tsUp = new System.Windows.Forms.ToolStripButton();
             this.lblCPU = new System.Windows.Forms.ToolStripLabel();
             this.tsAgg = new System.Windows.Forms.ToolStripDropDownButton();
             this.AVGToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.MAXToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.tsDateGrouping = new System.Windows.Forms.ToolStripDropDownButton();
-            this.tsUp = new System.Windows.Forms.ToolStripButton();
             this.toolStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -58,8 +57,8 @@
             this.tsClose,
             this.tsUp,
             this.lblCPU,
-            this.tsAgg,
-            this.tsDateGrouping});
+            this.tsDateGrouping,
+            this.tsAgg});
             this.toolStrip1.Location = new System.Drawing.Point(0, 0);
             this.toolStrip1.Name = "toolStrip1";
             this.toolStrip1.Size = new System.Drawing.Size(878, 27);
@@ -76,7 +75,18 @@
             this.tsClose.Size = new System.Drawing.Size(29, 24);
             this.tsClose.Text = "Close";
             this.tsClose.Visible = false;
-            this.tsClose.Click += new System.EventHandler(this.tsClose_Click);
+            this.tsClose.Click += new System.EventHandler(this.TsClose_Click);
+            // 
+            // tsUp
+            // 
+            this.tsUp.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
+            this.tsUp.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.tsUp.Image = global::DBADashGUI.Properties.Resources.arrow_Up_16xLG;
+            this.tsUp.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tsUp.Name = "tsUp";
+            this.tsUp.Size = new System.Drawing.Size(29, 24);
+            this.tsUp.Text = "Move Up";
+            this.tsUp.Click += new System.EventHandler(this.TsUp_Click);
             // 
             // lblCPU
             // 
@@ -89,15 +99,14 @@
             // 
             // tsAgg
             // 
-            this.tsAgg.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
             this.tsAgg.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.AVGToolStripMenuItem,
             this.MAXToolStripMenuItem});
-            this.tsAgg.Image = global::DBADashGUI.Properties.Resources.AutoSum_16x;
+            this.tsAgg.Image = global::DBADashGUI.Properties.Resources.AddComputedField_16x;
             this.tsAgg.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsAgg.Name = "tsAgg";
-            this.tsAgg.Size = new System.Drawing.Size(34, 24);
-            this.tsAgg.Text = "Aggregation";
+            this.tsAgg.Size = new System.Drawing.Size(69, 24);
+            this.tsAgg.Text = "Avg";
             // 
             // AVGToolStripMenuItem
             // 
@@ -105,37 +114,27 @@
             this.AVGToolStripMenuItem.CheckOnClick = true;
             this.AVGToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
             this.AVGToolStripMenuItem.Name = "AVGToolStripMenuItem";
-            this.AVGToolStripMenuItem.Size = new System.Drawing.Size(124, 26);
-            this.AVGToolStripMenuItem.Text = "AVG";
+            this.AVGToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            this.AVGToolStripMenuItem.Tag = "Avg";
+            this.AVGToolStripMenuItem.Text = "Avg";
             this.AVGToolStripMenuItem.Click += new System.EventHandler(this.AVGToolStripMenuItem_Click);
             // 
             // MAXToolStripMenuItem
             // 
             this.MAXToolStripMenuItem.CheckOnClick = true;
             this.MAXToolStripMenuItem.Name = "MAXToolStripMenuItem";
-            this.MAXToolStripMenuItem.Size = new System.Drawing.Size(124, 26);
-            this.MAXToolStripMenuItem.Text = "MAX";
+            this.MAXToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            this.MAXToolStripMenuItem.Tag = "Max";
+            this.MAXToolStripMenuItem.Text = "Max";
             this.MAXToolStripMenuItem.Click += new System.EventHandler(this.MAXToolStripMenuItem_Click);
             // 
             // tsDateGrouping
             // 
-            this.tsDateGrouping.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
-            this.tsDateGrouping.Image = ((System.Drawing.Image)(resources.GetObject("tsDateGrouping.Image")));
+            this.tsDateGrouping.Image = global::DBADashGUI.Properties.Resources.Time_16x;
             this.tsDateGrouping.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsDateGrouping.Name = "tsDateGrouping";
-            this.tsDateGrouping.Size = new System.Drawing.Size(56, 24);
+            this.tsDateGrouping.Size = new System.Drawing.Size(76, 24);
             this.tsDateGrouping.Text = "1min";
-            // 
-            // tsUp
-            // 
-            this.tsUp.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
-            this.tsUp.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.tsUp.Image = global::DBADashGUI.Properties.Resources.arrow_Up_16xLG;
-            this.tsUp.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsUp.Name = "tsUp";
-            this.tsUp.Size = new System.Drawing.Size(29, 24);
-            this.tsUp.Text = "Move Up";
-            this.tsUp.Click += new System.EventHandler(this.tsUp_Click);
             // 
             // CPU
             // 

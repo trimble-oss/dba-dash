@@ -10,10 +10,12 @@ Post-Deployment Script Template
 --------------------------------------------------------------------------------------
 */
 /* Security */
-GRANT SELECT ON SCHEMA::dbo TO [App]
-GRANT EXECUTE ON SCHEMA::dbo TO [App];
-GRANT SELECT ON SCHEMA::dbo TO [Reports]
-GRANT EXECUTE ON SCHEMA::[Report] TO [Reports];
+GRANT SELECT ON SCHEMA::dbo TO App
+GRANT EXECUTE ON SCHEMA::dbo TO App;
+GRANT SELECT ON SCHEMA::dbo TO Reports
+GRANT EXECUTE ON SCHEMA::Report TO Reports;
+GRANT SELECT ON SCHEMA::DBADash TO App;
+GRANT EXECUTE ON SCHEMA::DBADash TO App;
 /************/
 MERGE INTO [dbo].[SysConfigOptions] AS [Target]
 USING (VALUES
@@ -1801,5 +1803,37 @@ UPDATE SET T.SystemCriticalFrom = S.SystemCriticalFrom,
 WHEN NOT MATCHED BY TARGET THEN
 INSERT(object_name,counter_name,instance_name,SystemCriticalFrom,SystemCriticalTo,SystemWarningFrom,SystemWarningTo,SystemGoodFrom,SystemGoodTo)
 VALUES(object_name,counter_name,instance_name,SystemCriticalFrom,SystemCriticalTo,SystemWarningFrom,SystemWarningTo,SystemGoodFrom,SystemGoodTo);
+
+MERGE INTO [DBADash].[ViewType] AS [Target]
+USING (VALUES
+	(0,N'Metric'),
+	(1,N'PerformanceSummary')
+) AS [Source] ([ViewTypeID],[ViewType])
+ON ([Target].[ViewTypeID] = [Source].[ViewTypeID])
+WHEN MATCHED AND (
+	NULLIF([Source].[ViewType], [Target].[ViewType]) IS NOT NULL OR NULLIF([Target].[ViewType], [Source].[ViewType]) IS NOT NULL) THEN
+ UPDATE SET
+  [Target].[ViewType] = [Source].[ViewType]
+WHEN NOT MATCHED BY TARGET THEN
+ INSERT([ViewTypeID],[ViewType])
+ VALUES([Source].[ViewTypeID],[Source].[ViewType])
+WHEN NOT MATCHED BY SOURCE THEN 
+ DELETE;
+
+IF NOT EXISTS(
+		SELECT 1 
+		FROM DBADash.Users 
+		WHERE UserID=-1
+		)
+BEGIN
+	SET IDENTITY_INSERT DBADash.Users ON
+	INSERT INTO DBADash.Users
+	(
+		UserID,
+		UserName
+	)
+	VALUES(-1, N'{SYSTEM}')
+	SET IDENTITY_INSERT DBADash.Users OFF
+END
 
 ALTER DATABASE [$(DatabaseName)] SET AUTO_UPDATE_STATISTICS_ASYNC ON WITH NO_WAIT

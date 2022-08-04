@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using Microsoft.Data.SqlClient;
 using static DBADashGUI.DBADashStatus;
+using Newtonsoft.Json;
 
 namespace DBADashGUI.Performance
 {
@@ -20,7 +21,7 @@ namespace DBADashGUI.Performance
         }
 
         public Int32 InstanceID { get; set; }
-     
+
         public void RefreshData()
         {
             RefreshSummary();
@@ -62,10 +63,12 @@ namespace DBADashGUI.Performance
 
 
         private void PerformanceCounterSummary_Load(object sender, EventArgs e)
-        {
+        {        
             splitContainer1.Panel1Collapsed = true;
             performanceCounterSummaryGrid1.CounterSelected += PerformanceCounterSummaryGrid1_CounterSelected;
             performanceCounterSummaryGrid1.TextSelected += PerformanceCounterSummaryGrid1_TextSelected;
+            savedViewMenuItem1.LoadItems();
+            savedViewMenuItem1.SelectDefault();
         }
 
         private void PerformanceCounterSummaryGrid1_TextSelected(object sender, PerformanceCounterSummaryGrid.TextSelectedEventArgs e)
@@ -83,8 +86,11 @@ namespace DBADashGUI.Performance
         {
             PerformanceCounters pc = new()
             {
-                CounterID = CounterID,
-                CounterName = CounterName
+                Metric = new PerformanceCounterMetric()
+                {
+                    CounterID = CounterID,
+                    CounterName = CounterName
+                }
             };
             AddChartControl(pc);
         }
@@ -122,6 +128,7 @@ namespace DBADashGUI.Performance
             layout1.Controls.Add((Control)chart);
 
             splitContainer1.Panel1Collapsed = false;
+            DeSelectView();
             RefreshChart();
         }
 
@@ -158,14 +165,13 @@ namespace DBADashGUI.Performance
                 i += 1;
             }
             layout1.Controls.Clear();
-            layout1.Controls.AddRange(controlOrder.ToArray());          
-         
+            layout1.Controls.AddRange(controlOrder.ToArray());
+            DeSelectView();
         }
 
         private void Chart_Close(object sender, EventArgs e)
         {
             var chart = (Control)sender;
-            int RemoveRow = layout1.GetRow(chart);
             layout1.Controls.Remove(chart);
             layout1.RowCount--;
             if (layout1.Controls.Count == 0)
@@ -176,7 +182,7 @@ namespace DBADashGUI.Performance
             {
                 ((IMetricChart)layout1.Controls[0]).MoveUpVisible = false; // First item can't be moved up
             }
-
+            DeSelectView();
         }
 
         private void TsClear_Click(object sender, EventArgs e)
@@ -224,15 +230,119 @@ namespace DBADashGUI.Performance
             AddChartControl(new Blocking());
         }
 
-        private void tsToggleGrid_Click(object sender, EventArgs e)
+        private void ShowGrid(bool visible)
         {
-            bool visible = !performanceCounterSummaryGrid1.Visible;
             splitContainer1.Panel1Collapsed = layout1.Controls.Count == 0; // Chart.  Both panels can't be collapsed so reset to not visible on show grid
             splitContainer1.Panel2Collapsed = !visible; // Grid
             performanceCounterSummaryGrid1.Visible = visible;
             tsToggleGrid.Text = visible ? "Hide Grid" : "Show Grid";
             tsToggleGrid.Font = visible ? new Font(tsToggleGrid.Font, FontStyle.Regular) : new Font(tsToggleGrid.Font, FontStyle.Bold);
             RefreshSummary(); // will refresh if visible.
+        }
+
+        private void TsToggleGrid_Click(object sender, EventArgs e)
+        {
+            ShowGrid(!performanceCounterSummaryGrid1.Visible);
+            DeSelectView();
+        }
+
+
+        private void DeSelectView()
+        {
+            savedViewMenuItem1.ClearSelectedItem();
+            tsDeleteView.Visible = false;
+        }
+
+
+        private void LoadSelectedView(string _selectedView,bool isGlobal,string serializedObject)
+        {
+            MetricsSavedView view=null;
+
+            if (serializedObject != String.Empty)
+            {
+                try
+                {
+                    view = MetricsSavedView.Deserialize(serializedObject);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Error loading the saved view " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }
+            splitContainer1.Visible = false; // Prevent flickering when adding/removing controls
+            if (view == null) // User selected None of there was an issue with deserialization
+            {
+                // Show grid with no charts
+                layout1.Controls.Clear();
+                splitContainer1.Panel1Collapsed = true;
+                ShowGrid(true);
+                tsDeleteView.Visible =serializedObject != String.Empty && (!isGlobal || DBADashUser.HasManageGlobalViews); // Don't show for "None", but allow user to delete a view that fails to deserialize
+            }
+            else
+            {                
+                layout1.Controls.Clear();              
+                foreach (var chart in view.Metrics)
+                {
+                    AddChartControl(chart.GetChart());
+                }
+                splitContainer1.Panel1Collapsed = view.Metrics.Count == 0; // Hide chart panel if no charts
+                ShowGrid(view.ShowGrid);
+                tsDeleteView.Visible = !isGlobal | DBADashUser.HasManageGlobalViews;
+            }
+            savedViewMenuItem1.SelectItem(_selectedView, isGlobal);
+            splitContainer1.Visible = true; 
+
+        }
+
+
+        private void TsSaveView_Click(object sender, EventArgs e)
+        {
+            using (SaveViewPrompt frm = new())
+            {
+                frm.ShowDialog();
+                if(frm.DialogResult == DialogResult.OK)
+                {
+                    string name = frm.ViewName;
+                    if ((savedViewMenuItem1.ContainsUserView(name) && !frm.IsGlobal) || (savedViewMenuItem1.ContainsGlobalView(name) && frm.IsGlobal))
+                    {
+                        if (MessageBox.Show("Replace existing view : " + name, "Replace View", MessageBoxButtons.YesNo, MessageBoxIcon.Question) != DialogResult.Yes)
+                        {
+                            return;
+                        }
+                    }
+                    var savedView = new MetricsSavedView()
+                    {
+                        Name = name,
+                        ShowGrid = !splitContainer1.Panel2Collapsed,
+                        UserID = frm.IsGlobal ? DBADashUser.SystemUserID : DBADashUser.UserID,
+                        Metrics = layout1.Controls.Cast<IMetricChart>().Select(chart => chart.Metric).ToList()
+                    };
+
+                    savedView.Save();
+                    savedViewMenuItem1.LoadItems();
+                    savedViewMenuItem1.SelectItem(name, false);
+                    tsDeleteView.Visible = true;
+                }
+            }
+        }
+
+        private void TsDeleteView_Click(object sender, EventArgs e)
+        {
+            if(savedViewMenuItem1.SelectedSavedView!=String.Empty)
+            {
+                if (MessageBox.Show("Delete " + savedViewMenuItem1.SelectedSavedView, "Delete View", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+                {
+                    var sv = new MetricsSavedView { Name = savedViewMenuItem1.SelectedSavedView, UserID = savedViewMenuItem1.SelectedSavedViewIsGlobal ? DBADashUser.SystemUserID : DBADashUser.UserID };
+                    sv.Delete();
+                    savedViewMenuItem1.LoadItems();
+                    tsDeleteView.Visible = false;
+                }
+            }     
+        }
+
+        private void SavedViewSelected(object sender, SavedViewSelectedEventArgs e)
+        {
+            LoadSelectedView(e.Name, e.IsGlobal,e.SerializedObject);
         }
     }
 }

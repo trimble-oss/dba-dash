@@ -29,7 +29,7 @@ namespace DBADashGUI.Performance
             public double Value { get; set; }
         }
 
-        public string measure = "TotalDuration";
+        //public string measure = "TotalDuration";
         public DateTimePoint x;
         Int32 instanceID;
         DateTime chartMaxDate = DateTime.MinValue;
@@ -66,6 +66,11 @@ namespace DBADashGUI.Performance
             }
         }
 
+        public ObjectExecutionMetric Metric { get; set; } = new();
+
+
+        IMetric IMetricChart.Metric { get => Metric; }
+
         public void RefreshData(Int32 instanceID, Int64 objectID, Int32 databaseID)
         {
             this.instanceID = instanceID;
@@ -99,7 +104,7 @@ namespace DBADashGUI.Performance
             chartMaxDate = DateTime.MinValue;
             
 
-            var dt = CommonData.ObjectExecutionStats(instanceID, databaseid, objectID, dateGrouping, measure,DateRange.FromUTC,DateRange.ToUTC, "");
+            var dt = CommonData.ObjectExecutionStats(instanceID, databaseid, objectID, dateGrouping, Metric.Measure,DateRange.FromUTC,DateRange.ToUTC, "");
 
             if (dt.Rows.Count == 0)
             {
@@ -162,7 +167,7 @@ namespace DBADashGUI.Performance
 
             objectExecChart.AxisY.Add(new Axis
             {
-                LabelFormatter = val => val.ToString(measures[measure].LabelFormat)
+                LabelFormatter = val => val.ToString(measures[Metric.Measure].LabelFormat)
 
             });
 
@@ -216,7 +221,7 @@ namespace DBADashGUI.Performance
                 {
                     Name = m.Key
                 };
-                if (m.Key == measure) { 
+                if (m.Key == Metric.Measure) { 
                     itm.Checked = true;
                     tsMeasures.Text = m.Value.DisplayName;
                 }
@@ -237,12 +242,12 @@ namespace DBADashGUI.Performance
         private void Itm_Click(object sender, EventArgs e)
         {
             var tsItm = ((ToolStripMenuItem)sender);
-            if(measure!= tsItm.Name)
+            if(Metric.Measure!= tsItm.Name)
             {
-                measure = tsItm.Name;
+                Metric.Measure = tsItm.Name;
                 foreach(ToolStripMenuItem itm in tsMeasures.DropDownItems)
                 {
-                    itm.Checked = itm.Name == measure;
+                    itm.Checked = itm.Name == Metric.Measure;
                 }
                 tsMeasures.Text = tsItm.Text;
             }

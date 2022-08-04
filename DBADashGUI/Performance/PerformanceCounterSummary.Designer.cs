@@ -43,6 +43,11 @@
             this.IOToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.ObjectExecutionToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.WaitsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.tsToggleGrid = new System.Windows.Forms.ToolStripButton();
+            this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
+            this.tsSaveView = new System.Windows.Forms.ToolStripButton();
+            this.tsDeleteView = new System.Windows.Forms.ToolStripButton();
+            this.savedViewMenuItem1 = new DBADashGUI.SavedViewMenuItem();
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
             this.layout1 = new System.Windows.Forms.TableLayoutPanel();
             this.performanceCounterSummaryGrid1 = new DBADashGUI.Performance.PerformanceCounterSummaryGrid();
@@ -53,7 +58,6 @@
             this.dataGridViewTextBoxColumn12 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dataGridViewTextBoxColumn13 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dataGridViewTextBoxColumn7 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.tsToggleGrid = new System.Windows.Forms.ToolStripButton();
             this.toolStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
@@ -73,7 +77,11 @@
             this.txtSearch,
             this.tsClear,
             this.toolStripDropDownButton1,
-            this.tsToggleGrid});
+            this.tsToggleGrid,
+            this.toolStripSeparator1,
+            this.tsSaveView,
+            this.tsDeleteView,
+            this.savedViewMenuItem1});
             this.toolStrip1.Location = new System.Drawing.Point(0, 0);
             this.toolStrip1.Name = "toolStrip1";
             this.toolStrip1.Size = new System.Drawing.Size(759, 27);
@@ -182,6 +190,54 @@
             this.WaitsToolStripMenuItem.Text = "Waits";
             this.WaitsToolStripMenuItem.Click += new System.EventHandler(this.WaitsToolStripMenuItem_Click);
             // 
+            // tsToggleGrid
+            // 
+            this.tsToggleGrid.Image = global::DBADashGUI.Properties.Resources.Table_16x;
+            this.tsToggleGrid.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tsToggleGrid.Name = "tsToggleGrid";
+            this.tsToggleGrid.Size = new System.Drawing.Size(97, 24);
+            this.tsToggleGrid.Text = "Hide Grid";
+            this.tsToggleGrid.Click += new System.EventHandler(this.TsToggleGrid_Click);
+            // 
+            // toolStripSeparator1
+            // 
+            this.toolStripSeparator1.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
+            this.toolStripSeparator1.Name = "toolStripSeparator1";
+            this.toolStripSeparator1.Size = new System.Drawing.Size(6, 27);
+            // 
+            // tsSaveView
+            // 
+            this.tsSaveView.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
+            this.tsSaveView.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.tsSaveView.Image = global::DBADashGUI.Properties.Resources.Save_16x;
+            this.tsSaveView.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tsSaveView.Name = "tsSaveView";
+            this.tsSaveView.Size = new System.Drawing.Size(29, 24);
+            this.tsSaveView.Text = "Save View";
+            this.tsSaveView.Click += new System.EventHandler(this.TsSaveView_Click);
+            // 
+            // tsDeleteView
+            // 
+            this.tsDeleteView.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
+            this.tsDeleteView.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.tsDeleteView.Image = global::DBADashGUI.Properties.Resources.Close_red_16x;
+            this.tsDeleteView.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tsDeleteView.Name = "tsDeleteView";
+            this.tsDeleteView.Size = new System.Drawing.Size(29, 24);
+            this.tsDeleteView.Text = "Delete View";
+            this.tsDeleteView.Visible = false;
+            this.tsDeleteView.Click += new System.EventHandler(this.TsDeleteView_Click);
+            // 
+            // savedViewMenuItem1
+            // 
+            this.savedViewMenuItem1.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
+            this.savedViewMenuItem1.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.savedViewMenuItem1.Name = "savedViewMenuItem1";
+            this.savedViewMenuItem1.Size = new System.Drawing.Size(55, 24);
+            this.savedViewMenuItem1.Text = "View";
+            this.savedViewMenuItem1.Type = DBADashGUI.SavedView.ViewTypes.Metric;
+            this.savedViewMenuItem1.SavedViewSelected += new System.EventHandler<DBADashGUI.SavedViewSelectedEventArgs>(this.SavedViewSelected);
+            // 
             // splitContainer1
             // 
             this.splitContainer1.Dock = System.Windows.Forms.DockStyle.Fill;
@@ -288,21 +344,11 @@
             // dataGridViewTextBoxColumn7
             // 
             this.dataGridViewTextBoxColumn7.DataPropertyName = "CurrentValue";
-            this.dataGridViewTextBoxColumn7.DefaultCellStyle = dataGridViewCellStyle1;
             this.dataGridViewTextBoxColumn7.HeaderText = "Current Value";
             this.dataGridViewTextBoxColumn7.MinimumWidth = 6;
             this.dataGridViewTextBoxColumn7.Name = "dataGridViewTextBoxColumn7";
             this.dataGridViewTextBoxColumn7.ReadOnly = true;
             this.dataGridViewTextBoxColumn7.Width = 124;
-            // 
-            // tsToggleGrid
-            // 
-            this.tsToggleGrid.Image = global::DBADashGUI.Properties.Resources.Table_16x;
-            this.tsToggleGrid.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsToggleGrid.Name = "tsToggleGrid";
-            this.tsToggleGrid.Size = new System.Drawing.Size(97, 24);
-            this.tsToggleGrid.Text = "Hide Grid";
-            this.tsToggleGrid.Click += new System.EventHandler(this.tsToggleGrid_Click);
             // 
             // PerformanceCounterSummary
             // 
@@ -351,5 +397,9 @@
         private System.Windows.Forms.ToolStripMenuItem ObjectExecutionToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem blockingToolStripMenuItem;
         private System.Windows.Forms.ToolStripButton tsToggleGrid;
+        private System.Windows.Forms.ToolStripButton tsSaveView;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
+        private System.Windows.Forms.ToolStripButton tsDeleteView;
+        private SavedViewMenuItem savedViewMenuItem1;
     }
 }

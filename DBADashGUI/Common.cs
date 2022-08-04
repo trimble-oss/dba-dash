@@ -331,19 +331,21 @@ namespace DBADashGUI
 
         public static DialogResult ShowInputDialog(ref string input, string title)
         {
-            System.Drawing.Size size = new System.Drawing.Size(400, 70);
+            System.Drawing.Size size = new System.Drawing.Size(400, 80);
             Form inputBox = new Form
             {
                 FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog,
                 ClientSize = size,
                 Text = title,
                 MaximizeBox = false,
-                MinimizeBox = false
+                MinimizeBox = false,
+                StartPosition = FormStartPosition.CenterParent,
+                BackColor = DashColors.TrimbleBlueDark
             };
 
             System.Windows.Forms.TextBox textBox = new TextBox
             {
-                Size = new System.Drawing.Size(size.Width - 10, 23),
+                Size = new System.Drawing.Size(size.Width - 10, 25),
                 Location = new System.Drawing.Point(5, 5),
                 Text = input
             };
@@ -353,9 +355,10 @@ namespace DBADashGUI
             {
                 DialogResult = System.Windows.Forms.DialogResult.OK,
                 Name = "okButton",
-                Size = new System.Drawing.Size(75, 23),
+                Size = new System.Drawing.Size(75, 30),
                 Text = "&OK",
-                Location = new System.Drawing.Point(size.Width - 80 - 80, 39)
+                Location = new System.Drawing.Point(size.Width - 80 - 80, 39),
+                BackColor = SystemColors.Control
             };
             inputBox.Controls.Add(okButton);
 
@@ -363,9 +366,10 @@ namespace DBADashGUI
             {
                 DialogResult = System.Windows.Forms.DialogResult.Cancel,
                 Name = "cancelButton",
-                Size = new System.Drawing.Size(75, 23),
+                Size = new System.Drawing.Size(75, 30),
                 Text = "&Cancel",
-                Location = new System.Drawing.Point(size.Width - 80, 39)
+                Location = new System.Drawing.Point(size.Width - 80, 39),
+                BackColor = SystemColors.Control
             };
             inputBox.Controls.Add(cancelButton);
 

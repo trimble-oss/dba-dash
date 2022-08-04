@@ -10,7 +10,7 @@ namespace DBADashGUI.Performance
     /// <summary>
     /// Interface for chart controls to implement to allow them to be added to Metrics tab (PerformanceCounterSummary)
     /// </summary>
-    interface IMetricChart 
+    public interface IMetricChart
     {
         /// <summary>
         /// Event fired when Close button is clicked to remove the chart
@@ -36,6 +36,8 @@ namespace DBADashGUI.Performance
         /// Refresh the chart
         /// </summary>
         public void RefreshData(int InstanceID);
+
+        public IMetric Metric{ get;  }
  
 
     }

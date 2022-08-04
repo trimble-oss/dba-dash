@@ -28,16 +28,15 @@
         /// </summary>
         private void InitializeComponent()
         {
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Waits));
             this.waitChart = new LiveCharts.WinForms.CartesianChart();
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
             this.tsClose = new System.Windows.Forms.ToolStripButton();
+            this.tsUp = new System.Windows.Forms.ToolStripButton();
             this.lblWaits = new System.Windows.Forms.ToolStripLabel();
             this.tsDateGrouping = new System.Windows.Forms.ToolStripDropDownButton();
             this.tsFilter = new System.Windows.Forms.ToolStripDropDownButton();
             this.criticalWaitsOnlyToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.stringFilterToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.tsUp = new System.Windows.Forms.ToolStripButton();
             this.toolStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -78,6 +77,18 @@
             this.tsClose.Visible = false;
             this.tsClose.Click += new System.EventHandler(this.TsClose_Click);
             // 
+            // tsUp
+            // 
+            this.tsUp.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
+            this.tsUp.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.tsUp.Image = global::DBADashGUI.Properties.Resources.arrow_Up_16xLG;
+            this.tsUp.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tsUp.Name = "tsUp";
+            this.tsUp.Size = new System.Drawing.Size(29, 24);
+            this.tsUp.Text = "Move Up";
+            this.tsUp.Visible = false;
+            this.tsUp.Click += new System.EventHandler(this.TsUp_Click);
+            // 
             // lblWaits
             // 
             this.lblWaits.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
@@ -88,11 +99,10 @@
             // 
             // tsDateGrouping
             // 
-            this.tsDateGrouping.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
-            this.tsDateGrouping.Image = ((System.Drawing.Image)(resources.GetObject("tsDateGrouping.Image")));
+            this.tsDateGrouping.Image = global::DBADashGUI.Properties.Resources.Time_16x;
             this.tsDateGrouping.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsDateGrouping.Name = "tsDateGrouping";
-            this.tsDateGrouping.Size = new System.Drawing.Size(56, 24);
+            this.tsDateGrouping.Size = new System.Drawing.Size(76, 24);
             this.tsDateGrouping.Text = "1min";
             // 
             // tsFilter
@@ -109,7 +119,7 @@
             // 
             this.criticalWaitsOnlyToolStripMenuItem.CheckOnClick = true;
             this.criticalWaitsOnlyToolStripMenuItem.Name = "criticalWaitsOnlyToolStripMenuItem";
-            this.criticalWaitsOnlyToolStripMenuItem.Size = new System.Drawing.Size(212, 26);
+            this.criticalWaitsOnlyToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
             this.criticalWaitsOnlyToolStripMenuItem.Text = "Critical Waits Only";
             this.criticalWaitsOnlyToolStripMenuItem.ToolTipText = "Wait types that can indicate serious performance problems. e.g. RESOURCE_SEMAPHOR" +
     "E, THREADPOOL";
@@ -118,21 +128,9 @@
             // stringFilterToolStripMenuItem
             // 
             this.stringFilterToolStripMenuItem.Name = "stringFilterToolStripMenuItem";
-            this.stringFilterToolStripMenuItem.Size = new System.Drawing.Size(212, 26);
+            this.stringFilterToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
             this.stringFilterToolStripMenuItem.Text = "String Filter";
             this.stringFilterToolStripMenuItem.Click += new System.EventHandler(this.StringFilterToolStripMenuItem_Click);
-            // 
-            // tsUp
-            // 
-            this.tsUp.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
-            this.tsUp.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.tsUp.Image = global::DBADashGUI.Properties.Resources.arrow_Up_16xLG;
-            this.tsUp.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsUp.Name = "tsUp";
-            this.tsUp.Size = new System.Drawing.Size(29, 24);
-            this.tsUp.Text = "Move Up";
-            this.tsUp.Visible = false;
-            this.tsUp.Click += new System.EventHandler(this.TsUp_Click);
             // 
             // Waits
             // 
