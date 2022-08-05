@@ -13,6 +13,33 @@ If the tool doesn't run as sysadmin it won't be able to collect last good CHECKD
 ````SQL
 ALTER SERVER ROLE [sysadmin] ADD MEMBER [{LoginName}]
 ````
+
+### Firewall
+
+DBA Dash collects most of it's data via a SQL connection (Typically port 1433).  If you check the "No WMI" box when adding a connection then ALL data will be collected via the SQL connection and no additional firewall configuration would be required.  
+
+It can be useful to have WMI collection enabled though as this allows you to collect some extra data like drive capacity and free space for all drives.
+
+These firewall rules can be used to allow WMI:
+
+* Windows Management Instrumentation (ASync-In)
+* Windows Management Instrumentation (DCOM-In)
+* Windows Management Instrumentation (WMI-In)
+
+If you want to check if WMI is working, you can run this powershell script to test:
+```Powershell
+Get-WmiObject -Class Win32_computerSystem -ComputerName "YOUR_COMPUTER_NAME"
+```
+
+As part of the DriversWMI collection DBA Dash will also attempt to get the AWS PV driver version by reading this registry key: SOFTWARE\Amazon\PVDriver. This requires a different firewall rule: 
+* File and Printer Sharing (SMB-In)
+
+This powerhell query provides a quick way to test if it's working (it should run without errors):
+```Powershell
+[Microsoft.Win32.RegistryKey]::OpenRemoteBaseKey("LocalMachine", "YOUR_COMPUTER_NAME")
+```
+It's also possible to disable the "DriversWMI" collection in the service configuration tool if you are not interested in collecting driver versions for your SQL instances.
+
 ## Running with Minimal Permissions
 
 If you **don't** want to grant sysadmin access, you can assign the permissions listed below instead
