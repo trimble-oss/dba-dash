@@ -26,7 +26,7 @@ CREATE TABLE #results(
     DatabaseName NVARCHAR(128),
     DatabaseID INT,
 	ObjectID BIGINT,
-    object_name NVARCHAR(128),
+    object_name NVARCHAR(257),
     TotalCPU DECIMAL(29, 9),
     AvgCPU DECIMAL(29, 9),
 	cpu_ms_per_sec DECIMAL(29, 9),
