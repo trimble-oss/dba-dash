@@ -57,7 +57,8 @@ jobs:
         with:
           files: "DBADash*.zip"
           tag_name: ${{steps.GetVersion.outputs.BUILD_NUMBER}}
-          generate_release_notes: true,
+          generate_release_notes: true
+          body_path: ReleaseNotes.md
           draft: true
           fail_on_unmatched_files: true
         env:
