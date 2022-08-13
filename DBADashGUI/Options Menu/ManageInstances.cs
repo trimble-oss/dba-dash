@@ -105,7 +105,7 @@ namespace DBADashGUI
                 StringBuilder sbFilter = new StringBuilder();
                 if (txtSearch.Text.Trim().Length > 0)
                 {
-                    sbFilter.AppendFormat("AND ConnectionID LIKE '*{0}*'", txtSearch.Text.Replace("'", "''"));
+                    sbFilter.AppendFormat("AND (ConnectionID LIKE '*{0}*' OR InstanceDisplayName LIKE '*{0}*')", txtSearch.Text.Replace("'", "''"));
                 }
                 if (showActiveToolStripMenuItem.Checked != showDeletedToolStripMenuItem.Checked)
                 {
