@@ -9,9 +9,7 @@ AS (SELECT rsh.destination_database_name AS database_name,
                              ) rnum
     FROM msdb.dbo.restorehistory rsh
         INNER JOIN msdb.dbo.backupset bs ON rsh.backup_set_id = bs.backup_set_id
-        INNER JOIN msdb.dbo.restorefile rf ON rsh.restore_history_id = rf.restore_history_id
         INNER JOIN msdb.dbo.backupmediafamily bmf ON bmf.media_set_id = bs.media_set_id
-        INNER JOIN sys.databases d ON rsh.destination_database_name = d.name
     WHERE rsh.restore_type = 'L'
 	AND rsh.restore_date>=DATEADD(d,-14,GETUTCDATE())
 )
