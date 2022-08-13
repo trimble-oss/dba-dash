@@ -31,10 +31,10 @@
     <ProjectReference Include="..\DBADash\DBADash.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="AWSSDK.Core" Version="3.7.12.10" />
-    <PackageReference Include="AWSSDK.S3" Version="3.7.9.27" />
+    <PackageReference Include="AWSSDK.Core" Version="3.7.12.21" />
+    <PackageReference Include="AWSSDK.S3" Version="3.7.9.39" />
     <PackageReference Include="Azure.Core" Version="1.25.0" />
-    <PackageReference Include="Azure.Identity" Version="1.6.0" />
+    <PackageReference Include="Azure.Identity" Version="1.6.1" />
     <PackageReference Include="Common.Logging" Version="3.4.1" />
     <PackageReference Include="Common.Logging.Core" Version="3.4.1" />
     <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" Version="6.0.0" />
@@ -56,17 +56,17 @@
     <PackageReference Include="Microsoft.Extensions.Options" Version="6.0.0" />
     <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="6.0.0" />
     <PackageReference Include="Microsoft.Extensions.Primitives" Version="6.0.0" />
-    <PackageReference Include="Microsoft.Identity.Client" Version="4.45.0" />
-    <PackageReference Include="Microsoft.Identity.Client.Extensions.Msal" Version="2.22.0" />
-    <PackageReference Include="Microsoft.IdentityModel.JsonWebTokens" Version="6.21.0" />
-    <PackageReference Include="Microsoft.IdentityModel.Logging" Version="6.21.0" />
-    <PackageReference Include="Microsoft.IdentityModel.Protocols" Version="6.21.0" />
-    <PackageReference Include="Microsoft.IdentityModel.Protocols.OpenIdConnect" Version="6.21.0" />
-    <PackageReference Include="Microsoft.IdentityModel.Tokens" Version="6.21.0" />
+    <PackageReference Include="Microsoft.Identity.Client" Version="4.46.0" />
+    <PackageReference Include="Microsoft.Identity.Client.Extensions.Msal" Version="2.23.0" />
+    <PackageReference Include="Microsoft.IdentityModel.JsonWebTokens" Version="6.22.0" />
+    <PackageReference Include="Microsoft.IdentityModel.Logging" Version="6.22.0" />
+    <PackageReference Include="Microsoft.IdentityModel.Protocols" Version="6.22.0" />
+    <PackageReference Include="Microsoft.IdentityModel.Protocols.OpenIdConnect" Version="6.22.0" />
+    <PackageReference Include="Microsoft.IdentityModel.Tokens" Version="6.22.0" />
     <PackageReference Include="Microsoft.SqlServer.Assessment" Version="1.1.9" />
     <PackageReference Include="Microsoft.SqlServer.Assessment.Authoring" Version="1.1.0" />
-    <PackageReference Include="Microsoft.SqlServer.Management.SqlParser" Version="160.22506.0" />
-    <PackageReference Include="Microsoft.SqlServer.SqlManagementObjects" Version="161.47021.0" />
+    <PackageReference Include="Microsoft.SqlServer.Management.SqlParser" Version="160.22515.0" />
+    <PackageReference Include="Microsoft.SqlServer.SqlManagementObjects" Version="161.47027.0" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
     <PackageReference Include="Polly" Version="7.2.3" />
     <PackageReference Include="Quartz" Version="3.4.0" />
@@ -85,7 +85,7 @@
     <PackageReference Include="System.Data.Common" Version="4.3.0" />
     <PackageReference Include="System.Data.DataSetExtensions" Version="4.5.0" />
     <PackageReference Include="System.Diagnostics.DiagnosticSource" Version="6.0.0" />
-    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="6.21.0" />
+    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="6.22.0" />
     <PackageReference Include="System.IO" Version="4.3.0" />
     <PackageReference Include="System.Memory" Version="4.5.5" />
     <PackageReference Include="System.Memory.Data" Version="6.0.0" />
