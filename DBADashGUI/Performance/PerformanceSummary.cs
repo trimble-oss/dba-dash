@@ -432,7 +432,11 @@ namespace DBADashGUI.Performance
 
         private void LoadPersistedColumnLayout(List<KeyValuePair<string,PersistedColumnLayout>> savedCols)
         {
-            foreach(DataGridViewColumn col in dgv.Columns)
+            if (savedCols == null)
+            {
+                return;
+            }
+            foreach (DataGridViewColumn col in dgv.Columns)
             {
                 if (savedCols.Where(savedCol => savedCol.Key == col.Name).Count() == 1)
                 {
