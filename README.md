@@ -39,7 +39,8 @@ DBA Dash is a tool for SQL Server DBAs to assist with daily checks, performance 
 - Account to use for agent.  Review the [security doc](Docs/Security.md) for required permissions. 
 - [.NET Desktop Runtime 6](https://dotnet.microsoft.com/en-us/download/dotnet/6.0) is used by DBA Dash.  You will be prompted to install the .NET runtime version 6 if it's not already installed.
 
-Note: It's possible to run as a console app under your own user account for testing purposes.
+> **Note** 
+> It's possible to run as a console app under your own user account for testing purposes.
 
 ## Installation
 
@@ -77,7 +78,7 @@ Start-Process DBADashServiceConfigTool.exe
 - Click the "Source" tab.
 - Click the button to the right of the "Source" textbox to connect to the SQL Instance you want to monitor.  
  *Alternatively, the connection string can be entered manually.* 
- *Note: Connection strings are encrypted to avoid storing them in plain text but it is recommended to use Windows authentication - the encryption should be considered as obfuscation.*
+> **Note**: Connection strings are encrypted to avoid storing them in plain text but it is recommended to use Windows authentication - the encryption should be considered as obfuscation.
 - Review the "Extended Events" and "Other" tab for additional source configuration options.
 - Click "Add/Update" to add the connection.  Repeat as necessary to add the other SQL Instances you want to monitor.  
  *Tip: You can add a connection string (Or server name list) per line in the source textbox to bulk add connections.*
@@ -90,8 +91,10 @@ Start-Process DBADashServiceConfigTool.exe
  *Use the "View Service Log* button to see what the service is doing.  Click the "Refresh" button to update. * 
 - Installation is now complete.  You can run the "DBADash.exe" application to get started using DBA Dash.  
 
-**Note:**
-More advanced service configuration is possible.  e.g. A remote agent can be configured to write to a S3 bucket and another agent that connects to your repository database can use the S3 bucket as a source instead of a SQL connection string.  
+> **Note**
+More advanced service configuration is possible.  e.g. A remote agent can be configured to write to a S3 bucket.  Another agent can read from that S3 bucket as a source connection to import the data to your DBA Dash repository. This allows you to collect data from SQL Instances where there is no direct connectivity to the repository database.
+
+> **Note**
 There are PowerShell scripts available to assist with automating the config file.  `Set-DBADashDestination,Add-DBADashSource,Remove-DBADashSource`
 The release also has a GUI Only option which you can use to distribute the front-end to users of DBA Dash.  The front-end can also be run from a network share.
 
