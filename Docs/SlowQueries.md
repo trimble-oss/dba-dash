@@ -6,9 +6,11 @@ Slow query capture uses an extended event session to capture queries (batch_comp
 
 Slow query capture is disabled by default as it will add a small amount of overhead.  Also, you might want to tweak the thresholds for your server.  If you enable slow query capture, the associated table in the repository database could grow quite large depending on the activity on your monitored instances, the thresholds used and the data retention settings. That said, the data collected is very useful and can help troubleshoot performance issues.  The collection uses extended events and the overhead of the collection should still be very small.  
 
-Note: **Please ensure your SQL instance is patched to a recent CU**.  There have been some [issues](https://support.microsoft.com/en-us/topic/kb4051359-fix-sql-server-runs-out-of-memory-when-table-valued-parameters-are-captured-in-extended-events-sessions-in-sql-server-2016-even-if-collecting-statement-or-data-stream-isn-t-enabled-a3639efa-0618-82a8-f6b1-8cdcba29ce6d) with the OBJECTSTORE_LBSS memory clerk using a lot of space on older patch levels when using extended events.  If you are on a recent patch level it's unlikely that slow query capture will have any significant impact.  
+> **Note**
+>  **Please ensure your SQL instance is patched to a recent CU**.  There have been some [issues](https://support.microsoft.com/en-us/topic/kb4051359-fix-sql-server-runs-out-of-memory-when-table-valued-parameters-are-captured-in-extended-events-sessions-in-sql-server-2016-even-if-collecting-statement-or-data-stream-isn-t-enabled-a3639efa-0618-82a8-f6b1-8cdcba29ce6d) with the OBJECTSTORE_LBSS memory clerk using a lot of space on older patch levels when using extended events.  If you are on a recent patch level it's unlikely that slow query capture will have any significant impact.  
 
-Note: The Memory tab in DBA Dash can be used to track memory clerk usage over time which can help with the diagnosis of memory clerk issues.
+> **Note**
+>  The Memory tab in DBA Dash can be used to track memory clerk usage over time which can help with the diagnosis of memory clerk issues.
 
 ## Configuring
 
