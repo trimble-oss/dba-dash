@@ -2,7 +2,8 @@
 ## Notes
 Data collection runs on a schedule by the agent which is listed below. Collections will also run on service start.  If you need to refresh data prior to the scheduled collection, the only only way to do this is to restart the DBA Dash service. 
 
-*The refresh button in the GUI will refresh the data from the repository that has already been collected from the agent.  The agent collects data from your SQL Server instances.  The GUI tool only is just used to report on data from the repository database - it doesn't connect to your SQL instances directly.  The GUI tool is packaged with the agent but can also be deployed separately.*
+> **Note**
+> The refresh button in the GUI will refresh the data from the repository that has already been collected from the agent.  The agent collects data from your SQL Server instances.  The GUI tool only is just used to report on data from the repository database - it doesn't connect to your SQL instances directly.  The GUI tool is packaged with the agent but can also be deployed separately.*
 
 ## Schedule
 ### Every 1min
@@ -125,8 +126,8 @@ There is also the option to configure the collection to run on service start.  R
 
 If you configure the schedule in the options tab it will apply to all the monitored SQL instances for that agent.  If you want to adjust the schedule for a specific instance, click the "Source" tab.  In the "Existing Connections" grid, click the "Schedule" link to edit the schedule for a specific instance.  Any collections you don't override the schedule for will be inherited from the agent level configuration described earlier or from the built in application default values.  
 
-Note:
-_Collections that share the same schedule will be collected together.  For example, CPU, performance counters, waits etc might all share the same 1min collection schedule.  Every 1min, a job will be triggered to collect this data (serially) rather than separate triggers firing at the same time for each collection.  A separate job is used for each monitored SQL instance and each schedule._
+> **Note**
+> Collections that share the same schedule will be collected together.  For example, CPU, performance counters, waits etc might all share the same 1min collection schedule.  Every 1min, a job will be triggered to collect this data (serially) rather than separate triggers firing at the same time for each collection.  A separate job is used for each monitored SQL instance and each schedule.
 
 The schedule data is saved in the ServiceConfig.json for any collections that you have overridden from the default values. The application defaults are configured in [this source file](../DBADash/CollectionSchedule.cs).
 
@@ -156,7 +157,7 @@ Schedules can be configured in DBA Dash using cron expressions or you can enter 
 
 Cron expressions might seem cryptic but they provide a lot of flexibility for scheduling.  DBA Dash uses [Quartz.NET](https://www.quartz-scheduler.net/) for scheduling which provides some [good documentation](https://www.quartz-scheduler.net/documentation/quartz-3.x/tutorial/crontriggers.html#example-cron-expressions) on cron expressions.  The java version of Quartz also has a good [cron trigger tutorial](http://www.quartz-scheduler.org/documentation/quartz-2.3.0/tutorials/crontrigger.html). Or you can learn more on the [wiki page](https://en.wikipedia.org/wiki/Cron).  There are also some useful online cron expression generators if you need a complex schedule but don't have time to learn the syntax.
 
-Tip: DBA Dash has a "Schedule Description" column that you can use to validate your cron expression.
+> **Note**: DBA Dash has a "Schedule Description" column that you can use to validate your cron expression.
 ### Cron Generators
 
 * [freeformatter.com](https://www.freeformatter.com/cron-expression-generator-quartz.html#crongenerator)
