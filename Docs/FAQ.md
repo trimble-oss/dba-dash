@@ -65,7 +65,8 @@ Click the GitHub "Watch" button at the top of this page.  A drop down will appea
 
 The mark deleted is a soft delete operation that will hide the instance from display.  It's possible to click "Restore" to undo this operation.  If you want to remove the instance completely, this is a more resource intensive operation. You can complete this operation in SSMS:
 
-Note: You must wait at least 24hrs after stopping the collection for an instance before you can perform a hard delete.
+> **Note**
+>  You must wait at least 24hrs after stopping the collection for an instance before you can perform a hard delete.
 
 ```SQL
 /*  Find InstanceID:
