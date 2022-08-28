@@ -29,6 +29,13 @@
         private void InitializeComponent()
         {
             this.dgv = new System.Windows.Forms.DataGridView();
+            this.splitContainer1 = new System.Windows.Forms.SplitContainer();
+            this.configuration1 = new DBADashGUI.Changes.Configuration();
+            this.toolStrip1 = new System.Windows.Forms.ToolStrip();
+            this.toolStripLabel1 = new System.Windows.Forms.ToolStripLabel();
+            this.tsRefresh = new System.Windows.Forms.ToolStripButton();
+            this.tsCopy = new System.Windows.Forms.ToolStripButton();
+            this.tsHistoryExcel = new System.Windows.Forms.ToolStripButton();
             this.Instance = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.colName = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Description = new System.Windows.Forms.DataGridViewTextBoxColumn();
@@ -42,14 +49,7 @@
             this.is_advanced = new System.Windows.Forms.DataGridViewCheckBoxColumn();
             this.default_value = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Minimum = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.Maximum = new System.Windows.Forms.DataGridViewCheckBoxColumn();
-            this.splitContainer1 = new System.Windows.Forms.SplitContainer();
-            this.configuration1 = new DBADashGUI.Changes.Configuration();
-            this.toolStrip1 = new System.Windows.Forms.ToolStrip();
-            this.toolStripLabel1 = new System.Windows.Forms.ToolStripLabel();
-            this.tsRefresh = new System.Windows.Forms.ToolStripButton();
-            this.tsCopy = new System.Windows.Forms.ToolStripButton();
-            this.tsHistoryExcel = new System.Windows.Forms.ToolStripButton();
+            this.Maximum = new System.Windows.Forms.DataGridViewTextBoxColumn();
             ((System.ComponentModel.ISupportInitialize)(this.dgv)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
@@ -88,6 +88,89 @@
             this.dgv.RowHeadersWidth = 51;
             this.dgv.Size = new System.Drawing.Size(1678, 488);
             this.dgv.TabIndex = 0;
+            // 
+            // splitContainer1
+            // 
+            this.splitContainer1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.splitContainer1.Location = new System.Drawing.Point(0, 0);
+            this.splitContainer1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            this.splitContainer1.Name = "splitContainer1";
+            this.splitContainer1.Orientation = System.Windows.Forms.Orientation.Horizontal;
+            // 
+            // splitContainer1.Panel1
+            // 
+            this.splitContainer1.Panel1.Controls.Add(this.configuration1);
+            // 
+            // splitContainer1.Panel2
+            // 
+            this.splitContainer1.Panel2.Controls.Add(this.dgv);
+            this.splitContainer1.Panel2.Controls.Add(this.toolStrip1);
+            this.splitContainer1.Size = new System.Drawing.Size(1678, 1040);
+            this.splitContainer1.SplitterDistance = 520;
+            this.splitContainer1.SplitterWidth = 5;
+            this.splitContainer1.TabIndex = 2;
+            // 
+            // configuration1
+            // 
+            this.configuration1.BackColor = System.Drawing.Color.White;
+            this.configuration1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.configuration1.Location = new System.Drawing.Point(0, 0);
+            this.configuration1.Margin = new System.Windows.Forms.Padding(3, 5, 3, 5);
+            this.configuration1.Name = "configuration1";
+            this.configuration1.Size = new System.Drawing.Size(1678, 520);
+            this.configuration1.TabIndex = 1;
+            // 
+            // toolStrip1
+            // 
+            this.toolStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
+            this.toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.toolStripLabel1,
+            this.tsRefresh,
+            this.tsCopy,
+            this.tsHistoryExcel});
+            this.toolStrip1.Location = new System.Drawing.Point(0, 0);
+            this.toolStrip1.Name = "toolStrip1";
+            this.toolStrip1.Size = new System.Drawing.Size(1678, 27);
+            this.toolStrip1.TabIndex = 1;
+            this.toolStrip1.Text = "toolStrip1";
+            // 
+            // toolStripLabel1
+            // 
+            this.toolStripLabel1.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
+            this.toolStripLabel1.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            this.toolStripLabel1.Name = "toolStripLabel1";
+            this.toolStripLabel1.Size = new System.Drawing.Size(192, 24);
+            this.toolStripLabel1.Text = "Configuration Change Log";
+            // 
+            // tsRefresh
+            // 
+            this.tsRefresh.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.tsRefresh.Image = global::DBADashGUI.Properties.Resources._112_RefreshArrow_Green_16x16_72;
+            this.tsRefresh.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tsRefresh.Name = "tsRefresh";
+            this.tsRefresh.Size = new System.Drawing.Size(29, 24);
+            this.tsRefresh.Text = "Refresh";
+            this.tsRefresh.Click += new System.EventHandler(this.tsRefresh_Click);
+            // 
+            // tsCopy
+            // 
+            this.tsCopy.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.tsCopy.Image = global::DBADashGUI.Properties.Resources.ASX_Copy_blue_16x;
+            this.tsCopy.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tsCopy.Name = "tsCopy";
+            this.tsCopy.Size = new System.Drawing.Size(29, 24);
+            this.tsCopy.Text = "Copy";
+            this.tsCopy.Click += new System.EventHandler(this.tsCopy_Click);
+            // 
+            // tsHistoryExcel
+            // 
+            this.tsHistoryExcel.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.tsHistoryExcel.Image = global::DBADashGUI.Properties.Resources.excel16x16;
+            this.tsHistoryExcel.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tsHistoryExcel.Name = "tsHistoryExcel";
+            this.tsHistoryExcel.Size = new System.Drawing.Size(29, 24);
+            this.tsHistoryExcel.Text = "Excel";
+            this.tsHistoryExcel.Click += new System.EventHandler(this.tsHistoryExcel_Click);
             // 
             // Instance
             // 
@@ -217,90 +300,9 @@
             this.Maximum.MinimumWidth = 6;
             this.Maximum.Name = "Maximum";
             this.Maximum.ReadOnly = true;
+            this.Maximum.Resizable = System.Windows.Forms.DataGridViewTriState.True;
+            this.Maximum.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
             this.Maximum.Width = 72;
-            // 
-            // splitContainer1
-            // 
-            this.splitContainer1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.splitContainer1.Location = new System.Drawing.Point(0, 0);
-            this.splitContainer1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.splitContainer1.Name = "splitContainer1";
-            this.splitContainer1.Orientation = System.Windows.Forms.Orientation.Horizontal;
-            // 
-            // splitContainer1.Panel1
-            // 
-            this.splitContainer1.Panel1.Controls.Add(this.configuration1);
-            // 
-            // splitContainer1.Panel2
-            // 
-            this.splitContainer1.Panel2.Controls.Add(this.dgv);
-            this.splitContainer1.Panel2.Controls.Add(this.toolStrip1);
-            this.splitContainer1.Size = new System.Drawing.Size(1678, 1040);
-            this.splitContainer1.SplitterDistance = 520;
-            this.splitContainer1.SplitterWidth = 5;
-            this.splitContainer1.TabIndex = 2;
-            // 
-            // configuration1
-            // 
-            this.configuration1.BackColor = System.Drawing.Color.White;
-            this.configuration1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.configuration1.Location = new System.Drawing.Point(0, 0);
-            this.configuration1.Margin = new System.Windows.Forms.Padding(3, 5, 3, 5);
-            this.configuration1.Name = "configuration1";
-            this.configuration1.Size = new System.Drawing.Size(1678, 520);
-            this.configuration1.TabIndex = 1;
-            // 
-            // toolStrip1
-            // 
-            this.toolStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
-            this.toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.toolStripLabel1,
-            this.tsRefresh,
-            this.tsCopy,
-            this.tsHistoryExcel});
-            this.toolStrip1.Location = new System.Drawing.Point(0, 0);
-            this.toolStrip1.Name = "toolStrip1";
-            this.toolStrip1.Size = new System.Drawing.Size(1678, 27);
-            this.toolStrip1.TabIndex = 1;
-            this.toolStrip1.Text = "toolStrip1";
-            // 
-            // toolStripLabel1
-            // 
-            this.toolStripLabel1.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
-            this.toolStripLabel1.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            this.toolStripLabel1.Name = "toolStripLabel1";
-            this.toolStripLabel1.Size = new System.Drawing.Size(192, 24);
-            this.toolStripLabel1.Text = "Configuration Change Log";
-            // 
-            // tsRefresh
-            // 
-            this.tsRefresh.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.tsRefresh.Image = global::DBADashGUI.Properties.Resources._112_RefreshArrow_Green_16x16_72;
-            this.tsRefresh.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsRefresh.Name = "tsRefresh";
-            this.tsRefresh.Size = new System.Drawing.Size(29, 24);
-            this.tsRefresh.Text = "Refresh";
-            this.tsRefresh.Click += new System.EventHandler(this.tsRefresh_Click);
-            // 
-            // tsCopy
-            // 
-            this.tsCopy.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.tsCopy.Image = global::DBADashGUI.Properties.Resources.ASX_Copy_blue_16x;
-            this.tsCopy.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsCopy.Name = "tsCopy";
-            this.tsCopy.Size = new System.Drawing.Size(29, 24);
-            this.tsCopy.Text = "Copy";
-            this.tsCopy.Click += new System.EventHandler(this.tsCopy_Click);
-            // 
-            // tsHistoryExcel
-            // 
-            this.tsHistoryExcel.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.tsHistoryExcel.Image = global::DBADashGUI.Properties.Resources.excel16x16;
-            this.tsHistoryExcel.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsHistoryExcel.Name = "tsHistoryExcel";
-            this.tsHistoryExcel.Size = new System.Drawing.Size(29, 24);
-            this.tsHistoryExcel.Text = "Excel";
-            this.tsHistoryExcel.Click += new System.EventHandler(this.tsHistoryExcel_Click);
             // 
             // ConfigurationHistory
             // 
@@ -331,6 +333,7 @@
         private System.Windows.Forms.ToolStripLabel toolStripLabel1;
         private System.Windows.Forms.ToolStripButton tsRefresh;
         private System.Windows.Forms.ToolStripButton tsCopy;
+        private System.Windows.Forms.ToolStripButton tsHistoryExcel;
         private System.Windows.Forms.DataGridViewTextBoxColumn Instance;
         private System.Windows.Forms.DataGridViewTextBoxColumn colName;
         private System.Windows.Forms.DataGridViewTextBoxColumn Description;
@@ -344,7 +347,6 @@
         private System.Windows.Forms.DataGridViewCheckBoxColumn is_advanced;
         private System.Windows.Forms.DataGridViewTextBoxColumn default_value;
         private System.Windows.Forms.DataGridViewTextBoxColumn Minimum;
-        private System.Windows.Forms.DataGridViewCheckBoxColumn Maximum;
-        private System.Windows.Forms.ToolStripButton tsHistoryExcel;
+        private System.Windows.Forms.DataGridViewTextBoxColumn Maximum;
     }
 }
