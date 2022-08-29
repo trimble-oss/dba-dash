@@ -21,6 +21,7 @@
     family_guid UNIQUEIDENTIFIER NULL,
     compressed_backup_size DECIMAL(20, 0) NULL,
     key_algorithm NVARCHAR(32) NULL,
-    encryptor_type NVARCHAR(32) NULL
+    encryptor_type NVARCHAR(32) NULL,
+    compression_algorithm NVARCHAR(32) NULL
 )
 

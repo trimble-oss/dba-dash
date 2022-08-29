@@ -39,7 +39,10 @@ WITH B AS(
 			CAST(MAX(CASE WHEN B.type ='I' THEN CAST(B.IsCompressed AS INT) ELSE NULL END) AS BIT) as IsDiffCompressed,
 			CAST(MAX(CASE WHEN B.type ='L' THEN CAST(B.IsCompressed AS INT) ELSE NULL END) AS BIT) as IsLogCompressed,	
 			CASE WHEN MIN(CAST(B.is_snapshot AS INT))=1 THEN 'Y' WHEN MAX(CAST(B.is_snapshot AS INT))=1 THEN '(Y)' ELSE 'N' END AS SnapshotBackups,
-			CAST(MAX(CAST(B.IsPartnerBackup AS INT)) AS BIT) AS IsPartnerBackup
+			CAST(MAX(CAST(B.IsPartnerBackup AS INT)) AS BIT) AS IsPartnerBackup,
+			MAX(CASE WHEN B.type ='D' THEN B.compression_algorithm ELSE NULL END) as FullCompressionAlgorithm,
+			MAX(CASE WHEN B.type ='I' THEN B.compression_algorithm ELSE NULL END) as DiffCompressionAlgorithm,
+			MAX(CASE WHEN B.type ='L' THEN B.compression_algorithm ELSE NULL END) as LogCompressionAlgorithm	
 	FROM dbo.LastBackup B
 	GROUP BY B.DatabaseID
 )
@@ -112,7 +115,10 @@ SELECT I.InstanceID,
 	B.IsPartnerBackup,
 	f.FullBackupExcludedReason,
 	f.DiffBackupExcludedReason,
-	f.LogBackupExcludedReason
+	f.LogBackupExcludedReason,
+	B.FullCompressionAlgorithm,
+	B.DiffCompressionAlgorithm,
+	B.LogCompressionAlgorithm	
 FROM dbo.Databases d 
 JOIN dbo.Instances I ON d.InstanceID = I.InstanceID
 JOIN dbo.CollectionDatesStatus SSD ON SSD.InstanceID = I.InstanceID AND SSD.Reference='Backups'
