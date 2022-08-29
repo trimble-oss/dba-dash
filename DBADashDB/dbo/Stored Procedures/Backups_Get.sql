@@ -108,7 +108,10 @@ SELECT	BS.InstanceID,
 		BS.IsPartnerBackup,
 		BS.FullBackupExcludedReason,
 		BS.DiffBackupExcludedReason,
-		BS.LogBackupExcludedReason
+		BS.LogBackupExcludedReason,
+		BS.FullCompressionAlgorithm,
+		BS.DiffCompressionAlgorithm,
+		BS.LogCompressionAlgorithm	
 FROM dbo.BackupStatus BS
 WHERE EXISTS(SELECT 1 FROM @Instances I WHERE I.InstanceID = BS.InstanceID)
 AND EXISTS(SELECT 1 FROM BackupStatuses s WHERE BS.BackupStatus=s.BackupStatus)

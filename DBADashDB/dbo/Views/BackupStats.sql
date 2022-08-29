@@ -37,7 +37,8 @@ SELECT 		B.DatabaseID,
 			B.backup_size/POWER(1024.0,3) AS BackupSizeGB,
 			B.compressed_backup_size/POWER(1024.0,3) AS BackupSizeCompressedGB,
 			1.0-((B.compressed_backup_size*1.0)/B.backup_size) AS CompressionSavingPct,
-			CASE WHEN B.encryptor_type IS NULL THEN CAST(0 AS BIT) ELSE CAST(1 AS BIT) END AS IsEncrypted
+			CASE WHEN B.encryptor_type IS NULL THEN CAST(0 AS BIT) ELSE CAST(1 AS BIT) END AS IsEncrypted,
+            B.compression_algorithm
 FROM dbo.Backups B
 OUTER APPLY (SELECT DATEADD(mi,ISNULL(NULLIF(-B.time_zone,127)*15,0),B.backup_start_date) AS backup_start_date_utc,
 				DATEADD(mi,ISNULL(NULLIF(-B.time_zone,127)*15,0),B.backup_finish_date) AS backup_finish_date_utc,

@@ -137,7 +137,8 @@ namespace DBADashGUI.Backups
                     new DataGridViewCheckBoxColumn() { HeaderText = "Force Offline", DataPropertyName = "is_force_offline" },
                     new DataGridViewCheckBoxColumn() { HeaderText = "Single User", DataPropertyName = "is_single_user" },
                     new DataGridViewTextBoxColumn() { HeaderText = "Key Algorythm", DataPropertyName = "key_algorithm" },
-                    new DataGridViewTextBoxColumn() { HeaderText = "Encryptor_Type", DataPropertyName = "encryptor_type" }
+                    new DataGridViewTextBoxColumn() { HeaderText = "Encryptor_Type", DataPropertyName = "encryptor_type" },
+                    new DataGridViewTextBoxColumn() { HeaderText = "Compression Algorithm", DataPropertyName = "compression_algorithm" }                  
                 );
 
                 dgvBackups.DataSource = dtBackups;
@@ -209,11 +210,22 @@ namespace DBADashGUI.Backups
                     new DataGridViewTextBoxColumn() { HeaderText = "Diff Backup Size (Compressed) (GB)", DataPropertyName = "DiffBackupSizeCompressedGB", DefaultCellStyle = new DataGridViewCellStyle() { Format = "N1" } } ,
                     new DataGridViewTextBoxColumn() { HeaderText = "Diff Compression Saving %", DataPropertyName = "DiffCompressionSavingPct", DefaultCellStyle = new DataGridViewCellStyle() { Format = "P1" } },
                     new DataGridViewTextBoxColumn() { HeaderText = "Diff Backup Write MB/sec", DataPropertyName = "DiffBackupWriteMBsec", DefaultCellStyle = new DataGridViewCellStyle() { Format = "N1" } },
-                    new DataGridViewTextBoxColumn() { HeaderText = "Checksums", DataPropertyName = "Checksums" },
-                    new DataGridViewTextBoxColumn() { HeaderText = "Is Compressed", DataPropertyName = "IsCompressed" },
-                    new DataGridViewTextBoxColumn() { HeaderText = "Password Protected", DataPropertyName = "PasswordProtected" },
-                    new DataGridViewTextBoxColumn() { HeaderText = "Encrypted", DataPropertyName = "IsEncrypted" },
+                    new DataGridViewCheckBoxColumn { HeaderText = "Full Checksum", DataPropertyName = "IsFullChecksum" },
+                    new DataGridViewCheckBoxColumn { HeaderText = "Diff Checksum", DataPropertyName = "IsDiffChecksum" },
+                    new DataGridViewCheckBoxColumn { HeaderText = "Log Checksum", DataPropertyName = "IsLogChecksum" },
+                    new DataGridViewCheckBoxColumn() { HeaderText = "Full Compressed", DataPropertyName = "IsFullCompressed" },
+                    new DataGridViewCheckBoxColumn() { HeaderText = "Diff Compressed", DataPropertyName = "IsDiffCompressed" },
+                    new DataGridViewCheckBoxColumn() { HeaderText = "Log Compressed", DataPropertyName = "IsLogCompressed" },
+                    new DataGridViewCheckBoxColumn() { HeaderText = "Full Password Protected", DataPropertyName = "IsFullPasswordProtected" },
+                    new DataGridViewCheckBoxColumn() { HeaderText = "Diff Password Protected", DataPropertyName = "IsDiffPasswordProtected" },
+                    new DataGridViewCheckBoxColumn() { HeaderText = "Log Password Protected", DataPropertyName = "IsLogPasswordProtected" },
+                    new DataGridViewCheckBoxColumn() { HeaderText = "Full Encrypted", DataPropertyName = "IsFullEncrypted" },
+                    new DataGridViewCheckBoxColumn() { HeaderText = "Diff Encrypted", DataPropertyName = "IsDiffEncrypted" },
+                    new DataGridViewCheckBoxColumn() { HeaderText = "Log Encrypted", DataPropertyName = "IsLogEncrypted" },
                     new DataGridViewTextBoxColumn() { HeaderText = "Snapshot Backup", DataPropertyName = "SnapshotBackups" },
+                    new DataGridViewTextBoxColumn() { HeaderText = "Full Compression Algorithm", DataPropertyName = "FullCompressionAlgorithm" },
+                    new DataGridViewTextBoxColumn() { HeaderText = "Diff Compression Algorithm", DataPropertyName = "DiffCompressionAlgorithm" },
+                    new DataGridViewTextBoxColumn() { HeaderText = "Log Compression Algorithm", DataPropertyName = "LogCompressionAlgorithm" },
                     new DataGridViewLinkColumn() { HeaderText = "Configure", Text = "Configure", UseColumnTextForLinkValue = true, SortMode = DataGridViewColumnSortMode.NotSortable, Name = "Configure", LinkColor = DashColors.LinkColor }
                 );               
                 

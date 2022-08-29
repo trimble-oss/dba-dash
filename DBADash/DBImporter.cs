@@ -161,6 +161,10 @@ namespace DBADash
                     dtBackups.Columns.Add("key_algorithm", typeof(string));
                     dtBackups.Columns.Add("encryptor_type", typeof(string));
                 }
+                if (!dtBackups.Columns.Contains("compression_algorithm"))
+                {
+                    dtBackups.Columns.Add("compression_algorithm", typeof(string));
+                }
             }
             if (data.Tables.Contains("LogRestores"))
             {

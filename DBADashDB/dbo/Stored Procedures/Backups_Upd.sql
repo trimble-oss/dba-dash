@@ -6,7 +6,12 @@
 AS
 SET XACT_ABORT ON
 DECLARE @Ref VARCHAR(30)='Backups'
-IF NOT EXISTS(SELECT 1 FROM dbo.CollectionDates WHERE SnapshotDate>=@SnapshotDate AND InstanceID = @InstanceID AND Reference=@Ref)
+IF NOT EXISTS(	SELECT 1 
+				FROM dbo.CollectionDates 
+				WHERE SnapshotDate>=@SnapshotDate 
+				AND InstanceID = @InstanceID 
+				AND Reference=@Ref
+				)
 BEGIN
 	BEGIN TRAN
 
@@ -44,7 +49,8 @@ BEGIN
 					family_guid,
 					compressed_backup_size,
 					key_algorithm,
-					encryptor_type)
+					encryptor_type,
+					compression_algorithm)
 	SELECT			d.DatabaseID,
 					t.type,
 					t.backup_start_date,
@@ -67,11 +73,12 @@ BEGIN
 					t.family_guid,
 					t.compressed_backup_size,
 					t.key_algorithm,
-					t.encryptor_type 
+					t.encryptor_type,
+					t.compression_algorithm
 	FROM @Backups t 
 	JOIN dbo.Databases d ON d.name = t.database_name
-	AND d.IsActive=1
-	AND d.InstanceID=@InstanceID
+							AND d.IsActive=1
+							AND d.InstanceID=@InstanceID
 
 	EXEC dbo.CollectionDates_Upd @InstanceID = @InstanceID,  
 	                             @Reference = @Ref,

@@ -22,6 +22,7 @@
     compressed_backup_size DECIMAL(20, 0) NULL,
     key_algorithm NVARCHAR(32) NULL,
     encryptor_type NVARCHAR(32) NULL,
+    compression_algorithm NVARCHAR(32) NULL,
     CONSTRAINT PK_Backups PRIMARY KEY CLUSTERED (DatabaseID ASC, type ASC),
     CONSTRAINT FK_Backups_Databases FOREIGN KEY (DatabaseID) REFERENCES dbo.Databases (DatabaseID)
 );

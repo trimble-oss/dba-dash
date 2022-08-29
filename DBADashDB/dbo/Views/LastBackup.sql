@@ -56,6 +56,7 @@ LastBackup AS (
 			B.IsEncrypted,
 			CASE WHEN hadr.PartnerDatabaseID IS NULL THEN CAST(0 AS BIT) ELSE CAST(1 AS BIT) END AS IsPartnerBackup,
 			hadr.PartnerDatabaseID,
+            B.compression_algorithm,
 			ROW_NUMBER() OVER(PARTITION BY hadr.DatabaseID,B.type ORDER BY B.backup_start_date_utc DESC) rnum
 	FROM dbo.BackupStats B
 	JOIN hadr ON hadr.BackupDatabaseID = B.DatabaseID
@@ -96,6 +97,7 @@ SELECT B.DatabaseID,
        B.CompressionSavingPct,
 	   B.IsEncrypted,
 	   B.IsPartnerBackup,
-	   B.PartnerDatabaseID
+	   B.PartnerDatabaseID,
+       B.compression_algorithm
 FROM LastBackup B
 WHERE rnum=1
