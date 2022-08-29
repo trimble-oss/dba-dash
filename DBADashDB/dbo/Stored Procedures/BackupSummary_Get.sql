@@ -52,7 +52,10 @@ SELECT InstanceID,
        IsPartnerBackup,
        OldestFull,
        OldestDiff,
-       OldestLog
+       OldestLog,
+       FullCompressionAlgorithms,
+       DiffCompressionAlgorithms,
+       LogCompressionAlgorithms
 FROM dbo.BackupSummary B
 WHERE EXISTS(SELECT 1 
 			FROM @InstanceIDs T 

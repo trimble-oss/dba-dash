@@ -52,7 +52,30 @@ SELECT BS.InstanceID,
 	CAST(MAX(CAST(BS.IsPartnerBackup AS INT)) AS BIT) as IsPartnerBackup,
 	MIN(CASE WHEN BS.FullBackupExcludedReason IS NULL THEN BS.LastFull ELSE NULL END) as OldestFull,
 	MIN(CASE WHEN BS.DiffBackupExcludedReason IS NULL THEN BS.LastDiff ELSE NULL END) as OldestDiff,
-	MIN(CASE WHEN BS.LogBackupExcludedReason IS NULL THEN BS.LastLog ELSE NULL END) as OldestLog
+	MIN(CASE WHEN BS.LogBackupExcludedReason IS NULL THEN BS.LastLog ELSE NULL END) as OldestLog,
+	STUFF(
+			(SELECT ', ' + ISNULL(BSA.FullCompressionAlgorithm,'NULL') + '(' + CAST(COUNT(*) AS NVARCHAR(MAX)) + ')' 
+			FROM dbo.BackupStatus BSA
+			WHERE BSA.InstanceID=BS.InstanceID
+			AND BSA.FullBackupExcludedReason IS NULL 
+			GROUP BY BSA.FullCompressionAlgorithm
+			FOR XML PATH(''),TYPE).value('.','NVARCHAR(MAX)'),1,2,'') AS FullCompressionAlgorithms,
+	STUFF(
+			(SELECT ', ' + ISNULL(BSA.DiffCompressionAlgorithm,'NULL') + '(' + CAST(COUNT(*) AS NVARCHAR(MAX)) + ')' 
+			FROM dbo.BackupStatus BSA
+			WHERE BSA.InstanceID=BS.InstanceID
+			AND BSA.DiffBackupExcludedReason IS NULL 
+			GROUP BY BSA.DiffCompressionAlgorithm
+			FOR XML PATH(''),TYPE).value('.','NVARCHAR(MAX)')
+		,1,2,'') AS DiffCompressionAlgorithms,
+	STUFF(
+			(SELECT ', ' + ISNULL(BSA.LogCompressionAlgorithm,'NULL') + '(' + CAST(COUNT(*) AS NVARCHAR(MAX)) + ')' 
+			FROM dbo.BackupStatus BSA
+			WHERE BSA.InstanceID=BS.InstanceID
+			AND BSA.LogBackupExcludedReason IS NULL 
+			GROUP BY BSA.LogCompressionAlgorithm
+			FOR XML PATH(''),TYPE).value('.','NVARCHAR(MAX)')
+		,1,2,'') AS LogCompressionAlgorithms
 FROM dbo.BackupStatus BS
 LEFT JOIN dbo.BackupThresholds T ON BS.InstanceID = T.InstanceID AND T.DatabaseID = -1
 GROUP BY BS.InstanceID,
