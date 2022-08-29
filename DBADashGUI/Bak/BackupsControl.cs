@@ -299,6 +299,9 @@ namespace DBADashGUI.Backups
                         new DataGridViewTextBoxColumn() { HeaderText = "Log Encrypted", DataPropertyName = "LogEncrypted" },
                         new DataGridViewTextBoxColumn() { HeaderText = "Snapshot Backups", DataPropertyName = "SnapshotBackups" },
                         new DataGridViewTextBoxColumn() { HeaderText = "DB Level Threshold Config", DataPropertyName = "DBThresholdConfiguration" },
+                        new DataGridViewTextBoxColumn() { HeaderText = "Full Compression Algorithms", DataPropertyName = "FullCompressionAlgorithms" },
+                        new DataGridViewTextBoxColumn() { HeaderText = "Diff Compression Algorithms", DataPropertyName = "DiffCompressionAlgorithms" },
+                        new DataGridViewTextBoxColumn() { HeaderText = "Log Compression Algorithms", DataPropertyName = "LogCompressionAlgorithms" },
                         new DataGridViewLinkColumn() { HeaderText = "Configure", Text = "Configure", UseColumnTextForLinkValue = true, SortMode = DataGridViewColumnSortMode.NotSortable, Name = "Configure", LinkColor = DashColors.LinkColor }
                         );
                 }
