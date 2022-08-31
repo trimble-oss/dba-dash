@@ -1146,7 +1146,8 @@ FROM (VALUES('ObjectExecutionStats',120),
 				('RunningQueries',30),
 				('CollectionErrorLog',14),
 				('MemoryUsage',30),
-				('SessionWaits',30)
+				('SessionWaits',30),
+				('IdentityColumnsHistory',730)
 				) AS t(TableName,RetentionDays)
 WHERE NOT EXISTS(SELECT 1 FROM dbo.DataRetention DR WHERE DR.TableName = T.TableName)
 
@@ -1344,7 +1345,8 @@ FROM
 (-1,'DatabaseQueryStoreOptions',1445,2880),
 (-1,'AzureDBResourceGovernance',125,180),
 (-1,'ResourceGovernorConfiguration',1445,2880),
-(-1,'MemoryUsage',5,10)
+(-1,'MemoryUsage',5,10),
+(-1,'IdentityColumns',10080,20160)
 ) T(InstanceID,Reference,WarningThreshold,CriticalThreshold)
 WHERE NOT EXISTS(SELECT 1 FROM dbo.CollectionDatesThresholds CDT WHERE CDT.InstanceID = T.InstanceID AND CDT.Reference = T.Reference)
 
@@ -1836,6 +1838,24 @@ BEGIN
 	)
 	VALUES(-1, N'{SYSTEM}')
 	SET IDENTITY_INSERT DBADash.Users OFF
+END
+
+IF NOT EXISTS(SELECT 1 
+			FROM dbo.IdentityColumnThresholds
+			WHERE InstanceID=-1
+			AND DatabaseID=-1
+			AND object_name=''
+			)
+BEGIN
+	INSERT INTO dbo.IdentityColumnThresholds
+	(
+		InstanceID,
+		DatabaseID,
+		object_name,
+		PctUsedWarningThreshold,
+		PctUsedCriticalThreshold
+	)
+	VALUES (-1, -1, N'', 0.5, 0.8);
 END
 
 ALTER DATABASE [$(DatabaseName)] SET AUTO_UPDATE_STATISTICS_ASYNC ON WITH NO_WAIT

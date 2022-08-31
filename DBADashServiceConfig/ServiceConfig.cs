@@ -337,6 +337,12 @@ namespace DBADashServiceConfig
                     MessageBox.Show("Error reading ServiceConfig.json: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
+            else
+            {
+                numIdentityCollectionThreshold.Value = DBCollector.DefaultIdentityCollectionThreshold;
+                numIdentityCollectionThreshold.Enabled = false;
+                chkDefaultIdentityCollection.Checked = true;
+            }
             setConnectionCount();
             refreshServiceStatus();
             validateDestination();
@@ -397,6 +403,8 @@ namespace DBADashServiceConfig
             numAzureScanInterval.Value = collectionConfig.ScanForAzureDBsInterval;
             chkAutoUpgradeRepoDB.Checked = collectionConfig.AutoUpdateDatabase;
             chkLogInternalPerfCounters.Checked = collectionConfig.LogInternalPerformanceCounters;
+            chkDefaultIdentityCollection.Checked = !collectionConfig.IdentityCollectionThreshold.HasValue;
+            numIdentityCollectionThreshold.Value = collectionConfig.IdentityCollectionThreshold.HasValue ? collectionConfig.IdentityCollectionThreshold.Value : DBCollector.DefaultIdentityCollectionThreshold;
             updateScanInterval();
             setDgv();
 
@@ -1194,6 +1202,19 @@ namespace DBADashServiceConfig
             {
                 CommonShared.ShowAbout(this);
             }
+        }
+
+        private void chkDefaultIdentityCollection_CheckedChanged(object sender, EventArgs e)
+        {
+            numIdentityCollectionThreshold.Enabled = !chkDefaultIdentityCollection.Checked;
+            collectionConfig.IdentityCollectionThreshold = chkDefaultIdentityCollection.Checked ? null : (int)numIdentityCollectionThreshold.Value;
+            txtJson.Text = collectionConfig.Serialize();
+        }
+
+        private void NumIdentityCollectionThreshold_ValueChanged(object sender, EventArgs e)
+        {
+            collectionConfig.IdentityCollectionThreshold =chkDefaultIdentityCollection.Checked ? null : (int)numIdentityCollectionThreshold.Value;
+            txtJson.Text = collectionConfig.Serialize();
         }
     }
 }

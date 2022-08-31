@@ -679,6 +679,16 @@
     <Build Include="DBADash\Stored Procedures\SavedViews_Get.sql" />
     <Build Include="DBADash\Stored Procedures\SavedViews_Del.sql" />
     <Build Include="Security\ManageGlobalViews.sql" />
+    <Build Include="dbo\Tables\IdentityColumns.sql" />
+    <Build Include="dbo\User Defined Types\IdentityColumns.sql" />
+    <Build Include="dbo\Stored Procedures\IdentityColumns_Upd.sql" />
+    <Build Include="Storage\PF_IdentityColumnsHistory.sql" />
+    <Build Include="Storage\PS_IdentityColumnsHistory.sql" />
+    <Build Include="dbo\Tables\IdentityColumnsHistory.sql" />
+    <Build Include="Switch\Tables\IdentityColumnsHistory.sql" />
+    <Build Include="dbo\Views\IdentityColumnsInfo.sql" />
+    <Build Include="dbo\Stored Procedures\IdentityColumns_Get.sql" />
+    <Build Include="dbo\Tables\IdentityColumThresholds.sql" />
   </ItemGroup>
   <ItemGroup>
     <PostDeploy Include="Script.PostDeployment1.sql" />

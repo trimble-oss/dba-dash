@@ -563,6 +563,16 @@ namespace DBADashGUI
                 }
                 jobStats1.RefreshData();
             }
+            else if (tabs.SelectedTab == tabIdentityColumns)
+            {
+                identityColumns1.InstanceIDs = instanceIDs;
+                identityColumns1.DatabaseID = n.DatabaseID;
+                identityColumns1.IncludeCritical = true;
+                identityColumns1.IncludeWarning = true;
+                identityColumns1.IncludeOK = !(parent.Type == SQLTreeItem.TreeType.DBADashRoot);
+                identityColumns1.IncludeNA = !(parent.Type == SQLTreeItem.TreeType.DBADashRoot);
+                identityColumns1.RefreshData();
+            }
             UpdateTimeFilterVisibility();
         }
 
@@ -881,6 +891,7 @@ namespace DBADashGUI
                 allowedTabs.Add(tabDBSpace);
                 allowedTabs.Add(tabCustomChecks);
                 allowedTabs.Add(tabSnapshotsSummary);
+                allowedTabs.Add(tabIdentityColumns);
             }
             else if(n.Type== SQLTreeItem.TreeType.Tags)
             {
@@ -1163,11 +1174,7 @@ namespace DBADashGUI
 
         private List<int> SelectedTags(ToolStripMenuItem mnu = null)
         {
-            if (mnu == null)
-            {
-                mnu = mnuTags;
-                
-            }
+            mnu ??= mnuTags;
             var selected = new List<int>();
             foreach (ToolStripItem mnuTag in mnu.DropDownItems)
             {

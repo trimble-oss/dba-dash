@@ -103,6 +103,9 @@
             this.label13 = new System.Windows.Forms.Label();
             this.txtSearch = new System.Windows.Forms.TextBox();
             this.tabOther = new System.Windows.Forms.TabPage();
+            this.numIdentityCollectionThreshold = new System.Windows.Forms.NumericUpDown();
+            this.chkDefaultIdentityCollection = new System.Windows.Forms.CheckBox();
+            this.label2 = new System.Windows.Forms.Label();
             this.groupBox4 = new System.Windows.Forms.GroupBox();
             this.chkScanAzureDB = new System.Windows.Forms.CheckBox();
             this.lblHHmm = new System.Windows.Forms.Label();
@@ -138,6 +141,7 @@
             this.groupBox1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dgvConnections)).BeginInit();
             this.tabOther.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.numIdentityCollectionThreshold)).BeginInit();
             this.groupBox4.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.numAzureScanInterval)).BeginInit();
             this.groupBox3.SuspendLayout();
@@ -1040,6 +1044,9 @@
             // 
             // tabOther
             // 
+            this.tabOther.Controls.Add(this.numIdentityCollectionThreshold);
+            this.tabOther.Controls.Add(this.chkDefaultIdentityCollection);
+            this.tabOther.Controls.Add(this.label2);
             this.tabOther.Controls.Add(this.groupBox4);
             this.tabOther.Controls.Add(this.groupBox3);
             this.tabOther.Controls.Add(this.bttnSchedule);
@@ -1053,6 +1060,37 @@
             this.tabOther.Text = "Options";
             this.tabOther.UseVisualStyleBackColor = true;
             // 
+            // numIdentityCollectionThreshold
+            // 
+            this.numIdentityCollectionThreshold.Enabled = false;
+            this.numIdentityCollectionThreshold.Location = new System.Drawing.Point(324, 663);
+            this.numIdentityCollectionThreshold.Name = "numIdentityCollectionThreshold";
+            this.numIdentityCollectionThreshold.Size = new System.Drawing.Size(79, 27);
+            this.numIdentityCollectionThreshold.TabIndex = 34;
+            this.numIdentityCollectionThreshold.ValueChanged += new System.EventHandler(this.NumIdentityCollectionThreshold_ValueChanged);
+            // 
+            // chkDefaultIdentityCollection
+            // 
+            this.chkDefaultIdentityCollection.AutoSize = true;
+            this.chkDefaultIdentityCollection.Checked = true;
+            this.chkDefaultIdentityCollection.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.chkDefaultIdentityCollection.Location = new System.Drawing.Point(409, 666);
+            this.chkDefaultIdentityCollection.Name = "chkDefaultIdentityCollection";
+            this.chkDefaultIdentityCollection.Size = new System.Drawing.Size(80, 24);
+            this.chkDefaultIdentityCollection.TabIndex = 33;
+            this.chkDefaultIdentityCollection.Text = "Default";
+            this.chkDefaultIdentityCollection.UseVisualStyleBackColor = true;
+            this.chkDefaultIdentityCollection.CheckedChanged += new System.EventHandler(this.chkDefaultIdentityCollection_CheckedChanged);
+            // 
+            // label2
+            // 
+            this.label2.AutoSize = true;
+            this.label2.Location = new System.Drawing.Point(40, 666);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(265, 20);
+            this.label2.TabIndex = 32;
+            this.label2.Text = "Identity Collection Threshold (Used %):";
+            // 
             // groupBox4
             // 
             this.groupBox4.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
@@ -1064,11 +1102,11 @@
             this.groupBox4.Controls.Add(this.label10);
             this.groupBox4.Controls.Add(this.label11);
             this.groupBox4.Controls.Add(this.chkScanEvery);
-            this.groupBox4.Location = new System.Drawing.Point(24, 418);
+            this.groupBox4.Location = new System.Drawing.Point(24, 411);
             this.groupBox4.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.groupBox4.Name = "groupBox4";
             this.groupBox4.Padding = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.groupBox4.Size = new System.Drawing.Size(1088, 260);
+            this.groupBox4.Size = new System.Drawing.Size(1088, 233);
             this.groupBox4.TabIndex = 30;
             this.groupBox4.TabStop = false;
             this.groupBox4.Text = "Azure DB";
@@ -1186,7 +1224,7 @@
             // 
             this.label12.Location = new System.Drawing.Point(19, 156);
             this.label12.Name = "label12";
-            this.label12.Size = new System.Drawing.Size(1030, 150);
+            this.label12.Size = new System.Drawing.Size(1030, 129);
             this.label12.TabIndex = 15;
             this.label12.Text = resources.GetString("label12.Text");
             // 
@@ -1300,6 +1338,7 @@
             ((System.ComponentModel.ISupportInitialize)(this.dgvConnections)).EndInit();
             this.tabOther.ResumeLayout(false);
             this.tabOther.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.numIdentityCollectionThreshold)).EndInit();
             this.groupBox4.ResumeLayout(false);
             this.groupBox4.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.numAzureScanInterval)).EndInit();
@@ -1405,6 +1444,9 @@
         private System.Windows.Forms.Button bttnAbout;
         private System.Windows.Forms.Panel panel1;
         private System.Windows.Forms.Label lblServiceWarning;
+        private System.Windows.Forms.NumericUpDown numIdentityCollectionThreshold;
+        private System.Windows.Forms.CheckBox chkDefaultIdentityCollection;
+        private System.Windows.Forms.Label label2;
     }
 }
 

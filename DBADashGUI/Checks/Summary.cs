@@ -36,29 +36,29 @@ namespace DBADashGUI
         private bool focusedView = false;
 
 
-        private void resetStatusCols()
+        private void ResetStatusCols()
         {
            statusColumns= new Dictionary<string, bool> { { "FullBackupStatus", false }, { "LogShippingStatus", false }, { "DiffBackupStatus", false }, { "LogBackupStatus", false }, { "DriveStatus", false },
                                                             { "JobStatus", false }, { "CollectionErrorStatus", false }, { "AGStatus", false }, {"LastGoodCheckDBStatus",false}, {"SnapshotAgeStatus",false },
                                                             {"MemoryDumpStatus",false }, {"UptimeStatus",false }, {"CorruptionStatus",false }, {"AlertStatus",false }, {"FileFreeSpaceStatus",false },
                                                             {"CustomCheckStatus",false }, {"MirroringStatus",false },{"ElasticPoolStorageStatus",false},{"PctMaxSizeStatus",false}, {"QueryStoreStatus",false },
-                                                            {"LogFreeSpaceStatus",false },{"DBMailStatus",false } };
+                                                            {"LogFreeSpaceStatus",false },{"DBMailStatus",false },{"IdentityStatus",false } };
         }
 
 
-        private Task<DataTable> getSummaryAsync()
+        private Task<DataTable> GetSummaryAsync()
         {
             return Task<DataTable>.Factory.StartNew(() =>
             {
                 using (var cn = new SqlConnection(Common.ConnectionString))
                 using (var cmd = new SqlCommand("dbo.Summary_Get", cn) { CommandType = CommandType.StoredProcedure })
+                using (var da = new SqlDataAdapter(cmd))
                 {
                     cn.Open();
 
                     cmd.Parameters.AddWithValue("InstanceIDs", string.Join(",", InstanceIDs));
 
-                    SqlDataAdapter da = new SqlDataAdapter(cmd);
-                    DataTable dt = new DataTable();
+                    DataTable dt = new();
                     da.Fill(dt);
                     return dt;
                 }
@@ -67,7 +67,7 @@ namespace DBADashGUI
 
         public void RefreshDataIfStale()
         {
-            if (DateTime.Now.Subtract(lastRefresh).TotalMinutes > 5 || instanceIDsChanged())
+            if (DateTime.Now.Subtract(lastRefresh).TotalMinutes > 5 || InstanceIDsChanged())
             {
                 RefreshData();
             }
@@ -77,19 +77,19 @@ namespace DBADashGUI
             }
         }
 
-        private bool instanceIDsChanged()
+        private bool InstanceIDsChanged()
         {
-            return !(InstanceIDs.Count == refreshInstanceIDs.Count() && refreshInstanceIDs.All(InstanceIDs.Contains));
+            return !(InstanceIDs.Count == refreshInstanceIDs.Count && refreshInstanceIDs.All(InstanceIDs.Contains));
         }
         
         public void RefreshData()
         {
             dgvSummary.Columns[0].Frozen = Common.FreezeKeyColumn;
-            resetStatusCols();
+            ResetStatusCols();
             refresh1.Visible = true;
             dgvSummary.Visible = false;
             refreshInstanceIDs = new List<int>(InstanceIDs);
-            getSummaryAsync().ContinueWith(task =>
+            GetSummaryAsync().ContinueWith(task =>
             {
                 DataTable dt = task.Result;
                 dgvSummary.AutoGenerateColumns = false;
@@ -148,7 +148,7 @@ namespace DBADashGUI
                         
         }
 
-        private void dgvSummary_RowAdded(object sender, DataGridViewRowsAddedEventArgs e)
+        private void DgvSummary_RowAdded(object sender, DataGridViewRowsAddedEventArgs e)
         {
      
             for (Int32 idx = e.RowIndex; idx < e.RowIndex + e.RowCount; idx += 1)
@@ -290,7 +290,7 @@ namespace DBADashGUI
             }
         }
 
-        private void dgvSummary_ColumnHeaderMouseClick(object sender, DataGridViewCellMouseEventArgs e)
+        private void DgvSummary_ColumnHeaderMouseClick(object sender, DataGridViewCellMouseEventArgs e)
         {
             var sortCol = "";
             if(dgvSummary.Columns[e.ColumnIndex] == FullBackupStatus)
@@ -377,19 +377,19 @@ namespace DBADashGUI
             }
         }
 
-        private void tsRefresh_Click(object sender, EventArgs e)
+        private void TsRefresh_Click(object sender, EventArgs e)
         {
             RefreshData();
         }
 
-        private void tsCopy_Click(object sender, EventArgs e)
+        private void TsCopy_Click(object sender, EventArgs e)
         {
             Common.CopyDataGridViewToClipboard(dgvSummary);
         }
 
         public event EventHandler<InstanceSelectedEventArgs> Instance_Selected;
 
-        private void dgvSummary_CellContentClick(object sender, DataGridViewCellEventArgs e)
+        private void DgvSummary_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
             if (e.RowIndex >= 0)
             {
@@ -480,21 +480,25 @@ namespace DBADashGUI
                         RefreshData();
                     }
                 }
+                else if (e.ColumnIndex == IdentityStatus.Index)
+                {
+                    Instance_Selected(this, new InstanceSelectedEventArgs() { Instance = (string)row["InstanceGroupName"], Tab = "tabIdentityColumns" });
+                }
             }
         }
 
-        private void tsExcel_Click(object sender, EventArgs e)
+        private void TsExcel_Click(object sender, EventArgs e)
         {
             Common.PromptSaveDataGridView(ref dgvSummary);
         }
 
-        private void focusedViewToolStripMenuItem_Click(object sender, EventArgs e)
+        private void FocusedViewToolStripMenuItem_Click(object sender, EventArgs e)
         {
             focusedView = focusedViewToolStripMenuItem.Checked;
             RefreshData();
         }
 
-        private void timer1_Tick(object sender, EventArgs e)
+        private void Timer1_Tick(object sender, EventArgs e)
         {
             if (DateTime.Now.Subtract(lastRefresh).TotalMinutes > 60){
                 lblRefreshTime.ForeColor = DBADashStatusEnum.Critical.GetColor();
@@ -506,19 +510,17 @@ namespace DBADashGUI
             }
         }
 
-        private void configureThresholdsToolStripMenuItem_Click(object sender, EventArgs e)
+        private void ConfigureThresholdsToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            using(var frm = new MemoryDumpThresholdsConfig())
+            using var frm = new MemoryDumpThresholdsConfig();
+            frm.ShowDialog(this);
+            if (frm.DialogResult == DialogResult.OK)
             {
-                frm.ShowDialog(this);
-                if(frm.DialogResult == DialogResult.OK)
-                {
-                    RefreshData();
-                }
+                RefreshData();
             }
         }
 
-        private void acknowledgeDumpsToolStripMenuItem_Click(object sender, EventArgs e)
+        private void AcknowledgeDumpsToolStripMenuItem_Click(object sender, EventArgs e)
         {
             MemoryDumpThresholds.Acknowledge();
             MessageBox.Show("Memory dump acknowledge date updated", "Info", MessageBoxButtons.OK, MessageBoxIcon.Information);

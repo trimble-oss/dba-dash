@@ -60,6 +60,7 @@ namespace DBADashService
                             {CollectionType.OSLoadedModules, new CollectionSchedule(){ Schedule = midnight } },
                             {CollectionType.ResourceGovernorConfiguration, new CollectionSchedule(){ Schedule = midnight } },
                             {CollectionType.DatabaseQueryStoreOptions, new CollectionSchedule(){ Schedule = midnight } },
+                            {CollectionType.IdentityColumns, new CollectionSchedule(){ Schedule = midnight} },
                             {CollectionType.SchemaSnapshot, new CollectionSchedule(){Schedule=elevenPm} }
 
                   };
