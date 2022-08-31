@@ -19,7 +19,7 @@ Data collection runs on a schedule by the agent which is listed below. Collectio
 *Collects data from sys.dm_os_wait_stats*
 - [PerformanceCounters](../DBADash/SQL/SQLPerformanceCounters.sql)
 *Collects data from sys.dm_os_performance_counters.  Collection can be [customized](OSPerformanceCounters.md), adding additional performance counters or collecting your own metrics with custom SQL.*
-- [SlowQueries](../DBADash/SQL/SQLSlowQueries.sql) (Not enabled by default)
+- [SlowQueries](SQLSlowQueries.md) (Not enabled by default)
 *Captures queries that take longer than 1second (or custom) to run using extended events*
 - [JobHistory](../DBADash/SQL/SQLJobHistory.sql)
 *Collects job execution data from msdb.dbo.sysjobhistory (just what's new since the last collection)*
@@ -108,6 +108,8 @@ Add [your own](CustomChecks.md) checks to DBA Dash.
 *Scripts resource governor configuration using SMO*
 - [DatabaseQueryStoreOptions](../DBADash/SQL/SQLDatabaseQueryStoreOptions.sql)
 *Collects data from sys.database_query_store_options for each database*
+- [IdentityColumns](IdentityColumns.md)
+*Collects last identity value and row count for tables with identity values exceeding the capture threshold for % used*
 
 ### Daily @ 11pm
 - [Database Schema Snapshots](../DBADash/SchemaSnapshotDB.cs) (Not enabled by default)

@@ -53,6 +53,7 @@ namespace DBADash
         public static string DBFiles { get { return GetSqlString("DBFiles"); } }
         public static string DBTuningOptions { get { return GetSqlString("DBTuningOptions"); } }
         public static string Drives { get { return GetSqlString("Drives"); } }
+        public static string IdentityColumns { get { return GetSqlString("IdentityColumns"); } }
         public static string Instance { get { return GetSqlString("Instance"); } }
         public static string IOStats { get { return GetSqlString("IOStats"); } }
         public static string JobHistory { get { return GetSqlString("JobHistory"); } }

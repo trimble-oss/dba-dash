@@ -33,7 +33,8 @@ VALUES -- Daily Partitions
 	('Waits_60MIN','m',3),
 	('ObjectExecutionStats_60MIN','m',3),
 	('PerformanceCounters_60MIN','m',3),
-	('JobStats_60MIN','m',3)
+	('JobStats_60MIN','m',3),
+	('IdentityColumnsHistory','m',3)
 
 DECLARE cDaily CURSOR FAST_FORWARD LOCAL FOR 
 			SELECT TableName,

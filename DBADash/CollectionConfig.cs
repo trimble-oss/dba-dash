@@ -64,6 +64,7 @@ namespace DBADash
 
         public bool AutoUpdateDatabase { get; set; } = true;
         public bool LogInternalPerformanceCounters = false;
+        public int? IdentityCollectionThreshold = null;
         public CollectionSchedules CollectionSchedules;
 
         public CollectionSchedules GetSchedules()
@@ -78,7 +79,7 @@ namespace DBADash
             }
         }
 
-        public List<DBADashSource> SourceConnections = new List<DBADashSource>();
+        public List<DBADashSource> SourceConnections = new();
 
         public static new CollectionConfig Deserialize(string json)
         {
@@ -117,7 +118,7 @@ namespace DBADash
 
             if (_secretKey != null && _secretKey.StartsWith("¬=!"))
             {
-                return EncryptText.DecryptString(_secretKey.Substring(3), myString);
+                return EncryptText.DecryptString(_secretKey[3..], myString);
             }
             else
             {
@@ -224,7 +225,7 @@ namespace DBADash
                 var status = DBValidations.VersionStatus(destination.ConnectionString);
                 if(status.VersionStatus == DBValidations.DBVersionStatusEnum.CreateDB)
                 {
-                    validateDestinationVersion(destination);
+                    ValidateDestinationVersion(destination);
                 }
                 Log.Information("DB Version Status: {status}", status.VersionStatus);
             }
@@ -234,7 +235,7 @@ namespace DBADash
             }
         }
 
-        private static void validateDestinationVersion(DBADashConnection destination)
+        private static void ValidateDestinationVersion(DBADashConnection destination)
         {
             var master = destination.MasterConnection();
             var cinfo = master.ConnectionInfo;
@@ -347,12 +348,11 @@ namespace DBADash
         public List<DBADashSource> GetNewAzureDBConnections(DBADashSource masterConnection)
         {
             var newConnections = new List<DBADashSource>();
-            SqlConnection cn = new SqlConnection(masterConnection.SourceConnection.ConnectionString);
-            using (cn)
+            using (var cn = new SqlConnection(masterConnection.SourceConnection.ConnectionString))
+            using (var cmd = new SqlCommand("SELECT name from sys.databases WHERE name <> 'master'", cn))
             {
                 cn.Open();
-                SqlCommand cmd = new SqlCommand("SELECT name from sys.databases WHERE name <> 'master'", cn);
-                var rdr = cmd.ExecuteReader();
+                using var rdr = cmd.ExecuteReader();
                 var builder = new SqlConnectionStringBuilder(masterConnection.SourceConnection.ConnectionString);
                 
                 while (rdr.Read())

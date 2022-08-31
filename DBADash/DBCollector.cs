@@ -16,6 +16,7 @@ using System.Runtime.Caching;
 using System.Text;
 using System.Xml;
 using System.Threading.Tasks;
+using System.Configuration;
 
 namespace DBADash
 {
@@ -69,8 +70,10 @@ namespace DBADash
         AzureDBResourceGovernance,
         RunningQueries,
         MemoryUsage,
-        SchemaSnapshot
+        SchemaSnapshot,
+        IdentityColumns
     }
+
 
     public enum HostPlatform
     {
@@ -93,7 +96,7 @@ namespace DBADash
         public Int32 PerformanceCollectionPeriodMins = 60;
         string computerName;
         Int64 editionId;
-        readonly CollectionType[] azureCollectionTypes = new CollectionType[] { CollectionType.SlowQueries, CollectionType.AzureDBElasticPoolResourceStats, CollectionType.AzureDBServiceObjectives, CollectionType.AzureDBResourceStats, CollectionType.CPU, CollectionType.DBFiles, CollectionType.Databases, CollectionType.DBConfig, CollectionType.TraceFlags, CollectionType.ObjectExecutionStats, CollectionType.BlockingSnapshot, CollectionType.IOStats, CollectionType.Waits, CollectionType.ServerProperties, CollectionType.DBTuningOptions, CollectionType.SysConfig, CollectionType.DatabasePrincipals, CollectionType.DatabaseRoleMembers, CollectionType.DatabasePermissions, CollectionType.OSInfo,CollectionType.CustomChecks,CollectionType.PerformanceCounters,CollectionType.VLF, CollectionType.DatabaseQueryStoreOptions, CollectionType.AzureDBResourceGovernance, CollectionType.RunningQueries};
+        readonly CollectionType[] azureCollectionTypes = new CollectionType[] { CollectionType.SlowQueries, CollectionType.AzureDBElasticPoolResourceStats, CollectionType.AzureDBServiceObjectives, CollectionType.AzureDBResourceStats, CollectionType.CPU, CollectionType.DBFiles, CollectionType.Databases, CollectionType.DBConfig, CollectionType.TraceFlags, CollectionType.ObjectExecutionStats, CollectionType.BlockingSnapshot, CollectionType.IOStats, CollectionType.Waits, CollectionType.ServerProperties, CollectionType.DBTuningOptions, CollectionType.SysConfig, CollectionType.DatabasePrincipals, CollectionType.DatabaseRoleMembers, CollectionType.DatabasePermissions, CollectionType.OSInfo,CollectionType.CustomChecks,CollectionType.PerformanceCounters,CollectionType.VLF, CollectionType.DatabaseQueryStoreOptions, CollectionType.AzureDBResourceGovernance, CollectionType.RunningQueries, CollectionType.IdentityColumns};
         readonly CollectionType[] azureOnlyCollectionTypes = new CollectionType[] { CollectionType.AzureDBElasticPoolResourceStats, CollectionType.AzureDBResourceStats, CollectionType.AzureDBServiceObjectives, CollectionType.AzureDBResourceGovernance };
         readonly CollectionType[] azureMasterOnlyCollectionTypes = new CollectionType[] { CollectionType.AzureDBElasticPoolResourceStats };
         public DBADashSource Source;
@@ -112,6 +115,12 @@ namespace DBADash
         private DatabaseEngineEdition engineEdition;
         private DBADashAgent dashAgent;
         public bool IsExtendedEventsNotSupportedException=false;
+
+        public static int DefaultIdentityCollectionThreshold = 5;
+        /// <summary>
+        /// % Used threshold for IdentityColumns collection
+        /// </summary>
+        public int IdentityCollectionThreshold = DefaultIdentityCollectionThreshold;
 
         CacheItemPolicy policy = new CacheItemPolicy
         {
@@ -306,7 +315,7 @@ namespace DBADash
 
         public void GetInstance()
         {
-            var dt = getDT("DBADash", SqlStrings.Instance);
+            var dt = getDT("DBADash", SqlStrings.Instance, CollectionCommandTimeout.DefaultCommandTimeout);
             dt.Columns.Add("AgentVersion", typeof(string));
             dt.Columns.Add("ConnectionID", typeof(string));
             dt.Columns.Add("AgentHostName", typeof(string));
@@ -791,6 +800,10 @@ CROSS APPLY sys.dm_exec_sql_text(H.sql_handle) txt");
             {
                 param = new SqlParameter[] { new SqlParameter("TOP", PerformanceCollectionPeriodMins) };
             }
+            else if (collectionType== CollectionType.IdentityColumns)
+            {
+                param = new SqlParameter[] { new SqlParameter("IdentityCollectionThreshold", IdentityCollectionThreshold) };
+            }
 
             if (collectionType == CollectionType.Drives)
             {
@@ -858,7 +871,7 @@ CROSS APPLY sys.dm_exec_sql_text(H.sql_handle) txt");
             }
             else
             {
-                addDT(collectionTypeString, SqlStrings.GetSqlString(collectionType), param);
+                addDT(collectionTypeString, SqlStrings.GetSqlString(collectionType),collectionType.GetCommandTimeout(),  param);
             }
         }
 
@@ -916,7 +929,7 @@ CROSS APPLY sys.dm_exec_sql_text(H.sql_handle) txt");
                         {
                             SqlDbType = SqlDbType.Xml
                         };
-                        da.SelectCommand.CommandTimeout = 60;
+                        da.SelectCommand.CommandTimeout = CollectionType.PerformanceCounters.GetCommandTimeout();
                         da.SelectCommand.Parameters.Add(pCountersXML);
                         da.Fill(ds);
 
@@ -983,7 +996,7 @@ CROSS APPLY sys.dm_exec_sql_text(H.sql_handle) txt");
                 }
                 using (var cn = new SqlConnection(builder.ConnectionString))
                 {
-                    using (var cmd = new SqlCommand(slowQueriesSQL, cn) { CommandTimeout = 90 })
+                    using (var cmd = new SqlCommand(slowQueriesSQL, cn) { CommandTimeout = CollectionType.SlowQueries.GetCommandTimeout() })
                     {
                         cn.Open();
 
@@ -1022,7 +1035,7 @@ CROSS APPLY sys.dm_exec_sql_text(H.sql_handle) txt");
                     collectComputerSystemWMI();
                     collectOperatingSystemWMI();
                 }
-                addDT("ServerExtraProperties", SqlStrings.ServerExtraProperties);
+                addDT("ServerExtraProperties", SqlStrings.ServerExtraProperties,CollectionType.ServerExtraProperties.GetCommandTimeout());
                 Data.Tables["ServerExtraProperties"].Columns.Add("WindowsCaption");
                 if (manufacturer != "") { Data.Tables["ServerExtraProperties"].Rows[0]["SystemManufacturer"] = manufacturer; }
                 if (model != "") { Data.Tables["ServerExtraProperties"].Rows[0]["SystemProductName"] = model; }
@@ -1036,14 +1049,14 @@ CROSS APPLY sys.dm_exec_sql_text(H.sql_handle) txt");
             }
         }
 
-        public DataTable getDT(string tableName, string SQL, SqlParameter[] param = null)
+        public DataTable getDT(string tableName, string SQL,int commandTimeout, SqlParameter[] param = null)
         {
             using (var cn = new SqlConnection(_connectionString))
             {
                 using (var da = new SqlDataAdapter(SQL,cn)) {
                     cn.Open();
                     DataTable dt = new DataTable();
-                    da.SelectCommand.CommandTimeout = 60;
+                    da.SelectCommand.CommandTimeout = commandTimeout;
                     if (param != null)
                     {
                         da.SelectCommand.Parameters.AddRange(param);
@@ -1056,13 +1069,11 @@ CROSS APPLY sys.dm_exec_sql_text(H.sql_handle) txt");
             }
         }
 
-        public void addDT(string tableName, string sql, SqlParameter[] param = null)
+        public void addDT(string tableName, string sql,int commandTimeout, SqlParameter[] param = null)
         {
             if (!Data.Tables.Contains(tableName))
             {
-
-                Data.Tables.Add(getDT(tableName, sql, param));
-
+                Data.Tables.Add(getDT(tableName, sql,commandTimeout, param));
             }
         }
 
@@ -1079,7 +1090,7 @@ CROSS APPLY sys.dm_exec_sql_text(H.sql_handle) txt");
         {
             try
             {
-                addDT("Drives", SqlStrings.Drives);
+                addDT("Drives", SqlStrings.Drives, CollectionType.Drives.GetCommandTimeout());
             }
             catch (Exception ex)
             {

@@ -169,6 +169,26 @@ QS AS (
 	FROM dbo.DatabaseQueryStoreOptions QS
 	JOIN dbo.Databases D ON QS.DatabaseID = D.DatabaseID
 	GROUP BY D.InstanceID
+),
+Ident AS (
+	/* Get max % used for each instance */
+	SELECT	InstanceID,
+			MIN(NULLIF(IdentityStatus,3)) AS IdentityStatus,
+			MAX(pct_used) AS MaxIdentityPctUsed
+	FROM dbo.IdentityColumnsInfo
+	GROUP BY InstanceID
+	UNION ALL
+	/* Show status 4 (OK) if we have collected data for a instance but we don't have rows in IdentityColumns table.  (No identity columns have hit the collection threshold) */
+	SELECT InstanceID,
+			4 AS IdentityStatus,
+			NULL AS MaxIdentityPctUsed
+	FROM dbo.CollectionDatesStatus CD
+	WHERE Reference='IdentityColumns'
+	AND Status=4
+	AND NOT EXISTS(SELECT 1 
+					FROM dbo.IdentityColumns IC
+					WHERE IC.InstanceID=CD.InstanceID
+					)
 )
 SELECT I.InstanceID,
 	I.Instance,
@@ -236,7 +256,9 @@ SELECT I.InstanceID,
 	ISNULL(F.PctMaxSizeStatus,3) AS PctMaxSizeStatus,
 	ISNULL(QS.QueryStoreStatus,3) AS QueryStoreStatus,
 	CASE I.DBMailStatus WHEN 'STARTED' THEN 4 WHEN 'STOPPED' THEN 1 ELSE 3 END AS DBMailStatus,
-	I.DBMailStatus as DBMailStatusDescription
+	I.DBMailStatus as DBMailStatusDescription,
+	ISNULL(Ident.IdentityStatus,3) AS IdentityStatus,
+	Ident.MaxIdentityPctUsed
 FROM dbo.Instances I 
 LEFT JOIN LS ON I.InstanceID = LS.InstanceID
 LEFT JOIN B ON I.InstanceID = B.InstanceID
@@ -260,6 +282,7 @@ OUTER APPLY(SELECT TOP(1) IUT.WarningThreshold AS UptimeWarningThreshold,
 LEFT JOIN cus ON cus.InstanceID = I.InstanceID
 LEFT JOIN dbm ON dbm.InstanceID = I.InstanceID
 LEFT JOIN QS ON QS.InstanceID = I.InstanceID
+LEFT JOIN Ident ON Ident.InstanceID = I.InstanceID
 WHERE EXISTS(SELECT 1 FROM #Instances t WHERE I.InstanceID = t.InstanceID)
 AND I.IsActive=1
 AND I.EngineEdition<> 5 -- not azure
@@ -315,7 +338,9 @@ SELECT NULL AS InstanceID,
 	ISNULL(MIN(NULLIF(F.PctMaxSizeStatus,3)),3) AS PctMaxSizeStatus,
 	ISNULL(MIN(QS.QueryStoreStatus),3) AS QueryStoreStatus,
 	3 AS DBMailStatus,
-	NULL AS DBMailStatusDescription
+	NULL AS DBMailStatusDescription,
+	ISNULL(MIN(NULLIF(Ident.IdentityStatus,3)),3) IdentityStatus,
+	MAX(Ident.MaxIdentityPctUsed) AS MaxIdentityPctUsed
 FROM dbo.Instances I
 LEFT JOIN errSummary  ON I.InstanceID = errSummary.InstanceID
 LEFT JOIN F ON I.InstanceID = F.InstanceID
@@ -323,6 +348,7 @@ LEFT JOIN SSD ON I.InstanceID = SSD.InstanceID
 LEFT JOIN cus ON cus.InstanceID = I.InstanceID
 LEFT JOIN dbo.AzureDBElasticPoolStorageStatus EPS ON I.InstanceID = EPS.InstanceID
 LEFT JOIN QS ON QS.InstanceID = I.InstanceID
+LEFT JOIN Ident ON Ident.InstanceID = I.InstanceID
 WHERE I.EngineEdition=5 -- azure
 AND EXISTS(SELECT 1 FROM #Instances t WHERE I.InstanceID = t.InstanceID)
 AND I.IsActive=1

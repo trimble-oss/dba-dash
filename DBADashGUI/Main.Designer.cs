@@ -30,8 +30,8 @@
         {
             this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Main));
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle3 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle4 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
             this.TreeViewImageList = new System.Windows.Forms.ImageList(this.components);
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.mnuTags = new System.Windows.Forms.ToolStripMenuItem();
@@ -178,6 +178,8 @@
             this.lblVersion = new System.Windows.Forms.Label();
             this.lblSQLMonitoring = new System.Windows.Forms.Label();
             this.lblDBADash = new System.Windows.Forms.Label();
+            this.tabIdentityColumns = new System.Windows.Forms.TabPage();
+            this.identityColumns1 = new DBADashGUI.Checks.IdentityColumns();
             this.dataGridViewTextBoxColumn1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dataGridViewTextBoxColumn2 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dataGridViewTextBoxColumn3 = new System.Windows.Forms.DataGridViewTextBoxColumn();
@@ -257,6 +259,7 @@
             this.tabMemory.SuspendLayout();
             this.tabJobStats.SuspendLayout();
             this.tabDBADash.SuspendLayout();
+            this.tabIdentityColumns.SuspendLayout();
             this.SuspendLayout();
             // 
             // TreeViewImageList
@@ -410,7 +413,7 @@
             // 
             this.minsToolStripMenuItem2.CheckOnClick = true;
             this.minsToolStripMenuItem2.Name = "minsToolStripMenuItem2";
-            this.minsToolStripMenuItem2.Size = new System.Drawing.Size(224, 28);
+            this.minsToolStripMenuItem2.Size = new System.Drawing.Size(153, 28);
             this.minsToolStripMenuItem2.Tag = "5";
             this.minsToolStripMenuItem2.Text = "5 Mins";
             this.minsToolStripMenuItem2.Click += new System.EventHandler(this.TsTime_Click);
@@ -419,7 +422,7 @@
             // 
             this.minsToolStripMenuItem1.CheckOnClick = true;
             this.minsToolStripMenuItem1.Name = "minsToolStripMenuItem1";
-            this.minsToolStripMenuItem1.Size = new System.Drawing.Size(224, 28);
+            this.minsToolStripMenuItem1.Size = new System.Drawing.Size(153, 28);
             this.minsToolStripMenuItem1.Tag = "10";
             this.minsToolStripMenuItem1.Text = "10 Mins";
             this.minsToolStripMenuItem1.Click += new System.EventHandler(this.TsTime_Click);
@@ -428,7 +431,7 @@
             // 
             this.minsToolStripMenuItem.CheckOnClick = true;
             this.minsToolStripMenuItem.Name = "minsToolStripMenuItem";
-            this.minsToolStripMenuItem.Size = new System.Drawing.Size(224, 28);
+            this.minsToolStripMenuItem.Size = new System.Drawing.Size(153, 28);
             this.minsToolStripMenuItem.Tag = "15";
             this.minsToolStripMenuItem.Text = "15 Mins";
             this.minsToolStripMenuItem.Click += new System.EventHandler(this.TsTime_Click);
@@ -437,7 +440,7 @@
             // 
             this.ts30Min.CheckOnClick = true;
             this.ts30Min.Name = "ts30Min";
-            this.ts30Min.Size = new System.Drawing.Size(224, 28);
+            this.ts30Min.Size = new System.Drawing.Size(153, 28);
             this.ts30Min.Tag = "30";
             this.ts30Min.Text = "30 Mins";
             this.ts30Min.Click += new System.EventHandler(this.TsTime_Click);
@@ -447,7 +450,7 @@
             this.ts1Hr.Checked = true;
             this.ts1Hr.CheckState = System.Windows.Forms.CheckState.Checked;
             this.ts1Hr.Name = "ts1Hr";
-            this.ts1Hr.Size = new System.Drawing.Size(224, 28);
+            this.ts1Hr.Size = new System.Drawing.Size(153, 28);
             this.ts1Hr.Tag = "60";
             this.ts1Hr.Text = "1Hr";
             this.ts1Hr.Click += new System.EventHandler(this.TsTime_Click);
@@ -456,7 +459,7 @@
             // 
             this.ts2Hr.CheckOnClick = true;
             this.ts2Hr.Name = "ts2Hr";
-            this.ts2Hr.Size = new System.Drawing.Size(224, 28);
+            this.ts2Hr.Size = new System.Drawing.Size(153, 28);
             this.ts2Hr.Tag = "120";
             this.ts2Hr.Text = "2Hr";
             this.ts2Hr.Click += new System.EventHandler(this.TsTime_Click);
@@ -465,7 +468,7 @@
             // 
             this.ts3Hr.CheckOnClick = true;
             this.ts3Hr.Name = "ts3Hr";
-            this.ts3Hr.Size = new System.Drawing.Size(224, 28);
+            this.ts3Hr.Size = new System.Drawing.Size(153, 28);
             this.ts3Hr.Tag = "180";
             this.ts3Hr.Text = "3Hr";
             this.ts3Hr.Click += new System.EventHandler(this.TsTime_Click);
@@ -474,7 +477,7 @@
             // 
             this.ts6Hr.CheckOnClick = true;
             this.ts6Hr.Name = "ts6Hr";
-            this.ts6Hr.Size = new System.Drawing.Size(224, 28);
+            this.ts6Hr.Size = new System.Drawing.Size(153, 28);
             this.ts6Hr.Tag = "360";
             this.ts6Hr.Text = "6Hr";
             this.ts6Hr.Click += new System.EventHandler(this.TsTime_Click);
@@ -483,7 +486,7 @@
             // 
             this.ts12Hr.CheckOnClick = true;
             this.ts12Hr.Name = "ts12Hr";
-            this.ts12Hr.Size = new System.Drawing.Size(224, 28);
+            this.ts12Hr.Size = new System.Drawing.Size(153, 28);
             this.ts12Hr.Tag = "720";
             this.ts12Hr.Text = "12Hr";
             this.ts12Hr.Click += new System.EventHandler(this.TsTime_Click);
@@ -491,7 +494,7 @@
             // dayToolStripMenuItem
             // 
             this.dayToolStripMenuItem.Name = "dayToolStripMenuItem";
-            this.dayToolStripMenuItem.Size = new System.Drawing.Size(224, 28);
+            this.dayToolStripMenuItem.Size = new System.Drawing.Size(153, 28);
             this.dayToolStripMenuItem.Tag = "1440";
             this.dayToolStripMenuItem.Text = "1 Day";
             this.dayToolStripMenuItem.Click += new System.EventHandler(this.TsTime_Click);
@@ -499,7 +502,7 @@
             // daysToolStripMenuItem
             // 
             this.daysToolStripMenuItem.Name = "daysToolStripMenuItem";
-            this.daysToolStripMenuItem.Size = new System.Drawing.Size(224, 28);
+            this.daysToolStripMenuItem.Size = new System.Drawing.Size(153, 28);
             this.daysToolStripMenuItem.Tag = "2880";
             this.daysToolStripMenuItem.Text = "2 Days";
             this.daysToolStripMenuItem.Click += new System.EventHandler(this.TsTime_Click);
@@ -507,7 +510,7 @@
             // daysToolStripMenuItem1
             // 
             this.daysToolStripMenuItem1.Name = "daysToolStripMenuItem1";
-            this.daysToolStripMenuItem1.Size = new System.Drawing.Size(224, 28);
+            this.daysToolStripMenuItem1.Size = new System.Drawing.Size(153, 28);
             this.daysToolStripMenuItem1.Tag = "4320";
             this.daysToolStripMenuItem1.Text = "3 Days";
             this.daysToolStripMenuItem1.Click += new System.EventHandler(this.TsTime_Click);
@@ -515,7 +518,7 @@
             // days7ToolStripMenuItem
             // 
             this.days7ToolStripMenuItem.Name = "days7ToolStripMenuItem";
-            this.days7ToolStripMenuItem.Size = new System.Drawing.Size(224, 28);
+            this.days7ToolStripMenuItem.Size = new System.Drawing.Size(153, 28);
             this.days7ToolStripMenuItem.Tag = "10080";
             this.days7ToolStripMenuItem.Text = "7 Days";
             this.days7ToolStripMenuItem.Click += new System.EventHandler(this.TsTime_Click);
@@ -523,7 +526,7 @@
             // days14toolStripMenuItem
             // 
             this.days14toolStripMenuItem.Name = "days14toolStripMenuItem";
-            this.days14toolStripMenuItem.Size = new System.Drawing.Size(224, 28);
+            this.days14toolStripMenuItem.Size = new System.Drawing.Size(153, 28);
             this.days14toolStripMenuItem.Tag = "20160";
             this.days14toolStripMenuItem.Text = "14 Days";
             this.days14toolStripMenuItem.Click += new System.EventHandler(this.TsTime_Click);
@@ -531,7 +534,7 @@
             // days28ToolStripMenuItem
             // 
             this.days28ToolStripMenuItem.Name = "days28ToolStripMenuItem";
-            this.days28ToolStripMenuItem.Size = new System.Drawing.Size(224, 28);
+            this.days28ToolStripMenuItem.Size = new System.Drawing.Size(153, 28);
             this.days28ToolStripMenuItem.Tag = "40320";
             this.days28ToolStripMenuItem.Text = "28 Days";
             this.days28ToolStripMenuItem.Click += new System.EventHandler(this.TsTime_Click);
@@ -539,14 +542,14 @@
             // toolStripSeparator1
             // 
             this.toolStripSeparator1.Name = "toolStripSeparator1";
-            this.toolStripSeparator1.Size = new System.Drawing.Size(221, 6);
+            this.toolStripSeparator1.Size = new System.Drawing.Size(150, 6);
             // 
             // dateToolStripMenuItem
             // 
             this.dateToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.dummyToolStripMenuItem});
             this.dateToolStripMenuItem.Name = "dateToolStripMenuItem";
-            this.dateToolStripMenuItem.Size = new System.Drawing.Size(224, 28);
+            this.dateToolStripMenuItem.Size = new System.Drawing.Size(153, 28);
             this.dateToolStripMenuItem.Tag = "Date";
             this.dateToolStripMenuItem.Text = "Date";
             this.dateToolStripMenuItem.DropDownOpening += new System.EventHandler(this.DateToolStripMenuItem_Opening);
@@ -560,7 +563,7 @@
             // tsCustom
             // 
             this.tsCustom.Name = "tsCustom";
-            this.tsCustom.Size = new System.Drawing.Size(224, 28);
+            this.tsCustom.Size = new System.Drawing.Size(153, 28);
             this.tsCustom.Tag = "-1";
             this.tsCustom.Text = "Custom";
             this.tsCustom.Click += new System.EventHandler(this.TsCustomTime_Click);
@@ -712,6 +715,7 @@
             this.tabs.Controls.Add(this.tabMemory);
             this.tabs.Controls.Add(this.tabJobStats);
             this.tabs.Controls.Add(this.tabDBADash);
+            this.tabs.Controls.Add(this.tabIdentityColumns);
             this.tabs.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tabs.Location = new System.Drawing.Point(0, 0);
             this.tabs.Name = "tabs";
@@ -850,14 +854,14 @@
             this.gvHistory.AllowUserToDeleteRows = false;
             this.gvHistory.AllowUserToOrderColumns = true;
             this.gvHistory.BackgroundColor = System.Drawing.Color.White;
-            dataGridViewCellStyle3.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle3.BackColor = System.Drawing.SystemColors.Control;
-            dataGridViewCellStyle3.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            dataGridViewCellStyle3.ForeColor = System.Drawing.SystemColors.WindowText;
-            dataGridViewCellStyle3.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-            dataGridViewCellStyle3.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-            dataGridViewCellStyle3.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
-            this.gvHistory.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle3;
+            dataGridViewCellStyle1.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle1.BackColor = System.Drawing.SystemColors.Control;
+            dataGridViewCellStyle1.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            dataGridViewCellStyle1.ForeColor = System.Drawing.SystemColors.WindowText;
+            dataGridViewCellStyle1.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle1.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle1.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
+            this.gvHistory.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle1;
             this.gvHistory.ColumnHeadersHeight = 29;
             this.gvHistory.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
             this.ObjectName,
@@ -868,14 +872,14 @@
             this.ObjectDateCreated,
             this.ObjectDateModified,
             this.colCompare});
-            dataGridViewCellStyle4.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle4.BackColor = System.Drawing.SystemColors.Window;
-            dataGridViewCellStyle4.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            dataGridViewCellStyle4.ForeColor = System.Drawing.SystemColors.ControlText;
-            dataGridViewCellStyle4.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-            dataGridViewCellStyle4.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-            dataGridViewCellStyle4.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
-            this.gvHistory.DefaultCellStyle = dataGridViewCellStyle4;
+            dataGridViewCellStyle2.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle2.BackColor = System.Drawing.SystemColors.Window;
+            dataGridViewCellStyle2.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            dataGridViewCellStyle2.ForeColor = System.Drawing.SystemColors.ControlText;
+            dataGridViewCellStyle2.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle2.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle2.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
+            this.gvHistory.DefaultCellStyle = dataGridViewCellStyle2;
             this.gvHistory.Dock = System.Windows.Forms.DockStyle.Fill;
             this.gvHistory.Location = new System.Drawing.Point(0, 25);
             this.gvHistory.MultiSelect = false;
@@ -979,6 +983,7 @@
             // 
             // tags1
             // 
+            this.tags1.AllTags = null;
             this.tags1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tags1.InstanceID = 0;
             this.tags1.InstanceIDs = null;
@@ -1887,6 +1892,28 @@
             this.lblDBADash.Text = "DBA Dash";
             this.lblDBADash.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
+            // tabIdentityColumns
+            // 
+            this.tabIdentityColumns.Controls.Add(this.identityColumns1);
+            this.tabIdentityColumns.Location = new System.Drawing.Point(4, 25);
+            this.tabIdentityColumns.Name = "tabIdentityColumns";
+            this.tabIdentityColumns.Padding = new System.Windows.Forms.Padding(3);
+            this.tabIdentityColumns.Size = new System.Drawing.Size(1631, 1246);
+            this.tabIdentityColumns.TabIndex = 43;
+            this.tabIdentityColumns.Text = "Identity Columns";
+            this.tabIdentityColumns.UseVisualStyleBackColor = true;
+            // 
+            // identityColumns1
+            // 
+            this.identityColumns1.DatabaseID = 0;
+            this.identityColumns1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.identityColumns1.InstanceIDs = null;
+            this.identityColumns1.Location = new System.Drawing.Point(3, 3);
+            this.identityColumns1.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.identityColumns1.Name = "identityColumns1";
+            this.identityColumns1.Size = new System.Drawing.Size(1625, 1240);
+            this.identityColumns1.TabIndex = 0;
+            // 
             // dataGridViewTextBoxColumn1
             // 
             this.dataGridViewTextBoxColumn1.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.DisplayedCells;
@@ -2186,6 +2213,7 @@
             this.tabMemory.ResumeLayout(false);
             this.tabJobStats.ResumeLayout(false);
             this.tabDBADash.ResumeLayout(false);
+            this.tabIdentityColumns.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
@@ -2361,5 +2389,7 @@
         private System.Windows.Forms.ToolStripMenuItem dummyToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem tsTimeFilter;
         private System.Windows.Forms.ToolStripMenuItem tsDayOfWeek;
+        private System.Windows.Forms.TabPage tabIdentityColumns;
+        private Checks.IdentityColumns identityColumns1;
     }
 }

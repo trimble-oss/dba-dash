@@ -91,8 +91,13 @@ namespace DBADashService
                 var collector = new DBCollector(cfg, config.ServiceName)
                 {
                     Job_instance_id = dataMap.GetInt("Job_instance_id"),
-                    IsExtendedEventsNotSupportedException = dataMapExtendedEventsNotSupported
+                    IsExtendedEventsNotSupportedException = dataMapExtendedEventsNotSupported,
+
                 };
+                if (SchedulerServiceConfig.Config.IdentityCollectionThreshold.HasValue)
+                {
+                    collector.IdentityCollectionThreshold = (int)SchedulerServiceConfig.Config.IdentityCollectionThreshold;
+                }
 
                 var jobLastCollected = dataMap.GetDateTime("JobCollectDate");
 

@@ -30,14 +30,15 @@
         {
             this.components = new System.ComponentModel.Container();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle6 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle7 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle8 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle9 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle10 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle3 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle4 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle5 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle6 = new System.Windows.Forms.DataGridViewCellStyle();
             this.dgvSummary = new System.Windows.Forms.DataGridView();
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
             this.tsRefresh = new System.Windows.Forms.ToolStripButton();
@@ -90,6 +91,7 @@
             this.CollectionErrorStatus = new System.Windows.Forms.DataGridViewLinkColumn();
             this.SnapshotAgeStatus = new System.Windows.Forms.DataGridViewLinkColumn();
             this.DBMailStatus = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.IdentityStatus = new System.Windows.Forms.DataGridViewLinkColumn();
             this.UptimeStatus = new System.Windows.Forms.DataGridViewLinkColumn();
             ((System.ComponentModel.ISupportInitialize)(this.dgvSummary)).BeginInit();
             this.toolStrip1.SuspendLayout();
@@ -132,15 +134,16 @@
             this.CollectionErrorStatus,
             this.SnapshotAgeStatus,
             this.DBMailStatus,
+            this.IdentityStatus,
             this.UptimeStatus});
-            dataGridViewCellStyle6.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle6.BackColor = System.Drawing.SystemColors.Window;
-            dataGridViewCellStyle6.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            dataGridViewCellStyle6.ForeColor = System.Drawing.SystemColors.ControlText;
-            dataGridViewCellStyle6.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-            dataGridViewCellStyle6.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-            dataGridViewCellStyle6.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
-            this.dgvSummary.DefaultCellStyle = dataGridViewCellStyle6;
+            dataGridViewCellStyle7.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle7.BackColor = System.Drawing.SystemColors.Window;
+            dataGridViewCellStyle7.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            dataGridViewCellStyle7.ForeColor = System.Drawing.SystemColors.ControlText;
+            dataGridViewCellStyle7.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle7.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle7.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
+            this.dgvSummary.DefaultCellStyle = dataGridViewCellStyle7;
             this.dgvSummary.Dock = System.Windows.Forms.DockStyle.Fill;
             this.dgvSummary.Location = new System.Drawing.Point(0, 27);
             this.dgvSummary.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
@@ -151,9 +154,9 @@
             this.dgvSummary.RowTemplate.Height = 24;
             this.dgvSummary.Size = new System.Drawing.Size(1800, 239);
             this.dgvSummary.TabIndex = 0;
-            this.dgvSummary.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgvSummary_CellContentClick);
-            this.dgvSummary.ColumnHeaderMouseClick += new System.Windows.Forms.DataGridViewCellMouseEventHandler(this.dgvSummary_ColumnHeaderMouseClick);
-            this.dgvSummary.RowsAdded += new System.Windows.Forms.DataGridViewRowsAddedEventHandler(this.dgvSummary_RowAdded);
+            this.dgvSummary.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.DgvSummary_CellContentClick);
+            this.dgvSummary.ColumnHeaderMouseClick += new System.Windows.Forms.DataGridViewCellMouseEventHandler(this.DgvSummary_ColumnHeaderMouseClick);
+            this.dgvSummary.RowsAdded += new System.Windows.Forms.DataGridViewRowsAddedEventHandler(this.DgvSummary_RowAdded);
             // 
             // toolStrip1
             // 
@@ -178,7 +181,7 @@
             this.tsRefresh.Name = "tsRefresh";
             this.tsRefresh.Size = new System.Drawing.Size(29, 24);
             this.tsRefresh.Text = "Refresh";
-            this.tsRefresh.Click += new System.EventHandler(this.tsRefresh_Click);
+            this.tsRefresh.Click += new System.EventHandler(this.TsRefresh_Click);
             // 
             // tsCopy
             // 
@@ -188,7 +191,7 @@
             this.tsCopy.Name = "tsCopy";
             this.tsCopy.Size = new System.Drawing.Size(29, 24);
             this.tsCopy.Text = "Copy";
-            this.tsCopy.Click += new System.EventHandler(this.tsCopy_Click);
+            this.tsCopy.Click += new System.EventHandler(this.TsCopy_Click);
             // 
             // tsExcel
             // 
@@ -198,7 +201,7 @@
             this.tsExcel.Name = "tsExcel";
             this.tsExcel.Size = new System.Drawing.Size(29, 24);
             this.tsExcel.Text = "Export Excel";
-            this.tsExcel.Click += new System.EventHandler(this.tsExcel_Click);
+            this.tsExcel.Click += new System.EventHandler(this.TsExcel_Click);
             // 
             // tsOptions
             // 
@@ -219,7 +222,7 @@
             this.focusedViewToolStripMenuItem.Size = new System.Drawing.Size(198, 26);
             this.focusedViewToolStripMenuItem.Text = "Focused View";
             this.focusedViewToolStripMenuItem.ToolTipText = "Show only instances and checks that are warning or critical status";
-            this.focusedViewToolStripMenuItem.Click += new System.EventHandler(this.focusedViewToolStripMenuItem_Click);
+            this.focusedViewToolStripMenuItem.Click += new System.EventHandler(this.FocusedViewToolStripMenuItem_Click);
             // 
             // memoryDumpsToolStripMenuItem
             // 
@@ -235,14 +238,14 @@
             this.acknowledgeDumpsToolStripMenuItem.Name = "acknowledgeDumpsToolStripMenuItem";
             this.acknowledgeDumpsToolStripMenuItem.Size = new System.Drawing.Size(233, 26);
             this.acknowledgeDumpsToolStripMenuItem.Text = "Acknowledge Dumps";
-            this.acknowledgeDumpsToolStripMenuItem.Click += new System.EventHandler(this.acknowledgeDumpsToolStripMenuItem_Click);
+            this.acknowledgeDumpsToolStripMenuItem.Click += new System.EventHandler(this.AcknowledgeDumpsToolStripMenuItem_Click);
             // 
             // configureThresholdsToolStripMenuItem
             // 
             this.configureThresholdsToolStripMenuItem.Name = "configureThresholdsToolStripMenuItem";
             this.configureThresholdsToolStripMenuItem.Size = new System.Drawing.Size(233, 26);
             this.configureThresholdsToolStripMenuItem.Text = "Configure Thresholds";
-            this.configureThresholdsToolStripMenuItem.Click += new System.EventHandler(this.configureThresholdsToolStripMenuItem_Click);
+            this.configureThresholdsToolStripMenuItem.Click += new System.EventHandler(this.ConfigureThresholdsToolStripMenuItem_Click);
             // 
             // lblRefreshTime
             // 
@@ -287,8 +290,8 @@
             // 
             // dataGridViewTextBoxColumn5
             // 
-            dataGridViewCellStyle7.NullValue = "View";
-            this.dataGridViewTextBoxColumn5.DefaultCellStyle = dataGridViewCellStyle7;
+            dataGridViewCellStyle8.NullValue = "View";
+            this.dataGridViewTextBoxColumn5.DefaultCellStyle = dataGridViewCellStyle8;
             this.dataGridViewTextBoxColumn5.HeaderText = "Alerts";
             this.dataGridViewTextBoxColumn5.MinimumWidth = 6;
             this.dataGridViewTextBoxColumn5.Name = "dataGridViewTextBoxColumn5";
@@ -298,8 +301,8 @@
             // 
             // dataGridViewTextBoxColumn6
             // 
-            dataGridViewCellStyle8.NullValue = "View";
-            this.dataGridViewTextBoxColumn6.DefaultCellStyle = dataGridViewCellStyle8;
+            dataGridViewCellStyle9.NullValue = "View";
+            this.dataGridViewTextBoxColumn6.DefaultCellStyle = dataGridViewCellStyle9;
             this.dataGridViewTextBoxColumn6.HeaderText = "Full Backup";
             this.dataGridViewTextBoxColumn6.MinimumWidth = 6;
             this.dataGridViewTextBoxColumn6.Name = "dataGridViewTextBoxColumn6";
@@ -309,8 +312,8 @@
             // 
             // dataGridViewTextBoxColumn7
             // 
-            dataGridViewCellStyle9.NullValue = "View";
-            this.dataGridViewTextBoxColumn7.DefaultCellStyle = dataGridViewCellStyle9;
+            dataGridViewCellStyle10.NullValue = "View";
+            this.dataGridViewTextBoxColumn7.DefaultCellStyle = dataGridViewCellStyle10;
             this.dataGridViewTextBoxColumn7.HeaderText = "Diff Backup";
             this.dataGridViewTextBoxColumn7.MinimumWidth = 6;
             this.dataGridViewTextBoxColumn7.Name = "dataGridViewTextBoxColumn7";
@@ -400,7 +403,7 @@
             // 
             this.timer1.Enabled = true;
             this.timer1.Interval = 10000;
-            this.timer1.Tick += new System.EventHandler(this.timer1_Tick);
+            this.timer1.Tick += new System.EventHandler(this.Timer1_Tick);
             // 
             // refresh1
             // 
@@ -659,6 +662,21 @@
             this.DBMailStatus.ReadOnly = true;
             this.DBMailStatus.Width = 79;
             // 
+            // IdentityStatus
+            // 
+            this.IdentityStatus.DataPropertyName = "MaxIdentityPctUsed";
+            dataGridViewCellStyle6.Format = "P1";
+            this.IdentityStatus.DefaultCellStyle = dataGridViewCellStyle6;
+            this.IdentityStatus.HeaderText = "Identity Columns";
+            this.IdentityStatus.LinkColor = System.Drawing.Color.Black;
+            this.IdentityStatus.MinimumWidth = 6;
+            this.IdentityStatus.Name = "IdentityStatus";
+            this.IdentityStatus.ReadOnly = true;
+            this.IdentityStatus.Resizable = System.Windows.Forms.DataGridViewTriState.True;
+            this.IdentityStatus.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
+            this.IdentityStatus.ToolTipText = "Check for identity columns running out of values.  Show Max % used";
+            this.IdentityStatus.Width = 125;
+            // 
             // UptimeStatus
             // 
             this.UptimeStatus.HeaderText = "Instance Uptime";
@@ -742,6 +760,7 @@
         private System.Windows.Forms.DataGridViewLinkColumn CollectionErrorStatus;
         private System.Windows.Forms.DataGridViewLinkColumn SnapshotAgeStatus;
         private System.Windows.Forms.DataGridViewTextBoxColumn DBMailStatus;
+        private System.Windows.Forms.DataGridViewLinkColumn IdentityStatus;
         private System.Windows.Forms.DataGridViewLinkColumn UptimeStatus;
     }
 }
