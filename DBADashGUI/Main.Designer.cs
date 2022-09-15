@@ -748,10 +748,10 @@
             // tabSchema
             // 
             this.tabSchema.Controls.Add(this.splitSchemaSnapshot);
-            this.tabSchema.Location = new System.Drawing.Point(4, 29);
+            this.tabSchema.Location = new System.Drawing.Point(4, 25);
             this.tabSchema.Name = "tabSchema";
             this.tabSchema.Padding = new System.Windows.Forms.Padding(3);
-            this.tabSchema.Size = new System.Drawing.Size(192, 67);
+            this.tabSchema.Size = new System.Drawing.Size(1631, 1246);
             this.tabSchema.TabIndex = 0;
             this.tabSchema.Text = "Schema Snapshot";
             this.tabSchema.UseVisualStyleBackColor = true;
@@ -772,8 +772,8 @@
             this.splitSchemaSnapshot.Panel2.Controls.Add(this.toolStrip1);
             this.splitSchemaSnapshot.Panel2.Controls.Add(this.gvHistory);
             this.splitSchemaSnapshot.Panel2.Controls.Add(this.label1);
-            this.splitSchemaSnapshot.Size = new System.Drawing.Size(186, 61);
-            this.splitSchemaSnapshot.SplitterDistance = 26;
+            this.splitSchemaSnapshot.Size = new System.Drawing.Size(1625, 1240);
+            this.splitSchemaSnapshot.SplitterDistance = 528;
             this.splitSchemaSnapshot.TabIndex = 1;
             // 
             // label7
@@ -796,9 +796,9 @@
             this.tsNext,
             this.toolStripLabel1,
             this.tsPageSize});
-            this.toolStrip1.Location = new System.Drawing.Point(0, -1);
+            this.toolStrip1.Location = new System.Drawing.Point(0, 680);
             this.toolStrip1.Name = "toolStrip1";
-            this.toolStrip1.Size = new System.Drawing.Size(186, 32);
+            this.toolStrip1.Size = new System.Drawing.Size(1625, 28);
             this.toolStrip1.TabIndex = 1;
             this.toolStrip1.Text = "toolStrip1";
             // 
@@ -808,14 +808,14 @@
             this.tsPrevious.Image = ((System.Drawing.Image)(resources.GetObject("tsPrevious.Image")));
             this.tsPrevious.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsPrevious.Name = "tsPrevious";
-            this.tsPrevious.Size = new System.Drawing.Size(29, 29);
+            this.tsPrevious.Size = new System.Drawing.Size(29, 25);
             this.tsPrevious.Text = "Previous";
             this.tsPrevious.Click += new System.EventHandler(this.TsPrevious_Click);
             // 
             // tsPageNum
             // 
             this.tsPageNum.Name = "tsPageNum";
-            this.tsPageNum.Size = new System.Drawing.Size(53, 29);
+            this.tsPageNum.Size = new System.Drawing.Size(53, 25);
             this.tsPageNum.Text = "Page 1";
             // 
             // tsNext
@@ -824,14 +824,14 @@
             this.tsNext.Image = ((System.Drawing.Image)(resources.GetObject("tsNext.Image")));
             this.tsNext.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsNext.Name = "tsNext";
-            this.tsNext.Size = new System.Drawing.Size(29, 29);
+            this.tsNext.Size = new System.Drawing.Size(29, 25);
             this.tsNext.Text = "Next";
             this.tsNext.Click += new System.EventHandler(this.TsNext_Click);
             // 
             // toolStripLabel1
             // 
             this.toolStripLabel1.Name = "toolStripLabel1";
-            this.toolStripLabel1.Size = new System.Drawing.Size(75, 20);
+            this.toolStripLabel1.Size = new System.Drawing.Size(75, 25);
             this.toolStripLabel1.Text = "Page Size:";
             // 
             // tsPageSize
@@ -888,7 +888,7 @@
             this.gvHistory.RowHeadersWidth = 51;
             this.gvHistory.RowTemplate.Height = 24;
             this.gvHistory.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-            this.gvHistory.Size = new System.Drawing.Size(186, 6);
+            this.gvHistory.Size = new System.Drawing.Size(1625, 683);
             this.gvHistory.TabIndex = 0;
             this.gvHistory.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.GvHistory_CellContentClick);
             this.gvHistory.SelectionChanged += new System.EventHandler(this.GvHistory_SelectionChanged);
@@ -965,7 +965,7 @@
             this.label1.ForeColor = System.Drawing.Color.White;
             this.label1.Location = new System.Drawing.Point(0, 0);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(186, 25);
+            this.label1.Size = new System.Drawing.Size(1625, 25);
             this.label1.TabIndex = 2;
             this.label1.Text = "Snapshot History";
             this.label1.TextAlign = System.Drawing.ContentAlignment.TopCenter;
@@ -973,10 +973,10 @@
             // tabTags
             // 
             this.tabTags.Controls.Add(this.tags1);
-            this.tabTags.Location = new System.Drawing.Point(4, 29);
+            this.tabTags.Location = new System.Drawing.Point(4, 25);
             this.tabTags.Name = "tabTags";
             this.tabTags.Padding = new System.Windows.Forms.Padding(3);
-            this.tabTags.Size = new System.Drawing.Size(192, 67);
+            this.tabTags.Size = new System.Drawing.Size(1631, 1246);
             this.tabTags.TabIndex = 2;
             this.tabTags.Text = "Tags";
             this.tabTags.UseVisualStyleBackColor = true;
@@ -991,7 +991,7 @@
             this.tags1.Location = new System.Drawing.Point(3, 3);
             this.tags1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.tags1.Name = "tags1";
-            this.tags1.Size = new System.Drawing.Size(186, 61);
+            this.tags1.Size = new System.Drawing.Size(1625, 1240);
             this.tags1.TabIndex = 0;
             this.tags1.TagsChanged += new System.EventHandler(this.Tags1_TagsChanged);
             // 
@@ -1895,10 +1895,10 @@
             // tabIdentityColumns
             // 
             this.tabIdentityColumns.Controls.Add(this.identityColumns1);
-            this.tabIdentityColumns.Location = new System.Drawing.Point(4, 25);
+            this.tabIdentityColumns.Location = new System.Drawing.Point(4, 29);
             this.tabIdentityColumns.Name = "tabIdentityColumns";
             this.tabIdentityColumns.Padding = new System.Windows.Forms.Padding(3);
-            this.tabIdentityColumns.Size = new System.Drawing.Size(1631, 1246);
+            this.tabIdentityColumns.Size = new System.Drawing.Size(192, 67);
             this.tabIdentityColumns.TabIndex = 43;
             this.tabIdentityColumns.Text = "Identity Columns";
             this.tabIdentityColumns.UseVisualStyleBackColor = true;
@@ -1907,11 +1907,15 @@
             // 
             this.identityColumns1.DatabaseID = 0;
             this.identityColumns1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.identityColumns1.IncludeCritical = true;
+            this.identityColumns1.IncludeNA = false;
+            this.identityColumns1.IncludeOK = false;
+            this.identityColumns1.IncludeWarning = true;
             this.identityColumns1.InstanceIDs = null;
             this.identityColumns1.Location = new System.Drawing.Point(3, 3);
             this.identityColumns1.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.identityColumns1.Name = "identityColumns1";
-            this.identityColumns1.Size = new System.Drawing.Size(1625, 1240);
+            this.identityColumns1.Size = new System.Drawing.Size(186, 61);
             this.identityColumns1.TabIndex = 0;
             // 
             // dataGridViewTextBoxColumn1
