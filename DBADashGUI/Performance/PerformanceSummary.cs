@@ -19,8 +19,9 @@ namespace DBADashGUI.Performance
         public string TagIDs;
         private readonly List<KeyValuePair<string, PersistedColumnLayout>> standardLayout;
 
-        public Dictionary<int,Counter> SelectedPerformanceCounters =  new();
+        public Dictionary<int, Counter> SelectedPerformanceCounters = new();
         private PerformanceSummarySavedView selectedview;
+        private bool hasRunOnce;
 
         public PerformanceSummary()
         {
@@ -28,24 +29,31 @@ namespace DBADashGUI.Performance
             standardLayout = GetColumnLayout();
         }
 
-   
+
         public void RefreshData()
         {
-            dgv.Columns[0].Frozen = Common.FreezeKeyColumn;
-            dgv.DataSource = null;
-            var dt = GetPerformanceSummary();
-            AddPerformanceCounters(ref dt);
-            dgv.AutoGenerateColumns = false;
-            GenerateHistogram(ref dt);
-            if (dgv.DataSource == null)
+            if (!hasRunOnce)
             {
-                dgv.DataSource = new DataView(dt);
+                RunOnceOnRefresh(); // Triggers refresh
             }
-            dgv.AutoResizeColumnHeadersHeight();
-            dgv.Columns["colCPUHistogram"].Width = 200;
-            if (selectedview != null)
-            {
-                LoadPersistedColumnLayout(selectedview.ColumnLayout);
+            else
+            {   
+                dgv.Columns[0].Frozen = Common.FreezeKeyColumn;
+                dgv.DataSource = null;
+                var dt = GetPerformanceSummary();
+                AddPerformanceCounters(ref dt);
+                dgv.AutoGenerateColumns = false;
+                GenerateHistogram(ref dt);
+                if (dgv.DataSource == null)
+                {
+                    dgv.DataSource = new DataView(dt);
+                }
+                dgv.AutoResizeColumnHeadersHeight();
+                dgv.Columns["colCPUHistogram"].Width = 200;
+                if (selectedview != null)
+                {
+                    LoadPersistedColumnLayout(selectedview.ColumnLayout);
+                }
             }
         }
 
@@ -79,7 +87,7 @@ namespace DBADashGUI.Performance
                 {
                     string name = agg + "_" + ctr.CounterID;
                     dt.Columns.Add(name, typeof(double));
-                    dt.Columns.Add(name + "Status", typeof(int));        
+                    dt.Columns.Add(name + "Status", typeof(int));
                 }
             }
         }
@@ -108,12 +116,12 @@ namespace DBADashGUI.Performance
                         if (cntr.Avg)
                         {
                             mainRow[("Avg_" + (int)r["CounterID"]).ToString()] = r["AvgValue"];
-                            mainRow[("Avg_" + (int)r["CounterID"] + "Status").ToString()] = r["AvgValueStatus"];                            
+                            mainRow[("Avg_" + (int)r["CounterID"] + "Status").ToString()] = r["AvgValueStatus"];
                         }
                         if (cntr.Max)
                         {
                             mainRow[("Max_" + (int)r["CounterID"]).ToString()] = r["MaxValue"];
-                            mainRow[("Max_" + (int)r["CounterID"] + "Status").ToString()] = r["MaxValueStatus"];                            
+                            mainRow[("Max_" + (int)r["CounterID"] + "Status").ToString()] = r["MaxValueStatus"];
                         }
                         if (cntr.Total)
                         {
@@ -169,7 +177,7 @@ namespace DBADashGUI.Performance
                 DataTable dt = new();
                 da.Fill(dt);
                 return dt;
-            }           
+            }
         }
 
 
@@ -205,19 +213,19 @@ namespace DBADashGUI.Performance
                 dt.PrimaryKey = pkCols;
                 da.Fill(dt);
                 return dt;
-            }          
+            }
         }
-    
+
 
         private void GenerateHistogram(ref DataTable dt)
         {
-            if (dt.Rows.Count > 0 && dgv.Columns["colCPUHistogram"].Visible && (!dt.Columns.Contains("CPUHistogram")) )
+            if (dt.Rows.Count > 0 && dgv.Columns["colCPUHistogram"].Visible && (!dt.Columns.Contains("CPUHistogram")))
             {
                 dgv.DataSource = null;
                 dt.Columns.Add("CPUHistogram", typeof(Bitmap));
                 dt.Columns.Add("CPUHistogramTooltip", typeof(string));
                 foreach (DataRow row in dt.Rows)
-                {                    
+                {
                     var hist = new List<double>();
                     if (row["CPU10"] != DBNull.Value)
                     {
@@ -226,7 +234,7 @@ namespace DBADashGUI.Performance
                         {
                             var v = Convert.ToDouble(row["CPU" + i.ToString()]);
                             hist.Add(v);
-                            sbToolTip.AppendLine((i-10).ToString() + " to " +  i.ToString() + "% | " + v.ToString("N0"));
+                            sbToolTip.AppendLine((i - 10).ToString() + " to " + i.ToString() + "% | " + v.ToString("N0"));
                         }
                         row["CPUHistogram"] = Histogram.GetHistogram(hist, 200, 100, true);
                         row["CPUHistogramToolTip"] = sbToolTip.ToString();
@@ -236,7 +244,7 @@ namespace DBADashGUI.Performance
                     {
                         row["CPUHistogram"] = new Bitmap(1, 1);
                     }
-                    
+
                 }
                 dgv.DataSource = new DataView(dt);
             }
@@ -246,9 +254,17 @@ namespace DBADashGUI.Performance
         {
             Common.StyleGrid(ref dgv);
             AddHistCols(dgv, "col");
-            MigratePerformanceSummaryView();
-            savedViewMenuItem1.LoadItems();
-            savedViewMenuItem1.SelectDefault();
+        }
+
+        private void RunOnceOnRefresh() // // Running on Load causes issues with the designer, so load once on refresh
+        {
+            if (!hasRunOnce)
+            {
+                hasRunOnce = true;
+                MigratePerformanceSummaryView();
+                savedViewMenuItem1.LoadItems();
+                savedViewMenuItem1.SelectDefault();             
+            }
         }
 
         /// <summary>

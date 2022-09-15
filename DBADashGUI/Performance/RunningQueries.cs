@@ -114,6 +114,7 @@ namespace DBADashGUI.Performance
 
         public void RefreshData()
         {
+            updateRowLimit();
             tsEditLimit.Visible = false;
             lblRowLimit.Visible = false;
             tsWaitsFilter.Enabled = SessionID == 0;
@@ -762,25 +763,17 @@ namespace DBADashGUI.Performance
 
         private void RunningQueries_Load(object sender, EventArgs e)
         {
-            tsEditLimit.LinkColor = DashColors.LinkColor;
-            try
-            {
-                // Ensure max rows is set to a value greater than 0
-                if (Properties.Settings.Default.RunningQueriesSummaryMaxRows <= 0)
-                {
-                    Properties.Settings.Default.RunningQueriesSummaryMaxRows = 100;
-                    Properties.Settings.Default.Save();
-                }
-                updateRowLimit();
-            }
-            catch (System.Configuration.SettingsPropertyNotFoundException)
-            {
-                // Design time error we can ignore
-            }            
+            tsEditLimit.LinkColor = DashColors.LinkColor;           
         }
 
         private void updateRowLimit()
         {
+            // Ensure max rows is set to a value greater than 0
+            if (Properties.Settings.Default.RunningQueriesSummaryMaxRows <= 0)
+            {
+                Properties.Settings.Default.RunningQueriesSummaryMaxRows = 100;
+                Properties.Settings.Default.Save();
+            }
             tsEditLimit.Text = String.Format("Row Limit {0}", Properties.Settings.Default.RunningQueriesSummaryMaxRows);
         }
     }

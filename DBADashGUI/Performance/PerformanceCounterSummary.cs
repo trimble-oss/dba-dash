@@ -21,11 +21,23 @@ namespace DBADashGUI.Performance
         }
 
         public Int32 InstanceID { get; set; }
+        private bool hasRunOnce;
 
         public void RefreshData()
         {
+            RunOnceOnRefresh();
             RefreshSummary();
             RefreshChart();
+        }
+
+        private void RunOnceOnRefresh()  // Running on Load causes issues with the designer, so load once on refresh
+        {
+            if (!hasRunOnce)
+            {
+                hasRunOnce = true;
+                savedViewMenuItem1.LoadItems();
+                savedViewMenuItem1.SelectDefault();
+            }
         }
 
         private void RefreshSummary()
@@ -67,8 +79,6 @@ namespace DBADashGUI.Performance
             splitContainer1.Panel1Collapsed = true;
             performanceCounterSummaryGrid1.CounterSelected += PerformanceCounterSummaryGrid1_CounterSelected;
             performanceCounterSummaryGrid1.TextSelected += PerformanceCounterSummaryGrid1_TextSelected;
-            savedViewMenuItem1.LoadItems();
-            savedViewMenuItem1.SelectDefault();
         }
 
         private void PerformanceCounterSummaryGrid1_TextSelected(object sender, PerformanceCounterSummaryGrid.TextSelectedEventArgs e)

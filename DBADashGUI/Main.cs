@@ -120,7 +120,6 @@ namespace DBADashGUI
             GetCommandLineTags();
             BuildTagMenu(commandLineTags);
             AddInstanes();
-            LoadSelectedTab();
         }
 
         private async Task CheckVersion()
