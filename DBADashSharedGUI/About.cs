@@ -110,6 +110,7 @@ namespace DBADashGUI
         public Version DBVersion=new Version();
         public bool upgradeAvailable=false;
         public string upgradeMessage=String.Empty;
+        public bool StartGUIOnUpgrade;
 
         private void lnkDBADash_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
@@ -200,7 +201,7 @@ namespace DBADashGUI
             }
             try
             {
-                await Upgrade.UpgradeDBADashAsync(startGUI:true);
+                await Upgrade.UpgradeDBADashAsync(startGUI:StartGUIOnUpgrade);
             }
             catch(Octokit.NotFoundException)
             {

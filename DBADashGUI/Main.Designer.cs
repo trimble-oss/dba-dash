@@ -973,17 +973,16 @@
             // tabTags
             // 
             this.tabTags.Controls.Add(this.tags1);
-            this.tabTags.Location = new System.Drawing.Point(4, 25);
+            this.tabTags.Location = new System.Drawing.Point(4, 29);
             this.tabTags.Name = "tabTags";
             this.tabTags.Padding = new System.Windows.Forms.Padding(3);
-            this.tabTags.Size = new System.Drawing.Size(1631, 1246);
+            this.tabTags.Size = new System.Drawing.Size(192, 67);
             this.tabTags.TabIndex = 2;
             this.tabTags.Text = "Tags";
             this.tabTags.UseVisualStyleBackColor = true;
             // 
             // tags1
             // 
-            this.tags1.AllTags = null;
             this.tags1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tags1.InstanceID = 0;
             this.tags1.InstanceIDs = null;
@@ -991,7 +990,7 @@
             this.tags1.Location = new System.Drawing.Point(3, 3);
             this.tags1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.tags1.Name = "tags1";
-            this.tags1.Size = new System.Drawing.Size(1625, 1240);
+            this.tags1.Size = new System.Drawing.Size(186, 61);
             this.tags1.TabIndex = 0;
             this.tags1.TagsChanged += new System.EventHandler(this.Tags1_TagsChanged);
             // 
