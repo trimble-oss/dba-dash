@@ -1196,11 +1196,11 @@ namespace DBADashServiceConfig
         {
             if (collectionConfig.DestinationConnection.Type == ConnectionType.SQL)
             {
-                CommonShared.ShowAbout(collectionConfig.DestinationConnection.ConnectionString, this);
+                CommonShared.ShowAbout(collectionConfig.DestinationConnection.ConnectionString, this,false);
             }
             else
             {
-                CommonShared.ShowAbout(this);
+                CommonShared.ShowAbout(this,false);
             }
         }
 

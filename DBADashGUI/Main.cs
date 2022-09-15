@@ -1445,7 +1445,7 @@ namespace DBADashGUI
 
         private void AboutToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            CommonShared.ShowAbout(Common.ConnectionString, this);
+            CommonShared.ShowAbout(Common.ConnectionString, this,true);
         }
 
         private void BttnSearch_Click(object sender, EventArgs e)

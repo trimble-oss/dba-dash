@@ -18,17 +18,18 @@ namespace DBADashSharedGUI
         }
 
         [SupportedOSPlatform("windows")]
-        public static void ShowAbout(IWin32Window owner)
+        public static void ShowAbout(IWin32Window owner,bool StartGUIOnUpgrade)
         {
-            using (var frm = new About())
+            using About frm = new()
             {
-                frm.DBVersion = new Version();
-                frm.ShowDialog(owner);
-            }
+                DBVersion = new Version(),
+                StartGUIOnUpgrade = StartGUIOnUpgrade
+            };
+            frm.ShowDialog(owner);
         }
 
         [SupportedOSPlatform("windows")]
-        public static void ShowAbout(string connectionString,IWin32Window owner)
+        public static void ShowAbout(string connectionString, IWin32Window owner, bool StartGUIOnUpgrade)
         {
             Version DBVersion;
             try
@@ -40,11 +41,12 @@ namespace DBADashSharedGUI
                 MessageBox.Show("Error getting repository version" + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 DBVersion = new Version();
             }
-            using (var frm = new About())
+            using About frm = new()
             {
-                frm.DBVersion = DBVersion;
-                frm.ShowDialog(owner);
-            }
+                DBVersion = DBVersion,
+                StartGUIOnUpgrade = StartGUIOnUpgrade
+            };
+            frm.ShowDialog(owner);
         }
 
         public static void StyleGrid(ref DataGridView dgv)
