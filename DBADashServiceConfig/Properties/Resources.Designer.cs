@@ -159,5 +159,29 @@ namespace DBADashServiceConfig.Properties {
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
+
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap ASX_Paste_blue_16x
+        {
+            get
+            {
+                object obj = ResourceManager.GetObject("ASX_Paste_blue_16x", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap StatusAnnotations_Complete_and_ok_16xMD_color
+        {
+            get
+            {
+                object obj = ResourceManager.GetObject("StatusAnnotations_Complete_and_ok_16xMD_color", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
     }
 }
