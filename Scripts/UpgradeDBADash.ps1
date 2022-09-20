@@ -54,7 +54,7 @@ if (!(Test-Path -Path "ServiceConfig.json")){
 # If $Tag parameter isn't passed in, get the latest release tag.  Otherwise check that the tag exists
 if($Tag.Length -eq 0){
     Write-Host "Get the latest release"
-    $Tag = (Invoke-WebRequest "https://api.github.com/repos/$Repo/releases/latest" | ConvertFrom-Json).tag_name
+    $Tag = (Invoke-WebRequest "https://api.github.com/repos/$Repo/releases/latest" -UseBasicParsing | ConvertFrom-Json).tag_name
 }
 else{
     Write-Host "Checking specified tag exists"
