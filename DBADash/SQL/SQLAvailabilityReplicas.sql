@@ -14,7 +14,7 @@ SELECT replica_id,
        modify_date,
        backup_priority,
        read_only_routing_url,
-       seeding_mode,
+       ' + CASE WHEN COLUMNPROPERTY(OBJECT_ID('sys.availability_replicas'),'seeding_mode','ColumnID') IS NULL THEN ' CAST(NULL as TINYINT) AS ' ELSE '' END + 'seeding_mode,
        ' + CASE WHEN COLUMNPROPERTY(OBJECT_ID('sys.availability_replicas'),'read_write_routing_url','ColumnID') IS NULL THEN ' CAST(NULL as NVARCHAR(256)) AS ' ELSE '' END + 'read_write_routing_url
 FROM sys.availability_replicas;'
 

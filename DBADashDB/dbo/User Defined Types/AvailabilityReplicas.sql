@@ -13,6 +13,6 @@
        modify_date DATETIME NULL,
        backup_priority INT NOT NULL,
        read_only_routing_url NVARCHAR(256) NULL,
-       seeding_mode TINYINT NOT NULL,
+       seeding_mode TINYINT NULL,
        read_write_routing_url NVARCHAR(256) NULL
 )
