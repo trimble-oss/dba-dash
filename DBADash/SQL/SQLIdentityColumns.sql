@@ -36,6 +36,7 @@ WHERE (
 	*/
 	OR RC.row_count  / calc.max_rows * 100 > @IdentityCollectionThreshold 
 	)
+AND IC.max_length < 9 /* Exclude decimal types that would be larger than BIGINT and break calculations */
 ORDER BY object_name;'
 
 CREATE TABLE #ident(
