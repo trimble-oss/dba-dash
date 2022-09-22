@@ -519,7 +519,14 @@ namespace DBADash
             if(collectionType == CollectionType.RunningQueries)
             {
                 CollectText();
-                CollectPlans();
+                try
+                {
+                    CollectPlans();
+                }
+                catch(Exception ex)
+                {
+                    LogError(new Exception("Error collecting plans for Running Queries",ex), "RunningQueries");
+                }
             }
           
         }
@@ -683,7 +690,11 @@ CROSS APPLY sys.dm_exec_text_query_plan(t.plan_handle,t.statement_start_offset,t
             {
                 DataTable dt = Data.Tables["RunningQueries"];
                 var plans = (from r in dt.AsEnumerable()
-                             where r["plan_handle"] != DBNull.Value && r["query_plan_hash"] != DBNull.Value && r["statement_start_offset"] != DBNull.Value && r["statement_end_offset"] != DBNull.Value
+                             where r["plan_handle"] != DBNull.Value 
+                             && r["query_plan_hash"] != DBNull.Value 
+                             && r["statement_start_offset"] != DBNull.Value 
+                             && r["statement_end_offset"] != DBNull.Value 
+                             && ((byte[])r["query_plan_hash"]).Any(b=>b!=0) // Not 0x00000000 
                              group r by new Plan((byte[])r["plan_handle"], (byte[])r["query_plan_hash"], (int)r["statement_start_offset"], (int)r["statement_end_offset"]) into g
                              where g.Sum(r => Convert.ToInt32(r["cpu_time"])) >= Source.PlanCollectionCPUThreshold || g.Sum(r => Convert.ToInt32(r["granted_query_memory"])) >= Source.PlanCollectionMemoryGrantThreshold || g.Count() >= Source.PlanCollectionCountThreshold || g.Max(r=> ((DateTime)r["SnapshotDateUTC"]).Subtract((DateTime)r["last_request_start_time_utc"])).TotalMilliseconds >= Source.PlanCollectionDurationThreshold
                              select g.Key).Distinct().ToList();
