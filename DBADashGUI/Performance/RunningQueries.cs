@@ -337,7 +337,7 @@ namespace DBADashGUI.Performance
         {
             runningJobCount = snapshotDT.AsEnumerable().Where(r => r["job_id"] != DBNull.Value).Count();
             blockedCount = snapshotDT.AsEnumerable().Where(r => Convert.ToInt16(r["blocking_session_id"]) != 0).Count();
-            blockedWait = snapshotDT.AsEnumerable().Where(r => Convert.ToInt16(r["blocking_session_id"]) != 0).Sum(r => Convert.ToInt64(r["wait_time"]));
+            blockedWait = snapshotDT.AsEnumerable().Where(r => Convert.ToInt16(r["blocking_session_id"]) != 0 && r["wait_time"]!=DBNull.Value).Sum(r => Convert.ToInt64(r["wait_time"]));
             planCount = snapshotDT.AsEnumerable().Where(r => r["query_plan"] != DBNull.Value).Count();
             hasWaitResource = snapshotDT.AsEnumerable().Where(r => r["wait_resource"] != DBNull.Value && !string.IsNullOrEmpty((string)r["wait_resource"])).Any();
 
