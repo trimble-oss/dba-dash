@@ -35,6 +35,7 @@ BEGIN
 END 
 
 SELECT InstanceID,
+       InstanceDisplayName,
        Duration,
        batch_text,
        text,
