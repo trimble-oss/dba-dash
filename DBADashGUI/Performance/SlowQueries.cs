@@ -320,8 +320,14 @@ namespace DBADashGUI
                     dgvSummary.Invoke(() =>
                     {
                         dgvSummary.AutoGenerateColumns = false;
+                        if (dgvSummary.Columns[0].Width > dgvSummary.Width) 
+                        {
+                            // If column has expanded to > width, reset to half width
+                            // scrollbars are missing in this situation so this is a workaround to resolve it
+                            dgvSummary.Columns[0].Width = dgvSummary.Width / 2;
+                        }
                         dgvSummary.DataSource = dt;
-                        dgvSummary.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
+                       
                         dgvSummary.Visible = true;
                     });
                 }
