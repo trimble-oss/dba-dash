@@ -1,6 +1,7 @@
 ﻿CREATE VIEW dbo.RunningQueriesInfo
 AS
 SELECT Q.InstanceID,
+    I.InstanceDisplayName,
     HD.HumanDuration AS [Duration],
     QT.text AS batch_text,
 	SUBSTRING(QT.text,ISNULL((NULLIF(Q.statement_start_offset,-1)/2)+1,0),ISNULL((NULLIF(NULLIF(Q.statement_end_offset,-1),0) - NULLIF(Q.statement_start_offset,-1))/2+1,2147483647)) AS text,
@@ -69,7 +70,8 @@ SELECT Q.InstanceID,
 	waitF.filegroup_name + ' | ' + waitF.name AS wait_file,
     Q.login_time_utc,
     CASE WHEN QP.query_plan_compresed IS NULL THEN CAST(0 AS BIT) ELSE CAST(1 AS BIT) END AS has_plan
-FROM dbo.RunningQueries Q 
+FROM dbo.RunningQueries Q
+JOIN dbo.Instances I ON Q.InstanceID = I.InstanceID
 CROSS APPLY(SELECT CASE WHEN Q.start_time_utc < Q.SnapshotDateUTC OR Q.start_time_utc IS NULL  THEN DATEDIFF_BIG(ms,ISNULL(Q.start_time_utc,Q.last_request_start_time_utc),Q.SnapshotDateUTC) ELSE 0 END AS Duration) calc
 CROSS APPLY dbo.MillisecondsToHumanDuration (calc.Duration) HD
 CROSS APPLY dbo.SplitWaitResource(Q.wait_resource) waitR

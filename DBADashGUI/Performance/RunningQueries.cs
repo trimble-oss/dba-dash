@@ -35,6 +35,7 @@ namespace DBADashGUI.Performance
             get
             {
                 return new DataGridViewColumn[] {
+                    new DataGridViewLinkColumn() { HeaderText = "Instance", DataPropertyName = "InstanceDisplayName", Name = "colInstance", SortMode = DataGridViewColumnSortMode.Automatic, MinimumWidth = 60, LinkColor = DashColors.LinkColor, Frozen = Common.FreezeKeyColumn},
                     new DataGridViewLinkColumn() { HeaderText = "Session ID", DataPropertyName = "session_id", Name = "colSessionID", SortMode = DataGridViewColumnSortMode.Automatic, MinimumWidth = 60, LinkColor = DashColors.LinkColor, Frozen = Common.FreezeKeyColumn },
                     new DataGridViewLinkColumn() { HeaderText = "Batch Text", DataPropertyName = "batch_text", Name = "colBatchText", SortMode = DataGridViewColumnSortMode.Automatic, LinkColor = DashColors.LinkColor},
                     new DataGridViewLinkColumn() { HeaderText = "Text", DataPropertyName = "text", Name = "colText", SortMode = DataGridViewColumnSortMode.Automatic, LinkColor = DashColors.LinkColor},
