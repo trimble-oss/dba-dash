@@ -5,7 +5,8 @@
 	@PageNumber INT=1
 )
 AS
-SELECT ss.DatabaseID,
+SELECT I.InstanceGroupName,
+       ss.DatabaseID,
        ss.SnapshotDate,
        ss.ValidatedDate,
 	   DATEDIFF(d,ss.SnapshotDate,ss.ValidatedDate) AS ValidForDays,
