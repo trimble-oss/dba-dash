@@ -48,6 +48,7 @@
             this.pieChart1 = new LiveCharts.WinForms.PieChart();
             this.dataGridViewTextBoxColumn1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dataGridViewTextBoxColumn2 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.tsContext = new System.Windows.Forms.ToolStripLabel();
             ((System.ComponentModel.ISupportInitialize)(this.dgv)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
@@ -62,7 +63,7 @@
             this.elementHost1.Location = new System.Drawing.Point(0, 0);
             this.elementHost1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.elementHost1.Name = "elementHost1";
-            this.elementHost1.Size = new System.Drawing.Size(482, 966);
+            this.elementHost1.Size = new System.Drawing.Size(482, 939);
             this.elementHost1.TabIndex = 0;
             this.elementHost1.Text = "elementHost1";
             // 
@@ -78,7 +79,7 @@
             this.UsedGB,
             this.colHistory});
             this.dgv.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.dgv.Location = new System.Drawing.Point(0, 27);
+            this.dgv.Location = new System.Drawing.Point(0, 0);
             this.dgv.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.dgv.Name = "dgv";
             this.dgv.ReadOnly = true;
@@ -135,20 +136,19 @@
             // splitContainer1
             // 
             this.splitContainer1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.splitContainer1.Location = new System.Drawing.Point(0, 0);
+            this.splitContainer1.Location = new System.Drawing.Point(0, 27);
             this.splitContainer1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.splitContainer1.Name = "splitContainer1";
             // 
             // splitContainer1.Panel1
             // 
             this.splitContainer1.Panel1.Controls.Add(this.dgv);
-            this.splitContainer1.Panel1.Controls.Add(this.toolStrip1);
             // 
             // splitContainer1.Panel2
             // 
             this.splitContainer1.Panel2.Controls.Add(this.pieChart1);
             this.splitContainer1.Panel2.Controls.Add(this.elementHost1);
-            this.splitContainer1.Size = new System.Drawing.Size(1002, 966);
+            this.splitContainer1.Size = new System.Drawing.Size(1002, 939);
             this.splitContainer1.SplitterDistance = 516;
             this.splitContainer1.TabIndex = 2;
             // 
@@ -160,10 +160,11 @@
             this.tsCopy,
             this.tsExcel,
             this.tsBack,
-            this.tsHistory});
+            this.tsHistory,
+            this.tsContext});
             this.toolStrip1.Location = new System.Drawing.Point(0, 0);
             this.toolStrip1.Name = "toolStrip1";
-            this.toolStrip1.Size = new System.Drawing.Size(516, 27);
+            this.toolStrip1.Size = new System.Drawing.Size(1002, 27);
             this.toolStrip1.TabIndex = 2;
             this.toolStrip1.Text = "toolStrip1";
             // 
@@ -223,7 +224,7 @@
             this.pieChart1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.pieChart1.Location = new System.Drawing.Point(0, 0);
             this.pieChart1.Name = "pieChart1";
-            this.pieChart1.Size = new System.Drawing.Size(482, 966);
+            this.pieChart1.Size = new System.Drawing.Size(482, 939);
             this.pieChart1.TabIndex = 1;
             this.pieChart1.Text = "pieChart1";
             // 
@@ -249,24 +250,32 @@
             this.dataGridViewTextBoxColumn2.ReadOnly = true;
             this.dataGridViewTextBoxColumn2.Width = 94;
             // 
+            // tsContext
+            // 
+            this.tsContext.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
+            this.tsContext.Name = "tsContext";
+            this.tsContext.Size = new System.Drawing.Size(18, 24);
+            this.tsContext.Text = "...";
+            // 
             // SpaceTracking
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.Controls.Add(this.splitContainer1);
+            this.Controls.Add(this.toolStrip1);
             this.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.Name = "SpaceTracking";
             this.Size = new System.Drawing.Size(1002, 966);
             this.Load += new System.EventHandler(this.SpaceTracking_Load);
             ((System.ComponentModel.ISupportInitialize)(this.dgv)).EndInit();
             this.splitContainer1.Panel1.ResumeLayout(false);
-            this.splitContainer1.Panel1.PerformLayout();
             this.splitContainer1.Panel2.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).EndInit();
             this.splitContainer1.ResumeLayout(false);
             this.toolStrip1.ResumeLayout(false);
             this.toolStrip1.PerformLayout();
             this.ResumeLayout(false);
+            this.PerformLayout();
 
         }
 
@@ -288,5 +297,6 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn1;
         private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn2;
         private LiveCharts.WinForms.PieChart pieChart1;
+        private System.Windows.Forms.ToolStripLabel tsContext;
     }
 }
