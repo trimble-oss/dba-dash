@@ -162,8 +162,8 @@
             this.gvSnapshots.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
             this.gvSnapshots.Size = new System.Drawing.Size(2019, 748);
             this.gvSnapshots.TabIndex = 0;
-            this.gvSnapshots.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.gvSnapshots_CellContentClick);
-            this.gvSnapshots.SelectionChanged += new System.EventHandler(this.gvSnapshots_SelectionChanged);
+            this.gvSnapshots.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.GvSnapshots_CellContentClick);
+            this.gvSnapshots.SelectionChanged += new System.EventHandler(this.GvSnapshots_SelectionChanged);
             // 
             // toolStrip2
             // 
@@ -189,7 +189,7 @@
             this.tsSummaryBack.Name = "tsSummaryBack";
             this.tsSummaryBack.Size = new System.Drawing.Size(29, 25);
             this.tsSummaryBack.Text = "Previous";
-            this.tsSummaryBack.Click += new System.EventHandler(this.tsSummaryBack_Click);
+            this.tsSummaryBack.Click += new System.EventHandler(this.TsSummaryBack_Click);
             // 
             // tsSummaryPageNum
             // 
@@ -205,7 +205,7 @@
             this.tsSummaryNext.Name = "tsSummaryNext";
             this.tsSummaryNext.Size = new System.Drawing.Size(29, 25);
             this.tsSummaryNext.Text = "Next";
-            this.tsSummaryNext.Click += new System.EventHandler(this.tsSummaryNext_Click);
+            this.tsSummaryNext.Click += new System.EventHandler(this.TsSummaryNext_Click);
             // 
             // toolStripLabel3
             // 
@@ -224,7 +224,7 @@
             this.tsSummaryPageSize.Name = "tsSummaryPageSize";
             this.tsSummaryPageSize.Size = new System.Drawing.Size(121, 28);
             this.tsSummaryPageSize.Text = "100";
-            this.tsSummaryPageSize.Validated += new System.EventHandler(this.tsSummaryPageSize_Validated);
+            this.tsSummaryPageSize.Validated += new System.EventHandler(this.TsSummaryPageSize_Validated);
             // 
             // gvSnapshotsDetail
             // 
@@ -265,7 +265,7 @@
             this.gvSnapshotsDetail.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.CellSelect;
             this.gvSnapshotsDetail.Size = new System.Drawing.Size(2019, 490);
             this.gvSnapshotsDetail.TabIndex = 0;
-            this.gvSnapshotsDetail.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.gvSnapshotsDetail_CellContentClick);
+            this.gvSnapshotsDetail.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.GvSnapshotsDetail_CellContentClick);
             // 
             // colObjectName
             // 
@@ -337,7 +337,7 @@
             this.dgvInstanceSummary.RowTemplate.Height = 24;
             this.dgvInstanceSummary.Size = new System.Drawing.Size(2019, 228);
             this.dgvInstanceSummary.TabIndex = 3;
-            this.dgvInstanceSummary.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgvInstanceSummary_CellContentClick);
+            this.dgvInstanceSummary.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.DgvInstanceSummary_CellContentClick);
             // 
             // colInstance
             // 
@@ -388,7 +388,7 @@
             this.tsRefresh.Name = "tsRefresh";
             this.tsRefresh.Size = new System.Drawing.Size(29, 24);
             this.tsRefresh.Text = "Refresh";
-            this.tsRefresh.Click += new System.EventHandler(this.tsRefresh_Click);
+            this.tsRefresh.Click += new System.EventHandler(this.TsRefresh_Click);
             // 
             // tsBack
             // 
@@ -398,7 +398,7 @@
             this.tsBack.Name = "tsBack";
             this.tsBack.Size = new System.Drawing.Size(29, 24);
             this.tsBack.Text = "Up level";
-            this.tsBack.Click += new System.EventHandler(this.tsBack_Click);
+            this.tsBack.Click += new System.EventHandler(this.TsBack_Click);
             // 
             // dataGridViewTextBoxColumn1
             // 

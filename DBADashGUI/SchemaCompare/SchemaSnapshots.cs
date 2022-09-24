@@ -62,7 +62,7 @@ namespace DBADashGUI.Changes
         }
 
 
-        private DataSet ddlSnapshotDiff(DateTime snapshotDateUTC, int databaseID)
+        private static DataSet DdlSnapshotDiff(DateTime snapshotDateUTC, int databaseID)
         {
             using (var cn = new SqlConnection(Common.ConnectionString))
             using (var cmd = new SqlCommand("dbo.DDLSnapshotDiff_Get", cn) { CommandType = CommandType.StoredProcedure })
@@ -72,14 +72,14 @@ namespace DBADashGUI.Changes
                 cmd.Parameters.AddWithValue("DatabaseID", databaseID);
                 var p = cmd.Parameters.AddWithValue("SnapshotDate", snapshotDateUTC);
                 p.DbType = DbType.DateTime2;     
-                DataSet ds = new DataSet();
+                DataSet ds = new();
                 da.Fill(ds);
 
                 return ds;
             }           
         }
 
-        private void gvSnapshots_SelectionChanged(object sender, EventArgs e)
+        private void GvSnapshots_SelectionChanged(object sender, EventArgs e)
         {
             if (gvSnapshots.SelectedRows.Count == 1)
             {
@@ -87,7 +87,7 @@ namespace DBADashGUI.Changes
                 DateTime snapshotDateUTC = ((DateTime)row["SnapshotDate"]).ToUniversalTime();
                 Int32 databaseID = (Int32)row["DatabaseID"];
           
-                DataSet ds = ddlSnapshotDiff(snapshotDateUTC,databaseID);                     
+                DataSet ds = DdlSnapshotDiff(snapshotDateUTC,databaseID);                     
                 gvSnapshotsDetail.AutoGenerateColumns = false;
                 gvSnapshotsDetail.DataSource = ds.Tables[0];
                 gvSnapshotsDetail.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);                    
@@ -95,7 +95,7 @@ namespace DBADashGUI.Changes
             }
         }
 
-        private void gvSnapshotsDetail_CellContentClick(object sender, DataGridViewCellEventArgs e)
+        private void GvSnapshotsDetail_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
             if (e.RowIndex>=0 && (e.ColumnIndex ==  colView.Index|| e.ColumnIndex == colDiff.Index))
             {
@@ -121,16 +121,16 @@ namespace DBADashGUI.Changes
         {
             if (InstanceID >0 || (InstanceName !=null && InstanceName.Length> 0))
             {
-                loadSnapshots();
+                LoadSnapshots();
                 tsBack.Enabled = true;
             }
             else {
                 tsBack.Enabled = false;
-                loadInstanceSummary();
+                LoadInstanceSummary();
             }
         }
 
-        private DataTable ddlSnapshotInstanceSummary()
+        private DataTable DdlSnapshotInstanceSummary()
         {
             using (var cn = new SqlConnection(Common.ConnectionString))
             using (var cmd = new SqlCommand("dbo.DDLSnapshotInstanceSummary_Get", cn) { CommandType = CommandType.StoredProcedure })
@@ -146,16 +146,16 @@ namespace DBADashGUI.Changes
             }         
         }
 
-        private void loadInstanceSummary()
+        private void LoadInstanceSummary()
         {
             splitSnapshotSummary.Visible = false;
             dgvInstanceSummary.Visible = true;
-            var dt = ddlSnapshotInstanceSummary();
+            var dt = DdlSnapshotInstanceSummary();
             dgvInstanceSummary.DataSource = dt;
             dgvInstanceSummary.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);       
         }
 
-        private DataTable getDDLSnapshots(int pageNum)
+        private DataTable GetDDLSnapshots(int pageNum)
         {
             using (var cn = new SqlConnection(Common.ConnectionString))
             using (var cmd = new SqlCommand("dbo.DDLSnapshots_Get", cn) { CommandType = CommandType.StoredProcedure })
@@ -174,13 +174,13 @@ namespace DBADashGUI.Changes
             }           
         }
 
-        private void loadSnapshots(int pageNum = 1)
+        private void LoadSnapshots(int pageNum = 1)
         {
             splitSnapshotSummary.Visible = true;
             dgvInstanceSummary.Visible = false;
             gvSnapshotsDetail.DataSource = null;
             currentSummaryPage = Int32.Parse(tsSummaryPageSize.Text);    
-            var dt = getDDLSnapshots(pageNum);         
+            var dt = GetDDLSnapshots(pageNum);         
             gvSnapshots.AutoGenerateColumns = false;
             gvSnapshots.DataSource = dt;
             gvSnapshots.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
@@ -189,34 +189,34 @@ namespace DBADashGUI.Changes
             tsSummaryNext.Enabled = dt.Rows.Count == currentSummaryPage;
             currentSummaryPage = pageNum;
         }
-        private void tsSummaryBack_Click(object sender, EventArgs e)
+        private void TsSummaryBack_Click(object sender, EventArgs e)
         {
-            loadSnapshots(currentSummaryPage - 1);
+            LoadSnapshots(currentSummaryPage - 1);
         }
 
-        private void tsSummaryNext_Click(object sender, EventArgs e)
+        private void TsSummaryNext_Click(object sender, EventArgs e)
         {
-            loadSnapshots(currentSummaryPage + 1);
+            LoadSnapshots(currentSummaryPage + 1);
         }
 
-        private void tsSummaryPageSize_Validated(object sender, EventArgs e)
+        private void TsSummaryPageSize_Validated(object sender, EventArgs e)
         {
             if (Int32.Parse(tsSummaryPageSize.Text) != currentSummaryPage)
             {
-                loadSnapshots(1);
+                LoadSnapshots(1);
             }
         }
 
-        private void tsSummaryPageSize_Validating(object sender, CancelEventArgs e)
+        private void TsSummaryPageSize_Validating(object sender, CancelEventArgs e)
         {
-            int.TryParse(tsSummaryPageSize.Text, out int i);
+            _ = int.TryParse(tsSummaryPageSize.Text, out int i);
             if (i <= 0)
             {
                 tsSummaryPageSize.Text = currentSummaryPageSize.ToString();
             }
         }
 
-        private void dgvInstanceSummary_CellContentClick(object sender, DataGridViewCellEventArgs e)
+        private void DgvInstanceSummary_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
             if(e.RowIndex>=0 && e.ColumnIndex == colInstance.Index)
             {
@@ -233,7 +233,7 @@ namespace DBADashGUI.Changes
             splitSnapshotSummary.Dock = DockStyle.Fill;
         }
 
-        private void gvSnapshots_CellContentClick(object sender, DataGridViewCellEventArgs e)
+        private void GvSnapshots_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
             if (e.RowIndex>=0 && e.ColumnIndex== colDB.Index)
             {
@@ -244,42 +244,40 @@ namespace DBADashGUI.Changes
             else if(e.RowIndex>=0 && e.ColumnIndex == colExport.Index)
             {
                 var row = (DataRowView)gvSnapshots.Rows[e.RowIndex].DataBoundItem;
-                export(row);
+                Export(row);
             }
         }
 
-        private void export(DataRowView row)
+        private void Export(DataRowView row)
         {
             var dbid = (Int32)row["DatabaseID"];
             var db = (string)row["DB"];
             var snapshotDate = (DateTime)row["SnapshotDate"];
-            using (var ofd = new FolderBrowserDialog() { Description = "Select a folder" })
+            using var ofd = new FolderBrowserDialog() { Description = "Select a folder" };
+            if (ofd.ShowDialog() == DialogResult.OK)
             {
-                if (ofd.ShowDialog() == DialogResult.OK)
+                string folder = System.IO.Path.Combine(ofd.SelectedPath, InstanceName + "_" + db + "_" + snapshotDate.ToString("yyyyMMdd_HHmmss"));
+                Directory.CreateDirectory(folder);
+                try
                 {
-                    string folder = System.IO.Path.Combine(ofd.SelectedPath, InstanceName + "_" + db + "_" + snapshotDate.ToString("yyyyMMdd_HHmmss"));
-                    Directory.CreateDirectory(folder);
-                    try
+                    ExportSchema(folder, dbid, snapshotDate);
+                    MessageBox.Show("Export Completed", "Export", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo()
                     {
-                        ExportSchema(folder, dbid, snapshotDate);
-                        MessageBox.Show("Export Completed", "Export", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                        System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo()
-                        {
-                            FileName = folder,
-                            UseShellExecute = true,
-                            Verb = "open"
-                        });
-                    }
-                    catch (Exception ex)
-                    {
-                        MessageBox.Show(ex.Message, "Export", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    }
-
+                        FileName = folder,
+                        UseShellExecute = true,
+                        Verb = "open"
+                    });
                 }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(ex.Message, "Export", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+
             }
         }
 
-        private void ExportSchema(string folder,int DBID, DateTime SnapshotDate)
+        private static void ExportSchema(string folder,int DBID, DateTime SnapshotDate)
         {
             using (var cn = new SqlConnection(Common.ConnectionString))
             using(var cmd = new SqlCommand("dbo.DBSchemaAtDate_Get",cn) {  CommandType = CommandType.StoredProcedure, CommandTimeout = 300})
@@ -310,12 +308,12 @@ namespace DBADashGUI.Changes
             }
         }
 
-        private void tsRefresh_Click(object sender, EventArgs e)
+        private void TsRefresh_Click(object sender, EventArgs e)
         {
             RefreshData();
         }
 
-        private void tsBack_Click(object sender, EventArgs e)
+        private void TsBack_Click(object sender, EventArgs e)
         {
             NavigateBack();
         }
