@@ -206,6 +206,7 @@ namespace DBADashServiceConfig
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.Name = "ScheduleConfig";
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "Schedule";
             this.Load += new System.EventHandler(this.ScheduleConfig_Load);
             ((System.ComponentModel.ISupportInitialize)(this.dgv)).EndInit();
