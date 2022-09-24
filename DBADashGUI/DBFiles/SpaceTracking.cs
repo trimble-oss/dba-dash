@@ -65,6 +65,7 @@ namespace DBADashGUI
 
         private void refreshData()
         {
+            tsContext.Text = InstanceGroupName + (String.IsNullOrEmpty(DBName) ? "" : " \\ " + DBName);
             var dt = getDBSpace();
             dgv.AutoGenerateColumns = false;
             dgv.DataSource = dt;
