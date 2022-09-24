@@ -139,6 +139,7 @@
             this.Controls.Add(this.txtLog);
             this.Controls.Add(this.panel1);
             this.Name = "ServiceLog";
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "Service Log";
             this.Load += new System.EventHandler(this.ServiceLog_Load);
             this.panel1.ResumeLayout(false);
