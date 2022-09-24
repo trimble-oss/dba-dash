@@ -66,6 +66,38 @@ namespace DBADashGUI.Backups
 
         private List<Int32> backupInstanceIDs;
 
+        private void HandlePreviewKeyDown(object sender, PreviewKeyDownEventArgs e)
+        {
+            switch (e.KeyCode)
+            {
+                case Keys.XButton1:
+                    NavigateBack();
+                    break;
+            }
+        }
+        private void HandleMouseDown(object sender, MouseEventArgs e)
+        {
+            switch (e.Button)
+            {
+                case MouseButtons.XButton1:
+                    NavigateBack();
+                    break;
+            }
+        }
+        // https://stackoverflow.com/questions/41637248/how-do-i-capture-mouse-back-button-and-cause-it-to-do-something-else
+        private void HookupNavigationButtons(Control ctrl)
+        {
+            for (int t = ctrl.Controls.Count - 1; t >= 0; t--)
+            {
+                Control c = ctrl.Controls[t];
+                c.PreviewKeyDown -= HandlePreviewKeyDown;
+                c.PreviewKeyDown += HandlePreviewKeyDown;
+                c.MouseDown -= HandleMouseDown;
+                c.MouseDown += HandleMouseDown;
+                HookupNavigationButtons(c);
+            }
+        }
+
         public void RefreshBackups()
         {
             databaseID = 0;
@@ -316,6 +348,7 @@ namespace DBADashGUI.Backups
         public BackupsControl()
         {
             InitializeComponent();
+            HookupNavigationButtons(this); // Handle mouse back button
         }
 
 
@@ -503,10 +536,17 @@ namespace DBADashGUI.Backups
             }
         }
 
-    
-
         private void tsBack_Click(object sender, EventArgs e)
         {
+            NavigateBack();
+        }
+
+        private void NavigateBack()
+        {
+            if (!tsBack.Enabled)
+            {
+                return;
+            }
             if (databaseID > 0)
             {
                 databaseID = 0;
@@ -516,11 +556,11 @@ namespace DBADashGUI.Backups
                 InstanceIDs = backupInstanceIDs;
                 backupInstanceIDs = new List<int>();
             }
-            tsBack.Enabled = backupInstanceIDs.Count>0;
+            tsBack.Enabled = backupInstanceIDs.Count > 0;
             IncludeCritical = true;
             IncludeWarning = true;
-            IncludeOK = InstanceIDs.Count==1;
-            IncludeNA = InstanceIDs.Count==1;
+            IncludeOK = InstanceIDs.Count == 1;
+            IncludeNA = InstanceIDs.Count == 1;
             refresh();
         }
 
