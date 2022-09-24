@@ -16,11 +16,44 @@ namespace DBADashGUI.Changes
         public QueryStore()
         {
             InitializeComponent();
+            HookupNavigationButtons(this); // Handle mouse back button
         }
 
         public string Instance = string.Empty;
         public List<Int32> InstanceIDs;
         public int DatabaseID=-1;
+
+        private void HandlePreviewKeyDown(object sender, PreviewKeyDownEventArgs e)
+        {
+            switch (e.KeyCode)
+            {
+                case Keys.XButton1:
+                    NavigateBack();
+                    break;
+            }
+        }
+        private void HandleMouseDown(object sender, MouseEventArgs e)
+        {
+            switch (e.Button)
+            {
+                case MouseButtons.XButton1:
+                    NavigateBack();
+                    break;
+            }
+        }
+        // https://stackoverflow.com/questions/41637248/how-do-i-capture-mouse-back-button-and-cause-it-to-do-something-else
+        private void HookupNavigationButtons(Control ctrl)
+        {
+            for (int t = ctrl.Controls.Count - 1; t >= 0; t--)
+            {
+                Control c = ctrl.Controls[t];
+                c.PreviewKeyDown -= HandlePreviewKeyDown;
+                c.PreviewKeyDown += HandlePreviewKeyDown;
+                c.MouseDown -= HandleMouseDown;
+                c.MouseDown += HandleMouseDown;
+                HookupNavigationButtons(c);
+            }
+        }
 
         public void RefreshData()
         {
@@ -137,6 +170,15 @@ namespace DBADashGUI.Changes
 
         private void tsBack_Click(object sender, EventArgs e)
         {
+            NavigateBack();
+        }
+
+        private void NavigateBack()
+        {
+            if (!tsBack.Enabled)
+            {
+                return;
+            }
             if (DatabaseID > 0)
             {
                 DatabaseID = -1;
