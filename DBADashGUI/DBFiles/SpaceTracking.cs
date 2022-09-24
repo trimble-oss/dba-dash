@@ -33,11 +33,11 @@ namespace DBADashGUI
         {
             bool drillDownEnabled = DatabaseID > 0;
             tsBack.Enabled = false;
-            diableHyperLinks(drillDownEnabled);
-            refreshData();
+            DiableHyperLinks(drillDownEnabled);
+            RefreshDataLocal();
         }
 
-        private DataTable getDBSpace()
+        private DataTable GetDBSpace()
         {
             using (var cn = new SqlConnection(Common.ConnectionString))
             using (var cmd = new SqlCommand("dbo.DBSpace_Get", cn) { CommandType = CommandType.StoredProcedure, CommandTimeout = Properties.Settings.Default.CommandTimeout })
@@ -57,23 +57,24 @@ namespace DBADashGUI
                 {
                     cmd.Parameters.AddWithValue("@DBName", DBName);
                 }
-                DataTable dt = new DataTable();
+                DataTable dt = new();
                 da.Fill(dt);
                 return dt;
             }
          }
 
-        private void refreshData()
+        private void RefreshDataLocal()
         {
             tsContext.Text = InstanceGroupName + (String.IsNullOrEmpty(DBName) ? "" : " \\ " + DBName);
-            var dt = getDBSpace();
+            var dt = GetDBSpace();
             dgv.AutoGenerateColumns = false;
             dgv.DataSource = dt;
             dgv.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
             pieChart1.Series.Clear();
-            string labelPoint(ChartPoint chartPoint) =>
+
+            static string labelPoint(ChartPoint chartPoint) =>
             string.Format("{0} ({1:P})", chartPoint.SeriesView.Title, chartPoint.Participation);
-            SeriesCollection sc = new SeriesCollection();
+            SeriesCollection sc = new();
             var other = (double)0;
             foreach (DataRow r in dt.Rows)
             {
@@ -100,7 +101,7 @@ namespace DBADashGUI
                       
         }
 
-        private void dgv_CellContentClick(object sender, DataGridViewCellEventArgs e)
+        private void Dgv_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
             if (e.RowIndex >= 0)
             {
@@ -116,15 +117,15 @@ namespace DBADashGUI
                     else if (DBName.Length == 0)
                     {
                         DBName = selectedGroupValue;
-                        diableHyperLinks(true);
+                        DiableHyperLinks(true);
                     }
                     else
                     {
-                        diableHyperLinks(true);
+                        DiableHyperLinks(true);
                         return;
                     }
                     tsBack.Enabled = true;
-                    refreshData();
+                    RefreshDataLocal();
                 }
                 else if(dgv.Columns[e.ColumnIndex] == colHistory)
                 {
@@ -155,7 +156,7 @@ namespace DBADashGUI
             }
         }
 
-        private void diableHyperLinks(bool disable)
+        private void DiableHyperLinks(bool disable)
         {
             if (disable)
             {
@@ -171,19 +172,19 @@ namespace DBADashGUI
             }
         }
 
-        private void tsCopy_Click(object sender, EventArgs e)
+        private void TsCopy_Click(object sender, EventArgs e)
         {
             colHistory.Visible = false;
             Common.CopyDataGridViewToClipboard(dgv);
             colHistory.Visible = true;
         }
 
-        private void tsRefresh_Click(object sender, EventArgs e)
+        private void TsRefresh_Click(object sender, EventArgs e)
         {
-            refreshData();
+            RefreshDataLocal();
         }
 
-        private void tsBack_Click(object sender, EventArgs e)
+        private void TsBack_Click(object sender, EventArgs e)
         {
             if (DBName.Length > 0)
             {
@@ -194,11 +195,11 @@ namespace DBADashGUI
                 InstanceGroupName = "";
                 tsBack.Enabled = false;
             }
-            diableHyperLinks(false);
-            refreshData();
+            DiableHyperLinks(false);
+            RefreshDataLocal();
         }
 
-        private void tsHistory_Click(object sender, EventArgs e)
+        private void TsHistory_Click(object sender, EventArgs e)
         {
             var frm = new DBSpaceHistoryView
             {
@@ -213,7 +214,7 @@ namespace DBADashGUI
             frm.Show();
         }
 
-        private void tsExcel_Click(object sender, EventArgs e)
+        private void TsExcel_Click(object sender, EventArgs e)
         {
             colHistory.Visible = false;
             Common.PromptSaveDataGridView(ref dgv);
