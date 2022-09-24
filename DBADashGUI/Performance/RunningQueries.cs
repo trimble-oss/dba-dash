@@ -30,7 +30,7 @@ namespace DBADashGUI.Performance
         private bool hasWaitResource;
         private long blockedWait;
 
-        private DataGridViewColumn[] runningQueryColumns
+        private DataGridViewColumn[] RunningQueryColumns
         {
             get
             {
@@ -114,7 +114,7 @@ namespace DBADashGUI.Performance
 
         public void RefreshData()
         {
-            updateRowLimit();
+            UpdateRowLimit();
             tsEditLimit.Visible = false;
             lblRowLimit.Visible = false;
             tsWaitsFilter.Enabled = SessionID == 0;
@@ -129,7 +129,7 @@ namespace DBADashGUI.Performance
             tsPrevious.Visible = false;
             tsNext.Visible = false;
             tsGetLatest.Visible = true;
-            clearBlocking();
+            ClearBlocking();
             if (InstanceIDs != null && InstanceIDs.Count == 1)
             {
                 InstanceID = InstanceIDs[0];
@@ -138,25 +138,25 @@ namespace DBADashGUI.Performance
             if (SessionID != 0) // Show the running query snapshots for a specific session ID between specified dates
             {
                 tsGetLatest.Visible = false;
-                snapshotDT = runningQueriesForSession(SessionID, SnapshotDateFrom, SnapshotDateTo, InstanceID);
-                getCounts();
-                loadSnapshot(new DataView(snapshotDT));
+                snapshotDT = RunningQueriesForSession(SessionID, SnapshotDateFrom, SnapshotDateTo, InstanceID);
+                GetCounts();
+                LoadSnapshot(new DataView(snapshotDT));
                 dgv.Columns["colSnapshotDate"].Visible = false;
                 dgv.Columns["colSnapshotDateLink"].Visible = true;
             }
             else if (SnapshotDateFrom== SnapshotDateTo && InstanceID>0 && SnapshotDateFrom> DateTime.MinValue) // Show a specific blocking snapshot (e.g. Blocking chart drill down)
             {
-                loadSnapshot(SnapshotDateFrom);
+                LoadSnapshot(SnapshotDateFrom);
             }
             else // List of snapshots for an instance or last snapshot for all instances
             {
-                loadSummaryData();
+                LoadSummaryData();
             }
 
         }
 
         /// <summary>If we are not filtered for a specific instance then show server level summary</summary> 
-        private bool isServerLevelSummary
+        private bool IsServerLevelSummary
         {
             get
             {
@@ -165,21 +165,21 @@ namespace DBADashGUI.Performance
         }
 
         /// <summary>Get a list of running queries snapshots for an instance or last snapshot for each instance</summary> 
-        private void loadSummaryData()
+        private void LoadSummaryData()
         {
             DataTable dt;
             tsBlockingFilter.Visible = false;
-            tsGetLatest.Visible = !isServerLevelSummary;
+            tsGetLatest.Visible = !IsServerLevelSummary;
             tsStatus.Visible = false;
 
-            if (isServerLevelSummary) // Show a list of snapshots for the selected database instance
+            if (IsServerLevelSummary) // Show a list of snapshots for the selected database instance
             {
-                dt = runningQueriesServerSummary();
+                dt = RunningQueriesServerSummary();
                 tsBack.Enabled = false;           
             }
             else // Show the last snapshot for all instances
             {
-                dt = runningQueriesSummary();
+                dt = RunningQueriesSummary();
                 tsBack.Enabled = InstanceIDs != null && InstanceIDs.Count > 1;
                 lblRowLimit.Visible = dt.Rows.Count == Properties.Settings.Default.RunningQueriesSummaryMaxRows;
                 tsEditLimit.Visible = true;
@@ -188,8 +188,8 @@ namespace DBADashGUI.Performance
             dgv.AutoGenerateColumns = false;
             dgv.Columns.AddRange(
                 new DataGridViewTextBoxColumn() { HeaderText = "InstanceID", DataPropertyName = "InstanceID", Name = "colInstanceID", Visible = false , Frozen = Common.FreezeKeyColumn },
-                new DataGridViewLinkColumn() { HeaderText = "Instance", DataPropertyName = "InstanceDisplayName", Name = "colInstance", SortMode = DataGridViewColumnSortMode.Automatic, Visible= isServerLevelSummary, LinkColor=DashColors.LinkColor, Frozen= Common.FreezeKeyColumn},
-                new DataGridViewTextBoxColumn() { HeaderText = "Instance", DataPropertyName = "InstanceDisplayName", SortMode = DataGridViewColumnSortMode.Automatic,Visible=!isServerLevelSummary, Frozen = Common.FreezeKeyColumn },
+                new DataGridViewLinkColumn() { HeaderText = "Instance", DataPropertyName = "InstanceDisplayName", Name = "colInstance", SortMode = DataGridViewColumnSortMode.Automatic, Visible= IsServerLevelSummary, LinkColor=DashColors.LinkColor, Frozen= Common.FreezeKeyColumn},
+                new DataGridViewTextBoxColumn() { HeaderText = "Instance", DataPropertyName = "InstanceDisplayName", SortMode = DataGridViewColumnSortMode.Automatic,Visible=!IsServerLevelSummary, Frozen = Common.FreezeKeyColumn },
                 new DataGridViewLinkColumn() { HeaderText = "Snapshot Date", DataPropertyName = "SnapshotDate", Name = "colSnapshotDate", SortMode = DataGridViewColumnSortMode.Automatic, LinkColor = DashColors.LinkColor},
                 new DataGridViewTextBoxColumn() { HeaderText = "Running Queries", DataPropertyName = "RunningQueries", SortMode = DataGridViewColumnSortMode.Automatic, DefaultCellStyle = Common.DataGridViewNumericCellStyle },
                 new DataGridViewTextBoxColumn() { HeaderText = "Blocked Queries", DataPropertyName = "BlockedQueries", SortMode = DataGridViewColumnSortMode.Automatic, DefaultCellStyle = Common.DataGridViewNumericCellStyle },
@@ -207,7 +207,7 @@ namespace DBADashGUI.Performance
         }
 
         /// <summary>Get running query snapshots associated with a specified session id between two dates (for associating RPC/Batch completed events with running queries)</summary> 
-        private DataTable runningQueriesForSession(int sessionID, DateTime fromDate, DateTime toDate, int instanceID)
+        private static DataTable RunningQueriesForSession(int sessionID, DateTime fromDate, DateTime toDate, int instanceID)
         {
             using (var cn = new SqlConnection(Common.ConnectionString))
             using (var cmd = new SqlCommand("RunningQueriesForSession_Get", cn) { CommandType = CommandType.StoredProcedure })
@@ -217,7 +217,7 @@ namespace DBADashGUI.Performance
                 cmd.Parameters.Add(new SqlParameter("SnapshotDateFrom", fromDate) { DbType = DbType.DateTime2 });
                 cmd.Parameters.Add(new SqlParameter("SnapshotDateTo", toDate) { DbType = DbType.DateTime2 });
                 cmd.Parameters.AddWithValue("InstanceID", instanceID);
-                DataTable dt = new DataTable();
+                DataTable dt = new();
                 da.Fill(dt);
                 Common.ConvertUTCToLocal(ref dt);
                 dt.Columns["SnapshotDateUTC"].ColumnName = "SnapshotDate";
@@ -229,7 +229,7 @@ namespace DBADashGUI.Performance
         }
 
         /// <summary>Get last running query snapshot summary data for all servers</summary> 
-        private DataTable runningQueriesServerSummary()
+        private DataTable RunningQueriesServerSummary()
         {
             using (var cn = new SqlConnection(Common.ConnectionString))
             using (var cmd = new SqlCommand("dbo.RunningQueriesServerSummary_Get", cn) { CommandType = CommandType.StoredProcedure })
@@ -245,7 +245,7 @@ namespace DBADashGUI.Performance
         }
 
         /// <summary>Get a list of running query snapshots for the specified instance</summary> 
-        private DataTable runningQueriesSummary()
+        private DataTable RunningQueriesSummary()
         {
             using (var cn = new SqlConnection(Common.ConnectionString))
             using (var cmd = new SqlCommand("dbo.RunningQueriesSummary_Get", cn) { CommandType = CommandType.StoredProcedure })
@@ -264,7 +264,7 @@ namespace DBADashGUI.Performance
         }
 
         /// <summary>Get running queries snapshot data for the specified snapshot date. skip parameter is used to return next snapshot (1) or previous snapshot (-1)</summary> 
-        private DataTable runningQueriesSnapshot(ref DateTime snapshotDate, int skip = 0)
+        private DataTable RunningQueriesSnapshot(ref DateTime snapshotDate, int skip = 0)
         {
             using (var cn = new SqlConnection(Common.ConnectionString))
             using (var cmd = new SqlCommand("dbo.RunningQueries_Get", cn) { CommandType = CommandType.StoredProcedure })
@@ -292,15 +292,15 @@ namespace DBADashGUI.Performance
         }
 
         /// <summary>Load a running queries snapshot for the specified date. skip parameter is used to return next snapshot (1) or previous snapshot (-1) </summary> 
-        private void loadSnapshot(DateTime snapshotDate, int skip = 0)
+        private void LoadSnapshot(DateTime snapshotDate, int skip = 0)
         {
             lblRowLimit.Visible = false;
             tsEditLimit.Visible = false;
             tsGroupByFilter.Visible = false;
-            snapshotDT = runningQueriesSnapshot(ref snapshotDate, skip);
-            getCounts();
+            snapshotDT = RunningQueriesSnapshot(ref snapshotDate, skip);
+            GetCounts();
             lblSnapshotDate.Text = "Snapshot Date: " + snapshotDate.ToLocalTime().ToString();
-            loadSnapshot(new DataView(snapshotDT));
+            LoadSnapshot(new DataView(snapshotDT));
             lblSnapshotDate.Visible = true;
             tsGetLatest.Visible = true;
             tsPrevious.Visible = true;
@@ -311,12 +311,12 @@ namespace DBADashGUI.Performance
         }
 
         /// <summary>Load a running queries snapshot</summary> 
-        private void loadSnapshot(DataView source)
+        private void LoadSnapshot(DataView source)
         {
             dgv.DataSource = null;
             dgv.Columns.Clear();
             dgv.AutoGenerateColumns = false;          
-            dgv.Columns.AddRange(runningQueryColumns);
+            dgv.Columns.AddRange(RunningQueryColumns);
             dgv.DataSource = source;
             dgv.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCellsExceptHeader);
             dgv.Columns["colBatchText"].Width = 200;
@@ -333,7 +333,7 @@ namespace DBADashGUI.Performance
         }
 
         /// <summary>Get counts from the running queries snapshot table. e.g. Blocking counts</summary> 
-        private void getCounts()
+        private void GetCounts()
         {
             runningJobCount = snapshotDT.AsEnumerable().Where(r => r["job_id"] != DBNull.Value).Count();
             blockedCount = snapshotDT.AsEnumerable().Where(r => Convert.ToInt16(r["blocking_session_id"]) != 0).Count();
@@ -349,7 +349,7 @@ namespace DBADashGUI.Performance
             tsStatus.ForeColor = blockedCount > 0 ?  DashColors.Fail : DashColors.Success;
         }
 
-        private void dgv_CellContentClick(object sender, DataGridViewCellEventArgs e)
+        private void Dgv_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
             if (e.RowIndex >= 0)
             {
@@ -358,7 +358,7 @@ namespace DBADashGUI.Performance
                 {
                     var snapshotDate = ((DateTime)row["SnapshotDate"]).ToUniversalTime();
                     InstanceID = (int)row["InstanceID"];
-                    loadSnapshot(snapshotDate);
+                    LoadSnapshot(snapshotDate);
                     tsBack.Enabled = true;
                 }
                 else if (dgv.Columns[e.ColumnIndex].Name == "colInstance") // Drill down to view snapshot summary for a specific instance
@@ -399,7 +399,7 @@ namespace DBADashGUI.Performance
                         MessageBox.Show("Filter error: " + filter + Environment.NewLine + ex.Message);
                         return;
                     }
-                    loadSnapshot(dv);
+                    LoadSnapshot(dv);
                     tsBack.Enabled = true;
                 }
                 else if (dgv.Columns[e.ColumnIndex].Name == "colSessionID") // Load the associated RPC/Batch completed event when the user clicks the sesion ID column
@@ -412,7 +412,7 @@ namespace DBADashGUI.Performance
                         StartTimeUTC = row["start_time"] == DBNull.Value ? Convert.ToDateTime(row["last_request_start_time"]).ToUniversalTime() : Convert.ToDateTime(row["start_time"]).ToUniversalTime(),
                         IsSleeping = Convert.ToString(row["status"]) == "sleeping"
                     };
-                    frm.ShowDialog();
+                    frm.Show(this);
                 }
                 else if (dgv.Columns[e.ColumnIndex].Name == "colTopSessionWaits") // Show a summary of the waits for the session
                 {
@@ -430,11 +430,11 @@ namespace DBADashGUI.Performance
                 }
                 else if (dgv.Columns[e.ColumnIndex].Name == "colBlockCount") // Filter to show queries blocked directly by the selected session
                 {
-                    showBlocking(Convert.ToInt16(dgv.Rows[e.RowIndex].Cells["colSessionID"].Value));
+                    ShowBlocking(Convert.ToInt16(dgv.Rows[e.RowIndex].Cells["colSessionID"].Value));
                 }
                 else if (dgv.Columns[e.ColumnIndex].Name == "colBlockedCountRecursive") // Filter to show queries blocked directly by the selected session
                 {
-                    showBlocking(Convert.ToInt16(dgv.Rows[e.RowIndex].Cells["colSessionID"].Value),true);
+                    ShowBlocking(Convert.ToInt16(dgv.Rows[e.RowIndex].Cells["colSessionID"].Value),true);
                 }
                 else if (dgv.Columns[e.ColumnIndex].Name == "colSnapshotDateLink")
                 {
@@ -449,17 +449,17 @@ namespace DBADashGUI.Performance
             }
         }
 
-        private void tsCopy_Click(object sender, EventArgs e)
+        private void TsCopy_Click(object sender, EventArgs e)
         {
             Common.CopyDataGridViewToClipboard(dgv);
         }
 
-        private void tsExcel_Click(object sender, EventArgs e)
+        private void TsExcel_Click(object sender, EventArgs e)
         {
             Common.PromptSaveDataGridView(ref dgv);
         }
 
-        private void tsBack_Click(object sender, EventArgs e)
+        private void TsBack_Click(object sender, EventArgs e)
         {
             string rowFilter = String.Empty;
             if (dgv.DataSource.GetType() == typeof(DataView))
@@ -468,8 +468,8 @@ namespace DBADashGUI.Performance
             }
             if (dgv.Columns.Contains("colGroup") || !string.IsNullOrEmpty(rowFilter)) // Remove filter
             {
-                clearBlocking();
-                loadSnapshot(new DataView(snapshotDT));
+                ClearBlocking();
+                LoadSnapshot(new DataView(snapshotDT));
                 tsBack.Enabled = SnapshotDateFrom == DateTime.MinValue;
                 tsGroupByFilter.Visible = false;
             }
@@ -484,17 +484,17 @@ namespace DBADashGUI.Performance
             }
         }
 
-        private void tsGetLatest_Click(object sender, EventArgs e)
+        private void TsGetLatest_Click(object sender, EventArgs e)
         {
-            loadSnapshot(DateTime.MaxValue);
+            LoadSnapshot(DateTime.MaxValue);
         }
 
-        private void tsRefresh_Click(object sender, EventArgs e)
+        private void TsRefresh_Click(object sender, EventArgs e)
         {
             RefreshData();
         }
 
-        private void dgv_CellFormatting(object sender, DataGridViewCellFormattingEventArgs e)
+        private void Dgv_CellFormatting(object sender, DataGridViewCellFormattingEventArgs e)
         {
             if (dgv.Columns[e.ColumnIndex].Name == "colQueryPlan")
             {
@@ -512,12 +512,12 @@ namespace DBADashGUI.Performance
         }
 
         /// <summary>Takes the running query snapshot and groups the data by a specified column</summary> 
-        private void groupSnapshot(string group)
+        private void GroupSnapshot(string group)
         {
             if (snapshotDT != null && snapshotDT.Rows.Count > 0)
             {
-                clearBlocking();
-                DataTable groupedDT = new DataTable();
+                ClearBlocking();
+                DataTable groupedDT = new();
                 groupedDT.Columns.AddRange(
                     new DataColumn[] {
                          new DataColumn(group,typeof(string)),
@@ -570,33 +570,33 @@ namespace DBADashGUI.Performance
             }
         }
 
-        private void tsGroupBy_Click(object sender, EventArgs e)
+        private void TsGroupBy_Click(object sender, EventArgs e)
         {
             var ts = (ToolStripMenuItem)sender;
             if (ts.Tag == null)
             {
-                loadSnapshot(new DataView(snapshotDT));
+                LoadSnapshot(new DataView(snapshotDT));
             }
             else
             {
-                groupSnapshot((string)ts.Tag);
+                GroupSnapshot((string)ts.Tag);
                 tsBack.Enabled = true;
             }
 
         }
 
-        private void tsPrevious_Click(object sender, EventArgs e)
+        private void TsPrevious_Click(object sender, EventArgs e)
         {
-            loadSnapshot(currentSnapshotDate, -1);
+            LoadSnapshot(currentSnapshotDate, -1);
         }
 
-        private void tsNext_Click(object sender, EventArgs e)
+        private void TsNext_Click(object sender, EventArgs e)
         {
-            loadSnapshot(currentSnapshotDate, 1);
+            LoadSnapshot(currentSnapshotDate, 1);
         }
 
         /// <summary>Get session level wait stats for a specified session or for all sessions</summary> 
-        private DataTable GetSessionWaits(int InstanceID, short? SessionID, DateTime? SnapshotDateUTC, DateTime? LoginTimeUTC)
+        private static DataTable GetSessionWaits(int InstanceID, short? SessionID, DateTime? SnapshotDateUTC, DateTime? LoginTimeUTC)
         {
             using (var cn = new SqlConnection(Common.ConnectionString))
             using (var cmd = new SqlCommand("dbo.SessionWaits_Get", cn) { CommandType = CommandType.StoredProcedure })
@@ -613,7 +613,7 @@ namespace DBADashGUI.Performance
         }
 
         /// <summary>Get session level wait stats for the specified snapshot over all sessions.</summary> 
-        private DataTable GetSessionWaitSummary(int InstanceID, DateTime? SnapshotDateUTC)
+        private static DataTable GetSessionWaitSummary(int InstanceID, DateTime? SnapshotDateUTC)
         {
             using (var cn = new SqlConnection(Common.ConnectionString))
             using (var cmd = new SqlCommand("dbo.SessionWaitsSummary_Get", cn) { CommandType = CommandType.StoredProcedure })
@@ -627,31 +627,31 @@ namespace DBADashGUI.Performance
             }
         }
 
-        private void tsSessionWaitCopy_Click(object sender, EventArgs e)
+        private void TsSessionWaitCopy_Click(object sender, EventArgs e)
         {
             Common.CopyDataGridViewToClipboard(dgvSessionWaits);
         }
 
-        private void tsSessionWaitExcel_Click(object sender, EventArgs e)
+        private void TsSessionWaitExcel_Click(object sender, EventArgs e)
         {
             Common.PromptSaveDataGridView(ref dgvSessionWaits);
         }
 
-        private void allSessionsToolStripMenuItem_Click(object sender, EventArgs e)
+        private void AllSessionsToolStripMenuItem_Click(object sender, EventArgs e)
         {
             dgvSessionWaits.Columns["colSessionID"].Visible = true;
             dgvSessionWaits.DataSource = GetSessionWaits(InstanceID, null, currentSnapshotDate, null);
             lblWaitsForSession.Text = "All Sessions";
         }
 
-        private void summaryViewToolStripMenuItem_Click(object sender, EventArgs e)
+        private void SummaryViewToolStripMenuItem_Click(object sender, EventArgs e)
         {
             dgvSessionWaits.Columns["colSessionID"].Visible = false;
             dgvSessionWaits.DataSource = GetSessionWaitSummary(InstanceID, currentSnapshotDate);
             lblWaitsForSession.Text = "Session Wait Summary";
         }
 
-        private void sessionToolStripMenuItem_Click(object sender, EventArgs e)
+        private void SessionToolStripMenuItem_Click(object sender, EventArgs e)
         {
             dgvSessionWaits.Columns["colSessionID"].Visible = false;
             var sessionid = (short)sessionToolStripMenuItem.Tag;
@@ -659,7 +659,7 @@ namespace DBADashGUI.Performance
             lblWaitsForSession.Text = "Waits For Session ID: " + sessionid.ToString();
         }
 
-        private void dgvSessionWaits_CellContentClick(object sender, DataGridViewCellEventArgs e)
+        private void DgvSessionWaits_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
             if (e.RowIndex >= 0 && dgvSessionWaits.Columns[e.ColumnIndex].Name == "colHelp")
             {
@@ -669,7 +669,7 @@ namespace DBADashGUI.Performance
             }
         }
 
-        private void showRootBlockersToolStripMenuItem_Click(object sender, EventArgs e)
+        private void ShowRootBlockersToolStripMenuItem_Click(object sender, EventArgs e)
         {
             ShowRootBlockers();
         }
@@ -677,11 +677,11 @@ namespace DBADashGUI.Performance
         /// <summary>Filter to show root blockers - queries holding locks needed by other queries that are not blocked themselves</summary> 
         public void ShowRootBlockers()
         {
-            showBlocking(0);
+            ShowBlocking(0);
         }
 
         /// <summary>Filter to show the queries blocked by a particular session.  For SessionID=0, show root blockers.</summary>     
-        private void showBlocking(short sessionID,bool recursive=false) //
+        private void ShowBlocking(short sessionID,bool recursive=false) //
         {
             tsGroupByFilter.Visible = false;
             var dv = (DataView)dgv.DataSource;
@@ -705,7 +705,7 @@ namespace DBADashGUI.Performance
         }
 
         /// <summary>Remove blocking filter applied to grid with showBlocking()</summary>       
-        private void clearBlocking() 
+        private void ClearBlocking()
         {
             tsGroupByFilter.Visible = false;
             if (dgv.DataSource != null)
@@ -718,46 +718,41 @@ namespace DBADashGUI.Performance
             return;
         }
 
-        private void clearBlockingFilterToolStripMenuItem_Click(object sender, EventArgs e)
+        private void ClearBlockingFilterToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            clearBlocking();
+            ClearBlocking();
         }
 
-        private void tsCols_Click(object sender, EventArgs e)
+        private void TsCols_Click(object sender, EventArgs e)
         {
-            promptColumnSelection(ref dgv);
+            PromptColumnSelection(ref dgv);
         }
 
-        private void promptColumnSelection(ref DataGridView gv)
+        private void PromptColumnSelection(ref DataGridView gv)
         {
             using (var frm = new SelectColumns())
             {
                 frm.Columns = gv.Columns;
                 frm.ShowDialog(this);
-                if (frm.DialogResult == DialogResult.OK)
-                {
-                    var dt = ((DataView)dgv.DataSource).Table;
-                }
             }
         }
 
-        private void tsEditLimit_Click(object sender, EventArgs e)
+        private void TsEditLimit_Click(object sender, EventArgs e)
         {
             string limit = Properties.Settings.Default.RunningQueriesSummaryMaxRows.ToString();
             if (Common.ShowInputDialog(ref limit , "Enter row limit") == DialogResult.OK)
             {
-                int maxRows;
-                if( int.TryParse(limit,out maxRows) && maxRows >0)
+                if (int.TryParse(limit, out int maxRows) && maxRows > 0)
                 {
                     Properties.Settings.Default.RunningQueriesSummaryMaxRows = maxRows;
                     Properties.Settings.Default.Save();
-                    updateRowLimit();
-                    loadSummaryData();
+                    UpdateRowLimit();
+                    LoadSummaryData();
                 }
                 else
                 {
                     MessageBox.Show("Invalid value", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                }               
+                }
             }
         }
 
@@ -766,7 +761,7 @@ namespace DBADashGUI.Performance
             tsEditLimit.LinkColor = DashColors.LinkColor;           
         }
 
-        private void updateRowLimit()
+        private void UpdateRowLimit()
         {
             // Ensure max rows is set to a value greater than 0
             if (Properties.Settings.Default.RunningQueriesSummaryMaxRows <= 0)

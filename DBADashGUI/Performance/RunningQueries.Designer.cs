@@ -130,8 +130,8 @@ namespace DBADashGUI.Performance
             this.dgv.RowTemplate.Height = 24;
             this.dgv.Size = new System.Drawing.Size(1090, 376);
             this.dgv.TabIndex = 0;
-            this.dgv.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgv_CellContentClick);
-            this.dgv.CellFormatting += new System.Windows.Forms.DataGridViewCellFormattingEventHandler(this.dgv_CellFormatting);
+            this.dgv.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.Dgv_CellContentClick);
+            this.dgv.CellFormatting += new System.Windows.Forms.DataGridViewCellFormattingEventHandler(this.Dgv_CellFormatting);
             // 
             // toolStrip1
             // 
@@ -163,7 +163,7 @@ namespace DBADashGUI.Performance
             this.tsRefresh.Name = "tsRefresh";
             this.tsRefresh.Size = new System.Drawing.Size(29, 24);
             this.tsRefresh.Text = "Refresh";
-            this.tsRefresh.Click += new System.EventHandler(this.tsRefresh_Click);
+            this.tsRefresh.Click += new System.EventHandler(this.TsRefresh_Click);
             // 
             // tsCopy
             // 
@@ -173,7 +173,7 @@ namespace DBADashGUI.Performance
             this.tsCopy.Name = "tsCopy";
             this.tsCopy.Size = new System.Drawing.Size(29, 24);
             this.tsCopy.Text = "Copy";
-            this.tsCopy.Click += new System.EventHandler(this.tsCopy_Click);
+            this.tsCopy.Click += new System.EventHandler(this.TsCopy_Click);
             // 
             // tsExcel
             // 
@@ -183,7 +183,7 @@ namespace DBADashGUI.Performance
             this.tsExcel.Name = "tsExcel";
             this.tsExcel.Size = new System.Drawing.Size(29, 24);
             this.tsExcel.Text = "Export to Excel";
-            this.tsExcel.Click += new System.EventHandler(this.tsExcel_Click);
+            this.tsExcel.Click += new System.EventHandler(this.TsExcel_Click);
             // 
             // tsCols
             // 
@@ -193,7 +193,7 @@ namespace DBADashGUI.Performance
             this.tsCols.Name = "tsCols";
             this.tsCols.Size = new System.Drawing.Size(29, 24);
             this.tsCols.Text = "Columns";
-            this.tsCols.Click += new System.EventHandler(this.tsCols_Click);
+            this.tsCols.Click += new System.EventHandler(this.TsCols_Click);
             // 
             // tsBack
             // 
@@ -204,7 +204,7 @@ namespace DBADashGUI.Performance
             this.tsBack.Name = "tsBack";
             this.tsBack.Size = new System.Drawing.Size(29, 24);
             this.tsBack.Text = "Back";
-            this.tsBack.Click += new System.EventHandler(this.tsBack_Click);
+            this.tsBack.Click += new System.EventHandler(this.TsBack_Click);
             // 
             // tsGetLatest
             // 
@@ -214,7 +214,7 @@ namespace DBADashGUI.Performance
             this.tsGetLatest.Name = "tsGetLatest";
             this.tsGetLatest.Size = new System.Drawing.Size(99, 24);
             this.tsGetLatest.Text = "Get Latest";
-            this.tsGetLatest.Click += new System.EventHandler(this.tsGetLatest_Click);
+            this.tsGetLatest.Click += new System.EventHandler(this.TsGetLatest_Click);
             // 
             // tsNext
             // 
@@ -225,7 +225,7 @@ namespace DBADashGUI.Performance
             this.tsNext.Name = "tsNext";
             this.tsNext.Size = new System.Drawing.Size(29, 24);
             this.tsNext.Text = "Next Snapshot";
-            this.tsNext.Click += new System.EventHandler(this.tsNext_Click);
+            this.tsNext.Click += new System.EventHandler(this.TsNext_Click);
             // 
             // lblSnapshotDate
             // 
@@ -268,7 +268,7 @@ namespace DBADashGUI.Performance
             this.toolStripMenuItem1.Size = new System.Drawing.Size(236, 26);
             this.toolStripMenuItem1.Tag = "client_interface_name";
             this.toolStripMenuItem1.Text = "Client Interface Name";
-            this.toolStripMenuItem1.Click += new System.EventHandler(this.tsGroupBy_Click);
+            this.toolStripMenuItem1.Click += new System.EventHandler(this.TsGroupBy_Click);
             // 
             // databaseToolStripMenuItem
             // 
@@ -276,7 +276,7 @@ namespace DBADashGUI.Performance
             this.databaseToolStripMenuItem.Size = new System.Drawing.Size(236, 26);
             this.databaseToolStripMenuItem.Tag = "database_name";
             this.databaseToolStripMenuItem.Text = "Database";
-            this.databaseToolStripMenuItem.Click += new System.EventHandler(this.tsGroupBy_Click);
+            this.databaseToolStripMenuItem.Click += new System.EventHandler(this.TsGroupBy_Click);
             // 
             // hostNameToolStripMenuItem
             // 
@@ -284,7 +284,7 @@ namespace DBADashGUI.Performance
             this.hostNameToolStripMenuItem.Size = new System.Drawing.Size(236, 26);
             this.hostNameToolStripMenuItem.Tag = "host_name";
             this.hostNameToolStripMenuItem.Text = "Host Name";
-            this.hostNameToolStripMenuItem.Click += new System.EventHandler(this.tsGroupBy_Click);
+            this.hostNameToolStripMenuItem.Click += new System.EventHandler(this.TsGroupBy_Click);
             // 
             // loginNameToolStripMenuItem
             // 
@@ -292,7 +292,7 @@ namespace DBADashGUI.Performance
             this.loginNameToolStripMenuItem.Size = new System.Drawing.Size(236, 26);
             this.loginNameToolStripMenuItem.Tag = "login_name";
             this.loginNameToolStripMenuItem.Text = "Login Name";
-            this.loginNameToolStripMenuItem.Click += new System.EventHandler(this.tsGroupBy_Click);
+            this.loginNameToolStripMenuItem.Click += new System.EventHandler(this.TsGroupBy_Click);
             // 
             // objectNameToolStripMenuItem
             // 
@@ -300,7 +300,7 @@ namespace DBADashGUI.Performance
             this.objectNameToolStripMenuItem.Size = new System.Drawing.Size(236, 26);
             this.objectNameToolStripMenuItem.Tag = "object_name";
             this.objectNameToolStripMenuItem.Text = "Object Name";
-            this.objectNameToolStripMenuItem.Click += new System.EventHandler(this.tsGroupBy_Click);
+            this.objectNameToolStripMenuItem.Click += new System.EventHandler(this.TsGroupBy_Click);
             // 
             // planHandleToolStripMenuItem
             // 
@@ -308,7 +308,7 @@ namespace DBADashGUI.Performance
             this.planHandleToolStripMenuItem.Size = new System.Drawing.Size(236, 26);
             this.planHandleToolStripMenuItem.Tag = "plan_handle";
             this.planHandleToolStripMenuItem.Text = "Plan Handle";
-            this.planHandleToolStripMenuItem.Click += new System.EventHandler(this.tsGroupBy_Click);
+            this.planHandleToolStripMenuItem.Click += new System.EventHandler(this.TsGroupBy_Click);
             // 
             // programToolStripMenuItem
             // 
@@ -316,7 +316,7 @@ namespace DBADashGUI.Performance
             this.programToolStripMenuItem.Size = new System.Drawing.Size(236, 26);
             this.programToolStripMenuItem.Tag = "program_name";
             this.programToolStripMenuItem.Text = "Program";
-            this.programToolStripMenuItem.Click += new System.EventHandler(this.tsGroupBy_Click);
+            this.programToolStripMenuItem.Click += new System.EventHandler(this.TsGroupBy_Click);
             // 
             // queryHashToolStripMenuItem
             // 
@@ -324,7 +324,7 @@ namespace DBADashGUI.Performance
             this.queryHashToolStripMenuItem.Size = new System.Drawing.Size(236, 26);
             this.queryHashToolStripMenuItem.Tag = "query_hash";
             this.queryHashToolStripMenuItem.Text = "Query Hash";
-            this.queryHashToolStripMenuItem.Click += new System.EventHandler(this.tsGroupBy_Click);
+            this.queryHashToolStripMenuItem.Click += new System.EventHandler(this.TsGroupBy_Click);
             // 
             // queryPlanHashToolStripMenuItem
             // 
@@ -332,7 +332,7 @@ namespace DBADashGUI.Performance
             this.queryPlanHashToolStripMenuItem.Size = new System.Drawing.Size(236, 26);
             this.queryPlanHashToolStripMenuItem.Tag = "query_plan_hash";
             this.queryPlanHashToolStripMenuItem.Text = "Query Plan Hash";
-            this.queryPlanHashToolStripMenuItem.Click += new System.EventHandler(this.tsGroupBy_Click);
+            this.queryPlanHashToolStripMenuItem.Click += new System.EventHandler(this.TsGroupBy_Click);
             // 
             // sQLHandleToolStripMenuItem
             // 
@@ -340,7 +340,7 @@ namespace DBADashGUI.Performance
             this.sQLHandleToolStripMenuItem.Size = new System.Drawing.Size(236, 26);
             this.sQLHandleToolStripMenuItem.Tag = "sql_handle";
             this.sQLHandleToolStripMenuItem.Text = "SQL Handle";
-            this.sQLHandleToolStripMenuItem.Click += new System.EventHandler(this.tsGroupBy_Click);
+            this.sQLHandleToolStripMenuItem.Click += new System.EventHandler(this.TsGroupBy_Click);
             // 
             // statusToolStripMenuItem
             // 
@@ -348,7 +348,7 @@ namespace DBADashGUI.Performance
             this.statusToolStripMenuItem.Size = new System.Drawing.Size(236, 26);
             this.statusToolStripMenuItem.Tag = "status";
             this.statusToolStripMenuItem.Text = "Status";
-            this.statusToolStripMenuItem.Click += new System.EventHandler(this.tsGroupBy_Click);
+            this.statusToolStripMenuItem.Click += new System.EventHandler(this.TsGroupBy_Click);
             // 
             // waitResourceToolStripMenuItem
             // 
@@ -356,7 +356,7 @@ namespace DBADashGUI.Performance
             this.waitResourceToolStripMenuItem.Size = new System.Drawing.Size(236, 26);
             this.waitResourceToolStripMenuItem.Tag = "wait_resource";
             this.waitResourceToolStripMenuItem.Text = "Wait Resource";
-            this.waitResourceToolStripMenuItem.Click += new System.EventHandler(this.tsGroupBy_Click);
+            this.waitResourceToolStripMenuItem.Click += new System.EventHandler(this.TsGroupBy_Click);
             // 
             // waitTypeToolStripMenuItem
             // 
@@ -364,7 +364,7 @@ namespace DBADashGUI.Performance
             this.waitTypeToolStripMenuItem.Size = new System.Drawing.Size(236, 26);
             this.waitTypeToolStripMenuItem.Tag = "wait_type";
             this.waitTypeToolStripMenuItem.Text = "Wait Type";
-            this.waitTypeToolStripMenuItem.Click += new System.EventHandler(this.tsGroupBy_Click);
+            this.waitTypeToolStripMenuItem.Click += new System.EventHandler(this.TsGroupBy_Click);
             // 
             // toolStripSeparator1
             // 
@@ -376,7 +376,7 @@ namespace DBADashGUI.Performance
             this.noneToolStripMenuItem.Name = "noneToolStripMenuItem";
             this.noneToolStripMenuItem.Size = new System.Drawing.Size(236, 26);
             this.noneToolStripMenuItem.Text = "None";
-            this.noneToolStripMenuItem.Click += new System.EventHandler(this.tsGroupBy_Click);
+            this.noneToolStripMenuItem.Click += new System.EventHandler(this.TsGroupBy_Click);
             // 
             // tsPrevious
             // 
@@ -387,7 +387,7 @@ namespace DBADashGUI.Performance
             this.tsPrevious.Name = "tsPrevious";
             this.tsPrevious.Size = new System.Drawing.Size(29, 24);
             this.tsPrevious.Text = "Previous Snapshot";
-            this.tsPrevious.Click += new System.EventHandler(this.tsPrevious_Click);
+            this.tsPrevious.Click += new System.EventHandler(this.TsPrevious_Click);
             // 
             // tsBlockingFilter
             // 
@@ -406,7 +406,7 @@ namespace DBADashGUI.Performance
             this.showRootBlockersToolStripMenuItem.Name = "showRootBlockersToolStripMenuItem";
             this.showRootBlockersToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
             this.showRootBlockersToolStripMenuItem.Text = "Show Root Blockers";
-            this.showRootBlockersToolStripMenuItem.Click += new System.EventHandler(this.showRootBlockersToolStripMenuItem_Click);
+            this.showRootBlockersToolStripMenuItem.Click += new System.EventHandler(this.ShowRootBlockersToolStripMenuItem_Click);
             // 
             // clearBlockingFilterToolStripMenuItem
             // 
@@ -414,7 +414,7 @@ namespace DBADashGUI.Performance
             this.clearBlockingFilterToolStripMenuItem.Name = "clearBlockingFilterToolStripMenuItem";
             this.clearBlockingFilterToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
             this.clearBlockingFilterToolStripMenuItem.Text = "Clear Blocking Filter";
-            this.clearBlockingFilterToolStripMenuItem.Click += new System.EventHandler(this.clearBlockingFilterToolStripMenuItem_Click);
+            this.clearBlockingFilterToolStripMenuItem.Click += new System.EventHandler(this.ClearBlockingFilterToolStripMenuItem_Click);
             // 
             // tsGroupByFilter
             // 
@@ -479,7 +479,7 @@ namespace DBADashGUI.Performance
             this.tsEditLimit.Name = "tsEditLimit";
             this.tsEditLimit.Size = new System.Drawing.Size(72, 20);
             this.tsEditLimit.Text = "Edit Limit";
-            this.tsEditLimit.Click += new System.EventHandler(this.tsEditLimit_Click);
+            this.tsEditLimit.Click += new System.EventHandler(this.TsEditLimit_Click);
             // 
             // dgvSessionWaits
             // 
@@ -497,7 +497,7 @@ namespace DBADashGUI.Performance
             this.dgvSessionWaits.RowTemplate.Height = 24;
             this.dgvSessionWaits.Size = new System.Drawing.Size(1090, 134);
             this.dgvSessionWaits.TabIndex = 0;
-            this.dgvSessionWaits.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgvSessionWaits_CellContentClick);
+            this.dgvSessionWaits.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.DgvSessionWaits_CellContentClick);
             // 
             // toolStrip2
             // 
@@ -529,7 +529,7 @@ namespace DBADashGUI.Performance
             this.tsSessionWaitCopy.Name = "tsSessionWaitCopy";
             this.tsSessionWaitCopy.Size = new System.Drawing.Size(29, 24);
             this.tsSessionWaitCopy.Text = "Copy";
-            this.tsSessionWaitCopy.Click += new System.EventHandler(this.tsSessionWaitCopy_Click);
+            this.tsSessionWaitCopy.Click += new System.EventHandler(this.TsSessionWaitCopy_Click);
             // 
             // tsSessionWaitExcel
             // 
@@ -539,7 +539,7 @@ namespace DBADashGUI.Performance
             this.tsSessionWaitExcel.Name = "tsSessionWaitExcel";
             this.tsSessionWaitExcel.Size = new System.Drawing.Size(29, 24);
             this.tsSessionWaitExcel.Text = "Excel";
-            this.tsSessionWaitExcel.Click += new System.EventHandler(this.tsSessionWaitExcel_Click);
+            this.tsSessionWaitExcel.Click += new System.EventHandler(this.TsSessionWaitExcel_Click);
             // 
             // tsWaitsFilter
             // 
@@ -559,21 +559,21 @@ namespace DBADashGUI.Performance
             this.allSessionsToolStripMenuItem.Name = "allSessionsToolStripMenuItem";
             this.allSessionsToolStripMenuItem.Size = new System.Drawing.Size(190, 26);
             this.allSessionsToolStripMenuItem.Text = "All Sessions";
-            this.allSessionsToolStripMenuItem.Click += new System.EventHandler(this.allSessionsToolStripMenuItem_Click);
+            this.allSessionsToolStripMenuItem.Click += new System.EventHandler(this.AllSessionsToolStripMenuItem_Click);
             // 
             // summaryViewToolStripMenuItem
             // 
             this.summaryViewToolStripMenuItem.Name = "summaryViewToolStripMenuItem";
             this.summaryViewToolStripMenuItem.Size = new System.Drawing.Size(190, 26);
             this.summaryViewToolStripMenuItem.Text = "Summary View";
-            this.summaryViewToolStripMenuItem.Click += new System.EventHandler(this.summaryViewToolStripMenuItem_Click);
+            this.summaryViewToolStripMenuItem.Click += new System.EventHandler(this.SummaryViewToolStripMenuItem_Click);
             // 
             // sessionToolStripMenuItem
             // 
             this.sessionToolStripMenuItem.Name = "sessionToolStripMenuItem";
             this.sessionToolStripMenuItem.Size = new System.Drawing.Size(190, 26);
             this.sessionToolStripMenuItem.Text = "Session ";
-            this.sessionToolStripMenuItem.Click += new System.EventHandler(this.sessionToolStripMenuItem_Click);
+            this.sessionToolStripMenuItem.Click += new System.EventHandler(this.SessionToolStripMenuItem_Click);
             // 
             // RunningQueries
             // 
