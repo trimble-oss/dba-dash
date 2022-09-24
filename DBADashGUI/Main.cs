@@ -911,7 +911,7 @@ namespace DBADashGUI
                 }
                 allowedTabs.Add(tabSchema);               
             }
-            this.Text ="DBA Dash" + (n.Type== SQLTreeItem.TreeType.DBADashRoot || n.InstanceName == null ? "" : " - " + n.InstanceName) + ((n.DatabaseName ==null || n.DatabaseName=="") ? "" : "\\" + n.DatabaseName);
+            this.Text = n.FullPath.Replace("\\"," \\ ");
 
             bool validatedTabs = true;
             if (allowedTabs.Count == tabs.TabPages.Count)
