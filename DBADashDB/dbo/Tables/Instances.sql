@@ -84,6 +84,7 @@
     Alias NVARCHAR(128) NULL,
     InstanceDisplayName AS ISNULL(Alias,ConnectionID),
     InstanceGroupName AS CASE WHEN EngineEdition=5 THEN Instance ELSE ISNULL(Alias,ConnectionID) END,
+    LastMemoryDumpUTC AS DATEADD(mi,UTCOffset,LastMemoryDump),
     CONSTRAINT PK_Instances PRIMARY KEY CLUSTERED (InstanceID ASC),
     CONSTRAINT FK_Instances_CollectAgent FOREIGN KEY(CollectAgentID) REFERENCES dbo.DBADashAgent(DBADashAgentID),
     CONSTRAINT FK_Instances_ImportAgent FOREIGN KEY(ImportAgentID) REFERENCES dbo.DBADashAgent(DBADashAgentID)
