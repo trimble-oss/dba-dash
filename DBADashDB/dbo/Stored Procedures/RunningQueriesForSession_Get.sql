@@ -6,6 +6,7 @@
 )
 AS
 SELECT InstanceID,
+       InstanceDisplayName,
        Duration,
        batch_text,
        text,
