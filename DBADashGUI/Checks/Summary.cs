@@ -13,6 +13,7 @@ using System.IO;
 using System.Diagnostics;
 using DBADashGUI.Checks;
 using static DBADashGUI.DBADashStatus;
+using Humanizer;
 
 namespace DBADashGUI
 {
@@ -245,18 +246,27 @@ namespace DBADashGUI
                 if (row["LastMemoryDump"]!= DBNull.Value)
                 {
                     DateTime lastMemoryDump = (DateTime)row["LastMemoryDump"];
+                    DateTime lastMemoryDumpUTC = (DateTime)row["LastMemoryDumpUTC"];
                     Int32 memoryDumpCount = (Int32)row["MemoryDumpCount"];
-                    var lastMemoryDumpHrs = DateTime.UtcNow.Subtract(lastMemoryDump).TotalHours;
-                    var lastMemoryDumpDays = DateTime.UtcNow.Subtract(lastMemoryDump).TotalDays;
-                    if (DateTime.UtcNow.Subtract(lastMemoryDump).TotalHours< 24)
+                    string lastMemoryDumpStr;
+
+                    if(Math.Abs(lastMemoryDumpUTC.ToLocalTime().Subtract(lastMemoryDump).TotalMinutes) > 10)
                     {
-                        dgvSummary.Rows[idx].Cells["MemoryDumpStatus"].Value = lastMemoryDumpHrs.ToString("0") + "hrs";
+                        lastMemoryDumpStr = "Last Memory Dump (local time): " + lastMemoryDumpUTC.ToLocalTime().ToString() + Environment.NewLine +
+                           "Last Memory Dump (server time): " + lastMemoryDump.ToString() + Environment.NewLine +
+                           "Total Memory Dumps: " + memoryDumpCount; ;
+
                     }
                     else
                     {
-                        dgvSummary.Rows[idx].Cells["MemoryDumpStatus"].Value = lastMemoryDumpDays.ToString("0") + " days";
+                        lastMemoryDumpStr = "Last Memory Dump: " + lastMemoryDumpUTC.ToLocalTime().ToString() + Environment.NewLine +
+                           "Total Memory Dumps: " + memoryDumpCount; ;
+
                     }
-                    dgvSummary.Rows[idx].Cells["MemoryDumpStatus"].ToolTipText = "Last Memory Dump:" + lastMemoryDump.ToLocalTime().ToString("yyyy-MM-dd HH:mm:ss") + Environment.NewLine + "Total Memory Dumps:" + memoryDumpCount;
+
+                    dgvSummary.Rows[idx].Cells["MemoryDumpStatus"].Value = DateTime.UtcNow.Subtract(lastMemoryDumpUTC).Humanize(1);
+
+                    dgvSummary.Rows[idx].Cells["MemoryDumpStatus"].ToolTipText = lastMemoryDumpStr;
 
 
                 }

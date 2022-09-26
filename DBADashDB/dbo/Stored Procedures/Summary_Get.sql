@@ -228,6 +228,7 @@ SELECT I.InstanceID,
 	DATEADD(s,-I.ms_ticks/1000,OSInfoCD.SnapshotDate) AS host_start_time_utc,
 	I.MemoryDumpCount,
 	I.LastMemoryDump,
+	I.LastMemoryDumpUTC,
 	CASE WHEN I.MemoryDumpCount=0 THEN 4 
 		WHEN I.MemoryDumpCount IS NULL THEN 3 
 		WHEN I.LastMemoryDump < @MemoryDumpAckDate THEN 4
@@ -318,6 +319,7 @@ SELECT NULL AS InstanceID,
 	NULL AS	host_start_time_utc,
 	NULL AS MemoryDumpCount,
 	NULL AS LastMemoryDump,
+	NULL AS LastMemoryDumpUTC,
 	3 AS MemoryDumpStatus,
     3 AS  LastGoodCheckDBStatus,
     NULL AS LastGoodCheckDBCriticalCount,
