@@ -6,7 +6,7 @@ DECLARE @IdentSQL NVARCHAR(MAX)
 DECLARE @SQL NVARCHAR(MAX)
 SET @IdentSQL = N'SELECT DB_ID() AS database_id,
 	IC.object_id,
-	OBJECT_NAME(IC.object_id) AS object_name,
+	T.name AS object_name,
 	IC.name AS column_name,
 	CAST(IC.last_value AS BIGINT) AS last_value,
 	RC.row_count,
@@ -15,8 +15,10 @@ SET @IdentSQL = N'SELECT DB_ID() AS database_id,
 	IC.max_length,
 	CAST(IC.increment_value AS BIGINT) AS increment_value,
 	CAST(IC.seed_value AS BIGINT) AS seed_value,
-	OBJECT_SCHEMA_NAME(IC.object_id) AS schema_name
+	S.name AS schema_name
 FROM sys.identity_columns IC
+INNER JOIN sys.tables T ON IC.object_id = T.object_id
+INNER JOIN sys.schemas S ON T.schema_id = S.schema_id
 OUTER APPLY(SELECT	CASE IC.max_length
 						WHEN 1 THEN POWER(2.,IC.max_length*8) 
 							ELSE POWER(2.,IC.max_length*8-1)-1 
