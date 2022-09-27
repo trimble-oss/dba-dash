@@ -568,19 +568,22 @@ namespace DBADash
                             }
                             dt.Columns.Remove("query_plan");
 
-                            Data.Tables.Add(dt);
-                        }
-                        var nullRows = dt.Select("query_plan_hash IS NULL");
-                        
-                        // Remove rows with null query plan hash
-                        if (nullRows.Length > 0)
-                        {
-                            Log.Information("Removing {0} rows with NULL query_plan_hash", nullRows.Length);
-                            foreach (var row in nullRows)
+                            var nullRows = dt.Select("query_plan_hash IS NULL");
+
+                            // Remove rows with null query plan hash
+                            if (nullRows.Length > 0)
                             {
-                                row.Delete();
+                                Log.Information("Removing {0} rows with NULL query_plan_hash", nullRows.Length);
+                                foreach (var row in nullRows)
+                                {
+                                    row.Delete();
+                                }
+                                dt.AcceptChanges();
                             }
-                            dt.AcceptChanges();
+                            if (dt.Rows.Count > 0) // Check if we still have rows
+                            {
+                                Data.Tables.Add(dt);
+                            }
                         }
                         LogInternalPerformanceCounter("DBADash", "Count of plans collected", "", dt.Rows.Count); // Count of plans actually collected - might be less than the list of plans we wanted to collect
                     }
