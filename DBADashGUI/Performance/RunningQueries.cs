@@ -372,13 +372,13 @@ namespace DBADashGUI.Performance
                 {
                     string sql = (string)row["batch_text"];
                     var title = "SPID: " + Convert.ToString(row["session_id"]) + " Batch Text";
-                    Common.ShowCodeViewer(sql, title, this);
+                    Common.ShowCodeViewer(sql, title);
                 }
                 else if (dgv.Columns[e.ColumnIndex].Name == "colText") // New window with full query text
                 {
                     var sql = (string)row["text"];
                     var title = "SPID: " + Convert.ToString(row["session_id"]) + " Text";
-                    Common.ShowCodeViewer(sql,title, this);
+                    Common.ShowCodeViewer(sql,title);
                 }
                 else if (dgv.Columns[e.ColumnIndex].Name == "colQueryPlan") // save query plan and open in default tool
                 {

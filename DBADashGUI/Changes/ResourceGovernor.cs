@@ -120,7 +120,7 @@ namespace DBADashGUI.Changes
                 DataRowView row = (DataRowView)dgv.Rows[e.RowIndex].DataBoundItem;
                 string script = (string)row["script"];
                 string instance = (string)row["Instance"];
-                Common.ShowCodeViewer(script, "Resource Governor - " + instance, this);
+                Common.ShowCodeViewer(script, "Resource Governor - " + instance);
 
             }
             else if (e.RowIndex >= 0 && e.ColumnIndex == colLinkInstance.Index)
