@@ -20,6 +20,7 @@ namespace DBADashGUI
         public static readonly string JsonConfigPath = System.IO.Path.Combine(Application.StartupPath, "ServiceConfig.json");
         public static bool FreezeKeyColumn = true;
         public static bool IsApplicationRunning = false; /* Set to true if App is running - used to detect design time mode */
+        private static CodeViewer FrmCodeViewer;
 
         public static Dictionary<Int32, string> DateGroups = new Dictionary<Int32, string>() {
                 {0,"None" },
@@ -426,6 +427,26 @@ namespace DBADashGUI
         public static DataGridViewCellStyle DataGridViewCellStyle(string format)
         {
             return new DataGridViewCellStyle() { Format = format };
+        }
+
+        public static void ShowCodeViewer(string sql,string title="",IWin32Window owner=null)
+        {
+            FrmCodeViewer ??= new CodeViewer() { DisposeOnClose = false};
+            FrmCodeViewer.SQL= sql;        
+            FrmCodeViewer.Text = "Code Viewer" + (string.IsNullOrEmpty(title) ? "" : " - " + title);
+            if(FrmCodeViewer.WindowState == FormWindowState.Minimized)
+            {
+                FrmCodeViewer.WindowState = FormWindowState.Normal;
+            }
+            if (FrmCodeViewer.Visible)
+            {
+                FrmCodeViewer.Activate();
+            }
+            else
+            {
+                FrmCodeViewer.Show(owner);
+            }
+
         }
 
     }

@@ -808,17 +808,15 @@ namespace DBADashGUI
             if (e.RowIndex >= 0)
             {
                 var row = (DataRowView)dgvSlow.Rows[e.RowIndex].DataBoundItem;
-                if(dgvSlow.Columns[e.ColumnIndex] == colText){
-                    var frm = new CodeViewer
-                    {
-                        SQL = (string)row["Text"]
-                    };
-                    frm.ShowDialog();
+                int sessionID = Convert.ToInt32(row["session_id"]);
+                DateTime timestamp= Convert.ToDateTime(row["timestamp"]);
+                if (dgvSlow.Columns[e.ColumnIndex] == colText){
+                    string title = "SPID: " + sessionID + ", " + timestamp.ToString();
+                    Common.ShowCodeViewer((string)row["Text"], title, this);
                 }
                 else if(dgvSlow.Columns[e.ColumnIndex] == colSessionID)
                 {
-                    int sessionID = Convert.ToInt32(row["session_id"]);
-                    DateTime toDate = Convert.ToDateTime(row["timestamp"]).ToUniversalTime();
+                    DateTime toDate = timestamp.ToUniversalTime();
                     DateTime fromDate = Convert.ToDateTime(row["start_time"]).ToUniversalTime();
                     int instanceID = Convert.ToInt32(row["InstanceID"]);
                     ToggleSummary(false);

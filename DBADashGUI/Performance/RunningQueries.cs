@@ -370,13 +370,15 @@ namespace DBADashGUI.Performance
                 }
                 else if (dgv.Columns[e.ColumnIndex].Name == "colBatchText") // New window with full batch text for query
                 {
-                    var frm = new CodeViewer() { SQL = (string)row["batch_text"] };
-                    frm.Show();
+                    string sql = (string)row["batch_text"];
+                    var title = "SPID: " + Convert.ToString(row["session_id"]) + " Batch Text";
+                    Common.ShowCodeViewer(sql, title, this);
                 }
                 else if (dgv.Columns[e.ColumnIndex].Name == "colText") // New window with full query text
                 {
-                    var frm = new CodeViewer() { SQL = (string)row["text"] };
-                    frm.Show();
+                    var sql = (string)row["text"];
+                    var title = "SPID: " + Convert.ToString(row["session_id"]) + " Text";
+                    Common.ShowCodeViewer(sql,title, this);
                 }
                 else if (dgv.Columns[e.ColumnIndex].Name == "colQueryPlan") // save query plan and open in default tool
                 {
