@@ -57,7 +57,7 @@
             this.bttnCopy.Name = "bttnCopy";
             this.bttnCopy.Size = new System.Drawing.Size(29, 28);
             this.bttnCopy.Text = "Copy";
-            this.bttnCopy.Click += new System.EventHandler(this.bttnCopy_Click);
+            this.bttnCopy.Click += new System.EventHandler(this.BttnCopy_Click);
             // 
             // tsLineNumbers
             // 
@@ -67,7 +67,7 @@
             this.tsLineNumbers.Name = "tsLineNumbers";
             this.tsLineNumbers.Size = new System.Drawing.Size(29, 28);
             this.tsLineNumbers.Text = "Toggle Line Numbers";
-            this.tsLineNumbers.Click += new System.EventHandler(this.tsLineNumbers_Click);
+            this.tsLineNumbers.Click += new System.EventHandler(this.TsLineNumbers_Click);
             // 
             // elementHost1
             // 
@@ -90,6 +90,7 @@
             this.Name = "CodeViewer";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "Code Viewer";
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.CodeViewer_FormClosing);
             this.toolStrip1.ResumeLayout(false);
             this.toolStrip1.PerformLayout();
             this.ResumeLayout(false);

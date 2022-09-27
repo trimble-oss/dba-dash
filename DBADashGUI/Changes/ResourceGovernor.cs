@@ -119,8 +119,9 @@ namespace DBADashGUI.Changes
             {
                 DataRowView row = (DataRowView)dgv.Rows[e.RowIndex].DataBoundItem;
                 string script = (string)row["script"];
-                var frm = new CodeViewer() { SQL = script };
-                frm.ShowDialog();
+                string instance = (string)row["Instance"];
+                Common.ShowCodeViewer(script, "Resource Governor - " + instance, this);
+
             }
             else if (e.RowIndex >= 0 && e.ColumnIndex == colLinkInstance.Index)
             {
