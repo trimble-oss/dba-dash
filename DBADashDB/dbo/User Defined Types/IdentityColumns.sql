@@ -9,5 +9,6 @@
     user_type_id INT NOT NULL,
     max_length SMALLINT NOT NULL,
     increment_value BIGINT NULL,
-    seed_value BIGINT NULL
+    seed_value BIGINT NULL,
+    schema_name NVARCHAR(128) NULL
 );

@@ -190,6 +190,14 @@ namespace DBADash
                     dtRunningQueries.Columns.Add("login_time_utc", typeof(DateTime));
                 }
             }
+            if (data.Tables.Contains("IdentityColumns"))
+            {
+                var dtIdentityColumns = data.Tables["IdentityColumns"];
+                if (!dtIdentityColumns.Columns.Contains("schema_name"))
+                {
+                    dtIdentityColumns.Columns.Add("schema_name", typeof(string));
+                }
+            }
         }
 
         public void Update()

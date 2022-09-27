@@ -29,7 +29,8 @@ BEGIN
         user_type_id,
         max_length,
         increment_value,
-        seed_value
+        seed_value,
+        schema_name
     )
     SELECT InstanceID,
         DatabaseID,
@@ -43,7 +44,8 @@ BEGIN
         user_type_id,
         max_length,
         increment_value,
-        seed_value
+        seed_value,
+        schema_name
     FROM @IdentityColumns IC 
     JOIN dbo.Databases D ON IC.database_id = D.database_id
     WHERE D.InstanceID = @InstanceID

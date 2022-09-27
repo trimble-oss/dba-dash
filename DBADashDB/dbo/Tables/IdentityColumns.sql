@@ -12,6 +12,7 @@
     max_length SMALLINT NOT NULL,
     increment_value BIGINT NULL,
     seed_value BIGINT NULL,
+    schema_name NVARCHAR(128) NULL,
     min_ident AS CASE max_length WHEN 1 THEN 0 ELSE -POWER(2.,max_length*8-1) END,
     max_ident AS CASE max_length WHEN 1 THEN 255 ELSE POWER(2.,max_length*8-1)-1 END,
     max_rows AS POWER(2.,max_length*8),
