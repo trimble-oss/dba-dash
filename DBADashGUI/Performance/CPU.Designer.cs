@@ -33,10 +33,10 @@
             this.tsClose = new System.Windows.Forms.ToolStripButton();
             this.tsUp = new System.Windows.Forms.ToolStripButton();
             this.lblCPU = new System.Windows.Forms.ToolStripLabel();
+            this.tsDateGrouping = new System.Windows.Forms.ToolStripDropDownButton();
             this.tsAgg = new System.Windows.Forms.ToolStripDropDownButton();
             this.AVGToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.MAXToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.tsDateGrouping = new System.Windows.Forms.ToolStripDropDownButton();
             this.toolStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -95,7 +95,14 @@
             this.lblCPU.Name = "lblCPU";
             this.lblCPU.Size = new System.Drawing.Size(105, 24);
             this.lblCPU.Text = "CPU: Instance";
-            this.lblCPU.Visible = false;
+            // 
+            // tsDateGrouping
+            // 
+            this.tsDateGrouping.Image = global::DBADashGUI.Properties.Resources.Time_16x;
+            this.tsDateGrouping.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tsDateGrouping.Name = "tsDateGrouping";
+            this.tsDateGrouping.Size = new System.Drawing.Size(76, 24);
+            this.tsDateGrouping.Text = "1min";
             // 
             // tsAgg
             // 
@@ -114,7 +121,7 @@
             this.AVGToolStripMenuItem.CheckOnClick = true;
             this.AVGToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
             this.AVGToolStripMenuItem.Name = "AVGToolStripMenuItem";
-            this.AVGToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            this.AVGToolStripMenuItem.Size = new System.Drawing.Size(120, 26);
             this.AVGToolStripMenuItem.Tag = "Avg";
             this.AVGToolStripMenuItem.Text = "Avg";
             this.AVGToolStripMenuItem.Click += new System.EventHandler(this.AVGToolStripMenuItem_Click);
@@ -123,18 +130,10 @@
             // 
             this.MAXToolStripMenuItem.CheckOnClick = true;
             this.MAXToolStripMenuItem.Name = "MAXToolStripMenuItem";
-            this.MAXToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            this.MAXToolStripMenuItem.Size = new System.Drawing.Size(120, 26);
             this.MAXToolStripMenuItem.Tag = "Max";
             this.MAXToolStripMenuItem.Text = "Max";
             this.MAXToolStripMenuItem.Click += new System.EventHandler(this.MAXToolStripMenuItem_Click);
-            // 
-            // tsDateGrouping
-            // 
-            this.tsDateGrouping.Image = global::DBADashGUI.Properties.Resources.Time_16x;
-            this.tsDateGrouping.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsDateGrouping.Name = "tsDateGrouping";
-            this.tsDateGrouping.Size = new System.Drawing.Size(76, 24);
-            this.tsDateGrouping.Text = "1min";
             // 
             // CPU
             // 
