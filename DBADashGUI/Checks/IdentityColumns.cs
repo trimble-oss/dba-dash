@@ -47,6 +47,7 @@ namespace DBADashGUI.Checks
             dgv.Columns.AddRange(
                 new DataGridViewTextBoxColumn() { HeaderText = "Instance", DataPropertyName = "InstanceDisplayName" },
                 new DataGridViewTextBoxColumn() { HeaderText = "DB", DataPropertyName = "DB" },
+                new DataGridViewTextBoxColumn() { HeaderText = "Schema", DataPropertyName = "schema_name" },
                 new DataGridViewTextBoxColumn() { HeaderText = "Table", DataPropertyName = "object_name" },
                 new DataGridViewTextBoxColumn() { HeaderText = "Column", DataPropertyName = "column_name" },
                 new DataGridViewTextBoxColumn() { HeaderText = "Type", DataPropertyName = "type", ToolTipText="Data type for identity value" },

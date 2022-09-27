@@ -14,7 +14,8 @@ SET @IdentSQL = N'SELECT DB_ID() AS database_id,
 	IC.user_type_id,
 	IC.max_length,
 	CAST(IC.increment_value AS BIGINT) AS increment_value,
-	CAST(IC.seed_value AS BIGINT) AS seed_value
+	CAST(IC.seed_value AS BIGINT) AS seed_value,
+	OBJECT_SCHEMA_NAME(IC.object_id) AS schema_name
 FROM sys.identity_columns IC
 OUTER APPLY(SELECT	CASE IC.max_length
 						WHEN 1 THEN POWER(2.,IC.max_length*8) 
@@ -50,7 +51,8 @@ CREATE TABLE #ident(
     user_type_id INT NOT NULL,
     max_length SMALLINT NOT NULL,
     increment_value BIGINT NULL,
-    seed_value BIGINT NULL
+    seed_value BIGINT NULL,
+	schema_name NVARCHAR(128) NULL
 );
 
 
@@ -87,7 +89,8 @@ BEGIN
 		    user_type_id,
 		    max_length,
 		    increment_value,
-		    seed_value
+		    seed_value,
+			schema_name
 		)
 		EXEC sp_executesql @SQL,N'@IdentityCollectionThreshold INT',@IdentityCollectionThreshold
 	END
@@ -105,7 +108,8 @@ SELECT database_id,
        user_type_id,
        max_length,
        increment_value,
-       seed_value 
+       seed_value,
+	   schema_name
 FROM #ident
 
 DROP TABLE #ident
