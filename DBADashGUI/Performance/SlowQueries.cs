@@ -812,7 +812,7 @@ namespace DBADashGUI
                 DateTime timestamp= Convert.ToDateTime(row["timestamp"]);
                 if (dgvSlow.Columns[e.ColumnIndex] == colText){
                     string title = "SPID: " + sessionID + ", " + timestamp.ToString();
-                    Common.ShowCodeViewer((string)row["Text"], title, this);
+                    Common.ShowCodeViewer((string)row["Text"], title);
                 }
                 else if(dgvSlow.Columns[e.ColumnIndex] == colSessionID)
                 {

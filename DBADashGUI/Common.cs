@@ -429,9 +429,12 @@ namespace DBADashGUI
             return new DataGridViewCellStyle() { Format = format };
         }
 
-        public static void ShowCodeViewer(string sql,string title="",IWin32Window owner=null)
+        public static void ShowCodeViewer(string sql,string title="")
         {
-            FrmCodeViewer ??= new CodeViewer() { DisposeOnClose = false};
+            if(FrmCodeViewer==null || FrmCodeViewer.IsDisposed || FrmCodeViewer.Disposing)
+            {
+                FrmCodeViewer = new CodeViewer() { DisposeOnClose = false };
+            }   
             FrmCodeViewer.SQL= sql;        
             FrmCodeViewer.Text = "Code Viewer" + (string.IsNullOrEmpty(title) ? "" : " - " + title);
             if(FrmCodeViewer.WindowState == FormWindowState.Minimized)
@@ -444,7 +447,7 @@ namespace DBADashGUI
             }
             else
             {
-                FrmCodeViewer.Show(owner);
+                FrmCodeViewer.Show();
             }
 
         }
