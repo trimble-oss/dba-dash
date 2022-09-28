@@ -32,49 +32,68 @@ namespace DBADashGUI.Performance
         private string selectedCounter;
         private string selectedCounterAlias;
         readonly ToolTip dgvToolTip = new() { AutomaticDelay = 100, AutoPopDelay = 60000, ReshowDelay = 100 };
+        private int previousDurationMins = 0;
 
         public void RefreshData()
         {
             isClerksRefreshed = false;
             isCountersRefreshed = false;
             isConfigRefreshed = false;
-            dateGrouping = Common.DateGrouping(DateRange.DurationMins,MaxChartPoints);
-            tsDateGroup.Text = Common.DateGroupString(dateGrouping);
-            refreshCurrentTab();
+            ResetDateGroupingIfDurationChanged();
+            RefreshCurrentTab();
+            RefreshClerkLineChart();
+            RefreshPerformanceChart();
         }
 
-        private void refreshCurrentTab()
+        private void ResetDateGroupingIfDurationChanged()
         {
-            if (tab1.SelectedTab == tabClerks && !isClerksRefreshed)
+            if (Math.Abs(DateRange.DurationMins - previousDurationMins) > 5)
             {
-                if (pieChart1.Visible)
-                {
-                    refreshClerks();
-                }
-                else
-                {
-                    showMemoryUsageForClerk();
-                }
+                dateGrouping = Common.DateGrouping(DateRange.DurationMins, MaxChartPoints);
+                tsDateGroup.Text = Common.DateGroupString(dateGrouping);
+                previousDurationMins = DateRange.DurationMins;
             }
-            else if (tab1.SelectedTab == tabConfig && !isConfigRefreshed)
+        }
+
+        private void RefreshCurrentTab()
+        {
+            if ((tab1.SelectedTab == tabClerks || pieChart1.Visible) && !isClerksRefreshed)
             {
-                refreshConfig();
+                RefreshClerks();
+            }
+            if (tab1.SelectedTab == tabConfig && !isConfigRefreshed)
+            {
+                RefreshConfig();
             }
             else if (tab1.SelectedTab == tabCounters && !isCountersRefreshed)
             {
-                refreshCounters();
+                RefreshCounters();
             }
         }
 
-        private void refreshClerks()
+        private void RefreshPerformanceChart()
+        {
+            if (performanceCounters1.Visible)
+            {
+                performanceCounters1.FromDate = DateRange.FromUTC;
+                performanceCounters1.ToDate = DateRange.ToUTC;
+                performanceCounters1.InstanceID = InstanceID;
+                performanceCounters1.RefreshData();
+            }
+        }
+        private void RefreshClerkLineChart()
+        {
+            if (chartHistory.Visible)
+            {
+                ShowMemoryUsageForClerk();
+            }
+        }
+
+        private void RefreshClerks()
         {
             var dt = GetMemoryUsage();
             tsDateGroup.Visible =false;
             tsAgg.Visible = false;
-            tsPieChart.Visible = false;
-            chartHistory.Visible = false;
-            pieChart1.Visible = true;
-            performanceCounters1.Visible = false;
             dgv.AutoGenerateColumns = false;
             if (dgv.Columns.Count == 0)
             {
@@ -90,11 +109,14 @@ namespace DBADashGUI.Performance
             dgv.DataSource = dt;
 
             dgv.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
-            showPie(ref dt);
+            if (pieChart1.Visible)
+            {
+                ShowPie(ref dt);
+            }
             isClerksRefreshed = true;
         }
 
-        private void showPie(ref DataTable dt)
+        private void ShowPie(ref DataTable dt)
         {
             pieChart1.Series.Clear();
 
@@ -129,6 +151,7 @@ namespace DBADashGUI.Performance
            
             pieChart1.Series = sc;
             pieChart1.LegendLocation = LegendLocation.Bottom;
+            tsPieChart.Enabled = false;
         }
 
         public DataTable GetMemoryUsage()
@@ -147,7 +170,7 @@ namespace DBADashGUI.Performance
             }
         }
 
-        private void dgv_CellContentClick(object sender, DataGridViewCellEventArgs e)
+        private void Dgv_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
             if (e.RowIndex >= 0)
             {
@@ -156,41 +179,42 @@ namespace DBADashGUI.Performance
                 if (e.ColumnIndex == dgv.Columns["colPages"].Index)
                 {
                     selectedCounter = "pages_kb";
-                    selectedCounterAlias = "Pages KB";
+                    selectedCounterAlias =selectedClerk +  " - Pages KB";
                 }
                 else if (e.ColumnIndex == dgv.Columns["colVirtualMemoryCommitted"].Index)
                 {
                     selectedCounter = "virtual_memory_committed_kb";
-                    selectedCounterAlias = "Virtual Memory Committed KB";
+                    selectedCounterAlias = selectedClerk +  " - Virtual Memory Committed KB";
                 }
                 else if (e.ColumnIndex == dgv.Columns["colAWEAllocated"].Index)
                 {
                     selectedCounter = "awe_allocated_kb";
-                    selectedCounterAlias = "AWE Allocated KB";
+                    selectedCounterAlias = selectedClerk +  " - AWE Allocated KB";
                 }
                 else if(e.ColumnIndex== dgv.Columns["colSharedMemoryReserved"].Index)
                 {
                     selectedCounter = "shared_memory_reserved_kb";
-                    selectedCounterAlias="Shared Memory Reserved KB";
+                    selectedCounterAlias=selectedClerk + " - Shared Memory Reserved KB";
                 }
                 else if (e.ColumnIndex == dgv.Columns["colSharedMemoryCommitted"].Index)
                 {
                     selectedCounter = "shared_memory_committed_kb";
-                    selectedCounterAlias ="Shared Memory Committed KB";
+                    selectedCounterAlias =selectedClerk + " - Shared Memory Committed KB";
                 }
                 else
                 {
                     return;
                 }
-                showMemoryUsageForClerk();
+                ShowMemoryUsageForClerk();
             }
         }
 
-        private void showMemoryUsageForClerk(string format="N0")
+        private void ShowMemoryUsageForClerk(string format = "N0")
         {
+            chartHistory.Visible = true;
             tsDateGroup.Visible = true;
             tsAgg.Visible = true;
-            tsPieChart.Visible = true;
+            tsPieChart.Enabled = true;
             tsAgg.Enabled = dateGrouping > 0;
             chartHistory.Series.Clear();
             var dt = GetMemoryClerkUsage(selectedClerk,dateGrouping,tsAgg.Text,selectedCounter);
@@ -203,13 +227,14 @@ namespace DBADashGUI.Performance
             {
                 {selectedCounter, new columnMetaData{Alias=selectedCounterAlias,isVisible=true } }
             };
+            chartHistory.LegendLocation = LegendLocation.Top;
             chartHistory.AddDataTable(dt,columns,"SnapshotDate",false);
             chartHistory.AxisY.Clear();   
             chartHistory.AxisY.Add(new Axis() { 
                 MinValue = 0,
                 LabelFormatter = val => val.ToString(format)
             });
-            chartHistory.Visible = true;
+     
             pieChart1.Visible = false;
             performanceCounters1.Visible = false;
 
@@ -235,22 +260,22 @@ namespace DBADashGUI.Performance
             }
         }
 
-        private void tsExcel_Click(object sender, EventArgs e)
+        private void TsExcel_Click(object sender, EventArgs e)
         {
             Common.PromptSaveDataGridView(ref dgv);
         }
 
-        private void tsCopy_Click(object sender, EventArgs e)
+        private void TsCopy_Click(object sender, EventArgs e)
         {
             Common.CopyDataGridViewToClipboard(dgv);
         }
 
-        private void tsRefresh_Click(object sender, EventArgs e)
+        private void TsRefresh_Click(object sender, EventArgs e)
         {
             RefreshData();
         }
 
-        private void refreshConfig()
+        private void RefreshConfig()
         {
             var dt = GetMemoryConfig();
             dgvConfig.DataSource = dt;
@@ -259,7 +284,7 @@ namespace DBADashGUI.Performance
             isConfigRefreshed = true;
         }
 
-        private void refreshCounters()
+        private void RefreshCounters()
         {
             if (MemoryCounters == null || MemoryCounters.Count == 0) { 
                 MemoryCounters = GetMemoryCounters();
@@ -302,13 +327,13 @@ namespace DBADashGUI.Performance
             return Counters;
         }
 
-        private void tab1_SelectedIndexChanged(object sender, EventArgs e)
+        private void Tab1_SelectedIndexChanged(object sender, EventArgs e)
         {
-            refreshCurrentTab();
+            RefreshCurrentTab();
         }
 
      
-        private void dgv_CellMouseEnter(object sender, DataGridViewCellEventArgs e)
+        private void Dgv_CellMouseEnter(object sender, DataGridViewCellEventArgs e)
         {
             if (e.RowIndex >= 0) {
                 string toolTip = (string)((DataRowView)dgv.Rows[e.RowIndex].DataBoundItem)["MemoryClerkDescription"];
@@ -329,43 +354,41 @@ namespace DBADashGUI.Performance
             var ts = (ToolStripMenuItem)sender;
             dateGrouping = Convert.ToInt32(ts.Tag);
             tsDateGroup.Text = Common.DateGroupString(dateGrouping);
-            showMemoryUsageForClerk();
+            previousDurationMins = DateRange.DurationMins;
+            ShowMemoryUsageForClerk();
         }
 
         private void PerformanceCounterSummaryGrid1_CounterSelected(object sender, PerformanceCounterSummaryGrid.CounterSelectedEventArgs e)
         {
             performanceCounters1.CounterID = e.CounterID;
-            performanceCounters1.FromDate = DateRange.FromUTC;
-            performanceCounters1.ToDate = DateRange.ToUTC;
-            performanceCounters1.InstanceID = InstanceID;
             performanceCounters1.Visible = true;
             performanceCounters1.CounterName = e.CounterName;
             pieChart1.Visible = false;
             chartHistory.Visible = false;
             tsDateGroup.Visible = false;
             tsAgg.Visible = false;
-            tsPieChart.Visible = true;
-            performanceCounters1.RefreshData();
+            tsPieChart.Enabled = true;
+            RefreshPerformanceChart();
         }
 
-        private void tsAGG_Click(object sender, EventArgs e)
+        private void TsAGG_Click(object sender, EventArgs e)
         {
             avgToolStripMenuItem.Checked = avgToolStripMenuItem == sender;
             maxToolStripMenuItem.Checked = maxToolStripMenuItem == sender;
             minToolStripMenuItem.Checked = minToolStripMenuItem == sender;
             tsAgg.Text = ((ToolStripMenuItem)sender).Text;
-            showMemoryUsageForClerk();
+            ShowMemoryUsageForClerk();
         }
 
-        private void tsPieChart_Click(object sender, EventArgs e)
+        private void TsPieChart_Click(object sender, EventArgs e)
         {
             chartHistory.Visible = false;
             pieChart1.Visible = true;
+            tsPieChart.Enabled = false;
             performanceCounters1.Visible = false;
             tsDateGroup.Visible = false;
             tsAgg.Visible = false;
-            tsPieChart.Visible=false;
-            refreshCurrentTab();
+            RefreshCurrentTab();
         }
     }
 }
