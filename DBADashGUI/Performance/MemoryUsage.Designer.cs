@@ -81,8 +81,8 @@ namespace DBADashGUI.Performance
             this.dgv.ShowCellToolTips = false;
             this.dgv.Size = new System.Drawing.Size(870, 402);
             this.dgv.TabIndex = 0;
-            this.dgv.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgv_CellContentClick);
-            this.dgv.CellMouseEnter += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgv_CellMouseEnter);
+            this.dgv.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.Dgv_CellContentClick);
+            this.dgv.CellMouseEnter += new System.Windows.Forms.DataGridViewCellEventHandler(this.Dgv_CellMouseEnter);
             // 
             // splitContainer1
             // 
@@ -143,7 +143,7 @@ namespace DBADashGUI.Performance
             this.tsRefresh.Name = "tsRefresh";
             this.tsRefresh.Size = new System.Drawing.Size(29, 24);
             this.tsRefresh.Text = "Refresh";
-            this.tsRefresh.Click += new System.EventHandler(this.tsRefresh_Click);
+            this.tsRefresh.Click += new System.EventHandler(this.TsRefresh_Click);
             // 
             // tsCopy
             // 
@@ -153,7 +153,7 @@ namespace DBADashGUI.Performance
             this.tsCopy.Name = "tsCopy";
             this.tsCopy.Size = new System.Drawing.Size(29, 24);
             this.tsCopy.Text = "Copy";
-            this.tsCopy.Click += new System.EventHandler(this.tsCopy_Click);
+            this.tsCopy.Click += new System.EventHandler(this.TsCopy_Click);
             // 
             // tsExcel
             // 
@@ -163,7 +163,7 @@ namespace DBADashGUI.Performance
             this.tsExcel.Name = "tsExcel";
             this.tsExcel.Size = new System.Drawing.Size(29, 24);
             this.tsExcel.Text = "Excel";
-            this.tsExcel.Click += new System.EventHandler(this.tsExcel_Click);
+            this.tsExcel.Click += new System.EventHandler(this.TsExcel_Click);
             // 
             // tsDateGroup
             // 
@@ -192,14 +192,14 @@ namespace DBADashGUI.Performance
             this.avgToolStripMenuItem.Name = "avgToolStripMenuItem";
             this.avgToolStripMenuItem.Size = new System.Drawing.Size(120, 26);
             this.avgToolStripMenuItem.Text = "Avg";
-            this.avgToolStripMenuItem.Click += new System.EventHandler(this.tsAGG_Click);
+            this.avgToolStripMenuItem.Click += new System.EventHandler(this.TsAGG_Click);
             // 
             // minToolStripMenuItem
             // 
             this.minToolStripMenuItem.Name = "minToolStripMenuItem";
             this.minToolStripMenuItem.Size = new System.Drawing.Size(120, 26);
             this.minToolStripMenuItem.Text = "Min";
-            this.minToolStripMenuItem.Click += new System.EventHandler(this.tsAGG_Click);
+            this.minToolStripMenuItem.Click += new System.EventHandler(this.TsAGG_Click);
             // 
             // maxToolStripMenuItem
             // 
@@ -208,7 +208,7 @@ namespace DBADashGUI.Performance
             this.maxToolStripMenuItem.Name = "maxToolStripMenuItem";
             this.maxToolStripMenuItem.Size = new System.Drawing.Size(120, 26);
             this.maxToolStripMenuItem.Text = "Max";
-            this.maxToolStripMenuItem.Click += new System.EventHandler(this.tsAGG_Click);
+            this.maxToolStripMenuItem.Click += new System.EventHandler(this.TsAGG_Click);
             // 
             // tsPieChart
             // 
@@ -218,7 +218,7 @@ namespace DBADashGUI.Performance
             this.tsPieChart.Name = "tsPieChart";
             this.tsPieChart.Size = new System.Drawing.Size(29, 24);
             this.tsPieChart.Text = "Pie Chart";
-            this.tsPieChart.Click += new System.EventHandler(this.tsPieChart_Click);
+            this.tsPieChart.Click += new System.EventHandler(this.TsPieChart_Click);
             // 
             // performanceCounters1
             // 
@@ -257,7 +257,7 @@ namespace DBADashGUI.Performance
             this.tab1.SelectedIndex = 0;
             this.tab1.Size = new System.Drawing.Size(884, 443);
             this.tab1.TabIndex = 1;
-            this.tab1.SelectedIndexChanged += new System.EventHandler(this.tab1_SelectedIndexChanged);
+            this.tab1.SelectedIndexChanged += new System.EventHandler(this.Tab1_SelectedIndexChanged);
             // 
             // tabClerks
             // 
