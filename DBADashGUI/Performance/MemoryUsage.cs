@@ -178,6 +178,10 @@ namespace DBADashGUI.Performance
                     selectedCounter = "shared_memory_committed_kb";
                     selectedCounterAlias ="Shared Memory Committed KB";
                 }
+                else
+                {
+                    return;
+                }
                 showMemoryUsageForClerk();
             }
         }
