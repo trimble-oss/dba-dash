@@ -34,6 +34,40 @@ namespace DBADashGUI.Performance
         readonly ToolTip dgvToolTip = new() { AutomaticDelay = 100, AutoPopDelay = 60000, ReshowDelay = 100 };
         private int previousDurationMins = 0;
 
+        private enum ChartViews
+        {
+            Pie,
+            PerformanceCounter,
+            MemoryClerk
+        }
+
+        private ChartViews ChartView
+        {
+            get {
+                if (pieChart1.Visible)
+                {
+                    return ChartViews.Pie;
+                }
+                else if (performanceCounters1.Visible)
+                {
+                    return ChartViews.PerformanceCounter;
+                }
+                else
+                {
+                    return ChartViews.MemoryClerk;
+                }
+            }
+            set
+            {
+                pieChart1.Visible = value == ChartViews.Pie;
+                performanceCounters1.Visible = value == ChartViews.PerformanceCounter;
+                chartClerk.Visible = value == ChartViews.MemoryClerk;
+                tsDateGroup.Visible = value == ChartViews.MemoryClerk;
+                tsAgg.Visible = value == ChartViews.MemoryClerk;
+                tsPieChart.Enabled = value!= ChartViews.Pie;
+            }
+        }
+
         public void RefreshData()
         {
             isClerksRefreshed = false;
@@ -57,7 +91,7 @@ namespace DBADashGUI.Performance
 
         private void RefreshCurrentTab()
         {
-            if ((tab1.SelectedTab == tabClerks || pieChart1.Visible) && !isClerksRefreshed)
+            if ((tab1.SelectedTab == tabClerks || ChartView== ChartViews.Pie) && !isClerksRefreshed)
             {
                 RefreshClerks();
             }
@@ -73,7 +107,7 @@ namespace DBADashGUI.Performance
 
         private void RefreshPerformanceChart()
         {
-            if (performanceCounters1.Visible)
+            if (ChartView== ChartViews.PerformanceCounter)
             {
                 performanceCounters1.FromDate = DateRange.FromUTC;
                 performanceCounters1.ToDate = DateRange.ToUTC;
@@ -83,7 +117,7 @@ namespace DBADashGUI.Performance
         }
         private void RefreshClerkLineChart()
         {
-            if (chartHistory.Visible)
+            if (ChartView == ChartViews.MemoryClerk)
             {
                 ShowMemoryUsageForClerk();
             }
@@ -92,8 +126,6 @@ namespace DBADashGUI.Performance
         private void RefreshClerks()
         {
             var dt = GetMemoryUsage();
-            tsDateGroup.Visible =false;
-            tsAgg.Visible = false;
             dgv.AutoGenerateColumns = false;
             if (dgv.Columns.Count == 0)
             {
@@ -109,7 +141,7 @@ namespace DBADashGUI.Performance
             dgv.DataSource = dt;
 
             dgv.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
-            if (pieChart1.Visible)
+            if (ChartView == ChartViews.Pie)
             {
                 ShowPie(ref dt);
             }
@@ -151,7 +183,7 @@ namespace DBADashGUI.Performance
            
             pieChart1.Series = sc;
             pieChart1.LegendLocation = LegendLocation.Bottom;
-            tsPieChart.Enabled = false;
+            
         }
 
         public DataTable GetMemoryUsage()
@@ -211,12 +243,8 @@ namespace DBADashGUI.Performance
 
         private void ShowMemoryUsageForClerk(string format = "N0")
         {
-            chartHistory.Visible = true;
-            tsDateGroup.Visible = true;
-            tsAgg.Visible = true;
-            tsPieChart.Enabled = true;
-            tsAgg.Enabled = dateGrouping > 0;
-            chartHistory.Series.Clear();
+            ChartView = ChartViews.MemoryClerk;    
+            chartClerk.Series.Clear();
             var dt = GetMemoryClerkUsage(selectedClerk,dateGrouping,tsAgg.Text,selectedCounter);
             if (dt.Rows.Count > MaxChartPoints)
             {
@@ -227,17 +255,14 @@ namespace DBADashGUI.Performance
             {
                 {selectedCounter, new columnMetaData{Alias=selectedCounterAlias,isVisible=true } }
             };
-            chartHistory.LegendLocation = LegendLocation.Top;
-            chartHistory.AddDataTable(dt,columns,"SnapshotDate",false);
-            chartHistory.AxisY.Clear();   
-            chartHistory.AxisY.Add(new Axis() { 
+            chartClerk.LegendLocation = LegendLocation.Top;
+            chartClerk.AddDataTable(dt,columns,"SnapshotDate",false);
+            chartClerk.AxisY.Clear();   
+            chartClerk.AxisY.Add(new Axis() { 
                 MinValue = 0,
                 LabelFormatter = val => val.ToString(format)
             });
-     
-            pieChart1.Visible = false;
-            performanceCounters1.Visible = false;
-
+            tsAgg.Enabled = dateGrouping > 0;
         }
 
         private DataTable GetMemoryClerkUsage(string clerk,int? dateGrouping,string agg,string measure)
@@ -361,13 +386,8 @@ namespace DBADashGUI.Performance
         private void PerformanceCounterSummaryGrid1_CounterSelected(object sender, PerformanceCounterSummaryGrid.CounterSelectedEventArgs e)
         {
             performanceCounters1.CounterID = e.CounterID;
-            performanceCounters1.Visible = true;
             performanceCounters1.CounterName = e.CounterName;
-            pieChart1.Visible = false;
-            chartHistory.Visible = false;
-            tsDateGroup.Visible = false;
-            tsAgg.Visible = false;
-            tsPieChart.Enabled = true;
+            ChartView = ChartViews.PerformanceCounter;
             RefreshPerformanceChart();
         }
 
@@ -382,12 +402,7 @@ namespace DBADashGUI.Performance
 
         private void TsPieChart_Click(object sender, EventArgs e)
         {
-            chartHistory.Visible = false;
-            pieChart1.Visible = true;
-            tsPieChart.Enabled = false;
-            performanceCounters1.Visible = false;
-            tsDateGroup.Visible = false;
-            tsAgg.Visible = false;
+            ChartView = ChartViews.Pie;
             RefreshCurrentTab();
         }
     }
