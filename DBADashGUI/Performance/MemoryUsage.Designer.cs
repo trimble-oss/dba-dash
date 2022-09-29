@@ -31,7 +31,7 @@ namespace DBADashGUI.Performance
         {
             this.dgv = new System.Windows.Forms.DataGridView();
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
-            this.chartHistory = new DBADashGUI.Performance.CartesianChartWithDataTable();
+            this.chartClerk = new DBADashGUI.Performance.CartesianChartWithDataTable();
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
             this.tsRefresh = new System.Windows.Forms.ToolStripButton();
             this.tsCopy = new System.Windows.Forms.ToolStripButton();
@@ -94,7 +94,7 @@ namespace DBADashGUI.Performance
             // 
             // splitContainer1.Panel1
             // 
-            this.splitContainer1.Panel1.Controls.Add(this.chartHistory);
+            this.splitContainer1.Panel1.Controls.Add(this.chartClerk);
             this.splitContainer1.Panel1.Controls.Add(this.performanceCounters1);
             this.splitContainer1.Panel1.Controls.Add(this.pieChart1);
             this.splitContainer1.Panel1.Controls.Add(this.toolStrip1);
@@ -109,15 +109,15 @@ namespace DBADashGUI.Performance
             // 
             // chartHistory
             // 
-            this.chartHistory.DefaultLineSmoothness = 0.5D;
-            this.chartHistory.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.chartHistory.Location = new System.Drawing.Point(0, 27);
-            this.chartHistory.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.chartHistory.Name = "chartHistory";
-            this.chartHistory.Size = new System.Drawing.Size(884, 420);
-            this.chartHistory.TabIndex = 1;
-            this.chartHistory.Text = "cartesianChartWithDataTable1";
-            this.chartHistory.Visible = false;
+            this.chartClerk.DefaultLineSmoothness = 0.5D;
+            this.chartClerk.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.chartClerk.Location = new System.Drawing.Point(0, 27);
+            this.chartClerk.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            this.chartClerk.Name = "chartHistory";
+            this.chartClerk.Size = new System.Drawing.Size(884, 420);
+            this.chartClerk.TabIndex = 1;
+            this.chartClerk.Text = "cartesianChartWithDataTable1";
+            this.chartClerk.Visible = false;
             // 
             // toolStrip1
             // 
@@ -363,7 +363,7 @@ namespace DBADashGUI.Performance
         private System.Windows.Forms.DataGridView dgv;
         private System.Windows.Forms.SplitContainer splitContainer1;
         private LiveCharts.WinForms.PieChart pieChart1;
-        private CartesianChartWithDataTable chartHistory;
+        private CartesianChartWithDataTable chartClerk;
         private System.Windows.Forms.ToolStrip toolStrip1;
         private System.Windows.Forms.ToolStripButton tsRefresh;
         private System.Windows.Forms.ToolStripButton tsCopy;
