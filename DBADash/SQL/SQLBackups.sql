@@ -27,7 +27,7 @@ WITH T AS (
 	' + CASE WHEN NOT EXISTS(SELECT 1 FROM msdb.sys.columns WHERE object_id = OBJECT_ID('msdb.dbo.backupset') AND name = 'compression_algorithm') THEN 'CAST(NULL AS NVARCHAR(32)) AS compression_algorithm,' ELSE 'compression_algorithm,' END + '
 	ROW_NUMBER() OVER(PARTITION BY database_name,type ORDER BY backup_finish_date DESC) rnum
 	FROM msdb.dbo.backupset bs
-	WHERE server_name=@@SERVERNAME
+	WHERE server_name=@@SERVERNAME COLLATE SQL_Latin1_General_CP1_CI_AS
 	AND backup_finish_date>=DATEADD(d,-10,GETUTCDATE())
 )
 SELECT	database_name,
