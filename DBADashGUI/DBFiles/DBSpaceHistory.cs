@@ -48,6 +48,7 @@ namespace DBADashGUI.DBFiles
         public string FileName { get { return _fileName; } set { _fileName = value; setFileChecked(); } }
 
         private Int32? _dataspaceid=null;
+        DataTable HistoryDT;
      
         public Int32? DataSpaceID
         {
@@ -126,9 +127,12 @@ namespace DBADashGUI.DBFiles
 
         public void RefreshData()
         {
-            var dt = DriveSnapshot();
-            var cnt =dt.Rows.Count;
-            if (dt.Rows.Count < 2)
+            HistoryDT = DBFileSnapshot();
+            var cnt =HistoryDT.Rows.Count;
+            dgv.DataSource = HistoryDT;
+            dgv.Sort(dgv.Columns[0], ListSortDirection.Descending);
+
+            if (HistoryDT.Rows.Count < 2)
             {
                 return;
             }
@@ -145,7 +149,7 @@ namespace DBADashGUI.DBFiles
             }
 
             Int32 i = 0;
-            foreach (DataRow r in dt.Rows)
+            foreach (DataRow r in HistoryDT.Rows)
             {
                 foreach (string s in columns.Keys)
                 {
@@ -191,40 +195,39 @@ namespace DBADashGUI.DBFiles
 
         }
 
-        public DataTable DriveSnapshot()
+        public DataTable DBFileSnapshot()
         {
             using (var cn = new SqlConnection(connectionString))
-            {
-                using (SqlCommand cmd = new SqlCommand("dbo.DBFileSnapshot_Get", cn) { CommandType = CommandType.StoredProcedure }) {
-                    cn.Open();
-                    cmd.Parameters.AddWithValue("FromDate", From);
-                    cmd.Parameters.AddWithValue("ToDate", To);
-                    if (DatabaseID > 0)
-                    {
-                        cmd.Parameters.AddWithValue("DatabaseID", DatabaseID);
-                    }
-                    if (InstanceGroupName != null && InstanceGroupName.Length > 0)
-                    {
-                        cmd.Parameters.AddWithValue("InstanceGroupName", InstanceGroupName);
-                    }
-                    if (DBName != null && DBName.Length > 0)
-                    {
-                        cmd.Parameters.AddWithValue("DBName", DBName);
-                    }
-                    if (DataSpaceID != null)
-                    {
-                        cmd.Parameters.AddWithValue("DataSpaceID", DataSpaceID);
-                    }
-                    if (FileName != null && FileName.Length > 0)
-                    {
-                        cmd.Parameters.AddWithValue("FileName", FileName);
-                    }
-                    SqlDataAdapter da = new SqlDataAdapter(cmd);
-                    DataTable dt = new DataTable();
-                    da.Fill(dt);
-                    return dt;
+            using (var cmd = new SqlCommand("dbo.DBFileSnapshot_Get", cn) { CommandType = CommandType.StoredProcedure }) {
+                cn.Open();
+                cmd.Parameters.AddWithValue("FromDate", From);
+                cmd.Parameters.AddWithValue("ToDate", To);
+                if (DatabaseID > 0)
+                {
+                    cmd.Parameters.AddWithValue("DatabaseID", DatabaseID);
                 }
+                if (InstanceGroupName != null && InstanceGroupName.Length > 0)
+                {
+                    cmd.Parameters.AddWithValue("InstanceGroupName", InstanceGroupName);
+                }
+                if (DBName != null && DBName.Length > 0)
+                {
+                    cmd.Parameters.AddWithValue("DBName", DBName);
+                }
+                if (DataSpaceID != null)
+                {
+                    cmd.Parameters.AddWithValue("DataSpaceID", DataSpaceID);
+                }
+                if (FileName != null && FileName.Length > 0)
+                {
+                    cmd.Parameters.AddWithValue("FileName", FileName);
+                }
+                SqlDataAdapter da = new SqlDataAdapter(cmd);
+                DataTable dt = new DataTable();
+                da.Fill(dt);
+                return dt;
             }
+            
         }
 
         private void Days_Click(object sender, EventArgs e)
@@ -289,7 +292,19 @@ namespace DBADashGUI.DBFiles
 
         private void DBSpaceHistory_Load(object sender, EventArgs e)
         {
+            AddDgvColumns();
+        }
 
+        private void AddDgvColumns()
+        {
+            dgv.Columns.Clear();
+            dgv.AutoGenerateColumns = false;
+            dgv.Columns.AddRange(new DataGridViewColumn[]
+            {
+                new DataGridViewTextBoxColumn(){ HeaderText="Snapshot Date", DataPropertyName="SnapshotDate"},
+                new DataGridViewTextBoxColumn(){ HeaderText="Size (MB)", DataPropertyName="SizeMB", DefaultCellStyle= Common.DataGridViewNumericCellStyleNoDigits},
+                new DataGridViewTextBoxColumn(){ HeaderText="Used (MB)", DataPropertyName="UsedMB", DefaultCellStyle= Common.DataGridViewNumericCellStyleNoDigits}
+            });
         }
 
         private void populateFileGroupFilter()
@@ -385,6 +400,42 @@ namespace DBADashGUI.DBFiles
             }
         }
 
+        private void tsExcel_Click(object sender, EventArgs e)
+        {
+            Common.PromptSaveDataGridView(dgv);
+        }
 
+        private void tsGrid_Click(object sender, EventArgs e)
+        {
+            splitContainer1.Panel2Collapsed = !splitContainer1.Panel2Collapsed;
+            SetPanelSize();
+        }
+
+        private void SetPanelSize()
+        {
+            if (!splitContainer1.Panel2Collapsed)
+            {
+                int distance = this.Width - (ColumnTotalWidth() + 30);
+                if (distance > 10)
+                {
+                    splitContainer1.SplitterDistance = this.Width - (ColumnTotalWidth() + 30);
+                }
+            }
+        }
+
+        private int ColumnTotalWidth()
+        {
+            return dgv.Columns.Cast<DataGridViewColumn>().Select(x => x.Width).Sum();
+        }
+
+        private void DBSpaceHistory_Resize(object sender, EventArgs e)
+        {
+            SetPanelSize();
+        }
+
+        private void tsCopy_Click(object sender, EventArgs e)
+        {
+            Common.CopyDataGridViewToClipboard(dgv);
+        }
     }
 }
