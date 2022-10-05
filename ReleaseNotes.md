@@ -1,7 +1,7 @@
 ## Installation
 
-[Installation instructions](https://github.com/trimble-oss/dba-dash#installation)
+[Installation instructions](https://dbadash.com/installation)
 
-[Upgrade instructions](https://github.com/trimble-oss/dba-dash#upgrade-process)
+[Upgrade instructions](https://dbadash.com/upgrades)
 
 ---
