@@ -109,8 +109,9 @@ namespace DBADashGUI
 
         public Version DBVersion=new Version();
         public bool upgradeAvailable=false;
-        public string upgradeMessage=String.Empty;
+        public string upgradeMessage= "The upgrade check hasn't completed yet.\nIf this server doesn't have internet access, an offline upgrade can be performed. See:\nhttps://dbadash.com/upgrades";
         public bool StartGUIOnUpgrade;
+        MessageBoxIcon upgradeIcon = MessageBoxIcon.Warning;
 
         private void lnkDBADash_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
@@ -140,6 +141,7 @@ namespace DBADashGUI
             {
                 lnkLatestRelease.Text = "???";
                 toolTip1.SetToolTip(lnkLatestRelease, ex.Message);
+                upgradeMessage = "Error checking for the latest version.\nIf this server doesn't have internet access, an offline upgrade can be performed. See:\nhttps://dbadash.com/upgrades";
                 return;
             }
             lnkLatestRelease.Text = release.TagName;
@@ -149,7 +151,7 @@ namespace DBADashGUI
                 {
                     if (Upgrade.DeploymentType == Upgrade.DeploymentTypes.GUI && (DBVersion.Major != releaseVersion.Major || DBVersion.Minor != releaseVersion.Minor || DBVersion.Build != releaseVersion.Build))
                     {
-                        upgradeMessage = "An upgrade is available.  Please upgrade the DBA Dash agent first.";
+                        upgradeMessage = "An upgrade is available.  Please upgrade the DBA Dash service first.";
                     }
                     else
                     {
@@ -163,12 +165,13 @@ namespace DBADashGUI
                 else
                 {
                     upgradeMessage= "No upgrades are available at this time";
+                    upgradeIcon = MessageBoxIcon.Information;
                 }
             }
             catch
             {
                 lblLatest.Text = "Latest Version (Unable to Compare):";
-                upgradeMessage = "Error comparing versions.  Upgrade is not available at this time.";
+                upgradeMessage = "Error comparing versions.  Upgrade is not available at this time. See:\nhttps://dbadash.com/upgrades";
             }
 
         }
@@ -192,7 +195,7 @@ namespace DBADashGUI
         {
             if (!upgradeAvailable)
             {
-                MessageBox.Show(upgradeMessage,"Warning", MessageBoxButtons.OK,MessageBoxIcon.Warning);
+                MessageBox.Show(upgradeMessage,"Upgrade", MessageBoxButtons.OK,upgradeIcon);
                 return;
             }
             if(MessageBox.Show("Run script to upgrade to latest version of DBA Dash?","Upgrade",MessageBoxButtons.YesNo,MessageBoxIcon.Question) != DialogResult.Yes)
