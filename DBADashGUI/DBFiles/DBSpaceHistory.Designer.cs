@@ -44,7 +44,17 @@
             this.tsRefresh = new System.Windows.Forms.ToolStripButton();
             this.tsFileGroup = new System.Windows.Forms.ToolStripDropDownButton();
             this.tsFile = new System.Windows.Forms.ToolStripDropDownButton();
+            this.tsGrid = new System.Windows.Forms.ToolStripButton();
+            this.tsExcel = new System.Windows.Forms.ToolStripButton();
+            this.tsCopy = new System.Windows.Forms.ToolStripButton();
+            this.splitContainer1 = new System.Windows.Forms.SplitContainer();
+            this.dgv = new System.Windows.Forms.DataGridView();
             this.toolStrip1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
+            this.splitContainer1.Panel1.SuspendLayout();
+            this.splitContainer1.Panel2.SuspendLayout();
+            this.splitContainer1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.dgv)).BeginInit();
             this.SuspendLayout();
             // 
             // chart1
@@ -52,8 +62,9 @@
             this.chart1.BackColor = System.Drawing.Color.White;
             this.chart1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.chart1.Location = new System.Drawing.Point(0, 0);
+            this.chart1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.chart1.Name = "chart1";
-            this.chart1.Size = new System.Drawing.Size(1134, 438);
+            this.chart1.Size = new System.Drawing.Size(1134, 521);
             this.chart1.TabIndex = 0;
             this.chart1.Text = "cartesianChart1";
             // 
@@ -65,7 +76,10 @@
             this.toolStripDropDownButton1,
             this.tsRefresh,
             this.tsFileGroup,
-            this.tsFile});
+            this.tsFile,
+            this.tsGrid,
+            this.tsCopy,
+            this.tsExcel});
             this.toolStrip1.Location = new System.Drawing.Point(0, 0);
             this.toolStrip1.Name = "toolStrip1";
             this.toolStrip1.Size = new System.Drawing.Size(1134, 27);
@@ -204,17 +218,88 @@
             this.tsFile.Text = "File";
             this.tsFile.Visible = false;
             // 
+            // tsGrid
+            // 
+            this.tsGrid.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.tsGrid.Image = global::DBADashGUI.Properties.Resources.Table_16x;
+            this.tsGrid.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tsGrid.Name = "tsGrid";
+            this.tsGrid.Size = new System.Drawing.Size(29, 24);
+            this.tsGrid.Text = "Toggle Grid";
+            this.tsGrid.Click += new System.EventHandler(this.tsGrid_Click);
+            // 
+            // tsExcel
+            // 
+            this.tsExcel.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.tsExcel.Image = global::DBADashGUI.Properties.Resources.excel16x16;
+            this.tsExcel.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tsExcel.Name = "tsExcel";
+            this.tsExcel.Size = new System.Drawing.Size(29, 24);
+            this.tsExcel.Text = "Export to Excel";
+            this.tsExcel.Click += new System.EventHandler(this.tsExcel_Click);
+            // 
+            // tsCopy
+            // 
+            this.tsCopy.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.tsCopy.Image = global::DBADashGUI.Properties.Resources.ASX_Copy_blue_16x;
+            this.tsCopy.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tsCopy.Name = "tsCopy";
+            this.tsCopy.Size = new System.Drawing.Size(29, 24);
+            this.tsCopy.Text = "Copy Grid";
+            this.tsCopy.Click += new System.EventHandler(this.tsCopy_Click);
+            // 
+            // splitContainer1
+            // 
+            this.splitContainer1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.splitContainer1.Location = new System.Drawing.Point(0, 27);
+            this.splitContainer1.Name = "splitContainer1";
+            // 
+            // splitContainer1.Panel1
+            // 
+            this.splitContainer1.Panel1.Controls.Add(this.chart1);
+            // 
+            // splitContainer1.Panel2
+            // 
+            this.splitContainer1.Panel2.Controls.Add(this.dgv);
+            this.splitContainer1.Panel2Collapsed = true;
+            this.splitContainer1.Size = new System.Drawing.Size(1134, 521);
+            this.splitContainer1.SplitterDistance = 649;
+            this.splitContainer1.TabIndex = 4;
+            // 
+            // dgv
+            // 
+            this.dgv.AllowUserToAddRows = false;
+            this.dgv.AllowUserToDeleteRows = false;
+            this.dgv.BackgroundColor = System.Drawing.Color.White;
+            this.dgv.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.dgv.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.dgv.Location = new System.Drawing.Point(0, 0);
+            this.dgv.Name = "dgv";
+            this.dgv.ReadOnly = true;
+            this.dgv.RowHeadersVisible = false;
+            this.dgv.RowHeadersWidth = 51;
+            this.dgv.RowTemplate.Height = 29;
+            this.dgv.Size = new System.Drawing.Size(96, 100);
+            this.dgv.TabIndex = 0;
+            // 
             // DBSpaceHistory
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.Controls.Add(this.splitContainer1);
             this.Controls.Add(this.toolStrip1);
-            this.Controls.Add(this.chart1);
+            this.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.Name = "DBSpaceHistory";
-            this.Size = new System.Drawing.Size(1134, 438);
+            this.Size = new System.Drawing.Size(1134, 548);
             this.Load += new System.EventHandler(this.DBSpaceHistory_Load);
+            this.Resize += new System.EventHandler(this.DBSpaceHistory_Resize);
             this.toolStrip1.ResumeLayout(false);
             this.toolStrip1.PerformLayout();
+            this.splitContainer1.Panel1.ResumeLayout(false);
+            this.splitContainer1.Panel2.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).EndInit();
+            this.splitContainer1.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.dgv)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -238,5 +323,10 @@
         private System.Windows.Forms.ToolStripMenuItem pointsToolStripMenuItem;
         private System.Windows.Forms.ToolStripDropDownButton tsFileGroup;
         private System.Windows.Forms.ToolStripDropDownButton tsFile;
+        private System.Windows.Forms.ToolStripButton tsExcel;
+        private System.Windows.Forms.ToolStripButton tsGrid;
+        private System.Windows.Forms.SplitContainer splitContainer1;
+        private System.Windows.Forms.DataGridView dgv;
+        private System.Windows.Forms.ToolStripButton tsCopy;
     }
 }
