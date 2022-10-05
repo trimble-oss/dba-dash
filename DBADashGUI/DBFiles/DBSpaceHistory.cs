@@ -36,8 +36,8 @@ namespace DBADashGUI.DBFiles
                 _databaseID = value;
                 if (_databaseID >0)
                 {
-                    populateFileGroupFilter();
-                    populateFileFilesFilter();
+                    PopulateFileGroupFilter();
+                    PopulateFileFilesFilter();
                 }
             }
         }
@@ -45,7 +45,7 @@ namespace DBADashGUI.DBFiles
         public string InstanceGroupName { get; set; }
         public string DBName { get; set; }
         private string _fileName;
-        public string FileName { get { return _fileName; } set { _fileName = value; setFileChecked(); } }
+        public string FileName { get { return _fileName; } set { _fileName = value; SetFileChecked(); } }
 
         private Int32? _dataspaceid=null;
         DataTable HistoryDT;
@@ -59,7 +59,7 @@ namespace DBADashGUI.DBFiles
             set
             {
                 _dataspaceid = value;
-                setFGChecked();
+                SetFGChecked();
             }
         }
 
@@ -110,7 +110,7 @@ namespace DBADashGUI.DBFiles
             }
         }
 
-        Int32 pointSize
+        Int32 PointSize
         {
             get
             {
@@ -172,7 +172,7 @@ namespace DBADashGUI.DBFiles
                     Tag = s,
                     ScalesYAt = columns[s].axis,
                     LineSmoothness = SmoothLines ? 1 : 0,
-                    PointGeometrySize = pointSize, 
+                    PointGeometrySize = PointSize, 
                     Values=v
                 }
                 ); ;
@@ -198,7 +198,8 @@ namespace DBADashGUI.DBFiles
         public DataTable DBFileSnapshot()
         {
             using (var cn = new SqlConnection(connectionString))
-            using (var cmd = new SqlCommand("dbo.DBFileSnapshot_Get", cn) { CommandType = CommandType.StoredProcedure }) {
+            using (var cmd = new SqlCommand("dbo.DBFileSnapshot_Get", cn) { CommandType = CommandType.StoredProcedure })
+            using(var da = new SqlDataAdapter(cmd)){
                 cn.Open();
                 cmd.Parameters.AddWithValue("FromDate", From);
                 cmd.Parameters.AddWithValue("ToDate", To);
@@ -222,8 +223,7 @@ namespace DBADashGUI.DBFiles
                 {
                     cmd.Parameters.AddWithValue("FileName", FileName);
                 }
-                SqlDataAdapter da = new SqlDataAdapter(cmd);
-                DataTable dt = new DataTable();
+                DataTable dt = new();
                 da.Fill(dt);
                 return dt;
             }
@@ -233,11 +233,11 @@ namespace DBADashGUI.DBFiles
         private void Days_Click(object sender, EventArgs e)
         {
             Days = Int32.Parse((string)((ToolStripMenuItem)sender).Tag);
-            setTimeChecked();
+            SetTimeChecked();
             RefreshData();
         }
 
-        private void setTimeChecked()
+        private void SetTimeChecked()
         {
             foreach (ToolStripItem ts in tsTime.DropDownItems)
             {
@@ -263,30 +263,30 @@ namespace DBADashGUI.DBFiles
                 customFrom = frm.FromDate;
                 customTo = frm.ToDate;
                 Days = -1;
-                setTimeChecked();
+                SetTimeChecked();
                 RefreshData();
             }
 
         }
 
-        private void tsRefresh_Click(object sender, EventArgs e)
+        private void TsRefresh_Click(object sender, EventArgs e)
         {
             RefreshData();
         }
 
-        private void smoothLinesToolStripMenuItem_Click(object sender, EventArgs e)
+        private void SmoothLinesToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            foreach(LineSeries s in chart1.Series)
+            foreach (LineSeries s in chart1.Series.Cast<LineSeries>())
             {
                 s.LineSmoothness = SmoothLines ? 1 : 0;
             }
         }
 
-        private void pointsToolStripMenuItem_Click(object sender, EventArgs e)
+        private void PointsToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            foreach (LineSeries s in chart1.Series)
+            foreach (LineSeries s in chart1.Series.Cast<LineSeries>())
             {
-                s.PointGeometrySize = pointSize;
+                s.PointGeometrySize = PointSize;
             }
         }
 
@@ -307,7 +307,7 @@ namespace DBADashGUI.DBFiles
             });
         }
 
-        private void populateFileGroupFilter()
+        private void PopulateFileGroupFilter()
         {
             var dt = CommonData.GetFileGroups(DatabaseID);
             foreach(DataRow r in dt.Rows)
@@ -327,7 +327,7 @@ namespace DBADashGUI.DBFiles
             tsFileGroup.Visible = tsFileGroup.DropDownItems.Count>0;
         }
 
-        private void populateFileFilesFilter()
+        private void PopulateFileFilesFilter()
         {
             var dt = CommonData.GetFiles(DatabaseID);
             foreach (DataRow r in dt.Rows)
@@ -357,11 +357,11 @@ namespace DBADashGUI.DBFiles
             {
                 FileName = mnu.Text;
             }
-            setFileChecked();
+            SetFileChecked();
             RefreshData();
         }
 
-        private void setFileChecked()
+        private void SetFileChecked()
         {
             tsFile.Text = FileName ==null || FileName == "" ? "{All Files}" : FileName;
             tsFile.Font = FileName == null || FileName == "" ? new Font(tsFile.Font, FontStyle.Regular) : new Font(tsFile.Font, FontStyle.Bold);
@@ -384,11 +384,11 @@ namespace DBADashGUI.DBFiles
             {
                 DataSpaceID = (Int32?)mnu.Tag;
             }
-            setFGChecked();
+            SetFGChecked();
             RefreshData();
         }
 
-        private void setFGChecked()
+        private void SetFGChecked()
         {
             tsFileGroup.Text = DataSpaceID == null ? "{All FileGroups}" : DataSpaceID.ToString();
             tsFileGroup.Font = DataSpaceID == null ? new Font(tsFileGroup.Font, FontStyle.Regular) : new Font(tsFileGroup.Font, FontStyle.Bold);
@@ -400,12 +400,12 @@ namespace DBADashGUI.DBFiles
             }
         }
 
-        private void tsExcel_Click(object sender, EventArgs e)
+        private void TsExcel_Click(object sender, EventArgs e)
         {
             Common.PromptSaveDataGridView(dgv);
         }
 
-        private void tsGrid_Click(object sender, EventArgs e)
+        private void TsGrid_Click(object sender, EventArgs e)
         {
             splitContainer1.Panel2Collapsed = !splitContainer1.Panel2Collapsed;
             SetPanelSize();
@@ -433,7 +433,7 @@ namespace DBADashGUI.DBFiles
             SetPanelSize();
         }
 
-        private void tsCopy_Click(object sender, EventArgs e)
+        private void TsCopy_Click(object sender, EventArgs e)
         {
             Common.CopyDataGridViewToClipboard(dgv);
         }
