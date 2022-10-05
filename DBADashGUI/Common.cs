@@ -283,6 +283,7 @@ namespace DBADashGUI
                     if (cell.Visible)
                     {
                         colIndex += 1;
+                        var cellType = cell.Value == null ? typeof(System.String) : cell.Value.GetType();
                         SLStyle style = sl.CreateStyle();
                         string format = string.IsNullOrEmpty(cell.Style.Format) ? cell.InheritedStyle.Format : cell.Style.Format;
                         format = format switch
@@ -291,6 +292,10 @@ namespace DBADashGUI
                             "P:" or "P2" => "0.00%",
                             _ => "",
                         };
+                        if(cellType == typeof(DateTime))
+                        {
+                            format = "yyyy-MM-dd HH:mm";
+                        }
                         if (!cell.Style.ForeColor.IsEmpty || !cell.Style.BackColor.IsEmpty || !string.IsNullOrEmpty(format))
                         {
                             var backColor = cell.Style.BackColor.IsEmpty ? Color.Transparent : cell.Style.BackColor;
@@ -299,7 +304,7 @@ namespace DBADashGUI
                             style.FormatCode = format;
                             sl.SetCellStyle(rowIndex, colIndex, style);
                         }
-                        var cellType = cell.Value==null ? typeof(System.String) : cell.Value.GetType();
+                     
                         if (cellType == typeof(decimal) || cellType == typeof(float))
                         {
                             sl.SetCellValue(rowIndex, colIndex, Convert.ToDecimal(cell.Value));
@@ -307,6 +312,10 @@ namespace DBADashGUI
                         else if(cellType == typeof(int) || cellType== typeof(long) || cellType == typeof(short) || cellType == typeof(uint) || cellType == typeof(ulong) || cellType == typeof(ushort))
                         {
                             sl.SetCellValue(rowIndex, colIndex, Convert.ToInt64(cell.Value));
+                        }
+                        else if (cellType == typeof(DateTime))
+                        {
+                            sl.SetCellValue(rowIndex,colIndex,Convert.ToDateTime(cell.Value));
                         }
                         else
                         {
