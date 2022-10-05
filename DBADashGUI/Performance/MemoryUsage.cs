@@ -136,7 +136,8 @@ namespace DBADashGUI.Performance
                 dgv.Columns.Add(new DataGridViewLinkColumn() { Name = "colSharedMemoryReserved", HeaderText = "Shared Memory Reserved KB", DataPropertyName = "shared_memory_reserved_kb", DefaultCellStyle = Common.DataGridViewNumericCellStyleNoDigits, LinkColor = DashColors.LinkColor});
                 dgv.Columns.Add(new DataGridViewLinkColumn() { Name = "colSharedMemoryCommitted", HeaderText = "Shared Memory Committed KB", DataPropertyName = "shared_memory_committed_kb", DefaultCellStyle = Common.DataGridViewNumericCellStyleNoDigits,LinkColor = DashColors.LinkColor});
                 dgv.Columns.Add(new DataGridViewTextBoxColumn() { HeaderText = "Snapshot Date", DataPropertyName = "SnapshotDate" });
-                dgv.Columns.Add(new DataGridViewTextBoxColumn() { Name = "colPagesPct", HeaderText = "Pages %", DataPropertyName = "Pct", DefaultCellStyle = new DataGridViewCellStyle() { Format = "P1" } });             
+                dgv.Columns.Add(new DataGridViewTextBoxColumn() { Name = "colPagesPct", HeaderText = "Pages %", DataPropertyName = "Pct", DefaultCellStyle = new DataGridViewCellStyle() { Format = "P1" } });
+                dgv.Columns.Add(new DataGridViewTextBoxColumn() { Name = "colDescription", HeaderText = "Description", DataPropertyName = "MemoryClerkDescription" });
             }
             dgv.DataSource = dt;
 
