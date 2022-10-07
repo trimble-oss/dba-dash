@@ -572,6 +572,11 @@ namespace DBADashGUI
                 identityColumns1.IncludeNA = !(parent.Type == SQLTreeItem.TreeType.DBADashRoot);
                 identityColumns1.RefreshData();
             }
+            else if(tabs.SelectedTab == tabOSLoadedModules)
+            {
+                osLoadedModules1.InstanceIDs = instanceIDs;
+                osLoadedModules1.RefreshData();
+            }
             UpdateTimeFilterVisibility();
         }
 
@@ -891,6 +896,7 @@ namespace DBADashGUI
                 allowedTabs.Add(tabCustomChecks);
                 allowedTabs.Add(tabSnapshotsSummary);
                 allowedTabs.Add(tabIdentityColumns);
+                allowedTabs.Add(tabOSLoadedModules);
             }
             else if(n.Type== SQLTreeItem.TreeType.Tags)
             {
