@@ -1151,49 +1151,76 @@ FROM (VALUES('ObjectExecutionStats',120),
 				) AS t(TableName,RetentionDays)
 WHERE NOT EXISTS(SELECT 1 FROM dbo.DataRetention DR WHERE DR.TableName = T.TableName)
 
-INSERT INTO dbo.OSLoadedModulesStatus
-(
-    NAME,
-    Company,
-    Description,
-    STATUS
-)
-SELECT * FROM  (
-VALUES
-( N'%', N'%', N'XTP Native DLL', 4 ), 
-( N'%', N'Microsoft Corporation', N'%', 4 ), 
-( N'%', N'Корпорация Майкрософт', N'%', 4 ), 
-( N'%\ENTAPI.DLL', N'%', N'%', 1 ), 
-( N'%\HcApi.dll', N'%', N'%', 1 ), 
-( N'%\HcSQL.dll', N'%', N'%', 1 ), 
-( N'%\HcThe.dll', N'%', N'%', 1 ), 
-( N'%\HIPI.DLL', N'%', N'%', 1 ), 
-( N'%\PIOLEDB.DLL', N'%', N'%', 1 ), 
-( N'%\PISDK.DLL', N'%', N'%', 1 ), 
-( N'%\SOPHOS_DETOURED.DLL', N'%', N'%', 1 ), 
-( N'%\SOPHOS_DETOURED_x64.DLL', N'%', N'%', 1 ), 
-( N'%\SOPHOS~%.dll', N'%', N'%', 1 ), 
-( N'%\SWI_IFSLSP_64.dll', N'%', N'%', 1 ), 
-( N'%IisRTL.DLL', N'%', N'%', 4 ), 
-( N'%iisutil.dll', N'%', N'%', 4 ), 
-( N'%instapi.dll', N'%', N'%', 4 ), 
-( N'%MSDART.DLL', N'%', N'%', 4 ), 
-( N'%msxml3.dll', N'%', N'%', 4 ), 
-( N'%msxmlsql.dll', N'%', N'%', 4 ), 
-( N'%ODBC32.dll', N'%', N'%', 4 ), 
-( N'%oledb32.dll', N'%', N'%', 4 ), 
-( N'%OLEDB32R.DLL', N'%', N'%', 4 ), 
-( N'%ScriptControl64%.dll', N'%', N'%', 4 ), 
-( N'%UMPDC.dll', N'%', N'%', 4 ), 
-( N'%umppc%.dll', N'%', N'%', 4 ), 
-( N'%w3ctrs.dll', N'%', N'%', 4 ), 
-( N'%XmlLite.dll', N'%', N'%', 4 ), 
-( N'%xpsqlbot.dll', N'%', N'%', 4 )
-) t(name,company,description,status)
-WHERE NOT EXISTS(SELECT 1 FROM dbo.OSLoadedModulesStatus s
-			WHERE s.NAME = t.name 
-			AND s.Company = t.company
-			AND s.Description = t.description)
+DELETE dbo.OSLoadedModulesStatus
+WHERE IsSystem=1
+
+/*	MS docs list of drivers and modules known to cause issues:
+	https://learn.microsoft.com/en-us/troubleshoot/sql/performance/performance-consistency-issues-filter-drivers-modules
+*/
+MERGE INTO dbo.OSLoadedModulesStatus AS [Target]
+USING (
+	VALUES
+	( N'%', N'%', N'XTP Native DLL', 4,NULL,1 ), 
+	( N'%', N'Microsoft Corporation', N'%', 4,NULL,1 ), 
+	( N'%', N'Корпорация Майкрософт', N'%', 4, NULL,1 ), 
+	( N'%\ENTAPI.DLL', N'%', N'%', 1, N'McAfee VirusScan Enterprise',1 ), 
+	( N'%\HcApi.dll', N'%', N'%', 1, N'McAfee Host Intrusion',1  ), 
+	( N'%\HcSQL.dll', N'%', N'%', 1, N'McAfee Host Intrusion',1  ), 
+	( N'%\HcThe.dll', N'%', N'%', 1, N'McAfee Host Intrusion',1  ), 
+	( N'%\HIPI.DLL', N'%', N'%', 1, N'McAfee Host Intrusion',1  ), 
+	( N'%\PIOLEDB.DLL', N'%', N'%', 1, N'OSISoft PI data access',1  ), 
+	( N'%\PISDK.DLL', N'%', N'%', 1, N'OSISoft PI data access',1   ), 
+	( N'%\SOPHOS_DETOURED.DLL', N'%', N'%', 1,N'Sophos AV',1  ), 
+	( N'%\SOPHOS_DETOURED_x64.DLL', N'%', N'%', 1,N'Sophos AV',1  ), 
+	( N'%\SOPHOS~%.dll', N'%', N'%', 1,N'Sophos AV',1  ), 
+	( N'%\SWI_IFSLSP_64.dll', N'%', N'%', 1, N'Sophos AV',1  ), 
+	( N'%IisRTL.DLL', N'%', N'%', 4, NULL,1 ), 
+	( N'%iisutil.dll', N'%', N'%', 4, NULL,1 ), 
+	( N'%instapi.dll', N'%', N'%', 4, NULL,1 ), 
+	( N'%MSDART.DLL', N'%', N'%', 4, NULL,1 ), 
+	( N'%msxml3.dll', N'%', N'%', 4, NULL,1 ), 
+	( N'%msxmlsql.dll', N'%', N'%', 4, NULL,1 ), 
+	( N'%ODBC32.dll', N'%', N'%', 4, NULL,1 ), 
+	( N'%oledb32.dll', N'%', N'%', 4, NULL,1 ), 
+	( N'%OLEDB32R.DLL', N'%', N'%', 4, NULL,1 ), 
+	( N'%ScriptControl64%.dll', N'%', N'%', 1, N'CrowdStrike',1 ), 
+	( N'%UMPDC.dll', N'%', N'%', 4, NULL,1 ), 
+	( N'%umppc%.dll', N'%', N'%', 1, N'CrowdStrike',1 ), 
+	( N'%w3ctrs.dll', N'%', N'%', 4 , NULL,1 ), 
+	( N'%XmlLite.dll', N'%', N'%', 4, NULL,1 ), 
+	( N'%xpsqlbot.dll', N'%', N'%', 4, NULL,1 ),
+	( N'%perfiCrcPerfMonMgr.DLL',N'%',N'%',1,N'Trend Micro',1),
+	( N'%MFEBOPK.SYS',N'%',N'%',1,N'McAfee VirusScan Enterprise',1),
+	( N'%NLEMSQL%.SYS',N'%',N'%',1,N'NetLib Encryptionizer-Software',1),
+	( N'%MFETDIK.SYS',N'%',N'%',1,N'McAfee Anti-Virus Mini-Firewall',1),
+	( N'%sqlmaggieAntiVirus%.dll',N'%',N'%',1,N'Malware',1),
+	( N'%AntiVirus%',N'%',N'%',1,N'AntiVirus??',1),
+	( N'%odbccp32.dll',N'%',N'%',4,NULL,1),
+	( N'%isa-l.dll',N'Intel Corporation',N'%',4,NULL,1),
+	( N'%qatzip.dll',N'Intel Corporation',N'%',4,NULL,1),
+	( N'%\msadce.dll',N'%',N'%',4,NULL,1),
+	( N'%\msdatl3.dll',N'%',N'%',4,NULL,1)
+	)  [Source](Name,Company,Description,Status,Notes,IsSystem)
+ON ([Target].[Name] = [Source].[Name] AND [Target].[Company] = [Source].[Company] AND [Target].[Description] = [Source].[Description])
+WHEN MATCHED AND (
+	NULLIF([Source].[Status], [Target].[Status]) IS NOT NULL OR NULLIF([Target].[Status], [Source].[Status]) IS NOT NULL OR 
+	NULLIF([Source].[Notes], [Target].[Notes]) IS NOT NULL OR NULLIF([Target].[Notes], [Source].[Notes]) IS NOT NULL OR 
+	NULLIF([Source].[IsSystem], [Target].[IsSystem]) IS NOT NULL OR NULLIF([Target].[IsSystem], [Source].[IsSystem]) IS NOT NULL) THEN
+UPDATE SET
+  [Target].[Status] = [Source].[Status], 
+  [Target].[Notes] = [Source].[Notes], 
+  [Target].[IsSystem] = [Source].[IsSystem]
+WHEN NOT MATCHED BY TARGET THEN
+ INSERT([Name],[Company],[Description],[Status],[Notes],[IsSystem])
+ VALUES([Source].[Name],[Source].[Company],[Source].[Description],[Source].[Status],[Source].[Notes],[Source].[IsSystem])
+WHEN NOT MATCHED BY SOURCE AND [Target].IsSystem=1 THEN 
+ DELETE;
+
+ IF @@ROWCOUNT>0
+ BEGIN
+	EXEC dbo.OSLoadedModules_RefreshStatus
+ END
+
 
 IF NOT EXISTS(SELECT 1 FROM dbo.DriveThresholds)
 BEGIN 

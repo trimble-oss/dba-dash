@@ -317,6 +317,10 @@ namespace DBADashGUI
                         {
                             sl.SetCellValue(rowIndex,colIndex,Convert.ToDateTime(cell.Value));
                         }
+                        else if(cellType == typeof(byte[]))
+                        {
+                            sl.SetCellValue(rowIndex, colIndex, Convert.ToString(cell.FormattedValue));
+                        }
                         else
                         {
                             sl.SetCellValue(rowIndex, colIndex, Convert.ToString(cell.Value));

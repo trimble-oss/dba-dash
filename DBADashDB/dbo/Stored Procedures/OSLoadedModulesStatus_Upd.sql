@@ -1,10 +1,17 @@
-﻿CREATE PROC OSLoadedModulesStatus_Upd
-AS	
-UPDATE M 
-	SET M.Status= ISNULL(s.Status,2)
-FROM dbo.OSLoadedModules M
-OUTER APPLY(SELECT MIN(MS.Status) Status 
-				FROM dbo.OSLoadedModulesStatus MS 
-				WHERE ISNULL(M.company,'') LIKE MS.Company 
-				AND ISNULL(M.name,'') LIKE MS.Name 
-				AND ISNULL(M.description,'') LIKE MS.Description ) s
+﻿CREATE PROC dbo.OSLoadedModulesStatus_Upd(
+	@ID INT,
+	@Name NVARCHAR(256),
+	@Company NVARCHAR(256),
+	@Description NVARCHAR(256),
+	@Status TINYINT,
+	@Notes NVARCHAR(256)
+)
+AS
+UPDATE dbo.OSLoadedModulesStatus
+SET Name = @Name,
+	Company = @Company,
+	Description = @Description,
+	Status = @Status,
+	Notes = @Notes
+WHERE ID = @ID
+GO

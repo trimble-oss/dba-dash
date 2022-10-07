@@ -269,7 +269,7 @@
     <Build Include="dbo\User Defined Types\DBTuningOptions.sql" />
     <Build Include="dbo\Tables\OSLoadedModulesStatus.sql" />
     <Build Include="Report\Stored Procedures\OSLoadedModules_Get.sql" />
-    <Build Include="dbo\Stored Procedures\OSLoadedModulesStatus_Upd.sql" />
+    <Build Include="dbo\Stored Procedures\OSLoadedModules_RefreshStatus.sql" />
     <Build Include="Report\Stored Procedures\Connections_Get.sql" />
     <Build Include="dbo\Tables\AzureDBResourceStats.sql" />
     <Build Include="dbo\Stored Procedures\AzureDBResourceStats_Upd.sql" />
@@ -689,6 +689,12 @@
     <Build Include="dbo\Views\IdentityColumnsInfo.sql" />
     <Build Include="dbo\Stored Procedures\IdentityColumns_Get.sql" />
     <Build Include="dbo\Tables\IdentityColumThresholds.sql" />
+    <Build Include="dbo\Stored Procedures\OSLoadedModuleSummary_Get.sql" />
+    <Build Include="dbo\Stored Procedures\OSLoadedModules_Get.sql" />
+    <Build Include="dbo\Stored Procedures\OSLoadedModulesStatus_Get.sql" />
+    <Build Include="dbo\Stored Procedures\OSLoadedModulesStatus_Del.sql" />
+    <Build Include="dbo\Stored Procedures\OSLoadedModulesStatus_Upd.sql" />
+    <Build Include="dbo\Stored Procedures\OSLoadedModulesStatus_Add.sql" />
   </ItemGroup>
   <ItemGroup>
     <PostDeploy Include="Script.PostDeployment1.sql" />
