@@ -216,6 +216,7 @@
             this._30to60min = new System.Windows.Forms.DataGridViewLinkColumn();
             this._1hrPlus = new System.Windows.Forms.DataGridViewLinkColumn();
             this.Total = new System.Windows.Forms.DataGridViewLinkColumn();
+            this.Failed = new System.Windows.Forms.DataGridViewLinkColumn();
             this.TotalDuration = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.TotalCPU = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.TotalIO = new System.Windows.Forms.DataGridViewTextBoxColumn();
@@ -250,6 +251,7 @@
             this._30to60min,
             this._1hrPlus,
             this.Total,
+            this.Failed,
             this.TotalDuration,
             this.TotalCPU,
             this.TotalIO,
@@ -1148,6 +1150,7 @@
             this.dgvSlow.Size = new System.Drawing.Size(1829, 805);
             this.dgvSlow.TabIndex = 4;
             this.dgvSlow.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.DgvSlow_CellContentClick);
+            this.dgvSlow.RowsAdded += new System.Windows.Forms.DataGridViewRowsAddedEventHandler(this.dgvSlow_RowsAdded);
             // 
             // Instance
             // 
@@ -1751,6 +1754,18 @@
             this.Total.ReadOnly = true;
             this.Total.Width = 50;
             // 
+            // Failed
+            // 
+            this.Failed.DataPropertyName = "FailedCount";
+            this.Failed.HeaderText = "Failed";
+            this.Failed.MinimumWidth = 6;
+            this.Failed.Name = "Failed";
+            this.Failed.ReadOnly = true;
+            this.Failed.Resizable = System.Windows.Forms.DataGridViewTriState.True;
+            this.Failed.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
+            this.Failed.ToolTipText = "Failed query count";
+            this.Failed.Width = 50;
+            // 
             // TotalDuration
             // 
             this.TotalDuration.DataPropertyName = "TotalDuration";
@@ -1984,6 +1999,7 @@
         private System.Windows.Forms.DataGridViewLinkColumn _30to60min;
         private System.Windows.Forms.DataGridViewLinkColumn _1hrPlus;
         private System.Windows.Forms.DataGridViewLinkColumn Total;
+        private System.Windows.Forms.DataGridViewLinkColumn Failed;
         private System.Windows.Forms.DataGridViewTextBoxColumn TotalDuration;
         private System.Windows.Forms.DataGridViewTextBoxColumn TotalCPU;
         private System.Windows.Forms.DataGridViewTextBoxColumn TotalIO;

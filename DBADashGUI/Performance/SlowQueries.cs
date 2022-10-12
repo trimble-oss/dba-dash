@@ -11,6 +11,7 @@ using Microsoft.Data.SqlClient;
 using DBADashGUI.Performance;
 using Humanizer;
 using System.Diagnostics;
+using Humanizer.Localisation;
 
 namespace DBADashGUI
 {
@@ -504,6 +505,10 @@ namespace DBADashGUI
                 {
                     LoadSlowQueriesDetail();
                 }
+                else if (dgvSummary.Columns[e.ColumnIndex] == Failed)
+                {
+                    LoadSlowQueriesDetail(default, default, true);
+                }
                 else if (dgvSummary.Columns[e.ColumnIndex] == _1hrPlus)
                 {
                     LoadSlowQueriesDetail(3600, -1);
@@ -562,7 +567,7 @@ namespace DBADashGUI
             RefreshData();
         }
 
-        private DataTable GetSlowQueriesDetail(Int32 durationFrom = -1, Int32 durationTo = -1)
+        private DataTable GetSlowQueriesDetail(Int32 durationFrom = -1, Int32 durationTo = -1,bool failed=false)
         {
             using (var cn = new SqlConnection(Common.ConnectionString))
             using (var cmd = new SqlCommand("dbo.SlowQueriesDetail_Get", cn) { CommandType = CommandType.StoredProcedure })
@@ -573,6 +578,10 @@ namespace DBADashGUI
                 cmd.Parameters.AddWithValue("FromDate", DateRange.FromUTC);
                 cmd.Parameters.AddWithValue("ToDate", DateRange.ToUTC);
                 cmd.Parameters.AddWithValue("Top", pageSize);
+                if (failed)
+                {
+                    cmd.Parameters.AddWithValue("ResultFailed", true);
+                }
 
                 string displayName = txtInstance.Text;
                 string client = txtClient.Text;
@@ -767,9 +776,9 @@ namespace DBADashGUI
             }
         }
 
-        private void LoadSlowQueriesDetail(Int32 durationFrom=-1,Int32 durationTo=-1)
+        private void LoadSlowQueriesDetail(Int32 durationFrom=-1,Int32 durationTo=-1,bool failed=false)
         {
-           var dt = GetSlowQueriesDetail(durationFrom,durationTo);
+           var dt = GetSlowQueriesDetail(durationFrom,durationTo,failed);
             dt.Columns.Add("text_trunc",typeof(string));
             foreach(DataRow r in dt.Rows)
             {
@@ -938,5 +947,16 @@ namespace DBADashGUI
                 e.Handled = true;
             }
         }
+
+        private void dgvSlow_RowsAdded(object sender, DataGridViewRowsAddedEventArgs e)
+        {
+            for (Int32 idx = e.RowIndex; idx < e.RowIndex + e.RowCount; idx += 1)
+            {
+                var r = dgvSlow.Rows[idx];
+                var status = Convert.ToString(r.Cells["Result"].Value) == "0 - OK" ? DBADashStatus.DBADashStatusEnum.OK : DBADashStatus.DBADashStatusEnum.Critical;
+                r.Cells["Result"].SetStatusColor(status);
+            }
+        }    
+
     }
 }

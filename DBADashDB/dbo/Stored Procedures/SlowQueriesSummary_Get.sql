@@ -35,7 +35,8 @@
 	@LogicalReadsTo BIGINT=NULL,
 	@WritesFrom BIGINT=NULL,
 	@WritesTo BIGINT=NULL,
-	@EventType SYSNAME=NULL
+	@EventType SYSNAME=NULL,
+	@Debug BIT=0
 )
 AS
 DECLARE @DurationFromUS BIGINT 
@@ -91,6 +92,7 @@ N'SELECT ' + CASE WHEN @Top IS NOT NULL THEN 'TOP(@Top) ' ELSE '' END + @GroupSQ
 		SUM(CASE WHEN Duration>=1800000000 AND Duration < 3600000000 THEN 1 ELSE 0 END) AS [30-60 minutes], 
 		SUM(CASE WHEN Duration>=3600000000 THEN 1 ELSE 0 END) AS [1hr+], 
 		COUNT(*) Total,
+		SUM(CASE WHEN result <> ''0 - OK'' THEN 1 ELSE 0 END) AS FailedCount,
 		SUM(Duration) as TotalDuration,
 		SUM(cpu_time) as TotalCPU,
 		SUM(logical_reads+Writes) as TotalIO,
@@ -133,6 +135,9 @@ AND timestamp< @ToDate
 ' + CASE WHEN @EventType IS NULL THEN '' ELSE 'AND SQ.event_type = @EventType' END + '
 GROUP BY ' + @GroupSQL +'
 ORDER BY SUM(Duration) DESC'
+
+IF @Debug=1
+	PRINT @SQL
 
 EXEC sp_executesql @SQL,N'@Instances IDs READONLY,
 						@ObjectName SYSNAME,
