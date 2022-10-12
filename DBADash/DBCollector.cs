@@ -902,6 +902,10 @@ CROSS APPLY sys.dm_exec_sql_text(H.sql_handle) txt");
                     {
                         Log.Warning("SnapshotJobs not supported: {0}. From {1}", ex.Message, Source.SourceConnection.ConnectionForPrint);
                     }
+                    catch(AggregateException ex) // thrown if any issues scripting jobs
+                    {
+                        LogDBError(collectionTypeString,ex.ToString());
+                    }
                 }
                 else
                 {
