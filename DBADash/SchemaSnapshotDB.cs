@@ -226,7 +226,7 @@ namespace DBADash
                     r["start_step_id"] = job.StartStepID;
                     r["has_schedule"] = job.HasSchedule;
                     r["has_server"] = job.HasServer;
-                    r["has_step"] = job.HasSchedule;
+                    r["has_step"] = job.HasStep;
                     jobDT.Rows.Add(r);
 
                     foreach(Microsoft.SqlServer.Management.Smo.Agent.JobStep step in job.JobSteps)
