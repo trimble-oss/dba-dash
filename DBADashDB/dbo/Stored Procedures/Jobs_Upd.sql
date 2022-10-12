@@ -1,4 +1,4 @@
-﻿CREATE   PROC dbo.Jobs_Upd(
+﻿CREATE PROC dbo.Jobs_Upd(
 	@InstanceID INT,
 	@Jobs dbo.Jobs READONLY,
 	@SnapshotDate DATETIME2(2)
@@ -13,7 +13,8 @@ BEGIN
 		DDLHash,
 		DDL
 	)
-	SELECT DDLHash,DDL
+	SELECT DISTINCT DDLHash,
+			DDL
 	FROM @Jobs T
 	WHERE NOT EXISTS(SELECT 1 FROM dbo.DDL WHERE DDL.DDLHash = T.DDLHash)
 

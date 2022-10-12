@@ -13,6 +13,7 @@ using System.Security.Cryptography;
 using System.Text;
 using Serilog;
 using SerilogTimings;
+using System.Collections.Generic;
 
 namespace DBADash
 {
@@ -193,14 +194,25 @@ namespace DBADash
         {
             var jobDT = JobDataTableSchema();
             var jobStepDT = JobStepTableSchema();
-
+            List<Exception> errors = new();
             using (var cn = new Microsoft.Data.SqlClient.SqlConnection(_connectionString))
             {
                 var instance = new Microsoft.SqlServer.Management.Smo.Server(new Microsoft.SqlServer.Management.Common.ServerConnection(cn));
                 foreach(Microsoft.SqlServer.Management.Smo.Agent.Job job in instance.JobServer.Jobs)
                 {
                     DataRow r = jobDT.NewRow();
-                    var sDDL = stringCollectionToString(job.Script(ScriptingOptions));
+                    string sDDL;
+                    try
+                    {
+                        sDDL = stringCollectionToString(job.Script(ScriptingOptions));
+                    }
+                    catch(Exception ex)
+                    {
+                        string message = String.Format("Error scripting agent job `{0}` on {1}", job.Name, instance.Name);
+                        sDDL = "/*\n Error scripting job: \n" + ex.Message + "\n*/";
+                        errors.Add(new Exception(message, ex));
+                        Log.Error(ex, message);
+                    }
                    
                     var bDDL = Zip(sDDL);
                     r["name"] = job.Name;
@@ -256,6 +268,10 @@ namespace DBADash
             }
             ds.Tables.Add(jobDT);
             ds.Tables.Add(jobStepDT);
+            if (errors.Count > 0)
+            {
+                throw new AggregateException(errors);
+            }
         }
 
         private DataTable rgDTSchema()
