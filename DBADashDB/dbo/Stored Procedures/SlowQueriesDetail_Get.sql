@@ -36,7 +36,8 @@
 	@LogicalReadsTo BIGINT=NULL,
 	@WritesFrom BIGINT=NULL,
 	@WritesTo BIGINT=NULL,
-	@EventType SYSNAME=NULL
+	@EventType SYSNAME=NULL,
+	@ResultFailed BIT=NULL
 )
 AS
 DECLARE @DurationFromUS BIGINT 
@@ -131,6 +132,7 @@ AND timestamp< @ToDate
 ' + CASE WHEN @WritesFrom IS NULL THEN '' ELSE 'AND SQ.writes >= @WritesFrom' END + '
 ' + CASE WHEN @WritesTo IS NULL THEN '' ELSE 'AND SQ.writes < @WritesTo' END + '
 ' + CASE WHEN @EventType IS NULL THEN '' ELSE 'AND SQ.event_type = @EventType' END + '
+' + CASE WHEN @ResultFailed IS NULL THEN '' WHEN @ResultFailed = 1 THEN 'AND SQ.result <> ''0 - OK'''  ELSE 'AND SQ.result = ''0 - OK''' END + '
 ' + @SortSQL
 
 EXEC sp_executesql @SQL,N'@Instances IDs READONLY,
