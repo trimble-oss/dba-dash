@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(DBSpaceHistory));
             this.chart1 = new LiveCharts.WinForms.CartesianChart();
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
             this.tsTime = new System.Windows.Forms.ToolStripDropDownButton();
@@ -45,8 +46,12 @@
             this.tsFileGroup = new System.Windows.Forms.ToolStripDropDownButton();
             this.tsFile = new System.Windows.Forms.ToolStripDropDownButton();
             this.tsGrid = new System.Windows.Forms.ToolStripButton();
-            this.tsExcel = new System.Windows.Forms.ToolStripButton();
             this.tsCopy = new System.Windows.Forms.ToolStripButton();
+            this.tsExcel = new System.Windows.Forms.ToolStripButton();
+            this.tsUnits = new System.Windows.Forms.ToolStripDropDownButton();
+            this.mBToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.gBToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.tBToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
             this.dgv = new System.Windows.Forms.DataGridView();
             this.toolStrip1.SuspendLayout();
@@ -77,6 +82,7 @@
             this.tsRefresh,
             this.tsFileGroup,
             this.tsFile,
+            this.tsUnits,
             this.tsGrid,
             this.tsCopy,
             this.tsExcel});
@@ -228,6 +234,16 @@
             this.tsGrid.Text = "Toggle Grid";
             this.tsGrid.Click += new System.EventHandler(this.TsGrid_Click);
             // 
+            // tsCopy
+            // 
+            this.tsCopy.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.tsCopy.Image = global::DBADashGUI.Properties.Resources.ASX_Copy_blue_16x;
+            this.tsCopy.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tsCopy.Name = "tsCopy";
+            this.tsCopy.Size = new System.Drawing.Size(29, 24);
+            this.tsCopy.Text = "Copy Grid";
+            this.tsCopy.Click += new System.EventHandler(this.TsCopy_Click);
+            // 
             // tsExcel
             // 
             this.tsExcel.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
@@ -238,15 +254,44 @@
             this.tsExcel.Text = "Export to Excel";
             this.tsExcel.Click += new System.EventHandler(this.TsExcel_Click);
             // 
-            // tsCopy
+            // tsUnits
             // 
-            this.tsCopy.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.tsCopy.Image = global::DBADashGUI.Properties.Resources.ASX_Copy_blue_16x;
-            this.tsCopy.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsCopy.Name = "tsCopy";
-            this.tsCopy.Size = new System.Drawing.Size(29, 24);
-            this.tsCopy.Text = "Copy Grid";
-            this.tsCopy.Click += new System.EventHandler(this.TsCopy_Click);
+            this.tsUnits.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.tsUnits.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.mBToolStripMenuItem,
+            this.gBToolStripMenuItem,
+            this.tBToolStripMenuItem});
+            this.tsUnits.Image = ((System.Drawing.Image)(resources.GetObject("tsUnits.Image")));
+            this.tsUnits.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tsUnits.Name = "tsUnits";
+            this.tsUnits.Size = new System.Drawing.Size(56, 24);
+            this.tsUnits.Text = "Units";
+            // 
+            // mBToolStripMenuItem
+            // 
+            this.mBToolStripMenuItem.Checked = true;
+            this.mBToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.mBToolStripMenuItem.Name = "mBToolStripMenuItem";
+            this.mBToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            this.mBToolStripMenuItem.Tag = "MB";
+            this.mBToolStripMenuItem.Text = "MB";
+            this.mBToolStripMenuItem.Click += new System.EventHandler(this.SetUnit);
+            // 
+            // gBToolStripMenuItem
+            // 
+            this.gBToolStripMenuItem.Name = "gBToolStripMenuItem";
+            this.gBToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            this.gBToolStripMenuItem.Tag = "GB";
+            this.gBToolStripMenuItem.Text = "GB";
+            this.gBToolStripMenuItem.Click += new System.EventHandler(this.SetUnit);
+            // 
+            // tBToolStripMenuItem
+            // 
+            this.tBToolStripMenuItem.Name = "tBToolStripMenuItem";
+            this.tBToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            this.tBToolStripMenuItem.Tag = "TB";
+            this.tBToolStripMenuItem.Text = "TB";
+            this.tBToolStripMenuItem.Click += new System.EventHandler(this.SetUnit);
             // 
             // splitContainer1
             // 
@@ -328,5 +373,9 @@
         private System.Windows.Forms.SplitContainer splitContainer1;
         private System.Windows.Forms.DataGridView dgv;
         private System.Windows.Forms.ToolStripButton tsCopy;
+        private System.Windows.Forms.ToolStripDropDownButton tsUnits;
+        private System.Windows.Forms.ToolStripMenuItem mBToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem gBToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem tBToolStripMenuItem;
     }
 }

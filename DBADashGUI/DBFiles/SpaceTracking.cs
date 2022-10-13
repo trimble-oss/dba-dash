@@ -30,6 +30,7 @@ namespace DBADashGUI
         public string DBName="";
         public string InstanceGroupName="";
 
+
         private void HandlePreviewKeyDown(object sender, PreviewKeyDownEventArgs e)
         {
             switch (e.KeyCode)
@@ -92,7 +93,8 @@ namespace DBADashGUI
                     cmd.Parameters.AddWithValue("@DBName", DBName);
                 }
                 DataTable dt = new();
-                da.Fill(dt);
+                da.Fill(dt);  
+
                 return dt;
             }
          }
@@ -142,7 +144,7 @@ namespace DBADashGUI
                 var row = (DataRowView)dgv.Rows[e.RowIndex].DataBoundItem;
          
                 var selectedGroupValue = row["Grp"] == DBNull.Value ? "" : (string)row["Grp"];
-                if (dgv.Columns[e.ColumnIndex] == Grp)
+                if (e.ColumnIndex == dgv.Columns["colName"].Index)
                 {        
                     if (InstanceIDs.Count>1 && string.IsNullOrEmpty(InstanceGroupName))
                     {
@@ -161,13 +163,15 @@ namespace DBADashGUI
                     tsBack.Enabled = true;
                     RefreshDataLocal();
                 }
-                else if(dgv.Columns[e.ColumnIndex] == colHistory)
+                else if(e.ColumnIndex == dgv.Columns["colHistory"].Index)
                 {
                     var frm = new DBSpaceHistoryView
                     {
                         DatabaseID = DatabaseID,
                         InstanceGroupName = InstanceGroupName,
-                        DBName = DBName
+                        DBName = DBName,
+                        NumberFormat=NumberFormat,
+                        Unit=Unit
                     };
                     if (InstanceIDs.Count > 1 &&  string.IsNullOrEmpty(InstanceGroupName))
                     {
@@ -194,23 +198,23 @@ namespace DBADashGUI
         {
             if (disable)
             {
-                Grp.LinkBehavior = LinkBehavior.NeverUnderline;
-                Grp.LinkColor = Color.Black;
-                Grp.ActiveLinkColor = Color.Black;
+                ((DataGridViewLinkColumn)dgv.Columns["colName"]).LinkBehavior = LinkBehavior.NeverUnderline;
+                ((DataGridViewLinkColumn)dgv.Columns["colName"]).LinkColor = Color.Black;
+                ((DataGridViewLinkColumn)dgv.Columns["colName"]).ActiveLinkColor = Color.Black;
             }
             else
             {
-                Grp.LinkColor = DashColors.LinkColor;
-                Grp.ActiveLinkColor = DashColors.LinkColor;
-                Grp.LinkBehavior = LinkBehavior.AlwaysUnderline;
+                ((DataGridViewLinkColumn)dgv.Columns["colName"]).LinkColor = DashColors.LinkColor;
+                ((DataGridViewLinkColumn)dgv.Columns["colName"]).ActiveLinkColor = DashColors.LinkColor;
+                ((DataGridViewLinkColumn)dgv.Columns["colName"]).LinkBehavior = LinkBehavior.AlwaysUnderline;
             }
         }
 
         private void TsCopy_Click(object sender, EventArgs e)
         {
-            colHistory.Visible = false;
+            dgv.Columns["colHistory"].Visible = false;
             Common.CopyDataGridViewToClipboard(dgv);
-            colHistory.Visible = true;
+            dgv.Columns["colHistory"].Visible = true;
         }
 
         private void TsRefresh_Click(object sender, EventArgs e)
@@ -259,14 +263,91 @@ namespace DBADashGUI
 
         private void TsExcel_Click(object sender, EventArgs e)
         {
-            colHistory.Visible = false;
+            dgv.Columns["colHistory"].Visible = false;
             Common.PromptSaveDataGridView(ref dgv);
-            colHistory.Visible = true;
+            dgv.Columns["colHistory"].Visible = true;
         }
 
         private void SpaceTracking_Load(object sender, EventArgs e)
         {
+            dgv.Columns.Clear();
+            dgv.Columns.AddRange(
+                new DataGridViewLinkColumn() { Name="colName", DataPropertyName = "Grp", HeaderText = "Name" },
+                new DataGridViewTextBoxColumn() { Name="colAllocatedGB", DataPropertyName = "AllocatedGB", HeaderText = "Allocated (GB)", DefaultCellStyle = Common.DataGridViewCellStyle("N1"), Visible = true },
+                new DataGridViewTextBoxColumn() { Name="colUsedGB", DataPropertyName = "UsedGB", HeaderText = "Used (GB)", DefaultCellStyle = Common.DataGridViewCellStyle("N1"), Visible = true },
+                new DataGridViewTextBoxColumn() { Name="colAllocatedMB", DataPropertyName = "AllocatedMB", HeaderText = "Allocated (MB)", DefaultCellStyle = Common.DataGridViewCellStyle("N1"), Visible = false },
+                new DataGridViewTextBoxColumn() { Name="colUsedMB", DataPropertyName = "UsedMB", HeaderText = "Used (MB)", DefaultCellStyle = Common.DataGridViewCellStyle("N1"), Visible = false },
+                new DataGridViewTextBoxColumn() { Name="colAllocatedTB",DataPropertyName = "AllocatedTB", HeaderText = "Allocated (TB)", DefaultCellStyle = Common.DataGridViewCellStyle("N1"), Visible = false },
+                new DataGridViewTextBoxColumn() { Name="colUsedTB", DataPropertyName = "UsedTB", HeaderText = "Used (TB)", DefaultCellStyle = Common.DataGridViewCellStyle("N1"), Visible = false },
+                new DataGridViewLinkColumn() { Name = "colHistory", HeaderText = "History", Text = "View", UseColumnTextForLinkValue = true }
+                );
             Common.StyleGrid(ref dgv);
+        }
+
+        private void SetUnit(object sender, EventArgs e)
+        {
+            var selectedItem = (ToolStripMenuItem)sender;
+            foreach (ToolStripMenuItem itm in tsUnits.DropDownItems)
+            {
+                itm.Checked = itm == selectedItem;
+            }
+            foreach (string unit in new string[] { "MB", "GB", "TB" }) {
+                dgv.Columns["colAllocated" + unit].Visible = Convert.ToString(selectedItem.Tag) == unit;
+                dgv.Columns["colUsed" + unit].Visible = Convert.ToString(selectedItem.Tag) == unit;
+            }
+        }
+
+        private string Unit
+        {
+            get
+            {
+                foreach (ToolStripMenuItem itm in tsUnits.DropDownItems)
+                {
+                    if (itm.Checked)
+                    {
+                        return Convert.ToString(itm.Tag);
+                    }
+                }
+                return "MB";
+            }
+        }
+
+        private void SetDecimal(object sender, EventArgs e)
+        {
+            var selectedItem = (ToolStripMenuItem)sender;
+            foreach (ToolStripMenuItem itm in tsDecimalPlaces.DropDownItems)
+            {
+                itm.Checked = itm == selectedItem;
+            }
+            foreach (string unit in new string[] { "MB", "GB", "TB" })
+            {
+                dgv.Columns["colAllocated" + unit].DefaultCellStyle = Common.DataGridViewCellStyle(Convert.ToString(selectedItem.Tag));
+                dgv.Columns["colUsed" + unit].DefaultCellStyle = Common.DataGridViewCellStyle(Convert.ToString(selectedItem.Tag));
+            }
+        }
+
+        private string NumberFormat
+        {
+            get
+            {
+                foreach (ToolStripMenuItem itm in tsDecimalPlaces.DropDownItems)
+                {
+                    if (itm.Checked)
+                    {
+                        return Convert.ToString(itm.Tag);
+                    }
+                }
+                return "N1";
+            }
+        }
+
+        private void dgv_CellToolTipTextNeeded(object sender, DataGridViewCellToolTipTextNeededEventArgs e)
+        {
+            if (e.RowIndex >= 0)
+            {
+                object value = dgv.Rows[e.RowIndex].Cells[e.ColumnIndex].Value;
+                e.ToolTipText = value == null || value == DBNull.Value ? "Unknown" : value.ToString();
+            }
         }
     }
 }

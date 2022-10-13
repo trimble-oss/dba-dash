@@ -13,8 +13,12 @@ SET @Grp = CASE WHEN @DatabaseID IS NOT NULL OR @DBName IS NOT NULL THEN 'F.Name
 
 SET @SQL = N'
 SELECT ' + @Grp + ' as Grp,
+	SUM(F.size*8)/1024.0 AS AllocatedMB,
+	SUM(F.space_used*8)/1024.0 AS UsedMB,
 	SUM(F.size*8)/POWER(1024.0,2) AS AllocatedGB,
 	SUM(F.space_used*8)/POWER(1024.0,2) AS UsedGB,
+	SUM(F.size*8)/POWER(1024.0,3) AS AllocatedTB,
+	SUM(F.space_used*8)/POWER(1024.0,3) AS UsedTB,
 	SUM(size)/SUM(SUM(size*1.0)) OVER() Pct
 FROM dbo.Instances I 
 JOIN dbo.Databases D ON D.InstanceID = I.InstanceID
