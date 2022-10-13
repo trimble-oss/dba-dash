@@ -17,19 +17,16 @@ namespace DBADashGUI.DBFiles
             InitializeComponent();
         }
 
-        public Int32 DatabaseID { get; set; }
-        public Int32? DataSpaceID { get; set; } = null;
-        public string InstanceGroupName { get; set; }
-        public string DBName { get; set; }
-        public string FileName { get; set; }
+        public Int32 DatabaseID { get=>dbSpaceHistory1.DatabaseID; set=>dbSpaceHistory1.DatabaseID=value; }
+        public Int32? DataSpaceID { get=>dbSpaceHistory1.DataSpaceID; set=>dbSpaceHistory1.DataSpaceID=value; }
+        public string InstanceGroupName { get=> dbSpaceHistory1.InstanceGroupName; set=>dbSpaceHistory1.InstanceGroupName=value; }
+        public string DBName { get=>dbSpaceHistory1.DBName; set=>dbSpaceHistory1.DBName=value; }
+        public string FileName { get=>dbSpaceHistory1.FileName; set=>dbSpaceHistory1.FileName=value; }
+        public string NumberFormat { get=>dbSpaceHistory1.NumberFormat; set=>dbSpaceHistory1.NumberFormat=value; }
+        public string Unit { get => dbSpaceHistory1.Unit; set => dbSpaceHistory1.Unit = value; }
 
         private void DBSpaceHistoryView_Load(object sender, EventArgs e)
         {
-            dbSpaceHistory1.DatabaseID = DatabaseID;
-            dbSpaceHistory1.DataSpaceID = DataSpaceID;
-            dbSpaceHistory1.InstanceGroupName = InstanceGroupName;
-            dbSpaceHistory1.DBName = DBName;
-            dbSpaceHistory1.FileName = FileName;
             this.Text = InstanceGroupName;
             if(DBName!=null && DBName.Length > 0)
             {

@@ -12,6 +12,7 @@ using LiveCharts.Defaults;
 using LiveCharts;
 using LiveCharts.Wpf;
 using DBADashGUI.Performance;
+using System.Runtime.CompilerServices;
 
 namespace DBADashGUI.DBFiles
 {
@@ -46,6 +47,8 @@ namespace DBADashGUI.DBFiles
         public string DBName { get; set; }
         private string _fileName;
         public string FileName { get { return _fileName; } set { _fileName = value; SetFileChecked(); } }
+
+        public string NumberFormat { get; set; } = "N1";
 
         private Int32? _dataspaceid=null;
         DataTable HistoryDT;
@@ -125,21 +128,61 @@ namespace DBADashGUI.DBFiles
             }
         }
 
+        private string _unit = "MB";
+
+        public string Unit
+        {
+            get
+            {
+                return _unit;
+            }
+            set
+            {
+                int checkedCount=0;
+                foreach(ToolStripMenuItem itm in tsUnits.DropDownItems)
+                {
+                    itm.Checked = value == Convert.ToString(itm.Tag);
+                    if (itm.Checked)
+                    {
+                        checkedCount++;
+                    }
+                }
+                if (checkedCount != 1)
+                {
+                    throw new Exception("Invalid Unit.  Select MB, GB, TB");
+                }
+                _unit=value;
+                foreach(DataGridViewColumn col in dgv.Columns)
+                {
+                    if(col.DataPropertyName.StartsWith("Size") || col.DataPropertyName.StartsWith("Used"))
+                    {
+                        col.Visible = col.DataPropertyName == "Size" + value || col.DataPropertyName == "Used" + value;
+                    }
+                }
+            }
+        }
+
+
         public void RefreshData()
         {
             HistoryDT = DBFileSnapshot();
-            var cnt =HistoryDT.Rows.Count;
             dgv.DataSource = HistoryDT;
             dgv.Sort(dgv.Columns[0], ListSortDirection.Descending);
+            dgv.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
+            RefreshChart();
+        }
 
-            if (HistoryDT.Rows.Count < 2)
+        private void RefreshChart()
+        {
+            var cnt = HistoryDT.Rows.Count;
+            if (cnt < 2)
             {
                 return;
             }
             var columns = new Dictionary<string, columnMetaData>
             {
-                {"SizeMB", new columnMetaData{Alias="Size (MB)",isVisible=true } },
-                {"UsedMB", new columnMetaData{Alias="Used (MB)",isVisible=true } }
+                {"Size" + Unit, new columnMetaData{Alias="Size (" + Unit + ")",isVisible=true } },
+                {"Used" + Unit, new columnMetaData{Alias="Used (" + Unit + ")",isVisible=true } }
             };
 
 
@@ -172,8 +215,8 @@ namespace DBADashGUI.DBFiles
                     Tag = s,
                     ScalesYAt = columns[s].axis,
                     LineSmoothness = SmoothLines ? 1 : 0,
-                    PointGeometrySize = PointSize, 
-                    Values=v
+                    PointGeometrySize = PointSize,
+                    Values = v
                 }
                 ); ;
             }
@@ -187,12 +230,11 @@ namespace DBADashGUI.DBFiles
             });
             chart1.AxisY.Add(new Axis
             {
-                Title = "MB",
-                LabelFormatter = val => val.ToString("#,##0.0 MB"),
+                Title = Unit,
+                LabelFormatter = val => val.ToString("#,##0.0 " + Unit),
                 MinValue = 0
             });
             chart1.LegendLocation = LegendLocation.Bottom;
-
         }
 
         public DataTable DBFileSnapshot()
@@ -225,6 +267,25 @@ namespace DBADashGUI.DBFiles
                 }
                 DataTable dt = new();
                 da.Fill(dt);
+
+                dt.Columns.Add("SizeGB", typeof(decimal));
+                dt.Columns.Add("UsedGB", typeof(decimal));
+                dt.Columns.Add("SizeTB", typeof(decimal));
+                dt.Columns.Add("UsedTB", typeof(decimal));
+                foreach(DataRow row in dt.Rows)
+                {
+                    if (row["SizeMB"] != DBNull.Value)
+                    {
+                        row["SizeGB"] = Convert.ToDecimal(row["SizeMB"]) / 1024;
+                        row["SizeTB"] = Convert.ToDecimal(row["SizeGB"]) / 1024;
+                    }
+                    if (row["UsedMB"] != DBNull.Value)
+                    {
+                        row["UsedGB"] = Convert.ToDecimal(row["UsedMB"]) / 1024;
+                        row["UsedTB"] = Convert.ToDecimal(row["UsedGB"]) / 1024;
+                    }            
+                }
+
                 return dt;
             }
             
@@ -302,8 +363,12 @@ namespace DBADashGUI.DBFiles
             dgv.Columns.AddRange(new DataGridViewColumn[]
             {
                 new DataGridViewTextBoxColumn(){ HeaderText="Snapshot Date", DataPropertyName="SnapshotDate"},
-                new DataGridViewTextBoxColumn(){ HeaderText="Size (MB)", DataPropertyName="SizeMB", DefaultCellStyle= Common.DataGridViewNumericCellStyleNoDigits},
-                new DataGridViewTextBoxColumn(){ HeaderText="Used (MB)", DataPropertyName="UsedMB", DefaultCellStyle= Common.DataGridViewNumericCellStyleNoDigits}
+                new DataGridViewTextBoxColumn(){ HeaderText="Size (MB)", DataPropertyName="SizeMB", DefaultCellStyle= Common.DataGridViewCellStyle(NumberFormat), Visible=Unit=="MB" },
+                new DataGridViewTextBoxColumn(){ HeaderText="Used (MB)", DataPropertyName="UsedMB", DefaultCellStyle= Common.DataGridViewCellStyle(NumberFormat), Visible=Unit=="MB" },
+                new DataGridViewTextBoxColumn(){ HeaderText="Size (GB)", DataPropertyName="SizeGB", DefaultCellStyle= Common.DataGridViewCellStyle(NumberFormat), Visible=Unit=="GB" },
+                new DataGridViewTextBoxColumn(){ HeaderText="Used (GB)", DataPropertyName="UsedGB", DefaultCellStyle= Common.DataGridViewCellStyle(NumberFormat), Visible=Unit=="GB" },
+                new DataGridViewTextBoxColumn(){ HeaderText="Size (TB)", DataPropertyName="SizeTB", DefaultCellStyle= Common.DataGridViewCellStyle(NumberFormat), Visible=Unit=="TB" },
+                new DataGridViewTextBoxColumn(){ HeaderText="Used (TB)", DataPropertyName="UsedTB", DefaultCellStyle= Common.DataGridViewCellStyle(NumberFormat), Visible=Unit=="TB" }
             });
         }
 
@@ -408,6 +473,7 @@ namespace DBADashGUI.DBFiles
         private void TsGrid_Click(object sender, EventArgs e)
         {
             splitContainer1.Panel2Collapsed = !splitContainer1.Panel2Collapsed;
+            dgv.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
             SetPanelSize();
         }
 
@@ -425,7 +491,7 @@ namespace DBADashGUI.DBFiles
 
         private int ColumnTotalWidth()
         {
-            return dgv.Columns.Cast<DataGridViewColumn>().Select(x => x.Width).Sum();
+            return dgv.Columns.Cast<DataGridViewColumn>().Where(x=>x.Visible==true).Select(x => x.Width).Sum();
         }
 
         private void DBSpaceHistory_Resize(object sender, EventArgs e)
@@ -436,6 +502,15 @@ namespace DBADashGUI.DBFiles
         private void TsCopy_Click(object sender, EventArgs e)
         {
             Common.CopyDataGridViewToClipboard(dgv);
+        }
+
+        private void SetUnit(object sender, EventArgs e)
+        {
+            var selectedItem = (ToolStripMenuItem)sender;
+            Unit = Convert.ToString(selectedItem.Tag);
+            dgv.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
+            SetPanelSize();
+            RefreshChart();
         }
     }
 }
