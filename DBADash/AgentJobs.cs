@@ -79,12 +79,12 @@ namespace DBADash
         {
             DataTable jobsDT;
             DataTable jobStepsDT;
-            using (var op = Operation.At(Serilog.Events.LogEventLevel.Debug).Begin("Collect Jobs from instance {instance}", SourceConnection.ConnectionForPrint))
+            using (var op = Operation.At(Serilog.Events.LogEventLevel.Debug).Begin("Run Jobs query on instance {instance}", SourceConnection.ConnectionForPrint))
             {
                 jobsDT = GetJobsDT();
                 op.Complete();
             }
-            using (var op = Operation.At(Serilog.Events.LogEventLevel.Debug).Begin("Collect JobsSteps from instance {instance}", SourceConnection.ConnectionForPrint))
+            using (var op = Operation.At(Serilog.Events.LogEventLevel.Debug).Begin("Run JobsSteps query instance {instance}", SourceConnection.ConnectionForPrint))
             {
                 jobStepsDT = GetJobStepsDT();
                 op.Complete();

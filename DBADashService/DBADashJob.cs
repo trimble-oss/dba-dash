@@ -84,6 +84,11 @@ namespace DBADashService
         private static void CollectSQL(DBADashSource cfg, JobDataMap dataMap, IJobExecutionContext context)
         {
             var types = JsonConvert.DeserializeObject<CollectionType[]>(dataMap.GetString("Type"));
+            bool collectJobs = types.Contains(CollectionType.Jobs);
+            if (collectJobs)
+            {
+                types = types.Where(t => t != CollectionType.Jobs).ToArray<CollectionType>(); // Remove Jobs collection - we will save this to last
+            }
             try
             {
                 // Value used to disable future collections of SlowQueries if we encounter a not supported error on a RDS instance not running Standard or Enterprise edition
@@ -92,20 +97,10 @@ namespace DBADashService
                 {
                     Job_instance_id = dataMap.GetInt("Job_instance_id"),
                     IsExtendedEventsNotSupportedException = dataMapExtendedEventsNotSupported,
-
                 };
                 if (SchedulerServiceConfig.Config.IdentityCollectionThreshold.HasValue)
                 {
                     collector.IdentityCollectionThreshold = (int)SchedulerServiceConfig.Config.IdentityCollectionThreshold;
-                }
-
-                var jobLastCollected = dataMap.GetDateTime("JobCollectDate");
-
-                // Setting the JobLastModified means we will only collect job data if jobs have been updated since the last collection.
-                // This won't detect all changes - like changes to schedules.  Skip setting JobLastModified if we haven't collected in 1 day to ensure we collect at least once per day
-                if (DateTime.UtcNow.Subtract(jobLastCollected).TotalMinutes < 1430) // Allow 10min
-                {
-                    collector.JobLastModified = dataMap.GetDateTime("JobLastModified");
                 }
 
                 if (context.PreviousFireTimeUtc.HasValue)
@@ -126,21 +121,15 @@ namespace DBADashService
                         Log.Information("Disabling Extended events collection for {0}.  Instance type doesn't support extended events", cfg.SourceConnection.ConnectionForPrint);
                         dataMap.Put("IsExtendedEventsNotSupportedException", true);
                     }
+                    dataMap.Put("Job_instance_id", collector.Job_instance_id); // Store instance_id so we can get new history only on next run       
                     op.Complete();
                 }
-                bool containsJobs = collector.Data.Tables.Contains("Jobs");
+
                 string fileName = cfg.GenerateFileName(cfg.SourceConnection.ConnectionForFileName);
                 try
                 {
                     DestinationHandling.WriteAllDestinations(collector.Data, cfg, fileName).Wait();
-                    dataMap.Put("Job_instance_id", collector.Job_instance_id); // Store instance_id so we can get new history only on next run
-                    if (containsJobs)
-                    {
-                        // We have collected jobs data - Store JobLastModified and time we have collected the jobs.
-                        // Used on next run to determine if we need to refresh this data.
-                        dataMap.Put("JobLastModified", collector.JobLastModified);
-                        dataMap.Put("JobCollectDate", DateTime.UtcNow);
-                    }
+             
                     collector.CacheCollectedText();
                     collector.CacheCollectedPlans();
                 }
@@ -150,11 +139,61 @@ namespace DBADashService
                     DestinationHandling.WriteFolder(collector.Data, SchedulerServiceConfig.FailedMessageFolder, fileName);
                 }
 
+                if (collectJobs)
+                {
+                    try
+                    {
+                        using (var op = Operation.Begin("Collect Jobs from instance {instance}", cfg.SourceConnection.ConnectionForPrint))
+                        {
+                            CollectJobs(cfg, dataMap);
+                            op.Complete();
+                        }
+                    }
+                    catch(Exception ex)
+                    {
+                        Log.Error(ex, "Error running CollectJobs");
+                    }
+                }
+
             }
             catch (Exception ex)
             {
                 Log.Logger.Error(ex, "Error collecting types {types} from instance {instance}", string.Join(", ", types.Select(s => s.ToString()).ToArray()), cfg.SourceConnection.ConnectionForPrint);
             }
+        }
+
+        private static void CollectJobs(DBADashSource cfg, JobDataMap dataMap)
+        {
+
+            var jobLastCollected = dataMap.GetDateTime("JobCollectDate");
+            var collector = new DBCollector(cfg, config.ServiceName);
+
+            // Setting the JobLastModified means we will only collect job data if jobs have been updated since the last collection.
+            // This won't detect all changes - like changes to schedules.  Skip setting JobLastModified if we haven't collected in 1 day to ensure we collect at least once per day
+            if (DateTime.UtcNow.Subtract(jobLastCollected).TotalMinutes < 1430) // Allow 10min
+            {
+                collector.JobLastModified = dataMap.GetDateTime("JobLastModified");
+            }
+
+            collector.Collect(CollectionType.Jobs);
+
+
+            // We have collected jobs data - Store JobLastModified and time we have collected the jobs.
+            // Used on next run to determine if we need to refresh this data.
+            dataMap.Put("JobLastModified", collector.JobLastModified);
+            dataMap.Put("JobCollectDate", DateTime.UtcNow);
+            
+            string fileName = cfg.GenerateFileName(cfg.SourceConnection.ConnectionForFileName);
+            try
+            {
+                DestinationHandling.WriteAllDestinations(collector.Data, cfg, fileName).Wait();
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error writing {filename} to destination.  File will be copied to {folder}", fileName, SchedulerServiceConfig.FailedMessageFolder);
+                DestinationHandling.WriteFolder(collector.Data, SchedulerServiceConfig.FailedMessageFolder, fileName);
+            }
+
         }
 
         /// <summary>
