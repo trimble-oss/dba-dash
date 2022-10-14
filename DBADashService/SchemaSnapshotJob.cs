@@ -25,14 +25,15 @@ namespace DBADashService
             var dsSnapshot = collector.Data;
             var dbs = schemaSnapshotDBs.Split(',');
 
-            var cn = new Microsoft.Data.SqlClient.SqlConnection(connectionString);
-            var ss = new SchemaSnapshotDB(connectionString, SchedulerServiceConfig.Config.SchemaSnapshotOptions);
+            using var cn = new SqlConnection(connectionString);
+            var ss = new SchemaSnapshotDB(cfg.SourceConnection, SchedulerServiceConfig.Config.SchemaSnapshotOptions);
             var instance = new Microsoft.SqlServer.Management.Smo.Server(new Microsoft.SqlServer.Management.Common.ServerConnection(cn));
+
             if (instance.ServerType ==  Microsoft.SqlServer.Management.Common.DatabaseEngineType.SqlAzureDatabase && (builder.InitialCatalog == null || builder.InitialCatalog == "master" || builder.InitialCatalog==""))
             {
                 return Task.CompletedTask;
             }
-            Log.Information("DB Snapshots from instance {source}", builder.DataSource);
+            Log.Information("DB Snapshots from instance {source}",cfg.SourceConnection.ConnectionForPrint);
             foreach (Database db in instance.Databases)
             {
                 bool include = false;

@@ -76,7 +76,8 @@ namespace DBADashServiceConfig
                     SlowQueryThresholdMs = chkSlowQueryThreshold.Checked ? (Int32)numSlowQueryThreshold.Value : -1,
                     RunningQueryPlanThreshold = chkCollectPlans.Checked ? new PlanCollectionThreshold() { CountThreshold = int.Parse(txtCountThreshold.Text), CPUThreshold = int.Parse(txtCPUThreshold.Text), DurationThreshold = int.Parse(txtDurationThreshold.Text), MemoryGrantThreshold = int.Parse(txtGrantThreshold.Text) } : null,
                     SchemaSnapshotDBs = schemaSnapshotDBs,
-                    CollectSessionWaits = chkCollectSessionWaits.Checked
+                    CollectSessionWaits = chkCollectSessionWaits.Checked,
+                    ScriptAgentJobs=chkScriptJobs.Checked
                 };
                 bool validated = validateSource(sourceString);
 
@@ -309,6 +310,7 @@ namespace DBADashServiceConfig
             dgvConnections.Columns.Add(new DataGridViewTextBoxColumn() { DataPropertyName = "PlanCollectionDurationThreshold", HeaderText = "Plan Collection Duration Threshold" });
             dgvConnections.Columns.Add(new DataGridViewTextBoxColumn() { DataPropertyName = "PlanCollectionCountThreshold", HeaderText = "Plan Collection Count Threshold" });
             dgvConnections.Columns.Add(new DataGridViewTextBoxColumn() { DataPropertyName = "PlanCollectionMemoryGrantThreshold", HeaderText = "Plan Collection Memory Grant Threshold" });
+            dgvConnections.Columns.Add(new DataGridViewCheckBoxColumn() { DataPropertyName = "ScriptAgentJobs", HeaderText = "Script Agent Jobs" });
             dgvConnections.Columns.Add(new DataGridViewCheckBoxColumn() { DataPropertyName = "HasCustomSchedule", HeaderText = "Custom Schedule" });
             dgvConnections.Columns.Add(new DataGridViewLinkColumn() { Name = "Schedule", HeaderText = "Schedule", Text = "Schedule", UseColumnTextForLinkValue = true, LinkColor = DashColors.LinkColor });
             dgvConnections.Columns.Add(new DataGridViewLinkColumn() { Name = "Edit", HeaderText = "Edit", Text = "Edit", UseColumnTextForLinkValue = true, LinkColor = DashColors.LinkColor });
@@ -693,6 +695,7 @@ namespace DBADashServiceConfig
                 chkNoWMI.Checked = src.NoWMI;
                 chkPersistXESession.Checked = src.PersistXESessions;
                 chkSlowQueryThreshold.Checked = (src.SlowQueryThresholdMs != -1);
+                chkScriptJobs.Checked = src.ScriptAgentJobs;
                 if (chkSlowQueryThreshold.Checked)
                 {
                     numSlowQueryThreshold.Value = src.SlowQueryThresholdMs;
@@ -980,6 +983,7 @@ namespace DBADashServiceConfig
             chkCollectPlans.Enabled = isSql;
             grpRunningQueryThreshold.Enabled = isSql && chkCollectPlans.Checked;
             chkNoWMI.Enabled = isSql;
+            chkScriptJobs.Enabled = isSql;
         }
 
 

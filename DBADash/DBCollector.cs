@@ -892,10 +892,11 @@ CROSS APPLY sys.dm_exec_sql_text(H.sql_handle) txt");
                 var currentJobModified = GetJobLastModified();
                 if (currentJobModified > JobLastModified)
                 {
-                    var ss = new SchemaSnapshotDB(ConnectionString, new SchemaSnapshotDBOptions());
+                    var ss = new AgentJobs(Source.SourceConnection, new SchemaSnapshotDBOptions());
                     try
                     {
-                        ss.SnapshotJobs(ref Data);
+                        //ss.SnapshotJobs(ref Data);
+                        ss.CollectJobs(ref Data, Source.ScriptAgentJobs);
                         JobLastModified = currentJobModified;
                     }
                     catch (Microsoft.SqlServer.Management.Smo.UnsupportedFeatureException ex)
@@ -953,7 +954,7 @@ CROSS APPLY sys.dm_exec_sql_text(H.sql_handle) txt");
 
         private void CollectResourceGovernor()
         {
-            var ss = new SchemaSnapshotDB(ConnectionString);
+            var ss = new SchemaSnapshotDB(Source.SourceConnection);
             var dtRG = ss.ResourceGovernorConfiguration();
             Data.Tables.Add(dtRG);
         }

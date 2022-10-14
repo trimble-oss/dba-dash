@@ -80,7 +80,7 @@ namespace DBADash
         public static string TraceFlags { get { return GetSqlString("TraceFlags"); } }
         public static string VLF { get { return GetSqlString("VLF"); } }
         public static string Waits { get { return GetSqlString("Waits"); } }
-
-
+        public static string Jobs { get { return GetSqlString("Jobs"); } }
+        public static string JobSteps { get { return GetSqlString("JobSteps"); } }
     }
 }
