@@ -17,6 +17,7 @@ BEGIN
 			DDL
 	FROM @Jobs T
 	WHERE NOT EXISTS(SELECT 1 FROM dbo.DDL WHERE DDL.DDLHash = T.DDLHash)
+	AND DDL IS NOT NULL
 
 	BEGIN TRAN
 
@@ -92,7 +93,7 @@ BEGIN
 		@SnapshotDate,
 		@SnapshotDate
 	FROM @Jobs T
-	JOIN dbo.DDL ON T.DDLHash = DDL.DDLHash
+	LEFT JOIN dbo.DDL ON T.DDLHash = DDL.DDLHash
 	WHERE NOT EXISTS(SELECT 1 FROM dbo.Jobs J WHERE T.job_id = J.job_id AND J.InstanceID = @InstanceID)
 
 	UPDATE J 
@@ -131,7 +132,7 @@ BEGIN
 		SnapshotUpdatedDate = @SnapshotDate
 	FROM dbo.Jobs J
 	JOIN @Jobs T ON T.job_id = J.job_id
-	JOIN dbo.DDL ON T.DDLHash = DDL.DDLHash
+	LEFT JOIN dbo.DDL ON T.DDLHash = DDL.DDLHash
 	WHERE J.InstanceID = @InstanceID
 	AND NOT EXISTS(SELECT J.job_id,
 							J.originating_server,

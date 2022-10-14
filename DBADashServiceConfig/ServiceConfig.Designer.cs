@@ -123,6 +123,7 @@
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
             this.button1 = new System.Windows.Forms.Button();
             this.panel1 = new System.Windows.Forms.Panel();
+            this.chkScriptJobs = new System.Windows.Forms.CheckBox();
             ((System.ComponentModel.ISupportInitialize)(this.errorProvider1)).BeginInit();
             this.tab1.SuspendLayout();
             this.tabDest.SuspendLayout();
@@ -772,6 +773,7 @@
             // 
             // tabAddConnectionOther
             // 
+            this.tabAddConnectionOther.Controls.Add(this.chkScriptJobs);
             this.tabAddConnectionOther.Controls.Add(this.chkCollectSessionWaits);
             this.tabAddConnectionOther.Controls.Add(this.pictureBox3);
             this.tabAddConnectionOther.Controls.Add(this.lnkExample);
@@ -1297,6 +1299,19 @@
             this.panel1.Size = new System.Drawing.Size(1137, 64);
             this.panel1.TabIndex = 23;
             // 
+            // chkScriptJobs
+            // 
+            this.chkScriptJobs.AutoSize = true;
+            this.chkScriptJobs.Checked = true;
+            this.chkScriptJobs.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.chkScriptJobs.Location = new System.Drawing.Point(302, 23);
+            this.chkScriptJobs.Name = "chkScriptJobs";
+            this.chkScriptJobs.Size = new System.Drawing.Size(96, 20);
+            this.chkScriptJobs.TabIndex = 28;
+            this.chkScriptJobs.Text = "Script Jobs";
+            this.toolTip1.SetToolTip(this.chkScriptJobs, "If Jobs collection is enabled, the job definition will be scripted via SMO");
+            this.chkScriptJobs.UseVisualStyleBackColor = true;
+            // 
             // ServiceConfig
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
@@ -1447,6 +1462,7 @@
         private System.Windows.Forms.NumericUpDown numIdentityCollectionThreshold;
         private System.Windows.Forms.CheckBox chkDefaultIdentityCollection;
         private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.CheckBox chkScriptJobs;
     }
 }
 

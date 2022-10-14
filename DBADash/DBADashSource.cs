@@ -20,6 +20,7 @@ namespace DBADash
         private bool useDualXESesion = true;
 
         public string ConnectionID { get; set; }
+        public bool ScriptAgentJobs { get; set; } = true;
 
         public  CollectionSchedules CollectionSchedules {
             get

@@ -19,6 +19,8 @@
   </PropertyGroup>
   <ItemGroup>
     <None Remove="SQL\SQLIdentityColumns.sql" />
+    <None Remove="SQL\SQLJobs.sql" />
+    <None Remove="SQL\SQLJobSteps.sql" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="..\GlobalAssemblyInfo.cs" Link="Properties\GlobalAssemblyInfo.cs" />
@@ -55,6 +57,8 @@
 	<EmbeddedResource Include="SQL\SQLInstance.sql" />
 	<EmbeddedResource Include="SQL\SQLIOStats.sql" />
 	<EmbeddedResource Include="SQL\SQLJobHistory.sql" />
+	<EmbeddedResource Include="SQL\SQLJobs.sql" />
+	<EmbeddedResource Include="SQL\SQLJobSteps.sql" />
 	<EmbeddedResource Include="SQL\SQLLastGoodCheckDB.sql" />
 	<EmbeddedResource Include="SQL\SQLLogRestores.sql" />
 	<EmbeddedResource Include="SQL\SQLMemoryUsage.sql" />
