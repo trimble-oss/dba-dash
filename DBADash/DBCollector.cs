@@ -843,6 +843,7 @@ CROSS APPLY sys.dm_exec_sql_text(H.sql_handle) txt");
             if (collectionType == CollectionType.JobHistory)
             {
                 param = new SqlParameter[] { new SqlParameter { DbType = DbType.Int32, Value = Job_instance_id, ParameterName = "instance_id" }, new SqlParameter { DbType = DbType.Int32, ParameterName = "run_date", Value = Convert.ToInt32(DateTime.Now.AddDays(-7).ToString("yyyyMMdd")) } };
+                Log.Debug("JobHistory From {JobInstanceID} on {Instance}", Job_instance_id,Source.SourceConnection.ConnectionForPrint);
             }
             else if (collectionType == CollectionType.AzureDBResourceStats || collectionType == CollectionType.AzureDBElasticPoolResourceStats)
             {
