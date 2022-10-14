@@ -409,22 +409,26 @@ namespace DBADashService
             {
                 try
                 {
-                    var collector = new DBCollector(src, config.ServiceName);
-                    if (src.PersistXESessions)
+                    if (src.SourceConnection.ConnectionInfo.IsXESupported)
                     {
-                        Log.Logger.Information("Stop DBADash event sessions for {connection}", src.SourceConnection.ConnectionForPrint);
-                        await collector.StopEventSessionsAsync();
-                    }
-                    else
-                    {
-                        Log.Logger.Information("Remove DBADash event sessions for {connection}", src.SourceConnection.ConnectionForPrint);
-                        await collector.RemoveEventSessionsAsync();
+                        var collector = new DBCollector(src, config.ServiceName);
+                        if (src.PersistXESessions)
+                        {
+                            Log.Logger.Information("Stop DBADash event sessions for {connection}", src.SourceConnection.ConnectionForPrint);
+                            await collector.StopEventSessionsAsync();
+                        }
+                        else
+                        {
+                            Log.Logger.Information("Remove DBADash event sessions for {connection}", src.SourceConnection.ConnectionForPrint);
+                            await collector.RemoveEventSessionsAsync();
+                        }
                     }
                 }
                 catch (Exception ex)
                 {
                     Log.Logger.Error(ex, "Error Stop/Remove DBADash event sessions for {connection}", src.SourceConnection.ConnectionForPrint);
                 }
+                
             }
         }
 

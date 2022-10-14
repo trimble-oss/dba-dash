@@ -20,6 +20,8 @@ namespace DBADash
 
         public string ServerName { get; set; }
 
+        public string ComputerNetBIOSName { get; set; }
+
         public int MajorVersion
         {
             get
@@ -42,10 +44,18 @@ namespace DBADash
             }
         }
 
+        public bool IsRDS
+        {
+            get
+            {
+                return ComputerNetBIOSName.StartsWith("EC2AMAZ-");
+            }
+        }
+
         public bool IsXESupported
         {
             get {
-                if (ServerName.StartsWith("EC2AMAZ-") && !(EngineEdition == DatabaseEngineEdition.Standard || EngineEdition == DatabaseEngineEdition.Enterprise)) // Extended events only supported on Standard and Enterprise editions for RDS
+                if (IsRDS && !(EngineEdition == DatabaseEngineEdition.Standard || EngineEdition == DatabaseEngineEdition.Enterprise)) // Extended events only supported on Standard and Enterprise editions for RDS
                 {
                     return false;
                 }
@@ -82,7 +92,7 @@ namespace DBADash
         {
             var connectionInfo = new ConnectionInfo();
             using (var cn = new SqlConnection(connectionString))
-            using (var cmd = new SqlCommand("SELECT SERVERPROPERTY('EngineEdition'),SERVERPROPERTY('ProductVersion'),DB_NAME(),@@SERVERNAME", cn))
+            using (var cmd = new SqlCommand("SELECT SERVERPROPERTY('EngineEdition'),SERVERPROPERTY('ProductVersion'),DB_NAME(),@@SERVERNAME,SERVERPROPERTY('ComputerNamePhysicalNetBIOS')", cn))
             {
                 cn.Open();
                 using (var rdr = cmd.ExecuteReader())
@@ -99,6 +109,7 @@ namespace DBADash
                     connectionInfo.ProductVersion = rdr.GetString(1);
                     connectionInfo.DatabaseName = rdr.GetString(2);
                     connectionInfo.ServerName = rdr.GetString(3);
+                    connectionInfo.ComputerNetBIOSName = rdr.GetString(4);
                 }
             }
             return connectionInfo;
