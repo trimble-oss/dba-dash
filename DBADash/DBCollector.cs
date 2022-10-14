@@ -362,7 +362,7 @@ namespace DBADash
                 noWMI = true;
                 Log.Debug("WMI Disabled for Linux Instance: {0}", instanceName);
             }
-            if (!noWMI && instanceName.StartsWith("EC2AMAZ-")) // Disable WMI collection for RDS
+            if (!noWMI && computerName.StartsWith("EC2AMAZ-")) // Disable WMI collection for RDS
             {
                 noWMI = true;
                 Log.Debug("WMI Disabled for RDS Instance: {0}", instanceName);
