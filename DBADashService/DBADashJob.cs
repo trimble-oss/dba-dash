@@ -91,52 +91,55 @@ namespace DBADashService
             }
             try
             {
-                // Value used to disable future collections of SlowQueries if we encounter a not supported error on a RDS instance not running Standard or Enterprise edition
-                bool dataMapExtendedEventsNotSupported = dataMap.GetBooleanValue("IsExtendedEventsNotSupportedException");
-                var collector = new DBCollector(cfg, config.ServiceName)
+                if (types.Count() > 0) // Might be zero if we are only collecting Jobs in this batch (collected in the next section)
                 {
-                    Job_instance_id = dataMap.GetInt("Job_instance_id"),
-                    IsExtendedEventsNotSupportedException = dataMapExtendedEventsNotSupported,
-                };
-                if (SchedulerServiceConfig.Config.IdentityCollectionThreshold.HasValue)
-                {
-                    collector.IdentityCollectionThreshold = (int)SchedulerServiceConfig.Config.IdentityCollectionThreshold;
-                }
-
-                if (context.PreviousFireTimeUtc.HasValue)
-                {
-                    collector.PerformanceCollectionPeriodMins = (Int32)DateTime.UtcNow.Subtract(context.PreviousFireTimeUtc.Value.UtcDateTime).TotalMinutes + 5;
-                }
-                else
-                {
-                    collector.PerformanceCollectionPeriodMins = 30;
-                }
-                collector.LogInternalPerformanceCounters = SchedulerServiceConfig.Config.LogInternalPerformanceCounters;
-                using (var op = Operation.Begin("Collect {types} from instance {instance}", string.Join(", ", types.Select(s => s.ToString()).ToArray()), cfg.SourceConnection.ConnectionForPrint))
-                {
-                    collector.Collect(types);
-                    if (!dataMapExtendedEventsNotSupported && collector.IsExtendedEventsNotSupportedException)
+                    // Value used to disable future collections of SlowQueries if we encounter a not supported error on a RDS instance not running Standard or Enterprise edition
+                    bool dataMapExtendedEventsNotSupported = dataMap.GetBooleanValue("IsExtendedEventsNotSupportedException");
+                    var collector = new DBCollector(cfg, config.ServiceName)
                     {
-                        // We encounterd an error setting up extended events on a RDS instance because it's only supported for Standard and Enterprise editions.  Disable the collection
-                        Log.Information("Disabling Extended events collection for {0}.  Instance type doesn't support extended events", cfg.SourceConnection.ConnectionForPrint);
-                        dataMap.Put("IsExtendedEventsNotSupportedException", true);
+                        Job_instance_id = dataMap.GetInt("Job_instance_id"),
+                        IsExtendedEventsNotSupportedException = dataMapExtendedEventsNotSupported,
+                    };
+                    if (SchedulerServiceConfig.Config.IdentityCollectionThreshold.HasValue)
+                    {
+                        collector.IdentityCollectionThreshold = (int)SchedulerServiceConfig.Config.IdentityCollectionThreshold;
                     }
-                    dataMap.Put("Job_instance_id", collector.Job_instance_id); // Store instance_id so we can get new history only on next run       
-                    op.Complete();
-                }
 
-                string fileName = cfg.GenerateFileName(cfg.SourceConnection.ConnectionForFileName);
-                try
-                {
-                    DestinationHandling.WriteAllDestinations(collector.Data, cfg, fileName).Wait();
-             
-                    collector.CacheCollectedText();
-                    collector.CacheCollectedPlans();
-                }
-                catch (Exception ex)
-                {
-                    Log.Error(ex, "Error writing {filename} to destination.  File will be copied to {folder}", fileName, SchedulerServiceConfig.FailedMessageFolder);
-                    DestinationHandling.WriteFolder(collector.Data, SchedulerServiceConfig.FailedMessageFolder, fileName);
+                    if (context.PreviousFireTimeUtc.HasValue)
+                    {
+                        collector.PerformanceCollectionPeriodMins = (Int32)DateTime.UtcNow.Subtract(context.PreviousFireTimeUtc.Value.UtcDateTime).TotalMinutes + 5;
+                    }
+                    else
+                    {
+                        collector.PerformanceCollectionPeriodMins = 30;
+                    }
+                    collector.LogInternalPerformanceCounters = SchedulerServiceConfig.Config.LogInternalPerformanceCounters;
+                    using (var op = Operation.Begin("Collect {types} from instance {instance}", string.Join(", ", types.Select(s => s.ToString()).ToArray()), cfg.SourceConnection.ConnectionForPrint))
+                    {
+                        collector.Collect(types);
+                        if (!dataMapExtendedEventsNotSupported && collector.IsExtendedEventsNotSupportedException)
+                        {
+                            // We encounterd an error setting up extended events on a RDS instance because it's only supported for Standard and Enterprise editions.  Disable the collection
+                            Log.Information("Disabling Extended events collection for {0}.  Instance type doesn't support extended events", cfg.SourceConnection.ConnectionForPrint);
+                            dataMap.Put("IsExtendedEventsNotSupportedException", true);
+                        }
+                        dataMap.Put("Job_instance_id", collector.Job_instance_id); // Store instance_id so we can get new history only on next run       
+                        op.Complete();
+                    }
+
+                    string fileName = cfg.GenerateFileName(cfg.SourceConnection.ConnectionForFileName);
+                    try
+                    {
+                        DestinationHandling.WriteAllDestinations(collector.Data, cfg, fileName).Wait();
+
+                        collector.CacheCollectedText();
+                        collector.CacheCollectedPlans();
+                    }
+                    catch (Exception ex)
+                    {
+                        Log.Error(ex, "Error writing {filename} to destination.  File will be copied to {folder}", fileName, SchedulerServiceConfig.FailedMessageFolder);
+                        DestinationHandling.WriteFolder(collector.Data, SchedulerServiceConfig.FailedMessageFolder, fileName);
+                    }
                 }
 
                 if (collectJobs)
@@ -149,7 +152,7 @@ namespace DBADashService
                             op.Complete();
                         }
                     }
-                    catch(Exception ex)
+                    catch (Exception ex)
                     {
                         Log.Error(ex, "Error running CollectJobs");
                     }
