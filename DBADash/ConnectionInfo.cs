@@ -109,7 +109,7 @@ namespace DBADash
                     connectionInfo.ProductVersion = rdr.GetString(1);
                     connectionInfo.DatabaseName = rdr.GetString(2);
                     connectionInfo.ServerName = rdr.GetString(3);
-                    connectionInfo.ComputerNetBIOSName = rdr.GetString(4);
+                    connectionInfo.ComputerNetBIOSName =rdr.IsDBNull(4) ? "" : rdr.GetString(4);  /* ComputerNamePhysicalNetBIOS is NULL for AzureDB */
                 }
             }
             return connectionInfo;
