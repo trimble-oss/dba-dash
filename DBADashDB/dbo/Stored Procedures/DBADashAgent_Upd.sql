@@ -25,7 +25,13 @@ BEGIN
 				AND AgentServiceName = @AgentServiceName
 				)
 
-	SET @DBADashAgentID = SCOPE_IDENTITY();
+	/* 
+		Not using SCOPE_IDENTITY as there is potential for no rows to be inserted if two processes attempt the insert
+	*/
+	SELECT @DBADashAgentID = DBADashAgentID
+	FROM dbo.DBADashAgent
+	WHERE AgentHostName = @AgentHostName
+	AND AgentServiceName = @AgentServiceName
 END
 IF @UpdateAgent=1
 BEGIN
