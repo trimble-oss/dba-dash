@@ -25,12 +25,12 @@ namespace DBADashServiceConfig
         }
 
         string originalJson = "";
-        CollectionConfig collectionConfig = new CollectionConfig();
+        CollectionConfig collectionConfig = new();
         readonly string jsonPath = System.IO.Path.Combine(Application.StartupPath, "ServiceConfig.json");
         ServiceController svcCtrl;
         bool isInstalled = false;
 
-        private void bttnAdd_Click(object sender, EventArgs e)
+        private void BttnAdd_Click(object sender, EventArgs e)
         {
             if (string.IsNullOrEmpty(txtSource.Text))
             {
@@ -55,7 +55,7 @@ namespace DBADashServiceConfig
                 {
                     continue;
                 }
-                if (!sourceString.Contains(";") && !sourceString.Contains(":") && !sourceString.StartsWith("\\\\") && !sourceString.StartsWith("//"))
+                if (!sourceString.Contains(';') && !sourceString.Contains(':') && !sourceString.StartsWith("\\\\") && !sourceString.StartsWith("//"))
                 {
                     // Providing the name of the SQL instances - build the connection string automatically
                     var builder = new SqlConnectionStringBuilder
@@ -79,7 +79,7 @@ namespace DBADashServiceConfig
                     CollectSessionWaits = chkCollectSessionWaits.Checked,
                     ScriptAgentJobs=chkScriptJobs.Checked
                 };
-                bool validated = validateSource(sourceString);
+                bool validated = ValidateSource(sourceString);
 
                 string validationError = "";
                 if (validated)
@@ -162,8 +162,8 @@ namespace DBADashServiceConfig
             }
 
             txtJson.Text = collectionConfig.Serialize();
-            setConnectionCount();
-            setDgv();
+            SetConnectionCount();
+            SetDgv();
             if (warnXENotSupported)
             {
                 MessageBox.Show("Warning: Slow query capture requires an extended event session which is not supported for one or more connections.\nRequirements:\nSQL 2012 or later.\nStandard or Enteprise Edition on Amazon RDS", "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
@@ -172,10 +172,10 @@ namespace DBADashServiceConfig
 
 
 
-        private bool validateSource(string sourceString)
+        private bool ValidateSource(string sourceString)
         {
             errorProvider1.SetError(txtSource, null);
-            DBADashConnection source = new DBADashConnection(sourceString);
+            DBADashConnection source = new(sourceString);
             if (string.IsNullOrEmpty(sourceString))
             {
                 return false;
@@ -192,10 +192,10 @@ namespace DBADashServiceConfig
             }
         }
 
-        private bool validateDestination()
+        private bool ValidateDestination()
         {
             errorProvider1.SetError(txtDestination, null);
-            DBADashConnection dest = new DBADashConnection(txtDestination.Text);
+            DBADashConnection dest = new(txtDestination.Text);
             lblVersionInfo.ForeColor = Color.Black;
             lblVersionInfo.Text = "";
             lblVersionInfo.Font = new Font(lblVersionInfo.Font, FontStyle.Regular);
@@ -265,12 +265,12 @@ namespace DBADashServiceConfig
         }
 
 
-        private void bttnSave_Click(object sender, EventArgs e)
+        private void BttnSave_Click(object sender, EventArgs e)
         {
             try
             {
                 collectionConfig.ValidateDestination();
-                saveChanges();
+                SaveChanges();
             }
             catch (Exception ex)
             {
@@ -279,7 +279,7 @@ namespace DBADashServiceConfig
            
         }
 
-        private void saveChanges()
+        private void SaveChanges()
         {
             txtJson.Text = collectionConfig.Serialize();
             if (File.Exists(jsonPath))
@@ -288,7 +288,7 @@ namespace DBADashServiceConfig
             }
             System.IO.File.WriteAllText(jsonPath, txtJson.Text);
             originalJson = txtJson.Text;
-            updateSaveButton();
+            UpdateSaveButton();
             MessageBox.Show("Config saved.  Restart service to apply changes.", "Save", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 
@@ -328,8 +328,8 @@ namespace DBADashServiceConfig
                     {
                         if (MessageBox.Show("Encryption is applied by default to your SQL Server connections with Microsoft.Data.SqlClient 4.0.  Connections might fail if the server certificate is not trusted.  Apply Trust Server Certificate?", "Trust Server Certificate", MessageBoxButtons.YesNo, MessageBoxIcon.Question)== DialogResult.Yes)
                         {
-                            applyTrustServerCertificate();
-                            saveChanges();
+                            ApplyTrustServerCertificate();
+                            SaveChanges();
                         }
                     }
                 }
@@ -345,9 +345,9 @@ namespace DBADashServiceConfig
                 numIdentityCollectionThreshold.Enabled = false;
                 chkDefaultIdentityCollection.Checked = true;
             }
-            setConnectionCount();
-            refreshServiceStatus();
-            validateDestination();
+            SetConnectionCount();
+            RefreshServiceStatus();
+            ValidateDestination();
     
         }
 
@@ -362,38 +362,40 @@ namespace DBADashServiceConfig
             originalJson = cfg.Serialize();
             txtJson.Text = originalJson;
 
-            setFromJson(originalJson);
+            SetFromJson(originalJson);
 
         }
 
-        private void applyTrustServerCertificate()
+        private void ApplyTrustServerCertificate()
         {
             if (collectionConfig.DestinationConnection.Type == ConnectionType.SQL)
             {
-                collectionConfig.DestinationConnection.EncryptedConnectionString = addTrustServerCertificate(collectionConfig.DestinationConnection.EncryptedConnectionString);
+                collectionConfig.DestinationConnection.EncryptedConnectionString = AddTrustServerCertificate(collectionConfig.DestinationConnection.EncryptedConnectionString);
                 txtDestination.Text = collectionConfig.DestinationConnection.EncryptedConnectionString;
             }
             foreach(var dest in collectionConfig.SecondaryDestinationConnections.Where(dest=> dest.Type == ConnectionType.SQL))
             {
-                dest.EncryptedConnectionString = addTrustServerCertificate(dest.EncryptedConnectionString);
+                dest.EncryptedConnectionString = AddTrustServerCertificate(dest.EncryptedConnectionString);
             }
                         
             foreach(var src in collectionConfig.SourceConnections.Where(src => src.SourceConnection.Type == ConnectionType.SQL))
             {
-                src.SourceConnection.EncryptedConnectionString = addTrustServerCertificate(src.SourceConnection.EncryptedConnectionString);
+                src.SourceConnection.EncryptedConnectionString = AddTrustServerCertificate(src.SourceConnection.EncryptedConnectionString);
             }
         }
 
-        private string addTrustServerCertificate(string connectionString)
+        private static string AddTrustServerCertificate(string connectionString)
         {
-            var builder = new SqlConnectionStringBuilder(connectionString);
-            builder.TrustServerCertificate = true;
-            builder.Encrypt = true;
+            var builder = new SqlConnectionStringBuilder(connectionString)
+            {
+                TrustServerCertificate = true,
+                Encrypt = true
+            };
             return builder.ConnectionString;
         }
 
       
-        private void setConnectionCount()
+        private void SetConnectionCount()
         {
             int cnt = collectionConfig.SourceConnections.Count;
             lnkSourceConnections.Text = "Source Connections: " + cnt.ToString();
@@ -408,7 +410,7 @@ namespace DBADashServiceConfig
             }
         }
 
-        private void setFromJson(string json)
+        private void SetFromJson(string json)
         {
             collectionConfig = CollectionConfig.Deserialize(json);
             txtDestination.Text = collectionConfig.DestinationConnection.EncryptedConnectionString;
@@ -421,18 +423,18 @@ namespace DBADashServiceConfig
             chkAutoUpgradeRepoDB.Checked = collectionConfig.AutoUpdateDatabase;
             chkLogInternalPerfCounters.Checked = collectionConfig.LogInternalPerformanceCounters;
             chkDefaultIdentityCollection.Checked = !collectionConfig.IdentityCollectionThreshold.HasValue;
-            numIdentityCollectionThreshold.Value = collectionConfig.IdentityCollectionThreshold.HasValue ? collectionConfig.IdentityCollectionThreshold.Value : DBCollector.DefaultIdentityCollectionThreshold;
-            updateScanInterval();
-            setDgv();
+            numIdentityCollectionThreshold.Value = collectionConfig.IdentityCollectionThreshold ?? DBCollector.DefaultIdentityCollectionThreshold;
+            UpdateScanInterval();
+            SetDgv();
 
         }
 
-        private void setDgv()
+        private void SetDgv()
         {
             dgvConnections.DataSource = new BindingSource() { DataSource = collectionConfig.SourceConnections };
         }
 
-        private void refreshServiceStatus()
+        private void RefreshServiceStatus()
         {
             svcCtrl = ServiceController.GetServices()
     .FirstOrDefault(s => s.ServiceName == collectionConfig.ServiceName);
@@ -498,7 +500,7 @@ namespace DBADashServiceConfig
             }
         }
 
-        private void txtJson_Validating(object sender, CancelEventArgs e)
+        private void TxtJson_Validating(object sender, CancelEventArgs e)
         {
             errorProvider1.SetError(txtJson, null);
             if (txtJson.Text.Trim() == "")
@@ -508,7 +510,7 @@ namespace DBADashServiceConfig
             }
             try
             {
-                setFromJson(txtJson.Text);
+                SetFromJson(txtJson.Text);
             }
             catch (Exception ex)
             {
@@ -518,28 +520,28 @@ namespace DBADashServiceConfig
 
         private void ServiceConfig_FromClosing(object sender, FormClosingEventArgs e)
         {
-            promptSaveChanges();
+            PromptSaveChanges();
         }
 
-        private void promptSaveChanges()
+        private void PromptSaveChanges()
         {
             if (originalJson != txtJson.Text)
             {
                 if (MessageBox.Show("Save Changes?", "Save", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
                 {
-                    saveChanges();
+                    SaveChanges();
                 }
             }
         }
 
-        private void bttnStart_Click(object sender, EventArgs e)
+        private void BttnStart_Click(object sender, EventArgs e)
         {
-            startService();
+            StartService();
         }
 
-        private void startService()
+        private void StartService()
         {
-            promptSaveChanges();
+            PromptSaveChanges();
             svcCtrl.Refresh();
             if (svcCtrl.Status == ServiceControllerStatus.Stopped)
             {
@@ -550,15 +552,15 @@ namespace DBADashServiceConfig
                 }
                 catch (Exception ex)
                 {
-                    promptError(ex);
+                    PromptError(ex);
                 }
             }
 
-            refreshServiceStatus();
-            validateDestination();
+            RefreshServiceStatus();
+            ValidateDestination();
         }
 
-        private void promptError(Exception ex)
+        private static void PromptError(Exception ex)
         {
             var sbError = new StringBuilder();
             sbError.Append(ex.Message);
@@ -571,12 +573,12 @@ namespace DBADashServiceConfig
             MessageBox.Show(sbError.ToString(), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
 
-        private void bttnStop_Click(object sender, EventArgs e)
+        private void BttnStop_Click(object sender, EventArgs e)
         {
-            stopService();
+            StopService();
         }
 
-        private void stopService()
+        private void StopService()
         {
             svcCtrl.Refresh();
             if (svcCtrl.Status == ServiceControllerStatus.Running)
@@ -588,29 +590,29 @@ namespace DBADashServiceConfig
                 }
                 catch (Exception ex)
                 {
-                    promptError(ex);
+                    PromptError(ex);
                 }
             }
-            refreshServiceStatus();
+            RefreshServiceStatus();
         }
 
-        private void bttnRefresh_Click(object sender, EventArgs e)
+        private void BttnRefresh_Click(object sender, EventArgs e)
         {
-            refreshServiceStatus();
-            validateDestination();
+            RefreshServiceStatus();
+            ValidateDestination();
         }
 
-        private void bttnUninstall_Click(object sender, EventArgs e)
+        private void BttnUninstall_Click(object sender, EventArgs e)
         {
-            uninstallService();
+            UninstallService();
         }
 
-        private void uninstallService()
+        private void UninstallService()
         {
             if (MessageBox.Show("Are you sure you want to remove the DBA Dash Windows service?", "Uninstall", MessageBoxButtons.YesNo, MessageBoxIcon.Exclamation) == DialogResult.Yes)
             {
-                Process p = new Process();
-                ProcessStartInfo psi = new ProcessStartInfo()
+                Process p = new();
+                ProcessStartInfo psi = new()
                 {
                     FileName = "CMD.EXE",
                     Arguments = "/c DBADashService UnInstall"
@@ -619,72 +621,69 @@ namespace DBADashServiceConfig
                 p.Start();
                 p.WaitForExit();
                 System.Threading.Thread.Sleep(500);
-                refreshServiceStatus();
+                RefreshServiceStatus();
             }
         }
 
-        private void bttnCancel_Click(object sender, EventArgs e)
+        private void BttnCancel_Click(object sender, EventArgs e)
         {
             this.Close();
         }
 
-        private void txtAWSProfile_TextChanged(object sender, EventArgs e)
+        private void TxtAWSProfile_TextChanged(object sender, EventArgs e)
         {
             txtAccessKey.Enabled = (txtAWSProfile.Text.Length == 0);
             txtSecretKey.Enabled = txtAccessKey.Enabled;
 
         }
 
-        private void txtAccessKey_TextChanged(object sender, EventArgs e)
+        private void TxtAccessKey_TextChanged(object sender, EventArgs e)
         {
             txtAWSProfile.Enabled = (txtAccessKey.Text.Length == 0 && txtSecretKey.Text.Length == 0);
 
         }
 
-        private void txtSecretKey_TextChanged(object sender, EventArgs e)
+        private void TxtSecretKey_TextChanged(object sender, EventArgs e)
         {
             txtAWSProfile.Enabled = (txtAccessKey.Text.Length == 0 && txtSecretKey.Text.Length == 0);
 
         }
 
-
-        private void txtDestination_Validated(object sender, EventArgs e)
+        private void TxtDestination_Validated(object sender, EventArgs e)
         {
-            destinationChanged();
+            DestinationChanged();
         }
 
-
-        private void destinationChanged()
+        private void DestinationChanged()
         {
             if(collectionConfig.Destination!= txtDestination.Text)
             {
                 collectionConfig.Destination = txtDestination.Text;
                 txtJson.Text = collectionConfig.Serialize();
-                validateDestination();
+                ValidateDestination();
             }
 
         }
 
-
-        private void txtAccessKey_Validating(object sender, CancelEventArgs e)
+        private void TxtAccessKey_Validating(object sender, CancelEventArgs e)
         {
             collectionConfig.AccessKey = (txtAccessKey.Text == "" ? null : txtAccessKey.Text);
             txtJson.Text = collectionConfig.Serialize();
         }
 
-        private void txtSecretKey_Validating(object sender, CancelEventArgs e)
+        private void TxtSecretKey_Validating(object sender, CancelEventArgs e)
         {
             collectionConfig.SecretKey = (txtSecretKey.Text == "" ? null : txtSecretKey.Text);
             txtJson.Text = collectionConfig.Serialize();
         }
 
-        private void txtAWSProfile_Validating(object sender, CancelEventArgs e)
+        private void TxtAWSProfile_Validating(object sender, CancelEventArgs e)
         {
             collectionConfig.AWSProfile = (txtAWSProfile.Text == "" ? null : txtAWSProfile.Text);
             txtJson.Text = collectionConfig.Serialize();
         }
 
-        private void chkSlowQueryThreshold_CheckedChanged(object sender, EventArgs e)
+        private void ChkSlowQueryThreshold_CheckedChanged(object sender, EventArgs e)
         {
             numSlowQueryThreshold.Enabled = chkSlowQueryThreshold.Checked;
             if (chkSlowQueryThreshold.Checked)
@@ -702,7 +701,7 @@ namespace DBADashServiceConfig
 
         }
 
-        private void loadConnectionForEdit(DBADashSource src)
+        private void LoadConnectionForEdit(DBADashSource src)
         {
             if (src != null)
             {
@@ -740,10 +739,10 @@ namespace DBADashServiceConfig
             {
                 src.RunningQueryPlanThreshold = null;
             }
-            setAvailableOptionsForSource();
+            SetAvailableOptionsForSource();
         }
 
-        private void bttnDeployDatabase_Click(object sender, EventArgs e)
+        private void BttnDeployDatabase_Click(object sender, EventArgs e)
         {
             var frm = new DBDeploy();
             var cn =  new DBADashConnection(txtDestination.Text);
@@ -753,7 +752,7 @@ namespace DBADashServiceConfig
             }
             else
             {
-                if (setDestination())
+                if (SetDestination())
                 {
                     cn = new DBADashConnection(txtDestination.Text);
                     frm.ConnectionString = cn.ConnectionString;
@@ -775,14 +774,14 @@ namespace DBADashServiceConfig
                         InitialCatalog = frm.DatabaseName
                     };
                     txtDestination.Text = builder.ConnectionString;
-                    destinationChanged();
+                    DestinationChanged();
                 }
             }
-            validateDestination();
+            ValidateDestination();
 
         }
 
-        private bool setDestination()
+        private bool SetDestination()
         {
             var frm = new DBConnection();
             var cn = new DBADashConnection(txtDestination.Text);
@@ -814,18 +813,18 @@ namespace DBADashServiceConfig
                 cn = new DBADashConnection(builder.ConnectionString) ;
 
                 txtDestination.Text = cn.EncryptedConnectionString;
-                destinationChanged();
+                DestinationChanged();
                 return true;
             }
             return false;
         }
 
-        private void bttnConnect_Click(object sender, EventArgs e)
+        private void BttnConnect_Click(object sender, EventArgs e)
         {
-            setDestination();
+            SetDestination();
         }
 
-        private void bttnConnectSource_Click(object sender, EventArgs e)
+        private void BttnConnectSource_Click(object sender, EventArgs e)
         {
             var frm = new DBConnection();
             var cn = new DBADashConnection(txtSource.Text);
@@ -840,10 +839,10 @@ namespace DBADashServiceConfig
                 cn = new DBADashConnection(frm.ConnectionString);
                 txtSource.Text = cn.EncryptedConnectionString;
             }
-            setAvailableOptionsForSource();
+            SetAvailableOptionsForSource();
         }
 
-        private void bttnScanNow_Click(object sender, EventArgs e)
+        private void BttnScanNow_Click(object sender, EventArgs e)
         {
            var newConnections= collectionConfig.GetNewAzureDBConnections();
             if (newConnections.Count == 0)
@@ -856,25 +855,25 @@ namespace DBADashServiceConfig
                 {
                     collectionConfig.AddConnections(newConnections);
                     txtJson.Text = collectionConfig.Serialize();
-                    setConnectionCount();
-                    setDgv();
+                    SetConnectionCount();
+                    SetDgv();
                 }
             }
         }
 
-        private void chkScanAzureDB_CheckedChanged(object sender, EventArgs e)
+        private void ChkScanAzureDB_CheckedChanged(object sender, EventArgs e)
         {
             collectionConfig.ScanForAzureDBs = chkScanAzureDB.Checked;
             txtJson.Text = collectionConfig.Serialize();
         }
 
-        private void chkAutoUpgradeRepoDB_CheckedChanged(object sender, EventArgs e)
+        private void ChkAutoUpgradeRepoDB_CheckedChanged(object sender, EventArgs e)
         {
             collectionConfig.AutoUpdateDatabase = chkAutoUpgradeRepoDB.Checked;
             txtJson.Text = collectionConfig.Serialize();
         }
 
-        private void chkScanEvery_CheckedChanged(object sender, EventArgs e)
+        private void ChkScanEvery_CheckedChanged(object sender, EventArgs e)
         {
             if(numAzureScanInterval.Value==0 && chkScanEvery.Checked)
             {
@@ -885,43 +884,41 @@ namespace DBADashServiceConfig
                 numAzureScanInterval.Value = 0;
             }
             collectionConfig.ScanForAzureDBsInterval = Convert.ToInt32(numAzureScanInterval.Value);
-            updateScanInterval();
+            UpdateScanInterval();
             txtJson.Text = collectionConfig.Serialize();
         }
 
-        private void updateScanInterval()
+        private void UpdateScanInterval()
         {
             lblHHmm.Visible = chkScanEvery.Checked;
             lblHHmm.Text = TimeSpan.FromSeconds(Convert.ToInt32(numAzureScanInterval.Value)).ToString();
         }
 
-        private void numAzureScanInterval_ValueChanged(object sender, EventArgs e)
+        private void NumAzureScanInterval_ValueChanged(object sender, EventArgs e)
         {
             chkScanEvery.Checked = numAzureScanInterval.Value > 0;
             collectionConfig.ScanForAzureDBsInterval = Convert.ToInt32(numAzureScanInterval.Value);
-            updateScanInterval();
+            UpdateScanInterval();
             txtJson.Text = collectionConfig.Serialize();
         }
 
-        private void lnkCronBuilder_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        private void LnkCronBuilder_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
             var psi = new ProcessStartInfo("http://www.cronmaker.com/") { UseShellExecute = true };
             Process.Start(psi);
         }
 
-        private void bttnDestFolder_Click(object sender, EventArgs e)
+        private void BttnDestFolder_Click(object sender, EventArgs e)
         {
-            using (var fbd = new FolderBrowserDialog())
+            using var fbd = new FolderBrowserDialog();
+            if (fbd.ShowDialog() == DialogResult.OK)
             {
-                if (fbd.ShowDialog() == DialogResult.OK)
-                {
-                    txtDestination.Text = fbd.SelectedPath;
-                    destinationChanged();
-                }
+                txtDestination.Text = fbd.SelectedPath;
+                DestinationChanged();
             }
         }
 
-        private void bttnSrcFolder_Click_1(object sender, EventArgs e)
+        private void BttnSrcFolder_Click_1(object sender, EventArgs e)
         {
             using (var fbd = new FolderBrowserDialog())
             {
@@ -930,10 +927,10 @@ namespace DBADashServiceConfig
                     txtSource.Text  = fbd.SelectedPath;
                 }
             }
-            setAvailableOptionsForSource();
+            SetAvailableOptionsForSource();
         }
 
-        private void bttnS3_Click(object sender, EventArgs e)
+        private void BttnS3_Click(object sender, EventArgs e)
         {
             var cfg = new CollectionConfig
             {
@@ -942,18 +939,16 @@ namespace DBADashServiceConfig
                 AWSProfile = txtAWSProfile.Text
             };
 
-            using (var frm = new S3Browser() { AccessKey = cfg.AccessKey, SecretKey = cfg.GetSecretKey(), Folder= "DBADash_" + Environment.MachineName })
-            {                
-                frm.ShowDialog();
-                if(frm.DialogResult== DialogResult.OK)
-                {
-                    txtDestination.Text = frm.AWSURL;
-                    destinationChanged();
-                }
+            using var frm = new S3Browser() { AccessKey = cfg.AccessKey, SecretKey = cfg.GetSecretKey(), Folder = "DBADash_" + Environment.MachineName };
+            frm.ShowDialog();
+            if (frm.DialogResult == DialogResult.OK)
+            {
+                txtDestination.Text = frm.AWSURL;
+                DestinationChanged();
             }
         }
 
-        private void bttnS3Src_Click(object sender, EventArgs e)
+        private void BttnS3Src_Click(object sender, EventArgs e)
         {
             var cfg = new CollectionConfig
             {
@@ -969,27 +964,27 @@ namespace DBADashServiceConfig
                    txtSource.Text= frm.AWSURL;
                 }
             }
-            setAvailableOptionsForSource();
+            SetAvailableOptionsForSource();
         }
 
 
-        private void lnkSourceConnections_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        private void LnkSourceConnections_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
             tab1.SelectedTab = tabSource;
         }
 
-        private void lnkPermissions_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        private void LnkPermissions_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
             var psi = new ProcessStartInfo("https://github.com/DavidWiseman/DBADash/blob/develop/Docs/Security.md") { UseShellExecute=true};
             Process.Start(psi);
         }
 
-        private void cboSource_Validated(object sender, EventArgs e)
+        private void CboSource_Validated(object sender, EventArgs e)
         {
-            setAvailableOptionsForSource();
+            SetAvailableOptionsForSource();
         }
 
-        private void setAvailableOptionsForSource()
+        private void SetAvailableOptionsForSource()
         {
             var src = new DBADashSource(txtSource.Text);
             bool isSql = src.SourceConnection.Type == ConnectionType.SQL;
@@ -1002,13 +997,13 @@ namespace DBADashServiceConfig
         }
 
 
-        private void chkLogInternalPerfCounters_CheckedChanged(object sender, EventArgs e)
+        private void ChkLogInternalPerfCounters_CheckedChanged(object sender, EventArgs e)
         {
             collectionConfig.LogInternalPerformanceCounters = chkLogInternalPerfCounters.Checked;
             txtJson.Text = collectionConfig.Serialize();
         }
 
-        private void bttnSchedule_Click(object sender, EventArgs e)
+        private void BttnSchedule_Click(object sender, EventArgs e)
         {
             var frm = new ScheduleConfig()
             {
@@ -1024,20 +1019,20 @@ namespace DBADashServiceConfig
         }
 
    
-        private void dgv_RowValidated(object sender, DataGridViewCellEventArgs e)
+        private void Dgv_RowValidated(object sender, DataGridViewCellEventArgs e)
         {
-            updateFromGrid();
+            UpdateFromGrid();
         }
 
-        private void updateFromGrid()
+        private void UpdateFromGrid()
         { 
             collectionConfig.SourceConnections = (List<DBADashSource>)((BindingSource)dgvConnections.DataSource).DataSource;
             txtJson.Text = collectionConfig.Serialize();
-            setConnectionCount();
+            SetConnectionCount();
 
         }
 
-        private void dgvConnections_CellContentClick(object sender, DataGridViewCellEventArgs e)
+        private void DgvConnections_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
             if (e.RowIndex >= 0 && e.ColumnIndex == dgvConnections.Columns["Delete"].Index)
             {
@@ -1046,7 +1041,7 @@ namespace DBADashServiceConfig
             else if (e.RowIndex >= 0 && e.ColumnIndex == dgvConnections.Columns["Edit"].Index)
             {
                 var src = (DBADashSource)dgvConnections.Rows[e.RowIndex].DataBoundItem;
-                loadConnectionForEdit(src);
+                LoadConnectionForEdit(src);
             }
             else if (e.RowIndex >= 0 && dgvConnections.Columns[e.ColumnIndex].CellType == typeof(DataGridViewCheckBoxCell))
             {
@@ -1074,20 +1069,20 @@ namespace DBADashServiceConfig
                     MessageBox.Show("Custom schedule configuration is only available for SQL connections","Schedule", MessageBoxButtons.OK,MessageBoxIcon.Warning);
                 }
             }
-            updateFromGrid();
+            UpdateFromGrid();
         }
 
-        private void dgv_UserDeletedRow(object sender, DataGridViewRowEventArgs e)
+        private void Dgv_UserDeletedRow(object sender, DataGridViewRowEventArgs e)
         {
-            updateFromGrid();
+            UpdateFromGrid();
         }
 
-        private void txtSearch_TextChanged(object sender, EventArgs e)
+        private void TxtSearch_TextChanged(object sender, EventArgs e)
         {
-            applySearch();
+            ApplySearch();
         }
 
-        private void applySearch()
+        private void ApplySearch()
         {
             CurrencyManager currencyManager1 = (CurrencyManager)BindingContext[dgvConnections.DataSource];
             currencyManager1.SuspendBinding();
@@ -1105,7 +1100,7 @@ namespace DBADashServiceConfig
             currencyManager1.ResumeBinding();
         }
 
-        private void chkCollectPlans_CheckedChanged(object sender, EventArgs e)
+        private void ChkCollectPlans_CheckedChanged(object sender, EventArgs e)
         {
             grpRunningQueryThreshold.Enabled = chkCollectPlans.Checked;
             if (chkCollectPlans.Checked)
@@ -1118,22 +1113,22 @@ namespace DBADashServiceConfig
             }
         }
 
-        private void lnkALL_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        private void LnkALL_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
             txtSnapshotDBs.Text = "*";
         }
 
-        private void lnkNone_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        private void LnkNone_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
             txtSnapshotDBs.Text = string.Empty;
         }
 
-        private void lnkExample_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        private void LnkExample_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
             txtSnapshotDBs.Text = "Database1,Database2,Databsase3";
         }
 
-        private void dgv_RowsAdded(object sender, DataGridViewRowsAddedEventArgs e)
+        private void Dgv_RowsAdded(object sender, DataGridViewRowsAddedEventArgs e)
         {
             for(int i =e.RowIndex;i<e.RowIndex + e.RowCount; i++)
             {
@@ -1143,12 +1138,12 @@ namespace DBADashServiceConfig
             }
         }
 
-        private void txtJson_TextChanged(object sender, EventArgs e)
+        private void TxtJson_TextChanged(object sender, EventArgs e)
         {
-            updateSaveButton();
+            UpdateSaveButton();
         }
 
-        private void updateSaveButton()
+        private void UpdateSaveButton()
         {
             if (txtJson.Text != originalJson)
             {
@@ -1160,34 +1155,34 @@ namespace DBADashServiceConfig
             }
         }
 
-        private void lnkStart_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        private void LnkStart_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            startService();
+            StartService();
         }
 
-        private void lnkStop_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        private void LnkStop_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            stopService();
+            StopService();
         }
 
-        private void lnkRefresh_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        private void LnkRefresh_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            refreshServiceStatus();
-            validateDestination(); // DB could be upgraded on service start so refresh destination
+            RefreshServiceStatus();
+            ValidateDestination(); // DB could be upgraded on service start so refresh destination
         }
 
-        private void lnkInstall_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        private void LnkInstall_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
             if (isInstalled)
             {
-                uninstallService();
+                UninstallService();
             }
             else { 
                 if(txtJson.Text!= originalJson)
                 {
                     if(MessageBox.Show("Save changes to config", "Save", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
                     {
-                        saveChanges();
+                        SaveChanges();
                     }
                 }
                 if (!File.Exists(jsonPath))
@@ -1195,23 +1190,23 @@ namespace DBADashServiceConfig
                     MessageBox.Show("Please configure the service and save changes before installing as a service.", "Warning", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
                     return;
                 }
-                var frm = new InstallService();
-                frm.ServiceName = collectionConfig.ServiceName;
+                var frm = new InstallService
+                {
+                    ServiceName = collectionConfig.ServiceName
+                };
                 frm.ShowDialog();
-                refreshServiceStatus();
-                validateDestination(); // DB could be upgraded on service start so refresh destination
+                RefreshServiceStatus();
+                ValidateDestination(); // DB could be upgraded on service start so refresh destination
             }
         }
 
-        private void bttnViewServiceLog_Click(object sender, EventArgs e)
+        private void BttnViewServiceLog_Click(object sender, EventArgs e)
         {
-            using (var frm = new ServiceLog())
-            {
-                frm.ShowDialog(this);
-            }
+            using var frm = new ServiceLog();
+            frm.ShowDialog(this);
         }
 
-        private void bttnAbout_Click(object sender, EventArgs e)
+        private void BttnAbout_Click(object sender, EventArgs e)
         {
             if (collectionConfig.DestinationConnection.Type == ConnectionType.SQL)
             {
@@ -1223,7 +1218,7 @@ namespace DBADashServiceConfig
             }
         }
 
-        private void chkDefaultIdentityCollection_CheckedChanged(object sender, EventArgs e)
+        private void ChkDefaultIdentityCollection_CheckedChanged(object sender, EventArgs e)
         {
             numIdentityCollectionThreshold.Enabled = !chkDefaultIdentityCollection.Checked;
             collectionConfig.IdentityCollectionThreshold = chkDefaultIdentityCollection.Checked ? null : (int)numIdentityCollectionThreshold.Value;
@@ -1238,13 +1233,3 @@ namespace DBADashServiceConfig
     }
 }
 
-public struct CronSelection
-{
-    public string CronExpression { get; set; }
-    public string DisplayValue { get; set; }
-
-    public override string ToString()
-    {
-        return DisplayValue.ToString();
-    }
-}

@@ -47,7 +47,7 @@
             this.txtLogFilter.Name = "txtLogFilter";
             this.txtLogFilter.Size = new System.Drawing.Size(144, 27);
             this.txtLogFilter.TabIndex = 9;
-            this.txtLogFilter.KeyDown += new System.Windows.Forms.KeyEventHandler(this.txtLogFilter_KeyDown);
+            this.txtLogFilter.KeyDown += new System.Windows.Forms.KeyEventHandler(this.TxtLogFilter_KeyDown);
             // 
             // label2
             // 
@@ -68,7 +68,7 @@
             this.bttnRefreshLog.TabIndex = 7;
             this.toolTip1.SetToolTip(this.bttnRefreshLog, "Click to get latest entries from the log file");
             this.bttnRefreshLog.UseVisualStyleBackColor = true;
-            this.bttnRefreshLog.Click += new System.EventHandler(this.bttnRefreshLog_Click);
+            this.bttnRefreshLog.Click += new System.EventHandler(this.BttnRefreshLog_Click);
             // 
             // cboLogs
             // 
@@ -79,7 +79,7 @@
             this.cboLogs.Size = new System.Drawing.Size(325, 28);
             this.cboLogs.TabIndex = 6;
             this.toolTip1.SetToolTip(this.cboLogs, "Select a log file to read from");
-            this.cboLogs.SelectedIndexChanged += new System.EventHandler(this.cboLogs_SelectedIndexChanged);
+            this.cboLogs.SelectedIndexChanged += new System.EventHandler(this.CboLogs_SelectedIndexChanged);
             // 
             // txtLog
             // 
@@ -129,7 +129,7 @@
             this.bttnNotepad.Text = "Notepad";
             this.toolTip1.SetToolTip(this.bttnNotepad, "Open log in Notepad");
             this.bttnNotepad.UseVisualStyleBackColor = true;
-            this.bttnNotepad.Click += new System.EventHandler(this.bttnNotepad_Click);
+            this.bttnNotepad.Click += new System.EventHandler(this.BttnNotepad_Click);
             // 
             // ServiceLog
             // 

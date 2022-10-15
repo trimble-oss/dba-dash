@@ -36,7 +36,7 @@ namespace DBADashServiceConfig
 
         public string ConnectionString { 
             get {
-                SqlConnectionStringBuilder builder = new SqlConnectionStringBuilder(_connectionString)
+                SqlConnectionStringBuilder builder = new(_connectionString)
                 {
                     InitialCatalog = cboDatabase.Text
                 };
@@ -47,7 +47,7 @@ namespace DBADashServiceConfig
                 _connectionString = value;
                 try
                 {
-                    SqlConnectionStringBuilder builder = new SqlConnectionStringBuilder(value);
+                    SqlConnectionStringBuilder builder = new(value);
                    
                     if (builder.InitialCatalog != null && builder.InitialCatalog.Length > 0 && builder.InitialCatalog != "master")
                     {
@@ -68,7 +68,7 @@ namespace DBADashServiceConfig
         {
             get
             {
-                SqlConnectionStringBuilder builder = new SqlConnectionStringBuilder(ConnectionString)
+                SqlConnectionStringBuilder builder = new(ConnectionString)
                 {
                     ConnectTimeout = 3,
                     InitialCatalog = ""
@@ -77,22 +77,22 @@ namespace DBADashServiceConfig
             }
         }
 
-        private void getDatabases()
+        private void GetDatabases()
         {
-            cboDatabase.Items.Clear();
-            SqlConnection cn = new SqlConnection(ConnectionStringWithoutInitialCatalog);
-            using (cn)
-            {
-                cn.Open();
-                SqlCommand cmd = new SqlCommand(@"SELECT name
+            var sql = @"SELECT name
 FROM sys.databases
 WHERE DATABASEPROPERTYEX(name, 'Updateability') = 'READ_WRITE'
-AND database_id > 4 ", cn);
+AND database_id > 4 ";
+            cboDatabase.Items.Clear();
+            using( SqlConnection cn = new(ConnectionStringWithoutInitialCatalog))
+            using( SqlCommand cmd = new(sql, cn))
+            {
+                cn.Open();                 
                 var rdr = cmd.ExecuteReader();
                 while (rdr.Read())
                 {
                     cboDatabase.Items.Add((string)rdr[0]);
-                }
+                }              
             }
         }
 
@@ -133,15 +133,15 @@ AND database_id > 4 ", cn);
                 MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 this.DialogResult = DialogResult.Abort;
             }
-            dbChanged();
+            DbChanged();
         }
 
-        private void bttnGenerate_Click(object sender, EventArgs e)
+        private void BttnGenerate_Click(object sender, EventArgs e)
         {
             try
             {
                 this.Cursor = Cursors.WaitCursor;
-                generateScript();
+                GenerateScript();
                 lblNotice.Visible = true;
             }
             catch(Exception ex)
@@ -155,10 +155,10 @@ AND database_id > 4 ", cn);
             }
         }
 
-        private void generateScript()
+        private void GenerateScript()
         {
             isCancel = false;
-            DacpacUtility.DacpacService dac = new DacpacUtility.DacpacService();
+            DacpacUtility.DacpacService dac = new();
             string _db = DB;
             string _connectionString = ConnectionString;
             var t = Task.Run(()=> dac.GenerateDeployScript(_connectionString,_db, "DBADashDB.dacpac"));
@@ -207,10 +207,10 @@ AND database_id > 4 ", cn);
             }
         }
 
-        private void deploy()
+        private void Deploy()
         {
             isCancel = false;
-            DacpacUtility.DacpacService dac = new DacpacUtility.DacpacService();
+            DacpacUtility.DacpacService dac = new();
             string _db = DB;
             string _connectionString = ConnectionString;
             var t = Task.Run(() => dac.ProcessDacPac(_connectionString, _db, DBValidations.DACPackFile, dbVersionStatus.VersionStatus));
@@ -258,21 +258,21 @@ AND database_id > 4 ", cn);
             }
         }
 
-        private void txtConnectionString_Validated(object sender, EventArgs e)
+        private void TxtConnectionString_Validated(object sender, EventArgs e)
         {
-            dbChanged();
+            DbChanged();
         }
 
 
 
-        private void cboDatabase_DropDown(object sender, EventArgs e)
+        private void CboDatabase_DropDown(object sender, EventArgs e)
         {
             if (cboDatabase.Items.Count == 0)
             {
                 try
                 {
                     this.Cursor = Cursors.WaitCursor;
-                    getDatabases();
+                    GetDatabases();
                 }
                 catch (Exception ex)
                 {
@@ -287,12 +287,12 @@ AND database_id > 4 ", cn);
         }
         bool isCancel;
 
-        private void bttnCancel_Click(object sender, EventArgs e)
+        private void BttnCancel_Click(object sender, EventArgs e)
         {
             isCancel = true;
         }
 
-        private void bttnCopy_Click(object sender, EventArgs e)
+        private void BttnCopy_Click(object sender, EventArgs e)
         {
             if (txtDeployScript.Text.Length > 0)
             {
@@ -300,22 +300,22 @@ AND database_id > 4 ", cn);
             }
         }
 
-        private void txtDeployScript_Validated(object sender, EventArgs e)
+        private void TxtDeployScript_Validated(object sender, EventArgs e)
         {
             bttnCopy.Enabled = txtDeployScript.Text.Length > 0;
         }
 
-        private void txtDeployScript_TextChanged(object sender, EventArgs e)
+        private void TxtDeployScript_TextChanged(object sender, EventArgs e)
         {
             bttnCopy.Enabled = txtDeployScript.Text.Length > 0;
         }
 
-        private void cboDatabase_SelectedIndexChanged(object sender, EventArgs e)
+        private void CboDatabase_SelectedIndexChanged(object sender, EventArgs e)
         {
-            dbChanged();
+            DbChanged();
         }
 
-        private void dbChanged()
+        private void DbChanged()
         {
             try
             {
@@ -357,14 +357,14 @@ AND database_id > 4 ", cn);
 
         }
 
-        private void cboDatabase_Validated(object sender, EventArgs e)
+        private void CboDatabase_Validated(object sender, EventArgs e)
         {
-            dbChanged();
+            DbChanged();
         }
 
-        private void bttnDeploy_Click(object sender, EventArgs e)
+        private void BttnDeploy_Click(object sender, EventArgs e)
         {
-            deploy();
+            Deploy();
         }
     }
 }

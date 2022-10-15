@@ -48,9 +48,9 @@
             this.cboDatabase.Size = new System.Drawing.Size(536, 28);
             this.cboDatabase.TabIndex = 2;
             this.cboDatabase.Text = "DBADashDB";
-            this.cboDatabase.DropDown += new System.EventHandler(this.cboDatabase_DropDown);
-            this.cboDatabase.SelectedIndexChanged += new System.EventHandler(this.cboDatabase_SelectedIndexChanged);
-            this.cboDatabase.Validated += new System.EventHandler(this.cboDatabase_Validated);
+            this.cboDatabase.DropDown += new System.EventHandler(this.CboDatabase_DropDown);
+            this.cboDatabase.SelectedIndexChanged += new System.EventHandler(this.CboDatabase_SelectedIndexChanged);
+            this.cboDatabase.Validated += new System.EventHandler(this.CboDatabase_Validated);
             // 
             // label1
             // 
@@ -70,7 +70,7 @@
             this.bttnGenerate.TabIndex = 4;
             this.bttnGenerate.Text = "Generate Script";
             this.bttnGenerate.UseVisualStyleBackColor = true;
-            this.bttnGenerate.Click += new System.EventHandler(this.bttnGenerate_Click);
+            this.bttnGenerate.Click += new System.EventHandler(this.BttnGenerate_Click);
             // 
             // txtDeployScript
             // 
@@ -85,8 +85,8 @@
             this.txtDeployScript.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
             this.txtDeployScript.Size = new System.Drawing.Size(536, 563);
             this.txtDeployScript.TabIndex = 5;
-            this.txtDeployScript.TextChanged += new System.EventHandler(this.txtDeployScript_TextChanged);
-            this.txtDeployScript.Validated += new System.EventHandler(this.txtDeployScript_Validated);
+            this.txtDeployScript.TextChanged += new System.EventHandler(this.TxtDeployScript_TextChanged);
+            this.txtDeployScript.Validated += new System.EventHandler(this.TxtDeployScript_Validated);
             // 
             // lblNotice
             // 
@@ -109,7 +109,7 @@
             this.bttnCancel.Text = "Cancel";
             this.bttnCancel.UseVisualStyleBackColor = true;
             this.bttnCancel.Visible = false;
-            this.bttnCancel.Click += new System.EventHandler(this.bttnCancel_Click);
+            this.bttnCancel.Click += new System.EventHandler(this.BttnCancel_Click);
             // 
             // lblVersionInfo
             // 
@@ -130,7 +130,7 @@
             this.bttnCopy.Size = new System.Drawing.Size(36, 35);
             this.bttnCopy.TabIndex = 8;
             this.bttnCopy.UseVisualStyleBackColor = true;
-            this.bttnCopy.Click += new System.EventHandler(this.bttnCopy_Click);
+            this.bttnCopy.Click += new System.EventHandler(this.BttnCopy_Click);
             // 
             // bttnDeploy
             // 
@@ -141,7 +141,7 @@
             this.bttnDeploy.TabIndex = 10;
             this.bttnDeploy.Text = "Deploy";
             this.bttnDeploy.UseVisualStyleBackColor = true;
-            this.bttnDeploy.Click += new System.EventHandler(this.bttnDeploy_Click);
+            this.bttnDeploy.Click += new System.EventHandler(this.BttnDeploy_Click);
             // 
             // DBDeploy
             // 
