@@ -160,8 +160,8 @@
             this.txtJson.ScrollBars = System.Windows.Forms.ScrollBars.Both;
             this.txtJson.Size = new System.Drawing.Size(1123, 716);
             this.txtJson.TabIndex = 13;
-            this.txtJson.TextChanged += new System.EventHandler(this.txtJson_TextChanged);
-            this.txtJson.Validating += new System.ComponentModel.CancelEventHandler(this.txtJson_Validating);
+            this.txtJson.TextChanged += new System.EventHandler(this.TxtJson_TextChanged);
+            this.txtJson.Validating += new System.ComponentModel.CancelEventHandler(this.TxtJson_Validating);
             // 
             // bttnAdd
             // 
@@ -173,7 +173,7 @@
             this.bttnAdd.TabIndex = 8;
             this.bttnAdd.Text = "Add/Update";
             this.bttnAdd.UseVisualStyleBackColor = true;
-            this.bttnAdd.Click += new System.EventHandler(this.bttnAdd_Click);
+            this.bttnAdd.Click += new System.EventHandler(this.BttnAdd_Click);
             // 
             // errorProvider1
             // 
@@ -204,8 +204,8 @@
             this.txtSecretKey.Name = "txtSecretKey";
             this.txtSecretKey.Size = new System.Drawing.Size(461, 27);
             this.txtSecretKey.TabIndex = 5;
-            this.txtSecretKey.TextChanged += new System.EventHandler(this.txtSecretKey_TextChanged);
-            this.txtSecretKey.Validating += new System.ComponentModel.CancelEventHandler(this.txtSecretKey_Validating);
+            this.txtSecretKey.TextChanged += new System.EventHandler(this.TxtSecretKey_TextChanged);
+            this.txtSecretKey.Validating += new System.ComponentModel.CancelEventHandler(this.TxtSecretKey_Validating);
             // 
             // txtAccessKey
             // 
@@ -214,8 +214,8 @@
             this.txtAccessKey.Name = "txtAccessKey";
             this.txtAccessKey.Size = new System.Drawing.Size(461, 27);
             this.txtAccessKey.TabIndex = 4;
-            this.txtAccessKey.TextChanged += new System.EventHandler(this.txtAccessKey_TextChanged);
-            this.txtAccessKey.Validating += new System.ComponentModel.CancelEventHandler(this.txtAccessKey_Validating);
+            this.txtAccessKey.TextChanged += new System.EventHandler(this.TxtAccessKey_TextChanged);
+            this.txtAccessKey.Validating += new System.ComponentModel.CancelEventHandler(this.TxtAccessKey_Validating);
             // 
             // label4
             // 
@@ -233,8 +233,8 @@
             this.txtAWSProfile.Name = "txtAWSProfile";
             this.txtAWSProfile.Size = new System.Drawing.Size(461, 27);
             this.txtAWSProfile.TabIndex = 3;
-            this.txtAWSProfile.TextChanged += new System.EventHandler(this.txtAWSProfile_TextChanged);
-            this.txtAWSProfile.Validating += new System.ComponentModel.CancelEventHandler(this.txtAWSProfile_Validating);
+            this.txtAWSProfile.TextChanged += new System.EventHandler(this.TxtAWSProfile_TextChanged);
+            this.txtAWSProfile.Validating += new System.ComponentModel.CancelEventHandler(this.TxtAWSProfile_Validating);
             // 
             // bttnSave
             // 
@@ -247,7 +247,7 @@
             this.bttnSave.TabIndex = 14;
             this.bttnSave.Text = "&Save";
             this.bttnSave.UseVisualStyleBackColor = true;
-            this.bttnSave.Click += new System.EventHandler(this.bttnSave_Click);
+            this.bttnSave.Click += new System.EventHandler(this.BttnSave_Click);
             // 
             // label5
             // 
@@ -268,7 +268,7 @@
             this.bttnCancel.TabIndex = 15;
             this.bttnCancel.Text = "Cancel";
             this.bttnCancel.UseVisualStyleBackColor = true;
-            this.bttnCancel.Click += new System.EventHandler(this.bttnCancel_Click);
+            this.bttnCancel.Click += new System.EventHandler(this.BttnCancel_Click);
             // 
             // tab1
             // 
@@ -328,7 +328,7 @@
             this.bttnAbout.TabIndex = 20;
             this.bttnAbout.Text = "Check for Updates";
             this.bttnAbout.UseVisualStyleBackColor = true;
-            this.bttnAbout.Click += new System.EventHandler(this.bttnAbout_Click);
+            this.bttnAbout.Click += new System.EventHandler(this.BttnAbout_Click);
             // 
             // groupBox5
             // 
@@ -357,7 +357,7 @@
             this.bttnViewServiceLog.TabIndex = 20;
             this.bttnViewServiceLog.Text = "View Service Log";
             this.bttnViewServiceLog.UseVisualStyleBackColor = true;
-            this.bttnViewServiceLog.Click += new System.EventHandler(this.bttnViewServiceLog_Click);
+            this.bttnViewServiceLog.Click += new System.EventHandler(this.BttnViewServiceLog_Click);
             // 
             // lnkInstall
             // 
@@ -373,7 +373,7 @@
             this.lnkInstall.TabStop = true;
             this.lnkInstall.Text = "Install as service";
             this.lnkInstall.TextAlign = System.Drawing.ContentAlignment.TopRight;
-            this.lnkInstall.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.lnkInstall_LinkClicked);
+            this.lnkInstall.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.LnkInstall_LinkClicked);
             // 
             // lblServiceStatus
             // 
@@ -397,7 +397,7 @@
             this.lnkRefresh.Text = "Refresh";
             this.lnkRefresh.TextAlign = System.Drawing.ContentAlignment.TopRight;
             this.toolTip1.SetToolTip(this.lnkRefresh, "Refresh the status of the DBA Dash service");
-            this.lnkRefresh.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.lnkRefresh_LinkClicked);
+            this.lnkRefresh.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.LnkRefresh_LinkClicked);
             // 
             // lnkStart
             // 
@@ -412,7 +412,7 @@
             this.lnkStart.Text = "Start";
             this.lnkStart.TextAlign = System.Drawing.ContentAlignment.TopRight;
             this.toolTip1.SetToolTip(this.lnkStart, "Start the DBA Dash service");
-            this.lnkStart.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.lnkStart_LinkClicked);
+            this.lnkStart.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.LnkStart_LinkClicked);
             // 
             // lnkStop
             // 
@@ -427,7 +427,7 @@
             this.lnkStop.Text = "Stop";
             this.lnkStop.TextAlign = System.Drawing.ContentAlignment.TopRight;
             this.toolTip1.SetToolTip(this.lnkStop, "Stop the DBA Dash service");
-            this.lnkStop.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.lnkStop_LinkClicked);
+            this.lnkStop.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.LnkStop_LinkClicked);
             // 
             // bttnS3
             // 
@@ -440,7 +440,7 @@
             this.bttnS3.TabIndex = 10;
             this.toolTip1.SetToolTip(this.bttnS3, "Choose a S3 bucket destination");
             this.bttnS3.UseVisualStyleBackColor = true;
-            this.bttnS3.Click += new System.EventHandler(this.bttnS3_Click);
+            this.bttnS3.Click += new System.EventHandler(this.BttnS3_Click);
             // 
             // bttnDestFolder
             // 
@@ -453,7 +453,7 @@
             this.bttnDestFolder.TabIndex = 9;
             this.toolTip1.SetToolTip(this.bttnDestFolder, "Choose a folder destination path");
             this.bttnDestFolder.UseVisualStyleBackColor = true;
-            this.bttnDestFolder.Click += new System.EventHandler(this.bttnDestFolder_Click);
+            this.bttnDestFolder.Click += new System.EventHandler(this.BttnDestFolder_Click);
             // 
             // chkAutoUpgradeRepoDB
             // 
@@ -467,7 +467,7 @@
             this.chkAutoUpgradeRepoDB.TabIndex = 8;
             this.chkAutoUpgradeRepoDB.Text = "Auto upgrade repository DB on service start";
             this.chkAutoUpgradeRepoDB.UseVisualStyleBackColor = true;
-            this.chkAutoUpgradeRepoDB.CheckedChanged += new System.EventHandler(this.chkAutoUpgradeRepoDB_CheckedChanged);
+            this.chkAutoUpgradeRepoDB.CheckedChanged += new System.EventHandler(this.ChkAutoUpgradeRepoDB_CheckedChanged);
             // 
             // bttnConnect
             // 
@@ -480,7 +480,7 @@
             this.bttnConnect.TabIndex = 7;
             this.toolTip1.SetToolTip(this.bttnConnect, "Connect to a SQL Instance that will store your DBA Dash repository database");
             this.bttnConnect.UseVisualStyleBackColor = true;
-            this.bttnConnect.Click += new System.EventHandler(this.bttnConnect_Click);
+            this.bttnConnect.Click += new System.EventHandler(this.BttnConnect_Click);
             // 
             // lblVersionInfo
             // 
@@ -502,7 +502,7 @@
             this.bttnDeployDatabase.Text = "Deploy/Update Database";
             this.toolTip1.SetToolTip(this.bttnDeployDatabase, "Click to create/upgrade your DBA Dash repository database");
             this.bttnDeployDatabase.UseVisualStyleBackColor = true;
-            this.bttnDeployDatabase.Click += new System.EventHandler(this.bttnDeployDatabase_Click);
+            this.bttnDeployDatabase.Click += new System.EventHandler(this.BttnDeployDatabase_Click);
             // 
             // label7
             // 
@@ -522,7 +522,7 @@
             this.txtDestination.Name = "txtDestination";
             this.txtDestination.Size = new System.Drawing.Size(903, 27);
             this.txtDestination.TabIndex = 1;
-            this.txtDestination.Validated += new System.EventHandler(this.txtDestination_Validated);
+            this.txtDestination.Validated += new System.EventHandler(this.TxtDestination_Validated);
             // 
             // tabSource
             // 
@@ -620,7 +620,7 @@
             this.bttnS3Src.TabIndex = 12;
             this.toolTip1.SetToolTip(this.bttnS3Src, "Choose a S3 bucket source");
             this.bttnS3Src.UseVisualStyleBackColor = true;
-            this.bttnS3Src.Click += new System.EventHandler(this.bttnS3Src_Click);
+            this.bttnS3Src.Click += new System.EventHandler(this.BttnS3Src_Click);
             // 
             // bttnSrcFolder
             // 
@@ -633,7 +633,7 @@
             this.bttnSrcFolder.TabIndex = 10;
             this.toolTip1.SetToolTip(this.bttnSrcFolder, "Choose a folder source path");
             this.bttnSrcFolder.UseVisualStyleBackColor = true;
-            this.bttnSrcFolder.Click += new System.EventHandler(this.bttnSrcFolder_Click_1);
+            this.bttnSrcFolder.Click += new System.EventHandler(this.BttnSrcFolder_Click_1);
             // 
             // bttnConnectSource
             // 
@@ -646,7 +646,7 @@
             this.bttnConnectSource.TabIndex = 8;
             this.toolTip1.SetToolTip(this.bttnConnectSource, "Connect to a SQL Instance to monitor with DBA Dash");
             this.bttnConnectSource.UseVisualStyleBackColor = true;
-            this.bttnConnectSource.Click += new System.EventHandler(this.bttnConnectSource_Click);
+            this.bttnConnectSource.Click += new System.EventHandler(this.BttnConnectSource_Click);
             // 
             // label1
             // 
@@ -695,7 +695,7 @@
             this.chkSlowQueryThreshold.TabIndex = 13;
             this.chkSlowQueryThreshold.Text = "Capture Slow Queries (Extended Event)";
             this.chkSlowQueryThreshold.UseVisualStyleBackColor = true;
-            this.chkSlowQueryThreshold.CheckedChanged += new System.EventHandler(this.chkSlowQueryThreshold_CheckedChanged);
+            this.chkSlowQueryThreshold.CheckedChanged += new System.EventHandler(this.ChkSlowQueryThreshold_CheckedChanged);
             // 
             // chkDualSession
             // 
@@ -830,7 +830,7 @@
             this.lnkExample.TabIndex = 25;
             this.lnkExample.TabStop = true;
             this.lnkExample.Text = "Example";
-            this.lnkExample.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.lnkExample_LinkClicked);
+            this.lnkExample.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.LnkExample_LinkClicked);
             // 
             // lnkNone
             // 
@@ -842,7 +842,7 @@
             this.lnkNone.TabIndex = 24;
             this.lnkNone.TabStop = true;
             this.lnkNone.Text = "None";
-            this.lnkNone.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.lnkNone_LinkClicked);
+            this.lnkNone.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.LnkNone_LinkClicked);
             // 
             // lnkALL
             // 
@@ -854,7 +854,7 @@
             this.lnkALL.TabIndex = 23;
             this.lnkALL.TabStop = true;
             this.lnkALL.Text = "All";
-            this.lnkALL.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.lnkALL_LinkClicked);
+            this.lnkALL.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.LnkALL_LinkClicked);
             // 
             // label8
             // 
@@ -883,7 +883,7 @@
             this.chkCollectPlans.TabIndex = 13;
             this.chkCollectPlans.Text = "Collect Plans for Running Queries";
             this.chkCollectPlans.UseVisualStyleBackColor = true;
-            this.chkCollectPlans.CheckedChanged += new System.EventHandler(this.chkCollectPlans_CheckedChanged);
+            this.chkCollectPlans.CheckedChanged += new System.EventHandler(this.ChkCollectPlans_CheckedChanged);
             // 
             // grpRunningQueryThreshold
             // 
@@ -1018,10 +1018,10 @@
             this.dgvConnections.RowTemplate.Height = 24;
             this.dgvConnections.Size = new System.Drawing.Size(1068, 307);
             this.dgvConnections.TabIndex = 23;
-            this.dgvConnections.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgvConnections_CellContentClick);
-            this.dgvConnections.RowsAdded += new System.Windows.Forms.DataGridViewRowsAddedEventHandler(this.dgv_RowsAdded);
-            this.dgvConnections.RowValidated += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgv_RowValidated);
-            this.dgvConnections.UserDeletedRow += new System.Windows.Forms.DataGridViewRowEventHandler(this.dgv_UserDeletedRow);
+            this.dgvConnections.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.DgvConnections_CellContentClick);
+            this.dgvConnections.RowsAdded += new System.Windows.Forms.DataGridViewRowsAddedEventHandler(this.Dgv_RowsAdded);
+            this.dgvConnections.RowValidated += new System.Windows.Forms.DataGridViewCellEventHandler(this.Dgv_RowValidated);
+            this.dgvConnections.UserDeletedRow += new System.Windows.Forms.DataGridViewRowEventHandler(this.Dgv_UserDeletedRow);
             // 
             // label13
             // 
@@ -1042,7 +1042,7 @@
             this.txtSearch.Name = "txtSearch";
             this.txtSearch.Size = new System.Drawing.Size(191, 22);
             this.txtSearch.TabIndex = 24;
-            this.txtSearch.TextChanged += new System.EventHandler(this.txtSearch_TextChanged);
+            this.txtSearch.TextChanged += new System.EventHandler(this.TxtSearch_TextChanged);
             // 
             // tabOther
             // 
@@ -1082,7 +1082,7 @@
             this.chkDefaultIdentityCollection.TabIndex = 33;
             this.chkDefaultIdentityCollection.Text = "Default";
             this.chkDefaultIdentityCollection.UseVisualStyleBackColor = true;
-            this.chkDefaultIdentityCollection.CheckedChanged += new System.EventHandler(this.chkDefaultIdentityCollection_CheckedChanged);
+            this.chkDefaultIdentityCollection.CheckedChanged += new System.EventHandler(this.ChkDefaultIdentityCollection_CheckedChanged);
             // 
             // label2
             // 
@@ -1125,7 +1125,7 @@
             this.toolTip1.SetToolTip(this.chkScanAzureDB, "Add connection to Azure master DB.  Connections to other AzureDBs will be added o" +
         "n the fly at service start.");
             this.chkScanAzureDB.UseVisualStyleBackColor = true;
-            this.chkScanAzureDB.CheckedChanged += new System.EventHandler(this.chkScanAzureDB_CheckedChanged);
+            this.chkScanAzureDB.CheckedChanged += new System.EventHandler(this.ChkScanAzureDB_CheckedChanged);
             // 
             // lblHHmm
             // 
@@ -1146,7 +1146,7 @@
             this.toolTip1.SetToolTip(this.bttnScanNow, "Click this button to add connections for each Azure DB from the connection added " +
         "for the master database.");
             this.bttnScanNow.UseVisualStyleBackColor = true;
-            this.bttnScanNow.Click += new System.EventHandler(this.bttnScanNow_Click);
+            this.bttnScanNow.Click += new System.EventHandler(this.BttnScanNow_Click);
             // 
             // numAzureScanInterval
             // 
@@ -1170,7 +1170,7 @@
             this.numAzureScanInterval.Name = "numAzureScanInterval";
             this.numAzureScanInterval.Size = new System.Drawing.Size(95, 27);
             this.numAzureScanInterval.TabIndex = 28;
-            this.numAzureScanInterval.ValueChanged += new System.EventHandler(this.numAzureScanInterval_ValueChanged);
+            this.numAzureScanInterval.ValueChanged += new System.EventHandler(this.NumAzureScanInterval_ValueChanged);
             // 
             // label10
             // 
@@ -1200,7 +1200,7 @@
             this.chkScanEvery.Text = "Scan for new AzureDBs every";
             this.toolTip1.SetToolTip(this.chkScanEvery, "Automatically detect when new azure DBs are created on this interval.");
             this.chkScanEvery.UseVisualStyleBackColor = true;
-            this.chkScanEvery.CheckedChanged += new System.EventHandler(this.chkScanEvery_CheckedChanged);
+            this.chkScanEvery.CheckedChanged += new System.EventHandler(this.ChkScanEvery_CheckedChanged);
             // 
             // groupBox3
             // 
@@ -1239,7 +1239,7 @@
             this.bttnSchedule.TabIndex = 1;
             this.bttnSchedule.Text = "Configure Schedule";
             this.bttnSchedule.UseVisualStyleBackColor = true;
-            this.bttnSchedule.Click += new System.EventHandler(this.bttnSchedule_Click);
+            this.bttnSchedule.Click += new System.EventHandler(this.BttnSchedule_Click);
             // 
             // chkLogInternalPerfCounters
             // 
@@ -1252,7 +1252,7 @@
             this.chkLogInternalPerfCounters.TabIndex = 0;
             this.chkLogInternalPerfCounters.Text = "Log Internal Performance Counters";
             this.chkLogInternalPerfCounters.UseVisualStyleBackColor = true;
-            this.chkLogInternalPerfCounters.CheckedChanged += new System.EventHandler(this.chkLogInternalPerfCounters_CheckedChanged);
+            this.chkLogInternalPerfCounters.CheckedChanged += new System.EventHandler(this.ChkLogInternalPerfCounters_CheckedChanged);
             // 
             // tabJson
             // 
@@ -1277,7 +1277,7 @@
             this.lnkSourceConnections.TabIndex = 18;
             this.lnkSourceConnections.TabStop = true;
             this.lnkSourceConnections.Text = "Source Connections:";
-            this.lnkSourceConnections.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.lnkSourceConnections_LinkClicked);
+            this.lnkSourceConnections.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.LnkSourceConnections_LinkClicked);
             // 
             // button1
             // 

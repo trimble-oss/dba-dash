@@ -22,9 +22,9 @@ namespace DBADashServiceConfig
 
         public string ServiceName { get; set; }
 
-        private bool installService()
+        private bool InstallDBADashService()
         {
-            Process p = new Process();
+            Process p = new();
             var psi = new ProcessStartInfo()
             {
                 FileName = "CMD.EXE"
@@ -96,14 +96,14 @@ namespace DBADashServiceConfig
             return true;
         }
 
-        private void bttnInstall_Click(object sender, EventArgs e)
+        private void BttnInstall_Click(object sender, EventArgs e)
         {
             txtOutput.BackColor = Color.Black;
             txtOutput.ForeColor = Color.White;
 
-            if (installService())
+            if (InstallDBADashService())
             {
-                checkServiceInstalledAndClose();
+                CheckServiceInstalledAndClose();
             }
             else
             {
@@ -112,7 +112,7 @@ namespace DBADashServiceConfig
             }
         }
 
-        private void checkServiceInstalledAndClose()
+        private void CheckServiceInstalledAndClose()
         {
             var svcCtrl = ServiceController.GetServices()
                     .FirstOrDefault(s => s.ServiceName == ServiceName);
@@ -134,9 +134,9 @@ namespace DBADashServiceConfig
             cboServiceCredentials.SelectedIndex = 3;
         }
 
-        private void lnkPermissions_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        private void LnkPermissions_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            DBADashSharedGUI.CommonShared.OpenURL("https://github.com/trimble-oss/dba-dash/blob/main/Docs/Security.md");
+            DBADashSharedGUI.CommonShared.OpenURL("https://dbadash.com/docs/help/security/");
         }
     }
 }

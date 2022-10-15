@@ -48,36 +48,29 @@ namespace DBADashServiceConfig
             } 
         }
 
-        private void addBuckets()
+        private void AddBuckets()
         {
             var cred = DBADash.AWSTools.GetCredentials(AWSProfile, AccessKey, SecretKey);
             using (var s3 = new Amazon.S3.AmazonS3Client(cred))
+            using (var listBucketsTask = s3.ListBucketsAsync())
             {
-                using (var listBucketsTask = s3.ListBucketsAsync())
+                listBucketsTask.Wait();
+
+                foreach (var b in listBucketsTask.Result.Buckets)
                 {
-                    listBucketsTask.Wait();
-
-                    foreach (var b in listBucketsTask.Result.Buckets)
-                    {
-                        cboBuckets.Items.Add(b.BucketName);
-                    }
+                    cboBuckets.Items.Add(b.BucketName);
                 }
-            }
+            }      
         }
 
 
-        private void cboBuckets_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            
-        }
-
-        private void cboBuckets_DropDown(object sender, EventArgs e)
+        private void CboBuckets_DropDown(object sender, EventArgs e)
         {
             if (cboBuckets.Items.Count == 0)
             {
                 try
                 {
-                    addBuckets();
+                    AddBuckets();
                 }
                 catch(Exception ex)
                 {
@@ -86,7 +79,7 @@ namespace DBADashServiceConfig
             }
         }
 
-        private void bttnOK_Click(object sender, EventArgs e)
+        private void BttnOK_Click(object sender, EventArgs e)
         {
             if (string.IsNullOrEmpty(cboBuckets.Text))
             {
@@ -96,7 +89,7 @@ namespace DBADashServiceConfig
                 this.DialogResult = DialogResult.OK;
         }
 
-        private void bttnCancel_Click(object sender, EventArgs e)
+        private void BttnCancel_Click(object sender, EventArgs e)
         {
             this.DialogResult = DialogResult.Cancel;
         }

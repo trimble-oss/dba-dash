@@ -51,7 +51,7 @@ namespace DBADashServiceConfig
             this.lnkPermissions.TabIndex = 32;
             this.lnkPermissions.TabStop = true;
             this.lnkPermissions.Text = "Permissions required for service user";
-            this.lnkPermissions.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.lnkPermissions_LinkClicked);
+            this.lnkPermissions.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.LnkPermissions_LinkClicked);
             // 
             // cboServiceCredentials
             // 
@@ -88,7 +88,7 @@ namespace DBADashServiceConfig
             this.bttnInstall.TabIndex = 28;
             this.bttnInstall.Text = "Install";
             this.bttnInstall.UseVisualStyleBackColor = true;
-            this.bttnInstall.Click += new System.EventHandler(this.bttnInstall_Click);
+            this.bttnInstall.Click += new System.EventHandler(this.BttnInstall_Click);
             // 
             // bttnCancel
             // 

@@ -22,7 +22,7 @@ namespace DBADashServiceConfig
 
         private void ServiceLog_Load(object sender, EventArgs e)
         {
-            refreshLogs();
+            RefreshLogs();
             Activated += new System.EventHandler(this.ServiceLog_Activated); // Scroll to end of log when form is activated (doesn't work in form load event)
         }
 
@@ -34,7 +34,7 @@ namespace DBADashServiceConfig
             txtLog.ScrollToCaret();
         }
 
-        private void refreshLogs()
+        private void RefreshLogs()
         {
             if (Directory.Exists(logsFolder))
             {
@@ -59,19 +59,19 @@ namespace DBADashServiceConfig
             }
         }
 
-        private void loadLog(string fileName)
+        private void LoadLog(string fileName)
         {
             var sb = new StringBuilder();
             string filter = txtLogFilter.Text.ToLower().Trim();
             string filePath = Path.Combine(logsFolder, fileName);
             if (File.Exists(filePath))
             {
-                using (FileStream fs = new FileStream(filePath,
+                using (FileStream fs = new(filePath,
                                        FileMode.Open,
                                        FileAccess.Read,
                                        FileShare.ReadWrite))
                 {
-                    using (StreamReader sr = new StreamReader(fs))
+                    using (StreamReader sr = new(fs))
                     {
                         while (sr.Peek() >= 0) // reading the old data
                         {
@@ -97,25 +97,25 @@ namespace DBADashServiceConfig
             }
         }
 
-        private void bttnRefreshLog_Click(object sender, EventArgs e)
+        private void BttnRefreshLog_Click(object sender, EventArgs e)
         {
-            refreshLogs();
+            RefreshLogs();
         }
 
-        private void cboLogs_SelectedIndexChanged(object sender, EventArgs e)
+        private void CboLogs_SelectedIndexChanged(object sender, EventArgs e)
         {
-            loadLog(cboLogs.Text);
+            LoadLog(cboLogs.Text);
         }
 
-        private void txtLogFilter_KeyDown(object sender, KeyEventArgs e)
+        private void TxtLogFilter_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.KeyCode == Keys.Enter)
             {
-                loadLog(cboLogs.Text);
+                LoadLog(cboLogs.Text);
             }
         }
 
-        private void bttnNotepad_Click(object sender, EventArgs e)
+        private void BttnNotepad_Click(object sender, EventArgs e)
         {
             string filePath = Path.Combine(logsFolder, cboLogs.Text);
             System.Diagnostics.Process.Start("Notepad.exe", filePath);
