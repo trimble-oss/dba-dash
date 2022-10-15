@@ -322,9 +322,8 @@ namespace DBADashServiceConfig
             {
                 try
                 {
-                    originalJson = System.IO.File.ReadAllText(jsonPath);
-                    txtJson.Text = originalJson;
-                    setFromJson(originalJson);
+                    SetOriginalJson();
+
                     if (!originalJson.Like("%Trust%Server%Certificate%") && collectionConfig.SourceConnections.Count>0)
                     {
                         if (MessageBox.Show("Encryption is applied by default to your SQL Server connections with Microsoft.Data.SqlClient 4.0.  Connections might fail if the server certificate is not trusted.  Apply Trust Server Certificate?", "Trust Server Certificate", MessageBoxButtons.YesNo, MessageBoxIcon.Question)== DialogResult.Yes)
@@ -337,6 +336,7 @@ namespace DBADashServiceConfig
                 catch(Exception ex)
                 {
                     MessageBox.Show("Error reading ServiceConfig.json: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    tab1.SelectedTab = tabJson; // Set tab to Json to allow user to correct error in Json
                 }
             }
             else
@@ -349,6 +349,21 @@ namespace DBADashServiceConfig
             refreshServiceStatus();
             validateDestination();
     
+        }
+
+        private void SetOriginalJson()
+        {
+            // Read from disk
+            originalJson = System.IO.File.ReadAllText(jsonPath);
+            txtJson.Text = originalJson; // Set text just here just in case there is an error deserializing
+            // Convert back to object
+            var cfg = CollectionConfig.Deserialize(originalJson);
+            // Reserialize and set original json.  (Saves prompting user to save changes if new defaults are introduced etc)
+            originalJson = cfg.Serialize();
+            txtJson.Text = originalJson;
+
+            setFromJson(originalJson);
+
         }
 
         private void applyTrustServerCertificate()
