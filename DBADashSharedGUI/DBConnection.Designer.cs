@@ -77,7 +77,7 @@
             this.chkIntegratedSecurity.TabIndex = 2;
             this.chkIntegratedSecurity.Text = "Integrated Security";
             this.chkIntegratedSecurity.UseVisualStyleBackColor = true;
-            this.chkIntegratedSecurity.CheckedChanged += new System.EventHandler(this.chkIntegratedSecurity_CheckedChanged);
+            this.chkIntegratedSecurity.CheckedChanged += new System.EventHandler(this.ChkIntegratedSecurity_CheckedChanged);
             // 
             // pnlAuth
             // 
@@ -136,7 +136,7 @@
             this.bttnConnect.TabIndex = 4;
             this.bttnConnect.Text = "Connect";
             this.bttnConnect.UseVisualStyleBackColor = true;
-            this.bttnConnect.Click += new System.EventHandler(this.bttnConnect_Click);
+            this.bttnConnect.Click += new System.EventHandler(this.BttnConnect_Click);
             // 
             // bttnCancel
             // 
@@ -148,7 +148,7 @@
             this.bttnCancel.TabIndex = 5;
             this.bttnCancel.Text = "Cancel";
             this.bttnCancel.UseVisualStyleBackColor = true;
-            this.bttnCancel.Click += new System.EventHandler(this.bttnCancel_Click);
+            this.bttnCancel.Click += new System.EventHandler(this.BttnCancel_Click);
             // 
             // cboDatabase
             // 
@@ -158,7 +158,7 @@
             this.cboDatabase.Name = "cboDatabase";
             this.cboDatabase.Size = new System.Drawing.Size(358, 28);
             this.cboDatabase.TabIndex = 6;
-            this.cboDatabase.DropDown += new System.EventHandler(this.cboDatabase_Dropdown);
+            this.cboDatabase.DropDown += new System.EventHandler(this.CboDatabase_Dropdown);
             // 
             // lblDatabase
             // 

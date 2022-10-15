@@ -63,38 +63,34 @@ namespace DBADash
             }
         }
 
-        private void chkIntegratedSecurity_CheckedChanged(object sender, EventArgs e)
+        private void ChkIntegratedSecurity_CheckedChanged(object sender, EventArgs e)
         {
             pnlAuth.Enabled = !chkIntegratedSecurity.Checked;
         }
 
-        private void bttnCancel_Click(object sender, EventArgs e)
+        private void BttnCancel_Click(object sender, EventArgs e)
         {
             this.DialogResult = DialogResult.Cancel;
         }
 
-        public void testConnection(string connectionString)
+        public static void TestConnection(string connectionString)
         {
-            SqlConnection cn = new SqlConnection(connectionString);
-            using (cn)
-            {
-                cn.Open();
-            }
-          
+            using var cn = new SqlConnection(connectionString);
+            cn.Open();        
         }
 
-        private void bttnConnect_Click(object sender, EventArgs e)
+        private void BttnConnect_Click(object sender, EventArgs e)
         {
             try
             {
                 this.Cursor = Cursors.WaitCursor;
                 if (ValidateInitialCatalog)
                 {
-                    testConnection(ConnectionString);
+                    TestConnection(ConnectionString);
                 }
                 else
                 {
-                    testConnection(ConnectionStringWithoutInitialCatalog); // Try without initial catalog as DB might not have been created yet
+                    TestConnection(ConnectionStringWithoutInitialCatalog); // Try without initial catalog as DB might not have been created yet
                 }
             }
             catch (Exception ex)
@@ -118,12 +114,12 @@ namespace DBADash
             }
         }
 
-        private void cboDatabase_Dropdown(object sender, EventArgs e)
+        private void CboDatabase_Dropdown(object sender, EventArgs e)
         {
             try
             {
                 cboDatabase.Items.Clear();
-                var DBs = GetDatabases(ConnectionString);
+                var DBs = GetDatabases(ConnectionStringWithoutInitialCatalog);
                 foreach(string db in DBs)
                 {
                     cboDatabase.Items.Add(db);
@@ -137,10 +133,10 @@ namespace DBADash
 
         }
 
-        public List<string> GetDatabases(string ConnectionString)
+        public static List<string> GetDatabases(string ConnectionString)
         {
             using (var cn = new SqlConnection(ConnectionString))
-            using (SqlCommand cmd = new SqlCommand("SELECT name FROM sys.databases WHERE state=0", cn))
+            using (SqlCommand cmd = new("SELECT name FROM sys.databases WHERE state=0", cn))
             {
                 cn.Open();
                 var DBs = new List<string>();
