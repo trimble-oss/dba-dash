@@ -108,7 +108,6 @@ namespace DBADashGUI
                     connectionString = frm.cfg.DestinationConnection.ConnectionString;
                 }
             }
-
             var builder = new SqlConnectionStringBuilder(connectionString)
             {
                 ApplicationName = "DBADashGUI"
@@ -116,10 +115,61 @@ namespace DBADashGUI
             connectionString = builder.ConnectionString;
             Common.ConnectionString = connectionString;
             mnuTags.Visible = !commandLine.NoTagMenu;
-            await CheckVersion();
+
+            if (!CheckRepositoryDBConnection())
+            {
+                Application.Exit();
+                return;
+            }
+
+            try
+            {
+                await CheckVersion();
+            }
+            catch(Exception ex) when (ex.Message== "Version check")
+            {
+                Application.Exit();
+                return;
+            }
+            catch(Exception ex)
+            {
+                MessageBox.Show("Error checking repository DB version.  The application will close.\n" + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                Application.Exit();
+                return;
+            }
+
             GetCommandLineTags();
             BuildTagMenu(commandLineTags);
             AddInstanes();
+        }
+
+
+        /// <summary>
+        /// Check connection to DBA Dash repository DB.  User is prompted to retry or cancel on failure.
+        /// </summary>
+        /// <returns>True if connection succeeded</returns>
+        private bool CheckRepositoryDBConnection()
+        {
+            bool connectionCheckPassed = false;
+            while (!connectionCheckPassed)
+            {
+                try
+                {
+                    using (var cn = new SqlConnection(connectionString))
+                    {
+                        cn.Open();
+                    }
+                    connectionCheckPassed = true;
+                }
+                catch (Exception ex)
+                {
+                    if (MessageBox.Show("Error connecting to repository database\n" + ex.Message, "Connection Error", MessageBoxButtons.RetryCancel, MessageBoxIcon.Error) == DialogResult.Cancel)
+                    {
+                        break;
+                    }
+                }
+            }
+            return connectionCheckPassed;
         }
 
         private async Task CheckVersion()
