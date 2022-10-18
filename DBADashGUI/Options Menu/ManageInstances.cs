@@ -29,10 +29,10 @@ namespace DBADashGUI
         private void ManageInstances_Load(object sender, EventArgs e)
         {
             Common.StyleGrid(ref dgv);
-            refreshData();
+            RefreshData();
         }
 
-        void refreshData()
+        private void RefreshData()
         {
             var dt = CommonData.GetInstances(Tags, null);
             dgv.AutoGenerateColumns = false;
@@ -40,7 +40,7 @@ namespace DBADashGUI
 
         }
 
-        private void dgv_RowsAdded(object sender, DataGridViewRowsAddedEventArgs e)
+        private void Dgv_RowsAdded(object sender, DataGridViewRowsAddedEventArgs e)
         {
 
             for (Int32 idx = e.RowIndex; idx < e.RowIndex + e.RowCount; idx += 1)
@@ -56,7 +56,7 @@ namespace DBADashGUI
             
         }
 
-        void MarkInstanceDeleted(int InstanceID, bool IsActive)
+        private static void MarkInstanceDeleted(int InstanceID, bool IsActive)
         {
             using (var cn = new SqlConnection(Common.ConnectionString))
             using (var cmd = new SqlCommand("dbo.Instance_Del", cn) { CommandType= CommandType.StoredProcedure })
@@ -68,7 +68,7 @@ namespace DBADashGUI
             }            
         }
 
-        void UpdateShowInSummary(int InstanceID, bool ShowInSummary)
+        private static void UpdateShowInSummary(int InstanceID, bool ShowInSummary)
         {
             using (var cn = new SqlConnection(Common.ConnectionString))
             using (var cmd = new SqlCommand("dbo.Instance_ShowInSummary_Upd", cn) { CommandType = CommandType.StoredProcedure })
@@ -80,7 +80,7 @@ namespace DBADashGUI
             }
         }
 
-        private void dgv_CellContentClick(object sender, DataGridViewCellEventArgs e)
+        private void Dgv_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
             if (e.RowIndex >= 0 && e.ColumnIndex == colDeleteRestore.Index)
             {
@@ -96,7 +96,7 @@ namespace DBADashGUI
                 catch (Exception ex)
                 {
                     MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    refreshData();
+                    RefreshData();
                 }
                 activeFlagChanged = true;
 
@@ -108,17 +108,17 @@ namespace DBADashGUI
         }
 
 
-        private void txtSearch_TextChanged(object sender, EventArgs e)
+        private void TxtSearch_TextChanged(object sender, EventArgs e)
         {
             timer1.Stop();
             timer1.Start();
         }
 
-        private void setFilter()
+        private void SetFilter()
         {
             try
             {
-                StringBuilder sbFilter = new StringBuilder();
+                StringBuilder sbFilter = new();
                 if (txtSearch.Text.Trim().Length > 0)
                 {
                     sbFilter.AppendFormat(" AND (ConnectionID LIKE '*{0}*' OR InstanceDisplayName LIKE '*{0}*')", txtSearch.Text.Replace("'", "''"));
@@ -150,21 +150,10 @@ namespace DBADashGUI
             }
         }
 
-        private void timer1_Tick(object sender, EventArgs e)
+        private void Timer1_Tick(object sender, EventArgs e)
         {
             timer1.Stop();
-            setFilter();
-        }
-
-    
-        private void showActiveToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            setFilter();
-        }
-
-        private void showDeletedToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            setFilter();
+            SetFilter();
         }
 
         private void Dgv_CellValueChanged(object sender, DataGridViewCellEventArgs e)
@@ -182,15 +171,15 @@ namespace DBADashGUI
                 catch (Exception ex)
                 {
                     MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    refreshData();
+                    RefreshData();
                 }
                 summaryVisibleChanged = true;
             }
         }
 
-        private void showAzureToolStripMenuItem_Click(object sender, EventArgs e)
+        private void Filter_Click(object sender, EventArgs e)
         {
-            setFilter();
+            SetFilter();
         }
     }
 }
