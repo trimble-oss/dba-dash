@@ -44,6 +44,7 @@
             this.toolStripDropDownButton1 = new System.Windows.Forms.ToolStripDropDownButton();
             this.showActiveToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.showDeletedToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.showAzureToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
             this.tsFilterError = new System.Windows.Forms.ToolStripStatusLabel();
             this.timer1 = new System.Windows.Forms.Timer(this.components);
@@ -166,12 +167,13 @@
             this.toolStripDropDownButton1.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
             this.toolStripDropDownButton1.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.showActiveToolStripMenuItem,
-            this.showDeletedToolStripMenuItem});
+            this.showDeletedToolStripMenuItem,
+            this.showAzureToolStripMenuItem});
             this.toolStripDropDownButton1.Image = global::DBADashGUI.Properties.Resources.FilterDropdown_16x;
             this.toolStripDropDownButton1.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripDropDownButton1.Name = "toolStripDropDownButton1";
             this.toolStripDropDownButton1.Size = new System.Drawing.Size(34, 24);
-            this.toolStripDropDownButton1.Text = "toolStripDropDownButton1";
+            this.toolStripDropDownButton1.Text = "Filter";
             // 
             // showActiveToolStripMenuItem
             // 
@@ -179,7 +181,7 @@
             this.showActiveToolStripMenuItem.CheckOnClick = true;
             this.showActiveToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
             this.showActiveToolStripMenuItem.Name = "showActiveToolStripMenuItem";
-            this.showActiveToolStripMenuItem.Size = new System.Drawing.Size(185, 26);
+            this.showActiveToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
             this.showActiveToolStripMenuItem.Text = "Show Active";
             this.showActiveToolStripMenuItem.Click += new System.EventHandler(this.showActiveToolStripMenuItem_Click);
             // 
@@ -189,9 +191,19 @@
             this.showDeletedToolStripMenuItem.CheckOnClick = true;
             this.showDeletedToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
             this.showDeletedToolStripMenuItem.Name = "showDeletedToolStripMenuItem";
-            this.showDeletedToolStripMenuItem.Size = new System.Drawing.Size(185, 26);
+            this.showDeletedToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
             this.showDeletedToolStripMenuItem.Text = "Show Deleted";
             this.showDeletedToolStripMenuItem.Click += new System.EventHandler(this.showDeletedToolStripMenuItem_Click);
+            // 
+            // showAzureToolStripMenuItem
+            // 
+            this.showAzureToolStripMenuItem.Checked = true;
+            this.showAzureToolStripMenuItem.CheckOnClick = true;
+            this.showAzureToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.showAzureToolStripMenuItem.Name = "showAzureToolStripMenuItem";
+            this.showAzureToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            this.showAzureToolStripMenuItem.Text = "Show Azure";
+            this.showAzureToolStripMenuItem.Click += new System.EventHandler(this.showAzureToolStripMenuItem_Click);
             // 
             // statusStrip1
             // 
@@ -258,5 +270,6 @@
         private System.Windows.Forms.DataGridViewCheckBoxColumn colIsAzure;
         private System.Windows.Forms.DataGridViewLinkColumn colDeleteRestore;
         private System.Windows.Forms.DataGridViewCheckBoxColumn colShowInSummary;
+        private System.Windows.Forms.ToolStripMenuItem showAzureToolStripMenuItem;
     }
 }
