@@ -82,7 +82,7 @@ namespace DBADashGUI
             set
             {
                 _engineEdition = value;
-                setIcon();
+                SetIcon();
             }
         }
 
@@ -128,7 +128,7 @@ namespace DBADashGUI
             _schemaName = schemaName;
             Type = type;
             Text = FullName();
-            setIcon();
+            SetIcon();
 
         }
         public SQLTreeItem(string objectName, TreeType type) : base()
@@ -136,7 +136,7 @@ namespace DBADashGUI
             _objectName = objectName;
             Text = objectName;
             this.Type = type;
-            setIcon();
+            SetIcon();
         }
 
         public SQLTreeItem(string objectName, TreeType type, Dictionary<string,object> attributes) : base()
@@ -145,80 +145,41 @@ namespace DBADashGUI
             Text = objectName;
             this.Type = type;
             _attributes = attributes;
-            setIcon();
+            SetIcon();
         }
 
         public SQLTreeItem(string objectName,string schemaName,string type)
         {
-            switch (type)
+            Type = type switch
             {
-                case "P":
-                    Type = TreeType.StoredProcedure;
-                    break;
-                case "V":
-                    Type = TreeType.View;
-                    break;
-                case "IF":
-                    Type = TreeType.InlineFunction;
-                    break;
-                case "U":
-                    Type = TreeType.Table;
-                    break;
-                case "TF":
-                    Type = TreeType.TableFunction;
-                    break;
-                case "FN":
-                    Type = TreeType.ScalarFunction;
-                    break;
-                case "AF":
-                    Type = TreeType.AggregateFunction;
-                    break;
-                case "DTR":
-                    Type = TreeType.DatabaseTrigger;
-                    break;
-                case "CLR":
-                    Type = TreeType.CLRAssembly;
-                    break;
-                case "FT":
-                    Type = TreeType.CLRTableFunction;
-                    break;
-                case "FS":
-                    Type = TreeType.CLRScalarFunction;
-                    break;
-                case "TYP":
-                    Type = TreeType.UserDefinedDataType;
-                    break;
-                case "TT":
-                    Type = TreeType.UserDefinedTableType;
-                    break;
-                case "UTY":
-                    Type = TreeType.UserDefinedType;
-                    break;
-                case "XSC":
-                    Type = TreeType.XMLSchemaCollection;
-                    break;
-                case "SO":
-                    Type = TreeType.SequenceObject;
-                    break;
-                case "PC":
-                    Type = TreeType.CLRProcedure;
-                    break;
-                case "TR":
-                    Type = TreeType.Trigger;
-                    break;
-                case "TA":
-                    Type = TreeType.CLRTrigger;
-                    break;
-                 default:
-                    throw new ArgumentOutOfRangeException();
-            }
+                "P" => TreeType.StoredProcedure,
+                "V" => TreeType.View,
+                "IF" => TreeType.InlineFunction,
+                "U" => TreeType.Table,
+                "TF" => TreeType.TableFunction,
+                "FN" => TreeType.ScalarFunction,
+                "AF" => TreeType.AggregateFunction,
+                "DTR" => TreeType.DatabaseTrigger,
+                "CLR" => TreeType.CLRAssembly,
+                "FT" => TreeType.CLRTableFunction,
+                "FS" => TreeType.CLRScalarFunction,
+                "TYP" => TreeType.UserDefinedDataType,
+                "TT" => TreeType.UserDefinedTableType,
+                "UTY" => TreeType.UserDefinedType,
+                "XSC" => TreeType.XMLSchemaCollection,
+                "SO" => TreeType.SequenceObject,
+                "PC" => TreeType.CLRProcedure,
+                "TR" => TreeType.Trigger,
+                "TA" => TreeType.CLRTrigger,
+                _ => throw new ArgumentOutOfRangeException(nameof(type)),
+            };
             _objectName = objectName;
             _schemaName = schemaName;
             Text = FullName();
-            setIcon();
+            SetIcon();
         }
         private bool isVisibleInSummary;
-        public bool IsVisibleInSummary { get=>isVisibleInSummary; set{ isVisibleInSummary = value; setIcon(); } }
+        public bool IsVisibleInSummary { get=>isVisibleInSummary; set{ isVisibleInSummary = value; SetIcon(); } }
 
         private bool hasInstanceName=false;
         private string instanceName=null;
@@ -334,7 +295,7 @@ namespace DBADashGUI
         }
 
 
-        private void setIcon()
+        private void SetIcon()
         {
             switch (this.Type)
             {
@@ -446,7 +407,7 @@ namespace DBADashGUI
             SelectedImageIndex = ImageIndex;
         }
 
-    private SQLTreeItem newFolder(string name,string tag,bool addDummyNode)
+    private static SQLTreeItem NewFolder(string name,string tag,bool addDummyNode)
         {
             var n = new SQLTreeItem(name, TreeType.Folder)
             {
@@ -462,30 +423,30 @@ namespace DBADashGUI
 
     public void AddDummyNode()
         {
-            SQLTreeItem dummyNode = new SQLTreeItem("", "", TreeType.DummyNode);
+            SQLTreeItem dummyNode = new("", "", TreeType.DummyNode);
             this.Nodes.Add(dummyNode);
-            addRefreshContextMenu(this);
+            AddRefreshContextMenu(this);
         }
 
         public void AddDatabaseFolders()
         {
          
-            var nTables = newFolder("Tables","U",true);
-            var nViews = newFolder("Views","V",true);
-            var nProgrammability = newFolder("Programmability", null, false);
-            var nStoredProcs = newFolder("Stored Procedures","P,PC",true);         
-            var nTableFunctions = newFolder("Table Functions", "IF,TF,FT", true);
-            var nScalarFunctions = newFolder("Scalar Functions","FN,FS",true);
-            var nAggFunctions = newFolder("Aggregate Functions", "AF",true);
-            var nDBTriggers = newFolder("Database Triggers", "DTR",true);
-            var nAssemblies = newFolder("Assemblies", "CLR", true);
-            var nTypes = newFolder("Types", "", false);
-            var nTableTypes = newFolder("User-Defined Table Types", "TT", true);
-            var nDataTypes = newFolder("User-Defined Data Types", "TYP", true);
-            var nUserDefinedTypes = newFolder("User-Defined Types", "UTY", true);
-            var nXML = newFolder("XML Schema Collections", "XSC", true);
-            var nSeq = newFolder("Sequences", "SO", true);
-            var nTriggers = newFolder("Triggers", "TA,TR", true);
+            var nTables = NewFolder("Tables","U",true);
+            var nViews = NewFolder("Views","V",true);
+            var nProgrammability = NewFolder("Programmability", null, false);
+            var nStoredProcs = NewFolder("Stored Procedures","P,PC",true);         
+            var nTableFunctions = NewFolder("Table Functions", "IF,TF,FT", true);
+            var nScalarFunctions = NewFolder("Scalar Functions","FN,FS",true);
+            var nAggFunctions = NewFolder("Aggregate Functions", "AF",true);
+            var nDBTriggers = NewFolder("Database Triggers", "DTR",true);
+            var nAssemblies = NewFolder("Assemblies", "CLR", true);
+            var nTypes = NewFolder("Types", "", false);
+            var nTableTypes = NewFolder("User-Defined Table Types", "TT", true);
+            var nDataTypes = NewFolder("User-Defined Data Types", "TYP", true);
+            var nUserDefinedTypes = NewFolder("User-Defined Types", "UTY", true);
+            var nXML = NewFolder("XML Schema Collections", "XSC", true);
+            var nSeq = NewFolder("Sequences", "SO", true);
+            var nTriggers = NewFolder("Triggers", "TA,TR", true);
 
             nTypes.Nodes.Add(nTableTypes);
             nTypes.Nodes.Add(nDataTypes);
@@ -498,21 +459,21 @@ namespace DBADashGUI
             nProgrammability.Nodes.Add(nDBTriggers);
             nProgrammability.Nodes.Add(nTriggers);
             nProgrammability.Nodes.Add(nAssemblies);
-            addContextMenu(nStoredProcs);
-            addContextMenu(nAggFunctions);
-            addContextMenu(nTableFunctions);
-            addContextMenu(nScalarFunctions);
-            addContextMenu(nDBTriggers);
-            addContextMenu(nTriggers);
-            addContextMenu(nAssemblies);
-            addContextMenu(nTableTypes);
-            addContextMenu(nDataTypes);
-            addContextMenu(nUserDefinedTypes);
-            addContextMenu(nXML);
-            addContextMenu(nViews);
-            addContextMenu(nTables);
-            addContextMenu(nTypes);
-            addContextMenu(nSeq);
+            AddContextMenu(nStoredProcs);
+            AddContextMenu(nAggFunctions);
+            AddContextMenu(nTableFunctions);
+            AddContextMenu(nScalarFunctions);
+            AddContextMenu(nDBTriggers);
+            AddContextMenu(nTriggers);
+            AddContextMenu(nAssemblies);
+            AddContextMenu(nTableTypes);
+            AddContextMenu(nDataTypes);
+            AddContextMenu(nUserDefinedTypes);
+            AddContextMenu(nXML);
+            AddContextMenu(nViews);
+            AddContextMenu(nTables);
+            AddContextMenu(nTypes);
+            AddContextMenu(nSeq);
            
 
             this.Nodes.Add(nTables);
@@ -524,7 +485,7 @@ namespace DBADashGUI
  
         }
 
-        private void addRefreshContextMenu(SQLTreeItem n)
+        private void AddRefreshContextMenu(SQLTreeItem n)
         {
             var ctxMnu = new ContextMenuStrip();
 
@@ -548,7 +509,7 @@ namespace DBADashGUI
             }
         }
 
-        private void addContextMenu(SQLTreeItem n)
+        private void AddContextMenu(SQLTreeItem n)
         {
             var ctxMnu = new ContextMenuStrip();
             var mnuFilter = ctxMnu.Items.Add("Filter");
@@ -568,7 +529,7 @@ namespace DBADashGUI
             }
         }
 
-        readonly List<SQLTreeItem> unfilteredNodes = new List<SQLTreeItem>();
+        readonly List<SQLTreeItem> unfilteredNodes = new();
 
         public void Filter(string filter)
         {
