@@ -121,19 +121,23 @@ namespace DBADashGUI
                 StringBuilder sbFilter = new StringBuilder();
                 if (txtSearch.Text.Trim().Length > 0)
                 {
-                    sbFilter.AppendFormat("AND (ConnectionID LIKE '*{0}*' OR InstanceDisplayName LIKE '*{0}*')", txtSearch.Text.Replace("'", "''"));
+                    sbFilter.AppendFormat(" AND (ConnectionID LIKE '*{0}*' OR InstanceDisplayName LIKE '*{0}*')", txtSearch.Text.Replace("'", "''"));
                 }
                 if (showActiveToolStripMenuItem.Checked != showDeletedToolStripMenuItem.Checked)
                 {
-                    sbFilter.AppendFormat("AND IsActive = {0}", showActiveToolStripMenuItem.Checked ? 1 : 0);
+                    sbFilter.AppendFormat(" AND IsActive = {0}", showActiveToolStripMenuItem.Checked ? 1 : 0);
                 }
                 else if (!showActiveToolStripMenuItem.Checked && !showDeletedToolStripMenuItem.Checked)
                 {
-                    sbFilter.AppendFormat("AND 1=0"); // Not showing active or deleted items.  Return no rows
+                    sbFilter.AppendFormat(" AND 1=0"); // Not showing active or deleted items.  Return no rows
+                }
+                if (!showAzureToolStripMenuItem.Checked)
+                {
+                    sbFilter.AppendFormat(" AND IsAzure=0");
                 }
 
                 if (sbFilter.Length > 0) { 
-                    sbFilter.Remove(0, 4); // Remove AND 
+                    sbFilter.Remove(0, 5); // Remove AND 
                 }
 
                 ((DataView)dgv.DataSource).RowFilter = sbFilter.ToString();
@@ -182,6 +186,11 @@ namespace DBADashGUI
                 }
                 summaryVisibleChanged = true;
             }
+        }
+
+        private void showAzureToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            setFilter();
         }
     }
 }
