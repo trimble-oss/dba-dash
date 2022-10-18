@@ -73,9 +73,9 @@
             this.dgv.RowTemplate.Height = 24;
             this.dgv.Size = new System.Drawing.Size(621, 811);
             this.dgv.TabIndex = 0;
-            this.dgv.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgv_CellContentClick);
+            this.dgv.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.Dgv_CellContentClick);
             this.dgv.CellValueChanged += new System.Windows.Forms.DataGridViewCellEventHandler(this.Dgv_CellValueChanged);
-            this.dgv.RowsAdded += new System.Windows.Forms.DataGridViewRowsAddedEventHandler(this.dgv_RowsAdded);
+            this.dgv.RowsAdded += new System.Windows.Forms.DataGridViewRowsAddedEventHandler(this.Dgv_RowsAdded);
             // 
             // colInstance
             // 
@@ -153,7 +153,7 @@
             this.txtSearch.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
             this.txtSearch.Name = "txtSearch";
             this.txtSearch.Size = new System.Drawing.Size(150, 27);
-            this.txtSearch.TextChanged += new System.EventHandler(this.txtSearch_TextChanged);
+            this.txtSearch.TextChanged += new System.EventHandler(this.TxtSearch_TextChanged);
             // 
             // toolStripLabel1
             // 
@@ -183,7 +183,7 @@
             this.showActiveToolStripMenuItem.Name = "showActiveToolStripMenuItem";
             this.showActiveToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
             this.showActiveToolStripMenuItem.Text = "Show Active";
-            this.showActiveToolStripMenuItem.Click += new System.EventHandler(this.showActiveToolStripMenuItem_Click);
+            this.showActiveToolStripMenuItem.Click += new System.EventHandler(this.Filter_Click);
             // 
             // showDeletedToolStripMenuItem
             // 
@@ -193,7 +193,7 @@
             this.showDeletedToolStripMenuItem.Name = "showDeletedToolStripMenuItem";
             this.showDeletedToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
             this.showDeletedToolStripMenuItem.Text = "Show Deleted";
-            this.showDeletedToolStripMenuItem.Click += new System.EventHandler(this.showDeletedToolStripMenuItem_Click);
+            this.showDeletedToolStripMenuItem.Click += new System.EventHandler(this.Filter_Click);
             // 
             // showAzureToolStripMenuItem
             // 
@@ -203,7 +203,7 @@
             this.showAzureToolStripMenuItem.Name = "showAzureToolStripMenuItem";
             this.showAzureToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
             this.showAzureToolStripMenuItem.Text = "Show Azure";
-            this.showAzureToolStripMenuItem.Click += new System.EventHandler(this.showAzureToolStripMenuItem_Click);
+            this.showAzureToolStripMenuItem.Click += new System.EventHandler(this.Filter_Click);
             // 
             // statusStrip1
             // 
@@ -226,7 +226,7 @@
             // timer1
             // 
             this.timer1.Interval = 1000;
-            this.timer1.Tick += new System.EventHandler(this.timer1_Tick);
+            this.timer1.Tick += new System.EventHandler(this.Timer1_Tick);
             // 
             // ManageInstances
             // 
