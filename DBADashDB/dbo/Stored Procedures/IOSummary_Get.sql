@@ -48,7 +48,7 @@ DECLARE @TableName SYSNAME
 SELECT @TableName = CASE WHEN @GroupBy ='Filegroup' THEN 'dbo.FGIOStats' ELSE 'dbo.DBIOStats' END + CASE WHEN @Use60MIN=1 THEN '_60MIN' ELSE '' END
 
 DECLARE @GroupBySQL NVARCHAR(MAX) 
-SELECT @GroupBySQL= CASE @GroupBy WHEN 'Database' THEN 'D.name' WHEN 'Filegroup' THEN 'D.name + '' | '' + IOS.filegroup_name' WHEN 'File' THEN 'D.name + '' | '' + F.name + '' | ('' + IOS.Drive + '':\)''' WHEN 'Drive' THEN 'REPLACE(IOS.Drive,''*'',''{All}'')' END
+SELECT @GroupBySQL= CASE @GroupBy WHEN 'Database' THEN 'D.name' WHEN 'Filegroup' THEN 'D.name + '' | '' + IOS.filegroup_name' WHEN 'File' THEN 'D.name + '' | '' + F.name + '' | ('' + IOS.Drive + '':\)''' WHEN 'Drive' THEN 'REPLACE(IOS.Drive + '':\'',''*'',''{All}'') + ISNULL('' ('' + DRV.Label + '')'','''')' END
 IF @GroupBySQL IS NULL
 BEGIN
 	RAISERROR('Invalid @GroupBy.  Valid values: Database,Filegroup,File,Drive',11,1)
@@ -91,6 +91,7 @@ FROM ' + @TableName + ' IOS
 ' + CASE WHEN @GroupBy IN('Filegroup','File','Database') AND @EditionID=1674378470 THEN 'JOIN dbo.Databases D ON D.InstanceID = IOS.InstanceID AND D.IsActive=1 ' ELSE '' END + '
 ' + CASE WHEN @GroupBy IN('Filegroup','File','Database') AND @EditionID<>1674378470 THEN 'JOIN dbo.Databases D ON D.DatabaseID = IOS.DatabaseID AND D.IsActive=1' ELSE '' END + '
 ' + CASE WHEN @GroupBy IN('File') THEN 'JOIN dbo.DBFiles F ON D.DatabaseID = F.DatabaseID AND IOS.FileID = F.FileID' ELSE '' END + '
+' + CASE WHEN @GroupBy ='Drive' THEN 'LEFT JOIN dbo.Drives DRV ON IOS.InstanceID = DRV.InstanceID AND DRV.Name = IOS.Drive + '':\'' AND DRV.IsActive=1' ELSE '' END + '
 WHERE IOS.InstanceID = @InstanceID
 AND IOS.SnapshotDate >= @FromDate
 AND IOS.SnapshotDate < @ToDate
@@ -117,5 +118,3 @@ EXEC sp_executesql @SQL,
 					@ToDate,
 					@DatabaseID,
 					@UTCOffset
-
-GO
