@@ -16,7 +16,8 @@ SELECT  I.InstanceID,
 	I.IsActive,
 	I.EngineEdition,
 	I.InstanceDisplayName,
-	I.InstanceGroupName
+	I.InstanceGroupName,
+	I.ShowInSummary
 FROM dbo.InstancesMatchingTags(@TagIDs) I
 LEFT JOIN dbo.Databases D ON D.InstanceID = I.InstanceID AND I.EngineEdition = 5 AND D.IsActive=1
 WHERE (D.InstanceID IS NOT NULL OR I.EngineEdition <> 5 OR I.EngineEdition IS NULL)

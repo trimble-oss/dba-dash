@@ -49,6 +49,7 @@
             this.memoryDumpsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.acknowledgeDumpsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.configureThresholdsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.showHiddenToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.lblRefreshTime = new System.Windows.Forms.ToolStripLabel();
             this.dataGridViewTextBoxColumn1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dataGridViewTextBoxColumn2 = new System.Windows.Forms.DataGridViewTextBoxColumn();
@@ -70,6 +71,7 @@
             this.timer1 = new System.Windows.Forms.Timer(this.components);
             this.refresh1 = new DBADashGUI.Refresh();
             this.Instance = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colShowInSummary = new System.Windows.Forms.DataGridViewCheckBoxColumn();
             this.MemoryDumpStatus = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.CorruptionStatus = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.LastGoodCheckDBStatus = new System.Windows.Forms.DataGridViewLinkColumn();
@@ -113,6 +115,7 @@
             this.dgvSummary.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.dgvSummary.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
             this.Instance,
+            this.colShowInSummary,
             this.MemoryDumpStatus,
             this.CorruptionStatus,
             this.LastGoodCheckDBStatus,
@@ -208,7 +211,8 @@
             this.tsOptions.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
             this.tsOptions.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.focusedViewToolStripMenuItem,
-            this.memoryDumpsToolStripMenuItem});
+            this.memoryDumpsToolStripMenuItem,
+            this.showHiddenToolStripMenuItem});
             this.tsOptions.Image = global::DBADashGUI.Properties.Resources.SettingsOutline_16x;
             this.tsOptions.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsOptions.Name = "tsOptions";
@@ -246,6 +250,14 @@
             this.configureThresholdsToolStripMenuItem.Size = new System.Drawing.Size(233, 26);
             this.configureThresholdsToolStripMenuItem.Text = "Configure Thresholds";
             this.configureThresholdsToolStripMenuItem.Click += new System.EventHandler(this.ConfigureThresholdsToolStripMenuItem_Click);
+            // 
+            // showHiddenToolStripMenuItem
+            // 
+            this.showHiddenToolStripMenuItem.CheckOnClick = true;
+            this.showHiddenToolStripMenuItem.Name = "showHiddenToolStripMenuItem";
+            this.showHiddenToolStripMenuItem.Size = new System.Drawing.Size(198, 26);
+            this.showHiddenToolStripMenuItem.Text = "Show Hidden";
+            this.showHiddenToolStripMenuItem.Click += new System.EventHandler(this.TsRefresh_Click);
             // 
             // lblRefreshTime
             // 
@@ -425,6 +437,19 @@
             this.Instance.Name = "Instance";
             this.Instance.ReadOnly = true;
             this.Instance.Width = 90;
+            // 
+            // colShowInSummary
+            // 
+            this.colShowInSummary.DataPropertyName = "ShowInSummary";
+            this.colShowInSummary.HeaderText = "Visible";
+            this.colShowInSummary.MinimumWidth = 6;
+            this.colShowInSummary.Name = "colShowInSummary";
+            this.colShowInSummary.ReadOnly = true;
+            this.colShowInSummary.Resizable = System.Windows.Forms.DataGridViewTriState.True;
+            this.colShowInSummary.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
+            this.colShowInSummary.ToolTipText = "Checked if instance is visible in summary by default";
+            this.colShowInSummary.Visible = false;
+            this.colShowInSummary.Width = 125;
             // 
             // MemoryDumpStatus
             // 
@@ -738,7 +763,9 @@
         private System.Windows.Forms.ToolStripMenuItem acknowledgeDumpsToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem configureThresholdsToolStripMenuItem;
         private Refresh refresh1;
+        private System.Windows.Forms.ToolStripMenuItem showHiddenToolStripMenuItem;
         private System.Windows.Forms.DataGridViewTextBoxColumn Instance;
+        private System.Windows.Forms.DataGridViewCheckBoxColumn colShowInSummary;
         private System.Windows.Forms.DataGridViewTextBoxColumn MemoryDumpStatus;
         private System.Windows.Forms.DataGridViewTextBoxColumn CorruptionStatus;
         private System.Windows.Forms.DataGridViewLinkColumn LastGoodCheckDBStatus;
