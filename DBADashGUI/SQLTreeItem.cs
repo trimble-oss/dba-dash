@@ -217,6 +217,8 @@ namespace DBADashGUI
             Text = FullName();
             setIcon();
         }
+        private bool isVisibleInSummary;
+        public bool IsVisibleInSummary { get=>isVisibleInSummary; set{ isVisibleInSummary = value; setIcon(); } }
 
         private bool hasInstanceName=false;
         private string instanceName=null;
@@ -344,9 +346,13 @@ namespace DBADashGUI
                     {
                         ImageIndex = 18;
                     }
-                    else
+                    else if(IsVisibleInSummary)
                     {
                         ImageIndex = 1;
+                    }
+                    else
+                    {
+                        ImageIndex = 19;
                     }
                     break;
                 case TreeType.Database:

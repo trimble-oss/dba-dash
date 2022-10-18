@@ -58,7 +58,7 @@ namespace DBADashGUI
                     cn.Open();
 
                     cmd.Parameters.AddWithValue("InstanceIDs", string.Join(",", InstanceIDs));
-
+                    cmd.Parameters.AddWithValue("IncludeHidden", showHiddenToolStripMenuItem.Checked);
                     DataTable dt = new();
                     da.Fill(dt);
                     return dt;
@@ -94,7 +94,6 @@ namespace DBADashGUI
             {
                 DataTable dt = task.Result;
                 dgvSummary.AutoGenerateColumns = false;
-
                 var cols = (statusColumns.Keys).ToList<string>();
                 dt.Columns.Add("IsFocusedRow", typeof(bool));
                 foreach (DataRow row in dt.Rows)
@@ -122,6 +121,7 @@ namespace DBADashGUI
                 {
                     dgvSummary.Invoke((Action)(() => dgvSummary.Columns[col.Key].Visible = col.Value));
                 }
+                dgvSummary.Invoke((Action)(() => colShowInSummary.Visible = showHiddenToolStripMenuItem.Checked ));
                 string rowFilter = "";
                 if (focusedView)
                 {

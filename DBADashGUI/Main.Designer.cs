@@ -289,6 +289,7 @@
             this.TreeViewImageList.Images.SetKeyName(16, "SQLFile_16x.png");
             this.TreeViewImageList.Images.SetKeyName(17, "ProcedureMissing_16x.png");
             this.TreeViewImageList.Images.SetKeyName(18, "CloudServer_16x.png");
+            this.TreeViewImageList.Images.SetKeyName(19, "DataServer_16x_BWLight.png");
             // 
             // menuStrip1
             // 
@@ -1925,10 +1926,10 @@
             // tabOSLoadedModules
             // 
             this.tabOSLoadedModules.Controls.Add(this.osLoadedModules1);
-            this.tabOSLoadedModules.Location = new System.Drawing.Point(4, 25);
+            this.tabOSLoadedModules.Location = new System.Drawing.Point(4, 29);
             this.tabOSLoadedModules.Name = "tabOSLoadedModules";
             this.tabOSLoadedModules.Padding = new System.Windows.Forms.Padding(3);
-            this.tabOSLoadedModules.Size = new System.Drawing.Size(1631, 1246);
+            this.tabOSLoadedModules.Size = new System.Drawing.Size(192, 67);
             this.tabOSLoadedModules.TabIndex = 44;
             this.tabOSLoadedModules.Text = "OS Loaded Modules";
             this.tabOSLoadedModules.UseVisualStyleBackColor = true;
@@ -1940,7 +1941,7 @@
             this.osLoadedModules1.Location = new System.Drawing.Point(3, 3);
             this.osLoadedModules1.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.osLoadedModules1.Name = "osLoadedModules1";
-            this.osLoadedModules1.Size = new System.Drawing.Size(1625, 1240);
+            this.osLoadedModules1.Size = new System.Drawing.Size(186, 61);
             this.osLoadedModules1.TabIndex = 0;
             // 
             // dataGridViewTextBoxColumn1

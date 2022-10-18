@@ -21,11 +21,10 @@ namespace DBADashGUI
 
         public string Tags { get; set; } = null;
         private bool activeFlagChanged = false;
-        public bool InstanceActiveFlagChanged{
-            get{
-                return activeFlagChanged;
-            }
-        }
+        private bool summaryVisibleChanged = false;
+        public bool InstanceActiveFlagChanged{ get=> activeFlagChanged;}
+       
+        public bool InstanceSummaryVisibleChanged { get=>summaryVisibleChanged; }
 
         private void ManageInstances_Load(object sender, EventArgs e)
         {
@@ -69,12 +68,24 @@ namespace DBADashGUI
             }            
         }
 
+        void UpdateShowInSummary(int InstanceID, bool ShowInSummary)
+        {
+            using (var cn = new SqlConnection(Common.ConnectionString))
+            using (var cmd = new SqlCommand("dbo.Instance_ShowInSummary_Upd", cn) { CommandType = CommandType.StoredProcedure })
+            {
+                cn.Open();
+                cmd.Parameters.AddWithValue("InstanceID", InstanceID);
+                cmd.Parameters.AddWithValue("ShowInSummary",ShowInSummary);
+                cmd.ExecuteNonQuery();
+            }
+        }
+
         private void dgv_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
-            if(e.RowIndex>=0 && e.ColumnIndex== colDeleteRestore.Index)
+            if (e.RowIndex >= 0 && e.ColumnIndex == colDeleteRestore.Index)
             {
                 var row = (DataRowView)dgv.Rows[e.RowIndex].DataBoundItem;
-                var InstanceID =(Int32)row["InstanceID"];
+                var InstanceID = (Int32)row["InstanceID"];
                 var isActive = (bool)row["IsActive"];
                 isActive = !isActive;
                 try
@@ -82,15 +93,20 @@ namespace DBADashGUI
                     MarkInstanceDeleted(InstanceID, isActive);
                     dgv.Rows[e.RowIndex].Cells[colDeleteRestore.Index].Value = isActive ? "Mark Deleted" : "Restore";
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     refreshData();
                 }
                 activeFlagChanged = true;
-                
+
+            }
+            else if (e.RowIndex >= 0 && e.ColumnIndex == colShowInSummary.Index)
+            {
+                dgv.CommitEdit(DataGridViewDataErrorContexts.Commit); // Trigger cell value to change so we can process the update
             }
         }
+
 
         private void txtSearch_TextChanged(object sender, EventArgs e)
         {
@@ -145,6 +161,27 @@ namespace DBADashGUI
         private void showDeletedToolStripMenuItem_Click(object sender, EventArgs e)
         {
             setFilter();
+        }
+
+        private void Dgv_CellValueChanged(object sender, DataGridViewCellEventArgs e)
+        {
+            if (e.RowIndex >= 0 && e.ColumnIndex == colShowInSummary.Index)
+            {
+                try
+                {
+                    var row = (DataRowView)dgv.Rows[e.RowIndex].DataBoundItem;
+                    var InstanceID = (Int32)row["InstanceID"];
+                    var showInSummary = (bool)row["ShowInSummary"];
+
+                    UpdateShowInSummary(InstanceID, showInSummary);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    refreshData();
+                }
+                summaryVisibleChanged = true;
+            }
         }
     }
 }

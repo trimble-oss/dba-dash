@@ -677,6 +677,7 @@ namespace DBADashGUI
                 string instance = (string)row["Instance"];
                 string displayName = (string)row["InstanceDisplayName"];
                 Int32 instanceID = (Int32)row["InstanceID"];
+                bool showInSummary = (bool)row["ShowInSummary"];
                 DatabaseEngineEdition edition;
                 try
                 {
@@ -717,7 +718,8 @@ namespace DBADashGUI
                     var n = new SQLTreeItem(displayName, SQLTreeItem.TreeType.Instance)
                     {
                         InstanceID = instanceID,
-                        EngineEdition = edition
+                        EngineEdition = edition,
+                        IsVisibleInSummary = showInSummary
                     };
                     n.AddDummyNode();
                     root.Nodes.Add(n);
@@ -1468,9 +1470,13 @@ namespace DBADashGUI
                 Tags = String.Join(",", SelectedTags())
             };
             frm.ShowDialog();
-            if (frm.InstanceActiveFlagChanged)
+            if (frm.InstanceActiveFlagChanged || frm.InstanceSummaryVisibleChanged)
             {
                 AddInstanes(); // refresh the tree if instances deleted/restored
+                if(tabs.SelectedTab == tabSummary)
+                {
+                    summary1.RefreshData();
+                }
             }
         }
 

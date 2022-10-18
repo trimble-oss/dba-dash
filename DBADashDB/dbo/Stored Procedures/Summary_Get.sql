@@ -1,5 +1,6 @@
 ﻿CREATE PROC dbo.Summary_Get(
-	@InstanceIDs VARCHAR(MAX)=NULL
+	@InstanceIDs VARCHAR(MAX)=NULL,
+	@IncludeHidden BIT=0
 )
 AS
 CREATE TABLE #Instances(
@@ -259,7 +260,8 @@ SELECT I.InstanceID,
 	CASE I.DBMailStatus WHEN 'STARTED' THEN 4 WHEN 'STOPPED' THEN 1 ELSE 3 END AS DBMailStatus,
 	I.DBMailStatus as DBMailStatusDescription,
 	ISNULL(Ident.IdentityStatus,3) AS IdentityStatus,
-	Ident.MaxIdentityPctUsed
+	Ident.MaxIdentityPctUsed,
+	I.ShowInSummary
 FROM dbo.Instances I 
 LEFT JOIN LS ON I.InstanceID = LS.InstanceID
 LEFT JOIN B ON I.InstanceID = B.InstanceID
@@ -287,6 +289,7 @@ LEFT JOIN Ident ON Ident.InstanceID = I.InstanceID
 WHERE EXISTS(SELECT 1 FROM #Instances t WHERE I.InstanceID = t.InstanceID)
 AND I.IsActive=1
 AND I.EngineEdition<> 5 -- not azure
+AND (I.ShowInSummary=1 OR @IncludeHidden=1)
 UNION ALL
 SELECT NULL AS InstanceID,
 	I.Instance,
@@ -342,7 +345,8 @@ SELECT NULL AS InstanceID,
 	3 AS DBMailStatus,
 	NULL AS DBMailStatusDescription,
 	ISNULL(MIN(NULLIF(Ident.IdentityStatus,3)),3) IdentityStatus,
-	MAX(Ident.MaxIdentityPctUsed) AS MaxIdentityPctUsed
+	MAX(Ident.MaxIdentityPctUsed) AS MaxIdentityPctUsed,
+	CAST(MAX(CAST(I.ShowInSummary AS TINYINT)) AS BIT) AS ShowInSummary
 FROM dbo.Instances I
 LEFT JOIN errSummary  ON I.InstanceID = errSummary.InstanceID
 LEFT JOIN F ON I.InstanceID = F.InstanceID
@@ -355,3 +359,4 @@ WHERE I.EngineEdition=5 -- azure
 AND EXISTS(SELECT 1 FROM #Instances t WHERE I.InstanceID = t.InstanceID)
 AND I.IsActive=1
 GROUP BY I.Instance,I.InstanceGroupName
+HAVING (MAX(CAST(I.ShowInSummary AS TINYINT)) = 1 OR @IncludeHidden=1)
