@@ -169,7 +169,10 @@ namespace DBADashService
         {
 
             var jobLastCollected = dataMap.GetDateTime("JobCollectDate");
-            var collector = new DBCollector(cfg, config.ServiceName);
+            var collector = new DBCollector(cfg, config.ServiceName)
+            {
+                LogInternalPerformanceCounters = SchedulerServiceConfig.Config.LogInternalPerformanceCounters
+            };
 
             // Setting the JobLastModified means we will only collect job data if jobs have been updated since the last collection.
             // This won't detect all changes - like changes to schedules.  Skip setting JobLastModified if we haven't collected in 1 day to ensure we collect at least once per day
