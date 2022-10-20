@@ -911,7 +911,7 @@ CROSS APPLY sys.dm_exec_sql_text(H.sql_handle) txt");
                 }
                 else
                 {
-                    Log.Information("Skipping jobs collection for {0}.  Not Modified.", instanceName);
+                    Log.Information("Skipping jobs collection for {Instance}.  Not Modified since {JobLastModified}.", instanceName, JobLastModified);
                 }
             }
             else if (collectionType == CollectionType.ResourceGovernorConfiguration)

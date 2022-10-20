@@ -19,6 +19,8 @@ namespace DBADashService
     public class DBADashJob : IJob
     {
         static readonly CollectionConfig config = SchedulerServiceConfig.Config;
+        /* Ensure the Jobs collection runs once every ~24hrs.  Allowing 10mins as Jobs runs every 1hr by default */
+        private static int MAX_TIME_SINCE_LAST_JOB_COLLECTION = 1430; 
 
         static string GetID(DataSet ds)
         {
@@ -169,6 +171,10 @@ namespace DBADashService
         {
 
             var jobLastCollected = dataMap.GetDateTime("JobCollectDate");
+            var jobLastModified = dataMap.GetDateTime("JobLastModified");
+            var minsSinceLastCollection = DateTime.Now.Subtract(jobLastCollected).TotalMinutes;
+            var forcedCollectionDate = jobLastCollected.AddMinutes(MAX_TIME_SINCE_LAST_JOB_COLLECTION);
+
             var collector = new DBCollector(cfg, config.ServiceName)
             {
                 LogInternalPerformanceCounters = SchedulerServiceConfig.Config.LogInternalPerformanceCounters
@@ -176,30 +182,41 @@ namespace DBADashService
 
             // Setting the JobLastModified means we will only collect job data if jobs have been updated since the last collection.
             // This won't detect all changes - like changes to schedules.  Skip setting JobLastModified if we haven't collected in 1 day to ensure we collect at least once per day
-            if (DateTime.UtcNow.Subtract(jobLastCollected).TotalMinutes < 1430) // Allow 10min
+           
+            if(jobLastCollected == DateTime.MinValue)
             {
-                collector.JobLastModified = dataMap.GetDateTime("JobLastModified");
+                Log.Debug("Skipping setting JobLastModified (First collection on startup) on {Connection}",cfg.SourceConnection.ConnectionForPrint);
+            }
+            else if (DateTime.Now < forcedCollectionDate) 
+            {
+                collector.JobLastModified = jobLastModified;
+                Log.Debug("Setting JobLastModified to {JobLastModified}. Forced collection will run after {ForcedCollectionDate}.  {MinsSinceLastCollection}mins since last collection ({LastCollected}) on {Connection}", jobLastModified,forcedCollectionDate, minsSinceLastCollection.ToString("N0"), jobLastCollected, cfg.SourceConnection.ConnectionForPrint);
+            }
+            else
+            {
+                Log.Debug("Skipping setting JobLastModified to {JobLastModified} - forcing job collection to run. {MinsSinceLastCollection}mins since last collection ({LastCollected}) on {Connection}.",jobLastModified, minsSinceLastCollection.ToString("N0"),jobLastCollected,cfg.SourceConnection.ConnectionForPrint);
             }
 
             collector.Collect(CollectionType.Jobs);
-
-
-            // We have collected jobs data - Store JobLastModified and time we have collected the jobs.
-            // Used on next run to determine if we need to refresh this data.
-            dataMap.Put("JobLastModified", collector.JobLastModified);
-            dataMap.Put("JobCollectDate", DateTime.UtcNow);
-            
-            string fileName = cfg.GenerateFileName(cfg.SourceConnection.ConnectionForFileName);
-            try
+            bool containsJobs = collector.Data.Tables.Contains("Jobs");
+            if (containsJobs) // Only set JobLastModified/JobCollectDate and write to destination if Jobs collection ran
             {
-                DestinationHandling.WriteAllDestinations(collector.Data, cfg, fileName).Wait();
-            }
-            catch (Exception ex)
-            {
-                Log.Error(ex, "Error writing {filename} to destination.  File will be copied to {folder}", fileName, SchedulerServiceConfig.FailedMessageFolder);
-                DestinationHandling.WriteFolder(collector.Data, SchedulerServiceConfig.FailedMessageFolder, fileName);
-            }
+                // We have collected jobs data - Store JobLastModified and time we have collected the jobs.
+                // Used on next run to determine if we need to refresh this data.
+                dataMap.Put("JobLastModified", collector.JobLastModified);
+                dataMap.Put("JobCollectDate", DateTime.Now);
 
+                string fileName = cfg.GenerateFileName(cfg.SourceConnection.ConnectionForFileName);
+                try
+                {
+                    DestinationHandling.WriteAllDestinations(collector.Data, cfg, fileName).Wait();
+                }
+                catch (Exception ex)
+                {
+                    Log.Error(ex, "Error writing {filename} to destination.  File will be copied to {folder}", fileName, SchedulerServiceConfig.FailedMessageFolder);
+                    DestinationHandling.WriteFolder(collector.Data, SchedulerServiceConfig.FailedMessageFolder, fileName);
+                }
+            }
         }
 
         /// <summary>
