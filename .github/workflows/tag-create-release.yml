@@ -21,7 +21,6 @@ jobs:
         uses: actions/setup-dotnet@v3
         with:
           dotnet-version: 6.0.101
-          include-prerelease: true
 
       - name: Build
         run: dotnet build -c CLI
@@ -42,7 +41,7 @@ jobs:
           $path = [System.IO.Path]::Combine((Get-Location),"DBADashBuild\CLI\DBADash.dll")
           $version = [System.Reflection.Assembly]::LoadFrom($path).GetName().Version
           $version.ToString(3)
-          Write-Output "::set-output name=BUILD_NUMBER::$($version.ToString(3))"
+          Write-Output "BUILD_NUMBER=$($version.ToString(3))" >> $env:GITHUB_OUTPUT
 
       - name: Zip
         shell: powershell
