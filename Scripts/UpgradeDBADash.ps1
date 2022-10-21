@@ -39,6 +39,29 @@ Param(
     [Parameter(Mandatory=$false)]
     [string]$Repo="trimble-oss/dba-dash"
 )
+####################
+# Check .NET Version
+# https://github.com/trimble-oss/dba-dash/issues/42
+####################
+function CheckDotNetVersion(){
+
+    $MinVersion = [System.Version]::Parse("6.0.2")
+
+    $RuntimeVersions = dotnet --list-runtimes  | Where-Object { $_ -like "Microsoft.WindowsDesktop.App*" } 
+
+    $VersionCheck = @($RuntimeVersions | Where-Object { [System.Version]::Parse(($_).Split(" ")[1]) -ge $MinVersion }).Count -ge 1
+
+    if (!$VersionCheck){
+        Write-Warning ("Version of the .NET runtime appears to be out of date (Min Version: $MinVersion).  Please download the latest .NET 6 Desktop runtime.`n`nhttps://dotnet.microsoft.com/en-us/download/dotnet/6.0`n`nVersions detected:`n" + $RuntimeVersions)
+        $proceed = Read-Host "Are you sure you want to proceed (Y/N)"
+        if($proceed -ne "Y"){
+            return $false
+        }
+    }
+    return $true
+
+}
+
 $ErrorActionPreference = "Stop"
 $upgradeFile = "DBADash.Upgrade"
 
@@ -123,8 +146,24 @@ else{
     }
 }
 
+
 # Check if we need to upgrade
-if ($versionCompare -eq -1 -or $ForceUpgrade){   
+if ($versionCompare -eq -1 -or $ForceUpgrade){  
+    ## Check .NET version
+    try {
+        if (!(CheckDotNetVersion)){
+            return
+        }
+    }
+    catch{
+        Write-Warning ".NET version check failed."
+        $proceed = Read-Host "Are you sure you want to proceed (Y/N)"
+        if($proceed -ne "Y"){
+            return $false
+        }
+
+    }
+
     $download = "https://github.com/$Repo/releases/download/$tag/$zip"
     
     # Check if we already have the zip downloaded   
