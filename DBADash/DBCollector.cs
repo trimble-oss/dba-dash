@@ -10,7 +10,7 @@ using System.Data;
 using Microsoft.Data.SqlClient;
 using System.IO;
 using System.Linq;
-using System.Management;
+using Microsoft.Management.Infrastructure;
 using System.Reflection;
 using System.Runtime.Caching;
 using System.Text;
@@ -19,6 +19,8 @@ using System.Threading.Tasks;
 using System.Configuration;
 using System.Diagnostics;
 using System.Text.RegularExpressions;
+using Microsoft.SqlServer.Management.XEvent;
+using Microsoft.Management.Infrastructure.Options;
 
 namespace DBADash
 {
@@ -1186,25 +1188,13 @@ CROSS APPLY sys.dm_exec_sql_text(H.sql_handle) txt");
             {
                 try
                 {
-                    ManagementPath path = new()
-                    {
-                        NamespacePath = @"root\cimv2",
-                        Server = computerName
-                    };
-                    ManagementScope scopeCIMV2 = new(path);
+                    using CimSession session = CimSession.Create(computerName);
+                    IEnumerable<CimInstance> results = session.QueryInstances(@"root\cimv2", "WQL", "SELECT Caption FROM Win32_OperatingSystem");
 
-                    SelectQuery query = new("Win32_OperatingSystem", "", new string[] { "Caption" });
-                    using (ManagementObjectSearcher searcher = new(scopeCIMV2, query))
-                    using (ManagementObjectCollection results = searcher.Get())
+                    if (results.Count() == 1)
                     {
-                        if (results.Count == 1)
-                        {
-                            var mo = results.OfType<ManagementObject>().FirstOrDefault();
-                            if (mo != null)
-                            {
-                                WindowsCaption = GetMOStringValue(mo, "Caption", 256);
-                            }
-                        }
+                        var item = results.First();
+                        WindowsCaption = Convert.ToString(item.CimInstanceProperties["Caption"].Value).Truncate(256);
                     }
                 }
                 catch (Exception ex)
@@ -1220,27 +1210,14 @@ CROSS APPLY sys.dm_exec_sql_text(H.sql_handle) txt");
             {
                 try
                 {
-                    ManagementPath path = new()
-                    {
-                        NamespacePath = @"root\cimv2",
-                        Server = computerName
-                    };
-                    ManagementScope scopeCIMV2 = new(path);
+                    using CimSession session = CimSession.Create(computerName);
+                    IEnumerable<CimInstance> results = session.QueryInstances(@"root\cimv2", "WQL", "SELECT Manufacturer, Model FROM Win32_ComputerSystem");
 
-                    SelectQuery query = new("Win32_ComputerSystem", "", new string[] { "Manufacturer", "Model" });
-                    using (ManagementObjectSearcher searcher = new(scopeCIMV2, query))
-                    using (ManagementObjectCollection results = searcher.Get())
+                    if (results.Count() == 1)
                     {
-                        if (results.Count == 1)
-                        {
-                            var mo = results.OfType<ManagementObject>().FirstOrDefault();
-                            if (mo != null)
-                            {
-                                manufacturer = GetMOStringValue(mo, "Manufacturer", 200);
-                                model = GetMOStringValue(mo, "Model", 200);
-
-                            }
-                        }
+                        var item = results.First();
+                        manufacturer = Convert.ToString(item.CimInstanceProperties["Manufacturer"].Value).Truncate(200);
+                        model = Convert.ToString(item.CimInstanceProperties["Manufacturer"].Value).Truncate(200);
                     }
                 }
                 catch (Exception ex)
@@ -1250,22 +1227,6 @@ CROSS APPLY sys.dm_exec_sql_text(H.sql_handle) txt");
             }
         }
 
-        private static string GetMOStringValue(ManagementObject mo, string propertyName, Int32 truncateLength = 0)
-        {
-            string value = "";
-            if (OperatingSystem.IsWindows())
-            {
-                if (mo.GetPropertyValue(propertyName) != null)
-                {
-                    value = mo.GetPropertyValue(propertyName).ToString();
-                    if (truncateLength > 0 && value.Length > truncateLength)
-                    {
-                        value = value[..200];
-                    }
-                }
-            }
-            return value;
-        }
 
         private void CollectPowerPlanWMI()
         {
@@ -1273,30 +1234,19 @@ CROSS APPLY sys.dm_exec_sql_text(H.sql_handle) txt");
             {
                 try
                 {
-                    ManagementPath pathPower = new()
-                    {
-                        NamespacePath = @"root\cimv2\power",
-                        Server = computerName
-                    };
-                    ManagementScope scopePower = new(pathPower);
-                    SelectQuery query = new("Win32_PowerPlan", "IsActive=1", new string[] { "InstanceID", "ElementName" });
-                    using (ManagementObjectSearcher searcher = new(scopePower, query))
-                    using (ManagementObjectCollection results = searcher.Get())
-                    {
+                    WSManSessionOptions sessionOptions = new WSManSessionOptions(); /////////////////////////
+                    using CimSession session = CimSession.Create(computerName,sessionOptions);
+                    IEnumerable<CimInstance> results = session.QueryInstances(@"root\cimv2\power", "WQL", "SELECT InstanceID,ElementName FROM Win32_PowerPlan WHERE IsActive=1");
 
-                        var mo = results.OfType<ManagementObject>().FirstOrDefault();
-                        if (mo != null)
+                    if (results.Count() == 1)
+                    {
+                        var item = results.First();
+                        string instanceId = Convert.ToString(item.CimInstanceProperties["InstanceID"].Value);
+                        activePowerPlan = Convert.ToString(item.CimInstanceProperties["ElementName"].Value);
+                        if (instanceId.Length > 0)
                         {
-
-
-                            string instanceId = GetMOStringValue(mo, "InstanceID");
-                            if (instanceId.Length > 0)
-                            {
-                                activePowerPlanGUID = Guid.Parse(instanceId.AsSpan(instanceId.Length - 38, 38));
-                            }
-                            activePowerPlan = GetMOStringValue(mo, "ElementName");
+                            activePowerPlanGUID = Guid.Parse(instanceId.AsSpan(instanceId.Length - 38, 38));
                         }
-
                     }
                 }
                 catch (Exception ex)
@@ -1332,92 +1282,38 @@ CROSS APPLY sys.dm_exec_sql_text(H.sql_handle) txt");
                             }
                         }
 
-                        ManagementPath path = new()
-                        {
-                            NamespacePath = @"root\cimv2",
-                            Server = computerName
-                        };
-                        ManagementScope scope = new(path);
+                        string query = "SELECT " + string.Join(",",selectedProperties) + " FROM Win32_PnPSignedDriver";
 
-                        SelectQuery query = new("Win32_PnPSignedDriver", "", selectedProperties);
+                        using CimSession session = CimSession.Create(computerName);
+                        IEnumerable<CimInstance> results = session.QueryInstances(@"root\cimv2", "WQL", query) ;
 
-                        using (ManagementObjectSearcher searcher = new(scope, query))
-                        using (ManagementObjectCollection results = searcher.Get())
+                        foreach(CimInstance itm in results)
                         {
-                            foreach (ManagementObject mo in results.Cast<ManagementObject>())
+                            var r = dtDrivers.NewRow();
+                            foreach (DataColumn col in dtDrivers.Columns)
                             {
-                                if (mo != null)
+                                object value = itm.CimInstanceProperties[col.ColumnName].Value;
+                                if (col.DataType == typeof(DateTime))
                                 {
-                                    var rDriver = dtDrivers.NewRow();
-                                    foreach (string p in selectedProperties)
+                                   r[col.ColumnName] = Convert.ToDateTime(value) == DateTime.MinValue ? DBNull.Value : Convert.ToDateTime(value);
+                                }
+                                else if (col.DataType == typeof(Guid))
+                                {
+                                    if (Guid.TryParse(Convert.ToString(value), out Guid g))
                                     {
-                                        if (mo.GetPropertyValue(p) != null)
-                                        {
-                                            if (p == "DriverDate" || p == "InstallDate")
-                                            {
-
-                                                try
-                                                {
-                                                    rDriver[p] = ManagementDateTimeConverter.ToDateTime(mo.GetPropertyValue(p).ToString());
-                                                }
-                                                catch (Exception ex)
-                                                {
-                                                    LogError(ex,"Drivers");
-                                                }
-                                            }
-
-                                            else if (p == "ClassGuid")
-                                            {
-                                                try
-                                                {
-                                                    rDriver[p] = Guid.Parse(mo.GetPropertyValue(p).ToString());
-                                                }
-                                                catch (Exception ex)
-                                                {
-                                                    LogError(ex,"Drivers");
-                                                }
-
-                                            }
-                                            else
-                                            {
-                                                try
-                                                {
-                                                    string value = mo.GetPropertyValue(p).ToString();
-
-                                                    rDriver[p] = value.Length <= 200 ? value : value[..200];
-
-                                                }
-                                                catch (Exception ex)
-                                                {
-                                                    LogError(ex,"Drivers");
-                                                }
-
-                                            }
-
-                                        }
+                                        r[col.ColumnName] = g;
                                     }
-                                    dtDrivers.Rows.Add(rDriver);
+                                }
+                                else
+                                {
+                                    r[col.ColumnName] = Convert.ToString(value).Truncate(200);
                                 }
                             }
+                            dtDrivers.Rows.Add(r);
                         }
-                        try
-                        {
-                            var PVKey = RegistryKey.OpenRemoteBaseKey(RegistryHive.LocalMachine, computerName, RegistryView.Registry64).OpenSubKey("SOFTWARE\\Amazon\\PVDriver");
-                            if (PVKey != null)
-                            {
-                                var rDriver = dtDrivers.NewRow();
-                                rDriver["DeviceID"] = "HKEY_LOCAL_MACHINE\\SOFTWARE\\Amazon\\PVDriver";
-                                rDriver["Manufacturer"] = "Amazon Inc.";
-                                rDriver["DriverProviderName"] = "Amazon Inc.";
-                                rDriver["DeviceName"] = "AWS PV Driver";
-                                rDriver["DriverVersion"] = PVKey.GetValue("Version");
-                                dtDrivers.Rows.Add(rDriver);
-                            }
-                        }
-                        catch (Exception ex)
-                        {
-                            LogError(ex,"Drivers", "Collect:AWSPVDriver");
-                        }
+                        // Get AWS PV Driver from registry
+                        AddPVDriverVersion(ref dtDrivers);
+                
                         Data.Tables.Add(dtDrivers);
                     }
 
@@ -1427,6 +1323,44 @@ CROSS APPLY sys.dm_exec_sql_text(H.sql_handle) txt");
                     LogError(ex,"Drivers","Collect:WMI");
                 }
             }
+        }
+
+        private void AddPVDriverVersion(ref DataTable dtDrivers)
+        {
+            try
+            {
+                var PVVersion = PVDriverVersion();
+                if (!String.IsNullOrEmpty(PVVersion))
+                {
+                    var rDriver = dtDrivers.NewRow();
+                    rDriver["DeviceID"] = "HKEY_LOCAL_MACHINE\\SOFTWARE\\Amazon\\PVDriver";
+                    rDriver["Manufacturer"] = "Amazon Inc.";
+                    rDriver["DriverProviderName"] = "Amazon Inc.";
+                    rDriver["DeviceName"] = "AWS PV Driver";
+                    rDriver["DriverVersion"] = PVVersion;
+                    dtDrivers.Rows.Add(rDriver);
+                }
+            }
+            catch (Exception ex)
+            {
+                LogError(ex, "Drivers", "Collect:AWSPVDriver");
+            }
+        }
+
+        private string PVDriverVersion()
+        {
+            UInt32 LOCAL_MACHINE = 2147483650;
+            using CimMethodParametersCollection CimParams = new()
+            {
+                CimMethodParameter.Create("hDefKey", LOCAL_MACHINE, CimFlags.In),
+                CimMethodParameter.Create("sSubKeyName", @"HKEY_LOCAL_MACHINE\SOFTWARE\Amazon", CimFlags.In),
+                CimMethodParameter.Create("sValueName", "PVDriver", CimFlags.In)
+            };
+           
+            using CimSession session = CimSession.Create(computerName); 
+            using CimMethodResult results = session.InvokeMethod(new CimInstance("StdRegProv", @"root\default"), "GetStringValue", CimParams);
+            
+            return Convert.ToString(results.OutParameters["sValue"].Value);
         }
 
         private void CollectDrivesWMI()
@@ -1441,39 +1375,18 @@ CROSS APPLY sys.dm_exec_sql_text(H.sql_handle) txt");
                     drives.Columns.Add("FreeSpace", typeof(Int64));
                     drives.Columns.Add("Label", typeof(string));
 
-                    ManagementPath path = new()
+                    using CimSession session = CimSession.Create(computerName);
+                    IEnumerable<CimInstance> results = session.QueryInstances(@"root\cimv2", "WQL", @"SELECT FreeSpace,Name,Capacity,Caption,Label FROM Win32_Volume WHERE DriveType=3 AND NOT Name LIKE '%?%'");
+   
+                    foreach (CimInstance vol in results)
                     {
-                        NamespacePath = @"root\cimv2",
-                        Server = computerName
-                    };
-                    ManagementScope scope = new(path);
-                    //string condition = "DriveLetter = 'C:'";
-                    string[] selectedProperties = new string[] { "FreeSpace", "Name", "Capacity", "Caption", "Label" };
-                    // Using @ to avoid doubling up the backslashes for C#.  The doubling up is for WQL which also uses backslashes as an escape character.
-                    // Drive Type 3 = Local Disk.  Not like \\?\ excludes system voume and recovery partition
-                    string condition = @"DriveType=3 AND NOT Name LIKE '\\\\?\\%'"; 
-                    SelectQuery query = new("Win32_Volume", condition, selectedProperties);
-
-                    using (ManagementObjectSearcher searcher = new(scope, query))
-                    using (ManagementObjectCollection results = searcher.Get())
-                    {
-                        foreach (ManagementObject volume in results.Cast<ManagementObject>())
-                        {
-
-
-                            if (volume != null)
-                            {
-                                var rDrive = drives.NewRow();
-                                rDrive["FreeSpace"] = (UInt64)volume.GetPropertyValue("FreeSpace");
-                                rDrive["Name"] = (string)volume.GetPropertyValue("Name");
-                                rDrive["Capacity"] = (UInt64)volume.GetPropertyValue("Capacity");
-                                rDrive["Label"] = (string)volume.GetPropertyValue("Label");
-                                drives.Rows.Add(rDrive);
-                                // Use freeSpace here...
-                            }
-                        }
+                        var rDrive = drives.NewRow();
+                        rDrive["FreeSpace"] = (UInt64)vol.CimInstanceProperties["FreeSpace"].Value;
+                        rDrive["Name"] = (string)vol.CimInstanceProperties["Name"].Value;
+                        rDrive["Capacity"] = (UInt64)vol.CimInstanceProperties["Capacity"].Value;
+                        rDrive["Label"] = (string)vol.CimInstanceProperties["Label"].Value;
+                        drives.Rows.Add(rDrive);
                     }
-
                     Data.Tables.Add(drives);
 
                 }
