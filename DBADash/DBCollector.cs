@@ -1167,8 +1167,8 @@ CROSS APPLY sys.dm_exec_sql_text(H.sql_handle) txt");
                 }
                 catch (Exception ex)
                 {
-                    LogDBError("Drives", "Error collecting drives via WMI.  Drive info will be collected from SQL, but might be incomplete.  Use --nowmi switch to collect through SQL as default." + Environment.NewLine + ex.Message, "Collect:WMI");
-                    Log.Warning(ex, "Error collecting drives via WMI.Drive info will be collected from SQL, but might be incomplete.Use--nowmi switch to collect through SQL as default.");
+                    LogDBError("Drives", "Error collecting drives via WMI.  Drive info will be collected from SQL, but might be incomplete.  Use No WMI option to collect through SQL as default." + Environment.NewLine + ex.Message, "Collect:WMI");
+                    Log.Warning(ex, "Error collecting drives via WMI.Drive info will be collected from SQL, but might be incomplete. Use NoWMI to collect through SQL as default.");
                     CollectDrivesSQL();
                 }
             }
@@ -1365,36 +1365,30 @@ CROSS APPLY sys.dm_exec_sql_text(H.sql_handle) txt");
 
         private void CollectDrivesWMI()
         {
-            try
+            if (!Data.Tables.Contains("Drives") && OperatingSystem.IsWindows())
             {
-                if (!Data.Tables.Contains("Drives") && OperatingSystem.IsWindows())
-                {
-                    DataTable drives = new("Drives");
-                    drives.Columns.Add("Name", typeof(string));
-                    drives.Columns.Add("Capacity", typeof(Int64));
-                    drives.Columns.Add("FreeSpace", typeof(Int64));
-                    drives.Columns.Add("Label", typeof(string));
+                DataTable drives = new("Drives");
+                drives.Columns.Add("Name", typeof(string));
+                drives.Columns.Add("Capacity", typeof(Int64));
+                drives.Columns.Add("FreeSpace", typeof(Int64));
+                drives.Columns.Add("Label", typeof(string));
 
-                    using CimSession session = CimSession.Create(computerName);
-                    IEnumerable<CimInstance> results = session.QueryInstances(@"root\cimv2", "WQL", @"SELECT FreeSpace,Name,Capacity,Caption,Label FROM Win32_Volume WHERE DriveType=3 AND NOT Name LIKE '%?%'");
+                using CimSession session = CimSession.Create(computerName);
+                IEnumerable<CimInstance> results = session.QueryInstances(@"root\cimv2", "WQL", @"SELECT FreeSpace,Name,Capacity,Caption,Label FROM Win32_Volume WHERE DriveType=3 AND NOT Name LIKE '%?%'");
    
-                    foreach (CimInstance vol in results)
-                    {
-                        var rDrive = drives.NewRow();
-                        rDrive["FreeSpace"] = (UInt64)vol.CimInstanceProperties["FreeSpace"].Value;
-                        rDrive["Name"] = (string)vol.CimInstanceProperties["Name"].Value;
-                        rDrive["Capacity"] = (UInt64)vol.CimInstanceProperties["Capacity"].Value;
-                        rDrive["Label"] = (string)vol.CimInstanceProperties["Label"].Value;
-                        drives.Rows.Add(rDrive);
-                    }
-                    Data.Tables.Add(drives);
-
+                foreach (CimInstance vol in results)
+                {
+                    var rDrive = drives.NewRow();
+                    rDrive["FreeSpace"] = (UInt64)vol.CimInstanceProperties["FreeSpace"].Value;
+                    rDrive["Name"] = (string)vol.CimInstanceProperties["Name"].Value;
+                    rDrive["Capacity"] = (UInt64)vol.CimInstanceProperties["Capacity"].Value;
+                    rDrive["Label"] = (string)vol.CimInstanceProperties["Label"].Value;
+                    drives.Rows.Add(rDrive);
                 }
+                Data.Tables.Add(drives);
+
             }
-            catch (Exception ex)
-            {
-                LogError(ex,"Drives", "Collect:WMI");
-            }
+
         }
 
         #endregion
