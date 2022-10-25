@@ -10,5 +10,5 @@
     [MaxRunDurationSec] INT              NOT NULL,
     [MinRunDurationSec] INT              NOT NULL,
     CONSTRAINT [PK_JobStats_60MIN] PRIMARY KEY CLUSTERED ([InstanceID] ASC, [job_id] ASC, [step_id] ASC, [RunDateTime] ASC)
-) ON PS_JobStats_60MIN(RunDateTime)
+) 
 
