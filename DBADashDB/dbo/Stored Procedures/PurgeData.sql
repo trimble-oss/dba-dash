@@ -3,7 +3,8 @@ AS
 SET NOCOUNT ON
 SET XACT_ABORT ON
 DECLARE @TableName SYSNAME,@RetentionDays INT
-
+DECLARE @Errors VARCHAR(MAX) = ''
+DECLARE @Error VARCHAR(MAX)
 /*	Prevent simultaneous execution of partition cleanup.
 	After 20min, assume previous execution failed.
 */
@@ -34,7 +35,16 @@ BEGIN
 		IF @@FETCH_STATUS<>0
 			BREAK
 		PRINT 'Cleanup ' + @TableName
-		EXEC dbo.PartitionTable_Cleanup @TableName=@TableName,@DaysToKeep=@RetentionDays
+
+		BEGIN TRY
+			EXEC dbo.PartitionTable_Cleanup @TableName=@TableName,@DaysToKeep=@RetentionDays
+		END TRY 
+		BEGIN CATCH 
+			/* Continue processing if there is an issue with partition switching for a particular table and throw error at end */
+			SET @Error = 'Error running cleanup for ' + @TableName + ':' + ERROR_MESSAGE()
+			PRINT @Error 
+			SET @Errors += @Error + CHAR(13) + CHAR(10)
+		END CATCH
 	END
 
 	CLOSE cTables
@@ -47,7 +57,7 @@ BEGIN
 END
 ELSE
 BEGIN
-	PRINT 'Skipping ' + @TableName + ' (Already Running)'
+	PRINT 'Skipping PartitionTable_Cleanup (Already Running)'
 END
 
 /* Remove old data from CollectionErrorLog table.  Run once per day */
@@ -125,4 +135,9 @@ BEGIN
 END
 BEGIN
 	PRINT 'Skipping BlockingSnapshotSummary (Ran withing last 24hrs)'
+END
+
+IF @Errors <> ''
+BEGIN;
+	THROW 51000,@Errors,1;
 END
