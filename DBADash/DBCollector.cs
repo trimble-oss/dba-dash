@@ -1,5 +1,7 @@
-﻿using Microsoft.SqlServer.Management.Common;
-using Microsoft.Win32;
+﻿using Microsoft.Data.SqlClient;
+using Microsoft.Management.Infrastructure;
+using Microsoft.Management.Infrastructure.Options;
+using Microsoft.SqlServer.Management.Common;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Polly;
@@ -7,20 +9,13 @@ using Serilog;
 using System;
 using System.Collections.Generic;
 using System.Data;
-using Microsoft.Data.SqlClient;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using Microsoft.Management.Infrastructure;
-using System.Reflection;
 using System.Runtime.Caching;
 using System.Text;
-using System.Xml;
 using System.Threading.Tasks;
-using System.Configuration;
-using System.Diagnostics;
-using System.Text.RegularExpressions;
-using Microsoft.SqlServer.Management.XEvent;
-using Microsoft.Management.Infrastructure.Options;
+using System.Xml;
 
 namespace DBADash
 {
@@ -1188,7 +1183,7 @@ CROSS APPLY sys.dm_exec_sql_text(H.sql_handle) txt");
             {
                 try
                 {
-                    using CimSession session = CimSession.Create(computerName);
+                    using CimSession session = CimSession.Create(computerName, WMISessionOptions);
                     IEnumerable<CimInstance> results = session.QueryInstances(@"root\cimv2", "WQL", "SELECT Caption FROM Win32_OperatingSystem");
 
                     if (results.Count() == 1)
@@ -1204,13 +1199,95 @@ CROSS APPLY sys.dm_exec_sql_text(H.sql_handle) txt");
             }
         }
 
+        CimSessionOptions localSessionOptions;
+        public AggregateException WMIException;
+
+
+        /// <summary>
+        /// Cache the session options (DCom or WSMan) - avoid the need to test on the next run
+        /// </summary>
+        private void SetWMISessionOptions(CimSessionOptions options)
+        {
+            localSessionOptions=options;
+            cache.Add("WMISessionOptions_" + computerName, localSessionOptions, new CacheItemPolicy() { AbsoluteExpiration = DateTime.Now.AddDays(1) }  );
+            Log.Debug("Cache WMI options {options} on {Computer}", localSessionOptions is DComSessionOptions ? "DCom" : "WSMan", computerName);
+        }
+
+
+        /// <summary>
+        /// Get the session options (DCom or WSMan).  Avoid the need to test if it's previously cached
+        /// </summary>
+        private void GetWMISessionOptionsFromCache()
+        {
+            localSessionOptions = (CimSessionOptions)cache.Get("WMISessionOptions_" + computerName);
+            if(localSessionOptions != null)
+            {
+                Log.Debug("Set WMISessionOptions from cache to {options} on {Computer}", localSessionOptions is DComSessionOptions ? "DCom" : "WSMan",computerName);
+            }
+        }
+
+        public CimSessionOptions WMISessionOptions
+        {
+            get
+            {
+                if(WMIException != null) // Throw previous error if connection attempts previously failed
+                {
+                    throw WMIException;
+                }
+                if (localSessionOptions == null) // Get session options from the cache.  Saves the need to re-test.
+                {
+                    GetWMISessionOptionsFromCache();
+                }
+                if (localSessionOptions == null) 
+                {
+                    // Options are not in cache.  Try connection with WSMan then try DCom if this fails.  
+                    try
+                    {
+                        // Try to connect with WSMan first
+                        TestWMI(new WSManSessionOptions());
+                        SetWMISessionOptions(new WSManSessionOptions());
+                        Log.Debug("WMI Connection succeeded using WSMan on {computer}",computerName);
+                    }
+                    catch(Exception wsManEx)
+                    {
+                        // Connection failed, try again with DCom
+                        Log.Debug(wsManEx,"WMI Connection failed using WSMan on {computer}.  Connection will be attempted using DCom.", computerName);
+                        try
+                        {
+                            TestWMI(new DComSessionOptions());
+                            SetWMISessionOptions(new DComSessionOptions());
+                            Log.Debug("WMI Connection succeeded using DCom on {computer}",computerName);
+                        }
+                        catch (Exception dcomEx)
+                        {
+                            // WMI failed using WSMan and DCom
+                            WMIException = new AggregateException(String.Format("Error connecting to WMI on {0}",computerName), new Exception[] { wsManEx, dcomEx });
+                            throw WMIException;
+                        }
+                    }
+                }
+                return localSessionOptions;
+            }
+            set
+            {
+                localSessionOptions = value;
+            }
+        }
+
+        private void TestWMI(CimSessionOptions sessionOptions)
+        {  
+            using CimSession session = CimSession.Create(computerName, sessionOptions);
+            IEnumerable<CimInstance> results = session.QueryInstances(@"root\cimv2", "WQL", "SELECT Manufacturer, Model FROM Win32_ComputerSystem");
+            _ = results.Count();
+        }
+
         private void CollectComputerSystemWMI()
         {
             if (!noWMI && OperatingSystem.IsWindows())
             {
                 try
                 {
-                    using CimSession session = CimSession.Create(computerName);
+                    using CimSession session = CimSession.Create(computerName,WMISessionOptions);
                     IEnumerable<CimInstance> results = session.QueryInstances(@"root\cimv2", "WQL", "SELECT Manufacturer, Model FROM Win32_ComputerSystem");
 
                     if (results.Count() == 1)
@@ -1234,8 +1311,7 @@ CROSS APPLY sys.dm_exec_sql_text(H.sql_handle) txt");
             {
                 try
                 {
-                    WSManSessionOptions sessionOptions = new WSManSessionOptions(); /////////////////////////
-                    using CimSession session = CimSession.Create(computerName,sessionOptions);
+                    using CimSession session = CimSession.Create(computerName,WMISessionOptions);
                     IEnumerable<CimInstance> results = session.QueryInstances(@"root\cimv2\power", "WQL", "SELECT InstanceID,ElementName FROM Win32_PowerPlan WHERE IsActive=1");
 
                     if (results.Count() == 1)
@@ -1284,7 +1360,7 @@ CROSS APPLY sys.dm_exec_sql_text(H.sql_handle) txt");
 
                         string query = "SELECT " + string.Join(",",selectedProperties) + " FROM Win32_PnPSignedDriver";
 
-                        using CimSession session = CimSession.Create(computerName);
+                        using CimSession session = CimSession.Create(computerName,WMISessionOptions);
                         IEnumerable<CimInstance> results = session.QueryInstances(@"root\cimv2", "WQL", query) ;
 
                         foreach(CimInstance itm in results)
@@ -1357,7 +1433,7 @@ CROSS APPLY sys.dm_exec_sql_text(H.sql_handle) txt");
                 CimMethodParameter.Create("sValueName", "PVDriver", CimFlags.In)
             };
            
-            using CimSession session = CimSession.Create(computerName); 
+            using CimSession session = CimSession.Create(computerName, WMISessionOptions); 
             using CimMethodResult results = session.InvokeMethod(new CimInstance("StdRegProv", @"root\default"), "GetStringValue", CimParams);
             
             return Convert.ToString(results.OutParameters["sValue"].Value);
@@ -1373,7 +1449,7 @@ CROSS APPLY sys.dm_exec_sql_text(H.sql_handle) txt");
                 drives.Columns.Add("FreeSpace", typeof(Int64));
                 drives.Columns.Add("Label", typeof(string));
 
-                using CimSession session = CimSession.Create(computerName);
+                using CimSession session = CimSession.Create(computerName,WMISessionOptions);
                 IEnumerable<CimInstance> results = session.QueryInstances(@"root\cimv2", "WQL", @"SELECT FreeSpace,Name,Capacity,Caption,Label FROM Win32_Volume WHERE DriveType=3 AND NOT Name LIKE '%?%'");
    
                 foreach (CimInstance vol in results)
