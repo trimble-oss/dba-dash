@@ -1455,9 +1455,9 @@ CROSS APPLY sys.dm_exec_sql_text(H.sql_handle) txt");
                 foreach (CimInstance vol in results)
                 {
                     var rDrive = drives.NewRow();
-                    rDrive["FreeSpace"] = (UInt64)vol.CimInstanceProperties["FreeSpace"].Value;
+                    rDrive["FreeSpace"] = Convert.ToInt64(vol.CimInstanceProperties["FreeSpace"].Value);
                     rDrive["Name"] = (string)vol.CimInstanceProperties["Name"].Value;
-                    rDrive["Capacity"] = (UInt64)vol.CimInstanceProperties["Capacity"].Value;
+                    rDrive["Capacity"] = Convert.ToInt64(vol.CimInstanceProperties["Capacity"].Value);
                     rDrive["Label"] = (string)vol.CimInstanceProperties["Label"].Value;
                     drives.Rows.Add(rDrive);
                 }
