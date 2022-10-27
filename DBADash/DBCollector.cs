@@ -1294,7 +1294,7 @@ CROSS APPLY sys.dm_exec_sql_text(H.sql_handle) txt");
                     {
                         var item = results.First();
                         manufacturer = Convert.ToString(item.CimInstanceProperties["Manufacturer"].Value).Truncate(200);
-                        model = Convert.ToString(item.CimInstanceProperties["Manufacturer"].Value).Truncate(200);
+                        model = Convert.ToString(item.CimInstanceProperties["Model"].Value).Truncate(200);
                     }
                 }
                 catch (Exception ex)
