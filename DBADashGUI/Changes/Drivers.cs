@@ -80,15 +80,19 @@ namespace DBADashGUI.Changes
                     dgvDrivers.Columns.Add(col);
                 }
             }
-            string lastDevice = "";
-            string lastProvider = "";
-            string previousVersion = "";
+            string lastDevice = String.Empty;
+            string lastProvider = String.Empty;
+            string previousVersion = String.Empty;
             List<DataGridViewRow> rows = new List<DataGridViewRow>();
             DataGridViewRow row = null;
             foreach (DataRow r in dt.Select("", "DriverProviderName,DeviceName"))
             {
                 string device = r["DeviceName"] == DBNull.Value ? "" : (string)r["DeviceName"];
                 string provider = r["DriverProviderName"] == DBNull.Value ? "" : (string)r["DriverProviderName"];
+                if(provider==String.Empty && device == String.Empty)
+                {
+                    continue;
+                }
                 if (lastDevice != device | lastProvider != provider)
                 {
                     row = new DataGridViewRow();
