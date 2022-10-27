@@ -1209,7 +1209,7 @@ CROSS APPLY sys.dm_exec_sql_text(H.sql_handle) txt");
         private void SetWMISessionOptions(CimSessionOptions options)
         {
             localSessionOptions=options;
-            cache.Add("WMISessionOptions_" + computerName, localSessionOptions, new CacheItemPolicy() { AbsoluteExpiration = DateTime.Now.AddDays(1) }  );
+            cache.Set("WMISessionOptions_" + computerName, localSessionOptions, new CacheItemPolicy() { AbsoluteExpiration = DateTime.Now.AddDays(1) }  );
             Log.Debug("Cache WMI options {options} on {Computer}", localSessionOptions is DComSessionOptions ? "DCom" : "WSMan", computerName);
         }
 
@@ -1277,8 +1277,9 @@ CROSS APPLY sys.dm_exec_sql_text(H.sql_handle) txt");
         private void TestWMI(CimSessionOptions sessionOptions)
         {  
             using CimSession session = CimSession.Create(computerName, sessionOptions);
-            IEnumerable<CimInstance> results = session.QueryInstances(@"root\cimv2", "WQL", "SELECT Manufacturer, Model FROM Win32_ComputerSystem");
-            _ = results.Count();
+            // Changed from QueryInstances to GetClass which causes a failure on older OS when using WSMan.
+            // This failure is desired as it will cause the session option to change to DCom.  If session option isn't switched to DCom for older OS, drivers collection will fail. #299
+            using CimClass win32CS = session.GetClass(@"root\cimv2", "Win32_ComputerSystem");
         }
 
         private void CollectComputerSystemWMI()
@@ -1392,7 +1393,6 @@ CROSS APPLY sys.dm_exec_sql_text(H.sql_handle) txt");
                 
                         Data.Tables.Add(dtDrivers);
                     }
-
                 }
                 catch (Exception ex)
                 {
