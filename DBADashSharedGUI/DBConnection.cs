@@ -146,6 +146,7 @@ namespace DBADash
                     {
                         DBs.Add((string)rdr[0]);
                     }
+                    DBs.Sort();
                     return DBs;
                 }
             }           
