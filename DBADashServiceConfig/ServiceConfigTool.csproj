@@ -104,4 +104,7 @@
     </None>
   </ItemGroup>
   <Import Project="..\packages\Microsoft.Data.SqlClient.SNI.3.0.0\build\net46\Microsoft.Data.SqlClient.SNI.targets" Condition="Exists('..\packages\Microsoft.Data.SqlClient.SNI.3.0.0\build\net46\Microsoft.Data.SqlClient.SNI.targets')" />
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+    <Exec Command="powershell.exe $(ProjectDir)PostBuild.ps1 $(TargetDir)" />
+  </Target>
 </Project>
