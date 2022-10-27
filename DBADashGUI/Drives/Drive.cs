@@ -108,9 +108,9 @@ namespace DBADashGUI
         {
             get
             {
-                if (FreeSpace == 0 || DriveCapacity == 0)
+                if (DriveCapacity == 0)
                 {
-                    return 100;
+                    return 0;
                 }
                 else
                 {
