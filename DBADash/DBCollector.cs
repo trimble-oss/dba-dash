@@ -1429,8 +1429,8 @@ CROSS APPLY sys.dm_exec_sql_text(H.sql_handle) txt");
             using CimMethodParametersCollection CimParams = new()
             {
                 CimMethodParameter.Create("hDefKey", LOCAL_MACHINE, CimFlags.In),
-                CimMethodParameter.Create("sSubKeyName", @"HKEY_LOCAL_MACHINE\SOFTWARE\Amazon", CimFlags.In),
-                CimMethodParameter.Create("sValueName", "PVDriver", CimFlags.In)
+                CimMethodParameter.Create("sSubKeyName", @"SOFTWARE\Amazon\PVDriver", CimFlags.In),
+                CimMethodParameter.Create("sValueName", "Version", CimFlags.In)
             };
            
             using CimSession session = CimSession.Create(computerName, WMISessionOptions); 
