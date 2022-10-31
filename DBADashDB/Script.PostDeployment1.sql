@@ -1838,7 +1838,8 @@ VALUES(object_name,counter_name,instance_name,SystemCriticalFrom,SystemCriticalT
 MERGE INTO [DBADash].[ViewType] AS [Target]
 USING (VALUES
 	(0,N'Metric'),
-	(1,N'PerformanceSummary')
+	(1,N'PerformanceSummary'),
+	(2,N'Tree')
 ) AS [Source] ([ViewTypeID],[ViewType])
 ON ([Target].[ViewTypeID] = [Source].[ViewTypeID])
 WHEN MATCHED AND (
