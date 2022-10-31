@@ -17,7 +17,8 @@ namespace DBADashGUI
         public enum ViewTypes
         {
             Metric,
-            PerformanceSummary
+            PerformanceSummary,
+            Tree
         }
 
         [JsonIgnore]

@@ -145,6 +145,7 @@ namespace DBADashGUI
             }
 
             GetCommandLineTags();
+            GetTreeLayout();
             BuildTagMenu(commandLineTags);
             AddInstanes();
         }
@@ -1220,8 +1221,10 @@ namespace DBADashGUI
             ToolStripMenuItem mSystemTags = new("System Tags") { Font = new Font(groupToolStripMenuItem.Font, FontStyle.Italic) };
             ToolStripMenuItem mNone =new("[None]") {  Tag=string.Empty };
             ToolStripMenuItem mShowCounts = new("Show Counts") { CheckOnClick = true,Checked = ShowCounts };
+            ToolStripMenuItem mSave = new("Save") { Image = Properties.Resources.Save_16x };
             mNone.Click += GroupByTag_Click;
             mShowCounts.Click += ShowCounts_Click;
+            mSave.Click += SaveTreeLayout;
             foreach (string tag in tagNames)
             {
                 ToolStripMenuItem mnu = new(tag) { Tag=tag };
@@ -1239,7 +1242,32 @@ namespace DBADashGUI
             groupToolStripMenuItem.DropDownItems.Add(mNone);
             groupToolStripMenuItem.DropDownItems.Add(new ToolStripSeparator());
             groupToolStripMenuItem.DropDownItems.Add(mShowCounts);
+            groupToolStripMenuItem.DropDownItems.Add(mSave);
+        }
 
+        private void SaveTreeLayout(object sender, EventArgs e)
+        {
+            TreeSavedView treeView = new() { GroupByTag = GroupByTag, ShowCounts = ShowCounts, Name=SavedView.DefaultViewName };
+            treeView.Save();
+            MessageBox.Show("Tree layout saved", "Save", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        }
+
+        private void GetTreeLayout()
+        {
+            try
+            {
+                var savedView = TreeSavedView.GetSavedViews(SavedView.ViewTypes.Tree, DBADashUser.UserID).Where(sv => sv.Key == SavedView.DefaultViewName);
+                if (savedView.Count() == 1)
+                {
+                    TreeSavedView treeView = TreeSavedView.Deserialize(savedView.First().Value);
+                    GroupByTag = treeView.GroupByTag;
+                    ShowCounts = treeView.ShowCounts;
+                }
+            }
+            catch(Exception ex)
+            {
+                MessageBox.Show("Unexpected error loading tree layout\n" + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            } 
         }
 
         private void ShowCounts_Click(object sender, EventArgs e)
