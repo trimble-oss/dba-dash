@@ -14,12 +14,12 @@ namespace DBADashGUI
 
         public static DataTable Instances;
 
-        public static void UpdateInstancesList(string tagIDs = "", bool? Active = true, bool? azureDB = null, string searchString = "")
+        public static void UpdateInstancesList(string tagIDs = "", bool? Active = true, bool? azureDB = null, string searchString = "",string groupByTag="")
         {
-            Instances = GetInstances(tagIDs, Active, azureDB, searchString);
+            Instances = GetInstances(tagIDs, Active, azureDB, searchString,groupByTag);
         }
 
-        public static DataTable GetInstances(string tagIDs = "", bool? Active = true, bool? azureDB = null, string searchString = "")
+        public static DataTable GetInstances(string tagIDs = "", bool? Active = true, bool? azureDB = null, string searchString = "", string groupByTag = "")
         {
 
             using (var cn = new SqlConnection(Common.ConnectionString))
@@ -45,6 +45,10 @@ namespace DBADashGUI
                 if (!string.IsNullOrEmpty(searchString))
                 {
                     cmd.Parameters.AddWithValue("SearchString", searchString);
+                }
+                if (!string.IsNullOrEmpty(groupByTag))
+                {
+                    cmd.Parameters.AddWithValue("GroupByTag", groupByTag);
                 }
                 DataTable dt = new();
                 da.Fill(dt);

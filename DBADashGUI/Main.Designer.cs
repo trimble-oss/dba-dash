@@ -35,6 +35,7 @@
             this.TreeViewImageList = new System.Windows.Forms.ImageList(this.components);
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.mnuTags = new System.Windows.Forms.ToolStripMenuItem();
+            this.groupToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.diffToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.databaseSchemaDiffToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.agentJobDiffToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -290,6 +291,7 @@
             this.TreeViewImageList.Images.SetKeyName(17, "ProcedureMissing_16x.png");
             this.TreeViewImageList.Images.SetKeyName(18, "CloudServer_16x.png");
             this.TreeViewImageList.Images.SetKeyName(19, "DataServer_16x_BWLight.png");
+            this.TreeViewImageList.Images.SetKeyName(20, "FolderClosedBlue_16x.png");
             // 
             // menuStrip1
             // 
@@ -297,6 +299,7 @@
             this.menuStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
             this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.mnuTags,
+            this.groupToolStripMenuItem,
             this.diffToolStripMenuItem,
             this.optionsToolStripMenuItem,
             this.tsTime,
@@ -313,8 +316,17 @@
             // 
             this.mnuTags.Image = global::DBADashGUI.Properties.Resources.FilterDropdown_16x;
             this.mnuTags.Name = "mnuTags";
-            this.mnuTags.Size = new System.Drawing.Size(72, 30);
-            this.mnuTags.Text = "Tags";
+            this.mnuTags.Size = new System.Drawing.Size(76, 30);
+            this.mnuTags.Text = "Filter";
+            this.mnuTags.ToolTipText = "Filter instances by tag";
+            // 
+            // groupToolStripMenuItem
+            // 
+            this.groupToolStripMenuItem.Image = global::DBADashGUI.Properties.Resources.GroupBy_16x;
+            this.groupToolStripMenuItem.Name = "groupToolStripMenuItem";
+            this.groupToolStripMenuItem.Size = new System.Drawing.Size(84, 30);
+            this.groupToolStripMenuItem.Text = "Group";
+            this.groupToolStripMenuItem.ToolTipText = "Group instances by tag";
             // 
             // diffToolStripMenuItem
             // 
@@ -988,7 +1000,6 @@
             // 
             // tags1
             // 
-            this.tags1.AllTags = null;
             this.tags1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tags1.InstanceID = 0;
             this.tags1.InstanceIDs = null;
@@ -2424,5 +2435,6 @@
         private Checks.IdentityColumns identityColumns1;
         private System.Windows.Forms.TabPage tabOSLoadedModules;
         private Checks.OSLoadedModules osLoadedModules1;
+        private System.Windows.Forms.ToolStripMenuItem groupToolStripMenuItem;
     }
 }

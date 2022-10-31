@@ -64,7 +64,8 @@ namespace DBADashGUI
             HADR,
             DBAChecks,
             Tags,
-            AgentJobStep
+            AgentJobStep,
+            InstanceFolder
           
         }
 
@@ -400,6 +401,9 @@ namespace DBADashGUI
                         ImageIndex = 17;
                     }
                     break;
+                case TreeType.InstanceFolder:
+                    ImageIndex = 20;
+                    break;             
                 default:
                     ImageIndex = 5;
                     break;
