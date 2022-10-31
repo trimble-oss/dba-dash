@@ -50,6 +50,12 @@ namespace DBADashGUI
         private bool currentTabSupportsDayOfWeekFilter;
         private bool currentTabSupportsTimeOfDayFilter;
         private bool globalTimeIsVisible;
+        private readonly HashSet<Int32> InstanceIDs = new();
+        private readonly HashSet<Int32> AllInstanceIDs = new();
+        private readonly HashSet<Int32> AzureInstanceIDs = new();
+        private bool IsAzureOnly;
+        private bool ShowCounts = false;
+        private string GroupByTag = String.Empty;
 
         private string SearchString
         {
@@ -258,7 +264,7 @@ namespace DBADashGUI
                 }
                 else
                 {
-                    instanceIDs = InstanceIDs;
+                    instanceIDs = InstanceIDs.ToList<int>();
                 }
                
             }
@@ -266,7 +272,7 @@ namespace DBADashGUI
             {
                 tags1.InstanceName = n.InstanceName;
                 tags1.InstanceID = n.InstanceID;
-                tags1.InstanceIDs = AllInstanceIDs;
+                tags1.InstanceIDs = AllInstanceIDs.ToList<int>();
                 tags1.RefreshData();
             }
             else if (tabs.SelectedTab == tabDrives)
@@ -322,13 +328,13 @@ namespace DBADashGUI
             }
             else if(tabs.SelectedTab == tabSummary)
             {
-                summary1.InstanceIDs = n.Type == SQLTreeItem.TreeType.DBADashRoot || parent.Type == SQLTreeItem.TreeType.DBADashRoot ? AllInstanceIDs : instanceIDs;
+                summary1.InstanceIDs = n.Type == SQLTreeItem.TreeType.DBADashRoot || parent.Type == SQLTreeItem.TreeType.DBADashRoot ? AllInstanceIDs.ToList<int>() : instanceIDs;
                 summary1.RefreshDataIfStale();
             }
             else if(tabs.SelectedTab == tabFiles)
             {
                 dbFilesControl1.ConnectionString = connectionString;
-                dbFilesControl1.InstanceIDs = n.Type == SQLTreeItem.TreeType.DBADashRoot ? AllInstanceIDs : instanceIDs;
+                dbFilesControl1.InstanceIDs = n.Type == SQLTreeItem.TreeType.DBADashRoot ? AllInstanceIDs.ToList<int>() : instanceIDs;
                 dbFilesControl1.DatabaseID = (n.DatabaseID > 0 ? (Int32?)n.DatabaseID : null);
                 dbFilesControl1.IncludeCritical = true;
                 dbFilesControl1.IncludeWarning = true;
@@ -341,7 +347,7 @@ namespace DBADashGUI
                 schemaSnapshots1.InstanceID = n.InstanceID;
                 schemaSnapshots1.InstanceName = n.InstanceName;
                 schemaSnapshots1.DatabaseID = n.DatabaseID;
-                schemaSnapshots1.InstanceIDs = AllInstanceIDs;
+                schemaSnapshots1.InstanceIDs = AllInstanceIDs.ToList<int>();
                 schemaSnapshots1.RefreshData();
             }
             else if ( tabs.SelectedTab == tabSchema)
@@ -387,7 +393,7 @@ namespace DBADashGUI
             }
             else if(tabs.SelectedTab== tabCollectionDates)
             {
-                collectionDates1.InstanceIDs =  n.Type == SQLTreeItem.TreeType.DBADashRoot ? AllInstanceIDs : instanceIDs;
+                collectionDates1.InstanceIDs =  n.Type == SQLTreeItem.TreeType.DBADashRoot ? AllInstanceIDs.ToList<int>() : instanceIDs;
                 collectionDates1.IncludeCritical = true;
                 collectionDates1.IncludeWarning = true;
                 collectionDates1.IncludeNA = n.InstanceID > 0;
@@ -437,7 +443,7 @@ namespace DBADashGUI
             else if(tabs.SelectedTab== tabSlowQueries)
             {
                 globalTimeIsVisible = true;
-                slowQueries1.InstanceIDs = n.Type == SQLTreeItem.TreeType.DBADashRoot ? AllInstanceIDs : instanceIDs;
+                slowQueries1.InstanceIDs = n.Type == SQLTreeItem.TreeType.DBADashRoot ? AllInstanceIDs.ToList<int>() : instanceIDs;
                 if(n.Type== SQLTreeItem.TreeType.Database)
                 {
                     slowQueries1.DBName = n.DatabaseName;
@@ -469,7 +475,7 @@ namespace DBADashGUI
             }
             else if (tabs.SelectedTab == tabDBSpace)
             {
-                spaceTracking1.InstanceIDs = n.Type == SQLTreeItem.TreeType.DBADashRoot ? AllInstanceIDs : instanceIDs;
+                spaceTracking1.InstanceIDs = n.Type == SQLTreeItem.TreeType.DBADashRoot ? AllInstanceIDs.ToList<int>() : instanceIDs;
                 spaceTracking1.DatabaseID = n.DatabaseID;             
                 spaceTracking1.InstanceGroupName = n.InstanceName;              
                 spaceTracking1.DBName = n.DatabaseName;
@@ -478,7 +484,7 @@ namespace DBADashGUI
             else if(tabs.SelectedTab == tabAzureSummary)
             {
                 globalTimeIsVisible = true;
-                azureSummary1.InstanceIDs =n.Type == SQLTreeItem.TreeType.DBADashRoot ? AzureInstanceIDs : instanceIDs;
+                azureSummary1.InstanceIDs =n.Type == SQLTreeItem.TreeType.DBADashRoot ? AzureInstanceIDs.ToList<int>() : instanceIDs;
                 azureSummary1.RefreshData();
             }
             else if(tabs.SelectedTab== tabAzureDB)
@@ -489,23 +495,23 @@ namespace DBADashGUI
             }
             else if(tabs.SelectedTab == tabServiceObjectives)
             {
-                azureServiceObjectivesHistory1.InstanceIDs = parent.Type == SQLTreeItem.TreeType.DBADashRoot ? AzureInstanceIDs : instanceIDs;
+                azureServiceObjectivesHistory1.InstanceIDs = parent.Type == SQLTreeItem.TreeType.DBADashRoot ? AzureInstanceIDs.ToList<int>() : instanceIDs;
                 azureServiceObjectivesHistory1.RefreshData();
             }
             else if (tabs.SelectedTab == tabAzureDBesourceGovernance)
             {
-                azureDBResourceGovernance1.InstanceIDs = parent.Type == SQLTreeItem.TreeType.DBADashRoot ? AzureInstanceIDs : instanceIDs;
+                azureDBResourceGovernance1.InstanceIDs = parent.Type == SQLTreeItem.TreeType.DBADashRoot ? AzureInstanceIDs.ToList<int>() : instanceIDs;
                 azureDBResourceGovernance1.RefreshData();
             }
             else if (tabs.SelectedTab == tabDBConfiguration)
             {
-                dbConfiguration1.InstanceIDs = parent.Type == SQLTreeItem.TreeType.DBADashRoot ? AllInstanceIDs : instanceIDs;
+                dbConfiguration1.InstanceIDs = parent.Type == SQLTreeItem.TreeType.DBADashRoot ? AllInstanceIDs.ToList<int>() : instanceIDs;
                 dbConfiguration1.DatabaseID = n.DatabaseID;
                 dbConfiguration1.RefreshData();
             }
             else if(tabs.SelectedTab == tabDBOptions)
             {
-                dbOptions1.InstanceIDs = parent.Type == SQLTreeItem.TreeType.DBADashRoot ? AllInstanceIDs : instanceIDs;
+                dbOptions1.InstanceIDs = parent.Type == SQLTreeItem.TreeType.DBADashRoot ? AllInstanceIDs.ToList<int>() : instanceIDs;
                 dbOptions1.DatabaseID = n.DatabaseID;
                 dbOptions1.RefreshData();
             }
@@ -516,7 +522,7 @@ namespace DBADashGUI
             }
             else if (tabs.SelectedTab == tabCustomChecks)
             {
-               customChecks1.InstanceIDs = n.Type == SQLTreeItem.TreeType.DBADashRoot ? AllInstanceIDs : instanceIDs;
+               customChecks1.InstanceIDs = n.Type == SQLTreeItem.TreeType.DBADashRoot ? AllInstanceIDs.ToList<int>() : instanceIDs;
                customChecks1.IncludeCritical = true;
                customChecks1.IncludeWarning = true;
                customChecks1.IncludeNA = n.InstanceID > 0 || n.Type == SQLTreeItem.TreeType.AzureInstance;
@@ -568,7 +574,7 @@ namespace DBADashGUI
             }
             else if(tabs.SelectedTab == tabQS)
             {
-                queryStore1.InstanceIDs = AllInstanceIDs;
+                queryStore1.InstanceIDs = AllInstanceIDs.ToList<int>();
                 queryStore1.Instance = n.InstanceName;
                 queryStore1.DatabaseID = n.DatabaseID;
                 queryStore1.RefreshData();
@@ -581,7 +587,7 @@ namespace DBADashGUI
             else if (tabs.SelectedTab == tabRunningQueries)
             {
                 globalTimeIsVisible = true;
-                runningQueries1.InstanceIDs = n.Type == SQLTreeItem.TreeType.DBADashRoot ? AllInstanceIDs : instanceIDs;
+                runningQueries1.InstanceIDs = n.Type == SQLTreeItem.TreeType.DBADashRoot ? AllInstanceIDs.ToList<int>() : instanceIDs;
                 runningQueries1.InstanceID = n.InstanceID;
                 runningQueries1.RefreshData();
             }
@@ -630,13 +636,6 @@ namespace DBADashGUI
             UpdateTimeFilterVisibility();
         }
 
- 
-
-        private readonly List<Int32> InstanceIDs = new();
-        private readonly List<Int32> AllInstanceIDs=new();
-        private readonly List<Int32> AzureInstanceIDs= new();
-        private bool IsAzureOnly;
-
         #region Tree
 
         private ContextMenuStrip RootRefreshContextMenu()
@@ -666,18 +665,29 @@ namespace DBADashGUI
             root.Nodes.Add(changes);
             root.Nodes.Add(checks);
             root.Nodes.Add(hadr);
+            SQLTreeItem parentNode = root;
 
             var tags = String.Join(",", SelectedTags());
 
-            CommonData.UpdateInstancesList(tagIDs:tags, searchString:SearchString);
+            CommonData.UpdateInstancesList(tagIDs:tags, searchString:SearchString, groupByTag: GroupByTag );
 
             SQLTreeItem AzureNode = null;
+            string currentTagGroup = string.Empty;
             foreach (DataRow row in CommonData.Instances.Rows)
             {
                 string instance = (string)row["Instance"];
                 string displayName = (string)row["InstanceDisplayName"];
                 Int32 instanceID = (Int32)row["InstanceID"];
                 bool showInSummary = (bool)row["ShowInSummary"];
+                string tagGroup = Convert.ToString(row["TagGroup"]);
+                
+                if (currentTagGroup != tagGroup && !string.IsNullOrEmpty(tagGroup))
+                {
+                    parentNode = new SQLTreeItem(GroupByTag + ": " + tagGroup, SQLTreeItem.TreeType.InstanceFolder);
+                    root.Nodes.Add(parentNode);
+                    currentTagGroup = tagGroup;
+                }
+
                 DatabaseEngineEdition edition;
                 try
                 {
@@ -696,7 +706,7 @@ namespace DBADashGUI
                         {
                             EngineEdition = edition
                         };
-                        root.Nodes.Add(AzureNode);
+                        parentNode.Nodes.Add(AzureNode);
                         AzureNode.Nodes.Add(new SQLTreeItem("Configuration", SQLTreeItem.TreeType.Configuration));
                         AzureNode.Nodes.Add(new SQLTreeItem("Checks", SQLTreeItem.TreeType.DBAChecks));
                         AzureNode.Nodes.Add(new SQLTreeItem("Tags", SQLTreeItem.TreeType.Tags));
@@ -722,10 +732,17 @@ namespace DBADashGUI
                         IsVisibleInSummary = showInSummary
                     };
                     n.AddDummyNode();
-                    root.Nodes.Add(n);
+                    parentNode.Nodes.Add(n);
                     InstanceIDs.Add(instanceID);
                 }
                 AllInstanceIDs.Add(instanceID);
+            }
+            if (ShowCounts) // Show count of instances for the grouping
+            {
+                foreach (SQLTreeItem n in root.Nodes.Cast<SQLTreeItem>().Where(t => t.Type == SQLTreeItem.TreeType.InstanceFolder))
+                {
+                    n.Text += "    {" + n.Nodes.Count + "}";
+                }
             }
             IsAzureOnly = AllInstanceIDs.Count == AzureInstanceIDs.Count;
             if (IsAzureOnly)
@@ -1192,6 +1209,49 @@ namespace DBADashGUI
             mnuTags.DropDownItems.Add(clearTag);
 
             SetFont(mnuTags);
+
+            BuildGroupByTagMenu(ref tags);
+        }
+
+        private void BuildGroupByTagMenu(ref List<DBADashTag> tags)
+        {
+            groupToolStripMenuItem.DropDownItems.Clear();
+            IEnumerable<string> tagNames = tags.Select(t => t.TagName).Distinct();
+            ToolStripMenuItem mSystemTags = new("System Tags") { Font = new Font(groupToolStripMenuItem.Font, FontStyle.Italic) };
+            ToolStripMenuItem mNone =new("[None]") {  Tag=string.Empty };
+            ToolStripMenuItem mShowCounts = new("Show Counts") { CheckOnClick = true,Checked = ShowCounts };
+            mNone.Click += GroupByTag_Click;
+            mShowCounts.Click += ShowCounts_Click;
+            foreach (string tag in tagNames)
+            {
+                ToolStripMenuItem mnu = new(tag) { Tag=tag };
+                mnu.Click += GroupByTag_Click;
+                if (tag.StartsWith("{"))
+                {
+                    mSystemTags.DropDownItems.Add(mnu);
+                }
+                else
+                {
+                    groupToolStripMenuItem.DropDownItems.Add(mnu);
+                }
+            }
+            groupToolStripMenuItem.DropDownItems.Add(mSystemTags);
+            groupToolStripMenuItem.DropDownItems.Add(mNone);
+            groupToolStripMenuItem.DropDownItems.Add(new ToolStripSeparator());
+            groupToolStripMenuItem.DropDownItems.Add(mShowCounts);
+
+        }
+
+        private void ShowCounts_Click(object sender, EventArgs e)
+        {
+            ShowCounts = ((ToolStripMenuItem)sender).Checked;
+            AddInstanes();
+        }
+
+        private void GroupByTag_Click(object sender, EventArgs e)
+        {
+            GroupByTag = (string)((ToolStripMenuItem)sender).Tag;
+            AddInstanes();
         }
 
         private void RefreshTag_Click(object sender, EventArgs e)
