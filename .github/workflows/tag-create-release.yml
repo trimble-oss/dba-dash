@@ -51,14 +51,7 @@ jobs:
           $guiZipPath = "DBADash_GUI_Only_${{steps.GetVersion.outputs.BUILD_NUMBER}}.zip"
           Compress-Archive -Path "DBADashBuild\DBADashGUIOnly\*" -DestinationPath $guiZipPath
      
-      - name: Publish
-        uses: softprops/action-gh-release@v1
-        with:
-          files: "DBADash*.zip"
-          tag_name: ${{steps.GetVersion.outputs.BUILD_NUMBER}}
-          generate_release_notes: true
-          body_path: ReleaseNotes.md
-          draft: true
-          fail_on_unmatched_files: true
+      - name: Publish - GitHub CLI
+        run: gh release create ${{steps.GetVersion.outputs.BUILD_NUMBER}} "DBADash_${{steps.GetVersion.outputs.BUILD_NUMBER}}.zip" "DBADash_GUI_Only_${{steps.GetVersion.outputs.BUILD_NUMBER}}.zip" --generate-notes --notes-file ReleaseNotes.md --draft
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
