@@ -74,7 +74,7 @@ namespace DBADashGUI
         {
             get
             {
-                if (_engineEdition == DatabaseEngineEdition.Unknown && this.Type != TreeType.DBADashRoot && this.Parent != null)
+                if (_engineEdition == DatabaseEngineEdition.Unknown && Type != TreeType.DBADashRoot && this.Parent != null)
                 {
                         _engineEdition= ((SQLTreeItem)this.Parent).EngineEdition;
                 }
@@ -88,28 +88,119 @@ namespace DBADashGUI
         }
 
 
-        private List<Int32> _childInstanceIDs;
+        private HashSet<int> _RegularInstanceIDs;
+        private HashSet<int> _AzureInstanceIDs;
+        private HashSet<int> _InstanceIDs;
 
-        public List<Int32> ChildInstanceIDs { 
-            get {
-                
-                if (_childInstanceIDs == null)
+
+        /// <summary>
+        /// Populates lists of instance IDs: InstanceIDs, RegularInstanceIDs and AzureInstanceIDs
+        /// No work is performed if list of IDs has already been populated.
+        /// </summary>
+        private void GetInstanceIDs()
+        {
+            if (_InstanceIDs == null)
+            {
+                // Note dupes are possible but HashSet maintains a distinct list
+                _RegularInstanceIDs = new HashSet<int>();
+                _AzureInstanceIDs = new HashSet<int>();
+                _InstanceIDs = new HashSet<int>();
+                if (Type == TreeType.DBADashRoot || Type == TreeType.AzureInstance || Type == TreeType.InstanceFolder)
                 {
-                    _childInstanceIDs = new List<Int32>();
-                    if( (instanceID==0) && (this.Type == TreeType.DBADashRoot || this.Type == TreeType.Instance || this.Type == TreeType.AzureInstance))
+                    foreach (SQLTreeItem itm in this.Nodes) // Look down the tree for Instance/AzureDB nodes
                     {
-                        foreach (SQLTreeItem itm in this.Nodes)
+                        if (itm.InstanceID > 0) // We have an instance to add
                         {
-                            if (itm.InstanceID > 0)
+                            if (itm.Type == TreeType.AzureDatabase)
                             {
-                                _childInstanceIDs.Add(itm.InstanceID);
+                                _AzureInstanceIDs.Add(itm.instanceID);
                             }
+                            else
+                            {
+                                _RegularInstanceIDs.Add(itm.instanceID);
+                            }
+                            _InstanceIDs.Add(itm.InstanceID);
+                        }
+                        if (itm.Type == TreeType.AzureInstance || itm.Type == TreeType.InstanceFolder)
+                        {
+                            // We need to get the InstanceIDs from next level down
+                            _InstanceIDs.UnionWith(itm.InstanceIDs);
+                            _AzureInstanceIDs.UnionWith(itm.AzureInstanceIDs);
+                            _RegularInstanceIDs.UnionWith(itm.RegularInstanceIDs);
                         }
                     }
-                    
                 }
-                return _childInstanceIDs;
-            } 
+                else if (Type == TreeType.AzureDatabase) // Return a list with a single ID of the AzureDB
+                {
+                    _AzureInstanceIDs.Add(this.instanceID);
+                    _InstanceIDs.Add(this.instanceID);
+                }
+                else if (Type == TreeType.Instance) // Return a list with a single ID of the Instance
+                {
+                    _RegularInstanceIDs.Add(this.instanceID);
+                    _InstanceIDs.Add(this.instanceID);
+                }
+            }
+        }
+
+        
+        /// <summary>
+        /// Return a list of instance IDs associated with the current node in the tree.  Includes AzureDB.
+        /// </summary>
+        public HashSet<int> InstanceIDs
+        {
+            get
+            {
+                if (Type == TreeType.DBADashRoot || Type == TreeType.AzureInstance || Type == TreeType.InstanceFolder || Type == TreeType.Instance || Type ==  TreeType.AzureDatabase)
+                {
+                    GetInstanceIDs();
+                    return _InstanceIDs;
+                }
+                else
+                {
+                    return ((SQLTreeItem)this.Parent).InstanceIDs;
+                }
+          
+            }
+        }
+
+        /// <summary>
+        /// Return a list of instance IDs associated with the current node in the tree.  Excludes AzureDB.
+        /// </summary>
+        public HashSet<int> RegularInstanceIDs
+        {
+            get
+            {
+                if (Type == TreeType.DBADashRoot || Type == TreeType.AzureInstance || Type == TreeType.InstanceFolder || Type == TreeType.Instance || Type == TreeType.AzureDatabase)
+                {
+                    GetInstanceIDs();
+                    return _RegularInstanceIDs;
+                }
+                else
+                {
+                    return ((SQLTreeItem)this.Parent).RegularInstanceIDs;
+                }
+             
+            }
+        }
+
+        /// <summary>
+        /// Return a list of AzureDB instance IDs associated with the current node in the tree.  
+        /// </summary>
+        public HashSet<int> AzureInstanceIDs
+        {
+            get
+            {
+                if (Type == TreeType.DBADashRoot || Type == TreeType.AzureInstance || Type == TreeType.InstanceFolder || Type == TreeType.Instance || Type == TreeType.AzureDatabase)
+                {
+                    GetInstanceIDs();
+                    return _AzureInstanceIDs;
+                }
+                else
+                {
+                    return ((SQLTreeItem)this.Parent).AzureInstanceIDs;
+                }
+            }
         }
 
         public string FullName()
@@ -136,7 +227,7 @@ namespace DBADashGUI
         {
             _objectName = objectName;
             Text = objectName;
-            this.Type = type;
+            Type = type;
             SetIcon();
         }
 
@@ -144,7 +235,7 @@ namespace DBADashGUI
         {
             _objectName = objectName;
             Text = objectName;
-            this.Type = type;
+            Type = type;
             _attributes = attributes;
             SetIcon();
         }
@@ -298,7 +389,7 @@ namespace DBADashGUI
 
         private void SetIcon()
         {
-            switch (this.Type)
+            switch (Type)
             {
                 case TreeType.DBADashRoot:
                     ImageIndex = 0;
