@@ -50,9 +50,6 @@ namespace DBADashGUI
         private bool currentTabSupportsDayOfWeekFilter;
         private bool currentTabSupportsTimeOfDayFilter;
         private bool globalTimeIsVisible;
-        private readonly HashSet<Int32> InstanceIDs = new();
-        private readonly HashSet<Int32> AllInstanceIDs = new();
-        private readonly HashSet<Int32> AzureInstanceIDs = new();
         private bool IsAzureOnly;
         private bool ShowCounts = false;
         private string GroupByTag = String.Empty;
@@ -241,67 +238,48 @@ namespace DBADashGUI
             globalTimeIsVisible = false;
             currentTabSupportsDayOfWeekFilter = false;
             currentTabSupportsTimeOfDayFilter = false;
-            List<Int32> instanceIDs;         
+      
             var n = (SQLTreeItem) tv1.SelectedNode;
             if(n == null)
             {
                 return;
             }
+
             var parent = (SQLTreeItem)n.Parent;
-            if (n.InstanceID > 0)
-            {
-                instanceIDs = new List<Int32>() { n.InstanceID };
-            }
-            else
-            {
-            
-                if (n.Type == SQLTreeItem.TreeType.AzureInstance)
-                {
-                    instanceIDs = n.ChildInstanceIDs;
-                }
-                else if(parent!=null && parent.Type == SQLTreeItem.TreeType.AzureInstance && n.Type != SQLTreeItem.TreeType.AzureInstance)
-                {
-                    instanceIDs = parent.ChildInstanceIDs;
-                }
-                else
-                {
-                    instanceIDs = InstanceIDs.ToList<int>();
-                }
-               
-            }
+
             if (tabs.SelectedTab == tabTags)
             {
                 tags1.InstanceName = n.InstanceName;
                 tags1.InstanceID = n.InstanceID;
-                tags1.InstanceIDs = AllInstanceIDs.ToList<int>();
+                tags1.InstanceIDs = n.InstanceIDs.ToList();
                 tags1.RefreshData();
             }
             else if (tabs.SelectedTab == tabDrives)
             {
                 drivesControl1.ConnectionString = connectionString;
-                drivesControl1.InstanceIDs = instanceIDs;
-                drivesControl1.IncludeNA = instanceIDs.Count == 1;
-                drivesControl1.IncludeOK = instanceIDs.Count == 1;
+                drivesControl1.InstanceIDs = n.RegularInstanceIDs.ToList();
+                drivesControl1.IncludeNA = n.RegularInstanceIDs.Count == 1;
+                drivesControl1.IncludeOK = n.RegularInstanceIDs.Count == 1;
                 drivesControl1.IncludeWarning = true;
                 drivesControl1.IncludeCritical = true;
                 drivesControl1.RefreshData();
             }
             else if(tabs.SelectedTab == tabBackups)
             {
-                backupsControl1.InstanceIDs = instanceIDs;    
-                backupsControl1.IncludeNA = instanceIDs.Count==1;
-                backupsControl1.IncludeOK = instanceIDs.Count == 1;
+                backupsControl1.InstanceIDs = n.RegularInstanceIDs.ToList();    
+                backupsControl1.IncludeNA = n.RegularInstanceIDs.Count==1;
+                backupsControl1.IncludeOK = n.RegularInstanceIDs.Count==1;
                 backupsControl1.IncludeWarning = true;
                 backupsControl1.IncludeCritical = true;
                 backupsControl1.RefreshBackups();
             }
             else if(tabs.SelectedTab== tabLogShipping)
             {
-                logShippingControl1.IncludeNA = instanceIDs.Count==1;
-                logShippingControl1.IncludeOK = instanceIDs.Count==1;
+                logShippingControl1.IncludeNA = n.RegularInstanceIDs.Count==1;
+                logShippingControl1.IncludeOK = n.RegularInstanceIDs.Count==1;
                 logShippingControl1.IncludeWarning = true;
                 logShippingControl1.IncludeCritical = true;
-                logShippingControl1.InstanceIDs = instanceIDs;
+                logShippingControl1.InstanceIDs = n.RegularInstanceIDs.ToList();
                 logShippingControl1.RefreshData();
             }
             else if(tabs.SelectedTab== tabJobs)
@@ -320,22 +298,22 @@ namespace DBADashGUI
                 {
                     agentJobsControl1.JobID = Guid.Empty;
                 }
-                agentJobsControl1.IncludeNA = instanceIDs.Count == 1;
-                agentJobsControl1.IncludeOK = instanceIDs.Count == 1;
+                agentJobsControl1.IncludeNA = n.RegularInstanceIDs.Count == 1;
+                agentJobsControl1.IncludeOK = n.RegularInstanceIDs.Count == 1;
                 agentJobsControl1.IncludeWarning = true;
                 agentJobsControl1.IncludeCritical = true;
-                agentJobsControl1.InstanceIDs = instanceIDs;
+                agentJobsControl1.InstanceIDs = n.RegularInstanceIDs.ToList();
                 agentJobsControl1.RefreshData();
             }
             else if(tabs.SelectedTab == tabSummary)
             {
-                summary1.InstanceIDs = n.Type == SQLTreeItem.TreeType.DBADashRoot || parent.Type == SQLTreeItem.TreeType.DBADashRoot ? AllInstanceIDs.ToList<int>() : instanceIDs;
+                summary1.InstanceIDs = n.InstanceIDs.ToList();
                 summary1.RefreshDataIfStale();
             }
             else if(tabs.SelectedTab == tabFiles)
             {
                 dbFilesControl1.ConnectionString = connectionString;
-                dbFilesControl1.InstanceIDs = n.Type == SQLTreeItem.TreeType.DBADashRoot ? AllInstanceIDs.ToList<int>() : instanceIDs;
+                dbFilesControl1.InstanceIDs = n.InstanceIDs.ToList();
                 dbFilesControl1.DatabaseID = (n.DatabaseID > 0 ? (Int32?)n.DatabaseID : null);
                 dbFilesControl1.IncludeCritical = true;
                 dbFilesControl1.IncludeWarning = true;
@@ -348,7 +326,7 @@ namespace DBADashGUI
                 schemaSnapshots1.InstanceID = n.InstanceID;
                 schemaSnapshots1.InstanceName = n.InstanceName;
                 schemaSnapshots1.DatabaseID = n.DatabaseID;
-                schemaSnapshots1.InstanceIDs = AllInstanceIDs.ToList<int>();
+                schemaSnapshots1.InstanceIDs = n.InstanceIDs.ToList();
                 schemaSnapshots1.RefreshData();
             }
             else if ( tabs.SelectedTab == tabSchema)
@@ -357,7 +335,7 @@ namespace DBADashGUI
             }
             else if(tabs.SelectedTab == tabLastGood)
             {
-                lastGoodCheckDBControl1.InstanceIDs = instanceIDs;
+                lastGoodCheckDBControl1.InstanceIDs = n.RegularInstanceIDs.ToList();
                 lastGoodCheckDBControl1.connectionString = connectionString;
                 lastGoodCheckDBControl1.IncludeCritical = true;
                 lastGoodCheckDBControl1.IncludeWarning = true;
@@ -394,7 +372,7 @@ namespace DBADashGUI
             }
             else if(tabs.SelectedTab== tabCollectionDates)
             {
-                collectionDates1.InstanceIDs =  n.Type == SQLTreeItem.TreeType.DBADashRoot ? AllInstanceIDs.ToList<int>() : instanceIDs;
+                collectionDates1.InstanceIDs = n.InstanceIDs.ToList();
                 collectionDates1.IncludeCritical = true;
                 collectionDates1.IncludeWarning = true;
                 collectionDates1.IncludeNA = n.InstanceID > 0;
@@ -414,7 +392,7 @@ namespace DBADashGUI
                 }
                 else
                 {
-                    performanceSummary1.InstanceIDs = instanceIDs;                
+                    performanceSummary1.InstanceIDs = n.InstanceIDs.ToList();                
                     performanceSummary1.TagIDs = "";
                 }
                 performanceSummary1.RefreshData();
@@ -426,25 +404,25 @@ namespace DBADashGUI
             }
             else if(tabs.SelectedTab== tabHardware)
             {
-                hardwareChanges1.InstanceIDs = instanceIDs;
+                hardwareChanges1.InstanceIDs = n.RegularInstanceIDs.ToList();
                 hardwareChanges1.ConnectionString = connectionString;
                 hardwareChanges1.RefreshData();
             }
             else if (tabs.SelectedTab == tabSQLPatching)
             {
-                sqlPatching1.InstanceIDs = instanceIDs;
+                sqlPatching1.InstanceIDs = n.RegularInstanceIDs.ToList();
                 sqlPatching1.ConnectionString = connectionString;
                 sqlPatching1.RefreshData();
             }
             else if(tabs.SelectedTab == tabInstanceConfig)
             {                
-                configurationHistory1.InstanceIDs = instanceIDs;
+                configurationHistory1.InstanceIDs = n.RegularInstanceIDs.ToList();
                 configurationHistory1.RefreshData();
             }
             else if(tabs.SelectedTab== tabSlowQueries)
             {
                 globalTimeIsVisible = true;
-                slowQueries1.InstanceIDs = n.Type == SQLTreeItem.TreeType.DBADashRoot ? AllInstanceIDs.ToList<int>() : instanceIDs;
+                slowQueries1.InstanceIDs = n.InstanceIDs.ToList();
                 if(n.Type== SQLTreeItem.TreeType.Database)
                 {
                     slowQueries1.DBName = n.DatabaseName;
@@ -458,25 +436,25 @@ namespace DBADashGUI
             }
             else if(tabs.SelectedTab== tabTraceFlags)
             {
-                traceFlagHistory1.InstanceIDs = instanceIDs;
+                traceFlagHistory1.InstanceIDs = n.RegularInstanceIDs.ToList();
                 traceFlagHistory1.ConnectionString = connectionString;
                 traceFlagHistory1.RefreshData();
             }
             else if(tabs.SelectedTab == tabAlerts)
             {
-                alerts1.InstanceIDs = instanceIDs;
+                alerts1.InstanceIDs = n.RegularInstanceIDs.ToList();
                 alerts1.ConnectionString = connectionString;
                 alerts1.RefreshData();
             }
             else if (tabs.SelectedTab == tabDrivers)
             {
-                drivers1.InstanceIDs = instanceIDs;
+                drivers1.InstanceIDs = n.RegularInstanceIDs.ToList();
                 drivers1.ConnectionString = connectionString;
                 drivers1.RefreshData();
             }
             else if (tabs.SelectedTab == tabDBSpace)
             {
-                spaceTracking1.InstanceIDs = n.Type == SQLTreeItem.TreeType.DBADashRoot ? AllInstanceIDs.ToList<int>() : instanceIDs;
+                spaceTracking1.InstanceIDs = n.InstanceIDs.ToList();
                 spaceTracking1.DatabaseID = n.DatabaseID;             
                 spaceTracking1.InstanceGroupName = n.InstanceName;              
                 spaceTracking1.DBName = n.DatabaseName;
@@ -485,7 +463,7 @@ namespace DBADashGUI
             else if(tabs.SelectedTab == tabAzureSummary)
             {
                 globalTimeIsVisible = true;
-                azureSummary1.InstanceIDs =n.Type == SQLTreeItem.TreeType.DBADashRoot ? AzureInstanceIDs.ToList<int>() : instanceIDs;
+                azureSummary1.InstanceIDs =n.AzureInstanceIDs.ToList();
                 azureSummary1.RefreshData();
             }
             else if(tabs.SelectedTab== tabAzureDB)
@@ -496,34 +474,34 @@ namespace DBADashGUI
             }
             else if(tabs.SelectedTab == tabServiceObjectives)
             {
-                azureServiceObjectivesHistory1.InstanceIDs = parent.Type == SQLTreeItem.TreeType.DBADashRoot ? AzureInstanceIDs.ToList<int>() : instanceIDs;
+                azureServiceObjectivesHistory1.InstanceIDs = n.AzureInstanceIDs.ToList();
                 azureServiceObjectivesHistory1.RefreshData();
             }
             else if (tabs.SelectedTab == tabAzureDBesourceGovernance)
             {
-                azureDBResourceGovernance1.InstanceIDs = parent.Type == SQLTreeItem.TreeType.DBADashRoot ? AzureInstanceIDs.ToList<int>() : instanceIDs;
+                azureDBResourceGovernance1.InstanceIDs = n.AzureInstanceIDs.ToList();
                 azureDBResourceGovernance1.RefreshData();
             }
             else if (tabs.SelectedTab == tabDBConfiguration)
             {
-                dbConfiguration1.InstanceIDs = parent.Type == SQLTreeItem.TreeType.DBADashRoot ? AllInstanceIDs.ToList<int>() : instanceIDs;
+                dbConfiguration1.InstanceIDs = n.AzureInstanceIDs.ToList();
                 dbConfiguration1.DatabaseID = n.DatabaseID;
                 dbConfiguration1.RefreshData();
             }
             else if(tabs.SelectedTab == tabDBOptions)
             {
-                dbOptions1.InstanceIDs = parent.Type == SQLTreeItem.TreeType.DBADashRoot ? AllInstanceIDs.ToList<int>() : instanceIDs;
+                dbOptions1.InstanceIDs = n.AzureInstanceIDs.ToList();
                 dbOptions1.DatabaseID = n.DatabaseID;
                 dbOptions1.RefreshData();
             }
             else if(tabs.SelectedTab == tabTempDB)
             {
-                tempDBConfig1.InstanceIDs = instanceIDs;
+                tempDBConfig1.InstanceIDs = n.RegularInstanceIDs.ToList();
                 tempDBConfig1.RefreshData();
             }
             else if (tabs.SelectedTab == tabCustomChecks)
             {
-               customChecks1.InstanceIDs = n.Type == SQLTreeItem.TreeType.DBADashRoot ? AllInstanceIDs.ToList<int>() : instanceIDs;
+               customChecks1.InstanceIDs = n.InstanceIDs.ToList();
                customChecks1.IncludeCritical = true;
                customChecks1.IncludeWarning = true;
                customChecks1.IncludeNA = n.InstanceID > 0 || n.Type == SQLTreeItem.TreeType.AzureInstance;
@@ -559,7 +537,7 @@ namespace DBADashGUI
             }
             else if(tabs.SelectedTab == tabMirroring)
             {
-                mirroring1.InstanceIDs = instanceIDs;
+                mirroring1.InstanceIDs = n.RegularInstanceIDs.ToList();
                 mirroring1.RefreshData();
             }
             else if(tabs.SelectedTab == tabJobDDL)
@@ -570,25 +548,25 @@ namespace DBADashGUI
             }
            else  if(tabs.SelectedTab== tabAG)
             {
-                ag1.InstanceIDs = instanceIDs;
+                ag1.InstanceIDs = n.RegularInstanceIDs.ToList();
                 ag1.RefreshData();
             }
             else if(tabs.SelectedTab == tabQS)
             {
-                queryStore1.InstanceIDs = AllInstanceIDs.ToList<int>();
+                queryStore1.InstanceIDs = n.InstanceIDs.ToList();
                 queryStore1.Instance = n.InstanceName;
                 queryStore1.DatabaseID = n.DatabaseID;
                 queryStore1.RefreshData();
             }
             else if(tabs.SelectedTab== tabRG)
             {
-                resourceGovernor1.InstanceIDs = instanceIDs;
+                resourceGovernor1.InstanceIDs = n.RegularInstanceIDs.ToList();
                 resourceGovernor1.RefreshData();
             }
             else if (tabs.SelectedTab == tabRunningQueries)
             {
                 globalTimeIsVisible = true;
-                runningQueries1.InstanceIDs = n.Type == SQLTreeItem.TreeType.DBADashRoot ? AllInstanceIDs.ToList<int>() : instanceIDs;
+                runningQueries1.InstanceIDs = n.InstanceIDs.ToList();
                 runningQueries1.InstanceID = n.InstanceID;
                 runningQueries1.RefreshData();
             }
@@ -621,7 +599,7 @@ namespace DBADashGUI
             }
             else if (tabs.SelectedTab == tabIdentityColumns)
             {
-                identityColumns1.InstanceIDs = instanceIDs;
+                identityColumns1.InstanceIDs = n.InstanceIDs.ToList();
                 identityColumns1.DatabaseID = n.DatabaseID;
                 identityColumns1.IncludeCritical = true;
                 identityColumns1.IncludeWarning = true;
@@ -631,7 +609,7 @@ namespace DBADashGUI
             }
             else if(tabs.SelectedTab == tabOSLoadedModules)
             {
-                osLoadedModules1.InstanceIDs = instanceIDs;
+                osLoadedModules1.InstanceIDs = n.RegularInstanceIDs.ToList();
                 osLoadedModules1.RefreshData();
             }
             UpdateTimeFilterVisibility();
@@ -656,9 +634,6 @@ namespace DBADashGUI
         private void AddInstanes()
         {
             tv1.Nodes.Clear();
-            InstanceIDs.Clear();
-            AzureInstanceIDs.Clear();
-            AllInstanceIDs.Clear();
             var root = new SQLTreeItem("DBA Dash", SQLTreeItem.TreeType.DBADashRoot) {  ContextMenuStrip = RootRefreshContextMenu() };
             var changes = new SQLTreeItem("Configuration", SQLTreeItem.TreeType.Configuration);
             var hadr = new SQLTreeItem("HA/DR", SQLTreeItem.TreeType.HADR);
@@ -722,7 +697,6 @@ namespace DBADashGUI
                     azureDBNode.AddDatabaseFolders();
                     azureDBNode.EngineEdition = edition;
                     AzureNode.Nodes.Add(azureDBNode);
-                    AzureInstanceIDs.Add(instanceID);
                 }
                 else
                 {
@@ -734,9 +708,7 @@ namespace DBADashGUI
                     };
                     n.AddDummyNode();
                     parentNode.Nodes.Add(n);
-                    InstanceIDs.Add(instanceID);
                 }
-                AllInstanceIDs.Add(instanceID);
             }
             if (ShowCounts) // Show count of instances for the grouping
             {
@@ -745,7 +717,7 @@ namespace DBADashGUI
                     n.Text += "    {" + n.Nodes.Count + "}";
                 }
             }
-            IsAzureOnly = AllInstanceIDs.Count == AzureInstanceIDs.Count;
+            IsAzureOnly = root.InstanceIDs.Count == root.AzureInstanceIDs.Count;
             if (IsAzureOnly)
             {
                 root.Nodes.Remove(hadr);
@@ -847,11 +819,11 @@ namespace DBADashGUI
             var parent = (SQLTreeItem)n.Parent;
 
             List<TabPage> allowedTabs = new();         
-            bool hasAzureDBs = AzureInstanceIDs.Count > 0;
+            bool hasAzureDBs = n.AzureInstanceIDs.Count > 0;
             var suppress = suppressLoadTab;
             suppressLoadTab = true;
 
-            if(n.Type== SQLTreeItem.TreeType.DBADashRoot)
+            if(n.Type== SQLTreeItem.TreeType.DBADashRoot || n.Type == SQLTreeItem.TreeType.InstanceFolder)
             {
                 allowedTabs.Add(tabSummary);
                 allowedTabs.Add(tabPerformanceSummary);
@@ -1390,58 +1362,99 @@ namespace DBADashGUI
             frm.ShowDialog();
         }
 
+        /// <summary>
+        /// Find instance in the tree by ID
+        /// </summary>
+        private SQLTreeItem FindInstance(int instanceID,SQLTreeItem node)
+        {
+            foreach (SQLTreeItem child in node.Nodes)
+            {
+                if((child.Type== SQLTreeItem.TreeType.Instance || child.Type == SQLTreeItem.TreeType.AzureDatabase) && child.InstanceID == instanceID)
+                {
+                    return child;
+                }
+                if(child.Type == SQLTreeItem.TreeType.InstanceFolder || child.Type == SQLTreeItem.TreeType.AzureInstance)
+                {
+                    SQLTreeItem find = FindInstance(instanceID, child);
+                    if (find != null)
+                    {
+                        return find;
+                    }
+                }
+            }
+            return null;
+        }
+
+       
+        /// <summary>
+        /// Find instance in the tree by name
+        /// </summary>
+        private SQLTreeItem FindInstance(string instance, SQLTreeItem node)
+        {
+            foreach (SQLTreeItem child in node.Nodes)
+            {
+                if ((child.Type == SQLTreeItem.TreeType.Instance || child.Type == SQLTreeItem.TreeType.AzureDatabase) && child.InstanceName == instance)
+                {
+                    return child;
+                }
+                if (child.Type == SQLTreeItem.TreeType.InstanceFolder || child.Type == SQLTreeItem.TreeType.AzureInstance)
+                {
+                    SQLTreeItem find = FindInstance(instance, child);
+                    if (find != null)
+                    {
+                        return find;
+                    }
+                }
+            }
+            return null;
+        }
+
         private void Instance_Selected(object sender, InstanceSelectedEventArgs e)
         {
             suppressLoadTab = true;
-            var root = tv1.Nodes[0];
-            foreach(SQLTreeItem child in root.Nodes)
+            var root = (SQLTreeItem)tv1.SelectedNode;
+
+            SQLTreeItem nInstance;
+            nInstance = e.InstanceID > 0 ? FindInstance(e.InstanceID, root) : FindInstance(e.Instance, root);
+            if (nInstance != null)
             {
-                if((child.InstanceID  == e.InstanceID && e.InstanceID>0 ) || (child.InstanceName == e.Instance && e.Instance!=null))
+                var parent = nInstance.Parent;
+                if (!parent.IsExpanded)
                 {
-                    if (e.Tab == "tabAlerts" || e.Tab == "tabQS") // Configuration Node
-                    {
-                        child.Expand();
-                        tv1.SelectedNode = child.Nodes[0];
-                    }
-                    else if(e.Tab=="tabMirroring" || e.Tab== "tabLogShipping" || e.Tab=="tabBackups" || e.Tab=="tabAG")
-                    {
-                        child.Expand();
-                        tv1.SelectedNode = child.Nodes[2];
-                    }
-                    else if (e.Tab == "tabJobs")
-                    {
-                        child.Expand();
-                        tv1.SelectedNode = child.LastNode;
-                    }
-                    else if(e.Tab == "tabAzureSummary" || e.Tab=="tabPerformance")
-                    {
-                        tv1.SelectedNode = child;
-                    }
-                    else
-                    {
-                        child.Expand();
-                        tv1.SelectedNode = child.Nodes[1];
-                    }
-                    break;
+                    parent.Expand();
                 }
-                if (child.InstanceID <= 0)
+                if (e.Tab == "tabAlerts" || e.Tab == "tabQS") // Configuration Node
                 {
-                    foreach(SQLTreeItem azureDB in child.Nodes)
-                    {
-                        if(azureDB.InstanceID == e.InstanceID)
-                        {
-                            tv1.SelectedNode = azureDB;
-                            break;
-                        }
-                    }
+                    nInstance.Expand();
+                    tv1.SelectedNode = nInstance.Nodes[0];
                 }
+                else if (e.Tab == "tabMirroring" || e.Tab == "tabLogShipping" || e.Tab == "tabBackups" || e.Tab == "tabAG")
+                {
+                    nInstance.Expand();
+                    tv1.SelectedNode = nInstance.Nodes[2];
+                }
+                else if (e.Tab == "tabJobs")
+                {
+                    nInstance.Expand();
+                    tv1.SelectedNode = nInstance.LastNode;
+                }
+                else if (e.Tab == "tabAzureSummary" || e.Tab == "tabPerformance")
+                {
+                    tv1.SelectedNode = nInstance;
+                }
+                else
+                {
+                    nInstance.Expand();
+                    tv1.SelectedNode = nInstance.Nodes[1];
+                }
+
+                if (e.Tab != null && e.Tab.Length > 0)
+                {
+                    tabs.SelectedTab = tabs.TabPages[e.Tab];
+                }
+                suppressLoadTab = false;
+                LoadSelectedTab();
             }
-            if (e.Tab != null && e.Tab.Length > 0)
-            {
-                tabs.SelectedTab = tabs.TabPages[e.Tab];
-            }
-            suppressLoadTab = false;
-            LoadSelectedTab();
         }
 
         private void TsTime_Click(object sender, EventArgs e)
