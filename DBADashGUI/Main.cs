@@ -1393,7 +1393,7 @@ namespace DBADashGUI
         {
             foreach (SQLTreeItem child in node.Nodes)
             {
-                if ((child.Type == SQLTreeItem.TreeType.Instance || child.Type == SQLTreeItem.TreeType.AzureDatabase) && child.InstanceName == instance)
+                if ((child.Type == SQLTreeItem.TreeType.Instance || child.Type == SQLTreeItem.TreeType.AzureInstance) && child.InstanceName == instance)
                 {
                     return child;
                 }

@@ -129,7 +129,7 @@ namespace DBADashGUI.Changes
             using (var cmd = new SqlCommand("dbo.DatabaseQueryStoreOptions_Get", cn) { CommandType = CommandType.StoredProcedure })
             using (var da = new SqlDataAdapter(cmd))
             {
-                cmd.Parameters.AddWithValue("InstanceDisplayName", Instance);
+                cmd.Parameters.AddWithValue("InstanceGroupName", Instance);
                 if (DatabaseID > 0)
                 {
                     cmd.Parameters.AddWithValue("DatabaseID", DatabaseID);
