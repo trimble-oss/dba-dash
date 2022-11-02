@@ -1,5 +1,5 @@
 ﻿CREATE PROC dbo.DatabaseQueryStoreOptions_Get(
-	@InstanceDisplayName NVARCHAR(128),
+	@InstanceGroupName NVARCHAR(128),
 	@DatabaseID INT=NULL
 )
 AS
@@ -30,5 +30,5 @@ FROM dbo.DatabaseQueryStoreOptions QS
 JOIN dbo.Databases D ON QS.DatabaseID = D.DatabaseID
 JOIN dbo.Instances I ON I.InstanceID = D.InstanceID
 LEFT JOIN dbo.CollectionDatesStatus CDS ON CDS.InstanceID = I.InstanceID AND CDS.Reference = 'DatabaseQueryStoreOptions'
-WHERE I.InstanceDisplayName = @InstanceDisplayName
+WHERE I.InstanceGroupName = @InstanceGroupName
 AND (D.DatabaseID= @DatabaseID OR @DatabaseID IS NULL)
