@@ -19,7 +19,7 @@ namespace DBADashService
             var cfg = JsonConvert.DeserializeObject<DBADashSource>(dataMap.GetString("CFG"));
             var schemaSnapshotDBs = dataMap.GetString("SchemaSnapshotDBs");
             string connectionString = cfg.GetSource();
-            SqlConnectionStringBuilder builder = new SqlConnectionStringBuilder(connectionString);
+            SqlConnectionStringBuilder builder = new(connectionString);
 
             var collector = new DBCollector(cfg,SchedulerServiceConfig.Config.ServiceName);
             var dsSnapshot = collector.Data;
@@ -43,7 +43,7 @@ namespace DBADashService
                     {
                         if (strDB.StartsWith("-"))
                         {
-                            if (db.Name == strDB.Substring(1))
+                            if (db.Name == strDB[1..])
                             {
                                 include = false;
                                 break;

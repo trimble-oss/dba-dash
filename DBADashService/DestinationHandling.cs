@@ -16,7 +16,7 @@ namespace DBADashService
 
         public static async Task WriteAllDestinations(DataSet ds,DBADashSource src,string fileName)
         {
-            List<Exception> exceptions = new List<Exception>();
+            List<Exception> exceptions = new();
             foreach (var d in SchedulerServiceConfig.Config.AllDestinations)
             {
                 try
@@ -67,7 +67,7 @@ namespace DBADashService
             DataSetSerialization.SetDateTimeKind(ds); // Required to prevent timezone conversion
 
             var uri = new Amazon.S3.Util.AmazonS3Uri(destination);
-            string key = SchedulerServiceConfig.Config.GetSecretKey();
+ 
             using (var s3Cli = AWSTools.GetAWSClient(SchedulerServiceConfig.Config.AWSProfile, SchedulerServiceConfig.Config.AccessKey, SchedulerServiceConfig.Config.GetSecretKey(), uri))
             {
 
@@ -95,7 +95,7 @@ namespace DBADashService
                 string extension = System.IO.Path.GetExtension(fileName);
                 if (extension == ".xml")
                 {
-                    using (FileStream fs = new FileStream(filePath, FileMode.OpenOrCreate, FileAccess.ReadWrite))
+                    using (FileStream fs = new(filePath, FileMode.OpenOrCreate, FileAccess.ReadWrite))
                     {
                         DataSetSerialization.SetDateTimeKind(ds); // Required to prevent timezone conversion
                         ds.WriteXml(fs, XmlWriteMode.WriteSchema);

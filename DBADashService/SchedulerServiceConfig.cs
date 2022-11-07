@@ -22,7 +22,7 @@ namespace DBADashService
             catch
             {
                 Log.Error("Error creating failed message folder {FailedMessageFolder}", FailedMessageFolder);
-                FailedMessageFolder = String.Empty;
+                FailedMessageFolder = string.Empty;
             }
             
             Config = GetConfig();
