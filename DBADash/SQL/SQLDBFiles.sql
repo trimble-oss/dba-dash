@@ -1,20 +1,20 @@
 ﻿DECLARE @DBName SYSNAME
 DECLARE @SQL NVARCHAR(MAX)
 CREATE TABLE #FileList ( 
-database_id INT,
-file_id INT,
-data_space_id INT,
-name SYSNAME,
-filegroup_name SYSNAME NULL,
-physical_name nvarchar(260),
-type TINYINT,
-size bigint,
-space_used bigint,
-max_size bigint,
-growth bigint,
-is_percent_growth bit,
-is_read_only BIT,
-state TINYINT
+	database_id INT,
+	file_id INT,
+	data_space_id INT,
+	name SYSNAME,
+	filegroup_name SYSNAME NULL,
+	physical_name nvarchar(260),
+	type TINYINT,
+	size bigint,
+	space_used bigint,
+	max_size bigint,
+	growth bigint,
+	is_percent_growth bit,
+	is_read_only BIT,
+	state TINYINT
 )
 
 DECLARE DBs CURSOR FAST_FORWARD LOCAL FOR
@@ -32,24 +32,24 @@ BEGIN
 
 PRINT @DBName
 SET @SQL =  N'USE ' + QUOTENAME(@DBName) + ';
-select 
-DB_ID() database_id,
-file_id,
-f.data_space_id,
-f.name,
-CASE WHEN f.type=1 THEN ''LOG'' ELSE ISNULL(fg.name,f.name) END as filegroup_name,
-f.physical_name,
-f.type,
-f.size,
-CASE WHEN f.type=2 THEN f.size ELSE FILEPROPERTY(f.name,''spaceused'') END as spaceused,
-f.max_size,
-f.growth,
-f.is_percent_growth,
-f.is_read_only,
-f.state
-from sys.database_files f
+SELECT
+	DB_ID() database_id,
+	file_id,
+	f.data_space_id,
+	f.name,
+	CASE WHEN f.type=1 THEN ''LOG'' ELSE ISNULL(fg.name,f.name) END as filegroup_name,
+	f.physical_name,
+	f.type,
+	f.size,
+	CASE WHEN f.type=2 THEN f.size ELSE FILEPROPERTY(f.name,''spaceused'') END as spaceused,
+	f.max_size,
+	f.growth,
+	f.is_percent_growth,
+	f.is_read_only,
+	f.state
+FROM sys.database_files f
 LEFT JOIN sys.filegroups fg on f.data_space_id = fg.data_space_id
-where f.type_desc <> ''FULLTEXT'''
+WHERE f.type_desc <> ''FULLTEXT'''
 
 INSERT INTO #FileList 
 EXEC  (	@SQL )
