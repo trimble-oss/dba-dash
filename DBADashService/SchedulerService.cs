@@ -25,7 +25,7 @@ namespace DBADashService
         public readonly CollectionConfig config;
         System.Timers.Timer azureScanForNewDBsTimer;
         System.Timers.Timer folderCleanupTimer;
-        CollectionSchedules schedules;
+        readonly CollectionSchedules schedules;
 
         public  ScheduleService()
         {
@@ -47,8 +47,8 @@ namespace DBADashService
                 Log.Logger.Information("Threads {threadcount} (user)", threads);
             }
             
-            NameValueCollection props = new NameValueCollection
-        {
+            NameValueCollection props = new()
+            {
             { "quartz.serializer.type", "binary" },
             { "quartz.scheduler.instanceName", "DBADashScheduler" },
             { "quartz.jobStore.type", "Quartz.Simpl.RAMJobStore, Quartz" },
@@ -56,11 +56,11 @@ namespace DBADashService
             { "quartz.threadPool.maxConcurrency", threads.ToString() }
             };
             
-            StdSchedulerFactory factory = new StdSchedulerFactory(props);
+            StdSchedulerFactory factory = new(props);
             scheduler = factory.GetScheduler().ConfigureAwait(false).GetAwaiter().GetResult();
         }
 
-        private void upgradeDB()
+        private void UpgradeDB()
         {
             foreach (var d in config.AllDestinations.Where(dest => dest.Type == ConnectionType.SQL))
             {
@@ -133,7 +133,7 @@ namespace DBADashService
             scheduler.Start();
             try
             {
-                upgradeDB();
+                UpgradeDB();
             }
             catch(Exception ex)
             {
@@ -142,7 +142,7 @@ namespace DBADashService
             }
             try
             {
-                scheduleJobsAsync().Wait();
+                ScheduleJobsAsync().Wait();
             }
             catch(Exception ex)
             {
@@ -168,14 +168,14 @@ namespace DBADashService
                 }
             }
             Log.Information("Remove Event Sessions");
-            removeEventSessionsAsync().Wait();
+            RemoveEventSessionsAsync().Wait();
             Log.Information("Shutdown Scheduler");
             scheduler.Shutdown().ConfigureAwait(false).GetAwaiter().GetResult();
             Log.Information("Shutdown complete");
 
         }
 
-        private async Task scheduleAndRunMaintenanceJobAsync()
+        private async Task ScheduleAndRunMaintenanceJobAsync()
         {
             Int32 i = 0;
             foreach (DBADashConnection d in config.AllDestinations.Where(cn => cn.Type == ConnectionType.SQL))
@@ -197,14 +197,14 @@ namespace DBADashService
             }
         }
 
-        private async Task scheduleAndRunAzureScanAsync()
+        private async Task ScheduleAndRunAzureScanAsync()
         {
             if (config.ScanForAzureDBs)
             {
                 Log.Information("Running Scan for Azure DBs.");
                 try
                 {
-                    await scanForAzureDBsAsync();
+                    await ScanForAzureDBsAsync();
                 }
                 catch (Exception ex)
                 {
@@ -218,13 +218,13 @@ namespace DBADashService
                         Enabled = true,
                         Interval = config.ScanForAzureDBsInterval * 1000
                     };
-                    azureScanForNewDBsTimer.Elapsed += new System.Timers.ElapsedEventHandler(scanForAzureDBs);
+                    azureScanForNewDBsTimer.Elapsed += new System.Timers.ElapsedEventHandler(ScanForAzureDBs);
                 }
             }
 
         }
 
-        private async Task scanForAzureDBsAsync(DBADashSource src)
+        private async Task ScanForAzureDBsAsync(DBADashSource src)
         {
             if (config.ScanForAzureDBs && src.SourceConnection.Type == ConnectionType.SQL)
             {
@@ -242,7 +242,7 @@ namespace DBADashService
                 {
                     if (isAzureDBMaster)
                     {
-                        await scheduleCollectionsAsync(config.AddAzureDBs(src));
+                        await ScheduleCollectionsAsync(config.AddAzureDBs(src));
                     }
                 }
                 catch (Exception ex)
@@ -252,18 +252,18 @@ namespace DBADashService
             }
         }
 
-        private async Task scanForAzureDBsAsync()
+        private async Task ScanForAzureDBsAsync()
         {
             Log.Information("Scan for new azure DBs");
-            await scheduleCollectionsAsync(config.AddAzureDBs());
+            await ScheduleCollectionsAsync(config.AddAzureDBs());
         }
 
-        private void scanForAzureDBs(object sender, ElapsedEventArgs e)
+        private void ScanForAzureDBs(object sender, ElapsedEventArgs e)
         {
-            scanForAzureDBsAsync().Wait();
+            ScanForAzureDBsAsync().Wait();
         }
 
-        private async Task scheduleSourceAsync(DBADashSource src)
+        private async Task ScheduleSourceAsync(DBADashSource src)
         {              
             string cfgString = JsonConvert.SerializeObject(src);
             CollectionSchedules srcSchedule;
@@ -276,7 +276,7 @@ namespace DBADashService
             {
                 srcSchedule = schedules;
             }
-            if (srcSchedule.OnServiceStartCollection.Count() > 0)
+            if (srcSchedule.OnServiceStartCollection.Length > 0)
             {
                 Log.Information("Trigger on startup collections for {source} to collect {collection}", src.SourceConnection.ConnectionForPrint, srcSchedule.OnServiceStartCollection);
                 IJobDetail serviceStartJob = GetJob(srcSchedule.OnServiceStartCollection, src, cfgString);
@@ -289,7 +289,7 @@ namespace DBADashService
                 {
                     IJobDetail job = GetJob(s.Value, src, cfgString);
                     Log.Information("Add schedule for {source} to collect {collection} on schedule {schedule}", src.SourceConnection.ConnectionForPrint, s.Value, s.Key);
-                    scheduleJob(s.Key, job);
+                    ScheduleJob(s.Key, job);
                 }
                 if (src.SchemaSnapshotDBs != null && src.SchemaSnapshotDBs.Length > 0)
                 {
@@ -303,7 +303,7 @@ namespace DBADashService
                                 .UsingJobData("SchemaSnapshotDBs", src.SchemaSnapshotDBs)
                                     .Build();
 
-                        scheduleJob(snapshotSchedule.Schedule, job);
+                        ScheduleJob(snapshotSchedule.Schedule, job);
 
                         if (snapshotSchedule.RunOnServiceStart)
                         {
@@ -316,30 +316,30 @@ namespace DBADashService
             {
                 IJobDetail job = GetJob(null, src, cfgString);
                 Log.Information("Add schedule for {source} to import on schedule {schedule}", src.SourceConnection.ConnectionForPrint, CollectionSchedule.DefaultImportSchedule);
-                scheduleJob(CollectionSchedule.DefaultImportSchedule.Schedule, job);
+                ScheduleJob(CollectionSchedule.DefaultImportSchedule.Schedule, job);
             }
         }
 
-        private async Task scheduleJobsAsync()
+        private async Task ScheduleJobsAsync()
         {
             Log.Information("Agent Version {version}", Assembly.GetEntryAssembly().GetName().Version);
 
-            await scheduleAndRunMaintenanceJobAsync();
+            await ScheduleAndRunMaintenanceJobAsync();
 
-            await scheduleCollectionsAsync(config.SourceConnections.ToList());
+            await ScheduleCollectionsAsync(config.SourceConnections.ToList());
 
-            _ = scheduleAndRunAzureScanAsync();
+            _ = ScheduleAndRunAzureScanAsync();
        
-            folderCleanup();
+            FolderCleanup();
             folderCleanupTimer = new System.Timers.Timer
             {
                 Enabled = true,
                 Interval = 14400000 // 4hrs
             };
-            folderCleanupTimer.Elapsed += new System.Timers.ElapsedEventHandler(folderCleanup);
+            folderCleanupTimer.Elapsed += new System.Timers.ElapsedEventHandler(FolderCleanup);
         }
 
-        private async Task scheduleCollectionsAsync(List<DBADashSource> connections)
+        private async Task ScheduleCollectionsAsync(List<DBADashSource> connections)
         {
             var options = new ParallelOptions()
             {
@@ -347,16 +347,16 @@ namespace DBADashService
             };
             await Parallel.ForEachAsync(connections, options, async (src, ct) =>
             {
-                await removeEventSessionAsync(src);
+                await RemoveEventSessionAsync(src);
                 await Task.WhenAll(
-                    scheduleSourceAsync(src),
-                    scanForAzureDBsAsync(src)
+                    ScheduleSourceAsync(src),
+                    ScanForAzureDBsAsync(src)
                     );
             });
 
         }
 
-        private IJobDetail GetJob(CollectionType[]types,DBADashSource src,string cfgString)
+        private static IJobDetail GetJob(CollectionType[]types,DBADashSource src,string cfgString)
         {
             return JobBuilder.Create<DBADashJob>()
                      .UsingJobData("Type", JsonConvert.SerializeObject(types))
@@ -368,7 +368,7 @@ namespace DBADashService
                     .Build();
         }
 
-        private void scheduleJob(string schedule, IJobDetail job)
+        private void ScheduleJob(string schedule, IJobDetail job)
         {
             ITrigger trigger;
             if (int.TryParse(schedule, out int seconds)) // If it's an int, schedule is interval in seconds, otherwise use cron trigger
@@ -391,7 +391,7 @@ namespace DBADashService
             scheduler.ScheduleJob(job, trigger).ConfigureAwait(false).GetAwaiter().GetResult();
         }
 
-        private async Task removeEventSessionsAsync()
+        private async Task RemoveEventSessionsAsync()
         {
             var options = new ParallelOptions()
             {
@@ -399,11 +399,11 @@ namespace DBADashService
             };
             await Parallel.ForEachAsync(config.SourceConnections, options, async (src, ct) =>
             {
-                await removeEventSessionAsync(src);
+                await RemoveEventSessionAsync(src);
             });
         }
 
-        private async Task removeEventSessionAsync(DBADashSource src)
+        private async Task RemoveEventSessionAsync(DBADashSource src)
         {
             if (src.SourceConnection.Type == ConnectionType.SQL)
             {
@@ -432,12 +432,12 @@ namespace DBADashService
             }
         }
 
-        private static void folderCleanup(object sender, ElapsedEventArgs e)
+        private static void FolderCleanup(object sender, ElapsedEventArgs e)
         {
-            folderCleanup();
+            FolderCleanup();
         }
 
-        private static void folderCleanup()
+        private static void FolderCleanup()
         {
             try
             {

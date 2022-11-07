@@ -53,27 +53,12 @@ namespace DBADashService
             return ds;
         }
 
-        [ObsoleteAttribute("To be removed - BinaryFormatter is obsolete", false)]
-        public static DataSet DeserializeFromBinaryFile(string filePath)
-        {
-            BinaryFormatter fmt = new BinaryFormatter();
-            DataSet ds;
-            using (FileStream fs = new FileStream(filePath, FileMode.Open, FileAccess.Read))
-            {
-                ds = (DataSet)fmt.Deserialize(fs);
-            }
-            return ds;
-        }
-
-
         public static DataSet DeserializeFromXmlFile(string filePath)
         {
-            using (FileStream fs = new FileStream(filePath, FileMode.OpenOrCreate, FileAccess.Read))
-            {
-                var ds = new DataSet();
-                ds.ReadXml(fs);
-                return ds;
-            }
+            using FileStream fs = new(filePath, FileMode.OpenOrCreate, FileAccess.Read);
+            var ds = new DataSet();
+            ds.ReadXml(fs);
+            return ds;
         }
 
         public static DataSet DeserializeFromFile(string filePath)

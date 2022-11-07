@@ -21,7 +21,7 @@ namespace DBADashService
             }
             catch(Exception ex)
             {
-                logError(ex,connectionString, "AddPartitions", ex.Message);
+                LogError(ex,connectionString, "AddPartitions", ex.Message);
             }
             try
             {
@@ -29,7 +29,7 @@ namespace DBADashService
             }
             catch(Exception ex)
             {
-                logError(ex,connectionString, "PurgeData", ex.Message);
+                LogError(ex,connectionString, "PurgeData", ex.Message);
             }
             return Task.CompletedTask;
         }
@@ -61,7 +61,7 @@ namespace DBADashService
         }
 
 
-        private void logError(Exception ex,string connectionString, string errorSource, string errorMessage, string errorContext = "Maintenance")
+        private static void LogError(Exception ex,string connectionString, string errorSource, string errorMessage, string errorContext = "Maintenance")
         {
             Log.Error(ex, "{errorcontext} | {errorsource}", errorContext, errorSource);
             try
@@ -75,7 +75,7 @@ namespace DBADashService
                 rError["ErrorMessage"] = errorMessage;
                 rError["ErrorContext"] = errorContext;
                 dtErrors.Rows.Add(rError);
-                DataSet ds = new DataSet();
+                DataSet ds = new();
                 ds.Tables.Add(dtErrors);
                 DBADash.DBImporter.InsertErrors(connectionString, null, DateTime.UtcNow, ds);
             }

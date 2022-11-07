@@ -10,7 +10,7 @@ namespace DBADashService
 	// http://johnculviner.com/achieving-named-lock-locker-functionality-in-c-4-0/
 	public class NamedLocker
 	{
-		private readonly ConcurrentDictionary<string, object> _lockDict = new ConcurrentDictionary<string, object>();
+		private readonly ConcurrentDictionary<string, object> _lockDict = new();
 
 		//get a lock for use with a lock(){} block
 		public object GetLock(string name)
@@ -35,8 +35,7 @@ namespace DBADashService
 		//remove an old lock object that is no longer needed
 		public void RemoveLock(string name)
 		{
-			object o;
-			_lockDict.TryRemove(name, out o);
+			_lockDict.TryRemove(name, out _);
 		}
 	}
 }

@@ -20,7 +20,7 @@ namespace DBADashService
     {
         static readonly CollectionConfig config = SchedulerServiceConfig.Config;
         /* Ensure the Jobs collection runs once every ~24hrs.  Allowing 10mins as Jobs runs every 1hr by default */
-        private static int MAX_TIME_SINCE_LAST_JOB_COLLECTION = 1430; 
+        private static readonly int MAX_TIME_SINCE_LAST_JOB_COLLECTION = 1430; 
 
         static string GetID(DataSet ds)
         {
@@ -93,7 +93,7 @@ namespace DBADashService
             }
             try
             {
-                if (types.Count() > 0) // Might be zero if we are only collecting Jobs in this batch (collected in the next section)
+                if (types.Length > 0) // Might be zero if we are only collecting Jobs in this batch (collected in the next section)
                 {
                     // Value used to disable future collections of SlowQueries if we encounter a not supported error on a RDS instance not running Standard or Enterprise edition
                     bool dataMapExtendedEventsNotSupported = dataMap.GetBooleanValue("IsExtendedEventsNotSupportedException");

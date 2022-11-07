@@ -11,7 +11,7 @@ namespace DBADashService
 {
     class Program
     {
-        public static readonly NamedLocker Locker = new NamedLocker();
+        public static readonly NamedLocker Locker = new();
 
         static void Main(string[] args)
         {
