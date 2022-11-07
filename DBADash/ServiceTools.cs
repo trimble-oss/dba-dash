@@ -72,7 +72,8 @@ namespace DBADash
             return GetServiceNameFromPath(ServicePath);
         }
 
-        public static string ServicePath= Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "DBADashService.exe");
+        private static readonly string serviceFolder = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "DBADashService.exe");
+        public static readonly string ServicePath = serviceFolder;
 
     }
 }

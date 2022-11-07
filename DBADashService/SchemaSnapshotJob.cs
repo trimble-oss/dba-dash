@@ -68,7 +68,7 @@ namespace DBADashService
                             dt.ExtendedProperties.Add("SnapshotOptions", JsonConvert.SerializeObject(SchedulerServiceConfig.Config.SchemaSnapshotOptions));
                             dsSnapshot.Tables.Add(dt);
 
-                            string fileName = cfg.GenerateFileName(cfg.SourceConnection.ConnectionForFileName);
+                            string fileName = DBADashSource.GenerateFileName(cfg.SourceConnection.ConnectionForFileName);
                             DestinationHandling.WriteAllDestinations(dsSnapshot, cfg,fileName).Wait();
                             dsSnapshot.Tables.Remove(dt);
                         }

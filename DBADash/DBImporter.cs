@@ -13,19 +13,19 @@ namespace DBADash
     public class DBImporter
     {
 
-        private DataSet data;
-        private string connectionString;
-        private Policy  retryPolicy;
+        private readonly DataSet data;
+        private readonly string connectionString;
+        private readonly Policy  retryPolicy;
         private int? instanceID;
         private DateTime snapshotDate;
         private static readonly int commandTimeout = 60;
-        private DBADashAgent importAgent;
+        private readonly DBADashAgent importAgent;
 
         public DBImporter(DataSet data, string connectionString,DBADashAgent importAgent)
         {
             this.importAgent = importAgent;
             this.data = data;
-            upgradeDS();
+            UpgradeDS();
             this.connectionString = connectionString;
 
             retryPolicy = Policy.Handle<Exception>()
@@ -36,7 +36,7 @@ namespace DBADash
                     TimeSpan.FromSeconds(15)
                 }, (exception, timeSpan, retryCount, context) =>
                 {
-                    logError((string)context.OperationKey, exception, "Import[Retrying]");
+                    LogError((string)context.OperationKey, exception, "Import[Retrying]");
                 });
         }
 
@@ -49,7 +49,7 @@ namespace DBADash
         }
 
         // Adds error to Errors datatable to be imported into CollectionErrorLog table later.
-        private void logError(string errorSource, Exception ex, string errorContext = "Import")
+        private void LogError(string errorSource, Exception ex, string errorContext = "Import")
         {
             
             DataTable dtErrors;
@@ -87,7 +87,7 @@ namespace DBADash
         
 
         // handle schema changes between agent versions
-        private void upgradeDS()
+        private void UpgradeDS()
         {
             if (data.Tables.Contains("BlockingSnapshot"))
             {
@@ -202,13 +202,13 @@ namespace DBADash
 
         public void Update()
         {
-            List<Exception> exceptions = new List<Exception>();
+            List<Exception> exceptions = new();
             var rInstance = data.Tables["DBADash"].Rows[0];
             snapshotDate = (DateTime)rInstance["SnapshotDateUTC"];
 
             // we need to get the instanceID to continue further.  retry based on policy then exception will be thrown to catch higher up
             instanceID = retryPolicy.Execute(
-              context => updateInstance(ref rInstance),
+              context => UpdateInstance(ref rInstance),
               new Context("Instance")
             );
 
@@ -228,13 +228,13 @@ namespace DBADash
                 try
                 {
                     retryPolicy.Execute(
-                          context => update(tableName),
+                          context => Update(tableName),
                           new Context(tableName)
                       );
                 }
                 catch (Exception ex)
                 {
-                    logError(tableName, ex);
+                    LogError(tableName, ex);
                     exceptions.Add(ex);
                 }
             }
@@ -242,30 +242,30 @@ namespace DBADash
             string snapshotPrefix = "Snapshot_";
             foreach (string tableName in tablesInDataSet.Where(t=> t.StartsWith(snapshotPrefix)))
             {
-                string databaseName = tableName.Substring(snapshotPrefix.Length);
+                string databaseName = tableName[snapshotPrefix.Length..];
                 try
                 {
                     retryPolicy.Execute(
-                          context => updateSnapshot(tableName, databaseName),
+                          context => UpdateSnapshot(tableName, databaseName),
                           new Context(tableName)
                       );
                 }
                 catch (Exception ex)
                 {
-                    logError(tableName, ex);
+                    LogError(tableName, ex);
                     exceptions.Add(ex);
                 }
             }
             try
             {
                 retryPolicy.Execute(
-                   context => updateServerExtraProperties(),
+                   context => UpdateServerExtraProperties(),
                    new Context("ServerExtraProperties")
                );
             }
             catch(Exception ex)
             {
-                logError("ServerExtraProperties", ex);
+                LogError("ServerExtraProperties", ex);
                 exceptions.Add(ex);
             }
             // retry based on policy then let caller handle the exception
@@ -279,7 +279,7 @@ namespace DBADash
             }
         }
 
-        private void updateSnapshot(string tableName, string databaseName)
+        private void UpdateSnapshot(string tableName, string databaseName)
         {
             DataTable dtSS = data.Tables[tableName];
             try
@@ -331,7 +331,7 @@ namespace DBADash
 
         }
 
-        private void updateServerExtraProperties()
+        private void UpdateServerExtraProperties()
         {
             if (data.Tables.Contains("ServerExtraProperties") && data.Tables["ServerExtraProperties"].Rows.Count == 1)
             {
@@ -372,7 +372,7 @@ namespace DBADash
         }
 
 
-        private void update(string tableName)
+        private void Update(string tableName)
         {
             var dt = data.Tables[tableName];
             using (var cn = new SqlConnection(connectionString))
@@ -430,7 +430,7 @@ namespace DBADash
 
 
 
-        private Int32 updateInstance(ref DataRow rInstance)
+        private Int32 UpdateInstance(ref DataRow rInstance)
         {
             using (var cn = new SqlConnection(connectionString))
             {

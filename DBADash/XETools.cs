@@ -16,7 +16,7 @@ namespace DBADash
 
         public DataTable GetTable()
         {
-            DataTable dt = new DataTable();
+            DataTable dt = new();
             dt.Columns.Add("Truncated", typeof(Int32));
             dt.Columns.Add("ProcessingTime", typeof(Int32));
             dt.Columns.Add("TotalEventsProcessed", typeof(Int32));
@@ -39,7 +39,7 @@ namespace DBADash
     {
         public static DataTable XEStrToDT(string xe, out RingBufferTargetAttributes ringBufferAtt)
         {
-            DataTable dt = new DataTable("XEL");
+            DataTable dt = new("XEL");
             dt.Columns.Add("event_type", typeof(string));
             dt.Columns.Add("object_name", typeof(string));
             dt.Columns.Add("timestamp", typeof(DateTime));

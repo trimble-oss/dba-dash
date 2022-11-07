@@ -12,8 +12,8 @@ namespace DBADash
     public class DBADashConnection
     {
 
-        private List<int> supportedEngineEditions = new List<int> { 1, 2, 3, 4, 5, 8 }; // Personal, Standard, Enterprise, Express, Azure DB, Azure MI
-        private List<int> supportedProductVersions = new List<int> { 9, 10, 11, 12, 13, 14, 15, 16 }; // SQL 2005 to 2022 & Azure
+        private readonly List<int> supportedEngineEditions = new() { 1, 2, 3, 4, 5, 8 }; // Personal, Standard, Enterprise, Express, Azure DB, Azure MI
+        private readonly List<int> supportedProductVersions = new() { 9, 10, 11, 12, 13, 14, 15, 16 }; // SQL 2005 to 2022 & Azure
 
         public enum ConnectionType
         {
@@ -47,25 +47,25 @@ namespace DBADash
 
         public DBADashConnection(string connectionString)
         {
-            setConnectionString(connectionString);
+            SetConnectionString(connectionString);
         }
         public DBADashConnection()
         {
 
         }
 
-        private void setConnectionString(string value)
+        private void SetConnectionString(string value)
         {
-            if (getConnectionType(value) == ConnectionType.SQL){
+            if (GetConnectionType(value) == ConnectionType.SQL){
                 var builder = new SqlConnectionStringBuilder(value)
                 {
                     ApplicationName = "DBADash"
                 };
                 value = builder.ToString();
             }
-            encryptedConnectionString = getConnectionStringWithEncryptedPassword(value);
-            connectionString = getDecryptedConnectionString(value);
-            connectionType = getConnectionType(value);
+            encryptedConnectionString = GetConnectionStringWithEncryptedPassword(value);
+            connectionString = GetDecryptedConnectionString(value);
+            connectionType = GetConnectionType(value);
         }
 
         [JsonIgnore]
@@ -77,7 +77,7 @@ namespace DBADash
             }
             set
             {
-                setConnectionString(value);
+                SetConnectionString(value);
             }
         }
 
@@ -86,8 +86,10 @@ namespace DBADash
         {
             get
             {
-                var builder = new SqlConnectionStringBuilder(ConnectionString);
-                builder.InitialCatalog = "master";
+                var builder = new SqlConnectionStringBuilder(ConnectionString)
+                {
+                    InitialCatalog = "master"
+                };
                 return builder.ToString();
             }
         }
@@ -105,7 +107,7 @@ namespace DBADash
             }
             set
             {
-                setConnectionString(value);
+                SetConnectionString(value);
             }
         }
 
@@ -136,7 +138,7 @@ namespace DBADash
             }
            else if (connectionType == ConnectionType.SQL)
             {
-                validateSQLConnection(); // Open a connection to the DB
+                ValidateSQLConnection(); // Open a connection to the DB
             }
         }
 
@@ -164,7 +166,7 @@ namespace DBADash
         }
 
 
-        private void validateSQLConnection()
+        private void ValidateSQLConnection()
         {         
             if (!supportedProductVersions.Contains(ConnectionInfo.MajorVersion)){
                 throw new Exception(string.Format("SQL Server Version {0} isn't supported by DBA Dash.  For testing purposes, it's possible to skip this validation check.",ConnectionInfo.MajorVersion));
@@ -186,7 +188,7 @@ namespace DBADash
         {
             if (connectionType == ConnectionType.SQL)
             {
-                SqlConnectionStringBuilder builder = new SqlConnectionStringBuilder(connectionString);
+                SqlConnectionStringBuilder builder = new(connectionString);
                 return builder.InitialCatalog;
             }
             else
@@ -199,7 +201,7 @@ namespace DBADash
         {
             if (connectionType == ConnectionType.SQL)
             {
-                SqlConnectionStringBuilder builder = new SqlConnectionStringBuilder(connectionString);
+                SqlConnectionStringBuilder builder = new(connectionString);
                 return builder.DataSource;
             }
             else
@@ -208,7 +210,7 @@ namespace DBADash
             }
         }
 
-        private ConnectionType getConnectionType(string connectionString)
+        private static ConnectionType GetConnectionType(string connectionString)
         {
             if (connectionString == null || connectionString.Length < 3)
             {
@@ -226,7 +228,7 @@ namespace DBADash
             {
                 try
                 {
-                    SqlConnectionStringBuilder builder = new SqlConnectionStringBuilder(connectionString);
+                    SqlConnectionStringBuilder builder = new(connectionString);
                     return ConnectionType.SQL;
                 }
                 catch
@@ -236,11 +238,11 @@ namespace DBADash
             }
         }
 
-        private string getConnectionStringWithEncryptedPassword(string connectionString)
+        private string GetConnectionStringWithEncryptedPassword(string connectionString)
         {
-            if (getConnectionType(connectionString) == ConnectionType.SQL)
+            if (GetConnectionType(connectionString) == ConnectionType.SQL)
             {
-                SqlConnectionStringBuilder builder = new SqlConnectionStringBuilder(connectionString);
+                SqlConnectionStringBuilder builder = new(connectionString);
 
                 if (builder.Password.StartsWith("¬=!"))
                 {
@@ -266,18 +268,18 @@ namespace DBADash
         }
 
 
-        private string getDecryptedConnectionString(string connectionString)
+        private string GetDecryptedConnectionString(string connectionString)
         {
-            if (getConnectionType(connectionString) == ConnectionType.SQL)
+            if (GetConnectionType(connectionString) == ConnectionType.SQL)
             {
-                SqlConnectionStringBuilder builder = new SqlConnectionStringBuilder(connectionString);
+                SqlConnectionStringBuilder builder = new(connectionString);
                 if (builder.ApplicationName == ".Net SqlClient Data Provider")
                 {
                     builder.ApplicationName = "DBADash";
                 }
                 if (builder.Password.StartsWith("¬=!"))
                 {
-                    builder.Password = EncryptText.DecryptString(builder.Password.Substring(3), myString);
+                    builder.Password = EncryptText.DecryptString(builder.Password[3..], myString);
                 }
                 return builder.ConnectionString;
             }
@@ -293,10 +295,10 @@ namespace DBADash
             {
                 if (Type == ConnectionType.SQL)
                 {
-                    SqlConnectionStringBuilder builder = new SqlConnectionStringBuilder(connectionString);
+                    SqlConnectionStringBuilder builder = new(connectionString);
                     string connection = builder.DataSource + (builder.InitialCatalog == "" ? "" : "_" + builder.InitialCatalog);
                     string regexSearch = new string(Path.GetInvalidFileNameChars()) + new string(Path.GetInvalidPathChars());
-                    Regex r = new Regex(string.Format("[{0}]", Regex.Escape(regexSearch)));
+                    Regex r = new(string.Format("[{0}]", Regex.Escape(regexSearch)));
                     return r.Replace(connection, "");
                 }
                 else
@@ -312,7 +314,7 @@ namespace DBADash
             {
                 if (Type == ConnectionType.SQL)
                 {
-                    SqlConnectionStringBuilder builder = new SqlConnectionStringBuilder(connectionString);
+                    SqlConnectionStringBuilder builder = new(connectionString);
                     return builder.DataSource + (builder.InitialCatalog == "" ? "" : "|" + builder.InitialCatalog);
                 }
                 else

@@ -9,7 +9,7 @@ namespace DBADash
 {
     internal static class CollectionCommandTimeout
     {
-        private static Dictionary<CollectionType, int> collectionCommandTimeouts = new() {
+        private static readonly Dictionary<CollectionType, int> collectionCommandTimeouts = new() {
             { CollectionType.DatabasePermissions,300 },
             { CollectionType.DatabasePrincipals,300 },
             { CollectionType.DatabaseRoleMembers,300 },

@@ -68,7 +68,7 @@ namespace DBADash
 
         public static int GetMajorVersion(string ProductVersion)
         {
-            return Int32.Parse(ProductVersion.Substring(0, ProductVersion.IndexOf('.')));
+            return Int32.Parse(ProductVersion[..ProductVersion.IndexOf('.')]);
         }
 
         public static bool GetXESupported(string ProductVersion)

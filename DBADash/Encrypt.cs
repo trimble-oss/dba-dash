@@ -17,7 +17,7 @@ namespace DBADash
         {
             byte[] initVectorBytes = Encoding.UTF8.GetBytes(initVector);
             byte[] plainTextBytes = Encoding.UTF8.GetBytes(plainText);
-            using (PasswordDeriveBytes password = new PasswordDeriveBytes(passPhrase, null))
+            using (PasswordDeriveBytes password = new(passPhrase, null))
             {
                 byte[] keyBytes = password.GetBytes(keysize / 8);
                 using (var symmetricKey = Aes.Create())
@@ -41,16 +41,16 @@ namespace DBADash
         {
             byte[] initVectorBytes = Encoding.UTF8.GetBytes(initVector);
             byte[] cipherTextBytes = Convert.FromBase64String(cipherText);
-            using (PasswordDeriveBytes password = new PasswordDeriveBytes(passPhrase, null))
+            using (PasswordDeriveBytes password = new(passPhrase, null))
             {
                 byte[] keyBytes = password.GetBytes(keysize / 8);
                 using (var symmetricKey = Aes.Create())
                 {
                     symmetricKey.Mode = CipherMode.CBC;
                     using (ICryptoTransform decryptor = symmetricKey.CreateDecryptor(keyBytes, initVectorBytes))
-                    using (MemoryStream memoryStream = new MemoryStream(cipherTextBytes))
-                    using (CryptoStream cryptoStream = new CryptoStream(memoryStream, decryptor, CryptoStreamMode.Read))
-                    using (StreamReader srDecrypt = new StreamReader(cryptoStream))
+                    using (MemoryStream memoryStream = new(cipherTextBytes))
+                    using (CryptoStream cryptoStream = new(memoryStream, decryptor, CryptoStreamMode.Read))
+                    using (StreamReader srDecrypt = new(cryptoStream))
                     {
                         return srDecrypt.ReadToEnd();
                     }
