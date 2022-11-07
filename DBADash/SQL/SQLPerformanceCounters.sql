@@ -65,53 +65,53 @@ SELECT SYSUTCDATETIME() AS SnapshotDate,
        CAST(pc.cntr_value AS DECIMAL(28,9)) cntr_value,
        pc.cntr_type 
 FROM sys.dm_os_performance_counters pc
-WHERE EXISTS(SELECT 1 
-FROM @counters c
-WHERE c.object_name COLLATE SQL_Latin1_General_CP1_CI_AS = STUFF(pc.object_name,1,CHARINDEX(':',pc.object_name),'') COLLATE SQL_Latin1_General_CP1_CI_AS
-AND c.counter_name COLLATE SQL_Latin1_General_CP1_CI_AS = pc.counter_name COLLATE SQL_Latin1_General_CP1_CI_AS
-AND (c.instance_name COLLATE SQL_Latin1_General_CP1_CI_AS = pc.instance_name COLLATE SQL_Latin1_General_CP1_CI_AS OR c.instance_name IS NULL)
-)
+WHERE EXISTS(	SELECT 1 
+				FROM @counters c
+				WHERE c.object_name COLLATE SQL_Latin1_General_CP1_CI_AS = STUFF(pc.object_name,1,CHARINDEX(':',pc.object_name),'') COLLATE SQL_Latin1_General_CP1_CI_AS
+				AND c.counter_name COLLATE SQL_Latin1_General_CP1_CI_AS = pc.counter_name COLLATE SQL_Latin1_General_CP1_CI_AS
+				AND (c.instance_name COLLATE SQL_Latin1_General_CP1_CI_AS = pc.instance_name COLLATE SQL_Latin1_General_CP1_CI_AS OR c.instance_name IS NULL)
+			)
 AND pc.instance_name NOT IN('AuditingGroup',
-'AutoShrinkLogGroup',
-'CheckpointGroup',
-'DACGroup',
-'GhostCleanupGroup',
-'InMemBackupGroup',
-'InMemBackupRestorePool',
-'InMemDmvCollectorGroup',
-'InMemDmvCollectorPool',
-'InMemDTAPool',
-'InMemFullBackupGroup',
-'InMemMetricsDownloaderGroup',
-'InMemMetricsDownloaderPool',
-'InMemQueryStoreGroup',
-'InMemQueryStoreGroupFeedback',
-'InMemQueryStoreGroupLowPri',
-'InMemQueryStorePool',
-'InMemRestoreGroup',
-'InMemTdeScanGroup',
-'InMemTdeScanPool',
-'InMemWIAutoTuningPool',
-'InMemWIIndexValidationGroup',
-'InMemXdbLoginPool',
-'InMemXdbSeedingPool',
-'LazywriterGroup',
-'PVSCleanerGroup',
-'PVSCleanerPool',
-'RecoveryWriterGroup',
-'RedoGroup',
-'ResourceMonitorGroup',
-'SeedingGroup',
-'SloDTAGroup',
-'SloHkPool',
-'SloSecSharedInitGroup',
-'SloSecSharedPool',
-'UcsGroup',
-'UpdateAutoStatsAsyncGroup',
-'XdbLoginGroup',
-'XOdbcGroup',
-'mssqlsystemresource'
-)
+							'AutoShrinkLogGroup',
+							'CheckpointGroup',
+							'DACGroup',
+							'GhostCleanupGroup',
+							'InMemBackupGroup',
+							'InMemBackupRestorePool',
+							'InMemDmvCollectorGroup',
+							'InMemDmvCollectorPool',
+							'InMemDTAPool',
+							'InMemFullBackupGroup',
+							'InMemMetricsDownloaderGroup',
+							'InMemMetricsDownloaderPool',
+							'InMemQueryStoreGroup',
+							'InMemQueryStoreGroupFeedback',
+							'InMemQueryStoreGroupLowPri',
+							'InMemQueryStorePool',
+							'InMemRestoreGroup',
+							'InMemTdeScanGroup',
+							'InMemTdeScanPool',
+							'InMemWIAutoTuningPool',
+							'InMemWIIndexValidationGroup',
+							'InMemXdbLoginPool',
+							'InMemXdbSeedingPool',
+							'LazywriterGroup',
+							'PVSCleanerGroup',
+							'PVSCleanerPool',
+							'RecoveryWriterGroup',
+							'RedoGroup',
+							'ResourceMonitorGroup',
+							'SeedingGroup',
+							'SloDTAGroup',
+							'SloHkPool',
+							'SloSecSharedInitGroup',
+							'SloSecSharedPool',
+							'UcsGroup',
+							'UpdateAutoStatsAsyncGroup',
+							'XdbLoginGroup',
+							'XOdbcGroup',
+							'mssqlsystemresource'
+							)
 AND NOT (pc.counter_name= 'Percent Log Used' AND pc.instance_name='_Total')
 AND (SERVERPROPERTY('EngineEdition')<> 5
 	OR (pc.instance_name NOT IN('msdb','master','model','model_masterdb','model_userdb','mssqlsystemresource','tempdb')		
