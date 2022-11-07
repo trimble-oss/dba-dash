@@ -126,10 +126,7 @@ namespace DBADash
             }
             set
             {
-                if (RunningQueryPlanThreshold == null)
-                {
-                    RunningQueryPlanThreshold = PlanCollectionThreshold.PlanCollectionDisabledThreshold;
-                }
+                RunningQueryPlanThreshold ??= PlanCollectionThreshold.PlanCollectionDisabledThreshold;
                 RunningQueryPlanThreshold.CPUThreshold = value;
             }
         }
@@ -149,10 +146,7 @@ namespace DBADash
             }
             set
             {
-                if (RunningQueryPlanThreshold == null)
-                {
-                    RunningQueryPlanThreshold = PlanCollectionThreshold.PlanCollectionDisabledThreshold;
-                }
+                RunningQueryPlanThreshold ??= PlanCollectionThreshold.PlanCollectionDisabledThreshold;
                 RunningQueryPlanThreshold.MemoryGrantThreshold = value;
                 
             }
@@ -173,10 +167,7 @@ namespace DBADash
             }
             set
             {
-                if (RunningQueryPlanThreshold == null)
-                {
-                    RunningQueryPlanThreshold = PlanCollectionThreshold.PlanCollectionDisabledThreshold;
-                }
+                RunningQueryPlanThreshold ??= PlanCollectionThreshold.PlanCollectionDisabledThreshold;
                 RunningQueryPlanThreshold.DurationThreshold = value;                
             }
         }
@@ -197,10 +188,7 @@ namespace DBADash
             }
             set
             {
-                if (RunningQueryPlanThreshold == null)
-                {
-                    RunningQueryPlanThreshold = PlanCollectionThreshold.PlanCollectionDisabledThreshold;
-                }
+                RunningQueryPlanThreshold ??= PlanCollectionThreshold.PlanCollectionDisabledThreshold;
                 RunningQueryPlanThreshold.CountThreshold = value;             
             }
         }
@@ -236,7 +224,7 @@ namespace DBADash
             }
         }
 
-        public string GenerateFileName(string connection)
+        public static string GenerateFileName(string connection)
         {
             return "DBADash_" + DateTime.UtcNow.ToString("yyyyMMdd_HHmm_ss") + "_" + connection + "_" + Convert.ToBase64String(Guid.NewGuid().ToByteArray()).Replace("=", "").Replace("/","-") + ".xml";
         }

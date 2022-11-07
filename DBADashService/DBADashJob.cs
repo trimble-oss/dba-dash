@@ -129,7 +129,7 @@ namespace DBADashService
                         op.Complete();
                     }
 
-                    string fileName = cfg.GenerateFileName(cfg.SourceConnection.ConnectionForFileName);
+                    string fileName = DBADashSource.GenerateFileName(cfg.SourceConnection.ConnectionForFileName);
                     try
                     {
                         DestinationHandling.WriteAllDestinations(collector.Data, cfg, fileName).Wait();
@@ -206,7 +206,7 @@ namespace DBADashService
                 dataMap.Put("JobLastModified", collector.JobLastModified);
                 dataMap.Put("JobCollectDate", DateTime.Now);
 
-                string fileName = cfg.GenerateFileName(cfg.SourceConnection.ConnectionForFileName);
+                string fileName = DBADashSource.GenerateFileName(cfg.SourceConnection.ConnectionForFileName);
                 try
                 {
                     DestinationHandling.WriteAllDestinations(collector.Data, cfg, fileName).Wait();

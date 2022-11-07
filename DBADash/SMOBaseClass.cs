@@ -22,7 +22,7 @@ namespace DBADash
         public SMOBaseClass(DBADashConnection source, SchemaSnapshotDBOptions options)
         {
             SourceConnection =  source;
-            options = options == null ? new SchemaSnapshotDBOptions() : options;
+            options ??= new SchemaSnapshotDBOptions();
             this.options = options;
             this.ScriptingOptions = options.ScriptOptions();
         }
@@ -59,7 +59,7 @@ namespace DBADash
 
         public static string StringCollectionToString(StringCollection sc)
         {
-            StringBuilder sb = new StringBuilder();
+            StringBuilder sb = new();
             foreach (var s in sc)
             {
                 sb.AppendLine(s);

@@ -269,10 +269,7 @@ namespace DBADash
                         }
                         else
                         {
-                            if(isAzure == null)
-                            {
-                                isAzure = findConnection.IsAzureDB();
-                            }
+                            isAzure ??= findConnection.IsAzureDB();
                             if (isAzure==false)
                             {
                                 return s;

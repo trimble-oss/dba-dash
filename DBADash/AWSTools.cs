@@ -47,7 +47,7 @@ namespace DBADash
         {
             AWSCredentials cred = GetCredentials(profile, accessKey, secretKey);
 
-            using (Amazon.S3.AmazonS3Client cli = new AmazonS3Client(cred, RegionEndpoint.EUWest2))
+            using (Amazon.S3.AmazonS3Client cli = new(cred, RegionEndpoint.EUWest2))
             {
 
                 RegionEndpoint AWSRegion;

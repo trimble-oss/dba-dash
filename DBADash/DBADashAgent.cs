@@ -12,14 +12,14 @@ namespace DBADash
 {
     public class DBADashAgent
     {
-        MemoryCache cache = MemoryCache.Default;
+        readonly MemoryCache cache = MemoryCache.Default;
 
         public string AgentServiceName { get; set; }
         public string AgentHostName { get; set; }
         public string AgentPath { get; set; }
-        public string AgentVersion { get; set; }        
-  
-        CacheItemPolicy policy = new CacheItemPolicy
+        public string AgentVersion { get; set; }
+
+        readonly CacheItemPolicy policy = new()
         {
             SlidingExpiration = TimeSpan.FromMinutes(60)
         };
@@ -41,7 +41,7 @@ namespace DBADash
             else
             {
                 Log.Information("Update DBADashAgent");
-                agentID = update(connectionString);
+                agentID = Update(connectionString);
                 Log.Information("DBADashAgentID: {0}", agentID);
                 cache.Add(cacheKey, agentID, policy );
 
@@ -92,7 +92,7 @@ namespace DBADash
             };
         }
 
-        private int update(string connectionString)
+        private int Update(string connectionString)
         {
             using (var cn = new SqlConnection(connectionString))
             using(var cmd = new SqlCommand("dbo.DBADashAgent_Upd",cn) { CommandType = System.Data.CommandType.StoredProcedure })

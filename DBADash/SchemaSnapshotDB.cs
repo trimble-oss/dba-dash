@@ -94,9 +94,9 @@ namespace DBADash
             
         }
 
-        private DataTable rgDTSchema()
+        private static DataTable RgDTSchema()
         {
-            DataTable dtRG = new DataTable
+            DataTable dtRG = new()
             {
                 TableName = "ResourceGovernorConfiguration"
             };
@@ -111,7 +111,7 @@ namespace DBADash
 
         public DataTable ResourceGovernorConfiguration()
         {
-            DataTable dtRG = rgDTSchema();
+            DataTable dtRG = RgDTSchema();
             bool reconfigError = false;
             using (var cn = new Microsoft.Data.SqlClient.SqlConnection(MasterConnectionString))
             {
@@ -193,7 +193,7 @@ namespace DBADash
             using (var cn = new Microsoft.Data.SqlClient.SqlConnection(ConnectionString))
             using (var opSS = Operation.Begin("Schema snapshot {DBame}", DBName))
             {
-                DataTable dtSchema = new DataTable("Schema_" + DBName);
+                DataTable dtSchema = new("Schema_" + DBName);
                 dtSchema.Columns.Add("ObjectName");
                 dtSchema.Columns.Add("SchemaName");
                 dtSchema.Columns.Add("ObjectType");
@@ -230,7 +230,7 @@ namespace DBADash
                     {
                         using (var op = Operation.Begin("Schema snapshot {DBame}: {Object}", DBName, "Aggregate"))
                         {
-                            addAggregate(db, dtSchema);
+                            AddAggregate(db, dtSchema);
                             op.Complete();
                         }
                     }
@@ -238,7 +238,7 @@ namespace DBADash
                     {
                         using (var op = Operation.Begin("Schema snapshot {DBame}: {Object}", DBName, "Assembly"))
                         {
-                            addAssembly(db, dtSchema);
+                            AddAssembly(db, dtSchema);
                             op.Complete();
                         }
                     }
@@ -246,7 +246,7 @@ namespace DBADash
                     {
                         using (var op = Operation.Begin("Schema snapshot {DBame}: {Object}", DBName, "UserDefinedType"))
                         {
-                            addUserDefinedType(db, dtSchema); ;
+                            AddUserDefinedType(db, dtSchema); ;
                             op.Complete();
                         }
                     }
@@ -254,7 +254,7 @@ namespace DBADash
                     {
                         using (var op = Operation.Begin("Schema snapshot {DBame}: {Object}", DBName, "XMLSchema"))
                         {
-                            addXMLSchema(db, dtSchema);
+                            AddXMLSchema(db, dtSchema);
                             op.Complete();
                         }
                     }
@@ -262,7 +262,7 @@ namespace DBADash
                     {
                         using (var op = Operation.Begin("Schema snapshot {DBame}: {Object}", DBName, "Schema"))
                         {
-                            addSchema(db, dtSchema);
+                            AddSchema(db, dtSchema);
                             op.Complete();
                         }
                     }
@@ -270,7 +270,7 @@ namespace DBADash
                     {
                         using (var op = Operation.Begin("Schema snapshot {DBame}: {Object}", DBName, "Tables"))
                         {
-                            addTables(db, dtSchema);
+                            AddTables(db, dtSchema);
                             op.Complete();
                         }
                     }
@@ -278,7 +278,7 @@ namespace DBADash
                     {
                         using (var op = Operation.Begin("Schema snapshot {DBame}: {Object}", DBName, "StoredProcedures"))
                         {
-                            addSPs(db, dtSchema);
+                            AddSPs(db, dtSchema);
                             op.Complete();
                         }
                     }
@@ -286,7 +286,7 @@ namespace DBADash
                     {
                         using (var op = Operation.Begin("Schema snapshot {DBame}: {Object}", DBName, "UserDefinedFunctions"))
                         {
-                            addUDFs(db, dtSchema);
+                            AddUDFs(db, dtSchema);
                             op.Complete();
                         }
                     }
@@ -294,7 +294,7 @@ namespace DBADash
                     {
                         using (var op = Operation.Begin("Schema snapshot {DBame}: {Object}", DBName, "Views"))
                         {
-                            addViews(db, dtSchema);
+                            AddViews(db, dtSchema);
                             op.Complete();
                         }
                     }
@@ -302,7 +302,7 @@ namespace DBADash
                     {
                         using (var op = Operation.Begin("Schema snapshot {DBame}: {Object}", DBName, "UserDefinedTableTypes"))
                         {
-                            addUserDefinedTableType(db, dtSchema);
+                            AddUserDefinedTableType(db, dtSchema);
                             op.Complete();
                         }
                     }
@@ -310,7 +310,7 @@ namespace DBADash
                     {
                         using (var op = Operation.Begin("Schema snapshot {DBame}: {Object}", DBName, "UserDefinedDataTypes"))
                         {
-                            addUserDefinedDataType(db, dtSchema);
+                            AddUserDefinedDataType(db, dtSchema);
                             op.Complete();
                         }
                     }
@@ -318,7 +318,7 @@ namespace DBADash
                     {
                         using (var op = Operation.Begin("Schema snapshot {DBame}: {Object}", DBName, "DDLTriggers"))
                         {
-                            addDDLTriggers(db, dtSchema);
+                            AddDDLTriggers(db, dtSchema);
                             op.Complete();
                         }
                     }
@@ -326,7 +326,7 @@ namespace DBADash
                     {
                         using (var op = Operation.Begin("Schema snapshot {DBame}: {Object}", DBName, "Synonyms"))
                         {
-                            addSynonyms(db, dtSchema);
+                            AddSynonyms(db, dtSchema);
                             op.Complete();
                         }
                     }
@@ -334,7 +334,7 @@ namespace DBADash
                     {
                         using (var op = Operation.Begin("Schema snapshot {DBame}: {Object}", DBName, "Roles"))
                         {
-                            addRoles(db, dtSchema);
+                            AddRoles(db, dtSchema);
                             op.Complete();
                         }
                     }
@@ -342,7 +342,7 @@ namespace DBADash
                     {
                         using (var op = Operation.Begin("Schema snapshot {DBame}: {Object}", DBName, "Users"))
                         {
-                            addUsers(db, dtSchema);
+                            AddUsers(db, dtSchema);
                             op.Complete();
                         }
                     }
@@ -350,7 +350,7 @@ namespace DBADash
                     {
                         using (var op = Operation.Begin("Schema snapshot {DBame}: {Object}", DBName, "ApplicationRoles"))
                         {
-                            addAppRole(db, dtSchema);
+                            AddAppRole(db, dtSchema);
                             op.Complete();
                         }
                     }
@@ -358,7 +358,7 @@ namespace DBADash
                     {
                         using (var op = Operation.Begin("Schema snapshot {DBame}: {Object}", DBName, "Sequences"))
                         {
-                            addSeq(db, dtSchema);
+                            AddSeq(db, dtSchema);
                             op.Complete();
                         }
                     }
@@ -368,7 +368,7 @@ namespace DBADash
                         {
                             using (var op = Operation.Begin("Schema snapshot {DBame}: {Object}", DBName, "ServiceBroker"))
                             {
-                                addServiceBroker(db, dtSchema);
+                                AddServiceBroker(db, dtSchema);
                                 op.Complete();
                             }
                         }
@@ -381,7 +381,7 @@ namespace DBADash
             }
         }
 
-        private void addServiceBroker(Database db, DataTable dtSchema)
+        private void AddServiceBroker(Database db, DataTable dtSchema)
         {
             foreach (ServiceQueue q in db.ServiceBroker.Queues)
             {
@@ -505,7 +505,7 @@ namespace DBADash
             }
         }
 
-        private void addSeq(Database db, DataTable dtSchema)
+        private void AddSeq(Database db, DataTable dtSchema)
         {
             if (db.ServerVersion.Major > 11) // 2012+
             {
@@ -528,7 +528,7 @@ namespace DBADash
         }
 
 
-        private void addAppRole(Database db, DataTable dtSchema)
+        private void AddAppRole(Database db, DataTable dtSchema)
         {
             foreach (ApplicationRole ar in db.ApplicationRoles)
             {
@@ -547,7 +547,7 @@ namespace DBADash
             }
         }
 
-        private void addUsers(Database db, DataTable dtSchema)
+        private void AddUsers(Database db, DataTable dtSchema)
         {
             foreach (User u in db.Users)
             {
@@ -569,7 +569,7 @@ namespace DBADash
             }
         }
 
-        private void addRoles(Database db, DataTable dtSchema)
+        private void AddRoles(Database db, DataTable dtSchema)
         {
             foreach(DatabaseRole dbr in db.Roles)
             {
@@ -591,7 +591,7 @@ namespace DBADash
             }
         }
 
-        private void addAggregate(Database db, DataTable dtSchema)
+        private void AddAggregate(Database db, DataTable dtSchema)
         {
             foreach (UserDefinedAggregate a in db.UserDefinedAggregates)
             {  
@@ -610,7 +610,7 @@ namespace DBADash
             }
         }
 
-        private void addAssembly(Database db, DataTable dtSchema)
+        private void AddAssembly(Database db, DataTable dtSchema)
         {
             foreach (SqlAssembly a in db.Assemblies)
             {
@@ -632,7 +632,7 @@ namespace DBADash
             }
         }
 
-        private void addXMLSchema(Database db, DataTable dtSchema)
+        private void AddXMLSchema(Database db, DataTable dtSchema)
         {
             foreach (XmlSchemaCollection x in db.XmlSchemaCollections)
             {
@@ -651,7 +651,7 @@ namespace DBADash
             }
         }
 
-        private void addSchema(Database db, DataTable dtSchema)
+        private void AddSchema(Database db, DataTable dtSchema)
         {
             foreach (Schema s in db.Schemas)
             {
@@ -673,7 +673,7 @@ namespace DBADash
             }
         }
 
-        private void addSynonyms(Database db, DataTable dtSchema)
+        private void AddSynonyms(Database db, DataTable dtSchema)
         {
 
             foreach (Synonym s in db.Synonyms)
@@ -693,7 +693,7 @@ namespace DBADash
             }
         }
 
-        private void addDDLTriggers(Database db, DataTable dtSchema)
+        private void AddDDLTriggers(Database db, DataTable dtSchema)
         {
             foreach (DatabaseDdlTrigger t in db.Triggers)
             {
@@ -720,7 +720,7 @@ namespace DBADash
             }
         }
 
-        private void addUserDefinedTableType(Database db, DataTable dtSchema)
+        private void AddUserDefinedTableType(Database db, DataTable dtSchema)
         {
 
             db.PrefetchObjects(typeof(UserDefinedTableType), ScriptingOptions);
@@ -741,7 +741,7 @@ namespace DBADash
             }
         }
 
-        private void addUserDefinedType(Database db, DataTable dtSchema)
+        private void AddUserDefinedType(Database db, DataTable dtSchema)
         {
             foreach (UserDefinedType t in db.UserDefinedTypes)
             {
@@ -760,7 +760,7 @@ namespace DBADash
             }
         }
 
-        private void addUserDefinedDataType(Database db, DataTable dtSchema)
+        private void AddUserDefinedDataType(Database db, DataTable dtSchema)
         {
             db.PrefetchObjects(typeof(UserDefinedType), ScriptingOptions);
             foreach (UserDefinedDataType t in db.UserDefinedDataTypes)
@@ -780,7 +780,7 @@ namespace DBADash
             }
         }
 
-        private void addUDFs(Database db, DataTable dtSchema)
+        private void AddUDFs(Database db, DataTable dtSchema)
         {
             db.PrefetchObjects(typeof(UserDefinedFunction), ScriptingOptions);
             foreach (UserDefinedFunction f in db.UserDefinedFunctions)
@@ -841,7 +841,7 @@ namespace DBADash
             }
         }
 
-        private void addViews(Database db, DataTable dtSchema)
+        private void AddViews(Database db, DataTable dtSchema)
         {
             db.PrefetchObjects(typeof(View), ScriptingOptions);
             foreach (View v in db.Views)
@@ -870,12 +870,12 @@ namespace DBADash
                     r["ObjectDateModified"] = v.DateLastModified;
                     dtSchema.Rows.Add(r);
 
-                    addTriggers(v.Triggers, v.Schema, dtSchema);
+                    AddTriggers(v.Triggers, v.Schema, dtSchema);
                 }
             }
         }
 
-        private void addSPs(Database db, DataTable dtSchema)
+        private void AddSPs(Database db, DataTable dtSchema)
         {
             db.PrefetchObjects(typeof(StoredProcedure), ScriptingOptions);
 
@@ -914,7 +914,7 @@ namespace DBADash
             }
         }
 
-        private void addTables(Database db, DataTable dtSchema)
+        private void AddTables(Database db, DataTable dtSchema)
         {
             db.PrefetchObjects(typeof(Table), ScriptingOptions);
             bool includeTriggers = options.Triggers;
@@ -953,13 +953,13 @@ namespace DBADash
                     r["ObjectDateModified"] = t.DateLastModified;
                     dtSchema.Rows.Add(r);
 
-                    addTriggers(t.Triggers, t.Schema, dtSchema);
+                    AddTriggers(t.Triggers, t.Schema, dtSchema);
                 }
                 ScriptingOptions.Triggers = includeTriggers;
             }
         }
 
-        private void addTriggers(TriggerCollection triggers,string schema,DataTable dtSchema)
+        private void AddTriggers(TriggerCollection triggers,string schema,DataTable dtSchema)
         {
             if (options.ObjectTypes.Contains(SchemaSnapshotDBObjectTypes.Trigger))
             {

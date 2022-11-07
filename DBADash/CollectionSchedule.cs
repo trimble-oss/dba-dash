@@ -10,9 +10,7 @@ namespace DBADashService
         private const string hourly = "0 0 * ? * *";
         private const string midnight = "0 0 0 1/1 * ? *";
         private const string elevenPm = "0 0 23 1/1 * ? *";
-
-        public static CollectionSchedules DefaultSchedules
-               = new CollectionSchedules() {
+        private static readonly CollectionSchedules collectionSchedules = new() {
                             {CollectionType.ServerProperties, new CollectionSchedule(){ Schedule = hourly } },
                             {CollectionType.Databases, new CollectionSchedule(){ Schedule = hourly } },
                             {CollectionType.SysConfig, new CollectionSchedule(){ Schedule = hourly } },
@@ -64,6 +62,8 @@ namespace DBADashService
                             {CollectionType.SchemaSnapshot, new CollectionSchedule(){Schedule=elevenPm} }
 
                   };
+        public static readonly CollectionSchedules DefaultSchedules
+               = collectionSchedules;
 
         public CollectionSchedules CombineWithDefault()
         {
@@ -118,8 +118,8 @@ namespace DBADashService
         public bool RunOnServiceStart = true;
 
         private const string every1min = "0 * * ? * *";
-
-        public static CollectionSchedule DefaultImportSchedule = new CollectionSchedule() { Schedule = every1min };
+        private static readonly CollectionSchedule importSchedule = new() { Schedule = every1min };
+        public static readonly CollectionSchedule DefaultImportSchedule = importSchedule;
 
        
             
