@@ -73,6 +73,9 @@
             this.pnlSearch = new System.Windows.Forms.Panel();
             this.bttnSearch = new System.Windows.Forms.Button();
             this.txtSearch = new System.Windows.Forms.TextBox();
+            this.toolStrip2 = new System.Windows.Forms.ToolStrip();
+            this.tsHome = new System.Windows.Forms.ToolStripButton();
+            this.tsBack = new System.Windows.Forms.ToolStripButton();
             this.tabs = new System.Windows.Forms.TabControl();
             this.tabSnapshotsSummary = new System.Windows.Forms.TabPage();
             this.schemaSnapshots1 = new DBADashGUI.Changes.SchemaSnapshots();
@@ -183,6 +186,7 @@
             this.identityColumns1 = new DBADashGUI.Checks.IdentityColumns();
             this.tabOSLoadedModules = new System.Windows.Forms.TabPage();
             this.osLoadedModules1 = new DBADashGUI.Checks.OSLoadedModules();
+            this.refresh1 = new DBADashGUI.Refresh();
             this.dataGridViewTextBoxColumn1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dataGridViewTextBoxColumn2 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dataGridViewTextBoxColumn3 = new System.Windows.Forms.DataGridViewTextBoxColumn();
@@ -212,6 +216,7 @@
             this.splitMain.Panel2.SuspendLayout();
             this.splitMain.SuspendLayout();
             this.pnlSearch.SuspendLayout();
+            this.toolStrip2.SuspendLayout();
             this.tabs.SuspendLayout();
             this.tabSnapshotsSummary.SuspendLayout();
             this.tabSchema.SuspendLayout();
@@ -631,11 +636,13 @@
             // 
             this.splitMain.Panel1.Controls.Add(this.tv1);
             this.splitMain.Panel1.Controls.Add(this.pnlSearch);
+            this.splitMain.Panel1.Controls.Add(this.toolStrip2);
             this.splitMain.Panel1MinSize = 50;
             // 
             // splitMain.Panel2
             // 
             this.splitMain.Panel2.Controls.Add(this.tabs);
+            this.splitMain.Panel2.Controls.Add(this.refresh1);
             this.splitMain.Panel2MinSize = 100;
             this.splitMain.Size = new System.Drawing.Size(1983, 1275);
             this.splitMain.SplitterDistance = 340;
@@ -646,12 +653,13 @@
             this.tv1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tv1.ImageIndex = 0;
             this.tv1.ImageList = this.TreeViewImageList;
-            this.tv1.Location = new System.Drawing.Point(0, 0);
+            this.tv1.Location = new System.Drawing.Point(0, 27);
             this.tv1.Name = "tv1";
             this.tv1.SelectedImageIndex = 0;
-            this.tv1.Size = new System.Drawing.Size(340, 1223);
+            this.tv1.Size = new System.Drawing.Size(340, 1196);
             this.tv1.TabIndex = 0;
             this.tv1.BeforeExpand += new System.Windows.Forms.TreeViewCancelEventHandler(this.Tv1_BeforeExpand);
+            this.tv1.BeforeSelect += new System.Windows.Forms.TreeViewCancelEventHandler(this.Tv1_BeforeSelect);
             this.tv1.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.Tv1_AfterSelect);
             // 
             // pnlSearch
@@ -685,6 +693,38 @@
             this.txtSearch.Size = new System.Drawing.Size(214, 22);
             this.txtSearch.TabIndex = 0;
             this.txtSearch.KeyUp += new System.Windows.Forms.KeyEventHandler(this.TxtSearch_KeyUp);
+            // 
+            // toolStrip2
+            // 
+            this.toolStrip2.ImageScalingSize = new System.Drawing.Size(20, 20);
+            this.toolStrip2.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.tsHome,
+            this.tsBack});
+            this.toolStrip2.Location = new System.Drawing.Point(0, 0);
+            this.toolStrip2.Name = "toolStrip2";
+            this.toolStrip2.Size = new System.Drawing.Size(340, 27);
+            this.toolStrip2.TabIndex = 2;
+            this.toolStrip2.Text = "toolStrip2";
+            // 
+            // tsHome
+            // 
+            this.tsHome.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.tsHome.Image = global::DBADashGUI.Properties.Resources.HomeHS;
+            this.tsHome.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tsHome.Name = "tsHome";
+            this.tsHome.Size = new System.Drawing.Size(29, 24);
+            this.tsHome.Text = "Home";
+            this.tsHome.Click += new System.EventHandler(this.TsHome_Click);
+            // 
+            // tsBack
+            // 
+            this.tsBack.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.tsBack.Image = global::DBADashGUI.Properties.Resources.Previous_grey_16x;
+            this.tsBack.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tsBack.Name = "tsBack";
+            this.tsBack.Size = new System.Drawing.Size(29, 24);
+            this.tsBack.Text = "Back";
+            this.tsBack.Click += new System.EventHandler(this.TsBack_Click);
             // 
             // tabs
             // 
@@ -1937,10 +1977,10 @@
             // tabOSLoadedModules
             // 
             this.tabOSLoadedModules.Controls.Add(this.osLoadedModules1);
-            this.tabOSLoadedModules.Location = new System.Drawing.Point(4, 29);
+            this.tabOSLoadedModules.Location = new System.Drawing.Point(4, 25);
             this.tabOSLoadedModules.Name = "tabOSLoadedModules";
             this.tabOSLoadedModules.Padding = new System.Windows.Forms.Padding(3);
-            this.tabOSLoadedModules.Size = new System.Drawing.Size(192, 67);
+            this.tabOSLoadedModules.Size = new System.Drawing.Size(1631, 1246);
             this.tabOSLoadedModules.TabIndex = 44;
             this.tabOSLoadedModules.Text = "OS Loaded Modules";
             this.tabOSLoadedModules.UseVisualStyleBackColor = true;
@@ -1952,8 +1992,21 @@
             this.osLoadedModules1.Location = new System.Drawing.Point(3, 3);
             this.osLoadedModules1.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.osLoadedModules1.Name = "osLoadedModules1";
-            this.osLoadedModules1.Size = new System.Drawing.Size(186, 61);
+            this.osLoadedModules1.Size = new System.Drawing.Size(1625, 1240);
             this.osLoadedModules1.TabIndex = 0;
+            // 
+            // refresh1
+            // 
+            this.refresh1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(99)))), ((int)(((byte)(163)))));
+            this.refresh1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.refresh1.Font = new System.Drawing.Font("Segoe UI", 11F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.refresh1.ForeColor = System.Drawing.Color.White;
+            this.refresh1.Location = new System.Drawing.Point(0, 0);
+            this.refresh1.Margin = new System.Windows.Forms.Padding(4);
+            this.refresh1.Name = "refresh1";
+            this.refresh1.Size = new System.Drawing.Size(1639, 1275);
+            this.refresh1.TabIndex = 1;
+            this.refresh1.Visible = false;
             // 
             // dataGridViewTextBoxColumn1
             // 
@@ -2196,11 +2249,14 @@
             this.menuStrip1.ResumeLayout(false);
             this.menuStrip1.PerformLayout();
             this.splitMain.Panel1.ResumeLayout(false);
+            this.splitMain.Panel1.PerformLayout();
             this.splitMain.Panel2.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.splitMain)).EndInit();
             this.splitMain.ResumeLayout(false);
             this.pnlSearch.ResumeLayout(false);
             this.pnlSearch.PerformLayout();
+            this.toolStrip2.ResumeLayout(false);
+            this.toolStrip2.PerformLayout();
             this.tabs.ResumeLayout(false);
             this.tabSnapshotsSummary.ResumeLayout(false);
             this.tabSchema.ResumeLayout(false);
@@ -2436,5 +2492,9 @@
         private System.Windows.Forms.TabPage tabOSLoadedModules;
         private Checks.OSLoadedModules osLoadedModules1;
         private System.Windows.Forms.ToolStripMenuItem groupToolStripMenuItem;
+        private System.Windows.Forms.ToolStrip toolStrip2;
+        private System.Windows.Forms.ToolStripButton tsHome;
+        private System.Windows.Forms.ToolStripButton tsBack;
+        private Refresh refresh1;
     }
 }

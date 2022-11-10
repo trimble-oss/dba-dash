@@ -14,55 +14,19 @@ using DBADashGUI.DBFiles;
 
 namespace DBADashGUI
 {
-    public partial class SpaceTracking : UserControl
+    public partial class SpaceTracking : UserControl, INavigation
     {
         public SpaceTracking()
         {
             InitializeComponent();
-            HookupNavigationButtons(this); // Handle mouse back button
         }
 
 
-        public List<Int32> InstanceIDs;
-    
+        public List<Int32> InstanceIDs;  
         public Int32 DatabaseID = -1;
-
         public string DBName="";
         public string InstanceGroupName="";
-
-
-        private void HandlePreviewKeyDown(object sender, PreviewKeyDownEventArgs e)
-        {
-            switch (e.KeyCode)
-            {
-                case Keys.XButton1:
-                    NavigateBack();
-                    break;
-            }
-        }
-        private void HandleMouseDown(object sender, MouseEventArgs e)
-        {
-            switch (e.Button)
-            {
-                case MouseButtons.XButton1:
-                    NavigateBack();
-                    break;
-            }
-        }
-        // https://stackoverflow.com/questions/41637248/how-do-i-capture-mouse-back-button-and-cause-it-to-do-something-else
-        private void HookupNavigationButtons(Control ctrl)
-        {
-            for (int t = ctrl.Controls.Count - 1; t >= 0; t--)
-            {
-                Control c = ctrl.Controls[t];
-                c.PreviewKeyDown -= HandlePreviewKeyDown;
-                c.PreviewKeyDown += HandlePreviewKeyDown;
-                c.MouseDown -= HandleMouseDown;
-                c.MouseDown += HandleMouseDown;
-                HookupNavigationButtons(c);
-            }
-        }
-
+        public bool CanNavigateBack => tsBack.Enabled;
 
         public void RefreshData()
         {
@@ -227,23 +191,27 @@ namespace DBADashGUI
             NavigateBack();
         }
 
-        private void NavigateBack()
+        public bool NavigateBack()
         {
-            if (!tsBack.Enabled)
+            if (CanNavigateBack)
             {
-                return;
-            }
-            if (DBName.Length > 0)
-            {
-                DBName = "";
+                if (DBName.Length > 0)
+                {
+                    DBName = "";
+                }
+                else
+                {
+                    InstanceGroupName = "";
+                    tsBack.Enabled = false;
+                }
+                DiableHyperLinks(false);
+                RefreshDataLocal();
+                return true;
             }
             else
             {
-                InstanceGroupName = "";
-                tsBack.Enabled = false;
+                return false;
             }
-            DiableHyperLinks(false);
-            RefreshDataLocal();
         }
 
         private void TsHistory_Click(object sender, EventArgs e)
@@ -349,5 +317,6 @@ namespace DBADashGUI
                 e.ToolTipText = value == null || value == DBNull.Value ? "Unknown" : value.ToString();
             }
         }
+
     }
 }

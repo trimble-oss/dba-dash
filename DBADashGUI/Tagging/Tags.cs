@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 namespace DBADashGUI.Tagging
 {
-    public partial class Tags : UserControl
+    public partial class Tags : UserControl, INavigation
     {
         public Tags()
         {
@@ -37,6 +37,10 @@ namespace DBADashGUI.Tagging
         public List<int> InstanceIDs { get; set; }
         public string InstanceName { get; set; }
         public int InstanceID { get; set; }
+
+        public bool CanNavigateBack => !string.IsNullOrEmpty(InstanceName);
+
+        public bool CanNavigateForward => throw new NotImplementedException();
 
         private void bttnAdd_Click(object sender, EventArgs e)
         {
@@ -147,9 +151,27 @@ namespace DBADashGUI.Tagging
 
         private void tsBack_Click(object sender, EventArgs e)
         {
-            InstanceName = string.Empty;
-            InstanceID = -1;
-            RefreshData();
+            NavigateBack();
+        }
+
+        public bool NavigateBack()
+        {
+            if (CanNavigateBack)
+            {
+                InstanceName = string.Empty;
+                InstanceID = -1;
+                RefreshData();
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        public bool NavigateForward()
+        {
+            throw new NotImplementedException();
         }
 
         private void dgvTags_CellMouseUp(object sender, DataGridViewCellMouseEventArgs e)
@@ -180,6 +202,7 @@ namespace DBADashGUI.Tagging
                 tag.Save();
            }
         }
+
     }
 
 
