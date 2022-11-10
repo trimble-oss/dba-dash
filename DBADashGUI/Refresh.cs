@@ -20,7 +20,7 @@ namespace DBADashGUI
             SetStyle(ControlStyles.DoubleBuffer, true);
         }
 
-        private void reset()
+        private void Reset()
         {
             this.BackColor = DashColors.TrimbleBlue;
             this.ForeColor = Color.White;
@@ -28,9 +28,21 @@ namespace DBADashGUI
             timer1.Enabled = this.Visible && Common.IsApplicationRunning;
         }
 
+        public void ShowRefresh()
+        {
+            this.Visible = true;
+            Reset();
+        }
+
+        public void HideRefresh()
+        {
+            timer1.Enabled = false;
+            this.Visible = false;
+        }
+
         private readonly string baseText = "Refresh in progress";
 
-        private void timer1_Tick(object sender, EventArgs e)
+        private void Timer1_Tick(object sender, EventArgs e)
         {
             
             if (lblRefresh.Text.Length > baseText.Length + 20)
@@ -58,7 +70,7 @@ namespace DBADashGUI
 
         private void Refresh_VisibilityChanged(object sender, EventArgs e)
         {
-            reset();                       
+            Reset();                       
         }
     }
 }

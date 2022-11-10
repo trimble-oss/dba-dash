@@ -87,11 +87,16 @@ namespace DBADashGUI
         {
             dgvSummary.Columns[0].Frozen = Common.FreezeKeyColumn;
             ResetStatusCols();
-            refresh1.Visible = true;
+            refresh1.ShowRefresh();
             dgvSummary.Visible = false;
             refreshInstanceIDs = new List<int>(InstanceIDs);
             GetSummaryAsync().ContinueWith(task =>
             {
+                if (task.Exception != null)
+                {
+                    refresh1.SetFailed("Error:" + task.Exception.ToString());
+                    return;
+                }
                 DataTable dt = task.Result;
                 dgvSummary.AutoGenerateColumns = false;
                 var cols = (statusColumns.Keys).ToList<string>();
