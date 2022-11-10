@@ -59,6 +59,7 @@ namespace DBADashConfig.Test
             builder.DataSource = Guid.NewGuid().ToString();
             builder.InitialCatalog = "DABDashUnitTest" + Guid.NewGuid().ToString();
             builder.Password = "TestEncryption";
+            builder.ApplicationName = "DBADash";
             return builder;
         }
     }
