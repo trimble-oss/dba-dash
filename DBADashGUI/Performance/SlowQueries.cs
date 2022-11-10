@@ -314,14 +314,14 @@ namespace DBADashGUI
             ToggleSummary(true);
 
             dgvSummary.Visible = false;
-            refresh1.Show();
+            refresh1.ShowRefresh();
             GetSlowQueriesSummary().ContinueWith(task =>
             {
                 try
                 {
                     var dt = task.Result;
                     FormatTop(dt.Rows.Count);
-                    refresh1.Invoke(() => refresh1.Visible = false);
+                    refresh1.Invoke(() => refresh1.HideRefresh());
                     dgvSummary.Invoke(() =>
                     {
                         dgvSummary.AutoGenerateColumns = false;
