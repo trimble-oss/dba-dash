@@ -1640,6 +1640,7 @@
             this._lt5.MinimumWidth = 6;
             this._lt5.Name = "_lt5";
             this._lt5.ReadOnly = true;
+            this._lt5.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
             this._lt5.Width = 50;
             // 
             // _5to10
@@ -1651,6 +1652,7 @@
             this._5to10.MinimumWidth = 6;
             this._5to10.Name = "_5to10";
             this._5to10.ReadOnly = true;
+            this._5to10.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
             this._5to10.Width = 50;
             // 
             // _10to20
@@ -1675,6 +1677,7 @@
             this._20to30.MinimumWidth = 6;
             this._20to30.Name = "_20to30";
             this._20to30.ReadOnly = true;
+            this._20to30.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
             this._20to30.Width = 50;
             // 
             // _30to60
@@ -1686,6 +1689,7 @@
             this._30to60.MinimumWidth = 6;
             this._30to60.Name = "_30to60";
             this._30to60.ReadOnly = true;
+            this._30to60.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
             this._30to60.Width = 50;
             // 
             // _1to5min
@@ -1697,6 +1701,7 @@
             this._1to5min.MinimumWidth = 6;
             this._1to5min.Name = "_1to5min";
             this._1to5min.ReadOnly = true;
+            this._1to5min.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
             this._1to5min.Width = 50;
             // 
             // _5to10min
@@ -1708,6 +1713,7 @@
             this._5to10min.MinimumWidth = 6;
             this._5to10min.Name = "_5to10min";
             this._5to10min.ReadOnly = true;
+            this._5to10min.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
             this._5to10min.Width = 50;
             // 
             // _10to30min
@@ -1719,6 +1725,7 @@
             this._10to30min.MinimumWidth = 6;
             this._10to30min.Name = "_10to30min";
             this._10to30min.ReadOnly = true;
+            this._10to30min.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
             this._10to30min.Width = 50;
             // 
             // _30to60min
@@ -1730,6 +1737,7 @@
             this._30to60min.MinimumWidth = 6;
             this._30to60min.Name = "_30to60min";
             this._30to60min.ReadOnly = true;
+            this._30to60min.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
             this._30to60min.Width = 50;
             // 
             // _1hrPlus
@@ -1741,6 +1749,7 @@
             this._1hrPlus.MinimumWidth = 6;
             this._1hrPlus.Name = "_1hrPlus";
             this._1hrPlus.ReadOnly = true;
+            this._1hrPlus.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
             this._1hrPlus.Width = 50;
             // 
             // Total
@@ -1752,6 +1761,7 @@
             this.Total.MinimumWidth = 6;
             this.Total.Name = "Total";
             this.Total.ReadOnly = true;
+            this.Total.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
             this.Total.Width = 50;
             // 
             // Failed
