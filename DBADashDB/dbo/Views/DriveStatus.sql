@@ -10,7 +10,7 @@ SELECT I.InstanceID,
 	D.Capacity/POWER(1024.0,3) TotalGB,
 	D.UsedSpace/POWER(1024.0,3) UsedGB,
 	D.FreeSpace/POWER(1024.0,3) FreeGB,
-	D.FreeSpace/CAST(D.Capacity AS DECIMAL) AS PctFreeSpace,
+	D.FreeSpace/CAST(NULLIF(D.Capacity,0) AS DECIMAL) AS PctFreeSpace,
 	DATEDIFF(mi,SSD.SnapshotDate,GETUTCDATE()) AS SnapshotAgeMins,
 	SSD.SnapshotDate,
 	CASE WHEN cdt.WarningThreshold IS NULL AND cdt.CriticalThreshold IS NULL THEN 3 WHEN DATEDIFF(mi,SSD.SnapshotDate,GETUTCDATE()) > cdt.CriticalThreshold THEN 1 WHEN DATEDIFF(mi,SSD.SnapshotDate,GETUTCDATE()) > cdt.WarningThreshold THEN 2 ELSE 4 END AS SnapshotStatus,
@@ -39,9 +39,9 @@ OUTER APPLY(SELECT TOP(1) T.WarningThreshold, T.CriticalThreshold
 			AND T.Reference = 'Drives'
 			ORDER BY T.InstanceID DESC) cdt
 OUTER APPLY(SELECT CASE WHEN cfg.DriveCheckType = '%' 
-		AND FreeSpace/CAST(Capacity AS DECIMAL) < cfg.DriveCriticalThreshold THEN 1
+		AND FreeSpace/CAST(NULLIF(Capacity,0) AS DECIMAL) < cfg.DriveCriticalThreshold THEN 1
 		WHEN cfg.DriveCheckType = '%' 
-		AND FreeSpace/CAST(Capacity AS DECIMAL) < cfg.DriveWarningThreshold THEN 2
+		AND FreeSpace/CAST(NULLIF(Capacity,0) AS DECIMAL) < cfg.DriveWarningThreshold THEN 2
 		WHEN cfg.DriveCheckType = 'G' 
 		AND FreeSpace/POWER(1024.0,3)< cfg.DriveCriticalThreshold THEN 1
 		WHEN cfg.DriveCheckType = 'G' 

@@ -36,7 +36,7 @@ SELECT 		B.DatabaseID,
 			CASE WHEN B.backup_size = B.compressed_backup_size OR B.compressed_backup_size IS NULL THEN CAST(0 AS BIT) ELSE CAST(1 AS BIT) END AS IsCompressed,
 			B.backup_size/POWER(1024.0,3) AS BackupSizeGB,
 			B.compressed_backup_size/POWER(1024.0,3) AS BackupSizeCompressedGB,
-			1.0-((B.compressed_backup_size*1.0)/B.backup_size) AS CompressionSavingPct,
+			1.0-((B.compressed_backup_size*1.0)/NULLIF(B.backup_size,0)) AS CompressionSavingPct,
 			CASE WHEN B.encryptor_type IS NULL THEN CAST(0 AS BIT) ELSE CAST(1 AS BIT) END AS IsEncrypted,
             B.compression_algorithm
 FROM dbo.Backups B
