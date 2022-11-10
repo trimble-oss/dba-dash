@@ -15,12 +15,11 @@ using Humanizer.Localisation;
 
 namespace DBADashGUI
 {
-    public partial class SlowQueries : UserControl
+    public partial class SlowQueries : UserControl, INavigation
     {
         public SlowQueries()
         {
             InitializeComponent();
-            HookupNavigationButtons(this); // Handle mouse back button
         }
 
         public List<Int32> InstanceIDs;
@@ -39,6 +38,10 @@ namespace DBADashGUI
                 databaseNameToolStripMenuItem.Visible = _db.Length == 0;
             } 
         }
+
+        public bool CanNavigateBack => tsRunningBack.Visible && tsRunning.Enabled;
+
+        public bool CanNavigateForward => false;
 
         private bool IsFiltered()
         {
@@ -73,39 +76,6 @@ namespace DBADashGUI
                   sqlbatchcompletedToolStripMenuItem.Checked != rpccompletedToolStripMenuItem.Checked
                   ;
         }
-
-        private void HandlePreviewKeyDown(object sender, PreviewKeyDownEventArgs e)
-        {
-            switch (e.KeyCode)
-            {
-                case Keys.XButton1:
-                    NavigateBack();
-                    break;
-            }
-        }
-        private void HandleMouseDown(object sender, MouseEventArgs e)
-        {
-            switch (e.Button)
-            {
-                case MouseButtons.XButton1:
-                    NavigateBack();
-                    break;
-            }
-        }
-        // https://stackoverflow.com/questions/41637248/how-do-i-capture-mouse-back-button-and-cause-it-to-do-something-else
-        private void HookupNavigationButtons(Control ctrl)
-        {
-            for (int t = ctrl.Controls.Count - 1; t >= 0; t--)
-            {
-                Control c = ctrl.Controls[t];
-                c.PreviewKeyDown -= HandlePreviewKeyDown;
-                c.PreviewKeyDown += HandlePreviewKeyDown;
-                c.MouseDown -= HandleMouseDown;
-                c.MouseDown += HandleMouseDown;
-                HookupNavigationButtons(c);
-            }
-        }
-
 
         public void SetFilterFormatting()
         {
@@ -896,12 +866,22 @@ namespace DBADashGUI
             NavigateBack();
         }
 
-        private void NavigateBack()
+        public bool NavigateBack()
         {
-            if (tsRunningBack.Visible && tsRunning.Enabled)
+            if (CanNavigateBack)
             {
                 ToggleSummary(true);
+                return true;
             }
+            else
+            {
+                return false;
+            }
+        }
+
+        public bool NavigateForward()
+        {
+            return false;
         }
 
         private void Filter_TextChanged(object sender, EventArgs e)
@@ -956,7 +936,8 @@ namespace DBADashGUI
                 var status = Convert.ToString(r.Cells["Result"].Value) == "0 - OK" ? DBADashStatus.DBADashStatusEnum.OK : DBADashStatus.DBADashStatusEnum.Critical;
                 r.Cells["Result"].SetStatusColor(status);
             }
-        }    
+        }
+
 
     }
 }

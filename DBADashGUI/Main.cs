@@ -15,11 +15,12 @@ using System.IO;
 using Microsoft.SqlServer.Management.Common;
 using DBADashSharedGUI;
 using DBADashGUI.Performance;
+using System.Runtime.CompilerServices;
 
 namespace DBADashGUI
 {
 
-    public partial class Main : Form
+    public partial class Main : Form, IMessageFilter
     {
 
         public class InstanceSelectedEventArgs : EventArgs
@@ -34,6 +35,8 @@ namespace DBADashGUI
 
         public Main(CommandLineOptions opts)
         {
+            Application.AddMessageFilter(this);
+            this.FormClosed += (s, e) => Application.RemoveMessageFilter(this);
             InitializeComponent();
             commandLine = opts;
         }
@@ -53,6 +56,22 @@ namespace DBADashGUI
         private bool IsAzureOnly;
         private bool ShowCounts = false;
         private string GroupByTag = String.Empty;
+        private readonly List<TreeContext> VisitedNodes = new();
+        private bool suppressSaveContext = false;
+        /// <summary>
+        ///  For PreFilterMessage.  Mouse down button.
+        /// </summary>
+        private const int WM_XBUTTONDOWN = 0x020B;
+
+        /// <summary>
+        /// For PreFilterMessage. Mouse back button
+        /// </summary>
+        private const int MK_XBUTTON1 = 0x0020;
+
+        /// <summary>
+        /// For PreFilterMessage. Mouse forward button
+        /// </summary>
+        private const int MK_XBUTTON2 = 0x0040;
 
         private string SearchString
         {
@@ -75,6 +94,7 @@ namespace DBADashGUI
                 Properties.Settings.Default.SettingsUpgradeRequired = false;
                 Properties.Settings.Default.Save();
             }
+     
             lblVersion.Text = "Version: " + System.Reflection.Assembly.GetEntryAssembly().GetName().Version;
             tabs.TabPages.Clear();
             tabs.TabPages.Add(tabDBADash);
@@ -235,6 +255,7 @@ namespace DBADashGUI
             {
                 return;
             }
+            SaveContext();
             globalTimeIsVisible = false;
             currentTabSupportsDayOfWeekFilter = false;
             currentTabSupportsTimeOfDayFilter = false;
@@ -633,6 +654,8 @@ namespace DBADashGUI
 
         private void AddInstanes()
         {
+            VisitedNodes.Clear();
+            tsBack.Enabled = false;
             tv1.Nodes.Clear();
             var root = new SQLTreeItem("DBA Dash", SQLTreeItem.TreeType.DBADashRoot) {  ContextMenuStrip = RootRefreshContextMenu() };
             var changes = new SQLTreeItem("Configuration", SQLTreeItem.TreeType.Configuration);
@@ -726,6 +749,7 @@ namespace DBADashGUI
             tv1.Nodes.Add(root);
             root.Expand();
             tv1.SelectedNode = root;
+
         }
 
         private static void ExpandJobs(SQLTreeItem jobsNode)
@@ -989,7 +1013,7 @@ namespace DBADashGUI
                 }
             }
             suppressLoadTab = suppress;
-             LoadSelectedTab();
+            LoadSelectedTab();
             
            
         }
@@ -1731,6 +1755,146 @@ namespace DBADashGUI
                     DateRangeChanged();
                 }
             }
+        }
+
+        /// <summary>
+        /// Navigate to first tab (Summary) at root node in the tree.
+        /// </summary>
+        private void TsHome_Click(object sender, EventArgs e)
+        {
+            tv1.SelectedNode = tv1.Nodes[0];
+            tabs.SelectedIndex = 0;
+        }
+
+        private void Tv1_BeforeSelect(object sender, TreeViewCancelEventArgs e)
+        {
+            SaveContext(tv1.SelectedNode,tabs.SelectedIndex);
+        }
+
+        /// <summary>
+        /// Save current node and tab to support NavigateBack
+        /// </summary>
+        private void SaveContext()
+        {
+            SaveContext(tv1.SelectedNode, tabs.SelectedIndex);
+        }
+
+        /// <summary>
+        /// Save current node and tab to support NavigateBack
+        /// </summary>
+        private void SaveContext(TreeNode node,int tagIndex)
+        {
+            if (node != null)
+            {
+                SaveContext((SQLTreeItem)node, tagIndex);
+            }
+        }
+
+        /// <summary>
+        /// Save current node and tab to support NavigateBack
+        /// </summary>
+        private void SaveContext(SQLTreeItem node,int TabIndex)
+        {
+            if (node != null && TabIndex>=0 & !suppressSaveContext) // Save context if we have a current node/tab and save context is not supressed (e.g. When navigating back)
+            {
+                if (VisitedNodes.Count > 0) // Save only if current context is different to previous context
+                {
+                    var previousContext = VisitedNodes[^1];
+                    if (previousContext.Node == node && previousContext.TabIndex == TabIndex)
+                    {
+                        return;
+                    }
+                }
+                else if (tv1.Nodes.Count>0)
+                {
+                    // Ensure we have added the root context
+                    VisitedNodes.Add(new TreeContext() {  Node = (SQLTreeItem)tv1.Nodes[0], TabIndex = 0 }) ;
+                    if(node==tv1.Nodes[0] && TabIndex == 0) // If context we are saving is root, we don't need to add it again
+                    {
+                        return;
+                    }
+                }
+                VisitedNodes.Add(new TreeContext() { Node = node, TabIndex = TabIndex });
+                tsBack.Enabled = VisitedNodes.Count>0;
+            }
+        }
+
+        private void TsBack_Click(object sender, EventArgs e)
+        {
+            NavigateBack();
+        }
+
+
+        /// <summary>
+        /// Navigate back.  If current control supports INavigation, invoke the NavigateBack for the control.  If move back was not performed on control, take user to previous selected node/tab in tree.  
+        /// </summary>
+        private void NavigateBack()
+        {
+            foreach(var ctrl in tabs.SelectedTab.Controls)
+            {
+                if(ctrl is INavigation)
+                {
+                    if (((INavigation)ctrl).NavigateBack()){
+                        return;
+                    }
+                }
+            }
+            if (VisitedNodes.Count > 0)
+            {
+                suppressSaveContext = true; // Don't save the context change when moving back.  Otherwise we'd flip flop between two contexts.
+                var context = VisitedNodes[^1];
+                VisitedNodes.RemoveAt(VisitedNodes.Count - 1);
+                if (context.Node == tv1.SelectedNode && context.TabIndex == tabs.SelectedIndex) // If move back location is set to current location, navigate to the next saved location
+                {
+                    NavigateBack();
+                }
+                else
+                {
+                    suppressLoadTab = true; // Avoid potential double refresh when changing tree node then moving to different tab
+                    ShowRefresh();
+                    tv1.SelectedNode = context.Node;
+                    tabs.SelectedIndex = context.TabIndex;
+                    suppressLoadTab = false;
+                    LoadSelectedTab(); // Need to refresh data.  In some cases it could be OK not to refresh - in others, data could be shown from the wrong context.
+                    ShowRefresh(false);
+                }
+                tsBack.Enabled = VisitedNodes.Count > 0;
+                suppressSaveContext = false;
+            }
+        }
+
+
+        /// <summary>
+        /// Show Refresh screen
+        /// </summary>
+        private void ShowRefresh(bool showRefresh = true)
+        {
+            tabs.Visible = !showRefresh;
+            refresh1.Visible = showRefresh;
+            Application.DoEvents();
+        }
+
+        /// <summary>
+        /// Handle mouse back button press
+        /// https://stackoverflow.com/questions/67683479/process-mouse-back-and-forward-buttons-in-winforms-form-when-its-client-area-is
+        /// </summary>
+        public bool PreFilterMessage(ref Message m)
+        {
+            if (m.Msg == WM_XBUTTONDOWN)
+            {
+                int lowWord = (m.WParam.ToInt32() << 16) >> 16;
+                switch (lowWord)
+                {
+                    case MK_XBUTTON1:
+                        // navigate backward
+                        NavigateBack();
+                        break;
+                   // case MK_XBUTTON2:
+                       // navigate forward
+                       // break;
+                }
+            }
+            return false; // dispatch further
         }
     }
 }

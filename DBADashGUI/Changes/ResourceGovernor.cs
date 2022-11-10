@@ -11,48 +11,17 @@ using System.Windows.Forms;
 
 namespace DBADashGUI.Changes
 {
-    public partial class ResourceGovernor : UserControl
+    public partial class ResourceGovernor : UserControl, INavigation
     {
         public List<Int32> InstanceIDs;
         private List<Int32> backupInstanceIDs;
+
+        public bool CanNavigateBack => tsBack.Enabled;
+
         public ResourceGovernor()
         {
             InitializeComponent();
-            HookupNavigationButtons(this); // Handle mouse back button
         }
-
-        private void HandlePreviewKeyDown(object sender, PreviewKeyDownEventArgs e)
-        {
-            switch (e.KeyCode)
-            {
-                case Keys.XButton1:
-                    NavigateBack();
-                    break;
-            }
-        }
-        private void HandleMouseDown(object sender, MouseEventArgs e)
-        {
-            switch (e.Button)
-            {
-                case MouseButtons.XButton1:
-                    NavigateBack();
-                    break;
-            }
-        }
-        // https://stackoverflow.com/questions/41637248/how-do-i-capture-mouse-back-button-and-cause-it-to-do-something-else
-        private void HookupNavigationButtons(Control ctrl)
-        {
-            for (int t = ctrl.Controls.Count - 1; t >= 0; t--)
-            {
-                Control c = ctrl.Controls[t];
-                c.PreviewKeyDown -= HandlePreviewKeyDown;
-                c.PreviewKeyDown += HandlePreviewKeyDown;
-                c.MouseDown -= HandleMouseDown;
-                c.MouseDown += HandleMouseDown;
-                HookupNavigationButtons(c);
-            }
-        }
-
 
         public void RefreshData()
         {
@@ -153,12 +122,17 @@ namespace DBADashGUI.Changes
             NavigateBack();
         }
 
-        private void NavigateBack()
+        public bool NavigateBack()
         {
-            if (tsBack.Enabled)
+            if (CanNavigateBack)
             {
                 InstanceIDs = backupInstanceIDs;
                 RefreshData();
+                return true;
+            }
+            else
+            {
+                return false;
             }
         }
 

@@ -14,12 +14,11 @@ using System.Globalization;
 
 namespace DBADashGUI.Changes
 {
-    public partial class SchemaSnapshots : UserControl
+    public partial class SchemaSnapshots : UserControl, INavigation
     {
         public SchemaSnapshots()
         {
             InitializeComponent();
-            HookupNavigationButtons(this); // Handle mouse back button
         }
         readonly Int32 currentSummaryPageSize = 100;
         int currentSummaryPage = 1;
@@ -28,38 +27,7 @@ namespace DBADashGUI.Changes
         public Int32 DatabaseID;
         public List<Int32> InstanceIDs;
 
-
-        private void HandlePreviewKeyDown(object sender, PreviewKeyDownEventArgs e)
-        {
-            switch (e.KeyCode)
-            {
-                case Keys.XButton1:
-                    NavigateBack();
-                    break;
-            }
-        }
-        private void HandleMouseDown(object sender, MouseEventArgs e)
-        {
-            switch (e.Button)
-            {
-                case MouseButtons.XButton1:
-                    NavigateBack();
-                    break;
-            }
-        }
-        // https://stackoverflow.com/questions/41637248/how-do-i-capture-mouse-back-button-and-cause-it-to-do-something-else
-        private void HookupNavigationButtons(Control ctrl)
-        {
-            for (int t = ctrl.Controls.Count - 1; t >= 0; t--)
-            {
-                Control c = ctrl.Controls[t];
-                c.PreviewKeyDown -= HandlePreviewKeyDown;
-                c.PreviewKeyDown += HandlePreviewKeyDown;
-                c.MouseDown -= HandleMouseDown;
-                c.MouseDown += HandleMouseDown;
-                HookupNavigationButtons(c);
-            }
-        }
+        public bool CanNavigateBack { get=> tsBack.Enabled;}
 
 
         private static DataSet DdlSnapshotDiff(DateTime snapshotDateUTC, int databaseID)
@@ -318,22 +286,27 @@ namespace DBADashGUI.Changes
             NavigateBack();
         }
 
-        private void NavigateBack()
+        public bool NavigateBack()
         {
-            if (!tsBack.Enabled)
+            if (CanNavigateBack)
             {
-                return;
+                if (DatabaseID > 0)
+                {
+                    DatabaseID = -1;
+                }
+                else if (InstanceName.Length > 0 || InstanceID > 0)
+                {
+                    InstanceName = "";
+                    InstanceID = -1;
+                }
+                RefreshData();
+                return true;
             }
-            if (DatabaseID > 0)
+            else
             {
-                DatabaseID = -1;
+                return false;
             }
-            else if (InstanceName.Length > 0 || InstanceID > 0)
-            {
-                InstanceName = "";
-                InstanceID = -1;
-            }
-            RefreshData();
+       
         }
     }
 }

@@ -12,7 +12,7 @@ using static DBADashGUI.DBADashStatus;
 
 namespace DBADashGUI.Backups
 {
-    public partial class BackupsControl : UserControl
+    public partial class BackupsControl : UserControl, INavigation
     {
 
         public bool IncludeCritical
@@ -61,42 +61,12 @@ namespace DBADashGUI.Backups
             }
         }
 
+        public bool CanNavigateBack { get => tsBack.Enabled; }
+
         public List<Int32> InstanceIDs { get; set; }
         private int databaseID { get; set; }
 
         private List<Int32> backupInstanceIDs;
-
-        private void HandlePreviewKeyDown(object sender, PreviewKeyDownEventArgs e)
-        {
-            switch (e.KeyCode)
-            {
-                case Keys.XButton1:
-                    NavigateBack();
-                    break;
-            }
-        }
-        private void HandleMouseDown(object sender, MouseEventArgs e)
-        {
-            switch (e.Button)
-            {
-                case MouseButtons.XButton1:
-                    NavigateBack();
-                    break;
-            }
-        }
-        // https://stackoverflow.com/questions/41637248/how-do-i-capture-mouse-back-button-and-cause-it-to-do-something-else
-        private void HookupNavigationButtons(Control ctrl)
-        {
-            for (int t = ctrl.Controls.Count - 1; t >= 0; t--)
-            {
-                Control c = ctrl.Controls[t];
-                c.PreviewKeyDown -= HandlePreviewKeyDown;
-                c.PreviewKeyDown += HandlePreviewKeyDown;
-                c.MouseDown -= HandleMouseDown;
-                c.MouseDown += HandleMouseDown;
-                HookupNavigationButtons(c);
-            }
-        }
 
         public void RefreshBackups()
         {
@@ -348,7 +318,6 @@ namespace DBADashGUI.Backups
         public BackupsControl()
         {
             InitializeComponent();
-            HookupNavigationButtons(this); // Handle mouse back button
         }
 
 
@@ -541,27 +510,31 @@ namespace DBADashGUI.Backups
             NavigateBack();
         }
 
-        private void NavigateBack()
+        public bool NavigateBack()
         {
-            if (!tsBack.Enabled)
+            if (CanNavigateBack)
             {
-                return;
-            }
-            if (databaseID > 0)
-            {
-                databaseID = 0;
+                if (databaseID > 0)
+                {
+                    databaseID = 0;
+                }
+                else
+                {
+                    InstanceIDs = backupInstanceIDs;
+                    backupInstanceIDs = new List<int>();
+                }
+                tsBack.Enabled = backupInstanceIDs.Count > 0;
+                IncludeCritical = true;
+                IncludeWarning = true;
+                IncludeOK = InstanceIDs.Count == 1;
+                IncludeNA = InstanceIDs.Count == 1;
+                refresh();
+                return true;
             }
             else
             {
-                InstanceIDs = backupInstanceIDs;
-                backupInstanceIDs = new List<int>();
+                return false;
             }
-            tsBack.Enabled = backupInstanceIDs.Count > 0;
-            IncludeCritical = true;
-            IncludeWarning = true;
-            IncludeOK = InstanceIDs.Count == 1;
-            IncludeNA = InstanceIDs.Count == 1;
-            refresh();
         }
 
         private void tsExcelDetail_Click(object sender, EventArgs e)
