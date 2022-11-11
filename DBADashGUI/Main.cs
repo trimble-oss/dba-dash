@@ -41,7 +41,6 @@ namespace DBADashGUI
             commandLine = opts;
         }
 
-        string connectionString = "";
         readonly string jsonPath = Common.JsonConfigPath;
 
 
@@ -103,6 +102,7 @@ namespace DBADashGUI
             splitSchemaSnapshot.Panel1.Controls.Add(diffSchemaSnapshot);
             diffSchemaSnapshot.Dock = DockStyle.Fill;
 
+            string connectionString;
             if (System.IO.File.Exists(jsonPath))
             {
                 string jsonConfig = System.IO.File.ReadAllText(jsonPath);
@@ -131,36 +131,41 @@ namespace DBADashGUI
                     connectionString = frm.cfg.DestinationConnection.ConnectionString;
                 }
             }
-            var builder = new SqlConnectionStringBuilder(connectionString)
-            {
-                ApplicationName = "DBADashGUI"
-            };
-            connectionString = builder.ConnectionString;
-            Common.ConnectionString = connectionString;
-            mnuTags.Visible = !commandLine.NoTagMenu;
-
-            if (!CheckRepositoryDBConnection())
-            {
-                Application.Exit();
-                return;
-            }
-
             try
             {
-                await CheckVersion();
+                await SetConnection(connectionString);
             }
-            catch(Exception ex) when (ex.Message== "Version check")
+            catch (Exception ex) when (ex.Message == "Version check" || ex.Message == "Error checking repository DB connection")
             {
                 Application.Exit();
                 return;
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 MessageBox.Show("Error checking repository DB version.  The application will close.\n" + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 Application.Exit();
                 return;
             }
+        }
 
+
+        public async Task SetConnection(string connection)
+        {
+            var builder = new SqlConnectionStringBuilder(connection)
+            {
+                ApplicationName = "DBADashGUI"
+            };
+            Common.SetConnectionString(builder.ConnectionString);
+            mnuTags.Visible = !commandLine.NoTagMenu;
+
+            if (!CheckRepositoryDBConnection())
+            {
+                throw new Exception("Error checking repository DB connection");
+            }
+
+            await CheckVersion();
+
+            DBADashUser.GetUser();
             GetCommandLineTags();
             GetTreeLayout();
             BuildTagMenu(commandLineTags);
@@ -179,7 +184,7 @@ namespace DBADashGUI
             {
                 try
                 {
-                    using (var cn = new SqlConnection(connectionString))
+                    using (var cn = new SqlConnection(Common.ConnectionString))
                     {
                         cn.Open();
                     }
@@ -198,7 +203,7 @@ namespace DBADashGUI
 
         private async Task CheckVersion()
         {
-            var dbVersion = DBValidations.GetDBVersion(connectionString);
+            var dbVersion = DBValidations.GetDBVersion(Common.ConnectionString);
             var appVersion = System.Reflection.Assembly.GetEntryAssembly().GetName().Version;
             var compare = (new Version(appVersion.Major, appVersion.Minor)).CompareTo(new Version(dbVersion.Major, dbVersion.Minor));
 
@@ -213,7 +218,6 @@ namespace DBADashGUI
                 }      
                 else if( promptUpgrade== DialogResult.No)
                 {
-                    Application.Exit();
                     throw new Exception("Version check");
                 }
                 else
@@ -225,7 +229,6 @@ namespace DBADashGUI
             {
                 if(MessageBox.Show(String.Format("The version of this GUI app ({0}.{1}) is NEWER than the repository database ({2}.{3}). Please upgrade the repository database.", appVersion.Major, appVersion.Minor, dbVersion.Major, dbVersion.Minor), "Upgrade Agent", MessageBoxButtons.OKCancel, MessageBoxIcon.Warning) == DialogResult.OK)
                 {
-                    Application.Exit();
                     throw new Exception("Version check");
                 }
             }
@@ -277,7 +280,6 @@ namespace DBADashGUI
             }
             else if (tabs.SelectedTab == tabDrives)
             {
-                drivesControl1.ConnectionString = connectionString;
                 drivesControl1.InstanceIDs = n.RegularInstanceIDs.ToList();
                 drivesControl1.IncludeNA = n.RegularInstanceIDs.Count == 1;
                 drivesControl1.IncludeOK = n.RegularInstanceIDs.Count == 1;
@@ -333,7 +335,6 @@ namespace DBADashGUI
             }
             else if(tabs.SelectedTab == tabFiles)
             {
-                dbFilesControl1.ConnectionString = connectionString;
                 dbFilesControl1.InstanceIDs = n.InstanceIDs.ToList();
                 dbFilesControl1.DatabaseID = (n.DatabaseID > 0 ? (Int32?)n.DatabaseID : null);
                 dbFilesControl1.IncludeCritical = true;
@@ -357,7 +358,6 @@ namespace DBADashGUI
             else if(tabs.SelectedTab == tabLastGood)
             {
                 lastGoodCheckDBControl1.InstanceIDs = n.RegularInstanceIDs.ToList();
-                lastGoodCheckDBControl1.connectionString = connectionString;
                 lastGoodCheckDBControl1.IncludeCritical = true;
                 lastGoodCheckDBControl1.IncludeWarning = true;
                 lastGoodCheckDBControl1.IncludeNA = n.InstanceID>0;
@@ -371,7 +371,6 @@ namespace DBADashGUI
                 currentTabSupportsTimeOfDayFilter = true;
                 performance1.InstanceID = n.InstanceID;
                 performance1.DatabaseID = n.DatabaseID;
-                performance1.ConnectionString = connectionString;
                 if (n.Type == SQLTreeItem.TreeType.Database || n.Type == SQLTreeItem.TreeType.Instance)
                 {
                     performance1.ObjectID = 0;
@@ -426,13 +425,11 @@ namespace DBADashGUI
             else if(tabs.SelectedTab== tabHardware)
             {
                 hardwareChanges1.InstanceIDs = n.RegularInstanceIDs.ToList();
-                hardwareChanges1.ConnectionString = connectionString;
                 hardwareChanges1.RefreshData();
             }
             else if (tabs.SelectedTab == tabSQLPatching)
             {
                 sqlPatching1.InstanceIDs = n.RegularInstanceIDs.ToList();
-                sqlPatching1.ConnectionString = connectionString;
                 sqlPatching1.RefreshData();
             }
             else if(tabs.SelectedTab == tabInstanceConfig)
@@ -458,19 +455,16 @@ namespace DBADashGUI
             else if(tabs.SelectedTab== tabTraceFlags)
             {
                 traceFlagHistory1.InstanceIDs = n.RegularInstanceIDs.ToList();
-                traceFlagHistory1.ConnectionString = connectionString;
                 traceFlagHistory1.RefreshData();
             }
             else if(tabs.SelectedTab == tabAlerts)
             {
                 alerts1.InstanceIDs = n.RegularInstanceIDs.ToList();
-                alerts1.ConnectionString = connectionString;
                 alerts1.RefreshData();
             }
             else if (tabs.SelectedTab == tabDrivers)
             {
                 drivers1.InstanceIDs = n.RegularInstanceIDs.ToList();
-                drivers1.ConnectionString = connectionString;
                 drivers1.RefreshData();
             }
             else if (tabs.SelectedTab == tabDBSpace)
@@ -771,7 +765,7 @@ namespace DBADashGUI
 
         private void AddDatabases(SQLTreeItem instanceNode)
         {
-            using (var cn = new SqlConnection(connectionString))
+            using (var cn = new SqlConnection(Common.ConnectionString))
             using (var cmd = new SqlCommand("dbo.DatabasesByInstance_Get", cn) { CommandType = CommandType.StoredProcedure })
             {
                 cn.Open();
@@ -1205,7 +1199,7 @@ namespace DBADashGUI
             mnuTags.DropDownItems.Add(refreshTag);
             mnuTags.DropDownItems.Add(clearTag);
 
-            SetFont(mnuTags);
+            //SetFont(mnuTags);
 
             BuildGroupByTagMenu(ref tags);
         }
@@ -1250,6 +1244,7 @@ namespace DBADashGUI
 
         private void GetTreeLayout()
         {
+            GroupByTag = string.Empty;
             try
             {
                 var savedView = TreeSavedView.GetSavedViews(SavedView.ViewTypes.Tree, DBADashUser.UserID).Where(sv => sv.Key == SavedView.DefaultViewName);
@@ -1288,21 +1283,20 @@ namespace DBADashGUI
         {
             isClearTags = true;
             mnuTags.Font = Font = new Font(mnuTags.Font, mnuTags.Font.Style & ~FontStyle.Bold);
-            ClearTags(mnuTags);
+            ClearTags(mnuTags.DropDownItems);
             isClearTags = false;
             AddInstanes();
             this.Font = new Font(this.Font, FontStyle.Regular);
         }
 
-        private void ClearTags(ToolStripMenuItem rootMnu)
+        private void ClearTags(ToolStripItemCollection items)
         {
-            
-            foreach (ToolStripItem mnu in rootMnu.DropDownItems)
+            foreach (ToolStripItem mnu in items)
             {
                 if (mnu.GetType() == typeof(ToolStripMenuItem))
                 {
                     ((ToolStripMenuItem)mnu).Checked = false;
-                    ClearTags((ToolStripMenuItem)mnu);
+                    ClearTags(((ToolStripMenuItem)mnu).DropDownItems);
                     if (mnu.Font.Bold)
                     {
                         mnu.Font = Font = new Font(mnu.Font, mnu.Font.Style & ~FontStyle.Bold);
@@ -1311,13 +1305,15 @@ namespace DBADashGUI
             }
         }
 
-
-
-        private List<int> SelectedTags(ToolStripMenuItem mnu = null)
+        private List<int> SelectedTags()
         {
-            mnu ??= mnuTags;
+            return SelectedTags(mnuTags.DropDownItems);
+        }
+
+        private List<int> SelectedTags(ToolStripItemCollection items)
+        {
             var selected = new List<int>();
-            foreach (ToolStripItem mnuTag in mnu.DropDownItems)
+            foreach (ToolStripItem mnuTag in items)
             {
                 if (mnuTag.GetType() == typeof(ToolStripMenuItem))
                 {
@@ -1327,7 +1323,7 @@ namespace DBADashGUI
                     }
                     if (((ToolStripMenuItem)mnuTag).DropDownItems.Count > 0)
                     {
-                        selected.AddRange(SelectedTags((ToolStripMenuItem)mnuTag));
+                        selected.AddRange(SelectedTags(((ToolStripMenuItem)mnuTag).DropDownItems));
                     }
                 }
             }
@@ -1340,7 +1336,7 @@ namespace DBADashGUI
             {
                 AddInstanes();
                 var mnuTag = (ToolStripMenuItem)sender;
-                while (mnuTag.OwnerItem != null) {
+                while (mnuTag.OwnerItem != null && mnuTag.OwnerItem is ToolStripMenuItem) {
                     mnuTag = (ToolStripMenuItem)mnuTag.OwnerItem;
                 }
                 SetFont(mnuTag);
@@ -1355,7 +1351,7 @@ namespace DBADashGUI
             {
                 mnu.Font = new Font(mnu.Font, mnu.Font.Style | FontStyle.Bold);
             }
-            else if (SelectedTags(mnu).Count > 0)
+            else if (SelectedTags(mnu.DropDownItems).Count > 0)
             {
                 mnu.Font = new Font(mnu.Font, mnu.Font.Style | FontStyle.Bold);
             }
@@ -1379,10 +1375,7 @@ namespace DBADashGUI
 
         private void DataRetentionToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            DataRetention frm = new()
-            {
-                ConnectionString = connectionString
-            };
+            using DataRetention frm = new();
             frm.ShowDialog();
         }
 
@@ -1895,6 +1888,27 @@ namespace DBADashGUI
                 }
             }
             return false; // dispatch further
+        }
+
+        private async void tsConnect_Click(object sender, EventArgs e)
+        {
+            string oldConnection = Common.ConnectionString;
+            using(var frm = new DBConnection() { ConnectionString = Common.ConnectionString })
+            {
+                frm.ShowDialog();
+                if(frm.DialogResult== DialogResult.OK)
+                {
+                    try
+                    {
+                        await SetConnection(frm.ConnectionString);
+                    }
+                    catch(Exception ex)
+                    {
+                        MessageBox.Show("Error switching to DBA Dash repository database:\n" + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        await SetConnection(oldConnection);
+                    }
+                }
+            }   
         }
     }
 }

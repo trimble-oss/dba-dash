@@ -20,7 +20,6 @@ namespace DBADashGUI.DBFiles
         }
 
         public List<Int32> InstanceIDs;
-        public string ConnectionString;
         public Int32? DatabaseID;
 
         public bool IncludeCritical
@@ -88,7 +87,7 @@ namespace DBADashGUI.DBFiles
         private DataTable getDBFiles()
         {
             var selectedTypes = FileTypes;
-            using (var cn = new SqlConnection(ConnectionString))
+            using (var cn = new SqlConnection(Common.ConnectionString))
             using (var cmd = new SqlCommand("dbo.DBFiles_Get", cn) { CommandType = CommandType.StoredProcedure })
             using (var da = new SqlDataAdapter(cmd))
             {

@@ -21,7 +21,6 @@ namespace DBADashGUI.Properties
         }
 
         public List<Int32> InstanceIDs;
-        public string ConnectionString;
         public Int32 DrivesViewMaxRows = 30;
 
         public bool IncludeCritical
@@ -78,7 +77,7 @@ namespace DBADashGUI.Properties
 
         private DataTable getDrives()
         {
-            using (var cn = new SqlConnection(ConnectionString))
+            using (var cn = new SqlConnection(Common.ConnectionString))
             using (var cmd = new SqlCommand("dbo.Drives_Get", cn) { CommandType = CommandType.StoredProcedure })
             using (var da = new SqlDataAdapter(cmd))
             {
@@ -249,7 +248,6 @@ namespace DBADashGUI.Properties
                 drv.Drive.SnapshotDate = (DateTime)r["SnapshotDate"];
                 drv.Drive.SnapshotStatus= (DBADashStatusEnum)r["SnapshotStatus"];
                 drv.DisplayInstanceName = InstanceIDs.Count > 1;
-                drv.Drive.ConnectionString = ConnectionString;
                 drv.Dock = DockStyle.Top;
                 driveControls.Add(drv);
             }
@@ -268,7 +266,7 @@ namespace DBADashGUI.Properties
 
         public void Configure(Int32 InstanceID,Int32 DriveID)
         {
-            var drv = DriveThreshold.GetDriveThreshold(InstanceID, DriveID,ConnectionString);
+            var drv = DriveThreshold.GetDriveThreshold(InstanceID, DriveID);
             var frm = new DriveThresholdConfig
             {
                 DriveThreshold = drv

@@ -17,8 +17,6 @@ namespace DBADashGUI
             InitializeComponent();
         }
 
-        public string ConnectionString;
-
         private void DataRetention_Load(object sender, EventArgs e)
         {
             Common.StyleGrid(ref dgv);
@@ -42,7 +40,7 @@ namespace DBADashGUI
 
         private DataTable getDataRetention(bool allTables)
         {
-            using (var cn = new SqlConnection(ConnectionString))
+            using (var cn = new SqlConnection(Common.ConnectionString))
             using (var cmd = new SqlCommand("dbo.DataRetention_Get", cn) { CommandType = CommandType.StoredProcedure })
             using (var da = new SqlDataAdapter(cmd))
             {
@@ -95,7 +93,7 @@ namespace DBADashGUI
 
         private void updateRetention(string table, int days)
         {
-            using (var cn = new SqlConnection(ConnectionString))
+            using (var cn = new SqlConnection(Common.ConnectionString))
             using (SqlCommand cmd = new SqlCommand("dbo.DataRetention_Upd", cn) { CommandType = CommandType.StoredProcedure }) {
                 cn.Open();
                 cmd.Parameters.AddWithValue("TableName", table);
@@ -116,7 +114,7 @@ namespace DBADashGUI
 
         private void purge()
         {
-            SqlConnection cn = new SqlConnection(ConnectionString);
+            SqlConnection cn = new SqlConnection(Common.ConnectionString);
             using (cn)
             {
                 cn.Open();

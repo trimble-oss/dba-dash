@@ -18,7 +18,6 @@ namespace DBADashGUI.Changes
             InitializeComponent();
         }
 
-        public string ConnectionString;
         public List<Int32> InstanceIDs;
 
 
@@ -27,7 +26,7 @@ namespace DBADashGUI.Changes
         {
             var dt = new DataTable();
             dt.Columns.Add("Instance");
-            using (var cn = new SqlConnection(ConnectionString))
+            using (var cn = new SqlConnection(Common.ConnectionString))
             using (var cmd = new SqlCommand("dbo.TraceFlags_Get", cn) { CommandType = CommandType.StoredProcedure })
             {
                 cn.Open();
@@ -88,7 +87,7 @@ namespace DBADashGUI.Changes
 
         private DataTable getTraceFlagHistory()
         {
-            using (var cn = new SqlConnection(ConnectionString))
+            using (var cn = new SqlConnection(Common.ConnectionString))
             using (var cmd = new SqlCommand("dbo.TraceFlagHistory_Get", cn) { CommandType = CommandType.StoredProcedure })
             using (var da = new SqlDataAdapter(cmd))
             {

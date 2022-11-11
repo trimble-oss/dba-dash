@@ -48,8 +48,6 @@ namespace DBADashGUI.Performance
             }
         }
 
-        public string ConnectionString;
-
         public Performance()
         {
             InitializeComponent();

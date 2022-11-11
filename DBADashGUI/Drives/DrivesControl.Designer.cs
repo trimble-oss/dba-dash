@@ -65,7 +65,6 @@
             // 
             this.driveControl1.DisplayInstanceName = false;
             this.driveControl1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.driveControl1.Drive.ConnectionString = null;
             this.driveControl1.Drive.CriticalThreshold = new decimal(new int[] {
             0,
             0,

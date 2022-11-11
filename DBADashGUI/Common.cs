@@ -16,11 +16,20 @@ namespace DBADashGUI
 {
     public class Common : CommonShared
     {
-        public static string ConnectionString;
+        private static string connectionString;
+        private static Guid connectionGUID;
+        public static Guid ConnectionGUID { get => connectionGUID;  }
+        public static string ConnectionString { get => connectionString; }
         public static readonly string JsonConfigPath = System.IO.Path.Combine(Application.StartupPath, "ServiceConfig.json");
         public static bool FreezeKeyColumn = true;
         public static bool IsApplicationRunning = false; /* Set to true if App is running - used to detect design time mode */
         private static CodeViewer FrmCodeViewer;
+
+        public static void SetConnectionString(string connection)
+        {
+            connectionString = connection;
+            connectionGUID = Guid.NewGuid();
+        }
 
         public static Dictionary<Int32, string> DateGroups = new Dictionary<Int32, string>() {
                 {0,"None" },

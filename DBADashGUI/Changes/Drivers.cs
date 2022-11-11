@@ -18,8 +18,6 @@ namespace DBADashGUI.Changes
             InitializeComponent();
         }
 
-
-        public string ConnectionString;
         public List<Int32> InstanceIDs;
         string provider = "";
         string searchText = "";
@@ -34,7 +32,7 @@ namespace DBADashGUI.Changes
 
         private DataTable getDrivers()
         {
-            using (var cn = new SqlConnection(ConnectionString))
+            using (var cn = new SqlConnection(Common.ConnectionString))
             using (var cmd = new SqlCommand("dbo.Drivers_Get", cn) { CommandType = CommandType.StoredProcedure })
             using (var da = new SqlDataAdapter(cmd))
             {

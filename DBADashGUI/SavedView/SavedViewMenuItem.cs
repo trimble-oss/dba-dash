@@ -28,6 +28,7 @@ namespace DBADashGUI
         private readonly static string globalTag = "Global";
         private readonly static string userTag = "User";
         private readonly static string noneText = "{None}";
+        private Guid connectionGUID;
 
         public SavedView.ViewTypes Type { get; set; }
 
@@ -63,6 +64,8 @@ namespace DBADashGUI
             }
             else
             {
+                SelectItem(noneText,true);
+                SavedViewSelected(this, new SavedViewSelectedEventArgs() { Name = noneText, IsGlobal = true, SerializedObject = string.Empty });
                 return false;
             }
         }
@@ -77,16 +80,42 @@ namespace DBADashGUI
             return _globalSavedViews.ContainsKey(name);
         }
 
+
+        /// <summary>
+        /// Load saved view menu items.  Only runs if items haven't already been loaded.
+        /// </summary>
+        public bool LoadItems()
+        {
+            if (this.HasDropDownItems && this.connectionGUID == Common.ConnectionGUID)
+            {
+                return false;
+            }
+            else
+            {
+                RefreshItems();
+                return true;
+            }
+        }
+
+        /// <summary>
+        /// Load saved view menu items and select the default.  Only runs if items haven't already been loaded.
+        /// </summary>
+        public bool LoadItemsAndSelectDefault()
+        {
+            var loaded = LoadItems();
+            if (loaded)
+            {
+                SelectDefault();
+            }
+            return loaded;
+        }
+
         
         /// <summary>
-        /// Load saved view menu items
+        /// Load saved view menu items - replaces any existing items with new ones from the DB.
         /// </summary>
-        public void LoadItems()
+        public void RefreshItems()
         {
-            if(Common.ConnectionString == String.Empty)
-            {
-                return;
-            }
             _savedViews = SavedView.GetSavedViews(Type,DBADashUser.UserID);
             _globalSavedViews = SavedView.GetSavedViews(Type,DBADashUser.SystemUserID);
             DropDownItems.Clear();
@@ -126,6 +155,7 @@ namespace DBADashGUI
             SetText("View");
             Font = new Font(this.Font, FontStyle.Regular);
             _selectedSavedView = String.Empty;
+            connectionGUID = Common.ConnectionGUID; // Detect if we have changed connection to the repository DB for LoadItems
         }
 
         public void ClearSelectedItem()

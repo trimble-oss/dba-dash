@@ -34,8 +34,7 @@
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
             this.TreeViewImageList = new System.Windows.Forms.ImageList(this.components);
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
-            this.mnuTags = new System.Windows.Forms.ToolStripMenuItem();
-            this.groupToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.tsConnect = new System.Windows.Forms.ToolStripMenuItem();
             this.diffToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.databaseSchemaDiffToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.agentJobDiffToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -76,6 +75,8 @@
             this.toolStrip2 = new System.Windows.Forms.ToolStrip();
             this.tsHome = new System.Windows.Forms.ToolStripButton();
             this.tsBack = new System.Windows.Forms.ToolStripButton();
+            this.mnuTags = new System.Windows.Forms.ToolStripDropDownButton();
+            this.groupToolStripMenuItem = new System.Windows.Forms.ToolStripDropDownButton();
             this.tabs = new System.Windows.Forms.TabControl();
             this.tabSnapshotsSummary = new System.Windows.Forms.TabPage();
             this.schemaSnapshots1 = new DBADashGUI.Changes.SchemaSnapshots();
@@ -303,8 +304,7 @@
             this.menuStrip1.AutoSize = false;
             this.menuStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
             this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.mnuTags,
-            this.groupToolStripMenuItem,
+            this.tsConnect,
             this.diffToolStripMenuItem,
             this.optionsToolStripMenuItem,
             this.tsTime,
@@ -317,21 +317,14 @@
             this.menuStrip1.TabIndex = 1;
             this.menuStrip1.Text = "menuStrip1";
             // 
-            // mnuTags
+            // tsConnect
             // 
-            this.mnuTags.Image = global::DBADashGUI.Properties.Resources.FilterDropdown_16x;
-            this.mnuTags.Name = "mnuTags";
-            this.mnuTags.Size = new System.Drawing.Size(76, 30);
-            this.mnuTags.Text = "Filter";
-            this.mnuTags.ToolTipText = "Filter instances by tag";
-            // 
-            // groupToolStripMenuItem
-            // 
-            this.groupToolStripMenuItem.Image = global::DBADashGUI.Properties.Resources.GroupBy_16x;
-            this.groupToolStripMenuItem.Name = "groupToolStripMenuItem";
-            this.groupToolStripMenuItem.Size = new System.Drawing.Size(84, 30);
-            this.groupToolStripMenuItem.Text = "Group";
-            this.groupToolStripMenuItem.ToolTipText = "Group instances by tag";
+            this.tsConnect.Image = global::DBADashGUI.Properties.Resources.ConnectToDatabase_16x;
+            this.tsConnect.Name = "tsConnect";
+            this.tsConnect.Size = new System.Drawing.Size(97, 30);
+            this.tsConnect.Text = "Connect";
+            this.tsConnect.ToolTipText = "Connect to a different DBA Dash repository";
+            this.tsConnect.Click += new System.EventHandler(this.tsConnect_Click);
             // 
             // diffToolStripMenuItem
             // 
@@ -601,7 +594,7 @@
             // aboutToolStripMenuItem
             // 
             this.aboutToolStripMenuItem.Name = "aboutToolStripMenuItem";
-            this.aboutToolStripMenuItem.Size = new System.Drawing.Size(133, 26);
+            this.aboutToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
             this.aboutToolStripMenuItem.Text = "About";
             this.aboutToolStripMenuItem.Click += new System.EventHandler(this.AboutToolStripMenuItem_Click);
             // 
@@ -699,7 +692,9 @@
             this.toolStrip2.ImageScalingSize = new System.Drawing.Size(20, 20);
             this.toolStrip2.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.tsHome,
-            this.tsBack});
+            this.tsBack,
+            this.mnuTags,
+            this.groupToolStripMenuItem});
             this.toolStrip2.Location = new System.Drawing.Point(0, 0);
             this.toolStrip2.Name = "toolStrip2";
             this.toolStrip2.Size = new System.Drawing.Size(340, 27);
@@ -708,23 +703,45 @@
             // 
             // tsHome
             // 
+            this.tsHome.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
             this.tsHome.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
             this.tsHome.Image = global::DBADashGUI.Properties.Resources.HomeHS;
             this.tsHome.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsHome.Name = "tsHome";
             this.tsHome.Size = new System.Drawing.Size(29, 24);
             this.tsHome.Text = "Home";
+            this.tsHome.ToolTipText = "Go to root level summary";
             this.tsHome.Click += new System.EventHandler(this.TsHome_Click);
             // 
             // tsBack
             // 
+            this.tsBack.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
             this.tsBack.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
             this.tsBack.Image = global::DBADashGUI.Properties.Resources.Previous_grey_16x;
             this.tsBack.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsBack.Name = "tsBack";
             this.tsBack.Size = new System.Drawing.Size(29, 24);
             this.tsBack.Text = "Back";
+            this.tsBack.ToolTipText = "Move back to the previous context";
             this.tsBack.Click += new System.EventHandler(this.TsBack_Click);
+            // 
+            // mnuTags
+            // 
+            this.mnuTags.Image = global::DBADashGUI.Properties.Resources.FilterDropdown_16x;
+            this.mnuTags.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.mnuTags.Name = "mnuTags";
+            this.mnuTags.Size = new System.Drawing.Size(76, 24);
+            this.mnuTags.Text = "Filter";
+            this.mnuTags.ToolTipText = "Filter instances by tag";
+            // 
+            // groupToolStripMenuItem
+            // 
+            this.groupToolStripMenuItem.Image = global::DBADashGUI.Properties.Resources.GroupBy_16x;
+            this.groupToolStripMenuItem.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.groupToolStripMenuItem.Name = "groupToolStripMenuItem";
+            this.groupToolStripMenuItem.Size = new System.Drawing.Size(84, 24);
+            this.groupToolStripMenuItem.Text = "Group";
+            this.groupToolStripMenuItem.ToolTipText = "Group instances by tag";
             // 
             // tabs
             // 
@@ -1040,6 +1057,7 @@
             // 
             // tags1
             // 
+            this.tags1.AllTags = null;
             this.tags1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tags1.InstanceID = 0;
             this.tags1.InstanceIDs = null;
@@ -1977,10 +1995,10 @@
             // tabOSLoadedModules
             // 
             this.tabOSLoadedModules.Controls.Add(this.osLoadedModules1);
-            this.tabOSLoadedModules.Location = new System.Drawing.Point(4, 25);
+            this.tabOSLoadedModules.Location = new System.Drawing.Point(4, 29);
             this.tabOSLoadedModules.Name = "tabOSLoadedModules";
             this.tabOSLoadedModules.Padding = new System.Windows.Forms.Padding(3);
-            this.tabOSLoadedModules.Size = new System.Drawing.Size(1631, 1246);
+            this.tabOSLoadedModules.Size = new System.Drawing.Size(192, 67);
             this.tabOSLoadedModules.TabIndex = 44;
             this.tabOSLoadedModules.Text = "OS Loaded Modules";
             this.tabOSLoadedModules.UseVisualStyleBackColor = true;
@@ -1992,7 +2010,7 @@
             this.osLoadedModules1.Location = new System.Drawing.Point(3, 3);
             this.osLoadedModules1.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.osLoadedModules1.Name = "osLoadedModules1";
-            this.osLoadedModules1.Size = new System.Drawing.Size(1625, 1240);
+            this.osLoadedModules1.Size = new System.Drawing.Size(186, 61);
             this.osLoadedModules1.TabIndex = 0;
             // 
             // refresh1
@@ -2336,7 +2354,6 @@
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Label label7;
         private System.Windows.Forms.TabPage tabTags;
-        private System.Windows.Forms.ToolStripMenuItem mnuTags;
         private System.Windows.Forms.TabPage tabDrives;
         private Properties.DrivesControl drivesControl1;
         private System.Windows.Forms.TabPage tabBackups;
@@ -2491,10 +2508,12 @@
         private Checks.IdentityColumns identityColumns1;
         private System.Windows.Forms.TabPage tabOSLoadedModules;
         private Checks.OSLoadedModules osLoadedModules1;
-        private System.Windows.Forms.ToolStripMenuItem groupToolStripMenuItem;
         private System.Windows.Forms.ToolStrip toolStrip2;
         private System.Windows.Forms.ToolStripButton tsHome;
         private System.Windows.Forms.ToolStripButton tsBack;
         private Refresh refresh1;
+        private System.Windows.Forms.ToolStripMenuItem tsConnect;
+        private System.Windows.Forms.ToolStripDropDownButton mnuTags;
+        private System.Windows.Forms.ToolStripDropDownButton groupToolStripMenuItem;
     }
 }
