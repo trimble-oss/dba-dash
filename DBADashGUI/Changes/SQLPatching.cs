@@ -18,7 +18,6 @@ namespace DBADashGUI
             InitializeComponent();
         }
 
-        public string ConnectionString;
         public List<Int32> InstanceIDs;
 
         public void RefreshData()
@@ -31,41 +30,36 @@ namespace DBADashGUI
 
         private void refreshVersion()
         {
-            using (var cn = new SqlConnection(ConnectionString))
+            using (var cn = new SqlConnection(Common.ConnectionString))
+            using (SqlCommand cmd = new SqlCommand("dbo.InstanceVersionInfo_Get", cn) { CommandType = CommandType.StoredProcedure })
             {
-                using (SqlCommand cmd = new SqlCommand("dbo.InstanceVersionInfo_Get", cn) { CommandType = CommandType.StoredProcedure })
-                {
-                    cn.Open();
-                    cmd.Parameters.AddWithValue("@InstanceIDs", string.Join(",", InstanceIDs));
-                    SqlDataAdapter da = new SqlDataAdapter(cmd);
-                    DataTable dt = new DataTable();
-                    da.Fill(dt);
-                    Common.ConvertUTCToLocal(ref dt);
-                    dgvVersion.AutoGenerateColumns = false;
-                    dgvVersion.DataSource = dt;
-                    dgvVersion.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
-                }
-            }
+                cn.Open();
+                cmd.Parameters.AddWithValue("@InstanceIDs", string.Join(",", InstanceIDs));
+                SqlDataAdapter da = new SqlDataAdapter(cmd);
+                DataTable dt = new DataTable();
+                da.Fill(dt);
+                Common.ConvertUTCToLocal(ref dt);
+                dgvVersion.AutoGenerateColumns = false;
+                dgvVersion.DataSource = dt;
+                dgvVersion.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
+            }           
         }
 
         private void refreshHistory()
         {
-            SqlConnection cn = new SqlConnection(ConnectionString);
-            using (cn)
+            using (var cn = new SqlConnection(Common.ConnectionString))
+            using (var cmd = new SqlCommand("dbo.SQLPatching_Get", cn) { CommandType = CommandType.StoredProcedure })
             {
-                using (var cmd = new SqlCommand("dbo.SQLPatching_Get", cn) { CommandType = CommandType.StoredProcedure })
-                {
-                    cn.Open();
-                    cmd.Parameters.AddWithValue("@InstanceIDs", string.Join(",", InstanceIDs));
-                    SqlDataAdapter da = new SqlDataAdapter(cmd);
-                    DataTable dt = new DataTable();
-                    da.Fill(dt);
-                    Common.ConvertUTCToLocal(ref dt);
-                    dgv.AutoGenerateColumns = false;
-                    dgv.DataSource = dt;
-                    dgv.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
-                }
-            }
+                cn.Open();
+                cmd.Parameters.AddWithValue("@InstanceIDs", string.Join(",", InstanceIDs));
+                SqlDataAdapter da = new SqlDataAdapter(cmd);
+                DataTable dt = new DataTable();
+                da.Fill(dt);
+                Common.ConvertUTCToLocal(ref dt);
+                dgv.AutoGenerateColumns = false;
+                dgv.DataSource = dt;
+                dgv.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
+            }        
         }
 
         private void tsCopyVersion_Click(object sender, EventArgs e)

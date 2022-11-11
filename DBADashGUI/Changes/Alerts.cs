@@ -18,7 +18,6 @@ namespace DBADashGUI.Changes
             InitializeComponent();
         }
 
-        public string ConnectionString;
         public List<Int32> InstanceIDs;
  
         public bool UseAlertName
@@ -41,7 +40,7 @@ namespace DBADashGUI.Changes
 
         private DataTable getAlertsConfig()
         {
-            using (var cn = new SqlConnection(ConnectionString))
+            using (var cn = new SqlConnection(Common.ConnectionString))
             using (var cmd = new SqlCommand("dbo.AlertsConfig_Get", cn) { CommandType = CommandType.StoredProcedure })
             using (var da = new SqlDataAdapter(cmd))
             {
@@ -110,7 +109,7 @@ namespace DBADashGUI.Changes
 
         private DataTable getAlerts()
         {
-            using (var cn = new SqlConnection(ConnectionString))
+            using (var cn = new SqlConnection(Common.ConnectionString))
             using (var cmd = new SqlCommand("dbo.Alerts_Get", cn) { CommandType = CommandType.StoredProcedure })
             using (var da = new SqlDataAdapter(cmd))
             {

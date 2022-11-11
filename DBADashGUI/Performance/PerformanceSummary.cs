@@ -32,29 +32,27 @@ namespace DBADashGUI.Performance
 
         public void RefreshData()
         {
-            if (!hasRunOnce)
+            
+            MigratePerformanceSummaryView();
+            savedViewMenuItem1.LoadItemsAndSelectDefault();
+          
+            dgv.Columns[0].Frozen = Common.FreezeKeyColumn;
+            dgv.DataSource = null;
+            var dt = GetPerformanceSummary();
+            AddPerformanceCounters(ref dt);
+            dgv.AutoGenerateColumns = false;
+            GenerateHistogram(ref dt);
+            if (dgv.DataSource == null)
             {
-                RunOnceOnRefresh(); // Triggers refresh
+                dgv.DataSource = new DataView(dt);
             }
-            else
-            {   
-                dgv.Columns[0].Frozen = Common.FreezeKeyColumn;
-                dgv.DataSource = null;
-                var dt = GetPerformanceSummary();
-                AddPerformanceCounters(ref dt);
-                dgv.AutoGenerateColumns = false;
-                GenerateHistogram(ref dt);
-                if (dgv.DataSource == null)
-                {
-                    dgv.DataSource = new DataView(dt);
-                }
-                dgv.AutoResizeColumnHeadersHeight();
-                dgv.Columns["colCPUHistogram"].Width = 200;
-                if (selectedview != null)
-                {
-                    LoadPersistedColumnLayout(selectedview.ColumnLayout);
-                }
+            dgv.AutoResizeColumnHeadersHeight();
+            dgv.Columns["colCPUHistogram"].Width = 200;
+            if (selectedview != null)
+            {
+                LoadPersistedColumnLayout(selectedview.ColumnLayout);
             }
+            
         }
 
         private void AddPerformanceCounterColsToGrid()
@@ -256,16 +254,6 @@ namespace DBADashGUI.Performance
             AddHistCols(dgv, "col");
         }
 
-        private void RunOnceOnRefresh() // // Running on Load causes issues with the designer, so load once on refresh
-        {
-            if (!hasRunOnce)
-            {
-                hasRunOnce = true;
-                MigratePerformanceSummaryView();
-                savedViewMenuItem1.LoadItems();
-                savedViewMenuItem1.SelectDefault();             
-            }
-        }
 
         /// <summary>
         /// Migrate legacy saved view from Properties.Settings.Default to database
@@ -530,7 +518,7 @@ namespace DBADashGUI.Performance
                     };
 
                     savedView.Save();
-                    savedViewMenuItem1.LoadItems();
+                    savedViewMenuItem1.RefreshItems();
                     savedViewMenuItem1.SelectItem(name, false);
                     tsDeleteView.Visible = true;                    
                 }
@@ -579,7 +567,7 @@ namespace DBADashGUI.Performance
                 {
                     var view = new PerformanceSummarySavedView() { Name = savedViewMenuItem1.SelectedSavedView, UserID = savedViewMenuItem1.SelectedSavedViewIsGlobal ? DBADashUser.SystemUserID : DBADashUser.UserID };
                     view.Delete();
-                    savedViewMenuItem1.LoadItems();
+                    savedViewMenuItem1.RefreshItems();
                     tsDeleteView.Visible = false;
                 }
             }

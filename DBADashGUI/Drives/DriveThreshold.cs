@@ -20,8 +20,6 @@ namespace DBADashGUI
         public decimal WarningThreshold{get;set;}
         public decimal CriticalThreshold { get; set; }
 
-        public string ConnectionString { get; set; }
-
         public DriveCheckTypeEnum DriveCheckType { get; set; }
         public enum DriveCheckTypeEnum
         {
@@ -68,82 +66,75 @@ namespace DBADashGUI
         }
 
 
-        public static DriveThreshold GetDriveThreshold(Int32 InstanceID, Int32 DriveID,string ConnectionString)
+        public static DriveThreshold GetDriveThreshold(Int32 InstanceID, Int32 DriveID)
         {
             DriveThreshold drv = new DriveThreshold
             {
                 InstanceID = InstanceID,
                 DriveID = DriveID,
-                ConnectionString = ConnectionString
             };
-            using (var cn = new SqlConnection(ConnectionString))
-            {
-                using (SqlCommand cmd = new SqlCommand(@"DriveThreshold_Get", cn) { CommandType = CommandType.StoredProcedure }) {
-                    cn.Open();
-                    cmd.Parameters.AddWithValue("InstanceID", InstanceID);
-                    cmd.Parameters.AddWithValue("DriveID", DriveID);
-                    var rdr = cmd.ExecuteReader();
-                    if (rdr.Read())
-                    {
-                        drv.WarningThreshold = rdr["DriveWarningThreshold"] == DBNull.Value ? 0 : (decimal)rdr["DriveWarningThreshold"];
-                        drv.CriticalThreshold = rdr["DriveCriticalThreshold"] == DBNull.Value ? 0 : (decimal)rdr["DriveCriticalThreshold"];
-                        drv.Inherited = (bool)rdr["Inherited"];
-                        drv.DriveCheckTypeChar = char.Parse((string)rdr["DriveCheckType"]);
-                    }
-                    else
-                    {
-                        drv.Inherited = DriveID != -1;
-                    }
-                    return drv;
+            using (var cn = new SqlConnection(Common.ConnectionString))
+            using (SqlCommand cmd = new SqlCommand(@"DriveThreshold_Get", cn) { CommandType = CommandType.StoredProcedure }) {
+                cn.Open();
+                cmd.Parameters.AddWithValue("InstanceID", InstanceID);
+                cmd.Parameters.AddWithValue("DriveID", DriveID);
+                using var rdr = cmd.ExecuteReader();
+                if (rdr.Read())
+                {
+                    drv.WarningThreshold = rdr["DriveWarningThreshold"] == DBNull.Value ? 0 : (decimal)rdr["DriveWarningThreshold"];
+                    drv.CriticalThreshold = rdr["DriveCriticalThreshold"] == DBNull.Value ? 0 : (decimal)rdr["DriveCriticalThreshold"];
+                    drv.Inherited = (bool)rdr["Inherited"];
+                    drv.DriveCheckTypeChar = char.Parse((string)rdr["DriveCheckType"]);
                 }
+                else
+                {
+                    drv.Inherited = DriveID != -1;
+                }
+                return drv;
             }
+            
         }
 
 
         public void UpdateThresholds()
         {
-           SqlConnection cn = new SqlConnection(ConnectionString);
-            using (cn)
+
+            using (var cn = new SqlConnection(Common.ConnectionString))
+            using (SqlCommand cmd = new SqlCommand("dbo.DriveThresholds_Upd", cn) { CommandType = CommandType.StoredProcedure })
             {
-                using (SqlCommand cmd = new SqlCommand("dbo.DriveThresholds_Upd", cn) { CommandType = CommandType.StoredProcedure })
+                cn.Open();
+                cmd.Parameters.AddWithValue("InstanceID", InstanceID);
+                cmd.Parameters.AddWithValue("DriveID", DriveID);
+                cmd.Parameters.AddWithValue("DriveCheckType", Inherited ? 'I' : DriveCheckTypeChar);
+
+                if (WarningThreshold <= 0 || DriveCheckType == DriveCheckTypeEnum.None || Inherited)
                 {
-                    cn.Open();
-                    cmd.Parameters.AddWithValue("InstanceID", InstanceID);
-                    cmd.Parameters.AddWithValue("DriveID", DriveID);
-                    cmd.Parameters.AddWithValue("DriveCheckType", Inherited ? 'I' : DriveCheckTypeChar);
-
-                    if (WarningThreshold <= 0 || DriveCheckType == DriveCheckTypeEnum.None || Inherited)
-                    {
-                        cmd.Parameters.AddWithValue("Warning", DBNull.Value);
-                    }
-                    else
-                    {
-                        cmd.Parameters.AddWithValue("Warning", WarningThreshold);
-                    }
-                    if (CriticalThreshold <= 0 || DriveCheckType == DriveCheckTypeEnum.None || Inherited)
-                    {
-                        cmd.Parameters.AddWithValue("Critical", DBNull.Value);
-                    }
-                    else
-                    {
-
-                        cmd.Parameters.AddWithValue("Critical", CriticalThreshold);
-                    }
-                    cmd.ExecuteNonQuery();
-                    var rdr = cmd.ExecuteReader();
-                    if (rdr.Read())
-                    {
-                        WarningThreshold = rdr["DriveWarningThreshold"] == DBNull.Value ? 0 : (decimal)rdr["DriveWarningThreshold"];
-                        CriticalThreshold = rdr["DriveWarningThreshold"] == DBNull.Value ? 0 : (decimal)rdr["DriveCriticalThreshold"];
-                        DriveCheckTypeChar = char.Parse((string)rdr["DriveCheckType"]);
-                        Inherited = (bool)rdr["Inherited"];
-                    }
+                    cmd.Parameters.AddWithValue("Warning", DBNull.Value);
                 }
-            }
+                else
+                {
+                    cmd.Parameters.AddWithValue("Warning", WarningThreshold);
+                }
+                if (CriticalThreshold <= 0 || DriveCheckType == DriveCheckTypeEnum.None || Inherited)
+                {
+                    cmd.Parameters.AddWithValue("Critical", DBNull.Value);
+                }
+                else
+                {
+
+                    cmd.Parameters.AddWithValue("Critical", CriticalThreshold);
+                }
+                cmd.ExecuteNonQuery();
+                using var rdr = cmd.ExecuteReader();
+                if (rdr.Read())
+                {
+                    WarningThreshold = rdr["DriveWarningThreshold"] == DBNull.Value ? 0 : (decimal)rdr["DriveWarningThreshold"];
+                    CriticalThreshold = rdr["DriveWarningThreshold"] == DBNull.Value ? 0 : (decimal)rdr["DriveCriticalThreshold"];
+                    DriveCheckTypeChar = char.Parse((string)rdr["DriveCheckType"]);
+                    Inherited = (bool)rdr["Inherited"];
+                }
+            }            
         }
-
-
- 
 
     }
 }

@@ -21,24 +21,16 @@ namespace DBADashGUI.Performance
         }
 
         public Int32 InstanceID { get; set; }
-        private bool hasRunOnce;
+   
 
         public void RefreshData()
         {
-            RunOnceOnRefresh();
+            savedViewMenuItem1.LoadItemsAndSelectDefault();
             RefreshSummary();
             RefreshChart();
         }
 
-        private void RunOnceOnRefresh()  // Running on Load causes issues with the designer, so load once on refresh
-        {
-            if (!hasRunOnce)
-            {
-                hasRunOnce = true;
-                savedViewMenuItem1.LoadItems();
-                savedViewMenuItem1.SelectDefault();
-            }
-        }
+
 
         private void RefreshSummary()
         {
@@ -329,7 +321,7 @@ namespace DBADashGUI.Performance
                     };
 
                     savedView.Save();
-                    savedViewMenuItem1.LoadItems();
+                    savedViewMenuItem1.RefreshItems();
                     savedViewMenuItem1.SelectItem(name, false);
                     tsDeleteView.Visible = true;
                 }
@@ -344,7 +336,7 @@ namespace DBADashGUI.Performance
                 {
                     var sv = new MetricsSavedView { Name = savedViewMenuItem1.SelectedSavedView, UserID = savedViewMenuItem1.SelectedSavedViewIsGlobal ? DBADashUser.SystemUserID : DBADashUser.UserID };
                     sv.Delete();
-                    savedViewMenuItem1.LoadItems();
+                    savedViewMenuItem1.RefreshItems();
                     tsDeleteView.Visible = false;
                 }
             }     

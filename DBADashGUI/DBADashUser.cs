@@ -17,18 +17,13 @@ namespace DBADashGUI
 
         public static bool HasManageGlobalViews = false;
 
-        static DBADashUser()
-        {
-            GetUser(Environment.UserName);
-        }
-
-        private static void GetUser(string UserName)
+        public static void GetUser()
         {
             using (var cn = new SqlConnection(Common.ConnectionString))
             using (var cmd = new SqlCommand("DBADash.User_Get", cn) { CommandType = CommandType.StoredProcedure })
             {
                 cn.Open();
-                cmd.Parameters.AddWithValue("UserName", UserName);
+                cmd.Parameters.AddWithValue("UserName", Environment.UserName);
                 var pUserID = new SqlParameter("UserID", SqlDbType.Int) { Direction = ParameterDirection.Output };
                 var pManageGlobalViews = new SqlParameter("ManageGlobalViews", SqlDbType.Bit) { Direction = ParameterDirection.Output };
                 cmd.Parameters.Add(pUserID);

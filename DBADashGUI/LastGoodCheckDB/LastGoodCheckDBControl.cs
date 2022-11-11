@@ -13,8 +13,6 @@ namespace DBADashGUI.LastGoodCheckDB
     public partial class LastGoodCheckDBControl : UserControl
     {
         public List<Int32> InstanceIDs;
-        public string connectionString;
-
         public bool IncludeCritical
         {
             get
@@ -68,7 +66,7 @@ namespace DBADashGUI.LastGoodCheckDB
 
         public void RefreshData()
         {
-            using (var cn = new SqlConnection(connectionString))
+            using (var cn = new SqlConnection(Common.ConnectionString))
             using (var cmd = new SqlCommand("dbo.LastGoodCheckDB_Get", cn) { CommandType = CommandType.StoredProcedure })
             using (var da = new SqlDataAdapter(cmd))
             {
