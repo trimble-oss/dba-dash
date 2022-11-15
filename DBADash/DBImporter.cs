@@ -1,12 +1,11 @@
-﻿using Polly;
+﻿using Microsoft.Data.SqlClient;
+using Polly;
+using Serilog;
 using System;
 using System.Collections.Generic;
 using System.Data;
-using Microsoft.Data.SqlClient;
 using System.Linq;
 using System.Security.Cryptography;
-using System.Threading.Tasks;
-using Serilog;
 
 namespace DBADash
 {
@@ -15,13 +14,13 @@ namespace DBADash
 
         private readonly DataSet data;
         private readonly string connectionString;
-        private readonly Policy  retryPolicy;
+        private readonly Policy retryPolicy;
         private int? instanceID;
         private DateTime snapshotDate;
         private static readonly int commandTimeout = 60;
         private readonly DBADashAgent importAgent;
 
-        public DBImporter(DataSet data, string connectionString,DBADashAgent importAgent)
+        public DBImporter(DataSet data, string connectionString, DBADashAgent importAgent)
         {
             this.importAgent = importAgent;
             this.data = data;
@@ -45,13 +44,13 @@ namespace DBADash
             using (var cn = new SqlConnection(connectionString))
             {
                 cn.Open();
-            }            
+            }
         }
 
         // Adds error to Errors datatable to be imported into CollectionErrorLog table later.
         private void LogError(string errorSource, Exception ex, string errorContext = "Import")
         {
-            
+
             DataTable dtErrors;
             if (data.Tables.Contains("Errors"))
             {
@@ -76,7 +75,7 @@ namespace DBADash
                 data.Tables.Add(dtErrors);
             }
 
-            Log.Error(ex,"Error from {ErrorContext} {ErrorSource}", errorContext, errorSource);
+            Log.Error(ex, "Error from {ErrorContext} {ErrorSource}", errorContext, errorSource);
             var rError = dtErrors.NewRow();
             rError["ErrorSource"] = errorSource;
             rError["ErrorMessage"] = ex.ToString();
@@ -84,7 +83,7 @@ namespace DBADash
             dtErrors.Rows.Add(rError);
         }
 
-        
+
 
         // handle schema changes between agent versions
         private void UpgradeDS()
@@ -240,7 +239,7 @@ namespace DBADash
             }
             // Process tables that are database schema snapshots
             string snapshotPrefix = "Snapshot_";
-            foreach (string tableName in tablesInDataSet.Where(t=> t.StartsWith(snapshotPrefix)))
+            foreach (string tableName in tablesInDataSet.Where(t => t.StartsWith(snapshotPrefix)))
             {
                 string databaseName = tableName[snapshotPrefix.Length..];
                 try
@@ -263,7 +262,7 @@ namespace DBADash
                    new Context("ServerExtraProperties")
                );
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 LogError("ServerExtraProperties", ex);
                 exceptions.Add(ex);
@@ -326,7 +325,7 @@ namespace DBADash
             }
             catch (SqlException ex) when (ex.Number == 2627)
             {
-                throw new Exception($"DDLSnapshot:{ databaseName}. Primary key violation.  This can occur if you have a case sensitive database collation that contains tables, SPs or other database objects with names that are no longer unique with a case insensitive comparison.", ex);
+                throw new Exception($"DDLSnapshot:{databaseName}. Primary key violation.  This can occur if you have a case sensitive database collation that contains tables, SPs or other database objects with names that are no longer unique with a case insensitive comparison.", ex);
             }
 
         }
@@ -448,7 +447,7 @@ namespace DBADash
                     {
                         AgentHostName = (string)rInstance["AgentHostName"],
                         AgentVersion = (string)rInstance["AgentVersion"],
-                        AgentPath = rInstance.Table.Columns.Contains("AgentPath") ?  (string)rInstance["AgentPath"] : "",
+                        AgentPath = rInstance.Table.Columns.Contains("AgentPath") ? (string)rInstance["AgentPath"] : "",
                         AgentServiceName = rInstance.Table.Columns.Contains("AgentServiceName") ? (string)rInstance["AgentServiceName"] : "{DBADashService}",
                     };
                     if (collectAgent.Equals(importAgent))

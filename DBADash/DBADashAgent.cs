@@ -1,13 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.Data.SqlClient;
-using System.Reflection;
-using System.Security.Cryptography;
-using System.Runtime.Caching;
+﻿using Microsoft.Data.SqlClient;
 using Serilog;
+using System;
+using System.Reflection;
+using System.Runtime.Caching;
+using System.Security.Cryptography;
 namespace DBADash
 {
     public class DBADashAgent
@@ -30,7 +26,7 @@ namespace DBADash
         public int GetDBADashAgentID(string connectionString)
         {
             int agentID;
-            var hash = MD5.Create(); 
+            var hash = MD5.Create();
             string cacheKey;
             // Caching takes all properties into account + connection string (as we could be writing to multiple repositories and the agent could have different IDs for each).  Base off MD5 hash which should be sufficient for this use case.
             cacheKey = Convert.ToBase64String(hash.ComputeHash(System.Text.Encoding.UTF8.GetBytes(string.Concat(connectionString, AgentServiceName, AgentVersion, AgentHostName, AgentPath))));
@@ -43,7 +39,7 @@ namespace DBADash
                 Log.Information("Update DBADashAgent");
                 agentID = Update(connectionString);
                 Log.Information("DBADashAgentID: {0}", agentID);
-                cache.Add(cacheKey, agentID, policy );
+                cache.Add(cacheKey, agentID, policy);
 
             }
             return agentID;
@@ -51,10 +47,10 @@ namespace DBADash
 
         public override bool Equals(object obj)
         {
-            if(obj.GetType() == typeof(DBADashAgent))
+            if (obj.GetType() == typeof(DBADashAgent))
             {
                 var compare = (DBADashAgent)obj;
-                if (this.AgentServiceName == compare.AgentServiceName 
+                if (this.AgentServiceName == compare.AgentServiceName
                      && this.AgentHostName == compare.AgentHostName
                     && this.AgentPath == compare.AgentPath
                     && this.AgentVersion == compare.AgentVersion)
@@ -70,7 +66,7 @@ namespace DBADash
             {
                 return false;
             }
-           
+
         }
 
         public override int GetHashCode()
@@ -95,7 +91,7 @@ namespace DBADash
         private int Update(string connectionString)
         {
             using (var cn = new SqlConnection(connectionString))
-            using(var cmd = new SqlCommand("dbo.DBADashAgent_Upd",cn) { CommandType = System.Data.CommandType.StoredProcedure })
+            using (var cmd = new SqlCommand("dbo.DBADashAgent_Upd", cn) { CommandType = System.Data.CommandType.StoredProcedure })
             {
                 cn.Open();
                 cmd.Parameters.AddWithValue("AgentServiceName", AgentServiceName);

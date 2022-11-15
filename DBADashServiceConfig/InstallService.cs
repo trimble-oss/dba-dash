@@ -1,14 +1,9 @@
 ﻿using Meziantou.Framework.Win32;
 using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.ServiceProcess;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace DBADashServiceConfig
@@ -56,12 +51,12 @@ namespace DBADashServiceConfig
 
                     if (String.IsNullOrEmpty(domain) && !creds.UserName.StartsWith(".\\"))
                     {
-                        var input = MessageBox.Show(String.Format("Warning domain hasn't been specified.  Is this a local user account?\n\nSelect Yes to use {0} (local) \nSelect No to use {1} (domain)", Environment.MachineName, Environment.UserDomainName),"",MessageBoxButtons.YesNoCancel, MessageBoxIcon.Warning);
-                        if(input== DialogResult.Yes)
+                        var input = MessageBox.Show(String.Format("Warning domain hasn't been specified.  Is this a local user account?\n\nSelect Yes to use {0} (local) \nSelect No to use {1} (domain)", Environment.MachineName, Environment.UserDomainName), "", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Warning);
+                        if (input == DialogResult.Yes)
                         {
                             domain = Environment.MachineName;
                         }
-                        else if(input== DialogResult.No)
+                        else if (input == DialogResult.No)
                         {
                             domain = Environment.UserDomainName;
                         }
@@ -76,7 +71,7 @@ namespace DBADashServiceConfig
                         username = creds.UserName;
                     }
 
-                    arg = "-username \"" + username + "\" -password \"" + creds.Password.Replace("\"","\"\"") + "\"";
+                    arg = "-username \"" + username + "\" -password \"" + creds.Password.Replace("\"", "\"\"") + "\"";
 
                     break;
 
@@ -86,7 +81,7 @@ namespace DBADashServiceConfig
             psi.Arguments = "/c DBADashService Install " + arg;
             psi.RedirectStandardOutput = true;
             psi.RedirectStandardError = true;
-           
+
             p.OutputDataReceived += (sender, args) => txtOutput.AppendText(args.Data + Environment.NewLine);
             p.StartInfo = psi;
             p.Start();

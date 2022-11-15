@@ -74,7 +74,7 @@ namespace DBADashGUI.AgentJobs
             this.tsRefresh.Name = "tsRefresh";
             this.tsRefresh.Size = new System.Drawing.Size(29, 24);
             this.tsRefresh.Text = "Refresh";
-            this.tsRefresh.Click += new System.EventHandler(this.tsRefresh_Click);
+            this.tsRefresh.Click += new System.EventHandler(this.TsRefresh_Click);
             // 
             // tsDateGroup
             // 
@@ -118,7 +118,7 @@ namespace DBADashGUI.AgentJobs
             this.dgv.RowTemplate.Height = 24;
             this.dgv.Size = new System.Drawing.Size(904, 259);
             this.dgv.TabIndex = 0;
-            this.dgv.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgv_CellContentClick);
+            this.dgv.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.Dgv_CellContentClick);
             // 
             // tsJob
             // 
@@ -156,7 +156,7 @@ namespace DBADashGUI.AgentJobs
             this.tsBack.Name = "tsBack";
             this.tsBack.Size = new System.Drawing.Size(29, 24);
             this.tsBack.Text = "Back";
-            this.tsBack.Click += new System.EventHandler(this.tsBack_Click);
+            this.tsBack.Click += new System.EventHandler(this.TsBack_Click);
             // 
             // tsCopy
             // 
@@ -166,7 +166,7 @@ namespace DBADashGUI.AgentJobs
             this.tsCopy.Name = "tsCopy";
             this.tsCopy.Size = new System.Drawing.Size(29, 24);
             this.tsCopy.Text = "Copy";
-            this.tsCopy.Click += new System.EventHandler(this.tsCopy_Click);
+            this.tsCopy.Click += new System.EventHandler(this.TsCopy_Click);
             // 
             // tsExcel
             // 
@@ -176,7 +176,7 @@ namespace DBADashGUI.AgentJobs
             this.tsExcel.Name = "tsExcel";
             this.tsExcel.Size = new System.Drawing.Size(29, 24);
             this.tsExcel.Text = "Excel";
-            this.tsExcel.Click += new System.EventHandler(this.tsExcel_Click);
+            this.tsExcel.Click += new System.EventHandler(this.TsExcel_Click);
             // 
             // JobStats
             // 

@@ -46,8 +46,8 @@
             this.dgv.RowTemplate.Height = 29;
             this.dgv.Size = new System.Drawing.Size(800, 450);
             this.dgv.TabIndex = 0;
-            this.dgv.CellFormatting += new System.Windows.Forms.DataGridViewCellFormattingEventHandler(this.dgv_CellFormatting);
-            this.dgv.CellValueChanged += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgv_CellValueChanged);
+            this.dgv.CellFormatting += new System.Windows.Forms.DataGridViewCellFormattingEventHandler(this.Dgv_CellFormatting);
+            this.dgv.CellValueChanged += new System.Windows.Forms.DataGridViewCellEventHandler(this.Dgv_CellValueChanged);
             // 
             // ConfigureDisplayName
             // 

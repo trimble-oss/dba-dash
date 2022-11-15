@@ -1,19 +1,12 @@
-﻿using Microsoft.SqlServer.Management.Smo;
+﻿using Microsoft.Data.SqlClient;
+using Microsoft.SqlServer.Management.Smo;
 using Microsoft.SqlServer.Management.Smo.Broker;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
-using System;
-using System.Collections.Specialized;
-using System.Data;
-using  Microsoft.Data.SqlClient;
-using System.IO;
-using System.IO.Compression;
-using System.Linq;
-using System.Security.Cryptography;
-using System.Text;
-using Serilog;
 using SerilogTimings;
-using System.Collections.Generic;
+using System;
+using System.Data;
+using System.Linq;
 
 namespace DBADash
 {
@@ -42,11 +35,11 @@ namespace DBADash
         Trigger
     }
 
-  
+
     public class SchemaSnapshotDBOptions
     {
-    
-        public bool DriAll =true;
+
+        public bool DriAll = true;
         public bool Triggers = true;
         public bool FullTextIndexes = true;
         public bool Indexes = true;
@@ -55,12 +48,12 @@ namespace DBADash
         public bool Statistics = true;
         public bool DriIncludeSystemNames = false;
         public bool Permissions = false;
-       
+
         public SchemaSnapshotDBObjectTypes[] ObjectTypes = DefaultSchemaSnapshotDBObjectTypes();
 
         public static SchemaSnapshotDBObjectTypes[] DefaultSchemaSnapshotDBObjectTypes()
         {
-            return new SchemaSnapshotDBObjectTypes[] {SchemaSnapshotDBObjectTypes.Database, SchemaSnapshotDBObjectTypes.Aggregate, SchemaSnapshotDBObjectTypes.Assembly, SchemaSnapshotDBObjectTypes.DDLTrigger, SchemaSnapshotDBObjectTypes.Schema, SchemaSnapshotDBObjectTypes.StoredProcedures, SchemaSnapshotDBObjectTypes.Synonym, SchemaSnapshotDBObjectTypes.Tables, SchemaSnapshotDBObjectTypes.UserDefinedDataType, SchemaSnapshotDBObjectTypes.UserDefinedFunction, SchemaSnapshotDBObjectTypes.UserDefinedTableType, SchemaSnapshotDBObjectTypes.UserDefinedType, SchemaSnapshotDBObjectTypes.View, SchemaSnapshotDBObjectTypes.XMLSchema , SchemaSnapshotDBObjectTypes.Roles, SchemaSnapshotDBObjectTypes.ApplicationRole, SchemaSnapshotDBObjectTypes.Sequence, SchemaSnapshotDBObjectTypes.ServiceBroker,  SchemaSnapshotDBObjectTypes.Trigger};
+            return new SchemaSnapshotDBObjectTypes[] { SchemaSnapshotDBObjectTypes.Database, SchemaSnapshotDBObjectTypes.Aggregate, SchemaSnapshotDBObjectTypes.Assembly, SchemaSnapshotDBObjectTypes.DDLTrigger, SchemaSnapshotDBObjectTypes.Schema, SchemaSnapshotDBObjectTypes.StoredProcedures, SchemaSnapshotDBObjectTypes.Synonym, SchemaSnapshotDBObjectTypes.Tables, SchemaSnapshotDBObjectTypes.UserDefinedDataType, SchemaSnapshotDBObjectTypes.UserDefinedFunction, SchemaSnapshotDBObjectTypes.UserDefinedTableType, SchemaSnapshotDBObjectTypes.UserDefinedType, SchemaSnapshotDBObjectTypes.View, SchemaSnapshotDBObjectTypes.XMLSchema, SchemaSnapshotDBObjectTypes.Roles, SchemaSnapshotDBObjectTypes.ApplicationRole, SchemaSnapshotDBObjectTypes.Sequence, SchemaSnapshotDBObjectTypes.ServiceBroker, SchemaSnapshotDBObjectTypes.Trigger };
         }
 
 
@@ -91,7 +84,7 @@ namespace DBADash
         }
         public SchemaSnapshotDB(DBADashConnection source) : base(source)
         {
-            
+
         }
 
         private static DataTable RgDTSchema()
@@ -101,10 +94,10 @@ namespace DBADash
                 TableName = "ResourceGovernorConfiguration"
             };
             dtRG.Columns.Add("is_enabled", typeof(bool));
-            dtRG.Columns.Add("classifier_function", typeof(string));          
+            dtRG.Columns.Add("classifier_function", typeof(string));
             dtRG.Columns.Add("reconfiguration_error", typeof(bool));
             dtRG.Columns.Add("reconfiguration_pending", typeof(bool));
-            dtRG.Columns.Add("max_outstanding_io_per_volume",typeof(int));
+            dtRG.Columns.Add("max_outstanding_io_per_volume", typeof(int));
             dtRG.Columns.Add("script", typeof(string));
             return dtRG;
         }
@@ -122,7 +115,7 @@ namespace DBADash
                     // Script RG configuration
                     var sc = rg.Script();
                     // Add classifier function script
-                    sc.Insert(0,ObjectDDL(MasterConnectionString, rg.ClassifierFunction));
+                    sc.Insert(0, ObjectDDL(MasterConnectionString, rg.ClassifierFunction));
 
                     // Script out resource pool configuration and workload groups
                     foreach (ResourcePool pool in rg.ResourcePools)
@@ -166,10 +159,10 @@ namespace DBADash
                     row["classifier_function"] = rg.ClassifierFunction;
                     row["reconfiguration_error"] = reconfigError;
                     row["reconfiguration_pending"] = rg.ReconfigurePending;
-                    row["max_outstanding_io_per_volume"] =rg.ServerVersion.Major >=12 ? rg.MaxOutstandingIOPerVolume : 0; // Supported 2014 and later
+                    row["max_outstanding_io_per_volume"] = rg.ServerVersion.Major >= 12 ? rg.MaxOutstandingIOPerVolume : 0; // Supported 2014 and later
                     row["script"] = StringCollectionToString(sc);
                     dtRG.Rows.Add(row);
-                    
+
                 }
 
             }
@@ -298,7 +291,7 @@ namespace DBADash
                             op.Complete();
                         }
                     }
-                    if (options.ObjectTypes.Contains(SchemaSnapshotDBObjectTypes.UserDefinedTableType) && instance.VersionMajor>=10) // Support for User Defined Table Types added in SQL 2008
+                    if (options.ObjectTypes.Contains(SchemaSnapshotDBObjectTypes.UserDefinedTableType) && instance.VersionMajor >= 10) // Support for User Defined Table Types added in SQL 2008
                     {
                         using (var op = Operation.Begin("Schema snapshot {DBame}: {Object}", DBName, "UserDefinedTableTypes"))
                         {
@@ -571,7 +564,7 @@ namespace DBADash
 
         private void AddRoles(Database db, DataTable dtSchema)
         {
-            foreach(DatabaseRole dbr in db.Roles)
+            foreach (DatabaseRole dbr in db.Roles)
             {
                 if (!dbr.IsFixedRole)
                 {
@@ -594,7 +587,7 @@ namespace DBADash
         private void AddAggregate(Database db, DataTable dtSchema)
         {
             foreach (UserDefinedAggregate a in db.UserDefinedAggregates)
-            {  
+            {
                 var r = dtSchema.NewRow();
                 var sDDL = StringCollectionToString(a.Script(ScriptingOptions));
                 var bDDL = Zip(sDDL);
@@ -791,13 +784,13 @@ namespace DBADash
                     string sDDL;
                     if (f.IsEncrypted)
                     {
-                        sDDL = "/* Encrypted Function */"; 
+                        sDDL = "/* Encrypted Function */";
                     }
-                    else 
-                    {                         
+                    else
+                    {
                         sDDL = f.TextHeader + Environment.NewLine + f.TextBody;
                     }
-                    
+
                     var bDDL = Zip(sDDL);
                     r["ObjectName"] = f.Name;
                     r["SchemaName"] = f.Schema;
@@ -858,7 +851,7 @@ namespace DBADash
                     {
                         sDDL = StringCollectionToString(v.Script(ScriptingOptions));
                     }
-                 
+
                     var bDDL = Zip(sDDL);
                     r["ObjectName"] = v.Name;
                     r["SchemaName"] = v.Schema;
@@ -889,7 +882,7 @@ namespace DBADash
                     {
                         sDDL = "/* Encrypted stored procedure */";
                     }
-                    else 
+                    else
                     {
                         sDDL = sp.TextHeader + Environment.NewLine + sp.TextBody;
                     }
@@ -934,13 +927,13 @@ namespace DBADash
                                 hasEncryptedTriggers = true;
                                 ScriptingOptions.Triggers = false;
                                 break;
-                            }                      
-                        }                       
+                            }
+                        }
                     }
                     var sDDL = StringCollectionToString(t.Script(ScriptingOptions));
                     if (hasEncryptedTriggers)
                     {
-                        sDDL += Environment.NewLine +  "/* Encrypted Triggers */";
+                        sDDL += Environment.NewLine + "/* Encrypted Triggers */";
                     }
                     var bDDL = Zip(sDDL);
                     r["ObjectName"] = t.Name;
@@ -959,7 +952,7 @@ namespace DBADash
             }
         }
 
-        private void AddTriggers(TriggerCollection triggers,string schema,DataTable dtSchema)
+        private void AddTriggers(TriggerCollection triggers, string schema, DataTable dtSchema)
         {
             if (options.ObjectTypes.Contains(SchemaSnapshotDBObjectTypes.Trigger))
             {
@@ -992,7 +985,7 @@ namespace DBADash
             }
         }
 
- 
+
 
 
     }

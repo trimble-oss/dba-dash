@@ -1,14 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Drawing;
-using System.Data;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
+﻿using Humanizer;
 using Microsoft.Data.SqlClient;
-using Humanizer;
+using System;
+using System.Collections.Generic;
+using System.Data;
+using System.Drawing;
+using System.Windows.Forms;
 namespace DBADashGUI.Changes
 {
     public partial class DBOptions : UserControl
@@ -46,26 +42,26 @@ namespace DBADashGUI.Changes
         {
             if (InstanceIDs != null)
             {
-                refreshHistory();
+                RefreshHistory();
                 if (SummaryMode)
                 {
-                    refreshDBSummary();
+                    RefreshDBSummary();
                 }
                 else
                 {
-                    refreshDBInfo();
+                    RefreshDBInfo();
                 }
             }
         }
 
-        private void pivot(ref DataTable dt)
+        private void Pivot(ref DataTable dt)
         {
             var pivotDT = new DataTable();
             pivotDT.Columns.Add("Setting");
             pivotDT.Columns.Add("Value");
-            foreach(DataColumn col in dt.Columns)
+            foreach (DataColumn col in dt.Columns)
             {
-                if (col.ColumnName != "InstanceID" && col.ColumnName != "DatabaseID")
+                if (col.ColumnName is not "InstanceID" and not "DatabaseID")
                 {
                     var r = pivotDT.NewRow();
                     r[0] = col.ColumnName;
@@ -77,14 +73,14 @@ namespace DBADashGUI.Changes
             dgv.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
         }
 
-        private void refreshDBSummary()
+        private void RefreshDBSummary()
         {
             using (var cn = new SqlConnection(Common.ConnectionString))
             using (var cmd = new SqlCommand("dbo.DBSummary_Get", cn) { CommandType = CommandType.StoredProcedure })
             using (var da = new SqlDataAdapter(cmd))
             {
-                cmd.Parameters.AddWithValue("InstanceIDs", String.Join(",", InstanceIDs));               
-                DataTable dt = new DataTable();
+                cmd.Parameters.AddWithValue("InstanceIDs", String.Join(",", InstanceIDs));
+                DataTable dt = new();
                 da.Fill(dt);
                 dgv.DataSource = dt;
                 dgv.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
@@ -92,7 +88,7 @@ namespace DBADashGUI.Changes
             dgv.Columns[0].Frozen = Common.FreezeKeyColumn;
         }
 
-        private void refreshDBInfo()
+        private void RefreshDBInfo()
         {
             using (var cn = new SqlConnection(Common.ConnectionString))
             using (var cmd = new SqlCommand("dbo.DatabasesAllInfo_Get", cn) { CommandType = CommandType.StoredProcedure })
@@ -104,11 +100,11 @@ namespace DBADashGUI.Changes
                     cmd.Parameters.AddWithValue("DatabaseID", DatabaseID);
                 }
                 ;
-                DataTable dt = new DataTable();
+                DataTable dt = new();
                 da.Fill(dt);
                 if (dt.Rows.Count == 1)
                 {
-                    pivot(ref dt);
+                    Pivot(ref dt);
                 }
                 else
                 {
@@ -128,7 +124,7 @@ namespace DBADashGUI.Changes
             }
         }
 
-        private void refreshHistory()
+        private void RefreshHistory()
         {
             using (var cn = new SqlConnection(Common.ConnectionString))
             using (var cmd = new SqlCommand("dbo.DBOptionsHistory_Get", cn) { CommandType = CommandType.StoredProcedure })
@@ -140,8 +136,8 @@ namespace DBADashGUI.Changes
                     cmd.Parameters.AddWithValue("DatabaseID", DatabaseID);
                 }
                 cmd.Parameters.AddWithValue("ExcludeStateChanges", excludeStateChangesToolStripMenuItem.Checked);
-                
-                DataTable dt = new DataTable();
+
+                DataTable dt = new();
                 da.Fill(dt);
                 Common.ConvertUTCToLocal(ref dt);
                 foreach (DataRow r in dt.Rows)
@@ -158,51 +154,51 @@ namespace DBADashGUI.Changes
                 dgvHistory.AutoGenerateColumns = false;
                 dgvHistory.DataSource = dt;
                 dgvHistory.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
-            }          
+            }
         }
 
-        private void tsCopyHistory_Click(object sender, EventArgs e)
+        private void TsCopyHistory_Click(object sender, EventArgs e)
         {
             Common.CopyDataGridViewToClipboard(dgvHistory);
         }
 
-        private void tsRefreshHistory_Click(object sender, EventArgs e)
+        private void TsRefreshHistory_Click(object sender, EventArgs e)
         {
-            refreshHistory();
+            RefreshHistory();
         }
 
-        private void tsRefreshInfo_Click(object sender, EventArgs e)
+        private void TsRefreshInfo_Click(object sender, EventArgs e)
         {
             if (SummaryMode)
             {
-                refreshDBSummary();
+                RefreshDBSummary();
             }
             else
             {
-                refreshDBInfo();
+                RefreshDBInfo();
             }
         }
 
-        private void tsCopyInfo_Click(object sender, EventArgs e)
+        private void TsCopyInfo_Click(object sender, EventArgs e)
         {
             Common.CopyDataGridViewToClipboard(dgv);
         }
 
-        private void excludeStateChangesToolStripMenuItem_Click(object sender, EventArgs e)
+        private void ExcludeStateChangesToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            refreshHistory();
+            RefreshHistory();
         }
 
-        private void tsSummary_Click(object sender, EventArgs e)
+        private void TsSummary_Click(object sender, EventArgs e)
         {
             SummaryMode = true;
-            refreshDBSummary();
+            RefreshDBSummary();
         }
 
-        private void tsDetail_Click(object sender, EventArgs e)
+        private void TsDetail_Click(object sender, EventArgs e)
         {
             SummaryMode = false;
-            refreshDBInfo();
+            RefreshDBInfo();
         }
 
         private void DBOptions_Load(object sender, EventArgs e)
@@ -211,14 +207,14 @@ namespace DBADashGUI.Changes
             {
                 SummaryMode = false;
             }
-           
+
         }
 
-        private void dgv_RowsAdded(object sender, DataGridViewRowsAddedEventArgs e)
+        private void Dgv_RowsAdded(object sender, DataGridViewRowsAddedEventArgs e)
         {
             if (SummaryMode)
             {
-                var warningCols = new string[] { "Auto Create Stats Disabled", "Auto Update Stats Disabled", "Old Compat Level", "In Recovery", "Offline","Trustworthy" };
+                var warningCols = new string[] { "Auto Create Stats Disabled", "Auto Update Stats Disabled", "Old Compat Level", "In Recovery", "Offline", "Trustworthy" };
                 var criticalCols = new string[] { "Page Verify Not Optimal", "Auto Close", "Auto Shrink", "Suspect", "Emergency" };
                 for (Int32 idx = e.RowIndex; idx < e.RowIndex + e.RowCount; idx += 1)
                 {
@@ -229,7 +225,7 @@ namespace DBADashGUI.Changes
                     }
                     foreach (var col in criticalCols)
                     {
-                        r.Cells[col].SetStatusColor((Int32)r.Cells[col].Value > 0 ? DashColors.Fail  : Color.White);
+                        r.Cells[col].SetStatusColor((Int32)r.Cells[col].Value > 0 ? DashColors.Fail : Color.White);
                     }
                     Color vlfStatusColor = DashColors.NotApplicable;
                     if (r.Cells["Max VLF Count"].Value != DBNull.Value)
@@ -238,24 +234,24 @@ namespace DBADashGUI.Changes
                     }
 
                     r.Cells["Max VLF Count"].SetStatusColor(vlfStatusColor);
-                    
+
                 }
             }
         }
 
-        private void tsExcel_Click(object sender, EventArgs e)
+        private void TsExcel_Click(object sender, EventArgs e)
         {
             Common.PromptSaveDataGridView(ref dgv);
         }
 
-        private void tsExcelHistory_Click(object sender, EventArgs e)
+        private void TsExcelHistory_Click(object sender, EventArgs e)
         {
             Common.PromptSaveDataGridView(ref dgvHistory);
         }
 
-        private void tsCols_Click(object sender, EventArgs e)
+        private void TsCols_Click(object sender, EventArgs e)
         {
-            using(var frm = new SelectColumns() { Columns = dgv.Columns } )
+            using (var frm = new SelectColumns() { Columns = dgv.Columns })
             {
                 frm.ShowDialog(this);
             }

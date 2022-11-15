@@ -1,23 +1,18 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
+﻿using Microsoft.Data.SqlClient;
+using System;
 using System.Data;
-using Microsoft.Data.SqlClient;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace DBADashGUI
 {
 
-   public  class DriveThreshold
+    public class DriveThreshold
     {
 
         public bool Inherited { get; set; } = false;
         public Int32 InstanceID { get; set; }
         public Int32 DriveID { get; set; }
 
-        public decimal WarningThreshold{get;set;}
+        public decimal WarningThreshold { get; set; }
         public decimal CriticalThreshold { get; set; }
 
         public DriveCheckTypeEnum DriveCheckType { get; set; }
@@ -28,17 +23,19 @@ namespace DBADashGUI
             None
         }
 
-        public char DriveCheckTypeChar { 
-            get {
-                if (WarningThreshold <=0 && CriticalThreshold <= 0)
+        public char DriveCheckTypeChar
+        {
+            get
+            {
+                if (WarningThreshold <= 0 && CriticalThreshold <= 0)
                 {
                     return '-';
                 }
-                if (DriveCheckType== DriveCheckTypeEnum.GB)
+                if (DriveCheckType == DriveCheckTypeEnum.GB)
                 {
                     return 'G';
                 }
-                if(DriveCheckType== DriveCheckTypeEnum.Percent)
+                if (DriveCheckType == DriveCheckTypeEnum.Percent)
                 {
                     return '%';
                 }
@@ -49,13 +46,13 @@ namespace DBADashGUI
             }
             set
             {
-                if( value== 'G')
+                if (value == 'G')
                 {
                     DriveCheckType = DriveCheckTypeEnum.GB;
                 }
-                else if ( value== '%')
+                else if (value == '%')
                 {
-                    DriveCheckType= DriveCheckTypeEnum.Percent;
+                    DriveCheckType = DriveCheckTypeEnum.Percent;
                 }
                 else
                 {
@@ -68,13 +65,14 @@ namespace DBADashGUI
 
         public static DriveThreshold GetDriveThreshold(Int32 InstanceID, Int32 DriveID)
         {
-            DriveThreshold drv = new DriveThreshold
+            DriveThreshold drv = new()
             {
                 InstanceID = InstanceID,
                 DriveID = DriveID,
             };
             using (var cn = new SqlConnection(Common.ConnectionString))
-            using (SqlCommand cmd = new SqlCommand(@"DriveThreshold_Get", cn) { CommandType = CommandType.StoredProcedure }) {
+            using (SqlCommand cmd = new(@"DriveThreshold_Get", cn) { CommandType = CommandType.StoredProcedure })
+            {
                 cn.Open();
                 cmd.Parameters.AddWithValue("InstanceID", InstanceID);
                 cmd.Parameters.AddWithValue("DriveID", DriveID);
@@ -92,7 +90,7 @@ namespace DBADashGUI
                 }
                 return drv;
             }
-            
+
         }
 
 
@@ -100,7 +98,7 @@ namespace DBADashGUI
         {
 
             using (var cn = new SqlConnection(Common.ConnectionString))
-            using (SqlCommand cmd = new SqlCommand("dbo.DriveThresholds_Upd", cn) { CommandType = CommandType.StoredProcedure })
+            using (SqlCommand cmd = new("dbo.DriveThresholds_Upd", cn) { CommandType = CommandType.StoredProcedure })
             {
                 cn.Open();
                 cmd.Parameters.AddWithValue("InstanceID", InstanceID);
@@ -133,7 +131,7 @@ namespace DBADashGUI
                     DriveCheckTypeChar = char.Parse((string)rdr["DriveCheckType"]);
                     Inherited = (bool)rdr["Inherited"];
                 }
-            }            
+            }
         }
 
     }

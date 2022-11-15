@@ -120,7 +120,7 @@
             this.tsRefresh.Name = "tsRefresh";
             this.tsRefresh.Size = new System.Drawing.Size(29, 24);
             this.tsRefresh.Text = "Refresh";
-            this.tsRefresh.Click += new System.EventHandler(this.tsRefresh_Click);
+            this.tsRefresh.Click += new System.EventHandler(this.TsRefresh_Click);
             // 
             // tsCopy
             // 
@@ -130,7 +130,7 @@
             this.tsCopy.Name = "tsCopy";
             this.tsCopy.Size = new System.Drawing.Size(29, 24);
             this.tsCopy.Text = "Copy";
-            this.tsCopy.Click += new System.EventHandler(this.tsCopy_Click);
+            this.tsCopy.Click += new System.EventHandler(this.TsCopy_Click);
             // 
             // tsExcel
             // 
@@ -140,7 +140,7 @@
             this.tsExcel.Name = "tsExcel";
             this.tsExcel.Size = new System.Drawing.Size(29, 24);
             this.tsExcel.Text = "Export Excel";
-            this.tsExcel.Click += new System.EventHandler(this.tsExcel_Click);
+            this.tsExcel.Click += new System.EventHandler(this.TsExcel_Click);
             // 
             // toolStripDropDownButton1
             // 
@@ -159,7 +159,7 @@
             this.pivotByAlertNameToolStripMenuItem.Name = "pivotByAlertNameToolStripMenuItem";
             this.pivotByAlertNameToolStripMenuItem.Size = new System.Drawing.Size(225, 26);
             this.pivotByAlertNameToolStripMenuItem.Text = "Pivot By Alert Name";
-            this.pivotByAlertNameToolStripMenuItem.Click += new System.EventHandler(this.pivotByAlertNameToolStripMenuItem_Click);
+            this.pivotByAlertNameToolStripMenuItem.Click += new System.EventHandler(this.PivotByAlertNameToolStripMenuItem_Click);
             // 
             // dgvAlerts
             // 
@@ -207,7 +207,7 @@
             this.tsRefreshAlerts.Name = "tsRefreshAlerts";
             this.tsRefreshAlerts.Size = new System.Drawing.Size(29, 24);
             this.tsRefreshAlerts.Text = "Refresh";
-            this.tsRefreshAlerts.Click += new System.EventHandler(this.tsRefreshAlerts_Click);
+            this.tsRefreshAlerts.Click += new System.EventHandler(this.TsRefreshAlerts_Click);
             // 
             // tsCopyAlerts
             // 
@@ -217,7 +217,7 @@
             this.tsCopyAlerts.Name = "tsCopyAlerts";
             this.tsCopyAlerts.Size = new System.Drawing.Size(29, 24);
             this.tsCopyAlerts.Text = "Copy";
-            this.tsCopyAlerts.Click += new System.EventHandler(this.tsCopyAlerts_Click);
+            this.tsCopyAlerts.Click += new System.EventHandler(this.TsCopyAlerts_Click);
             // 
             // tsExcelAlerts
             // 
@@ -227,7 +227,7 @@
             this.tsExcelAlerts.Name = "tsExcelAlerts";
             this.tsExcelAlerts.Size = new System.Drawing.Size(29, 24);
             this.tsExcelAlerts.Text = "Export Excel";
-            this.tsExcelAlerts.Click += new System.EventHandler(this.tsExcelAlerts_Click);
+            this.tsExcelAlerts.Click += new System.EventHandler(this.TsExcelAlerts_Click);
             // 
             // Alerts
             // 

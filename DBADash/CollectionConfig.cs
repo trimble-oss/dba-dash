@@ -1,11 +1,11 @@
 ﻿using DBADashService;
+using Microsoft.Data.SqlClient;
 using Newtonsoft.Json;
+using Serilog;
 using System;
 using System.Collections.Generic;
-using Microsoft.Data.SqlClient;
-using static DBADash.DBADashConnection;
 using System.Linq;
-using Serilog;
+using static DBADash.DBADashConnection;
 
 namespace DBADash
 {
@@ -51,13 +51,13 @@ namespace DBADash
 
     }
 
-    public class CollectionConfig:BasicConfig
+    public class CollectionConfig : BasicConfig
     {
-        public Int32 ServiceThreads=-1;
+        public Int32 ServiceThreads = -1;
         private string _secretKey;
         private bool wasEncryptionPerformed = false;
         private readonly string myString = "g&hAs2&mVOLwE6DqO!I5";
-        public SchemaSnapshotDBOptions SchemaSnapshotOptions=null;
+        public SchemaSnapshotDBOptions SchemaSnapshotOptions = null;
         public bool ScanForAzureDBs { get; set; } = true;
         public Int32 ScanForAzureDBsInterval { get; set; } = 3600;
         public string ServiceName { get; set; } = "DBADashService";
@@ -133,7 +133,7 @@ namespace DBADash
 
         public string GetMaintenanceCron()
         {
-            if (MaintenanceScheduleCron == null || MaintenanceScheduleCron == "")
+            if (MaintenanceScheduleCron is null or "")
             {
                 return defaultMaintenanceCron;
             }
@@ -151,7 +151,7 @@ namespace DBADash
             get
             {
                 var encryptedStrings = new List<string>();
-                foreach(var d in SecondaryDestinationConnections)
+                foreach (var d in SecondaryDestinationConnections)
                 {
                     encryptedStrings.Add(d.EncryptedConnectionString);
                 }
@@ -160,9 +160,9 @@ namespace DBADash
             set
             {
                 SecondaryDestinationConnections = new List<DBADashConnection>();
-                foreach(string s in value.Distinct().ToArray())
+                foreach (string s in value.Distinct().ToArray())
                 {
-                      SecondaryDestinationConnections.Add(new DBADashConnection(s));
+                    SecondaryDestinationConnections.Add(new DBADashConnection(s));
                 }
             }
         }
@@ -223,7 +223,7 @@ namespace DBADash
                 }
                 // VersionStatus check will throw an error if there is an issue connecting to the DB or the DB isn't valid.
                 var status = DBValidations.VersionStatus(destination.ConnectionString);
-                if(status.VersionStatus == DBValidations.DBVersionStatusEnum.CreateDB)
+                if (status.VersionStatus == DBValidations.DBVersionStatusEnum.CreateDB)
                 {
                     ValidateDestinationVersion(destination);
                 }
@@ -250,16 +250,18 @@ namespace DBADash
             }
         }
 
-       public DBADashSource GetSourceFromConnectionString(string connectionString,bool? isAzure=null)
+        public DBADashSource GetSourceFromConnectionString(string connectionString, bool? isAzure = null)
         {
             var findConnection = new DBADashConnection(connectionString);
             foreach (var s in SourceConnections)
             {
                 if (s.SourceConnection.Type == findConnection.Type)
                 {
-                    if (s.SourceConnection.Type == ConnectionType.SQL && s.SourceConnection.DataSource().ToLower() == findConnection.DataSource().ToLower()) {
+                    if (s.SourceConnection.Type == ConnectionType.SQL && s.SourceConnection.DataSource().ToLower() == findConnection.DataSource().ToLower())
+                    {
                         // normally we can treat as same connection if we just vary by initial catalog.  For AzureDB, a different DB is a different instance
-                        if (s.SourceConnection.InitialCatalog().ToLower() == findConnection.InitialCatalog().ToLower()) {
+                        if (s.SourceConnection.InitialCatalog().ToLower() == findConnection.InitialCatalog().ToLower())
+                        {
                             return s;
                         }
                         else if ((new string[] { "master", String.Empty }).Contains(s.SourceConnection.InitialCatalog().ToLower())
@@ -270,7 +272,7 @@ namespace DBADash
                         else
                         {
                             isAzure ??= findConnection.IsAzureDB();
-                            if (isAzure==false)
+                            if (isAzure == false)
                             {
                                 return s;
                             }
@@ -285,9 +287,9 @@ namespace DBADash
             return null;
         }
 
-        public bool SourceExists(string connectionString,bool? isAzure=null)
+        public bool SourceExists(string connectionString, bool? isAzure = null)
         {
-            if (GetSourceFromConnectionString(connectionString,isAzure) != null)
+            if (GetSourceFromConnectionString(connectionString, isAzure) != null)
             {
                 return true;
             }
@@ -320,19 +322,19 @@ namespace DBADash
             return newConnections;
         }
 
-  
+
         public List<DBADashSource> GetNewAzureDBConnections()
         {
             var newConnections = new List<DBADashSource>();
-            foreach (var cfg in SourceConnections.Where(src=>src.SourceConnection.Type == ConnectionType.SQL))
+            foreach (var cfg in SourceConnections.Where(src => src.SourceConnection.Type == ConnectionType.SQL))
             {
                 try
                 {
-                    if ((new string[] {"master", String.Empty}).Contains(cfg.SourceConnection.InitialCatalog()) && cfg.SourceConnection.ConnectionInfo.IsAzureMasterDB)
-                    {             
+                    if ((new string[] { "master", String.Empty }).Contains(cfg.SourceConnection.InitialCatalog()) && cfg.SourceConnection.ConnectionInfo.IsAzureMasterDB)
+                    {
                         newConnections.AddRange(GetNewAzureDBConnections(cfg));
                     }
- 
+
                 }
                 catch (Exception ex)
                 {
@@ -351,7 +353,7 @@ namespace DBADash
                 cn.Open();
                 using var rdr = cmd.ExecuteReader();
                 var builder = new SqlConnectionStringBuilder(masterConnection.SourceConnection.ConnectionString);
-                
+
                 while (rdr.Read())
                 {
                     builder.InitialCatalog = rdr.GetString(0);
@@ -359,7 +361,7 @@ namespace DBADash
                     dbCn.SourceConnection.ConnectionString = builder.ConnectionString;
                     dbCn.ConnectionID = string.Empty;
 
-                    if (!SourceExists(dbCn.SourceConnection.ConnectionString,true))
+                    if (!SourceExists(dbCn.SourceConnection.ConnectionString, true))
                     {
                         newConnections.Add(dbCn);
                         Log.Information("Add Azure DB connection {DataSource}|{DB}", builder.DataSource, builder.InitialCatalog);

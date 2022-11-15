@@ -82,7 +82,7 @@ namespace DBADashGUI.DBFiles
             this.chkMaxSizeDisable.TabIndex = 26;
             this.chkMaxSizeDisable.Text = "Disabled";
             this.chkMaxSizeDisable.UseVisualStyleBackColor = true;
-            this.chkMaxSizeDisable.CheckedChanged += new System.EventHandler(this.chkMaxSizeDisable_CheckedChanged);
+            this.chkMaxSizeDisable.CheckedChanged += new System.EventHandler(this.ChkMaxSizeDisable_CheckedChanged);
             // 
             // label1
             // 
@@ -161,7 +161,7 @@ namespace DBADashGUI.DBFiles
             this.chkInherit.TabIndex = 46;
             this.chkInherit.Text = "Inherit";
             this.chkInherit.UseVisualStyleBackColor = true;
-            this.chkInherit.CheckedChanged += new System.EventHandler(this.chkInherit_CheckedChanged);
+            this.chkInherit.CheckedChanged += new System.EventHandler(this.ChkInherit_CheckedChanged);
             // 
             // grpFreespace
             // 
@@ -272,7 +272,7 @@ namespace DBADashGUI.DBFiles
             this.optMB.TabIndex = 36;
             this.optMB.Text = "MB";
             this.optMB.UseVisualStyleBackColor = true;
-            this.optMB.CheckedChanged += new System.EventHandler(this.optMBPct_CheckedChanged);
+            this.optMB.CheckedChanged += new System.EventHandler(this.OptMBPct_CheckedChanged);
             // 
             // lblDriveWarning
             // 
@@ -296,7 +296,7 @@ namespace DBADashGUI.DBFiles
             this.optPercent.TabStop = true;
             this.optPercent.Text = "Percent %";
             this.optPercent.UseVisualStyleBackColor = true;
-            this.optPercent.CheckedChanged += new System.EventHandler(this.optMBPct_CheckedChanged);
+            this.optPercent.CheckedChanged += new System.EventHandler(this.OptMBPct_CheckedChanged);
             // 
             // FileThresholdConfigControl
             // 

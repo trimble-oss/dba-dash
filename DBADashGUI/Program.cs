@@ -1,10 +1,7 @@
 ﻿global using DBADashSharedGUI;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using System.Windows.Forms;
 using CommandLine;
+using System;
+using System.Windows.Forms;
 
 namespace DBADashGUI
 {
@@ -25,7 +22,7 @@ namespace DBADashGUI
            Application.SetCompatibleTextRenderingDefault(false);
            Application.Run(new Main(o));
        });
-        
+
         }
     }
 }

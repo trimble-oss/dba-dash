@@ -1,16 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Drawing;
-using System.Data;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
-using Microsoft.Data.SqlClient;
+﻿using DBADashGUI.DBFiles;
 using LiveCharts;
 using LiveCharts.Wpf;
-using DBADashGUI.DBFiles;
+using Microsoft.Data.SqlClient;
+using System;
+using System.Collections.Generic;
+using System.Data;
+using System.Drawing;
+using System.Windows.Forms;
 
 namespace DBADashGUI
 {
@@ -22,10 +18,10 @@ namespace DBADashGUI
         }
 
 
-        public List<Int32> InstanceIDs;  
+        public List<Int32> InstanceIDs;
         public Int32 DatabaseID = -1;
-        public string DBName="";
-        public string InstanceGroupName="";
+        public string DBName = "";
+        public string InstanceGroupName = "";
         public bool CanNavigateBack => tsBack.Enabled;
 
         public void RefreshData()
@@ -57,11 +53,11 @@ namespace DBADashGUI
                     cmd.Parameters.AddWithValue("@DBName", DBName);
                 }
                 DataTable dt = new();
-                da.Fill(dt);  
+                da.Fill(dt);
 
                 return dt;
             }
-         }
+        }
 
         private void RefreshDataLocal()
         {
@@ -98,7 +94,7 @@ namespace DBADashGUI
 
             pieChart1.Series = sc;
             pieChart1.LegendLocation = LegendLocation.Bottom;
-                      
+
         }
 
         private void Dgv_CellContentClick(object sender, DataGridViewCellEventArgs e)
@@ -106,11 +102,11 @@ namespace DBADashGUI
             if (e.RowIndex >= 0)
             {
                 var row = (DataRowView)dgv.Rows[e.RowIndex].DataBoundItem;
-         
+
                 var selectedGroupValue = row["Grp"] == DBNull.Value ? "" : (string)row["Grp"];
                 if (e.ColumnIndex == dgv.Columns["colName"].Index)
-                {        
-                    if (InstanceIDs.Count>1 && string.IsNullOrEmpty(InstanceGroupName))
+                {
+                    if (InstanceIDs.Count > 1 && string.IsNullOrEmpty(InstanceGroupName))
                     {
                         InstanceGroupName = selectedGroupValue;
                     }
@@ -127,17 +123,17 @@ namespace DBADashGUI
                     tsBack.Enabled = true;
                     RefreshDataLocal();
                 }
-                else if(e.ColumnIndex == dgv.Columns["colHistory"].Index)
+                else if (e.ColumnIndex == dgv.Columns["colHistory"].Index)
                 {
                     var frm = new DBSpaceHistoryView
                     {
                         DatabaseID = DatabaseID,
                         InstanceGroupName = InstanceGroupName,
                         DBName = DBName,
-                        NumberFormat=NumberFormat,
-                        Unit=Unit
+                        NumberFormat = NumberFormat,
+                        Unit = Unit
                     };
-                    if (InstanceIDs.Count > 1 &&  string.IsNullOrEmpty(InstanceGroupName))
+                    if (InstanceIDs.Count > 1 && string.IsNullOrEmpty(InstanceGroupName))
                     {
                         frm.InstanceGroupName = selectedGroupValue;
                     }
@@ -151,7 +147,7 @@ namespace DBADashGUI
                     }
                     if (frm.DatabaseID < 1)
                     {
-                        frm.DatabaseID  = CommonData.GetDatabaseID(frm.InstanceGroupName, frm.DBName);
+                        frm.DatabaseID = CommonData.GetDatabaseID(frm.InstanceGroupName, frm.DBName);
                     }
                     frm.Show();
                 }
@@ -240,13 +236,13 @@ namespace DBADashGUI
         {
             dgv.Columns.Clear();
             dgv.Columns.AddRange(
-                new DataGridViewLinkColumn() { Name="colName", DataPropertyName = "Grp", HeaderText = "Name" },
-                new DataGridViewTextBoxColumn() { Name="colAllocatedGB", DataPropertyName = "AllocatedGB", HeaderText = "Allocated (GB)", DefaultCellStyle = Common.DataGridViewCellStyle("N1"), Visible = true },
-                new DataGridViewTextBoxColumn() { Name="colUsedGB", DataPropertyName = "UsedGB", HeaderText = "Used (GB)", DefaultCellStyle = Common.DataGridViewCellStyle("N1"), Visible = true },
-                new DataGridViewTextBoxColumn() { Name="colAllocatedMB", DataPropertyName = "AllocatedMB", HeaderText = "Allocated (MB)", DefaultCellStyle = Common.DataGridViewCellStyle("N1"), Visible = false },
-                new DataGridViewTextBoxColumn() { Name="colUsedMB", DataPropertyName = "UsedMB", HeaderText = "Used (MB)", DefaultCellStyle = Common.DataGridViewCellStyle("N1"), Visible = false },
-                new DataGridViewTextBoxColumn() { Name="colAllocatedTB",DataPropertyName = "AllocatedTB", HeaderText = "Allocated (TB)", DefaultCellStyle = Common.DataGridViewCellStyle("N1"), Visible = false },
-                new DataGridViewTextBoxColumn() { Name="colUsedTB", DataPropertyName = "UsedTB", HeaderText = "Used (TB)", DefaultCellStyle = Common.DataGridViewCellStyle("N1"), Visible = false },
+                new DataGridViewLinkColumn() { Name = "colName", DataPropertyName = "Grp", HeaderText = "Name" },
+                new DataGridViewTextBoxColumn() { Name = "colAllocatedGB", DataPropertyName = "AllocatedGB", HeaderText = "Allocated (GB)", DefaultCellStyle = Common.DataGridViewCellStyle("N1"), Visible = true },
+                new DataGridViewTextBoxColumn() { Name = "colUsedGB", DataPropertyName = "UsedGB", HeaderText = "Used (GB)", DefaultCellStyle = Common.DataGridViewCellStyle("N1"), Visible = true },
+                new DataGridViewTextBoxColumn() { Name = "colAllocatedMB", DataPropertyName = "AllocatedMB", HeaderText = "Allocated (MB)", DefaultCellStyle = Common.DataGridViewCellStyle("N1"), Visible = false },
+                new DataGridViewTextBoxColumn() { Name = "colUsedMB", DataPropertyName = "UsedMB", HeaderText = "Used (MB)", DefaultCellStyle = Common.DataGridViewCellStyle("N1"), Visible = false },
+                new DataGridViewTextBoxColumn() { Name = "colAllocatedTB", DataPropertyName = "AllocatedTB", HeaderText = "Allocated (TB)", DefaultCellStyle = Common.DataGridViewCellStyle("N1"), Visible = false },
+                new DataGridViewTextBoxColumn() { Name = "colUsedTB", DataPropertyName = "UsedTB", HeaderText = "Used (TB)", DefaultCellStyle = Common.DataGridViewCellStyle("N1"), Visible = false },
                 new DataGridViewLinkColumn() { Name = "colHistory", HeaderText = "History", Text = "View", UseColumnTextForLinkValue = true }
                 );
             Common.StyleGrid(ref dgv);
@@ -259,7 +255,8 @@ namespace DBADashGUI
             {
                 itm.Checked = itm == selectedItem;
             }
-            foreach (string unit in new string[] { "MB", "GB", "TB" }) {
+            foreach (string unit in new string[] { "MB", "GB", "TB" })
+            {
                 dgv.Columns["colAllocated" + unit].Visible = Convert.ToString(selectedItem.Tag) == unit;
                 dgv.Columns["colUsed" + unit].Visible = Convert.ToString(selectedItem.Tag) == unit;
             }
@@ -309,7 +306,7 @@ namespace DBADashGUI
             }
         }
 
-        private void dgv_CellToolTipTextNeeded(object sender, DataGridViewCellToolTipTextNeededEventArgs e)
+        private void Dgv_CellToolTipTextNeeded(object sender, DataGridViewCellToolTipTextNeededEventArgs e)
         {
             if (e.RowIndex >= 0)
             {

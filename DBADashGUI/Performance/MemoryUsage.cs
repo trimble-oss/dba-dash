@@ -1,14 +1,9 @@
 ﻿using LiveCharts;
 using LiveCharts.Wpf;
+using Microsoft.Data.SqlClient;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Data;
-using Microsoft.Data.SqlClient;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace DBADashGUI.Performance
@@ -43,7 +38,8 @@ namespace DBADashGUI.Performance
 
         private ChartViews ChartView
         {
-            get {
+            get
+            {
                 if (pieChart1.Visible)
                 {
                     return ChartViews.Pie;
@@ -64,7 +60,7 @@ namespace DBADashGUI.Performance
                 chartClerk.Visible = value == ChartViews.MemoryClerk;
                 tsDateGroup.Visible = value == ChartViews.MemoryClerk;
                 tsAgg.Visible = value == ChartViews.MemoryClerk;
-                tsPieChart.Enabled = value!= ChartViews.Pie;
+                tsPieChart.Enabled = value != ChartViews.Pie;
             }
         }
 
@@ -91,7 +87,7 @@ namespace DBADashGUI.Performance
 
         private void RefreshCurrentTab()
         {
-            if ((tab1.SelectedTab == tabClerks || ChartView== ChartViews.Pie) && !isClerksRefreshed)
+            if ((tab1.SelectedTab == tabClerks || ChartView == ChartViews.Pie) && !isClerksRefreshed)
             {
                 RefreshClerks();
             }
@@ -107,7 +103,7 @@ namespace DBADashGUI.Performance
 
         private void RefreshPerformanceChart()
         {
-            if (ChartView== ChartViews.PerformanceCounter)
+            if (ChartView == ChartViews.PerformanceCounter)
             {
                 performanceCounters1.FromDate = DateRange.FromUTC;
                 performanceCounters1.ToDate = DateRange.ToUTC;
@@ -129,12 +125,12 @@ namespace DBADashGUI.Performance
             dgv.AutoGenerateColumns = false;
             if (dgv.Columns.Count == 0)
             {
-                dgv.Columns.Add(new DataGridViewTextBoxColumn() {Name="colMemoryClerkType", HeaderText = "Memory Clerk Type", DataPropertyName = "MemoryClerkType" });
-                dgv.Columns.Add(new DataGridViewLinkColumn() { Name = "colPages", HeaderText = "Pages KB", DataPropertyName = "pages_kb", DefaultCellStyle = Common.DataGridViewNumericCellStyleNoDigits, LinkColor= DashColors.LinkColor});
-                dgv.Columns.Add(new DataGridViewLinkColumn() { Name = "colVirtualMemoryCommitted", HeaderText = "Virtual Memory Committed KB", DataPropertyName = "virtual_memory_committed_kb", DefaultCellStyle = Common.DataGridViewNumericCellStyleNoDigits, LinkColor = DashColors.LinkColor});
-                dgv.Columns.Add(new DataGridViewLinkColumn() { Name = "colAWEAllocated", HeaderText = "AWE Allocated KB", DataPropertyName = "awe_allocated_kb", DefaultCellStyle = Common.DataGridViewNumericCellStyleNoDigits, LinkColor = DashColors.LinkColor});
-                dgv.Columns.Add(new DataGridViewLinkColumn() { Name = "colSharedMemoryReserved", HeaderText = "Shared Memory Reserved KB", DataPropertyName = "shared_memory_reserved_kb", DefaultCellStyle = Common.DataGridViewNumericCellStyleNoDigits, LinkColor = DashColors.LinkColor});
-                dgv.Columns.Add(new DataGridViewLinkColumn() { Name = "colSharedMemoryCommitted", HeaderText = "Shared Memory Committed KB", DataPropertyName = "shared_memory_committed_kb", DefaultCellStyle = Common.DataGridViewNumericCellStyleNoDigits,LinkColor = DashColors.LinkColor});
+                dgv.Columns.Add(new DataGridViewTextBoxColumn() { Name = "colMemoryClerkType", HeaderText = "Memory Clerk Type", DataPropertyName = "MemoryClerkType" });
+                dgv.Columns.Add(new DataGridViewLinkColumn() { Name = "colPages", HeaderText = "Pages KB", DataPropertyName = "pages_kb", DefaultCellStyle = Common.DataGridViewNumericCellStyleNoDigits, LinkColor = DashColors.LinkColor });
+                dgv.Columns.Add(new DataGridViewLinkColumn() { Name = "colVirtualMemoryCommitted", HeaderText = "Virtual Memory Committed KB", DataPropertyName = "virtual_memory_committed_kb", DefaultCellStyle = Common.DataGridViewNumericCellStyleNoDigits, LinkColor = DashColors.LinkColor });
+                dgv.Columns.Add(new DataGridViewLinkColumn() { Name = "colAWEAllocated", HeaderText = "AWE Allocated KB", DataPropertyName = "awe_allocated_kb", DefaultCellStyle = Common.DataGridViewNumericCellStyleNoDigits, LinkColor = DashColors.LinkColor });
+                dgv.Columns.Add(new DataGridViewLinkColumn() { Name = "colSharedMemoryReserved", HeaderText = "Shared Memory Reserved KB", DataPropertyName = "shared_memory_reserved_kb", DefaultCellStyle = Common.DataGridViewNumericCellStyleNoDigits, LinkColor = DashColors.LinkColor });
+                dgv.Columns.Add(new DataGridViewLinkColumn() { Name = "colSharedMemoryCommitted", HeaderText = "Shared Memory Committed KB", DataPropertyName = "shared_memory_committed_kb", DefaultCellStyle = Common.DataGridViewNumericCellStyleNoDigits, LinkColor = DashColors.LinkColor });
                 dgv.Columns.Add(new DataGridViewTextBoxColumn() { HeaderText = "Snapshot Date", DataPropertyName = "SnapshotDate" });
                 dgv.Columns.Add(new DataGridViewTextBoxColumn() { Name = "colPagesPct", HeaderText = "Pages %", DataPropertyName = "Pct", DefaultCellStyle = new DataGridViewCellStyle() { Format = "P1" } });
                 dgv.Columns.Add(new DataGridViewTextBoxColumn() { Name = "colDescription", HeaderText = "Description", DataPropertyName = "MemoryClerkDescription" });
@@ -157,7 +153,7 @@ namespace DBADashGUI.Performance
             string.Format("{0} ({1:P})", chartPoint.SeriesView.Title, chartPoint.Participation);
             SeriesCollection sc = new();
             Double other = 0;
-            Double otherPct=0;
+            Double otherPct = 0;
             bool dataLabels;
             foreach (DataRow r in dt.Rows)
             {
@@ -166,7 +162,7 @@ namespace DBADashGUI.Performance
                 dataLabels = pct > 0.05;
                 if (pct > 0.02)
                 {
-                    var s = new PieSeries() { Title = (string)r["MemoryClerkType"], Values = new ChartValues<double> { pages }, LabelPoint = labelPoint, DataLabels = dataLabels, ToolTip = true};
+                    var s = new PieSeries() { Title = (string)r["MemoryClerkType"], Values = new ChartValues<double> { pages }, LabelPoint = labelPoint, DataLabels = dataLabels, ToolTip = true };
                     sc.Add(s);
                 }
                 else
@@ -178,20 +174,20 @@ namespace DBADashGUI.Performance
             if (other > 0)
             {
                 dataLabels = otherPct > 0.05;
-                var s = new PieSeries() { Title = "{Other}", Values = new ChartValues<double> { other }, LabelPoint = labelPoint, DataLabels = true, ToolTip = true};
+                var s = new PieSeries() { Title = "{Other}", Values = new ChartValues<double> { other }, LabelPoint = labelPoint, DataLabels = true, ToolTip = true };
                 sc.Add(s);
             }
-           
+
             pieChart1.Series = sc;
             pieChart1.LegendLocation = LegendLocation.Bottom;
-            
+
         }
 
         public DataTable GetMemoryUsage()
         {
-            using(var cn = new SqlConnection(Common.ConnectionString))
-            using(var cmd = new SqlCommand("dbo.MemoryUsage_Get", cn) { CommandType = CommandType.StoredProcedure })
-            using(var da = new SqlDataAdapter(cmd))
+            using (var cn = new SqlConnection(Common.ConnectionString))
+            using (var cmd = new SqlCommand("dbo.MemoryUsage_Get", cn) { CommandType = CommandType.StoredProcedure })
+            using (var da = new SqlDataAdapter(cmd))
             {
                 cmd.Parameters.AddWithValue("InstanceID", InstanceID);
                 cmd.Parameters.AddWithValue("FromDate", DateRange.FromUTC);
@@ -212,27 +208,27 @@ namespace DBADashGUI.Performance
                 if (e.ColumnIndex == dgv.Columns["colPages"].Index)
                 {
                     selectedCounter = "pages_kb";
-                    selectedCounterAlias =selectedClerk +  " - Pages KB";
+                    selectedCounterAlias = selectedClerk + " - Pages KB";
                 }
                 else if (e.ColumnIndex == dgv.Columns["colVirtualMemoryCommitted"].Index)
                 {
                     selectedCounter = "virtual_memory_committed_kb";
-                    selectedCounterAlias = selectedClerk +  " - Virtual Memory Committed KB";
+                    selectedCounterAlias = selectedClerk + " - Virtual Memory Committed KB";
                 }
                 else if (e.ColumnIndex == dgv.Columns["colAWEAllocated"].Index)
                 {
                     selectedCounter = "awe_allocated_kb";
-                    selectedCounterAlias = selectedClerk +  " - AWE Allocated KB";
+                    selectedCounterAlias = selectedClerk + " - AWE Allocated KB";
                 }
-                else if(e.ColumnIndex== dgv.Columns["colSharedMemoryReserved"].Index)
+                else if (e.ColumnIndex == dgv.Columns["colSharedMemoryReserved"].Index)
                 {
                     selectedCounter = "shared_memory_reserved_kb";
-                    selectedCounterAlias=selectedClerk + " - Shared Memory Reserved KB";
+                    selectedCounterAlias = selectedClerk + " - Shared Memory Reserved KB";
                 }
                 else if (e.ColumnIndex == dgv.Columns["colSharedMemoryCommitted"].Index)
                 {
                     selectedCounter = "shared_memory_committed_kb";
-                    selectedCounterAlias =selectedClerk + " - Shared Memory Committed KB";
+                    selectedCounterAlias = selectedClerk + " - Shared Memory Committed KB";
                 }
                 else
                 {
@@ -244,29 +240,30 @@ namespace DBADashGUI.Performance
 
         private void ShowMemoryUsageForClerk(string format = "N0")
         {
-            ChartView = ChartViews.MemoryClerk;    
+            ChartView = ChartViews.MemoryClerk;
             chartClerk.Series.Clear();
-            var dt = GetMemoryClerkUsage(selectedClerk,dateGrouping,tsAgg.Text,selectedCounter);
+            var dt = GetMemoryClerkUsage(selectedClerk, dateGrouping, tsAgg.Text, selectedCounter);
             if (dt.Rows.Count > MaxChartPoints)
             {
-                MessageBox.Show("Max Chart points exceeded.  Please select a narrower date range or increase the date grouping.","Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("Max Chart points exceeded.  Please select a narrower date range or increase the date grouping.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
-            var columns = new Dictionary<string, columnMetaData>
+            var columns = new Dictionary<string, ColumnMetaData>
             {
-                {selectedCounter, new columnMetaData{Alias=selectedCounterAlias,isVisible=true } }
+                {selectedCounter, new ColumnMetaData{Alias=selectedCounterAlias,isVisible=true } }
             };
             chartClerk.LegendLocation = LegendLocation.Top;
-            chartClerk.AddDataTable(dt,columns,"SnapshotDate",false);
-            chartClerk.AxisY.Clear();   
-            chartClerk.AxisY.Add(new Axis() { 
+            chartClerk.AddDataTable(dt, columns, "SnapshotDate", false);
+            chartClerk.AxisY.Clear();
+            chartClerk.AxisY.Add(new Axis()
+            {
                 MinValue = 0,
                 LabelFormatter = val => val.ToString(format)
             });
             tsAgg.Enabled = dateGrouping > 0;
         }
 
-        private DataTable GetMemoryClerkUsage(string clerk,int? dateGrouping,string agg,string measure)
+        private DataTable GetMemoryClerkUsage(string clerk, int? dateGrouping, string agg, string measure)
         {
             using (var cn = new SqlConnection(Common.ConnectionString))
             using (var cmd = new SqlCommand("dbo.MemoryClerkUsage_Get", cn) { CommandType = CommandType.StoredProcedure })
@@ -276,7 +273,7 @@ namespace DBADashGUI.Performance
                 cmd.Parameters.AddWithValue("FromDate", DateRange.FromUTC);
                 cmd.Parameters.AddWithValue("ToDate", DateRange.ToUTC);
                 cmd.Parameters.AddWithValue("MemoryClerkType", clerk);
-                cmd.Parameters.AddWithValue("Mins",dateGrouping);
+                cmd.Parameters.AddWithValue("Mins", dateGrouping);
                 cmd.Parameters.AddWithValue("Agg", agg);
                 cmd.Parameters.AddWithValue("Measure", measure);
                 var dt = new DataTable();
@@ -312,7 +309,8 @@ namespace DBADashGUI.Performance
 
         private void RefreshCounters()
         {
-            if (MemoryCounters == null || MemoryCounters.Count == 0) { 
+            if (MemoryCounters == null || MemoryCounters.Count == 0)
+            {
                 MemoryCounters = GetMemoryCounters();
             }
             performanceCounterSummaryGrid1.Counters = MemoryCounters;
@@ -358,10 +356,11 @@ namespace DBADashGUI.Performance
             RefreshCurrentTab();
         }
 
-     
+
         private void Dgv_CellMouseEnter(object sender, DataGridViewCellEventArgs e)
         {
-            if (e.RowIndex >= 0) {
+            if (e.RowIndex >= 0)
+            {
                 string toolTip = (string)((DataRowView)dgv.Rows[e.RowIndex].DataBoundItem)["MemoryClerkDescription"];
                 dgvToolTip.SetToolTip(dgv, toolTip);
             }
@@ -373,7 +372,7 @@ namespace DBADashGUI.Performance
             performanceCounterSummaryGrid1.InstanceLink = false;
             performanceCounterSummaryGrid1.CounterLink = false;
             performanceCounterSummaryGrid1.CounterSelected += PerformanceCounterSummaryGrid1_CounterSelected;
-            Common.AddDateGroups(tsDateGroup,TsDateGroup_Click);
+            Common.AddDateGroups(tsDateGroup, TsDateGroup_Click);
         }
         private void TsDateGroup_Click(object sender, EventArgs e)
         {

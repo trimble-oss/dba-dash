@@ -1,15 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Drawing;
-using System.Linq;
-using System.Reflection;
-using System.Threading.Tasks;
-using System.Windows.Forms;
-using System.Diagnostics;
-using Octokit;
-using DBADash;
+﻿using DBADash;
 using DBADashSharedGUI;
+using Octokit;
+using System.Diagnostics;
+using System.Reflection;
 using System.Runtime.Versioning;
 
 namespace DBADashGUI
@@ -20,14 +13,14 @@ namespace DBADashGUI
         public About()
         {
             InitializeComponent();
-            this.labelVersion.Text =  AssemblyVersion;
+            this.labelVersion.Text = AssemblyVersion;
             this.labelCopyright.Text = AssemblyCopyright;
             this.labelCompanyName.Text = AssemblyCompany;
         }
 
         #region Assembly Attribute Accessors
 
-        public string AssemblyTitle
+        public static string AssemblyTitle
         {
             get
             {
@@ -44,16 +37,16 @@ namespace DBADashGUI
             }
         }
 
-        public string AssemblyVersion
+        public static string AssemblyVersion
         {
             get
             {
                 var version = Assembly.GetExecutingAssembly().GetName().Version;
-                return version==null ? "???" : version.ToString();
+                return version == null ? "???" : version.ToString();
             }
         }
 
-        public string AssemblyDescription
+        public static string AssemblyDescription
         {
             get
             {
@@ -66,7 +59,7 @@ namespace DBADashGUI
             }
         }
 
-        public string AssemblyProduct
+        public static string AssemblyProduct
         {
             get
             {
@@ -79,7 +72,7 @@ namespace DBADashGUI
             }
         }
 
-        public string AssemblyCopyright
+        public static string AssemblyCopyright
         {
             get
             {
@@ -92,7 +85,7 @@ namespace DBADashGUI
             }
         }
 
-        public string AssemblyCompany
+        public static string AssemblyCompany
         {
             get
             {
@@ -107,13 +100,13 @@ namespace DBADashGUI
 
         #endregion
 
-        public Version DBVersion=new Version();
-        public bool upgradeAvailable=false;
-        public string upgradeMessage= "The upgrade check hasn't completed yet.\nIf this server doesn't have internet access, an offline upgrade can be performed. See:\nhttps://dbadash.com/upgrades";
+        public Version DBVersion = new();
+        public bool upgradeAvailable = false;
+        public string upgradeMessage = "The upgrade check hasn't completed yet.\nIf this server doesn't have internet access, an offline upgrade can be performed. See:\nhttps://dbadash.com/upgrades";
         public bool StartGUIOnUpgrade;
         MessageBoxIcon upgradeIcon = MessageBoxIcon.Warning;
 
-        private void lnkDBADash_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        private void LnkDBADash_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
             CommonShared.OpenURL(Upgrade.AppURL);
         }
@@ -123,12 +116,12 @@ namespace DBADashGUI
         {
             lblDeploymentType.Text = Upgrade.DeploymentType.ToString();
             lblRepoVersion.Text = DBVersion.ToString();
-            await setLatestVersionAsync(); // Display the latest version from github       
+            await SetLatestVersionAsync(); // Display the latest version from github       
         }
 
 
         /// <summary>Update about box with latest version info</summary> 
-        private async Task setLatestVersionAsync()
+        private async Task SetLatestVersionAsync()
         {
             Release release;
             Version releaseVersion;
@@ -137,7 +130,7 @@ namespace DBADashGUI
                 release = await Upgrade.GetLatestVersionAsync();
                 releaseVersion = new Version(release.TagName);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 lnkLatestRelease.Text = "???";
                 toolTip1.SetToolTip(lnkLatestRelease, ex.Message);
@@ -164,7 +157,7 @@ namespace DBADashGUI
                 }
                 else
                 {
-                    upgradeMessage= "No upgrades are available at this time";
+                    upgradeMessage = "No upgrades are available at this time";
                     upgradeIcon = MessageBoxIcon.Information;
                 }
             }
@@ -176,37 +169,37 @@ namespace DBADashGUI
 
         }
 
-        private void lnkLatestRelease_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        private void LnkLatestRelease_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
             CommonShared.OpenURL(Upgrade.LatestVersionLink);
         }
 
-        private void lnkAuthor_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        private void LnkAuthor_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
             CommonShared.OpenURL(Upgrade.AuthorURL);
         }
 
-        private void lnkLicense_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        private void LnkLicense_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
             Process.Start("notepad.exe", "LICENSE");
         }
 
-        private async void bttnUpgrade_Click(object sender, EventArgs e)
+        private async void BttnUpgrade_Click(object sender, EventArgs e)
         {
             if (!upgradeAvailable)
             {
-                MessageBox.Show(upgradeMessage,"Upgrade", MessageBoxButtons.OK,upgradeIcon);
+                MessageBox.Show(upgradeMessage, "Upgrade", MessageBoxButtons.OK, upgradeIcon);
                 return;
             }
-            if(MessageBox.Show("Run script to upgrade to latest version of DBA Dash?","Upgrade",MessageBoxButtons.YesNo,MessageBoxIcon.Question) != DialogResult.Yes)
+            if (MessageBox.Show("Run script to upgrade to latest version of DBA Dash?", "Upgrade", MessageBoxButtons.YesNo, MessageBoxIcon.Question) != DialogResult.Yes)
             {
                 return;
             }
             try
             {
-                await Upgrade.UpgradeDBADashAsync(startGUI:StartGUIOnUpgrade);
+                await Upgrade.UpgradeDBADashAsync(startGUI: StartGUIOnUpgrade);
             }
-            catch(Octokit.NotFoundException)
+            catch (Octokit.NotFoundException)
             {
                 MessageBox.Show("Upgrade script is not available.  Please check the upgrade instructions on the GitHub page", "Not Available", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
                 CommonShared.OpenURL(Upgrade.LatestVersionLink);

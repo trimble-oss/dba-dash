@@ -1,14 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using DBADashGUI.Drives;
+using System;
 using System.ComponentModel;
 using System.Drawing;
-using System.Data;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
-using System.Runtime.InteropServices;
-using DBADashGUI.Drives;
 using static DBADashGUI.DBADashStatus;
 
 namespace DBADashGUI
@@ -22,20 +16,24 @@ namespace DBADashGUI
         {
             InitializeComponent();
         }
-        private Drive drive=new Drive();
+        private Drive drive = new();
 
         [Category("Drive"),
           DesignerSerializationVisibility(DesignerSerializationVisibility.Content)]
-        public Drive Drive { 
-            get {
+        public Drive Drive
+        {
+            get
+            {
                 return drive;
-            } set { 
+            }
+            set
+            {
                 drive = value;
-                setDrive();
+                SetDrive();
             }
         }
 
-        private void setDrive()
+        private void SetDrive()
         {
             if (DisplayInstanceName)
             {
@@ -81,7 +79,7 @@ namespace DBADashGUI
             picStatus.Visible = (drive.DriveStatus != DBADashStatusEnum.NA);
 
             lblUpdated.Text = "Updated " + drive.SnapshotDate.ToString("yyyy-MM-dd HH:mm") + " (" + DateTime.Now.Subtract(drive.SnapshotDate).TotalMinutes.ToString("N0") + "min ago)";
-            
+
             lblUpdated.ForeColor = drive.SnapshotStatus.GetColor();
             if (drive.SnapshotStatus == DBADashStatusEnum.NA)
             {
@@ -94,17 +92,17 @@ namespace DBADashGUI
         {
             lnkThreshold.LinkColor = DashColors.LinkColor;
             lnkHistory.LinkColor = DashColors.LinkColor;
-            setDrive();
+            SetDrive();
         }
 
-        private void lnkThreshold_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        private void LnkThreshold_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
             var frm = new DriveThresholdConfig
             {
                 DriveThreshold = drive
             };
             frm.ShowDialog();
-            if(frm.DialogResult== DialogResult.OK)
+            if (frm.DialogResult == DialogResult.OK)
             {
                 var thres = frm.DriveThreshold;
                 Drive.WarningThreshold = thres.WarningThreshold;
@@ -112,12 +110,12 @@ namespace DBADashGUI
                 drive.DriveCheckType = thres.DriveCheckType;
                 drive.Inherited = thres.Inherited;
                 drive.RefreshDriveStatus();
-                setDrive();
+                SetDrive();
             }
 
         }
 
-        private void lnkHistory_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        private void LnkHistory_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
             var frm = new DriveHistoryView
             {

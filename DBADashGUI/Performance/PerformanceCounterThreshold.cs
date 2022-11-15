@@ -1,12 +1,6 @@
-﻿using Microsoft.Data.SqlClient;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
+﻿using System;
 using System.Data;
-using System.Drawing;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace DBADashGUI.Performance
@@ -28,43 +22,43 @@ namespace DBADashGUI.Performance
         private void PerformanceCounterThreshold_Load(object sender, EventArgs e)
         {
             counters = CommonData.GetCounters();
-            var objectNames= counters.AsEnumerable().Select(r => (string)r["object_name"]).Distinct().ToList();
+            var objectNames = counters.AsEnumerable().Select(r => (string)r["object_name"]).Distinct().ToList();
             cboObject.DataSource = objectNames;
-            cboInstances.DataSource = new BindingSource(CommonData.Instances,null);   
+            cboInstances.DataSource = new BindingSource(CommonData.Instances, null);
             cboInstances.DisplayMember = "InstanceDisplayName";
             cboInstances.ValueMember = "InstanceID";
 
             chkAllInstances.Checked = InstanceID == null;
             cboInstances.SelectedValue = InstanceID;
             cboObject.Text = ObjectName;
-            cboCounter.Text = CounterName;       
+            cboCounter.Text = CounterName;
             cboCounterInstance.Text = CounterInstance;
 
-            foreach(var lnk in grpThresholds.Controls.OfType<LinkLabel>())
+            foreach (var lnk in grpThresholds.Controls.OfType<LinkLabel>())
             {
                 lnk.LinkColor = DashColors.LinkColor;
             }
         }
 
-        private void cboObject_SelectedValueChanged(object sender, EventArgs e)
+        private void CboObject_SelectedValueChanged(object sender, EventArgs e)
         {
-            var counterNames = counters.AsEnumerable().Where(r=>(string)r["object_name"]==cboObject.Text).Select(r => (string)r["counter_name"]).Distinct().ToList();
+            var counterNames = counters.AsEnumerable().Where(r => (string)r["object_name"] == cboObject.Text).Select(r => (string)r["counter_name"]).Distinct().ToList();
             cboCounter.DataSource = counterNames;
         }
 
-        private void cboCounter_SelectedValueChanged(object sender, EventArgs e)
+        private void CboCounter_SelectedValueChanged(object sender, EventArgs e)
         {
-            var instanceNames = counters.AsEnumerable().Where(r => (string)r["object_name"] == cboObject.Text && (string)r["counter_name"]==cboCounter.Text).Select(r => (string)r["instance_name"]).Distinct().ToList();
+            var instanceNames = counters.AsEnumerable().Where(r => (string)r["object_name"] == cboObject.Text && (string)r["counter_name"] == cboCounter.Text).Select(r => (string)r["instance_name"]).Distinct().ToList();
             cboCounterInstance.DataSource = instanceNames;
         }
 
-        private void getThresholds()
+        private void GetThresholds()
         {
             chkCritical.Text = chkAllInstances.Checked ? "System" : "Inherit";
             chkWarning.Text = chkCritical.Text;
             chkGood.Text = chkCritical.Text;
             threshold = CounterThreshold.GetCounterThreshold(cboObject.Text, cboCounter.Text, cboCounterInstance.Text, chkAllInstances.Checked ? null : Convert.ToInt32(cboInstances.SelectedValue));
-            var inheritedThreshold = CounterThreshold.GetCounterThreshold(cboObject.Text, cboCounter.Text, cboCounterInstance.Text,null);
+            var inheritedThreshold = CounterThreshold.GetCounterThreshold(cboObject.Text, cboCounter.Text, cboCounterInstance.Text, null);
             if (threshold == null)
             {
                 grpThresholds.Enabled = false;
@@ -72,73 +66,73 @@ namespace DBADashGUI.Performance
             else
             {
                 grpThresholds.Enabled = true;
-                numWarningFrom.Value = coalesceDecimal(threshold.WarningFrom, inheritedThreshold.WarningFrom, inheritedThreshold.SystemWarningFrom);
-                numWarningTo.Value = coalesceDecimal(threshold.WarningTo,inheritedThreshold.WarningTo,inheritedThreshold.SystemWarningTo);
-                numCriticalFrom.Value = coalesceDecimal(threshold.CritialFrom,inheritedThreshold.CritialFrom,inheritedThreshold.SystemCritialFrom);
-                numCriticalTo.Value = coalesceDecimal(threshold.CritialTo,inheritedThreshold.CritialTo, inheritedThreshold.SystemCritialTo);
-                numGoodFrom.Value = coalesceDecimal(threshold.GoodFrom,inheritedThreshold.GoodFrom, inheritedThreshold.SystemGoodFrom);
-                numGoodTo.Value = coalesceDecimal(threshold.GoodTo,inheritedThreshold.CritialTo,inheritedThreshold.SystemGoodTo);
+                numWarningFrom.Value = CoalesceDecimal(threshold.WarningFrom, inheritedThreshold.WarningFrom, inheritedThreshold.SystemWarningFrom);
+                numWarningTo.Value = CoalesceDecimal(threshold.WarningTo, inheritedThreshold.WarningTo, inheritedThreshold.SystemWarningTo);
+                numCriticalFrom.Value = CoalesceDecimal(threshold.CritialFrom, inheritedThreshold.CritialFrom, inheritedThreshold.SystemCritialFrom);
+                numCriticalTo.Value = CoalesceDecimal(threshold.CritialTo, inheritedThreshold.CritialTo, inheritedThreshold.SystemCritialTo);
+                numGoodFrom.Value = CoalesceDecimal(threshold.GoodFrom, inheritedThreshold.GoodFrom, inheritedThreshold.SystemGoodFrom);
+                numGoodTo.Value = CoalesceDecimal(threshold.GoodTo, inheritedThreshold.CritialTo, inheritedThreshold.SystemGoodTo);
                 chkWarning.Checked = !(threshold.WarningFrom.HasValue && threshold.WarningTo.HasValue);
                 chkCritical.Checked = !(threshold.CritialFrom.HasValue && threshold.CritialTo.HasValue);
                 chkGood.Checked = !(threshold.GoodFrom.HasValue && threshold.GoodTo.HasValue);
             }
         }
 
-        private decimal coalesceDecimal(decimal? value1,decimal? value2, decimal? value3)
+        private static decimal CoalesceDecimal(decimal? value1, decimal? value2, decimal? value3)
         {
             return value1.GetValueOrDefault(value2.GetValueOrDefault(value3.GetValueOrDefault()));
         }
 
-        private void lnkCriticalToMax_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        private void LnkCriticalToMax_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
             numCriticalTo.Value = numCriticalTo.Maximum;
         }
 
-        private void lnkWarningToMax_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        private void LnkWarningToMax_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
             numWarningTo.Value = numWarningTo.Maximum;
         }
 
-        private void lnkGoodToMax_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        private void LnkGoodToMax_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
             numGoodTo.Value = numGoodTo.Maximum;
         }
 
-        private void chkCriticalEnabled_CheckedChanged(object sender, EventArgs e)
+        private void ChkCriticalEnabled_CheckedChanged(object sender, EventArgs e)
         {
             numCriticalFrom.Enabled = !chkCritical.Checked;
             numCriticalTo.Enabled = !chkCritical.Checked;
         }
 
-        private void chkWarningEnabled_CheckedChanged(object sender, EventArgs e)
+        private void ChkWarningEnabled_CheckedChanged(object sender, EventArgs e)
         {
             numWarningFrom.Enabled = !chkWarning.Checked;
-            numWarningTo.Enabled= !chkWarning.Checked;
+            numWarningTo.Enabled = !chkWarning.Checked;
         }
 
-        private void chkGoodEnabled_CheckedChanged(object sender, EventArgs e)
+        private void ChkGoodEnabled_CheckedChanged(object sender, EventArgs e)
         {
             numGoodFrom.Enabled = !chkGood.Checked;
-            numGoodTo.Enabled=!chkGood.Checked;
+            numGoodTo.Enabled = !chkGood.Checked;
         }
 
-        private void chkAllInstances_CheckedChanged(object sender, EventArgs e)
+        private void ChkAllInstances_CheckedChanged(object sender, EventArgs e)
         {
             cboInstances.Enabled = !chkAllInstances.Checked;
-            getThresholds();
+            GetThresholds();
         }
 
 
-        private void cboCounterInstance_SelectedValueChanged(object sender, EventArgs e)
+        private void CboCounterInstance_SelectedValueChanged(object sender, EventArgs e)
         {
-            getThresholds();
+            GetThresholds();
         }
 
-        private void bttnUpdate_Click(object sender, EventArgs e)
+        private void BttnUpdate_Click(object sender, EventArgs e)
         {
             if (threshold != null)
             {
-                threshold.CritialFrom = chkCritical.Checked ? null : numCriticalFrom.Value ;
+                threshold.CritialFrom = chkCritical.Checked ? null : numCriticalFrom.Value;
                 threshold.CritialTo = chkCritical.Checked ? null : numCriticalTo.Value;
                 threshold.WarningFrom = chkWarning.Checked ? null : numWarningFrom.Value;
                 threshold.WarningTo = chkWarning.Checked ? null : numWarningTo.Value;
@@ -153,27 +147,27 @@ namespace DBADashGUI.Performance
             }
         }
 
-        private void cboInstances_SelectedValueChanged(object sender, EventArgs e)
+        private void CboInstances_SelectedValueChanged(object sender, EventArgs e)
         {
-            getThresholds();
+            GetThresholds();
         }
 
-        private void lnkDisableCritical_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        private void LnkDisableCritical_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
             numCriticalFrom.Value = 0;
             numCriticalTo.Value = -1;
         }
 
-        private void lnkDisableWarning_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        private void LnkDisableWarning_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
             numWarningFrom.Value = 0;
             numWarningTo.Value = -1;
         }
 
-        private void lnkDisableGood_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        private void LnkDisableGood_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
             numGoodFrom.Value = 0;
-            numGoodTo.Value=-1;
+            numGoodTo.Value = -1;
         }
     }
 }

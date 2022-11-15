@@ -85,7 +85,7 @@ namespace DBADashGUI.AgentJobs
             this.tsLineNumbers.Name = "tsLineNumbers";
             this.tsLineNumbers.Size = new System.Drawing.Size(29, 28);
             this.tsLineNumbers.Text = "Toggle Line Numbers";
-            this.tsLineNumbers.Click += new System.EventHandler(this.tsLineNumbers_Click);
+            this.tsLineNumbers.Click += new System.EventHandler(this.TsLineNumbers_Click);
             // 
             // JobStep
             // 

@@ -2,16 +2,15 @@
 using DBADash;
 using Newtonsoft.Json;
 using Quartz;
+using Serilog;
+using SerilogTimings;
 using System;
+using System.Collections.Generic;
 using System.Data;
 using System.IO;
 using System.Linq;
-using System.Runtime.Serialization.Formatters.Binary;
 using System.Threading.Tasks;
 using static DBADash.DBADashConnection;
-using Serilog;
-using SerilogTimings;
-using System.Collections.Generic;
 
 namespace DBADashService
 {
@@ -20,7 +19,7 @@ namespace DBADashService
     {
         static readonly CollectionConfig config = SchedulerServiceConfig.Config;
         /* Ensure the Jobs collection runs once every ~24hrs.  Allowing 10mins as Jobs runs every 1hr by default */
-        private static readonly int MAX_TIME_SINCE_LAST_JOB_COLLECTION = 1430; 
+        private static readonly int MAX_TIME_SINCE_LAST_JOB_COLLECTION = 1430;
 
         static string GetID(DataSet ds)
         {
@@ -40,7 +39,7 @@ namespace DBADashService
             Log.Information("Processing Job : " + context.JobDetail.Key);
             JobDataMap dataMap = context.JobDetail.JobDataMap;
             var cfg = JsonConvert.DeserializeObject<DBADashSource>(dataMap.GetString("CFG"));
-          
+
             try
             {
                 if (cfg.SourceConnection.Type == ConnectionType.Directory)
@@ -60,7 +59,7 @@ namespace DBADashService
                     Log.Debug("Wait for lock {0}", context.JobDetail.Key);
                     // Ensures that S3 folder can only be processed by 1 job instance at a time.
                     // Note: DisallowConcurrentExecution didn't prevent triggered at startup job from overlapping with the scheduled one
-                    lock (Program.Locker.GetLock(cfg.ConnectionString)) 
+                    lock (Program.Locker.GetLock(cfg.ConnectionString))
                     {
                         Log.Debug("Lock acquired {0}", context.JobDetail.Key);
                         CollectS3(cfg);
@@ -68,7 +67,7 @@ namespace DBADashService
                 }
                 else
                 {
-                    CollectSQL(cfg,dataMap,context);                
+                    CollectSQL(cfg, dataMap, context);
                 }
             }
             catch (Exception ex)
@@ -182,19 +181,19 @@ namespace DBADashService
 
             // Setting the JobLastModified means we will only collect job data if jobs have been updated since the last collection.
             // This won't detect all changes - like changes to schedules.  Skip setting JobLastModified if we haven't collected in 1 day to ensure we collect at least once per day
-           
-            if(jobLastCollected == DateTime.MinValue)
+
+            if (jobLastCollected == DateTime.MinValue)
             {
-                Log.Debug("Skipping setting JobLastModified (First collection on startup) on {Connection}",cfg.SourceConnection.ConnectionForPrint);
+                Log.Debug("Skipping setting JobLastModified (First collection on startup) on {Connection}", cfg.SourceConnection.ConnectionForPrint);
             }
-            else if (DateTime.Now < forcedCollectionDate) 
+            else if (DateTime.Now < forcedCollectionDate)
             {
                 collector.JobLastModified = jobLastModified;
-                Log.Debug("Setting JobLastModified to {JobLastModified}. Forced collection will run after {ForcedCollectionDate}.  {MinsSinceLastCollection}mins since last collection ({LastCollected}) on {Connection}", jobLastModified,forcedCollectionDate, minsSinceLastCollection.ToString("N0"), jobLastCollected, cfg.SourceConnection.ConnectionForPrint);
+                Log.Debug("Setting JobLastModified to {JobLastModified}. Forced collection will run after {ForcedCollectionDate}.  {MinsSinceLastCollection}mins since last collection ({LastCollected}) on {Connection}", jobLastModified, forcedCollectionDate, minsSinceLastCollection.ToString("N0"), jobLastCollected, cfg.SourceConnection.ConnectionForPrint);
             }
             else
             {
-                Log.Debug("Skipping setting JobLastModified to {JobLastModified} - forcing job collection to run. {MinsSinceLastCollection}mins since last collection ({LastCollected}) on {Connection}.",jobLastModified, minsSinceLastCollection.ToString("N0"),jobLastCollected,cfg.SourceConnection.ConnectionForPrint);
+                Log.Debug("Skipping setting JobLastModified to {JobLastModified} - forcing job collection to run. {MinsSinceLastCollection}mins since last collection ({LastCollected}) on {Connection}.", jobLastModified, minsSinceLastCollection.ToString("N0"), jobLastCollected, cfg.SourceConnection.ConnectionForPrint);
             }
 
             collector.Collect(CollectionType.Jobs);
@@ -268,7 +267,7 @@ namespace DBADashService
                     {
                         List<string> instanceFiles = instanceItem.Value;
                         ProcessFileListForCollectFolder(instanceFiles, cfg);
-                        
+
                     });
                 }
                 catch (Exception ex)
@@ -285,7 +284,7 @@ namespace DBADashService
         /// <summary>
         /// Process a given list of files in order for a specific instance, writing collected data to the DBADash repository database
         /// </summary>
-        static void ProcessFileListForCollectFolder(List<string>files, DBADashSource cfg)
+        static void ProcessFileListForCollectFolder(List<string> files, DBADashSource cfg)
         {
             files.Sort(); // Ensure we process files in order
             foreach (string f in files)
@@ -323,7 +322,7 @@ namespace DBADashService
                 var uri = new Amazon.S3.Util.AmazonS3Uri(cfg.ConnectionString);
                 using var s3Cli = AWSTools.GetAWSClient(config.AWSProfile, config.AccessKey, config.GetSecretKey(), uri);
                 ListObjectsRequest request = new() { BucketName = uri.Bucket, Prefix = (uri.Key + "/DBADash_").Replace("//", "/") };
-       
+
                 do
                 {
                     ListObjectsResponse resp;
@@ -342,8 +341,8 @@ namespace DBADashService
                     Parallel.ForEach(filesToProcessByInstance, instanceItem =>
                     {
                         List<string> instanceFiles = instanceItem.Value;
-                        ProcessS3FileListForCollectS3(instanceFiles, s3Cli,uri,cfg);
-                  
+                        ProcessS3FileListForCollectS3(instanceFiles, s3Cli, uri, cfg);
+
                     });
                     if (resp.IsTruncated)
                     {
@@ -367,7 +366,7 @@ namespace DBADashService
         /// <summary>
         /// Process a given list of S3 files for a sepecific instance in order, writing collected data to DBA Dash repository database
         /// </summary>
-        private static void ProcessS3FileListForCollectS3(List<string>instanceFiles,Amazon.S3.AmazonS3Client s3Cli, Amazon.S3.Util.AmazonS3Uri uri, DBADashSource cfg)
+        private static void ProcessS3FileListForCollectS3(List<string> instanceFiles, Amazon.S3.AmazonS3Client s3Cli, Amazon.S3.Util.AmazonS3Uri uri, DBADashSource cfg)
         {
             instanceFiles.Sort(); // Ensure files are processed in order
             foreach (string s3Path in instanceFiles)

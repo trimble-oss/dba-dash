@@ -112,7 +112,7 @@ namespace DBADashGUI
             this.dgvJobs.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
             this.dgvJobs.Size = new System.Drawing.Size(1338, 263);
             this.dgvJobs.TabIndex = 0;
-            this.dgvJobs.SelectionChanged += new System.EventHandler(this.dgvJobs_SelectionChanged);
+            this.dgvJobs.SelectionChanged += new System.EventHandler(this.DgvJobs_SelectionChanged);
             // 
             // colDiff
             // 
@@ -243,7 +243,7 @@ namespace DBADashGUI
             this.bttnCompare.TabIndex = 2;
             this.bttnCompare.Text = "Compare";
             this.bttnCompare.UseVisualStyleBackColor = true;
-            this.bttnCompare.Click += new System.EventHandler(this.bttnCompare_Click);
+            this.bttnCompare.Click += new System.EventHandler(this.BttnCompare_Click);
             // 
             // cboB
             // 
@@ -252,7 +252,7 @@ namespace DBADashGUI
             this.cboB.Name = "cboB";
             this.cboB.Size = new System.Drawing.Size(190, 24);
             this.cboB.TabIndex = 1;
-            this.cboB.SelectedIndexChanged += new System.EventHandler(this.cboB_SelectedIndexChanged);
+            this.cboB.SelectedIndexChanged += new System.EventHandler(this.CboB_SelectedIndexChanged);
             // 
             // cboA
             // 
@@ -261,7 +261,7 @@ namespace DBADashGUI
             this.cboA.Name = "cboA";
             this.cboA.Size = new System.Drawing.Size(190, 24);
             this.cboA.TabIndex = 0;
-            this.cboA.SelectedIndexChanged += new System.EventHandler(this.cboA_SelectedIndexChanged);
+            this.cboA.SelectedIndexChanged += new System.EventHandler(this.CboA_SelectedIndexChanged);
             // 
             // JobDiff
             // 

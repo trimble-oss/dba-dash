@@ -1,10 +1,6 @@
 ﻿using Microsoft.Data.SqlClient;
 using System;
-using System.Collections.Generic;
 using System.Data;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace DBADashGUI.Checks
 {
@@ -12,7 +8,7 @@ namespace DBADashGUI.Checks
     {
         public int? MemoryDumpWarningThresholdHrs { get; set; }
         public int? MemoryDumpCriticalThresholdHrs { get; set; }
-        public DateTime ?MemoryDumpAckDate { get; init; }
+        public DateTime? MemoryDumpAckDate { get; init; }
 
         public static MemoryDumpThresholds GetMemoryDumpThresholds()
         {
@@ -23,7 +19,7 @@ namespace DBADashGUI.Checks
                 var pWarning = new SqlParameter() { ParameterName = "MemoryDumpWarningThresholdHrs", Direction = ParameterDirection.Output, SqlDbType = SqlDbType.Int };
                 var pCritical = new SqlParameter() { ParameterName = "MemoryDumpCriticalThresholdHrs", Direction = ParameterDirection.Output, SqlDbType = SqlDbType.Int };
                 var pAckDate = new SqlParameter() { ParameterName = "MemoryDumpAckDate", Direction = ParameterDirection.Output, SqlDbType = SqlDbType.DateTime };
-                
+
                 cmd.Parameters.Add(pWarning);
                 cmd.Parameters.Add(pCritical);
                 cmd.Parameters.Add(pAckDate);
@@ -39,14 +35,14 @@ namespace DBADashGUI.Checks
             }
         }
 
-        public static void Acknowledge(bool clear =false)
+        public static void Acknowledge(bool clear = false)
         {
             using (var cn = new SqlConnection(Common.ConnectionString))
             using (var cmd = new SqlCommand("dbo.AcknowledgeMemoryDumps", cn) { CommandType = CommandType.StoredProcedure })
             {
-                cmd.Parameters.AddWithValue("Clear",clear);
+                cmd.Parameters.AddWithValue("Clear", clear);
                 cn.Open();
-                cmd.ExecuteNonQuery();              
+                cmd.ExecuteNonQuery();
             }
         }
 

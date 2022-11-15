@@ -108,8 +108,8 @@ namespace DBADashGUI.Changes
             this.dgv.RowTemplate.Height = 24;
             this.dgv.Size = new System.Drawing.Size(895, 452);
             this.dgv.TabIndex = 0;
-            this.dgv.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgv_CellContentClick);
-            this.dgv.SelectionChanged += new System.EventHandler(this.dgv_SelectionChanged);
+            this.dgv.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.Dgv_CellContentClick);
+            this.dgv.SelectionChanged += new System.EventHandler(this.Dgv_SelectionChanged);
             // 
             // toolStrip1
             // 
@@ -134,7 +134,7 @@ namespace DBADashGUI.Changes
             this.tsRefresh.Name = "tsRefresh";
             this.tsRefresh.Size = new System.Drawing.Size(29, 24);
             this.tsRefresh.Text = "Refresh";
-            this.tsRefresh.Click += new System.EventHandler(this.tsRefresh_Click);
+            this.tsRefresh.Click += new System.EventHandler(this.TsRefresh_Click);
             // 
             // tsCopy
             // 
@@ -144,7 +144,7 @@ namespace DBADashGUI.Changes
             this.tsCopy.Name = "tsCopy";
             this.tsCopy.Size = new System.Drawing.Size(29, 24);
             this.tsCopy.Text = "Copy";
-            this.tsCopy.Click += new System.EventHandler(this.tsCopy_Click);
+            this.tsCopy.Click += new System.EventHandler(this.TsCopy_Click);
             // 
             // tsExcel
             // 
@@ -154,7 +154,7 @@ namespace DBADashGUI.Changes
             this.tsExcel.Name = "tsExcel";
             this.tsExcel.Size = new System.Drawing.Size(29, 24);
             this.tsExcel.Text = "Export Excel";
-            this.tsExcel.Click += new System.EventHandler(this.tsExcel_Click);
+            this.tsExcel.Click += new System.EventHandler(this.TsExcel_Click);
             // 
             // tsBack
             // 
@@ -164,7 +164,7 @@ namespace DBADashGUI.Changes
             this.tsBack.Name = "tsBack";
             this.tsBack.Size = new System.Drawing.Size(29, 24);
             this.tsBack.Text = "Back";
-            this.tsBack.Click += new System.EventHandler(this.tsBack_Click);
+            this.tsBack.Click += new System.EventHandler(this.TsBack_Click);
             // 
             // tsCompare
             // 
@@ -176,7 +176,7 @@ namespace DBADashGUI.Changes
             this.tsCompare.Size = new System.Drawing.Size(94, 24);
             this.tsCompare.Text = "Compare";
             this.tsCompare.ToolTipText = "Select two rows to enable compare";
-            this.tsCompare.Click += new System.EventHandler(this.tsCompare_Click);
+            this.tsCompare.Click += new System.EventHandler(this.TsCompare_Click);
             // 
             // dataGridViewTextBoxColumn1
             // 

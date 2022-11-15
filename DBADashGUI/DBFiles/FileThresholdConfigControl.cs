@@ -1,11 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace DBADashGUI.DBFiles
@@ -17,7 +10,7 @@ namespace DBADashGUI.DBFiles
             InitializeComponent();
         }
 
-        private FileThreshold fileThres = new FileThreshold();
+        private FileThreshold fileThres = new();
         public FileThreshold FileThreshold
         {
             get
@@ -50,9 +43,9 @@ namespace DBADashGUI.DBFiles
                 fileThres = value;
                 var setValueByThres = fileThres;
 
-                chkInherit.Enabled = fileThres.InstanceID!=-1;
+                chkInherit.Enabled = fileThres.InstanceID != -1;
 
-                
+
                 if (fileThres.Inherited)
                 {
                     chkInherit.Checked = true;
@@ -91,7 +84,7 @@ namespace DBADashGUI.DBFiles
         }
 
 
-        private void setThresholdType()
+        private void SetThresholdType()
         {
             if (optMB.Checked)
             {
@@ -110,13 +103,13 @@ namespace DBADashGUI.DBFiles
         }
 
 
-        private void chkInherit_CheckedChanged(object sender, EventArgs e)
+        private void ChkInherit_CheckedChanged(object sender, EventArgs e)
         {
             grpMaxSize.Enabled = !chkInherit.Checked;
             grpFreespace.Enabled = !chkInherit.Checked;
         }
 
-        private void chkMaxSizeDisable_CheckedChanged(object sender, EventArgs e)
+        private void ChkMaxSizeDisable_CheckedChanged(object sender, EventArgs e)
         {
             numMaxSizeCritical.Enabled = !chkMaxSizeDisable.Checked;
             numMaxSizeWarning.Enabled = !chkMaxSizeDisable.Checked;
@@ -127,9 +120,9 @@ namespace DBADashGUI.DBFiles
             }
         }
 
-        private void optMBPct_CheckedChanged(object sender, EventArgs e)
+        private void OptMBPct_CheckedChanged(object sender, EventArgs e)
         {
-            setThresholdType();
+            SetThresholdType();
         }
     }
 }

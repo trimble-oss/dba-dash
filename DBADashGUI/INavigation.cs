@@ -1,12 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace DBADashGUI
+﻿namespace DBADashGUI
 {
- 
+
     /// <summary>
     /// Interface for navigation operations.  e.g. Navigate back.  
     /// Controls implement this common navigation interface which is used to support global navigation buttons.
@@ -19,7 +13,7 @@ namespace DBADashGUI
         /// Return true if navigation back is possible
         /// </summary>
         public bool CanNavigateBack { get; }
-        
+
         // Consider for future?
         // public bool CanNavigateForward { get; }
 

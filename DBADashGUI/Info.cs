@@ -1,13 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Drawing;
+﻿using Microsoft.Data.SqlClient;
+using System;
 using System.Data;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
-using Microsoft.Data.SqlClient;
 
 namespace DBADashGUI
 {
@@ -28,7 +22,7 @@ namespace DBADashGUI
             {
                 cn.Open();
                 cmd.Parameters.AddWithValue("InstanceID", InstanceID);
-                DataTable dt = new DataTable();
+                DataTable dt = new();
                 da.Fill(dt);
                 dgv.DataSource = dt;
             }

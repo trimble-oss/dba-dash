@@ -80,7 +80,7 @@
             this.bttnToggle.TabIndex = 1;
             this.bttnToggle.Text = "Toggle Selection";
             this.bttnToggle.UseVisualStyleBackColor = true;
-            this.bttnToggle.Click += new System.EventHandler(this.bttnToggle_Click);
+            this.bttnToggle.Click += new System.EventHandler(this.BttnToggle_Click);
             // 
             // bttn9to5
             // 
@@ -90,7 +90,7 @@
             this.bttn9to5.TabIndex = 2;
             this.bttn9to5.Text = "09:00 to 17:00";
             this.bttn9to5.UseVisualStyleBackColor = true;
-            this.bttn9to5.Click += new System.EventHandler(this.bttn9to5_Click);
+            this.bttn9to5.Click += new System.EventHandler(this.Bttn9to5_Click);
             // 
             // bttnOK
             // 
@@ -100,7 +100,7 @@
             this.bttnOK.TabIndex = 3;
             this.bttnOK.Text = "&OK";
             this.bttnOK.UseVisualStyleBackColor = true;
-            this.bttnOK.Click += new System.EventHandler(this.bttnOK_Click);
+            this.bttnOK.Click += new System.EventHandler(this.BttnOK_Click);
             // 
             // bttnCancel
             // 
@@ -119,7 +119,7 @@
             this.bttnAll.TabIndex = 5;
             this.bttnAll.Text = "All";
             this.bttnAll.UseVisualStyleBackColor = true;
-            this.bttnAll.Click += new System.EventHandler(this.bttnAll_Click);
+            this.bttnAll.Click += new System.EventHandler(this.BttnAll_Click);
             // 
             // bttnNone
             // 
@@ -129,7 +129,7 @@
             this.bttnNone.TabIndex = 6;
             this.bttnNone.Text = "None";
             this.bttnNone.UseVisualStyleBackColor = true;
-            this.bttnNone.Click += new System.EventHandler(this.bttnNone_Click);
+            this.bttnNone.Click += new System.EventHandler(this.BttnNone_Click);
             // 
             // HourSelection
             // 

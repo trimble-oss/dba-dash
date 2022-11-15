@@ -145,7 +145,7 @@
             this.tsRefresh.Name = "tsRefresh";
             this.tsRefresh.Size = new System.Drawing.Size(29, 24);
             this.tsRefresh.Text = "Refresh";
-            this.tsRefresh.Click += new System.EventHandler(this.tsRefresh_Click);
+            this.tsRefresh.Click += new System.EventHandler(this.TsRefresh_Click);
             // 
             // tsCopy
             // 
@@ -155,7 +155,7 @@
             this.tsCopy.Name = "tsCopy";
             this.tsCopy.Size = new System.Drawing.Size(29, 24);
             this.tsCopy.Text = "Copy";
-            this.tsCopy.Click += new System.EventHandler(this.tsCopy_Click);
+            this.tsCopy.Click += new System.EventHandler(this.TsCopy_Click);
             // 
             // tsExcel
             // 
@@ -165,7 +165,7 @@
             this.tsExcel.Name = "tsExcel";
             this.tsExcel.Size = new System.Drawing.Size(29, 24);
             this.tsExcel.Text = "Export Excel";
-            this.tsExcel.Click += new System.EventHandler(this.tsExcel_Click);
+            this.tsExcel.Click += new System.EventHandler(this.TsExcel_Click);
             // 
             // toolStrip2
             // 
@@ -197,7 +197,7 @@
             this.tsRefreshHistory.Name = "tsRefreshHistory";
             this.tsRefreshHistory.Size = new System.Drawing.Size(29, 24);
             this.tsRefreshHistory.Text = "Refresh";
-            this.tsRefreshHistory.Click += new System.EventHandler(this.tsRefreshHistory_Click);
+            this.tsRefreshHistory.Click += new System.EventHandler(this.TsRefreshHistory_Click);
             // 
             // tsCopyHistory
             // 
@@ -207,7 +207,7 @@
             this.tsCopyHistory.Name = "tsCopyHistory";
             this.tsCopyHistory.Size = new System.Drawing.Size(29, 24);
             this.tsCopyHistory.Text = "Copy";
-            this.tsCopyHistory.Click += new System.EventHandler(this.tsCopyHistory_Click);
+            this.tsCopyHistory.Click += new System.EventHandler(this.TsCopyHistory_Click);
             // 
             // tsExcelHistory
             // 
@@ -217,7 +217,7 @@
             this.tsExcelHistory.Name = "tsExcelHistory";
             this.tsExcelHistory.Size = new System.Drawing.Size(29, 24);
             this.tsExcelHistory.Text = "Export Excel";
-            this.tsExcelHistory.Click += new System.EventHandler(this.tsExcelHistory_Click);
+            this.tsExcelHistory.Click += new System.EventHandler(this.TsExcelHistory_Click);
             // 
             // Instance
             // 

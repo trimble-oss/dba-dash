@@ -1,15 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
+﻿using DBADash;
+using System;
 using System.Diagnostics;
-using System.Drawing;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
-using DBADash;
 namespace DBADashGUI
 {
     public partial class ConnectionOptions : Form
@@ -21,19 +14,19 @@ namespace DBADashGUI
 
         public BasicConfig cfg;
 
-        private void bttnOK_Click(object sender, EventArgs e)
+        private void BttnOK_Click(object sender, EventArgs e)
         {
             if (optConfigure.Checked)
             {
-                configureService();
+                ConfigureService();
             }
             else
             {
-                connect();
+                Connect();
             }
         }
 
-        private void connect()
+        private void Connect()
         {
             using (var frm = new DBConnection())
             {
@@ -45,9 +38,9 @@ namespace DBADashGUI
                     {
                         DBValidations.GetDBVersion(frm.ConnectionString);
                     }
-                    catch(Exception ex)
+                    catch (Exception ex)
                     {
-                        MessageBox.Show("Error validating connection to repository database:" + ex.Message,"Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        MessageBox.Show("Error validating connection to repository database:" + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                         return;
                     }
 
@@ -71,13 +64,13 @@ namespace DBADashGUI
         }
 
 
-        private void configureService()
+        private static void ConfigureService()
         {
             var psi = new ProcessStartInfo(Properties.Resources.ServiceConfigToolName) { UseShellExecute = true };
             Process.Start(psi);
             Application.Exit();
         }
-        
+
 
         private void ConnectionOptions_Load(object sender, EventArgs e)
         {
@@ -85,7 +78,7 @@ namespace DBADashGUI
             {
                 optConfigure.Enabled = false;
                 optConnect.Checked = true;
-                connect();
+                Connect();
             }
         }
     }

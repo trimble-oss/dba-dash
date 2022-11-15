@@ -1,14 +1,13 @@
-﻿using SpreadsheetLight;
+﻿using Microsoft.Data.SqlClient;
+using SpreadsheetLight;
 using System;
 using System.Collections.Generic;
 using System.Data;
-using Microsoft.Data.SqlClient;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 
@@ -18,11 +17,13 @@ namespace DBADashGUI
     {
         private static string connectionString;
         private static Guid connectionGUID;
-        public static Guid ConnectionGUID { get => connectionGUID;  }
+        public static Guid ConnectionGUID { get => connectionGUID; }
         public static string ConnectionString { get => connectionString; }
         public static readonly string JsonConfigPath = System.IO.Path.Combine(Application.StartupPath, "ServiceConfig.json");
-        public static bool FreezeKeyColumn = true;
-        public static bool IsApplicationRunning = false; /* Set to true if App is running - used to detect design time mode */
+        private static bool FreezeKeyColumnInternal;
+        public static bool FreezeKeyColumn { get => FreezeKeyColumnInternal; set => FreezeKeyColumnInternal = value; }
+        private static bool IsApplicationRunningInternal = false;
+        public static bool IsApplicationRunning { get => IsApplicationRunningInternal; set => IsApplicationRunningInternal = value; } /* Set to true if App is running - used to detect design time mode */
         private static CodeViewer FrmCodeViewer;
 
         public static void SetConnectionString(string connection)
@@ -31,7 +32,7 @@ namespace DBADashGUI
             connectionGUID = Guid.NewGuid();
         }
 
-        public static Dictionary<Int32, string> DateGroups = new Dictionary<Int32, string>() {
+        public static readonly Dictionary<int, string> DateGroups = new() {
                 {0,"None" },
                 { 1, "1min" },
                 { 2, "2min" },
@@ -120,7 +121,7 @@ namespace DBADashGUI
 
         public static DataTable ConvertUTCToLocal(ref DataTable dt, List<string> convertCols = null)
         {
-            List<Int32> convertColsIdx = new List<int>();
+            List<Int32> convertColsIdx = new();
             if (convertCols == null || convertCols.Count == 0)
             {
                 foreach (DataColumn col in dt.Columns)
@@ -185,12 +186,12 @@ namespace DBADashGUI
               , count_begin + count_html_begin + count_html
               ) + html_begin + html + html_end;
 
-            DataObject obj = new DataObject();
+            DataObject obj = new();
             obj.SetData(DataFormats.Html, new MemoryStream(
               enc.GetBytes(html_total)));
 
             obj.SetData(DataFormats.Text, html);
-            
+
             Clipboard.SetDataObject(obj, true);
         }
 
@@ -205,7 +206,7 @@ namespace DBADashGUI
             var DataGridView1Counts = dgv.Rows.Count;
 
 
-            StringBuilder html = new StringBuilder();
+            StringBuilder html = new();
             html.Append("<table>");
 
             if (DataGridView1Counts > 0)
@@ -246,11 +247,11 @@ namespace DBADashGUI
         public static void PromptSaveDataGridView(DataGridView dgv)
         {
             string defaultFileName = "DBADash_" + DateTime.Now.ToString("yyyyMMdd_HHmmss") + ".xlsx";
-            using (var ofd = new SaveFileDialog() { FileName=defaultFileName,  AddExtension = true, DefaultExt = ".xlsx" })
+            using (var ofd = new SaveFileDialog() { FileName = defaultFileName, AddExtension = true, DefaultExt = ".xlsx" })
             {
                 if (ofd.ShowDialog() == DialogResult.OK)
                 {
-        
+
                     if (File.Exists(ofd.FileName))
                     {
                         if (MessageBox.Show(string.Format("Are you sure you want to replace the existing file: {0}", ofd.FileName), "Confirm Replace", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) == DialogResult.Yes)
@@ -261,17 +262,17 @@ namespace DBADashGUI
                         {
                             return;
                         }
-                    }             
+                    }
                     Common.SaveDataGridViewToXLSX(ref dgv, ofd.FileName);
                     var psi = new ProcessStartInfo(ofd.FileName) { UseShellExecute = true };
-                    Process.Start(psi);                    
+                    Process.Start(psi);
                 }
             }
         }
 
-        public static void SaveDataGridViewToXLSX(ref DataGridView dgv,string path)
+        public static void SaveDataGridViewToXLSX(ref DataGridView dgv, string path)
         {
-            SLDocument sl = new SLDocument();
+            SLDocument sl = new();
             Int32 colIndex = 1;
             Int32 rowIndex = 1;
             foreach (DataGridViewColumn col in dgv.Columns)
@@ -288,7 +289,7 @@ namespace DBADashGUI
                 colIndex = 0;
                 rowIndex += 1;
                 foreach (DataGridViewCell cell in row.Cells)
-                {                   
+                {
                     if (cell.Visible)
                     {
                         colIndex += 1;
@@ -301,7 +302,7 @@ namespace DBADashGUI
                             "P:" or "P2" => "0.00%",
                             _ => "",
                         };
-                        if(cellType == typeof(DateTime))
+                        if (cellType == typeof(DateTime))
                         {
                             format = "yyyy-MM-dd HH:mm";
                         }
@@ -313,20 +314,20 @@ namespace DBADashGUI
                             style.FormatCode = format;
                             sl.SetCellStyle(rowIndex, colIndex, style);
                         }
-                     
+
                         if (cellType == typeof(decimal) || cellType == typeof(float))
                         {
                             sl.SetCellValue(rowIndex, colIndex, Convert.ToDecimal(cell.Value));
                         }
-                        else if(cellType == typeof(int) || cellType== typeof(long) || cellType == typeof(short) || cellType == typeof(uint) || cellType == typeof(ulong) || cellType == typeof(ushort))
+                        else if (cellType == typeof(int) || cellType == typeof(long) || cellType == typeof(short) || cellType == typeof(uint) || cellType == typeof(ulong) || cellType == typeof(ushort))
                         {
                             sl.SetCellValue(rowIndex, colIndex, Convert.ToInt64(cell.Value));
                         }
                         else if (cellType == typeof(DateTime))
                         {
-                            sl.SetCellValue(rowIndex,colIndex,Convert.ToDateTime(cell.Value));
+                            sl.SetCellValue(rowIndex, colIndex, Convert.ToDateTime(cell.Value));
                         }
-                        else if(cellType == typeof(byte[]))
+                        else if (cellType == typeof(byte[]))
                         {
                             sl.SetCellValue(rowIndex, colIndex, Convert.ToString(cell.FormattedValue));
                         }
@@ -334,13 +335,13 @@ namespace DBADashGUI
                         {
                             sl.SetCellValue(rowIndex, colIndex, Convert.ToString(cell.Value));
                         }
-                       
+
                     }
                 }
             }
             if (rowIndex > 1)
             {
-                var tbl = sl.CreateTable(1, 1, rowIndex, colIndex);        
+                var tbl = sl.CreateTable(1, 1, rowIndex, colIndex);
                 sl.InsertTable(tbl);
                 SLStyle headerStyle = sl.CreateStyle();
                 headerStyle.Fill.SetPattern(DocumentFormat.OpenXml.Spreadsheet.PatternValues.Solid, DashColors.TrimbleBlue, DashColors.TrimbleBlue);
@@ -354,8 +355,8 @@ namespace DBADashGUI
 
         public static DialogResult ShowInputDialog(ref string input, string title)
         {
-            System.Drawing.Size size = new System.Drawing.Size(400, 80);
-            Form inputBox = new Form
+            System.Drawing.Size size = new(400, 80);
+            Form inputBox = new()
             {
                 FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog,
                 ClientSize = size,
@@ -366,7 +367,7 @@ namespace DBADashGUI
                 BackColor = DashColors.TrimbleBlueDark
             };
 
-            System.Windows.Forms.TextBox textBox = new TextBox
+            System.Windows.Forms.TextBox textBox = new()
             {
                 Size = new System.Drawing.Size(size.Width - 10, 25),
                 Location = new System.Drawing.Point(5, 5),
@@ -374,7 +375,7 @@ namespace DBADashGUI
             };
             inputBox.Controls.Add(textBox);
 
-            Button okButton = new Button
+            Button okButton = new()
             {
                 DialogResult = System.Windows.Forms.DialogResult.OK,
                 Name = "okButton",
@@ -385,7 +386,7 @@ namespace DBADashGUI
             };
             inputBox.Controls.Add(okButton);
 
-            Button cancelButton = new Button
+            Button cancelButton = new()
             {
                 DialogResult = System.Windows.Forms.DialogResult.Cancel,
                 Name = "cancelButton",
@@ -406,7 +407,7 @@ namespace DBADashGUI
 
         public static string ByteArrayToString(byte[] ba)
         {
-            StringBuilder hex = new StringBuilder(ba.Length * 2);
+            StringBuilder hex = new(ba.Length * 2);
             hex.Append("0x");
             foreach (byte b in ba)
                 hex.AppendFormat("{0:x2}", b);
@@ -442,24 +443,24 @@ namespace DBADashGUI
             }
         }
 
-        public static DataGridViewCellStyle DataGridViewNumericCellStyle = DataGridViewCellStyle("#,##0.###");
-        public static DataGridViewCellStyle DataGridViewNumericCellStyleNoDigits = DataGridViewCellStyle("#,##0");
-        public static DataGridViewCellStyle DataGridViewPercentCellStyle = DataGridViewCellStyle("P1"); 
+        public static readonly DataGridViewCellStyle DataGridViewNumericCellStyle = DataGridViewCellStyle("#,##0.###");
+        public static readonly DataGridViewCellStyle DataGridViewNumericCellStyleNoDigits = DataGridViewCellStyle("#,##0");
+        public static readonly DataGridViewCellStyle DataGridViewPercentCellStyle = DataGridViewCellStyle("P1");
 
         public static DataGridViewCellStyle DataGridViewCellStyle(string format)
         {
             return new DataGridViewCellStyle() { Format = format };
         }
 
-        public static void ShowCodeViewer(string sql,string title="")
+        public static void ShowCodeViewer(string sql, string title = "")
         {
-            if(FrmCodeViewer==null || FrmCodeViewer.IsDisposed || FrmCodeViewer.Disposing)
+            if (FrmCodeViewer == null || FrmCodeViewer.IsDisposed || FrmCodeViewer.Disposing)
             {
                 FrmCodeViewer = new CodeViewer() { DisposeOnClose = false };
-            }   
-            FrmCodeViewer.SQL= sql;        
+            }
+            FrmCodeViewer.SQL = sql;
             FrmCodeViewer.Text = "Code Viewer" + (string.IsNullOrEmpty(title) ? "" : " - " + title);
-            if(FrmCodeViewer.WindowState == FormWindowState.Minimized)
+            if (FrmCodeViewer.WindowState == FormWindowState.Minimized)
             {
                 FrmCodeViewer.WindowState = FormWindowState.Normal;
             }

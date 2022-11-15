@@ -81,7 +81,7 @@
             this.lnkThreshold.TabIndex = 28;
             this.lnkThreshold.TabStop = true;
             this.lnkThreshold.Text = "Configure";
-            this.lnkThreshold.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.lnkThreshold_LinkClicked);
+            this.lnkThreshold.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.LnkThreshold_LinkClicked);
             // 
             // imageList1
             // 
@@ -121,7 +121,7 @@
             this.lnkHistory.TabIndex = 33;
             this.lnkHistory.TabStop = true;
             this.lnkHistory.Text = "History";
-            this.lnkHistory.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.lnkHistory_LinkClicked);
+            this.lnkHistory.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.LnkHistory_LinkClicked);
             // 
             // pbSpace
             // 

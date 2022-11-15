@@ -1,13 +1,8 @@
-﻿using System;
+﻿using Microsoft.Data.SqlClient;
+using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Drawing;
 using System.Data;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
-using Microsoft.Data.SqlClient;
 
 namespace DBADashGUI.Changes
 {
@@ -27,10 +22,10 @@ namespace DBADashGUI.Changes
             tsProvider.DropDownItems.Clear();
             txtSearch.Text = "";
             searchText = "";
-            refreshDrivers();
+            RefreshDrivers();
         }
 
-        private DataTable getDrivers()
+        private DataTable GetDrivers()
         {
             using (var cn = new SqlConnection(Common.ConnectionString))
             using (var cmd = new SqlCommand("dbo.Drivers_Get", cn) { CommandType = CommandType.StoredProcedure })
@@ -46,48 +41,48 @@ namespace DBADashGUI.Changes
                 {
                     cmd.Parameters.AddWithValue("DriverSearch", searchText);
                 }
-             
-                DataTable dt = new DataTable();
+
+                DataTable dt = new();
                 da.Fill(dt);
                 return dt;
             }
-            
+
         }
 
-        private void refreshDrivers()
+        private void RefreshDrivers()
         {
             dgvDrivers.Columns.Clear();
             searchText = txtSearch.Text;
 
-            dgvDrivers.Columns.Add(new DataGridViewTextBoxColumn() { Name = "DriverProviderName", HeaderText = "Provider",Frozen=Common.FreezeKeyColumn });
-            dgvDrivers.Columns.Add(new DataGridViewTextBoxColumn() { Name = "DeviceName", HeaderText = "Device",Frozen = Common.FreezeKeyColumn });
+            dgvDrivers.Columns.Add(new DataGridViewTextBoxColumn() { Name = "DriverProviderName", HeaderText = "Provider", Frozen = Common.FreezeKeyColumn });
+            dgvDrivers.Columns.Add(new DataGridViewTextBoxColumn() { Name = "DeviceName", HeaderText = "Device", Frozen = Common.FreezeKeyColumn });
 
-      
-            DataTable dt = getDrivers();
-                    
+
+            DataTable dt = GetDrivers();
+
             string pivotCol = "InstanceDisplayName";
             if (tsProvider.DropDownItems.Count == 0)
             {
-                addFilters(dt);
+                AddFilters(dt);
             }
             foreach (DataRow r in dt.DefaultView.ToTable(true, pivotCol).Select("", pivotCol))
             {
                 if (r[pivotCol] != DBNull.Value)
                 {
-                    DataGridViewTextBoxColumn col = new DataGridViewTextBoxColumn() { HeaderText = (string)r[pivotCol], Name = (string)r[pivotCol] };
+                    DataGridViewTextBoxColumn col = new() { HeaderText = (string)r[pivotCol], Name = (string)r[pivotCol] };
                     dgvDrivers.Columns.Add(col);
                 }
             }
             string lastDevice = String.Empty;
             string lastProvider = String.Empty;
             string previousVersion = String.Empty;
-            List<DataGridViewRow> rows = new List<DataGridViewRow>();
+            List<DataGridViewRow> rows = new();
             DataGridViewRow row = null;
             foreach (DataRow r in dt.Select("", "DriverProviderName,DeviceName"))
             {
                 string device = r["DeviceName"] == DBNull.Value ? "" : (string)r["DeviceName"];
                 string provider = r["DriverProviderName"] == DBNull.Value ? "" : (string)r["DriverProviderName"];
-                if(provider==String.Empty && device == String.Empty)
+                if (provider == String.Empty && device == String.Empty)
                 {
                     continue;
                 }
@@ -110,7 +105,7 @@ namespace DBADashGUI.Changes
                 row.Cells[idx].ToolTipText = "Valid From: " + validFrom.ToLocalTime().ToString("yyyy-MM-dd");
                 if (previousVersion != version && previousVersion != "")
                 {
-                    row.DefaultCellStyle.BackColor = DashColors.YellowPale ;
+                    row.DefaultCellStyle.BackColor = DashColors.YellowPale;
                 }
 
                 lastDevice = device;
@@ -119,17 +114,17 @@ namespace DBADashGUI.Changes
             }
             dgvDrivers.Rows.AddRange(rows.ToArray());
             dgvDrivers.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
-           
+
         }
 
-        private void addFilters(DataTable dt)
+        private void AddFilters(DataTable dt)
         {
             tsProvider.DropDownItems.Clear();
             foreach (DataRow r in dt.DefaultView.ToTable(true, "DriverProviderName").Select("", "DriverProviderName"))
             {
-                if (r["DriverProviderName"] != DBNull.Value && (string)r["DriverProviderName"]!="")
+                if (r["DriverProviderName"] != DBNull.Value && (string)r["DriverProviderName"] != "")
                 {
-                   var tsItem= new ToolStripMenuItem((string)r["DriverProviderName"]);
+                    var tsItem = new ToolStripMenuItem((string)r["DriverProviderName"]);
                     tsItem.Checked = tsItem.Text == provider;
                     tsItem.Click += TsItem_Click;
                     tsProvider.DropDownItems.Add(tsItem);
@@ -140,35 +135,35 @@ namespace DBADashGUI.Changes
         private void TsItem_Click(object sender, EventArgs e)
         {
             var selectedItm = (ToolStripMenuItem)sender;
-            foreach(ToolStripMenuItem itm in tsProvider.DropDownItems)
+            foreach (ToolStripMenuItem itm in tsProvider.DropDownItems)
             {
 
                 itm.Checked = itm == selectedItm && !selectedItm.Checked;
             }
             provider = selectedItm.Checked ? selectedItm.Text : "";
-            refreshDrivers();
+            RefreshDrivers();
         }
 
 
 
-        private void txtSearch_KeyPress(object sender, KeyPressEventArgs e)
+        private void TxtSearch_KeyPress(object sender, KeyPressEventArgs e)
         {
-            if(e.KeyChar == (char)13)
+            if (e.KeyChar == (char)13)
             {
                 if (searchText != txtSearch.Text)
                 {
                     searchText = txtSearch.Text;
-                    refreshDrivers();
+                    RefreshDrivers();
                 }
             }
         }
 
-        private void tsRefresh_Click(object sender, EventArgs e)
+        private void TsRefresh_Click(object sender, EventArgs e)
         {
-            refreshDrivers();
+            RefreshDrivers();
         }
 
-        private void clearToolStripMenuItem_Click(object sender, EventArgs e)
+        private void ClearToolStripMenuItem_Click(object sender, EventArgs e)
         {
             txtSearch.Text = "";
             provider = "";
@@ -176,12 +171,12 @@ namespace DBADashGUI.Changes
             RefreshData();
         }
 
-        private void tsCopy_Click(object sender, EventArgs e)
+        private void TsCopy_Click(object sender, EventArgs e)
         {
             Common.CopyDataGridViewToClipboard(dgvDrivers);
         }
 
-        private void tsExcel_Click(object sender, EventArgs e)
+        private void TsExcel_Click(object sender, EventArgs e)
         {
             Common.PromptSaveDataGridView(ref dgvDrivers);
         }

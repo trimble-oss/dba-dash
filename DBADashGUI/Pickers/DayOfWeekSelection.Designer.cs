@@ -63,7 +63,7 @@
             this.bttnOK.TabIndex = 1;
             this.bttnOK.Text = "&OK";
             this.bttnOK.UseVisualStyleBackColor = true;
-            this.bttnOK.Click += new System.EventHandler(this.bttnOK_Click);
+            this.bttnOK.Click += new System.EventHandler(this.BttnOK_Click);
             // 
             // bttnCancel
             // 
@@ -82,7 +82,7 @@
             this.bttnNone.TabIndex = 10;
             this.bttnNone.Text = "None";
             this.bttnNone.UseVisualStyleBackColor = true;
-            this.bttnNone.Click += new System.EventHandler(this.bttnNone_Click);
+            this.bttnNone.Click += new System.EventHandler(this.BttnNone_Click);
             // 
             // bttnALL
             // 
@@ -92,7 +92,7 @@
             this.bttnALL.TabIndex = 9;
             this.bttnALL.Text = "All";
             this.bttnALL.UseVisualStyleBackColor = true;
-            this.bttnALL.Click += new System.EventHandler(this.bttnALL_Click);
+            this.bttnALL.Click += new System.EventHandler(this.BttnALL_Click);
             // 
             // bttnWeekday
             // 
@@ -102,7 +102,7 @@
             this.bttnWeekday.TabIndex = 8;
             this.bttnWeekday.Text = "Weekday";
             this.bttnWeekday.UseVisualStyleBackColor = true;
-            this.bttnWeekday.Click += new System.EventHandler(this.bttnWeekday_Click);
+            this.bttnWeekday.Click += new System.EventHandler(this.BttnWeekday_Click);
             // 
             // bttnToggle
             // 
@@ -112,7 +112,7 @@
             this.bttnToggle.TabIndex = 7;
             this.bttnToggle.Text = "Toggle Selection";
             this.bttnToggle.UseVisualStyleBackColor = true;
-            this.bttnToggle.Click += new System.EventHandler(this.bttnToggle_Click);
+            this.bttnToggle.Click += new System.EventHandler(this.BttnToggle_Click);
             // 
             // DayOfWeekSelection
             // 

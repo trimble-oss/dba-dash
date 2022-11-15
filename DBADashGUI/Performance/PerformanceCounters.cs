@@ -1,17 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Drawing;
-using System.Data;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
-using Microsoft.Data.SqlClient;
-using static DBADashGUI.Performance.Performance;
-using LiveCharts;
+﻿using LiveCharts;
 using LiveCharts.Defaults;
 using LiveCharts.Wpf;
+using Microsoft.Data.SqlClient;
+using System;
+using System.Data;
+using System.Windows.Forms;
 using static DBADashGUI.Performance.IMetric;
 
 namespace DBADashGUI.Performance
@@ -54,17 +47,17 @@ namespace DBADashGUI.Performance
         public DateTime ToDate { get; set; }
 
         public int CounterID { get => Metric.CounterID; set => Metric.CounterID = value; }
-        public string CounterName { get=>Metric.CounterName; set=>Metric.CounterName=value; }
+        public string CounterName { get => Metric.CounterName; set => Metric.CounterName = value; }
 
         private PerformanceCounterMetric _metric = new();
-        public PerformanceCounterMetric Metric { get=>_metric; set { _metric = value; SelectAggregate(); } } 
+        public PerformanceCounterMetric Metric { get => _metric; set { _metric = value; SelectAggregate(); } }
         IMetric IMetricChart.Metric { get => Metric; }
 
         public bool SmoothLines = false;
         public Int32 PointSize = 5;
 
         private int durationMins;
-       
+
 
         Int32 DateGrouping;
         DataTable dt;
@@ -106,7 +99,7 @@ namespace DBADashGUI.Performance
             chart1.AxisX.Clear();
             chart1.AxisY.Clear();
             chart1.Series = null;
-            
+
             var values = new ChartValues<DateTimePoint>();
             double maxValue = 0;
             double minValue = 0;
@@ -116,28 +109,28 @@ namespace DBADashGUI.Performance
             }
             foreach (DataRow r in dt.Rows)
             {
-                string aggColName= "Value_" + Enum.GetName(Metric.AggregateType);
-                
+                string aggColName = "Value_" + Enum.GetName(Metric.AggregateType);
+
                 var value = Convert.ToDouble(r[aggColName]);
                 maxValue = value > maxValue ? value : maxValue;
                 minValue = value < minValue ? value : minValue;
-                values.Add(new DateTimePoint((DateTime)r["SnapshotDate"],value ));
+                values.Add(new DateTimePoint((DateTime)r["SnapshotDate"], value));
             }
             Int32 pointSize = PointSize;
             if (dt.Rows.Count > 500)
             {
-                pointSize= 0;
+                pointSize = 0;
             }
-            if(maxValue==0 && minValue == 0)
+            if (maxValue == 0 && minValue == 0)
             {
                 maxValue = 1;
             }
-            if (maxValue < 1 && minValue==0)
+            if (maxValue < 1 && minValue == 0)
             {
-                minValue = -maxValue/2;
+                minValue = -maxValue / 2;
             }
             maxValue *= 1.1;
-            
+
             SeriesCollection s1 = new()
             {
                         new LineSeries
@@ -148,8 +141,8 @@ namespace DBADashGUI.Performance
                         PointGeometrySize = pointSize,
                         }
                     };
-            
-     
+
+
             string format = "yyyy-MM-dd HH:mm";
             chart1.AxisX.Add(new Axis
             {
@@ -158,8 +151,8 @@ namespace DBADashGUI.Performance
             chart1.AxisY.Add(new Axis
             {
                 LabelFormatter = val => val.ToString("#,##0.######"),
-                MaxValue=maxValue,
-                MinValue=minValue
+                MaxValue = maxValue,
+                MinValue = minValue
 
             });
             chart1.Series = s1;
@@ -169,10 +162,10 @@ namespace DBADashGUI.Performance
         }
 
         private DataTable GetPerformanceCounter()
-        {           
+        {
             using (var cn = new SqlConnection(Common.ConnectionString))
-            using (var cmd = new SqlCommand("dbo.PerformanceCounter_Get", cn) {  CommandType = CommandType.StoredProcedure })
-            using(var da = new SqlDataAdapter(cmd))
+            using (var cmd = new SqlCommand("dbo.PerformanceCounter_Get", cn) { CommandType = CommandType.StoredProcedure })
+            using (var da = new SqlDataAdapter(cmd))
             {
                 cn.Open();
 
@@ -194,7 +187,7 @@ namespace DBADashGUI.Performance
                 da.Fill(dt);
                 Common.ConvertUTCToLocal(ref dt);
                 return dt;
-            }           
+            }
         }
 
         private void PerformanceCounters_Load(object sender, EventArgs e)
@@ -208,12 +201,12 @@ namespace DBADashGUI.Performance
             DateGrouping = Convert.ToInt32(ts.Tag);
             tsDateGrouping.Text = Common.DateGroupString(DateGrouping);
             dt = GetPerformanceCounter();
-            RefreshChart();           
+            RefreshChart();
         }
 
         private void TsAgg_Click(object sender, EventArgs e)
         {
-            foreach(ToolStripMenuItem itm in tsAgg.DropDownItems)
+            foreach (ToolStripMenuItem itm in tsAgg.DropDownItems)
             {
                 itm.Checked = itm == sender;
                 if (itm.Checked)
@@ -227,7 +220,7 @@ namespace DBADashGUI.Performance
 
         private void TsClose_Click(object sender, EventArgs e)
         {
-            Close.Invoke(this,new EventArgs());
+            Close.Invoke(this, new EventArgs());
         }
 
         private void TsUp_Click(object sender, EventArgs e)

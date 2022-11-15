@@ -1,11 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace DBADashGUI
@@ -44,7 +38,7 @@ namespace DBADashGUI
 
         private void Timer1_Tick(object sender, EventArgs e)
         {
-            
+
             if (lblRefresh.Text.Length > baseText.Length + 20)
             {
                 lblRefresh.Text = baseText;
@@ -60,17 +54,17 @@ namespace DBADashGUI
             SetMessage(message, DashColors.Fail, Color.White);
         }
 
-        public void SetMessage(string message,Color backColor,Color foreColor)
+        public void SetMessage(string message, Color backColor, Color foreColor)
         {
             this.BackColor = backColor;
-            this.ForeColor= foreColor;  
-            lblRefresh.Text=message;
+            this.ForeColor = foreColor;
+            lblRefresh.Text = message;
             timer1.Enabled = false;
         }
 
         private void Refresh_VisibilityChanged(object sender, EventArgs e)
         {
-            Reset();                       
+            Reset();
         }
     }
 }

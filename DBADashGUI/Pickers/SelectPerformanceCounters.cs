@@ -1,12 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Data;
-using Microsoft.Data.SqlClient;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace DBADashGUI.Performance
@@ -20,19 +14,19 @@ namespace DBADashGUI.Performance
 
         public DataTable Counters;
 
-        private Dictionary<int, Counter>selectedCounters;
+        private Dictionary<int, Counter> selectedCounters;
 
-        public Dictionary<int,Counter> SelectedCounters
+        public Dictionary<int, Counter> SelectedCounters
         {
             get
             {
                 var selected = new Dictionary<int, Counter>();
                 foreach (DataRow row in Counters.Rows)
                 {
-                    var ctr = new Counter() { CounterID = (int)row["CounterID"], Avg = (bool)row["Avg"], Max = (bool)row["Max"], Min = (bool)row["Min"], SampleCount = (bool)row["SampleCount"],Current= (bool)row["Current"], Total = (bool)row["Total"], CounterName = (string)row["counter_name"], ObjectName=(string)row["object_name"], InstanceName = (string)row["instance_name"] };
+                    var ctr = new Counter() { CounterID = (int)row["CounterID"], Avg = (bool)row["Avg"], Max = (bool)row["Max"], Min = (bool)row["Min"], SampleCount = (bool)row["SampleCount"], Current = (bool)row["Current"], Total = (bool)row["Total"], CounterName = (string)row["counter_name"], ObjectName = (string)row["object_name"], InstanceName = (string)row["instance_name"] };
                     if (ctr.GetAggColumns().Count > 0)
                     {
-                        selected.Add(ctr.CounterID,ctr);
+                        selected.Add(ctr.CounterID, ctr);
                     }
                 }
                 return selected;
@@ -43,7 +37,7 @@ namespace DBADashGUI.Performance
             }
         }
 
-        private void addAggSelectionColumns()
+        private void AddAggSelectionColumns()
         {
             Counters.Columns.Add(new DataColumn("Total", typeof(bool)) { DefaultValue = false });
             Counters.Columns.Add(new DataColumn("Avg", typeof(bool)) { DefaultValue = false });
@@ -55,16 +49,16 @@ namespace DBADashGUI.Performance
 
         private void SelectPerformanceCounters_Load(object sender, EventArgs e)
         {
-            dgvCounters.CurrentCellDirtyStateChanged += dgvCounters_CurrentCellDirtyStateChanged;
+            dgvCounters.CurrentCellDirtyStateChanged += DgvCounters_CurrentCellDirtyStateChanged;
             if (Counters == null || Counters.Rows.Count == 0)
             {
                 Counters = CommonData.GetCounters();
-                addAggSelectionColumns();
-                if (selectedCounters!=null && selectedCounters.Count > 0)
+                AddAggSelectionColumns();
+                if (selectedCounters != null && selectedCounters.Count > 0)
                 {
-                    foreach(DataRow row in Counters.Rows)
+                    foreach (DataRow row in Counters.Rows)
                     {
-                        int counterID = (int)row["CounterID"];                       
+                        int counterID = (int)row["CounterID"];
                         if (selectedCounters.ContainsKey(counterID))
                         {
                             var counter = selectedCounters[counterID];
@@ -79,10 +73,10 @@ namespace DBADashGUI.Performance
                 }
             }
             dgvCounters.AutoGenerateColumns = false;
-            dgvCounters.DataSource =new DataView(Counters);
+            dgvCounters.DataSource = new DataView(Counters);
         }
-     
-        private void dgvCounters_CurrentCellDirtyStateChanged(object sender, EventArgs e)
+
+        private void DgvCounters_CurrentCellDirtyStateChanged(object sender, EventArgs e)
         {
             if (dgvCounters.CurrentCell is DataGridViewCheckBoxCell)
             {
@@ -90,22 +84,22 @@ namespace DBADashGUI.Performance
             }
         }
 
-        private void bttnOK_Click(object sender, EventArgs e)
+        private void BttnOK_Click(object sender, EventArgs e)
         {
             this.DialogResult = DialogResult.OK;
             this.Close();
         }
 
-        private void txtSearch_TextChanged(object sender, EventArgs e)
+        private void TxtSearch_TextChanged(object sender, EventArgs e)
         {
             var dv = (DataView)dgvCounters.DataSource;
             dv.RowFilter = String.Format("counter_name LIKE '*{0}*' OR object_name LIKE '*{0}*' OR instance_name LIKE '*{0}*'", txtSearch.Text.Replace("'", ""));
         }
 
 
-        private void bttnClear_Click(object sender, EventArgs e)
+        private void BttnClear_Click(object sender, EventArgs e)
         {
-            foreach(DataRow row in Counters.Rows)
+            foreach (DataRow row in Counters.Rows)
             {
                 row["Total"] = false;
                 row["Avg"] = false;
@@ -116,7 +110,7 @@ namespace DBADashGUI.Performance
             }
         }
 
-        private void bttnCancel_Click(object sender, EventArgs e)
+        private void BttnCancel_Click(object sender, EventArgs e)
         {
             this.Close();
         }

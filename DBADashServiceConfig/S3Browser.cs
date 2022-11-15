@@ -1,12 +1,4 @@
-﻿using DBADash;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System;
 using System.Windows.Forms;
 
 namespace DBADashServiceConfig
@@ -33,19 +25,21 @@ namespace DBADashServiceConfig
             }
         }
 
-        public string AWSURL { 
-            get {
+        public string AWSURL
+        {
+            get
+            {
                 if (!string.IsNullOrEmpty(cboBuckets.Text) & !String.IsNullOrEmpty(txtFolder.Text))
                 {
-                    string folder = txtFolder.Text.Trim(new char[] { ' ', '/'});
-                   
+                    string folder = txtFolder.Text.Trim(new char[] { ' ', '/' });
+
                     return string.Format("https://{0}.s3.amazonaws.com/{1}", cboBuckets.Text, folder);
                 }
                 else
                 {
                     return string.Empty;
                 }
-            } 
+            }
         }
 
         private void AddBuckets()
@@ -60,7 +54,7 @@ namespace DBADashServiceConfig
                 {
                     cboBuckets.Items.Add(b.BucketName);
                 }
-            }      
+            }
         }
 
 
@@ -72,9 +66,9 @@ namespace DBADashServiceConfig
                 {
                     AddBuckets();
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
-                    MessageBox.Show("Error listing buckets.  If you don't have list bucket access, enter the name of the bucket manually." +  ex.Message, "List Bucket Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show("Error listing buckets.  If you don't have list bucket access, enter the name of the bucket manually." + ex.Message, "List Bucket Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
         }
@@ -86,7 +80,7 @@ namespace DBADashServiceConfig
                 MessageBox.Show("Please select a bucket", "Bucket required", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
-                this.DialogResult = DialogResult.OK;
+            this.DialogResult = DialogResult.OK;
         }
 
         private void BttnCancel_Click(object sender, EventArgs e)

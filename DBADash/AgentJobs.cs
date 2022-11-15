@@ -6,14 +6,10 @@ using SerilogTimings;
 using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Linq;
-using System.Security.AccessControl;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace DBADash
 {
-    internal class AgentJobs: SMOBaseClass
+    internal class AgentJobs : SMOBaseClass
     {
         public AgentJobs(DBADashConnection source, SchemaSnapshotDBOptions options) : base(source, options)
         {
@@ -75,7 +71,7 @@ namespace DBADash
             return jobStepDT;
         }
 
-        public void CollectJobs(ref DataSet ds,bool scriptJobs)
+        public void CollectJobs(ref DataSet ds, bool scriptJobs)
         {
             DataTable jobsDT;
             DataTable jobStepsDT;
@@ -89,7 +85,7 @@ namespace DBADash
                 jobStepsDT = GetJobStepsDT();
                 op.Complete();
             }
-           
+
             if (scriptJobs)
             {
                 using (var op = Operation.At(Serilog.Events.LogEventLevel.Debug).Begin("Script Jobs from instance {instance}", SourceConnection.ConnectionForPrint))
@@ -109,13 +105,13 @@ namespace DBADash
             {
                 var instance = new Microsoft.SqlServer.Management.Smo.Server(new Microsoft.SqlServer.Management.Common.ServerConnection(cn));
                 int totalJobs = jobsDT.Rows.Count;
-                int cnt=0;
+                int cnt = 0;
                 foreach (DataRow row in jobsDT.Rows)
                 {
                     cnt++;
                     string sDDL;
                     string jobName = (string)row["name"];
-                    using (var op = Operation.At(Serilog.Events.LogEventLevel.Debug).Begin("Script Job {number}/{totaljobs} ({pct}) {job} from {instance}",cnt,totalJobs,(cnt*1.0/totalJobs).ToString("P1"), jobName, SourceConnection.ConnectionForPrint))
+                    using (var op = Operation.At(Serilog.Events.LogEventLevel.Debug).Begin("Script Job {number}/{totaljobs} ({pct}) {job} from {instance}", cnt, totalJobs, (cnt * 1.0 / totalJobs).ToString("P1"), jobName, SourceConnection.ConnectionForPrint))
                     {
                         try
                         {
@@ -135,7 +131,7 @@ namespace DBADash
                         op.Complete();
                     }
                 }
-                
+
             }
         }
 

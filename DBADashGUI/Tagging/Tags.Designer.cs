@@ -116,7 +116,7 @@ namespace DBADashGUI.Tagging
             this.tsBack.Name = "tsBack";
             this.tsBack.Size = new System.Drawing.Size(29, 24);
             this.tsBack.Text = "Back";
-            this.tsBack.Click += new System.EventHandler(this.tsBack_Click);
+            this.tsBack.Click += new System.EventHandler(this.TsBack_Click);
             // 
             // lblInstance
             // 
@@ -144,7 +144,7 @@ namespace DBADashGUI.Tagging
             this.bttnAdd.TabIndex = 5;
             this.bttnAdd.Text = "Add";
             this.bttnAdd.UseVisualStyleBackColor = true;
-            this.bttnAdd.Click += new System.EventHandler(this.bttnAdd_Click);
+            this.bttnAdd.Click += new System.EventHandler(this.BttnAdd_Click);
             // 
             // cboTagName
             // 
@@ -154,7 +154,7 @@ namespace DBADashGUI.Tagging
             this.cboTagName.Name = "cboTagName";
             this.cboTagName.Size = new System.Drawing.Size(177, 28);
             this.cboTagName.TabIndex = 1;
-            this.cboTagName.SelectedValueChanged += new System.EventHandler(this.cboTagName_SelectedValueChanged);
+            this.cboTagName.SelectedValueChanged += new System.EventHandler(this.CboTagName_SelectedValueChanged);
             // 
             // label3
             // 
@@ -252,9 +252,9 @@ namespace DBADashGUI.Tagging
             this.dgvTags.RowTemplate.Height = 24;
             this.dgvTags.Size = new System.Drawing.Size(917, 158);
             this.dgvTags.TabIndex = 12;
-            this.dgvTags.CellMouseDoubleClick += new System.Windows.Forms.DataGridViewCellMouseEventHandler(this.dgvTags_CellMouseDoubleClick);
-            this.dgvTags.CellMouseUp += new System.Windows.Forms.DataGridViewCellMouseEventHandler(this.dgvTags_CellMouseUp);
-            this.dgvTags.CellValueChanged += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgvTags_CellValueChanged);
+            this.dgvTags.CellMouseDoubleClick += new System.Windows.Forms.DataGridViewCellMouseEventHandler(this.DgvTags_CellMouseDoubleClick);
+            this.dgvTags.CellMouseUp += new System.Windows.Forms.DataGridViewCellMouseEventHandler(this.DgvTags_CellMouseUp);
+            this.dgvTags.CellValueChanged += new System.Windows.Forms.DataGridViewCellEventHandler(this.DgvTags_CellValueChanged);
             // 
             // colTagID
             // 
@@ -352,7 +352,7 @@ namespace DBADashGUI.Tagging
             this.dgvReport.RowTemplate.Height = 24;
             this.dgvReport.Size = new System.Drawing.Size(917, 466);
             this.dgvReport.TabIndex = 0;
-            this.dgvReport.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgvReport_CellContentClick);
+            this.dgvReport.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.DgvReport_CellContentClick);
             // 
             // toolStrip1
             // 
@@ -375,7 +375,7 @@ namespace DBADashGUI.Tagging
             this.tsRefresh.Name = "tsRefresh";
             this.tsRefresh.Size = new System.Drawing.Size(29, 24);
             this.tsRefresh.Text = "Refresh";
-            this.tsRefresh.Click += new System.EventHandler(this.tsRefresh_Click);
+            this.tsRefresh.Click += new System.EventHandler(this.TsRefresh_Click);
             // 
             // tsCopy
             // 
@@ -385,7 +385,7 @@ namespace DBADashGUI.Tagging
             this.tsCopy.Name = "tsCopy";
             this.tsCopy.Size = new System.Drawing.Size(29, 24);
             this.tsCopy.Text = "Copy";
-            this.tsCopy.Click += new System.EventHandler(this.tsCopy_Click);
+            this.tsCopy.Click += new System.EventHandler(this.TsCopy_Click);
             // 
             // tsExcel
             // 
@@ -395,7 +395,7 @@ namespace DBADashGUI.Tagging
             this.tsExcel.Name = "tsExcel";
             this.tsExcel.Size = new System.Drawing.Size(29, 24);
             this.tsExcel.Text = "Excel";
-            this.tsExcel.Click += new System.EventHandler(this.tsExcel_Click);
+            this.tsExcel.Click += new System.EventHandler(this.TsExcel_Click);
             // 
             // splitEditReport
             // 

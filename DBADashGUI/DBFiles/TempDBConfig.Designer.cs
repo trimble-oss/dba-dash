@@ -120,7 +120,7 @@
             this.dgvTempDB.RowTemplate.Height = 24;
             this.dgvTempDB.Size = new System.Drawing.Size(959, 549);
             this.dgvTempDB.TabIndex = 0;
-            this.dgvTempDB.RowsAdded += new System.Windows.Forms.DataGridViewRowsAddedEventHandler(this.dgvTempDB_RowsAdded);
+            this.dgvTempDB.RowsAdded += new System.Windows.Forms.DataGridViewRowsAddedEventHandler(this.DgvTempDB_RowsAdded);
             // 
             // toolStrip1
             // 
@@ -143,7 +143,7 @@
             this.tsRefresh.Name = "tsRefresh";
             this.tsRefresh.Size = new System.Drawing.Size(29, 24);
             this.tsRefresh.Text = "Refresh";
-            this.tsRefresh.Click += new System.EventHandler(this.tsRefresh_Click);
+            this.tsRefresh.Click += new System.EventHandler(this.TsRefresh_Click);
             // 
             // tsCopy
             // 
@@ -153,7 +153,7 @@
             this.tsCopy.Name = "tsCopy";
             this.tsCopy.Size = new System.Drawing.Size(29, 24);
             this.tsCopy.Text = "Copy";
-            this.tsCopy.Click += new System.EventHandler(this.tsCopy_Click);
+            this.tsCopy.Click += new System.EventHandler(this.TsCopy_Click);
             // 
             // tsExcel
             // 
@@ -163,7 +163,7 @@
             this.tsExcel.Name = "tsExcel";
             this.tsExcel.Size = new System.Drawing.Size(29, 24);
             this.tsExcel.Text = "Export Excel";
-            this.tsExcel.Click += new System.EventHandler(this.tsExcel_Click);
+            this.tsExcel.Click += new System.EventHandler(this.TsExcel_Click);
             // 
             // dataGridViewTextBoxColumn1
             // 

@@ -1,9 +1,5 @@
 ﻿using DBADashGUI.Performance;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using static DBADashGUI.Performance.IMetric;
 
 namespace DBADashGUI
@@ -25,7 +21,7 @@ namespace DBADashGUI
             }
             set
             {
-                if (value == AggregateTypes.Avg || value == AggregateTypes.Max)
+                if (value is AggregateTypes.Avg or AggregateTypes.Max)
                 {
                     _aggregateType = value;
                 }

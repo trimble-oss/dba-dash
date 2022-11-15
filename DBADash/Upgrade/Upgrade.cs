@@ -1,11 +1,8 @@
 ﻿using Octokit;
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Reflection;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace DBADash
@@ -13,7 +10,7 @@ namespace DBADash
     public class Upgrade
     {
 
-        public const string GITHUB_OWNER = "trimble-oss"; 
+        public const string GITHUB_OWNER = "trimble-oss";
         public const string GITHUB_REPO = "dba-dash";
         public const string GITHUB_APP = "dba-dash";
         public const string GITHUB_BRANCH = "main";
@@ -49,10 +46,10 @@ namespace DBADash
         }
 
 
-        public static async Task UpgradeDBADashAsync(string tag = "",bool startGUI=false, bool startConfig=false)
+        public static async Task UpgradeDBADashAsync(string tag = "", bool startGUI = false, bool startConfig = false)
         {
             var client = new GitHubClient(new ProductHeaderValue(GITHUB_APP));
-            var upgradeScript = await client.Repository.Content.GetRawContentByRef(GITHUB_OWNER,GITHUB_REPO, GITHUB_SCRIPTPATH + GITHUB_UPGRADESCRIPT, GITHUB_BRANCH);
+            var upgradeScript = await client.Repository.Content.GetRawContentByRef(GITHUB_OWNER, GITHUB_REPO, GITHUB_SCRIPTPATH + GITHUB_UPGRADESCRIPT, GITHUB_BRANCH);
 
             System.IO.File.WriteAllBytes(GITHUB_UPGRADESCRIPT, upgradeScript);
             // Note: Setting working directory via ProcessStartInfo doesn't work when using "runas" verb. 
@@ -78,7 +75,7 @@ namespace DBADash
         {
             get
             {
-               return Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+                return Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
             }
         }
 
@@ -86,7 +83,7 @@ namespace DBADash
         {
             get
             {
-                if (File.Exists(Path.Combine(ApplicationPath,ServiceFileName)))
+                if (File.Exists(Path.Combine(ApplicationPath, ServiceFileName)))
                 {
                     return DeploymentTypes.ServiceAndGUI;
                 }

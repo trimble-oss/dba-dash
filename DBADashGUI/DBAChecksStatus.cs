@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Drawing;
 
 namespace DBADashGUI
 {
@@ -21,24 +16,24 @@ namespace DBADashGUI
         {
             if (status == DBADashStatusEnum.Critical)
             {
-                return DashColors.Fail; 
+                return DashColors.Fail;
             }
             else if (status == DBADashStatusEnum.Warning)
             {
-                return DashColors.Warning; 
+                return DashColors.Warning;
             }
             else if (status == DBADashStatusEnum.NA)
             {
-                return DashColors.GrayLight; 
+                return DashColors.GrayLight;
             }
             else if (status == DBADashStatusEnum.OK)
             {
-                return DashColors.Success; 
+                return DashColors.Success;
             }
-            return DashColors.RedPale; 
+            return DashColors.RedPale;
         }
 
-        public static void SetProgressBarColor(DBADashStatusEnum status, ref CustomProgressControl.DataGridViewProgressBarCell pCell )
+        public static void SetProgressBarColor(DBADashStatusEnum status, ref CustomProgressControl.DataGridViewProgressBarCell pCell)
         {
             if (status == DBADashStatus.DBADashStatusEnum.OK)
             {

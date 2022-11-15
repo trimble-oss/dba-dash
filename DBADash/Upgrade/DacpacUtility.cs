@@ -1,7 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using Microsoft.SqlServer.Dac;
+﻿using Microsoft.SqlServer.Dac;
 using Serilog;
+using System;
+using System.Collections.Generic;
 using static DBADash.DBValidations;
 
 namespace DacpacUtility
@@ -52,7 +52,8 @@ namespace DacpacUtility
 
             var dacServiceInstance = new DacServices(connectionString);
             dacServiceInstance.ProgressChanged +=
-              new EventHandler<DacProgressEventArgs>((s, e) => {
+              new EventHandler<DacProgressEventArgs>((s, e) =>
+              {
                   MessageList.Add(e.Message);
                   Log.Information(e.Message);
               });
@@ -99,7 +100,7 @@ namespace DacpacUtility
             }
         }
 
-        public System.Version GetVersion(string dacpacName)
+        public static System.Version GetVersion(string dacpacName)
         {
             using (DacPackage dacpac = DacPackage.Load(dacpacName))
             {
@@ -112,7 +113,7 @@ namespace DacpacUtility
                                 string databaseName,
                                 string dacpacName)
         {
-  
+
             MessageList.Add("*** Start of processing for " +
                              databaseName);
 

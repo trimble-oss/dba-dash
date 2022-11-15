@@ -140,7 +140,7 @@
             this.lnkGoodToMax.TabIndex = 20;
             this.lnkGoodToMax.TabStop = true;
             this.lnkGoodToMax.Text = "Max";
-            this.lnkGoodToMax.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.lnkGoodToMax_LinkClicked);
+            this.lnkGoodToMax.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.LnkGoodToMax_LinkClicked);
             // 
             // lnkWarningToMax
             // 
@@ -151,7 +151,7 @@
             this.lnkWarningToMax.TabIndex = 21;
             this.lnkWarningToMax.TabStop = true;
             this.lnkWarningToMax.Text = "Max";
-            this.lnkWarningToMax.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.lnkWarningToMax_LinkClicked);
+            this.lnkWarningToMax.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.LnkWarningToMax_LinkClicked);
             // 
             // lnkCriticalToMax
             // 
@@ -162,7 +162,7 @@
             this.lnkCriticalToMax.TabIndex = 22;
             this.lnkCriticalToMax.TabStop = true;
             this.lnkCriticalToMax.Text = "Max";
-            this.lnkCriticalToMax.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.lnkCriticalToMax_LinkClicked);
+            this.lnkCriticalToMax.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.LnkCriticalToMax_LinkClicked);
             // 
             // chkCritical
             // 
@@ -176,7 +176,7 @@
             this.chkCritical.Text = "Inherit";
             this.toolTip1.SetToolTip(this.chkCritical, "Check to Inherit/Disable");
             this.chkCritical.UseVisualStyleBackColor = true;
-            this.chkCritical.CheckedChanged += new System.EventHandler(this.chkCriticalEnabled_CheckedChanged);
+            this.chkCritical.CheckedChanged += new System.EventHandler(this.ChkCriticalEnabled_CheckedChanged);
             // 
             // chkWarning
             // 
@@ -190,7 +190,7 @@
             this.chkWarning.Text = "Inherit";
             this.toolTip1.SetToolTip(this.chkWarning, "Check to Inherit/Disable");
             this.chkWarning.UseVisualStyleBackColor = true;
-            this.chkWarning.CheckedChanged += new System.EventHandler(this.chkWarningEnabled_CheckedChanged);
+            this.chkWarning.CheckedChanged += new System.EventHandler(this.ChkWarningEnabled_CheckedChanged);
             // 
             // chkGood
             // 
@@ -204,7 +204,7 @@
             this.chkGood.Text = "Inherit";
             this.toolTip1.SetToolTip(this.chkGood, "Check to Inherit/Disable");
             this.chkGood.UseVisualStyleBackColor = true;
-            this.chkGood.CheckedChanged += new System.EventHandler(this.chkGoodEnabled_CheckedChanged);
+            this.chkGood.CheckedChanged += new System.EventHandler(this.ChkGoodEnabled_CheckedChanged);
             // 
             // grpThresholds
             // 
@@ -246,7 +246,7 @@
             this.lnkDisableGood.TabStop = true;
             this.lnkDisableGood.Text = "Disable";
             this.toolTip1.SetToolTip(this.lnkDisableGood, "Threshold is disabled when From > To");
-            this.lnkDisableGood.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.lnkDisableGood_LinkClicked);
+            this.lnkDisableGood.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.LnkDisableGood_LinkClicked);
             // 
             // lnkDisableWarning
             // 
@@ -258,7 +258,7 @@
             this.lnkDisableWarning.TabStop = true;
             this.lnkDisableWarning.Text = "Disable";
             this.toolTip1.SetToolTip(this.lnkDisableWarning, "Threshold is disabled when From > To");
-            this.lnkDisableWarning.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.lnkDisableWarning_LinkClicked);
+            this.lnkDisableWarning.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.LnkDisableWarning_LinkClicked);
             // 
             // lnkDisableCritical
             // 
@@ -270,7 +270,7 @@
             this.lnkDisableCritical.TabStop = true;
             this.lnkDisableCritical.Text = "Disable";
             this.toolTip1.SetToolTip(this.lnkDisableCritical, "Threshold is disabled when From > To");
-            this.lnkDisableCritical.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.lnkDisableCritical_LinkClicked);
+            this.lnkDisableCritical.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.LnkDisableCritical_LinkClicked);
             // 
             // numGoodTo
             // 
@@ -454,7 +454,7 @@
             this.cboCounterInstance.Name = "cboCounterInstance";
             this.cboCounterInstance.Size = new System.Drawing.Size(439, 28);
             this.cboCounterInstance.TabIndex = 35;
-            this.cboCounterInstance.SelectedValueChanged += new System.EventHandler(this.cboCounterInstance_SelectedValueChanged);
+            this.cboCounterInstance.SelectedValueChanged += new System.EventHandler(this.CboCounterInstance_SelectedValueChanged);
             // 
             // cboCounter
             // 
@@ -464,7 +464,7 @@
             this.cboCounter.Name = "cboCounter";
             this.cboCounter.Size = new System.Drawing.Size(439, 28);
             this.cboCounter.TabIndex = 34;
-            this.cboCounter.SelectedValueChanged += new System.EventHandler(this.cboCounter_SelectedValueChanged);
+            this.cboCounter.SelectedValueChanged += new System.EventHandler(this.CboCounter_SelectedValueChanged);
             // 
             // cboObject
             // 
@@ -474,7 +474,7 @@
             this.cboObject.Name = "cboObject";
             this.cboObject.Size = new System.Drawing.Size(439, 28);
             this.cboObject.TabIndex = 33;
-            this.cboObject.SelectedValueChanged += new System.EventHandler(this.cboObject_SelectedValueChanged);
+            this.cboObject.SelectedValueChanged += new System.EventHandler(this.CboObject_SelectedValueChanged);
             // 
             // groupBox3
             // 
@@ -500,7 +500,7 @@
             this.chkAllInstances.Text = "All Instances";
             this.toolTip1.SetToolTip(this.chkAllInstances, "Check to set root level threshold configuration for all instances");
             this.chkAllInstances.UseVisualStyleBackColor = true;
-            this.chkAllInstances.CheckedChanged += new System.EventHandler(this.chkAllInstances_CheckedChanged);
+            this.chkAllInstances.CheckedChanged += new System.EventHandler(this.ChkAllInstances_CheckedChanged);
             // 
             // label10
             // 
@@ -520,7 +520,7 @@
             this.cboInstances.Name = "cboInstances";
             this.cboInstances.Size = new System.Drawing.Size(439, 28);
             this.cboInstances.TabIndex = 34;
-            this.cboInstances.SelectedValueChanged += new System.EventHandler(this.cboInstances_SelectedValueChanged);
+            this.cboInstances.SelectedValueChanged += new System.EventHandler(this.CboInstances_SelectedValueChanged);
             // 
             // bttnUpdate
             // 
@@ -530,7 +530,7 @@
             this.bttnUpdate.TabIndex = 35;
             this.bttnUpdate.Text = "&Update";
             this.bttnUpdate.UseVisualStyleBackColor = true;
-            this.bttnUpdate.Click += new System.EventHandler(this.bttnUpdate_Click);
+            this.bttnUpdate.Click += new System.EventHandler(this.BttnUpdate_Click);
             // 
             // bttnCancel
             // 

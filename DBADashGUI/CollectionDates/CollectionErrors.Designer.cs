@@ -108,7 +108,7 @@
             this.dgvDBADashErrors.RowTemplate.Height = 24;
             this.dgvDBADashErrors.Size = new System.Drawing.Size(829, 521);
             this.dgvDBADashErrors.TabIndex = 2;
-            this.dgvDBADashErrors.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgvDBADashErrors_CellContentClick);
+            this.dgvDBADashErrors.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.DgvDBADashErrors_CellContentClick);
             // 
             // Instance
             // 
@@ -187,7 +187,7 @@
             this.tsRefreshErrors.Name = "tsRefreshErrors";
             this.tsRefreshErrors.Size = new System.Drawing.Size(29, 24);
             this.tsRefreshErrors.Text = "Refresh";
-            this.tsRefreshErrors.Click += new System.EventHandler(this.tsRefreshErrors_Click);
+            this.tsRefreshErrors.Click += new System.EventHandler(this.TsRefreshErrors_Click);
             // 
             // tsCopyErrors
             // 
@@ -197,7 +197,7 @@
             this.tsCopyErrors.Name = "tsCopyErrors";
             this.tsCopyErrors.Size = new System.Drawing.Size(29, 24);
             this.tsCopyErrors.Text = "Copy";
-            this.tsCopyErrors.Click += new System.EventHandler(this.tsCopyErrors_Click);
+            this.tsCopyErrors.Click += new System.EventHandler(this.TsCopyErrors_Click);
             // 
             // tsExcel
             // 
@@ -207,7 +207,7 @@
             this.tsExcel.Name = "tsExcel";
             this.tsExcel.Size = new System.Drawing.Size(29, 24);
             this.tsExcel.Text = "Export Excel";
-            this.tsExcel.Click += new System.EventHandler(this.tsExcel_Click);
+            this.tsExcel.Click += new System.EventHandler(this.TsExcel_Click);
             // 
             // tsErrorDays
             // 
@@ -231,7 +231,7 @@
             this.tsErrors1Day.Size = new System.Drawing.Size(144, 26);
             this.tsErrors1Day.Tag = "1";
             this.tsErrors1Day.Text = "1 Day";
-            this.tsErrors1Day.Click += new System.EventHandler(this.tsErrorDays_Click);
+            this.tsErrors1Day.Click += new System.EventHandler(this.TsErrorDays_Click);
             // 
             // tsErrors2Days
             // 
@@ -239,7 +239,7 @@
             this.tsErrors2Days.Size = new System.Drawing.Size(144, 26);
             this.tsErrors2Days.Tag = "2";
             this.tsErrors2Days.Text = "2 Days";
-            this.tsErrors2Days.Click += new System.EventHandler(this.tsErrorDays_Click);
+            this.tsErrors2Days.Click += new System.EventHandler(this.TsErrorDays_Click);
             // 
             // tsErrors3Days
             // 
@@ -247,7 +247,7 @@
             this.tsErrors3Days.Size = new System.Drawing.Size(144, 26);
             this.tsErrors3Days.Tag = "3";
             this.tsErrors3Days.Text = "3 Days";
-            this.tsErrors3Days.Click += new System.EventHandler(this.tsErrorDays_Click);
+            this.tsErrors3Days.Click += new System.EventHandler(this.TsErrorDays_Click);
             // 
             // tsErrors7Days
             // 
@@ -255,7 +255,7 @@
             this.tsErrors7Days.Size = new System.Drawing.Size(144, 26);
             this.tsErrors7Days.Tag = "7";
             this.tsErrors7Days.Text = "7 Days";
-            this.tsErrors7Days.Click += new System.EventHandler(this.tsErrorDays_Click);
+            this.tsErrors7Days.Click += new System.EventHandler(this.TsErrorDays_Click);
             // 
             // tsErrors14Days
             // 
@@ -263,7 +263,7 @@
             this.tsErrors14Days.Size = new System.Drawing.Size(144, 26);
             this.tsErrors14Days.Tag = "14";
             this.tsErrors14Days.Text = "14 Days";
-            this.tsErrors14Days.Click += new System.EventHandler(this.tsErrorDays_Click);
+            this.tsErrors14Days.Click += new System.EventHandler(this.TsErrorDays_Click);
             // 
             // tsErrors30Days
             // 
@@ -271,7 +271,7 @@
             this.tsErrors30Days.Size = new System.Drawing.Size(144, 26);
             this.tsErrors30Days.Tag = "30";
             this.tsErrors30Days.Text = "30 Days";
-            this.tsErrors30Days.Click += new System.EventHandler(this.tsErrorDays_Click);
+            this.tsErrors30Days.Click += new System.EventHandler(this.TsErrorDays_Click);
             // 
             // tsAckErrors
             // 
@@ -282,7 +282,7 @@
             this.tsAckErrors.Name = "tsAckErrors";
             this.tsAckErrors.Size = new System.Drawing.Size(145, 24);
             this.tsAckErrors.Text = "Acknowledge Errors";
-            this.tsAckErrors.Click += new System.EventHandler(this.tsAckErrors_Click);
+            this.tsAckErrors.Click += new System.EventHandler(this.TsAckErrors_Click);
             // 
             // tsFilter
             // 
@@ -313,7 +313,7 @@
             this.txtSource.Name = "txtSource";
             this.txtSource.Size = new System.Drawing.Size(150, 27);
             this.txtSource.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.Filter_KeyPress);
-            this.txtSource.TextChanged += new System.EventHandler(this.txtSource_TextChanged);
+            this.txtSource.TextChanged += new System.EventHandler(this.TxtSource_TextChanged);
             // 
             // contextToolStripMenuItem
             // 
@@ -328,7 +328,7 @@
             this.txtContext.Name = "txtContext";
             this.txtContext.Size = new System.Drawing.Size(150, 27);
             this.txtContext.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.Filter_KeyPress);
-            this.txtContext.TextChanged += new System.EventHandler(this.txtContext_TextChanged);
+            this.txtContext.TextChanged += new System.EventHandler(this.TxtContext_TextChanged);
             // 
             // messageToolStripMenuItem
             // 
@@ -343,7 +343,7 @@
             this.txtMessage.Name = "txtMessage";
             this.txtMessage.Size = new System.Drawing.Size(150, 27);
             this.txtMessage.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.Filter_KeyPress);
-            this.txtMessage.TextChanged += new System.EventHandler(this.txtMessage_TextChanged);
+            this.txtMessage.TextChanged += new System.EventHandler(this.TxtMessage_TextChanged);
             // 
             // instanceToolStripMenuItem
             // 
@@ -358,7 +358,7 @@
             this.txtInstance.Name = "txtInstance";
             this.txtInstance.Size = new System.Drawing.Size(150, 27);
             this.txtInstance.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.Filter_KeyPress);
-            this.txtInstance.TextChanged += new System.EventHandler(this.txtInstance_TextChanged);
+            this.txtInstance.TextChanged += new System.EventHandler(this.TxtInstance_TextChanged);
             // 
             // toolStripSeparator1
             // 
@@ -370,7 +370,7 @@
             this.tsClearFilters.Name = "tsClearFilters";
             this.tsClearFilters.Size = new System.Drawing.Size(224, 26);
             this.tsClearFilters.Text = "Clear Filters";
-            this.tsClearFilters.Click += new System.EventHandler(this.tsClearFilters_Click);
+            this.tsClearFilters.Click += new System.EventHandler(this.TsClearFilters_Click);
             // 
             // dataGridViewTextBoxColumn1
             // 

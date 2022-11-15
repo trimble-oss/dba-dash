@@ -1,19 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Drawing;
-using System.Data;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
-using Microsoft.Data.SqlClient;
+﻿using LiveCharts;
 using LiveCharts.Configurations;
-using LiveCharts.Wpf;
 using LiveCharts.Defaults;
-using LiveCharts;
-using static DBADashGUI.Performance.Performance;
-using System.Xml.Schema;
+using LiveCharts.Wpf;
+using Microsoft.Data.SqlClient;
+using System;
+using System.Collections.Generic;
+using System.Data;
+using System.Windows.Forms;
 
 namespace DBADashGUI.Performance
 {
@@ -74,8 +67,8 @@ namespace DBADashGUI.Performance
                 tsUp.Visible = value;
             }
         }
-        private WaitMetric _metric=new();
-        public WaitMetric Metric { get => _metric; set { _metric = value;SetMetric(); } }
+        private WaitMetric _metric = new();
+        public WaitMetric Metric { get => _metric; set { _metric = value; SetMetric(); } }
 
         private void SetMetric()
         {
@@ -89,7 +82,7 @@ namespace DBADashGUI.Performance
         {
             this.instanceID = instanceID;
 
-            if(mins!= DateRange.DurationMins)
+            if (mins != DateRange.DurationMins)
             {
                 dateGrouping = Common.DateGrouping(DateRange.DurationMins, 35);
                 if (dateGrouping < 1)
@@ -99,7 +92,7 @@ namespace DBADashGUI.Performance
                 tsDateGrouping.Text = Common.DateGroupString(dateGrouping);
                 mins = DateRange.DurationMins;
             }
-        
+
             RefreshData();
         }
 
@@ -214,9 +207,9 @@ namespace DBADashGUI.Performance
 
             });
         }
-    
 
-    private void Waits_Load(object sender, EventArgs e)
+
+        private void Waits_Load(object sender, EventArgs e)
         {
             Common.AddDateGroups(tsDateGrouping, TsDateGrouping_Click);
         }
@@ -232,9 +225,9 @@ namespace DBADashGUI.Performance
         private void TsFilterWaitType_Click(object sender, EventArgs e)
         {
             string wt = Metric.WaitType;
-            if (Common.ShowInputDialog(ref wt,"Wait Type (LIKE):") == DialogResult.OK)
+            if (Common.ShowInputDialog(ref wt, "Wait Type (LIKE):") == DialogResult.OK)
             {
-                WaitType = wt.EndsWith("%") || wt.Length==0 ? wt : wt+"%";
+                WaitType = wt.EndsWith("%") || wt.Length == 0 ? wt : wt + "%";
                 RefreshData();
             }
         }
@@ -253,7 +246,7 @@ namespace DBADashGUI.Performance
         private void CriticalWaitsOnlyToolStripMenuItem_Click(object sender, EventArgs e)
         {
             Metric.CriticalWaitsOnly = criticalWaitsOnlyToolStripMenuItem.Checked;
-            WaitType = "";      
+            WaitType = "";
             RefreshData();
         }
 

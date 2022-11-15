@@ -1,14 +1,12 @@
-﻿using System;
+﻿using DBADashGUI.Changes;
+using Microsoft.Data.SqlClient;
+using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Drawing;
 using System.Data;
+using System.Drawing;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
-using Microsoft.Data.SqlClient;
-using DBADashGUI.Changes;
 
 namespace DBADashGUI.Performance
 {
@@ -26,15 +24,15 @@ namespace DBADashGUI.Performance
         {
             if (Common.ConnectionString != null)
             {
-                refreshDB();
-                refreshPool();
+                RefreshDB();
+                RefreshPool();
             }
         }
 
-        private DataTable getAzureDBPerformanceSummary()
+        private DataTable GetAzureDBPerformanceSummary()
         {
             using (var cn = new SqlConnection(Common.ConnectionString))
-            using (SqlCommand cmd = new SqlCommand("dbo.AzureDBPerformanceSummary_Get", cn) { CommandType = CommandType.StoredProcedure })
+            using (SqlCommand cmd = new("dbo.AzureDBPerformanceSummary_Get", cn) { CommandType = CommandType.StoredProcedure })
             {
                 cn.Open();
 
@@ -42,7 +40,7 @@ namespace DBADashGUI.Performance
                 {
                     cmd.Parameters.AddWithValue("InstanceIDs", string.Join(",", InstanceIDs));
                 }
-                bool histogram = hasHistograms(ref dgv);
+                bool histogram = HasHistograms(ref dgv);
                 cmd.Parameters.AddWithValue("CPUHist", histogram);
                 cmd.Parameters.AddWithValue("DataHist", histogram);
                 cmd.Parameters.AddWithValue("LogHist", histogram);
@@ -50,36 +48,36 @@ namespace DBADashGUI.Performance
                 cmd.Parameters.AddWithValue("FromDate", DateRange.FromUTC);
                 cmd.Parameters.AddWithValue("ToDate", DateRange.ToUTC);
                 cmd.CommandTimeout = Properties.Settings.Default.CommandTimeout;
-                SqlDataAdapter da = new SqlDataAdapter(cmd);
-                DataTable dt = new DataTable();
+                SqlDataAdapter da = new(cmd);
+                DataTable dt = new();
                 da.Fill(dt);
                 return dt;
             }
         }
 
-        private void refreshDB()
+        private void RefreshDB()
         {
-            var dt = getAzureDBPerformanceSummary();
+            var dt = GetAzureDBPerformanceSummary();
             dgv.AutoGenerateColumns = false;
             dgv.DataSource = new DataView(dt);
-            generateHistogram(dgv);
+            GenerateHistogram(dgv);
             dgv.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
 
         }
 
-        private void refreshPool()
+        private void RefreshPool()
         {
-            var dt = getAzureDBPoolSummary();
+            var dt = GetAzureDBPoolSummary();
             dgvPool.AutoGenerateColumns = false;
             dgvPool.DataSource = new DataView(dt);
-            generateHistogram(dgvPool);
-            dgvPool.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);                    
+            GenerateHistogram(dgvPool);
+            dgvPool.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
         }
 
-        private DataTable getAzureDBPoolSummary()
+        private DataTable GetAzureDBPoolSummary()
         {
             using (var cn = new SqlConnection(Common.ConnectionString))
-            using (SqlCommand cmd = new SqlCommand("dbo.AzureDBPoolSummary_Get", cn) { CommandType = CommandType.StoredProcedure })
+            using (SqlCommand cmd = new("dbo.AzureDBPoolSummary_Get", cn) { CommandType = CommandType.StoredProcedure })
             {
                 cn.Open();
 
@@ -87,7 +85,7 @@ namespace DBADashGUI.Performance
                 {
                     cmd.Parameters.AddWithValue("InstanceIDs", string.Join(",", InstanceIDs));
                 }
-                bool histogram = hasHistograms(ref dgvPool);
+                bool histogram = HasHistograms(ref dgvPool);
                 cmd.Parameters.AddWithValue("CPUHist", histogram);
                 cmd.Parameters.AddWithValue("DataHist", histogram);
                 cmd.Parameters.AddWithValue("LogHist", histogram);
@@ -95,8 +93,8 @@ namespace DBADashGUI.Performance
                 cmd.Parameters.AddWithValue("FromDate", DateRange.FromUTC);
                 cmd.Parameters.AddWithValue("ToDate", DateRange.ToUTC);
                 cmd.CommandTimeout = Properties.Settings.Default.CommandTimeout;
-                SqlDataAdapter da = new SqlDataAdapter(cmd);
-                DataTable dt = new DataTable();
+                SqlDataAdapter da = new(cmd);
+                DataTable dt = new();
                 da.Fill(dt);
                 return dt;
             }
@@ -104,10 +102,10 @@ namespace DBADashGUI.Performance
 
         readonly string[] histograms = new string[] { "DTU", "CPU", "Data", "Log" };
 
-        private void generateHistogram(DataGridView gv)
+        private void GenerateHistogram(DataGridView gv)
         {
             string colPrefix = gv.Name + "_";
-            foreach(string histogram in histograms)
+            foreach (string histogram in histograms)
             {
                 string colName = colPrefix + histogram + "Histogram";
                 if (gv.Rows.Count > 0 && gv.Rows[0].Cells[colName].Visible && gv.Rows[0].Cells[colName].Value == null)
@@ -115,7 +113,7 @@ namespace DBADashGUI.Performance
                     foreach (DataGridViewRow r in gv.Rows)
                     {
                         DataRowView row = (DataRowView)r.DataBoundItem;
-                        StringBuilder sbToolTip = new StringBuilder();
+                        StringBuilder sbToolTip = new();
                         var hist = new List<double>();
                         double total = 0;
 
@@ -125,7 +123,7 @@ namespace DBADashGUI.Performance
                             hist.Add(v);
                             total += v;
                         }
-                        
+
                         if (total == 0)
                         {
                             r.Cells[colName].Value = new Bitmap(1, 1);
@@ -135,7 +133,7 @@ namespace DBADashGUI.Performance
                             for (Int32 i = 10; i <= 100; i += 10)
                             {
                                 var v = Convert.ToDouble(row[histogram + i.ToString()]);
-                                sbToolTip.AppendLine((i - 10).ToString() + " to " + i.ToString() + "% | " + v.ToString("N0") + " (" + (v/total).ToString("P2") + ")")  ;
+                                sbToolTip.AppendLine((i - 10).ToString() + " to " + i.ToString() + "% | " + v.ToString("N0") + " (" + (v / total).ToString("P2") + ")");
                             }
                             r.Cells[colName].Value = Histogram.GetHistogram(hist, 200, 100, true);
                             r.Height = 100;
@@ -144,38 +142,20 @@ namespace DBADashGUI.Performance
 
                     }
                 }
-            }       
-        }
-
-  
-        private void checkAll(bool isChecked,ref ToolStripDropDownButton tsColumns, ref DataGridView dgv)
-        {
-            foreach (ToolStripItem itm in tsColumns.DropDownItems)
-            {
-                if (itm.GetType() == typeof(ToolStripMenuItem))
-                {
-                    var mnu = (ToolStripMenuItem)itm;
-                    if (mnu.CheckOnClick)
-                    {
-                        mnu.Checked = isChecked;
-                        dgv.Columns[mnu.Name].Visible = isChecked;
-                    }
-                }
             }
         }
-
 
         private void AzureSummary_Load(object sender, EventArgs e)
         {
             Common.StyleGrid(ref dgv);
             Common.StyleGrid(ref dgvPool);
-            addHistCols(dgv);
-            addHistCols(dgvPool);
+            AddHistCols(dgv);
+            AddHistCols(dgvPool);
         }
 
-        private void addHistCols(DataGridView gv)
+        private void AddHistCols(DataGridView gv)
         {
-            foreach(string histogram in histograms)
+            foreach (string histogram in histograms)
             {
 
                 for (int i = 10; i <= 100; i += 10)
@@ -190,49 +170,49 @@ namespace DBADashGUI.Performance
                     gv.Columns.Add(col);
                 }
             }
-        
+
         }
 
 
-        private void tsRefresh_Click(object sender, EventArgs e)
+        private void TsRefresh_Click(object sender, EventArgs e)
         {
-            refreshDB();
+            RefreshDB();
         }
 
 
-        private void tsCopy_Click(object sender, EventArgs e)
+        private void TsCopy_Click(object sender, EventArgs e)
         {
-            exportDGV(ExportTarget.Clipboard);
+            ExportDGV(ExportTarget.Clipboard);
         }
 
-        private void tsCopyPool_Click(object sender, EventArgs e)
+        private void TsCopyPool_Click(object sender, EventArgs e)
         {
-            exportDGVPool(ExportTarget.Clipboard);
+            ExportDGVPool(ExportTarget.Clipboard);
         }
 
-        private void tsRefreshPool_Click(object sender, EventArgs e)
+        private void TsRefreshPool_Click(object sender, EventArgs e)
         {
-            refreshPool();
+            RefreshPool();
         }
 
-        private void dgv_Sorted(object sender, EventArgs e)
+        private void Dgv_Sorted(object sender, EventArgs e)
         {
-            generateHistogram(dgv);
+            GenerateHistogram(dgv);
         }
 
-        private void dgvPool_Sorted(object sender, EventArgs e)
+        private void DgvPool_Sorted(object sender, EventArgs e)
         {
-            generateHistogram(dgvPool);
+            GenerateHistogram(dgvPool);
         }
 
-        private void dgv_CellContentClick(object sender, DataGridViewCellEventArgs e)
+        private void Dgv_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
             var col = dgv.Columns[e.ColumnIndex];
-            if (e.RowIndex>=0 && (col == colDB || col==colElasticPool))
+            if (e.RowIndex >= 0 && (col == colDB || col == colElasticPool))
             {
                 DataRowView row = (DataRowView)dgv.Rows[e.RowIndex].DataBoundItem;
-                string instance =(string)row["Instance"];
-                string db= (string)row["DB"];
+                string instance = (string)row["Instance"];
+                string db = (string)row["DB"];
 
                 var frm = new AzureDBResourceStatsView
                 {
@@ -250,19 +230,19 @@ namespace DBADashGUI.Performance
                 {
                     frm.Text = instance + " | " + db;
                 }
-     
+
                 frm.Show();
             }
-            else if(e.RowIndex>=0 && col == colServiceObjective)
+            else if (e.RowIndex >= 0 && col == colServiceObjective)
             {
                 DataRowView row = (DataRowView)dgv.Rows[e.RowIndex].DataBoundItem;
-                var frm = new ResourceGovernanceViewer() { InstanceID = (Int32)row["InstanceID"], DatabaseName= (string)row["DB"] };
+                var frm = new ResourceGovernanceViewer() { InstanceID = (Int32)row["InstanceID"], DatabaseName = (string)row["DB"] };
                 frm.Show();
             }
-            
+
         }
 
-        private void dgvPool_CellContentClick(object sender, DataGridViewCellEventArgs e)
+        private void DgvPool_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
             if (e.RowIndex >= 0 && dgvPool.Columns[e.ColumnIndex] == colPoolName)
             {
@@ -281,7 +261,7 @@ namespace DBADashGUI.Performance
             }
         }
 
-        private void dgvPol_RowsAdded(object sender, DataGridViewRowsAddedEventArgs e)
+        private void DgvPol_RowsAdded(object sender, DataGridViewRowsAddedEventArgs e)
         {
             for (Int32 idx = e.RowIndex; idx < e.RowIndex + e.RowCount; idx += 1)
             {
@@ -292,14 +272,14 @@ namespace DBADashGUI.Performance
             }
         }
 
-        private void tsExcel_Click(object sender, EventArgs e)
+        private void TsExcel_Click(object sender, EventArgs e)
         {
-            exportDGV(ExportTarget.Excel);
+            ExportDGV(ExportTarget.Excel);
         }
 
-        private void tsExcelPool_Click(object sender, EventArgs e)
+        private void TsExcelPool_Click(object sender, EventArgs e)
         {
-            exportDGVPool(ExportTarget.Excel);
+            ExportDGVPool(ExportTarget.Excel);
         }
 
         private enum ExportTarget
@@ -308,7 +288,7 @@ namespace DBADashGUI.Performance
             Excel
         }
 
-        private void exportDGV(ExportTarget target)
+        private void ExportDGV(ExportTarget target)
         {
             var visibleCols = (new DataGridViewColumn[] { dgv_CPUHistogram, dgv_DataHistogram, dgv_DTUHistogram, dgv_LogHistogram }).Where(col => col.Visible == true).ToList();
 
@@ -330,7 +310,7 @@ namespace DBADashGUI.Performance
             }
         }
 
-        private void exportDGVPool(ExportTarget target)
+        private void ExportDGVPool(ExportTarget target)
         {
             var visibleCols = (new DataGridViewColumn[] { dgvPool_CPUHistogram, dgvPool_DataHistogram, dgvPool_DTUHistogram, dgvPool_LogHistogram }).Where(col => col.Visible == true).ToList();
 
@@ -353,56 +333,56 @@ namespace DBADashGUI.Performance
 
         }
 
-        private Color getStatusColour(object value)
+        private static Color GetStatusColour(object value)
         {
             var status = (DBADashStatus.DBADashStatusEnum)Convert.ToInt32(value == DBNull.Value ? 3 : value);
             return status.GetColor();
         }
 
-        private void dgv_RowsAdded(object sender, DataGridViewRowsAddedEventArgs e)
+        private void Dgv_RowsAdded(object sender, DataGridViewRowsAddedEventArgs e)
         {
             for (Int32 idx = e.RowIndex; idx < e.RowIndex + e.RowCount; idx += 1)
             {
                 var row = (DataRowView)dgv.Rows[idx].DataBoundItem;
-                var pctMaxSizeStatusColor = getStatusColour(row["PctMaxSizeStatus"]);
-                var snapshotStatusColor = getStatusColour(row["FileSnapshotStatus"]);
+                var pctMaxSizeStatusColor = GetStatusColour(row["PctMaxSizeStatus"]);
+                var snapshotStatusColor = GetStatusColour(row["FileSnapshotStatus"]);
                 dgv.Rows[idx].Cells["colAlocatedPctMax"].SetStatusColor(pctMaxSizeStatusColor);
                 dgv.Rows[idx].Cells["colFileSnapshotAge"].SetStatusColor(snapshotStatusColor);
             }
         }
 
-        private bool hasHistograms(ref DataGridView gv)
+        private static bool HasHistograms(ref DataGridView gv)
         {
             return gv.Columns.Cast<DataGridViewColumn>().Where(col => col.Name.Contains("Histogram") && col.Visible).Any();
         }
 
-        private void updateHistogramsIfNeeded(ref DataGridView gv)
+        private void UpdateHistogramsIfNeeded(ref DataGridView gv)
         {
             DataView dv = (DataView)gv.DataSource;
 
-            if (hasHistograms(ref gv))
+            if (HasHistograms(ref gv))
             {
                 foreach (string histogram in histograms)
                 {
                     if (!dv.Table.Columns.Contains(histogram + "10"))
                     {
-                        if(gv == dgvPool)
+                        if (gv == dgvPool)
                         {
-                            refreshPool();
+                            RefreshPool();
                         }
                         else
                         {
-                            refreshDB();
+                            RefreshDB();
                         }
-                                              
+
                         return;
                     }
                 }
-                generateHistogram(gv);
+                GenerateHistogram(gv);
             }
         }
 
-        private void promptColumnSelection(ref DataGridView gv)
+        private void PromptColumnSelection(ref DataGridView gv)
         {
             using (var frm = new SelectColumns())
             {
@@ -410,21 +390,21 @@ namespace DBADashGUI.Performance
                 frm.ShowDialog(this);
                 if (frm.DialogResult == DialogResult.OK)
                 {
-                    updateHistogramsIfNeeded(ref gv);
+                    UpdateHistogramsIfNeeded(ref gv);
                     gv.AutoResizeColumns();
                     gv.AutoResizeRows();
                 }
             }
         }
 
-        private void tsCols_Click(object sender, EventArgs e)
-        {          
-             promptColumnSelection(ref dgv);                    
+        private void TsCols_Click(object sender, EventArgs e)
+        {
+            PromptColumnSelection(ref dgv);
         }
 
-        private void tsPoolCols_Click(object sender, EventArgs e)
+        private void TsPoolCols_Click(object sender, EventArgs e)
         {
-            promptColumnSelection(ref dgvPool);
+            PromptColumnSelection(ref dgvPool);
         }
     }
 }

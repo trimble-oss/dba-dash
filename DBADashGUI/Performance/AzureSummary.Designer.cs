@@ -236,9 +236,9 @@
             this.dgv.RowTemplate.Height = 24;
             this.dgv.Size = new System.Drawing.Size(1455, 752);
             this.dgv.TabIndex = 0;
-            this.dgv.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgv_CellContentClick);
-            this.dgv.RowsAdded += new System.Windows.Forms.DataGridViewRowsAddedEventHandler(this.dgv_RowsAdded);
-            this.dgv.Sorted += new System.EventHandler(this.dgv_Sorted);
+            this.dgv.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.Dgv_CellContentClick);
+            this.dgv.RowsAdded += new System.Windows.Forms.DataGridViewRowsAddedEventHandler(this.Dgv_RowsAdded);
+            this.dgv.Sorted += new System.EventHandler(this.Dgv_Sorted);
             // 
             // colInstance
             // 
@@ -588,7 +588,7 @@
             this.tsRefresh.Name = "tsRefresh";
             this.tsRefresh.Size = new System.Drawing.Size(29, 24);
             this.tsRefresh.Text = "Refresh";
-            this.tsRefresh.Click += new System.EventHandler(this.tsRefresh_Click);
+            this.tsRefresh.Click += new System.EventHandler(this.TsRefresh_Click);
             // 
             // tsCopy
             // 
@@ -598,7 +598,7 @@
             this.tsCopy.Name = "tsCopy";
             this.tsCopy.Size = new System.Drawing.Size(29, 24);
             this.tsCopy.Text = "Copy";
-            this.tsCopy.Click += new System.EventHandler(this.tsCopy_Click);
+            this.tsCopy.Click += new System.EventHandler(this.TsCopy_Click);
             // 
             // tsExcel
             // 
@@ -608,7 +608,7 @@
             this.tsExcel.Name = "tsExcel";
             this.tsExcel.Size = new System.Drawing.Size(29, 24);
             this.tsExcel.Text = "Export Excel";
-            this.tsExcel.Click += new System.EventHandler(this.tsExcel_Click);
+            this.tsExcel.Click += new System.EventHandler(this.TsExcel_Click);
             // 
             // toolStripLabel2
             // 
@@ -626,7 +626,7 @@
             this.tsCols.Name = "tsCols";
             this.tsCols.Size = new System.Drawing.Size(29, 24);
             this.tsCols.Text = "Columns";
-            this.tsCols.Click += new System.EventHandler(this.tsCols_Click);
+            this.tsCols.Click += new System.EventHandler(this.TsCols_Click);
             // 
             // dataGridViewTextBoxColumn1
             // 
@@ -953,9 +953,9 @@
             this.dgvPool.RowTemplate.Height = 24;
             this.dgvPool.Size = new System.Drawing.Size(1455, 440);
             this.dgvPool.TabIndex = 5;
-            this.dgvPool.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgvPool_CellContentClick);
-            this.dgvPool.RowsAdded += new System.Windows.Forms.DataGridViewRowsAddedEventHandler(this.dgvPol_RowsAdded);
-            this.dgvPool.Sorted += new System.EventHandler(this.dgvPool_Sorted);
+            this.dgvPool.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.DgvPool_CellContentClick);
+            this.dgvPool.RowsAdded += new System.Windows.Forms.DataGridViewRowsAddedEventHandler(this.DgvPol_RowsAdded);
+            this.dgvPool.Sorted += new System.EventHandler(this.DgvPool_Sorted);
             // 
             // poolInstance
             // 
@@ -1268,7 +1268,7 @@
             this.tsRefreshPool.Name = "tsRefreshPool";
             this.tsRefreshPool.Size = new System.Drawing.Size(29, 24);
             this.tsRefreshPool.Text = "toolStripButton1";
-            this.tsRefreshPool.Click += new System.EventHandler(this.tsRefreshPool_Click);
+            this.tsRefreshPool.Click += new System.EventHandler(this.TsRefreshPool_Click);
             // 
             // tsCopyPool
             // 
@@ -1278,7 +1278,7 @@
             this.tsCopyPool.Name = "tsCopyPool";
             this.tsCopyPool.Size = new System.Drawing.Size(29, 24);
             this.tsCopyPool.Text = "Copy";
-            this.tsCopyPool.Click += new System.EventHandler(this.tsCopyPool_Click);
+            this.tsCopyPool.Click += new System.EventHandler(this.TsCopyPool_Click);
             // 
             // toolStripLabel1
             // 
@@ -1296,7 +1296,7 @@
             this.tsExcelPool.Name = "tsExcelPool";
             this.tsExcelPool.Size = new System.Drawing.Size(29, 24);
             this.tsExcelPool.Text = "Export Excel";
-            this.tsExcelPool.Click += new System.EventHandler(this.tsExcelPool_Click);
+            this.tsExcelPool.Click += new System.EventHandler(this.TsExcelPool_Click);
             // 
             // tsPoolCols
             // 
@@ -1306,7 +1306,7 @@
             this.tsPoolCols.Name = "tsPoolCols";
             this.tsPoolCols.Size = new System.Drawing.Size(29, 24);
             this.tsPoolCols.Text = "Columns";
-            this.tsPoolCols.Click += new System.EventHandler(this.tsPoolCols_Click);
+            this.tsPoolCols.Click += new System.EventHandler(this.TsPoolCols_Click);
             // 
             // AzureSummary
             // 

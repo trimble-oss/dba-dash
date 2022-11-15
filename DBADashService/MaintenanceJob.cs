@@ -1,12 +1,9 @@
-﻿using Quartz;
-using System;
-using System.Collections.Generic;
-using System.Data;
-using Microsoft.Data.SqlClient;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Microsoft.Data.SqlClient;
+using Quartz;
 using Serilog;
+using System;
+using System.Data;
+using System.Threading.Tasks;
 namespace DBADashService
 {
     public class MaintenanceJob : IJob
@@ -19,17 +16,17 @@ namespace DBADashService
             {
                 AddPartitions(connectionString);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
-                LogError(ex,connectionString, "AddPartitions", ex.Message);
+                LogError(ex, connectionString, "AddPartitions", ex.Message);
             }
             try
             {
                 PurgeData(connectionString);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
-                LogError(ex,connectionString, "PurgeData", ex.Message);
+                LogError(ex, connectionString, "PurgeData", ex.Message);
             }
             return Task.CompletedTask;
         }
@@ -39,7 +36,8 @@ namespace DBADashService
             var cn = new SqlConnection(connectionString);
             using (cn)
             {
-                using (var cmd = new SqlCommand("dbo.Partitions_Add", cn) { CommandType = CommandType.StoredProcedure, CommandTimeout=120 }) {
+                using (var cmd = new SqlCommand("dbo.Partitions_Add", cn) { CommandType = CommandType.StoredProcedure, CommandTimeout = 120 })
+                {
                     cn.Open();
                     Log.Information("Maintenance: Creating partitions");
                     cmd.ExecuteNonQuery();
@@ -61,7 +59,7 @@ namespace DBADashService
         }
 
 
-        private static void LogError(Exception ex,string connectionString, string errorSource, string errorMessage, string errorContext = "Maintenance")
+        private static void LogError(Exception ex, string connectionString, string errorSource, string errorMessage, string errorContext = "Maintenance")
         {
             Log.Error(ex, "{errorcontext} | {errorsource}", errorContext, errorSource);
             try
@@ -79,11 +77,11 @@ namespace DBADashService
                 ds.Tables.Add(dtErrors);
                 DBADash.DBImporter.InsertErrors(connectionString, null, DateTime.UtcNow, ds);
             }
-            catch(Exception ex2)
+            catch (Exception ex2)
             {
-                Log.Error(ex2,"Write errors to database from {errorcontext} | {errorsource}", errorContext,errorSource);
+                Log.Error(ex2, "Write errors to database from {errorcontext} | {errorsource}", errorContext, errorSource);
             }
         }
-        
+
     }
 }

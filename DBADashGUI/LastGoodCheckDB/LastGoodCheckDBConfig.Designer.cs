@@ -133,7 +133,7 @@
             this.chkEnabled.TabIndex = 41;
             this.chkEnabled.Text = "Enabled";
             this.chkEnabled.UseVisualStyleBackColor = true;
-            this.chkEnabled.CheckedChanged += new System.EventHandler(this.chkEnabled_CheckedChanged);
+            this.chkEnabled.CheckedChanged += new System.EventHandler(this.ChkEnabled_CheckedChanged);
             // 
             // label25
             // 
@@ -200,7 +200,7 @@
             this.chkInherit.TabIndex = 41;
             this.chkInherit.Text = "Inherit";
             this.chkInherit.UseVisualStyleBackColor = true;
-            this.chkInherit.CheckedChanged += new System.EventHandler(this.chkInherit_CheckedChanged);
+            this.chkInherit.CheckedChanged += new System.EventHandler(this.ChkInherit_CheckedChanged);
             // 
             // bttnUpdate
             // 
@@ -210,7 +210,7 @@
             this.bttnUpdate.TabIndex = 43;
             this.bttnUpdate.Text = "Update";
             this.bttnUpdate.UseVisualStyleBackColor = true;
-            this.bttnUpdate.Click += new System.EventHandler(this.bttnUpdate_Click);
+            this.bttnUpdate.Click += new System.EventHandler(this.BttnUpdate_Click);
             // 
             // label1
             // 

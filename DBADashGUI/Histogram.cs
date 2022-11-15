@@ -1,9 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms.DataVisualization.Charting;
 
 namespace DBADashGUI
@@ -11,17 +8,17 @@ namespace DBADashGUI
     class Histogram
     {
 
-        public static Bitmap GetHistogram(List<double> values,Int32 width,Int32 height,bool ColorPoints)
+        public static Bitmap GetHistogram(List<double> values, Int32 width, Int32 height, bool ColorPoints)
         {
             var chart = new Chart();
             var chartArea = new ChartArea();
             chart.ChartAreas.Add(chartArea);
             chartArea.AxisY.Enabled = AxisEnabled.False;
-            chartArea.AxisY.MajorGrid.Enabled =  false;
+            chartArea.AxisY.MajorGrid.Enabled = false;
             chartArea.AxisX.MajorGrid.Enabled = false;
             chartArea.AxisX.Interval = 1;
             chartArea.AxisX.LabelStyle.Enabled = false;
-                 
+
 
             var s = chart.Series.Add("s1");
             s.Points.DataBindY(values);

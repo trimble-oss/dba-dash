@@ -72,7 +72,7 @@
             this.tsRefresh.Name = "tsRefresh";
             this.tsRefresh.Size = new System.Drawing.Size(29, 28);
             this.tsRefresh.Text = "Refresh";
-            this.tsRefresh.Click += new System.EventHandler(this.tsRefresh_Click);
+            this.tsRefresh.Click += new System.EventHandler(this.TsRefresh_Click);
             // 
             // tsOptions
             // 
@@ -92,7 +92,7 @@
             this.smoothLinesToolStripMenuItem.Name = "smoothLinesToolStripMenuItem";
             this.smoothLinesToolStripMenuItem.Size = new System.Drawing.Size(178, 26);
             this.smoothLinesToolStripMenuItem.Text = "Smooth lines";
-            this.smoothLinesToolStripMenuItem.Click += new System.EventHandler(this.smoothLinesToolStripMenuItem_Click);
+            this.smoothLinesToolStripMenuItem.Click += new System.EventHandler(this.SmoothLinesToolStripMenuItem_Click);
             // 
             // pointsToolStripMenuItem
             // 
@@ -100,7 +100,7 @@
             this.pointsToolStripMenuItem.Name = "pointsToolStripMenuItem";
             this.pointsToolStripMenuItem.Size = new System.Drawing.Size(178, 26);
             this.pointsToolStripMenuItem.Text = "Points";
-            this.pointsToolStripMenuItem.Click += new System.EventHandler(this.pointsToolStripMenuItem_Click);
+            this.pointsToolStripMenuItem.Click += new System.EventHandler(this.PointsToolStripMenuItem_Click);
             // 
             // tsMeasures
             // 

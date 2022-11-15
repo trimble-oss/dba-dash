@@ -1,18 +1,15 @@
-﻿using System;
+﻿using DBADashGUI.Performance;
+using LiveCharts;
+using LiveCharts.Defaults;
+using LiveCharts.Wpf;
+using Microsoft.Data.SqlClient;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Drawing;
 using System.Data;
+using System.Drawing;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
-using Microsoft.Data.SqlClient;
-using LiveCharts.Defaults;
-using LiveCharts;
-using LiveCharts.Wpf;
-using DBADashGUI.Performance;
-using System.Runtime.CompilerServices;
 
 namespace DBADashGUI.DBFiles
 {
@@ -35,7 +32,7 @@ namespace DBADashGUI.DBFiles
             set
             {
                 _databaseID = value;
-                if (_databaseID >0)
+                if (_databaseID > 0)
                 {
                     PopulateFileGroupFilter();
                     PopulateFileFilesFilter();
@@ -50,9 +47,9 @@ namespace DBADashGUI.DBFiles
 
         public string NumberFormat { get; set; } = "N1";
 
-        private Int32? _dataspaceid=null;
+        private Int32? _dataspaceid = null;
         DataTable HistoryDT;
-     
+
         public Int32? DataSpaceID
         {
             get
@@ -66,8 +63,10 @@ namespace DBADashGUI.DBFiles
             }
         }
 
-        public bool SmoothLines {
-            get {
+        public bool SmoothLines
+        {
+            get
+            {
                 return smoothLinesToolStripMenuItem.Checked;
             }
             set
@@ -138,8 +137,8 @@ namespace DBADashGUI.DBFiles
             }
             set
             {
-                int checkedCount=0;
-                foreach(ToolStripMenuItem itm in tsUnits.DropDownItems)
+                int checkedCount = 0;
+                foreach (ToolStripMenuItem itm in tsUnits.DropDownItems)
                 {
                     itm.Checked = value == Convert.ToString(itm.Tag);
                     if (itm.Checked)
@@ -151,10 +150,10 @@ namespace DBADashGUI.DBFiles
                 {
                     throw new Exception("Invalid Unit.  Select MB, GB, TB");
                 }
-                _unit=value;
-                foreach(DataGridViewColumn col in dgv.Columns)
+                _unit = value;
+                foreach (DataGridViewColumn col in dgv.Columns)
                 {
-                    if(col.DataPropertyName.StartsWith("Size") || col.DataPropertyName.StartsWith("Used"))
+                    if (col.DataPropertyName.StartsWith("Size") || col.DataPropertyName.StartsWith("Used"))
                     {
                         col.Visible = col.DataPropertyName == "Size" + value || col.DataPropertyName == "Used" + value;
                     }
@@ -179,10 +178,10 @@ namespace DBADashGUI.DBFiles
             {
                 return;
             }
-            var columns = new Dictionary<string, columnMetaData>
+            var columns = new Dictionary<string, ColumnMetaData>
             {
-                {"Size" + Unit, new columnMetaData{Alias="Size (" + Unit + ")",isVisible=true } },
-                {"Used" + Unit, new columnMetaData{Alias="Used (" + Unit + ")",isVisible=true } }
+                {"Size" + Unit, new ColumnMetaData{Alias="Size (" + Unit + ")",isVisible=true } },
+                {"Used" + Unit, new ColumnMetaData{Alias="Used (" + Unit + ")",isVisible=true } }
             };
 
 
@@ -241,7 +240,8 @@ namespace DBADashGUI.DBFiles
         {
             using (var cn = new SqlConnection(connectionString))
             using (var cmd = new SqlCommand("dbo.DBFileSnapshot_Get", cn) { CommandType = CommandType.StoredProcedure })
-            using(var da = new SqlDataAdapter(cmd)){
+            using (var da = new SqlDataAdapter(cmd))
+            {
                 cn.Open();
                 cmd.Parameters.AddWithValue("FromDate", From);
                 cmd.Parameters.AddWithValue("ToDate", To);
@@ -272,7 +272,7 @@ namespace DBADashGUI.DBFiles
                 dt.Columns.Add("UsedGB", typeof(decimal));
                 dt.Columns.Add("SizeTB", typeof(decimal));
                 dt.Columns.Add("UsedTB", typeof(decimal));
-                foreach(DataRow row in dt.Rows)
+                foreach (DataRow row in dt.Rows)
                 {
                     if (row["SizeMB"] != DBNull.Value)
                     {
@@ -283,12 +283,12 @@ namespace DBADashGUI.DBFiles
                     {
                         row["UsedGB"] = Convert.ToDecimal(row["UsedMB"]) / 1024;
                         row["UsedTB"] = Convert.ToDecimal(row["UsedGB"]) / 1024;
-                    }            
+                    }
                 }
 
                 return dt;
             }
-            
+
         }
 
         private void Days_Click(object sender, EventArgs e)
@@ -302,12 +302,12 @@ namespace DBADashGUI.DBFiles
         {
             foreach (ToolStripItem ts in tsTime.DropDownItems)
             {
-                if(ts.GetType() == typeof(ToolStripMenuItem))
+                if (ts.GetType() == typeof(ToolStripMenuItem))
                 {
                     var itm = (ToolStripMenuItem)ts;
                     itm.Checked = (string)itm.Tag == Days.ToString();
                 }
-                
+
             }
         }
 
@@ -375,11 +375,12 @@ namespace DBADashGUI.DBFiles
         private void PopulateFileGroupFilter()
         {
             var dt = CommonData.GetFileGroups(DatabaseID);
-            foreach(DataRow r in dt.Rows)
+            foreach (DataRow r in dt.Rows)
             {
                 string fg = r["FileGroup"] == DBNull.Value ? "{NULL}" : (string)r["FileGroup"];
                 Int32? dataspaceid = r["data_space_id"] == DBNull.Value ? null : (Int32?)r["data_space_id"];
-                if (dataspaceid != null) {
+                if (dataspaceid != null)
+                {
                     var mnu = new ToolStripMenuItem(fg)
                     {
                         Tag = dataspaceid,
@@ -389,7 +390,7 @@ namespace DBADashGUI.DBFiles
                     tsFileGroup.DropDownItems.Add(mnu);
                 }
             }
-            tsFileGroup.Visible = tsFileGroup.DropDownItems.Count>0;
+            tsFileGroup.Visible = tsFileGroup.DropDownItems.Count > 0;
         }
 
         private void PopulateFileFilesFilter()
@@ -398,7 +399,7 @@ namespace DBADashGUI.DBFiles
             foreach (DataRow r in dt.Rows)
             {
                 string fileName = r["file_name"] == DBNull.Value ? "" : (string)r["file_name"];
-                if (fileName.Length>0)
+                if (fileName.Length > 0)
                 {
                     var mnu = new ToolStripMenuItem(fileName)
                     {
@@ -428,11 +429,11 @@ namespace DBADashGUI.DBFiles
 
         private void SetFileChecked()
         {
-            tsFile.Text = FileName ==null || FileName == "" ? "{All Files}" : FileName;
-            tsFile.Font = FileName == null || FileName == "" ? new Font(tsFile.Font, FontStyle.Regular) : new Font(tsFile.Font, FontStyle.Bold);
+            tsFile.Text = FileName is null or "" ? "{All Files}" : FileName;
+            tsFile.Font = FileName is null or "" ? new Font(tsFile.Font, FontStyle.Regular) : new Font(tsFile.Font, FontStyle.Bold);
             foreach (ToolStripMenuItem mnu in tsFile.DropDownItems)
             {
-                mnu.Checked = mnu.Text== FileName;
+                mnu.Checked = mnu.Text == FileName;
                 if (mnu.Checked) { tsFile.Text = mnu.Text; };
                 mnu.Font = mnu.Checked ? new Font(mnu.Font, FontStyle.Bold) : new Font(mnu.Font, FontStyle.Regular);
             }
@@ -491,7 +492,7 @@ namespace DBADashGUI.DBFiles
 
         private int ColumnTotalWidth()
         {
-            return dgv.Columns.Cast<DataGridViewColumn>().Where(x=>x.Visible==true).Select(x => x.Width).Sum();
+            return dgv.Columns.Cast<DataGridViewColumn>().Where(x => x.Visible == true).Select(x => x.Width).Sum();
         }
 
         private void DBSpaceHistory_Resize(object sender, EventArgs e)

@@ -1,12 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
+﻿using Microsoft.Data.SqlClient;
+using System;
 using System.Data;
-using Microsoft.Data.SqlClient;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace DBADashGUI
@@ -23,9 +17,9 @@ namespace DBADashGUI
 
         DataTable GetJobDiff()
         {
-            using(var cn = new SqlConnection(Common.ConnectionString))
-            using(var cmd = new SqlCommand("dbo.Job_Diff", cn) { CommandType = CommandType.StoredProcedure })
-            using(var da = new SqlDataAdapter(cmd))
+            using (var cn = new SqlConnection(Common.ConnectionString))
+            using (var cmd = new SqlCommand("dbo.Job_Diff", cn) { CommandType = CommandType.StoredProcedure })
+            using (var da = new SqlDataAdapter(cmd))
             {
                 cmd.Parameters.AddWithValue("InstanceID_A", InstanceID_A);
                 cmd.Parameters.AddWithValue("InstanceID_B", InstanceID_B);
@@ -38,8 +32,8 @@ namespace DBADashGUI
 
         private void JobDiff_Load(object sender, EventArgs e)
         {
-            var dt = CommonData.GetInstances(default,default,false);
-            foreach(DataRow row in dt.Rows)
+            var dt = CommonData.GetInstances(default, default, false);
+            foreach (DataRow row in dt.Rows)
             {
                 var a = new InstanceItem() { Instance = (string)row["InstanceGroupName"], InstanceID = (Int32)row["InstanceID"] };
                 var b = new InstanceItem() { Instance = (string)row["InstanceGroupName"], InstanceID = (Int32)row["InstanceID"] };
@@ -49,14 +43,14 @@ namespace DBADashGUI
                 {
                     cboA.SelectedItem = a;
                 }
-                if(InstanceID_B  == b.InstanceID)
+                if (InstanceID_B == b.InstanceID)
                 {
                     cboB.SelectedItem = b;
                 }
             }
         }
 
-        private void cboA_SelectedIndexChanged(object sender, EventArgs e)
+        private void CboA_SelectedIndexChanged(object sender, EventArgs e)
         {
             InstanceID_A = ((InstanceItem)cboA.SelectedItem).InstanceID;
         }
@@ -71,7 +65,7 @@ namespace DBADashGUI
             }
         }
 
-        private void bttnCompare_Click(object sender, EventArgs e)
+        private void BttnCompare_Click(object sender, EventArgs e)
         {
             var diff = GetJobDiff();
             dgvJobs.AutoGenerateColumns = false;
@@ -79,12 +73,12 @@ namespace DBADashGUI
             dgvJobs.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
         }
 
-        private void cboB_SelectedIndexChanged(object sender, EventArgs e)
+        private void CboB_SelectedIndexChanged(object sender, EventArgs e)
         {
             InstanceID_B = ((InstanceItem)cboB.SelectedItem).InstanceID;
         }
 
-        private void dgvJobs_SelectionChanged(object sender, EventArgs e)
+        private void DgvJobs_SelectionChanged(object sender, EventArgs e)
         {
             if (dgvJobs.SelectedRows.Count == 1)
             {

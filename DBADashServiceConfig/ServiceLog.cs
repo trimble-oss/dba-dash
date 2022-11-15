@@ -1,12 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
 using System.Data;
-using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace DBADashServiceConfig
@@ -55,7 +51,7 @@ namespace DBADashServiceConfig
             }
             else
             {
-                txtLog.Text = string.Format("Log folder does not exist '{0}'. This is created when the service is started.",logsFolder);
+                txtLog.Text = string.Format("Log folder does not exist '{0}'. This is created when the service is started.", logsFolder);
             }
         }
 

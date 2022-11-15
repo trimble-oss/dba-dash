@@ -75,7 +75,7 @@ namespace DBADashGUI
             this.bttnOK.TabIndex = 3;
             this.bttnOK.Text = "OK";
             this.bttnOK.UseVisualStyleBackColor = true;
-            this.bttnOK.Click += new System.EventHandler(this.bttnOK_Click);
+            this.bttnOK.Click += new System.EventHandler(this.BttnOK_Click);
             // 
             // ConnectionOptions
             // 

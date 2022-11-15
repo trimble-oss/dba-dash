@@ -1,11 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace DBADashGUI.Checks
@@ -19,10 +12,10 @@ namespace DBADashGUI.Checks
 
         private void MemoryDumpThresholdsConfig_Load(object sender, EventArgs e)
         {
-            refreshData();
+            RefreshData();
         }
 
-        private void refreshData()
+        private void RefreshData()
         {
             var thres = MemoryDumpThresholds.GetMemoryDumpThresholds();
             chkCritical.Checked = thres.MemoryDumpCriticalThresholdHrs != null;
@@ -33,12 +26,12 @@ namespace DBADashGUI.Checks
             lnkClear.Enabled = thres.MemoryDumpAckDate != null;
         }
 
-        private void bttnCancel_Click(object sender, EventArgs e)
+        private void BttnCancel_Click(object sender, EventArgs e)
         {
-            this.DialogResult= DialogResult.Cancel; 
+            this.DialogResult = DialogResult.Cancel;
         }
 
-        private void update()
+        private void UpdateThresholds()
         {
             var thres = new MemoryDumpThresholds()
             {
@@ -48,32 +41,32 @@ namespace DBADashGUI.Checks
             thres.Save();
         }
 
-        private void bttnUpdate_Click(object sender, EventArgs e)
+        private void BttnUpdate_Click(object sender, EventArgs e)
         {
-            update();
+            UpdateThresholds();
             this.DialogResult = DialogResult.OK;
         }
 
-        private void chkCritical_CheckedChanged(object sender, EventArgs e)
+        private void ChkCritical_CheckedChanged(object sender, EventArgs e)
         {
             numCritical.Enabled = chkCritical.Checked;
         }
 
-        private void numWarning_CheckChanged(object sender, EventArgs e)
+        private void NumWarning_CheckChanged(object sender, EventArgs e)
         {
             numWarning.Enabled = chkWarning.Checked;
         }
 
-        private void lnkClear_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        private void LnkClear_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
             MemoryDumpThresholds.Acknowledge(true);
             this.DialogResult = DialogResult.OK;
         }
 
-        private void lnkAcknowledge_Click(object sender, LinkLabelLinkClickedEventArgs e)
+        private void LnkAcknowledge_Click(object sender, LinkLabelLinkClickedEventArgs e)
         {
             MemoryDumpThresholds.Acknowledge();
-            this.DialogResult=DialogResult.OK;
+            this.DialogResult = DialogResult.OK;
         }
     }
 }

@@ -218,7 +218,7 @@
             this.tsRefresh.Name = "tsRefresh";
             this.tsRefresh.Size = new System.Drawing.Size(29, 24);
             this.tsRefresh.Text = "Refresh";
-            this.tsRefresh.Click += new System.EventHandler(this.tsRefresh_Click);
+            this.tsRefresh.Click += new System.EventHandler(this.TsRefresh_Click);
             // 
             // tsCopy
             // 
@@ -228,7 +228,7 @@
             this.tsCopy.Name = "tsCopy";
             this.tsCopy.Size = new System.Drawing.Size(29, 24);
             this.tsCopy.Text = "Copy";
-            this.tsCopy.Click += new System.EventHandler(this.tsCopy_Click);
+            this.tsCopy.Click += new System.EventHandler(this.TsCopy_Click);
             // 
             // toolStripLabel1
             // 
@@ -246,7 +246,7 @@
             this.tsExcel.Name = "tsExcel";
             this.tsExcel.Size = new System.Drawing.Size(29, 24);
             this.tsExcel.Text = "Export Excel";
-            this.tsExcel.Click += new System.EventHandler(this.tsExcel_Click);
+            this.tsExcel.Click += new System.EventHandler(this.TsExcel_Click);
             // 
             // dataGridViewTextBoxColumn1
             // 
@@ -477,7 +477,7 @@
             this.tsRefreshPool.Name = "tsRefreshPool";
             this.tsRefreshPool.Size = new System.Drawing.Size(29, 24);
             this.tsRefreshPool.Text = "toolStripButton1";
-            this.tsRefreshPool.Click += new System.EventHandler(this.tsRefreshPool_Click);
+            this.tsRefreshPool.Click += new System.EventHandler(this.TsRefreshPool_Click);
             // 
             // tsCopyPool
             // 
@@ -487,7 +487,7 @@
             this.tsCopyPool.Name = "tsCopyPool";
             this.tsCopyPool.Size = new System.Drawing.Size(29, 24);
             this.tsCopyPool.Text = "toolStripButton1";
-            this.tsCopyPool.Click += new System.EventHandler(this.tsCopyPool_Click);
+            this.tsCopyPool.Click += new System.EventHandler(this.TsCopyPool_Click);
             // 
             // toolStripLabel2
             // 
@@ -505,7 +505,7 @@
             this.tsPoolExcel.Name = "tsPoolExcel";
             this.tsPoolExcel.Size = new System.Drawing.Size(29, 24);
             this.tsPoolExcel.Text = "Export Excel";
-            this.tsPoolExcel.Click += new System.EventHandler(this.tsPoolExcel_Click);
+            this.tsPoolExcel.Click += new System.EventHandler(this.TsPoolExcel_Click);
             // 
             // AzureServiceObjectivesHistory
             // 

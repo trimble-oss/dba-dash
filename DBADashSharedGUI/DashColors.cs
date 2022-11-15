@@ -1,17 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
-
-namespace DBADashSharedGUI
+﻿namespace DBADashSharedGUI
 {
     //https://modus.trimble.com/foundations/color-palette/
-    public static class DashColors 
+    public static class DashColors
     {
         // Primary
         public static readonly Color TrimbleBlueDark = Color.FromArgb(0, 79, 131);
@@ -45,7 +35,7 @@ namespace DBADashSharedGUI
 
         // Success/Warn/Fail
         public static readonly Color Warning = YellowDark;
-        public static readonly Color Fail= RedDark;
+        public static readonly Color Fail = RedDark;
         public static readonly Color Success = GreenDark;
         public static readonly Color NotApplicable = DashColors.GrayLight;
 
@@ -56,8 +46,8 @@ namespace DBADashSharedGUI
         public static readonly Color GridViewBackground = Color.White;
         public static readonly Color LinkColor = TrimbleBlueDark;
         public static readonly Color ProgressBarFrom = Color.White;
-        public static readonly Color ProgressBarTo = Color.FromArgb(103, 176, 228) ;
+        public static readonly Color ProgressBarTo = Color.FromArgb(103, 176, 228);
 
- 
+
     }
 }

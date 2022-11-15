@@ -113,7 +113,7 @@ namespace DBADashGUI
             this.lnkDBADash.TabIndex = 25;
             this.lnkDBADash.TabStop = true;
             this.lnkDBADash.Text = "DBA Dash";
-            this.lnkDBADash.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.lnkDBADash_LinkClicked);
+            this.lnkDBADash.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.LnkDBADash_LinkClicked);
             // 
             // lblRepoVersion
             // 
@@ -146,7 +146,7 @@ namespace DBADashGUI
             this.lnkLatestRelease.TabIndex = 28;
             this.lnkLatestRelease.TabStop = true;
             this.lnkLatestRelease.Text = "{Latest Release}";
-            this.lnkLatestRelease.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.lnkLatestRelease_LinkClicked);
+            this.lnkLatestRelease.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.LnkLatestRelease_LinkClicked);
             // 
             // lblLatest
             // 
@@ -270,7 +270,7 @@ namespace DBADashGUI
             this.lnkAuthor.TabIndex = 35;
             this.lnkAuthor.TabStop = true;
             this.lnkAuthor.Text = "David Wiseman";
-            this.lnkAuthor.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.lnkAuthor_LinkClicked);
+            this.lnkAuthor.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.LnkAuthor_LinkClicked);
             // 
             // label7
             // 
@@ -291,7 +291,7 @@ namespace DBADashGUI
             this.lnkLicense.TabIndex = 37;
             this.lnkLicense.TabStop = true;
             this.lnkLicense.Text = "MIT License";
-            this.lnkLicense.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.lnkLicense_LinkClicked);
+            this.lnkLicense.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.LnkLicense_LinkClicked);
             // 
             // toolTip1
             // 
@@ -308,7 +308,7 @@ namespace DBADashGUI
             this.bttnUpgrade.TabIndex = 31;
             this.bttnUpgrade.Text = "Upgrade";
             this.bttnUpgrade.UseVisualStyleBackColor = false;
-            this.bttnUpgrade.Click += new System.EventHandler(this.bttnUpgrade_Click);
+            this.bttnUpgrade.Click += new System.EventHandler(this.BttnUpgrade_Click);
             // 
             // About
             // 

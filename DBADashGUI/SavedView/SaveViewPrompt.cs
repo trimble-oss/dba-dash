@@ -1,11 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace DBADashGUI
@@ -17,26 +10,26 @@ namespace DBADashGUI
             InitializeComponent();
         }
 
-        public string ViewName { get => txtName.Text;set=>txtName.Text = value;  }
+        public string ViewName { get => txtName.Text; set => txtName.Text = value; }
 
-        public bool IsGlobal { get=>optEveryone.Checked; set => optEveryone.Checked = value; }
+        public bool IsGlobal { get => optEveryone.Checked; set => optEveryone.Checked = value; }
 
         private void TxtName_TextChanged(object sender, EventArgs e)
         {
-            chkDefault.Checked = txtName.Text == "Default";           
+            chkDefault.Checked = txtName.Text == "Default";
         }
 
-        private void chkDefault_CheckedChanged(object sender, EventArgs e)
+        private void ChkDefault_CheckedChanged(object sender, EventArgs e)
         {
             txtName.Text = "Default";
         }
 
-        private void bttnCancel_Click(object sender, EventArgs e)
+        private void BttnCancel_Click(object sender, EventArgs e)
         {
             this.DialogResult = DialogResult.Cancel;
         }
 
-        private void bttnSave_Click(object sender, EventArgs e)
+        private void BttnSave_Click(object sender, EventArgs e)
         {
             if (txtName.Text.Length == 0)
             {

@@ -1,10 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace DBADash
 {
@@ -16,7 +12,7 @@ namespace DBADash
             return GetSqlString(Enum.GetName(typeof(CollectionType), type));
         }
 
-     
+
         public static string GetSqlString(string name)
         {
             string resourcePath = "DBADash.SQL.SQL" + name + ".sql";

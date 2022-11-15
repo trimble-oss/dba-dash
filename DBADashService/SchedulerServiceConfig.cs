@@ -1,8 +1,7 @@
 ﻿using DBADash;
-using System;
-using System.Diagnostics;
-using System.IO;
 using Serilog;
+using System;
+using System.IO;
 namespace DBADashService
 {
     class SchedulerServiceConfig
@@ -15,7 +14,8 @@ namespace DBADashService
             FailedMessageFolder = Path.Combine(AppContext.BaseDirectory, "Failed");
             try
             {
-                if (!Directory.Exists(FailedMessageFolder)){
+                if (!Directory.Exists(FailedMessageFolder))
+                {
                     Directory.CreateDirectory(FailedMessageFolder);
                 }
             }
@@ -24,7 +24,7 @@ namespace DBADashService
                 Log.Error("Error creating failed message folder {FailedMessageFolder}", FailedMessageFolder);
                 FailedMessageFolder = string.Empty;
             }
-            
+
             Config = GetConfig();
         }
 

@@ -1,13 +1,8 @@
-﻿using System;
+﻿using Microsoft.Data.SqlClient;
+using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Drawing;
 using System.Data;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
-using Microsoft.Data.SqlClient;
 
 namespace DBADashGUI.Changes
 {
@@ -22,7 +17,7 @@ namespace DBADashGUI.Changes
 
 
         // Pivot data returned by TraceFlags_Get by trace flag
-        private DataTable getTraceFlags()
+        private DataTable GetTraceFlags()
         {
             var dt = new DataTable();
             dt.Columns.Add("Instance");
@@ -70,22 +65,22 @@ namespace DBADashGUI.Changes
             return dt;
         }
 
-        private void refreshFlags()
+        private void RefreshFlags()
         {
-            var dt = getTraceFlags();
+            var dt = GetTraceFlags();
             dgvFlags.DataSource = dt;
             dgvFlags.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
         }
 
-        private void refreshHistory()
+        private void RefreshHistory()
         {
-            var dt = getTraceFlagHistory();
+            var dt = GetTraceFlagHistory();
             dgv.AutoGenerateColumns = false;
             dgv.DataSource = dt;
             dgv.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
         }
 
-        private DataTable getTraceFlagHistory()
+        private DataTable GetTraceFlagHistory()
         {
             using (var cn = new SqlConnection(Common.ConnectionString))
             using (var cmd = new SqlCommand("dbo.TraceFlagHistory_Get", cn) { CommandType = CommandType.StoredProcedure })
@@ -93,7 +88,7 @@ namespace DBADashGUI.Changes
             {
                 cn.Open();
                 cmd.Parameters.AddWithValue("@InstanceIDs", string.Join(",", InstanceIDs));
-                DataTable dt = new DataTable();
+                DataTable dt = new();
                 da.Fill(dt);
                 Common.ConvertUTCToLocal(ref dt);
                 return dt;
@@ -102,37 +97,37 @@ namespace DBADashGUI.Changes
 
         public void RefreshData()
         {
-            refreshFlags();
-            refreshHistory();
+            RefreshFlags();
+            RefreshHistory();
 
         }
 
-        private void tsRefreshHistory_Click(object sender, EventArgs e)
+        private void TsRefreshHistory_Click(object sender, EventArgs e)
         {
-            refreshHistory();
+            RefreshHistory();
         }
 
-        private void tsRefresh_Click(object sender, EventArgs e)
+        private void TsRefresh_Click(object sender, EventArgs e)
         {
-            refreshFlags();
+            RefreshFlags();
         }
 
-        private void tsCopy_Click(object sender, EventArgs e)
+        private void TsCopy_Click(object sender, EventArgs e)
         {
             Common.CopyDataGridViewToClipboard(dgvFlags);
         }
 
-        private void tsCopyHistory_Click(object sender, EventArgs e)
+        private void TsCopyHistory_Click(object sender, EventArgs e)
         {
             Common.CopyDataGridViewToClipboard(dgv);
         }
 
-        private void tsExcel_Click(object sender, EventArgs e)
+        private void TsExcel_Click(object sender, EventArgs e)
         {
             Common.PromptSaveDataGridView(ref dgvFlags);
         }
 
-        private void tsExcelHistory_Click(object sender, EventArgs e)
+        private void TsExcelHistory_Click(object sender, EventArgs e)
         {
             Common.PromptSaveDataGridView(ref dgv);
         }

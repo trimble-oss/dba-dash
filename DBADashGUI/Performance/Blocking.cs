@@ -1,18 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Drawing;
-using System.Data;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
-using static DBADashGUI.Performance.Performance;
-using Microsoft.Data.SqlClient;
-using LiveCharts;
-using LiveCharts.Wpf;
-using LiveCharts.Defaults;
+﻿using LiveCharts;
 using LiveCharts.Configurations;
+using LiveCharts.Wpf;
+using Microsoft.Data.SqlClient;
+using System;
+using System.Data;
+using System.Windows.Forms;
 
 namespace DBADashGUI.Performance
 {
@@ -115,13 +107,13 @@ namespace DBADashGUI.Performance
             {
                 return tsUp.Visible;
             }
-            set 
-            { 
-                tsUp.Visible = value; 
+            set
+            {
+                tsUp.Visible = value;
             }
         }
 
-        public BlockingMetric Metric { get; set; } = new ();
+        public BlockingMetric Metric { get; set; } = new();
 
         IMetric IMetricChart.Metric { get => Metric; }
 
@@ -216,7 +208,7 @@ namespace DBADashGUI.Performance
             Close.Invoke(this, new EventArgs());
         }
 
-        private void tsUp_Click(object sender, EventArgs e)
+        private void TsUp_Click(object sender, EventArgs e)
         {
             MoveUp.Invoke(this, new EventArgs());
         }

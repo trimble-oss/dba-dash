@@ -80,7 +80,7 @@
             this.bttnOK.TabIndex = 4;
             this.bttnOK.Text = "OK";
             this.bttnOK.UseVisualStyleBackColor = true;
-            this.bttnOK.Click += new System.EventHandler(this.bttnOK_Click);
+            this.bttnOK.Click += new System.EventHandler(this.BttnOK_Click);
             // 
             // bttnCancel
             // 
@@ -90,7 +90,7 @@
             this.bttnCancel.TabIndex = 5;
             this.bttnCancel.Text = "Cancel";
             this.bttnCancel.UseVisualStyleBackColor = true;
-            this.bttnCancel.Click += new System.EventHandler(this.bttnCancel_Click);
+            this.bttnCancel.Click += new System.EventHandler(this.BttnCancel_Click);
             // 
             // CustomTimePicker
             // 

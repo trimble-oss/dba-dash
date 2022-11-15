@@ -1,13 +1,9 @@
-﻿using System;
+﻿using Microsoft.Data.SqlClient;
+using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Drawing;
 using System.Data;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Drawing;
 using System.Windows.Forms;
-using Microsoft.Data.SqlClient;
 namespace DBADashGUI.LastGoodCheckDB
 {
     public partial class LastGoodCheckDBControl : UserControl
@@ -76,29 +72,29 @@ namespace DBADashGUI.LastGoodCheckDB
                 cmd.Parameters.AddWithValue("IncludeWarning", IncludeWarning);
                 cmd.Parameters.AddWithValue("IncludeOK", IncludeOK);
                 cmd.Parameters.AddWithValue("IncludeNA", IncludeNA);
-                
-                DataTable dt = new DataTable();
+
+                DataTable dt = new();
                 da.Fill(dt);
                 Common.ConvertUTCToLocal(ref dt);
                 dgvLastGoodCheckDB.AutoGenerateColumns = false;
                 dgvLastGoodCheckDB.DataSource = new DataView(dt);
                 dgvLastGoodCheckDB.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
-                
+
             }
             configureInstanceThresholdsToolStripMenuItem.Enabled = InstanceIDs.Count == 1;
         }
 
-        private void criticalToolStripMenuItem_Click(object sender, EventArgs e)
+        private void CriticalToolStripMenuItem_Click(object sender, EventArgs e)
         {
             RefreshData();
         }
 
-        private void warningToolStripMenuItem_Click(object sender, EventArgs e)
+        private void WarningToolStripMenuItem_Click(object sender, EventArgs e)
         {
             RefreshData();
         }
 
-        private void undefinedToolStripMenuItem_Click(object sender, EventArgs e)
+        private void UndefinedToolStripMenuItem_Click(object sender, EventArgs e)
         {
             RefreshData();
         }
@@ -108,7 +104,7 @@ namespace DBADashGUI.LastGoodCheckDB
             RefreshData();
         }
 
-        private void dgvLastGoodCheckDB_RowsAdded(object sender, DataGridViewRowsAddedEventArgs e)
+        private void DgvLastGoodCheckDB_RowsAdded(object sender, DataGridViewRowsAddedEventArgs e)
         {
             for (Int32 idx = e.RowIndex; idx < e.RowIndex + e.RowCount; idx += 1)
             {
@@ -118,7 +114,7 @@ namespace DBADashGUI.LastGoodCheckDB
                 var r = dgvLastGoodCheckDB.Rows[idx];
                 r.Cells["LastGoodCheckDBTime"].SetStatusColor(statusC);
                 r.Cells["DaysSinceLastGoodCheckDB"].SetStatusColor(statusC);
-                if ((string)row["ConfiguredLevel"]== "Database")
+                if ((string)row["ConfiguredLevel"] == "Database")
                 {
                     r.Cells["Configure"].Style.Font = new Font(dgvLastGoodCheckDB.Font, FontStyle.Bold);
                 }
@@ -127,9 +123,9 @@ namespace DBADashGUI.LastGoodCheckDB
                     r.Cells["Configure"].Style.Font = new Font(dgvLastGoodCheckDB.Font, FontStyle.Regular);
                 }
             }
-         }
+        }
 
-        private void dgvLastGoodCheckDB_CellContentClick(object sender, DataGridViewCellEventArgs e)
+        private void DgvLastGoodCheckDB_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
             if (e.RowIndex >= 0)
             {
@@ -141,7 +137,7 @@ namespace DBADashGUI.LastGoodCheckDB
             }
         }
 
-        public void ConfigureThresholds(Int32 InstanceID,Int32 DatabaseID)
+        public void ConfigureThresholds(Int32 InstanceID, Int32 DatabaseID)
         {
             var frm = new LastGoodCheckDBConfig();
             var threshold = LastGoodCheckDBThreshold.GetLastGoodCheckDBThreshold(InstanceID, DatabaseID);
@@ -155,7 +151,7 @@ namespace DBADashGUI.LastGoodCheckDB
         }
 
 
-        private void configureInstanceThresholdsToolStripMenuItem_Click(object sender, EventArgs e)
+        private void ConfigureInstanceThresholdsToolStripMenuItem_Click(object sender, EventArgs e)
         {
             if (InstanceIDs.Count == 1)
             {
@@ -163,24 +159,24 @@ namespace DBADashGUI.LastGoodCheckDB
             }
         }
 
-        private void configureRootThresholdsToolStripMenuItem_Click(object sender, EventArgs e)
+        private void ConfigureRootThresholdsToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            ConfigureThresholds(-1,-1);
+            ConfigureThresholds(-1, -1);
         }
 
-        private void tsRefresh_Click(object sender, EventArgs e)
+        private void TsRefresh_Click(object sender, EventArgs e)
         {
             RefreshData();
         }
 
-        private void tsCopy_Click(object sender, EventArgs e)
+        private void TsCopy_Click(object sender, EventArgs e)
         {
             Configure.Visible = false;
             Common.CopyDataGridViewToClipboard(dgvLastGoodCheckDB);
             Configure.Visible = true;
         }
 
-        private void tsExcel_Click(object sender, EventArgs e)
+        private void TsExcel_Click(object sender, EventArgs e)
         {
             Configure.Visible = false;
             Common.PromptSaveDataGridView(ref dgvLastGoodCheckDB);

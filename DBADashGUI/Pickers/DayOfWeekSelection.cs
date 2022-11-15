@@ -1,11 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Data;
-using System.Drawing;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace DBADashGUI
@@ -22,18 +18,18 @@ namespace DBADashGUI
             get
             {
                 var selected = new List<int>();
-                return chkDayOfWeek.CheckedIndices.Cast<int>().Select(i=>i+=1).ToList();
+                return chkDayOfWeek.CheckedIndices.Cast<int>().Select(i => i += 1).ToList();
             }
             set
             {
-                clearChecks();
+                ClearChecks();
                 if (value != null)
                 {
                     foreach (int dow in value)
                     {
-                        if (dow >= 1 && dow < 8)
+                        if (dow is >= 1 and < 8)
                         {
-                            chkDayOfWeek.SetItemCheckState(dow-1, CheckState.Checked);
+                            chkDayOfWeek.SetItemCheckState(dow - 1, CheckState.Checked);
                         }
                         else
                         {
@@ -45,7 +41,7 @@ namespace DBADashGUI
         }
 
 
-        private void clearChecks()
+        private void ClearChecks()
         {
             for (int i = 0; i < 7; i++)
             {
@@ -53,12 +49,12 @@ namespace DBADashGUI
             }
         }
 
-        private void bttnNone_Click(object sender, EventArgs e)
+        private void BttnNone_Click(object sender, EventArgs e)
         {
-            clearChecks();
+            ClearChecks();
         }
 
-        private void bttnALL_Click(object sender, EventArgs e)
+        private void BttnALL_Click(object sender, EventArgs e)
         {
             for (int i = 0; i < 7; i++)
             {
@@ -66,7 +62,7 @@ namespace DBADashGUI
             }
         }
 
-        private void bttnToggle_Click(object sender, EventArgs e)
+        private void BttnToggle_Click(object sender, EventArgs e)
         {
             for (int i = 0; i < 7; i++)
             {
@@ -74,12 +70,12 @@ namespace DBADashGUI
             }
         }
 
-        private void bttnOK_Click(object sender, EventArgs e)
+        private void BttnOK_Click(object sender, EventArgs e)
         {
             this.DialogResult = DialogResult.OK;
         }
 
-        private void bttnWeekday_Click(object sender, EventArgs e)
+        private void BttnWeekday_Click(object sender, EventArgs e)
         {
             for (int i = 0; i < 5; i++)
             {

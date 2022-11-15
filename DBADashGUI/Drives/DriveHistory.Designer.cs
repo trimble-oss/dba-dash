@@ -193,7 +193,7 @@
             this.smoothLinesToolStripMenuItem.Name = "smoothLinesToolStripMenuItem";
             this.smoothLinesToolStripMenuItem.Size = new System.Drawing.Size(181, 26);
             this.smoothLinesToolStripMenuItem.Text = "Smooth Lines";
-            this.smoothLinesToolStripMenuItem.Click += new System.EventHandler(this.smoothLinesToolStripMenuItem_Click);
+            this.smoothLinesToolStripMenuItem.Click += new System.EventHandler(this.SmoothLinesToolStripMenuItem_Click);
             // 
             // pointsToolStripMenuItem
             // 
@@ -201,7 +201,7 @@
             this.pointsToolStripMenuItem.Name = "pointsToolStripMenuItem";
             this.pointsToolStripMenuItem.Size = new System.Drawing.Size(181, 26);
             this.pointsToolStripMenuItem.Text = "Points";
-            this.pointsToolStripMenuItem.Click += new System.EventHandler(this.pointsToolStripMenuItem_Click);
+            this.pointsToolStripMenuItem.Click += new System.EventHandler(this.PointsToolStripMenuItem_Click);
             // 
             // tsRefresh
             // 
@@ -211,7 +211,7 @@
             this.tsRefresh.Name = "tsRefresh";
             this.tsRefresh.Size = new System.Drawing.Size(29, 24);
             this.tsRefresh.Text = "Refresh";
-            this.tsRefresh.Click += new System.EventHandler(this.tsRefresh_Click);
+            this.tsRefresh.Click += new System.EventHandler(this.TsRefresh_Click);
             // 
             // tsChart
             // 
@@ -222,7 +222,7 @@
             this.tsChart.Size = new System.Drawing.Size(29, 24);
             this.tsChart.Text = "View Chart";
             this.tsChart.Visible = false;
-            this.tsChart.Click += new System.EventHandler(this.tsChart_Click);
+            this.tsChart.Click += new System.EventHandler(this.TsChart_Click);
             // 
             // tsGrid
             // 
@@ -232,7 +232,7 @@
             this.tsGrid.Name = "tsGrid";
             this.tsGrid.Size = new System.Drawing.Size(29, 24);
             this.tsGrid.Text = "View Grid";
-            this.tsGrid.Click += new System.EventHandler(this.tsGrid_Click);
+            this.tsGrid.Click += new System.EventHandler(this.TsGrid_Click);
             // 
             // tsExcel
             // 
@@ -242,7 +242,7 @@
             this.tsExcel.Name = "tsExcel";
             this.tsExcel.Size = new System.Drawing.Size(29, 24);
             this.tsExcel.Text = "Export to Excel";
-            this.tsExcel.Click += new System.EventHandler(this.tsExcel_Click);
+            this.tsExcel.Click += new System.EventHandler(this.TsExcel_Click);
             // 
             // lblInsufficientData
             // 
@@ -281,7 +281,7 @@
             this.tsCopy.Name = "tsCopy";
             this.tsCopy.Size = new System.Drawing.Size(29, 24);
             this.tsCopy.Text = "Copy Data";
-            this.tsCopy.Click += new System.EventHandler(this.tsCopy_Click);
+            this.tsCopy.Click += new System.EventHandler(this.TsCopy_Click);
             // 
             // DriveHistory
             // 

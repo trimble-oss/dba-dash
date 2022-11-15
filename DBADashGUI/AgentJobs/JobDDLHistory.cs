@@ -1,12 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
+﻿using Microsoft.Data.SqlClient;
+using System;
 using System.Data;
-using Microsoft.Data.SqlClient;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace DBADashGUI.Changes
@@ -23,9 +17,9 @@ namespace DBADashGUI.Changes
 
         public DataTable GetDDLHistory()
         {
-            using(var cn = new SqlConnection(Common.ConnectionString))
-            using(var cmd = new SqlCommand("dbo.JobDDLHistory_Get", cn) { CommandType = CommandType.StoredProcedure })
-            using(var da = new SqlDataAdapter(cmd))
+            using (var cn = new SqlConnection(Common.ConnectionString))
+            using (var cmd = new SqlCommand("dbo.JobDDLHistory_Get", cn) { CommandType = CommandType.StoredProcedure })
+            using (var da = new SqlDataAdapter(cmd))
             {
                 cmd.Parameters.AddWithValue("InstanceID", InstanceID);
                 cmd.Parameters.AddWithValue("JobID", JobID);
@@ -46,7 +40,7 @@ namespace DBADashGUI.Changes
             dgv.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
         }
 
-        private void dgv_SelectionChanged(object sender, EventArgs e)
+        private void Dgv_SelectionChanged(object sender, EventArgs e)
         {
             if (dgv.SelectedRows.Count == 1)
             {

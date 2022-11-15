@@ -1,13 +1,8 @@
-﻿using System;
+﻿using Microsoft.Data.SqlClient;
+using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Drawing;
 using System.Data;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
-using Microsoft.Data.SqlClient;
 
 namespace DBADashGUI
 {
@@ -24,75 +19,75 @@ namespace DBADashGUI
         {
             dgvVersion.Columns[0].Frozen = Common.FreezeKeyColumn;
             dgv.Columns[0].Frozen = Common.FreezeKeyColumn;
-            refreshHistory();
-            refreshVersion();
+            RefreshHistory();
+            RefreshVersion();
         }
 
-        private void refreshVersion()
+        private void RefreshVersion()
         {
             using (var cn = new SqlConnection(Common.ConnectionString))
-            using (SqlCommand cmd = new SqlCommand("dbo.InstanceVersionInfo_Get", cn) { CommandType = CommandType.StoredProcedure })
+            using (SqlCommand cmd = new("dbo.InstanceVersionInfo_Get", cn) { CommandType = CommandType.StoredProcedure })
             {
                 cn.Open();
                 cmd.Parameters.AddWithValue("@InstanceIDs", string.Join(",", InstanceIDs));
-                SqlDataAdapter da = new SqlDataAdapter(cmd);
-                DataTable dt = new DataTable();
+                SqlDataAdapter da = new(cmd);
+                DataTable dt = new();
                 da.Fill(dt);
                 Common.ConvertUTCToLocal(ref dt);
                 dgvVersion.AutoGenerateColumns = false;
                 dgvVersion.DataSource = dt;
                 dgvVersion.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
-            }           
+            }
         }
 
-        private void refreshHistory()
+        private void RefreshHistory()
         {
             using (var cn = new SqlConnection(Common.ConnectionString))
             using (var cmd = new SqlCommand("dbo.SQLPatching_Get", cn) { CommandType = CommandType.StoredProcedure })
             {
                 cn.Open();
                 cmd.Parameters.AddWithValue("@InstanceIDs", string.Join(",", InstanceIDs));
-                SqlDataAdapter da = new SqlDataAdapter(cmd);
-                DataTable dt = new DataTable();
+                SqlDataAdapter da = new(cmd);
+                DataTable dt = new();
                 da.Fill(dt);
                 Common.ConvertUTCToLocal(ref dt);
                 dgv.AutoGenerateColumns = false;
                 dgv.DataSource = dt;
                 dgv.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
-            }        
+            }
         }
 
-        private void tsCopyVersion_Click(object sender, EventArgs e)
+        private void TsCopyVersion_Click(object sender, EventArgs e)
         {
             Common.CopyDataGridViewToClipboard(dgvVersion);
         }
 
-        private void tsCopyHistory_Click(object sender, EventArgs e)
+        private void TsCopyHistory_Click(object sender, EventArgs e)
         {
             Common.CopyDataGridViewToClipboard(dgv);
         }
 
-        private void tsRefreshVersion_Click(object sender, EventArgs e)
+        private void TsRefreshVersion_Click(object sender, EventArgs e)
         {
-            refreshVersion();
+            RefreshVersion();
         }
 
-        private void tsRefreshHistory_Click(object sender, EventArgs e)
+        private void TsRefreshHistory_Click(object sender, EventArgs e)
         {
-            refreshHistory();
+            RefreshHistory();
         }
 
-        private void tsExcel_Click(object sender, EventArgs e)
+        private void TsExcel_Click(object sender, EventArgs e)
         {
             Common.PromptSaveDataGridView(ref dgvVersion);
         }
 
-        private void tsExcelHistory_Click(object sender, EventArgs e)
+        private void TsExcelHistory_Click(object sender, EventArgs e)
         {
             Common.PromptSaveDataGridView(ref dgv);
         }
 
-        private void tsCols_Click(object sender, EventArgs e)
+        private void TsCols_Click(object sender, EventArgs e)
         {
             using (var frm = new SelectColumns() { Columns = dgvVersion.Columns })
             {

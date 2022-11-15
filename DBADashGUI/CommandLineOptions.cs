@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using CommandLine;
+﻿using CommandLine;
 namespace DBADashGUI
 {
     public class CommandLineOptions
@@ -12,7 +7,7 @@ namespace DBADashGUI
         public string TagFilters { get; set; }
 
         [Option('x', "NoTagMenu", Required = false, HelpText = "Remove Tag Menu")]
-        public bool NoTagMenu{ get; set; }
+        public bool NoTagMenu { get; set; }
     }
 
 }

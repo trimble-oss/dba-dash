@@ -324,7 +324,7 @@
             this.tsConnect.Size = new System.Drawing.Size(97, 30);
             this.tsConnect.Text = "Connect";
             this.tsConnect.ToolTipText = "Connect to a different DBA Dash repository";
-            this.tsConnect.Click += new System.EventHandler(this.tsConnect_Click);
+            this.tsConnect.Click += new System.EventHandler(this.TsConnect_Click);
             // 
             // diffToolStripMenuItem
             // 

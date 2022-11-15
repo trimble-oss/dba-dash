@@ -56,7 +56,7 @@
             this.optInherit.TabIndex = 31;
             this.optInherit.Text = "Inherit";
             this.optInherit.UseVisualStyleBackColor = true;
-            this.optInherit.CheckedChanged += new System.EventHandler(this.optInherit_CheckedChanged);
+            this.optInherit.CheckedChanged += new System.EventHandler(this.OptInherit_CheckedChanged);
             // 
             // OptDisabled
             // 
@@ -80,7 +80,7 @@
             this.optGB.TabIndex = 29;
             this.optGB.Text = "GB";
             this.optGB.UseVisualStyleBackColor = true;
-            this.optGB.CheckedChanged += new System.EventHandler(this.optGB_CheckedChanged);
+            this.optGB.CheckedChanged += new System.EventHandler(this.OptGB_CheckedChanged);
             // 
             // optPercent
             // 
@@ -94,7 +94,7 @@
             this.optPercent.TabStop = true;
             this.optPercent.Text = "Percent %";
             this.optPercent.UseVisualStyleBackColor = true;
-            this.optPercent.CheckedChanged += new System.EventHandler(this.optPercent_CheckedChanged);
+            this.optPercent.CheckedChanged += new System.EventHandler(this.OptPercent_CheckedChanged);
             // 
             // pnlThresholds
             // 
@@ -186,7 +186,7 @@
             this.bttnUpdate.TabIndex = 33;
             this.bttnUpdate.Text = "Update";
             this.bttnUpdate.UseVisualStyleBackColor = true;
-            this.bttnUpdate.Click += new System.EventHandler(this.bttnUpdate_Click);
+            this.bttnUpdate.Click += new System.EventHandler(this.BttnUpdate_Click);
             // 
             // bttnCancel
             // 
@@ -196,7 +196,7 @@
             this.bttnCancel.TabIndex = 34;
             this.bttnCancel.Text = "Cancel";
             this.bttnCancel.UseVisualStyleBackColor = true;
-            this.bttnCancel.Click += new System.EventHandler(this.bttnCancel_Click);
+            this.bttnCancel.Click += new System.EventHandler(this.BttnCancel_Click);
             // 
             // DriveThresholdConfig
             // 

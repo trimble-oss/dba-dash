@@ -150,7 +150,7 @@
             this.tsRefresh.Name = "tsRefresh";
             this.tsRefresh.Size = new System.Drawing.Size(29, 24);
             this.tsRefresh.Text = "Refresh";
-            this.tsRefresh.Click += new System.EventHandler(this.tsRefresh_Click);
+            this.tsRefresh.Click += new System.EventHandler(this.TsRefresh_Click);
             // 
             // tsCopy
             // 
@@ -160,7 +160,7 @@
             this.tsCopy.Name = "tsCopy";
             this.tsCopy.Size = new System.Drawing.Size(29, 24);
             this.tsCopy.Text = "Copy";
-            this.tsCopy.Click += new System.EventHandler(this.tsCopy_Click);
+            this.tsCopy.Click += new System.EventHandler(this.TsCopy_Click);
             // 
             // tsHistoryExcel
             // 
@@ -170,7 +170,7 @@
             this.tsHistoryExcel.Name = "tsHistoryExcel";
             this.tsHistoryExcel.Size = new System.Drawing.Size(29, 24);
             this.tsHistoryExcel.Text = "Excel";
-            this.tsHistoryExcel.Click += new System.EventHandler(this.tsHistoryExcel_Click);
+            this.tsHistoryExcel.Click += new System.EventHandler(this.TsHistoryExcel_Click);
             // 
             // Instance
             // 

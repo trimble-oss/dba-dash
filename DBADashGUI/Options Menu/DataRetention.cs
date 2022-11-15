@@ -1,13 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
+﻿using Microsoft.Data.SqlClient;
+using System;
 using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
-using Microsoft.Data.SqlClient;
 namespace DBADashGUI
 {
     public partial class DataRetention : Form
@@ -22,60 +16,61 @@ namespace DBADashGUI
             Common.StyleGrid(ref dgv);
             try
             {
-                refreshData();
+                RefreshData();
             }
-            catch(SqlException ex) when (ex.Number == 262)
+            catch (SqlException ex) when (ex.Number == 262)
             {
                 MessageBox.Show("Insufficient permissions", "Error", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
                 this.Close();
             }
         }
 
-        private void refreshData()
+        private void RefreshData()
         {
-            var dt = getDataRetention(showAllTablesToolStripMenuItem.Checked);
+            var dt = GetDataRetention(showAllTablesToolStripMenuItem.Checked);
             dgv.DataSource = dt;
             dgv.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
         }
 
-        private DataTable getDataRetention(bool allTables)
+        private static DataTable GetDataRetention(bool allTables)
         {
             using (var cn = new SqlConnection(Common.ConnectionString))
             using (var cmd = new SqlCommand("dbo.DataRetention_Get", cn) { CommandType = CommandType.StoredProcedure })
             using (var da = new SqlDataAdapter(cmd))
             {
-                    cn.Open();
-                    cmd.Parameters.AddWithValue("AllTables", allTables);                   
-                    DataTable dt = new DataTable();
-                    da.Fill(dt);
-                    return dt;               
-            }          
-      }
-
-        private void showAllTablesToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            refreshData();
+                cn.Open();
+                cmd.Parameters.AddWithValue("AllTables", allTables);
+                DataTable dt = new();
+                da.Fill(dt);
+                return dt;
+            }
         }
 
-        private void dgv_CellContentClick(object sender, DataGridViewCellEventArgs e)
+        private void ShowAllTablesToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            if(e.RowIndex>=0 && dgv.Columns[e.ColumnIndex].Name == "colRetentionDays")
+            RefreshData();
+        }
+
+        private void Dgv_CellContentClick(object sender, DataGridViewCellEventArgs e)
+        {
+            if (e.RowIndex >= 0 && dgv.Columns[e.ColumnIndex].Name == "colRetentionDays")
             {
                 Int32 days = (Int32)dgv[e.ColumnIndex, e.RowIndex].Value;
                 string sDays = days.ToString();
                 string tableName = (string)dgv["colTableName", e.RowIndex].Value;
-                if (Common.ShowInputDialog(ref sDays, "Enter number of days") == DialogResult.OK) {
-                    
+                if (Common.ShowInputDialog(ref sDays, "Enter number of days") == DialogResult.OK)
+                {
+
                     if (Int32.TryParse(sDays, out int newRetention))
                     {
                         if (newRetention != days)
                         {
                             try
                             {
-                                updateRetention(tableName, newRetention);
+                                UpdateRetention(tableName, newRetention);
                                 dgv[e.ColumnIndex, e.RowIndex].Value = newRetention;
                             }
-                            catch(Exception ex)
+                            catch (Exception ex)
                             {
                                 MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                             }
@@ -85,54 +80,53 @@ namespace DBADashGUI
                     {
                         MessageBox.Show("Please enter an integer number of days for retention", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     }
-                    
 
-                }              
+
+                }
             }
         }
 
-        private void updateRetention(string table, int days)
+        private static void UpdateRetention(string table, int days)
         {
             using (var cn = new SqlConnection(Common.ConnectionString))
-            using (SqlCommand cmd = new SqlCommand("dbo.DataRetention_Upd", cn) { CommandType = CommandType.StoredProcedure }) {
+            using (SqlCommand cmd = new("dbo.DataRetention_Upd", cn) { CommandType = CommandType.StoredProcedure })
+            {
                 cn.Open();
                 cmd.Parameters.AddWithValue("TableName", table);
                 cmd.Parameters.AddWithValue("RetentionDays", days);
                 cmd.ExecuteNonQuery();
-            }          
+            }
         }
 
-        private void tsRefresh_Click(object sender, EventArgs e)
+        private void TsRefresh_Click(object sender, EventArgs e)
         {
-            refreshData();
+            RefreshData();
         }
 
-        private void tsCopy_Click(object sender, EventArgs e)
+        private void TsCopy_Click(object sender, EventArgs e)
         {
             Common.CopyDataGridViewToClipboard(dgv);
         }
 
-        private void purge()
+        private static void Purge()
         {
-            SqlConnection cn = new SqlConnection(Common.ConnectionString);
-            using (cn)
-            {
-                cn.Open();
-                SqlCommand cmd = new SqlCommand("dbo.PurgeData", cn);
-                cmd.ExecuteNonQuery();
-            }
+            using SqlConnection cn = new(Common.ConnectionString);
+            cn.Open();
+            SqlCommand cmd = new("dbo.PurgeData", cn);
+            cmd.ExecuteNonQuery();
+
         }
 
-        private void tsPurge_Click(object sender, EventArgs e)
+        private void TsPurge_Click(object sender, EventArgs e)
         {
             try
             {
                 this.Cursor = Cursors.WaitCursor;
-                purge();
-                refreshData();
+                Purge();
+                RefreshData();
                 this.Cursor = Cursors.Default;
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 this.Cursor = Cursors.Default;
                 MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);

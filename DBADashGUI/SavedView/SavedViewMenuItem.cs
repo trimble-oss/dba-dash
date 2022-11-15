@@ -1,15 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Windows.Forms.Design;
 
 namespace DBADashGUI
 {
-    public class SavedViewSelectedEventArgs: EventArgs
+    public class SavedViewSelectedEventArgs : EventArgs
     {
         public string Name;
         public bool IsGlobal;
@@ -20,9 +17,9 @@ namespace DBADashGUI
     /// Custom ToolStipDrownDownButton that shows the saved views available for selection
     /// </summary>
     [ToolStripItemDesignerAvailability(ToolStripItemDesignerAvailability.ToolStrip)]
-    public class SavedViewMenuItem:  ToolStripDropDownButton
+    public class SavedViewMenuItem : ToolStripDropDownButton
     {
-        private Dictionary<string,string> _savedViews;
+        private Dictionary<string, string> _savedViews;
         private Dictionary<string, string> _globalSavedViews;
 
         private readonly static string globalTag = "Global";
@@ -34,7 +31,7 @@ namespace DBADashGUI
 
         public event EventHandler<SavedViewSelectedEventArgs> SavedViewSelected;
 
-        public override ToolStripItemDisplayStyle DisplayStyle { get => base.DisplayStyle ; set => base.DisplayStyle= ToolStripItemDisplayStyle.Text ; }
+        public override ToolStripItemDisplayStyle DisplayStyle { get => base.DisplayStyle; set => base.DisplayStyle = ToolStripItemDisplayStyle.Text; }
         public override string Text { get => base.Text; set => base.Text = _text; }
         private string _text = "View";
 
@@ -64,12 +61,12 @@ namespace DBADashGUI
             }
             else
             {
-                SelectItem(noneText,true);
+                SelectItem(noneText, true);
                 SavedViewSelected(this, new SavedViewSelectedEventArgs() { Name = noneText, IsGlobal = true, SerializedObject = string.Empty });
                 return false;
             }
         }
-  
+
         public bool ContainsUserView(string name)
         {
             return _savedViews.ContainsKey(name);
@@ -110,14 +107,14 @@ namespace DBADashGUI
             return loaded;
         }
 
-        
+
         /// <summary>
         /// Load saved view menu items - replaces any existing items with new ones from the DB.
         /// </summary>
         public void RefreshItems()
         {
-            _savedViews = SavedView.GetSavedViews(Type,DBADashUser.UserID);
-            _globalSavedViews = SavedView.GetSavedViews(Type,DBADashUser.SystemUserID);
+            _savedViews = SavedView.GetSavedViews(Type, DBADashUser.UserID);
+            _globalSavedViews = SavedView.GetSavedViews(Type, DBADashUser.SystemUserID);
             DropDownItems.Clear();
             ToolStripMenuItem mnuNone = new()
             {
@@ -166,16 +163,16 @@ namespace DBADashGUI
         /// <summary>
         /// Select a saved view in the menu by name
         /// </summary>
-        public void SelectItem(string selectedItem,bool isGlobal)
+        public void SelectItem(string selectedItem, bool isGlobal)
         {
-            foreach(ToolStripMenuItem mnu in DropDownItems)
+            foreach (ToolStripMenuItem mnu in DropDownItems)
             {
                 bool mnuIsGlobal = Convert.ToString(mnu.Tag) == globalTag;
                 bool isSelected = mnu.Text.ToLower() == selectedItem.ToLower() && isGlobal == mnuIsGlobal;
                 mnu.Checked = isSelected;
                 mnu.Font = isSelected ? new Font(mnu.Font, FontStyle.Bold) : new Font(mnu.Font, FontStyle.Regular);
             }
-            if(selectedItem!=noneText && selectedItem != String.Empty)
+            if (selectedItem != noneText && selectedItem != String.Empty)
             {
                 SetText("View: " + selectedItem);
                 Font = new Font(this.Font, FontStyle.Bold);
@@ -191,7 +188,7 @@ namespace DBADashGUI
 
         private string _selectedSavedView;
         private bool _selectedSavedViewIsGlobal;
-        public string SelectedSavedView { get=>_selectedSavedView;  }
+        public string SelectedSavedView { get => _selectedSavedView; }
         public bool SelectedSavedViewIsGlobal { get => _selectedSavedViewIsGlobal; }
 
 
@@ -202,7 +199,7 @@ namespace DBADashGUI
             string serializedObject;
             if (isGlobal)
             {
-                serializedObject =mnu.Text == noneText ? String.Empty : _globalSavedViews[mnu.Text];
+                serializedObject = mnu.Text == noneText ? String.Empty : _globalSavedViews[mnu.Text];
             }
             else
             {

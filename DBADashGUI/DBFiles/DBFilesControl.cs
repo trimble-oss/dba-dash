@@ -1,13 +1,9 @@
-﻿using System;
+﻿using Microsoft.Data.SqlClient;
+using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Drawing;
 using System.Data;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Drawing;
 using System.Windows.Forms;
-using Microsoft.Data.SqlClient;
 using static DBADashGUI.DBADashStatus;
 
 namespace DBADashGUI.DBFiles
@@ -77,14 +73,14 @@ namespace DBADashGUI.DBFiles
                 {
                     if (itm.Checked)
                     {
-                       selected.Add(Convert.ToInt16(itm.Tag));
+                        selected.Add(Convert.ToInt16(itm.Tag));
                     }
                 }
                 return selected;
             }
         }
 
-        private DataTable getDBFiles()
+        private DataTable GetDBFiles()
         {
             var selectedTypes = FileTypes;
             using (var cn = new SqlConnection(Common.ConnectionString))
@@ -99,12 +95,12 @@ namespace DBADashGUI.DBFiles
                 cmd.Parameters.AddWithValue("IncludeWarning", IncludeWarning);
                 cmd.Parameters.AddWithValue("IncludeCritical", IncludeCritical);
                 cmd.Parameters.AddWithValue("FilegroupLevel", tsFilegroup.Checked);
-                if (selectedTypes.Count > 0 && selectedTypes.Count < 4)
+                if (selectedTypes.Count is > 0 and < 4)
                 {
                     cmd.Parameters.AddWithValue("Types", string.Join(",", selectedTypes));
                 }
 
-                DataTable dt = new DataTable();
+                DataTable dt = new();
                 da.Fill(dt);
                 return dt;
             }
@@ -113,27 +109,27 @@ namespace DBADashGUI.DBFiles
         public void RefreshData()
         {
 
-            var dt = getDBFiles();
+            var dt = GetDBFiles();
             dgvFiles.AutoGenerateColumns = false;
             dgvFiles.DataSource = new DataView(dt);
-            dgvFiles.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);               
-           
+            dgvFiles.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
+
             configureInstanceThresholdsToolStripMenuItem.Enabled = InstanceIDs.Count == 1;
             configureDatabaseThresholdsToolStripMenuItem.Enabled = InstanceIDs.Count == 1 && DatabaseID > 0;
-   
+
         }
 
-        private void criticalToolStripMenuItem_Click(object sender, EventArgs e)
+        private void CriticalToolStripMenuItem_Click(object sender, EventArgs e)
         {
             RefreshData();
         }
 
-        private void warningToolStripMenuItem_Click(object sender, EventArgs e)
+        private void WarningToolStripMenuItem_Click(object sender, EventArgs e)
         {
             RefreshData();
         }
 
-        private void undefinedToolStripMenuItem_Click(object sender, EventArgs e)
+        private void UndefinedToolStripMenuItem_Click(object sender, EventArgs e)
         {
             RefreshData();
         }
@@ -143,7 +139,7 @@ namespace DBADashGUI.DBFiles
             RefreshData();
         }
 
-        private void dgvFiles_CellContentClick(object sender, DataGridViewCellEventArgs e)
+        private void DgvFiles_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
             if (e.RowIndex >= 0)
             {
@@ -167,11 +163,11 @@ namespace DBADashGUI.DBFiles
             }
         }
 
-        public void ConfigureThresholds(Int32 InstanceID, Int32 DatabaseID,Int32 DataSpaceID)
+        public void ConfigureThresholds(Int32 InstanceID, Int32 DatabaseID, Int32 DataSpaceID)
         {
             var frm = new FileThresholdConfig
             {
-                InstanceID=InstanceID,
+                InstanceID = InstanceID,
                 DataSpaceID = DataSpaceID,
                 DatabaseID = DatabaseID
             };
@@ -182,7 +178,7 @@ namespace DBADashGUI.DBFiles
             }
         }
 
-        private void dgvFiles_RowsAdded(object sender, DataGridViewRowsAddedEventArgs e)
+        private void DgvFiles_RowsAdded(object sender, DataGridViewRowsAddedEventArgs e)
         {
             for (Int32 idx = e.RowIndex; idx < e.RowIndex + e.RowCount; idx += 1)
             {
@@ -192,17 +188,17 @@ namespace DBADashGUI.DBFiles
                 var maxSizeStatus = (DBADashStatus.DBADashStatusEnum)row["PctMaxSizeStatus"];
                 var fgAutogrowStatus = (DBADashStatus.DBADashStatusEnum)row["FilegroupAutogrowStatus"];
                 string checkType = row["FreeSpaceCheckType"] == DBNull.Value ? "-" : (string)row["FreeSpaceCheckType"];
-                dgvFiles.Rows[idx].Cells["FileSnapshotAge"].SetStatusColor(snapshotStatus);           
+                dgvFiles.Rows[idx].Cells["FileSnapshotAge"].SetStatusColor(snapshotStatus);
                 dgvFiles.Rows[idx].Cells["FilegroupPctMaxSize"].SetStatusColor(maxSizeStatus);
-                dgvFiles.Rows[idx].Cells["FilegroupAutogrow"].SetStatusColor(fgAutogrowStatus);        
+                dgvFiles.Rows[idx].Cells["FilegroupAutogrow"].SetStatusColor(fgAutogrowStatus);
                 dgvFiles.Rows[idx].Cells["FilegroupPctFree"].SetStatusColor(checkType == "%" ? Status : DBADashStatusEnum.NA);
-                dgvFiles.Rows[idx].Cells["FilegroupFreeMB"].SetStatusColor(checkType=="M"  ? Status : DBADashStatusEnum.NA);                   
-            
-                if (row["ConfiguredLevel"]!=DBNull.Value && (string)row["ConfiguredLevel"] == "FG")
+                dgvFiles.Rows[idx].Cells["FilegroupFreeMB"].SetStatusColor(checkType == "M" ? Status : DBADashStatusEnum.NA);
+
+                if (row["ConfiguredLevel"] != DBNull.Value && (string)row["ConfiguredLevel"] == "FG")
                 {
                     dgvFiles.Rows[idx].Cells["Configure"].Style.Font = new Font(dgvFiles.Font, FontStyle.Bold);
                 }
-                else if (row["ConfiguredLevel"] != DBNull.Value && (string)row["ConfiguredLevel"] == "DB" && (int)row["data_space_id"]==0)
+                else if (row["ConfiguredLevel"] != DBNull.Value && (string)row["ConfiguredLevel"] == "DB" && (int)row["data_space_id"] == 0)
                 {
                     dgvFiles.Rows[idx].Cells["Configure"].Style.Font = new Font(dgvFiles.Font, FontStyle.Bold);
                 }
@@ -213,32 +209,33 @@ namespace DBADashGUI.DBFiles
             }
         }
 
-        private void configureDatabaseThresholdsToolStripMenuItem_Click(object sender, EventArgs e)
+        private void ConfigureDatabaseThresholdsToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            if(InstanceIDs.Count==1 && DatabaseID > 0)
+            if (InstanceIDs.Count == 1 && DatabaseID > 0)
             {
                 ConfigureThresholds(InstanceIDs[0], (Int32)DatabaseID, -1);
             }
         }
 
-        private void configureInstanceThresholdsToolStripMenuItem_Click(object sender, EventArgs e)
+        private void ConfigureInstanceThresholdsToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            if (InstanceIDs.Count == 1) {
+            if (InstanceIDs.Count == 1)
+            {
                 ConfigureThresholds(InstanceIDs[0], -1, -1);
             }
         }
 
-        private void configureRootThresholdsToolStripMenuItem_Click(object sender, EventArgs e)
+        private void ConfigureRootThresholdsToolStripMenuItem_Click(object sender, EventArgs e)
         {
             ConfigureThresholds(-1, -1, -1);
         }
 
-        private void tsRefresh_Click(object sender, EventArgs e)
+        private void TsRefresh_Click(object sender, EventArgs e)
         {
             RefreshData();
         }
 
-        private void tsCopy_Click(object sender, EventArgs e)
+        private void TsCopy_Click(object sender, EventArgs e)
         {
             Configure.Visible = false;
             History.Visible = false;
@@ -247,34 +244,35 @@ namespace DBADashGUI.DBFiles
             History.Visible = true;
         }
 
-        private void tsFilegroup_Click(object sender, EventArgs e)
+        private void TsFilegroup_Click(object sender, EventArgs e)
         {
-            toggleFileLevel(false);
+            ToggleFileLevel(false);
             RefreshData();
         }
 
-        private void tsFile_Click(object sender, EventArgs e)
+        private void TsFile_Click(object sender, EventArgs e)
         {
-            toggleFileLevel(true);
+            ToggleFileLevel(true);
             RefreshData();
         }
 
-        private void toggleFileLevel(bool isFileLevel)
+        private void ToggleFileLevel(bool isFileLevel)
         {
             tsFilegroup.Checked = !isFileLevel;
             tsFile.Checked = isFileLevel;
-            foreach(DataGridViewColumn col in dgvFiles.Columns)
+            foreach (DataGridViewColumn col in dgvFiles.Columns)
             {
-                if (col.Name.StartsWith("FileLevel_")){
+                if (col.Name.StartsWith("FileLevel_"))
+                {
                     col.Visible = isFileLevel;
                 }
             }
         }
 
-        private void tsTypes_Click(object sender, EventArgs e)
+        private void TsTypes_Click(object sender, EventArgs e)
         {
             var selectedTypes = FileTypes;
-            if(selectedTypes.Count>0 && selectedTypes.Count < 4)
+            if (selectedTypes.Count is > 0 and < 4)
             {
                 tsType.Font = new Font(tsType.Font, FontStyle.Bold);
             }
@@ -296,7 +294,7 @@ namespace DBADashGUI.DBFiles
             RefreshData();
         }
 
-        private void tsExcel_Click(object sender, EventArgs e)
+        private void TsExcel_Click(object sender, EventArgs e)
         {
             Common.PromptSaveDataGridView(ref dgvFiles);
         }

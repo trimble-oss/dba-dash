@@ -1,19 +1,17 @@
 ﻿using DBADash;
-using Newtonsoft.Json;
-using Quartz;
-using System;
-using System.ComponentModel;
 using Microsoft.Data.SqlClient;
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
 using System.Diagnostics;
+using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.ServiceProcess;
 using System.Text;
 using System.Windows.Forms;
 using static DBADash.DBADashConnection;
-using System.Drawing;
-using System.Collections.Generic;
-using System.Data;
 
 namespace DBADashServiceConfig
 {
@@ -48,7 +46,7 @@ namespace DBADashServiceConfig
             bool addUnvalidated = false;
             bool doNotAddUnvalidated = false;
             bool doesNotHaveUpdateApproval = false;
-            foreach (string splitSource in txtSource.Text.Split(new[] { "\r\n", "\r", "\n" },StringSplitOptions.None))
+            foreach (string splitSource in txtSource.Text.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.None))
             {
                 string sourceString = splitSource.Trim();
                 if (string.IsNullOrEmpty(splitSource))
@@ -63,7 +61,7 @@ namespace DBADashServiceConfig
                         DataSource = sourceString,
                         IntegratedSecurity = true,
                         TrustServerCertificate = true,
-                        Encrypt=true,
+                        Encrypt = true,
                         ApplicationName = "DBADash"
                     };
                     sourceString = builder.ConnectionString;
@@ -77,7 +75,7 @@ namespace DBADashServiceConfig
                     RunningQueryPlanThreshold = chkCollectPlans.Checked ? new PlanCollectionThreshold() { CountThreshold = int.Parse(txtCountThreshold.Text), CPUThreshold = int.Parse(txtCPUThreshold.Text), DurationThreshold = int.Parse(txtDurationThreshold.Text), MemoryGrantThreshold = int.Parse(txtGrantThreshold.Text) } : null,
                     SchemaSnapshotDBs = schemaSnapshotDBs,
                     CollectSessionWaits = chkCollectSessionWaits.Checked,
-                    ScriptAgentJobs=chkScriptJobs.Checked
+                    ScriptAgentJobs = chkScriptJobs.Checked
                 };
                 bool validated = ValidateSource(sourceString);
 
@@ -90,34 +88,31 @@ namespace DBADashServiceConfig
                         return;
                     }
 
-                    if (collectionConfig == null)
-                    {
-                        collectionConfig = new CollectionConfig();
-                    }
+                    collectionConfig ??= new CollectionConfig();
                     if (!addUnvalidated)
                     {
                         System.Windows.Forms.Cursor.Current = System.Windows.Forms.Cursors.WaitCursor;
                         try
                         {
                             src.SourceConnection.Validate();
-                            validated= true;
+                            validated = true;
                         }
                         catch (Exception ex)
                         {
-                            validated= false;
+                            validated = false;
                             validationError = ex.Message;
                         }
                         System.Windows.Forms.Cursor.Current = System.Windows.Forms.Cursors.Default;
                     }
-                    if (!addUnvalidated  && !validated)
+                    if (!addUnvalidated && !validated)
                     {
-                        if(doNotAddUnvalidated)
+                        if (doNotAddUnvalidated)
                         {
                             continue;
                         }
                         else if (MessageBox.Show("Error connecting to data source.  Do you wish to add anyway?" + Environment.NewLine + Environment.NewLine + validationError, "Error", MessageBoxButtons.YesNo, MessageBoxIcon.Exclamation) == DialogResult.No)
                         {
-                            doNotAddUnvalidated=true;
+                            doNotAddUnvalidated = true;
                             continue;
                         }
                         else
@@ -127,7 +122,7 @@ namespace DBADashServiceConfig
                     }
                     else if (!addUnvalidated && !src.SourceConnection.IsXESupported() && src.SlowQueryThresholdMs >= 0)
                     {
-                        warnXENotSupported=true;
+                        warnXENotSupported = true;
                         src.SlowQueryThresholdMs = -1;
                         src.PersistXESessions = false;
                     }
@@ -221,7 +216,7 @@ namespace DBADashServiceConfig
                 errorProvider1.SetError(txtDestination, ex.Message);
                 return false;
             }
-            if(dest.Type == ConnectionType.SQL)
+            if (dest.Type == ConnectionType.SQL)
             {
                 try
                 {
@@ -252,7 +247,7 @@ namespace DBADashServiceConfig
                     }
                     return true;
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     return false;
@@ -276,7 +271,7 @@ namespace DBADashServiceConfig
             {
                 MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
-           
+
         }
 
         private void SaveChanges()
@@ -296,14 +291,14 @@ namespace DBADashServiceConfig
         {
             dgvConnections.AutoGenerateColumns = false;
             dgvConnections.Columns.Add(new DataGridViewTextBoxColumn() { Name = "ConnectionString", DataPropertyName = "ConnectionString", HeaderText = "Connection String", Width = 300 });
-            dgvConnections.Columns.Add(new DataGridViewTextBoxColumn() { Name = "ConnectionID", DataPropertyName = "ConnectionID", HeaderText = "Connection ID", ToolTipText="The ConnectionID is used to uniquely identify the SQL Instance in the repository database.  The ConnectionID is automatically assigned to @@SERVERNAME but you can override this with a custom value.  If you change the ConnectionID for an existing server it will appear as a new instance in the repository database." });
+            dgvConnections.Columns.Add(new DataGridViewTextBoxColumn() { Name = "ConnectionID", DataPropertyName = "ConnectionID", HeaderText = "Connection ID", ToolTipText = "The ConnectionID is used to uniquely identify the SQL Instance in the repository database.  The ConnectionID is automatically assigned to @@SERVERNAME but you can override this with a custom value.  If you change the ConnectionID for an existing server it will appear as a new instance in the repository database." });
             dgvConnections.Columns.Add(new DataGridViewCheckBoxColumn() { DataPropertyName = "NoWMI", HeaderText = "No WMI" });
             dgvConnections.Columns.Add(new DataGridViewTextBoxColumn() { DataPropertyName = "SlowQueryThresholdMs", HeaderText = "Slow Query Threshold (ms)" });
             dgvConnections.Columns.Add(new DataGridViewCheckBoxColumn() { DataPropertyName = "UseDualEventSession", HeaderText = "Use Dual Event Session" });
             dgvConnections.Columns.Add(new DataGridViewCheckBoxColumn() { DataPropertyName = "PersistXESessions", HeaderText = "Persist XE Sessions" });
             dgvConnections.Columns.Add(new DataGridViewTextBoxColumn() { DataPropertyName = "SchemaSnapshotDBs", HeaderText = "Schema Snapshot DBs" });
-            dgvConnections.Columns.Add(new DataGridViewTextBoxColumn() { DataPropertyName = "SlowQuerySessionMaxMemoryKB", HeaderText = "Slow Query Session Max Memory (KB)", ToolTipText= "Max amount of memory to allocate for event buffering." });
-            dgvConnections.Columns.Add(new DataGridViewTextBoxColumn() { DataPropertyName = "SlowQueryTargetMaxMemoryKB", HeaderText = "Slow Query Target Max Memory (KB)", ToolTipText="Max memory target parameter for ring_buffer" });
+            dgvConnections.Columns.Add(new DataGridViewTextBoxColumn() { DataPropertyName = "SlowQuerySessionMaxMemoryKB", HeaderText = "Slow Query Session Max Memory (KB)", ToolTipText = "Max amount of memory to allocate for event buffering." });
+            dgvConnections.Columns.Add(new DataGridViewTextBoxColumn() { DataPropertyName = "SlowQueryTargetMaxMemoryKB", HeaderText = "Slow Query Target Max Memory (KB)", ToolTipText = "Max memory target parameter for ring_buffer" });
             dgvConnections.Columns.Add(new DataGridViewCheckBoxColumn() { DataPropertyName = "CollectSessionWaits", HeaderText = "Collect Session Waits", ToolTipText = "Collect Session Waits for Running Queries" });
             dgvConnections.Columns.Add(new DataGridViewCheckBoxColumn() { DataPropertyName = "PlanCollectionEnabled", HeaderText = "Running Query Plan Collection" });
             dgvConnections.Columns.Add(new DataGridViewTextBoxColumn() { DataPropertyName = "PlanCollectionCPUThreshold", HeaderText = "Plan Collection CPU Threshold" });
@@ -324,16 +319,16 @@ namespace DBADashServiceConfig
                 {
                     SetOriginalJson();
 
-                    if (!originalJson.Like("%Trust%Server%Certificate%") && collectionConfig.SourceConnections.Count>0)
+                    if (!originalJson.Like("%Trust%Server%Certificate%") && collectionConfig.SourceConnections.Count > 0)
                     {
-                        if (MessageBox.Show("Encryption is applied by default to your SQL Server connections with Microsoft.Data.SqlClient 4.0.  Connections might fail if the server certificate is not trusted.  Apply Trust Server Certificate?", "Trust Server Certificate", MessageBoxButtons.YesNo, MessageBoxIcon.Question)== DialogResult.Yes)
+                        if (MessageBox.Show("Encryption is applied by default to your SQL Server connections with Microsoft.Data.SqlClient 4.0.  Connections might fail if the server certificate is not trusted.  Apply Trust Server Certificate?", "Trust Server Certificate", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
                         {
                             ApplyTrustServerCertificate();
                             SaveChanges();
                         }
                     }
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     MessageBox.Show("Error reading ServiceConfig.json: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     tab1.SelectedTab = tabJson; // Set tab to Json to allow user to correct error in Json
@@ -348,7 +343,7 @@ namespace DBADashServiceConfig
             SetConnectionCount();
             RefreshServiceStatus();
             ValidateDestination();
-    
+
         }
 
         private void SetOriginalJson()
@@ -373,12 +368,12 @@ namespace DBADashServiceConfig
                 collectionConfig.DestinationConnection.EncryptedConnectionString = AddTrustServerCertificate(collectionConfig.DestinationConnection.EncryptedConnectionString);
                 txtDestination.Text = collectionConfig.DestinationConnection.EncryptedConnectionString;
             }
-            foreach(var dest in collectionConfig.SecondaryDestinationConnections.Where(dest=> dest.Type == ConnectionType.SQL))
+            foreach (var dest in collectionConfig.SecondaryDestinationConnections.Where(dest => dest.Type == ConnectionType.SQL))
             {
                 dest.EncryptedConnectionString = AddTrustServerCertificate(dest.EncryptedConnectionString);
             }
-                        
-            foreach(var src in collectionConfig.SourceConnections.Where(src => src.SourceConnection.Type == ConnectionType.SQL))
+
+            foreach (var src in collectionConfig.SourceConnections.Where(src => src.SourceConnection.Type == ConnectionType.SQL))
             {
                 src.SourceConnection.EncryptedConnectionString = AddTrustServerCertificate(src.SourceConnection.EncryptedConnectionString);
             }
@@ -394,7 +389,7 @@ namespace DBADashServiceConfig
             return builder.ConnectionString;
         }
 
-      
+
         private void SetConnectionCount()
         {
             int cnt = collectionConfig.SourceConnections.Count;
@@ -479,12 +474,12 @@ namespace DBADashServiceConfig
             else
             {
                 isInstalled = true;
-                lblServiceStatus.Text ="Service Status: " +  Enum.GetName(typeof(ServiceControllerStatus), svcCtrl.Status);
-                if(svcCtrl.Status == ServiceControllerStatus.Running)
+                lblServiceStatus.Text = "Service Status: " + Enum.GetName(typeof(ServiceControllerStatus), svcCtrl.Status);
+                if (svcCtrl.Status == ServiceControllerStatus.Running)
                 {
                     lblServiceStatus.ForeColor = Color.Green;
                 }
-                else if(svcCtrl.Status== ServiceControllerStatus.Stopped || svcCtrl.Status == ServiceControllerStatus.StopPending || svcCtrl.Status == ServiceControllerStatus.Paused)
+                else if (svcCtrl.Status is ServiceControllerStatus.Stopped or ServiceControllerStatus.StopPending or ServiceControllerStatus.Paused)
                 {
                     lblServiceStatus.ForeColor = Color.Red;
                 }
@@ -493,7 +488,7 @@ namespace DBADashServiceConfig
                     lblServiceStatus.ForeColor = Color.Orange;
                 }
                 lnkStart.Enabled = (svcCtrl.Status == ServiceControllerStatus.Stopped);
-                lnkStop.Enabled= (svcCtrl.Status == ServiceControllerStatus.Running);
+                lnkStop.Enabled = (svcCtrl.Status == ServiceControllerStatus.Running);
                 lnkInstall.Font = new Font(lnkInstall.Font, FontStyle.Regular);
                 toolTip1.SetToolTip(lnkInstall, "Remove Windows service for DBA Dash agent");
                 lnkInstall.Text = "Uninstall service";
@@ -656,7 +651,7 @@ namespace DBADashServiceConfig
 
         private void DestinationChanged()
         {
-            if(collectionConfig.Destination!= txtDestination.Text)
+            if (collectionConfig.Destination != txtDestination.Text)
             {
                 collectionConfig.Destination = txtDestination.Text;
                 txtJson.Text = collectionConfig.Serialize();
@@ -696,7 +691,7 @@ namespace DBADashServiceConfig
                 numSlowQueryThreshold.Value = -1;
                 lblSlow.Text = "Extended events trace to capture slow rpc and batch completed events is NOT enabled";
             }
-            chkDualSession.Enabled= chkSlowQueryThreshold.Checked;
+            chkDualSession.Enabled = chkSlowQueryThreshold.Checked;
             chkPersistXESession.Enabled = chkSlowQueryThreshold.Checked;
 
         }
@@ -733,7 +728,7 @@ namespace DBADashServiceConfig
                 {
                     chkCollectPlans.Checked = false;
                 }
-                
+
             }
             else
             {
@@ -745,7 +740,7 @@ namespace DBADashServiceConfig
         private void BttnDeployDatabase_Click(object sender, EventArgs e)
         {
             var frm = new DBDeploy();
-            var cn =  new DBADashConnection(txtDestination.Text);
+            var cn = new DBADashConnection(txtDestination.Text);
             if (cn.Type == ConnectionType.SQL)
             {
                 frm.ConnectionString = cn.ConnectionString;
@@ -767,7 +762,7 @@ namespace DBADashServiceConfig
             frm.ShowDialog();
             if (frm.DatabaseName != cn.InitialCatalog())
             {
-                if(MessageBox.Show("Update connection string?","Update", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+                if (MessageBox.Show("Update connection string?", "Update", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
                 {
                     var builder = new SqlConnectionStringBuilder(txtDestination.Text)
                     {
@@ -798,19 +793,19 @@ namespace DBADashServiceConfig
                     IntegratedSecurity = true,
                     TrustServerCertificate = true,
                     Encrypt = true,
-                };               
-                
-                frm.ConnectionString =builder.ConnectionString;
+                };
+
+                frm.ConnectionString = builder.ConnectionString;
             }
             frm.ShowDialog();
             if (frm.DialogResult == DialogResult.OK)
             {
                 var builder = new SqlConnectionStringBuilder(frm.ConnectionString);
-                if(builder.InitialCatalog==null || builder.InitialCatalog.Length == 0)
+                if (builder.InitialCatalog == null || builder.InitialCatalog.Length == 0)
                 {
                     builder.InitialCatalog = "DBADashDB";
                 }
-                cn = new DBADashConnection(builder.ConnectionString) ;
+                cn = new DBADashConnection(builder.ConnectionString);
 
                 txtDestination.Text = cn.EncryptedConnectionString;
                 DestinationChanged();
@@ -844,14 +839,14 @@ namespace DBADashServiceConfig
 
         private void BttnScanNow_Click(object sender, EventArgs e)
         {
-           var newConnections= collectionConfig.GetNewAzureDBConnections();
+            var newConnections = collectionConfig.GetNewAzureDBConnections();
             if (newConnections.Count == 0)
             {
-                MessageBox.Show("No new Azure DB connections found", "Scan",  MessageBoxButtons.OK, MessageBoxIcon.Information);
+                MessageBox.Show("No new Azure DB connections found", "Scan", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
             else
             {
-                if( MessageBox.Show(String.Format("Found {0} new connections.  Add connections to config file?",newConnections.Count), "Scan", MessageBoxButtons.YesNo, MessageBoxIcon.Question)== DialogResult.Yes)
+                if (MessageBox.Show(String.Format("Found {0} new connections.  Add connections to config file?", newConnections.Count), "Scan", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
                 {
                     collectionConfig.AddConnections(newConnections);
                     txtJson.Text = collectionConfig.Serialize();
@@ -875,7 +870,7 @@ namespace DBADashServiceConfig
 
         private void ChkScanEvery_CheckedChanged(object sender, EventArgs e)
         {
-            if(numAzureScanInterval.Value==0 && chkScanEvery.Checked)
+            if (numAzureScanInterval.Value == 0 && chkScanEvery.Checked)
             {
                 numAzureScanInterval.Value = 3600;
             }
@@ -924,7 +919,7 @@ namespace DBADashServiceConfig
             {
                 if (fbd.ShowDialog() == DialogResult.OK)
                 {
-                    txtSource.Text  = fbd.SelectedPath;
+                    txtSource.Text = fbd.SelectedPath;
                 }
             }
             SetAvailableOptionsForSource();
@@ -961,7 +956,7 @@ namespace DBADashServiceConfig
                 frm.ShowDialog();
                 if (frm.DialogResult == DialogResult.OK)
                 {
-                   txtSource.Text= frm.AWSURL;
+                    txtSource.Text = frm.AWSURL;
                 }
             }
             SetAvailableOptionsForSource();
@@ -975,7 +970,7 @@ namespace DBADashServiceConfig
 
         private void LnkPermissions_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            var psi = new ProcessStartInfo("https://github.com/DavidWiseman/DBADash/blob/develop/Docs/Security.md") { UseShellExecute=true};
+            var psi = new ProcessStartInfo("https://github.com/DavidWiseman/DBADash/blob/develop/Docs/Security.md") { UseShellExecute = true };
             Process.Start(psi);
         }
 
@@ -1018,14 +1013,14 @@ namespace DBADashServiceConfig
             }
         }
 
-   
+
         private void Dgv_RowValidated(object sender, DataGridViewCellEventArgs e)
         {
             UpdateFromGrid();
         }
 
         private void UpdateFromGrid()
-        { 
+        {
             collectionConfig.SourceConnections = (List<DBADashSource>)((BindingSource)dgvConnections.DataSource).DataSource;
             txtJson.Text = collectionConfig.Serialize();
             SetConnectionCount();
@@ -1066,7 +1061,7 @@ namespace DBADashServiceConfig
                 }
                 else
                 {
-                    MessageBox.Show("Custom schedule configuration is only available for SQL connections","Schedule", MessageBoxButtons.OK,MessageBoxIcon.Warning);
+                    MessageBox.Show("Custom schedule configuration is only available for SQL connections", "Schedule", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 }
             }
             UpdateFromGrid();
@@ -1130,7 +1125,7 @@ namespace DBADashServiceConfig
 
         private void Dgv_RowsAdded(object sender, DataGridViewRowsAddedEventArgs e)
         {
-            for(int i =e.RowIndex;i<e.RowIndex + e.RowCount; i++)
+            for (int i = e.RowIndex; i < e.RowIndex + e.RowCount; i++)
             {
                 var src = (DBADashSource)dgvConnections.Rows[i].DataBoundItem;
                 dgvConnections.Rows[i].ReadOnly = src.SourceConnection.Type != ConnectionType.SQL;
@@ -1177,10 +1172,11 @@ namespace DBADashServiceConfig
             {
                 UninstallService();
             }
-            else { 
-                if(txtJson.Text!= originalJson)
+            else
+            {
+                if (txtJson.Text != originalJson)
                 {
-                    if(MessageBox.Show("Save changes to config", "Save", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+                    if (MessageBox.Show("Save changes to config", "Save", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
                     {
                         SaveChanges();
                     }
@@ -1210,11 +1206,11 @@ namespace DBADashServiceConfig
         {
             if (collectionConfig.DestinationConnection.Type == ConnectionType.SQL)
             {
-                CommonShared.ShowAbout(collectionConfig.DestinationConnection.ConnectionString, this,false);
+                CommonShared.ShowAbout(collectionConfig.DestinationConnection.ConnectionString, this, false);
             }
             else
             {
-                CommonShared.ShowAbout(this,false);
+                CommonShared.ShowAbout(this, false);
             }
         }
 
@@ -1227,7 +1223,7 @@ namespace DBADashServiceConfig
 
         private void NumIdentityCollectionThreshold_ValueChanged(object sender, EventArgs e)
         {
-            collectionConfig.IdentityCollectionThreshold =chkDefaultIdentityCollection.Checked ? null : (int)numIdentityCollectionThreshold.Value;
+            collectionConfig.IdentityCollectionThreshold = chkDefaultIdentityCollection.Checked ? null : (int)numIdentityCollectionThreshold.Value;
             txtJson.Text = collectionConfig.Serialize();
         }
     }

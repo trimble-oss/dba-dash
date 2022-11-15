@@ -1,12 +1,8 @@
 ﻿using Microsoft.Data.SqlClient;
 using System;
-using System.Collections.Generic;
-using System.ComponentModel;
 using System.Data;
 using System.Drawing;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace DBADashGUI.Checks
@@ -49,7 +45,7 @@ namespace DBADashGUI.Checks
                 new DataGridViewTextBoxColumn() { Name = "colName", HeaderText = "Name", DataPropertyName = "Name" },
                 new DataGridViewTextBoxColumn() { Name = "colCompany", HeaderText = "Company", DataPropertyName = "Company" },
                 new DataGridViewTextBoxColumn() { Name = "colDescription", HeaderText = "Description", DataPropertyName = "Description" },
-                new DataGridViewTextBoxColumn() { Name = "colStatus", HeaderText = "Status", DataPropertyName = "Status", ToolTipText="1=Critical, 2= Warning, 3 = N/A, 4 = OK" },
+                new DataGridViewTextBoxColumn() { Name = "colStatus", HeaderText = "Status", DataPropertyName = "Status", ToolTipText = "1=Critical, 2= Warning, 3 = N/A, 4 = OK" },
                 new DataGridViewTextBoxColumn() { Name = "colNotes", HeaderText = "Notes", DataPropertyName = "Notes" },
                 new DataGridViewCheckBoxColumn() { Name = "colIsSystem", HeaderText = "Is System", DataPropertyName = "IsSystem", ReadOnly = true }
                 );
@@ -75,7 +71,7 @@ namespace DBADashGUI.Checks
             }
         }
 
-        private static int AddOSLoadedModulesStatus(string Name,string Company,string Description,Int16 Status,string Notes)
+        private static int AddOSLoadedModulesStatus(string Name, string Company, string Description, Int16 Status, string Notes)
         {
             using (var cn = new SqlConnection(Common.ConnectionString))
             using (var cmd = new SqlCommand("dbo.OSLoadedModulesStatus_Add", cn) { CommandType = CommandType.StoredProcedure })
@@ -93,7 +89,7 @@ namespace DBADashGUI.Checks
             }
         }
 
-        private static void UpdateOSLoadedModulesStatus(int ID,string Name, string Company, string Description, Int16 Status, string Notes)
+        private static void UpdateOSLoadedModulesStatus(int ID, string Name, string Company, string Description, Int16 Status, string Notes)
         {
             using (var cn = new SqlConnection(Common.ConnectionString))
             using (var cmd = new SqlCommand("dbo.OSLoadedModulesStatus_Upd", cn) { CommandType = CommandType.StoredProcedure })
@@ -126,11 +122,11 @@ namespace DBADashGUI.Checks
                 var isSystem = Convert.ToBoolean(row.Cells["colIsSystem"].Value);
                 var status = (DBADashStatus.DBADashStatusEnum)Convert.ToInt32(row.Cells["colStatus"].Value == DBNull.Value ? 3 : row.Cells["colStatus"].Value);
                 row.DefaultCellStyle.BackColor = isSystem ? Color.Gray : Color.White;
-                row.Cells["colStatus"].SetStatusColor(status);   
+                row.Cells["colStatus"].SetStatusColor(status);
                 row.ReadOnly = isSystem;
             }
         }
-    
+
 
         /// <summary>
         /// Add default values when user is adding a new row.  % will match everything.
@@ -158,7 +154,7 @@ namespace DBADashGUI.Checks
                 try
                 {
                     int status = Convert.ToInt32(e.FormattedValue);
-                    if (!(status >= 1 && status <= 4))
+                    if (status is not (>= 1 and <= 4))
                     {
                         e.Cancel = true;
                         ShowStatusValidationError();
@@ -167,7 +163,7 @@ namespace DBADashGUI.Checks
                 }
                 catch
                 {
-                    e.Cancel=true;
+                    e.Cancel = true;
                     ShowStatusValidationError();
                     return;
                 }
@@ -228,7 +224,7 @@ namespace DBADashGUI.Checks
                 {
                     if (dtDeleted != null)
                     {
-                        foreach (int id in dtDeleted.Rows.Cast<DataRow>().Select(row => Convert.ToInt32(row["ID",DataRowVersion.Original])))
+                        foreach (int id in dtDeleted.Rows.Cast<DataRow>().Select(row => Convert.ToInt32(row["ID", DataRowVersion.Original])))
                         {
                             DeleteOSLoadedModulesStatus(id);
                         }
@@ -303,7 +299,8 @@ namespace DBADashGUI.Checks
         {
             if (HasChanges() && e.CloseReason == CloseReason.UserClosing)
             {
-                if (MessageBox.Show("You have unsaved changes.  Are you sure you want to exit?", "Exit", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.No){
+                if (MessageBox.Show("You have unsaved changes.  Are you sure you want to exit?", "Exit", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.No)
+                {
                     e.Cancel = true;
                 }
             }
@@ -311,7 +308,7 @@ namespace DBADashGUI.Checks
 
         private void Dgv_UserDeletingRow(object sender, DataGridViewRowCancelEventArgs e)
         {
-           if (Convert.ToBoolean(e.Row.Cells["colIsSystem"].Value))
+            if (Convert.ToBoolean(e.Row.Cells["colIsSystem"].Value))
             {
                 MessageBox.Show("Can't delete system row", "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }

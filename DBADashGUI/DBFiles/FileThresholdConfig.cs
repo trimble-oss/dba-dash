@@ -1,11 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace DBADashGUI.DBFiles
@@ -26,7 +19,7 @@ namespace DBADashGUI.DBFiles
         {
             get
             {
-                return DataSpaceID == -1 || DataSpaceID > 0;
+                return DataSpaceID is (-1) or > 0;
             }
         }
 
@@ -38,13 +31,13 @@ namespace DBADashGUI.DBFiles
             }
         }
 
-        private void bttnCancel_Click(object sender, EventArgs e)
+        private void BttnCancel_Click(object sender, EventArgs e)
         {
             this.DialogResult = DialogResult.Cancel;
             this.Close();
         }
 
-        private void bttnUpdate_Click(object sender, EventArgs e)
+        private void BttnUpdate_Click(object sender, EventArgs e)
         {
             if (IsDataConfig)
             {
@@ -59,7 +52,7 @@ namespace DBADashGUI.DBFiles
         }
 
         private void FileThresholdConfig_Load(object sender, EventArgs e)
-        {          
+        {
             cboLevel.Items.Add("Root");
             cboLevel.SelectedIndex = 0;
             if (InstanceID != -1)
@@ -81,21 +74,21 @@ namespace DBADashGUI.DBFiles
             {
                 tab1.SelectedTab = tabLog;
             }
-            loadThresholds();
+            LoadThresholds();
             isLoaded = true;
         }
 
-        private void loadThresholds()
+        private void LoadThresholds()
         {
             tab1.TabPages.Clear();
             int _instanceID = cboLevel.Text == "Root" ? -1 : InstanceID;
-            int _databaseID = cboLevel.Text == "Root" || cboLevel.Text == "Instance" ? -1 : DatabaseID;
-            int _dataSpaceID = cboLevel.Text == "Root" || cboLevel.Text == "Instance" || cboLevel.Text=="Database" ? -1 : DataSpaceID;
+            int _databaseID = cboLevel.Text is "Root" or "Instance" ? -1 : DatabaseID;
+            int _dataSpaceID = cboLevel.Text is "Root" or "Instance" or "Database" ? -1 : DataSpaceID;
 
             tab1.TabPages.Add(tabData);
-            var dataThreshold = FileThreshold.GetFileThreshold(_instanceID,_databaseID,_dataSpaceID);
+            var dataThreshold = FileThreshold.GetFileThreshold(_instanceID, _databaseID, _dataSpaceID);
             dataConfig.FileThreshold = dataThreshold;
-            
+
             if (IsLogConfig)
             {
                 var logThreshold = FileThreshold.GetFileThreshold(_instanceID, _databaseID, 0);
@@ -104,11 +97,11 @@ namespace DBADashGUI.DBFiles
             }
         }
 
-        private void cboLevel_SelectedIndexChanged(object sender, EventArgs e)
+        private void CboLevel_SelectedIndexChanged(object sender, EventArgs e)
         {
             if (isLoaded)
             {
-                loadThresholds();
+                LoadThresholds();
             }
         }
     }

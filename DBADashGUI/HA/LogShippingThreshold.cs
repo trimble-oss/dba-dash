@@ -1,9 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using Microsoft.Data.SqlClient;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Microsoft.Data.SqlClient;
+using System;
 using System.Data;
 
 namespace DBADashGUI.LogShipping
@@ -20,16 +16,16 @@ namespace DBADashGUI.LogShipping
 
         public bool Inherited { get; set; }
 
-        public static LogShippingThreshold GetLogShippingThreshold(Int32 InstanceID,Int32 DatabaseID)
+        public static LogShippingThreshold GetLogShippingThreshold(Int32 InstanceID, Int32 DatabaseID)
         {
-            LogShippingThreshold threshold = new LogShippingThreshold
+            LogShippingThreshold threshold = new()
             {
                 InstanceID = InstanceID,
                 DatabaseID = DatabaseID
             };
 
-            using (var cn = new SqlConnection(Common.ConnectionString))           
-            using (SqlCommand cmd = new SqlCommand("dbo.LogRestoreThresholds_Get", cn) { CommandType = CommandType.StoredProcedure })
+            using (var cn = new SqlConnection(Common.ConnectionString))
+            using (SqlCommand cmd = new("dbo.LogRestoreThresholds_Get", cn) { CommandType = CommandType.StoredProcedure })
             {
                 cn.Open();
 
@@ -60,14 +56,14 @@ namespace DBADashGUI.LogShipping
                     threshold.Inherited = true;
                 }
             }
-            
+
             return threshold;
         }
 
         public void Save()
         {
-            using (var cn = new SqlConnection(Common.ConnectionString))         
-            using (SqlCommand cmd = new SqlCommand("dbo.LogRestoreThresholds_Upd", cn) { CommandType = CommandType.StoredProcedure })
+            using (var cn = new SqlConnection(Common.ConnectionString))
+            using (SqlCommand cmd = new("dbo.LogRestoreThresholds_Upd", cn) { CommandType = CommandType.StoredProcedure })
             {
                 cn.Open();
                 cmd.Parameters.AddWithValue("InstanceID", InstanceID);
@@ -79,7 +75,7 @@ namespace DBADashGUI.LogShipping
                 cmd.Parameters.AddWithValue("Inherit", Inherited);
                 cmd.Parameters.AddWithValue("NewDatabaseExcludePeriodMin", NewDatabaseExcludePeriod);
                 cmd.ExecuteNonQuery();
-            }           
+            }
         }
     }
 }

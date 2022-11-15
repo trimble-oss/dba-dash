@@ -1,6 +1,4 @@
-﻿using DBADashGUI;
-using System;
-using System.ComponentModel;
+﻿using System;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Windows.Forms;
@@ -19,7 +17,7 @@ namespace CustomProgressControl
             CellTemplate = new DataGridViewProgressBarCell();
 
             // Set the default style padding
-            Padding pad = new Padding(
+            Padding pad = new(
               DataGridViewProgressBarCell.STANDARD_HORIZONTAL_MARGIN,
               DataGridViewProgressBarCell.STANDARD_VERTICAL_MARGIN,
               DataGridViewProgressBarCell.STANDARD_HORIZONTAL_MARGIN,
@@ -76,14 +74,11 @@ namespace CustomProgressControl
             int rightMargin = STANDARD_HORIZONTAL_MARGIN;
             int topMargin = STANDARD_VERTICAL_MARGIN;
             int bottomMargin = STANDARD_VERTICAL_MARGIN;
-            int imgHeight = 1;
-            int imgWidth = 1;
-            int progressWidth = 1;
-            PointF fontPlacement = new PointF(0, 0);
+            PointF fontPlacement = new(0, 0);
 
             int progressVal;
             if (value != null)
-                progressVal = value==DBNull.Value ? 0 : Convert.ToInt32(value);
+                progressVal = value == DBNull.Value ? 0 : Convert.ToInt32(value);
             else
                 progressVal = 0;
 
@@ -93,15 +88,15 @@ namespace CustomProgressControl
             // Get margins from the style
             if (null != cellStyle)
             {
-                leftMargin = cellStyle.Padding.Left+1;
-                rightMargin = cellStyle.Padding.Right+1;
-                topMargin = cellStyle.Padding.Top+1;
-                bottomMargin = cellStyle.Padding.Bottom+1;
+                leftMargin = cellStyle.Padding.Left + 1;
+                rightMargin = cellStyle.Padding.Right + 1;
+                topMargin = cellStyle.Padding.Top + 1;
+                bottomMargin = cellStyle.Padding.Bottom + 1;
             }
 
             // Calculate the sizes
-            imgHeight = cellBounds.Bottom - cellBounds.Top - (topMargin + bottomMargin);
-            imgWidth = cellBounds.Right - cellBounds.Left - (leftMargin + rightMargin);
+            int imgHeight = cellBounds.Bottom - cellBounds.Top - (topMargin + bottomMargin);
+            int imgWidth = cellBounds.Right - cellBounds.Left - (leftMargin + rightMargin);
             if (imgWidth <= 0)
             {
                 imgWidth = 1;
@@ -112,7 +107,7 @@ namespace CustomProgressControl
             }
 
             // Calculate the progress
-            progressWidth = (imgWidth * (progressVal) / 100);
+            int progressWidth = imgWidth * progressVal / 100;
             if (progressWidth <= 0)
             {
                 if (progressVal > 0)
@@ -128,7 +123,7 @@ namespace CustomProgressControl
             // Calculate the font
             if (null != formattedValue)
             {
-                SizeF availArea = new SizeF(imgWidth, imgHeight);
+                SizeF availArea = new(imgWidth, imgHeight);
                 SizeF fontSize = g.MeasureString(formattedValue.ToString(), cellStyle.Font, availArea);
 
                 #region [Font Placement Calc]
@@ -200,8 +195,8 @@ namespace CustomProgressControl
             }
 
             //Draw the background
-           Rectangle backRectangle = new Rectangle(cellBounds.X + leftMargin, cellBounds.Y + topMargin, imgWidth, imgHeight);
-            using (SolidBrush backgroundBrush = new SolidBrush(cellStyle.BackColor))
+            Rectangle backRectangle = new(cellBounds.X + leftMargin, cellBounds.Y + topMargin, imgWidth, imgHeight);
+            using (SolidBrush backgroundBrush = new(cellStyle.BackColor))
             {
                 g.FillRectangle(backgroundBrush, backRectangle);
             }
@@ -209,8 +204,8 @@ namespace CustomProgressControl
             // Draw the progress bar
             if (progressWidth > 0)
             {
-                Rectangle progressRectangle = new Rectangle(cellBounds.X + leftMargin, cellBounds.Y + topMargin, progressWidth, imgHeight);
-                using (LinearGradientBrush progressGradientBrush = new LinearGradientBrush(progressRectangle, ProgressBarColorFrom, ProgressBarColorTo, LinearGradientMode.Vertical))
+                Rectangle progressRectangle = new(cellBounds.X + leftMargin, cellBounds.Y + topMargin, progressWidth, imgHeight);
+                using (LinearGradientBrush progressGradientBrush = new(progressRectangle, ProgressBarColorFrom, ProgressBarColorTo, LinearGradientMode.Vertical))
                 {
                     progressGradientBrush.SetBlendTriangularShape((float).5);
                     g.FillRectangle(progressGradientBrush, progressRectangle);
@@ -220,7 +215,7 @@ namespace CustomProgressControl
             // Draw the text
             if (null != formattedValue && null != cellStyle)
             {
-                using (SolidBrush fontBrush = new SolidBrush(cellStyle.ForeColor))
+                using (SolidBrush fontBrush = new(cellStyle.ForeColor))
                 {
                     g.DrawString(formattedValue.ToString(), cellStyle.Font, fontBrush, fontPlacement);
                 }

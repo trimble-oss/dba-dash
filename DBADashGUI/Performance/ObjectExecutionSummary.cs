@@ -1,13 +1,10 @@
-﻿using System;
+﻿using Microsoft.Data.SqlClient;
+using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Drawing;
 using System.Data;
+using System.Drawing;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
-using Microsoft.Data.SqlClient;
 
 namespace DBADashGUI.Performance
 {
@@ -23,15 +20,16 @@ namespace DBADashGUI.Performance
         public Int32 DatabaseID { get; set; }
         public Int64 ObjectID { get; set; }
 
-        public string Types { 
+        public string Types
+        {
             get
             {
                 string types = "";
-                foreach(ToolStripMenuItem mnu in tsType.DropDownItems)
+                foreach (ToolStripMenuItem mnu in tsType.DropDownItems)
                 {
                     if (mnu.Checked)
                     {
-                        types += (types.Length>0 ? "," : "") + mnu.Tag;
+                        types += (types.Length > 0 ? "," : "") + mnu.Tag;
                     }
                 }
                 return types;
@@ -41,19 +39,20 @@ namespace DBADashGUI.Performance
                 var types = value.Split(',');
                 foreach (ToolStripMenuItem mnu in tsType.DropDownItems)
                 {
-                   mnu.Checked = types.Contains(mnu.Tag);
+                    mnu.Checked = types.Contains(mnu.Tag);
                 }
             }
         }
 
         private Int32 compareOffset = 0;
-        private DateTime _compareTo=DateTime.MinValue;
-        private DateTime _compareFrom=DateTime.MinValue;
+        private DateTime _compareTo = DateTime.MinValue;
+        private DateTime _compareFrom = DateTime.MinValue;
         private DataTable dt;
 
         private DateTime CompareTo
         {
-            get {
+            get
+            {
                 var toDate = DateRange.ToUTC;
                 if (compareOffset > 0)
                 {
@@ -111,7 +110,8 @@ namespace DBADashGUI.Performance
 
         private void TsColumn_Click(object sender, EventArgs e)
         {
-            if (sender.GetType() == typeof(ToolStripMenuItem)) {
+            if (sender.GetType() == typeof(ToolStripMenuItem))
+            {
                 var mnu = (ToolStripMenuItem)sender;
                 foreach (string name in new string[] { mnu.Text, "Compare " + mnu.Text })
                 {
@@ -146,12 +146,12 @@ namespace DBADashGUI.Performance
                             DisplayIndex = displayIdx,
                             DefaultCellStyle = col.DefaultCellStyle.Clone()
                         };
-                        compareCol.DefaultCellStyle.BackColor = Color.BlanchedAlmond;         
+                        compareCol.DefaultCellStyle.BackColor = Color.BlanchedAlmond;
                         _cols.Add(compareCol);
                         displayIdx += 1;
-                        if (col.DataPropertyName== "avg_duration_sec" || col.DataPropertyName == "avg_cpu_sec")
+                        if (col.DataPropertyName is "avg_duration_sec" or "avg_cpu_sec")
                         {
-                            var diffCol = new DataGridViewTextBoxColumn() { Name = "Diff " + col.Name.Replace("sec","%"), DataPropertyName = "diff_" + col.DataPropertyName.Replace("_sec","_pct"), DisplayIndex = displayIdx };
+                            var diffCol = new DataGridViewTextBoxColumn() { Name = "Diff " + col.Name.Replace("sec", "%"), DataPropertyName = "diff_" + col.DataPropertyName.Replace("_sec", "_pct"), DisplayIndex = displayIdx };
                             diffCol.DefaultCellStyle.Format = "P2";
                             diffCol.DefaultCellStyle.BackColor = Color.AliceBlue;
                             _cols.Add(diffCol);
@@ -165,7 +165,7 @@ namespace DBADashGUI.Performance
         }
 
 
-       public void RefreshData()
+        public void RefreshData()
         {
             if (objectExecutionLineChart1.InstanceID != InstanceID)
             {
@@ -189,14 +189,14 @@ namespace DBADashGUI.Performance
             {
                 RefreshChart();
             }
-           
+
         }
 
         private DataTable GetObjectExecutionStatsSummary()
         {
-            using(var cn = new SqlConnection(Common.ConnectionString))
-            using(var cmd = new SqlCommand("dbo.ObjectExecutionStatsSummary_Get", cn) { CommandType = CommandType.StoredProcedure, CommandTimeout = Properties.Settings.Default.CommandTimeout })
-            using(var da = new SqlDataAdapter(cmd))
+            using (var cn = new SqlConnection(Common.ConnectionString))
+            using (var cmd = new SqlCommand("dbo.ObjectExecutionStatsSummary_Get", cn) { CommandType = CommandType.StoredProcedure, CommandTimeout = Properties.Settings.Default.CommandTimeout })
+            using (var da = new SqlDataAdapter(cmd))
             {
                 cn.Open();
                 if (InstanceID > 0)
@@ -251,7 +251,7 @@ namespace DBADashGUI.Performance
             if (string.IsNullOrEmpty(txtSearch.Text.Trim()))
             {
                 dgv.DataSource = new DataView(dt, null, "total_duration_sec DESC", DataViewRowState.CurrentRows);
-                lblSearch.Font= new Font(lblSearch.Font, FontStyle.Regular);
+                lblSearch.Font = new Font(lblSearch.Font, FontStyle.Regular);
             }
             else
             {
@@ -260,7 +260,7 @@ namespace DBADashGUI.Performance
                 {
                     dgv.DataSource = new DataView(dt, string.Format("SchemaName LIKE '%{0}%' OR ObjectName LIKE '%{0}%'", txtSearch.Text.Replace("'", "''")), "total_duration_sec DESC", DataViewRowState.CurrentRows);
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     MessageBox.Show(ex.Message, "Filter Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     dgv.DataSource = new DataView(dt, null, "total_duration_sec DESC", DataViewRowState.CurrentRows);
@@ -290,7 +290,7 @@ namespace DBADashGUI.Performance
 
         private void CheckOffset()
         {
-            tsNoCompare.Checked = compareOffset == 0;          
+            tsNoCompare.Checked = compareOffset == 0;
             foreach (ToolStripItem itm in tsCompare.DropDownItems)
             {
                 if (itm.GetType() == typeof(ToolStripMenuItem))
@@ -314,8 +314,8 @@ namespace DBADashGUI.Performance
         {
             var frm = new CustomTimePicker
             {
-                FromDate = CompareFrom > DateTime.MinValue && CompareFrom<DateTime.MaxValue ? CompareFrom.ToLocalTime() : DateRange.FromUTC.ToLocalTime(),
-                ToDate = CompareTo > DateTime.MinValue && CompareTo<DateTime.MaxValue ? CompareTo.ToLocalTime() : DateRange.ToUTC.ToLocalTime()
+                FromDate = CompareFrom > DateTime.MinValue && CompareFrom < DateTime.MaxValue ? CompareFrom.ToLocalTime() : DateRange.FromUTC.ToLocalTime(),
+                ToDate = CompareTo > DateTime.MinValue && CompareTo < DateTime.MaxValue ? CompareTo.ToLocalTime() : DateRange.ToUTC.ToLocalTime()
             };
             frm.ShowDialog();
             if (frm.DialogResult == DialogResult.OK)
@@ -331,22 +331,23 @@ namespace DBADashGUI.Performance
 
         private void TsType_Click(object sender, EventArgs e)
         {
-            int checkCount=0;
-            foreach(ToolStripMenuItem itm in tsType.DropDownItems)
+            int checkCount = 0;
+            foreach (ToolStripMenuItem itm in tsType.DropDownItems)
             {
-                itm.Font = new Font(itm.Font, itm.Checked ? FontStyle.Bold: FontStyle.Regular);
+                itm.Font = new Font(itm.Font, itm.Checked ? FontStyle.Bold : FontStyle.Regular);
                 if (itm.Checked)
                 {
                     checkCount++;
                 }
             }
-            tsType.Font = new Font(tsType.Font, checkCount>0 ? FontStyle.Bold : FontStyle.Regular);
+            tsType.Font = new Font(tsType.Font, checkCount > 0 ? FontStyle.Bold : FontStyle.Regular);
             RefreshData();
         }
 
         private void Dgv_RowsAdded(object sender, DataGridViewRowsAddedEventArgs e)
         {
-            if (dgv.Columns.Contains("Diff Avg Duration (%)")){
+            if (dgv.Columns.Contains("Diff Avg Duration (%)"))
+            {
                 for (Int32 idx = e.RowIndex; idx < e.RowIndex + e.RowCount; idx += 1)
                 {
                     var r = dgv.Rows[idx];
@@ -365,14 +366,15 @@ namespace DBADashGUI.Performance
             {
                 return DashColors.Red;
             }
-            else if (value>0.3){
+            else if (value > 0.3)
+            {
                 return DashColors.RedLight;
             }
             else if (value < -0.5)
             {
                 return DashColors.Success;
             }
-            else if (value<-0.3)
+            else if (value < -0.3)
             {
                 return DashColors.GreenLight;
             }
@@ -400,7 +402,7 @@ namespace DBADashGUI.Performance
             objectExecutionLineChart1.RefreshData();
         }
 
-        private void RefreshChart(Int64 objectID,string title)
+        private void RefreshChart(Int64 objectID, string title)
         {
 
             splitContainer1.Panel1Collapsed = false;
@@ -422,10 +424,10 @@ namespace DBADashGUI.Performance
         {
             if (e.RowIndex >= 0)
             {
-                if(dgv.Columns[e.ColumnIndex].Name == "Name")
-                {                 
+                if (dgv.Columns[e.ColumnIndex].Name == "Name")
+                {
                     var row = (DataRowView)dgv.Rows[e.RowIndex].DataBoundItem;
-                    RefreshChart((Int64)row["ObjectID"], (string)row["ObjectName"]);               
+                    RefreshChart((Int64)row["ObjectID"], (string)row["ObjectName"]);
                 }
             }
         }
@@ -435,7 +437,7 @@ namespace DBADashGUI.Performance
             Common.PromptSaveDataGridView(ref dgv);
         }
 
-  
+
         private void TxtSearch_TextChanged(object sender, EventArgs e)
         {
             tmrSearch.Enabled = true;
