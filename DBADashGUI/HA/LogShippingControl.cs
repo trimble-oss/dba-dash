@@ -1,13 +1,9 @@
-﻿using System;
+﻿using Microsoft.Data.SqlClient;
+using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Drawing;
 using System.Data;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Drawing;
 using System.Windows.Forms;
-using Microsoft.Data.SqlClient;
 
 namespace DBADashGUI.LogShipping
 {
@@ -17,16 +13,19 @@ namespace DBADashGUI.LogShipping
         private List<int> instanceIDs;
         private List<int> cachedInstanceIDs;
 
-        public List<int> InstanceIDs {
-            get {
+        public List<int> InstanceIDs
+        {
+            get
+            {
                 return instanceIDs;
             }
-            set {
+            set
+            {
                 cachedInstanceIDs = value;
                 instanceIDs = value;
             }
         }
-    
+
 
         public bool IncludeCritical
         {
@@ -76,33 +75,33 @@ namespace DBADashGUI.LogShipping
 
         public bool CanNavigateBack { get => tsBack.Enabled; }
 
-        private void refreshSummary()
+        private void RefreshSummary()
         {
             using (var cn = new SqlConnection(Common.ConnectionString))
             using (var cmd = new SqlCommand("dbo.LogShippingSummary_Get", cn) { CommandType = CommandType.StoredProcedure })
             using (var da = new SqlDataAdapter(cmd))
             {
                 cn.Open();
-                cmd.Parameters.AddWithValue("InstanceIDs",InstanceIDs.AsDataTable());
-                
-                DataTable dt = new DataTable();
+                cmd.Parameters.AddWithValue("InstanceIDs", InstanceIDs.AsDataTable());
+
+                DataTable dt = new();
                 da.Fill(dt);
                 Common.ConvertUTCToLocal(ref dt);
                 dgvSummary.AutoGenerateColumns = false;
                 if (dgvSummary.Columns.Count == 0)
                 {
-                    dgvSummary.Columns.Add(new DataGridViewLinkColumn() { HeaderText = "Instance", DataPropertyName = "InstanceDisplayName", SortMode= DataGridViewColumnSortMode.Automatic,LinkColor=DashColors.LinkColor, Frozen = Common.FreezeKeyColumn});
-                    dgvSummary.Columns.Add(new DataGridViewTextBoxColumn {Name="Status", HeaderText = "Status", DataPropertyName = "StatusDescription" });
+                    dgvSummary.Columns.Add(new DataGridViewLinkColumn() { HeaderText = "Instance", DataPropertyName = "InstanceDisplayName", SortMode = DataGridViewColumnSortMode.Automatic, LinkColor = DashColors.LinkColor, Frozen = Common.FreezeKeyColumn });
+                    dgvSummary.Columns.Add(new DataGridViewTextBoxColumn { Name = "Status", HeaderText = "Status", DataPropertyName = "StatusDescription" });
                     dgvSummary.Columns.Add(new DataGridViewTextBoxColumn { HeaderText = "Log Shipped DBs", DataPropertyName = "LogshippedDBCount" });
                     dgvSummary.Columns.Add(new DataGridViewTextBoxColumn { HeaderText = "Warning", DataPropertyName = "WarningCount" });
                     dgvSummary.Columns.Add(new DataGridViewTextBoxColumn { HeaderText = "Critical", DataPropertyName = "CriticalCount" });
                     dgvSummary.Columns.Add(new DataGridViewTextBoxColumn { HeaderText = "Max Total Time Behind", DataPropertyName = "MaxTotalTimeBehind" });
                     dgvSummary.Columns.Add(new DataGridViewTextBoxColumn { HeaderText = "Max Latency of Last", DataPropertyName = "MaxLatencyOfLast" });
                     dgvSummary.Columns.Add(new DataGridViewTextBoxColumn { HeaderText = "Max Time Since Last", DataPropertyName = "TimeSinceLast" });
-                    dgvSummary.Columns.Add(new DataGridViewTextBoxColumn { Name="SnapshotAge",HeaderText = "Snapshot Age", DataPropertyName = "SnapshotAge" });
+                    dgvSummary.Columns.Add(new DataGridViewTextBoxColumn { Name = "SnapshotAge", HeaderText = "Snapshot Age", DataPropertyName = "SnapshotAge" });
                     dgvSummary.Columns.Add(new DataGridViewTextBoxColumn { HeaderText = "Backup Date of Oldest File", DataPropertyName = "MinDateOfLastBackupRestored" });
                     dgvSummary.Columns.Add(new DataGridViewTextBoxColumn { HeaderText = "Restore Date of Oldest File", DataPropertyName = "MinLastRestoreCompleted" });
-                    dgvSummary.Columns.Add(new DataGridViewLinkColumn() {Name="Configure", HeaderText = "Configure",  Text="Configure", UseColumnTextForLinkValue=true, LinkColor = DashColors.LinkColor});
+                    dgvSummary.Columns.Add(new DataGridViewLinkColumn() { Name = "Configure", HeaderText = "Configure", Text = "Configure", UseColumnTextForLinkValue = true, LinkColor = DashColors.LinkColor });
                 }
                 dgvSummary.DataSource = new DataView(dt);
                 dgvSummary.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
@@ -112,7 +111,7 @@ namespace DBADashGUI.LogShipping
         public void RefreshData()
         {
             tsBack.Enabled = (cachedInstanceIDs.Count > 1 && instanceIDs.Count == 1);
-            refreshSummary();
+            RefreshSummary();
             using (var cn = new SqlConnection(Common.ConnectionString))
             using (var cmd = new SqlCommand("dbo.LogShipping_Get", cn) { CommandType = CommandType.StoredProcedure })
             using (var da = new SqlDataAdapter(cmd))
@@ -123,10 +122,10 @@ namespace DBADashGUI.LogShipping
                 cmd.Parameters.AddWithValue("IncludeWarning", IncludeWarning);
                 cmd.Parameters.AddWithValue("IncludeNA", IncludeNA);
                 cmd.Parameters.AddWithValue("IncludeOK", IncludeOK);
-                
-                DataTable dt = new DataTable();
+
+                DataTable dt = new();
                 da.Fill(dt);
-				Common.ConvertUTCToLocal(ref dt);
+                Common.ConvertUTCToLocal(ref dt);
                 dt.Columns["restore_date_utc"].ColumnName = "restore_date";
                 dt.Columns["backup_start_date_utc"].ColumnName = "backup_start_date";
                 dgvLogShipping.AutoGenerateColumns = false;
@@ -134,7 +133,7 @@ namespace DBADashGUI.LogShipping
                 dgvLogShipping.DataSource = new DataView(dt);
                 dgvLogShipping.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
             }
-            
+
             configureInstanceThresholdsToolStripMenuItem.Enabled = InstanceIDs.Count == 1;
         }
 
@@ -145,13 +144,13 @@ namespace DBADashGUI.LogShipping
             Common.StyleGrid(ref dgvLogShipping);
         }
 
-        private void tsFilter_Click(object sender, EventArgs e)
+        private void TsFilter_Click(object sender, EventArgs e)
         {
             RefreshData();
         }
 
 
-        private void dgvLogShipping_CellContentClick(object sender, DataGridViewCellEventArgs e)
+        private void DgvLogShipping_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
             if (e.RowIndex >= 0)
             {
@@ -163,7 +162,7 @@ namespace DBADashGUI.LogShipping
             }
         }
 
-        public void ConfigureThresholds(Int32 InstanceID,Int32 DatabaseID)
+        public void ConfigureThresholds(Int32 InstanceID, Int32 DatabaseID)
         {
             var frm = new LogShippingThresholdsConfig
             {
@@ -171,13 +170,13 @@ namespace DBADashGUI.LogShipping
                 DatabaseID = DatabaseID
             };
             frm.ShowDialog();
-            if(frm.DialogResult == DialogResult.OK)
+            if (frm.DialogResult == DialogResult.OK)
             {
                 RefreshData();
             }
         }
 
-        private void configureInstanceThresholdsToolStripMenuItem_Click(object sender, EventArgs e)
+        private void ConfigureInstanceThresholdsToolStripMenuItem_Click(object sender, EventArgs e)
         {
             if (InstanceIDs.Count == 1)
             {
@@ -185,12 +184,12 @@ namespace DBADashGUI.LogShipping
             }
         }
 
-        private void configureRootThresholdsToolStripMenuItem_Click(object sender, EventArgs e)
+        private void ConfigureRootThresholdsToolStripMenuItem_Click(object sender, EventArgs e)
         {
             ConfigureThresholds(-1, -1);
         }
 
-        private void dgvLogShipping_RowsAdded(object sender, DataGridViewRowsAddedEventArgs e)
+        private void DgvLogShipping_RowsAdded(object sender, DataGridViewRowsAddedEventArgs e)
         {
             for (Int32 idx = e.RowIndex; idx < e.RowIndex + e.RowCount; idx += 1)
             {
@@ -210,32 +209,32 @@ namespace DBADashGUI.LogShipping
             }
         }
 
-        private void tsCopy_Click(object sender, EventArgs e)
+        private void TsCopy_Click(object sender, EventArgs e)
         {
             dgvSummary.Columns["Configure"].Visible = false;
             Common.CopyDataGridViewToClipboard(dgvSummary);
             dgvSummary.Columns["Configure"].Visible = true;
         }
 
-        private void tsRefresh_Click(object sender, EventArgs e)
+        private void TsRefresh_Click(object sender, EventArgs e)
         {
             RefreshData();
         }
 
-        private void tsExcel_Click(object sender, EventArgs e)
+        private void TsExcel_Click(object sender, EventArgs e)
         {
             dgvSummary.Columns["Configure"].Visible = false;
             Common.PromptSaveDataGridView(ref dgvSummary);
-            dgvSummary.Columns["Configure"].Visible = true;             
+            dgvSummary.Columns["Configure"].Visible = true;
         }
 
-        private void dgvSummary_CellContentClick(object sender, DataGridViewCellEventArgs e)
+        private void DgvSummary_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
-            if(e.RowIndex>=0)
+            if (e.RowIndex >= 0)
             {
                 var r = (DataRowView)dgvSummary.Rows[e.RowIndex].DataBoundItem;
                 if (e.ColumnIndex == 0)
-                {                   
+                {
                     instanceIDs = new List<int> { (int)r["InstanceID"] };
                     IncludeCritical = true;
                     IncludeNA = true;
@@ -248,10 +247,10 @@ namespace DBADashGUI.LogShipping
                     ConfigureThresholds((Int32)r["InstanceID"], -1);
                 }
             }
-         
+
         }
 
-        private void tsBack_Click(object sender, EventArgs e)
+        private void TsBack_Click(object sender, EventArgs e)
         {
             NavigateBack();
         }
@@ -274,7 +273,7 @@ namespace DBADashGUI.LogShipping
             }
         }
 
-        private void dgvSummary_RowsAdded(object sender, DataGridViewRowsAddedEventArgs e)
+        private void DgvSummary_RowsAdded(object sender, DataGridViewRowsAddedEventArgs e)
         {
             for (Int32 idx = e.RowIndex; idx < e.RowIndex + e.RowCount; idx += 1)
             {
@@ -291,18 +290,18 @@ namespace DBADashGUI.LogShipping
                 {
                     dgvSummary.Rows[idx].Cells["Configure"].Style.Font = new Font(dgvSummary.Font, FontStyle.Regular);
                 }
-                    
+
             }
         }
 
-        private void tsCopyDetail_Click(object sender, EventArgs e)
+        private void TsCopyDetail_Click(object sender, EventArgs e)
         {
             Configure.Visible = false;
             Common.CopyDataGridViewToClipboard(dgvLogShipping);
             Configure.Visible = true;
         }
 
-        private void tsExportExcelDetail_Click(object sender, EventArgs e)
+        private void TsExportExcelDetail_Click(object sender, EventArgs e)
         {
             Configure.Visible = false;
             Common.PromptSaveDataGridView(ref dgvLogShipping);

@@ -96,7 +96,7 @@
             this.chkDefault.TabIndex = 5;
             this.chkDefault.Text = "Default";
             this.chkDefault.UseVisualStyleBackColor = true;
-            this.chkDefault.CheckedChanged += new System.EventHandler(this.chkDefault_CheckedChanged);
+            this.chkDefault.CheckedChanged += new System.EventHandler(this.ChkDefault_CheckedChanged);
             // 
             // bttnSave
             // 
@@ -108,7 +108,7 @@
             this.bttnSave.TabIndex = 6;
             this.bttnSave.Text = "&Save";
             this.bttnSave.UseVisualStyleBackColor = false;
-            this.bttnSave.Click += new System.EventHandler(this.bttnSave_Click);
+            this.bttnSave.Click += new System.EventHandler(this.BttnSave_Click);
             // 
             // bttnCancel
             // 
@@ -120,7 +120,7 @@
             this.bttnCancel.TabIndex = 7;
             this.bttnCancel.Text = "&Cancel";
             this.bttnCancel.UseVisualStyleBackColor = false;
-            this.bttnCancel.Click += new System.EventHandler(this.bttnCancel_Click);
+            this.bttnCancel.Click += new System.EventHandler(this.BttnCancel_Click);
             // 
             // SaveViewPrompt
             // 

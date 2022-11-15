@@ -81,7 +81,7 @@
             this.tsUp.Size = new System.Drawing.Size(29, 24);
             this.tsUp.Text = "Move Up";
             this.tsUp.Visible = false;
-            this.tsUp.Click += new System.EventHandler(this.tsUp_Click);
+            this.tsUp.Click += new System.EventHandler(this.TsUp_Click);
             // 
             // lblBlocking
             // 

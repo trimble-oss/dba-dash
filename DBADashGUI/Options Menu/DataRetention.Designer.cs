@@ -67,7 +67,7 @@
             this.dgv.RowHeadersWidth = 51;
             this.dgv.Size = new System.Drawing.Size(1028, 532);
             this.dgv.TabIndex = 0;
-            this.dgv.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgv_CellContentClick);
+            this.dgv.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.Dgv_CellContentClick);
             // 
             // colSchema
             // 
@@ -149,7 +149,7 @@
             this.tsRefresh.Name = "tsRefresh";
             this.tsRefresh.Size = new System.Drawing.Size(29, 24);
             this.tsRefresh.Text = "Refresh";
-            this.tsRefresh.Click += new System.EventHandler(this.tsRefresh_Click);
+            this.tsRefresh.Click += new System.EventHandler(this.TsRefresh_Click);
             // 
             // tsCopy
             // 
@@ -159,7 +159,7 @@
             this.tsCopy.Name = "tsCopy";
             this.tsCopy.Size = new System.Drawing.Size(29, 24);
             this.tsCopy.Text = "Copy";
-            this.tsCopy.Click += new System.EventHandler(this.tsCopy_Click);
+            this.tsCopy.Click += new System.EventHandler(this.TsCopy_Click);
             // 
             // toolStripDropDownButton1
             // 
@@ -178,7 +178,7 @@
             this.showAllTablesToolStripMenuItem.Name = "showAllTablesToolStripMenuItem";
             this.showAllTablesToolStripMenuItem.Size = new System.Drawing.Size(195, 26);
             this.showAllTablesToolStripMenuItem.Text = "Show All Tables";
-            this.showAllTablesToolStripMenuItem.Click += new System.EventHandler(this.showAllTablesToolStripMenuItem_Click);
+            this.showAllTablesToolStripMenuItem.Click += new System.EventHandler(this.ShowAllTablesToolStripMenuItem_Click);
             // 
             // tsPurge
             // 
@@ -189,7 +189,7 @@
             this.tsPurge.Name = "tsPurge";
             this.tsPurge.Size = new System.Drawing.Size(29, 24);
             this.tsPurge.Text = "Run Cleanup";
-            this.tsPurge.Click += new System.EventHandler(this.tsPurge_Click);
+            this.tsPurge.Click += new System.EventHandler(this.TsPurge_Click);
             // 
             // DataRetention
             // 

@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using static DBADashGUI.Performance.IMetric;
-
-namespace DBADashGUI.Performance
+﻿namespace DBADashGUI.Performance
 {
 
     /// <summary>
@@ -34,9 +27,9 @@ namespace DBADashGUI.Performance
             None
         }
 
-        public MetricTypes MetricType { get;}
+        public MetricTypes MetricType { get; }
 
-        
+
         /// <summary>
         /// Create the associated chart control
         /// </summary>

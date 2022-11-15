@@ -1,14 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
+﻿using Humanizer;
 using Microsoft.Data.SqlClient;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System;
+using System.Collections.Generic;
+using System.Data;
 using System.Windows.Forms;
-using Humanizer;
 
 namespace DBADashGUI.Changes
 {
@@ -26,11 +21,11 @@ namespace DBADashGUI.Changes
             var dt = GetAzureDBResourceGovernance(InstanceIDs);
             dgv.DataSource = dt;
             dgv.Columns["InstanceID"].Visible = false;
-            foreach(DataGridViewColumn col in dgv.Columns)
+            foreach (DataGridViewColumn col in dgv.Columns)
             {
                 col.HeaderText = col.HeaderText.Titleize();
             }
-            if (InstanceIDs.Count==1 & dgv.Rows.Count==1)
+            if (InstanceIDs.Count == 1 & dgv.Rows.Count == 1)
             {
                 Common.PivotDGV(ref dgv);
             }
@@ -39,9 +34,9 @@ namespace DBADashGUI.Changes
 
         public static DataTable GetAzureDBResourceGovernance(List<Int32> instanceIDs)
         {
-            using(var cn = new SqlConnection(Common.ConnectionString))
-            using(var cmd = new SqlCommand("dbo.AzureDBResourceGovernance_Get", cn) { CommandType = CommandType.StoredProcedure })
-            using(var da = new SqlDataAdapter(cmd))
+            using (var cn = new SqlConnection(Common.ConnectionString))
+            using (var cmd = new SqlCommand("dbo.AzureDBResourceGovernance_Get", cn) { CommandType = CommandType.StoredProcedure })
+            using (var da = new SqlDataAdapter(cmd))
             {
                 var dt = new DataTable();
                 cmd.Parameters.AddWithValue("InstanceIDs", string.Join(",", instanceIDs));
@@ -50,22 +45,22 @@ namespace DBADashGUI.Changes
             }
         }
 
-        private void tsRefresh_Click(object sender, EventArgs e)
+        private void TsRefresh_Click(object sender, EventArgs e)
         {
             RefreshData();
         }
 
-        private void tsCopy_Click(object sender, EventArgs e)
+        private void TsCopy_Click(object sender, EventArgs e)
         {
             Common.CopyDataGridViewToClipboard(dgv);
         }
 
-        private void tsExcel_Click(object sender, EventArgs e)
+        private void TsExcel_Click(object sender, EventArgs e)
         {
             Common.PromptSaveDataGridView(ref dgv);
         }
 
-        private void tsCols_Click(object sender, EventArgs e)
+        private void TsCols_Click(object sender, EventArgs e)
         {
             using (var frm = new SelectColumns() { Columns = dgv.Columns })
             {

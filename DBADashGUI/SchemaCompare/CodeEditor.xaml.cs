@@ -1,9 +1,5 @@
-﻿using ICSharpCode.AvalonEdit.Highlighting;
-
-using System.Reflection;
+﻿using System.IO;
 using System.Windows.Controls;
-using System.Windows.Shapes;
-using System.IO;
 namespace DBADashGUI.SchemaCompare
 {
     /// <summary>
@@ -21,7 +17,7 @@ namespace DBADashGUI.SchemaCompare
 
         private CodeEditorModes mode = CodeEditorModes.SQL;
 
-        private void setHighlighting(byte[] highlightingResource)
+        private void SetHighlighting(byte[] highlightingResource)
         {
             using (var stream = new MemoryStream(highlightingResource))
             {
@@ -56,11 +52,11 @@ namespace DBADashGUI.SchemaCompare
             {
                 if (value == CodeEditorModes.SQL)
                 {
-                    setHighlighting(Properties.Resources.SQL_Mode);
+                    SetHighlighting(Properties.Resources.SQL_Mode);
                 }
-                else if(value== CodeEditorModes.PowerShell)
+                else if (value == CodeEditorModes.PowerShell)
                 {
-                    setHighlighting(Properties.Resources.PowerShell_Mode);
+                    SetHighlighting(Properties.Resources.PowerShell_Mode);
                 }
                 else
                 {

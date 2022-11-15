@@ -1,16 +1,12 @@
 ﻿using Microsoft.Data.SqlClient;
 using Microsoft.SqlServer.Management.Common;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace DBADash
 {
     public class ConnectionInfo
     {
-        public int EngineEditionValue { get; set; } 
+        public int EngineEditionValue { get; set; }
 
         public DatabaseEngineEdition EngineEdition { get; set; }
 
@@ -32,7 +28,8 @@ namespace DBADash
 
         public bool IsAzureMasterDB
         {
-            get{
+            get
+            {
                 return IsAzureDB && DatabaseName == "master";
             }
         }
@@ -40,7 +37,7 @@ namespace DBADash
         {
             get
             {
-                return EngineEdition ==  DatabaseEngineEdition.SqlDatabase;
+                return EngineEdition == DatabaseEngineEdition.SqlDatabase;
             }
         }
 
@@ -54,7 +51,8 @@ namespace DBADash
 
         public bool IsXESupported
         {
-            get {
+            get
+            {
                 if (IsRDS && !(EngineEdition == DatabaseEngineEdition.Standard || EngineEdition == DatabaseEngineEdition.Enterprise)) // Extended events only supported on Standard and Enterprise editions for RDS
                 {
                     return false;
@@ -103,13 +101,14 @@ namespace DBADash
                     {
                         connectionInfo.EngineEdition = (DatabaseEngineEdition)connectionInfo.EngineEditionValue;
                     }
-                    catch {
+                    catch
+                    {
                         connectionInfo.EngineEdition = DatabaseEngineEdition.Unknown;
                     }
                     connectionInfo.ProductVersion = rdr.GetString(1);
                     connectionInfo.DatabaseName = rdr.GetString(2);
                     connectionInfo.ServerName = rdr.GetString(3);
-                    connectionInfo.ComputerNetBIOSName =rdr.IsDBNull(4) ? "" : rdr.GetString(4);  /* ComputerNamePhysicalNetBIOS is NULL for AzureDB */
+                    connectionInfo.ComputerNetBIOSName = rdr.IsDBNull(4) ? "" : rdr.GetString(4);  /* ComputerNamePhysicalNetBIOS is NULL for AzureDB */
                 }
             }
             return connectionInfo;

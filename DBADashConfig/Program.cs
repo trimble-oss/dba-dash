@@ -52,7 +52,7 @@ try
               }
               else if (o.Option == CommandLineActionOption.Count) // Count connections
               {
-                  Console.WriteLine(config.SourceConnections.Count());
+                  Console.WriteLine(config.SourceConnections.Count);
                   Environment.Exit(0);
               }
               else if (o.Option == CommandLineActionOption.Add) // Add a new source connection
@@ -79,7 +79,7 @@ try
                   var source = new DBADashSource();
                   if (o.ConnectionID != string.Empty)
                   {
-                      source.ConnectionID=o.ConnectionID;
+                      source.ConnectionID = o.ConnectionID;
                   }
                   source.ConnectionString = o.ConnectionString;
                   source.NoWMI = o.NoWMI;
@@ -140,9 +140,9 @@ try
                       Log.Information("Validated");
                   }
               }
-              else if(o.Option == CommandLineActionOption.CheckForUpdates)
+              else if (o.Option == CommandLineActionOption.CheckForUpdates)
               {
-                  var latest =  Upgrade.GetLatestVersionAsync().GetAwaiter().GetResult();
+                  var latest = Upgrade.GetLatestVersionAsync().GetAwaiter().GetResult();
                   Log.Information("Upgrade Available: : {0}", Upgrade.IsUpgradeAvailable(latest));
                   Log.Information("Current Version: {0}", Upgrade.CurrentVersion().ToString());
                   Log.Information("Latest Version: {0}", latest.TagName);
@@ -151,21 +151,21 @@ try
                   Console.WriteLine(latest.Body);
                   return;
               }
-              else if(o.Option== CommandLineActionOption.Update)
+              else if (o.Option == CommandLineActionOption.Update)
               {
                   try
                   {
                       Upgrade.UpgradeDBADashAsync().Wait();
                       return;
                   }
-                  catch (AggregateException ex) when(ex.InnerException!=null && ex.InnerException.GetType() == typeof(Octokit.NotFoundException))
+                  catch (AggregateException ex) when (ex.InnerException != null && ex.InnerException.GetType() == typeof(Octokit.NotFoundException))
                   {
                       Log.Error("Upgrade script is not available.  Please check the upgrade instructions on the GitHub page");
                       return;
                   }
                   catch (Exception ex)
                   {
-                      Log.Error(ex,"Error running upgrade");
+                      Log.Error(ex, "Error running upgrade");
                       throw;
                   }
               }
@@ -203,7 +203,7 @@ try
                   {
                       Log.Error("SetServiceName is only supported on Windows");
                       return;
-                  }                  
+                  }
               }
               // Save a copy of the old config before writing changes
               if (File.Exists(jsonConfigPath) && !o.NoBackupConfig)
@@ -221,7 +221,7 @@ try
 }
 catch (Exception ex)
 {
-    Log.Error(ex,"Error running DBADashConfig");
+    Log.Error(ex, "Error running DBADashConfig");
     Environment.Exit(1);
 }
 

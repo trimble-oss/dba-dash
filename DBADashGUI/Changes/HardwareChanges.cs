@@ -1,13 +1,8 @@
-﻿using System;
+﻿using Microsoft.Data.SqlClient;
+using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Drawing;
 using System.Data;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
-using Microsoft.Data.SqlClient;
 
 namespace DBADashGUI
 {
@@ -25,74 +20,74 @@ namespace DBADashGUI
         {
             dgv.Columns[0].Frozen = Common.FreezeKeyColumn;
             dgvHardware.Columns[0].Frozen = Common.FreezeKeyColumn;
-            refreshHistory();
-            refreshHardware();
+            RefreshHistory();
+            RefreshHardware();
         }
 
-        private void refreshHistory()
+        private void RefreshHistory()
         {
             using (var cn = new SqlConnection(Common.ConnectionString))
-            using (var cmd = new SqlCommand("dbo.HostUpgradeHistory_Get", cn) { CommandType = CommandType.StoredProcedure }) 
+            using (var cmd = new SqlCommand("dbo.HostUpgradeHistory_Get", cn) { CommandType = CommandType.StoredProcedure })
             using (var da = new SqlDataAdapter(cmd))
             {
                 cn.Open();
-                cmd.Parameters.AddWithValue("@InstanceIDs", string.Join(",", InstanceIDs));                
-                DataTable dt = new DataTable();
+                cmd.Parameters.AddWithValue("@InstanceIDs", string.Join(",", InstanceIDs));
+                DataTable dt = new();
                 da.Fill(dt);
                 Common.ConvertUTCToLocal(ref dt);
                 dgv.AutoGenerateColumns = false;
                 dgv.DataSource = dt;
                 dgv.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
             }
-            
+
         }
 
-        private void refreshHardware()
+        private void RefreshHardware()
         {
             using (var cn = new SqlConnection(Common.ConnectionString))
-            using (var cmd = new SqlCommand("dbo.Hardware_Get", cn) { CommandType = CommandType.StoredProcedure }) 
-            using(var da = new SqlDataAdapter(cmd))
+            using (var cmd = new SqlCommand("dbo.Hardware_Get", cn) { CommandType = CommandType.StoredProcedure })
+            using (var da = new SqlDataAdapter(cmd))
             {
                 cn.Open();
                 cmd.Parameters.AddWithValue("@InstanceIDs", string.Join(",", InstanceIDs));
-                DataTable dt = new DataTable();
+                DataTable dt = new();
                 da.Fill(dt);
                 dgvHardware.AutoGenerateColumns = false;
                 dgvHardware.DataSource = dt;
                 dgvHardware.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
-            }            
+            }
         }
 
-        private void tsCopy_Click(object sender, EventArgs e)
+        private void TsCopy_Click(object sender, EventArgs e)
         {
             Common.CopyDataGridViewToClipboard(dgvHardware);
         }
 
-        private void tsRefreshHardware_Click(object sender, EventArgs e)
+        private void TsRefreshHardware_Click(object sender, EventArgs e)
         {
-            refreshHardware();
+            RefreshHardware();
         }
 
-        private void tsRefreshHistory_Click(object sender, EventArgs e)
+        private void TsRefreshHistory_Click(object sender, EventArgs e)
         {
-            refreshHistory();
+            RefreshHistory();
         }
 
-        private void tsCopyHistory_Click(object sender, EventArgs e)
+        private void TsCopyHistory_Click(object sender, EventArgs e)
         {
             Common.CopyDataGridViewToClipboard(dgv);
         }
 
-        private void dgvHardware_RowsAdded(object sender, DataGridViewRowsAddedEventArgs e)
+        private void DgvHardware_RowsAdded(object sender, DataGridViewRowsAddedEventArgs e)
         {
-            for (Int32 idx = e.RowIndex; idx < e.RowIndex + e.RowCount; idx ++)
+            for (Int32 idx = e.RowIndex; idx < e.RowIndex + e.RowCount; idx++)
             {
                 var r = dgvHardware.Rows[idx];
                 var row = (DataRowView)r.DataBoundItem;
-                var ifiStatus = row["InstantFileInitializationEnabled"] == DBNull.Value ?  DBADashStatus.DBADashStatusEnum.NA : ((bool)row["InstantFileInitializationEnabled"] ? DBADashStatus.DBADashStatusEnum.OK : DBADashStatus.DBADashStatusEnum.Warning);
-                var offlineSchedulerStatus = row["OfflineSchedulers"] == DBNull.Value ? DBADashStatus.DBADashStatusEnum.NA : ((Int32)row["OfflineSchedulers"]==0 ? DBADashStatus.DBADashStatusEnum.OK : DBADashStatus.DBADashStatusEnum.Critical);
+                var ifiStatus = row["InstantFileInitializationEnabled"] == DBNull.Value ? DBADashStatus.DBADashStatusEnum.NA : ((bool)row["InstantFileInitializationEnabled"] ? DBADashStatus.DBADashStatusEnum.OK : DBADashStatus.DBADashStatusEnum.Warning);
+                var offlineSchedulerStatus = row["OfflineSchedulers"] == DBNull.Value ? DBADashStatus.DBADashStatusEnum.NA : ((Int32)row["OfflineSchedulers"] == 0 ? DBADashStatus.DBADashStatusEnum.OK : DBADashStatus.DBADashStatusEnum.Critical);
                 var ppStatus = row["ActivePowerPlanGUID"] == DBNull.Value ? DBADashStatus.DBADashStatusEnum.NA : ((Guid)row["ActivePowerPlanGUID"] == Common.HighPerformancePowerPlanGUID ? DBADashStatus.DBADashStatusEnum.OK : DBADashStatus.DBADashStatusEnum.Warning);
-                var priorityStatus = row["os_priority_class"] == DBNull.Value ? DBADashStatus.DBADashStatusEnum.NA: ((Int32)row["os_priority_class"] == 32 ? DBADashStatus.DBADashStatusEnum.OK : DBADashStatus.DBADashStatusEnum.Warning);
+                var priorityStatus = row["os_priority_class"] == DBNull.Value ? DBADashStatus.DBADashStatusEnum.NA : ((Int32)row["os_priority_class"] == 32 ? DBADashStatus.DBADashStatusEnum.OK : DBADashStatus.DBADashStatusEnum.Warning);
                 var affinityStatus = row["affinity_type_desc"] == DBNull.Value ? DBADashStatus.DBADashStatusEnum.NA : ((string)row["affinity_type_desc"] == "AUTO" ? DBADashStatus.DBADashStatusEnum.OK : DBADashStatus.DBADashStatusEnum.Warning);
 
                 r.Cells[colAffinity.Index].SetStatusColor(affinityStatus);
@@ -104,17 +99,17 @@ namespace DBADashGUI
 
         }
 
-        private void tsExcelHistory_Click(object sender, EventArgs e)
+        private void TsExcelHistory_Click(object sender, EventArgs e)
         {
             Common.PromptSaveDataGridView(ref dgv);
         }
 
-        private void tsExcel_Click(object sender, EventArgs e)
+        private void TsExcel_Click(object sender, EventArgs e)
         {
             Common.PromptSaveDataGridView(ref dgvHardware);
         }
 
-        private void tsCols_Click(object sender, EventArgs e)
+        private void TsCols_Click(object sender, EventArgs e)
         {
             using (var frm = new SelectColumns() { Columns = dgvHardware.Columns })
             {

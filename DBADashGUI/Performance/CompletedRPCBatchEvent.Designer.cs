@@ -97,7 +97,7 @@ namespace DBADashGUI.Performance
             this.tsCopy.Name = "tsCopy";
             this.tsCopy.Size = new System.Drawing.Size(29, 24);
             this.tsCopy.Text = "Copy";
-            this.tsCopy.Click += new System.EventHandler(this.tsCopy_Click);
+            this.tsCopy.Click += new System.EventHandler(this.TsCopy_Click);
             // 
             // elementHost1
             // 

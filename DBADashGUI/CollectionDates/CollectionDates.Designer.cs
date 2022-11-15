@@ -73,7 +73,7 @@
             this.tsRefresh.Name = "tsRefresh";
             this.tsRefresh.Size = new System.Drawing.Size(29, 24);
             this.tsRefresh.Text = "Refresh";
-            this.tsRefresh.Click += new System.EventHandler(this.tsRefresh_Click);
+            this.tsRefresh.Click += new System.EventHandler(this.TsRefresh_Click);
             // 
             // tsCopy
             // 
@@ -83,7 +83,7 @@
             this.tsCopy.Name = "tsCopy";
             this.tsCopy.Size = new System.Drawing.Size(29, 24);
             this.tsCopy.Text = "Copy";
-            this.tsCopy.Click += new System.EventHandler(this.tsCopy_Click);
+            this.tsCopy.Click += new System.EventHandler(this.TsCopy_Click);
             // 
             // tsExcel
             // 
@@ -93,7 +93,7 @@
             this.tsExcel.Name = "tsExcel";
             this.tsExcel.Size = new System.Drawing.Size(29, 24);
             this.tsExcel.Text = "Export Excel";
-            this.tsExcel.Click += new System.EventHandler(this.tsExcel_Click);
+            this.tsExcel.Click += new System.EventHandler(this.TsExcel_Click);
             // 
             // toolStripFilter
             // 
@@ -115,7 +115,7 @@
             this.criticalToolStripMenuItem.Name = "criticalToolStripMenuItem";
             this.criticalToolStripMenuItem.Size = new System.Drawing.Size(161, 26);
             this.criticalToolStripMenuItem.Text = "Critical";
-            this.criticalToolStripMenuItem.Click += new System.EventHandler(this.criticalToolStripMenuItem_Click);
+            this.criticalToolStripMenuItem.Click += new System.EventHandler(this.CriticalToolStripMenuItem_Click);
             // 
             // warningToolStripMenuItem
             // 
@@ -123,7 +123,7 @@
             this.warningToolStripMenuItem.Name = "warningToolStripMenuItem";
             this.warningToolStripMenuItem.Size = new System.Drawing.Size(161, 26);
             this.warningToolStripMenuItem.Text = "Warning";
-            this.warningToolStripMenuItem.Click += new System.EventHandler(this.warningToolStripMenuItem_Click);
+            this.warningToolStripMenuItem.Click += new System.EventHandler(this.WarningToolStripMenuItem_Click);
             // 
             // undefinedToolStripMenuItem
             // 
@@ -131,7 +131,7 @@
             this.undefinedToolStripMenuItem.Name = "undefinedToolStripMenuItem";
             this.undefinedToolStripMenuItem.Size = new System.Drawing.Size(161, 26);
             this.undefinedToolStripMenuItem.Text = "Undefined";
-            this.undefinedToolStripMenuItem.Click += new System.EventHandler(this.undefinedToolStripMenuItem_Click);
+            this.undefinedToolStripMenuItem.Click += new System.EventHandler(this.UndefinedToolStripMenuItem_Click);
             // 
             // OKToolStripMenuItem
             // 
@@ -168,8 +168,8 @@
             this.dgvCollectionDates.RowTemplate.Height = 24;
             this.dgvCollectionDates.Size = new System.Drawing.Size(882, 354);
             this.dgvCollectionDates.TabIndex = 3;
-            this.dgvCollectionDates.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgv_CellContentClick);
-            this.dgvCollectionDates.RowsAdded += new System.Windows.Forms.DataGridViewRowsAddedEventHandler(this.dgv_RowsAdded);
+            this.dgvCollectionDates.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.Dgv_CellContentClick);
+            this.dgvCollectionDates.RowsAdded += new System.Windows.Forms.DataGridViewRowsAddedEventHandler(this.Dgv_RowsAdded);
             // 
             // Instance
             // 

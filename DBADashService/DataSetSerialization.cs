@@ -2,7 +2,6 @@
 using System;
 using System.Data;
 using System.IO;
-using System.Runtime.Serialization.Formatters.Binary;
 
 namespace DBADashService
 {
@@ -26,18 +25,18 @@ namespace DBADashService
         private static readonly string binaryPrefix = "###BINARY###";
 
         [ObsoleteAttribute("To be removed. Json serialization replaced with XML serialization", false)]
-        public static DataSet  DeserializeDS(string json)
+        public static DataSet DeserializeDS(string json)
         {
             var ds = JsonConvert.DeserializeObject<DataSet>(json);
             foreach (DataTable dt in ds.Tables)
             {
-                for(Int32 i = 0;i<  dt.Columns.Count-1;  i++)
+                for (Int32 i = 0; i < dt.Columns.Count - 1; i++)
                 {
                     var col = dt.Columns[i];
                     if (col.ColumnName.StartsWith(binaryPrefix))
                     {
-                       var newCol = dt.Columns.Add(col.ColumnName.Remove(0, binaryPrefix.Length), typeof(byte[]));
-                        foreach(DataRow r in dt.Rows)
+                        var newCol = dt.Columns.Add(col.ColumnName.Remove(0, binaryPrefix.Length), typeof(byte[]));
+                        foreach (DataRow r in dt.Rows)
                         {
                             if (r[col] != DBNull.Value)
                             {
@@ -47,7 +46,7 @@ namespace DBADashService
                         newCol.SetOrdinal(col.Ordinal);
                         dt.Columns.Remove(col);
                     }
-                    
+
                 }
             }
             return ds;
@@ -69,7 +68,7 @@ namespace DBADashService
             }
             else
             {
-                throw new Exception($"Invalid file extention { filePath } expected: .xml");
+                throw new Exception($"Invalid file extention {filePath} expected: .xml");
             }
         }
     }

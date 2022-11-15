@@ -1,11 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel;
-using System.Drawing;
-using System.Data;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace DBADashGUI
@@ -39,11 +33,11 @@ namespace DBADashGUI
             set
             {
                 mode = value;
-                setMode();
+                SetMode();
             }
         }
 
-        private void setMode()
+        private void SetMode()
         {
             elCodeEditor.Visible = (mode == ViewMode.Code);
             elDiffViewer.Visible = (mode != ViewMode.Code);
@@ -83,24 +77,24 @@ namespace DBADashGUI
                 newText = value;
                 codeEditor1.Text = value;
                 diffViewer1.NewText = value;
-                copyRightToolStripMenuItem.Enabled =value!=null && value.Length > 0;
+                copyRightToolStripMenuItem.Enabled = value != null && value.Length > 0;
             }
         }
 
 
-        private void tsInline_Click(object sender, EventArgs e)
+        private void TsInline_Click(object sender, EventArgs e)
         {
             Mode = ViewMode.Inline;
         }
 
 
-        private void tsCode_Click(object sender, EventArgs e)
+        private void TsCode_Click(object sender, EventArgs e)
         {
             Mode = ViewMode.Code;
         }
 
 
-        private void copyLeftToolStripMenuItem_Click(object sender, EventArgs e)
+        private void CopyLeftToolStripMenuItem_Click(object sender, EventArgs e)
         {
             if (oldText.Length > 0)
             {
@@ -108,7 +102,7 @@ namespace DBADashGUI
             }
         }
 
-        private void copyRightToolStripMenuItem_Click(object sender, EventArgs e)
+        private void CopyRightToolStripMenuItem_Click(object sender, EventArgs e)
         {
             if (newText.Length > 0)
             {
@@ -116,7 +110,7 @@ namespace DBADashGUI
             }
         }
 
-        private void tsDiff_Click(object sender, EventArgs e)
+        private void TsDiff_Click(object sender, EventArgs e)
         {
             Mode = ViewMode.Diff;
         }

@@ -16,6 +16,7 @@
   <PropertyGroup>
     <ApplicationIcon>services.ico</ApplicationIcon>
     <BaseOutputPath>..\DBADashBuild</BaseOutputPath>
+    <NeutralLanguage>en-GB</NeutralLanguage>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug2|AnyCPU'">
     <DebugSymbols>true</DebugSymbols>

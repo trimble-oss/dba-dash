@@ -1,13 +1,7 @@
-﻿using Humanizer;
+﻿using Microsoft.Data.SqlClient;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Data;
-using Microsoft.Data.SqlClient;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace DBADashGUI.Checks
@@ -20,14 +14,14 @@ namespace DBADashGUI.Checks
         }
 
         public List<int> InstanceIDs { get; set; }
-        private int selectedInstanceID=-1;
+        private int selectedInstanceID = -1;
         private bool HasSelectedInstance { get => selectedInstanceID > 0; }
 
         public bool CanNavigateBack { get => selectedInstanceID != -1; }
 
         public void RefreshData()
         {
-            selectedInstanceID = InstanceIDs.Count==1 ? InstanceIDs[0] : -1;
+            selectedInstanceID = InstanceIDs.Count == 1 ? InstanceIDs[0] : -1;
             RefreshDataLocal();
         }
 
@@ -58,7 +52,7 @@ namespace DBADashGUI.Checks
                 new DataGridViewTextBoxColumn() { HeaderText = "Instance", DataPropertyName = "InstanceDisplayName" },
                 new DataGridViewTextBoxColumn() { Name = "colStatus", HeaderText = "Status", DataPropertyName = "StatusDescription" },
                 new DataGridViewTextBoxColumn() { HeaderText = "Notes", DataPropertyName = "Notes" },
-                new DataGridViewTextBoxColumn() {Name="colBaseAddress", HeaderText = "Base Address", DataPropertyName = "base_address" },
+                new DataGridViewTextBoxColumn() { Name = "colBaseAddress", HeaderText = "Base Address", DataPropertyName = "base_address" },
                 new DataGridViewTextBoxColumn() { HeaderText = "File Version", DataPropertyName = "file_version" },
                 new DataGridViewTextBoxColumn() { HeaderText = "Product Version", DataPropertyName = "product_version" },
                 new DataGridViewCheckBoxColumn() { HeaderText = "Debug", DataPropertyName = "debug" },
@@ -78,8 +72,8 @@ namespace DBADashGUI.Checks
             dgv.AutoGenerateColumns = false;
             dgv.Columns.Clear();
             dgv.Columns.AddRange(
-                new DataGridViewLinkColumn() { HeaderText ="Instance", DataPropertyName= "InstanceDisplayName", LinkColor = DashColors.LinkColor},
-                new DataGridViewTextBoxColumn() { Name="colStatus", HeaderText = "Status", DataPropertyName = "StatusDescription" },
+                new DataGridViewLinkColumn() { HeaderText = "Instance", DataPropertyName = "InstanceDisplayName", LinkColor = DashColors.LinkColor },
+                new DataGridViewTextBoxColumn() { Name = "colStatus", HeaderText = "Status", DataPropertyName = "StatusDescription" },
                 new DataGridViewTextBoxColumn() { HeaderText = "Notes", DataPropertyName = "Notes" }
                 );
         }
@@ -130,7 +124,7 @@ namespace DBADashGUI.Checks
         private void Dgv_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
 
-            if (e.RowIndex >= 0  && !HasSelectedInstance)
+            if (e.RowIndex >= 0 && !HasSelectedInstance)
             {
                 DataRowView row = (DataRowView)dgv.Rows[e.RowIndex].DataBoundItem;
                 selectedInstanceID = (int)row["InstanceID"];
@@ -145,7 +139,8 @@ namespace DBADashGUI.Checks
 
         public bool NavigateBack()
         {
-            if (CanNavigateBack) {
+            if (CanNavigateBack)
+            {
                 selectedInstanceID = -1;
                 RefreshDataLocal();
                 return true;
@@ -182,7 +177,7 @@ namespace DBADashGUI.Checks
 
         private void Dgv_CellFormatting(object sender, DataGridViewCellFormattingEventArgs e)
         {
-            if (dgv.Columns.Contains("colBaseAddress") &&  e.ColumnIndex == dgv.Columns["colBaseAddress"].Index)
+            if (dgv.Columns.Contains("colBaseAddress") && e.ColumnIndex == dgv.Columns["colBaseAddress"].Index)
             {
                 if (e.Value != null && e.Value != DBNull.Value)
                 {

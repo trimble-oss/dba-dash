@@ -1,12 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.Data.SqlClient;
+﻿using Microsoft.Data.SqlClient;
+using System;
 namespace DBADashGUI.LastGoodCheckDB
 {
-   public class LastGoodCheckDBThreshold
+    public class LastGoodCheckDBThreshold
     {
         public Int32 InstanceID { get; set; }
         public Int32 DatabaseID { get; set; }
@@ -17,18 +13,18 @@ namespace DBADashGUI.LastGoodCheckDB
 
         public string ExcludedDatabases { get; set; }
 
-        public static LastGoodCheckDBThreshold GetLastGoodCheckDBThreshold(Int32 InstanceID,Int32 DatabaseID)
+        public static LastGoodCheckDBThreshold GetLastGoodCheckDBThreshold(Int32 InstanceID, Int32 DatabaseID)
         {
             var threshold = new LastGoodCheckDBThreshold
             {
                 InstanceID = InstanceID,
                 DatabaseID = DatabaseID,
             };
-            SqlConnection cn = new SqlConnection(Common.ConnectionString);
+            SqlConnection cn = new(Common.ConnectionString);
             using (cn)
             {
                 cn.Open();
-                SqlCommand cmd = new SqlCommand("dbo.LastGoodCheckDBThresholds_Get", cn);
+                SqlCommand cmd = new("dbo.LastGoodCheckDBThresholds_Get", cn);
                 cmd.Parameters.AddWithValue("InstanceID", InstanceID);
                 cmd.Parameters.AddWithValue("DatabaseID", DatabaseID);
                 cmd.CommandType = System.Data.CommandType.StoredProcedure;
@@ -51,11 +47,11 @@ namespace DBADashGUI.LastGoodCheckDB
 
         public void Save()
         {
-            SqlConnection cn = new SqlConnection(Common.ConnectionString);
+            SqlConnection cn = new(Common.ConnectionString);
             using (cn)
             {
                 cn.Open();
-                SqlCommand cmd = new SqlCommand("dbo.LastGoodCheckDBThresholds_Upd", cn);
+                SqlCommand cmd = new("dbo.LastGoodCheckDBThresholds_Upd", cn);
                 cmd.Parameters.AddWithValue("InstanceID", InstanceID);
                 cmd.Parameters.AddWithValue("DatabaseID", DatabaseID);
                 cmd.Parameters.AddWithValue("WarningThreshold", WarningThreshold);

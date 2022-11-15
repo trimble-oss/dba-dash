@@ -1,11 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace DBADashGUI.Performance
@@ -25,7 +18,7 @@ namespace DBADashGUI.Performance
             }
             set
             {
-                time1.Value = new DateTime(value.Year,value.Month,value.Day,value.Hour,value.Minute,0);
+                time1.Value = new DateTime(value.Year, value.Month, value.Day, value.Hour, value.Minute, 0);
             }
         }
 
@@ -41,14 +34,14 @@ namespace DBADashGUI.Performance
             }
         }
 
-        private void bttnOK_Click(object sender, EventArgs e)
+        private void BttnOK_Click(object sender, EventArgs e)
         {
             this.DialogResult = DialogResult.OK;
             this.Close();
 
         }
 
-        private void bttnCancel_Click(object sender, EventArgs e)
+        private void BttnCancel_Click(object sender, EventArgs e)
         {
             this.DialogResult = DialogResult.Cancel;
             this.Close();

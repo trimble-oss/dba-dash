@@ -1,11 +1,9 @@
-﻿using DBADashService;
+﻿using Microsoft.Data.SqlClient;
 using Newtonsoft.Json;
 using System;
-using Microsoft.Data.SqlClient;
+using System.Collections.Generic;
 using System.IO;
 using System.Text.RegularExpressions;
-using Serilog;
-using System.Collections.Generic;
 
 namespace DBADash
 {
@@ -56,7 +54,8 @@ namespace DBADash
 
         private void SetConnectionString(string value)
         {
-            if (GetConnectionType(value) == ConnectionType.SQL){
+            if (GetConnectionType(value) == ConnectionType.SQL)
+            {
                 var builder = new SqlConnectionStringBuilder(value)
                 {
                     ApplicationName = "DBADash"
@@ -136,7 +135,7 @@ namespace DBADash
                     throw new Exception("Directory does not exist");
                 }
             }
-           else if (connectionType == ConnectionType.SQL)
+            else if (connectionType == ConnectionType.SQL)
             {
                 ValidateSQLConnection(); // Open a connection to the DB
             }
@@ -151,13 +150,13 @@ namespace DBADash
             }
             else
             {
-                return false;   
+                return false;
             }
         }
 
         public static bool IsXESupported(string productVersion)
         {
-           return ConnectionInfo.GetXESupported(productVersion);
+            return ConnectionInfo.GetXESupported(productVersion);
         }
 
         public bool IsAzureDB()
@@ -167,13 +166,15 @@ namespace DBADash
 
 
         private void ValidateSQLConnection()
-        {         
-            if (!supportedProductVersions.Contains(ConnectionInfo.MajorVersion)){
-                throw new Exception(string.Format("SQL Server Version {0} isn't supported by DBA Dash.  For testing purposes, it's possible to skip this validation check.",ConnectionInfo.MajorVersion));
+        {
+            if (!supportedProductVersions.Contains(ConnectionInfo.MajorVersion))
+            {
+                throw new Exception(string.Format("SQL Server Version {0} isn't supported by DBA Dash.  For testing purposes, it's possible to skip this validation check.", ConnectionInfo.MajorVersion));
             }
-            if(!supportedEngineEditions.Contains(ConnectionInfo.EngineEditionValue)){
+            if (!supportedEngineEditions.Contains(ConnectionInfo.EngineEditionValue))
+            {
                 throw new Exception(string.Format("SQL Server Engine Edition {0} isn't supported by DBA Dash.  For testing purposes, it's possible to skip this validation check.", ConnectionInfo.EngineEditionValue));
-            }       
+            }
         }
 
         public ConnectionType Type
@@ -321,7 +322,7 @@ namespace DBADash
                 {
                     return connectionString;
                 }
-            
+
             }
         }
 

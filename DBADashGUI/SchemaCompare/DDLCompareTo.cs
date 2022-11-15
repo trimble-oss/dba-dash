@@ -1,11 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace DBADashGUI
@@ -13,14 +8,14 @@ namespace DBADashGUI
     public partial class DDLCompareTo : Form
     {
 
-        readonly DiffControl diffControl = new DiffControl();
+        readonly DiffControl diffControl = new();
 
         public List<int> SelectedTags;
 
         public int DatabaseID_A;
         public string Instance_A;
         public long ObjectID_A;
-        public string ObjectType_A="P";
+        public string ObjectType_A = "P";
         public DateTime SnapshotDate_A;
 
         public DDLCompareTo()
@@ -37,11 +32,11 @@ namespace DBADashGUI
             var instances = CommonData.GetInstancesWithDDLSnapshot(SelectedTags);
             Dictionary<string, string> objtypes = CommonData.GetObjectTypes();
 
-            cboInstanceA.DataSource = new BindingSource(instances,null);
-            
-            cboInstanceB.DataSource = new BindingSource(instances,null);
+            cboInstanceA.DataSource = new BindingSource(instances, null);
 
-            
+            cboInstanceB.DataSource = new BindingSource(instances, null);
+
+
             cboObjectTypeA.DisplayMember = "Value";
             cboObjectTypeA.ValueMember = "Key";
             cboObjectTypeA.DataSource = new BindingSource(objtypes, null);
@@ -53,38 +48,38 @@ namespace DBADashGUI
             cboObjectTypeB.SelectedValue = ObjectType_A.TrimEnd();
 
             cboInstanceA.SelectedItem = Instance_A;
-            cboDatabaseA.SelectedValue = DatabaseID_A;         
+            cboDatabaseA.SelectedValue = DatabaseID_A;
             cboObjectA.SelectedValue = ObjectID_A;
             cboDate_A.SelectedValue = SnapshotDate_A;
-            
-           
+
+
             cboInstanceB.SelectedItem = Instance_A;
             cboDatabaseB.SelectedIndex = cboDatabaseB.FindStringExact(cboDatabaseA.Text);
             cboObjectB.SelectedIndex = cboObjectB.FindStringExact(cboObjectA.Text);
         }
 
-        private void getObjectsB()
+        private void GetObjectsB()
         {
             if (cboDatabaseB.SelectedValue != null && cboObjectTypeB.SelectedValue != null)
             {
-                getObjects(cboObjectB, (int)cboDatabaseB.SelectedValue, (string)cboObjectTypeB.SelectedValue);
+                GetObjects(cboObjectB, (int)cboDatabaseB.SelectedValue, (string)cboObjectTypeB.SelectedValue);
             }
         }
 
-        private void getObjectsA()
+        private void GetObjectsA()
         {
             if (cboDatabaseA.SelectedValue != null && cboObjectTypeA.SelectedValue != null)
             {
-                getObjects(cboObjectA, (int)cboDatabaseA.SelectedValue, (string)cboObjectTypeA.SelectedValue);
-            }       
+                GetObjects(cboObjectA, (int)cboDatabaseA.SelectedValue, (string)cboObjectTypeA.SelectedValue);
+            }
         }
 
-        int DropDownWidth(ComboBox myCombo)
+        private static int DropDownWidth(ComboBox myCombo)
         {
-            int maxWidth = 0, temp = 0;
+            int maxWidth = 0;
             foreach (var obj in myCombo.Items)
             {
-                temp = TextRenderer.MeasureText(myCombo.GetItemText(obj), myCombo.Font).Width;
+                int temp = TextRenderer.MeasureText(myCombo.GetItemText(obj), myCombo.Font).Width;
                 if (temp > maxWidth)
                 {
                     maxWidth = temp;
@@ -95,22 +90,23 @@ namespace DBADashGUI
             {
                 return myCombo.Width;
             }
-            else {
+            else
+            {
                 return maxWidth;
             }
         }
 
-        private void getObjects(ComboBox cbo,int DatabaseID,string type)
+        private static void GetObjects(ComboBox cbo, int DatabaseID, string type)
         {
-            DataTable dt =  CommonData.GetDBObjects(DatabaseID, type);
-            cbo.DataSource = new BindingSource(dt,null);
+            DataTable dt = CommonData.GetDBObjects(DatabaseID, type);
+            cbo.DataSource = new BindingSource(dt, null);
             cbo.DisplayMember = "FullName";
             cbo.ValueMember = "ObjectID";
             cbo.DropDownWidth = DropDownWidth(cbo);
         }
 
 
-        private void getDatabases(ComboBox cbo, string instanceGroupName)
+        private static void GetDatabases(ComboBox cbo, string instanceGroupName)
         {
             var databases = CommonData.GetDatabasesWithDDLSnapshot(instanceGroupName);
             cbo.DataSource = databases;
@@ -119,48 +115,48 @@ namespace DBADashGUI
 
         }
 
-        private void cboInstanceA_SelectedIndexedChanged(object sender, EventArgs e)
+        private void CboInstanceA_SelectedIndexedChanged(object sender, EventArgs e)
         {
-            getDatabases(cboDatabaseA, cboInstanceA.Text);
+            GetDatabases(cboDatabaseA, cboInstanceA.Text);
         }
 
-        private void cboInstanceB_SelectedIndexedChanged(object sender, EventArgs e)
+        private void CboInstanceB_SelectedIndexedChanged(object sender, EventArgs e)
         {
-            getDatabases(cboDatabaseB, cboInstanceB.Text);
+            GetDatabases(cboDatabaseB, cboInstanceB.Text);
             cboDatabaseB.SelectedIndex = cboDatabaseB.FindStringExact(cboDatabaseA.Text);
         }
 
-        private void cboDatabaseB_SelectedIndexChanged(object sender, EventArgs e)
+        private void CboDatabaseB_SelectedIndexChanged(object sender, EventArgs e)
         {
-            getObjectsB();
+            GetObjectsB();
             cboObjectB.SelectedIndex = cboObjectB.FindStringExact(cboObjectA.Text);
         }
 
-        private void cboDatabaseA_SelectedIndexChanged(object sender, EventArgs e)
+        private void CboDatabaseA_SelectedIndexChanged(object sender, EventArgs e)
         {
-            getObjectsA();
+            GetObjectsA();
         }
 
-        private void cboObjectTypeA_SelectedIndexChanged(object sender, EventArgs e)
+        private void CboObjectTypeA_SelectedIndexChanged(object sender, EventArgs e)
         {
-            getObjectsA();
+            GetObjectsA();
         }
 
-        private void cboObjectTypeB_SelectedIndexChanged(object sender, EventArgs e)
+        private void CboObjectTypeB_SelectedIndexChanged(object sender, EventArgs e)
         {
-            getObjectsB();
+            GetObjectsB();
         }
 
-        private void cboObjectA_SelectedIndexChanged(object sender, EventArgs e)
+        private void CboObjectA_SelectedIndexChanged(object sender, EventArgs e)
         {
             if (cboObjectA.SelectedValue != null)
             {
                 long ObjectID = (Int64)cboObjectA.SelectedValue;
-                getSnapshots(cboDate_A, ObjectID);
+                GetSnapshots(cboDate_A, ObjectID);
             }
         }
 
-        private void getSnapshots(ComboBox cbo,long ObjectID)
+        private static void GetSnapshots(ComboBox cbo, long ObjectID)
         {
             DataTable dt = CommonData.GetDDLHistoryForObject(ObjectID, 1, 200);
             cbo.DataSource = new BindingSource(dt, null);
@@ -168,16 +164,16 @@ namespace DBADashGUI
             cbo.ValueMember = "SnapshotValidFrom";
         }
 
-        private void cboObjectB_SelectedIndexChanged(object sender, EventArgs e)
+        private void CboObjectB_SelectedIndexChanged(object sender, EventArgs e)
         {
             if (cboObjectB.SelectedValue != null)
             {
                 long ObjectID = (Int64)cboObjectB.SelectedValue;
-                getSnapshots(cboDate_B, ObjectID);
+                GetSnapshots(cboDate_B, ObjectID);
             }
         }
 
-        private void cboDate_A_SelectedIndexChanged(object sender, EventArgs e)
+        private void CboDate_A_SelectedIndexChanged(object sender, EventArgs e)
         {
             var row = (DataRowView)cboDate_A.SelectedItem;
             if (row != null)
@@ -192,10 +188,10 @@ namespace DBADashGUI
                     diffControl.OldText = Common.DDL(ddlID);
                 }
             }
-        
+
         }
 
-        private void cboDate_B_SelectedIndexChanged(object sender, EventArgs e)
+        private void CboDate_B_SelectedIndexChanged(object sender, EventArgs e)
         {
             var row = (DataRowView)cboDate_B.SelectedItem;
             if (row["DDLID"] == DBNull.Value)

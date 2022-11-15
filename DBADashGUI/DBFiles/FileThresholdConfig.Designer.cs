@@ -55,7 +55,7 @@
             this.bttnCancel.TabIndex = 41;
             this.bttnCancel.Text = "Cancel";
             this.bttnCancel.UseVisualStyleBackColor = true;
-            this.bttnCancel.Click += new System.EventHandler(this.bttnCancel_Click);
+            this.bttnCancel.Click += new System.EventHandler(this.BttnCancel_Click);
             // 
             // bttnUpdate
             // 
@@ -66,7 +66,7 @@
             this.bttnUpdate.TabIndex = 40;
             this.bttnUpdate.Text = "Update";
             this.bttnUpdate.UseVisualStyleBackColor = true;
-            this.bttnUpdate.Click += new System.EventHandler(this.bttnUpdate_Click);
+            this.bttnUpdate.Click += new System.EventHandler(this.BttnUpdate_Click);
             // 
             // tab1
             // 
@@ -182,7 +182,7 @@
             this.cboLevel.Name = "cboLevel";
             this.cboLevel.Size = new System.Drawing.Size(121, 24);
             this.cboLevel.TabIndex = 43;
-            this.cboLevel.SelectedIndexChanged += new System.EventHandler(this.cboLevel_SelectedIndexChanged);
+            this.cboLevel.SelectedIndexChanged += new System.EventHandler(this.CboLevel_SelectedIndexChanged);
             // 
             // label1
             // 

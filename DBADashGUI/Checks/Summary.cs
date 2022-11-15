@@ -1,19 +1,15 @@
-﻿using System;
+﻿using DBADashGUI.Checks;
+using Humanizer;
+using Microsoft.Data.SqlClient;
+using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Drawing;
 using System.Data;
+using System.Drawing;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using Microsoft.Data.SqlClient;
-using static DBADashGUI.Main;
-using System.IO;
-using System.Diagnostics;
-using DBADashGUI.Checks;
 using static DBADashGUI.DBADashStatus;
-using Humanizer;
+using static DBADashGUI.Main;
 
 namespace DBADashGUI
 {
@@ -39,7 +35,7 @@ namespace DBADashGUI
 
         private void ResetStatusCols()
         {
-           statusColumns= new Dictionary<string, bool> { { "FullBackupStatus", false }, { "LogShippingStatus", false }, { "DiffBackupStatus", false }, { "LogBackupStatus", false }, { "DriveStatus", false },
+            statusColumns = new Dictionary<string, bool> { { "FullBackupStatus", false }, { "LogShippingStatus", false }, { "DiffBackupStatus", false }, { "LogBackupStatus", false }, { "DriveStatus", false },
                                                             { "JobStatus", false }, { "CollectionErrorStatus", false }, { "AGStatus", false }, {"LastGoodCheckDBStatus",false}, {"SnapshotAgeStatus",false },
                                                             {"MemoryDumpStatus",false }, {"UptimeStatus",false }, {"CorruptionStatus",false }, {"AlertStatus",false }, {"FileFreeSpaceStatus",false },
                                                             {"CustomCheckStatus",false }, {"MirroringStatus",false },{"ElasticPoolStorageStatus",false},{"PctMaxSizeStatus",false}, {"QueryStoreStatus",false },
@@ -82,7 +78,7 @@ namespace DBADashGUI
         {
             return !(InstanceIDs.Count == refreshInstanceIDs.Count && refreshInstanceIDs.All(InstanceIDs.Contains));
         }
-        
+
         public void RefreshData()
         {
             dgvSummary.Columns[0].Frozen = Common.FreezeKeyColumn;
@@ -126,7 +122,7 @@ namespace DBADashGUI
                 {
                     dgvSummary.Invoke((Action)(() => dgvSummary.Columns[col.Key].Visible = col.Value));
                 }
-                dgvSummary.Invoke((Action)(() => colShowInSummary.Visible = showHiddenToolStripMenuItem.Checked ));
+                dgvSummary.Invoke((Action)(() => colShowInSummary.Visible = showHiddenToolStripMenuItem.Checked));
                 string rowFilter = "";
                 if (focusedView)
                 {
@@ -149,14 +145,14 @@ namespace DBADashGUI
                 refresh1.Invoke((Action)(() => refresh1.Visible = false));
                 dgvSummary.Invoke((Action)(() => dgvSummary.Visible = true));
                 timer1.Enabled = true;
-                
+
             });
-                        
+
         }
 
         private void DgvSummary_RowAdded(object sender, DataGridViewRowsAddedEventArgs e)
         {
-     
+
             for (Int32 idx = e.RowIndex; idx < e.RowIndex + e.RowCount; idx += 1)
             {
                 var row = (DataRowView)dgvSummary.Rows[idx].DataBoundItem;
@@ -165,7 +161,7 @@ namespace DBADashGUI
                 foreach (var col in cols)
                 {
                     var status = (DBADashStatus.DBADashStatusEnum)Convert.ToInt32(row[col] == DBNull.Value ? 3 : row[col]);
-                    dgvSummary.Rows[idx].Cells[col].SetStatusColor(status);                    
+                    dgvSummary.Rows[idx].Cells[col].SetStatusColor(status);
                 }
                 string DBMailStatus = Convert.ToString(row["DBMailStatusDescription"]);
                 dgvSummary.Rows[idx].Cells["DBMailStatus"].ToolTipText = DBMailStatus;
@@ -176,13 +172,13 @@ namespace DBADashGUI
                 dgvSummary.Rows[idx].Cells["DriveStatus"].Value = isAzure ? "" : "View";
                 dgvSummary.Rows[idx].Cells["JobStatus"].Value = isAzure ? "" : "View";
                 dgvSummary.Rows[idx].Cells["LogShippingStatus"].Value = isAzure ? "" : "View";
-                dgvSummary.Rows[idx].Cells["AGStatus"].Value = (int)row["AGStatus"]==3 ? "" : "View";
+                dgvSummary.Rows[idx].Cells["AGStatus"].Value = (int)row["AGStatus"] == 3 ? "" : "View";
                 dgvSummary.Rows[idx].Cells["QueryStoreStatus"].Value = (int)row["QueryStoreStatus"] == 3 ? "" : "View";
-                if (row["IsAgentRunning"]!=DBNull.Value && (bool)row["IsAgentRunning"] == false)
+                if (row["IsAgentRunning"] != DBNull.Value && (bool)row["IsAgentRunning"] == false)
                 {
                     dgvSummary.Rows[idx].Cells["JobStatus"].SetStatusColor(Color.Black);
                     dgvSummary.Rows[idx].Cells["JobStatus"].Value = "Not Running";
-                }              
+                }
 
                 string uptimeString;
                 if (row["sqlserver_uptime"] != DBNull.Value)
@@ -225,10 +221,10 @@ namespace DBADashGUI
                 {
                     dgvSummary.Rows[idx].Cells["LastGoodCheckDBStatus"].Value = ((Int32)row["DaysSinceLastGoodCheckDB"]).ToString() + " days";
                 }
-                string oldestLastGoodCheckDB="Unknown";
-                if(row["OldestLastGoodCheckDBTime"] !=DBNull.Value)
+                string oldestLastGoodCheckDB = "Unknown";
+                if (row["OldestLastGoodCheckDBTime"] != DBNull.Value)
                 {
-                    if((DateTime)row["OldestLastGoodCheckDBTime"] == DateTime.Parse("1900-01-01"))
+                    if ((DateTime)row["OldestLastGoodCheckDBTime"] == DateTime.Parse("1900-01-01"))
                     {
                         oldestLastGoodCheckDB = "Never";
                         dgvSummary.Rows[idx].Cells["LastGoodCheckDBStatus"].Value = "Never";
@@ -248,14 +244,14 @@ namespace DBADashGUI
                                                                                "Oldest Last Good CheckDB:" + oldestLastGoodCheckDB;
                     ;
                 }
-                if (row["LastMemoryDump"]!= DBNull.Value)
+                if (row["LastMemoryDump"] != DBNull.Value)
                 {
                     DateTime lastMemoryDump = (DateTime)row["LastMemoryDump"];
                     DateTime lastMemoryDumpUTC = (DateTime)row["LastMemoryDumpUTC"];
                     Int32 memoryDumpCount = (Int32)row["MemoryDumpCount"];
                     string lastMemoryDumpStr;
 
-                    if(Math.Abs(lastMemoryDumpUTC.ToLocalTime().Subtract(lastMemoryDump).TotalMinutes) > 10)
+                    if (Math.Abs(lastMemoryDumpUTC.ToLocalTime().Subtract(lastMemoryDump).TotalMinutes) > 10)
                     {
                         lastMemoryDumpStr = "Last Memory Dump (local time): " + lastMemoryDumpUTC.ToLocalTime().ToString() + Environment.NewLine +
                            "Last Memory Dump (server time): " + lastMemoryDump.ToString() + Environment.NewLine +
@@ -282,7 +278,7 @@ namespace DBADashGUI
                 {
                     DateTime lastAlertD = (DateTime)row["LastAlert"];
                     lastAlert = lastAlertD.ToLocalTime().ToString("yyyy-MM-dd HH:mm");
-                    if(DateTime.UtcNow.Subtract(lastAlertD).TotalHours < 24)
+                    if (DateTime.UtcNow.Subtract(lastAlertD).TotalHours < 24)
                     {
                         lastAlertDays = DateTime.UtcNow.Subtract(lastAlertD).TotalHours.ToString("0") + "hrs";
                     }
@@ -291,15 +287,15 @@ namespace DBADashGUI
                         lastAlertDays = DateTime.UtcNow.Subtract(lastAlertD).TotalDays.ToString("0") + " days";
                     }
                 }
-               if(row["LastCritical"] != DBNull.Value)
+                if (row["LastCritical"] != DBNull.Value)
                 {
                     lastCriticalAlert = (((DateTime)row["LastCritical"]).ToLocalTime()).ToString("yyyy-MM-dd HH:mm");
                 }
                 Int32 totalAlerts = row["TotalAlerts"] == DBNull.Value ? 0 : (Int32)row["TotalAlerts"];
 
                 dgvSummary.Rows[idx].Cells["AlertStatus"].Value = lastAlertDays;
-                dgvSummary.Rows[idx].Cells["AlertStatus"].ToolTipText = "Last Alert:" + lastAlert + Environment.NewLine + 
-                                                                        "Last Critical Alert:" + lastCriticalAlert + Environment.NewLine + 
+                dgvSummary.Rows[idx].Cells["AlertStatus"].ToolTipText = "Last Alert:" + lastAlert + Environment.NewLine +
+                                                                        "Last Critical Alert:" + lastCriticalAlert + Environment.NewLine +
                                                                         "Total Alerts:" + totalAlerts;
                 dgvSummary.Rows[idx].Cells["ElasticPoolStorageStatus"].Value = isAzure ? "View" : "";
             }
@@ -308,11 +304,11 @@ namespace DBADashGUI
         private void DgvSummary_ColumnHeaderMouseClick(object sender, DataGridViewCellMouseEventArgs e)
         {
             var sortCol = "";
-            if(dgvSummary.Columns[e.ColumnIndex] == FullBackupStatus)
+            if (dgvSummary.Columns[e.ColumnIndex] == FullBackupStatus)
             {
                 sortCol = "FullBackupStatus";
             }
-            if(dgvSummary.Columns[e.ColumnIndex] == AlertStatus)
+            if (dgvSummary.Columns[e.ColumnIndex] == AlertStatus)
             {
                 sortCol = "AlertStatus";
             }
@@ -344,7 +340,7 @@ namespace DBADashGUI
             {
                 sortCol = "LastMemoryDump";
             }
-            if (dgvSummary.Columns[e.ColumnIndex] == LastGoodCheckDBStatus )
+            if (dgvSummary.Columns[e.ColumnIndex] == LastGoodCheckDBStatus)
             {
                 sortCol = "LastGoodCheckDBStatus";
             }
@@ -382,7 +378,8 @@ namespace DBADashGUI
             }
             if (sortCol != "")
             {
-                if (dv.Sort == sortCol) {
+                if (dv.Sort == sortCol)
+                {
                     dv.Sort = sortCol += " DESC";
                 }
                 else
@@ -409,14 +406,14 @@ namespace DBADashGUI
             if (e.RowIndex >= 0)
             {
                 DataRowView row = (DataRowView)dgvSummary.Rows[e.RowIndex].DataBoundItem;
-                if (e.ColumnIndex== LastGoodCheckDBStatus.Index)
+                if (e.ColumnIndex == LastGoodCheckDBStatus.Index)
                 {
                     if (row["InstanceID"] != DBNull.Value)
                     {
                         Instance_Selected(this, new InstanceSelectedEventArgs() { InstanceID = (Int32)row["InstanceID"], Tab = "tabLastGood" });
-                    }                   
+                    }
                 }
-                else if(e.ColumnIndex == FullBackupStatus.Index || e.ColumnIndex == DiffBackupStatus.Index || e.ColumnIndex == LogBackupStatus.Index)
+                else if (e.ColumnIndex == FullBackupStatus.Index || e.ColumnIndex == DiffBackupStatus.Index || e.ColumnIndex == LogBackupStatus.Index)
                 {
                     if (row["InstanceID"] != DBNull.Value)
                     {
@@ -430,7 +427,7 @@ namespace DBADashGUI
                         Instance_Selected(this, new InstanceSelectedEventArgs() { InstanceID = (Int32)row["InstanceID"], Tab = "tabLogShipping" });
                     }
                 }
-                else if(e.ColumnIndex == DriveStatus.Index)
+                else if (e.ColumnIndex == DriveStatus.Index)
                 {
                     if (row["InstanceID"] != DBNull.Value)
                     {
@@ -446,13 +443,13 @@ namespace DBADashGUI
                 }
                 else if (e.ColumnIndex == FileFreeSpaceStatus.Index || e.ColumnIndex == PctMaxSizeStatus.Index || e.ColumnIndex == LogFreeSpaceStatus.Index)
                 {
-                     Instance_Selected(this, new InstanceSelectedEventArgs() { Instance = (string)row["InstanceGroupName"], Tab = "tabFiles" });
+                    Instance_Selected(this, new InstanceSelectedEventArgs() { Instance = (string)row["InstanceGroupName"], Tab = "tabFiles" });
                 }
                 else if (e.ColumnIndex == CustomCheckStatus.Index)
                 {
-                       Instance_Selected(this, new InstanceSelectedEventArgs() { Instance = (string)row["InstanceGroupName"], Tab = "tabCustomChecks" });
+                    Instance_Selected(this, new InstanceSelectedEventArgs() { Instance = (string)row["InstanceGroupName"], Tab = "tabCustomChecks" });
                 }
-                else if (e.ColumnIndex ==  CollectionErrorStatus.Index)
+                else if (e.ColumnIndex == CollectionErrorStatus.Index)
                 {
                     if (row["InstanceID"] != DBNull.Value)
                     {
@@ -460,12 +457,12 @@ namespace DBADashGUI
                     }
                     else
                     {
-                        Instance_Selected(this, new InstanceSelectedEventArgs() { InstanceID=-1, Instance = (string)row["InstanceGroupName"], Tab = "tabDBADashErrorLog" });
+                        Instance_Selected(this, new InstanceSelectedEventArgs() { InstanceID = -1, Instance = (string)row["InstanceGroupName"], Tab = "tabDBADashErrorLog" });
                     }
                 }
                 else if (e.ColumnIndex == SnapshotAgeStatus.Index)
                 {
-                    Instance_Selected(this, new InstanceSelectedEventArgs() { Instance = (string)row["InstanceGroupName"], Tab = "tabCollectionDates" });                   
+                    Instance_Selected(this, new InstanceSelectedEventArgs() { Instance = (string)row["InstanceGroupName"], Tab = "tabCollectionDates" });
                 }
                 else if (e.ColumnIndex == AlertStatus.Index)
                 {
@@ -474,23 +471,23 @@ namespace DBADashGUI
                         Instance_Selected(this, new InstanceSelectedEventArgs() { InstanceID = (Int32)row["InstanceID"], Tab = "tabAlerts" });
                     }
                 }
-                else if(e.ColumnIndex == ElasticPoolStorageStatus.Index)
+                else if (e.ColumnIndex == ElasticPoolStorageStatus.Index)
                 {
                     Instance_Selected(this, new InstanceSelectedEventArgs() { Instance = (string)row["InstanceGroupName"], Tab = "tabAzureSummary" });
                 }
-                else if(e.ColumnIndex== AGStatus.Index)
+                else if (e.ColumnIndex == AGStatus.Index)
                 {
                     Instance_Selected(this, new InstanceSelectedEventArgs() { Instance = (string)row["InstanceGroupName"], Tab = "tabAG" });
                 }
-                else if ( e.ColumnIndex == QueryStoreStatus.Index)
+                else if (e.ColumnIndex == QueryStoreStatus.Index)
                 {
-                    Instance_Selected(this,new InstanceSelectedEventArgs() { Instance = (string)row["InstanceGroupName"], Tab = "tabQS" });
+                    Instance_Selected(this, new InstanceSelectedEventArgs() { Instance = (string)row["InstanceGroupName"], Tab = "tabQS" });
                 }
-                else if (e.ColumnIndex== UptimeStatus.Index)
+                else if (e.ColumnIndex == UptimeStatus.Index)
                 {
                     var frm = new UptimeThresholdConfig() { InstanceID = (Int32)row["InstanceID"] };
                     frm.ShowDialog();
-                    if(frm.DialogResult == DialogResult.OK)
+                    if (frm.DialogResult == DialogResult.OK)
                     {
                         RefreshData();
                     }
@@ -515,11 +512,12 @@ namespace DBADashGUI
 
         private void Timer1_Tick(object sender, EventArgs e)
         {
-            if (DateTime.Now.Subtract(lastRefresh).TotalMinutes > 60){
+            if (DateTime.Now.Subtract(lastRefresh).TotalMinutes > 60)
+            {
                 lblRefreshTime.ForeColor = DBADashStatusEnum.Critical.GetColor();
                 timer1.Enabled = false;
             }
-            else if(DateTime.Now.Subtract(lastRefresh).TotalMinutes>10)
+            else if (DateTime.Now.Subtract(lastRefresh).TotalMinutes > 10)
             {
                 lblRefreshTime.ForeColor = DBADashStatusEnum.Warning.GetColor();
             }

@@ -1,11 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace DBADashGUI.LogShipping
@@ -20,26 +13,26 @@ namespace DBADashGUI.LogShipping
         public Int32 InstanceID;
         public Int32 DatabaseID;
 
-        private void chkLRLatency_CheckedChanged(object sender, EventArgs e)
+        private void ChkLRLatency_CheckedChanged(object sender, EventArgs e)
         {
             numLRLatencyCritical.Enabled = chkLRLatency.Checked;
             numLRLatencyWarning.Enabled = chkLRLatency.Checked;
         }
 
-        private void chkLRTimeSinceLast_CheckedChanged(object sender, EventArgs e)
+        private void ChkLRTimeSinceLast_CheckedChanged(object sender, EventArgs e)
         {
             numLRTimeSinceLastCritical.Enabled = chkLRTimeSinceLast.Checked;
             numLRTimeSinceLastWarning.Enabled = chkLRTimeSinceLast.Checked;
         }
 
-        private void chkLRInherit_CheckedChanged(object sender, EventArgs e)
+        private void ChkLRInherit_CheckedChanged(object sender, EventArgs e)
         {
             pnlThresholds.Enabled = !chkLRInherit.Checked;
         }
 
         private void LogShippingThresholdsConfig_Load(object sender, EventArgs e)
         {
-            var threshold =  LogShippingThreshold.GetLogShippingThreshold(InstanceID, DatabaseID);
+            var threshold = LogShippingThreshold.GetLogShippingThreshold(InstanceID, DatabaseID);
             Threshold = threshold;
         }
 
@@ -59,7 +52,7 @@ namespace DBADashGUI.LogShipping
                     threshold.LatencyCriticalThreshold = (Int32?)numLRLatencyCritical.Value;
                     threshold.LatencyWarningThreshold = (Int32?)numLRLatencyWarning.Value;
                 }
-                if(chkLRTimeSinceLast.Checked & !chkLRInherit.Checked)
+                if (chkLRTimeSinceLast.Checked & !chkLRInherit.Checked)
                 {
                     threshold.TimeSinceLastCriticalThreshold = (Int32?)numLRTimeSinceLastCritical.Value;
                     threshold.TimeSinceLastWarningThreshold = (Int32?)numLRTimeSinceLastWarning.Value;
@@ -91,13 +84,13 @@ namespace DBADashGUI.LogShipping
             }
         }
 
-        private void bttnUpdate_Click(object sender, EventArgs e)
+        private void BttnUpdate_Click(object sender, EventArgs e)
         {
             Threshold.Save();
             this.DialogResult = DialogResult.OK;
         }
 
-        private void chkExcludePeriod_CheckedChanged(object sender, EventArgs e)
+        private void ChkExcludePeriod_CheckedChanged(object sender, EventArgs e)
         {
             if (chkExcludePeriod.Checked && numExcludePeriod.Value == 0 || !chkExcludePeriod.Checked && numExcludePeriod.Value > 0)
             {
@@ -105,7 +98,7 @@ namespace DBADashGUI.LogShipping
             }
         }
 
-        private void numExcludePeriod_Validated(object sender, EventArgs e)
+        private void NumExcludePeriod_Validated(object sender, EventArgs e)
         {
             chkExcludePeriod.Checked = numExcludePeriod.Value > 0;
         }

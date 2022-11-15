@@ -1,15 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using Microsoft.Data.SqlClient;
+using System;
 using System.Data;
-using Microsoft.Data.SqlClient;
-using System.Data.SqlTypes;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace DBADashGUI.Backups
 {
-   public class BackupThresholds
+    public class BackupThresholds
     {
         public Int32 InstanceID { get; set; }
         public Int32 DatabaseID { get; set; }
@@ -28,11 +23,11 @@ namespace DBADashGUI.Backups
 
         public string ExcludedDBs { get; set; } = string.Empty;
 
-        
-        public static BackupThresholds GetThresholds(Int32 InstanceID,Int32 DatabaseID)
+
+        public static BackupThresholds GetThresholds(Int32 InstanceID, Int32 DatabaseID)
         {
-            BackupThresholds thresholds = new BackupThresholds();
-            using (var cn = new SqlConnection(Common.ConnectionString))          
+            BackupThresholds thresholds = new();
+            using (var cn = new SqlConnection(Common.ConnectionString))
             using (var cmd = new SqlCommand("dbo.BackupThresholds_Get", cn) { CommandType = CommandType.StoredProcedure })
             {
                 cn.Open();
@@ -58,7 +53,7 @@ namespace DBADashGUI.Backups
                         thresholds.LogCritical = (Int32)rdr["LogBackupCriticalThreshold"];
                         thresholds.LogWarning = (Int32)rdr["LogBackupWarningThreshold"];
                     }
-                    thresholds.MinimumAge =rdr["MinimumAge"]==DBNull.Value ? 0 :  (Int32)rdr["MinimumAge"];
+                    thresholds.MinimumAge = rdr["MinimumAge"] == DBNull.Value ? 0 : (Int32)rdr["MinimumAge"];
                     thresholds.UsePartial = (bool)rdr["ConsiderPartialBackups"];
                     thresholds.UseFG = (bool)rdr["ConsiderFGBackups"];
                     thresholds.ExcludedDBs = Convert.ToString(rdr["ExcludedDatabases"]);
@@ -67,14 +62,14 @@ namespace DBADashGUI.Backups
                 {
                     thresholds.Inherit = true;
                 }
-                
+
             }
             return thresholds;
         }
 
         public void Save()
         {
-            using (var cn = new SqlConnection(Common.ConnectionString))         
+            using (var cn = new SqlConnection(Common.ConnectionString))
             using (var cmd = new SqlCommand("dbo.BackupThresholds_Upd", cn) { CommandType = CommandType.StoredProcedure })
             {
                 cn.Open();
@@ -93,7 +88,7 @@ namespace DBADashGUI.Backups
                 if (MinimumAge > 0) { cmd.Parameters.AddWithValue("MinimumAge", MinimumAge); }
                 cmd.ExecuteNonQuery();
             }
-            
+
         }
 
     }

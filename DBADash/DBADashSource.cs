@@ -22,7 +22,8 @@ namespace DBADash
         public string ConnectionID { get; set; }
         public bool ScriptAgentJobs { get; set; } = true;
 
-        public  CollectionSchedules CollectionSchedules {
+        public CollectionSchedules CollectionSchedules
+        {
             get
             {
                 if (SourceConnection != null && SourceConnection.Type == ConnectionType.SQL)
@@ -34,13 +35,16 @@ namespace DBADash
                     return null;
                 }
             }
-            set {
-                 collectionSchedules = value;
+            set
+            {
+                collectionSchedules = value;
             }
         }
 
-        public PlanCollectionThreshold RunningQueryPlanThreshold {
-            get {
+        public PlanCollectionThreshold RunningQueryPlanThreshold
+        {
+            get
+            {
                 if (SourceConnection != null && SourceConnection.Type == ConnectionType.SQL)
                 {
                     return runningQueryPlanThreshold;
@@ -50,14 +54,17 @@ namespace DBADash
                     return null;
                 }
             }
-            set {
-              
-                    runningQueryPlanThreshold = value;
+            set
+            {
+
+                runningQueryPlanThreshold = value;
             }
         }
 
-        public string SchemaSnapshotDBs { 
-            get {
+        public string SchemaSnapshotDBs
+        {
+            get
+            {
                 if (SourceConnection != null && SourceConnection.Type == ConnectionType.SQL)
                 {
                     return schemaSnapshotDBs;
@@ -66,10 +73,11 @@ namespace DBADash
                 {
                     return string.Empty;
                 }
-            } 
-            set {
-                    schemaSnapshotDBs = value;
-            } 
+            }
+            set
+            {
+                schemaSnapshotDBs = value;
+            }
         }
 
         [JsonIgnore]
@@ -148,7 +156,7 @@ namespace DBADash
             {
                 RunningQueryPlanThreshold ??= PlanCollectionThreshold.PlanCollectionDisabledThreshold;
                 RunningQueryPlanThreshold.MemoryGrantThreshold = value;
-                
+
             }
         }
         [JsonIgnore]
@@ -168,7 +176,7 @@ namespace DBADash
             set
             {
                 RunningQueryPlanThreshold ??= PlanCollectionThreshold.PlanCollectionDisabledThreshold;
-                RunningQueryPlanThreshold.DurationThreshold = value;                
+                RunningQueryPlanThreshold.DurationThreshold = value;
             }
         }
 
@@ -189,7 +197,7 @@ namespace DBADash
             set
             {
                 RunningQueryPlanThreshold ??= PlanCollectionThreshold.PlanCollectionDisabledThreshold;
-                RunningQueryPlanThreshold.CountThreshold = value;             
+                RunningQueryPlanThreshold.CountThreshold = value;
             }
         }
 
@@ -226,12 +234,14 @@ namespace DBADash
 
         public static string GenerateFileName(string connection)
         {
-            return "DBADash_" + DateTime.UtcNow.ToString("yyyyMMdd_HHmm_ss") + "_" + connection + "_" + Convert.ToBase64String(Guid.NewGuid().ToByteArray()).Replace("=", "").Replace("/","-") + ".xml";
+            return "DBADash_" + DateTime.UtcNow.ToString("yyyyMMdd_HHmm_ss") + "_" + connection + "_" + Convert.ToBase64String(Guid.NewGuid().ToByteArray()).Replace("=", "").Replace("/", "-") + ".xml";
         }
 
         [DefaultValue(false)]
-        public bool NoWMI { 
-            get {
+        public bool NoWMI
+        {
+            get
+            {
                 if (SourceConnection != null && SourceConnection.Type == ConnectionType.SQL)
                 {
                     return noWMI;
@@ -240,16 +250,19 @@ namespace DBADash
                 {
                     return false;
                 }
-            } 
-            set {
-             
-                    noWMI = value;
-            } 
+            }
+            set
+            {
+
+                noWMI = value;
+            }
         }
 
 
-        public Int32 SlowQuerySessionMaxMemoryKB { 
-            get {
+        public Int32 SlowQuerySessionMaxMemoryKB
+        {
+            get
+            {
                 if (SourceConnection != null && SourceConnection.Type == ConnectionType.SQL)
                 {
                     return slowQuerySessionMaxMemoryKB;
@@ -258,10 +271,11 @@ namespace DBADash
                 {
                     return 0;
                 }
-            } 
-            set {            
-                    slowQuerySessionMaxMemoryKB = value;
-            } 
+            }
+            set
+            {
+                slowQuerySessionMaxMemoryKB = value;
+            }
         }
 
         public Int32 SlowQueryTargetMaxMemoryKB
@@ -284,8 +298,10 @@ namespace DBADash
         }
 
         [DefaultValue(true)]
-        public bool UseDualEventSession {
-            get {
+        public bool UseDualEventSession
+        {
+            get
+            {
                 if (SourceConnection != null && SourceConnection.Type == ConnectionType.SQL)
                 {
                     return useDualXESesion;
@@ -297,10 +313,10 @@ namespace DBADash
             }
             set
             {
-                    useDualXESesion = value;
+                useDualXESesion = value;
             }
         }
-       
+
 
         [DefaultValue(-1)]
         public Int32 SlowQueryThresholdMs
@@ -315,14 +331,16 @@ namespace DBADash
                 {
                     return -1;
                 }
-                
-             }
-            set {           
-                    slowQueryThresholdMs = value;             
+
+            }
+            set
+            {
+                slowQueryThresholdMs = value;
             }
         }
         [DefaultValue(false)]
-        public bool PersistXESessions { 
+        public bool PersistXESessions
+        {
             get
             {
                 if (SourceConnection != null && SourceConnection.Type == ConnectionType.SQL)
@@ -333,11 +351,12 @@ namespace DBADash
                 {
                     return false;
                 }
-                
+
             }
-            set {
-              
-                    persistXESessions = value;
+            set
+            {
+
+                persistXESessions = value;
             }
         }
 
@@ -347,7 +366,7 @@ namespace DBADash
         {
             get
             {
-                if(SourceConnection!=null && SourceConnection.Type == ConnectionType.SQL)
+                if (SourceConnection != null && SourceConnection.Type == ConnectionType.SQL)
                 {
                     return _collectSessionWaits;
                 }

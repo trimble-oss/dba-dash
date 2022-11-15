@@ -1,13 +1,11 @@
-﻿using System;
+﻿using Microsoft.Data.SqlClient;
+using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Drawing;
 using System.Data;
+using System.Drawing;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
-using Microsoft.Data.SqlClient;
 using static DBADashGUI.Main;
 
 namespace DBADashGUI.Performance
@@ -21,7 +19,6 @@ namespace DBADashGUI.Performance
 
         public Dictionary<int, Counter> SelectedPerformanceCounters = new();
         private PerformanceSummarySavedView selectedview;
-        private bool hasRunOnce;
 
         public PerformanceSummary()
         {
@@ -32,27 +29,24 @@ namespace DBADashGUI.Performance
 
         public void RefreshData()
         {
-            
+
             MigratePerformanceSummaryView();
             savedViewMenuItem1.LoadItemsAndSelectDefault();
-          
+
             dgv.Columns[0].Frozen = Common.FreezeKeyColumn;
             dgv.DataSource = null;
             var dt = GetPerformanceSummary();
             AddPerformanceCounters(ref dt);
             dgv.AutoGenerateColumns = false;
             GenerateHistogram(ref dt);
-            if (dgv.DataSource == null)
-            {
-                dgv.DataSource = new DataView(dt);
-            }
+            dgv.DataSource ??= new DataView(dt);
             dgv.AutoResizeColumnHeadersHeight();
             dgv.Columns["colCPUHistogram"].Width = 200;
             if (selectedview != null)
             {
                 LoadPersistedColumnLayout(selectedview.ColumnLayout);
             }
-            
+
         }
 
         private void AddPerformanceCounterColsToGrid()
@@ -303,7 +297,7 @@ namespace DBADashGUI.Performance
 
         private static void AddHistCols(DataGridView dgv, string prefix)
         {
-            string histogram = "CPU";        
+            string histogram = "CPU";
 
             for (int i = 10; i <= 100; i += 10)
             {
@@ -316,7 +310,7 @@ namespace DBADashGUI.Performance
                 };
                 dgv.Columns.Add(col);
             }
-            
+
 
         }
 
@@ -330,8 +324,8 @@ namespace DBADashGUI.Performance
         private void Dgv_RowsAdded(object sender, DataGridViewRowsAddedEventArgs e)
         {
             bool histogram = ((DataView)dgv.DataSource).Table.Columns.Contains("CPUHistogram");
-            var pcCols = dgv.Columns.Cast<DataGridViewColumn>().Where(col => Convert.ToString(col.Tag) == "PC" 
-                                                                && (col.DataPropertyName.StartsWith("Avg") || col.DataPropertyName.StartsWith("Max") || col.DataPropertyName.StartsWith("Min") || col.DataPropertyName.StartsWith("Current")) 
+            var pcCols = dgv.Columns.Cast<DataGridViewColumn>().Where(col => Convert.ToString(col.Tag) == "PC"
+                                                                && (col.DataPropertyName.StartsWith("Avg") || col.DataPropertyName.StartsWith("Max") || col.DataPropertyName.StartsWith("Min") || col.DataPropertyName.StartsWith("Current"))
                                                                 )
                                                                 .Select(col => col.DataPropertyName)
                                                                 .ToList();
@@ -344,10 +338,10 @@ namespace DBADashGUI.Performance
                 var avgCPUstatus = (DBADashStatus.DBADashStatusEnum)row["AvgCPUStatus"];
                 var maxCPUstatus = (DBADashStatus.DBADashStatusEnum)row["MaxCPUStatus"];
 
-                DBADashStatus.SetProgressBarColor(avgCPUstatus,ref pAvgCPU);
+                DBADashStatus.SetProgressBarColor(avgCPUstatus, ref pAvgCPU);
                 DBADashStatus.SetProgressBarColor(maxCPUstatus, ref pMaxCPU);
-              
-                foreach(var pcCol in pcCols)
+
+                foreach (var pcCol in pcCols)
                 {
                     var status = row[pcCol + "Status"];
                     if (status != DBNull.Value)
@@ -365,11 +359,11 @@ namespace DBADashGUI.Performance
                 r.Cells["CriticalWaitMsPerSec"].SetStatusColor((DBADashStatus.DBADashStatusEnum)row["CriticalWaitStatus"]);
                 if (histogram)
                 {
-                     r.Height = 100;
-                    r.Cells["colCPUHistogram"].ToolTipText = row["CPUHistogramTooltip"]==DBNull.Value ? "" : (string)row["CPUHistogramTooltip"];
+                    r.Height = 100;
+                    r.Cells["colCPUHistogram"].ToolTipText = row["CPUHistogramTooltip"] == DBNull.Value ? "" : (string)row["CPUHistogramTooltip"];
                 }
             }
-             
+
         }
 
         private void TsCopy_Click(object sender, EventArgs e)
@@ -389,7 +383,7 @@ namespace DBADashGUI.Performance
             {
                 for (int i = 10; i <= 100; i += 10)
                 {
-                    dgv.Columns["colCPUHistogram_" + i.ToString()].Visible = false ;
+                    dgv.Columns["colCPUHistogram_" + i.ToString()].Visible = false;
                 }
             }
         }
@@ -402,7 +396,7 @@ namespace DBADashGUI.Performance
             if (e.RowIndex >= 0 && e.ColumnIndex == 0)
             {
                 DataRowView row = (DataRowView)dgv.Rows[e.RowIndex].DataBoundItem;
-                Instance_Selected(this, new InstanceSelectedEventArgs() { InstanceID = (Int32)row["InstanceID"], Tab="tabPerformance"});
+                Instance_Selected(this, new InstanceSelectedEventArgs() { InstanceID = (Int32)row["InstanceID"], Tab = "tabPerformance" });
             }
         }
 
@@ -429,12 +423,12 @@ namespace DBADashGUI.Performance
 
         private List<KeyValuePair<string, PersistedColumnLayout>> GetColumnLayout()
         {
-           return dgv.Columns.Cast<DataGridViewColumn>()
-          .Select(c => new KeyValuePair<string, PersistedColumnLayout>(c.Name, new PersistedColumnLayout() { Visible = c.Visible, Width = c.Width, DisplayIndex = c.DisplayIndex }))
-          .ToList();
+            return dgv.Columns.Cast<DataGridViewColumn>()
+           .Select(c => new KeyValuePair<string, PersistedColumnLayout>(c.Name, new PersistedColumnLayout() { Visible = c.Visible, Width = c.Width, DisplayIndex = c.DisplayIndex }))
+           .ToList();
         }
 
-        private void LoadPersistedColumnLayout(List<KeyValuePair<string,PersistedColumnLayout>> savedCols)
+        private void LoadPersistedColumnLayout(List<KeyValuePair<string, PersistedColumnLayout>> savedCols)
         {
             if (savedCols == null)
             {
@@ -455,7 +449,7 @@ namespace DBADashGUI.Performance
                 else
                 {
                     col.Visible = false;
-                }           
+                }
             }
             if (dgv.DataSource != null)
             {
@@ -481,7 +475,7 @@ namespace DBADashGUI.Performance
             {
                 SelectedPerformanceCounters = frm.SelectedCounters;
                 DeSelectView();
-                RefreshData();    
+                RefreshData();
             }
         }
 
@@ -520,15 +514,15 @@ namespace DBADashGUI.Performance
                     savedView.Save();
                     savedViewMenuItem1.RefreshItems();
                     savedViewMenuItem1.SelectItem(name, false);
-                    tsDeleteView.Visible = true;                    
+                    tsDeleteView.Visible = true;
                 }
             }
         }
 
-  
+
         private void SavedViewSelected(object sender, SavedViewSelectedEventArgs e)
         {
-            selectedview=null;
+            selectedview = null;
             if (e.SerializedObject != String.Empty)
             {
                 try

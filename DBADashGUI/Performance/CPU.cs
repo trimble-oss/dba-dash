@@ -1,17 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Drawing;
+﻿using LiveCharts;
+using LiveCharts.Defaults;
+using LiveCharts.Wpf;
+using Microsoft.Data.SqlClient;
+using System;
 using System.Data;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
-using LiveCharts.Defaults;
-using Microsoft.Data.SqlClient;
-using LiveCharts.Wpf;
-using LiveCharts;
-using static DBADashGUI.Performance.Performance;
 
 namespace DBADashGUI.Performance
 {
@@ -53,7 +47,7 @@ namespace DBADashGUI.Performance
             set
             {
                 smoothLines = value;
-                foreach (Series s in chartCPU.Series)
+                foreach (Series s in chartCPU.Series.Cast<Series>())
                 {
                     if (s.GetType() == typeof(LineSeries))
                     {
@@ -68,16 +62,19 @@ namespace DBADashGUI.Performance
             }
         }
 
-        public bool MoveUpVisible { 
-            get { 
-                return tsUp.Visible; 
-            } 
-            set { 
-                tsUp.Visible = value; 
-            } 
+        public bool MoveUpVisible
+        {
+            get
+            {
+                return tsUp.Visible;
+            }
+            set
+            {
+                tsUp.Visible = value;
+            }
         }
-        private CPUMetric _metric = new() { AggregateType = IMetric.AggregateTypes.Avg  };
-        public CPUMetric Metric { get=>_metric; set { _metric = value; SelectAggregate(); } } 
+        private CPUMetric _metric = new() { AggregateType = IMetric.AggregateTypes.Avg };
+        public CPUMetric Metric { get => _metric; set { _metric = value; SelectAggregate(); } }
 
         IMetric IMetricChart.Metric { get => Metric; }
 

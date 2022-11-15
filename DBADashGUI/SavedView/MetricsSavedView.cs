@@ -1,10 +1,6 @@
 ﻿using DBADashGUI.Performance;
 using Newtonsoft.Json;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace DBADashGUI
 {
@@ -26,7 +22,7 @@ namespace DBADashGUI
             {
                 TypeNameHandling = TypeNameHandling.Objects,
                 TypeNameAssemblyFormatHandling = TypeNameAssemblyFormatHandling.Simple,
-                MaxDepth=1
+                MaxDepth = 1
             });
             return json;
         }
@@ -41,10 +37,10 @@ namespace DBADashGUI
 
         public static Dictionary<string, string> GetSavedViews(int UserID)
         {
-           return SavedView.GetSavedViews(ViewTypes.Metric,UserID);
+            return SavedView.GetSavedViews(ViewTypes.Metric, UserID);
         }
 
-   
+
     }
 
 

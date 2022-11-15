@@ -202,7 +202,7 @@
             this.tsRefreshVersion.Name = "tsRefreshVersion";
             this.tsRefreshVersion.Size = new System.Drawing.Size(29, 24);
             this.tsRefreshVersion.Text = "Refresh";
-            this.tsRefreshVersion.Click += new System.EventHandler(this.tsRefreshVersion_Click);
+            this.tsRefreshVersion.Click += new System.EventHandler(this.TsRefreshVersion_Click);
             // 
             // tsCopyVersion
             // 
@@ -212,7 +212,7 @@
             this.tsCopyVersion.Name = "tsCopyVersion";
             this.tsCopyVersion.Size = new System.Drawing.Size(29, 24);
             this.tsCopyVersion.Text = "Copy";
-            this.tsCopyVersion.Click += new System.EventHandler(this.tsCopyVersion_Click);
+            this.tsCopyVersion.Click += new System.EventHandler(this.TsCopyVersion_Click);
             // 
             // tsExcel
             // 
@@ -222,7 +222,7 @@
             this.tsExcel.Name = "tsExcel";
             this.tsExcel.Size = new System.Drawing.Size(29, 24);
             this.tsExcel.Text = "Export Excel";
-            this.tsExcel.Click += new System.EventHandler(this.tsExcel_Click);
+            this.tsExcel.Click += new System.EventHandler(this.TsExcel_Click);
             // 
             // tsCols
             // 
@@ -232,7 +232,7 @@
             this.tsCols.Name = "tsCols";
             this.tsCols.Size = new System.Drawing.Size(29, 24);
             this.tsCols.Text = "Columns";
-            this.tsCols.Click += new System.EventHandler(this.tsCols_Click);
+            this.tsCols.Click += new System.EventHandler(this.TsCols_Click);
             // 
             // toolStrip1
             // 
@@ -264,7 +264,7 @@
             this.tsRefreshHistory.Name = "tsRefreshHistory";
             this.tsRefreshHistory.Size = new System.Drawing.Size(29, 24);
             this.tsRefreshHistory.Text = "Refresh";
-            this.tsRefreshHistory.Click += new System.EventHandler(this.tsRefreshHistory_Click);
+            this.tsRefreshHistory.Click += new System.EventHandler(this.TsRefreshHistory_Click);
             // 
             // tsCopyHistory
             // 
@@ -274,7 +274,7 @@
             this.tsCopyHistory.Name = "tsCopyHistory";
             this.tsCopyHistory.Size = new System.Drawing.Size(29, 24);
             this.tsCopyHistory.Text = "Copy";
-            this.tsCopyHistory.Click += new System.EventHandler(this.tsCopyHistory_Click);
+            this.tsCopyHistory.Click += new System.EventHandler(this.TsCopyHistory_Click);
             // 
             // tsExcelHistory
             // 
@@ -284,7 +284,7 @@
             this.tsExcelHistory.Name = "tsExcelHistory";
             this.tsExcelHistory.Size = new System.Drawing.Size(29, 24);
             this.tsExcelHistory.Text = "Export Excel";
-            this.tsExcelHistory.Click += new System.EventHandler(this.tsExcelHistory_Click);
+            this.tsExcelHistory.Click += new System.EventHandler(this.TsExcelHistory_Click);
             // 
             // colInstance
             // 

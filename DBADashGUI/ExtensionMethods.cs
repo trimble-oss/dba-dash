@@ -2,9 +2,6 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using static DBADashGUI.DBADashStatus;
 
@@ -16,10 +13,10 @@ namespace DBADashGUI
         {
             if (string.IsNullOrEmpty(value)) { return value; }
 
-            return value.Substring(0, Math.Min(value.Length, maxLength));
+            return value[..Math.Min(value.Length, maxLength)];
         }
 
-        private static readonly HashSet<Type> NumericTypes = new HashSet<Type>
+        private static readonly HashSet<Type> NumericTypes = new()
         {
             typeof(int),  typeof(double),  typeof(decimal),
             typeof(long), typeof(short),   typeof(sbyte),
@@ -36,9 +33,9 @@ namespace DBADashGUI
         {
             var dt = new DataTable();
             dt.Columns.Add("ID", typeof(int));
-            foreach(int i in list)
+            foreach (int i in list)
             {
-               var r =  dt.NewRow();
+                var r = dt.NewRow();
                 r["ID"] = i;
                 dt.Rows.Add(r);
             }
@@ -53,14 +50,14 @@ namespace DBADashGUI
 
         public static Color ContrastColor(this Color value)
         {
-                return ((value.R * 0.299) + (value.G * 0.587) + (value.B * 0.114)) > 186 ? Color.Black : Color.White;           
+            return ((value.R * 0.299) + (value.G * 0.587) + (value.B * 0.114)) > 186 ? Color.Black : Color.White;
         }
 
         public static void SetStatusColor(this DataGridViewCell cell, Color StatusColor)
         {
             cell.Style.BackColor = StatusColor;
             cell.Style.ForeColor = StatusColor.ContrastColor();
-            if(cell.GetType()== typeof(DataGridViewLinkCell))
+            if (cell.GetType() == typeof(DataGridViewLinkCell))
             {
                 ((DataGridViewLinkCell)cell).LinkColor = StatusColor.ContrastColor();
             }

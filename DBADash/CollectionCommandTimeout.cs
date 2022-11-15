@@ -1,9 +1,4 @@
-﻿using Azure.Core;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 
 namespace DBADash
 {
@@ -17,8 +12,8 @@ namespace DBADash
             { CollectionType.SlowQueries, 90 }
         };
         public static int DefaultCommandTimeout = 60;
-      
-         public static int GetCommandTimeout(this CollectionType type)
+
+        public static int GetCommandTimeout(this CollectionType type)
         {
             return collectionCommandTimeouts.TryGetValue(type, out var value) ? value : DefaultCommandTimeout;
         }

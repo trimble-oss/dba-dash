@@ -1,13 +1,9 @@
-﻿using System;
+﻿using Microsoft.Data.SqlClient;
+using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Drawing;
 using System.Data;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Drawing;
 using System.Windows.Forms;
-using Microsoft.Data.SqlClient;
 
 namespace DBADashGUI.Checks
 {
@@ -75,7 +71,7 @@ namespace DBADashGUI.Checks
             set
             {
                 context = value;
-                bool found=false;
+                bool found = false;
                 var style = context == null ? FontStyle.Regular : FontStyle.Bold;
                 contextToolStripMenuItem.Font = new Font(contextToolStripMenuItem.Font, style);
                 foreach (ToolStripItem child in contextToolStripMenuItem.DropDownItems)
@@ -88,7 +84,7 @@ namespace DBADashGUI.Checks
                         found = found || child.Text == value;
                     }
                 }
-               if(context!=null && !found)
+                if (context != null && !found)
                 {
                     ddCustomContext.Checked = true;
                     ddCustomContext.Font = new Font(ddCustomContext.Font, FontStyle.Bold);
@@ -134,19 +130,19 @@ namespace DBADashGUI.Checks
             }
         }
 
-        private readonly ToolStripMenuItem ddCustomContext=new ToolStripMenuItem("Custom");
-        private ToolStripMenuItem ddCustomTest = new ToolStripMenuItem("Custom");
+        private readonly ToolStripMenuItem ddCustomContext = new("Custom");
+        private ToolStripMenuItem ddCustomTest = new("Custom");
         private string context = null;
         private string test = null;
 
-        private void refreshContext()
+        private void RefreshContext()
         {
             context = null;
             contextToolStripMenuItem.DropDownItems.Clear();
 
             using var cn = new SqlConnection(Common.ConnectionString);
             using var cmd = new SqlCommand("dbo.CustomCheckContext_Get", cn) { CommandType = CommandType.StoredProcedure };
-            
+
             cn.Open();
             cmd.Parameters.AddWithValue("InstanceIDs", String.Join(",", InstanceIDs));
             using var rdr = cmd.ExecuteReader();
@@ -165,27 +161,27 @@ namespace DBADashGUI.Checks
             }
             contextToolStripMenuItem.DropDownItems.Add(new ToolStripSeparator());
             contextToolStripMenuItem.DropDownItems.Add(ddCustomContext);
-                       
+
         }
 
         private void DdCustomContext_Click(object sender, EventArgs e)
         {
             var custom = (ToolStripMenuItem)sender;
-            string userContext="";
+            string userContext = "";
             if (custom.Checked)
             {
                 Context = null;
-                refreshCustomChecks();
+                RefreshCustomChecks();
             }
             else
             {
                 if (Common.ShowInputDialog(ref userContext, "Enter Context") == DialogResult.OK)
                 {
                     Context = userContext;
-                    refreshCustomChecks();
+                    RefreshCustomChecks();
                 }
             }
-           
+
         }
         private void DdCustomTest_Click(object sender, EventArgs e)
         {
@@ -194,26 +190,26 @@ namespace DBADashGUI.Checks
             if (custom.Checked)
             {
                 Test = null;
-                refreshCustomChecks();
+                RefreshCustomChecks();
             }
             else
             {
                 if (Common.ShowInputDialog(ref userTest, "Enter Test") == DialogResult.OK)
                 {
-                   Test = userTest;
-                    refreshCustomChecks();
+                    Test = userTest;
+                    RefreshCustomChecks();
                 }
             }
         }
 
-        private void refreshTest()
+        private void RefreshTest()
         {
             test = null;
             testToolStripMenuItem.DropDownItems.Clear();
-            
+
             using var cn = new SqlConnection(Common.ConnectionString);
-            using var cmd = new SqlCommand("dbo.CustomCheckTest_Get", cn) { CommandType = CommandType.StoredProcedure }; 
-            cn.Open();                  
+            using var cmd = new SqlCommand("dbo.CustomCheckTest_Get", cn) { CommandType = CommandType.StoredProcedure };
+            cn.Open();
             cmd.Parameters.AddWithValue("InstanceIDs", String.Join(",", InstanceIDs));
 
             using var rdr = cmd.ExecuteReader();
@@ -234,24 +230,24 @@ namespace DBADashGUI.Checks
             ddCustomTest = new ToolStripMenuItem("Custom");
             ddCustomTest.Click += DdCustomTest_Click;
             testToolStripMenuItem.DropDownItems.Add(ddCustomTest);
-                       
+
         }
 
-    
+
 
         private void DdTest_Click(object sender, EventArgs e)
         {
             var itm = (ToolStripMenuItem)sender;
             if (itm.Checked)
             {
-                Test= itm.Text;
-                
+                Test = itm.Text;
+
             }
             else
             {
-               Test = null;
+                Test = null;
             }
-            refreshCustomChecks();
+            RefreshCustomChecks();
         }
 
         private void DdContext_Click(object sender, EventArgs e)
@@ -259,32 +255,33 @@ namespace DBADashGUI.Checks
             var itm = (ToolStripMenuItem)sender;
             if (itm.Checked)
             {
-                Context = null;               
+                Context = null;
             }
             else
             {
                 Context = itm.Text;
             }
-            refreshCustomChecks();
+            RefreshCustomChecks();
         }
 
         public void RefreshData()
         {
-            refreshContext();
-            refreshTest();
-            refreshCustomChecks();
+            RefreshContext();
+            RefreshTest();
+            RefreshCustomChecks();
             Context = context;
             Test = test;
-           
+
         }
 
-        private void refreshCustomChecks()
-        {        
+        private void RefreshCustomChecks()
+        {
             using (var cn = new SqlConnection(Common.ConnectionString))
             using (var cmd = new SqlCommand("dbo.CustomCheck_Get", cn) { CommandType = CommandType.StoredProcedure })
-            using(var da = new SqlDataAdapter(cmd)){
+            using (var da = new SqlDataAdapter(cmd))
+            {
                 cn.Open();
-                   
+
                 cmd.Parameters.AddWithValue("InstanceIDs", String.Join(",", InstanceIDs));
                 cmd.Parameters.AddWithValue("IncludeNA", IncludeNA);
                 cmd.Parameters.AddWithValue("IncludeOK", IncludeOK);
@@ -297,8 +294,8 @@ namespace DBADashGUI.Checks
                 if (test != null)
                 {
                     cmd.Parameters.AddWithValue("Test", test);
-                }                
-                DataTable dt = new DataTable();
+                }
+                DataTable dt = new();
                 da.Fill(dt);
                 Common.ConvertUTCToLocal(ref dt);
                 dgvCustom.AutoGenerateColumns = false;
@@ -306,7 +303,7 @@ namespace DBADashGUI.Checks
                 HistoryView(false);
                 dgvCustom.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
             }
-            
+
         }
 
         private void HistoryView(bool isHistory)
@@ -318,7 +315,7 @@ namespace DBADashGUI.Checks
             tsRefresh.Visible = !isHistory;
         }
 
-        private void getHistory(Int32 InstanceID,string test,string context)
+        private void GetHistory(Int32 InstanceID, string test, string context)
         {
             using (var cn = new SqlConnection(Common.ConnectionString))
             using (var cmd = new SqlCommand("dbo.CustomChecksHistory_Get", cn) { CommandType = CommandType.StoredProcedure })
@@ -335,39 +332,39 @@ namespace DBADashGUI.Checks
                 {
                     cmd.Parameters.AddWithValue("Test", test);
                 }
-                
-                DataTable dt = new DataTable();
+
+                DataTable dt = new();
                 da.Fill(dt);
                 Common.ConvertUTCToLocal(ref dt);
                 dgvCustom.AutoGenerateColumns = false;
                 dgvCustom.DataSource = dt;
                 HistoryView(true);
-            }            
+            }
         }
 
-        private void tsRefresh_Click(object sender, EventArgs e)
+        private void TsRefresh_Click(object sender, EventArgs e)
         {
-            refreshCustomChecks();
+            RefreshCustomChecks();
         }
 
-  
-        private void statusToolStripMenuItem_Click(object sender, EventArgs e)
+
+        private void StatusToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            refreshCustomChecks();
+            RefreshCustomChecks();
         }
 
-        private void dgvCustom_RowsAdded(object sender, DataGridViewRowsAddedEventArgs e)
+        private void DgvCustom_RowsAdded(object sender, DataGridViewRowsAddedEventArgs e)
         {
             for (Int32 idx = e.RowIndex; idx < e.RowIndex + e.RowCount; idx += 1)
             {
                 var row = (DataRowView)dgvCustom.Rows[idx].DataBoundItem;
                 var status = (DBADashStatus.DBADashStatusEnum)Convert.ToInt32(row["Status"]);
                 dgvCustom.Rows[idx].Cells[colStatus.Index].SetStatusColor(status);
-                
+
             }
         }
 
-        private void tsCopy_Click(object sender, EventArgs e)
+        private void TsCopy_Click(object sender, EventArgs e)
         {
             Common.CopyDataGridViewToClipboard(dgvCustom);
         }
@@ -378,29 +375,29 @@ namespace DBADashGUI.Checks
             ddCustomTest.Click += DdCustomTest_Click;
         }
 
-        private void dgvCustom_CellContentClick(object sender, DataGridViewCellEventArgs e)
+        private void DgvCustom_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
             if (e.RowIndex >= 0)
             {
                 var row = (DataRowView)dgvCustom.Rows[e.RowIndex].DataBoundItem;
-                if(e.ColumnIndex== colContext.Index)
+                if (e.ColumnIndex == colContext.Index)
                 {
                     Context = (string)dgvCustom.Rows[e.RowIndex].Cells[e.ColumnIndex].Value;
-                    refreshCustomChecks();
+                    RefreshCustomChecks();
                 }
-                else if(e.ColumnIndex == colTest.Index)
+                else if (e.ColumnIndex == colTest.Index)
                 {
                     Test = (string)dgvCustom.Rows[e.RowIndex].Cells[e.ColumnIndex].Value;
-                    refreshCustomChecks();
+                    RefreshCustomChecks();
                 }
-                else if(e.ColumnIndex == History.Index)
+                else if (e.ColumnIndex == History.Index)
                 {
-                    getHistory((Int32)row["InstanceID"], (string)row["Test"], (string)row["Context"]);
+                    GetHistory((Int32)row["InstanceID"], (string)row["Test"], (string)row["Context"]);
                 }
             }
         }
 
-        private void tsClear_Click(object sender, EventArgs e)
+        private void TsClear_Click(object sender, EventArgs e)
         {
             Context = null;
             Test = null;
@@ -408,15 +405,15 @@ namespace DBADashGUI.Checks
             IncludeNA = true;
             IncludeCritical = true;
             IncludeWarning = true;
-            refreshCustomChecks();
+            RefreshCustomChecks();
         }
 
-        private void tsBack_Click(object sender, EventArgs e)
+        private void TsBack_Click(object sender, EventArgs e)
         {
-            refreshCustomChecks();
+            RefreshCustomChecks();
         }
 
-        private void tsExcel_Click(object sender, EventArgs e)
+        private void TsExcel_Click(object sender, EventArgs e)
         {
             Common.PromptSaveDataGridView(ref dgvCustom);
         }

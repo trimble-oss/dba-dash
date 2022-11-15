@@ -96,7 +96,7 @@
             0,
             0,
             0});
-            this.numExcludePeriod.Validated += new System.EventHandler(this.numExcludePeriod_Validated);
+            this.numExcludePeriod.Validated += new System.EventHandler(this.NumExcludePeriod_Validated);
             // 
             // label21
             // 
@@ -181,7 +181,7 @@
             this.chkLRTimeSinceLast.TabIndex = 42;
             this.chkLRTimeSinceLast.Text = "Time Since Last";
             this.chkLRTimeSinceLast.UseVisualStyleBackColor = true;
-            this.chkLRTimeSinceLast.CheckedChanged += new System.EventHandler(this.chkLRTimeSinceLast_CheckedChanged);
+            this.chkLRTimeSinceLast.CheckedChanged += new System.EventHandler(this.ChkLRTimeSinceLast_CheckedChanged);
             // 
             // chkLRLatency
             // 
@@ -194,7 +194,7 @@
             this.chkLRLatency.TabIndex = 41;
             this.chkLRLatency.Text = "Latency";
             this.chkLRLatency.UseVisualStyleBackColor = true;
-            this.chkLRLatency.CheckedChanged += new System.EventHandler(this.chkLRLatency_CheckedChanged);
+            this.chkLRLatency.CheckedChanged += new System.EventHandler(this.ChkLRLatency_CheckedChanged);
             // 
             // label25
             // 
@@ -261,7 +261,7 @@
             this.chkLRInherit.TabIndex = 39;
             this.chkLRInherit.Text = "Inherit";
             this.chkLRInherit.UseVisualStyleBackColor = true;
-            this.chkLRInherit.CheckedChanged += new System.EventHandler(this.chkLRInherit_CheckedChanged);
+            this.chkLRInherit.CheckedChanged += new System.EventHandler(this.ChkLRInherit_CheckedChanged);
             // 
             // bttnUpdate
             // 
@@ -271,7 +271,7 @@
             this.bttnUpdate.TabIndex = 41;
             this.bttnUpdate.Text = "Update";
             this.bttnUpdate.UseVisualStyleBackColor = true;
-            this.bttnUpdate.Click += new System.EventHandler(this.bttnUpdate_Click);
+            this.bttnUpdate.Click += new System.EventHandler(this.BttnUpdate_Click);
             // 
             // chkExcludePeriod
             // 
@@ -286,7 +286,7 @@
             this.toolTip1.SetToolTip(this.chkExcludePeriod, "Databases in restoring state are detected as log shipping databases after this th" +
         "reshold");
             this.chkExcludePeriod.UseVisualStyleBackColor = true;
-            this.chkExcludePeriod.CheckedChanged += new System.EventHandler(this.chkExcludePeriod_CheckedChanged);
+            this.chkExcludePeriod.CheckedChanged += new System.EventHandler(this.ChkExcludePeriod_CheckedChanged);
             // 
             // panel1
             // 

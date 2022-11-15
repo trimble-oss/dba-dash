@@ -1,11 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel;
-using System.Data;
-using Microsoft.Data.SqlClient;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using static DBADashGUI.DBADashStatus;
 
 namespace DBADashGUI
@@ -25,7 +19,7 @@ namespace DBADashGUI
     }
 
     [TypeConverter(typeof(DriveTypeConverter))]
-    public  class Drive: DriveThreshold
+    public class Drive : DriveThreshold
     {
         const Int64 bytesPerGB = 1073741824;
 
@@ -49,13 +43,13 @@ namespace DBADashGUI
                     DriveStatus = DBADashStatusEnum.OK;
                 }
             }
-            else if(DriveCheckType == DriveCheckTypeEnum.Percent)
+            else if (DriveCheckType == DriveCheckTypeEnum.Percent)
             {
-                if(PercentFreeSpace<= ((double)CriticalThreshold*100))
+                if (PercentFreeSpace <= ((double)CriticalThreshold * 100))
                 {
                     DriveStatus = DBADashStatusEnum.Critical;
                 }
-                else if(PercentFreeSpace<= ((double)WarningThreshold*100))
+                else if (PercentFreeSpace <= ((double)WarningThreshold * 100))
                 {
                     DriveStatus = DBADashStatusEnum.Warning;
                 }
@@ -78,8 +72,8 @@ namespace DBADashGUI
         public DateTime SnapshotDate { get; set; }
 
         public DBADashStatusEnum SnapshotStatus { get; set; }
-        
-       public  decimal FreeSpaceGB
+
+        public decimal FreeSpaceGB
         {
             get
             {
@@ -126,7 +120,7 @@ namespace DBADashGUI
                 return 100d - PercentFreeSpace;
             }
         }
-       
+
 
         public Int64 DriveCapacity { get; set; } = 0;
 
@@ -135,7 +129,7 @@ namespace DBADashGUI
 
         public override string ToString()
         {
-            return  DriveLabel + " (" + DriveLetter + ")";
+            return DriveLabel + " (" + DriveLetter + ")";
         }
     }
 }

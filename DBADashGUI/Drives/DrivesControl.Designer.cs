@@ -126,7 +126,7 @@
             this.tsRefresh.Name = "tsRefresh";
             this.tsRefresh.Size = new System.Drawing.Size(29, 24);
             this.tsRefresh.Text = "Refresh";
-            this.tsRefresh.Click += new System.EventHandler(this.tsRefresh_Click);
+            this.tsRefresh.Click += new System.EventHandler(this.TsRefresh_Click);
             // 
             // tsCopy
             // 
@@ -136,7 +136,7 @@
             this.tsCopy.Name = "tsCopy";
             this.tsCopy.Size = new System.Drawing.Size(29, 24);
             this.tsCopy.Text = "Copy";
-            this.tsCopy.Click += new System.EventHandler(this.tsCopy_Click);
+            this.tsCopy.Click += new System.EventHandler(this.TsCopy_Click);
             // 
             // toolStripFilter
             // 
@@ -158,7 +158,7 @@
             this.criticalToolStripMenuItem.Name = "criticalToolStripMenuItem";
             this.criticalToolStripMenuItem.Size = new System.Drawing.Size(161, 26);
             this.criticalToolStripMenuItem.Text = "Critical";
-            this.criticalToolStripMenuItem.Click += new System.EventHandler(this.criticalToolStripMenuItem_Click);
+            this.criticalToolStripMenuItem.Click += new System.EventHandler(this.CriticalToolStripMenuItem_Click);
             // 
             // warningToolStripMenuItem
             // 
@@ -166,7 +166,7 @@
             this.warningToolStripMenuItem.Name = "warningToolStripMenuItem";
             this.warningToolStripMenuItem.Size = new System.Drawing.Size(161, 26);
             this.warningToolStripMenuItem.Text = "Warning";
-            this.warningToolStripMenuItem.Click += new System.EventHandler(this.warningToolStripMenuItem_Click);
+            this.warningToolStripMenuItem.Click += new System.EventHandler(this.WarningToolStripMenuItem_Click);
             // 
             // undefinedToolStripMenuItem
             // 
@@ -174,7 +174,7 @@
             this.undefinedToolStripMenuItem.Name = "undefinedToolStripMenuItem";
             this.undefinedToolStripMenuItem.Size = new System.Drawing.Size(161, 26);
             this.undefinedToolStripMenuItem.Text = "Undefined";
-            this.undefinedToolStripMenuItem.Click += new System.EventHandler(this.undefinedToolStripMenuItem_Click);
+            this.undefinedToolStripMenuItem.Click += new System.EventHandler(this.UndefinedToolStripMenuItem_Click);
             // 
             // OKToolStripMenuItem
             // 
@@ -201,14 +201,14 @@
             this.configureInstanceThresholdsToolStripMenuItem.Name = "configureInstanceThresholdsToolStripMenuItem";
             this.configureInstanceThresholdsToolStripMenuItem.Size = new System.Drawing.Size(290, 26);
             this.configureInstanceThresholdsToolStripMenuItem.Text = "Configure Instance Thresholds";
-            this.configureInstanceThresholdsToolStripMenuItem.Click += new System.EventHandler(this.configureInstanceThresholdsToolStripMenuItem_Click);
+            this.configureInstanceThresholdsToolStripMenuItem.Click += new System.EventHandler(this.ConfigureInstanceThresholdsToolStripMenuItem_Click);
             // 
             // configureRootThresholdsToolStripMenuItem
             // 
             this.configureRootThresholdsToolStripMenuItem.Name = "configureRootThresholdsToolStripMenuItem";
             this.configureRootThresholdsToolStripMenuItem.Size = new System.Drawing.Size(290, 26);
             this.configureRootThresholdsToolStripMenuItem.Text = "Configure Root Thresholds";
-            this.configureRootThresholdsToolStripMenuItem.Click += new System.EventHandler(this.configureRootThresholdsToolStripMenuItem_Click);
+            this.configureRootThresholdsToolStripMenuItem.Click += new System.EventHandler(this.ConfigureRootThresholdsToolStripMenuItem_Click);
             // 
             // tsGridView
             // 
@@ -218,7 +218,7 @@
             this.tsGridView.Name = "tsGridView";
             this.tsGridView.Size = new System.Drawing.Size(29, 24);
             this.tsGridView.Text = "Table View";
-            this.tsGridView.Click += new System.EventHandler(this.tsGridView_Click);
+            this.tsGridView.Click += new System.EventHandler(this.TsGridView_Click);
             // 
             // tsDrivesView
             // 
@@ -228,7 +228,7 @@
             this.tsDrivesView.Name = "tsDrivesView";
             this.tsDrivesView.Size = new System.Drawing.Size(29, 24);
             this.tsDrivesView.Text = "Drives View";
-            this.tsDrivesView.Click += new System.EventHandler(this.tsDrivesView_Click);
+            this.tsDrivesView.Click += new System.EventHandler(this.TsDrivesView_Click);
             // 
             // tsColumns
             // 
@@ -247,7 +247,7 @@
             this.includeAllMetricsToolStripMenuItem.Name = "includeAllMetricsToolStripMenuItem";
             this.includeAllMetricsToolStripMenuItem.Size = new System.Drawing.Size(214, 26);
             this.includeAllMetricsToolStripMenuItem.Text = "Include All Metrics";
-            this.includeAllMetricsToolStripMenuItem.Click += new System.EventHandler(this.includeAllMetricsToolStripMenuItem_Click);
+            this.includeAllMetricsToolStripMenuItem.Click += new System.EventHandler(this.IncludeAllMetricsToolStripMenuItem_Click);
             // 
             // pnlSpacing
             // 
@@ -265,7 +265,7 @@
             this.tsExcel.Name = "tsExcel";
             this.tsExcel.Size = new System.Drawing.Size(29, 24);
             this.tsExcel.Text = "Export Excel";
-            this.tsExcel.Click += new System.EventHandler(this.tsExcel_Click);
+            this.tsExcel.Click += new System.EventHandler(this.TsExcel_Click);
             // 
             // DrivesControl
             // 

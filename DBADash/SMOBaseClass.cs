@@ -1,14 +1,10 @@
 ﻿using Microsoft.Data.SqlClient;
 using Microsoft.SqlServer.Management.Smo;
-using System;
-using System.Collections.Generic;
-using System.IO.Compression;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Collections.Specialized;
+using System.IO;
+using System.IO.Compression;
 using System.Security.Cryptography;
+using System.Text;
 
 namespace DBADash
 {
@@ -21,7 +17,7 @@ namespace DBADash
 
         public SMOBaseClass(DBADashConnection source, SchemaSnapshotDBOptions options)
         {
-            SourceConnection =  source;
+            SourceConnection = source;
             options ??= new SchemaSnapshotDBOptions();
             this.options = options;
             this.ScriptingOptions = options.ScriptOptions();
@@ -34,7 +30,7 @@ namespace DBADash
             this.ScriptingOptions = options.ScriptOptions();
         }
 
-        
+
 
         protected string MasterConnectionString
         {

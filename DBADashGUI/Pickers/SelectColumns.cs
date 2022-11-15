@@ -1,11 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
 using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace DBADashGUI
@@ -24,57 +18,57 @@ namespace DBADashGUI
         private void SelectColumns_Load(object sender, EventArgs e)
         {
             dgvCols.AutoGenerateColumns = false;
-            dtCols = columnsToDataTable(Columns);
+            dtCols = ColumnsToDataTable(Columns);
             dgvCols.DataSource = dtCols;
         }
 
-        private static DataTable columnsToDataTable(DataGridViewColumnCollection Columns) 
+        private static DataTable ColumnsToDataTable(DataGridViewColumnCollection Columns)
         {
             var dtCols = new DataTable();
-            dtCols.Columns.Add( "ColumnName", typeof(string) );
-            dtCols.Columns.Add("IsVisible",typeof(bool) );
-            dtCols.Columns.Add("Index",typeof(int) );   
+            dtCols.Columns.Add("ColumnName", typeof(string));
+            dtCols.Columns.Add("IsVisible", typeof(bool));
+            dtCols.Columns.Add("Index", typeof(int));
             foreach (DataGridViewColumn col in Columns)
             {
-                dtCols.Rows.Add(new object[] { col.HeaderText, col.Visible,col.Index });
+                dtCols.Rows.Add(new object[] { col.HeaderText, col.Visible, col.Index });
             }
             return dtCols;
-         
+
         }
 
-        private void toggleIsVisible(bool isVisible)
+        private void ToggleIsVisible(bool isVisible)
         {
-            foreach(DataRow row in dtCols.Rows)
+            foreach (DataRow row in dtCols.Rows)
             {
                 row["IsVisible"] = isVisible;
             }
         }
 
-        private void lnkAll_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        private void LnkAll_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            toggleIsVisible(Visible);
+            ToggleIsVisible(Visible);
         }
 
-        private void lnkNone_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        private void LnkNone_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            toggleIsVisible(false);
+            ToggleIsVisible(false);
         }
 
-        private void bttnOK_Click(object sender, EventArgs e)
+        private void BttnOK_Click(object sender, EventArgs e)
         {
-            foreach(DataRow r in dtCols.Rows)
+            foreach (DataRow r in dtCols.Rows)
             {
                 Columns[(int)r["Index"]].Visible = (bool)r["IsVisible"];
             }
             this.DialogResult = DialogResult.OK;
         }
 
-        private void bttnCancel_Click(object sender, EventArgs e)
+        private void BttnCancel_Click(object sender, EventArgs e)
         {
-            this.DialogResult= DialogResult.Cancel;
+            this.DialogResult = DialogResult.Cancel;
         }
 
-        private void toggleSelected()
+        private void ToggleSelected()
         {
             if (dgvCols.SelectedRows.Count > 0)
             {
@@ -88,16 +82,16 @@ namespace DBADashGUI
             }
         }
 
-        private void lnkSelected_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        private void LnkSelected_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            toggleSelected();
+            ToggleSelected();
         }
 
-        private void dgvCols_KeyPress(object sender, KeyPressEventArgs e)
+        private void DgvCols_KeyPress(object sender, KeyPressEventArgs e)
         {
-            if(e.KeyChar==' ')
+            if (e.KeyChar == ' ')
             {
-                toggleSelected();
+                ToggleSelected();
             }
         }
     }

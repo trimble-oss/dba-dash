@@ -1,15 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Drawing;
 using System.Data;
+using System.Drawing;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
-using Microsoft.Data.SqlClient;
-using static DBADashGUI.DBADashStatus;
-using Newtonsoft.Json;
 
 namespace DBADashGUI.Performance
 {
@@ -21,7 +15,7 @@ namespace DBADashGUI.Performance
         }
 
         public Int32 InstanceID { get; set; }
-   
+
 
         public void RefreshData()
         {
@@ -58,8 +52,8 @@ namespace DBADashGUI.Performance
         {
             if (!splitContainer1.Panel1Collapsed)
             {
-                foreach(Control c in layout1.Controls)
-                {              
+                foreach (Control c in layout1.Controls)
+                {
                     ((IMetricChart)c).RefreshData(InstanceID);
                 }
             }
@@ -67,7 +61,7 @@ namespace DBADashGUI.Performance
 
 
         private void PerformanceCounterSummary_Load(object sender, EventArgs e)
-        {        
+        {
             splitContainer1.Panel1Collapsed = true;
             performanceCounterSummaryGrid1.CounterSelected += PerformanceCounterSummaryGrid1_CounterSelected;
             performanceCounterSummaryGrid1.TextSelected += PerformanceCounterSummaryGrid1_TextSelected;
@@ -76,7 +70,7 @@ namespace DBADashGUI.Performance
         private void PerformanceCounterSummaryGrid1_TextSelected(object sender, PerformanceCounterSummaryGrid.TextSelectedEventArgs e)
         {
             txtSearch.Text = e.Text;
-            RefreshSummary(); 
+            RefreshSummary();
         }
 
         private void PerformanceCounterSummaryGrid1_CounterSelected(object sender, PerformanceCounterSummaryGrid.CounterSelectedEventArgs e)
@@ -84,7 +78,7 @@ namespace DBADashGUI.Performance
             AddCounter(e.CounterName, e.CounterID);
         }
 
-        private void AddCounter(string CounterName,int CounterID)
+        private void AddCounter(string CounterName, int CounterID)
         {
             PerformanceCounters pc = new()
             {
@@ -100,11 +94,11 @@ namespace DBADashGUI.Performance
         private void AddChartControl(IMetricChart chart)
         {
             chart.Close += Chart_Close;
-            chart.MoveUp+=Chart_MoveUp;
-            chart.MoveUpVisible = layout1.Controls.Count>0;
+            chart.MoveUp += Chart_MoveUp;
+            chart.MoveUpVisible = layout1.Controls.Count > 0;
             chart.CloseVisible = true;
             ((Control)chart).Dock = DockStyle.Fill;
-           
+
             if (layout1.RowCount >= 10)
             {
                 if (MessageBox.Show("Max number of charts added. Clear existing charts?", "Metrics", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
@@ -150,7 +144,7 @@ namespace DBADashGUI.Performance
             int i = 0;
             foreach (Control c in layout1.Controls)
             {
-                if(c==chart && i == 0)
+                if (c == chart && i == 0)
                 {
                     return;
                 }
@@ -256,9 +250,9 @@ namespace DBADashGUI.Performance
         }
 
 
-        private void LoadSelectedView(string _selectedView,bool isGlobal,string serializedObject)
+        private void LoadSelectedView(string _selectedView, bool isGlobal, string serializedObject)
         {
-            MetricsSavedView view=null;
+            MetricsSavedView view = null;
 
             if (serializedObject != String.Empty)
             {
@@ -278,11 +272,11 @@ namespace DBADashGUI.Performance
                 layout1.Controls.Clear();
                 splitContainer1.Panel1Collapsed = true;
                 ShowGrid(true);
-                tsDeleteView.Visible =serializedObject != String.Empty && (!isGlobal || DBADashUser.HasManageGlobalViews); // Don't show for "None", but allow user to delete a view that fails to deserialize
+                tsDeleteView.Visible = serializedObject != String.Empty && (!isGlobal || DBADashUser.HasManageGlobalViews); // Don't show for "None", but allow user to delete a view that fails to deserialize
             }
             else
-            {                
-                layout1.Controls.Clear();              
+            {
+                layout1.Controls.Clear();
                 foreach (var chart in view.Metrics)
                 {
                     AddChartControl(chart.GetChart());
@@ -292,7 +286,7 @@ namespace DBADashGUI.Performance
                 tsDeleteView.Visible = !isGlobal | DBADashUser.HasManageGlobalViews;
             }
             savedViewMenuItem1.SelectItem(_selectedView, isGlobal);
-            splitContainer1.Visible = true; 
+            splitContainer1.Visible = true;
 
         }
 
@@ -302,7 +296,7 @@ namespace DBADashGUI.Performance
             using (SaveViewPrompt frm = new())
             {
                 frm.ShowDialog();
-                if(frm.DialogResult == DialogResult.OK)
+                if (frm.DialogResult == DialogResult.OK)
                 {
                     string name = frm.ViewName;
                     if ((savedViewMenuItem1.ContainsUserView(name) && !frm.IsGlobal) || (savedViewMenuItem1.ContainsGlobalView(name) && frm.IsGlobal))
@@ -330,7 +324,7 @@ namespace DBADashGUI.Performance
 
         private void TsDeleteView_Click(object sender, EventArgs e)
         {
-            if(savedViewMenuItem1.SelectedSavedView!=String.Empty)
+            if (savedViewMenuItem1.SelectedSavedView != String.Empty)
             {
                 if (MessageBox.Show("Delete " + savedViewMenuItem1.SelectedSavedView, "Delete View", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
                 {
@@ -339,12 +333,12 @@ namespace DBADashGUI.Performance
                     savedViewMenuItem1.RefreshItems();
                     tsDeleteView.Visible = false;
                 }
-            }     
+            }
         }
 
         private void SavedViewSelected(object sender, SavedViewSelectedEventArgs e)
         {
-            LoadSelectedView(e.Name, e.IsGlobal,e.SerializedObject);
+            LoadSelectedView(e.Name, e.IsGlobal, e.SerializedObject);
         }
     }
 }

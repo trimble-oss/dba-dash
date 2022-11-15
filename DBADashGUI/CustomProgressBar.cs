@@ -1,7 +1,6 @@
-﻿using System;
-using System.Windows.Forms;
-using System.Drawing;
+﻿using System.Drawing;
 using System.Drawing.Drawing2D;
+using System.Windows.Forms;
 
 namespace DBADashGUI
 {
@@ -14,15 +13,15 @@ namespace DBADashGUI
 
         protected override void OnPaint(PaintEventArgs e)
         {
-            Rectangle rec = new Rectangle(0, 0, this.Width, this.Height);
+            Rectangle rec = new(0, 0, this.Width, this.Height);
             double scaleFactor = (((double)Value - (double)Minimum) / ((double)Maximum - (double)Minimum));
             if (ProgressBarRenderer.IsSupported)
                 ProgressBarRenderer.DrawHorizontalBar(e.Graphics, rec);
             var width = (int)((rec.Width * scaleFactor) - 4);
             if (width <= 0) { width = 1; }
             rec.Width = width;
-            rec.Height = rec.Height>5 ? rec.Height-= 4 : 1;
-            LinearGradientBrush brush = new LinearGradientBrush(rec, this.ForeColor, this.BackColor, LinearGradientMode.Vertical);
+            rec.Height = rec.Height > 5 ? rec.Height -= 4 : 1;
+            LinearGradientBrush brush = new(rec, this.ForeColor, this.BackColor, LinearGradientMode.Vertical);
             e.Graphics.FillRectangle(brush, 2, 2, rec.Width, rec.Height);
         }
         protected override CreateParams CreateParams

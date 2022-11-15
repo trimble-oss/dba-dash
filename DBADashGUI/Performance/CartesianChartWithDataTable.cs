@@ -5,24 +5,24 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
 
 namespace DBADashGUI.Performance
 {
     class CartesianChartWithDataTable : LiveCharts.WinForms.CartesianChart
     {
 
-        public Int32 DefaultPointSize=10;
-        private double _defaultLineSmoothness=0.5;
-        public double DefaultLineSmoothness {
-            get {
+        public Int32 DefaultPointSize = 10;
+        private double _defaultLineSmoothness = 0.5;
+        public double DefaultLineSmoothness
+        {
+            get
+            {
                 return _defaultLineSmoothness;
             }
-            set {
+            set
+            {
                 _defaultLineSmoothness = value;
-                foreach(LineSeries s in Series)
+                foreach (LineSeries s in Series.Cast<LineSeries>())
                 {
                     s.LineSmoothness = _defaultLineSmoothness;
                 }
@@ -32,7 +32,7 @@ namespace DBADashGUI.Performance
         public void SetPointSize(int pointSize)
         {
             DefaultPointSize = pointSize;
-            foreach(LineSeries s in this.Series)
+            foreach (LineSeries s in Series.Cast<LineSeries>())
             {
                 s.PointGeometrySize = pointSize;
             }
@@ -40,19 +40,19 @@ namespace DBADashGUI.Performance
 
         public System.Windows.Media.Brush DefaultFill;
 
-        public void UpdateColumnVisibility(Dictionary<string, columnMetaData> columns)
+        public void UpdateColumnVisibility(Dictionary<string, ColumnMetaData> columns)
         {
-            foreach(LineSeries s in Series)
+            foreach (LineSeries s in Series.Cast<LineSeries>())
             {
                 s.Visibility = columns[(string)s.Tag].isVisible ? System.Windows.Visibility.Visible : System.Windows.Visibility.Hidden;
             }
-            
+
         }
 
-        public void AddDataTable(DataTable dt, Dictionary<string, columnMetaData> columns,string dateCol,bool convertToLocalTime=true)
+        public void AddDataTable(DataTable dt, Dictionary<string, ColumnMetaData> columns, string dateCol, bool convertToLocalTime = true)
         {
             var cnt = dt.Rows.Count;
-            if (cnt <1)
+            if (cnt < 1)
             {
                 return;
             }
@@ -66,7 +66,7 @@ namespace DBADashGUI.Performance
             {
                 foreach (string s in columns.Keys)
                 {
-                    var v = r[s] == DBNull.Value ? 0 :Convert.ToDouble(r[s]);
+                    var v = r[s] == DBNull.Value ? 0 : Convert.ToDouble(r[s]);
                     var t = (DateTime)r[dateCol];
                     if (convertToLocalTime) { t = t.ToLocalTime(); }
                     columns[s].Points[i] = new DateTimePoint(t, v);

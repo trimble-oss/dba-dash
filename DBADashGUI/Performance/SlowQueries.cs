@@ -1,17 +1,12 @@
-﻿using System;
+﻿using DBADashGUI.Performance;
+using Microsoft.Data.SqlClient;
+using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Drawing;
 using System.Data;
+using System.Drawing;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using Microsoft.Data.SqlClient;
-using DBADashGUI.Performance;
-using Humanizer;
-using System.Diagnostics;
-using Humanizer.Localisation;
 
 namespace DBADashGUI
 {
@@ -24,24 +19,25 @@ namespace DBADashGUI
 
         public List<Int32> InstanceIDs;
         string groupBy = "InstanceDisplayName";
-        string _db="";
-        public string DBName {
-            get {
+        string _db = "";
+        public string DBName
+        {
+            get
+            {
                 return _db;
             }
-            set {
+            set
+            {
                 _db = value;
-           
+
                 lblDatabase.Visible = _db.Length == 0;
                 lblInstance.Visible = _db.Length == 0;
                 instanceToolStripMenuItem.Visible = _db.Length == 0;
                 databaseNameToolStripMenuItem.Visible = _db.Length == 0;
-            } 
+            }
         }
 
         public bool CanNavigateBack => tsRunningBack.Visible && tsRunning.Enabled;
-
-        public bool CanNavigateForward => false;
 
         private bool IsFiltered()
         {
@@ -63,16 +59,16 @@ namespace DBADashGUI
                   txtExcludeApp.Text.Length > 0 ||
                   txtExcludeResult.Text.Length > 0 ||
                   txtExcludeSessionID.Text.Length > 0 ||
-                  txtDurationFrom.Text.Length >0 || 
-                  txtDurationTo.Text.Length>0 ||
+                  txtDurationFrom.Text.Length > 0 ||
+                  txtDurationTo.Text.Length > 0 ||
                   txtPhysicalReadsFrom.Text.Length > 0 ||
-                  txtPhysicalReadsTo.Text.Length>0 ||  
-                  txtLogicalReadsFrom.Text.Length>0 ||
-                  txtLogicalReadsTo.Text.Length>0 ||
-                  txtWritesFrom.Text.Length>0 || 
-                  txtWritesTo.Text.Length>0 ||
-                  txtCPUFrom.Text.Length>0 ||
-                  txtCPUTo.Text.Length>0 ||
+                  txtPhysicalReadsTo.Text.Length > 0 ||
+                  txtLogicalReadsFrom.Text.Length > 0 ||
+                  txtLogicalReadsTo.Text.Length > 0 ||
+                  txtWritesFrom.Text.Length > 0 ||
+                  txtWritesTo.Text.Length > 0 ||
+                  txtCPUFrom.Text.Length > 0 ||
+                  txtCPUTo.Text.Length > 0 ||
                   sqlbatchcompletedToolStripMenuItem.Checked != rpccompletedToolStripMenuItem.Checked
                   ;
         }
@@ -91,25 +87,25 @@ namespace DBADashGUI
             SetFilterFormatting(lblResult, lblIncludeResult, lblExcludeResult, txtResult, txtExcludeResult);
             SetFilterFormatting(lblUser, lblIncludeUser, lblExcludeUser, txtUser, txtExcludeUser);
             SetFilterFormatting(lblSessionID, lblIncludeSessionID, lblExcludeSessionID, txtSessionID, txtExcludeSessionID);
-            SetFilterFormatting(lblDuration,lblDurationFrom,lblDurationTo,txtDurationFrom,txtDurationTo);
+            SetFilterFormatting(lblDuration, lblDurationFrom, lblDurationTo, txtDurationFrom, txtDurationTo);
             SetFilterFormatting(lblCPU, lblCPUFrom, lblCPUTo, txtCPUFrom, txtCPUTo);
-            SetFilterFormatting(lblLogicalReads, lblLogicalReadsFrom,lblLogicalReadsTo, txtLogicalReadsFrom, txtLogicalReadsTo);
-            SetFilterFormatting(lblPhysicalReads,lblPhysicalReadsFrom,lblPhysicalReadsTo,txtPhysicalReadsFrom,txtPhysicalReadsTo);
+            SetFilterFormatting(lblLogicalReads, lblLogicalReadsFrom, lblLogicalReadsTo, txtLogicalReadsFrom, txtLogicalReadsTo);
+            SetFilterFormatting(lblPhysicalReads, lblPhysicalReadsFrom, lblPhysicalReadsTo, txtPhysicalReadsFrom, txtPhysicalReadsTo);
             SetFilterFormatting(lblWrites, lblWritesFrom, lblWritesTo, txtWritesFrom, txtWritesTo);
             lblEventType.Font = sqlbatchcompletedToolStripMenuItem.Checked == rpccompletedToolStripMenuItem.Checked ? regularFont : boldFont;
             sqlbatchcompletedToolStripMenuItem.Font = regularFont;
             rpccompletedToolStripMenuItem.Font = regularFont;
         }
 
-        private void SetFilterFormatting(ToolStripMenuItem rootMnu,ToolStripMenuItem includeMnu, ToolStripMenuItem excludeMnu, ToolStripTextBox includeTxt, ToolStripTextBox excludeTxt)
+        private void SetFilterFormatting(ToolStripMenuItem rootMnu, ToolStripMenuItem includeMnu, ToolStripMenuItem excludeMnu, ToolStripTextBox includeTxt, ToolStripTextBox excludeTxt)
         {
             var boldFont = new Font(tsFilter.Font, FontStyle.Bold);
             var regularFont = new Font(tsFilter.Font, FontStyle.Regular);
-            rootMnu.Font = includeTxt.Text.Length>0 || excludeTxt.Text.Length>0 ? boldFont : regularFont;
+            rootMnu.Font = includeTxt.Text.Length > 0 || excludeTxt.Text.Length > 0 ? boldFont : regularFont;
             includeMnu.Font = includeTxt.Text.Length > 0 ? boldFont : regularFont;
             excludeMnu.Font = excludeTxt.Text.Length > 0 ? boldFont : regularFont;
         }
-      
+
 
         public void ResetFilters()
         {
@@ -145,7 +141,8 @@ namespace DBADashGUI
             txtWritesTo.Text = "";
             rpccompletedToolStripMenuItem.Checked = false;
             sqlbatchcompletedToolStripMenuItem.Checked = false;
-            if (_db.Length > 0){
+            if (_db.Length > 0)
+            {
                 groupBy = "object_name";
             }
             else if (InstanceIDs.Count == 1)
@@ -207,9 +204,9 @@ namespace DBADashGUI
                     {
                         cmd.Parameters.AddWithValue("Result", txtResult.Text);
                     }
-                    if (txtSessionID.Text.Length>0)
-                    {                  
-                       cmd.Parameters.AddWithValue("SessionID", txtSessionID.Text);                       
+                    if (txtSessionID.Text.Length > 0)
+                    {
+                        cmd.Parameters.AddWithValue("SessionID", txtSessionID.Text);
                     }
                     if (txtExcludeApp.Text.Length > 0)
                     {
@@ -223,9 +220,9 @@ namespace DBADashGUI
                     {
                         cmd.Parameters.AddWithValue("ExcludeDatabaseName", txtExcludeDatabase.Text);
                     }
-                    if(txtExcludeInstance.Text.Length > 0)
+                    if (txtExcludeInstance.Text.Length > 0)
                     {
-                        cmd.Parameters.AddWithValue("ExcludeInstanceDisplayName",txtExcludeInstance.Text);
+                        cmd.Parameters.AddWithValue("ExcludeInstanceDisplayName", txtExcludeInstance.Text);
                     }
                     if (txtExcludeObject.Text.Length > 0)
                     {
@@ -287,17 +284,17 @@ namespace DBADashGUI
                     {
                         cmd.Parameters.AddWithValue("WritesTo", Convert.ToInt64(txtWritesTo.Text));
                     }
-                    if(sqlbatchcompletedToolStripMenuItem.Checked && !rpccompletedToolStripMenuItem.Checked)
+                    if (sqlbatchcompletedToolStripMenuItem.Checked && !rpccompletedToolStripMenuItem.Checked)
                     {
                         cmd.Parameters.AddWithValue("Eventtype", "sql_batch_completed");
                     }
-                    else if(rpccompletedToolStripMenuItem.Checked && !sqlbatchcompletedToolStripMenuItem.Checked)
+                    else if (rpccompletedToolStripMenuItem.Checked && !sqlbatchcompletedToolStripMenuItem.Checked)
                     {
                         cmd.Parameters.AddWithValue("EventType", "rpc_completed");
                     }
                     int top = Convert.ToInt32(tsTop.Tag);
                     cmd.Parameters.AddWithValue("Top", top);
-                   
+
                     var dt = new DataTable();
                     da.Fill(dt);
                     return dt;
@@ -325,22 +322,22 @@ namespace DBADashGUI
                     dgvSummary.Invoke(() =>
                     {
                         dgvSummary.AutoGenerateColumns = false;
-                        if (dgvSummary.Columns[0].Width > dgvSummary.Width) 
+                        if (dgvSummary.Columns[0].Width > dgvSummary.Width)
                         {
                             // If column has expanded to > width, reset to half width
                             // scrollbars are missing in this situation so this is a workaround to resolve it
                             dgvSummary.Columns[0].Width = dgvSummary.Width / 2;
                         }
                         dgvSummary.DataSource = dt;
-                       
+
                         dgvSummary.Visible = true;
                     });
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     refresh1.Invoke(() => refresh1.SetFailed(ex.Message));
                 }
-            });                
+            });
         }
 
         private void FormatTop(int RowCount)
@@ -414,7 +411,7 @@ namespace DBADashGUI
                     {
                         txtUser.Text = selectedGroupValue;
                     }
-                    else if(groupBy == "Result")
+                    else if (groupBy == "Result")
                     {
                         txtResult.Text = selectedGroupValue;
                     }
@@ -422,7 +419,7 @@ namespace DBADashGUI
                     {
                         txtText.Text = selectedGroupValue;
                     }
-                    else if(groupBy== "session_id")
+                    else if (groupBy == "session_id")
                     {
                         txtSessionID.Text = selectedGroupValue;
                     }
@@ -436,11 +433,11 @@ namespace DBADashGUI
                         throw new Exception($"Invalid group by: {groupBy}");
                     }
 
-                    if (txtInstance.Text.Length == 0 && _db.Length==0)
+                    if (txtInstance.Text.Length == 0 && _db.Length == 0)
                     {
                         groupBy = "InstanceDisplayName";
                     }
-                    else if (txtDatabase.Text.Length == 0 && _db.Length==0)
+                    else if (txtDatabase.Text.Length == 0 && _db.Length == 0)
                     {
                         groupBy = "DatabaseName";
                     }
@@ -456,7 +453,7 @@ namespace DBADashGUI
                     {
                         groupBy = "object_name";
                     }
-                    else if(txtUser.Text.Length==0)
+                    else if (txtUser.Text.Length == 0)
                     {
                         groupBy = "username";
                     }
@@ -537,7 +534,7 @@ namespace DBADashGUI
             RefreshData();
         }
 
-        private DataTable GetSlowQueriesDetail(Int32 durationFrom = -1, Int32 durationTo = -1,bool failed=false)
+        private DataTable GetSlowQueriesDetail(Int32 durationFrom = -1, Int32 durationTo = -1, bool failed = false)
         {
             using (var cn = new SqlConnection(Common.ConnectionString))
             using (var cmd = new SqlCommand("dbo.SlowQueriesDetail_Get", cn) { CommandType = CommandType.StoredProcedure })
@@ -562,14 +559,14 @@ namespace DBADashGUI
                 string result = txtResult.Text;
                 string text = txtText.Text;
                 string sessionid = txtSessionID.Text;
-                string eventType="";
+                string eventType = "";
                 if (sqlbatchcompletedToolStripMenuItem.Checked && !rpccompletedToolStripMenuItem.Checked)
                 {
-                    eventType= "sql_batch_completed";
+                    eventType = "sql_batch_completed";
                 }
                 else if (rpccompletedToolStripMenuItem.Checked && !sqlbatchcompletedToolStripMenuItem.Checked)
                 {
-                    eventType= "rpc_completed";
+                    eventType = "rpc_completed";
                 }
                 if (groupBy == "InstanceDisplayName")
                 {
@@ -666,11 +663,11 @@ namespace DBADashGUI
                 }
                 if (txtExcludeClient.Text.Length > 0)
                 {
-                    cmd.Parameters.AddWithValue("ExcludeClientHostName",txtExcludeClient.Text);
+                    cmd.Parameters.AddWithValue("ExcludeClientHostName", txtExcludeClient.Text);
                 }
                 if (txtExcludeDatabase.Text.Length > 0)
                 {
-                    cmd.Parameters.AddWithValue("ExcludeDatabaseName",txtExcludeDatabase.Text);
+                    cmd.Parameters.AddWithValue("ExcludeDatabaseName", txtExcludeDatabase.Text);
                 }
                 if (txtExcludeInstance.Text.Length > 0)
                 {
@@ -678,17 +675,17 @@ namespace DBADashGUI
                 }
                 if (txtExcludeObject.Text.Length > 0)
                 {
-                    cmd.Parameters.AddWithValue("ExcludeObjectName",txtExcludeObject.Text);
+                    cmd.Parameters.AddWithValue("ExcludeObjectName", txtExcludeObject.Text);
                 }
                 if (txtExcludeSessionID.Text.Length > 0)
                 {
-                    cmd.Parameters.AddWithValue("ExcludeSessionID",txtExcludeSessionID.Text);
+                    cmd.Parameters.AddWithValue("ExcludeSessionID", txtExcludeSessionID.Text);
                 }
                 if (txtExcludeText.Text.Length > 0)
                 {
                     cmd.Parameters.AddWithValue("ExcludeText", txtExcludeText.Text);
                 }
-                if(txtExcludeUser.Text.Length > 0)
+                if (txtExcludeUser.Text.Length > 0)
                 {
                     cmd.Parameters.AddWithValue("ExcludeUserName", txtExcludeUser.Text);
                 }
@@ -746,11 +743,11 @@ namespace DBADashGUI
             }
         }
 
-        private void LoadSlowQueriesDetail(Int32 durationFrom=-1,Int32 durationTo=-1,bool failed=false)
+        private void LoadSlowQueriesDetail(Int32 durationFrom = -1, Int32 durationTo = -1, bool failed = false)
         {
-           var dt = GetSlowQueriesDetail(durationFrom,durationTo,failed);
-            dt.Columns.Add("text_trunc",typeof(string));
-            foreach(DataRow r in dt.Rows)
+            var dt = GetSlowQueriesDetail(durationFrom, durationTo, failed);
+            dt.Columns.Add("text_trunc", typeof(string));
+            foreach (DataRow r in dt.Rows)
             {
                 if (r["text"] != DBNull.Value)
                 {
@@ -759,7 +756,7 @@ namespace DBADashGUI
                 }
             }
             Common.ConvertUTCToLocal(ref dt);
-            if(dt.Rows.Count== pageSize)
+            if (dt.Rows.Count == pageSize)
             {
                 lblPageSize.Text = string.Format("Top {0} rows", pageSize);
                 lblPageSize.Visible = true;
@@ -769,12 +766,12 @@ namespace DBADashGUI
                 lblPageSize.Visible = false;
             }
             dgvSlow.AutoGenerateColumns = false;
-          
+
             dgvSlow.DataSource = dt;
             colText.AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
             dgvSlow.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
             colText.AutoSizeMode = DataGridViewAutoSizeColumnMode.None;
-            dgvSlow.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.None;            
+            dgvSlow.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.None;
         }
 
         private void TsRefresh_Click(object sender, EventArgs e)
@@ -788,12 +785,13 @@ namespace DBADashGUI
             {
                 var row = (DataRowView)dgvSlow.Rows[e.RowIndex].DataBoundItem;
                 int sessionID = Convert.ToInt32(row["session_id"]);
-                DateTime timestamp= Convert.ToDateTime(row["timestamp"]);
-                if (dgvSlow.Columns[e.ColumnIndex] == colText){
+                DateTime timestamp = Convert.ToDateTime(row["timestamp"]);
+                if (dgvSlow.Columns[e.ColumnIndex] == colText)
+                {
                     string title = "SPID: " + sessionID + ", " + timestamp.ToString();
                     Common.ShowCodeViewer((string)row["Text"], title);
                 }
-                else if(dgvSlow.Columns[e.ColumnIndex] == colSessionID)
+                else if (dgvSlow.Columns[e.ColumnIndex] == colSessionID)
                 {
                     DateTime toDate = timestamp.ToUniversalTime();
                     DateTime fromDate = Convert.ToDateTime(row["start_time"]).ToUniversalTime();
@@ -806,7 +804,7 @@ namespace DBADashGUI
                     runningQueries1.RefreshData();
 
                 }
-            }       
+            }
         }
 
         private void Filter_KeyPress(object sender, KeyPressEventArgs e)
@@ -820,7 +818,7 @@ namespace DBADashGUI
         private void TsCopySummary_Click(object sender, EventArgs e)
         {
 
-           Common.CopyDataGridViewToClipboard(dgvSummary);
+            Common.CopyDataGridViewToClipboard(dgvSummary);
         }
 
         private void TsCopyDetail_Click(object sender, EventArgs e)
@@ -831,7 +829,7 @@ namespace DBADashGUI
         private void TsTop_Click(object sender, EventArgs e)
         {
             var ts = (ToolStripMenuItem)sender;
-            if(ts == tsTopAll)
+            if (ts == tsTopAll)
             {
                 tsTop.Text = "Top *";
             }
@@ -845,7 +843,7 @@ namespace DBADashGUI
 
         private void TsExcel_Click(object sender, EventArgs e)
         {
-           Common.PromptSaveDataGridView(ref dgvSummary);    
+            Common.PromptSaveDataGridView(ref dgvSummary);
         }
 
         private void TsExcelDetail_Click(object sender, EventArgs e)
@@ -877,11 +875,6 @@ namespace DBADashGUI
             {
                 return false;
             }
-        }
-
-        public bool NavigateForward()
-        {
-            return false;
         }
 
         private void Filter_TextChanged(object sender, EventArgs e)
@@ -922,13 +915,13 @@ namespace DBADashGUI
             {
                 RefreshData();
             }
-            else if (!Char.IsDigit(e.KeyChar) && !Char.IsControl(e.KeyChar) && !(e.KeyChar==','))
+            else if (!Char.IsDigit(e.KeyChar) && !Char.IsControl(e.KeyChar) && !(e.KeyChar == ','))
             {
                 e.Handled = true;
             }
         }
 
-        private void dgvSlow_RowsAdded(object sender, DataGridViewRowsAddedEventArgs e)
+        private void DgvSlow_RowsAdded(object sender, DataGridViewRowsAddedEventArgs e)
         {
             for (Int32 idx = e.RowIndex; idx < e.RowIndex + e.RowCount; idx += 1)
             {

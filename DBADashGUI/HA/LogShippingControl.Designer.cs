@@ -140,8 +140,8 @@
             this.dgvLogShipping.RowTemplate.Height = 24;
             this.dgvLogShipping.Size = new System.Drawing.Size(698, 287);
             this.dgvLogShipping.TabIndex = 0;
-            this.dgvLogShipping.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgvLogShipping_CellContentClick);
-            this.dgvLogShipping.RowsAdded += new System.Windows.Forms.DataGridViewRowsAddedEventHandler(this.dgvLogShipping_RowsAdded);
+            this.dgvLogShipping.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.DgvLogShipping_CellContentClick);
+            this.dgvLogShipping.RowsAdded += new System.Windows.Forms.DataGridViewRowsAddedEventHandler(this.DgvLogShipping_RowsAdded);
             // 
             // toolStrip1
             // 
@@ -166,7 +166,7 @@
             this.tsRefresh.Name = "tsRefresh";
             this.tsRefresh.Size = new System.Drawing.Size(29, 24);
             this.tsRefresh.Text = "Refresh";
-            this.tsRefresh.Click += new System.EventHandler(this.tsRefresh_Click);
+            this.tsRefresh.Click += new System.EventHandler(this.TsRefresh_Click);
             // 
             // tsCopy
             // 
@@ -176,7 +176,7 @@
             this.tsCopy.Name = "tsCopy";
             this.tsCopy.Size = new System.Drawing.Size(29, 24);
             this.tsCopy.Text = "Copy";
-            this.tsCopy.Click += new System.EventHandler(this.tsCopy_Click);
+            this.tsCopy.Click += new System.EventHandler(this.TsCopy_Click);
             // 
             // tsExcel
             // 
@@ -186,7 +186,7 @@
             this.tsExcel.Name = "tsExcel";
             this.tsExcel.Size = new System.Drawing.Size(29, 24);
             this.tsExcel.Text = "Export Excel";
-            this.tsExcel.Click += new System.EventHandler(this.tsExcel_Click);
+            this.tsExcel.Click += new System.EventHandler(this.TsExcel_Click);
             // 
             // tsConfigure
             // 
@@ -205,14 +205,14 @@
             this.configureInstanceThresholdsToolStripMenuItem.Name = "configureInstanceThresholdsToolStripMenuItem";
             this.configureInstanceThresholdsToolStripMenuItem.Size = new System.Drawing.Size(290, 26);
             this.configureInstanceThresholdsToolStripMenuItem.Text = "Configure Instance Thresholds";
-            this.configureInstanceThresholdsToolStripMenuItem.Click += new System.EventHandler(this.configureInstanceThresholdsToolStripMenuItem_Click);
+            this.configureInstanceThresholdsToolStripMenuItem.Click += new System.EventHandler(this.ConfigureInstanceThresholdsToolStripMenuItem_Click);
             // 
             // configureRootThresholdsToolStripMenuItem
             // 
             this.configureRootThresholdsToolStripMenuItem.Name = "configureRootThresholdsToolStripMenuItem";
             this.configureRootThresholdsToolStripMenuItem.Size = new System.Drawing.Size(290, 26);
             this.configureRootThresholdsToolStripMenuItem.Text = "Configure Root Thresholds";
-            this.configureRootThresholdsToolStripMenuItem.Click += new System.EventHandler(this.configureRootThresholdsToolStripMenuItem_Click);
+            this.configureRootThresholdsToolStripMenuItem.Click += new System.EventHandler(this.ConfigureRootThresholdsToolStripMenuItem_Click);
             // 
             // tsBack
             // 
@@ -222,7 +222,7 @@
             this.tsBack.Name = "tsBack";
             this.tsBack.Size = new System.Drawing.Size(29, 24);
             this.tsBack.Text = "Back";
-            this.tsBack.Click += new System.EventHandler(this.tsBack_Click);
+            this.tsBack.Click += new System.EventHandler(this.TsBack_Click);
             // 
             // dgvSummary
             // 
@@ -240,8 +240,8 @@
             this.dgvSummary.RowTemplate.Height = 24;
             this.dgvSummary.Size = new System.Drawing.Size(698, 195);
             this.dgvSummary.TabIndex = 3;
-            this.dgvSummary.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgvSummary_CellContentClick);
-            this.dgvSummary.RowsAdded += new System.Windows.Forms.DataGridViewRowsAddedEventHandler(this.dgvSummary_RowsAdded);
+            this.dgvSummary.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.DgvSummary_CellContentClick);
+            this.dgvSummary.RowsAdded += new System.Windows.Forms.DataGridViewRowsAddedEventHandler(this.DgvSummary_RowsAdded);
             // 
             // splitContainer1
             // 
@@ -285,7 +285,7 @@
             this.tsCopyDetail.Name = "tsCopyDetail";
             this.tsCopyDetail.Size = new System.Drawing.Size(29, 24);
             this.tsCopyDetail.Text = "Copy";
-            this.tsCopyDetail.Click += new System.EventHandler(this.tsCopyDetail_Click);
+            this.tsCopyDetail.Click += new System.EventHandler(this.TsCopyDetail_Click);
             // 
             // tsExportExcelDetail
             // 
@@ -295,7 +295,7 @@
             this.tsExportExcelDetail.Name = "tsExportExcelDetail";
             this.tsExportExcelDetail.Size = new System.Drawing.Size(29, 24);
             this.tsExportExcelDetail.Text = "Export Excel";
-            this.tsExportExcelDetail.Click += new System.EventHandler(this.tsExportExcelDetail_Click);
+            this.tsExportExcelDetail.Click += new System.EventHandler(this.TsExportExcelDetail_Click);
             // 
             // toolStripDropDownButton1
             // 
@@ -317,7 +317,7 @@
             this.tsCritical.Name = "tsCritical";
             this.tsCritical.Size = new System.Drawing.Size(161, 26);
             this.tsCritical.Text = "Critical";
-            this.tsCritical.Click += new System.EventHandler(this.tsFilter_Click);
+            this.tsCritical.Click += new System.EventHandler(this.TsFilter_Click);
             // 
             // tsWarning
             // 
@@ -325,7 +325,7 @@
             this.tsWarning.Name = "tsWarning";
             this.tsWarning.Size = new System.Drawing.Size(161, 26);
             this.tsWarning.Text = "Warning";
-            this.tsWarning.Click += new System.EventHandler(this.tsFilter_Click);
+            this.tsWarning.Click += new System.EventHandler(this.TsFilter_Click);
             // 
             // tsNA
             // 
@@ -333,7 +333,7 @@
             this.tsNA.Name = "tsNA";
             this.tsNA.Size = new System.Drawing.Size(161, 26);
             this.tsNA.Text = "Undefined";
-            this.tsNA.Click += new System.EventHandler(this.tsFilter_Click);
+            this.tsNA.Click += new System.EventHandler(this.TsFilter_Click);
             // 
             // tsOK
             // 
@@ -341,7 +341,7 @@
             this.tsOK.Name = "tsOK";
             this.tsOK.Size = new System.Drawing.Size(161, 26);
             this.tsOK.Text = "OK";
-            this.tsOK.Click += new System.EventHandler(this.tsFilter_Click);
+            this.tsOK.Click += new System.EventHandler(this.TsFilter_Click);
             // 
             // dataGridViewTextBoxColumn1
             // 

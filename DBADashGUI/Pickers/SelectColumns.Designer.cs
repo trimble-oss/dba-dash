@@ -61,7 +61,7 @@
             this.dgvCols.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
             this.dgvCols.Size = new System.Drawing.Size(363, 441);
             this.dgvCols.TabIndex = 0;
-            this.dgvCols.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.dgvCols_KeyPress);
+            this.dgvCols.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.DgvCols_KeyPress);
             // 
             // colIsVisible
             // 
@@ -92,7 +92,7 @@
             this.bttnOK.TabIndex = 1;
             this.bttnOK.Text = "OK";
             this.bttnOK.UseVisualStyleBackColor = true;
-            this.bttnOK.Click += new System.EventHandler(this.bttnOK_Click);
+            this.bttnOK.Click += new System.EventHandler(this.BttnOK_Click);
             // 
             // bttnCancel
             // 
@@ -103,7 +103,7 @@
             this.bttnCancel.TabIndex = 2;
             this.bttnCancel.Text = "Cancel";
             this.bttnCancel.UseVisualStyleBackColor = true;
-            this.bttnCancel.Click += new System.EventHandler(this.bttnCancel_Click);
+            this.bttnCancel.Click += new System.EventHandler(this.BttnCancel_Click);
             // 
             // lnkAll
             // 
@@ -116,7 +116,7 @@
             this.lnkAll.TabStop = true;
             this.lnkAll.Text = "All";
             this.toolTip1.SetToolTip(this.lnkAll, "Check all items");
-            this.lnkAll.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.lnkAll_LinkClicked);
+            this.lnkAll.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.LnkAll_LinkClicked);
             // 
             // lnkNone
             // 
@@ -129,7 +129,7 @@
             this.lnkNone.TabStop = true;
             this.lnkNone.Text = "None";
             this.toolTip1.SetToolTip(this.lnkNone, "Remove all checks");
-            this.lnkNone.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.lnkNone_LinkClicked);
+            this.lnkNone.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.LnkNone_LinkClicked);
             // 
             // lnkSelected
             // 
@@ -144,7 +144,7 @@
             this.lnkSelected.Text = "Toggle Selected";
             this.toolTip1.SetToolTip(this.lnkSelected, "Check/Uncheck all the selected items.  Use spacebar to activate from the keyboard" +
         ".");
-            this.lnkSelected.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.lnkSelected_LinkClicked);
+            this.lnkSelected.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.LnkSelected_LinkClicked);
             // 
             // SelectColumns
             // 

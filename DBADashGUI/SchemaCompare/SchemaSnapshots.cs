@@ -1,16 +1,11 @@
-﻿using System;
+﻿using Microsoft.Data.SqlClient;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Drawing;
 using System.Data;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
-using Microsoft.Data.SqlClient;
-using static DBADashGUI.DiffControl;
 using System.IO;
-using System.Globalization;
+using System.Windows.Forms;
+using static DBADashGUI.DiffControl;
 
 namespace DBADashGUI.Changes
 {
@@ -27,7 +22,7 @@ namespace DBADashGUI.Changes
         public Int32 DatabaseID;
         public List<Int32> InstanceIDs;
 
-        public bool CanNavigateBack { get=> tsBack.Enabled;}
+        public bool CanNavigateBack { get => tsBack.Enabled; }
 
 
         private static DataSet DdlSnapshotDiff(DateTime snapshotDateUTC, int databaseID)
@@ -39,12 +34,12 @@ namespace DBADashGUI.Changes
                 cn.Open();
                 cmd.Parameters.AddWithValue("DatabaseID", databaseID);
                 var p = cmd.Parameters.AddWithValue("SnapshotDate", snapshotDateUTC);
-                p.DbType = DbType.DateTime2;     
+                p.DbType = DbType.DateTime2;
                 DataSet ds = new();
                 da.Fill(ds);
 
                 return ds;
-            }           
+            }
         }
 
         private void GvSnapshots_SelectionChanged(object sender, EventArgs e)
@@ -54,18 +49,18 @@ namespace DBADashGUI.Changes
                 var row = (DataRowView)gvSnapshots.SelectedRows[0].DataBoundItem;
                 DateTime snapshotDateUTC = ((DateTime)row["SnapshotDate"]).ToUniversalTime();
                 Int32 databaseID = (Int32)row["DatabaseID"];
-          
-                DataSet ds = DdlSnapshotDiff(snapshotDateUTC,databaseID);                     
+
+                DataSet ds = DdlSnapshotDiff(snapshotDateUTC, databaseID);
                 gvSnapshotsDetail.AutoGenerateColumns = false;
                 gvSnapshotsDetail.DataSource = ds.Tables[0];
-                gvSnapshotsDetail.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);                    
-                
+                gvSnapshotsDetail.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
+
             }
         }
 
         private void GvSnapshotsDetail_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
-            if (e.RowIndex>=0 && (e.ColumnIndex ==  colView.Index|| e.ColumnIndex == colDiff.Index))
+            if (e.RowIndex >= 0 && (e.ColumnIndex == colView.Index || e.ColumnIndex == colDiff.Index))
             {
                 var row = (DataRowView)gvSnapshotsDetail.Rows[e.RowIndex].DataBoundItem;
                 string ddl = "";
@@ -80,19 +75,20 @@ namespace DBADashGUI.Changes
                 }
                 ViewMode mode = e.ColumnIndex == colDiff.Index ? ViewMode.Diff : ViewMode.Code;
                 var frm = new Diff();
-                frm.setText(ddlOld, ddl, mode);
+                frm.SetText(ddlOld, ddl, mode);
                 frm.Show();
             }
         }
- 
+
         public void RefreshData()
         {
-            if (InstanceID >0 || (InstanceName !=null && InstanceName.Length> 0))
+            if (InstanceID > 0 || (InstanceName != null && InstanceName.Length > 0))
             {
                 LoadSnapshots();
                 tsBack.Enabled = true;
             }
-            else {
+            else
+            {
                 tsBack.Enabled = false;
                 LoadInstanceSummary();
             }
@@ -106,12 +102,12 @@ namespace DBADashGUI.Changes
             {
                 cn.Open();
                 cmd.Parameters.AddWithValue("InstanceIDs", string.Join(",", InstanceIDs));
-                
+
                 var dt = new DataTable();
                 da.Fill(dt);
                 Common.ConvertUTCToLocal(ref dt);
                 return dt;
-            }         
+            }
         }
 
         private void LoadInstanceSummary()
@@ -120,7 +116,7 @@ namespace DBADashGUI.Changes
             dgvInstanceSummary.Visible = true;
             var dt = DdlSnapshotInstanceSummary();
             dgvInstanceSummary.DataSource = dt;
-            dgvInstanceSummary.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);       
+            dgvInstanceSummary.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
         }
 
         private DataTable GetDDLSnapshots(int pageNum)
@@ -134,12 +130,12 @@ namespace DBADashGUI.Changes
                 cmd.Parameters.AddWithValue("InstanceDisplayName", InstanceName);
                 cmd.Parameters.AddWithValue("PageSize", currentSummaryPage);
                 cmd.Parameters.AddWithValue("PageNumber", pageNum);
-                
+
                 var dt = new DataTable();
                 da.Fill(dt);
                 Common.ConvertUTCToLocal(ref dt);
                 return dt;
-            }           
+            }
         }
 
         private void LoadSnapshots(int pageNum = 1)
@@ -147,8 +143,8 @@ namespace DBADashGUI.Changes
             splitSnapshotSummary.Visible = true;
             dgvInstanceSummary.Visible = false;
             gvSnapshotsDetail.DataSource = null;
-            currentSummaryPage = Int32.Parse(tsSummaryPageSize.Text);    
-            var dt = GetDDLSnapshots(pageNum);         
+            currentSummaryPage = Int32.Parse(tsSummaryPageSize.Text);
+            var dt = GetDDLSnapshots(pageNum);
             gvSnapshots.AutoGenerateColumns = false;
             gvSnapshots.DataSource = dt;
             gvSnapshots.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
@@ -186,7 +182,7 @@ namespace DBADashGUI.Changes
 
         private void DgvInstanceSummary_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
-            if(e.RowIndex>=0 && e.ColumnIndex == colInstance.Index)
+            if (e.RowIndex >= 0 && e.ColumnIndex == colInstance.Index)
             {
                 InstanceName = (string)dgvInstanceSummary.Rows[e.RowIndex].Cells[e.ColumnIndex].Value;
                 RefreshData();
@@ -203,13 +199,13 @@ namespace DBADashGUI.Changes
 
         private void GvSnapshots_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
-            if (e.RowIndex>=0 && e.ColumnIndex== colDB.Index)
+            if (e.RowIndex >= 0 && e.ColumnIndex == colDB.Index)
             {
                 var row = (DataRowView)gvSnapshots.Rows[e.RowIndex].DataBoundItem;
                 DatabaseID = (Int32)row["DatabaseID"];
                 RefreshData();
             }
-            else if(e.RowIndex>=0 && e.ColumnIndex == colExport.Index)
+            else if (e.RowIndex >= 0 && e.ColumnIndex == colExport.Index)
             {
                 var row = (DataRowView)gvSnapshots.Rows[e.RowIndex].DataBoundItem;
                 Export(row);
@@ -245,10 +241,10 @@ namespace DBADashGUI.Changes
             }
         }
 
-        private static void ExportSchema(string folder,int DBID, DateTime SnapshotDate)
+        private static void ExportSchema(string folder, int DBID, DateTime SnapshotDate)
         {
             using (var cn = new SqlConnection(Common.ConnectionString))
-            using(var cmd = new SqlCommand("dbo.DBSchemaAtDate_Get",cn) {  CommandType = CommandType.StoredProcedure, CommandTimeout = 300})
+            using (var cmd = new SqlCommand("dbo.DBSchemaAtDate_Get", cn) { CommandType = CommandType.StoredProcedure, CommandTimeout = 300 })
             {
                 cn.Open();
                 cmd.Parameters.AddWithValue("DBID", DBID);
@@ -258,7 +254,7 @@ namespace DBADashGUI.Changes
                 {
                     while (rdr.Read())
                     {
-                        string schema =(string)rdr["SchemaName"];
+                        string schema = (string)rdr["SchemaName"];
                         string name = (string)rdr["ObjectName"];
                         string objType = (string)rdr["TypeDescription"];
                         string subFolder = Path.Combine(Path.Combine(folder, Common.StripInvalidFileNameChars(schema)), objType);
@@ -269,7 +265,7 @@ namespace DBADashGUI.Changes
                         }
                         var bDDL = (byte[])rdr["DDL"];
                         string sql = DBADash.SchemaSnapshotDB.Unzip(bDDL);
-                        File.WriteAllText(filePath, sql);                       
+                        File.WriteAllText(filePath, sql);
                     }
                 }
 
@@ -306,7 +302,7 @@ namespace DBADashGUI.Changes
             {
                 return false;
             }
-       
+
         }
     }
 }

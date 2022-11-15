@@ -1,19 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Diagnostics;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
-using DBADash;
+﻿using DBADash;
 using DBADashService;
 using Humanizer;
-using Microsoft.SqlServer.Management.Smo;
-using Newtonsoft.Json;
 using Quartz;
+using System;
+using System.Diagnostics;
+using System.Drawing;
+using System.Windows.Forms;
 
 namespace DBADashServiceConfig
 {
@@ -40,7 +32,8 @@ namespace DBADashServiceConfig
                 var schedule = new CollectionSchedules();
                 foreach (DataGridViewRow row in dgv.Rows)
                 {
-                    if (!(bool)row.Cells["Default"].Value) {
+                    if (!(bool)row.Cells["Default"].Value)
+                    {
                         schedule.Add((CollectionType)Enum.Parse(typeof(CollectionType), (string)row.Cells["CollectionType"].Value), new CollectionSchedule() { Schedule = (string)row.Cells["Schedule"].Value, RunOnServiceStart = (bool)row.Cells["RunOnStart"].Value });
                     }
                 }
@@ -56,10 +49,10 @@ namespace DBADashServiceConfig
         {
             dgv.Columns.Clear();
             dgv.Columns.Add(new DataGridViewTextBoxColumn() { Name = "CollectionType", HeaderText = "Collection Type", ReadOnly = true, AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill });
-            dgv.Columns.Add(new DataGridViewTextBoxColumn() {Name="Schedule", HeaderText = "Schedule", ToolTipText="Cron expression or time in seconds" });
-            dgv.Columns.Add(new DataGridViewTextBoxColumn() {Name="ScheduleDescription", HeaderText = "Schedule Description", ReadOnly = true });
-            dgv.Columns.Add(new DataGridViewCheckBoxColumn() {Name="RunOnStart", HeaderText = "Run on service start" });
-            dgv.Columns.Add(new DataGridViewCheckBoxColumn() {Name="Default", HeaderText = "Default", ToolTipText = "Uncheck to supply a custom cron schedule or check to use the default schedule."});
+            dgv.Columns.Add(new DataGridViewTextBoxColumn() { Name = "Schedule", HeaderText = "Schedule", ToolTipText = "Cron expression or time in seconds" });
+            dgv.Columns.Add(new DataGridViewTextBoxColumn() { Name = "ScheduleDescription", HeaderText = "Schedule Description", ReadOnly = true });
+            dgv.Columns.Add(new DataGridViewCheckBoxColumn() { Name = "RunOnStart", HeaderText = "Run on service start" });
+            dgv.Columns.Add(new DataGridViewCheckBoxColumn() { Name = "Default", HeaderText = "Default", ToolTipText = "Uncheck to supply a custom cron schedule or check to use the default schedule." });
 
             if (userSchedule != null)
             {
@@ -71,7 +64,7 @@ namespace DBADashServiceConfig
             }
             foreach (var s in BaseSchedule)
             {
-                if (userSchedule==null || !userSchedule.ContainsKey(s.Key))
+                if (userSchedule == null || !userSchedule.ContainsKey(s.Key))
                 {
                     int idx = dgv.Rows.Add(new object[] { Enum.GetName(typeof(CollectionType), s.Key), s.Value.Schedule, GetScheduleDescription(s.Value.Schedule), s.Value.RunOnServiceStart, true });
                     FormatRow(idx);
@@ -86,7 +79,7 @@ namespace DBADashServiceConfig
             {
                 return "Disabled";
             }
-            if (int.TryParse(schedule,out int seconds))
+            if (int.TryParse(schedule, out int seconds))
             {
 
                 return TimeSpan.FromSeconds(seconds).Humanize(5);
@@ -106,15 +99,15 @@ namespace DBADashServiceConfig
 
         private void Dgv_RowValidating(object sender, DataGridViewCellCancelEventArgs e)
         {
-            string schedule = (string)dgv[1,e.RowIndex].Value;
-            
+            string schedule = (string)dgv[1, e.RowIndex].Value;
+
             try
-            {                    
-                dgv[2, e.RowIndex].Value = GetScheduleDescription(schedule);              
+            {
+                dgv[2, e.RowIndex].Value = GetScheduleDescription(schedule);
             }
             catch
             {
-                MessageBox.Show("Invalid cron expression","Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("Invalid cron expression", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 e.Cancel = true;
             }
         }
@@ -124,9 +117,11 @@ namespace DBADashServiceConfig
 
         }
 
-        private void Dgv_RowsAdded(object sender, DataGridViewRowsAddedEventArgs e) { 
-       
-            for (int i= 0; i < e.RowCount - 1; i++){
+        private void Dgv_RowsAdded(object sender, DataGridViewRowsAddedEventArgs e)
+        {
+
+            for (int i = 0; i < e.RowCount - 1; i++)
+            {
                 dgv.Rows[e.RowIndex + i].Cells["Schedule"].ReadOnly = (bool)dgv.Rows[e.RowIndex + i].Cells["Default"].Value;
                 dgv.Rows[e.RowIndex + i].Cells["RunOnStart"].ReadOnly = (bool)dgv.Rows[e.RowIndex + i].Cells["Default"].Value;
             }
@@ -134,11 +129,11 @@ namespace DBADashServiceConfig
 
         private void Dgv_CellValueChanged(object sender, DataGridViewCellEventArgs e)
         {
-            if(e.ColumnIndex == dgv.Columns["Default"].Index)
+            if (e.ColumnIndex == dgv.Columns["Default"].Index)
             {
                 FormatRow(e.RowIndex);
             }
-  
+
         }
 
         private void FormatRow(int idx)
@@ -156,9 +151,9 @@ namespace DBADashServiceConfig
                 CollectionType collectType = (CollectionType)Enum.Parse(typeof(CollectionType), (string)row.Cells["CollectionType"].Value);
                 row.Cells["Schedule"].Value = BaseSchedule[collectType].Schedule;
                 row.Cells["RunOnStart"].Value = BaseSchedule[collectType].RunOnServiceStart;
-            }      
-             row.Cells["ScheduleDescription"].Value = GetScheduleDescription(Convert.ToString(row.Cells["Schedule"].Value));
-            
+            }
+            row.Cells["ScheduleDescription"].Value = GetScheduleDescription(Convert.ToString(row.Cells["Schedule"].Value));
+
         }
 
         private void Dgv_CellContentClick(object sender, DataGridViewCellEventArgs e)
@@ -170,7 +165,7 @@ namespace DBADashServiceConfig
             }
         }
 
-         private void BttnCancel_Click(object sender, EventArgs e)
+        private void BttnCancel_Click(object sender, EventArgs e)
         {
             this.DialogResult = DialogResult.Cancel;
         }

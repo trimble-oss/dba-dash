@@ -1,13 +1,8 @@
-﻿using System;
+﻿using Microsoft.Data.SqlClient;
+using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Drawing;
 using System.Data;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
-using Microsoft.Data.SqlClient;
 
 namespace DBADashGUI.Changes
 {
@@ -22,19 +17,19 @@ namespace DBADashGUI.Changes
 
         public void RefreshData()
         {
-            refreshDB();
-            refreshPool();
+            RefreshDB();
+            RefreshPool();
         }
 
-        private void refreshDB()
+        private void RefreshDB()
         {
             using (var cn = new SqlConnection(Common.ConnectionString))
             {
-                using (SqlCommand cmd = new SqlCommand("dbo.AzureServiceObjectivesHistory_Get", cn) { CommandType = CommandType.StoredProcedure })
+                using (SqlCommand cmd = new("dbo.AzureServiceObjectivesHistory_Get", cn) { CommandType = CommandType.StoredProcedure })
                 {
                     cmd.Parameters.AddWithValue("InstanceIDs", string.Join(",", InstanceIDs));
-                    SqlDataAdapter da = new SqlDataAdapter(cmd);
-                    DataTable dt = new DataTable();
+                    SqlDataAdapter da = new(cmd);
+                    DataTable dt = new();
                     da.Fill(dt);
                     Common.ConvertUTCToLocal(ref dt);
                     dgv.AutoGenerateColumns = false;
@@ -44,15 +39,15 @@ namespace DBADashGUI.Changes
             }
         }
 
-        private void refreshPool()
+        private void RefreshPool()
         {
             using (var cn = new SqlConnection(Common.ConnectionString))
             {
-                using (SqlCommand cmd = new SqlCommand("dbo.AzureDBElasticPoolHistory_Get", cn) { CommandType = CommandType.StoredProcedure })
+                using (SqlCommand cmd = new("dbo.AzureDBElasticPoolHistory_Get", cn) { CommandType = CommandType.StoredProcedure })
                 {
                     cmd.Parameters.AddWithValue("InstanceIDs", string.Join(",", InstanceIDs));
-                    SqlDataAdapter da = new SqlDataAdapter(cmd);
-                    DataTable dt = new DataTable();
+                    SqlDataAdapter da = new(cmd);
+                    DataTable dt = new();
                     da.Fill(dt);
                     Common.ConvertUTCToLocal(ref dt);
                     dgvPool.AutoGenerateColumns = false;
@@ -62,32 +57,32 @@ namespace DBADashGUI.Changes
             }
         }
 
-        private void tsRefresh_Click(object sender, EventArgs e)
+        private void TsRefresh_Click(object sender, EventArgs e)
         {
-            refreshDB();
+            RefreshDB();
         }
 
-        private void tsCopy_Click(object sender, EventArgs e)
+        private void TsCopy_Click(object sender, EventArgs e)
         {
             Common.CopyDataGridViewToClipboard(dgv);
         }
 
-        private void tsRefreshPool_Click(object sender, EventArgs e)
+        private void TsRefreshPool_Click(object sender, EventArgs e)
         {
-            refreshPool();
+            RefreshPool();
         }
 
-        private void tsCopyPool_Click(object sender, EventArgs e)
+        private void TsCopyPool_Click(object sender, EventArgs e)
         {
             Common.CopyDataGridViewToClipboard(dgvPool);
         }
 
-        private void tsExcel_Click(object sender, EventArgs e)
+        private void TsExcel_Click(object sender, EventArgs e)
         {
             Common.PromptSaveDataGridView(ref dgv);
         }
 
-        private void tsPoolExcel_Click(object sender, EventArgs e)
+        private void TsPoolExcel_Click(object sender, EventArgs e)
         {
             Common.PromptSaveDataGridView(ref dgvPool);
         }

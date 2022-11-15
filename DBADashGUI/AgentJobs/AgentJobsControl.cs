@@ -1,13 +1,9 @@
-﻿using System;
+﻿using Microsoft.Data.SqlClient;
+using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Drawing;
 using System.Data;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Drawing;
 using System.Windows.Forms;
-using Microsoft.Data.SqlClient;
 
 namespace DBADashGUI.AgentJobs
 {
@@ -19,7 +15,7 @@ namespace DBADashGUI.AgentJobs
         private int? instance_id = null;
         private int instanceId;
         private Guid jobID;
-        public int StepID=-1;
+        public int StepID = -1;
 
         public bool IncludeCritical
         {
@@ -76,7 +72,7 @@ namespace DBADashGUI.AgentJobs
             failedOnlyToolStripMenuItem.Checked = false;
             splitContainer1.Panel2Collapsed = true;
             dgvJobHistory.DataSource = null;
-            if (StepID > 0 && InstanceIDs.Count==1)
+            if (StepID > 0 && InstanceIDs.Count == 1)
             {
                 tsJobs.Visible = false;
                 dgvJobs.Visible = false;
@@ -87,7 +83,7 @@ namespace DBADashGUI.AgentJobs
                 jobStep1.InstanceID = InstanceIDs[0];
                 jobStep1.StepID = StepID;
                 jobStep1.RefreshData();
-                showHistory();
+                ShowHistory();
             }
             else
             {
@@ -101,30 +97,30 @@ namespace DBADashGUI.AgentJobs
                 configureInstanceThresholdsToolStripMenuItem.Enabled = InstanceIDs.Count == 1;
                 if (JobID != Guid.Empty && dt.Rows.Count == 1)
                 {
-                    showHistory(dt.Rows[0]);
+                    ShowHistory(dt.Rows[0]);
                 }
             }
-          
-      
+
+
         }
 
         private DataTable GetJobs()
         {
             using (var cn = new SqlConnection(Common.ConnectionString))
-            using(var cmd= new SqlCommand("dbo.AgentJobs_Get", cn) { CommandType = CommandType.StoredProcedure })
-            using(var da = new SqlDataAdapter(cmd))
+            using (var cmd = new SqlCommand("dbo.AgentJobs_Get", cn) { CommandType = CommandType.StoredProcedure })
+            using (var da = new SqlDataAdapter(cmd))
             {
                 cmd.Parameters.AddWithValue("InstanceIDs", string.Join(",", InstanceIDs));
                 cmd.Parameters.AddWithValue("IncludeCritical", IncludeCritical);
                 cmd.Parameters.AddWithValue("IncludeWarning", IncludeWarning);
                 cmd.Parameters.AddWithValue("IncludeNA", IncludeNA);
                 cmd.Parameters.AddWithValue("IncludeOK", IncludeOK);
-                if(JobID!= Guid.Empty)
+                if (JobID != Guid.Empty)
                 {
                     cmd.Parameters.AddWithValue("JobID", JobID);
                 }
                 cmd.CommandType = CommandType.StoredProcedure;
-                DataTable dt = new DataTable();
+                DataTable dt = new();
                 da.Fill(dt);
                 Common.ConvertUTCToLocal(ref dt);
                 return dt;
@@ -137,20 +133,20 @@ namespace DBADashGUI.AgentJobs
             InitializeComponent();
         }
 
-        private void configureRootThresholdsToolStripMenuItem_Click(object sender, EventArgs e)
+        private void ConfigureRootThresholdsToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            configureThresholds(-1, Guid.Empty);
+            ConfigureThresholds(-1, Guid.Empty);
         }
 
-        private void configureInstanceThresholdsToolStripMenuItem_Click(object sender, EventArgs e)
+        private void ConfigureInstanceThresholdsToolStripMenuItem_Click(object sender, EventArgs e)
         {
             if (InstanceIDs.Count == 1)
             {
-                configureThresholds(InstanceIDs[0], Guid.Empty);
+                ConfigureThresholds(InstanceIDs[0], Guid.Empty);
             }
         }
 
-        private void configureThresholds(Int32 InstanceID,Guid jobID)
+        private void ConfigureThresholds(Int32 InstanceID, Guid jobID)
         {
             var frm = new AgentJobThresholdsConfig
             {
@@ -159,31 +155,31 @@ namespace DBADashGUI.AgentJobs
                 connectionString = Common.ConnectionString
             };
             frm.ShowDialog();
-            if(frm.DialogResult== DialogResult.OK)
+            if (frm.DialogResult == DialogResult.OK)
             {
                 RefreshData();
             }
         }
 
-        private void dgvJobs_CellContentClick(object sender, DataGridViewCellEventArgs e)
+        private void DgvJobs_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
             if (e.RowIndex >= 0)
             {
                 var row = (DataRowView)dgvJobs.Rows[e.RowIndex].DataBoundItem;
                 if (dgvJobs.Columns[e.ColumnIndex].HeaderText == "Configure")
                 {
-                    
-                    configureThresholds((Int32)row["InstanceID"], (Guid)row["job_id"]);
+
+                    ConfigureThresholds((Int32)row["InstanceID"], (Guid)row["job_id"]);
                 }
                 if (dgvJobs.Columns[e.ColumnIndex] == colHistory)
                 {
                     failedOnlyToolStripMenuItem.Checked = false;
-                    showHistory(row.Row);
+                    ShowHistory(row.Row);
                 }
             }
         }
 
-        private void showHistory(DataRow row)
+        private void ShowHistory(DataRow row)
         {
 
             if (row["job_id"] != DBNull.Value)
@@ -192,7 +188,7 @@ namespace DBADashGUI.AgentJobs
                 jobID = (Guid)row["job_id"];
                 tsJobName.Text = (string)row["Instance"] + " | " + (string)row["name"];
                 instance_id = null;
-                showHistory();
+                ShowHistory();
             }
             else
             {
@@ -200,7 +196,7 @@ namespace DBADashGUI.AgentJobs
             }
         }
 
-        private void showHistory()
+        private void ShowHistory()
         {
             int? stepID = StepID;
             if (StepID < 0)
@@ -208,22 +204,22 @@ namespace DBADashGUI.AgentJobs
                 stepID = showJobStepsToolStripMenuItem.Checked ? (int?)null : 0;
             }
             stepID = instance_id == null ? stepID : null;
-            colStepName.Visible = stepID !=0;
+            colStepName.Visible = stepID != 0;
             colStepID.Visible = stepID != 0;
             tsFilter.Visible = instance_id == null;
             tsBack.Visible = instance_id != null;
-            colViewSteps.Visible=instance_id== null && stepID==0;
+            colViewSteps.Visible = instance_id == null && stepID == 0;
             splitContainer1.Panel2Collapsed = false;
             dgvJobHistory.AutoGenerateColumns = false;
-            dgvJobHistory.DataSource = GetJobHistory(instanceId, jobID,stepID,instance_id, failedOnlyToolStripMenuItem.Checked);
+            dgvJobHistory.DataSource = GetJobHistory(instanceId, jobID, stepID, instance_id, failedOnlyToolStripMenuItem.Checked);
             dgvJobHistory.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
         }
 
-        private DataTable GetJobHistory(int InstanceID,Guid JobID, int? StepID=0,int? instance_id=null,bool failedOnly=false)
+        private static DataTable GetJobHistory(int InstanceID, Guid JobID, int? StepID = 0, int? instance_id = null, bool failedOnly = false)
         {
-            using (var cn = new SqlConnection(Common.ConnectionString))         
-            using (SqlCommand cmd = new SqlCommand("dbo.JobHistory_Get", cn) { CommandType = CommandType.StoredProcedure })
-            using(SqlDataAdapter da = new SqlDataAdapter(cmd))
+            using (var cn = new SqlConnection(Common.ConnectionString))
+            using (SqlCommand cmd = new("dbo.JobHistory_Get", cn) { CommandType = CommandType.StoredProcedure })
+            using (SqlDataAdapter da = new(cmd))
             {
                 var dt = new DataTable();
                 cmd.Parameters.AddWithValue("InstanceID", InstanceID);
@@ -245,10 +241,10 @@ namespace DBADashGUI.AgentJobs
                 Common.ConvertUTCToLocal(ref dt);
                 return dt;
             }
-          
+
         }
 
-        private void dgvJobs_RowsAdded(object sender, DataGridViewRowsAddedEventArgs e)
+        private void DgvJobs_RowsAdded(object sender, DataGridViewRowsAddedEventArgs e)
         {
             for (Int32 idx = e.RowIndex; idx < e.RowIndex + e.RowCount; idx += 1)
             {
@@ -272,26 +268,26 @@ namespace DBADashGUI.AgentJobs
                 dgvJobs.Rows[idx].Cells["JobStepFails7Days"].SetStatusColor(stepFailCount7DaysStatus);
                 if ((string)row["ConfiguredLevel"] == "Job")
                 {
-                        dgvJobs.Rows[idx].Cells["Configure"].Style.Font = new Font(dgvJobs.Font, FontStyle.Bold);
-                    }
+                    dgvJobs.Rows[idx].Cells["Configure"].Style.Font = new Font(dgvJobs.Font, FontStyle.Bold);
+                }
                 else
-                    {
-                        dgvJobs.Rows[idx].Cells["Configure"].Style.Font = new Font(dgvJobs.Font, FontStyle.Regular);
-                    }
+                {
+                    dgvJobs.Rows[idx].Cells["Configure"].Style.Font = new Font(dgvJobs.Font, FontStyle.Regular);
                 }
             }
+        }
 
-        private void criticalToolStripMenuItem_Click(object sender, EventArgs e)
+        private void CriticalToolStripMenuItem_Click(object sender, EventArgs e)
         {
             RefreshData();
         }
 
-        private void warningToolStripMenuItem_Click(object sender, EventArgs e)
+        private void WarningToolStripMenuItem_Click(object sender, EventArgs e)
         {
             RefreshData();
         }
 
-        private void undefinedToolStripMenuItem_Click(object sender, EventArgs e)
+        private void UndefinedToolStripMenuItem_Click(object sender, EventArgs e)
         {
             RefreshData();
 
@@ -302,12 +298,12 @@ namespace DBADashGUI.AgentJobs
             RefreshData();
         }
 
-        private void tsRefresh_Click(object sender, EventArgs e)
+        private void TsRefresh_Click(object sender, EventArgs e)
         {
             RefreshData();
         }
 
-        private void tsCopy_Click(object sender, EventArgs e)
+        private void TsCopy_Click(object sender, EventArgs e)
         {
             Configure.Visible = false;
             colHistory.Visible = false;
@@ -316,53 +312,53 @@ namespace DBADashGUI.AgentJobs
             colHistory.Visible = true;
         }
 
-        private void dgvJobHistory_CellContentClick(object sender, DataGridViewCellEventArgs e)
+        private void DgvJobHistory_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
             if (e.RowIndex >= 0)
             {
                 var row = (DataRowView)dgvJobHistory.Rows[e.RowIndex].DataBoundItem;
-                if(e.ColumnIndex == colViewSteps.Index)
+                if (e.ColumnIndex == colViewSteps.Index)
                 {
                     instance_id = (int)row["instance_id"];
-                    showHistory();
+                    ShowHistory();
                 }
                 if (e.ColumnIndex == colMessage.Index)
                 {
                     string message = Convert.ToString(row["Message"]);
-                    NotepadHelper.ShowMessage(message, "DBA Dash Job History");                                     
+                    NotepadHelper.ShowMessage(message, "DBA Dash Job History");
                 }
             }
-       }
+        }
 
-        private void tsCopyHistory_Click(object sender, EventArgs e)
+        private void TsCopyHistory_Click(object sender, EventArgs e)
         {
             colViewSteps.Visible = false;
             Common.CopyDataGridViewToClipboard(dgvJobHistory);
             colViewSteps.Visible = true;
         }
 
-        private void showJobStepsToolStripMenuItem_Click(object sender, EventArgs e)
+        private void ShowJobStepsToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            showHistory();
+            ShowHistory();
         }
 
-        private void tsBack_Click(object sender, EventArgs e)
+        private void TsBack_Click(object sender, EventArgs e)
         {
             instance_id = null;
-            showHistory();
+            ShowHistory();
         }
 
-        private void tsRefreshHistory_Click(object sender, EventArgs e)
+        private void TsRefreshHistory_Click(object sender, EventArgs e)
         {
-            showHistory();
+            ShowHistory();
         }
 
-        private void failedOnlyToolStripMenuItem_Click(object sender, EventArgs e)
+        private void FailedOnlyToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            showHistory();
+            ShowHistory();
         }
 
-        private void tsExcel_Click(object sender, EventArgs e)
+        private void TsExcel_Click(object sender, EventArgs e)
         {
             Configure.Visible = false;
             colHistory.Visible = false;
@@ -371,7 +367,7 @@ namespace DBADashGUI.AgentJobs
             colHistory.Visible = true;
         }
 
-        private void tsExcelHistory_Click(object sender, EventArgs e)
+        private void TsExcelHistory_Click(object sender, EventArgs e)
         {
             colViewSteps.Visible = false;
             Common.PromptSaveDataGridView(ref dgvJobHistory);
@@ -384,5 +380,5 @@ namespace DBADashGUI.AgentJobs
             Common.StyleGrid(ref dgvJobs);
         }
     }
-    }
+}
 

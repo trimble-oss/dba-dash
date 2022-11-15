@@ -2,8 +2,8 @@
 using Amazon.Runtime;
 using Amazon.Runtime.CredentialManagement;
 using Amazon.S3;
-using System;
 using Serilog;
+using System;
 namespace DBADash
 {
     public class AWSTools

@@ -1,8 +1,7 @@
-﻿using System;
-using Microsoft.Data.SqlClient;
+﻿using Microsoft.Data.SqlClient;
+using System;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
 
 namespace DBADashConfig.Test
 {
@@ -22,20 +21,18 @@ namespace DBADashConfig.Test
             psi.RedirectStandardOutput = true;
             psi.RedirectStandardError = true;
 
-            using (var p = Process.Start(psi))
+            using var p = Process.Start(psi);
+            if (p == null)
             {
-                if (p == null)
-                {
-                    throw new Exception("Process is NULL");
-                }
-                p.WaitForExit();
-                var output = p.StandardOutput.ReadToEnd();
-                var error = p.StandardError.ReadToEnd();
-                Console.WriteLine(output);
-                if (!string.IsNullOrEmpty(error))
-                {
-                    throw new Exception(error);
-                }
+                throw new Exception("Process is NULL");
+            }
+            p.WaitForExit();
+            var output = p.StandardOutput.ReadToEnd();
+            var error = p.StandardError.ReadToEnd();
+            Console.WriteLine(output);
+            if (!string.IsNullOrEmpty(error))
+            {
+                throw new Exception(error);
             }
         }
 
@@ -45,7 +42,7 @@ namespace DBADashConfig.Test
             {
                 string json = GetConfigJson();
                 var cfg = DBADash.CollectionConfig.Deserialize(json);
-                return cfg.SourceConnections.Count();
+                return cfg.SourceConnections.Count;
             }
             else
             {
@@ -53,13 +50,15 @@ namespace DBADashConfig.Test
             }
         }
 
-       public static SqlConnectionStringBuilder GetRandomConnectionString()
+        public static SqlConnectionStringBuilder GetRandomConnectionString()
         {
-            var builder = new SqlConnectionStringBuilder();
-            builder.DataSource = Guid.NewGuid().ToString();
-            builder.InitialCatalog = "DABDashUnitTest" + Guid.NewGuid().ToString();
-            builder.Password = "TestEncryption";
-            builder.ApplicationName = "DBADash";
+            var builder = new SqlConnectionStringBuilder
+            {
+                DataSource = Guid.NewGuid().ToString(),
+                InitialCatalog = "DABDashUnitTest" + Guid.NewGuid().ToString(),
+                Password = "TestEncryption",
+                ApplicationName = "DBADash"
+            };
             return builder;
         }
     }

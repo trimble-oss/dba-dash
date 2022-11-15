@@ -1,11 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace DBADashGUI.Performance
@@ -49,7 +42,7 @@ namespace DBADashGUI.Performance
             }
             set
             {
-                ioSummary1.FromDate= value;
+                ioSummary1.FromDate = value;
             }
         }
 
@@ -61,7 +54,7 @@ namespace DBADashGUI.Performance
             }
             set
             {
-               ioSummary1.ToDate= value;
+                ioSummary1.ToDate = value;
             }
         }
 

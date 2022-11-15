@@ -74,7 +74,7 @@
             this.tsCode.Name = "tsCode";
             this.tsCode.Size = new System.Drawing.Size(29, 28);
             this.tsCode.Text = "Code View";
-            this.tsCode.Click += new System.EventHandler(this.tsCode_Click);
+            this.tsCode.Click += new System.EventHandler(this.TsCode_Click);
             // 
             // tsDiff
             // 
@@ -84,7 +84,7 @@
             this.tsDiff.Name = "tsDiff";
             this.tsDiff.Size = new System.Drawing.Size(29, 28);
             this.tsDiff.Text = "Side by Side Diff";
-            this.tsDiff.Click += new System.EventHandler(this.tsDiff_Click);
+            this.tsDiff.Click += new System.EventHandler(this.TsDiff_Click);
             // 
             // tsInline
             // 
@@ -94,7 +94,7 @@
             this.tsInline.Name = "tsInline";
             this.tsInline.Size = new System.Drawing.Size(29, 28);
             this.tsInline.Text = "Inline Diff";
-            this.tsInline.Click += new System.EventHandler(this.tsInline_Click);
+            this.tsInline.Click += new System.EventHandler(this.TsInline_Click);
             // 
             // toolStripDropDownButton1
             // 
@@ -114,7 +114,7 @@
             this.copyLeftToolStripMenuItem.Name = "copyLeftToolStripMenuItem";
             this.copyLeftToolStripMenuItem.Size = new System.Drawing.Size(165, 26);
             this.copyLeftToolStripMenuItem.Text = "Copy Left";
-            this.copyLeftToolStripMenuItem.Click += new System.EventHandler(this.copyLeftToolStripMenuItem_Click);
+            this.copyLeftToolStripMenuItem.Click += new System.EventHandler(this.CopyLeftToolStripMenuItem_Click);
             // 
             // copyRightToolStripMenuItem
             // 
@@ -122,7 +122,7 @@
             this.copyRightToolStripMenuItem.Name = "copyRightToolStripMenuItem";
             this.copyRightToolStripMenuItem.Size = new System.Drawing.Size(165, 26);
             this.copyRightToolStripMenuItem.Text = "Copy Right";
-            this.copyRightToolStripMenuItem.Click += new System.EventHandler(this.copyRightToolStripMenuItem_Click);
+            this.copyRightToolStripMenuItem.Click += new System.EventHandler(this.CopyRightToolStripMenuItem_Click);
             // 
             // elCodeEditor
             // 

@@ -1,17 +1,12 @@
-﻿using System;
+﻿using LiveCharts;
+using LiveCharts.Defaults;
+using LiveCharts.Wpf;
+using Microsoft.Data.SqlClient;
+using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Drawing;
 using System.Data;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
-using Microsoft.Data.SqlClient;
-using LiveCharts.Defaults;
-using LiveCharts;
-using LiveCharts.Wpf;
-using static DBADashGUI.Performance.Performance;
 
 namespace DBADashGUI.Performance
 {
@@ -20,20 +15,24 @@ namespace DBADashGUI.Performance
 
         public Int32 InstanceID;
         public string ElasticPoolName = String.Empty;
-      
+
         public AzureDBResourceStats()
         {
             InitializeComponent();
         }
 
-        bool SmoothLines { 
-            get {
+        bool SmoothLines
+        {
+            get
+            {
                 return smoothLinesToolStripMenuItem.Checked;
             }
-            set { smoothLinesToolStripMenuItem.Checked = value; 
+            set
+            {
+                smoothLinesToolStripMenuItem.Checked = value;
             }
         }
-        Int32 pointSize
+        Int32 PointSize
         {
             get
             {
@@ -52,11 +51,11 @@ namespace DBADashGUI.Performance
         {
             get
             {
-                if(DateGrouping== 0)
+                if (DateGrouping == 0)
                 {
                     return "yyyy-MM-dd HH:mm:ss";
                 }
-                else if(DateGrouping>=1440)
+                else if (DateGrouping >= 1440)
                 {
                     return "yyyy-MM-dd";
                 }
@@ -64,13 +63,13 @@ namespace DBADashGUI.Performance
                 {
                     return "yyyy-MM-dd HH:mm";
                 }
-               
+
             }
         }
 
 
 
-        Int32 _dateGrouping=0;
+        Int32 _dateGrouping = 0;
         public Int32 DateGrouping
         {
             get
@@ -85,47 +84,47 @@ namespace DBADashGUI.Performance
 
         }
 
-  
 
-        Dictionary<string, columnMetaData> columns;
-        readonly Dictionary<string,columnMetaData> DBColumns = new Dictionary<string, columnMetaData>
-            {
-                {"avg_cpu_percent", new columnMetaData{Alias="Avg CPU %",isVisible=false } },
-                {"avg_data_io_percent", new columnMetaData{Alias="Avg Data %",isVisible=false } },
-                {"avg_log_write_percent", new columnMetaData{Alias="Avg Log Write %",isVisible=false } },
-                {"AvgDTUPercent", new columnMetaData{Alias="Avg DTU %",isVisible=false } },
-                {"avg_memory_usage_percent", new columnMetaData{Alias="Avg Memory %",isVisible=false } },
-                {"xtp_storage_percent", new columnMetaData{Alias="XTP Storage %",isVisible=false } },
-                {"avg_instance_cpu_percent", new columnMetaData{Alias="Avg CPU % (Instance)",isVisible=false } },
-                {"avg_instance_memory_percent", new columnMetaData{Alias="Avg Memory % (Instance)",isVisible=false } },
-                {"max_worker_percent", new columnMetaData{Alias="Max Worker %",isVisible=false } },
-                {"max_session_percent", new columnMetaData{Alias="Max Session %",isVisible=false } },
-                {"max_cpu_percent", new columnMetaData{Alias="Max CPU %",isVisible=true } },
-                {"max_data_io_percent", new columnMetaData{Alias="Max Data %",isVisible=true } },
-                {"max_log_write_percent", new columnMetaData{Alias="Max Log Write %",isVisible=true } },
-                {"max_instance_cpu_percent", new columnMetaData{Alias="Max CPU % (Instance)",isVisible=false } },
-                {"max_instance_memory_percent", new columnMetaData{Alias="Max Memory % (Instance)",isVisible=false } },
-                {"MaxDTUPercent", new columnMetaData{Alias="Max DTU %",isVisible=false} },
-                {"AvgDTUsUsed", new columnMetaData{Alias="Avg DTU",isVisible=false,axis=1} },
-                {"MaxDTUsUsed", new columnMetaData{Alias="Max DTU",isVisible=false,axis=1} },
-                {"dtu_limit", new columnMetaData{Alias="DTU Limit",isVisible=false,axis=1} },
-                {"cpu_limit", new columnMetaData{Alias="CPU Limit",isVisible=false,axis=1} },
+
+        Dictionary<string, ColumnMetaData> columns;
+        readonly Dictionary<string, ColumnMetaData> DBColumns = new()
+        {
+                {"avg_cpu_percent", new ColumnMetaData{Alias="Avg CPU %",isVisible=false } },
+                {"avg_data_io_percent", new ColumnMetaData{Alias="Avg Data %",isVisible=false } },
+                {"avg_log_write_percent", new ColumnMetaData{Alias="Avg Log Write %",isVisible=false } },
+                {"AvgDTUPercent", new ColumnMetaData{Alias="Avg DTU %",isVisible=false } },
+                {"avg_memory_usage_percent", new ColumnMetaData{Alias="Avg Memory %",isVisible=false } },
+                {"xtp_storage_percent", new ColumnMetaData{Alias="XTP Storage %",isVisible=false } },
+                {"avg_instance_cpu_percent", new ColumnMetaData{Alias="Avg CPU % (Instance)",isVisible=false } },
+                {"avg_instance_memory_percent", new ColumnMetaData{Alias="Avg Memory % (Instance)",isVisible=false } },
+                {"max_worker_percent", new ColumnMetaData{Alias="Max Worker %",isVisible=false } },
+                {"max_session_percent", new ColumnMetaData{Alias="Max Session %",isVisible=false } },
+                {"max_cpu_percent", new ColumnMetaData{Alias="Max CPU %",isVisible=true } },
+                {"max_data_io_percent", new ColumnMetaData{Alias="Max Data %",isVisible=true } },
+                {"max_log_write_percent", new ColumnMetaData{Alias="Max Log Write %",isVisible=true } },
+                {"max_instance_cpu_percent", new ColumnMetaData{Alias="Max CPU % (Instance)",isVisible=false } },
+                {"max_instance_memory_percent", new ColumnMetaData{Alias="Max Memory % (Instance)",isVisible=false } },
+                {"MaxDTUPercent", new ColumnMetaData{Alias="Max DTU %",isVisible=false} },
+                {"AvgDTUsUsed", new ColumnMetaData{Alias="Avg DTU",isVisible=false,axis=1} },
+                {"MaxDTUsUsed", new ColumnMetaData{Alias="Max DTU",isVisible=false,axis=1} },
+                {"dtu_limit", new ColumnMetaData{Alias="DTU Limit",isVisible=false,axis=1} },
+                {"cpu_limit", new ColumnMetaData{Alias="CPU Limit",isVisible=false,axis=1} },
             };
-        readonly Dictionary<string, columnMetaData> PoolColumns = new Dictionary<string, columnMetaData>
-            {
-                {"avg_cpu_percent", new columnMetaData{Alias="Avg CPU %",isVisible=false } },
-                {"avg_data_io_percent", new columnMetaData{Alias="Avg Data %",isVisible=false } },
-                {"avg_log_write_percent", new columnMetaData{Alias="Avg Log Write %",isVisible=false } },
-                {"AvgDTUPercent", new columnMetaData{Alias="Avg DTU %",isVisible=false } },              
-                {"max_worker_percent", new columnMetaData{Alias="Max Worker %",isVisible=false } },
-                {"max_session_percent", new columnMetaData{Alias="Max Session %",isVisible=false } },
-                {"max_cpu_percent", new columnMetaData{Alias="Max CPU %",isVisible=true } },
-                {"max_data_io_percent", new columnMetaData{Alias="Max Data %",isVisible=true } },
-                {"max_log_write_percent", new columnMetaData{Alias="Max Log Write %",isVisible=true } },
-                {"MaxDTUPercent", new columnMetaData{Alias="Max DTU %",isVisible=false} },
-                {"AvgDTUsUsed", new columnMetaData{Alias="Avg DTU",isVisible=false,axis=1} },
-                {"MaxDTUsUsed", new columnMetaData{Alias="Max DTU",isVisible=false,axis=1} },
-                {"dtu_limit", new columnMetaData{Alias="DTU Limit",isVisible=false,axis=1} }
+        readonly Dictionary<string, ColumnMetaData> PoolColumns = new()
+        {
+                {"avg_cpu_percent", new ColumnMetaData{Alias="Avg CPU %",isVisible=false } },
+                {"avg_data_io_percent", new ColumnMetaData{Alias="Avg Data %",isVisible=false } },
+                {"avg_log_write_percent", new ColumnMetaData{Alias="Avg Log Write %",isVisible=false } },
+                {"AvgDTUPercent", new ColumnMetaData{Alias="Avg DTU %",isVisible=false } },
+                {"max_worker_percent", new ColumnMetaData{Alias="Max Worker %",isVisible=false } },
+                {"max_session_percent", new ColumnMetaData{Alias="Max Session %",isVisible=false } },
+                {"max_cpu_percent", new ColumnMetaData{Alias="Max CPU %",isVisible=true } },
+                {"max_data_io_percent", new ColumnMetaData{Alias="Max Data %",isVisible=true } },
+                {"max_log_write_percent", new ColumnMetaData{Alias="Max Log Write %",isVisible=true } },
+                {"MaxDTUPercent", new ColumnMetaData{Alias="Max DTU %",isVisible=false} },
+                {"AvgDTUsUsed", new ColumnMetaData{Alias="Avg DTU",isVisible=false,axis=1} },
+                {"MaxDTUsUsed", new ColumnMetaData{Alias="Max DTU",isVisible=false,axis=1} },
+                {"dtu_limit", new ColumnMetaData{Alias="DTU Limit",isVisible=false,axis=1} }
             };
 
 
@@ -134,10 +133,10 @@ namespace DBADashGUI.Performance
         public void RefreshData()
         {
             DateGrouping = Common.DateGrouping(DateRange.DurationMins, 400);
-            refreshData();
+            RefreshDataLocal();
         }
 
-        private void refreshData()
+        private void RefreshDataLocal()
         {
             if (ElasticPoolName == string.Empty)
             {
@@ -148,10 +147,10 @@ namespace DBADashGUI.Performance
                 dt = GetAzurePoolResourceStats();
             }
 
-            updateChart();
+            UpdateChart();
         }
 
-        private void updateChart()
+        private void UpdateChart()
         {
             var cnt = dt.Rows.Count;
             if (cnt < 2)
@@ -169,10 +168,10 @@ namespace DBADashGUI.Performance
             }
 
             Int32 i = 0;
-            Int32 y1Max=1;
+            Int32 y1Max = 1;
             foreach (DataRow r in dt.Rows)
             {
-                var dtuLimit = r["dtu_limit"] ==DBNull.Value ? 0 : (Int32)r["dtu_limit"];
+                var dtuLimit = r["dtu_limit"] == DBNull.Value ? 0 : (Int32)r["dtu_limit"];
                 if (ElasticPoolName == string.Empty)
                 {
                     var cpuLimit = r["cpu_Limit"] == DBNull.Value ? 0 : Convert.ToInt32(r["cpu_limit"]);
@@ -206,10 +205,10 @@ namespace DBADashGUI.Performance
                         Tag = kv.Key,
                         ScalesYAt = columns[kv.Key].axis,
                         LineSmoothness = SmoothLines ? 1 : 0,
-                        PointGeometrySize = pointSize,
+                        PointGeometrySize = PointSize,
                         Values = v
                     }
-                    ); 
+                    );
                 }
             }
             chart1.AxisX.Clear();
@@ -220,7 +219,7 @@ namespace DBADashGUI.Performance
                 LabelFormatter = val => new System.DateTime((long)val).ToString(DateFormat)
 
             });
-            var y0visible = columns.Values.Where(c => c.isVisible && c.axis == 0).Count() > 0;
+            var y0visible = columns.Values.Where(c => c.isVisible && c.axis == 0).Any();
             chart1.AxisY.Add(new Axis
             {
                 Title = "%",
@@ -230,7 +229,7 @@ namespace DBADashGUI.Performance
                 Visibility = y0visible ? System.Windows.Visibility.Visible : System.Windows.Visibility.Hidden
 
             });
-            var y1visible = columns.Values.Where(c => c.isVisible && c.axis == 1).Count() > 0;
+            var y1visible = columns.Values.Where(c => c.isVisible && c.axis == 1).Any();
             if (y1visible)
             {
                 chart1.AxisY.Add(new Axis
@@ -246,9 +245,9 @@ namespace DBADashGUI.Performance
             chart1.LegendLocation = LegendLocation.Bottom;
         }
 
-        private void addMeasures()
+        private void AddMeasures()
         {
-            foreach(var k in columns)
+            foreach (var k in columns)
             {
                 var dd = new ToolStripMenuItem(k.Value.Alias)
                 {
@@ -256,23 +255,24 @@ namespace DBADashGUI.Performance
                     CheckOnClick = true
                 };
                 dd.Checked = dd.Enabled && k.Value.isVisible;
-                dd.Click += measureDropDown_Click;
+                dd.Click += MeasureDropDown_Click;
                 tsMeasures.DropDownItems.Add(dd);
             }
-     }
+        }
 
-        private void measureDropDown_Click(object sender, EventArgs e)
+        private void MeasureDropDown_Click(object sender, EventArgs e)
         {
             var mnu = (ToolStripMenuItem)sender;
             columns[mnu.Name].isVisible = mnu.Checked;
-            updateChart();
+            UpdateChart();
         }
 
         private DataTable GetAzurePoolResourceStats()
         {
             using (var cn = new SqlConnection(Common.ConnectionString))
             {
-                using (SqlCommand cmd = new SqlCommand("dbo.AzureDBElasticPoolResourceStats_Get", cn) { CommandType = CommandType.StoredProcedure }) {
+                using (SqlCommand cmd = new("dbo.AzureDBElasticPoolResourceStats_Get", cn) { CommandType = CommandType.StoredProcedure })
+                {
                     cn.Open();
                     cmd.Parameters.AddWithValue("FromDate", DateRange.FromUTC);
                     cmd.Parameters.AddWithValue("ToDate", DateRange.ToUTC);
@@ -280,8 +280,8 @@ namespace DBADashGUI.Performance
                     cmd.Parameters.AddWithValue("elastic_pool_name", ElasticPoolName);
                     cmd.Parameters.AddWithValue("DateGroupingMin", DateGrouping);
                     cmd.Parameters.AddWithValue("UTCOffset", Common.UtcOffset);
-                    SqlDataAdapter da = new SqlDataAdapter(cmd);
-                    DataTable dt = new DataTable();
+                    SqlDataAdapter da = new(cmd);
+                    DataTable dt = new();
                     da.Fill(dt);
                     return dt;
                 }
@@ -293,22 +293,23 @@ namespace DBADashGUI.Performance
         {
             using (var cn = new SqlConnection(Common.ConnectionString))
             {
-                using (SqlCommand cmd = new SqlCommand("dbo.AzureDBResourceStats_Get", cn) { CommandType = CommandType.StoredProcedure }) {
+                using (SqlCommand cmd = new("dbo.AzureDBResourceStats_Get", cn) { CommandType = CommandType.StoredProcedure })
+                {
                     cn.Open();
                     cmd.Parameters.AddWithValue("FromDate", DateRange.FromUTC);
                     cmd.Parameters.AddWithValue("ToDate", DateRange.ToUTC);
                     cmd.Parameters.AddWithValue("InstanceID", InstanceID);
                     cmd.Parameters.AddWithValue("DateGroupingMin", DateGrouping);
                     cmd.Parameters.AddWithValue("UTCOffset", Common.UtcOffset);
-                    SqlDataAdapter da = new SqlDataAdapter(cmd);
-                    DataTable dt = new DataTable();
+                    SqlDataAdapter da = new(cmd);
+                    DataTable dt = new();
                     da.Fill(dt);
                     return dt;
                 }
             }
         }
 
-        private void tsRefresh_Click(object sender, EventArgs e)
+        private void TsRefresh_Click(object sender, EventArgs e)
         {
             RefreshData();
         }
@@ -323,30 +324,30 @@ namespace DBADashGUI.Performance
             {
                 columns = PoolColumns;
             }
-            addMeasures();
-            Common.AddDateGroups(tsDateGrouping,TsDateGrouping_Click);
-           
+            AddMeasures();
+            Common.AddDateGroups(tsDateGrouping, TsDateGrouping_Click);
+
         }
 
         private void TsDateGrouping_Click(object sender, EventArgs e)
         {
             var ts = (ToolStripMenuItem)sender;
             DateGrouping = Convert.ToInt32(ts.Tag);
-            refreshData();
+            RefreshDataLocal();
         }
 
-        private void smoothLinesToolStripMenuItem_Click(object sender, EventArgs e)
+        private void SmoothLinesToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            updateChart();
+            UpdateChart();
         }
 
-        private void pointsToolStripMenuItem_Click(object sender, EventArgs e)
+        private void PointsToolStripMenuItem_Click(object sender, EventArgs e)
         {
-                foreach (LineSeries s in chart1.Series)
-                {
-                    s.PointGeometrySize = pointSize;
-                }
-         }
-        
+            foreach (LineSeries s in chart1.Series.Cast<LineSeries>())
+            {
+                s.PointGeometrySize = PointSize;
+            }
+        }
+
     }
 }

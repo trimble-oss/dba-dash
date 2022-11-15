@@ -117,7 +117,7 @@
             this.chkLastFailIsCritical.TabIndex = 62;
             this.chkLastFailIsCritical.Text = "Last Fail Is Critical";
             this.chkLastFailIsCritical.UseVisualStyleBackColor = true;
-            this.chkLastFailIsCritical.CheckedChanged += new System.EventHandler(this.chkLastFailIsCritical_CheckedChanged);
+            this.chkLastFailIsCritical.CheckedChanged += new System.EventHandler(this.ChkLastFailIsCritical_CheckedChanged);
             // 
             // chkLastFailIsWarning
             // 
@@ -128,7 +128,7 @@
             this.chkLastFailIsWarning.TabIndex = 61;
             this.chkLastFailIsWarning.Text = "Last Fail Is Warning";
             this.chkLastFailIsWarning.UseVisualStyleBackColor = true;
-            this.chkLastFailIsWarning.CheckedChanged += new System.EventHandler(this.chkLastFailIsWarning_CheckedChanged);
+            this.chkLastFailIsWarning.CheckedChanged += new System.EventHandler(this.ChkLastFailIsWarning_CheckedChanged);
             // 
             // numJobStep7DaysWarning
             // 
@@ -177,7 +177,7 @@
             this.chkJobStep7Days.TabIndex = 12;
             this.chkJobStep7Days.Text = "Job Step Fail 7 Days";
             this.chkJobStep7Days.UseVisualStyleBackColor = true;
-            this.chkJobStep7Days.CheckedChanged += new System.EventHandler(this.chkJobStep7Days_CheckedChanged);
+            this.chkJobStep7Days.CheckedChanged += new System.EventHandler(this.ChkJobStep7Days_CheckedChanged);
             // 
             // numJobStep24HrsWarning
             // 
@@ -226,7 +226,7 @@
             this.chkJobStep24Hrs.TabIndex = 9;
             this.chkJobStep24Hrs.Text = "Job Step Fail 24hrs";
             this.chkJobStep24Hrs.UseVisualStyleBackColor = true;
-            this.chkJobStep24Hrs.CheckedChanged += new System.EventHandler(this.chkJobStep24Hrs_CheckedChanged);
+            this.chkJobStep24Hrs.CheckedChanged += new System.EventHandler(this.ChkJobStep24Hrs_CheckedChanged);
             // 
             // numFailCount7DaysWarning
             // 
@@ -275,7 +275,7 @@
             this.chkFailCount7Days.TabIndex = 6;
             this.chkFailCount7Days.Text = "Fail Count 7 Days";
             this.chkFailCount7Days.UseVisualStyleBackColor = true;
-            this.chkFailCount7Days.CheckedChanged += new System.EventHandler(this.chkFailCount7Days_CheckedChanged);
+            this.chkFailCount7Days.CheckedChanged += new System.EventHandler(this.ChkFailCount7Days_CheckedChanged);
             // 
             // numFailCount24HrsWarning
             // 
@@ -398,7 +398,7 @@
             this.chkFailCount24Hrs.TabIndex = 3;
             this.chkFailCount24Hrs.Text = "Fail Count 24hrs";
             this.chkFailCount24Hrs.UseVisualStyleBackColor = true;
-            this.chkFailCount24Hrs.CheckedChanged += new System.EventHandler(this.chkFailCount24Hrs_CheckedChanged);
+            this.chkFailCount24Hrs.CheckedChanged += new System.EventHandler(this.ChkFailCount24Hrs_CheckedChanged);
             // 
             // chkTimeSinceLastSucceeded
             // 
@@ -409,7 +409,7 @@
             this.chkTimeSinceLastSucceeded.TabIndex = 18;
             this.chkTimeSinceLastSucceeded.Text = "Time Since Last Succeeded";
             this.chkTimeSinceLastSucceeded.UseVisualStyleBackColor = true;
-            this.chkTimeSinceLastSucceeded.CheckedChanged += new System.EventHandler(this.chkTimeSinceLastSucceeded_CheckedChanged);
+            this.chkTimeSinceLastSucceeded.CheckedChanged += new System.EventHandler(this.ChkTimeSinceLastSucceeded_CheckedChanged);
             // 
             // chkTimeSinceLast
             // 
@@ -420,7 +420,7 @@
             this.chkTimeSinceLast.TabIndex = 15;
             this.chkTimeSinceLast.Text = "Time Since Last Failure";
             this.chkTimeSinceLast.UseVisualStyleBackColor = true;
-            this.chkTimeSinceLast.CheckedChanged += new System.EventHandler(this.chkTimeSinceLast_CheckedChanged);
+            this.chkTimeSinceLast.CheckedChanged += new System.EventHandler(this.ChkTimeSinceLast_CheckedChanged);
             // 
             // label7
             // 
@@ -489,7 +489,7 @@
             this.chkInherit.TabIndex = 1;
             this.chkInherit.Text = "Inherit";
             this.chkInherit.UseVisualStyleBackColor = true;
-            this.chkInherit.CheckedChanged += new System.EventHandler(this.chkInherit_CheckedChanged);
+            this.chkInherit.CheckedChanged += new System.EventHandler(this.ChkInherit_CheckedChanged);
             // 
             // bttnUpdate
             // 
@@ -499,7 +499,7 @@
             this.bttnUpdate.TabIndex = 64;
             this.bttnUpdate.Text = "Update";
             this.bttnUpdate.UseVisualStyleBackColor = true;
-            this.bttnUpdate.Click += new System.EventHandler(this.bttnUpdate_Click);
+            this.bttnUpdate.Click += new System.EventHandler(this.BttnUpdate_Click);
             // 
             // AgentJobThresholdsConfig
             // 

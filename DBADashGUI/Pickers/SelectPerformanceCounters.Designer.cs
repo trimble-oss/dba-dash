@@ -147,7 +147,7 @@
             this.bttnCancel.TabIndex = 4;
             this.bttnCancel.Text = "&Cancel";
             this.bttnCancel.UseVisualStyleBackColor = true;
-            this.bttnCancel.Click += new System.EventHandler(this.bttnCancel_Click);
+            this.bttnCancel.Click += new System.EventHandler(this.BttnCancel_Click);
             // 
             // bttnClear
             // 
@@ -157,7 +157,7 @@
             this.bttnClear.TabIndex = 3;
             this.bttnClear.Text = "Clear Selected";
             this.bttnClear.UseVisualStyleBackColor = true;
-            this.bttnClear.Click += new System.EventHandler(this.bttnClear_Click);
+            this.bttnClear.Click += new System.EventHandler(this.BttnClear_Click);
             // 
             // label1
             // 
@@ -174,7 +174,7 @@
             this.txtSearch.Name = "txtSearch";
             this.txtSearch.Size = new System.Drawing.Size(244, 22);
             this.txtSearch.TabIndex = 1;
-            this.txtSearch.TextChanged += new System.EventHandler(this.txtSearch_TextChanged);
+            this.txtSearch.TextChanged += new System.EventHandler(this.TxtSearch_TextChanged);
             // 
             // bttnOK
             // 
@@ -185,7 +185,7 @@
             this.bttnOK.TabIndex = 0;
             this.bttnOK.Text = "&OK";
             this.bttnOK.UseVisualStyleBackColor = true;
-            this.bttnOK.Click += new System.EventHandler(this.bttnOK_Click);
+            this.bttnOK.Click += new System.EventHandler(this.BttnOK_Click);
             // 
             // dataGridViewTextBoxColumn1
             // 

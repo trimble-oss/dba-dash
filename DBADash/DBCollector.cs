@@ -85,13 +85,13 @@ namespace DBADash
     public class DBCollector
     {
         public DataSet Data;
-        string ConnectionString { get => Source.SourceConnection.ConnectionString; }   
+        string ConnectionString { get => Source.SourceConnection.ConnectionString; }
         private DataTable dtErrors;
-        public bool LogInternalPerformanceCounters=false;
+        public bool LogInternalPerformanceCounters = false;
         private DataTable dtInternalPerfCounters;
         public Int32 PerformanceCollectionPeriodMins = 60;
         string computerName;
-        readonly CollectionType[] azureCollectionTypes = new CollectionType[] { CollectionType.SlowQueries, CollectionType.AzureDBElasticPoolResourceStats, CollectionType.AzureDBServiceObjectives, CollectionType.AzureDBResourceStats, CollectionType.CPU, CollectionType.DBFiles, CollectionType.Databases, CollectionType.DBConfig, CollectionType.TraceFlags, CollectionType.ObjectExecutionStats, CollectionType.BlockingSnapshot, CollectionType.IOStats, CollectionType.Waits, CollectionType.ServerProperties, CollectionType.DBTuningOptions, CollectionType.SysConfig, CollectionType.DatabasePrincipals, CollectionType.DatabaseRoleMembers, CollectionType.DatabasePermissions, CollectionType.OSInfo,CollectionType.CustomChecks,CollectionType.PerformanceCounters,CollectionType.VLF, CollectionType.DatabaseQueryStoreOptions, CollectionType.AzureDBResourceGovernance, CollectionType.RunningQueries, CollectionType.IdentityColumns};
+        readonly CollectionType[] azureCollectionTypes = new CollectionType[] { CollectionType.SlowQueries, CollectionType.AzureDBElasticPoolResourceStats, CollectionType.AzureDBServiceObjectives, CollectionType.AzureDBResourceStats, CollectionType.CPU, CollectionType.DBFiles, CollectionType.Databases, CollectionType.DBConfig, CollectionType.TraceFlags, CollectionType.ObjectExecutionStats, CollectionType.BlockingSnapshot, CollectionType.IOStats, CollectionType.Waits, CollectionType.ServerProperties, CollectionType.DBTuningOptions, CollectionType.SysConfig, CollectionType.DatabasePrincipals, CollectionType.DatabaseRoleMembers, CollectionType.DatabasePermissions, CollectionType.OSInfo, CollectionType.CustomChecks, CollectionType.PerformanceCounters, CollectionType.VLF, CollectionType.DatabaseQueryStoreOptions, CollectionType.AzureDBResourceGovernance, CollectionType.RunningQueries, CollectionType.IdentityColumns };
         readonly CollectionType[] azureOnlyCollectionTypes = new CollectionType[] { CollectionType.AzureDBElasticPoolResourceStats, CollectionType.AzureDBResourceStats, CollectionType.AzureDBServiceObjectives, CollectionType.AzureDBResourceGovernance };
         readonly CollectionType[] azureMasterOnlyCollectionTypes = new CollectionType[] { CollectionType.AzureDBElasticPoolResourceStats };
         public DBADashSource Source;
@@ -101,15 +101,15 @@ namespace DBADash
         private string instanceName;
         string dbName;
         string productVersion;
-        public Int32 RetryCount=1;
+        public Int32 RetryCount = 1;
         public Int32 RetryInterval = 30;
         private HostPlatform platform;
-        public DateTime JobLastModified=DateTime.MinValue;
-        private bool IsHadrEnabled=false;
+        public DateTime JobLastModified = DateTime.MinValue;
+        private bool IsHadrEnabled = false;
         private Policy retryPolicy;
         private DatabaseEngineEdition engineEdition;
         private DBADashAgent dashAgent;
-        public bool IsExtendedEventsNotSupportedException=false;
+        public bool IsExtendedEventsNotSupportedException = false;
 
         public const int DefaultIdentityCollectionThreshold = 5;
         /// <summary>
@@ -124,7 +124,8 @@ namespace DBADash
         private readonly Stopwatch swatch = new();
         private CollectionType currentCollection;
 
-        public int Job_instance_id {
+        public int Job_instance_id
+        {
             get
             {
                 if (Data.Tables.Contains("JobHistory"))
@@ -133,12 +134,13 @@ namespace DBADash
                     if (jh.Rows.Count > 0)
                     {
                         job_instance_id = Convert.ToInt32(jh.Compute("max(instance_id)", string.Empty));
-                    }                   
+                    }
                 }
                 return job_instance_id;
             }
-            set {
-                job_instance_id=value;
+            set
+            {
+                job_instance_id = value;
             }
         }
         int job_instance_id = 0;
@@ -186,15 +188,15 @@ namespace DBADash
             }
         }
 
-        public DBCollector(DBADashSource source,string serviceName)
+        public DBCollector(DBADashSource source, string serviceName)
         {
             Source = source;
             Startup(serviceName);
         }
 
-        private void LogError(Exception ex,string errorSource, string errorContext = "Collect")
-        {           
-            Log.Error(ex,"{ErrorContext} {ErrorSource} {Connection}" ,errorContext,errorSource, Source.SourceConnection.ConnectionForPrint);
+        private void LogError(Exception ex, string errorSource, string errorContext = "Collect")
+        {
+            Log.Error(ex, "{ErrorContext} {ErrorSource} {Connection}", errorContext, errorSource, Source.SourceConnection.ConnectionForPrint);
             LogDBError(errorSource, ex.ToString(), errorContext);
         }
 
@@ -207,14 +209,14 @@ namespace DBADash
             dtErrors.Rows.Add(rError);
         }
 
-        private void LogInternalPerformanceCounter(string objectName, string counterName,string instanceName, decimal counterValue)
+        private void LogInternalPerformanceCounter(string objectName, string counterName, string instanceName, decimal counterValue)
         {
             if (LogInternalPerformanceCounters)
             {
                 if (dtInternalPerfCounters == null)
                 {
                     dtInternalPerfCounters = new DataTable("InternalPerformanceCounters");
-                    dtInternalPerfCounters.Columns.Add("SnapshotDate",typeof(DateTime));
+                    dtInternalPerfCounters.Columns.Add("SnapshotDate", typeof(DateTime));
                     dtInternalPerfCounters.Columns.Add("object_name");
                     dtInternalPerfCounters.Columns.Add("counter_name");
                     dtInternalPerfCounters.Columns.Add("instance_name");
@@ -240,13 +242,13 @@ namespace DBADash
             currentCollection = type;
         }
 
-  
+
         private void StopCollection()
         {
             if (swatch.IsRunning)
             {
                 swatch.Stop();
-                Log.Debug("Collect {0} on {1} completed in {2}ms", currentCollection.ToString(),instanceName, swatch.ElapsedMilliseconds);
+                Log.Debug("Collect {0} on {1} completed in {2}ms", currentCollection.ToString(), instanceName, swatch.ElapsedMilliseconds);
                 LogInternalPerformanceCounter("DBADash", "Collection Duration (ms)", currentCollection.ToString(), Convert.ToDecimal(swatch.Elapsed.TotalMilliseconds));
             }
         }
@@ -263,7 +265,7 @@ namespace DBADash
                                 TimeSpan.FromSeconds(10)
                 }, (exception, timeSpan, retryCount, context) =>
                 {
-                    LogError(exception,(string)context.OperationKey, "Collect[Retrying]");
+                    LogError(exception, (string)context.OperationKey, "Collect[Retrying]");
                 });
 
             Data = new DataSet("DBADash");
@@ -278,7 +280,7 @@ namespace DBADash
                 context => GetInstance(),
                 new Context("Instance")
               );
-            
+
         }
 
 
@@ -317,13 +319,13 @@ namespace DBADash
                 {
                     removeSQL = SqlStrings.StopEventSessions;
                 }
-                using (var cn = new SqlConnection(ConnectionString))  
+                using (var cn = new SqlConnection(ConnectionString))
                 using (var cmd = new SqlCommand(removeSQL, cn))
                 {
                     await cn.OpenAsync();
                     await cmd.ExecuteNonQueryAsync();
                 }
-                
+
             }
         }
 
@@ -354,7 +356,7 @@ namespace DBADash
                 LogDBError("Instance", "host_platform parse error");
                 platform = HostPlatform.Windows;
             }
-            if(!noWMI && platform == HostPlatform.Linux) // Disable WMI collection for Linux
+            if (!noWMI && platform == HostPlatform.Linux) // Disable WMI collection for Linux
             {
                 noWMI = true;
                 Log.Debug("WMI Disabled for Linux Instance: {0}", instanceName);
@@ -478,7 +480,7 @@ namespace DBADash
             {
                 return engineEdition == DatabaseEngineEdition.Enterprise && !IsAzureDB; // Must be enterprise edition and not AzureDB
             }
-            else if(collectionType == CollectionType.Instance)
+            else if (collectionType == CollectionType.Instance)
             {
                 return false; // Required & collected by default
             }
@@ -496,15 +498,16 @@ namespace DBADash
             {
                 return;
             }
-          
+
             try
             {
                 retryPolicy.Execute(
-                  context => {
+                  context =>
+                  {
                       StartCollection(collectionType);
                       ExecuteCollection(collectionType);
                       StopCollection();
-                      },
+                  },
                   new Context(collectionTypeString)
                 );
             }
@@ -513,19 +516,19 @@ namespace DBADash
                 LogError(ex, collectionTypeString);
                 StopCollection();
             }
-            if(collectionType == CollectionType.RunningQueries)
+            if (collectionType == CollectionType.RunningQueries)
             {
                 CollectText();
                 try
                 {
                     CollectPlans();
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
-                    LogError(new Exception("Error collecting plans for Running Queries",ex), "RunningQueries");
+                    LogError(new Exception("Error collecting plans for Running Queries", ex), "RunningQueries");
                 }
             }
-          
+
         }
 
         static string ByteArrayToHexString(byte[] bytes)
@@ -544,13 +547,14 @@ namespace DBADash
                     using (var cn = new SqlConnection(ConnectionString))
                     using (var da = new SqlDataAdapter(plansSQL, cn))
                     {
-                        var dt = new DataTable("QueryPlans");                      
+                        var dt = new DataTable("QueryPlans");
                         da.Fill(dt);
                         if (dt.Rows.Count > 0)
                         {
                             dt.Columns.Add("query_plan_hash", typeof(byte[]));
                             dt.Columns.Add("query_plan_compressed", typeof(byte[]));
-                            foreach (DataRow r in dt.Rows){                         
+                            foreach (DataRow r in dt.Rows)
+                            {
                                 try
                                 {
                                     string strPlan = r["query_plan"] == DBNull.Value ? string.Empty : (string)r["query_plan"];
@@ -558,7 +562,7 @@ namespace DBADash
                                     var hash = GetPlanHash(strPlan);
                                     r["query_plan_hash"] = hash;
                                 }
-                                catch(Exception ex)
+                                catch (Exception ex)
                                 {
                                     Log.Error(ex, "Error processing query plans");
                                 }
@@ -605,9 +609,9 @@ namespace DBADash
                 {
                     while (xr.Read())
                     {
-                        if (xr.Name== "StmtSimple")
+                        if (xr.Name == "StmtSimple")
                         {
-                            string strHash= xr.GetAttribute("QueryPlanHash");
+                            string strHash = xr.GetAttribute("QueryPlanHash");
                             return StringToByteArray(strHash);
                         }
                     }
@@ -645,18 +649,18 @@ VALUES");
 
             // Already have a distinct list by plan handle, hash and offsets.  
             // Filter this list by plans not already colllected and get a distinct list by handle and offsets (excluding the hash as this can cause duplicates in rare cases)
-            var collectList =  plans.Where(p => !cache.Contains(p.Key))
+            var collectList = plans.Where(p => !cache.Contains(p.Key))
                 .GroupBy(p => Convert.ToBase64String(p.PlanHandle.Concat(BitConverter.GetBytes(p.StartOffset)).Concat(BitConverter.GetBytes(p.EndOffset)).ToArray()))
                 .Select(p => p.First())
                 .ToList();
 
-            collectList.ForEach(p =>sb.AppendFormat("{3}(0x{0},{1},{2}),", ByteArrayToHexString(p.PlanHandle), p.StartOffset, p.EndOffset,Environment.NewLine));
+            collectList.ForEach(p => sb.AppendFormat("{3}(0x{0},{1},{2}),", ByteArrayToHexString(p.PlanHandle), p.StartOffset, p.EndOffset, Environment.NewLine));
 
-            Log.Information("Plans {0}, {1} to collect from {2}", plans.Count, collectList.Count,instanceName);
+            Log.Information("Plans {0}, {1} to collect from {2}", plans.Count, collectList.Count, instanceName);
 
             LogInternalPerformanceCounter("DBADash", "Count of plans meeting threshold for collection", "", plans.Count); // Total number of plans that meet the threshold for collection
             LogInternalPerformanceCounter("DBADash", "Count of plans to collect", "", collectList.Count); // Total number of plans we want to collect (plans that meet the threshold that are not cached)
-            LogInternalPerformanceCounter("DBADash", "Count of plans from cache", "", plans.Count- collectList.Count); // Plan count we didn't collect because they have been collected previously and we cached the handles/hashes.
+            LogInternalPerformanceCounter("DBADash", "Count of plans from cache", "", plans.Count - collectList.Count); // Plan count we didn't collect because they have been collected previously and we cached the handles/hashes.
 
             if (collectList.Count == 0)
             {
@@ -690,13 +694,13 @@ CROSS APPLY sys.dm_exec_text_query_plan(t.plan_handle,t.statement_start_offset,t
             {
                 DataTable dt = Data.Tables["RunningQueries"];
                 var plans = (from r in dt.AsEnumerable()
-                             where r["plan_handle"] != DBNull.Value 
-                             && r["query_plan_hash"] != DBNull.Value 
-                             && r["statement_start_offset"] != DBNull.Value 
-                             && r["statement_end_offset"] != DBNull.Value 
-                             && ((byte[])r["query_plan_hash"]).Any(b=>b!=0) // Not 0x00000000 
+                             where r["plan_handle"] != DBNull.Value
+                             && r["query_plan_hash"] != DBNull.Value
+                             && r["statement_start_offset"] != DBNull.Value
+                             && r["statement_end_offset"] != DBNull.Value
+                             && ((byte[])r["query_plan_hash"]).Any(b => b != 0) // Not 0x00000000 
                              group r by new Plan((byte[])r["plan_handle"], (byte[])r["query_plan_hash"], (int)r["statement_start_offset"], (int)r["statement_end_offset"]) into g
-                             where g.Sum(r => Convert.ToInt32(r["cpu_time"])) >= Source.PlanCollectionCPUThreshold || g.Sum(r => Convert.ToInt32(r["granted_query_memory"])) >= Source.PlanCollectionMemoryGrantThreshold || g.Count() >= Source.PlanCollectionCountThreshold || g.Max(r=> ((DateTime)r["SnapshotDateUTC"]).Subtract((DateTime)r["last_request_start_time_utc"])).TotalMilliseconds >= Source.PlanCollectionDurationThreshold
+                             where g.Sum(r => Convert.ToInt32(r["cpu_time"])) >= Source.PlanCollectionCPUThreshold || g.Sum(r => Convert.ToInt32(r["granted_query_memory"])) >= Source.PlanCollectionMemoryGrantThreshold || g.Count() >= Source.PlanCollectionCountThreshold || g.Max(r => ((DateTime)r["SnapshotDateUTC"]).Subtract((DateTime)r["last_request_start_time_utc"])).TotalMilliseconds >= Source.PlanCollectionDurationThreshold
                              select g.Key).Distinct().ToList();
                 return plans;
             }
@@ -727,7 +731,7 @@ CROSS APPLY sys.dm_exec_text_query_plan(t.plan_handle,t.statement_start_offset,t
                         }
                         LogInternalPerformanceCounter("DBADash", "Count of text collected", "", dt.Rows.Count); // Count of text collected from sql_handles
                         LogInternalPerformanceCounter("DBADash", "Count of running queries", "", Data.Tables["RunningQueries"].Rows.Count); // Total number of running queries
-                    }                   
+                    }
                 }
             }
         }
@@ -761,9 +765,9 @@ CROSS APPLY sys.dm_exec_text_query_plan(t.plan_handle,t.statement_start_offset,t
             if (Data.Tables.Contains("QueryText"))
             {
                 var dt = Data.Tables["QueryText"];
-                foreach(DataRow r in dt.Rows)
+                foreach (DataRow r in dt.Rows)
                 {
-                    cache.Add(ByteArrayToHexString((byte[])r["sql_handle"]), "",policy);
+                    cache.Add(ByteArrayToHexString((byte[])r["sql_handle"]), "", policy);
                 }
             }
         }
@@ -840,9 +844,9 @@ CROSS APPLY sys.dm_exec_sql_text(H.sql_handle) txt");
             if (collectionType == CollectionType.JobHistory)
             {
                 param = new SqlParameter[] { new SqlParameter { DbType = DbType.Int32, Value = Job_instance_id, ParameterName = "instance_id" }, new SqlParameter { DbType = DbType.Int32, ParameterName = "run_date", Value = Convert.ToInt32(DateTime.Now.AddDays(-7).ToString("yyyyMMdd")) } };
-                Log.Debug("JobHistory From {JobInstanceID} on {Instance}", Job_instance_id,Source.SourceConnection.ConnectionForPrint);
+                Log.Debug("JobHistory From {JobInstanceID} on {Instance}", Job_instance_id, Source.SourceConnection.ConnectionForPrint);
             }
-            else if (collectionType == CollectionType.AzureDBResourceStats || collectionType == CollectionType.AzureDBElasticPoolResourceStats)
+            else if (collectionType is CollectionType.AzureDBResourceStats or CollectionType.AzureDBElasticPoolResourceStats)
             {
                 param = new SqlParameter[] { new SqlParameter("Date", DateTime.UtcNow.AddMinutes(-PerformanceCollectionPeriodMins)) };
             }
@@ -850,14 +854,14 @@ CROSS APPLY sys.dm_exec_sql_text(H.sql_handle) txt");
             {
                 param = new SqlParameter[] { new SqlParameter("TOP", PerformanceCollectionPeriodMins) };
             }
-            else if (collectionType== CollectionType.IdentityColumns)
+            else if (collectionType == CollectionType.IdentityColumns)
             {
                 param = new SqlParameter[] { new SqlParameter("IdentityCollectionThreshold", IdentityCollectionThreshold) };
             }
 
             if (collectionType == CollectionType.Drives)
             {
-                 CollectDrives();
+                CollectDrives();
             }
             else if (collectionType == CollectionType.ServerExtraProperties)
             {
@@ -868,18 +872,19 @@ CROSS APPLY sys.dm_exec_sql_text(H.sql_handle) txt");
                 CollectDriversWMI();
             }
             else if (collectionType == CollectionType.SlowQueries)
-            {         
+            {
                 try
                 {
                     CollectSlowQueries();
                 }
-                catch(SqlException ex) when (ex.Message.StartsWith("Unable to create/alter extended events session: RDS for SQL Server supports extended events")){
+                catch (SqlException ex) when (ex.Message.StartsWith("Unable to create/alter extended events session: RDS for SQL Server supports extended events"))
+                {
                     // RDS instances only support extended events for Standard and Enterprise editions.  If we encounter an error because it's not supported, log the error and continue
                     // Set IsExtendedEventsNotSupportedException which is used to disable the collection for future schedules
-                    Log.Warning("Slow query capture relies on extended events which is not supported for {0}: {1}",instanceName, ex.Message);
-                    LogDBError(collectionTypeString, "Slow query capture relies on extended events which is not supported for this instance","Collect[Warning]");
+                    Log.Warning("Slow query capture relies on extended events which is not supported for {0}: {1}", instanceName, ex.Message);
+                    LogDBError(collectionTypeString, "Slow query capture relies on extended events which is not supported for this instance", "Collect[Warning]");
                     IsExtendedEventsNotSupportedException = true;
-                }                
+                }
             }
             else if (collectionType == CollectionType.PerformanceCounters)
             {
@@ -901,9 +906,9 @@ CROSS APPLY sys.dm_exec_sql_text(H.sql_handle) txt");
                     {
                         Log.Warning("SnapshotJobs not supported: {0}. From {1}", ex.Message, Source.SourceConnection.ConnectionForPrint);
                     }
-                    catch(AggregateException ex) // thrown if any issues scripting jobs
+                    catch (AggregateException ex) // thrown if any issues scripting jobs
                     {
-                        LogDBError(collectionTypeString,ex.ToString());
+                        LogDBError(collectionTypeString, ex.ToString());
                     }
                 }
                 else
@@ -912,22 +917,22 @@ CROSS APPLY sys.dm_exec_sql_text(H.sql_handle) txt");
                 }
             }
             else if (collectionType == CollectionType.ResourceGovernorConfiguration)
-            {   
-                CollectResourceGovernor();               
+            {
+                CollectResourceGovernor();
             }
-            else if(collectionType == CollectionType.RunningQueries)
+            else if (collectionType == CollectionType.RunningQueries)
             {
                 CollectRunningQueries();
             }
             else
             {
-                AddDT(collectionTypeString, SqlStrings.GetSqlString(collectionType),collectionType.GetCommandTimeout(),  param);
+                AddDT(collectionTypeString, SqlStrings.GetSqlString(collectionType), collectionType.GetCommandTimeout(), param);
             }
         }
 
         private void CollectRunningQueries()
         {
-            using(var cn = new SqlConnection(ConnectionString))
+            using (var cn = new SqlConnection(ConnectionString))
             using (var cmd = new SqlCommand(SqlStrings.RunningQueries, cn))
             using (var da = new SqlDataAdapter(cmd))
             {
@@ -959,13 +964,13 @@ CROSS APPLY sys.dm_exec_sql_text(H.sql_handle) txt");
 
         private void CollectPerformanceCounters()
         {
-  
+
             string xml = PerformanceCounters.PerformanceCountersXML;
             if (xml.Length > 0)
             {
-       
+
                 string sql = SqlStrings.PerformanceCounters;
-                if(productVersion.StartsWith("8") || productVersion.StartsWith("9"))
+                if (productVersion.StartsWith("8") || productVersion.StartsWith("9"))
                 {
                     sql = sql.Replace("SYSUTCDATETIME()", "GETUTCDATE()");
                 }
@@ -1007,7 +1012,7 @@ CROSS APPLY sys.dm_exec_sql_text(H.sql_handle) txt");
                                 }
                                 catch (Exception ex)
                                 {
-                                    LogError(ex,"PerformanceCounters");
+                                    LogError(ex, "PerformanceCounters");
                                 }
                             }
                             else
@@ -1021,8 +1026,8 @@ CROSS APPLY sys.dm_exec_sql_text(H.sql_handle) txt");
                     }
                 }
             }
-            
-       
+
+
         }
 
 
@@ -1051,7 +1056,7 @@ CROSS APPLY sys.dm_exec_sql_text(H.sql_handle) txt");
                         cn.Open();
 
                         cmd.Parameters.AddWithValue("SlowQueryThreshold", Source.SlowQueryThresholdMs * 1000);
-                        cmd.Parameters.AddWithValue("MaxMemory",Source.SlowQuerySessionMaxMemoryKB);
+                        cmd.Parameters.AddWithValue("MaxMemory", Source.SlowQuerySessionMaxMemoryKB);
                         cmd.Parameters.AddWithValue("UseDualSession", Source.UseDualEventSession);
                         cmd.Parameters.AddWithValue("MaxTargetMemory", Source.SlowQueryTargetMaxMemoryKB);
                         var result = cmd.ExecuteScalar();
@@ -1087,7 +1092,7 @@ CROSS APPLY sys.dm_exec_sql_text(H.sql_handle) txt");
                 CollectComputerSystemWMI();
                 CollectOperatingSystemWMI();
             }
-            AddDT("ServerExtraProperties", SqlStrings.ServerExtraProperties,CollectionType.ServerExtraProperties.GetCommandTimeout());
+            AddDT("ServerExtraProperties", SqlStrings.ServerExtraProperties, CollectionType.ServerExtraProperties.GetCommandTimeout());
             Data.Tables["ServerExtraProperties"].Columns.Add("WindowsCaption");
             if (manufacturer != "") { Data.Tables["ServerExtraProperties"].Rows[0]["SystemManufacturer"] = manufacturer; }
             if (model != "") { Data.Tables["ServerExtraProperties"].Rows[0]["SystemProductName"] = model; }
@@ -1097,7 +1102,7 @@ CROSS APPLY sys.dm_exec_sql_text(H.sql_handle) txt");
                 CollectPowerPlanWMI();
                 Data.Tables["ServerExtraProperties"].Rows[0]["ActivePowerPlanGUID"] = activePowerPlanGUID;
                 Data.Tables["ServerExtraProperties"].Rows[0]["ActivePowerPlan"] = activePowerPlan;
-            }        
+            }
         }
 
         public DataTable GetDT(string tableName, string SQL, int commandTimeout, SqlParameter[] param = null)
@@ -1118,11 +1123,11 @@ CROSS APPLY sys.dm_exec_sql_text(H.sql_handle) txt");
             }
         }
 
-        public void AddDT(string tableName, string sql,int commandTimeout, SqlParameter[] param = null)
+        public void AddDT(string tableName, string sql, int commandTimeout, SqlParameter[] param = null)
         {
             if (!Data.Tables.Contains(tableName))
             {
-                Data.Tables.Add(GetDT(tableName, sql,commandTimeout, param));
+                Data.Tables.Add(GetDT(tableName, sql, commandTimeout, param));
             }
         }
 
@@ -1143,7 +1148,7 @@ CROSS APPLY sys.dm_exec_sql_text(H.sql_handle) txt");
             }
             catch (Exception ex)
             {
-                LogError(ex,"Drives");
+                LogError(ex, "Drives");
             }
         }
 
@@ -1194,7 +1199,7 @@ CROSS APPLY sys.dm_exec_sql_text(H.sql_handle) txt");
                 }
                 catch (Exception ex)
                 {
-                    LogError(ex,"ServerExtraProperties","Collect:Win32_OperatingSystem WMI");
+                    LogError(ex, "ServerExtraProperties", "Collect:Win32_OperatingSystem WMI");
                 }
             }
         }
@@ -1208,8 +1213,8 @@ CROSS APPLY sys.dm_exec_sql_text(H.sql_handle) txt");
         /// </summary>
         private void SetWMISessionOptions(CimSessionOptions options)
         {
-            localSessionOptions=options;
-            cache.Set("WMISessionOptions_" + computerName, localSessionOptions, new CacheItemPolicy() { AbsoluteExpiration = DateTime.Now.AddDays(1) }  );
+            localSessionOptions = options;
+            cache.Set("WMISessionOptions_" + computerName, localSessionOptions, new CacheItemPolicy() { AbsoluteExpiration = DateTime.Now.AddDays(1) });
             Log.Debug("Cache WMI options {options} on {Computer}", localSessionOptions is DComSessionOptions ? "DCom" : "WSMan", computerName);
         }
 
@@ -1220,9 +1225,9 @@ CROSS APPLY sys.dm_exec_sql_text(H.sql_handle) txt");
         private void GetWMISessionOptionsFromCache()
         {
             localSessionOptions = (CimSessionOptions)cache.Get("WMISessionOptions_" + computerName);
-            if(localSessionOptions != null)
+            if (localSessionOptions != null)
             {
-                Log.Debug("Set WMISessionOptions from cache to {options} on {Computer}", localSessionOptions is DComSessionOptions ? "DCom" : "WSMan",computerName);
+                Log.Debug("Set WMISessionOptions from cache to {options} on {Computer}", localSessionOptions is DComSessionOptions ? "DCom" : "WSMan", computerName);
             }
         }
 
@@ -1230,7 +1235,7 @@ CROSS APPLY sys.dm_exec_sql_text(H.sql_handle) txt");
         {
             get
             {
-                if(WMIException != null) // Throw previous error if connection attempts previously failed
+                if (WMIException != null) // Throw previous error if connection attempts previously failed
                 {
                     throw WMIException;
                 }
@@ -1238,7 +1243,7 @@ CROSS APPLY sys.dm_exec_sql_text(H.sql_handle) txt");
                 {
                     GetWMISessionOptionsFromCache();
                 }
-                if (localSessionOptions == null) 
+                if (localSessionOptions == null)
                 {
                     // Options are not in cache.  Try connection with WSMan then try DCom if this fails.  
                     try
@@ -1246,22 +1251,22 @@ CROSS APPLY sys.dm_exec_sql_text(H.sql_handle) txt");
                         // Try to connect with WSMan first
                         TestWMI(new WSManSessionOptions());
                         SetWMISessionOptions(new WSManSessionOptions());
-                        Log.Debug("WMI Connection succeeded using WSMan on {computer}",computerName);
+                        Log.Debug("WMI Connection succeeded using WSMan on {computer}", computerName);
                     }
-                    catch(Exception wsManEx)
+                    catch (Exception wsManEx)
                     {
                         // Connection failed, try again with DCom
-                        Log.Debug(wsManEx,"WMI Connection failed using WSMan on {computer}.  Connection will be attempted using DCom.", computerName);
+                        Log.Debug(wsManEx, "WMI Connection failed using WSMan on {computer}.  Connection will be attempted using DCom.", computerName);
                         try
                         {
                             TestWMI(new DComSessionOptions());
                             SetWMISessionOptions(new DComSessionOptions());
-                            Log.Debug("WMI Connection succeeded using DCom on {computer}",computerName);
+                            Log.Debug("WMI Connection succeeded using DCom on {computer}", computerName);
                         }
                         catch (Exception dcomEx)
                         {
                             // WMI failed using WSMan and DCom
-                            WMIException = new AggregateException(String.Format("Error connecting to WMI on {0}",computerName), new Exception[] { wsManEx, dcomEx });
+                            WMIException = new AggregateException(String.Format("Error connecting to WMI on {0}", computerName), new Exception[] { wsManEx, dcomEx });
                             throw WMIException;
                         }
                     }
@@ -1275,7 +1280,7 @@ CROSS APPLY sys.dm_exec_sql_text(H.sql_handle) txt");
         }
 
         private void TestWMI(CimSessionOptions sessionOptions)
-        {  
+        {
             using CimSession session = CimSession.Create(computerName, sessionOptions);
             // Changed from QueryInstances to GetClass which causes a failure on older OS when using WSMan.
             // This failure is desired as it will cause the session option to change to DCom.  If session option isn't switched to DCom for older OS, drivers collection will fail. #299
@@ -1288,7 +1293,7 @@ CROSS APPLY sys.dm_exec_sql_text(H.sql_handle) txt");
             {
                 try
                 {
-                    using CimSession session = CimSession.Create(computerName,WMISessionOptions);
+                    using CimSession session = CimSession.Create(computerName, WMISessionOptions);
                     IEnumerable<CimInstance> results = session.QueryInstances(@"root\cimv2", "WQL", "SELECT Manufacturer, Model FROM Win32_ComputerSystem");
 
                     if (results.Count() == 1)
@@ -1300,7 +1305,7 @@ CROSS APPLY sys.dm_exec_sql_text(H.sql_handle) txt");
                 }
                 catch (Exception ex)
                 {
-                    LogError(ex,"ServerExtraProperties", "Collect:Win32_ComputerSystem WMI");
+                    LogError(ex, "ServerExtraProperties", "Collect:Win32_ComputerSystem WMI");
                 }
             }
         }
@@ -1312,7 +1317,7 @@ CROSS APPLY sys.dm_exec_sql_text(H.sql_handle) txt");
             {
                 try
                 {
-                    using CimSession session = CimSession.Create(computerName,WMISessionOptions);
+                    using CimSession session = CimSession.Create(computerName, WMISessionOptions);
                     IEnumerable<CimInstance> results = session.QueryInstances(@"root\cimv2\power", "WQL", "SELECT InstanceID,ElementName FROM Win32_PowerPlan WHERE IsActive=1");
 
                     if (results.Count() == 1)
@@ -1328,7 +1333,7 @@ CROSS APPLY sys.dm_exec_sql_text(H.sql_handle) txt");
                 }
                 catch (Exception ex)
                 {
-                    LogError(ex,"ServerExtraProperties", "Collect:Win32_PowerPlan WMI");
+                    LogError(ex, "ServerExtraProperties", "Collect:Win32_PowerPlan WMI");
                 }
             }
         }
@@ -1359,12 +1364,12 @@ CROSS APPLY sys.dm_exec_sql_text(H.sql_handle) txt");
                             }
                         }
 
-                        string query = "SELECT " + string.Join(",",selectedProperties) + " FROM Win32_PnPSignedDriver";
+                        string query = "SELECT " + string.Join(",", selectedProperties) + " FROM Win32_PnPSignedDriver";
 
-                        using CimSession session = CimSession.Create(computerName,WMISessionOptions);
-                        IEnumerable<CimInstance> results = session.QueryInstances(@"root\cimv2", "WQL", query) ;
+                        using CimSession session = CimSession.Create(computerName, WMISessionOptions);
+                        IEnumerable<CimInstance> results = session.QueryInstances(@"root\cimv2", "WQL", query);
 
-                        foreach(CimInstance itm in results)
+                        foreach (CimInstance itm in results)
                         {
                             var r = dtDrivers.NewRow();
                             foreach (DataColumn col in dtDrivers.Columns)
@@ -1372,7 +1377,7 @@ CROSS APPLY sys.dm_exec_sql_text(H.sql_handle) txt");
                                 object value = itm.CimInstanceProperties[col.ColumnName].Value;
                                 if (col.DataType == typeof(DateTime))
                                 {
-                                   r[col.ColumnName] = Convert.ToDateTime(value) == DateTime.MinValue ? DBNull.Value : Convert.ToDateTime(value);
+                                    r[col.ColumnName] = Convert.ToDateTime(value) == DateTime.MinValue ? DBNull.Value : Convert.ToDateTime(value);
                                 }
                                 else if (col.DataType == typeof(Guid))
                                 {
@@ -1390,13 +1395,13 @@ CROSS APPLY sys.dm_exec_sql_text(H.sql_handle) txt");
                         }
                         // Get AWS PV Driver from registry
                         AddPVDriverVersion(ref dtDrivers);
-                
+
                         Data.Tables.Add(dtDrivers);
                     }
                 }
                 catch (Exception ex)
                 {
-                    LogError(ex,"Drivers","Collect:WMI");
+                    LogError(ex, "Drivers", "Collect:WMI");
                 }
             }
         }
@@ -1432,10 +1437,10 @@ CROSS APPLY sys.dm_exec_sql_text(H.sql_handle) txt");
                 CimMethodParameter.Create("sSubKeyName", @"SOFTWARE\Amazon\PVDriver", CimFlags.In),
                 CimMethodParameter.Create("sValueName", "Version", CimFlags.In)
             };
-           
-            using CimSession session = CimSession.Create(computerName, WMISessionOptions); 
+
+            using CimSession session = CimSession.Create(computerName, WMISessionOptions);
             using CimMethodResult results = session.InvokeMethod(new CimInstance("StdRegProv", @"root\default"), "GetStringValue", CimParams);
-            
+
             return Convert.ToString(results.OutParameters["sValue"].Value);
         }
 
@@ -1449,9 +1454,9 @@ CROSS APPLY sys.dm_exec_sql_text(H.sql_handle) txt");
                 drives.Columns.Add("FreeSpace", typeof(Int64));
                 drives.Columns.Add("Label", typeof(string));
 
-                using CimSession session = CimSession.Create(computerName,WMISessionOptions);
+                using CimSession session = CimSession.Create(computerName, WMISessionOptions);
                 IEnumerable<CimInstance> results = session.QueryInstances(@"root\cimv2", "WQL", @"SELECT FreeSpace,Name,Capacity,Caption,Label FROM Win32_Volume WHERE DriveType=3 AND NOT Name LIKE '%?%'");
-   
+
                 foreach (CimInstance vol in results)
                 {
                     var rDrive = drives.NewRow();

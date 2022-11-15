@@ -1150,7 +1150,7 @@
             this.dgvSlow.Size = new System.Drawing.Size(1829, 805);
             this.dgvSlow.TabIndex = 4;
             this.dgvSlow.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.DgvSlow_CellContentClick);
-            this.dgvSlow.RowsAdded += new System.Windows.Forms.DataGridViewRowsAddedEventHandler(this.dgvSlow_RowsAdded);
+            this.dgvSlow.RowsAdded += new System.Windows.Forms.DataGridViewRowsAddedEventHandler(this.DgvSlow_RowsAdded);
             // 
             // Instance
             // 

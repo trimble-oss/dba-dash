@@ -1,9 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using Microsoft.Data.SqlClient;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Microsoft.Data.SqlClient;
+using System;
 
 namespace DBADashGUI.Performance
 {
@@ -44,9 +40,9 @@ namespace DBADashGUI.Performance
                     cmd.Parameters.AddWithValue("instance_name", CounterInstance);
                 }
                 cmd.Parameters.AddWithValue("CriticalFrom", CritialFrom.HasValue ? CritialFrom : DBNull.Value);
-                cmd.Parameters.AddWithValue("CriticalTo",CritialTo.HasValue ? CritialTo : DBNull.Value);
-                cmd.Parameters.AddWithValue("WarningFrom",WarningFrom.HasValue ? WarningFrom : DBNull.Value);
-                cmd.Parameters.AddWithValue("WarningTo",WarningTo.HasValue ? WarningTo : DBNull.Value);
+                cmd.Parameters.AddWithValue("CriticalTo", CritialTo.HasValue ? CritialTo : DBNull.Value);
+                cmd.Parameters.AddWithValue("WarningFrom", WarningFrom.HasValue ? WarningFrom : DBNull.Value);
+                cmd.Parameters.AddWithValue("WarningTo", WarningTo.HasValue ? WarningTo : DBNull.Value);
                 cmd.Parameters.AddWithValue("GoodFrom", GoodFrom.HasValue ? GoodFrom : DBNull.Value);
                 cmd.Parameters.AddWithValue("GoodTo", GoodTo.HasValue ? GoodTo : DBNull.Value);
                 cmd.ExecuteNonQuery();
@@ -54,10 +50,10 @@ namespace DBADashGUI.Performance
 
         }
 
-        public static CounterThreshold GetCounterThreshold(string ObjectName,string CounterName,string CounterInstance,int? InstanceID)
+        public static CounterThreshold GetCounterThreshold(string ObjectName, string CounterName, string CounterInstance, int? InstanceID)
         {
             using (var cn = new SqlConnection(Common.ConnectionString))
-            using (var cmd = new SqlCommand("CounterThresholds_Get",cn) { CommandType = System.Data.CommandType.StoredProcedure})
+            using (var cmd = new SqlCommand("CounterThresholds_Get", cn) { CommandType = System.Data.CommandType.StoredProcedure })
             {
                 cn.Open();
                 if (InstanceID.HasValue)
@@ -69,30 +65,33 @@ namespace DBADashGUI.Performance
                 cmd.Parameters.AddWithValue("instance_name", CounterInstance);
                 using (var rdr = cmd.ExecuteReader())
                 {
-        
+
                     if (rdr.Read())
                     {
-                        var threshold = new CounterThreshold();
-                        threshold.InstanceID = InstanceID;
-                        threshold.ObjectName = ObjectName;
-                        threshold.CounterName = CounterName;
-                        threshold.CounterInstance = CounterInstance;
-                        threshold.CritialFrom = rdr["CriticalFrom"] == DBNull.Value ? null : (decimal)rdr["CriticalFrom"];
-                        threshold.CritialTo = rdr["CriticalTo"] == DBNull.Value ? null : (decimal)rdr["CriticalTo"];
-                        threshold.WarningFrom = rdr["WarningFrom"] == DBNull.Value ? null : (decimal)rdr["WarningFrom"];
-                        threshold.WarningTo = rdr["WarningTo"]==DBNull.Value ? null : (decimal)rdr["WarningTo"];
-                        threshold.GoodFrom = rdr["GoodFrom"] == DBNull.Value ? null : (decimal)rdr["GoodFrom"];
-                        threshold.GoodTo = rdr["GoodTo"] == DBNull.Value ? null : (decimal)rdr["GoodTo"];
-                        threshold.SystemCritialFrom = rdr["SystemCriticalFrom"] == DBNull.Value ? null : (decimal)rdr["SystemCriticalFrom"];
-                        threshold.SystemCritialTo = rdr["SystemCriticalTo"] == DBNull.Value ? null : (decimal)rdr["SystemCriticalTo"];
-                        threshold.SystemWarningFrom = rdr["SystemWarningFrom"] == DBNull.Value ? null : (decimal)rdr["SystemWarningFrom"];
-                        threshold.SystemWarningTo = rdr["SystemWarningTo"] == DBNull.Value ? null : (decimal)rdr["SystemWarningTo"];
-                        threshold.SystemGoodFrom = rdr["SystemGoodFrom"] == DBNull.Value ? null : (decimal)rdr["SystemGoodFrom"];
-                        threshold.SystemGoodTo = rdr["SystemGoodTo"] == DBNull.Value ? null : (decimal)rdr["SystemGoodTo"];
+                        var threshold = new CounterThreshold
+                        {
+                            InstanceID = InstanceID,
+                            ObjectName = ObjectName,
+                            CounterName = CounterName,
+                            CounterInstance = CounterInstance,
+                            CritialFrom = rdr["CriticalFrom"] == DBNull.Value ? null : (decimal)rdr["CriticalFrom"],
+                            CritialTo = rdr["CriticalTo"] == DBNull.Value ? null : (decimal)rdr["CriticalTo"],
+                            WarningFrom = rdr["WarningFrom"] == DBNull.Value ? null : (decimal)rdr["WarningFrom"],
+                            WarningTo = rdr["WarningTo"] == DBNull.Value ? null : (decimal)rdr["WarningTo"],
+                            GoodFrom = rdr["GoodFrom"] == DBNull.Value ? null : (decimal)rdr["GoodFrom"],
+                            GoodTo = rdr["GoodTo"] == DBNull.Value ? null : (decimal)rdr["GoodTo"],
+                            SystemCritialFrom = rdr["SystemCriticalFrom"] == DBNull.Value ? null : (decimal)rdr["SystemCriticalFrom"],
+                            SystemCritialTo = rdr["SystemCriticalTo"] == DBNull.Value ? null : (decimal)rdr["SystemCriticalTo"],
+                            SystemWarningFrom = rdr["SystemWarningFrom"] == DBNull.Value ? null : (decimal)rdr["SystemWarningFrom"],
+                            SystemWarningTo = rdr["SystemWarningTo"] == DBNull.Value ? null : (decimal)rdr["SystemWarningTo"],
+                            SystemGoodFrom = rdr["SystemGoodFrom"] == DBNull.Value ? null : (decimal)rdr["SystemGoodFrom"],
+                            SystemGoodTo = rdr["SystemGoodTo"] == DBNull.Value ? null : (decimal)rdr["SystemGoodTo"]
+                        };
                         return threshold;
                     }
-                    else { 
-                        return null; 
+                    else
+                    {
+                        return null;
                     }
                 }
             }

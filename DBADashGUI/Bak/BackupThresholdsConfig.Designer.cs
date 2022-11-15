@@ -96,7 +96,7 @@
             this.chkBackupInherit.TabIndex = 42;
             this.chkBackupInherit.Text = "Inherit";
             this.chkBackupInherit.UseVisualStyleBackColor = true;
-            this.chkBackupInherit.CheckedChanged += new System.EventHandler(this.chkBackupInherit_CheckedChanged);
+            this.chkBackupInherit.CheckedChanged += new System.EventHandler(this.ChkBackupInherit_CheckedChanged);
             // 
             // pnlBackupThresholds
             // 
@@ -269,7 +269,7 @@
             this.chkLog.TabIndex = 43;
             this.chkLog.Text = "Log";
             this.chkLog.UseVisualStyleBackColor = true;
-            this.chkLog.CheckedChanged += new System.EventHandler(this.chkLog_CheckedChanged);
+            this.chkLog.CheckedChanged += new System.EventHandler(this.ChkLog_CheckedChanged);
             // 
             // chkDiff
             // 
@@ -280,7 +280,7 @@
             this.chkDiff.TabIndex = 42;
             this.chkDiff.Text = "Diff";
             this.chkDiff.UseVisualStyleBackColor = true;
-            this.chkDiff.CheckedChanged += new System.EventHandler(this.chkDiff_CheckedChanged);
+            this.chkDiff.CheckedChanged += new System.EventHandler(this.ChkDiff_CheckedChanged);
             // 
             // chkFull
             // 
@@ -293,7 +293,7 @@
             this.chkFull.TabIndex = 41;
             this.chkFull.Text = "Full";
             this.chkFull.UseVisualStyleBackColor = true;
-            this.chkFull.CheckedChanged += new System.EventHandler(this.chkFull_CheckedChanged);
+            this.chkFull.CheckedChanged += new System.EventHandler(this.ChkFull_CheckedChanged);
             // 
             // label7
             // 
@@ -359,7 +359,7 @@
             this.bttnUpdate.TabIndex = 45;
             this.bttnUpdate.Text = "Update";
             this.bttnUpdate.UseVisualStyleBackColor = true;
-            this.bttnUpdate.Click += new System.EventHandler(this.bttnUpdate_Click);
+            this.bttnUpdate.Click += new System.EventHandler(this.BttnUpdate_Click);
             // 
             // txtExcluded
             // 

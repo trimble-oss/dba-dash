@@ -1,14 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
+﻿using DBADash;
+using Microsoft.Data.SqlClient;
+using System;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using Microsoft.Data.SqlClient;
-using DBADash;
 namespace DBADashServiceConfig
 {
     public partial class DBDeploy : Form
@@ -18,7 +13,7 @@ namespace DBADashServiceConfig
             InitializeComponent();
         }
 
-      // public Version DACVersion;
+        // public Version DACVersion;
 
         string _connectionString;
 
@@ -34,32 +29,35 @@ namespace DBADashServiceConfig
             }
         }
 
-        public string ConnectionString { 
-            get {
+        public string ConnectionString
+        {
+            get
+            {
                 SqlConnectionStringBuilder builder = new(_connectionString)
                 {
                     InitialCatalog = cboDatabase.Text
                 };
                 return builder.ConnectionString;
             }
-            set {
+            set
+            {
                 string db = "DBADashDB";
                 _connectionString = value;
                 try
                 {
                     SqlConnectionStringBuilder builder = new(value);
-                   
+
                     if (builder.InitialCatalog != null && builder.InitialCatalog.Length > 0 && builder.InitialCatalog != "master")
                     {
-                        db= builder.InitialCatalog;
+                        db = builder.InitialCatalog;
                     }
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
                 DB = db;
-            } 
+            }
         }
 
         DBValidations.DBVersionStatus dbVersionStatus;
@@ -84,15 +82,15 @@ FROM sys.databases
 WHERE DATABASEPROPERTYEX(name, 'Updateability') = 'READ_WRITE'
 AND database_id > 4 ";
             cboDatabase.Items.Clear();
-            using( SqlConnection cn = new(ConnectionStringWithoutInitialCatalog))
-            using( SqlCommand cmd = new(sql, cn))
+            using (SqlConnection cn = new(ConnectionStringWithoutInitialCatalog))
+            using (SqlCommand cmd = new(sql, cn))
             {
-                cn.Open();                 
+                cn.Open();
                 var rdr = cmd.ExecuteReader();
                 while (rdr.Read())
                 {
                     cboDatabase.Items.Add((string)rdr[0]);
-                }              
+                }
             }
         }
 
@@ -123,12 +121,12 @@ AND database_id > 4 ";
 
         private void DBDeploy_Load(object sender, EventArgs e)
         {
-            try 
-            { 
-            
+            try
+            {
+
                 CollectionConfig.ValidateDestination(new DBADashConnection(ConnectionString));
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 this.DialogResult = DialogResult.Abort;
@@ -144,7 +142,7 @@ AND database_id > 4 ";
                 GenerateScript();
                 lblNotice.Visible = true;
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 DeployScript = ex.Message;
             }
@@ -161,7 +159,7 @@ AND database_id > 4 ";
             DacpacUtility.DacpacService dac = new();
             string _db = DB;
             string _connectionString = ConnectionString;
-            var t = Task.Run(()=> dac.GenerateDeployScript(_connectionString,_db, "DBADashDB.dacpac"));
+            var t = Task.Run(() => dac.GenerateDeployScript(_connectionString, _db, "DBADashDB.dacpac"));
             lblNotice.Visible = true;
             bttnCancel.Visible = true;
             bttnGenerate.Visible = false;
@@ -235,10 +233,10 @@ AND database_id > 4 ";
                 System.Threading.Thread.Sleep(500);
             }
             lblNotice.Visible = false;
-            bttnGenerate.Enabled= false;
+            bttnGenerate.Enabled = false;
             if (t.IsCompleted)
             {
-                if(!t.IsFaulted)
+                if (!t.IsFaulted)
                 {
                     MessageBox.Show("Deploy succeeded", "Deploy", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     this.DialogResult = DialogResult.OK;
@@ -283,7 +281,7 @@ AND database_id > 4 ";
                     this.Cursor = Cursors.Default;
                 }
             }
-            
+
         }
         bool isCancel;
 
@@ -333,20 +331,20 @@ AND database_id > 4 ";
                     lblVersionInfo.ForeColor = DashColors.Success;
                     bttnGenerate.Enabled = true;
                 }
-                else if(dbVersionStatus.VersionStatus == DBValidations.DBVersionStatusEnum.UpgradeRequired)
+                else if (dbVersionStatus.VersionStatus == DBValidations.DBVersionStatusEnum.UpgradeRequired)
                 {
                     lblVersionInfo.Text = dbVersionStatus.DBVersion.ToString() + " Upgrade to " + dbVersionStatus.DACVersion.ToString();
                     lblVersionInfo.ForeColor = DashColors.Fail;
                     bttnGenerate.Enabled = true;
                 }
-                else if(dbVersionStatus.VersionStatus== DBValidations.DBVersionStatusEnum.AppUpgradeRequired)
+                else if (dbVersionStatus.VersionStatus == DBValidations.DBVersionStatusEnum.AppUpgradeRequired)
                 {
                     lblVersionInfo.Text = dbVersionStatus.DBVersion.ToString() + "Newer than app:" + dbVersionStatus.DACVersion.ToString() + ". Upgrade app";
                     lblVersionInfo.ForeColor = DashColors.Fail;
                     bttnGenerate.Enabled = false;
                     bttnDeploy.Enabled = false;
                 }
-      
+
             }
             catch (Exception ex)
             {

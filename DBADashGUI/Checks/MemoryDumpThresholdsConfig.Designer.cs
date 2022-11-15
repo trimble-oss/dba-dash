@@ -75,7 +75,7 @@
             this.chkWarning.Size = new System.Drawing.Size(18, 17);
             this.chkWarning.TabIndex = 1;
             this.chkWarning.UseVisualStyleBackColor = true;
-            this.chkWarning.CheckedChanged += new System.EventHandler(this.numWarning_CheckChanged);
+            this.chkWarning.CheckedChanged += new System.EventHandler(this.NumWarning_CheckChanged);
             // 
             // chkCritical
             // 
@@ -85,7 +85,7 @@
             this.chkCritical.Size = new System.Drawing.Size(18, 17);
             this.chkCritical.TabIndex = 3;
             this.chkCritical.UseVisualStyleBackColor = true;
-            this.chkCritical.CheckedChanged += new System.EventHandler(this.chkCritical_CheckedChanged);
+            this.chkCritical.CheckedChanged += new System.EventHandler(this.ChkCritical_CheckedChanged);
             // 
             // label1
             // 
@@ -113,7 +113,7 @@
             this.bttnCancel.TabIndex = 6;
             this.bttnCancel.Text = "&Cancel";
             this.bttnCancel.UseVisualStyleBackColor = true;
-            this.bttnCancel.Click += new System.EventHandler(this.bttnCancel_Click);
+            this.bttnCancel.Click += new System.EventHandler(this.BttnCancel_Click);
             // 
             // bttnUpdate
             // 
@@ -123,7 +123,7 @@
             this.bttnUpdate.TabIndex = 7;
             this.bttnUpdate.Text = "&Update";
             this.bttnUpdate.UseVisualStyleBackColor = true;
-            this.bttnUpdate.Click += new System.EventHandler(this.bttnUpdate_Click);
+            this.bttnUpdate.Click += new System.EventHandler(this.BttnUpdate_Click);
             // 
             // lblAckDate
             // 
@@ -143,7 +143,7 @@
             this.lnkClear.TabIndex = 5;
             this.lnkClear.TabStop = true;
             this.lnkClear.Text = "Clear";
-            this.lnkClear.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.lnkClear_LinkClicked);
+            this.lnkClear.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.LnkClear_LinkClicked);
             // 
             // lnkAcknowledge
             // 
@@ -155,7 +155,7 @@
             this.lnkAcknowledge.TabIndex = 4;
             this.lnkAcknowledge.TabStop = true;
             this.lnkAcknowledge.Text = "Acknowledge";
-            this.lnkAcknowledge.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.lnkAcknowledge_Click);
+            this.lnkAcknowledge.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.LnkAcknowledge_Click);
             // 
             // MemoryDumpThresholdsConfig
             // 

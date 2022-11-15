@@ -1,14 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Drawing;
-using System.Data;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
+﻿using DBADashGUI.Drives;
 using Microsoft.Data.SqlClient;
-using DBADashGUI.Drives;
+using System;
+using System.Collections.Generic;
+using System.Data;
+using System.Drawing;
+using System.Windows.Forms;
 using static DBADashGUI.DBADashStatus;
 
 namespace DBADashGUI.Properties
@@ -75,7 +71,7 @@ namespace DBADashGUI.Properties
 
         DataView dvDrives;
 
-        private DataTable getDrives()
+        private DataTable GetDrives()
         {
             using (var cn = new SqlConnection(Common.ConnectionString))
             using (var cmd = new SqlCommand("dbo.Drives_Get", cn) { CommandType = CommandType.StoredProcedure })
@@ -88,8 +84,8 @@ namespace DBADashGUI.Properties
                 cmd.Parameters.AddWithValue("IncludeNA", IncludeNA);
                 cmd.Parameters.AddWithValue("IncludeOK", IncludeOK);
                 cmd.Parameters.AddWithValue("IncludeMetrics", includeAllMetricsToolStripMenuItem.Checked);
-                
-                DataTable dt = new DataTable();
+
+                DataTable dt = new();
                 da.Fill(dt);
                 Common.ConvertUTCToLocal(ref dt);
                 return dt;
@@ -98,8 +94,8 @@ namespace DBADashGUI.Properties
 
         public void RefreshData()
         {
-            pnlDrives.Controls.Clear();     
-            DataTable dt = getDrives();
+            pnlDrives.Controls.Clear();
+            DataTable dt = GetDrives();
             dvDrives = new DataView(dt);
 
             if (dt.Rows.Count > DrivesViewMaxRows || gridview)
@@ -110,7 +106,7 @@ namespace DBADashGUI.Properties
             {
                 ShowDrivesView();
             }
-        
+
             configureInstanceThresholdsToolStripMenuItem.Enabled = InstanceIDs.Count == 1;
         }
 
@@ -140,30 +136,30 @@ namespace DBADashGUI.Properties
             dgv.Columns.Add(new DataGridViewTextBoxColumn() { Name = "FreeGB", DataPropertyName = "FreeGB", HeaderText = "Free GB", DefaultCellStyle = new DataGridViewCellStyle() { Format = "0.0" } });
             dgv.Columns.Add(new DataGridViewTextBoxColumn() { Name = "PctFreeSpace", DataPropertyName = "PctFreeSpace", HeaderText = "Free %", DefaultCellStyle = new DataGridViewCellStyle() { Format = "P1" } });
             dgv.Columns.Add(new DataGridViewTextBoxColumn() { Name = "DriveCheckConfiguredLevel", DataPropertyName = "DriveCheckConfiguredLevel", HeaderText = "Configured Level" });
-            dgv.Columns.Add(new DataGridViewTextBoxColumn() { Name = "Warning",DataPropertyName="DriveWarningThreshold", HeaderText = "Warning" });
+            dgv.Columns.Add(new DataGridViewTextBoxColumn() { Name = "Warning", DataPropertyName = "DriveWarningThreshold", HeaderText = "Warning" });
             dgv.Columns.Add(new DataGridViewTextBoxColumn() { Name = "Critical", DataPropertyName = "DriveCriticalThreshold", HeaderText = "Critical" });
             dgv.Columns.Add(new DataGridViewTextBoxColumn() { Name = "SnapshotDate", DataPropertyName = "SnapshotDate", HeaderText = "Snapshot Date", DefaultCellStyle = new DataGridViewCellStyle() { Format = "yyyy-MM-dd HH:mm" } });
             dgv.Columns.Add(new DataGridViewTextBoxColumn() { Name = "SnapshotAge", DataPropertyName = "SnapshotAgeMins", HeaderText = "Snapshot Age (Mins)", DefaultCellStyle = new DataGridViewCellStyle() { Format = "N0" } });
             if (includeAllMetricsToolStripMenuItem.Checked)
             {
-                dgv.Columns.Add(new DataGridViewTextBoxColumn() { Name = "ChangedUsedGB24Hrs", DataPropertyName = "ChangeUsedGB24Hrs", HeaderText = "Used 24Hrs Change (GB+-)", Width=100, AutoSizeMode= DataGridViewAutoSizeColumnMode.None, DefaultCellStyle = new DataGridViewCellStyle() { Format = "+#,##0.0GB;-#,##0.0GB;-" }  });
+                dgv.Columns.Add(new DataGridViewTextBoxColumn() { Name = "ChangedUsedGB24Hrs", DataPropertyName = "ChangeUsedGB24Hrs", HeaderText = "Used 24Hrs Change (GB+-)", Width = 100, AutoSizeMode = DataGridViewAutoSizeColumnMode.None, DefaultCellStyle = new DataGridViewCellStyle() { Format = "+#,##0.0GB;-#,##0.0GB;-" } });
                 dgv.Columns.Add(new DataGridViewTextBoxColumn() { Name = "ChangedUsedGB7Days", DataPropertyName = "ChangeUsedGB7Days", HeaderText = "Used 7 Days Change (GB+-)", Width = 100, AutoSizeMode = DataGridViewAutoSizeColumnMode.None, DefaultCellStyle = new DataGridViewCellStyle() { Format = "+#,##0.0GB;-#,##0.0GB;-" } });
                 dgv.Columns.Add(new DataGridViewTextBoxColumn() { Name = "ChangedUsedGB30Days", DataPropertyName = "ChangeUsedGB30Days", HeaderText = "Used 30 Days Change (GB+-)", Width = 100, AutoSizeMode = DataGridViewAutoSizeColumnMode.None, DefaultCellStyle = new DataGridViewCellStyle() { Format = "+#,##0.0GB;-#,##0.0GB;-" } });
                 dgv.Columns.Add(new DataGridViewTextBoxColumn() { Name = "ChangedUsedGB90Days", DataPropertyName = "ChangeUsedGB90Days", HeaderText = "Used 90 Days Change (GB+-)", Width = 100, AutoSizeMode = DataGridViewAutoSizeColumnMode.None, DefaultCellStyle = new DataGridViewCellStyle() { Format = "+#,##0.0GB;-#,##0.0GB;-" } });
 
                 dgv.Columns.Add(new DataGridViewTextBoxColumn() { Name = "ChangedDriveSize24Hrs", DataPropertyName = "ChangeDriveSize24Hrs", HeaderText = "Drive Size 24Hrs Change (GB+-)", Width = 100, AutoSizeMode = DataGridViewAutoSizeColumnMode.None, DefaultCellStyle = new DataGridViewCellStyle() { Format = "+#,##0.0GB;-#,##0.0GB;-" } });
                 dgv.Columns.Add(new DataGridViewTextBoxColumn() { Name = "ChangedDriveSize7Days", DataPropertyName = "ChangeDriveSize7Days", HeaderText = "Drive Size 7 Days Change (GB+-)", Width = 100, AutoSizeMode = DataGridViewAutoSizeColumnMode.None, DefaultCellStyle = new DataGridViewCellStyle() { Format = "+#,##0.0GB;-#,##0.0GB;-" } });
-                dgv.Columns.Add(new DataGridViewTextBoxColumn() { Name = "ChangedDriveSize30Days", DataPropertyName = "ChangeDriveSize30Days", HeaderText = "Drive Size 30 Days Change (GB+-)",Width = 100, AutoSizeMode = DataGridViewAutoSizeColumnMode.None, DefaultCellStyle = new DataGridViewCellStyle() { Format = "+#,##0.0GB;-#,##0.0GB;-" } });
+                dgv.Columns.Add(new DataGridViewTextBoxColumn() { Name = "ChangedDriveSize30Days", DataPropertyName = "ChangeDriveSize30Days", HeaderText = "Drive Size 30 Days Change (GB+-)", Width = 100, AutoSizeMode = DataGridViewAutoSizeColumnMode.None, DefaultCellStyle = new DataGridViewCellStyle() { Format = "+#,##0.0GB;-#,##0.0GB;-" } });
                 dgv.Columns.Add(new DataGridViewTextBoxColumn() { Name = "ChangedDriveSize90Days", DataPropertyName = "ChangeDriveSize90Days", HeaderText = "Drive Size 90 Days Change (GB+-)", Width = 100, AutoSizeMode = DataGridViewAutoSizeColumnMode.None, DefaultCellStyle = new DataGridViewCellStyle() { Format = "+#,##0.0GB;-#,##0.0GB;-" } });
             }
-            dgv.Columns.Add(new DataGridViewLinkColumn() { Name = "History", HeaderText = "History", UseColumnTextForLinkValue = true, Text = "History", LinkColor=DashColors.LinkColor});
-            dgv.Columns.Add(new DataGridViewLinkColumn() { Name = "Configure", HeaderText = "Configure", UseColumnTextForLinkValue = true, Text = "Configure", LinkColor = DashColors.LinkColor});
+            dgv.Columns.Add(new DataGridViewLinkColumn() { Name = "History", HeaderText = "History", UseColumnTextForLinkValue = true, Text = "History", LinkColor = DashColors.LinkColor });
+            dgv.Columns.Add(new DataGridViewLinkColumn() { Name = "Configure", HeaderText = "Configure", UseColumnTextForLinkValue = true, Text = "Configure", LinkColor = DashColors.LinkColor });
             dgv.CellContentClick += Dgv_CellContentClick;
             dgv.RowsAdded += Dgv_RowsAdded;
             pnlDrives.Controls.Add(dgv);
             dgv.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
             tsGridView.Enabled = false;
-            tsDrivesView.Enabled = dvDrives.Table.Rows.Count<= DrivesViewMaxRows;
+            tsDrivesView.Enabled = dvDrives.Table.Rows.Count <= DrivesViewMaxRows;
         }
 
         private void Dgv_RowsAdded(object sender, DataGridViewRowsAddedEventArgs e)
@@ -174,7 +170,7 @@ namespace DBADashGUI.Properties
                 var Status = (DBADashStatus.DBADashStatusEnum)row["Status"];
                 var SnapshotStatus = (DBADashStatus.DBADashStatusEnum)row["SnapshotStatus"];
                 dgv.Rows[idx].Cells["SnapshotAge"].SetStatusColor(SnapshotStatus);
-                if (row["DriveCheckType"]!=DBNull.Value && (string)row["DriveCheckType"]== "G")
+                if (row["DriveCheckType"] != DBNull.Value && (string)row["DriveCheckType"] == "G")
                 {
                     dgv.Rows[idx].Cells["FreeGB"].SetStatusColor(Status);
                     dgv.Rows[idx].Cells["PctFreeSpace"].SetStatusColor(Color.White);
@@ -188,8 +184,8 @@ namespace DBADashGUI.Properties
                     dgv.Rows[idx].Cells["Warning"].Style.Format = "P2";
                     dgv.Rows[idx].Cells["Critical"].Style.Format = "P2";
                 }
-           
-             
+
+
                 if ((bool)row["IsInheritedThreshold"])
                 {
                     dgv.Rows[idx].Cells["Configure"].Style.Font = new Font(dgv.Font, FontStyle.Regular);
@@ -246,15 +242,15 @@ namespace DBADashGUI.Properties
                 drv.Drive.DriveID = (Int32)r["DriveID"];
                 drv.Drive.DriveCheckTypeChar = char.Parse((string)r["DriveCheckType"]);
                 drv.Drive.SnapshotDate = (DateTime)r["SnapshotDate"];
-                drv.Drive.SnapshotStatus= (DBADashStatusEnum)r["SnapshotStatus"];
+                drv.Drive.SnapshotStatus = (DBADashStatusEnum)r["SnapshotStatus"];
                 drv.DisplayInstanceName = InstanceIDs.Count > 1;
                 drv.Dock = DockStyle.Top;
                 driveControls.Add(drv);
             }
-            
+
             if (driveControls.Count == 0)
             {
-                pnlDrives.Controls.Add(new Label() { Text = "No drives to display matching the selected filters", Dock= DockStyle.Fill });
+                pnlDrives.Controls.Add(new Label() { Text = "No drives to display matching the selected filters", Dock = DockStyle.Fill });
             }
             else
             {
@@ -264,7 +260,7 @@ namespace DBADashGUI.Properties
             tsGridView.Enabled = true;
         }
 
-        public void Configure(Int32 InstanceID,Int32 DriveID)
+        public void Configure(Int32 InstanceID, Int32 DriveID)
         {
             var drv = DriveThreshold.GetDriveThreshold(InstanceID, DriveID);
             var frm = new DriveThresholdConfig
@@ -279,8 +275,8 @@ namespace DBADashGUI.Properties
         }
 
 
-        
-        private void configureInstanceThresholdsToolStripMenuItem_Click(object sender, EventArgs e)
+
+        private void ConfigureInstanceThresholdsToolStripMenuItem_Click(object sender, EventArgs e)
         {
             if (InstanceIDs.Count == 1)
             {
@@ -288,22 +284,22 @@ namespace DBADashGUI.Properties
             }
         }
 
-        private void configureRootThresholdsToolStripMenuItem_Click(object sender, EventArgs e)
+        private void ConfigureRootThresholdsToolStripMenuItem_Click(object sender, EventArgs e)
         {
             Configure(-1, -1);
         }
 
-        private void criticalToolStripMenuItem_Click(object sender, EventArgs e)
+        private void CriticalToolStripMenuItem_Click(object sender, EventArgs e)
         {
             RefreshData();
         }
 
-        private void warningToolStripMenuItem_Click(object sender, EventArgs e)
+        private void WarningToolStripMenuItem_Click(object sender, EventArgs e)
         {
             RefreshData();
         }
 
-        private void undefinedToolStripMenuItem_Click(object sender, EventArgs e)
+        private void UndefinedToolStripMenuItem_Click(object sender, EventArgs e)
         {
             RefreshData();
         }
@@ -314,26 +310,26 @@ namespace DBADashGUI.Properties
         }
 
 
-        private void tsDrivesView_Click(object sender, EventArgs e)
+        private void TsDrivesView_Click(object sender, EventArgs e)
         {
             ShowDrivesView();
         }
 
-        private void tsGridView_Click(object sender, EventArgs e)
+        private void TsGridView_Click(object sender, EventArgs e)
         {
             ShowGridView();
         }
 
-        private void tsRefresh_Click(object sender, EventArgs e)
+        private void TsRefresh_Click(object sender, EventArgs e)
         {
             RefreshData();
         }
 
-        private void tsCopy_Click(object sender, EventArgs e)
+        private void TsCopy_Click(object sender, EventArgs e)
         {
             if (!gridview)
             {
-                ShowGridView();              
+                ShowGridView();
             }
             dgv.Columns["Configure"].Visible = false;
             dgv.Columns["History"].Visible = false;
@@ -343,14 +339,14 @@ namespace DBADashGUI.Properties
 
         }
 
-        private void includeAllMetricsToolStripMenuItem_Click(object sender, EventArgs e)
+        private void IncludeAllMetricsToolStripMenuItem_Click(object sender, EventArgs e)
         {
             gridview = true;
             RefreshData();
-          
+
         }
 
-        private void tsExcel_Click(object sender, EventArgs e)
+        private void TsExcel_Click(object sender, EventArgs e)
         {
             if (!gridview)
             {

@@ -1,13 +1,8 @@
-﻿using System;
+﻿using Microsoft.Data.SqlClient;
+using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Drawing;
 using System.Data;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
-using Microsoft.Data.SqlClient;
 
 namespace DBADashGUI.Changes
 {
@@ -19,7 +14,7 @@ namespace DBADashGUI.Changes
         }
 
         public List<Int32> InstanceIDs;
- 
+
         public bool UseAlertName
         {
             get
@@ -34,11 +29,11 @@ namespace DBADashGUI.Changes
 
         public void RefreshData()
         {
-            refreshAlertConfig();
-            refreshAlerts();
+            RefreshAlertConfig();
+            RefreshAlerts();
         }
 
-        private DataTable getAlertsConfig()
+        private DataTable GetAlertsConfig()
         {
             using (var cn = new SqlConnection(Common.ConnectionString))
             using (var cmd = new SqlCommand("dbo.AlertsConfig_Get", cn) { CommandType = CommandType.StoredProcedure })
@@ -47,31 +42,31 @@ namespace DBADashGUI.Changes
                 cn.Open();
                 cmd.Parameters.AddWithValue("@InstanceIDs", string.Join(",", InstanceIDs));
 
-                DataTable dt = new DataTable();
+                DataTable dt = new();
                 da.Fill(dt);
                 return dt;
             }
-         }
+        }
 
-        private void refreshAlertConfig()
+        private void RefreshAlertConfig()
         {
             dgvAlertsConfig.Columns.Clear();
             dgvAlertsConfig.Columns.Add(new DataGridViewTextBoxColumn() { Name = "Instance", HeaderText = "Instance" });
 
-            DataTable dt = getAlertsConfig();
-               
+            DataTable dt = GetAlertsConfig();
+
             string pivotCol = UseAlertName ? "name" : "Alert";
 
             foreach (DataRow r in dt.DefaultView.ToTable(true, pivotCol).Select("", pivotCol))
             {
                 if (r[pivotCol] != DBNull.Value)
                 {
-                    DataGridViewTextBoxColumn col = new DataGridViewTextBoxColumn() { HeaderText = (string)r[pivotCol], Name = (string)r[pivotCol] };
+                    DataGridViewTextBoxColumn col = new() { HeaderText = (string)r[pivotCol], Name = (string)r[pivotCol] };
                     dgvAlertsConfig.Columns.Add(col);
                 }
             }
             string lastInstance = "";
-            List<DataGridViewRow> rows = new List<DataGridViewRow>();
+            List<DataGridViewRow> rows = new();
             DataGridViewRow row = null;
             foreach (DataRow r in dt.Rows)
             {
@@ -103,65 +98,65 @@ namespace DBADashGUI.Changes
             }
             dgvAlertsConfig.Rows.AddRange(rows.ToArray());
             dgvAlertsConfig.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
-            
+
         }
 
 
-        private DataTable getAlerts()
+        private DataTable GetAlerts()
         {
             using (var cn = new SqlConnection(Common.ConnectionString))
             using (var cmd = new SqlCommand("dbo.Alerts_Get", cn) { CommandType = CommandType.StoredProcedure })
             using (var da = new SqlDataAdapter(cmd))
             {
                 cmd.Parameters.AddWithValue("@InstanceIDs", string.Join(",", InstanceIDs));
-                
-                DataTable dt = new DataTable();
+
+                DataTable dt = new();
                 da.Fill(dt);
                 Common.ConvertUTCToLocal(ref dt);
                 return dt;
-            }          
+            }
         }
 
-        private void refreshAlerts()
+        private void RefreshAlerts()
         {
-        
-            DataTable dt = getAlerts();            
+
+            DataTable dt = GetAlerts();
             dgvAlerts.DataSource = dt;
             dgvAlerts.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
-                           
+
         }
 
-        private void pivotByAlertNameToolStripMenuItem_Click(object sender, EventArgs e)
+        private void PivotByAlertNameToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            refreshAlertConfig();
+            RefreshAlertConfig();
         }
 
-        private void tsCopy_Click(object sender, EventArgs e)
+        private void TsCopy_Click(object sender, EventArgs e)
         {
             Common.CopyDataGridViewToClipboard(dgvAlertsConfig);
         }
 
-        private void tsRefresh_Click(object sender, EventArgs e)
+        private void TsRefresh_Click(object sender, EventArgs e)
         {
-            refreshAlertConfig();
+            RefreshAlertConfig();
         }
 
-        private void tsRefreshAlerts_Click(object sender, EventArgs e)
+        private void TsRefreshAlerts_Click(object sender, EventArgs e)
         {
-            refreshAlerts();
+            RefreshAlerts();
         }
 
-        private void tsCopyAlerts_Click(object sender, EventArgs e)
+        private void TsCopyAlerts_Click(object sender, EventArgs e)
         {
             Common.CopyDataGridViewToClipboard(dgvAlerts);
         }
 
-        private void tsExcel_Click(object sender, EventArgs e)
+        private void TsExcel_Click(object sender, EventArgs e)
         {
             Common.PromptSaveDataGridView(ref dgvAlertsConfig);
         }
 
-        private void tsExcelAlerts_Click(object sender, EventArgs e)
+        private void TsExcelAlerts_Click(object sender, EventArgs e)
         {
             Common.PromptSaveDataGridView(ref dgvAlerts);
         }

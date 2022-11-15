@@ -1,13 +1,9 @@
 ﻿using LiveCharts.Defaults;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace DBADashGUI
 {
-    class columnMetaData
+    class ColumnMetaData
     {
         public string Alias;
         public bool isVisible;

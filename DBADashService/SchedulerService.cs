@@ -3,18 +3,16 @@ using Newtonsoft.Json;
 using Polly;
 using Quartz;
 using Quartz.Impl;
+using Serilog;
 using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
-using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Text;
 using System.Threading.Tasks;
 using System.Timers;
 using static DBADash.DBADashConnection;
-using Serilog;
-using System.IO;
 
 namespace DBADashService
 {
@@ -27,7 +25,7 @@ namespace DBADashService
         System.Timers.Timer folderCleanupTimer;
         readonly CollectionSchedules schedules;
 
-        public  ScheduleService()
+        public ScheduleService()
         {
             config = SchedulerServiceConfig.Config;
             schedules = config.GetSchedules();
@@ -46,7 +44,7 @@ namespace DBADashService
             {
                 Log.Logger.Information("Threads {threadcount} (user)", threads);
             }
-            
+
             NameValueCollection props = new()
             {
             { "quartz.serializer.type", "binary" },
@@ -55,7 +53,7 @@ namespace DBADashService
             { "quartz.threadPool.threadCount", threads.ToString() },
             { "quartz.threadPool.maxConcurrency", threads.ToString() }
             };
-            
+
             StdSchedulerFactory factory = new(props);
             scheduler = factory.GetScheduler().ConfigureAwait(false).GetAwaiter().GetResult();
         }
@@ -75,7 +73,7 @@ namespace DBADashService
                     TimeSpan.FromSeconds(60)
                   }, (exception, timeSpan, context) =>
                   {
-                      Log.Error(exception,"Version check for repository database failed");
+                      Log.Error(exception, "Version check for repository database failed");
                   }).Execute(() => status = DBValidations.VersionStatus(d.ConnectionString));
 
                 if (status.VersionStatus == DBValidations.DBVersionStatusEnum.AppUpgradeRequired)
@@ -135,16 +133,16 @@ namespace DBADashService
             {
                 UpgradeDB();
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
-                Log.Error(ex,"upgradeDB failed");
+                Log.Error(ex, "upgradeDB failed");
                 throw;
             }
             try
             {
                 ScheduleJobsAsync().Wait();
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 Log.Error(ex, "Error scheduling collections.  Please check configuration.");
                 throw;
@@ -264,7 +262,7 @@ namespace DBADashService
         }
 
         private async Task ScheduleSourceAsync(DBADashSource src)
-        {              
+        {
             string cfgString = JsonConvert.SerializeObject(src);
             CollectionSchedules srcSchedule;
             if (src.CollectionSchedules != null && src.CollectionSchedules.Count > 0)
@@ -312,7 +310,7 @@ namespace DBADashService
                     }
                 }
             }
-            else if (src.SourceConnection.Type == ConnectionType.Directory || src.SourceConnection.Type == ConnectionType.AWSS3)
+            else if (src.SourceConnection.Type is ConnectionType.Directory or ConnectionType.AWSS3)
             {
                 IJobDetail job = GetJob(null, src, cfgString);
                 Log.Information("Add schedule for {source} to import on schedule {schedule}", src.SourceConnection.ConnectionForPrint, CollectionSchedule.DefaultImportSchedule);
@@ -329,7 +327,7 @@ namespace DBADashService
             await ScheduleCollectionsAsync(config.SourceConnections.ToList());
 
             _ = ScheduleAndRunAzureScanAsync();
-       
+
             FolderCleanup();
             folderCleanupTimer = new System.Timers.Timer
             {
@@ -356,7 +354,7 @@ namespace DBADashService
 
         }
 
-        private static IJobDetail GetJob(CollectionType[]types,DBADashSource src,string cfgString)
+        private static IJobDetail GetJob(CollectionType[] types, DBADashSource src, string cfgString)
         {
             return JobBuilder.Create<DBADashJob>()
                      .UsingJobData("Type", JsonConvert.SerializeObject(types))
@@ -428,7 +426,7 @@ namespace DBADashService
                 {
                     Log.Logger.Error(ex, "Error Stop/Remove DBADash event sessions for {connection}", src.SourceConnection.ConnectionForPrint);
                 }
-                
+
             }
         }
 

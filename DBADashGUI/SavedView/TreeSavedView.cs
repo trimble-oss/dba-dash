@@ -1,13 +1,8 @@
 ﻿using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace DBADashGUI
 {
-    internal class TreeSavedView :SavedView
+    internal class TreeSavedView : SavedView
     {
         public string GroupByTag { get; set; }
         public bool ShowCounts { get; set; }

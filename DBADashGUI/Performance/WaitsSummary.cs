@@ -1,14 +1,9 @@
-﻿using System;
+﻿using Microsoft.Data.SqlClient;
+using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Drawing;
 using System.Data;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
-using Microsoft.Data.SqlClient;
 using System.Diagnostics;
+using System.Windows.Forms;
 
 namespace DBADashGUI.Performance
 {
@@ -24,7 +19,7 @@ namespace DBADashGUI.Performance
 
         private int dateGrouping = 1;
         private int mins;
-        
+
         public int DateGrouping
         {
             get
@@ -63,7 +58,7 @@ namespace DBADashGUI.Performance
                 cmd.Parameters.AddWithValue("ToDate", DateRange.ToUTC);
 
                 cmd.Parameters.AddWithValue("UTCOffset", Common.UtcOffset);
-            
+
                 if (DateRange.HasTimeOfDayFilter)
                 {
                     cmd.Parameters.AddWithValue("Hours", DateRange.TimeOfDay.AsDataTable());
@@ -75,7 +70,7 @@ namespace DBADashGUI.Performance
                 var dt = new DataTable();
                 da.Fill(dt);
                 return dt;
-            }           
+            }
         }
 
 
@@ -102,18 +97,18 @@ namespace DBADashGUI.Performance
                 var dt = new DataTable();
                 da.Fill(dt);
                 return dt;
-            }            
+            }
         }
 
         private void Dgv_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
-            if(e.RowIndex>=0 && e.ColumnIndex == colHelp.Index)
+            if (e.RowIndex >= 0 && e.ColumnIndex == colHelp.Index)
             {
                 string wait = (string)dgv[colWaitType.Index, e.RowIndex].Value;
                 var psi = new ProcessStartInfo("https://www.sqlskills.com/help/waits/" + wait.ToLower() + "/") { UseShellExecute = true };
                 Process.Start(psi);
             }
-            else if(e.RowIndex>=0 && e.ColumnIndex == colWaitType.Index)
+            else if (e.RowIndex >= 0 && e.ColumnIndex == colWaitType.Index)
             {
                 selectedWaitType = (string)dgv[colWaitType.Index, e.RowIndex].Value;
                 RefreshChart();
@@ -121,18 +116,18 @@ namespace DBADashGUI.Performance
             }
         }
 
-        readonly Dictionary<string, columnMetaData> columns = new()
+        readonly Dictionary<string, ColumnMetaData> columns = new()
         {
-                {"AvgWaitTimeMs", new columnMetaData{Alias="Avg Wait Time (ms)",isVisible=false } },
-                {"SampleDurationSec", new columnMetaData{Alias="Sample Duration (sec)",isVisible=false } },
-                {"SignalWaitPct", new columnMetaData{Alias="Signal Wait %",isVisible=false } },
-                {"SignalWaitMsPerSec", new columnMetaData{Alias="Signal Wait (ms/sec)",isVisible=true } },
-                {"SignalWaitMsPerCorePerSec", new columnMetaData{Alias="Signal Wait Time (ms/sec/core)",isVisible=false } },
-                {"SignalWaitSec", new columnMetaData{Alias="Signal Wait (sec)",isVisible=false } },
-                {"TotalWaitSec", new columnMetaData{Alias="Total Wait (sec)",isVisible=false } },
-                {"WaitTimeMsPerSec", new columnMetaData{Alias="Wait Time (ms/sec)",isVisible=true } },           
-                {"WaitTimeMsPerCorePerSec", new columnMetaData{Alias="Wait Time (ms/sec/core)",isVisible=false } },
-                {"WaitingTasksCount", new columnMetaData{Alias="Waiting Tasks Count",isVisible=false } }
+                {"AvgWaitTimeMs", new ColumnMetaData{Alias="Avg Wait Time (ms)",isVisible=false } },
+                {"SampleDurationSec", new ColumnMetaData{Alias="Sample Duration (sec)",isVisible=false } },
+                {"SignalWaitPct", new ColumnMetaData{Alias="Signal Wait %",isVisible=false } },
+                {"SignalWaitMsPerSec", new ColumnMetaData{Alias="Signal Wait (ms/sec)",isVisible=true } },
+                {"SignalWaitMsPerCorePerSec", new ColumnMetaData{Alias="Signal Wait Time (ms/sec/core)",isVisible=false } },
+                {"SignalWaitSec", new ColumnMetaData{Alias="Signal Wait (sec)",isVisible=false } },
+                {"TotalWaitSec", new ColumnMetaData{Alias="Total Wait (sec)",isVisible=false } },
+                {"WaitTimeMsPerSec", new ColumnMetaData{Alias="Wait Time (ms/sec)",isVisible=true } },
+                {"WaitTimeMsPerCorePerSec", new ColumnMetaData{Alias="Wait Time (ms/sec/core)",isVisible=false } },
+                {"WaitingTasksCount", new ColumnMetaData{Alias="Waiting Tasks Count",isVisible=false } }
             };
 
         private void PopulateMetricsMenu()
@@ -149,7 +144,7 @@ namespace DBADashGUI.Performance
             columns[(string)ts.Tag].isVisible = ts.Checked;
             WaitChart1.UpdateColumnVisibility(columns);
         }
-    
+
 
 
         private void RefreshChart()
@@ -198,9 +193,9 @@ namespace DBADashGUI.Performance
 
         private void PopulateColumnsMenu()
         {
-            foreach(DataGridViewColumn col in dgv.Columns)
+            foreach (DataGridViewColumn col in dgv.Columns)
             {
-                var mnuCol = new ToolStripMenuItem { Text = col.HeaderText, Tag = col.Name,Checked =col.Visible, CheckOnClick=true };
+                var mnuCol = new ToolStripMenuItem { Text = col.HeaderText, Tag = col.Name, Checked = col.Visible, CheckOnClick = true };
                 mnuCol.Click += MnuCol_Click;
                 tsColumns.DropDownItems.Add(mnuCol);
             }
@@ -235,6 +230,6 @@ namespace DBADashGUI.Performance
             Common.PromptSaveDataGridView(ref dgv);
         }
 
-   
+
     }
 }

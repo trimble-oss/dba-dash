@@ -1,11 +1,8 @@
-﻿using DBADash;
-using System;
-using System.Diagnostics;
-using System.Reflection;
-using Topshelf;
+﻿using Microsoft.Extensions.Configuration;
 using Serilog;
+using System;
 using System.IO;
-using Microsoft.Extensions.Configuration;
+using Topshelf;
 
 namespace DBADashService
 {
@@ -23,7 +20,7 @@ namespace DBADashService
             var configuration = new ConfigurationBuilder()
                 .SetBasePath(AppContext.BaseDirectory)
                   // reloadOnChange will allow you to auto reload the minimum level and level switches
-                  .AddJsonFile(path: "serilog.json", optional: false, reloadOnChange: true)                  
+                  .AddJsonFile(path: "serilog.json", optional: false, reloadOnChange: true)
                   .Build();
 
             Log.Logger = new LoggerConfiguration()
@@ -32,7 +29,7 @@ namespace DBADashService
                .Enrich.WithProperty("ServiceName", cfg.ServiceName)
                .Enrich.WithProperty("MachineName", Environment.MachineName)
                .CreateLogger();
-  
+
             var rc = HostFactory.Run(x =>
             {
                 x.Service<ScheduleService>(s =>

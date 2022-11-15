@@ -4,7 +4,7 @@ using System.Linq;
 namespace DBADashService
 {
 
-    public class CollectionSchedules: Dictionary<CollectionType, CollectionSchedule>
+    public class CollectionSchedules : Dictionary<CollectionType, CollectionSchedule>
     {
         private const string every1min = "0 * * ? * *";
         private const string hourly = "0 0 * ? * *";
@@ -80,8 +80,9 @@ namespace DBADashService
                     combined.Add(s.Key, s.Value);
                 }
             }
-            foreach (var s in baseSchedule) {
-                if (overrideSchedule==null || !overrideSchedule.ContainsKey(s.Key))
+            foreach (var s in baseSchedule)
+            {
+                if (overrideSchedule == null || !overrideSchedule.ContainsKey(s.Key))
                 {
                     combined.Add(s.Key, s.Value);
                 }
@@ -91,12 +92,13 @@ namespace DBADashService
 
         public Dictionary<string, CollectionType[]> GroupedBySchedule
         {
-            get {
+            get
+            {
                 var groupedSchedule = new Dictionary<string, CollectionType[]>();
-                var schedules=  this.Where(s=>s.Key != CollectionType.SchemaSnapshot && !string.IsNullOrEmpty(s.Value.Schedule)).Select(s => s.Value.Schedule).Distinct().ToArray();
-                foreach(var schedule in schedules)
+                var schedules = this.Where(s => s.Key != CollectionType.SchemaSnapshot && !string.IsNullOrEmpty(s.Value.Schedule)).Select(s => s.Value.Schedule).Distinct().ToArray();
+                foreach (var schedule in schedules)
                 {
-                    groupedSchedule.Add(schedule, this.Where(s => s.Value.Schedule == schedule).Select(s=>s.Key).ToArray());
+                    groupedSchedule.Add(schedule, this.Where(s => s.Value.Schedule == schedule).Select(s => s.Key).ToArray());
                 }
                 return groupedSchedule;
             }
@@ -112,7 +114,8 @@ namespace DBADashService
 
     }
 
-    public class CollectionSchedule{
+    public class CollectionSchedule
+    {
 
         public string Schedule;
         public bool RunOnServiceStart = true;
@@ -121,9 +124,9 @@ namespace DBADashService
         private static readonly CollectionSchedule importSchedule = new() { Schedule = every1min };
         public static readonly CollectionSchedule DefaultImportSchedule = importSchedule;
 
-       
-            
+
+
     }
-   
-  
+
+
 }

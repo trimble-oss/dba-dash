@@ -59,7 +59,7 @@ namespace DBADash
             string name;
             var el = XElement.Parse(xe);
             ringBufferAtt = new RingBufferTargetAttributes();
-            if(el.Attribute("truncated") != null)
+            if (el.Attribute("truncated") != null)
             {
                 ringBufferAtt.Truncated = Int32.Parse(el.Attribute("truncated").Value);
             }

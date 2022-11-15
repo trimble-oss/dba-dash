@@ -1,11 +1,6 @@
 ﻿using DBADashGUI;
-using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 using System.Runtime.Versioning;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace DBADashSharedGUI
 {
@@ -18,7 +13,7 @@ namespace DBADashSharedGUI
         }
 
         [SupportedOSPlatform("windows")]
-        public static void ShowAbout(IWin32Window owner,bool StartGUIOnUpgrade)
+        public static void ShowAbout(IWin32Window owner, bool StartGUIOnUpgrade)
         {
             using About frm = new()
             {

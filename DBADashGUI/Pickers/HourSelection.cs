@@ -1,11 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Data;
-using System.Drawing;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace DBADashGUI
@@ -21,17 +17,16 @@ namespace DBADashGUI
         {
             get
             {
-                var selected = new List<int>();
                 return chkHours.CheckedIndices.Cast<int>().ToList();
             }
             set
             {
-                clearChecks();
+                ClearChecks();
                 if (value != null)
                 {
                     foreach (int h in value)
                     {
-                        if (h >= 0 && h < 24)
+                        if (h is >= 0 and < 24)
                         {
                             chkHours.SetItemCheckState(h, CheckState.Checked);
                         }
@@ -44,14 +39,15 @@ namespace DBADashGUI
             }
         }
 
-        private void bttnAll_Click(object sender, EventArgs e)
+        private void BttnAll_Click(object sender, EventArgs e)
         {
-           for(int i = 0; i < 24; i++) {
-                chkHours.SetItemCheckState(i,  CheckState.Checked);
-           }
+            for (int i = 0; i < 24; i++)
+            {
+                chkHours.SetItemCheckState(i, CheckState.Checked);
+            }
         }
 
-        private void clearChecks()
+        private void ClearChecks()
         {
             for (int i = 0; i < 24; i++)
             {
@@ -59,28 +55,28 @@ namespace DBADashGUI
             }
         }
 
-        private void bttnNone_Click(object sender, EventArgs e)
+        private void BttnNone_Click(object sender, EventArgs e)
         {
-            clearChecks();
+            ClearChecks();
         }
 
-        private void bttnToggle_Click(object sender, EventArgs e)
+        private void BttnToggle_Click(object sender, EventArgs e)
         {
             for (int i = 0; i < 24; i++)
-            {              
+            {
                 chkHours.SetItemCheckState(i, chkHours.GetItemCheckState(i) == CheckState.Checked ? CheckState.Unchecked : CheckState.Checked);
             }
         }
 
-        private void bttn9to5_Click(object sender, EventArgs e)
+        private void Bttn9to5_Click(object sender, EventArgs e)
         {
             for (int i = 0; i < 24; i++)
             {
-                chkHours.SetItemCheckState(i, i>=9 && i<17  ? CheckState.Checked : CheckState.Unchecked);
+                chkHours.SetItemCheckState(i, i is >= 9 and < 17 ? CheckState.Checked : CheckState.Unchecked);
             }
         }
 
-        private void bttnOK_Click(object sender, EventArgs e)
+        private void BttnOK_Click(object sender, EventArgs e)
         {
             this.DialogResult = DialogResult.OK;
         }

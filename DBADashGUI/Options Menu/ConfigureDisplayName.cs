@@ -1,13 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
+﻿using Microsoft.Data.SqlClient;
+using System;
 using System.Data;
 using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
-using Microsoft.Data.SqlClient;
 
 namespace DBADashGUI
 {
@@ -18,8 +13,8 @@ namespace DBADashGUI
             InitializeComponent();
         }
 
-        public string TagIDs { get;set; }
-        public string SearchString { get;set; }
+        public string TagIDs { get; set; }
+        public string SearchString { get; set; }
 
         public int EditCount
         {
@@ -32,74 +27,76 @@ namespace DBADashGUI
 
         private void ConfigureDisplayName_Load(object sender, EventArgs e)
         {
-            setCols();
-            refreshData();
+            SetCols();
+            RefreshData();
         }
 
-        private void setCols()
+        private void SetCols()
         {
             dgv.AutoGenerateColumns = false;
             dgv.Columns.AddRange(
-                new DataGridViewTextBoxColumn() { Name = "colConnectionID", DataPropertyName = "ConnectionID", HeaderText = "ConnectionID", ReadOnly = true , DefaultCellStyle= new DataGridViewCellStyle() { BackColor = DashColors.GrayLight } },
+                new DataGridViewTextBoxColumn() { Name = "colConnectionID", DataPropertyName = "ConnectionID", HeaderText = "ConnectionID", ReadOnly = true, DefaultCellStyle = new DataGridViewCellStyle() { BackColor = DashColors.GrayLight } },
                 new DataGridViewTextBoxColumn() { DataPropertyName = "Instance", HeaderText = "Instance", ReadOnly = true, DefaultCellStyle = new DataGridViewCellStyle() { BackColor = DashColors.GrayLight } },
                 new DataGridViewTextBoxColumn() { Name = "colDisplayName", DataPropertyName = "InstanceDisplayName", HeaderText = "Display Name", AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill }
             );
         }
 
 
-        private void refreshData()
+        private void RefreshData()
         {
-            DataTable dt = CommonData.GetInstances(TagIDs, true, false,SearchString);
+            DataTable dt = CommonData.GetInstances(TagIDs, true, false, SearchString);
             dgv.DataSource = dt;
             dgv.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
         }
 
-        private void dgv_CellValueChanged(object sender, DataGridViewCellEventArgs e)
+        private void Dgv_CellValueChanged(object sender, DataGridViewCellEventArgs e)
         {
-            if (e.ColumnIndex == dgv.Columns["colDisplayName"].Index) {
+            if (e.ColumnIndex == dgv.Columns["colDisplayName"].Index)
+            {
                 var row = (DataRowView)dgv.Rows[e.RowIndex].DataBoundItem;
                 int instanceID = (int)row["InstanceID"];
                 var alias = Convert.ToString(dgv.Rows[e.RowIndex].Cells[e.ColumnIndex].Value);
                 try
-                {                                 
-                    updateAlias(instanceID,ref alias);
+                {
+                    UpdateAlias(instanceID, ref alias);
                     row["InstanceDisplayName"] = alias;
                     row.EndEdit();
                     _editCount++; // Keep track of edits made so we can decide to refresh the tree
                 }
-                catch(SqlException ex) when (ex.Number == 2601)
+                catch (SqlException ex) when (ex.Number == 2601)
                 {
-                    MessageBox.Show("A server with the specified alias already exists.  Please enter a unique alias.","Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    MessageBox.Show("A server with the specified alias already exists.  Please enter a unique alias.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     row.CancelEdit();
                 }
-                catch(Exception ex) { 
-                    MessageBox.Show("Error updating alias: " + ex.Message,"Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Error updating alias: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     row.CancelEdit();
                 }
             }
         }
 
-        private void updateAlias(int instanceID,ref string alias)
+        private static void UpdateAlias(int instanceID, ref string alias)
         {
             using (var cn = new SqlConnection(Common.ConnectionString))
             using (var cmd = new SqlCommand("dbo.InstanceAlias_Upd", cn) { CommandType = CommandType.StoredProcedure })
             {
                 cn.Open();
-                cmd.Parameters.AddWithValue("InstanceID",instanceID);
-                cmd.Parameters.AddWithValue("Alias",alias);
+                cmd.Parameters.AddWithValue("InstanceID", instanceID);
+                cmd.Parameters.AddWithValue("Alias", alias);
                 var pInstanceDisplayName = new SqlParameter("InstanceDisplayName", SqlDbType.NVarChar, 128) { Direction = ParameterDirection.Output };
-                cmd.Parameters.Add(pInstanceDisplayName);             
+                cmd.Parameters.Add(pInstanceDisplayName);
                 cmd.ExecuteNonQuery();
                 alias = (string)pInstanceDisplayName.Value; // Returns the display name (set to ConnectionID if alias is NULL)
             }
         }
 
-        private void dgv_CellFormatting(object sender, DataGridViewCellFormattingEventArgs e)
+        private void Dgv_CellFormatting(object sender, DataGridViewCellFormattingEventArgs e)
         {
             // Highlight displayname column if it's been edited from the default value
             if (e.ColumnIndex == 2)
             {
-                if(Convert.ToString(dgv.Rows[e.RowIndex].Cells[0].Value) == Convert.ToString(dgv.Rows[e.RowIndex].Cells[2].Value))
+                if (Convert.ToString(dgv.Rows[e.RowIndex].Cells[0].Value) == Convert.ToString(dgv.Rows[e.RowIndex].Cells[2].Value))
                 {
                     e.CellStyle.Font = new Font(e.CellStyle.Font, FontStyle.Regular);
                 }

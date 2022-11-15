@@ -1,13 +1,9 @@
-﻿using System;
+﻿using Microsoft.Data.SqlClient;
+using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Drawing;
 using System.Data;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Drawing;
 using System.Windows.Forms;
-using Microsoft.Data.SqlClient;
 
 namespace DBADashGUI.Changes
 {
@@ -19,16 +15,16 @@ namespace DBADashGUI.Changes
         }
 
         public List<Int32> InstanceIDs;
-        public Int32 DatabaseID=-1;
+        public Int32 DatabaseID = -1;
 
 
         public void RefreshData()
         {
-            refreshConfig();
-            refreshHistory();
+            RefreshConfig();
+            RefreshHistory();
         }
 
-        private DataTable getDBConfiguration()
+        private DataTable GetDBConfiguration()
         {
             using (var cn = new SqlConnection(Common.ConnectionString))
             using (var cmd = new SqlCommand("dbo.DBConfiguration_Get", cn) { CommandType = CommandType.StoredProcedure })
@@ -42,28 +38,28 @@ namespace DBADashGUI.Changes
                     cmd.Parameters.AddWithValue("DatabaseID", DatabaseID);
                 }
 
-                DataTable dt = new DataTable();
+                DataTable dt = new();
                 da.Fill(dt);
                 return dt;
             }
-         }
+        }
 
-        private void refreshConfig()
+        private void RefreshConfig()
         {
             dgvConfig.Columns.Clear();
 
-            dgvConfig.Columns.Add(new DataGridViewTextBoxColumn() { Name = "Instance", HeaderText = "Instance",Frozen=Common.FreezeKeyColumn });
+            dgvConfig.Columns.Add(new DataGridViewTextBoxColumn() { Name = "Instance", HeaderText = "Instance", Frozen = Common.FreezeKeyColumn });
             dgvConfig.Columns.Add(new DataGridViewTextBoxColumn() { Name = "DB", HeaderText = "Database", Frozen = Common.FreezeKeyColumn });
-         
-            DataTable dt =getDBConfiguration();
-                   
+
+            DataTable dt = GetDBConfiguration();
+
             foreach (DataRow r in dt.DefaultView.ToTable(true, "name").Rows)
             {
-                DataGridViewTextBoxColumn col = new DataGridViewTextBoxColumn() { HeaderText = (string)r["name"], Name = (string)r["name"] };
+                DataGridViewTextBoxColumn col = new() { HeaderText = (string)r["name"], Name = (string)r["name"] };
                 dgvConfig.Columns.Add(col);
             }
             Int32 lastDB = -1;
-            List<DataGridViewRow> rows = new List<DataGridViewRow>();
+            List<DataGridViewRow> rows = new();
             DataGridViewRow row = null;
             foreach (DataRow r in dt.Rows)
             {
@@ -89,10 +85,10 @@ namespace DBADashGUI.Changes
             }
             dgvConfig.Rows.AddRange(rows.ToArray());
             dgvConfig.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
-       
+
         }
 
-        private DataTable getDBConfigurationHistory()
+        private DataTable GetDBConfigurationHistory()
         {
             using (var cn = new SqlConnection(Common.ConnectionString))
             using (var cmd = new SqlCommand("dbo.DBConfigurationHistory_Get", cn) { CommandType = CommandType.StoredProcedure })
@@ -104,58 +100,58 @@ namespace DBADashGUI.Changes
                 {
                     cmd.Parameters.AddWithValue("DatabaseID", DatabaseID);
                 }
-                
-                DataTable dt = new DataTable();
+
+                DataTable dt = new();
                 da.Fill(dt);
                 return dt;
-            }           
+            }
         }
 
-        private void refreshHistory()
-        {   
-            DataTable dt = getDBConfigurationHistory();
+        private void RefreshHistory()
+        {
+            DataTable dt = GetDBConfigurationHistory();
             dgvConfigHistory.AutoGenerateColumns = false;
             Common.ConvertUTCToLocal(ref dt);
             dgvConfigHistory.DataSource = dt;
-            dgvConfigHistory.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);      
+            dgvConfigHistory.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
         }
 
-        private void configuredOnlyToolStripMenuItem_Click(object sender, EventArgs e)
+        private void ConfiguredOnlyToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            refreshConfig();
+            RefreshConfig();
         }
 
-        private void tsRefresh_Click(object sender, EventArgs e)
+        private void TsRefresh_Click(object sender, EventArgs e)
         {
-            refreshConfig();
+            RefreshConfig();
         }
 
-        private void tsCopy_Click(object sender, EventArgs e)
+        private void TsCopy_Click(object sender, EventArgs e)
         {
             Common.CopyDataGridViewToClipboard(dgvConfig);
         }
 
-        private void tsRefreshHistory_Click(object sender, EventArgs e)
+        private void TsRefreshHistory_Click(object sender, EventArgs e)
         {
-            refreshHistory();
+            RefreshHistory();
         }
 
-        private void tsCopyHistory_Click(object sender, EventArgs e)
+        private void TsCopyHistory_Click(object sender, EventArgs e)
         {
             Common.CopyDataGridViewToClipboard(dgvConfigHistory);
         }
 
-        private void tsExcel_Click(object sender, EventArgs e)
+        private void TsExcel_Click(object sender, EventArgs e)
         {
             Common.PromptSaveDataGridView(ref dgvConfig);
         }
 
-        private void tsExcelHistory_Click(object sender, EventArgs e)
+        private void TsExcelHistory_Click(object sender, EventArgs e)
         {
             Common.PromptSaveDataGridView(ref dgvConfigHistory);
         }
 
-        private void tsCols_Click(object sender, EventArgs e)
+        private void TsCols_Click(object sender, EventArgs e)
         {
             using (var frm = new SelectColumns() { Columns = dgvConfig.Columns })
             {

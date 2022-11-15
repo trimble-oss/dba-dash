@@ -1,12 +1,7 @@
-﻿using System;
+﻿using Microsoft.Data.SqlClient;
+using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Data;
-using Microsoft.Data.SqlClient;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace DBADashGUI.Changes
@@ -27,10 +22,10 @@ namespace DBADashGUI.Changes
         {
             tsBack.Enabled = false;
             backupInstanceIDs = new List<int>();
-            refreshData();
+            RefreshDataLocal();
         }
 
-        private void refreshData()
+        private void RefreshDataLocal()
         {
             dgv.AutoGenerateColumns = false;
             DataTable dt;
@@ -59,8 +54,8 @@ namespace DBADashGUI.Changes
         private static DataTable GetResourceGovernorConfiguration(List<Int32> InstanceIDs)
         {
             using (var cn = new SqlConnection(Common.ConnectionString))
-            using(var cmd = new SqlCommand("dbo.ResourceGovernorConfiguration_Get", cn) { CommandType = CommandType.StoredProcedure })
-            using(var da = new SqlDataAdapter(cmd))
+            using (var cmd = new SqlCommand("dbo.ResourceGovernorConfiguration_Get", cn) { CommandType = CommandType.StoredProcedure })
+            using (var da = new SqlDataAdapter(cmd))
             {
                 cmd.Parameters.AddWithValue("InstanceIDs", string.Join(",", InstanceIDs));
                 var dt = new DataTable();
@@ -68,7 +63,7 @@ namespace DBADashGUI.Changes
                 return dt;
             }
         }
-        private DataTable GetResourceGovernorConfigurationHistory(int InstanceID)
+        private static DataTable GetResourceGovernorConfigurationHistory(int InstanceID)
         {
             using (var cn = new SqlConnection(Common.ConnectionString))
             using (var cmd = new SqlCommand("dbo.ResourceGovernorConfigurationHistory_Get", cn) { CommandType = CommandType.StoredProcedure })
@@ -82,7 +77,7 @@ namespace DBADashGUI.Changes
             }
         }
 
-        private void dgv_CellContentClick(object sender, DataGridViewCellEventArgs e)
+        private void Dgv_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
             if (e.RowIndex >= 0 && e.ColumnIndex == colScript.Index)
             {
@@ -99,7 +94,7 @@ namespace DBADashGUI.Changes
                 backupInstanceIDs = InstanceIDs;
                 tsBack.Enabled = true;
                 InstanceIDs = new List<int>() { instanceId };
-                refreshData();
+                RefreshDataLocal();
             }
             else if (e.RowIndex >= 0 && e.ColumnIndex == colDiff.Index)
             {
@@ -107,17 +102,17 @@ namespace DBADashGUI.Changes
                 string script = (string)row["script"];
                 string scriptPrevious = Convert.ToString(row["script_previous"]);
                 var frm = new Diff();
-                frm.setText(scriptPrevious, script);
+                frm.SetText(scriptPrevious, script);
                 frm.ShowDialog();
             }
         }
 
-        private void tsRefresh_Click(object sender, EventArgs e)
+        private void TsRefresh_Click(object sender, EventArgs e)
         {
-            refreshData();
+            RefreshDataLocal();
         }
 
-        private void tsBack_Click(object sender, EventArgs e)
+        private void TsBack_Click(object sender, EventArgs e)
         {
             NavigateBack();
         }
@@ -136,8 +131,8 @@ namespace DBADashGUI.Changes
             }
         }
 
-        private void tsCopy_Click(object sender, EventArgs e)
-        {          
+        private void TsCopy_Click(object sender, EventArgs e)
+        {
             bool diffVisible = colDiff.Visible;
             colDiff.Visible = false;
             colScript.Visible = false;
@@ -146,26 +141,26 @@ namespace DBADashGUI.Changes
             colDiff.Visible = diffVisible;
         }
 
-        private void dgv_SelectionChanged(object sender, EventArgs e)
+        private void Dgv_SelectionChanged(object sender, EventArgs e)
         {
             tsCompare.Enabled = dgv.SelectedRows.Count == 2;
         }
 
-        private void tsCompare_Click(object sender, EventArgs e)
+        private void TsCompare_Click(object sender, EventArgs e)
         {
             if (dgv.SelectedRows.Count == 2)
             {
                 DataRowView row1 = (DataRowView)dgv.SelectedRows[0].DataBoundItem;
                 DataRowView row2 = (DataRowView)dgv.SelectedRows[1].DataBoundItem;
-                string script1 = "/* " + (string)row1["Instance"] + " (" + ((DateTime)row1["ValidFrom"]).ToString("yyyy-MM-dd hh:mm") + ")" + " */" + Environment.NewLine + (string)row1["script"] ;
-                string script2 = "/* " + (string)row2["Instance"] + " (" + ((DateTime)row2["ValidFrom"]).ToString("yyyy-MM-dd hh:mm") + ")" + " */" + Environment.NewLine + (string)row2["script"] ;
+                string script1 = "/* " + (string)row1["Instance"] + " (" + ((DateTime)row1["ValidFrom"]).ToString("yyyy-MM-dd hh:mm") + ")" + " */" + Environment.NewLine + (string)row1["script"];
+                string script2 = "/* " + (string)row2["Instance"] + " (" + ((DateTime)row2["ValidFrom"]).ToString("yyyy-MM-dd hh:mm") + ")" + " */" + Environment.NewLine + (string)row2["script"];
                 var frm = new Diff();
-                frm.setText(script1, script2);
+                frm.SetText(script1, script2);
                 frm.ShowDialog();
             }
         }
 
-        private void tsExcel_Click(object sender, EventArgs e)
+        private void TsExcel_Click(object sender, EventArgs e)
         {
             bool diffVisible = colDiff.Visible;
             colDiff.Visible = false;

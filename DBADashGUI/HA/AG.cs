@@ -1,12 +1,8 @@
-﻿using System;
+﻿using Microsoft.Data.SqlClient;
+using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Data;
-using Microsoft.Data.SqlClient;
 using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace DBADashGUI.HA
@@ -19,7 +15,7 @@ namespace DBADashGUI.HA
         }
 
         public List<Int32> InstanceIDs;
-        private int instanceId=-1;
+        private int instanceId = -1;
 
         public bool CanNavigateBack { get => tsBack.Enabled; }
 
@@ -28,29 +24,29 @@ namespace DBADashGUI.HA
             instanceId = -1;
             if (InstanceIDs.Count == 1)
             {
-               instanceId= InstanceIDs[0];
+                instanceId = InstanceIDs[0];
             }
-            refreshData();
+            RefreshDataLocal();
         }
 
-        private void refreshData()
+        private void RefreshDataLocal()
         {
-            tsBack.Enabled = instanceId > 0  && InstanceIDs.Count>1;
+            tsBack.Enabled = instanceId > 0 && InstanceIDs.Count > 1;
             dgv.DataSource = null;
             dgv.Columns.Clear();
             DataTable dt;
 
-            dgv.Columns.Add(new DataGridViewTextBoxColumn() { DataPropertyName = "InstanceID", Visible = false, Name="colInstanceID",Frozen = Common.FreezeKeyColumn });
-            dgv.Columns.Add(new DataGridViewTextBoxColumn() { DataPropertyName = "Snapshot Status",Name="colSnapshotStatus", Visible = false, Frozen= Common.FreezeKeyColumn });
+            dgv.Columns.Add(new DataGridViewTextBoxColumn() { DataPropertyName = "InstanceID", Visible = false, Name = "colInstanceID", Frozen = Common.FreezeKeyColumn });
+            dgv.Columns.Add(new DataGridViewTextBoxColumn() { DataPropertyName = "Snapshot Status", Name = "colSnapshotStatus", Visible = false, Frozen = Common.FreezeKeyColumn });
             if (instanceId > 0)
-            {                
+            {
                 dt = GetAvailabilityGroup(instanceId);
-                dgv.Columns.Add(new DataGridViewTextBoxColumn() { DataPropertyName = "Database", Name = "colDatabase", HeaderText ="Database", Frozen = Common.FreezeKeyColumn });
+                dgv.Columns.Add(new DataGridViewTextBoxColumn() { DataPropertyName = "Database", Name = "colDatabase", HeaderText = "Database", Frozen = Common.FreezeKeyColumn });
             }
             else
             {
                 dt = GetAvailabilityGroupSummary(InstanceIDs);
-                dgv.Columns.Add(new DataGridViewLinkColumn() { HeaderText = "Instance", DataPropertyName = "Instance", Name = "colInstance", LinkColor=DashColors.LinkColor, Frozen = Common.FreezeKeyColumn });
+                dgv.Columns.Add(new DataGridViewLinkColumn() { HeaderText = "Instance", DataPropertyName = "Instance", Name = "colInstance", LinkColor = DashColors.LinkColor, Frozen = Common.FreezeKeyColumn });
             }
             Common.ConvertUTCToLocal(ref dt);
             dgv.DataSource = dt;
@@ -58,11 +54,11 @@ namespace DBADashGUI.HA
             dgv.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
         }
 
-        public DataTable GetAvailabilityGroup(Int32 InstanceID)
+        public static DataTable GetAvailabilityGroup(Int32 InstanceID)
         {
-            using (SqlConnection cn = new SqlConnection(Common.ConnectionString))
-            using (SqlCommand cmd = new SqlCommand("AvailabilityGroup_Get", cn) { CommandType = CommandType.StoredProcedure })
-            using (SqlDataAdapter da = new SqlDataAdapter(cmd))
+            using (SqlConnection cn = new(Common.ConnectionString))
+            using (SqlCommand cmd = new("AvailabilityGroup_Get", cn) { CommandType = CommandType.StoredProcedure })
+            using (SqlDataAdapter da = new(cmd))
             {
                 cmd.Parameters.AddWithValue("InstanceID", InstanceID);
                 var dt = new DataTable();
@@ -71,11 +67,11 @@ namespace DBADashGUI.HA
             }
         }
 
-        public DataTable GetAvailabilityGroupSummary(List<int> InstanceIDs)
+        public static DataTable GetAvailabilityGroupSummary(List<int> InstanceIDs)
         {
-            using(SqlConnection cn = new SqlConnection(Common.ConnectionString))
-            using (SqlCommand cmd = new SqlCommand("AvailabilityGroupSummary_Get", cn) { CommandType = CommandType.StoredProcedure })
-            using (SqlDataAdapter da = new SqlDataAdapter(cmd))
+            using (SqlConnection cn = new(Common.ConnectionString))
+            using (SqlCommand cmd = new("AvailabilityGroupSummary_Get", cn) { CommandType = CommandType.StoredProcedure })
+            using (SqlDataAdapter da = new(cmd))
             {
                 cmd.Parameters.AddWithValue("InstanceIDs", string.Join(",", InstanceIDs));
                 var dt = new DataTable();
@@ -84,27 +80,27 @@ namespace DBADashGUI.HA
             }
         }
 
-        private void tsCopy_Click(object sender, EventArgs e)
+        private void TsCopy_Click(object sender, EventArgs e)
         {
             Common.CopyDataGridViewToClipboard(dgv);
         }
 
-        private void tsRefresh_Click(object sender, EventArgs e)
+        private void TsRefresh_Click(object sender, EventArgs e)
         {
-            refreshData();
+            RefreshDataLocal();
         }
 
-        private void dgv_CellContentClick(object sender, DataGridViewCellEventArgs e)
+        private void Dgv_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
-            if(e.RowIndex>=0 && dgv.Columns[e.ColumnIndex].Name=="colInstance")
+            if (e.RowIndex >= 0 && dgv.Columns[e.ColumnIndex].Name == "colInstance")
             {
                 var row = (DataRowView)dgv.Rows[e.RowIndex].DataBoundItem;
                 instanceId = (int)row["InstanceID"];
-                refreshData();
+                RefreshDataLocal();
             }
         }
 
-        private void tsBack_Click(object sender, EventArgs e)
+        private void TsBack_Click(object sender, EventArgs e)
         {
             NavigateBack();
         }
@@ -122,7 +118,7 @@ namespace DBADashGUI.HA
             }
         }
 
-        private void dgv_RowsAdded(object sender, DataGridViewRowsAddedEventArgs e)
+        private void Dgv_RowsAdded(object sender, DataGridViewRowsAddedEventArgs e)
         {
             if (dgv.Columns.Contains("Snapshot Date"))
             {
@@ -141,7 +137,7 @@ namespace DBADashGUI.HA
                     }
                     else
                     {
-                        r.Cells["Not Synchronizing"].SetStatusColor((int)row["Not Synchronizing"] >0 ? DashColors.Fail: Color.White);
+                        r.Cells["Not Synchronizing"].SetStatusColor((int)row["Not Synchronizing"] > 0 ? DashColors.Fail : Color.White);
                         r.Cells["Remote Not Synchronizing"].SetStatusColor((int)row["Remote Not Synchronizing"] > 0 ? DashColors.Fail : Color.White);
                         r.Cells["Synchronized"].SetStatusColor((int)row["Synchronized"] > 0 ? DashColors.Success : Color.White);
                         r.Cells["Remote Synchronized"].SetStatusColor((int)row["Remote Synchronized"] > 0 ? DashColors.Success : Color.White);
@@ -153,12 +149,12 @@ namespace DBADashGUI.HA
                     }
                     var syncHealthStatus = Convert.ToString(row["Sync Health"]) == "HEALTHY" ? DashColors.Success :
                                                      Convert.ToString(row["Sync Health"]) == "PARTIALLY_HEALTHY" ? DashColors.Warning : DashColors.Fail;
-                    dgv.Rows[idx].Cells["Sync Health"].SetStatusColor(syncHealthStatus); 
+                    dgv.Rows[idx].Cells["Sync Health"].SetStatusColor(syncHealthStatus);
                 }
             }
         }
 
-        private void tsExcel_Click(object sender, EventArgs e)
+        private void TsExcel_Click(object sender, EventArgs e)
         {
             Common.PromptSaveDataGridView(ref dgv);
         }

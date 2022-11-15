@@ -1,12 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
+﻿using Microsoft.Data.SqlClient;
+using System;
 using System.Data;
-using Microsoft.Data.SqlClient;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace DBADashGUI.CollectionDates
@@ -67,15 +61,15 @@ namespace DBADashGUI.CollectionDates
             }
             set
             {
-               OptDisabled.Checked = value;
+                OptDisabled.Checked = value;
             }
         }
 
-        private void getThreshold()
+        private void GetThreshold()
         {
             using var cn = new SqlConnection(Common.ConnectionString);
             using var cmd = new SqlCommand("CollectionDatesThresholds_Get", cn) { CommandType = CommandType.StoredProcedure };
-            
+
             cn.Open();
             cmd.Parameters.AddWithValue("InstanceID", InstanceID);
             using var rdr = cmd.ExecuteReader();
@@ -106,21 +100,21 @@ namespace DBADashGUI.CollectionDates
                     chkReferences.Items.Add(reference, CheckState.Unchecked);
                 }
 
-            } 
+            }
 
             optInherit.Enabled = InstanceID > 0;
-                       
+
         }
 
-        private void bttnUpdate_Click(object sender, EventArgs e)
+        private void BttnUpdate_Click(object sender, EventArgs e)
         {
-            foreach(string itm in chkReferences.CheckedItems)
+            foreach (string itm in chkReferences.CheckedItems)
             {
-                update(itm);
+                Update(itm);
             }
         }
 
-        private void update(string reference)
+        private void Update(string reference)
         {
             using (var cn = new SqlConnection(Common.ConnectionString))
             using (var cmd = new SqlCommand("CollectionDatesThresholds_Upd", cn) { CommandType = CommandType.StoredProcedure })
@@ -142,24 +136,24 @@ namespace DBADashGUI.CollectionDates
                 cmd.Parameters.AddWithValue("Inherit", Inherit);
                 cmd.ExecuteNonQuery();
                 this.DialogResult = DialogResult.OK;
-            }           
+            }
         }
 
         private void CollectionDatesThresholds_Load(object sender, EventArgs e)
         {
-            chkCheckAll.Enabled = InstanceID!=-1;
+            chkCheckAll.Enabled = InstanceID != -1;
             if (InstanceID == -1)
             {
-                this.Text += " (Root)";              
+                this.Text += " (Root)";
             }
             else
             {
                 this.Text += " (Instance)";
             }
-            getThreshold();
+            GetThreshold();
         }
 
-        private void optInherit_CheckedChanged(object sender, EventArgs e)
+        private void OptInherit_CheckedChanged(object sender, EventArgs e)
         {
             pnlThresholds.Enabled = false;
         }
@@ -169,19 +163,19 @@ namespace DBADashGUI.CollectionDates
             pnlThresholds.Enabled = false;
         }
 
-        private void optEnabled_CheckedChanged(object sender, EventArgs e)
+        private void OptEnabled_CheckedChanged(object sender, EventArgs e)
         {
             pnlThresholds.Enabled = true;
         }
 
-        private void bttnCancel_Click(object sender, EventArgs e)
+        private void BttnCancel_Click(object sender, EventArgs e)
         {
             this.DialogResult = DialogResult.Cancel;
         }
 
-        private void chkCheckAll_CheckedChanged(object sender, EventArgs e)
+        private void ChkCheckAll_CheckedChanged(object sender, EventArgs e)
         {
-            for(int i =0;i<chkReferences.Items.Count;i++)
+            for (int i = 0; i < chkReferences.Items.Count; i++)
             {
                 chkReferences.SetItemChecked(i, chkCheckAll.Checked);
             }

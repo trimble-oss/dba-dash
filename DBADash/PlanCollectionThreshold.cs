@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace DBADash
 {
@@ -34,12 +30,13 @@ namespace DBADash
             }
         }
 
-        public static PlanCollectionThreshold DefaultThreshold 
+        public static PlanCollectionThreshold DefaultThreshold
+        {
+            get
             {
-                get{
-                    return new PlanCollectionThreshold() { CPUThreshold = 1000, DurationThreshold = 10000, MemoryGrantThreshold = 6400, CountThreshold = 2 };
-                }
-            } 
+                return new PlanCollectionThreshold() { CPUThreshold = 1000, DurationThreshold = 10000, MemoryGrantThreshold = 6400, CountThreshold = 2 };
+            }
+        }
 
         public static PlanCollectionThreshold PlanCollectionDisabledThreshold
         {

@@ -1,13 +1,9 @@
-﻿using System;
+﻿using Microsoft.Data.SqlClient;
+using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Drawing;
 using System.Data;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Drawing;
 using System.Windows.Forms;
-using Microsoft.Data.SqlClient;
 using static DBADashGUI.DBADashStatus;
 
 namespace DBADashGUI.Backups
@@ -64,55 +60,55 @@ namespace DBADashGUI.Backups
         public bool CanNavigateBack { get => tsBack.Enabled; }
 
         public List<Int32> InstanceIDs { get; set; }
-        private int databaseID { get; set; }
+        private int DatabaseID { get; set; }
 
         private List<Int32> backupInstanceIDs;
 
         public void RefreshBackups()
         {
-            databaseID = 0;
+            DatabaseID = 0;
             dgvBackups.DataSource = null;
             dgvBackups.Columns.Clear();
 
             backupInstanceIDs = new List<int>();
             tsBack.Enabled = false;
-            refresh();
+            RefreshDataLocal();
         }
 
-        private void refresh()
+        private void RefreshDataLocal()
         {
-            refreshSummary();
-            if (InstanceIDs.Count>0 && (splitContainer1.SplitterDistance+200) > splitContainer1.Height) // Sumary is taking up all the room so don't show DB level data.
+            RefreshSummary();
+            if (InstanceIDs.Count > 0 && (splitContainer1.SplitterDistance + 200) > splitContainer1.Height) // Sumary is taking up all the room so don't show DB level data.
             {
                 splitContainer1.Panel2Collapsed = true;
             }
             else
             {
                 splitContainer1.Panel2Collapsed = false;
-                if (databaseID > 0)
+                if (DatabaseID > 0)
                 {
-                    refreshLastBackup();
+                    RefreshLastBackup();
                 }
                 else
                 {
-                    refreshBackups();
+                    RefreshBackupsLocal();
                 }
             }
-            
+
         }
 
-        private void refreshLastBackup()
+        private void RefreshLastBackup()
         {
             using (var cn = new SqlConnection(Common.ConnectionString))
-            using (SqlCommand cmd = new SqlCommand("dbo.LastBackup_Get", cn) { CommandType = CommandType.StoredProcedure })
-            using (SqlDataAdapter da = new SqlDataAdapter(cmd))
+            using (SqlCommand cmd = new("dbo.LastBackup_Get", cn) { CommandType = CommandType.StoredProcedure })
+            using (SqlDataAdapter da = new(cmd))
             {
-                cmd.Parameters.AddWithValue("DatabaseID", databaseID);
-                DataTable dtBackups = new DataTable();
+                cmd.Parameters.AddWithValue("DatabaseID", DatabaseID);
+                DataTable dtBackups = new();
                 Common.ConvertUTCToLocal(ref dtBackups);
                 da.Fill(dtBackups);
                 dgvBackups.DataSource = null;
-                dgvBackups.AutoGenerateColumns =false;
+                dgvBackups.AutoGenerateColumns = false;
                 dgvBackups.Columns.Clear();
                 dgvBackups.Columns.AddRange(
                     new DataGridViewTextBoxColumn { HeaderText = "Database", DataPropertyName = "name", SortMode = DataGridViewColumnSortMode.Automatic, Frozen = Common.FreezeKeyColumn },
@@ -140,7 +136,7 @@ namespace DBADashGUI.Backups
                     new DataGridViewCheckBoxColumn() { HeaderText = "Single User", DataPropertyName = "is_single_user", SortMode = DataGridViewColumnSortMode.Automatic },
                     new DataGridViewTextBoxColumn() { HeaderText = "Key Algorythm", DataPropertyName = "key_algorithm" },
                     new DataGridViewTextBoxColumn() { HeaderText = "Encryptor_Type", DataPropertyName = "encryptor_type" },
-                    new DataGridViewTextBoxColumn() { HeaderText = "Compression Algorithm", DataPropertyName = "compression_algorithm" }                  
+                    new DataGridViewTextBoxColumn() { HeaderText = "Compression Algorithm", DataPropertyName = "compression_algorithm" }
                 );
 
                 dgvBackups.DataSource = dtBackups;
@@ -148,15 +144,15 @@ namespace DBADashGUI.Backups
             }
 
         }
-        
 
-        private void refreshBackups()
+
+        private void RefreshBackupsLocal()
         {
             UseWaitCursor = true;
             configureInstanceThresholdsToolStripMenuItem.Enabled = (InstanceIDs.Count == 1);
 
             using (var cn = new SqlConnection(Common.ConnectionString))
-            using (SqlCommand cmd = new SqlCommand("dbo.Backups_Get", cn) { CommandType = CommandType.StoredProcedure })
+            using (SqlCommand cmd = new("dbo.Backups_Get", cn) { CommandType = CommandType.StoredProcedure })
             {
                 cn.Open();
                 cmd.Parameters.AddWithValue("InstanceIDs", string.Join(",", InstanceIDs));
@@ -164,15 +160,15 @@ namespace DBADashGUI.Backups
                 cmd.Parameters.AddWithValue("IncludeWarning", IncludeWarning);
                 cmd.Parameters.AddWithValue("IncludeNA", IncludeNA);
                 cmd.Parameters.AddWithValue("IncludeOK", IncludeOK);
-                SqlDataAdapter da = new SqlDataAdapter(cmd);
-                DataTable dtBackups = new DataTable();
+                SqlDataAdapter da = new(cmd);
+                DataTable dtBackups = new();
                 da.Fill(dtBackups);
                 Common.ConvertUTCToLocal(ref dtBackups);
                 dgvBackups.AutoGenerateColumns = false;
                 dgvBackups.DataSource = null;
                 dgvBackups.Columns.Clear();
                 dgvBackups.Columns.AddRange(
-                    new DataGridViewTextBoxColumn() { HeaderText = "Instance", DataPropertyName = "InstanceDisplayName", Name = "Instance", Frozen=Common.FreezeKeyColumn },
+                    new DataGridViewTextBoxColumn() { HeaderText = "Instance", DataPropertyName = "InstanceDisplayName", Name = "Instance", Frozen = Common.FreezeKeyColumn },
                     new DataGridViewLinkColumn { HeaderText = "Database", DataPropertyName = "name", SortMode = DataGridViewColumnSortMode.Automatic, LinkColor = DashColors.LinkColor, Frozen = Common.FreezeKeyColumn },
                     new DataGridViewTextBoxColumn() { HeaderText = "Created", DataPropertyName = "create_date_utc" },
                     new DataGridViewTextBoxColumn() { HeaderText = "Recovery Model", DataPropertyName = "recovery_model_desc" },
@@ -199,17 +195,17 @@ namespace DBADashGUI.Backups
                     new DataGridViewTextBoxColumn() { HeaderText = "Full Backup Critical Threshold", DataPropertyName = "FullBackupCriticalThreshold" },
                     new DataGridViewTextBoxColumn() { HeaderText = "Diff Backup Warning Threshold", DataPropertyName = "DiffBackupWarningThreshold" },
                     new DataGridViewTextBoxColumn() { HeaderText = "Diff Backup Critical Threshold", DataPropertyName = "DiffBackupCriticalThreshold" },
-                    new DataGridViewCheckBoxColumn() { HeaderText = "Consider Partial Backups", DataPropertyName = "ConsiderPartialBackups",SortMode = DataGridViewColumnSortMode.Automatic },
+                    new DataGridViewCheckBoxColumn() { HeaderText = "Consider Partial Backups", DataPropertyName = "ConsiderPartialBackups", SortMode = DataGridViewColumnSortMode.Automatic },
                     new DataGridViewCheckBoxColumn() { HeaderText = "Consider FG Backups", DataPropertyName = "ConsiderFGBackups", SortMode = DataGridViewColumnSortMode.Automatic },
-                    new DataGridViewTextBoxColumn() { HeaderText = "Last Full Duration", DataPropertyName = "LastFullDuration" } ,
+                    new DataGridViewTextBoxColumn() { HeaderText = "Last Full Duration", DataPropertyName = "LastFullDuration" },
                     new DataGridViewTextBoxColumn() { HeaderText = "Full Backup Size (GB)", DataPropertyName = "FullBackupSizeGB", DefaultCellStyle = new DataGridViewCellStyle() { Format = "N1" } },
                     new DataGridViewTextBoxColumn() { HeaderText = "Full Backup MB/sec", DataPropertyName = "FullBackupMBsec", DefaultCellStyle = new DataGridViewCellStyle() { Format = "N1" } },
                     new DataGridViewTextBoxColumn() { HeaderText = "Full Backup Size (Compressed) (GB)", DataPropertyName = "FullBackupSizeCompressedGB", DefaultCellStyle = new DataGridViewCellStyle() { Format = "N1" } },
                     new DataGridViewTextBoxColumn() { HeaderText = "Full Compression Saving %", DataPropertyName = "FullCompressionSavingPct", DefaultCellStyle = new DataGridViewCellStyle() { Format = "P1" } },
                     new DataGridViewTextBoxColumn() { HeaderText = "Full Backup Write MB/sec", DataPropertyName = "FullBackupWriteMBsec", DefaultCellStyle = new DataGridViewCellStyle() { Format = "N1" } },
-                    new DataGridViewTextBoxColumn() { HeaderText = "Diff Backup Size (GB)", DataPropertyName = "DiffBackupSizeGB", DefaultCellStyle = new DataGridViewCellStyle() { Format = "N1" } } ,
-                    new DataGridViewTextBoxColumn() { HeaderText = "Diff Backup MB/sec", DataPropertyName = "DiffBackupMBsec", DefaultCellStyle = new DataGridViewCellStyle() { Format = "N1" } } ,
-                    new DataGridViewTextBoxColumn() { HeaderText = "Diff Backup Size (Compressed) (GB)", DataPropertyName = "DiffBackupSizeCompressedGB", DefaultCellStyle = new DataGridViewCellStyle() { Format = "N1" } } ,
+                    new DataGridViewTextBoxColumn() { HeaderText = "Diff Backup Size (GB)", DataPropertyName = "DiffBackupSizeGB", DefaultCellStyle = new DataGridViewCellStyle() { Format = "N1" } },
+                    new DataGridViewTextBoxColumn() { HeaderText = "Diff Backup MB/sec", DataPropertyName = "DiffBackupMBsec", DefaultCellStyle = new DataGridViewCellStyle() { Format = "N1" } },
+                    new DataGridViewTextBoxColumn() { HeaderText = "Diff Backup Size (Compressed) (GB)", DataPropertyName = "DiffBackupSizeCompressedGB", DefaultCellStyle = new DataGridViewCellStyle() { Format = "N1" } },
                     new DataGridViewTextBoxColumn() { HeaderText = "Diff Compression Saving %", DataPropertyName = "DiffCompressionSavingPct", DefaultCellStyle = new DataGridViewCellStyle() { Format = "P1" } },
                     new DataGridViewTextBoxColumn() { HeaderText = "Diff Backup Write MB/sec", DataPropertyName = "DiffBackupWriteMBsec", DefaultCellStyle = new DataGridViewCellStyle() { Format = "N1" } },
                     new DataGridViewCheckBoxColumn { HeaderText = "Full Checksum", DataPropertyName = "IsFullChecksum", SortMode = DataGridViewColumnSortMode.Automatic },
@@ -229,8 +225,8 @@ namespace DBADashGUI.Backups
                     new DataGridViewTextBoxColumn() { HeaderText = "Diff Compression Algorithm", DataPropertyName = "DiffCompressionAlgorithm" },
                     new DataGridViewTextBoxColumn() { HeaderText = "Log Compression Algorithm", DataPropertyName = "LogCompressionAlgorithm" },
                     new DataGridViewLinkColumn() { HeaderText = "Configure", Text = "Configure", UseColumnTextForLinkValue = true, SortMode = DataGridViewColumnSortMode.NotSortable, Name = "Configure", LinkColor = DashColors.LinkColor }
-                );               
-                
+                );
+
                 dgvBackups.DataSource = new DataView(dtBackups);
                 dgvBackups.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
             }
@@ -238,23 +234,23 @@ namespace DBADashGUI.Backups
             UseWaitCursor = false;
         }
 
-        private void refreshSummary()
+        private void RefreshSummary()
         {
             UseWaitCursor = true;
             using (var cn = new SqlConnection(Common.ConnectionString))
-            using (SqlCommand cmd = new SqlCommand("dbo.BackupSummary_Get", cn) { CommandType = CommandType.StoredProcedure })
+            using (SqlCommand cmd = new("dbo.BackupSummary_Get", cn) { CommandType = CommandType.StoredProcedure })
             {
                 cn.Open();
                 cmd.Parameters.AddWithValue("InstanceIDs", InstanceIDs.AsDataTable());
-                SqlDataAdapter da = new SqlDataAdapter(cmd);
-                DataTable dt = new DataTable();
+                SqlDataAdapter da = new(cmd);
+                DataTable dt = new();
                 da.Fill(dt);
                 Common.ConvertUTCToLocal(ref dt);
                 dgvSummary.AutoGenerateColumns = false;
                 if (dgvSummary.Columns.Count == 0)
                 {
                     dgvSummary.Columns.AddRange(
-                        new DataGridViewLinkColumn() { HeaderText = "Instance", DataPropertyName = "InstanceDisplayName", SortMode = DataGridViewColumnSortMode.Automatic, Name = "Instance", LinkColor = DashColors.LinkColor, Frozen=Common.FreezeKeyColumn },
+                        new DataGridViewLinkColumn() { HeaderText = "Instance", DataPropertyName = "InstanceDisplayName", SortMode = DataGridViewColumnSortMode.Automatic, Name = "Instance", LinkColor = DashColors.LinkColor, Frozen = Common.FreezeKeyColumn },
                         new DataGridViewTextBoxColumn() { HeaderText = "Database Count", DataPropertyName = "DatabaseCount" },
                         new DataGridViewTextBoxColumn() { HeaderText = "Full Backup OK", DataPropertyName = "FullOK", Name = "FullOK" },
                         new DataGridViewTextBoxColumn() { HeaderText = "Full Backup N/A", DataPropertyName = "FullNA", Name = "FullNA" },
@@ -308,8 +304,8 @@ namespace DBADashGUI.Backups
                         );
                 }
                 dgvSummary.Columns[0].Frozen = Common.FreezeKeyColumn;
-                dgvSummary.DataSource = new DataView(dt);               
-                splitContainer1.SplitterDistance = (dgvSummary.Rows.Count * 24) + dgvSummary.ColumnHeadersHeight+24; // Set size based on row count, header size and scrollbar
+                dgvSummary.DataSource = new DataView(dt);
+                splitContainer1.SplitterDistance = (dgvSummary.Rows.Count * 24) + dgvSummary.ColumnHeadersHeight + 24; // Set size based on row count, header size and scrollbar
                 dgvSummary.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
             }
             UseWaitCursor = false;
@@ -322,7 +318,7 @@ namespace DBADashGUI.Backups
 
 
 
-        private void dgvBackups_RowsAdded(object sender, DataGridViewRowsAddedEventArgs e)
+        private void DgvBackups_RowsAdded(object sender, DataGridViewRowsAddedEventArgs e)
         {
             if (dgvBackups.Columns.Contains("LastFull"))
             {
@@ -370,20 +366,20 @@ namespace DBADashGUI.Backups
 
         }
 
-        private void dgvBackups_CellContentClick(object sender, DataGridViewCellEventArgs e)
+        private void DgvBackups_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
             if (e.RowIndex >= 0 && dgvBackups.Columns.Contains("Configure"))
             {
                 var row = (DataRowView)dgvBackups.Rows[e.RowIndex].DataBoundItem;
                 if (dgvBackups.Columns[e.ColumnIndex].Name == "Configure")
-                {                   
+                {
                     ConfigureThresholds((Int32)row["InstanceID"], (Int32)row["DatabaseID"]);
                 }
                 else if (dgvBackups.Columns[e.ColumnIndex].HeaderText == "Database")
                 {
-                    databaseID = (Int32)row["DatabaseID"];
+                    DatabaseID = (Int32)row["DatabaseID"];
                     tsBack.Enabled = true;
-                    refresh();
+                    RefreshDataLocal();
                 }
             }
         }
@@ -398,17 +394,17 @@ namespace DBADashGUI.Backups
             frm.ShowDialog();
             if (frm.DialogResult == DialogResult.OK)
             {
-                refresh();
+                RefreshDataLocal();
             }
 
         }
 
-        private void configureRootThresholdsToolStripMenuItem_Click(object sender, EventArgs e)
+        private void ConfigureRootThresholdsToolStripMenuItem_Click(object sender, EventArgs e)
         {
             ConfigureThresholds(-1, -1);
         }
 
-        private void configureInstanceThresholdsToolStripMenuItem_Click(object sender, EventArgs e)
+        private void ConfigureInstanceThresholdsToolStripMenuItem_Click(object sender, EventArgs e)
         {
             if (InstanceIDs.Count == 1)
             {
@@ -416,38 +412,38 @@ namespace DBADashGUI.Backups
             }
         }
 
-        private void criticalToolStripMenuItem_Click(object sender, EventArgs e)
+        private void CriticalToolStripMenuItem_Click(object sender, EventArgs e)
         {
             RefreshBackups();
 
         }
 
-        private void tsFilter_Click(object sender, EventArgs e)
+        private void TsFilter_Click(object sender, EventArgs e)
         {
-            refresh();
+            RefreshDataLocal();
         }
 
 
-        private void tsRefresh_Click(object sender, EventArgs e)
+        private void TsRefresh_Click(object sender, EventArgs e)
         {
-            refresh();
+            RefreshDataLocal();
         }
 
-        private void tsCopy_Click(object sender, EventArgs e)
+        private void TsCopy_Click(object sender, EventArgs e)
         {
             dgvSummary.Columns["Configure"].Visible = false;
             Common.CopyDataGridViewToClipboard(dgvSummary);
             dgvSummary.Columns["Configure"].Visible = true;
         }
 
-        private void tsExcel_Click(object sender, EventArgs e)
+        private void TsExcel_Click(object sender, EventArgs e)
         {
             dgvSummary.Columns["Configure"].Visible = false;
             Common.PromptSaveDataGridView(ref dgvSummary);
-            dgvSummary.Columns["Configure"].Visible =true;
+            dgvSummary.Columns["Configure"].Visible = true;
         }
 
-        private void dgvSummary_RowsAdded(object sender, DataGridViewRowsAddedEventArgs e)
+        private void DgvSummary_RowsAdded(object sender, DataGridViewRowsAddedEventArgs e)
         {
             for (Int32 idx = e.RowIndex; idx < e.RowIndex + e.RowCount; idx += 1)
             {
@@ -476,17 +472,17 @@ namespace DBADashGUI.Backups
                     dgvSummary.Rows[idx].Cells[col].SetStatusColor(value > 0 ? DBADashStatusEnum.Critical : DBADashStatusEnum.NA);
                 }
                 dgvSummary.Rows[idx].Cells["Configure"].Style.Font = Convert.ToBoolean(row["InstanceThresholdConfiguration"]) ? new Font(dgvSummary.Font, FontStyle.Bold) : new Font(dgvSummary.Font, FontStyle.Regular);
-                
+
             }
         }
 
-        private void dgvSummary_CellContentClick(object sender, DataGridViewCellEventArgs e)
+        private void DgvSummary_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
             if (e.RowIndex >= 0)
             {
                 if (dgvSummary.Columns[e.ColumnIndex].Name == "Instance" && backupInstanceIDs.Count == 0)
                 {
-                    databaseID = 0;
+                    DatabaseID = 0;
                     DataRowView row = (DataRowView)dgvSummary.Rows[e.RowIndex].DataBoundItem;
                     backupInstanceIDs = InstanceIDs;
                     InstanceIDs = new List<int>() { (int)row["InstanceID"] };
@@ -495,7 +491,7 @@ namespace DBADashGUI.Backups
                     IncludeOK = true;
                     IncludeNA = true;
                     tsBack.Enabled = true;
-                    refresh();
+                    RefreshDataLocal();
                 }
                 else if (dgvSummary.Columns[e.ColumnIndex].Name == "Configure")
                 {
@@ -505,7 +501,7 @@ namespace DBADashGUI.Backups
             }
         }
 
-        private void tsBack_Click(object sender, EventArgs e)
+        private void TsBack_Click(object sender, EventArgs e)
         {
             NavigateBack();
         }
@@ -514,9 +510,9 @@ namespace DBADashGUI.Backups
         {
             if (CanNavigateBack)
             {
-                if (databaseID > 0)
+                if (DatabaseID > 0)
                 {
-                    databaseID = 0;
+                    DatabaseID = 0;
                 }
                 else
                 {
@@ -528,7 +524,7 @@ namespace DBADashGUI.Backups
                 IncludeWarning = true;
                 IncludeOK = InstanceIDs.Count == 1;
                 IncludeNA = InstanceIDs.Count == 1;
-                refresh();
+                RefreshDataLocal();
                 return true;
             }
             else
@@ -537,21 +533,21 @@ namespace DBADashGUI.Backups
             }
         }
 
-        private void tsExcelDetail_Click(object sender, EventArgs e)
+        private void TsExcelDetail_Click(object sender, EventArgs e)
         {
             dgvBackups.Columns["Configure"].Visible = false;
             Common.PromptSaveDataGridView(ref dgvBackups);
             dgvBackups.Columns["Configure"].Visible = true;
         }
 
-        private void tsCopyDetail_Click(object sender, EventArgs e)
+        private void TsCopyDetail_Click(object sender, EventArgs e)
         {
             dgvBackups.Columns["Configure"].Visible = false;
             Common.CopyDataGridViewToClipboard(dgvBackups);
             dgvBackups.Columns["Configure"].Visible = true;
         }
 
-        private void tsCols_Click(object sender, EventArgs e)
+        private void TsCols_Click(object sender, EventArgs e)
         {
             using (var frm = new SelectColumns() { Columns = dgvSummary.Columns })
             {
@@ -559,7 +555,7 @@ namespace DBADashGUI.Backups
             }
         }
 
-        private void tsDetailCols_Click(object sender, EventArgs e)
+        private void TsDetailCols_Click(object sender, EventArgs e)
         {
             using (var frm = new SelectColumns() { Columns = dgvBackups.Columns })
             {

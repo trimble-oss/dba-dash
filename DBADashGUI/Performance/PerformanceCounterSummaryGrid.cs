@@ -1,12 +1,8 @@
-﻿using System;
+﻿using Microsoft.Data.SqlClient;
+using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Data;
-using Microsoft.Data.SqlClient;
 using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using static DBADashGUI.DBADashStatus;
 
@@ -14,14 +10,14 @@ namespace DBADashGUI.Performance
 {
     public class PerformanceCounterSummaryGrid : DataGridView
     {
- 
+
         public Int32 InstanceID { get; set; }
         public string SearchText { get; set; }
         public List<int> Counters { get; set; }
-        
+
         public event EventHandler<CounterSelectedEventArgs> CounterSelected;
         public event EventHandler<TextSelectedEventArgs> TextSelected;
-        public bool ObjectLink=true;
+        public bool ObjectLink = true;
         public bool CounterLink = true;
         public bool InstanceLink = true;
 
@@ -37,7 +33,7 @@ namespace DBADashGUI.Performance
 
         public void RefreshData()
         {
-            refreshSummary();
+            RefreshSummary();
         }
 
         public PerformanceCounterSummaryGrid()
@@ -54,9 +50,9 @@ namespace DBADashGUI.Performance
 
 
 
-        private void refreshSummary()
+        private void RefreshSummary()
         {
-            addCols();
+            AddCols();
             using (var cn = new SqlConnection(Common.ConnectionString))
             using (var cmd = new SqlCommand("dbo.PerformanceCounterSummary_Get", cn) { CommandType = CommandType.StoredProcedure })
             using (var da = new SqlDataAdapter(cmd))
@@ -69,7 +65,7 @@ namespace DBADashGUI.Performance
                 {
                     cmd.Parameters.AddWithValue("Search", $"%{SearchText}%");
                 }
-                if (Counters!=null && Counters.Count > 0)
+                if (Counters != null && Counters.Count > 0)
                 {
                     cmd.Parameters.AddWithValue("Counters", string.Join(",", Counters));
                 }
@@ -82,7 +78,7 @@ namespace DBADashGUI.Performance
                     cmd.Parameters.AddWithValue("Hours", DateRange.TimeOfDay.AsDataTable());
                 }
                 cmd.Parameters.AddWithValue("UTCOffset", Common.UtcOffset);
-                DataTable dt = new DataTable();
+                DataTable dt = new();
                 da.Fill(dt);
                 AutoGenerateColumns = false;
                 DataSource = dt;
@@ -92,10 +88,10 @@ namespace DBADashGUI.Performance
         }
 
 
-        private void tsRefresh_Click(object sender, EventArgs e)
+        private void TsRefresh_Click(object sender, EventArgs e)
         {
-            refreshSummary();
-        }       
+            RefreshSummary();
+        }
 
 
         private void PerformanceCounterSummaryGrid_CellContentClick(object sender, DataGridViewCellEventArgs e)
@@ -124,18 +120,18 @@ namespace DBADashGUI.Performance
                 {
                     TextSelected?.Invoke(this, new TextSelectedEventArgs() { Text = objectName });
                 }
-                else if(colName == "lnkThresholds")
+                else if (colName == "lnkThresholds")
                 {
-                    using (var frm = new PerformanceCounterThreshold() )
+                    using (var frm = new PerformanceCounterThreshold())
                     {
                         frm.CounterName = counterName;
                         frm.CounterInstance = instanceName;
                         frm.ObjectName = objectName;
                         frm.InstanceID = InstanceID;
                         frm.ShowDialog(this);
-                        if(frm.DialogResult == DialogResult.OK)
+                        if (frm.DialogResult == DialogResult.OK)
                         {
-                            refreshSummary();
+                            RefreshSummary();
                         }
                     }
 
@@ -163,21 +159,21 @@ namespace DBADashGUI.Performance
                     Rows[idx].Cells["colCurrentValue"].SetStatusColor((DBADashStatusEnum)row["CurrentValueStatus"]);
                 }
 
-    
+
             }
         }
 
-        private void addCols()
+        private void AddCols()
         {
             if (Columns.Count == 0)
             {
                 Columns.AddRange(
-                    new DataGridViewLinkColumn() { Name = "lnkObject", HeaderText = "Object", DataPropertyName = "object_name", LinkColor = DashColors.LinkColor, Visible = ObjectLink, SortMode= DataGridViewColumnSortMode.Automatic },
+                    new DataGridViewLinkColumn() { Name = "lnkObject", HeaderText = "Object", DataPropertyName = "object_name", LinkColor = DashColors.LinkColor, Visible = ObjectLink, SortMode = DataGridViewColumnSortMode.Automatic },
                     new DataGridViewLinkColumn() { Name = "lnkCounter", HeaderText = "Counter", DataPropertyName = "counter_name", LinkColor = DashColors.LinkColor, Visible = CounterLink, SortMode = DataGridViewColumnSortMode.Automatic },
-                    new DataGridViewLinkColumn() { Name = "lnkInstance", HeaderText = "Instance", DataPropertyName = "instance_name", LinkColor = DashColors.LinkColor, Visible = InstanceLink, SortMode= DataGridViewColumnSortMode.Automatic },
+                    new DataGridViewLinkColumn() { Name = "lnkInstance", HeaderText = "Instance", DataPropertyName = "instance_name", LinkColor = DashColors.LinkColor, Visible = InstanceLink, SortMode = DataGridViewColumnSortMode.Automatic },
                     new DataGridViewTextBoxColumn() { Name = "colObject", HeaderText = "Object", DataPropertyName = "object_name", Visible = !ObjectLink },
-                    new DataGridViewTextBoxColumn() { Name = "colCounter", HeaderText = "Counter", DataPropertyName = "counter_name", Visible=!CounterLink },
-                    new DataGridViewTextBoxColumn() { Name = "colInstance", HeaderText = "Instance", DataPropertyName = "instance_name", Visible = !InstanceLink },                  
+                    new DataGridViewTextBoxColumn() { Name = "colCounter", HeaderText = "Counter", DataPropertyName = "counter_name", Visible = !CounterLink },
+                    new DataGridViewTextBoxColumn() { Name = "colInstance", HeaderText = "Instance", DataPropertyName = "instance_name", Visible = !InstanceLink },
                     new DataGridViewTextBoxColumn() { Name = "colMaxValue", HeaderText = "Max Value", DataPropertyName = "MaxValue", DefaultCellStyle = Common.DataGridViewNumericCellStyle },
                     new DataGridViewTextBoxColumn() { Name = "colMinValue", HeaderText = "Min Value", DataPropertyName = "MinValue", DefaultCellStyle = Common.DataGridViewNumericCellStyle },
                     new DataGridViewTextBoxColumn() { Name = "colAvgValue", HeaderText = "Avg Value", DataPropertyName = "AvgValue", DefaultCellStyle = Common.DataGridViewNumericCellStyle },
@@ -185,16 +181,16 @@ namespace DBADashGUI.Performance
                     new DataGridViewTextBoxColumn() { Name = "colSampleCount", HeaderText = "Sample Count", DataPropertyName = "SampleCount", DefaultCellStyle = Common.DataGridViewNumericCellStyle },
                     new DataGridViewTextBoxColumn() { Name = "colCurrentValue", HeaderText = "Current Value", DataPropertyName = "CurrentValue", DefaultCellStyle = Common.DataGridViewNumericCellStyle },
                     new DataGridViewLinkColumn() { Name = "lnkThresholds", HeaderText = "Thresholds", Text = "Edit", LinkColor = DashColors.LinkColor, UseColumnTextForLinkValue = true },
-                    new DataGridViewLinkColumn() { Name = "lnkView", HeaderText = "Chart", Text = "View", LinkColor = DashColors.LinkColor, UseColumnTextForLinkValue=true, ToolTipText="Click to view chart."}
+                    new DataGridViewLinkColumn() { Name = "lnkView", HeaderText = "Chart", Text = "View", LinkColor = DashColors.LinkColor, UseColumnTextForLinkValue = true, ToolTipText = "Click to view chart." }
                 );
             }
         }
 
-        private void tsClear_Click(object sender, EventArgs e)
+        private void TsClear_Click(object sender, EventArgs e)
         {
-            refreshSummary();
+            RefreshSummary();
         }
 
-        
+
     }
 }

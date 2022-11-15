@@ -1,12 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
+﻿using Microsoft.Data.SqlClient;
+using System;
 using System.Data;
-using Microsoft.Data.SqlClient;
-using System.Drawing;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace DBADashGUI
@@ -22,9 +17,9 @@ namespace DBADashGUI
         public string Tags { get; set; } = null;
         private bool activeFlagChanged = false;
         private bool summaryVisibleChanged = false;
-        public bool InstanceActiveFlagChanged{ get=> activeFlagChanged;}
-       
-        public bool InstanceSummaryVisibleChanged { get=>summaryVisibleChanged; }
+        public bool InstanceActiveFlagChanged { get => activeFlagChanged; }
+
+        public bool InstanceSummaryVisibleChanged { get => summaryVisibleChanged; }
 
         private void ManageInstances_Load(object sender, EventArgs e)
         {
@@ -53,19 +48,19 @@ namespace DBADashGUI
                     dgv.Rows[idx].Cells[colDeleteRestore.Index].Value = isActive ? "Mark Deleted" : "Restore";
                 }
             }
-            
+
         }
 
         private static void MarkInstanceDeleted(int InstanceID, bool IsActive)
         {
             using (var cn = new SqlConnection(Common.ConnectionString))
-            using (var cmd = new SqlCommand("dbo.Instance_Del", cn) { CommandType= CommandType.StoredProcedure })
+            using (var cmd = new SqlCommand("dbo.Instance_Del", cn) { CommandType = CommandType.StoredProcedure })
             {
                 cn.Open();
                 cmd.Parameters.AddWithValue("InstanceID", InstanceID);
                 cmd.Parameters.AddWithValue("IsActive", IsActive);
                 cmd.ExecuteNonQuery();
-            }            
+            }
         }
 
         private static void UpdateShowInSummary(int InstanceID, bool ShowInSummary)
@@ -75,7 +70,7 @@ namespace DBADashGUI
             {
                 cn.Open();
                 cmd.Parameters.AddWithValue("InstanceID", InstanceID);
-                cmd.Parameters.AddWithValue("ShowInSummary",ShowInSummary);
+                cmd.Parameters.AddWithValue("ShowInSummary", ShowInSummary);
                 cmd.ExecuteNonQuery();
             }
         }
@@ -136,7 +131,8 @@ namespace DBADashGUI
                     sbFilter.AppendFormat(" AND IsAzure=0");
                 }
 
-                if (sbFilter.Length > 0) { 
+                if (sbFilter.Length > 0)
+                {
                     sbFilter.Remove(0, 5); // Remove AND 
                 }
 

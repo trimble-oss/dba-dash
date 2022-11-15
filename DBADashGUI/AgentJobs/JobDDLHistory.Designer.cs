@@ -97,7 +97,7 @@ namespace DBADashGUI.Changes
             this.dgv.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
             this.dgv.Size = new System.Drawing.Size(1017, 183);
             this.dgv.TabIndex = 0;
-            this.dgv.SelectionChanged += new System.EventHandler(this.dgv_SelectionChanged);
+            this.dgv.SelectionChanged += new System.EventHandler(this.Dgv_SelectionChanged);
             // 
             // colVersion
             // 

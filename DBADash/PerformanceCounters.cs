@@ -1,18 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Serilog;
+using System;
 using System.IO;
-using Serilog;
 namespace DBADash
 {
     static class PerformanceCounters
     {
 
-       static string countersXML;
-       static readonly string defaultFileName = "PerformanceCounters.xml";
-       static readonly string userFileName = "PerformanceCountersCustom.xml";
+        static string countersXML;
+        static readonly string defaultFileName = "PerformanceCounters.xml";
+        static readonly string userFileName = "PerformanceCountersCustom.xml";
 
         public static string PerformanceCountersXML
         {
@@ -40,15 +36,15 @@ namespace DBADash
                             return countersXML;
                         }
                     }
-                    catch(Exception ex)
+                    catch (Exception ex)
                     {
-                        Log.Error(ex,"Error reading performance counters file '{filename}'.  Performance counter collection disabled", defaultFileName);
+                        Log.Error(ex, "Error reading performance counters file '{filename}'.  Performance counter collection disabled", defaultFileName);
                         countersXML = "";
                     }
-                    
-                   
+
+
                 }
-         
+
                 return countersXML;
             }
         }

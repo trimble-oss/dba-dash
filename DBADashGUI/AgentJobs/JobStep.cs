@@ -1,12 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
+﻿using Microsoft.Data.SqlClient;
+using System;
 using System.Data;
-using Microsoft.Data.SqlClient;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace DBADashGUI.AgentJobs
@@ -25,7 +19,7 @@ namespace DBADashGUI.AgentJobs
 
         private DataTable GetJobStep()
         {
-            using(var cn = new SqlConnection(Common.ConnectionString))
+            using (var cn = new SqlConnection(Common.ConnectionString))
             using (var cmd = new SqlCommand("dbo.JobStep_Get", cn) { CommandType = CommandType.StoredProcedure })
             using (var da = new SqlDataAdapter(cmd))
             {
@@ -49,7 +43,7 @@ namespace DBADashGUI.AgentJobs
                 lblJobStep.Text = (string)r["name"] + " | " + r["step_name"];
                 if (subsystem == "TransactSql")
                 {
-                    txtJobStep.Mode= SchemaCompare.CodeEditor.CodeEditorModes.SQL;
+                    txtJobStep.Mode = SchemaCompare.CodeEditor.CodeEditorModes.SQL;
                 }
                 else if (subsystem == "PowerShell")
                 {
@@ -57,12 +51,12 @@ namespace DBADashGUI.AgentJobs
                 }
                 else
                 {
-                    txtJobStep.Mode= SchemaCompare.CodeEditor.CodeEditorModes.None;
+                    txtJobStep.Mode = SchemaCompare.CodeEditor.CodeEditorModes.None;
                 }
             }
         }
 
-        private void tsLineNumbers_Click(object sender, EventArgs e)
+        private void TsLineNumbers_Click(object sender, EventArgs e)
         {
             txtJobStep.ShowLineNumbers = !txtJobStep.ShowLineNumbers;
         }

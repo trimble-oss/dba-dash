@@ -1,11 +1,8 @@
-﻿using System;
+﻿using DBADashGUI.Performance;
+using Microsoft.Data.SqlClient;
+using System;
 using System.Collections.Generic;
 using System.Data;
-using Microsoft.Data.SqlClient;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using DBADashGUI.Performance;
 
 namespace DBADashGUI
 {
@@ -14,9 +11,9 @@ namespace DBADashGUI
 
         public static DataTable Instances;
 
-        public static void UpdateInstancesList(string tagIDs = "", bool? Active = true, bool? azureDB = null, string searchString = "",string groupByTag="")
+        public static void UpdateInstancesList(string tagIDs = "", bool? Active = true, bool? azureDB = null, string searchString = "", string groupByTag = "")
         {
-            Instances = GetInstances(tagIDs, Active, azureDB, searchString,groupByTag);
+            Instances = GetInstances(tagIDs, Active, azureDB, searchString, groupByTag);
         }
 
         public static DataTable GetInstances(string tagIDs = "", bool? Active = true, bool? azureDB = null, string searchString = "", string groupByTag = "")

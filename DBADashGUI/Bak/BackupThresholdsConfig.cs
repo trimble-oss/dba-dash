@@ -1,12 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using Microsoft.Data.SqlClient;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace DBADashGUI.Backups
@@ -22,10 +14,10 @@ namespace DBADashGUI.Backups
             InitializeComponent();
         }
 
-        private void getThresholds()
+        private void GetThresholds()
         {
             var thresholds = BackupThresholds.GetThresholds(InstanceID, DatabaseID);
-            if (thresholds.FullCritical!=null && thresholds.FullWarning !=null)
+            if (thresholds.FullCritical != null && thresholds.FullWarning != null)
             {
                 chkFull.Checked = true;
                 numFullCritical.Value = (Int32)thresholds.FullCritical;
@@ -77,7 +69,8 @@ namespace DBADashGUI.Backups
 
         }
 
-        public BackupThresholds BackupThreshold { 
+        public BackupThresholds BackupThreshold
+        {
             get
             {
                 var thresholds = new BackupThresholds
@@ -88,7 +81,7 @@ namespace DBADashGUI.Backups
                     UseFG = chkUseFG.Checked,
                     UsePartial = chkUsePartial.Checked,
                     ExcludedDBs = txtExcluded.Text.Trim(),
-                    MinimumAge=Convert.ToInt32(numMinimumAge.Value)
+                    MinimumAge = Convert.ToInt32(numMinimumAge.Value)
                 };
                 if (chkFull.Checked) { thresholds.FullCritical = (Int32?)numFullCritical.Value; }
                 if (chkFull.Checked) { thresholds.FullWarning = (Int32?)numFullWarning.Value; }
@@ -99,38 +92,38 @@ namespace DBADashGUI.Backups
                 return thresholds;
             }
         }
-        
+
 
         private void BackupThresholds_Load(object sender, EventArgs e)
         {
-            getThresholds();
+            GetThresholds();
         }
 
-        private void chkBackupInherit_CheckedChanged(object sender, EventArgs e)
+        private void ChkBackupInherit_CheckedChanged(object sender, EventArgs e)
         {
             pnlBackupThresholds.Enabled = !chkBackupInherit.Checked;
         }
 
-        private void bttnUpdate_Click(object sender, EventArgs e)
+        private void BttnUpdate_Click(object sender, EventArgs e)
         {
             BackupThreshold.Save();
             this.DialogResult = DialogResult.OK;
 
         }
 
-        private void chkFull_CheckedChanged(object sender, EventArgs e)
+        private void ChkFull_CheckedChanged(object sender, EventArgs e)
         {
             numFullWarning.Enabled = chkFull.Checked;
             numFullCritical.Enabled = chkFull.Checked;
         }
 
-        private void chkDiff_CheckedChanged(object sender, EventArgs e)
+        private void ChkDiff_CheckedChanged(object sender, EventArgs e)
         {
             numDiffCritical.Enabled = chkDiff.Checked;
             numDiffWarning.Enabled = chkDiff.Checked;
         }
 
-        private void chkLog_CheckedChanged(object sender, EventArgs e)
+        private void ChkLog_CheckedChanged(object sender, EventArgs e)
         {
             numLogCritical.Enabled = chkLog.Checked;
             numLogWarning.Enabled = chkLog.Checked;

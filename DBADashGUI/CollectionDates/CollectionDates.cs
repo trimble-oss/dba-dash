@@ -1,13 +1,9 @@
-﻿using System;
+﻿using Microsoft.Data.SqlClient;
+using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Drawing;
 using System.Data;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Drawing;
 using System.Windows.Forms;
-using Microsoft.Data.SqlClient;
 
 namespace DBADashGUI.CollectionDates
 {
@@ -68,7 +64,7 @@ namespace DBADashGUI.CollectionDates
         }
 
 
-        private DataTable getCollectionDates()
+        private DataTable GetCollectionDates()
         {
             using (var cn = new SqlConnection(Common.ConnectionString))
             using (var cmd = new SqlCommand("dbo.CollectionDates_Get", cn) { CommandType = CommandType.StoredProcedure })
@@ -81,7 +77,7 @@ namespace DBADashGUI.CollectionDates
                 cmd.Parameters.AddWithValue("IncludeNA", IncludeNA);
                 cmd.Parameters.AddWithValue("IncludeOK", IncludeOK);
 
-                DataTable dt = new DataTable();
+                DataTable dt = new();
                 da.Fill(dt);
                 Common.ConvertUTCToLocal(ref dt);
                 return dt;
@@ -90,24 +86,24 @@ namespace DBADashGUI.CollectionDates
         public void RefreshData()
         {
             UseWaitCursor = true;
-            DataTable dt = getCollectionDates();
+            DataTable dt = GetCollectionDates();
             dgvCollectionDates.AutoGenerateColumns = false;
             dgvCollectionDates.DataSource = new DataView(dt);
-            dgvCollectionDates.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);        
+            dgvCollectionDates.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
             UseWaitCursor = false;
         }
 
-        private void criticalToolStripMenuItem_Click(object sender, EventArgs e)
+        private void CriticalToolStripMenuItem_Click(object sender, EventArgs e)
         {
             RefreshData();
         }
 
-        private void warningToolStripMenuItem_Click(object sender, EventArgs e)
+        private void WarningToolStripMenuItem_Click(object sender, EventArgs e)
         {
             RefreshData();
         }
 
-        private void undefinedToolStripMenuItem_Click(object sender, EventArgs e)
+        private void UndefinedToolStripMenuItem_Click(object sender, EventArgs e)
         {
             RefreshData();
         }
@@ -144,7 +140,7 @@ namespace DBADashGUI.CollectionDates
             }
         }
 
-        private void dgv_CellContentClick(object sender, DataGridViewCellEventArgs e)
+        private void Dgv_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
             if (e.RowIndex >= 0)
             {
@@ -162,7 +158,7 @@ namespace DBADashGUI.CollectionDates
             }
         }
 
-        private void dgv_RowsAdded(object sender, DataGridViewRowsAddedEventArgs e)
+        private void Dgv_RowsAdded(object sender, DataGridViewRowsAddedEventArgs e)
         {
             for (Int32 idx = e.RowIndex; idx < e.RowIndex + e.RowCount; idx += 1)
             {
@@ -185,12 +181,12 @@ namespace DBADashGUI.CollectionDates
             }
         }
 
-        private void tsRefresh_Click(object sender, EventArgs e)
+        private void TsRefresh_Click(object sender, EventArgs e)
         {
             RefreshData();
         }
 
-        private void tsCopy_Click(object sender, EventArgs e)
+        private void TsCopy_Click(object sender, EventArgs e)
         {
             Configure.Visible = false;
             ConfigureRoot.Visible = false;
@@ -199,7 +195,7 @@ namespace DBADashGUI.CollectionDates
             ConfigureRoot.Visible = true;
         }
 
-        private void tsExcel_Click(object sender, EventArgs e)
+        private void TsExcel_Click(object sender, EventArgs e)
         {
             Common.PromptSaveDataGridView(ref dgvCollectionDates);
         }

@@ -1,9 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using Microsoft.Data.SqlClient;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Microsoft.Data.SqlClient;
+using System;
 using System.Data;
 
 namespace DBADashGUI
@@ -13,7 +9,7 @@ namespace DBADashGUI
         public static readonly int SystemUserID = -1;
 
         private static int _UserID = 0;
-        public static int UserID { get=> _UserID; }
+        public static int UserID { get => _UserID; }
 
         public static bool HasManageGlobalViews = false;
 
@@ -35,7 +31,8 @@ namespace DBADashGUI
                     _UserID = (int)pUserID.Value;
                     HasManageGlobalViews = (bool)pManageGlobalViews.Value;
                 }
-                else{
+                else
+                {
                     throw new Exception("Invalid UserID");
                 }
             }

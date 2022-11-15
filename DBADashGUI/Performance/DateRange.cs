@@ -1,9 +1,6 @@
-﻿using Microsoft.Data.SqlClient;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace DBADashGUI.Performance
 {
@@ -74,7 +71,7 @@ namespace DBADashGUI.Performance
         {
             get
             {
-                return timeOfDay.Count > 0 && timeOfDay.Count < 24;
+                return timeOfDay.Count is > 0 and < 24;
             }
         }
 
@@ -82,7 +79,7 @@ namespace DBADashGUI.Performance
         {
             get
             {
-                return dayOfWeek.Count > 0 && dayOfWeek.Count < 7;
+                return dayOfWeek.Count is > 0 and < 7;
             }
         }
 
@@ -92,12 +89,14 @@ namespace DBADashGUI.Performance
             {
                 return timeOfDay;
             }
-            set {
+            set
+            {
                 if (value.Count > 24)
                 {
                     throw new Exception("Invalid time of day filter. Expected 24 items or less");
                 }
-                if (value.Where(hr=> hr>23 || hr < 0).Any()){
+                if (value.Where(hr => hr is > 23 or < 0).Any())
+                {
                     throw new Exception("Invalid time of day filter. Expected values 0..23");
                 }
                 if (value.GroupBy(hr => hr).Where(grp => grp.Count() > 1).Any())
@@ -124,7 +123,7 @@ namespace DBADashGUI.Performance
                 {
                     throw new Exception("Invalid day of week filter.  Expected 7 items or less");
                 }
-                if (value.Where(dow => dow > 7 || dow < 1).Any())
+                if (value.Where(dow => dow is > 7 or < 1).Any())
                 {
                     throw new Exception("Invalid days of week filter. Expected values 1..7");
                 }
@@ -139,7 +138,7 @@ namespace DBADashGUI.Performance
                 dayOfWeek = value;
             }
         }
-      
+
 
         public static DateTime FromUTC
         {
@@ -180,7 +179,7 @@ namespace DBADashGUI.Performance
         {
             get
             {
-                return mins>0 ? mins : Convert.ToInt32(ToUTC.Subtract(FromUTC).TotalMinutes);
+                return mins > 0 ? mins : Convert.ToInt32(ToUTC.Subtract(FromUTC).TotalMinutes);
             }
         }
 

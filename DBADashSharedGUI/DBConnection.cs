@@ -1,7 +1,4 @@
-﻿using System;
-using System.Windows.Forms;
-using Microsoft.Data.SqlClient;
-using System.Collections.Generic;
+﻿using Microsoft.Data.SqlClient;
 
 namespace DBADash
 {
@@ -12,14 +9,15 @@ namespace DBADash
             InitializeComponent();
         }
 
-        string connectionString=String.Empty;
+        string connectionString = String.Empty;
         public bool ValidateInitialCatalog = false;
 
         public string ConnectionString
         {
-            get {
+            get
+            {
                 var builder = new SqlConnectionStringBuilder(connectionString);
-               
+
                 if (chkIntegratedSecurity.Checked)
                 {
                     builder.Remove("UserID");
@@ -30,10 +28,10 @@ namespace DBADash
                 else
                 {
                     builder.UserID = txtUserName.Text;
-                    builder.Password= txtPassword.Text;
+                    builder.Password = txtPassword.Text;
                 }
                 builder.IntegratedSecurity = chkIntegratedSecurity.Checked;
-                builder.DataSource= txtServerName.Text;
+                builder.DataSource = txtServerName.Text;
                 builder.InitialCatalog = cboDatabase.Text;
                 builder.Encrypt = chkEncrypt.Checked;
                 builder.TrustServerCertificate = chkTrustServerCert.Checked;
@@ -76,7 +74,7 @@ namespace DBADash
         public static void TestConnection(string connectionString)
         {
             using var cn = new SqlConnection(connectionString);
-            cn.Open();        
+            cn.Open();
         }
 
         private void BttnConnect_Click(object sender, EventArgs e)
@@ -94,7 +92,7 @@ namespace DBADash
                 }
             }
             catch (Exception ex)
-            {          
+            {
                 this.Cursor = Cursors.Default;
                 MessageBox.Show("Error connecting to data source:" + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
@@ -120,12 +118,12 @@ namespace DBADash
             {
                 cboDatabase.Items.Clear();
                 var DBs = GetDatabases(ConnectionStringWithoutInitialCatalog);
-                foreach(string db in DBs)
+                foreach (string db in DBs)
                 {
                     cboDatabase.Items.Add(db);
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
@@ -149,7 +147,7 @@ namespace DBADash
                     DBs.Sort();
                     return DBs;
                 }
-            }           
+            }
         }
     }
 }

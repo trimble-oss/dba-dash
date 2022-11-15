@@ -1,20 +1,20 @@
 ﻿using DBADash;
 using Polly;
+using Serilog;
+using SerilogTimings;
 using System;
 using System.Collections.Generic;
 using System.Data;
 using System.IO;
-using static DBADash.DBADashConnection;
-using Serilog;
-using SerilogTimings;
 using System.Threading.Tasks;
+using static DBADash.DBADashConnection;
 
 namespace DBADashService
 {
     public class DestinationHandling
     {
 
-        public static async Task WriteAllDestinations(DataSet ds,DBADashSource src,string fileName)
+        public static async Task WriteAllDestinations(DataSet ds, DBADashSource src, string fileName)
         {
             List<Exception> exceptions = new();
             foreach (var d in SchedulerServiceConfig.Config.AllDestinations)
@@ -27,7 +27,7 @@ namespace DBADashService
                         op.Complete();
                     }
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     Log.Error(ex, "Error writing to destination {destination} from {source}", d.ConnectionForPrint, src.SourceConnection.ConnectionForPrint);
                     exceptions.Add(ex);
@@ -39,7 +39,7 @@ namespace DBADashService
             }
         }
 
-        public static async Task Write(DataSet ds, DBADashConnection d,string fileName)
+        public static async Task Write(DataSet ds, DBADashConnection d, string fileName)
         {
             switch (d.Type)
             {
@@ -56,7 +56,7 @@ namespace DBADashService
 
         }
 
-  
+
         public static async Task WriteS3(DataSet ds, string destination, string fileName)
         {
             string extension = System.IO.Path.GetExtension(fileName);
@@ -67,7 +67,7 @@ namespace DBADashService
             DataSetSerialization.SetDateTimeKind(ds); // Required to prevent timezone conversion
 
             var uri = new Amazon.S3.Util.AmazonS3Uri(destination);
- 
+
             using (var s3Cli = AWSTools.GetAWSClient(SchedulerServiceConfig.Config.AWSProfile, SchedulerServiceConfig.Config.AccessKey, SchedulerServiceConfig.Config.GetSecretKey(), uri))
             {
 
@@ -76,7 +76,7 @@ namespace DBADashService
                     BucketName = uri.Bucket,
                     Key = (uri.Key + "/" + fileName).Replace("//", "/")
                 };
-            
+
                 using (var ms = new MemoryStream())
                 {
                     ds.WriteXml(ms, XmlWriteMode.WriteSchema);
@@ -108,7 +108,7 @@ namespace DBADashService
             }
             else
             {
-               Log.Error("Destination Folder doesn't exist {folder}",destination);
+                Log.Error("Destination Folder doesn't exist {folder}", destination);
             }
         }
 
@@ -126,7 +126,7 @@ namespace DBADashService
                     }
                     )
               .Execute(() => importer.TestConnection());
-           
+
             importer.Update();
         }
     }

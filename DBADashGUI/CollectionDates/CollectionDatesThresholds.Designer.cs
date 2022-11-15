@@ -120,7 +120,7 @@
             this.bttnCancel.TabIndex = 56;
             this.bttnCancel.Text = "Cancel";
             this.bttnCancel.UseVisualStyleBackColor = true;
-            this.bttnCancel.Click += new System.EventHandler(this.bttnCancel_Click);
+            this.bttnCancel.Click += new System.EventHandler(this.BttnCancel_Click);
             // 
             // bttnUpdate
             // 
@@ -131,7 +131,7 @@
             this.bttnUpdate.TabIndex = 55;
             this.bttnUpdate.Text = "Update";
             this.bttnUpdate.UseVisualStyleBackColor = true;
-            this.bttnUpdate.Click += new System.EventHandler(this.bttnUpdate_Click);
+            this.bttnUpdate.Click += new System.EventHandler(this.BttnUpdate_Click);
             // 
             // optInherit
             // 
@@ -144,7 +144,7 @@
             this.optInherit.TabIndex = 59;
             this.optInherit.Text = "Inherit";
             this.optInherit.UseVisualStyleBackColor = true;
-            this.optInherit.CheckedChanged += new System.EventHandler(this.optInherit_CheckedChanged);
+            this.optInherit.CheckedChanged += new System.EventHandler(this.OptInherit_CheckedChanged);
             // 
             // OptDisabled
             // 
@@ -172,7 +172,7 @@
             this.optEnabled.TabStop = true;
             this.optEnabled.Text = "Enabled";
             this.optEnabled.UseVisualStyleBackColor = true;
-            this.optEnabled.CheckedChanged += new System.EventHandler(this.optEnabled_CheckedChanged);
+            this.optEnabled.CheckedChanged += new System.EventHandler(this.OptEnabled_CheckedChanged);
             // 
             // pnlThresholds
             // 
@@ -209,7 +209,7 @@
             this.chkCheckAll.TabIndex = 62;
             this.chkCheckAll.Text = "Check All";
             this.chkCheckAll.UseVisualStyleBackColor = true;
-            this.chkCheckAll.CheckedChanged += new System.EventHandler(this.chkCheckAll_CheckedChanged);
+            this.chkCheckAll.CheckedChanged += new System.EventHandler(this.ChkCheckAll_CheckedChanged);
             // 
             // CollectionDatesThresholds
             // 

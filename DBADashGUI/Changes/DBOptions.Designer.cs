@@ -106,7 +106,7 @@
             this.dgv.RowTemplate.Height = 24;
             this.dgv.Size = new System.Drawing.Size(839, 321);
             this.dgv.TabIndex = 0;
-            this.dgv.RowsAdded += new System.Windows.Forms.DataGridViewRowsAddedEventHandler(this.dgv_RowsAdded);
+            this.dgv.RowsAdded += new System.Windows.Forms.DataGridViewRowsAddedEventHandler(this.Dgv_RowsAdded);
             // 
             // toolStrip2
             // 
@@ -141,7 +141,7 @@
             this.tsRefreshInfo.Name = "tsRefreshInfo";
             this.tsRefreshInfo.Size = new System.Drawing.Size(29, 24);
             this.tsRefreshInfo.Text = "Refresh";
-            this.tsRefreshInfo.Click += new System.EventHandler(this.tsRefreshInfo_Click);
+            this.tsRefreshInfo.Click += new System.EventHandler(this.TsRefreshInfo_Click);
             // 
             // tsCopyInfo
             // 
@@ -151,7 +151,7 @@
             this.tsCopyInfo.Name = "tsCopyInfo";
             this.tsCopyInfo.Size = new System.Drawing.Size(29, 24);
             this.tsCopyInfo.Text = "Copy";
-            this.tsCopyInfo.Click += new System.EventHandler(this.tsCopyInfo_Click);
+            this.tsCopyInfo.Click += new System.EventHandler(this.TsCopyInfo_Click);
             // 
             // tsExcel
             // 
@@ -161,7 +161,7 @@
             this.tsExcel.Name = "tsExcel";
             this.tsExcel.Size = new System.Drawing.Size(29, 24);
             this.tsExcel.Text = "Export Excel";
-            this.tsExcel.Click += new System.EventHandler(this.tsExcel_Click);
+            this.tsExcel.Click += new System.EventHandler(this.TsExcel_Click);
             // 
             // tsCols
             // 
@@ -171,7 +171,7 @@
             this.tsCols.Name = "tsCols";
             this.tsCols.Size = new System.Drawing.Size(29, 24);
             this.tsCols.Text = "Columns";
-            this.tsCols.Click += new System.EventHandler(this.tsCols_Click);
+            this.tsCols.Click += new System.EventHandler(this.TsCols_Click);
             // 
             // tsSummary
             // 
@@ -181,7 +181,7 @@
             this.tsSummary.Size = new System.Drawing.Size(95, 24);
             this.tsSummary.Text = "Summary";
             this.tsSummary.Visible = false;
-            this.tsSummary.Click += new System.EventHandler(this.tsSummary_Click);
+            this.tsSummary.Click += new System.EventHandler(this.TsSummary_Click);
             // 
             // tsDetail
             // 
@@ -190,7 +190,7 @@
             this.tsDetail.Name = "tsDetail";
             this.tsDetail.Size = new System.Drawing.Size(73, 24);
             this.tsDetail.Text = "Detail";
-            this.tsDetail.Click += new System.EventHandler(this.tsDetail_Click);
+            this.tsDetail.Click += new System.EventHandler(this.TsDetail_Click);
             // 
             // dgvHistory
             // 
@@ -247,7 +247,7 @@
             this.tsRefreshHistory.Name = "tsRefreshHistory";
             this.tsRefreshHistory.Size = new System.Drawing.Size(29, 24);
             this.tsRefreshHistory.Text = "Refresh";
-            this.tsRefreshHistory.Click += new System.EventHandler(this.tsRefreshHistory_Click);
+            this.tsRefreshHistory.Click += new System.EventHandler(this.TsRefreshHistory_Click);
             // 
             // tsCopyHistory
             // 
@@ -257,7 +257,7 @@
             this.tsCopyHistory.Name = "tsCopyHistory";
             this.tsCopyHistory.Size = new System.Drawing.Size(29, 24);
             this.tsCopyHistory.Text = "Copy";
-            this.tsCopyHistory.Click += new System.EventHandler(this.tsCopyHistory_Click);
+            this.tsCopyHistory.Click += new System.EventHandler(this.TsCopyHistory_Click);
             // 
             // tsExcelHistory
             // 
@@ -267,7 +267,7 @@
             this.tsExcelHistory.Name = "tsExcelHistory";
             this.tsExcelHistory.Size = new System.Drawing.Size(29, 24);
             this.tsExcelHistory.Text = "Export Excel";
-            this.tsExcelHistory.Click += new System.EventHandler(this.tsExcelHistory_Click);
+            this.tsExcelHistory.Click += new System.EventHandler(this.TsExcelHistory_Click);
             // 
             // tsFilter
             // 
@@ -288,7 +288,7 @@
             this.excludeStateChangesToolStripMenuItem.Name = "excludeStateChangesToolStripMenuItem";
             this.excludeStateChangesToolStripMenuItem.Size = new System.Drawing.Size(241, 26);
             this.excludeStateChangesToolStripMenuItem.Text = "Exclude State Changes";
-            this.excludeStateChangesToolStripMenuItem.Click += new System.EventHandler(this.excludeStateChangesToolStripMenuItem_Click);
+            this.excludeStateChangesToolStripMenuItem.Click += new System.EventHandler(this.ExcludeStateChangesToolStripMenuItem_Click);
             // 
             // dataGridViewTextBoxColumn1
             // 

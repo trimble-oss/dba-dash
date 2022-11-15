@@ -1,10 +1,7 @@
 ﻿using Microsoft.Data.SqlClient;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Text.Json.Serialization;
-using System.Threading.Tasks;
 
 namespace DBADashGUI
 {
@@ -26,7 +23,7 @@ namespace DBADashGUI
         public abstract ViewTypes Type { get; }
 
         [JsonIgnore]
-        public int UserID { get; set; }=DBADashUser.UserID;
+        public int UserID { get; set; } = DBADashUser.UserID;
 
         public abstract string Serialize();
 
@@ -35,7 +32,7 @@ namespace DBADashGUI
 
         public void Save()
         {
-            if(UserID== DBADashUser.SystemUserID && !DBADashUser.HasManageGlobalViews)
+            if (UserID == DBADashUser.SystemUserID && !DBADashUser.HasManageGlobalViews)
             {
                 throw new Exception("User doesn't have permissions to manage global views");
             }
@@ -68,7 +65,7 @@ namespace DBADashGUI
             }
         }
 
-        public static Dictionary<string, string>GetSavedViews(ViewTypes type, int UserID)
+        public static Dictionary<string, string> GetSavedViews(ViewTypes type, int UserID)
         {
             using (var cn = new SqlConnection(Common.ConnectionString))
             using (var cmd = new SqlCommand("DBADash.SavedViews_Get", cn) { CommandType = System.Data.CommandType.StoredProcedure })

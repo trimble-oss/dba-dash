@@ -88,7 +88,7 @@
             this.dgv.Size = new System.Drawing.Size(516, 939);
             this.dgv.TabIndex = 1;
             this.dgv.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.Dgv_CellContentClick);
-            this.dgv.CellToolTipTextNeeded += new System.Windows.Forms.DataGridViewCellToolTipTextNeededEventHandler(this.dgv_CellToolTipTextNeeded);
+            this.dgv.CellToolTipTextNeeded += new System.Windows.Forms.DataGridViewCellToolTipTextNeededEventHandler(this.Dgv_CellToolTipTextNeeded);
             // 
             // splitContainer1
             // 

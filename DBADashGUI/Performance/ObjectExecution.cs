@@ -1,18 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Drawing;
-using System.Data;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
-using Microsoft.Data.SqlClient;
+﻿using LiveCharts;
 using LiveCharts.Configurations;
-using LiveCharts.Wpf;
 using LiveCharts.Defaults;
-using LiveCharts;
-using static DBADashGUI.Performance.Performance;
+using LiveCharts.Wpf;
+using System;
+using System.Collections.Generic;
+using System.Data;
+using System.Windows.Forms;
 
 namespace DBADashGUI.Performance
 {
@@ -33,11 +26,11 @@ namespace DBADashGUI.Performance
         public DateTimePoint x;
         Int32 instanceID;
         DateTime chartMaxDate = DateTime.MinValue;
-     
+
 
         Int32 mins;
         private Int64 objectID;
-        Int32 databaseid=0;
+        Int32 databaseid = 0;
         private Int32 dateGrouping;
         public event EventHandler<EventArgs> Close;
         public event EventHandler<EventArgs> MoveUp;
@@ -85,7 +78,7 @@ namespace DBADashGUI.Performance
                 mins = DateRange.DurationMins;
             }
             this.objectID = objectID;
-    
+
             this.databaseid = databaseID;
             RefreshData();
         }
@@ -97,14 +90,14 @@ namespace DBADashGUI.Performance
 
         public void RefreshData()
         {
-    
+
             objectExecChart.Series.Clear();
             objectExecChart.AxisX.Clear();
             objectExecChart.AxisY.Clear();
             chartMaxDate = DateTime.MinValue;
-            
 
-            var dt = CommonData.ObjectExecutionStats(instanceID, databaseid, objectID, dateGrouping, Metric.Measure,DateRange.FromUTC,DateRange.ToUTC, "");
+
+            var dt = CommonData.ObjectExecutionStats(instanceID, databaseid, objectID, dateGrouping, Metric.Measure, DateRange.FromUTC, DateRange.ToUTC, "");
 
             if (dt.Rows.Count == 0)
             {
@@ -136,7 +129,7 @@ namespace DBADashGUI.Performance
             }
 
             CartesianMapper<DateTimePoint> dayConfig = Mappers.Xy<DateTimePoint>()
-.X(dateModel => dateModel.DateTime.Ticks / TimeSpan.FromMinutes(dateGrouping==0?1:dateGrouping).Ticks)
+.X(dateModel => dateModel.DateTime.Ticks / TimeSpan.FromMinutes(dateGrouping == 0 ? 1 : dateGrouping).Ticks)
 .Y(dateModel => dateModel.Value);
 
 
@@ -162,7 +155,7 @@ namespace DBADashGUI.Performance
             }
             objectExecChart.AxisX.Add(new Axis
             {
-                LabelFormatter = value => new DateTime((long)(value * TimeSpan.FromMinutes(dateGrouping==0?1:dateGrouping).Ticks)).ToString(format)
+                LabelFormatter = value => new DateTime((long)(value * TimeSpan.FromMinutes(dateGrouping == 0 ? 1 : dateGrouping).Ticks)).ToString(format)
             });
 
             objectExecChart.AxisY.Add(new Axis
@@ -171,7 +164,7 @@ namespace DBADashGUI.Performance
 
             });
 
-            
+
             lblExecution.Text = databaseid > 0 ? "Excution Stats: Database" : "Execution Stats: Instance";
         }
 
@@ -185,9 +178,9 @@ namespace DBADashGUI.Performance
 
         }
 
-        private class Measures: Dictionary<string, Measure>
+        private class Measures : Dictionary<string, Measure>
         {
-            public void Add(string Name,string displayName,string labelFormat)
+            public void Add(string Name, string displayName, string labelFormat)
             {
                 Add(Name, new Measure() { Name = Name, DisplayName = displayName, LabelFormat = labelFormat });
             }
@@ -215,13 +208,14 @@ namespace DBADashGUI.Performance
         private void ObjectExecution_Load(object sender, EventArgs e)
         {
             Common.AddDateGroups(tsDateGroup, TsDateGrouping_Click);
-            foreach(var m in measures)
+            foreach (var m in measures)
             {
                 ToolStripMenuItem itm = new(m.Value.DisplayName)
                 {
                     Name = m.Key
                 };
-                if (m.Key == Metric.Measure) { 
+                if (m.Key == Metric.Measure)
+                {
                     itm.Checked = true;
                     tsMeasures.Text = m.Value.DisplayName;
                 }
@@ -242,16 +236,16 @@ namespace DBADashGUI.Performance
         private void Itm_Click(object sender, EventArgs e)
         {
             var tsItm = ((ToolStripMenuItem)sender);
-            if(Metric.Measure!= tsItm.Name)
+            if (Metric.Measure != tsItm.Name)
             {
                 Metric.Measure = tsItm.Name;
-                foreach(ToolStripMenuItem itm in tsMeasures.DropDownItems)
+                foreach (ToolStripMenuItem itm in tsMeasures.DropDownItems)
                 {
                     itm.Checked = itm.Name == Metric.Measure;
                 }
                 tsMeasures.Text = tsItm.Text;
             }
-            RefreshData(instanceID,objectID, databaseid);
+            RefreshData(instanceID, objectID, databaseid);
         }
 
         private void TsClose_Click(object sender, EventArgs e)

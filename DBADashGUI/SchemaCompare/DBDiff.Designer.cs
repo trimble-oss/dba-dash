@@ -79,7 +79,7 @@
             this.cboInstanceA.Name = "cboInstanceA";
             this.cboInstanceA.Size = new System.Drawing.Size(181, 24);
             this.cboInstanceA.TabIndex = 0;
-            this.cboInstanceA.SelectedIndexChanged += new System.EventHandler(this.cboInstanceA_SelectedIndexChanged);
+            this.cboInstanceA.SelectedIndexChanged += new System.EventHandler(this.CboInstanceA_SelectedIndexChanged);
             // 
             // cboDatabaseA
             // 
@@ -89,7 +89,7 @@
             this.cboDatabaseA.Name = "cboDatabaseA";
             this.cboDatabaseA.Size = new System.Drawing.Size(181, 24);
             this.cboDatabaseA.TabIndex = 1;
-            this.cboDatabaseA.SelectedIndexChanged += new System.EventHandler(this.cboDatabaseA_SelectedIndexChanged);
+            this.cboDatabaseA.SelectedIndexChanged += new System.EventHandler(this.CboDatabaseA_SelectedIndexChanged);
             // 
             // cboInstanceB
             // 
@@ -99,7 +99,7 @@
             this.cboInstanceB.Name = "cboInstanceB";
             this.cboInstanceB.Size = new System.Drawing.Size(181, 24);
             this.cboInstanceB.TabIndex = 2;
-            this.cboInstanceB.SelectedIndexChanged += new System.EventHandler(this.cboInstanceB_SelectedIndexChanged);
+            this.cboInstanceB.SelectedIndexChanged += new System.EventHandler(this.CboInstanceB_SelectedIndexChanged);
             // 
             // cboDatabaseB
             // 
@@ -109,7 +109,7 @@
             this.cboDatabaseB.Name = "cboDatabaseB";
             this.cboDatabaseB.Size = new System.Drawing.Size(181, 24);
             this.cboDatabaseB.TabIndex = 3;
-            this.cboDatabaseB.SelectedIndexChanged += new System.EventHandler(this.cboDatabaseB_SelectedIndexChanged);
+            this.cboDatabaseB.SelectedIndexChanged += new System.EventHandler(this.CboDatabaseB_SelectedIndexChanged);
             // 
             // label1
             // 
@@ -155,7 +155,7 @@
             this.bttnCompare.TabIndex = 8;
             this.bttnCompare.Text = "Compare";
             this.bttnCompare.UseVisualStyleBackColor = true;
-            this.bttnCompare.Click += new System.EventHandler(this.bttnCompare_Click);
+            this.bttnCompare.Click += new System.EventHandler(this.BttnCompare_Click);
             // 
             // gvDiff
             // 
@@ -176,7 +176,7 @@
             this.gvDiff.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
             this.gvDiff.Size = new System.Drawing.Size(937, 372);
             this.gvDiff.TabIndex = 9;
-            this.gvDiff.SelectionChanged += new System.EventHandler(this.gvDiff_SelectionChanged);
+            this.gvDiff.SelectionChanged += new System.EventHandler(this.GvDiff_SelectionChanged);
             // 
             // ObjectName
             // 
@@ -249,7 +249,7 @@
             this.chkIgnoreWhiteSpace.TabIndex = 17;
             this.chkIgnoreWhiteSpace.Text = "Ignore Whitespace";
             this.chkIgnoreWhiteSpace.UseVisualStyleBackColor = true;
-            this.chkIgnoreWhiteSpace.CheckedChanged += new System.EventHandler(this.chkIgnoreWhiteSpace_CheckedChanged);
+            this.chkIgnoreWhiteSpace.CheckedChanged += new System.EventHandler(this.ChkIgnoreWhiteSpace_CheckedChanged);
             // 
             // bttnCopyA
             // 
@@ -259,7 +259,7 @@
             this.bttnCopyA.Size = new System.Drawing.Size(75, 23);
             this.bttnCopyA.TabIndex = 16;
             this.bttnCopyA.UseVisualStyleBackColor = true;
-            this.bttnCopyA.Click += new System.EventHandler(this.bttnCopyA_Click);
+            this.bttnCopyA.Click += new System.EventHandler(this.BttnCopyA_Click);
             // 
             // bttnCopyB
             // 
@@ -269,7 +269,7 @@
             this.bttnCopyB.Size = new System.Drawing.Size(75, 23);
             this.bttnCopyB.TabIndex = 15;
             this.bttnCopyB.UseVisualStyleBackColor = true;
-            this.bttnCopyB.Click += new System.EventHandler(this.bttnCopyB_Click);
+            this.bttnCopyB.Click += new System.EventHandler(this.BttnCopyB_Click);
             // 
             // bttnSwitch
             // 
@@ -279,7 +279,7 @@
             this.bttnSwitch.Size = new System.Drawing.Size(75, 23);
             this.bttnSwitch.TabIndex = 14;
             this.bttnSwitch.UseVisualStyleBackColor = true;
-            this.bttnSwitch.Click += new System.EventHandler(this.bttnSwitch_Click);
+            this.bttnSwitch.Click += new System.EventHandler(this.BttnSwitch_Click);
             // 
             // label6
             // 
@@ -356,7 +356,7 @@
             this.chkDiffType.Name = "chkDiffType";
             this.chkDiffType.Size = new System.Drawing.Size(937, 32);
             this.chkDiffType.TabIndex = 17;
-            this.chkDiffType.SelectedValueChanged += new System.EventHandler(this.chkDiffType_SelectedValueChanged);
+            this.chkDiffType.SelectedValueChanged += new System.EventHandler(this.ChkDiffType_SelectedValueChanged);
             // 
             // label8
             // 
@@ -376,7 +376,7 @@
             this.chkObjectType.Name = "chkObjectType";
             this.chkObjectType.Size = new System.Drawing.Size(207, 372);
             this.chkObjectType.TabIndex = 9;
-            this.chkObjectType.SelectedValueChanged += new System.EventHandler(this.chkObjectType_SelectedValueChanged);
+            this.chkObjectType.SelectedValueChanged += new System.EventHandler(this.ChkObjectType_SelectedValueChanged);
             // 
             // label7
             // 

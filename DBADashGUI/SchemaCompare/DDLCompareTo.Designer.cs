@@ -69,7 +69,7 @@ namespace DBADashGUI
             this.cboDate_A.Name = "cboDate_A";
             this.cboDate_A.Size = new System.Drawing.Size(280, 24);
             this.cboDate_A.TabIndex = 17;
-            this.cboDate_A.SelectedIndexChanged += new System.EventHandler(this.cboDate_A_SelectedIndexChanged);
+            this.cboDate_A.SelectedIndexChanged += new System.EventHandler(this.CboDate_A_SelectedIndexChanged);
             // 
             // label1
             // 
@@ -88,7 +88,7 @@ namespace DBADashGUI
             this.cboInstanceA.Name = "cboInstanceA";
             this.cboInstanceA.Size = new System.Drawing.Size(280, 24);
             this.cboInstanceA.TabIndex = 13;
-            this.cboInstanceA.SelectedIndexChanged += new System.EventHandler(this.cboInstanceA_SelectedIndexedChanged);
+            this.cboInstanceA.SelectedIndexChanged += new System.EventHandler(this.CboInstanceA_SelectedIndexedChanged);
             // 
             // cboDatabaseA
             // 
@@ -98,7 +98,7 @@ namespace DBADashGUI
             this.cboDatabaseA.Name = "cboDatabaseA";
             this.cboDatabaseA.Size = new System.Drawing.Size(280, 24);
             this.cboDatabaseA.TabIndex = 14;
-            this.cboDatabaseA.SelectedIndexChanged += new System.EventHandler(this.cboDatabaseA_SelectedIndexChanged);
+            this.cboDatabaseA.SelectedIndexChanged += new System.EventHandler(this.CboDatabaseA_SelectedIndexChanged);
             // 
             // label3
             // 
@@ -117,7 +117,7 @@ namespace DBADashGUI
             this.cboObjectA.Name = "cboObjectA";
             this.cboObjectA.Size = new System.Drawing.Size(280, 24);
             this.cboObjectA.TabIndex = 19;
-            this.cboObjectA.SelectedIndexChanged += new System.EventHandler(this.cboObjectA_SelectedIndexChanged);
+            this.cboObjectA.SelectedIndexChanged += new System.EventHandler(this.CboObjectA_SelectedIndexChanged);
             // 
             // label2
             // 
@@ -136,7 +136,7 @@ namespace DBADashGUI
             this.cboObjectTypeA.Name = "cboObjectTypeA";
             this.cboObjectTypeA.Size = new System.Drawing.Size(280, 24);
             this.cboObjectTypeA.TabIndex = 21;
-            this.cboObjectTypeA.SelectedIndexChanged += new System.EventHandler(this.cboObjectTypeA_SelectedIndexChanged);
+            this.cboObjectTypeA.SelectedIndexChanged += new System.EventHandler(this.CboObjectTypeA_SelectedIndexChanged);
             // 
             // label4
             // 
@@ -155,7 +155,7 @@ namespace DBADashGUI
             this.cboObjectTypeB.Name = "cboObjectTypeB";
             this.cboObjectTypeB.Size = new System.Drawing.Size(280, 24);
             this.cboObjectTypeB.TabIndex = 27;
-            this.cboObjectTypeB.SelectedIndexChanged += new System.EventHandler(this.cboObjectTypeB_SelectedIndexChanged);
+            this.cboObjectTypeB.SelectedIndexChanged += new System.EventHandler(this.CboObjectTypeB_SelectedIndexChanged);
             // 
             // cboObjectB
             // 
@@ -165,7 +165,7 @@ namespace DBADashGUI
             this.cboObjectB.Name = "cboObjectB";
             this.cboObjectB.Size = new System.Drawing.Size(280, 24);
             this.cboObjectB.TabIndex = 26;
-            this.cboObjectB.SelectedIndexChanged += new System.EventHandler(this.cboObjectB_SelectedIndexChanged);
+            this.cboObjectB.SelectedIndexChanged += new System.EventHandler(this.CboObjectB_SelectedIndexChanged);
             // 
             // cboDate_B
             // 
@@ -175,7 +175,7 @@ namespace DBADashGUI
             this.cboDate_B.Name = "cboDate_B";
             this.cboDate_B.Size = new System.Drawing.Size(280, 24);
             this.cboDate_B.TabIndex = 25;
-            this.cboDate_B.SelectedIndexChanged += new System.EventHandler(this.cboDate_B_SelectedIndexChanged);
+            this.cboDate_B.SelectedIndexChanged += new System.EventHandler(this.CboDate_B_SelectedIndexChanged);
             // 
             // cboInstanceB
             // 
@@ -185,7 +185,7 @@ namespace DBADashGUI
             this.cboInstanceB.Name = "cboInstanceB";
             this.cboInstanceB.Size = new System.Drawing.Size(280, 24);
             this.cboInstanceB.TabIndex = 23;
-            this.cboInstanceB.SelectedIndexChanged += new System.EventHandler(this.cboInstanceB_SelectedIndexedChanged);
+            this.cboInstanceB.SelectedIndexChanged += new System.EventHandler(this.CboInstanceB_SelectedIndexedChanged);
             // 
             // cboDatabaseB
             // 
@@ -195,7 +195,7 @@ namespace DBADashGUI
             this.cboDatabaseB.Name = "cboDatabaseB";
             this.cboDatabaseB.Size = new System.Drawing.Size(280, 24);
             this.cboDatabaseB.TabIndex = 24;
-            this.cboDatabaseB.SelectedIndexChanged += new System.EventHandler(this.cboDatabaseB_SelectedIndexChanged);
+            this.cboDatabaseB.SelectedIndexChanged += new System.EventHandler(this.CboDatabaseB_SelectedIndexChanged);
             // 
             // label6
             // 
