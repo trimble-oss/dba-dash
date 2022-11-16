@@ -2,18 +2,25 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Linq;
 using System.Windows.Forms;
 
 namespace DBADashGUI
 {
-    public partial class SQLPatching : UserControl
+    public partial class SQLPatching : UserControl, ISetContext
     {
         public SQLPatching()
         {
             InitializeComponent();
         }
 
-        public List<Int32> InstanceIDs;
+        private List<Int32> InstanceIDs;
+
+        public void SetContext(DBADashContext context)
+        {
+            InstanceIDs = context.RegularInstanceIDs.ToList();
+            RefreshData();
+        }
 
         public void RefreshData()
         {

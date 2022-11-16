@@ -3,25 +3,33 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Drawing;
+using System.Linq;
 using System.Windows.Forms;
 
 namespace DBADashGUI.Changes
 {
-    public partial class QueryStore : UserControl, INavigation
+    public partial class QueryStore : UserControl, INavigation, ISetContext
     {
         public QueryStore()
         {
             InitializeComponent();
         }
 
-        public string Instance = string.Empty;
-        public List<Int32> InstanceIDs;
-        public int DatabaseID = -1;
+        private string Instance = string.Empty;
+        private List<Int32> InstanceIDs;
+        private int DatabaseID = -1;
 
         public bool CanNavigateBack => tsBack.Enabled;
 
         public bool CanNavigateForward => throw new NotImplementedException();
 
+        public void SetContext(DBADashContext context)
+        {
+            InstanceIDs = context.InstanceIDs.ToList();
+            Instance = context.InstanceName;
+            DatabaseID = context.DatabaseID;
+            RefreshData();
+        }
 
         public void RefreshData()
         {

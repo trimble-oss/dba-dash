@@ -2,20 +2,27 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Linq;
 using System.Windows.Forms;
 
 namespace DBADashGUI.Changes
 {
-    public partial class Drivers : UserControl
+    public partial class Drivers : UserControl, ISetContext
     {
         public Drivers()
         {
             InitializeComponent();
         }
 
-        public List<Int32> InstanceIDs;
+        private List<Int32> InstanceIDs;
         string provider = "";
         string searchText = "";
+
+        public void SetContext(DBADashContext context)
+        {
+            InstanceIDs = context.RegularInstanceIDs.ToList();
+            RefreshData();
+        }
 
         public void RefreshData()
         {

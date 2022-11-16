@@ -3,21 +3,28 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Drawing;
+using System.Linq;
 using System.Windows.Forms;
 
 namespace DBADashGUI.HA
 {
-    public partial class AG : UserControl, INavigation
+    public partial class AG : UserControl, INavigation, ISetContext
     {
         public AG()
         {
             InitializeComponent();
         }
 
-        public List<Int32> InstanceIDs;
+        private List<Int32> InstanceIDs;
         private int instanceId = -1;
 
         public bool CanNavigateBack { get => tsBack.Enabled; }
+
+        public void SetContext(DBADashContext context)
+        {
+            InstanceIDs = context.RegularInstanceIDs.ToList();
+            RefreshData();
+        }
 
         public void RefreshData()
         {

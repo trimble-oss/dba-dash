@@ -4,12 +4,13 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.IO;
+using System.Linq;
 using System.Windows.Forms;
 using static DBADashGUI.DiffControl;
 
 namespace DBADashGUI.Changes
 {
-    public partial class SchemaSnapshots : UserControl, INavigation
+    public partial class SchemaSnapshots : UserControl, INavigation, ISetContext
     {
         public SchemaSnapshots()
         {
@@ -17,10 +18,10 @@ namespace DBADashGUI.Changes
         }
         readonly Int32 currentSummaryPageSize = 100;
         int currentSummaryPage = 1;
-        public Int32 InstanceID;
-        public string InstanceName;
-        public Int32 DatabaseID;
-        public List<Int32> InstanceIDs;
+        private Int32 InstanceID;
+        private string InstanceName;
+        private Int32 DatabaseID;
+        private List<Int32> InstanceIDs;
 
         public bool CanNavigateBack { get => tsBack.Enabled; }
 
@@ -78,6 +79,15 @@ namespace DBADashGUI.Changes
                 frm.SetText(ddlOld, ddl, mode);
                 frm.Show();
             }
+        }
+
+        public void SetContext(DBADashContext context)
+        {
+            InstanceID = context.InstanceID;
+            InstanceName = context.InstanceName;
+            DatabaseID = context.DatabaseID;
+            InstanceIDs = context.InstanceIDs.ToList();
+            RefreshData();
         }
 
         public void RefreshData()

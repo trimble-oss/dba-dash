@@ -6,7 +6,7 @@ using System.Linq;
 using System.Windows.Forms;
 namespace DBADashGUI.Tagging
 {
-    public partial class Tags : UserControl, INavigation
+    public partial class Tags : UserControl, INavigation, ISetContext
     {
         public Tags()
         {
@@ -33,9 +33,21 @@ namespace DBADashGUI.Tagging
                         );
             }
         }
-        public List<int> InstanceIDs { get; set; }
-        public string InstanceName { get; set; }
-        public int InstanceID { get; set; }
+
+        private DBADashContext context;
+        private int InstanceID;
+        private string InstanceName;
+
+        public void SetContext(DBADashContext context)
+        {
+            this.context = context;
+            if (context.InstanceIDs.Count == 1)
+            {
+                InstanceID = context.InstanceIDs.First();
+            }
+            InstanceName = context.InstanceName;
+            RefreshData();
+        }
 
         public bool CanNavigateBack => !string.IsNullOrEmpty(InstanceName);
 
@@ -65,10 +77,7 @@ namespace DBADashGUI.Tagging
 
         public void RefreshData()
         {
-            if (InstanceIDs.Count == 1)
-            {
-                InstanceID = InstanceIDs[0];
-            }
+
             lblInstance.Text = InstanceName;
             if (string.IsNullOrEmpty(InstanceName))
             {
@@ -112,7 +121,7 @@ namespace DBADashGUI.Tagging
             using var cmd = new SqlCommand("dbo.TagReport_Get", cn) { CommandType = CommandType.StoredProcedure };
             using var da = new SqlDataAdapter(cmd);
             var dt = new DataTable();
-            cmd.Parameters.AddWithValue("InstanceIDs", InstanceIDs.AsDataTable());
+            cmd.Parameters.AddWithValue("InstanceIDs", context.InstanceIDs.ToList().AsDataTable());
             da.Fill(dt);
             dgvReport.DataSource = null;
             dgvReport.Columns.Clear();

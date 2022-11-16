@@ -13,10 +13,9 @@ using static DBADashGUI.Main;
 
 namespace DBADashGUI
 {
-    public partial class Summary : UserControl
+    public partial class Summary : UserControl, ISetContext
     {
 
-        public List<Int32> InstanceIDs;
         private List<Int32> refreshInstanceIDs;
 
         DateTime lastRefresh;
@@ -31,6 +30,7 @@ namespace DBADashGUI
         Dictionary<string, bool> statusColumns;
 
         private bool focusedView = false;
+        private DBADashContext context;
 
 
         private void ResetStatusCols()
@@ -53,13 +53,19 @@ namespace DBADashGUI
                 {
                     cn.Open();
 
-                    cmd.Parameters.AddWithValue("InstanceIDs", string.Join(",", InstanceIDs));
+                    cmd.Parameters.AddWithValue("InstanceIDs", string.Join(",", context.InstanceIDs));
                     cmd.Parameters.AddWithValue("IncludeHidden", showHiddenToolStripMenuItem.Checked);
                     DataTable dt = new();
                     da.Fill(dt);
                     return dt;
                 }
             });
+        }
+
+        public void SetContext(DBADashContext context)
+        {
+            this.context = context;
+            RefreshDataIfStale();
         }
 
         public void RefreshDataIfStale()
@@ -76,7 +82,7 @@ namespace DBADashGUI
 
         private bool InstanceIDsChanged()
         {
-            return !(InstanceIDs.Count == refreshInstanceIDs.Count && refreshInstanceIDs.All(InstanceIDs.Contains));
+            return !(context.InstanceIDs.Count == refreshInstanceIDs.Count && refreshInstanceIDs.All(context.InstanceIDs.Contains));
         }
 
         public void RefreshData()
@@ -85,7 +91,7 @@ namespace DBADashGUI
             ResetStatusCols();
             refresh1.ShowRefresh();
             dgvSummary.Visible = false;
-            refreshInstanceIDs = new List<int>(InstanceIDs);
+            refreshInstanceIDs = new List<int>(context.InstanceIDs);
             GetSummaryAsync().ContinueWith(task =>
             {
                 if (task.Exception != null)
@@ -539,5 +545,6 @@ namespace DBADashGUI
             MessageBox.Show("Memory dump acknowledge date updated", "Info", MessageBoxButtons.OK, MessageBoxIcon.Information);
             RefreshData();
         }
+
     }
 }

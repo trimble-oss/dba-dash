@@ -6,7 +6,7 @@ using System.Windows.Forms;
 
 namespace DBADashGUI.CollectionDates
 {
-    public partial class CollectionErrors : UserControl
+    public partial class CollectionErrors : UserControl, ISetContext
     {
         public CollectionErrors()
         {
@@ -21,8 +21,8 @@ namespace DBADashGUI.CollectionDates
             SetFilterHighlight(txtInstance, instanceToolStripMenuItem);
         }
 
-        public Int32 InstanceID { get; set; }
-        public string InstanceGroupName { get; set; }
+        private Int32 InstanceID { get; set; }
+        private string InstanceGroupName { get; set; }
         private int _days;
         public Int32 Days
         {
@@ -88,6 +88,14 @@ namespace DBADashGUI.CollectionDates
                 Common.ConvertUTCToLocal(ref dt);
                 return dt;
             }
+        }
+
+        public void SetContext(DBADashContext context)
+        {
+            InstanceID = context.InstanceID;
+            InstanceGroupName = context.InstanceName;
+            Days = 1;
+            RefreshData();
         }
 
         public void RefreshData()

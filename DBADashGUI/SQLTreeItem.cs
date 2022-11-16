@@ -89,6 +89,63 @@ namespace DBADashGUI
         private HashSet<int> _AzureInstanceIDs;
         private HashSet<int> _InstanceIDs;
 
+        private DBADashContext InternalContext;
+        public DBADashContext Context
+        {
+            get
+            {
+                InternalContext ??= new DBADashContext()
+                {
+                    InstanceIDs = InstanceIDs,
+                    AzureInstanceIDs = AzureInstanceIDs,
+                    RegularInstanceIDs = RegularInstanceIDs,
+                    ObjectID = ObjectID,
+                    ObjectName = ObjectName,
+                    InstanceID = InstanceID,
+                    DatabaseID = DatabaseID,
+                    InstanceName = InstanceName,
+                    JobID = JobID,
+                    JobStepID = JobStepID,
+                    Type = Type,
+                    DatabaseName = DatabaseName
+                };
+                return InternalContext;
+            }
+        }
+
+        public Guid JobID
+        {
+            get
+            {
+                if (this.Type == SQLTreeItem.TreeType.AgentJob)
+                {
+                    return (Guid)Tag;
+                }
+                else if (this.Type == SQLTreeItem.TreeType.AgentJobStep)
+                {
+                    return (Guid)Parent.Tag;
+                }
+                else
+                {
+                    return Guid.Empty;
+                }
+            }
+        }
+
+        public int JobStepID
+        {
+            get
+            {
+                if (this.Type == SQLTreeItem.TreeType.AgentJobStep)
+                {
+                    return (int)Tag;
+                }
+                else
+                {
+                    return -1;
+                }
+            }
+        }
 
         /// <summary>
         /// Populates lists of instance IDs: InstanceIDs, RegularInstanceIDs and AzureInstanceIDs

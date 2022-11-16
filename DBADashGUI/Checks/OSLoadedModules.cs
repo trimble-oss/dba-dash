@@ -2,22 +2,29 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Linq;
 using System.Windows.Forms;
 
 namespace DBADashGUI.Checks
 {
-    public partial class OSLoadedModules : UserControl, INavigation
+    public partial class OSLoadedModules : UserControl, INavigation, ISetContext
     {
         public OSLoadedModules()
         {
             InitializeComponent();
         }
 
-        public List<int> InstanceIDs { get; set; }
+        private List<int> InstanceIDs { get; set; }
         private int selectedInstanceID = -1;
         private bool HasSelectedInstance { get => selectedInstanceID > 0; }
 
         public bool CanNavigateBack { get => selectedInstanceID != -1; }
+
+        public void SetContext(DBADashContext context)
+        {
+            InstanceIDs = context.RegularInstanceIDs.ToList();
+            RefreshData();
+        }
 
         public void RefreshData()
         {

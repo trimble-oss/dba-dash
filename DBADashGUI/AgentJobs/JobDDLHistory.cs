@@ -5,15 +5,15 @@ using System.Windows.Forms;
 
 namespace DBADashGUI.Changes
 {
-    public partial class JobDDLHistory : UserControl
+    public partial class JobDDLHistory : UserControl, ISetContext
     {
         public JobDDLHistory()
         {
             InitializeComponent();
         }
 
-        public int InstanceID { get; set; }
-        public Guid JobID { get; set; }
+        private int InstanceID { get; set; }
+        private Guid JobID { get; set; }
 
         public DataTable GetDDLHistory()
         {
@@ -29,6 +29,13 @@ namespace DBADashGUI.Changes
                 return dt;
 
             }
+        }
+
+        public void SetContext(DBADashContext context)
+        {
+            InstanceID = context.InstanceID;
+            JobID = context.JobID;
+            RefreshData();
         }
 
         public void RefreshData()

@@ -3,23 +3,26 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Drawing;
+using System.Linq;
 using System.Windows.Forms;
 
 namespace DBADashGUI.Changes
 {
-    public partial class DBConfiguration : UserControl
+    public partial class DBConfiguration : UserControl, ISetContext
     {
         public DBConfiguration()
         {
             InitializeComponent();
         }
 
-        public List<Int32> InstanceIDs;
-        public Int32 DatabaseID = -1;
+        private List<Int32> InstanceIDs;
+        private Int32 DatabaseID = -1;
 
-
-        public void RefreshData()
+        public void SetContext(DBADashContext context)
         {
+            InstanceIDs = context.InstanceIDs.ToList();
+            DatabaseID = context.DatabaseID;
+
             RefreshConfig();
             RefreshHistory();
         }

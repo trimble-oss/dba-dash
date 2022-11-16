@@ -2,11 +2,12 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Linq;
 using System.Windows.Forms;
 
 namespace DBADashGUI
 {
-    public partial class HardwareChanges : UserControl
+    public partial class HardwareChanges : UserControl, ISetContext
     {
         public HardwareChanges()
         {
@@ -14,7 +15,13 @@ namespace DBADashGUI
         }
 
 
-        public List<Int32> InstanceIDs;
+        private List<Int32> InstanceIDs;
+
+        public void SetContext(DBADashContext context)
+        {
+            this.InstanceIDs = context.RegularInstanceIDs.ToList();
+            RefreshData();
+        }
 
         public void RefreshData()
         {

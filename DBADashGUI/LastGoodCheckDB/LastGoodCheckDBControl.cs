@@ -3,12 +3,13 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Drawing;
+using System.Linq;
 using System.Windows.Forms;
 namespace DBADashGUI.LastGoodCheckDB
 {
-    public partial class LastGoodCheckDBControl : UserControl
+    public partial class LastGoodCheckDBControl : UserControl, ISetContext
     {
-        public List<Int32> InstanceIDs;
+        private List<Int32> InstanceIDs;
         public bool IncludeCritical
         {
             get
@@ -58,6 +59,16 @@ namespace DBADashGUI.LastGoodCheckDB
         public LastGoodCheckDBControl()
         {
             InitializeComponent();
+        }
+
+        public void SetContext(DBADashContext context)
+        {
+            InstanceIDs = context.RegularInstanceIDs.ToList();
+            IncludeCritical = true;
+            IncludeWarning = true;
+            IncludeNA = context.InstanceID > 0;
+            IncludeOK = context.InstanceID > 0;
+            RefreshData();
         }
 
         public void RefreshData()

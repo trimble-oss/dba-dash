@@ -10,7 +10,7 @@ using System.Windows.Forms;
 
 namespace DBADashGUI.Performance
 {
-    public partial class AzureDBResourceStats : UserControl
+    public partial class AzureDBResourceStats : UserControl, ISetContext, IRefreshData
     {
 
         public Int32 InstanceID;
@@ -129,6 +129,12 @@ namespace DBADashGUI.Performance
 
 
         DataTable dt;
+
+        public void SetContext(DBADashContext context)
+        {
+            InstanceID = context.InstanceID;
+            RefreshData();
+        }
 
         public void RefreshData()
         {

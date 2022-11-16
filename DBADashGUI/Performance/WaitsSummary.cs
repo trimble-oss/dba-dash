@@ -7,14 +7,14 @@ using System.Windows.Forms;
 
 namespace DBADashGUI.Performance
 {
-    public partial class WaitsSummary : UserControl
+    public partial class WaitsSummary : UserControl, ISetContext, IRefreshData
     {
         public WaitsSummary()
         {
             InitializeComponent();
         }
 
-        public int InstanceID { get; set; }
+        private int InstanceID { get; set; }
         string selectedWaitType;
 
         private int dateGrouping = 1;
@@ -31,6 +31,12 @@ namespace DBADashGUI.Performance
                 dateGrouping = value;
                 tsDateGroup.Text = Common.DateGroupString(value);
             }
+        }
+
+        public void SetContext(DBADashContext context)
+        {
+            InstanceID = context.InstanceID;
+            RefreshData();
         }
 
         public void RefreshData()

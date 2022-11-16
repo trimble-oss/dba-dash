@@ -3,20 +3,21 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Drawing;
+using System.Linq;
 using System.Windows.Forms;
 using static DBADashGUI.DBADashStatus;
 
 namespace DBADashGUI.DBFiles
 {
-    public partial class DBFilesControl : UserControl
+    public partial class DBFilesControl : UserControl, ISetContext
     {
         public DBFilesControl()
         {
             InitializeComponent();
         }
 
-        public List<Int32> InstanceIDs;
-        public Int32? DatabaseID;
+        private List<Int32> InstanceIDs;
+        private Int32? DatabaseID;
 
         public bool IncludeCritical
         {
@@ -104,6 +105,18 @@ namespace DBADashGUI.DBFiles
                 da.Fill(dt);
                 return dt;
             }
+        }
+
+        public void SetContext(DBADashContext context)
+        {
+            InstanceIDs = context.InstanceIDs.ToList();
+            DatabaseID = (context.DatabaseID > 0 ? (Int32?)context.DatabaseID : null);
+            IncludeCritical = true;
+            IncludeWarning = true;
+            IncludeNA = DatabaseID != null;
+            IncludeOK = DatabaseID != null;
+
+            RefreshData();
         }
 
         public void RefreshData()

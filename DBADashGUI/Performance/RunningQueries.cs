@@ -8,7 +8,7 @@ using System.Linq;
 using System.Windows.Forms;
 namespace DBADashGUI.Performance
 {
-    public partial class RunningQueries : UserControl, INavigation
+    public partial class RunningQueries : UserControl, INavigation, ISetContext, IRefreshData
     {
         public RunningQueries()
         {
@@ -16,7 +16,7 @@ namespace DBADashGUI.Performance
         }
 
         public int InstanceID;
-        public List<Int32> InstanceIDs;
+        private List<Int32> InstanceIDs;
         private DateTime currentSnapshotDate;
         private DataTable snapshotDT;
         public DateTime SnapshotDateFrom;
@@ -111,6 +111,14 @@ namespace DBADashGUI.Performance
                 new DataGridViewTextBoxColumn() { HeaderText = "Signal Wait %", DataPropertyName = "signal_wait_pct", DefaultCellStyle = new DataGridViewCellStyle() { Format = "P1" } },
                 new DataGridViewLinkColumn() { HeaderText = "Help", Text = "help", UseColumnTextForLinkValue = true, Name = "colHelp", LinkColor = DashColors.LinkColor}
         };
+
+
+        public void SetContext(DBADashContext context)
+        {
+            InstanceIDs = context.InstanceIDs.ToList();
+            InstanceID = context.InstanceID;
+            RefreshData();
+        }
 
         public void RefreshData()
         {

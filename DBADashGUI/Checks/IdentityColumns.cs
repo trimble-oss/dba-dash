@@ -3,24 +3,36 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
+using System.Linq;
 using System.Windows.Forms;
 
 namespace DBADashGUI.Checks
 {
-    public partial class IdentityColumns : UserControl
+    public partial class IdentityColumns : UserControl, ISetContext
     {
         public IdentityColumns()
         {
             InitializeComponent();
         }
 
-        public List<int> InstanceIDs { get; set; }
-        public int DatabaseID { get; set; }
+        private List<int> InstanceIDs { get; set; }
+        private int DatabaseID { get; set; }
 
         public bool IncludeOK { get => oKToolStripMenuItem.Checked; set => oKToolStripMenuItem.Checked = value; }
         public bool IncludeNA { get => undefinedToolStripMenuItem.Checked; set => undefinedToolStripMenuItem.Checked = value; }
         public bool IncludeWarning { get => warningToolStripMenuItem.Checked; set => warningToolStripMenuItem.Checked = value; }
         public bool IncludeCritical { get => criticalToolStripMenuItem.Checked; set => criticalToolStripMenuItem.Checked = value; }
+
+        public void SetContext(DBADashContext context)
+        {
+            InstanceIDs = context.InstanceIDs.ToList();
+            DatabaseID = context.DatabaseID;
+            IncludeCritical = true;
+            IncludeWarning = true;
+            IncludeOK = !string.IsNullOrEmpty(context.InstanceName);
+            IncludeNA = !string.IsNullOrEmpty(context.InstanceName);
+            RefreshData();
+        }
 
         public void RefreshData()
         {

@@ -3,11 +3,12 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Drawing;
+using System.Linq;
 using System.Windows.Forms;
 
 namespace DBADashGUI.CollectionDates
 {
-    public partial class CollectionDates : UserControl
+    public partial class CollectionDates : UserControl, ISetContext
     {
         public CollectionDates()
         {
@@ -15,7 +16,7 @@ namespace DBADashGUI.CollectionDates
             Common.StyleGrid(ref dgvCollectionDates);
         }
 
-        public List<Int32> InstanceIDs { get; set; }
+        private List<Int32> InstanceIDs { get; set; }
 
         public bool IncludeCritical
         {
@@ -83,6 +84,17 @@ namespace DBADashGUI.CollectionDates
                 return dt;
             }
         }
+
+        public void SetContext(DBADashContext context)
+        {
+            InstanceIDs = context.InstanceIDs.ToList();
+            IncludeCritical = true;
+            IncludeWarning = true;
+            IncludeNA = context.InstanceID > 0;
+            IncludeOK = context.InstanceID > 0;
+            RefreshData();
+        }
+
         public void RefreshData()
         {
             UseWaitCursor = true;

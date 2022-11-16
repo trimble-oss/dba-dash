@@ -3,25 +3,8 @@ using System.Windows.Forms;
 
 namespace DBADashGUI.Performance
 {
-    public partial class Performance : UserControl
+    public partial class Performance : UserControl, ISetContext, IRefreshData
     {
-
-        private Int32 instanceID;
-
-        public Int32 InstanceID
-        {
-            get
-            {
-                return instanceID;
-            }
-            set
-            {
-                if (instanceID != value)
-                {
-                    instanceID = value;
-                }
-            }
-        }
 
         Int32 PointSize
         {
@@ -44,49 +27,37 @@ namespace DBADashGUI.Performance
         }
 
 
-        Int32 databaseID = 0;
-        Int64 objectID = 0;
-        public Int64 ObjectID
-        {
-            get
-            {
-                return objectID;
-            }
-            set
-            {
-                if (objectID != value)
-                {
-                    objectID = value;
-                }
-            }
-        }
+        private DBADashContext context;
 
-        public Int32 DatabaseID
+        private Int64 ObjectID;
+
+        private int InstanceID { get => context.InstanceID; }
+
+        private Int32 DatabaseID { get => context.DatabaseID; }
+
+        private bool objectMode;
+
+        public void SetContext(DBADashContext context)
         {
-            get
-            {
-                return databaseID;
-            }
-            set
-            {
-                if (databaseID != value)
-                {
-                    databaseID = value;
-                }
-            }
+            this.context = context;
+            objectMode = context.Type is not (SQLTreeItem.TreeType.Instance or SQLTreeItem.TreeType.Database or SQLTreeItem.TreeType.AzureDatabase or SQLTreeItem.TreeType.AzureInstance);
+            ObjectID = objectMode ? context.ObjectID : 0; // ObjectID should be 0 if we are at Instance/DB level.  Database object can have ObjectID is schema snapshots are used
+            ioPerformance1.Visible = !objectMode;
+            cpu1.Visible = !objectMode;
+            waits1.Visible = !objectMode;
+            blocking1.Visible = !objectMode;
+            this.tableLayoutPanel1.RowStyles[0].Height = objectMode ? 0 : 20;
+            this.tableLayoutPanel1.RowStyles[1].Height = objectMode ? 0 : 20;
+            this.tableLayoutPanel1.RowStyles[2].Height = objectMode ? 0 : 20;
+            this.tableLayoutPanel1.RowStyles[3].Height = objectMode ? 0 : 20;
+            this.tableLayoutPanel1.RowStyles[4].Height = objectMode ? 100 : 20;
+
+            RefreshData();
         }
 
 
         public void RefreshData()
         {
-            if (ObjectID == 0)
-            {
-                ioPerformance1.RefreshData(InstanceID, DatabaseID);
-                cpu1.InstanceID = InstanceID;
-                cpu1.RefreshData();
-                waits1.RefreshData(InstanceID);
-                blocking1.RefreshData(InstanceID, DatabaseID);
-            }
             this.SuspendLayout();
             objectExecution1.SuspendLayout();
             ioPerformance1.SuspendLayout();
@@ -94,18 +65,14 @@ namespace DBADashGUI.Performance
             blocking1.SuspendLayout();
             waits1.SuspendLayout();
 
-            ioPerformance1.Visible = ObjectID == 0;
-            cpu1.Visible = ObjectID == 0;
-            waits1.Visible = ObjectID == 0;
-            blocking1.Visible = ObjectID == 0;
-
-            this.tableLayoutPanel1.RowStyles[0].Height = ObjectID == 0 ? 20 : 0;
-            this.tableLayoutPanel1.RowStyles[1].Height = ObjectID == 0 ? 20 : 0;
-            this.tableLayoutPanel1.RowStyles[2].Height = ObjectID == 0 ? 20 : 0;
-            this.tableLayoutPanel1.RowStyles[3].Height = ObjectID == 0 ? 20 : 0;
-            this.tableLayoutPanel1.RowStyles[4].Height = ObjectID == 0 ? 20 : 100;
-
-
+            if (!objectMode)
+            {
+                ioPerformance1.RefreshData(InstanceID, DatabaseID);
+                cpu1.InstanceID = InstanceID;
+                cpu1.RefreshData();
+                waits1.RefreshData(InstanceID);
+                blocking1.RefreshData(InstanceID, DatabaseID);
+            }
 
             objectExecution1.RefreshData(InstanceID, ObjectID, DatabaseID);
             this.ResumeLayout();

@@ -3,18 +3,18 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Drawing;
+using System.Linq;
 using System.Windows.Forms;
 
 namespace DBADashGUI.Checks
 {
-    public partial class CustomChecks : UserControl
+    public partial class CustomChecks : UserControl, ISetContext
     {
         public CustomChecks()
         {
             InitializeComponent();
         }
-        public List<Int32> InstanceIDs;
-        public string ConnectionString;
+        private List<Int32> InstanceIDs;
 
         public bool IncludeCritical
         {
@@ -134,6 +134,17 @@ namespace DBADashGUI.Checks
         private ToolStripMenuItem ddCustomTest = new("Custom");
         private string context = null;
         private string test = null;
+
+
+        public void SetContext(DBADashContext context)
+        {
+            InstanceIDs = context.InstanceIDs.ToList();
+            IncludeCritical = true;
+            IncludeWarning = true;
+            IncludeNA = context.InstanceID > 0 || context.Type == SQLTreeItem.TreeType.AzureInstance;
+            IncludeOK = context.InstanceID > 0 || context.Type == SQLTreeItem.TreeType.AzureInstance;
+            RefreshData();
+        }
 
         private void RefreshContext()
         {
