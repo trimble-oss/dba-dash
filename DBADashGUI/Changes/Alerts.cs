@@ -2,18 +2,19 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Linq;
 using System.Windows.Forms;
 
 namespace DBADashGUI.Changes
 {
-    public partial class Alerts : UserControl
+    public partial class Alerts : UserControl, ISetContext
     {
         public Alerts()
         {
             InitializeComponent();
         }
 
-        public List<Int32> InstanceIDs;
+        private List<Int32> InstanceIDs;
 
         public bool UseAlertName
         {
@@ -27,8 +28,9 @@ namespace DBADashGUI.Changes
             }
         }
 
-        public void RefreshData()
+        public void SetContext(DBADashContext context)
         {
+            InstanceIDs = context.RegularInstanceIDs.ToList();
             RefreshAlertConfig();
             RefreshAlerts();
         }

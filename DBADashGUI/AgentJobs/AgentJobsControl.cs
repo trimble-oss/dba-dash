@@ -3,19 +3,19 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Drawing;
+using System.Linq;
 using System.Windows.Forms;
 
 namespace DBADashGUI.AgentJobs
 {
-    public partial class AgentJobsControl : UserControl
+    public partial class AgentJobsControl : UserControl, ISetContext
     {
-        public List<Int32> InstanceIDs;
-        public Guid JobID;
-
+        private List<Int32> InstanceIDs;
         private int? instance_id = null;
         private int instanceId;
         private Guid jobID;
-        public int StepID = -1;
+        private int StepID = -1;
+        private DBADashContext context;
 
         public bool IncludeCritical
         {
@@ -63,7 +63,19 @@ namespace DBADashGUI.AgentJobs
             }
         }
 
+        public void SetContext(DBADashContext context)
+        {
+            this.context = context;
 
+            StepID = context.JobStepID;
+            IncludeNA = context.RegularInstanceIDs.Count == 1;
+            IncludeOK = context.RegularInstanceIDs.Count == 1;
+            IncludeWarning = true;
+            IncludeCritical = true;
+            InstanceIDs = context.RegularInstanceIDs.ToList();
+
+            RefreshData();
+        }
 
         public void RefreshData()
         {
@@ -77,8 +89,8 @@ namespace DBADashGUI.AgentJobs
                 tsJobs.Visible = false;
                 dgvJobs.Visible = false;
                 jobStep1.Visible = true;
-                jobStep1.JobID = JobID;
-                jobID = JobID;
+                jobStep1.JobID = context.JobID;
+                jobID = context.JobID;
                 instanceId = InstanceIDs[0];
                 jobStep1.InstanceID = InstanceIDs[0];
                 jobStep1.StepID = StepID;
@@ -95,7 +107,7 @@ namespace DBADashGUI.AgentJobs
                 dgvJobs.DataSource = new DataView(dt);
                 dgvJobs.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
                 configureInstanceThresholdsToolStripMenuItem.Enabled = InstanceIDs.Count == 1;
-                if (JobID != Guid.Empty && dt.Rows.Count == 1)
+                if (context.JobID != Guid.Empty && dt.Rows.Count == 1)
                 {
                     ShowHistory(dt.Rows[0]);
                 }
@@ -115,9 +127,9 @@ namespace DBADashGUI.AgentJobs
                 cmd.Parameters.AddWithValue("IncludeWarning", IncludeWarning);
                 cmd.Parameters.AddWithValue("IncludeNA", IncludeNA);
                 cmd.Parameters.AddWithValue("IncludeOK", IncludeOK);
-                if (JobID != Guid.Empty)
+                if (context.JobID != Guid.Empty)
                 {
-                    cmd.Parameters.AddWithValue("JobID", JobID);
+                    cmd.Parameters.AddWithValue("JobID", context.JobID);
                 }
                 cmd.CommandType = CommandType.StoredProcedure;
                 DataTable dt = new();

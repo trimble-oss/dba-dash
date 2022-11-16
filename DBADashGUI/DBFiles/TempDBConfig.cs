@@ -3,18 +3,25 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Drawing;
+using System.Linq;
 using System.Windows.Forms;
 namespace DBADashGUI.DBFiles
 {
-    public partial class TempDBConfig : UserControl
+    public partial class TempDBConfig : UserControl, ISetContext
     {
         public TempDBConfig()
         {
             InitializeComponent();
         }
-        public List<Int32> InstanceIDs;
+        private List<Int32> InstanceIDs;
 
-        public void RefreshData()
+        public void SetContext(DBADashContext context)
+        {
+            InstanceIDs = context.RegularInstanceIDs.ToList();
+            RefreshData();
+        }
+
+        private void RefreshData()
         {
             dgvTempDB.Columns[0].Frozen = Common.FreezeKeyColumn;
             using (var cn = new SqlConnection(Common.ConnectionString))

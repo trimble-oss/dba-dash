@@ -3,29 +3,16 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Drawing;
+using System.Linq;
 using System.Windows.Forms;
 
 namespace DBADashGUI.LogShipping
 {
-    public partial class LogShippingControl : UserControl, INavigation
+    public partial class LogShippingControl : UserControl, INavigation, ISetContext
     {
 
-        private List<int> instanceIDs;
-        private List<int> cachedInstanceIDs;
-
-        public List<int> InstanceIDs
-        {
-            get
-            {
-                return instanceIDs;
-            }
-            set
-            {
-                cachedInstanceIDs = value;
-                instanceIDs = value;
-            }
-        }
-
+        private List<int> InstanceIDs;
+        private DBADashContext context;
 
         public bool IncludeCritical
         {
@@ -75,6 +62,18 @@ namespace DBADashGUI.LogShipping
 
         public bool CanNavigateBack { get => tsBack.Enabled; }
 
+        public void SetContext(DBADashContext context)
+        {
+            this.context = context;
+            IncludeNA = context.RegularInstanceIDs.Count == 1;
+            IncludeOK = context.RegularInstanceIDs.Count == 1;
+            IncludeWarning = true;
+            IncludeCritical = true;
+            InstanceIDs = context.RegularInstanceIDs.ToList();
+
+            RefreshData();
+        }
+
         private void RefreshSummary()
         {
             using (var cn = new SqlConnection(Common.ConnectionString))
@@ -110,7 +109,7 @@ namespace DBADashGUI.LogShipping
 
         public void RefreshData()
         {
-            tsBack.Enabled = (cachedInstanceIDs.Count > 1 && instanceIDs.Count == 1);
+            tsBack.Enabled = (context.RegularInstanceIDs.Count > 1 && InstanceIDs.Count == 1);
             RefreshSummary();
             using (var cn = new SqlConnection(Common.ConnectionString))
             using (var cmd = new SqlCommand("dbo.LogShipping_Get", cn) { CommandType = CommandType.StoredProcedure })
@@ -235,7 +234,7 @@ namespace DBADashGUI.LogShipping
                 var r = (DataRowView)dgvSummary.Rows[e.RowIndex].DataBoundItem;
                 if (e.ColumnIndex == 0)
                 {
-                    instanceIDs = new List<int> { (int)r["InstanceID"] };
+                    InstanceIDs = new List<int> { (int)r["InstanceID"] };
                     IncludeCritical = true;
                     IncludeNA = true;
                     IncludeOK = true;
@@ -259,12 +258,7 @@ namespace DBADashGUI.LogShipping
         {
             if (CanNavigateBack)
             {
-                instanceIDs = cachedInstanceIDs;
-                IncludeCritical = true;
-                IncludeNA = false;
-                IncludeOK = false;
-                IncludeWarning = true;
-                RefreshData();
+                SetContext(context);
                 return true;
             }
             else

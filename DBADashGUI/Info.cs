@@ -1,18 +1,23 @@
 ﻿using Microsoft.Data.SqlClient;
-using System;
 using System.Data;
 using System.Windows.Forms;
 
 namespace DBADashGUI
 {
-    public partial class Info : UserControl
+    public partial class Info : UserControl, ISetContext
     {
         public Info()
         {
             InitializeComponent();
         }
 
-        public Int32 InstanceID;
+        private int InstanceID;
+
+        public void SetContext(DBADashContext context)
+        {
+            InstanceID = context.InstanceID;
+            RefreshData();
+        }
 
         public void RefreshData()
         {

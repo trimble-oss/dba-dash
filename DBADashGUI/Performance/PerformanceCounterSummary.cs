@@ -7,15 +7,20 @@ using System.Windows.Forms;
 
 namespace DBADashGUI.Performance
 {
-    public partial class PerformanceCounterSummary : UserControl
+    public partial class PerformanceCounterSummary : UserControl, ISetContext, IRefreshData
     {
         public PerformanceCounterSummary()
         {
             InitializeComponent();
         }
 
-        public Int32 InstanceID { get; set; }
+        private Int32 InstanceID { get; set; }
 
+        public void SetContext(DBADashContext context)
+        {
+            InstanceID = context.InstanceID;
+            RefreshData();
+        }
 
         public void RefreshData()
         {
@@ -23,8 +28,6 @@ namespace DBADashGUI.Performance
             RefreshSummary();
             RefreshChart();
         }
-
-
 
         private void RefreshSummary()
         {
@@ -35,7 +38,6 @@ namespace DBADashGUI.Performance
                 performanceCounterSummaryGrid1.RefreshData();
             }
         }
-
 
         private void TsRefresh_Click(object sender, EventArgs e)
         {

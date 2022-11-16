@@ -6,11 +6,12 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Drawing;
+using System.Linq;
 using System.Windows.Forms;
 
 namespace DBADashGUI
 {
-    public partial class SpaceTracking : UserControl, INavigation
+    public partial class SpaceTracking : UserControl, INavigation, ISetContext
     {
         public SpaceTracking()
         {
@@ -18,11 +19,20 @@ namespace DBADashGUI
         }
 
 
-        public List<Int32> InstanceIDs;
-        public Int32 DatabaseID = -1;
-        public string DBName = "";
-        public string InstanceGroupName = "";
+        private List<Int32> InstanceIDs;
+        private Int32 DatabaseID = -1;
+        private string DBName = "";
+        private string InstanceGroupName = "";
         public bool CanNavigateBack => tsBack.Enabled;
+
+        public void SetContext(DBADashContext context)
+        {
+            InstanceIDs = context.InstanceIDs.ToList();
+            DatabaseID = context.DatabaseID;
+            InstanceGroupName = context.InstanceName;
+            DBName = context.DatabaseName;
+            RefreshData();
+        }
 
         public void RefreshData()
         {

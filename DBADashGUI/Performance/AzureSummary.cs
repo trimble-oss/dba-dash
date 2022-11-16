@@ -10,15 +10,20 @@ using System.Windows.Forms;
 
 namespace DBADashGUI.Performance
 {
-    public partial class AzureSummary : UserControl
+    public partial class AzureSummary : UserControl, ISetContext, IRefreshData
     {
         public AzureSummary()
         {
             InitializeComponent();
         }
 
-        public List<Int32> InstanceIDs;
+        private List<Int32> InstanceIDs;
 
+        public void SetContext(DBADashContext context)
+        {
+            this.InstanceIDs = context.AzureInstanceIDs.ToList();
+            RefreshData();
+        }
 
         public void RefreshData()
         {

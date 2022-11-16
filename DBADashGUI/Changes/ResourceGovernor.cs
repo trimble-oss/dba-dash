@@ -2,13 +2,14 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Linq;
 using System.Windows.Forms;
 
 namespace DBADashGUI.Changes
 {
-    public partial class ResourceGovernor : UserControl, INavigation
+    public partial class ResourceGovernor : UserControl, INavigation, ISetContext
     {
-        public List<Int32> InstanceIDs;
+        private List<Int32> InstanceIDs;
         private List<Int32> backupInstanceIDs;
 
         public bool CanNavigateBack => tsBack.Enabled;
@@ -18,7 +19,13 @@ namespace DBADashGUI.Changes
             InitializeComponent();
         }
 
-        public void RefreshData()
+        public void SetContext(DBADashContext context)
+        {
+            InstanceIDs = context.RegularInstanceIDs.ToList();
+            RefreshData();
+        }
+
+        private void RefreshData()
         {
             tsBack.Enabled = false;
             backupInstanceIDs = new List<int>();

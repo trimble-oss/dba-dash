@@ -2,18 +2,19 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Linq;
 using System.Windows.Forms;
 
 namespace DBADashGUI.Changes
 {
-    public partial class TraceFlagHistory : UserControl
+    public partial class TraceFlagHistory : UserControl, ISetContext
     {
         public TraceFlagHistory()
         {
             InitializeComponent();
         }
 
-        public List<Int32> InstanceIDs;
+        private List<Int32> InstanceIDs;
 
 
         // Pivot data returned by TraceFlags_Get by trace flag
@@ -95,11 +96,11 @@ namespace DBADashGUI.Changes
             }
         }
 
-        public void RefreshData()
+        public void SetContext(DBADashContext context)
         {
+            InstanceIDs = context.RegularInstanceIDs.ToList();
             RefreshFlags();
             RefreshHistory();
-
         }
 
         private void TsRefreshHistory_Click(object sender, EventArgs e)

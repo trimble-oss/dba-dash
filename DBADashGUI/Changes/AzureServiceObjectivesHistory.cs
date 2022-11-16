@@ -2,21 +2,23 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Linq;
 using System.Windows.Forms;
 
 namespace DBADashGUI.Changes
 {
-    public partial class AzureServiceObjectivesHistory : UserControl
+    public partial class AzureServiceObjectivesHistory : UserControl, ISetContext
     {
         public AzureServiceObjectivesHistory()
         {
             InitializeComponent();
         }
 
-        public List<Int32> InstanceIDs;
+        private List<Int32> InstanceIDs;
 
-        public void RefreshData()
+        public void SetContext(DBADashContext context)
         {
+            InstanceIDs = context.AzureInstanceIDs.ToList();
             RefreshDB();
             RefreshPool();
         }

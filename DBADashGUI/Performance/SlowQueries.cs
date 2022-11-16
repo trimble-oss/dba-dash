@@ -10,14 +10,14 @@ using System.Windows.Forms;
 
 namespace DBADashGUI
 {
-    public partial class SlowQueries : UserControl, INavigation
+    public partial class SlowQueries : UserControl, INavigation, ISetContext, IRefreshData
     {
         public SlowQueries()
         {
             InitializeComponent();
         }
 
-        public List<Int32> InstanceIDs;
+        private List<Int32> InstanceIDs;
         string groupBy = "InstanceDisplayName";
         string _db = "";
         public string DBName
@@ -302,6 +302,13 @@ namespace DBADashGUI
             });
         }
 
+        public void SetContext(DBADashContext context)
+        {
+            InstanceIDs = context.InstanceIDs.ToList();
+            DBName = context.DatabaseName;
+            ResetFilters();
+            RefreshData();
+        }
         public void RefreshData()
         {
             SetFilterFormatting();

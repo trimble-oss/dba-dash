@@ -4,20 +4,21 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Drawing;
+using System.Linq;
 using System.Windows.Forms;
 using static DBADashGUI.DBADashStatus;
 
 namespace DBADashGUI.Properties
 {
-    public partial class DrivesControl : UserControl
+    public partial class DrivesControl : UserControl, ISetContext
     {
         public DrivesControl()
         {
             InitializeComponent();
         }
 
-        public List<Int32> InstanceIDs;
         public Int32 DrivesViewMaxRows = 30;
+        private DBADashContext context;
 
         public bool IncludeCritical
         {
@@ -78,7 +79,7 @@ namespace DBADashGUI.Properties
             using (var da = new SqlDataAdapter(cmd))
             {
                 cn.Open();
-                cmd.Parameters.AddWithValue("InstanceIDs", String.Join(",", InstanceIDs));
+                cmd.Parameters.AddWithValue("InstanceIDs", String.Join(",", context.RegularInstanceIDs));
                 cmd.Parameters.AddWithValue("IncludeCritical", IncludeCritical);
                 cmd.Parameters.AddWithValue("IncludeWarning", IncludeWarning);
                 cmd.Parameters.AddWithValue("IncludeNA", IncludeNA);
@@ -90,6 +91,16 @@ namespace DBADashGUI.Properties
                 Common.ConvertUTCToLocal(ref dt);
                 return dt;
             }
+        }
+
+        public void SetContext(DBADashContext context)
+        {
+            this.context = context;
+            IncludeNA = context.RegularInstanceIDs.Count == 1;
+            IncludeOK = context.RegularInstanceIDs.Count == 1;
+            IncludeWarning = true;
+            IncludeCritical = true;
+            RefreshData();
         }
 
         public void RefreshData()
@@ -107,7 +118,7 @@ namespace DBADashGUI.Properties
                 ShowDrivesView();
             }
 
-            configureInstanceThresholdsToolStripMenuItem.Enabled = InstanceIDs.Count == 1;
+            configureInstanceThresholdsToolStripMenuItem.Enabled = context.RegularInstanceIDs.Count == 1;
         }
 
         private DataGridView dgv;
@@ -243,7 +254,7 @@ namespace DBADashGUI.Properties
                 drv.Drive.DriveCheckTypeChar = char.Parse((string)r["DriveCheckType"]);
                 drv.Drive.SnapshotDate = (DateTime)r["SnapshotDate"];
                 drv.Drive.SnapshotStatus = (DBADashStatusEnum)r["SnapshotStatus"];
-                drv.DisplayInstanceName = InstanceIDs.Count > 1;
+                drv.DisplayInstanceName = context.RegularInstanceIDs.Count > 1;
                 drv.Dock = DockStyle.Top;
                 driveControls.Add(drv);
             }
@@ -278,9 +289,9 @@ namespace DBADashGUI.Properties
 
         private void ConfigureInstanceThresholdsToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            if (InstanceIDs.Count == 1)
+            if (context.RegularInstanceIDs.Count == 1)
             {
-                Configure(InstanceIDs[0], -1);
+                Configure(context.RegularInstanceIDs.First(), -1);
             }
         }
 
@@ -358,5 +369,6 @@ namespace DBADashGUI.Properties
             dgv.Columns["Configure"].Visible = true;
             dgv.Columns["History"].Visible = true;
         }
+
     }
 }

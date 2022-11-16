@@ -2,18 +2,19 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Linq;
 using System.Windows.Forms;
 
 namespace DBADashGUI.HA
 {
-    public partial class Mirroring : UserControl
+    public partial class Mirroring : UserControl, ISetContext
     {
         public Mirroring()
         {
             InitializeComponent();
         }
 
-        public List<Int32> InstanceIDs;
+        private List<Int32> InstanceIDs;
 
         public bool SummaryMode
         {
@@ -27,7 +28,13 @@ namespace DBADashGUI.HA
             }
         }
 
-        public void RefreshData()
+        public void SetContext(DBADashContext context)
+        {
+            InstanceIDs = context.RegularInstanceIDs.ToList();
+            RefreshData();
+        }
+
+        private void RefreshData()
         {
             if (SummaryMode)
             {

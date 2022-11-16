@@ -9,21 +9,24 @@ using System.Windows.Forms;
 
 namespace DBADashGUI.AgentJobs
 {
-    public partial class JobStats : UserControl
+    public partial class JobStats : UserControl, ISetContext, IRefreshData, INavigation
     {
         public JobStats()
         {
             InitializeComponent();
         }
 
-        public int InstanceID { get; set; }
-        public Guid JobID { get; set; }
-        public int StepID { get; set; } = 0;
+        private int InstanceID { get; set; }
+        private Guid JobID { get; set; }
+        private int StepID { get; set; } = 0;
+
+        public bool CanNavigateBack => StepID != context.JobStepID || JobID != context.JobID;
 
         private int dateGrouping = 60;
 
         private Guid selectedJobID;
         private int selectedStepID = -1;
+        private DBADashContext context;
 
         public DataTable GetJobStats()
         {
@@ -54,7 +57,11 @@ namespace DBADashGUI.AgentJobs
             {
                 cmd.Parameters.AddWithValue("InstanceID", InstanceID);
                 cmd.Parameters.AddWithValue("JobID", JobID);
-                if (JobID == Guid.Empty)
+                if(JobID == Guid.Empty)
+                {
+                    cmd.Parameters.AddWithValue("StepID", 0);
+                }
+                else if (StepID >= 0)
                 {
                     cmd.Parameters.AddWithValue("StepID", StepID);
                 }
@@ -76,11 +83,20 @@ namespace DBADashGUI.AgentJobs
                 {"TotalDurationSec", new ColumnMetaData{Alias="Total Duration",isVisible=false } }
         };
 
+        public void SetContext(DBADashContext context)
+        {
+            this.context = context;
+            InstanceID = context.InstanceID;
+            JobID = context.JobID;
+            StepID = context.JobStepID;
+            selectedStepID = context.JobStepID >= 0 ? context.JobStepID : 0;
+            selectedJobID = context.JobID;
+            RefreshData();
+        }
+
         public void RefreshData()
         {
-            tsBack.Enabled = JobID != Guid.Empty;
-            selectedJobID = Guid.Empty;
-            selectedStepID = -1;
+            tsBack.Enabled = CanNavigateBack;
             tsJob.Visible = false;
             dateGrouping = Common.DateGrouping(DateRange.DurationMins, 200);
             tsDateGroup.Text = Common.DateGroupString(dateGrouping);
@@ -216,15 +232,7 @@ namespace DBADashGUI.AgentJobs
 
         private void TsBack_Click(object sender, EventArgs e)
         {
-            if (StepID > 0)
-            {
-                StepID = 0;
-            }
-            else
-            {
-                JobID = Guid.Empty;
-            }
-            RefreshData();
+            _ = NavigateBack();
         }
 
         private void TsCopy_Click(object sender, EventArgs e)
@@ -235,6 +243,27 @@ namespace DBADashGUI.AgentJobs
         private void TsExcel_Click(object sender, EventArgs e)
         {
             Common.PromptSaveDataGridView(ref dgv);
+        }
+
+        public bool NavigateBack()
+        {
+            if (CanNavigateBack)
+            {
+                if (StepID != context.JobStepID)
+                {
+                    StepID = context.JobStepID;
+                }
+                else if (JobID != context.JobID)
+                {
+                    JobID = context.JobID;
+                }
+                RefreshData();
+                return true;
+            }
+            else
+            {
+                return false;
+            }
         }
     }
 }

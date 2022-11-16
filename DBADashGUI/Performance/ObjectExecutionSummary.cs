@@ -8,17 +8,17 @@ using System.Windows.Forms;
 
 namespace DBADashGUI.Performance
 {
-    public partial class ObjectExecutionSummary : UserControl
+    public partial class ObjectExecutionSummary : UserControl, ISetContext, IRefreshData
     {
         public ObjectExecutionSummary()
         {
             InitializeComponent();
         }
 
-        public string Instance { get; set; }
-        public Int32 InstanceID { get; set; }
-        public Int32 DatabaseID { get; set; }
-        public Int64 ObjectID { get; set; }
+        private string Instance { get; set; }
+        private Int32 InstanceID { get; set; }
+        private Int32 DatabaseID { get; set; }
+        private Int64 ObjectID { get; set; }
 
         public string Types
         {
@@ -164,6 +164,14 @@ namespace DBADashGUI.Performance
             }
         }
 
+        public void SetContext(DBADashContext context)
+        {
+            Instance = context.InstanceName;
+            InstanceID = context.InstanceID;
+            DatabaseID = context.DatabaseID;
+            ObjectID = (context.Type is SQLTreeItem.TreeType.Database or SQLTreeItem.TreeType.AzureDatabase) ? -1 : context.ObjectID;
+            RefreshData();
+        }
 
         public void RefreshData()
         {

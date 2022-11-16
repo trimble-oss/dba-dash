@@ -3,12 +3,13 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Drawing;
+using System.Linq;
 using System.Windows.Forms;
 using static DBADashGUI.DBADashStatus;
 
 namespace DBADashGUI.Backups
 {
-    public partial class BackupsControl : UserControl, INavigation
+    public partial class BackupsControl : UserControl, INavigation, ISetContext
     {
 
         public bool IncludeCritical
@@ -59,13 +60,19 @@ namespace DBADashGUI.Backups
 
         public bool CanNavigateBack { get => tsBack.Enabled; }
 
-        public List<Int32> InstanceIDs { get; set; }
+        private List<Int32> InstanceIDs { get; set; }
         private int DatabaseID { get; set; }
 
         private List<Int32> backupInstanceIDs;
 
-        public void RefreshBackups()
+        public void SetContext(DBADashContext context)
         {
+            InstanceIDs = context.RegularInstanceIDs.ToList();
+            IncludeNA = context.RegularInstanceIDs.Count == 1;
+            IncludeOK = context.RegularInstanceIDs.Count == 1;
+            IncludeWarning = true;
+            IncludeCritical = true;
+
             DatabaseID = 0;
             dgvBackups.DataSource = null;
             dgvBackups.Columns.Clear();
@@ -410,12 +417,6 @@ namespace DBADashGUI.Backups
             {
                 ConfigureThresholds(InstanceIDs[0], -1);
             }
-        }
-
-        private void CriticalToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            RefreshBackups();
-
         }
 
         private void TsFilter_Click(object sender, EventArgs e)

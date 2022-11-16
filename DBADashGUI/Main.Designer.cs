@@ -1059,9 +1059,6 @@
             // 
             this.tags1.AllTags = null;
             this.tags1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.tags1.InstanceID = 0;
-            this.tags1.InstanceIDs = null;
-            this.tags1.InstanceName = null;
             this.tags1.Location = new System.Drawing.Point(3, 3);
             this.tags1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.tags1.Name = "tags1";
@@ -1113,7 +1110,6 @@
             this.backupsControl1.IncludeNA = false;
             this.backupsControl1.IncludeOK = false;
             this.backupsControl1.IncludeWarning = false;
-            this.backupsControl1.InstanceIDs = null;
             this.backupsControl1.Location = new System.Drawing.Point(3, 3);
             this.backupsControl1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.backupsControl1.Name = "backupsControl1";
@@ -1138,7 +1134,6 @@
             this.logShippingControl1.IncludeNA = false;
             this.logShippingControl1.IncludeOK = false;
             this.logShippingControl1.IncludeWarning = false;
-            this.logShippingControl1.InstanceIDs = null;
             this.logShippingControl1.Location = new System.Drawing.Point(3, 3);
             this.logShippingControl1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.logShippingControl1.Name = "logShippingControl1";
@@ -1252,13 +1247,10 @@
             // performance1
             // 
             this.performance1.AutoScroll = true;
-            this.performance1.DatabaseID = 0;
             this.performance1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.performance1.InstanceID = 0;
             this.performance1.Location = new System.Drawing.Point(3, 3);
             this.performance1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.performance1.Name = "performance1";
-            this.performance1.ObjectID = ((long)(0));
             this.performance1.Size = new System.Drawing.Size(186, 61);
             this.performance1.TabIndex = 0;
             // 
@@ -1278,8 +1270,6 @@
             this.collectionErrors1.AckErrors = false;
             this.collectionErrors1.Days = 0;
             this.collectionErrors1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.collectionErrors1.InstanceGroupName = null;
-            this.collectionErrors1.InstanceID = 0;
             this.collectionErrors1.Location = new System.Drawing.Point(3, 3);
             this.collectionErrors1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.collectionErrors1.Name = "collectionErrors1";
@@ -1304,7 +1294,6 @@
             this.collectionDates1.IncludeNA = false;
             this.collectionDates1.IncludeOK = false;
             this.collectionDates1.IncludeWarning = false;
-            this.collectionDates1.InstanceIDs = null;
             this.collectionDates1.Location = new System.Drawing.Point(3, 3);
             this.collectionDates1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.collectionDates1.Name = "collectionDates1";
@@ -1676,7 +1665,6 @@
             // performanceCounterSummary1
             // 
             this.performanceCounterSummary1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.performanceCounterSummary1.InstanceID = 0;
             this.performanceCounterSummary1.Location = new System.Drawing.Point(3, 3);
             this.performanceCounterSummary1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.performanceCounterSummary1.Name = "performanceCounterSummary1";
@@ -1696,14 +1684,10 @@
             // 
             // objectExecutionSummary1
             // 
-            this.objectExecutionSummary1.DatabaseID = 0;
             this.objectExecutionSummary1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.objectExecutionSummary1.Instance = null;
-            this.objectExecutionSummary1.InstanceID = 0;
             this.objectExecutionSummary1.Location = new System.Drawing.Point(3, 3);
             this.objectExecutionSummary1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.objectExecutionSummary1.Name = "objectExecutionSummary1";
-            this.objectExecutionSummary1.ObjectID = ((long)(0));
             this.objectExecutionSummary1.Size = new System.Drawing.Size(186, 61);
             this.objectExecutionSummary1.TabIndex = 0;
             this.objectExecutionSummary1.Types = "";
@@ -1723,7 +1707,6 @@
             // 
             this.waitsSummary1.DateGrouping = 1;
             this.waitsSummary1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.waitsSummary1.InstanceID = 0;
             this.waitsSummary1.Location = new System.Drawing.Point(3, 3);
             this.waitsSummary1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.waitsSummary1.Name = "waitsSummary1";
@@ -1765,8 +1748,6 @@
             // jobDDLHistory1
             // 
             this.jobDDLHistory1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.jobDDLHistory1.InstanceID = 0;
-            this.jobDDLHistory1.JobID = new System.Guid("00000000-0000-0000-0000-000000000000");
             this.jobDDLHistory1.Location = new System.Drawing.Point(3, 3);
             this.jobDDLHistory1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.jobDDLHistory1.Name = "jobDDLHistory1";
@@ -1907,13 +1888,10 @@
             // jobStats1
             // 
             this.jobStats1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.jobStats1.InstanceID = 0;
-            this.jobStats1.JobID = new System.Guid("00000000-0000-0000-0000-000000000000");
             this.jobStats1.Location = new System.Drawing.Point(3, 3);
             this.jobStats1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.jobStats1.Name = "jobStats1";
             this.jobStats1.Size = new System.Drawing.Size(186, 61);
-            this.jobStats1.StepID = 0;
             this.jobStats1.TabIndex = 0;
             // 
             // tabDBADash
@@ -1979,13 +1957,11 @@
             // 
             // identityColumns1
             // 
-            this.identityColumns1.DatabaseID = 0;
             this.identityColumns1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.identityColumns1.IncludeCritical = true;
             this.identityColumns1.IncludeNA = false;
             this.identityColumns1.IncludeOK = false;
             this.identityColumns1.IncludeWarning = true;
-            this.identityColumns1.InstanceIDs = null;
             this.identityColumns1.Location = new System.Drawing.Point(3, 3);
             this.identityColumns1.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.identityColumns1.Name = "identityColumns1";
@@ -2006,7 +1982,6 @@
             // osLoadedModules1
             // 
             this.osLoadedModules1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.osLoadedModules1.InstanceIDs = null;
             this.osLoadedModules1.Location = new System.Drawing.Point(3, 3);
             this.osLoadedModules1.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.osLoadedModules1.Name = "osLoadedModules1";

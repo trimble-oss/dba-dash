@@ -4,14 +4,15 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Drawing;
+using System.Linq;
 using System.Windows.Forms;
 namespace DBADashGUI.Changes
 {
-    public partial class DBOptions : UserControl
+    public partial class DBOptions : UserControl, ISetContext
     {
 
-        public List<Int32> InstanceIDs;
-        public Int32 DatabaseID;
+        private List<Int32> InstanceIDs;
+        private Int32 DatabaseID;
 
         public DBOptions()
         {
@@ -38,7 +39,14 @@ namespace DBADashGUI.Changes
             }
         }
 
-        public void RefreshData()
+        public void SetContext(DBADashContext context)
+        {
+            InstanceIDs = context.InstanceIDs.ToList();
+            DatabaseID = context.DatabaseID;
+            RefreshData();
+        }
+
+        private void RefreshData()
         {
             if (InstanceIDs != null)
             {

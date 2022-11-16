@@ -8,14 +8,14 @@ using System.Windows.Forms;
 
 namespace DBADashGUI.Performance
 {
-    public partial class MemoryUsage : UserControl
+    public partial class MemoryUsage : UserControl, ISetContext, IRefreshData
     {
         public MemoryUsage()
         {
             InitializeComponent();
         }
 
-        public int InstanceID;
+        private int InstanceID;
 
         private bool isClerksRefreshed = false;
         private bool isConfigRefreshed = false;
@@ -62,6 +62,12 @@ namespace DBADashGUI.Performance
                 tsAgg.Visible = value == ChartViews.MemoryClerk;
                 tsPieChart.Enabled = value != ChartViews.Pie;
             }
+        }
+
+        public void SetContext(DBADashContext context)
+        {
+            InstanceID = context.InstanceID;
+            RefreshData();
         }
 
         public void RefreshData()

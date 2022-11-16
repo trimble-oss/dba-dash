@@ -3,11 +3,12 @@ using Microsoft.Data.SqlClient;
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Linq;
 using System.Windows.Forms;
 
 namespace DBADashGUI.Changes
 {
-    public partial class AzureDBResourceGovernance : UserControl
+    public partial class AzureDBResourceGovernance : UserControl, ISetContext
     {
         public AzureDBResourceGovernance()
         {
@@ -15,6 +16,12 @@ namespace DBADashGUI.Changes
         }
 
         public List<Int32> InstanceIDs;
+
+        public void SetContext(DBADashContext context)
+        {
+            InstanceIDs = context.AzureInstanceIDs.ToList();
+            RefreshData();
+        }
 
         public void RefreshData()
         {

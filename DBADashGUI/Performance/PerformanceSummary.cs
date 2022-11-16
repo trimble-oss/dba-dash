@@ -10,11 +10,12 @@ using static DBADashGUI.Main;
 
 namespace DBADashGUI.Performance
 {
-    public partial class PerformanceSummary : UserControl
+    public partial class PerformanceSummary : UserControl, ISetContext, IRefreshData
     {
 
-        public List<Int32> InstanceIDs;
-        public string TagIDs;
+        //public List<Int32> InstanceIDs;
+        private DBADashContext context;
+        //public string TagIDs;
         private readonly List<KeyValuePair<string, PersistedColumnLayout>> standardLayout;
 
         public Dictionary<int, Counter> SelectedPerformanceCounters = new();
@@ -26,6 +27,12 @@ namespace DBADashGUI.Performance
             standardLayout = GetColumnLayout();
         }
 
+
+        public void SetContext(DBADashContext context)
+        {
+            this.context = context;
+            RefreshData();
+        }
 
         public void RefreshData()
         {
@@ -145,14 +152,9 @@ namespace DBADashGUI.Performance
             using (var da = new SqlDataAdapter(cmd))
             {
                 cn.Open();
-                if (InstanceIDs.Count > 0)
-                {
-                    cmd.Parameters.AddWithValue("InstanceIDs", string.Join(",", InstanceIDs));
-                }
-                else
-                {
-                    cmd.Parameters.AddWithValue("TagIDs", TagIDs);
-                }
+
+                cmd.Parameters.AddWithValue("InstanceIDs", string.Join(",", context.InstanceIDs));
+
                 var counters = String.Join(",", SelectedPerformanceCounters.Values.Select(pc => pc.CounterID));
                 cmd.Parameters.AddWithValue("Counters", counters);
                 cmd.Parameters.AddWithValue("FromDate", DateRange.FromUTC);
@@ -180,14 +182,9 @@ namespace DBADashGUI.Performance
             using (var da = new SqlDataAdapter(cmd))
             {
                 cn.Open();
-                if (InstanceIDs.Count > 0)
-                {
-                    cmd.Parameters.AddWithValue("InstanceIDs", string.Join(",", InstanceIDs));
-                }
-                else
-                {
-                    cmd.Parameters.AddWithValue("TagIDs", TagIDs);
-                }
+
+                cmd.Parameters.AddWithValue("InstanceIDs", string.Join(",", context.InstanceIDs));
+
                 cmd.Parameters.AddWithValue("FromDate", DateRange.FromUTC);
                 cmd.Parameters.AddWithValue("ToDate", DateRange.ToUTC);
                 cmd.Parameters.AddWithValue("@UTCOffset", Common.UtcOffset);
@@ -547,7 +544,7 @@ namespace DBADashGUI.Performance
                 LoadPersistedColumnLayout(selectedview.ColumnLayout);
                 tsDeleteView.Visible = !e.IsGlobal || DBADashUser.HasManageGlobalViews;
             }
-            if (InstanceIDs != null)
+            if (context != null)
             {
                 RefreshData();
             }
