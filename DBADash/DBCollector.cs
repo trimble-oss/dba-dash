@@ -329,10 +329,12 @@ namespace DBADash
             }
         }
 
-        public void GetInstance()
+
+        /// <summary>
+        /// Add MetaData relating to the DBA Dash service used for collection.
+        /// </summary>
+        private void AddDBADashServiceMetaData(ref DataTable dt)
         {
-            StartCollection(CollectionType.Instance);
-            var dt = GetDT("DBADash", SqlStrings.Instance, CollectionCommandTimeout.DefaultCommandTimeout);
             dt.Columns.Add("AgentVersion", typeof(string));
             dt.Columns.Add("ConnectionID", typeof(string));
             dt.Columns.Add("AgentHostName", typeof(string));
@@ -342,6 +344,13 @@ namespace DBADash
             dt.Rows[0]["AgentHostName"] = dashAgent.AgentHostName;
             dt.Rows[0]["AgentServiceName"] = dashAgent.AgentServiceName;
             dt.Rows[0]["AgentPath"] = dashAgent.AgentPath;
+        }
+
+        public void GetInstance()
+        {
+            StartCollection(CollectionType.Instance);
+            var dt = GetDT("DBADash", SqlStrings.Instance, CollectionCommandTimeout.DefaultCommandTimeout);
+            AddDBADashServiceMetaData(ref dt);
 
             computerName = (string)dt.Rows[0]["ComputerNamePhysicalNetBIOS"];
             dbName = (string)dt.Rows[0]["DBName"];
@@ -349,6 +358,7 @@ namespace DBADash
             productVersion = (string)dt.Rows[0]["ProductVersion"];
             string hostPlatform = (string)dt.Rows[0]["host_platform"];
             engineEdition = (DatabaseEngineEdition)Convert.ToInt32(dt.Rows[0]["EngineEdition"]);
+            string containedAGName = Convert.ToString(dt.Rows[0]["contained_availability_group_name"]);
 
             if (!Enum.TryParse(hostPlatform, out platform))
             {
@@ -385,6 +395,10 @@ namespace DBADash
                 {
                     dt.Rows[0]["ConnectionID"] = instanceName + "|" + dbName;
                     noWMI = true;
+                }
+                else if (!string.IsNullOrEmpty(containedAGName)) // Use the name of the contained AG as the ConnectionID.
+                {
+                    dt.Rows[0]["ConnectionID"] = containedAGName;
                 }
                 else
                 {
