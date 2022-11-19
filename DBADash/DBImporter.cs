@@ -83,8 +83,6 @@ namespace DBADash
             dtErrors.Rows.Add(rError);
         }
 
-
-
         // handle schema changes between agent versions
         private void UpgradeDS()
         {
@@ -131,6 +129,10 @@ namespace DBADash
                     }
                     dtDB.Columns.Remove("owner_sid_string");
                     newCol.SetOrdinal(pos);
+                }
+                if (!dtDB.Columns.Contains("is_ledger_on"))
+                {
+                    dtDB.Columns.Add("is_ledger_on", typeof(bool));
                 }
             }
             if (data.Tables.Contains("Backups"))
@@ -370,7 +372,6 @@ namespace DBADash
             }
         }
 
-
         private void Update(string tableName)
         {
             var dt = data.Tables[tableName];
@@ -390,7 +391,6 @@ namespace DBADash
                 }
             }
         }
-
 
         public void InsertErrors()
         {
@@ -426,8 +426,6 @@ namespace DBADash
                 }
             }
         }
-
-
 
         private Int32 UpdateInstance(ref DataRow rInstance)
         {
@@ -482,9 +480,6 @@ namespace DBADash
                 }
             }
         }
-
-
-
 
     }
 }

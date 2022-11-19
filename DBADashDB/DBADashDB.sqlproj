@@ -125,12 +125,11 @@
     <Build Include="dbo\Views\LogShippingStatus.sql" />
     <Build Include="dbo\Views\DriveStatus.sql" />
     <Build Include="dbo\Stored Procedures\Instance_Upd.sql" />
-    <Build Include="dbo\Stored Procedures\Database_Upd.sql" />
     <Build Include="dbo\Stored Procedures\Drives_Upd.sql" />
     <Build Include="dbo\Stored Procedures\Backups_Upd.sql" />
     <Build Include="dbo\Stored Procedures\AgentJobs_Upd.sql" />
     <Build Include="dbo\Stored Procedures\LogRestores_Upd.sql" />
-    <Build Include="dbo\User Defined Types\SQLDB.sql" />
+    <Build Include="dbo\User Defined Types\Databases.sql" />
     <Build Include="dbo\User Defined Types\Drives.sql" />
     <Build Include="dbo\User Defined Types\Backups.sql" />
     <Build Include="dbo\User Defined Types\AgentJobs.sql" />

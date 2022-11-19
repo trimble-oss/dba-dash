@@ -6,11 +6,11 @@ using System.Data;
 using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
+
 namespace DBADashGUI.Changes
 {
     public partial class DBOptions : UserControl, ISetContext
     {
-
         private List<Int32> InstanceIDs;
         private Int32 DatabaseID;
 
@@ -96,7 +96,7 @@ namespace DBADashGUI.Changes
             dgv.Columns[0].Frozen = Common.FreezeKeyColumn;
         }
 
-        private void RefreshDBInfo()
+        public DataTable GetDBInfo()
         {
             using (var cn = new SqlConnection(Common.ConnectionString))
             using (var cmd = new SqlCommand("dbo.DatabasesAllInfo_Get", cn) { CommandType = CommandType.StoredProcedure })
@@ -110,25 +110,33 @@ namespace DBADashGUI.Changes
                 ;
                 DataTable dt = new();
                 da.Fill(dt);
-                if (dt.Rows.Count == 1)
+                return dt;
+            }
+        }
+
+        private void RefreshDBInfo()
+        {
+            DataTable dt = GetDBInfo();
+
+            if (dt.Rows.Count == 1)
+            {
+                Pivot(ref dt);
+            }
+            else
+            {
+                dgv.DataSource = dt;
+                dgv.Columns["InstanceID"].Visible = false;
+                dgv.Columns["DatabaseID"].Visible = false;
+                foreach (DataGridViewColumn col in dgv.Columns)
                 {
-                    Pivot(ref dt);
+                    col.HeaderText = col.HeaderText.Titleize();
+                    col.SortMode = DataGridViewColumnSortMode.Automatic;
                 }
-                else
-                {
-                    dgv.DataSource = dt;
-                    dgv.Columns["InstanceID"].Visible = false;
-                    dgv.Columns["DatabaseID"].Visible = false;
-                    foreach (DataGridViewColumn col in dgv.Columns)
-                    {
-                        col.HeaderText = col.HeaderText.Titleize();
-                    }
-                    dgv.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
-                    dgv.Columns[0].Frozen = Common.FreezeKeyColumn;
-                    dgv.Columns[1].Frozen = Common.FreezeKeyColumn; //hidden
-                    dgv.Columns[2].Frozen = Common.FreezeKeyColumn; //hidden
-                    dgv.Columns[3].Frozen = Common.FreezeKeyColumn;
-                }
+                dgv.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
+                dgv.Columns[0].Frozen = Common.FreezeKeyColumn;
+                dgv.Columns[1].Frozen = Common.FreezeKeyColumn; //hidden
+                dgv.Columns[2].Frozen = Common.FreezeKeyColumn; //hidden
+                dgv.Columns[3].Frozen = Common.FreezeKeyColumn;
             }
         }
 
@@ -215,7 +223,6 @@ namespace DBADashGUI.Changes
             {
                 SummaryMode = false;
             }
-
         }
 
         private void Dgv_RowsAdded(object sender, DataGridViewRowsAddedEventArgs e)
@@ -242,7 +249,6 @@ namespace DBADashGUI.Changes
                     }
 
                     r.Cells["Max VLF Count"].SetStatusColor(vlfStatusColor);
-
                 }
             }
         }
