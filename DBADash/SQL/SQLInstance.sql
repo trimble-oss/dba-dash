@@ -1,4 +1,16 @@
-﻿IF OBJECT_ID('sys.dm_os_host_info') IS NOT NULL
+﻿DECLARE @ContainedAGName SYSNAME
+DECLARE @ContainedAGID UNIQUEIDENTIFIER
+
+/* For SQL 2022+ Get the Contained Availability Group Name */
+IF COLUMNPROPERTY(OBJECT_ID('sys.dm_exec_sessions'),'contained_availability_group_id','ColumnID') IS NOT NULL
+BEGIN
+	SELECT	@ContainedAGName = AG.name,
+			@ContainedAGID = S.contained_availability_group_id 
+	FROM sys.dm_exec_sessions S 
+	JOIN sys.availability_groups AG ON S.contained_availability_group_id = AG.group_id
+	WHERE session_id = @@SPID
+END 
+IF OBJECT_ID('sys.dm_os_host_info') IS NOT NULL
 BEGIN
 	SELECT host_platform,
 		host_distribution,
@@ -13,7 +25,9 @@ BEGIN
 		SERVERPROPERTY ('ProductVersion') AS ProductVersion,
 		CAST(ROUND(DATEDIFF(s,GETDATE(),GETUTCDATE())/60.0,0) AS INT) AS UTCOffset,
 		SERVERPROPERTY('IsHadrEnabled') IsHadrEnabled,
-		SERVERPROPERTY('EngineEdition') EngineEdition
+		SERVERPROPERTY('EngineEdition') EngineEdition,
+		@ContainedAGID as contained_availability_group_id,
+		@ContainedAGName AS contained_availability_group_name
 	FROM sys.dm_os_host_info
 END
 ELSE IF OBJECT_ID('sys.dm_os_windows_info') IS NOT NULL
@@ -32,7 +46,9 @@ BEGIN
 		SERVERPROPERTY ('ProductVersion') AS ProductVersion,
 		CAST(ROUND(DATEDIFF(s,GETDATE(),GETUTCDATE())/60.0,0) AS INT) AS UTCOffset,
 		SERVERPROPERTY('IsHadrEnabled') IsHadrEnabled,
-		SERVERPROPERTY('EngineEdition') EngineEdition
+		SERVERPROPERTY('EngineEdition') EngineEdition,
+		@ContainedAGID as contained_availability_group_id,
+		@ContainedAGName AS contained_availability_group_name
 	FROM sys.dm_os_windows_info
 END
 ELSE
@@ -50,5 +66,8 @@ BEGIN
 		SERVERPROPERTY ('ProductVersion') AS ProductVersion,
 		CAST(ROUND(DATEDIFF(s,GETDATE(),GETUTCDATE())/60.0,0) AS INT) AS UTCOffset,
 		SERVERPROPERTY('IsHadrEnabled') IsHadrEnabled,
-		SERVERPROPERTY('EngineEdition') EngineEdition
+		SERVERPROPERTY('EngineEdition') EngineEdition,
+		@ContainedAGID as contained_availability_group_id,
+		@ContainedAGName AS contained_availability_group_name
 END
+
