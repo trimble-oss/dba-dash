@@ -1,6 +1,4 @@
-﻿CREATE TABLE dbo.Databases (
-    DatabaseID INT IDENTITY(1, 1) NOT NULL,
-    InstanceID INT NOT NULL,
+﻿CREATE TYPE dbo.Databases AS TABLE (
     name sysname NOT NULL,
     database_id INT NOT NULL,
     source_database_id INT NULL,
@@ -69,30 +67,6 @@
     is_federation_member BIT NULL,
     is_remote_data_archive_enabled BIT NULL,
     is_mixed_page_allocation_on BIT NULL,
-    IsActive BIT NOT NULL,
-    state_desc AS (CASE WHEN state = (0) THEN 'ONLINE'
-                       WHEN state = (1) THEN 'RESTORING'
-                       WHEN state = (2) THEN 'RECOVERING'
-                       WHEN state = (3) THEN 'RECOVERY_PENDING'
-                       WHEN state = (4) THEN 'SUSPECT'
-                       WHEN state = (5) THEN 'EMERGENCY'
-                       WHEN state = (6) THEN 'OFFLINE'
-                       WHEN state = (7) THEN 'COPYING'
-                       WHEN state = (10) THEN 'OFFLINE_SECONDARY' ELSE CONVERT(NVARCHAR(60), state)END
-                  ),
-    LastGoodCheckDbTime DATETIME2(3) NULL,
-    VLFCount INT NULL,
     is_ledger_on BIT NULL,
-    CONSTRAINT PK_Databases PRIMARY KEY CLUSTERED (DatabaseID ASC),
-    CONSTRAINT FK_Databases_Instances FOREIGN KEY (InstanceID) REFERENCES dbo.Instances (InstanceID)
+    PRIMARY KEY CLUSTERED (database_id ASC)
 );
-
-GO
-CREATE UNIQUE NONCLUSTERED INDEX IX_Databases_InstanceID_database_id_create_date
-    ON dbo.Databases(InstanceID ASC, database_id ASC, create_date ASC)
-    INCLUDE(IsActive);
-
-GO
-CREATE UNIQUE NONCLUSTERED INDEX FIX_Databases_InstanceID_name
-    ON dbo.Databases(InstanceID ASC, name ASC)
-    INCLUDE(database_id) WHERE (IsActive=(1));
