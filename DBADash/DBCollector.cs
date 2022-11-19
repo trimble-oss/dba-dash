@@ -74,33 +74,31 @@ namespace DBADash
         Instance
     }
 
-
     public enum HostPlatform
     {
         Linux,
         Windows
     }
 
-
     public class DBCollector
     {
         public DataSet Data;
-        string ConnectionString { get => Source.SourceConnection.ConnectionString; }
+        private string ConnectionString { get => Source.SourceConnection.ConnectionString; }
         private DataTable dtErrors;
         public bool LogInternalPerformanceCounters = false;
         private DataTable dtInternalPerfCounters;
         public Int32 PerformanceCollectionPeriodMins = 60;
-        string computerName;
-        readonly CollectionType[] azureCollectionTypes = new CollectionType[] { CollectionType.SlowQueries, CollectionType.AzureDBElasticPoolResourceStats, CollectionType.AzureDBServiceObjectives, CollectionType.AzureDBResourceStats, CollectionType.CPU, CollectionType.DBFiles, CollectionType.Databases, CollectionType.DBConfig, CollectionType.TraceFlags, CollectionType.ObjectExecutionStats, CollectionType.BlockingSnapshot, CollectionType.IOStats, CollectionType.Waits, CollectionType.ServerProperties, CollectionType.DBTuningOptions, CollectionType.SysConfig, CollectionType.DatabasePrincipals, CollectionType.DatabaseRoleMembers, CollectionType.DatabasePermissions, CollectionType.OSInfo, CollectionType.CustomChecks, CollectionType.PerformanceCounters, CollectionType.VLF, CollectionType.DatabaseQueryStoreOptions, CollectionType.AzureDBResourceGovernance, CollectionType.RunningQueries, CollectionType.IdentityColumns };
-        readonly CollectionType[] azureOnlyCollectionTypes = new CollectionType[] { CollectionType.AzureDBElasticPoolResourceStats, CollectionType.AzureDBResourceStats, CollectionType.AzureDBServiceObjectives, CollectionType.AzureDBResourceGovernance };
-        readonly CollectionType[] azureMasterOnlyCollectionTypes = new CollectionType[] { CollectionType.AzureDBElasticPoolResourceStats };
+        private string computerName;
+        private readonly CollectionType[] azureCollectionTypes = new CollectionType[] { CollectionType.SlowQueries, CollectionType.AzureDBElasticPoolResourceStats, CollectionType.AzureDBServiceObjectives, CollectionType.AzureDBResourceStats, CollectionType.CPU, CollectionType.DBFiles, CollectionType.Databases, CollectionType.DBConfig, CollectionType.TraceFlags, CollectionType.ObjectExecutionStats, CollectionType.BlockingSnapshot, CollectionType.IOStats, CollectionType.Waits, CollectionType.ServerProperties, CollectionType.DBTuningOptions, CollectionType.SysConfig, CollectionType.DatabasePrincipals, CollectionType.DatabaseRoleMembers, CollectionType.DatabasePermissions, CollectionType.OSInfo, CollectionType.CustomChecks, CollectionType.PerformanceCounters, CollectionType.VLF, CollectionType.DatabaseQueryStoreOptions, CollectionType.AzureDBResourceGovernance, CollectionType.RunningQueries, CollectionType.IdentityColumns };
+        private readonly CollectionType[] azureOnlyCollectionTypes = new CollectionType[] { CollectionType.AzureDBElasticPoolResourceStats, CollectionType.AzureDBResourceStats, CollectionType.AzureDBServiceObjectives, CollectionType.AzureDBResourceGovernance };
+        private readonly CollectionType[] azureMasterOnlyCollectionTypes = new CollectionType[] { CollectionType.AzureDBElasticPoolResourceStats };
         public DBADashSource Source;
         private bool noWMI;
         private bool IsAzureDB = false;
         private bool isAzureMasterDB = false;
         private string instanceName;
-        string dbName;
-        string productVersion;
+        private string dbName;
+        private string productVersion;
         public Int32 RetryCount = 1;
         public Int32 RetryInterval = 30;
         private HostPlatform platform;
@@ -112,15 +110,18 @@ namespace DBADash
         public bool IsExtendedEventsNotSupportedException = false;
 
         public const int DefaultIdentityCollectionThreshold = 5;
+
         /// <summary>
         /// % Used threshold for IdentityColumns collection
         /// </summary>
         public int IdentityCollectionThreshold = DefaultIdentityCollectionThreshold;
-        readonly CacheItemPolicy policy = new()
+
+        private readonly CacheItemPolicy policy = new()
         {
             SlidingExpiration = TimeSpan.FromMinutes(60)
         };
-        readonly MemoryCache cache = MemoryCache.Default;
+
+        private readonly MemoryCache cache = MemoryCache.Default;
         private readonly Stopwatch swatch = new();
         private CollectionType currentCollection;
 
@@ -143,7 +144,8 @@ namespace DBADash
                 job_instance_id = value;
             }
         }
-        int job_instance_id = 0;
+
+        private int job_instance_id = 0;
 
         public DateTime GetJobLastModified()
         {
@@ -162,7 +164,6 @@ namespace DBADash
                 }
             }
         }
-
 
         public bool IsXESupported()
         {
@@ -242,7 +243,6 @@ namespace DBADash
             currentCollection = type;
         }
 
-
         private void StopCollection()
         {
             if (swatch.IsRunning)
@@ -280,9 +280,7 @@ namespace DBADash
                 context => GetInstance(),
                 new Context("Instance")
               );
-
         }
-
 
         public async Task RemoveEventSessionsAsync()
         {
@@ -325,10 +323,8 @@ namespace DBADash
                     await cn.OpenAsync();
                     await cmd.ExecuteNonQueryAsync();
                 }
-
             }
         }
-
 
         /// <summary>
         /// Add MetaData relating to the DBA Dash service used for collection.
@@ -413,7 +409,6 @@ namespace DBADash
 
             Data.Tables.Add(dt);
             StopCollection();
-
         }
 
         public void Collect(CollectionType[] collectionTypes)
@@ -423,11 +418,11 @@ namespace DBADash
                 Collect(type);
             }
         }
+
         private static string EnumToString(Enum en)
         {
             return Enum.GetName(en.GetType(), en);
         }
-
 
         private bool CollectionTypeIsApplicable(CollectionType collectionType)
         {
@@ -542,10 +537,9 @@ namespace DBADash
                     LogError(new Exception("Error collecting plans for Running Queries", ex), "RunningQueries");
                 }
             }
-
         }
 
-        static string ByteArrayToHexString(byte[] bytes)
+        private static string ByteArrayToHexString(byte[] bytes)
         {
             string hex = BitConverter.ToString(bytes);
             return hex.Replace("-", "");
@@ -610,7 +604,6 @@ namespace DBADash
             }
         }
 
-
         ///<summary>
         ///Get the query plan hash from a  string of the plan XML
         ///</summary>
@@ -634,7 +627,6 @@ namespace DBADash
             return Array.Empty<byte>();
         }
 
-
         public static byte[] StringToByteArray(string hex)
         {
             if (hex.StartsWith("0x"))
@@ -646,7 +638,6 @@ namespace DBADash
                              .Select(x => Convert.ToByte(hex.Substring(x, 2), 16))
                              .ToArray();
         }
-
 
         ///<summary>
         ///Generate a SQL query to get the query plan text for running queries. Captured plan handles get cached with a call to CacheCollectedPlans later <br/>
@@ -661,7 +652,7 @@ namespace DBADash
 INSERT INTO @plans(plan_handle,statement_start_offset,statement_end_offset)
 VALUES");
 
-            // Already have a distinct list by plan handle, hash and offsets.  
+            // Already have a distinct list by plan handle, hash and offsets.
             // Filter this list by plans not already colllected and get a distinct list by handle and offsets (excluding the hash as this can cause duplicates in rare cases)
             var collectList = plans.Where(p => !cache.Contains(p.Key))
                 .GroupBy(p => Convert.ToBase64String(p.PlanHandle.Concat(BitConverter.GetBytes(p.StartOffset)).Concat(BitConverter.GetBytes(p.EndOffset)).ToArray()))
@@ -691,7 +682,7 @@ VALUES");
         pln.objectid,
         pln.encrypted,
         pln.query_plan
-FROM @plans t 
+FROM @plans t
 CROSS APPLY sys.dm_exec_text_query_plan(t.plan_handle,t.statement_start_offset,t.statement_end_offset) pln");
                 return sb.ToString();
             }
@@ -712,7 +703,7 @@ CROSS APPLY sys.dm_exec_text_query_plan(t.plan_handle,t.statement_start_offset,t
                              && r["query_plan_hash"] != DBNull.Value
                              && r["statement_start_offset"] != DBNull.Value
                              && r["statement_end_offset"] != DBNull.Value
-                             && ((byte[])r["query_plan_hash"]).Any(b => b != 0) // Not 0x00000000 
+                             && ((byte[])r["query_plan_hash"]).Any(b => b != 0) // Not 0x00000000
                              group r by new Plan((byte[])r["plan_handle"], (byte[])r["query_plan_hash"], (int)r["statement_start_offset"], (int)r["statement_end_offset"]) into g
                              where g.Sum(r => Convert.ToInt32(r["cpu_time"])) >= Source.PlanCollectionCPUThreshold || g.Sum(r => Convert.ToInt32(r["granted_query_memory"])) >= Source.PlanCollectionMemoryGrantThreshold || g.Count() >= Source.PlanCollectionCountThreshold || g.Max(r => ((DateTime)r["SnapshotDateUTC"]).Subtract((DateTime)r["last_request_start_time_utc"])).TotalMilliseconds >= Source.PlanCollectionDurationThreshold
                              select g.Key).Distinct().ToList();
@@ -833,7 +824,7 @@ VALUES
     txt.objectid as object_id,
     txt.encrypted,
     txt.text
-FROM @handles H 
+FROM @handles H
 CROSS APPLY sys.dm_exec_sql_text(H.sql_handle) txt");
                 return sb.ToString();
             }
@@ -965,7 +956,6 @@ CROSS APPLY sys.dm_exec_sql_text(H.sql_handle) txt");
                     ds.Tables.Remove(dtSessionWaits);
                     Data.Tables.Add(dtSessionWaits);
                 }
-
             }
         }
 
@@ -978,11 +968,9 @@ CROSS APPLY sys.dm_exec_sql_text(H.sql_handle) txt");
 
         private void CollectPerformanceCounters()
         {
-
             string xml = PerformanceCounters.PerformanceCountersXML;
             if (xml.Length > 0)
             {
-
                 string sql = SqlStrings.PerformanceCounters;
                 if (productVersion.StartsWith("8") || productVersion.StartsWith("9"))
                 {
@@ -1001,7 +989,6 @@ CROSS APPLY sys.dm_exec_sql_text(H.sql_handle) txt");
                         da.SelectCommand.CommandTimeout = CollectionType.PerformanceCounters.GetCommandTimeout();
                         da.SelectCommand.Parameters.Add(pCountersXML);
                         da.Fill(ds);
-
 
                         var dt = ds.Tables[0];
                         if (ds.Tables.Count == 2)
@@ -1040,14 +1027,10 @@ CROSS APPLY sys.dm_exec_sql_text(H.sql_handle) txt");
                     }
                 }
             }
-
-
         }
-
 
         private void CollectSlowQueries()
         {
-
             if (IsXESupported())
             {
                 SqlConnectionStringBuilder builder = new(ConnectionString)
@@ -1087,13 +1070,11 @@ CROSS APPLY sys.dm_exec_sql_text(H.sql_handle) txt");
                             var dtAtt = ringBufferAtt.GetTable();
                             dtAtt.TableName = "SlowQueriesStats";
                             AddDT(dtAtt);
-
                         }
                     }
                 }
             }
         }
-
 
         private void CollectServerExtraProperties()
         {
@@ -1153,7 +1134,6 @@ CROSS APPLY sys.dm_exec_sql_text(H.sql_handle) txt");
             }
         }
 
-
         public void CollectDrivesSQL()
         {
             try
@@ -1168,7 +1148,6 @@ CROSS APPLY sys.dm_exec_sql_text(H.sql_handle) txt");
 
         public void CollectDrives()
         {
-
             if (noWMI)
             {
                 CollectDrivesSQL();
@@ -1188,11 +1167,11 @@ CROSS APPLY sys.dm_exec_sql_text(H.sql_handle) txt");
             }
         }
 
-        string activePowerPlan;
-        Guid activePowerPlanGUID;
-        string manufacturer;
-        string model;
-        string WindowsCaption;
+        private string activePowerPlan;
+        private Guid activePowerPlanGUID;
+        private string manufacturer;
+        private string model;
+        private string WindowsCaption;
 
         #region "WMI"
 
@@ -1218,9 +1197,8 @@ CROSS APPLY sys.dm_exec_sql_text(H.sql_handle) txt");
             }
         }
 
-        CimSessionOptions localSessionOptions;
+        private CimSessionOptions localSessionOptions;
         public AggregateException WMIException;
-
 
         /// <summary>
         /// Cache the session options (DCom or WSMan) - avoid the need to test on the next run
@@ -1231,7 +1209,6 @@ CROSS APPLY sys.dm_exec_sql_text(H.sql_handle) txt");
             cache.Set("WMISessionOptions_" + computerName, localSessionOptions, new CacheItemPolicy() { AbsoluteExpiration = DateTime.Now.AddDays(1) });
             Log.Debug("Cache WMI options {options} on {Computer}", localSessionOptions is DComSessionOptions ? "DCom" : "WSMan", computerName);
         }
-
 
         /// <summary>
         /// Get the session options (DCom or WSMan).  Avoid the need to test if it's previously cached
@@ -1259,7 +1236,7 @@ CROSS APPLY sys.dm_exec_sql_text(H.sql_handle) txt");
                 }
                 if (localSessionOptions == null)
                 {
-                    // Options are not in cache.  Try connection with WSMan then try DCom if this fails.  
+                    // Options are not in cache.  Try connection with WSMan then try DCom if this fails.
                     try
                     {
                         // Try to connect with WSMan first
@@ -1323,7 +1300,6 @@ CROSS APPLY sys.dm_exec_sql_text(H.sql_handle) txt");
                 }
             }
         }
-
 
         private void CollectPowerPlanWMI()
         {
@@ -1481,12 +1457,9 @@ CROSS APPLY sys.dm_exec_sql_text(H.sql_handle) txt");
                     drives.Rows.Add(rDrive);
                 }
                 Data.Tables.Add(drives);
-
             }
-
         }
 
-        #endregion
-
+        #endregion "WMI"
     }
 }
