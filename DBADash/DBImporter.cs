@@ -11,7 +11,6 @@ namespace DBADash
 {
     public class DBImporter
     {
-
         private readonly DataSet data;
         private readonly string connectionString;
         private readonly Policy retryPolicy;
@@ -50,7 +49,6 @@ namespace DBADash
         // Adds error to Errors datatable to be imported into CollectionErrorLog table later.
         private void LogError(string errorSource, Exception ex, string errorContext = "Import")
         {
-
             DataTable dtErrors;
             if (data.Tables.Contains("Errors"))
             {
@@ -329,7 +327,6 @@ namespace DBADash
             {
                 throw new Exception($"DDLSnapshot:{databaseName}. Primary key violation.  This can occur if you have a case sensitive database collation that contains tables, SPs or other database objects with names that are no longer unique with a case insensitive comparison.", ex);
             }
-
         }
 
         private void UpdateServerExtraProperties()
@@ -387,7 +384,6 @@ namespace DBADash
                     cmd.Parameters.AddWithValue("InstanceID", instanceID);
                     cmd.Parameters.AddWithValue("SnapshotDate", snapshotDate);
                     cmd.ExecuteNonQuery();
-
                 }
             }
         }
@@ -486,6 +482,5 @@ namespace DBADash
                 }
             }
         }
-
     }
 }
