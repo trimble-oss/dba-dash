@@ -473,6 +473,12 @@ namespace DBADash
                     {
                         cmd.Parameters.AddWithValue("UTCOffset", Convert.ToInt32(rInstance["UTCOffset"]));
                     }
+                    if (rInstance.Table.Columns.Contains("contained_availability_group_id"))
+                    {
+                        cmd.Parameters.AddWithValue("contained_availability_group_id", rInstance["contained_availability_group_id"]);
+                        cmd.Parameters.AddWithValue("contained_availability_group_name", rInstance["contained_availability_group_name"]);
+                    }
+
                     var pInstanceID = cmd.Parameters.Add("InstanceID", SqlDbType.Int);
                     pInstanceID.Direction = ParameterDirection.Output;
                     cmd.ExecuteNonQuery();

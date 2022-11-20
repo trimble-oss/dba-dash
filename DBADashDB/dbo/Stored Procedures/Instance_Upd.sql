@@ -16,6 +16,8 @@
 	@AgentPath NVARCHAR(260)='',
 	@CollectAgentID INT=NULL,
 	@ImportAgentID INT=NULL,
+	@contained_availability_group_id UNIQUEIDENTIFIER=NULL,
+	@contained_availability_group_name NVARCHAR(128)=NULL,
 	@InstanceID INT OUT
 )
 AS
@@ -74,7 +76,9 @@ BEGIN
 			os_language_version = @OSLanguageVersion,
 			UTCOffset = ISNULL(@UTCOffset,UTCOffset),
 			CollectAgentID = @CollectAgentID,
-			ImportAgentID = @ImportAgentID
+			ImportAgentID = @ImportAgentID,
+			contained_availability_group_id = @contained_availability_group_id,
+			contained_availability_group_name = @contained_availability_group_name 
 		WHERE InstanceID = @InstanceID
 		AND EXISTS(SELECT Instance,
 						EditionID,
@@ -86,7 +90,9 @@ BEGIN
 						os_language_version,
 						UTCOffset,
 						CollectAgentID,
-						ImportAgentID
+						ImportAgentID,
+						contained_availability_group_id,
+						contained_availability_group_name
 					EXCEPT
 					SELECT @Instance,
 							@EditionID,
@@ -98,7 +104,9 @@ BEGIN
 							@OSLanguageVersion,
 							ISNULL(@UTCOffset,UTCOffset),
 							@CollectAgentID,
-							@ImportAgentID
+							@ImportAgentID,
+							@contained_availability_group_id,
+							@contained_availability_group_name
 					)
 
 		EXEC dbo.CollectionDates_Upd @InstanceID = @InstanceID,  

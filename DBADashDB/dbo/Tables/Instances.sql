@@ -83,6 +83,8 @@
     ImportAgentID INT NULL,
     Alias NVARCHAR(128) NULL,
     ShowInSummary BIT NOT NULL CONSTRAINT DF_Instances DEFAULT(1),
+    contained_availability_group_id UNIQUEIDENTIFIER NULL,
+    contained_availability_group_name NVARCHAR(128) NULL,
     InstanceDisplayName AS ISNULL(Alias,ConnectionID),
     InstanceGroupName AS CASE WHEN EngineEdition=5 THEN Instance ELSE ISNULL(Alias,ConnectionID) END,
     LastMemoryDumpUTC AS DATEADD(mi,UTCOffset,LastMemoryDump),
