@@ -4,11 +4,14 @@ DECLARE @ContainedAGID UNIQUEIDENTIFIER
 /* For SQL 2022+ Get the Contained Availability Group Name */
 IF COLUMNPROPERTY(OBJECT_ID('sys.dm_exec_sessions'),'contained_availability_group_id','ColumnID') IS NOT NULL
 BEGIN
+	DECLARE @SQL NVARCHAR(MAX)
+	SET @SQL = N'
 	SELECT	@ContainedAGName = AG.name,
 			@ContainedAGID = S.contained_availability_group_id 
 	FROM sys.dm_exec_sessions S 
 	JOIN sys.availability_groups AG ON S.contained_availability_group_id = AG.group_id
-	WHERE session_id = @@SPID
+	WHERE session_id = @@SPID'
+	EXEC sp_executesql @SQL,N'@ContainedAGName SYSNAME OUT,@ContainedAGID UNIQUEIDENTIFIER OUT',@ContainedAGName OUT,@ContainedAGID OUT
 END 
 IF OBJECT_ID('sys.dm_os_host_info') IS NOT NULL
 BEGIN
@@ -70,4 +73,3 @@ BEGIN
 		@ContainedAGID as contained_availability_group_id,
 		@ContainedAGName AS contained_availability_group_name
 END
-
