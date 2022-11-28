@@ -24,7 +24,7 @@ namespace DBADashGUI.Performance
         public PerformanceSummary()
         {
             InitializeComponent();
-            standardLayout = GetColumnLayout();
+            standardLayout = dgv.GetColumnLayout();
         }
 
 
@@ -417,37 +417,14 @@ namespace DBADashGUI.Performance
             }
         }
 
-
-        private List<KeyValuePair<string, PersistedColumnLayout>> GetColumnLayout()
-        {
-            return dgv.Columns.Cast<DataGridViewColumn>()
-           .Select(c => new KeyValuePair<string, PersistedColumnLayout>(c.Name, new PersistedColumnLayout() { Visible = c.Visible, Width = c.Width, DisplayIndex = c.DisplayIndex }))
-           .ToList();
-        }
-
         private void LoadPersistedColumnLayout(List<KeyValuePair<string, PersistedColumnLayout>> savedCols)
         {
             if (savedCols == null)
             {
                 return;
             }
-            foreach (DataGridViewColumn col in dgv.Columns)
-            {
-                if (savedCols.Where(savedCol => savedCol.Key == col.Name).Count() == 1)
-                {
-                    var savedCol = savedCols.Where(savedCol => savedCol.Key == col.Name).First();
-                    col.Visible = savedCol.Value.Visible;
-                    col.Width = savedCol.Value.Width;
-                    if (savedCol.Value.DisplayIndex >= 0)
-                    {
-                        col.DisplayIndex = savedCol.Value.DisplayIndex;
-                    }
-                }
-                else
-                {
-                    col.Visible = false;
-                }
-            }
+            dgv.LoadColumnLayout(savedCols);
+
             if (dgv.DataSource != null)
             {
                 var dt = ((DataView)dgv.DataSource).Table;
@@ -505,7 +482,7 @@ namespace DBADashGUI.Performance
                         Name = name,
                         SelectedPerformanceCounters = SelectedPerformanceCounters,
                         UserID = frm.IsGlobal ? DBADashUser.SystemUserID : DBADashUser.UserID,
-                        ColumnLayout = GetColumnLayout()
+                        ColumnLayout = dgv.GetColumnLayout()
                     };
 
                     savedView.Save();
@@ -515,7 +492,6 @@ namespace DBADashGUI.Performance
                 }
             }
         }
-
 
         private void SavedViewSelected(object sender, SavedViewSelectedEventArgs e)
         {

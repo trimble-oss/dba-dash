@@ -1839,7 +1839,8 @@ MERGE INTO [DBADash].[ViewType] AS [Target]
 USING (VALUES
 	(0,N'Metric'),
 	(1,N'PerformanceSummary'),
-	(2,N'Tree')
+	(2,N'Tree'),
+	(3,N'SlowQueryDetail')
 ) AS [Source] ([ViewTypeID],[ViewType])
 ON ([Target].[ViewTypeID] = [Source].[ViewTypeID])
 WHEN MATCHED AND (
