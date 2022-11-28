@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Drawing;
+using System.Linq;
 using System.Windows.Forms;
 using static DBADashGUI.DBADashStatus;
 
@@ -62,11 +63,51 @@ namespace DBADashGUI
                 ((DataGridViewLinkCell)cell).LinkColor = StatusColor.ContrastColor();
             }
         }
+
         public static void SetStatusColor(this DataGridViewCell cell, DBADashStatusEnum Status)
         {
             cell.SetStatusColor(Status.GetColor());
         }
 
         public static string ToHexString(this Color c) => $"#{c.R:X2}{c.G:X2}{c.B:X2}";
+
+        /// <summary>
+        /// Returns structure with column layout - size, position & visibility
+        /// </summary>
+        internal static List<KeyValuePair<string, PersistedColumnLayout>> GetColumnLayout(this DataGridView dgv)
+        {
+            return dgv.Columns.Cast<DataGridViewColumn>()
+           .Select(c => new KeyValuePair<string, PersistedColumnLayout>(c.Name, new PersistedColumnLayout() { Visible = c.Visible, Width = c.Width, DisplayIndex = c.DisplayIndex }))
+           .ToList();
+        }
+
+
+        /// <summary>
+        /// Loads a saved column layout to the grid.  Size, position & visibility of columns
+        /// </summary>
+        internal static void LoadColumnLayout(this DataGridView dgv, List<KeyValuePair<string, PersistedColumnLayout>> savedCols)
+        {
+            if (savedCols == null)
+            {
+                return;
+            }
+            foreach (DataGridViewColumn col in dgv.Columns)
+            {
+                if (savedCols.Where(savedCol => savedCol.Key == col.Name).Count() == 1)
+                {
+                    var savedCol = savedCols.Where(savedCol => savedCol.Key == col.Name).First();
+                    col.Visible = savedCol.Value.Visible;
+                    col.Width = savedCol.Value.Width;
+                    if (savedCol.Value.DisplayIndex >= 0)
+                    {
+                        col.DisplayIndex = savedCol.Value.DisplayIndex;
+                    }
+                }
+                else
+                {
+                    col.Visible = false;
+                }
+            }
+        }
     }
 }

@@ -18,8 +18,10 @@ namespace DBADashGUI
         }
 
         private List<Int32> InstanceIDs;
-        string groupBy = "InstanceDisplayName";
-        string _db = "";
+        private string groupBy = "InstanceDisplayName";
+        private string _db = "";
+        private bool savedLayoutLoaded = false;
+
         public string DBName
         {
             get
@@ -106,7 +108,6 @@ namespace DBADashGUI
             excludeMnu.Font = excludeTxt.Text.Length > 0 ? boldFont : regularFont;
         }
 
-
         public void ResetFilters()
         {
             txtText.Text = "";
@@ -155,7 +156,6 @@ namespace DBADashGUI
             }
             SelectGroupBy();
         }
-
 
         private Task<DataTable> GetSlowQueriesSummary()
         {
@@ -309,8 +309,14 @@ namespace DBADashGUI
             ResetFilters();
             RefreshData();
         }
+
         public void RefreshData()
         {
+            if (!savedLayoutLoaded)
+            {
+                LoadSavedLayout();
+                savedLayoutLoaded = true;
+            }
             SetFilterFormatting();
             dgvSummary.Columns[0].Frozen = Common.FreezeKeyColumn;
             dgvSlow.DataSource = null;
@@ -384,7 +390,6 @@ namespace DBADashGUI
 
         public Int32 pageSize = 1000;
 
-
         private void DgvSummary_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
             if (e.RowIndex >= 0)
@@ -393,7 +398,6 @@ namespace DBADashGUI
                 selectedGroupValue = row["Grp"] == DBNull.Value ? "" : Convert.ToString(row["Grp"]);
                 if (dgvSummary.Columns[e.ColumnIndex] == Grp)
                 {
-
                     if (groupBy == "InstanceDisplayName")
                     {
                         txtInstance.Text = selectedGroupValue;
@@ -526,7 +530,7 @@ namespace DBADashGUI
             }
         }
 
-        string selectedGroupValue;
+        private string selectedGroupValue;
 
         private void SlowQueries_Load(object sender, EventArgs e)
         {
@@ -775,6 +779,14 @@ namespace DBADashGUI
             dgvSlow.AutoGenerateColumns = false;
 
             dgvSlow.DataSource = dt;
+            if (autoSizeColumnsToolStripMenuItem.Checked)
+            {
+                AutoSizeDetailGridColumns();
+            }
+        }
+
+        private void AutoSizeDetailGridColumns()
+        {
             colText.AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
             dgvSlow.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
             colText.AutoSizeMode = DataGridViewAutoSizeColumnMode.None;
@@ -809,7 +821,6 @@ namespace DBADashGUI
                     runningQueries1.SnapshotDateTo = toDate;
                     runningQueries1.InstanceID = instanceID;
                     runningQueries1.RefreshData();
-
                 }
             }
         }
@@ -824,7 +835,6 @@ namespace DBADashGUI
 
         private void TsCopySummary_Click(object sender, EventArgs e)
         {
-
             Common.CopyDataGridViewToClipboard(dgvSummary);
         }
 
@@ -938,6 +948,81 @@ namespace DBADashGUI
             }
         }
 
+        private void LoadSavedLayout()
+        {
+            resetLayoutToolStripMenuItem.Enabled = false;
+            loadSavedToolStripMenuItem.Enabled = false;
+            try
+            {
+                SlowQueryDetailSavedView saved = SlowQueryDetailSavedView.GetDefaultSavedView();
 
+                if (saved != null)
+                {
+                    resetLayoutToolStripMenuItem.Enabled = true;
+                    loadSavedToolStripMenuItem.Enabled = true;
+                    autoSizeColumnsToolStripMenuItem.Checked = saved.AutoSizeColumns;
+                    dgvSlow.LoadColumnLayout(saved.ColumnLayout);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error loading saved view\n" + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private void SaveToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            SlowQueryDetailSavedView saved = new()
+            {
+                ColumnLayout = dgvSlow.GetColumnLayout(),
+                Name = "Default",
+                AutoSizeColumns = autoSizeColumnsToolStripMenuItem.Checked
+            };
+            try
+            {
+                saved.Save();
+                resetLayoutToolStripMenuItem.Enabled = true;
+                loadSavedToolStripMenuItem.Enabled = true;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error saving grid layout\n", ex.Message, MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private void AutoSizeColumnsToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (autoSizeColumnsToolStripMenuItem.Checked)
+            {
+                AutoSizeDetailGridColumns();
+            }
+        }
+
+        private void LoadSavedToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            LoadSavedLayout();
+        }
+
+        private void ResetToolStripMenuItem1_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                SlowQueryDetailSavedView saved = SlowQueryDetailSavedView.GetDefaultSavedView();
+                if (saved != null)
+                {
+                    if (MessageBox.Show("Remove saved layout?", "Reset", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+                    {
+                        saved.Delete();
+                        resetLayoutToolStripMenuItem.Enabled = false;
+                        loadSavedToolStripMenuItem.Enabled = false;
+                        MessageBox.Show("The application defaults will be used the next time the application is started", "Reset", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error deleting saved view\n" + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
     }
 }

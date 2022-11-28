@@ -15,7 +15,8 @@ namespace DBADashGUI
         {
             Metric,
             PerformanceSummary,
-            Tree
+            Tree,
+            SlowQueryDetail
         }
 
         [JsonIgnore]
