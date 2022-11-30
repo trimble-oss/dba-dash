@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Drawing;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using static DBADashGUI.DBADashStatus;
@@ -15,23 +16,21 @@ namespace DBADashGUI
 {
     public partial class Summary : UserControl, ISetContext
     {
-
         private List<Int32> refreshInstanceIDs;
 
-        DateTime lastRefresh;
+        private DateTime lastRefresh;
 
         public Summary()
         {
             InitializeComponent();
         }
 
-        DataView dv;
+        private DataView dv;
 
-        Dictionary<string, bool> statusColumns;
+        private Dictionary<string, bool> statusColumns;
 
         private bool focusedView = false;
         private DBADashContext context;
-
 
         private void ResetStatusCols()
         {
@@ -41,7 +40,6 @@ namespace DBADashGUI
                                                             {"CustomCheckStatus",false }, {"MirroringStatus",false },{"ElasticPoolStorageStatus",false},{"PctMaxSizeStatus",false}, {"QueryStoreStatus",false },
                                                             {"LogFreeSpaceStatus",false },{"DBMailStatus",false },{"IdentityStatus",false } };
         }
-
 
         private Task<DataTable> GetSummaryAsync()
         {
@@ -85,80 +83,88 @@ namespace DBADashGUI
             return !(context.InstanceIDs.Count == refreshInstanceIDs.Count && refreshInstanceIDs.All(context.InstanceIDs.Contains));
         }
 
+        private CancellationTokenSource cancellationTS = new();
+
         public void RefreshData()
         {
+            cancellationTS.Cancel(); // Cancel previous execution
+            cancellationTS = new();
             dgvSummary.Columns[0].Frozen = Common.FreezeKeyColumn;
             ResetStatusCols();
             refresh1.ShowRefresh();
             dgvSummary.Visible = false;
             refreshInstanceIDs = new List<int>(context.InstanceIDs);
+            tsRefresh.Enabled = false;
             GetSummaryAsync().ContinueWith(task =>
             {
+                toolStrip1.Invoke(() => tsRefresh.Enabled = true);
                 if (task.Exception != null)
                 {
                     refresh1.SetFailed("Error:" + task.Exception.ToString());
                     return;
                 }
                 DataTable dt = task.Result;
-                dgvSummary.AutoGenerateColumns = false;
-                var cols = (statusColumns.Keys).ToList<string>();
-                dt.Columns.Add("IsFocusedRow", typeof(bool));
-                foreach (DataRow row in dt.Rows)
-                {
-                    bool isFocusedRow = false;
-                    foreach (string col in cols)
-                    {
-                        var status = (DBADashStatus.DBADashStatusEnum)Convert.ToInt32(row[col] == DBNull.Value ? 3 : row[col]);
-                        if (!(status == DBADashStatus.DBADashStatusEnum.NA || (status == DBADashStatus.DBADashStatusEnum.OK && focusedView)))
-                        {
-                            statusColumns[col] = true;
-                            isFocusedRow = true;
-                        }
-                    }
+                UpdateSummary(ref dt);
+            }, cancellationTS.Token);
+        }
 
-                    if (row["IsAgentRunning"] != DBNull.Value && (bool)row["IsAgentRunning"] == false)
+        private void UpdateSummary(ref DataTable dt)
+        {
+            dgvSummary.AutoGenerateColumns = false;
+            var cols = (statusColumns.Keys).ToList<string>();
+            dt.Columns.Add("IsFocusedRow", typeof(bool));
+            foreach (DataRow row in dt.Rows)
+            {
+                bool isFocusedRow = false;
+                foreach (string col in cols)
+                {
+                    var status = (DBADashStatus.DBADashStatusEnum)Convert.ToInt32(row[col] == DBNull.Value ? 3 : row[col]);
+                    if (!(status == DBADashStatus.DBADashStatusEnum.NA || (status == DBADashStatus.DBADashStatusEnum.OK && focusedView)))
                     {
+                        statusColumns[col] = true;
                         isFocusedRow = true;
-                        statusColumns["JobStatus"] = true;
                     }
-                    row["IsFocusedRow"] = isFocusedRow;
                 }
-                // hide columns that all have status N/A
-                foreach (var col in statusColumns)
-                {
-                    dgvSummary.Invoke((Action)(() => dgvSummary.Columns[col.Key].Visible = col.Value));
-                }
-                dgvSummary.Invoke((Action)(() => colShowInSummary.Visible = showHiddenToolStripMenuItem.Checked));
-                string rowFilter = "";
-                if (focusedView)
-                {
-                    rowFilter = "IsFocusedRow=1";
-                }
-                dv = new DataView(dt, rowFilter, "Instance", DataViewRowState.CurrentRows);
-                dgvSummary.Invoke((Action)(() =>
-                {
-                    dgvSummary.DataSource = dv;
-                    dgvSummary.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
-                }
-                ));
-                lastRefresh = DateTime.Now;
-                toolStrip1.Invoke((Action)(() =>
-                {
-                    lblRefreshTime.Text = "Refresh Time: " + lastRefresh.ToString();
-                    lblRefreshTime.ForeColor = DBADashStatusEnum.OK.GetColor();
-                }
-                ));
-                refresh1.Invoke((Action)(() => refresh1.Visible = false));
-                dgvSummary.Invoke((Action)(() => dgvSummary.Visible = true));
-                timer1.Enabled = true;
 
-            });
-
+                if (row["IsAgentRunning"] != DBNull.Value && (bool)row["IsAgentRunning"] == false)
+                {
+                    isFocusedRow = true;
+                    statusColumns["JobStatus"] = true;
+                }
+                row["IsFocusedRow"] = isFocusedRow;
+            }
+            // hide columns that all have status N/A
+            foreach (var col in statusColumns)
+            {
+                dgvSummary.Invoke((Action)(() => dgvSummary.Columns[col.Key].Visible = col.Value));
+            }
+            dgvSummary.Invoke((Action)(() => colShowInSummary.Visible = showHiddenToolStripMenuItem.Checked));
+            string rowFilter = "";
+            if (focusedView)
+            {
+                rowFilter = "IsFocusedRow=1";
+            }
+            dv = new DataView(dt, rowFilter, "Instance", DataViewRowState.CurrentRows);
+            dgvSummary.Invoke((Action)(() =>
+            {
+                dgvSummary.DataSource = dv;
+                dgvSummary.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
+            }
+            ));
+            lastRefresh = DateTime.Now;
+            toolStrip1.Invoke((Action)(() =>
+            {
+                lblRefreshTime.Text = "Refresh Time: " + lastRefresh.ToString();
+                lblRefreshTime.ForeColor = DBADashStatusEnum.OK.GetColor();
+            }
+            ));
+            refresh1.Invoke((Action)(() => refresh1.Visible = false));
+            dgvSummary.Invoke((Action)(() => dgvSummary.Visible = true));
+            timer1.Enabled = true;
         }
 
         private void DgvSummary_RowAdded(object sender, DataGridViewRowsAddedEventArgs e)
         {
-
             for (Int32 idx = e.RowIndex; idx < e.RowIndex + e.RowCount; idx += 1)
             {
                 var row = (DataRowView)dgvSummary.Rows[idx].DataBoundItem;
@@ -239,7 +245,6 @@ namespace DBADashGUI
                     {
                         oldestLastGoodCheckDB = ((DateTime)row["OldestLastGoodCheckDBTime"]).ToLocalTime().ToString("yyyy-MM-dd HH:mm");
                     }
-
                 }
                 if (row["LastGoodCheckDBCriticalCount"] != DBNull.Value)
                 {
@@ -262,20 +267,16 @@ namespace DBADashGUI
                         lastMemoryDumpStr = "Last Memory Dump (local time): " + lastMemoryDumpUTC.ToLocalTime().ToString() + Environment.NewLine +
                            "Last Memory Dump (server time): " + lastMemoryDump.ToString() + Environment.NewLine +
                            "Total Memory Dumps: " + memoryDumpCount; ;
-
                     }
                     else
                     {
                         lastMemoryDumpStr = "Last Memory Dump: " + lastMemoryDumpUTC.ToLocalTime().ToString() + Environment.NewLine +
                            "Total Memory Dumps: " + memoryDumpCount; ;
-
                     }
 
                     dgvSummary.Rows[idx].Cells["MemoryDumpStatus"].Value = DateTime.UtcNow.Subtract(lastMemoryDumpUTC).Humanize(1);
 
                     dgvSummary.Rows[idx].Cells["MemoryDumpStatus"].ToolTipText = lastMemoryDumpStr;
-
-
                 }
                 string lastAlert = "Never";
                 string lastAlertDays = "Never";
@@ -545,6 +546,5 @@ namespace DBADashGUI
             MessageBox.Show("Memory dump acknowledge date updated", "Info", MessageBoxButtons.OK, MessageBoxIcon.Information);
             RefreshData();
         }
-
     }
 }
