@@ -57,7 +57,7 @@ jobs:
           Compress-Archive -Path "DBADashBuild\DBADashGUIOnly\*" -DestinationPath $guiZipPath
 
       - name: Install SQL
-        uses: potatoqualitee/mssqlsuite@v1.5
+        uses: potatoqualitee/mssqlsuite@v1.7
         with:
           install: sqlengine
           collation: Latin1_General_BIN
