@@ -354,7 +354,8 @@ namespace DBADashGUI
                     var azureDBNode = new SQLTreeItem(db, SQLTreeItem.TreeType.AzureDatabase)
                     {
                         DatabaseID = (Int32)row["AzureDatabaseID"],
-                        InstanceID = instanceID
+                        InstanceID = instanceID,
+                        DatabaseName = db
                     };
                     azureDBNode.Nodes.Add(new SQLTreeItem("Configuration", SQLTreeItem.TreeType.Configuration));
                     azureDBNode.Nodes.Add(new SQLTreeItem("Checks", SQLTreeItem.TreeType.DBAChecks));

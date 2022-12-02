@@ -16,15 +16,15 @@ namespace DBADashGUI.Changes
         {
             InitializeComponent();
         }
-        readonly Int32 currentSummaryPageSize = 100;
-        int currentSummaryPage = 1;
+
+        private readonly Int32 currentSummaryPageSize = 100;
+        private int currentSummaryPage = 1;
         private Int32 InstanceID;
         private string InstanceName;
         private Int32 DatabaseID;
         private List<Int32> InstanceIDs;
 
         public bool CanNavigateBack { get => tsBack.Enabled; }
-
 
         private static DataSet DdlSnapshotDiff(DateTime snapshotDateUTC, int databaseID)
         {
@@ -55,7 +55,6 @@ namespace DBADashGUI.Changes
                 gvSnapshotsDetail.AutoGenerateColumns = false;
                 gvSnapshotsDetail.DataSource = ds.Tables[0];
                 gvSnapshotsDetail.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
-
             }
         }
 
@@ -137,7 +136,7 @@ namespace DBADashGUI.Changes
             {
                 cn.Open();
                 cmd.Parameters.AddWithValue("DatabaseID", DatabaseID);
-                cmd.Parameters.AddWithValue("InstanceDisplayName", InstanceName);
+                cmd.Parameters.AddWithValue("InstanceGroupName", InstanceName);
                 cmd.Parameters.AddWithValue("PageSize", currentSummaryPage);
                 cmd.Parameters.AddWithValue("PageNumber", pageNum);
 
@@ -163,6 +162,7 @@ namespace DBADashGUI.Changes
             tsSummaryNext.Enabled = dt.Rows.Count == currentSummaryPage;
             currentSummaryPage = pageNum;
         }
+
         private void TsSummaryBack_Click(object sender, EventArgs e)
         {
             LoadSnapshots(currentSummaryPage - 1);
@@ -247,7 +247,6 @@ namespace DBADashGUI.Changes
                 {
                     MessageBox.Show(ex.Message, "Export", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
-
             }
         }
 
@@ -278,7 +277,6 @@ namespace DBADashGUI.Changes
                         File.WriteAllText(filePath, sql);
                     }
                 }
-
             }
         }
 
@@ -312,7 +310,6 @@ namespace DBADashGUI.Changes
             {
                 return false;
             }
-
         }
     }
 }

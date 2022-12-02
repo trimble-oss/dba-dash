@@ -7,8 +7,8 @@ namespace DBADashGUI
 {
     public class SQLTreeItem : TreeNode
     {
-
         private readonly Dictionary<string, object> _attributes;
+
         public Dictionary<string, object> Attributes
         {
             get
@@ -63,10 +63,10 @@ namespace DBADashGUI
             Tags,
             AgentJobStep,
             InstanceFolder
-
         }
 
         private DatabaseEngineEdition _engineEdition = DatabaseEngineEdition.Unknown;
+
         public DatabaseEngineEdition EngineEdition
         {
             get
@@ -84,12 +84,12 @@ namespace DBADashGUI
             }
         }
 
-
         private HashSet<int> _RegularInstanceIDs;
         private HashSet<int> _AzureInstanceIDs;
         private HashSet<int> _InstanceIDs;
 
         private DBADashContext InternalContext;
+
         public DBADashContext Context
         {
             get
@@ -107,7 +107,8 @@ namespace DBADashGUI
                     JobID = JobID,
                     JobStepID = JobStepID,
                     Type = Type,
-                    DatabaseName = DatabaseName
+                    DatabaseName = DatabaseName,
+                    ParentType = Parent == null ? TreeType.DBADashRoot : ((SQLTreeItem)Parent).Type
                 };
                 return InternalContext;
             }
@@ -197,7 +198,6 @@ namespace DBADashGUI
             }
         }
 
-
         /// <summary>
         /// Return a list of instance IDs associated with the current node in the tree.  Includes AzureDB.
         /// </summary>
@@ -214,7 +214,6 @@ namespace DBADashGUI
                 {
                     return ((SQLTreeItem)this.Parent).InstanceIDs;
                 }
-
             }
         }
 
@@ -234,12 +233,11 @@ namespace DBADashGUI
                 {
                     return ((SQLTreeItem)this.Parent).RegularInstanceIDs;
                 }
-
             }
         }
 
         /// <summary>
-        /// Return a list of AzureDB instance IDs associated with the current node in the tree.  
+        /// Return a list of AzureDB instance IDs associated with the current node in the tree.
         /// </summary>
         public HashSet<int> AzureInstanceIDs
         {
@@ -268,6 +266,7 @@ namespace DBADashGUI
                 return _schemaName + "." + _objectName;
             }
         }
+
         public SQLTreeItem(string objectName, string schemaName, TreeType type) : base()
         {
             _objectName = objectName;
@@ -275,8 +274,8 @@ namespace DBADashGUI
             Type = type;
             Text = FullName();
             SetIcon();
-
         }
+
         public SQLTreeItem(string objectName, TreeType type) : base()
         {
             _objectName = objectName;
@@ -324,12 +323,15 @@ namespace DBADashGUI
             Text = FullName();
             SetIcon();
         }
+
         private bool isVisibleInSummary;
-        public bool IsVisibleInSummary { get => isVisibleInSummary; set { isVisibleInSummary = value; SetIcon(); } }
+        public bool IsVisibleInSummary
+        { get => isVisibleInSummary; set { isVisibleInSummary = value; SetIcon(); } }
 
         private bool hasInstanceName = false;
         private string instanceName = null;
         private Int32 instanceID = 0;
+
         public Int32 InstanceID
         {
             get
@@ -357,6 +359,7 @@ namespace DBADashGUI
         }
 
         public TreeType Type;
+
         public string InstanceName
         {
             get
@@ -388,13 +391,17 @@ namespace DBADashGUI
                 return instanceName;
             }
         }
+
         public string _objectName;
         public string _schemaName;
         private Int32 _databaseID = -1;
         private string databaseName;
-        public string ObjectName { get { return _objectName; } set { _objectName = value; this.Name = FullName(); } }
-        public string SchemaName { get { return _schemaName; } set { _schemaName = value; this.Name = FullName(); } }
+        public string ObjectName
+        { get { return _objectName; } set { _objectName = value; this.Name = FullName(); } }
+        public string SchemaName
+        { get { return _schemaName; } set { _schemaName = value; this.Name = FullName(); } }
         public Int64 ObjectID { get; set; }
+
         public Int32 DatabaseID
         {
             get
@@ -447,7 +454,6 @@ namespace DBADashGUI
             }
         }
 
-
         private void SetIcon()
         {
             switch (Type)
@@ -455,6 +461,7 @@ namespace DBADashGUI
                 case TreeType.DBADashRoot:
                     ImageIndex = 0;
                     break;
+
                 case TreeType.Instance:
                     if (EngineEdition == DatabaseEngineEdition.SqlManagedInstance)
                     {
@@ -469,57 +476,75 @@ namespace DBADashGUI
                         ImageIndex = 19;
                     }
                     break;
+
                 case TreeType.Database:
                     ImageIndex = 2;
                     break;
+
                 case TreeType.Table:
                     ImageIndex = 4;
                     break;
+
                 case TreeType.StoredProcedure:
                     ImageIndex = 5;
                     break;
+
                 case TreeType.InlineFunction:
                     ImageIndex = 5;
                     break;
+
                 case TreeType.ScalarFunction:
                     ImageIndex = 5;
                     break;
+
                 case TreeType.TableFunction:
                     ImageIndex = 5;
                     break;
+
                 case TreeType.AggregateFunction:
                     ImageIndex = 5;
                     break;
+
                 case TreeType.DatabaseTrigger:
                     ImageIndex = 5;
                     break;
+
                 case TreeType.CLRAssembly:
                     ImageIndex = 5;
                     break;
+
                 case TreeType.Folder:
                     ImageIndex = 3;
                     break;
+
                 case TreeType.Configuration:
                     ImageIndex = 7;
                     break;
+
                 case TreeType.AzureInstance:
                     ImageIndex = 8;
                     break;
+
                 case TreeType.AzureDatabase:
                     ImageIndex = 9;
                     break;
+
                 case TreeType.AgentJobs:
                     ImageIndex = 3;
                     break;
+
                 case TreeType.HADR:
                     ImageIndex = 3;
                     break;
+
                 case TreeType.DBAChecks:
                     ImageIndex = 10;
                     break;
+
                 case TreeType.Tags:
                     ImageIndex = 11;
                     break;
+
                 case TreeType.AgentJobStep:
                     string subsystem = (string)_attributes["subsystem"];
                     if (subsystem == "CmdExec")
@@ -543,6 +568,7 @@ namespace DBADashGUI
                         ImageIndex = 16;
                     }
                     break;
+
                 case TreeType.AgentJob:
                     if (Attributes.Count > 0 && (bool)Attributes["enabled"])
                     {
@@ -553,9 +579,11 @@ namespace DBADashGUI
                         ImageIndex = 17;
                     }
                     break;
+
                 case TreeType.InstanceFolder:
                     ImageIndex = 20;
                     break;
+
                 default:
                     ImageIndex = 5;
                     break;
@@ -576,7 +604,6 @@ namespace DBADashGUI
             return n;
         }
 
-
         public void AddDummyNode()
         {
             SQLTreeItem dummyNode = new("", "", TreeType.DummyNode);
@@ -586,7 +613,6 @@ namespace DBADashGUI
 
         public void AddDatabaseFolders()
         {
-
             var nTables = NewFolder("Tables", "U", true);
             var nViews = NewFolder("Views", "V", true);
             var nProgrammability = NewFolder("Programmability", null, false);
@@ -631,14 +657,12 @@ namespace DBADashGUI
             AddContextMenu(nTypes);
             AddContextMenu(nSeq);
 
-
             this.Nodes.Add(nTables);
             this.Nodes.Add(nViews);
             this.Nodes.Add(nProgrammability);
 
             this.Nodes.Add(nTypes);
             this.Nodes.Add(nSeq);
-
         }
 
         private void AddRefreshContextMenu(SQLTreeItem n)
@@ -673,6 +697,7 @@ namespace DBADashGUI
             mnuFilter.Tag = n;
             n.ContextMenuStrip = ctxMnu;
         }
+
         public String FilterText = "";
 
         private void MnuFilter_Click(object sender, EventArgs e)
@@ -685,11 +710,10 @@ namespace DBADashGUI
             }
         }
 
-        readonly List<SQLTreeItem> unfilteredNodes = new();
+        private readonly List<SQLTreeItem> unfilteredNodes = new();
 
         public void Filter(string filter)
         {
-
             this.Expand();
             if (unfilteredNodes.Count == 0)
             {
@@ -719,6 +743,5 @@ namespace DBADashGUI
             }
             this.FilterText = filter;
         }
-
     }
 }
