@@ -3,6 +3,7 @@ DECLARE @ContainedAGID UNIQUEIDENTIFIER
 
 /* For SQL 2022+ Get the Contained Availability Group Name */
 IF COLUMNPROPERTY(OBJECT_ID('sys.dm_exec_sessions'),'contained_availability_group_id','ColumnID') IS NOT NULL
+	AND OBJECT_ID('sys.availability_groups') IS NOT NULL /* AzureDB has contained_availability_group_id column but not sys.availability_groups DMV */
 BEGIN
 	DECLARE @SQL NVARCHAR(MAX)
 	SET @SQL = N'
