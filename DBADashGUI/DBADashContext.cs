@@ -19,6 +19,6 @@ namespace DBADashGUI
         public int JobStepID { get; set; }
 
         public SQLTreeItem.TreeType Type { get; set; }
-
+        public SQLTreeItem.TreeType ParentType { get; set; }
     }
 }
