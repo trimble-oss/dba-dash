@@ -53,7 +53,7 @@ namespace DBADashGUI.HA
             else
             {
                 dt = GetAvailabilityGroupSummary(InstanceIDs);
-                dgv.Columns.Add(new DataGridViewLinkColumn() { HeaderText = "Instance", DataPropertyName = "Instance", Name = "colInstance", LinkColor = DashColors.LinkColor, Frozen = Common.FreezeKeyColumn });
+                dgv.Columns.Add(new DataGridViewLinkColumn() { HeaderText = "Instance", DataPropertyName = "Instance", Name = "colInstance", LinkColor = DashColors.LinkColor, Frozen = Common.FreezeKeyColumn, SortMode = DataGridViewColumnSortMode.Automatic });
             }
             Common.ConvertUTCToLocal(ref dt);
             dgv.DataSource = dt;
@@ -152,7 +152,6 @@ namespace DBADashGUI.HA
                         r.Cells["Remote Reverting"].SetStatusColor((int)row["Remote Reverting"] > 0 ? DashColors.Warning : Color.White);
                         r.Cells["Initializing"].SetStatusColor((int)row["Initializing"] > 0 ? DashColors.Warning : Color.White);
                         r.Cells["Remote Initializing"].SetStatusColor((int)row["Remote Initializing"] > 0 ? DashColors.Warning : Color.White);
-
                     }
                     var syncHealthStatus = Convert.ToString(row["Sync Health"]) == "HEALTHY" ? DashColors.Success :
                                                      Convert.ToString(row["Sync Health"]) == "PARTIALLY_HEALTHY" ? DashColors.Warning : DashColors.Fail;
