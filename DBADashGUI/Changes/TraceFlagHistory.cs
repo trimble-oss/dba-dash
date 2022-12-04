@@ -52,7 +52,7 @@ namespace DBADashGUI.Changes
                             }
                             if (validFrom > DateTime.Parse("1900-01-01"))
                             {
-                                r[colName] = "Y (" + validFrom.ToLocalTime().ToString("yyyy-MM-dd") + ")";
+                                r[colName] = "Y (" + validFrom.ToAppTimeZone().ToString("yyyy-MM-dd") + ")";
                             }
                             else
                             {
@@ -91,7 +91,7 @@ namespace DBADashGUI.Changes
                 cmd.Parameters.AddWithValue("@InstanceIDs", string.Join(",", InstanceIDs));
                 DataTable dt = new();
                 da.Fill(dt);
-                Common.ConvertUTCToLocal(ref dt);
+                DateHelper.ConvertUTCToAppTimeZone(ref dt);
                 return dt;
             }
         }

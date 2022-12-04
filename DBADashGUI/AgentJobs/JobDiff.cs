@@ -25,7 +25,7 @@ namespace DBADashGUI
                 cmd.Parameters.AddWithValue("InstanceID_B", InstanceID_B);
                 var dt = new DataTable();
                 da.Fill(dt);
-                Common.ConvertUTCToLocal(ref dt);
+                DateHelper.ConvertUTCToAppTimeZone(ref dt);
                 return dt;
             }
         }

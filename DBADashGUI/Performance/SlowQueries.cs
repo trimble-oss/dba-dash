@@ -766,7 +766,7 @@ namespace DBADashGUI
                     r["text_trunc"] = txt.Length > 10000 ? txt[..10000] : txt;
                 }
             }
-            Common.ConvertUTCToLocal(ref dt);
+            DateHelper.ConvertUTCToAppTimeZone(ref dt);
             if (dt.Rows.Count == pageSize)
             {
                 lblPageSize.Text = string.Format("Top {0} rows", pageSize);
@@ -812,8 +812,8 @@ namespace DBADashGUI
                 }
                 else if (dgvSlow.Columns[e.ColumnIndex] == colSessionID)
                 {
-                    DateTime toDate = timestamp.ToUniversalTime();
-                    DateTime fromDate = Convert.ToDateTime(row["start_time"]).ToUniversalTime();
+                    DateTime toDate = timestamp.AppTimeZoneToUtc();
+                    DateTime fromDate = Convert.ToDateTime(row["start_time"]).AppTimeZoneToUtc();
                     int instanceID = Convert.ToInt32(row["InstanceID"]);
                     ToggleSummary(false);
                     runningQueries1.SessionID = sessionID;

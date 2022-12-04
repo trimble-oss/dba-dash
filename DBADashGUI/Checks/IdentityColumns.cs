@@ -98,7 +98,7 @@ namespace DBADashGUI.Checks
                 cmd.Parameters.AddWithValue("IncludeNA", undefinedToolStripMenuItem.Checked);
                 DataTable dt = new();
                 da.Fill(dt);
-                Common.ConvertUTCToLocal(ref dt);
+                DateHelper.ConvertUTCToAppTimeZone(ref dt);
                 return dt;
             }
         }

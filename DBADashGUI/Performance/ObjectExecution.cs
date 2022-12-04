@@ -69,12 +69,12 @@ namespace DBADashGUI.Performance
             this.instanceID = instanceID;
             if (mins != DateRange.DurationMins)
             {
-                dateGrouping = Common.DateGrouping(DateRange.DurationMins, 35);
+                dateGrouping = DateHelper.DateGrouping(DateRange.DurationMins, 35);
                 if (dateGrouping < 1)
                 {
                     dateGrouping = 1;
                 }
-                tsDateGroup.Text = Common.DateGroupString(dateGrouping);
+                tsDateGroup.Text = DateHelper.DateGroupString(dateGrouping);
                 mins = DateRange.DurationMins;
             }
             this.objectID = objectID;
@@ -207,7 +207,7 @@ namespace DBADashGUI.Performance
 
         private void ObjectExecution_Load(object sender, EventArgs e)
         {
-            Common.AddDateGroups(tsDateGroup, TsDateGrouping_Click);
+            DateHelper.AddDateGroups(tsDateGroup, TsDateGrouping_Click);
             foreach (var m in measures)
             {
                 ToolStripMenuItem itm = new(m.Value.DisplayName)
@@ -229,7 +229,7 @@ namespace DBADashGUI.Performance
         {
             var ts = (ToolStripMenuItem)sender;
             dateGrouping = Convert.ToInt32(ts.Tag);
-            tsDateGroup.Text = Common.DateGroupString(dateGrouping);
+            tsDateGroup.Text = DateHelper.DateGroupString(dateGrouping);
             RefreshData();
         }
 

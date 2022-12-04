@@ -29,7 +29,7 @@ namespace DBADashGUI.Performance
             set
             {
                 dateGrouping = value;
-                tsDateGroup.Text = Common.DateGroupString(value);
+                tsDateGroup.Text = DateHelper.DateGroupString(value);
             }
         }
 
@@ -43,7 +43,7 @@ namespace DBADashGUI.Performance
         {
             if (mins != DateRange.DurationMins)
             {
-                DateGrouping = Common.DateGrouping(DateRange.DurationMins, 300);
+                DateGrouping = DateHelper.DateGrouping(DateRange.DurationMins, 300);
                 mins = DateRange.DurationMins;
             }
             var dt = GetWaitsSummaryDT();
@@ -63,7 +63,7 @@ namespace DBADashGUI.Performance
                 cmd.Parameters.AddWithValue("FromDate", DateRange.FromUTC);
                 cmd.Parameters.AddWithValue("ToDate", DateRange.ToUTC);
 
-                cmd.Parameters.AddWithValue("UTCOffset", Common.UtcOffset);
+                cmd.Parameters.AddWithValue("UTCOffset", DateHelper.UtcOffset);
 
                 if (DateRange.HasTimeOfDayFilter)
                 {
@@ -167,8 +167,8 @@ namespace DBADashGUI.Performance
                 WaitChart1.LegendLocation = LiveCharts.LegendLocation.Bottom;
                 WaitChart1.Series.Clear();
                 WaitChart1.AddDataTable(dt, columns, "time", true);
-                WaitChart1.AxisX[0].MinValue = DateRange.FromUTC.ToLocalTime().Ticks;
-                WaitChart1.AxisX[0].MaxValue = DateRange.ToUTC.ToLocalTime().Ticks;
+                WaitChart1.AxisX[0].MinValue = DateRange.FromUTC.ToAppTimeZone().Ticks;
+                WaitChart1.AxisX[0].MaxValue = DateRange.ToUTC.ToAppTimeZone().Ticks;
                 if (WaitChart1.AxisY.Count == 1)
                 {
                     WaitChart1.AxisY[0].MinValue = 0;
@@ -192,7 +192,7 @@ namespace DBADashGUI.Performance
         private void WaitsSummary_Load(object sender, EventArgs e)
         {
             Common.StyleGrid(ref dgv);
-            Common.AddDateGroups(tsDateGroup, TsDateGroups_Click);
+            DateHelper.AddDateGroups(tsDateGroup, TsDateGroups_Click);
             PopulateColumnsMenu();
             PopulateMetricsMenu();
         }

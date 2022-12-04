@@ -114,7 +114,7 @@ namespace DBADashGUI.Changes
         {
             DataTable dt = GetDBConfigurationHistory();
             dgvConfigHistory.AutoGenerateColumns = false;
-            Common.ConvertUTCToLocal(ref dt);
+            DateHelper.ConvertUTCToAppTimeZone(ref dt);
             dgvConfigHistory.DataSource = dt;
             dgvConfigHistory.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
         }

@@ -77,7 +77,7 @@ namespace DBADashGUI.Performance
                 {
                     cmd.Parameters.AddWithValue("Hours", DateRange.TimeOfDay.AsDataTable());
                 }
-                cmd.Parameters.AddWithValue("UTCOffset", Common.UtcOffset);
+                cmd.Parameters.AddWithValue("UTCOffset", DateHelper.UtcOffset);
                 DataTable dt = new();
                 da.Fill(dt);
                 AutoGenerateColumns = false;

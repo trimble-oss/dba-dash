@@ -60,7 +60,7 @@ namespace DBADashGUI.Performance
                 {
                     cmd.Parameters.AddWithValue("@DatabaseID", databaseID);
                 }
-                cmd.Parameters.AddWithValue("@UTCOffset", Common.UtcOffset);
+                cmd.Parameters.AddWithValue("@UTCOffset", DateHelper.UtcOffset);
                 if (DateRange.HasTimeOfDayFilter)
                 {
                     cmd.Parameters.AddWithValue("Hours", DateRange.TimeOfDay.AsDataTable());
@@ -140,7 +140,7 @@ namespace DBADashGUI.Performance
                 {
                     maxBlockedTime = blockedTime;
                 }
-                points[i] = new BlockingPoint(snapshotID, dtm.ToLocalTime(), blockedCnt, blockedTime);
+                points[i] = new BlockingPoint(snapshotID, dtm.ToAppTimeZone(), blockedCnt, blockedTime);
                 Ymax = blockedCnt > Ymax ? blockedCnt : Ymax;
                 i += 1;
             }
@@ -167,8 +167,8 @@ namespace DBADashGUI.Performance
             chartBlocking.AxisX.Add(new Axis
             {
                 LabelFormatter = val => new System.DateTime((long)val).ToString(format),
-                MinValue = DateRange.FromUTC.ToLocalTime().Ticks,
-                MaxValue = DateRange.ToUTC.ToLocalTime().Ticks
+                MinValue = DateRange.FromUTC.ToAppTimeZone().Ticks,
+                MaxValue = DateRange.ToUTC.ToAppTimeZone().Ticks
             });
             chartBlocking.AxisY.Add(new Axis
             {
@@ -189,8 +189,8 @@ namespace DBADashGUI.Performance
             var blockPoint = (BlockingPoint)chartPoint.Instance;
             RunningQueriesViewer frm = new()
             {
-                SnapshotDateFrom = blockPoint.SnapshotDate.ToUniversalTime(),
-                SnapshotDateTo = blockPoint.SnapshotDate.ToUniversalTime(),
+                SnapshotDateFrom = blockPoint.SnapshotDate.AppTimeZoneToUtc(),
+                SnapshotDateTo = blockPoint.SnapshotDate.AppTimeZoneToUtc(),
                 InstanceID = InstanceID,
                 ShowRootBlockers = true,
             };

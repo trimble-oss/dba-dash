@@ -44,7 +44,7 @@ namespace DBADashGUI.AgentJobs
                 pDateGrouping.Direction = ParameterDirection.InputOutput;
                 DataTable dt = new();
                 da.Fill(dt);
-                tsDateGroup.Text = Common.DateGroups[(int)pDateGrouping.Value];
+                tsDateGroup.Text = DateHelper.DateGroups[(int)pDateGrouping.Value];
                 return dt;
             }
         }
@@ -98,8 +98,8 @@ namespace DBADashGUI.AgentJobs
         {
             tsBack.Enabled = CanNavigateBack;
             tsJob.Visible = false;
-            dateGrouping = Common.DateGrouping(DateRange.DurationMins, 200);
-            tsDateGroup.Text = Common.DateGroupString(dateGrouping);
+            dateGrouping = DateHelper.DateGrouping(DateRange.DurationMins, 200);
+            tsDateGroup.Text = DateHelper.DateGroupString(dateGrouping);
 
             dgv.Columns["colRetry"].Visible = JobID != Guid.Empty;
 
@@ -158,7 +158,7 @@ namespace DBADashGUI.AgentJobs
 
         private void JobStats_Load(object sender, EventArgs e)
         {
-            Common.AddDateGroups(tsDateGroup, TsDateGroup_Click);
+            DateHelper.AddDateGroups(tsDateGroup, TsDateGroup_Click);
             dgv.AutoGenerateColumns = false;
             dgv.Columns.Add(new DataGridViewLinkColumn() { Name = "colJob", HeaderText = "Job", DataPropertyName = "JobName", SortMode = DataGridViewColumnSortMode.Automatic, LinkColor = DashColors.LinkColor });
             dgv.Columns.Add(new DataGridViewTextBoxColumn() { HeaderText = "Step", DataPropertyName = "JobStep" });
@@ -199,7 +199,7 @@ namespace DBADashGUI.AgentJobs
         {
             var ts = (ToolStripMenuItem)sender;
             dateGrouping = Convert.ToInt32(ts.Tag);
-            tsDateGroup.Text = Common.DateGroupString(dateGrouping);
+            tsDateGroup.Text = DateHelper.DateGroupString(dateGrouping);
             RefreshChart();
         }
 

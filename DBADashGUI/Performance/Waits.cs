@@ -84,12 +84,12 @@ namespace DBADashGUI.Performance
 
             if (mins != DateRange.DurationMins)
             {
-                dateGrouping = Common.DateGrouping(DateRange.DurationMins, 35);
+                dateGrouping = DateHelper.DateGrouping(DateRange.DurationMins, 35);
                 if (dateGrouping < 1)
                 {
                     dateGrouping = 1;
                 }
-                tsDateGrouping.Text = Common.DateGroupString(dateGrouping);
+                tsDateGrouping.Text = DateHelper.DateGroupString(dateGrouping);
                 mins = DateRange.DurationMins;
             }
 
@@ -115,7 +115,7 @@ namespace DBADashGUI.Performance
                 {
                     cmd.Parameters.AddWithValue("WaitType", Metric.WaitType);
                 }
-                cmd.Parameters.AddWithValue("@UTCOffset", Common.UtcOffset);
+                cmd.Parameters.AddWithValue("@UTCOffset", DateHelper.UtcOffset);
                 if (DateRange.HasTimeOfDayFilter)
                 {
                     cmd.Parameters.AddWithValue("Hours", DateRange.TimeOfDay.AsDataTable());
@@ -163,7 +163,7 @@ namespace DBADashGUI.Performance
                     values = new ChartValues<DateTimePoint>();
                     current = waitType;
                 }
-                values.Add(new DateTimePoint(((DateTime)r["Time"]).ToLocalTime(), (double)(decimal)r["WaitTimeMsPerSec"]));
+                values.Add(new DateTimePoint(((DateTime)r["Time"]).ToAppTimeZone(), (double)(decimal)r["WaitTimeMsPerSec"]));
             }
             if (values.Count > 0)
             {
@@ -211,14 +211,14 @@ namespace DBADashGUI.Performance
 
         private void Waits_Load(object sender, EventArgs e)
         {
-            Common.AddDateGroups(tsDateGrouping, TsDateGrouping_Click);
+            DateHelper.AddDateGroups(tsDateGrouping, TsDateGrouping_Click);
         }
 
         private void TsDateGrouping_Click(object sender, EventArgs e)
         {
             var ts = (ToolStripMenuItem)sender;
             dateGrouping = Convert.ToInt32(ts.Tag);
-            tsDateGrouping.Text = Common.DateGroupString(dateGrouping);
+            tsDateGrouping.Text = DateHelper.DateGroupString(dateGrouping);
             RefreshData();
         }
 

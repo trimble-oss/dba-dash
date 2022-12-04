@@ -25,7 +25,7 @@ namespace DBADashGUI.Changes
                 cmd.Parameters.AddWithValue("JobID", JobID);
                 var dt = new DataTable();
                 da.Fill(dt);
-                Common.ConvertUTCToLocal(ref dt);
+                DateHelper.ConvertUTCToAppTimeZone(ref dt);
                 return dt;
 
             }

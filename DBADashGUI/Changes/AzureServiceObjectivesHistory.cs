@@ -33,7 +33,7 @@ namespace DBADashGUI.Changes
                     SqlDataAdapter da = new(cmd);
                     DataTable dt = new();
                     da.Fill(dt);
-                    Common.ConvertUTCToLocal(ref dt);
+                    DateHelper.ConvertUTCToAppTimeZone(ref dt);
                     dgv.AutoGenerateColumns = false;
                     dgv.DataSource = dt;
                     dgv.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
@@ -51,7 +51,7 @@ namespace DBADashGUI.Changes
                     SqlDataAdapter da = new(cmd);
                     DataTable dt = new();
                     da.Fill(dt);
-                    Common.ConvertUTCToLocal(ref dt);
+                    DateHelper.ConvertUTCToAppTimeZone(ref dt);
                     dgvPool.AutoGenerateColumns = false;
                     dgvPool.DataSource = dt;
                     dgvPool.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);

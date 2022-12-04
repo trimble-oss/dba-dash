@@ -79,7 +79,7 @@ namespace DBADashGUI.Performance
             set
             {
                 _dateGrouping = value;
-                tsDateGrouping.Text = Common.DateGroupString(_dateGrouping);
+                tsDateGrouping.Text = DateHelper.DateGroupString(_dateGrouping);
             }
 
         }
@@ -138,7 +138,7 @@ namespace DBADashGUI.Performance
 
         public void RefreshData()
         {
-            DateGrouping = Common.DateGrouping(DateRange.DurationMins, 400);
+            DateGrouping = DateHelper.DateGrouping(DateRange.DurationMins, 400);
             RefreshDataLocal();
         }
 
@@ -285,7 +285,7 @@ namespace DBADashGUI.Performance
                     cmd.Parameters.AddWithValue("InstanceID", InstanceID);
                     cmd.Parameters.AddWithValue("elastic_pool_name", ElasticPoolName);
                     cmd.Parameters.AddWithValue("DateGroupingMin", DateGrouping);
-                    cmd.Parameters.AddWithValue("UTCOffset", Common.UtcOffset);
+                    cmd.Parameters.AddWithValue("UTCOffset", DateHelper.UtcOffset);
                     SqlDataAdapter da = new(cmd);
                     DataTable dt = new();
                     da.Fill(dt);
@@ -306,7 +306,7 @@ namespace DBADashGUI.Performance
                     cmd.Parameters.AddWithValue("ToDate", DateRange.ToUTC);
                     cmd.Parameters.AddWithValue("InstanceID", InstanceID);
                     cmd.Parameters.AddWithValue("DateGroupingMin", DateGrouping);
-                    cmd.Parameters.AddWithValue("UTCOffset", Common.UtcOffset);
+                    cmd.Parameters.AddWithValue("UTCOffset", DateHelper.UtcOffset);
                     SqlDataAdapter da = new(cmd);
                     DataTable dt = new();
                     da.Fill(dt);
@@ -331,7 +331,7 @@ namespace DBADashGUI.Performance
                 columns = PoolColumns;
             }
             AddMeasures();
-            Common.AddDateGroups(tsDateGrouping, TsDateGrouping_Click);
+            DateHelper.AddDateGroups(tsDateGrouping, TsDateGrouping_Click);
 
         }
 

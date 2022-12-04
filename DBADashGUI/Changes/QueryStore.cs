@@ -49,7 +49,7 @@ namespace DBADashGUI.Changes
                 dt = GetDatabaseQueryStoreOptionsSummary();
                 SetSummaryCols();
             }
-            Common.ConvertUTCToLocal(ref dt);
+            DateHelper.ConvertUTCToAppTimeZone(ref dt);
             dgv.AutoGenerateColumns = false;
             dgv.DataSource = dt;
             if (dt.Rows.Count == 1 && DatabaseID > 0)

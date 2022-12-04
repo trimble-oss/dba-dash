@@ -48,7 +48,7 @@ namespace DBADashGUI.Changes
             if (gvSnapshots.SelectedRows.Count == 1)
             {
                 var row = (DataRowView)gvSnapshots.SelectedRows[0].DataBoundItem;
-                DateTime snapshotDateUTC = ((DateTime)row["SnapshotDate"]).ToUniversalTime();
+                DateTime snapshotDateUTC = ((DateTime)row["SnapshotDate"]).AppTimeZoneToUtc();
                 Int32 databaseID = (Int32)row["DatabaseID"];
 
                 DataSet ds = DdlSnapshotDiff(snapshotDateUTC, databaseID);
@@ -114,7 +114,7 @@ namespace DBADashGUI.Changes
 
                 var dt = new DataTable();
                 da.Fill(dt);
-                Common.ConvertUTCToLocal(ref dt);
+                DateHelper.ConvertUTCToAppTimeZone(ref dt);
                 return dt;
             }
         }
@@ -142,7 +142,7 @@ namespace DBADashGUI.Changes
 
                 var dt = new DataTable();
                 da.Fill(dt);
-                Common.ConvertUTCToLocal(ref dt);
+                DateHelper.ConvertUTCToAppTimeZone(ref dt);
                 return dt;
             }
         }

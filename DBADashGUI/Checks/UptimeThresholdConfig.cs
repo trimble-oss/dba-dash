@@ -44,8 +44,8 @@ namespace DBADashGUI.Checks
                             DateTime startTimeServer = Convert.ToDateTime(rdr["sqlserver_start_time"]);
                             DateTime ackDate = Convert.ToDateTime(rdr["UptimeAckDate"] == DBNull.Value ? DateTime.MinValue : rdr["UptimeAckDate"]);
 
-                            lblStartTime.Text = "Start Time: " + startTimeUtc.ToLocalTime();
-                            if (startTimeUtc.ToLocalTime() != startTimeServer)
+                            lblStartTime.Text = "Start Time: " + startTimeUtc.ToAppTimeZone();
+                            if (startTimeUtc.ToAppTimeZone() != startTimeServer)
                             {
                                 lblStartTime.Text += " (" + startTimeServer.ToString() + " on server)";
                             }

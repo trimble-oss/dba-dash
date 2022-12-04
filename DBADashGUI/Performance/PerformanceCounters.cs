@@ -88,8 +88,8 @@ namespace DBADashGUI.Performance
         {
             if (durationMins != mins) // Change dategroup only if date range has changed.
             {
-                DateGrouping = Common.DateGrouping(mins, 200);
-                tsDateGrouping.Text = Common.DateGroupString(DateGrouping);
+                DateGrouping = DateHelper.DateGrouping(mins, 200);
+                tsDateGrouping.Text = DateHelper.DateGroupString(DateGrouping);
                 durationMins = mins;
             }
         }
@@ -174,7 +174,7 @@ namespace DBADashGUI.Performance
                 cmd.Parameters.AddWithValue("ToDate", ToDate == DateTime.MinValue ? DateRange.ToUTC : ToDate);
                 cmd.Parameters.AddWithValue("CounterID", Metric.CounterID);
                 cmd.Parameters.AddWithValue("DateGroupingMin", DateGrouping);
-                cmd.Parameters.AddWithValue("UTCOffset", Common.UtcOffset);
+                cmd.Parameters.AddWithValue("UTCOffset", DateHelper.UtcOffset);
                 if (DateRange.HasDayOfWeekFilter)
                 {
                     cmd.Parameters.AddWithValue("DaysOfWeek", DateRange.DayOfWeek.AsDataTable());
@@ -185,21 +185,21 @@ namespace DBADashGUI.Performance
                 }
                 DataTable dt = new();
                 da.Fill(dt);
-                Common.ConvertUTCToLocal(ref dt);
+                DateHelper.ConvertUTCToAppTimeZone(ref dt);
                 return dt;
             }
         }
 
         private void PerformanceCounters_Load(object sender, EventArgs e)
         {
-            Common.AddDateGroups(tsDateGrouping, TsDateGrouping_Click);
+            DateHelper.AddDateGroups(tsDateGrouping, TsDateGrouping_Click);
         }
 
         private void TsDateGrouping_Click(object sender, EventArgs e)
         {
             var ts = (ToolStripMenuItem)sender;
             DateGrouping = Convert.ToInt32(ts.Tag);
-            tsDateGrouping.Text = Common.DateGroupString(DateGrouping);
+            tsDateGrouping.Text = DateHelper.DateGroupString(DateGrouping);
             dt = GetPerformanceCounter();
             RefreshChart();
         }

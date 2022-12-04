@@ -124,7 +124,7 @@ namespace DBADashGUI
                 }
                 cmd.Parameters.AddWithValue("FromDateUTC", FromDate);
                 cmd.Parameters.AddWithValue("ToDateUTC", ToDate);
-                cmd.Parameters.AddWithValue("UTCOffset", Common.UtcOffset);
+                cmd.Parameters.AddWithValue("UTCOffset", DateHelper.UtcOffset);
                 if (objectID > 0)
                 {
                     cmd.Parameters.AddWithValue("ObjectID", objectID);

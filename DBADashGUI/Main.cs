@@ -13,10 +13,8 @@ using System.Windows.Forms;
 
 namespace DBADashGUI
 {
-
     public partial class Main : Form, IMessageFilter
     {
-
         public class InstanceSelectedEventArgs : EventArgs
         {
             public int InstanceID = -1;
@@ -35,7 +33,7 @@ namespace DBADashGUI
             commandLine = opts;
         }
 
-        readonly string jsonPath = Common.JsonConfigPath;
+        private readonly string jsonPath = Common.JsonConfigPath;
 
         private Int64 currentObjectID;
         private Int32 currentPage = 1;
@@ -51,6 +49,7 @@ namespace DBADashGUI
         private string GroupByTag = String.Empty;
         private readonly List<TreeContext> VisitedNodes = new();
         private bool suppressSaveContext = false;
+
         /// <summary>
         ///  For PreFilterMessage.  Mouse down button.
         /// </summary>
@@ -140,6 +139,7 @@ namespace DBADashGUI
                 Application.Exit();
                 return;
             }
+            AddTimeZoneMenus();
         }
 
         public async Task SetConnection(string connection)
@@ -224,7 +224,6 @@ namespace DBADashGUI
                     throw new Exception("Version check");
                 }
             }
-
         }
 
         private void GetCommandLineTags()
@@ -391,7 +390,6 @@ namespace DBADashGUI
             tv1.Nodes.Add(root);
             root.Expand();
             tv1.SelectedNode = root;
-
         }
 
         private static void ExpandJobs(SQLTreeItem jobsNode)
@@ -570,7 +568,6 @@ namespace DBADashGUI
 
         private void Tv1_AfterSelect(object sender, TreeViewEventArgs e)
         {
-
             var suppress = suppressLoadTab;
             suppressLoadTab = true; // Don't Load tab while adding/removing tabs
             var n = (SQLTreeItem)tv1.SelectedNode;
@@ -621,7 +618,6 @@ namespace DBADashGUI
                 {
                     ExpandObjects(n);
                 }
-
             }
         }
 
@@ -642,9 +638,10 @@ namespace DBADashGUI
             }
         }
 
-        #endregion
+        #endregion Tree
 
         #region SchemaSnapshots
+
         private void LoadDDL(Int64 DDLID, Int64 DDLIDOld)
         {
             string newText = Common.DDL(DDLID);
@@ -668,7 +665,6 @@ namespace DBADashGUI
             tsPageNum.Text = "Page " + PageNum;
             tsPrevious.Enabled = (PageNum > 1);
             tsNext.Enabled = dt.Rows.Count == currentPageSize;
-
         }
 
         private void GvHistory_SelectionChanged(object sender, EventArgs e)
@@ -725,11 +721,11 @@ namespace DBADashGUI
             }
         }
 
-        #endregion
+        #endregion SchemaSnapshots
 
         #region Tagging
 
-        bool isClearTags = false;
+        private bool isClearTags = false;
 
         private void BuildTagMenu(List<int> selected = null)
         {
@@ -743,7 +739,6 @@ namespace DBADashGUI
             tags1.AllTags = tags;
             foreach (var tag in tags)
             {
-
                 if (tag.TagName != currentTag)
                 {
                     mTagName = new ToolStripMenuItem(tag.TagName);
@@ -924,7 +919,6 @@ namespace DBADashGUI
                     mnuTag = (ToolStripMenuItem)mnuTag.OwnerItem;
                 }
                 SetFont(mnuTag);
-
             }
         }
 
@@ -948,11 +942,10 @@ namespace DBADashGUI
                 {
                     SetFont((ToolStripMenuItem)itm);
                 }
-
             }
         }
 
-        #endregion
+        #endregion Tagging
 
         private void DataRetentionToolStripMenuItem_Click(object sender, EventArgs e)
         {
@@ -1085,7 +1078,6 @@ namespace DBADashGUI
                     }
                 }
             }
-
         }
 
         private void UpdateTimeFilterVisibility()
@@ -1099,7 +1091,6 @@ namespace DBADashGUI
 
         private void DateRangeChanged()
         {
-
             UpdateTimeFilterVisibility();
 
             foreach (IRefreshData ctrl in tabs.SelectedTab.Controls.OfType<IRefreshData>())
@@ -1110,11 +1101,11 @@ namespace DBADashGUI
 
         private void TsCustomTime_Click(object sender, EventArgs e)
         {
-            var frm = new Performance.CustomTimePicker() { FromDate = Performance.DateRange.FromUTC.ToLocalTime(), ToDate = Performance.DateRange.ToUTC.ToLocalTime() };
+            var frm = new CustomTimePicker() { FromDate = DateRange.FromUTC.ToAppTimeZone(), ToDate = DateRange.ToUTC.ToAppTimeZone() };
             frm.ShowDialog();
             if (frm.DialogResult == DialogResult.OK)
             {
-                Performance.DateRange.SetCustom(frm.FromDate.ToUniversalTime(), frm.ToDate.ToUniversalTime());
+                DateRange.SetCustom(frm.FromDate.AppTimeZoneToUtc(), frm.ToDate.AppTimeZoneToUtc());
                 CheckTime((string)((ToolStripMenuItem)sender).Tag);
                 DateRangeChanged();
             }
@@ -1223,10 +1214,10 @@ namespace DBADashGUI
             dateToolStripMenuItem.DropDownItems.Clear();
             for (int i = 0; i <= 14; i++)
             {
-                var date = DateTime.Now.AddDays(-i).Date;
+                var date = DateHelper.AppNow.AddDays(-i).Date;
                 var daysAgo = i == 0 ? "Today" : i == 1 ? "Yesterday" : i.ToString() + " days ago";
                 var humanDateString = date.ToShortDateString() + " (" + date.DayOfWeek.ToString()[..3] + " - " + daysAgo + ")";
-                var dateItem = new ToolStripMenuItem(humanDateString) { Tag = date, Checked = DateRange.FromUTC == date.ToUniversalTime() && DateRange.ToUTC == date.AddDays(1).ToUniversalTime() };
+                var dateItem = new ToolStripMenuItem(humanDateString) { Tag = date, Checked = DateRange.FromUTC == date.AppTimeZoneToUtc() && DateRange.ToUTC == date.AddDays(1).AppTimeZoneToUtc() };
                 dateItem.Click += DateItem_Click;
                 dateToolStripMenuItem.DropDownItems.Add(dateItem);
             }
@@ -1236,7 +1227,7 @@ namespace DBADashGUI
         {
             var dateItem = (ToolStripMenuItem)sender;
             var selectedDate = (DateTime)dateItem.Tag;
-            DateRange.SetCustom(selectedDate.ToUniversalTime(), selectedDate.ToUniversalTime().AddDays(1));
+            DateRange.SetCustom(selectedDate.AppTimeZoneToUtc(), selectedDate.AppTimeZoneToUtc().AddDays(1));
             CheckTime("Date");
             tsTime.Text = dateItem.Text;
             DateRangeChanged();
@@ -1357,7 +1348,7 @@ namespace DBADashGUI
         }
 
         /// <summary>
-        /// Navigate back.  If current control supports INavigation, invoke the NavigateBack for the control.  If move back was not performed on control, take user to previous selected node/tab in tree.  
+        /// Navigate back.  If current control supports INavigation, invoke the NavigateBack for the control.  If move back was not performed on control, take user to previous selected node/tab in tree.
         /// </summary>
         private void NavigateBack()
         {
@@ -1446,6 +1437,27 @@ namespace DBADashGUI
                         await SetConnection(oldConnection);
                     }
                 }
+            }
+        }
+
+        private bool IsLoadingTimeZones = true;
+
+        private void AddTimeZoneMenus()
+        {
+            cboTimeZone.Items.Add(TimeZoneInfo.Local);
+            cboTimeZone.Items.AddRange(TimeZoneInfo.GetSystemTimeZones().ToArray());
+            cboTimeZone.SelectedIndex = 0;
+            IsLoadingTimeZones = false;
+        }
+
+        private void TimeZone_Selected(object sender, EventArgs e)
+        {
+            if (!IsLoadingTimeZones)
+            {
+                DateHelper.AppTimeZone = cboTimeZone.SelectedItem as TimeZoneInfo;
+                ShowRefresh();
+                LoadSelectedTab();
+                ShowRefresh(false);
             }
         }
     }
