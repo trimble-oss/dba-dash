@@ -308,7 +308,7 @@ namespace DBADashGUI.Checks
                 }
                 DataTable dt = new();
                 da.Fill(dt);
-                Common.ConvertUTCToLocal(ref dt);
+                DateHelper.ConvertUTCToAppTimeZone(ref dt);
                 dgvCustom.AutoGenerateColumns = false;
                 dgvCustom.DataSource = dt;
                 HistoryView(false);
@@ -346,7 +346,7 @@ namespace DBADashGUI.Checks
 
                 DataTable dt = new();
                 da.Fill(dt);
-                Common.ConvertUTCToLocal(ref dt);
+                DateHelper.ConvertUTCToAppTimeZone(ref dt);
                 dgvCustom.AutoGenerateColumns = false;
                 dgvCustom.DataSource = dt;
                 HistoryView(true);

@@ -85,8 +85,8 @@ namespace DBADashGUI.Performance
         {
             if (Math.Abs(DateRange.DurationMins - previousDurationMins) > 5)
             {
-                dateGrouping = Common.DateGrouping(DateRange.DurationMins, MaxChartPoints);
-                tsDateGroup.Text = Common.DateGroupString(dateGrouping);
+                dateGrouping = DateHelper.DateGrouping(DateRange.DurationMins, MaxChartPoints);
+                tsDateGroup.Text = DateHelper.DateGroupString(dateGrouping);
                 previousDurationMins = DateRange.DurationMins;
             }
         }
@@ -200,7 +200,7 @@ namespace DBADashGUI.Performance
                 cmd.Parameters.AddWithValue("ToDate", DateRange.ToUTC);
                 var dt = new DataTable();
                 da.Fill(dt);
-                Common.ConvertUTCToLocal(ref dt);
+                DateHelper.ConvertUTCToAppTimeZone(ref dt);
                 return dt;
             }
         }
@@ -284,7 +284,7 @@ namespace DBADashGUI.Performance
                 cmd.Parameters.AddWithValue("Measure", measure);
                 var dt = new DataTable();
                 da.Fill(dt);
-                Common.ConvertUTCToLocal(ref dt);
+                DateHelper.ConvertUTCToAppTimeZone(ref dt);
                 return dt;
             }
         }
@@ -378,13 +378,13 @@ namespace DBADashGUI.Performance
             performanceCounterSummaryGrid1.InstanceLink = false;
             performanceCounterSummaryGrid1.CounterLink = false;
             performanceCounterSummaryGrid1.CounterSelected += PerformanceCounterSummaryGrid1_CounterSelected;
-            Common.AddDateGroups(tsDateGroup, TsDateGroup_Click);
+            DateHelper.AddDateGroups(tsDateGroup, TsDateGroup_Click);
         }
         private void TsDateGroup_Click(object sender, EventArgs e)
         {
             var ts = (ToolStripMenuItem)sender;
             dateGrouping = Convert.ToInt32(ts.Tag);
-            tsDateGroup.Text = Common.DateGroupString(dateGrouping);
+            tsDateGroup.Text = DateHelper.DateGroupString(dateGrouping);
             previousDurationMins = DateRange.DurationMins;
             ShowMemoryUsageForClerk();
         }

@@ -57,8 +57,8 @@ namespace DBADashGUI.Performance
         {
             if (DateRange.DurationMins != durationMins) // Update date grouping only if duration has changed
             {
-                dateGrouping = Common.DateGrouping(DateRange.DurationMins, 200);
-                tsGroup.Text = Common.DateGroupString(dateGrouping);
+                dateGrouping = DateHelper.DateGrouping(DateRange.DurationMins, 200);
+                tsGroup.Text = DateHelper.DateGroupString(dateGrouping);
                 durationMins = DateRange.DurationMins;
             }
             var dt = CommonData.ObjectExecutionStats(InstanceID, -1, ObjectID, dateGrouping, "AvgDuration", FromDate, ToDate, Instance);
@@ -99,7 +99,7 @@ namespace DBADashGUI.Performance
 
         private void ObjectExecutionLineChart_Load(object sender, EventArgs e)
         {
-            Common.AddDateGroups(tsGroup, TsGroup_Click);
+            DateHelper.AddDateGroups(tsGroup, TsGroup_Click);
             LoadMeasures();
         }
 
@@ -107,7 +107,7 @@ namespace DBADashGUI.Performance
         {
             var ts = (ToolStripMenuItem)sender;
             dateGrouping = (Int32)ts.Tag;
-            tsGroup.Text = Common.DateGroupString(dateGrouping);
+            tsGroup.Text = DateHelper.DateGroupString(dateGrouping);
             RefreshData();
 
         }

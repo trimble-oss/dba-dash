@@ -243,7 +243,7 @@ namespace DBADashGUI
                     }
                     else
                     {
-                        oldestLastGoodCheckDB = ((DateTime)row["OldestLastGoodCheckDBTime"]).ToLocalTime().ToString("yyyy-MM-dd HH:mm");
+                        oldestLastGoodCheckDB = ((DateTime)row["OldestLastGoodCheckDBTime"]).ToAppTimeZone().ToString("yyyy-MM-dd HH:mm");
                     }
                 }
                 if (row["LastGoodCheckDBCriticalCount"] != DBNull.Value)
@@ -262,15 +262,15 @@ namespace DBADashGUI
                     Int32 memoryDumpCount = (Int32)row["MemoryDumpCount"];
                     string lastMemoryDumpStr;
 
-                    if (Math.Abs(lastMemoryDumpUTC.ToLocalTime().Subtract(lastMemoryDump).TotalMinutes) > 10)
+                    if (Math.Abs(lastMemoryDumpUTC.ToAppTimeZone().Subtract(lastMemoryDump).TotalMinutes) > 10)
                     {
-                        lastMemoryDumpStr = "Last Memory Dump (local time): " + lastMemoryDumpUTC.ToLocalTime().ToString() + Environment.NewLine +
+                        lastMemoryDumpStr = "Last Memory Dump (local time): " + lastMemoryDumpUTC.ToAppTimeZone().ToString() + Environment.NewLine +
                            "Last Memory Dump (server time): " + lastMemoryDump.ToString() + Environment.NewLine +
                            "Total Memory Dumps: " + memoryDumpCount; ;
                     }
                     else
                     {
-                        lastMemoryDumpStr = "Last Memory Dump: " + lastMemoryDumpUTC.ToLocalTime().ToString() + Environment.NewLine +
+                        lastMemoryDumpStr = "Last Memory Dump: " + lastMemoryDumpUTC.ToAppTimeZone().ToString() + Environment.NewLine +
                            "Total Memory Dumps: " + memoryDumpCount; ;
                     }
 
@@ -284,7 +284,7 @@ namespace DBADashGUI
                 if (row["LastAlert"] != DBNull.Value)
                 {
                     DateTime lastAlertD = (DateTime)row["LastAlert"];
-                    lastAlert = lastAlertD.ToLocalTime().ToString("yyyy-MM-dd HH:mm");
+                    lastAlert = lastAlertD.ToAppTimeZone().ToString("yyyy-MM-dd HH:mm");
                     if (DateTime.UtcNow.Subtract(lastAlertD).TotalHours < 24)
                     {
                         lastAlertDays = DateTime.UtcNow.Subtract(lastAlertD).TotalHours.ToString("0") + "hrs";
@@ -296,7 +296,7 @@ namespace DBADashGUI
                 }
                 if (row["LastCritical"] != DBNull.Value)
                 {
-                    lastCriticalAlert = (((DateTime)row["LastCritical"]).ToLocalTime()).ToString("yyyy-MM-dd HH:mm");
+                    lastCriticalAlert = (((DateTime)row["LastCritical"]).ToAppTimeZone()).ToString("yyyy-MM-dd HH:mm");
                 }
                 Int32 totalAlerts = row["TotalAlerts"] == DBNull.Value ? 0 : (Int32)row["TotalAlerts"];
 

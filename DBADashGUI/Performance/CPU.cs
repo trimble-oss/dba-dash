@@ -97,8 +97,8 @@ namespace DBADashGUI.Performance
         {
             if (durationMins != DateRange.DurationMins) // Update date grouping only if date range has changed
             {
-                DateGrouping = Common.DateGrouping(DateRange.DurationMins, 200);
-                tsDateGrouping.Text = Common.DateGroupString(DateGrouping);
+                DateGrouping = DateHelper.DateGrouping(DateRange.DurationMins, 200);
+                tsDateGrouping.Text = DateHelper.DateGroupString(DateGrouping);
                 durationMins = DateRange.DurationMins;
             }
 
@@ -110,7 +110,7 @@ namespace DBADashGUI.Performance
                 cmd.Parameters.AddWithValue("@FromDate", DateRange.FromUTC);
                 cmd.Parameters.AddWithValue("@ToDate", DateRange.ToUTC);
                 cmd.Parameters.AddWithValue("@DateGroupingMin", DateGrouping);
-                cmd.Parameters.AddWithValue("@UTCOffset", Common.UtcOffset);
+                cmd.Parameters.AddWithValue("@UTCOffset", DateHelper.UtcOffset);
                 if (DateRange.HasTimeOfDayFilter)
                 {
                     cmd.Parameters.AddWithValue("Hours", DateRange.TimeOfDay.AsDataTable());
@@ -129,9 +129,9 @@ namespace DBADashGUI.Performance
                 while (rdr.Read())
                 {
                     var eventTime = (DateTime)rdr["EventTime"];
-                    sqlProcessValues.Add(new DateTimePoint(eventTime.ToLocalTime(), Decimal.ToDouble((decimal)rdr["SQLProcessCPU"]) / 100.0));
-                    otherValues.Add(new DateTimePoint(eventTime.ToLocalTime(), Decimal.ToDouble((decimal)rdr["OtherCPU"]) / 100.0));
-                    maxValues.Add(new DateTimePoint(eventTime.ToLocalTime(), Decimal.ToDouble((decimal)rdr["MaxCPU"]) / 100.0));
+                    sqlProcessValues.Add(new DateTimePoint(eventTime.ToAppTimeZone(), Decimal.ToDouble((decimal)rdr["SQLProcessCPU"]) / 100.0));
+                    otherValues.Add(new DateTimePoint(eventTime.ToAppTimeZone(), Decimal.ToDouble((decimal)rdr["OtherCPU"]) / 100.0));
+                    maxValues.Add(new DateTimePoint(eventTime.ToAppTimeZone(), Decimal.ToDouble((decimal)rdr["MaxCPU"]) / 100.0));
 
                 }
 
@@ -213,7 +213,7 @@ namespace DBADashGUI.Performance
 
         private void CPU_Load(object sender, EventArgs e)
         {
-            Common.AddDateGroups(tsDateGrouping, TsDateGrouping_Click);
+            DateHelper.AddDateGroups(tsDateGrouping, TsDateGrouping_Click);
 
         }
 
@@ -221,7 +221,7 @@ namespace DBADashGUI.Performance
         {
             var ts = (ToolStripMenuItem)sender;
             DateGrouping = Convert.ToInt32(ts.Tag);
-            tsDateGrouping.Text = Common.DateGroupString(DateGrouping);
+            tsDateGrouping.Text = DateHelper.DateGroupString(DateGrouping);
             RefreshData();
 
         }

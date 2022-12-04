@@ -69,7 +69,7 @@ namespace DBADashGUI.Performance
                     cmd.Parameters.AddWithValue("DatabaseID", DatabaseID);
                 }
 
-                cmd.Parameters.AddWithValue("UTCOffset", Common.UtcOffset);
+                cmd.Parameters.AddWithValue("UTCOffset", DateHelper.UtcOffset);
                 if (DateRange.HasTimeOfDayFilter)
                 {
                     cmd.Parameters.AddWithValue("Hours", DateRange.TimeOfDay.AsDataTable());
@@ -142,7 +142,7 @@ namespace DBADashGUI.Performance
             dgv.Columns["colGroup"].HeaderText = GroupBy.ToString();
             dgv.Sort(dgv.Columns[1], ListSortDirection.Descending);
             dgv.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
-            lblDateRange.Text = "Date Range : " + FromDate.ToLocalTime().ToString() + " to " + ToDate.ToLocalTime().ToString();
+            lblDateRange.Text = "Date Range : " + FromDate.ToAppTimeZone().ToString() + " to " + ToDate.ToAppTimeZone().ToString();
 
         }
 

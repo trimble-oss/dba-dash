@@ -35,7 +35,7 @@ namespace DBADashGUI
 
                 DataTable dt = new();
                 da.Fill(dt);
-                Common.ConvertUTCToLocal(ref dt);
+                DateHelper.ConvertUTCToAppTimeZone(ref dt);
                 dgv.AutoGenerateColumns = false;
                 dgv.DataSource = dt;
                 dgv.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);

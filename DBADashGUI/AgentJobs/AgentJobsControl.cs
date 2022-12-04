@@ -134,7 +134,7 @@ namespace DBADashGUI.AgentJobs
                 cmd.CommandType = CommandType.StoredProcedure;
                 DataTable dt = new();
                 da.Fill(dt);
-                Common.ConvertUTCToLocal(ref dt);
+                DateHelper.ConvertUTCToAppTimeZone(ref dt);
                 return dt;
             }
         }
@@ -250,7 +250,7 @@ namespace DBADashGUI.AgentJobs
                 }
                 cmd.Parameters.AddWithValue("FailedOnly", failedOnly);
                 da.Fill(dt);
-                Common.ConvertUTCToLocal(ref dt);
+                DateHelper.ConvertUTCToAppTimeZone(ref dt);
                 return dt;
             }
 

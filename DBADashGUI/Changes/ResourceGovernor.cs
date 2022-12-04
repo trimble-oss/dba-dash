@@ -46,7 +46,7 @@ namespace DBADashGUI.Changes
             {
                 dt = GetResourceGovernorConfiguration(InstanceIDs);
             }
-            Common.ConvertUTCToLocal(ref dt);
+            DateHelper.ConvertUTCToAppTimeZone(ref dt);
             colLinkInstance.Visible = !historyMode;
             colInstance.Visible = historyMode;
             colValidTo.Visible = historyMode;

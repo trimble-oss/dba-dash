@@ -197,7 +197,7 @@ namespace DBADashGUI.DBFiles
                 {
                     var v = r[s] == DBNull.Value ? 0 : (double)(decimal)r[s];
                     var ssDate = (DateTime)r["SnapshotDate"];
-                    columns[s].Points[i] = new DateTimePoint(ssDate.ToLocalTime(), v);
+                    columns[s].Points[i] = new DateTimePoint(ssDate.ToAppTimeZone(), v);
                 }
                 i++;
             }

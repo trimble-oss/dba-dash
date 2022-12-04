@@ -247,7 +247,7 @@ namespace DBADashGUI.Performance
 
                 cmd.Parameters.AddWithValue("FromDate", DateRange.FromUTC);
                 cmd.Parameters.AddWithValue("ToDate", DateRange.ToUTC);
-                cmd.Parameters.AddWithValue("UTCOffset", Common.UtcOffset);
+                cmd.Parameters.AddWithValue("UTCOffset", DateHelper.UtcOffset);
                 dt = new DataTable();
                 da.Fill(dt);
                 return dt;
@@ -322,14 +322,14 @@ namespace DBADashGUI.Performance
         {
             var frm = new CustomTimePicker
             {
-                FromDate = CompareFrom > DateTime.MinValue && CompareFrom < DateTime.MaxValue ? CompareFrom.ToLocalTime() : DateRange.FromUTC.ToLocalTime(),
-                ToDate = CompareTo > DateTime.MinValue && CompareTo < DateTime.MaxValue ? CompareTo.ToLocalTime() : DateRange.ToUTC.ToLocalTime()
+                FromDate = CompareFrom > DateTime.MinValue && CompareFrom < DateTime.MaxValue ? CompareFrom.ToAppTimeZone() : DateRange.FromUTC.ToAppTimeZone(),
+                ToDate = CompareTo > DateTime.MinValue && CompareTo < DateTime.MaxValue ? CompareTo.ToAppTimeZone() : DateRange.ToUTC.ToAppTimeZone()
             };
             frm.ShowDialog();
             if (frm.DialogResult == DialogResult.OK)
             {
-                _compareFrom = frm.FromDate.ToUniversalTime();
-                _compareTo = frm.ToDate.ToUniversalTime();
+                _compareFrom = frm.FromDate.AppTimeZoneToUtc();
+                _compareTo = frm.ToDate.AppTimeZoneToUtc();
                 compareOffset = -1;
                 CheckOffset();
                 RefreshData();

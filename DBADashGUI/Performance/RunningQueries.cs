@@ -229,7 +229,7 @@ namespace DBADashGUI.Performance
                 cmd.Parameters.AddWithValue("InstanceID", instanceID);
                 DataTable dt = new();
                 da.Fill(dt);
-                Common.ConvertUTCToLocal(ref dt);
+                DateHelper.ConvertUTCToAppTimeZone(ref dt);
                 dt.Columns["SnapshotDateUTC"].ColumnName = "SnapshotDate";
                 dt.Columns["start_time_utc"].ColumnName = "start_time";
                 dt.Columns["last_request_start_time_utc"].ColumnName = "last_request_start_time";
@@ -248,7 +248,7 @@ namespace DBADashGUI.Performance
                 var dt = new DataTable();
                 cmd.Parameters.AddWithValue("InstanceIDs", string.Join(",", InstanceIDs));
                 da.Fill(dt);
-                Common.ConvertUTCToLocal(ref dt);
+                DateHelper.ConvertUTCToAppTimeZone(ref dt);
                 dt.Columns["SnapshotDateUTC"].ColumnName = "SnapshotDate";
                 return dt;
             }
@@ -267,7 +267,7 @@ namespace DBADashGUI.Performance
                 cmd.Parameters.AddWithValue("ToDate", DateRange.ToUTC);
                 cmd.Parameters.AddWithValue("MaxRows", Properties.Settings.Default.RunningQueriesSummaryMaxRows);
                 da.Fill(dt);
-                Common.ConvertUTCToLocal(ref dt);
+                DateHelper.ConvertUTCToAppTimeZone(ref dt);
                 dt.Columns["SnapshotDateUTC"].ColumnName = "SnapshotDate";
                 return dt;
             }
@@ -292,7 +292,7 @@ namespace DBADashGUI.Performance
                 }
                 da.Fill(dt);
                 snapshotDate = Convert.ToDateTime(pSnapshotDate.Value);
-                Common.ConvertUTCToLocal(ref dt);
+                DateHelper.ConvertUTCToAppTimeZone(ref dt);
                 dt.Columns["SnapshotDateUTC"].ColumnName = "SnapshotDate";
                 dt.Columns["start_time_utc"].ColumnName = "start_time";
                 dt.Columns["last_request_start_time_utc"].ColumnName = "last_request_start_time";
@@ -309,7 +309,7 @@ namespace DBADashGUI.Performance
             tsGroupByFilter.Visible = false;
             snapshotDT = RunningQueriesSnapshot(ref snapshotDate, skip);
             GetCounts();
-            lblSnapshotDate.Text = "Snapshot Date: " + snapshotDate.ToLocalTime().ToString();
+            lblSnapshotDate.Text = "Snapshot Date: " + snapshotDate.ToAppTimeZone().ToString();
             LoadSnapshot(new DataView(snapshotDT));
             lblSnapshotDate.Visible = true;
             tsGetLatest.Visible = true;
@@ -366,7 +366,7 @@ namespace DBADashGUI.Performance
                 var row = (DataRowView)dgv.Rows[e.RowIndex].DataBoundItem;
                 if (dgv.Columns[e.ColumnIndex].Name == "colSnapshotDate") // Drill down to view a snapshot from summary
                 {
-                    var snapshotDate = ((DateTime)row["SnapshotDate"]).ToUniversalTime();
+                    var snapshotDate = ((DateTime)row["SnapshotDate"]).AppTimeZoneToUtc();
                     InstanceID = (int)row["InstanceID"];
                     LoadSnapshot(snapshotDate);
                     tsBack.Enabled = true;
@@ -420,8 +420,8 @@ namespace DBADashGUI.Performance
                     {
                         SessionID = Convert.ToInt32(row["session_id"]),
                         InstanceID = Convert.ToInt32(row["InstanceID"]),
-                        SnapshotDateUTC = Convert.ToDateTime(row["SnapshotDate"]).ToUniversalTime(),
-                        StartTimeUTC = row["start_time"] == DBNull.Value ? Convert.ToDateTime(row["last_request_start_time"]).ToUniversalTime() : Convert.ToDateTime(row["start_time"]).ToUniversalTime(),
+                        SnapshotDateUTC = Convert.ToDateTime(row["SnapshotDate"]).AppTimeZoneToUtc(),
+                        StartTimeUTC = row["start_time"] == DBNull.Value ? Convert.ToDateTime(row["last_request_start_time"]).AppTimeZoneToUtc() : Convert.ToDateTime(row["start_time"]).AppTimeZoneToUtc(),
                         IsSleeping = Convert.ToString(row["status"]) == "sleeping"
                     };
                     frm.Show(this);
@@ -435,7 +435,7 @@ namespace DBADashGUI.Performance
                         dgvSessionWaits.Columns.AddRange(sessionWaitColumns);
                     }
                     var sessionid = (short)row["session_id"];
-                    dgvSessionWaits.DataSource = GetSessionWaits(InstanceID, sessionid, Convert.ToDateTime(row["SnapshotDate"]).ToUniversalTime(), Convert.ToDateTime(row["login_time"]).ToUniversalTime());
+                    dgvSessionWaits.DataSource = GetSessionWaits(InstanceID, sessionid, Convert.ToDateTime(row["SnapshotDate"]).AppTimeZoneToUtc(), Convert.ToDateTime(row["login_time"]).AppTimeZoneToUtc());
                     dgvSessionWaits.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
                     sessionToolStripMenuItem.Tag = sessionid;
                     lblWaitsForSession.Text = "Waits For Session ID: " + sessionid.ToString();
@@ -453,8 +453,8 @@ namespace DBADashGUI.Performance
                     var frm = new RunningQueriesViewer()
                     {
                         InstanceID = InstanceID,
-                        SnapshotDateFrom = Convert.ToDateTime(row["SnapshotDate"]).ToUniversalTime(),
-                        SnapshotDateTo = Convert.ToDateTime(row["SnapshotDate"]).ToUniversalTime()
+                        SnapshotDateFrom = Convert.ToDateTime(row["SnapshotDate"]).AppTimeZoneToUtc(),
+                        SnapshotDateTo = Convert.ToDateTime(row["SnapshotDate"]).AppTimeZoneToUtc()
                     };
                     frm.Show(this);
                 }

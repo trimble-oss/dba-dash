@@ -109,7 +109,7 @@ namespace DBADashGUI.Changes
                 var idx = dgvDrivers.Columns[instance].Index;
 
                 row.Cells[idx].Value = version;
-                row.Cells[idx].ToolTipText = "Valid From: " + validFrom.ToLocalTime().ToString("yyyy-MM-dd");
+                row.Cells[idx].ToolTipText = "Valid From: " + validFrom.ToAppTimeZone().ToString("yyyy-MM-dd");
                 if (previousVersion != version && previousVersion != "")
                 {
                     row.DefaultCellStyle.BackColor = DashColors.YellowPale;

@@ -68,7 +68,7 @@ namespace DBADashGUI.Performance
                 {
                     var v = r[s] == DBNull.Value ? 0 : Convert.ToDouble(r[s]);
                     var t = (DateTime)r[dateCol];
-                    if (convertToLocalTime) { t = t.ToLocalTime(); }
+                    if (convertToLocalTime) { t = t.ToAppTimeZone(); }
                     columns[s].Points[i] = new DateTimePoint(t, v);
                 }
                 i++;

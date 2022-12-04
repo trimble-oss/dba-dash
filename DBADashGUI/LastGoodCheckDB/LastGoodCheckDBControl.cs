@@ -86,7 +86,7 @@ namespace DBADashGUI.LastGoodCheckDB
 
                 DataTable dt = new();
                 da.Fill(dt);
-                Common.ConvertUTCToLocal(ref dt);
+                DateHelper.ConvertUTCToAppTimeZone(ref dt);
                 dgvLastGoodCheckDB.AutoGenerateColumns = false;
                 dgvLastGoodCheckDB.DataSource = new DataView(dt);
                 dgvLastGoodCheckDB.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);

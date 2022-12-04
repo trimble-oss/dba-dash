@@ -67,6 +67,7 @@
             this.aboutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.tsTimeFilter = new System.Windows.Forms.ToolStripMenuItem();
             this.tsDayOfWeek = new System.Windows.Forms.ToolStripMenuItem();
+            this.cboTimeZone = new System.Windows.Forms.ToolStripComboBox();
             this.splitMain = new System.Windows.Forms.SplitContainer();
             this.tv1 = new System.Windows.Forms.TreeView();
             this.pnlSearch = new System.Windows.Forms.Panel();
@@ -310,7 +311,8 @@
             this.tsTime,
             this.helpToolStripMenuItem,
             this.tsTimeFilter,
-            this.tsDayOfWeek});
+            this.tsDayOfWeek,
+            this.cboTimeZone});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
             this.menuStrip1.Size = new System.Drawing.Size(1983, 34);
@@ -594,7 +596,7 @@
             // aboutToolStripMenuItem
             // 
             this.aboutToolStripMenuItem.Name = "aboutToolStripMenuItem";
-            this.aboutToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            this.aboutToolStripMenuItem.Size = new System.Drawing.Size(133, 26);
             this.aboutToolStripMenuItem.Text = "About";
             this.aboutToolStripMenuItem.Click += new System.EventHandler(this.AboutToolStripMenuItem_Click);
             // 
@@ -617,6 +619,16 @@
             this.tsDayOfWeek.Text = "Day of Week";
             this.tsDayOfWeek.Visible = false;
             this.tsDayOfWeek.Click += new System.EventHandler(this.TsDayOfWeek_Click);
+            // 
+            // cboTimeZone
+            // 
+            this.cboTimeZone.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
+            this.cboTimeZone.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(99)))), ((int)(((byte)(163)))));
+            this.cboTimeZone.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cboTimeZone.ForeColor = System.Drawing.Color.White;
+            this.cboTimeZone.Name = "cboTimeZone";
+            this.cboTimeZone.Size = new System.Drawing.Size(250, 30);
+            this.cboTimeZone.SelectedIndexChanged += new System.EventHandler(this.TimeZone_Selected);
             // 
             // splitMain
             // 
@@ -2490,5 +2502,6 @@
         private System.Windows.Forms.ToolStripMenuItem tsConnect;
         private System.Windows.Forms.ToolStripDropDownButton mnuTags;
         private System.Windows.Forms.ToolStripDropDownButton groupToolStripMenuItem;
+        private System.Windows.Forms.ToolStripComboBox cboTimeZone;
     }
 }

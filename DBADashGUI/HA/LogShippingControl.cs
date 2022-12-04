@@ -85,7 +85,7 @@ namespace DBADashGUI.LogShipping
 
                 DataTable dt = new();
                 da.Fill(dt);
-                Common.ConvertUTCToLocal(ref dt);
+                DateHelper.ConvertUTCToAppTimeZone(ref dt);
                 dgvSummary.AutoGenerateColumns = false;
                 if (dgvSummary.Columns.Count == 0)
                 {
@@ -124,7 +124,7 @@ namespace DBADashGUI.LogShipping
 
                 DataTable dt = new();
                 da.Fill(dt);
-                Common.ConvertUTCToLocal(ref dt);
+                DateHelper.ConvertUTCToAppTimeZone(ref dt);
                 dt.Columns["restore_date_utc"].ColumnName = "restore_date";
                 dt.Columns["backup_start_date_utc"].ColumnName = "backup_start_date";
                 dgvLogShipping.AutoGenerateColumns = false;

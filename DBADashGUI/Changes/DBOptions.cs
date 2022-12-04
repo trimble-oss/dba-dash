@@ -155,7 +155,7 @@ namespace DBADashGUI.Changes
 
                 DataTable dt = new();
                 da.Fill(dt);
-                Common.ConvertUTCToLocal(ref dt);
+                DateHelper.ConvertUTCToAppTimeZone(ref dt);
                 foreach (DataRow r in dt.Rows)
                 {
                     if (r["OldValue"].GetType() == typeof(byte[]))

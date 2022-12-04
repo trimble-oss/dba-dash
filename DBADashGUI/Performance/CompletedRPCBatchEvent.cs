@@ -54,7 +54,7 @@ namespace DBADashGUI.Performance
                     }
                     else
                     {
-                        Common.ConvertUTCToLocal(ref dt);
+                        DateHelper.ConvertUTCToAppTimeZone(ref dt);
                         return dt;
                     }
                 }
@@ -86,7 +86,7 @@ namespace DBADashGUI.Performance
             }
             catch (Exception ex) when (ex.Message == "Unable to find completed event that was running at this time.")
             {
-                MessageBox.Show(string.Format("No RPC or Batch completed was found for session {0} running at {1}. This could occur for a number of reasons:{2}* The session is still running or hasn't been processed yet. (Try again later){2}* Slow query capture isn't configured{2}* It did not meet the threshold for collection.{2}* The event was lost for some reason{2}", SessionID, SnapshotDateUTC.ToLocalTime(), Environment.NewLine), "Not Found", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                MessageBox.Show(string.Format("No RPC or Batch completed was found for session {0} running at {1}. This could occur for a number of reasons:{2}* The session is still running or hasn't been processed yet. (Try again later){2}* Slow query capture isn't configured{2}* It did not meet the threshold for collection.{2}* The event was lost for some reason{2}", SessionID, SnapshotDateUTC.ToAppTimeZone(), Environment.NewLine), "Not Found", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 this.Close();
             }
         }

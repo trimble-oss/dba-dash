@@ -159,7 +159,7 @@ namespace DBADashGUI.Performance
                 cmd.Parameters.AddWithValue("Counters", counters);
                 cmd.Parameters.AddWithValue("FromDate", DateRange.FromUTC);
                 cmd.Parameters.AddWithValue("ToDate", DateRange.ToUTC);
-                cmd.Parameters.AddWithValue("@UTCOffset", Common.UtcOffset);
+                cmd.Parameters.AddWithValue("@UTCOffset", DateHelper.UtcOffset);
                 if (DateRange.HasTimeOfDayFilter)
                 {
                     cmd.Parameters.AddWithValue("Hours", DateRange.TimeOfDay.AsDataTable());
@@ -187,7 +187,7 @@ namespace DBADashGUI.Performance
 
                 cmd.Parameters.AddWithValue("FromDate", DateRange.FromUTC);
                 cmd.Parameters.AddWithValue("ToDate", DateRange.ToUTC);
-                cmd.Parameters.AddWithValue("@UTCOffset", Common.UtcOffset);
+                cmd.Parameters.AddWithValue("@UTCOffset", DateHelper.UtcOffset);
                 if (DateRange.HasTimeOfDayFilter)
                 {
                     cmd.Parameters.AddWithValue("Hours", DateRange.TimeOfDay.AsDataTable());

@@ -240,7 +240,7 @@ namespace DBADashGUI.Performance
                 {
                     cmd.Parameters.AddWithValue("@DatabaseID", DatabaseID);
                 }
-                cmd.Parameters.AddWithValue("@UTCOffset", Common.UtcOffset);
+                cmd.Parameters.AddWithValue("@UTCOffset", DateHelper.UtcOffset);
                 if (DateRange.HasTimeOfDayFilter)
                 {
                     cmd.Parameters.AddWithValue("Hours", DateRange.TimeOfDay.AsDataTable());
@@ -299,8 +299,8 @@ namespace DBADashGUI.Performance
         {
             if (mins != DateRange.DurationMins)
             {
-                dateGrouping = Common.DateGrouping(DateRange.DurationMins, 200);
-                tsDateGroup.Text = Common.DateGroupString(dateGrouping);
+                dateGrouping = DateHelper.DateGrouping(DateRange.DurationMins, 200);
+                tsDateGroup.Text = DateHelper.DateGroupString(dateGrouping);
                 mins = DateRange.DurationMins;
             }
 
@@ -330,7 +330,7 @@ namespace DBADashGUI.Performance
                 {
                     var v = r[s] == DBNull.Value ? 0 : (double)(decimal)r[s];
                     ioTime = (DateTime)r["SnapshotDate"];
-                    columns[s].Points[i] = new DateTimePoint(ioTime.ToLocalTime(), v);
+                    columns[s].Points[i] = new DateTimePoint(ioTime.ToAppTimeZone(), v);
                 }
                 i++;
             }
@@ -426,7 +426,7 @@ namespace DBADashGUI.Performance
 
         private void IOPerformance_Load(object sender, EventArgs e)
         {
-            Common.AddDateGroups(tsDateGroup, TsDateGroup_Click);
+            DateHelper.AddDateGroups(tsDateGroup, TsDateGroup_Click);
             AddMeasures();
         }
 
@@ -434,7 +434,7 @@ namespace DBADashGUI.Performance
         {
             var ts = (ToolStripMenuItem)sender;
             dateGrouping = Convert.ToInt32(ts.Tag);
-            tsDateGroup.Text = Common.DateGroupString(dateGrouping);
+            tsDateGroup.Text = DateHelper.DateGroupString(dateGrouping);
             RefreshData();
         }
 

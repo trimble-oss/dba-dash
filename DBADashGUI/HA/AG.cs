@@ -55,7 +55,7 @@ namespace DBADashGUI.HA
                 dt = GetAvailabilityGroupSummary(InstanceIDs);
                 dgv.Columns.Add(new DataGridViewLinkColumn() { HeaderText = "Instance", DataPropertyName = "Instance", Name = "colInstance", LinkColor = DashColors.LinkColor, Frozen = Common.FreezeKeyColumn, SortMode = DataGridViewColumnSortMode.Automatic });
             }
-            Common.ConvertUTCToLocal(ref dt);
+            DateHelper.ConvertUTCToAppTimeZone(ref dt);
             dgv.DataSource = dt;
 
             dgv.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);

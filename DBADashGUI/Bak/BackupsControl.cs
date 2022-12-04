@@ -112,7 +112,7 @@ namespace DBADashGUI.Backups
             {
                 cmd.Parameters.AddWithValue("DatabaseID", DatabaseID);
                 DataTable dtBackups = new();
-                Common.ConvertUTCToLocal(ref dtBackups);
+                DateHelper.ConvertUTCToAppTimeZone(ref dtBackups);
                 da.Fill(dtBackups);
                 dgvBackups.DataSource = null;
                 dgvBackups.AutoGenerateColumns = false;
@@ -170,7 +170,7 @@ namespace DBADashGUI.Backups
                 SqlDataAdapter da = new(cmd);
                 DataTable dtBackups = new();
                 da.Fill(dtBackups);
-                Common.ConvertUTCToLocal(ref dtBackups);
+                DateHelper.ConvertUTCToAppTimeZone(ref dtBackups);
                 dgvBackups.AutoGenerateColumns = false;
                 dgvBackups.DataSource = null;
                 dgvBackups.Columns.Clear();
@@ -252,7 +252,7 @@ namespace DBADashGUI.Backups
                 SqlDataAdapter da = new(cmd);
                 DataTable dt = new();
                 da.Fill(dt);
-                Common.ConvertUTCToLocal(ref dt);
+                DateHelper.ConvertUTCToAppTimeZone(ref dt);
                 dgvSummary.AutoGenerateColumns = false;
                 if (dgvSummary.Columns.Count == 0)
                 {

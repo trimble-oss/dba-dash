@@ -118,7 +118,7 @@ namespace DBADashGUI.Drives
             get
             {
                 var mins = Convert.ToInt32(To.Subtract(From).TotalMinutes);
-                return Common.DateGrouping(mins, 400);
+                return DateHelper.DateGrouping(mins, 400);
             }
         }
 
@@ -214,7 +214,7 @@ namespace DBADashGUI.Drives
                 cmd.Parameters.AddWithValue("DateGroupingMins", DateGroupingMins);
                 DataTable dt = new();
                 da.Fill(dt);
-                Common.ConvertUTCToLocal(ref dt);
+                DateHelper.ConvertUTCToAppTimeZone(ref dt);
                 return dt;
             }
         }

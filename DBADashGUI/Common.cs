@@ -32,67 +32,12 @@ namespace DBADashGUI
             connectionGUID = Guid.NewGuid();
         }
 
-        public static readonly Dictionary<int, string> DateGroups = new() {
-                {0,"None" },
-                { 1, "1min" },
-                { 2, "2min" },
-                { 5, "5min" },
-                { 10, "10min" },
-                { 15, "15min" },
-                { 30, "30min" },
-                { 60, "1hr" },
-                { 120, "2hrs" },
-                { 240, "4hrs" },
-                { 360, "6hrs" },
-                { 720, "12hrs" },
-                { 1440, "1 Day" },
-                { 2880, "2 Days" },
-                { 10880, "7 Days" },
-                { 20160, "14 Days" }
-            };
-
         public static Guid HighPerformancePowerPlanGUID
         {
             get
             {
                 return Guid.Parse("8C5E7FDA-E8BF-4A96-9A85-A6E23A8C635C");
             }
-        }
-
-        public static string DateGroupString(Int32 mins)
-        {
-            return (DateGroups.Where(k => k.Key == mins).First()).Value;
-        }
-
-        public static void AddDateGroups(ToolStripDropDownButton tsRoot, EventHandler click)
-        {
-            foreach (var dg in Common.DateGroups)
-            {
-                var ts = new ToolStripMenuItem(dg.Value)
-                {
-                    Tag = dg.Key
-                };
-                ts.Click += click;
-                tsRoot.DropDownItems.Add(ts);
-            }
-        }
-
-        public static Int32 DateGrouping(Int32 Mins, Int32 MaxPoints)
-        {
-            Int32 lastMins = 0;
-
-            foreach (var mins in Common.DateGroups.OrderBy(k => k.Key)
-                .Select(k => k.Key)
-                .ToList())
-            {
-                double div = mins == 0 ? 0.2 : mins;
-                if (Mins / div < MaxPoints)
-                {
-                    return mins;
-                }
-                lastMins = mins;
-            }
-            return lastMins;
         }
 
         public static string DDL(Int64 DDLID)
@@ -107,53 +52,6 @@ namespace DBADashGUI
                     return DBADash.SchemaSnapshotDB.Unzip(bDDL);
                 }
             }
-        }
-
-        public static Int32 UtcOffset
-        {
-            get
-            {
-                return (int)Math.Ceiling(TimeZoneInfo.Local.GetUtcOffset(DateTime.UtcNow).TotalMinutes);
-            }
-        }
-
-
-
-        public static DataTable ConvertUTCToLocal(ref DataTable dt, List<string> convertCols = null)
-        {
-            List<Int32> convertColsIdx = new();
-            if (convertCols == null || convertCols.Count == 0)
-            {
-                foreach (DataColumn col in dt.Columns)
-                {
-                    if (col.DataType == typeof(DateTime))
-                    {
-                        convertColsIdx.Add(col.Ordinal);
-                    }
-                }
-            }
-            else
-            {
-                foreach (string col in convertCols)
-                {
-                    convertColsIdx.Add(dt.Columns[col].Ordinal);
-                }
-            }
-            if (convertColsIdx.Count > 0)
-            {
-                foreach (DataRow row in dt.Rows)
-                {
-                    foreach (var col in convertColsIdx)
-                    {
-                        if (row[col] != DBNull.Value)
-                        {
-                            row[col] = ((DateTime)row[col]).ToLocalTime();
-                        }
-                    }
-                }
-            }
-            return dt;
-
         }
 
         public static void CopyHtmlToClipBoard(string html)
