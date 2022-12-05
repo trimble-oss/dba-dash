@@ -43,6 +43,7 @@
             this.dataRetentionToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.freezeKeyColumnsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.manageInstancesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.saveTimeZonePreferenceToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.tsTime = new System.Windows.Forms.ToolStripDropDownButton();
             this.minsToolStripMenuItem2 = new System.Windows.Forms.ToolStripMenuItem();
             this.minsToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
@@ -358,7 +359,8 @@
             this.configureDisplayNameToolStripMenuItem,
             this.dataRetentionToolStripMenuItem,
             this.freezeKeyColumnsToolStripMenuItem,
-            this.manageInstancesToolStripMenuItem});
+            this.manageInstancesToolStripMenuItem,
+            this.saveTimeZonePreferenceToolStripMenuItem});
             this.optionsToolStripMenuItem.Image = global::DBADashGUI.Properties.Resources.SettingsOutline_16x;
             this.optionsToolStripMenuItem.Name = "optionsToolStripMenuItem";
             this.optionsToolStripMenuItem.Size = new System.Drawing.Size(95, 30);
@@ -367,14 +369,14 @@
             // configureDisplayNameToolStripMenuItem
             // 
             this.configureDisplayNameToolStripMenuItem.Name = "configureDisplayNameToolStripMenuItem";
-            this.configureDisplayNameToolStripMenuItem.Size = new System.Drawing.Size(254, 26);
+            this.configureDisplayNameToolStripMenuItem.Size = new System.Drawing.Size(268, 26);
             this.configureDisplayNameToolStripMenuItem.Text = "Configure Display Name";
             this.configureDisplayNameToolStripMenuItem.Click += new System.EventHandler(this.ConfigureDisplayNameToolStripMenuItem_Click);
             // 
             // dataRetentionToolStripMenuItem
             // 
             this.dataRetentionToolStripMenuItem.Name = "dataRetentionToolStripMenuItem";
-            this.dataRetentionToolStripMenuItem.Size = new System.Drawing.Size(254, 26);
+            this.dataRetentionToolStripMenuItem.Size = new System.Drawing.Size(268, 26);
             this.dataRetentionToolStripMenuItem.Text = "Data Retention";
             this.dataRetentionToolStripMenuItem.Click += new System.EventHandler(this.DataRetentionToolStripMenuItem_Click);
             // 
@@ -384,7 +386,7 @@
             this.freezeKeyColumnsToolStripMenuItem.CheckOnClick = true;
             this.freezeKeyColumnsToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
             this.freezeKeyColumnsToolStripMenuItem.Name = "freezeKeyColumnsToolStripMenuItem";
-            this.freezeKeyColumnsToolStripMenuItem.Size = new System.Drawing.Size(254, 26);
+            this.freezeKeyColumnsToolStripMenuItem.Size = new System.Drawing.Size(268, 26);
             this.freezeKeyColumnsToolStripMenuItem.Text = "Freeze Key Columns";
             this.freezeKeyColumnsToolStripMenuItem.ToolTipText = "Keep the key column(s) in the grid visible as you scroll to the right";
             this.freezeKeyColumnsToolStripMenuItem.Click += new System.EventHandler(this.FreezeKeyColumnsToolStripMenuItem_Click);
@@ -392,9 +394,17 @@
             // manageInstancesToolStripMenuItem
             // 
             this.manageInstancesToolStripMenuItem.Name = "manageInstancesToolStripMenuItem";
-            this.manageInstancesToolStripMenuItem.Size = new System.Drawing.Size(254, 26);
+            this.manageInstancesToolStripMenuItem.Size = new System.Drawing.Size(268, 26);
             this.manageInstancesToolStripMenuItem.Text = "Manage Instances";
             this.manageInstancesToolStripMenuItem.Click += new System.EventHandler(this.ManageInstancesToolStripMenuItem_Click);
+            // 
+            // saveTimeZonePreferenceToolStripMenuItem
+            // 
+            this.saveTimeZonePreferenceToolStripMenuItem.Image = global::DBADashGUI.Properties.Resources.Save_16x;
+            this.saveTimeZonePreferenceToolStripMenuItem.Name = "saveTimeZonePreferenceToolStripMenuItem";
+            this.saveTimeZonePreferenceToolStripMenuItem.Size = new System.Drawing.Size(268, 26);
+            this.saveTimeZonePreferenceToolStripMenuItem.Text = "Save time zone preference";
+            this.saveTimeZonePreferenceToolStripMenuItem.Click += new System.EventHandler(this.SaveTimeZonePreferenceToolStripMenuItem_Click);
             // 
             // tsTime
             // 
@@ -625,6 +635,7 @@
             this.cboTimeZone.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
             this.cboTimeZone.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(99)))), ((int)(((byte)(163)))));
             this.cboTimeZone.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cboTimeZone.DropDownWidth = 350;
             this.cboTimeZone.ForeColor = System.Drawing.Color.White;
             this.cboTimeZone.Name = "cboTimeZone";
             this.cboTimeZone.Size = new System.Drawing.Size(250, 30);
@@ -1069,7 +1080,6 @@
             // 
             // tags1
             // 
-            this.tags1.AllTags = null;
             this.tags1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tags1.Location = new System.Drawing.Point(3, 3);
             this.tags1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
@@ -2503,5 +2513,6 @@
         private System.Windows.Forms.ToolStripDropDownButton mnuTags;
         private System.Windows.Forms.ToolStripDropDownButton groupToolStripMenuItem;
         private System.Windows.Forms.ToolStripComboBox cboTimeZone;
+        private System.Windows.Forms.ToolStripMenuItem saveTimeZonePreferenceToolStripMenuItem;
     }
 }

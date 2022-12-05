@@ -1,15 +1,12 @@
 ﻿using Microsoft.Data.SqlClient;
 using SpreadsheetLight;
 using System;
-using System.Collections.Generic;
 using System.Data;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
-using System.Linq;
 using System.Text;
 using System.Windows.Forms;
-
 
 namespace DBADashGUI
 {
@@ -100,9 +97,7 @@ namespace DBADashGUI
 
         public static void CopyDataGridViewToClipboard(DataGridView dgv, Color headerBGcolor, Color headerColor)
         {
-
             var DataGridView1Counts = dgv.Rows.Count;
-
 
             StringBuilder html = new();
             html.Append("<table>");
@@ -118,7 +113,6 @@ namespace DBADashGUI
                     }
                 }
                 html.Append("</tr>");
-
 
                 foreach (DataGridViewRow row in dgv.Rows)
                 {
@@ -149,7 +143,6 @@ namespace DBADashGUI
             {
                 if (ofd.ShowDialog() == DialogResult.OK)
                 {
-
                     if (File.Exists(ofd.FileName))
                     {
                         if (MessageBox.Show(string.Format("Are you sure you want to replace the existing file: {0}", ofd.FileName), "Confirm Replace", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) == DialogResult.Yes)
@@ -233,7 +226,6 @@ namespace DBADashGUI
                         {
                             sl.SetCellValue(rowIndex, colIndex, Convert.ToString(cell.Value));
                         }
-
                     }
                 }
             }
@@ -370,8 +362,6 @@ namespace DBADashGUI
             {
                 FrmCodeViewer.Show();
             }
-
         }
-
     }
 }

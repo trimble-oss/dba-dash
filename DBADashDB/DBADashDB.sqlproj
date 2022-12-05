@@ -696,6 +696,7 @@
     <Build Include="dbo\Stored Procedures\OSLoadedModulesStatus_Add.sql" />
     <Build Include="dbo\Stored Procedures\Instance_ShowInSummary_Upd.sql" />
     <Build Include="dbo\Functions\TagValue.sql" />
+    <Build Include="DBADash\Stored Procedures\User_TimeZone_Upd.sql" />
   </ItemGroup>
   <ItemGroup>
     <PostDeploy Include="Script.PostDeployment1.sql" />

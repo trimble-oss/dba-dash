@@ -139,7 +139,6 @@ namespace DBADashGUI
                 Application.Exit();
                 return;
             }
-            AddTimeZoneMenus();
         }
 
         public async Task SetConnection(string connection)
@@ -163,6 +162,7 @@ namespace DBADashGUI
             GetTreeLayout();
             BuildTagMenu(commandLineTags);
             AddInstanes();
+            AddTimeZoneMenus();
         }
 
         /// <summary>
@@ -1444,9 +1444,10 @@ namespace DBADashGUI
 
         private void AddTimeZoneMenus()
         {
+            cboTimeZone.Items.Clear();
             cboTimeZone.Items.Add(TimeZoneInfo.Local);
             cboTimeZone.Items.AddRange(TimeZoneInfo.GetSystemTimeZones().ToArray());
-            cboTimeZone.SelectedIndex = 0;
+            cboTimeZone.SelectedItem = DateHelper.AppTimeZone;
             IsLoadingTimeZones = false;
         }
 
@@ -1458,6 +1459,15 @@ namespace DBADashGUI
                 ShowRefresh();
                 LoadSelectedTab();
                 ShowRefresh(false);
+            }
+        }
+
+        private void SaveTimeZonePreferenceToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (MessageBox.Show("Save time zone: " + DateHelper.AppTimeZone.DisplayName, "Save", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+            {
+                DBADashUser.SetUserTimeZone(DateHelper.AppTimeZone);
+                MessageBox.Show($"Time zone will be set to {DateHelper.AppTimeZone.DisplayName} on application start.", "Save", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
         }
     }
