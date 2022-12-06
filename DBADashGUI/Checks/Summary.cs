@@ -68,12 +68,13 @@ namespace DBADashGUI
 
         public void RefreshDataIfStale()
         {
-            if (DateTime.Now.Subtract(lastRefresh).TotalMinutes > 5 || InstanceIDsChanged())
+            if (DateTime.UtcNow.Subtract(lastRefresh).TotalMinutes > 5 || InstanceIDsChanged())
             {
                 RefreshData();
             }
             else
             {
+                UpdateRefreshTime(); // Ensure refresh time is in correct time zone in case of switching time zones.
                 dgvSummary.Columns[0].Frozen = Common.FreezeKeyColumn;
             }
         }
@@ -151,13 +152,13 @@ namespace DBADashGUI
                 dgvSummary.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
             }
             ));
-            lastRefresh = DateTime.Now;
-            toolStrip1.Invoke((Action)(() =>
+            lastRefresh = DateTime.UtcNow;
+            toolStrip1.Invoke(() =>
             {
-                lblRefreshTime.Text = "Refresh Time: " + lastRefresh.ToString();
+                UpdateRefreshTime();
                 lblRefreshTime.ForeColor = DBADashStatusEnum.OK.GetColor();
             }
-            ));
+            );
             refresh1.Invoke((Action)(() => refresh1.Visible = false));
             dgvSummary.Invoke((Action)(() => dgvSummary.Visible = true));
             timer1.Enabled = true;
@@ -517,14 +518,19 @@ namespace DBADashGUI
             RefreshData();
         }
 
+        private void UpdateRefreshTime()
+        {
+            lblRefreshTime.Text = "Refresh Time: " + DateHelper.ToAppTimeZone(lastRefresh).ToString();
+        }
+
         private void Timer1_Tick(object sender, EventArgs e)
         {
-            if (DateTime.Now.Subtract(lastRefresh).TotalMinutes > 60)
+            if (DateTime.UtcNow.Subtract(lastRefresh).TotalMinutes > 60)
             {
                 lblRefreshTime.ForeColor = DBADashStatusEnum.Critical.GetColor();
                 timer1.Enabled = false;
             }
-            else if (DateTime.Now.Subtract(lastRefresh).TotalMinutes > 10)
+            else if (DateTime.UtcNow.Subtract(lastRefresh).TotalMinutes > 10)
             {
                 lblRefreshTime.ForeColor = DBADashStatusEnum.Warning.GetColor();
             }

@@ -138,7 +138,7 @@ namespace DBADashGUI
 
         public static void PromptSaveDataGridView(DataGridView dgv)
         {
-            string defaultFileName = "DBADash_" + DateTime.Now.ToString("yyyyMMdd_HHmmss") + ".xlsx";
+            string defaultFileName = "DBADash_" + DateHelper.AppNow.ToString("yyyyMMdd_HHmmss") + ".xlsx";
             using (var ofd = new SaveFileDialog() { FileName = defaultFileName, AddExtension = true, DefaultExt = ".xlsx" })
             {
                 if (ofd.ShowDialog() == DialogResult.OK)
