@@ -9,13 +9,13 @@ namespace DBADashGUI
 {
     public partial class DriveControl : UserControl
     {
-
         public bool DisplayInstanceName { get; set; }
 
         public DriveControl()
         {
             InitializeComponent();
         }
+
         private Drive drive = new();
 
         [Category("Drive"),
@@ -69,7 +69,6 @@ namespace DBADashGUI
             else if (drive.DriveStatus == DBADashStatusEnum.OK)
             {
                 picStatus.Image = imageList1.Images[2];
-
             }
             else if (drive.DriveStatus == DBADashStatusEnum.NA)
             {
@@ -78,7 +77,7 @@ namespace DBADashGUI
             }
             picStatus.Visible = (drive.DriveStatus != DBADashStatusEnum.NA);
 
-            lblUpdated.Text = "Updated " + drive.SnapshotDate.ToString("yyyy-MM-dd HH:mm") + " (" + DateTime.Now.Subtract(drive.SnapshotDate).TotalMinutes.ToString("N0") + "min ago)";
+            lblUpdated.Text = "Updated " + drive.SnapshotDate.ToString("yyyy-MM-dd HH:mm") + " (" + DateHelper.AppNow.Subtract(drive.SnapshotDate).TotalMinutes.ToString("N0") + "min ago)";
 
             lblUpdated.ForeColor = drive.SnapshotStatus.GetColor();
             if (drive.SnapshotStatus == DBADashStatusEnum.NA)
@@ -86,7 +85,6 @@ namespace DBADashGUI
                 lblUpdated.ForeColor = Color.Black;
             }
         }
-
 
         private void DriveControl_Load(object sender, EventArgs e)
         {
@@ -112,7 +110,6 @@ namespace DBADashGUI
                 drive.RefreshDriveStatus();
                 SetDrive();
             }
-
         }
 
         private void LnkHistory_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
