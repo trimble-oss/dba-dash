@@ -109,5 +109,15 @@ namespace DBADashGUI
                 }
             }
         }
+
+        internal static SQLTreeItem SelectedSQLTreeItem(this TreeView value)
+        {
+            return value.SelectedNode.AsSQLTreeItem();
+        }
+
+        internal static SQLTreeItem AsSQLTreeItem(this TreeNode value)
+        {
+            return (SQLTreeItem)value;
+        }
     }
 }
