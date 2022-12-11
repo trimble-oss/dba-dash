@@ -9,12 +9,6 @@ namespace DBADashGUI
 
         public override ViewTypes Type => ViewTypes.Tree;
 
-        public override string Serialize()
-        {
-            string json = JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented);
-            return json;
-        }
-
         public static TreeSavedView Deserialize(string json)
         {
             return JsonConvert.DeserializeObject<TreeSavedView>(json);

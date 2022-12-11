@@ -36,9 +36,12 @@
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle4 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle5 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle6 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Summary));
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle8 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle9 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle10 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle11 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle12 = new System.Windows.Forms.DataGridViewCellStyle();
             this.dgvSummary = new System.Windows.Forms.DataGridView();
             this.Instance = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.colShowInSummary = new System.Windows.Forms.DataGridViewCheckBoxColumn();
@@ -51,6 +54,7 @@
             this.LogBackupStatus = new System.Windows.Forms.DataGridViewLinkColumn();
             this.DriveStatus = new System.Windows.Forms.DataGridViewLinkColumn();
             this.JobStatus = new System.Windows.Forms.DataGridViewLinkColumn();
+            this.IsAgentRunningStatus = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.LogShippingStatus = new System.Windows.Forms.DataGridViewLinkColumn();
             this.MirroringStatus = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.AGStatus = new System.Windows.Forms.DataGridViewLinkColumn();
@@ -67,15 +71,22 @@
             this.UptimeStatus = new System.Windows.Forms.DataGridViewLinkColumn();
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
             this.tsRefresh = new System.Windows.Forms.ToolStripButton();
-            this.tsCopy = new System.Windows.Forms.ToolStripButton();
-            this.tsExcel = new System.Windows.Forms.ToolStripButton();
+            this.tsCopyGrid = new System.Windows.Forms.ToolStripDropDownButton();
+            this.copySummaryToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.copyTestSummaryToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.tsExportToExcel = new System.Windows.Forms.ToolStripDropDownButton();
+            this.exportSummaryToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.exportTestSummaryToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.tsOptions = new System.Windows.Forms.ToolStripDropDownButton();
             this.focusedViewToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.memoryDumpsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.showHiddenToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.showTestSummaryToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.saveToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.lblRefreshTime = new System.Windows.Forms.ToolStripLabel();
+            this.toolStripDropDownButton1 = new System.Windows.Forms.ToolStripDropDownButton();
             this.acknowledgeDumpsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.configureThresholdsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.showHiddenToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.lblRefreshTime = new System.Windows.Forms.ToolStripLabel();
+            this.tsClearFilter = new System.Windows.Forms.ToolStripButton();
             this.dataGridViewTextBoxColumn1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dataGridViewTextBoxColumn2 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dataGridViewTextBoxColumn3 = new System.Windows.Forms.DataGridViewTextBoxColumn();
@@ -95,8 +106,15 @@
             this.dataGridViewTextBoxColumn17 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.timer1 = new System.Windows.Forms.Timer(this.components);
             this.refresh1 = new DBADashGUI.Refresh();
+            this.splitContainer1 = new System.Windows.Forms.SplitContainer();
+            this.dgvTests = new System.Windows.Forms.DataGridView();
             ((System.ComponentModel.ISupportInitialize)(this.dgvSummary)).BeginInit();
             this.toolStrip1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
+            this.splitContainer1.Panel1.SuspendLayout();
+            this.splitContainer1.Panel2.SuspendLayout();
+            this.splitContainer1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.dgvTests)).BeginInit();
             this.SuspendLayout();
             // 
             // dgvSummary
@@ -125,6 +143,7 @@
             this.LogBackupStatus,
             this.DriveStatus,
             this.JobStatus,
+            this.IsAgentRunningStatus,
             this.LogShippingStatus,
             this.MirroringStatus,
             this.AGStatus,
@@ -148,14 +167,14 @@
             dataGridViewCellStyle7.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
             this.dgvSummary.DefaultCellStyle = dataGridViewCellStyle7;
             this.dgvSummary.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.dgvSummary.Location = new System.Drawing.Point(0, 27);
+            this.dgvSummary.Location = new System.Drawing.Point(0, 0);
             this.dgvSummary.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.dgvSummary.Name = "dgvSummary";
             this.dgvSummary.ReadOnly = true;
             this.dgvSummary.RowHeadersVisible = false;
             this.dgvSummary.RowHeadersWidth = 51;
             this.dgvSummary.RowTemplate.Height = 24;
-            this.dgvSummary.Size = new System.Drawing.Size(1800, 239);
+            this.dgvSummary.Size = new System.Drawing.Size(1800, 117);
             this.dgvSummary.TabIndex = 0;
             this.dgvSummary.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.DgvSummary_CellContentClick);
             this.dgvSummary.ColumnHeaderMouseClick += new System.Windows.Forms.DataGridViewCellMouseEventHandler(this.DgvSummary_ColumnHeaderMouseClick);
@@ -276,6 +295,14 @@
             this.JobStatus.Resizable = System.Windows.Forms.DataGridViewTriState.True;
             this.JobStatus.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
             this.JobStatus.Width = 125;
+            // 
+            // IsAgentRunningStatus
+            // 
+            this.IsAgentRunningStatus.HeaderText = "Is Agent Running";
+            this.IsAgentRunningStatus.MinimumWidth = 6;
+            this.IsAgentRunningStatus.Name = "IsAgentRunningStatus";
+            this.IsAgentRunningStatus.ReadOnly = true;
+            this.IsAgentRunningStatus.Width = 125;
             // 
             // LogShippingStatus
             // 
@@ -450,10 +477,12 @@
             this.toolStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
             this.toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.tsRefresh,
-            this.tsCopy,
-            this.tsExcel,
+            this.tsCopyGrid,
+            this.tsExportToExcel,
             this.tsOptions,
-            this.lblRefreshTime});
+            this.lblRefreshTime,
+            this.toolStripDropDownButton1,
+            this.tsClearFilter});
             this.toolStrip1.Location = new System.Drawing.Point(0, 0);
             this.toolStrip1.Name = "toolStrip1";
             this.toolStrip1.Size = new System.Drawing.Size(1800, 27);
@@ -470,56 +499,124 @@
             this.tsRefresh.Text = "Refresh";
             this.tsRefresh.Click += new System.EventHandler(this.TsRefresh_Click);
             // 
-            // tsCopy
+            // tsCopyGrid
             // 
-            this.tsCopy.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.tsCopy.Image = global::DBADashGUI.Properties.Resources.ASX_Copy_blue_16x;
-            this.tsCopy.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsCopy.Name = "tsCopy";
-            this.tsCopy.Size = new System.Drawing.Size(29, 24);
-            this.tsCopy.Text = "Copy";
-            this.tsCopy.Click += new System.EventHandler(this.TsCopy_Click);
+            this.tsCopyGrid.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.tsCopyGrid.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.copySummaryToolStripMenuItem,
+            this.copyTestSummaryToolStripMenuItem});
+            this.tsCopyGrid.Image = global::DBADashGUI.Properties.Resources.ASX_Copy_blue_16x;
+            this.tsCopyGrid.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tsCopyGrid.Name = "tsCopyGrid";
+            this.tsCopyGrid.Size = new System.Drawing.Size(34, 24);
+            this.tsCopyGrid.Text = "Copy";
             // 
-            // tsExcel
+            // copySummaryToolStripMenuItem
             // 
-            this.tsExcel.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.tsExcel.Image = global::DBADashGUI.Properties.Resources.excel16x16;
-            this.tsExcel.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsExcel.Name = "tsExcel";
-            this.tsExcel.Size = new System.Drawing.Size(29, 24);
-            this.tsExcel.Text = "Export Excel";
-            this.tsExcel.Click += new System.EventHandler(this.TsExcel_Click);
+            this.copySummaryToolStripMenuItem.Name = "copySummaryToolStripMenuItem";
+            this.copySummaryToolStripMenuItem.Size = new System.Drawing.Size(222, 26);
+            this.copySummaryToolStripMenuItem.Text = "Copy Summary";
+            this.copySummaryToolStripMenuItem.Click += new System.EventHandler(this.CopySummaryToolStripMenuItem_Click);
+            // 
+            // copyTestSummaryToolStripMenuItem
+            // 
+            this.copyTestSummaryToolStripMenuItem.Name = "copyTestSummaryToolStripMenuItem";
+            this.copyTestSummaryToolStripMenuItem.Size = new System.Drawing.Size(222, 26);
+            this.copyTestSummaryToolStripMenuItem.Text = "Copy Test Summary";
+            this.copyTestSummaryToolStripMenuItem.Click += new System.EventHandler(this.CopyTestSummaryToolStripMenuItem_Click);
+            // 
+            // tsExportToExcel
+            // 
+            this.tsExportToExcel.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.tsExportToExcel.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.exportSummaryToolStripMenuItem,
+            this.exportTestSummaryToolStripMenuItem});
+            this.tsExportToExcel.Image = global::DBADashGUI.Properties.Resources.excel16x16;
+            this.tsExportToExcel.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tsExportToExcel.Name = "tsExportToExcel";
+            this.tsExportToExcel.Size = new System.Drawing.Size(34, 24);
+            this.tsExportToExcel.Text = "Export to Excel";
+            // 
+            // exportSummaryToolStripMenuItem
+            // 
+            this.exportSummaryToolStripMenuItem.Name = "exportSummaryToolStripMenuItem";
+            this.exportSummaryToolStripMenuItem.Size = new System.Drawing.Size(231, 26);
+            this.exportSummaryToolStripMenuItem.Text = "Export Summary";
+            this.exportSummaryToolStripMenuItem.Click += new System.EventHandler(this.ExportSummaryToolStripMenuItem_Click);
+            // 
+            // exportTestSummaryToolStripMenuItem
+            // 
+            this.exportTestSummaryToolStripMenuItem.Name = "exportTestSummaryToolStripMenuItem";
+            this.exportTestSummaryToolStripMenuItem.Size = new System.Drawing.Size(231, 26);
+            this.exportTestSummaryToolStripMenuItem.Text = "Export Test Summary";
+            this.exportTestSummaryToolStripMenuItem.Click += new System.EventHandler(this.ExportTestSummaryToolStripMenuItem_Click);
             // 
             // tsOptions
             // 
-            this.tsOptions.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
             this.tsOptions.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.focusedViewToolStripMenuItem,
-            this.memoryDumpsToolStripMenuItem,
-            this.showHiddenToolStripMenuItem});
-            this.tsOptions.Image = global::DBADashGUI.Properties.Resources.SettingsOutline_16x;
+            this.showHiddenToolStripMenuItem,
+            this.showTestSummaryToolStripMenuItem,
+            this.saveToolStripMenuItem});
+            this.tsOptions.Image = global::DBADashGUI.Properties.Resources.Table_16x;
             this.tsOptions.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsOptions.Name = "tsOptions";
-            this.tsOptions.Size = new System.Drawing.Size(34, 24);
-            this.tsOptions.Text = "Options";
+            this.tsOptions.Size = new System.Drawing.Size(75, 24);
+            this.tsOptions.Text = "View";
             // 
             // focusedViewToolStripMenuItem
             // 
             this.focusedViewToolStripMenuItem.CheckOnClick = true;
             this.focusedViewToolStripMenuItem.Name = "focusedViewToolStripMenuItem";
-            this.focusedViewToolStripMenuItem.Size = new System.Drawing.Size(198, 26);
+            this.focusedViewToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
             this.focusedViewToolStripMenuItem.Text = "Focused View";
             this.focusedViewToolStripMenuItem.ToolTipText = "Show only instances and checks that are warning or critical status";
             this.focusedViewToolStripMenuItem.Click += new System.EventHandler(this.FocusedViewToolStripMenuItem_Click);
             // 
-            // memoryDumpsToolStripMenuItem
+            // showHiddenToolStripMenuItem
             // 
-            this.memoryDumpsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.showHiddenToolStripMenuItem.CheckOnClick = true;
+            this.showHiddenToolStripMenuItem.Name = "showHiddenToolStripMenuItem";
+            this.showHiddenToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            this.showHiddenToolStripMenuItem.Text = "Show Hidden";
+            this.showHiddenToolStripMenuItem.Click += new System.EventHandler(this.TsRefresh_Click);
+            // 
+            // showTestSummaryToolStripMenuItem
+            // 
+            this.showTestSummaryToolStripMenuItem.Checked = true;
+            this.showTestSummaryToolStripMenuItem.CheckOnClick = true;
+            this.showTestSummaryToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.showTestSummaryToolStripMenuItem.Name = "showTestSummaryToolStripMenuItem";
+            this.showTestSummaryToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            this.showTestSummaryToolStripMenuItem.Text = "Show Test Summary";
+            this.showTestSummaryToolStripMenuItem.Click += new System.EventHandler(this.ShowTestSummaryToolStripMenuItem_Click);
+            // 
+            // saveToolStripMenuItem
+            // 
+            this.saveToolStripMenuItem.Image = global::DBADashGUI.Properties.Resources.Save_16x;
+            this.saveToolStripMenuItem.Name = "saveToolStripMenuItem";
+            this.saveToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            this.saveToolStripMenuItem.Text = "Save";
+            this.saveToolStripMenuItem.Click += new System.EventHandler(this.SaveToolStripMenuItem_Click);
+            // 
+            // lblRefreshTime
+            // 
+            this.lblRefreshTime.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
+            this.lblRefreshTime.Name = "lblRefreshTime";
+            this.lblRefreshTime.Size = new System.Drawing.Size(98, 24);
+            this.lblRefreshTime.Text = "Refresh Time:";
+            // 
+            // toolStripDropDownButton1
+            // 
+            this.toolStripDropDownButton1.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.toolStripDropDownButton1.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.acknowledgeDumpsToolStripMenuItem,
             this.configureThresholdsToolStripMenuItem});
-            this.memoryDumpsToolStripMenuItem.Name = "memoryDumpsToolStripMenuItem";
-            this.memoryDumpsToolStripMenuItem.Size = new System.Drawing.Size(198, 26);
-            this.memoryDumpsToolStripMenuItem.Text = "Memory Dumps";
+            this.toolStripDropDownButton1.Image = ((System.Drawing.Image)(resources.GetObject("toolStripDropDownButton1.Image")));
+            this.toolStripDropDownButton1.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolStripDropDownButton1.Name = "toolStripDropDownButton1";
+            this.toolStripDropDownButton1.Size = new System.Drawing.Size(129, 24);
+            this.toolStripDropDownButton1.Text = "Memory Dumps";
             // 
             // acknowledgeDumpsToolStripMenuItem
             // 
@@ -535,20 +632,15 @@
             this.configureThresholdsToolStripMenuItem.Text = "Configure Thresholds";
             this.configureThresholdsToolStripMenuItem.Click += new System.EventHandler(this.ConfigureThresholdsToolStripMenuItem_Click);
             // 
-            // showHiddenToolStripMenuItem
+            // tsClearFilter
             // 
-            this.showHiddenToolStripMenuItem.CheckOnClick = true;
-            this.showHiddenToolStripMenuItem.Name = "showHiddenToolStripMenuItem";
-            this.showHiddenToolStripMenuItem.Size = new System.Drawing.Size(198, 26);
-            this.showHiddenToolStripMenuItem.Text = "Show Hidden";
-            this.showHiddenToolStripMenuItem.Click += new System.EventHandler(this.TsRefresh_Click);
-            // 
-            // lblRefreshTime
-            // 
-            this.lblRefreshTime.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
-            this.lblRefreshTime.Name = "lblRefreshTime";
-            this.lblRefreshTime.Size = new System.Drawing.Size(98, 24);
-            this.lblRefreshTime.Text = "Refresh Time:";
+            this.tsClearFilter.Enabled = false;
+            this.tsClearFilter.Image = global::DBADashGUI.Properties.Resources.Eraser_16x;
+            this.tsClearFilter.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tsClearFilter.Name = "tsClearFilter";
+            this.tsClearFilter.Size = new System.Drawing.Size(104, 24);
+            this.tsClearFilter.Text = "Clear Filter";
+            this.tsClearFilter.Click += new System.EventHandler(this.TsClearFilter_Click);
             // 
             // dataGridViewTextBoxColumn1
             // 
@@ -713,11 +805,63 @@
             this.refresh1.Size = new System.Drawing.Size(1800, 239);
             this.refresh1.TabIndex = 2;
             // 
+            // splitContainer1
+            // 
+            this.splitContainer1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.splitContainer1.Location = new System.Drawing.Point(0, 27);
+            this.splitContainer1.Name = "splitContainer1";
+            this.splitContainer1.Orientation = System.Windows.Forms.Orientation.Horizontal;
+            // 
+            // splitContainer1.Panel1
+            // 
+            this.splitContainer1.Panel1.Controls.Add(this.dgvTests);
+            // 
+            // splitContainer1.Panel2
+            // 
+            this.splitContainer1.Panel2.Controls.Add(this.dgvSummary);
+            this.splitContainer1.Size = new System.Drawing.Size(1800, 239);
+            this.splitContainer1.SplitterDistance = 118;
+            this.splitContainer1.TabIndex = 3;
+            // 
+            // dgvTests
+            // 
+            this.dgvTests.AllowUserToAddRows = false;
+            this.dgvTests.AllowUserToDeleteRows = false;
+            this.dgvTests.BackgroundColor = System.Drawing.Color.White;
+            dataGridViewCellStyle11.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle11.BackColor = System.Drawing.SystemColors.Control;
+            dataGridViewCellStyle11.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            dataGridViewCellStyle11.ForeColor = System.Drawing.SystemColors.WindowText;
+            dataGridViewCellStyle11.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle11.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle11.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
+            this.dgvTests.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle11;
+            this.dgvTests.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            dataGridViewCellStyle12.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle12.BackColor = System.Drawing.SystemColors.Window;
+            dataGridViewCellStyle12.Font = new System.Drawing.Font("Microsoft Sans Serif", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            dataGridViewCellStyle12.ForeColor = System.Drawing.SystemColors.ControlText;
+            dataGridViewCellStyle12.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle12.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle12.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
+            this.dgvTests.DefaultCellStyle = dataGridViewCellStyle12;
+            this.dgvTests.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.dgvTests.Location = new System.Drawing.Point(0, 0);
+            this.dgvTests.Name = "dgvTests";
+            this.dgvTests.ReadOnly = true;
+            this.dgvTests.RowHeadersVisible = false;
+            this.dgvTests.RowHeadersWidth = 51;
+            this.dgvTests.RowTemplate.Height = 29;
+            this.dgvTests.Size = new System.Drawing.Size(1800, 118);
+            this.dgvTests.TabIndex = 0;
+            this.dgvTests.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.DgvTests_CellContentClick);
+            this.dgvTests.RowsAdded += new System.Windows.Forms.DataGridViewRowsAddedEventHandler(this.DgvTests_RowsAdded);
+            // 
             // Summary
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.Controls.Add(this.dgvSummary);
+            this.Controls.Add(this.splitContainer1);
             this.Controls.Add(this.refresh1);
             this.Controls.Add(this.toolStrip1);
             this.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
@@ -726,6 +870,11 @@
             ((System.ComponentModel.ISupportInitialize)(this.dgvSummary)).EndInit();
             this.toolStrip1.ResumeLayout(false);
             this.toolStrip1.PerformLayout();
+            this.splitContainer1.Panel1.ResumeLayout(false);
+            this.splitContainer1.Panel2.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).EndInit();
+            this.splitContainer1.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.dgvTests)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -736,7 +885,6 @@
         private System.Windows.Forms.DataGridView dgvSummary;
         private System.Windows.Forms.ToolStrip toolStrip1;
         private System.Windows.Forms.ToolStripButton tsRefresh;
-        private System.Windows.Forms.ToolStripButton tsCopy;
         private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn1;
         private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn2;
         private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn3;
@@ -754,16 +902,14 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn15;
         private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn16;
         private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn17;
-        private System.Windows.Forms.ToolStripButton tsExcel;
         private System.Windows.Forms.ToolStripDropDownButton tsOptions;
         private System.Windows.Forms.ToolStripMenuItem focusedViewToolStripMenuItem;
         private System.Windows.Forms.ToolStripLabel lblRefreshTime;
         private System.Windows.Forms.Timer timer1;
-        private System.Windows.Forms.ToolStripMenuItem memoryDumpsToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem acknowledgeDumpsToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem configureThresholdsToolStripMenuItem;
         private Refresh refresh1;
         private System.Windows.Forms.ToolStripMenuItem showHiddenToolStripMenuItem;
+        private System.Windows.Forms.SplitContainer splitContainer1;
+        private System.Windows.Forms.DataGridView dgvTests;
         private System.Windows.Forms.DataGridViewTextBoxColumn Instance;
         private System.Windows.Forms.DataGridViewCheckBoxColumn colShowInSummary;
         private System.Windows.Forms.DataGridViewTextBoxColumn MemoryDumpStatus;
@@ -775,6 +921,7 @@
         private System.Windows.Forms.DataGridViewLinkColumn LogBackupStatus;
         private System.Windows.Forms.DataGridViewLinkColumn DriveStatus;
         private System.Windows.Forms.DataGridViewLinkColumn JobStatus;
+        private System.Windows.Forms.DataGridViewTextBoxColumn IsAgentRunningStatus;
         private System.Windows.Forms.DataGridViewLinkColumn LogShippingStatus;
         private System.Windows.Forms.DataGridViewTextBoxColumn MirroringStatus;
         private System.Windows.Forms.DataGridViewLinkColumn AGStatus;
@@ -789,5 +936,17 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn DBMailStatus;
         private System.Windows.Forms.DataGridViewLinkColumn IdentityStatus;
         private System.Windows.Forms.DataGridViewLinkColumn UptimeStatus;
+        private System.Windows.Forms.ToolStripButton tsClearFilter;
+        private System.Windows.Forms.ToolStripMenuItem showTestSummaryToolStripMenuItem;
+        private System.Windows.Forms.ToolStripDropDownButton tsExportToExcel;
+        private System.Windows.Forms.ToolStripMenuItem exportSummaryToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem exportTestSummaryToolStripMenuItem;
+        private System.Windows.Forms.ToolStripDropDownButton tsCopyGrid;
+        private System.Windows.Forms.ToolStripMenuItem copySummaryToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem copyTestSummaryToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem saveToolStripMenuItem;
+        private System.Windows.Forms.ToolStripDropDownButton toolStripDropDownButton1;
+        private System.Windows.Forms.ToolStripMenuItem acknowledgeDumpsToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem configureThresholdsToolStripMenuItem;
     }
 }

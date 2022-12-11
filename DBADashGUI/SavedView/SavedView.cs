@@ -5,7 +5,6 @@ using System.Text.Json.Serialization;
 
 namespace DBADashGUI
 {
-
     /// <summary>
     /// A class inheriting SavedView is used to presist the state of a page.
     /// </summary>
@@ -16,17 +15,23 @@ namespace DBADashGUI
             Metric,
             PerformanceSummary,
             Tree,
-            SlowQueryDetail
+            SlowQueryDetail,
+            Summary
         }
 
         [JsonIgnore]
         public string Name { get; set; }
+
         public abstract ViewTypes Type { get; }
 
         [JsonIgnore]
         public int UserID { get; set; } = DBADashUser.UserID;
 
-        public abstract string Serialize();
+        public virtual string Serialize()
+        {
+            string json = Newtonsoft.Json.JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented);
+            return json;
+        }
 
         [JsonIgnore]
         public static readonly string DefaultViewName = "Default";
