@@ -1,6 +1,7 @@
 ﻿using Microsoft.SqlServer.Management.Common;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Windows.Forms;
 
 namespace DBADashGUI
@@ -87,8 +88,12 @@ namespace DBADashGUI
         private HashSet<int> _RegularInstanceIDs;
         private HashSet<int> _AzureInstanceIDs;
         private HashSet<int> _InstanceIDs;
-
         private DBADashContext InternalContext;
+        public SQLTreeItem SQLTreeItemParent => (SQLTreeItem)Parent;
+        private bool IsChildOfInstanceOrAzureDB => InstanceID > 0 && !IsInstanceOrAzureDB;
+        private bool IsChildOfInstanceOrAzureInstance => InstanceID > 0 && !IsInstanceOrAzureInstance;
+        private bool IsInstanceOrAzureDB => Type == TreeType.Instance || Type == TreeType.AzureDatabase;
+        private bool IsInstanceOrAzureInstance => Type == TreeType.Instance || Type == TreeType.AzureInstance;
 
         public DBADashContext Context
         {
@@ -325,6 +330,7 @@ namespace DBADashGUI
         }
 
         private bool isVisibleInSummary;
+
         public bool IsVisibleInSummary
         { get => isVisibleInSummary; set { isVisibleInSummary = value; SetIcon(); } }
 
@@ -396,10 +402,13 @@ namespace DBADashGUI
         public string _schemaName;
         private Int32 _databaseID = -1;
         private string databaseName;
+
         public string ObjectName
         { get { return _objectName; } set { _objectName = value; this.Name = FullName(); } }
+
         public string SchemaName
         { get { return _schemaName; } set { _schemaName = value; this.Name = FullName(); } }
+
         public Int64 ObjectID { get; set; }
 
         public Int32 DatabaseID
@@ -742,6 +751,110 @@ namespace DBADashGUI
                 this.SelectedImageIndex = 6;
             }
             this.FilterText = filter;
+        }
+
+        private bool IsThisInstance(int InstanceID)
+        {
+            return IsInstanceOrAzureDB && this.InstanceID == InstanceID;
+        }
+
+        private bool IsThisInstance(string Instance)
+        {
+            return IsInstanceOrAzureDB && this.InstanceID == InstanceID;
+        }
+
+        /// <summary>
+        /// Find instance in the tree by ID
+        /// </summary>
+        public SQLTreeItem FindInstance(int InstanceID)
+        {
+            SQLTreeItem n = this;
+            while (n.IsChildOfInstanceOrAzureDB) // If we are inside an instance node, navigate up until we get the instance ID.
+            {
+                n = n.SQLTreeItemParent;
+            }
+            if ((new TreeType[] { TreeType.DBAChecks, TreeType.HADR, TreeType.Configuration }).Contains(n.Type)) // Navigate up a level for these types
+            {
+                n = n.SQLTreeItemParent;
+            }
+            if (n.IsThisInstance(InstanceID)) // Check if we have the instance
+            {
+                return n;
+            }
+            // Look down the tree to find the instance
+            return FindChildInstance(InstanceID, n);
+        }
+
+        /// <summary>
+        /// Find instance in the tree by name
+        /// </summary>
+        public SQLTreeItem FindInstance(string instance)
+        {
+            SQLTreeItem n = this;
+            while (n.IsChildOfInstanceOrAzureInstance) // If we are inside an instance node, navigate up until we get the instance ID.
+            {
+                n = n.SQLTreeItemParent;
+            }
+            if ((new TreeType[] { TreeType.DBAChecks, TreeType.HADR, TreeType.Configuration }).Contains(n.Type)) // Navigate up a level for these types
+            {
+                n = n.SQLTreeItemParent;
+            }
+            if (n.IsThisInstance(instance)) // Check if we have the instance
+            {
+                return n;
+            }
+            // Look down the tree to find the instance
+            return FindChildInstance(instance, n);
+        }
+
+        /// <summary>
+        /// Look down the tree to find instance in the tree by ID
+        /// </summary>
+        private static SQLTreeItem FindChildInstance(int instanceID, SQLTreeItem node)
+        {
+            foreach (SQLTreeItem child in node.Nodes)
+            {
+                if (child.IsInstanceOrAzureDB && child.InstanceID == instanceID)
+                {
+                    return child;
+                }
+                if (child.Type is SQLTreeItem.TreeType.InstanceFolder or SQLTreeItem.TreeType.AzureInstance)
+                {
+                    SQLTreeItem find = FindChildInstance(instanceID, child);
+                    if (find != null)
+                    {
+                        return find;
+                    }
+                }
+            }
+            return null;
+        }
+
+        /// <summary>
+        /// Look down the tree to find instance in the tree by name
+        /// </summary>
+        private static SQLTreeItem FindChildInstance(string instance, SQLTreeItem node)
+        {
+            if (node.IsInstanceOrAzureInstance && node.InstanceName == instance)
+            {
+                return node;
+            }
+            foreach (SQLTreeItem child in node.Nodes)
+            {
+                if (child.IsInstanceOrAzureInstance && child.InstanceName == instance)
+                {
+                    return child;
+                }
+                if (child.Type is SQLTreeItem.TreeType.InstanceFolder or SQLTreeItem.TreeType.AzureInstance)
+                {
+                    SQLTreeItem find = FindChildInstance(instance, child);
+                    if (find != null)
+                    {
+                        return find;
+                    }
+                }
+            }
+            return null;
         }
     }
 }

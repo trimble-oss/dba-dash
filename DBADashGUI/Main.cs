@@ -953,96 +953,65 @@ namespace DBADashGUI
             frm.ShowDialog();
         }
 
-        /// <summary>
-        /// Find instance in the tree by ID
-        /// </summary>
-        private SQLTreeItem FindInstance(int instanceID, SQLTreeItem node)
-        {
-            foreach (SQLTreeItem child in node.Nodes)
-            {
-                if ((child.Type == SQLTreeItem.TreeType.Instance || child.Type == SQLTreeItem.TreeType.AzureDatabase) && child.InstanceID == instanceID)
-                {
-                    return child;
-                }
-                if (child.Type is SQLTreeItem.TreeType.InstanceFolder or SQLTreeItem.TreeType.AzureInstance)
-                {
-                    SQLTreeItem find = FindInstance(instanceID, child);
-                    if (find != null)
-                    {
-                        return find;
-                    }
-                }
-            }
-            return null;
-        }
-
-        /// <summary>
-        /// Find instance in the tree by name
-        /// </summary>
-        private SQLTreeItem FindInstance(string instance, SQLTreeItem node)
-        {
-            foreach (SQLTreeItem child in node.Nodes)
-            {
-                if ((child.Type == SQLTreeItem.TreeType.Instance || child.Type == SQLTreeItem.TreeType.AzureInstance) && child.InstanceName == instance)
-                {
-                    return child;
-                }
-                if (child.Type is SQLTreeItem.TreeType.InstanceFolder or SQLTreeItem.TreeType.AzureInstance)
-                {
-                    SQLTreeItem find = FindInstance(instance, child);
-                    if (find != null)
-                    {
-                        return find;
-                    }
-                }
-            }
-            return null;
-        }
-
         private void Instance_Selected(object sender, InstanceSelectedEventArgs e)
         {
-            suppressLoadTab = true;
             var root = (SQLTreeItem)tv1.SelectedNode;
 
             SQLTreeItem nInstance;
-            nInstance = e.InstanceID > 0 ? FindInstance(e.InstanceID, root) : FindInstance(e.Instance, root);
-            if (nInstance != null)
-            {
-                var parent = nInstance.Parent;
-                if (!parent.IsExpanded)
-                {
-                    parent.Expand();
-                }
-                if (e.Tab is "tabAlerts" or "tabQS") // Configuration Node
-                {
-                    nInstance.Expand();
-                    tv1.SelectedNode = nInstance.Nodes[0];
-                }
-                else if (e.Tab is "tabMirroring" or "tabLogShipping" or "tabBackups" or "tabAG")
-                {
-                    nInstance.Expand();
-                    tv1.SelectedNode = nInstance.Nodes[2];
-                }
-                else if (e.Tab == "tabJobs")
-                {
-                    nInstance.Expand();
-                    tv1.SelectedNode = nInstance.LastNode;
-                }
-                else if (e.Tab is "tabAzureSummary" or "tabPerformance")
-                {
-                    tv1.SelectedNode = nInstance;
-                }
-                else
-                {
-                    nInstance.Expand();
-                    tv1.SelectedNode = nInstance.Nodes[1];
-                }
+            nInstance = e.InstanceID > 0 ? root.FindInstance(e.InstanceID) : root.FindInstance(e.Instance);
 
-                if (e.Tab != null && e.Tab.Length > 0)
+            if (nInstance == null)
+            {
+                MessageBox.Show("Instance not found: " + (e.InstanceID > 0 ? e.InstanceID.ToString() : e.Instance), "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
+            else
+            {
+                suppressLoadTab = true;
+                try
                 {
-                    tabs.SelectedTab = tabs.TabPages[e.Tab];
+                    var parent = nInstance.Parent;
+                    if (!parent.IsExpanded)
+                    {
+                        parent.Expand();
+                    }
+                    if (e.Tab is "tabAlerts" or "tabQS") // Configuration Node
+                    {
+                        nInstance.Expand();
+                        tv1.SelectedNode = nInstance.Nodes[0];
+                    }
+                    else if (e.Tab is "tabMirroring" or "tabLogShipping" or "tabBackups" or "tabAG")
+                    {
+                        nInstance.Expand();
+                        tv1.SelectedNode = nInstance.Nodes[2];
+                    }
+                    else if (e.Tab == "tabJobs")
+                    {
+                        nInstance.Expand();
+                        tv1.SelectedNode = nInstance.LastNode;
+                    }
+                    else if (e.Tab is "tabAzureSummary" or "tabPerformance")
+                    {
+                        tv1.SelectedNode = nInstance;
+                    }
+                    else
+                    {
+                        nInstance.Expand();
+                        tv1.SelectedNode = nInstance.Nodes[1];
+                    }
+
+                    if (e.Tab != null && e.Tab.Length > 0)
+                    {
+                        tabs.SelectedTab = tabs.TabPages[e.Tab];
+                    }
                 }
-                suppressLoadTab = false;
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Error selecting instance: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+                finally
+                {
+                    suppressLoadTab = false;
+                }
                 LoadSelectedTab();
             }
         }
