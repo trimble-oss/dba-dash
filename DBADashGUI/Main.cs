@@ -957,7 +957,15 @@ namespace DBADashGUI
             var root = tv1.SelectedSQLTreeItem();
 
             SQLTreeItem nInstance;
-            nInstance = e.InstanceID > 0 ? root.FindInstance(e.InstanceID) : root.FindInstance(e.Instance);
+            
+            if (e.InstanceID <= 0 && string.IsNullOrEmpty(e.Instance)) // No Instance - Use root Level
+            {
+                nInstance = tv1.Nodes[0].AsSQLTreeItem();
+            }
+            else
+            {
+                nInstance = e.InstanceID > 0 ? root.FindInstance(e.InstanceID) : root.FindInstance(e.Instance);
+            }
 
             if (nInstance == null)
             {
@@ -969,7 +977,7 @@ namespace DBADashGUI
                 try
                 {
                     var parent = nInstance.Parent;
-                    if (!parent.IsExpanded)
+                    if (parent !=null && !parent.IsExpanded)
                     {
                         parent.Expand();
                     }
@@ -983,7 +991,12 @@ namespace DBADashGUI
                         nInstance.Expand();
                         tv1.SelectedNode = nInstance.Nodes[2];
                     }
-                    else if (e.Tab == "tabJobs")
+                    else if (e.Tab == "tabJobs" && parent == null) // Root Level (Jobs Uner Checks)
+                    {
+                        nInstance.Expand();
+                        tv1.SelectedNode = nInstance.Nodes[1];
+                    }
+                    else if (e.Tab == "tabJobs" && parent !=null) // Instance Level Jobs tab
                     {
                         nInstance.Expand();
                         tv1.SelectedNode = nInstance.LastNode;
@@ -1000,7 +1013,16 @@ namespace DBADashGUI
 
                     if (e.Tab != null && e.Tab.Length > 0)
                     {
-                        tabs.SelectedTab = tabs.TabPages[e.Tab];
+                        if (tabs.TabPages.ContainsKey(e.Tab))
+                        {
+                            tabs.SelectedTab = tabs.TabPages[e.Tab];
+                        }
+                        else
+                        {
+                            NavigateBack();
+                            MessageBox.Show("Selected tab page is not available for this context", "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                            return;
+                        }
                     }
                 }
                 catch (Exception ex)

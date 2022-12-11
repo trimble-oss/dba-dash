@@ -1221,7 +1221,6 @@ WHEN NOT MATCHED BY SOURCE AND [Target].IsSystem=1 THEN
 	EXEC dbo.OSLoadedModules_RefreshStatus
  END
 
-
 IF NOT EXISTS(SELECT 1 FROM dbo.DriveThresholds)
 BEGIN 
 	INSERT INTO dbo.DriveThresholds
@@ -1766,7 +1765,6 @@ WHEN NOT MATCHED BY TARGET THEN
 INSERT(MemoryClerkType,MemoryClerkDescription)
 VALUES(S.MemoryClerkType,S.MemoryClerkDescription);
 
-
 IF NOT EXISTS(SELECT 1 
 			FROM dbo.Settings
 			WHERE SettingName = 'InstanceTagIDsMigratedDate'
@@ -1840,7 +1838,8 @@ USING (VALUES
 	(0,N'Metric'),
 	(1,N'PerformanceSummary'),
 	(2,N'Tree'),
-	(3,N'SlowQueryDetail')
+	(3,N'SlowQueryDetail'),
+	(4,N'Summary')
 ) AS [Source] ([ViewTypeID],[ViewType])
 ON ([Target].[ViewTypeID] = [Source].[ViewTypeID])
 WHEN MATCHED AND (

@@ -61,7 +61,9 @@ namespace DBADashGUI
             if (cell.GetType() == typeof(DataGridViewLinkCell))
             {
                 ((DataGridViewLinkCell)cell).LinkColor = StatusColor.ContrastColor();
+                ((DataGridViewLinkCell)cell).VisitedLinkColor = StatusColor.ContrastColor();
             }
+            cell.Style.SelectionBackColor = ControlPaint.Light(StatusColor);
         }
 
         public static void SetStatusColor(this DataGridViewCell cell, DBADashStatusEnum Status)
@@ -80,7 +82,6 @@ namespace DBADashGUI
            .Select(c => new KeyValuePair<string, PersistedColumnLayout>(c.Name, new PersistedColumnLayout() { Visible = c.Visible, Width = c.Width, DisplayIndex = c.DisplayIndex }))
            .ToList();
         }
-
 
         /// <summary>
         /// Loads a saved column layout to the grid.  Size, position & visibility of columns

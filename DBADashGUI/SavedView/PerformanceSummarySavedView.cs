@@ -16,12 +16,6 @@ namespace DBADashGUI
         public Dictionary<int, Counter> SelectedPerformanceCounters = new();
         public List<KeyValuePair<string, PersistedColumnLayout>> ColumnLayout;
 
-        public override string Serialize()
-        {
-            string json = Newtonsoft.Json.JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented);
-            return json;
-        }
-
         public static PerformanceSummarySavedView Deserialize(string json)
         {
             return JsonConvert.DeserializeObject<PerformanceSummarySavedView>(json);
@@ -31,7 +25,6 @@ namespace DBADashGUI
         {
             return SavedView.GetSavedViews(ViewTypes.PerformanceSummary, UserID);
         }
-
 
     }
 }

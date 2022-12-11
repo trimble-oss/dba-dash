@@ -760,7 +760,7 @@ namespace DBADashGUI
 
         private bool IsThisInstance(string Instance)
         {
-            return IsInstanceOrAzureDB && this.InstanceID == InstanceID;
+            return IsInstanceOrAzureDB && this.instanceName == Instance;
         }
 
         /// <summary>

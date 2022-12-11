@@ -15,12 +15,6 @@ namespace DBADashGUI
 
         public bool AutoSizeColumns { get; set; }
 
-        public override string Serialize()
-        {
-            string json = Newtonsoft.Json.JsonConvert.SerializeObject(this, Newtonsoft.Json.Formatting.Indented);
-            return json;
-        }
-
         public static SlowQueryDetailSavedView Deserialize(string json)
         {
             return JsonConvert.DeserializeObject<SlowQueryDetailSavedView>(json);
