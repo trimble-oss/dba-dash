@@ -74,7 +74,7 @@ namespace DBADashGUI
             {
                 if (_engineEdition == DatabaseEngineEdition.Unknown && Type != TreeType.DBADashRoot && this.Parent != null)
                 {
-                    _engineEdition = ((SQLTreeItem)this.Parent).EngineEdition;
+                    _engineEdition = SQLTreeItemParent.EngineEdition;
                 }
                 return _engineEdition;
             }
@@ -89,7 +89,7 @@ namespace DBADashGUI
         private HashSet<int> _AzureInstanceIDs;
         private HashSet<int> _InstanceIDs;
         private DBADashContext InternalContext;
-        public SQLTreeItem SQLTreeItemParent => (SQLTreeItem)Parent;
+        public SQLTreeItem SQLTreeItemParent => Parent.AsSQLTreeItem();
         private bool IsChildOfInstanceOrAzureDB => InstanceID > 0 && !IsInstanceOrAzureDB;
         private bool IsChildOfInstanceOrAzureInstance => InstanceID > 0 && !IsInstanceOrAzureInstance;
         private bool IsInstanceOrAzureDB => Type == TreeType.Instance || Type == TreeType.AzureDatabase;
@@ -113,7 +113,7 @@ namespace DBADashGUI
                     JobStepID = JobStepID,
                     Type = Type,
                     DatabaseName = DatabaseName,
-                    ParentType = Parent == null ? TreeType.DBADashRoot : ((SQLTreeItem)Parent).Type
+                    ParentType = Parent == null ? TreeType.DBADashRoot : SQLTreeItemParent.Type
                 };
                 return InternalContext;
             }
@@ -217,7 +217,7 @@ namespace DBADashGUI
                 }
                 else
                 {
-                    return ((SQLTreeItem)this.Parent).InstanceIDs;
+                    return SQLTreeItemParent.InstanceIDs;
                 }
             }
         }
@@ -236,7 +236,7 @@ namespace DBADashGUI
                 }
                 else
                 {
-                    return ((SQLTreeItem)this.Parent).RegularInstanceIDs;
+                    return SQLTreeItemParent.RegularInstanceIDs;
                 }
             }
         }
@@ -255,7 +255,7 @@ namespace DBADashGUI
                 }
                 else
                 {
-                    return ((SQLTreeItem)this.Parent).AzureInstanceIDs;
+                    return SQLTreeItemParent.AzureInstanceIDs;
                 }
             }
         }
@@ -354,7 +354,7 @@ namespace DBADashGUI
                     }
                     else
                     {
-                        return ((SQLTreeItem)this.Parent).InstanceID;
+                        return SQLTreeItemParent.InstanceID;
                     }
                 }
             }
@@ -389,7 +389,7 @@ namespace DBADashGUI
                     }
                     else
                     {
-                        n = (SQLTreeItem)n.Parent;
+                        n = n.SQLTreeItemParent;
                     }
                 }
                 while (n.Parent != null && !hasInstanceName);
@@ -425,7 +425,7 @@ namespace DBADashGUI
                 }
                 else
                 {
-                    _databaseID = ((SQLTreeItem)Parent).DatabaseID;
+                    _databaseID = SQLTreeItemParent.DatabaseID;
                     return _databaseID;
                 }
             }
@@ -453,7 +453,7 @@ namespace DBADashGUI
                 }
                 else
                 {
-                    databaseName = ((SQLTreeItem)Parent).DatabaseName;
+                    databaseName = SQLTreeItemParent.DatabaseName;
                     return databaseName;
                 }
             }

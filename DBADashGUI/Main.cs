@@ -250,7 +250,7 @@ namespace DBADashGUI
             }
             SaveContext();
 
-            SQLTreeItem n = (SQLTreeItem)tv1.SelectedNode;
+            SQLTreeItem n = tv1.SelectedSQLTreeItem();
             if (n == null)
             {
                 return;
@@ -258,8 +258,7 @@ namespace DBADashGUI
 
             if (tabs.SelectedTab == tabDBADashErrorLog)
             {
-                var parent = (SQLTreeItem)n.Parent;
-                collectionErrors1.AckErrors = SelectedTags().Count == 0 && parent.Type == SQLTreeItem.TreeType.DBADashRoot;
+                collectionErrors1.AckErrors = SelectedTags().Count == 0 && n.SQLTreeItemParent.Type == SQLTreeItem.TreeType.DBADashRoot;
             }
 
             if (tabs.SelectedTab == tabSchema)
@@ -477,8 +476,8 @@ namespace DBADashGUI
         private List<TabPage> GetAllowedTabs()
         {
             List<TabPage> allowedTabs = new();
-            var n = (SQLTreeItem)tv1.SelectedNode;
-            var parent = (SQLTreeItem)n.Parent;
+            var n = tv1.SelectedSQLTreeItem();
+            var parent = n.SQLTreeItemParent;
             bool hasAzureDBs = n.AzureInstanceIDs.Count > 0;
             if (n.Type is SQLTreeItem.TreeType.DBADashRoot or SQLTreeItem.TreeType.InstanceFolder)
             {
@@ -570,8 +569,8 @@ namespace DBADashGUI
         {
             var suppress = suppressLoadTab;
             suppressLoadTab = true; // Don't Load tab while adding/removing tabs
-            var n = (SQLTreeItem)tv1.SelectedNode;
-            var parent = (SQLTreeItem)n.Parent;
+            var n = tv1.SelectedSQLTreeItem();
+
             List<TabPage> allowedTabs = GetAllowedTabs();
 
             this.Text = n.FullPath.Replace("\\", " \\ ");
@@ -598,8 +597,8 @@ namespace DBADashGUI
 
         private void Tv1_BeforeExpand(object sender, TreeViewCancelEventArgs e)
         {
-            var n = (SQLTreeItem)e.Node;
-            if (n.Nodes.Count == 1 && ((SQLTreeItem)n.Nodes[0]).Type == SQLTreeItem.TreeType.DummyNode)
+            var n = e.Node.AsSQLTreeItem();
+            if (n.Nodes.Count == 1 && n.Nodes[0].AsSQLTreeItem().Type == SQLTreeItem.TreeType.DummyNode)
             {
                 n.Nodes.Clear();
                 if (n.Type == SQLTreeItem.TreeType.Instance)
@@ -955,7 +954,7 @@ namespace DBADashGUI
 
         private void Instance_Selected(object sender, InstanceSelectedEventArgs e)
         {
-            var root = (SQLTreeItem)tv1.SelectedNode;
+            var root = tv1.SelectedSQLTreeItem();
 
             SQLTreeItem nInstance;
             nInstance = e.InstanceID > 0 ? root.FindInstance(e.InstanceID) : root.FindInstance(e.Instance);
@@ -1099,7 +1098,7 @@ namespace DBADashGUI
 
         private void GvHistory_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
-            var node = (SQLTreeItem)tv1.SelectedNode;
+            var node = tv1.SelectedSQLTreeItem();
             if (e.RowIndex >= 0 && e.ColumnIndex == colCompare.Index)
             {
                 var row = (DataRowView)gvHistory.Rows[e.RowIndex].DataBoundItem;
@@ -1135,7 +1134,7 @@ namespace DBADashGUI
         {
             using (var frm = new DBDiff { SelectedTags = SelectedTags() })
             {
-                var n = (SQLTreeItem)tv1.SelectedNode;
+                var n = tv1.SelectedSQLTreeItem();
                 frm.SelectedInstanceA = n.InstanceName;
                 frm.SelectedDatabaseA = new DatabaseItem() { DatabaseID = n.DatabaseID, DatabaseName = n.DatabaseName };
                 frm.ShowDialog(this);
@@ -1146,7 +1145,7 @@ namespace DBADashGUI
         {
             using (var frm = new JobDiff())
             {
-                var selected = (SQLTreeItem)tv1.SelectedNode;
+                var selected = tv1.SelectedSQLTreeItem();
                 frm.InstanceID_A = selected.InstanceID;
                 frm.ShowDialog(this);
             }
@@ -1278,7 +1277,7 @@ namespace DBADashGUI
         {
             if (node != null)
             {
-                SaveContext((SQLTreeItem)node, tagIndex);
+                SaveContext(node.AsSQLTreeItem(), tagIndex);
             }
         }
 
@@ -1300,7 +1299,7 @@ namespace DBADashGUI
                 else if (tv1.Nodes.Count > 0)
                 {
                     // Ensure we have added the root context
-                    VisitedNodes.Add(new TreeContext() { Node = (SQLTreeItem)tv1.Nodes[0], TabIndex = 0 });
+                    VisitedNodes.Add(new TreeContext() { Node = tv1.Nodes[0].AsSQLTreeItem(), TabIndex = 0 });
                     if (node == tv1.Nodes[0] && TabIndex == 0) // If context we are saving is root, we don't need to add it again
                     {
                         return;
