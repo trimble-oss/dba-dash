@@ -4,7 +4,8 @@
 	@IncludeWarning BIT=1,
 	@IncludeNA BIT=0,
 	@IncludeOK BIT=0,
-	@IncludeMetrics BIT=0
+	@IncludeMetrics BIT=0,
+	@ShowHidden BIT=1
 )
 AS
 DECLARE @StatusSQL NVARCHAR(MAX)
@@ -81,6 +82,7 @@ WHERE ' + CASE WHEN @InstanceIDs IS NULL OR @InstanceIDs = ''
 						FROM STRING_SPLIT(@InstanceIDs,'','') ss
 						WHERE ss.value = D.InstanceID)' END + '
 ' + @StatusSQL + '
+' + CASE WHEN @ShowHidden=1 THEN '' ELSE 'AND D.ShowInSummary=1' END + '
 ORDER BY Status DESC, PctFreeSpace DESC;'
 
 EXEC sp_executesql @SQL,N'@InstanceIDs VARCHAR(MAX)',@InstanceIDs

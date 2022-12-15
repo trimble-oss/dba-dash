@@ -23,7 +23,8 @@ SELECT I.InstanceID,
 	WHEN cfg.DriveID =-1 THEN 'Instance'
 	WHEN cfg.InstanceID IS NULL THEN 'None'
 	ELSE 'Drive' END DriveCheckConfiguredLevel,
-	CASE WHEN cfg.DriveID=-1 OR cfg.InstanceID=-1 THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END AS IsInheritedThreshold
+	CASE WHEN cfg.DriveID=-1 OR cfg.InstanceID=-1 THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END AS IsInheritedThreshold,
+	I.ShowInSummary
 FROM dbo.Drives D
 INNER JOIN dbo.Instances I ON D.InstanceID = I.InstanceID
 INNER JOIN dbo.CollectionDates SSD ON SSD.InstanceID = I.InstanceID AND SSD.Reference='Drives'

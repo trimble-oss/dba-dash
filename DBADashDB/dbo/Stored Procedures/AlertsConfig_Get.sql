@@ -1,5 +1,6 @@
 ﻿CREATE PROC dbo.AlertsConfig_Get(
-	@InstanceIDs VARCHAR(MAX) = NULL
+	@InstanceIDs VARCHAR(MAX) = NULL,
+	@ShowHidden BIT=1
 )
 AS
 DECLARE @Instances TABLE(
@@ -35,6 +36,11 @@ SELECT I.InstanceID,
 FROM dbo.Instances I
 LEFT JOIN dbo.Alerts A ON A.InstanceID = I.InstanceID
 WHERE I.EditionID<> 1674378470 --exclude azure DB & Azure managed instance
-AND EXISTS(SELECT 1 FROM @Instances t WHERE I.InstanceID = t.InstanceID)
+AND EXISTS	(	
+			SELECT 1 
+			FROM @Instances t 
+			WHERE I.InstanceID = t.InstanceID
+			)
 AND I.IsActive=1
+AND (I.ShowInSummary=1 OR @ShowHidden=1)
 ORDER BY I.Instance,Alert

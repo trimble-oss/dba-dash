@@ -18,6 +18,7 @@ namespace DBADashGUI
     public partial class Summary : UserControl, ISetContext
     {
         private List<Int32> refreshInstanceIDs;
+        private bool refreshIncludeHidden;
 
         private DateTime lastRefresh;
 
@@ -32,8 +33,9 @@ namespace DBADashGUI
 
         private Dictionary<string, bool> statusColumns;
 
-        private bool focusedView { get => focusedViewToolStripMenuItem.Checked; }
+        private bool FocusedView { get => focusedViewToolStripMenuItem.Checked; }
         private DBADashContext context;
+        private bool IncludeHidden => context.InstanceIDs.Count == 1 || Common.ShowHidden;
 
         private readonly Dictionary<string, string> tabMapping = new() { { "FullBackupStatus", "tabBackups" }, { "LogShippingStatus", "tabLogShipping" }, { "DiffBackupStatus", "tabBackups" }, { "LogBackupStatus", "tabBackups" }, { "DriveStatus", "tabDrives" },
                                                             { "JobStatus", "tabJobs" }, { "CollectionErrorStatus", "tabDBADashErrorLog"}, { "AGStatus", "tabAG" }, {"LastGoodCheckDBStatus","tabLastGood"}, {"SnapshotAgeStatus","tabCollectionDates"  },
@@ -61,7 +63,7 @@ namespace DBADashGUI
                     cn.Open();
 
                     cmd.Parameters.AddWithValue("InstanceIDs", string.Join(",", context.InstanceIDs));
-                    cmd.Parameters.AddWithValue("IncludeHidden", showHiddenToolStripMenuItem.Checked);
+                    cmd.Parameters.AddWithValue("IncludeHidden", IncludeHidden);
                     DataTable dt = new();
                     da.Fill(dt);
                     return dt;
@@ -77,7 +79,7 @@ namespace DBADashGUI
 
         public void RefreshDataIfStale()
         {
-            if (DateTime.UtcNow.Subtract(lastRefresh).TotalMinutes > 5 || InstanceIDsChanged())
+            if (DateTime.UtcNow.Subtract(lastRefresh).TotalMinutes > 5 || ParametersChanged)
             {
                 RefreshData();
             }
@@ -88,10 +90,7 @@ namespace DBADashGUI
             }
         }
 
-        private bool InstanceIDsChanged()
-        {
-            return !(context.InstanceIDs.Count == refreshInstanceIDs.Count && refreshInstanceIDs.All(context.InstanceIDs.Contains));
-        }
+        private bool ParametersChanged => !(context.InstanceIDs.Count == refreshInstanceIDs.Count && refreshInstanceIDs.All(context.InstanceIDs.Contains) && refreshIncludeHidden == Common.ShowHidden);
 
         private CancellationTokenSource cancellationTS = new();
         private bool savedLayoutLoaded;
@@ -110,6 +109,7 @@ namespace DBADashGUI
             refresh1.ShowRefresh();
             splitContainer1.Visible = false;
             refreshInstanceIDs = new List<int>(context.InstanceIDs);
+            refreshIncludeHidden = Common.ShowHidden;
             tsRefresh.Enabled = false;
             _ = GetSummaryAsync().ContinueWith(task =>
             {
@@ -134,7 +134,7 @@ namespace DBADashGUI
 
                 if (saved != null)
                 {
-                    showHiddenToolStripMenuItem.Checked = saved.ShowHidden;
+                    Common.ShowHidden = saved.ShowHidden;
                     focusedViewToolStripMenuItem.Checked = saved.FocusedView;
                     showTestSummaryToolStripMenuItem.Checked = saved.ShowTestSummary;
                     splitContainer1.Panel1Collapsed = !showTestSummaryToolStripMenuItem.Checked;
@@ -154,7 +154,7 @@ namespace DBADashGUI
                     new DataGridViewLinkColumn(){ Name = "NA",  HeaderText="Instance Count N/A", DataPropertyName="NA",SortMode = DataGridViewColumnSortMode.Automatic },
         };
 
-        private DataTable GroupedByTestSchema()
+        private static DataTable GroupedByTestSchema()
         {
             DataTable grouped = new();
             grouped.Columns.Add("Test", typeof(string));
@@ -252,7 +252,7 @@ namespace DBADashGUI
                 foreach (string col in cols)
                 {
                     var status = (DBADashStatus.DBADashStatusEnum)Convert.ToInt32(row[col] == DBNull.Value ? 3 : row[col]);
-                    if (!(status == DBADashStatus.DBADashStatusEnum.NA || (status == DBADashStatus.DBADashStatusEnum.OK && focusedView)))
+                    if (!(status == DBADashStatus.DBADashStatusEnum.NA || (status == DBADashStatus.DBADashStatusEnum.OK && FocusedView)))
                     {
                         statusColumns[col] = true;
                         isFocusedRow = true;
@@ -267,7 +267,7 @@ namespace DBADashGUI
                 row["IsFocusedRow"] = isFocusedRow;
             }
             dgvSummary.Invoke(() => SetStatusColumnVisiblity());
-            dgvSummary.Invoke((Action)(() => colShowInSummary.Visible = showHiddenToolStripMenuItem.Checked));
+            dgvSummary.Invoke((Action)(() => colShowInSummary.Visible = IncludeHidden));
 
             dv = new DataView(dt, SummaryRowFilter, "Instance", DataViewRowState.CurrentRows);
             dgvSummary.Invoke((Action)(() =>
@@ -288,8 +288,8 @@ namespace DBADashGUI
             timer1.Enabled = true;
         }
 
-        private string SummaryRowFilter => focusedView ? "IsFocusedRow=1" : "";
-        private string TestRowFilter => focusedView ? "IsFocusedRow=1" : "OK>0 OR Warning>0 OR Critical>0";
+        private string SummaryRowFilter => FocusedView ? "IsFocusedRow=1" : "";
+        private string TestRowFilter => FocusedView ? "IsFocusedRow=1" : "OK>0 OR Warning>0 OR Critical>0";
 
         private void DgvSummary_RowAdded(object sender, DataGridViewRowsAddedEventArgs e)
         {
@@ -723,7 +723,7 @@ namespace DBADashGUI
                     }
                     else
                     {
-                        Instance_Selected(this, new InstanceSelectedEventArgs() { InstanceID = context.InstanceID, Instance = context.InstanceName , Tab = tab });
+                        Instance_Selected(this, new InstanceSelectedEventArgs() { InstanceID = context.InstanceID, Instance = context.InstanceName, Tab = tab });
                     }
                 }
                 else if (e.ColumnIndex >= 1 && e.ColumnIndex <= 4)
@@ -801,7 +801,7 @@ namespace DBADashGUI
         {
             SummarySavedView saved = new()
             {
-                ShowHidden = showHiddenToolStripMenuItem.Checked,
+                ShowHidden = Common.ShowHidden,
                 ShowTestSummary = showTestSummaryToolStripMenuItem.Checked,
                 FocusedView = focusedViewToolStripMenuItem.Checked,
                 Name = "Default"

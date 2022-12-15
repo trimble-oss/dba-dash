@@ -54,7 +54,8 @@ SELECT J.Instance,
 				OR st.FailCount7DaysStatus=2 OR st.JobStepFail7DaysStatus=2 OR st.JobStepFail24HrsStatus=2 OR st.LastFailStatus=2 THEN 2
 		WHEN st.TimeSinceLastFailureStatus=4 OR st.TimeSinceLastSucceededStatus=4 OR st.FailCount24HrsStatus=4
 				OR st.FailCount7DaysStatus=4 OR st.JobStepFail7DaysStatus=4 OR st.JobStepFail24HrsStatus=4 OR st.LastFailStatus=4 THEN 4
-		ELSE 3 END AS JobStatus 
+		ELSE 3 END AS JobStatus,
+	J.ShowInSummary
 FROM dbo.AgentJob7Day J
 CROSS APPLY dbo.SecondsToHumanDuration(J.MaxDurationSec) AS MaxD
 CROSS APPLY dbo.SecondsToHumanDuration(J.AvgDurationSec) AS AvgD

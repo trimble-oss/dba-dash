@@ -93,6 +93,7 @@ namespace DBADashGUI.Checks
             {
                 cn.Open();
                 cmd.Parameters.AddWithValue("InstanceIDs", InstanceIDs.AsDataTable());
+                cmd.Parameters.AddWithValue("ShowHidden", InstanceIDs.Count == 1 || Common.ShowHidden);
                 DataTable dt = new();
                 da.Fill(dt);
                 return dt;
@@ -130,7 +131,6 @@ namespace DBADashGUI.Checks
 
         private void Dgv_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
-
             if (e.RowIndex >= 0 && !HasSelectedInstance)
             {
                 DataRowView row = (DataRowView)dgv.Rows[e.RowIndex].DataBoundItem;
@@ -167,8 +167,6 @@ namespace DBADashGUI.Checks
         {
             Common.PromptSaveDataGridView(ref dgv);
         }
-
-
 
         private void TsEdit_Click(object sender, EventArgs e)
         {

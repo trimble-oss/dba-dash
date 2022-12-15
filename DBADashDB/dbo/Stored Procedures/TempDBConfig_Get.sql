@@ -1,5 +1,6 @@
 ﻿CREATE PROC dbo.TempDBConfig_Get(
-	@InstanceIDs VARCHAR(MAX)
+	@InstanceIDs VARCHAR(MAX),
+    @ShowHidden BIT=1
 )
 AS
 SELECT InstanceID,
@@ -28,3 +29,4 @@ FROM dbo.TempDBConfiguration T
 WHERE EXISTS(SELECT 1 
             FROM STRING_SPLIT(@InstanceIDs,',') ss 
             WHERE ss.value = T.InstanceID)
+AND (T.ShowInSummary=1 OR @ShowHidden=1)

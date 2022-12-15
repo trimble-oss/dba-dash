@@ -15,8 +15,8 @@ namespace DBADashGUI.Changes
         }
 
         private List<Int32> InstanceIDs;
-        string provider = "";
-        string searchText = "";
+        private string provider = "";
+        private string searchText = "";
 
         public void SetContext(DBADashContext context)
         {
@@ -48,12 +48,11 @@ namespace DBADashGUI.Changes
                 {
                     cmd.Parameters.AddWithValue("DriverSearch", searchText);
                 }
-
+                cmd.Parameters.AddWithValue("ShowHidden", InstanceIDs.Count == 1 ? true : Common.ShowHidden);
                 DataTable dt = new();
                 da.Fill(dt);
                 return dt;
             }
-
         }
 
         private void RefreshDrivers()
@@ -63,7 +62,6 @@ namespace DBADashGUI.Changes
 
             dgvDrivers.Columns.Add(new DataGridViewTextBoxColumn() { Name = "DriverProviderName", HeaderText = "Provider", Frozen = Common.FreezeKeyColumn });
             dgvDrivers.Columns.Add(new DataGridViewTextBoxColumn() { Name = "DeviceName", HeaderText = "Device", Frozen = Common.FreezeKeyColumn });
-
 
             DataTable dt = GetDrivers();
 
@@ -121,7 +119,6 @@ namespace DBADashGUI.Changes
             }
             dgvDrivers.Rows.AddRange(rows.ToArray());
             dgvDrivers.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
-
         }
 
         private void AddFilters(DataTable dt)
@@ -144,14 +141,11 @@ namespace DBADashGUI.Changes
             var selectedItm = (ToolStripMenuItem)sender;
             foreach (ToolStripMenuItem itm in tsProvider.DropDownItems)
             {
-
                 itm.Checked = itm == selectedItm && !selectedItm.Checked;
             }
             provider = selectedItm.Checked ? selectedItm.Text : "";
             RefreshDrivers();
         }
-
-
 
         private void TxtSearch_KeyPress(object sender, KeyPressEventArgs e)
         {

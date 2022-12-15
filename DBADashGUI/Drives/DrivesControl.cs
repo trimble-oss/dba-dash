@@ -43,6 +43,7 @@ namespace DBADashGUI.Properties
                 warningToolStripMenuItem.Checked = value;
             }
         }
+
         public bool IncludeNA
         {
             get
@@ -54,6 +55,7 @@ namespace DBADashGUI.Properties
                 undefinedToolStripMenuItem.Checked = value;
             }
         }
+
         public bool IncludeOK
         {
             get
@@ -68,9 +70,7 @@ namespace DBADashGUI.Properties
 
         public bool gridview = false;
 
-
-
-        DataView dvDrives;
+        private DataView dvDrives;
 
         private DataTable GetDrives()
         {
@@ -85,6 +85,7 @@ namespace DBADashGUI.Properties
                 cmd.Parameters.AddWithValue("IncludeNA", IncludeNA);
                 cmd.Parameters.AddWithValue("IncludeOK", IncludeOK);
                 cmd.Parameters.AddWithValue("IncludeMetrics", includeAllMetricsToolStripMenuItem.Checked);
+                cmd.Parameters.AddWithValue("ShowHidden", context.RegularInstanceIDs.Count == 1 || Common.ShowHidden);
 
                 DataTable dt = new();
                 da.Fill(dt);
@@ -122,6 +123,7 @@ namespace DBADashGUI.Properties
         }
 
         private DataGridView dgv;
+
         public void ShowGridView()
         {
             gridview = true;
@@ -195,7 +197,6 @@ namespace DBADashGUI.Properties
                     dgv.Rows[idx].Cells["Warning"].Style.Format = "P2";
                     dgv.Rows[idx].Cells["Critical"].Style.Format = "P2";
                 }
-
 
                 if ((bool)row["IsInheritedThreshold"])
                 {
@@ -285,8 +286,6 @@ namespace DBADashGUI.Properties
             }
         }
 
-
-
         private void ConfigureInstanceThresholdsToolStripMenuItem_Click(object sender, EventArgs e)
         {
             if (context.RegularInstanceIDs.Count == 1)
@@ -320,7 +319,6 @@ namespace DBADashGUI.Properties
             RefreshData();
         }
 
-
         private void TsDrivesView_Click(object sender, EventArgs e)
         {
             ShowDrivesView();
@@ -347,14 +345,12 @@ namespace DBADashGUI.Properties
             Common.CopyDataGridViewToClipboard(dgv);
             dgv.Columns["Configure"].Visible = true;
             dgv.Columns["History"].Visible = true;
-
         }
 
         private void IncludeAllMetricsToolStripMenuItem_Click(object sender, EventArgs e)
         {
             gridview = true;
             RefreshData();
-
         }
 
         private void TsExcel_Click(object sender, EventArgs e)
@@ -369,6 +365,5 @@ namespace DBADashGUI.Properties
             dgv.Columns["Configure"].Visible = true;
             dgv.Columns["History"].Visible = true;
         }
-
     }
 }

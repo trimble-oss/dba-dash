@@ -2,7 +2,8 @@
 	@InstanceIDs VARCHAR(MAX)=NULL,
 	@DatabaseID INT=NULL,
 	@DBName SYSNAME=NULL,
-	@InstanceGroupName NVARCHAR(128)=NULL
+	@InstanceGroupName NVARCHAR(128)=NULL,
+	@ShowHidden BIT=1
 )
 AS
 DECLARE @SQL NVARCHAR(MAX)
@@ -34,6 +35,7 @@ AND D.source_database_id IS NULL
 ' + CASE WHEN @DatabaseID IS NULL THEN '' ELSE 'AND F.DatabaseID = @DatabaseID' END + '
 ' + CASE WHEN @InstanceGroupName IS NULL THEN '' ELSE 'AND I.InstanceGroupName = @InstanceGroupName' END + '
 ' + CASE WHEN @DBName IS NULL THEN '' ELSE 'AND D.Name = @DBName' END + '
+' + CASE WHEN @ShowHidden=1 THEN '' ELSE 'AND I.ShowInSummary=1' END + '
 GROUP BY ' + @Grp + '
 ORDER BY AllocatedGB DESC'
 

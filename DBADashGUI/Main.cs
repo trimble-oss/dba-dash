@@ -1460,5 +1460,11 @@ namespace DBADashGUI
                 MessageBox.Show($"Time zone will be set to {DateHelper.AppTimeZone.DisplayName} on application start.", "Save", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
         }
+
+        private void ShowHidden_Changed(object sender, EventArgs e)
+        {
+            Common.ShowHidden = showHiddenToolStripMenuItem.Checked;
+            LoadSelectedTab();
+        }
     }
 }

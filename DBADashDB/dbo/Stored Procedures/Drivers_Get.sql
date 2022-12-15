@@ -1,7 +1,8 @@
 ﻿CREATE PROC dbo.Drivers_Get(
 	@InstanceIDs VARCHAR(MAX)=NULL,
 	@DriverSearch NVARCHAR(200)=NULL,
-	@Provider NVARCHAR(200)=NULL
+	@Provider NVARCHAR(200)=NULL,
+	@ShowHidden BIT=1
 )
 AS
 DECLARE @Instances TABLE(
@@ -41,9 +42,18 @@ FROM dbo.InstanceInfo I
 	LEFT JOIN dbo.CollectionDates CD ON I.InstanceID = CD.InstanceID AND CD.Reference='Drivers'
 WHERE D.DeviceName IS NOT NULL
 AND I.IsActive=1
-AND EXISTS(SELECT 1 FROM @Instances t WHERE I.InstanceID = t.InstanceID)
-AND (D.DeviceName LIKE '%' + @DriverSearch + '%' OR D.DriverProviderName LIKE '%' + @DriverSearch + '%'  OR D.DriverVersion LIKE '%' + @DriverSearch + '%'  OR @DriverSearch IS NULL)
+AND EXISTS	(	
+			SELECT 1 
+			FROM @Instances t 
+			WHERE I.InstanceID = t.InstanceID
+			)
+AND	(	D.DeviceName LIKE '%' + @DriverSearch + '%' 
+		OR D.DriverProviderName LIKE '%' + @DriverSearch + '%'  
+		OR D.DriverVersion LIKE '%' + @DriverSearch + '%'  
+		OR @DriverSearch IS NULL
+	)
 AND (D.DriverProviderName = @Provider OR @Provider IS NULL)
+AND (I.ShowInSummary=1 OR @ShowHidden=1)
 GROUP BY I.InstanceID,
        I.Instance,
 	   I.ConnectionID,

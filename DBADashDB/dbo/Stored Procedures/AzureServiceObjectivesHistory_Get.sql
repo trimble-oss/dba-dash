@@ -1,4 +1,7 @@
-﻿CREATE PROC dbo.AzureServiceObjectivesHistory_Get(@InstanceIDs VARCHAR(MAX))
+﻿CREATE PROC dbo.AzureServiceObjectivesHistory_Get(
+    @InstanceIDs VARCHAR(MAX),
+    @ShowHidden BIT=1
+)
 AS
 SELECT H.InstanceID,
 	  I.Instance,
@@ -14,5 +17,10 @@ SELECT H.InstanceID,
 FROM dbo.AzureDBServiceObjectivesHistory H
 JOIN dbo.Instances I  ON I.InstanceID = H.InstanceID
 JOIN dbo.Databases D  ON I.InstanceID = D.InstanceID
-WHERE EXISTS(SELECT 1 FROM STRING_SPLIT(@InstanceIDs,',') ss WHERE ss.value =  I.InstanceID)
+WHERE EXISTS(
+            SELECT 1 
+            FROM STRING_SPLIT(@InstanceIDs,',') ss 
+            WHERE ss.value =  I.InstanceID
+            )
+AND (I.ShowInSummary=1 OR @ShowHidden=1)
 ORDER BY H.ValidTo DESC;

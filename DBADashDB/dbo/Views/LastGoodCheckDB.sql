@@ -22,7 +22,8 @@ SELECT I.InstanceID,
 	cfg.CriticalThresholdHrs,
 	excl.LastGoodCheckDBExcludedReason,
 	D.create_date,
-	DATEADD(mi,I.UTCOffset,D.create_date)  AS create_date_utc
+	DATEADD(mi,I.UTCOffset,D.create_date)  AS create_date_utc,
+	I.ShowInSummary
 FROM dbo.Databases D 
 JOIN dbo.Instances I ON I.InstanceID = D.InstanceID
 OUTER APPLY(SELECT TOP(1) T.*

@@ -10,7 +10,8 @@
 	@Debug BIT=0,
 	@DaysOfWeek IDs READONLY, /* e.g. exclude weekends:  Monday,Tuesday,Wednesday,Thursday,Friday. Filter applied in local timezone (@UTCOffset) */
 	@Hours IDs READONLY, /* e.g. 9 to 5 :  9,10,11,12,13,14,15,16. Filter applied in local timezone (@UTCOffset)  */
-	@UTCOffset INT=0 /* Used for filtering on hours & weekday in current timezone */
+	@UTCOffset INT=0, /* Used for filtering on hours & weekday in current timezone */
+	@ShowHidden BIT=1
 )
 AS
 SET DATEFIRST 1 /* Start week on Monday */
@@ -61,6 +62,7 @@ WITH T AS (
 			COALESCE(IC.GoodFrom,C.GoodFrom,C.SystemGoodFrom) AS GoodFrom,
 			COALESCE(IC.GoodTo,C.GoodTo,C.SystemGoodTo) AS GoodTo
 	FROM dbo.InstanceCounters IC
+	JOIN dbo.Instances I ON I.InstanceID = IC.InstanceID
 	JOIN dbo.Counters C ON C.CounterID = IC.CounterID
 	JOIN dbo.PerformanceCounters' + CASE WHEN @Use60Min=1 THEN '_60MIN' ELSE '' END + ' PC ON PC.InstanceID = IC.InstanceID AND PC.CounterID = IC.CounterID
 	WHERE PC.SnapshotDate>=@FromDate
@@ -75,6 +77,7 @@ WITH T AS (
 		)' END + '
 	' + CASE WHEN @DaysOfWeekCsv IS NULL THEN N'' ELSE 'AND DATEPART(dw,DATEADD(mi, @UTCOffset, PC.SnapshotDate)) IN (' + @DaysOfWeekCsv + ')' END + '
 	' + CASE WHEN @HoursCsv IS NULL THEN N'' ELSE 'AND DATEPART(hh,DATEADD(mi, @UTCOffset, PC.SnapshotDate)) IN(' + @HoursCsv + ')' END + '
+	' + CASE WHEN @ShowHidden=1 THEN '' ELSE 'AND I.ShowInSummary=1' END + '
 GROUP BY	C.CounterID,
 			C.object_name,
 			C.counter_name,

@@ -40,6 +40,7 @@ namespace DBADashGUI.AgentJobs
                 warningToolStripMenuItem.Checked = value;
             }
         }
+
         public bool IncludeNA
         {
             get
@@ -51,6 +52,7 @@ namespace DBADashGUI.AgentJobs
                 undefinedToolStripMenuItem.Checked = value;
             }
         }
+
         public bool IncludeOK
         {
             get
@@ -112,8 +114,6 @@ namespace DBADashGUI.AgentJobs
                     ShowHistory(dt.Rows[0]);
                 }
             }
-
-
         }
 
         private DataTable GetJobs()
@@ -127,6 +127,7 @@ namespace DBADashGUI.AgentJobs
                 cmd.Parameters.AddWithValue("IncludeWarning", IncludeWarning);
                 cmd.Parameters.AddWithValue("IncludeNA", IncludeNA);
                 cmd.Parameters.AddWithValue("IncludeOK", IncludeOK);
+                cmd.Parameters.AddWithValue("ShowHidden", context.RegularInstanceIDs.Count == 1 || Common.ShowHidden);
                 if (context.JobID != Guid.Empty)
                 {
                     cmd.Parameters.AddWithValue("JobID", context.JobID);
@@ -138,7 +139,6 @@ namespace DBADashGUI.AgentJobs
                 return dt;
             }
         }
-
 
         public AgentJobsControl()
         {
@@ -180,7 +180,6 @@ namespace DBADashGUI.AgentJobs
                 var row = (DataRowView)dgvJobs.Rows[e.RowIndex].DataBoundItem;
                 if (dgvJobs.Columns[e.ColumnIndex].HeaderText == "Configure")
                 {
-
                     ConfigureThresholds((Int32)row["InstanceID"], (Guid)row["job_id"]);
                 }
                 if (dgvJobs.Columns[e.ColumnIndex] == colHistory)
@@ -193,7 +192,6 @@ namespace DBADashGUI.AgentJobs
 
         private void ShowHistory(DataRow row)
         {
-
             if (row["job_id"] != DBNull.Value)
             {
                 instanceId = (Int32)row["InstanceID"];
@@ -253,7 +251,6 @@ namespace DBADashGUI.AgentJobs
                 DateHelper.ConvertUTCToAppTimeZone(ref dt);
                 return dt;
             }
-
         }
 
         private void DgvJobs_RowsAdded(object sender, DataGridViewRowsAddedEventArgs e)
@@ -302,7 +299,6 @@ namespace DBADashGUI.AgentJobs
         private void UndefinedToolStripMenuItem_Click(object sender, EventArgs e)
         {
             RefreshData();
-
         }
 
         private void OKToolStripMenuItem_Click(object sender, EventArgs e)
@@ -393,4 +389,3 @@ namespace DBADashGUI.AgentJobs
         }
     }
 }
-

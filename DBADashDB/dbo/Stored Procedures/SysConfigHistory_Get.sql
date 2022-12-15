@@ -1,7 +1,8 @@
 ﻿CREATE PROC dbo.SysConfigHistory_Get(
 	@InstanceIDs VARCHAR(MAX)=NULL,
 	@FromDate DATETIME2=NULL,
-	@ToDate DATETIME2=NULL
+	@ToDate DATETIME2=NULL,
+	@ShowHidden BIT=1
 )
 AS
 DECLARE @Instances TABLE(
@@ -49,4 +50,5 @@ WHERE EXISTS(SELECT 1 FROM @Instances t WHERE I.InstanceID = t.InstanceID)
 AND I.IsActive=1
 AND (h.ValidTo>=@FromDate OR @FromDate IS NULL)
 AND (h.ValidTo<=@ToDate OR @ToDate IS NULL)
+AND (I.ShowInSummary=1 OR @ShowHidden=1)
 ORDER BY h.ValidTo DESC;

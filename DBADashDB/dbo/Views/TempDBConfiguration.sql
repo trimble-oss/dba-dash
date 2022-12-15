@@ -22,7 +22,8 @@ SELECT i.InstanceID,
 		CAST(ISNULL(T.T1117,0) AS BIT) AS T1117,
 		CAST(ISNULL(T.T1118,0) AS BIT) AS T1118,
 		CASE WHEN I.ProductMajorVersion<13 THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END AS IsTraceFlagRequired,
-		I.IsTempDBMetadataMemoryOptimized
+		i.IsTempDBMetadataMemoryOptimized,
+		i.ShowInSummary
 FROM dbo.InstanceInfo i 
 JOIN dbo.Databases d ON d.InstanceID = i.InstanceID
 JOIN dbo.DBFiles f ON d.DatabaseID = f.DatabaseID
@@ -44,7 +45,8 @@ GROUP BY	i.Instance,
 			d.DatabaseID, 
 			T.T1118,
 			T.T1117,
-			I.ProductMajorVersion,
+			i.ProductMajorVersion,
 			calc.MinimumRecommendedFiles,
-			I.IsTempDBMetadataMemoryOptimized,
-			I.cpu_count
+			i.IsTempDBMetadataMemoryOptimized,
+			i.cpu_count,
+			i.ShowInSummary

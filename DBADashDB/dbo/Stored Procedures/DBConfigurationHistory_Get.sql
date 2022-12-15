@@ -1,7 +1,8 @@
 ﻿CREATE PROC dbo.DBConfigurationHistory_Get(
 	@InstanceIDs VARCHAR(MAX)=NULL,
 	@ConfiguredOnly BIT=0,
-	@DatabaseID INT=NULL
+	@DatabaseID INT=NULL,
+	@ShowHidden BIT=1
 )
 AS
 DECLARE @Instances TABLE(
@@ -39,8 +40,13 @@ FROM dbo.DBConfigHistory H
 JOIN dbo.DBConfigOptions CO ON H.configuration_id = CO.configuration_id
 JOIN dbo.Databases D ON D.DatabaseID = H.DatabaseID
 JOIN dbo.Instances I ON I.InstanceID = D.InstanceID
-WHERE EXISTS(SELECT 1 FROM @Instances t WHERE I.InstanceID = t.InstanceID)
+WHERE EXISTS(
+			SELECT 1 
+			FROM @Instances t 
+			WHERE I.InstanceID = t.InstanceID
+			)
 AND I.IsActive=1
 AND D.IsActive=1
 AND (D.DatabaseID = @DatabaseID OR @DatabaseID IS NULL)
+AND (I.ShowInSummary=1 OR @ShowHidden=1)
 ORDER BY H.ValidTo DESC

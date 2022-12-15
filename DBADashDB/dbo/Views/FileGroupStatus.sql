@@ -44,6 +44,7 @@ WITH F AS (
 	       FilegroupAutogrowStatus,
            type,
            type_desc,
+           ShowInSummary,
 	       ROW_NUMBER() OVER(PARTITION BY DatabaseID,data_space_id ORDER BY FileID) rnum
     FROM dbo.FileStatus
 ) 
@@ -88,8 +89,9 @@ SELECT NULL AS FileID,
 	   F.PctMaxSizeStatus,
 	   F.MaxSizeExcludedReason,
 	   F.FilegroupAutogrowFileCount,
-	   FilegroupAutogrowStatus,
-       type,
-       type_desc
+	   F.FilegroupAutogrowStatus,
+       F.type,
+       F.type_desc,
+       F.ShowInSummary
 FROM F 
 WHERE rnum=1

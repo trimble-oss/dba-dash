@@ -11,7 +11,6 @@ namespace DBADashGUI.Backups
 {
     public partial class BackupsControl : UserControl, INavigation, ISetContext
     {
-
         public bool IncludeCritical
         {
             get
@@ -35,6 +34,7 @@ namespace DBADashGUI.Backups
                 warningToolStripMenuItem.Checked = value;
             }
         }
+
         public bool IncludeNA
         {
             get
@@ -46,6 +46,7 @@ namespace DBADashGUI.Backups
                 undefinedToolStripMenuItem.Checked = value;
             }
         }
+
         public bool IncludeOK
         {
             get
@@ -101,7 +102,6 @@ namespace DBADashGUI.Backups
                     RefreshBackupsLocal();
                 }
             }
-
         }
 
         private void RefreshLastBackup()
@@ -149,9 +149,7 @@ namespace DBADashGUI.Backups
                 dgvBackups.DataSource = dtBackups;
                 dgvBackups.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
             }
-
         }
-
 
         private void RefreshBackupsLocal()
         {
@@ -167,6 +165,7 @@ namespace DBADashGUI.Backups
                 cmd.Parameters.AddWithValue("IncludeWarning", IncludeWarning);
                 cmd.Parameters.AddWithValue("IncludeNA", IncludeNA);
                 cmd.Parameters.AddWithValue("IncludeOK", IncludeOK);
+                cmd.Parameters.AddWithValue("ShowHidden", InstanceIDs.Count == 1 || Common.ShowHidden);
                 SqlDataAdapter da = new(cmd);
                 DataTable dtBackups = new();
                 da.Fill(dtBackups);
@@ -249,6 +248,7 @@ namespace DBADashGUI.Backups
             {
                 cn.Open();
                 cmd.Parameters.AddWithValue("InstanceIDs", InstanceIDs.AsDataTable());
+                cmd.Parameters.AddWithValue("ShowHidden", InstanceIDs.Count == 1 || Common.ShowHidden);
                 SqlDataAdapter da = new(cmd);
                 DataTable dt = new();
                 da.Fill(dt);
@@ -323,8 +323,6 @@ namespace DBADashGUI.Backups
             InitializeComponent();
         }
 
-
-
         private void DgvBackups_RowsAdded(object sender, DataGridViewRowsAddedEventArgs e)
         {
             if (dgvBackups.Columns.Contains("LastFull"))
@@ -370,7 +368,6 @@ namespace DBADashGUI.Backups
                     }
                 }
             }
-
         }
 
         private void DgvBackups_CellContentClick(object sender, DataGridViewCellEventArgs e)
@@ -403,7 +400,6 @@ namespace DBADashGUI.Backups
             {
                 RefreshDataLocal();
             }
-
         }
 
         private void ConfigureRootThresholdsToolStripMenuItem_Click(object sender, EventArgs e)
@@ -423,7 +419,6 @@ namespace DBADashGUI.Backups
         {
             RefreshDataLocal();
         }
-
 
         private void TsRefresh_Click(object sender, EventArgs e)
         {
@@ -448,7 +443,6 @@ namespace DBADashGUI.Backups
         {
             for (Int32 idx = e.RowIndex; idx < e.RowIndex + e.RowCount; idx += 1)
             {
-
                 var row = (DataRowView)dgvSummary.Rows[idx].DataBoundItem;
                 var snapshotStatus = (DBADashStatus.DBADashStatusEnum)row["SnapshotAgeStatus"];
 
@@ -473,7 +467,6 @@ namespace DBADashGUI.Backups
                     dgvSummary.Rows[idx].Cells[col].SetStatusColor(value > 0 ? DBADashStatusEnum.Critical : DBADashStatusEnum.NA);
                 }
                 dgvSummary.Rows[idx].Cells["Configure"].Style.Font = Convert.ToBoolean(row["InstanceThresholdConfiguration"]) ? new Font(dgvSummary.Font, FontStyle.Bold) : new Font(dgvSummary.Font, FontStyle.Regular);
-
             }
         }
 

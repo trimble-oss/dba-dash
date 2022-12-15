@@ -1,5 +1,6 @@
 ﻿CREATE PROC dbo.DBSummary_Get(
-	@InstanceIDs VARCHAR(MAX)=NULL
+	@InstanceIDs VARCHAR(MAX)=NULL,
+	@ShowHidden BIT=1
 )
 AS
 SELECT I.InstanceGroupName AS Instance, 
@@ -21,6 +22,13 @@ FROM dbo.Instances I
 JOIN dbo.Databases D ON I.InstanceID = D.InstanceID
 WHERE I.IsActive=1
 AND D.IsActive=1
-AND (EXISTS(SELECT 1 FROM STRING_SPLIT(@InstanceIDs,',') ss WHERE ss.value = I.InstanceID)
-		OR @InstanceIDs IS NULL)
+AND (
+	EXISTS	(
+			SELECT 1 
+			FROM STRING_SPLIT(@InstanceIDs,',') ss 
+			WHERE ss.value = I.InstanceID
+			)
+		OR @InstanceIDs IS NULL
+	)
+AND (I.ShowInSummary=1 OR @ShowHidden=1)
 GROUP BY I.InstanceGroupName

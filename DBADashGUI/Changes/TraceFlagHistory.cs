@@ -16,7 +16,6 @@ namespace DBADashGUI.Changes
 
         private List<Int32> InstanceIDs;
 
-
         // Pivot data returned by TraceFlags_Get by trace flag
         private DataTable GetTraceFlags()
         {
@@ -27,6 +26,8 @@ namespace DBADashGUI.Changes
             {
                 cn.Open();
                 cmd.Parameters.AddWithValue("@InstanceIDs", string.Join(",", InstanceIDs));
+                cmd.Parameters.AddWithValue("ShowHidden", InstanceIDs.Count == 1 ? true : Common.ShowHidden);
+
                 using (var rdr = cmd.ExecuteReader())
                 {
                     string instance = "";
@@ -89,6 +90,8 @@ namespace DBADashGUI.Changes
             {
                 cn.Open();
                 cmd.Parameters.AddWithValue("@InstanceIDs", string.Join(",", InstanceIDs));
+                cmd.Parameters.AddWithValue("ShowHidden", InstanceIDs.Count == 1 ? true : Common.ShowHidden);
+
                 DataTable dt = new();
                 da.Fill(dt);
                 DateHelper.ConvertUTCToAppTimeZone(ref dt);
@@ -133,6 +136,4 @@ namespace DBADashGUI.Changes
             Common.PromptSaveDataGridView(ref dgv);
         }
     }
-
-
 }

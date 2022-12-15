@@ -1,5 +1,6 @@
 ﻿CREATE PROC dbo.AzureDBElasticPoolHistory_Get(
-	@InstanceIDs VARCHAR(MAX)
+	@InstanceIDs VARCHAR(MAX),
+    @ShowHidden BIT=1
 )
 AS
 SELECT PH.PoolID,
@@ -14,5 +15,10 @@ SELECT PH.PoolID,
 FROM dbo.AzureDBElasticPoolHistory PH 
 JOIN dbo.AzureDBElasticPool P ON P.PoolID = PH.PoolID
 JOIN dbo.Instances I ON P.InstanceID = I.InstanceID
-WHERE EXISTS(SELECT 1 FROM STRING_SPLIT(@InstanceIDs,',') ss WHERE ss.value = I.InstanceID)
+WHERE EXISTS(
+            SELECT 1 
+            FROM STRING_SPLIT(@InstanceIDs,',') ss 
+            WHERE ss.value = I.InstanceID
+            )
+AND (I.ShowInSummary=1 OR @ShowHidden=1)
 ORDER BY PH.ValidTo DESC

@@ -43,7 +43,7 @@ namespace DBADashGUI.Changes
             {
                 cn.Open();
                 cmd.Parameters.AddWithValue("@InstanceIDs", string.Join(",", InstanceIDs));
-
+                cmd.Parameters.AddWithValue("ShowHidden", InstanceIDs.Count == 1 ? true : Common.ShowHidden);
                 DataTable dt = new();
                 da.Fill(dt);
                 return dt;
@@ -100,9 +100,7 @@ namespace DBADashGUI.Changes
             }
             dgvAlertsConfig.Rows.AddRange(rows.ToArray());
             dgvAlertsConfig.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
-
         }
-
 
         private DataTable GetAlerts()
         {
@@ -111,7 +109,7 @@ namespace DBADashGUI.Changes
             using (var da = new SqlDataAdapter(cmd))
             {
                 cmd.Parameters.AddWithValue("@InstanceIDs", string.Join(",", InstanceIDs));
-
+                cmd.Parameters.AddWithValue("ShowHidden", InstanceIDs.Count == 1 ? true : Common.ShowHidden);
                 DataTable dt = new();
                 da.Fill(dt);
                 DateHelper.ConvertUTCToAppTimeZone(ref dt);
@@ -121,11 +119,9 @@ namespace DBADashGUI.Changes
 
         private void RefreshAlerts()
         {
-
             DataTable dt = GetAlerts();
             dgvAlerts.DataSource = dt;
             dgvAlerts.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
-
         }
 
         private void PivotByAlertNameToolStripMenuItem_Click(object sender, EventArgs e)

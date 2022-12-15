@@ -1,5 +1,6 @@
 ﻿CREATE PROC dbo.OSLoadedModuleSummary_Get(
-	@InstanceIDs IDs READONLY
+	@InstanceIDs IDs READONLY,
+	@ShowHidden BIT=1
 )
 AS
 SELECT I.InstanceID,
@@ -29,4 +30,5 @@ AND EXISTS(	SELECT *
 			FROM @InstanceIDs IDs
 			WHERE IDs.ID = I.InstanceID
 			)
+AND (I.ShowInSummary=1 OR @ShowHidden=1)
 ORDER BY Loaded.Status 

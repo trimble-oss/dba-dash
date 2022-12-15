@@ -1,5 +1,6 @@
 ﻿CREATE PROC dbo.DatabaseMirroringSummary_Get(
-		@InstanceIDs VARCHAR(MAX)=NULL
+		@InstanceIDs VARCHAR(MAX)=NULL,
+		@ShowHidden BIT=1
 )
 AS
 SELECT I.InstanceDisplayName AS Instance, 
@@ -23,6 +24,7 @@ LEFT JOIN dbo.CollectionDatesStatus CD ON DM.InstanceID = CD.InstanceID AND CD.R
 WHERE EXISTS(SELECT 1 FROM STRING_SPLIT(@InstanceIDs,',') ss WHERE ss.value = I.InstanceID
 		UNION ALL
 		SELECT 1 WHERE @InstanceIDs IS NULL)
+AND (I.ShowInSummary=1 OR @ShowHidden=1)
 GROUP BY I.InstanceDisplayName,
 		CD.SnapshotAge,
 		CD.Status

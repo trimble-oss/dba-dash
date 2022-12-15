@@ -4,7 +4,8 @@
     @IncludeCritical BIT=1,
 	@IncludeWarning BIT=1,
 	@IncludeNA BIT=0,
-	@IncludeOK BIT=0
+	@IncludeOK BIT=0,
+    @ShowHidden BIT=1
 )
 AS
 SELECT ICI.InstanceID,
@@ -38,7 +39,7 @@ SELECT ICI.InstanceID,
        ICI.ident_estimated_days,
        ICI.row_estimated_days,
        ICI.estimated_days,
-       ICI.estimated_date 
+       ICI.estimated_date
 FROM dbo.IdentityColumnsInfo ICI
 WHERE EXISTS(
 		SELECT 1 
@@ -50,3 +51,4 @@ AND ICI.IdentityStatus IN(  CASE WHEN @IncludeCritical=1 THEN 1 ELSE NULL END,
                             CASE WHEN @IncludeWarning=1 THEN 2 ELSE NULL END,
                             CASE WHEN @IncludeNA=1 THEN 3 ELSE NULL END,
                             CASE WHEN @IncludeOK=1 THEN 4 ELSE NULL END)
+AND (ICI.ShowInSummary=1 OR @ShowHidden=1)

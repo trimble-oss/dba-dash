@@ -1,5 +1,6 @@
 ﻿CREATE PROC dbo.TagReport_Get(
-	@InstanceIDs IDs READONLY
+	@InstanceIDs IDs READONLY,
+	@ShowHidden BIT=1
 )
 AS
 /*
@@ -25,6 +26,7 @@ WITH T AS (
 	JOIN dbo.InstanceIDsTags IT ON T.TagID = IT.TagID
 	JOIN dbo.Instances I ON I.InstanceID = IT.InstanceID
 	WHERE I.IsActive=1
+	' + CASE WHEN @ShowHidden=1 THEN '' ELSE 'AND I.ShowInSummary=1' END + '
 	' + CASE WHEN EXISTS(SELECT 1 FROM @InstanceIDs) THEN 'AND EXISTS(SELECT 1 
 				FROM @InstanceIDs T 
 				WHERE T.ID = I.InstanceID

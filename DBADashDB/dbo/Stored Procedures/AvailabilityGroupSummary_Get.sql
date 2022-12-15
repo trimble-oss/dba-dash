@@ -1,5 +1,6 @@
 ﻿CREATE PROC dbo.AvailabilityGroupSummary_Get(
-    @InstanceIDs VARCHAR(MAX)
+    @InstanceIDs VARCHAR(MAX),
+    @ShowHidden BIT=1
 )
 AS
 SELECT I.InstanceID,
@@ -35,4 +36,5 @@ WHERE EXISTS(SELECT 1 FROM STRING_SPLIT(@InstanceIDs,',') ss WHERE ss.value = I.
 		UNION ALL
 		SELECT 1 WHERE @InstanceIDs IS NULL)
 AND D.IsActive=1
+AND (I.ShowInSummary = 1 OR  @ShowHidden = 1)
 GROUP BY I.Instance,I.InstanceID,I.InstanceDisplayName;

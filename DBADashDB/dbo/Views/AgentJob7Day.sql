@@ -38,7 +38,8 @@ SELECT I.InstanceID,
 	CASE WHEN J.LastFailed > ISNULL(J.LastSucceeded,'19000101') THEN 1 ELSE 0 END AS IsLastFail,
 	agg.MaxDurationSec,
 	agg.AvgDurationSec,
-	J.enabled
+	J.enabled,
+	I.ShowInSummary
 FROM dbo.Instances I 
 JOIN  dbo.Jobs J ON I.InstanceID = J.InstanceID
 LEFT JOIN agg ON J.job_id = agg.job_id AND J.InstanceID = agg.InstanceID

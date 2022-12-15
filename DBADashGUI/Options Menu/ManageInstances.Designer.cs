@@ -32,10 +32,6 @@
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(ManageInstances));
             this.dgv = new System.Windows.Forms.DataGridView();
-            this.colInstance = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colIsAzure = new System.Windows.Forms.DataGridViewCheckBoxColumn();
-            this.colDeleteRestore = new System.Windows.Forms.DataGridViewLinkColumn();
-            this.colShowInSummary = new System.Windows.Forms.DataGridViewCheckBoxColumn();
             this.dataGridViewTextBoxColumn1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dataGridViewTextBoxColumn2 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
@@ -48,6 +44,10 @@
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
             this.tsFilterError = new System.Windows.Forms.ToolStripStatusLabel();
             this.timer1 = new System.Windows.Forms.Timer(this.components);
+            this.colInstance = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colIsAzure = new System.Windows.Forms.DataGridViewCheckBoxColumn();
+            this.colDeleteRestore = new System.Windows.Forms.DataGridViewLinkColumn();
+            this.colShowInSummary = new System.Windows.Forms.DataGridViewCheckBoxColumn();
             ((System.ComponentModel.ISupportInitialize)(this.dgv)).BeginInit();
             this.toolStrip1.SuspendLayout();
             this.statusStrip1.SuspendLayout();
@@ -76,46 +76,6 @@
             this.dgv.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.Dgv_CellContentClick);
             this.dgv.CellValueChanged += new System.Windows.Forms.DataGridViewCellEventHandler(this.Dgv_CellValueChanged);
             this.dgv.RowsAdded += new System.Windows.Forms.DataGridViewRowsAddedEventHandler(this.Dgv_RowsAdded);
-            // 
-            // colInstance
-            // 
-            this.colInstance.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
-            this.colInstance.DataPropertyName = "InstanceDisplayName";
-            this.colInstance.HeaderText = "Instance";
-            this.colInstance.MinimumWidth = 6;
-            this.colInstance.Name = "colInstance";
-            this.colInstance.ReadOnly = true;
-            // 
-            // colIsAzure
-            // 
-            this.colIsAzure.DataPropertyName = "IsAzure";
-            dataGridViewCellStyle1.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
-            dataGridViewCellStyle1.BackColor = System.Drawing.SystemColors.ControlLight;
-            dataGridViewCellStyle1.NullValue = false;
-            this.colIsAzure.DefaultCellStyle = dataGridViewCellStyle1;
-            this.colIsAzure.HeaderText = "Is Azure?";
-            this.colIsAzure.MinimumWidth = 6;
-            this.colIsAzure.Name = "colIsAzure";
-            this.colIsAzure.ReadOnly = true;
-            this.colIsAzure.Resizable = System.Windows.Forms.DataGridViewTriState.True;
-            this.colIsAzure.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
-            this.colIsAzure.Width = 80;
-            // 
-            // colDeleteRestore
-            // 
-            this.colDeleteRestore.HeaderText = "Delete/Restore";
-            this.colDeleteRestore.MinimumWidth = 6;
-            this.colDeleteRestore.Name = "colDeleteRestore";
-            this.colDeleteRestore.Width = 109;
-            // 
-            // colShowInSummary
-            // 
-            this.colShowInSummary.DataPropertyName = "ShowInSummary";
-            this.colShowInSummary.HeaderText = "Show In Summary?";
-            this.colShowInSummary.MinimumWidth = 6;
-            this.colShowInSummary.Name = "colShowInSummary";
-            this.colShowInSummary.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
-            this.colShowInSummary.Width = 125;
             // 
             // dataGridViewTextBoxColumn1
             // 
@@ -181,7 +141,7 @@
             this.showActiveToolStripMenuItem.CheckOnClick = true;
             this.showActiveToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
             this.showActiveToolStripMenuItem.Name = "showActiveToolStripMenuItem";
-            this.showActiveToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            this.showActiveToolStripMenuItem.Size = new System.Drawing.Size(185, 26);
             this.showActiveToolStripMenuItem.Text = "Show Active";
             this.showActiveToolStripMenuItem.Click += new System.EventHandler(this.Filter_Click);
             // 
@@ -191,7 +151,7 @@
             this.showDeletedToolStripMenuItem.CheckOnClick = true;
             this.showDeletedToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
             this.showDeletedToolStripMenuItem.Name = "showDeletedToolStripMenuItem";
-            this.showDeletedToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            this.showDeletedToolStripMenuItem.Size = new System.Drawing.Size(185, 26);
             this.showDeletedToolStripMenuItem.Text = "Show Deleted";
             this.showDeletedToolStripMenuItem.Click += new System.EventHandler(this.Filter_Click);
             // 
@@ -201,7 +161,7 @@
             this.showAzureToolStripMenuItem.CheckOnClick = true;
             this.showAzureToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
             this.showAzureToolStripMenuItem.Name = "showAzureToolStripMenuItem";
-            this.showAzureToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            this.showAzureToolStripMenuItem.Size = new System.Drawing.Size(185, 26);
             this.showAzureToolStripMenuItem.Text = "Show Azure";
             this.showAzureToolStripMenuItem.Click += new System.EventHandler(this.Filter_Click);
             // 
@@ -227,6 +187,47 @@
             // 
             this.timer1.Interval = 1000;
             this.timer1.Tick += new System.EventHandler(this.Timer1_Tick);
+            // 
+            // colInstance
+            // 
+            this.colInstance.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
+            this.colInstance.DataPropertyName = "InstanceDisplayName";
+            this.colInstance.HeaderText = "Instance";
+            this.colInstance.MinimumWidth = 6;
+            this.colInstance.Name = "colInstance";
+            this.colInstance.ReadOnly = true;
+            // 
+            // colIsAzure
+            // 
+            this.colIsAzure.DataPropertyName = "IsAzure";
+            dataGridViewCellStyle1.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleCenter;
+            dataGridViewCellStyle1.BackColor = System.Drawing.SystemColors.ControlLight;
+            dataGridViewCellStyle1.NullValue = false;
+            this.colIsAzure.DefaultCellStyle = dataGridViewCellStyle1;
+            this.colIsAzure.HeaderText = "Is Azure?";
+            this.colIsAzure.MinimumWidth = 6;
+            this.colIsAzure.Name = "colIsAzure";
+            this.colIsAzure.ReadOnly = true;
+            this.colIsAzure.Resizable = System.Windows.Forms.DataGridViewTriState.True;
+            this.colIsAzure.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
+            this.colIsAzure.Width = 80;
+            // 
+            // colDeleteRestore
+            // 
+            this.colDeleteRestore.HeaderText = "Delete/Restore";
+            this.colDeleteRestore.MinimumWidth = 6;
+            this.colDeleteRestore.Name = "colDeleteRestore";
+            this.colDeleteRestore.Width = 109;
+            // 
+            // colShowInSummary
+            // 
+            this.colShowInSummary.DataPropertyName = "ShowInSummary";
+            this.colShowInSummary.HeaderText = "Show In Summary?";
+            this.colShowInSummary.MinimumWidth = 6;
+            this.colShowInSummary.Name = "colShowInSummary";
+            this.colShowInSummary.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
+            this.colShowInSummary.ToolTipText = "Uncheck to hide instance from Summary tab and other tabs at root level";
+            this.colShowInSummary.Width = 125;
             // 
             // ManageInstances
             // 
@@ -266,10 +267,10 @@
         private System.Windows.Forms.ToolStripDropDownButton toolStripDropDownButton1;
         private System.Windows.Forms.ToolStripMenuItem showActiveToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem showDeletedToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem showAzureToolStripMenuItem;
         private System.Windows.Forms.DataGridViewTextBoxColumn colInstance;
         private System.Windows.Forms.DataGridViewCheckBoxColumn colIsAzure;
         private System.Windows.Forms.DataGridViewLinkColumn colDeleteRestore;
         private System.Windows.Forms.DataGridViewCheckBoxColumn colShowInSummary;
-        private System.Windows.Forms.ToolStripMenuItem showAzureToolStripMenuItem;
     }
 }

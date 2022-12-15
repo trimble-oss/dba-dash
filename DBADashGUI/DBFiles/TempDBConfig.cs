@@ -5,6 +5,7 @@ using System.Data;
 using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
+
 namespace DBADashGUI.DBFiles
 {
     public partial class TempDBConfig : UserControl, ISetContext
@@ -13,6 +14,7 @@ namespace DBADashGUI.DBFiles
         {
             InitializeComponent();
         }
+
         private List<Int32> InstanceIDs;
 
         public void SetContext(DBADashContext context)
@@ -30,6 +32,7 @@ namespace DBADashGUI.DBFiles
             {
                 cn.Open();
                 cmd.Parameters.AddWithValue("@InstanceIDs", string.Join(",", InstanceIDs));
+                cmd.Parameters.AddWithValue("ShowHidden", InstanceIDs.Count == 1 ? true : Common.ShowHidden);
 
                 DataTable dt = new();
                 da.Fill(dt);
@@ -37,7 +40,6 @@ namespace DBADashGUI.DBFiles
                 dgvTempDB.DataSource = dt;
                 dgvTempDB.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
             }
-
         }
 
         private void TsCopy_Click(object sender, EventArgs e)
@@ -73,7 +75,6 @@ namespace DBADashGUI.DBFiles
                 Color logFilesColor = (Int32)row["NumberOfLogFiles"] > 1 ? DashColors.Warning : DashColors.Success;
                 dgvTempDB.Rows[idx].Cells[colTempDBMemoryOpt.Index].SetStatusColor(memoryOptimizedColor);
                 dgvTempDB.Rows[idx].Cells[colNumberOfLogFiles.Index].SetStatusColor(logFilesColor);
-
             }
         }
 

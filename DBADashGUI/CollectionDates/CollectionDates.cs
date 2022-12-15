@@ -41,6 +41,7 @@ namespace DBADashGUI.CollectionDates
                 warningToolStripMenuItem.Checked = value;
             }
         }
+
         public bool IncludeNA
         {
             get
@@ -52,6 +53,7 @@ namespace DBADashGUI.CollectionDates
                 undefinedToolStripMenuItem.Checked = value;
             }
         }
+
         public bool IncludeOK
         {
             get
@@ -63,7 +65,6 @@ namespace DBADashGUI.CollectionDates
                 OKToolStripMenuItem.Checked = value;
             }
         }
-
 
         private DataTable GetCollectionDates()
         {
@@ -77,7 +78,7 @@ namespace DBADashGUI.CollectionDates
                 cmd.Parameters.AddWithValue("IncludeWarning", IncludeWarning);
                 cmd.Parameters.AddWithValue("IncludeNA", IncludeNA);
                 cmd.Parameters.AddWithValue("IncludeOK", IncludeOK);
-
+                cmd.Parameters.AddWithValue("ShowHidden", InstanceIDs.Count == 1 || Common.ShowHidden);
                 DataTable dt = new();
                 da.Fill(dt);
                 DateHelper.ConvertUTCToAppTimeZone(ref dt);
@@ -159,7 +160,6 @@ namespace DBADashGUI.CollectionDates
                 var row = (DataRowView)dgvCollectionDates.Rows[e.RowIndex].DataBoundItem;
                 if (dgvCollectionDates.Columns[e.ColumnIndex].HeaderText == "Configure Instance")
                 {
-
                     var InstanceID = (Int32)row["InstanceID"];
                     ConfigureThresholds(InstanceID, row);
                 }

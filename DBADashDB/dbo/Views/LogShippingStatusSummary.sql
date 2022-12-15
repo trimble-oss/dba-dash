@@ -14,11 +14,13 @@ SELECT LSS.InstanceID,
 	   ISNULL(MIN(NULLIF(LSS.SnapshotAgeStatus,3)),3) AS SnapshotAgeStatus,
 	   MIN(LSS.backup_start_date_utc) MinDateOfLastBackupRestored,
 	   MIN(LSS.restore_date_utc) MinLastRestoreCompleted,
-	   CASE WHEN T.InstanceID IS NULL THEN CAST(0 AS BIT) ELSE CAST(1 AS BIT) END as InstanceLevelThreshold,
-	   SUM(CASE WHEN LSS.ThresholdConfiguredLevel='Database' THEN 1 ELSE 0 END) as DatabaseLevelThresholds
+	   CASE WHEN T.InstanceID IS NULL THEN CAST(0 AS BIT) ELSE CAST(1 AS BIT) END AS InstanceLevelThreshold,
+	   SUM(CASE WHEN LSS.ThresholdConfiguredLevel='Database' THEN 1 ELSE 0 END) AS DatabaseLevelThresholds,
+	   LSS.ShowInSummary
 FROM dbo.LogShippingStatus LSS
 LEFT JOIN dbo.LogRestoreThresholds T ON LSS.InstanceID = T.InstanceID AND T.DatabaseID=-1
 WHERE LSS.Status<> 3
 GROUP BY LSS.InstanceID,
 		 LSS.InstanceDisplayName,
-		 T.InstanceID
+		 T.InstanceID,
+		 LSS.ShowInSummary

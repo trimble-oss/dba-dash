@@ -1,9 +1,10 @@
 ﻿CREATE PROC dbo.LastGoodCheckDB_Get(
-		@InstanceIDs VARCHAR(MAX)=NULL,
-		@IncludeCritical BIT=1,
-		@IncludeWarning BIT=1,
-		@IncludeNA BIT=0,
-		@IncludeOK BIT=0
+        @InstanceIDs VARCHAR(MAX)=NULL,
+        @IncludeCritical BIT=1,
+        @IncludeWarning BIT=1,
+        @IncludeNA BIT=0,
+        @IncludeOK BIT=0,
+        @ShowHidden BIT=1
 )
 AS
 DECLARE @StatusSQL NVARCHAR(MAX)
@@ -41,6 +42,7 @@ CASE WHEN @InstanceIDs IS NULL THEN '' ELSE 'AND EXISTS (SELECT 1
 			FROM STRING_SPLIT(@InstanceIDs,'','') ss
 			WHERE ss.value = LG.InstanceID
 			)' END + '
-' + @StatusSQL 
+' + @StatusSQL + '
+' + CASE WHEN @ShowHidden=1 THEN '' ELSE 'AND LG.ShowInSummary=1' END
 
 EXEC sp_executesql @SQL,N'@InstanceIDs VARCHAR(MAX)',@InstanceIDs

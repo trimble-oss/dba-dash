@@ -14,6 +14,7 @@ namespace DBADashGUI.Checks
         {
             InitializeComponent();
         }
+
         private List<Int32> InstanceIDs;
 
         public bool IncludeCritical
@@ -39,6 +40,7 @@ namespace DBADashGUI.Checks
                 warningToolStripMenuItem.Checked = value;
             }
         }
+
         public bool IncludeNA
         {
             get
@@ -50,6 +52,7 @@ namespace DBADashGUI.Checks
                 undefinedToolStripMenuItem.Checked = value;
             }
         }
+
         public bool IncludeOK
         {
             get
@@ -135,7 +138,6 @@ namespace DBADashGUI.Checks
         private string context = null;
         private string test = null;
 
-
         public void SetContext(DBADashContext context)
         {
             InstanceIDs = context.InstanceIDs.ToList();
@@ -156,6 +158,7 @@ namespace DBADashGUI.Checks
 
             cn.Open();
             cmd.Parameters.AddWithValue("InstanceIDs", String.Join(",", InstanceIDs));
+
             using var rdr = cmd.ExecuteReader();
             Int32 i = 0;
             while (rdr.Read())
@@ -172,7 +175,6 @@ namespace DBADashGUI.Checks
             }
             contextToolStripMenuItem.DropDownItems.Add(new ToolStripSeparator());
             contextToolStripMenuItem.DropDownItems.Add(ddCustomContext);
-
         }
 
         private void DdCustomContext_Click(object sender, EventArgs e)
@@ -192,8 +194,8 @@ namespace DBADashGUI.Checks
                     RefreshCustomChecks();
                 }
             }
-
         }
+
         private void DdCustomTest_Click(object sender, EventArgs e)
         {
             var custom = (ToolStripMenuItem)sender;
@@ -241,10 +243,7 @@ namespace DBADashGUI.Checks
             ddCustomTest = new ToolStripMenuItem("Custom");
             ddCustomTest.Click += DdCustomTest_Click;
             testToolStripMenuItem.DropDownItems.Add(ddCustomTest);
-
         }
-
-
 
         private void DdTest_Click(object sender, EventArgs e)
         {
@@ -252,7 +251,6 @@ namespace DBADashGUI.Checks
             if (itm.Checked)
             {
                 Test = itm.Text;
-
             }
             else
             {
@@ -282,7 +280,6 @@ namespace DBADashGUI.Checks
             RefreshCustomChecks();
             Context = context;
             Test = test;
-
         }
 
         private void RefreshCustomChecks()
@@ -306,6 +303,7 @@ namespace DBADashGUI.Checks
                 {
                     cmd.Parameters.AddWithValue("Test", test);
                 }
+                cmd.Parameters.AddWithValue("ShowHidden", InstanceIDs.Count == 1 ? true : Common.ShowHidden);
                 DataTable dt = new();
                 da.Fill(dt);
                 DateHelper.ConvertUTCToAppTimeZone(ref dt);
@@ -314,7 +312,6 @@ namespace DBADashGUI.Checks
                 HistoryView(false);
                 dgvCustom.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
             }
-
         }
 
         private void HistoryView(bool isHistory)
@@ -358,7 +355,6 @@ namespace DBADashGUI.Checks
             RefreshCustomChecks();
         }
 
-
         private void StatusToolStripMenuItem_Click(object sender, EventArgs e)
         {
             RefreshCustomChecks();
@@ -371,7 +367,6 @@ namespace DBADashGUI.Checks
                 var row = (DataRowView)dgvCustom.Rows[idx].DataBoundItem;
                 var status = (DBADashStatus.DBADashStatusEnum)Convert.ToInt32(row["Status"]);
                 dgvCustom.Rows[idx].Cells[colStatus.Index].SetStatusColor(status);
-
             }
         }
 
@@ -429,6 +424,4 @@ namespace DBADashGUI.Checks
             Common.PromptSaveDataGridView(ref dgvCustom);
         }
     }
-
-
 }

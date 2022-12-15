@@ -1,5 +1,6 @@
 ﻿CREATE PROC dbo.RunningQueriesServerSummary_Get(
-	@InstanceIDs NVARCHAR(MAX)=NULL
+	@InstanceIDs NVARCHAR(MAX)=NULL,
+	@ShowHidden BIT=1
 )
 AS
 DECLARE @Instances TABLE(
@@ -44,6 +45,7 @@ WITH T AS (
 	WHERE EXISTS(SELECT 1 FROM @Instances t WHERE t.InstanceID = I.InstanceID)
 	AND S.SnapshotDateUTC>=DATEADD(mi,-15,GETUTCDATE())
 	AND S.SnapshotDateUTC< DATEADD(mi,1,GETUTCDATE())
+	AND (I.ShowInSummary=1 OR @ShowHidden=1)
 )
 SELECT T.InstanceID,
        T.InstanceDisplayName,

@@ -6,7 +6,8 @@
 	@IncludeNA BIT=0,
 	@IncludeOK BIT=0,
 	@JobName SYSNAME=NULL,
-    @JobID UNIQUEIDENTIFIER=NULL
+    @JobID UNIQUEIDENTIFIER=NULL,
+    @ShowHidden BIT=1
 )
 AS
 DECLARE @Instances IDs
@@ -75,6 +76,7 @@ WHERE J.JobStatus IN(' + @StatusesString + ')
 ' + CASE WHEN @InstanceIDs IS NULL THEN '' ELSE 'AND EXISTS(SELECT 1 FROM @Instances I WHERE I.ID = J.InstanceID)' END + '
 ' + CASE WHEN @JobName IS NULL THEN '' ELSE 'AND J.name LIKE @JobName' END + '
 ' + CASE WHEN @JobID IS NULL THEN '' ELSE 'AND J.job_id = @JobID' END + ' 
+' + CASE WHEN @ShowHidden=1 THEN '' ELSE 'AND J.ShowInSummary=1' END + '
 ORDER BY J.IsLastFail DESC,J.LastFailed DESC'
 
 EXEC sp_executesql @SQL,N'@Instances IDs READONLY,@JobName SYSNAME,@JobID UNIQUEIDENTIFIER,@enabled BIT',@Instances,@JobName,@JobID,@enabled

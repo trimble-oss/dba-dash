@@ -81,6 +81,7 @@ namespace DBADashGUI.HA
             using (SqlDataAdapter da = new(cmd))
             {
                 cmd.Parameters.AddWithValue("InstanceIDs", string.Join(",", InstanceIDs));
+                cmd.Parameters.AddWithValue("ShowHidden", InstanceIDs.Count == 1 || Common.ShowHidden);
                 var dt = new DataTable();
                 da.Fill(dt);
                 return dt;

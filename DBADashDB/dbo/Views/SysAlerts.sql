@@ -30,7 +30,8 @@ SELECT I.InstanceID,
         A.category_id,
 		A.performance_condition,
 		CASE WHEN (message_id IN (823,824,825) OR severity >20 ) THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END AS IsCriticalAlert,
-		I.UTCOffset
+		I.UTCOffset,
+        I.ShowInSummary
 FROM dbo.Alerts A 
 JOIN dbo.Instances I ON A.InstanceID = I.InstanceID
 LEFT JOIN dbo.AgentJobs J ON J.InstanceID = I.InstanceID AND J.job_id = A.job_id

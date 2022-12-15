@@ -57,7 +57,6 @@ namespace DBADashGUI.Changes
             dgv.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
         }
 
-
         private static DataTable GetResourceGovernorConfiguration(List<Int32> InstanceIDs)
         {
             using (var cn = new SqlConnection(Common.ConnectionString))
@@ -65,18 +64,19 @@ namespace DBADashGUI.Changes
             using (var da = new SqlDataAdapter(cmd))
             {
                 cmd.Parameters.AddWithValue("InstanceIDs", string.Join(",", InstanceIDs));
+                cmd.Parameters.AddWithValue("ShowHidden", InstanceIDs.Count == 1 ? true : Common.ShowHidden);
                 var dt = new DataTable();
                 da.Fill(dt);
                 return dt;
             }
         }
+
         private static DataTable GetResourceGovernorConfigurationHistory(int InstanceID)
         {
             using (var cn = new SqlConnection(Common.ConnectionString))
             using (var cmd = new SqlCommand("dbo.ResourceGovernorConfigurationHistory_Get", cn) { CommandType = CommandType.StoredProcedure })
             using (var da = new SqlDataAdapter(cmd))
             {
-
                 cmd.Parameters.AddWithValue("InstanceID", InstanceID);
                 var dt = new DataTable();
                 da.Fill(dt);
@@ -92,7 +92,6 @@ namespace DBADashGUI.Changes
                 string script = (string)row["script"];
                 string instance = (string)row["Instance"];
                 Common.ShowCodeViewer(script, "Resource Governor - " + instance);
-
             }
             else if (e.RowIndex >= 0 && e.ColumnIndex == colLinkInstance.Index)
             {

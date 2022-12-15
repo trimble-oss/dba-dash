@@ -52,6 +52,7 @@ namespace DBADashGUI.Performance
                 cmd.Parameters.AddWithValue("DTUHist", histogram);
                 cmd.Parameters.AddWithValue("FromDate", DateRange.FromUTC);
                 cmd.Parameters.AddWithValue("ToDate", DateRange.ToUTC);
+                cmd.Parameters.AddWithValue("ShowHidden", InstanceIDs.Count == 1 || Common.ShowHidden);
                 cmd.CommandTimeout = Properties.Settings.Default.CommandTimeout;
                 SqlDataAdapter da = new(cmd);
                 DataTable dt = new();
@@ -67,7 +68,6 @@ namespace DBADashGUI.Performance
             dgv.DataSource = new DataView(dt);
             GenerateHistogram(dgv);
             dgv.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
-
         }
 
         private void RefreshPool()
@@ -97,6 +97,7 @@ namespace DBADashGUI.Performance
                 cmd.Parameters.AddWithValue("DTUHist", histogram);
                 cmd.Parameters.AddWithValue("FromDate", DateRange.FromUTC);
                 cmd.Parameters.AddWithValue("ToDate", DateRange.ToUTC);
+                cmd.Parameters.AddWithValue("ShowHidden", InstanceIDs.Count == 1 || Common.ShowHidden);
                 cmd.CommandTimeout = Properties.Settings.Default.CommandTimeout;
                 SqlDataAdapter da = new(cmd);
                 DataTable dt = new();
@@ -105,7 +106,7 @@ namespace DBADashGUI.Performance
             }
         }
 
-        readonly string[] histograms = new string[] { "DTU", "CPU", "Data", "Log" };
+        private readonly string[] histograms = new string[] { "DTU", "CPU", "Data", "Log" };
 
         private void GenerateHistogram(DataGridView gv)
         {
@@ -144,7 +145,6 @@ namespace DBADashGUI.Performance
                             r.Height = 100;
                             r.Cells[colName].ToolTipText = sbToolTip.ToString();
                         }
-
                     }
                 }
             }
@@ -162,7 +162,6 @@ namespace DBADashGUI.Performance
         {
             foreach (string histogram in histograms)
             {
-
                 for (int i = 10; i <= 100; i += 10)
                 {
                     var col = new DataGridViewTextBoxColumn()
@@ -175,15 +174,12 @@ namespace DBADashGUI.Performance
                     gv.Columns.Add(col);
                 }
             }
-
         }
-
 
         private void TsRefresh_Click(object sender, EventArgs e)
         {
             RefreshDB();
         }
-
 
         private void TsCopy_Click(object sender, EventArgs e)
         {
@@ -244,7 +240,6 @@ namespace DBADashGUI.Performance
                 var frm = new ResourceGovernanceViewer() { InstanceID = (Int32)row["InstanceID"], DatabaseName = (string)row["DB"] };
                 frm.Show();
             }
-
         }
 
         private void DgvPool_CellContentClick(object sender, DataGridViewCellEventArgs e)
@@ -335,7 +330,6 @@ namespace DBADashGUI.Performance
             {
                 c.Visible = true;
             }
-
         }
 
         private static Color GetStatusColour(object value)

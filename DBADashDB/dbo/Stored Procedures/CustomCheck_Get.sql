@@ -5,7 +5,8 @@
 	@IncludeNA BIT=1,
 	@IncludeOK BIT=1,
 	@Context NVARCHAR(128)=NULL,
-	@Test NVARCHAR(128)=NULL
+	@Test NVARCHAR(128)=NULL,
+	@ShowHidden BIT=1
 )
 AS
 DECLARE @StatusSQL NVARCHAR(MAX)
@@ -33,6 +34,7 @@ WHERE ' + @StatusSQL + '
 ' + CASE WHEN @Test IS NULL THEN '' ELSE 'AND cc.Test = @Test' END + '
 ' + CASE WHEN @Context IS NULL THEN '' ELSE 'AND cc.Context = @Context' END + '
 ' + CASE WHEN @InstanceIDs IS NULL THEN '' ELSE 'AND EXISTS(SELECT 1 FROM STRING_SPLIT(@InstanceIDs,'','') ss WHERE ss.Value = I.InstanceID)' END + '
+' + CASE WHEN @ShowHidden=1 THEN '' ELSE 'AND I.ShowInSummary=1' END + '
 ORDER BY cc.Status'
 
 EXEC sp_executesql @SQL,N'@InstanceIDs VARCHAR(MAX),@Test NVARCHAR(128),@Context NVARCHAR(128)',@InstanceIDs,@Test,@Context

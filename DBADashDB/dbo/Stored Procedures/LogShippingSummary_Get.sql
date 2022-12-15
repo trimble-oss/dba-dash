@@ -1,5 +1,6 @@
 ﻿CREATE PROC dbo.LogShippingSummary_Get(
-	@InstanceIDs IDs READONLY
+	@InstanceIDs IDs READONLY,
+    @ShowHidden BIT=1
 )
 AS
 DECLARE @SQL NVARCHAR(MAX)
@@ -21,10 +22,12 @@ SELECT InstanceID,
        InstanceLevelThreshold,
        DatabaseLevelThresholds
 FROM dbo.LogShippingStatusSummary LS
-'+ CASE WHEN EXISTS(SELECT 1 FROM @InstanceIDs) THEN 'WHERE EXISTS
+WHERE 1=1
+'+ CASE WHEN EXISTS(SELECT 1 FROM @InstanceIDs) THEN 'AND EXISTS
 (
     SELECT 1 FROM @InstanceIDs t WHERE t.ID = LS.InstanceID
-)' ELSE '' END 
+)' ELSE '' END + '
+' + CASE WHEN @ShowHidden=1 THEN '' ELSE 'AND LS.ShowInSummary=1' END
 
 EXEC sp_executesql @SQL,N'@InstanceIDs IDs READONLY',@InstanceIDs
 GO
