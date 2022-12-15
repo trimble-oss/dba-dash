@@ -1,4 +1,7 @@
-﻿CREATE PROC dbo.DDLSnapshotInstanceSummary_Get(@InstanceIDs VARCHAR(MAX)=NULL)
+﻿CREATE PROC dbo.DDLSnapshotInstanceSummary_Get(
+	@InstanceIDs VARCHAR(MAX)=NULL,
+	@ShowHidden BIT=1
+)
 AS
 DECLARE @SQL NVARCHAR(MAX) 
 SET @SQL =N'
@@ -19,6 +22,7 @@ AND D.IsActive=1
 															FROM STRING_SPLIT(@InstanceIDs,'','') ss 
 															WHERE ss.value = I.InstanceID
 															)' END + '
+' + CASE WHEN @ShowHidden=1 THEN '' ELSE 'AND I.ShowInSummary=1' END + '
 GROUP BY I.InstanceGroupName
 ORDER BY LastUpdated DESC'
 

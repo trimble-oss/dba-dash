@@ -70,26 +70,28 @@ namespace DBADashGUI.HA
             }
         }
 
-        DataTable GetMirroringSummary()
+        private DataTable GetMirroringSummary()
         {
             using (var cn = new SqlConnection(Common.ConnectionString))
             using (var cmd = new SqlCommand("dbo.DatabaseMirroringSummary_Get", cn) { CommandType = CommandType.StoredProcedure })
             using (SqlDataAdapter da = new(cmd))
             {
                 cmd.Parameters.AddWithValue("InstanceIDs", string.Join(",", InstanceIDs));
+                cmd.Parameters.AddWithValue("ShowHidden", InstanceIDs.Count == 1 || Common.ShowHidden);
                 var dt = new DataTable();
                 da.Fill(dt);
                 return dt;
             }
-
         }
-        DataTable GetMirroringDetail()
+
+        private DataTable GetMirroringDetail()
         {
             using (var cn = new SqlConnection(Common.ConnectionString))
             using (var cmd = new SqlCommand("dbo.DatabaseMirroring_Get", cn) { CommandType = CommandType.StoredProcedure })
             using (var da = new SqlDataAdapter(cmd))
             {
                 cmd.Parameters.AddWithValue("InstanceIDs", string.Join(",", InstanceIDs));
+                cmd.Parameters.AddWithValue("ShowHidden", InstanceIDs.Count == 1 || Common.ShowHidden);
                 var dt = new DataTable();
                 da.Fill(dt);
                 return dt;
@@ -150,7 +152,6 @@ namespace DBADashGUI.HA
                     dgv.Rows[idx].Cells["mirroring_witness_state"].SetStatusColor(witnessColour);
                     dgv.Rows[idx].Cells["mirroring_state"].SetStatusColor(colour);
                 }
-
             }
         }
 

@@ -40,7 +40,8 @@ WITH F AS (
 				   F.growth,
 				   CASE WHEN F.is_percent_growth=1 THEN F.growth ELSE NULL END AS GrowthPct,
 				   F.is_percent_growth,
-				   CASE WHEN I.EngineEdition=5 THEN CAST(1 as BIT) ELSE CAST(0 as BIT) END as IsAzureDB
+				   CASE WHEN I.EngineEdition=5 THEN CAST(1 as BIT) ELSE CAST(0 as BIT) END as IsAzureDB,
+				   I.ShowInSummary
 		FROM dbo.DBFiles F
 			JOIN dbo.Databases D ON D.DatabaseID = F.DatabaseID
 			JOIN dbo.Instances I ON I.InstanceID = D.InstanceID
@@ -127,7 +128,8 @@ SELECT F.FileID,
 			ELSE NULL END AS MaxSizeExcludedReason,
 	  CASE WHEN F.is_db_read_only=0 AND F.state=0 AND F.is_read_only=0 AND F.is_in_standby=0 AND F.FilegroupAutogrowFileCount=0 THEN 2 WHEN F.FilegroupAutogrowFileCount=0 THEN 3 ELSE 4 END AS FilegroupAutogrowStatus,
 	  F.type,
-	  CASE WHEN F.type =0 THEN N'ROWS' WHEN F.type = 1 THEN N'LOG' WHEN F.type=2 THEN N'FILESTREAM' WHEN F.type = 4 THEN N'FULLTEXT' ELSE CAST(f.type as NVARCHAR(60)) END as type_desc
+	  CASE WHEN F.type =0 THEN N'ROWS' WHEN F.type = 1 THEN N'LOG' WHEN F.type=2 THEN N'FILESTREAM' WHEN F.type = 4 THEN N'FULLTEXT' ELSE CAST(f.type as NVARCHAR(60)) END as type_desc,
+	  F.ShowInSummary
 FROM F
 OUTER APPLY(SELECT TOP(1) T.FreeSpaceWarningThreshold,
                     T.FreeSpaceCriticalThreshold,

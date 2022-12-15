@@ -6,6 +6,7 @@ using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
+
 namespace DBADashGUI.Performance
 {
     public partial class RunningQueries : UserControl, INavigation, ISetContext, IRefreshData
@@ -112,7 +113,6 @@ namespace DBADashGUI.Performance
                 new DataGridViewLinkColumn() { HeaderText = "Help", Text = "help", UseColumnTextForLinkValue = true, Name = "colHelp", LinkColor = DashColors.LinkColor}
         };
 
-
         public void SetContext(DBADashContext context)
         {
             InstanceIDs = context.InstanceIDs.ToList();
@@ -160,10 +160,9 @@ namespace DBADashGUI.Performance
             {
                 LoadSummaryData();
             }
-
         }
 
-        /// <summary>If we are not filtered for a specific instance then show server level summary</summary> 
+        /// <summary>If we are not filtered for a specific instance then show server level summary</summary>
         private bool IsServerLevelSummary
         {
             get
@@ -174,7 +173,7 @@ namespace DBADashGUI.Performance
 
         public bool CanNavigateBack => tsBack.Enabled;
 
-        /// <summary>Get a list of running queries snapshots for an instance or last snapshot for each instance</summary> 
+        /// <summary>Get a list of running queries snapshots for an instance or last snapshot for each instance</summary>
         private void LoadSummaryData()
         {
             DataTable dt;
@@ -216,7 +215,7 @@ namespace DBADashGUI.Performance
             dgv.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
         }
 
-        /// <summary>Get running query snapshots associated with a specified session id between two dates (for associating RPC/Batch completed events with running queries)</summary> 
+        /// <summary>Get running query snapshots associated with a specified session id between two dates (for associating RPC/Batch completed events with running queries)</summary>
         private static DataTable RunningQueriesForSession(int sessionID, DateTime fromDate, DateTime toDate, int instanceID)
         {
             using (var cn = new SqlConnection(Common.ConnectionString))
@@ -238,7 +237,7 @@ namespace DBADashGUI.Performance
             }
         }
 
-        /// <summary>Get last running query snapshot summary data for all servers</summary> 
+        /// <summary>Get last running query snapshot summary data for all servers</summary>
         private DataTable RunningQueriesServerSummary()
         {
             using (var cn = new SqlConnection(Common.ConnectionString))
@@ -247,6 +246,7 @@ namespace DBADashGUI.Performance
             {
                 var dt = new DataTable();
                 cmd.Parameters.AddWithValue("InstanceIDs", string.Join(",", InstanceIDs));
+                cmd.Parameters.AddWithValue("ShowHidden", InstanceIDs.Count == 1 || Common.ShowHidden);
                 da.Fill(dt);
                 DateHelper.ConvertUTCToAppTimeZone(ref dt);
                 dt.Columns["SnapshotDateUTC"].ColumnName = "SnapshotDate";
@@ -254,7 +254,7 @@ namespace DBADashGUI.Performance
             }
         }
 
-        /// <summary>Get a list of running query snapshots for the specified instance</summary> 
+        /// <summary>Get a list of running query snapshots for the specified instance</summary>
         private DataTable RunningQueriesSummary()
         {
             using (var cn = new SqlConnection(Common.ConnectionString))
@@ -273,7 +273,7 @@ namespace DBADashGUI.Performance
             }
         }
 
-        /// <summary>Get running queries snapshot data for the specified snapshot date. skip parameter is used to return next snapshot (1) or previous snapshot (-1)</summary> 
+        /// <summary>Get running queries snapshot data for the specified snapshot date. skip parameter is used to return next snapshot (1) or previous snapshot (-1)</summary>
         private DataTable RunningQueriesSnapshot(ref DateTime snapshotDate, int skip = 0)
         {
             using (var cn = new SqlConnection(Common.ConnectionString))
@@ -301,7 +301,7 @@ namespace DBADashGUI.Performance
             }
         }
 
-        /// <summary>Load a running queries snapshot for the specified date. skip parameter is used to return next snapshot (1) or previous snapshot (-1) </summary> 
+        /// <summary>Load a running queries snapshot for the specified date. skip parameter is used to return next snapshot (1) or previous snapshot (-1) </summary>
         private void LoadSnapshot(DateTime snapshotDate, int skip = 0)
         {
             lblRowLimit.Visible = false;
@@ -320,7 +320,7 @@ namespace DBADashGUI.Performance
             tsBack.Enabled = SnapshotDateFrom == DateTime.MinValue;
         }
 
-        /// <summary>Load a running queries snapshot</summary> 
+        /// <summary>Load a running queries snapshot</summary>
         private void LoadSnapshot(DataView source)
         {
             dgv.DataSource = null;
@@ -339,10 +339,9 @@ namespace DBADashGUI.Performance
             dgv.Columns["colQueryPlanHash"].Width = 70;
             tsGroupBy.Enabled = dgv.Rows.Count > 1;
             tsBlockingFilter.Visible = SessionID == 0;
-
         }
 
-        /// <summary>Get counts from the running queries snapshot table. e.g. Blocking counts</summary> 
+        /// <summary>Get counts from the running queries snapshot table. e.g. Blocking counts</summary>
         private void GetCounts()
         {
             runningJobCount = snapshotDT.AsEnumerable().Where(r => r["job_id"] != DBNull.Value).Count();
@@ -530,10 +529,9 @@ namespace DBADashGUI.Performance
             {
                 e.CellStyle.BackColor = Convert.ToInt32(e.Value) == 0 ? DashColors.Success : DashColors.Fail;
             }
-
         }
 
-        /// <summary>Takes the running query snapshot and groups the data by a specified column</summary> 
+        /// <summary>Takes the running query snapshot and groups the data by a specified column</summary>
         private void GroupSnapshot(string group)
         {
             if (snapshotDT != null && snapshotDT.Rows.Count > 0)
@@ -604,7 +602,6 @@ namespace DBADashGUI.Performance
                 GroupSnapshot((string)ts.Tag);
                 tsBack.Enabled = true;
             }
-
         }
 
         private void TsPrevious_Click(object sender, EventArgs e)
@@ -617,7 +614,7 @@ namespace DBADashGUI.Performance
             LoadSnapshot(currentSnapshotDate, 1);
         }
 
-        /// <summary>Get session level wait stats for a specified session or for all sessions</summary> 
+        /// <summary>Get session level wait stats for a specified session or for all sessions</summary>
         private static DataTable GetSessionWaits(int InstanceID, short? SessionID, DateTime? SnapshotDateUTC, DateTime? LoginTimeUTC)
         {
             using (var cn = new SqlConnection(Common.ConnectionString))
@@ -634,7 +631,7 @@ namespace DBADashGUI.Performance
             }
         }
 
-        /// <summary>Get session level wait stats for the specified snapshot over all sessions.</summary> 
+        /// <summary>Get session level wait stats for the specified snapshot over all sessions.</summary>
         private static DataTable GetSessionWaitSummary(int InstanceID, DateTime? SnapshotDateUTC)
         {
             using (var cn = new SqlConnection(Common.ConnectionString))
@@ -696,13 +693,13 @@ namespace DBADashGUI.Performance
             ShowRootBlockers();
         }
 
-        /// <summary>Filter to show root blockers - queries holding locks needed by other queries that are not blocked themselves</summary> 
+        /// <summary>Filter to show root blockers - queries holding locks needed by other queries that are not blocked themselves</summary>
         public void ShowRootBlockers()
         {
             ShowBlocking(0);
         }
 
-        /// <summary>Filter to show the queries blocked by a particular session.  For SessionID=0, show root blockers.</summary>     
+        /// <summary>Filter to show the queries blocked by a particular session.  For SessionID=0, show root blockers.</summary>
         private void ShowBlocking(short sessionID, bool recursive = false) //
         {
             tsGroupByFilter.Visible = false;
@@ -726,7 +723,7 @@ namespace DBADashGUI.Performance
             tsBlockingFilter.Font = new Font(tsBlockingFilter.Font, FontStyle.Bold);
         }
 
-        /// <summary>Remove blocking filter applied to grid with showBlocking()</summary>       
+        /// <summary>Remove blocking filter applied to grid with showBlocking()</summary>
         private void ClearBlocking()
         {
             tsGroupByFilter.Visible = false;
@@ -793,6 +790,5 @@ namespace DBADashGUI.Performance
             }
             tsEditLimit.Text = String.Format("Row Limit {0}", Properties.Settings.Default.RunningQueriesSummaryMaxRows);
         }
-
     }
 }

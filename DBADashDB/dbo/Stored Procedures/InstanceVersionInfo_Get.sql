@@ -1,5 +1,6 @@
 ﻿CREATE PROC dbo.InstanceVersionInfo_Get(
-	@InstanceIDs VARCHAR(MAX)=NULL
+	@InstanceIDs VARCHAR(MAX)=NULL,
+	@ShowHidden BIT=1
 )
 AS
 DECLARE @Instances TABLE(
@@ -56,3 +57,4 @@ WHERE EXISTS(SELECT 1
 			WHERE t.InstanceID = I.InstanceID
 			)
 AND I.IsActive=1
+AND (I.ShowInSummary=1 OR @ShowHidden=1)

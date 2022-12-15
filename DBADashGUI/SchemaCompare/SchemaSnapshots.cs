@@ -111,7 +111,7 @@ namespace DBADashGUI.Changes
             {
                 cn.Open();
                 cmd.Parameters.AddWithValue("InstanceIDs", string.Join(",", InstanceIDs));
-
+                cmd.Parameters.AddWithValue("ShowHidden", InstanceIDs.Count == 1 ? true : Common.ShowHidden);
                 var dt = new DataTable();
                 da.Fill(dt);
                 DateHelper.ConvertUTCToAppTimeZone(ref dt);

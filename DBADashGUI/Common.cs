@@ -22,6 +22,7 @@ namespace DBADashGUI
         private static bool IsApplicationRunningInternal = false;
         public static bool IsApplicationRunning { get => IsApplicationRunningInternal; set => IsApplicationRunningInternal = value; } /* Set to true if App is running - used to detect design time mode */
         private static CodeViewer FrmCodeViewer;
+        public static bool ShowHidden;
 
         public static void SetConnectionString(string connection)
         {

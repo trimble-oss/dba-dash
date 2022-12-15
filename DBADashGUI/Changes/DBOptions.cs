@@ -88,6 +88,7 @@ namespace DBADashGUI.Changes
             using (var da = new SqlDataAdapter(cmd))
             {
                 cmd.Parameters.AddWithValue("InstanceIDs", String.Join(",", InstanceIDs));
+                cmd.Parameters.AddWithValue("ShowHidden", InstanceIDs.Count == 1 ? true : Common.ShowHidden);
                 DataTable dt = new();
                 da.Fill(dt);
                 dgv.DataSource = dt;
@@ -107,7 +108,7 @@ namespace DBADashGUI.Changes
                 {
                     cmd.Parameters.AddWithValue("DatabaseID", DatabaseID);
                 }
-                ;
+                cmd.Parameters.AddWithValue("ShowHidden", InstanceIDs.Count == 1 ? true : Common.ShowHidden);
                 DataTable dt = new();
                 da.Fill(dt);
                 return dt;
@@ -152,7 +153,7 @@ namespace DBADashGUI.Changes
                     cmd.Parameters.AddWithValue("DatabaseID", DatabaseID);
                 }
                 cmd.Parameters.AddWithValue("ExcludeStateChanges", excludeStateChangesToolStripMenuItem.Checked);
-
+                cmd.Parameters.AddWithValue("ShowHidden", InstanceIDs.Count == 1 ? true : Common.ShowHidden);
                 DataTable dt = new();
                 da.Fill(dt);
                 DateHelper.ConvertUTCToAppTimeZone(ref dt);

@@ -294,6 +294,7 @@ namespace DBADashGUI
                     }
                     int top = Convert.ToInt32(tsTop.Tag);
                     cmd.Parameters.AddWithValue("Top", top);
+                    cmd.Parameters.AddWithValue("ShowHidden", InstanceIDs.Count == 1 || Common.ShowHidden);
 
                     var dt = new DataTable();
                     da.Fill(dt);

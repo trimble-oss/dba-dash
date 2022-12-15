@@ -3,7 +3,8 @@
 		@IncludeCritical BIT=1,
 		@IncludeWarning BIT=1,
 		@IncludeNA BIT=0,
-		@IncludeOK BIT=0
+		@IncludeOK BIT=0,
+		@ShowHidden BIT=1
 )
 AS
 DECLARE @Instances TABLE(
@@ -115,4 +116,5 @@ SELECT	BS.InstanceID,
 FROM dbo.BackupStatus BS
 WHERE EXISTS(SELECT 1 FROM @Instances I WHERE I.InstanceID = BS.InstanceID)
 AND EXISTS(SELECT 1 FROM BackupStatuses s WHERE BS.BackupStatus=s.BackupStatus)
+AND (BS.ShowInSummary = 1 OR  @ShowHidden = 1)
 ORDER BY FullBackupStatus

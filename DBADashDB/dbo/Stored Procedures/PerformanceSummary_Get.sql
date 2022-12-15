@@ -7,7 +7,8 @@
 	@Debug BIT=0,
 	@DaysOfWeek IDs READONLY, /* e.g. exclude weekends:  Monday,Tuesday,Wednesday,Thursday,Friday. Filter applied in local timezone (@UTCOffset) */
 	@Hours IDs READONLY, /* e.g. 9 to 5 :  9,10,11,12,13,14,15,16. Filter applied in local timezone (@UTCOffset)  */
-	@UTCOffset INT=0 /* Used for filtering on hours & weekday in current timezone */
+	@UTCOffset INT=0, /* Used for filtering on hours & weekday in current timezone */
+	@ShowHidden BIT=1
 )
 AS
 SET DATEFIRST 1 /* Start week on Monday */
@@ -189,6 +190,7 @@ LEFT JOIN wait ON I.InstanceID = wait.InstanceID
 CROSS JOIN dbo.PerformanceThresholds thres
 WHERE EXISTS(SELECT 1 FROM #Instances t WHERE I.InstanceID = t.InstanceID)
 AND I.IsActive=1
+' + CASE WHEN @ShowHidden=1 THEN '' ELSE 'AND I.ShowInSummary=1' END + '
 ORDER BY CASE WHEN wait.CriticalWaitMsPerSec > thres.CriticalWaitWarningThreshold THEN wait.CriticalWaitMsPerSec ELSE 0 END DESC, cpuAgg.AvgCPU DESC
 OPTION(RECOMPILE)'
 

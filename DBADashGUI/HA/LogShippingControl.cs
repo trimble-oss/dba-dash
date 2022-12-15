@@ -10,7 +10,6 @@ namespace DBADashGUI.LogShipping
 {
     public partial class LogShippingControl : UserControl, INavigation, ISetContext
     {
-
         private List<int> InstanceIDs;
         private DBADashContext context;
 
@@ -37,6 +36,7 @@ namespace DBADashGUI.LogShipping
                 tsWarning.Checked = value;
             }
         }
+
         public bool IncludeNA
         {
             get
@@ -48,6 +48,7 @@ namespace DBADashGUI.LogShipping
                 tsNA.Checked = value;
             }
         }
+
         public bool IncludeOK
         {
             get
@@ -82,7 +83,7 @@ namespace DBADashGUI.LogShipping
             {
                 cn.Open();
                 cmd.Parameters.AddWithValue("InstanceIDs", InstanceIDs.AsDataTable());
-
+                cmd.Parameters.AddWithValue("ShowHidden", InstanceIDs.Count == 1 || Common.ShowHidden);
                 DataTable dt = new();
                 da.Fill(dt);
                 DateHelper.ConvertUTCToAppTimeZone(ref dt);
@@ -136,7 +137,6 @@ namespace DBADashGUI.LogShipping
             configureInstanceThresholdsToolStripMenuItem.Enabled = InstanceIDs.Count == 1;
         }
 
-
         public LogShippingControl()
         {
             InitializeComponent();
@@ -147,7 +147,6 @@ namespace DBADashGUI.LogShipping
         {
             RefreshData();
         }
-
 
         private void DgvLogShipping_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
@@ -246,7 +245,6 @@ namespace DBADashGUI.LogShipping
                     ConfigureThresholds((Int32)r["InstanceID"], -1);
                 }
             }
-
         }
 
         private void TsBack_Click(object sender, EventArgs e)
@@ -284,7 +282,6 @@ namespace DBADashGUI.LogShipping
                 {
                     dgvSummary.Rows[idx].Cells["Configure"].Style.Font = new Font(dgvSummary.Font, FontStyle.Regular);
                 }
-
             }
         }
 

@@ -30,6 +30,7 @@ namespace DBADashGUI.Changes
                 using (SqlCommand cmd = new("dbo.AzureServiceObjectivesHistory_Get", cn) { CommandType = CommandType.StoredProcedure })
                 {
                     cmd.Parameters.AddWithValue("InstanceIDs", string.Join(",", InstanceIDs));
+                    cmd.Parameters.AddWithValue("ShowHidden", InstanceIDs.Count == 1 ? true : Common.ShowHidden);
                     SqlDataAdapter da = new(cmd);
                     DataTable dt = new();
                     da.Fill(dt);
@@ -48,6 +49,7 @@ namespace DBADashGUI.Changes
                 using (SqlCommand cmd = new("dbo.AzureDBElasticPoolHistory_Get", cn) { CommandType = CommandType.StoredProcedure })
                 {
                     cmd.Parameters.AddWithValue("InstanceIDs", string.Join(",", InstanceIDs));
+                    cmd.Parameters.AddWithValue("ShowHidden", InstanceIDs.Count == 1 ? true : Common.ShowHidden);
                     SqlDataAdapter da = new(cmd);
                     DataTable dt = new();
                     da.Fill(dt);

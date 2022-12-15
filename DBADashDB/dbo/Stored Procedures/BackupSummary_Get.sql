@@ -1,5 +1,6 @@
 ﻿CREATE PROC dbo.BackupSummary_Get(
-	@InstanceIDs IDs READONLY
+	@InstanceIDs IDs READONLY,
+    @ShowHidden BIT=1
 )
 AS
 SELECT InstanceID,
@@ -60,4 +61,5 @@ FROM dbo.BackupSummary B
 WHERE EXISTS(SELECT 1 
 			FROM @InstanceIDs T 
 			WHERE T.ID = B.InstanceID)
+AND (B.ShowInSummary = 1 OR  @ShowHidden = 1)
 ORDER BY Instance

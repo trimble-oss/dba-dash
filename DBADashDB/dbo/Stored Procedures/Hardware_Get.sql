@@ -1,5 +1,6 @@
 ﻿CREATE PROC dbo.Hardware_Get(
-	@InstanceIDs VARCHAR(MAX)=NULL
+	@InstanceIDs VARCHAR(MAX)=NULL,
+	@ShowHidden BIT=1
 )
 AS
 DECLARE @Instances TABLE(
@@ -54,4 +55,9 @@ SELECT ConnectionID,
 	I.max_workers_count,
 	I.os_priority_class
 FROM dbo.InstanceInfo I
-WHERE EXISTS(SELECT 1 FROM @Instances t WHERE t.InstanceID = I.InstanceID)
+WHERE EXISTS(
+			SELECT 1 
+			FROM @Instances t 
+			WHERE t.InstanceID = I.InstanceID
+			)
+AND (I.ShowInSummary=1 OR @ShowHidden=1)

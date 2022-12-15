@@ -1,5 +1,6 @@
 ﻿CREATE PROC dbo.DatabaseQueryStoreOptionsSummary_Get(
-	@InstanceIDs VARCHAR(MAX)
+	@InstanceIDs VARCHAR(MAX),
+	@ShowHidden BIT=1
 )
 AS
 SELECT	I.InstanceGroupName,
@@ -20,5 +21,10 @@ FROM dbo.DatabaseQueryStoreOptions QS
 JOIN dbo.Databases D ON QS.DatabaseID = D.DatabaseID
 JOIN dbo.Instances I ON I.InstanceID = D.InstanceID
 LEFT JOIN dbo.CollectionDatesStatus CDS ON CDS.InstanceID = I.InstanceID AND CDS.Reference = 'DatabaseQueryStoreOptions'
-WHERE EXISTS(SELECT 1 FROM STRING_SPLIT(@InstanceIDs,',') ss WHERE ss.value = I.InstanceID)
+WHERE EXISTS	(
+				SELECT 1 
+				FROM STRING_SPLIT(@InstanceIDs,',') ss 
+				WHERE ss.value = I.InstanceID
+				)
+AND (I.ShowInSummary=1 OR @ShowHidden=1)
 GROUP BY I.InstanceGroupName

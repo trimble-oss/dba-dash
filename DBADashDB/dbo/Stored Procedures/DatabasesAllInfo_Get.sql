@@ -1,6 +1,7 @@
 ﻿CREATE PROC dbo.DatabasesAllInfo_Get(
 		@InstanceIDs VARCHAR(MAX)=NULL,
-		@DatabaseID INT=NULL
+		@DatabaseID INT=NULL,
+        @ShowHidden BIT=1
 )
 AS
 DECLARE @SQL NVARCHAR(MAX) 
@@ -91,7 +92,8 @@ AND I.IsActive=1
 			FROM STRING_SPLIT(@InstanceIDs,'','') ss 
 			WHERE ss.value = D.InstanceID
 			)
-' END 
-+ CASE WHEN @DatabaseID IS NULL THEN '' ELSE 'AND D.DatabaseID = @DatabaseID' END
+' END + '
+' + CASE WHEN @DatabaseID IS NULL THEN '' ELSE 'AND D.DatabaseID = @DatabaseID' END + '
+' + CASE WHEN @ShowHidden=1 THEN '' ELSE 'AND I.ShowInSummary=1' END
 
 EXEC sp_executesql @SQL,N'@InstanceIDs VARCHAR(MAX),@DatabaseID INT',@InstanceIDs,@DatabaseID

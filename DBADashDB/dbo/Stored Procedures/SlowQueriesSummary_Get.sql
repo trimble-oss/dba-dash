@@ -36,7 +36,8 @@
 	@WritesFrom BIGINT=NULL,
 	@WritesTo BIGINT=NULL,
 	@EventType SYSNAME=NULL,
-	@Debug BIT=0
+	@Debug BIT=0,
+	@ShowHidden BIT=1
 )
 AS
 DECLARE @DurationFromUS BIGINT 
@@ -133,6 +134,7 @@ AND timestamp< @ToDate
 ' + CASE WHEN @WritesFrom IS NULL THEN '' ELSE 'AND SQ.writes >= @WritesFrom' END + '
 ' + CASE WHEN @WritesTo IS NULL THEN '' ELSE 'AND SQ.writes < @WritesTo' END + '
 ' + CASE WHEN @EventType IS NULL THEN '' ELSE 'AND SQ.event_type = @EventType' END + '
+' + CASE WHEN @ShowHidden=1 THEN '' ELSE 'AND I.ShowInSummary=1' END + '
 GROUP BY ' + @GroupSQL +'
 ORDER BY SUM(Duration) DESC'
 

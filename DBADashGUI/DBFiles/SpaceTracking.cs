@@ -18,7 +18,6 @@ namespace DBADashGUI
             InitializeComponent();
         }
 
-
         private List<Int32> InstanceIDs;
         private Int32 DatabaseID = -1;
         private string DBName = "";
@@ -62,6 +61,7 @@ namespace DBADashGUI
                 {
                     cmd.Parameters.AddWithValue("@DBName", DBName);
                 }
+                cmd.Parameters.AddWithValue("ShowHidden", InstanceIDs.Count == 1 ? true : Common.ShowHidden);
                 DataTable dt = new();
                 da.Fill(dt);
 
@@ -104,7 +104,6 @@ namespace DBADashGUI
 
             pieChart1.Series = sc;
             pieChart1.LegendLocation = LegendLocation.Bottom;
-
         }
 
         private void Dgv_CellContentClick(object sender, DataGridViewCellEventArgs e)
@@ -324,6 +323,5 @@ namespace DBADashGUI
                 e.ToolTipText = value == null || value == DBNull.Value ? "Unknown" : value.ToString();
             }
         }
-
     }
 }

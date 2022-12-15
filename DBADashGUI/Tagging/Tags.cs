@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Windows.Forms;
+
 namespace DBADashGUI.Tagging
 {
     public partial class Tags : UserControl, INavigation, ISetContext
@@ -14,7 +15,9 @@ namespace DBADashGUI.Tagging
         }
 
         public event EventHandler TagsChanged;
+
         private List<DBADashTag> _allTags;
+
         public List<DBADashTag> AllTags
         {
             get
@@ -77,7 +80,6 @@ namespace DBADashGUI.Tagging
 
         public void RefreshData()
         {
-
             lblInstance.Text = InstanceName;
             if (string.IsNullOrEmpty(InstanceName))
             {
@@ -91,7 +93,6 @@ namespace DBADashGUI.Tagging
                 splitEditReport.Panel1Collapsed = false;
                 RefreshEdit();
             }
-
         }
 
         private void RefreshEdit()
@@ -122,6 +123,7 @@ namespace DBADashGUI.Tagging
             using var da = new SqlDataAdapter(cmd);
             var dt = new DataTable();
             cmd.Parameters.AddWithValue("InstanceIDs", context.InstanceIDs.ToList().AsDataTable());
+            cmd.Parameters.AddWithValue("ShowHidden", context.InstanceIDs.Count == 1 || Common.ShowHidden);
             da.Fill(dt);
             dgvReport.DataSource = null;
             dgvReport.Columns.Clear();
@@ -130,7 +132,6 @@ namespace DBADashGUI.Tagging
             dgvReport.DataSource = dt;
             dgvReport.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
         }
-
 
         private void DgvReport_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
@@ -210,9 +211,5 @@ namespace DBADashGUI.Tagging
                 tag.Save();
             }
         }
-
     }
-
-
-
 }

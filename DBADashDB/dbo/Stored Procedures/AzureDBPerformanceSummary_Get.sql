@@ -8,7 +8,8 @@
 	@DataHist BIT = 0,
 	@LogHist BIT=0,
 	@Use60MIN BIT=NULL,
-	@Debug BIT=0
+	@Debug BIT=0,
+	@ShowHidden BIT=1
 )
 AS
 IF @FromDate IS NULL
@@ -23,9 +24,10 @@ BEGIN
 	    ID
 	)
 	SELECT DISTINCT InstanceID
-	FROM dbo.Instances 
-	WHERE IsActive=1
-	AND EngineEdition=5 --AzureDB
+	FROM dbo.Instances I
+	WHERE I.IsActive=1
+	AND I.EngineEdition=5 --AzureDB
+	AND (I.ShowInSummary=1 OR @ShowHidden=1)
 END 
 ELSE 
 BEGIN
@@ -34,7 +36,10 @@ BEGIN
 		ID
 	)
 	SELECT value
-	FROM STRING_SPLIT(@InstanceIDs,',')
+	FROM dbo.Instances I
+	JOIN STRING_SPLIT(@InstanceIDs,',') SS ON SS.Value = I.InstanceID
+	WHERE (I.ShowInSummary=1 OR @ShowHidden=1)
+
 END;
 IF @Use60MIN IS NULL
 BEGIN

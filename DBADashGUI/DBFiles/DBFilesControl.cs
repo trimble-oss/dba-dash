@@ -42,6 +42,7 @@ namespace DBADashGUI.DBFiles
                 warningToolStripMenuItem.Checked = value;
             }
         }
+
         public bool IncludeNA
         {
             get
@@ -53,6 +54,7 @@ namespace DBADashGUI.DBFiles
                 undefinedToolStripMenuItem.Checked = value;
             }
         }
+
         public bool IncludeOK
         {
             get
@@ -96,6 +98,7 @@ namespace DBADashGUI.DBFiles
                 cmd.Parameters.AddWithValue("IncludeWarning", IncludeWarning);
                 cmd.Parameters.AddWithValue("IncludeCritical", IncludeCritical);
                 cmd.Parameters.AddWithValue("FilegroupLevel", tsFilegroup.Checked);
+                cmd.Parameters.AddWithValue("ShowHidden", InstanceIDs.Count == 1 || Common.ShowHidden);
                 if (selectedTypes.Count is > 0 and < 4)
                 {
                     cmd.Parameters.AddWithValue("Types", string.Join(",", selectedTypes));
@@ -121,7 +124,6 @@ namespace DBADashGUI.DBFiles
 
         public void RefreshData()
         {
-
             var dt = GetDBFiles();
             dgvFiles.AutoGenerateColumns = false;
             dgvFiles.DataSource = new DataView(dt);
@@ -129,7 +131,6 @@ namespace DBADashGUI.DBFiles
 
             configureInstanceThresholdsToolStripMenuItem.Enabled = InstanceIDs.Count == 1;
             configureDatabaseThresholdsToolStripMenuItem.Enabled = InstanceIDs.Count == 1 && DatabaseID > 0;
-
         }
 
         private void CriticalToolStripMenuItem_Click(object sender, EventArgs e)

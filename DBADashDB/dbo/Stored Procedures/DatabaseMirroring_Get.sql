@@ -1,5 +1,6 @@
 ﻿CREATE PROC dbo.DatabaseMirroring_Get(
-		@InstanceIDs VARCHAR(MAX)=NULL
+		@InstanceIDs VARCHAR(MAX)=NULL,
+		@ShowHidden BIT=1
 )
 AS
 SELECT I.InstanceDisplayName as Instance,
@@ -30,3 +31,4 @@ WHERE EXISTS(SELECT 1 FROM STRING_SPLIT(@InstanceIDs,',') ss WHERE ss.value = I.
 		SELECT 1 WHERE @InstanceIDs IS NULL)
 AND I.IsActive=1
 AND D.IsActive=1
+AND (I.ShowInSummary=1 OR @ShowHidden=1)

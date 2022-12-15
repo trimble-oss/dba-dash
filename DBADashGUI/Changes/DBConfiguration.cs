@@ -40,7 +40,7 @@ namespace DBADashGUI.Changes
                 {
                     cmd.Parameters.AddWithValue("DatabaseID", DatabaseID);
                 }
-
+                cmd.Parameters.AddWithValue("ShowHidden", InstanceIDs.Count == 1 ? true : Common.ShowHidden);
                 DataTable dt = new();
                 da.Fill(dt);
                 return dt;
@@ -88,7 +88,6 @@ namespace DBADashGUI.Changes
             }
             dgvConfig.Rows.AddRange(rows.ToArray());
             dgvConfig.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
-
         }
 
         private DataTable GetDBConfigurationHistory()
@@ -103,7 +102,7 @@ namespace DBADashGUI.Changes
                 {
                     cmd.Parameters.AddWithValue("DatabaseID", DatabaseID);
                 }
-
+                cmd.Parameters.AddWithValue("ShowHidden", InstanceIDs.Count == 1 ? true : Common.ShowHidden);
                 DataTable dt = new();
                 da.Fill(dt);
                 return dt;

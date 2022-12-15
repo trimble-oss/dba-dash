@@ -79,7 +79,6 @@
             this.exportTestSummaryToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.tsOptions = new System.Windows.Forms.ToolStripDropDownButton();
             this.focusedViewToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.showHiddenToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.showTestSummaryToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.saveToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.lblRefreshTime = new System.Windows.Forms.ToolStripLabel();
@@ -555,7 +554,6 @@
             // 
             this.tsOptions.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.focusedViewToolStripMenuItem,
-            this.showHiddenToolStripMenuItem,
             this.showTestSummaryToolStripMenuItem,
             this.saveToolStripMenuItem});
             this.tsOptions.Image = global::DBADashGUI.Properties.Resources.Table_16x;
@@ -572,14 +570,6 @@
             this.focusedViewToolStripMenuItem.Text = "Focused View";
             this.focusedViewToolStripMenuItem.ToolTipText = "Show only instances and checks that are warning or critical status";
             this.focusedViewToolStripMenuItem.Click += new System.EventHandler(this.FocusedViewToolStripMenuItem_Click);
-            // 
-            // showHiddenToolStripMenuItem
-            // 
-            this.showHiddenToolStripMenuItem.CheckOnClick = true;
-            this.showHiddenToolStripMenuItem.Name = "showHiddenToolStripMenuItem";
-            this.showHiddenToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
-            this.showHiddenToolStripMenuItem.Text = "Show Hidden";
-            this.showHiddenToolStripMenuItem.Click += new System.EventHandler(this.TsRefresh_Click);
             // 
             // showTestSummaryToolStripMenuItem
             // 
@@ -907,7 +897,6 @@
         private System.Windows.Forms.ToolStripLabel lblRefreshTime;
         private System.Windows.Forms.Timer timer1;
         private Refresh refresh1;
-        private System.Windows.Forms.ToolStripMenuItem showHiddenToolStripMenuItem;
         private System.Windows.Forms.SplitContainer splitContainer1;
         private System.Windows.Forms.DataGridView dgvTests;
         private System.Windows.Forms.DataGridViewTextBoxColumn Instance;

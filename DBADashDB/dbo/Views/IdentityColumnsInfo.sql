@@ -32,7 +32,9 @@ SELECT	IC.InstanceID,
 		calc2.row_estimated_days,
 		calc3.estimated_days,
 		CAST(DATEADD(d,CASE WHEN calc3.estimated_days > 36500 THEN NULL ELSE calc3.estimated_days END,IC.SnapshotDate) AS DATE) AS estimated_date,
-		THRES.*
+		THRES.PctUsedWarningThreshold,
+		THRES.PctUsedCriticalThreshold,
+		I.ShowInSummary
 FROM dbo.IdentityColumns IC
 JOIN dbo.Instances I ON I.InstanceID = IC.InstanceID
 JOIN dbo.Databases D ON D.DatabaseID = IC.DatabaseID

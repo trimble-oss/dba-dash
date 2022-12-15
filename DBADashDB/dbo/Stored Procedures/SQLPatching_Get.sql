@@ -1,5 +1,6 @@
 ﻿CREATE PROC dbo.SQLPatching_Get(
-	@InstanceIDs VARCHAR(MAX)=NULL
+	@InstanceIDs VARCHAR(MAX)=NULL,
+	@ShowHidden BIT=1
 )
 AS
 DECLARE @Instances TABLE(
@@ -39,4 +40,5 @@ SELECT	I.Instance,
 FROM dbo.SQLPatchingHistory P
 JOIN dbo.Instances I ON I.InstanceID = P.InstanceID
 WHERE EXISTS(SELECT 1 FROM @Instances I WHERE I.InstanceID = P.InstanceID)
+AND (I.ShowInSummary=1 OR @ShowHidden=1)
 ORDER BY P.ChangedDate DESC

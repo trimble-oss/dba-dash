@@ -41,7 +41,6 @@ namespace DBADashGUI.Changes
                 tsBack.Enabled = true;
                 dt = GetDatabaseQueryStoreOptions();
                 SetCols();
-
             }
             else
             {
@@ -55,7 +54,6 @@ namespace DBADashGUI.Changes
             if (dt.Rows.Count == 1 && DatabaseID > 0)
             {
                 Common.PivotDGV(ref dgv);
-
             }
             dgv.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
         }
@@ -123,6 +121,7 @@ namespace DBADashGUI.Changes
             using (var da = new SqlDataAdapter(cmd))
             {
                 cmd.Parameters.AddWithValue("InstanceIDs", string.Join(",", InstanceIDs));
+                cmd.Parameters.AddWithValue("ShowHidden", InstanceIDs.Count == 1 ? true : Common.ShowHidden);
                 var dt = new DataTable();
                 da.Fill(dt);
                 return dt;
@@ -214,6 +213,5 @@ namespace DBADashGUI.Changes
         {
             Common.PromptSaveDataGridView(ref dgv);
         }
-
     }
 }

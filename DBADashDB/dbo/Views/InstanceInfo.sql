@@ -96,7 +96,8 @@ SELECT I.InstanceID,
 	CASE WHEN tDB.value_in_use=1 AND tDB.value=1 THEN CAST(1 AS BIT) WHEN tDB.configuration_id=1589 THEN CAST(0 AS BIT) ELSE NULL END AS IsTempDBMetadataMemoryOptimized,
 	CASE WHEN I.EditionID=1674378470 -- AzureDB or Azure Managed Instance
             THEN 150 ELSE TRY_CAST(I.ProductMajorVersion AS INT)*10 END AS MaxSupportedCompatibilityLevel,
-    I.InstanceDisplayName
+    I.InstanceDisplayName,
+    I.ShowInSummary
 FROM dbo.Instances I
 LEFT JOIN dbo.DBADashAgent A ON I.CollectAgentID = A.DBADashAgentID
 CROSS APPLY dbo.SQLVersionName(I.EditionID,I.ProductVersion) v

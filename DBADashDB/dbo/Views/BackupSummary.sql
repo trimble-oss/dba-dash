@@ -75,10 +75,12 @@ SELECT BS.InstanceID,
 			AND BSA.LogBackupExcludedReason IS NULL 
 			GROUP BY BSA.LogCompressionAlgorithm
 			FOR XML PATH(''),TYPE).value('.','NVARCHAR(MAX)')
-		,1,2,'') AS LogCompressionAlgorithms
+		,1,2,'') AS LogCompressionAlgorithms,
+	BS.ShowInSummary
 FROM dbo.BackupStatus BS
 LEFT JOIN dbo.BackupThresholds T ON BS.InstanceID = T.InstanceID AND T.DatabaseID = -1
 GROUP BY BS.InstanceID,
 	BS.Instance,
 	BS.InstanceDisplayName,
-	T.InstanceID
+	T.InstanceID,
+	BS.ShowInSummary

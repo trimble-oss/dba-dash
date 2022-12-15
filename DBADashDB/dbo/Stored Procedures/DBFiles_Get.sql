@@ -6,7 +6,8 @@
 	@IncludeNA BIT=0,
 	@IncludeOK BIT=0,
 	@FilegroupLevel BIT=1,
-    @Types VARCHAR(50)=NULL
+    @Types VARCHAR(50)=NULL,
+    @ShowHidden BIT=1
 )
 AS
 DECLARE @StatusSQL NVARCHAR(MAX)
@@ -84,7 +85,8 @@ WHERE 1=1
 			WHERE CAST(ss.value as TINYINT) = F.type
 			)' END + '
 ' + @StatusSQL + '
-' + CASE WHEN @DatabaseID IS NULL THEN '' ELSE 'AND F.DatabaseID = @DatabaseID' END 
+' + CASE WHEN @DatabaseID IS NULL THEN '' ELSE 'AND F.DatabaseID = @DatabaseID' END + '
+' + CASE WHEN @ShowHidden=1 THEN '' ELSE 'AND F.ShowInSummary=1' END
 
 PRINT @SQL
 EXEC sp_executesql @SQL,N'@InstanceIDs VARCHAR(MAX), @DatabaseID INT, @Types VARCHAR(50)', @InstanceIDs, @DatabaseID, @Types

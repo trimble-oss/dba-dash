@@ -25,7 +25,7 @@ namespace DBADashGUI.Changes
                 cn.Open();
                 cmd.Parameters.AddWithValue("@InstanceIDs", string.Join(",", InstanceIDs));
                 cmd.Parameters.AddWithValue("@ConfiguredOnly", configuredOnlyToolStripMenuItem.Checked);
-
+                cmd.Parameters.AddWithValue("ShowHidden", InstanceIDs.Count == 1 ? true : Common.ShowHidden);
                 DataTable dt = new();
                 da.Fill(dt);
                 return dt;
@@ -71,7 +71,6 @@ namespace DBADashGUI.Changes
             }
             dgvConfig.Rows.AddRange(rows.ToArray());
             dgvConfig.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
-
         }
 
         private void ConfiguredOnlyToolStripMenuItem_Click(object sender, EventArgs e)

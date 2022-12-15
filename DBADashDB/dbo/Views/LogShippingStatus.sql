@@ -19,7 +19,8 @@ SELECT I.InstanceID,
 	CASE WHEN utc.create_date_utc > DATEADD(mi,-cfg.NewDatabaseExcludePeriodMin,GETUTCDATE()) THEN 'N/A (New Database)' WHEN chk.Status = 1 THEN 'Critical' WHEN chk.Status = 2 THEN 'Warning' WHEN chk.Status = 3 THEN 'N/A' WHEN chk.Status = 4 THEN 'OK' ELSE 'N/A' END AS StatusDescription,
 	LR.last_file,
 	D.state_desc,
-	CASE WHEN cfg.InstanceID=D.InstanceID AND cfg.DatabaseID=D.DatabaseID THEN 'Database' WHEN cfg.InstanceID = D.InstanceID THEN 'Instance' ELSE 'Root' END AS ThresholdConfiguredLevel
+	CASE WHEN cfg.InstanceID=D.InstanceID AND cfg.DatabaseID=D.DatabaseID THEN 'Database' WHEN cfg.InstanceID = D.InstanceID THEN 'Instance' ELSE 'Root' END AS ThresholdConfiguredLevel,
+	I.ShowInSummary
 FROM dbo.Instances I 
 JOIN dbo.Databases D ON I.InstanceID = D.InstanceID
 JOIN dbo.CollectionDatesStatus SSD ON SSD.InstanceID = I.InstanceID AND SSD.Reference='LogRestores'

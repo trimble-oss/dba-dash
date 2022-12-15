@@ -1,5 +1,6 @@
 ﻿CREATE PROC dbo.ResourceGovernorConfiguration_Get(
-	@InstanceIDs VARCHAR(MAX)=NULL
+	@InstanceIDs VARCHAR(MAX)=NULL,
+	@ShowHidden BIT=1
 )
 AS
 DECLARE @Instances TABLE(
@@ -44,3 +45,4 @@ WHERE EXISTS(SELECT 1
 			FROM @Instances t 
 			WHERE I.InstanceID = t.InstanceID
 			)
+AND (I.ShowInSummary=1 OR @ShowHidden=1)

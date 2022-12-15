@@ -12,9 +12,9 @@ namespace DBADashGUI.Performance
 {
     public partial class PerformanceSummary : UserControl, ISetContext, IRefreshData
     {
-
         //public List<Int32> InstanceIDs;
         private DBADashContext context;
+
         //public string TagIDs;
         private readonly List<KeyValuePair<string, PersistedColumnLayout>> standardLayout;
 
@@ -27,7 +27,6 @@ namespace DBADashGUI.Performance
             standardLayout = dgv.GetColumnLayout();
         }
 
-
         public void SetContext(DBADashContext context)
         {
             this.context = context;
@@ -36,7 +35,6 @@ namespace DBADashGUI.Performance
 
         public void RefreshData()
         {
-
             MigratePerformanceSummaryView();
             savedViewMenuItem1.LoadItemsAndSelectDefault();
 
@@ -53,7 +51,6 @@ namespace DBADashGUI.Performance
             {
                 LoadPersistedColumnLayout(selectedview.ColumnLayout);
             }
-
         }
 
         private void AddPerformanceCounterColsToGrid()
@@ -91,7 +88,7 @@ namespace DBADashGUI.Performance
             }
         }
 
-        void AddPerformanceCounters(ref DataTable dt)
+        private void AddPerformanceCounters(ref DataTable dt)
         {
             AddPerformanceCounterColsToGrid();
             AddPerformanceCounterColsToTable(ref dt);
@@ -145,7 +142,7 @@ namespace DBADashGUI.Performance
             }
         }
 
-        DataTable GetPerformanceCounters()
+        private DataTable GetPerformanceCounters()
         {
             using (var cn = new SqlConnection(Common.ConnectionString))
             using (var cmd = new SqlCommand("dbo.PerformanceCounterSummary_Get", cn) { CommandType = CommandType.StoredProcedure, CommandTimeout = Properties.Settings.Default.CommandTimeout })
@@ -168,14 +165,14 @@ namespace DBADashGUI.Performance
                 {
                     cmd.Parameters.AddWithValue("DaysOfWeek", DateRange.DayOfWeek.AsDataTable());
                 }
+                cmd.Parameters.AddWithValue("ShowHidden", context.InstanceIDs.Count == 1 || Common.ShowHidden);
                 DataTable dt = new();
                 da.Fill(dt);
                 return dt;
             }
         }
 
-
-        DataTable GetPerformanceSummary()
+        private DataTable GetPerformanceSummary()
         {
             using (var cn = new SqlConnection(Common.ConnectionString))
             using (var cmd = new SqlCommand("dbo.PerformanceSummary_Get", cn) { CommandType = CommandType.StoredProcedure, CommandTimeout = Properties.Settings.Default.CommandTimeout })
@@ -196,6 +193,7 @@ namespace DBADashGUI.Performance
                 {
                     cmd.Parameters.AddWithValue("DaysOfWeek", DateRange.DayOfWeek.AsDataTable());
                 }
+                cmd.Parameters.AddWithValue("ShowHidden", context.InstanceIDs.Count == 1 || Common.ShowHidden);
                 DataTable dt = new();
                 var pkCols = new DataColumn[1];
                 pkCols[0] = dt.Columns.Add("InstanceID", typeof(int));
@@ -204,7 +202,6 @@ namespace DBADashGUI.Performance
                 return dt;
             }
         }
-
 
         private void GenerateHistogram(ref DataTable dt)
         {
@@ -227,13 +224,11 @@ namespace DBADashGUI.Performance
                         }
                         row["CPUHistogram"] = Histogram.GetHistogram(hist, 200, 100, true);
                         row["CPUHistogramToolTip"] = sbToolTip.ToString();
-
                     }
                     else
                     {
                         row["CPUHistogram"] = new Bitmap(1, 1);
                     }
-
                 }
                 dgv.DataSource = new DataView(dt);
             }
@@ -244,7 +239,6 @@ namespace DBADashGUI.Performance
             Common.StyleGrid(ref dgv);
             AddHistCols(dgv, "col");
         }
-
 
         /// <summary>
         /// Migrate legacy saved view from Properties.Settings.Default to database
@@ -307,16 +301,12 @@ namespace DBADashGUI.Performance
                 };
                 dgv.Columns.Add(col);
             }
-
-
         }
-
 
         private void TsRefresh_Click(object sender, EventArgs e)
         {
             RefreshData();
         }
-
 
         private void Dgv_RowsAdded(object sender, DataGridViewRowsAddedEventArgs e)
         {
@@ -360,7 +350,6 @@ namespace DBADashGUI.Performance
                     r.Cells["colCPUHistogram"].ToolTipText = row["CPUHistogramTooltip"] == DBNull.Value ? "" : (string)row["CPUHistogramTooltip"];
                 }
             }
-
         }
 
         private void TsCopy_Click(object sender, EventArgs e)
@@ -386,7 +375,6 @@ namespace DBADashGUI.Performance
         }
 
         public event EventHandler<InstanceSelectedEventArgs> Instance_Selected;
-
 
         private void Dgv_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
@@ -462,7 +450,6 @@ namespace DBADashGUI.Performance
 
         private void TsSave_Click(object sender, EventArgs e)
         {
-
             using (SaveViewPrompt frm = new())
             {
                 frm.ShowDialog();

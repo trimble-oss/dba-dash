@@ -3,7 +3,8 @@
 		@IncludeCritical BIT=1,
 		@IncludeWarning BIT=1,
 		@IncludeNA BIT=0,
-		@IncludeOK BIT=0
+		@IncludeOK BIT=0,
+		@ShowHidden BIT=1
 )
 AS
 DECLARE @Instances TABLE(
@@ -62,5 +63,6 @@ FROM dbo.LogShippingStatus LSS
 CROSS APPLY dbo.ParseFileName(LSS.last_file) f
 WHERE EXISTS(SELECT 1 FROM @Instances I WHERE I.InstanceID = LSS.InstanceID)
 AND EXISTS(SELECT 1 FROM Statuses s WHERE LSS.Status=s.Status)
+AND (LSS.ShowInSummary=1 OR @ShowHidden=1)
 ORDER BY LSS.Status,LSS.TotalTimeBehind DESC
 OPTION(RECOMPILE)

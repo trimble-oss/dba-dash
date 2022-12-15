@@ -118,7 +118,8 @@ SELECT I.InstanceID,
 	f.LogBackupExcludedReason,
 	B.FullCompressionAlgorithm,
 	B.DiffCompressionAlgorithm,
-	B.LogCompressionAlgorithm	
+	B.LogCompressionAlgorithm,
+	I.ShowInSummary
 FROM dbo.Databases d 
 JOIN dbo.Instances I ON d.InstanceID = I.InstanceID
 JOIN dbo.CollectionDatesStatus SSD ON SSD.InstanceID = I.InstanceID AND SSD.Reference='Backups'

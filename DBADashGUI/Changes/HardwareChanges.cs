@@ -14,7 +14,6 @@ namespace DBADashGUI
             InitializeComponent();
         }
 
-
         private List<Int32> InstanceIDs;
 
         public void SetContext(DBADashContext context)
@@ -39,6 +38,7 @@ namespace DBADashGUI
             {
                 cn.Open();
                 cmd.Parameters.AddWithValue("@InstanceIDs", string.Join(",", InstanceIDs));
+                cmd.Parameters.AddWithValue("ShowHidden", InstanceIDs.Count == 1 ? true : Common.ShowHidden);
                 DataTable dt = new();
                 da.Fill(dt);
                 DateHelper.ConvertUTCToAppTimeZone(ref dt);
@@ -46,7 +46,6 @@ namespace DBADashGUI
                 dgv.DataSource = dt;
                 dgv.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
             }
-
         }
 
         private void RefreshHardware()
@@ -57,6 +56,7 @@ namespace DBADashGUI
             {
                 cn.Open();
                 cmd.Parameters.AddWithValue("@InstanceIDs", string.Join(",", InstanceIDs));
+                cmd.Parameters.AddWithValue("ShowHidden", InstanceIDs.Count == 1 ? true : Common.ShowHidden);
                 DataTable dt = new();
                 da.Fill(dt);
                 dgvHardware.AutoGenerateColumns = false;
@@ -103,7 +103,6 @@ namespace DBADashGUI
                 r.Cells[colPowerPlan.Index].SetStatusColor(ppStatus);
                 r.Cells[colInstantFileInitialization.Index].SetStatusColor(ifiStatus);
             }
-
         }
 
         private void TsExcelHistory_Click(object sender, EventArgs e)

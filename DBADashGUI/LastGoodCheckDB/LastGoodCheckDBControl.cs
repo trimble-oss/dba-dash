@@ -5,11 +5,13 @@ using System.Data;
 using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
+
 namespace DBADashGUI.LastGoodCheckDB
 {
     public partial class LastGoodCheckDBControl : UserControl, ISetContext
     {
         private List<Int32> InstanceIDs;
+
         public bool IncludeCritical
         {
             get
@@ -33,6 +35,7 @@ namespace DBADashGUI.LastGoodCheckDB
                 warningToolStripMenuItem.Checked = value;
             }
         }
+
         public bool IncludeNA
         {
             get
@@ -44,6 +47,7 @@ namespace DBADashGUI.LastGoodCheckDB
                 undefinedToolStripMenuItem.Checked = value;
             }
         }
+
         public bool IncludeOK
         {
             get
@@ -83,6 +87,7 @@ namespace DBADashGUI.LastGoodCheckDB
                 cmd.Parameters.AddWithValue("IncludeWarning", IncludeWarning);
                 cmd.Parameters.AddWithValue("IncludeOK", IncludeOK);
                 cmd.Parameters.AddWithValue("IncludeNA", IncludeNA);
+                cmd.Parameters.AddWithValue("ShowHidden", InstanceIDs.Count == 1 || Common.ShowHidden);
 
                 DataTable dt = new();
                 da.Fill(dt);
@@ -90,7 +95,6 @@ namespace DBADashGUI.LastGoodCheckDB
                 dgvLastGoodCheckDB.AutoGenerateColumns = false;
                 dgvLastGoodCheckDB.DataSource = new DataView(dt);
                 dgvLastGoodCheckDB.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
-
             }
             configureInstanceThresholdsToolStripMenuItem.Enabled = InstanceIDs.Count == 1;
         }
@@ -161,7 +165,6 @@ namespace DBADashGUI.LastGoodCheckDB
             }
         }
 
-
         private void ConfigureInstanceThresholdsToolStripMenuItem_Click(object sender, EventArgs e)
         {
             if (InstanceIDs.Count == 1)
@@ -199,7 +202,4 @@ namespace DBADashGUI.LastGoodCheckDB
             Common.StyleGrid(ref dgvLastGoodCheckDB);
         }
     }
-
-
-
 }

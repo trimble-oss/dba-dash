@@ -2,7 +2,8 @@
 	@InstanceIDs VARCHAR(MAX)=NULL,
 	@LastOccurrenceFrom DATETIME2(3)=NULL, 
 	@LastOccurrenceTo DATETIME2(3)=NULL, 
-	@IsCritical BIT=NULL
+	@IsCritical BIT=NULL,
+	@ShowHidden BIT=1
 )
 AS
 DECLARE @Instances TABLE(
@@ -54,4 +55,5 @@ WHERE EXISTS(SELECT 1 FROM @Instances I WHERE I.InstanceID = A.InstanceID)
 AND (A.last_occurrence_utc>=@LastOccurrenceFrom OR @LastOccurrenceFrom IS NULL)
 AND (A.last_occurrence_utc< @LastOccurrenceTo OR @LastOccurrenceTo IS NULL)
 AND (A.IsCriticalAlert=@IsCritical OR @IsCritical IS NULL)
+AND (A.ShowInSummary=1 OR @ShowHidden=1)
 ORDER BY [Last Occurrence] DESC

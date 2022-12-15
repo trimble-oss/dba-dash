@@ -1,5 +1,6 @@
 ﻿CREATE PROC dbo.HostUpgradeHistory_Get(
-	@InstanceIDs VARCHAR(MAX)=NULL
+	@InstanceIDs VARCHAR(MAX)=NULL,
+	@ShowHidden BIT=1
 )
 AS
 DECLARE @Instances TABLE(
@@ -47,5 +48,10 @@ SELECT I.Instance,
 	   HUH.physical_memory_kb_new/POWER(1024.0,2) AS physical_memory_gb_new
 FROM dbo.HostUpgradeHistory HUH
     JOIN dbo.Instances I ON HUH.InstanceID = I.InstanceID
-WHERE EXISTS(SELECT 1 FROM @Instances t WHERE t.InstanceID = HUH.InstanceID)
+WHERE EXISTS(
+			SELECT 1 
+			FROM @Instances t 
+			WHERE t.InstanceID = HUH.InstanceID
+			)
+AND (I.ShowInSummary=1 OR @ShowHidden=1)
 ORDER BY HUH.ChangeDate DESC;

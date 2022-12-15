@@ -1,6 +1,7 @@
 ﻿CREATE PROC dbo.Configuration_Get(
 	@InstanceIDs VARCHAR(MAX)=NULL,
-	@ConfiguredOnly BIT=0
+	@ConfiguredOnly BIT=0,
+	@ShowHidden BIT=1
 )
 AS
 DECLARE @Instances TABLE(
@@ -41,6 +42,7 @@ WITH T AS (
 	JOIN dbo.SysConfigOptions SCO ON SC.configuration_id = SCO.configuration_id
 	WHERE EXISTS(SELECT 1 FROM @Instances t WHERE I.InstanceID = t.InstanceID)
 	AND I.IsActive=1
+	AND (I.ShowInSummary=1 OR @ShowHidden=1)
 )
 SELECT T.Instance,
        T.ConnectionID,

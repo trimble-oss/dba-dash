@@ -1,7 +1,8 @@
 ﻿CREATE PROC dbo.DBConfiguration_Get(
 	@InstanceIDs VARCHAR(MAX)=NULL,
 	@ConfiguredOnly BIT=0,
-	@DatabaseID INT=NULL
+	@DatabaseID INT=NULL,
+	@ShowHidden BIT=1
 )
 AS
 DECLARE @Instances TABLE(
@@ -48,6 +49,7 @@ WITH T AS (
 				FROM @Instances t 
 				WHERE t.InstanceID = I.InstanceID)
 	AND (D.DatabaseID = @DatabaseID OR @DatabaseID IS NULL)
+	AND (I.ShowInSummary=1 OR @ShowHidden=1)
 )
 SELECT T.InstanceGroupName,
        T.DB,

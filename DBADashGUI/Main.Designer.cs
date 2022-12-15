@@ -42,6 +42,7 @@
             this.configureDisplayNameToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.dataRetentionToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.freezeKeyColumnsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.showHiddenToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.manageInstancesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.saveTimeZonePreferenceToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.tsTime = new System.Windows.Forms.ToolStripDropDownButton();
@@ -359,6 +360,7 @@
             this.configureDisplayNameToolStripMenuItem,
             this.dataRetentionToolStripMenuItem,
             this.freezeKeyColumnsToolStripMenuItem,
+            this.showHiddenToolStripMenuItem,
             this.manageInstancesToolStripMenuItem,
             this.saveTimeZonePreferenceToolStripMenuItem});
             this.optionsToolStripMenuItem.Image = global::DBADashGUI.Properties.Resources.SettingsOutline_16x;
@@ -390,6 +392,14 @@
             this.freezeKeyColumnsToolStripMenuItem.Text = "Freeze Key Columns";
             this.freezeKeyColumnsToolStripMenuItem.ToolTipText = "Keep the key column(s) in the grid visible as you scroll to the right";
             this.freezeKeyColumnsToolStripMenuItem.Click += new System.EventHandler(this.FreezeKeyColumnsToolStripMenuItem_Click);
+            // 
+            // showHiddenToolStripMenuItem
+            // 
+            this.showHiddenToolStripMenuItem.CheckOnClick = true;
+            this.showHiddenToolStripMenuItem.Name = "showHiddenToolStripMenuItem";
+            this.showHiddenToolStripMenuItem.Size = new System.Drawing.Size(268, 26);
+            this.showHiddenToolStripMenuItem.Text = "Show Hidden";
+            this.showHiddenToolStripMenuItem.CheckStateChanged += new System.EventHandler(this.ShowHidden_Changed);
             // 
             // manageInstancesToolStripMenuItem
             // 
@@ -2514,5 +2524,6 @@
         private System.Windows.Forms.ToolStripDropDownButton groupToolStripMenuItem;
         private System.Windows.Forms.ToolStripComboBox cboTimeZone;
         private System.Windows.Forms.ToolStripMenuItem saveTimeZonePreferenceToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem showHiddenToolStripMenuItem;
     }
 }
