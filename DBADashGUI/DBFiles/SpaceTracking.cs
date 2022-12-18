@@ -61,7 +61,7 @@ namespace DBADashGUI
                 {
                     cmd.Parameters.AddWithValue("@DBName", DBName);
                 }
-                cmd.Parameters.AddWithValue("ShowHidden", InstanceIDs.Count == 1 ? true : Common.ShowHidden);
+                cmd.Parameters.AddWithValue("ShowHidden", InstanceIDs.Count == 1 || Common.ShowHidden);
                 DataTable dt = new();
                 da.Fill(dt);
 
@@ -245,7 +245,7 @@ namespace DBADashGUI
         {
             dgv.Columns.Clear();
             dgv.Columns.AddRange(
-                new DataGridViewLinkColumn() { Name = "colName", DataPropertyName = "Grp", HeaderText = "Name" },
+                new DataGridViewLinkColumn() { Name = "colName", DataPropertyName = "Grp", HeaderText = "Name", SortMode = DataGridViewColumnSortMode.Automatic },
                 new DataGridViewTextBoxColumn() { Name = "colAllocatedGB", DataPropertyName = "AllocatedGB", HeaderText = "Allocated (GB)", DefaultCellStyle = Common.DataGridViewCellStyle("N1"), Visible = true },
                 new DataGridViewTextBoxColumn() { Name = "colUsedGB", DataPropertyName = "UsedGB", HeaderText = "Used (GB)", DefaultCellStyle = Common.DataGridViewCellStyle("N1"), Visible = true },
                 new DataGridViewTextBoxColumn() { Name = "colAllocatedMB", DataPropertyName = "AllocatedMB", HeaderText = "Allocated (MB)", DefaultCellStyle = Common.DataGridViewCellStyle("N1"), Visible = false },
