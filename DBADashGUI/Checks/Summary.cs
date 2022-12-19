@@ -35,7 +35,7 @@ namespace DBADashGUI
 
         private bool FocusedView { get => focusedViewToolStripMenuItem.Checked; }
         private DBADashContext context;
-        private bool IncludeHidden => context.InstanceIDs.Count == 1 || Common.ShowHidden;
+        private bool ShowHidden => context.InstanceIDs.Count == 1 || Common.ShowHidden;
 
         private readonly Dictionary<string, string> tabMapping = new() { { "FullBackupStatus", "tabBackups" }, { "LogShippingStatus", "tabLogShipping" }, { "DiffBackupStatus", "tabBackups" }, { "LogBackupStatus", "tabBackups" }, { "DriveStatus", "tabDrives" },
                                                             { "JobStatus", "tabJobs" }, { "CollectionErrorStatus", "tabDBADashErrorLog"}, { "AGStatus", "tabAG" }, {"LastGoodCheckDBStatus","tabLastGood"}, {"SnapshotAgeStatus","tabCollectionDates"  },
@@ -63,7 +63,7 @@ namespace DBADashGUI
                     cn.Open();
 
                     cmd.Parameters.AddWithValue("InstanceIDs", string.Join(",", context.InstanceIDs));
-                    cmd.Parameters.AddWithValue("IncludeHidden", IncludeHidden);
+                    cmd.Parameters.AddWithValue("ShowHidden", ShowHidden);
                     DataTable dt = new();
                     da.Fill(dt);
                     return dt;
@@ -267,7 +267,7 @@ namespace DBADashGUI
                 row["IsFocusedRow"] = isFocusedRow;
             }
             dgvSummary.Invoke(() => SetStatusColumnVisiblity());
-            dgvSummary.Invoke((Action)(() => colShowInSummary.Visible = IncludeHidden));
+            dgvSummary.Invoke((Action)(() => colHidden.Visible = ShowHidden));
 
             dv = new DataView(dt, SummaryRowFilter, "Instance", DataViewRowState.CurrentRows);
             dgvSummary.Invoke((Action)(() =>
