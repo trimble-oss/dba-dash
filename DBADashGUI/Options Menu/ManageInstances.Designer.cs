@@ -47,7 +47,7 @@
             this.colInstance = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.colIsAzure = new System.Windows.Forms.DataGridViewCheckBoxColumn();
             this.colDeleteRestore = new System.Windows.Forms.DataGridViewLinkColumn();
-            this.colShowInSummary = new System.Windows.Forms.DataGridViewCheckBoxColumn();
+            this.colHidden = new System.Windows.Forms.DataGridViewCheckBoxColumn();
             ((System.ComponentModel.ISupportInitialize)(this.dgv)).BeginInit();
             this.toolStrip1.SuspendLayout();
             this.statusStrip1.SuspendLayout();
@@ -63,7 +63,7 @@
             this.colInstance,
             this.colIsAzure,
             this.colDeleteRestore,
-            this.colShowInSummary});
+            this.colHidden});
             this.dgv.Dock = System.Windows.Forms.DockStyle.Fill;
             this.dgv.Location = new System.Drawing.Point(0, 27);
             this.dgv.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
@@ -219,15 +219,16 @@
             this.colDeleteRestore.Name = "colDeleteRestore";
             this.colDeleteRestore.Width = 109;
             // 
-            // colShowInSummary
+            // colHidden
             // 
-            this.colShowInSummary.DataPropertyName = "ShowInSummary";
-            this.colShowInSummary.HeaderText = "Show In Summary?";
-            this.colShowInSummary.MinimumWidth = 6;
-            this.colShowInSummary.Name = "colShowInSummary";
-            this.colShowInSummary.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
-            this.colShowInSummary.ToolTipText = "Uncheck to hide instance from Summary tab and other tabs at root level";
-            this.colShowInSummary.Width = 125;
+            this.colHidden.DataPropertyName = "IsHidden";
+            this.colHidden.HeaderText = "Hidden";
+            this.colHidden.MinimumWidth = 6;
+            this.colHidden.Name = "colHidden";
+            this.colHidden.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
+            this.colHidden.ToolTipText = "Check to hide instance.  Instance won\'t be shown by default at root level but wil" +
+    "l still be available in the tree.";
+            this.colHidden.Width = 125;
             // 
             // ManageInstances
             // 
@@ -271,6 +272,6 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn colInstance;
         private System.Windows.Forms.DataGridViewCheckBoxColumn colIsAzure;
         private System.Windows.Forms.DataGridViewLinkColumn colDeleteRestore;
-        private System.Windows.Forms.DataGridViewCheckBoxColumn colShowInSummary;
+        private System.Windows.Forms.DataGridViewCheckBoxColumn colHidden;
     }
 }

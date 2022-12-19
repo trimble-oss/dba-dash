@@ -20,6 +20,7 @@ SELECT  I.InstanceID,
 	I.InstanceDisplayName,
 	I.InstanceGroupName,
 	I.ShowInSummary,
+	~I.ShowInSummary AS IsHidden,
 	' + CASE WHEN @GroupByTag IS NULL THEN 'CAST(NULL AS NVARCHAR(128)) as TagGroup' ELSE 'ISNULL(T.TagValue,''[N/A]'') AS TagGroup' END + '
 FROM dbo.InstancesMatchingTags(@TagIDs) I
 LEFT JOIN dbo.Databases D ON D.InstanceID = I.InstanceID AND I.EngineEdition = 5 AND D.IsActive=1

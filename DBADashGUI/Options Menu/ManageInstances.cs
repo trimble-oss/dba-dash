@@ -96,12 +96,11 @@ namespace DBADashGUI
                 activeFlagChanged = true;
 
             }
-            else if (e.RowIndex >= 0 && e.ColumnIndex == colShowInSummary.Index)
+            else if (e.RowIndex >= 0 && e.ColumnIndex == colHidden.Index)
             {
                 dgv.CommitEdit(DataGridViewDataErrorContexts.Commit); // Trigger cell value to change so we can process the update
             }
         }
-
 
         private void TxtSearch_TextChanged(object sender, EventArgs e)
         {
@@ -154,13 +153,13 @@ namespace DBADashGUI
 
         private void Dgv_CellValueChanged(object sender, DataGridViewCellEventArgs e)
         {
-            if (e.RowIndex >= 0 && e.ColumnIndex == colShowInSummary.Index)
+            if (e.RowIndex >= 0 && e.ColumnIndex == colHidden.Index)
             {
                 try
                 {
                     var row = (DataRowView)dgv.Rows[e.RowIndex].DataBoundItem;
                     var InstanceID = (Int32)row["InstanceID"];
-                    var showInSummary = (bool)row["ShowInSummary"];
+                    var showInSummary = !(bool)row["IsHidden"];
 
                     UpdateShowInSummary(InstanceID, showInSummary);
                 }
