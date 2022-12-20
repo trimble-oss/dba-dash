@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Data.SqlClient;
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Drawing;
@@ -119,6 +120,49 @@ namespace DBADashGUI
         internal static SQLTreeItem AsSQLTreeItem(this TreeNode value)
         {
             return (SQLTreeItem)value;
+        }
+
+        /// <summary>
+        /// Add Guid SqlParameter to the collection only if parameter value is not empty
+        /// </summary>
+        /// <param name="p"></param>
+        /// <param name="name">Name of parameter</param>
+        /// <param name="value">Parameter value</param>
+        internal static SqlParameter AddGuidIfNotEmpty(this SqlParameterCollection p, string name, Guid value)
+        {
+            if (value != Guid.Empty)
+            {
+                return p.AddWithValue(name, value);
+            }
+            return null;
+        }
+
+        /// <summary>
+        /// Add Guid SqlParameter to the collection only if parameter value is not null or empty
+        /// </summary>
+        /// <param name="p"></param>
+        /// <param name="name">Name of parameter</param>
+        /// <param name="value">Parameter value</param>
+        internal static SqlParameter AddStringIfNotNullOrEmpty(this SqlParameterCollection p, string name, string value)
+        {
+            if (!string.IsNullOrEmpty(value))
+            {
+                return p.AddWithValue(name, value);
+            }
+            return null;
+        }
+
+        /// <summary>
+        /// Check a single ToolStripMenuItem.  Other menu items to be unchecked
+        /// </summary>
+        /// <param name="dropdown"></param>
+        /// <param name="checkedItem">Item to be checked.  Other drop down items will be unchecked</param>
+        internal static void CheckSingleItem(this ToolStripDropDownButton dropdown, ToolStripMenuItem checkedItem)
+        {
+            foreach (ToolStripMenuItem mnu in dropdown.DropDownItems.OfType<ToolStripMenuItem>())
+            {
+                mnu.Checked = mnu == checkedItem;
+            }
         }
     }
 }

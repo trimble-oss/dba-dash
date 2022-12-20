@@ -190,6 +190,8 @@
             this.identityColumns1 = new DBADashGUI.Checks.IdentityColumns();
             this.tabOSLoadedModules = new System.Windows.Forms.TabPage();
             this.osLoadedModules1 = new DBADashGUI.Checks.OSLoadedModules();
+            this.tabJobTimeline = new System.Windows.Forms.TabPage();
+            this.jobTimeline1 = new DBADashGUI.AgentJobs.JobTimeline();
             this.refresh1 = new DBADashGUI.Refresh();
             this.dataGridViewTextBoxColumn1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dataGridViewTextBoxColumn2 = new System.Windows.Forms.DataGridViewTextBoxColumn();
@@ -273,6 +275,7 @@
             this.tabDBADash.SuspendLayout();
             this.tabIdentityColumns.SuspendLayout();
             this.tabOSLoadedModules.SuspendLayout();
+            this.tabJobTimeline.SuspendLayout();
             this.SuspendLayout();
             // 
             // TreeViewImageList
@@ -823,6 +826,7 @@
             this.tabs.Controls.Add(this.tabDBADash);
             this.tabs.Controls.Add(this.tabIdentityColumns);
             this.tabs.Controls.Add(this.tabOSLoadedModules);
+            this.tabs.Controls.Add(this.tabJobTimeline);
             this.tabs.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tabs.Location = new System.Drawing.Point(0, 0);
             this.tabs.Name = "tabs";
@@ -1090,6 +1094,7 @@
             // 
             // tags1
             // 
+            this.tags1.AllTags = null;
             this.tags1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tags1.Location = new System.Drawing.Point(3, 3);
             this.tags1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
@@ -2020,6 +2025,26 @@
             this.osLoadedModules1.Size = new System.Drawing.Size(186, 61);
             this.osLoadedModules1.TabIndex = 0;
             // 
+            // tabJobTimeline
+            // 
+            this.tabJobTimeline.Controls.Add(this.jobTimeline1);
+            this.tabJobTimeline.Location = new System.Drawing.Point(4, 25);
+            this.tabJobTimeline.Name = "tabJobTimeline";
+            this.tabJobTimeline.Padding = new System.Windows.Forms.Padding(3);
+            this.tabJobTimeline.Size = new System.Drawing.Size(1631, 1246);
+            this.tabJobTimeline.TabIndex = 45;
+            this.tabJobTimeline.Text = "Timeline";
+            this.tabJobTimeline.UseVisualStyleBackColor = true;
+            // 
+            // jobTimeline1
+            // 
+            this.jobTimeline1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.jobTimeline1.Location = new System.Drawing.Point(3, 3);
+            this.jobTimeline1.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.jobTimeline1.Name = "jobTimeline1";
+            this.jobTimeline1.Size = new System.Drawing.Size(1625, 1240);
+            this.jobTimeline1.TabIndex = 0;
+            // 
             // refresh1
             // 
             this.refresh1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(99)))), ((int)(((byte)(163)))));
@@ -2337,6 +2362,7 @@
             this.tabDBADash.ResumeLayout(false);
             this.tabIdentityColumns.ResumeLayout(false);
             this.tabOSLoadedModules.ResumeLayout(false);
+            this.tabJobTimeline.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
@@ -2525,5 +2551,7 @@
         private System.Windows.Forms.ToolStripComboBox cboTimeZone;
         private System.Windows.Forms.ToolStripMenuItem saveTimeZonePreferenceToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem showHiddenToolStripMenuItem;
+        private System.Windows.Forms.TabPage tabJobTimeline;
+        private AgentJobs.JobTimeline jobTimeline1;
     }
 }

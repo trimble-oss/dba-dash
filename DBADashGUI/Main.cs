@@ -42,7 +42,7 @@ namespace DBADashGUI
         private bool suppressLoadTab = false;
         private bool CurrentTabSupportsDayOfWeekFilter { get => (new List<TabPage>() { tabPerformanceSummary, tabPerformance, tabPC, tabObjectExecutionSummary, tabWaits }).Contains(tabs.SelectedTab); }
         private bool CurrentTabSupportsTimeOfDayFilter { get => (new List<TabPage>() { tabPerformanceSummary, tabPerformance, tabPC, tabObjectExecutionSummary, tabWaits }).Contains(tabs.SelectedTab); }
-        private bool GlobalTimeIsVisible { get => (new List<TabPage>() { tabPerformanceSummary, tabPerformance, tabSlowQueries, tabAzureDB, tabAzureSummary, tabPC, tabObjectExecutionSummary, tabWaits, tabRunningQueries, tabMemory, tabJobStats }).Contains(tabs.SelectedTab); }
+        private bool GlobalTimeIsVisible { get => (new List<TabPage>() { tabPerformanceSummary, tabPerformance, tabSlowQueries, tabAzureDB, tabAzureSummary, tabPC, tabObjectExecutionSummary, tabWaits, tabRunningQueries, tabMemory, tabJobStats, tabJobTimeline }).Contains(tabs.SelectedTab); }
 
         private bool IsAzureOnly;
         private bool ShowCounts = false;
@@ -522,11 +522,11 @@ namespace DBADashGUI
             }
             else if (n.Type == SQLTreeItem.TreeType.AgentJobs)
             {
-                allowedTabs.AddRange(new TabPage[] { tabJobs, tabJobStats });
+                allowedTabs.AddRange(new TabPage[] { tabJobs, tabJobStats, tabJobTimeline });
             }
             else if (n.Type == SQLTreeItem.TreeType.AgentJob)
             {
-                allowedTabs.AddRange(new TabPage[] { tabJobs, tabJobDDL, tabJobStats });
+                allowedTabs.AddRange(new TabPage[] { tabJobs, tabJobDDL, tabJobStats, tabJobTimeline });
             }
             else if (n.Type == SQLTreeItem.TreeType.HADR)
             {
@@ -957,7 +957,7 @@ namespace DBADashGUI
             var root = tv1.SelectedSQLTreeItem();
 
             SQLTreeItem nInstance;
-            
+
             if (e.InstanceID <= 0 && string.IsNullOrEmpty(e.Instance)) // No Instance - Use root Level
             {
                 nInstance = tv1.Nodes[0].AsSQLTreeItem();
@@ -977,7 +977,7 @@ namespace DBADashGUI
                 try
                 {
                     var parent = nInstance.Parent;
-                    if (parent !=null && !parent.IsExpanded)
+                    if (parent != null && !parent.IsExpanded)
                     {
                         parent.Expand();
                     }
@@ -996,7 +996,7 @@ namespace DBADashGUI
                         nInstance.Expand();
                         tv1.SelectedNode = nInstance.Nodes[1];
                     }
-                    else if (e.Tab == "tabJobs" && parent !=null) // Instance Level Jobs tab
+                    else if (e.Tab == "tabJobs" && parent != null) // Instance Level Jobs tab
                     {
                         nInstance.Expand();
                         tv1.SelectedNode = nInstance.LastNode;
