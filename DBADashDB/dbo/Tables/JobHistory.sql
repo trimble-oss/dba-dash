@@ -15,6 +15,7 @@
     [operator_id_paged]   INT              NULL,
     [retries_attempted]   INT              NULL,
     [server]              NVARCHAR (128)   NULL,
+    FinishDateTime AS DATEADD(s,RunDurationSec,RunDateTime),
     CONSTRAINT [PK_JobHistory_InstanceID_instance_id] PRIMARY KEY CLUSTERED ([InstanceID] ASC, [instance_id] ASC, [RunDateTime] ASC),
     CONSTRAINT [FK_Instances] FOREIGN KEY ([InstanceID]) REFERENCES [dbo].[Instances] ([InstanceID])
 ) ON PS_JobHistory(RunDateTime);
