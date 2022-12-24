@@ -19,50 +19,22 @@ namespace DBADashGUI.AgentJobs
 
         public bool IncludeCritical
         {
-            get
-            {
-                return criticalToolStripMenuItem.Checked;
-            }
-            set
-            {
-                criticalToolStripMenuItem.Checked = value;
-            }
+            get => criticalToolStripMenuItem.Checked; set => criticalToolStripMenuItem.Checked = value;
         }
 
         public bool IncludeWarning
         {
-            get
-            {
-                return warningToolStripMenuItem.Checked;
-            }
-            set
-            {
-                warningToolStripMenuItem.Checked = value;
-            }
+            get => warningToolStripMenuItem.Checked; set => warningToolStripMenuItem.Checked = value;
         }
 
         public bool IncludeNA
         {
-            get
-            {
-                return undefinedToolStripMenuItem.Checked;
-            }
-            set
-            {
-                undefinedToolStripMenuItem.Checked = value;
-            }
+            get => undefinedToolStripMenuItem.Checked; set => undefinedToolStripMenuItem.Checked = value;
         }
 
         public bool IncludeOK
         {
-            get
-            {
-                return OKToolStripMenuItem.Checked;
-            }
-            set
-            {
-                OKToolStripMenuItem.Checked = value;
-            }
+            get => OKToolStripMenuItem.Checked; set => OKToolStripMenuItem.Checked = value;
         }
 
         public void SetContext(DBADashContext context)
@@ -128,11 +100,8 @@ namespace DBADashGUI.AgentJobs
                 cmd.Parameters.AddWithValue("IncludeNA", IncludeNA);
                 cmd.Parameters.AddWithValue("IncludeOK", IncludeOK);
                 cmd.Parameters.AddWithValue("ShowHidden", context.RegularInstanceIDs.Count == 1 || Common.ShowHidden);
-                if (context.JobID != Guid.Empty)
-                {
-                    cmd.Parameters.AddWithValue("JobID", context.JobID);
-                }
-                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.Parameters.AddGuidIfNotEmpty("JobID", context.JobID);
+
                 DataTable dt = new();
                 da.Fill(dt);
                 DateHelper.ConvertUTCToAppTimeZone(ref dt);
@@ -234,18 +203,8 @@ namespace DBADashGUI.AgentJobs
                 var dt = new DataTable();
                 cmd.Parameters.AddWithValue("InstanceID", InstanceID);
                 cmd.Parameters.AddWithValue("JobID", JobID);
-                if (StepID != null)
-                {
-                    cmd.Parameters.AddWithValue("StepID", StepID);
-                }
-                else
-                {
-                    cmd.Parameters.AddWithValue("StepID", DBNull.Value);
-                }
-                if (instance_id != null)
-                {
-                    cmd.Parameters.AddWithValue("instance_id", instance_id);
-                }
+                cmd.Parameters.AddWithNullableValue("StepID", StepID);
+                cmd.Parameters.AddWithNullableValue("instance_id", instance_id);
                 cmd.Parameters.AddWithValue("FailedOnly", failedOnly);
                 da.Fill(dt);
                 DateHelper.ConvertUTCToAppTimeZone(ref dt);
@@ -286,22 +245,7 @@ namespace DBADashGUI.AgentJobs
             }
         }
 
-        private void CriticalToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            RefreshData();
-        }
-
-        private void WarningToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            RefreshData();
-        }
-
-        private void UndefinedToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            RefreshData();
-        }
-
-        private void OKToolStripMenuItem_Click(object sender, EventArgs e)
+        private void Status_Selected(object sender, EventArgs e)
         {
             RefreshData();
         }

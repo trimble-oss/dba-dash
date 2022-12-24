@@ -18,32 +18,23 @@ namespace DBADashGUI.Performance
 
         public bool CloseVisible
         {
-            get
-            {
-                return tsClose.Visible;
-            }
-            set
-            {
-                tsClose.Visible = value;
-            }
+            get => tsClose.Visible; set => tsClose.Visible = value;
         }
 
         public event EventHandler<EventArgs> Close;
+
         public event EventHandler<EventArgs> MoveUp;
 
         public Int32 InstanceID { get; set; }
-        Int32 DateGrouping;
-        bool smoothLines = true;
+        private Int32 DateGrouping;
+        private bool smoothLines = true;
         private int durationMins;
 
         public Int32 PointSize;
 
         public bool SmoothLines
         {
-            get
-            {
-                return smoothLines;
-            }
+            get => smoothLines;
             set
             {
                 smoothLines = value;
@@ -57,24 +48,19 @@ namespace DBADashGUI.Performance
                     {
                         ((StackedAreaSeries)s).LineSmoothness = smoothLines ? 1 : 0;
                     }
-
                 }
             }
         }
 
         public bool MoveUpVisible
         {
-            get
-            {
-                return tsUp.Visible;
-            }
-            set
-            {
-                tsUp.Visible = value;
-            }
+            get => tsUp.Visible; set => tsUp.Visible = value;
         }
+
         private CPUMetric _metric = new() { AggregateType = IMetric.AggregateTypes.Avg };
-        public CPUMetric Metric { get => _metric; set { _metric = value; SelectAggregate(); } }
+
+        public CPUMetric Metric
+        { get => _metric; set { _metric = value; SelectAggregate(); } }
 
         IMetric IMetricChart.Metric { get => Metric; }
 
@@ -132,7 +118,6 @@ namespace DBADashGUI.Performance
                     sqlProcessValues.Add(new DateTimePoint(eventTime.ToAppTimeZone(), Decimal.ToDouble((decimal)rdr["SQLProcessCPU"]) / 100.0));
                     otherValues.Add(new DateTimePoint(eventTime.ToAppTimeZone(), Decimal.ToDouble((decimal)rdr["OtherCPU"]) / 100.0));
                     maxValues.Add(new DateTimePoint(eventTime.ToAppTimeZone(), Decimal.ToDouble((decimal)rdr["MaxCPU"]) / 100.0));
-
                 }
 
                 SeriesCollection s1 = new()
@@ -169,7 +154,6 @@ namespace DBADashGUI.Performance
                     LabelFormatter = val => val.ToString("P1"),
                     MaxValue = 1,
                     MinValue = 0,
-
                 });
                 if (maxValues.Count > 1)
                 {
@@ -180,9 +164,7 @@ namespace DBADashGUI.Performance
                     chartCPU.Series.Clear();
                 }
                 UpdateVisibility();
-
             }
-
         }
 
         private void UpdateVisibility()
@@ -214,7 +196,6 @@ namespace DBADashGUI.Performance
         private void CPU_Load(object sender, EventArgs e)
         {
             DateHelper.AddDateGroups(tsDateGrouping, TsDateGrouping_Click);
-
         }
 
         private void TsDateGrouping_Click(object sender, EventArgs e)
@@ -223,7 +204,6 @@ namespace DBADashGUI.Performance
             DateGrouping = Convert.ToInt32(ts.Tag);
             tsDateGrouping.Text = DateHelper.DateGroupString(DateGrouping);
             RefreshData();
-
         }
 
         private void TsClose_Click(object sender, EventArgs e)
@@ -235,7 +215,5 @@ namespace DBADashGUI.Performance
         {
             MoveUp.Invoke(this, new EventArgs());
         }
-
-
     }
 }

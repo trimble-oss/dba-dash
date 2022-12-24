@@ -24,43 +24,32 @@ namespace DBADashGUI.Performance
 
         //public string measure = "TotalDuration";
         public DateTimePoint x;
-        Int32 instanceID;
-        DateTime chartMaxDate = DateTime.MinValue;
 
+        private Int32 instanceID;
+        private DateTime chartMaxDate = DateTime.MinValue;
 
-        Int32 mins;
+        private Int32 mins;
         private Int64 objectID;
-        Int32 databaseid = 0;
+        private Int32 databaseid = 0;
         private Int32 dateGrouping;
+
         public event EventHandler<EventArgs> Close;
+
         public event EventHandler<EventArgs> MoveUp;
 
         public bool CloseVisible
         {
-            get
-            {
-                return tsClose.Visible;
-            }
-            set
-            {
-                tsClose.Visible = value;
-            }
+            get => tsClose.Visible;
+            set => tsClose.Visible = value;
         }
 
         public bool MoveUpVisible
         {
-            get
-            {
-                return tsUp.Visible;
-            }
-            set
-            {
-                tsUp.Visible = value;
-            }
+            get => tsUp.Visible;
+            set => tsUp.Visible = value;
         }
 
         public ObjectExecutionMetric Metric { get; set; } = new();
-
 
         IMetric IMetricChart.Metric { get => Metric; }
 
@@ -90,12 +79,10 @@ namespace DBADashGUI.Performance
 
         public void RefreshData()
         {
-
             objectExecChart.Series.Clear();
             objectExecChart.AxisX.Clear();
             objectExecChart.AxisY.Clear();
             chartMaxDate = DateTime.MinValue;
-
 
             var dt = CommonData.ObjectExecutionStats(instanceID, databaseid, objectID, dateGrouping, Metric.Measure, DateRange.FromUTC, DateRange.ToUTC, "");
 
@@ -132,7 +119,6 @@ namespace DBADashGUI.Performance
 .X(dateModel => dateModel.DateTime.Ticks / TimeSpan.FromMinutes(dateGrouping == 0 ? 1 : dateGrouping).Ticks)
 .Y(dateModel => dateModel.Value);
 
-
             SeriesCollection s1 = new(dayConfig);
             foreach (var x in dPoints)
             {
@@ -161,21 +147,16 @@ namespace DBADashGUI.Performance
             objectExecChart.AxisY.Add(new Axis
             {
                 LabelFormatter = val => val.ToString(measures[Metric.Measure].LabelFormat)
-
             });
-
 
             lblExecution.Text = databaseid > 0 ? "Excution Stats: Database" : "Execution Stats: Instance";
         }
 
         private class Measure
         {
-
             public string Name { get; set; }
             public string DisplayName { get; set; }
             public string LabelFormat { get; set; }
-
-
         }
 
         private class Measures : Dictionary<string, Measure>
@@ -184,7 +165,6 @@ namespace DBADashGUI.Performance
             {
                 Add(Name, new Measure() { Name = Name, DisplayName = displayName, LabelFormat = labelFormat });
             }
-
         }
 
         private readonly Measures measures = new()
@@ -202,7 +182,6 @@ namespace DBADashGUI.Performance
                 {"AvgPhysicalReads","Avg Physical Reads" ,"N0"},
                 {"TotalWrites","Total Writes" ,"N0"},
                 {"AvgWrites","Avg Writes","N0" }
-
             };
 
         private void ObjectExecution_Load(object sender, EventArgs e)
@@ -257,6 +236,5 @@ namespace DBADashGUI.Performance
         {
             MoveUp.Invoke(this, new EventArgs());
         }
-
     }
 }

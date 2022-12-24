@@ -40,15 +40,9 @@ namespace DBADashGUI.Changes
             {
                 cn.Open();
                 cmd.Parameters.AddWithValue("@InstanceIDs", string.Join(",", InstanceIDs));
-                if (provider != "")
-                {
-                    cmd.Parameters.AddWithValue("Provider", provider);
-                }
-                if (searchText != "")
-                {
-                    cmd.Parameters.AddWithValue("DriverSearch", searchText);
-                }
-                cmd.Parameters.AddWithValue("ShowHidden", InstanceIDs.Count == 1 ? true : Common.ShowHidden);
+                cmd.Parameters.AddStringIfNotNullOrEmpty("Provider", provider);
+                cmd.Parameters.AddStringIfNotNullOrEmpty("DriverSearch", searchText);
+                cmd.Parameters.AddWithValue("ShowHidden", InstanceIDs.Count == 1 || Common.ShowHidden);
                 DataTable dt = new();
                 da.Fill(dt);
                 return dt;

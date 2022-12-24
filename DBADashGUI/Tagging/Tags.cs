@@ -20,10 +20,7 @@ namespace DBADashGUI.Tagging
 
         public List<DBADashTag> AllTags
         {
-            get
-            {
-                return _allTags;
-            }
+            get => _allTags;
             set
             {
                 _allTags = value ?? new List<DBADashTag>();

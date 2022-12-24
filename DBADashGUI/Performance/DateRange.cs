@@ -6,28 +6,15 @@ namespace DBADashGUI.Performance
 {
     public static class DateRange
     {
-
         private static int mins = 60;
         private static DateTime customFrom = DateTime.MinValue;
         private static DateTime customTo = DateTime.MinValue;
         private static List<int> timeOfDay = new();
         private static List<int> dayOfWeek = new();
 
-        public static bool CurrentDateRangeSupportsTimeOfDayFilter
-        {
-            get
-            {
-                return DurationMins >= 1440;
-            }
-        }
+        public static bool CurrentDateRangeSupportsTimeOfDayFilter => DurationMins >= 1440;
 
-        public static bool CurrentDateRangeSupportsDayOfWeekFilter
-        {
-            get
-            {
-                return DurationMins >= 10080;
-            }
-        }
+        public static bool CurrentDateRangeSupportsDayOfWeekFilter => DurationMins >= 10080;
 
         public static void SetMins(int minutes)
         {
@@ -36,6 +23,7 @@ namespace DBADashGUI.Performance
             customTo = DateTime.MinValue;
             ResetIfNotSupported();
         }
+
         public static void SetCustom(DateTime fromUTC, DateTime toUTC)
         {
             customFrom = fromUTC;
@@ -66,29 +54,13 @@ namespace DBADashGUI.Performance
             dayOfWeek = new List<int>();
         }
 
+        public static bool HasTimeOfDayFilter => timeOfDay.Count is > 0 and < 24;
 
-        public static bool HasTimeOfDayFilter
-        {
-            get
-            {
-                return timeOfDay.Count is > 0 and < 24;
-            }
-        }
-
-        public static bool HasDayOfWeekFilter
-        {
-            get
-            {
-                return dayOfWeek.Count is > 0 and < 7;
-            }
-        }
+        public static bool HasDayOfWeekFilter => dayOfWeek.Count is > 0 and < 7;
 
         public static List<int> TimeOfDay
         {
-            get
-            {
-                return timeOfDay;
-            }
+            get => timeOfDay;
             set
             {
                 if (value.Count > 24)
@@ -113,10 +85,7 @@ namespace DBADashGUI.Performance
 
         public static List<int> DayOfWeek
         {
-            get
-            {
-                return dayOfWeek;
-            }
+            get => dayOfWeek;
             set
             {
                 if (value.Count > 7)
@@ -139,7 +108,6 @@ namespace DBADashGUI.Performance
             }
         }
 
-
         public static DateTime FromUTC
         {
             get
@@ -160,28 +128,8 @@ namespace DBADashGUI.Performance
             }
         }
 
-        public static DateTime ToUTC
-        {
-            get
-            {
-                if (mins < 0 || customTo == DateTime.MaxValue)
-                {
-                    return customTo;
-                }
-                else
-                {
-                    return DateTime.UtcNow;
-                }
-            }
-        }
+        public static DateTime ToUTC => mins < 0 || customTo == DateTime.MaxValue ? customTo : DateTime.UtcNow;
 
-        public static int DurationMins
-        {
-            get
-            {
-                return mins > 0 ? mins : Convert.ToInt32(ToUTC.Subtract(FromUTC).TotalMinutes);
-            }
-        }
-
+        public static int DurationMins => mins > 0 ? mins : Convert.ToInt32(ToUTC.Subtract(FromUTC).TotalMinutes);
     }
 }

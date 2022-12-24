@@ -22,50 +22,22 @@ namespace DBADashGUI.Properties
 
         public bool IncludeCritical
         {
-            get
-            {
-                return criticalToolStripMenuItem.Checked;
-            }
-            set
-            {
-                criticalToolStripMenuItem.Checked = value;
-            }
+            get => criticalToolStripMenuItem.Checked; set => criticalToolStripMenuItem.Checked = value;
         }
 
         public bool IncludeWarning
         {
-            get
-            {
-                return warningToolStripMenuItem.Checked;
-            }
-            set
-            {
-                warningToolStripMenuItem.Checked = value;
-            }
+            get => warningToolStripMenuItem.Checked; set => warningToolStripMenuItem.Checked = value;
         }
 
         public bool IncludeNA
         {
-            get
-            {
-                return undefinedToolStripMenuItem.Checked;
-            }
-            set
-            {
-                undefinedToolStripMenuItem.Checked = value;
-            }
+            get => undefinedToolStripMenuItem.Checked; set => undefinedToolStripMenuItem.Checked = value;
         }
 
         public bool IncludeOK
         {
-            get
-            {
-                return OKToolStripMenuItem.Checked;
-            }
-            set
-            {
-                OKToolStripMenuItem.Checked = value;
-            }
+            get => OKToolStripMenuItem.Checked; set => OKToolStripMenuItem.Checked = value;
         }
 
         public bool gridview = false;
@@ -299,22 +271,7 @@ namespace DBADashGUI.Properties
             Configure(-1, -1);
         }
 
-        private void CriticalToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            RefreshData();
-        }
-
-        private void WarningToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            RefreshData();
-        }
-
-        private void UndefinedToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            RefreshData();
-        }
-
-        private void OKToolStripMenuItem_Click(object sender, EventArgs e)
+        private void Status_Selected(object sender, EventArgs e)
         {
             RefreshData();
         }

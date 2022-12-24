@@ -19,50 +19,22 @@ namespace DBADashGUI.Checks
 
         public bool IncludeCritical
         {
-            get
-            {
-                return criticalToolStripMenuItem.Checked;
-            }
-            set
-            {
-                criticalToolStripMenuItem.Checked = value;
-            }
+            get => criticalToolStripMenuItem.Checked; set => criticalToolStripMenuItem.Checked = value;
         }
 
         public bool IncludeWarning
         {
-            get
-            {
-                return warningToolStripMenuItem.Checked;
-            }
-            set
-            {
-                warningToolStripMenuItem.Checked = value;
-            }
+            get => warningToolStripMenuItem.Checked; set => warningToolStripMenuItem.Checked = value;
         }
 
         public bool IncludeNA
         {
-            get
-            {
-                return undefinedToolStripMenuItem.Checked;
-            }
-            set
-            {
-                undefinedToolStripMenuItem.Checked = value;
-            }
+            get => undefinedToolStripMenuItem.Checked; set => undefinedToolStripMenuItem.Checked = value;
         }
 
         public bool IncludeOK
         {
-            get
-            {
-                return OKToolStripMenuItem.Checked;
-            }
-            set
-            {
-                OKToolStripMenuItem.Checked = value;
-            }
+            get => OKToolStripMenuItem.Checked; set => OKToolStripMenuItem.Checked = value;
         }
 
         public string Context
@@ -169,7 +141,6 @@ namespace DBADashGUI.Checks
                 }
                 var ddContext = new ToolStripMenuItem((string)rdr[0]);
                 ddContext.Click += DdContext_Click;
-                // ddContext.CheckOnClick = true;
                 contextToolStripMenuItem.DropDownItems.Add(ddContext);
                 i += 1;
             }
@@ -289,21 +260,14 @@ namespace DBADashGUI.Checks
             using (var da = new SqlDataAdapter(cmd))
             {
                 cn.Open();
-
                 cmd.Parameters.AddWithValue("InstanceIDs", String.Join(",", InstanceIDs));
                 cmd.Parameters.AddWithValue("IncludeNA", IncludeNA);
                 cmd.Parameters.AddWithValue("IncludeOK", IncludeOK);
                 cmd.Parameters.AddWithValue("IncludeWarning", IncludeWarning);
                 cmd.Parameters.AddWithValue("IncludeCritical", IncludeCritical);
-                if (context != null)
-                {
-                    cmd.Parameters.AddWithValue("Context", context);
-                }
-                if (test != null)
-                {
-                    cmd.Parameters.AddWithValue("Test", test);
-                }
-                cmd.Parameters.AddWithValue("ShowHidden", InstanceIDs.Count == 1 ? true : Common.ShowHidden);
+                cmd.Parameters.AddWithNullableValue("Context", context);
+                cmd.Parameters.AddWithNullableValue("Test", test);
+                cmd.Parameters.AddWithValue("ShowHidden", InstanceIDs.Count == 1 || Common.ShowHidden);
                 DataTable dt = new();
                 da.Fill(dt);
                 DateHelper.ConvertUTCToAppTimeZone(ref dt);
@@ -331,15 +295,8 @@ namespace DBADashGUI.Checks
             {
                 cn.Open();
                 cmd.Parameters.AddWithValue("InstanceID", InstanceID);
-
-                if (context != null)
-                {
-                    cmd.Parameters.AddWithValue("Context", context);
-                }
-                if (test != null)
-                {
-                    cmd.Parameters.AddWithValue("Test", test);
-                }
+                cmd.Parameters.AddWithNullableValue("Context", context);
+                cmd.Parameters.AddWithNullableValue("Test", test);
 
                 DataTable dt = new();
                 da.Fill(dt);

@@ -24,6 +24,7 @@ namespace DBADashGUI.CollectionDates
         private Int32 InstanceID { get; set; }
         private string InstanceGroupName { get; set; }
         private int _days;
+
         public Int32 Days
         {
             get
@@ -58,30 +59,12 @@ namespace DBADashGUI.CollectionDates
             using (var cmd = new SqlCommand("dbo.CollectionErrorLog_Get", cn) { CommandType = CommandType.StoredProcedure })
             using (var da = new SqlDataAdapter(cmd))
             {
-                if (instanceID > 0)
-                {
-                    cmd.Parameters.AddWithValue("InstanceID", instanceID);
-                }
-                if (!String.IsNullOrEmpty(instanceGroupName))
-                {
-                    cmd.Parameters.AddWithValue("InstanceGroupName", instanceGroupName);
-                }
-                if (!String.IsNullOrEmpty(instanceDisplayName))
-                {
-                    cmd.Parameters.AddWithValue("InstanceDisplayName", instanceDisplayName);
-                }
-                if (!String.IsNullOrEmpty(errorSource))
-                {
-                    cmd.Parameters.AddWithValue("ErrorSource", errorSource);
-                }
-                if (!String.IsNullOrEmpty(errorContext))
-                {
-                    cmd.Parameters.AddWithValue("ErrorContext", errorContext);
-                }
-                if (!String.IsNullOrEmpty(errorMessage))
-                {
-                    cmd.Parameters.AddWithValue("ErrorMessage", errorMessage);
-                }
+                cmd.Parameters.AddIfGreaterThanZero("InstanceID", instanceID);
+                cmd.Parameters.AddStringIfNotNullOrEmpty("InstanceGroupName", instanceGroupName);
+                cmd.Parameters.AddStringIfNotNullOrEmpty("InstanceDisplayName", instanceDisplayName);
+                cmd.Parameters.AddStringIfNotNullOrEmpty("ErrorSource", errorSource);
+                cmd.Parameters.AddStringIfNotNullOrEmpty("ErrorContext", errorContext);
+                cmd.Parameters.AddStringIfNotNullOrEmpty("ErrorMessage", errorMessage);
                 cmd.Parameters.AddWithValue("Days", Days);
                 DataTable dt = new();
                 da.Fill(dt);
@@ -229,6 +212,7 @@ namespace DBADashGUI.CollectionDates
         {
             SetFilterHighlight(txtMessage, messageToolStripMenuItem);
         }
+
         private void TxtInstance_TextChanged(object sender, EventArgs e)
         {
             SetFilterHighlight(txtInstance, instanceToolStripMenuItem);

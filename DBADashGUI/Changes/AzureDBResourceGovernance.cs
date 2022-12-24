@@ -47,7 +47,7 @@ namespace DBADashGUI.Changes
             {
                 var dt = new DataTable();
                 cmd.Parameters.AddWithValue("InstanceIDs", string.Join(",", instanceIDs));
-                cmd.Parameters.AddWithValue("ShowHidden", instanceIDs.Count == 1 ? true : Common.ShowHidden);
+                cmd.Parameters.AddWithValue("ShowHidden", instanceIDs.Count == 1 || Common.ShowHidden);
                 da.Fill(dt);
                 return dt;
             }

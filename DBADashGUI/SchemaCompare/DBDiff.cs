@@ -7,15 +7,13 @@ using System.Windows.Forms;
 
 namespace DBADashGUI
 {
-
     public partial class DBDiff : Form
     {
-
-
         public List<int> SelectedTags;
 
         private string selectedInstance_A;
         private DatabaseItem selectedDB_A;
+
         public DBDiff()
         {
             InitializeComponent();
@@ -23,34 +21,22 @@ namespace DBADashGUI
 
         public string SelectedInstanceA
         {
-            get
-            {
-                return cboInstanceA.Text;
-            }
+            get => cboInstanceA.Text;
             set
             {
                 selectedInstance_A = value;
                 cboInstanceA.Text = value;
             }
         }
+
         public string SelectedInstanceB
         {
-            get
-            {
-                return cboInstanceB.Text;
-            }
-            set
-            {
-                cboInstanceB.Text = value;
-            }
+            get => cboInstanceB.Text; set => cboInstanceB.Text = value;
         }
 
         public DatabaseItem SelectedDatabaseA
         {
-            get
-            {
-                return (DatabaseItem)cboDatabaseA.SelectedItem;
-            }
+            get => (DatabaseItem)cboDatabaseA.SelectedItem;
             set
             {
                 selectedDB_A = value;
@@ -64,16 +50,12 @@ namespace DBADashGUI
             cboInstanceA.DataSource = new BindingSource(instances, null);
             cboInstanceB.DataSource = new BindingSource(instances, null);
             cboInstanceA.SelectedItem = selectedInstance_A;
-
         }
-
-
 
         private static void GetDatabases(ComboBox cbo, string instanceGroupName)
         {
             var databases = CommonData.GetDatabasesWithDDLSnapshot(instanceGroupName);
             cbo.DataSource = databases;
-
         }
 
         private void CboInstanceB_SelectedIndexChanged(object sender, EventArgs e)
@@ -83,13 +65,12 @@ namespace DBADashGUI
 
         private void CboInstanceA_SelectedIndexChanged(object sender, EventArgs e)
         {
-
             GetDatabases(cboDatabaseA, cboInstanceA.Text);
 
             cboDatabaseA.SelectedItem = selectedDB_A;
         }
 
-        readonly DiffControl diffControl = new();
+        private readonly DiffControl diffControl = new();
 
         private void DBDiff_Load(object sender, EventArgs e)
         {
@@ -148,50 +129,13 @@ namespace DBADashGUI
             }
         }
 
-        private int DBID_A
-        {
-            get
-            {
-                return ((DatabaseItem)cboDatabaseA.SelectedItem).DatabaseID;
-            }
-        }
+        private int DBID_A => ((DatabaseItem)cboDatabaseA.SelectedItem).DatabaseID;
 
-        private int DBID_B
-        {
-            get
-            {
-                return ((DatabaseItem)cboDatabaseB.SelectedItem).DatabaseID;
-            }
-        }
+        private int DBID_B => ((DatabaseItem)cboDatabaseB.SelectedItem).DatabaseID;
 
-        private DateTime Date_A
-        {
-            get
-            {
-                if (cboDate_A.SelectedIndex > 0)
-                {
-                    return (DateTime)cboDate_A.SelectedItem;
-                }
-                else
-                {
-                    return DateTime.MinValue;
-                }
-            }
-        }
-        private DateTime Date_B
-        {
-            get
-            {
-                if (cboDate_B.SelectedIndex > 0)
-                {
-                    return (DateTime)cboDate_B.SelectedItem;
-                }
-                else
-                {
-                    return DateTime.MinValue;
-                }
-            }
-        }
+        private DateTime Date_A => cboDate_A.SelectedIndex > 0 ? (DateTime)cboDate_A.SelectedItem : DateTime.MinValue;
+
+        private DateTime Date_B => cboDate_B.SelectedIndex > 0 ? (DateTime)cboDate_B.SelectedItem : DateTime.MinValue;
 
         private void BttnCompare_Click(object sender, EventArgs e)
         {
@@ -214,7 +158,7 @@ namespace DBADashGUI
             }
         }
 
-        DataView dvDiff;
+        private DataView dvDiff;
 
         private void GvDiff_SelectionChanged(object sender, EventArgs e)
         {
@@ -259,8 +203,6 @@ namespace DBADashGUI
             }
         }
 
-
-
         private string GetRowFilter()
         {
             StringBuilder sb = new();
@@ -302,7 +244,6 @@ namespace DBADashGUI
                 sb.Append("1=2 ");
             }
             return sb.ToString();
-
         }
 
         private bool CheckAllState = true;
@@ -358,7 +299,6 @@ namespace DBADashGUI
             GetSnapshotDates(cboDate_B, ((DatabaseItem)cboDatabaseB.SelectedItem).DatabaseID);
         }
 
-
         private void ChkDiffType_SelectedValueChanged(object sender, EventArgs e)
         {
             if (dvDiff != null)
@@ -381,7 +321,6 @@ namespace DBADashGUI
             cboDatabaseB.SelectedItem = db_A;
             cboDate_A.SelectedItem = verB;
             cboDate_B.SelectedItem = verA;
-
         }
 
         private void BttnCopyA_Click(object sender, EventArgs e)
@@ -417,7 +356,6 @@ namespace DBADashGUI
                     if (r["WhitespaceDiff"] != DBNull.Value && (bool)r["WhitespaceDiff"] == true)
                     {
                         r["DiffType"] = chkIgnoreWhiteSpace.Checked ? "Equal (Whitespace)" : "Diff";
-
                     }
                 }
             }
@@ -426,6 +364,5 @@ namespace DBADashGUI
                 this.Cursor = Cursors.Default;
             }
         }
-
     }
 }

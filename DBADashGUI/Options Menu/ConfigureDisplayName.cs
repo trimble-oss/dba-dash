@@ -16,13 +16,7 @@ namespace DBADashGUI
         public string TagIDs { get; set; }
         public string SearchString { get; set; }
 
-        public int EditCount
-        {
-            get
-            {
-                return _editCount;
-            }
-        }
+        public int EditCount => _editCount;
         private int _editCount = 0;
 
         private void ConfigureDisplayName_Load(object sender, EventArgs e)
@@ -40,7 +34,6 @@ namespace DBADashGUI
                 new DataGridViewTextBoxColumn() { Name = "colDisplayName", DataPropertyName = "InstanceDisplayName", HeaderText = "Display Name", AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill }
             );
         }
-
 
         private void RefreshData()
         {

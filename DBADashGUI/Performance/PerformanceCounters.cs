@@ -17,29 +17,19 @@ namespace DBADashGUI.Performance
         }
 
         public event EventHandler<EventArgs> Close;
+
         public event EventHandler<EventArgs> MoveUp;
 
         public bool CloseVisible
         {
-            get
-            {
-                return tsClose.Visible;
-            }
-            set
-            {
-                tsClose.Visible = value;
-            }
+            get => tsClose.Visible;
+            set => tsClose.Visible = value;
         }
+
         public bool MoveUpVisible
         {
-            get
-            {
-                return tsUp.Visible;
-            }
-            set
-            {
-                tsUp.Visible = value;
-            }
+            get => tsUp.Visible;
+            set => tsUp.Visible = value;
         }
 
         public Int32 InstanceID { get; set; }
@@ -50,7 +40,8 @@ namespace DBADashGUI.Performance
         public string CounterName { get => Metric.CounterName; set => Metric.CounterName = value; }
 
         private PerformanceCounterMetric _metric = new();
-        public PerformanceCounterMetric Metric { get => _metric; set { _metric = value; SelectAggregate(); } }
+        public PerformanceCounterMetric Metric
+        { get => _metric; set { _metric = value; SelectAggregate(); } }
         IMetric IMetricChart.Metric { get => Metric; }
 
         public bool SmoothLines = false;
@@ -58,9 +49,8 @@ namespace DBADashGUI.Performance
 
         private int durationMins;
 
-
-        Int32 DateGrouping;
-        DataTable dt;
+        private Int32 DateGrouping;
+        private DataTable dt;
 
         private void SelectAggregate()
         {
@@ -142,7 +132,6 @@ namespace DBADashGUI.Performance
                         }
                     };
 
-
             string format = "yyyy-MM-dd HH:mm";
             chart1.AxisX.Add(new Axis
             {
@@ -153,12 +142,10 @@ namespace DBADashGUI.Performance
                 LabelFormatter = val => val.ToString("#,##0.######"),
                 MaxValue = maxValue,
                 MinValue = minValue
-
             });
             chart1.Series = s1;
             chart1.LegendLocation = LegendLocation.Top;
             chart1.Text = Metric.CounterName;
-
         }
 
         private DataTable GetPerformanceCounter()

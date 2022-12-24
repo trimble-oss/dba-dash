@@ -68,10 +68,10 @@ namespace DBADashGUI.LogShipping
                 cn.Open();
                 cmd.Parameters.AddWithValue("InstanceID", InstanceID);
                 cmd.Parameters.AddWithValue("DatabaseID", DatabaseID);
-                if (LatencyWarningThreshold != null) { cmd.Parameters.AddWithValue("LatencyWarning", LatencyWarningThreshold); }
-                if (LatencyCriticalThreshold != null) { cmd.Parameters.AddWithValue("LatencyCritical", LatencyCriticalThreshold); }
-                if (TimeSinceLastWarningThreshold != null) { cmd.Parameters.AddWithValue("TimeSinceLastWarning", TimeSinceLastWarningThreshold); }
-                if (TimeSinceLastCriticalThreshold != null) { cmd.Parameters.AddWithValue("TimeSinceLastCritical", TimeSinceLastCriticalThreshold); }
+                cmd.Parameters.AddWithNullableValue("LatencyWarning", LatencyWarningThreshold);
+                cmd.Parameters.AddWithNullableValue("LatencyCritical", LatencyCriticalThreshold);
+                cmd.Parameters.AddWithNullableValue("TimeSinceLastWarning", TimeSinceLastWarningThreshold);
+                cmd.Parameters.AddWithNullableValue("TimeSinceLastCritical", TimeSinceLastCriticalThreshold);
                 cmd.Parameters.AddWithValue("Inherit", Inherited);
                 cmd.Parameters.AddWithValue("NewDatabaseExcludePeriodMin", NewDatabaseExcludePeriod);
                 cmd.ExecuteNonQuery();

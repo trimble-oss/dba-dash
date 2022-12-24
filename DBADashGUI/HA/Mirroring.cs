@@ -18,14 +18,8 @@ namespace DBADashGUI.HA
 
         public bool SummaryMode
         {
-            get
-            {
-                return tsDetailSummary.Text != "Summary";
-            }
-            set
-            {
-                tsDetailSummary.Text = value ? "Detail" : "Summary";
-            }
+            get => tsDetailSummary.Text != "Summary";
+            set => tsDetailSummary.Text = value ? "Detail" : "Summary";
         }
 
         public void SetContext(DBADashContext context)

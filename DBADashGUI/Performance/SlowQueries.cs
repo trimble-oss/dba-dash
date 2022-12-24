@@ -24,10 +24,7 @@ namespace DBADashGUI
 
         public string DBName
         {
-            get
-            {
-                return _db;
-            }
+            get => _db;
             set
             {
                 _db = value;
@@ -41,9 +38,7 @@ namespace DBADashGUI
 
         public bool CanNavigateBack => tsRunningBack.Visible && tsRunning.Enabled;
 
-        private bool IsFiltered()
-        {
-            return txtText.Text.Length > 0 ||
+        private bool IsFiltered() => txtText.Text.Length > 0 ||
                   txtClient.Text.Length > 0 ||
                   txtDatabase.Text.Length > 0 ||
                   txtInstance.Text.Length > 0 ||
@@ -73,7 +68,6 @@ namespace DBADashGUI
                   txtCPUTo.Text.Length > 0 ||
                   sqlbatchcompletedToolStripMenuItem.Checked != rpccompletedToolStripMenuItem.Checked
                   ;
-        }
 
         public void SetFilterFormatting()
         {
@@ -171,79 +165,25 @@ namespace DBADashGUI
                     cmd.Parameters.AddWithValue("FromDate", DateRange.FromUTC);
                     cmd.Parameters.AddWithValue("ToDate", DateRange.ToUTC);
                     cmd.Parameters.AddWithValue("GroupBy", groupBy);
+                    cmd.Parameters.AddStringIfNotNullOrEmpty("ClientHostName", txtClient.Text);
+                    cmd.Parameters.AddStringIfNotNullOrEmpty("InstanceDisplayName", txtInstance.Text);
+                    cmd.Parameters.AddStringIfNotNullOrEmpty("ClientAppName", txtApp.Text);
                     string db = DBName.Length > 0 ? DBName : txtDatabase.Text;
-                    if (txtClient.Text.Length > 0)
-                    {
-                        cmd.Parameters.AddWithValue("ClientHostName", txtClient.Text);
-                    }
-                    if (txtInstance.Text.Length > 0)
-                    {
-                        cmd.Parameters.AddWithValue("InstanceDisplayName", txtInstance.Text);
-                    }
-                    if (txtApp.Text.Length > 0)
-                    {
-                        cmd.Parameters.AddWithValue("ClientAppName", txtApp.Text);
-                    }
-                    if (db.Length > 0)
-                    {
-                        cmd.Parameters.AddWithValue("DatabaseName", db);
-                    }
-                    if (txtObject.Text.Length > 0)
-                    {
-                        cmd.Parameters.AddWithValue("ObjectName", txtObject.Text);
-                    }
-                    if (txtUser.Text.Length > 0)
-                    {
-                        cmd.Parameters.AddWithValue("UserName", txtUser.Text);
-                    }
-                    if (txtText.Text.Length > 0)
-                    {
-                        cmd.Parameters.AddWithValue("Text", txtText.Text);
-                    }
-                    if (txtResult.Text.Length > 0)
-                    {
-                        cmd.Parameters.AddWithValue("Result", txtResult.Text);
-                    }
-                    if (txtSessionID.Text.Length > 0)
-                    {
-                        cmd.Parameters.AddWithValue("SessionID", txtSessionID.Text);
-                    }
-                    if (txtExcludeApp.Text.Length > 0)
-                    {
-                        cmd.Parameters.AddWithValue("ExcludeClientAppName", txtExcludeApp.Text);
-                    }
-                    if (txtExcludeClient.Text.Length > 0)
-                    {
-                        cmd.Parameters.AddWithValue("ExcludeClientHostName", txtExcludeClient.Text);
-                    }
-                    if (txtExcludeDatabase.Text.Length > 0)
-                    {
-                        cmd.Parameters.AddWithValue("ExcludeDatabaseName", txtExcludeDatabase.Text);
-                    }
-                    if (txtExcludeInstance.Text.Length > 0)
-                    {
-                        cmd.Parameters.AddWithValue("ExcludeInstanceDisplayName", txtExcludeInstance.Text);
-                    }
-                    if (txtExcludeObject.Text.Length > 0)
-                    {
-                        cmd.Parameters.AddWithValue("ExcludeObjectName", txtExcludeObject.Text);
-                    }
-                    if (txtExcludeSessionID.Text.Length > 0)
-                    {
-                        cmd.Parameters.AddWithValue("ExcludeSessionID", txtExcludeSessionID.Text);
-                    }
-                    if (txtExcludeText.Text.Length > 0)
-                    {
-                        cmd.Parameters.AddWithValue("ExcludeText", txtExcludeText.Text);
-                    }
-                    if (txtExcludeUser.Text.Length > 0)
-                    {
-                        cmd.Parameters.AddWithValue("ExcludeUserName", txtExcludeUser.Text);
-                    }
-                    if (txtExcludeResult.Text.Length > 0)
-                    {
-                        cmd.Parameters.AddWithValue("ExcludeResult", txtExcludeResult.Text);
-                    }
+                    cmd.Parameters.AddStringIfNotNullOrEmpty("DatabaseName", db);
+                    cmd.Parameters.AddStringIfNotNullOrEmpty("ObjectName", txtObject.Text);
+                    cmd.Parameters.AddStringIfNotNullOrEmpty("UserName", txtUser.Text);
+                    cmd.Parameters.AddStringIfNotNullOrEmpty("Text", txtText.Text);
+                    cmd.Parameters.AddStringIfNotNullOrEmpty("Result", txtResult.Text);
+                    cmd.Parameters.AddStringIfNotNullOrEmpty("SessionID", txtSessionID.Text);
+                    cmd.Parameters.AddStringIfNotNullOrEmpty("ExcludeClientAppName", txtExcludeApp.Text);
+                    cmd.Parameters.AddStringIfNotNullOrEmpty("ExcludeClientHostName", txtExcludeClient.Text);
+                    cmd.Parameters.AddStringIfNotNullOrEmpty("ExcludeDatabaseName", txtExcludeDatabase.Text);
+                    cmd.Parameters.AddStringIfNotNullOrEmpty("ExcludeInstanceDisplayName", txtExcludeInstance.Text);
+                    cmd.Parameters.AddStringIfNotNullOrEmpty("ExcludeObjectName", txtExcludeObject.Text);
+                    cmd.Parameters.AddStringIfNotNullOrEmpty("ExcludeSessionID", txtExcludeSessionID.Text);
+                    cmd.Parameters.AddStringIfNotNullOrEmpty("ExcludeText", txtExcludeText.Text);
+                    cmd.Parameters.AddStringIfNotNullOrEmpty("ExcludeUserName", txtExcludeUser.Text);
+                    cmd.Parameters.AddStringIfNotNullOrEmpty("ExcludeResult", txtExcludeResult.Text);
                     if (txtDurationFrom.Text.Length > 0)
                     {
                         cmd.Parameters.AddWithValue("DurationFromMs", Convert.ToInt64(txtDurationFrom.Text));
@@ -625,86 +565,26 @@ namespace DBADashGUI
                     throw new Exception($"Invalid group by: {groupBy}");
                 }
 
-                if (client.Length > 0)
-                {
-                    cmd.Parameters.AddWithValue("ClientHostName", client);
-                }
-                if (displayName.Length > 0)
-                {
-                    cmd.Parameters.AddWithValue("InstanceDisplayName", displayName);
-                }
-                if (app.Length > 0)
-                {
-                    cmd.Parameters.AddWithValue("ClientAppName", app);
-                }
-                if (db.Length > 0)
-                {
-                    cmd.Parameters.AddWithValue("DatabaseName", db);
-                }
-                if (objectname.Length > 0)
-                {
-                    cmd.Parameters.AddWithValue("ObjectName", objectname);
-                }
-                if (user.Length > 0)
-                {
-                    cmd.Parameters.AddWithValue("UserName", user);
-                }
-                if (text.Length > 0)
-                {
-                    cmd.Parameters.AddWithValue("Text", text);
-                }
-                if (durationFrom > 0)
-                {
-                    cmd.Parameters.AddWithValue("DurationFromSec", durationFrom);
-                }
-                if (durationTo > 0)
-                {
-                    cmd.Parameters.AddWithValue("DurationToSec", durationTo);
-                }
-                if (result.Length > 0)
-                {
-                    cmd.Parameters.AddWithValue("Result", result);
-                }
-                if (sessionid.Length > 0)
-                {
-                    cmd.Parameters.AddWithValue("SessionID", sessionid);
-                }
-                if (txtExcludeApp.Text.Length > 0)
-                {
-                    cmd.Parameters.AddWithValue("ExcludeClientAppName", txtExcludeApp.Text);
-                }
-                if (txtExcludeClient.Text.Length > 0)
-                {
-                    cmd.Parameters.AddWithValue("ExcludeClientHostName", txtExcludeClient.Text);
-                }
-                if (txtExcludeDatabase.Text.Length > 0)
-                {
-                    cmd.Parameters.AddWithValue("ExcludeDatabaseName", txtExcludeDatabase.Text);
-                }
-                if (txtExcludeInstance.Text.Length > 0)
-                {
-                    cmd.Parameters.AddWithValue("ExcludeInstanceDisplayName", txtExcludeInstance.Text);
-                }
-                if (txtExcludeObject.Text.Length > 0)
-                {
-                    cmd.Parameters.AddWithValue("ExcludeObjectName", txtExcludeObject.Text);
-                }
-                if (txtExcludeSessionID.Text.Length > 0)
-                {
-                    cmd.Parameters.AddWithValue("ExcludeSessionID", txtExcludeSessionID.Text);
-                }
-                if (txtExcludeText.Text.Length > 0)
-                {
-                    cmd.Parameters.AddWithValue("ExcludeText", txtExcludeText.Text);
-                }
-                if (txtExcludeUser.Text.Length > 0)
-                {
-                    cmd.Parameters.AddWithValue("ExcludeUserName", txtExcludeUser.Text);
-                }
-                if (txtExcludeResult.Text.Length > 0)
-                {
-                    cmd.Parameters.AddWithValue("ExcludeResult", txtExcludeResult.Text);
-                }
+                cmd.Parameters.AddStringIfNotNullOrEmpty("ClientHostName", client);
+                cmd.Parameters.AddStringIfNotNullOrEmpty("InstanceDisplayName", displayName);
+                cmd.Parameters.AddStringIfNotNullOrEmpty("ClientAppName", app);
+                cmd.Parameters.AddStringIfNotNullOrEmpty("DatabaseName", db);
+                cmd.Parameters.AddStringIfNotNullOrEmpty("ObjectName", objectname);
+                cmd.Parameters.AddStringIfNotNullOrEmpty("UserName", user);
+                cmd.Parameters.AddStringIfNotNullOrEmpty("Text", text);
+                cmd.Parameters.AddIfGreaterThanZero("DurationFromSec", durationFrom);
+                cmd.Parameters.AddIfGreaterThanZero("DurationToSec", durationTo);
+                cmd.Parameters.AddStringIfNotNullOrEmpty("Result", result);
+                cmd.Parameters.AddStringIfNotNullOrEmpty("SessionID", sessionid);
+                cmd.Parameters.AddStringIfNotNullOrEmpty("ExcludeClientAppName", txtExcludeApp.Text);
+                cmd.Parameters.AddStringIfNotNullOrEmpty("ExcludeClientHostName", txtExcludeClient.Text);
+                cmd.Parameters.AddStringIfNotNullOrEmpty("ExcludeDatabaseName", txtExcludeDatabase.Text);
+                cmd.Parameters.AddStringIfNotNullOrEmpty("ExcludeInstanceDisplayName", txtExcludeInstance.Text);
+                cmd.Parameters.AddStringIfNotNullOrEmpty("ExcludeObjectName", txtExcludeObject.Text);
+                cmd.Parameters.AddStringIfNotNullOrEmpty("ExcludeSessionID", txtExcludeSessionID.Text);
+                cmd.Parameters.AddStringIfNotNullOrEmpty("ExcludeText", txtExcludeText.Text);
+                cmd.Parameters.AddStringIfNotNullOrEmpty("ExcludeUserName", txtExcludeUser.Text);
+                cmd.Parameters.AddStringIfNotNullOrEmpty("ExcludeResult", txtExcludeResult.Text);
                 if (txtDurationFrom.Text.Length > 0)
                 {
                     cmd.Parameters.AddWithValue("DurationFromMs", Convert.ToInt64(txtDurationFrom.Text));
@@ -745,10 +625,7 @@ namespace DBADashGUI
                 {
                     cmd.Parameters.AddWithValue("WritesTo", Convert.ToInt64(txtWritesTo.Text));
                 }
-                if (eventType.Length > 0)
-                {
-                    cmd.Parameters.AddWithValue("EventType", eventType);
-                }
+                cmd.Parameters.AddStringIfNotNullOrEmpty("EventType", eventType);
                 var dt = new DataTable();
                 da.Fill(dt);
                 return dt;

@@ -6,25 +6,16 @@ namespace DBADashGUI
 {
     public partial class Diff : Form
     {
-        readonly DiffControl diff1 = new();
+        private readonly DiffControl diff1 = new();
 
         public Diff()
         {
             InitializeComponent();
         }
 
-
         public ViewMode Mode
         {
-            get
-            {
-                return diff1.Mode;
-            }
-            set
-            {
-                diff1.Mode = value;
-
-            }
+            get => diff1.Mode; set => diff1.Mode = value;
         }
 
         public void SetText(string oldText, string newText, ViewMode mode = ViewMode.Diff)
@@ -33,8 +24,6 @@ namespace DBADashGUI
             diff1.OldText = oldText;
             diff1.NewText = newText;
             diff1.Mode = mode;
-
-
         }
 
         private void AddDiffControl()
@@ -45,7 +34,6 @@ namespace DBADashGUI
                 diff1.Dock = DockStyle.Fill;
             }
         }
-
 
         private void Diff_Load(object sender, EventArgs e)
         {

@@ -12,7 +12,6 @@ namespace DBADashGUI.Performance
 {
     public partial class AzureDBResourceStats : UserControl, ISetContext, IRefreshData
     {
-
         public Int32 InstanceID;
         public string ElasticPoolName = String.Empty;
 
@@ -21,73 +20,36 @@ namespace DBADashGUI.Performance
             InitializeComponent();
         }
 
-        bool SmoothLines
+        private bool SmoothLines
         {
-            get
-            {
-                return smoothLinesToolStripMenuItem.Checked;
-            }
-            set
-            {
-                smoothLinesToolStripMenuItem.Checked = value;
-            }
-        }
-        Int32 PointSize
-        {
-            get
-            {
-                if (pointsToolStripMenuItem.Checked)
-                {
-                    return 10;
-                }
-                else
-                {
-                    return 0;
-                }
-            }
+            get => smoothLinesToolStripMenuItem.Checked;
+            set => smoothLinesToolStripMenuItem.Checked = value;
         }
 
-        string DateFormat
+        private int PointSize => pointsToolStripMenuItem.Checked ? 10 : 0;
+
+        private string DateFormat => DateGrouping switch
         {
-            get
-            {
-                if (DateGrouping == 0)
-                {
-                    return "yyyy-MM-dd HH:mm:ss";
-                }
-                else if (DateGrouping >= 1440)
-                {
-                    return "yyyy-MM-dd";
-                }
-                else
-                {
-                    return "yyyy-MM-dd HH:mm";
-                }
+            0 => "yyyy-MM-dd HH:mm:ss",
+            >= 1440 => "yyyy-MM-dd",
+            _ => "yyyy-MM-dd HH:mm"
+        };
 
-            }
-        }
+        private Int32 _dateGrouping = 0;
 
-
-
-        Int32 _dateGrouping = 0;
         public Int32 DateGrouping
         {
-            get
-            {
-                return _dateGrouping;
-            }
+            get => _dateGrouping;
             set
             {
                 _dateGrouping = value;
                 tsDateGrouping.Text = DateHelper.DateGroupString(_dateGrouping);
             }
-
         }
 
+        private Dictionary<string, ColumnMetaData> columns;
 
-
-        Dictionary<string, ColumnMetaData> columns;
-        readonly Dictionary<string, ColumnMetaData> DBColumns = new()
+        private readonly Dictionary<string, ColumnMetaData> DBColumns = new()
         {
                 {"avg_cpu_percent", new ColumnMetaData{Alias="Avg CPU %",isVisible=false } },
                 {"avg_data_io_percent", new ColumnMetaData{Alias="Avg Data %",isVisible=false } },
@@ -110,7 +72,8 @@ namespace DBADashGUI.Performance
                 {"dtu_limit", new ColumnMetaData{Alias="DTU Limit",isVisible=false,axis=1} },
                 {"cpu_limit", new ColumnMetaData{Alias="CPU Limit",isVisible=false,axis=1} },
             };
-        readonly Dictionary<string, ColumnMetaData> PoolColumns = new()
+
+        private readonly Dictionary<string, ColumnMetaData> PoolColumns = new()
         {
                 {"avg_cpu_percent", new ColumnMetaData{Alias="Avg CPU %",isVisible=false } },
                 {"avg_data_io_percent", new ColumnMetaData{Alias="Avg Data %",isVisible=false } },
@@ -127,8 +90,7 @@ namespace DBADashGUI.Performance
                 {"dtu_limit", new ColumnMetaData{Alias="DTU Limit",isVisible=false,axis=1} }
             };
 
-
-        DataTable dt;
+        private DataTable dt;
 
         public void SetContext(DBADashContext context)
         {
@@ -223,7 +185,6 @@ namespace DBADashGUI.Performance
             {
                 Title = "Time",
                 LabelFormatter = val => new System.DateTime((long)val).ToString(DateFormat)
-
             });
             var y0visible = columns.Values.Where(c => c.isVisible && c.axis == 0).Any();
             chart1.AxisY.Add(new Axis
@@ -233,7 +194,6 @@ namespace DBADashGUI.Performance
                 MinValue = 0,
                 MaxValue = 100,
                 Visibility = y0visible ? System.Windows.Visibility.Visible : System.Windows.Visibility.Hidden
-
             });
             var y1visible = columns.Values.Where(c => c.isVisible && c.axis == 1).Any();
             if (y1visible)
@@ -245,7 +205,6 @@ namespace DBADashGUI.Performance
                     Position = AxisPosition.RightTop,
                     MinValue = 0,
                     MaxValue = y1Max
-
                 });
             }
             chart1.LegendLocation = LegendLocation.Bottom;
@@ -294,7 +253,6 @@ namespace DBADashGUI.Performance
             }
         }
 
-
         private DataTable GetAzureDBResourceStats()
         {
             using (var cn = new SqlConnection(Common.ConnectionString))
@@ -332,7 +290,6 @@ namespace DBADashGUI.Performance
             }
             AddMeasures();
             DateHelper.AddDateGroups(tsDateGrouping, TsDateGrouping_Click);
-
         }
 
         private void TsDateGrouping_Click(object sender, EventArgs e)
@@ -354,6 +311,5 @@ namespace DBADashGUI.Performance
                 s.PointGeometrySize = PointSize;
             }
         }
-
     }
 }

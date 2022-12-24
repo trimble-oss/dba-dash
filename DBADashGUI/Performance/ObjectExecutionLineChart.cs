@@ -16,24 +16,17 @@ namespace DBADashGUI.Performance
         public Int32 InstanceID;
         public string Instance;
         public Int64 ObjectID;
-        int dateGrouping;
-        int durationMins;
+        private int dateGrouping;
+        private int durationMins;
         public DateTime FromDate;
         public DateTime ToDate;
 
         public string Title
         {
-            get
-            {
-                return tsTitle.Text;
-            }
-            set
-            {
-                tsTitle.Text = value;
-            }
+            get => tsTitle.Text; set => tsTitle.Text = value;
         }
 
-        readonly Dictionary<string, ColumnMetaData> columns = new()
+        private readonly Dictionary<string, ColumnMetaData> columns = new()
         {
                 {"AvgCPU", new ColumnMetaData{Alias="Avg CPU (sec)",isVisible=true } },
                 {"TotalCPU", new ColumnMetaData{Alias="Total CPU (sec)",isVisible=false } },
@@ -52,7 +45,6 @@ namespace DBADashGUI.Performance
                 {"TotalWrites", new ColumnMetaData{Alias="Total Writes",isVisible=false,axis=2} },
             };
 
-
         public void RefreshData()
         {
             if (DateRange.DurationMins != durationMins) // Update date grouping only if duration has changed
@@ -64,7 +56,6 @@ namespace DBADashGUI.Performance
             var dt = CommonData.ObjectExecutionStats(InstanceID, -1, ObjectID, dateGrouping, "AvgDuration", FromDate, ToDate, Instance);
             chart1.Series.Clear();
             chart1.DefaultFill = System.Windows.Media.Brushes.Transparent;
-
 
             chart1.AddDataTable(dt, columns, "SnapshotDate", false);
             chart1.AxisY.Clear();
@@ -109,7 +100,6 @@ namespace DBADashGUI.Performance
             dateGrouping = (Int32)ts.Tag;
             tsGroup.Text = DateHelper.DateGroupString(dateGrouping);
             RefreshData();
-
         }
 
         private void LoadMeasures()

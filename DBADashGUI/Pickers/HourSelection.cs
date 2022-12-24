@@ -15,10 +15,7 @@ namespace DBADashGUI
 
         public List<int> SelectedHours
         {
-            get
-            {
-                return chkHours.CheckedIndices.Cast<int>().ToList();
-            }
+            get => chkHours.CheckedIndices.Cast<int>().ToList();
             set
             {
                 ClearChecks();
