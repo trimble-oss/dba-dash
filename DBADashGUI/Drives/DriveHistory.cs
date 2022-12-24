@@ -32,88 +32,32 @@ namespace DBADashGUI.Drives
             dgv.AutoGenerateColumns = false;
         }
 
-        readonly string connectionString = Common.ConnectionString;
+        private readonly string connectionString = Common.ConnectionString;
 
         public Int32 DriveID { get; set; }
 
         public bool SmoothLines
         {
-            get
-            {
-                return smoothLinesToolStripMenuItem.Checked;
-            }
-            set
-            {
-                smoothLinesToolStripMenuItem.Checked = value;
-            }
+            get => smoothLinesToolStripMenuItem.Checked; set => smoothLinesToolStripMenuItem.Checked = value;
         }
 
-        public string DateFormat
-        {
-            get
-            {
-                if (DateGroupingMins < 1440)
-                {
-                    return "yyyy-MM-dd HH:mm";
-                }
-                else
-                {
-                    return "yyyy-MM-dd";
-                }
-            }
-        }
+        public string DateFormat => DateGroupingMins < 1440 ? "yyyy-MM-dd HH:mm" : "yyyy-MM-dd";
 
-        Int32 Days = 7;
+        private Int32 Days = 7;
+        private DateTime customFrom;
+        private DateTime customTo;
 
-        DateTime customFrom;
-        DateTime customTo;
+        private DateTime From => Days > 0
+                    ? new DateTime(DateTime.UtcNow.Year, DateTime.UtcNow.Month, DateTime.UtcNow.Day, DateTime.UtcNow.Hour, 0, 0).AddDays(-Days)
+                    : customFrom;
 
-        DateTime From
-        {
-            get
-            {
-                if (Days > 0)
-                {
-                    return new DateTime(DateTime.UtcNow.Year, DateTime.UtcNow.Month, DateTime.UtcNow.Day, DateTime.UtcNow.Hour, 0, 0).AddDays(-Days);
-                }
-                else
-                {
-                    return customFrom;
-                }
-            }
-        }
+        private DateTime To => Days > 0
+                    ? new DateTime(DateTime.UtcNow.Year, DateTime.UtcNow.Month, DateTime.UtcNow.Day, DateTime.UtcNow.Hour, 0, 0).AddHours(1)
+                    : customTo;
 
-        DateTime To
-        {
-            get
-            {
-                if (Days > 0)
-                {
-                    return new DateTime(DateTime.UtcNow.Year, DateTime.UtcNow.Month, DateTime.UtcNow.Day, DateTime.UtcNow.Hour, 0, 0).AddHours(1);
-                }
-                else
-                {
-                    return customTo;
-                }
-            }
-        }
+        private Int32 PointSize => pointsToolStripMenuItem.Checked ? 10 : 0;
 
-        Int32 PointSize
-        {
-            get
-            {
-                if (pointsToolStripMenuItem.Checked)
-                {
-                    return 10;
-                }
-                else
-                {
-                    return 0;
-                }
-            }
-        }
-
-        Int32 DateGroupingMins
+        private Int32 DateGroupingMins
         {
             get
             {
@@ -147,7 +91,6 @@ namespace DBADashGUI.Drives
                 {"SizeGB", new ColumnMetaData{Alias="Size (GB)",isVisible=true } },
                 {"UsedGB", new ColumnMetaData{Alias="Used (GB)",isVisible=true } }
             };
-
 
             foreach (var s in columns.Keys)
             {
@@ -189,7 +132,6 @@ namespace DBADashGUI.Drives
             {
                 Title = "Time",
                 LabelFormatter = val => new System.DateTime((long)val).ToString(DateFormat)
-
             });
             chart1.AxisY.Add(new Axis
             {
@@ -198,7 +140,6 @@ namespace DBADashGUI.Drives
                 MinValue = 0
             });
             chart1.LegendLocation = LegendLocation.Bottom;
-
         }
 
         public DataTable DriveSnapshot()
@@ -239,7 +180,6 @@ namespace DBADashGUI.Drives
                         tsTime.Text = itm.Text;
                     }
                 }
-
             }
         }
 
@@ -259,7 +199,6 @@ namespace DBADashGUI.Drives
                 SetTimeChecked();
                 RefreshData();
             }
-
         }
 
         private void TsRefresh_Click(object sender, EventArgs e)

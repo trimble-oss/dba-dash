@@ -14,38 +14,17 @@ namespace DBADashGUI.Performance
 
         public DateTime SnapshotDateFrom
         {
-            get
-            {
-                return runningQueries1.SnapshotDateFrom;
-            }
-            set
-            {
-                runningQueries1.SnapshotDateFrom = value;
-            }
+            get => runningQueries1.SnapshotDateFrom; set => runningQueries1.SnapshotDateFrom = value;
         }
 
         public DateTime SnapshotDateTo
         {
-            get
-            {
-                return runningQueries1.SnapshotDateTo;
-            }
-            set
-            {
-                runningQueries1.SnapshotDateTo = value;
-            }
+            get => runningQueries1.SnapshotDateTo; set => runningQueries1.SnapshotDateTo = value;
         }
 
         public int InstanceID
         {
-            get
-            {
-                return runningQueries1.InstanceID;
-            }
-            set
-            {
-                runningQueries1.InstanceID = value;
-            }
+            get => runningQueries1.InstanceID; set => runningQueries1.InstanceID = value;
         }
 
         private void RunningQueriesViewer_Load(object sender, EventArgs e)

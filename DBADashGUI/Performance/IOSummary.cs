@@ -64,11 +64,7 @@ namespace DBADashGUI.Performance
                 cmd.Parameters.AddWithValue("GroupBy", GroupBy.ToString());
                 var pDatabaseName = cmd.Parameters.Add(new SqlParameter() { ParameterName = "DatabaseName", Direction = ParameterDirection.Output, SqlDbType = SqlDbType.NVarChar, Size = 128 });
                 var pInstance = cmd.Parameters.Add(new SqlParameter() { ParameterName = "Instance", Direction = ParameterDirection.Output, SqlDbType = SqlDbType.NVarChar, Size = 128 });
-                if (DatabaseID != null)
-                {
-                    cmd.Parameters.AddWithValue("DatabaseID", DatabaseID);
-                }
-
+                cmd.Parameters.AddWithNullableValue("DatabaseID", DatabaseID);
                 cmd.Parameters.AddWithValue("UTCOffset", DateHelper.UtcOffset);
                 if (DateRange.HasTimeOfDayFilter)
                 {
@@ -131,7 +127,6 @@ namespace DBADashGUI.Performance
         {
             AddGroupByOptions();
             AddColsToDGV();
-
         }
 
         public void RefreshData()
@@ -143,7 +138,6 @@ namespace DBADashGUI.Performance
             dgv.Sort(dgv.Columns[1], ListSortDirection.Descending);
             dgv.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
             lblDateRange.Text = "Date Range : " + FromDate.ToAppTimeZone().ToString() + " to " + ToDate.ToAppTimeZone().ToString();
-
         }
 
         private void TsGroupBy_Click(object sender, EventArgs e)

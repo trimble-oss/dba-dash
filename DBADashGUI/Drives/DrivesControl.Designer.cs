@@ -33,6 +33,7 @@
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
             this.tsRefresh = new System.Windows.Forms.ToolStripButton();
             this.tsCopy = new System.Windows.Forms.ToolStripButton();
+            this.tsExcel = new System.Windows.Forms.ToolStripButton();
             this.toolStripFilter = new System.Windows.Forms.ToolStripDropDownButton();
             this.criticalToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.warningToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -46,7 +47,6 @@
             this.tsColumns = new System.Windows.Forms.ToolStripDropDownButton();
             this.includeAllMetricsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.pnlSpacing = new System.Windows.Forms.Panel();
-            this.tsExcel = new System.Windows.Forms.ToolStripButton();
             this.pnlDrives.SuspendLayout();
             this.toolStrip1.SuspendLayout();
             this.SuspendLayout();
@@ -56,9 +56,10 @@
             this.pnlDrives.AutoScroll = true;
             this.pnlDrives.Controls.Add(this.driveControl1);
             this.pnlDrives.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.pnlDrives.Location = new System.Drawing.Point(0, 43);
+            this.pnlDrives.Location = new System.Drawing.Point(0, 47);
+            this.pnlDrives.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.pnlDrives.Name = "pnlDrives";
-            this.pnlDrives.Size = new System.Drawing.Size(735, 214);
+            this.pnlDrives.Size = new System.Drawing.Size(735, 274);
             this.pnlDrives.TabIndex = 3;
             // 
             // driveControl1
@@ -96,8 +97,9 @@
             0,
             0});
             this.driveControl1.Location = new System.Drawing.Point(0, 0);
+            this.driveControl1.Margin = new System.Windows.Forms.Padding(3, 5, 3, 5);
             this.driveControl1.Name = "driveControl1";
-            this.driveControl1.Size = new System.Drawing.Size(735, 214);
+            this.driveControl1.Size = new System.Drawing.Size(735, 274);
             this.driveControl1.TabIndex = 0;
             // 
             // toolStrip1
@@ -138,6 +140,16 @@
             this.tsCopy.Text = "Copy";
             this.tsCopy.Click += new System.EventHandler(this.TsCopy_Click);
             // 
+            // tsExcel
+            // 
+            this.tsExcel.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.tsExcel.Image = global::DBADashGUI.Properties.Resources.excel16x16;
+            this.tsExcel.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tsExcel.Name = "tsExcel";
+            this.tsExcel.Size = new System.Drawing.Size(29, 24);
+            this.tsExcel.Text = "Export Excel";
+            this.tsExcel.Click += new System.EventHandler(this.TsExcel_Click);
+            // 
             // toolStripFilter
             // 
             this.toolStripFilter.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
@@ -156,33 +168,33 @@
             // 
             this.criticalToolStripMenuItem.CheckOnClick = true;
             this.criticalToolStripMenuItem.Name = "criticalToolStripMenuItem";
-            this.criticalToolStripMenuItem.Size = new System.Drawing.Size(161, 26);
+            this.criticalToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
             this.criticalToolStripMenuItem.Text = "Critical";
-            this.criticalToolStripMenuItem.Click += new System.EventHandler(this.CriticalToolStripMenuItem_Click);
+            this.criticalToolStripMenuItem.Click += new System.EventHandler(this.Status_Selected);
             // 
             // warningToolStripMenuItem
             // 
             this.warningToolStripMenuItem.CheckOnClick = true;
             this.warningToolStripMenuItem.Name = "warningToolStripMenuItem";
-            this.warningToolStripMenuItem.Size = new System.Drawing.Size(161, 26);
+            this.warningToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
             this.warningToolStripMenuItem.Text = "Warning";
-            this.warningToolStripMenuItem.Click += new System.EventHandler(this.WarningToolStripMenuItem_Click);
+            this.warningToolStripMenuItem.Click += new System.EventHandler(this.Status_Selected);
             // 
             // undefinedToolStripMenuItem
             // 
             this.undefinedToolStripMenuItem.CheckOnClick = true;
             this.undefinedToolStripMenuItem.Name = "undefinedToolStripMenuItem";
-            this.undefinedToolStripMenuItem.Size = new System.Drawing.Size(161, 26);
+            this.undefinedToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
             this.undefinedToolStripMenuItem.Text = "Undefined";
-            this.undefinedToolStripMenuItem.Click += new System.EventHandler(this.UndefinedToolStripMenuItem_Click);
+            this.undefinedToolStripMenuItem.Click += new System.EventHandler(this.Status_Selected);
             // 
             // OKToolStripMenuItem
             // 
             this.OKToolStripMenuItem.CheckOnClick = true;
             this.OKToolStripMenuItem.Name = "OKToolStripMenuItem";
-            this.OKToolStripMenuItem.Size = new System.Drawing.Size(161, 26);
+            this.OKToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
             this.OKToolStripMenuItem.Text = "OK";
-            this.OKToolStripMenuItem.Click += new System.EventHandler(this.OKToolStripMenuItem_Click);
+            this.OKToolStripMenuItem.Click += new System.EventHandler(this.Status_Selected);
             // 
             // tsConfigure
             // 
@@ -253,29 +265,21 @@
             // 
             this.pnlSpacing.Dock = System.Windows.Forms.DockStyle.Top;
             this.pnlSpacing.Location = new System.Drawing.Point(0, 27);
+            this.pnlSpacing.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.pnlSpacing.Name = "pnlSpacing";
-            this.pnlSpacing.Size = new System.Drawing.Size(735, 16);
+            this.pnlSpacing.Size = new System.Drawing.Size(735, 20);
             this.pnlSpacing.TabIndex = 8;
-            // 
-            // tsExcel
-            // 
-            this.tsExcel.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.tsExcel.Image = global::DBADashGUI.Properties.Resources.excel16x16;
-            this.tsExcel.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsExcel.Name = "tsExcel";
-            this.tsExcel.Size = new System.Drawing.Size(29, 24);
-            this.tsExcel.Text = "Export Excel";
-            this.tsExcel.Click += new System.EventHandler(this.TsExcel_Click);
             // 
             // DrivesControl
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.Controls.Add(this.pnlDrives);
             this.Controls.Add(this.pnlSpacing);
             this.Controls.Add(this.toolStrip1);
+            this.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.Name = "DrivesControl";
-            this.Size = new System.Drawing.Size(735, 257);
+            this.Size = new System.Drawing.Size(735, 321);
             this.pnlDrives.ResumeLayout(false);
             this.toolStrip1.ResumeLayout(false);
             this.toolStrip1.PerformLayout();

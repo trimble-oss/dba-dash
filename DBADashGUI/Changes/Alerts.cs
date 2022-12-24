@@ -18,14 +18,7 @@ namespace DBADashGUI.Changes
 
         public bool UseAlertName
         {
-            get
-            {
-                return pivotByAlertNameToolStripMenuItem.Checked;
-            }
-            set
-            {
-                pivotByAlertNameToolStripMenuItem.Checked = value;
-            }
+            get => pivotByAlertNameToolStripMenuItem.Checked; set => pivotByAlertNameToolStripMenuItem.Checked = value;
         }
 
         public void SetContext(DBADashContext context)
@@ -43,7 +36,7 @@ namespace DBADashGUI.Changes
             {
                 cn.Open();
                 cmd.Parameters.AddWithValue("@InstanceIDs", string.Join(",", InstanceIDs));
-                cmd.Parameters.AddWithValue("ShowHidden", InstanceIDs.Count == 1 ? true : Common.ShowHidden);
+                cmd.Parameters.AddWithValue("ShowHidden", InstanceIDs.Count == 1 || Common.ShowHidden);
                 DataTable dt = new();
                 da.Fill(dt);
                 return dt;
@@ -109,7 +102,7 @@ namespace DBADashGUI.Changes
             using (var da = new SqlDataAdapter(cmd))
             {
                 cmd.Parameters.AddWithValue("@InstanceIDs", string.Join(",", InstanceIDs));
-                cmd.Parameters.AddWithValue("ShowHidden", InstanceIDs.Count == 1 ? true : Common.ShowHidden);
+                cmd.Parameters.AddWithValue("ShowHidden", InstanceIDs.Count == 1 || Common.ShowHidden);
                 DataTable dt = new();
                 da.Fill(dt);
                 DateHelper.ConvertUTCToAppTimeZone(ref dt);

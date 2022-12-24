@@ -5,27 +5,12 @@ namespace DBADashGUI.Performance
 {
     public partial class Performance : UserControl, ISetContext, IRefreshData
     {
-
-        Int32 PointSize
-        {
-            get
-            {
-                if (dataPointsToolStripMenuItem.Checked)
-                {
-                    return 10;
-                }
-                else
-                {
-                    return 0;
-                }
-            }
-        }
+        private int PointSize => dataPointsToolStripMenuItem.Checked ? 10 : 0;
 
         public Performance()
         {
             InitializeComponent();
         }
-
 
         private DBADashContext context;
 
@@ -55,7 +40,6 @@ namespace DBADashGUI.Performance
             RefreshData();
         }
 
-
         public void RefreshData()
         {
             this.SuspendLayout();
@@ -83,17 +67,14 @@ namespace DBADashGUI.Performance
             waits1.ResumeLayout();
         }
 
-
         private void Timer1_Tick(object sender, EventArgs e)
         {
-
             ioPerformance1.RefreshData();
             cpu1.RefreshData();
             waits1.RefreshData();
             blocking1.RefreshData();
             objectExecution1.RefreshData();
         }
-
 
         private void SmoothLinesToolStripMenuItem_Click(object sender, EventArgs e)
         {
@@ -117,7 +98,6 @@ namespace DBADashGUI.Performance
             cpu1.PointSize = PointSize;
             ioPerformance1.PointSize = PointSize;
             RefreshData();
-
         }
     }
 }

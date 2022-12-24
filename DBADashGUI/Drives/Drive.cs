@@ -4,7 +4,6 @@ using static DBADashGUI.DBADashStatus;
 
 namespace DBADashGUI
 {
-
     public class DriveTypeConverter : TypeConverter
     {
         public override bool GetPropertiesSupported(ITypeDescriptorContext context)
@@ -21,7 +20,7 @@ namespace DBADashGUI
     [TypeConverter(typeof(DriveTypeConverter))]
     public class Drive : DriveThreshold
     {
-        const Int64 bytesPerGB = 1073741824;
+        private const Int64 bytesPerGB = 1073741824;
 
         public string InstanceName;
         public DBADashStatusEnum DriveStatus;
@@ -64,7 +63,6 @@ namespace DBADashGUI
             }
         }
 
-
         public string DriveLetter { get; set; }
 
         public string DriveLabel { get; set; }
@@ -75,61 +73,22 @@ namespace DBADashGUI
 
         public decimal FreeSpaceGB
         {
-            get
-            {
-                return FreeSpace / (decimal)bytesPerGB;
-            }
-            set
-            {
-                FreeSpace = (Int64)(value * bytesPerGB);
-            }
+            get => FreeSpace / (decimal)bytesPerGB; set => FreeSpace = (Int64)(value * bytesPerGB);
         }
+
         public decimal DriveCapacityGB
         {
-            get
-            {
-                return DriveCapacity / (decimal)bytesPerGB;
-            }
-            set
-            {
-                DriveCapacity = (Int64)(value * bytesPerGB);
-            }
+            get => DriveCapacity / (decimal)bytesPerGB; set => DriveCapacity = (Int64)(value * bytesPerGB);
         }
 
+        public double PercentFreeSpace => DriveCapacity == 0 ? 0 : (FreeSpace * 1.0 / DriveCapacity) * 100;
 
-
-        public double PercentFreeSpace
-        {
-            get
-            {
-                if (DriveCapacity == 0)
-                {
-                    return 0;
-                }
-                else
-                {
-                    return ((FreeSpace * 1.0 / DriveCapacity) * 100);
-                }
-            }
-        }
-
-        public double PercentUsedSpace
-        {
-            get
-            {
-                return 100d - PercentFreeSpace;
-            }
-        }
-
+        public double PercentUsedSpace => 100d - PercentFreeSpace;
 
         public Int64 DriveCapacity { get; set; } = 0;
 
         public Int64 FreeSpace { get; set; } = 0;
 
-
-        public override string ToString()
-        {
-            return DriveLabel + " (" + DriveLetter + ")";
-        }
+        public override string ToString() => DriveLabel + " (" + DriveLetter + ")";
     }
 }

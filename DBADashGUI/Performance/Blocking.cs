@@ -15,22 +15,17 @@ namespace DBADashGUI.Performance
             InitializeComponent();
         }
 
-        Int32 InstanceID;
-        double maxBlockedTime = 0;
-        Int32 databaseID = 0;
+        private Int32 InstanceID;
+        private double maxBlockedTime = 0;
+        private Int32 databaseID = 0;
+
         public bool CloseVisible
         {
-            get
-            {
-                return tsClose.Visible;
-            }
-            set
-            {
-                tsClose.Visible = value;
-            }
+            get => tsClose.Visible; set => tsClose.Visible = value;
         }
 
         public event EventHandler<EventArgs> Close;
+
         public event EventHandler<EventArgs> MoveUp;
 
         public void RefreshData(Int32 InstanceID, Int32 databaseID)
@@ -45,7 +40,6 @@ namespace DBADashGUI.Performance
             RefreshData(InstanceID, -1);
         }
 
-
         private DataTable GetDT()
         {
             using (var cn = new SqlConnection(Common.ConnectionString))
@@ -56,10 +50,7 @@ namespace DBADashGUI.Performance
                 cmd.Parameters.AddWithValue("@InstanceID", InstanceID);
                 cmd.Parameters.AddWithValue("@FromDate", DateRange.FromUTC);
                 cmd.Parameters.AddWithValue("@ToDate", DateRange.ToUTC);
-                if (databaseID > 0)
-                {
-                    cmd.Parameters.AddWithValue("@DatabaseID", databaseID);
-                }
+                cmd.Parameters.AddIfGreaterThanZero("@DatabaseID", databaseID);
                 cmd.Parameters.AddWithValue("@UTCOffset", DateHelper.UtcOffset);
                 if (DateRange.HasTimeOfDayFilter)
                 {
@@ -77,40 +68,17 @@ namespace DBADashGUI.Performance
             }
         }
 
-        double MaxPointShapeDiameter
+        private double MaxPointShapeDiameter => maxBlockedTime switch
         {
-            get
-            {
-
-                if (maxBlockedTime > 3600000)
-                {
-                    return 60;
-                }
-                else if (maxBlockedTime > 600000)
-                {
-                    return 30;
-                }
-                else if (maxBlockedTime > 60000)
-                {
-                    return 10;
-                }
-                else
-                {
-                    return 5;
-                }
-            }
-        }
+            > 3600000 => 60,
+            > 600000 => 30,
+            > 60000 => 10,
+            _ => 5
+        };
 
         public bool MoveUpVisible
         {
-            get
-            {
-                return tsUp.Visible;
-            }
-            set
-            {
-                tsUp.Visible = value;
-            }
+            get => tsUp.Visible; set => tsUp.Visible = value;
         }
 
         public BlockingMetric Metric { get; set; } = new();
@@ -158,9 +126,7 @@ namespace DBADashGUI.Performance
                     Values = new ChartValues<BlockingPoint>(points),
                     MinPointShapeDiameter = 5,
                     MaxPointShapeDiameter = MaxPointShapeDiameter
-
                     }
-
                 };
 
             string format = DateRange.DurationMins < 1440 ? "HH:mm" : "yyyy-MM-dd HH:mm";
@@ -180,9 +146,7 @@ namespace DBADashGUI.Performance
             chartBlocking.Series = s1;
 
             lblBlocking.Text = databaseID > 0 ? "Blocking: Database" : "Blocking: Instance";
-
         }
-
 
         private void ChartBlocking_DataClick(object sender, ChartPoint chartPoint)
         {
@@ -195,7 +159,6 @@ namespace DBADashGUI.Performance
                 ShowRootBlockers = true,
             };
             frm.Show(this);
-
         }
 
         private void Blocking_Load(object sender, EventArgs e)
@@ -215,7 +178,7 @@ namespace DBADashGUI.Performance
     }
 }
 
-class BlockingPoint
+internal class BlockingPoint
 {
     public Int32 SnapshotID { get; set; }
 
@@ -224,6 +187,7 @@ class BlockingPoint
     public Int32 BlockedSessions { get; set; }
 
     public Int64 BlockedWaitTime { get; set; }
+
     public BlockingPoint(Int32 snapshotID, DateTime snapshotDate, Int32 blockedSessions, Int64 blockedWaitTime)
     {
         this.SnapshotID = snapshotID;

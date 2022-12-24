@@ -15,50 +15,22 @@ namespace DBADashGUI.LogShipping
 
         public bool IncludeCritical
         {
-            get
-            {
-                return tsCritical.Checked;
-            }
-            set
-            {
-                tsCritical.Checked = value;
-            }
+            get => tsCritical.Checked; set => tsCritical.Checked = value;
         }
 
         public bool IncludeWarning
         {
-            get
-            {
-                return tsWarning.Checked;
-            }
-            set
-            {
-                tsWarning.Checked = value;
-            }
+            get => tsWarning.Checked; set => tsWarning.Checked = value;
         }
 
         public bool IncludeNA
         {
-            get
-            {
-                return tsNA.Checked;
-            }
-            set
-            {
-                tsNA.Checked = value;
-            }
+            get => tsNA.Checked; set => tsNA.Checked = value;
         }
 
         public bool IncludeOK
         {
-            get
-            {
-                return tsOK.Checked;
-            }
-            set
-            {
-                tsOK.Checked = value;
-            }
+            get => tsOK.Checked; set => tsOK.Checked = value;
         }
 
         public bool CanNavigateBack { get => tsBack.Enabled; }

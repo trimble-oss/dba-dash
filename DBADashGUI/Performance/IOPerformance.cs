@@ -18,35 +18,28 @@ namespace DBADashGUI.Performance
             InitializeComponent();
         }
 
-        Int32 mins;
-        DateTime ioTime = DateTime.MinValue;
-        Int32 instanceID;
+        private Int32 mins;
+        private DateTime ioTime = DateTime.MinValue;
+        private Int32 instanceID;
         private Int32 dateGrouping;
-        bool smoothLines = true;
-        Int32 databaseid = 0;
+        private bool smoothLines = true;
+        private Int32 databaseid = 0;
         public Int32 PointSize;
-        string filegroup = "";
+        private string filegroup = "";
 
         public event EventHandler<EventArgs> Close;
+
         public event EventHandler<EventArgs> MoveUp;
 
         public bool CloseVisible
         {
-            get
-            {
-                return tsClose.Visible;
-            }
-            set
-            {
-                tsClose.Visible = value;
-            }
+            get => tsClose.Visible;
+            set => tsClose.Visible = value;
         }
+
         public string FileGroup
         {
-            get
-            {
-                return filegroup;
-            }
+            get => filegroup;
             set
             {
                 filegroup = value;
@@ -64,10 +57,7 @@ namespace DBADashGUI.Performance
 
         public string Drive
         {
-            get
-            {
-                return Metric.Drive;
-            }
+            get => Metric.Drive;
             set
             {
                 tsDrives.Text = value;
@@ -81,10 +71,7 @@ namespace DBADashGUI.Performance
 
         public bool SmoothLines
         {
-            get
-            {
-                return smoothLines;
-            }
+            get => smoothLines;
             set
             {
                 smoothLines = value;
@@ -97,18 +84,13 @@ namespace DBADashGUI.Performance
 
         public bool MoveUpVisible
         {
-            get
-            {
-                return tsUp.Visible;
-            }
-            set
-            {
-                tsUp.Visible = value;
-            }
+            get => tsUp.Visible; set => tsUp.Visible = value;
         }
 
         private IOMetric _metric = new();
-        public IOMetric Metric { get => _metric; set { _metric = value; SetMetric(); } }
+
+        public IOMetric Metric
+        { get => _metric; set { _metric = value; SetMetric(); } }
 
         IMetric IMetricChart.Metric { get => Metric; }
 
@@ -161,7 +143,6 @@ namespace DBADashGUI.Performance
                     };
                     mnu.Click += Filegroup_Click; ;
                     tsFileGroup.DropDownItems.Add(mnu);
-
                 }
                 tsFileGroup.Visible = tsFileGroup.DropDownItems.Count > 0;
             }
@@ -227,19 +208,11 @@ namespace DBADashGUI.Performance
                 cmd.Parameters.AddWithValue("@InstanceID", instanceid);
                 cmd.Parameters.AddWithValue("@FromDate", from);
                 cmd.Parameters.AddWithValue("@ToDate", to);
-                if (filegroup.Length > 0)
-                {
-                    cmd.Parameters.AddWithValue("@FileGroup", filegroup);
-                }
+                cmd.Parameters.AddStringIfNotNullOrEmpty("@FileGroup", filegroup);
                 cmd.Parameters.AddWithValue("DateGroupingMin", dateGrouping);
-                if (drive != "")
-                {
-                    cmd.Parameters.AddWithValue("Drive", drive);
-                }
-                if (DatabaseID > 0)
-                {
-                    cmd.Parameters.AddWithValue("@DatabaseID", DatabaseID);
-                }
+                cmd.Parameters.AddStringIfNotNullOrEmpty("Drive", drive);
+                cmd.Parameters.AddIfGreaterThanZero("@DatabaseID", DatabaseID);
+
                 cmd.Parameters.AddWithValue("@UTCOffset", DateHelper.UtcOffset);
                 if (DateRange.HasTimeOfDayFilter)
                 {
@@ -287,7 +260,6 @@ namespace DBADashGUI.Performance
             PopulateFileGroupFilter();
             GetDrives();
             RefreshData();
-
         }
 
         public void RefreshData(int InstanceID)
@@ -311,8 +283,6 @@ namespace DBADashGUI.Performance
             }
             var dt = IOStats(instanceID, DateRange.FromUTC, DateRange.ToUTC, databaseid, Metric.Drive);
             var cnt = dt.Rows.Count;
-
-
 
             foreach (ToolStripMenuItem ts in tsMeasures.DropDownItems)
             {
@@ -357,7 +327,6 @@ namespace DBADashGUI.Performance
             {
                 Title = "Time",
                 LabelFormatter = val => new System.DateTime((long)val).ToString(DateFormat)
-
             });
             chartIO.AxisY.Add(new Axis
             {
@@ -389,14 +358,12 @@ namespace DBADashGUI.Performance
                     var v = new ChartValues<DateTimePoint>();
                     v.AddRange(c.Points);
                     s.Values = v;
-
                 }
                 else
                 {
                     s.Values.AddRange(c.Points);
                 }
                 s.Visibility = c.isVisible ? System.Windows.Visibility.Visible : System.Windows.Visibility.Hidden;
-
             }
             if (chartIO.Series[0].Values.Count == 1)
             {
@@ -421,7 +388,6 @@ namespace DBADashGUI.Performance
                     Metric.VisibleMetrics.Add(metricName);
                 }
             }
-
         }
 
         private void IOPerformance_Load(object sender, EventArgs e)
@@ -459,7 +425,5 @@ namespace DBADashGUI.Performance
         {
             MoveUp.Invoke(this, new EventArgs());
         }
-
-
     }
 }

@@ -113,33 +113,33 @@
             // 
             this.criticalToolStripMenuItem.CheckOnClick = true;
             this.criticalToolStripMenuItem.Name = "criticalToolStripMenuItem";
-            this.criticalToolStripMenuItem.Size = new System.Drawing.Size(161, 26);
+            this.criticalToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
             this.criticalToolStripMenuItem.Text = "Critical";
-            this.criticalToolStripMenuItem.Click += new System.EventHandler(this.CriticalToolStripMenuItem_Click);
+            this.criticalToolStripMenuItem.Click += new System.EventHandler(this.Status_Selected);
             // 
             // warningToolStripMenuItem
             // 
             this.warningToolStripMenuItem.CheckOnClick = true;
             this.warningToolStripMenuItem.Name = "warningToolStripMenuItem";
-            this.warningToolStripMenuItem.Size = new System.Drawing.Size(161, 26);
+            this.warningToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
             this.warningToolStripMenuItem.Text = "Warning";
-            this.warningToolStripMenuItem.Click += new System.EventHandler(this.WarningToolStripMenuItem_Click);
+            this.warningToolStripMenuItem.Click += new System.EventHandler(this.Status_Selected);
             // 
             // undefinedToolStripMenuItem
             // 
             this.undefinedToolStripMenuItem.CheckOnClick = true;
             this.undefinedToolStripMenuItem.Name = "undefinedToolStripMenuItem";
-            this.undefinedToolStripMenuItem.Size = new System.Drawing.Size(161, 26);
+            this.undefinedToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
             this.undefinedToolStripMenuItem.Text = "Undefined";
-            this.undefinedToolStripMenuItem.Click += new System.EventHandler(this.UndefinedToolStripMenuItem_Click);
+            this.undefinedToolStripMenuItem.Click += new System.EventHandler(this.Status_Selected);
             // 
             // OKToolStripMenuItem
             // 
             this.OKToolStripMenuItem.CheckOnClick = true;
             this.OKToolStripMenuItem.Name = "OKToolStripMenuItem";
-            this.OKToolStripMenuItem.Size = new System.Drawing.Size(161, 26);
+            this.OKToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
             this.OKToolStripMenuItem.Text = "OK";
-            this.OKToolStripMenuItem.Click += new System.EventHandler(this.OKToolStripMenuItem_Click);
+            this.OKToolStripMenuItem.Click += new System.EventHandler(this.Status_Selected);
             // 
             // dgvCollectionDates
             // 

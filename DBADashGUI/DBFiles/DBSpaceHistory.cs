@@ -20,15 +20,13 @@ namespace DBADashGUI.DBFiles
             InitializeComponent();
         }
 
-        readonly string connectionString = Common.ConnectionString;
+        private readonly string connectionString = Common.ConnectionString;
 
         private Int32 _databaseID;
+
         public Int32 DatabaseID
         {
-            get
-            {
-                return _databaseID;
-            }
+            get => _databaseID;
             set
             {
                 _databaseID = value;
@@ -43,19 +41,18 @@ namespace DBADashGUI.DBFiles
         public string InstanceGroupName { get; set; }
         public string DBName { get; set; }
         private string _fileName;
-        public string FileName { get { return _fileName; } set { _fileName = value; SetFileChecked(); } }
+
+        public string FileName
+        { get { return _fileName; } set { _fileName = value; SetFileChecked(); } }
 
         public string NumberFormat { get; set; } = "N1";
 
         private Int32? _dataspaceid = null;
-        DataTable HistoryDT;
+        private DataTable HistoryDT;
 
         public Int32? DataSpaceID
         {
-            get
-            {
-                return _dataspaceid;
-            }
+            get => _dataspaceid;
             set
             {
                 _dataspaceid = value;
@@ -65,24 +62,17 @@ namespace DBADashGUI.DBFiles
 
         public bool SmoothLines
         {
-            get
-            {
-                return smoothLinesToolStripMenuItem.Checked;
-            }
-            set
-            {
-                smoothLinesToolStripMenuItem.Checked = value;
-            }
+            get => smoothLinesToolStripMenuItem.Checked; set => smoothLinesToolStripMenuItem.Checked = value;
         }
 
         public string DateFormat = "yyyy-MM-dd";
 
-        Int32 Days = 90;
+        private Int32 Days = 90;
 
-        DateTime customFrom;
-        DateTime customTo;
+        private DateTime customFrom;
+        private DateTime customTo;
 
-        DateTime From
+        private DateTime From
         {
             get
             {
@@ -97,44 +87,15 @@ namespace DBADashGUI.DBFiles
             }
         }
 
-        DateTime To
-        {
-            get
-            {
-                if (Days > 0)
-                {
-                    return DateTime.UtcNow.Date.AddDays(1);
-                }
-                else
-                {
-                    return customTo;
-                }
-            }
-        }
+        private DateTime To => Days > 0 ? DateTime.UtcNow.Date.AddDays(1) : customTo;
 
-        Int32 PointSize
-        {
-            get
-            {
-                if (pointsToolStripMenuItem.Checked)
-                {
-                    return 10;
-                }
-                else
-                {
-                    return 0;
-                }
-            }
-        }
+        private Int32 PointSize => pointsToolStripMenuItem.Checked ? 10 : 0;
 
         private string _unit = "MB";
 
         public string Unit
         {
-            get
-            {
-                return _unit;
-            }
+            get => _unit;
             set
             {
                 int checkedCount = 0;
@@ -161,7 +122,6 @@ namespace DBADashGUI.DBFiles
             }
         }
 
-
         public void RefreshData()
         {
             HistoryDT = DBFileSnapshot();
@@ -183,7 +143,6 @@ namespace DBADashGUI.DBFiles
                 {"Size" + Unit, new ColumnMetaData{Alias="Size (" + Unit + ")",isVisible=true } },
                 {"Used" + Unit, new ColumnMetaData{Alias="Used (" + Unit + ")",isVisible=true } }
             };
-
 
             foreach (var s in columns.Keys)
             {
@@ -225,7 +184,6 @@ namespace DBADashGUI.DBFiles
             {
                 Title = "Time",
                 LabelFormatter = val => new System.DateTime((long)val).ToString(DateFormat)
-
             });
             chart1.AxisY.Add(new Axis
             {
@@ -245,22 +203,11 @@ namespace DBADashGUI.DBFiles
                 cn.Open();
                 cmd.Parameters.AddWithValue("FromDate", From);
                 cmd.Parameters.AddWithValue("ToDate", To);
-                if (DatabaseID > 0)
-                {
-                    cmd.Parameters.AddWithValue("DatabaseID", DatabaseID);
-                }
-                if (InstanceGroupName != null && InstanceGroupName.Length > 0)
-                {
-                    cmd.Parameters.AddWithValue("InstanceGroupName", InstanceGroupName);
-                }
-                if (DBName != null && DBName.Length > 0)
-                {
-                    cmd.Parameters.AddWithValue("DBName", DBName);
-                }
-                if (DataSpaceID != null)
-                {
-                    cmd.Parameters.AddWithValue("DataSpaceID", DataSpaceID);
-                }
+                cmd.Parameters.AddIfGreaterThanZero("DatabaseID", DatabaseID);
+                cmd.Parameters.AddStringIfNotNullOrEmpty("InstanceGroupName", InstanceGroupName);
+                cmd.Parameters.AddStringIfNotNullOrEmpty("DBName", DBName);
+                cmd.Parameters.AddWithNullableValue("DataSpaceID", DataSpaceID);
+
                 if (FileName != null && FileName.Length > 0)
                 {
                     cmd.Parameters.AddWithValue("FileName", FileName);
@@ -288,7 +235,6 @@ namespace DBADashGUI.DBFiles
 
                 return dt;
             }
-
         }
 
         private void Days_Click(object sender, EventArgs e)
@@ -307,7 +253,6 @@ namespace DBADashGUI.DBFiles
                     var itm = (ToolStripMenuItem)ts;
                     itm.Checked = (string)itm.Tag == Days.ToString();
                 }
-
             }
         }
 
@@ -327,7 +272,6 @@ namespace DBADashGUI.DBFiles
                 SetTimeChecked();
                 RefreshData();
             }
-
         }
 
         private void TsRefresh_Click(object sender, EventArgs e)

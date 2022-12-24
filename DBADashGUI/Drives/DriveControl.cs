@@ -22,10 +22,7 @@ namespace DBADashGUI
           DesignerSerializationVisibility(DesignerSerializationVisibility.Content)]
         public Drive Drive
         {
-            get
-            {
-                return drive;
-            }
+            get => drive;
             set
             {
                 drive = value;

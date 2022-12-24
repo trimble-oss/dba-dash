@@ -24,31 +24,24 @@ namespace DBADashGUI.Performance
         }
 
         public DateTimePoint x;
-        Int32 instanceID;
-        DateTime lastWait = DateTime.MinValue;
+        private Int32 instanceID;
+        private DateTime lastWait = DateTime.MinValue;
         private Int32 dateGrouping;
-        Int32 mins;
+        private Int32 mins;
+
         public event EventHandler<EventArgs> Close;
+
         public event EventHandler<EventArgs> MoveUp;
 
         public bool CloseVisible
         {
-            get
-            {
-                return tsClose.Visible;
-            }
-            set
-            {
-                tsClose.Visible = value;
-            }
+            get => tsClose.Visible;
+            set => tsClose.Visible = value;
         }
 
         public string WaitType
         {
-            get
-            {
-                return Metric.WaitType;
-            }
+            get => Metric.WaitType;
             set
             {
                 Metric.WaitType = value;
@@ -58,17 +51,15 @@ namespace DBADashGUI.Performance
 
         public bool MoveUpVisible
         {
-            get
-            {
-                return tsUp.Visible;
-            }
-            set
-            {
-                tsUp.Visible = value;
-            }
+            get => tsUp.Visible; set => tsUp.Visible = value;
         }
+
         private WaitMetric _metric = new();
-        public WaitMetric Metric { get => _metric; set { _metric = value; SetMetric(); } }
+
+        public WaitMetric Metric
+        {
+            get => _metric; set { _metric = value; SetMetric(); }
+        }
 
         private void SetMetric()
         {
@@ -96,10 +87,8 @@ namespace DBADashGUI.Performance
             RefreshData();
         }
 
-
         private DataTable GetWaitsDT()
         {
-
             using (var cn = new SqlConnection(Common.ConnectionString))
             using (var cmd = new SqlCommand("dbo.Waits_Get", cn))
             using (var da = new SqlDataAdapter(cmd))
@@ -111,10 +100,7 @@ namespace DBADashGUI.Performance
                 cmd.Parameters.AddWithValue("ToDate", DateRange.ToUTC);
                 cmd.Parameters.AddWithValue("DateGroupingMin", dateGrouping);
                 cmd.Parameters.AddWithValue("CriticalWaitsOnly", criticalWaitsOnlyToolStripMenuItem.Checked);
-                if (!String.IsNullOrEmpty(Metric.WaitType))
-                {
-                    cmd.Parameters.AddWithValue("WaitType", Metric.WaitType);
-                }
+                cmd.Parameters.AddStringIfNotNullOrEmpty("WaitType", Metric.WaitType);
                 cmd.Parameters.AddWithValue("@UTCOffset", DateHelper.UtcOffset);
                 if (DateRange.HasTimeOfDayFilter)
                 {
@@ -134,7 +120,6 @@ namespace DBADashGUI.Performance
 
         public void RefreshData()
         {
-
             waitChart.Series.Clear();
             waitChart.AxisX.Clear();
             waitChart.AxisY.Clear();
@@ -171,11 +156,9 @@ namespace DBADashGUI.Performance
                 values = new ChartValues<DateTimePoint>();
             }
 
-
             CartesianMapper<DateTimePoint> dayConfig = Mappers.Xy<DateTimePoint>()
 .X(dateModel => dateModel.DateTime.Ticks / TimeSpan.FromMinutes(dateGrouping == 0 ? 1 : dateGrouping).Ticks)
 .Y(dateModel => dateModel.Value);
-
 
             SeriesCollection s1 = new(dayConfig);
             foreach (var x in dPoints)
@@ -204,10 +187,8 @@ namespace DBADashGUI.Performance
             waitChart.AxisY.Add(new Axis
             {
                 LabelFormatter = val => val.ToString("0ms/sec")
-
             });
         }
-
 
         private void Waits_Load(object sender, EventArgs e)
         {

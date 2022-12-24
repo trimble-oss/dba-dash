@@ -6,9 +6,8 @@ using System.Data;
 
 namespace DBADashGUI
 {
-    static class CommonData
+    internal static class CommonData
     {
-
         public static DataTable Instances;
 
         public static void UpdateInstancesList(string tagIDs = "", bool? Active = true, bool? azureDB = null, string searchString = "", string groupByTag = "")
@@ -18,35 +17,15 @@ namespace DBADashGUI
 
         public static DataTable GetInstances(string tagIDs = "", bool? Active = true, bool? azureDB = null, string searchString = "", string groupByTag = "")
         {
-
             using (var cn = new SqlConnection(Common.ConnectionString))
             using (var cmd = new SqlCommand(@"dbo.Instances_Get", cn) { CommandType = CommandType.StoredProcedure })
             using (var da = new SqlDataAdapter(cmd))
             {
-                if (tagIDs != null && tagIDs != String.Empty)
-                {
-                    cmd.Parameters.AddWithValue("TagIDs", tagIDs);
-                }
-                if (Active == null)
-                {
-                    cmd.Parameters.AddWithValue("IsActive", DBNull.Value);
-                }
-                else
-                {
-                    cmd.Parameters.AddWithValue("IsActive", Active);
-                }
-                if (azureDB != null)
-                {
-                    cmd.Parameters.AddWithValue("IsAzure", azureDB);
-                }
-                if (!string.IsNullOrEmpty(searchString))
-                {
-                    cmd.Parameters.AddWithValue("SearchString", searchString);
-                }
-                if (!string.IsNullOrEmpty(groupByTag))
-                {
-                    cmd.Parameters.AddWithValue("GroupByTag", groupByTag);
-                }
+                cmd.Parameters.AddStringIfNotNullOrEmpty("TagIDs", tagIDs);
+                cmd.Parameters.AddWithNullableValue("IsActive", Active);
+                cmd.Parameters.AddWithNullableValue("IsAzure", azureDB);
+                cmd.Parameters.AddStringIfNotNullOrEmpty("SearchString", searchString);
+                cmd.Parameters.AddStringIfNotNullOrEmpty("GroupByTag", groupByTag);
                 DataTable dt = new();
                 da.Fill(dt);
                 return dt;
@@ -104,7 +83,6 @@ namespace DBADashGUI
                 da.Fill(dt);
                 return dt;
             }
-
         }
 
         public static DataTable ObjectExecutionStats(Int32 instanceID, Int32 databaseID, Int64 objectID, Int32 dateGrouping, string measure, DateTime FromDate, DateTime ToDate, string instance = "")
@@ -114,27 +92,16 @@ namespace DBADashGUI
             using (var da = new SqlDataAdapter(cmd))
             {
                 cn.Open();
-                if (instanceID > 0)
-                {
-                    cmd.Parameters.AddWithValue("InstanceID", instanceID);
-                }
-                else if (instance != null && instance.Length > 0)
-                {
-                    cmd.Parameters.AddWithValue("Instance", instance);
-                }
+
+                cmd.Parameters.AddIfGreaterThanZero("InstanceID", instanceID);
+                cmd.Parameters.AddStringIfNotNullOrEmpty("Instance", instance);
                 cmd.Parameters.AddWithValue("FromDateUTC", FromDate);
                 cmd.Parameters.AddWithValue("ToDateUTC", ToDate);
                 cmd.Parameters.AddWithValue("UTCOffset", DateHelper.UtcOffset);
-                if (objectID > 0)
-                {
-                    cmd.Parameters.AddWithValue("ObjectID", objectID);
-                }
+                cmd.Parameters.AddIfGreaterThanZero("ObjectID", objectID);
                 cmd.Parameters.AddWithValue("DateGroupingMin", dateGrouping);
                 cmd.Parameters.AddWithValue("Measure", measure);
-                if (databaseID > 0)
-                {
-                    cmd.Parameters.AddWithValue("DatabaseID", databaseID);
-                }
+                cmd.Parameters.AddIfGreaterThanZero("DatabaseID", databaseID);
                 if (DateRange.HasTimeOfDayFilter)
                 {
                     cmd.Parameters.AddWithValue("Hours", DateRange.TimeOfDay.AsDataTable());
@@ -147,7 +114,6 @@ namespace DBADashGUI
                 da.Fill(dt);
                 return dt;
             }
-
         }
 
         public static DataTable GetJobSteps(Int32 InstanceID, Guid JobID)
@@ -267,6 +233,7 @@ namespace DBADashGUI
                 return dt;
             }
         }
+
         public static DataTable GetCounters()
         {
             using (var cn = new SqlConnection(Common.ConnectionString))

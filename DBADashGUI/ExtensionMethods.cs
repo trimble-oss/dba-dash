@@ -126,13 +126,13 @@ namespace DBADashGUI
         /// Add Guid SqlParameter to the collection only if parameter value is not empty
         /// </summary>
         /// <param name="p"></param>
-        /// <param name="name">Name of parameter</param>
+        /// <param name="parameterName">Name of parameter</param>
         /// <param name="value">Parameter value</param>
-        internal static SqlParameter AddGuidIfNotEmpty(this SqlParameterCollection p, string name, Guid value)
+        internal static SqlParameter AddGuidIfNotEmpty(this SqlParameterCollection p, string parameterName, Guid value)
         {
             if (value != Guid.Empty)
             {
-                return p.AddWithValue(name, value);
+                return p.AddWithValue(parameterName, value);
             }
             return null;
         }
@@ -141,15 +141,57 @@ namespace DBADashGUI
         /// Add Guid SqlParameter to the collection only if parameter value is not null or empty
         /// </summary>
         /// <param name="p"></param>
-        /// <param name="name">Name of parameter</param>
+        /// <param name="parameterName">Name of parameter</param>
         /// <param name="value">Parameter value</param>
-        internal static SqlParameter AddStringIfNotNullOrEmpty(this SqlParameterCollection p, string name, string value)
+        internal static SqlParameter AddStringIfNotNullOrEmpty(this SqlParameterCollection p, string parameterName, string value)
         {
             if (!string.IsNullOrEmpty(value))
             {
-                return p.AddWithValue(name, value);
+                return p.AddWithValue(parameterName, value);
             }
             return null;
+        }
+
+        /// <summary>
+        /// Add parameter with value, passing DBNull.value in place of null
+        /// </summary>
+        /// <param name="p"></param>
+        /// <param name="parameterName">Name of parameter</param>
+        /// <param name="value">Parameter value</param>
+        internal static SqlParameter AddWithNullableValue(this SqlParameterCollection p, string parameterName, object value)
+        {
+            if (value == null)
+                return p.AddWithValue(parameterName, DBNull.Value);
+            else
+                return p.AddWithValue(parameterName, value);
+        }
+
+        /// <summary>
+        /// Add parameter with value if value is greater than zero
+        /// </summary>
+        /// <param name="p"></param>
+        /// <param name="parameterName">Name of parameter</param>
+        /// <param name="value">Parameter value</param>
+        internal static SqlParameter AddIfGreaterThanZero(this SqlParameterCollection p, string parameterName, int value)
+        {
+            if (value > 0)
+                return p.AddWithValue(parameterName, value);
+            else
+                return null;
+        }
+
+        /// <summary>
+        /// Add parameter with value if value is greater than zero
+        /// </summary>
+        /// <param name="p"></param>
+        /// <param name="parameterName">Name of parameter</param>
+        /// <param name="value">Parameter value</param>
+        internal static SqlParameter AddIfGreaterThanZero(this SqlParameterCollection p, string parameterName, long value)
+        {
+            if (value > 0)
+                return p.AddWithValue(parameterName, value);
+            else
+                return null;
         }
 
         /// <summary>

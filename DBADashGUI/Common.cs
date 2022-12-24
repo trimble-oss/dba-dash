@@ -22,7 +22,7 @@ namespace DBADashGUI
         private static bool IsApplicationRunningInternal = false;
         public static bool IsApplicationRunning { get => IsApplicationRunningInternal; set => IsApplicationRunningInternal = value; } /* Set to true if App is running - used to detect design time mode */
         private static CodeViewer FrmCodeViewer;
-        public static bool ShowHidden;
+        private static bool showHidden;
 
         public static void SetConnectionString(string connection)
         {
@@ -37,6 +37,8 @@ namespace DBADashGUI
                 return Guid.Parse("8C5E7FDA-E8BF-4A96-9A85-A6E23A8C635C");
             }
         }
+
+        public static bool ShowHidden { get => showHidden; set => showHidden = value; }
 
         public static string DDL(Int64 DDLID)
         {

@@ -96,7 +96,7 @@ namespace DBADashGUI.Checks
                 cmd.Parameters.AddWithValue("IncludeCritical", criticalToolStripMenuItem.Checked);
                 cmd.Parameters.AddWithValue("IncludeOK", oKToolStripMenuItem.Checked);
                 cmd.Parameters.AddWithValue("IncludeNA", undefinedToolStripMenuItem.Checked);
-                cmd.Parameters.AddWithValue("ShowHidden", InstanceIDs.Count == 1 ? true : Common.ShowHidden);
+                cmd.Parameters.AddWithValue("ShowHidden", InstanceIDs.Count == 1 || Common.ShowHidden);
                 DataTable dt = new();
                 da.Fill(dt);
                 DateHelper.ConvertUTCToAppTimeZone(ref dt);

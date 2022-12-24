@@ -49,18 +49,9 @@ namespace DBADashGUI
             {
                 cn.Open();
                 cmd.Parameters.AddWithValue("@InstanceIDs", string.Join(",", InstanceIDs));
-                if (DatabaseID > 0)
-                {
-                    cmd.Parameters.AddWithValue("@DatabaseID", DatabaseID);
-                }
-                if (InstanceGroupName != null && InstanceGroupName.Length > 0)
-                {
-                    cmd.Parameters.AddWithValue("@InstanceGroupName", InstanceGroupName);
-                }
-                if (!string.IsNullOrEmpty(DBName))
-                {
-                    cmd.Parameters.AddWithValue("@DBName", DBName);
-                }
+                cmd.Parameters.AddIfGreaterThanZero("@DatabaseID", DatabaseID);
+                cmd.Parameters.AddStringIfNotNullOrEmpty("@InstanceGroupName", InstanceGroupName);
+                cmd.Parameters.AddStringIfNotNullOrEmpty("@DBName", DBName);
                 cmd.Parameters.AddWithValue("ShowHidden", InstanceIDs.Count == 1 || Common.ShowHidden);
                 DataTable dt = new();
                 da.Fill(dt);

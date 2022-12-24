@@ -1,6 +1,7 @@
 ﻿using Microsoft.Data.SqlClient;
 using System;
 using System.Data;
+
 namespace DBADashGUI.AgentJobs
 {
     public class AgentJobThreshold
@@ -65,7 +66,6 @@ namespace DBADashGUI.AgentJobs
                         threshold.IsInherited = true;
                     }
                     return threshold;
-
                 }
             }
         }
@@ -79,24 +79,23 @@ namespace DBADashGUI.AgentJobs
                     cn.Open();
                     cmd.Parameters.AddWithValue("InstanceID", InstanceID);
                     cmd.Parameters.AddWithValue("job_id", JobID);
-                    if (TimeSinceLastFailureWarning != null) { cmd.Parameters.AddWithValue("TimeSinceLastFailureWarning", TimeSinceLastFailureWarning); }
-                    if (TimeSinceLastFailureCritical != null) { cmd.Parameters.AddWithValue("TimeSinceLastFailureCritical", TimeSinceLastFailureCritical); }
-                    if (TimeSinceLastSucceededWarning != null) { cmd.Parameters.AddWithValue("TimeSinceLastSucceededWarning", TimeSinceLastSucceededWarning); }
-                    if (TimeSinceLastSucceededCritical != null) { cmd.Parameters.AddWithValue("TimeSinceLastSucceededCritical", TimeSinceLastSucceededCritical); }
-                    if (FailCount24HrsWarning != null) { cmd.Parameters.AddWithValue("FailCount24HrsWarning", FailCount24HrsWarning); }
-                    if (FailCount24HrsCritical != null) { cmd.Parameters.AddWithValue("FailCount24HrsCritical", FailCount24HrsCritical); }
-                    if (FailCount7DaysCritical != null) { cmd.Parameters.AddWithValue("FailCount7DaysCritical", FailCount7DaysCritical); }
-                    if (FailCount7DaysWarning != null) { cmd.Parameters.AddWithValue("FailCount7DaysWarning", FailCount7DaysWarning); }
-                    if (JobStepFails24HrsWarning != null) { cmd.Parameters.AddWithValue("JobStepFails24HrsWarning", JobStepFails24HrsWarning); }
-                    if (JobStepFails24HrsCritical != null) { cmd.Parameters.AddWithValue("JobStepFails24HrsCritical", JobStepFails24HrsCritical); }
-                    if (JobStepFails7DaysWarning != null) { cmd.Parameters.AddWithValue("JobStepFails7DaysWarning", JobStepFails7DaysWarning); }
-                    if (JobStepFails7DaysCritical != null) { cmd.Parameters.AddWithValue("JobStepFails7DaysCritical", JobStepFails7DaysCritical); }
+                    cmd.Parameters.AddWithNullableValue("TimeSinceLastFailureWarning", TimeSinceLastFailureWarning);
+                    cmd.Parameters.AddWithNullableValue("TimeSinceLastFailureCritical", TimeSinceLastFailureCritical);
+                    cmd.Parameters.AddWithNullableValue("TimeSinceLastSucceededWarning", TimeSinceLastSucceededWarning);
+                    cmd.Parameters.AddWithNullableValue("TimeSinceLastSucceededCritical", TimeSinceLastSucceededCritical);
+                    cmd.Parameters.AddWithNullableValue("FailCount24HrsWarning", FailCount24HrsWarning);
+                    cmd.Parameters.AddWithNullableValue("FailCount24HrsCritical", FailCount24HrsCritical);
+                    cmd.Parameters.AddWithNullableValue("FailCount7DaysCritical", FailCount7DaysCritical);
+                    cmd.Parameters.AddWithNullableValue("FailCount7DaysWarning", FailCount7DaysWarning);
+                    cmd.Parameters.AddWithNullableValue("JobStepFails24HrsWarning", JobStepFails24HrsWarning);
+                    cmd.Parameters.AddWithNullableValue("JobStepFails24HrsCritical", JobStepFails24HrsCritical);
+                    cmd.Parameters.AddWithNullableValue("JobStepFails7DaysWarning", JobStepFails7DaysWarning);
+                    cmd.Parameters.AddWithNullableValue("JobStepFails7DaysCritical", JobStepFails7DaysCritical);
                     cmd.Parameters.AddWithValue("LastFailIsCritical", LastFailIsCritical);
                     cmd.Parameters.AddWithValue("LastFailIsWarning", LastFailIsWarning);
                     cmd.Parameters.AddWithValue("Inherit", IsInherited);
                     cmd.ExecuteNonQuery();
                 }
-
             }
         }
 
@@ -104,6 +103,5 @@ namespace DBADashGUI.AgentJobs
         {
             return rdr[columnName] == DBNull.Value ? null : (Int32?)rdr[columnName];
         }
-
     }
 }

@@ -15,17 +15,14 @@ namespace DBADashGUI.Performance
         }
 
         private int InstanceID { get; set; }
-        string selectedWaitType;
+        private string selectedWaitType;
 
         private int dateGrouping = 1;
         private int mins;
 
         public int DateGrouping
         {
-            get
-            {
-                return dateGrouping;
-            }
+            get => dateGrouping;
             set
             {
                 dateGrouping = value;
@@ -62,7 +59,6 @@ namespace DBADashGUI.Performance
                 cmd.Parameters.AddWithValue("InstanceID", InstanceID);
                 cmd.Parameters.AddWithValue("FromDate", DateRange.FromUTC);
                 cmd.Parameters.AddWithValue("ToDate", DateRange.ToUTC);
-
                 cmd.Parameters.AddWithValue("UTCOffset", DateHelper.UtcOffset);
 
                 if (DateRange.HasTimeOfDayFilter)
@@ -79,7 +75,6 @@ namespace DBADashGUI.Performance
             }
         }
 
-
         public DataTable GetWaitsDT(string waitType)
         {
             using (var cn = new SqlConnection(Common.ConnectionString))
@@ -91,7 +86,6 @@ namespace DBADashGUI.Performance
                 cmd.Parameters.AddWithValue("ToDate", DateRange.ToUTC);
                 cmd.Parameters.AddWithValue("WaitType", waitType);
                 cmd.Parameters.AddWithValue("DateGroupingMin", DateGrouping);
-
                 if (DateRange.HasTimeOfDayFilter)
                 {
                     cmd.Parameters.AddWithValue("Hours", DateRange.TimeOfDay.AsDataTable());
@@ -118,11 +112,10 @@ namespace DBADashGUI.Performance
             {
                 selectedWaitType = (string)dgv[colWaitType.Index, e.RowIndex].Value;
                 RefreshChart();
-
             }
         }
 
-        readonly Dictionary<string, ColumnMetaData> columns = new()
+        private readonly Dictionary<string, ColumnMetaData> columns = new()
         {
                 {"AvgWaitTimeMs", new ColumnMetaData{Alias="Avg Wait Time (ms)",isVisible=false } },
                 {"SampleDurationSec", new ColumnMetaData{Alias="Sample Duration (sec)",isVisible=false } },
@@ -151,8 +144,6 @@ namespace DBADashGUI.Performance
             WaitChart1.UpdateColumnVisibility(columns);
         }
 
-
-
         private void RefreshChart()
         {
             if (selectedWaitType == null || selectedWaitType == String.Empty)
@@ -174,7 +165,6 @@ namespace DBADashGUI.Performance
                     WaitChart1.AxisY[0].MinValue = 0;
                 }
             }
-
         }
 
         private void TsRefresh_Click(object sender, EventArgs e)
@@ -235,7 +225,5 @@ namespace DBADashGUI.Performance
         {
             Common.PromptSaveDataGridView(ref dgv);
         }
-
-
     }
 }

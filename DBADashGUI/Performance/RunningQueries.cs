@@ -163,13 +163,7 @@ namespace DBADashGUI.Performance
         }
 
         /// <summary>If we are not filtered for a specific instance then show server level summary</summary>
-        private bool IsServerLevelSummary
-        {
-            get
-            {
-                return !(InstanceID > 0);
-            }
-        }
+        private bool IsServerLevelSummary => !(InstanceID > 0);
 
         public bool CanNavigateBack => tsBack.Enabled;
 

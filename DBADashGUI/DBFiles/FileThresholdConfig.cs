@@ -15,21 +15,9 @@ namespace DBADashGUI.DBFiles
         public int DataSpaceID;
         private bool isLoaded = false;
 
-        public bool IsDataConfig
-        {
-            get
-            {
-                return DataSpaceID is (-1) or > 0;
-            }
-        }
+        public bool IsDataConfig => DataSpaceID is (-1) or > 0;
 
-        public bool IsLogConfig
-        {
-            get
-            {
-                return cboLevel.Text != "Filegroup";
-            }
-        }
+        public bool IsLogConfig => cboLevel.Text != "Filegroup";
 
         private void BttnCancel_Click(object sender, EventArgs e)
         {

@@ -30,7 +30,7 @@ namespace DBADashGUI.Changes
                 using (SqlCommand cmd = new("dbo.AzureServiceObjectivesHistory_Get", cn) { CommandType = CommandType.StoredProcedure })
                 {
                     cmd.Parameters.AddWithValue("InstanceIDs", string.Join(",", InstanceIDs));
-                    cmd.Parameters.AddWithValue("ShowHidden", InstanceIDs.Count == 1 ? true : Common.ShowHidden);
+                    cmd.Parameters.AddWithValue("ShowHidden", InstanceIDs.Count == 1 || Common.ShowHidden);
                     SqlDataAdapter da = new(cmd);
                     DataTable dt = new();
                     da.Fill(dt);
@@ -45,19 +45,17 @@ namespace DBADashGUI.Changes
         private void RefreshPool()
         {
             using (var cn = new SqlConnection(Common.ConnectionString))
+            using (SqlCommand cmd = new("dbo.AzureDBElasticPoolHistory_Get", cn) { CommandType = CommandType.StoredProcedure })
             {
-                using (SqlCommand cmd = new("dbo.AzureDBElasticPoolHistory_Get", cn) { CommandType = CommandType.StoredProcedure })
-                {
-                    cmd.Parameters.AddWithValue("InstanceIDs", string.Join(",", InstanceIDs));
-                    cmd.Parameters.AddWithValue("ShowHidden", InstanceIDs.Count == 1 ? true : Common.ShowHidden);
-                    SqlDataAdapter da = new(cmd);
-                    DataTable dt = new();
-                    da.Fill(dt);
-                    DateHelper.ConvertUTCToAppTimeZone(ref dt);
-                    dgvPool.AutoGenerateColumns = false;
-                    dgvPool.DataSource = dt;
-                    dgvPool.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
-                }
+                cmd.Parameters.AddWithValue("InstanceIDs", string.Join(",", InstanceIDs));
+                cmd.Parameters.AddWithValue("ShowHidden", InstanceIDs.Count == 1 || Common.ShowHidden);
+                SqlDataAdapter da = new(cmd);
+                DataTable dt = new();
+                da.Fill(dt);
+                DateHelper.ConvertUTCToAppTimeZone(ref dt);
+                dgvPool.AutoGenerateColumns = false;
+                dgvPool.DataSource = dt;
+                dgvPool.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
             }
         }
 

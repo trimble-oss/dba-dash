@@ -8,17 +8,14 @@ using System.Linq;
 
 namespace DBADashGUI.Performance
 {
-    class CartesianChartWithDataTable : LiveCharts.WinForms.CartesianChart
+    internal class CartesianChartWithDataTable : LiveCharts.WinForms.CartesianChart
     {
-
         public Int32 DefaultPointSize = 10;
         private double _defaultLineSmoothness = 0.5;
+
         public double DefaultLineSmoothness
         {
-            get
-            {
-                return _defaultLineSmoothness;
-            }
+            get => _defaultLineSmoothness;
             set
             {
                 _defaultLineSmoothness = value;
@@ -46,7 +43,6 @@ namespace DBADashGUI.Performance
             {
                 s.Visibility = columns[(string)s.Tag].isVisible ? System.Windows.Visibility.Visible : System.Windows.Visibility.Hidden;
             }
-
         }
 
         public void AddDataTable(DataTable dt, Dictionary<string, ColumnMetaData> columns, string dateCol, bool convertToLocalTime = true)
@@ -102,7 +98,6 @@ namespace DBADashGUI.Performance
                 {
                     Title = "Time",
                     LabelFormatter = val => new System.DateTime((long)val).ToString("yyyy-MM-dd HH:mm")
-
                 });
             }
             if (Series[0].Values.Count == 1)

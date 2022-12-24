@@ -15,14 +15,7 @@ namespace DBADashGUI
 
         public string SQL
         {
-            get
-            {
-                return codeEditor1.Text;
-            }
-            set
-            {
-                codeEditor1.Text = value;
-            }
+            get => codeEditor1.Text; set => codeEditor1.Text = value;
         }
 
         private void BttnCopy_Click(object sender, EventArgs e)

@@ -10,13 +10,7 @@ namespace DBADashGUI
     {
         private readonly Dictionary<string, object> _attributes;
 
-        public Dictionary<string, object> Attributes
-        {
-            get
-            {
-                return _attributes;
-            }
-        }
+        public Dictionary<string, object> Attributes => _attributes;
 
         public enum TreeType
         {
@@ -119,39 +113,14 @@ namespace DBADashGUI
             }
         }
 
-        public Guid JobID
+        public Guid JobID => Type switch
         {
-            get
-            {
-                if (this.Type == SQLTreeItem.TreeType.AgentJob)
-                {
-                    return (Guid)Tag;
-                }
-                else if (this.Type == SQLTreeItem.TreeType.AgentJobStep)
-                {
-                    return (Guid)Parent.Tag;
-                }
-                else
-                {
-                    return Guid.Empty;
-                }
-            }
-        }
+            TreeType.AgentJob => (Guid)Tag,
+            TreeType.AgentJobStep => (Guid)Parent.Tag,
+            _ => Guid.Empty
+        };
 
-        public int JobStepID
-        {
-            get
-            {
-                if (this.Type == SQLTreeItem.TreeType.AgentJobStep)
-                {
-                    return (int)Tag;
-                }
-                else
-                {
-                    return -1;
-                }
-            }
-        }
+        public int JobStepID => Type == SQLTreeItem.TreeType.AgentJobStep ? (int)Tag : -1;
 
         /// <summary>
         /// Populates lists of instance IDs: InstanceIDs, RegularInstanceIDs and AzureInstanceIDs
@@ -260,17 +229,7 @@ namespace DBADashGUI
             }
         }
 
-        public string FullName()
-        {
-            if (_schemaName == null || _schemaName.Length == 0)
-            {
-                return _objectName;
-            }
-            else
-            {
-                return _schemaName + "." + _objectName;
-            }
-        }
+        public string FullName() => _schemaName == null || _schemaName.Length == 0 ? _objectName : _schemaName + "." + _objectName;
 
         public SQLTreeItem(string objectName, string schemaName, TreeType type) : base()
         {
@@ -340,28 +299,8 @@ namespace DBADashGUI
 
         public Int32 InstanceID
         {
-            get
-            {
-                if (instanceID > 0)
-                {
-                    return instanceID;
-                }
-                else
-                {
-                    if (this.Parent == null)
-                    {
-                        return 0;
-                    }
-                    else
-                    {
-                        return SQLTreeItemParent.InstanceID;
-                    }
-                }
-            }
-            set
-            {
-                instanceID = value;
-            }
+            get => instanceID > 0 ? instanceID : this.Parent == null ? 0 : SQLTreeItemParent.InstanceID;
+            set => instanceID = value;
         }
 
         public TreeType Type;
@@ -404,10 +343,10 @@ namespace DBADashGUI
         private string databaseName;
 
         public string ObjectName
-        { get { return _objectName; } set { _objectName = value; this.Name = FullName(); } }
+        { get => _objectName; set { _objectName = value; this.Name = FullName(); } }
 
         public string SchemaName
-        { get { return _schemaName; } set { _schemaName = value; this.Name = FullName(); } }
+        { get => _schemaName; set { _schemaName = value; this.Name = FullName(); } }
 
         public Int64 ObjectID { get; set; }
 

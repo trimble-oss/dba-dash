@@ -31,10 +31,7 @@ namespace DBADashGUI.Performance
                 }
                 return selected;
             }
-            set
-            {
-                selectedCounters = value;
-            }
+            set => selectedCounters = value;
         }
 
         private void AddAggSelectionColumns()
@@ -95,7 +92,6 @@ namespace DBADashGUI.Performance
             var dv = (DataView)dgvCounters.DataSource;
             dv.RowFilter = String.Format("counter_name LIKE '*{0}*' OR object_name LIKE '*{0}*' OR instance_name LIKE '*{0}*'", txtSearch.Text.Replace("'", ""));
         }
-
 
         private void BttnClear_Click(object sender, EventArgs e)
         {

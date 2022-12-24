@@ -54,40 +54,23 @@ namespace DBADashGUI.Performance
             get
             {
                 var toDate = DateRange.ToUTC;
-                if (compareOffset > 0)
-                {
-                    return new DateTime(toDate.Year, toDate.Month, toDate.Day, toDate.Hour, toDate.Minute, 0, DateTimeKind.Utc).AddMinutes(-compareOffset);
-                }
-                else
-                {
-                    return _compareTo;
-                }
-            }
-        }
-        private DateTime CompareFrom
-        {
-            get
-            {
-                if (compareOffset > 0)
-                {
-                    return DateRange.FromUTC.AddMinutes(-compareOffset);
-                }
-                else
-                {
-                    return _compareFrom;
-                }
+                return compareOffset > 0
+                    ? new DateTime(toDate.Year, toDate.Month, toDate.Day, toDate.Hour, toDate.Minute, 0, DateTimeKind.Utc).AddMinutes(-compareOffset)
+                    : _compareTo;
             }
         }
 
-        readonly List<DataGridViewColumn> StandardCols = new()
+        private DateTime CompareFrom => compareOffset > 0 ? DateRange.FromUTC.AddMinutes(-compareOffset) : _compareFrom;
+
+        private readonly List<DataGridViewColumn> StandardCols = new()
         {
             new DataGridViewTextBoxColumn() { Name = "DB", DataPropertyName = "DB",DisplayIndex=0 },
                                                                         new DataGridViewTextBoxColumn() { Name = "Schema", DataPropertyName = "SchemaName",DisplayIndex=1},
                                                                         new DataGridViewLinkColumn { Name = "Name", DataPropertyName = "ObjectName",DisplayIndex=2, SortMode = DataGridViewColumnSortMode.Automatic, LinkColor = DashColors.LinkColor},
                                                                         new DataGridViewTextBoxColumn() { Name = "Type", DataPropertyName = "TypeDescription",DisplayIndex=3}
-
         };
-        readonly List<DataGridViewColumn> Cols = new()
+
+        private readonly List<DataGridViewColumn> Cols = new()
         { new DataGridViewTextBoxColumn()  { Name= "Total Duration (sec)",Visible=false, DataPropertyName = "total_duration_sec", DefaultCellStyle = new DataGridViewCellStyle() { Format = "#,##0.000" } },
                                                                         new DataGridViewTextBoxColumn()  { Name= "Total Duration (ms/sec)", DataPropertyName = "duration_ms_per_sec", DefaultCellStyle = new DataGridViewCellStyle() { Format = "#,##0.####" } },
                                                                         new DataGridViewTextBoxColumn()  { Name = "Avg Duration (sec)", DataPropertyName = "avg_duration_sec", DefaultCellStyle = new DataGridViewCellStyle() { Format = "#,##0.000" } },
@@ -104,9 +87,7 @@ namespace DBADashGUI.Performance
                                                                         new DataGridViewTextBoxColumn()  { Name = "Total Writes", Visible=false,DataPropertyName = "total_writes", DefaultCellStyle = new DataGridViewCellStyle() { Format = "#,##0" } },
                                                                         new DataGridViewTextBoxColumn()  { Name = "Avg Writes",Visible=false, DataPropertyName = "avg_writes", DefaultCellStyle = new DataGridViewCellStyle() { Format = "#,##0" } },
                                                                         new DataGridViewTextBoxColumn()  { Name = "Period Time (sec)",Visible=false, DataPropertyName = "period_time_sec", DefaultCellStyle = new DataGridViewCellStyle() { Format = "#,##0.###" } },
-
         };
-
 
         private void TsColumn_Click(object sender, EventArgs e)
         {
@@ -122,7 +103,6 @@ namespace DBADashGUI.Performance
                 }
             }
         }
-
 
         public List<DataGridViewColumn> Columns
         {
@@ -197,7 +177,6 @@ namespace DBADashGUI.Performance
             {
                 RefreshChart();
             }
-
         }
 
         private DataTable GetObjectExecutionStatsSummary()
@@ -207,35 +186,23 @@ namespace DBADashGUI.Performance
             using (var da = new SqlDataAdapter(cmd))
             {
                 cn.Open();
-                if (InstanceID > 0)
-                {
-                    cmd.Parameters.AddWithValue("InstanceID", InstanceID);
-                }
-                else if (Instance != null && Instance.Length > 0)
-                {
-                    cmd.Parameters.AddWithValue("Instance", Instance);
-                }
-                else
+
+                if (cmd.Parameters.AddIfGreaterThanZero("InstanceID", InstanceID) == null && cmd.Parameters.AddStringIfNotNullOrEmpty("Instance", Instance) == null)
                 {
                     throw new Exception("Instance not provided to Object Execution Summary");
                 }
-                if (ObjectID > 0)
-                {
-                    cmd.Parameters.AddWithValue("ObjectID", ObjectID);
-                }
-                if (DatabaseID > 0)
-                {
-                    cmd.Parameters.AddWithValue("DatabaseID", DatabaseID);
-                }
+
+                cmd.Parameters.AddIfGreaterThanZero("ObjectID", ObjectID);
+                cmd.Parameters.AddIfGreaterThanZero("DatabaseID", DatabaseID);
+
                 if (CompareFrom != DateTime.MinValue && CompareFrom != DateTime.MaxValue && CompareTo != DateTime.MinValue && CompareTo != DateTime.MaxValue)
                 {
                     cmd.Parameters.AddWithValue("CompareFrom", CompareFrom);
                     cmd.Parameters.AddWithValue("CompareTo", CompareTo);
                 }
-                if (Types.Length > 0)
-                {
-                    cmd.Parameters.AddWithValue("Types", Types);
-                }
+
+                cmd.Parameters.AddStringIfNotNullOrEmpty("Types", Types);
+
                 if (DateRange.HasDayOfWeekFilter)
                 {
                     cmd.Parameters.AddWithValue("DaysOfWeek", DateRange.DayOfWeek.AsDataTable());
@@ -277,7 +244,6 @@ namespace DBADashGUI.Performance
             dgv.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
         }
 
-
         private void TsRefresh_Click(object sender, EventArgs e)
         {
             RefreshData();
@@ -287,7 +253,6 @@ namespace DBADashGUI.Performance
         {
             Common.CopyDataGridViewToClipboard(dgv);
         }
-
 
         private void TsSetOffset_Click(object sender, EventArgs e)
         {
@@ -368,28 +333,16 @@ namespace DBADashGUI.Performance
             }
         }
 
-        private static Color DiffColourFromDouble(Double value)
+        private static Color DiffColourFromDouble(double value)
         {
-            if (value > 0.5)
+            return value switch
             {
-                return DashColors.Red;
-            }
-            else if (value > 0.3)
-            {
-                return DashColors.RedLight;
-            }
-            else if (value < -0.5)
-            {
-                return DashColors.Success;
-            }
-            else if (value < -0.3)
-            {
-                return DashColors.GreenLight;
-            }
-            else
-            {
-                return DashColors.BlueLight;
-            }
+                > 0.5 => DashColors.Red,
+                > 0.3 => DashColors.RedLight,
+                < -0.5 => DashColors.Success,
+                < -0.3 => DashColors.GreenLight,
+                _ => DashColors.BlueLight
+            };
         }
 
         private void RefreshChart()
@@ -412,7 +365,6 @@ namespace DBADashGUI.Performance
 
         private void RefreshChart(Int64 objectID, string title)
         {
-
             splitContainer1.Panel1Collapsed = false;
 
             compareObjectExecutionLineChart.InstanceID = InstanceID;
@@ -426,7 +378,6 @@ namespace DBADashGUI.Performance
             objectExecutionLineChart1.Title = title;
             RefreshChart();
         }
-
 
         private void Dgv_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
@@ -444,7 +395,6 @@ namespace DBADashGUI.Performance
         {
             Common.PromptSaveDataGridView(ref dgv);
         }
-
 
         private void TxtSearch_TextChanged(object sender, EventArgs e)
         {

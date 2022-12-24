@@ -26,10 +26,7 @@ namespace DBADashGUI
         [Description("How to view the diff. e.g. inline, side by side"), Category("Diff")]
         public ViewMode Mode
         {
-            get
-            {
-                return mode;
-            }
+            get => mode;
             set
             {
                 mode = value;
@@ -54,10 +51,7 @@ namespace DBADashGUI
         [Description("Old text to compare"), Category("Diff")]
         public string OldText
         {
-            get
-            {
-                return oldText;
-            }
+            get => oldText;
             set
             {
                 oldText = value;
@@ -65,13 +59,11 @@ namespace DBADashGUI
                 copyLeftToolStripMenuItem.Enabled = value != null && value.Length > 0; ;
             }
         }
+
         [Description("New text to compare"), Category("Diff")]
         public string NewText
         {
-            get
-            {
-                return newText;
-            }
+            get => newText;
             set
             {
                 newText = value;
@@ -81,18 +73,15 @@ namespace DBADashGUI
             }
         }
 
-
         private void TsInline_Click(object sender, EventArgs e)
         {
             Mode = ViewMode.Inline;
         }
 
-
         private void TsCode_Click(object sender, EventArgs e)
         {
             Mode = ViewMode.Code;
         }
-
 
         private void CopyLeftToolStripMenuItem_Click(object sender, EventArgs e)
         {
