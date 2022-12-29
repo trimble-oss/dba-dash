@@ -366,5 +366,15 @@ namespace DBADashGUI
                 FrmCodeViewer.Show();
             }
         }
+
+        public static Image Base64StringAsImage(string base64String)
+        {
+            byte[] bytes = Convert.FromBase64String(base64String);
+
+            using (MemoryStream ms = new(bytes))
+            {
+                return Image.FromStream(ms);
+            }
+        }
     }
 }

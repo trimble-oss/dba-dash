@@ -1,7 +1,10 @@
 ﻿using DBADashGUI.Performance;
 using Humanizer;
 using Microsoft.Data.SqlClient;
+using Microsoft.IdentityModel.Tokens;
+using Newtonsoft.Json.Linq;
 using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Drawing;
 using System.Formats.Asn1;
@@ -10,8 +13,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Web;
-using System.Windows;
+using System.Windows.Automation;
 using System.Windows.Forms;
+using static DBADashGUI.AgentJobs.TimelineRow;
 
 namespace DBADashGUI.AgentJobs
 {
@@ -31,73 +35,97 @@ namespace DBADashGUI.AgentJobs
         </style>
         <script type=""text/javascript"" src=""https://www.gstatic.com/charts/loader.js""></script>
         <script type=""text/javascript"">
-          google.charts.load('current', {'packages':['timeline']});
-          google.charts.setOnLoadCallback(drawChart);
+            google.charts.load('current', {
+                'packages': ['timeline']
+            });
+            google.charts.setOnLoadCallback(drawChart);
 
-          function drawChart() {
-            var container = document.getElementById('job-timeline');
-            var chart = new google.visualization.Timeline(container);
-            var dataTable = new google.visualization.DataTable();
+            function drawChart() {
+                var container = document.getElementById('job-timeline');
+                var chart = new google.visualization.Timeline(container);
+                var dataTable = new google.visualization.DataTable();
 
-            dataTable.addColumn({ type: 'string', id: 'Job' });
-            dataTable.addColumn({ type: 'string', id: 'label' });
-            dataTable.addColumn({ type: 'string', role: 'style' });
-            dataTable.addColumn({ type: 'string', role: 'tooltip' });
-            dataTable.addColumn({ type: 'date', id: 'Start' });
-            dataTable.addColumn({ type: 'date', id: 'End' });
-            dataTable.addRows([
-              ##DATA##
-            ]);
+                dataTable.addColumn({
+                    type: 'string',
+                    id: 'Job'
+                });
+                dataTable.addColumn({
+                    type: 'string',
+                    id: 'label'
+                });
+                dataTable.addColumn({
+                    type: 'string',
+                    role: 'style'
+                });
+                dataTable.addColumn({
+                    type: 'string',
+                    role: 'tooltip'
+                });
+                dataTable.addColumn({
+                    type: 'date',
+                    id: 'Start'
+                });
+                dataTable.addColumn({
+                    type: 'date',
+                    id: 'End'
+                });
+                dataTable.addRows([
+                    ##DATA##
+                ]);
 
-            var options = {
-                timeline: {   colorByRowLabel: true,
-                            rowLabelStyle: {color: '#004f83' }
-                },
-                backgroundColor: '#ffffff',
-                alternatingRowStyle: false,
-                height:##HEIGHT##,
-                hAxis: {
-                    format: '##DATEFORMAT##'
-                }
-            };
-
-            google.visualization.events.addListener(chart, 'ready', function () {
-                // find <rect> elements for outer rectangle formatting
-                var rects = container.getElementsByTagName('rect');
-                Array.prototype.forEach.call(rects, function(rect) {
-                    if (rect.getAttribute('stroke') === '#9a9a9a') {
-                    rect.setAttribute('stroke', '#004f83');
-                    rect.setAttribute('stroke-width', '');
-                    rect.setAttribute('stroke-dasharray', '1,1');
+                var options = {
+                    timeline: {
+                        colorByRowLabel: true,
+                        rowLabelStyle: {
+                            color: '#004f83'
+                        }
+                    },
+                    backgroundColor: '#ffffff',
+                    alternatingRowStyle: false,
+                    height: ##HEIGHT##,
+                    hAxis: {
+                        format: '##DATEFORMAT##'
                     }
+                };
+
+                google.visualization.events.addListener(chart, 'ready', function() {
+                    // find <rect> elements for outer rectangle formatting
+                    var rects = container.getElementsByTagName('rect');
+                    Array.prototype.forEach.call(rects, function(rect) {
+                        if (rect.getAttribute('stroke') === '#9a9a9a') {
+                            rect.setAttribute('stroke', '#004f83');
+                            rect.setAttribute('stroke-width', '');
+                            rect.setAttribute('stroke-dasharray', '1,1');
+                        }
+                    });
+
+                    // find <path> elements for vertical/horizontal gridlines
+                    var paths = container.getElementsByTagName('path');
+                    Array.prototype.forEach.call(paths, function(path) {
+                        // vertical
+                        if ((path.getAttribute('stroke') === '#ffffff') || (path.getAttribute('stroke') === '#e6e6e6')) {
+                            path.setAttribute('stroke', '#004f83');
+                            path.setAttribute('stroke-dasharray', '1,1');
+                        }
+                        // horizontal
+                        if (path.getAttribute('stroke') === '#b7b7b7') {
+                            path.setAttribute('stroke', '#004f83');
+                            path.setAttribute('stroke-width', '0.5');
+                            path.setAttribute('stroke-dasharray', '1,1');
+                        }
+                    });
+
+                    // find <text> elements for formatting axis labels
+                    var labels = container.getElementsByTagName('text');
+                    Array.prototype.forEach.call(labels, function(label) {
+                        if (label.getAttribute('text-anchor') === 'middle') {
+                            label.setAttribute('fill', '#004f83');
+                        }
+                    });
                 });
 
-                // find <path> elements for vertical/horizontal gridlines
-                var paths = container.getElementsByTagName('path');
-                Array.prototype.forEach.call(paths, function(path) {
-                  // vertical
-                  if ((path.getAttribute('stroke') === '#ffffff') || (path.getAttribute('stroke') === '#e6e6e6')) {
-                    path.setAttribute('stroke', '#004f83');
-                    path.setAttribute('stroke-dasharray', '1,1');
-                  }
-                  // horizontal
-                  if(path.getAttribute('stroke') === '#b7b7b7'){
-                    path.setAttribute('stroke', '#004f83');
-                    path.setAttribute('stroke-width', '0.5');
-                    path.setAttribute('stroke-dasharray', '1,1');
-                    }
-                });
-
-                // find <text> elements for formatting axis labels
-                var labels = container.getElementsByTagName('text');
-                  Array.prototype.forEach.call(labels, function(label) {
-                    if (label.getAttribute('text-anchor') === 'middle') {
-                      label.setAttribute('fill', '#004f83');
-                    }
-                  });
-                });
-                chart.draw(dataTable,options);
-          }
+                chart.draw(dataTable, options);
+            }
         </script>
     </head>
     <body>
@@ -128,14 +156,20 @@ namespace DBADashGUI.AgentJobs
         private DBADashContext context;
         private int categoryInstanceID;
         private string selectedCategory;
+        private int mins = -1;
+        public bool IsActive { get; set; }
 
-        private enum RunStatus
+        private bool IncludeSteps => stepsToolStripMenuItem.Checked || bothToolStripMenuItem.Checked || context.JobID != Guid.Empty;
+        private bool IncludeOutcome => outcomeToolStripMenuItem.Checked || bothToolStripMenuItem.Checked || context.JobID != Guid.Empty;
+
+        private int DateGrouping
         {
-            Failed = 0,
-            Retry = 2,
-            Succeeded = 1,
-            Cancelled = 3,
-            InProgress = 4
+            get => (int)tsDateGroup.Tag;
+            set
+            {
+                tsDateGroup.Tag = value;
+                tsDateGroup.Text = DateHelper.DateGroupString(value);
+            }
         }
 
         /// <summary>
@@ -149,12 +183,20 @@ namespace DBADashGUI.AgentJobs
         public JobTimeline()
         {
             InitializeComponent();
+            DateHelper.AddDateGroups(tsDateGroup, TsDateGroup_Click);
+        }
+
+        private void TsDateGroup_Click(object sender, EventArgs e)
+        {
+            var ts = (ToolStripMenuItem)sender;
+            DateGrouping = Convert.ToInt32(ts.Tag);
+            RefreshData();
         }
 
         /// <summary>
         /// Get DataTable with Job Timeline data.  Dates converted to app timezone
         /// </summary>
-        private static DataTable GetJobTimelineData(int InstanceID, DateTime from, DateTime to, string category, Guid job_id, bool steps, bool outcome)
+        private static DataTable GetJobTimelineData(int InstanceID, DateTime from, DateTime to, string category, Guid job_id, bool steps, bool outcome, int dateGroup)
         {
             using (var cn = new SqlConnection(Common.ConnectionString))
             using (var cmd = new SqlCommand("dbo.JobTimeline_Get", cn) { CommandType = CommandType.StoredProcedure })
@@ -167,6 +209,7 @@ namespace DBADashGUI.AgentJobs
                 cmd.Parameters.AddWithValue("@IncludeOutcome", outcome);
                 cmd.Parameters.AddGuidIfNotEmpty("@job_id", job_id);
                 cmd.Parameters.AddStringIfNotNullOrEmpty("category", category);
+                cmd.Parameters.AddWithValue("@DateGroupingMin", dateGroup);
 
                 DataTable dt = new();
                 da.Fill(dt);
@@ -227,13 +270,17 @@ namespace DBADashGUI.AgentJobs
 
         public async void RefreshData()
         {
+            if (mins != DateRange.DurationMins)
+            {
+                DateGrouping = DateHelper.DateGrouping(DateRange.DurationMins, 1440);
+                mins = DateRange.DurationMins;
+            }
             RefreshCategories();
             await webCtrl.EnsureCoreWebView2Async(null);
             from = DateRange.FromUTC;
             to = DateRange.ToUTC;
-            bool steps = stepsToolStripMenuItem.Checked || context.JobID != Guid.Empty;
-            bool outcome = outcomeToolStripMenuItem.Checked || context.JobID != Guid.Empty;
-            dt = GetJobTimelineData(context.InstanceID, from, to, selectedCategory, context.JobID, steps, outcome);
+
+            dt = GetJobTimelineData(context.InstanceID, from, to, selectedCategory, context.JobID, IncludeSteps, IncludeOutcome, DateGrouping);
             DrawTimeline();
         }
 
@@ -300,63 +347,58 @@ namespace DBADashGUI.AgentJobs
             StringBuilder sb = new();
             DateTime appFrom = from.ToAppTimeZone();
             DateTime appTo = to.ToAppTimeZone();
-            string previousName = string.Empty;
             int rowCount = 0;
+            TimelineRow previousTlr = new();
+            List<TimelineRow.RunStatus> statuses = new();
             foreach (DataRow r in dt.Rows)
             {
-                DateTime actualStart = (DateTime)r["RunDateTime"];
-                DateTime actualEnd = (DateTime)r["FinishDateTime"];
-                int Duration = (int)r["RunDurationSec"];
-                string name = (string)r["name"];
-                var runStatus = (RunStatus)r["run_status"];
-                string step = (string)r["step_name"];
-                string encodedName = HttpUtility.JavaScriptStringEncode(context.JobID == Guid.Empty ? name : step);
-                if (encodedName != previousName)
+                TimelineRow tlr = new()
                 {
-                    rowCount++;
+                    ActualStart = (DateTime)r["RunDateTime"],
+                    ActualEnd = (DateTime)r["FinishDateTime"],
+                    Duration = (int)r["RunDurationSec"],
+                    JobName = (string)r["name"],
+                    Status = (RunStatus)r["run_status"],
+                    Step = (string)r["step_name"],
+                    ExecutionCount = (int)r["Executions"],
+                    AppFrom = appFrom,
+                    AppTo = appTo,
+                    StepID = (int)r["step_id"]
+                };
+                if (context.JobID == Guid.Empty)
+                {
+                    tlr.Name = tlr.JobName + (IncludeSteps ? " | " + tlr.StepID.ToString() : "");
+                }
+                else
+                {
+                    tlr.Name = tlr.StepID + " : " + tlr.Step;
                 }
 
-                // Get truncated start/end for drawing within the selected time period (for jobs that started before or finished after)
-                DateTime start = actualStart < appFrom ? appFrom : actualStart;
-                DateTime end = actualEnd > appTo ? appTo : actualEnd;
-                bool isTruncated = actualStart < start || actualEnd > end; //Truncated if started before selected time period or finished after
-                Color statusColor = GetStatusColor(runStatus, isTruncated);
-                string toolTip = GetToolTip(name, step, actualStart, actualEnd, Duration, runStatus);
+                if (tlr.Name != previousTlr.Name)
+                {
+                    rowCount++;
+                    statuses.Clear();
+                    statuses.Add(tlr.Status);
+                }
+                else if (tlr.Start < previousTlr.End && !statuses.Contains(tlr.Status))
+                {
+                    rowCount++;
+                    statuses.Add(tlr.Status);
+                }
+
+                Color statusColor = GetStatusColor(tlr.Status, tlr.IsTruncated);
 
                 sb.AppendFormat("[ '{0}', '{1}', '{2}', '{3}', new Date('{4}'), new Date('{5}') ],\n",
-                    encodedName,
+                    tlr.EncodedName,
                     "",
                     statusColor.ToHexString(),
-                    toolTip,
-                    start.ToString("s", System.Globalization.CultureInfo.InvariantCulture),
-                    end.ToString("s", System.Globalization.CultureInfo.InvariantCulture));
-                previousName = encodedName;
+                    tlr.ToolTip,
+                    tlr.Start.ToString("s", System.Globalization.CultureInfo.InvariantCulture),
+                    tlr.End.ToString("s", System.Globalization.CultureInfo.InvariantCulture));
+                previousTlr = tlr;
             }
             html = template.Replace("##DATEFORMAT##", DateFormat).Replace("##SERVERNAME##", context.InstanceName).Replace("##HEIGHT##", ChartHeight(rowCount).ToString()).ToString();
             html = html.Replace("##DATA##", sb.ToString());
-        }
-
-        /// <summary>
-        /// Get a HTML formatted tooltip for the job execution
-        /// </summary>
-        private static string GetToolTip(string name, string step, DateTime actualStart, DateTime actualEnd, int Duration, RunStatus status)
-        {
-            // Tooltip css class
-            string ttClass = status switch
-            {
-                RunStatus.Succeeded => "tt",
-                RunStatus.Retry => "ttw",
-                RunStatus.InProgress => "ttw",
-                _ => "ttf"
-            };
-            return String.Format("<span class=\"{5}\"><h1>{0}</h1>Step: {6}<br/>Start: {1}<br/>End: {2}<br/>Duration: {3}<br/>Status: {4}</span>",
-                             HttpUtility.HtmlEncode(name),
-                             actualStart.ToString(),
-                             actualEnd.ToString(),
-                             TimeSpan.FromSeconds(Duration).Humanize(4),
-                             status.ToString(),
-                             ttClass,
-                             step);
         }
 
         /// <summary>
@@ -409,13 +451,17 @@ namespace DBADashGUI.AgentJobs
         public void SetContext(DBADashContext context)
         {
             this.context = context;
+            IsActive = true;
             tsIncludeSteps.Visible = context.JobID == Guid.Empty;
             RefreshData();
         }
 
         private void JobTimeLine_Resize(object sender, EventArgs e)
         {
-            DrawTimeline();
+            if (IsActive)
+            {
+                DrawTimeline();
+            }
         }
 
         private void TsRefresh_Click(object sender, EventArgs e)
@@ -423,17 +469,28 @@ namespace DBADashGUI.AgentJobs
             RefreshData();
         }
 
-        private void TsCopy_Click(object sender, EventArgs e)
+        private void Include_Steps(object sender, EventArgs e)
+        {
+            var item = (ToolStripMenuItem)sender;
+            tsIncludeSteps.CheckSingleItem(item);
+            stepsToolStripMenuItem.Checked = stepsToolStripMenuItem == sender;
+            outcomeToolStripMenuItem.Checked = outcomeToolStripMenuItem == sender;
+            tsIncludeSteps.Text = item.Text;
+            RefreshData();
+        }
+
+        private void Copy_HTML(object sender, EventArgs e)
         {
             Common.CopyHtmlToClipBoard(html);
         }
 
-        private void Include_Steps(object sender, EventArgs e)
+        private async void Copy_Image(object sender, EventArgs e)
         {
-            stepsToolStripMenuItem.Checked = stepsToolStripMenuItem == sender;
-            outcomeToolStripMenuItem.Checked = outcomeToolStripMenuItem == sender;
-            tsIncludeSteps.Text = ((ToolStripMenuItem)sender).Text;
-            RefreshData();
+            Task<string> t = webCtrl.CoreWebView2.CallDevToolsProtocolMethodAsync("Page.captureScreenshot", "{}");
+            string json = await t;
+            string base64Image = JObject.Parse(json).Value<string>("data");
+            Image img = Common.Base64StringAsImage(base64Image);
+            Clipboard.SetImage(img);
         }
     }
 }

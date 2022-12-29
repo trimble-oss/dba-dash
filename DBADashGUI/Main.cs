@@ -244,6 +244,7 @@ namespace DBADashGUI
 
         private void LoadSelectedTab()
         {
+            jobTimeline1.IsActive = false; // Don't re-draw timeline on resize unless control is active
             if (suppressLoadTab)
             {
                 return;
