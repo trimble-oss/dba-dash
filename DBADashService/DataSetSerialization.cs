@@ -5,7 +5,7 @@ using System.IO;
 
 namespace DBADashService
 {
-    class DataSetSerialization
+    internal class DataSetSerialization
     {
         public static void SetDateTimeKind(DataSet ds) // Required for binary serialization to prevent dates captured in UTC from being converted to local timezone on deserialization
         {
@@ -20,7 +20,6 @@ namespace DBADashService
                 }
             }
         }
-
 
         private static readonly string binaryPrefix = "###BINARY###";
 
@@ -46,7 +45,6 @@ namespace DBADashService
                         newCol.SetOrdinal(col.Ordinal);
                         dt.Columns.Remove(col);
                     }
-
                 }
             }
             return ds;

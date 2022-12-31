@@ -4,24 +4,25 @@ using System;
 using System.Reflection;
 using System.Runtime.Caching;
 using System.Security.Cryptography;
+
 namespace DBADash
 {
     public class DBADashAgent
     {
-        readonly MemoryCache cache = MemoryCache.Default;
+        private readonly MemoryCache cache = MemoryCache.Default;
 
         public string AgentServiceName { get; set; }
         public string AgentHostName { get; set; }
         public string AgentPath { get; set; }
         public string AgentVersion { get; set; }
 
-        readonly CacheItemPolicy policy = new()
+        private readonly CacheItemPolicy policy = new()
         {
             SlidingExpiration = TimeSpan.FromMinutes(60)
         };
 
         ///<summary>
-        ///Get the DBADashAgentID from the repository DB.  This will collect/update on startup then be cached. 
+        ///Get the DBADashAgentID from the repository DB.  This will collect/update on startup then be cached.
         ///</summary>
         public int GetDBADashAgentID(string connectionString)
         {
@@ -40,7 +41,6 @@ namespace DBADash
                 agentID = Update(connectionString);
                 Log.Information("DBADashAgentID: {0}", agentID);
                 cache.Add(cacheKey, agentID, policy);
-
             }
             return agentID;
         }
@@ -66,7 +66,6 @@ namespace DBADash
             {
                 return false;
             }
-
         }
 
         public override int GetHashCode()

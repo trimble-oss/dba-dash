@@ -9,7 +9,6 @@ namespace DBADash
 {
     public class DBADashConnection
     {
-
         private readonly List<int> supportedEngineEditions = new() { 1, 2, 3, 4, 5, 8 }; // Personal, Standard, Enterprise, Express, Azure DB, Azure MI
         private readonly List<int> supportedProductVersions = new() { 9, 10, 11, 12, 13, 14, 15, 16 }; // SQL 2005 to 2022 & Azure
 
@@ -20,6 +19,7 @@ namespace DBADash
             AWSS3,
             Invalid
         }
+
         private readonly string myString = "g&hAs2&mVOLwE6DqO!I5";
         private bool wasEncryptionPerformed = false;
         private bool isEncrypted = false;
@@ -27,29 +27,17 @@ namespace DBADash
         private string connectionString = "";
         private ConnectionType connectionType;
 
-        public bool WasEncrypted
-        {
-            get
-            {
-                return wasEncryptionPerformed;
-            }
-        }
+        public bool WasEncrypted => wasEncryptionPerformed;
 
-        public bool IsEncrypted
-        {
-            get
-            {
-                return isEncrypted;
-            }
-        }
+        public bool IsEncrypted => isEncrypted;
 
         public DBADashConnection(string connectionString)
         {
             SetConnectionString(connectionString);
         }
+
         public DBADashConnection()
         {
-
         }
 
         private void SetConnectionString(string value)
@@ -70,14 +58,8 @@ namespace DBADash
         [JsonIgnore]
         public string ConnectionString
         {
-            get
-            {
-                return connectionString;
-            }
-            set
-            {
-                SetConnectionString(value);
-            }
+            get => connectionString;
+            set => SetConnectionString(value);
         }
 
         [JsonIgnore]
@@ -93,21 +75,12 @@ namespace DBADash
             }
         }
 
-        public DBADashConnection MasterConnection()
-        {
-            return new DBADashConnection(MasterConnectionString);
-        }
+        public DBADashConnection MasterConnection() => new DBADashConnection(MasterConnectionString);
 
         public string EncryptedConnectionString
         {
-            get
-            {
-                return encryptedConnectionString;
-            }
-            set
-            {
-                SetConnectionString(value);
-            }
+            get => encryptedConnectionString;
+            set => SetConnectionString(value);
         }
 
         private ConnectionInfo _connectionInfo;
@@ -127,7 +100,6 @@ namespace DBADash
 
         public void Validate()
         {
-
             if (connectionType == ConnectionType.Directory)
             {
                 if (System.IO.Directory.Exists(connectionString) == false)
@@ -141,17 +113,9 @@ namespace DBADash
             }
         }
 
-
         public bool IsXESupported()
         {
-            if (connectionType == ConnectionType.SQL)
-            {
-                return ConnectionInfo.IsXESupported;
-            }
-            else
-            {
-                return false;
-            }
+            return connectionType == ConnectionType.SQL && ConnectionInfo.IsXESupported;
         }
 
         public static bool IsXESupported(string productVersion)
@@ -163,7 +127,6 @@ namespace DBADash
         {
             return ConnectionInfo.IsAzureDB;
         }
-
 
         private void ValidateSQLConnection()
         {
@@ -177,13 +140,7 @@ namespace DBADash
             }
         }
 
-        public ConnectionType Type
-        {
-            get
-            {
-                return connectionType;
-            }
-        }
+        public ConnectionType Type => connectionType;
 
         public string InitialCatalog()
         {
@@ -268,7 +225,6 @@ namespace DBADash
             }
         }
 
-
         private string GetDecryptedConnectionString(string connectionString)
         {
             if (GetConnectionType(connectionString) == ConnectionType.SQL)
@@ -322,10 +278,7 @@ namespace DBADash
                 {
                     return connectionString;
                 }
-
             }
         }
-
     }
-
 }

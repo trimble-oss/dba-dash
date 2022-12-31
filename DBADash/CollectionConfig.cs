@@ -9,10 +9,8 @@ using static DBADash.DBADashConnection;
 
 namespace DBADash
 {
-
     public class BasicConfig
     {
-
         [JsonIgnore]
         public DBADashConnection DestinationConnection { get; set; }
 
@@ -40,7 +38,6 @@ namespace DBADash
             {
                 NullValueHandling = NullValueHandling.Ignore,
                 DefaultValueHandling = DefaultValueHandling.Include,
-
             });
         }
 
@@ -48,7 +45,6 @@ namespace DBADash
         {
             return JsonConvert.DeserializeObject<BasicConfig>(json);
         }
-
     }
 
     public class CollectionConfig : BasicConfig
@@ -81,7 +77,7 @@ namespace DBADash
 
         public List<DBADashSource> SourceConnections = new();
 
-        public static new CollectionConfig Deserialize(string json)
+        public new static CollectionConfig Deserialize(string json)
         {
             return JsonConvert.DeserializeObject<CollectionConfig>(json);
         }
@@ -89,12 +85,10 @@ namespace DBADash
         public string AWSProfile { get; set; }
 
         public string AccessKey { get; set; }
+
         public string SecretKey
         {
-            get
-            {
-                return _secretKey;
-            }
+            get => _secretKey;
             set
             {
                 if (value == "")
@@ -115,7 +109,6 @@ namespace DBADash
 
         public string GetSecretKey()
         {
-
             if (_secretKey != null && _secretKey.StartsWith("¬=!"))
             {
                 return EncryptText.DecryptString(_secretKey[3..], myString);
@@ -124,7 +117,6 @@ namespace DBADash
             {
                 return _secretKey;
             }
-
         }
 
         private readonly string defaultMaintenanceCron = "0 0 0/12 1/1 * ? *";
@@ -142,6 +134,7 @@ namespace DBADash
                 return MaintenanceScheduleCron;
             }
         }
+
         [JsonIgnore]
         public List<DBADashConnection> SecondaryDestinationConnections { get; set; } = new List<DBADashConnection>();
 
@@ -289,15 +282,7 @@ namespace DBADash
 
         public bool SourceExists(string connectionString, bool? isAzure = null)
         {
-            if (GetSourceFromConnectionString(connectionString, isAzure) != null)
-            {
-                return true;
-            }
-            else
-            {
-                return false;
-            }
-
+            return GetSourceFromConnectionString(connectionString, isAzure) != null;
         }
 
         public void AddConnections(List<DBADashSource> connections)
@@ -322,7 +307,6 @@ namespace DBADash
             return newConnections;
         }
 
-
         public List<DBADashSource> GetNewAzureDBConnections()
         {
             var newConnections = new List<DBADashSource>();
@@ -334,7 +318,6 @@ namespace DBADash
                     {
                         newConnections.AddRange(GetNewAzureDBConnections(cfg));
                     }
-
                 }
                 catch (Exception ex)
                 {
@@ -370,7 +353,5 @@ namespace DBADash
             }
             return newConnections;
         }
-
-
     }
 }

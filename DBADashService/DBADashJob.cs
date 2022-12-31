@@ -17,11 +17,11 @@ namespace DBADashService
     [DisallowConcurrentExecution, PersistJobDataAfterExecution]
     public class DBADashJob : IJob
     {
-        static readonly CollectionConfig config = SchedulerServiceConfig.Config;
+        private static readonly CollectionConfig config = SchedulerServiceConfig.Config;
         /* Ensure the Jobs collection runs once every ~24hrs.  Allowing 10mins as Jobs runs every 1hr by default */
         private static readonly int MAX_TIME_SINCE_LAST_JOB_COLLECTION = 1430;
 
-        static string GetID(DataSet ds)
+        private static string GetID(DataSet ds)
         {
             return ds.Tables["DBADash"].Rows[0]["Instance"] + "_" + ds.Tables["DBADash"].Rows[0]["DBName"];
         }
@@ -52,7 +52,6 @@ namespace DBADashService
                         Log.Debug("Lock acquired {0}", context.JobDetail.Key);
                         CollectFolder(cfg);
                     }
-
                 }
                 else if (cfg.SourceConnection.Type == ConnectionType.AWSS3)
                 {
@@ -76,7 +75,6 @@ namespace DBADashService
             }
 
             return Task.CompletedTask;
-
         }
 
         /// <summary>
@@ -124,7 +122,7 @@ namespace DBADashService
                             Log.Information("Disabling Extended events collection for {0}.  Instance type doesn't support extended events", cfg.SourceConnection.ConnectionForPrint);
                             dataMap.Put("IsExtendedEventsNotSupportedException", true);
                         }
-                        dataMap.Put("Job_instance_id", collector.Job_instance_id); // Store instance_id so we can get new history only on next run       
+                        dataMap.Put("Job_instance_id", collector.Job_instance_id); // Store instance_id so we can get new history only on next run
                         op.Complete();
                     }
 
@@ -158,7 +156,6 @@ namespace DBADashService
                         Log.Error(ex, "Error running CollectJobs");
                     }
                 }
-
             }
             catch (Exception ex)
             {
@@ -168,7 +165,6 @@ namespace DBADashService
 
         private static void CollectJobs(DBADashSource cfg, JobDataMap dataMap)
         {
-
             var jobLastCollected = dataMap.GetDateTime("JobCollectDate");
             var jobLastModified = dataMap.GetDateTime("JobLastModified");
             var minsSinceLastCollection = DateTime.Now.Subtract(jobLastCollected).TotalMinutes;
@@ -267,7 +263,6 @@ namespace DBADashService
                     {
                         List<string> instanceFiles = instanceItem.Value;
                         ProcessFileListForCollectFolder(instanceFiles, cfg);
-
                     });
                 }
                 catch (Exception ex)
@@ -284,7 +279,7 @@ namespace DBADashService
         /// <summary>
         /// Process a given list of files in order for a specific instance, writing collected data to the DBADash repository database
         /// </summary>
-        static void ProcessFileListForCollectFolder(List<string> files, DBADashSource cfg)
+        private static void ProcessFileListForCollectFolder(List<string> files, DBADashSource cfg)
         {
             files.Sort(); // Ensure we process files in order
             foreach (string f in files)
@@ -342,7 +337,6 @@ namespace DBADashService
                     {
                         List<string> instanceFiles = instanceItem.Value;
                         ProcessS3FileListForCollectS3(instanceFiles, s3Cli, uri, cfg);
-
                     });
                     if (resp.IsTruncated)
                     {
@@ -353,7 +347,6 @@ namespace DBADashService
                     {
                         request = null;
                     }
-
                 }
                 while (request != null);
             }
@@ -402,8 +395,5 @@ namespace DBADashService
                 Log.Information("Imported {file}", s3Path);
             }
         }
-
-
     }
-
 }

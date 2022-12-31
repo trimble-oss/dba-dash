@@ -40,7 +40,6 @@ namespace DacpacUtility
                                     string dacpacName,
                                     DBVersionStatusEnum status)
         {
-
             MessageList.Add("*** Start of processing for " +
                              databaseName);
             // For an existing DB we want to skip this option.  Some users might prefer to use SIMPLE recovery model and this option would set it back to FULL each time the dacpac is deployed
@@ -86,18 +85,12 @@ namespace DacpacUtility
             }
         }
 
-        DacDeployOptions _dacDeployOptions;
+        private DacDeployOptions _dacDeployOptions;
 
         public DacDeployOptions DacDeployOpts
         {
-            get
-            {
-                return _dacDeployOptions;
-            }
-            set
-            {
-                _dacDeployOptions = value;
-            }
+            get => _dacDeployOptions;
+            set => _dacDeployOptions = value;
         }
 
         public static System.Version GetVersion(string dacpacName)
@@ -108,15 +101,12 @@ namespace DacpacUtility
             }
         }
 
-
         public string GenerateDeployScript(string connectionString,
                                 string databaseName,
                                 string dacpacName)
         {
-
             MessageList.Add("*** Start of processing for " +
                              databaseName);
-
 
             var dacServiceInstance = new DacServices(connectionString);
             dacServiceInstance.ProgressChanged +=
@@ -138,15 +128,12 @@ namespace DacpacUtility
                     return dacServiceInstance.GenerateDeployScript(dacpac, databaseName,
                                             options: _dacDeployOptions);
                 }
-
             }
             catch (Exception ex)
             {
                 MessageList.Add(ex.Message);
                 return null;
             }
-
         }
-
     }
 }

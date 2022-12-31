@@ -139,10 +139,7 @@ namespace DBADash
                 }
                 return job_instance_id;
             }
-            set
-            {
-                job_instance_id = value;
-            }
+            set => job_instance_id = value;
         }
 
         private int job_instance_id = 0;
@@ -172,21 +169,9 @@ namespace DBADash
 
         public bool IsQueryStoreSupported()
         {
-            if (IsAzureDB)
-            {
-                return true;
-            }
-            else
-            {
-                if (productVersion.StartsWith("8.") || productVersion.StartsWith("9.") || productVersion.StartsWith("10.") || productVersion.StartsWith("11.") || productVersion.StartsWith("12."))
-                {
-                    return false;
-                }
-                else
-                {
-                    return true;
-                }
-            }
+            return IsAzureDB
+                ? true
+                : !productVersion.StartsWith("8.") && !productVersion.StartsWith("9.") && !productVersion.StartsWith("10.") && !productVersion.StartsWith("11.") && !productVersion.StartsWith("12.");
         }
 
         public DBCollector(DBADashSource source, string serviceName)
@@ -1047,30 +1032,28 @@ CROSS APPLY sys.dm_exec_sql_text(H.sql_handle) txt");
                     slowQueriesSQL = SqlStrings.SlowQueries;
                 }
                 using (var cn = new SqlConnection(builder.ConnectionString))
+                using (var cmd = new SqlCommand(slowQueriesSQL, cn) { CommandTimeout = CollectionType.SlowQueries.GetCommandTimeout() })
                 {
-                    using (var cmd = new SqlCommand(slowQueriesSQL, cn) { CommandTimeout = CollectionType.SlowQueries.GetCommandTimeout() })
-                    {
-                        cn.Open();
+                    cn.Open();
 
-                        cmd.Parameters.AddWithValue("SlowQueryThreshold", Source.SlowQueryThresholdMs * 1000);
-                        cmd.Parameters.AddWithValue("MaxMemory", Source.SlowQuerySessionMaxMemoryKB);
-                        cmd.Parameters.AddWithValue("UseDualSession", Source.UseDualEventSession);
-                        cmd.Parameters.AddWithValue("MaxTargetMemory", Source.SlowQueryTargetMaxMemoryKB);
-                        var result = cmd.ExecuteScalar();
-                        if (result == DBNull.Value)
-                        {
-                            throw new Exception("Result is NULL");
-                        }
-                        string ringBuffer = (string)result;
-                        if (ringBuffer.Length > 0)
-                        {
-                            var dt = XETools.XEStrToDT(ringBuffer, out RingBufferTargetAttributes ringBufferAtt);
-                            dt.TableName = "SlowQueries";
-                            AddDT(dt);
-                            var dtAtt = ringBufferAtt.GetTable();
-                            dtAtt.TableName = "SlowQueriesStats";
-                            AddDT(dtAtt);
-                        }
+                    cmd.Parameters.AddWithValue("SlowQueryThreshold", Source.SlowQueryThresholdMs * 1000);
+                    cmd.Parameters.AddWithValue("MaxMemory", Source.SlowQuerySessionMaxMemoryKB);
+                    cmd.Parameters.AddWithValue("UseDualSession", Source.UseDualEventSession);
+                    cmd.Parameters.AddWithValue("MaxTargetMemory", Source.SlowQueryTargetMaxMemoryKB);
+                    var result = cmd.ExecuteScalar();
+                    if (result == DBNull.Value)
+                    {
+                        throw new Exception("Result is NULL");
+                    }
+                    string ringBuffer = (string)result;
+                    if (ringBuffer.Length > 0)
+                    {
+                        var dt = XETools.XEStrToDT(ringBuffer, out RingBufferTargetAttributes ringBufferAtt);
+                        dt.TableName = "SlowQueries";
+                        AddDT(dt);
+                        var dtAtt = ringBufferAtt.GetTable();
+                        dtAtt.TableName = "SlowQueriesStats";
+                        AddDT(dtAtt);
                     }
                 }
             }

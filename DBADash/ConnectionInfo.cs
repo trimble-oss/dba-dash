@@ -18,51 +18,15 @@ namespace DBADash
 
         public string ComputerNetBIOSName { get; set; }
 
-        public int MajorVersion
-        {
-            get
-            {
-                return GetMajorVersion(ProductVersion);
-            }
-        }
+        public int MajorVersion => GetMajorVersion(ProductVersion);
 
-        public bool IsAzureMasterDB
-        {
-            get
-            {
-                return IsAzureDB && DatabaseName == "master";
-            }
-        }
-        public bool IsAzureDB
-        {
-            get
-            {
-                return EngineEdition == DatabaseEngineEdition.SqlDatabase;
-            }
-        }
+        public bool IsAzureMasterDB => IsAzureDB && DatabaseName == "master";
+        public bool IsAzureDB => EngineEdition == DatabaseEngineEdition.SqlDatabase;
 
-        public bool IsRDS
-        {
-            get
-            {
-                return ComputerNetBIOSName.StartsWith("EC2AMAZ-");
-            }
-        }
+        public bool IsRDS => ComputerNetBIOSName.StartsWith("EC2AMAZ-");
 
-        public bool IsXESupported
-        {
-            get
-            {
-                if (IsRDS && !(EngineEdition == DatabaseEngineEdition.Standard || EngineEdition == DatabaseEngineEdition.Enterprise)) // Extended events only supported on Standard and Enterprise editions for RDS
-                {
-                    return false;
-                }
-                else
-                {
-                    return GetXESupported(MajorVersion);
-                }
-            }
-        }
+        // Extended events only supported on Standard and Enterprise editions for RDS
+        public bool IsXESupported => IsRDS && !(EngineEdition == DatabaseEngineEdition.Standard || EngineEdition == DatabaseEngineEdition.Enterprise) ? false : GetXESupported(MajorVersion);
 
         public static int GetMajorVersion(string ProductVersion)
         {
@@ -76,14 +40,8 @@ namespace DBADash
 
         public static bool GetXESupported(int MajorVersion)
         {
-            if (MajorVersion <= 10) // Note: Extended events added in SQL 2008 (10.*).  Batch completed not supported in this version & there are other differences like recording durations in ms instead of microseconds
-            {
-                return false;
-            }
-            else
-            {
-                return true;
-            }
+            // Note: Extended events added in SQL 2008 (10.*).  Batch completed not supported in this version & there are other differences like recording durations in ms instead of microseconds
+            return MajorVersion > 10;
         }
 
         public static ConnectionInfo GetConnectionInfo(string connectionString)

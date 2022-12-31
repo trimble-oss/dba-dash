@@ -13,7 +13,6 @@ namespace DBADashService
 {
     public class DestinationHandling
     {
-
         public static async Task WriteAllDestinations(DataSet ds, DBADashSource src, string fileName)
         {
             List<Exception> exceptions = new();
@@ -46,16 +45,16 @@ namespace DBADashService
                 case ConnectionType.AWSS3:
                     await WriteS3(ds, d.ConnectionString, fileName);
                     break;
+
                 case ConnectionType.Directory:
                     WriteFolder(ds, d.ConnectionString, fileName);
                     break;
+
                 case ConnectionType.SQL:
                     WriteDB(ds, d.ConnectionString);
                     break;
             }
-
         }
-
 
         public static async Task WriteS3(DataSet ds, string destination, string fileName)
         {
@@ -70,7 +69,6 @@ namespace DBADashService
 
             using (var s3Cli = AWSTools.GetAWSClient(SchedulerServiceConfig.Config.AWSProfile, SchedulerServiceConfig.Config.AccessKey, SchedulerServiceConfig.Config.GetSecretKey(), uri))
             {
-
                 var r = new Amazon.S3.Model.PutObjectRequest()
                 {
                     BucketName = uri.Bucket,
@@ -84,7 +82,6 @@ namespace DBADashService
                     await s3Cli.PutObjectAsync(r);
                 }
             }
-
         }
 
         public static void WriteFolder(DataSet ds, string destination, string fileName)

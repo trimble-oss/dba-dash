@@ -6,11 +6,11 @@ using Topshelf;
 
 namespace DBADashService
 {
-    class Program
+    internal class Program
     {
         public static readonly NamedLocker Locker = new();
 
-        static void Main(string[] args)
+        private static void Main(string[] args)
         {
             Console.WriteLine(Properties.Resources.LogoText);
             var cfg = SchedulerServiceConfig.Config;
@@ -53,10 +53,5 @@ namespace DBADashService
             var exitCode = (int)Convert.ChangeType(rc, rc.GetTypeCode());
             Environment.ExitCode = exitCode;
         }
-
-
     }
-
-
-
 }

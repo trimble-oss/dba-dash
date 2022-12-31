@@ -22,11 +22,11 @@ namespace DBADashServiceConfig
             InitializeComponent();
         }
 
-        string originalJson = "";
-        CollectionConfig collectionConfig = new();
-        readonly string jsonPath = System.IO.Path.Combine(Application.StartupPath, "ServiceConfig.json");
-        ServiceController svcCtrl;
-        bool isInstalled = false;
+        private string originalJson = "";
+        private CollectionConfig collectionConfig = new();
+        private readonly string jsonPath = System.IO.Path.Combine(Application.StartupPath, "ServiceConfig.json");
+        private ServiceController svcCtrl;
+        private bool isInstalled = false;
 
         private void BttnAdd_Click(object sender, EventArgs e)
         {
@@ -130,7 +130,6 @@ namespace DBADashServiceConfig
                     var existingConnection = collectionConfig.GetSourceFromConnectionString(sourceString);
                     if (existingConnection != null)
                     {
-
                         src.CollectionSchedules = existingConnection.CollectionSchedules;
                         if (doesNotHaveUpdateApproval)
                         {
@@ -147,13 +146,10 @@ namespace DBADashServiceConfig
                             doesNotHaveUpdateApproval = true;
                             continue;
                         }
-
                     }
 
                     collectionConfig.SourceConnections.Add(src);
-
                 }
-
             }
 
             txtJson.Text = collectionConfig.Serialize();
@@ -164,8 +160,6 @@ namespace DBADashServiceConfig
                 MessageBox.Show("Warning: Slow query capture requires an extended event session which is not supported for one or more connections.\nRequirements:\nSQL 2012 or later.\nStandard or Enteprise Edition on Amazon RDS", "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
         }
-
-
 
         private bool ValidateSource(string sourceString)
         {
@@ -259,7 +253,6 @@ namespace DBADashServiceConfig
             }
         }
 
-
         private void BttnSave_Click(object sender, EventArgs e)
         {
             try
@@ -271,7 +264,6 @@ namespace DBADashServiceConfig
             {
                 MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
-
         }
 
         private void SaveChanges()
@@ -343,7 +335,6 @@ namespace DBADashServiceConfig
             SetConnectionCount();
             RefreshServiceStatus();
             ValidateDestination();
-
         }
 
         private void SetOriginalJson()
@@ -358,7 +349,6 @@ namespace DBADashServiceConfig
             txtJson.Text = originalJson;
 
             SetFromJson(originalJson);
-
         }
 
         private void ApplyTrustServerCertificate()
@@ -388,7 +378,6 @@ namespace DBADashServiceConfig
             };
             return builder.ConnectionString;
         }
-
 
         private void SetConnectionCount()
         {
@@ -421,7 +410,6 @@ namespace DBADashServiceConfig
             numIdentityCollectionThreshold.Value = collectionConfig.IdentityCollectionThreshold ?? DBCollector.DefaultIdentityCollectionThreshold;
             UpdateScanInterval();
             SetDgv();
-
         }
 
         private void SetDgv()
@@ -457,7 +445,6 @@ namespace DBADashServiceConfig
                 lblServiceWarning.Visible = true;
             }
 
-
             if (svcCtrl == null)
             {
                 isInstalled = false;
@@ -469,7 +456,6 @@ namespace DBADashServiceConfig
                 toolTip1.SetToolTip(lnkInstall, "Install DBA Dash agent as a Windows service");
                 lblServiceStatus.Text = "Service Status: Not Installed";
                 lblServiceStatus.ForeColor = Color.Brown;
-
             }
             else
             {
@@ -629,19 +615,16 @@ namespace DBADashServiceConfig
         {
             txtAccessKey.Enabled = (txtAWSProfile.Text.Length == 0);
             txtSecretKey.Enabled = txtAccessKey.Enabled;
-
         }
 
         private void TxtAccessKey_TextChanged(object sender, EventArgs e)
         {
             txtAWSProfile.Enabled = (txtAccessKey.Text.Length == 0 && txtSecretKey.Text.Length == 0);
-
         }
 
         private void TxtSecretKey_TextChanged(object sender, EventArgs e)
         {
             txtAWSProfile.Enabled = (txtAccessKey.Text.Length == 0 && txtSecretKey.Text.Length == 0);
-
         }
 
         private void TxtDestination_Validated(object sender, EventArgs e)
@@ -657,7 +640,6 @@ namespace DBADashServiceConfig
                 txtJson.Text = collectionConfig.Serialize();
                 ValidateDestination();
             }
-
         }
 
         private void TxtAccessKey_Validating(object sender, CancelEventArgs e)
@@ -693,7 +675,6 @@ namespace DBADashServiceConfig
             }
             chkDualSession.Enabled = chkSlowQueryThreshold.Checked;
             chkPersistXESession.Enabled = chkSlowQueryThreshold.Checked;
-
         }
 
         private void LoadConnectionForEdit(DBADashSource src)
@@ -728,7 +709,6 @@ namespace DBADashServiceConfig
                 {
                     chkCollectPlans.Checked = false;
                 }
-
             }
             else
             {
@@ -756,7 +736,6 @@ namespace DBADashServiceConfig
                 {
                     return;
                 }
-
             }
 
             frm.ShowDialog();
@@ -773,7 +752,6 @@ namespace DBADashServiceConfig
                 }
             }
             ValidateDestination();
-
         }
 
         private bool SetDestination()
@@ -962,7 +940,6 @@ namespace DBADashServiceConfig
             SetAvailableOptionsForSource();
         }
 
-
         private void LnkSourceConnections_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
             tab1.SelectedTab = tabSource;
@@ -991,7 +968,6 @@ namespace DBADashServiceConfig
             chkScriptJobs.Enabled = isSql;
         }
 
-
         private void ChkLogInternalPerfCounters_CheckedChanged(object sender, EventArgs e)
         {
             collectionConfig.LogInternalPerformanceCounters = chkLogInternalPerfCounters.Checked;
@@ -1013,7 +989,6 @@ namespace DBADashServiceConfig
             }
         }
 
-
         private void Dgv_RowValidated(object sender, DataGridViewCellEventArgs e)
         {
             UpdateFromGrid();
@@ -1024,7 +999,6 @@ namespace DBADashServiceConfig
             collectionConfig.SourceConnections = (List<DBADashSource>)((BindingSource)dgvConnections.DataSource).DataSource;
             txtJson.Text = collectionConfig.Serialize();
             SetConnectionCount();
-
         }
 
         private void DgvConnections_CellContentClick(object sender, DataGridViewCellEventArgs e)
@@ -1228,4 +1202,3 @@ namespace DBADashServiceConfig
         }
     }
 }
-

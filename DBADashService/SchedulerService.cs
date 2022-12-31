@@ -16,14 +16,13 @@ using static DBADash.DBADashConnection;
 
 namespace DBADashService
 {
-
     public class ScheduleService
     {
         private readonly IScheduler scheduler;
         public readonly CollectionConfig config;
-        System.Timers.Timer azureScanForNewDBsTimer;
-        System.Timers.Timer folderCleanupTimer;
-        readonly CollectionSchedules schedules;
+        private System.Timers.Timer azureScanForNewDBsTimer;
+        private System.Timers.Timer folderCleanupTimer;
+        private readonly CollectionSchedules schedules;
 
         public ScheduleService()
         {
@@ -122,7 +121,6 @@ namespace DBADashService
                 {
                     Log.Information("Repository database version check OK {version}", status.DBVersion.ToString());
                 }
-
             }
         }
 
@@ -170,7 +168,6 @@ namespace DBADashService
             Log.Information("Shutdown Scheduler");
             scheduler.Shutdown().ConfigureAwait(false).GetAwaiter().GetResult();
             Log.Information("Shutdown complete");
-
         }
 
         private async Task ScheduleAndRunMaintenanceJobAsync()
@@ -219,7 +216,6 @@ namespace DBADashService
                     azureScanForNewDBsTimer.Elapsed += new System.Timers.ElapsedEventHandler(ScanForAzureDBs);
                 }
             }
-
         }
 
         private async Task ScanForAzureDBsAsync(DBADashSource src)
@@ -351,7 +347,6 @@ namespace DBADashService
                     ScanForAzureDBsAsync(src)
                     );
             });
-
         }
 
         private static IJobDetail GetJob(CollectionType[] types, DBADashSource src, string cfgString)
@@ -426,7 +421,6 @@ namespace DBADashService
                 {
                     Log.Logger.Error(ex, "Error Stop/Remove DBADash event sessions for {connection}", src.SourceConnection.ConnectionForPrint);
                 }
-
             }
         }
 

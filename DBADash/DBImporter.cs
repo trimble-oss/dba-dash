@@ -284,43 +284,41 @@ namespace DBADash
             try
             {
                 using (var cn = new SqlConnection(connectionString))
+                using (var cmd = new SqlCommand("DDLSnapshot_Add", cn) { CommandType = CommandType.StoredProcedure, CommandTimeout = commandTimeout })
                 {
-                    using (var cmd = new SqlCommand("DDLSnapshot_Add", cn) { CommandType = CommandType.StoredProcedure, CommandTimeout = commandTimeout })
+                    cn.Open();
+                    DateTime StartTime;
+                    DateTime EndTime;
+                    if (dtSS.ExtendedProperties.ContainsKey("StartTime"))
                     {
-                        cn.Open();
-                        DateTime StartTime;
-                        DateTime EndTime;
-                        if (dtSS.ExtendedProperties.ContainsKey("StartTime"))
-                        {
-                            // legacy
-                            StartTime = Convert.ToDateTime(dtSS.ExtendedProperties["StartTime"]);
-                            EndTime = Convert.ToDateTime(dtSS.ExtendedProperties["EndTime"]);
-                        }
-                        else if (dtSS.ExtendedProperties.Contains("StartTimeBin"))
-                        {
-                            StartTime = DateTime.FromBinary(long.Parse((string)dtSS.ExtendedProperties["StartTimeBin"]));
-                            EndTime = DateTime.FromBinary(long.Parse((string)dtSS.ExtendedProperties["EndTimeBin"]));
-                        }
-                        else
-                        {
-                            throw new Exception("Extended properies missing from schema snapshot");
-                        }
-                        string snapshotOptions = (string)dtSS.ExtendedProperties["SnapshotOptions"];
-                        byte[] snapshptOptionsHash;
-                        using (var crypt = SHA256.Create())
-                        {
-                            snapshptOptionsHash = crypt.ComputeHash(System.Text.Encoding.ASCII.GetBytes(snapshotOptions));
-                        }
-                        cmd.Parameters.AddWithValue("ss", dtSS);
-                        cmd.Parameters.AddWithValue("InstanceID", instanceID);
-                        cmd.Parameters.AddWithValue("SnapshotDate", snapshotDate);
-                        cmd.Parameters.AddWithValue("DB", databaseName);
-                        cmd.Parameters.AddWithValue("StartTime", StartTime);
-                        cmd.Parameters.AddWithValue("EndTime", EndTime);
-                        cmd.Parameters.AddWithValue("SnapshotOptions", snapshotOptions);
-                        cmd.Parameters.AddWithValue("SnapshotOptionsHash", snapshptOptionsHash);
-                        cmd.ExecuteNonQuery();
+                        // legacy
+                        StartTime = Convert.ToDateTime(dtSS.ExtendedProperties["StartTime"]);
+                        EndTime = Convert.ToDateTime(dtSS.ExtendedProperties["EndTime"]);
                     }
+                    else if (dtSS.ExtendedProperties.Contains("StartTimeBin"))
+                    {
+                        StartTime = DateTime.FromBinary(long.Parse((string)dtSS.ExtendedProperties["StartTimeBin"]));
+                        EndTime = DateTime.FromBinary(long.Parse((string)dtSS.ExtendedProperties["EndTimeBin"]));
+                    }
+                    else
+                    {
+                        throw new Exception("Extended properies missing from schema snapshot");
+                    }
+                    string snapshotOptions = (string)dtSS.ExtendedProperties["SnapshotOptions"];
+                    byte[] snapshptOptionsHash;
+                    using (var crypt = SHA256.Create())
+                    {
+                        snapshptOptionsHash = crypt.ComputeHash(System.Text.Encoding.ASCII.GetBytes(snapshotOptions));
+                    }
+                    cmd.Parameters.AddWithValue("ss", dtSS);
+                    cmd.Parameters.AddWithValue("InstanceID", instanceID);
+                    cmd.Parameters.AddWithValue("SnapshotDate", snapshotDate);
+                    cmd.Parameters.AddWithValue("DB", databaseName);
+                    cmd.Parameters.AddWithValue("StartTime", StartTime);
+                    cmd.Parameters.AddWithValue("EndTime", EndTime);
+                    cmd.Parameters.AddWithValue("SnapshotOptions", snapshotOptions);
+                    cmd.Parameters.AddWithValue("SnapshotOptionsHash", snapshptOptionsHash);
+                    cmd.ExecuteNonQuery();
                 }
             }
             catch (SqlException ex) when (ex.Number == 2627)
@@ -335,36 +333,34 @@ namespace DBADash
             {
                 var r = data.Tables["ServerExtraProperties"].Rows[0];
                 using (var cn = new SqlConnection(connectionString))
+                using (var cmd = new SqlCommand("ServerExtraProperties_Upd", cn) { CommandType = CommandType.StoredProcedure, CommandTimeout = commandTimeout })
                 {
-                    using (var cmd = new SqlCommand("ServerExtraProperties_Upd", cn) { CommandType = CommandType.StoredProcedure, CommandTimeout = commandTimeout })
-                    {
-                        cn.Open();
-                        cmd.Parameters.AddWithValue("InstanceID", instanceID);
-                        cmd.Parameters.AddWithValue("SnapshotDate", snapshotDate);
-                        cmd.Parameters.AddWithValue("ActivePowerPlanGUID", r["ActivePowerPlanGUID"]);
-                        cmd.Parameters.AddWithValue("ActivePowerPlan", r["ActivePowerPlan"]);
-                        cmd.Parameters.AddWithValue("ProcessorNameString", r["ProcessorNameString"]);
-                        cmd.Parameters.AddWithValue("SystemManufacturer", r["SystemManufacturer"]);
-                        cmd.Parameters.AddWithValue("SystemProductName", r["SystemProductName"]);
-                        cmd.Parameters.AddWithValue("IsAgentRunning", r["IsAgentRunning"]);
-                        cmd.Parameters.AddWithValue("InstantFileInitializationEnabled", r["InstantFileInitializationEnabled"]);
-                        cmd.Parameters.AddWithValue("OfflineSchedulers", r["OfflineSchedulers"]);
-                        cmd.Parameters.AddWithValue("ResourceGovernorEnabled", r["ResourceGovernorEnabled"]);
-                        if (r.Table.Columns.Contains("WindowsRelease"))
-                        { // older version of the agent.  no longer collected here
-                            cmd.Parameters.AddWithValue("WindowsRelease", r["WindowsRelease"]);
-                            cmd.Parameters.AddWithValue("WindowsSP", r["WindowsServicePackLevel"]);
-                            cmd.Parameters.AddWithValue("WindowsSKU", r["WindowsSKU"]);
-                        }
-                        cmd.Parameters.AddWithValue("LastMemoryDump", r["LastMemoryDump"]);
-                        cmd.Parameters.AddWithValue("MemoryDumpCount", r["MemoryDumpCount"]);
-                        cmd.Parameters.AddWithValue("WindowsCaption", r["WindowsCaption"]);
-                        if (r.Table.Columns.Contains("DBMailStatus")) // Backward compatibility with older agent versions
-                        {
-                            cmd.Parameters.AddWithValue("DBMailStatus", r["DBMailStatus"]);
-                        }
-                        cmd.ExecuteNonQuery();
+                    cn.Open();
+                    cmd.Parameters.AddWithValue("InstanceID", instanceID);
+                    cmd.Parameters.AddWithValue("SnapshotDate", snapshotDate);
+                    cmd.Parameters.AddWithValue("ActivePowerPlanGUID", r["ActivePowerPlanGUID"]);
+                    cmd.Parameters.AddWithValue("ActivePowerPlan", r["ActivePowerPlan"]);
+                    cmd.Parameters.AddWithValue("ProcessorNameString", r["ProcessorNameString"]);
+                    cmd.Parameters.AddWithValue("SystemManufacturer", r["SystemManufacturer"]);
+                    cmd.Parameters.AddWithValue("SystemProductName", r["SystemProductName"]);
+                    cmd.Parameters.AddWithValue("IsAgentRunning", r["IsAgentRunning"]);
+                    cmd.Parameters.AddWithValue("InstantFileInitializationEnabled", r["InstantFileInitializationEnabled"]);
+                    cmd.Parameters.AddWithValue("OfflineSchedulers", r["OfflineSchedulers"]);
+                    cmd.Parameters.AddWithValue("ResourceGovernorEnabled", r["ResourceGovernorEnabled"]);
+                    if (r.Table.Columns.Contains("WindowsRelease"))
+                    { // older version of the agent.  no longer collected here
+                        cmd.Parameters.AddWithValue("WindowsRelease", r["WindowsRelease"]);
+                        cmd.Parameters.AddWithValue("WindowsSP", r["WindowsServicePackLevel"]);
+                        cmd.Parameters.AddWithValue("WindowsSKU", r["WindowsSKU"]);
                     }
+                    cmd.Parameters.AddWithValue("LastMemoryDump", r["LastMemoryDump"]);
+                    cmd.Parameters.AddWithValue("MemoryDumpCount", r["MemoryDumpCount"]);
+                    cmd.Parameters.AddWithValue("WindowsCaption", r["WindowsCaption"]);
+                    if (r.Table.Columns.Contains("DBMailStatus")) // Backward compatibility with older agent versions
+                    {
+                        cmd.Parameters.AddWithValue("DBMailStatus", r["DBMailStatus"]);
+                    }
+                    cmd.ExecuteNonQuery();
                 }
             }
         }
@@ -373,18 +369,16 @@ namespace DBADash
         {
             var dt = data.Tables[tableName];
             using (var cn = new SqlConnection(connectionString))
+            using (var cmd = new SqlCommand(dt.TableName + "_Upd", cn) { CommandTimeout = commandTimeout, CommandType = CommandType.StoredProcedure })
             {
-                using (var cmd = new SqlCommand(dt.TableName + "_Upd", cn) { CommandTimeout = commandTimeout, CommandType = CommandType.StoredProcedure })
+                cn.Open();
+                if (dt.Rows.Count > 0)
                 {
-                    cn.Open();
-                    if (dt.Rows.Count > 0)
-                    {
-                        cmd.Parameters.AddWithValue(dt.TableName, dt);
-                    }
-                    cmd.Parameters.AddWithValue("InstanceID", instanceID);
-                    cmd.Parameters.AddWithValue("SnapshotDate", snapshotDate);
-                    cmd.ExecuteNonQuery();
+                    cmd.Parameters.AddWithValue(dt.TableName, dt);
                 }
+                cmd.Parameters.AddWithValue("InstanceID", instanceID);
+                cmd.Parameters.AddWithValue("SnapshotDate", snapshotDate);
+                cmd.ExecuteNonQuery();
             }
         }
 
@@ -402,23 +396,21 @@ namespace DBADash
                     ds.Tables["Errors"].Columns.Add("ErrorContext");
                 }
                 using (var cn = new SqlConnection(connectionString))
+                using (var cmd = new SqlCommand("CollectionErrorLog_Add", cn) { CommandType = CommandType.StoredProcedure, CommandTimeout = commandTimeout })
                 {
-                    using (var cmd = new SqlCommand("CollectionErrorLog_Add", cn) { CommandType = CommandType.StoredProcedure, CommandTimeout = commandTimeout })
-                    {
-                        cn.Open();
+                    cn.Open();
 
-                        cmd.Parameters.AddWithValue("Errors", ds.Tables["Errors"]);
-                        if (instanceID == null)
-                        {
-                            cmd.Parameters.AddWithValue("InstanceID", DBNull.Value);
-                        }
-                        else
-                        {
-                            cmd.Parameters.AddWithValue("InstanceID", instanceID);
-                        }
-                        cmd.Parameters.AddWithValue("ErrorDate", SnapshotDate);
-                        cmd.ExecuteNonQuery();
+                    cmd.Parameters.AddWithValue("Errors", ds.Tables["Errors"]);
+                    if (instanceID == null)
+                    {
+                        cmd.Parameters.AddWithValue("InstanceID", DBNull.Value);
                     }
+                    else
+                    {
+                        cmd.Parameters.AddWithValue("InstanceID", instanceID);
+                    }
+                    cmd.Parameters.AddWithValue("ErrorDate", SnapshotDate);
+                    cmd.ExecuteNonQuery();
                 }
             }
         }
@@ -426,60 +418,58 @@ namespace DBADash
         private Int32 UpdateInstance(ref DataRow rInstance)
         {
             using (var cn = new SqlConnection(connectionString))
+            using (var cmd = new SqlCommand("Instance_Upd", cn) { CommandType = CommandType.StoredProcedure, CommandTimeout = commandTimeout })
             {
-                using (var cmd = new SqlCommand("Instance_Upd", cn) { CommandType = CommandType.StoredProcedure, CommandTimeout = commandTimeout })
+                cn.Open();
+
+                cmd.Parameters.AddWithValue("ConnectionID", (string)rInstance["ConnectionID"]);
+                cmd.Parameters.AddWithValue("Instance", (string)rInstance["Instance"]);
+                cmd.Parameters.AddWithValue("SnapshotDate", (DateTime)rInstance["SnapshotDateUTC"]);
+
+                var importAgentID = importAgent.GetDBADashAgentID(connectionString);
+                int collectAgentID;
+                var collectAgent = new DBADashAgent()
                 {
-                    cn.Open();
-
-                    cmd.Parameters.AddWithValue("ConnectionID", (string)rInstance["ConnectionID"]);
-                    cmd.Parameters.AddWithValue("Instance", (string)rInstance["Instance"]);
-                    cmd.Parameters.AddWithValue("SnapshotDate", (DateTime)rInstance["SnapshotDateUTC"]);
-
-                    var importAgentID = importAgent.GetDBADashAgentID(connectionString);
-                    int collectAgentID;
-                    var collectAgent = new DBADashAgent()
-                    {
-                        AgentHostName = (string)rInstance["AgentHostName"],
-                        AgentVersion = (string)rInstance["AgentVersion"],
-                        AgentPath = rInstance.Table.Columns.Contains("AgentPath") ? (string)rInstance["AgentPath"] : "",
-                        AgentServiceName = rInstance.Table.Columns.Contains("AgentServiceName") ? (string)rInstance["AgentServiceName"] : "{DBADashService}",
-                    };
-                    if (collectAgent.Equals(importAgent))
-                    {
-                        collectAgentID = importAgentID;
-                    }
-                    else
-                    {
-                        collectAgentID = collectAgent.GetDBADashAgentID(connectionString);
-                    }
-
-                    cmd.Parameters.AddWithValue("CollectAgentID", collectAgentID);
-                    cmd.Parameters.AddWithValue("ImportAgentID", importAgentID);
-                    if (rInstance.Table.Columns.Contains("host_platform"))
-                    {
-                        cmd.Parameters.AddWithValue("HostPlatform", rInstance["host_platform"]);
-                        cmd.Parameters.AddWithValue("HostDistribution", rInstance["host_distribution"]);
-                        cmd.Parameters.AddWithValue("HostRelease", rInstance["host_release"]);
-                        cmd.Parameters.AddWithValue("HostServicePackLevel", rInstance["host_service_pack_level"]);
-                        cmd.Parameters.AddWithValue("HostSKU", rInstance["host_sku"]);
-                        cmd.Parameters.AddWithValue("OSLanguageVersion", rInstance["os_language_version"]);
-                    }
-                    cmd.Parameters.AddWithValue("EditionID", (long)rInstance["EditionID"]);
-                    if (rInstance.Table.Columns.Contains("UTCOffset"))
-                    {
-                        cmd.Parameters.AddWithValue("UTCOffset", Convert.ToInt32(rInstance["UTCOffset"]));
-                    }
-                    if (rInstance.Table.Columns.Contains("contained_availability_group_id"))
-                    {
-                        cmd.Parameters.AddWithValue("contained_availability_group_id", rInstance["contained_availability_group_id"]);
-                        cmd.Parameters.AddWithValue("contained_availability_group_name", rInstance["contained_availability_group_name"]);
-                    }
-
-                    var pInstanceID = cmd.Parameters.Add("InstanceID", SqlDbType.Int);
-                    pInstanceID.Direction = ParameterDirection.Output;
-                    cmd.ExecuteNonQuery();
-                    return (Int32)pInstanceID.Value;
+                    AgentHostName = (string)rInstance["AgentHostName"],
+                    AgentVersion = (string)rInstance["AgentVersion"],
+                    AgentPath = rInstance.Table.Columns.Contains("AgentPath") ? (string)rInstance["AgentPath"] : "",
+                    AgentServiceName = rInstance.Table.Columns.Contains("AgentServiceName") ? (string)rInstance["AgentServiceName"] : "{DBADashService}",
+                };
+                if (collectAgent.Equals(importAgent))
+                {
+                    collectAgentID = importAgentID;
                 }
+                else
+                {
+                    collectAgentID = collectAgent.GetDBADashAgentID(connectionString);
+                }
+
+                cmd.Parameters.AddWithValue("CollectAgentID", collectAgentID);
+                cmd.Parameters.AddWithValue("ImportAgentID", importAgentID);
+                if (rInstance.Table.Columns.Contains("host_platform"))
+                {
+                    cmd.Parameters.AddWithValue("HostPlatform", rInstance["host_platform"]);
+                    cmd.Parameters.AddWithValue("HostDistribution", rInstance["host_distribution"]);
+                    cmd.Parameters.AddWithValue("HostRelease", rInstance["host_release"]);
+                    cmd.Parameters.AddWithValue("HostServicePackLevel", rInstance["host_service_pack_level"]);
+                    cmd.Parameters.AddWithValue("HostSKU", rInstance["host_sku"]);
+                    cmd.Parameters.AddWithValue("OSLanguageVersion", rInstance["os_language_version"]);
+                }
+                cmd.Parameters.AddWithValue("EditionID", (long)rInstance["EditionID"]);
+                if (rInstance.Table.Columns.Contains("UTCOffset"))
+                {
+                    cmd.Parameters.AddWithValue("UTCOffset", Convert.ToInt32(rInstance["UTCOffset"]));
+                }
+                if (rInstance.Table.Columns.Contains("contained_availability_group_id"))
+                {
+                    cmd.Parameters.AddWithValue("contained_availability_group_id", rInstance["contained_availability_group_id"]);
+                    cmd.Parameters.AddWithValue("contained_availability_group_name", rInstance["contained_availability_group_name"]);
+                }
+
+                var pInstanceID = cmd.Parameters.Add("InstanceID", SqlDbType.Int);
+                pInstanceID.Direction = ParameterDirection.Output;
+                cmd.ExecuteNonQuery();
+                return (Int32)pInstanceID.Value;
             }
         }
     }

@@ -4,6 +4,7 @@ using Serilog;
 using System;
 using System.Data;
 using System.Threading.Tasks;
+
 namespace DBADashService
 {
     public class MaintenanceJob : IJob
@@ -44,6 +45,7 @@ namespace DBADashService
                 }
             }
         }
+
         public static void PurgeData(string connectionString)
         {
             var cn = new SqlConnection(connectionString);
@@ -57,7 +59,6 @@ namespace DBADashService
                 }
             }
         }
-
 
         private static void LogError(Exception ex, string connectionString, string errorSource, string errorMessage, string errorContext = "Maintenance")
         {
@@ -82,6 +83,5 @@ namespace DBADashService
                 Log.Error(ex2, "Write errors to database from {errorcontext} | {errorsource}", errorContext, errorSource);
             }
         }
-
     }
 }

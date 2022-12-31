@@ -16,11 +16,12 @@ namespace DBADashServiceConfig
             InitializeComponent();
         }
 
-        CollectionSchedules userSchedule;
+        private CollectionSchedules userSchedule;
         public CollectionSchedules BaseSchedule = CollectionSchedules.DefaultSchedules;
 
-        // For copy/paste function 
+        // For copy/paste function
         private string copySchedule;
+
         private bool copyDefault;
         private bool copyRunOnStart;
         private bool hasCopy;
@@ -81,7 +82,6 @@ namespace DBADashServiceConfig
             }
             if (int.TryParse(schedule, out int seconds))
             {
-
                 return TimeSpan.FromSeconds(seconds).Humanize(5);
             }
             else
@@ -114,12 +114,10 @@ namespace DBADashServiceConfig
 
         private void Dgv_CellValidated(object sender, DataGridViewCellEventArgs e)
         {
-
         }
 
         private void Dgv_RowsAdded(object sender, DataGridViewRowsAddedEventArgs e)
         {
-
             for (int i = 0; i < e.RowCount - 1; i++)
             {
                 dgv.Rows[e.RowIndex + i].Cells["Schedule"].ReadOnly = (bool)dgv.Rows[e.RowIndex + i].Cells["Default"].Value;
@@ -133,7 +131,6 @@ namespace DBADashServiceConfig
             {
                 FormatRow(e.RowIndex);
             }
-
         }
 
         private void FormatRow(int idx)
@@ -153,7 +150,6 @@ namespace DBADashServiceConfig
                 row.Cells["RunOnStart"].Value = BaseSchedule[collectType].RunOnServiceStart;
             }
             row.Cells["ScheduleDescription"].Value = GetScheduleDescription(Convert.ToString(row.Cells["Schedule"].Value));
-
         }
 
         private void Dgv_CellContentClick(object sender, DataGridViewCellEventArgs e)
