@@ -24,155 +24,64 @@ namespace DBADash
 
         public CollectionSchedules CollectionSchedules
         {
-            get
-            {
-                if (SourceConnection != null && SourceConnection.Type == ConnectionType.SQL)
-                {
-                    return collectionSchedules;
-                }
-                else
-                {
-                    return null;
-                }
-            }
-            set
-            {
-                collectionSchedules = value;
-            }
+            get => SourceConnection != null && SourceConnection.Type == ConnectionType.SQL ? collectionSchedules : null;
+            set => collectionSchedules = value;
         }
 
         public PlanCollectionThreshold RunningQueryPlanThreshold
         {
-            get
-            {
-                if (SourceConnection != null && SourceConnection.Type == ConnectionType.SQL)
-                {
-                    return runningQueryPlanThreshold;
-                }
-                else
-                {
-                    return null;
-                }
-            }
-            set
-            {
-
-                runningQueryPlanThreshold = value;
-            }
+            get => SourceConnection != null && SourceConnection.Type == ConnectionType.SQL ? runningQueryPlanThreshold : null;
+            set => runningQueryPlanThreshold = value;
         }
 
         public string SchemaSnapshotDBs
         {
-            get
-            {
-                if (SourceConnection != null && SourceConnection.Type == ConnectionType.SQL)
-                {
-                    return schemaSnapshotDBs;
-                }
-                else
-                {
-                    return string.Empty;
-                }
-            }
-            set
-            {
-                schemaSnapshotDBs = value;
-            }
+            get => SourceConnection != null && SourceConnection.Type == ConnectionType.SQL ? schemaSnapshotDBs : string.Empty;
+            set => schemaSnapshotDBs = value;
         }
 
         [JsonIgnore]
-        public bool HasCustomSchedule
-        {
-            get
-            {
-                return !(CollectionSchedules == null || CollectionSchedules.Count == 0);
-            }
-        }
+        public bool HasCustomSchedule => !(CollectionSchedules == null || CollectionSchedules.Count == 0);
+
         #region "Plan Collection Threshold Properties"
+
         // Added plan collection properties to allow them to be visible/editable in the grid
 
         [JsonIgnore]
         public bool PlanCollectionEnabled
         {
-            get
-            {
-                if (RunningQueryPlanThreshold == null)
-                {
-                    return false;
-                }
-                else
-                {
-                    return RunningQueryPlanThreshold.PlanCollectionEnabled;
-                }
-            }
-            set
-            {
-                if (value)
-                {
-                    RunningQueryPlanThreshold = PlanCollectionThreshold.DefaultThreshold;
-                }
-                else
-                {
-                    RunningQueryPlanThreshold = null;
-                }
-            }
+            get => RunningQueryPlanThreshold != null && RunningQueryPlanThreshold.PlanCollectionEnabled;
+            set => RunningQueryPlanThreshold = value ? PlanCollectionThreshold.DefaultThreshold : null;
         }
 
         [JsonIgnore]
         public int PlanCollectionCPUThreshold
         {
-            get
-            {
-                if (RunningQueryPlanThreshold == null || SourceConnection.Type != ConnectionType.SQL)
-                {
-                    return Int32.MaxValue;
-                }
-                else
-                {
-                    return RunningQueryPlanThreshold.CPUThreshold;
-                }
-            }
+            get => RunningQueryPlanThreshold == null || SourceConnection.Type != ConnectionType.SQL
+                    ? Int32.MaxValue
+                    : RunningQueryPlanThreshold.CPUThreshold;
             set
             {
                 RunningQueryPlanThreshold ??= PlanCollectionThreshold.PlanCollectionDisabledThreshold;
                 RunningQueryPlanThreshold.CPUThreshold = value;
             }
         }
+
         [JsonIgnore]
         public int PlanCollectionMemoryGrantThreshold
         {
-            get
-            {
-                if (RunningQueryPlanThreshold == null || SourceConnection.Type != ConnectionType.SQL)
-                {
-                    return Int32.MaxValue;
-                }
-                else
-                {
-                    return RunningQueryPlanThreshold.MemoryGrantThreshold;
-                }
-            }
+            get => RunningQueryPlanThreshold == null || SourceConnection.Type != ConnectionType.SQL ? Int32.MaxValue : RunningQueryPlanThreshold.MemoryGrantThreshold;
             set
             {
                 RunningQueryPlanThreshold ??= PlanCollectionThreshold.PlanCollectionDisabledThreshold;
                 RunningQueryPlanThreshold.MemoryGrantThreshold = value;
-
             }
         }
+
         [JsonIgnore]
         public int PlanCollectionDurationThreshold
         {
-            get
-            {
-                if (RunningQueryPlanThreshold == null || SourceConnection.Type != ConnectionType.SQL)
-                {
-                    return Int32.MaxValue;
-                }
-                else
-                {
-                    return RunningQueryPlanThreshold.DurationThreshold;
-                }
-            }
+            get => RunningQueryPlanThreshold == null || SourceConnection.Type != ConnectionType.SQL ? Int32.MaxValue : RunningQueryPlanThreshold.DurationThreshold;
             set
             {
                 RunningQueryPlanThreshold ??= PlanCollectionThreshold.PlanCollectionDisabledThreshold;
@@ -183,17 +92,7 @@ namespace DBADash
         [JsonIgnore]
         public int PlanCollectionCountThreshold
         {
-            get
-            {
-                if (RunningQueryPlanThreshold == null || SourceConnection.Type != ConnectionType.SQL)
-                {
-                    return Int32.MaxValue;
-                }
-                else
-                {
-                    return RunningQueryPlanThreshold.CountThreshold;
-                }
-            }
+            get => RunningQueryPlanThreshold == null || SourceConnection.Type != ConnectionType.SQL ? Int32.MaxValue : RunningQueryPlanThreshold.CountThreshold;
             set
             {
                 RunningQueryPlanThreshold ??= PlanCollectionThreshold.PlanCollectionDisabledThreshold;
@@ -201,11 +100,10 @@ namespace DBADash
             }
         }
 
-        #endregion
+        #endregion "Plan Collection Threshold Properties"
 
         [JsonIgnore]
         public DBADashConnection SourceConnection { get; set; }
-
 
         public string GetSource()
         {
@@ -215,21 +113,8 @@ namespace DBADash
         // Note if source is SQL connection string, password is encrypted.  Use GetSource() to return with real password
         public string ConnectionString
         {
-            get
-            {
-                if (SourceConnection == null)
-                {
-                    return "";
-                }
-                else
-                {
-                    return SourceConnection.EncryptedConnectionString;
-                }
-            }
-            set
-            {
-                SourceConnection = new DBADashConnection(value);
-            }
+            get => SourceConnection == null ? "" : SourceConnection.EncryptedConnectionString;
+            set => SourceConnection = new DBADashConnection(value);
         }
 
         public static string GenerateFileName(string connection)
@@ -240,157 +125,56 @@ namespace DBADash
         [DefaultValue(false)]
         public bool NoWMI
         {
-            get
-            {
-                if (SourceConnection != null && SourceConnection.Type == ConnectionType.SQL)
-                {
-                    return noWMI;
-                }
-                else
-                {
-                    return false;
-                }
-            }
-            set
-            {
-
-                noWMI = value;
-            }
+            get => SourceConnection != null && SourceConnection.Type == ConnectionType.SQL && noWMI;
+            set => noWMI = value;
         }
-
 
         public Int32 SlowQuerySessionMaxMemoryKB
         {
-            get
-            {
-                if (SourceConnection != null && SourceConnection.Type == ConnectionType.SQL)
-                {
-                    return slowQuerySessionMaxMemoryKB;
-                }
-                else
-                {
-                    return 0;
-                }
-            }
-            set
-            {
-                slowQuerySessionMaxMemoryKB = value;
-            }
+            get => SourceConnection != null && SourceConnection.Type == ConnectionType.SQL ? slowQuerySessionMaxMemoryKB : 0;
+            set => slowQuerySessionMaxMemoryKB = value;
         }
 
         public Int32 SlowQueryTargetMaxMemoryKB
         {
-            get
-            {
-                if (SourceConnection != null && SourceConnection.Type == ConnectionType.SQL)
-                {
-                    return slowQueryTargetMaxMemoryKB;
-                }
-                else
-                {
-                    return 0;
-                }
-            }
-            set
-            {
-                slowQueryTargetMaxMemoryKB = value;
-            }
+            get => SourceConnection != null && SourceConnection.Type == ConnectionType.SQL ? slowQueryTargetMaxMemoryKB : 0;
+            set => slowQueryTargetMaxMemoryKB = value;
         }
 
         [DefaultValue(true)]
         public bool UseDualEventSession
         {
-            get
-            {
-                if (SourceConnection != null && SourceConnection.Type == ConnectionType.SQL)
-                {
-                    return useDualXESesion;
-                }
-                else
-                {
-                    return false;
-                }
-            }
-            set
-            {
-                useDualXESesion = value;
-            }
+            get => SourceConnection != null && SourceConnection.Type == ConnectionType.SQL ? useDualXESesion : false;
+            set => useDualXESesion = value;
         }
-
 
         [DefaultValue(-1)]
         public Int32 SlowQueryThresholdMs
         {
-            get
-            {
-                if (SourceConnection != null && SourceConnection.Type == ConnectionType.SQL)
-                {
-                    return slowQueryThresholdMs;
-                }
-                else
-                {
-                    return -1;
-                }
-
-            }
-            set
-            {
-                slowQueryThresholdMs = value;
-            }
+            get => SourceConnection != null && SourceConnection.Type == ConnectionType.SQL ? slowQueryThresholdMs : -1;
+            set => slowQueryThresholdMs = value;
         }
+
         [DefaultValue(false)]
         public bool PersistXESessions
         {
-            get
-            {
-                if (SourceConnection != null && SourceConnection.Type == ConnectionType.SQL)
-                {
-                    return persistXESessions;
-                }
-                else
-                {
-                    return false;
-                }
-
-            }
-            set
-            {
-
-                persistXESessions = value;
-            }
+            get => SourceConnection != null && SourceConnection.Type == ConnectionType.SQL && persistXESessions; set => persistXESessions = value;
         }
 
         private bool _collectSessionWaits = true;
 
         public bool CollectSessionWaits
         {
-            get
-            {
-                if (SourceConnection != null && SourceConnection.Type == ConnectionType.SQL)
-                {
-                    return _collectSessionWaits;
-                }
-                else
-                {
-                    return false;
-                }
-            }
-            set
-            {
-                _collectSessionWaits = value;
-            }
+            get => SourceConnection != null && SourceConnection.Type == ConnectionType.SQL && _collectSessionWaits; set => _collectSessionWaits = value;
         }
 
         public DBADashSource(string source)
         {
             this.ConnectionString = source;
         }
+
         public DBADashSource()
         {
-
         }
-
-
     }
-
 }

@@ -4,6 +4,7 @@ using System;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+
 namespace DBADashServiceConfig
 {
     public partial class DBDeploy : Form
@@ -15,18 +16,12 @@ namespace DBADashServiceConfig
 
         // public Version DACVersion;
 
-        string _connectionString;
+        private string _connectionString;
 
         public string DatabaseName
         {
-            get
-            {
-                return cboDatabase.Text;
-            }
-            set
-            {
-                cboDatabase.Text = value;
-            }
+            get => cboDatabase.Text;
+            set => cboDatabase.Text = value;
         }
 
         public string ConnectionString
@@ -60,7 +55,7 @@ namespace DBADashServiceConfig
             }
         }
 
-        DBValidations.DBVersionStatus dbVersionStatus;
+        private DBValidations.DBVersionStatus dbVersionStatus;
 
         public string ConnectionStringWithoutInitialCatalog
         {
@@ -86,7 +81,7 @@ AND database_id > 4 ";
             using (SqlCommand cmd = new(sql, cn))
             {
                 cn.Open();
-                var rdr = cmd.ExecuteReader();
+                using var rdr = cmd.ExecuteReader();
                 while (rdr.Read())
                 {
                     cboDatabase.Items.Add((string)rdr[0]);
@@ -94,36 +89,22 @@ AND database_id > 4 ";
             }
         }
 
-
         public string DB
         {
-            get
-            {
-                return cboDatabase.Text;
-            }
-            set
-            {
-                cboDatabase.Text = value;
-            }
+            get => cboDatabase.Text;
+            set => cboDatabase.Text = value;
         }
 
         public string DeployScript
         {
-            get
-            {
-                return txtDeployScript.Text;
-            }
-            set
-            {
-                txtDeployScript.Text = value;
-            }
+            get => txtDeployScript.Text;
+            set => txtDeployScript.Text = value;
         }
 
         private void DBDeploy_Load(object sender, EventArgs e)
         {
             try
             {
-
                 CollectionConfig.ValidateDestination(new DBADashConnection(ConnectionString));
             }
             catch (Exception ex)
@@ -252,7 +233,6 @@ AND database_id > 4 ";
                     }
                     DeployScript = sb.ToString();
                 }
-
             }
         }
 
@@ -260,8 +240,6 @@ AND database_id > 4 ";
         {
             DbChanged();
         }
-
-
 
         private void CboDatabase_DropDown(object sender, EventArgs e)
         {
@@ -281,9 +259,9 @@ AND database_id > 4 ";
                     this.Cursor = Cursors.Default;
                 }
             }
-
         }
-        bool isCancel;
+
+        private bool isCancel;
 
         private void BttnCancel_Click(object sender, EventArgs e)
         {
@@ -344,7 +322,6 @@ AND database_id > 4 ";
                     bttnGenerate.Enabled = false;
                     bttnDeploy.Enabled = false;
                 }
-
             }
             catch (Exception ex)
             {
@@ -352,7 +329,6 @@ AND database_id > 4 ";
                 bttnDeploy.Enabled = false;
                 MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
-
         }
 
         private void CboDatabase_Validated(object sender, EventArgs e)

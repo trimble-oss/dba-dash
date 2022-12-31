@@ -30,12 +30,15 @@ namespace DBADashServiceConfig
                 case 0:
                     arg = "--localsystem";
                     break;
+
                 case 1:
                     arg = "--localservice";
                     break;
+
                 case 2:
                     arg = "--networkservice";
                     break;
+
                 case 3:
                     // Note: --interactive doesn't work on .NET 6 without a target OS.  Prompt user and pass as commandline arguments.
                     var creds = CredentialManager.PromptForCredentials(
@@ -74,7 +77,6 @@ namespace DBADashServiceConfig
                     arg = "-username \"" + username + "\" -password \"" + creds.Password.Replace("\"", "\"\"") + "\"";
 
                     break;
-
             }
             psi.UseShellExecute = false;
             psi.CreateNoWindow = true;

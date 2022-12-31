@@ -11,7 +11,6 @@ namespace DBADashService
 {
     public class SchemaSnapshotJob : IJob
     {
-
         public Task Execute(IJobExecutionContext context)
         {
             JobDataMap dataMap = context.JobDetail.JobDataMap;
@@ -76,12 +75,10 @@ namespace DBADashService
                         {
                             Log.Error(ex, "Error creating schema snapshot {db}", db.Name);
                         }
-
                     }
                 }
             }
             return Task.CompletedTask;
         }
-
     }
 }

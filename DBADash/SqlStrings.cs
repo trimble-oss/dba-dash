@@ -6,12 +6,10 @@ namespace DBADash
 {
     internal class SqlStrings
     {
-
         public static string GetSqlString(CollectionType type)
         {
             return GetSqlString(Enum.GetName(typeof(CollectionType), type));
         }
-
 
         public static string GetSqlString(string name)
         {
@@ -25,58 +23,58 @@ namespace DBADash
             }
         }
 
-        public static string AgentJobs { get { return GetSqlString("AgentJobs"); } }
-        public static string Alerts { get { return GetSqlString("Alerts"); } }
-        public static string AvailabilityGroups { get { return GetSqlString("AvailabilityGroups"); } }
-        public static string AvailabilityReplicas { get { return GetSqlString("AvailabilityReplicas"); } }
-        public static string AzureDBElasticPoolResourceStats { get { return GetSqlString("AzureDBElasticPoolResourceStats"); } }
-        public static string AzureDBResourceGovernance { get { return GetSqlString("AzureDBResourceGovernance"); } }
-        public static string AzureDBResourceStats { get { return GetSqlString("AzureDBResourceStats"); } }
-        public static string AzureDBServiceObjectives { get { return GetSqlString("AzureDBServiceObjectives"); } }
-        public static string Backups { get { return GetSqlString("Backups"); } }
-        public static string BlockingSnapshot { get { return GetSqlString("BlockingSnapshot"); } }
-        public static string Corruption { get { return GetSqlString("Corruption"); } }
-        public static string CPU { get { return GetSqlString("CPU"); } }
-        public static string CustomChecks { get { return GetSqlString("CustomChecks"); } }
-        public static string DatabaseMirroring { get { return GetSqlString("DatabaseMirroring"); } }
-        public static string DatabasePermissions { get { return GetSqlString("DatabasePermissions"); } }
-        public static string DatabasePrincipals { get { return GetSqlString("DatabasePrincipals"); } }
-        public static string DatabaseQueryStoreOptions { get { return GetSqlString("DatabaseQueryStoreOptions"); } }
-        public static string DatabaseRoleMembers { get { return GetSqlString("DatabaseRoleMembers"); } }
-        public static string Databases { get { return GetSqlString("Databases"); } }
-        public static string DatabasesHADR { get { return GetSqlString("DatabasesHADR"); } }
-        public static string DBConfig { get { return GetSqlString("DBConfig"); } }
-        public static string DBFiles { get { return GetSqlString("DBFiles"); } }
-        public static string DBTuningOptions { get { return GetSqlString("DBTuningOptions"); } }
-        public static string Drives { get { return GetSqlString("Drives"); } }
-        public static string IdentityColumns { get { return GetSqlString("IdentityColumns"); } }
-        public static string Instance { get { return GetSqlString("Instance"); } }
-        public static string IOStats { get { return GetSqlString("IOStats"); } }
-        public static string JobHistory { get { return GetSqlString("JobHistory"); } }
-        public static string LastGoodCheckDB { get { return GetSqlString("LastGoodCheckDB"); } }
-        public static string LogRestores { get { return GetSqlString("LogRestores"); } }
-        public static string MemoryUsage { get { return GetSqlString("MemoryUsage"); } }
-        public static string ObjectExecutionStats { get { return GetSqlString("ObjectExecutionStats"); } }
-        public static string OSInfo { get { return GetSqlString("OSInfo"); } }
-        public static string OSLoadedModules { get { return GetSqlString("OSLoadedModules"); } }
-        public static string PerformanceCounters { get { return GetSqlString("PerformanceCounters"); } }
-        public static string RemoveEventSessions { get { return GetSqlString("RemoveEventSessions"); } }
-        public static string RemoveEventSessionsAzure { get { return GetSqlString("RemoveEventSessionsAzure"); } }
-        public static string RunningQueries { get { return GetSqlString("RunningQueries"); } }
-        public static string ServerExtraProperties { get { return GetSqlString("ServerExtraProperties"); } }
-        public static string ServerPermissions { get { return GetSqlString("ServerPermissions"); } }
-        public static string ServerPrincipals { get { return GetSqlString("ServerPrincipals"); } }
-        public static string ServerProperties { get { return GetSqlString("ServerProperties"); } }
-        public static string ServerRoleMembers { get { return GetSqlString("ServerRoleMembers"); } }
-        public static string SlowQueries { get { return GetSqlString("SlowQueries"); } }
-        public static string SlowQueriesAzure { get { return GetSqlString("SlowQueriesAzure"); } }
-        public static string StopEventSessions { get { return GetSqlString("StopEventSessions"); } }
-        public static string StopEventSessionsAzure { get { return GetSqlString("StopEventSessionsAzure"); } }
-        public static string SysConfig { get { return GetSqlString("SysConfig"); } }
-        public static string TraceFlags { get { return GetSqlString("TraceFlags"); } }
-        public static string VLF { get { return GetSqlString("VLF"); } }
-        public static string Waits { get { return GetSqlString("Waits"); } }
-        public static string Jobs { get { return GetSqlString("Jobs"); } }
-        public static string JobSteps { get { return GetSqlString("JobSteps"); } }
+        public static string AgentJobs => GetSqlString("AgentJobs");
+        public static string Alerts => GetSqlString("Alerts");
+        public static string AvailabilityGroups => GetSqlString("AvailabilityGroups");
+        public static string AvailabilityReplicas => GetSqlString("AvailabilityReplicas");
+        public static string AzureDBElasticPoolResourceStats => GetSqlString("AzureDBElasticPoolResourceStats");
+        public static string AzureDBResourceGovernance => GetSqlString("AzureDBResourceGovernance");
+        public static string AzureDBResourceStats => GetSqlString("AzureDBResourceStats");
+        public static string AzureDBServiceObjectives => GetSqlString("AzureDBServiceObjectives");
+        public static string Backups => GetSqlString("Backups");
+        public static string BlockingSnapshot => GetSqlString("BlockingSnapshot");
+        public static string Corruption => GetSqlString("Corruption");
+        public static string CPU => GetSqlString("CPU");
+        public static string CustomChecks => GetSqlString("CustomChecks");
+        public static string DatabaseMirroring => GetSqlString("DatabaseMirroring");
+        public static string DatabasePermissions => GetSqlString("DatabasePermissions");
+        public static string DatabasePrincipals => GetSqlString("DatabasePrincipals");
+        public static string DatabaseQueryStoreOptions => GetSqlString("DatabaseQueryStoreOptions");
+        public static string DatabaseRoleMembers => GetSqlString("DatabaseRoleMembers");
+        public static string Databases => GetSqlString("Databases");
+        public static string DatabasesHADR => GetSqlString("DatabasesHADR");
+        public static string DBConfig => GetSqlString("DBConfig");
+        public static string DBFiles => GetSqlString("DBFiles");
+        public static string DBTuningOptions => GetSqlString("DBTuningOptions");
+        public static string Drives => GetSqlString("Drives");
+        public static string IdentityColumns => GetSqlString("IdentityColumns");
+        public static string Instance => GetSqlString("Instance");
+        public static string IOStats => GetSqlString("IOStats");
+        public static string JobHistory => GetSqlString("JobHistory");
+        public static string LastGoodCheckDB => GetSqlString("LastGoodCheckDB");
+        public static string LogRestores => GetSqlString("LogRestores");
+        public static string MemoryUsage => GetSqlString("MemoryUsage");
+        public static string ObjectExecutionStats => GetSqlString("ObjectExecutionStats");
+        public static string OSInfo => GetSqlString("OSInfo");
+        public static string OSLoadedModules => GetSqlString("OSLoadedModules");
+        public static string PerformanceCounters => GetSqlString("PerformanceCounters");
+        public static string RemoveEventSessions => GetSqlString("RemoveEventSessions");
+        public static string RemoveEventSessionsAzure => GetSqlString("RemoveEventSessionsAzure");
+        public static string RunningQueries => GetSqlString("RunningQueries");
+        public static string ServerExtraProperties => GetSqlString("ServerExtraProperties");
+        public static string ServerPermissions => GetSqlString("ServerPermissions");
+        public static string ServerPrincipals => GetSqlString("ServerPrincipals");
+        public static string ServerProperties => GetSqlString("ServerProperties");
+        public static string ServerRoleMembers => GetSqlString("ServerRoleMembers");
+        public static string SlowQueries => GetSqlString("SlowQueries");
+        public static string SlowQueriesAzure => GetSqlString("SlowQueriesAzure");
+        public static string StopEventSessions => GetSqlString("StopEventSessions");
+        public static string StopEventSessionsAzure => GetSqlString("StopEventSessionsAzure");
+        public static string SysConfig => GetSqlString("SysConfig");
+        public static string TraceFlags => GetSqlString("TraceFlags");
+        public static string VLF => GetSqlString("VLF");
+        public static string Waits => GetSqlString("Waits");
+        public static string Jobs => GetSqlString("Jobs");
+        public static string JobSteps => GetSqlString("JobSteps");
     }
 }

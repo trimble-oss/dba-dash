@@ -1,15 +1,16 @@
 ﻿using DBADash;
 using System.Collections.Generic;
 using System.Linq;
+
 namespace DBADashService
 {
-
     public class CollectionSchedules : Dictionary<CollectionType, CollectionSchedule>
     {
         private const string every1min = "0 * * ? * *";
         private const string hourly = "0 0 * ? * *";
         private const string midnight = "0 0 0 1/1 * ? *";
         private const string elevenPm = "0 0 23 1/1 * ? *";
+
         private static readonly CollectionSchedules collectionSchedules = new() {
                             {CollectionType.ServerProperties, new CollectionSchedule(){ Schedule = hourly } },
                             {CollectionType.Databases, new CollectionSchedule(){ Schedule = hourly } },
@@ -60,8 +61,8 @@ namespace DBADashService
                             {CollectionType.DatabaseQueryStoreOptions, new CollectionSchedule(){ Schedule = midnight } },
                             {CollectionType.IdentityColumns, new CollectionSchedule(){ Schedule = midnight} },
                             {CollectionType.SchemaSnapshot, new CollectionSchedule(){Schedule=elevenPm} }
-
                   };
+
         public static readonly CollectionSchedules DefaultSchedules
                = collectionSchedules;
 
@@ -111,22 +112,15 @@ namespace DBADashService
                 return this.Where(s => s.Key != CollectionType.SchemaSnapshot && s.Value.RunOnServiceStart).Select(s => s.Key).ToArray();
             }
         }
-
     }
 
     public class CollectionSchedule
     {
-
         public string Schedule;
         public bool RunOnServiceStart = true;
 
         private const string every1min = "0 * * ? * *";
         private static readonly CollectionSchedule importSchedule = new() { Schedule = every1min };
         public static readonly CollectionSchedule DefaultImportSchedule = importSchedule;
-
-
-
     }
-
-
 }

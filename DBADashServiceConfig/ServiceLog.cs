@@ -9,7 +9,7 @@ namespace DBADashServiceConfig
 {
     public partial class ServiceLog : Form
     {
-        readonly string logsFolder = System.IO.Path.Combine(Application.StartupPath, "Logs");
+        private readonly string logsFolder = System.IO.Path.Combine(Application.StartupPath, "Logs");
 
         public ServiceLog()
         {

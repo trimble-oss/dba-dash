@@ -2,9 +2,10 @@
 using Serilog;
 using System;
 using System.IO;
+
 namespace DBADashService
 {
-    class SchedulerServiceConfig
+    internal class SchedulerServiceConfig
     {
         public static readonly CollectionConfig Config;
         public static readonly string FailedMessageFolder;
