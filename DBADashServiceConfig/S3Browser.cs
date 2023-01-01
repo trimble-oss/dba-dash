@@ -13,16 +13,10 @@ namespace DBADashServiceConfig
         public string AccessKey;
         public string SecretKey;
         public string AWSProfile;
+
         public string Folder
         {
-            get
-            {
-                return txtFolder.Text;
-            }
-            set
-            {
-                txtFolder.Text = value;
-            }
+            get => txtFolder.Text; set => txtFolder.Text = value;
         }
 
         public string AWSURL
@@ -56,7 +50,6 @@ namespace DBADashServiceConfig
                 }
             }
         }
-
 
         private void CboBuckets_DropDown(object sender, EventArgs e)
         {
