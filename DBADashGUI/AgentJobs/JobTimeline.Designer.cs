@@ -28,7 +28,6 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.webCtrl = new Microsoft.Web.WebView2.WinForms.WebView2();
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
             this.tsRefresh = new System.Windows.Forms.ToolStripButton();
             this.tsCopyDropDown = new System.Windows.Forms.ToolStripDropDownButton();
@@ -38,23 +37,11 @@
             this.tsIncludeSteps = new System.Windows.Forms.ToolStripDropDownButton();
             this.outcomeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.stepsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.tsDateGroup = new System.Windows.Forms.ToolStripDropDownButton();
             this.bothToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            ((System.ComponentModel.ISupportInitialize)(this.webCtrl)).BeginInit();
+            this.tsDateGroup = new System.Windows.Forms.ToolStripDropDownButton();
+            this.WebView2Wrapper1 = new DBADashGUI.AgentJobs.WebView2Wrapper();
             this.toolStrip1.SuspendLayout();
             this.SuspendLayout();
-            // 
-            // webCtrl
-            // 
-            this.webCtrl.AllowExternalDrop = true;
-            this.webCtrl.CreationProperties = null;
-            this.webCtrl.DefaultBackgroundColor = System.Drawing.Color.White;
-            this.webCtrl.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.webCtrl.Location = new System.Drawing.Point(0, 27);
-            this.webCtrl.Name = "webCtrl";
-            this.webCtrl.Size = new System.Drawing.Size(1065, 697);
-            this.webCtrl.TabIndex = 0;
-            this.webCtrl.ZoomFactor = 1D;
             // 
             // toolStrip1
             // 
@@ -91,7 +78,7 @@
             this.tsCopyDropDown.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsCopyDropDown.Name = "tsCopyDropDown";
             this.tsCopyDropDown.Size = new System.Drawing.Size(34, 24);
-            this.tsCopyDropDown.Text = "toolStripDropDownButton1";
+            this.tsCopyDropDown.Text = "Copy";
             // 
             // hTMLToolStripMenuItem
             // 
@@ -132,16 +119,23 @@
             this.outcomeToolStripMenuItem.Checked = true;
             this.outcomeToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
             this.outcomeToolStripMenuItem.Name = "outcomeToolStripMenuItem";
-            this.outcomeToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            this.outcomeToolStripMenuItem.Size = new System.Drawing.Size(153, 26);
             this.outcomeToolStripMenuItem.Text = "Outcome";
             this.outcomeToolStripMenuItem.Click += new System.EventHandler(this.Include_Steps);
             // 
             // stepsToolStripMenuItem
             // 
             this.stepsToolStripMenuItem.Name = "stepsToolStripMenuItem";
-            this.stepsToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            this.stepsToolStripMenuItem.Size = new System.Drawing.Size(153, 26);
             this.stepsToolStripMenuItem.Text = "Steps";
             this.stepsToolStripMenuItem.Click += new System.EventHandler(this.Include_Steps);
+            // 
+            // bothToolStripMenuItem
+            // 
+            this.bothToolStripMenuItem.Name = "bothToolStripMenuItem";
+            this.bothToolStripMenuItem.Size = new System.Drawing.Size(153, 26);
+            this.bothToolStripMenuItem.Text = "Both";
+            this.bothToolStripMenuItem.Click += new System.EventHandler(this.Include_Steps);
             // 
             // tsDateGroup
             // 
@@ -152,23 +146,24 @@
             this.tsDateGroup.Tag = "0";
             this.tsDateGroup.Text = "None";
             // 
-            // bothToolStripMenuItem
+            // WebView2Wrapper1
             // 
-            this.bothToolStripMenuItem.Name = "bothToolStripMenuItem";
-            this.bothToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
-            this.bothToolStripMenuItem.Text = "Both";
-            this.bothToolStripMenuItem.Click += new System.EventHandler(this.Include_Steps);
+            this.WebView2Wrapper1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.WebView2Wrapper1.Location = new System.Drawing.Point(0, 27);
+            this.WebView2Wrapper1.Name = "WebView2Wrapper1";
+            this.WebView2Wrapper1.Size = new System.Drawing.Size(1065, 697);
+            this.WebView2Wrapper1.TabIndex = 2;
+            this.WebView2Wrapper1.SetupCompleted += new DBADashGUI.AgentJobs.WebView2Wrapper.WebView2SetupCompleted(this.WebView2_SetupCompleted);
             // 
             // JobTimeline
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.Controls.Add(this.webCtrl);
+            this.Controls.Add(this.WebView2Wrapper1);
             this.Controls.Add(this.toolStrip1);
             this.Name = "JobTimeline";
             this.Size = new System.Drawing.Size(1065, 724);
             this.Resize += new System.EventHandler(this.JobTimeLine_Resize);
-            ((System.ComponentModel.ISupportInitialize)(this.webCtrl)).EndInit();
             this.toolStrip1.ResumeLayout(false);
             this.toolStrip1.PerformLayout();
             this.ResumeLayout(false);
@@ -177,8 +172,6 @@
         }
 
         #endregion
-
-        private Microsoft.Web.WebView2.WinForms.WebView2 webCtrl;
         private System.Windows.Forms.ToolStrip toolStrip1;
         private System.Windows.Forms.ToolStripButton tsRefresh;
         private System.Windows.Forms.ToolStripDropDownButton tsCategories;
@@ -190,5 +183,6 @@
         private System.Windows.Forms.ToolStripMenuItem hTMLToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem imageToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem bothToolStripMenuItem;
+        private WebView2Wrapper WebView2Wrapper1;
     }
 }

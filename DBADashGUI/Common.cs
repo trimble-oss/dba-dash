@@ -5,6 +5,7 @@ using System.Data;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
+using System.Net.Http;
 using System.Text;
 using System.Windows.Forms;
 
@@ -374,6 +375,16 @@ namespace DBADashGUI
             using (MemoryStream ms = new(bytes))
             {
                 return Image.FromStream(ms);
+            }
+        }
+
+        internal static void DownloadFile(string localPath, string url)
+        {
+            using (var client = new HttpClient())
+            using (var s = client.GetStreamAsync(url))
+            using (var fs = new FileStream(localPath, FileMode.OpenOrCreate))
+            {
+                s.Result.CopyTo(fs);
             }
         }
     }

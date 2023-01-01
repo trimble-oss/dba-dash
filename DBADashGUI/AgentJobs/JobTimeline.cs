@@ -16,6 +16,7 @@ using System.Web;
 using System.Windows.Automation;
 using System.Windows.Forms;
 using static DBADashGUI.AgentJobs.TimelineRow;
+using static System.Net.WebRequestMethods;
 
 namespace DBADashGUI.AgentJobs
 {
@@ -149,7 +150,6 @@ namespace DBADashGUI.AgentJobs
 </html>";
 
         private string html;
-        private static readonly string tempFilePrefix = "DBADashJobTimeline_";
         private DataTable dt;
         private DateTime from;
         private DateTime to;
@@ -170,14 +170,6 @@ namespace DBADashGUI.AgentJobs
                 tsDateGroup.Tag = value;
                 tsDateGroup.Text = DateHelper.DateGroupString(value);
             }
-        }
-
-        /// <summary>
-        /// Get temp file name for writing HTML timeline out to disk.  Required if size is over 2MB
-        /// </summary>
-        private static string GetTempFilePath()
-        {
-            return Path.Combine(System.IO.Path.GetTempPath(), tempFilePrefix + Guid.NewGuid().ToString() + ".html"); // File name will be reused to avoid creating large numbers of temp files that might not get cleaned up
         }
 
         public JobTimeline()
@@ -276,12 +268,11 @@ namespace DBADashGUI.AgentJobs
                 mins = DateRange.DurationMins;
             }
             RefreshCategories();
-            await webCtrl.EnsureCoreWebView2Async(null);
             from = DateRange.FromUTC;
             to = DateRange.ToUTC;
 
             dt = GetJobTimelineData(context.InstanceID, from, to, selectedCategory, context.JobID, IncludeSteps, IncludeOutcome, DateGrouping);
-            DrawTimeline();
+            await DrawTimeline();
         }
 
         /// <summary>
@@ -311,27 +302,13 @@ namespace DBADashGUI.AgentJobs
             }
         }
 
-        /// <summary>
-        /// Generate and load timeline HTML
-        /// </summary>
-        private async void DrawTimeline()
+        // <summary>
+        // Generate and load timeline HTML
+        // </summary>
+        private async Task DrawTimeline()
         {
-            if (webCtrl == null || webCtrl.IsDisposed || webCtrl.Disposing || dt == null)
-            {
-                return;
-            }
-            await webCtrl.EnsureCoreWebView2Async(null);
-
             GenerateHTML();
-
-            try
-            {
-                webCtrl.NavigateToString(html);
-            }
-            catch (Exception ex)
-            {
-                LoadHTMLFromDisk(ex); // NavigateToString might fail if size exceeds 2MB.  Try loading from disk instead.
-            }
+            await WebView2Wrapper1.NavigateToLargeString(html);
         }
 
         /// <summary>
@@ -401,43 +378,6 @@ namespace DBADashGUI.AgentJobs
             html = html.Replace("##DATA##", sb.ToString());
         }
 
-        /// <summary>
-        /// Load HTML from disk instead of using NavigateToString.  Required if HTML is over 2MB.
-        /// </summary>
-        private void LoadHTMLFromDisk(Exception ex)
-        {
-            TryDeleteTempFiles(); // Cleanup previous temp files
-            try
-            {
-                string tempFilePath = GetTempFilePath(); // Generate a unique file.  Setting source to same file doesn't refresh
-                System.IO.File.WriteAllText(tempFilePath, html);
-                webCtrl.Source = new Uri(tempFilePath);
-            }
-            catch (Exception ex2)
-            {
-                webCtrl.NavigateToString(String.Format("<html><body style='background-color:{0};color:#ffffff'>Error loading HTML:<br/>{1}</body></html>", DashColors.Fail.ToHexString(), HttpUtility.HtmlEncode(ex.ToString()) + "<br/>" + HttpUtility.HtmlEncode(ex2.ToString())));
-            }
-        }
-
-        /// <summary>
-        /// Remove temp file that is written to when NavigateToString fails (Can occur due to 2MB size limit)
-        /// </summary>
-        private static void TryDeleteTempFiles()
-        {
-            try
-            {
-                string pattern = tempFilePrefix + "*.html";
-                foreach (string f in Directory.EnumerateFiles(System.IO.Path.GetTempPath(), pattern))
-                {
-                    File.Delete(f);
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine("Error deleting temp file:" + ex.ToString());
-            }
-        }
-
         private static int ChartHeight(int rows)
         {
             return (42 * rows) + 100;
@@ -456,11 +396,11 @@ namespace DBADashGUI.AgentJobs
             RefreshData();
         }
 
-        private void JobTimeLine_Resize(object sender, EventArgs e)
+        private async void JobTimeLine_Resize(object sender, EventArgs e)
         {
             if (IsActive)
             {
-                DrawTimeline();
+                await DrawTimeline();
             }
         }
 
@@ -484,13 +424,14 @@ namespace DBADashGUI.AgentJobs
             Common.CopyHtmlToClipBoard(html);
         }
 
-        private async void Copy_Image(object sender, EventArgs e)
+        private void Copy_Image(object sender, EventArgs e)
         {
-            Task<string> t = webCtrl.CoreWebView2.CallDevToolsProtocolMethodAsync("Page.captureScreenshot", "{}");
-            string json = await t;
-            string base64Image = JObject.Parse(json).Value<string>("data");
-            Image img = Common.Base64StringAsImage(base64Image);
-            Clipboard.SetImage(img);
+            WebView2Wrapper1.CopyImageToClipboard();
+        }
+
+        private void WebView2_SetupCompleted()
+        {
+            this.Invoke(() => RefreshData());
         }
     }
 }
