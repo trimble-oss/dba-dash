@@ -276,8 +276,7 @@ namespace DBADashGUI.AgentJobs
                 }
                 if (e.ColumnIndex == colMessage.Index)
                 {
-                    string message = Convert.ToString(row["Message"]);
-                    NotepadHelper.ShowMessage(message, "DBA Dash Job History");
+                    Convert.ToString(row["Message"]).OpenAsTextFile();
                 }
             }
         }

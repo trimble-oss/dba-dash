@@ -163,8 +163,7 @@ namespace DBADashGUI.CollectionDates
             {
                 if (e.ColumnIndex == ErrorMessage.Index)
                 {
-                    string message = Convert.ToString(dgvDBADashErrors.Rows[e.RowIndex].Cells[e.ColumnIndex].Value);
-                    NotepadHelper.ShowMessage(message, "DBA Dash Error");
+                    Convert.ToString(dgvDBADashErrors.Rows[e.RowIndex].Cells[e.ColumnIndex].Value).OpenAsTextFile();
                 }
                 else if (e.ColumnIndex == ErrorSource.Index)
                 {

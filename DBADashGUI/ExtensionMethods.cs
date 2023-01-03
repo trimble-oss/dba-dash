@@ -2,8 +2,10 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Windows.Forms;
 using static DBADashGUI.DBADashStatus;
 
@@ -205,6 +207,14 @@ namespace DBADashGUI
             {
                 mnu.Checked = mnu == checkedItem;
             }
+        }
+
+        internal static void OpenAsTextFile(this string value)
+        {
+            string path = Common.GetTempFilePath(".txt");
+            System.IO.File.WriteAllText(path, value);
+            ProcessStartInfo psi = new() { FileName = path, UseShellExecute = true };
+            Process.Start(psi);
         }
     }
 }

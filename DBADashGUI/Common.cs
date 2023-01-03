@@ -387,5 +387,29 @@ namespace DBADashGUI
                 s.Result.CopyTo(fs);
             }
         }
+
+        internal static readonly string TempFilePrefix = "DBADashGUITemp_";
+
+        internal static string GetTempFilePath(string extension)
+            => Path.Combine(Path.GetTempPath(), TempFilePrefix + Guid.NewGuid().ToString() + (extension.StartsWith(".") ? extension : "." + extension));
+
+        /// <summary>
+        /// Delete temp files generated
+        /// </summary>
+        internal static void TryDeleteTempFiles()
+        {
+            try
+            {
+                string pattern = TempFilePrefix + "*";
+                foreach (string f in Directory.EnumerateFiles(Path.GetTempPath(), pattern))
+                {
+                    File.Delete(f);
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error deleting temp file:" + ex.ToString());
+            }
+        }
     }
 }
