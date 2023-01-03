@@ -31,6 +31,12 @@ namespace DBADashGUI
             this.FormClosed += (s, e) => Application.RemoveMessageFilter(this);
             InitializeComponent();
             commandLine = opts;
+            this.Disposed += OnDispose;
+        }
+
+        private void OnDispose(object sender, EventArgs e)
+        {
+            Common.TryDeleteTempFiles();
         }
 
         private readonly string jsonPath = Common.JsonConfigPath;

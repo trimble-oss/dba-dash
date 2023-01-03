@@ -20,7 +20,6 @@ namespace DBADashGUI.AgentJobs
             InitializeComponent();
             lnkDownload.LinkColor = DashColors.LinkColor;
             lblNotice.ForeColor = DashColors.Fail;
-            this.Disposed += OnDispose;
         }
 
         public delegate void WebView2SetupCompleted();
@@ -28,8 +27,6 @@ namespace DBADashGUI.AgentJobs
         public event WebView2SetupCompleted SetupCompleted;
 
         public Microsoft.Web.WebView2.WinForms.WebView2 WebView2 => WebViewCtrl;
-
-        private static readonly string tempFilePrefix = "DBADashWebView2_";
 
         /// <summary>
         /// Run EnsureCoreWebView2Async.  If WebView2 runtime isn't installed a download link will be displayed.  Error will be re-thrown
@@ -50,7 +47,7 @@ namespace DBADashGUI.AgentJobs
             WebViewCtrl.Visible = true;
         }
 
-        private static string WebView2SetupTempPath => Path.Combine(System.IO.Path.GetTempPath(), "DBADash_MicrosoftEdgeWebview2Setup.exe");
+        private static string WebView2SetupTempPath => Path.Combine(System.IO.Path.GetTempPath(), Common.TempFilePrefix + "MicrosoftEdgeWebview2Setup.exe");
 
         /// <summary>
         /// Download & Install WebView2 runtime.  Fire Setup_Completed event when finished.
@@ -76,42 +73,9 @@ namespace DBADashGUI.AgentJobs
             }
         }
 
-        private static string GetTempFilePath()
-        {
-            return Path.Combine(System.IO.Path.GetTempPath(), tempFilePrefix + Guid.NewGuid().ToString() + ".html"); // File name will be reused to avoid creating large numbers of temp files that might not get cleaned up
-        }
-
         private void Setup_Completed(object sender, EventArgs e)
         {
             SetupCompleted?.Invoke();
-        }
-
-        private void OnDispose(object sender, EventArgs e)
-        {
-            TryDeleteTempFiles();
-        }
-
-        /// <summary>
-        /// Delete temp files generated
-        /// </summary>
-        private static void TryDeleteTempFiles()
-        {
-            try
-            {
-                string pattern = tempFilePrefix + "*.html";
-                foreach (string f in Directory.EnumerateFiles(System.IO.Path.GetTempPath(), pattern))
-                {
-                    System.IO.File.Delete(f);
-                }
-                if (File.Exists(WebView2SetupTempPath))
-                {
-                    File.Delete(WebView2SetupTempPath);
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine("Error deleting temp file:" + ex.ToString());
-            }
         }
 
         public async Task NavigateToLargeString(string html)
@@ -141,7 +105,7 @@ namespace DBADashGUI.AgentJobs
         {
             try
             {
-                string tempFilePath = GetTempFilePath(); // Generate a unique file.  Setting source to same file doesn't refresh
+                string tempFilePath = Common.GetTempFilePath(".html"); // Generate a unique file.  Setting source to same file doesn't refresh
                 System.IO.File.WriteAllText(tempFilePath, html);
                 WebViewCtrl.Source = new Uri(tempFilePath);
             }
