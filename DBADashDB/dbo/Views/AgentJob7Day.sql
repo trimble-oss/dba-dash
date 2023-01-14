@@ -39,7 +39,11 @@ SELECT I.InstanceID,
 	agg.MaxDurationSec,
 	agg.AvgDurationSec,
 	J.enabled,
-	I.ShowInSummary
+	I.ShowInSummary,
+	J.AckDate,
+	J.StepLastFailed,
+	DATEDIFF(mi,J.LastFailed,GETUTCDATE()) AS TimeSinceLastFailedMin,
+	DATEDIFF(mi,J.LastSucceeded,GETUTCDATE()) AS TimeSinceLastSucceededMin
 FROM dbo.Instances I 
 JOIN  dbo.Jobs J ON I.InstanceID = J.InstanceID
 LEFT JOIN agg ON J.job_id = agg.job_id AND J.InstanceID = agg.InstanceID

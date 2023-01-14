@@ -30,9 +30,6 @@ BEGIN
 		RETURN
 	END
 
-	DELETE dbo.AgentJobs 
-	WHERE InstanceID = @InstanceID
-
 	DELETE dbo.AgentJobThresholds
 	WHERE InstanceId = @InstanceID
 

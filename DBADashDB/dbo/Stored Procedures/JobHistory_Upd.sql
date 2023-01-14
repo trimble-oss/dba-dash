@@ -83,15 +83,16 @@ WHERE NOT EXISTS(
 
 WITH L AS (
 	SELECT job_id,
-			MAX(CASE WHEN run_status IN(0,3) THEN RunDateTime ELSE NULL END) as LastFailed,
-			MAX(CASE WHEN run_status=1 THEN RunDateTime ELSE NULL END) as LastSucceeded
+			MAX(CASE WHEN run_status IN(0,3) AND step_id=0 THEN RunDateTime ELSE NULL END) as LastFailed,
+			MAX(CASE WHEN run_status=1 AND step_id=0 THEN RunDateTime ELSE NULL END) as LastSucceeded,
+			MAX(CASE WHEN run_status IN(0,3) AND step_id<>0 THEN RunDateTime ELSE NULL END) as StepLastFailed
 	FROM @InsertedJobHistory
-	WHERE step_id=0
 	GROUP BY job_id
 )
 UPDATE J 
 SET J.LastFailed = ISNULL(L.LastFailed,J.LastFailed),
-	J.LastSucceeded = ISNULL(L.LastSucceeded,J.LastSucceeded)
+	J.LastSucceeded = ISNULL(L.LastSucceeded,J.LastSucceeded),
+	J.StepLastFailed = ISNULL(L.StepLastFailed,J.StepLastFailed)
 FROM dbo.Jobs J
 JOIN L ON J.job_id = L.job_id
 WHERE J.InstanceID = @InstanceID

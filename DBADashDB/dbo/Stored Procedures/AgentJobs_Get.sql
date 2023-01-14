@@ -5,6 +5,7 @@
 	@IncludeWarning BIT=1,
 	@IncludeNA BIT=0,
 	@IncludeOK BIT=0,
+    @IncludeACK BIT=1,
 	@JobName SYSNAME=NULL,
     @JobID UNIQUEIDENTIFIER=NULL,
     @ShowHidden BIT=1
@@ -22,7 +23,11 @@ BEGIN
 END;
 
 DECLARE @SQL NVARCHAR(MAX)
-DECLARE @StatusesString NVARCHAR(MAX) = '0' + CASE WHEN @IncludeCritical=1 THEN ',1' ELSE '' END + CASE WHEN @IncludeWarning=1 THEN ',2' ELSE '' END + CASE WHEN @IncludeNA=1 THEN ',3' ELSE '' END + CASE WHEN @IncludeOK=1 THEN ',4' ELSE '' END
+DECLARE @StatusesString NVARCHAR(MAX) = '0' + CASE WHEN @IncludeCritical=1 THEN ',1' ELSE '' END + 
+                                              CASE WHEN @IncludeWarning=1 THEN ',2' ELSE '' END + 
+                                              CASE WHEN @IncludeNA=1 THEN ',3' ELSE '' END + 
+                                              CASE WHEN @IncludeOK=1 THEN ',4' ELSE '' END + 
+                                              CASE WHEN @IncludeACK=1 THEN ',5' ELSE '' END
 
 SET @SQL = N'
 SELECT J.Instance,
@@ -69,7 +74,10 @@ SELECT J.Instance,
        J.LastFailIsCritical,
        J.LastFailIsWarning,
        J.ConfiguredLevel,
-	   J.JobStatus
+	   J.JobStatus,
+       J.AckDate,
+       J.AckStatus,
+       J.StepLastFailed
 FROM dbo.AgentJobStatus J
 WHERE J.JobStatus IN(' + @StatusesString + ')
 ' + CASE WHEN @enabled IS NULL THEN '' ELSE 'AND J.enabled=@enabled' END + '

@@ -17,25 +17,15 @@ namespace DBADashGUI.AgentJobs
         private int StepID = -1;
         private DBADashContext context;
 
-        public bool IncludeCritical
-        {
-            get => criticalToolStripMenuItem.Checked; set => criticalToolStripMenuItem.Checked = value;
-        }
+        public bool IncludeCritical { get => statusFilterToolStrip1.Critical; set => statusFilterToolStrip1.Critical = value; }
 
-        public bool IncludeWarning
-        {
-            get => warningToolStripMenuItem.Checked; set => warningToolStripMenuItem.Checked = value;
-        }
+        public bool IncludeWarning { get => statusFilterToolStrip1.Warning; set => statusFilterToolStrip1.Warning = value; }
 
-        public bool IncludeNA
-        {
-            get => undefinedToolStripMenuItem.Checked; set => undefinedToolStripMenuItem.Checked = value;
-        }
+        public bool IncludeNA { get => statusFilterToolStrip1.NA; set => statusFilterToolStrip1.NA = value; }
 
-        public bool IncludeOK
-        {
-            get => OKToolStripMenuItem.Checked; set => OKToolStripMenuItem.Checked = value;
-        }
+        public bool IncludeOK { get => statusFilterToolStrip1.OK; set => statusFilterToolStrip1.OK = value; }
+
+        public bool IncludeAcknowledged { get => statusFilterToolStrip1.Acknowledged; set => statusFilterToolStrip1.Acknowledged = value; }
 
         public void SetContext(DBADashContext context)
         {
@@ -46,6 +36,7 @@ namespace DBADashGUI.AgentJobs
             IncludeOK = context.RegularInstanceIDs.Count == 1;
             IncludeWarning = true;
             IncludeCritical = true;
+            IncludeAcknowledged = true;
             InstanceIDs = context.RegularInstanceIDs.ToList();
 
             RefreshData();
@@ -95,10 +86,7 @@ namespace DBADashGUI.AgentJobs
             using (var da = new SqlDataAdapter(cmd))
             {
                 cmd.Parameters.AddWithValue("InstanceIDs", string.Join(",", InstanceIDs));
-                cmd.Parameters.AddWithValue("IncludeCritical", IncludeCritical);
-                cmd.Parameters.AddWithValue("IncludeWarning", IncludeWarning);
-                cmd.Parameters.AddWithValue("IncludeNA", IncludeNA);
-                cmd.Parameters.AddWithValue("IncludeOK", IncludeOK);
+                cmd.Parameters.AddRange(statusFilterToolStrip1.GetSQLParams());
                 cmd.Parameters.AddWithValue("ShowHidden", context.RegularInstanceIDs.Count == 1 || Common.ShowHidden);
                 cmd.Parameters.AddGuidIfNotEmpty("JobID", context.JobID);
 
@@ -151,10 +139,16 @@ namespace DBADashGUI.AgentJobs
                 {
                     ConfigureThresholds((Int32)row["InstanceID"], (Guid)row["job_id"]);
                 }
-                if (dgvJobs.Columns[e.ColumnIndex] == colHistory)
+                else if (dgvJobs.Columns[e.ColumnIndex] == colHistory)
                 {
                     failedOnlyToolStripMenuItem.Checked = false;
                     ShowHistory(row.Row);
+                }
+                else if (e.ColumnIndex == Acknowledge.Index)
+                {
+                    bool clear = (DBADashStatus.DBADashStatusEnum)row["JobStatus"] == DBADashStatus.DBADashStatusEnum.Acknowledged;
+                    AcknowledgeJobErrors((int)row["InstanceID"], (Guid)row["job_id"], clear);
+                    RefreshData();
                 }
             }
         }
@@ -242,12 +236,27 @@ namespace DBADashGUI.AgentJobs
                 {
                     dgvJobs.Rows[idx].Cells["Configure"].Style.Font = new Font(dgvJobs.Font, FontStyle.Regular);
                 }
+                dgvJobs.Rows[idx].Cells["Acknowledge"].Value = jobStatus switch
+                {
+                    DBADashStatus.DBADashStatusEnum.Critical or DBADashStatus.DBADashStatusEnum.Warning => "Acknowledge",
+                    DBADashStatus.DBADashStatusEnum.Acknowledged => "Clear",
+                    _ => "",
+                };
             }
         }
 
-        private void Status_Selected(object sender, EventArgs e)
+        private static void AcknowledgeJobErrors(int InstanceID, Guid JobID, bool clear)
         {
-            RefreshData();
+            using (var cn = new SqlConnection(Common.ConnectionString))
+            using (SqlCommand cmd = new("dbo.JobErrorAck", cn) { CommandType = CommandType.StoredProcedure })
+            using (SqlDataAdapter da = new(cmd))
+            {
+                cn.Open();
+                cmd.Parameters.AddWithValue("InstanceID", InstanceID);
+                cmd.Parameters.AddGuidIfNotEmpty("job_id", JobID);
+                cmd.Parameters.AddWithValue("Clear", clear);
+                cmd.ExecuteNonQuery();
+            }
         }
 
         private void TsRefresh_Click(object sender, EventArgs e)
@@ -274,7 +283,7 @@ namespace DBADashGUI.AgentJobs
                     instance_id = (int)row["instance_id"];
                     ShowHistory();
                 }
-                if (e.ColumnIndex == colMessage.Index)
+                else if (e.ColumnIndex == colMessage.Index)
                 {
                     Convert.ToString(row["Message"]).OpenAsTextFile();
                 }
@@ -329,6 +338,31 @@ namespace DBADashGUI.AgentJobs
         {
             Common.StyleGrid(ref dgvJobHistory);
             Common.StyleGrid(ref dgvJobs);
+        }
+
+        private void UserChangedStatusFilter(object sender, EventArgs e)
+        {
+            RefreshData();
+        }
+
+        private void AcknowledgeErrorsToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            DataView dt = (DataView)dgvJobs.DataSource;
+            var warningsAndFailures = dt.Table.Select("JobStatus IN(1,2)");
+            if (warningsAndFailures.Length == 0)
+            {
+                MessageBox.Show("No warnings/failures to acknowledge", "Acknowledge Failures", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            else if (MessageBox.Show(string.Format("Are you sure you want to acknowledge {0} job failure(s)?", warningsAndFailures.Length), "Acknowledge Failures", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+            {
+                foreach (DataRow row in warningsAndFailures)
+                {
+                    Guid jobID = (Guid)row["job_id"];
+                    int instanceID = (int)row["InstanceID"];
+                    AcknowledgeJobErrors(instanceID, jobID, false);
+                }
+                RefreshData();
+            }
         }
     }
 }
