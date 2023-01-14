@@ -9,7 +9,8 @@ namespace DBADashGUI
             Critical = 1,
             Warning = 2,
             NA = 3,
-            OK = 4
+            OK = 4,
+            Acknowledged = 5
         }
 
         public static Color GetStatusColour(DBADashStatusEnum status)
@@ -29,6 +30,10 @@ namespace DBADashGUI
             else if (status == DBADashStatusEnum.OK)
             {
                 return DashColors.Success;
+            }
+            else if (status == DBADashStatusEnum.Acknowledged)
+            {
+                return DashColors.BlueLight;
             }
             return DashColors.RedPale;
         }

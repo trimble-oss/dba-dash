@@ -118,7 +118,6 @@
     <Build Include="dbo\Tables\Drives.sql" />
     <Build Include="dbo\Tables\DriveSnapshot.sql" />
     <Build Include="dbo\Tables\Backups.sql" />
-    <Build Include="dbo\Tables\AgentJobs.sql" />
     <Build Include="dbo\Tables\LogRestores.sql" />
     <Build Include="dbo\Tables\DriveThresholds.sql" />
     <Build Include="dbo\Views\BackupStatus.sql" />
@@ -127,7 +126,6 @@
     <Build Include="dbo\Stored Procedures\Instance_Upd.sql" />
     <Build Include="dbo\Stored Procedures\Drives_Upd.sql" />
     <Build Include="dbo\Stored Procedures\Backups_Upd.sql" />
-    <Build Include="dbo\Stored Procedures\AgentJobs_Upd.sql" />
     <Build Include="dbo\Stored Procedures\LogRestores_Upd.sql" />
     <Build Include="dbo\User Defined Types\Databases.sql" />
     <Build Include="dbo\User Defined Types\Drives.sql" />
@@ -699,6 +697,7 @@
     <Build Include="DBADash\Stored Procedures\User_TimeZone_Upd.sql" />
     <Build Include="dbo\Stored Procedures\JobTimeline_Get.sql" />
     <Build Include="dbo\Stored Procedures\JobCategories_Get.sql" />
+    <Build Include="dbo\Stored Procedures\JobErrorAck.sql" />
   </ItemGroup>
   <ItemGroup>
     <PostDeploy Include="Script.PostDeployment1.sql" />

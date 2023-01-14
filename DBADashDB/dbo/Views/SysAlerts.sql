@@ -34,4 +34,4 @@ SELECT I.InstanceID,
         I.ShowInSummary
 FROM dbo.Alerts A 
 JOIN dbo.Instances I ON A.InstanceID = I.InstanceID
-LEFT JOIN dbo.AgentJobs J ON J.InstanceID = I.InstanceID AND J.job_id = A.job_id
+LEFT JOIN dbo.Jobs J ON J.InstanceID = I.InstanceID AND J.job_id = A.job_id

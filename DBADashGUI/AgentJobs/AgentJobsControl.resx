@@ -57,6 +57,9 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <metadata name="colHistory.UserAddedColumn" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
+    <value>True</value>
+  </metadata>
   <metadata name="Instance.UserAddedColumn" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
     <value>True</value>
   </metadata>
@@ -78,10 +81,16 @@
   <metadata name="TimeSinceLastFail.UserAddedColumn" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
     <value>True</value>
   </metadata>
+  <metadata name="StepLastFailed.UserAddedColumn" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
+    <value>True</value>
+  </metadata>
   <metadata name="LastSucceeded.UserAddedColumn" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
     <value>True</value>
   </metadata>
   <metadata name="TimeSinceLastSucceeded.UserAddedColumn" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
+    <value>True</value>
+  </metadata>
+  <metadata name="colAckDate.UserAddedColumn" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
     <value>True</value>
   </metadata>
   <metadata name="FailCount24Hrs.UserAddedColumn" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
@@ -120,12 +129,24 @@
   <metadata name="Configure.UserAddedColumn" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
     <value>True</value>
   </metadata>
-  <metadata name="colHistory.UserAddedColumn" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
-    <value>True</value>
-  </metadata>
   <metadata name="tsJobs.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
     <value>17, 17</value>
   </metadata>
+  <assembly alias="System.Drawing" name="System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
+  <data name="statusFilterToolStrip1.Image" type="System.Drawing.Bitmap, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+    <value>
+        iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8
+        YQUAAAAJcEhZcwAAEnQAABJ0Ad5mH3gAAAHbSURBVDhPjZK9SwJxHMbvT6m9SYKWs8EabogKc1CijLpB
+        HCKkLE6pqJBeDSsqzV6Iiny7osFBe6FwKiFoMGgqSIgg3Bz95vPr7tK7hr7wLMc9n+/zfO84/VyFT6NP
+        a7ulj+UQQV+5INPzdbh0lz2JKq8ZJ70r84VQpPw0JlG8s4eCphamdXcz01mgmwryOL3cbJezWZlXbD8D
+        89vKeuXc5qAwb6Gca5heZxaoOB+kz9sler8M0P2Bm/a8rZRZ66XiXahSB8HmtKOf9iyCZlQFgCqAjqR2
+        BkESZmadq7GxWW/WA1QIkqAOuwkOhs6IDUOmb0jrX3sDKLcjMgjq4CY4LIdL48Xa7bEOqwEgB7rqUuAZ
+        vo4GUM0QYKikAhAZJhUAaQCfvEWNNjNNxDfq5IrMseeNVg+5whmaiN3XCc99yfwvwHO8aoCoAL3Zc5T7
+        BUipw5J5xEH2xdF/A+zzMTIPB0lK5m84fyoRFbenqckpGFL8BcD2pv5JEjfT5E/mB9i/4JP3y21eJ5nE
+        TmMVndk0OEuCFEH8R2bGTMkXvC8VqQh+kSVBHQ2kGBEbm2GWEg+lqbPHBsX+MwxSTYI6uAmLr1SA0Bmx
+        sdlgrh3cBIfF12GqXhrCwbTO2nDcNxpvR7NQRXnOAAAAAElFTkSuQmCC
+</value>
+  </data>
   <metadata name="colRunDateTime.UserAddedColumn" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
     <value>True</value>
   </metadata>

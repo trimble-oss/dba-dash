@@ -28,41 +28,17 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(AgentJobsControl));
             this.dgvJobs = new System.Windows.Forms.DataGridView();
-            this.Instance = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.name = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colEnabled = new System.Windows.Forms.DataGridViewCheckBoxColumn();
-            this.Description = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.LastFail = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.IsLastFail = new System.Windows.Forms.DataGridViewCheckBoxColumn();
-            this.TimeSinceLastFail = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.LastSucceeded = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.TimeSinceLastSucceeded = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.FailCount24Hrs = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.SucceedCount24Hrs = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.FailCount7Days = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.SucceedCount7Days = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.JobStepFails24Hrs = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.JobStepFails7Days = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.MaxDurationSec = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colMaxDuration = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.AvgDurationSec = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colAvgDuration = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.ConfiguredLevel = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.Configure = new System.Windows.Forms.DataGridViewLinkColumn();
-            this.colHistory = new System.Windows.Forms.DataGridViewLinkColumn();
             this.tsJobs = new System.Windows.Forms.ToolStrip();
             this.tsRefresh = new System.Windows.Forms.ToolStripButton();
             this.tsCopy = new System.Windows.Forms.ToolStripButton();
             this.tsExcel = new System.Windows.Forms.ToolStripButton();
-            this.toolStripFilter = new System.Windows.Forms.ToolStripDropDownButton();
-            this.criticalToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.warningToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.undefinedToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.OKToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.tsConfigure = new System.Windows.Forms.ToolStripDropDownButton();
             this.configureInstanceThresholdsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.configureRootThresholdsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.acknowledgeErrorsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.statusFilterToolStrip1 = new DBADashGUI.StatusFilterToolStrip();
             this.dgvJobHistory = new System.Windows.Forms.DataGridView();
             this.colRunDateTime = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.colStepID = new System.Windows.Forms.DataGridViewTextBoxColumn();
@@ -114,6 +90,31 @@
             this.dataGridViewTextBoxColumn26 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dataGridViewTextBoxColumn27 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dataGridViewTextBoxColumn28 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colHistory = new System.Windows.Forms.DataGridViewLinkColumn();
+            this.Acknowledge = new System.Windows.Forms.DataGridViewLinkColumn();
+            this.Instance = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.name = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colEnabled = new System.Windows.Forms.DataGridViewCheckBoxColumn();
+            this.Description = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.LastFail = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.IsLastFail = new System.Windows.Forms.DataGridViewCheckBoxColumn();
+            this.TimeSinceLastFail = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.StepLastFailed = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.LastSucceeded = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.TimeSinceLastSucceeded = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colAckDate = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.FailCount24Hrs = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.SucceedCount24Hrs = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.FailCount7Days = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.SucceedCount7Days = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.JobStepFails24Hrs = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.JobStepFails7Days = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.MaxDurationSec = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colMaxDuration = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.AvgDurationSec = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colAvgDuration = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.ConfiguredLevel = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.Configure = new System.Windows.Forms.DataGridViewLinkColumn();
             ((System.ComponentModel.ISupportInitialize)(this.dgvJobs)).BeginInit();
             this.tsJobs.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dgvJobHistory)).BeginInit();
@@ -132,6 +133,8 @@
             this.dgvJobs.ClipboardCopyMode = System.Windows.Forms.DataGridViewClipboardCopyMode.EnableAlwaysIncludeHeaderText;
             this.dgvJobs.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.dgvJobs.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
+            this.colHistory,
+            this.Acknowledge,
             this.Instance,
             this.name,
             this.colEnabled,
@@ -139,8 +142,10 @@
             this.LastFail,
             this.IsLastFail,
             this.TimeSinceLastFail,
+            this.StepLastFailed,
             this.LastSucceeded,
             this.TimeSinceLastSucceeded,
+            this.colAckDate,
             this.FailCount24Hrs,
             this.SucceedCount24Hrs,
             this.FailCount7Days,
@@ -152,8 +157,7 @@
             this.AvgDurationSec,
             this.colAvgDuration,
             this.ConfiguredLevel,
-            this.Configure,
-            this.colHistory});
+            this.Configure});
             this.dgvJobs.Dock = System.Windows.Forms.DockStyle.Fill;
             this.dgvJobs.Location = new System.Drawing.Point(0, 0);
             this.dgvJobs.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
@@ -167,210 +171,6 @@
             this.dgvJobs.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.DgvJobs_CellContentClick);
             this.dgvJobs.RowsAdded += new System.Windows.Forms.DataGridViewRowsAddedEventHandler(this.DgvJobs_RowsAdded);
             // 
-            // Instance
-            // 
-            this.Instance.DataPropertyName = "InstanceDisplayName";
-            this.Instance.HeaderText = "Instance";
-            this.Instance.MinimumWidth = 6;
-            this.Instance.Name = "Instance";
-            this.Instance.ReadOnly = true;
-            this.Instance.Width = 90;
-            // 
-            // name
-            // 
-            this.name.DataPropertyName = "name";
-            this.name.HeaderText = "Job Name";
-            this.name.MinimumWidth = 6;
-            this.name.Name = "name";
-            this.name.ReadOnly = true;
-            this.name.Width = 101;
-            // 
-            // colEnabled
-            // 
-            this.colEnabled.DataPropertyName = "enabled";
-            this.colEnabled.HeaderText = "Enabled";
-            this.colEnabled.MinimumWidth = 6;
-            this.colEnabled.Name = "colEnabled";
-            this.colEnabled.ReadOnly = true;
-            this.colEnabled.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
-            this.colEnabled.Width = 125;
-            // 
-            // Description
-            // 
-            this.Description.DataPropertyName = "description";
-            this.Description.HeaderText = "Description";
-            this.Description.MinimumWidth = 6;
-            this.Description.Name = "Description";
-            this.Description.ReadOnly = true;
-            this.Description.Width = 108;
-            // 
-            // LastFail
-            // 
-            this.LastFail.DataPropertyName = "LastFailed";
-            this.LastFail.HeaderText = "Last Failed";
-            this.LastFail.MinimumWidth = 6;
-            this.LastFail.Name = "LastFail";
-            this.LastFail.ReadOnly = true;
-            this.LastFail.Width = 106;
-            // 
-            // IsLastFail
-            // 
-            this.IsLastFail.DataPropertyName = "IsLastFail";
-            this.IsLastFail.HeaderText = "Is Last Fail?";
-            this.IsLastFail.MinimumWidth = 6;
-            this.IsLastFail.Name = "IsLastFail";
-            this.IsLastFail.ReadOnly = true;
-            this.IsLastFail.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
-            this.IsLastFail.Width = 89;
-            // 
-            // TimeSinceLastFail
-            // 
-            this.TimeSinceLastFail.DataPropertyName = "TimeSinceLastFailed";
-            this.TimeSinceLastFail.HeaderText = "Time Since Last Fail";
-            this.TimeSinceLastFail.MinimumWidth = 6;
-            this.TimeSinceLastFail.Name = "TimeSinceLastFail";
-            this.TimeSinceLastFail.ReadOnly = true;
-            this.TimeSinceLastFail.Width = 130;
-            // 
-            // LastSucceeded
-            // 
-            this.LastSucceeded.DataPropertyName = "LastSucceeded";
-            this.LastSucceeded.HeaderText = "Last Succeeded";
-            this.LastSucceeded.MinimumWidth = 6;
-            this.LastSucceeded.Name = "LastSucceeded";
-            this.LastSucceeded.ReadOnly = true;
-            this.LastSucceeded.Width = 127;
-            // 
-            // TimeSinceLastSucceeded
-            // 
-            this.TimeSinceLastSucceeded.DataPropertyName = "TimeSinceLastSucceeded";
-            this.TimeSinceLastSucceeded.HeaderText = "Time Since Last Succeded";
-            this.TimeSinceLastSucceeded.MinimumWidth = 6;
-            this.TimeSinceLastSucceeded.Name = "TimeSinceLastSucceeded";
-            this.TimeSinceLastSucceeded.ReadOnly = true;
-            this.TimeSinceLastSucceeded.Width = 193;
-            // 
-            // FailCount24Hrs
-            // 
-            this.FailCount24Hrs.DataPropertyName = "FailCount24Hrs";
-            this.FailCount24Hrs.HeaderText = "Fail Count (24Hrs)";
-            this.FailCount24Hrs.MinimumWidth = 6;
-            this.FailCount24Hrs.Name = "FailCount24Hrs";
-            this.FailCount24Hrs.ReadOnly = true;
-            this.FailCount24Hrs.Width = 139;
-            // 
-            // SucceedCount24Hrs
-            // 
-            this.SucceedCount24Hrs.DataPropertyName = "SucceedCount24Hrs";
-            this.SucceedCount24Hrs.HeaderText = "Succeed Count (24Hrs)";
-            this.SucceedCount24Hrs.MinimumWidth = 6;
-            this.SucceedCount24Hrs.Name = "SucceedCount24Hrs";
-            this.SucceedCount24Hrs.ReadOnly = true;
-            this.SucceedCount24Hrs.Width = 126;
-            // 
-            // FailCount7Days
-            // 
-            this.FailCount7Days.DataPropertyName = "FailCount7Days";
-            this.FailCount7Days.HeaderText = "Fail Count (7 Days)";
-            this.FailCount7Days.MinimumWidth = 6;
-            this.FailCount7Days.Name = "FailCount7Days";
-            this.FailCount7Days.ReadOnly = true;
-            this.FailCount7Days.Width = 111;
-            // 
-            // SucceedCount7Days
-            // 
-            this.SucceedCount7Days.DataPropertyName = "SucceedCount7Days";
-            this.SucceedCount7Days.HeaderText = "Succeed Count (7 Days)";
-            this.SucceedCount7Days.MinimumWidth = 6;
-            this.SucceedCount7Days.Name = "SucceedCount7Days";
-            this.SucceedCount7Days.ReadOnly = true;
-            this.SucceedCount7Days.Width = 141;
-            // 
-            // JobStepFails24Hrs
-            // 
-            this.JobStepFails24Hrs.DataPropertyName = "JobStepFails24Hrs";
-            this.JobStepFails24Hrs.HeaderText = "Job Step Fails (24Hrs)";
-            this.JobStepFails24Hrs.MinimumWidth = 6;
-            this.JobStepFails24Hrs.Name = "JobStepFails24Hrs";
-            this.JobStepFails24Hrs.ReadOnly = true;
-            this.JobStepFails24Hrs.Width = 119;
-            // 
-            // JobStepFails7Days
-            // 
-            this.JobStepFails7Days.DataPropertyName = "JobStepFails7Days";
-            this.JobStepFails7Days.HeaderText = "Job Step Fails (7 Days)";
-            this.JobStepFails7Days.MinimumWidth = 6;
-            this.JobStepFails7Days.Name = "JobStepFails7Days";
-            this.JobStepFails7Days.ReadOnly = true;
-            this.JobStepFails7Days.Width = 135;
-            // 
-            // MaxDurationSec
-            // 
-            this.MaxDurationSec.DataPropertyName = "MaxDurationSec";
-            this.MaxDurationSec.HeaderText = "Max Duration (sec)";
-            this.MaxDurationSec.MinimumWidth = 6;
-            this.MaxDurationSec.Name = "MaxDurationSec";
-            this.MaxDurationSec.ReadOnly = true;
-            this.MaxDurationSec.Width = 143;
-            // 
-            // colMaxDuration
-            // 
-            this.colMaxDuration.DataPropertyName = "MaxDuration";
-            this.colMaxDuration.HeaderText = "Max Duration";
-            this.colMaxDuration.MinimumWidth = 6;
-            this.colMaxDuration.Name = "colMaxDuration";
-            this.colMaxDuration.ReadOnly = true;
-            this.colMaxDuration.Width = 125;
-            // 
-            // AvgDurationSec
-            // 
-            this.AvgDurationSec.DataPropertyName = "AvgDurationSec";
-            this.AvgDurationSec.HeaderText = "Avg Duration (sec)";
-            this.AvgDurationSec.MinimumWidth = 6;
-            this.AvgDurationSec.Name = "AvgDurationSec";
-            this.AvgDurationSec.ReadOnly = true;
-            this.AvgDurationSec.Width = 142;
-            // 
-            // colAvgDuration
-            // 
-            this.colAvgDuration.DataPropertyName = "AvgDuration";
-            this.colAvgDuration.HeaderText = "Avg Duration";
-            this.colAvgDuration.MinimumWidth = 6;
-            this.colAvgDuration.Name = "colAvgDuration";
-            this.colAvgDuration.ReadOnly = true;
-            this.colAvgDuration.Width = 125;
-            // 
-            // ConfiguredLevel
-            // 
-            this.ConfiguredLevel.DataPropertyName = "ConfiguredLevel";
-            this.ConfiguredLevel.HeaderText = "Configured Level";
-            this.ConfiguredLevel.MinimumWidth = 6;
-            this.ConfiguredLevel.Name = "ConfiguredLevel";
-            this.ConfiguredLevel.ReadOnly = true;
-            this.ConfiguredLevel.Width = 132;
-            // 
-            // Configure
-            // 
-            this.Configure.HeaderText = "Configure";
-            this.Configure.MinimumWidth = 6;
-            this.Configure.Name = "Configure";
-            this.Configure.ReadOnly = true;
-            this.Configure.Resizable = System.Windows.Forms.DataGridViewTriState.True;
-            this.Configure.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
-            this.Configure.Text = "Configure";
-            this.Configure.UseColumnTextForLinkValue = true;
-            this.Configure.Width = 98;
-            // 
-            // colHistory
-            // 
-            this.colHistory.HeaderText = "History";
-            this.colHistory.MinimumWidth = 6;
-            this.colHistory.Name = "colHistory";
-            this.colHistory.ReadOnly = true;
-            this.colHistory.Text = "View History";
-            this.colHistory.UseColumnTextForLinkValue = true;
-            this.colHistory.Width = 58;
-            // 
             // tsJobs
             // 
             this.tsJobs.ImageScalingSize = new System.Drawing.Size(20, 20);
@@ -378,8 +178,8 @@
             this.tsRefresh,
             this.tsCopy,
             this.tsExcel,
-            this.toolStripFilter,
-            this.tsConfigure});
+            this.tsConfigure,
+            this.statusFilterToolStrip1});
             this.tsJobs.Location = new System.Drawing.Point(0, 0);
             this.tsJobs.Name = "tsJobs";
             this.tsJobs.Size = new System.Drawing.Size(2197, 27);
@@ -416,58 +216,13 @@
             this.tsExcel.Text = "Export Excel";
             this.tsExcel.Click += new System.EventHandler(this.TsExcel_Click);
             // 
-            // toolStripFilter
-            // 
-            this.toolStripFilter.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.toolStripFilter.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.criticalToolStripMenuItem,
-            this.warningToolStripMenuItem,
-            this.undefinedToolStripMenuItem,
-            this.OKToolStripMenuItem});
-            this.toolStripFilter.Image = global::DBADashGUI.Properties.Resources.FilterDropdown_16x;
-            this.toolStripFilter.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.toolStripFilter.Name = "toolStripFilter";
-            this.toolStripFilter.Size = new System.Drawing.Size(34, 24);
-            this.toolStripFilter.Text = "Filter";
-            // 
-            // criticalToolStripMenuItem
-            // 
-            this.criticalToolStripMenuItem.CheckOnClick = true;
-            this.criticalToolStripMenuItem.Name = "criticalToolStripMenuItem";
-            this.criticalToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
-            this.criticalToolStripMenuItem.Text = "Critical";
-            this.criticalToolStripMenuItem.Click += new System.EventHandler(this.Status_Selected);
-            // 
-            // warningToolStripMenuItem
-            // 
-            this.warningToolStripMenuItem.CheckOnClick = true;
-            this.warningToolStripMenuItem.Name = "warningToolStripMenuItem";
-            this.warningToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
-            this.warningToolStripMenuItem.Text = "Warning";
-            this.warningToolStripMenuItem.Click += new System.EventHandler(this.Status_Selected);
-            // 
-            // undefinedToolStripMenuItem
-            // 
-            this.undefinedToolStripMenuItem.CheckOnClick = true;
-            this.undefinedToolStripMenuItem.Name = "undefinedToolStripMenuItem";
-            this.undefinedToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
-            this.undefinedToolStripMenuItem.Text = "Undefined";
-            this.undefinedToolStripMenuItem.Click += new System.EventHandler(this.Status_Selected);
-            // 
-            // OKToolStripMenuItem
-            // 
-            this.OKToolStripMenuItem.CheckOnClick = true;
-            this.OKToolStripMenuItem.Name = "OKToolStripMenuItem";
-            this.OKToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
-            this.OKToolStripMenuItem.Text = "OK";
-            this.OKToolStripMenuItem.Click += new System.EventHandler(this.Status_Selected);
-            // 
             // tsConfigure
             // 
             this.tsConfigure.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
             this.tsConfigure.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.configureInstanceThresholdsToolStripMenuItem,
-            this.configureRootThresholdsToolStripMenuItem});
+            this.configureRootThresholdsToolStripMenuItem,
+            this.acknowledgeErrorsToolStripMenuItem});
             this.tsConfigure.Image = global::DBADashGUI.Properties.Resources.SettingsOutline_16x;
             this.tsConfigure.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.tsConfigure.Name = "tsConfigure";
@@ -487,6 +242,34 @@
             this.configureRootThresholdsToolStripMenuItem.Size = new System.Drawing.Size(290, 26);
             this.configureRootThresholdsToolStripMenuItem.Text = "Configure Root Thresholds";
             this.configureRootThresholdsToolStripMenuItem.Click += new System.EventHandler(this.ConfigureRootThresholdsToolStripMenuItem_Click);
+            // 
+            // acknowledgeErrorsToolStripMenuItem
+            // 
+            this.acknowledgeErrorsToolStripMenuItem.Name = "acknowledgeErrorsToolStripMenuItem";
+            this.acknowledgeErrorsToolStripMenuItem.Size = new System.Drawing.Size(290, 26);
+            this.acknowledgeErrorsToolStripMenuItem.Text = "Acknowledge Errors";
+            this.acknowledgeErrorsToolStripMenuItem.Click += new System.EventHandler(this.AcknowledgeErrorsToolStripMenuItem_Click);
+            // 
+            // statusFilterToolStrip1
+            // 
+            this.statusFilterToolStrip1.Acknowledged = true;
+            this.statusFilterToolStrip1.AcknowledgedVisible = true;
+            this.statusFilterToolStrip1.Critical = true;
+            this.statusFilterToolStrip1.CriticalVisible = true;
+            this.statusFilterToolStrip1.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.ImageAndText;
+            this.statusFilterToolStrip1.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.statusFilterToolStrip1.Image = ((System.Drawing.Image)(resources.GetObject("statusFilterToolStrip1.Image")));
+            this.statusFilterToolStrip1.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.statusFilterToolStrip1.NA = true;
+            this.statusFilterToolStrip1.Name = "statusFilterToolStrip1";
+            this.statusFilterToolStrip1.NAVisible = true;
+            this.statusFilterToolStrip1.OK = true;
+            this.statusFilterToolStrip1.OKVisible = true;
+            this.statusFilterToolStrip1.Size = new System.Drawing.Size(67, 24);
+            this.statusFilterToolStrip1.Text = "ALL";
+            this.statusFilterToolStrip1.Warning = true;
+            this.statusFilterToolStrip1.WarningVisible = true;
+            this.statusFilterToolStrip1.UserChangedStatusFilter += new System.EventHandler(this.UserChangedStatusFilter);
             // 
             // dgvJobHistory
             // 
@@ -984,6 +767,237 @@
             this.dataGridViewTextBoxColumn28.Name = "dataGridViewTextBoxColumn28";
             this.dataGridViewTextBoxColumn28.Width = 125;
             // 
+            // colHistory
+            // 
+            this.colHistory.HeaderText = "History";
+            this.colHistory.MinimumWidth = 6;
+            this.colHistory.Name = "colHistory";
+            this.colHistory.ReadOnly = true;
+            this.colHistory.Text = "View History";
+            this.colHistory.UseColumnTextForLinkValue = true;
+            this.colHistory.Width = 58;
+            // 
+            // Acknowledge
+            // 
+            this.Acknowledge.HeaderText = "Acknowledge";
+            this.Acknowledge.MinimumWidth = 6;
+            this.Acknowledge.Name = "Acknowledge";
+            this.Acknowledge.ReadOnly = true;
+            this.Acknowledge.Text = "Acknowledge";
+            this.Acknowledge.Width = 125;
+            // 
+            // Instance
+            // 
+            this.Instance.DataPropertyName = "InstanceDisplayName";
+            this.Instance.HeaderText = "Instance";
+            this.Instance.MinimumWidth = 6;
+            this.Instance.Name = "Instance";
+            this.Instance.ReadOnly = true;
+            this.Instance.Width = 90;
+            // 
+            // name
+            // 
+            this.name.DataPropertyName = "name";
+            this.name.HeaderText = "Job Name";
+            this.name.MinimumWidth = 6;
+            this.name.Name = "name";
+            this.name.ReadOnly = true;
+            this.name.Width = 101;
+            // 
+            // colEnabled
+            // 
+            this.colEnabled.DataPropertyName = "enabled";
+            this.colEnabled.HeaderText = "Enabled";
+            this.colEnabled.MinimumWidth = 6;
+            this.colEnabled.Name = "colEnabled";
+            this.colEnabled.ReadOnly = true;
+            this.colEnabled.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
+            this.colEnabled.Width = 125;
+            // 
+            // Description
+            // 
+            this.Description.DataPropertyName = "description";
+            this.Description.HeaderText = "Description";
+            this.Description.MinimumWidth = 6;
+            this.Description.Name = "Description";
+            this.Description.ReadOnly = true;
+            this.Description.Width = 108;
+            // 
+            // LastFail
+            // 
+            this.LastFail.DataPropertyName = "LastFailed";
+            this.LastFail.HeaderText = "Last Failed";
+            this.LastFail.MinimumWidth = 6;
+            this.LastFail.Name = "LastFail";
+            this.LastFail.ReadOnly = true;
+            this.LastFail.Width = 106;
+            // 
+            // IsLastFail
+            // 
+            this.IsLastFail.DataPropertyName = "IsLastFail";
+            this.IsLastFail.HeaderText = "Is Last Fail?";
+            this.IsLastFail.MinimumWidth = 6;
+            this.IsLastFail.Name = "IsLastFail";
+            this.IsLastFail.ReadOnly = true;
+            this.IsLastFail.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
+            this.IsLastFail.Width = 89;
+            // 
+            // TimeSinceLastFail
+            // 
+            this.TimeSinceLastFail.DataPropertyName = "TimeSinceLastFailed";
+            this.TimeSinceLastFail.HeaderText = "Time Since Last Fail";
+            this.TimeSinceLastFail.MinimumWidth = 6;
+            this.TimeSinceLastFail.Name = "TimeSinceLastFail";
+            this.TimeSinceLastFail.ReadOnly = true;
+            this.TimeSinceLastFail.Width = 130;
+            // 
+            // StepLastFailed
+            // 
+            this.StepLastFailed.DataPropertyName = "StepLastFailed";
+            this.StepLastFailed.HeaderText = "Step Last Failed";
+            this.StepLastFailed.MinimumWidth = 6;
+            this.StepLastFailed.Name = "StepLastFailed";
+            this.StepLastFailed.ReadOnly = true;
+            this.StepLastFailed.Width = 125;
+            // 
+            // LastSucceeded
+            // 
+            this.LastSucceeded.DataPropertyName = "LastSucceeded";
+            this.LastSucceeded.HeaderText = "Last Succeeded";
+            this.LastSucceeded.MinimumWidth = 6;
+            this.LastSucceeded.Name = "LastSucceeded";
+            this.LastSucceeded.ReadOnly = true;
+            this.LastSucceeded.Width = 127;
+            // 
+            // TimeSinceLastSucceeded
+            // 
+            this.TimeSinceLastSucceeded.DataPropertyName = "TimeSinceLastSucceeded";
+            this.TimeSinceLastSucceeded.HeaderText = "Time Since Last Succeded";
+            this.TimeSinceLastSucceeded.MinimumWidth = 6;
+            this.TimeSinceLastSucceeded.Name = "TimeSinceLastSucceeded";
+            this.TimeSinceLastSucceeded.ReadOnly = true;
+            this.TimeSinceLastSucceeded.Width = 193;
+            // 
+            // colAckDate
+            // 
+            this.colAckDate.DataPropertyName = "AckDate";
+            this.colAckDate.HeaderText = "Acknowledged Date";
+            this.colAckDate.MinimumWidth = 6;
+            this.colAckDate.Name = "colAckDate";
+            this.colAckDate.ReadOnly = true;
+            this.colAckDate.Width = 125;
+            // 
+            // FailCount24Hrs
+            // 
+            this.FailCount24Hrs.DataPropertyName = "FailCount24Hrs";
+            this.FailCount24Hrs.HeaderText = "Fail Count (24Hrs)";
+            this.FailCount24Hrs.MinimumWidth = 6;
+            this.FailCount24Hrs.Name = "FailCount24Hrs";
+            this.FailCount24Hrs.ReadOnly = true;
+            this.FailCount24Hrs.Width = 139;
+            // 
+            // SucceedCount24Hrs
+            // 
+            this.SucceedCount24Hrs.DataPropertyName = "SucceedCount24Hrs";
+            this.SucceedCount24Hrs.HeaderText = "Succeed Count (24Hrs)";
+            this.SucceedCount24Hrs.MinimumWidth = 6;
+            this.SucceedCount24Hrs.Name = "SucceedCount24Hrs";
+            this.SucceedCount24Hrs.ReadOnly = true;
+            this.SucceedCount24Hrs.Width = 126;
+            // 
+            // FailCount7Days
+            // 
+            this.FailCount7Days.DataPropertyName = "FailCount7Days";
+            this.FailCount7Days.HeaderText = "Fail Count (7 Days)";
+            this.FailCount7Days.MinimumWidth = 6;
+            this.FailCount7Days.Name = "FailCount7Days";
+            this.FailCount7Days.ReadOnly = true;
+            this.FailCount7Days.Width = 111;
+            // 
+            // SucceedCount7Days
+            // 
+            this.SucceedCount7Days.DataPropertyName = "SucceedCount7Days";
+            this.SucceedCount7Days.HeaderText = "Succeed Count (7 Days)";
+            this.SucceedCount7Days.MinimumWidth = 6;
+            this.SucceedCount7Days.Name = "SucceedCount7Days";
+            this.SucceedCount7Days.ReadOnly = true;
+            this.SucceedCount7Days.Width = 141;
+            // 
+            // JobStepFails24Hrs
+            // 
+            this.JobStepFails24Hrs.DataPropertyName = "JobStepFails24Hrs";
+            this.JobStepFails24Hrs.HeaderText = "Job Step Fails (24Hrs)";
+            this.JobStepFails24Hrs.MinimumWidth = 6;
+            this.JobStepFails24Hrs.Name = "JobStepFails24Hrs";
+            this.JobStepFails24Hrs.ReadOnly = true;
+            this.JobStepFails24Hrs.Width = 119;
+            // 
+            // JobStepFails7Days
+            // 
+            this.JobStepFails7Days.DataPropertyName = "JobStepFails7Days";
+            this.JobStepFails7Days.HeaderText = "Job Step Fails (7 Days)";
+            this.JobStepFails7Days.MinimumWidth = 6;
+            this.JobStepFails7Days.Name = "JobStepFails7Days";
+            this.JobStepFails7Days.ReadOnly = true;
+            this.JobStepFails7Days.Width = 135;
+            // 
+            // MaxDurationSec
+            // 
+            this.MaxDurationSec.DataPropertyName = "MaxDurationSec";
+            this.MaxDurationSec.HeaderText = "Max Duration (sec)";
+            this.MaxDurationSec.MinimumWidth = 6;
+            this.MaxDurationSec.Name = "MaxDurationSec";
+            this.MaxDurationSec.ReadOnly = true;
+            this.MaxDurationSec.Width = 143;
+            // 
+            // colMaxDuration
+            // 
+            this.colMaxDuration.DataPropertyName = "MaxDuration";
+            this.colMaxDuration.HeaderText = "Max Duration";
+            this.colMaxDuration.MinimumWidth = 6;
+            this.colMaxDuration.Name = "colMaxDuration";
+            this.colMaxDuration.ReadOnly = true;
+            this.colMaxDuration.Width = 125;
+            // 
+            // AvgDurationSec
+            // 
+            this.AvgDurationSec.DataPropertyName = "AvgDurationSec";
+            this.AvgDurationSec.HeaderText = "Avg Duration (sec)";
+            this.AvgDurationSec.MinimumWidth = 6;
+            this.AvgDurationSec.Name = "AvgDurationSec";
+            this.AvgDurationSec.ReadOnly = true;
+            this.AvgDurationSec.Width = 142;
+            // 
+            // colAvgDuration
+            // 
+            this.colAvgDuration.DataPropertyName = "AvgDuration";
+            this.colAvgDuration.HeaderText = "Avg Duration";
+            this.colAvgDuration.MinimumWidth = 6;
+            this.colAvgDuration.Name = "colAvgDuration";
+            this.colAvgDuration.ReadOnly = true;
+            this.colAvgDuration.Width = 125;
+            // 
+            // ConfiguredLevel
+            // 
+            this.ConfiguredLevel.DataPropertyName = "ConfiguredLevel";
+            this.ConfiguredLevel.HeaderText = "Configured Level";
+            this.ConfiguredLevel.MinimumWidth = 6;
+            this.ConfiguredLevel.Name = "ConfiguredLevel";
+            this.ConfiguredLevel.ReadOnly = true;
+            this.ConfiguredLevel.Width = 132;
+            // 
+            // Configure
+            // 
+            this.Configure.HeaderText = "Configure";
+            this.Configure.MinimumWidth = 6;
+            this.Configure.Name = "Configure";
+            this.Configure.ReadOnly = true;
+            this.Configure.Resizable = System.Windows.Forms.DataGridViewTriState.True;
+            this.Configure.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
+            this.Configure.Text = "Configure";
+            this.Configure.UseColumnTextForLinkValue = true;
+            this.Configure.Width = 98;
+            // 
             // AgentJobsControl
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
@@ -1014,11 +1028,6 @@
 
         private System.Windows.Forms.DataGridView dgvJobs;
         private System.Windows.Forms.ToolStrip tsJobs;
-        private System.Windows.Forms.ToolStripDropDownButton toolStripFilter;
-        private System.Windows.Forms.ToolStripMenuItem criticalToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem warningToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem undefinedToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem OKToolStripMenuItem;
         private System.Windows.Forms.ToolStripDropDownButton tsConfigure;
         private System.Windows.Forms.ToolStripMenuItem configureInstanceThresholdsToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem configureRootThresholdsToolStripMenuItem;
@@ -1076,6 +1085,10 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn colRetries;
         private System.Windows.Forms.DataGridViewLinkColumn colMessage;
         private System.Windows.Forms.DataGridViewLinkColumn colViewSteps;
+        private StatusFilterToolStrip statusFilterToolStrip1;
+        private System.Windows.Forms.ToolStripMenuItem acknowledgeErrorsToolStripMenuItem;
+        private System.Windows.Forms.DataGridViewLinkColumn colHistory;
+        private System.Windows.Forms.DataGridViewLinkColumn Acknowledge;
         private System.Windows.Forms.DataGridViewTextBoxColumn Instance;
         private System.Windows.Forms.DataGridViewTextBoxColumn name;
         private System.Windows.Forms.DataGridViewCheckBoxColumn colEnabled;
@@ -1083,8 +1096,10 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn LastFail;
         private System.Windows.Forms.DataGridViewCheckBoxColumn IsLastFail;
         private System.Windows.Forms.DataGridViewTextBoxColumn TimeSinceLastFail;
+        private System.Windows.Forms.DataGridViewTextBoxColumn StepLastFailed;
         private System.Windows.Forms.DataGridViewTextBoxColumn LastSucceeded;
         private System.Windows.Forms.DataGridViewTextBoxColumn TimeSinceLastSucceeded;
+        private System.Windows.Forms.DataGridViewTextBoxColumn colAckDate;
         private System.Windows.Forms.DataGridViewTextBoxColumn FailCount24Hrs;
         private System.Windows.Forms.DataGridViewTextBoxColumn SucceedCount24Hrs;
         private System.Windows.Forms.DataGridViewTextBoxColumn FailCount7Days;
@@ -1097,6 +1112,5 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn colAvgDuration;
         private System.Windows.Forms.DataGridViewTextBoxColumn ConfiguredLevel;
         private System.Windows.Forms.DataGridViewLinkColumn Configure;
-        private System.Windows.Forms.DataGridViewLinkColumn colHistory;
     }
 }

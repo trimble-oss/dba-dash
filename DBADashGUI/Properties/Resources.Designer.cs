@@ -508,5 +508,32 @@ namespace DBADashGUI.Properties {
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
+
+        internal static System.Drawing.Bitmap FilterCircle_16x_Yellow
+        {
+            get
+            {
+                object obj = ResourceManager.GetObject("FilterCircle_16x_Yellow", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+
+        internal static System.Drawing.Bitmap FilterCircle_16x_Green
+        {
+            get
+            {
+                object obj = ResourceManager.GetObject("FilterCircle_16x_Green", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+
+        internal static System.Drawing.Bitmap FilterCircle_16x_Colors
+        {
+            get
+            {
+                object obj = ResourceManager.GetObject("FilterCircle_16x_Colors", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
     }
 }
