@@ -94,7 +94,7 @@ namespace DBADashGUI
                 cn.Open();
 
                 cmd.Parameters.AddIfGreaterThanZero("InstanceID", instanceID);
-                cmd.Parameters.AddStringIfNotNullOrEmpty("Instance", instance);
+                cmd.Parameters.AddStringIfNotNullOrEmpty("InstanceGroupName", instance);
                 cmd.Parameters.AddWithValue("FromDateUTC", FromDate);
                 cmd.Parameters.AddWithValue("ToDateUTC", ToDate);
                 cmd.Parameters.AddWithValue("UTCOffset", DateHelper.UtcOffset);
