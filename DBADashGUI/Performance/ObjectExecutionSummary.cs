@@ -187,7 +187,7 @@ namespace DBADashGUI.Performance
             {
                 cn.Open();
 
-                if (cmd.Parameters.AddIfGreaterThanZero("InstanceID", InstanceID) == null && cmd.Parameters.AddStringIfNotNullOrEmpty("Instance", Instance) == null)
+                if (cmd.Parameters.AddIfGreaterThanZero("InstanceID", InstanceID) == null && cmd.Parameters.AddStringIfNotNullOrEmpty("InstanceGroupName", Instance) == null)
                 {
                     throw new Exception("Instance not provided to Object Execution Summary");
                 }

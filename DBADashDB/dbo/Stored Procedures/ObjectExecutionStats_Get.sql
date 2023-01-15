@@ -1,5 +1,6 @@
 ﻿CREATE PROC dbo.ObjectExecutionStats_Get(
 	@Instance SYSNAME=NULL,
+	@InstanceGroupName SYSNAME=NULL,
 	@DatabaseID INT=NULL,
 	@ObjectName SYSNAME=NULL,
 	@SchemaName SYSNAME=NULL,
@@ -47,7 +48,7 @@ CREATE TABLE #results(
 	TotalMeasure DECIMAL(29, 9)
 );
 
-IF @Instance IS NULL AND @InstanceID IS NULL
+IF @Instance IS NULL AND @InstanceID IS NULL AND @InstanceGroupName IS NULL
 BEGIN
 	RAISERROR('Instance not specified',11,1);
 	RETURN;
@@ -107,6 +108,7 @@ WITH agg AS (
 		JOIN dbo.Instances I ON D.InstanceID = I.InstanceID AND OES.InstanceID = I.InstanceID
 	WHERE D.IsActive=1
 	' + CASE WHEN @Instance IS NOT NULL THEN N'AND I.Instance = @Instance' ELSE '' END + N'
+	' + CASE WHEN @InstanceGroupName IS NOT NULL THEN N'AND I.InstanceGroupName = @InstanceGroupName' ELSE '' END + N'
 	' + CASE WHEN @InstanceID IS NOT NULL THEN N'AND I.InstanceID = @InstanceID' ELSE '' END + N'
 	AND OES.SnapshotDate >= @FromDate 
 	AND OES.SnapshotDate< @ToDate
@@ -162,6 +164,7 @@ BEGIN
 	    TotalMeasure
 	)
 	EXEC sp_executesql @SQL,N'@Instance SYSNAME,
+							@InstanceGroupName SYSNAME,
 							@DatabaseID INT,
 							@FromDate DATETIME2(3),
 							@ToDate DATETIME2(3),
@@ -172,6 +175,7 @@ BEGIN
 							@ObjectID BIGINT,
 							@DateGroupingMin INT',
 							@Instance,
+							@InstanceGroupName,
 							@DatabaseID,
 							@FromDateUTC,
 							@ToDateUTC,
@@ -217,6 +221,7 @@ BEGIN;
 	)
 	EXEC sp_executesql @DateGroupSQL,
 						N'@Instance SYSNAME,
+						@InstanceGroupName SYSNAME,
 						@DatabaseID INT,
 						@FromDateUTC DATETIME2(3),
 						@ToDateUTC DATETIME2(3),
@@ -227,6 +232,7 @@ BEGIN;
 						@ObjectID BIGINT,
 						@DateGroupingMin INT',
 						@Instance,
+						@InstanceGroupName,
 						@DatabaseID,
 						@FromDateUTC,
 						@ToDateUTC,

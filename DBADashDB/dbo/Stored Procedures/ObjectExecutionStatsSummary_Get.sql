@@ -4,6 +4,7 @@
 		@CompareFrom DATETIME2(3)=NULL,
 		@CompareTo DATETIME2(3)=NULL,
 		@Instance SYSNAME=NULL,
+		@InstanceGroupName SYSNAME=NULL,
 		@InstanceID INT=NULL,
 		@DatabaseID INT=NULL,
 		@Types VARCHAR(200)=NULL, -- 'P,FN,TR,TA,PC,X'
@@ -84,6 +85,7 @@ WITH base AS (
 	JOIN dbo.ObjectType OT ON OT.ObjectType = O.ObjectType
 	WHERE OES.SnapshotDate>=@FromDate
 	AND OES.SnapshotDate<@ToDate
+	' + CASE WHEN @InstanceGroupName IS NULL THEN '' ELSE 'AND I.InstanceGroupName=@InstanceGroupName' END + '
 	' + CASE WHEN @Instance IS NULL THEN '' ELSE 'AND I.Instance=@Instance' END + '
 	' + CASE WHEN @InstanceID IS NULL THEN '' ELSE 'AND I.InstanceID=@InstanceID' END + '
 	' + CASE WHEN @Types IS NULL THEN '' ELSE 'AND EXISTS(SELECT 1 FROM STRING_SPLIT(@Types,'','') ss WHERE ss.Value =  O.ObjectType)' END + '
@@ -125,6 +127,7 @@ compare as(
 	JOIN dbo.ObjectType OT ON OT.ObjectType = O.ObjectType
 	WHERE OES.SnapshotDate>=@CompareFrom
 	AND OES.SnapshotDate<@CompareTo
+	' + CASE WHEN @InstanceGroupName IS NULL THEN '' ELSE 'AND I.InstanceGroupName=@InstanceGroupName' END + '
 	' + CASE WHEN @Instance IS NULL THEN '' ELSE 'AND I.Instance=@Instance' END + '
 	' + CASE WHEN @InstanceID IS NULL THEN '' ELSE 'AND I.InstanceID=@InstanceID' END + '
 	' + CASE WHEN @Types IS NULL THEN '' ELSE 'AND EXISTS(SELECT 1 FROM STRING_SPLIT(@Types,'','') ss WHERE ss.Value =  O.ObjectType)' END + '
@@ -184,6 +187,7 @@ IF @Debug=1
 
 EXEC sp_executesql @SQL,N'@InstanceID INT,
 						@Instance SYSNAME,
+						@InstanceGroupName SYSNAME,
 						@FromDate DATETIME2(3),
 						@ToDate DATETIME2(3),
 						@CompareFrom DATETIME2(3),
@@ -194,6 +198,7 @@ EXEC sp_executesql @SQL,N'@InstanceID INT,
 						@UTCOffset INT',
 						@InstanceID,
 						@Instance,
+						@InstanceGroupName,
 						@FromDate,
 						@ToDate,
 						@CompareFrom,
