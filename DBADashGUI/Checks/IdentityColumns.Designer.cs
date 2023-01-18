@@ -28,17 +28,14 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(IdentityColumns));
             this.dgv = new System.Windows.Forms.DataGridView();
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
             this.tsRefresh = new System.Windows.Forms.ToolStripButton();
             this.tsColumns = new System.Windows.Forms.ToolStripButton();
             this.tsCopy = new System.Windows.Forms.ToolStripButton();
             this.tsExcel = new System.Windows.Forms.ToolStripButton();
-            this.tsStatus = new System.Windows.Forms.ToolStripDropDownButton();
-            this.criticalToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.warningToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.undefinedToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.oKToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.statusFilterToolStrip1 = new DBADashGUI.StatusFilterToolStrip();
             ((System.ComponentModel.ISupportInitialize)(this.dgv)).BeginInit();
             this.toolStrip1.SuspendLayout();
             this.SuspendLayout();
@@ -65,7 +62,7 @@
             this.toolStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
             this.toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.tsRefresh,
-            this.tsStatus,
+            this.statusFilterToolStrip1,
             this.tsColumns,
             this.tsCopy,
             this.tsExcel});
@@ -115,55 +112,26 @@
             this.tsExcel.Text = "Export to Excel";
             this.tsExcel.Click += new System.EventHandler(this.TsExcel_Click);
             // 
-            // tsStatus
+            // statusFilterToolStrip1
             // 
-            this.tsStatus.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.tsStatus.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.criticalToolStripMenuItem,
-            this.warningToolStripMenuItem,
-            this.undefinedToolStripMenuItem,
-            this.oKToolStripMenuItem});
-            this.tsStatus.Image = global::DBADashGUI.Properties.Resources.FilterDropdown_16x;
-            this.tsStatus.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsStatus.Name = "tsStatus";
-            this.tsStatus.Size = new System.Drawing.Size(34, 24);
-            this.tsStatus.Text = "Status Filter";
-            // 
-            // criticalToolStripMenuItem
-            // 
-            this.criticalToolStripMenuItem.Checked = true;
-            this.criticalToolStripMenuItem.CheckOnClick = true;
-            this.criticalToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.criticalToolStripMenuItem.Name = "criticalToolStripMenuItem";
-            this.criticalToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
-            this.criticalToolStripMenuItem.Text = "Critical";
-            this.criticalToolStripMenuItem.Click += new System.EventHandler(this.Filter_Click);
-            // 
-            // warningToolStripMenuItem
-            // 
-            this.warningToolStripMenuItem.Checked = true;
-            this.warningToolStripMenuItem.CheckOnClick = true;
-            this.warningToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.warningToolStripMenuItem.Name = "warningToolStripMenuItem";
-            this.warningToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
-            this.warningToolStripMenuItem.Text = "Warning";
-            this.warningToolStripMenuItem.Click += new System.EventHandler(this.Filter_Click);
-            // 
-            // undefinedToolStripMenuItem
-            // 
-            this.undefinedToolStripMenuItem.CheckOnClick = true;
-            this.undefinedToolStripMenuItem.Name = "undefinedToolStripMenuItem";
-            this.undefinedToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
-            this.undefinedToolStripMenuItem.Text = "Undefined";
-            this.undefinedToolStripMenuItem.Click += new System.EventHandler(this.Filter_Click);
-            // 
-            // oKToolStripMenuItem
-            // 
-            this.oKToolStripMenuItem.CheckOnClick = true;
-            this.oKToolStripMenuItem.Name = "oKToolStripMenuItem";
-            this.oKToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
-            this.oKToolStripMenuItem.Text = "OK";
-            this.oKToolStripMenuItem.Click += new System.EventHandler(this.Filter_Click);
+            this.statusFilterToolStrip1.Acknowledged = true;
+            this.statusFilterToolStrip1.AcknowledgedVisible = false;
+            this.statusFilterToolStrip1.Critical = true;
+            this.statusFilterToolStrip1.CriticalVisible = true;
+            this.statusFilterToolStrip1.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.ImageAndText;
+            this.statusFilterToolStrip1.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.statusFilterToolStrip1.Image = ((System.Drawing.Image)(resources.GetObject("statusFilterToolStrip1.Image")));
+            this.statusFilterToolStrip1.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.statusFilterToolStrip1.NA = true;
+            this.statusFilterToolStrip1.Name = "statusFilterToolStrip1";
+            this.statusFilterToolStrip1.NAVisible = true;
+            this.statusFilterToolStrip1.OK = true;
+            this.statusFilterToolStrip1.OKVisible = true;
+            this.statusFilterToolStrip1.Size = new System.Drawing.Size(67, 24);
+            this.statusFilterToolStrip1.Text = "ALL";
+            this.statusFilterToolStrip1.Warning = true;
+            this.statusFilterToolStrip1.WarningVisible = true;
+            this.statusFilterToolStrip1.UserChangedStatusFilter += new System.EventHandler(this.Filter_Click);
             // 
             // IdentityColumns
             // 
@@ -189,10 +157,6 @@
         private System.Windows.Forms.ToolStripButton tsColumns;
         private System.Windows.Forms.ToolStripButton tsExcel;
         private System.Windows.Forms.ToolStripButton tsCopy;
-        private System.Windows.Forms.ToolStripDropDownButton tsStatus;
-        private System.Windows.Forms.ToolStripMenuItem criticalToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem warningToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem undefinedToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem oKToolStripMenuItem;
+        private StatusFilterToolStrip statusFilterToolStrip1;
     }
 }

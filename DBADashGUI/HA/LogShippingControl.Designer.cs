@@ -31,37 +31,8 @@
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle3 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(LogShippingControl));
             this.dgvLogShipping = new System.Windows.Forms.DataGridView();
-            this.toolStrip1 = new System.Windows.Forms.ToolStrip();
-            this.tsRefresh = new System.Windows.Forms.ToolStripButton();
-            this.tsCopy = new System.Windows.Forms.ToolStripButton();
-            this.tsExcel = new System.Windows.Forms.ToolStripButton();
-            this.tsConfigure = new System.Windows.Forms.ToolStripDropDownButton();
-            this.configureInstanceThresholdsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.configureRootThresholdsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.tsBack = new System.Windows.Forms.ToolStripButton();
-            this.dgvSummary = new System.Windows.Forms.DataGridView();
-            this.splitContainer1 = new System.Windows.Forms.SplitContainer();
-            this.toolStrip2 = new System.Windows.Forms.ToolStrip();
-            this.tsCopyDetail = new System.Windows.Forms.ToolStripButton();
-            this.tsExportExcelDetail = new System.Windows.Forms.ToolStripButton();
-            this.toolStripDropDownButton1 = new System.Windows.Forms.ToolStripDropDownButton();
-            this.tsCritical = new System.Windows.Forms.ToolStripMenuItem();
-            this.tsWarning = new System.Windows.Forms.ToolStripMenuItem();
-            this.tsNA = new System.Windows.Forms.ToolStripMenuItem();
-            this.tsOK = new System.Windows.Forms.ToolStripMenuItem();
-            this.dataGridViewTextBoxColumn1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.dataGridViewTextBoxColumn2 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.dataGridViewTextBoxColumn3 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.dataGridViewTextBoxColumn4 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.dataGridViewTextBoxColumn5 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.dataGridViewTextBoxColumn6 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.dataGridViewTextBoxColumn7 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.dataGridViewTextBoxColumn8 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.dataGridViewTextBoxColumn9 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.dataGridViewTextBoxColumn10 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.dataGridViewTextBoxColumn11 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.dataGridViewTextBoxColumn12 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Instance = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Database = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Status = new System.Windows.Forms.DataGridViewTextBoxColumn();
@@ -75,6 +46,32 @@
             this.LastFile = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.ThresholdConfiguredLevel = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Configure = new System.Windows.Forms.DataGridViewLinkColumn();
+            this.toolStrip1 = new System.Windows.Forms.ToolStrip();
+            this.tsRefresh = new System.Windows.Forms.ToolStripButton();
+            this.tsCopy = new System.Windows.Forms.ToolStripButton();
+            this.tsExcel = new System.Windows.Forms.ToolStripButton();
+            this.tsConfigure = new System.Windows.Forms.ToolStripDropDownButton();
+            this.configureInstanceThresholdsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.configureRootThresholdsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.tsBack = new System.Windows.Forms.ToolStripButton();
+            this.dgvSummary = new System.Windows.Forms.DataGridView();
+            this.splitContainer1 = new System.Windows.Forms.SplitContainer();
+            this.toolStrip2 = new System.Windows.Forms.ToolStrip();
+            this.tsCopyDetail = new System.Windows.Forms.ToolStripButton();
+            this.tsExportExcelDetail = new System.Windows.Forms.ToolStripButton();
+            this.dataGridViewTextBoxColumn1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.dataGridViewTextBoxColumn2 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.dataGridViewTextBoxColumn3 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.dataGridViewTextBoxColumn4 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.dataGridViewTextBoxColumn5 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.dataGridViewTextBoxColumn6 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.dataGridViewTextBoxColumn7 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.dataGridViewTextBoxColumn8 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.dataGridViewTextBoxColumn9 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.dataGridViewTextBoxColumn10 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.dataGridViewTextBoxColumn11 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.dataGridViewTextBoxColumn12 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.statusFilterToolStrip1 = new DBADashGUI.StatusFilterToolStrip();
             ((System.ComponentModel.ISupportInitialize)(this.dgvLogShipping)).BeginInit();
             this.toolStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dgvSummary)).BeginInit();
@@ -142,6 +139,126 @@
             this.dgvLogShipping.TabIndex = 0;
             this.dgvLogShipping.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.DgvLogShipping_CellContentClick);
             this.dgvLogShipping.RowsAdded += new System.Windows.Forms.DataGridViewRowsAddedEventHandler(this.DgvLogShipping_RowsAdded);
+            // 
+            // Instance
+            // 
+            this.Instance.DataPropertyName = "InstanceDisplayName";
+            this.Instance.HeaderText = "Instance";
+            this.Instance.MinimumWidth = 6;
+            this.Instance.Name = "Instance";
+            this.Instance.ReadOnly = true;
+            this.Instance.Width = 90;
+            // 
+            // Database
+            // 
+            this.Database.DataPropertyName = "name";
+            this.Database.HeaderText = "Database";
+            this.Database.MinimumWidth = 6;
+            this.Database.Name = "Database";
+            this.Database.ReadOnly = true;
+            this.Database.Width = 98;
+            // 
+            // Status
+            // 
+            this.Status.DataPropertyName = "StatusDescription";
+            this.Status.HeaderText = "Status";
+            this.Status.MinimumWidth = 6;
+            this.Status.Name = "Status";
+            this.Status.ReadOnly = true;
+            this.Status.Width = 77;
+            // 
+            // RestoreDate
+            // 
+            this.RestoreDate.DataPropertyName = "restore_date";
+            this.RestoreDate.HeaderText = "Restore Date";
+            this.RestoreDate.MinimumWidth = 6;
+            this.RestoreDate.Name = "RestoreDate";
+            this.RestoreDate.ReadOnly = true;
+            this.RestoreDate.Width = 111;
+            // 
+            // BackupStartDate
+            // 
+            this.BackupStartDate.DataPropertyName = "backup_start_date";
+            this.BackupStartDate.HeaderText = "Backup Start Date";
+            this.BackupStartDate.MinimumWidth = 6;
+            this.BackupStartDate.Name = "BackupStartDate";
+            this.BackupStartDate.ReadOnly = true;
+            this.BackupStartDate.Width = 112;
+            // 
+            // TimeSinceLast
+            // 
+            this.TimeSinceLast.DataPropertyName = "TimeSinceLast";
+            this.TimeSinceLast.HeaderText = "Time Since Last";
+            this.TimeSinceLast.MinimumWidth = 6;
+            this.TimeSinceLast.Name = "TimeSinceLast";
+            this.TimeSinceLast.ReadOnly = true;
+            this.TimeSinceLast.Width = 127;
+            // 
+            // LatencyOfLast
+            // 
+            this.LatencyOfLast.DataPropertyName = "LatencyOfLast";
+            this.LatencyOfLast.HeaderText = "Latency of Last";
+            this.LatencyOfLast.MinimumWidth = 6;
+            this.LatencyOfLast.Name = "LatencyOfLast";
+            this.LatencyOfLast.ReadOnly = true;
+            this.LatencyOfLast.Width = 99;
+            // 
+            // TotalTimeBehind
+            // 
+            this.TotalTimeBehind.DataPropertyName = "TotalTimeBehind";
+            this.TotalTimeBehind.HeaderText = "Total Time Behind";
+            this.TotalTimeBehind.MinimumWidth = 6;
+            this.TotalTimeBehind.Name = "TotalTimeBehind";
+            this.TotalTimeBehind.ReadOnly = true;
+            this.TotalTimeBehind.Width = 139;
+            // 
+            // SnapshotAge
+            // 
+            this.SnapshotAge.DataPropertyName = "SnapshotAge";
+            this.SnapshotAge.HeaderText = "Snapshot Age";
+            this.SnapshotAge.MinimumWidth = 6;
+            this.SnapshotAge.Name = "SnapshotAge";
+            this.SnapshotAge.ReadOnly = true;
+            this.SnapshotAge.Width = 116;
+            // 
+            // SnapshotDate
+            // 
+            this.SnapshotDate.DataPropertyName = "SnapshotDate";
+            this.SnapshotDate.HeaderText = "Snapshot Date";
+            this.SnapshotDate.MinimumWidth = 6;
+            this.SnapshotDate.Name = "SnapshotDate";
+            this.SnapshotDate.ReadOnly = true;
+            this.SnapshotDate.Width = 143;
+            // 
+            // LastFile
+            // 
+            this.LastFile.DataPropertyName = "last_file";
+            this.LastFile.HeaderText = "Last File";
+            this.LastFile.MinimumWidth = 6;
+            this.LastFile.Name = "LastFile";
+            this.LastFile.ReadOnly = true;
+            this.LastFile.Width = 64;
+            // 
+            // ThresholdConfiguredLevel
+            // 
+            this.ThresholdConfiguredLevel.DataPropertyName = "ThresholdConfiguredLevel";
+            this.ThresholdConfiguredLevel.HeaderText = "Threshold Configured Level";
+            this.ThresholdConfiguredLevel.MinimumWidth = 6;
+            this.ThresholdConfiguredLevel.Name = "ThresholdConfiguredLevel";
+            this.ThresholdConfiguredLevel.ReadOnly = true;
+            this.ThresholdConfiguredLevel.Width = 163;
+            // 
+            // Configure
+            // 
+            this.Configure.HeaderText = "Configure";
+            this.Configure.MinimumWidth = 6;
+            this.Configure.Name = "Configure";
+            this.Configure.ReadOnly = true;
+            this.Configure.Resizable = System.Windows.Forms.DataGridViewTriState.True;
+            this.Configure.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
+            this.Configure.Text = "Configure";
+            this.Configure.UseColumnTextForLinkValue = true;
+            this.Configure.Width = 98;
             // 
             // toolStrip1
             // 
@@ -270,7 +387,7 @@
             this.toolStrip2.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.tsCopyDetail,
             this.tsExportExcelDetail,
-            this.toolStripDropDownButton1});
+            this.statusFilterToolStrip1});
             this.toolStrip2.Location = new System.Drawing.Point(0, 0);
             this.toolStrip2.Name = "toolStrip2";
             this.toolStrip2.Size = new System.Drawing.Size(698, 27);
@@ -296,52 +413,6 @@
             this.tsExportExcelDetail.Size = new System.Drawing.Size(29, 24);
             this.tsExportExcelDetail.Text = "Export Excel";
             this.tsExportExcelDetail.Click += new System.EventHandler(this.TsExportExcelDetail_Click);
-            // 
-            // toolStripDropDownButton1
-            // 
-            this.toolStripDropDownButton1.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.toolStripDropDownButton1.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.tsCritical,
-            this.tsWarning,
-            this.tsNA,
-            this.tsOK});
-            this.toolStripDropDownButton1.Image = global::DBADashGUI.Properties.Resources.FilterDropdown_16x;
-            this.toolStripDropDownButton1.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.toolStripDropDownButton1.Name = "toolStripDropDownButton1";
-            this.toolStripDropDownButton1.Size = new System.Drawing.Size(34, 24);
-            this.toolStripDropDownButton1.Text = "Filter";
-            // 
-            // tsCritical
-            // 
-            this.tsCritical.CheckOnClick = true;
-            this.tsCritical.Name = "tsCritical";
-            this.tsCritical.Size = new System.Drawing.Size(161, 26);
-            this.tsCritical.Text = "Critical";
-            this.tsCritical.Click += new System.EventHandler(this.TsFilter_Click);
-            // 
-            // tsWarning
-            // 
-            this.tsWarning.CheckOnClick = true;
-            this.tsWarning.Name = "tsWarning";
-            this.tsWarning.Size = new System.Drawing.Size(161, 26);
-            this.tsWarning.Text = "Warning";
-            this.tsWarning.Click += new System.EventHandler(this.TsFilter_Click);
-            // 
-            // tsNA
-            // 
-            this.tsNA.CheckOnClick = true;
-            this.tsNA.Name = "tsNA";
-            this.tsNA.Size = new System.Drawing.Size(161, 26);
-            this.tsNA.Text = "Undefined";
-            this.tsNA.Click += new System.EventHandler(this.TsFilter_Click);
-            // 
-            // tsOK
-            // 
-            this.tsOK.CheckOnClick = true;
-            this.tsOK.Name = "tsOK";
-            this.tsOK.Size = new System.Drawing.Size(161, 26);
-            this.tsOK.Text = "OK";
-            this.tsOK.Click += new System.EventHandler(this.TsFilter_Click);
             // 
             // dataGridViewTextBoxColumn1
             // 
@@ -439,125 +510,26 @@
             this.dataGridViewTextBoxColumn12.Name = "dataGridViewTextBoxColumn12";
             this.dataGridViewTextBoxColumn12.Width = 163;
             // 
-            // Instance
+            // statusFilterToolStrip1
             // 
-            this.Instance.DataPropertyName = "InstanceDisplayName";
-            this.Instance.HeaderText = "Instance";
-            this.Instance.MinimumWidth = 6;
-            this.Instance.Name = "Instance";
-            this.Instance.ReadOnly = true;
-            this.Instance.Width = 90;
-            // 
-            // Database
-            // 
-            this.Database.DataPropertyName = "name";
-            this.Database.HeaderText = "Database";
-            this.Database.MinimumWidth = 6;
-            this.Database.Name = "Database";
-            this.Database.ReadOnly = true;
-            this.Database.Width = 98;
-            // 
-            // Status
-            // 
-            this.Status.DataPropertyName = "StatusDescription";
-            this.Status.HeaderText = "Status";
-            this.Status.MinimumWidth = 6;
-            this.Status.Name = "Status";
-            this.Status.ReadOnly = true;
-            this.Status.Width = 77;
-            // 
-            // RestoreDate
-            // 
-            this.RestoreDate.DataPropertyName = "restore_date";
-            this.RestoreDate.HeaderText = "Restore Date";
-            this.RestoreDate.MinimumWidth = 6;
-            this.RestoreDate.Name = "RestoreDate";
-            this.RestoreDate.ReadOnly = true;
-            this.RestoreDate.Width = 111;
-            // 
-            // BackupStartDate
-            // 
-            this.BackupStartDate.DataPropertyName = "backup_start_date";
-            this.BackupStartDate.HeaderText = "Backup Start Date";
-            this.BackupStartDate.MinimumWidth = 6;
-            this.BackupStartDate.Name = "BackupStartDate";
-            this.BackupStartDate.ReadOnly = true;
-            this.BackupStartDate.Width = 112;
-            // 
-            // TimeSinceLast
-            // 
-            this.TimeSinceLast.DataPropertyName = "TimeSinceLast";
-            this.TimeSinceLast.HeaderText = "Time Since Last";
-            this.TimeSinceLast.MinimumWidth = 6;
-            this.TimeSinceLast.Name = "TimeSinceLast";
-            this.TimeSinceLast.ReadOnly = true;
-            this.TimeSinceLast.Width = 127;
-            // 
-            // LatencyOfLast
-            // 
-            this.LatencyOfLast.DataPropertyName = "LatencyOfLast";
-            this.LatencyOfLast.HeaderText = "Latency of Last";
-            this.LatencyOfLast.MinimumWidth = 6;
-            this.LatencyOfLast.Name = "LatencyOfLast";
-            this.LatencyOfLast.ReadOnly = true;
-            this.LatencyOfLast.Width = 99;
-            // 
-            // TotalTimeBehind
-            // 
-            this.TotalTimeBehind.DataPropertyName = "TotalTimeBehind";
-            this.TotalTimeBehind.HeaderText = "Total Time Behind";
-            this.TotalTimeBehind.MinimumWidth = 6;
-            this.TotalTimeBehind.Name = "TotalTimeBehind";
-            this.TotalTimeBehind.ReadOnly = true;
-            this.TotalTimeBehind.Width = 139;
-            // 
-            // SnapshotAge
-            // 
-            this.SnapshotAge.DataPropertyName = "SnapshotAge";
-            this.SnapshotAge.HeaderText = "Snapshot Age";
-            this.SnapshotAge.MinimumWidth = 6;
-            this.SnapshotAge.Name = "SnapshotAge";
-            this.SnapshotAge.ReadOnly = true;
-            this.SnapshotAge.Width = 116;
-            // 
-            // SnapshotDate
-            // 
-            this.SnapshotDate.DataPropertyName = "SnapshotDate";
-            this.SnapshotDate.HeaderText = "Snapshot Date";
-            this.SnapshotDate.MinimumWidth = 6;
-            this.SnapshotDate.Name = "SnapshotDate";
-            this.SnapshotDate.ReadOnly = true;
-            this.SnapshotDate.Width = 143;
-            // 
-            // LastFile
-            // 
-            this.LastFile.DataPropertyName = "last_file";
-            this.LastFile.HeaderText = "Last File";
-            this.LastFile.MinimumWidth = 6;
-            this.LastFile.Name = "LastFile";
-            this.LastFile.ReadOnly = true;
-            this.LastFile.Width = 64;
-            // 
-            // ThresholdConfiguredLevel
-            // 
-            this.ThresholdConfiguredLevel.DataPropertyName = "ThresholdConfiguredLevel";
-            this.ThresholdConfiguredLevel.HeaderText = "Threshold Configured Level";
-            this.ThresholdConfiguredLevel.MinimumWidth = 6;
-            this.ThresholdConfiguredLevel.Name = "ThresholdConfiguredLevel";
-            this.ThresholdConfiguredLevel.ReadOnly = true;
-            this.ThresholdConfiguredLevel.Width = 163;
-            // 
-            // Configure
-            // 
-            this.Configure.HeaderText = "Configure";
-            this.Configure.MinimumWidth = 6;
-            this.Configure.Name = "Configure";
-            this.Configure.ReadOnly = true;
-            this.Configure.Resizable = System.Windows.Forms.DataGridViewTriState.True;
-            this.Configure.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
-            this.Configure.Text = "Configure";
-            this.Configure.UseColumnTextForLinkValue = true;
-            this.Configure.Width = 98;
+            this.statusFilterToolStrip1.Acknowledged = true;
+            this.statusFilterToolStrip1.AcknowledgedVisible = false;
+            this.statusFilterToolStrip1.Critical = true;
+            this.statusFilterToolStrip1.CriticalVisible = true;
+            this.statusFilterToolStrip1.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.ImageAndText;
+            this.statusFilterToolStrip1.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.statusFilterToolStrip1.Image = ((System.Drawing.Image)(resources.GetObject("statusFilterToolStrip1.Image")));
+            this.statusFilterToolStrip1.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.statusFilterToolStrip1.NA = true;
+            this.statusFilterToolStrip1.Name = "statusFilterToolStrip1";
+            this.statusFilterToolStrip1.NAVisible = true;
+            this.statusFilterToolStrip1.OK = true;
+            this.statusFilterToolStrip1.OKVisible = true;
+            this.statusFilterToolStrip1.Size = new System.Drawing.Size(67, 24);
+            this.statusFilterToolStrip1.Text = "ALL";
+            this.statusFilterToolStrip1.Warning = true;
+            this.statusFilterToolStrip1.WarningVisible = true;
+            this.statusFilterToolStrip1.UserChangedStatusFilter += new System.EventHandler(this.TsFilter_Click);
             // 
             // LogShippingControl
             // 
@@ -612,11 +584,6 @@
         private System.Windows.Forms.ToolStrip toolStrip2;
         private System.Windows.Forms.ToolStripButton tsCopyDetail;
         private System.Windows.Forms.ToolStripButton tsExportExcelDetail;
-        private System.Windows.Forms.ToolStripDropDownButton toolStripDropDownButton1;
-        private System.Windows.Forms.ToolStripMenuItem tsCritical;
-        private System.Windows.Forms.ToolStripMenuItem tsWarning;
-        private System.Windows.Forms.ToolStripMenuItem tsNA;
-        private System.Windows.Forms.ToolStripMenuItem tsOK;
         private System.Windows.Forms.DataGridViewTextBoxColumn Instance;
         private System.Windows.Forms.DataGridViewTextBoxColumn Database;
         private System.Windows.Forms.DataGridViewTextBoxColumn Status;
@@ -630,5 +597,6 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn LastFile;
         private System.Windows.Forms.DataGridViewTextBoxColumn ThresholdConfiguredLevel;
         private System.Windows.Forms.DataGridViewLinkColumn Configure;
+        private StatusFilterToolStrip statusFilterToolStrip1;
     }
 }

@@ -18,10 +18,25 @@ namespace DBADashGUI.Checks
         private List<int> InstanceIDs { get; set; }
         private int DatabaseID { get; set; }
 
-        public bool IncludeOK { get => oKToolStripMenuItem.Checked; set => oKToolStripMenuItem.Checked = value; }
-        public bool IncludeNA { get => undefinedToolStripMenuItem.Checked; set => undefinedToolStripMenuItem.Checked = value; }
-        public bool IncludeWarning { get => warningToolStripMenuItem.Checked; set => warningToolStripMenuItem.Checked = value; }
-        public bool IncludeCritical { get => criticalToolStripMenuItem.Checked; set => criticalToolStripMenuItem.Checked = value; }
+        public bool IncludeCritical
+        {
+            get => statusFilterToolStrip1.Critical; set => statusFilterToolStrip1.Critical = value;
+        }
+
+        public bool IncludeWarning
+        {
+            get => statusFilterToolStrip1.Warning; set => statusFilterToolStrip1.Warning = value;
+        }
+
+        public bool IncludeNA
+        {
+            get => statusFilterToolStrip1.NA; set => statusFilterToolStrip1.NA = value;
+        }
+
+        public bool IncludeOK
+        {
+            get => statusFilterToolStrip1.OK; set => statusFilterToolStrip1.OK = value;
+        }
 
         public void SetContext(DBADashContext context)
         {
@@ -92,10 +107,7 @@ namespace DBADashGUI.Checks
                 {
                     cmd.Parameters.AddWithValue("DatabaseID", DatabaseID);
                 }
-                cmd.Parameters.AddWithValue("IncludeWarning", warningToolStripMenuItem.Checked);
-                cmd.Parameters.AddWithValue("IncludeCritical", criticalToolStripMenuItem.Checked);
-                cmd.Parameters.AddWithValue("IncludeOK", oKToolStripMenuItem.Checked);
-                cmd.Parameters.AddWithValue("IncludeNA", undefinedToolStripMenuItem.Checked);
+                cmd.Parameters.AddRange(statusFilterToolStrip1.GetSQLParams());
                 cmd.Parameters.AddWithValue("ShowHidden", InstanceIDs.Count == 1 || Common.ShowHidden);
                 DataTable dt = new();
                 da.Fill(dt);
