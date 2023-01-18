@@ -15,22 +15,22 @@ namespace DBADashGUI.LogShipping
 
         public bool IncludeCritical
         {
-            get => tsCritical.Checked; set => tsCritical.Checked = value;
+            get => statusFilterToolStrip1.Critical; set => statusFilterToolStrip1.Critical = value;
         }
 
         public bool IncludeWarning
         {
-            get => tsWarning.Checked; set => tsWarning.Checked = value;
+            get => statusFilterToolStrip1.Warning; set => statusFilterToolStrip1.Warning = value;
         }
 
         public bool IncludeNA
         {
-            get => tsNA.Checked; set => tsNA.Checked = value;
+            get => statusFilterToolStrip1.NA; set => statusFilterToolStrip1.NA = value;
         }
 
         public bool IncludeOK
         {
-            get => tsOK.Checked; set => tsOK.Checked = value;
+            get => statusFilterToolStrip1.OK; set => statusFilterToolStrip1.OK = value;
         }
 
         public bool CanNavigateBack { get => tsBack.Enabled; }
@@ -90,10 +90,7 @@ namespace DBADashGUI.LogShipping
             {
                 cn.Open();
                 cmd.Parameters.AddWithValue("InstanceIDs", string.Join(",", InstanceIDs));
-                cmd.Parameters.AddWithValue("IncludeCritical", IncludeCritical);
-                cmd.Parameters.AddWithValue("IncludeWarning", IncludeWarning);
-                cmd.Parameters.AddWithValue("IncludeNA", IncludeNA);
-                cmd.Parameters.AddWithValue("IncludeOK", IncludeOK);
+                cmd.Parameters.AddRange(statusFilterToolStrip1.GetSQLParams());
 
                 DataTable dt = new();
                 da.Fill(dt);

@@ -22,22 +22,22 @@ namespace DBADashGUI.Properties
 
         public bool IncludeCritical
         {
-            get => criticalToolStripMenuItem.Checked; set => criticalToolStripMenuItem.Checked = value;
+            get => statusFilterToolStrip1.Critical; set => statusFilterToolStrip1.Critical = value;
         }
 
         public bool IncludeWarning
         {
-            get => warningToolStripMenuItem.Checked; set => warningToolStripMenuItem.Checked = value;
+            get => statusFilterToolStrip1.Warning; set => statusFilterToolStrip1.Warning = value;
         }
 
         public bool IncludeNA
         {
-            get => undefinedToolStripMenuItem.Checked; set => undefinedToolStripMenuItem.Checked = value;
+            get => statusFilterToolStrip1.NA; set => statusFilterToolStrip1.NA = value;
         }
 
         public bool IncludeOK
         {
-            get => OKToolStripMenuItem.Checked; set => OKToolStripMenuItem.Checked = value;
+            get => statusFilterToolStrip1.OK; set => statusFilterToolStrip1.OK = value;
         }
 
         public bool gridview = false;
@@ -52,10 +52,7 @@ namespace DBADashGUI.Properties
             {
                 cn.Open();
                 cmd.Parameters.AddWithValue("InstanceIDs", String.Join(",", context.RegularInstanceIDs));
-                cmd.Parameters.AddWithValue("IncludeCritical", IncludeCritical);
-                cmd.Parameters.AddWithValue("IncludeWarning", IncludeWarning);
-                cmd.Parameters.AddWithValue("IncludeNA", IncludeNA);
-                cmd.Parameters.AddWithValue("IncludeOK", IncludeOK);
+                cmd.Parameters.AddRange(statusFilterToolStrip1.GetSQLParams());
                 cmd.Parameters.AddWithValue("IncludeMetrics", includeAllMetricsToolStripMenuItem.Checked);
                 cmd.Parameters.AddWithValue("ShowHidden", context.RegularInstanceIDs.Count == 1 || Common.ShowHidden);
 
@@ -112,7 +109,8 @@ namespace DBADashGUI.Properties
                 ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize,
                 DataSource = dvDrives,
                 Dock = DockStyle.Fill,
-                ClipboardCopyMode = DataGridViewClipboardCopyMode.EnableAlwaysIncludeHeaderText
+                ClipboardCopyMode = DataGridViewClipboardCopyMode.EnableAlwaysIncludeHeaderText,
+                BackgroundColor = Color.White
             };
             dgv.Columns.Add(new DataGridViewTextBoxColumn() { Name = "Instance", DataPropertyName = "InstanceDisplayName", HeaderText = "Instance" });
             dgv.Columns.Add(new DataGridViewTextBoxColumn() { Name = "Name", DataPropertyName = "Name", HeaderText = "Name" });

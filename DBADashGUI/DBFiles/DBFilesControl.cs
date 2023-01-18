@@ -21,22 +21,22 @@ namespace DBADashGUI.DBFiles
 
         public bool IncludeCritical
         {
-            get => criticalToolStripMenuItem.Checked; set => criticalToolStripMenuItem.Checked = value;
+            get => statusFilterToolStrip1.Critical; set => statusFilterToolStrip1.Critical = value;
         }
 
         public bool IncludeWarning
         {
-            get => warningToolStripMenuItem.Checked; set => warningToolStripMenuItem.Checked = value;
+            get => statusFilterToolStrip1.Warning; set => statusFilterToolStrip1.Warning = value;
         }
 
         public bool IncludeNA
         {
-            get => undefinedToolStripMenuItem.Checked; set => undefinedToolStripMenuItem.Checked = value;
+            get => statusFilterToolStrip1.NA; set => statusFilterToolStrip1.NA = value;
         }
 
         public bool IncludeOK
         {
-            get => OKToolStripMenuItem.Checked; set => OKToolStripMenuItem.Checked = value;
+            get => statusFilterToolStrip1.OK; set => statusFilterToolStrip1.OK = value;
         }
 
         public List<short> FileTypes
@@ -65,10 +65,7 @@ namespace DBADashGUI.DBFiles
                 cn.Open();
                 cmd.Parameters.AddWithValue("InstanceIDs", string.Join(",", InstanceIDs));
                 if (DatabaseID != null) { cmd.Parameters.AddWithValue("DatabaseID", DatabaseID); }
-                cmd.Parameters.AddWithValue("IncludeNA", IncludeNA);
-                cmd.Parameters.AddWithValue("IncludeOK", IncludeOK);
-                cmd.Parameters.AddWithValue("IncludeWarning", IncludeWarning);
-                cmd.Parameters.AddWithValue("IncludeCritical", IncludeCritical);
+                cmd.Parameters.AddRange(statusFilterToolStrip1.GetSQLParams());
                 cmd.Parameters.AddWithValue("FilegroupLevel", tsFilegroup.Checked);
                 cmd.Parameters.AddWithValue("ShowHidden", InstanceIDs.Count == 1 || Common.ShowHidden);
                 if (selectedTypes.Count is > 0 and < 4)

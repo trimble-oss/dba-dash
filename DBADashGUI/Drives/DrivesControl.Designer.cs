@@ -28,17 +28,14 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(DrivesControl));
             this.pnlDrives = new System.Windows.Forms.Panel();
             this.driveControl1 = new DBADashGUI.DriveControl();
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
             this.tsRefresh = new System.Windows.Forms.ToolStripButton();
             this.tsCopy = new System.Windows.Forms.ToolStripButton();
             this.tsExcel = new System.Windows.Forms.ToolStripButton();
-            this.toolStripFilter = new System.Windows.Forms.ToolStripDropDownButton();
-            this.criticalToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.warningToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.undefinedToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.OKToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.statusFilterToolStrip1 = new DBADashGUI.StatusFilterToolStrip();
             this.tsConfigure = new System.Windows.Forms.ToolStripDropDownButton();
             this.configureInstanceThresholdsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.configureRootThresholdsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -109,7 +106,7 @@
             this.tsRefresh,
             this.tsCopy,
             this.tsExcel,
-            this.toolStripFilter,
+            this.statusFilterToolStrip1,
             this.tsConfigure,
             this.tsGridView,
             this.tsDrivesView,
@@ -150,51 +147,26 @@
             this.tsExcel.Text = "Export Excel";
             this.tsExcel.Click += new System.EventHandler(this.TsExcel_Click);
             // 
-            // toolStripFilter
+            // statusFilterToolStrip1
             // 
-            this.toolStripFilter.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.toolStripFilter.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.criticalToolStripMenuItem,
-            this.warningToolStripMenuItem,
-            this.undefinedToolStripMenuItem,
-            this.OKToolStripMenuItem});
-            this.toolStripFilter.Image = global::DBADashGUI.Properties.Resources.FilterDropdown_16x;
-            this.toolStripFilter.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.toolStripFilter.Name = "toolStripFilter";
-            this.toolStripFilter.Size = new System.Drawing.Size(34, 24);
-            this.toolStripFilter.Text = "Filter";
-            // 
-            // criticalToolStripMenuItem
-            // 
-            this.criticalToolStripMenuItem.CheckOnClick = true;
-            this.criticalToolStripMenuItem.Name = "criticalToolStripMenuItem";
-            this.criticalToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
-            this.criticalToolStripMenuItem.Text = "Critical";
-            this.criticalToolStripMenuItem.Click += new System.EventHandler(this.Status_Selected);
-            // 
-            // warningToolStripMenuItem
-            // 
-            this.warningToolStripMenuItem.CheckOnClick = true;
-            this.warningToolStripMenuItem.Name = "warningToolStripMenuItem";
-            this.warningToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
-            this.warningToolStripMenuItem.Text = "Warning";
-            this.warningToolStripMenuItem.Click += new System.EventHandler(this.Status_Selected);
-            // 
-            // undefinedToolStripMenuItem
-            // 
-            this.undefinedToolStripMenuItem.CheckOnClick = true;
-            this.undefinedToolStripMenuItem.Name = "undefinedToolStripMenuItem";
-            this.undefinedToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
-            this.undefinedToolStripMenuItem.Text = "Undefined";
-            this.undefinedToolStripMenuItem.Click += new System.EventHandler(this.Status_Selected);
-            // 
-            // OKToolStripMenuItem
-            // 
-            this.OKToolStripMenuItem.CheckOnClick = true;
-            this.OKToolStripMenuItem.Name = "OKToolStripMenuItem";
-            this.OKToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
-            this.OKToolStripMenuItem.Text = "OK";
-            this.OKToolStripMenuItem.Click += new System.EventHandler(this.Status_Selected);
+            this.statusFilterToolStrip1.Acknowledged = false;
+            this.statusFilterToolStrip1.AcknowledgedVisible = false;
+            this.statusFilterToolStrip1.Critical = true;
+            this.statusFilterToolStrip1.CriticalVisible = true;
+            this.statusFilterToolStrip1.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.ImageAndText;
+            this.statusFilterToolStrip1.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.statusFilterToolStrip1.Image = ((System.Drawing.Image)(resources.GetObject("statusFilterToolStrip1.Image")));
+            this.statusFilterToolStrip1.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.statusFilterToolStrip1.NA = true;
+            this.statusFilterToolStrip1.Name = "statusFilterToolStrip1";
+            this.statusFilterToolStrip1.NAVisible = true;
+            this.statusFilterToolStrip1.OK = true;
+            this.statusFilterToolStrip1.OKVisible = true;
+            this.statusFilterToolStrip1.Size = new System.Drawing.Size(67, 24);
+            this.statusFilterToolStrip1.Text = "ALL";
+            this.statusFilterToolStrip1.Warning = true;
+            this.statusFilterToolStrip1.WarningVisible = true;
+            this.statusFilterToolStrip1.UserChangedStatusFilter += new System.EventHandler(this.Status_Selected);
             // 
             // tsConfigure
             // 
@@ -292,11 +264,6 @@
         private System.Windows.Forms.Panel pnlDrives;
         private DriveControl driveControl1;
         private System.Windows.Forms.ToolStrip toolStrip1;
-        private System.Windows.Forms.ToolStripDropDownButton toolStripFilter;
-        private System.Windows.Forms.ToolStripMenuItem criticalToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem warningToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem undefinedToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem OKToolStripMenuItem;
         private System.Windows.Forms.ToolStripDropDownButton tsConfigure;
         private System.Windows.Forms.ToolStripMenuItem configureInstanceThresholdsToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem configureRootThresholdsToolStripMenuItem;
@@ -308,5 +275,6 @@
         private System.Windows.Forms.ToolStripDropDownButton tsColumns;
         private System.Windows.Forms.ToolStripMenuItem includeAllMetricsToolStripMenuItem;
         private System.Windows.Forms.ToolStripButton tsExcel;
+        private StatusFilterToolStrip statusFilterToolStrip1;
     }
 }
