@@ -117,6 +117,9 @@ EXEC sp_executesql @SQL,
 				@DateGroupingMin,
 				@UTCOffset;
 
+DECLARE @TotalSampleDurationMs BIGINT 
+SELECT @TotalSampleDurationMs = SUM(SampleDurationMs)
+FROM #Time
 
 SET @SQL = N'
 SELECT ' + @DateGroupingSQL + ' AS [Time],
@@ -173,40 +176,57 @@ BEGIN
 			ISNULL(W.SignalWaitMs / (T.SampleDurationMs/1000.0) / @SchedulerCount,0) AS SignalWaitMsPerCorePerSec,
 			T.SampleDurationMs /1000 SampleDurationSec,
 			W.TotalWaitMs*1.0 /ISNULL(NULLIF(W.WaitingTasksCount,0),1)  AS AvgWaitTimeMs,
-			ISNULL(W.WaitingTasksCount,0) AS WaitingTasksCount
+			ISNULL(W.WaitingTasksCount,0) AS WaitingTasksCount,
+			@SchedulerCount AS SchedulerCount,
+			@TotalSampleDurationMs/1000.0 TotalSampleDurationSec,
+			0 AS rnk
 	FROM #Time T
 	CROSS JOIN dbo.WaitType WT 
 	LEFT JOIN #WaitGrp W ON W.Time = T.Time AND WT.WaitTypeID = W.WaitTypeID
-	WHERE WT.WaitTypeID = @WaitTypeID
-	ORDER BY WT.WaitType,T.Time
+	WHERE		WT.WaitTypeID = @WaitTypeID
+	ORDER BY	WT.WaitType,
+				T.Time
 END;
 ELSE
 BEGIN
 	/* 
-		Show the top waits for each time period and group other waits as "{Other}"
+		Show the top waits and group other waits as "{Other}"
+		Previously calculated as top N waits for each time period.  Changed to calculate top waits overall for better consistency.  
+		e.g. If a wait type is included - you see all waits for that wait type.  It won't sometimes be included in {Other}
+		App based calculations can then match WaitsSummary_Get
 	*/
-	WITH W AS (
-		SELECT *,ROW_NUMBER() OVER(PARTITION BY [Time] ORDER BY T1.TotalWaitMs DESC) rnum
+	WITH G AS ( /* Calculate total wait for each wait type */
+		SELECT *,SUM(T1.TotalWaitMs) OVER(PARTITION BY T1.WaitTypeID) AS Summary_TotalWaitMs
 		FROM #WaitGrp T1
 	)
-	SELECT T.[Time],
-		CASE WHEN rnum> @Top THEN '{Other}' WHEN WT.IsCriticalWait=1 THEN '!!'  + WT.WaitType ELSE WT.WaitType END as WaitType,
-		SUM(W.TotalWaitMs)/1000.0 AS TotalWaitSec,
-        SUM(W.SignalWaitMs)/1000.0 AS SignalWaitSec,
-		SUM(W.SignalWaitMs)*100.0 / NULLIF(SUM(W.TotalWaitMs),0) AS SignalWaitPct,
-		SUM(W.TotalWaitMs) / SUM(T.SampleDurationMs/1000.0) AS WaitTimeMsPerSec,
-		SUM(W.SignalWaitMs) / SUM(T.SampleDurationMs/1000.0) AS SignalWaitMsPerSec,
-		SUM(W.TotalWaitMs) / SUM(T.SampleDurationMs/1000.0) / @SchedulerCount AS WaitTimeMsPerCorePerSec,
-		SUM(W.SignalWaitMs) / SUM(T.SampleDurationMs/1000.0) / @SchedulerCount AS SignalWaitMsPerCorePerSec,
-		SUM(T.SampleDurationMs) /1000 SampleDurationSec,
-        SUM(W.TotalWaitMs*1.0) /ISNULL(NULLIF(SUM(WaitingTasksCount),0),1)  AS AvgWaitTimeMs,
-		SUM(W.WaitingTasksCount) AS WaitingTasksCount
+	, W AS ( /* Rank the wait types by total wait for entire period.  */
+		SELECT *,DENSE_RANK() OVER(ORDER BY G.Summary_TotalWaitMs DESC) rnk
+		FROM G
+	)
+	SELECT	T.[Time],
+			CASE WHEN W.rnk> @Top THEN '{Other}' WHEN WT.IsCriticalWait=1 THEN '!!'  + WT.WaitType ELSE WT.WaitType END as WaitType,
+			CAST(MAX(CASE WHEN W.rnk> @Top THEN 0 ELSE CAST(WT.IsCriticalWait AS INT) END) AS BIT) AS IsCriticalWait,
+			SUM(W.TotalWaitMs)/1000.0 AS TotalWaitSec,
+			SUM(W.SignalWaitMs)/1000.0 AS SignalWaitSec,
+			SUM(W.SignalWaitMs)*100.0 / NULLIF(SUM(W.TotalWaitMs),0) AS SignalWaitPct,
+			SUM(W.TotalWaitMs) / MAX(T.SampleDurationMs/1000.0) AS WaitTimeMsPerSec,
+			SUM(W.SignalWaitMs) / MAX(T.SampleDurationMs/1000.0) AS SignalWaitMsPerSec,
+			SUM(W.TotalWaitMs) / MAX(T.SampleDurationMs/1000.0) / @SchedulerCount AS WaitTimeMsPerCorePerSec,
+			SUM(W.SignalWaitMs) / MAX(T.SampleDurationMs/1000.0) / @SchedulerCount AS SignalWaitMsPerCorePerSec,
+			MAX(T.SampleDurationMs) /1000.0 SampleDurationSec,
+			SUM(W.TotalWaitMs*1.0) /ISNULL(NULLIF(SUM(W.WaitingTasksCount),0),1)  AS AvgWaitTimeMs,
+			SUM(W.WaitingTasksCount) AS WaitingTasksCount,
+			@SchedulerCount AS SchedulerCount,
+			@TotalSampleDurationMs/1000.0 TotalSampleDurationSec,
+			MIN(rnk) rnk
 	FROM W 
 	JOIN #Time T ON T.Time = W.Time
 	JOIN dbo.WaitType WT ON WT.WaitTypeID = W.WaitTypeID
-	GROUP BY T.[Time],CASE WHEN rnum> @Top THEN '{Other}' WHEN WT.IsCriticalWait=1 THEN '!!'  + WT.WaitType ELSE WT.WaitType END
-	ORDER BY WaitType,T.Time
+	GROUP BY	T.[Time],
+				CASE WHEN W.rnk> @Top THEN '{Other}' WHEN WT.IsCriticalWait=1 THEN '!!'  + WT.WaitType ELSE WT.WaitType END
+	ORDER BY	MIN(rnk),
+				WaitType,
+				T.Time
 END
 
 DROP TABLE #WaitGrp
-GO

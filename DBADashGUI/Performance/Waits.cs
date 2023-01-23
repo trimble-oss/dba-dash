@@ -6,7 +6,11 @@ using Microsoft.Data.SqlClient;
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Linq;
+using System.Text;
 using System.Windows.Forms;
+using Humanizer;
+using Microsoft.SqlServer.TransactSql.ScriptDom;
 
 namespace DBADashGUI.Performance
 {
@@ -28,6 +32,7 @@ namespace DBADashGUI.Performance
         private DateTime lastWait = DateTime.MinValue;
         private Int32 dateGrouping;
         private Int32 mins;
+        private DataTable dt;
 
         public event EventHandler<EventArgs> Close;
 
@@ -118,14 +123,63 @@ namespace DBADashGUI.Performance
             }
         }
 
+        private void CalcTopWaits(ref DataTable dt)
+        {
+            // Get top 3 wait types, calculating total wait for period
+            var topWaits = dt.AsEnumerable()
+                .GroupBy(r => r["WaitType"])
+                .OrderByDescending(g => g.Sum(s => (decimal)s["TotalWaitSec"]))
+                .Take(3)
+                .Select(g => new
+                {
+                    WaitType = ((string)g.Key),
+                    IsCritical = g.Max(s => (bool)s["IsCriticalWait"]),
+                    WaitTime = g.Sum(s => (decimal)s["TotalWaitSec"]),
+                    WaitTimeMsPerSecond = g.Sum(s => Convert.ToDouble(s["TotalWaitSec"]) * 1000) / g.Max(s => Convert.ToDouble(s["TotalSampleDurationSec"])),
+                    // Sample duration could be calculated from DateRange.TimeSpan.TotalSeconds. TotalSampleDurationSec should be more accurate and match Waits tab
+                    WaitTimeMsPerSecondPerCore = g.Sum(s => Convert.ToDouble(s["TotalWaitSec"]) * 1000) / g.Max(s => Convert.ToDouble(s["TotalSampleDurationSec"])) / g.Max(s => (int)s["SchedulerCount"])
+                }
+                ).ToList();
+            StringBuilder sb = new();
+            // CSV list of top waits
+            tsTopWaits.Text = "Top Waits: " + string.Join(", ", topWaits.Select(x => x.WaitType));
+            // Tooltip with wait times
+            tsTopWaits.ToolTipText = string.Join(Environment.NewLine,
+                topWaits.Select(x => x.WaitType + " - "
+                + TimeSpan.FromSeconds(Convert.ToDouble(x.WaitTime)).Humanize(2, minUnit: Humanizer.Localisation.TimeUnit.Second)
+                + " (" + x.WaitTimeMsPerSecond.ToString("N1") + "ms/sec" + ")"
+                ));
+            double threshold = 100; // To avoid highlighting with very small amounts of wait
+            if (topWaits.Where(r => r.IsCritical && r.WaitTimeMsPerSecond > threshold).Any()) // One of the top wait types is critical (RESOURCE_SEMAPHORE etc).  Red
+            {
+                tsTopWaits.ForeColor = DashColors.Fail;
+                tsTopWaits.Font = new System.Drawing.Font(tsTopWaits.Font, System.Drawing.FontStyle.Bold);
+            }
+            else if (topWaits.Where(r => r.WaitType.StartsWith("LCK_") && r.WaitTimeMsPerSecond > threshold).Any()) // One of the top wait types is blocking.  Amber
+            {
+                tsTopWaits.ForeColor = DashColors.Warning;
+                tsTopWaits.Font = new System.Drawing.Font(tsTopWaits.Font, System.Drawing.FontStyle.Bold);
+            }
+            else
+            {
+                tsTopWaits.ForeColor = DashColors.TrimbleBlue;
+                tsTopWaits.Font = new System.Drawing.Font(tsTopWaits.Font, System.Drawing.FontStyle.Regular);
+            }
+        }
+
         public void RefreshData()
+        {
+            dt = GetWaitsDT();
+            CalcTopWaits(ref dt);
+            RefreshChart();
+        }
+
+        public void RefreshChart()
         {
             waitChart.Series.Clear();
             waitChart.AxisX.Clear();
             waitChart.AxisY.Clear();
             lastWait = DateTime.MinValue;
-
-            var dt = GetWaitsDT();
 
             if (dt.Rows.Count == 0)
             {
@@ -148,7 +202,8 @@ namespace DBADashGUI.Performance
                     values = new ChartValues<DateTimePoint>();
                     current = waitType;
                 }
-                values.Add(new DateTimePoint(((DateTime)r["Time"]).ToAppTimeZone(), (double)(decimal)r["WaitTimeMsPerSec"]));
+                string metric = (string)tsMetric.Tag;
+                values.Add(new DateTimePoint(((DateTime)r["Time"]).ToAppTimeZone(), Convert.ToDouble(r[metric])));
             }
             if (values.Count > 0)
             {
@@ -186,8 +241,31 @@ namespace DBADashGUI.Performance
             });
             waitChart.AxisY.Add(new Axis
             {
-                LabelFormatter = val => val.ToString("0ms/sec")
+                LabelFormatter = val => val.ToString("0" + Units)
             });
+        }
+
+        private string Units
+        {
+            get
+            {
+                if (msseccoreToolStripMenuItem.Checked || signalWaitMsseccoreToolStripMenuItem.Checked)
+                {
+                    return "ms/sec/core";
+                }
+                else if (waitmssecToolStripMenuItem.Checked || signalWaitMssecToolStripMenuItem.Checked)
+                {
+                    return "ms/sec";
+                }
+                else if (totalWaitsecToolStripMenuItem.Checked || signalWaitsecToolStripMenuItem.Checked)
+                {
+                    return "sec";
+                }
+                else
+                {
+                    return "";
+                }
+            }
         }
 
         private void Waits_Load(object sender, EventArgs e)
@@ -218,8 +296,9 @@ namespace DBADashGUI.Performance
             string wt = Metric.WaitType;
             if (Common.ShowInputDialog(ref wt, "Wait Type (LIKE):") == DialogResult.OK)
             {
-                WaitType = wt.EndsWith("%") || wt.Length == 0 ? wt : wt + "%";
                 criticalWaitsOnlyToolStripMenuItem.Checked = false;
+                Metric.CriticalWaitsOnly = false;
+                WaitType = wt.EndsWith("%") || wt.Length == 0 ? wt : wt + "%";        
                 RefreshData();
             }
         }
@@ -239,6 +318,29 @@ namespace DBADashGUI.Performance
         private void TsUp_Click(object sender, EventArgs e)
         {
             MoveUp.Invoke(this, new EventArgs());
+        }
+
+        private void SelectMetric(object sender, EventArgs e)
+        {
+            var item = (ToolStripMenuItem)sender;
+            tsMetric.CheckSingleItem(item);
+            tsMetric.Text = item.Text;
+            tsMetric.Tag = item.Tag;
+            RefreshChart();
+        }
+
+        private static WaitSummaryDialog WaitSummaryForm=null;
+
+        private void TsTopWaits_Click(object sender, EventArgs e)
+        {
+            if (WaitSummaryForm == null)
+            {
+                WaitSummaryForm = new WaitSummaryDialog();
+                WaitSummaryForm.FormClosed += delegate { WaitSummaryForm = null; };        
+            }
+            WaitSummaryForm.SetContext(new DBADashContext() { InstanceID = instanceID });
+            WaitSummaryForm.Show();
+            WaitSummaryForm.Focus();
         }
     }
 }
