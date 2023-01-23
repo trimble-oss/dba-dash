@@ -130,6 +130,8 @@ namespace DBADashGUI.Performance
 
         public static DateTime ToUTC => mins < 0 || customTo == DateTime.MaxValue ? customTo : DateTime.UtcNow;
 
-        public static int DurationMins => mins > 0 ? mins : Convert.ToInt32(ToUTC.Subtract(FromUTC).TotalMinutes);
+        public static int DurationMins => mins > 0 ? mins : Convert.ToInt32(TimeSpan.TotalMinutes);
+
+        public static TimeSpan TimeSpan => ToUTC.Subtract(FromUTC);
     }
 }

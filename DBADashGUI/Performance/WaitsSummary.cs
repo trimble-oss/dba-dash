@@ -46,7 +46,7 @@ namespace DBADashGUI.Performance
             var dt = GetWaitsSummaryDT();
             dgv.AutoGenerateColumns = false;
             dgv.DataSource = dt;
-            dgv.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.AllCells);
+            dgv.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.AllCellsExceptHeader);
             RefreshChart();
         }
 
