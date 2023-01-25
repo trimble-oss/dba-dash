@@ -953,10 +953,17 @@ namespace DBADashGUI
 
         #endregion Tagging
 
+        private DataRetention DataRetentionForm = null;
+
         private void DataRetentionToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            using DataRetention frm = new();
-            frm.ShowDialog();
+            if (DataRetentionForm == null)
+            {
+                DataRetentionForm = new();
+                DataRetentionForm.FormClosed += delegate { DataRetentionForm = null; };
+            }   
+            DataRetentionForm.Show();
+            DataRetentionForm.Focus();
         }
 
         private void Instance_Selected(object sender, InstanceSelectedEventArgs e)
@@ -1108,21 +1115,27 @@ namespace DBADashGUI
             }
         }
 
+        private static ManageInstances ManageInstancesForm = null;
+
         private void ManageInstancesToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            var frm = new ManageInstances
+            ManageInstancesForm?.Close();
+            ManageInstancesForm = new ManageInstances
             {
                 Tags = String.Join(",", SelectedTags())
             };
-            frm.ShowDialog();
-            if (frm.InstanceActiveFlagChanged || frm.InstanceSummaryVisibleChanged)
-            {
-                AddInstanes(); // refresh the tree if instances deleted/restored
-                if (tabs.SelectedTab == tabSummary)
+            ManageInstancesForm.FormClosing += delegate {
+                if (ManageInstancesForm.InstanceActiveFlagChanged || ManageInstancesForm.InstanceSummaryVisibleChanged)
                 {
-                    summary1.RefreshData();
+                    AddInstanes(); // refresh the tree if instances deleted/restored
+                    if (tabs.SelectedTab == tabSummary)
+                    {
+                        summary1.RefreshData();
+                    }
                 }
-            }
+                ManageInstancesForm = null; 
+            };
+            ManageInstancesForm.Show();
         }
 
         private void GvHistory_CellContentClick(object sender, DataGridViewCellEventArgs e)
@@ -1159,25 +1172,34 @@ namespace DBADashGUI
             AddInstanes();
         }
 
+        private static DBDiff DBDiffForm = null;
+
         private void DatabaseSchemaDiffToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            using (var frm = new DBDiff { SelectedTags = SelectedTags() })
+            DBDiffForm?.Close();
+            var n = tv1.SelectedSQLTreeItem();
+            DBDiffForm = new DBDiff
             {
-                var n = tv1.SelectedSQLTreeItem();
-                frm.SelectedInstanceA = n.InstanceName;
-                frm.SelectedDatabaseA = new DatabaseItem() { DatabaseID = n.DatabaseID, DatabaseName = n.DatabaseName };
-                frm.ShowDialog(this);
-            }
+                SelectedTags = SelectedTags(),
+                SelectedInstanceA = n.InstanceName,
+                SelectedDatabaseA = new DatabaseItem() { DatabaseID = n.DatabaseID, DatabaseName = n.DatabaseName }
+            };
+            DBDiffForm.FormClosed += delegate { DBDiffForm = null; };
+            DBDiffForm.Show();         
         }
+
+        private static JobDiff JobDiffForm = null;
 
         private void AgentJobDiffToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            using (var frm = new JobDiff())
+            JobDiffForm?.Close();
+            var selected = tv1.SelectedSQLTreeItem();
+            JobDiffForm = new()
             {
-                var selected = tv1.SelectedSQLTreeItem();
-                frm.InstanceID_A = selected.InstanceID;
-                frm.ShowDialog(this);
-            }
+                InstanceID_A = selected.InstanceID
+            };
+            JobDiffForm.FormClosed += delegate { JobDiffForm = null; };
+            JobDiffForm.Show();
         }
 
         private void TxtSearch_KeyUp(object sender, KeyEventArgs e)
@@ -1188,16 +1210,25 @@ namespace DBADashGUI
             }
         }
 
+        private static ConfigureDisplayName ConfigureDisplayNameForm = null;
+
         private void ConfigureDisplayNameToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            using (var frm = new ConfigureDisplayName() { TagIDs = String.Join(",", SelectedTags()), SearchString = SearchString })
+            ConfigureDisplayNameForm?.Close();
+            ConfigureDisplayNameForm = new ConfigureDisplayName()
             {
-                frm.ShowDialog(this);
-                if (frm.EditCount > 0)
+                TagIDs = String.Join(",", SelectedTags()),
+                SearchString = SearchString
+            };
+            ConfigureDisplayNameForm.FormClosing += delegate
+            {
+                if (ConfigureDisplayNameForm.EditCount > 0)
                 {
                     AddInstanes();
                 }
-            }
+                ConfigureDisplayNameForm = null;
+            };
+            ConfigureDisplayNameForm.Show();
         }
 
         private void FreezeKeyColumnsToolStripMenuItem_Click(object sender, EventArgs e)
