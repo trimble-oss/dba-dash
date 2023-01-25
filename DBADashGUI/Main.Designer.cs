@@ -1118,10 +1118,10 @@
             // drivesControl1
             // 
             this.drivesControl1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.drivesControl1.IncludeCritical = false;
-            this.drivesControl1.IncludeNA = false;
-            this.drivesControl1.IncludeOK = false;
-            this.drivesControl1.IncludeWarning = false;
+            this.drivesControl1.IncludeCritical = true;
+            this.drivesControl1.IncludeNA = true;
+            this.drivesControl1.IncludeOK = true;
+            this.drivesControl1.IncludeWarning = true;
             this.drivesControl1.Location = new System.Drawing.Point(3, 3);
             this.drivesControl1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.drivesControl1.Name = "drivesControl1";
@@ -1143,10 +1143,10 @@
             // backupsControl1
             // 
             this.backupsControl1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.backupsControl1.IncludeCritical = false;
-            this.backupsControl1.IncludeNA = false;
-            this.backupsControl1.IncludeOK = false;
-            this.backupsControl1.IncludeWarning = false;
+            this.backupsControl1.IncludeCritical = true;
+            this.backupsControl1.IncludeNA = true;
+            this.backupsControl1.IncludeOK = true;
+            this.backupsControl1.IncludeWarning = true;
             this.backupsControl1.Location = new System.Drawing.Point(3, 3);
             this.backupsControl1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.backupsControl1.Name = "backupsControl1";
@@ -1167,10 +1167,10 @@
             // logShippingControl1
             // 
             this.logShippingControl1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.logShippingControl1.IncludeCritical = false;
-            this.logShippingControl1.IncludeNA = false;
-            this.logShippingControl1.IncludeOK = false;
-            this.logShippingControl1.IncludeWarning = false;
+            this.logShippingControl1.IncludeCritical = true;
+            this.logShippingControl1.IncludeNA = true;
+            this.logShippingControl1.IncludeOK = true;
+            this.logShippingControl1.IncludeWarning = true;
             this.logShippingControl1.Location = new System.Drawing.Point(3, 3);
             this.logShippingControl1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.logShippingControl1.Name = "logShippingControl1";
@@ -1191,6 +1191,7 @@
             // agentJobsControl1
             // 
             this.agentJobsControl1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.agentJobsControl1.IncludeAcknowledged = true;
             this.agentJobsControl1.IncludeCritical = false;
             this.agentJobsControl1.IncludeNA = false;
             this.agentJobsControl1.IncludeOK = false;
@@ -1236,10 +1237,10 @@
             // dbFilesControl1
             // 
             this.dbFilesControl1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.dbFilesControl1.IncludeCritical = false;
-            this.dbFilesControl1.IncludeNA = false;
-            this.dbFilesControl1.IncludeOK = false;
-            this.dbFilesControl1.IncludeWarning = false;
+            this.dbFilesControl1.IncludeCritical = true;
+            this.dbFilesControl1.IncludeNA = true;
+            this.dbFilesControl1.IncludeOK = true;
+            this.dbFilesControl1.IncludeWarning = true;
             this.dbFilesControl1.Location = new System.Drawing.Point(3, 3);
             this.dbFilesControl1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.dbFilesControl1.Name = "dbFilesControl1";
@@ -1260,10 +1261,10 @@
             // lastGoodCheckDBControl1
             // 
             this.lastGoodCheckDBControl1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.lastGoodCheckDBControl1.IncludeCritical = false;
-            this.lastGoodCheckDBControl1.IncludeNA = false;
-            this.lastGoodCheckDBControl1.IncludeOK = false;
-            this.lastGoodCheckDBControl1.IncludeWarning = false;
+            this.lastGoodCheckDBControl1.IncludeCritical = true;
+            this.lastGoodCheckDBControl1.IncludeNA = true;
+            this.lastGoodCheckDBControl1.IncludeOK = true;
+            this.lastGoodCheckDBControl1.IncludeWarning = true;
             this.lastGoodCheckDBControl1.Location = new System.Drawing.Point(3, 3);
             this.lastGoodCheckDBControl1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.lastGoodCheckDBControl1.Name = "lastGoodCheckDBControl1";
@@ -1327,10 +1328,10 @@
             // collectionDates1
             // 
             this.collectionDates1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.collectionDates1.IncludeCritical = false;
-            this.collectionDates1.IncludeNA = false;
-            this.collectionDates1.IncludeOK = false;
-            this.collectionDates1.IncludeWarning = false;
+            this.collectionDates1.IncludeCritical = true;
+            this.collectionDates1.IncludeNA = true;
+            this.collectionDates1.IncludeOK = true;
+            this.collectionDates1.IncludeWarning = true;
             this.collectionDates1.Location = new System.Drawing.Point(3, 3);
             this.collectionDates1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.collectionDates1.Name = "collectionDates1";
@@ -2028,10 +2029,10 @@
             // tabJobTimeline
             // 
             this.tabJobTimeline.Controls.Add(this.jobTimeline1);
-            this.tabJobTimeline.Location = new System.Drawing.Point(4, 25);
+            this.tabJobTimeline.Location = new System.Drawing.Point(4, 29);
             this.tabJobTimeline.Name = "tabJobTimeline";
             this.tabJobTimeline.Padding = new System.Windows.Forms.Padding(3);
-            this.tabJobTimeline.Size = new System.Drawing.Size(1631, 1246);
+            this.tabJobTimeline.Size = new System.Drawing.Size(192, 67);
             this.tabJobTimeline.TabIndex = 45;
             this.tabJobTimeline.Text = "Timeline";
             this.tabJobTimeline.UseVisualStyleBackColor = true;
@@ -2039,10 +2040,11 @@
             // jobTimeline1
             // 
             this.jobTimeline1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.jobTimeline1.IsActive = false;
             this.jobTimeline1.Location = new System.Drawing.Point(3, 3);
             this.jobTimeline1.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.jobTimeline1.Name = "jobTimeline1";
-            this.jobTimeline1.Size = new System.Drawing.Size(1625, 1240);
+            this.jobTimeline1.Size = new System.Drawing.Size(186, 61);
             this.jobTimeline1.TabIndex = 0;
             // 
             // refresh1

@@ -404,16 +404,25 @@ namespace DBADashGUI.Performance
             RefreshData();
         }
 
+        private static IOSummaryForm SummaryForm = null;
+
         private void TsIOSummary_Click(object sender, EventArgs e)
         {
-            var frm = new IOSummaryForm()
+            if(SummaryForm != null)
+            {
+                SummaryForm.Close();
+            }
+            SummaryForm = new IOSummaryForm()
             {
                 InstanceID = instanceID,
                 DatabaseID = databaseid,
                 FromDate = DateRange.FromUTC,
                 ToDate = DateRange.ToUTC
+
             };
-            frm.ShowDialog(this);
+            SummaryForm.FormClosed += delegate { SummaryForm = null; };
+            
+            SummaryForm.Show();
         }
 
         private void TsClose_Click(object sender, EventArgs e)
