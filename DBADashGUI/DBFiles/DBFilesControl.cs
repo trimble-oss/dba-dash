@@ -107,6 +107,22 @@ namespace DBADashGUI.DBFiles
             RefreshData();
         }
 
+        private static DBSpaceHistoryView DBSpaceHistoryViewForm = null;
+        private static void LoadDBSpaceHistory(int dbid,int? dbSpaceID,string instance,string dbName,string fileName)
+        {
+            DBSpaceHistoryViewForm?.Close();
+            DBSpaceHistoryViewForm = new()
+            {
+                DatabaseID = dbid,
+                DataSpaceID = dbSpaceID,
+                InstanceGroupName = instance,
+                DBName = dbName,
+                FileName = fileName
+            };
+            DBSpaceHistoryViewForm.FormClosed += delegate{ DBSpaceHistoryViewForm = null; };
+            DBSpaceHistoryViewForm.Show();
+        }
+
         private void DgvFiles_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
             if (e.RowIndex >= 0)
@@ -118,15 +134,7 @@ namespace DBADashGUI.DBFiles
                 }
                 else if (dgvFiles.Columns[e.ColumnIndex].HeaderText == "History")
                 {
-                    var frm = new DBSpaceHistoryView
-                    {
-                        DatabaseID = (Int32)row["DatabaseID"],
-                        DataSpaceID = row["data_space_id"] == DBNull.Value ? null : (Int32?)row["data_space_id"],
-                        InstanceGroupName = (string)row["InstanceGroupName"],
-                        DBName = (string)row["name"],
-                        FileName = row["file_name"] == DBNull.Value ? null : (string)row["file_name"]
-                    };
-                    frm.Show();
+                    LoadDBSpaceHistory((int)row["DatabaseID"], row["data_space_id"] == DBNull.Value ? null : (int?)row["data_space_id"], (string)row["InstanceGroupName"], (string)row["name"], row["file_name"] == DBNull.Value ? null : (string)row["file_name"]);
                 }
             }
         }

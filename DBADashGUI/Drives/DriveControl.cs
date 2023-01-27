@@ -109,14 +109,18 @@ namespace DBADashGUI
             }
         }
 
+        private static DriveHistoryView DriveHistoryViewForm = null;
+
         private void LnkHistory_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            var frm = new DriveHistoryView
+            DriveHistoryViewForm?.Close();
+            DriveHistoryViewForm = new()
             {
                 DriveID = this.Drive.DriveID,
                 Text = this.Drive.InstanceName + " | " + this.Drive.DriveLetter + " " + this.Drive.DriveLabel
             };
-            frm.Show();
+            DriveHistoryViewForm.FormClosed += delegate { DriveHistoryViewForm = null; };
+            DriveHistoryViewForm.Show();
         }
     }
 }

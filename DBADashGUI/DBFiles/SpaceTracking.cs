@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Drawing;
+using System.Drawing.Text;
 using System.Linq;
 using System.Windows.Forms;
 
@@ -125,31 +126,28 @@ namespace DBADashGUI
                 }
                 else if (e.ColumnIndex == dgv.Columns["colHistory"].Index)
                 {
-                    var frm = new DBSpaceHistoryView
-                    {
-                        DatabaseID = DatabaseID,
-                        InstanceGroupName = InstanceGroupName,
-                        DBName = DBName,
-                        NumberFormat = NumberFormat,
-                        Unit = Unit
-                    };
+                    string instance = InstanceGroupName;
+                    string db = DBName;
+                    int dbid = DatabaseID;
+                    string fileName = string.Empty;
+
                     if (InstanceIDs.Count > 1 && string.IsNullOrEmpty(InstanceGroupName))
                     {
-                        frm.InstanceGroupName = selectedGroupValue;
+                        instance = selectedGroupValue;
                     }
                     else if (DBName.Length == 0)
                     {
-                        frm.DBName = selectedGroupValue;
+                        db = selectedGroupValue;
                     }
                     else
                     {
-                        frm.FileName = selectedGroupValue;
+                        fileName = selectedGroupValue;
                     }
-                    if (frm.DatabaseID < 1)
+                    if (dbid < 1)
                     {
-                        frm.DatabaseID = CommonData.GetDatabaseID(frm.InstanceGroupName, frm.DBName);
+                        dbid = CommonData.GetDatabaseID(instance, db);
                     }
-                    frm.Show();
+                    LoadDBSpaceHistoryView(dbid, db, instance, fileName);
                 }
             }
         }
@@ -210,19 +208,28 @@ namespace DBADashGUI
             }
         }
 
+        private static DBSpaceHistoryView DBSpaceHistoryViewForm = null;
+
         private void TsHistory_Click(object sender, EventArgs e)
         {
-            var frm = new DBSpaceHistoryView
+            int dbid = DatabaseID < 1 ? CommonData.GetDatabaseID(InstanceGroupName, DBName) : DatabaseID;
+            LoadDBSpaceHistoryView(dbid, DBName, InstanceGroupName,string.Empty);
+        }
+
+        private void LoadDBSpaceHistoryView(int databaseID,string dbName,string instanceGroupName,string fileName)
+        {
+            DBSpaceHistoryViewForm?.Close();
+            DBSpaceHistoryViewForm = new DBSpaceHistoryView
             {
-                DatabaseID = DatabaseID,
-                InstanceGroupName = InstanceGroupName,
-                DBName = DBName
+                DatabaseID = databaseID,
+                InstanceGroupName = instanceGroupName,
+                DBName = dbName,
+                NumberFormat = NumberFormat,
+                Unit = Unit,
+                FileName=fileName
             };
-            if (frm.DatabaseID < 1)
-            {
-                frm.DatabaseID = CommonData.GetDatabaseID(frm.InstanceGroupName, frm.DBName);
-            }
-            frm.Show();
+            DBSpaceHistoryViewForm.FormClosed += delegate { DBSpaceHistoryViewForm = null; };
+            DBSpaceHistoryViewForm.Show();
         }
 
         private void TsExcel_Click(object sender, EventArgs e)
