@@ -37,13 +37,20 @@
 	@WritesTo BIGINT=NULL,
 	@EventType SYSNAME=NULL,
 	@Debug BIT=0,
-	@ShowHidden BIT=1
+	@ShowHidden BIT=1,
+	@Metric VARCHAR(50)='duration' /* duration or cpu_time */
 )
 AS
 DECLARE @DurationFromUS BIGINT 
 DECLARE @DurationToUS BIGINT
 SELECT @DurationFromUS = (SELECT MAX(value) FROM (VALUES(@DurationFromSec*1000000),(@DurationFromMs*1000)) AS T(value)), 
 	   @DurationToUS= (SELECT MIN(value) FROM (VALUES(@DurationToSec*1000000),(@DurationToMs*1000)) AS T(value))
+
+IF @Metric NOT IN('duration','cpu_time')
+BEGIN
+	RAISERROR('Invalid @Metric value.  Valid options: duration, cpu_time',11,1);
+	RETURN;
+END
 
 IF @FromDate IS NULL	
 	SET @FromDate = DATEADD(mi,-60,GETUTCDATE())
@@ -82,16 +89,16 @@ END
 DECLARE @SQL NVARCHAR(MAX)
 SET @SQL = 
 N'SELECT ' + CASE WHEN @Top IS NOT NULL THEN 'TOP(@Top) ' ELSE '' END + @GroupSQL + ' as Grp,
-		SUM(CASE WHEN Duration<5000000 THEN 1 ELSE 0 END) AS [<5 seconds], 
-		SUM(CASE WHEN Duration>=5000000 AND Duration < 10000000 THEN 1 ELSE 0 END) AS [5-10 seconds], 
-		SUM(CASE WHEN Duration>=10000000 AND Duration < 20000000 THEN 1 ELSE 0 END) AS [10-20 seconds], 
-		SUM(CASE WHEN Duration>=20000000 AND Duration < 30000000 THEN 1 ELSE 0 END) AS [20-30 seconds], 
-		SUM(CASE WHEN Duration>=30000000 AND Duration < 60000000 THEN 1 ELSE 0 END) AS [30-60 seconds], 
-		SUM(CASE WHEN Duration>=60000000 AND Duration < 300000000 THEN 1 ELSE 0 END) AS [1-5 minutes], 
-		SUM(CASE WHEN Duration>=300000000 AND Duration < 600000000 THEN 1 ELSE 0 END) AS [5-10 minutes], 
-		SUM(CASE WHEN Duration>=600000000 AND Duration < 1800000000 THEN 1 ELSE 0 END) AS [10-30 minutes], 
-		SUM(CASE WHEN Duration>=1800000000 AND Duration < 3600000000 THEN 1 ELSE 0 END) AS [30-60 minutes], 
-		SUM(CASE WHEN Duration>=3600000000 THEN 1 ELSE 0 END) AS [1hr+], 
+		SUM(CASE WHEN {Metric}<5000000 THEN 1 ELSE 0 END) AS [<5 seconds], 
+		SUM(CASE WHEN {Metric}>=5000000 AND {Metric} < 10000000 THEN 1 ELSE 0 END) AS [5-10 seconds], 
+		SUM(CASE WHEN {Metric}>=10000000 AND {Metric} < 20000000 THEN 1 ELSE 0 END) AS [10-20 seconds], 
+		SUM(CASE WHEN {Metric}>=20000000 AND {Metric} < 30000000 THEN 1 ELSE 0 END) AS [20-30 seconds], 
+		SUM(CASE WHEN {Metric}>=30000000 AND {Metric}< 60000000 THEN 1 ELSE 0 END) AS [30-60 seconds], 
+		SUM(CASE WHEN {Metric}>=60000000 AND {Metric} < 300000000 THEN 1 ELSE 0 END) AS [1-5 minutes], 
+		SUM(CASE WHEN {Metric}>=300000000 AND {Metric} < 600000000 THEN 1 ELSE 0 END) AS [5-10 minutes], 
+		SUM(CASE WHEN {Metric}>=600000000 AND {Metric} < 1800000000 THEN 1 ELSE 0 END) AS [10-30 minutes], 
+		SUM(CASE WHEN {Metric}>=1800000000 AND {Metric} < 3600000000 THEN 1 ELSE 0 END) AS [30-60 minutes], 
+		SUM(CASE WHEN {Metric}>=3600000000 THEN 1 ELSE 0 END) AS [1hr+], 
 		COUNT(*) Total,
 		SUM(CASE WHEN result <> ''0 - OK'' THEN 1 ELSE 0 END) AS FailedCount,
 		SUM(Duration) as TotalDuration,
@@ -137,6 +144,8 @@ AND timestamp< @ToDate
 ' + CASE WHEN @ShowHidden=1 THEN '' ELSE 'AND I.ShowInSummary=1' END + '
 GROUP BY ' + @GroupSQL +'
 ORDER BY SUM(Duration) DESC'
+
+SET @SQL = REPLACE(@SQL,'{Metric}',CASE WHEN @Metric = 'cpu_time' THEN 'cpu_time' ELSE 'Duration' END)
 
 IF @Debug=1
 	PRINT @SQL

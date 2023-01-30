@@ -226,6 +226,9 @@
             this.dataGridViewTextBoxColumn17 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dataGridViewTextBoxColumn18 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dataGridViewTextBoxColumn19 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.tsMetric = new System.Windows.Forms.ToolStripDropDownButton();
+            this.durationToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.cPUToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             ((System.ComponentModel.ISupportInitialize)(this.dgvSummary)).BeginInit();
             this.tsSummary.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dgvSlow)).BeginInit();
@@ -479,6 +482,7 @@
             this.tsSummary.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.tsRefresh,
             this.tsGroup,
+            this.tsMetric,
             this.tsFilter,
             this.tsTop,
             this.tsCopySummary,
@@ -1645,21 +1649,21 @@
             this.autoSizeColumnsToolStripMenuItem.CheckOnClick = true;
             this.autoSizeColumnsToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
             this.autoSizeColumnsToolStripMenuItem.Name = "autoSizeColumnsToolStripMenuItem";
-            this.autoSizeColumnsToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            this.autoSizeColumnsToolStripMenuItem.Size = new System.Drawing.Size(216, 26);
             this.autoSizeColumnsToolStripMenuItem.Text = "Auto Size Columns";
             this.autoSizeColumnsToolStripMenuItem.Click += new System.EventHandler(this.AutoSizeColumnsToolStripMenuItem_Click);
             // 
             // loadSavedToolStripMenuItem
             // 
             this.loadSavedToolStripMenuItem.Name = "loadSavedToolStripMenuItem";
-            this.loadSavedToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            this.loadSavedToolStripMenuItem.Size = new System.Drawing.Size(216, 26);
             this.loadSavedToolStripMenuItem.Text = "Load Saved";
             this.loadSavedToolStripMenuItem.Click += new System.EventHandler(this.LoadSavedToolStripMenuItem_Click);
             // 
             // resetLayoutToolStripMenuItem
             // 
             this.resetLayoutToolStripMenuItem.Name = "resetLayoutToolStripMenuItem";
-            this.resetLayoutToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            this.resetLayoutToolStripMenuItem.Size = new System.Drawing.Size(216, 26);
             this.resetLayoutToolStripMenuItem.Text = "Reset";
             this.resetLayoutToolStripMenuItem.ToolTipText = "Remove the saved layout.  The default layout will be used next time the applicati" +
     "on is loaded.";
@@ -1669,7 +1673,7 @@
             // 
             this.saveToolStripMenuItem.Image = global::DBADashGUI.Properties.Resources.Save_16x;
             this.saveToolStripMenuItem.Name = "saveToolStripMenuItem";
-            this.saveToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            this.saveToolStripMenuItem.Size = new System.Drawing.Size(216, 26);
             this.saveToolStripMenuItem.Text = "Save";
             this.saveToolStripMenuItem.Click += new System.EventHandler(this.SaveToolStripMenuItem_Click);
             // 
@@ -1873,6 +1877,33 @@
             this.dataGridViewTextBoxColumn19.ReadOnly = true;
             this.dataGridViewTextBoxColumn19.Width = 125;
             // 
+            // tsMetric
+            // 
+            this.tsMetric.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.durationToolStripMenuItem,
+            this.cPUToolStripMenuItem});
+            this.tsMetric.Image = global::DBADashGUI.Properties.Resources.AddComputedField_16x;
+            this.tsMetric.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tsMetric.Name = "tsMetric";
+            this.tsMetric.Size = new System.Drawing.Size(101, 24);
+            this.tsMetric.Text = "Duration";
+            // 
+            // durationToolStripMenuItem
+            // 
+            this.durationToolStripMenuItem.Checked = true;
+            this.durationToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.durationToolStripMenuItem.Name = "durationToolStripMenuItem";
+            this.durationToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            this.durationToolStripMenuItem.Text = "Duration";
+            this.durationToolStripMenuItem.Click += new System.EventHandler(this.Metric_Selected);
+            // 
+            // cPUToolStripMenuItem
+            // 
+            this.cPUToolStripMenuItem.Name = "cPUToolStripMenuItem";
+            this.cPUToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            this.cPUToolStripMenuItem.Text = "CPU";
+            this.cPUToolStripMenuItem.Click += new System.EventHandler(this.Metric_Selected);
+            // 
             // SlowQueries
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
@@ -2072,5 +2103,8 @@
         private System.Windows.Forms.DataGridViewLinkColumn colText;
         private System.Windows.Forms.ToolStripMenuItem loadSavedToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem resetLayoutToolStripMenuItem;
+        private System.Windows.Forms.ToolStripDropDownButton tsMetric;
+        private System.Windows.Forms.ToolStripMenuItem durationToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem cPUToolStripMenuItem;
     }
 }

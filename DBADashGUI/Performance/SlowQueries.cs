@@ -36,7 +36,16 @@ namespace DBADashGUI
             }
         }
 
+        private string Metric => tsMetric.Text == "CPU" ? "cpu_time" : "Duration";
+
+        private bool IsCPU => tsMetric.Text == "CPU";
+
         public bool CanNavigateBack => tsRunningBack.Visible && tsRunning.Enabled;
+
+        private long CPUFilterFrom => long.TryParse(txtCPUFrom.Text, out long value) ? value : -1;
+        private long CPUFilterTo => long.TryParse(txtCPUTo.Text, out long value) ? value : long.MaxValue;
+        private long DurationFilterFrom => long.TryParse(txtDurationFrom.Text, out long value) ? value : -1;
+        private long DurationFilterTo => long.TryParse(txtDurationTo.Text, out long value) ? value : long.MaxValue;
 
         private bool IsFiltered() => txtText.Text.Length > 0 ||
                   txtClient.Text.Length > 0 ||
@@ -184,6 +193,7 @@ namespace DBADashGUI
                     cmd.Parameters.AddStringIfNotNullOrEmpty("ExcludeText", txtExcludeText.Text);
                     cmd.Parameters.AddStringIfNotNullOrEmpty("ExcludeUserName", txtExcludeUser.Text);
                     cmd.Parameters.AddStringIfNotNullOrEmpty("ExcludeResult", txtExcludeResult.Text);
+                    cmd.Parameters.AddWithValue("Metric", Metric);
                     if (txtDurationFrom.Text.Length > 0)
                     {
                         cmd.Parameters.AddWithValue("DurationFromMs", Convert.ToInt64(txtDurationFrom.Text));
@@ -486,7 +496,7 @@ namespace DBADashGUI
             RefreshData();
         }
 
-        private DataTable GetSlowQueriesDetail(Int32 durationFrom = -1, Int32 durationTo = -1, bool failed = false)
+        private DataTable GetSlowQueriesDetail(long durationFrom = -1, long durationTo = -1, long cpuFrom = -1, long cpuTo = long.MaxValue, bool failed = false)
         {
             using (var cn = new SqlConnection(Common.ConnectionString))
             using (var cmd = new SqlCommand("dbo.SlowQueriesDetail_Get", cn) { CommandType = CommandType.StoredProcedure })
@@ -564,7 +574,15 @@ namespace DBADashGUI
                 {
                     throw new Exception($"Invalid group by: {groupBy}");
                 }
+                long cpuFromMs = Math.Max(cpuFrom, CPUFilterFrom);
+                long cpuToMs = Math.Min(cpuTo, CPUFilterTo);
+                long durationFromMs = Math.Max(durationFrom, DurationFilterFrom);
+                long durationToMs = Math.Min(durationTo, DurationFilterTo);
 
+                cmd.Parameters.AddIfGreaterThanZero("CPUFromMs", cpuFromMs);
+                cmd.Parameters.AddIfLessThanMaxValue("CPUToMs", cpuToMs);
+                cmd.Parameters.AddIfGreaterThanZero("DurationFromMs", durationFromMs);
+                cmd.Parameters.AddIfLessThanMaxValue("DurationToMs", durationToMs);
                 cmd.Parameters.AddStringIfNotNullOrEmpty("ClientHostName", client);
                 cmd.Parameters.AddStringIfNotNullOrEmpty("InstanceDisplayName", displayName);
                 cmd.Parameters.AddStringIfNotNullOrEmpty("ClientAppName", app);
@@ -572,8 +590,6 @@ namespace DBADashGUI
                 cmd.Parameters.AddStringIfNotNullOrEmpty("ObjectName", objectname);
                 cmd.Parameters.AddStringIfNotNullOrEmpty("UserName", user);
                 cmd.Parameters.AddStringIfNotNullOrEmpty("Text", text);
-                cmd.Parameters.AddIfGreaterThanZero("DurationFromSec", durationFrom);
-                cmd.Parameters.AddIfGreaterThanZero("DurationToSec", durationTo);
                 cmd.Parameters.AddStringIfNotNullOrEmpty("Result", result);
                 cmd.Parameters.AddStringIfNotNullOrEmpty("SessionID", sessionid);
                 cmd.Parameters.AddStringIfNotNullOrEmpty("ExcludeClientAppName", txtExcludeApp.Text);
@@ -585,22 +601,7 @@ namespace DBADashGUI
                 cmd.Parameters.AddStringIfNotNullOrEmpty("ExcludeText", txtExcludeText.Text);
                 cmd.Parameters.AddStringIfNotNullOrEmpty("ExcludeUserName", txtExcludeUser.Text);
                 cmd.Parameters.AddStringIfNotNullOrEmpty("ExcludeResult", txtExcludeResult.Text);
-                if (txtDurationFrom.Text.Length > 0)
-                {
-                    cmd.Parameters.AddWithValue("DurationFromMs", Convert.ToInt64(txtDurationFrom.Text));
-                }
-                if (txtDurationTo.Text.Length > 0)
-                {
-                    cmd.Parameters.AddWithValue("DurationToMs", Convert.ToInt64(txtDurationTo.Text));
-                }
-                if (txtCPUFrom.Text.Length > 0)
-                {
-                    cmd.Parameters.AddWithValue("CPUFromMs", Convert.ToInt64(txtCPUFrom.Text));
-                }
-                if (txtCPUTo.Text.Length > 0)
-                {
-                    cmd.Parameters.AddWithValue("CPUToMs", Convert.ToInt64(txtCPUTo.Text));
-                }
+
                 if (txtPhysicalReadsFrom.Text.Length > 0)
                 {
                     cmd.Parameters.AddWithValue("PhysicalReadsFrom", Convert.ToInt64(txtPhysicalReadsFrom.Text));
@@ -632,9 +633,13 @@ namespace DBADashGUI
             }
         }
 
-        private void LoadSlowQueriesDetail(Int32 durationFrom = -1, Int32 durationTo = -1, bool failed = false)
+        private void LoadSlowQueriesDetail(Int32 metricFrom = -1, Int32 metricTo = -1, bool failed = false)
         {
-            var dt = GetSlowQueriesDetail(durationFrom, durationTo, failed);
+            long durationFrom = !IsCPU && metricFrom > 0 ? Convert.ToInt64(metricFrom) * 1000 : -1;
+            long durationTo = !IsCPU && metricTo > 0 ? Convert.ToInt64(metricTo) * 1000 : long.MaxValue;
+            long cpuFrom = IsCPU && metricFrom > 0 ? Convert.ToInt64(metricFrom) * 1000 : -1;
+            long cpuTo = IsCPU && metricTo > 0 ? Convert.ToInt64(metricTo) * 1000 : long.MaxValue;
+            var dt = GetSlowQueriesDetail(durationFrom, durationTo, cpuFrom, cpuTo, failed);
             dt.Columns.Add("text_trunc", typeof(string));
             foreach (DataRow r in dt.Rows)
             {
@@ -901,6 +906,14 @@ namespace DBADashGUI
             {
                 MessageBox.Show("Error deleting saved view\n" + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
+        }
+
+        private void Metric_Selected(object sender, EventArgs e)
+        {
+            var item = (ToolStripMenuItem)sender;
+            tsMetric.CheckSingleItem(item);
+            tsMetric.Text = item.Text;
+            RefreshData();
         }
     }
 }
