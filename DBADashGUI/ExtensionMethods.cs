@@ -197,6 +197,20 @@ namespace DBADashGUI
         }
 
         /// <summary>
+        /// Add parameter with value if value is less than max value
+        /// </summary>
+        /// <param name="p"></param>
+        /// <param name="parameterName">Name of parameter</param>
+        /// <param name="value">Parameter value</param>
+        internal static SqlParameter AddIfLessThanMaxValue(this SqlParameterCollection p, string parameterName, long value)
+        {
+            if (value != Int64.MaxValue)
+                return p.AddWithValue(parameterName, value);
+            else
+                return null;
+        }
+
+        /// <summary>
         /// Check a single ToolStripMenuItem.  Other menu items to be unchecked
         /// </summary>
         /// <param name="dropdown"></param>
