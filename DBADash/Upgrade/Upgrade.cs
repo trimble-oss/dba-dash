@@ -3,6 +3,7 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Reflection;
+using System.Security.Principal;
 using System.Threading.Tasks;
 
 namespace DBADash
@@ -44,7 +45,7 @@ namespace DBADash
             return Assembly.GetExecutingAssembly().GetName().Version;
         }
 
-        public static async Task UpgradeDBADashAsync(string tag = "", bool startGUI = false, bool startConfig = false)
+        public static async Task UpgradeDBADashAsync(string tag = "", bool startGUI = false, bool startConfig = false,bool noExit=true)
         {
             var client = new GitHubClient(new ProductHeaderValue(GITHUB_APP));
             var upgradeScript = await client.Repository.Content.GetRawContentByRef(GITHUB_OWNER, GITHUB_REPO, GITHUB_SCRIPTPATH + GITHUB_UPGRADESCRIPT, GITHUB_BRANCH);
@@ -54,7 +55,7 @@ namespace DBADash
             var psi = new ProcessStartInfo()
             {
                 FileName = "PowerShell.exe",
-                Arguments = "-NoProfile -NoExit -ExecutionPolicy ByPass -Command &{" +
+                Arguments = "-NoProfile " + (noExit ? "-NoExit " : "") + "-ExecutionPolicy ByPass -Command &{" +
                                $"Set-Location -Path '{ApplicationPath}'; " +
                                $"./{GITHUB_UPGRADESCRIPT}" +
                                             (tag == String.Empty ? string.Empty : " -Tag " + tag)
@@ -74,5 +75,9 @@ namespace DBADash
         public static DeploymentTypes DeploymentType => File.Exists(Path.Combine(ApplicationPath, ServiceFileName)) ? DeploymentTypes.ServiceAndGUI : DeploymentTypes.GUI;
 
         public static string LatestVersionLink => $"https://github.com/{Upgrade.GITHUB_OWNER}/{Upgrade.GITHUB_REPO}/releases/latest";
+
+        public static bool IsAdministrator =>
+            new WindowsPrincipal(WindowsIdentity.GetCurrent())
+                .IsInRole(WindowsBuiltInRole.Administrator);
     }
 }

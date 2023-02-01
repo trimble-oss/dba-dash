@@ -5,6 +5,43 @@ using Serilog;
 using System.Runtime.InteropServices;
 using static DBADashConfig.Options;
 
+static void CommandLineUpgrade()
+{
+    try
+    {
+        var latest = Upgrade.GetLatestVersionAsync().GetAwaiter().GetResult();
+        if (Upgrade.IsUpgradeAvailable(latest))
+        {
+            if (Upgrade.IsAdministrator)
+            {
+                Log.Information($"Upgrade is available to {latest.TagName}.  Initiating upgrade.");
+                Upgrade.UpgradeDBADashAsync(noExit: false).Wait();
+            }
+            else
+            {
+                Log.Information($"Upgrade is available to {latest.TagName}.  Please re-run as Administrator.");
+            }
+        }
+        else
+        {
+            Log.Information($"Latest version is {latest.TagName}.  Upgrade is not available at this time. ");
+        }
+
+        return;
+    }
+    catch (AggregateException ex) when (ex.InnerException != null &&
+                                        ex.InnerException.GetType() == typeof(Octokit.NotFoundException))
+    {
+        Log.Error("Upgrade script is not available.  Please check the upgrade instructions on the GitHub page");
+        return;
+    }
+    catch (Exception ex)
+    {
+        Log.Error(ex, "Error running upgrade");
+        throw;
+    }
+}
+
 Log.Logger = new LoggerConfiguration()
     .WriteTo.Console(outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] {Message:lj} {NewLine}{Exception}")
     .CreateLogger();
@@ -153,21 +190,8 @@ try
               }
               else if (o.Option == CommandLineActionOption.Update)
               {
-                  try
-                  {
-                      Upgrade.UpgradeDBADashAsync().Wait();
-                      return;
-                  }
-                  catch (AggregateException ex) when (ex.InnerException != null && ex.InnerException.GetType() == typeof(Octokit.NotFoundException))
-                  {
-                      Log.Error("Upgrade script is not available.  Please check the upgrade instructions on the GitHub page");
-                      return;
-                  }
-                  catch (Exception ex)
-                  {
-                      Log.Error(ex, "Error running upgrade");
-                      throw;
-                  }
+                  CommandLineUpgrade();
+                  return;
               }
               else if (o.Option == CommandLineActionOption.SetServiceName)
               {
@@ -224,8 +248,4 @@ catch (Exception ex)
     Log.Error(ex, "Error running DBADashConfig");
     Environment.Exit(1);
 }
-
-
-
-
 
