@@ -68,7 +68,10 @@ SELECT InstanceID,
        wait_db,
        wait_object,
        wait_file,
-       login_time_utc  
+       login_time_utc,
+       has_plan,
+       statement_start_offset,
+       statement_end_offset
 FROM dbo.RunningQueriesInfo Q
 WHERE Q.SnapshotDateUTC >= @SnapshotDateFrom 
 AND Q.SnapshotDateUTC < @SnapshotDateTo
