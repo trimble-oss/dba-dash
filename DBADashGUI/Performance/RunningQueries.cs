@@ -4,8 +4,8 @@ using System.Collections.Generic;
 using System.Data;
 using System.Diagnostics;
 using System.Drawing;
+using System.Globalization;
 using System.Linq;
-using System.Text;
 using System.Windows.Forms;
 
 namespace DBADashGUI.Performance
@@ -18,7 +18,7 @@ namespace DBADashGUI.Performance
         }
 
         public int InstanceID;
-        private List<Int32> InstanceIDs;
+        private List<int> InstanceIDs;
         private DateTime currentSnapshotDate;
         private DataTable snapshotDT;
         public DateTime SnapshotDateFrom;
@@ -30,76 +30,71 @@ namespace DBADashGUI.Performance
         private bool hasWaitResource;
         private long blockedWait;
 
-        private DataGridViewColumn[] RunningQueryColumns
-        {
-            get
-            {
-                return new DataGridViewColumn[] {
-                    new DataGridViewLinkColumn() { HeaderText = "Instance", DataPropertyName = "InstanceDisplayName", Name = "colInstance", SortMode = DataGridViewColumnSortMode.Automatic, MinimumWidth = 60, LinkColor = DashColors.LinkColor, Frozen = Common.FreezeKeyColumn},
-                    new DataGridViewLinkColumn() { HeaderText = "Session ID", DataPropertyName = "session_id", Name = "colSessionID", SortMode = DataGridViewColumnSortMode.Automatic, MinimumWidth = 60, LinkColor = DashColors.LinkColor, Frozen = Common.FreezeKeyColumn },
-                    new DataGridViewLinkColumn() { HeaderText = "Batch Text", DataPropertyName = "batch_text", Name = "colBatchText", SortMode = DataGridViewColumnSortMode.Automatic, LinkColor = DashColors.LinkColor},
-                    new DataGridViewLinkColumn() { HeaderText = "Text", DataPropertyName = "text", Name = "colText", SortMode = DataGridViewColumnSortMode.Automatic, LinkColor = DashColors.LinkColor},
-                    new DataGridViewLinkColumn() { HeaderText = "Plan", DataPropertyName="has_plan", Name = "colQueryPlan", SortMode = DataGridViewColumnSortMode.Automatic, Visible = true, LinkColor = DashColors.LinkColor, ToolTipText="Click link to view query plan" },
-                    new DataGridViewTextBoxColumn() { HeaderText = "Blocking Session ID", DataPropertyName = "blocking_session_id", Name = "colBlockingSessionID", SortMode = DataGridViewColumnSortMode.Automatic, MinimumWidth = 60, ToolTipText = "ID of the session directly blocking the current query.  0 = Not blocked.", DefaultCellStyle = new DataGridViewCellStyle(){ ForeColor=Color.White } },
-                    new DataGridViewTextBoxColumn() { HeaderText = "Blocking Hierarchy", DataPropertyName = "BlockingHierarchy", SortMode = DataGridViewColumnSortMode.Automatic, Visible = blockedCount > 0, MinimumWidth = 70, ToolTipText = "Identifies all the session IDs that are involved in the blocking chain for each query starting with the root blocker." },
-                    new DataGridViewCheckBoxColumn { HeaderText = "Root Blocker", DataPropertyName = "IsRootBlocker", Name = "colIsRootBlocker", SortMode = DataGridViewColumnSortMode.Automatic, MinimumWidth = 60, Visible = blockedCount > 0, ToolTipText = "Root blocker is the query at the head of the blocking chain. This query is not blocked but it's holding locks that other queries are waiting for." },
-                    new DataGridViewLinkColumn() { HeaderText = "Blocked Count", DataPropertyName = "BlockCount", Name = "colBlockCount", SortMode = DataGridViewColumnSortMode.Automatic, Visible = blockedCount > 0, MinimumWidth = 60, ToolTipText = "Count of sessions blocked directly by the current query." , LinkColor = Color.White },
-                    new DataGridViewLinkColumn() { HeaderText = "Blocked Count Recursive", DataPropertyName = "BlockCountRecursive", Name = "colBlockedCountRecursive", SortMode = DataGridViewColumnSortMode.Automatic, Visible = blockedCount > 0, MinimumWidth = 60, ToolTipText = "Count of sessions blocked by the current query - directly or indirectly", LinkColor = Color.White },
-                    new DataGridViewTextBoxColumn() { HeaderText = "Blocked Wait Time", DataPropertyName = "BlockWaitTime", Name = "colBlockedWaitTime", SortMode = DataGridViewColumnSortMode.Automatic, Visible = blockedCount > 0, MinimumWidth = 60, ToolTipText = "Wait time associated with sessions blocked directly by the current session." },
-                    new DataGridViewTextBoxColumn() { HeaderText = "Blocked Wait Time Recursive", DataPropertyName = "BlockWaitTimeRecursive", Name = "colBlockedWaitTimeRecursive", SortMode = DataGridViewColumnSortMode.Automatic, Visible = blockedCount > 0, MinimumWidth = 60, ToolTipText = "Wait time associated with sessions blocked directly or indirectly by the current session" },
-                    new DataGridViewTextBoxColumn() { HeaderText = "Duration", DataPropertyName = "Duration", Name = "colDuration", SortMode = DataGridViewColumnSortMode.Automatic, MinimumWidth = 60 },
-                    new DataGridViewTextBoxColumn() { HeaderText = "Duration (ms)", DataPropertyName = "Duration (ms)", SortMode = DataGridViewColumnSortMode.Automatic, DefaultCellStyle = Common.DataGridViewNumericCellStyle, MinimumWidth = 60 },
-                    new DataGridViewTextBoxColumn() { HeaderText = "CPU Time", DataPropertyName = "cpu_time", SortMode = DataGridViewColumnSortMode.Automatic, DefaultCellStyle = Common.DataGridViewNumericCellStyle, MinimumWidth = 60 },
-                    new DataGridViewTextBoxColumn() { HeaderText = "Logical Reads", DataPropertyName = "logical_reads", SortMode = DataGridViewColumnSortMode.Automatic, DefaultCellStyle = Common.DataGridViewNumericCellStyle, MinimumWidth = 60 },
-                    new DataGridViewTextBoxColumn() { HeaderText = "Reads", DataPropertyName = "reads", SortMode = DataGridViewColumnSortMode.Automatic, DefaultCellStyle = Common.DataGridViewNumericCellStyle, MinimumWidth = 60 },
-                    new DataGridViewTextBoxColumn() { HeaderText = "Writes", DataPropertyName = "writes", SortMode = DataGridViewColumnSortMode.Automatic, DefaultCellStyle = Common.DataGridViewNumericCellStyle, MinimumWidth = 60 },
-                    new DataGridViewTextBoxColumn() { HeaderText = "Granted Query Memory (Kb)", DataPropertyName = "granted_query_memory_kb", SortMode = DataGridViewColumnSortMode.Automatic, DefaultCellStyle = Common.DataGridViewNumericCellStyle, MinimumWidth = 60 },
-                    new DataGridViewTextBoxColumn() { HeaderText = "Command", DataPropertyName = "Command", Name = "colCommand", SortMode = DataGridViewColumnSortMode.Automatic, MinimumWidth = 40 },
-                    new DataGridViewTextBoxColumn() { HeaderText = "Status", DataPropertyName = "Status", Name = "colStatus", SortMode = DataGridViewColumnSortMode.Automatic, MinimumWidth = 40 },
-                    new DataGridViewTextBoxColumn() { HeaderText = "Wait Time (ms)", DataPropertyName = "wait_time", Name = "colWaitTime", SortMode = DataGridViewColumnSortMode.Automatic, DefaultCellStyle = Common.DataGridViewNumericCellStyle, MinimumWidth = 60 },
-                    new DataGridViewTextBoxColumn() { HeaderText = "Wait Type", DataPropertyName = "wait_type", SortMode = DataGridViewColumnSortMode.Automatic, MinimumWidth = 40 },
-                    new DataGridViewLinkColumn() { HeaderText = "Top Session Waits", DataPropertyName = "TopSessionWaits", Name = "colTopSessionWaits", AutoSizeMode = DataGridViewAutoSizeColumnMode.None, Width = 50, SortMode = DataGridViewColumnSortMode.Automatic , LinkColor = DashColors.LinkColor},
-                    new DataGridViewTextBoxColumn() { HeaderText = "Object ID", DataPropertyName = "object_id", SortMode = DataGridViewColumnSortMode.Automatic, MinimumWidth = 40 },
-                    new DataGridViewTextBoxColumn() { HeaderText = "Object Name", DataPropertyName = "object_name", SortMode = DataGridViewColumnSortMode.Automatic, MinimumWidth = 40 },
-                    new DataGridViewTextBoxColumn() { Name="colSnapshotDate", HeaderText = "Snapshot Date", DataPropertyName = "SnapshotDate", SortMode = DataGridViewColumnSortMode.Automatic, MinimumWidth = 40 },
-                    new DataGridViewLinkColumn { Name="colSnapshotDateLink", HeaderText = "Snapshot Date", DataPropertyName = "SnapshotDate", SortMode = DataGridViewColumnSortMode.Automatic, MinimumWidth = 40, Visible=false,LinkColor=DashColors.LinkColor },
-                    new DataGridViewTextBoxColumn() { HeaderText = "% Complete", DataPropertyName = "percent_complete", SortMode = DataGridViewColumnSortMode.Automatic, DefaultCellStyle = Common.DataGridViewNumericCellStyle, MinimumWidth = 60 },
-                    new DataGridViewTextBoxColumn() { HeaderText = "Open Transaction Count", DataPropertyName = "open_transaction_count", SortMode = DataGridViewColumnSortMode.Automatic, DefaultCellStyle = Common.DataGridViewNumericCellStyle, MinimumWidth = 60 },
-                    new DataGridViewTextBoxColumn() { HeaderText = "Transaction Isolation Level", DataPropertyName = "transaction_isolation_level", SortMode = DataGridViewColumnSortMode.Automatic, MinimumWidth = 40  },
-                    new DataGridViewTextBoxColumn() { HeaderText = "Login Name", DataPropertyName = "login_name", SortMode = DataGridViewColumnSortMode.Automatic, MinimumWidth = 40 },
-                    new DataGridViewTextBoxColumn() { HeaderText = "Host Name", DataPropertyName = "host_name", SortMode = DataGridViewColumnSortMode.Automatic, MinimumWidth = 40 },
-                    new DataGridViewTextBoxColumn() { HeaderText = "Database ID", DataPropertyName = "database_id", SortMode = DataGridViewColumnSortMode.Automatic, MinimumWidth = 60 },
-                    new DataGridViewTextBoxColumn() { HeaderText = "Database Name", DataPropertyName = "database_names", SortMode = DataGridViewColumnSortMode.Automatic, MinimumWidth = 40 },
-                    new DataGridViewTextBoxColumn() { HeaderText = "Program Name", DataPropertyName = "program_name", SortMode = DataGridViewColumnSortMode.Automatic, MinimumWidth = 40 },
-                    new DataGridViewTextBoxColumn() { HeaderText = "Job ID", DataPropertyName = "job_id", SortMode = DataGridViewColumnSortMode.Automatic, Visible = runningJobCount > 0, MinimumWidth = 40 },
-                    new DataGridViewTextBoxColumn() { HeaderText = "Job Name", DataPropertyName = "job_name", SortMode = DataGridViewColumnSortMode.Automatic, Visible = runningJobCount > 0, MinimumWidth = 40 },
-                    new DataGridViewTextBoxColumn() { HeaderText = "Client Interface Name", DataPropertyName = "client_interface_name", SortMode = DataGridViewColumnSortMode.Automatic, MinimumWidth = 40 },
-                    new DataGridViewTextBoxColumn() { HeaderText = "Start Time", DataPropertyName = "start_time", SortMode = DataGridViewColumnSortMode.Automatic, MinimumWidth = 40 },
-                    new DataGridViewTextBoxColumn() { HeaderText = "Last Request Start Time", DataPropertyName = "last_request_start_time", SortMode = DataGridViewColumnSortMode.Automatic, MinimumWidth = 40 },
-                    new DataGridViewTextBoxColumn() { HeaderText = "Wait Resource", DataPropertyName = "wait_resource", SortMode = DataGridViewColumnSortMode.Automatic, MinimumWidth = 40 },
-                    new DataGridViewTextBoxColumn() { HeaderText = "Wait Resource Type", DataPropertyName = "wait_resource_type", SortMode = DataGridViewColumnSortMode.Automatic, MinimumWidth = 40, Visible = hasWaitResource },
-                    new DataGridViewTextBoxColumn() { HeaderText = "Wait Database ID", DataPropertyName = "wait_database_id", SortMode = DataGridViewColumnSortMode.Automatic, MinimumWidth = 40, Visible = hasWaitResource },
-                    new DataGridViewTextBoxColumn() { HeaderText = "Wait Database", DataPropertyName = "wait_db", SortMode = DataGridViewColumnSortMode.Automatic, MinimumWidth = 40, Visible = hasWaitResource },
-                    new DataGridViewTextBoxColumn() { HeaderText = "Wait File ID", DataPropertyName = "wait_file_id", SortMode = DataGridViewColumnSortMode.Automatic, MinimumWidth = 40, Visible = hasWaitResource },
-                    new DataGridViewTextBoxColumn() { HeaderText = "Wait File", DataPropertyName = "wait_file", SortMode = DataGridViewColumnSortMode.Automatic, MinimumWidth = 40, Visible = hasWaitResource },
-                    new DataGridViewTextBoxColumn() { HeaderText = "Wait Page ID", DataPropertyName = "wait_page_id", SortMode = DataGridViewColumnSortMode.Automatic, MinimumWidth = 40, Visible = hasWaitResource },
-                    new DataGridViewTextBoxColumn() { HeaderText = "Wait Object ID", DataPropertyName = "wait_object_id", SortMode = DataGridViewColumnSortMode.Automatic, MinimumWidth = 40, Visible = hasWaitResource },
-                    new DataGridViewTextBoxColumn() { HeaderText = "Wait Object", DataPropertyName = "wait_object", SortMode = DataGridViewColumnSortMode.Automatic, MinimumWidth = 40, Visible = hasWaitResource },
-                    new DataGridViewTextBoxColumn() { HeaderText = "Wait Index ID", DataPropertyName = "wait_index_id", SortMode = DataGridViewColumnSortMode.Automatic, MinimumWidth = 40, Visible = hasWaitResource },
-                    new DataGridViewTextBoxColumn() { HeaderText = "Wait HOBT", DataPropertyName = "wait_hobt", SortMode = DataGridViewColumnSortMode.Automatic, MinimumWidth = 40, Visible = hasWaitResource },
-                    new DataGridViewTextBoxColumn() { HeaderText = "Wait Hash", DataPropertyName = "wait_hash", SortMode = DataGridViewColumnSortMode.Automatic, MinimumWidth = 40, Visible = hasWaitResource },
-                    new DataGridViewTextBoxColumn() { HeaderText = "Wait Slot", DataPropertyName = "wait_slot", SortMode = DataGridViewColumnSortMode.Automatic, MinimumWidth = 40, Visible = hasWaitResource },
-                    new DataGridViewCheckBoxColumn() { HeaderText = "Wait Is Compile", DataPropertyName = "wait_is_compile", SortMode = DataGridViewColumnSortMode.Automatic, MinimumWidth = 40, Visible = hasWaitResource },
-                    new DataGridViewTextBoxColumn() { HeaderText = "Page Type", DataPropertyName = "page_type", SortMode = DataGridViewColumnSortMode.Automatic, MinimumWidth = 40, Visible = hasWaitResource },
-                    new DataGridViewTextBoxColumn() { HeaderText = "Login Time", DataPropertyName = "login_time", SortMode = DataGridViewColumnSortMode.Automatic, MinimumWidth = 40, },
-                    new DataGridViewLinkColumn()  { HeaderText = "SQL Handle", DataPropertyName = "sql_handle", SortMode = DataGridViewColumnSortMode.Automatic, Name = "colSQLHandle" ,LinkColor=DashColors.LinkColor },
-                    new DataGridViewLinkColumn()  { HeaderText = "Plan Handle", DataPropertyName = "plan_handle", SortMode = DataGridViewColumnSortMode.Automatic, Name = "colPlanHandle",LinkColor=DashColors.LinkColor  },
-                    new DataGridViewLinkColumn()  { HeaderText = "Query Hash", DataPropertyName = "query_hash", SortMode = DataGridViewColumnSortMode.Automatic, Name = "colQueryHash" ,LinkColor=DashColors.LinkColor },
-                    new DataGridViewLinkColumn()  { HeaderText = "Query Plan Hash", DataPropertyName = "query_plan_hash", SortMode = DataGridViewColumnSortMode.Automatic, Name = "colQueryPlanHash" ,LinkColor=DashColors.LinkColor },
-                    new DataGridViewTextBoxColumn { HeaderText = "InstanceID", DataPropertyName = "InstanceID", Name = "colInstanceID", Visible = false },
-                };
-            }
-        }
+        private DataGridViewColumn[] RunningQueryColumns =>
+            new DataGridViewColumn[] {
+                new DataGridViewLinkColumn() { HeaderText = "Instance", DataPropertyName = "InstanceDisplayName", Name = "colInstance", SortMode = DataGridViewColumnSortMode.Automatic, MinimumWidth = 60, LinkColor = DashColors.LinkColor, Frozen = Common.FreezeKeyColumn},
+                new DataGridViewLinkColumn() { HeaderText = "Session ID", DataPropertyName = "session_id", Name = "colSessionID", SortMode = DataGridViewColumnSortMode.Automatic, MinimumWidth = 60, LinkColor = DashColors.LinkColor, Frozen = Common.FreezeKeyColumn },
+                new DataGridViewLinkColumn() { HeaderText = "Batch Text", DataPropertyName = "batch_text", Name = "colBatchText", SortMode = DataGridViewColumnSortMode.Automatic, LinkColor = DashColors.LinkColor},
+                new DataGridViewLinkColumn() { HeaderText = "Text", DataPropertyName = "text", Name = "colText", SortMode = DataGridViewColumnSortMode.Automatic, LinkColor = DashColors.LinkColor},
+                new DataGridViewLinkColumn() { HeaderText = "Plan", DataPropertyName="has_plan", Name = "colQueryPlan", SortMode = DataGridViewColumnSortMode.Automatic, Visible = true, LinkColor = DashColors.LinkColor, ToolTipText="Click link to view query plan" },
+                new DataGridViewTextBoxColumn() { HeaderText = "Blocking Session ID", DataPropertyName = "blocking_session_id", Name = "colBlockingSessionID", SortMode = DataGridViewColumnSortMode.Automatic, MinimumWidth = 60, ToolTipText = "ID of the session directly blocking the current query.  0 = Not blocked.", DefaultCellStyle = new DataGridViewCellStyle(){ ForeColor=Color.White } },
+                new DataGridViewTextBoxColumn() { HeaderText = "Blocking Hierarchy", DataPropertyName = "BlockingHierarchy", SortMode = DataGridViewColumnSortMode.Automatic, Visible = blockedCount > 0, MinimumWidth = 70, ToolTipText = "Identifies all the session IDs that are involved in the blocking chain for each query starting with the root blocker." },
+                new DataGridViewCheckBoxColumn { HeaderText = "Root Blocker", DataPropertyName = "IsRootBlocker", Name = "colIsRootBlocker", SortMode = DataGridViewColumnSortMode.Automatic, MinimumWidth = 60, Visible = blockedCount > 0, ToolTipText = "Root blocker is the query at the head of the blocking chain. This query is not blocked but it's holding locks that other queries are waiting for." },
+                new DataGridViewLinkColumn() { HeaderText = "Blocked Count", DataPropertyName = "BlockCount", Name = "colBlockCount", SortMode = DataGridViewColumnSortMode.Automatic, Visible = blockedCount > 0, MinimumWidth = 60, ToolTipText = "Count of sessions blocked directly by the current query." , LinkColor = Color.White },
+                new DataGridViewLinkColumn() { HeaderText = "Blocked Count Recursive", DataPropertyName = "BlockCountRecursive", Name = "colBlockedCountRecursive", SortMode = DataGridViewColumnSortMode.Automatic, Visible = blockedCount > 0, MinimumWidth = 60, ToolTipText = "Count of sessions blocked by the current query - directly or indirectly", LinkColor = Color.White },
+                new DataGridViewTextBoxColumn() { HeaderText = "Blocked Wait Time", DataPropertyName = "BlockWaitTime", Name = "colBlockedWaitTime", SortMode = DataGridViewColumnSortMode.Automatic, Visible = blockedCount > 0, MinimumWidth = 60, ToolTipText = "Wait time associated with sessions blocked directly by the current session." },
+                new DataGridViewTextBoxColumn() { HeaderText = "Blocked Wait Time Recursive", DataPropertyName = "BlockWaitTimeRecursive", Name = "colBlockedWaitTimeRecursive", SortMode = DataGridViewColumnSortMode.Automatic, Visible = blockedCount > 0, MinimumWidth = 60, ToolTipText = "Wait time associated with sessions blocked directly or indirectly by the current session" },
+                new DataGridViewTextBoxColumn() { HeaderText = "Duration", DataPropertyName = "Duration", Name = "colDuration", SortMode = DataGridViewColumnSortMode.Automatic, MinimumWidth = 60 },
+                new DataGridViewTextBoxColumn() { HeaderText = "Duration (ms)", DataPropertyName = "Duration (ms)", SortMode = DataGridViewColumnSortMode.Automatic, DefaultCellStyle = Common.DataGridViewNumericCellStyle, MinimumWidth = 60 },
+                new DataGridViewTextBoxColumn() { HeaderText = "CPU Time", DataPropertyName = "cpu_time", SortMode = DataGridViewColumnSortMode.Automatic, DefaultCellStyle = Common.DataGridViewNumericCellStyle, MinimumWidth = 60 },
+                new DataGridViewTextBoxColumn() { HeaderText = "Logical Reads", DataPropertyName = "logical_reads", SortMode = DataGridViewColumnSortMode.Automatic, DefaultCellStyle = Common.DataGridViewNumericCellStyle, MinimumWidth = 60 },
+                new DataGridViewTextBoxColumn() { HeaderText = "Reads", DataPropertyName = "reads", SortMode = DataGridViewColumnSortMode.Automatic, DefaultCellStyle = Common.DataGridViewNumericCellStyle, MinimumWidth = 60 },
+                new DataGridViewTextBoxColumn() { HeaderText = "Writes", DataPropertyName = "writes", SortMode = DataGridViewColumnSortMode.Automatic, DefaultCellStyle = Common.DataGridViewNumericCellStyle, MinimumWidth = 60 },
+                new DataGridViewTextBoxColumn() { HeaderText = "Granted Query Memory (Kb)", DataPropertyName = "granted_query_memory_kb", SortMode = DataGridViewColumnSortMode.Automatic, DefaultCellStyle = Common.DataGridViewNumericCellStyle, MinimumWidth = 60 },
+                new DataGridViewTextBoxColumn() { HeaderText = "Command", DataPropertyName = "Command", Name = "colCommand", SortMode = DataGridViewColumnSortMode.Automatic, MinimumWidth = 40 },
+                new DataGridViewTextBoxColumn() { HeaderText = "Status", DataPropertyName = "Status", Name = "colStatus", SortMode = DataGridViewColumnSortMode.Automatic, MinimumWidth = 40 },
+                new DataGridViewTextBoxColumn() { HeaderText = "Wait Time (ms)", DataPropertyName = "wait_time", Name = "colWaitTime", SortMode = DataGridViewColumnSortMode.Automatic, DefaultCellStyle = Common.DataGridViewNumericCellStyle, MinimumWidth = 60 },
+                new DataGridViewTextBoxColumn() { HeaderText = "Wait Type", DataPropertyName = "wait_type", SortMode = DataGridViewColumnSortMode.Automatic, MinimumWidth = 40 },
+                new DataGridViewLinkColumn() { HeaderText = "Top Session Waits", DataPropertyName = "TopSessionWaits", Name = "colTopSessionWaits", AutoSizeMode = DataGridViewAutoSizeColumnMode.None, Width = 50, SortMode = DataGridViewColumnSortMode.Automatic , LinkColor = DashColors.LinkColor},
+                new DataGridViewTextBoxColumn() { HeaderText = "Object ID", DataPropertyName = "object_id", SortMode = DataGridViewColumnSortMode.Automatic, MinimumWidth = 40 },
+                new DataGridViewTextBoxColumn() { HeaderText = "Object Name", DataPropertyName = "object_name", SortMode = DataGridViewColumnSortMode.Automatic, MinimumWidth = 40 },
+                new DataGridViewTextBoxColumn() { Name="colSnapshotDate", HeaderText = "Snapshot Date", DataPropertyName = "SnapshotDate", SortMode = DataGridViewColumnSortMode.Automatic, MinimumWidth = 40 },
+                new DataGridViewLinkColumn { Name="colSnapshotDateLink", HeaderText = "Snapshot Date", DataPropertyName = "SnapshotDate", SortMode = DataGridViewColumnSortMode.Automatic, MinimumWidth = 40, Visible=false,LinkColor=DashColors.LinkColor },
+                new DataGridViewTextBoxColumn() { HeaderText = "% Complete", DataPropertyName = "percent_complete", SortMode = DataGridViewColumnSortMode.Automatic, DefaultCellStyle = Common.DataGridViewNumericCellStyle, MinimumWidth = 60 },
+                new DataGridViewTextBoxColumn() { HeaderText = "Open Transaction Count", DataPropertyName = "open_transaction_count", SortMode = DataGridViewColumnSortMode.Automatic, DefaultCellStyle = Common.DataGridViewNumericCellStyle, MinimumWidth = 60 },
+                new DataGridViewTextBoxColumn() { HeaderText = "Transaction Isolation Level", DataPropertyName = "transaction_isolation_level", SortMode = DataGridViewColumnSortMode.Automatic, MinimumWidth = 40  },
+                new DataGridViewTextBoxColumn() { HeaderText = "Login Name", DataPropertyName = "login_name", SortMode = DataGridViewColumnSortMode.Automatic, MinimumWidth = 40 },
+                new DataGridViewTextBoxColumn() { HeaderText = "Host Name", DataPropertyName = "host_name", SortMode = DataGridViewColumnSortMode.Automatic, MinimumWidth = 40 },
+                new DataGridViewTextBoxColumn() { HeaderText = "Database ID", DataPropertyName = "database_id", SortMode = DataGridViewColumnSortMode.Automatic, MinimumWidth = 60 },
+                new DataGridViewTextBoxColumn() { HeaderText = "Database Name", DataPropertyName = "database_names", SortMode = DataGridViewColumnSortMode.Automatic, MinimumWidth = 40 },
+                new DataGridViewTextBoxColumn() { HeaderText = "Program Name", DataPropertyName = "program_name", SortMode = DataGridViewColumnSortMode.Automatic, MinimumWidth = 40 },
+                new DataGridViewTextBoxColumn() { HeaderText = "Job ID", DataPropertyName = "job_id", SortMode = DataGridViewColumnSortMode.Automatic, Visible = runningJobCount > 0, MinimumWidth = 40 },
+                new DataGridViewTextBoxColumn() { HeaderText = "Job Name", DataPropertyName = "job_name", SortMode = DataGridViewColumnSortMode.Automatic, Visible = runningJobCount > 0, MinimumWidth = 40 },
+                new DataGridViewTextBoxColumn() { HeaderText = "Client Interface Name", DataPropertyName = "client_interface_name", SortMode = DataGridViewColumnSortMode.Automatic, MinimumWidth = 40 },
+                new DataGridViewTextBoxColumn() { HeaderText = "Start Time", DataPropertyName = "start_time", SortMode = DataGridViewColumnSortMode.Automatic, MinimumWidth = 40 },
+                new DataGridViewTextBoxColumn() { HeaderText = "Last Request Start Time", DataPropertyName = "last_request_start_time", SortMode = DataGridViewColumnSortMode.Automatic, MinimumWidth = 40 },
+                new DataGridViewTextBoxColumn() { HeaderText = "Wait Resource", DataPropertyName = "wait_resource", SortMode = DataGridViewColumnSortMode.Automatic, MinimumWidth = 40 },
+                new DataGridViewTextBoxColumn() { HeaderText = "Wait Resource Type", DataPropertyName = "wait_resource_type", SortMode = DataGridViewColumnSortMode.Automatic, MinimumWidth = 40, Visible = hasWaitResource },
+                new DataGridViewTextBoxColumn() { HeaderText = "Wait Database ID", DataPropertyName = "wait_database_id", SortMode = DataGridViewColumnSortMode.Automatic, MinimumWidth = 40, Visible = hasWaitResource },
+                new DataGridViewTextBoxColumn() { HeaderText = "Wait Database", DataPropertyName = "wait_db", SortMode = DataGridViewColumnSortMode.Automatic, MinimumWidth = 40, Visible = hasWaitResource },
+                new DataGridViewTextBoxColumn() { HeaderText = "Wait File ID", DataPropertyName = "wait_file_id", SortMode = DataGridViewColumnSortMode.Automatic, MinimumWidth = 40, Visible = hasWaitResource },
+                new DataGridViewTextBoxColumn() { HeaderText = "Wait File", DataPropertyName = "wait_file", SortMode = DataGridViewColumnSortMode.Automatic, MinimumWidth = 40, Visible = hasWaitResource },
+                new DataGridViewTextBoxColumn() { HeaderText = "Wait Page ID", DataPropertyName = "wait_page_id", SortMode = DataGridViewColumnSortMode.Automatic, MinimumWidth = 40, Visible = hasWaitResource },
+                new DataGridViewTextBoxColumn() { HeaderText = "Wait Object ID", DataPropertyName = "wait_object_id", SortMode = DataGridViewColumnSortMode.Automatic, MinimumWidth = 40, Visible = hasWaitResource },
+                new DataGridViewTextBoxColumn() { HeaderText = "Wait Object", DataPropertyName = "wait_object", SortMode = DataGridViewColumnSortMode.Automatic, MinimumWidth = 40, Visible = hasWaitResource },
+                new DataGridViewTextBoxColumn() { HeaderText = "Wait Index ID", DataPropertyName = "wait_index_id", SortMode = DataGridViewColumnSortMode.Automatic, MinimumWidth = 40, Visible = hasWaitResource },
+                new DataGridViewTextBoxColumn() { HeaderText = "Wait HOBT", DataPropertyName = "wait_hobt", SortMode = DataGridViewColumnSortMode.Automatic, MinimumWidth = 40, Visible = hasWaitResource },
+                new DataGridViewTextBoxColumn() { HeaderText = "Wait Hash", DataPropertyName = "wait_hash", SortMode = DataGridViewColumnSortMode.Automatic, MinimumWidth = 40, Visible = hasWaitResource },
+                new DataGridViewTextBoxColumn() { HeaderText = "Wait Slot", DataPropertyName = "wait_slot", SortMode = DataGridViewColumnSortMode.Automatic, MinimumWidth = 40, Visible = hasWaitResource },
+                new DataGridViewCheckBoxColumn() { HeaderText = "Wait Is Compile", DataPropertyName = "wait_is_compile", SortMode = DataGridViewColumnSortMode.Automatic, MinimumWidth = 40, Visible = hasWaitResource },
+                new DataGridViewTextBoxColumn() { HeaderText = "Page Type", DataPropertyName = "page_type", SortMode = DataGridViewColumnSortMode.Automatic, MinimumWidth = 40, Visible = hasWaitResource },
+                new DataGridViewTextBoxColumn() { HeaderText = "Login Time", DataPropertyName = "login_time", SortMode = DataGridViewColumnSortMode.Automatic, MinimumWidth = 40, },
+                new DataGridViewLinkColumn()  { HeaderText = "SQL Handle", DataPropertyName = "sql_handle", SortMode = DataGridViewColumnSortMode.Automatic, Name = "colSQLHandle" ,LinkColor=DashColors.LinkColor },
+                new DataGridViewLinkColumn()  { HeaderText = "Plan Handle", DataPropertyName = "plan_handle", SortMode = DataGridViewColumnSortMode.Automatic, Name = "colPlanHandle",LinkColor=DashColors.LinkColor  },
+                new DataGridViewLinkColumn()  { HeaderText = "Query Hash", DataPropertyName = "query_hash", SortMode = DataGridViewColumnSortMode.Automatic, Name = "colQueryHash" ,LinkColor=DashColors.LinkColor },
+                new DataGridViewLinkColumn()  { HeaderText = "Query Plan Hash", DataPropertyName = "query_plan_hash", SortMode = DataGridViewColumnSortMode.Automatic, Name = "colQueryPlanHash" ,LinkColor=DashColors.LinkColor },
+                new DataGridViewTextBoxColumn { HeaderText = "InstanceID", DataPropertyName = "InstanceID", Name = "colInstanceID", Visible = false },
+            };
 
         private readonly DataGridViewColumn[] sessionWaitColumns = new DataGridViewColumn[]  {
                 new DataGridViewTextBoxColumn() { HeaderText = "Session ID", DataPropertyName = "session_id", Name = "colSessionID", Visible=false, Frozen = Common.FreezeKeyColumn },
@@ -138,7 +133,7 @@ namespace DBADashGUI.Performance
             tsNext.Visible = false;
             tsGetLatest.Visible = true;
             ClearBlocking();
-            if (InstanceIDs != null && InstanceIDs.Count == 1)
+            if (InstanceIDs is { Count: 1 })
             {
                 InstanceID = InstanceIDs[0];
             }
@@ -183,7 +178,7 @@ namespace DBADashGUI.Performance
             else // Show the last snapshot for all instances
             {
                 dt = RunningQueriesSummary();
-                tsBack.Enabled = InstanceIDs != null && InstanceIDs.Count > 1;
+                tsBack.Enabled = InstanceIDs is { Count: > 1 };
                 lblRowLimit.Visible = dt.Rows.Count == Properties.Settings.Default.RunningQueriesSummaryMaxRows;
                 tsEditLimit.Visible = true;
             }
@@ -303,7 +298,7 @@ namespace DBADashGUI.Performance
             tsGroupByFilter.Visible = false;
             snapshotDT = RunningQueriesSnapshot(ref snapshotDate, skip);
             GetCounts();
-            lblSnapshotDate.Text = "Snapshot Date: " + snapshotDate.ToAppTimeZone().ToString();
+            lblSnapshotDate.Text = "Snapshot Date: " + snapshotDate.ToAppTimeZone().ToString(CultureInfo.CurrentCulture);
             LoadSnapshot(new DataView(snapshotDT));
             lblSnapshotDate.Visible = true;
             tsGetLatest.Visible = true;
@@ -338,15 +333,16 @@ namespace DBADashGUI.Performance
         /// <summary>Get counts from the running queries snapshot table. e.g. Blocking counts</summary>
         private void GetCounts()
         {
-            runningJobCount = snapshotDT.AsEnumerable().Where(r => r["job_id"] != DBNull.Value).Count();
-            blockedCount = snapshotDT.AsEnumerable().Where(r => Convert.ToInt16(r["blocking_session_id"]) != 0).Count();
+            runningJobCount = snapshotDT.AsEnumerable().Count(r => r["job_id"] != DBNull.Value);
+            blockedCount = snapshotDT.AsEnumerable().Count(r => Convert.ToInt16(r["blocking_session_id"]) != 0);
             blockedWait = snapshotDT.AsEnumerable().Where(r => Convert.ToInt16(r["blocking_session_id"]) != 0 && r["wait_time"] != DBNull.Value).Sum(r => Convert.ToInt64(r["wait_time"]));
-            hasWaitResource = snapshotDT.AsEnumerable().Where(r => r["wait_resource"] != DBNull.Value && !string.IsNullOrEmpty((string)r["wait_resource"])).Any();
+            hasWaitResource = snapshotDT.AsEnumerable().Any(r => r["wait_resource"] != DBNull.Value && !string.IsNullOrEmpty((string)r["wait_resource"]));
 
-            tsBlockingFilter.Text = string.Format("Blocking ({0} Blocked)", blockedCount);
+            tsBlockingFilter.Text = $"Blocking ({blockedCount} Blocked)";
             tsBlockingFilter.Enabled = blockedCount > 0;
             tsStatus.Visible = SessionID == 0;
-            tsStatus.Text = string.Format("Blocked Sessions: {0}, Blocked Wait Time: {1:dd\\ hh\\:mm\\:ss}, Running Jobs {2}", blockedCount, TimeSpan.FromMilliseconds(blockedWait), runningJobCount);
+            tsStatus.Text =
+                $"Blocked Sessions: {blockedCount}, Blocked Wait Time: {TimeSpan.FromMilliseconds(blockedWait):dd\\ hh\\:mm\\:ss}, Running Jobs {runningJobCount}";
             tsStatus.Font = blockedCount > 0 ? new Font(tsStatus.Font, FontStyle.Bold) : new Font(tsStatus.Font, FontStyle.Regular);
             tsStatus.ForeColor = blockedCount > 0 ? DashColors.Fail : DashColors.Success;
         }
@@ -384,105 +380,150 @@ namespace DBADashGUI.Performance
 
         private void Dgv_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
-            if (e.RowIndex >= 0)
+            if (e.RowIndex < 0) return;
+            var row = (DataRowView)dgv.Rows[e.RowIndex].DataBoundItem;
+            string colName = dgv.Columns[e.ColumnIndex].Name;
+            switch (colName)
             {
-                var row = (DataRowView)dgv.Rows[e.RowIndex].DataBoundItem;
-                string colName = dgv.Columns[e.ColumnIndex].Name;
-                if (colName == "colSnapshotDate") // Drill down to view a snapshot from summary
-                {
-                    var snapshotDate = ((DateTime)row["SnapshotDate"]).AppTimeZoneToUtc();
-                    InstanceID = (int)row["InstanceID"];
-                    LoadSnapshot(snapshotDate);
-                    tsBack.Enabled = true;
-                }
-                else if (colName == "colInstance") // Drill down to view snapshot summary for a specific instance
-                {
+                // Drill down to view a snapshot from summary
+                case "colSnapshotDate":
+                    {
+                        var snapshotDate = ((DateTime)row["SnapshotDate"]).AppTimeZoneToUtc();
+                        InstanceID = (int)row["InstanceID"];
+                        LoadSnapshot(snapshotDate);
+                        tsBack.Enabled = true;
+                        break;
+                    }
+                // Drill down to view snapshot summary for a specific instance
+                case "colInstance":
                     InstanceID = (int)row["InstanceID"];
                     RefreshData();
-                }
-                else if (colName == "colBatchText") // New window with full batch text for query
-                {
-                    string sql = (string)row["batch_text"];
-                    var title = "SPID: " + Convert.ToString(row["session_id"]) + " Batch Text";
-                    Common.ShowCodeViewer(sql, title);
-                }
-                else if (colName == "colText") // New window with full query text
-                {
-                    var sql = (string)row["text"];
-                    var title = "SPID: " + Convert.ToString(row["session_id"]) + " Text";
-                    Common.ShowCodeViewer(sql, title);
-                }
-                else if (colName == "colQueryPlan") // save query plan and open in default tool
-                {
+                    break;
+                // New window with full batch text for query
+                case "colBatchText":
+                    {
+                        string sql = (string)row["batch_text"];
+                        var title = "SPID: " + Convert.ToString(row["session_id"]) + " Batch Text";
+                        Common.ShowCodeViewer(sql, title);
+                        break;
+                    }
+                // New window with full query text
+                case "colText":
+                    {
+                        var sql = (string)row["text"];
+                        var title = "SPID: " + Convert.ToString(row["session_id"]) + " Text";
+                        Common.ShowCodeViewer(sql, title);
+                        break;
+                    }
+                // save query plan and open in default tool
+                case "colQueryPlan":
                     ShowPlan(row);
-                }
-                else if ((new string[] { "colPlanHandle", "colQueryPlanHash", "colQueryHash", "colSQLHandle" }).Contains(colName))
-                {
+                    break;
+
+                case "colPlanHandle":
+                case "colQueryPlanHash":
+                case "colQueryHash":
+                case "colSQLHandle":
                     FindPlan(row);
-                }
-                else if (colName == "colGroup") // Running query snapshot has been grouped by some value and the user has selected to drill down - filter the grid by the selected value for the column we have grouped by
-                {
-                    string filter = dgv.Columns[e.ColumnIndex].DataPropertyName + "='" + Convert.ToString(row[dgv.Columns[e.ColumnIndex].DataPropertyName]).Replace("'", "''") + "'";
-                    tsGroupByFilter.Text = filter;
-                    tsGroupByFilter.Visible = true;
-                    DataView dv;
-                    try
+                    break;
+                // Running query snapshot has been grouped by some value and the user has selected to drill down - filter the grid by the selected value for the column we have grouped by
+                case "colGroup":
                     {
-                        dv = new DataView(snapshotDT, filter, "", DataViewRowState.CurrentRows);
+                        GroupByFilter(e, row);
+                        break;
                     }
-                    catch (Exception ex)
+                // Load the associated RPC/Batch completed event when the user clicks the session ID column
+                case "colSessionID":
                     {
-                        MessageBox.Show("Filter error: " + filter + Environment.NewLine + ex.Message);
-                        return;
+                        ShowCompletedBatchRPC(row);
+                        break;
                     }
-                    LoadSnapshot(dv);
-                    tsBack.Enabled = true;
-                }
-                else if (colName == "colSessionID") // Load the associated RPC/Batch completed event when the user clicks the sesion ID column
-                {
-                    var frm = new CompletedRPCBatchEvent()
+                // Show a summary of the waits for the session
+                case "colTopSessionWaits":
                     {
-                        SessionID = Convert.ToInt32(row["session_id"]),
-                        InstanceID = Convert.ToInt32(row["InstanceID"]),
-                        SnapshotDateUTC = Convert.ToDateTime(row["SnapshotDate"]).AppTimeZoneToUtc(),
-                        StartTimeUTC = row["start_time"] == DBNull.Value ? Convert.ToDateTime(row["last_request_start_time"]).AppTimeZoneToUtc() : Convert.ToDateTime(row["start_time"]).AppTimeZoneToUtc(),
-                        IsSleeping = Convert.ToString(row["status"]) == "sleeping"
-                    };
-                    frm.Show(this);
-                }
-                else if (colName == "colTopSessionWaits") // Show a summary of the waits for the session
-                {
-                    splitContainer1.Panel2Collapsed = false;
-                    if (dgvSessionWaits.Columns.Count == 0)
-                    {
-                        dgvSessionWaits.AutoGenerateColumns = false;
-                        dgvSessionWaits.Columns.AddRange(sessionWaitColumns);
+                        ShowSessionWaits(row);
+                        break;
                     }
-                    var sessionid = (short)row["session_id"];
-                    dgvSessionWaits.DataSource = GetSessionWaits(InstanceID, sessionid, Convert.ToDateTime(row["SnapshotDate"]).AppTimeZoneToUtc(), Convert.ToDateTime(row["login_time"]).AppTimeZoneToUtc());
-                    dgvSessionWaits.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
-                    sessionToolStripMenuItem.Tag = sessionid;
-                    lblWaitsForSession.Text = "Waits For Session ID: " + sessionid.ToString();
-                }
-                else if (colName == "colBlockCount") // Filter to show queries blocked directly by the selected session
-                {
+                // Filter to show queries blocked directly by the selected session
+                case "colBlockCount":
                     ShowBlocking(Convert.ToInt16(dgv.Rows[e.RowIndex].Cells["colSessionID"].Value));
-                }
-                else if (colName == "colBlockedCountRecursive") // Filter to show queries blocked directly by the selected session
-                {
+                    break;
+                // Filter to show queries blocked directly by the selected session
+                case "colBlockedCountRecursive":
                     ShowBlocking(Convert.ToInt16(dgv.Rows[e.RowIndex].Cells["colSessionID"].Value), true);
-                }
-                else if (colName == "colSnapshotDateLink")
-                {
-                    var frm = new RunningQueriesViewer()
+                    break;
+
+                case "colSnapshotDateLink":
                     {
-                        InstanceID = InstanceID,
-                        SnapshotDateFrom = Convert.ToDateTime(row["SnapshotDate"]).AppTimeZoneToUtc(),
-                        SnapshotDateTo = Convert.ToDateTime(row["SnapshotDate"]).AppTimeZoneToUtc()
-                    };
-                    frm.Show(this);
-                }
+                        ShowRunningQueriesForSnapshotDate(row);
+                        break;
+                    }
             }
+        }
+
+        private void GroupByFilter(DataGridViewCellEventArgs e, DataRowView row)
+        {
+            string filter = dgv.Columns[e.ColumnIndex].DataPropertyName + "='" +
+                            Convert.ToString(row[dgv.Columns[e.ColumnIndex].DataPropertyName]).Replace("'", "''") + "'";
+            tsGroupByFilter.Text = filter;
+            tsGroupByFilter.Visible = true;
+            DataView dv;
+            try
+            {
+                dv = new DataView(snapshotDT, filter, "", DataViewRowState.CurrentRows);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Filter error: " + filter + Environment.NewLine + ex.Message);
+                return;
+            }
+
+            LoadSnapshot(dv);
+            tsBack.Enabled = true;
+        }
+
+        private void ShowCompletedBatchRPC(DataRowView row)
+        {
+            var frm = new CompletedRPCBatchEvent()
+            {
+                SessionID = Convert.ToInt32(row["session_id"]),
+                InstanceID = Convert.ToInt32(row["InstanceID"]),
+                SnapshotDateUTC = Convert.ToDateTime(row["SnapshotDate"]).AppTimeZoneToUtc(),
+                StartTimeUTC = row["start_time"] == DBNull.Value
+                    ? Convert.ToDateTime(row["last_request_start_time"]).AppTimeZoneToUtc()
+                    : Convert.ToDateTime(row["start_time"]).AppTimeZoneToUtc(),
+                IsSleeping = Convert.ToString(row["status"]) == "sleeping"
+            };
+            frm.Show(this);
+        }
+
+        private void ShowSessionWaits(DataRowView row)
+        {
+            splitContainer1.Panel2Collapsed = false;
+            if (dgvSessionWaits.Columns.Count == 0)
+            {
+                dgvSessionWaits.AutoGenerateColumns = false;
+                dgvSessionWaits.Columns.AddRange(sessionWaitColumns);
+            }
+
+            var sessionid = (short)row["session_id"];
+            dgvSessionWaits.DataSource = GetSessionWaits(InstanceID, sessionid,
+                Convert.ToDateTime(row["SnapshotDate"]).AppTimeZoneToUtc(),
+                Convert.ToDateTime(row["login_time"]).AppTimeZoneToUtc());
+            dgvSessionWaits.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
+            sessionToolStripMenuItem.Tag = sessionid;
+            lblWaitsForSession.Text = "Waits For Session ID: " + sessionid.ToString();
+        }
+
+        private void ShowRunningQueriesForSnapshotDate(DataRowView row)
+        {
+            var frm = new RunningQueriesViewer()
+            {
+                InstanceID = InstanceID,
+                SnapshotDateFrom = Convert.ToDateTime(row["SnapshotDate"]).AppTimeZoneToUtc(),
+                SnapshotDateTo = Convert.ToDateTime(row["SnapshotDate"]).AppTimeZoneToUtc()
+            };
+            frm.Show(this);
         }
 
         private void TsCopy_Click(object sender, EventArgs e)
@@ -506,7 +547,7 @@ namespace DBADashGUI.Performance
             {
                 return false;
             }
-            string rowFilter = String.Empty;
+            var rowFilter = string.Empty;
             if (dgv.DataSource.GetType() == typeof(DataView))
             {
                 rowFilter = ((DataView)dgv.DataSource).RowFilter;
@@ -544,15 +585,13 @@ namespace DBADashGUI.Performance
         {
             if (dgv.Columns[e.ColumnIndex].Name == "colQueryPlan")
             {
-                var row = dgv.Rows[e.RowIndex];
-
                 e.Value = Convert.ToBoolean(e.Value) ? "View Plan" : "Find Plan";
             }
-            else if (Convert.ToString(e.Value).Length > 1000)
+            else if (Convert.ToString(e.Value)?.Length > 1000)
             {
                 e.Value = Convert.ToString(e.Value).Truncate(997) + "...";
             }
-            else if ((new string[] { "colBlockCount", "colBlockedCountRecursive", "colBlockingSessionID" }).Contains(dgv.Columns[e.ColumnIndex].Name))
+            else if ((new[] { "colBlockCount", "colBlockedCountRecursive", "colBlockingSessionID" }).Contains(dgv.Columns[e.ColumnIndex].Name))
             {
                 e.CellStyle.BackColor = Convert.ToInt32(e.Value) == 0 ? DashColors.Success : DashColors.Fail;
             }
@@ -561,60 +600,58 @@ namespace DBADashGUI.Performance
         /// <summary>Takes the running query snapshot and groups the data by a specified column</summary>
         private void GroupSnapshot(string group)
         {
-            if (snapshotDT != null && snapshotDT.Rows.Count > 0)
-            {
-                ClearBlocking();
-                DataTable groupedDT = new();
-                groupedDT.Columns.AddRange(
-                    new DataColumn[] {
-                         new DataColumn(group,typeof(string)),
-                         new DataColumn("execution_count", typeof(long)),
-                         new DataColumn("sum_cpu_time", typeof(long)),
-                         new DataColumn("sum_reads", typeof(long)),
-                         new DataColumn("sum_logical_reads", typeof(long)),
-                         new DataColumn("sum_writes", typeof(long)),
-                         new DataColumn("sum_granted_query_memory_kb", typeof(long)),
-                         new DataColumn("blocked_count", typeof(long)),
-                         new DataColumn("blocking_count", typeof(long)),
-                         new DataColumn("root_blockers", typeof(long))
-                    }
-                 );
-                groupedDT = snapshotDT.AsEnumerable()
-                      .GroupBy(r => r.Field<string>(group))
-                      .Select(g =>
-                      {
-                          var row = groupedDT.NewRow();
-                          row[group] = g.Key;
-                          row["execution_count"] = g.Count();
-                          row["sum_reads"] = g.Sum(r => r["reads"] == DBNull.Value ? 0 : r.Field<long>("reads"));
-                          row["sum_logical_reads"] = g.Sum(r => r["logical_reads"] == DBNull.Value ? 0 : r.Field<long>("logical_reads"));
-                          row["sum_writes"] = g.Sum(r => r["writes"] == DBNull.Value ? 0 : r.Field<long>("writes"));
-                          row["sum_cpu_time"] = g.Sum(r => r["cpu_time"] == DBNull.Value ? 0 : r.Field<int>("cpu_time"));
-                          row["sum_granted_query_memory_kb"] = g.Sum(r => r["granted_query_memory_kb"] == DBNull.Value ? 0 : Convert.ToInt64(r["granted_query_memory_kb"]));
-                          row["blocked_count"] = g.Count(r => r.Field<short>("blocking_session_id") != 0);
-                          row["blocking_count"] = g.Count(r => r.Field<int>("BlockCount") > 0);
-                          row["root_blockers"] = g.Count(r => r.Field<bool>("IsRootBlocker"));
-                          return row;
-                      }).CopyToDataTable();
+            if (snapshotDT == null || snapshotDT.Rows.Count <= 0) return;
+            ClearBlocking();
+            DataTable groupedDT = new();
+            groupedDT.Columns.AddRange(
+                new[] {
+                    new DataColumn(group,typeof(string)),
+                    new DataColumn("execution_count", typeof(long)),
+                    new DataColumn("sum_cpu_time", typeof(long)),
+                    new DataColumn("sum_reads", typeof(long)),
+                    new DataColumn("sum_logical_reads", typeof(long)),
+                    new DataColumn("sum_writes", typeof(long)),
+                    new DataColumn("sum_granted_query_memory_kb", typeof(long)),
+                    new DataColumn("blocked_count", typeof(long)),
+                    new DataColumn("blocking_count", typeof(long)),
+                    new DataColumn("root_blockers", typeof(long))
+                }
+            );
+            groupedDT = snapshotDT.AsEnumerable()
+                .GroupBy(r => r.Field<string>(group))
+                .Select(g =>
+                {
+                    var row = groupedDT.NewRow();
+                    row[group] = g.Key;
+                    row["execution_count"] = g.Count();
+                    row["sum_reads"] = g.Sum(r => r["reads"] == DBNull.Value ? 0 : r.Field<long>("reads"));
+                    row["sum_logical_reads"] = g.Sum(r => r["logical_reads"] == DBNull.Value ? 0 : r.Field<long>("logical_reads"));
+                    row["sum_writes"] = g.Sum(r => r["writes"] == DBNull.Value ? 0 : r.Field<long>("writes"));
+                    row["sum_cpu_time"] = g.Sum(r => r["cpu_time"] == DBNull.Value ? 0 : r.Field<int>("cpu_time"));
+                    row["sum_granted_query_memory_kb"] = g.Sum(r => r["granted_query_memory_kb"] == DBNull.Value ? 0 : Convert.ToInt64(r["granted_query_memory_kb"]));
+                    row["blocked_count"] = g.Count(r => r.Field<short>("blocking_session_id") != 0);
+                    row["blocking_count"] = g.Count(r => r.Field<int>("BlockCount") > 0);
+                    row["root_blockers"] = g.Count(r => r.Field<bool>("IsRootBlocker"));
+                    return row;
+                }).CopyToDataTable();
 
-                dgv.Columns.Clear();
-                dgv.AutoGenerateColumns = false;
-                dgv.Columns.AddRange(
-                    new DataGridViewLinkColumn() { DataPropertyName = group, HeaderText = group, Name = "colGroup", SortMode = DataGridViewColumnSortMode.Automatic },
-                    new DataGridViewTextBoxColumn() { DataPropertyName = "execution_count", HeaderText = "Execution Count", SortMode = DataGridViewColumnSortMode.Automatic, DefaultCellStyle = Common.DataGridViewNumericCellStyle },
-                    new DataGridViewTextBoxColumn() { DataPropertyName = "sum_reads", HeaderText = "Sum Reads", SortMode = DataGridViewColumnSortMode.Automatic, DefaultCellStyle = Common.DataGridViewNumericCellStyle },
-                    new DataGridViewTextBoxColumn() { DataPropertyName = "sum_logical_reads", HeaderText = "Sum Logical Reads", SortMode = DataGridViewColumnSortMode.Automatic, DefaultCellStyle = Common.DataGridViewNumericCellStyle },
-                    new DataGridViewTextBoxColumn() { DataPropertyName = "sum_writes", HeaderText = "Sum Writes", SortMode = DataGridViewColumnSortMode.Automatic, DefaultCellStyle = Common.DataGridViewNumericCellStyle },
-                    new DataGridViewTextBoxColumn() { DataPropertyName = "sum_cpu_time", HeaderText = "Sum CPU", SortMode = DataGridViewColumnSortMode.Automatic, DefaultCellStyle = Common.DataGridViewNumericCellStyle },
-                    new DataGridViewTextBoxColumn() { DataPropertyName = "sum_granted_query_memory_kb", HeaderText = "Sum Granted Query Memory (KB)", SortMode = DataGridViewColumnSortMode.Automatic, DefaultCellStyle = Common.DataGridViewNumericCellStyle },
-                    new DataGridViewTextBoxColumn() { DataPropertyName = "blocked_count", HeaderText = "Count of Queries Blocked", SortMode = DataGridViewColumnSortMode.Automatic, DefaultCellStyle = Common.DataGridViewNumericCellStyle },
-                    new DataGridViewTextBoxColumn() { DataPropertyName = "blocking_count", HeaderText = "Count of Queries Blocking", SortMode = DataGridViewColumnSortMode.Automatic, DefaultCellStyle = Common.DataGridViewNumericCellStyle },
-                    new DataGridViewTextBoxColumn() { DataPropertyName = "root_blockers", HeaderText = "Count of Root Blockers", SortMode = DataGridViewColumnSortMode.Automatic, DefaultCellStyle = Common.DataGridViewNumericCellStyle }
-                 );
-                dgv.DataSource = new DataView(groupedDT);
-                dgv.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
-                tsBlockingFilter.Visible = false;
-            }
+            dgv.Columns.Clear();
+            dgv.AutoGenerateColumns = false;
+            dgv.Columns.AddRange(
+                new DataGridViewLinkColumn() { DataPropertyName = group, HeaderText = group, Name = "colGroup", SortMode = DataGridViewColumnSortMode.Automatic, LinkColor = DashColors.LinkColor },
+                new DataGridViewTextBoxColumn() { DataPropertyName = "execution_count", HeaderText = "Execution Count", SortMode = DataGridViewColumnSortMode.Automatic, DefaultCellStyle = Common.DataGridViewNumericCellStyle },
+                new DataGridViewTextBoxColumn() { DataPropertyName = "sum_reads", HeaderText = "Sum Reads", SortMode = DataGridViewColumnSortMode.Automatic, DefaultCellStyle = Common.DataGridViewNumericCellStyle },
+                new DataGridViewTextBoxColumn() { DataPropertyName = "sum_logical_reads", HeaderText = "Sum Logical Reads", SortMode = DataGridViewColumnSortMode.Automatic, DefaultCellStyle = Common.DataGridViewNumericCellStyle },
+                new DataGridViewTextBoxColumn() { DataPropertyName = "sum_writes", HeaderText = "Sum Writes", SortMode = DataGridViewColumnSortMode.Automatic, DefaultCellStyle = Common.DataGridViewNumericCellStyle },
+                new DataGridViewTextBoxColumn() { DataPropertyName = "sum_cpu_time", HeaderText = "Sum CPU", SortMode = DataGridViewColumnSortMode.Automatic, DefaultCellStyle = Common.DataGridViewNumericCellStyle },
+                new DataGridViewTextBoxColumn() { DataPropertyName = "sum_granted_query_memory_kb", HeaderText = "Sum Granted Query Memory (KB)", SortMode = DataGridViewColumnSortMode.Automatic, DefaultCellStyle = Common.DataGridViewNumericCellStyle },
+                new DataGridViewTextBoxColumn() { DataPropertyName = "blocked_count", HeaderText = "Count of Queries Blocked", SortMode = DataGridViewColumnSortMode.Automatic, DefaultCellStyle = Common.DataGridViewNumericCellStyle },
+                new DataGridViewTextBoxColumn() { DataPropertyName = "blocking_count", HeaderText = "Count of Queries Blocking", SortMode = DataGridViewColumnSortMode.Automatic, DefaultCellStyle = Common.DataGridViewNumericCellStyle },
+                new DataGridViewTextBoxColumn() { DataPropertyName = "root_blockers", HeaderText = "Count of Root Blockers", SortMode = DataGridViewColumnSortMode.Automatic, DefaultCellStyle = Common.DataGridViewNumericCellStyle }
+            );
+            dgv.DataSource = new DataView(groupedDT);
+            dgv.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
+            tsBlockingFilter.Visible = false;
         }
 
         private void TsGroupBy_Click(object sender, EventArgs e)
@@ -707,12 +744,10 @@ namespace DBADashGUI.Performance
 
         private void DgvSessionWaits_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
-            if (e.RowIndex >= 0 && dgvSessionWaits.Columns[e.ColumnIndex].Name == "colHelp")
-            {
-                string wait = (string)dgvSessionWaits.Rows[e.RowIndex].Cells["colWaitType"].Value;
-                var psi = new ProcessStartInfo("https://www.sqlskills.com/help/waits/" + wait.ToLower() + "/") { UseShellExecute = true };
-                Process.Start(psi);
-            }
+            if (e.RowIndex < 0 || dgvSessionWaits.Columns[e.ColumnIndex].Name != "colHelp") return;
+            var wait = (string)dgvSessionWaits.Rows[e.RowIndex].Cells["colWaitType"].Value;
+            var psi = new ProcessStartInfo("https://www.sqlskills.com/help/waits/" + wait.ToLower() + "/") { UseShellExecute = true };
+            Process.Start(psi);
         }
 
         private void ShowRootBlockersToolStripMenuItem_Click(object sender, EventArgs e)
@@ -733,18 +768,19 @@ namespace DBADashGUI.Performance
             var dv = (DataView)dgv.DataSource;
             if (sessionID == 0) // Root blockers
             {
-                dv.RowFilter = string.Format("blocking_session_id = {0} AND BlockCount > 0 ", sessionID);
+                dv.RowFilter = $"blocking_session_id = {sessionID} AND BlockCount > 0 ";
                 tsBlockingFilter.Text = "Blocking : Root Blockers";
             }
             else if (recursive)
             {
-                dv.RowFilter = string.Format("(blocking_session_id = {0} OR BlockingHierarchy LIKE '{0} \\%' OR BlockingHierarchy LIKE '%\\ {0}' OR BlockingHierarchy LIKE '%\\ {0} \\%')", sessionID);
-                tsBlockingFilter.Text = String.Format("Blocking : Blocked By {0} (Recursive)", sessionID);
+                dv.RowFilter =
+                    $"(blocking_session_id = {sessionID} OR BlockingHierarchy LIKE '{sessionID} \\%' OR BlockingHierarchy LIKE '%\\ {sessionID}' OR BlockingHierarchy LIKE '%\\ {sessionID} \\%')";
+                tsBlockingFilter.Text = $"Blocking : Blocked By {sessionID} (Recursive)";
             }
             else
             {
-                dv.RowFilter = string.Format("blocking_session_id = {0}", sessionID);
-                tsBlockingFilter.Text = String.Format("Blocking : Blocked By {0}", sessionID);
+                dv.RowFilter = $"blocking_session_id = {sessionID}";
+                tsBlockingFilter.Text = $"Blocking : Blocked By {sessionID}";
             }
 
             tsBlockingFilter.Font = new Font(tsBlockingFilter.Font, FontStyle.Bold);
@@ -759,9 +795,8 @@ namespace DBADashGUI.Performance
                 var dv = (DataView)dgv.DataSource;
                 dv.RowFilter = "";
             }
-            tsBlockingFilter.Text = string.Format("Blocking ({0} Blocked)", blockedCount);
+            tsBlockingFilter.Text = $"Blocking ({blockedCount} Blocked)";
             tsBlockingFilter.Font = new Font(tsBlockingFilter.Font, FontStyle.Regular);
-            return;
         }
 
         private void ClearBlockingFilterToolStripMenuItem_Click(object sender, EventArgs e)
@@ -776,29 +811,25 @@ namespace DBADashGUI.Performance
 
         private void PromptColumnSelection(ref DataGridView gv)
         {
-            using (var frm = new SelectColumns())
-            {
-                frm.Columns = gv.Columns;
-                frm.ShowDialog(this);
-            }
+            using var frm = new SelectColumns();
+            frm.Columns = gv.Columns;
+            frm.ShowDialog(this);
         }
 
         private void TsEditLimit_Click(object sender, EventArgs e)
         {
             string limit = Properties.Settings.Default.RunningQueriesSummaryMaxRows.ToString();
-            if (Common.ShowInputDialog(ref limit, "Enter row limit") == DialogResult.OK)
+            if (Common.ShowInputDialog(ref limit, "Enter row limit") != DialogResult.OK) return;
+            if (int.TryParse(limit, out int maxRows) && maxRows > 0)
             {
-                if (int.TryParse(limit, out int maxRows) && maxRows > 0)
-                {
-                    Properties.Settings.Default.RunningQueriesSummaryMaxRows = maxRows;
-                    Properties.Settings.Default.Save();
-                    UpdateRowLimit();
-                    LoadSummaryData();
-                }
-                else
-                {
-                    MessageBox.Show("Invalid value", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                }
+                Properties.Settings.Default.RunningQueriesSummaryMaxRows = maxRows;
+                Properties.Settings.Default.Save();
+                UpdateRowLimit();
+                LoadSummaryData();
+            }
+            else
+            {
+                MessageBox.Show("Invalid value", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
@@ -815,7 +846,7 @@ namespace DBADashGUI.Performance
                 Properties.Settings.Default.RunningQueriesSummaryMaxRows = 100;
                 Properties.Settings.Default.Save();
             }
-            tsEditLimit.Text = String.Format("Row Limit {0}", Properties.Settings.Default.RunningQueriesSummaryMaxRows);
+            tsEditLimit.Text = $"Row Limit {Properties.Settings.Default.RunningQueriesSummaryMaxRows}";
         }
     }
 }
