@@ -70,6 +70,7 @@ SELECT InstanceID,
        host_name,
        database_id,
        database_name,
+       database_names,
        program_name,
        job_id,
        job_name,
@@ -97,7 +98,9 @@ SELECT InstanceID,
        wait_object,
        wait_file,
        login_time_utc,
-       has_plan
+       has_plan,
+       statement_start_offset,
+       statement_end_offset
 FROM dbo.RunningQueriesInfo Q
 WHERE Q.SnapshotDateUTC = @SnapshotDate
 AND Q.InstanceID = @InstanceID
