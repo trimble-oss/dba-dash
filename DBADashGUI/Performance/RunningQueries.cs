@@ -5,6 +5,7 @@ using System.Data;
 using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
+using System.Text;
 using System.Windows.Forms;
 
 namespace DBADashGUI.Performance
@@ -26,7 +27,6 @@ namespace DBADashGUI.Performance
 
         private int blockedCount;
         private int runningJobCount;
-        private int planCount;
         private bool hasWaitResource;
         private long blockedWait;
 
@@ -39,7 +39,7 @@ namespace DBADashGUI.Performance
                     new DataGridViewLinkColumn() { HeaderText = "Session ID", DataPropertyName = "session_id", Name = "colSessionID", SortMode = DataGridViewColumnSortMode.Automatic, MinimumWidth = 60, LinkColor = DashColors.LinkColor, Frozen = Common.FreezeKeyColumn },
                     new DataGridViewLinkColumn() { HeaderText = "Batch Text", DataPropertyName = "batch_text", Name = "colBatchText", SortMode = DataGridViewColumnSortMode.Automatic, LinkColor = DashColors.LinkColor},
                     new DataGridViewLinkColumn() { HeaderText = "Text", DataPropertyName = "text", Name = "colText", SortMode = DataGridViewColumnSortMode.Automatic, LinkColor = DashColors.LinkColor},
-                    new DataGridViewLinkColumn() { HeaderText = "Plan", DataPropertyName="has_plan", Name = "colQueryPlan", SortMode = DataGridViewColumnSortMode.NotSortable, Visible = planCount > 0, LinkColor = DashColors.LinkColor, ToolTipText="Click link to view query plan" },
+                    new DataGridViewLinkColumn() { HeaderText = "Plan", DataPropertyName="has_plan", Name = "colQueryPlan", SortMode = DataGridViewColumnSortMode.Automatic, Visible = true, LinkColor = DashColors.LinkColor, ToolTipText="Click link to view query plan" },
                     new DataGridViewTextBoxColumn() { HeaderText = "Blocking Session ID", DataPropertyName = "blocking_session_id", Name = "colBlockingSessionID", SortMode = DataGridViewColumnSortMode.Automatic, MinimumWidth = 60, ToolTipText = "ID of the session directly blocking the current query.  0 = Not blocked.", DefaultCellStyle = new DataGridViewCellStyle(){ ForeColor=Color.White } },
                     new DataGridViewTextBoxColumn() { HeaderText = "Blocking Hierarchy", DataPropertyName = "BlockingHierarchy", SortMode = DataGridViewColumnSortMode.Automatic, Visible = blockedCount > 0, MinimumWidth = 70, ToolTipText = "Identifies all the session IDs that are involved in the blocking chain for each query starting with the root blocker." },
                     new DataGridViewCheckBoxColumn { HeaderText = "Root Blocker", DataPropertyName = "IsRootBlocker", Name = "colIsRootBlocker", SortMode = DataGridViewColumnSortMode.Automatic, MinimumWidth = 60, Visible = blockedCount > 0, ToolTipText = "Root blocker is the query at the head of the blocking chain. This query is not blocked but it's holding locks that other queries are waiting for." },
@@ -69,7 +69,7 @@ namespace DBADashGUI.Performance
                     new DataGridViewTextBoxColumn() { HeaderText = "Login Name", DataPropertyName = "login_name", SortMode = DataGridViewColumnSortMode.Automatic, MinimumWidth = 40 },
                     new DataGridViewTextBoxColumn() { HeaderText = "Host Name", DataPropertyName = "host_name", SortMode = DataGridViewColumnSortMode.Automatic, MinimumWidth = 40 },
                     new DataGridViewTextBoxColumn() { HeaderText = "Database ID", DataPropertyName = "database_id", SortMode = DataGridViewColumnSortMode.Automatic, MinimumWidth = 60 },
-                    new DataGridViewTextBoxColumn() { HeaderText = "Database Name", DataPropertyName = "database_name", SortMode = DataGridViewColumnSortMode.Automatic, MinimumWidth = 40 },
+                    new DataGridViewTextBoxColumn() { HeaderText = "Database Name", DataPropertyName = "database_names", SortMode = DataGridViewColumnSortMode.Automatic, MinimumWidth = 40 },
                     new DataGridViewTextBoxColumn() { HeaderText = "Program Name", DataPropertyName = "program_name", SortMode = DataGridViewColumnSortMode.Automatic, MinimumWidth = 40 },
                     new DataGridViewTextBoxColumn() { HeaderText = "Job ID", DataPropertyName = "job_id", SortMode = DataGridViewColumnSortMode.Automatic, Visible = runningJobCount > 0, MinimumWidth = 40 },
                     new DataGridViewTextBoxColumn() { HeaderText = "Job Name", DataPropertyName = "job_name", SortMode = DataGridViewColumnSortMode.Automatic, Visible = runningJobCount > 0, MinimumWidth = 40 },
@@ -92,10 +92,10 @@ namespace DBADashGUI.Performance
                     new DataGridViewCheckBoxColumn() { HeaderText = "Wait Is Compile", DataPropertyName = "wait_is_compile", SortMode = DataGridViewColumnSortMode.Automatic, MinimumWidth = 40, Visible = hasWaitResource },
                     new DataGridViewTextBoxColumn() { HeaderText = "Page Type", DataPropertyName = "page_type", SortMode = DataGridViewColumnSortMode.Automatic, MinimumWidth = 40, Visible = hasWaitResource },
                     new DataGridViewTextBoxColumn() { HeaderText = "Login Time", DataPropertyName = "login_time", SortMode = DataGridViewColumnSortMode.Automatic, MinimumWidth = 40, },
-                    new DataGridViewTextBoxColumn() { HeaderText = "SQL Handle", DataPropertyName = "sql_handle", SortMode = DataGridViewColumnSortMode.Automatic, Name = "colSQLHandle" },
-                    new DataGridViewTextBoxColumn() { HeaderText = "Plan Handle", DataPropertyName = "plan_handle", SortMode = DataGridViewColumnSortMode.Automatic, Name = "colPlanHandle" },
-                    new DataGridViewTextBoxColumn() { HeaderText = "Query Hash", DataPropertyName = "query_hash", SortMode = DataGridViewColumnSortMode.Automatic, Name = "colQueryHash" },
-                    new DataGridViewTextBoxColumn() { HeaderText = "Query Plan Hash", DataPropertyName = "query_plan_hash", SortMode = DataGridViewColumnSortMode.Automatic, Name = "colQueryPlanHash" },
+                    new DataGridViewLinkColumn()  { HeaderText = "SQL Handle", DataPropertyName = "sql_handle", SortMode = DataGridViewColumnSortMode.Automatic, Name = "colSQLHandle" ,LinkColor=DashColors.LinkColor },
+                    new DataGridViewLinkColumn()  { HeaderText = "Plan Handle", DataPropertyName = "plan_handle", SortMode = DataGridViewColumnSortMode.Automatic, Name = "colPlanHandle",LinkColor=DashColors.LinkColor  },
+                    new DataGridViewLinkColumn()  { HeaderText = "Query Hash", DataPropertyName = "query_hash", SortMode = DataGridViewColumnSortMode.Automatic, Name = "colQueryHash" ,LinkColor=DashColors.LinkColor },
+                    new DataGridViewLinkColumn()  { HeaderText = "Query Plan Hash", DataPropertyName = "query_plan_hash", SortMode = DataGridViewColumnSortMode.Automatic, Name = "colQueryPlanHash" ,LinkColor=DashColors.LinkColor },
                     new DataGridViewTextBoxColumn { HeaderText = "InstanceID", DataPropertyName = "InstanceID", Name = "colInstanceID", Visible = false },
                 };
             }
@@ -341,7 +341,6 @@ namespace DBADashGUI.Performance
             runningJobCount = snapshotDT.AsEnumerable().Where(r => r["job_id"] != DBNull.Value).Count();
             blockedCount = snapshotDT.AsEnumerable().Where(r => Convert.ToInt16(r["blocking_session_id"]) != 0).Count();
             blockedWait = snapshotDT.AsEnumerable().Where(r => Convert.ToInt16(r["blocking_session_id"]) != 0 && r["wait_time"] != DBNull.Value).Sum(r => Convert.ToInt64(r["wait_time"]));
-            planCount = snapshotDT.AsEnumerable().Where(r => r["query_plan"] != DBNull.Value).Count();
             hasWaitResource = snapshotDT.AsEnumerable().Where(r => r["wait_resource"] != DBNull.Value && !string.IsNullOrEmpty((string)r["wait_resource"])).Any();
 
             tsBlockingFilter.Text = string.Format("Blocking ({0} Blocked)", blockedCount);
@@ -352,44 +351,76 @@ namespace DBADashGUI.Performance
             tsStatus.ForeColor = blockedCount > 0 ? DashColors.Fail : DashColors.Success;
         }
 
+        private static void ShowPlan(DataRowView row)
+        {
+            if (row["query_plan"] == DBNull.Value)
+            {
+                FindPlan(row);
+            }
+            else
+            {
+                var plan = (string)row["query_plan"];
+                var path = System.IO.Path.GetTempFileName() + ".sqlplan";
+                System.IO.File.WriteAllText(path, plan);
+                var psi = new ProcessStartInfo(path) { UseShellExecute = true };
+                Process.Start(psi);
+            }
+        }
+
+        private static void FindPlan(DataRowView row)
+        {
+            var db = Convert.ToString(row["database_name"]);
+            var planHandle = Convert.ToString(row["plan_handle"]);
+            var planHash = Convert.ToString(row["query_plan_hash"]);
+            var queryHash = Convert.ToString(row["query_hash"]);
+            var sqlHandle = Convert.ToString(row["sql_handle"]);
+            var statementStartOffset = Convert.ToInt32(row["statement_start_offset"] == DBNull.Value ? -1 : row["statement_start_offset"]);
+            var statementEndOffset = Convert.ToInt32(row["statement_end_offset"] == DBNull.Value ? -1 : row["statement_end_offset"]);
+            var instance = Convert.ToString(row["InstanceDisplayName"]);
+            var sql = SqlStrings.GetFindPlan(planHash, queryHash, planHandle, sqlHandle, db, statementStartOffset, statementEndOffset, instance);
+
+            Common.ShowCodeViewer(sql, "Find Plan");
+        }
+
         private void Dgv_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
             if (e.RowIndex >= 0)
             {
                 var row = (DataRowView)dgv.Rows[e.RowIndex].DataBoundItem;
-                if (dgv.Columns[e.ColumnIndex].Name == "colSnapshotDate") // Drill down to view a snapshot from summary
+                string colName = dgv.Columns[e.ColumnIndex].Name;
+                if (colName == "colSnapshotDate") // Drill down to view a snapshot from summary
                 {
                     var snapshotDate = ((DateTime)row["SnapshotDate"]).AppTimeZoneToUtc();
                     InstanceID = (int)row["InstanceID"];
                     LoadSnapshot(snapshotDate);
                     tsBack.Enabled = true;
                 }
-                else if (dgv.Columns[e.ColumnIndex].Name == "colInstance") // Drill down to view snapshot summary for a specific instance
+                else if (colName == "colInstance") // Drill down to view snapshot summary for a specific instance
                 {
                     InstanceID = (int)row["InstanceID"];
                     RefreshData();
                 }
-                else if (dgv.Columns[e.ColumnIndex].Name == "colBatchText") // New window with full batch text for query
+                else if (colName == "colBatchText") // New window with full batch text for query
                 {
                     string sql = (string)row["batch_text"];
                     var title = "SPID: " + Convert.ToString(row["session_id"]) + " Batch Text";
                     Common.ShowCodeViewer(sql, title);
                 }
-                else if (dgv.Columns[e.ColumnIndex].Name == "colText") // New window with full query text
+                else if (colName == "colText") // New window with full query text
                 {
                     var sql = (string)row["text"];
                     var title = "SPID: " + Convert.ToString(row["session_id"]) + " Text";
                     Common.ShowCodeViewer(sql, title);
                 }
-                else if (dgv.Columns[e.ColumnIndex].Name == "colQueryPlan") // save query plan and open in default tool
+                else if (colName == "colQueryPlan") // save query plan and open in default tool
                 {
-                    var plan = (string)row["query_plan"];
-                    string path = System.IO.Path.GetTempFileName() + ".sqlplan";
-                    System.IO.File.WriteAllText(path, plan);
-                    var psi = new ProcessStartInfo(path) { UseShellExecute = true };
-                    Process.Start(psi);
+                    ShowPlan(row);
                 }
-                else if (dgv.Columns[e.ColumnIndex].Name == "colGroup") // Running query snapshot has been grouped by some value and the user has selected to drill down - filter the grid by the selected value for the column we have grouped by
+                else if ((new string[] { "colPlanHandle", "colQueryPlanHash", "colQueryHash", "colSQLHandle" }).Contains(colName))
+                {
+                    FindPlan(row);
+                }
+                else if (colName == "colGroup") // Running query snapshot has been grouped by some value and the user has selected to drill down - filter the grid by the selected value for the column we have grouped by
                 {
                     string filter = dgv.Columns[e.ColumnIndex].DataPropertyName + "='" + Convert.ToString(row[dgv.Columns[e.ColumnIndex].DataPropertyName]).Replace("'", "''") + "'";
                     tsGroupByFilter.Text = filter;
@@ -407,7 +438,7 @@ namespace DBADashGUI.Performance
                     LoadSnapshot(dv);
                     tsBack.Enabled = true;
                 }
-                else if (dgv.Columns[e.ColumnIndex].Name == "colSessionID") // Load the associated RPC/Batch completed event when the user clicks the sesion ID column
+                else if (colName == "colSessionID") // Load the associated RPC/Batch completed event when the user clicks the sesion ID column
                 {
                     var frm = new CompletedRPCBatchEvent()
                     {
@@ -419,7 +450,7 @@ namespace DBADashGUI.Performance
                     };
                     frm.Show(this);
                 }
-                else if (dgv.Columns[e.ColumnIndex].Name == "colTopSessionWaits") // Show a summary of the waits for the session
+                else if (colName == "colTopSessionWaits") // Show a summary of the waits for the session
                 {
                     splitContainer1.Panel2Collapsed = false;
                     if (dgvSessionWaits.Columns.Count == 0)
@@ -433,15 +464,15 @@ namespace DBADashGUI.Performance
                     sessionToolStripMenuItem.Tag = sessionid;
                     lblWaitsForSession.Text = "Waits For Session ID: " + sessionid.ToString();
                 }
-                else if (dgv.Columns[e.ColumnIndex].Name == "colBlockCount") // Filter to show queries blocked directly by the selected session
+                else if (colName == "colBlockCount") // Filter to show queries blocked directly by the selected session
                 {
                     ShowBlocking(Convert.ToInt16(dgv.Rows[e.RowIndex].Cells["colSessionID"].Value));
                 }
-                else if (dgv.Columns[e.ColumnIndex].Name == "colBlockedCountRecursive") // Filter to show queries blocked directly by the selected session
+                else if (colName == "colBlockedCountRecursive") // Filter to show queries blocked directly by the selected session
                 {
                     ShowBlocking(Convert.ToInt16(dgv.Rows[e.RowIndex].Cells["colSessionID"].Value), true);
                 }
-                else if (dgv.Columns[e.ColumnIndex].Name == "colSnapshotDateLink")
+                else if (colName == "colSnapshotDateLink")
                 {
                     var frm = new RunningQueriesViewer()
                     {
@@ -513,7 +544,9 @@ namespace DBADashGUI.Performance
         {
             if (dgv.Columns[e.ColumnIndex].Name == "colQueryPlan")
             {
-                e.Value = Convert.ToBoolean(e.Value) ? "View Plan" : "";
+                var row = dgv.Rows[e.RowIndex];
+
+                e.Value = Convert.ToBoolean(e.Value) ? "View Plan" : "Find Plan";
             }
             else if (Convert.ToString(e.Value).Length > 1000)
             {

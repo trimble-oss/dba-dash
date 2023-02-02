@@ -32,6 +32,9 @@
     <Deterministic>False</Deterministic>
   </PropertyGroup>
   <ItemGroup>
+    <None Remove="SQL\FindPlan.sql" />
+  </ItemGroup>
+  <ItemGroup>
     <Compile Include="..\GlobalAssemblyInfo.cs" Link="Properties\GlobalAssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -213,6 +216,7 @@
     </Compile>
     <EmbeddedResource Include="Resources\PowerShell-Mode.xshd" />
     <EmbeddedResource Include="Resources\SQL-Mode.xshd" />
+    <EmbeddedResource Include="SQL\FindPlan.sql" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="DatabaseUnknown_16x.ico" />
