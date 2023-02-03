@@ -118,7 +118,12 @@ WHERE (
 		OR q.query_hash = @query_hash
 		OR q.batch_sql_handle = @sql_handle
 )
-ORDER BY MatchOn,q.query_id,p.plan_id;
+ORDER BY	CASE WHEN p.query_plan_hash = @query_plan_hash THEN 50 ELSE 0 END +
+				CASE WHEN q.query_hash = @query_hash THEN 20 ELSE 0 END +
+				CASE WHEN q.batch_sql_handle = @sql_handle THEN 10 ELSE 0 END DESC,
+			q.last_execution_time DESC,
+			q.query_id,
+			p.plan_id;
 
 IF NOT EXISTS(
 		SELECT * 
