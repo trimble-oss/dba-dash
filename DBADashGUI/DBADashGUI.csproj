@@ -32,6 +32,7 @@
     <Deterministic>False</Deterministic>
   </PropertyGroup>
   <ItemGroup>
+    <None Remove="SQL\DecipherWaitResource.sql" />
     <None Remove="SQL\FindPlan.sql" />
   </ItemGroup>
   <ItemGroup>
@@ -216,6 +217,7 @@
     </Compile>
     <EmbeddedResource Include="Resources\PowerShell-Mode.xshd" />
     <EmbeddedResource Include="Resources\SQL-Mode.xshd" />
+    <EmbeddedResource Include="SQL\DecipherWaitResource.sql" />
     <EmbeddedResource Include="SQL\FindPlan.sql" />
   </ItemGroup>
   <ItemGroup>
