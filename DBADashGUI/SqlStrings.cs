@@ -23,6 +23,8 @@ namespace DBADashGUI
 
         private static string FindPlan => GetSqlString("FindPlan");
 
+        private static string DecipherWaitResource => GetSqlString("DecipherWaitResource");
+
         public static string GetFindPlan(string queryPlanHash, string queryHash, string planHandle, string sqlHandle, string db, int statementStartOffset, int statementEndOffset, string instance)
         {
             if (string.IsNullOrEmpty(planHandle))
@@ -59,6 +61,14 @@ namespace DBADashGUI
                 .Replace("{database_name}", db.Trim())
                 .Replace("'{statement_start_offset}'", statementStartOffset.ToString())
                 .Replace("'{statement_end_offset}'", statementEndOffset.ToString())
+                .Replace("{instance_name}", instance);
+        }
+
+        public static string GetDecipherWaitResource(string waitResource, string instance)
+        {
+            instance = instance.Replace("*", "+"); // Prevent ending of comment section with */
+            waitResource = waitResource.Replace("'","''"); // Ensure wait resource is quoted just in case
+            return DecipherWaitResource.Replace("{wait_resource}", waitResource)
                 .Replace("{instance_name}", instance);
         }
     }

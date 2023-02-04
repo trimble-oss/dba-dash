@@ -73,7 +73,7 @@ namespace DBADashGUI.Performance
                 new DataGridViewTextBoxColumn() { HeaderText = "Client Interface Name", DataPropertyName = "client_interface_name", SortMode = DataGridViewColumnSortMode.Automatic, MinimumWidth = 40 },
                 new DataGridViewTextBoxColumn() { HeaderText = "Start Time", DataPropertyName = "start_time", SortMode = DataGridViewColumnSortMode.Automatic, MinimumWidth = 40 },
                 new DataGridViewTextBoxColumn() { HeaderText = "Last Request Start Time", DataPropertyName = "last_request_start_time", SortMode = DataGridViewColumnSortMode.Automatic, MinimumWidth = 40 },
-                new DataGridViewTextBoxColumn() { HeaderText = "Wait Resource", DataPropertyName = "wait_resource", SortMode = DataGridViewColumnSortMode.Automatic, MinimumWidth = 40 },
+                new DataGridViewLinkColumn()   { HeaderText = "Wait Resource", DataPropertyName = "wait_resource", SortMode = DataGridViewColumnSortMode.Automatic, MinimumWidth = 40, LinkColor = DashColors.LinkColor, Name="colWaitResource"},
                 new DataGridViewTextBoxColumn() { HeaderText = "Wait Resource Type", DataPropertyName = "wait_resource_type", SortMode = DataGridViewColumnSortMode.Automatic, MinimumWidth = 40, Visible = hasWaitResource },
                 new DataGridViewTextBoxColumn() { HeaderText = "Wait Database ID", DataPropertyName = "wait_database_id", SortMode = DataGridViewColumnSortMode.Automatic, MinimumWidth = 40, Visible = hasWaitResource },
                 new DataGridViewTextBoxColumn() { HeaderText = "Wait Database", DataPropertyName = "wait_db", SortMode = DataGridViewColumnSortMode.Automatic, MinimumWidth = 40, Visible = hasWaitResource },
@@ -458,7 +458,18 @@ namespace DBADashGUI.Performance
                         ShowRunningQueriesForSnapshotDate(row);
                         break;
                     }
+                case "colWaitResource":
+                    DecipherWaitResource(row);
+                    break;
             }
+        }
+
+        private void DecipherWaitResource(DataRowView row)
+        {
+            var waitResource = Convert.ToString(row["wait_resource"]);
+            var instance = Convert.ToString(row["InstanceDisplayName"]);
+            var sql = SqlStrings.GetDecipherWaitResource(waitResource, instance);
+            Common.ShowCodeViewer(sql, "Decipher Wait Resource");
         }
 
         private void GroupByFilter(DataGridViewCellEventArgs e, DataRowView row)
