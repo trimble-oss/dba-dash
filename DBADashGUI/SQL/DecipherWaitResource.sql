@@ -214,4 +214,7 @@ BEGIN
 	
 	EXEC sp_executesql @SQL,N'@ObjectID INT,@IndexID INT,@WaitResource NVARCHAR(256)',@ObjectID,@IndexID,@WaitResource
 END
-
+ELSE
+BEGIN
+	SELECT @WaitResource as wait_resource,'Wait resource type is not yet supported for decoding' AS info
+END
