@@ -124,6 +124,9 @@ namespace DBADash
         private readonly MemoryCache cache = MemoryCache.Default;
         private readonly Stopwatch swatch = new();
         private CollectionType currentCollection;
+        private Version SQLVersion = new();
+
+        private bool IsTableValuedConstructorsSupported => SQLVersion.Major > 9;
 
         public int Job_instance_id
         {
@@ -337,6 +340,7 @@ namespace DBADash
             dbName = (string)dt.Rows[0]["DBName"];
             instanceName = (string)dt.Rows[0]["Instance"];
             productVersion = (string)dt.Rows[0]["ProductVersion"];
+            Version.TryParse(productVersion, out SQLVersion);
             string hostPlatform = (string)dt.Rows[0]["host_platform"];
             engineEdition = (DatabaseEngineEdition)Convert.ToInt32(dt.Rows[0]["EngineEdition"]);
             string containedAGName = Convert.ToString(dt.Rows[0]["contained_availability_group_name"]);
@@ -512,7 +516,14 @@ namespace DBADash
             }
             if (collectionType == CollectionType.RunningQueries)
             {
-                CollectText();
+                try
+                {
+                    CollectText();
+                }
+                catch (Exception ex)
+                {
+                    LogError(new Exception("Error collecting text for Running Queries", ex), "RunningQueries");
+                }
                 try
                 {
                     CollectPlans();
@@ -768,19 +779,32 @@ CROSS APPLY sys.dm_exec_text_query_plan(t.plan_handle,t.statement_start_offset,t
         private string GetTextFromHandlesSQL()
         {
             var handles = RunningQueriesHandles();
-            Int32 cnt = 0;
-            Int32 cacheCount = 0;
+            int cnt = 0;
+            int cacheCount = 0;
             var sb = new StringBuilder();
             sb.Append(@"DECLARE @handles TABLE(sql_handle VARBINARY(64))
-INSERT INTO @handles(sql_handle)
-VALUES
-");
+INSERT INTO @handles(sql_handle)");
+
+            if (IsTableValuedConstructorsSupported)
+            {
+                sb.Append("\nVALUES");
+            }
+
             foreach (string strHandle in handles)
             {
                 if (!cache.Contains(strHandle))
                 {
-                    cnt += 1;
-                    sb.Append(string.Format("(0x{0}),", strHandle));
+                    if (IsTableValuedConstructorsSupported)
+                    {
+                        if (cnt > 0) sb.Append(",");
+                        sb.Append($"(0x{strHandle})");
+                    }
+                    else
+                    {
+                        if (cnt > 0) sb.Append("\nUNION ALL");
+                        sb.Append($"\nSELECT 0x{strHandle}");
+                    }
+                    cnt++;
                 }
                 else
                 {
@@ -790,7 +814,7 @@ VALUES
 
             LogInternalPerformanceCounter("DBADash", "Distinct count of text (sql_handle)", "", handles.Count); // Total number of distinct sql_handles
             LogInternalPerformanceCounter("DBADash", "Count of text (sql_handle) to collect", "", cnt); // Count of sql_handles we need to collect
-            LogInternalPerformanceCounter("DBADash", "Count of text (sql_handle) from cache", "", handles.Count - cnt); // Count of sql_handles we didn't need to collect becasue they were collected previously and we cached the sql_handle.
+            LogInternalPerformanceCounter("DBADash", "Count of text (sql_handle) from cache", "", handles.Count - cnt); // Count of sql_handles we didn't need to collect because they were collected previously and we cached the sql_handle.
 
             if ((cnt + cacheCount) > 0)
             {
@@ -802,7 +826,8 @@ VALUES
             }
             else
             {
-                sb.Remove(sb.Length - 1, 1);
+                sb.AppendLine("OPTION(RECOMPILE)"); // Plan caching is not beneficial.  RECOMPILE hint to avoid polluting the plan cache
+                sb.AppendLine();
                 sb.AppendLine();
                 sb.Append(@"SELECT H.sql_handle,
     txt.dbid,
@@ -810,7 +835,8 @@ VALUES
     txt.encrypted,
     txt.text
 FROM @handles H
-CROSS APPLY sys.dm_exec_sql_text(H.sql_handle) txt");
+CROSS APPLY sys.dm_exec_sql_text(H.sql_handle) txt
+OPTION(RECOMPILE)"); // Plan caching is not beneficial.  RECOMPILE hint to avoid polluting the plan cache
                 return sb.ToString();
             }
         }
