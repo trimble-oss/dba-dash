@@ -670,6 +670,7 @@ VALUES");
             else
             {
                 sb.Remove(sb.Length - 1, 1);
+                sb.AppendLine("OPTION(RECOMPILE)"); // Plan caching is not beneficial.  RECOMPILE hint to avoid polluting the plan cache
                 sb.AppendLine();
                 sb.Append(@"SELECT t.plan_handle,
         t.statement_start_offset,
@@ -679,7 +680,8 @@ VALUES");
         pln.encrypted,
         pln.query_plan
 FROM @plans t
-CROSS APPLY sys.dm_exec_text_query_plan(t.plan_handle,t.statement_start_offset,t.statement_end_offset) pln");
+CROSS APPLY sys.dm_exec_text_query_plan(t.plan_handle,t.statement_start_offset,t.statement_end_offset) pln
+OPTION(RECOMPILE)"); // Plan caching is not beneficial.  RECOMPILE hint to avoid polluting the plan cache
                 return sb.ToString();
             }
         }
