@@ -279,8 +279,10 @@ namespace DBADashServiceConfig
             MessageBox.Show("Config saved.  Restart service to apply changes.", "Save", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 
-        private void ServiceConfig_Load(object sender, EventArgs e)
+        private async void ServiceConfig_Load(object sender, EventArgs e)
         {
+            await CommonShared.CheckForIncompleteUpgrade();
+            if (Upgrade.IsUpgradeIncomplete) return;
             dgvConnections.AutoGenerateColumns = false;
             dgvConnections.Columns.Add(new DataGridViewTextBoxColumn() { Name = "ConnectionString", DataPropertyName = "ConnectionString", HeaderText = "Connection String", Width = 300 });
             dgvConnections.Columns.Add(new DataGridViewTextBoxColumn() { Name = "ConnectionID", DataPropertyName = "ConnectionID", HeaderText = "Connection ID", ToolTipText = "The ConnectionID is used to uniquely identify the SQL Instance in the repository database.  The ConnectionID is automatically assigned to @@SERVERNAME but you can override this with a custom value.  If you change the ConnectionID for an existing server it will appear as a new instance in the repository database." });

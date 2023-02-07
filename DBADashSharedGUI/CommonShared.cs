@@ -1,4 +1,5 @@
-﻿using DBADashGUI;
+﻿using DBADash;
+using DBADashGUI;
 using System.Diagnostics;
 using System.Runtime.Versioning;
 
@@ -56,5 +57,18 @@ namespace DBADashSharedGUI
             }
         }
 
+        public static async Task CheckForIncompleteUpgrade()
+        {
+            if (!DBADash.Upgrade.IsUpgradeIncomplete) ;
+            MessageBox.Show(DBADash.Upgrade.IncompleteUpgradeMessage, "Error", MessageBoxButtons.OK,
+                MessageBoxIcon.Error);
+            if (MessageBox.Show("Retry upgrade?", "Retry", MessageBoxButtons.YesNo, MessageBoxIcon.Question) ==
+                DialogResult.Yes)
+            {
+                await Upgrade.UpgradeDBADashAsync();
+            }
+
+            Application.Exit();
+        }
     }
 }

@@ -30,6 +30,13 @@ namespace DBADashService
                .Enrich.WithProperty("MachineName", Environment.MachineName)
                .CreateLogger();
 
+            if (DBADash.Upgrade.IsUpgradeIncomplete)
+            {
+                const string message = $"Incomplete upgrade of DBA Dash detected.  File '{DBADash.Upgrade.UpgradeFile}' found in directory. Upgrade might have failed due to locked files. More info: https://dbadash.com/upgrades/";
+                Log.Logger.Error(message);
+                throw new Exception(message);
+            }
+
             var rc = HostFactory.Run(x =>
             {
                 x.Service<ScheduleService>(s =>
