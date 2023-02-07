@@ -10,7 +10,12 @@ static void CommandLineUpgrade()
     try
     {
         var latest = Upgrade.GetLatestVersionAsync().GetAwaiter().GetResult();
-        if (Upgrade.IsUpgradeAvailable(latest))
+        if (Upgrade.IsUpgradeIncomplete)
+        {
+            Log.Warning(Upgrade.IncompleteUpgradeMessage);
+            Log.Information("Upgrade will be attempted");
+        }
+        if (Upgrade.IsUpgradeAvailable(latest) || Upgrade.IsUpgradeIncomplete)
         {
             if (Upgrade.IsAdministrator)
             {
@@ -239,13 +244,10 @@ try
               File.WriteAllText(jsonConfigPath, config.Serialize());
 
               Log.Information("Complete.  Restart the service to apply the config change");
-
           });
-
 }
 catch (Exception ex)
 {
     Log.Error(ex, "Error running DBADashConfig");
     Environment.Exit(1);
 }
-

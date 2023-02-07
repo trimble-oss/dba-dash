@@ -62,6 +62,30 @@ function CheckDotNetVersion(){
 
 }
 
+<#  
+    Expand a zip file with multiple retry
+    Retry might be beneficial if there is a locked file.
+#>
+function ExpandWithRetry([string]$ZipFile,[int]$RetryCount,[int]$WaitBetweenRetry){
+    $Error.Clear()
+    $cnt=1
+    do {
+        if($Error.Count -gt 0){
+            "Waiting $WaitBetweenRetry seconds between retries"
+            Start-Sleep -Seconds $WaitBetweenRetry
+        }
+        "Expanding $zip" + (&{If($cnt -gt 1) {" (Attempt $cnt of $RetryCount)"} Else {""}})
+        $Error.Clear()
+        Expand-Archive -Path $zip -DestinationPath (Get-Location) -Force -ErrorAction Continue
+        $cnt+=1 
+    }
+    while ($cnt -le $RetryCount -and $Error.Count -gt 0)
+   
+    if($Error.Count -gt 0){
+        throw "Failed to extract files"
+    }
+}
+
 $ErrorActionPreference = "Stop"
 $upgradeFile = "DBADash.Upgrade"
 
@@ -201,8 +225,8 @@ if ($versionCompare -eq -1 -or $ForceUpgrade){
     }
     Write-Host "Extract Files from: $zip"
     "Upgrade Started " + (Get-Date).ToString() | Out-File $upgradeFile
-    Expand-Archive -Path $zip -DestinationPath (Get-Location) -Force -ErrorAction Stop
-    Remove-Item $upgradeFile
+    ExpandWithRetry -ZipFile $zip -RetryCount 3 -WaitBetweenRetry 5
+    Remove-Item $upgradeFile # Item is removed on successful file extract
 
     # If service exists, start it back up
     if($serviceExists){

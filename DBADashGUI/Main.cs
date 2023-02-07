@@ -86,6 +86,8 @@ namespace DBADashGUI
 
         private async void Main_Load(object sender, EventArgs e)
         {
+            await CommonShared.CheckForIncompleteUpgrade();
+            if (Upgrade.IsUpgradeIncomplete) return;
             if (Properties.Settings.Default.SettingsUpgradeRequired)
             {
                 Properties.Settings.Default.Upgrade();
@@ -961,7 +963,7 @@ namespace DBADashGUI
             {
                 DataRetentionForm = new();
                 DataRetentionForm.FormClosed += delegate { DataRetentionForm = null; };
-            }   
+            }
             DataRetentionForm.Show();
             DataRetentionForm.Focus();
         }
@@ -1124,7 +1126,8 @@ namespace DBADashGUI
             {
                 Tags = String.Join(",", SelectedTags())
             };
-            ManageInstancesForm.FormClosing += delegate {
+            ManageInstancesForm.FormClosing += delegate
+            {
                 if (ManageInstancesForm.InstanceActiveFlagChanged || ManageInstancesForm.InstanceSummaryVisibleChanged)
                 {
                     AddInstanes(); // refresh the tree if instances deleted/restored
@@ -1133,7 +1136,7 @@ namespace DBADashGUI
                         summary1.RefreshData();
                     }
                 }
-                ManageInstancesForm = null; 
+                ManageInstancesForm = null;
             };
             ManageInstancesForm.Show();
         }
@@ -1185,7 +1188,7 @@ namespace DBADashGUI
                 SelectedDatabaseA = new DatabaseItem() { DatabaseID = n.DatabaseID, DatabaseName = n.DatabaseName }
             };
             DBDiffForm.FormClosed += delegate { DBDiffForm = null; };
-            DBDiffForm.Show();         
+            DBDiffForm.Show();
         }
 
         private static JobDiff JobDiffForm = null;

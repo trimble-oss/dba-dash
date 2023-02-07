@@ -3,6 +3,7 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Security.Principal;
 using System.Threading.Tasks;
 
@@ -20,6 +21,10 @@ namespace DBADash
         public const string AppURL = "http://dbadash.com";
         public const string AuthorURL = "https://github.com/DavidWiseman";
         public const string ServiceFileName = "DBADashService.exe";
+        public const string UpgradeFile = "DBADash.Upgrade";
+        public const string IncompleteUpgradeMessage = $"Incomplete upgrade of DBA Dash detected.  File '{DBADash.Upgrade.UpgradeFile}' found in directory. Upgrade might have failed due to locked files. More info: https://dbadash.com/upgrades/";
+
+        public static bool IsUpgradeIncomplete => File.Exists(Path.Combine(ApplicationPath, UpgradeFile));
 
         public enum DeploymentTypes
         {
@@ -45,7 +50,7 @@ namespace DBADash
             return Assembly.GetExecutingAssembly().GetName().Version;
         }
 
-        public static async Task UpgradeDBADashAsync(string tag = "", bool startGUI = false, bool startConfig = false,bool noExit=true)
+        public static async Task UpgradeDBADashAsync(string tag = "", bool startGUI = false, bool startConfig = false, bool noExit = true)
         {
             var client = new GitHubClient(new ProductHeaderValue(GITHUB_APP));
             var upgradeScript = await client.Repository.Content.GetRawContentByRef(GITHUB_OWNER, GITHUB_REPO, GITHUB_SCRIPTPATH + GITHUB_UPGRADESCRIPT, GITHUB_BRANCH);
@@ -76,8 +81,7 @@ namespace DBADash
 
         public static string LatestVersionLink => $"https://github.com/{Upgrade.GITHUB_OWNER}/{Upgrade.GITHUB_REPO}/releases/latest";
 
-        public static bool IsAdministrator =>
-            new WindowsPrincipal(WindowsIdentity.GetCurrent())
-                .IsInRole(WindowsBuiltInRole.Administrator);
+        public static bool IsAdministrator => RuntimeInformation.IsOSPlatform(OSPlatform.Windows) && new WindowsPrincipal(WindowsIdentity.GetCurrent())
+            .IsInRole(WindowsBuiltInRole.Administrator);
     }
 }
