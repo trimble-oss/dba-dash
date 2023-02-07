@@ -25,7 +25,7 @@ namespace DBADashGUI
             }
             else if (status == DBADashStatusEnum.NA)
             {
-                return DashColors.GrayLight;
+                return DashColors.NotApplicable;
             }
             else if (status == DBADashStatusEnum.OK)
             {

@@ -66,7 +66,7 @@ namespace DBADashGUI
                 ((DataGridViewLinkCell)cell).LinkColor = StatusColor.ContrastColor();
                 ((DataGridViewLinkCell)cell).VisitedLinkColor = StatusColor.ContrastColor();
             }
-            cell.Style.SelectionBackColor = ControlPaint.Light(StatusColor);
+            cell.Style.SelectionBackColor = StatusColor == Color.White || StatusColor == DashColors.NotApplicable ? Color.Empty : ControlPaint.Light(StatusColor);
         }
 
         public static void SetStatusColor(this DataGridViewCell cell, DBADashStatusEnum Status)

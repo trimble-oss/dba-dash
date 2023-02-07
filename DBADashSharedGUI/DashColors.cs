@@ -43,7 +43,7 @@
 
         public static readonly Color Fail = RedDark;
         public static readonly Color Success = GreenDark;
-        public static readonly Color NotApplicable = DashColors.GrayLight;
+        public static Color NotApplicable => DashColors.GrayLight;
 
         //Neutral Progression
         public static readonly Color GrayLight = Color.FromArgb(241, 241, 246);
