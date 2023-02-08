@@ -59,7 +59,8 @@ namespace DBADashSharedGUI
 
         public static async Task CheckForIncompleteUpgrade()
         {
-            if (!DBADash.Upgrade.IsUpgradeIncomplete) ;
+            if (!DBADash.Upgrade.IsUpgradeIncomplete) return;
+
             MessageBox.Show(DBADash.Upgrade.IncompleteUpgradeMessage, "Error", MessageBoxButtons.OK,
                 MessageBoxIcon.Error);
             if (MessageBox.Show("Retry upgrade?", "Retry", MessageBoxButtons.YesNo, MessageBoxIcon.Question) ==
