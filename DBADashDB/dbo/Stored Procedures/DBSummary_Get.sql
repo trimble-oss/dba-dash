@@ -4,7 +4,7 @@
 )
 AS
 SELECT I.InstanceGroupName AS Instance, 
-	SUM(CASE WHEN page_verify_option<>2 THEN 1 ELSE 0 END) as [Page Verify Not Optimal],
+	SUM(CASE WHEN D.page_verify_option<>2 THEN 1 ELSE 0 END) as [Page Verify Not Optimal],
 	SUM(CASE WHEN D.is_auto_close_on =1 THEN 1 ELSE 0 END) as [Auto Close],
 	SUM(CASE WHEN D.is_auto_shrink_on =1 THEN 1 ELSE 0 END) as [Auto Shrink],
 	SUM(CASE WHEN D.is_auto_create_stats_on=0 THEN 1 ELSE 0 END) as [Auto Create Stats Disabled],
@@ -17,7 +17,8 @@ SELECT I.InstanceGroupName AS Instance,
 	SUM(CASE WHEN D.state=5 THEN 1 ELSE 0 END) AS Emergency,
 	SUM(CASE WHEN D.state IN(6,10) THEN 1 ELSE 0 END) AS Offline,
 	SUM(CASE WHEN D.database_id >4 THEN 1 ELSE 0 END) AS [User Database Count],
-	MAX(D.VLFCount) AS [Max VLF Count]
+	MAX(D.VLFCount) AS [Max VLF Count],
+	SUM(CASE WHEN D.target_recovery_time_in_seconds IS NULL THEN NULL WHEN D.target_recovery_time_in_seconds = 0 AND D.database_id > 4 THEN 1 ELSE 0 END) AS [Not Using Indirect Checkpoints]
 FROM dbo.Instances I 
 JOIN dbo.Databases D ON I.InstanceID = D.InstanceID
 WHERE I.IsActive=1

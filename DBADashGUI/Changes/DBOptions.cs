@@ -11,8 +11,8 @@ namespace DBADashGUI.Changes
 {
     public partial class DBOptions : UserControl, ISetContext
     {
-        private List<Int32> InstanceIDs;
-        private Int32 DatabaseID;
+        private List<int> InstanceIDs;
+        private int DatabaseID;
 
         public DBOptions()
         {
@@ -87,7 +87,7 @@ namespace DBADashGUI.Changes
             using (var cmd = new SqlCommand("dbo.DBSummary_Get", cn) { CommandType = CommandType.StoredProcedure })
             using (var da = new SqlDataAdapter(cmd))
             {
-                cmd.Parameters.AddWithValue("InstanceIDs", String.Join(",", InstanceIDs));
+                cmd.Parameters.AddWithValue("InstanceIDs", string.Join(",", InstanceIDs));
                 cmd.Parameters.AddWithValue("ShowHidden", InstanceIDs.Count == 1 || Common.ShowHidden);
                 DataTable dt = new();
                 da.Fill(dt);
@@ -103,7 +103,7 @@ namespace DBADashGUI.Changes
             using (var cmd = new SqlCommand("dbo.DatabasesAllInfo_Get", cn) { CommandType = CommandType.StoredProcedure })
             using (var da = new SqlDataAdapter(cmd))
             {
-                cmd.Parameters.AddWithValue("InstanceIDs", String.Join(",", InstanceIDs));
+                cmd.Parameters.AddWithValue("InstanceIDs", string.Join(",", InstanceIDs));
                 cmd.Parameters.AddIfGreaterThanZero("DatabaseID", DatabaseID);
                 cmd.Parameters.AddWithValue("ShowHidden", InstanceIDs.Count == 1 || Common.ShowHidden);
                 DataTable dt = new();
@@ -144,7 +144,7 @@ namespace DBADashGUI.Changes
             using (var cmd = new SqlCommand("dbo.DBOptionsHistory_Get", cn) { CommandType = CommandType.StoredProcedure })
             using (var da = new SqlDataAdapter(cmd))
             {
-                cmd.Parameters.AddWithValue("InstanceIDs", String.Join(",", InstanceIDs));
+                cmd.Parameters.AddWithValue("InstanceIDs", string.Join(",", InstanceIDs));
                 cmd.Parameters.AddIfGreaterThanZero("DatabaseID", DatabaseID);
                 cmd.Parameters.AddWithValue("ExcludeStateChanges", excludeStateChangesToolStripMenuItem.Checked);
                 cmd.Parameters.AddWithValue("ShowHidden", InstanceIDs.Count == 1 || Common.ShowHidden);
@@ -224,23 +224,38 @@ namespace DBADashGUI.Changes
         {
             if (SummaryMode)
             {
-                var warningCols = new string[] { "Auto Create Stats Disabled", "Auto Update Stats Disabled", "Old Compat Level", "In Recovery", "Offline", "Trustworthy" };
+                var warningCols = new string[] { "Auto Create Stats Disabled", "Auto Update Stats Disabled", "Old Compat Level", "In Recovery", "Offline", "Trustworthy", "Not Using Indirect Checkpoints" };
                 var criticalCols = new string[] { "Page Verify Not Optimal", "Auto Close", "Auto Shrink", "Suspect", "Emergency" };
-                for (Int32 idx = e.RowIndex; idx < e.RowIndex + e.RowCount; idx += 1)
+                for (int idx = e.RowIndex; idx < e.RowIndex + e.RowCount; idx += 1)
                 {
                     var r = dgv.Rows[idx];
+
                     foreach (var col in warningCols)
                     {
-                        r.Cells[col].SetStatusColor((Int32)r.Cells[col].Value > 0 ? DashColors.Warning : Color.White);
+                        if (r.Cells[col].Value == DBNull.Value)
+                        {
+                            r.Cells[col].SetStatusColor(DashColors.NotApplicable);
+                        }
+                        else
+                        {
+                            r.Cells[col].SetStatusColor((int)r.Cells[col].Value > 0 ? DashColors.Warning : DashColors.Success);
+                        }
                     }
                     foreach (var col in criticalCols)
                     {
-                        r.Cells[col].SetStatusColor((Int32)r.Cells[col].Value > 0 ? DashColors.Fail : Color.White);
+                        if (r.Cells[col].Value == DBNull.Value)
+                        {
+                            r.Cells[col].SetStatusColor(DashColors.NotApplicable);
+                        }
+                        else
+                        {
+                            r.Cells[col].SetStatusColor((int)r.Cells[col].Value > 0 ? DashColors.Fail : DashColors.Success);
+                        }
                     }
                     Color vlfStatusColor = DashColors.NotApplicable;
                     if (r.Cells["Max VLF Count"].Value != DBNull.Value)
                     {
-                        vlfStatusColor = (Int32)r.Cells["Max VLF Count"].Value > 10000 ? DashColors.Fail : ((Int32)r.Cells["Max VLF Count"].Value > 1000 ? DashColors.Warning : Color.White);
+                        vlfStatusColor = (int)r.Cells["Max VLF Count"].Value > 10000 ? DashColors.Fail : ((int)r.Cells["Max VLF Count"].Value > 1000 ? DashColors.Warning : DashColors.Success);
                     }
 
                     r.Cells["Max VLF Count"].SetStatusColor(vlfStatusColor);
