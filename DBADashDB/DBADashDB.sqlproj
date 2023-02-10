@@ -35,6 +35,7 @@
     <CompatibilityMode>130</CompatibilityMode>
     <TargetFrameworkProfile />
     <AutoUpdateStatisticsAsynchronously>True</AutoUpdateStatisticsAsynchronously>
+    <TargetRecoveryTimePeriod>60</TargetRecoveryTimePeriod>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <BuildScriptName>$(MSBuildProjectName).sql</BuildScriptName>
