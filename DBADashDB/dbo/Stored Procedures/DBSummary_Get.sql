@@ -18,7 +18,8 @@ SELECT I.InstanceGroupName AS Instance,
 	SUM(CASE WHEN D.state IN(6,10) THEN 1 ELSE 0 END) AS Offline,
 	SUM(CASE WHEN D.database_id >4 THEN 1 ELSE 0 END) AS [User Database Count],
 	MAX(D.VLFCount) AS [Max VLF Count],
-	SUM(CASE WHEN D.target_recovery_time_in_seconds IS NULL THEN NULL WHEN D.target_recovery_time_in_seconds = 0 AND D.database_id > 4 THEN 1 ELSE 0 END) AS [Not Using Indirect Checkpoints]
+	SUM(CASE WHEN D.target_recovery_time_in_seconds IS NULL THEN NULL WHEN D.target_recovery_time_in_seconds = 0 AND D.database_id > 4 THEN 1 ELSE 0 END) AS [Not Using Indirect Checkpoints],
+	SUM(CASE WHEN D.target_recovery_time_in_seconds IS NULL OR D.target_recovery_time_in_seconds IN(0,60) THEN 0 ELSE 1 END) AS [None-Default Target Recovery Time]
 FROM dbo.Instances I 
 JOIN dbo.Databases D ON I.InstanceID = D.InstanceID
 WHERE I.IsActive=1

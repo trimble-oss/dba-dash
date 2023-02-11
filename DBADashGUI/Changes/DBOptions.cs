@@ -224,7 +224,7 @@ namespace DBADashGUI.Changes
         {
             if (SummaryMode)
             {
-                var warningCols = new string[] { "Auto Create Stats Disabled", "Auto Update Stats Disabled", "Old Compat Level", "In Recovery", "Offline", "Trustworthy", "Not Using Indirect Checkpoints" };
+                var warningCols = new string[] { "Auto Create Stats Disabled", "Auto Update Stats Disabled", "Old Compat Level", "In Recovery", "Offline", "Trustworthy", "Not Using Indirect Checkpoints", "None-Default Target Recovery Time" };
                 var criticalCols = new string[] { "Page Verify Not Optimal", "Auto Close", "Auto Shrink", "Suspect", "Emergency" };
                 for (int idx = e.RowIndex; idx < e.RowIndex + e.RowCount; idx += 1)
                 {
