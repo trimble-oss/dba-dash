@@ -1,7 +1,8 @@
 ﻿CREATE PROC dbo.DatabasesAllInfo_Get(
 		@InstanceIDs VARCHAR(MAX)=NULL,
 		@DatabaseID INT=NULL,
-        @ShowHidden BIT=1
+        @ShowHidden BIT=1,
+        @InstanceGroupName NVARCHAR(128)=NULL
 )
 AS
 DECLARE @SQL NVARCHAR(MAX) 
@@ -88,6 +89,7 @@ JOIN dbo.Instances I ON I.InstanceID = D.InstanceID
 WHERE 1=1
 AND D.IsActive=1
 AND I.IsActive=1
+' + CASE WHEN @InstanceGroupName IS NULL THEN '' ELSE 'AND I.InstanceGroupName = @InstanceGroupName' END + '
 ' + CASE WHEN @InstanceIDs IS NULL THEN '' ELSE ' AND EXISTS(SELECT 1 
 			FROM STRING_SPLIT(@InstanceIDs,'','') ss 
 			WHERE ss.value = D.InstanceID
@@ -96,4 +98,4 @@ AND I.IsActive=1
 ' + CASE WHEN @DatabaseID IS NULL THEN '' ELSE 'AND D.DatabaseID = @DatabaseID' END + '
 ' + CASE WHEN @ShowHidden=1 THEN '' ELSE 'AND I.ShowInSummary=1' END
 
-EXEC sp_executesql @SQL,N'@InstanceIDs VARCHAR(MAX),@DatabaseID INT',@InstanceIDs,@DatabaseID
+EXEC sp_executesql @SQL,N'@InstanceIDs VARCHAR(MAX),@DatabaseID INT,@InstanceGroupName NVARCHAR(128)',@InstanceIDs,@DatabaseID,@InstanceGroupName
