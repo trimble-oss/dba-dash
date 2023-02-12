@@ -97,7 +97,8 @@ SELECT I.InstanceID,
 	CASE WHEN I.EditionID=1674378470 -- AzureDB or Azure Managed Instance
             THEN 150 ELSE TRY_CAST(I.ProductMajorVersion AS INT)*10 END AS MaxSupportedCompatibilityLevel,
     I.InstanceDisplayName,
-    I.ShowInSummary
+    I.ShowInSummary,
+    I.InstanceGroupName
 FROM dbo.Instances I
 LEFT JOIN dbo.DBADashAgent A ON I.CollectAgentID = A.DBADashAgentID
 CROSS APPLY dbo.SQLVersionName(I.EditionID,I.ProductVersion) v
