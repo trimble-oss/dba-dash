@@ -42,17 +42,7 @@ namespace DBADashGUI.Changes
 
         public bool SummaryMode
         {
-            get
-            {
-                if (DatabaseID > 0)
-                {
-                    return false;
-                }
-                else
-                {
-                    return tsDetail.Visible;
-                }
-            }
+            get => DatabaseID <= 0 && tsDetail.Visible;
             set
             {
                 tsDetail.Visible = value;
@@ -104,6 +94,7 @@ namespace DBADashGUI.Changes
 
         private void RefreshDBSummary()
         {
+            tsClearFilter.Visible = false;
             using (var cn = new SqlConnection(Common.ConnectionString))
             using (var cmd = new SqlCommand("dbo.DBSummary_Get", cn) { CommandType = CommandType.StoredProcedure })
             using (var da = new SqlDataAdapter(cmd))
@@ -141,7 +132,8 @@ namespace DBADashGUI.Changes
         private void RefreshDBInfo()
         {
             DataTable dt = GetDBInfo();
-
+            tsClearFilter.Visible = true;
+            tsClearFilter.Enabled = RowFilter != string.Empty;
             if (dt.Rows.Count == 1)
             {
                 Pivot(ref dt);
@@ -398,6 +390,13 @@ namespace DBADashGUI.Changes
 
             ShowSummary();
             return true;
+        }
+
+        private void tsClearFilter_Click(object sender, EventArgs e)
+        {
+            RowFilter = string.Empty;
+            ((DataView)dgv.DataSource).RowFilter = RowFilter;
+            tsClearFilter.Enabled = false;
         }
     }
 }
