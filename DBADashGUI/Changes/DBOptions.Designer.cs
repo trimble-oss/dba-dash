@@ -58,6 +58,7 @@
             this.dataGridViewTextBoxColumn4 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dataGridViewTextBoxColumn5 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dataGridViewTextBoxColumn6 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.tsClearFilter = new System.Windows.Forms.ToolStripButton();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
             this.splitContainer1.Panel2.SuspendLayout();
@@ -119,7 +120,8 @@
             this.tsExcel,
             this.tsCols,
             this.tsSummary,
-            this.tsDetail});
+            this.tsDetail,
+            this.tsClearFilter});
             this.toolStrip2.Location = new System.Drawing.Point(0, 0);
             this.toolStrip2.Name = "toolStrip2";
             this.toolStrip2.Size = new System.Drawing.Size(839, 27);
@@ -399,6 +401,16 @@
             this.dataGridViewTextBoxColumn6.ReadOnly = true;
             this.dataGridViewTextBoxColumn6.Width = 120;
             // 
+            // tsClearFilter
+            // 
+            this.tsClearFilter.Image = global::DBADashGUI.Properties.Resources.Filter_16x;
+            this.tsClearFilter.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tsClearFilter.Name = "tsClearFilter";
+            this.tsClearFilter.Size = new System.Drawing.Size(104, 24);
+            this.tsClearFilter.Text = "Clear Filter";
+            this.tsClearFilter.Visible = false;
+            this.tsClearFilter.Click += new System.EventHandler(this.tsClearFilter_Click);
+            // 
             // DBOptions
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
@@ -456,5 +468,6 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn colHOldValue;
         private System.Windows.Forms.DataGridViewTextBoxColumn colHValueNew;
         private System.Windows.Forms.DataGridViewTextBoxColumn colHChangeDate;
+        private System.Windows.Forms.ToolStripButton tsClearFilter;
     }
 }
