@@ -56,6 +56,7 @@ namespace DBADashGUI.Changes
             DatabaseID = context.DatabaseID;
             RowFilter = string.Empty;
             InstanceGroupName = string.Empty;
+            SummaryMode = true;
             RefreshData();
         }
 
@@ -88,6 +89,8 @@ namespace DBADashGUI.Changes
                     pivotDT.Rows.Add(r);
                 }
             }
+
+            dgv.AutoGenerateColumns = true;
             dgv.DataSource = pivotDT;
             dgv.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.DisplayedCells);
         }
@@ -132,14 +135,18 @@ namespace DBADashGUI.Changes
         private void RefreshDBInfo()
         {
             DataTable dt = GetDBInfo();
-            tsClearFilter.Visible = true;
             tsClearFilter.Enabled = RowFilter != string.Empty;
             if (dt.Rows.Count == 1)
             {
+                tsSummary.Visible = false;
+                tsClearFilter.Visible = false;
+                tsDetail.Visible = false;
                 Pivot(ref dt);
             }
             else
             {
+                tsSummary.Visible = true;
+                tsClearFilter.Visible = true;
                 dgv.Columns.Clear();
                 dgv.AutoGenerateColumns = true;
                 var dv = new DataView(dt, RowFilter, string.Empty, DataViewRowState.CurrentRows);
