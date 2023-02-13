@@ -3,6 +3,7 @@ using Microsoft.Data.SqlClient;
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Diagnostics.Eventing.Reader;
 using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
@@ -15,6 +16,8 @@ namespace DBADashGUI.Changes
         private int DatabaseID;
         private string InstanceGroupName;
         private string RowFilter;
+        private const int MAX_VLF_WARNING_THRESHOLD = 1000;
+        private const int MAX_VLF_CRITICAL_THRESHOLD = 10000;
 
         public DBOptions()
         {
@@ -153,6 +156,7 @@ namespace DBADashGUI.Changes
                 dgv.DataSource = dv;
                 dgv.Columns["InstanceID"].Visible = false;
                 dgv.Columns["DatabaseID"].Visible = false;
+                dgv.Columns["LastGoodCheckDBStatus"].Visible = false;
                 foreach (DataGridViewColumn col in dgv.Columns)
                 {
                     col.HeaderText = col.HeaderText.Titleize();
@@ -255,9 +259,109 @@ namespace DBADashGUI.Changes
             }
         }
 
-        private void Dgv_RowsAdded(object sender, DataGridViewRowsAddedEventArgs e)
+        private void Detail_RowsAdded(object sender, DataGridViewRowsAddedEventArgs e)
         {
-            if (!SummaryMode) return;
+            if (!dgv.Columns.Contains("database_id")) return;
+
+            for (int idx = e.RowIndex; idx < e.RowIndex + e.RowCount; idx += 1)
+            {
+                var r = dgv.Rows[idx];
+                var maxCompatLevel = Convert.ToInt32(r.Cells["MaxSupportedCompatibilityLevel"].Value);
+                r.Cells["compatibility_level"].SetStatusColor(r.Cells["compatibility_level"].Value as int? < maxCompatLevel
+                    ? DBADashStatus.DBADashStatusEnum.Warning
+                    : DBADashStatus.DBADashStatusEnum.OK);
+
+                r.Cells["page_verify_option_desc"].SetStatusColor(r.Cells["page_verify_option_desc"].Value as string == "CHECKSUM"
+                    ? DBADashStatus.DBADashStatusEnum.OK
+                    : DBADashStatus.DBADashStatusEnum.Critical);
+                r.Cells["page_verify_option"].SetStatusColor(r.Cells["page_verify_option_desc"].Value as string == "CHECKSUM"
+                    ? DBADashStatus.DBADashStatusEnum.OK
+                    : DBADashStatus.DBADashStatusEnum.Critical);
+                r.Cells["is_auto_create_stats_on"].SetStatusColor(r.Cells["is_auto_create_stats_on"].Value as bool? == true
+                    ? DBADashStatus.DBADashStatusEnum.OK
+                    : DBADashStatus.DBADashStatusEnum.Warning);
+                r.Cells["is_auto_update_stats_on"].SetStatusColor(r.Cells["is_auto_update_stats_on"].Value as bool? == true
+                    ? DBADashStatus.DBADashStatusEnum.OK
+                    : DBADashStatus.DBADashStatusEnum.Warning);
+                r.Cells["is_auto_close_on"].SetStatusColor(r.Cells["is_auto_close_on"].Value as bool? == false
+                    ? DBADashStatus.DBADashStatusEnum.OK
+                    : DBADashStatus.DBADashStatusEnum.Critical);
+                r.Cells["is_auto_shrink_on"].SetStatusColor(r.Cells["is_auto_shrink_on"].Value as bool? == false
+                    ? DBADashStatus.DBADashStatusEnum.OK
+                    : DBADashStatus.DBADashStatusEnum.Critical);
+                r.Cells["LastGoodCheckDBStatus"].SetStatusColor(((DBADashStatus.DBADashStatusEnum)Convert.ToInt32(r.Cells["LastGoodCheckDBStatus"].Value)).GetColor());
+                r.Cells["LastGoodCheckDbTime"].SetStatusColor(((DBADashStatus.DBADashStatusEnum)Convert.ToInt32(r.Cells["LastGoodCheckDBStatus"].Value)).GetColor());
+
+                if (Convert.ToInt32(r.Cells["database_id"].Value) == 4) // msdb
+                {
+                    r.Cells["is_trustworthy_on"].SetStatusColor(DBADashStatus.DBADashStatusEnum.NA);
+                }
+                else
+                {
+                    r.Cells["is_trustworthy_on"].SetStatusColor(r.Cells["is_trustworthy_on"].Value as bool? == false
+                        ? DBADashStatus.DBADashStatusEnum.OK
+                        : DBADashStatus.DBADashStatusEnum.Critical);
+                }
+
+                if (r.Cells["target_recovery_time_in_seconds"].Value == DBNull.Value)
+                {
+                    r.Cells["target_recovery_time_in_seconds"].SetStatusColor(DBADashStatus.DBADashStatusEnum.NA);
+                }
+                else
+                {
+                    r.Cells["target_recovery_time_in_seconds"].SetStatusColor(
+                        r.Cells["target_recovery_time_in_seconds"].Value as int? == 60
+                            ? DBADashStatus.DBADashStatusEnum.OK
+                            : DBADashStatus.DBADashStatusEnum.Warning);
+                }
+
+                switch (Convert.ToInt32(r.Cells["state"].Value))
+                {
+                    case 0: // Online
+                        r.Cells["state"].SetStatusColor(DBADashStatus.DBADashStatusEnum.OK);
+                        r.Cells["state_desc"].SetStatusColor(DBADashStatus.DBADashStatusEnum.OK);
+                        break;
+
+                    case 1: // Restoring
+                    case 6: // Offline
+                    case 7: // Copying
+                    case 10: // Offline Secondary
+                        r.Cells["state"].SetStatusColor(DBADashStatus.DBADashStatusEnum.NA);
+                        r.Cells["state_desc"].SetStatusColor(DBADashStatus.DBADashStatusEnum.NA);
+                        break;
+
+                    case 2: // Recovering
+                    case 3: // Recovery Pending
+                        r.Cells["state"].SetStatusColor(DBADashStatus.DBADashStatusEnum.Warning);
+                        r.Cells["state_desc"].SetStatusColor(DBADashStatus.DBADashStatusEnum.Warning);
+                        break;
+
+                    case 4: // Suspect
+                    case 5: // Emergency
+                        r.Cells["state"].SetStatusColor(DBADashStatus.DBADashStatusEnum.Critical);
+                        r.Cells["state_desc"].SetStatusColor(DBADashStatus.DBADashStatusEnum.Critical);
+                        break;
+                }
+
+                switch (Convert.ToInt32(r.Cells["state"].Value))
+                {
+                    case > MAX_VLF_CRITICAL_THRESHOLD:
+                        r.Cells["VLFCount"].SetStatusColor(DBADashStatus.DBADashStatusEnum.Critical);
+                        break;
+
+                    case > MAX_VLF_WARNING_THRESHOLD:
+                        r.Cells["VLFCount"].SetStatusColor(DBADashStatus.DBADashStatusEnum.Warning);
+                        break;
+
+                    default:
+                        r.Cells["VLFCount"].SetStatusColor(DBADashStatus.DBADashStatusEnum.OK);
+                        break;
+                }
+            }
+        }
+
+        private void Summary_RowsAdded(object sender, DataGridViewRowsAddedEventArgs e)
+        {
             var warningCols = new string[] { "Auto Create Stats Disabled", "Auto Update Stats Disabled", "Old Compat Level", "In Recovery", "Offline", "Trustworthy", "Not Using Indirect Checkpoints", "None-Default Target Recovery Time" };
             var criticalCols = new string[] { "Page Verify Not Optimal", "Auto Close", "Auto Shrink", "Suspect", "Emergency" };
             for (int idx = e.RowIndex; idx < e.RowIndex + e.RowCount; idx += 1)
@@ -289,10 +393,22 @@ namespace DBADashGUI.Changes
                 Color vlfStatusColor = DashColors.NotApplicable;
                 if (r.Cells["Max VLF Count"].Value != DBNull.Value)
                 {
-                    vlfStatusColor = (int)r.Cells["Max VLF Count"].Value > 10000 ? DashColors.Fail : ((int)r.Cells["Max VLF Count"].Value > 1000 ? DashColors.Warning : DashColors.Success);
+                    vlfStatusColor = (int)r.Cells["Max VLF Count"].Value > MAX_VLF_CRITICAL_THRESHOLD ? DashColors.Fail : ((int)r.Cells["Max VLF Count"].Value > MAX_VLF_WARNING_THRESHOLD ? DashColors.Warning : DashColors.Success);
                 }
 
                 r.Cells["Max VLF Count"].SetStatusColor(vlfStatusColor);
+            }
+        }
+
+        private void Dgv_RowsAdded(object sender, DataGridViewRowsAddedEventArgs e)
+        {
+            if (SummaryMode)
+            {
+                Summary_RowsAdded(sender, e);
+            }
+            else
+            {
+                Detail_RowsAdded(sender, e);
             }
         }
 
@@ -376,7 +492,7 @@ namespace DBADashGUI.Changes
             }
             else if (e.ColumnIndex == dgv.Columns["Max VLF Count"]?.Index)
             {
-                RowFilter = "VLFCount >= " + Math.Min(1001, Convert.ToInt32(row["Max VLF Count"]));
+                RowFilter = "VLFCount >= " + Math.Min(MAX_VLF_WARNING_THRESHOLD + 1, Convert.ToInt32(row["Max VLF Count"]));
             }
             else if (e.ColumnIndex == dgv.Columns["User Database Count"]?.Index)
             {
