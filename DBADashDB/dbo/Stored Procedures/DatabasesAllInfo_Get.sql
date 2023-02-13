@@ -16,12 +16,14 @@ SELECT  I.InstanceGroupName AS Instance,
         CONVERT(VARCHAR(MAX),D.owner_sid,1) owner_sid,
         D.create_date,
         D.compatibility_level,
+        I.MaxSupportedCompatibilityLevel,
         D.collation_name,
         D.user_access,
         D.is_read_only,
         D.is_auto_close_on,
         D.is_auto_shrink_on,
         D.state,
+        D.state_desc,
         D.is_in_standby,
         D.is_cleanly_shutdown,
         D.is_supplemental_logging_enabled,
@@ -79,13 +81,13 @@ SELECT  I.InstanceGroupName AS Instance,
         D.is_federation_member,
         D.is_remote_data_archive_enabled,
         D.is_mixed_page_allocation_on,
-        D.is_ledger_on,
-        D.IsActive,
-        D.state_desc,
+        D.is_ledger_on, 
         D.LastGoodCheckDbTime,
+        LG.status as LastGoodCheckDBStatus,
 		D.VLFCount
 FROM dbo.Databases D
-JOIN dbo.Instances I ON I.InstanceID = D.InstanceID
+JOIN dbo.InstanceInfo I ON I.InstanceID = D.InstanceID
+JOIN dbo.LastGoodCheckDB LG ON I.InstanceID = LG.InstanceID AND D.DatabaseID = LG.DatabaseID
 WHERE 1=1
 AND D.IsActive=1
 AND I.IsActive=1
