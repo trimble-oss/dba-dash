@@ -3,7 +3,6 @@ using Microsoft.Data.SqlClient;
 using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Diagnostics.Eventing.Reader;
 using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
@@ -26,21 +25,21 @@ namespace DBADashGUI.Changes
 
         private static readonly DataGridViewColumn[] SummaryCols =
         {           new DataGridViewLinkColumn(){ Name="Instance", HeaderText="Instance", DataPropertyName="Instance", SortMode = DataGridViewColumnSortMode.Automatic, LinkColor = DashColors.LinkColor},
-                    new DataGridViewLinkColumn(){ Name="Page Verify Not Optimal", HeaderText="Page Verify Not Optimal", DataPropertyName="Page Verify Not Optimal", SortMode = DataGridViewColumnSortMode.Automatic, LinkColor = DashColors.LinkColor},
-                    new DataGridViewLinkColumn(){ Name="Auto Close", HeaderText="Auto Close", DataPropertyName="Auto Close", SortMode = DataGridViewColumnSortMode.Automatic, LinkColor = DashColors.LinkColor},
-                    new DataGridViewLinkColumn(){ Name="Auto Shrink", HeaderText="Auto Shrink", DataPropertyName="Auto Shrink", SortMode = DataGridViewColumnSortMode.Automatic, LinkColor = DashColors.LinkColor},
-                    new DataGridViewLinkColumn(){ Name="Auto Create Stats Disabled", HeaderText="Auto Create Stats Disabled", DataPropertyName="Auto Create Stats Disabled", SortMode = DataGridViewColumnSortMode.Automatic, LinkColor = DashColors.LinkColor},
-                    new DataGridViewLinkColumn(){ Name="Auto Update Stats Disabled", HeaderText="Auto Update Stats Disabled", DataPropertyName="Auto Update Stats Disabled", SortMode = DataGridViewColumnSortMode.Automatic, LinkColor = DashColors.LinkColor},
-                    new DataGridViewLinkColumn(){ Name="Old Compat Level", HeaderText="Old Compat Level", DataPropertyName="Old Compat Level", SortMode = DataGridViewColumnSortMode.Automatic, LinkColor = DashColors.LinkColor},
-                    new DataGridViewLinkColumn(){ Name="Trustworthy", HeaderText="Trustworthy", DataPropertyName="Trustworthy", SortMode = DataGridViewColumnSortMode.Automatic, LinkColor = DashColors.LinkColor},
-                    new DataGridViewLinkColumn(){ Name="In Recovery", HeaderText="In Recovery", DataPropertyName="In Recovery", SortMode = DataGridViewColumnSortMode.Automatic, LinkColor = DashColors.LinkColor},
-                    new DataGridViewLinkColumn(){ Name="Suspect", HeaderText="Suspect", DataPropertyName="Suspect", SortMode = DataGridViewColumnSortMode.Automatic, LinkColor = DashColors.LinkColor},
-                    new DataGridViewLinkColumn(){ Name="Emergency", HeaderText="Emergency", DataPropertyName="Emergency", SortMode = DataGridViewColumnSortMode.Automatic, LinkColor = DashColors.LinkColor},
-                    new DataGridViewLinkColumn(){ Name="Offline", HeaderText="Offline", DataPropertyName="Offline", SortMode = DataGridViewColumnSortMode.Automatic, LinkColor = DashColors.LinkColor},
-                    new DataGridViewLinkColumn(){ Name="Max VLF Count", HeaderText="Max VLF Count", DataPropertyName="Max VLF Count", SortMode = DataGridViewColumnSortMode.Automatic, LinkColor = DashColors.LinkColor},
-                    new DataGridViewLinkColumn(){ Name="Not Using Indirect Checkpoints", HeaderText="Not Using Indirect Checkpoints", DataPropertyName="Not Using Indirect Checkpoints", SortMode = DataGridViewColumnSortMode.Automatic, LinkColor = DashColors.LinkColor},
-                    new DataGridViewLinkColumn(){ Name="None-Default Target Recovery Time", HeaderText="None-Default Target Recovery Time", DataPropertyName="None-Default Target Recovery Time", SortMode = DataGridViewColumnSortMode.Automatic, LinkColor = DashColors.LinkColor},
-                    new DataGridViewLinkColumn(){ Name="User Database Count", HeaderText="User Database Count", DataPropertyName="User Database Count", SortMode = DataGridViewColumnSortMode.Automatic, LinkColor = DashColors.LinkColor},
+                    new DataGridViewLinkColumn(){ Name="Page Verify Not Optimal", HeaderText="Page Verify Not Optimal", DataPropertyName="Page Verify Not Optimal", SortMode = DataGridViewColumnSortMode.Automatic, LinkColor = DashColors.LinkColor, ToolTipText = "Page verify should be set to CHECKSUM which can help detect corruption"},
+                    new DataGridViewLinkColumn(){ Name="Auto Close", HeaderText="Auto Close", DataPropertyName="Auto Close", SortMode = DataGridViewColumnSortMode.Automatic, LinkColor = DashColors.LinkColor, ToolTipText = "Auto close should be set to OFF.  Opening and closing the database after each connection can result in performance issues"},
+                    new DataGridViewLinkColumn(){ Name="Auto Shrink", HeaderText="Auto Shrink", DataPropertyName="Auto Shrink", SortMode = DataGridViewColumnSortMode.Automatic, LinkColor = DashColors.LinkColor, ToolTipText ="Auto shrink should be set to OFF.  Constant growing and shrinking of database files will result in performance issues."},
+                    new DataGridViewLinkColumn(){ Name="Auto Create Stats Disabled", HeaderText="Auto Create Stats Disabled", DataPropertyName="Auto Create Stats Disabled", SortMode = DataGridViewColumnSortMode.Automatic, LinkColor = DashColors.LinkColor, ToolTipText = "Auto create statistics should be enabled. Statistics enable the query optimizer to make better decisions about how to process your query."},
+                    new DataGridViewLinkColumn(){ Name="Auto Update Stats Disabled", HeaderText="Auto Update Stats Disabled", DataPropertyName="Auto Update Stats Disabled", SortMode = DataGridViewColumnSortMode.Automatic, LinkColor = DashColors.LinkColor, ToolTipText ="Auto update statistics should be enabled. Up-to-date statistics enable the query optimizer to make better decisions about how to process your query." },
+                    new DataGridViewLinkColumn(){ Name="Old Compat Level", HeaderText="Old Compat Level", DataPropertyName="Old Compat Level", SortMode = DataGridViewColumnSortMode.Automatic, LinkColor = DashColors.LinkColor, ToolTipText = "Use the latest compatibility level to benefit from new performance improvements and features. \nWARNING: Changing the database compatibility level has some risk associated with it and it can also result in performance degradation."},
+                    new DataGridViewLinkColumn(){ Name="Trustworthy", HeaderText="Trustworthy", DataPropertyName="Trustworthy", SortMode = DataGridViewColumnSortMode.Automatic, LinkColor = DashColors.LinkColor, ToolTipText = "Trustworthy should be set to OFF.  This setting has security risks associated with it."},
+                    new DataGridViewLinkColumn(){ Name="In Recovery", HeaderText="In Recovery", DataPropertyName="In Recovery", SortMode = DataGridViewColumnSortMode.Automatic, LinkColor = DashColors.LinkColor, ToolTipText = "Database is waiting for recovery to complete before it becomes online."},
+                    new DataGridViewLinkColumn(){ Name="Suspect", HeaderText="Suspect", DataPropertyName="Suspect", SortMode = DataGridViewColumnSortMode.Automatic, LinkColor = DashColors.LinkColor, ToolTipText = "Database couldn't be recovered and might be damaged."},
+                    new DataGridViewLinkColumn(){ Name="Emergency", HeaderText="Emergency", DataPropertyName="Emergency", SortMode = DataGridViewColumnSortMode.Automatic, LinkColor = DashColors.LinkColor, ToolTipText = "User has changed the database state to EMERGENCY.  The database is in single-user mode to allow repair."},
+                    new DataGridViewLinkColumn(){ Name="Offline", HeaderText="Offline", DataPropertyName="Offline", SortMode = DataGridViewColumnSortMode.Automatic, LinkColor = DashColors.LinkColor, ToolTipText = "Database has been taken offline and is unavailable"},
+                    new DataGridViewLinkColumn(){ Name="Max VLF Count", HeaderText="Max VLF Count", DataPropertyName="Max VLF Count", SortMode = DataGridViewColumnSortMode.Automatic, LinkColor = DashColors.LinkColor, ToolTipText = "Too many virtual log files (VLF) can slow down log backups and database recovery."},
+                    new DataGridViewLinkColumn(){ Name="Not Using Indirect Checkpoints", HeaderText="Not Using Indirect Checkpoints", DataPropertyName="Not Using Indirect Checkpoints", SortMode = DataGridViewColumnSortMode.Automatic, LinkColor = DashColors.LinkColor, ToolTipText = "Indirect checkpoints can improve database recovery time and reduce checkpoint related I/O spiking.  Introduced in SQL 2012 and became the default in SQL 2016. In some cases indirect checkpoints might cause performance degradation."},
+                    new DataGridViewLinkColumn(){ Name="None-Default Target Recovery Time", HeaderText="None-Default Target Recovery Time", DataPropertyName="None-Default Target Recovery Time", SortMode = DataGridViewColumnSortMode.Automatic, LinkColor = DashColors.LinkColor, ToolTipText = "Defaults are 0 (Automatic checkpoints), 60 (Indirect checkpoints)."},
+                    new DataGridViewLinkColumn(){ Name="User Database Count", HeaderText="User Database Count", DataPropertyName="User Database Count", SortMode = DataGridViewColumnSortMode.Automatic, LinkColor = DashColors.LinkColor, ToolTipText = "Count of databases excluding system databases."},
         };
 
         public bool SummaryMode
@@ -515,7 +514,7 @@ namespace DBADashGUI.Changes
             return true;
         }
 
-        private void tsClearFilter_Click(object sender, EventArgs e)
+        private void TsClearFilter_Click(object sender, EventArgs e)
         {
             RowFilter = string.Empty;
             ((DataView)dgv.DataSource).RowFilter = RowFilter;
