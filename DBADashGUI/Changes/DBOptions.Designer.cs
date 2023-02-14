@@ -409,7 +409,7 @@
             this.tsClearFilter.Size = new System.Drawing.Size(104, 24);
             this.tsClearFilter.Text = "Clear Filter";
             this.tsClearFilter.Visible = false;
-            this.tsClearFilter.Click += new System.EventHandler(this.tsClearFilter_Click);
+            this.tsClearFilter.Click += new System.EventHandler(this.TsClearFilter_Click);
             // 
             // DBOptions
             // 
