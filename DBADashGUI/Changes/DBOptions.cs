@@ -139,7 +139,7 @@ namespace DBADashGUI.Changes
         {
             DataTable dt = GetDBInfo();
             tsClearFilter.Enabled = RowFilter != string.Empty;
-            if (dt.Rows.Count == 1)
+            if (dt.Rows.Count == 1 && DatabaseID > 0)
             {
                 tsSummary.Visible = false;
                 tsClearFilter.Visible = false;
