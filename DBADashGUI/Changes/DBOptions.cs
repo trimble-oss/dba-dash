@@ -14,7 +14,18 @@ namespace DBADashGUI.Changes
         private List<int> InstanceIDs;
         private int DatabaseID;
         private string InstanceGroupName;
-        private string RowFilter;
+        private string _RowFilter;
+
+        private string RowFilter
+        {
+            get => _RowFilter;
+            set
+            {
+                _RowFilter = value;
+                tsClearFilter.Text = "Clear Filter" + (string.IsNullOrEmpty(value) ? "" : " : " + RowFilter);
+            }
+        }
+
         private const int MAX_VLF_WARNING_THRESHOLD = 1000;
         private const int MAX_VLF_CRITICAL_THRESHOLD = 10000;
 
@@ -32,13 +43,17 @@ namespace DBADashGUI.Changes
                     new DataGridViewLinkColumn(){ Name="Auto Update Stats Disabled", HeaderText="Auto Update Stats Disabled", DataPropertyName="Auto Update Stats Disabled", SortMode = DataGridViewColumnSortMode.Automatic, LinkColor = DashColors.LinkColor, ToolTipText ="Auto update statistics should be enabled. Up-to-date statistics enable the query optimizer to make better decisions about how to process your query." },
                     new DataGridViewLinkColumn(){ Name="Old Compat Level", HeaderText="Old Compat Level", DataPropertyName="Old Compat Level", SortMode = DataGridViewColumnSortMode.Automatic, LinkColor = DashColors.LinkColor, ToolTipText = "Use the latest compatibility level to benefit from new performance improvements and features. \nWARNING: Changing the database compatibility level has some risk associated with it and it can also result in performance degradation."},
                     new DataGridViewLinkColumn(){ Name="Trustworthy", HeaderText="Trustworthy", DataPropertyName="Trustworthy", SortMode = DataGridViewColumnSortMode.Automatic, LinkColor = DashColors.LinkColor, ToolTipText = "Trustworthy should be set to OFF.  This setting has security risks associated with it."},
-                    new DataGridViewLinkColumn(){ Name="In Recovery", HeaderText="In Recovery", DataPropertyName="In Recovery", SortMode = DataGridViewColumnSortMode.Automatic, LinkColor = DashColors.LinkColor, ToolTipText = "Database is waiting for recovery to complete before it becomes online."},
+                    new DataGridViewLinkColumn(){ Name="Online", HeaderText="Online", DataPropertyName="Online", SortMode = DataGridViewColumnSortMode.Automatic, LinkColor = DashColors.LinkColor, ToolTipText = "Database is online ready for queries."},
+                    new DataGridViewLinkColumn(){ Name="Offline", HeaderText="Offline", DataPropertyName="Offline", SortMode = DataGridViewColumnSortMode.Automatic, LinkColor = DashColors.LinkColor, ToolTipText = "Database has been taken offline and is unavailable"},
+                    new DataGridViewLinkColumn(){ Name="Restoring", HeaderText="Restoring", DataPropertyName="Restoring", SortMode = DataGridViewColumnSortMode.Automatic, LinkColor = DashColors.LinkColor, ToolTipText = "Database is restoring."},
+                    new DataGridViewLinkColumn(){ Name="Recovering", HeaderText="Recovering", DataPropertyName="Recovering", SortMode = DataGridViewColumnSortMode.Automatic, LinkColor = DashColors.LinkColor, ToolTipText = "Database is waiting for recovery process to complete before it becomes online"},
+                    new DataGridViewLinkColumn(){ Name="Recovery Pending", HeaderText="Recovery Pending", DataPropertyName="Recovery Pending", SortMode = DataGridViewColumnSortMode.Automatic, LinkColor = DashColors.LinkColor, ToolTipText = "SQL Server encountered a resource related error during recovery.  Files could be missing or system resource limitations might be preventing the database from starting."},
                     new DataGridViewLinkColumn(){ Name="Suspect", HeaderText="Suspect", DataPropertyName="Suspect", SortMode = DataGridViewColumnSortMode.Automatic, LinkColor = DashColors.LinkColor, ToolTipText = "Database couldn't be recovered and might be damaged."},
                     new DataGridViewLinkColumn(){ Name="Emergency", HeaderText="Emergency", DataPropertyName="Emergency", SortMode = DataGridViewColumnSortMode.Automatic, LinkColor = DashColors.LinkColor, ToolTipText = "User has changed the database state to EMERGENCY.  The database is in single-user mode to allow repair."},
-                    new DataGridViewLinkColumn(){ Name="Offline", HeaderText="Offline", DataPropertyName="Offline", SortMode = DataGridViewColumnSortMode.Automatic, LinkColor = DashColors.LinkColor, ToolTipText = "Database has been taken offline and is unavailable"},
+                    new DataGridViewLinkColumn(){ Name="Standby", HeaderText="Standby", DataPropertyName="Standby", SortMode = DataGridViewColumnSortMode.Automatic, LinkColor = DashColors.LinkColor, ToolTipText = "Database is restoring and has been brought online with STANDBY for read-only access."},
                     new DataGridViewLinkColumn(){ Name="Max VLF Count", HeaderText="Max VLF Count", DataPropertyName="Max VLF Count", SortMode = DataGridViewColumnSortMode.Automatic, LinkColor = DashColors.LinkColor, ToolTipText = "Too many virtual log files (VLF) can slow down log backups and database recovery."},
-                    new DataGridViewLinkColumn(){ Name="Not Using Indirect Checkpoints", HeaderText="Not Using Indirect Checkpoints", DataPropertyName="Not Using Indirect Checkpoints", SortMode = DataGridViewColumnSortMode.Automatic, LinkColor = DashColors.LinkColor, ToolTipText = "Indirect checkpoints can improve database recovery time and reduce checkpoint related I/O spiking.  Introduced in SQL 2012 and became the default in SQL 2016. In some cases indirect checkpoints might cause performance degradation."},
-                    new DataGridViewLinkColumn(){ Name="None-Default Target Recovery Time", HeaderText="None-Default Target Recovery Time", DataPropertyName="None-Default Target Recovery Time", SortMode = DataGridViewColumnSortMode.Automatic, LinkColor = DashColors.LinkColor, ToolTipText = "Defaults are 0 (Automatic checkpoints), 60 (Indirect checkpoints)."},
+                    new DataGridViewLinkColumn(){ Name="Not Using Indirect Checkpoints", HeaderText="Not Using Indirect Checkpoints", DataPropertyName="Not Using Indirect Checkpoints", SortMode = DataGridViewColumnSortMode.Automatic, LinkColor = DashColors.LinkColor, ToolTipText = "Indirect checkpoints can improve database recovery time and reduce checkpoint related I/O spiking.\nIntroduced in SQL 2012 and became the default in SQL 2016.\nNote: In some cases indirect checkpoints might cause performance degradation."},
+                    new DataGridViewLinkColumn(){ Name="None-Default Target Recovery Time", HeaderText="None-Default Target Recovery Time", DataPropertyName="None-Default Target Recovery Time", SortMode = DataGridViewColumnSortMode.Automatic, LinkColor = DashColors.LinkColor, ToolTipText = "Defaults are:\n0 - Automatic checkpoints.  Old default.\n60 - Indirect checkpoints. Default from SQL 2016.  Can improve recovery time and reduce checkpoint related I/O spiking."},
                     new DataGridViewLinkColumn(){ Name="User Database Count", HeaderText="User Database Count", DataPropertyName="User Database Count", SortMode = DataGridViewColumnSortMode.Automatic, LinkColor = DashColors.LinkColor, ToolTipText = "Count of databases excluding system databases."},
         };
 
@@ -49,6 +64,11 @@ namespace DBADashGUI.Changes
             {
                 tsDetail.Visible = value;
                 tsSummary.Visible = !value;
+                if (value)
+                {
+                    RowFilter = string.Empty;
+                    InstanceGroupName = string.Empty;
+                }
             }
         }
 
@@ -179,6 +199,7 @@ namespace DBADashGUI.Changes
                 cmd.Parameters.AddIfGreaterThanZero("DatabaseID", DatabaseID);
                 cmd.Parameters.AddWithValue("ExcludeStateChanges", excludeStateChangesToolStripMenuItem.Checked);
                 cmd.Parameters.AddWithValue("ShowHidden", InstanceIDs.Count == 1 || Common.ShowHidden);
+                cmd.Parameters.AddStringIfNotNullOrEmpty("InstanceGroupName", InstanceGroupName);
                 DataTable dt = new();
                 da.Fill(dt);
                 DateHelper.ConvertUTCToAppTimeZone(ref dt);
@@ -238,16 +259,26 @@ namespace DBADashGUI.Changes
 
         private void ShowSummary()
         {
+            bool historyRefresh = !string.IsNullOrEmpty(InstanceGroupName);
             dgv.DataSource = null;
             SummaryMode = true;
             RefreshDBSummary();
+            if (historyRefresh)
+            {
+                RefreshHistory();
+            }
         }
 
         private void TsDetail_Click(object sender, EventArgs e)
         {
+            bool historyRefresh = string.IsNullOrEmpty(InstanceGroupName);
             RowFilter = string.Empty;
             SummaryMode = false;
             RefreshDBInfo();
+            if (historyRefresh)
+            {
+                RefreshHistory();
+            }
         }
 
         private void DBOptions_Load(object sender, EventArgs e)
@@ -318,8 +349,7 @@ namespace DBADashGUI.Changes
                 {
                     case 0: // Online
                         r.Cells["state"].SetStatusColor(DBADashStatus.DBADashStatusEnum.OK);
-                        r.Cells["state_desc"].SetStatusColor(DBADashStatus.DBADashStatusEnum.OK);
-                        break;
+                        r.Cells["state_desc"].SetStatusColor(DBADashStatus.DBADashStatusEnum.OK); break;
 
                     case 1: // Restoring
                     case 6: // Offline
@@ -330,11 +360,11 @@ namespace DBADashGUI.Changes
                         break;
 
                     case 2: // Recovering
-                    case 3: // Recovery Pending
                         r.Cells["state"].SetStatusColor(DBADashStatus.DBADashStatusEnum.Warning);
                         r.Cells["state_desc"].SetStatusColor(DBADashStatus.DBADashStatusEnum.Warning);
                         break;
 
+                    case 3: // Recovery Pending
                     case 4: // Suspect
                     case 5: // Emergency
                         r.Cells["state"].SetStatusColor(DBADashStatus.DBADashStatusEnum.Critical);
@@ -361,8 +391,8 @@ namespace DBADashGUI.Changes
 
         private void Summary_RowsAdded(object sender, DataGridViewRowsAddedEventArgs e)
         {
-            var warningCols = new string[] { "Auto Create Stats Disabled", "Auto Update Stats Disabled", "Old Compat Level", "In Recovery", "Offline", "Trustworthy", "Not Using Indirect Checkpoints", "None-Default Target Recovery Time" };
-            var criticalCols = new string[] { "Page Verify Not Optimal", "Auto Close", "Auto Shrink", "Suspect", "Emergency" };
+            var warningCols = new string[] { "Auto Create Stats Disabled", "Auto Update Stats Disabled", "Old Compat Level", "Recovering", "Offline", "Trustworthy", "Not Using Indirect Checkpoints", "None-Default Target Recovery Time" };
+            var criticalCols = new string[] { "Page Verify Not Optimal", "Auto Close", "Auto Shrink", "Suspect", "Emergency", "Recovery Pending" };
             for (int idx = e.RowIndex; idx < e.RowIndex + e.RowCount; idx += 1)
             {
                 var r = dgv.Rows[idx];
@@ -461,9 +491,21 @@ namespace DBADashGUI.Changes
             {
                 RowFilter = "is_trustworthy_on = 1 AND DatabaseName<> 'msdb'";
             }
-            else if (e.ColumnIndex == dgv.Columns["In Recovery"]?.Index)
+            else if (e.ColumnIndex == dgv.Columns["Online"]?.Index)
             {
-                RowFilter = "state IN(2,3)";
+                RowFilter = "state = 0";
+            }
+            else if (e.ColumnIndex == dgv.Columns["Restoring"]?.Index)
+            {
+                RowFilter = "state = 1";
+            }
+            else if (e.ColumnIndex == dgv.Columns["Recovering"]?.Index)
+            {
+                RowFilter = "state = 2";
+            }
+            else if (e.ColumnIndex == dgv.Columns["Recovery Pending"]?.Index)
+            {
+                RowFilter = "state = 3";
             }
             else if (e.ColumnIndex == dgv.Columns["Suspect"]?.Index)
             {
@@ -496,6 +538,10 @@ namespace DBADashGUI.Changes
             else if (e.ColumnIndex == dgv.Columns["User Database Count"]?.Index)
             {
                 RowFilter = "database_id > 4";
+            }
+            else if (e.ColumnIndex == dgv.Columns["Standby"]?.Index)
+            {
+                RowFilter = "is_in_standby = 1";
             }
             else
             {
