@@ -2,13 +2,14 @@
 		@InstanceIDs VARCHAR(MAX)=NULL,
 		@DatabaseID INT=NULL,
 		@ExcludeStateChanges BIT=1,
-		@ShowHidden BIT=1
+		@ShowHidden BIT=1,
+		@InstanceGroupName NVARCHAR(128)=NULL
 )
 AS
 DECLARE @SQL NVARCHAR(MAX) 
 SET @SQL = N'
 SELECT I.Instance, 
-		I.InstanceDisplayName,
+		I.InstanceGroupName,
 		D.name AS DB,
 		H.Setting,
 		H.OldValue,
@@ -25,6 +26,7 @@ WHERE 1=1
 ' + CASE WHEN @DatabaseID IS NULL THEN 'AND D.IsActive=1' ELSE 'AND D.DatabaseID = @DatabaseID' END + '
 ' + CASE WHEN @ExcludeStateChanges=1 THEN 'AND H.Setting NOT IN(''state'',''is_read_only'',''is_in_standby'')' ELSE '' END + '
 ' + CASE WHEN @ShowHidden=1 THEN '' ELSE 'AND I.ShowInSummary=1' END + '
+' + CASE WHEN @InstanceGroupName IS NULL THEN '' ELSE 'AND I.InstanceGroupName=@InstanceGroupName' END + '
 ORDER BY H.ChangeDate DESC'
 
-EXEC sp_executesql @SQL,N'@InstanceIDs VARCHAR(MAX),@DatabaseID INT',@InstanceIDs,@DatabaseID
+EXEC sp_executesql @SQL,N'@InstanceIDs VARCHAR(MAX),@DatabaseID INT,@InstanceGroupName NVARCHAR(128)',@InstanceIDs,@DatabaseID,@InstanceGroupName
