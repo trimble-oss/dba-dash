@@ -1886,4 +1886,19 @@ BEGIN
 	VALUES (-1, -1, N'', 0.5, 0.8);
 END
 
+/* 
+	ResourceGovernorConfiguration collection no longer run non-enterprise edition engines.
+	Remove the row from CollectionDates to prevent warnings about snapshot age for this collection
+	where it's no longer applicable.
+	#542
+*/
+DELETE CD
+FROM dbo.CollectionDates CD
+WHERE Reference = 'ResourceGovernorConfiguration'
+AND NOT EXISTS(SELECT 1
+	FROM dbo.Instances I
+	WHERE I.InstanceID = CD.InstanceID
+	AND I.EngineEdition = 3 /* Enterprise */
+)
+
 ALTER DATABASE [$(DatabaseName)] SET AUTO_UPDATE_STATISTICS_ASYNC ON WITH NO_WAIT
