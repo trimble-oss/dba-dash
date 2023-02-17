@@ -23,10 +23,11 @@ CREATE TABLE #permissions
 
 
 DECLARE DBs CURSOR FAST_FORWARD READ_ONLY LOCAL FOR
-SELECT name
-FROM sys.databases
-WHERE state  = 0
-AND HAS_DBACCESS(name)=1
+    SELECT name
+    FROM sys.databases
+    WHERE state  = 0
+    AND HAS_DBACCESS(name)=1
+    AND compatibility_level >=80
 
 OPEN DBs
 FETCH NEXT FROM DBs INTO @DBName
