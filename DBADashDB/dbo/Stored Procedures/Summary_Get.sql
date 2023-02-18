@@ -190,6 +190,14 @@ Ident AS (
 					FROM dbo.IdentityColumns IC
 					WHERE IC.InstanceID=CD.InstanceID
 					)
+),
+DBState AS (
+	SELECT	InstanceID, 
+			1 AS DatabaseStateStatus 
+	FROM dbo.Databases
+	WHERE IsActive = 1
+	AND state IN(3,4,5) /* Recovery Pending, Suspect, Emergency */
+	GROUP BY InstanceID
 )
 SELECT I.InstanceID,
 	I.Instance,
@@ -263,7 +271,8 @@ SELECT I.InstanceID,
 	ISNULL(Ident.IdentityStatus,3) AS IdentityStatus,
 	Ident.MaxIdentityPctUsed,
 	I.ShowInSummary,
-	~I.ShowInSummary IsHidden
+	~I.ShowInSummary IsHidden,
+	ISNULL(DBState.DatabaseStateStatus,4) AS DatabaseStateStatus
 FROM dbo.Instances I 
 LEFT JOIN LS ON I.InstanceID = LS.InstanceID
 LEFT JOIN B ON I.InstanceID = B.InstanceID
@@ -288,6 +297,7 @@ LEFT JOIN cus ON cus.InstanceID = I.InstanceID
 LEFT JOIN dbm ON dbm.InstanceID = I.InstanceID
 LEFT JOIN QS ON QS.InstanceID = I.InstanceID
 LEFT JOIN Ident ON Ident.InstanceID = I.InstanceID
+LEFT JOIN DBState ON I.InstanceID = DBState.InstanceID
 WHERE EXISTS(SELECT 1 FROM #Instances t WHERE I.InstanceID = t.InstanceID)
 AND I.IsActive=1
 AND I.EngineEdition<> 5 -- not azure
@@ -350,7 +360,8 @@ SELECT NULL AS InstanceID,
 	ISNULL(MIN(NULLIF(Ident.IdentityStatus,3)),3) IdentityStatus,
 	MAX(Ident.MaxIdentityPctUsed) AS MaxIdentityPctUsed,
 	CAST(MAX(CAST(I.ShowInSummary AS TINYINT)) AS BIT) AS ShowInSummary,
-	~CAST(MAX(CAST(I.ShowInSummary AS TINYINT)) AS BIT) AS IsHidden
+	~CAST(MAX(CAST(I.ShowInSummary AS TINYINT)) AS BIT) AS IsHidden,
+	ISNULL(MIN(DBState.DatabaseStateStatus),4) AS DatabaseStateStatus
 FROM dbo.Instances I
 LEFT JOIN errSummary  ON I.InstanceID = errSummary.InstanceID
 LEFT JOIN F ON I.InstanceID = F.InstanceID
@@ -359,6 +370,7 @@ LEFT JOIN cus ON cus.InstanceID = I.InstanceID
 LEFT JOIN dbo.AzureDBElasticPoolStorageStatus EPS ON I.InstanceID = EPS.InstanceID
 LEFT JOIN QS ON QS.InstanceID = I.InstanceID
 LEFT JOIN Ident ON Ident.InstanceID = I.InstanceID
+LEFT JOIN DBState ON I.InstanceID = DBState.InstanceID
 WHERE I.EngineEdition=5 -- azure
 AND EXISTS(SELECT 1 FROM #Instances t WHERE I.InstanceID = t.InstanceID)
 AND I.IsActive=1
