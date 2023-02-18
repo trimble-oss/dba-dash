@@ -106,6 +106,7 @@
             this.SnapshotAgeStatus = new System.Windows.Forms.DataGridViewLinkColumn();
             this.DBMailStatus = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.IdentityStatus = new System.Windows.Forms.DataGridViewLinkColumn();
+            this.DatabaseStateStatus = new System.Windows.Forms.DataGridViewLinkColumn();
             this.UptimeStatus = new System.Windows.Forms.DataGridViewLinkColumn();
             ((System.ComponentModel.ISupportInitialize)(this.dgvSummary)).BeginInit();
             this.toolStrip1.SuspendLayout();
@@ -156,6 +157,7 @@
             this.SnapshotAgeStatus,
             this.DBMailStatus,
             this.IdentityStatus,
+            this.DatabaseStateStatus,
             this.UptimeStatus});
             dataGridViewCellStyle7.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
             dataGridViewCellStyle7.BackColor = System.Drawing.SystemColors.Window;
@@ -836,6 +838,17 @@
             this.IdentityStatus.ToolTipText = "Check for identity columns running out of values.  Show Max % used";
             this.IdentityStatus.Width = 125;
             // 
+            // DatabaseStateStatus
+            // 
+            this.DatabaseStateStatus.HeaderText = "Database State";
+            this.DatabaseStateStatus.MinimumWidth = 6;
+            this.DatabaseStateStatus.Name = "DatabaseStateStatus";
+            this.DatabaseStateStatus.ReadOnly = true;
+            this.DatabaseStateStatus.Text = "View";
+            this.DatabaseStateStatus.ToolTipText = "Check for databases in Recovery Pending, Suspect or Emergency state";
+            this.DatabaseStateStatus.UseColumnTextForLinkValue = true;
+            this.DatabaseStateStatus.Width = 125;
+            // 
             // UptimeStatus
             // 
             this.UptimeStatus.HeaderText = "Instance Uptime";
@@ -936,6 +949,7 @@
         private System.Windows.Forms.DataGridViewLinkColumn SnapshotAgeStatus;
         private System.Windows.Forms.DataGridViewTextBoxColumn DBMailStatus;
         private System.Windows.Forms.DataGridViewLinkColumn IdentityStatus;
+        private System.Windows.Forms.DataGridViewLinkColumn DatabaseStateStatus;
         private System.Windows.Forms.DataGridViewLinkColumn UptimeStatus;
     }
 }
