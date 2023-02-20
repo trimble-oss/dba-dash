@@ -38,6 +38,8 @@ namespace DBADashGUI
         private DBADashContext context;
         private bool ShowHidden => context.InstanceIDs.Count == 1 || Common.ShowHidden;
 
+        private CorruptionViewer CorruptionFrm = null;
+
         private readonly Dictionary<string, string> tabMapping = new() { { "FullBackupStatus", "tabBackups" }, { "LogShippingStatus", "tabLogShipping" }, { "DiffBackupStatus", "tabBackups" }, { "LogBackupStatus", "tabBackups" }, { "DriveStatus", "tabDrives" },
                                                             { "JobStatus", "tabJobs" }, { "CollectionErrorStatus", "tabDBADashErrorLog"}, { "AGStatus", "tabAG" }, {"LastGoodCheckDBStatus","tabLastGood"}, {"SnapshotAgeStatus","tabCollectionDates"  },
                                                             {"MemoryDumpStatus","" }, {"UptimeStatus","" }, {"CorruptionStatus","" }, {"AlertStatus","tabAlerts" }, {"FileFreeSpaceStatus","tabFiles" },
@@ -313,6 +315,9 @@ namespace DBADashGUI
                 dgvSummary.Rows[idx].Cells["LogShippingStatus"].Value = isAzure ? "" : "View";
                 dgvSummary.Rows[idx].Cells["AGStatus"].Value = (int)row["AGStatus"] == 3 ? "" : "View";
                 dgvSummary.Rows[idx].Cells["QueryStoreStatus"].Value = (int)row["QueryStoreStatus"] == 3 ? "" : "View";
+                dgvSummary.Rows[idx].Cells["CorruptionStatus"].Value = row["DetectedCorruptionDateUtc"] == DBNull.Value
+                    ? ""
+                    : DateTime.UtcNow.Subtract((DateTime)row["DetectedCorruptionDateUtc"]).Humanize(1);
                 if (row["IsAgentRunning"] != DBNull.Value && (bool)row["IsAgentRunning"] == false)
                 {
                     dgvSummary.Rows[idx].Cells["JobStatus"].SetStatusColor(Color.Black);
@@ -473,6 +478,10 @@ namespace DBADashGUI
                     RefreshData();
                 }
             }
+            else if (e.ColumnIndex == CorruptionStatus.Index)
+            {
+                ShowCorruptionViewer((string)row["InstanceGroupName"], (int)row["InstanceID"]);
+            }
             else if (tab != string.Empty)
             {
                 Instance_Selected?.Invoke(this,
@@ -480,6 +489,24 @@ namespace DBADashGUI
                         ? new InstanceSelectedEventArgs() { InstanceID = (int)row["InstanceID"], Tab = tab }
                         : new InstanceSelectedEventArgs() { Instance = (string)row["InstanceGroupName"], Tab = tab });
             }
+        }
+
+        private void ShowCorruptionViewer(string instance, int instanceID)
+        {
+            DBADashContext ctx = new() { InstanceIDs = new HashSet<int>() { instanceID }, InstanceID = instanceID, InstanceName = instance };
+            ShowCorruptionViewer(ctx);
+        }
+
+        private void ShowCorruptionViewer(DBADashContext ctx)
+        {
+            if (CorruptionFrm == null)
+            {
+                CorruptionFrm = new();
+                CorruptionFrm.FormClosed += delegate { CorruptionFrm = null; };
+            }
+            CorruptionFrm.SetContext(ctx);
+            CorruptionFrm.Show();
+            CorruptionFrm.Focus();
         }
 
         private void FocusedViewToolStripMenuItem_Click(object sender, EventArgs e)
@@ -568,7 +595,11 @@ namespace DBADashGUI
             string tab = (string)tabMapping[test];
             if (e.ColumnIndex == 0)
             {
-                if (string.IsNullOrEmpty(tab))
+                if (test == CorruptionStatus.Name)
+                {
+                    ShowCorruptionViewer(context);
+                }
+                else if (string.IsNullOrEmpty(tab))
                 {
                     FilterByStatus(new List<DBADashStatusEnum>() { DBADashStatusEnum.Warning, DBADashStatusEnum.Critical }, test);
                 }

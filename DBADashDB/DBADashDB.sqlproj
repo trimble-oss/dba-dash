@@ -699,6 +699,7 @@
     <Build Include="dbo\Stored Procedures\JobTimeline_Get.sql" />
     <Build Include="dbo\Stored Procedures\JobCategories_Get.sql" />
     <Build Include="dbo\Stored Procedures\JobErrorAck.sql" />
+    <Build Include="dbo\Stored Procedures\Corruption_Get.sql" />
   </ItemGroup>
   <ItemGroup>
     <PostDeploy Include="Script.PostDeployment1.sql" />
