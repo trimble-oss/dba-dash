@@ -24,6 +24,7 @@ namespace DBADashGUI
         private static string FindPlan => GetSqlString("FindPlan");
 
         private static string DecipherWaitResource => GetSqlString("DecipherWaitResource");
+        private static string CorruptionInfo => GetSqlString("CorruptionInfo");
 
         public static string GetFindPlan(string queryPlanHash, string queryHash, string planHandle, string sqlHandle, string db, int statementStartOffset, int statementEndOffset, string instance)
         {
@@ -67,9 +68,15 @@ namespace DBADashGUI
         public static string GetDecipherWaitResource(string waitResource, string instance)
         {
             instance = instance.Replace("*", "+"); // Prevent ending of comment section with */
-            waitResource = waitResource.Replace("'","''"); // Ensure wait resource is quoted just in case
+            waitResource = waitResource.Replace("'", "''"); // Ensure wait resource is quoted just in case
             return DecipherWaitResource.Replace("{wait_resource}", waitResource)
                 .Replace("{instance_name}", instance);
+        }
+
+        public static string GetCorruptionInfo(string instance)
+        {
+            instance = instance.Replace("*", "+"); // Prevent ending of comment section with */
+            return CorruptionInfo.Replace("{instance_name}", instance);
         }
     }
 }

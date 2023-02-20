@@ -86,7 +86,7 @@ J AS (
 ),
 dc AS (
 	SELECT I.InstanceID,
-		MAX(c.UpdateDate) AS DetectedCorruptionDate
+		MAX(DATEADD(mi,I.UTCOffset,c.UpdateDate)) AS DetectedCorruptionDateUtc
 	FROM dbo.Instances I
 	JOIN dbo.Databases D ON D.InstanceID = I.InstanceID
 	JOIN dbo.Corruption c ON D.DatabaseID = c.DatabaseID
@@ -211,10 +211,10 @@ SELECT I.InstanceID,
 	ISNULL(F.LogFreeSpaceStatus,3) AS LogFreeSpaceStatus,
 	ISNULL(J.JobStatus,3) AS JobStatus,
 	CASE ag.synchronization_health WHEN 0 THEN 1 WHEN 1 THEN 2 WHEN 2 THEN 4 ELSE 3 END AS AGStatus,
-	dc.DetectedCorruptionDate,
-	CASE WHEN dc.DetectedCorruptionDate IS NULL THEN 4 
-		WHEN DATEDIFF(d,dc.DetectedCorruptionDate,GETUTCDATE())<14 THEN 1
-		WHEN DATEDIFF(d,dc.DetectedCorruptionDate,GETUTCDATE())<30 THEN 2
+	dc.DetectedCorruptionDateUtc,
+	CASE WHEN dc.DetectedCorruptionDateUtc IS NULL THEN 4 
+		WHEN DATEDIFF(d,dc.DetectedCorruptionDateUtc,GETUTCDATE())<14 THEN 1
+		WHEN DATEDIFF(d,dc.DetectedCorruptionDateUtc,GETUTCDATE())<30 THEN 2
 		ELSE 3 END AS CorruptionStatus,
 	CASE WHEN  errSummary.SucceedAfterErrorCount=0 THEN 1 WHEN errSummary.CollectionErrorCount>0 THEN 2 ELSE 4 END AS CollectionErrorStatus,
 	ISNULL(errSummary.CollectionErrorCount,0) AS CollectionErrorCount, 
@@ -315,7 +315,7 @@ SELECT NULL AS InstanceID,
 	ISNULL(MIN(NULLIF(F.LogFreeSpaceStatus,3)),3) AS LogFreeSpaceStatus,
 	3 AS JobStatus,
 	3 AS AGStatus,
-	NULL AS DetectedCorruptionDate,
+	NULL AS DetectedCorruptionDateUtc,
 	3 AS CorruptionStatus,
 	MIN(CASE WHEN  errSummary.SucceedAfterErrorCount=0 THEN 1 WHEN errSummary.CollectionErrorCount>0 THEN 2 ELSE 4 END) AS CollectionErrorStatus,
 	ISNULL(SUM(errSummary.CollectionErrorCount),0) AS CollectionErrorCount,

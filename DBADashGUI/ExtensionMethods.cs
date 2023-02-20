@@ -33,7 +33,7 @@ namespace DBADashGUI
             return NumericTypes.Contains(Nullable.GetUnderlyingType(myType) ?? myType);
         }
 
-        public static DataTable AsDataTable(this List<int> list)
+        public static DataTable AsDataTable(this IEnumerable<int> list)
         {
             var dt = new DataTable();
             dt.Columns.Add("ID", typeof(int));

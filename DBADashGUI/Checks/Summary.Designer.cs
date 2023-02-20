@@ -84,7 +84,7 @@
             this.Instance = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.colHidden = new System.Windows.Forms.DataGridViewCheckBoxColumn();
             this.MemoryDumpStatus = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.CorruptionStatus = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.CorruptionStatus = new System.Windows.Forms.DataGridViewLinkColumn();
             this.LastGoodCheckDBStatus = new System.Windows.Forms.DataGridViewLinkColumn();
             this.AlertStatus = new System.Windows.Forms.DataGridViewLinkColumn();
             this.FullBackupStatus = new System.Windows.Forms.DataGridViewLinkColumn();
@@ -589,11 +589,13 @@
             // 
             // CorruptionStatus
             // 
-            this.CorruptionStatus.DataPropertyName = "DetectedCorruptionDate ";
+            this.CorruptionStatus.DataPropertyName = "DetectedCorruptionDate";
             this.CorruptionStatus.HeaderText = "Corruption";
             this.CorruptionStatus.MinimumWidth = 6;
             this.CorruptionStatus.Name = "CorruptionStatus";
             this.CorruptionStatus.ReadOnly = true;
+            this.CorruptionStatus.Resizable = System.Windows.Forms.DataGridViewTriState.True;
+            this.CorruptionStatus.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.Automatic;
             this.CorruptionStatus.Width = 103;
             // 
             // LastGoodCheckDBStatus
@@ -927,7 +929,7 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn Instance;
         private System.Windows.Forms.DataGridViewCheckBoxColumn colHidden;
         private System.Windows.Forms.DataGridViewTextBoxColumn MemoryDumpStatus;
-        private System.Windows.Forms.DataGridViewTextBoxColumn CorruptionStatus;
+        private System.Windows.Forms.DataGridViewLinkColumn CorruptionStatus;
         private System.Windows.Forms.DataGridViewLinkColumn LastGoodCheckDBStatus;
         private System.Windows.Forms.DataGridViewLinkColumn AlertStatus;
         private System.Windows.Forms.DataGridViewLinkColumn FullBackupStatus;
