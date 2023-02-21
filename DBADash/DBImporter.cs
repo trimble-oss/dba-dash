@@ -197,6 +197,14 @@ namespace DBADash
                     dtIdentityColumns.Columns.Add("schema_name", typeof(string));
                 }
             }
+            if (data.Tables.Contains("Corruption"))
+            {
+                var dtCorruption = data.Tables["Corruption"];
+                if (!dtCorruption.Columns.Contains("CountOfRows"))
+                {
+                    dtCorruption.Columns.Add("CountOfRows", typeof(int));
+                }
+            }
         }
 
         public void Update()

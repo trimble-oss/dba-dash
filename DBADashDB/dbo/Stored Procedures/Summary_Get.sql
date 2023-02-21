@@ -87,7 +87,8 @@ J AS (
 dc AS (
 	SELECT I.InstanceID,
 		MAX(DATEADD(mi,I.UTCOffset,c.UpdateDate)) AS DetectedCorruptionDateUtc,
-		MIN(CASE WHEN c.AckDate >=DATEADD(mi,I.UTCOffset,c.UpdateDate) THEN 5 ELSE 1 END) AS CorruptionStatus
+		MIN(CASE WHEN c.CountOfRows>=1000 AND c.SourceTable=1 THEN 1 
+				WHEN c.AckDate >=DATEADD(mi,I.UTCOffset,c.UpdateDate) THEN 5 ELSE 1 END) AS CorruptionStatus
 	FROM dbo.Instances I
 	JOIN dbo.Databases D ON D.InstanceID = I.InstanceID
 	JOIN dbo.Corruption c ON D.DatabaseID = c.DatabaseID

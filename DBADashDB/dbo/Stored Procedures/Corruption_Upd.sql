@@ -16,36 +16,45 @@ BEGIN
 	CREATE TABLE #CorruptionTemp(
 		DatabaseID INT NOT NULL,
 		SourceTable TINYINT NOT NULL,
-		UpdateDate DATETIME2(3) NOT NULL
+		UpdateDate DATETIME2(3) NOT NULL,
+		CountOfRows INT NULL
 	)
 	INSERT INTO #CorruptionTemp
 	(
 	    DatabaseID,
 	    SourceTable,
-	    UpdateDate
+	    UpdateDate,
+		CountOfRows
 	)
 	SELECT	D.DatabaseID, 
 			C.SourceTable,
-			C.last_update_date 
+			C.last_update_date,
+			C.CountOfRows
 	FROM @Corruption C 
 	JOIN dbo.Databases D ON C.database_id = D.database_id AND D.InstanceID  = @InstanceID
 	WHERE D.IsActive=1
 
 	UPDATE C
-		SET C.UpdateDate = T.UpdateDate
+		SET C.UpdateDate = T.UpdateDate,
+			C.CountOfRows = T.CountOfRows
 	FROM dbo.Corruption C 
 	JOIN #CorruptionTemp T ON C.DatabaseID = T.DatabaseID AND C.SourceTable = T.SourceTable
-	WHERE T.UpdateDate>C.UpdateDate
+	WHERE	EXISTS(	SELECT T.DatabaseID,T.SourceTable, T.UpdateDate, T.CountOfRows
+					EXCEPT
+					SELECT T.DatabaseID,T.SourceTable, C.UpdateDate, C.CountOfRows
+					)
 
 	INSERT INTO dbo.Corruption
 	(
 		DatabaseID,
 		SourceTable,
-		UpdateDate
+		UpdateDate,
+		CountOfRows
 	)
 	SELECT DatabaseID,
 		SourceTable,
-		UpdateDate 
+		UpdateDate,
+		CountOfRows
 	FROM #CorruptionTemp T
 	WHERE NOT EXISTS(
 					SELECT 1 

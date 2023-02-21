@@ -15,7 +15,9 @@ SELECT D.DatabaseID,
 		ELSE NULL END as SourceTable,
 	D.LastGoodCheckDbTime,
 	LG.Status as LastGoodCheckDBStatus,
-	DATEADD(mi,I.UTCOffset,C.UpdateDate) AS UpdateDateUtc
+	DATEADD(mi,I.UTCOffset,C.UpdateDate) AS UpdateDateUtc,
+	C.CountOfRows,
+	CASE WHEN C.SourceTable <> 1 THEN 4 WHEN C.CountOfRows>=1000 THEN 1 WHEN C.CountOfRows > 800 THEN 2 ELSE 4 END AS CountOfRowsStatus
 FROM dbo.Corruption C 
 JOIN dbo.Databases D ON C.DatabaseID = D.DatabaseID
 JOIN dbo.Instances I ON D.InstanceID = I.InstanceID
