@@ -13,6 +13,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using static DBADashGUI.DBADashStatus;
 using static DBADashGUI.Main;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 
 namespace DBADashGUI
 {
@@ -153,6 +154,7 @@ namespace DBADashGUI
                     new DataGridViewLinkColumn(){ Name = "Warning",  HeaderText="Instance Count Warning", DataPropertyName="Warning", SortMode = DataGridViewColumnSortMode.Automatic },
                     new DataGridViewLinkColumn(){ Name = "Critical",  HeaderText="Instance Count Critical", DataPropertyName="Critical", SortMode = DataGridViewColumnSortMode.Automatic },
                     new DataGridViewLinkColumn(){ Name = "NA",  HeaderText="Instance Count N/A", DataPropertyName="NA",SortMode = DataGridViewColumnSortMode.Automatic },
+                    new DataGridViewLinkColumn(){ Name = "Acknowledged",  HeaderText="Instance Count Acknowledged", DataPropertyName="Acknowledged", SortMode = DataGridViewColumnSortMode.Automatic }
         };
 
         private static DataTable GroupedByTestSchema()
@@ -164,6 +166,7 @@ namespace DBADashGUI
             grouped.Columns.Add("Warning", typeof(int));
             grouped.Columns.Add("Critical", typeof(int));
             grouped.Columns.Add("NA", typeof(int));
+            grouped.Columns.Add("Acknowledged", typeof(int));
             grouped.Columns.Add("Total", typeof(int));
             grouped.Columns.Add("Status", typeof(DBADashStatusEnum));
             grouped.Columns.Add("IsFocusedRow", typeof(bool));
@@ -185,6 +188,7 @@ namespace DBADashGUI
                 row["Warning"] = 0;
                 row["Critical"] = 0;
                 row["NA"] = 0;
+                row["Acknowledged"] = 0;
                 row["Total"] = 0;
                 row["Status"] = DBADashStatusEnum.NA;
                 row["IsFocusedRow"] = false;
@@ -555,35 +559,21 @@ namespace DBADashGUI
             {
                 var gridRow = dgvTests.Rows[idx];
                 var row = (DataRowView)gridRow.DataBoundItem;
-                gridRow.Cells["Test"].SetStatusColor(DBADashStatusEnum.NA);
-                if ((int)row[DBADashStatusEnum.OK.ToString()] > 0)
+                var rowStatus = DBADashStatusEnum.NA;
+                foreach (var status in (DBADashStatusEnum[])Enum.GetValues(typeof(DBADashStatusEnum)))
                 {
-                    gridRow.Cells[DBADashStatusEnum.OK.ToString()].SetStatusColor(DBADashStatusEnum.OK);
-                    gridRow.Cells["Test"].SetStatusColor(DBADashStatusEnum.OK);
+                    if (!row.Row.Table.Columns.Contains(status.ToString())) return;
+                    if ((int)row[status.ToString()] > 0)
+                    {
+                        gridRow.Cells[status.ToString()].SetStatusColor(status);
+                        rowStatus = status < rowStatus || rowStatus == DBADashStatusEnum.NA ? status : rowStatus;
+                    }
+                    else
+                    {
+                        gridRow.Cells[status.ToString()].SetStatusColor(DBADashStatusEnum.OK);
+                    }
                 }
-                else
-                {
-                    gridRow.Cells[DBADashStatusEnum.OK.ToString()].SetStatusColor(DBADashStatusEnum.NA);
-                }
-                if ((int)row[DBADashStatusEnum.Warning.ToString()] > 0)
-                {
-                    gridRow.Cells[DBADashStatusEnum.Warning.ToString()].SetStatusColor(DBADashStatusEnum.Warning);
-                    gridRow.Cells["Test"].SetStatusColor(DBADashStatusEnum.Warning);
-                }
-                else
-                {
-                    gridRow.Cells[DBADashStatusEnum.Warning.ToString()].SetStatusColor(DBADashStatusEnum.OK);
-                }
-                if ((int)row[DBADashStatusEnum.Critical.ToString()] > 0)
-                {
-                    gridRow.Cells[DBADashStatusEnum.Critical.ToString()].SetStatusColor(DBADashStatusEnum.Critical);
-                    gridRow.Cells["Test"].SetStatusColor(DBADashStatusEnum.Critical);
-                }
-                else
-                {
-                    gridRow.Cells[DBADashStatusEnum.Critical.ToString()].SetStatusColor(DBADashStatusEnum.OK);
-                }
-                gridRow.Cells[DBADashStatusEnum.NA.ToString()].SetStatusColor(DBADashStatusEnum.NA);
+                gridRow.Cells["Test"].SetStatusColor(rowStatus);
             }
         }
 
@@ -608,7 +598,7 @@ namespace DBADashGUI
                     Instance_Selected?.Invoke(this, new InstanceSelectedEventArgs() { InstanceID = context.InstanceID, Instance = context.InstanceName, Tab = tab });
                 }
             }
-            else if (e.ColumnIndex is >= 1 and <= 4)
+            else if (e.ColumnIndex is >= 1 and <= 5)
             {
                 DBADashStatusEnum status = e.ColumnIndex switch
                 {
@@ -616,6 +606,7 @@ namespace DBADashGUI
                     2 => DBADashStatusEnum.Warning,
                     3 => DBADashStatusEnum.Critical,
                     4 => DBADashStatusEnum.NA,
+                    5 => DBADashStatusEnum.Acknowledged,
                     _ => throw new Exception("Invalid ColumnIndex"),
                 };
                 FilterByStatus(status, test);

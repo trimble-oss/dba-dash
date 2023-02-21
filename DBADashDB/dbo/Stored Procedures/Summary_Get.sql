@@ -86,7 +86,8 @@ J AS (
 ),
 dc AS (
 	SELECT I.InstanceID,
-		MAX(DATEADD(mi,I.UTCOffset,c.UpdateDate)) AS DetectedCorruptionDateUtc
+		MAX(DATEADD(mi,I.UTCOffset,c.UpdateDate)) AS DetectedCorruptionDateUtc,
+		MIN(CASE WHEN c.AckDate >=DATEADD(mi,I.UTCOffset,c.UpdateDate) THEN 5 ELSE 1 END) AS CorruptionStatus
 	FROM dbo.Instances I
 	JOIN dbo.Databases D ON D.InstanceID = I.InstanceID
 	JOIN dbo.Corruption c ON D.DatabaseID = c.DatabaseID
@@ -212,10 +213,7 @@ SELECT I.InstanceID,
 	ISNULL(J.JobStatus,3) AS JobStatus,
 	CASE ag.synchronization_health WHEN 0 THEN 1 WHEN 1 THEN 2 WHEN 2 THEN 4 ELSE 3 END AS AGStatus,
 	dc.DetectedCorruptionDateUtc,
-	CASE WHEN dc.DetectedCorruptionDateUtc IS NULL THEN 4 
-		WHEN DATEDIFF(d,dc.DetectedCorruptionDateUtc,GETUTCDATE())<14 THEN 1
-		WHEN DATEDIFF(d,dc.DetectedCorruptionDateUtc,GETUTCDATE())<30 THEN 2
-		ELSE 3 END AS CorruptionStatus,
+	ISNULL(CorruptionStatus,4) AS CorruptionStatus,
 	CASE WHEN  errSummary.SucceedAfterErrorCount=0 THEN 1 WHEN errSummary.CollectionErrorCount>0 THEN 2 ELSE 4 END AS CollectionErrorStatus,
 	ISNULL(errSummary.CollectionErrorCount,0) AS CollectionErrorCount, 
 	SSD.SnapshotAgeMin,
