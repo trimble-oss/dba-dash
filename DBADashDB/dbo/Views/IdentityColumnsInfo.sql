@@ -10,7 +10,7 @@ SELECT	IC.InstanceID,
 		IC.schema_name,
 		IC.object_name,
 		IC.column_name,
-		T.name AS type,
+		TYPE_NAME(IC.system_type_id) AS type,
 		IC.increment_value,
 		IC.seed_value, 
 		IC.row_count,
@@ -38,7 +38,6 @@ SELECT	IC.InstanceID,
 FROM dbo.IdentityColumns IC
 JOIN dbo.Instances I ON I.InstanceID = IC.InstanceID
 JOIN dbo.Databases D ON D.DatabaseID = IC.DatabaseID
-JOIN sys.types T ON T.system_type_id = IC.system_type_id AND T.system_type_id = T.user_type_id
 OUTER APPLY (SELECT CASE WHEN IC.last_value <0 THEN (ABS(IC.min_ident)-ABS(IC.last_value)) / IC.max_rows ELSE IC.last_value/IC.max_ident END AS pct_ident_used,
 					IC.row_count/IC.max_rows AS pct_rows_used,
 					CASE WHEN IC.last_value < 0 THEN ABS(IC.last_value)+IC.max_ident ELSE IC.max_ident - IC.last_value END AS remaining_ident_count,
@@ -54,6 +53,7 @@ OUTER APPLY(SELECT TOP(1) (IC.last_value-ICH.last_value) / (DATEDIFF(s,ICH.Snaps
 			AND ICH.object_id = IC.object_id
 			AND ICH.SnapshotDate < IC.SnapshotDate
 			AND ICH.SnapshotDate > CAST(DATEADD(d,-31,GETUTCDATE()) AS DATETIME2(2))
+			ORDER BY ICH.SnapshotDate
 			) AS PerDay
 OUTER APPLY(SELECT	calc.remaining_ident_count / CASE WHEN PerDay.avg_ident_per_day <=0 THEN NULL ELSE PerDay.avg_ident_per_day END AS ident_estimated_days,
 					calc.remaining_row_count / CASE WHEN PerDay.avg_rows_per_day <=0 THEN NULL ELSE PerDay.avg_rows_per_day END AS row_estimated_days,
