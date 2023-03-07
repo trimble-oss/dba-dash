@@ -372,7 +372,7 @@ namespace DBADashGUI.Changes
                         break;
                 }
 
-                switch (Convert.ToInt32(r.Cells["state"].Value))
+                switch (Convert.ToInt32(r.Cells["VLFCount"].Value))
                 {
                     case > MAX_VLF_CRITICAL_THRESHOLD:
                         r.Cells["VLFCount"].SetStatusColor(DBADashStatus.DBADashStatusEnum.Critical);
