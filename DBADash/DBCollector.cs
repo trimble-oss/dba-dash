@@ -1042,11 +1042,14 @@ OPTION(RECOMPILE)"); // Plan caching is not beneficial.  RECOMPILE hint to avoid
             {
                 CollectComputerSystemWMI();
                 CollectOperatingSystemWMI();
+                CollectProcessorWMI();
             }
             AddDT("ServerExtraProperties", SqlStrings.ServerExtraProperties, CollectionType.ServerExtraProperties.GetCommandTimeout());
             Data.Tables["ServerExtraProperties"].Columns.Add("WindowsCaption");
             if (manufacturer != "") { Data.Tables["ServerExtraProperties"].Rows[0]["SystemManufacturer"] = manufacturer; }
             if (model != "") { Data.Tables["ServerExtraProperties"].Rows[0]["SystemProductName"] = model; }
+
+            if (!string.IsNullOrEmpty(ProcessorName)) { Data.Tables["ServerExtraProperties"].Rows[0]["ProcessorNameString"] = ProcessorName; }
             Data.Tables["ServerExtraProperties"].Rows[0]["WindowsCaption"] = WindowsCaption;
             if (Data.Tables["ServerExtraProperties"].Rows[0]["ActivePowerPlanGUID"] == DBNull.Value && noWMI == false)
             {
@@ -1128,6 +1131,7 @@ OPTION(RECOMPILE)"); // Plan caching is not beneficial.  RECOMPILE hint to avoid
         private string manufacturer;
         private string model;
         private string WindowsCaption;
+        private string ProcessorName;
 
         #region "WMI"
 
@@ -1355,9 +1359,37 @@ OPTION(RECOMPILE)"); // Plan caching is not beneficial.  RECOMPILE hint to avoid
             }
         }
 
+        private const uint LOCAL_MACHINE = 2147483650;
+
+        private void CollectProcessorWMI()
+        {
+            try
+            {
+                ProcessorName = GetProcessorName();
+            }
+            catch (Exception ex)
+            {
+                LogError(ex, "ServerExtraProperties", "Collect:Processor WMI");
+            }
+        }
+
+        private string GetProcessorName()
+        {
+            using CimMethodParametersCollection CimParams = new()
+            {
+                CimMethodParameter.Create("hDefKey", LOCAL_MACHINE, CimFlags.In),
+                CimMethodParameter.Create("sSubKeyName", @"HARDWARE\DESCRIPTION\System\CentralProcessor\0", CimFlags.In),
+                CimMethodParameter.Create("sValueName", "ProcessorNameString", CimFlags.In)
+            };
+
+            using CimSession session = CimSession.Create(computerName, WMISessionOptions);
+            using CimMethodResult results = session.InvokeMethod(new CimInstance("StdRegProv", @"root\default"), "GetStringValue", CimParams);
+
+            return Convert.ToString(results.OutParameters["sValue"].Value);
+        }
+
         private string PVDriverVersion()
         {
-            uint LOCAL_MACHINE = 2147483650;
             using CimMethodParametersCollection CimParams = new()
             {
                 CimMethodParameter.Create("hDefKey", LOCAL_MACHINE, CimFlags.In),
